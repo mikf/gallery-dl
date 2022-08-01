@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2021 Mike Fährmann
+# Copyright 2016-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -36,13 +36,13 @@ class ImagefapGalleryExtractor(ImagefapExtractor):
 
     test = (
         ("https://www.imagefap.com/pictures/7102714", {
-            "pattern": r"https://cdnh\.imagefap\.com"
+            "pattern": r"https://cdnh?\.imagefap\.com"
                        r"/images/full/\d+/\d+/\d+\.jpg",
             "keyword": "2ba96e84c2952c4750e9fa94a3f2b1f965cec2f3",
             "content": "694a0a57385980a6f90fbc296cadcd6c11ba2dab",
         }),
         ("https://www.imagefap.com/gallery/5486966", {
-            "pattern": r"https://cdnh\.imagefap\.com"
+            "pattern": r"https://cdnh?\.imagefap\.com"
                        r"/images/full/\d+/\d+/\d+\.jpg",
             "keyword": "3e24eace5b09639b881ebd393165862feb46adde",
         }),
@@ -107,7 +107,7 @@ class ImagefapImageExtractor(ImagefapExtractor):
     pattern = BASE_PATTERN + r"/photo/(\d+)"
     test = (
         ("https://www.imagefap.com/photo/1369341772/", {
-            "pattern": r"https://cdnh\.imagefap\.com"
+            "pattern": r"https://cdnh?\.imagefap\.com"
                        r"/images/full/\d+/\d+/\d+\.jpg",
             "keyword": "8894e45f7262020d8d66ce59917315def1fc475b",
         }),
@@ -156,10 +156,10 @@ class ImagefapUserExtractor(ImagefapExtractor):
                r"|usergallery\.php\?userid=(\d+))")
     test = (
         ("https://www.imagefap.com/profile/LucyRae/galleries", {
-            "url": "d941aa906f56a75972a7a5283030eb9a8d27a4fd",
+            "url": "822cb6cbb6f474ca2d0f58d1d6d253bc2338937a",
         }),
         ("https://www.imagefap.com/usergallery.php?userid=1862791", {
-            "url": "d941aa906f56a75972a7a5283030eb9a8d27a4fd",
+            "url": "822cb6cbb6f474ca2d0f58d1d6d253bc2338937a",
         }),
         ("https://www.imagefap.com/profile.php?user=LucyRae"),
         ("https://beta.imagefap.com/profile.php?user=LucyRae"),

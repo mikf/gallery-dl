@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2021 Mike Fährmann
+# Copyright 2019-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -261,7 +261,7 @@ class _500pxImageExtractor(_500pxExtractor):
             "tags": list,
             "taken_at": "2017-05-04T17:36:51+00:00",
             "times_viewed": int,
-            "url": "/photo/222049255/Queen-Of-Coasts-by-Olesya-Nabieva",
+            "url": "/photo/222049255/Queen-Of-Coasts-by-Alice-Nabieva",
             "user": dict,
             "user_id": 12847235,
             "votes_count": int,

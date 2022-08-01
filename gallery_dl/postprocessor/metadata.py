@@ -30,6 +30,17 @@ class MetadataPP(PostProcessor):
         elif mode == "tags":
             self.write = self._write_tags
             ext = "txt"
+        elif mode == "modify":
+            self.run = self._run_modify
+            self.fields = {
+                name: formatter.parse(value, None, util.identity).format_map
+                for name, value in options.get("fields").items()
+            }
+            ext = None
+        elif mode == "delete":
+            self.run = self._run_delete
+            self.fields = options.get("fields")
+            ext = None
         else:
             self.write = self._write_json
             self.indent = options.get("indent", 4)
@@ -113,6 +124,32 @@ class MetadataPP(PostProcessor):
 
     def _run_stdout(self, pathfmt):
         self.write(sys.stdout, pathfmt.kwdict)
+
+    def _run_modify(self, pathfmt):
+        kwdict = pathfmt.kwdict
+        for key, func in self.fields.items():
+            obj = kwdict
+            try:
+                while "[" in key:
+                    name, _, key = key.partition("[")
+                    obj = obj[name]
+                    key = key.rstrip("]")
+                obj[key] = func(kwdict)
+            except Exception:
+                pass
+
+    def _run_delete(self, pathfmt):
+        kwdict = pathfmt.kwdict
+        for key in self.fields:
+            obj = kwdict
+            try:
+                while "[" in key:
+                    name, _, key = key.partition("[")
+                    obj = obj[name]
+                    key = key.rstrip("]")
+                del obj[key]
+            except Exception:
+                pass
 
     def _directory(self, pathfmt):
         return pathfmt.realdirectory

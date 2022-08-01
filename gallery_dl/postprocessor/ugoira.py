@@ -35,7 +35,7 @@ class UgoiraPP(PostProcessor):
         self.output = options.get("ffmpeg-output", True)
         self.delete = not options.get("keep-files", False)
         self.repeat = options.get("repeat-last-frame", True)
-        self.mtime = options.get("mtime")
+        self.mtime = options.get("mtime", True)
 
         ffmpeg = options.get("ffmpeg-location")
         self.ffmpeg = util.expand_path(ffmpeg) if ffmpeg else "ffmpeg"

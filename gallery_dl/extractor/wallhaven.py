@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2021 Mike Fährmann
+# Copyright 2018-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -58,7 +58,7 @@ class WallhavenSearchExtractor(WallhavenExtractor):
         (("https://wallhaven.cc/search?q=id%3A87"
           "&categories=111&purity=100&sorting=date_added&order=asc&page=3"), {
             "pattern": r"https://w.wallhaven.cc/full/\w\w/wallhaven-\w+\.\w+",
-            "count": "<= 20",
+            "count": "<= 30",
         }),
     )
 

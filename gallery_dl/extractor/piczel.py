@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2021 Mike Fährmann
+# Copyright 2018-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -108,7 +108,7 @@ class PiczelImageExtractor(PiczelExtractor):
     pattern = r"(?:https?://)?(?:www\.)?piczel\.tv/gallery/image/(\d+)"
     test = ("https://piczel.tv/gallery/image/7807", {
         "pattern": r"https://(\w+\.)?piczel\.tv/static/uploads/gallery_image"
-                   r"/32920/image/7807/25737334-Lulena\.png",
+                   r"/32920/image/7807/1532236438-Lulena\.png",
         "content": "df9a053a24234474a19bce2b7e27e0dec23bff87",
         "keyword": {
             "created_at": "2018-07-22T05:13:58.000Z",

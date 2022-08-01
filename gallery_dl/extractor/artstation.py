@@ -32,9 +32,11 @@ class ArtstationExtractor(Extractor):
         data = self.metadata()
 
         for project in self.projects():
-            for asset in self.get_project_assets(project["hash_id"]):
+            for num, asset in enumerate(
+                    self.get_project_assets(project["hash_id"]), 1):
                 asset.update(data)
                 adict = asset["asset"]
+                asset["num"] = num
                 yield Message.Directory, asset
 
                 if adict["has_embedded_player"] and self.external:
@@ -85,6 +87,7 @@ class ArtstationExtractor(Extractor):
         assets = data["assets"]
         del data["assets"]
 
+        data["count"] = len(assets)
         if len(assets) == 1:
             data["asset"] = assets[0]
             yield data
@@ -147,14 +150,15 @@ class ArtstationUserExtractor(ArtstationExtractor):
                r"/(?!artwork|projects|search)([^/?#]+)(?:/albums/all)?"
                r"|((?!www)\w+)\.artstation\.com(?:/projects)?)/?$")
     test = (
-        ("https://www.artstation.com/gaerikim/", {
+        ("https://www.artstation.com/sungchoi/", {
             "pattern": r"https://\w+\.artstation\.com/p/assets/images"
                        r"/images/\d+/\d+/\d+/(4k|large|medium|small)/[^/]+",
-            "count": ">= 6",
+            "range": "1-10",
+            "count": ">= 10",
         }),
-        ("https://www.artstation.com/gaerikim/albums/all/"),
-        ("https://gaerikim.artstation.com/"),
-        ("https://gaerikim.artstation.com/projects/"),
+        ("https://www.artstation.com/sungchoi/albums/all/"),
+        ("https://sungchoi.artstation.com/"),
+        ("https://sungchoi.artstation.com/projects/"),
     )
 
     def projects(self):
@@ -400,7 +404,7 @@ class ArtstationFollowingExtractor(ArtstationExtractor):
     subcategory = "following"
     pattern = (r"(?:https?://)?(?:www\.)?artstation\.com"
                r"/(?!artwork|projects|search)([^/?#]+)/following")
-    test = ("https://www.artstation.com/gaerikim/following", {
+    test = ("https://www.artstation.com/sungchoi/following", {
         "pattern": ArtstationUserExtractor.pattern,
         "count": ">= 50",
     })

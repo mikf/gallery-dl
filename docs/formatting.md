@@ -173,10 +173,16 @@ Format specifiers can be used for advanced formatting by using the options provi
     <td><code>{updated:D%b %d %Y %I:%M %p/}</code></td>
     <td><code>2010-01-01 00:00:00</code></td>
 </tr>
+<tr>
+    <td><code>O&lt;offset&gt;/</code></td>
+    <td>Apply <code>&lt;offset&gt;</code> to a <code>datetime</code> object, either as <code>±HH:MM</code> or <code>local</code> for local UTC offset</td>
+    <td><code>{date:O-06:30/}</code></td>
+    <td><code>2009-12-31 17:30:00</code></td>
+</tr>
 </tbody>
 </table>
 
-All special format specifiers (`?`, `L`, `J`, `R`, `D`) can be chained and combined with one another, but must always come before any standard format specifiers:
+All special format specifiers (`?`, `L`, `J`, `R`, `D`, `O`) can be chained and combined with one another, but must always come before any standard format specifiers:
 
 For example `{foo:?//RF/B/Ro/e/> 10}` -> `   Bee Bar`
 - `?//` - Tests if `foo` has a value

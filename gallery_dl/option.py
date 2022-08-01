@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2017-2021 Mike Fährmann
+# Copyright 2017-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -282,6 +282,11 @@ def build_parser():
         "--no-download",
         dest="download", nargs=0, action=ConfigConstAction, const=False,
         help=("Do not download any files")
+    )
+    downloader.add_argument(
+        "--no-postprocessors",
+        dest="postprocess", nargs=0, action=ConfigConstAction, const=False,
+        help=("Do not run any post processors")
     )
     downloader.add_argument(
         "--no-check-certificate",

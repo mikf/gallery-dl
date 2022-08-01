@@ -104,6 +104,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
+    <td>Bunkr</td>
+    <td>https://bunkr.is/</td>
+    <td>Albums</td>
+    <td></td>
+</tr>
+<tr>
     <td>Comic Vine</td>
     <td>https://comicvine.gamespot.com/</td>
     <td>Tag Searches</td>
@@ -370,7 +376,7 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>Instagram</td>
     <td>https://www.instagram.com/</td>
-    <td>Channels, Highlights, Posts, Reels, Saved Posts, Stories, Tag Searches, Tagged Posts, User Profiles</td>
+    <td>Channels, Collections, Highlights, Posts, Reels, Saved Posts, Stories, Tag Searches, Tagged Posts, User Profiles</td>
     <td>Supported</td>
 </tr>
 <tr>
@@ -417,7 +423,7 @@ Consider all sites to be NSFW unless otherwise known.
 </tr>
 <tr>
     <td>Komikcast</td>
-    <td>https://komikcast.com/</td>
+    <td>https://komikcast.me/</td>
     <td>Chapters, Manga</td>
     <td></td>
 </tr>
@@ -890,6 +896,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
+    <td>Zerochan</td>
+    <td>https://www.zerochan.net/</td>
+    <td>individual Images, Tag Searches</td>
+    <td></td>
+</tr>
+<tr>
     <td>かべうち</td>
     <td>https://kabe-uchiroom.com/</td>
     <td>User Profiles</td>
@@ -1149,12 +1161,6 @@ Consider all sites to be NSFW unless otherwise known.
     <td>Boards, Galleries, Search Results, Threads</td>
     <td></td>
 </tr>
-<tr>
-    <td>Wakarimasen Archive</td>
-    <td>https://archive.wakarimasen.moe/</td>
-    <td>Boards, Galleries, Search Results, Threads</td>
-    <td></td>
-</tr>
 
 <tr>
     <td colspan="4"><strong>FoOlSlide Instances</strong></td>
@@ -1266,12 +1272,6 @@ Consider all sites to be NSFW unless otherwise known.
 
 <tr>
     <td colspan="4"><strong>lolisafe and chibisafe</strong></td>
-</tr>
-<tr>
-    <td>Bunkr</td>
-    <td>https://app.bunkr.is/</td>
-    <td>Albums</td>
-    <td></td>
 </tr>
 <tr>
     <td>ZzZz</td>

@@ -377,6 +377,7 @@ Description
     * ``tapas``
     * ``tsumino``
     * ``twitter``
+    * ``zerochan``
 
     These values can also be specified via the
     ``-u/--username`` and ``-p/--password`` command-line options or
@@ -496,7 +497,7 @@ extractor.*.user-agent
 Type
     ``string``
 Default
-    ``"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:78.0) Gecko/20100101 Firefox/78.0"``
+    ``"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101 Firefox/102.0"``
 Description
     User-Agent header value to be used for HTTP requests.
 
@@ -558,6 +559,20 @@ Description
     current file's download URL.
     This can then be used in `filenames <extractor.*.filename_>`_,
     with a ``metadata`` post processor, etc.
+
+
+extractor.*.path-metadata
+-------------------------
+Type
+    ``string``
+Default
+    ``null``
+Description
+    Insert a reference to the current `PathFormat <https://github.com/mikf/gallery-dl/blob/v1.22.4/gallery_dl/path.py#L20>`__
+    data structure into metadata dictionaries as the given name.
+
+    For example, setting this option to ``"gdl_path"`` would make it possible
+    to access the current file's filename as ``"[gdl_path.filename}"``.
 
 
 extractor.*.category-transfer
@@ -1311,6 +1326,18 @@ Description
     * ``"auto"``: Automatically differentiate between ``"old"`` and ``"new"``
     * ``"old"``: Expect the *old* site layout
     * ``"new"``: Expect the *new* site layout
+
+
+extractor.gelbooru.api-key & .user-id
+-------------------------------------
+Type
+    ``string``
+Default
+    ``null``
+Description
+    Values from the API Access Credentials section found at the bottom of your
+    `Account Options <https://gelbooru.com/index.php?page=account&s=options>`__
+    page.
 
 
 extractor.generic.enabled
@@ -2129,6 +2156,16 @@ Description
     Download videos.
 
 
+extractor.skeb.article
+----------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Download article images.
+
+
 extractor.skeb.sent-requests
 ----------------------------
 Type
@@ -2375,6 +2412,22 @@ Description
     will be taken from the original Tweets, not the Retweets.
 
 
+extractor.twitter.timeline.strategy
+-----------------------------------
+Type
+    ``string``
+Default
+    ``"auto"``
+Description
+    Controls the strategy / tweet source used for user URLs
+    (``https://twitter.com/USER``).
+
+    * ``"tweets"``: `/tweets <https://twitter.com/USER/tweets>`__ timeline + search
+    * ``"media"``: `/media <https://twitter.com/USER/media>`__ timeline + search
+    * ``"with_replies"``: `/with_replies <https://twitter.com/USER/with_replies>`__ timeline + search
+    * ``"auto"``: ``"tweets"`` or ``"media"``, depending on `retweets <extractor.twitter.retweets_>`__ and `text-tweets <extractor.twitter.text-tweets_>`__ settings
+
+
 extractor.twitter.text-tweets
 -----------------------------
 Type
@@ -2397,6 +2450,16 @@ Default
     ``false``
 Description
     Extract `TwitPic <https://twitpic.com/>`__ embeds.
+
+
+extractor.twitter.unique
+------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Ignore previously seen Tweets.
 
 
 extractor.twitter.users
@@ -3274,13 +3337,15 @@ Type
 Default
     ``"json"``
 Description
-    Select how to write metadata.
+    Selects how to process metadata.
 
-    * ``"json"``: all metadata using `json.dump()
+    * ``"json"``: write metadata using `json.dump()
       <https://docs.python.org/3/library/json.html#json.dump>`_
-    * ``"tags"``: ``tags`` separated by newlines
-    * ``"custom"``: result of applying `metadata.content-format`_
+    * ``"tags"``: write ``tags`` separated by newlines
+    * ``"custom"``: write the result of applying `metadata.content-format`_
       to a file's metadata dictionary
+    * ``"modify"``: add or modify metadata entries
+    * ``"delete"``: remove metadata entries
 
 
 metadata.filename
@@ -3369,6 +3434,32 @@ Description
         e.g. a Tweet on Twitter or a post on Patreon.
 
 
+metadata.fields
+---------------
+Type
+    * ``list`` of ``strings``
+    * ``object`` (`field name` -> `format string`_)
+Example
+    * .. code:: json
+
+        ["blocked", "watching", "status[creator][name]"]
+
+    * .. code:: json
+
+        {
+            "blocked"         : "***",
+            "watching"        : "\fE 'yes' if watching else 'no'",
+            "status[username]": "{status[creator][name]!l}"
+        }
+
+Description
+    * ``"mode": "delete"``:
+        A list of metadata field names to remove.
+    * ``"mode": "modify"``:
+        An object with metadata field names mapping to a `format string`_
+        whose result is assigned to said field name.
+
+
 metadata.content-format
 -----------------------
 Type
@@ -3436,6 +3527,24 @@ Description
     Name of the metadata field whose value should be used.
 
     This value must either be a UNIX timestamp or a
+    |datetime|_ object.
+
+    Note: This option gets ignored if `mtime.value`_ is set.
+
+
+mtime.value
+-----------
+Type
+    ``string``
+Default
+    ``null``
+Example
+    * ``"{status[date]}"``
+    * ``"{content[0:6]:R22/2022/D%Y%m%d/}"``
+Description
+    A `format string`_ whose value should be used.
+
+    The resulting value must either be a UNIX timestamp or a
     |datetime|_ object.
 
 
@@ -3567,7 +3676,7 @@ ugoira.mtime
 Type
     ``bool``
 Default
-    ``false``
+    ``true``
 Description
     Set modification times of generated ugoira aniomations.
 
@@ -3666,6 +3775,20 @@ Description
     this cache.
 
 
+format-separator
+----------------
+Type
+    ``string``
+Default
+    ``"/"``
+Description
+    Character(s) used as argument separator in format string
+    `format specifiers <formatting.md#format-specifiers>`__.
+
+    For example, setting this option to ``"#"`` would allow a replacement
+    operation to be ``Rold#new#`` instead of the default ``Rold/new/``
+
+
 signals-ignore
 --------------
 Type
@@ -3676,6 +3799,17 @@ Description
     The list of signal names to ignore, i.e. set
     `SIG_IGN <https://docs.python.org/3/library/signal.html#signal.SIG_IGN>`_
     as signal handler for.
+
+
+warnings
+--------
+Type
+    ``string``
+Default
+    ``"default"``
+Description
+    The `Warnings Filter action <https://docs.python.org/3/library/warnings.html#the-warnings-filter>`__
+    used for (urllib3) warnings.
 
 
 pyopenssl

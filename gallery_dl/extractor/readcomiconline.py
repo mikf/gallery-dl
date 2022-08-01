@@ -50,8 +50,9 @@ class ReadcomiconlineIssueExtractor(ReadcomiconlineBase, ChapterExtractor):
     subcategory = "issue"
     pattern = BASE_PATTERN + r"(/Comic/[^/?#]+/[^/?#]+\?)([^#]+)"
     test = ("https://readcomiconline.li/Comic/W-i-t-c-h/Issue-130?id=22289", {
-        "url": "30d29c5afc65043bfd384c010257ec2d0ecbafa6",
+        "pattern": r"https://2\.bp\.blogspot\.com/[\w-]+=s0\?.+",
         "keyword": "2d9ec81ce1b11fac06ebf96ce33cdbfca0e85eb5",
+        "count": 36,
     })
 
     def __init__(self, match):

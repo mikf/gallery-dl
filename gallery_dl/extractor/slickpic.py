@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2020 Mike Fährmann
+# Copyright 2019-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -36,12 +36,15 @@ class SlickpicAlbumExtractor(SlickpicExtractor):
     pattern = BASE_PATTERN + r"/albums/([^/?#]+)"
     test = (
         ("https://mattcrandall.slickpic.com/albums/LamborghiniMurcielago/", {
-            "url": "58bd94ebc80fd906e9879826970b408d54c6da07",
-            "keyword": "54a9d6f9e42ae43c644aa9316186fb9d9955fe53",
+            "pattern": r"https://stored-cf\.slickpic\.com/NDk5MjNmYTc1MzU0MQ,,"
+                       r"/20160807/\w+/p/o/JSBFSS-\d+\.jpg",
+            "keyword": "c37c4ce9c54c09abc6abdf295855d46f11529cbf",
+            "count": 102,
         }),
         ("https://mattcrandall.slickpic.com/albums/LamborghiniMurcielago/", {
             "range": "34",
-            "content": ("cec6630e659dc72db1ee1a9a6f3b525189261988",
+            "content": ("52b5a310587de1048030ab13a912f6a3a9cc7dab",
+                        "cec6630e659dc72db1ee1a9a6f3b525189261988",
                         "6f81e1e74c6cd6db36844e7211eef8e7cd30055d",
                         "22e83645fc242bc3584eca7ec982c8a53a4d8a44"),
         }),

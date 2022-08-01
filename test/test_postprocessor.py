@@ -339,6 +339,52 @@ class MetadataTest(BasePostprocessorTest):
 {"category": "test", "extension": "ext", "filename": "file"}
 """)
 
+    def test_metadata_modify(self):
+        kwdict = {"foo": 0, "bar": {"bax": 1, "bay": 2, "baz": 3}}
+        self._create({
+            "mode": "modify",
+            "fields": {
+                "foo"     : "{filename}-{foo!s}",
+                "foo2"    : "\fE bar['bax'] + 122",
+                "bar[baz]": "{_now}",
+                "bar[ba2]": "test",
+            },
+        }, kwdict)
+        pdict = self.pathfmt.kwdict
+
+        self.assertIsNot(kwdict, pdict)
+        self.assertEqual(pdict["foo"], kwdict["foo"])
+        self.assertEqual(pdict["bar"], kwdict["bar"])
+
+        self._trigger()
+
+        self.assertEqual(pdict["foo"]       , "file-0")
+        self.assertEqual(pdict["foo2"]      , 123)
+        self.assertEqual(pdict["bar"]["ba2"], "test")
+        self.assertIsInstance(pdict["bar"]["baz"], datetime)
+
+    def test_metadata_delete(self):
+        kwdict = {"foo": 0, "bar": {"bax": 1, "bay": 2, "baz": 3}}
+        self._create({"mode": "delete", "fields": ["foo", "bar[baz]"]}, kwdict)
+        pdict = self.pathfmt.kwdict
+
+        self.assertIsNot(kwdict, pdict)
+        self.assertEqual(pdict["foo"], kwdict["foo"])
+        self.assertEqual(pdict["bar"], kwdict["bar"])
+
+        del kwdict["foo"]
+        del kwdict["bar"]["baz"]
+
+        self._trigger()
+        self.assertNotIn("foo", pdict)
+        self.assertNotIn("baz", pdict["bar"])
+        self.assertEqual(kwdict["bar"], pdict["bar"])
+
+        self._trigger()
+        self.assertNotIn("foo", pdict)
+        self.assertNotIn("baz", pdict["bar"])
+        self.assertEqual(kwdict["bar"], pdict["bar"])
+
     @staticmethod
     def _output(mock):
         return "".join(
@@ -350,10 +396,6 @@ class MetadataTest(BasePostprocessorTest):
 
 class MtimeTest(BasePostprocessorTest):
 
-    def test_mtime_default(self):
-        pp = self._create()
-        self.assertEqual(pp.key, "date")
-
     def test_mtime_datetime(self):
         self._create(None, {"date": datetime(1980, 1, 1)})
         self._trigger()
@@ -364,8 +406,13 @@ class MtimeTest(BasePostprocessorTest):
         self._trigger()
         self.assertEqual(self.pathfmt.kwdict["_mtime"], 315532800)
 
-    def test_mtime_custom(self):
+    def test_mtime_key(self):
         self._create({"key": "foo"}, {"foo": 315532800})
+        self._trigger()
+        self.assertEqual(self.pathfmt.kwdict["_mtime"], 315532800)
+
+    def test_mtime_value(self):
+        self._create({"value": "{foo}"}, {"foo": 315532800})
         self._trigger()
         self.assertEqual(self.pathfmt.kwdict["_mtime"], 315532800)
 
@@ -374,21 +421,21 @@ class ZipTest(BasePostprocessorTest):
 
     def test_zip_default(self):
         pp = self._create()
-        self.assertEqual(self.job.hooks["file"][0], pp.write)
-        self.assertEqual(pp.path, self.pathfmt.realdirectory)
+        self.assertEqual(self.job.hooks["file"][0], pp.write_fast)
+        self.assertEqual(pp.path, self.pathfmt.realdirectory[:-1])
         self.assertEqual(pp.delete, True)
         self.assertEqual(pp.args, (
-            pp.path[:-1] + ".zip", "a", zipfile.ZIP_STORED, True,
+            pp.path + ".zip", "a", zipfile.ZIP_STORED, True,
         ))
         self.assertTrue(pp.args[0].endswith("/test.zip"))
 
     def test_zip_safe(self):
         pp = self._create({"mode": "safe"})
         self.assertEqual(self.job.hooks["file"][0], pp.write_safe)
-        self.assertEqual(pp.path, self.pathfmt.realdirectory)
+        self.assertEqual(pp.path, self.pathfmt.realdirectory[:-1])
         self.assertEqual(pp.delete, True)
         self.assertEqual(pp.args, (
-            pp.path[:-1] + ".zip", "a", zipfile.ZIP_STORED, True,
+            pp.path + ".zip", "a", zipfile.ZIP_STORED, True,
         ))
         self.assertTrue(pp.args[0].endswith("/test.zip"))
 
@@ -400,7 +447,7 @@ class ZipTest(BasePostprocessorTest):
         })
         self.assertEqual(pp.delete, False)
         self.assertEqual(pp.args, (
-            pp.path[:-1] + ".cbz", "a", zipfile.ZIP_DEFLATED, True,
+            pp.path + ".cbz", "a", zipfile.ZIP_DEFLATED, True,
         ))
         self.assertTrue(pp.args[0].endswith("/test.cbz"))
 
@@ -439,9 +486,9 @@ class ZipTest(BasePostprocessorTest):
         with zipfile.ZipFile(pp.zfile.filename) as file:
             nti = file.NameToInfo
             self.assertEqual(len(pp.zfile.NameToInfo), 3)
-            self.assertIn("file0.ext", pp.zfile.NameToInfo)
-            self.assertIn("file1.ext", pp.zfile.NameToInfo)
-            self.assertIn("file2.ext", pp.zfile.NameToInfo)
+            self.assertIn("file0.ext", nti)
+            self.assertIn("file1.ext", nti)
+            self.assertIn("file2.ext", nti)
 
         os.unlink(pp.zfile.filename)
 
