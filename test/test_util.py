@@ -541,6 +541,41 @@ class TestOther(unittest.TestCase):
         r = util.filter_dict(d)
         self.assertEqual(r, {"foo": 123})
 
+    def test_enumerate_reversed(self):
+
+        seq = [11, 22, 33]
+        result = [(3, 33), (2, 22), (1, 11)]
+
+        def gen():
+            for i in seq:
+                yield i
+
+        def gen_2():
+            yield from seq
+
+        def assertEqual(it1, it2):
+            ae = self.assertEqual
+            for i1, i2 in zip(it1, it2, strict=True):
+                ae(i1, i2)
+
+        assertEqual(
+            util.enumerate_reversed(seq), [(2, 33), (1, 22), (0, 11)])
+        assertEqual(
+            util.enumerate_reversed(seq, 1), result)
+        assertEqual(
+            util.enumerate_reversed(seq, 2), [(4, 33), (3, 22), (2, 11)])
+
+        assertEqual(
+            util.enumerate_reversed(gen(), 0, len(seq)),
+            [(2, 33), (1, 22), (0, 11)])
+        assertEqual(
+            util.enumerate_reversed(gen(), 1, len(seq)), result)
+        assertEqual(
+            util.enumerate_reversed(gen_2(), 1, len(seq)), result)
+        assertEqual(
+            util.enumerate_reversed(gen_2(), 2, len(seq)),
+            [(4, 33), (3, 22), (2, 11)])
+
     def test_number_to_string(self, f=util.number_to_string):
         self.assertEqual(f(1)     , "1")
         self.assertEqual(f(1.0)   , "1.0")
