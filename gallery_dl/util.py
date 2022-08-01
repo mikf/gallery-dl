@@ -161,13 +161,16 @@ def delete_items(obj, keys):
 
 def enumerate_reversed(iterable, start=0, length=None):
     """Enumerate 'iterable' and return its elements in reverse order"""
-    start -= 1
     if length is None:
         length = len(iterable)
-    return zip(
-        range(length - start, start, -1),
-        reversed(iterable),
-    )
+
+    try:
+        iterable = zip(range(start-1+length, start-1, -1), reversed(iterable))
+    except TypeError:
+        iterable = list(zip(range(start, start+length), iterable))
+        iterable.reverse()
+
+    return iterable
 
 
 def number_to_string(value, numbers=(int, float)):
