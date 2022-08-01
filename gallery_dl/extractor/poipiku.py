@@ -51,7 +51,7 @@ class PoipikuExtractor(Extractor):
                 thumb = extr('class="IllustItemThumbImg" src="', '"')
                 if not thumb:
                     break
-                elif thumb.startswith("/img/"):
+                elif thumb.startswith(("//img.poipiku.com/img/", "/img/")):
                     continue
                 post["num"] += 1
                 url = text.ensure_http_scheme(thumb[:-8])
