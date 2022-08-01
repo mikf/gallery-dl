@@ -8,6 +8,7 @@
 
 """Common classes and constants used by extractor modules."""
 
+import os
 import re
 import ssl
 import time
@@ -224,7 +225,9 @@ class Extractor():
         headers.clear()
         ssl_options = ssl_ciphers = 0
 
-        browser = self.config("browser") or self.browser
+        browser = self.config("browser")
+        if browser is None:
+            browser = self.browser
         if browser and isinstance(browser, str):
             browser, _, platform = browser.lower().partition(":")
 
@@ -256,9 +259,13 @@ class Extractor():
         else:
             headers["User-Agent"] = self.config("user-agent", (
                 "Mozilla/5.0 (Windows NT 10.0; Win64; x64; "
-                "rv:91.0) Gecko/20100101 Firefox/91.0"))
+                "rv:102.0) Gecko/20100101 Firefox/102.0"))
             headers["Accept"] = "*/*"
             headers["Accept-Language"] = "en-US,en;q=0.5"
+
+        if BROTLI:
+            headers["Accept-Encoding"] = "gzip, deflate, br"
+        else:
             headers["Accept-Encoding"] = "gzip, deflate"
 
         custom_headers = self.config("headers")
@@ -473,11 +480,16 @@ class Extractor():
 
         fname = "{:>02}_{}".format(
             Extractor._dump_index,
-            Extractor._dump_sanitize('_', response.url)
-        )[:250]
+            Extractor._dump_sanitize('_', response.url),
+        )
+
+        if util.WINDOWS:
+            path = os.path.abspath(fname)[:255]
+        else:
+            path = fname[:251]
 
         try:
-            with open(fname + ".dump", 'wb') as fp:
+            with open(path + ".txt", 'wb') as fp:
                 util.dump_response(
                     response, fp, headers=(self._write_pages == "all"))
         except Exception as e:
@@ -713,16 +725,21 @@ _browser_cookies = {}
 
 HTTP_HEADERS = {
     "firefox": (
-        ("User-Agent", "Mozilla/5.0 ({}; rv:91.0) "
-                       "Gecko/20100101 Firefox/91.0"),
+        ("User-Agent", "Mozilla/5.0 ({}; rv:102.0) "
+                       "Gecko/20100101 Firefox/102.0"),
         ("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,"
-                   "image/avif,*/*;q=0.8"),
+                   "image/avif,image/webp,*/*;q=0.8"),
         ("Accept-Language", "en-US,en;q=0.5"),
-        ("Accept-Encoding", "gzip, deflate"),
+        ("Accept-Encoding", None),
         ("Referer", None),
+        ("DNT", "1"),
         ("Connection", "keep-alive"),
         ("Upgrade-Insecure-Requests", "1"),
         ("Cookie", None),
+        ("Sec-Fetch-Dest", "empty"),
+        ("Sec-Fetch-Mode", "no-cors"),
+        ("Sec-Fetch-Site", "same-origin"),
+        ("TE", "trailers"),
     ),
     "chrome": (
         ("Upgrade-Insecure-Requests", "1"),
@@ -731,7 +748,7 @@ HTTP_HEADERS = {
         ("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,"
                    "image/webp,image/apng,*/*;q=0.8"),
         ("Referer", None),
-        ("Accept-Encoding", "gzip, deflate"),
+        ("Accept-Encoding", None),
         ("Accept-Language", "en-US,en;q=0.9"),
         ("Cookie", None),
     ),
@@ -755,8 +772,7 @@ SSL_CIPHERS = {
         "AES128-GCM-SHA256:"
         "AES256-GCM-SHA384:"
         "AES128-SHA:"
-        "AES256-SHA:"
-        "DES-CBC3-SHA"
+        "AES256-SHA"
     ),
     "chrome": (
         "TLS_AES_128_GCM_SHA256:"
@@ -778,6 +794,24 @@ SSL_CIPHERS = {
     ),
 }
 
+
+urllib3 = requests.packages.urllib3
+
+# detect brotli support
+try:
+    BROTLI = urllib3.response.brotli is not None
+except AttributeError:
+    BROTLI = False
+
+# set (urllib3) warnings filter
+action = config.get((), "warnings", "default")
+if action:
+    try:
+        import warnings
+        warnings.simplefilter(action, urllib3.exceptions.HTTPWarning)
+    except Exception:
+        pass
+del action
 
 # Undo automatic pyOpenSSL injection by requests
 pyopenssl = config.get((), "pyopenssl", False)

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2021 Mike Fährmann
+# Copyright 2015-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -121,8 +121,8 @@ class MangaparkMangaExtractor(MangaparkBase, MangaExtractor):
                r"(/manga/[^/?#]+)/?$")
     test = (
         ("https://mangapark.net/manga/aria", {
-            "url": "b8f7db2f581404753c4af37af66c049a41273b94",
-            "keyword": "2c0d28efaf84fcfe62932b6931ef3c3987cd48c0",
+            "url": "51c6d82aed5c3c78e0d3f980b09a998e6a2a83ee",
+            "keyword": "cabc60cf2efa82749d27ac92c495945961e4b73c",
         }),
         ("https://mangapark.me/manga/aria"),
         ("https://mangapark.com/manga/aria"),

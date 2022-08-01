@@ -35,6 +35,12 @@ class PinterestExtractor(Extractor):
 
         yield Message.Directory, data
         for pin in self.pins():
+
+            if isinstance(pin, tuple):
+                url, data = pin
+                yield Message.Queue, url, data
+                continue
+
             pin.update(data)
 
             carousel_data = pin.get("carousel_data")
@@ -170,14 +176,17 @@ class PinterestBoardExtractor(PinterestExtractor):
 
     def pins(self):
         board = self.board
+        pins = self.api.board_pins(board["id"])
 
         if board["section_count"] and self.config("sections", True):
-            pins = [self.api.board_pins(board["id"])]
-            for section in self.api.board_sections(board["id"]):
-                pins.append(self.api.board_section_pins(section["id"]))
-            return itertools.chain.from_iterable(pins)
-        else:
-            return self.api.board_pins(board["id"])
+            base = "{}/{}/{}/id:".format(
+                self.root, board["owner"]["username"], board["name"])
+            data = {"_extractor": PinterestSectionExtractor}
+            sections = [(base + section["id"], data)
+                        for section in self.api.board_sections(board["id"])]
+            pins = itertools.chain(pins, sections)
+
+        return pins
 
 
 class PinterestUserExtractor(PinterestExtractor):
@@ -245,8 +254,12 @@ class PinterestSectionExtractor(PinterestExtractor):
         self.section = None
 
     def metadata(self):
-        section = self.section = self.api.board_section(
-            self.user, self.board_slug, self.section_slug)
+        if self.section_slug.startswith("id:"):
+            section = self.section = self.api.board_section(
+                self.section_slug[3:])
+        else:
+            section = self.section = self.api.board_section_by_name(
+                self.user, self.board_slug, self.section_slug)
         section.pop("preview_pins", None)
         return {"board": section.pop("board"), "section": section}
 
@@ -398,8 +411,13 @@ class PinterestAPI():
         options = {"board_id": board_id}
         return self._pagination("BoardFeed", options)
 
-    def board_section(self, user, board_slug, section_slug):
+    def board_section(self, section_id):
         """Yield a specific board section"""
+        options = {"section_id": section_id}
+        return self._call("BoardSection", options)["resource_response"]["data"]
+
+    def board_section_by_name(self, user, board_slug, section_slug):
+        """Yield a board section by name"""
         options = {"board_slug": board_slug, "section_slug": section_slug,
                    "username": user}
         return self._call("BoardSection", options)["resource_response"]["data"]

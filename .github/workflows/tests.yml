@@ -30,7 +30,7 @@ jobs:
         PYV: ${{ matrix.python-version }}
       run: |
         pip install -r requirements.txt
-        pip install flake8
+        pip install "flake8<4"
         pip install youtube-dl
         if [[ "$PYV" != "3.4" && "$PYV" != "3.5" ]]; then pip install yt-dlp; fi
 

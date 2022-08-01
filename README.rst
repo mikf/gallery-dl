@@ -25,6 +25,7 @@ Optional
 - FFmpeg_: Pixiv Ugoira to WebM conversion
 - yt-dlp_ or youtube-dl_: Video downloads
 - PySocks_: SOCKS proxy support
+- brotli_ or brotlicffi_: Brotli compression support
 
 
 Installation
@@ -65,8 +66,8 @@ Standalone Executable
 Prebuilt executable files with a Python interpreter and
 required Python packages included are available for
 
-- `Windows <https://github.com/mikf/gallery-dl/releases/download/v1.22.1/gallery-dl.exe>`__
-- `Linux   <https://github.com/mikf/gallery-dl/releases/download/v1.22.1/gallery-dl.bin>`__
+- `Windows <https://github.com/mikf/gallery-dl/releases/download/v1.22.4/gallery-dl.exe>`__
+- `Linux   <https://github.com/mikf/gallery-dl/releases/download/v1.22.4/gallery-dl.bin>`__
 
 | Executables build from the latest commit can be found at
 | https://github.com/mikf/gallery-dl/actions/workflows/executables.yml
@@ -217,7 +218,8 @@ and optional for
 ``subscribestar``,
 ``tapas``,
 ``tsumino``,
-and ``twitter``.
+``twitter``,
+and ``zerochan``.
 
 You can set the necessary information in your configuration file
 (cf. gallery-dl.conf_)
@@ -332,6 +334,8 @@ To authenticate with a ``mastodon`` instance, run *gallery-dl* with
 .. _yt-dlp:     https://github.com/yt-dlp/yt-dlp
 .. _youtube-dl: https://ytdl-org.github.io/youtube-dl/
 .. _PySocks:    https://pypi.org/project/PySocks/
+.. _brotli:     https://github.com/google/brotli
+.. _brotlicffi: https://github.com/python-hyper/brotlicffi
 .. _pyOpenSSL:  https://pyopenssl.org/
 .. _Snapd:      https://docs.snapcraft.io/installing-snapd
 .. _OAuth:      https://en.wikipedia.org/wiki/OAuth

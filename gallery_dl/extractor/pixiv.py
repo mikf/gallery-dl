@@ -238,7 +238,7 @@ class PixivAvatarExtractor(PixivExtractor):
 class PixivBackgroundExtractor(PixivExtractor):
     """Extractor for pixiv background banners"""
     subcategory = "background"
-    filename_fmt = "background{date?_//:%Y-%m-%d}.{extension}"
+    filename_fmt = "background{date:?_//%Y-%m-%d}.{extension}"
     archive_fmt = "background_{user[id]}_{date}"
     pattern = (r"(?:https?://)?(?:www\.)?pixiv\.net"
                r"/(?:en/)?users/(\d+)/background")

@@ -9,12 +9,13 @@
 
 import os
 import sys
+import time
 import unittest
 import datetime
 import tempfile
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from gallery_dl import formatter  # noqa E402
+from gallery_dl import formatter, text, util  # noqa E402
 
 
 class TestFormatter(unittest.TestCase):
@@ -97,6 +98,14 @@ class TestFormatter(unittest.TestCase):
         self._run_test("{missing.attr}", replacement, default)
         self._run_test("{missing[key]}", replacement, default)
         self._run_test("{missing:?a//}", "a" + default, default)
+
+    def test_fmt_func(self):
+        self._run_test("{t}" , self.kwdict["t"] , None, int)
+        self._run_test("{t}" , self.kwdict["t"] , None, util.identity)
+        self._run_test("{dt}", self.kwdict["dt"], None, util.identity)
+        self._run_test("{ds}", self.kwdict["dt"], None, text.parse_datetime)
+        self._run_test("{ds:D%Y-%m-%dT%H:%M:%S%z}", self.kwdict["dt"],
+                       None, util.identity)
 
     def test_alternative(self):
         self._run_test("{a|z}"    , "hElLo wOrLd")
@@ -184,6 +193,31 @@ class TestFormatter(unittest.TestCase):
         self._run_test("{ds:D%Y}", "2010-01-01T01:00:00+0100")
         self._run_test("{l:D%Y}", "None")
 
+    def test_offset(self):
+        self._run_test("{dt:O 01:00}", "2010-01-01 01:00:00")
+        self._run_test("{dt:O+02:00}", "2010-01-01 02:00:00")
+        self._run_test("{dt:O-03:45}", "2009-12-31 20:15:00")
+
+        self._run_test("{dt:O12}", "2010-01-01 12:00:00")
+        self._run_test("{dt:O-24}", "2009-12-31 00:00:00")
+
+        self._run_test("{ds:D%Y-%m-%dT%H:%M:%S%z/O1}", "2010-01-01 01:00:00")
+        self._run_test("{t!d:O2}", "2010-01-01 02:00:00")
+
+        orig_daylight = time.daylight
+        orig_timezone = time.timezone
+        orig_altzone = time.altzone
+        try:
+            time.daylight = False
+            time.timezone = -3600
+            self._run_test("{dt:O}", "2010-01-01 01:00:00")
+            time.timezone = 7200
+            self._run_test("{dt:Olocal}", "2009-12-31 22:00:00")
+        finally:
+            time.daylight = orig_daylight
+            time.timezone = orig_timezone
+            time.altzone = orig_altzone
+
     def test_chain_special(self):
         # multiple replacements
         self._run_test("{a:Rh/C/RE/e/RL/l/}", "Cello wOrld")
@@ -201,6 +235,26 @@ class TestFormatter(unittest.TestCase):
 
         # parse and format datetime
         self._run_test("{ds:D%Y-%m-%dT%H:%M:%S%z/%Y%m%d}", "20100101")
+
+    def test_separator(self):
+        orig_separator = formatter._SEPARATOR
+        try:
+            formatter._SEPARATOR = "|"
+            self._run_test("{a:Rh|C|RE|e|RL|l|}", "Cello wOrld")
+            self._run_test("{d[b]!s:R1|Q|R2|A|R0|Y|}", "Y")
+
+            formatter._SEPARATOR = "##"
+            self._run_test("{l:J-##Rb##E##}", "a-E-c")
+            self._run_test("{l:J-##[1:-1]}", "-b-")
+
+            formatter._SEPARATOR = "\0"
+            self._run_test("{d[a]:?<\0>\0L1\0too long\0}", "<too long>")
+            self._run_test("{d[c]:?<\0>\0L5\0too long\0}", "")
+
+            formatter._SEPARATOR = "?"
+            self._run_test("{ds:D%Y-%m-%dT%H:%M:%S%z?%Y%m%d}", "20100101")
+        finally:
+            formatter._SEPARATOR = orig_separator
 
     def test_globals_env(self):
         os.environ["FORMATTER_TEST"] = value = self.kwdict["a"]
@@ -316,8 +370,8 @@ def noarg():
         with self.assertRaises(TypeError):
             self.assertEqual(fmt3.format_map(self.kwdict), "")
 
-    def _run_test(self, format_string, result, default=None):
-        fmt = formatter.parse(format_string, default)
+    def _run_test(self, format_string, result, default=None, fmt=format):
+        fmt = formatter.parse(format_string, default, fmt)
         output = fmt.format_map(self.kwdict)
         self.assertEqual(output, result, format_string)
 

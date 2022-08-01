@@ -4,7 +4,7 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract hentai-gallery from https://myhentaigallery.com/"""
+"""Extractors for https://myhentaigallery.com/"""
 
 from .common import GalleryExtractor
 from .. import text, exception
@@ -18,8 +18,8 @@ class MyhentaigalleryGalleryExtractor(GalleryExtractor):
                r"/gallery/(?:thumbnails|show)/(\d+)")
     test = (
         ("https://myhentaigallery.com/gallery/thumbnails/16247", {
-            "pattern": r"https://images.myhentaigrid.com/imagesgallery/images"
-                       r"/[^/]+/original/\d+\.jpg",
+            "pattern": r"https://images.myhentaicomics\.com/imagesgallery"
+                       r"/images/[^/]+/original/\d+\.jpg",
             "keyword": {
                 "artist"    : list,
                 "count"     : 11,

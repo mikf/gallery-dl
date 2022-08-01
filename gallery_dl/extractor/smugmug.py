@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2021 Mike Fährmann
+# Copyright 2018-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract images from https://www.smugmug.com/"""
+"""Extractors for https://www.smugmug.com/"""
 
 from .common import Extractor, Message
 from .. import text, oauth, exception
@@ -111,13 +111,13 @@ class SmugmugImageExtractor(SmugmugExtractor):
     test = (
         ("https://tdm.smugmug.com/Nature/Dove/i-kCsLJT6", {
             "url": "e6408fd2c64e721fd146130dceb56a971ceb4259",
-            "keyword": "b15af021186b7234cebcac758d2a4fd8462f9912",
+            "keyword": "460a773f5addadd3e216bda346fc524fe4eedc52",
             "content": "ecbd9d7b4f75a637abc8d35319be9ec065a44eb0",
         }),
         # video
         ("https://tstravels.smugmug.com/Dailies/Daily-Dose-2015/i-39JFNzB", {
             "url": "04d0ab1ff829ca7d78f5acb5548953df08e9a5ee",
-            "keyword": "f6967cc5a46c3e130a4f8de7c5c971f72e07fe61",
+            "keyword": "eb74e5cf6780d5152ab8f11b431ec1b17fa8f69b",
         }),
     )
 

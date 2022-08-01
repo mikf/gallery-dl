@@ -23,6 +23,7 @@ class SkebExtractor(Extractor):
         Extractor.__init__(self, match)
         self.user_name = match.group(1)
         self.thumbnails = self.config("thumbnails", False)
+        self.article = self.config("article", False)
 
     def items(self):
         for user_name, post_num in self.posts():
@@ -105,6 +106,12 @@ class SkebExtractor(Extractor):
             post["file_url"] = resp["og_image_url"]
             yield post
 
+        if self.article and "article_image_url" in resp:
+            post["content_category"] = "article"
+            post["file_id"] = "article"
+            post["file_url"] = resp["article_image_url"]
+            yield post
+
         for preview in resp["previews"]:
             post["content_category"] = "preview"
             post["file_id"] = preview["id"]
@@ -134,11 +141,12 @@ class SkebPostExtractor(SkebExtractor):
             "anonymous": False,
             "body": "re:はじめまして。私はYouTubeにてVTuberとして活動をしている湊ラ",
             "client": {
-                "avatar_url": "https://pbs.twimg.com/profile_images"
-                              "/1471184042791895042/f0DcWFGl.jpg",
-                "header_url": None,
+                "avatar_url": r"re:https://pbs.twimg.com/profile_images"
+                              r"/\d+/\w+\.jpg",
+                "header_url": r"re:https://pbs.twimg.com/profile_banners"
+                              r"/1375007870291300358/\d+/1500x500",
                 "id": 1196514,
-                "name": "湊ラギ",
+                "name": str,
                 "screen_name": "minato_ragi",
             },
             "completed_at": "2022-02-27T14:03:45.442Z",
@@ -208,3 +216,30 @@ class SkebUserExtractor(SkebExtractor):
             posts = itertools.chain(posts, self._pagination(url, params))
 
         return posts
+
+
+class SkebFollowingExtractor(SkebExtractor):
+    """Extractor for all creators followed by a skeb user"""
+    subcategory = "following"
+    pattern = r"(?:https?://)?skeb\.jp/@([^/?#]+)/following_creators"
+    test = ("https://skeb.jp/@user/following_creators",)
+
+    def items(self):
+        for user in self.users():
+            url = "{}/@{}".format(self.root, user["screen_name"])
+            user["_extractor"] = SkebUserExtractor
+            yield Message.Queue, url, user
+
+    def users(self):
+        url = "{}/api/users/{}/following_creators".format(
+            self.root, self.user_name)
+        headers = {"Referer": self.root, "Authorization": "Bearer null"}
+        params = {"sort": "date", "offset": 0, "limit": 90}
+
+        while True:
+            data = self.request(url, params=params, headers=headers).json()
+            yield from data
+
+            if len(data) < params["limit"]:
+                return
+            params["offset"] += params["limit"]

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2021 Mike Fährmann
+# Copyright 2019-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -55,7 +55,7 @@ class _8musesAlbumExtractor(Extractor):
             },
         }),
         # custom sorting
-        ("https://www.8muses.com/comics/album/Fakku-Comics/9?sort=az", {
+        ("https://www.8muses.com/comics/album/Fakku-Comics/11?sort=az", {
             "count": ">= 70",
             "keyword": {"name": r"re:^[R-Zr-z]"},
         }),
