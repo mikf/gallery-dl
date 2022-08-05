@@ -14,10 +14,12 @@ from .. import text
 
 def slugify(value):
     """
-    Modified from https://github.com/django/django/blob/master/django/utils/text.py
-    Convert spaces, repeated dashes abd repeated underscores to single underscore.
-    Remove characters that aren't alphanumerics, underscores, or hyphens.
-    Also strip leading and trailing whitespace, dashes, and underscores.
+    Adapted from:
+    https://github.com/django/django/blob/master/django/utils/text.py
+    Convert spaces, repeated dashes abd repeated underscores to single
+    underscore.Remove characters that aren't alphanumerics, underscores,
+    or hyphens. Also strip leading and trailing whitespace, dashes,
+    and underscores.
     """
     value = str(value)
     value = unicodedata.normalize('NFKC', value)
@@ -29,7 +31,7 @@ class CatboxCollectionExtractor(Extractor):
     """extractor for Catbox Collections"""
     category = "catbox"
     subcategory = "collection"
-    directory_fmt = ("{category}","{title}{id}",)
+    directory_fmt = ("{category}", "{title}{id}",)
     pattern = (
         r"(?:https?:\/\/)?(?:www\.)?catbox\.moe\/c\/[\w-]+#?"
     )
@@ -56,6 +58,6 @@ class CatboxCollectionExtractor(Extractor):
             r">https?:\/\/files\.catbox\.moe\/[0-9a-z.]+<", webpage)
         if len(links) != 0:
             yield Message.Directory, {"id": self.name, "title": title}
-            links = [l.strip("<>") for l in set(links)]
+            links = [link.strip("<>") for link in set(links)]
             for link in links:
                 yield Message.Url, link, text.nameext_from_url(link)
