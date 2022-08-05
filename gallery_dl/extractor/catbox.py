@@ -29,7 +29,7 @@ class CatboxCollectionExtractor(Extractor):
     """extractor for Catbox Collections"""
     category = "catbox"
     subcategory = "collection"
-    directory_fmt = ("{title}{id}",)
+    directory_fmt = ("{category}","{title}{id}",)
     pattern = (
         r"(?:https?:\/\/)?(?:www\.)?catbox\.moe\/c\/[\w-]+#?"
     )
