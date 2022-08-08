@@ -189,7 +189,7 @@ class WallhavenAPI():
 
     def collections(self, username):
         endpoint = "/v1/collections/" + username
-        return self._pagination(endpoint)
+        return self._pagination(endpoint, metadata=False)
 
     def search(self, params):
         endpoint = "/v1/search"
@@ -200,13 +200,20 @@ class WallhavenAPI():
         return self.extractor.request(
             url, headers=self.headers, params=params).json()
 
-    def _pagination(self, endpoint, params=None):
+    def _pagination(self, endpoint, params=None, metadata=None):
         if params is None:
             params = {}
+        if metadata is None:
+            metadata = self.extractor.config("metadata")
 
         while True:
             data = self._call(endpoint, params)
-            yield from data["data"]
+
+            if metadata:
+                for wp in data["data"]:
+                    yield self.info(str(wp["id"]))
+            else:
+                yield from data["data"]
 
             meta = data.get("meta")
             if not meta or meta["current_page"] >= meta["last_page"]:
