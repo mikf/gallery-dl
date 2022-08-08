@@ -2538,6 +2538,18 @@ Description
     See https://wallhaven.cc/help/api for more information.
 
 
+extractor.wallhaven.metadata
+----------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Extract additional metadata (tags, uploader)
+
+    Note: This requires 1 additional HTTP request for each post.
+
+
 extractor.weasyl.api-key
 ------------------------
 Type
