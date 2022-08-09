@@ -38,11 +38,11 @@ def parse_inputfile(file, log):
     Lines starting with '#' and empty lines will be ignored.
     Lines starting with '-' will be interpreted as a key-value pair separated
       by an '='. where 'key' is a dot-separated option name and 'value' is a
-      JSON-parsable value for it. These config options will be applied while
+      JSON-parsable value. These configuration options will be applied while
       processing the next URL.
     Lines starting with '-G' are the same as above, except these options will
-      be valid for all following URLs, i.e. they are Global.
-    Everything else will be used as potential URL.
+      be applied for *all* following URLs, i.e. they are Global.
+    Everything else will be used as a potential URL.
 
     Example input file:
 
@@ -57,7 +57,8 @@ def parse_inputfile(file, log):
     https://example.org/
 
     # next URL uses default filename and 'skip' is false.
-    https://example.com/index.htm
+    https://example.com/index.htm # comment1
+    https://example.com/404.htm   # comment2
     """
     gconf = []
     lconf = []
@@ -94,6 +95,8 @@ def parse_inputfile(file, log):
 
         else:
             # url
+            if " #" in line:
+                line = line.partition(" #")[0]
             if gconf or lconf:
                 yield util.ExtendedUrl(line, gconf, lconf)
                 gconf = []
