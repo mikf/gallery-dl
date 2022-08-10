@@ -2237,6 +2237,20 @@ Description
     Search posts for inline images and videos.
 
 
+extractor.tumblr.original
+-------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Download full-resolution ``photo`` images.
+
+    For each photo with "maximum" resolution
+    (width equal to 2048 or height equal to 3072),
+    use an extra HTTP request to find the URL to its full-resolution version.
+
+
 extractor.tumblr.reblogs
 ------------------------
 Type
