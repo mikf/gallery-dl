@@ -64,6 +64,7 @@ class TumblrExtractor(Extractor):
         self.inline = self.config("inline", True)
         self.reblogs = self.config("reblogs", True)
         self.external = self.config("external", False)
+        self.original = self.config("original", True)
 
         if len(self.types) == 1:
             self.api.posts_type = next(iter(self.types))
@@ -110,12 +111,17 @@ class TumblrExtractor(Extractor):
 
                 for photo in photos:
                     post["photo"] = photo
+
                     best_photo = photo["original_size"]
                     for alt_photo in photo["alt_sizes"]:
                         if (alt_photo["height"] > best_photo["height"] or
                                 alt_photo["width"] > best_photo["width"]):
                             best_photo = alt_photo
                     photo.update(best_photo)
+
+                    if "/s2048x3072/" in photo["url"] and self.original:
+                        photo["url"] = self._original_image(photo["url"])
+
                     del photo["original_size"]
                     del photo["alt_sizes"]
                     yield self._prepare_image(photo["url"], post)
@@ -205,6 +211,12 @@ class TumblrExtractor(Extractor):
     def _skip_reblog_same_blog(self, post):
         return self.blog != post.get("reblogged_root_uuid")
 
+    def _original_image(self, url):
+        url = url.replace("/s2048x3072/", "/s99999x99999/", 1)
+        headers = {"Accept": "text/html,*/*;q=0.8"}
+        response = self.request(url, headers=headers)
+        return text.extract(response.text, '" src="', '"')[0]
+
 
 class TumblrUserExtractor(TumblrExtractor):
     """Extractor for all images from a tumblr-user"""
@@ -283,6 +295,12 @@ class TumblrPostExtractor(TumblrExtractor):
         }),
         ("https://mikf123.tumblr.com/post/181022380064/chat-post", {
             "count": 0,
+        }),
+        ("https://mikf123.tumblr.com/image/689860196535762944", {
+            "pattern": r"^https://\d+\.media\.tumblr\.com"
+                       r"/134791621559a79793563b636b5fe2c6"
+                       r"/8f1131551cef6e74-bc/s99999x99999"
+                       r"/188cf9b8915b0d0911c6c743d152fc62e8f38491\.png$",
         }),
         ("http://ziemniax.tumblr.com/post/109697912859/", {
             "exception": exception.NotFoundError,  # HTML response (#297)
