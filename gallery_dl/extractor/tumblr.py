@@ -119,7 +119,8 @@ class TumblrExtractor(Extractor):
                             best_photo = alt_photo
                     photo.update(best_photo)
 
-                    if "/s2048x3072/" in photo["url"] and self.original:
+                    if self.original and "/s2048x3072/" in photo["url"] and (
+                            photo["width"] == 2048 or photo["height"] == 3072):
                         photo["url"] = self._original_image(photo["url"])
 
                     del photo["original_size"]
