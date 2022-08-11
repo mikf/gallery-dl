@@ -97,6 +97,8 @@ def parse_inputfile(file, log):
             # url
             if " #" in line:
                 line = line.partition(" #")[0]
+            elif "\t#" in line:
+                line = line.partition("\t#")[0]
             if gconf or lconf:
                 yield util.ExtendedUrl(line, gconf, lconf)
                 gconf = []
