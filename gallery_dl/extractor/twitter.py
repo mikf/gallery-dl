@@ -23,7 +23,7 @@ BASE_PATTERN = (
 class TwitterExtractor(Extractor):
     """Base class for twitter extractors"""
     category = "twitter"
-    directory_fmt = ("{category}", "{user[name]}")
+    directory_fmt = ("{category}", "{author[name]}")
     filename_fmt = "{tweet_id}_{num}.{extension}"
     archive_fmt = "{tweet_id}_{retweet_id}_{num}"
     cookiedomain = ".twitter.com"
