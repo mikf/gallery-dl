@@ -53,23 +53,29 @@ class SankakuExtractor(BooruExtractor):
             url = "https://s.sankakucomplex.com" + url[url.index("/", 8):]
         return url
 
-    @staticmethod
-    def _prepare(post):
+    def _prepare(self, post):
         post["created_at"] = post["created_at"]["s"]
         post["date"] = text.parse_timestamp(post["created_at"])
+        self._extended_tags(post)
         post["tags"] = [tag["name"] for tag in post["tags"] if tag["name"]]
         post["tag_string"] = " ".join(post["tags"])
 
-    def _extended_tags(self, post):
-        tags = collections.defaultdict(list)
-        types = self.TAG_TYPES
+    def _extended_tags(self, post, page=None):
+        # group/sort the tags into additional categories,
+        # such as "tags_character" or "tags_artist"
+        grouped_tags = collections.defaultdict(list)
+        for category in self.TAG_TYPES.values():
+            # ensure that each category exists for each post, even if empty
+            if category:
+                grouped_tags[category] = []
         for tag in post["tags"]:
             name = tag["name"]
-            if name:
-                tags[types[tag["type"]]].append(name)
-        for key, value in tags.items():
-            post["tags_" + key] = value
-            post["tag_string_" + key] = " ".join(value)
+            category = self.TAG_TYPES[tag["type"]]
+            if name and category:
+                grouped_tags[category].append(name)
+        for category, value in grouped_tags.items():
+            post["tags_" + category] = value
+            post["tag_string_" + category] = " ".join(value)
 
 
 class SankakuTagExtractor(SankakuExtractor):
