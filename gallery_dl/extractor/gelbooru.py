@@ -127,8 +127,10 @@ class GelbooruPoolExtractor(GelbooruBase,
 class GelbooruPostExtractor(GelbooruBase,
                             gelbooru_v02.GelbooruV02PostExtractor):
     """Extractor for single images from gelbooru.com"""
-    #pattern = (r"(?:https?://)?(?:www\.)?gelbooru\.com/(?:index\.php)/match()/?\?page=post&s=view&id=(?P<post>\d+")
-    pattern = (r"(?:https?:\/\/)?(?:www\.)?gelbooru\.com\/(?:index\.php)?\?(?=.*page=post)(?=.*s=view).*id=(?P<post>\d+).*")
+    #pattern = (r"(?:https?://)?(?:www\.)?gelbooru\.com/(?:index\.php)?"
+    #r"\?page=post&s=view&id=(?P<post>\d+)")
+    pattern = (r"(?:https?://)?(?:www\.)?gelbooru\.com/(?:index\.php)?"
+               r"\?(?=.*page=post)(?=.*s=view).*id=(?P<post>\d+).*")
 
     test = (
         ("https://gelbooru.com/index.php?page=post&s=view&id=313638", {
