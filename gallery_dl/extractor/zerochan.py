@@ -67,6 +67,9 @@ class ZerochanExtractor(BooruExtractor):
             "width" : extr('"width": "', ' '),
             "height": extr('"height": "', ' '),
             "size"  : extr('"contentSize": "', 'B'),
+            "path"  : text.split_html(extr(
+                'class="breadcrumbs', '</p>'))[3::2],
+            "tags"  : extr('alt="Tags: ', '"').split(", ")
         }
 
 
