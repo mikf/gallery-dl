@@ -1783,6 +1783,16 @@ Description
     in `cache <cache.file_>`__.
 
 
+extractor.oauth.host
+--------------------
+Type
+    ``string``
+Default
+    ``"localhost"``
+Description
+    Host name / IP address to bind to during OAuth authorization.
+
+
 extractor.oauth.port
 --------------------
 Type

@@ -41,7 +41,8 @@ class OAuthBase(Extractor):
         stdout_write("Waiting for response. (Cancel with Ctrl+c)\n")
         server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        server.bind(("localhost", self.config("port", 6414)))
+        server.bind((self.config("host", "localhost"),
+                     self.config("port", 6414)))
         server.listen(1)
 
         # workaround for ctrl+c not working during server.accept on Windows
