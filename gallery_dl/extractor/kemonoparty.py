@@ -447,13 +447,26 @@ class KemonopartyFavoriteExtractor(KemonopartyExtractor):
         "count": 3,
     })
 
+    def __init__(self, match):
+        KemonopartyExtractor.__init__(self, match)
+        self.favorites = self.config("favorites", "artist")
+
     def items(self):
         self._prepare_ddosguard_cookies()
         self.login()
 
-        users = self.request(self.root + "/api/favorites").json()
-        for user in users:
-            user["_extractor"] = KemonopartyUserExtractor
-            url = "{}/{}/user/{}".format(
-                self.root, user["service"], user["id"])
-            yield Message.Queue, url, user
+        if self.favorites == "artist":
+            users = self.request(self.root + "/api/favorites").json()
+            for user in users:
+                user["_extractor"] = KemonopartyUserExtractor
+                url = "{}/{}/user/{}".format(
+                    self.root, user["service"], user["id"])
+                yield Message.Queue, url, user
+
+        if self.favorites == "post":
+            posts = self.request(self.root + "/api/favorites?type=post").json()
+            for post in posts:
+                post["_extractor"] = KemonopartyPostExtractor
+                url = "{}/{}/user/{}/post/{}".format(
+                    self.root, post["service"], post["user"], post["id"])
+                yield Message.Queue, url, post
