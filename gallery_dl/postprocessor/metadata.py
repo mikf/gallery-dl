@@ -110,7 +110,7 @@ class MetadataPP(PostProcessor):
             with open(path, "w", encoding="utf-8") as fp:
                 self.write(fp, pathfmt.kwdict)
         except FileNotFoundError:
-            os.makedirs(directory)
+            os.makedirs(directory, exist_ok=True)
             with open(path, "w", encoding="utf-8") as fp:
                 self.write(fp, pathfmt.kwdict)
 
