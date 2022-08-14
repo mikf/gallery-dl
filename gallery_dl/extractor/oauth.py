@@ -42,7 +42,7 @@ class OAuthBase(Extractor):
         server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         server.bind((self.config("host", "localhost"),
-                    self.config("port", 6414)))
+                     self.config("port", 6414)))
         server.listen(1)
 
         # workaround for ctrl+c not working during server.accept on Windows
