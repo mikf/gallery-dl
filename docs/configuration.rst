@@ -1783,6 +1783,16 @@ Description
     in `cache <cache.file_>`__.
 
 
+extractor.oauth.host
+--------------------
+Type
+    ``string``
+Default
+    ``"localhost"``
+Description
+    Host name / IP address to bind to during OAuth authorization.
+
+
 extractor.oauth.port
 --------------------
 Type
@@ -2237,6 +2247,20 @@ Description
     Search posts for inline images and videos.
 
 
+extractor.tumblr.original
+-------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Download full-resolution ``photo`` images.
+
+    For each photo with "maximum" resolution
+    (width equal to 2048 or height equal to 3072),
+    use an extra HTTP request to find the URL to its full-resolution version.
+
+
 extractor.tumblr.reblogs
 ------------------------
 Type
@@ -2536,6 +2560,18 @@ Description
     to use your account's browsing settings and default filters when searching.
 
     See https://wallhaven.cc/help/api for more information.
+
+
+extractor.wallhaven.metadata
+----------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Extract additional metadata (tags, uploader)
+
+    Note: This requires 1 additional HTTP request for each post.
 
 
 extractor.weasyl.api-key

@@ -148,14 +148,17 @@ class WeiboExtractor(Extractor):
                 return
             yield from statuses
 
-            if "next_cursor" in data:
+            if "next_cursor" in data:  # videos, newvideo
                 params["cursor"] = data["next_cursor"]
-            elif "page" in params:
+            elif "page" in params:     # home, article
                 params["page"] += 1
-            elif data["since_id"]:
+            elif data["since_id"]:     # album
                 params["sinceid"] = data["since_id"]
-            else:
-                params["since_id"] = statuses[-1]["id"] - 1
+            else:                      # feed, last album page
+                try:
+                    params["since_id"] = statuses[-1]["id"] - 1
+                except KeyError:
+                    return
 
     def _sina_visitor_system(self, response):
         self.log.info("Sina Visitor System")
