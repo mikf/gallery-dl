@@ -440,17 +440,21 @@ class KemonopartyDiscordServerExtractor(KemonopartyExtractor):
 class KemonopartyFavoriteExtractor(KemonopartyExtractor):
     """Extractor for kemono.party favorites"""
     subcategory = "favorite"
-    pattern = BASE_PATTERN + r"/favorites"
+    pattern = BASE_PATTERN + r"/favorites(?:/?\?([^#]+))?"
     test = ("https://kemono.party/favorites", {
         "pattern": KemonopartyUserExtractor.pattern,
         "url": "f4b5b796979bcba824af84206578c79101c7f0e1",
         "count": 3,
     })
 
+    def __init__(self, match):
+        KemonopartyExtractor.__init__(self, match)
+        self.favorites = text.parse_query(
+            match.group(2)).get("type") or self.config("favorites", "artist")
+
     def items(self):
         self._prepare_ddosguard_cookies()
         self.login()
-        self.favorites = self.config("favorites", "artist")
 
         if self.favorites == "artist":
             users = self.request(
