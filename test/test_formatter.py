@@ -177,7 +177,7 @@ class TestFormatter(unittest.TestCase):
         self._run_test("{l:J - />20}", "           a - b - c")
 
         self._run_test("{a:J/}"      , self.kwdict["a"])
-        self._run_test("{a:J, /}"    , ", ".join(self.kwdict["a"]))
+        self._run_test("{a:J, /}"    , self.kwdict["a"])
 
     def test_replace(self):
         self._run_test("{a:Rh/C/}"  , "CElLo wOrLd")
