@@ -620,7 +620,7 @@ class TwitterSearchExtractor(TwitterExtractor):
         return {"search": text.unquote(self.user)}
 
     def tweets(self):
-        query = text.unquote(self.user)
+        query = text.unquote(self.user.replace("+", " "))
 
         user = None
         for item in query.split():
@@ -636,7 +636,7 @@ class TwitterSearchExtractor(TwitterExtractor):
             try:
                 self._assign_user(self.api.user_by_screen_name(user))
             except KeyError:
-                raise exception.NotFoundError("user")
+                pass
 
         return self.api.search_adaptive(query)
 
