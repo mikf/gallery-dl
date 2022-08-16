@@ -296,12 +296,14 @@ def _parse_maxlen(format_spec, default):
 
 def _parse_join(format_spec, default):
     separator, _, format_spec = format_spec.partition(_SEPARATOR)
-    separator = separator[1:]
+    join = separator[1:].join
     fmt = _build_format_func(format_spec, default)
 
-    def join(obj):
-        return fmt(separator.join(obj))
-    return join
+    def apply_join(obj):
+        if isinstance(obj, str):
+            return fmt(obj)
+        return fmt(join(obj))
+    return apply_join
 
 
 def _parse_replace(format_spec, default):
