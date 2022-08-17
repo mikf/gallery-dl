@@ -450,7 +450,7 @@ class KemonopartyFavoriteExtractor(KemonopartyExtractor):
     def __init__(self, match):
         KemonopartyExtractor.__init__(self, match)
         self.favorites = text.parse_query(
-            match.group(2)).get("type") or self.config("favorites", "artist")
+            match.group(2)).get("type", self.config("favorites", "artist"))
 
     def items(self):
         self._prepare_ddosguard_cookies()
