@@ -26,6 +26,7 @@ modules = [
     "behance",
     "blogger",
     "bunkr",
+    "catbox",
     "comicvine",
     "cyberdrop",
     "danbooru",

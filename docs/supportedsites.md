@@ -110,6 +110,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
+    <td>Catbox</td>
+    <td>https://catbox.moe/</td>
+    <td>Albums</td>
+    <td></td>
+</tr>
+<tr>
     <td>Comic Vine</td>
     <td>https://comicvine.gamespot.com/</td>
     <td>Tag Searches</td>
