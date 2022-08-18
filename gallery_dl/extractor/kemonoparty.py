@@ -441,16 +441,24 @@ class KemonopartyFavoriteExtractor(KemonopartyExtractor):
     """Extractor for kemono.party favorites"""
     subcategory = "favorite"
     pattern = BASE_PATTERN + r"/favorites(?:/?\?([^#]+))?"
-    test = ("https://kemono.party/favorites", {
-        "pattern": KemonopartyUserExtractor.pattern,
-        "url": "f4b5b796979bcba824af84206578c79101c7f0e1",
-        "count": 3,
-    })
+    test = (
+        ("https://kemono.party/favorites", {
+            "pattern": KemonopartyUserExtractor.pattern,
+            "url": "f4b5b796979bcba824af84206578c79101c7f0e1",
+            "count": 3,
+        }),
+        ("https://kemono.party/favorites?type=post", {
+            "pattern": KemonopartyPostExtractor.pattern,
+            "url": "ecfccf5f0d50b8d14caa7bbdcf071de5c1e5b90f",
+            "count": 3,
+        }),
+    )
 
     def __init__(self, match):
         KemonopartyExtractor.__init__(self, match)
-        self.favorites = text.parse_query(
-            match.group(2)).get("type", self.config("favorites", "artist"))
+        self.favorites = (text.parse_query(match.group(2)).get("type") or
+                          self.config("favorites") or
+                          "artist")
 
     def items(self):
         self._prepare_ddosguard_cookies()
@@ -458,15 +466,16 @@ class KemonopartyFavoriteExtractor(KemonopartyExtractor):
 
         if self.favorites == "artist":
             users = self.request(
-                self.root + "/api/favorites?type=artist").json()
+                self.root + "/api/v1/account/favorites?type=artist").json()
             for user in users:
                 user["_extractor"] = KemonopartyUserExtractor
                 url = "{}/{}/user/{}".format(
                     self.root, user["service"], user["id"])
                 yield Message.Queue, url, user
 
-        if self.favorites == "post":
-            posts = self.request(self.root + "/api/favorites?type=post").json()
+        elif self.favorites == "post":
+            posts = self.request(
+                self.root + "/api/v1/account/favorites?type=post").json()
             for post in posts:
                 post["_extractor"] = KemonopartyPostExtractor
                 url = "{}/{}/user/{}/post/{}".format(
