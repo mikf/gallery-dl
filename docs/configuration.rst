@@ -1550,6 +1550,18 @@ Description
     Extract a user's direct messages as ``dms`` metadata.
 
 
+extractor.kemonoparty.favorites
+---------------------------
+Type
+    ``string``
+Default
+    ``artist``
+Description
+    Determines the type of favorites to be downloaded.
+
+    Available types are ``artist``, and ``post``.
+
+
 extractor.kemonoparty.files
 ---------------------------
 Type
