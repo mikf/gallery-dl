@@ -102,8 +102,7 @@ class TumblrExtractor(Extractor):
                 del post["trail"]
             post["blog"] = blog
             post["date"] = text.parse_timestamp(post["timestamp"])
-            yield Message.Directory, post
-            post["num"] = 0
+            posts = []
 
             if "photos" in post:  # type "photo" or "link"
                 photos = post["photos"]
@@ -125,15 +124,17 @@ class TumblrExtractor(Extractor):
 
                     del photo["original_size"]
                     del photo["alt_sizes"]
-                    yield self._prepare_image(photo["url"], post)
+                    posts.append(
+                        self._prepare_image(photo["url"], post.copy()))
+                    del post["photo"]
 
             url = post.get("audio_url")  # type "audio"
             if url and url.startswith("https://a.tumblr.com/"):
-                yield self._prepare(url, post)
+                posts.append(self._prepare(url, post.copy()))
 
             url = post.get("video_url")  # type "video"
             if url:
-                yield self._prepare(_original_video(url), post)
+                posts.append(self._prepare(_original_video(url), post.copy()))
 
             if self.inline and "reblog" in post:  # inline media
                 # only "chat" posts are missing a "reblog" key in their
@@ -141,16 +142,25 @@ class TumblrExtractor(Extractor):
                 body = post["reblog"]["comment"] + post["reblog"]["tree_html"]
                 for url in re.findall('<img src="([^"]+)"', body):
                     url = _original_inline_image(url)
-                    yield self._prepare_image(url, post)
+                    posts.append(self._prepare_image(url, post.copy()))
                 for url in re.findall('<source src="([^"]+)"', body):
                     url = _original_video(url)
-                    yield self._prepare(url, post)
+                    posts.append(self._prepare(url, post.copy()))
 
             if self.external:  # external links
-                post["extension"] = None
                 url = post.get("permalink_url") or post.get("url")
                 if url:
-                    yield Message.Queue, url, post
+                    post["extension"] = None
+                    posts.append((Message.Queue, url, post.copy()))
+                    del post["extension"]
+
+            post["count"] = len(posts)
+            yield Message.Directory, post
+
+            for num, (msg, url, post) in enumerate(posts, 1):
+                post["num"] = num
+                post["count"] = len(posts)
+                yield msg, url, post
 
     def posts(self):
         """Return an iterable containing all relevant posts"""
@@ -179,14 +189,12 @@ class TumblrExtractor(Extractor):
     @staticmethod
     def _prepare(url, post):
         text.nameext_from_url(url, post)
-        post["num"] += 1
         post["hash"] = post["filename"].partition("_")[2]
         return Message.Url, url, post
 
     @staticmethod
     def _prepare_image(url, post):
         text.nameext_from_url(url, post)
-        post["num"] += 1
 
         parts = post["filename"].split("_")
         try:
@@ -200,7 +208,7 @@ class TumblrExtractor(Extractor):
     @staticmethod
     def _prepare_avatar(url, post, blog):
         text.nameext_from_url(url, post)
-        post["num"] = 1
+        post["num"] = post["count"] = 1
         post["blog"] = blog
         post["reblogged"] = False
         post["type"] = post["id"] = post["hash"] = "avatar"
