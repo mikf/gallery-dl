@@ -1397,10 +1397,14 @@ class TwitterAPI():
                 if instr["type"] == "TimelineAddEntries":
                     for entry in instr["entries"]:
                         if entry["entryId"].startswith("user-"):
-                            user = (entry["content"]["itemContent"]
-                                    ["user_results"]["result"])
-                            if "rest_id" in user:
-                                yield user
+                            try:
+                                user = (entry["content"]["itemContent"]
+                                        ["user_results"]["result"])
+                            except KeyError:
+                                pass
+                            else:
+                                if "rest_id" in user:
+                                    yield user
                         elif entry["entryId"].startswith("cursor-bottom-"):
                             cursor = entry["content"]["value"]
                 elif instr["type"] == "TimelineTerminateTimeline":
