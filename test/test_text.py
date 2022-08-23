@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2021 Mike Fährmann
+# Copyright 2015-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -74,6 +74,23 @@ class TestText(unittest.TestCase):
         # invalid arguments
         for value in INVALID:
             self.assertEqual(f(value), empty)
+
+    def test_slugify(self, f=text.slugify):
+        self.assertEqual(f("Hello World"), "hello-world")
+        self.assertEqual(f("-HeLLo---World-"), "hello-world")
+        self.assertEqual(f("_-H#e:l#l:o+\t+W?o!rl=d-_"), "hello-world")
+        self.assertEqual(f("_Hello_World_"), "hello_world")
+
+        self.assertEqual(f(""), "")
+        self.assertEqual(f("-"), "")
+        self.assertEqual(f("--"), "")
+
+        self.assertEqual(f(()), "")
+        self.assertEqual(f([]), "")
+        self.assertEqual(f({}), "")
+        self.assertEqual(f(None), "none")
+        self.assertEqual(f(1), "1")
+        self.assertEqual(f(2.3), "23")
 
     def test_ensure_http_scheme(self, f=text.ensure_http_scheme):
         result = "https://example.org/filename.ext"

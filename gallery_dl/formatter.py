@@ -381,6 +381,7 @@ _CONVERSIONS = {
     "T": util.datetime_to_timestamp_string,
     "d": text.parse_timestamp,
     "U": text.unescape,
+    "g": text.slugify,
     "S": util.to_string,
     "s": str,
     "r": repr,
