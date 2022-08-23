@@ -39,6 +39,16 @@ def split_html(txt):
         return []
 
 
+def slugify(value):
+    """Convert a string to a URL slug
+
+    Adapted from:
+    https://github.com/django/django/blob/master/django/utils/text.py
+    """
+    value = re.sub(r"[^\w\s-]", "", str(value).lower())
+    return re.sub(r"[-\s]+", "-", value).strip("-_")
+
+
 def ensure_http_scheme(url, scheme="https://"):
     """Prepend 'scheme' to 'url' if it doesn't have one"""
     if url and not url.startswith(("https://", "http://")):

@@ -64,6 +64,12 @@ Conversion specifiers allow to *convert* the value to a different form or type. 
     <td><code>Foo Bar</code></td>
 </tr>
 <tr>
+    <td align="center"><code>g</code></td>
+    <td>Slugify a value</td>
+    <td><code>{foo!g}</code></td>
+    <td><code>foo-bar</code></td>
+</tr>
+<tr>
     <td align="center"><code>j</code></td>
     <td>Serialize value to a JSON formatted string</td>
     <td><code>{tags!j}</code></td>
