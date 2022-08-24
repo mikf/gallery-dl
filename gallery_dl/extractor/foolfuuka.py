@@ -88,9 +88,13 @@ BASE_PATTERN = FoolfuukaExtractor.update({
         "root": "https://boards.fireden.net",
         "pattern": r"boards\.fireden\.net",
     },
-    "nyafuu": {
-        "root": "https://archive.nyafuu.org",
-        "pattern": r"(?:archive\.)?nyafuu\.org",
+    "rozenarcana": {
+        "root": "https://archive.alice.al",
+        "pattern": r"(?:archive\.)?alice\.al",
+    },
+    "tokyochronos": {
+        "root": "https://www.tokyochronos.net",
+        "pattern": r"(?:www\.)?tokyochronos\.net",
     },
     "rbt": {
         "root": "https://rbt.asia",
@@ -111,7 +115,7 @@ class FoolfuukaThreadExtractor(FoolfuukaExtractor):
     pattern = BASE_PATTERN + r"/([^/?#]+)/thread/(\d+)"
     test = (
         ("https://archive.4plebs.org/tg/thread/54059290", {
-            "url": "07452944164b602502b02b24521f8cee5c484d2a",
+            "url": "fd823f17b5001442b941fddcd9ec91bafedfbc79",
         }),
         ("https://archived.moe/gd/thread/309639/", {
             "url": "fdd533840e2d535abd162c02d6dfadbc12e2dcd8",
@@ -133,8 +137,11 @@ class FoolfuukaThreadExtractor(FoolfuukaExtractor):
         ("https://boards.fireden.net/sci/thread/11264294/", {
             "url": "61cab625c95584a12a30049d054931d64f8d20aa",
         }),
-        ("https://archive.nyafuu.org/c/thread/2849220/", {
-            "url": "bbe6f82944a45e359f5c8daf53f565913dc13e4f",
+        ("https://archive.alice.al/c/thread/2849220/", {
+            "url": "632e2c8de05de6b3847685f4bf1b4e5c6c9e0ed5",
+        }),
+        ("https://www.tokyochronos.net/a/thread/241664141/", {
+            "url": "ae03852cf44e3dcfce5be70274cb1828e1dbb7d6",
         }),
         ("https://rbt.asia/g/thread/61487650/", {
             "url": "fadd274b25150a1bdf03a40c58db320fa3b617c4",
@@ -180,7 +187,8 @@ class FoolfuukaBoardExtractor(FoolfuukaExtractor):
         ("https://arch.b4k.co/meta/"),
         ("https://desuarchive.org/a/"),
         ("https://boards.fireden.net/sci/"),
-        ("https://archive.nyafuu.org/c/"),
+        ("https://archive.alice.al/c/"),
+        ("https://www.tokyochronos.net/a/"),
         ("https://rbt.asia/g/"),
         ("https://thebarchive.com/b/"),
     )
@@ -223,7 +231,8 @@ class FoolfuukaSearchExtractor(FoolfuukaExtractor):
         ("https://archiveofsins.com/_/search/text/test/"),
         ("https://desuarchive.org/_/search/text/test/"),
         ("https://boards.fireden.net/_/search/text/test/"),
-        ("https://archive.nyafuu.org/_/search/text/test/"),
+        ("https://archive.alice.al/_/search/text/test/"),
+        ("https://www.tokyochronos.net/_/search/text/test/"),
         ("https://rbt.asia/_/search/text/test/"),
         ("https://thebarchive.com/_/search/text/test/"),
     )
@@ -288,7 +297,8 @@ class FoolfuukaGalleryExtractor(FoolfuukaExtractor):
         ("https://arch.b4k.co/meta/gallery/"),
         ("https://desuarchive.org/a/gallery/5"),
         ("https://boards.fireden.net/sci/gallery/6"),
-        ("https://archive.nyafuu.org/c/gallery/7"),
+        ("https://archive.alice.al/c/gallery/7"),
+        ("https://www.tokyochronos.net/a/gallery/7"),
         ("https://rbt.asia/g/gallery/8"),
         ("https://thebarchive.com/b/gallery/9"),
     )
