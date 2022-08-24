@@ -34,6 +34,7 @@ class DanbooruExtractor(BaseExtractor):
         self.per_page = iget("per-page", 200)
         self.request_interval_min = iget("request-interval-min", 0.0)
         self._pools = iget("pools")
+        self._popular_endpoint = iget("popular", "/explore/posts/popular.json")
 
         BaseExtractor.__init__(self, match)
 
@@ -150,6 +151,7 @@ INSTANCES = {
         "headers": {"User-Agent": "gallery-dl/{} (by mikf)".format(
             __version__)},
         "pools": "sort",
+        "popular": "/popular.json",
         "page-limit": 750,
         "per-page": 320,
         "request-interval-min": 1.0,
@@ -308,7 +310,7 @@ class DanbooruPopularExtractor(DanbooruExtractor):
     subcategory = "popular"
     directory_fmt = ("{category}", "popular", "{scale}", "{date}")
     archive_fmt = "P_{scale[0]}_{date}_{id}"
-    pattern = BASE_PATTERN + r"/explore/posts/popular(?:\?([^#]*))?"
+    pattern = BASE_PATTERN + r"/(?:explore/posts/)?popular(?:\?([^#]*))?"
     test = (
         ("https://danbooru.donmai.us/explore/posts/popular"),
         (("https://danbooru.donmai.us/explore/posts/popular"
@@ -316,7 +318,7 @@ class DanbooruPopularExtractor(DanbooruExtractor):
             "range": "1-120",
             "count": 120,
         }),
-        ("https://e621.net/explore/posts/popular"),
+        ("https://e621.net/popular"),
         (("https://e621.net/explore/posts/popular"
           "?date=2019-06-01&scale=month"), {
             "pattern": r"https://static\d.e621.net/data/../../[0-9a-f]+",
@@ -345,8 +347,7 @@ class DanbooruPopularExtractor(DanbooruExtractor):
     def posts(self):
         if self.page_start is None:
             self.page_start = 1
-        return self._pagination(
-            "/explore/posts/popular.json", self.params, True)
+        return self._pagination(self._popular_endpoint, self.params, True)
 
 
 class DanbooruFavoriteExtractor(DanbooruExtractor):
