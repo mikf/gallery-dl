@@ -107,10 +107,12 @@ class SkebExtractor(Extractor):
             yield post
 
         if self.article and "article_image_url" in resp:
-            post["content_category"] = "article"
-            post["file_id"] = "article"
-            post["file_url"] = resp["article_image_url"]
-            yield post
+            url = resp["article_image_url"]
+            if url:
+                post["content_category"] = "article"
+                post["file_id"] = "article"
+                post["file_url"] = url
+                yield post
 
         for preview in resp["previews"]:
             post["content_category"] = "preview"
