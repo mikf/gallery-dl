@@ -62,6 +62,24 @@ class GelbooruV02Extractor(booru.BooruExtractor):
                 return
             params["pid"] += 1
 
+    def _pagination_html(self, params):
+        url = self.root + "/index.php"
+        params["pid"] = self.page_start * self.per_page
+
+        data = {}
+        while True:
+            num_ids = 0
+            page = self.request(url, params=params).text
+
+            for data["id"] in text.extract_iter(page, '" id="p', '"'):
+                num_ids += 1
+                for post in self._api_request(data):
+                    yield post.attrib
+
+            if num_ids < self.per_page:
+                return
+            params["pid"] += self.per_page
+
     @staticmethod
     def _prepare(post):
         post["date"] = text.parse_datetime(
@@ -207,7 +225,12 @@ class GelbooruV02PoolExtractor(GelbooruV02Extractor):
     def __init__(self, match):
         GelbooruV02Extractor.__init__(self, match)
         self.pool_id = match.group(match.lastindex)
-        self.post_ids = ()
+
+        if self.category == "rule34":
+            self.posts = self._posts_pages
+            self.per_page = 45
+        else:
+            self.post_ids = ()
 
     def skip(self, num):
         self.page_start += num
@@ -234,6 +257,13 @@ class GelbooruV02PoolExtractor(GelbooruV02Extractor):
         for params["id"] in util.advance(self.post_ids, self.page_start):
             for post in self._api_request(params):
                 yield post.attrib
+
+    def _posts_pages(self):
+        return self._pagination_html({
+            "page": "pool",
+            "s"   : "show",
+            "id"  : self.pool_id,
+        })
 
 
 class GelbooruV02FavoriteExtractor(GelbooruV02Extractor):
@@ -268,27 +298,11 @@ class GelbooruV02FavoriteExtractor(GelbooruV02Extractor):
         return {"favorite_id": text.parse_int(self.favorite_id)}
 
     def posts(self):
-        url = self.root + "/index.php"
-        params = {
+        return self._pagination_html({
             "page": "favorites",
             "s"   : "view",
             "id"  : self.favorite_id,
-            "pid" : self.page_start * self.per_page,
-        }
-
-        data = {}
-        while True:
-            num_ids = 0
-            page = self.request(url, params=params).text
-
-            for data["id"] in text.extract_iter(page, '" id="p', '"'):
-                num_ids += 1
-                for post in self._api_request(data):
-                    yield post.attrib
-
-            if num_ids < self.per_page:
-                return
-            params["pid"] += self.per_page
+        })
 
 
 class GelbooruV02PostExtractor(GelbooruV02Extractor):
