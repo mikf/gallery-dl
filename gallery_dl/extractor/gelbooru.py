@@ -10,7 +10,7 @@
 
 from .common import Extractor, Message
 from . import gelbooru_v02
-from .. import text, util, exception
+from .. import text, exception
 import binascii
 
 
@@ -90,28 +90,29 @@ class GelbooruTagExtractor(GelbooruBase,
 
 class GelbooruPoolExtractor(GelbooruBase,
                             gelbooru_v02.GelbooruV02PoolExtractor):
-    """Extractor for image-pools from gelbooru.com"""
+    """Extractor for gelbooru pools"""
+    per_page = 45
     pattern = (r"(?:https?://)?(?:www\.)?gelbooru\.com/(?:index\.php)?"
                r"\?page=pool&s=show&id=(?P<pool>\d+)")
     test = (
         ("https://gelbooru.com/index.php?page=pool&s=show&id=761", {
             "count": 6,
         }),
-        ("https://gelbooru.com/index.php?page=pool&s=show&id=761", {
-            "options": (("api", False),),
-            "count": 6,
-        }),
     )
 
     def metadata(self):
-        url = "{}/index.php?page=pool&s=show&id={}".format(
-            self.root, self.pool_id)
-        page = self.request(url).text
+        url = self.root + "/index.php"
+        self._params = {
+            "page": "pool",
+            "s"   : "show",
+            "id"  : self.pool_id,
+            "pid" : self.page_start,
+        }
+        self._page = self.request(url, params=self._params).text
 
-        name, pos = text.extract(page, "<h3>Now Viewing: ", "</h3>")
+        name, pos = text.extract(self._page, "<h3>Now Viewing: ", "</h3>")
         if not name:
             raise exception.NotFoundError("pool")
-        self.post_ids = text.extract_iter(page, 'class="" id="p', '"', pos)
 
         return {
             "pool": text.parse_int(self.pool_id),
@@ -119,9 +120,23 @@ class GelbooruPoolExtractor(GelbooruBase,
         }
 
     def posts(self):
-        params = {}
-        for params["id"] in util.advance(self.post_ids, self.page_start):
-            yield from self._api_request(params)
+        url = self.root + "/index.php"
+        params = self._params
+
+        page = self._page
+        del self._page
+        data = {}
+
+        while True:
+            num_ids = 0
+            for data["id"] in text.extract_iter(page, '" id="p', '"'):
+                num_ids += 1
+                yield from self._api_request(data)
+
+            if num_ids < self.per_page:
+                return
+            params["pid"] += self.per_page
+            page = self.request(url, params=params).text
 
 
 class GelbooruPostExtractor(GelbooruBase,
