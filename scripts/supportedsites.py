@@ -13,6 +13,7 @@ from gallery_dl import extractor
 
 CATEGORY_MAP = {
     "2chan"          : "Futaba Channel",
+    "2chen"          : "2chen",
     "35photo"        : "35PHOTO",
     "adultempire"    : "Adult Empire",
     "allgirlbooru"   : "All girl",

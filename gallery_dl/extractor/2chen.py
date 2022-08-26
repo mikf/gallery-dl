@@ -15,57 +15,66 @@ class _2chenThreadExtractor(Extractor):
     category = "2chen"
     subcategory = "thread"
     directory_fmt = ("{category}", "{board}", "{thread} {title}")
-    filename_fmt = "{filename}"
+    filename_fmt = "{reply_no} {filename}.{extension}"
+    archive_fmt = "{hash}"
+    root = "https://2chen.moe"
     pattern = (r"(?:https?://)?2chen\.moe"
                r"/([^/]+)/(\d+)")
-    test = ("https://2chen.moe/jp/303786",)
+    test = (
+        ("https://2chen.moe/jp/303786", {
+            "count": ">= 10",
+        }),
+    )
 
     def __init__(self, match):
         Extractor.__init__(self, match)
         self.board, self.thread = match.groups()
 
     def items(self):
-        url = "https://2chen.moe/{}/{}".format(self.board, self.thread)
+        url = "{}/{}/{}".format(self.root, self.board, self.thread)
         page = self.request(url, encoding="utf-8").text
         data = self.metadata(page)
         yield Message.Directory, data
         for post in self.posts(page):
+            post.update(data)
             if post["url"] is None or post["filename"] is None:
                 continue
-            url = "https://2chen.moe{}".format(post["url"])
-            yield Message.Url, url, post
+            yield Message.Url, post["url"], post
 
     def metadata(self, page):
         title = text.extract(page, "<h3>", "</h3>")[0]
         return {
-            "board": self.board,
+            "board" : self.board,
             "thread": self.thread,
-            "title": title
+            "title" : title
         }
 
     def posts(self, page):
+        """Return list containing relevant posts"""
         posts = text.extract_iter(
-            page, '<figcaption class="spaced">', '</figcaption>')
+            page, 'class="glass media', '</article>')
         return [self.parse(post) for post in posts]
 
     def parse(self, post):
-        data = self._extract_post(post)
-        data["extension"] = str(data["filename"]).split(".")[-1]
-        return data
-
-    @staticmethod
-    def _extract_post(post):
-        return text.extract_all(post, (
-            ('url', '</span><a href="', '" download="'),
-            ('filename', '', '" data-hash=')
+        post = text.extract(post, '<a class="quote"', '</figcaption>')[0]
+        data = text.extract_all(post, (
+            ('reply_no', '">', '</a>'),
+            ('url', '</span><a href="', '" download='),
+            ('filename', '"', '" data-hash='),
+            ('hash', '"', '">'),
         ))[0]
+        data["url"] = self.root + data["url"]
+        data["filename"], _, data["extension"] = \
+            data["filename"].partition(".")
+        return data
 
 
 class _2chenBoardExtractor(Extractor):
     """Extractor for 2chen boards"""
     category = "2chen"
     subcategory = "board"
-    pattern = r"(?:https?://)?2chen\.moe/([^/?#]+)/?(?:catalog/?)?$"
+    root = "https://2chen.moe"
+    pattern = r"(?:https?://)?2chen\.moe/([^/?#]+)(?:/catalog)?/?$"
     test = (
         ("https://2chen.moe/co/", {
             "pattern": _2chenThreadExtractor.pattern
@@ -82,12 +91,13 @@ class _2chenBoardExtractor(Extractor):
         self.board = match.group(1)
 
     def items(self):
-        url = "https://2chen.moe/{}/catalog".format(self.board)
+        url = "{}/{}/catalog".format(self.root, self.board)
         page = self.request(url).text
         data = {"_extractor": _2chenThreadExtractor}
         for thread in self.threads(page):
-            url = "https://2chen.moe{}".format(thread)
+            url = self.root + thread
             yield Message.Queue, url, data
 
-    def threads(self, page):
+    @staticmethod
+    def threads(page):
         return text.extract_iter(page, '<figure><a href="', '">')
