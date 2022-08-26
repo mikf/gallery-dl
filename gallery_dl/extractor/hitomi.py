@@ -190,7 +190,7 @@ class HitomiTagExtractor(Extractor):
             offset += 100
 
 
-@memcache()
+@memcache(maxage=1800)
 def _parse_gg(extr):
     page = extr.request("https://ltn.hitomi.la/gg.js").text
 
