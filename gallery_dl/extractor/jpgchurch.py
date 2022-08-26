@@ -16,23 +16,18 @@ class JpgchurchExtractor(Extractor):
     """Base class for Jpgchurch extractors"""
     category = "jpgchurch"
     root = "https://jpg.church"
-    directory_fmt = ("{category}", "{user}",)
-    archive_fmt = "{filename}"
-
-    def __init__(self, match):
-        Extractor.__init__(self, match)
-
-    def items(self):
-        for image in self.images():
-            yield Message.Directory, image
-            yield Message.Url, image["url"], image
-
-    def images(self):
-        """Return an iterable containing the image(s)"""
+    directory_fmt = ("{category}", "{user}", "{album}",)
+    archive_fmt = "{user}_{filename}"
 
     @staticmethod
     def _extract_user(page):
         return text.extract(page, 'username: "', '"')[0]
+
+    @staticmethod
+    def _extract_album(page):
+        album = text.extract(page, 'Added to <a', '<span')[0]
+        album = text.extract(album, '">', '</a>')[0]
+        return album
 
     def _extract_image(self, url):
         page = self.request(url).text
@@ -42,36 +37,22 @@ class JpgchurchExtractor(Extractor):
         }
         text.nameext_from_url(data["url"], data)
         data["user"] = self._extract_user(page)
+        data["album"] = self._extract_album(page)
         return data
 
     def _pagination(self, url):
-        """Uses recursion to yield the next page"""
-        yield url
-        page = self.request(url).text
-        _next = text.extract(
-            page, '<a data-pagination="next" href="', '" ><')[0]
-        if _next:
-            url = _next
-            yield from self._pagination(_next)
-
-    def _get_images(self, url):
-        for url in self._pagination(url):
+        while True:
+            yield url
             page = self.request(url).text
-            album = text.extract(page, '<a data-text="album-name"', '</h1>')[0]
-            album = text.extract(album, '>', '</a>')[0]
-            page = text.extract_iter(
-                page, '<div class="list-item-image ', 'image-container')
-            for image in page:
-                image = text.extract(image, '<a href="', '"')[0]
-                data = self._extract_image(image)
-                data["album"] = album
-                yield data
+            _next = text.extract(
+                page, '<a data-pagination="next" href="', '" ><')[0]
+            if not _next:
+                return
+            url = _next
 
     def _get_albums(self, url):
         for url in self._pagination(url):
             page = self.request(url).text
-            album = text.extract(page, '<a data-text="album-name"', '</h1>')[0]
-            album = text.extract(album, '>', '</a>')[0]
             page = text.extract_iter(
                 page, '<div class="list-item-image ', 'image-container')
             for image in page:
@@ -84,27 +65,35 @@ class JpgchurchImageExtractor(JpgchurchExtractor):
     subcategory = "image"
     pattern = BASE_PATTERN + r"/img/([^/?#]+)"
     test = (
-        ("https://jpg.church/img/funnymeme.LecXGS"),
+        ("https://jpg.church/img/funnymeme.LecXGS", {
+            "pattern": r"^https://[^/]+/.*\.(jpg|png)",
+        }),
+        ("https://jpg.church/img/hannahowo-00457.auCruA", {
+            "pattern": r"https://simp2\.jpg\.church/hannahowo_00457\.jpg",
+        }),
+        ("https://jpg.church/img/hannahowo-00424.au64iA"),
     )
 
     def __init__(self, match):
         JpgchurchExtractor.__init__(self, match)
         self.image = match.group(1)
 
-    def images(self):
+    def items(self):
         url = "{}/img/{}".format(self.root, self.image)
-        yield self._extract_image(url)
+        image = self._extract_image(url)
+        if not image["album"]:
+            self.directory_fmt = ("{category}", "{user}",)
+        yield Message.Directory, image
+        yield Message.Url, image["url"], image
 
 
 class JpgchurchAlbumExtractor(JpgchurchExtractor):
     """Extractor for Jpgchurch Albums"""
     subcategory = "album"
-    directory_fmt = ("{category}", "{user}", "{album}",)
     pattern = BASE_PATTERN + r"/a(?:lbum)?/([^/?#]+)(/sub)?"
     test = (
         ("https://jpg.church/album/CDilP/?sort=date_desc&page=1", {
             "count": 2,
-            "pattern": r"^https://[^/]+/.*\.(jpg|png)",
         }),
         ("https://jpg.church/a/gunggingnsk.N9OOI", {
             "count": 114,
@@ -119,17 +108,19 @@ class JpgchurchAlbumExtractor(JpgchurchExtractor):
 
     def __init__(self, match):
         JpgchurchExtractor.__init__(self, match)
-        self.album = match.group(1)
-        self.is_sub = match.group(2)
+        self.album, self.is_sub = match.groups()
 
-    def images(self):
+    def items(self):
         url = "{}/a/{}".format(self.root, self.album)
+        data = {"_extractor": JpgchurchImageExtractor}
         if self.is_sub:
             url += "/sub"
             for album in self._get_albums(url):
-                yield from self._get_images(album)
+                for image in self._get_albums(album):
+                    yield Message.Queue, image, data
         else:
-            yield from self._get_images(url)
+            for image in self._get_albums(url):
+                yield Message.Queue, image, data
 
 
 class JpgchurchUserExtractor(JpgchurchExtractor):
@@ -147,21 +138,16 @@ class JpgchurchUserExtractor(JpgchurchExtractor):
 
     def __init__(self, match):
         JpgchurchExtractor.__init__(self, match)
-        self.user = match.group(1)
-        self.is_album = match.group(2)
+        self.user, self.is_album = match.groups()
 
     def items(self):
         url = "{}/{}".format(self.root, self.user)
         if self.is_album:
             url += "/albums"
-            data = {
-                "_extractor": JpgchurchAlbumExtractor,
-            }
+            data = {"_extractor": JpgchurchAlbumExtractor}
             for album in self._get_albums(url):
                 yield Message.Queue, album, data
         else:
-            data = {
-                "_extractor": JpgchurchImageExtractor,
-            }
+            data = {"_extractor": JpgchurchImageExtractor}
             for image in self._get_albums(url):
                 yield Message.Queue, image, data
