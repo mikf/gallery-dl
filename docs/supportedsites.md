@@ -392,6 +392,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
+    <td>Jpgchurch</td>
+    <td>https://jpg.church/</td>
+    <td>Albums, individual Images, User Profiles</td>
+    <td></td>
+</tr>
+<tr>
     <td>Keenspot</td>
     <td>http://www.keenspot.com/</td>
     <td>Comics</td>
