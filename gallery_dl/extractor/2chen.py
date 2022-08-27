@@ -65,7 +65,7 @@ class _2chenThreadExtractor(Extractor):
         ))[0]
         data["url"] = self.root + data["url"]
         data["filename"], _, data["extension"] = \
-            data["filename"].partition(".")
+            data["filename"].rpartition(".")
         return data
 
 
