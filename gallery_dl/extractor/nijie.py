@@ -126,7 +126,7 @@ class NijieExtractor(AsynchronousMixin, BaseExtractor):
             username, password = self._get_auth_info()
             self._update_cookies(self._login_impl(username, password))
 
-    @cache(maxage=150*24*3600, keyarg=1)
+    @cache(maxage=90*24*3600, keyarg=1)
     def _login_impl(self, username, password):
         if not username or not password:
             raise exception.AuthenticationError(
