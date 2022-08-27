@@ -122,7 +122,7 @@ class PhilomenaPostExtractor(PhilomenaExtractor):
                 "tag_ids": list,
                 "tags": list,
                 "thumbnails_generated": True,
-                "updated_at": "2022-04-25T09:30:57Z",
+                "updated_at": r"re:\d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\dZ",
                 "uploader": "Clover the Clever",
                 "uploader_id": 211188,
                 "upvotes": int,

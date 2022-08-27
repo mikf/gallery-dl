@@ -84,7 +84,7 @@ class UnsplashImageExtractor(UnsplashExtractor):
             "blur_hash": "LZP4uQS4jboe%#o0WCa}2doJNaaz",
             "categories": list,
             "color": "#f3c08c",
-            "created_at": "2020-04-08T08:29:42-04:00",
+            "created_at": "2020-04-08T12:29:42Z",
             "date": "dt:2020-04-08 12:29:42",
             "description": "The Island",
             "downloads": int,
@@ -112,7 +112,7 @@ class UnsplashImageExtractor(UnsplashExtractor):
                 },
                 "title": "Beaver Dam, WI 53916, USA"
             },
-            "promoted_at": "2020-04-08T11:12:03-04:00",
+            "promoted_at": "2020-04-08T15:12:03Z",
             "sponsorship": None,
             "tags": list,
             "updated_at": str,

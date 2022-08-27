@@ -108,7 +108,7 @@ class TapasSeriesExtractor(TapasExtractor):
     test = (
         ("https://tapas.io/series/just-leave-me-be", {
             "pattern": r"https://\w+\.cloudfront\.net/pc/\w\w/[0-9a-f-]+\.jpg",
-            "count": 127,
+            "count": 132,
         }),
         ("https://tapas.io/series/yona", {  # mature
             "count": 26,

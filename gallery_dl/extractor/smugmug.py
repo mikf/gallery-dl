@@ -111,13 +111,13 @@ class SmugmugImageExtractor(SmugmugExtractor):
     test = (
         ("https://tdm.smugmug.com/Nature/Dove/i-kCsLJT6", {
             "url": "e6408fd2c64e721fd146130dceb56a971ceb4259",
-            "keyword": "460a773f5addadd3e216bda346fc524fe4eedc52",
+            "keyword": "b31a63d07c9c26eb0f79f52d60d171a98938f99b",
             "content": "ecbd9d7b4f75a637abc8d35319be9ec065a44eb0",
         }),
         # video
         ("https://tstravels.smugmug.com/Dailies/Daily-Dose-2015/i-39JFNzB", {
             "url": "04d0ab1ff829ca7d78f5acb5548953df08e9a5ee",
-            "keyword": "eb74e5cf6780d5152ab8f11b431ec1b17fa8f69b",
+            "keyword": "4cef98133ace511adc874c9d9abac5817ba0d856",
         }),
     )
 
