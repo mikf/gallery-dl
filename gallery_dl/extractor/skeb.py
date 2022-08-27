@@ -16,7 +16,7 @@ class SkebExtractor(Extractor):
     category = "skeb"
     directory_fmt = ("{category}", "{creator[screen_name]}")
     filename_fmt = "{post_num}_{file_id}.{extension}"
-    archive_fmt = "{post_num}_{file_id}_{content_category}"
+    archive_fmt = "{post_num}_{_file_id}_{content_category}"
     root = "https://skeb.jp"
 
     def __init__(self, match):
@@ -65,6 +65,7 @@ class SkebExtractor(Extractor):
         resp = self.request(url, headers=headers).json()
         creator = resp["creator"]
         post = {
+            "post_id"          : resp["id"],
             "post_num"         : post_num,
             "post_url"         : self.root + resp["path"],
             "body"             : resp["body"],
@@ -103,6 +104,7 @@ class SkebExtractor(Extractor):
         if self.thumbnails and "og_image_url" in resp:
             post["content_category"] = "thumb"
             post["file_id"] = "thumb"
+            post["_file_id"] = str(resp["id"]) + "t"
             post["file_url"] = resp["og_image_url"]
             yield post
 
@@ -111,12 +113,13 @@ class SkebExtractor(Extractor):
             if url:
                 post["content_category"] = "article"
                 post["file_id"] = "article"
+                post["_file_id"] = str(resp["id"]) + "a"
                 post["file_url"] = url
                 yield post
 
         for preview in resp["previews"]:
             post["content_category"] = "preview"
-            post["file_id"] = preview["id"]
+            post["file_id"] = post["_file_id"] = preview["id"]
             post["file_url"] = preview["url"]
             info = preview["information"]
             post["original"] = {
