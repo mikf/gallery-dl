@@ -46,7 +46,7 @@ class _2chenThreadExtractor(Extractor):
         return {
             "board" : self.board,
             "thread": self.thread,
-            "title" : title
+            "title" : text.unescape(title),
         }
 
     def posts(self, page):
