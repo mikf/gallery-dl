@@ -49,7 +49,9 @@ class LusciousAlbumExtractor(LusciousExtractor):
                r"/(?:albums|pictures/c/[^/?#]+/album)/[^/?#]+_(\d+)")
     test = (
         ("https://luscious.net/albums/okinami-no-koigokoro_277031/", {
-            "url": "7e4984a271a1072ac6483e4228a045895aff86f3",
+            "pattern": r"https://storage\.bhs\.cloud\.ovh\.net/v1/AUTH_\w+"
+                       r"/images/NTRshouldbeillegal/277031"
+                       r"/luscious_net_\d+_\d+\.jpg$",
             #  "content": "b3a747a6464509440bd0ff6d1267e6959f8d6ff3",
             "keyword": {
                 "album": {
