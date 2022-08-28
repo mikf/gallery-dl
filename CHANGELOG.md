@@ -1,5 +1,59 @@
 # Changelog
 
+## 1.23.0 - 2022-08-28
+### Changes
+- [twitter] update `user` and `author` metdata fields
+  - for URLs with a single username or ID like `https://twitter.com/USER` or a search with a single `from:` statement, `user` will now always refer to the user referenced in the URL.
+  - for all other URLs like `https://twitter.com/i/bookmarks`, `user` and `author` refer to the same user
+  - `author` will always refer to the original Tweet author
+- [twitter] update `quote_id` and `quote_by` metadata fields
+  - `quote_id` is now non-zero for quoted Tweets and contains the Tweet ID of the quotng Tweet (was the other way round before)
+  - `quote_by` is only defined for quoted Tweets like before, but now contains the screen name of the user quoting this Tweet
+- [skeb] improve archive IDs for thumbnails and article images
+### Additions
+- [artstation] add `num` and `count` metadata fields ([#2764](https://github.com/mikf/gallery-dl/issues/2764))
+- [catbox] add `album` extractor ([#2410](https://github.com/mikf/gallery-dl/issues/2410))
+- [blogger] emit metadata for posts without files ([#2789](https://github.com/mikf/gallery-dl/issues/2789))
+- [foolfuuka] update supported domains
+- [gelbooru] add support for `api_key` and `user_id` ([#2767](https://github.com/mikf/gallery-dl/issues/2767))
+- [gelbooru] implement pagination for `pool` results ([#2853](https://github.com/mikf/gallery-dl/issues/2853))
+- [instagram] add support for a user's saved collections ([#2769](https://github.com/mikf/gallery-dl/issues/2769))
+- [instagram] provide `date` for directory format strings ([#2830](https://github.com/mikf/gallery-dl/issues/2830))
+- [kemonoparty] add `favorites` option ([#2826](https://github.com/mikf/gallery-dl/issues/2826), [#2831](https://github.com/mikf/gallery-dl/issues/2831))
+- [oauth] add `host` config option ([#2806](https://github.com/mikf/gallery-dl/issues/2806))
+- [rule34] implement pagination for `pool` results ([#2853](https://github.com/mikf/gallery-dl/issues/2853))
+- [skeb] add option to download `article` images ([#1031](https://github.com/mikf/gallery-dl/issues/1031))
+- [tumblr] download higher-quality images ([#2761](https://github.com/mikf/gallery-dl/issues/2761))
+- [tumblr] add `count` metadata field ([#2804](https://github.com/mikf/gallery-dl/issues/2804))
+- [wallhaven] implement `metadata` option ([#2803](https://github.com/mikf/gallery-dl/issues/2803))
+- [zerochan] add `tag` and `image` extractors ([#1434](https://github.com/mikf/gallery-dl/issues/1434))
+- [zerochan] implement login with username & password ([#1434](https://github.com/mikf/gallery-dl/issues/1434))
+- [postprocessor:metadata] implement `mode: modify` and `mode: delete` ([#2640](https://github.com/mikf/gallery-dl/issues/2640))
+- [formatter] add `g` conversion for slugifying a string ([#2410](https://github.com/mikf/gallery-dl/issues/2410))
+- [formatter] apply `:J` only to lists ([#2833](https://github.com/mikf/gallery-dl/issues/2833))
+- implement `path-metadata` option ([#2734](https://github.com/mikf/gallery-dl/issues/2734))
+- allow comments after input file URLs ([#2808](https://github.com/mikf/gallery-dl/issues/2808))
+- add global `warnings` option to control `urllib3` warning behavior ([#2762](https://github.com/mikf/gallery-dl/issues/2762))
+### Fixes
+- [bunkr] fix extraction ([#2788](https://github.com/mikf/gallery-dl/issues/2788))
+- [deviantart] use public access token for journals ([#2702](https://github.com/mikf/gallery-dl/issues/2702))
+- [e621] fix extraction of `popular` posts
+- [fanbox] download cover images in original size ([#2784](https://github.com/mikf/gallery-dl/issues/2784))
+- [mastodon] allow downloading without access token ([#2782](https://github.com/mikf/gallery-dl/issues/2782))
+- [hitomi] update cache expiry time ([#2863](https://github.com/mikf/gallery-dl/issues/2863))
+- [hitomi] fix error when number of tag results is a multiple of 25 ([#2870](https://github.com/mikf/gallery-dl/issues/2870))
+- [mangahere] fix `page-reverse` option ([#2795](https://github.com/mikf/gallery-dl/issues/2795))
+- [poipiku] fix posts with more than one image ([#2796](https://github.com/mikf/gallery-dl/issues/2796))
+- [poipiku] update filter for static images ([#2796](https://github.com/mikf/gallery-dl/issues/2796))
+- [slideshare] fix metadata extraction
+- [twitter] unescape `+` in search queries ([#2226](https://github.com/mikf/gallery-dl/issues/2226))
+- [twitter] fall back to unfiltered search ([#2766](https://github.com/mikf/gallery-dl/issues/2766))
+- [twitter] ignore invalid user entries ([#2850](https://github.com/mikf/gallery-dl/issues/2850))
+- [vk] prevent exceptions for broken/invalid photos ([#2774](https://github.com/mikf/gallery-dl/issues/2774))
+- [vsco] fix `collection` extraction
+- [weibo] prevent exception for missing `playback_list` ([#2792](https://github.com/mikf/gallery-dl/issues/2792))
+- [weibo] prevent errors when paginating over album entries ([#2817](https://github.com/mikf/gallery-dl/issues/2817))
+
 ## 1.22.4 - 2022-07-15
 ### Additions
 - [instagram] add `pinned` metadata field ([#2752](https://github.com/mikf/gallery-dl/issues/2752))
