@@ -174,20 +174,24 @@ class HitomiTagExtractor(Extractor):
         }
 
         offset = 0
+        total = None
         while True:
             headers["Referer"] = "{}/{}/{}.html?page={}".format(
                 self.root, self.type, self.tag, offset // 100 + 1)
             headers["Range"] = "bytes={}-{}".format(offset, offset+99)
-            nozomi = self.request(nozomi_url, headers=headers).content
+            response = self.request(nozomi_url, headers=headers)
 
-            for gallery_id in decode_nozomi(nozomi):
+            for gallery_id in decode_nozomi(response.content):
                 gallery_url = "{}/galleries/{}.html".format(
                     self.root, gallery_id)
                 yield Message.Queue, gallery_url, data
 
-            if len(nozomi) < 100:
-                return
             offset += 100
+            if total is None:
+                total = text.parse_int(
+                    response.headers["content-range"].rpartition("/")[2])
+            if offset >= total:
+                return
 
 
 @memcache(maxage=1800)
