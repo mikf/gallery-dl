@@ -59,7 +59,7 @@ class SlidesharePresentationExtractor(GalleryExtractor):
         # mobile URL
         (("https://www.slideshare.net"
           "/mobile/uqudent/introduction-to-fixed-prosthodontics"), {
-            "url": "59993ad7b0cb93c73011547eedcd02c622649e9d",
+            "url": "43eda2adf4dd221a251c8df794dfb82649e94647",
         }),
     )
 
@@ -72,14 +72,14 @@ class SlidesharePresentationExtractor(GalleryExtractor):
     def metadata(self, page):
         extr = text.extract_from(page)
         descr = extr('<meta name="description" content="', '"')
-        title = extr('<span class="j-title-breadcrumb">', '</span>')
-        published = extr('<div class="metadata-item">', '</div>')
         comments = extr('content="UserComments:', '"')
         likes = extr('content="UserLikes:', '"')
         views = extr('content="UserPageVisits:', '"')
+        title = extr('<span class="j-title-breadcrumb">', '</span>')
+        published = extr('<div class="metadata-item">', '</div>')
 
         if descr.endswith("…"):
-            alt_descr = extr('id="slideshow-description-text"', '</p>')
+            alt_descr = extr('slideshow-description-text"', '</p>')
             if alt_descr:
                 descr = text.remove_html(alt_descr.partition(">")[2]).strip()
 
