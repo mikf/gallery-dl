@@ -142,6 +142,8 @@ class TumblrExtractor(Extractor):
                 body = post["reblog"]["comment"] + post["reblog"]["tree_html"]
                 for url in re.findall('<img src="([^"]+)"', body):
                     url = _original_inline_image(url)
+                    if self.original:
+                        url = self._original_image(url)
                     posts.append(self._prepare_image(url, post.copy()))
                 for url in re.findall('<source src="([^"]+)"', body):
                     url = _original_video(url)
@@ -221,9 +223,11 @@ class TumblrExtractor(Extractor):
         return self.blog != post.get("reblogged_root_uuid")
 
     def _original_image(self, url):
-        url = url.replace("/s2048x3072/", "/s99999x99999/", 1)
+        new_url = re.sub(r"/s\d+x\d+/", "/s99999x99999/", url, 1)
+        if new_url == url:
+            return url
         headers = {"Accept": "text/html,*/*;q=0.8"}
-        response = self.request(url, headers=headers)
+        response = self.request(new_url, headers=headers)
         return text.extract(response.text, '" src="', '"')[0]
 
 
@@ -304,6 +308,14 @@ class TumblrPostExtractor(TumblrExtractor):
         }),
         ("https://mikf123.tumblr.com/post/181022380064/chat-post", {
             "count": 0,
+        }),
+        ("https://kichatundk.tumblr.com/post/654953419288821760", {
+            "count": 2,  # high-quality images (#1846)
+            "content": "d6fcc7b6f750d835d55c7f31fa3b63be26c9f89b",
+        }),
+        ("https://hameru-is-cool.tumblr.com/post/639261855227002880", {
+            "count": 2,  # high-quality images (#1344)
+            "content": "6bc19a42787e46e1bba2ef4aeef5ca28fcd3cd34",
         }),
         ("https://mikf123.tumblr.com/image/689860196535762944", {
             "pattern": r"^https://\d+\.media\.tumblr\.com"
