@@ -15,7 +15,7 @@ class _2chenThreadExtractor(Extractor):
     category = "2chen"
     subcategory = "thread"
     directory_fmt = ("{category}", "{board}", "{thread} {title}")
-    filename_fmt = "{reply_no} {filename}.{extension}"
+    filename_fmt = "{time} {filename}.{extension}"
     archive_fmt = "{hash}"
     root = "https://2chen.moe"
     pattern = (r"(?:https?://)?2chen\.moe"
@@ -56,16 +56,25 @@ class _2chenThreadExtractor(Extractor):
         return [self.parse(post) for post in posts]
 
     def parse(self, post):
-        post = text.extract(post, '<a class="quote"', '</figcaption>')[0]
-        data = text.extract_all(post, (
-            ('reply_no', '">', '</a>'),
-            ('url', '</span><a href="', '" download='),
-            ('filename', '"', '" data-hash='),
-            ('hash', '"', '">'),
-        ))[0]
-        data["url"] = self.root + data["url"]
+        extr = text.extract_from(post)
+        name = extr('<span>', '</span>')
+        date = extr('<time', 'time>')
+        date = text.parse_datetime(
+            text.extract(date, '>', '</')[0],
+            "%d %b %Y (%a) %H:%M:%S", utcoffset=-5.5)
+        extr = text.extract_from(extr('<a class="quote"', '</figcaption>'))
+        data = {
+            "name"    : name,
+            "date"    : date,
+            "time"    : text.parse_int(date.timestamp()),
+            "no"      : extr('">', '</a>'),
+            "url"     : self.root + extr('</span><a href="', '" download='),
+            "filename": extr('"', '" data-hash='),
+            "hash"    : extr('"', '">'),
+        }
         data["filename"], _, data["extension"] = \
             data["filename"].rpartition(".")
+        data["ext"] = "." + data["extension"]
         return data
 
 
