@@ -208,7 +208,7 @@ class TwitterExtractor(Extractor):
             else:
                 bval = bvals["unified_card"]["string_value"]
             data = json.loads(bval)
-            if data.get("type") == "image_carousel_website":
+            if data.get("type") in ("image_website", "image_carousel_website"):
                 self._extract_media(
                     tweet, data["media_entities"].values(), files)
                 return
@@ -735,7 +735,13 @@ class TwitterTweetExtractor(TwitterExtractor):
             "options": (("cards", True),),
             "pattern": r"https://pbs.twimg.com/card_img/\d+/",
         }),
-        # unified_card with image_carousel_website
+        # image_website unified_card (#2875)
+        ("https://twitter.com/i/web/status/1561674543323910144", {
+            "options": (("cards", True),),
+            "pattern": r"https://pbs\.twimg\.com/media/F.+=jpg",
+            "count": 1,
+        }),
+        # image_carousel_website unified_card
         ("https://twitter.com/doax_vv_staff/status/1479438945662685184", {
             "options": (("cards", True),),
             "pattern": r"https://pbs\.twimg\.com/media/F.+=png",
