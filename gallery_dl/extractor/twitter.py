@@ -208,10 +208,8 @@ class TwitterExtractor(Extractor):
             else:
                 bval = bvals["unified_card"]["string_value"]
             data = json.loads(bval)
-            if data.get("type") in ("image_website", "image_carousel_website"):
-                self._extract_media(
-                    tweet, data["media_entities"].values(), files)
-                return
+            self._extract_media(tweet, data["media_entities"].values(), files)
+            return
 
         if self.cards == "ytdl":
             tweet_id = tweet.get("rest_id") or tweet["id_str"]
@@ -735,17 +733,22 @@ class TwitterTweetExtractor(TwitterExtractor):
             "options": (("cards", True),),
             "pattern": r"https://pbs.twimg.com/card_img/\d+/",
         }),
-        # image_website unified_card (#2875)
+        # unified_card image_website (#2875)
         ("https://twitter.com/i/web/status/1561674543323910144", {
             "options": (("cards", True),),
             "pattern": r"https://pbs\.twimg\.com/media/F.+=jpg",
-            "count": 1,
         }),
-        # image_carousel_website unified_card
+        # unified_card image_carousel_website
         ("https://twitter.com/doax_vv_staff/status/1479438945662685184", {
             "options": (("cards", True),),
             "pattern": r"https://pbs\.twimg\.com/media/F.+=png",
             "count": 6,
+        }),
+        # unified_card video_website (#2875)
+        ("https://twitter.com/bang_dream_1242/status/1561548715348746241", {
+            "options": (("cards", True),),
+            "pattern": r"https://video\.twimg\.com/amplify_video"
+                       r"/1560607284333449216/vid/720x720/\w+\.mp4",
         }),
         # unified_card without type
         ("https://twitter.com/i/web/status/1466183847628865544", {
