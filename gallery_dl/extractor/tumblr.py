@@ -14,14 +14,6 @@ from datetime import datetime, timedelta
 import re
 
 
-def _original_inline_image(url):
-    return re.sub(
-        (r"https?://(\d+\.media\.tumblr\.com(?:/[0-9a-f]+)?"
-         r"/tumblr(?:_inline)?_[^_]+)_\d+\.([0-9a-z]+)"),
-        r"https://\1_1280.\2", url
-    )
-
-
 def _original_video(url):
     return re.sub(
         (r"https?://((?:vt|vtt|ve)(?:\.media)?\.tumblr\.com"
@@ -141,9 +133,7 @@ class TumblrExtractor(Extractor):
                 # API response, but they can't contain images/videos anyway
                 body = post["reblog"]["comment"] + post["reblog"]["tree_html"]
                 for url in re.findall('<img src="([^"]+)"', body):
-                    url = _original_inline_image(url)
-                    if self.original:
-                        url = self._original_image(url)
+                    url = self._original_inline_image(url)
                     posts.append(self._prepare_image(url, post.copy()))
                 for url in re.findall('<source src="([^"]+)"', body):
                     url = _original_video(url)
@@ -223,11 +213,23 @@ class TumblrExtractor(Extractor):
         return self.blog != post.get("reblogged_root_uuid")
 
     def _original_image(self, url):
-        new_url = re.sub(r"/s\d+x\d+/", "/s99999x99999/", url, 1)
-        if new_url == url:
-            return url
+        return self._update_image_token(
+            url.replace("/s2048x3072/", "/s99999x99999/", 1))
+
+    def _original_inline_image(self, url):
+        if self.original:
+            url, n = re.subn(r"/s\d+x\d+/", "/s99999x99999/", url, 1)
+            if n:
+                return self._update_image_token(url)
+        return re.sub(
+            (r"https?://(\d+\.media\.tumblr\.com(?:/[0-9a-f]+)?"
+             r"/tumblr(?:_inline)?_[^_]+)_\d+\.([0-9a-z]+)"),
+            r"https://\1_1280.\2", url
+        )
+
+    def _update_image_token(self, url):
         headers = {"Accept": "text/html,*/*;q=0.8"}
-        response = self.request(new_url, headers=headers)
+        response = self.request(url, headers=headers)
         return text.extract(response.text, '" src="', '"')[0]
 
 
