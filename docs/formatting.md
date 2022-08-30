@@ -19,7 +19,6 @@ While simple names are usually enough, more complex forms like accessing values 
 | Alternatives         | `{empty\|title}`  | `Hello World`          |
 | Element Access       | `{user[name]}`    | `John Doe`             |
 | Attribute Access     | `{extractor.url}` | `https://example.org/` |
-| Environment Variable | `{_env[FOO]}`     | `BAR`                  |
 
 All of these methods can be combined as needed.
 For example `{title[24]|empty|extractor.url[15:-1]}` would result in `.org`.
@@ -195,6 +194,46 @@ For example `{foo:?//RF/B/Ro/e/> 10}` -> `   Bee Bar`
 - `RF/B/` - Replaces `F` with `B`
 - `Ro/e/` - Replaces `o` with `e`
 - `> 10` - Left-fills the string with spaces until it is 10 characters long
+
+
+## Global Replacement Fields
+
+Replacement field names that are available in all format strings.
+
+<table>
+<thead>
+<tr>
+    <th>Field Name</th>
+    <th>Description</th>
+    <th>Example</th>
+    <th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+    <td><code>_env</code></td>
+    <td>Environment variables</td>
+    <td><code>{_env[HOME]}</code></td>
+    <td><code>/home/john</code></td>
+</tr>
+<tr>
+    <td><code>_now</code></td>
+    <td>Current local date and time</td>
+    <td><code>{_now:%Y-%m}</code></td>
+    <td><code>2022-08</code></td>
+</tr>
+<tr>
+    <td rowspan="2"><code>_lit</code></td>
+    <td rowspan="2">String literals</td>
+    <td><code>{_lit[foo]}</code></td>
+    <td><code>foo</code></td>
+</tr>
+<tr>
+    <td><code>{'bar'}</code></td>
+    <td><code>bar</code></td>
+</tr>
+</tbody>
+</table>
 
 
 ## Special Type Format Strings
