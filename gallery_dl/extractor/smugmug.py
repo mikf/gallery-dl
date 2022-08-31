@@ -209,9 +209,9 @@ class SmugmugPathExtractor(SmugmugExtractor):
 class SmugmugAPI(oauth.OAuth1API):
     """Minimal interface for the smugmug API v2"""
     API_DOMAIN = "api.smugmug.com"
-    API_KEY = "DFqxg4jf7GrtsQ5PnbNB8899zKfnDrdK"
-    API_SECRET = ("fknV35p9r9BwZC4XbTzvCXpcSJRdD83S"
-                  "9nMFQm25ndGBzNPnwRDbRnnVBvqt4xTq")
+    API_KEY = "RCVHDGjcbc4Fhzq4qzqLdZmvwmwB6LM2"
+    API_SECRET = ("jGrdndvJqhTx8XSNs7TFTSSthhZHq92d"
+                  "dMpbpDpkDVNM7TDgnvLFMtfB5Mg5kH73")
     HEADERS = {"Accept": "application/json"}
 
     def album(self, album_id, expands=None):
