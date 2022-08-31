@@ -2266,10 +2266,11 @@ Type
 Default
     ``true``
 Description
-    Download full-resolution ``photo`` images.
+    Download full-resolution ``photo`` and ``inline`` images.
 
     For each photo with "maximum" resolution
-    (width equal to 2048 or height equal to 3072),
+    (width equal to 2048 or height equal to 3072)
+    or each inline image,
     use an extra HTTP request to find the URL to its full-resolution version.
 
 
