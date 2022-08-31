@@ -41,6 +41,7 @@ class TwitterExtractor(Extractor):
         self.quoted = self.config("quoted", False)
         self.videos = self.config("videos", True)
         self.cards = self.config("cards", False)
+        self.cards_blacklist = self.config("cards-blacklist") or ()
         self._user = self._user_obj = None
         self._user_cache = {}
         self._init_sizes()
@@ -174,7 +175,10 @@ class TwitterExtractor(Extractor):
         card = tweet["card"]
         if "legacy" in card:
             card = card["legacy"]
-        name = card["name"]
+
+        name = card["name"].rpartition(":")[2]
+        if name in self.cards_blacklist:
+            return
 
         if name in ("summary", "summary_large_image"):
             bvals = card["binding_values"]
