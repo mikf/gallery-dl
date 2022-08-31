@@ -2343,6 +2343,16 @@ Description
     * ``"ytdl"``: Additionally download video content from unsupported cards using `youtube-dl`_
 
 
+extractor.twitter.cards-blacklist
+---------------------------------
+Type
+    ``list`` of ``strings``
+Example
+    ``["player", "summary"]``
+Description
+    List of card types to ignore
+
+
 extractor.twitter.conversations
 -------------------------------
 Type
