@@ -53,6 +53,7 @@ class RedgifsExtractor(Extractor):
         for fmt in self.formats:
             url = urls.get(fmt)
             if url:
+                url = url.replace("//thumbs2.", "//thumbs3.", 1)
                 text.nameext_from_url(url, gif)
                 yield url
 
