@@ -11,6 +11,8 @@
 from .booru import BooruExtractor
 from ..cache import cache
 from .. import text, exception
+from xml.etree import ElementTree
+
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?zerochan\.net"
 
@@ -54,7 +56,7 @@ class ZerochanExtractor(BooruExtractor):
 
         return response.cookies
 
-    def _parse_entry_page(self, entry_id):
+    def _parse_entry_html(self, entry_id):
         url = "{}/{}".format(self.root, entry_id)
         extr = text.extract_from(self.request(url).text)
 
@@ -66,10 +68,26 @@ class ZerochanExtractor(BooruExtractor):
                 '"datePublished": "', '"'), "%a %b %d %H:%M:%S %Y"),
             "width" : extr('"width": "', ' '),
             "height": extr('"height": "', ' '),
-            "size"  : extr('"contentSize": "', 'B'),
+            "size"  : text.parse_bytes(extr('"contentSize": "', 'B')),
             "path"  : text.split_html(extr(
                 'class="breadcrumbs', '</p>'))[3::2],
-            "tags"  : extr('alt="Tags: ', '"').split(", ")
+            "tags"  : extr('alt="Tags: Anime, ', '"').split(", ")
+        }
+
+    def _parse_entry_xml(self, entry_id):
+        url = "{}/{}?xml".format(self.root, entry_id)
+        item = ElementTree.fromstring(self.request(url).text)[0][-1]
+        #  content = item[4].attrib
+
+        return {
+            #  "id"    : entry_id,
+            #  "file_url": content["url"],
+            #  "width" : content["width"],
+            #  "height": content["height"],
+            #  "size"  : content["filesize"],
+            "name"  : item[2].text,
+            "tags"  : item[5].text.lstrip().split(", "),
+            "md5"   : item[6].text,
         }
 
 
@@ -105,6 +123,7 @@ class ZerochanTagExtractor(ZerochanExtractor):
         url = self.root + "/" + self.search_tag
         params = text.parse_query(self.query)
         params["p"] = text.parse_int(params.get("p"), 1)
+        metadata = self.config("metadata")
 
         while True:
             page = self.request(url, params=params).text
@@ -115,15 +134,22 @@ class ZerochanTagExtractor(ZerochanExtractor):
                 post = extr('<li class="', '>')
                 if not post:
                     break
-                yield {
-                    "id"    : extr('href="/', '"'),
-                    "name"  : extr('alt="', '"'),
-                    "width" : extr('title="', 'x'),
-                    "height": extr('', ' '),
-                    "size"  : extr('', 'B'),
-                    "file_url": "https://static." + extr(
-                        '<a href="https://static.', '"'),
-                }
+
+                if metadata:
+                    entry_id = extr('href="/', '"')
+                    post = self._parse_entry_html(entry_id)
+                    post.update(self._parse_entry_xml(entry_id))
+                    yield post
+                else:
+                    yield {
+                        "id"    : extr('href="/', '"'),
+                        "name"  : extr('alt="', '"'),
+                        "width" : extr('title="', 'x'),
+                        "height": extr('', ' '),
+                        "size"  : extr('', 'B'),
+                        "file_url": "https://static." + extr(
+                            '<a href="https://static.', '"'),
+                    }
 
             if 'rel="next"' not in page:
                 break
@@ -153,4 +179,7 @@ class ZerochanImageExtractor(ZerochanExtractor):
         self.image_id = match.group(1)
 
     def posts(self):
-        return (self._parse_entry_page(self.image_id),)
+        post = self._parse_entry_html(self.image_id)
+        if self.config("metadata"):
+            post.update(self._parse_entry_xml(self.image_id))
+        return (post,)
