@@ -2797,6 +2797,18 @@ Description
     Location of a youtube-dl configuration file to load options from.
 
 
+extractor.zerochan.metadata
+---------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Extract additional metadata (date, md5, tags, ...)
+
+    Note: This requires 1-2 additional HTTP request for each post.
+
+
 extractor.[booru].tags
 ----------------------
 Type
