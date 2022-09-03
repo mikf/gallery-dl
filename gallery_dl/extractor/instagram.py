@@ -264,6 +264,12 @@ class InstagramExtractor(Extractor):
                 "post_id": reel_id,
                 "post_shortcode": shortcode_from_id(reel_id),
             }
+
+            if "title" in post:
+                data["highlight_title"] = post["title"]
+            if "created_at" in post:
+                data["date"] = text.parse_timestamp(post.get("created_at"))
+
         else:
             data = {
                 "post_id" : post["pk"],
