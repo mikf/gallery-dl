@@ -49,7 +49,8 @@ class PahealExtractor(Extractor):
             "id"      : post_id,
             "tags"    : extr(": ", "<"),
             "md5"     : extr("/_thumbs/", "/"),
-            "file_url": extr("id='main_image' src='", "'"),
+            "file_url": (extr("id='main_image' src='", "'") or
+                         extr("<source src='", "'")),
             "uploader": text.unquote(extr(
                 "class='username' href='/user/", "'")),
             "date"    : text.parse_datetime(
@@ -59,8 +60,10 @@ class PahealExtractor(Extractor):
         }
 
         dimensions, size, ext = extr("Info</th><td>", ">").split(" // ")
-        post["width"], _, post["height"] = dimensions.partition("x")
+        post["width"], _, height = dimensions.partition("x")
         post["size"] = text.parse_bytes(size[:-1])
+        post["height"], _, duration = height.partition(", ")
+        post["duration"] = text.parse_float(duration[:-1])
 
         return post
 
@@ -111,10 +114,12 @@ class PahealTagExtractor(PahealExtractor):
         tags, data, date = data.split("\n")
         dimensions, size, ext = data.split(" // ")
         width, _, height = dimensions.partition("x")
+        height, _, duration = height.partition(", ")
 
         return {
             "id": pid, "md5": md5, "file_url": url,
             "width": width, "height": height,
+            "duration": text.parse_float(duration[:-1]),
             "tags": text.unescape(tags),
             "size": text.parse_bytes(size[:-1]),
             "date": text.parse_datetime(date, "%B %d, %Y; %H:%M"),
@@ -161,6 +166,27 @@ class PahealPostExtractor(PahealExtractor):
                 "tags": "Vuvuzela inanimate thelost-dragon",
                 "uploader": "leacheate_soup",
                 "width": 1200,
+            },
+        }),
+        # video
+        ("https://rule34.paheal.net/post/view/3864982", {
+            "pattern": r"https://[\w]+\.paheal\.net/_images/7629fc0ff77e32637d"
+                       r"de5bf4f992b2cb/3864982%20-%20Metal_Gear%20Metal_Gear_"
+                       r"Solid_V%20Quiet%20Vg_erotica%20animated%20webm\.webm",
+            "keyword": {
+                "date": "dt:2020-09-06 01:59:03",
+                "duration": 30.0,
+                "extension": "webm",
+                "height": 2500,
+                "id": 3864982,
+                "md5": "7629fc0ff77e32637dde5bf4f992b2cb",
+                "size": 18454938,
+                "source": "https://twitter.com/VG_Worklog"
+                          "/status/1302407696294055936",
+                "tags": "Metal_Gear Metal_Gear_Solid_V Quiet "
+                        "Vg_erotica animated webm",
+                "uploader": "justausername",
+                "width": 1768,
             },
         }),
     )
