@@ -452,9 +452,11 @@ class ZipTest(BasePostprocessorTest):
         self.assertTrue(pp.args[0].endswith("/test.cbz"))
 
     def test_zip_write(self):
-        pp = self._create()
-
         with tempfile.NamedTemporaryFile("w", dir=self.dir.name) as file:
+            pp = self._create({"files": [file.name, "_info_.json"],
+                               "keep-files": True})
+
+            filename = os.path.basename(file.name)
             file.write("foobar\n")
 
             # write dummy file with 3 different names
@@ -466,18 +468,19 @@ class ZipTest(BasePostprocessorTest):
                 self._trigger()
 
                 nti = pp.zfile.NameToInfo
-                self.assertEqual(len(nti), i+1)
+                self.assertEqual(len(nti), i+2)
                 self.assertIn(name, nti)
 
             # check file contents
-            self.assertEqual(len(nti), 3)
+            self.assertEqual(len(nti), 4)
             self.assertIn("file0.ext", nti)
             self.assertIn("file1.ext", nti)
             self.assertIn("file2.ext", nti)
+            self.assertIn(filename, nti)
 
             # write the last file a second time (will be skipped)
             self._trigger()
-            self.assertEqual(len(pp.zfile.NameToInfo), 3)
+            self.assertEqual(len(pp.zfile.NameToInfo), 4)
 
         # close file
         self._trigger(("finalize",), 0)
@@ -485,10 +488,11 @@ class ZipTest(BasePostprocessorTest):
         # reopen to check persistence
         with zipfile.ZipFile(pp.zfile.filename) as file:
             nti = file.NameToInfo
-            self.assertEqual(len(pp.zfile.NameToInfo), 3)
+            self.assertEqual(len(pp.zfile.NameToInfo), 4)
             self.assertIn("file0.ext", nti)
             self.assertIn("file1.ext", nti)
             self.assertIn("file2.ext", nti)
+            self.assertIn(filename, nti)
 
         os.unlink(pp.zfile.filename)
 
