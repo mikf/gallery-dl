@@ -26,6 +26,7 @@ class ZipPP(PostProcessor):
     def __init__(self, job, options):
         PostProcessor.__init__(self, job)
         self.delete = not options.get("keep-files", False)
+        self.files = options.get("files")
         ext = "." + options.get("extension", "zip")
         algorithm = options.get("compression", "store")
         if algorithm not in self.COMPRESSION_ALGORITHMS:
@@ -56,6 +57,9 @@ class ZipPP(PostProcessor):
         # 'NameToInfo' is not officially documented, but it's available
         # for all supported Python versions and using it directly is a lot
         # faster than calling getinfo()
+        if self.files:
+            self.write_extra(pathfmt, zfile, self.files)
+            self.files = None
         if pathfmt.filename not in zfile.NameToInfo:
             zfile.write(pathfmt.temppath, pathfmt.filename)
             pathfmt.delete = self.delete
@@ -68,6 +72,21 @@ class ZipPP(PostProcessor):
     def write_safe(self, pathfmt):
         with self.open() as zfile:
             self.write(pathfmt, zfile)
+
+    def write_extra(self, pathfmt, zfile, files):
+        for path in map(util.expand_path, files):
+            if not os.path.isabs(path):
+                path = os.path.join(pathfmt.realdirectory, path)
+            try:
+                zfile.write(path, os.path.basename(path))
+            except OSError as exc:
+                self.log.warning(
+                    "Unable to write %s to %s", path, zfile.filename)
+                self.log.debug("%s: %s", exc, exc.__class__.__name__)
+                pass
+            else:
+                if self.delete:
+                    util.remove_file(path)
 
     def finalize(self, pathfmt, status):
         if self.zfile:

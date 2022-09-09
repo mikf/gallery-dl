@@ -3805,6 +3805,19 @@ Description
     Filename extension for the created ZIP archive.
 
 
+zip.files
+---------
+Type
+    ``list`` of |Path|
+Example
+    ``["info.json"]``
+Description
+    List of extra files to be added to a ZIP archive.
+
+    Note: Relative paths are relative to the current
+    `download directory <extractor.*.directory_>`__.
+
+
 zip.keep-files
 --------------
 Type
