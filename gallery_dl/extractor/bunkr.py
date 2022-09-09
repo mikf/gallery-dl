@@ -37,6 +37,11 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
             "pattern": r"https://media-files\.bunkr\.is/_-RnHoW69L\.mp4",
             "content": "80e61d1dbc5896ae7ef9a28734c747b28b320471",
         }),
+        # cdn4
+        ("https://bunkr.is/a/iXTTc1o2", {
+            "pattern": r"https://(cdn|media-files)4\.bunkr\.is/",
+            "content": "da29aae371b7adc8c5ef8e6991b66b69823791e8",
+        }),
         ("https://bunkr.to/a/Lktg9Keq"),
     )
 
@@ -66,9 +71,8 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
             data = json.loads(text.extract(
                 self.request(url).text,
                 'id="__NEXT_DATA__" type="application/json">', '<')[0])
-            props = data["props"]["pageProps"]
-            album = props["album"]
-            files = props["files"]
+            album = data["props"]["pageProps"]["album"]
+            files = album["files"]
         except Exception as exc:
             self.log.debug(exc.__class__.__name__, exc)
             self.root = self.root.replace("bunkr", "app.bunkr", 1)
