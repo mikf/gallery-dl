@@ -42,6 +42,7 @@ class PoipikuExtractor(Extractor):
                     '<h2 class="UserInfoUserName">', '</').rpartition(">")[2]),
                 "description": text.unescape(extr(
                     'class="IllustItemDesc" >', '<')),
+                "_http_headers": {"Referer": post_url},
             }
 
             yield Message.Directory, post
@@ -54,7 +55,8 @@ class PoipikuExtractor(Extractor):
                 elif thumb.startswith(("//img.poipiku.com/img/", "/img/")):
                     continue
                 post["num"] += 1
-                url = text.ensure_http_scheme(thumb[:-8])
+                url = text.ensure_http_scheme(thumb[:-8]).replace(
+                    "//img.", "//img-org.", 1)
                 yield Message.Url, url, text.nameext_from_url(url, post)
 
             if not extr('> show all', '<'):
@@ -80,7 +82,8 @@ class PoipikuExtractor(Extractor):
             for thumb in text.extract_iter(
                     page, 'class="IllustItemThumbImg" src="', '"'):
                 post["num"] += 1
-                url = text.ensure_http_scheme(thumb[:-8])
+                url = text.ensure_http_scheme(thumb[:-8]).replace(
+                    "//img.", "//img-org.", 1)
                 yield Message.Url, url, text.nameext_from_url(url, post)
 
 
@@ -91,7 +94,7 @@ class PoipikuUserExtractor(PoipikuExtractor):
                r"(\d+)/?(?:$|[?&#])")
     test = (
         ("https://poipiku.com/25049/", {
-            "pattern": r"https://img\.poipiku\.com/user_img\d+/000025049"
+            "pattern": r"https://img-org\.poipiku\.com/user_img\d+/000025049"
                        r"/\d+_\w+\.(jpe?g|png)$",
             "range": "1-10",
             "count": 10,
@@ -131,7 +134,7 @@ class PoipikuPostExtractor(PoipikuExtractor):
     pattern = BASE_PATTERN + r"/(\d+)/(\d+)"
     test = (
         ("https://poipiku.com/25049/5864576.html", {
-            "pattern": r"https://img\.poipiku\.com/user_img\d+/000025049"
+            "pattern": r"https://img-org\.poipiku\.com/user_img\d+/000025049"
                        r"/005864576_EWN1Y65gQ\.png$",
             "keyword": {
                 "count": "1",
@@ -146,7 +149,7 @@ class PoipikuPostExtractor(PoipikuExtractor):
             },
         }),
         ("https://poipiku.com/2166245/6411749.html", {
-            "pattern": r"https://img\.poipiku\.com/user_img\d+/002166245"
+            "pattern": r"https://img-org\.poipiku\.com/user_img\d+/002166245"
                        r"/006411749_\w+\.jpeg$",
             "count": 4,
             "keyword": {
