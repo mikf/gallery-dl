@@ -152,7 +152,8 @@ class Extractor():
                 server = response.headers.get("Server")
                 if server and server.startswith("cloudflare"):
                     if code == 503 and \
-                            b"jschl-answer" in response.content:
+                            (b"_cf_chl_opt" in response.content or
+                             b"jschl-answer" in response.content):
                         self.log.warning("Cloudflare IUAM challenge")
                         break
                     if code == 403 and \
