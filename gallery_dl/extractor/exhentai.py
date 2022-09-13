@@ -328,13 +328,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
         data["image_token"] = self.key["start"] = extr('var startkey="', '";')
         self.key["show"] = extr('var showkey="', '";')
 
-        # full 509.gif URLs
-        # - https://exhentai.org/img/509.gif
-        # - https://ehgt.org/g/509.gif
-        if iurl.endswith(("hentai.org/img/509.gif",
-                          "ehgt.org/g/509.gif")):
-            self._report_limits(data)
-
+        self._check_509(iurl, data)
         return url, text.nameext_from_url(iurl, data)
 
     def images_from_api(self):
@@ -370,9 +364,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
             data["num"] = request["page"]
             data["image_token"] = imgkey
 
-            if imgurl.endswith(("hentai.org/img/509.gif",
-                                "ehgt.org/g/509.gif")):
-                self._report_limits(data)
+            self._check_509(imgurl, data)
             yield url, text.nameext_from_url(imgurl, data)
 
             request["imgkey"] = nextkey
@@ -389,6 +381,15 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
             self._update_limits()
         self._remaining -= data["cost"]
         if self._remaining <= 0:
+            self._report_limits(data)
+
+    def _check_509(self, url, data):
+        # full 509.gif URLs
+        # - https://exhentai.org/img/509.gif
+        # - https://ehgt.org/g/509.gif
+        if url.endswith(("hentai.org/img/509.gif",
+                         "ehgt.org/g/509.gif")):
+            self.log.debug(url)
             self._report_limits(data)
 
     def _update_limits(self):
