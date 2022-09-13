@@ -55,7 +55,7 @@ class FlickrImageExtractor(FlickrExtractor):
     """Extractor for individual images from flickr.com"""
     subcategory = "image"
     pattern = (r"(?:https?://)?(?:"
-               r"(?:(?:www\.|m\.)?flickr\.com/photos/[^/]+/"
+               r"(?:(?:www\.|secure\.|m\.)?flickr\.com/photos/[^/]+/"
                r"|[\w-]+\.static\.?flickr\.com/(?:\d+/)+)(\d+)"
                r"|flic\.kr/p/([A-Za-z1-9]+))")
     test = (
