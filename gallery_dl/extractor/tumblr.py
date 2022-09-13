@@ -14,23 +14,15 @@ from datetime import datetime, timedelta
 import re
 
 
-def _original_video(url):
-    return re.sub(
-        (r"https?://((?:vt|vtt|ve)(?:\.media)?\.tumblr\.com"
-         r"/tumblr_[^_]+)_\d+\.([0-9a-z]+)"),
-        r"https://\1.\2", url
-    )
-
-
-POST_TYPES = frozenset((
-    "text", "quote", "link", "answer", "video", "audio", "photo", "chat"))
-
 BASE_PATTERN = (
     r"(?:tumblr:(?:https?://)?([^/]+)|"
     r"(?:https?://)?"
     r"(?:www\.tumblr\.com/blog/(?:view/)?([\w-]+)|"
     r"([\w-]+\.tumblr\.com)))"
 )
+
+POST_TYPES = frozenset((
+    "text", "quote", "link", "answer", "video", "audio", "photo", "chat"))
 
 
 class TumblrExtractor(Extractor):
@@ -70,6 +62,18 @@ class TumblrExtractor(Extractor):
 
     def items(self):
         blog = None
+
+        # pre-compile regular expressions
+        self._sub_video = re.compile(
+            r"https?://((?:vt|vtt|ve)(?:\.media)?\.tumblr\.com"
+            r"/tumblr_[^_]+)_\d+\.([0-9a-z]+)").sub
+        if self.inline:
+            self._sub_image = re.compile(
+                r"https?://(\d+\.media\.tumblr\.com(?:/[0-9a-f]+)?"
+                r"/tumblr(?:_inline)?_[^_]+)_\d+\.([0-9a-z]+)").sub
+            self._subn_orig_image = re.compile(r"/s\d+x\d+/").subn
+            _findall_image = re.compile('<img src="([^"]+)"').findall
+            _findall_video = re.compile('<source src="([^"]+)"').findall
 
         for post in self.posts():
             if self.date_min > post["timestamp"]:
@@ -112,7 +116,7 @@ class TumblrExtractor(Extractor):
 
                     if self.original and "/s2048x3072/" in photo["url"] and (
                             photo["width"] == 2048 or photo["height"] == 3072):
-                        photo["url"] = self._original_image(photo["url"])
+                        photo["url"] = self._original_photo(photo["url"])
 
                     del photo["original_size"]
                     del photo["alt_sizes"]
@@ -126,17 +130,18 @@ class TumblrExtractor(Extractor):
 
             url = post.get("video_url")  # type "video"
             if url:
-                posts.append(self._prepare(_original_video(url), post.copy()))
+                posts.append(self._prepare(
+                    self._original_video(url), post.copy()))
 
             if self.inline and "reblog" in post:  # inline media
                 # only "chat" posts are missing a "reblog" key in their
                 # API response, but they can't contain images/videos anyway
                 body = post["reblog"]["comment"] + post["reblog"]["tree_html"]
-                for url in re.findall('<img src="([^"]+)"', body):
+                for url in _findall_image(body):
                     url = self._original_inline_image(url)
                     posts.append(self._prepare_image(url, post.copy()))
-                for url in re.findall('<source src="([^"]+)"', body):
-                    url = _original_video(url)
+                for url in _findall_video(body):
+                    url = self._original_video(url)
                     posts.append(self._prepare(url, post.copy()))
 
             if self.external:  # external links
@@ -212,20 +217,19 @@ class TumblrExtractor(Extractor):
     def _skip_reblog_same_blog(self, post):
         return self.blog != post.get("reblogged_root_uuid")
 
-    def _original_image(self, url):
+    def _original_photo(self, url):
         return self._update_image_token(
             url.replace("/s2048x3072/", "/s99999x99999/", 1))
 
     def _original_inline_image(self, url):
         if self.original:
-            url, n = re.subn(r"/s\d+x\d+/", "/s99999x99999/", url, 1)
+            url, n = self._subn_orig_image("/s99999x99999/", url, 1)
             if n:
                 return self._update_image_token(url)
-        return re.sub(
-            (r"https?://(\d+\.media\.tumblr\.com(?:/[0-9a-f]+)?"
-             r"/tumblr(?:_inline)?_[^_]+)_\d+\.([0-9a-z]+)"),
-            r"https://\1_1280.\2", url
-        )
+        return self._sub_image(r"https://\1_1280.\2", url)
+
+    def _original_video(self, url):
+        return self._sub_video(r"https://\1.\2", url)
 
     def _update_image_token(self, url):
         headers = {"Accept": "text/html,*/*;q=0.8"}
