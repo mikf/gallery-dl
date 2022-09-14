@@ -219,7 +219,6 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
             if self.limits:
                 self._check_limits(data)
             if "/fullimg.php" in url:
-                data["extension"] = ""
                 data["_http_validate"] = _validate_response
             else:
                 data["_http_validate"] = None
