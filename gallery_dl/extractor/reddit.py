@@ -46,10 +46,10 @@ class RedditExtractor(Extractor):
                         submission["created_utc"])
                     yield Message.Directory, submission
                     visited.add(submission["id"])
-                    url = submission["url"]
                     submission["num"] = 0
 
-                    if url.startswith("https://i.redd.it/"):
+                    url = submission["url"]
+                    if url and url.startswith("https://i.redd.it/"):
                         text.nameext_from_url(url, submission)
                         yield Message.Url, url, submission
 
