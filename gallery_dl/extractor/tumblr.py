@@ -464,10 +464,8 @@ class TumblrAPI(oauth.OAuth1API):
 
             # daily rate limit
             if response.headers.get("x-ratelimit-perday-remaining") == "0":
+                self.log.info("Daily API rate limit exceeded")
                 reset = response.headers.get("x-ratelimit-perday-reset")
-                t = (datetime.now() + timedelta(seconds=float(reset))).time()
-
-                self.log.error("Daily API rate limit exceeded")
 
                 api_key = self.api_key or self.session.auth.consumer_key
                 if api_key == self.API_KEY:
@@ -477,6 +475,11 @@ class TumblrAPI(oauth.OAuth1API):
                                   "ter/docs/configuration.rst#extractortumblra"
                                   "pi-key--api-secret")
 
+                if self.extractor.config("ratelimit") == "wait":
+                    self.extractor.wait(seconds=reset)
+                    return self._call(blog, endpoint, params)
+
+                t = (datetime.now() + timedelta(seconds=float(reset))).time()
                 raise exception.StopExtraction(
                     "Aborting - Rate limit will reset at %s",
                     "{:02}:{:02}:{:02}".format(t.hour, t.minute, t.second))
