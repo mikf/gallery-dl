@@ -61,7 +61,7 @@ class _2chenThreadExtractor(Extractor):
         date = extr('<time', 'time>')
         date = text.parse_datetime(
             text.extract(date, '>', '</')[0],
-            "%d %b %Y (%a) %H:%M:%S", utcoffset=-5.5)
+            "%d %b %Y (%a) %H:%M:%S")
         extr = text.extract_from(extr('<a class="quote"', '</figcaption>'))
         data = {
             "name"    : name,
@@ -72,8 +72,7 @@ class _2chenThreadExtractor(Extractor):
             "filename": extr('"', '" data-hash='),
             "hash"    : extr('"', '">'),
         }
-        data["filename"], _, data["extension"] = \
-            data["filename"].rpartition(".")
+        text.nameext_from_url(data["filename"], data)
         data["ext"] = "." + data["extension"]
         return data
 
