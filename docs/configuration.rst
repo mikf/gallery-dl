@@ -2274,6 +2274,19 @@ Description
     use an extra HTTP request to find the URL to its full-resolution version.
 
 
+extractor.tumblr.ratelimit
+--------------------------
+Type
+    ``string``
+Default
+    ``"abort"``
+Description
+    Selects how to handle exceeding the daily API rate limit.
+
+    * ``"abort"``: Raise an error and stop extraction
+    * ``"wait"``: Wait until rate limit reset
+
+
 extractor.tumblr.reblogs
 ------------------------
 Type
