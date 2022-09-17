@@ -2362,9 +2362,15 @@ extractor.twitter.cards-blacklist
 Type
     ``list`` of ``strings``
 Example
-    ``["player", "summary"]``
+    ``["summary", "youtube.com", "player:twitch.tv"]``
 Description
-    List of card types to ignore
+    List of card types to ignore.
+
+    Possible values are
+
+    * card names
+    * card domains
+    * ``<card name>:<card domain>``
 
 
 extractor.twitter.conversations

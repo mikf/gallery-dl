@@ -41,7 +41,7 @@ class TwitterExtractor(Extractor):
         self.quoted = self.config("quoted", False)
         self.videos = self.config("videos", True)
         self.cards = self.config("cards", False)
-        self.cards_blacklist = self.config("cards-blacklist") or ()
+        self.cards_blacklist = self.config("cards-blacklist")
         self._user = self._user_obj = None
         self._user_cache = {}
         self._init_sizes()
@@ -180,16 +180,21 @@ class TwitterExtractor(Extractor):
             card = card["legacy"]
 
         name = card["name"].rpartition(":")[2]
-        if name in self.cards_blacklist:
-            return
+        bvals = card["binding_values"]
+        if isinstance(bvals, list):
+            bvals = {bval["key"]: bval["value"]
+                     for bval in card["binding_values"]}
+
+        cbl = self.cards_blacklist
+        if cbl:
+            if name in cbl:
+                return
+            if "vanity_url" in bvals:
+                domain = bvals["vanity_url"]["string_value"]
+                if domain in cbl or name + ":" + domain in cbl:
+                    return
 
         if name in ("summary", "summary_large_image"):
-            bvals = card["binding_values"]
-            if isinstance(bvals, list):
-                bvals = {
-                    bval["key"]: bval["value"]
-                    for bval in card["binding_values"]
-                }
             for prefix in ("photo_image_full_size_",
                            "summary_photo_image_",
                            "thumbnail_image_"):
@@ -206,15 +211,7 @@ class TwitterExtractor(Extractor):
                             files.append(value)
                             return
         elif name == "unified_card":
-            bvals = card["binding_values"]
-            if isinstance(bvals, list):
-                for bval in card["binding_values"]:
-                    if bval["key"] == "unified_card":
-                        bval = bval["value"]["string_value"]
-                        break
-            else:
-                bval = bvals["unified_card"]["string_value"]
-            data = json.loads(bval)
+            data = json.loads(bvals["unified_card"]["string_value"])
             self._extract_media(tweet, data["media_entities"].values(), files)
             return
 
@@ -759,6 +756,12 @@ class TwitterTweetExtractor(TwitterExtractor):
         }),
         # unified_card without type
         ("https://twitter.com/i/web/status/1466183847628865544", {
+            "count": 0,
+        }),
+        # 'cards-blacklist' option
+        ("https://twitter.com/i/web/status/1571141912295243776", {
+            "options": (("cards", "ytdl"),
+                        ("cards-blacklist", ("twitch.tv",))),
             "count": 0,
         }),
         # original retweets (#1026)
