@@ -155,8 +155,11 @@ class TwitterExtractor(Extractor):
                     })
             elif "media_url_https" in media:
                 url = media["media_url_https"]
-                base, _, fmt = url.rpartition(".")
-                base += "?format=" + fmt + "&name="
+                if url[-4] == ".":
+                    base, _, fmt = url.rpartition(".")
+                    base += "?format=" + fmt + "&name="
+                else:
+                    base = url.rpartition("=")[0] + "="
                 files.append(text.nameext_from_url(url, {
                     "url"        : base + self._size_image,
                     "width"      : width,
@@ -795,6 +798,13 @@ class TwitterTweetExtractor(TwitterExtractor):
         # media alt texts / descriptions (#2617)
         ("https://twitter.com/my0nruri/status/1528379296041299968", {
             "keyword": {"description": "oc"}
+        }),
+        # '?format=...&name=...'-style URLs
+        ("https://twitter.com/poco_dandy/status/1150646424461176832", {
+            "options": (("cards", True),),
+            "pattern": r"https://pbs.twimg.com/card_img/157\d+/\w+"
+                       r"\?format=(jpg|png)&name=orig$",
+            "range": "1-2",
         }),
     )
 
