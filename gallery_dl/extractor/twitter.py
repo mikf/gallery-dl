@@ -789,6 +789,7 @@ class TwitterTweetExtractor(TwitterExtractor):
         # age-restricted (#2354)
         ("https://twitter.com/mightbecursed/status/1492954264909479936", {
             "options": (("syndication", True),),
+            "keywords": {"date": "dt:2022-02-13 20:10:09"},
             "count": 1,
         }),
         # media alt texts / descriptions (#2617)
@@ -1454,6 +1455,10 @@ class TwitterAPI():
             tweet["id_str"] = retweet_id = tweet_id
         else:
             retweet_id = None
+
+        tweet["created_at"] = text.parse_datetime(
+            tweet["created_at"], "%Y-%m-%dT%H:%M:%S.%fZ").strftime(
+            "%a %b %d %H:%M:%S +0000 %Y")
 
         if "video" in tweet:
             video = tweet["video"]
