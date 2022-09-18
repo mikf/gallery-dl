@@ -143,6 +143,7 @@ SUBCATEGORY_MAP = {
     "tag"    : "Tag Searches",
     "user"   : "User Profiles",
     "watch"  : "Watches",
+    "category"     : "Categories",
     "following"    : "",
     "related-pin"  : "related Pins",
     "related-board": "",
