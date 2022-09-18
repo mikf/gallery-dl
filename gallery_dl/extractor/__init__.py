@@ -55,6 +55,7 @@ modules = [
     "hentaihere",
     "hiperdex",
     "hitomi",
+    "hotleak",
     "idolcomplex",
     "imagebam",
     "imagechest",

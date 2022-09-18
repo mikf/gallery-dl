@@ -296,6 +296,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
+    <td>Hotleak</td>
+    <td>https://hotleak.vip/</td>
+    <td>Categories, Creators, Posts, Search Results</td>
+    <td></td>
+</tr>
+<tr>
     <td>Idol Complex</td>
     <td>https://idol.sankakucomplex.com/</td>
     <td>Pools, Posts, Tag Searches</td>
