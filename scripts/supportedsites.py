@@ -48,7 +48,6 @@ CATEGORY_MAP = {
     "hentaiimg"      : "Hentai Image",
     "hitomi"         : "Hitomi.la",
     "horne"          : "horne",
-    "hotleak"        : "Hotleak",
     "idolcomplex"    : "Idol Complex",
     "illusioncardsbooru": "Illusion Game Cards",
     "imagebam"       : "ImageBam",

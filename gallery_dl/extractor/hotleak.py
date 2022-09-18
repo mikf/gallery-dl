@@ -99,7 +99,7 @@ class HotleakPostExtractor(HotleakExtractor):
             data["url"] = text.extract(page, 'data-src="', '"')[0]
             text.nameext_from_url(data["url"], data)
 
-        if self.type == "video":
+        elif self.type == "video":
             data["url"] = "ytdl:" + text.extract(
                 text.unescape(page), '"src":"', '"')[0]
             text.nameext_from_url(data["url"], data)
@@ -114,7 +114,8 @@ class HotleakCreatorExtractor(HotleakExtractor):
     pattern = BASE_PATTERN + r"/(?!hot|creators|videos|photos)([^/?#]+)/?$"
     test = (
         ("https://hotleak.vip/kaiyakawaii", {
-            "count": "> 1200",
+            "range": "1-200",
+            "count": 200,
         }),
         ("https://hotleak.vip/stellaviolet", {
             "count": "> 600"
@@ -133,18 +134,19 @@ class HotleakCreatorExtractor(HotleakExtractor):
         return self._pagination(url)
 
     def _pagination(self, url):
+        headers = {"X-Requested-With": "XMLHttpRequest"}
         params = {"page": 1}
 
         while True:
             try:
-                response = self.request(url, headers={
-                    "X-Requested-With": "XMLHttpRequest"}, params=params)
+                response = self.request(
+                    url, headers=headers, params=params, notfound="creator")
             except exception.HttpError as exc:
-                if exc.response.status_code == 404:
-                    raise exception.NotFoundError()
                 if exc.response.status_code == 429:
                     self.wait(
                         until=exc.response.headers.get("X-RateLimit-Reset"))
+                    continue
+
             posts = response.json()
             if not posts:
                 return
@@ -152,12 +154,13 @@ class HotleakCreatorExtractor(HotleakExtractor):
             data = {"creator": self.creator}
             for post in posts:
                 data["id"] = text.parse_int(post["id"])
+
                 if post["type"] == 0:
                     data["type"] = "photo"
                     data["url"] = self.root + "/storage/" + post["image"]
                     text.nameext_from_url(data["url"], data)
 
-                if post["type"] == 1:
+                elif post["type"] == 1:
                     data["type"] = "video"
                     data["url"] = "ytdl:" + post["stream_url_play"]
                     text.nameext_from_url(data["url"], data)
@@ -172,8 +175,18 @@ class HotleakCategoryExtractor(HotleakExtractor):
     subcategory = "category"
     pattern = BASE_PATTERN + r"/(hot|creators|videos|photos)(?:/?\?([^#]+))?"
     test = (
+        ("https://hotleak.vip/photos", {
+            "pattern": HotleakPostExtractor.pattern,
+            "range": "1-50",
+            "count": 50,
+        }),
         ("https://hotleak.vip/videos"),
-        ("https://hotleak.vip/photos"),
+        ("https://hotleak.vip/creators", {
+            "pattern": HotleakCreatorExtractor.pattern,
+            "range": "1-50",
+            "count": 50,
+        }),
+        ("https://hotleak.vip/hot"),
     )
 
     def __init__(self, match):
@@ -183,9 +196,9 @@ class HotleakCategoryExtractor(HotleakExtractor):
     def items(self):
         url = "{}/{}".format(self.root, self._category)
 
-        if self._category == "hot" or self._category == "creators":
+        if self._category in ("hot", "creators"):
             data = {"_extractor": HotleakCreatorExtractor}
-        if self._category == "videos" or self._category == "photos":
+        elif self._category in ("videos", "photos"):
             data = {"_extractor": HotleakPostExtractor}
 
         for item in self._pagination(url, self.params):
