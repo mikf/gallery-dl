@@ -1,5 +1,30 @@
 # Changelog
 
+## 1.23.1 - 2022-09-18
+### Additions
+- [flickr] add support for `secure.flickr.com` URLs ([#2910](https://github.com/mikf/gallery-dl/issues/2910))
+- [hotleak] add hotleak extractors ([#2890](https://github.com/mikf/gallery-dl/issues/2890), [#2909](https://github.com/mikf/gallery-dl/issues/2909))
+- [instagram] add `highlight_title` and `date` metadata for highlight downloads ([#2879](https://github.com/mikf/gallery-dl/issues/2879))
+- [paheal] add support for videos ([#2892](https://github.com/mikf/gallery-dl/issues/2892))
+- [twitter] add general support for unified cards ([#2875](https://github.com/mikf/gallery-dl/issues/2875))
+- [twitter] implement `cards-blacklist` option ([#2875](https://github.com/mikf/gallery-dl/issues/2875))
+- [tumblr] fetch high-quality inline images ([#2877](https://github.com/mikf/gallery-dl/issues/2877))
+- [tumblr] implement `ratelimit` option ([#2919](https://github.com/mikf/gallery-dl/issues/2919))
+- [zerochan] add `metadata` option ([#2861](https://github.com/mikf/gallery-dl/issues/2861))
+- [postprocessor:zip] implement `files` option ([#2872](https://github.com/mikf/gallery-dl/issues/2872))
+### Fixes
+- [bunkr] fix extraction ([#2903](https://github.com/mikf/gallery-dl/issues/2903))
+- [bunkr] use `media-files` servers for `m4v` and `mov` downloads ([#2925](https://github.com/mikf/gallery-dl/issues/2925))
+- [exhentai] improve 509.gif detection ([#2901](https://github.com/mikf/gallery-dl/issues/2901))
+- [exhentai] guess extension for original files ([#2842](https://github.com/mikf/gallery-dl/issues/2842))
+- [poipiku] use `img-org.poipiku.com` as image domain ([#2796](https://github.com/mikf/gallery-dl/issues/2796))
+- [reddit] prevent exception with empty submission URLs ([#2913](https://github.com/mikf/gallery-dl/issues/2913))
+- [redgifs] fix download URLs ([#2884](https://github.com/mikf/gallery-dl/issues/2884))
+- [smugmug] update default API credentials ([#2881](https://github.com/mikf/gallery-dl/issues/2881))
+- [twitter] provide proper `date` for syndication results ([#2920](https://github.com/mikf/gallery-dl/issues/2920))
+- [twitter] fix new-style `/card_img/` URLs
+- remove all whitespace before comments after input file URLs ([#2808](https://github.com/mikf/gallery-dl/issues/2808))
+
 ## 1.23.0 - 2022-08-28
 ### Changes
 - [twitter] update `user` and `author` metdata fields
