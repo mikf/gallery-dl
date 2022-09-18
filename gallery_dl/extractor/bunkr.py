@@ -81,7 +81,7 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
         for file in files:
             name = file["name"]
             cdn = file["cdn"]
-            if name.endswith(".mp4"):
+            if name.endswith((".mp4", ".m4v", ".mov")):
                 cdn = cdn.replace("//cdn", "//media-files")
             file["file"] = cdn + "/" + name
 
