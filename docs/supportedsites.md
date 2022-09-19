@@ -100,7 +100,7 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>Blogger</td>
     <td>https://www.blogger.com/</td>
-    <td>Blogs, Posts, Search Results</td>
+    <td>Blogs, Labels, Posts, Search Results</td>
     <td></td>
 </tr>
 <tr>
