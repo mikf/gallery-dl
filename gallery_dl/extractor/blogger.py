@@ -173,13 +173,28 @@ class BloggerBlogExtractor(BloggerExtractor):
 
 
 class BloggerSearchExtractor(BloggerExtractor):
-    """Extractor for search resuls and labels"""
+    """Extractor for Blogger search resuls"""
     subcategory = "search"
-    pattern = BASE_PATTERN + r"/search(?:/?\?q=([^/?#]+)|/label/([^/?#]+))"
+    pattern = BASE_PATTERN + r"/search/?\?q=([^&#]+)"
     test = (
         ("https://julianbphotography.blogspot.com/search?q=400mm", {
             "count": "< 10"
         }),
+    )
+
+    def __init__(self, match):
+        BloggerExtractor.__init__(self, match)
+        self.query = text.unquote(match.group(3))
+
+    def posts(self, blog):
+        return self.api.blog_search(blog["id"], self.query)
+
+
+class BloggerLabelExtractor(BloggerExtractor):
+    """Extractor for Blogger posts by label"""
+    subcategory = "label"
+    pattern = BASE_PATTERN + r"/search/label/([^/?#]+)"
+    test = (
         ("https://dmmagazine.blogspot.com/search/label/D%26D", {
             "range": "1-25",
             "count": 25,
@@ -188,16 +203,10 @@ class BloggerSearchExtractor(BloggerExtractor):
 
     def __init__(self, match):
         BloggerExtractor.__init__(self, match)
-        query = match.group(3)
-        if query:
-            self.query, self.label = query, None
-        else:
-            self.query, self.label = None, match.group(4)
+        self.label = text.unquote(match.group(3))
 
     def posts(self, blog):
-        if self.query:
-            return self.api.blog_search(blog["id"], text.unquote(self.query))
-        return self.api.blog_posts(blog["id"], text.unquote(self.label))
+        return self.api.blog_posts(blog["id"], self.label)
 
 
 class BloggerAPI():
