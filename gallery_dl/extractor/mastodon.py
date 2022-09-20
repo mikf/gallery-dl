@@ -31,6 +31,8 @@ class MastodonExtractor(BaseExtractor):
     def items(self):
         for status in self.statuses():
 
+            if self._check_move:
+                self._check_move(status["account"])
             if not self.reblogs and status["reblog"]:
                 self.log.debug("Skipping %s (reblog)", status["id"])
                 continue
@@ -55,6 +57,12 @@ class MastodonExtractor(BaseExtractor):
     def statuses(self):
         """Return an iterable containing all relevant Status objects"""
         return ()
+
+    def _check_move(self, account):
+        self._check_move = None
+        if "moved" in account:
+            self.log.warning("Account '%s' moved to '%s'",
+                             account["acct"], account["moved"]["acct"])
 
 
 INSTANCES = {
@@ -192,6 +200,7 @@ class MastodonAPI():
         handle = "@{}@{}".format(username, self.extractor.instance)
         for account in self.account_search(handle, 1):
             if account["username"] == username:
+                self.extractor._check_move(account)
                 return account["id"]
         raise exception.NotFoundError("account")
 
