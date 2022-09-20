@@ -48,6 +48,7 @@ class BloggerExtractor(Extractor):
             r'\d+\.bp\.blogspot\.com)/[^"]+)').findall
         findall_video = re.compile(
             r'src="(https?://www\.blogger\.com/video\.g\?token=[^"]+)').findall
+        metadata = self.metadata()
 
         for post in self.posts(blog):
             content = post["content"]
@@ -74,17 +75,20 @@ class BloggerExtractor(Extractor):
             del post["selfLink"]
             del post["blog"]
 
-            yield Message.Directory, {"blog": blog, "post": post}
-            for num, url in enumerate(files, 1):
-                yield Message.Url, url, text.nameext_from_url(url, {
-                    "blog": blog,
-                    "post": post,
-                    "url" : url,
-                    "num" : num,
-                })
+            data = {"blog": blog, "post": post}
+            if metadata:
+                data.update(metadata)
+            yield Message.Directory, data
+
+            for data["num"], url in enumerate(files, 1):
+                data["url"] = url
+                yield Message.Url, url, text.nameext_from_url(url, data)
 
     def posts(self, blog):
         """Return an iterable with all relevant post objects"""
+
+    def metadata(self):
+        """Return additional metadata"""
 
 
 class BloggerPostExtractor(BloggerExtractor):
@@ -178,7 +182,8 @@ class BloggerSearchExtractor(BloggerExtractor):
     pattern = BASE_PATTERN + r"/search/?\?q=([^&#]+)"
     test = (
         ("https://julianbphotography.blogspot.com/search?q=400mm", {
-            "count": "< 10"
+            "count": "< 10",
+            "keyword": {"query": "400mm"},
         }),
     )
 
@@ -189,6 +194,9 @@ class BloggerSearchExtractor(BloggerExtractor):
     def posts(self, blog):
         return self.api.blog_search(blog["id"], self.query)
 
+    def metadata(self):
+        return {"query": self.query}
+
 
 class BloggerLabelExtractor(BloggerExtractor):
     """Extractor for Blogger posts by label"""
@@ -198,6 +206,7 @@ class BloggerLabelExtractor(BloggerExtractor):
         ("https://dmmagazine.blogspot.com/search/label/D%26D", {
             "range": "1-25",
             "count": 25,
+            "keyword": {"label": "D&D"},
         }),
     )
 
@@ -207,6 +216,9 @@ class BloggerLabelExtractor(BloggerExtractor):
 
     def posts(self, blog):
         return self.api.blog_posts(blog["id"], self.label)
+
+    def metadata(self):
+        return {"label": self.label}
 
 
 class BloggerAPI():
