@@ -110,9 +110,13 @@ class InstagramExtractor(Extractor):
     def _request_api(self, endpoint, **kwargs):
         url = "https://i.instagram.com/api" + endpoint
         kwargs["headers"] = {
-            "X-CSRFToken"   : self.csrf_token,
-            "X-IG-App-ID"   : "936619743392459",
-            "X-IG-WWW-Claim": self.www_claim,
+            "X-CSRFToken"     : self.csrf_token,
+            "X-Instagram-AJAX": "1006242110",
+            "X-IG-App-ID"     : "936619743392459",
+            "X-ASBD-ID"       : "198387",
+            "X-IG-WWW-Claim"  : self.www_claim,
+            "Origin"          : self.root,
+            "Referer"         : self.root + "/",
         }
         kwargs["cookies"] = {
             "csrftoken": self.csrf_token,
@@ -127,9 +131,12 @@ class InstagramExtractor(Extractor):
         }
         headers = {
             "X-CSRFToken"     : self.csrf_token,
+            "X-Instagram-AJAX": "1006242110",
             "X-IG-App-ID"     : "936619743392459",
+            "X-ASBD-ID"       : "198387",
             "X-IG-WWW-Claim"  : self.www_claim,
             "X-Requested-With": "XMLHttpRequest",
+            "Referer"         : self.root + "/",
         }
         cookies = {
             "csrftoken": self.csrf_token,
