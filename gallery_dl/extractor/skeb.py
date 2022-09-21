@@ -223,6 +223,55 @@ class SkebUserExtractor(SkebExtractor):
         return posts
 
 
+class SkebSearchExtractor(SkebExtractor):
+    """Extractor for skeb search results"""
+    subcategory = "search"
+    pattern = r"(?:https?://)?skeb\.jp/search\?q=([^&#]+)"
+    test = ("https://skeb.jp/search?q=bunny%20tree&t=works", {
+        "count": ">= 18",
+    })
+
+    def posts(self):
+        url = "https://hb1jt3kre9-2.algolianet.com/1/indexes/*/queries"
+        params = {
+            "x-algolia-agent": "Algolia for JavaScript (4.13.1); Browser",
+        }
+        headers = {
+            "Origin": self.root,
+            "Referer": self.root + "/",
+            "x-algolia-api-key": "9a4ce7d609e71bf29e977925e4c6740c",
+            "x-algolia-application-id": "HB1JT3KRE9",
+        }
+
+        pams = ("hitsPerPage=40&filters=genre%3Aart%20OR%20genre%3Avoice%20OR"
+                "%20genre%3Anovel%20OR%20genre%3Avideo%20OR%20genre%3Amusic%2"
+                "0OR%20genre%3Acorrection&page=")
+        page = 0
+
+        request = {
+            "indexName": "Request",
+            "query": text.unquote(self.user_name),
+            "params": pams + str(page),
+        }
+        data = {"requests": (request,)}
+
+        while True:
+            result = self.request(
+                url, method="POST", params=params, headers=headers, json=data,
+            ).json()["results"][0]
+
+            for post in result["hits"]:
+                parts = post["path"].split("/")
+                user_name = parts[1][1:]
+                post_num = parts[3]
+                yield user_name, post_num
+
+            if page >= result["nbPages"]:
+                return
+            page += 1
+            request["params"] = pams + str(page)
+
+
 class SkebFollowingExtractor(SkebExtractor):
     """Extractor for all creators followed by a skeb user"""
     subcategory = "following"

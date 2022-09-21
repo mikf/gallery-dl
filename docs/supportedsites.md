@@ -736,7 +736,7 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>Skeb</td>
     <td>https://skeb.jp/</td>
-    <td>Posts, User Profiles</td>
+    <td>Posts, Search Results, User Profiles</td>
     <td></td>
 </tr>
 <tr>
