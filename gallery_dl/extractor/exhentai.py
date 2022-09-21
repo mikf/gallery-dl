@@ -505,7 +505,7 @@ class ExhentaiSearchExtractor(ExhentaiExtractor):
                 if url == last:
                     continue
                 last = url
-                yield Message.Queue, url, data
+                yield Message.Queue, url + "/", data
 
             if 'class="ptdd">&gt;<' in page or ">No hits found</p>" in page:
                 return
