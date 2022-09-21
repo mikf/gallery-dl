@@ -147,20 +147,9 @@ class InstagramExtractor(Extractor):
 
     @memcache(keyarg=1)
     def _user_by_screen_name(self, screen_name):
-        url = "https://www.instagram.com/{}/?__a=1&__d=dis".format(
-            screen_name)
-        headers = {
-            "Referer": "https://www.instagram.com/{}/".format(screen_name),
-            "X-CSRFToken"     : self.csrf_token,
-            "X-IG-App-ID"     : "936619743392459",
-            "X-IG-WWW-Claim"  : self.www_claim,
-            "X-Requested-With": "XMLHttpRequest",
-        }
-        cookies = {
-            "csrftoken": self.csrf_token,
-        }
-        return self.request(
-            url, headers=headers, cookies=cookies).json()["graphql"]["user"]
+        endpoint = "/v1/users/web_profile_info/"
+        params = {"username": screen_name}
+        return self._request_api(endpoint, params=params)["data"]["user"]
 
     def _uid_by_screen_name(self, screen_name):
         if screen_name.startswith("id:"):
