@@ -457,9 +457,10 @@ class InstagramPostsExtractor(InstagramExtractor):
     })
 
     def posts(self):
-        query_hash = "69cba40317214236af40e7efa697781d"
-        variables = {"id": self._uid_by_screen_name(self.item), "first": 50}
-        return self._pagination_graphql(query_hash, variables)
+        endpoint = "/v1/feed/user/{}/".format(
+            self._uid_by_screen_name(self.item))
+        params = {"count": 30}
+        return self._pagination_api(endpoint, params)
 
 
 class InstagramTaggedExtractor(InstagramExtractor):
