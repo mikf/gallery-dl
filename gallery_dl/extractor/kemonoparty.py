@@ -46,7 +46,7 @@ class KemonopartyExtractor(Extractor):
         comments = self.config("comments")
         username = dms = None
 
-        # prevent files to be sent with gzip compression
+        # prevent files from being sent with gzip compression
         headers = {"Accept-Encoding": "identity"}
 
         if self.config("metadata"):
@@ -63,6 +63,7 @@ class KemonopartyExtractor(Extractor):
 
         for post in posts:
 
+            post["_http_headers"] = headers
             post["date"] = text.parse_datetime(
                 post["published"] or post["added"],
                 "%a, %d %b %Y %H:%M:%S %Z")
@@ -74,27 +75,32 @@ class KemonopartyExtractor(Extractor):
                 if dms is True:
                     dms = self._extract_dms(post)
                 post["dms"] = dms
-            yield Message.Directory, post
 
+            files = []
             hashes = set()
-            post["num"] = 0
+
             for file in itertools.chain.from_iterable(
                     g(post) for g in generators):
                 url = file["path"]
 
                 match = find_hash(url)
                 if match:
-                    post["hash"] = hash = match.group(1)
+                    file["hash"] = hash = match.group(1)
                     if hash in hashes and not duplicates:
                         self.log.debug("Skipping %s (duplicate)", url)
                         continue
                     hashes.add(hash)
                 else:
-                    post["hash"] = ""
+                    file["hash"] = ""
 
-                post["type"] = file["type"]
-                post["num"] += 1
-                post["_http_headers"] = headers
+                files.append(file)
+
+            post["count"] = len(files)
+            yield Message.Directory, post
+
+            for post["num"], file in enumerate(files, 1):
+                post.update(file)
+                url = file["path"]
 
                 text.nameext_from_url(file.get("name", url), post)
                 if not post["extension"]:
@@ -236,6 +242,7 @@ class KemonopartyPostExtractor(KemonopartyExtractor):
             "keyword": {
                 "added": "Wed, 06 May 2020 20:28:02 GMT",
                 "content": str,
+                "count": 1,
                 "date": "dt:2019-08-11 02:09:04",
                 "edited": None,
                 "embed": dict,
@@ -374,6 +381,7 @@ class KemonopartyDiscordExtractor(KemonopartyExtractor):
             post["channel_name"] = self.channel_name
             post["date"] = text.parse_datetime(
                 post["published"], "%a, %d %b %Y %H:%M:%S %Z")
+            post["count"] = len(files)
             yield Message.Directory, post
 
             for post["num"], file in enumerate(files, 1):
