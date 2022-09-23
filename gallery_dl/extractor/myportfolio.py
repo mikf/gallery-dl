@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2021 Mike Fährmann
+# Copyright 2018-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -104,4 +104,7 @@ class MyportfolioGalleryExtractor(Extractor):
     @staticmethod
     def images(page):
         """Extract and return a list of all image-urls"""
-        return list(text.extract_iter(page, 'js-lightbox" data-src="', '"'))
+        return (
+            list(text.extract_iter(page, 'js-lightbox" data-src="', '"')) or
+            list(text.extract_iter(page, 'data-src="', '"'))
+        )
