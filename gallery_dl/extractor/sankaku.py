@@ -53,12 +53,15 @@ class SankakuExtractor(BooruExtractor):
             url = "https://s.sankakucomplex.com" + url[url.index("/", 8):]
         return url
 
-    @staticmethod
-    def _prepare(post):
+    def _prepare(self, post):
         post["created_at"] = post["created_at"]["s"]
         post["date"] = text.parse_timestamp(post["created_at"])
         post["tags"] = [tag["name"] for tag in post["tags"] if tag["name"]]
         post["tag_string"] = " ".join(post["tags"])
+        post["_http_validate"] = self._check_expired
+
+    def _check_expired(self, response):
+        return not response.history or '.com/expired.png' not in response.url
 
     def _extended_tags(self, post):
         tags = collections.defaultdict(list)
