@@ -26,8 +26,11 @@ class SkebExtractor(Extractor):
         self.article = self.config("article", False)
 
     def items(self):
+        metadata = self.metadata()
         for user_name, post_num in self.posts():
             response, post = self._get_post_data(user_name, post_num)
+            if metadata:
+                post.update(metadata)
             yield Message.Directory, post
             for data in self._get_urls_from_post(response, post):
                 url = data["file_url"]
@@ -35,6 +38,9 @@ class SkebExtractor(Extractor):
 
     def posts(self):
         """Return post number"""
+
+    def metadata(self):
+        """Return additional metadata"""
 
     def _pagination(self, url, params):
         headers = {"Referer": self.root, "Authorization": "Bearer null"}
@@ -229,7 +235,11 @@ class SkebSearchExtractor(SkebExtractor):
     pattern = r"(?:https?://)?skeb\.jp/search\?q=([^&#]+)"
     test = ("https://skeb.jp/search?q=bunny%20tree&t=works", {
         "count": ">= 18",
+        "keyword": {"search_tags": "bunny tree"},
     })
+
+    def metadata(self):
+        return {"search_tags": text.unquote(self.user_name)}
 
     def posts(self):
         url = "https://hb1jt3kre9-2.algolianet.com/1/indexes/*/queries"
@@ -243,10 +253,10 @@ class SkebSearchExtractor(SkebExtractor):
             "x-algolia-application-id": "HB1JT3KRE9",
         }
 
+        page = 0
         pams = ("hitsPerPage=40&filters=genre%3Aart%20OR%20genre%3Avoice%20OR"
                 "%20genre%3Anovel%20OR%20genre%3Avideo%20OR%20genre%3Amusic%2"
                 "0OR%20genre%3Acorrection&page=")
-        page = 0
 
         request = {
             "indexName": "Request",
@@ -262,9 +272,7 @@ class SkebSearchExtractor(SkebExtractor):
 
             for post in result["hits"]:
                 parts = post["path"].split("/")
-                user_name = parts[1][1:]
-                post_num = parts[3]
-                yield user_name, post_num
+                yield parts[1][1:], parts[3]
 
             if page >= result["nbPages"]:
                 return
@@ -287,8 +295,8 @@ class SkebFollowingExtractor(SkebExtractor):
     def users(self):
         url = "{}/api/users/{}/following_creators".format(
             self.root, self.user_name)
-        headers = {"Referer": self.root, "Authorization": "Bearer null"}
         params = {"sort": "date", "offset": 0, "limit": 90}
+        headers = {"Referer": self.root, "Authorization": "Bearer null"}
 
         while True:
             data = self.request(url, params=params, headers=headers).json()
