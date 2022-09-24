@@ -155,6 +155,7 @@ class NewgroundsExtractor(Extractor):
         data = {
             "title"      : text.unescape(extr('"og:title" content="', '"')),
             "description": text.unescape(extr(':description" content="', '"')),
+            "type"       : extr('og:type" content="', '"'),
             "date"       : text.parse_datetime(extr(
                 'itemprop="datePublished" content="', '"')),
             "rating"     : extr('class="rated-', '"'),
@@ -173,6 +174,7 @@ class NewgroundsExtractor(Extractor):
         return {
             "title"      : text.unescape(extr('"og:title" content="', '"')),
             "description": text.unescape(extr(':description" content="', '"')),
+            "type"       : extr('og:type" content="', '"'),
             "date"       : text.parse_datetime(extr(
                 'itemprop="datePublished" content="', '"')),
             "url"        : extr('{"url":"', '"').replace("\\/", "/"),
@@ -184,6 +186,7 @@ class NewgroundsExtractor(Extractor):
     def _extract_media_data(self, extr, url):
         index = url.split("/")[5]
         title = extr('"og:title" content="', '"')
+        type = extr('og:type" content="', '"')
         descr = extr('"og:description" content="', '"')
         src = extr('{"url":"', '"')
 
@@ -223,6 +226,7 @@ class NewgroundsExtractor(Extractor):
             "title"      : text.unescape(title),
             "url"        : src,
             "date"       : date,
+            "type"       : type,
             "description": text.unescape(descr or extr(
                 'itemprop="description" content="', '"')),
             "rating"     : extr('class="rated-', '"'),
@@ -305,6 +309,7 @@ class NewgroundsImageExtractor(NewgroundsExtractor):
                 "score"      : float,
                 "tags"       : ["ryu", "streetfighter"],
                 "title"      : "Ryu is Hawt",
+                "type"       : "article",
                 "user"       : "tomfulp",
                 "width"      : 447,
             },
@@ -357,6 +362,7 @@ class NewgroundsMediaExtractor(NewgroundsExtractor):
                 "score"      : float,
                 "tags"       : ["alienhominid", "trailer"],
                 "title"      : "Alien Hominid Fan Trailer",
+                "type"       : "movie",
                 "user"       : "kickinthehead",
             },
         }),
@@ -373,6 +379,7 @@ class NewgroundsMediaExtractor(NewgroundsExtractor):
                 "score"      : float,
                 "tags"       : ["fulp", "interview", "tom", "zj"],
                 "title"      : "ZJ Interviews Tom Fulp!",
+                "type"       : "music.song",
                 "user"       : "zj",
             },
         }),
@@ -380,6 +387,7 @@ class NewgroundsMediaExtractor(NewgroundsExtractor):
         ("https://www.newgrounds.com/portal/view/161181/format/flash", {
             "pattern": r"https://uploads\.ungrounded\.net/161000"
                        r"/161181_ddautta_mask__550x281_\.swf\?f1081628129",
+            "keyword": {"type": "movie"},
         }),
         # format selection (#1729)
         ("https://www.newgrounds.com/portal/view/758545", {
@@ -391,6 +399,49 @@ class NewgroundsMediaExtractor(NewgroundsExtractor):
         ("https://www.newgrounds.com/portal/view/717744", {
             "options": (("username", None),),
             "count": 1,
+        }),
+        # flash game
+        ("https://www.newgrounds.com/portal/view/829032", {
+            "pattern": r"https://uploads\.ungrounded\.net/829000"
+                       r"/829032_picovsbeardx\.swf\?f1641968445",
+            "range": "1",
+            "keyword": {
+                "artist"     : [
+                    "dungeonation",
+                    "carpetbakery",
+                    "animalspeakandrews",
+                    "bill",
+                    "chipollo",
+                    "dylz49",
+                    "gappyshamp",
+                    "pinktophat",
+                    "rad",
+                    "shapeshiftingblob",
+                    "tomfulp",
+                    "voicesbycorey",
+                    "psychogoldfish",
+                ],
+                "comment"    : "re:The children are expendable. Take out the ",
+                "date"       : "dt:2022-01-10 23:00:57",
+                "description": "Bloodshed in The Big House that Blew...again!",
+                "favorites"  : int,
+                "index"      : 829032,
+                "post_url"   : "https://www.newgrounds.com/portal/view/829032",
+                "rating"     : "m",
+                "score"      : float,
+                "tags"       : [
+                    "assassin",
+                    "boyfriend",
+                    "darnell",
+                    "nene",
+                    "pico",
+                    "picos-school",
+                ],
+                "title"      : "PICO VS BEAR DX",
+                "type"       : "game",
+                "url"        : "https://uploads.ungrounded.net/829000"
+                               "/829032_picovsbeardx.swf?f1641968445",
+            },
         }),
     )
 
