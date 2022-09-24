@@ -434,6 +434,17 @@ class NewgroundsMoviesExtractor(NewgroundsExtractor):
     })
 
 
+class NewgroundsGamesExtractor(NewgroundsExtractor):
+    """Extractor for a newgrounds user's games"""
+    subcategory = _path = "games"
+    pattern = r"(?:https?://)?([\w-]+)\.newgrounds\.com/games/?$"
+    test = ("https://tomfulp.newgrounds.com/games", {
+        "pattern": r"https://uploads.ungrounded.net(/alternate)?/\d+/\d+_.+",
+        "range": "1-10",
+        "count": 10,
+    })
+
+
 class NewgroundsUserExtractor(NewgroundsExtractor):
     """Extractor for a newgrounds user profile"""
     subcategory = "user"
@@ -454,6 +465,7 @@ class NewgroundsUserExtractor(NewgroundsExtractor):
         return self._dispatch_extractors((
             (NewgroundsArtExtractor   , base + "art"),
             (NewgroundsAudioExtractor , base + "audio"),
+            (NewgroundsGamesExtractor , base + "games"),
             (NewgroundsMoviesExtractor, base + "movies"),
         ), ("art",))
 

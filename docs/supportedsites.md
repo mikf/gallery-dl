@@ -538,7 +538,7 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>Newgrounds</td>
     <td>https://www.newgrounds.com/</td>
-    <td>Art, Audio, Favorites, individual Images, Media Files, Movies, Search Results, User Profiles</td>
+    <td>Art, Audio, Favorites, Games, individual Images, Media Files, Movies, Search Results, User Profiles</td>
     <td>Supported</td>
 </tr>
 <tr>
