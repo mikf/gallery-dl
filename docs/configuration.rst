@@ -1749,7 +1749,7 @@ Description
     when processing a user profile.
 
     Possible values are
-    ``"art"``, ``"audio"``, ``"movies"``.
+    ``"art"``, ``"audio"``, ``"games"``, ``"movies"``.
 
     You can use ``"all"`` instead of listing all values separately.
 
