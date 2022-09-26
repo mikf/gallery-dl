@@ -2208,6 +2208,18 @@ Description
     Download thumbnails.
 
 
+extractor.skeb.search.filters
+-----------------------------
+Type
+    ``list`` or ``string``
+Default
+    ``["genre:art", "genre:voice", "genre:novel", "genre:video", "genre:music", "genre:correction"]``
+Example
+    ``"genre:music OR genre:voice"``
+Description
+    Filters used during searches.
+
+
 extractor.smugmug.videos
 ------------------------
 Type
