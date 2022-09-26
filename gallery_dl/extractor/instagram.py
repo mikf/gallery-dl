@@ -43,8 +43,15 @@ class InstagramExtractor(Extractor):
 
     def items(self):
         self.login()
-        self.api = (InstagramRestAPI(self) if self._logged_in else
-                    InstagramGraphqlAPI(self))
+
+        api = self.config("api")
+        if api is None or api == "auto":
+            api = InstagramRestAPI if self._logged_in else InstagramGraphqlAPI
+        elif api == "graphql":
+            api = InstagramGraphqlAPI
+        else:
+            api = InstagramRestAPI
+        self.api = api(self)
 
         data = self.metadata()
         videos = self.config("videos", True)
