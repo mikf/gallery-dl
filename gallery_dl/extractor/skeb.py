@@ -253,10 +253,15 @@ class SkebSearchExtractor(SkebExtractor):
             "x-algolia-application-id": "HB1JT3KRE9",
         }
 
+        filters = self.config("filters")
+        if filters is None:
+            filters = ("genre:art OR genre:voice OR genre:novel OR "
+                       "genre:video OR genre:music OR genre:correction")
+        elif not isinstance(filters, str):
+            filters = " OR ".join(filters)
+
         page = 0
-        pams = ("hitsPerPage=40&filters=genre%3Aart%20OR%20genre%3Avoice%20OR"
-                "%20genre%3Anovel%20OR%20genre%3Avideo%20OR%20genre%3Amusic%2"
-                "0OR%20genre%3Acorrection&page=")
+        pams = "hitsPerPage=40&filters=" + text.quote(filters) + "&page="
 
         request = {
             "indexName": "Request",
