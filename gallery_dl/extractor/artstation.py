@@ -298,7 +298,7 @@ class ArtstationSearchExtractor(ArtstationExtractor):
     archive_fmt = "s_{search[query]}_{asset[id]}"
     pattern = (r"(?:https?://)?(?:\w+\.)?artstation\.com"
                r"/search/?\?([^#]+)")
-    test = ("https://www.artstation.com/search?q=ancient&sort_by=rank", {
+    test = ("https://www.artstation.com/search?query=ancient&sort_by=rank", {
         "range": "1-20",
         "count": 20,
     })
@@ -306,8 +306,8 @@ class ArtstationSearchExtractor(ArtstationExtractor):
     def __init__(self, match):
         ArtstationExtractor.__init__(self, match)
         query = text.parse_query(match.group(1))
-        self.query = query.get("q", "")
-        self.sorting = query.get("sort_by", "rank").lower()
+        self.query = text.unquote(query.get("query") or query.get("q", ""))
+        self.sorting = query.get("sort_by", "relevance").lower()
 
     def metadata(self):
         return {"search": {
