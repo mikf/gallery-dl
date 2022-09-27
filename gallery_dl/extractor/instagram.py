@@ -67,6 +67,7 @@ class InstagramExtractor(Extractor):
             post.update(data)
             files = post.pop("_files")
 
+            post["count"] = len(files)
             yield Message.Directory, post
             for file in files:
                 file.update(post)
