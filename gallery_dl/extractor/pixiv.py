@@ -642,6 +642,66 @@ class PixivPixivisionExtractor(PixivExtractor):
         }
 
 
+class PixivSeriesExtractor(PixivExtractor):
+    """Extractor for illustrations from a Pixiv series"""
+    subcategory = "series"
+    directory_fmt = ("{category}", "{user[id]} {user[account]}",
+                     "{series[id]} {series[title]}")
+    filename_fmt = "{num_series:>03}_{id}_p{num}.{extension}"
+    pattern = (r"(?:https?://)?(?:www\.)?pixiv\.net"
+               r"/user/(\d+)/series/(\d+)")
+    test = ("https://www.pixiv.net/user/10509347/series/21859", {
+        "range": "1-10",
+        "count": 10,
+        "keyword": {
+            "num_series": int,
+            "series": {
+                "canonical": "https://www.pixiv.net/user/10509347"
+                             "/series/21859",
+                "description": str,
+                "ogp": dict,
+                "title": "先輩がうざい後輩の話",
+                "total": int,
+                "twitter": dict,
+            },
+        },
+    })
+
+    def __init__(self, match):
+        PixivExtractor.__init__(self, match)
+        self.user_id, self.series_id = match.groups()
+
+    def works(self):
+        url = self.root + "/ajax/series/" + self.series_id
+        params = {"p": 1}
+        headers = {
+            "Accept": "application/json",
+            "Referer": "{}/user/{}/series/{}".format(
+                self.root, self.user_id, self.series_id),
+            "Alt-Used": "www.pixiv.net",
+        }
+
+        while True:
+            data = self.request(url, params=params, headers=headers).json()
+            body = data["body"]
+            page = body["page"]
+
+            series = body["extraData"]["meta"]
+            series["id"] = self.series_id
+            series["total"] = page["total"]
+            series["title"] = text.extract(series["title"], '"', '"')[0]
+
+            for info in page["series"]:
+                work = self.api.illust_detail(info["workId"])
+                work["num_series"] = info["order"]
+                work["series"] = series
+                yield work
+
+            if len(page["series"]) < 10:
+                return
+            params["p"] += 1
+
+
 class PixivSketchExtractor(Extractor):
     """Extractor for user pages on sketch.pixiv.net"""
     category = "pixiv"
