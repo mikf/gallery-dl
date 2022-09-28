@@ -116,15 +116,17 @@ class TumblrExtractor(Extractor):
 
                     if self.original and "/s2048x3072/" in photo["url"] and (
                             photo["width"] == 2048 or photo["height"] == 3072):
-                        try:
-                            photo["url"] = self._original_photo(photo["url"])
-                        except Exception:
-                            self._warn_original(photo["url"], post)
+                        photo["url"], fb = self._original_photo(photo["url"])
+                        if fb:
+                            post["_fallback"] = self._original_image_fallback(
+                                photo["url"], post["id"])
+
                     del photo["original_size"]
                     del photo["alt_sizes"]
                     posts.append(
                         self._prepare_image(photo["url"], post.copy()))
                     del post["photo"]
+                    post.pop("_fallback", None)
 
             url = post.get("audio_url")  # type "audio"
             if url and url.startswith("https://a.tumblr.com/"):
@@ -140,11 +142,12 @@ class TumblrExtractor(Extractor):
                 # API response, but they can't contain images/videos anyway
                 body = post["reblog"]["comment"] + post["reblog"]["tree_html"]
                 for url in _findall_image(body):
-                    try:
-                        url = self._original_inline_image(url)
-                    except Exception:
-                        self._warn_original(url, post)
+                    url, fb = self._original_inline_image(url)
+                    if fb:
+                        post["_fallback"] = self._original_image_fallback(
+                            url, post["id"])
                     posts.append(self._prepare_image(url, post.copy()))
+                    post.pop("_fallback", None)
                 for url in _findall_video(body):
                     url = self._original_video(url)
                     posts.append(self._prepare(url, post.copy()))
@@ -231,25 +234,23 @@ class TumblrExtractor(Extractor):
             resized, n = self._subn_orig_image("/s99999x99999/", url, 1)
             if n:
                 return self._update_image_token(resized)
-        return self._sub_image(r"https://\1_1280.\2", url)
+        return self._sub_image(r"https://\1_1280.\2", url), False
 
     def _original_video(self, url):
         return self._sub_video(r"https://\1.\2", url)
 
     def _update_image_token(self, resized):
         headers = {"Accept": "text/html,*/*;q=0.8"}
+        response = self.request(resized, headers=headers)
+        updated = text.extract(response.text, '" src="', '"')[0]
+        return updated, (resized == updated)
 
-        for _ in range(3):
-            response = self.request(resized, headers=headers)
-            updated = text.extract(response.text, '" src="', '"')[0]
-            if updated != resized:
-                return updated
-
-        raise RuntimeError("invalid token")
-
-    def _warn_original(self, url, post):
+    def _original_image_fallback(self, url, post_id):
+        yield self._update_image_token(url)[0]
+        yield self._update_image_token(url)[0]
+        yield self._update_image_token(url)[0]
         self.log.warning("Unable to fetch higher-resolution "
-                         "version of %s (%s)", url, post["id"])
+                         "version of %s (%s)", url, post_id)
 
 
 class TumblrUserExtractor(TumblrExtractor):
