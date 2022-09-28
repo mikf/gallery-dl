@@ -103,16 +103,23 @@ class ArtstationExtractor(Extractor):
         return response.json()
 
     def _pagination(self, url, params=None, json=None):
+        headers = {
+            "Accept" : "application/json, text/plain, */*",
+            "Origin" : self.root,
+            "Referer": self.root + "/",
+        }
+
         if json:
             params = json
-            kwargs = {"json": json}
+            headers["PUBLIC-CSRF-TOKEN"] = self._init_csrf_token()
+            kwargs = {"method": "POST", "headers": headers, "json": json}
         else:
             if not params:
                 params = {}
-            kwargs = {"params": params}
+            kwargs = {"params": params, "headers": headers}
 
-        params["page"] = 1
         total = 0
+        params["page"] = 1
 
         while True:
             data = self.request(url, **kwargs).json()
@@ -123,6 +130,17 @@ class ArtstationExtractor(Extractor):
                 return
 
             params["page"] += 1
+
+    def _init_csrf_token(self):
+        url = self.root + "/api/v2/csrf_protection/token.json"
+        headers = {
+            "Accept" : "*/*",
+            "Origin" : self.root,
+            "Referer": self.root + "/",
+        }
+        return self.request(
+            url, method="POST", headers=headers, json={},
+        ).json()["public_csrf_token"]
 
     @staticmethod
     def _no_cache(url, alphabet=(string.digits + string.ascii_letters)):
@@ -305,27 +323,39 @@ class ArtstationSearchExtractor(ArtstationExtractor):
 
     def __init__(self, match):
         ArtstationExtractor.__init__(self, match)
-        query = text.parse_query(match.group(1))
+        self.params = query = text.parse_query(match.group(1))
         self.query = text.unquote(query.get("query") or query.get("q", ""))
         self.sorting = query.get("sort_by", "relevance").lower()
+        self.tags = query.get("tags", "").split(",")
 
     def metadata(self):
         return {"search": {
             "query"  : self.query,
             "sorting": self.sorting,
+            "tags"   : self.tags,
         }}
 
     def projects(self):
+        filters = []
+        for key, value in self.params.items():
+            if key.endswith("_ids") or key == "tags":
+                filters.append({
+                    "field" : key,
+                    "method": "include",
+                    "value" : value.split(","),
+                })
+
         url = "{}/api/v2/search/projects.json".format(self.root)
-        return self._pagination(url, json={
-            "additional_fields": "[]",
-            "filters"          : "[]",
-            "page"             : None,
-            "per_page"         : "50",
-            "pro_first"        : "1",
+        data = {
             "query"            : self.query,
+            "page"             : None,
+            "per_page"         : 50,
             "sorting"          : self.sorting,
-        })
+            "pro_first"        : "1",
+            "filters"          : filters,
+            "additional_fields": (),
+        }
+        return self._pagination(url, json=data)
 
 
 class ArtstationArtworkExtractor(ArtstationExtractor):
