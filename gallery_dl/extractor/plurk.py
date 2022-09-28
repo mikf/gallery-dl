@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2020 Mike Fährmann
+# Copyright 2019-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -85,7 +85,7 @@ class PlurkTimelineExtractor(PlurkExtractor):
     def plurks(self):
         url = "{}/{}".format(self.root, self.user)
         page = self.request(url).text
-        user_id, pos = text.extract(page, '"user_id":', ',')
+        user_id, pos = text.extract(page, '"page_user": {"id":', ',')
         plurks = self._load(text.extract(page, "_PLURKS = ", ";\n", pos)[0])
 
         headers = {"Referer": url, "X-Requested-With": "XMLHttpRequest"}
