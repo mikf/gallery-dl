@@ -936,12 +936,13 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
         self.deviation_id = match.group(4)
 
     def deviations(self):
-        deviation = DeviantartEclipseAPI(self).deviation_extended_fetch(
-            self.deviation_id, self.user, self.type)
-        if "error" in deviation:
+        url = "{}/{}/{}/{}".format(
+            self.root, self.user, self.type, self.deviation_id)
+        appurl = text.extract(self._limited_request(url).text,
+                              'property="da:appurl" content="', '"')[0]
+        if not appurl:
             raise exception.NotFoundError("deviation")
-        return (self.api.deviation(
-            deviation["deviation"]["extended"]["deviationUuid"]),)
+        return (self.api.deviation(appurl.rpartition("/")[2]),)
 
 
 class DeviantartScrapsExtractor(DeviantartExtractor):
@@ -1398,6 +1399,8 @@ class DeviantartEclipseAPI():
     def __init__(self, extractor):
         self.extractor = extractor
         self.log = extractor.log
+        self.request = self.extractor._limited_request
+        self.csrf_token = None
 
     def deviation_extended_fetch(self, deviation_id, user=None, kind=None):
         endpoint = "/da-browse/shared_api/deviation/extended_fetch"
@@ -1429,11 +1432,12 @@ class DeviantartEclipseAPI():
         }
         return self._pagination(endpoint, params)
 
-    def _call(self, endpoint, params=None):
+    def _call(self, endpoint, params):
         url = "https://www.deviantart.com/_napi" + endpoint
         headers = {"Referer": "https://www.deviantart.com/"}
+        params["csrf_token"] = self.csrf_token or self._fetch_csrf_token()
 
-        response = self.extractor._limited_request(
+        response = self.request(
             url, params=params, headers=headers, fatal=None)
 
         if response.status_code == 404:
@@ -1464,11 +1468,19 @@ class DeviantartEclipseAPI():
 
     def _module_id_watching(self, user):
         url = "{}/{}/about".format(self.extractor.root, user)
-        page = self.extractor._limited_request(url).text
+        page = self.request(url).text
         pos = page.find('\\"type\\":\\"watching\\"')
         if pos < 0:
             raise exception.NotFoundError("module")
+        self._fetch_csrf_token(page)
         return text.rextract(page, '\\"id\\":', ',', pos)[0].strip('" ')
+
+    def _fetch_csrf_token(self, page=None):
+        if page is None:
+            page = self.request(self.extractor.root + "/").text
+        self.csrf_token = token = text.extract(
+            page, "window.__CSRF_TOKEN__ = '", "'")[0]
+        return token
 
 
 @cache(maxage=100*365*24*3600, keyarg=0)
