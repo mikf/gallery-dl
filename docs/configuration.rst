@@ -2172,6 +2172,16 @@ Description
     restrict it to only one possible format.
 
 
+extractor.sankaku.refresh
+-------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Refresh download URLs before they expire.
+
+
 extractor.sankakucomplex.embeds
 -------------------------------
 Type

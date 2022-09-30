@@ -281,9 +281,41 @@ class SankakuAPI():
         params["lang"] = "en"
         params["limit"] = str(self.extractor.per_page)
 
+        refresh = self.extractor.config("refresh", False)
+        if refresh:
+            offset = expires = 0
+            from time import time
+
         while True:
             data = self._call(endpoint, params)
-            yield from data["data"]
+
+            if refresh:
+                posts = data["data"]
+                if offset:
+                    posts = util.advance(posts, offset)
+
+                for post in posts:
+                    if not expires:
+                        url = post["file_url"]
+                        if url:
+                            expires = text.parse_int(
+                                text.extract(url, "e=", "&")[0]) - 60
+
+                    if 0 < expires <= time():
+                        self.extractor.log.debug("Refreshing download URLs")
+                        expires = None
+                        break
+
+                    offset += 1
+                    yield post
+
+                if expires is None:
+                    expires = 0
+                    continue
+                offset = expires = 0
+
+            else:
+                yield from data["data"]
 
             params["next"] = data["meta"]["next"]
             if not params["next"]:
