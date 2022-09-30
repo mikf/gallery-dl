@@ -33,6 +33,7 @@ class KemonopartyExtractor(Extractor):
             self.cookiedomain = ".coomer.party"
         self.root = text.root_from_url(match.group(0))
         Extractor.__init__(self, match)
+        self.session.headers["Referer"] = self.root + "/"
 
     def items(self):
         self._prepare_ddosguard_cookies()
@@ -63,6 +64,8 @@ class KemonopartyExtractor(Extractor):
 
         for post in posts:
 
+            headers["Referer"] = "{}/{}/user/{}/post/{}".format(
+                self.root, post["service"], post["user"], post["id"])
             post["_http_headers"] = headers
             post["date"] = text.parse_datetime(
                 post["published"] or post["added"],
