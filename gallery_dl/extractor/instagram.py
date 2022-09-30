@@ -868,14 +868,15 @@ class InstagramGraphqlAPI():
             url, params=params, headers=headers, cookies=cookies,
         ).json()["data"]
 
-    def _pagination(self, query_hash, variables, key="user", edge=None):
+    def _pagination(self, query_hash, variables,
+                    key_data="user", key_edge=None):
         cursor = self.extractor.config("cursor")
         if cursor:
             variables["after"] = cursor
 
         while True:
-            data = self._call(query_hash, variables)[key]
-            data = data[edge] if edge else next(iter(data.values()))
+            data = self._call(query_hash, variables)[key_data]
+            data = data[key_edge] if key_edge else next(iter(data.values()))
 
             for edge in data["edges"]:
                 yield edge["node"]
@@ -889,7 +890,7 @@ class InstagramGraphqlAPI():
                     "%s'%s posts are private", self.item, s)
 
             variables["after"] = self._cursor = info["end_cursor"]
-            self.log.debug("Cursor: %s", self._cursor)
+            self.extractor.log.debug("Cursor: %s", self._cursor)
 
 
 @cache(maxage=360*24*3600, keyarg=1)
