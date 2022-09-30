@@ -99,7 +99,8 @@ class KemonopartyExtractor(Extractor):
             yield Message.Directory, post
 
             for post["num"], file in enumerate(files, 1):
-                post.update(file)
+                post["hash"] = file["hash"]
+                post["type"] = file["type"]
                 url = file["path"]
 
                 text.nameext_from_url(file.get("name", url), post)
