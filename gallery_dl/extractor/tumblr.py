@@ -241,9 +241,13 @@ class TumblrExtractor(Extractor):
 
     def _update_image_token(self, resized):
         headers = {"Accept": "text/html,*/*;q=0.8"}
-        response = self.request(resized, headers=headers)
-        updated = text.extract(response.text, '" src="', '"')[0]
-        return updated, (resized == updated)
+        try:
+            response = self.request(resized, headers=headers)
+        except Exception:
+            return resized, True
+        else:
+            updated = text.extract(response.text, '" src="', '"')[0]
+            return updated, (resized == updated)
 
     def _original_image_fallback(self, url, post_id):
         yield self._update_image_token(url)[0]
