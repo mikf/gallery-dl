@@ -478,7 +478,7 @@ class KemonopartyFavoriteExtractor(KemonopartyExtractor):
 
         if self.favorites == "artist":
             users = self.request(
-                self.root + "/api/v1/account/favorites?type=artist").json()
+                self.root + "/api/favorites?type=artist").json()
             for user in users:
                 user["_extractor"] = KemonopartyUserExtractor
                 url = "{}/{}/user/{}".format(
@@ -487,7 +487,7 @@ class KemonopartyFavoriteExtractor(KemonopartyExtractor):
 
         elif self.favorites == "post":
             posts = self.request(
-                self.root + "/api/v1/account/favorites?type=post").json()
+                self.root + "/api/favorites?type=post").json()
             for post in posts:
                 post["_extractor"] = KemonopartyPostExtractor
                 url = "{}/{}/user/{}/post/{}".format(
