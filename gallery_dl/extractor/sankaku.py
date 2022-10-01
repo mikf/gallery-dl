@@ -222,7 +222,11 @@ class SankakuAPI():
 
     def __init__(self, extractor):
         self.extractor = extractor
-        self.headers = {"Accept": "application/vnd.sankaku.api+json;v=2"}
+        self.headers = {
+            "Accept" : "application/vnd.sankaku.api+json;v=2",
+            "Origin" : extractor.root,
+            "Referer": extractor.root + "/",
+        }
 
         self.username, self.password = self.extractor._get_auth_info()
         if not self.username:
@@ -256,11 +260,14 @@ class SankakuAPI():
         for _ in range(5):
             self.authenticate()
             response = self.extractor.request(
-                url, params=params, headers=self.headers, fatal=False)
+                url, params=params, headers=self.headers, fatal=None)
 
             if response.status_code == 429:
-                self.extractor.wait(
-                    until=response.headers.get("X-RateLimit-Reset"))
+                until = response.headers.get("X-RateLimit-Reset")
+                if not until and b"tags-limit" in response.content:
+                    raise exception.StopExtraction("Search tag limit exceeded")
+                seconds = None if until else 60
+                self.extractor.wait(until=until, seconds=seconds)
                 continue
 
             data = response.json()
