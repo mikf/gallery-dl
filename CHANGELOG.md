@@ -1,15 +1,42 @@
 # Changelog
 
+## 1.23.2 - 2022-10-01
+### Additions
+- [artstation] support search filters ([#2970](https://github.com/mikf/gallery-dl/issues/2970))
+- [blogger] add `label` and `query` metadata fields ([#2930](https://github.com/mikf/gallery-dl/issues/2930))
+- [exhentai] add a slash to the end of gallery URLs ([#2947](https://github.com/mikf/gallery-dl/issues/2947))
+- [instagram] add `count` metadata field ([#2979](https://github.com/mikf/gallery-dl/issues/2979))
+- [instagram] add `api` option
+- [kemonoparty] add `count` metadata field ([#2952](https://github.com/mikf/gallery-dl/issues/2952))
+- [mastodon] warn about moved accounts ([#2939](https://github.com/mikf/gallery-dl/issues/2939))
+- [newgrounds] add `games` extractor ([#2955](https://github.com/mikf/gallery-dl/issues/2955))
+- [newgrounds] extract `type` metadata
+- [pixiv] add `series` extractor ([#2964](https://github.com/mikf/gallery-dl/issues/2964))
+- [sankaku] implement `refresh` option ([#2958](https://github.com/mikf/gallery-dl/issues/2958))
+- [skeb] add `search` extractor and `filters` option ([#2945](https://github.com/mikf/gallery-dl/issues/2945))
+### Fixes
+- [deviantart] fix extraction ([#2981](https://github.com/mikf/gallery-dl/issues/2981), [#2983](https://github.com/mikf/gallery-dl/issues/2983))
+- [fappic] fix extraction
+- [instagram] extract higher-resolution photos ([#2666](https://github.com/mikf/gallery-dl/issues/2666))
+- [instagram] fix `username` and `fullname` metadata for saved posts ([#2911](https://github.com/mikf/gallery-dl/issues/2911))
+- [instagram] update API headers
+- [kemonoparty] send `Referer` headers ([#2989](https://github.com/mikf/gallery-dl/issues/2989), [#2990](https://github.com/mikf/gallery-dl/issues/2990))
+- [kemonoparty] restore `favorites` API endpoints ([#2994](https://github.com/mikf/gallery-dl/issues/2994))
+- [myportfolio] use fallback when no images are found ([#2959](https://github.com/mikf/gallery-dl/issues/2959))
+- [plurk] fix extraction ([#2977](https://github.com/mikf/gallery-dl/issues/2977))
+- [sankaku] detect expired links ([#2958](https://github.com/mikf/gallery-dl/issues/2958))
+- [tumblr] retry extraction of failed higher-resolution images ([#2957](https://github.com/mikf/gallery-dl/issues/2957))
+
 ## 1.23.1 - 2022-09-18
 ### Additions
 - [flickr] add support for `secure.flickr.com` URLs ([#2910](https://github.com/mikf/gallery-dl/issues/2910))
 - [hotleak] add hotleak extractors ([#2890](https://github.com/mikf/gallery-dl/issues/2890), [#2909](https://github.com/mikf/gallery-dl/issues/2909))
 - [instagram] add `highlight_title` and `date` metadata for highlight downloads ([#2879](https://github.com/mikf/gallery-dl/issues/2879))
 - [paheal] add support for videos ([#2892](https://github.com/mikf/gallery-dl/issues/2892))
-- [twitter] add general support for unified cards ([#2875](https://github.com/mikf/gallery-dl/issues/2875))
-- [twitter] implement `cards-blacklist` option ([#2875](https://github.com/mikf/gallery-dl/issues/2875))
 - [tumblr] fetch high-quality inline images ([#2877](https://github.com/mikf/gallery-dl/issues/2877))
 - [tumblr] implement `ratelimit` option ([#2919](https://github.com/mikf/gallery-dl/issues/2919))
+- [twitter] add general support for unified cards ([#2875](https://github.com/mikf/gallery-dl/issues/2875))
+- [twitter] implement `cards-blacklist` option ([#2875](https://github.com/mikf/gallery-dl/issues/2875))
 - [zerochan] add `metadata` option ([#2861](https://github.com/mikf/gallery-dl/issues/2861))
 - [postprocessor:zip] implement `files` option ([#2872](https://github.com/mikf/gallery-dl/issues/2872))
 ### Fixes
