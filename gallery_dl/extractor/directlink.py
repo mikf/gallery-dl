@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2017-2021 Mike Fährmann
+# Copyright 2017-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -19,7 +19,7 @@ class DirectlinkExtractor(Extractor):
     archive_fmt = filename_fmt
     pattern = (r"(?i)https?://(?P<domain>[^/?#]+)/(?P<path>[^?#]+\."
                r"(?:jpe?g|jpe|png|gif|web[mp]|mp4|mkv|og[gmv]|opus))"
-               r"(?:\?(?P<query>[^/?#]*))?(?:#(?P<fragment>.*))?$")
+               r"(?:\?(?P<query>[^#]*))?(?:#(?P<fragment>.*))?$")
     test = (
         (("https://en.wikipedia.org/static/images/project-logos/enwiki.png"), {
             "url": "18c5d00077332e98e53be9fed2ee4be66154b88d",
@@ -31,9 +31,9 @@ class DirectlinkExtractor(Extractor):
             "keyword": "29dad729c40fb09349f83edafa498dba1297464a",
         }),
         # more complex example
-        ("https://example.org/path/to/file.webm?que=1&ry=2#fragment", {
-            "url": "114b8f1415cc224b0f26488ccd4c2e7ce9136622",
-            "keyword": "06014abd503e3b2b58aa286f9bdcefdd2ae336c0",
+        ("https://example.org/path/to/file.webm?que=1?&ry=2/#fragment", {
+            "url": "6fb1061390f8aada3db01cb24b51797c7ee42b31",
+            "keyword": "3d7abc31d45ba324e59bc599c3b4862452d5f29c",
         }),
         # percent-encoded characters
         ("https://example.org/%27%3C%23/%23%3E%27.jpg?key=%3C%26%3E", {
