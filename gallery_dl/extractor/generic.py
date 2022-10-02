@@ -27,9 +27,9 @@ class GenericExtractor(Extractor):
     pattern += r"""
         (?P<scheme>https?://)?          # optional http(s) scheme
         (?P<domain>[-\w\.]+)            # required domain
-        (?P<path>/[^?&#]*)?             # optional path
-        (?:\?(?P<query>[^/?#]*))?       # optional query
-        (?:\#(?P<fragment>.*))?$        # optional fragment
+        (?P<path>/[^?#]*)?              # optional path
+        (?:\?(?P<query>[^#]*))?         # optional query
+        (?:\#(?P<fragment>.*))?         # optional fragment
         """
 
     def __init__(self, match):
