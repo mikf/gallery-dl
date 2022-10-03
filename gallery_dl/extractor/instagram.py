@@ -338,6 +338,14 @@ class InstagramExtractor(Extractor):
                                          "username" : user["username"],
                                          "full_name": user["full_name"]})
 
+    def _init_cursor(self):
+        return self.config("cursor") or None
+
+    def _update_cursor(self, cursor):
+        self.log.debug("Cursor: %s", cursor)
+        self._cursor = cursor
+        return cursor
+
 
 class InstagramUserExtractor(InstagramExtractor):
     """Extractor for an Instagram user profile"""
@@ -741,6 +749,9 @@ class InstagramRestAPI():
     def _pagination(self, endpoint, params=None, media=False):
         if params is None:
             params = {}
+        extr = self.extractor
+        params["max_id"] = extr._init_cursor()
+
         while True:
             data = self._call(endpoint, params=params)
 
@@ -752,9 +763,12 @@ class InstagramRestAPI():
 
             if not data.get("more_available"):
                 return
-            params["max_id"] = data["next_max_id"]
+            params["max_id"] = extr._update_cursor(data["next_max_id"])
 
     def _pagination_post(self, endpoint, params):
+        extr = self.extractor
+        params["max_id"] = extr._init_cursor()
+
         while True:
             data = self._call(endpoint, method="POST", data=params)
 
@@ -764,9 +778,12 @@ class InstagramRestAPI():
             info = data["paging_info"]
             if not info.get("more_available"):
                 return
-            params["max_id"] = info["max_id"]
+            params["max_id"] = extr._update_cursor(info["max_id"])
 
     def _pagination_sections(self, endpoint, params):
+        extr = self.extractor
+        params["max_id"] = extr._init_cursor()
+
         while True:
             info = self._call(endpoint, method="POST", data=params)
 
@@ -774,8 +791,8 @@ class InstagramRestAPI():
 
             if not info.get("more_available"):
                 return
-            params["max_id"] = info["next_max_id"]
             params["page"] = info["next_page"]
+            params["max_id"] = extr._update_cursor(info["next_max_id"])
 
 
 class InstagramGraphqlAPI():
@@ -871,9 +888,8 @@ class InstagramGraphqlAPI():
 
     def _pagination(self, query_hash, variables,
                     key_data="user", key_edge=None):
-        cursor = self.extractor.config("cursor")
-        if cursor:
-            variables["after"] = cursor
+        extr = self.extractor
+        variables["after"] = extr._init_cursor()
 
         while True:
             data = self._call(query_hash, variables)[key_data]
@@ -890,8 +906,7 @@ class InstagramGraphqlAPI():
                 raise exception.StopExtraction(
                     "%s'%s posts are private", self.item, s)
 
-            variables["after"] = self._cursor = info["end_cursor"]
-            self.extractor.log.debug("Cursor: %s", self._cursor)
+            variables["after"] = extr._update_cursor(info["end_cursor"])
 
 
 @cache(maxage=360*24*3600, keyarg=1)
