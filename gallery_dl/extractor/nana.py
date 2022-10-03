@@ -53,13 +53,13 @@ class NanaGalleryExtractor(GalleryExtractor):
             "gallery_id": self.gallery_id,
             "title"     : title,
             "artist"    : artist[4:] if artist.startswith(" by") else "",
-            "tags"      : tags.split(", ") if tags else [],
+            "tags"      : tags.split(", ") if tags else (),
             "lang"      : "en",
             "language"  : "English",
         }
 
     def images(self, page):
-        data = json.loads(text.extract(page, 'Reader.pages = ', '.pages')[0])
+        data = json.loads(text.extract(page, "Reader.pages = ", ".pages")[0])
         return [
             ("https://nana.my.id" + image, None)
             for image in data["pages"]
@@ -75,7 +75,7 @@ class NanaSearchExtractor(Extractor):
         ('https://nana.my.id/?q=+"elf"&sort=desc', {
             "pattern": NanaGalleryExtractor.pattern,
             "range": "1-100",
-            "count"  : 100,
+            "count": 100,
         }),
         ("https://nana.my.id/?q=favorites%3A", {
             "pattern": NanaGalleryExtractor.pattern,

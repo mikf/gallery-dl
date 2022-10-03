@@ -1712,7 +1712,7 @@ Description
 
 
 extractor.nana.favkey
------------------------------
+---------------------
 Type
     ``string``
 Default
