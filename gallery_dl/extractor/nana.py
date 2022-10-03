@@ -52,7 +52,7 @@ class NanaGalleryExtractor(GalleryExtractor):
         return {
             "gallery_id": self.gallery_id,
             "title"     : title,
-            "artist"    : artist[4:] if artist.startswith(" by") else "",
+            "artist"    : artist[4:] if artist.startswith(" by ") else "",
             "tags"      : tags.split(", ") if tags else (),
             "lang"      : "en",
             "language"  : "English",
