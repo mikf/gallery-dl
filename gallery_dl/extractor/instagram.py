@@ -701,7 +701,12 @@ class InstagramRestAPI():
     def user_id(self, screen_name):
         if screen_name.startswith("id:"):
             return screen_name[3:]
-        return self.user(screen_name)["id"]
+        user = self.user(screen_name)
+        if user["is_private"] and not user["followed_by_viewer"]:
+            name = user["username"]
+            s = "" if name.endswith("s") else "s"
+            raise exception.StopExtraction("%s'%s posts are private", name, s)
+        return user["id"]
 
     def user_clips(self, user_id):
         endpoint = "/v1/clips/user/"
@@ -799,10 +804,13 @@ class InstagramGraphqlAPI():
 
     def __init__(self, extractor):
         self.extractor = extractor
-        self.user = InstagramRestAPI(extractor).user
         self.user_collection = self.user_saved = self.reels_media = \
             self.highlights_media = self._login_required
         self._json_dumps = json.JSONEncoder(separators=(",", ":")).encode
+
+        api = InstagramRestAPI(extractor)
+        self.user = api.user
+        self.user_id = api.user_id
 
     @staticmethod
     def _login_required(_=None):
@@ -840,11 +848,6 @@ class InstagramGraphqlAPI():
         variables = {"tag_name": text.unescape(tag), "first": 50}
         return self._pagination(query_hash, variables,
                                 "hashtag", "edge_hashtag_to_media")
-
-    def user_id(self, screen_name):
-        if screen_name.startswith("id:"):
-            return screen_name[3:]
-        return self.user(screen_name)["id"]
 
     def user_clips(self, user_id):
         query_hash = "bc78b344a68ed16dd5d7f264681c4c76"
