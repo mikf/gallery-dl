@@ -13,6 +13,7 @@ import errno
 import logging
 import functools
 import collections
+import datetime
 from . import extractor, downloader, postprocessor
 from . import config, text, util, path, formatter, output, exception
 from .extractor.message import Message
@@ -154,6 +155,7 @@ class Job():
         extr = self.extractor
         kwdict["category"] = extr.category
         kwdict["subcategory"] = extr.subcategory
+        kwdict["epoch"] = datetime.datetime.now()
         if self.kwdict:
             kwdict.update(self.kwdict)
 
