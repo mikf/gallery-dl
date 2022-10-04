@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2017-2021 Mike Fährmann
-#
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
+
+"""Extractors for https://2chen.moe/"""
 
 from .common import Extractor, Message
 from .. import text
@@ -18,8 +18,7 @@ class _2chenThreadExtractor(Extractor):
     filename_fmt = "{time} {filename}.{extension}"
     archive_fmt = "{hash}"
     root = "https://2chen.moe"
-    pattern = (r"(?:https?://)?2chen\.moe"
-               r"/([^/]+)/(\d+)")
+    pattern = r"(?:https?://)?2chen\.moe/([^/?#]+)/(\d+)"
     test = (
         ("https://2chen.moe/jp/303786", {
             "count": ">= 10",
@@ -36,10 +35,12 @@ class _2chenThreadExtractor(Extractor):
         data = self.metadata(page)
         yield Message.Directory, data
         for post in self.posts(page):
-            post.update(data)
-            if post["url"] is None or post["filename"] is None:
+            if not post["url"]:
                 continue
-            yield Message.Url, post["url"], post
+            post.update(data)
+            post["time"] = text.parse_int(post["date"].timestamp())
+            yield Message.Url, post["url"], text.nameext_from_url(
+                post["filename"], post)
 
     def metadata(self, page):
         title = text.extract(page, "<h3>", "</h3>")[0]
@@ -50,31 +51,21 @@ class _2chenThreadExtractor(Extractor):
         }
 
     def posts(self, page):
-        """Return list containing relevant posts"""
-        posts = text.extract_iter(
-            page, 'class="glass media', '</article>')
-        return [self.parse(post) for post in posts]
+        """Return iterable with relevant posts"""
+        return map(self.parse, text.extract_iter(
+            page, 'class="glass media', '</article>'))
 
     def parse(self, post):
         extr = text.extract_from(post)
-        name = extr('<span>', '</span>')
-        date = extr('<time', 'time>')
-        date = text.parse_datetime(
-            text.extract(date, '>', '</')[0],
-            "%d %b %Y (%a) %H:%M:%S")
-        extr = text.extract_from(extr('<a class="quote"', '</figcaption>'))
-        data = {
-            "name"    : name,
-            "date"    : date,
-            "time"    : text.parse_int(date.timestamp()),
-            "no"      : extr('">', '</a>'),
-            "url"     : self.root + extr('</span><a href="', '" download='),
-            "filename": extr('"', '" data-hash='),
-            "hash"    : extr('"', '">'),
+        return {
+            "name"    : extr("<span>", "</span>"),
+            "date"    : text.parse_datetime(
+                extr("<time>", "<"), "%d %b %Y (%a) %H:%M:%S"),
+            "no"      : extr('href="#p', '"'),
+            "url"     : self.root + extr('</span><a href="', '"'),
+            "filename": extr('download="', '"'),
+            "hash"    : extr('data-hash="', '"'),
         }
-        text.nameext_from_url(data["filename"], data)
-        data["ext"] = "." + data["extension"]
-        return data
 
 
 class _2chenBoardExtractor(Extractor):
@@ -84,15 +75,9 @@ class _2chenBoardExtractor(Extractor):
     root = "https://2chen.moe"
     pattern = r"(?:https?://)?2chen\.moe/([^/?#]+)(?:/catalog)?/?$"
     test = (
-        ("https://2chen.moe/co/", {
-            "pattern": _2chenThreadExtractor.pattern
-        }),
-        ("https://2chen.moe/co", {
-            "pattern": _2chenThreadExtractor.pattern
-        }),
-        ("https://2chen.moe/co/catalog", {
-            "pattern": _2chenThreadExtractor.pattern
-        }))
+        ("https://2chen.moe/co"),
+        ("https://2chen.moe/co/catalog")
+    )
 
     def __init__(self, match):
         Extractor.__init__(self, match)
@@ -102,10 +87,6 @@ class _2chenBoardExtractor(Extractor):
         url = "{}/{}/catalog".format(self.root, self.board)
         page = self.request(url).text
         data = {"_extractor": _2chenThreadExtractor}
-        for thread in self.threads(page):
-            url = self.root + thread
-            yield Message.Queue, url, data
-
-    @staticmethod
-    def threads(page):
-        return text.extract_iter(page, '<figure><a href="', '">')
+        for thread in text.extract_iter(
+                page, '<figure><a href="', '"'):
+            yield Message.Queue, self.root + thread, data
