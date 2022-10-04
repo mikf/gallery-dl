@@ -10,6 +10,7 @@ import re
 
 modules = [
     "2chan",
+    "2chen",
     "35photo",
     "3dbooru",
     "420chan",

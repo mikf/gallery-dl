@@ -14,6 +14,12 @@ Consider all sites to be NSFW unless otherwise known.
 </thead>
 <tbody valign="top">
 <tr>
+    <td>2chen</td>
+    <td>https://2chen.moe/</td>
+    <td>Boards, Threads</td>
+    <td></td>
+</tr>
+<tr>
     <td>35PHOTO</td>
     <td>https://35photo.pro/</td>
     <td>Genres, individual Images, Tag Searches, User Profiles</td>
