@@ -330,6 +330,10 @@ def setup_test_config():
     config.set(("extractor", "mastodon.social"), "access-token",
                "Blf9gVqG7GytDTfVMiyYQjwVMQaNACgf3Ds3IxxVDUQ")
 
+    config.set(("extractor", "nana"), "favkey",
+               "9237ddb82019558ea7d179e805100805"
+               "ea6aa1c53ca6885cd4c179f9fb22ead2")
+
     config.set(("extractor", "deviantart"), "client-id", "7777")
     config.set(("extractor", "deviantart"), "client-secret",
                "ff14994c744d9208e5caeec7aab4a026")

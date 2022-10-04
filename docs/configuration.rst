@@ -1725,6 +1725,17 @@ Description
     Also emit metadata for text-only posts without media content.
 
 
+extractor.nana.favkey
+---------------------
+Type
+    ``string``
+Default
+    ``null``
+Description
+    Your `Nana Favorite Key <https://nana.my.id/tutorial>`__,
+    used to access your favorite archives.
+
+
 extractor.newgrounds.flash
 --------------------------
 Type
