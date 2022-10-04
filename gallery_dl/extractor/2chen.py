@@ -60,14 +60,14 @@ class _2chenThreadExtractor(Extractor):
     def parse(self, post):
         extr = text.extract_from(post)
         return {
-            "name"    : extr("<span>", "</span>"),
+            "name"    : text.unescape(extr("<span>", "</span>")),
             "date"    : text.parse_datetime(
                 extr("<time", "<").partition(">")[2],
                 "%d %b %Y (%a) %H:%M:%S"
             ),
             "no"      : extr('href="#p', '"'),
             "url"     : extr('</span><a href="', '"'),
-            "filename": extr('download="', '"'),
+            "filename": text.unescape(extr('download="', '"')),
             "hash"    : extr('data-hash="', '"'),
         }
 
