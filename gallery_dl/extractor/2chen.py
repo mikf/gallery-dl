@@ -38,14 +38,16 @@ class _2chenThreadExtractor(Extractor):
             if not post["url"]:
                 continue
             post.update(data)
+            post["url"] = self.root + post["url"]
             post["time"] = text.parse_int(post["date"].timestamp())
             yield Message.Url, post["url"], text.nameext_from_url(
                 post["filename"], post)
 
     def metadata(self, page):
-        title = text.extract(page, "<h3>", "</h3>")[0]
+        board, pos = text.extract(page, 'class="board">/', '/<')
+        title = text.extract(page, "<h3>", "</h3>", pos)[0]
         return {
-            "board" : self.board,
+            "board" : board,
             "thread": self.thread,
             "title" : text.unescape(title),
         }
@@ -60,9 +62,11 @@ class _2chenThreadExtractor(Extractor):
         return {
             "name"    : extr("<span>", "</span>"),
             "date"    : text.parse_datetime(
-                extr("<time>", "<"), "%d %b %Y (%a) %H:%M:%S"),
+                extr("<time", "<").partition(">")[2],
+                "%d %b %Y (%a) %H:%M:%S"
+            ),
             "no"      : extr('href="#p', '"'),
-            "url"     : self.root + extr('</span><a href="', '"'),
+            "url"     : extr('</span><a href="', '"'),
             "filename": extr('download="', '"'),
             "hash"    : extr('data-hash="', '"'),
         }
@@ -75,6 +79,9 @@ class _2chenBoardExtractor(Extractor):
     root = "https://2chen.moe"
     pattern = r"(?:https?://)?2chen\.moe/([^/?#]+)(?:/catalog)?/?$"
     test = (
+        ("https://2chen.moe/co/", {
+            "pattern": _2chenThreadExtractor.pattern
+        }),
         ("https://2chen.moe/co"),
         ("https://2chen.moe/co/catalog")
     )
