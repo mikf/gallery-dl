@@ -524,6 +524,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
+    <td>Nana</td>
+    <td>https://nana.my.id/</td>
+    <td>Galleries, Favorites, Search Results</td>
+    <td></td>
+</tr>
+<tr>
     <td>Naver</td>
     <td>https://blog.naver.com/</td>
     <td>Blogs, Posts</td>

@@ -90,6 +90,7 @@ modules = [
     "mememuseum",
     "myhentaigallery",
     "myportfolio",
+    "nana",
     "naver",
     "naverwebtoon",
     "newgrounds",

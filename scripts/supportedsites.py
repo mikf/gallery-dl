@@ -189,6 +189,9 @@ SUBCATEGORY_MAP = {
     "mangadex": {
         "feed" : "Followed Feed",
     },
+    "nana": {
+        "search": "Favorites, Search Results",
+    },
     "nijie": {
         "nuita" : "Nuita History",
     },
