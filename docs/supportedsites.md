@@ -920,6 +920,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
+    <td>さいずどんの森 (Sizedon Forest)</td>
+    <td>https://wp.sizedon.com</td>
+    <td>Posts by アーカイブ/Archive, Posts by Author, Posts by 投稿者/Contributor, Posts by ジャンル/Genre, Individual Posts</td>
+    <td></td>
+</tr>
+<tr>
     <td>もえぴりあ</td>
     <td>https://vanilla-rock.com/</td>
     <td>Posts, Tag Searches</td>

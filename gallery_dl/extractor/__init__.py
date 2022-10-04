@@ -150,6 +150,7 @@ modules = [
     "weibo",
     "wikiart",
     "wikieat",
+    "wpsizedon",
     "xhamster",
     "xvideos",
     "zerochan",

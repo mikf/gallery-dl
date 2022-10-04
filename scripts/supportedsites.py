@@ -120,6 +120,7 @@ CATEGORY_MAP = {
     "wallpapercave"  : "Wallpaper Cave",
     "webtoons"       : "Webtoon",
     "wikiart"        : "WikiArt.org",
+    "wpsizedon"      : "さいずどんの森 (Sizedon Forest)",
     "xhamster"       : "xHamster",
     "xvideos"        : "XVideos",
     "yandere"        : "yande.re",
@@ -237,6 +238,13 @@ SUBCATEGORY_MAP = {
     },
     "wikiart": {
         "artists": "Artist Listings",
+    },
+    "wpsizedon": {
+        "post": "Individual Posts",
+        "genre": "Posts by ジャンル/Genre",
+        "contributor": "Posts by 投稿者/Contributor",
+        "author": "Posts by Author",
+        "archive": "Posts by アーカイブ/Archive",
     },
 }
 
