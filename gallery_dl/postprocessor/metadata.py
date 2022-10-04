@@ -20,14 +20,8 @@ class MetadataPP(PostProcessor):
         PostProcessor.__init__(self, job)
 
         mode = options.get("mode", "json")
-        if mode == "custom":
-            self.write = self._write_custom
-            cfmt = options.get("content-format") or options.get("format")
-            if isinstance(cfmt, list):
-                cfmt = "\n".join(cfmt) + "\n"
-            self._content_fmt = formatter.parse(cfmt).format_map
-            ext = "txt"
-        elif mode == "tags":
+        cfmt = options.get("content-format") or options.get("format")
+        if mode == "tags":
             self.write = self._write_tags
             ext = "txt"
         elif mode == "modify":
@@ -41,6 +35,12 @@ class MetadataPP(PostProcessor):
             self.run = self._run_delete
             self.fields = options.get("fields")
             ext = None
+        elif mode == "custom" or cfmt:
+            self.write = self._write_custom
+            if isinstance(cfmt, list):
+                cfmt = "\n".join(cfmt) + "\n"
+            self._content_fmt = formatter.parse(cfmt).format_map
+            ext = "txt"
         else:
             self.write = self._write_json
             self.indent = options.get("indent", 4)
