@@ -938,11 +938,11 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
     def deviations(self):
         url = "{}/{}/{}/{}".format(
             self.root, self.user, self.type, self.deviation_id)
-        appurl = text.extract(self._limited_request(url).text,
-                              'property="da:appurl" content="', '"')[0]
-        if not appurl:
+        uuid = text.extract(self._limited_request(url).text,
+                            '"deviationUuid\\":\\"', '\\')[0]
+        if not uuid:
             raise exception.NotFoundError("deviation")
-        return (self.api.deviation(appurl.rpartition("/")[2]),)
+        return (self.api.deviation(uuid),)
 
 
 class DeviantartScrapsExtractor(DeviantartExtractor):
