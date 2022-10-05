@@ -702,6 +702,9 @@ class InstagramRestAPI():
         if screen_name.startswith("id:"):
             return screen_name[3:]
         user = self.user(screen_name)
+        if user is None:
+            raise exception.AuthorizationError(
+                "Login required to access this profile")
         if user["is_private"] and not user["followed_by_viewer"]:
             name = user["username"]
             s = "" if name.endswith("s") else "s"
