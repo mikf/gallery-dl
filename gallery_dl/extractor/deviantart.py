@@ -72,7 +72,7 @@ class DeviantartExtractor(Extractor):
     def items(self):
         self.api = DeviantartOAuthAPI(self)
 
-        if self.user:
+        if self.user and self.config("group", True):
             profile = self.api.user_profile(self.user)
             self.group = not profile
             if self.group:
