@@ -76,7 +76,12 @@ class ArtstationExtractor(Extractor):
     def get_project_assets(self, project_id):
         """Return all assets associated with 'project_id'"""
         url = "{}/projects/{}.json".format(self.root, project_id)
-        data = self.request(url).json()
+
+        try:
+            data = self.request(url).json()
+        except exception.HttpError as exc:
+            self.log.warning(exc)
+            return
 
         data["title"] = text.unescape(data["title"])
         data["description"] = text.unescape(text.remove_html(
@@ -406,6 +411,10 @@ class ArtstationImageExtractor(ArtstationExtractor):
             "options": (("external", True),),
             "pattern": "ytdl:https://www.youtube.com/embed/JNFfJtwwrU0",
         }),
+        # 404 (#3016)
+        ("https://www.artstation.com/artwork/3q3mXB", {
+            "count": 0,
+        }),
         # alternate URL patterns
         ("https://sungchoi.artstation.com/projects/LQVJr"),
         ("https://artstn.co/p/LQVJr"),
@@ -419,7 +428,10 @@ class ArtstationImageExtractor(ArtstationExtractor):
     def metadata(self):
         self.assets = list(ArtstationExtractor.get_project_assets(
             self, self.project_id))
-        self.user = self.assets[0]["user"]["username"]
+        try:
+            self.user = self.assets[0]["user"]["username"]
+        except IndexError:
+            self.user = ""
         return ArtstationExtractor.metadata(self)
 
     def projects(self):
