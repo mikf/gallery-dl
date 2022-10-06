@@ -1048,6 +1048,17 @@ Description
     Use with caution.
 
 
+extractor.deviantart.group
+--------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Check whether the profile name in a given URL
+    belongs to a group or a regular user.
+
+
 extractor.deviantart.include
 ----------------------------
 Type
