@@ -44,7 +44,9 @@ class ImagefapGalleryExtractor(ImagefapExtractor):
         ("https://www.imagefap.com/gallery/5486966", {
             "pattern": r"https://cdnh?\.imagefap\.com"
                        r"/images/full/\d+/\d+/\d+\.jpg",
-            "keyword": "3e24eace5b09639b881ebd393165862feb46adde",
+            "keyword": "8d2e562df7a0bc9e8eecb9d1bb68d32b4086bf98",
+            "archive": False,
+            "count": 62,
         }),
         ("https://www.imagefap.com/gallery.php?gid=7102714"),
         ("https://beta.imagefap.com/gallery.php?gid=7102714"),
@@ -73,32 +75,42 @@ class ImagefapGalleryExtractor(ImagefapExtractor):
 
         title, _, descr = descr.partition(" porn picture gallery by ")
         uploader, _, tags = descr.partition(" to see hottest ")
+        self._count = text.parse_int(count)
         return {
             "gallery_id": text.parse_int(self.gid),
             "title": text.unescape(title),
             "uploader": uploader,
             "tags": tags[:-11].split(", "),
-            "count": text.parse_int(count),
+            "count": self._count,
         }
 
     def get_images(self):
         """Collect image-urls and -metadata"""
-        num = 0
         url = "{}/photo/{}/".format(self.root, self.image_id)
         params = {"gid": self.gid, "idx": 0, "partial": "true"}
+        headers = {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "X-Requested-With": "XMLHttpRequest",
+            "Referer": "{}?pgid=&gid={}&page=0".format(url, self.image_id)
+        }
+
+        num = 0
+        total = self._count
         while True:
-            pos = 0
-            page = self.request(url, params=params).text
-            for _ in range(24):
-                imgurl, pos = text.extract(page, '<a href="', '"', pos)
-                if not imgurl:
-                    return
+            page = self.request(url, params=params, headers=headers).text
+
+            cnt = 0
+            for image_url in text.extract_iter(page, '<a href="', '"'):
                 num += 1
-                data = text.nameext_from_url(imgurl)
+                cnt += 1
+                data = text.nameext_from_url(image_url)
                 data["num"] = num
                 data["image_id"] = text.parse_int(data["filename"])
-                yield imgurl, data
-            params["idx"] += 24
+                yield image_url, data
+
+            if cnt < 24 and num >= total:
+                return
+            params["idx"] += cnt
 
 
 class ImagefapImageExtractor(ImagefapExtractor):
