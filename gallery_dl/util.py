@@ -22,17 +22,18 @@ import itertools
 import urllib.parse
 from http.cookiejar import Cookie
 from email.utils import mktime_tz, parsedate_tz
+from collections import deque
 from . import text, exception
 
 
 def bencode(num, alphabet="0123456789"):
     """Encode an integer into a base-N encoded string"""
-    data = ""
+    data_list = deque([])
     base = len(alphabet)
     while num:
         num, remainder = divmod(num, base)
-        data = alphabet[remainder] + data
-    return data
+        data_list.appendleft(alphabet[remainder])
+    return ''.join(data_list)
 
 
 def bdecode(data, alphabet="0123456789"):
