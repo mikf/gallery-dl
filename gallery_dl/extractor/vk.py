@@ -79,7 +79,8 @@ class VkExtractor(Extractor):
 
             if len(payload) < 4:
                 self.log.debug(payload)
-                raise exception.AuthorizationError(payload[0])
+                raise exception.AuthorizationError(
+                    text.unescape(payload[0]) if payload[0] else None)
 
             total = payload[1]
             photos = payload[3]
@@ -182,14 +183,14 @@ class VkAlbumExtractor(VkExtractor):
     directory_fmt = ("{category}", "{user[id]}", "{album[id]}")
     pattern = BASE_PATTERN + r"/album(-?\d+)_(\d+)$"
     test = (
-        ("https://vk.com/album232175027_00", {
-            "count": 8,
-        }),
         ("https://vk.com/album-165740836_281339889", {
             "count": 12,
         }),
         # "Access denied" (#2556)
         ("https://vk.com/album-53775183_00", {
+            "exception": exception.AuthorizationError,
+        }),
+        ("https://vk.com/album232175027_00", {
             "exception": exception.AuthorizationError,
         }),
     )
