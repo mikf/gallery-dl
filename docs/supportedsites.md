@@ -850,7 +850,7 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>VK</td>
     <td>https://vk.com/</td>
-    <td>Albums, Photos</td>
+    <td>Albums, Photos, Tagged Photos</td>
     <td></td>
 </tr>
 <tr>

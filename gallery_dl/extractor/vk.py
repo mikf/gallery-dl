@@ -104,7 +104,7 @@ class VkPhotosExtractor(VkExtractor):
     subcategory = "photos"
     pattern = (BASE_PATTERN + r"/(?:"
                r"(?:albums|photos|id)(-?\d+)"
-               r"|(?!album-?\d+_)([^/?#]+))")
+               r"|(?!(?:album|tag)-?\d+_?)([^/?#]+))")
     test = (
         ("https://vk.com/id398982326", {
             "pattern": r"https://sun\d+-\d+\.userapi\.com/s/v1/if1"
@@ -208,3 +208,25 @@ class VkAlbumExtractor(VkExtractor):
             "user": {"id": self.user_id},
             "album": {"id": self.album_id},
         }
+
+
+class VkTaggedExtractor(VkExtractor):
+    """Extractor for a vk tagged photos"""
+    subcategory = "tagged"
+    directory_fmt = ("{category}", "{user[id]}", "tags")
+    pattern = BASE_PATTERN + r"/tag(-?\d+)$"
+    test = (
+        ("https://vk.com/tag304303884", {
+            "count": 44,
+        }),
+    )
+
+    def __init__(self, match):
+        VkExtractor.__init__(self, match)
+        self.user_id = match.group(1)
+
+    def photos(self):
+        return self._pagination("tag{}".format(self.user_id))
+
+    def metadata(self):
+        return {"user": {"id": self.user_id}}
