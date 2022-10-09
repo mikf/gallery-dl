@@ -224,6 +224,9 @@ SUBCATEGORY_MAP = {
         "replies": "",
         "list-members": "List Members",
     },
+    "vk": {
+        "tagged": "Tagged Photos",
+    },
     "wallhaven": {
         "collections": "",
     },

@@ -50,6 +50,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
+    <td>8chan</td>
+    <td>https://8chan.moe/</td>
+    <td>Boards, Threads</td>
+    <td></td>
+</tr>
+<tr>
     <td>8kun</td>
     <td>https://8kun.top/</td>
     <td>Boards, Threads</td>
