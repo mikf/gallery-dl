@@ -3095,8 +3095,12 @@ Type
 Default
     ``true``
 Description
-    Check the file headers of ``jpg``, ``png``, and ``gif`` files
+    Check file headers of downloaded files
     and adjust their filename extensions if they do not match.
+
+    For example, this will change the filename extension (``{extension}``)
+    of a file called ``example.png`` from ``png`` to ``jpg`` when said file
+    contains JPEG/JFIF data.
 
 
 downloader.http.headers
