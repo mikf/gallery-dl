@@ -16,6 +16,7 @@ modules = [
     "420chan",
     "4chan",
     "500px",
+    "8chan",
     "8kun",
     "8muses",
     "adultempire",
