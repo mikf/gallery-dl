@@ -250,9 +250,9 @@ class TumblrExtractor(Extractor):
             return updated, (resized == updated)
 
     def _original_image_fallback(self, url, post_id):
-        yield self._update_image_token(url)[0]
-        yield self._update_image_token(url)[0]
-        yield self._update_image_token(url)[0]
+        for _ in range(3):
+            self.sleep(120, "image token")
+            yield self._update_image_token(url)[0]
         self.log.warning("Unable to fetch higher-resolution "
                          "version of %s (%s)", url, post_id)
 
