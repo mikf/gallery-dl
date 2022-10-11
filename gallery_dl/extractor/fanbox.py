@@ -284,11 +284,14 @@ class FanboxPostExtractor(FanboxExtractor):
         # 'content' metadata (#3020)
         ("https://www.fanbox.cc/@official-en/posts/4326303", {
             "keyword": {
-                "content": r"re:^Greetings from FANBOX.\n \n"
-                           r"As of Monday, September 5th, 2022, we are happy "
-                           r"to announce the start of the FANBOX hashtag "
-                           r"event #MySetupTour ! \nAbout the event\n"
-                           r"To join this event ...",
+                "content": r"re:(?s)^Greetings from FANBOX.\n \nAs of Monday, "
+                           r"September 5th, 2022, we are happy to announce "
+                           r"the start of the FANBOX hashtag event "
+                           r"#MySetupTour ! \nAbout the event\nTo join this "
+                           r"event .+ \nPlease check this page for further "
+                           r"details regarding the Privacy & Terms.\n"
+                           r"https://fanbox.pixiv.help/.+/10184952456601\n\n\n"
+                           r"Thank you for your continued support of FANBOX.$",
             },
         }),
     )
