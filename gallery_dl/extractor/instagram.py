@@ -915,31 +915,52 @@ class InstagramGraphqlAPI():
             variables["after"] = extr._update_cursor(info["end_cursor"])
 
 
-@cache(maxage=360*24*3600, keyarg=1)
+@cache(maxage=90*24*3600, keyarg=1)
 def _login_impl(extr, username, password):
     extr.log.info("Logging in as %s", username)
 
-    url = extr.root + "/accounts/login/"
-    page = extr.request(url).text
+    user_agent = ("Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 "
+                  "(KHTML, like Gecko) Chrome/106.0.5249.79 Mobile "
+                  "Safari/537.36 Instagram 255.1.0.17.102")
 
     headers = {
-        "X-Web-Device-Id" : text.extract(page, '"device_id":"', '"')[0],
+        "User-Agent"    : user_agent,
+        "Sec-Fetch-Dest": "document",
+        "Sec-Fetch-Mode": "navigate",
+        "Sec-Fetch-Site": "none",
+        "Sec-Fetch-User": "?1",
+    }
+    url = extr.root + "/accounts/login/"
+    response = extr.request(url, headers=headers)
+
+    extract = text.extract_from(response.text)
+    csrf_token = extract('"csrf_token":"', '"')
+    device_id = extract('"device_id":"', '"')
+    rollout_hash = extract('"rollout_hash":"', '"')
+
+    cset = extr.session.cookies.set
+    cset("csrftoken", csrf_token, domain=extr.cookiedomain)
+    cset("ig_did", device_id, domain=extr.cookiedomain)
+
+    headers = {
+        "User-Agent"      : user_agent,
+        "Accept"          : "*/*",
+        "X-CSRFToken"     : csrf_token,
+        "X-Instagram-AJAX": rollout_hash,
         "X-IG-App-ID"     : "936619743392459",
-        "X-ASBD-ID"       : "437806",
+        "X-ASBD-ID"       : "198387",
         "X-IG-WWW-Claim"  : "0",
         "X-Requested-With": "XMLHttpRequest",
+        "Origin"          : extr.root,
         "Referer"         : url,
+        "Sec-Fetch-Dest"  : "empty",
+        "Sec-Fetch-Mode"  : "cors",
+        "Sec-Fetch-Site"  : "same-origin",
     }
-    url = extr.root + "/data/shared_data/"
-    data = extr.request(url, headers=headers).json()
-
-    headers["X-CSRFToken"] = data["config"]["csrf_token"]
-    headers["X-Instagram-AJAX"] = data["rollout_hash"]
-    headers["Origin"] = extr.root
     data = {
-        "username"     : username,
-        "enc_password" : "#PWD_INSTAGRAM_BROWSER:0:{}:{}".format(
+        "enc_password"        : "#PWD_INSTAGRAM_BROWSER:0:{}:{}".format(
             int(time.time()), password),
+        "username"            : username,
         "queryParams"         : "{}",
         "optIntoOneTap"       : "false",
         "stopDeletionNonce"   : "",
@@ -951,11 +972,8 @@ def _login_impl(extr, username, password):
     if not response.json().get("authenticated"):
         raise exception.AuthenticationError()
 
-    cget = extr.session.cookies.get
-    return {
-        name: cget(name)
-        for name in ("sessionid", "mid", "ig_did")
-    }
+    return {cookie.name: cookie.value
+            for cookie in extr.session.cookies}
 
 
 def id_from_shortcode(shortcode):
