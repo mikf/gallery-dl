@@ -17,7 +17,7 @@ import re
 BASE_PATTERN = (
     r"(?:tumblr:(?:https?://)?([^/]+)|"
     r"(?:https?://)?"
-    r"(?:www\.tumblr\.com/blog/(?:view/)?([\w-]+)|"
+    r"(?:www\.tumblr\.com/(?:blog/(?:view/)?)?([\w-]+)|"
     r"([\w-]+\.tumblr\.com)))"
 )
 
@@ -298,6 +298,7 @@ class TumblrUserExtractor(TumblrExtractor):
         ("tumblr:www.b-authentique.com"),
         ("https://www.tumblr.com/blog/view/smarties-art"),
         ("https://www.tumblr.com/blog/smarties-art"),
+        ("https://www.tumblr.com/smarties-art"),
     )
 
     def posts(self):
@@ -354,6 +355,8 @@ class TumblrPostExtractor(TumblrExtractor):
         }),
         ("http://demo.tumblr.com/image/459265350"),
         ("https://www.tumblr.com/blog/view/smarties-art/686047436641353728"),
+        ("https://www.tumblr.com/blog/smarties-art/686047436641353728"),
+        ("https://www.tumblr.com/smarties-art/686047436641353728"),
     )
 
     def __init__(self, match):
@@ -381,6 +384,8 @@ class TumblrTagExtractor(TumblrExtractor):
             "count": 1,
         }),
         ("https://www.tumblr.com/blog/view/smarties-art/tagged/undertale"),
+        ("https://www.tumblr.com/blog/smarties-art/tagged/undertale"),
+        ("https://www.tumblr.com/smarties-art/tagged/undertale"),
     )
 
     def __init__(self, match):
@@ -402,6 +407,8 @@ class TumblrLikesExtractor(TumblrExtractor):
             "count": 1,
         }),
         ("https://www.tumblr.com/blog/view/mikf123/likes"),
+        ("https://www.tumblr.com/blog/mikf123/likes"),
+        ("https://www.tumblr.com/mikf123/likes"),
     )
 
     def posts(self):
