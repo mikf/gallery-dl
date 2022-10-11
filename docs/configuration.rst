@@ -2328,6 +2328,18 @@ Description
     Search posts for inline images and videos.
 
 
+extractor.tumblr.offset
+-----------------------
+Type
+    ``integer``
+Default
+    ``0``
+Description
+    Custom ``offset`` starting value when paginating over blog posts.
+
+    Allows skipping over posts without having to waste API calls.
+
+
 extractor.tumblr.original
 -------------------------
 Type

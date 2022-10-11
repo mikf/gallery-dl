@@ -435,11 +435,15 @@ class TumblrAPI(oauth.OAuth1API):
 
     def posts(self, blog, params):
         """Retrieve published posts"""
-        params.update({"offset": 0, "limit": 50, "reblog_info": "true"})
+        params["offset"] = self.extractor.config("offset") or 0
+        params["limit"] = 50
+        params["reblog_info"] = "true"
+
         if self.posts_type:
             params["type"] = self.posts_type
         if self.before:
             params["before"] = self.before
+
         while True:
             data = self._call(blog, "posts", params)
             self.BLOG_CACHE[blog] = data["blog"]
