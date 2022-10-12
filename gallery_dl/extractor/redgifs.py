@@ -88,7 +88,7 @@ class RedgifsSearchExtractor(RedgifsExtractor):
     pattern = r"(?:https?://)?(?:www\.)?redgifs\.com/browse/?\?([^#]+)"
     test = (
         ("https://www.redgifs.com/browse?tags=JAV", {
-            "pattern": r"https://\w+\.redgifs\.com/[A-Za-z]+\.mp4",
+            "pattern": r"https://\w+\.redgifs\.com/[A-Za-z-]+\.mp4",
             "range": "1-10",
             "count": 10,
         }),
@@ -148,8 +148,21 @@ class RedgifsAPI():
         return self._pagination(endpoint, params)
 
     def _call(self, endpoint, params=None):
+        extr = self.extractor
+
         url = self.API_ROOT + endpoint
-        return self.extractor.request(url, params=params).json()
+        headers = {
+            "Referer"      : extr.root + "/",
+            "authorization": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJp"
+                             "c3MiOiIxODIzYzMxZjdkMy03NDVhLTY1ODktMDAwNS1kOGU4"
+                             "ZmUwYTQ0YzIiLCJleHAiOjE2NjYwOTgzMTIsInN1YiI6ImNs"
+                             "aWVudFwvMTgyM2MzMWY3ZDMtNzQ1YS02NTg5LTAwMDUtZDhl"
+                             "OGZlMGE0NGMyIiwic2NvcGVzIjoicmVhZCIsInJhdGUiOi0x"
+                             "fQ.qG5aAxmUTktQyDeHK2oJfoBRPOpUSNEsA92cChei1x4",
+            "content-type" : "application/json",
+            "Origin"       : extr.root,
+        }
+        return extr.request(url, params=params, headers=headers).json()
 
     def _pagination(self, endpoint, params):
         params["page"] = 1
