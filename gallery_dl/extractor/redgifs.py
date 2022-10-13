@@ -10,6 +10,7 @@
 
 from .common import Extractor, Message
 from .. import text
+from ..cache import cache
 
 
 class RedgifsExtractor(Extractor):
@@ -131,6 +132,12 @@ class RedgifsAPI():
 
     def __init__(self, extractor):
         self.extractor = extractor
+        self.headers = {
+            "Referer"      : extractor.root + "/",
+            "authorization": "Bearer " + self._fetch_bearer_token(extractor),
+            "content-type" : "application/json",
+            "Origin"       : extractor.root,
+        }
 
     def gif(self, gif_id):
         endpoint = "/v2/gifs/" + gif_id.lower()
@@ -148,21 +155,9 @@ class RedgifsAPI():
         return self._pagination(endpoint, params)
 
     def _call(self, endpoint, params=None):
-        extr = self.extractor
-
         url = self.API_ROOT + endpoint
-        headers = {
-            "Referer"      : extr.root + "/",
-            "authorization": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJp"
-                             "c3MiOiIxODIzYzMxZjdkMy03NDVhLTY1ODktMDAwNS1kOGU4"
-                             "ZmUwYTQ0YzIiLCJleHAiOjE2NjYwOTgzMTIsInN1YiI6ImNs"
-                             "aWVudFwvMTgyM2MzMWY3ZDMtNzQ1YS02NTg5LTAwMDUtZDhl"
-                             "OGZlMGE0NGMyIiwic2NvcGVzIjoicmVhZCIsInJhdGUiOi0x"
-                             "fQ.qG5aAxmUTktQyDeHK2oJfoBRPOpUSNEsA92cChei1x4",
-            "content-type" : "application/json",
-            "Origin"       : extr.root,
-        }
-        return extr.request(url, params=params, headers=headers).json()
+        return self.extractor.request(
+            url, params=params, headers=self.headers).json()
 
     def _pagination(self, endpoint, params):
         params["page"] = 1
@@ -174,3 +169,17 @@ class RedgifsAPI():
             if params["page"] >= data["pages"]:
                 return
             params["page"] += 1
+
+    @cache(maxage=3600)
+    def _fetch_bearer_token(self, extr):
+        extr.log.debug("Retrieving Bearer token")
+
+        page = extr.request(extr.root + "/").text
+        index = text.extract(page, "/assets/js/index", ".js")[0]
+
+        url = extr.root + "/assets/js/index" + index + ".js"
+        page = extr.request(url, encoding="utf-8").text
+        token = "ey" + text.extract(page, '="ey', '"')[0]
+
+        extr.log.debug("Token: '%s'", token)
+        return token
