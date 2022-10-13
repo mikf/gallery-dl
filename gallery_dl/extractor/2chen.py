@@ -16,7 +16,7 @@ class _2chenThreadExtractor(Extractor):
     subcategory = "thread"
     directory_fmt = ("{category}", "{board}", "{thread} {title}")
     filename_fmt = "{time} {filename}.{extension}"
-    archive_fmt = "{hash}"
+    archive_fmt = "{board}_{thread}_{hash}"
     root = "https://2chen.moe"
     pattern = r"(?:https?://)?2chen\.moe/([^/?#]+)/(\d+)"
     test = (
