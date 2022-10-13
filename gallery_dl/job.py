@@ -697,7 +697,7 @@ class DataJob(Job):
         self.ascii = config.get(("output",), "ascii", ensure_ascii)
 
         private = config.get(("output",), "private")
-        self.filter = util.identity if private else util.filter_dict
+        self.filter = dict.copy if private else util.filter_dict
 
     def run(self):
         extractor = self.extractor
