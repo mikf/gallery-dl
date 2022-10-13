@@ -222,7 +222,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
                 data["_http_validate"] = _validate_response
             else:
                 data["_http_validate"] = None
-            yield Message.Url, url, data.copy()
+            yield Message.Url, url, data
 
     def _items_hitomi(self):
         if self.config("metadata", False):
