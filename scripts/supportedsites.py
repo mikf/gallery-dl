@@ -193,6 +193,7 @@ SUBCATEGORY_MAP = {
         "search": "Favorites, Search Results",
     },
     "nijie": {
+        "followed": "Followed Users",
         "nuita" : "Nuita History",
     },
     "pinterest": {

@@ -1046,13 +1046,13 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>nijie</td>
     <td>https://nijie.info/</td>
-    <td>Doujin, Favorites, Feeds, Illustrations, individual Images, Nuita History, User Profiles</td>
+    <td>Doujin, Favorites, Feeds, Followed Users, Illustrations, individual Images, Nuita History, User Profiles</td>
     <td>Required</td>
 </tr>
 <tr>
     <td>horne</td>
     <td>https://horne.red/</td>
-    <td>Doujin, Favorites, Feeds, Illustrations, individual Images, Nuitas, User Profiles</td>
+    <td>Doujin, Favorites, Feeds, Followeds, Illustrations, individual Images, Nuitas, User Profiles</td>
     <td>Required</td>
 </tr>
 
