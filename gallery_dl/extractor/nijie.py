@@ -326,6 +326,26 @@ class NijieNuitaExtractor(NijieExtractor):
             page, "<title>", "さんの抜いた")[0] or "")
 
 
+class NijieFeedExtractor(NijieExtractor):
+    """Extractor for nijie liked user feed"""
+    subcategory = "feed"
+    pattern = BASE_PATTERN + r"/like_user_view\.php"
+    test = (
+        ("https://nijie.info/like_user_view.php", {
+            "range": "1-10",
+            "count": 10,
+        }),
+        ("https://horne.red/like_user_view.php"),
+    )
+
+    def image_ids(self):
+        return self._pagination("like_user_view")
+
+    @staticmethod
+    def _extract_user_name(page):
+        return ""
+
+
 class NijieImageExtractor(NijieExtractor):
     """Extractor for a nijie work/image"""
     subcategory = "image"
