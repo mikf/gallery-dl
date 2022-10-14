@@ -346,6 +346,35 @@ class NijieFeedExtractor(NijieExtractor):
         return ""
 
 
+class NijiefollowedExtractor(NijieExtractor):
+    """Extractor for followed nijie users"""
+    subcategory = "followed"
+    pattern = BASE_PATTERN + r"/like_my\.php"
+    test = (
+        ("https://nijie.info/like_my.php"),
+        ("https://horne.red/like_my.php"),
+    )
+
+    def items(self):
+        self.login()
+
+        url = self.root + "/like_my.php"
+        params = {"p": 1}
+        data = {"_extractor": NijieUserExtractor}
+
+        while True:
+            page = self.request(url, params=params).text
+
+            for user_id in text.extract_iter(
+                    page, '"><a href="/members.php?id=', '"'):
+                user_url = "{}/members.php?id={}".format(self.root, user_id)
+                yield Message.Queue, user_url, data
+
+            if '<a rel="next"' not in page:
+                return
+            params["p"] += 1
+
+
 class NijieImageExtractor(NijieExtractor):
     """Extractor for a nijie work/image"""
     subcategory = "image"
