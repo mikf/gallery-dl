@@ -1,5 +1,36 @@
 # Changelog
 
+## 1.23.3 - 2022-10-15
+### Additions
+- [2chen] Add `2chen.moe` extractor ([#2707](https://github.com/mikf/gallery-dl/issues/2707))
+- [8chan] add `thread` and `board` extractors ([#2938](https://github.com/mikf/gallery-dl/issues/2938))
+- [deviantart] add `group` option ([#3018](https://github.com/mikf/gallery-dl/issues/3018))
+- [fanbox] add `content` metadata field ([#3020](https://github.com/mikf/gallery-dl/issues/3020))
+- [instagram] restore `cursor` functionality ([#2991](https://github.com/mikf/gallery-dl/issues/2991))
+- [instagram] restore warnings for private profiles ([#3004](https://github.com/mikf/gallery-dl/issues/3004), [#3045](https://github.com/mikf/gallery-dl/issues/3045))
+- [nana] add `nana` extractors ([#2967](https://github.com/mikf/gallery-dl/issues/2967))
+- [nijie] add `feed` and `followed` extractors ([#3048](https://github.com/mikf/gallery-dl/issues/3048))
+- [tumblr] support `https://www.tumblr.com/BLOGNAME` URLs ([#3034](https://github.com/mikf/gallery-dl/issues/3034))
+- [tumblr] add `offset` option
+- [vk] add `tagged` extractor ([#2997](https://github.com/mikf/gallery-dl/issues/2997))
+- add `path-extended` option ([#3021](https://github.com/mikf/gallery-dl/issues/3021))
+- emit debug logging messages before calling time.sleep() ([#2982](https://github.com/mikf/gallery-dl/issues/2982))
+### Changes
+- [postprocessor:metadata] assume `"mode": "custom"` when `format` is given
+### Fixes
+- [artstation] skip missing projects ([#3016](https://github.com/mikf/gallery-dl/issues/3016))
+- [danbooru] fix ugoira metadata extraction ([#3056](https://github.com/mikf/gallery-dl/issues/3056))
+- [deviantart] fix `deviation` extraction ([#2981](https://github.com/mikf/gallery-dl/issues/2981))
+- [hitomi] fall back to `webp` when selected format is not available ([#3030](https://github.com/mikf/gallery-dl/issues/3030))
+- [imagefap] fix and improve folder extraction and gallery pagination ([#3013](https://github.com/mikf/gallery-dl/issues/3013))
+- [instagram] fix login ([#3011](https://github.com/mikf/gallery-dl/issues/3011), [#3015](https://github.com/mikf/gallery-dl/issues/3015))
+- [nozomi] fix extraction ([#3051](https://github.com/mikf/gallery-dl/issues/3051))
+- [redgifs] fix extraction ([#3037](https://github.com/mikf/gallery-dl/issues/3037))
+- [tumblr] sleep between fallback retries ([#2957](https://github.com/mikf/gallery-dl/issues/2957))
+- [vk] unescape error messages
+- fix duplicated metadata bug with `-j` ([#3033](https://github.com/mikf/gallery-dl/issues/3033))
+- fix bug when processing input file comments ([#2808](https://github.com/mikf/gallery-dl/issues/2808))
+
 ## 1.23.2 - 2022-10-01
 ### Additions
 - [artstation] support search filters ([#2970](https://github.com/mikf/gallery-dl/issues/2970))
