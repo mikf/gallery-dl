@@ -366,7 +366,6 @@ class InstagramUserExtractor(InstagramExtractor):
             (InstagramPostsExtractor     , base + "posts/"),
             (InstagramReelsExtractor     , base + "reels/"),
             (InstagramTaggedExtractor    , base + "tagged/"),
-            (InstagramChannelExtractor   , base + "channel/"),
         ), ("posts",))
 
 
@@ -428,20 +427,6 @@ class InstagramTaggedExtractor(InstagramExtractor):
 
     def posts(self):
         return self.api.user_tagged(self.user_id)
-
-
-class InstagramChannelExtractor(InstagramExtractor):
-    """Extractor for an Instagram user's channel posts"""
-    subcategory = "channel"
-    pattern = USER_PATTERN + r"/channel"
-    test = ("https://www.instagram.com/instagram/channel/", {
-        "range": "1-16",
-        "count": ">= 16",
-    })
-
-    def posts(self):
-        uid = self.api.user_id(self.item)
-        return self.api.user_clips(uid)
 
 
 class InstagramSavedExtractor(InstagramExtractor):
