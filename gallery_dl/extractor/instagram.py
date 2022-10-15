@@ -417,8 +417,8 @@ class InstagramTaggedExtractor(InstagramExtractor):
             self.user_id = self.item[3:]
             return {"tagged_owner_id": self.user_id}
 
+        self.user_id = self.api.user_id(self.item)
         user = self.api.user(self.item)
-        self.user_id = user["id"]
 
         return {
             "tagged_owner_id" : user["id"],
