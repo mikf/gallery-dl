@@ -88,10 +88,7 @@ class DanbooruExtractor(BaseExtractor):
 
             if post["extension"] == "zip":
                 if self.ugoira:
-                    post["frames"] = self.request(
-                        "{}/posts/{}.json?only=pixiv_ugoira_frame_data".format(
-                            self.root, post["id"])
-                    ).json()["pixiv_ugoira_frame_data"]["data"]
+                    post["frames"] = self._ugoira_frames(post)
                     post["_http_adjust_extension"] = False
                 else:
                     url = post["large_file_url"]
@@ -138,6 +135,18 @@ class DanbooruExtractor(BaseExtractor):
                         break
                 else:
                     return
+
+    def _ugoira_frames(self, post):
+        data = self.request("{}/posts/{}.json?only=media_metadata".format(
+            self.root, post["id"])
+        ).json()["media_metadata"]["metadata"]
+
+        ext = data["ZIP:ZipFileName"].rpartition(".")[2]
+        print(post["id"], ext)
+        fmt = ("{:>06}." + ext).format
+        delays = data["Ugoira:FrameDelays"]
+        return [{"file": fmt(index), "delay": delay}
+                for index, delay in enumerate(delays)]
 
 
 INSTANCES = {
