@@ -1971,8 +1971,8 @@ Description
     It is possible to use ``"all"`` instead of listing all values separately.
 
 
-extractor.pixiv.artworks.metadata
----------------------------------
+extractor.pixiv.metadata
+------------------------
 Type
     ``bool``
 Default
