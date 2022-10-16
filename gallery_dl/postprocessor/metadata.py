@@ -9,7 +9,7 @@
 """Write metadata to external files"""
 
 from .common import PostProcessor
-from .. import util, formatter
+from .. import util, formatter, version
 import sys
 import os
 
@@ -97,6 +97,7 @@ class MetadataPP(PostProcessor):
             self.archive = None
 
         self.mtime = options.get("mtime")
+        self.version = options.get("version", True)
 
     def run(self, pathfmt):
         archive = self.archive
@@ -198,7 +199,17 @@ class MetadataPP(PostProcessor):
         fp.write("\n".join(tags) + "\n")
 
     def _write_json(self, fp, kwdict):
-        util.dump_json(util.filter_dict(kwdict), fp, self.ascii, self.indent)
+        kwdict_copy = util.filter_dict(kwdict)
+        if self.version:
+            is_executable = getattr(sys, "frozen", False)
+            kwdict_copy.update({
+                "_version": {
+                    "version": version.__version__,
+                    "is_executable": is_executable,
+                    "current_git_head": None if is_executable else version.current_git_head()
+                }
+            })
+        util.dump_json(kwdict_copy, fp, self.ascii, self.indent)
 
 
 __postprocessor__ = MetadataPP

@@ -3702,6 +3702,17 @@ Description
     *not* be able to set its file's modification time unless an ``mtime``
     post processor with ``"event": "post"`` runs *before* it.
 
+metadata.version
+--------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Output version info (``version``, ``current_git_head`` and 
+    ``is_executable``) in addition to normal metadata.
+    This option has no effect if ``metadata.mode`` is not ``JSON``.
+
 
 mtime.event
 -----------
