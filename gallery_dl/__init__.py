@@ -118,25 +118,13 @@ def main():
             config.set(("output",), "mode", "null")
         elif args.loglevel <= logging.DEBUG:
             import platform
-            import subprocess
-            import os.path
             import requests
 
             extra = ""
             if getattr(sys, "frozen", False):
                 extra = " - Executable"
-            else:
-                try:
-                    out, err = subprocess.Popen(
-                        ("git", "rev-parse", "--short", "HEAD"),
-                        stdout=subprocess.PIPE,
-                        stderr=subprocess.PIPE,
-                        cwd=os.path.dirname(os.path.abspath(__file__)),
-                    ).communicate()
-                    if out and not err:
-                        extra = " - Git HEAD: " + out.decode().rstrip()
-                except (OSError, subprocess.SubprocessError):
-                    pass
+            elif version.current_git_head():
+                extra = " - Git HEAD: " + version.current_git_head()
 
             log.debug("Version %s%s", __version__, extra)
             log.debug("Python %s - %s",
