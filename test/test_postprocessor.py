@@ -177,6 +177,7 @@ class MetadataTest(BasePostprocessorTest):
             "mode"     : "json",
             "ascii"    : True,
             "indent"   : 2,
+            "version"  : False,
             "extension": "JSON",
         }, {
             "public"   : "hello",
@@ -186,6 +187,7 @@ class MetadataTest(BasePostprocessorTest):
         self.assertEqual(pp.write    , pp._write_json)
         self.assertEqual(pp.ascii    , True)
         self.assertEqual(pp.indent   , 2)
+        self.assertEqual(pp.version  , False)
         self.assertEqual(pp.extension, "JSON")
 
         with patch("builtins.open", mock_open()) as m:
@@ -331,7 +333,11 @@ class MetadataTest(BasePostprocessorTest):
         m.assert_called_once_with(path, "w", encoding="utf-8")
 
     def test_metadata_stdout(self):
-        self._create({"filename": "-", "indent": None})
+        self._create({
+            "filename": "-",
+            "indent"  : None,
+            "version" : False
+        })
 
         with patch("sys.stdout", Mock()) as m:
             self._trigger()
@@ -339,6 +345,24 @@ class MetadataTest(BasePostprocessorTest):
         self.assertEqual(self._output(m), """\
 {"category": "test", "extension": "ext", "filename": "file"}
 """)
+
+    def test_metadata_version(self):
+        self._create()
+
+        with patch("builtins.open", mock_open()) as m:
+            self._trigger()
+
+        self.assertRegex(self._output(m), r'''^\{
+    "_version": \{
+        "current_git_head": ("[0-9a-f]+"|null),
+        "is_executable": (true|false),
+        "version": "[0-9]\.[0-9]+\.[0-9]+"
+    \},
+    "category": "test",
+    "extension": "ext",
+    "filename": "file"
+\}
+$''')
 
     def test_metadata_modify(self):
         kwdict = {"foo": 0, "bar": {"bax": 1, "bay": 2, "baz": 3}}

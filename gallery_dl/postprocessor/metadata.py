@@ -204,8 +204,8 @@ class MetadataPP(PostProcessor):
             is_executable = getattr(sys, "frozen", False)
             kwdict_copy.update({
                 "_version": {
-                    "version": version.__version__,
-                    "is_executable": is_executable,
+                    "version"         : version.__version__,
+                    "is_executable"   : is_executable,
                     "current_git_head": None if is_executable else version.current_git_head()
                 }
             })
