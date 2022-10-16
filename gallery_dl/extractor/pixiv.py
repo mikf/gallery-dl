@@ -45,6 +45,7 @@ class PixivExtractor(Extractor):
                 work["tags"] = [tag["name"] for tag in work["tags"]]
 
         ratings = {0: "General", 1: "R-18", 2: "R-18G"}
+        userdata = self.config("metadata")
         metadata = self.metadata()
 
         works = self.works()
@@ -60,6 +61,8 @@ class PixivExtractor(Extractor):
             del work["image_urls"]
             del work["meta_pages"]
 
+            if userdata:
+                work.update(self.api.user_detail(work["user"]["id"]))
             if transform_tags:
                 transform_tags(work)
             work["num"] = 0
@@ -198,7 +201,7 @@ class PixivArtworksExtractor(PixivExtractor):
 
     def metadata(self):
         if self.config("metadata"):
-            return self.api.user_detail(self.user_id)
+            self.api.user_detail(self.user_id)
         return {}
 
     def works(self):
