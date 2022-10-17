@@ -12,6 +12,7 @@ from . import cache
 import subprocess
 import os
 
+
 @cache.memcache()
 def current_git_head():
     try:
@@ -22,7 +23,7 @@ def current_git_head():
             cwd=os.path.dirname(os.path.abspath(__file__)),
         ).communicate()
         if out and not err:
-           return out.decode().rstrip()
+            return out.decode().rstrip()
         return None
     except (OSError, subprocess.SubprocessError):
         return None

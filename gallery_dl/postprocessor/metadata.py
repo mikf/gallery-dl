@@ -206,7 +206,8 @@ class MetadataPP(PostProcessor):
                 "_version": {
                     "version"         : version.__version__,
                     "is_executable"   : is_executable,
-                    "current_git_head": None if is_executable else version.current_git_head()
+                    "current_git_head": None if is_executable
+                    else version.current_git_head()
                 }
             })
         util.dump_json(kwdict_copy, fp, self.ascii, self.indent)
