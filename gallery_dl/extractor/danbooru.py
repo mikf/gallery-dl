@@ -102,6 +102,9 @@ class DanbooruExtractor(BaseExtractor):
                 resp = self.request(template.format(self.root, post["id"]))
                 post.update(resp.json())
 
+            if self.root and url.startswith("/"):
+                url = self.root + url
+
             post.update(data)
             yield Message.Directory, post
             yield Message.Url, url, post
@@ -170,6 +173,10 @@ INSTANCES = {
         "pattern": r"booru\.allthefallen\.moe",
         "page-limit": 5000,
     },
+    "aibooru": {
+        "root": "https://aibooru.online",
+        "pattern": r"aibooru\.online",
+    }
 }
 
 BASE_PATTERN = DanbooruExtractor.update(INSTANCES)
