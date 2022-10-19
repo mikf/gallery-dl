@@ -170,7 +170,7 @@ class ReactorTagExtractor(ReactorExtractor):
     subcategory = "tag"
     directory_fmt = ("{category}", "{search_tags}")
     archive_fmt = "{search_tags}_{post_id}_{num}"
-    pattern = BASE_PATTERN + r"/tag/([^/?#]+)"
+    pattern = BASE_PATTERN + r"/tag/([^/?#]+)(?:/[^/?#]+)?"
     test = (
         ("http://reactor.cc/tag/gif"),
         ("http://anime.reactor.cc/tag/Anime+Art"),
@@ -179,6 +179,10 @@ class ReactorTagExtractor(ReactorExtractor):
         }),
         ("http://joyreactor.com/tag/Cirno", {
             "url": "aa59090590b26f4654881301fe8fe748a51625a8",
+        }),
+        # 'best' rating (#3073)
+        ("http://joyreactor.com/tag/Dark+Souls+2/best", {
+            "count": 4,
         }),
         ("http://pornreactor.cc/tag/RiceGnat", {
             "range": "1-25",
