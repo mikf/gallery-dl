@@ -560,12 +560,6 @@ Consider all sites to be NSFW unless otherwise known.
     <td>Supported</td>
 </tr>
 <tr>
-    <td>Ngomik</td>
-    <td>http://ngomik.in/</td>
-    <td>Chapters</td>
-    <td></td>
-</tr>
-<tr>
     <td>nhentai</td>
     <td>https://nhentai.net/</td>
     <td>Favorites, Galleries, Search Results, Tag Searches</td>

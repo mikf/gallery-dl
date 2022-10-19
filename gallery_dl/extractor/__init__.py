@@ -96,7 +96,6 @@ modules = [
     "naver",
     "naverwebtoon",
     "newgrounds",
-    "ngomik",
     "nhentai",
     "nijie",
     "nozomi",
