@@ -1517,7 +1517,12 @@ Description
     when processing a user profile.
 
     Possible values are
-    ``"posts"``, ``"reels"``, ``"tagged"``, ``"stories"``, ``"highlights"``.
+    ``"posts"``,
+    ``"reels"``,
+    ``"tagged"``,
+    ``"stories"``,
+    ``"highlights"``,
+    ``"avatar"``.
 
     You can use ``"all"`` instead of listing all values separately.
 

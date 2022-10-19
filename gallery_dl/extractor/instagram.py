@@ -361,6 +361,7 @@ class InstagramUserExtractor(InstagramExtractor):
         base = "{}/{}/".format(self.root, self.item)
         stories = "{}/stories/{}/".format(self.root, self.item)
         return self._dispatch_extractors((
+            (InstagramAvatarExtractor    , base + "avatar/"),
             (InstagramStoriesExtractor   , stories),
             (InstagramHighlightsExtractor, base + "highlights/"),
             (InstagramPostsExtractor     , base + "posts/"),
@@ -417,7 +418,7 @@ class InstagramTaggedExtractor(InstagramExtractor):
             return {"tagged_owner_id": self.user_id}
 
         self.user_id = self.api.user_id(self.item)
-        user = self.api.user(self.item)
+        user = self.api.user_by_name(self.item)
 
         return {
             "tagged_owner_id" : user["id"],
@@ -527,6 +528,48 @@ class InstagramTagExtractor(InstagramExtractor):
 
     def posts(self):
         return self.api.tags_media(self.item)
+
+
+class InstagramAvatarExtractor(InstagramExtractor):
+    """Extractor for an Instagram user's avatar"""
+    subcategory = "avatar"
+    pattern = USER_PATTERN + r"/avatar"
+    test = ("https://www.instagram.com/instagram/avatar", {
+        "pattern": r"https://instagram\.[\w.-]+\.fbcdn\.net/v/t51\.2885-19"
+                   r"/281440578_1088265838702675_6233856337905829714_n\.jpg",
+    })
+
+    def posts(self):
+        if self._logged_in:
+            user_id = self.api.user_id(self.item)
+            user = self.api.user_by_id(user_id)
+            avatar = (user.get("hd_profile_pic_url_info") or
+                      user["hd_profile_pic_versions"][-1])
+        else:
+            user = self.item
+            if user.startswith("id:"):
+                user = self.api.user_by_id(user[3:])
+            else:
+                user = self.api.user_by_name(user)
+                user["pk"] = user["id"]
+            url = user.get("profile_pic_url_hd") or user["profile_pic_url"]
+            avatar = {"url": url, "width": 0, "height": 0}
+
+        pk = user.get("profile_pic_id")
+        if pk:
+            pk = pk.partition("_")[0]
+            code = shortcode_from_id(pk)
+        else:
+            pk = code = "avatar:" + str(user["pk"])
+
+        return ({
+            "pk"        : pk,
+            "code"      : code,
+            "user"      : user,
+            "caption"   : None,
+            "like_count": 0,
+            "image_versions2": {"candidates": (avatar,)},
+        },)
 
 
 class InstagramPostExtractor(InstagramExtractor):
@@ -678,15 +721,19 @@ class InstagramRestAPI():
         return self._pagination_sections(endpoint, data)
 
     @memcache(keyarg=1)
-    def user(self, screen_name):
+    def user_by_name(self, screen_name):
         endpoint = "/v1/users/web_profile_info/"
         params = {"username": screen_name}
         return self._call(endpoint, params=params)["data"]["user"]
 
+    def user_by_id(self, user_id):
+        endpoint = "/v1/users/{}/info/".format(user_id)
+        return self._call(endpoint)["user"]
+
     def user_id(self, screen_name):
         if screen_name.startswith("id:"):
             return screen_name[3:]
-        user = self.user(screen_name)
+        user = self.user_by_name(screen_name)
         if user is None:
             raise exception.AuthorizationError(
                 "Login required to access this profile")
@@ -797,7 +844,8 @@ class InstagramGraphqlAPI():
         self._json_dumps = json.JSONEncoder(separators=(",", ":")).encode
 
         api = InstagramRestAPI(extractor)
-        self.user = api.user
+        self.user_by_name = api.user_by_name
+        self.user_by_id = api.user_by_id
         self.user_id = api.user_id
 
     @staticmethod
