@@ -977,6 +977,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td>Pools, Popular Images, Posts, Tag Searches</td>
     <td>Supported</td>
 </tr>
+<tr>
+    <td>Aibooru</td>
+    <td>https://aibooru.online/</td>
+    <td>Favorites, Pools, Popular Images, Posts, Tag Searches</td>
+    <td></td>
+</tr>
 
 <tr>
     <td colspan="4"><strong>Gelbooru Beta 0.1.11</strong></td>
