@@ -161,6 +161,7 @@ modules = [
     "foolslide",
     "mastodon",
     "shopify",
+    "smugloli",
     "lolisafe",
     "imagehosts",
     "directlink",

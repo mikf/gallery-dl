@@ -764,6 +764,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
+    <td>Smugloli</td>
+    <td>https://smuglo.li/</td>
+    <td>Boards, Threads</td>
+    <td></td>
+</tr>
+<tr>
     <td>SmugMug</td>
     <td>https://www.smugmug.com/</td>
     <td>Albums, individual Images, Images from Users and Folders</td>
