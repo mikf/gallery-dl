@@ -173,13 +173,7 @@ class RedgifsAPI():
     @cache(maxage=3600)
     def _fetch_bearer_token(self, extr):
         extr.log.debug("Retrieving Bearer token")
-
-        page = extr.request(extr.root + "/").text
-        index = text.extract(page, "/assets/js/index", ".js")[0]
-
-        url = extr.root + "/assets/js/index" + index + ".js"
-        page = extr.request(url, encoding="utf-8").text
-        token = "ey" + text.extract(page, '="ey', '"')[0]
-
+        token = extr.request(
+            self.API_ROOT + "/v2/auth/temporary").json()["token"]
         extr.log.debug("Token: '%s'", token)
         return token
