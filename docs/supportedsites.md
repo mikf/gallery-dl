@@ -494,6 +494,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
+    <td>MangaLife</td>
+    <td>https://manga4life.com/</td>
+    <td>Chapters, Manga</td>
+    <td></td>
+</tr>
+<tr>
     <td>Manganato</td>
     <td>https://manganato.com/</td>
     <td>Chapters, Manga</td>
