@@ -56,12 +56,6 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
-    <td>8kun</td>
-    <td>https://8kun.top/</td>
-    <td>Boards, Threads</td>
-    <td></td>
-</tr>
-<tr>
     <td>8muses</td>
     <td>https://comics.8muses.com/</td>
     <td>Albums</td>
@@ -764,12 +758,6 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
-    <td>Smugloli</td>
-    <td>https://smuglo.li/</td>
-    <td>Boards, Threads</td>
-    <td></td>
-</tr>
-<tr>
     <td>SmugMug</td>
     <td>https://www.smugmug.com/</td>
     <td>Albums, individual Images, Images from Users and Folders</td>
@@ -905,12 +893,6 @@ Consider all sites to be NSFW unless otherwise known.
     <td>WikiArt.org</td>
     <td>https://www.wikiart.org/</td>
     <td>Artists, Artist Listings, Artworks, individual Images</td>
-    <td></td>
-</tr>
-<tr>
-    <td>Wikieat</td>
-    <td>https://wikieat.club/</td>
-    <td>Boards, Threads</td>
     <td></td>
 </tr>
 <tr>
@@ -1109,6 +1091,28 @@ Consider all sites to be NSFW unless otherwise known.
     <td>ThatPervert</td>
     <td>http://thatpervert.com/</td>
     <td>Posts, Search Results, Tag Searches, User Profiles</td>
+    <td></td>
+</tr>
+
+<tr>
+    <td colspan="4"><strong>vichan Imageboards</strong></td>
+</tr>
+<tr>
+    <td>8kun</td>
+    <td>https://8kun.top/</td>
+    <td>Boards, Threads</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Wikieat</td>
+    <td>https://wikieat.club/</td>
+    <td>Boards, Threads</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Smugloli</td>
+    <td>https://smuglo.li/</td>
+    <td>Boards, Threads</td>
     <td></td>
 </tr>
 
