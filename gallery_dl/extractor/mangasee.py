@@ -17,7 +17,6 @@ class MangaseeBase():
     category = "mangasee"
     browser = "firefox"
     root = "https://mangasee123.com"
-    domain = "mangasee123.com"
 
     @staticmethod
     def _transform_chapter(data):
@@ -85,11 +84,10 @@ class MangaseeChapterExtractor(MangaseeBase, ChapterExtractor):
         if match.group(1) == "manga4life":
             self.category = "mangalife"
             self.root = "https://manga4life.com"
-            self.domain = "manga4life.com"
         ChapterExtractor.__init__(self, match, self.root + match.group(2))
         self.session.headers["Referer"] = self.gallery_url
 
-        domain = self.domain
+        domain = self.root.rpartition("/")[2]
         cookies = self.session.cookies
         if not cookies.get("PHPSESSID", domain=domain):
             cookies.set("PHPSESSID", util.generate_token(13), domain=domain)
