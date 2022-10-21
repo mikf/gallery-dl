@@ -254,6 +254,7 @@ BASE_MAP = {
     "gelbooru_v02": "Gelbooru Beta 0.2",
     "lolisafe"    : "lolisafe and chibisafe",
     "moebooru"    : "Moebooru and MyImouto",
+    "vichan"      : "vichan Imageboards",
 }
 
 _OAUTH = '<a href="https://github.com/mikf/gallery-dl#oauth">OAuth</a>'
