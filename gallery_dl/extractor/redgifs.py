@@ -10,7 +10,7 @@
 
 from .common import Extractor, Message
 from .. import text
-from ..cache import cache
+from ..cache import memcache
 
 
 class RedgifsExtractor(Extractor):
@@ -133,10 +133,11 @@ class RedgifsAPI():
     def __init__(self, extractor):
         self.extractor = extractor
         self.headers = {
-            "Referer"      : extractor.root + "/",
-            "authorization": "Bearer " + self._fetch_bearer_token(extractor),
-            "content-type" : "application/json",
-            "Origin"       : extractor.root,
+            "Referer"       : extractor.root + "/",
+            "authorization" : None,
+            "content-type"  : "application/json",
+            "x-customheader": extractor.root + "/",
+            "Origin"        : extractor.root,
         }
 
     def gif(self, gif_id):
@@ -156,6 +157,7 @@ class RedgifsAPI():
 
     def _call(self, endpoint, params=None):
         url = self.API_ROOT + endpoint
+        self.headers["authorization"] = self._auth()
         return self.extractor.request(
             url, params=params, headers=self.headers).json()
 
@@ -170,16 +172,10 @@ class RedgifsAPI():
                 return
             params["page"] += 1
 
-    @cache(maxage=3600)
-    def _fetch_bearer_token(self, extr):
-        extr.log.debug("Retrieving Bearer token")
-
-        page = extr.request(extr.root + "/").text
-        index = text.extract(page, "/assets/js/index", ".js")[0]
-
-        url = extr.root + "/assets/js/index" + index + ".js"
-        page = extr.request(url, encoding="utf-8").text
-        token = "ey" + text.extract(page, '="ey', '"')[0]
-
-        extr.log.debug("Token: '%s'", token)
-        return token
+    @memcache(maxage=600)
+    def _auth(self):
+        # https://github.com/Redgifs/api/wiki/Temporary-tokens
+        url = self.API_ROOT + "/v2/auth/temporary"
+        self.headers["authorization"] = None
+        return "Bearer " + self.extractor.request(
+            url, headers=self.headers).json()["token"]
