@@ -142,13 +142,23 @@ class GelbooruPoolExtractor(GelbooruBase,
 class GelbooruPostExtractor(GelbooruBase,
                             gelbooru_v02.GelbooruV02PostExtractor):
     """Extractor for single images from gelbooru.com"""
-    pattern = (r"(?:https?://)?(?:www\.)?gelbooru\.com/(?:index\.php)?"
-               r"\?page=post&s=view&id=(?P<post>\d+)")
+    pattern = (r"(?:https?://)?(?:www\.)?gelbooru\.com/(?:index\.php)?\?"
+               r"(?=(?:[^#]+&)?page=post(?:&|#|$))"
+               r"(?=(?:[^#]+&)?s=view(?:&|#|$))"
+               r"(?:[^#]+&)?id=(\d+)")
     test = (
         ("https://gelbooru.com/index.php?page=post&s=view&id=313638", {
             "content": "5e255713cbf0a8e0801dc423563c34d896bb9229",
             "count": 1,
         }),
+
+        ("https://gelbooru.com/index.php?page=post&s=view&id=313638"),
+        ("https://gelbooru.com/index.php?s=view&page=post&id=313638"),
+        ("https://gelbooru.com/index.php?page=post&id=313638&s=view"),
+        ("https://gelbooru.com/index.php?s=view&id=313638&page=post"),
+        ("https://gelbooru.com/index.php?id=313638&page=post&s=view"),
+        ("https://gelbooru.com/index.php?id=313638&s=view&page=post"),
+
         ("https://gelbooru.com/index.php?page=post&s=view&id=6018318", {
             "options": (("tags", True),),
             "content": "977caf22f27c72a5d07ea4d4d9719acdab810991",
