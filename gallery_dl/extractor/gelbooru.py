@@ -127,9 +127,10 @@ class GelbooruPoolExtractor(GelbooruBase,
 class GelbooruPostExtractor(GelbooruBase,
                             gelbooru_v02.GelbooruV02PostExtractor):
     """Extractor for single images from gelbooru.com"""
-    pattern = (r"(?:https?://)?(?:www\.)?gelbooru\.com/(?:index\.php)?"
-               r"\?(?=.*page=post)(?=.*s=view).*id=(?P<post>\d+).*")
-
+    pattern = (r"(?:https?://)?(?:www\.)?gelbooru\.com/(?:index\.php)?\?"
+               r"(?=(?:[^#]+&)?page=post(?:&|#|$))"
+               r"(?=(?:[^#]+&)?s=view(?:&|#|$))"
+               r"(?:[^#]+&)?id=(\d+)")
     test = (
         ("https://gelbooru.com/index.php?page=post&s=view&id=313638", {
             "content": "5e255713cbf0a8e0801dc423563c34d896bb9229",
