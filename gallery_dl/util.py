@@ -790,11 +790,11 @@ class DownloadArchive():
 
         try:
             self.cursor.execute("CREATE TABLE IF NOT EXISTS archive "
-                                "(entry PRIMARY KEY) WITHOUT ROWID")
+                                "(entry TEXT PRIMARY KEY) WITHOUT ROWID")
         except sqlite3.OperationalError:
             # fallback for missing WITHOUT ROWID support (#553)
             self.cursor.execute("CREATE TABLE IF NOT EXISTS archive "
-                                "(entry PRIMARY KEY)")
+                                "(entry TEXT PRIMARY KEY)")
 
     def check(self, kwdict):
         """Return True if the item described by 'kwdict' exists in archive"""
@@ -807,4 +807,4 @@ class DownloadArchive():
         """Add item described by 'kwdict' to archive"""
         key = kwdict.get(self._cache_key) or self.keygen(kwdict)
         self.cursor.execute(
-            "INSERT OR IGNORE INTO archive VALUES (?)", (key,))
+            "INSERT OR IGNORE INTO archive (entry) VALUES (?)", (key,))
