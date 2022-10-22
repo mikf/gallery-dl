@@ -12,6 +12,7 @@
 from .common import Extractor, Message
 from .. import text, util, exception
 from ..cache import cache, memcache
+import binascii
 import json
 import time
 import re
@@ -484,25 +485,28 @@ class InstagramStoriesExtractor(InstagramExtractor):
     """Extractor for Instagram stories"""
     subcategory = "stories"
     pattern = (r"(?:https?://)?(?:www\.)?instagram\.com"
-               r"/stories/(?:highlights/(\d+)|([^/?#]+)(?:/(\d+))?)")
+               r"/s(?:tories/(?:highlights/(\d+)|([^/?#]+)(?:/(\d+))?)"
+               r"|/(aGlnaGxpZ2h0[^?#]+)(?:\?story_media_id=(\d+))?)")
     test = (
         ("https://www.instagram.com/stories/instagram/"),
         ("https://www.instagram.com/stories/highlights/18042509488170095/"),
         ("https://instagram.com/stories/geekmig/2724343156064789461"),
+        ("https://www.instagram.com/s/aGlnaGxpZ2h0OjE4MDQyNTA5NDg4MTcwMDk1"),
+        ("https://www.instagram.com/s/aGlnaGxpZ2h0OjE4MDQyNTA5NDg4MTcwMDk1"
+         "?story_media_id=2724343156064789461"),
     )
 
     def __init__(self, match):
-        self.highlight_id, self.user, self.media_id = match.groups()
-        if self.highlight_id:
+        h1, self.user, m1, h2, m2 = match.groups()
+        if not self.user:
             self.subcategory = InstagramHighlightsExtractor.subcategory
+            self.highlight_id = ("highlight:" + h1 if h1 else
+                                 binascii.a2b_base64(h2).decode())
+        self.media_id = m1 or m2
         InstagramExtractor.__init__(self, match)
 
     def posts(self):
-        if self.highlight_id:
-            reel_id = "highlight:" + self.highlight_id
-        else:
-            reel_id = self.api.user_id(self.user)
-
+        reel_id = self.highlight_id or self.api.user_id(self.user)
         reels = self.api.reels_media(reel_id)
 
         if self.media_id and reels:
