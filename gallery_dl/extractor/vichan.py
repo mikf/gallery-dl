@@ -122,7 +122,7 @@ class VichanThreadExtractor(VichanExtractor):
 class VichanBoardExtractor(VichanExtractor):
     """Extractor for vichan boards"""
     subcategory = "board"
-    pattern = BASE_PATTERN + r"/([^/?#]+)(?:/index|/catalog|/\d+|/$)?"
+    pattern = BASE_PATTERN + r"/([^/?#]+)(?:/index|/catalog|/\d+|/?$)"
     test = (
         ("https://8kun.top/v/index.html", {
             "pattern": VichanThreadExtractor.pattern,
