@@ -26,9 +26,10 @@ class MoebooruExtractor(BooruExtractor):
     def _prepare(post):
         post["date"] = text.parse_timestamp(post["created_at"])
 
-    def _extended_tags(self, post):
-        url = "{}/post/show/{}".format(self.root, post["id"])
-        page = self.request(url).text
+    def _extended_tags(self, post, page=None):
+        if not page:
+            url = "{}/post/show/{}".format(self.root, post["id"])
+            page = self.request(url).text
         html = text.extract(page, '<ul id="tag-', '</ul>')[0]
         if html:
             tags = collections.defaultdict(list)
@@ -37,6 +38,18 @@ class MoebooruExtractor(BooruExtractor):
                 tags[tag_type].append(text.unquote(tag_name))
             for key, value in tags.items():
                 post["tags_" + key] = " ".join(value)
+        return page
+
+    def _notes(self, post, page=None):
+        if not page:
+            url = "{}/post/show/{}".format(self.root, post["id"])
+            page = self.request(url).text
+        notes = collections.defaultdict(list)
+        for translation in text.extract_iter(
+                page, 'class="note-body"', "</div>"):
+            notes["translation"].append(
+                " ".join(re.findall(r"<p>([^<]+)</p>", translation)))
+        post["notes"] = notes
 
     def _pagination(self, url, params):
         params["page"] = self.page_start
@@ -95,6 +108,24 @@ class MoebooruPostExtractor(MoebooruExtractor):
                 "tags_copyright": "touhou",
                 "tags_general": str,
             },
+        }),
+        ("https://lolibooru.moe/post/show/417848", {
+            "content": "18a71e573ad252de7fee7987b8d3365681f0f9bc",
+            "options": (("notes", True),),
+            "keyword": {
+                "notes": {
+                    "translation": ["I'm going shopping!"],
+                },
+            },
+        }),
+        ("https://lolibooru.moe/post/show/281305/", {
+            "content": "a331430223ffc5b23c31649102e7d49f52489b57",
+            "options": (("notes", True),),
+            "keyword": {
+                "notes": {
+                    "translation": list,
+                },
+            }
         }),
         ("https://konachan.net/post/show/205189"),
         ("https://www.sakugabooru.com/post/show/125570"),
