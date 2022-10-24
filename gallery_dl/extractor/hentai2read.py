@@ -23,26 +23,34 @@ class Hentai2readBase():
 class Hentai2readChapterExtractor(Hentai2readBase, ChapterExtractor):
     """Extractor for a single manga chapter from hentai2read.com"""
     archive_fmt = "{chapter_id}_{page}"
-    pattern = r"(?:https?://)?(?:www\.)?hentai2read\.com(/[^/?#]+/(\d+))"
-    test = ("https://hentai2read.com/amazon_elixir/1/", {
-        "url": "964b942cf492b3a129d2fe2608abfc475bc99e71",
-        "keyword": "ff84b8f751f0e4ee37717efc4332ff1db71951d9",
-    })
+    pattern = r"(?:https?://)?(?:www\.)?hentai2read\.com(/[^/?#]+/([^/?#]+))"
+    test = (
+        ("https://hentai2read.com/amazon_elixir/1/", {
+            "url": "964b942cf492b3a129d2fe2608abfc475bc99e71",
+            "keyword": "85645b02d34aa11b3deb6dadd7536863476e1bad",
+        }),
+        ("https://hentai2read.com/popuni_kei_joshi_panic/2.5/", {
+            "url": "454a2312238e3aa7d89dd118252f57c084e21d29",
+            "keyword": "1f244247ad9a801fce3671a4d88c21d4e5b3c7a3",
+        }),
+    )
 
     def __init__(self, match):
         self.chapter = match.group(2)
         ChapterExtractor.__init__(self, match)
 
     def metadata(self, page):
+        chapter, sep, minor = self.chapter.partition(".")
         title, pos = text.extract(page, "<title>", "</title>")
         manga_id, pos = text.extract(page, 'data-mid="', '"', pos)
         chapter_id, pos = text.extract(page, 'data-cid="', '"', pos)
         match = re.match(r"Reading (.+) \(([^)]+)\) Hentai(?: by (.+))? - "
-                         r"(\d+): (.+) . Page 1 ", title)
+                         r"([^:]+): (.+) . Page 1 ", title)
         return {
             "manga": match.group(1),
             "manga_id": text.parse_int(manga_id),
-            "chapter": text.parse_int(self.chapter),
+            "chapter": text.parse_int(chapter),
+            "chapter_minor": sep + minor,
             "chapter_id": text.parse_int(chapter_id),
             "type": match.group(2),
             "author": match.group(3),
@@ -51,8 +59,7 @@ class Hentai2readChapterExtractor(Hentai2readBase, ChapterExtractor):
             "language": "English",
         }
 
-    @staticmethod
-    def images(page):
+    def images(self, page):
         images = text.extract(page, "'images' : ", ",\n")[0]
         return [
             ("https://hentaicdn.com/hentai" + part, None)
@@ -67,11 +74,11 @@ class Hentai2readMangaExtractor(Hentai2readBase, MangaExtractor):
     test = (
         ("https://hentai2read.com/amazon_elixir/", {
             "url": "273073752d418ec887d7f7211e42b832e8c403ba",
-            "keyword": "13c1ce7e15cbb941f01c843b0e89adc993d939ac",
+            "keyword": "85d55ecc3508e321a9b52f0b2241708ea7f06ffa",
         }),
         ("https://hentai2read.com/oshikage_riot/", {
             "url": "6595f920a3088a15c2819c502862d45f8eb6bea6",
-            "keyword": "675c7b7a4fa52cf569c283553bd16b4200a5cd36",
+            "keyword": "4aa8d9d7c4a92f2f9d39bc33eee4b0773fcbe887",
         }),
     )
 
