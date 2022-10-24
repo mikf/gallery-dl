@@ -132,20 +132,7 @@ class AcqqComicExtractor(AcqqBase, Extractor):
     subcategory = "comic"
     categorytransfer = True
     pattern = (BASE_PATTERN + r"$")
-    test = (
-        ("", {
-            "pattern": AcqqChapterExtractor.pattern,
-            "count": 32,
-        }),
-        ("https://comic.naver.com/challenge/list?titleId=765124", {
-            "pattern": AcqqChapterExtractor.pattern,
-            "count": 25,
-        }),
-        ("https://comic.naver.com/bestChallenge/list.nhn?titleId=789786", {
-            "pattern": AcqqChapterExtractor.pattern,
-            "count": ">= 12",
-        }),
-    )
+    test = ()
 
     def __init__(self, match):
         Extractor.__init__(self, match)
