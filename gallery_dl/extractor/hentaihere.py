@@ -30,19 +30,24 @@ class HentaihereChapterExtractor(HentaihereBase, ChapterExtractor):
             "keyword": "0207d20eea3a15d2a8d1496755bdfa49de7cfa9d",
         }),
         ("https://hentaihere.com/m/S23048/1.5/1/", {
-            "author": "Shinozuka Yuuji",
-            "chapter": 1,
-            "chapter_id": 80186,
-            "chapter_minor": ".5",
+            "pattern": r"https://hentaicdn\.com/hentai"
+                       r"/23048/1\.5/ccdn00\d+\.jpg",
             "count": 32,
-            "lang": "en",
-            "language": "English",
-            "manga": "High School Slut's Love Consultation",
-            "manga_id": 23048,
-            "page": int,
-            "title": "High School Slut's Love Consultation + "
-                     "Girlfriend [Full Color]",
-            "type": "Original",
+            "keyword": {
+                "author": "Shinozuka Yuuji",
+                "chapter": 1,
+                "chapter_id": 80186,
+                "chapter_minor": ".5",
+                "count": 32,
+                "lang": "en",
+                "language": "English",
+                "manga": "High School Slut's Love Consultation",
+                "manga_id": 23048,
+                "page": int,
+                "title": "High School Slut's Love Consultation + "
+                         "Girlfriend [Full Color]",
+                "type": "Original",
+            },
         }),
     )
 
