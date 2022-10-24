@@ -512,6 +512,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
+    <td>Mangaplus</td>
+    <td>https://mangaplus.shueisha.co.jp</td>
+    <td>Chapters, Manga</td>
+    <td></td>
+</tr>
+<tr>
     <td>MangaSee</td>
     <td>https://mangasee123.com/</td>
     <td>Chapters, Manga</td>

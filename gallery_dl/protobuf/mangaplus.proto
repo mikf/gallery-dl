@@ -1,0 +1,167 @@
+// Type definitions borrowed from
+// https://github.com/parasquid/manga_plus-api/blob/c7066684f9bb3f354a55cc7094a420134060d897/lib/manga_plus/proto/manga_plus.proto
+
+syntax = "proto3";
+
+package manga_plus;
+
+message Chapter {
+    uint32 titleId = 1;
+    uint32 chapterId = 2;
+    string name = 3;
+    string subTitle = 4;
+    string thumbnailUrl = 5;
+    uint32 startTimeStamp = 6;
+    uint32 endTimeStamp = 7;
+    bool alreadyViewed = 8;
+    bool isVerticalOnly = 9;
+}
+
+message LastPage {
+    Chapter currentChapter = 1;
+    Chapter nextChapter = 2;
+    bool isSubscribed = 4;
+    uint32 nextTimeStamp = 5;
+    int32 chapterType = 6;
+}
+
+message MangaPage {
+    string imageUrl = 1;
+    uint32 width = 2;
+    uint32 height = 3;
+    enum Type {
+        SINGLE = 0;
+        LEFT = 1;
+        RIGHT = 2;
+        DOUBLE = 3;
+    }
+    Type type = 4;
+    string encryptionKey = 5;
+}
+
+message Page {
+    MangaPage mangaPage = 1;
+}
+
+message MangaViewer {
+    repeated Page pages = 1;
+    uint32 chapterId = 2;
+    repeated Chapter chapters = 3;
+    Sns sns = 4;
+    string titleName = 5;
+    string chapterName = 6;
+    uint32 numberOfComments = 7;
+    bool isVerticalOnly = 8;
+    uint32 titleId = 9;
+    bool startFromRight = 10;
+}
+
+message TitleDetailView {
+    Title title = 1;
+    string titleImageUrl = 2;
+    string overview = 3;
+    string backgroundImageUrl = 4;
+    uint32 nextTimeStamp = 5;
+    enum UpdateTiming {
+        NOT_REGULARLY = 0;
+        MONDAY = 1;
+        TUESDAY = 2;
+        WEDNESDAY =3;
+        THURSDAY = 4;
+        FRIDAY = 5;
+        SATURDAY = 6;
+        SUNDAY = 7;
+        DAY = 8;
+    }
+    UpdateTiming updateTiming = 6;
+    string viewingPeriodDescription = 7;
+    string nonAppearanceInfo = 8;
+    repeated Chapter firstChapterList = 9;
+    repeated Chapter lastChapterList = 10;
+    // repeated Banner banners = 11;
+    repeated Title recommendedTitleList = 12;
+    Sns sns = 13;
+    bool isSimulReleased = 14;
+    bool isSubscribed = 15;
+    enum Rating {
+        ALLAGE = 0;
+        TEEN = 1;
+        TEENPLUS = 2;
+        MATURE = 3;
+    }
+    Rating rating = 16;
+    bool chaptersDescending = 17;
+    uint32 numberOfViews = 18;
+    // publisherItems = 19;
+    // titleBanners = 20;
+}
+
+message Title {
+    uint32 titleId = 1;
+    string name = 2;
+    string author = 3;
+    string portraitImageUrl = 4;
+    string landscapeImageUrl = 5;
+    uint32 viewCount = 6;
+    enum Language {
+        ENGLISH = 0;
+        SPANISH = 1;
+    }
+    Language language = 7;
+}
+
+message Sns {
+    string body = 1;
+    string url = 2;
+}
+
+message SuccessResult {
+    // isFeaturedUpdated = 1
+    // registerationData = 3
+    // homeView = 4
+    // featuredTitlesView = 4
+    AllTitlesView allTitlesView = 5;
+    // titleRankingView = 6
+    // subscribedTitlesView = 7
+    TitleDetailView titleDetailView = 8;
+    // commentListView = 9
+    MangaViewer mangaViewer = 10;
+    WebHomeView webHomeView = 11;
+    // settingsView
+    // profileSettingsView
+    // updateProfileResultView
+    // serviceAnnouncementsView
+    // initialView
+    // feedbackView
+    // publisherNewsListView
+    // questionnaireView
+}
+
+message Response {
+    SuccessResult success = 1;
+}
+
+message AllTitlesView {
+    repeated Title titles = 1;
+}
+
+message WebHomeView {
+    // Banner banner = 1;
+    repeated UpdatedTitleGroup updatedTitleGroup = 2;
+    repeated Title title = 3;
+    // Popup popup = 4;
+}
+
+message UpdatedTitleGroup {
+    string groupName = 1;
+    repeated UpdatedTitle title = 2;
+}
+
+message UpdatedTitle {
+    Title title = 1;
+    uint32 chapterId = 2;
+    string chapterName = 3;
+    string chapterSubTitle = 4;
+    bool isLatest = 5;
+    bool isVerticalOnly = 6;
+}

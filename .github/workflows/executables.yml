@@ -28,7 +28,8 @@ jobs:
 
     - name: Build executable
       run: |
-        pip install requests requests[socks] yt-dlp pyinstaller
+        pip install requests requests[socks] yt-dlp pyinstaller grpcio-tools
+        make compile
         python scripts/pyinstaller.py
 
     - name: Upload executable

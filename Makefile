@@ -4,7 +4,7 @@ BINDIR ?= $(PREFIX)/bin
 MANDIR ?= $(PREFIX)/man
 SHAREDIR ?= $(PREFIX)/share
 PYTHON ?= /usr/bin/env python3
-
+SRC ?= gallery_dl
 
 all: man completion supportedsites
 
@@ -12,10 +12,10 @@ clean:
 	$(RM) -r build/
 	$(RM) -r data/
 
-install: man completion
+install: compile man completion
 	$(PYTHON) setup.py install
 
-release: man completion supportedsites
+release: compile man completion supportedsites
 	scripts/release.sh
 
 test:
@@ -23,6 +23,11 @@ test:
 
 executable:
 	scripts/pyinstaller.py
+
+compile:
+	$(PYTHON) -m pip show "grpcio-tools" >/dev/null 2>&1 || \
+		{ >&2 echo "python module 'grpcio-tools' must be installed to compile protocol buffers"; exit 1; }
+	$(PYTHON) -m grpc_tools.protoc -I=$(SRC) --python_out=$(SRC)/ $(SRC)/**/*.proto
 
 completion: data/completion/gallery-dl data/completion/_gallery-dl data/completion/gallery-dl.fish
 

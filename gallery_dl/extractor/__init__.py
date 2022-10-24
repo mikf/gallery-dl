@@ -88,6 +88,7 @@ modules = [
     "mangapark",
     "mangasee",
     "mangoxo",
+    "mangaplus",
     "mememuseum",
     "myhentaigallery",
     "myportfolio",
