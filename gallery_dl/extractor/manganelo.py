@@ -11,21 +11,22 @@ from .. import text
 import re
 
 BASE_PATTERN = \
-    r"(?:https?://)?((?:(?:read)?manganato|(?:www\.)?manganelo)\.com)"
+    r"(?:https?://)?((?:(?:chap|read)?manganato|(?:www\.)?manganelo)\.com)"
 
 
 class ManganeloChapterExtractor(ChapterExtractor):
     """Extractor for manga-chapters from manganelo.com"""
     category = "manganelo"
-    root = "https://readmanganato.com"
+    root = "https://chapmanganato.com"
     pattern = BASE_PATTERN + r"(/(?:manga-\w+|chapter/\w+)/chapter[-_][^/?#]+)"
     test = (
-        ("https://readmanganato.com/manga-gn983696/chapter-23", {
+        ("https://chapmanganato.com/manga-gn983696/chapter-23", {
             "pattern": r"https://v\d+\.mkklcdnv6tempv5\.com/img/tab_17/03/23"
                        r"/39/gn983696/vol_3_chapter_23_24_yen/\d+-[no]\.jpg",
             "keyword": "2c5cd59342f149375df9bcb50aa416b4d04a43cf",
             "count": 25,
         }),
+        ("https://readmanganato.com/manga-gn983696/chapter-23"),
         ("https://manganelo.com/chapter/gamers/chapter_15"),
         ("https://manganelo.com/chapter/gq921227/chapter_23"),
     )
@@ -73,14 +74,15 @@ class ManganeloChapterExtractor(ChapterExtractor):
 class ManganeloMangaExtractor(MangaExtractor):
     """Extractor for manga from manganelo.com"""
     category = "manganelo"
-    root = "https://readmanganato.com"
+    root = "https://chapmanganato.com"
     chapterclass = ManganeloChapterExtractor
     pattern = BASE_PATTERN + r"(/(?:manga[-/]|read_)\w+)/?$"
     test = (
-        ("https://readmanganato.com/manga-gn983696", {
+        ("https://chapmanganato.com/manga-gn983696", {
             "pattern": ManganeloChapterExtractor.pattern,
             "count": ">= 25",
         }),
+        ("https://readmanganato.com/manga-gn983696"),
         ("https://manganelo.com/manga/read_otome_no_teikoku"),
         ("https://manganelo.com/manga/ol921234/"),
     )
