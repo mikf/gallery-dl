@@ -18,10 +18,10 @@ jobs:
           architecture: "x86"
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - name: Set up Python ${{ matrix.python-version }} ${{ matrix.architecture }}
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
         architecture: ${{ matrix.architecture }}
@@ -32,7 +32,7 @@ jobs:
         python scripts/pyinstaller.py
 
     - name: Upload executable
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: gallery-dl-${{ matrix.os }}-${{ matrix.architecture }}-${{ matrix.python-version }}
         path: |
