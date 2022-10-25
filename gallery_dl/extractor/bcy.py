@@ -77,6 +77,7 @@ class BcyExtractor(Extractor):
                             multi = multi["post_data"]["multi"]
                         else:
                             multi = post["multi"]
+                    image_old = image
                     image = multi[data["num"] - 1]
 
                     if image["origin"]:
@@ -87,6 +88,8 @@ class BcyExtractor(Extractor):
                         data["extension"] = ""
                         data["filter"] = "noop"
                         yield Message.Url, image["original_path"], data
+                    else:
+                        yield Message.Url, image_old["path"], data
 
     def posts(self):
         """Returns an iterable with all relevant 'post' objects"""
