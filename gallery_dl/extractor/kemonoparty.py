@@ -190,7 +190,7 @@ class KemonopartyExtractor(Extractor):
         for dm in text.extract_iter(page, "<article", "</article>"):
             dms.append({
                 "body": text.unescape(text.extract(
-                    dm, '<pre>', '</pre></section>',
+                    dm, "<pre>", "</pre></",
                 )[0].strip()),
                 "date": text.extract(dm, 'datetime="', '"')[0],
             })
