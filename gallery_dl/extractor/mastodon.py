@@ -126,6 +126,20 @@ class MastodonUserExtractor(MastodonExtractor):
         )
 
 
+class MastodonBookmarkExtractor(MastodonExtractor):
+    """Extractor for mastodon bookmarks"""
+    subcategory = "bookmark"
+    pattern = BASE_PATTERN + r"/bookmarks"
+    test = (
+        ("https://mastodon.social/bookmarks"),
+        ("https://pawoo.net/bookmarks"),
+        ("https://baraag.net/bookmarks"),
+    )
+
+    def statuses(self):
+        return MastodonAPI(self).account_bookmarks()
+
+
 class MastodonFollowingExtractor(MastodonExtractor):
     """Extractor for followed mastodon users"""
     subcategory = "following"
@@ -203,6 +217,10 @@ class MastodonAPI():
                 self.extractor._check_move(account)
                 return account["id"]
         raise exception.NotFoundError("account")
+
+    def account_bookmarks(self):
+        endpoint = "/v1/bookmarks"
+        return self._pagination(endpoint, None)
 
     def account_following(self, account_id):
         endpoint = "/v1/accounts/{}/following".format(account_id)
