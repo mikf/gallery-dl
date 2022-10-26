@@ -2403,6 +2403,27 @@ Description
     You can use ``"all"`` instead of listing all types separately.
 
 
+extractor.tumblr.fallback-delay
+-------------------------------
+Type
+    ``float``
+Default
+    ``120.0``
+Description
+    Number of seconds to wait between retries
+    for fetching full-resolution images.
+
+
+extractor.tumblr.fallback-retries
+---------------------------------
+Type
+    ``integer``
+Default
+    ``2``
+Description
+    Number of retries for fetching full-resolution images.
+
+
 extractor.twibooru.api-key
 --------------------------
 Type
