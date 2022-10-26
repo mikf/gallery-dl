@@ -49,6 +49,8 @@ class TumblrExtractor(Extractor):
         self.reblogs = self.config("reblogs", True)
         self.external = self.config("external", False)
         self.original = self.config("original", True)
+        self.fallback_delay = self.config("fallback-delay", 120.0)
+        self.fallback_retries = self.config("fallback-retries", 2)
 
         if len(self.types) == 1:
             self.api.posts_type = next(iter(self.types))
@@ -250,8 +252,8 @@ class TumblrExtractor(Extractor):
             return updated, (resized == updated)
 
     def _original_image_fallback(self, url, post_id):
-        for _ in range(3):
-            self.sleep(120, "image token")
+        for _ in range(self.fallback_retries):
+            self.sleep(self.fallback_delay, "image token")
             yield self._update_image_token(url)[0]
         self.log.warning("Unable to fetch higher-resolution "
                          "version of %s (%s)", url, post_id)
