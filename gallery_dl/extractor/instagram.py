@@ -172,6 +172,15 @@ class InstagramExtractor(Extractor):
                 data["location_url"] = "{}/explore/locations/{}/{}/".format(
                     self.root, location["pk"], slug)
 
+            coauthors = post.get("coauthor_producers")
+            if coauthors:
+                data["coauthors"] = [
+                    {"id"       : user["pk"],
+                     "username" : user["username"],
+                     "full_name": user["full_name"]}
+                    for user in coauthors
+                ]
+
             if "carousel_media" in post:
                 items = post["carousel_media"]
                 data["sidecar_media_id"] = data["post_id"]
@@ -265,6 +274,14 @@ class InstagramExtractor(Extractor):
             data["location_slug"] = location["slug"]
             data["location_url"] = "{}/explore/locations/{}/{}/".format(
                 self.root, location["id"], location["slug"])
+
+        coauthors = post.get("coauthor_producers")
+        if coauthors:
+            data["coauthors"] = [
+                {"id"      : user["id"],
+                 "username": user["username"]}
+                for user in coauthors
+            ]
 
         data["_files"] = files = []
         if "edge_sidecar_to_children" in post:
