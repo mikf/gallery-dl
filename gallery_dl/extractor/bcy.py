@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2020-2021 Mike Fährmann
+# Copyright 2020-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -25,9 +25,12 @@ class BcyExtractor(Extractor):
     def __init__(self, match):
         Extractor.__init__(self, match)
         self.item_id = match.group(1)
+        self.session.headers["Referer"] = self.root + "/"
 
     def items(self):
-        sub = re.compile(r"^https?://p\d+-bcy\.byteimg\.com/img/banciyuan").sub
+        sub = re.compile(r"^https?://p\d+-bcy"
+                         r"(?:-sign\.bcyimg\.com|\.byteimg\.com/img)"
+                         r"/banciyuan").sub
         iroot = "https://img-bcy-qn.pstatp.com"
         noop = self.config("noop")
 
@@ -64,19 +67,18 @@ class BcyExtractor(Extractor):
                 url = image["path"].partition("~")[0]
                 text.nameext_from_url(url, data)
 
+                # full-resolution image without watermark
                 if data["extension"]:
                     if not url.startswith(iroot):
                         url = sub(iroot, url)
                     data["filter"] = ""
                     yield Message.Url, url, data
 
+                # watermarked image & low quality noop filter
                 else:
-                    if not multi:
-                        if len(post["multi"]) < len(post["image_list"]):
-                            multi = self._data_from_post(post["item_id"])
-                            multi = multi["post_data"]["multi"]
-                        else:
-                            multi = post["multi"]
+                    if multi is None:
+                        multi = self._data_from_post(
+                            post["item_id"])["post_data"]["multi"]
                     image = multi[data["num"] - 1]
 
                     if image["origin"]:
@@ -111,8 +113,8 @@ class BcyUserExtractor(BcyExtractor):
             "count": ">= 20",
         }),
         ("https://bcy.net/u/109282764041", {
-            "pattern": r"https://p\d-bcy.byteimg.com/img/banciyuan/[0-9a-f]+"
-                       r"~tplv-banciyuan-logo-v3:.+\.image",
+            "pattern": r"https://p\d-bcy-sign\.bcyimg\.com/banciyuan/[0-9a-f]+"
+                       r"~tplv-bcyx-yuan-logo-v1:.+\.image",
             "range": "1-25",
             "count": 25,
         }),
@@ -171,13 +173,13 @@ class BcyPostExtractor(BcyExtractor):
         }),
         # only watermarked images available
         ("https://bcy.net/item/detail/6950136331708144648", {
-            "pattern": r"https://p\d-bcy.byteimg.com/img/banciyuan/[0-9a-f]+"
-                       r"~tplv-banciyuan-logo-v3:.+\.image",
-            "count": 8,
+            "pattern": r"https://p\d-bcy-sign\.bcyimg\.com/banciyuan/[0-9a-f]+"
+                       r"~tplv-bcyx-yuan-logo-v1:.+\.image",
+            "count": 10,
             "keyword": {"filter": "watermark"},
         }),
         # deleted
-        ("https://bcy.net/item/detail/6780546160802143236", {
+        ("https://bcy.net/item/detail/6780546160802143237", {
             "exception": exception.NotFoundError,
             "count": 0,
         }),
