@@ -44,11 +44,22 @@ class MoebooruExtractor(BooruExtractor):
         if not page:
             url = "{}/post/show/{}".format(self.root, post["id"])
             page = self.request(url).text
-        notes = collections.defaultdict(list)
-        for translation in text.extract_iter(
-                page, 'class="note-body"', "</div>"):
-            notes["translation"].append(
-                " ".join(re.findall(r"<p>([^<]+)</p>", translation)))
+        notes = []
+        notes_container = text.extract(page, 'id="note-container"', "<img ")[0]
+        if not notes_container:
+            return
+
+        for note in notes_container.split('class="note-box"')[1:]:
+            extr = text.extract_from(note)
+            notes.append({
+                "width" : int(extr("width: ", "p")),
+                "height": int(extr("height: ", "p")),
+                "y"     : int(extr("top: ", "p")),
+                "x"     : int(extr("left: ", "p")),
+                "id"    : int(extr('id="note-body-', '"')),
+                "body"  : text.remove_html(extr('>', "</div>")),
+            })
+
         post["notes"] = notes
 
     def _pagination(self, url, params):
@@ -109,23 +120,36 @@ class MoebooruPostExtractor(MoebooruExtractor):
                 "tags_general": str,
             },
         }),
-        ("https://lolibooru.moe/post/show/417848", {
-            "content": "18a71e573ad252de7fee7987b8d3365681f0f9bc",
+        ("https://yande.re/post/show/993156", {
+            "content": "fed722bd90f48de41ec163692befc701056e2b1e",
             "options": (("notes", True),),
             "keyword": {
-                "notes": {
-                    "translation": ["I'm going shopping!"],
-                },
+                "notes": [
+                    {
+                        "id": 7096,
+                        "x" : 90,
+                        "y" : 626,
+                        "width" : 283,
+                        "height": 529,
+                        "body"  : "Please keep this as a secret for me!!",
+                    },
+                    {
+                        "id": 7095,
+                        "x" : 900,
+                        "y" : 438,
+                        "width" : 314,
+                        "height": 588,
+                        "body"  : "The facts that I love playing games",
+                    },
+                ],
             },
         }),
         ("https://lolibooru.moe/post/show/281305/", {
             "content": "a331430223ffc5b23c31649102e7d49f52489b57",
             "options": (("notes", True),),
             "keyword": {
-                "notes": {
-                    "translation": list,
-                },
-            }
+                "notes": list,
+            },
         }),
         ("https://konachan.net/post/show/205189"),
         ("https://www.sakugabooru.com/post/show/125570"),
