@@ -111,9 +111,15 @@ class MastodonUserExtractor(MastodonExtractor):
             "count": 60,
         }),
         ("https://baraag.net/@pumpkinnsfw"),
+        ("https://mastodon.social/@yoru_nine@pawoo.net", {
+            "pattern": r"https://mastodon\.social/media_proxy/\d+/original",
+            "range": "1-10",
+            "count": 10,
+        }),
         ("https://mastodon.social/@id:10843"),
         ("https://mastodon.social/users/id:10843"),
         ("https://mastodon.social/users/jk"),
+        ("https://mastodon.social/users/yoru_nine@pawoo.net"),
     )
 
     def statuses(self):
@@ -211,9 +217,13 @@ class MastodonAPI():
         if username.startswith("id:"):
             return username[3:]
 
-        handle = "@{}@{}".format(username, self.extractor.instance)
+        if "@" in username:
+            handle = "@" + username
+        else:
+            handle = "@{}@{}".format(username, self.extractor.instance)
+
         for account in self.account_search(handle, 1):
-            if account["username"] == username:
+            if account["acct"] == username:
                 self.extractor._check_move(account)
                 return account["id"]
         raise exception.NotFoundError("account")
