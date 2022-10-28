@@ -235,7 +235,7 @@ def main():
                 except exception.TerminateExtraction:
                     pass
                 except exception.NoExtractorError:
-                    log.error("No suitable extractor found for '%s'", url)
+                    log.error("Unsupported URL '%s'", url)
                     retval |= 64
             return retval
 
