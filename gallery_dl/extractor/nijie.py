@@ -326,6 +326,55 @@ class NijieNuitaExtractor(NijieExtractor):
             page, "<title>", "さんの抜いた")[0] or "")
 
 
+class NijieFeedExtractor(NijieExtractor):
+    """Extractor for nijie liked user feed"""
+    subcategory = "feed"
+    pattern = BASE_PATTERN + r"/like_user_view\.php"
+    test = (
+        ("https://nijie.info/like_user_view.php", {
+            "range": "1-10",
+            "count": 10,
+        }),
+        ("https://horne.red/like_user_view.php"),
+    )
+
+    def image_ids(self):
+        return self._pagination("like_user_view")
+
+    @staticmethod
+    def _extract_user_name(page):
+        return ""
+
+
+class NijiefollowedExtractor(NijieExtractor):
+    """Extractor for followed nijie users"""
+    subcategory = "followed"
+    pattern = BASE_PATTERN + r"/like_my\.php"
+    test = (
+        ("https://nijie.info/like_my.php"),
+        ("https://horne.red/like_my.php"),
+    )
+
+    def items(self):
+        self.login()
+
+        url = self.root + "/like_my.php"
+        params = {"p": 1}
+        data = {"_extractor": NijieUserExtractor}
+
+        while True:
+            page = self.request(url, params=params).text
+
+            for user_id in text.extract_iter(
+                    page, '"><a href="/members.php?id=', '"'):
+                user_url = "{}/members.php?id={}".format(self.root, user_id)
+                yield Message.Queue, user_url, data
+
+            if '<a rel="next"' not in page:
+                return
+            params["p"] += 1
+
+
 class NijieImageExtractor(NijieExtractor):
     """Extractor for a nijie work/image"""
     subcategory = "image"

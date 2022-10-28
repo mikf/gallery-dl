@@ -68,6 +68,16 @@ class FanboxExtractor(Extractor):
                 post["html"] = content_body["html"]
             if post["type"] == "article":
                 post["articleBody"] = content_body.copy()
+            if "blocks" in content_body:
+                content = []
+                append = content.append
+                for block in content_body["blocks"]:
+                    if "text" in block:
+                        append(block["text"])
+                    if "links" in block:
+                        for link in block["links"]:
+                            append(link["url"])
+                post["content"] = "\n".join(content)
 
         post["date"] = text.parse_datetime(post["publishedDatetime"])
         post["text"] = content_body.get("text") if content_body else None
@@ -269,6 +279,19 @@ class FanboxPostExtractor(FanboxExtractor):
                 "tags": list,
                 "articleBody": dict,
                 "hasAdultContent": True
+            },
+        }),
+        # 'content' metadata (#3020)
+        ("https://www.fanbox.cc/@official-en/posts/4326303", {
+            "keyword": {
+                "content": r"re:(?s)^Greetings from FANBOX.\n \nAs of Monday, "
+                           r"September 5th, 2022, we are happy to announce "
+                           r"the start of the FANBOX hashtag event "
+                           r"#MySetupTour ! \nAbout the event\nTo join this "
+                           r"event .+ \nPlease check this page for further "
+                           r"details regarding the Privacy & Terms.\n"
+                           r"https://fanbox.pixiv.help/.+/10184952456601\n\n\n"
+                           r"Thank you for your continued support of FANBOX.$",
             },
         }),
     )

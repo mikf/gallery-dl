@@ -17,7 +17,7 @@ import re
 BASE_PATTERN = (
     r"(?:tumblr:(?:https?://)?([^/]+)|"
     r"(?:https?://)?"
-    r"(?:www\.tumblr\.com/blog/(?:view/)?([\w-]+)|"
+    r"(?:www\.tumblr\.com/(?:blog/(?:view/)?)?([\w-]+)|"
     r"([\w-]+\.tumblr\.com)))"
 )
 
@@ -49,6 +49,8 @@ class TumblrExtractor(Extractor):
         self.reblogs = self.config("reblogs", True)
         self.external = self.config("external", False)
         self.original = self.config("original", True)
+        self.fallback_delay = self.config("fallback-delay", 120.0)
+        self.fallback_retries = self.config("fallback-retries", 2)
 
         if len(self.types) == 1:
             self.api.posts_type = next(iter(self.types))
@@ -250,9 +252,9 @@ class TumblrExtractor(Extractor):
             return updated, (resized == updated)
 
     def _original_image_fallback(self, url, post_id):
-        yield self._update_image_token(url)[0]
-        yield self._update_image_token(url)[0]
-        yield self._update_image_token(url)[0]
+        for _ in range(self.fallback_retries):
+            self.sleep(self.fallback_delay, "image token")
+            yield self._update_image_token(url)[0]
         self.log.warning("Unable to fetch higher-resolution "
                          "version of %s (%s)", url, post_id)
 
@@ -298,6 +300,7 @@ class TumblrUserExtractor(TumblrExtractor):
         ("tumblr:www.b-authentique.com"),
         ("https://www.tumblr.com/blog/view/smarties-art"),
         ("https://www.tumblr.com/blog/smarties-art"),
+        ("https://www.tumblr.com/smarties-art"),
     )
 
     def posts(self):
@@ -354,6 +357,8 @@ class TumblrPostExtractor(TumblrExtractor):
         }),
         ("http://demo.tumblr.com/image/459265350"),
         ("https://www.tumblr.com/blog/view/smarties-art/686047436641353728"),
+        ("https://www.tumblr.com/blog/smarties-art/686047436641353728"),
+        ("https://www.tumblr.com/smarties-art/686047436641353728"),
     )
 
     def __init__(self, match):
@@ -381,6 +386,8 @@ class TumblrTagExtractor(TumblrExtractor):
             "count": 1,
         }),
         ("https://www.tumblr.com/blog/view/smarties-art/tagged/undertale"),
+        ("https://www.tumblr.com/blog/smarties-art/tagged/undertale"),
+        ("https://www.tumblr.com/smarties-art/tagged/undertale"),
     )
 
     def __init__(self, match):
@@ -402,6 +409,8 @@ class TumblrLikesExtractor(TumblrExtractor):
             "count": 1,
         }),
         ("https://www.tumblr.com/blog/view/mikf123/likes"),
+        ("https://www.tumblr.com/blog/mikf123/likes"),
+        ("https://www.tumblr.com/mikf123/likes"),
     )
 
     def posts(self):
@@ -435,11 +444,15 @@ class TumblrAPI(oauth.OAuth1API):
 
     def posts(self, blog, params):
         """Retrieve published posts"""
-        params.update({"offset": 0, "limit": 50, "reblog_info": "true"})
+        params["offset"] = self.extractor.config("offset") or 0
+        params["limit"] = 50
+        params["reblog_info"] = "true"
+
         if self.posts_type:
             params["type"] = self.posts_type
         if self.before:
             params["before"] = self.before
+
         while True:
             data = self._call(blog, "posts", params)
             self.BLOG_CACHE[blog] = data["blog"]

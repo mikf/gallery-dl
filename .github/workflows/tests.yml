@@ -15,13 +15,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.4", "3.5", "3.6", "3.7", "3.8", "3.9", "3.10", "pypy3"]
+        python-version: ["3.4", "3.5", "3.6", "3.7", "3.8", "3.9", "3.10", "3.11", "pypy3.9"]
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
 
@@ -30,7 +30,7 @@ jobs:
         PYV: ${{ matrix.python-version }}
       run: |
         pip install -r requirements.txt
-        pip install "flake8<4"
+        pip install "flake8<4" "importlib-metadata<5"
         pip install youtube-dl
         if [[ "$PYV" != "3.4" && "$PYV" != "3.5" ]]; then pip install yt-dlp; fi
 
@@ -42,6 +42,6 @@ jobs:
       run: |
         make test
 
-    - name: Test autogeneration of man pages, bash/zsh completion, etc
+    - name: Test autogeneration of man pages, bash/zsh/fish completion, etc
       run: |
         make

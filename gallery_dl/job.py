@@ -8,7 +8,6 @@
 
 import sys
 import json
-import time
 import errno
 import logging
 import functools
@@ -74,9 +73,10 @@ class Job():
         log = extractor.log
         msg = None
 
-        sleep = util.build_duration_func(extractor.config("sleep-extractor"))
+        sleep = util.build_duration_func(
+            extractor.config("sleep-extractor"))
         if sleep:
-            time.sleep(sleep())
+            extractor.sleep(sleep(), "extractor")
 
         try:
             for msg in extractor:
@@ -238,7 +238,7 @@ class DownloadJob(Job):
             return
 
         if self.sleep:
-            time.sleep(self.sleep())
+            self.extractor.sleep(self.sleep(), "download")
 
         # download from URL
         if not self.download(url):
@@ -527,11 +527,11 @@ class SimulationJob(DownloadJob):
         if not kwdict["extension"]:
             kwdict["extension"] = "jpg"
         self.pathfmt.set_filename(kwdict)
-        self.out.skip(self.pathfmt.path)
         if self.sleep:
-            time.sleep(self.sleep())
+            self.extractor.sleep(self.sleep(), "download")
         if self.archive:
             self.archive.add(kwdict)
+        self.out.skip(self.pathfmt.path)
 
     def handle_directory(self, kwdict):
         if not self.pathfmt:
@@ -697,17 +697,18 @@ class DataJob(Job):
         self.ascii = config.get(("output",), "ascii", ensure_ascii)
 
         private = config.get(("output",), "private")
-        self.filter = util.identity if private else util.filter_dict
+        self.filter = dict.copy if private else util.filter_dict
 
     def run(self):
+        extractor = self.extractor
         sleep = util.build_duration_func(
-            self.extractor.config("sleep-extractor"))
+            extractor.config("sleep-extractor"))
         if sleep:
-            time.sleep(sleep())
+            extractor.sleep(sleep(), "extractor")
 
         # collect data
         try:
-            for msg in self.extractor:
+            for msg in extractor:
                 self.dispatch(msg)
         except exception.StopExtraction:
             pass

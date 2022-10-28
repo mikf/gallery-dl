@@ -45,6 +45,7 @@ class PixivExtractor(Extractor):
                 work["tags"] = [tag["name"] for tag in work["tags"]]
 
         ratings = {0: "General", 1: "R-18", 2: "R-18G"}
+        userdata = self.config("metadata")
         metadata = self.metadata()
 
         works = self.works()
@@ -60,6 +61,8 @@ class PixivExtractor(Extractor):
             del work["image_urls"]
             del work["meta_pages"]
 
+            if userdata:
+                work.update(self.api.user_detail(work["user"]["id"]))
             if transform_tags:
                 transform_tags(work)
             work["num"] = 0
@@ -198,7 +201,7 @@ class PixivArtworksExtractor(PixivExtractor):
 
     def metadata(self):
         if self.config("metadata"):
-            return self.api.user_detail(self.user_id)
+            self.api.user_detail(self.user_id)
         return {}
 
     def works(self):
@@ -557,7 +560,7 @@ class PixivSearchExtractor(PixivExtractor):
             sort = "date_d"
         self.sort = sort_map[sort]
 
-        target = query.get("s_mode", "s_tag")
+        target = query.get("s_mode", "s_tag_full")
         target_map = {
             "s_tag": "partial_match_for_tags",
             "s_tag_full": "exact_match_for_tags",
@@ -565,7 +568,7 @@ class PixivSearchExtractor(PixivExtractor):
         }
         if target not in target_map:
             self.log.warning("invalid search target '%s'", target)
-            target = "s_tag"
+            target = "s_tag_full"
         self.target = target_map[target]
 
         self.date_start = query.get("scd")

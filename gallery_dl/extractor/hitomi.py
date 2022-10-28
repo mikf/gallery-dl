@@ -115,12 +115,16 @@ class HitomiGalleryExtractor(GalleryExtractor):
 
         fmt = self.config("format") or "webp"
         if fmt == "original":
-            subdomain, fmt, ext = "b", "images", None
+            subdomain, fmt, ext, check = "b", "images", None, False
         else:
-            subdomain, ext = "a", fmt
+            subdomain, ext, check = "a", fmt, True
 
         result = []
         for image in self.info["files"]:
+            if check:
+                if not image.get("has" + fmt):
+                    fmt = ext = "webp"
+                check = False
             ihash = image["hash"]
             idata = text.nameext_from_url(image["name"])
             if ext:

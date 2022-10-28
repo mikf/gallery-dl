@@ -190,7 +190,7 @@ class KemonopartyExtractor(Extractor):
         for dm in text.extract_iter(page, "<article", "</article>"):
             dms.append({
                 "body": text.unescape(text.extract(
-                    dm, '<pre>', '</pre></section>',
+                    dm, "<pre>", "</pre></",
                 )[0].strip()),
                 "date": text.extract(dm, 'datetime="', '"')[0],
             })
@@ -230,9 +230,10 @@ class KemonopartyUserExtractor(KemonopartyExtractor):
             posts = self.request(url, params=params).json()
             yield from posts
 
-            if len(posts) < 25:
+            cnt = len(posts)
+            if cnt < 25:
                 return
-            params["o"] += 25
+            params["o"] += cnt
 
 
 class KemonopartyPostExtractor(KemonopartyExtractor):
@@ -420,9 +421,10 @@ class KemonopartyDiscordExtractor(KemonopartyExtractor):
             posts = self.request(url, params=params).json()
             yield from posts
 
-            if len(posts) < 25:
+            cnt = len(posts)
+            if cnt < 25:
                 break
-            params["skip"] += 25
+            params["skip"] += cnt
 
 
 class KemonopartyDiscordServerExtractor(KemonopartyExtractor):

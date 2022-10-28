@@ -52,7 +52,7 @@ class WallhavenSearchExtractor(WallhavenExtractor):
     subcategory = "search"
     directory_fmt = ("{category}", "{search[q]}")
     archive_fmt = "s_{search[q]}_{id}"
-    pattern = r"(?:https?://)?wallhaven\.cc/search(?:/?\?([^/?#]+))?"
+    pattern = r"(?:https?://)?wallhaven\.cc/search(?:/?\?([^#]+))?"
     test = (
         ("https://wallhaven.cc/search?q=touhou"),
         (("https://wallhaven.cc/search?q=id%3A87"

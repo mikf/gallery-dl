@@ -105,6 +105,9 @@ class PathFormat():
             strip = ". "
         self.strip = strip
 
+        if WINDOWS:
+            self.extended = config("path-extended", True)
+
         basedir = extractor._parentdir
         if not basedir:
             basedir = config("base-directory")
@@ -178,7 +181,7 @@ class PathFormat():
         else:
             self.directory = directory = self.basedirectory
 
-        if WINDOWS:
+        if WINDOWS and self.extended:
             # Enable longer-than-260-character paths
             directory = os.path.abspath(directory)
             if directory.startswith("\\\\"):

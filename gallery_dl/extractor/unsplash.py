@@ -210,7 +210,7 @@ class UnsplashCollectionExtractor(UnsplashExtractor):
 class UnsplashSearchExtractor(UnsplashExtractor):
     """Extractor for unsplash search results"""
     subcategory = "search"
-    pattern = BASE_PATTERN + r"/s/photos/([^/?#]+)(?:\?([^/?#]+))?"
+    pattern = BASE_PATTERN + r"/s/photos/([^/?#]+)(?:\?([^#]+))?"
     test = ("https://unsplash.com/s/photos/hair-style", {
         "pattern": r"https://images\.unsplash\.com/((flagged/)?photo-\d+-\w+"
                    r"|reserve/[^/?#]+)\?ixid=\w+&ixlib=rb-1\.2\.1$",

@@ -57,7 +57,7 @@ build-linux() {
     VENV_PYTHON="${VENV_PATH}/bin/python"
 
     rm -rf "${VENV_PATH}"
-    virtualenv "${VENV_PATH}"
+    python -m virtualenv "${VENV_PATH}"
 
     $VENV_PYTHON -m pip install requests requests[socks] yt-dlp pyinstaller
     $VENV_PYTHON ./scripts/pyinstaller.py

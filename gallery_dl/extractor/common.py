@@ -122,8 +122,7 @@ class Extractor():
             seconds = (self._interval() -
                        (time.time() - Extractor.request_timestamp))
             if seconds > 0.0:
-                self.log.debug("Sleeping for %.5s seconds", seconds)
-                time.sleep(seconds)
+                self.sleep(seconds, "request")
 
         while True:
             try:
@@ -169,8 +168,9 @@ class Extractor():
             self.log.debug("%s (%s/%s)", msg, tries, retries+1)
             if tries > retries:
                 break
-            time.sleep(
-                max(tries, self._interval()) if self._interval else tries)
+            self.sleep(
+                max(tries, self._interval()) if self._interval else tries,
+                "retry")
             tries += 1
 
         raise exception.HttpError(msg, response)
@@ -200,6 +200,11 @@ class Extractor():
             t = datetime.datetime.fromtimestamp(until).time()
             isotime = "{:02}:{:02}:{:02}".format(t.hour, t.minute, t.second)
             self.log.info("Waiting until %s for %s.", isotime, reason)
+        time.sleep(seconds)
+
+    def sleep(self, seconds, reason):
+        self.log.debug("Sleeping %.2f seconds (%s)",
+                       seconds, reason)
         time.sleep(seconds)
 
     def _get_auth_info(self):

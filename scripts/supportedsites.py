@@ -69,6 +69,7 @@ CATEGORY_MAP = {
     "mangafox"       : "Manga Fox",
     "mangahere"      : "Manga Here",
     "mangakakalot"   : "MangaKakalot",
+    "mangalife"      : "MangaLife",
     "manganelo"      : "Manganato",
     "mangapark"      : "MangaPark",
     "mangasee"       : "MangaSee",
@@ -190,7 +191,11 @@ SUBCATEGORY_MAP = {
     "mangadex": {
         "feed" : "Followed Feed",
     },
+    "nana": {
+        "search": "Favorites, Search Results",
+    },
     "nijie": {
+        "followed": "Followed Users",
         "nuita" : "Nuita History",
     },
     "pinterest": {
@@ -221,6 +226,9 @@ SUBCATEGORY_MAP = {
         "tweets": "",
         "replies": "",
         "list-members": "List Members",
+    },
+    "vk": {
+        "tagged": "Tagged Photos",
     },
     "wallhaven": {
         "collections": "",
@@ -255,6 +263,7 @@ BASE_MAP = {
     "gelbooru_v02": "Gelbooru Beta 0.2",
     "lolisafe"    : "lolisafe and chibisafe",
     "moebooru"    : "Moebooru and MyImouto",
+    "vichan"      : "vichan Imageboards",
 }
 
 _OAUTH = '<a href="https://github.com/mikf/gallery-dl#oauth">OAuth</a>'
@@ -424,6 +433,10 @@ def build_extractor_list():
 
     default["pornimagesxxx"] = default["hentaicosplays"]
     domains["pornimagesxxx"] = "https://porn-images-xxx.com/"
+
+    # add manga4life.com
+    default["mangalife"] = default["mangasee"]
+    domains["mangalife"] = "https://manga4life.com/"
 
     return categories, domains
 

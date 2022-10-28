@@ -72,7 +72,7 @@ class DeviantartExtractor(Extractor):
     def items(self):
         self.api = DeviantartOAuthAPI(self)
 
-        if self.user:
+        if self.user and self.config("group", True):
             profile = self.api.user_profile(self.user)
             self.group = not profile
             if self.group:
@@ -938,11 +938,11 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
     def deviations(self):
         url = "{}/{}/{}/{}".format(
             self.root, self.user, self.type, self.deviation_id)
-        appurl = text.extract(self._limited_request(url).text,
-                              'property="da:appurl" content="', '"')[0]
-        if not appurl:
+        uuid = text.extract(self._limited_request(url).text,
+                            '"deviationUuid\\":\\"', '\\')[0]
+        if not uuid:
             raise exception.NotFoundError("deviation")
-        return (self.api.deviation(appurl.rpartition("/")[2]),)
+        return (self.api.deviation(uuid),)
 
 
 class DeviantartScrapsExtractor(DeviantartExtractor):

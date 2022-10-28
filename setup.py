@@ -5,7 +5,6 @@ import re
 import sys
 import os.path
 import warnings
-from setuptools import setup
 
 
 def read(fname):
@@ -41,99 +40,109 @@ FILES = [
     ]
 ]
 
+PACKAGES = [
+    "gallery_dl",
+    "gallery_dl.extractor",
+    "gallery_dl.downloader",
+    "gallery_dl.postprocessor",
+]
+
 DESCRIPTION = ("Command-line program to download image galleries and "
                "collections from several image hosting sites")
 LONG_DESCRIPTION = read("README.rst")
 
 
-if "py2exe" in sys.argv:
-    try:
-        import py2exe
-    except ImportError:
-        sys.exit("Error importing 'py2exe'")
+def build_py2exe():
+    from py2exe import freeze
 
     # py2exe dislikes version specifiers with a trailing '-dev'
-    VERSION = VERSION.partition("-")[0]
+    VERSION_ = VERSION.partition("-")[0]
 
-    params = {
-        "console": [{
+    freeze(
+        console=[{
             "script"         : "./gallery_dl/__main__.py",
             "dest_base"      : "gallery-dl",
-            "version"        : VERSION,
+        }],
+        version_info={
+            "version"        : VERSION_,
             "description"    : DESCRIPTION,
             "comments"       : LONG_DESCRIPTION,
             "product_name"   : "gallery-dl",
-            "product_version": VERSION,
-        }],
-        "options": {"py2exe": {
-            "bundle_files": 0,
-            "compressed"  : 1,
-            "optimize"    : 1,
-            "dist_dir"    : ".",
-            "packages"    : ["gallery_dl"],
-            "includes"    : ["youtube_dl"],
-            "dll_excludes": ["w9xpopen.exe"],
-        }},
-        "zipfile": None,
-    }
+            "product_version": VERSION_,
+        },
+        options={
+            "bundle_files"   : 0,
+            "compressed"     : 1,
+            "optimize"       : 1,
+            "dist_dir"       : "./dist",
+            "packages"       : PACKAGES,
+            "includes"       : ["youtube_dl"],
+            "dll_excludes"   : ["w9xpopen.exe"],
+        },
+        zipfile=None,
+    )
 
+
+def build_setuptools():
+    from setuptools import setup
+
+    setup(
+        name="gallery_dl",
+        version=VERSION,
+        description=DESCRIPTION,
+        long_description=LONG_DESCRIPTION,
+        url="https://github.com/mikf/gallery-dl",
+        download_url="https://github.com/mikf/gallery-dl/releases/latest",
+        author="Mike Fährmann",
+        author_email="mike_faehrmann@web.de",
+        maintainer="Mike Fährmann",
+        maintainer_email="mike_faehrmann@web.de",
+        license="GPLv2",
+        python_requires=">=3.4",
+        install_requires=[
+            "requests>=2.11.0",
+        ],
+        extras_require={
+            "video": [
+                "youtube-dl",
+            ],
+        },
+        entry_points={
+            "console_scripts": [
+                "gallery-dl = gallery_dl:main",
+            ],
+        },
+        packages=PACKAGES,
+        data_files=FILES,
+        test_suite="test",
+        keywords="image gallery downloader crawler scraper",
+        classifiers=[
+            "Development Status :: 5 - Production/Stable",
+            "Environment :: Console",
+            "Intended Audience :: End Users/Desktop",
+            "License :: OSI Approved :: GNU General Public License v2 (GPLv2)",
+            "Operating System :: OS Independent",
+            "Programming Language :: Python",
+            "Programming Language :: Python :: 3",
+            "Programming Language :: Python :: 3 :: Only",
+            "Programming Language :: Python :: 3.4",
+            "Programming Language :: Python :: 3.5",
+            "Programming Language :: Python :: 3.6",
+            "Programming Language :: Python :: 3.7",
+            "Programming Language :: Python :: 3.8",
+            "Programming Language :: Python :: 3.9",
+            "Programming Language :: Python :: 3.10",
+            "Programming Language :: Python :: 3.11",
+            "Programming Language :: Python :: Implementation :: CPython",
+            "Programming Language :: Python :: Implementation :: PyPy",
+            "Topic :: Internet :: WWW/HTTP",
+            "Topic :: Multimedia :: Graphics",
+            "Topic :: Utilities",
+        ],
+    )
+
+
+if "py2exe" in sys.argv:
+    build_py2exe()
 else:
-    params = {}
-
-
-setup(
-    name="gallery_dl",
-    version=VERSION,
-    description=DESCRIPTION,
-    long_description=LONG_DESCRIPTION,
-    url="https://github.com/mikf/gallery-dl",
-    download_url="https://github.com/mikf/gallery-dl/releases/latest",
-    author="Mike Fährmann",
-    author_email="mike_faehrmann@web.de",
-    maintainer="Mike Fährmann",
-    maintainer_email="mike_faehrmann@web.de",
-    license="GPLv2",
-    python_requires=">=3.4",
-    install_requires=[
-        "requests>=2.11.0",
-    ],
-    extras_require={
-        "video": [
-            "youtube-dl",
-        ],
-    },
-    packages=[
-        "gallery_dl",
-        "gallery_dl.extractor",
-        "gallery_dl.downloader",
-        "gallery_dl.postprocessor",
-    ],
-    entry_points={
-        "console_scripts": [
-            "gallery-dl = gallery_dl:main",
-        ],
-    },
-    data_files=FILES,
-    keywords="image gallery downloader crawler scraper",
-    classifiers=[
-        "Development Status :: 5 - Production/Stable",
-        "Environment :: Console",
-        "Intended Audience :: End Users/Desktop",
-        "License :: OSI Approved :: GNU General Public License v2 (GPLv2)",
-        "Operating System :: Microsoft :: Windows",
-        "Operating System :: POSIX",
-        "Operating System :: MacOS",
-        "Programming Language :: Python :: 3.4",
-        "Programming Language :: Python :: 3.5",
-        "Programming Language :: Python :: 3.6",
-        "Programming Language :: Python :: 3.7",
-        "Programming Language :: Python :: 3.8",
-        "Programming Language :: Python :: 3.9",
-        "Programming Language :: Python :: 3 :: Only",
-        "Topic :: Internet :: WWW/HTTP",
-        "Topic :: Multimedia :: Graphics",
-        "Topic :: Utilities",
-    ],
-    test_suite="test",
-    **params,
-)
+    build_setuptools()

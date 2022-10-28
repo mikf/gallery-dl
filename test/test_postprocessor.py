@@ -267,6 +267,7 @@ class MetadataTest(BasePostprocessorTest):
         test({"mode": "custom", "content-format": "{foo}\n{missing}\n"})
         test({"mode": "custom", "content-format": ["{foo}", "{missing}"]})
         test({"mode": "custom", "format": "{foo}\n{missing}\n"})
+        test({"format": "{foo}\n{missing}\n"})
 
     def test_metadata_extfmt(self):
         pp = self._create({

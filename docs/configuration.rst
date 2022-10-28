@@ -263,6 +263,17 @@ Description
     * ``"windows"``: ``". "``
 
 
+extractor.*.path-extended
+-------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    On Windows, use `extended-length paths <https://learn.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation>`__
+    prefixed with ``\\?\`` to work around the 260 characters path length limit.
+
+
 extractor.*.extension-map
 -------------------------
 Type
@@ -1048,6 +1059,17 @@ Description
     Use with caution.
 
 
+extractor.deviantart.group
+--------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Check whether the profile name in a given URL
+    belongs to a group or a regular user.
+
+
 extractor.deviantart.include
 ----------------------------
 Type
@@ -1495,8 +1517,12 @@ Description
     when processing a user profile.
 
     Possible values are
-    ``"posts"``, ``"reels"``, ``"channel"``, ``"tagged"``,
-    ``"stories"``, ``"highlights"``.
+    ``"posts"``,
+    ``"reels"``,
+    ``"tagged"``,
+    ``"stories"``,
+    ``"highlights"``,
+    ``"avatar"``.
 
     You can use ``"all"`` instead of listing all values separately.
 
@@ -1725,6 +1751,17 @@ Description
     Also emit metadata for text-only posts without media content.
 
 
+extractor.nana.favkey
+---------------------
+Type
+    ``string``
+Default
+    ``null``
+Description
+    Your `Nana Favorite Key <https://nana.my.id/tutorial>`__,
+    used to access your favorite archives.
+
+
 extractor.newgrounds.flash
 --------------------------
 Type
@@ -1939,8 +1976,8 @@ Description
     It is possible to use ``"all"`` instead of listing all values separately.
 
 
-extractor.pixiv.artworks.metadata
----------------------------------
+extractor.pixiv.metadata
+------------------------
 Type
     ``bool``
 Default
@@ -2295,6 +2332,18 @@ Description
     Search posts for inline images and videos.
 
 
+extractor.tumblr.offset
+-----------------------
+Type
+    ``integer``
+Default
+    ``0``
+Description
+    Custom ``offset`` starting value when paginating over blog posts.
+
+    Allows skipping over posts without having to waste API calls.
+
+
 extractor.tumblr.original
 -------------------------
 Type
@@ -2351,6 +2400,27 @@ Description
     ``video``, ``audio``, ``photo``, ``chat``.
 
     You can use ``"all"`` instead of listing all types separately.
+
+
+extractor.tumblr.fallback-delay
+-------------------------------
+Type
+    ``float``
+Default
+    ``120.0``
+Description
+    Number of seconds to wait between retries
+    for fetching full-resolution images.
+
+
+extractor.tumblr.fallback-retries
+---------------------------------
+Type
+    ``integer``
+Default
+    ``2``
+Description
+    Number of retries for fetching full-resolution images.
 
 
 extractor.twibooru.api-key
@@ -3062,8 +3132,12 @@ Type
 Default
     ``true``
 Description
-    Check the file headers of ``jpg``, ``png``, and ``gif`` files
+    Check file headers of downloaded files
     and adjust their filename extensions if they do not match.
+
+    For example, this will change the filename extension (``{extension}``)
+    of a file called ``example.png`` from ``png`` to ``jpg`` when said file
+    contains JPEG/JFIF data.
 
 
 downloader.http.headers

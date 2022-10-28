@@ -14,6 +14,12 @@ Consider all sites to be NSFW unless otherwise known.
 </thead>
 <tbody valign="top">
 <tr>
+    <td>2chen</td>
+    <td>https://2chen.moe/</td>
+    <td>Boards, Threads</td>
+    <td></td>
+</tr>
+<tr>
     <td>35PHOTO</td>
     <td>https://35photo.pro/</td>
     <td>Genres, individual Images, Tag Searches, User Profiles</td>
@@ -44,8 +50,8 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
-    <td>8kun</td>
-    <td>https://8kun.top/</td>
+    <td>8chan</td>
+    <td>https://8chan.moe/</td>
     <td>Boards, Threads</td>
     <td></td>
 </tr>
@@ -388,7 +394,7 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>Instagram</td>
     <td>https://www.instagram.com/</td>
-    <td>Channels, Collections, Highlights, Posts, Reels, Saved Posts, Stories, Tag Searches, Tagged Posts, User Profiles</td>
+    <td>Avatars, Collections, Highlights, Posts, Reels, Saved Posts, Stories, Tag Searches, Tagged Posts, User Profiles</td>
     <td>Supported</td>
 </tr>
 <tr>
@@ -488,6 +494,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
+    <td>MangaLife</td>
+    <td>https://manga4life.com/</td>
+    <td>Chapters, Manga</td>
+    <td></td>
+</tr>
+<tr>
     <td>Manganato</td>
     <td>https://manganato.com/</td>
     <td>Chapters, Manga</td>
@@ -524,6 +536,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
+    <td>Nana</td>
+    <td>https://nana.my.id/</td>
+    <td>Galleries, Favorites, Search Results</td>
+    <td></td>
+</tr>
+<tr>
     <td>Naver</td>
     <td>https://blog.naver.com/</td>
     <td>Blogs, Posts</td>
@@ -540,12 +558,6 @@ Consider all sites to be NSFW unless otherwise known.
     <td>https://www.newgrounds.com/</td>
     <td>Art, Audio, Favorites, Games, individual Images, Media Files, Movies, Search Results, User Profiles</td>
     <td>Supported</td>
-</tr>
-<tr>
-    <td>Ngomik</td>
-    <td>http://ngomik.in/</td>
-    <td>Chapters</td>
-    <td></td>
 </tr>
 <tr>
     <td>nhentai</td>
@@ -838,7 +850,7 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>VK</td>
     <td>https://vk.com/</td>
-    <td>Albums, Photos</td>
+    <td>Albums, Photos, Tagged Photos</td>
     <td></td>
 </tr>
 <tr>
@@ -887,12 +899,6 @@ Consider all sites to be NSFW unless otherwise known.
     <td>WikiArt.org</td>
     <td>https://www.wikiart.org/</td>
     <td>Artists, Artist Listings, Artworks, individual Images</td>
-    <td></td>
-</tr>
-<tr>
-    <td>Wikieat</td>
-    <td>https://wikieat.club/</td>
-    <td>Boards, Threads</td>
     <td></td>
 </tr>
 <tr>
@@ -958,6 +964,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td>https://booru.allthefallen.moe/</td>
     <td>Pools, Popular Images, Posts, Tag Searches</td>
     <td>Supported</td>
+</tr>
+<tr>
+    <td>Aibooru</td>
+    <td>https://aibooru.online/</td>
+    <td>Favorites, Pools, Popular Images, Posts, Tag Searches</td>
+    <td></td>
 </tr>
 
 <tr>
@@ -1034,13 +1046,13 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>nijie</td>
     <td>https://nijie.info/</td>
-    <td>Doujin, Favorites, Illustrations, individual Images, Nuita History, User Profiles</td>
+    <td>Doujin, Favorites, Feeds, Followed Users, Illustrations, individual Images, Nuita History, User Profiles</td>
     <td>Required</td>
 </tr>
 <tr>
     <td>horne</td>
     <td>https://horne.red/</td>
-    <td>Doujin, Favorites, Illustrations, individual Images, Nuitas, User Profiles</td>
+    <td>Doujin, Favorites, Feeds, Followeds, Illustrations, individual Images, Nuitas, User Profiles</td>
     <td>Required</td>
 </tr>
 
@@ -1091,6 +1103,28 @@ Consider all sites to be NSFW unless otherwise known.
     <td>ThatPervert</td>
     <td>http://thatpervert.com/</td>
     <td>Posts, Search Results, Tag Searches, User Profiles</td>
+    <td></td>
+</tr>
+
+<tr>
+    <td colspan="4"><strong>vichan Imageboards</strong></td>
+</tr>
+<tr>
+    <td>8kun</td>
+    <td>https://8kun.top/</td>
+    <td>Boards, Threads</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Wikieat</td>
+    <td>https://wikieat.club/</td>
+    <td>Boards, Threads</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Smugloli</td>
+    <td>https://smuglo.li/</td>
+    <td>Boards, Threads</td>
     <td></td>
 </tr>
 

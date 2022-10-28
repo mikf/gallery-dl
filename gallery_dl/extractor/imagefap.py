@@ -44,7 +44,9 @@ class ImagefapGalleryExtractor(ImagefapExtractor):
         ("https://www.imagefap.com/gallery/5486966", {
             "pattern": r"https://cdnh?\.imagefap\.com"
                        r"/images/full/\d+/\d+/\d+\.jpg",
-            "keyword": "3e24eace5b09639b881ebd393165862feb46adde",
+            "keyword": "8d2e562df7a0bc9e8eecb9d1bb68d32b4086bf98",
+            "archive": False,
+            "count": 62,
         }),
         ("https://www.imagefap.com/gallery.php?gid=7102714"),
         ("https://beta.imagefap.com/gallery.php?gid=7102714"),
@@ -73,32 +75,42 @@ class ImagefapGalleryExtractor(ImagefapExtractor):
 
         title, _, descr = descr.partition(" porn picture gallery by ")
         uploader, _, tags = descr.partition(" to see hottest ")
+        self._count = text.parse_int(count)
         return {
             "gallery_id": text.parse_int(self.gid),
             "title": text.unescape(title),
             "uploader": uploader,
             "tags": tags[:-11].split(", "),
-            "count": text.parse_int(count),
+            "count": self._count,
         }
 
     def get_images(self):
         """Collect image-urls and -metadata"""
-        num = 0
         url = "{}/photo/{}/".format(self.root, self.image_id)
         params = {"gid": self.gid, "idx": 0, "partial": "true"}
+        headers = {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "X-Requested-With": "XMLHttpRequest",
+            "Referer": "{}?pgid=&gid={}&page=0".format(url, self.image_id)
+        }
+
+        num = 0
+        total = self._count
         while True:
-            pos = 0
-            page = self.request(url, params=params).text
-            for _ in range(24):
-                imgurl, pos = text.extract(page, '<a href="', '"', pos)
-                if not imgurl:
-                    return
+            page = self.request(url, params=params, headers=headers).text
+
+            cnt = 0
+            for image_url in text.extract_iter(page, '<a href="', '"'):
                 num += 1
-                data = text.nameext_from_url(imgurl)
+                cnt += 1
+                data = text.nameext_from_url(image_url)
                 data["num"] = num
                 data["image_id"] = text.parse_int(data["filename"])
-                yield imgurl, data
-            params["idx"] += 24
+                yield image_url, data
+
+            if cnt < 24 and num >= total:
+                return
+            params["idx"] += cnt
 
 
 class ImagefapImageExtractor(ImagefapExtractor):
@@ -170,40 +182,49 @@ class ImagefapUserExtractor(ImagefapExtractor):
         self.user, self.user_id = match.groups()
 
     def items(self):
-        for gid, name in self.get_gallery_data():
-            url = "{}/gallery/{}".format(self.root, gid)
-            data = {
-                "gallery_id": text.parse_int(gid),
-                "title": text.unescape(name),
-                "_extractor": ImagefapGalleryExtractor,
-            }
-            yield Message.Queue, url, data
+        for folder_id in self.folders():
+            for gallery_id, name in self.galleries(folder_id):
+                url = "{}/gallery/{}".format(self.root, gallery_id)
+                data = {
+                    "gallery_id": text.parse_int(gallery_id),
+                    "title"     : text.unescape(name),
+                    "_extractor": ImagefapGalleryExtractor,
+                }
+                yield Message.Queue, url, data
 
-    def get_gallery_data(self):
-        """Yield all gallery_ids of a specific user"""
-        folders = self.get_gallery_folders()
-        url = "{}/ajax_usergallery_folder.php".format(self.root)
-        params = {"userid": self.user_id}
-        for folder_id in folders:
-            params["id"] = folder_id
-            page = self.request(url, params=params).text
-
-            pos = 0
-            while True:
-                gid, pos = text.extract(page, '<a  href="/gallery/', '"', pos)
-                if not gid:
-                    break
-                name, pos = text.extract(page, "<b>", "<", pos)
-                yield gid, name
-
-    def get_gallery_folders(self):
-        """Create a list of all folder_ids of a specific user"""
+    def folders(self):
+        """Return a list of folder_ids of a specific user"""
         if self.user:
             url = "{}/profile/{}/galleries".format(self.root, self.user)
         else:
             url = "{}/usergallery.php?userid={}".format(
                 self.root, self.user_id)
-        page = self.request(url).text
-        self.user_id, pos = text.extract(page, '?userid=', '"')
-        folders, pos = text.extract(page, ' id="tgl_all" value="', '"', pos)
-        return folders.split("|")[:-1]
+
+        response = self.request(url)
+        self.user = response.url.split("/")[-2]
+        folders = text.extract(response.text, ' id="tgl_all" value="', '"')[0]
+        return folders.rstrip("|").split("|")
+
+    def galleries(self, folder_id):
+        """Yield gallery_ids of a folder"""
+        if folder_id == "-1":
+            url = "{}/profile/{}/galleries?folderid=-1".format(
+                self.root, self.user)
+        else:
+            url = "{}/organizer/{}/".format(self.root, folder_id)
+        params = {"page": 0}
+
+        while True:
+            extr = text.extract_from(self.request(url, params=params).text)
+            cnt = 0
+
+            while True:
+                gid = extr('<a  href="/gallery/', '"')
+                if not gid:
+                    break
+                yield gid, extr("<b>", "<")
+                cnt += 1
+
+            if cnt < 25:
+                break
+            params["page"] += 1

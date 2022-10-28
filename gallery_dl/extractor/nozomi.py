@@ -62,10 +62,11 @@ class NozomiExtractor(Extractor):
 
             yield Message.Directory, post
             for post["num"], image in enumerate(images, 1):
-                post["url"] = url = text.urljoin(self.root, image["imageurl"])
-                text.nameext_from_url(url, post)
-                post["is_video"] = bool(image.get("is_video"))
-                post["dataid"] = post["filename"]
+                post["filename"] = post["dataid"] = did = image["dataid"]
+                post["extension"] = ext = image["type"]
+                post["is_video"] = video = bool(image.get("is_video"))
+                post["url"] = url = "https://{}.nozomi.la/{}/{}/{}.{}".format(
+                    "v" if video else "i", did[-1], did[-3:-1], did, ext)
                 yield Message.Url, url, post
 
     def posts(self):
@@ -109,7 +110,6 @@ class NozomiPostExtractor(NozomiExtractor):
                 "height"   : 768,
                 "is_video" : False,
                 "postid"   : 3649262,
-                "source"   : "danbooru",
                 "tags"     : list,
                 "type"     : "jpg",
                 "url"      : str,
@@ -119,7 +119,7 @@ class NozomiPostExtractor(NozomiExtractor):
         #  multiple images per post
         ("https://nozomi.la/post/25588032.html", {
             "url": "6aa3b7db385abcc9d374bdffd19187bccbf8f228",
-            "keyword": "f60e048df36308b6b25dfaac419b586895d360bc",
+            "keyword": "2a2998af93c6438863c4077bd386b613b8bc2957",
             "count": 7,
         }),
         # empty 'date' (#1163)
@@ -160,7 +160,7 @@ class NozomiTagExtractor(NozomiExtractor):
     archive_fmt = "t_{search_tags}_{dataid}"
     pattern = r"(?:https?://)?nozomi\.la/tag/([^/?#]+)-(\d+)\."
     test = ("https://nozomi.la/tag/3:1_aspect_ratio-1.html", {
-        "pattern": r"^https://i.nozomi.la/\w/\w\w/\w+\.\w+$",
+        "pattern": r"^https://[iv]\.nozomi\.la/\w/\w\w/\w+\.\w+$",
         "count": ">= 25",
         "range": "1-25",
     })

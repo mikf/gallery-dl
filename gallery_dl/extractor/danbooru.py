@@ -88,10 +88,7 @@ class DanbooruExtractor(BaseExtractor):
 
             if post["extension"] == "zip":
                 if self.ugoira:
-                    post["frames"] = self.request(
-                        "{}/posts/{}.json?only=pixiv_ugoira_frame_data".format(
-                            self.root, post["id"])
-                    ).json()["pixiv_ugoira_frame_data"]["data"]
+                    post["frames"] = self._ugoira_frames(post)
                     post["_http_adjust_extension"] = False
                 else:
                     url = post["large_file_url"]
@@ -104,6 +101,9 @@ class DanbooruExtractor(BaseExtractor):
                 )
                 resp = self.request(template.format(self.root, post["id"]))
                 post.update(resp.json())
+
+            if url[0] == "/":
+                url = self.root + url
 
             post.update(data)
             yield Message.Directory, post
@@ -139,6 +139,18 @@ class DanbooruExtractor(BaseExtractor):
                 else:
                     return
 
+    def _ugoira_frames(self, post):
+        data = self.request("{}/posts/{}.json?only=media_metadata".format(
+            self.root, post["id"])
+        ).json()["media_metadata"]["metadata"]
+
+        ext = data["ZIP:ZipFileName"].rpartition(".")[2]
+        print(post["id"], ext)
+        fmt = ("{:>06}." + ext).format
+        delays = data["Ugoira:FrameDelays"]
+        return [{"file": fmt(index), "delay": delay}
+                for index, delay in enumerate(delays)]
+
 
 INSTANCES = {
     "danbooru": {
@@ -161,6 +173,10 @@ INSTANCES = {
         "pattern": r"booru\.allthefallen\.moe",
         "page-limit": 5000,
     },
+    "aibooru": {
+        "root": "https://aibooru.online",
+        "pattern": r"aibooru\.online",
+    }
 }
 
 BASE_PATTERN = DanbooruExtractor.update(INSTANCES)
@@ -192,6 +208,11 @@ class DanbooruTagExtractor(DanbooruExtractor):
         }),
         ("https://booru.allthefallen.moe/posts?tags=yume_shokunin", {
             "count": 12,
+        }),
+        ("https://aibooru.online/posts?tags=center_frills&z=1", {
+            "pattern": r"https://aibooru\.online/data/original"
+                       r"/[0-9a-f]{2}/[0-9a-f]{2}/[0-9a-f]{32}\.\w+",
+            "count": ">= 3",
         }),
         ("https://hijiribe.donmai.us/posts?tags=bonocho"),
         ("https://sonohara.donmai.us/posts?tags=bonocho"),
@@ -229,6 +250,7 @@ class DanbooruPoolExtractor(DanbooruExtractor):
             "url": "902549ffcdb00fe033c3f63e12bc3cb95c5fd8d5",
             "count": 6,
         }),
+        ("https://aibooru.online/pools/1"),
         ("https://danbooru.donmai.us/pool/show/7659"),
         ("https://e621.net/pool/show/73"),
     )
@@ -291,6 +313,9 @@ class DanbooruPostExtractor(DanbooruExtractor):
         ("https://booru.allthefallen.moe/posts/22", {
             "content": "21dda68e1d7e0a554078e62923f537d8e895cac8",
         }),
+        ("https://aibooru.online/posts/1", {
+            "content": "54d548743cd67799a62c77cbae97cfa0fec1b7e9",
+        }),
         ("https://danbooru.donmai.us/post/show/294929"),
         ("https://e621.net/post/show/535"),
     )
@@ -325,6 +350,7 @@ class DanbooruPopularExtractor(DanbooruExtractor):
             "count": ">= 70",
         }),
         ("https://booru.allthefallen.moe/explore/posts/popular"),
+        ("https://aibooru.online/explore/posts/popular"),
     )
 
     def __init__(self, match):

@@ -79,7 +79,8 @@ class VkExtractor(Extractor):
 
             if len(payload) < 4:
                 self.log.debug(payload)
-                raise exception.AuthorizationError(payload[0])
+                raise exception.AuthorizationError(
+                    text.unescape(payload[0]) if payload[0] else None)
 
             total = payload[1]
             photos = payload[3]
@@ -103,7 +104,7 @@ class VkPhotosExtractor(VkExtractor):
     subcategory = "photos"
     pattern = (BASE_PATTERN + r"/(?:"
                r"(?:albums|photos|id)(-?\d+)"
-               r"|(?!album-?\d+_)([^/?#]+))")
+               r"|(?!(?:album|tag)-?\d+_?)([^/?#]+))")
     test = (
         ("https://vk.com/id398982326", {
             "pattern": r"https://sun\d+-\d+\.userapi\.com/s/v1/if1"
@@ -182,14 +183,14 @@ class VkAlbumExtractor(VkExtractor):
     directory_fmt = ("{category}", "{user[id]}", "{album[id]}")
     pattern = BASE_PATTERN + r"/album(-?\d+)_(\d+)$"
     test = (
-        ("https://vk.com/album232175027_00", {
-            "count": 8,
-        }),
         ("https://vk.com/album-165740836_281339889", {
             "count": 12,
         }),
         # "Access denied" (#2556)
         ("https://vk.com/album-53775183_00", {
+            "exception": exception.AuthorizationError,
+        }),
+        ("https://vk.com/album232175027_00", {
             "exception": exception.AuthorizationError,
         }),
     )
@@ -207,3 +208,25 @@ class VkAlbumExtractor(VkExtractor):
             "user": {"id": self.user_id},
             "album": {"id": self.album_id},
         }
+
+
+class VkTaggedExtractor(VkExtractor):
+    """Extractor for a vk tagged photos"""
+    subcategory = "tagged"
+    directory_fmt = ("{category}", "{user[id]}", "tags")
+    pattern = BASE_PATTERN + r"/tag(-?\d+)$"
+    test = (
+        ("https://vk.com/tag304303884", {
+            "count": 44,
+        }),
+    )
+
+    def __init__(self, match):
+        VkExtractor.__init__(self, match)
+        self.user_id = match.group(1)
+
+    def photos(self):
+        return self._pagination("tag{}".format(self.user_id))
+
+    def metadata(self):
+        return {"user": {"id": self.user_id}}
