@@ -26,9 +26,10 @@ class MoebooruExtractor(BooruExtractor):
     def _prepare(post):
         post["date"] = text.parse_timestamp(post["created_at"])
 
-    def _extended_tags(self, post):
-        url = "{}/post/show/{}".format(self.root, post["id"])
-        page = self.request(url).text
+    def _extended_tags(self, post, page=None):
+        if not page:
+            url = "{}/post/show/{}".format(self.root, post["id"])
+            page = self.request(url).text
         html = text.extract(page, '<ul id="tag-', '</ul>')[0]
         if html:
             tags = collections.defaultdict(list)
@@ -37,6 +38,29 @@ class MoebooruExtractor(BooruExtractor):
                 tags[tag_type].append(text.unquote(tag_name))
             for key, value in tags.items():
                 post["tags_" + key] = " ".join(value)
+        return page
+
+    def _notes(self, post, page=None):
+        if not page:
+            url = "{}/post/show/{}".format(self.root, post["id"])
+            page = self.request(url).text
+        notes = []
+        notes_container = text.extract(page, 'id="note-container"', "<img ")[0]
+        if not notes_container:
+            return
+
+        for note in notes_container.split('class="note-box"')[1:]:
+            extr = text.extract_from(note)
+            notes.append({
+                "width" : int(extr("width: ", "p")),
+                "height": int(extr("height: ", "p")),
+                "y"     : int(extr("top: ", "p")),
+                "x"     : int(extr("left: ", "p")),
+                "id"    : int(extr('id="note-body-', '"')),
+                "body"  : text.remove_html(extr('>', "</div>")),
+            })
+
+        post["notes"] = notes
 
     def _pagination(self, url, params):
         params["page"] = self.page_start
@@ -94,6 +118,37 @@ class MoebooruPostExtractor(MoebooruExtractor):
                 "tags_character": "clownpiece",
                 "tags_copyright": "touhou",
                 "tags_general": str,
+            },
+        }),
+        ("https://yande.re/post/show/993156", {
+            "content": "fed722bd90f48de41ec163692befc701056e2b1e",
+            "options": (("notes", True),),
+            "keyword": {
+                "notes": [
+                    {
+                        "id": 7096,
+                        "x" : 90,
+                        "y" : 626,
+                        "width" : 283,
+                        "height": 529,
+                        "body"  : "Please keep this as a secret for me!!",
+                    },
+                    {
+                        "id": 7095,
+                        "x" : 900,
+                        "y" : 438,
+                        "width" : 314,
+                        "height": 588,
+                        "body"  : "The facts that I love playing games",
+                    },
+                ],
+            },
+        }),
+        ("https://lolibooru.moe/post/show/281305/", {
+            "content": "a331430223ffc5b23c31649102e7d49f52489b57",
+            "options": (("notes", True),),
+            "keyword": {
+                "notes": list,
             },
         }),
         ("https://konachan.net/post/show/205189"),
