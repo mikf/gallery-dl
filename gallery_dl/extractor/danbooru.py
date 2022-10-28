@@ -174,8 +174,8 @@ INSTANCES = {
         "page-limit": 5000,
     },
     "aibooru": {
-        "root": "https://aibooru.online",
-        "pattern": r"aibooru\.online",
+        "root": None,
+        "pattern": r"(?:safe.)?aibooru\.online",
     }
 }
 
@@ -218,6 +218,7 @@ class DanbooruTagExtractor(DanbooruExtractor):
         ("https://sonohara.donmai.us/posts?tags=bonocho"),
         ("https://safebooru.donmai.us/posts?tags=bonocho"),
         ("https://e926.net/posts?tags=anry"),
+        ("https://safe.aibooru.online/posts?tags=center_frills"),
     )
 
     def __init__(self, match):
