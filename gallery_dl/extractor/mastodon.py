@@ -92,7 +92,7 @@ INSTANCES = {
     }
 }
 
-BASE_PATTERN = MastodonExtractor.update(INSTANCES)
+BASE_PATTERN = MastodonExtractor.update(INSTANCES) + "(?:/web)?"
 
 
 class MastodonUserExtractor(MastodonExtractor):
@@ -120,6 +120,7 @@ class MastodonUserExtractor(MastodonExtractor):
         ("https://mastodon.social/users/id:10843"),
         ("https://mastodon.social/users/jk"),
         ("https://mastodon.social/users/yoru_nine@pawoo.net"),
+        ("https://mastodon.social/web/@jk"),
     )
 
     def statuses(self):
