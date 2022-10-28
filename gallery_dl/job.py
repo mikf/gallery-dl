@@ -605,12 +605,15 @@ class KeywordJob(Job):
                 self.print_kwdict(value, key + "[", markers)
 
             elif isinstance(value, list):
-                if value and isinstance(value[0], dict):
-                    self.print_kwdict(value[0], key + "[][", markers)
+                if not value:
+                    pass
+                elif isinstance(value[0], dict):
+                    self.print_kwdict(value[0], key + "[N][", markers)
                 else:
-                    write(key + "[]\n")
-                    for val in value:
-                        write("  - " + str(val) + "\n")
+                    fmt = ("  {:>%s} {}\n" % len(str(len(value)))).format
+                    write(key + "[N]\n")
+                    for idx, val in enumerate(value, 0):
+                        write(fmt(idx, val))
 
             else:
                 # string or number
