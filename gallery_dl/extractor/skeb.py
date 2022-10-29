@@ -77,9 +77,6 @@ class SkebExtractor(Extractor):
             "body"             : resp["body"],
             "source_body"      : resp["source_body"],
             "translated_body"  : resp["translated"],
-            "completed_at"     : resp["completed_at"],
-            "date"             : text.parse_datetime(
-                resp["completed_at"], "%Y-%m-%dT%H:%M:%S.%fZ"),
             "nsfw"             : resp["nsfw"],
             "anonymous"        : resp["anonymous"],
             "tags"             : resp["tag_list"],
@@ -160,7 +157,6 @@ class SkebPostExtractor(SkebExtractor):
                 "name": str,
                 "screen_name": "minato_ragi",
             },
-            "completed_at": "2022-02-27T14:03:45.442Z",
             "content_category": "preview",
             "creator": {
                 "avatar_url": "https://pbs.twimg.com/profile_images"
@@ -171,7 +167,6 @@ class SkebPostExtractor(SkebExtractor):
                 "name": "イチノセ奏",
                 "screen_name": "kanade_cocotte",
             },
-            "date": "dt:2022-02-27 14:03:45",
             "file_id": int,
             "file_url": str,
             "genre": "art",
@@ -212,7 +207,7 @@ class SkebUserExtractor(SkebExtractor):
         "pattern": r"https://skeb\.imgix\.net/uploads/origins/[\w-]+"
                    r"\?bg=%23fff&auto=format&txtfont=bold&txtshad=70"
                    r"&txtclr=BFFFFFFF&txtalign=middle%2Ccenter&txtsize=150"
-                   r"&txt=SAMPLE&w=800&s=\w+",
+                   r"&txt=SAMPLE&fm=webp&w=800&s=\w+",
         "range": "1-5",
     })
 
