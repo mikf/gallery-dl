@@ -44,6 +44,10 @@ class MastodonExtractor(BaseExtractor):
             del status["media_attachments"]
 
             status["instance"] = self.instance
+            acct = status["account"]["acct"]
+            status["instance_remote"] = \
+                acct.rpartition("@")[2] if "@" in acct else None
+
             status["tags"] = [tag["name"] for tag in status["tags"]]
             status["date"] = text.parse_datetime(
                 status["created_at"][:19], "%Y-%m-%dT%H:%M:%S")
