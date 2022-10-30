@@ -515,10 +515,14 @@ class InstagramStoriesExtractor(InstagramExtractor):
 
     def __init__(self, match):
         h1, self.user, m1, h2, m2 = match.groups()
-        if not self.user:
+
+        if self.user:
+            self.highlight_id = None
+        else:
             self.subcategory = InstagramHighlightsExtractor.subcategory
             self.highlight_id = ("highlight:" + h1 if h1 else
                                  binascii.a2b_base64(h2).decode())
+
         self.media_id = m1 or m2
         InstagramExtractor.__init__(self, match)
 
