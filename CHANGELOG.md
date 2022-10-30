@@ -1,6 +1,10 @@
 # Changelog
 
-# asd
+## 1.23.5 - 2022-10-30
+### Fixes
+- [instagram] fix AttributeError on user stories extraction ([#3123](https://github.com/mikf/gallery-dl/issues/3123))
+
+## 1.23.4 - 2022-10-29
 ### Additions
 - [aibooru] add support for aibooru.online ([#3075](https://github.com/mikf/gallery-dl/issues/3075))
 - [instagram] add 'avatar' extractor ([#929](https://github.com/mikf/gallery-dl/issues/929), [#1097](https://github.com/mikf/gallery-dl/issues/1097), [#2992](https://github.com/mikf/gallery-dl/issues/2992))
