@@ -500,6 +500,7 @@ class InstagramStoriesExtractor(InstagramExtractor):
 
     def __init__(self, match):
         h1, self.user, m1, h2, m2 = match.groups()
+        self.highlight_id = None
         if not self.user:
             self.subcategory = InstagramHighlightsExtractor.subcategory
             self.highlight_id = ("highlight:" + h1 if h1 else
