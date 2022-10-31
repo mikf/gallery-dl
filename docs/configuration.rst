@@ -3653,6 +3653,8 @@ Description
     ``post``
         When starting to download all files of a `post`,
         e.g. a Tweet on Twitter or a post on Patreon.
+    ``post-after``
+        After downloading all files of a `post`
 
 
 metadata.fields
