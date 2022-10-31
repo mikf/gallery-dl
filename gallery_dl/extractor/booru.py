@@ -25,6 +25,7 @@ class BooruExtractor(BaseExtractor):
         data = self.metadata()
         tags = self.config("tags", False)
         notes = self.config("notes", False)
+        fetch_html = tags or notes
 
         for post in self.posts():
             try:
@@ -36,11 +37,13 @@ class BooruExtractor(BaseExtractor):
                                "(md5: %s)", post.get("id"), post.get("md5"))
                 continue
 
-            page_html = None
-            if tags:
-                page_html = self._extended_tags(post)
-            if notes:
-                self._notes(post, page_html)
+            if fetch_html:
+                html = self._html(post)
+                if tags:
+                    self._tags(post, html)
+                if notes:
+                    self._notes(post, html)
+
             text.nameext_from_url(url, post)
             post.update(data)
             self._prepare(post)
@@ -67,16 +70,13 @@ class BooruExtractor(BaseExtractor):
     _file_url = operator.itemgetter("file_url")
 
     def _prepare(self, post):
-        """Prepare the 'post's metadata"""
+        """Prepare a 'post's metadata"""
 
-    def _extended_tags(self, post, page=None):
-        """Generate extended tag information
+    def _html(self, post):
+        """Return HTML content of a post"""
 
-        The return value of this function will be
-        passed to the _notes function as the page parameter.
-        This makes it possible to reuse the same HTML both for
-        extracting tags and notes.
-        """
+    def _tags(self, post, page):
+        """Extract extended tag metadata"""
 
-    def _notes(self, post, page=None):
-        """Generate information about notes"""
+    def _notes(self, post, page):
+        """Extract notes metadata"""

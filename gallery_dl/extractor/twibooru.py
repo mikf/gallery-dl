@@ -83,7 +83,7 @@ class TwibooruPostExtractor(TwibooruExtractor):
             "tag_ids": list,
             "tags": list,
             "thumbnails_generated": True,
-            "updated_at": "2022-05-13T00:43:19.791Z",
+            "updated_at": "2022-09-21T14:31:50.441Z",
             "upvotes": int,
             "view_url": "https://cdn.twibooru.org/img/2020/7/8/1/full.png",
             "width": 576,
