@@ -63,7 +63,7 @@ class SankakuExtractor(BooruExtractor):
     def _check_expired(self, response):
         return not response.history or '.com/expired.png' not in response.url
 
-    def _extended_tags(self, post):
+    def _tags(self, post, page):
         tags = collections.defaultdict(list)
         types = self.TAG_TYPES
         for tag in post["tags"]:

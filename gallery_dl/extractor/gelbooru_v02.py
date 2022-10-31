@@ -93,11 +93,11 @@ class GelbooruV02Extractor(booru.BooruExtractor):
                 self.root, md5[0:2], md5[2:4], md5, url.rpartition(".")[2])
         return url
 
-    def _extended_tags(self, post, page=None):
-        if not page:
-            url = "{}/index.php?page=post&s=view&id={}".format(
-                self.root, post["id"])
-            page = self.request(url).text
+    def _html(self, post):
+        return self.request("{}/index.php?page=post&s=view&id={}".format(
+            self.root, post["id"])).text
+
+    def _tags(self, post, page):
         html = text.extract(page, '<ul id="tag-', '</ul>')[0]
         if not html:
             html = text.extract(page, '<ul class="tag-', '</ul>')[0]
@@ -109,31 +109,6 @@ class GelbooruV02Extractor(booru.BooruExtractor):
                 tags[tag_type].append(text.unquote(tag_name))
             for key, value in tags.items():
                 post["tags_" + key] = " ".join(value)
-        return page
-
-    def _notes(self, post, page=None):
-        if not page:
-            url = "{}/index.php?page=post&s=view&id={}".format(
-                self.root, post["id"])
-            page = self.request(url).text
-        notes = []
-        notes_data = text.extract(page, '<section id="notes"', '</section>')[0]
-        if not notes_data:
-            return
-
-        note_iter = text.extract_iter(notes_data, '<article', '</article>')
-        extr = text.extract
-        for note_data in note_iter:
-            note = {
-                "width": int(extr(note_data, 'data-width="', '"')[0]),
-                "height": int(extr(note_data, 'data-height="', '"')[0]),
-                "x": int(extr(note_data, 'data-x="', '"')[0]),
-                "y": int(extr(note_data, 'data-y="', '"')[0]),
-                "body": extr(note_data, 'data-body="', '"')[0],
-            }
-            notes.append(note)
-
-        post["notes"] = notes
 
 
 INSTANCES = {

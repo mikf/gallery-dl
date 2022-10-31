@@ -26,10 +26,11 @@ class MoebooruExtractor(BooruExtractor):
     def _prepare(post):
         post["date"] = text.parse_timestamp(post["created_at"])
 
-    def _extended_tags(self, post, page=None):
-        if not page:
-            url = "{}/post/show/{}".format(self.root, post["id"])
-            page = self.request(url).text
+    def _html(self, post):
+        return self.request("{}/post/show/{}".format(
+            self.root, post["id"])).text
+
+    def _tags(self, post, page):
         html = text.extract(page, '<ul id="tag-', '</ul>')[0]
         if html:
             tags = collections.defaultdict(list)
@@ -38,29 +39,23 @@ class MoebooruExtractor(BooruExtractor):
                 tags[tag_type].append(text.unquote(tag_name))
             for key, value in tags.items():
                 post["tags_" + key] = " ".join(value)
-        return page
 
-    def _notes(self, post, page=None):
-        if not page:
-            url = "{}/post/show/{}".format(self.root, post["id"])
-            page = self.request(url).text
-        notes = []
+    def _notes(self, post, page):
         notes_container = text.extract(page, 'id="note-container"', "<img ")[0]
         if not notes_container:
             return
 
+        post["notes"] = notes = []
         for note in notes_container.split('class="note-box"')[1:]:
             extr = text.extract_from(note)
             notes.append({
-                "width" : int(extr("width: ", "p")),
-                "height": int(extr("height: ", "p")),
-                "y"     : int(extr("top: ", "p")),
-                "x"     : int(extr("left: ", "p")),
+                "width" : int(extr("width:", "p")),
+                "height": int(extr("height:", "p")),
+                "y"     : int(extr("top:", "p")),
+                "x"     : int(extr("left:", "p")),
                 "id"    : int(extr('id="note-body-', '"')),
-                "body"  : text.remove_html(extr('>', "</div>")),
+                "body"  : text.remove_html(extr(">", "</div>")),
             })
-
-        post["notes"] = notes
 
     def _pagination(self, url, params):
         params["page"] = self.page_start
