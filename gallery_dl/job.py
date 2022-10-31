@@ -283,6 +283,9 @@ class DownloadJob(Job):
         if not self.pathfmt:
             self.initialize(kwdict)
         else:
+            if "post-after" in self.hooks:
+                for callback in self.hooks["post-after"]:
+                    callback(self.pathfmt)
             self.pathfmt.set_directory(kwdict)
         if "post" in self.hooks:
             for callback in self.hooks["post"]:
@@ -337,14 +340,20 @@ class DownloadJob(Job):
             self._write_unsupported(url)
 
     def handle_finalize(self):
-        pathfmt = self.pathfmt
         if self.archive:
             self.archive.close()
+
+        pathfmt = self.pathfmt
         if pathfmt:
+            hooks = self.hooks
+            if "post-after" in hooks:
+                for callback in hooks["post-after"]:
+                    callback(pathfmt)
+
             self.extractor._store_cookies()
-            if "finalize" in self.hooks:
+            if "finalize" in hooks:
                 status = self.status
-                for callback in self.hooks["finalize"]:
+                for callback in hooks["finalize"]:
                     callback(pathfmt, status)
 
     def handle_skip(self):
