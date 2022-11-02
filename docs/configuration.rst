@@ -3009,7 +3009,7 @@ Description
     Any file smaller/larger than this limit will not be downloaded.
 
     Possible values are valid integer or floating-point numbers
-    optionally followed by one of ``k``, ``m``. ``g``, ``t`` or ``p``.
+    optionally followed by one of ``k``, ``m``. ``g``, ``t``, or ``p``.
     These suffixes are case-insensitive.
 
 
@@ -3079,7 +3079,7 @@ Description
     Maximum download rate in bytes per second.
 
     Possible values are valid integer or floating-point numbers
-    optionally followed by one of ``k``, ``m``. ``g``, ``t`` or ``p``.
+    optionally followed by one of ``k``, ``m``. ``g``, ``t``, or ``p``.
     These suffixes are case-insensitive.
 
 
@@ -3138,6 +3138,22 @@ Description
     For example, this will change the filename extension (``{extension}``)
     of a file called ``example.png`` from ``png`` to ``jpg`` when said file
     contains JPEG/JFIF data.
+
+
+downloader.http.chunk-size
+--------------------------
+Type
+    ``integer`` or ``string``
+Default
+    ``32768``
+Example
+    ``"50k"``, ``"0.8M"``
+Description
+    Number of bytes per downloaded chunk.
+
+    Possible values are integer numbers
+    optionally followed by one of ``k``, ``m``. ``g``, ``t``, or ``p``.
+    These suffixes are case-insensitive.
 
 
 downloader.http.headers
