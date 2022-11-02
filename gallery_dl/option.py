@@ -268,6 +268,11 @@ def build_parser():
         help="Do not download files larger than SIZE (e.g. 500k or 2.5M)",
     )
     downloader.add_argument(
+        "--chunk-size",
+        dest="chunk-size", metavar="SIZE", action=ConfigAction,
+        help="Size of in-memory data chunks (default: 32k)",
+    )
+    downloader.add_argument(
         "--no-part",
         dest="part", nargs=0, action=ConfigConstAction, const=False,
         help="Do not use .part files",
