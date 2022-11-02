@@ -125,6 +125,11 @@ def build_parser():
         help="Client-side IP address to bind to",
     )
     general.add_argument(
+        "--user-agent",
+        dest="user-agent", metavar="UA", action=ConfigAction,
+        help="User-Agent request header",
+    )
+    general.add_argument(
         "--clear-cache",
         dest="clear_cache", metavar="MODULE",
         help="Delete cached login sessions, cookies, etc. for MODULE "
