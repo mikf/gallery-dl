@@ -27,10 +27,10 @@ class HttpDownloader(DownloaderBase):
     def __init__(self, job):
         DownloaderBase.__init__(self, job)
         extractor = job.extractor
-        self.chunk_size = 16384
         self.downloading = False
 
         self.adjust_extension = self.config("adjust-extensions", True)
+        self.chunk_size = self.config("chunk-size", 32768)
         self.progress = self.config("progress", 3.0)
         self.headers = self.config("headers")
         self.minsize = self.config("filesize-min")
@@ -55,6 +55,13 @@ class HttpDownloader(DownloaderBase):
                 self.log.warning(
                     "Invalid maximum file size (%r)", self.maxsize)
             self.maxsize = maxsize
+        if isinstance(self.chunk_size, str):
+            chunk_size = text.parse_bytes(self.chunk_size)
+            if not chunk_size:
+                self.log.warning(
+                    "Invalid chunk size (%r)", self.chunk_size)
+                chunk_size = 32768
+            self.chunk_size = chunk_size
         if self.rate:
             rate = text.parse_bytes(self.rate)
             if rate:
