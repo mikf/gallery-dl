@@ -157,6 +157,12 @@ def build_parser():
         help="Print various debugging information",
     )
     output.add_argument(
+        "--quiet-skipped",
+        dest="quiet_skip",
+        action="store_true",
+        help="Don't print skipped files",
+    )
+    output.add_argument(
         "-g", "--get-urls",
         dest="list_urls", action="count",
         help="Print URLs instead of downloading",

@@ -358,7 +358,8 @@ class DownloadJob(Job):
 
     def handle_skip(self):
         pathfmt = self.pathfmt
-        self.out.skip(pathfmt.path)
+        if not config.get(("output",), "quiet_skip", False):
+            self.out.skip(pathfmt.path)
         if "skip" in self.hooks:
             for callback in self.hooks["skip"]:
                 callback(pathfmt)
