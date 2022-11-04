@@ -121,6 +121,7 @@ CATEGORY_MAP = {
     "wallpapercave"  : "Wallpaper Cave",
     "webtoons"       : "Webtoon",
     "wikiart"        : "WikiArt.org",
+    "xbunkr"         : "xBunkr",
     "xhamster"       : "xHamster",
     "xvideos"        : "XVideos",
     "yandere"        : "yande.re",

@@ -24,6 +24,10 @@ BASE_PATTERN = LolisafeExtractor.update({
         "root": "https://zz.ht",
         "pattern": r"zz\.(?:ht|fo)",
     },
+    "xbunkr": {
+        "root": "https://xbunkr.com",
+        "pattern": r"xbunkr\.com",
+    }
 })
 
 
@@ -40,6 +44,15 @@ class LolisafeAlbumExtractor(LolisafeExtractor):
             },
         }),
         ("https://zz.fo/a/lop7W6EZ"),
+        ("https://xbunkr.com/a/TA0bu3F4", {
+            "pattern": r"https://media\.xbunkr\.com/[^.]+\.\w+",
+            "count": 861,
+            "keyword": {
+                "album_id": "TA0bu3F4",
+                "album_name": "Hannahowo Onlyfans Photos",
+            }
+        }),
+        ("https://xbunkr.com/a/GNQc2I5d"),
     )
 
     def __init__(self, match):
