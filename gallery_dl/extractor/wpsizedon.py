@@ -29,8 +29,9 @@ class WpsizedonExtractor(Extractor):
     def items(self):
         for post_id in self.posts():
             post = self._parse_post(post_id)
-            yield Message.Directory, post
-            yield Message.Url, post['url'], post
+            if post:
+                yield Message.Directory, post
+                yield Message.Url, post['url'], post
 
     def posts(self):
         """Return post IDs from the URL"""
@@ -59,6 +60,7 @@ class WpsizedonExtractor(Extractor):
             else:
                 self.log.warning('Unable to fetch post {}: '
                                  'URL not found in page.'.format(post_id))
+                return None
 
             basename, extension = splitext(urlparse(media_url).path)
             basename, extension = splitext(split(media_url)[1])
