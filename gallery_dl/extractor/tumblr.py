@@ -203,6 +203,15 @@ class TumblrExtractor(Extractor):
     def _prepare_image(url, post):
         text.nameext_from_url(url, post)
 
+        # try ".gifv" (#3095)
+        # it's unknown whether all gifs in this case are actually webps
+        # incorrect extensions will be corrected by 'adjust-extensions'
+        if post["extension"] == "gif":
+            post["_fallback"] = (url + "v",)
+            post["_http_headers"] = {"Accept":  # copied from chrome 106
+                                     "image/avif,image/webp,image/apng,"
+                                     "image/svg+xml,image/*,*/*;q=0.8"}
+
         parts = post["filename"].split("_")
         try:
             post["hash"] = parts[1] if parts[1] != "inline" else parts[2]
