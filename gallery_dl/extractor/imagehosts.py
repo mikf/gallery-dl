@@ -259,7 +259,7 @@ class ViprImageExtractor(ImagehostImageExtractor):
     })
 
     def get_info(self, page):
-        url = text.extract(page, '<img src="', '"')[0]
+        url = text.extr(page, '<img src="', '"')
         return url, url
 
 

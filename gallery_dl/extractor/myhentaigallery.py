@@ -59,7 +59,7 @@ class MyhentaigalleryGalleryExtractor(GalleryExtractor):
 
     def images(self, page):
         return [
-            (text.unescape(text.extract(url, 'src="', '"')[0]).replace(
+            (text.unescape(text.extr(url, 'src="', '"')).replace(
                 "/thumbnail/", "/original/"), None)
             for url in text.extract_iter(page, 'class="comic-thumb"', '</div>')
         ]

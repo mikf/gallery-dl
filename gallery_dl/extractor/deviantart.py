@@ -603,22 +603,22 @@ class DeviantartStashExtractor(DeviantartExtractor):
         page = self._limited_request(url).text
 
         if stash_id[0] == "0":
-            uuid = text.extract(page, '//deviation/', '"')[0]
+            uuid = text.extr(page, '//deviation/', '"')
             if uuid:
                 deviation = self.api.deviation(uuid)
-                deviation["index"] = text.parse_int(text.extract(
-                    page, 'gmi-deviationid="', '"')[0])
+                deviation["index"] = text.parse_int(text.extr(
+                    page, 'gmi-deviationid="', '"'))
                 yield deviation
                 return
 
         for item in text.extract_iter(
                 page, 'class="stash-thumb-container', '</div>'):
-            url = text.extract(item, '<a href="', '"')[0]
+            url = text.extr(item, '<a href="', '"')
 
             if url:
                 stash_id = url.rpartition("/")[2]
             else:
-                stash_id = text.extract(item, 'gmi-stashid="', '"')[0]
+                stash_id = text.extr(item, 'gmi-stashid="', '"')
                 stash_id = "2" + util.bencode(text.parse_int(
                     stash_id), "0123456789abcdefghijklmnopqrstuvwxyz")
 
@@ -1484,8 +1484,8 @@ class DeviantartEclipseAPI():
     def _fetch_csrf_token(self, page=None):
         if page is None:
             page = self.request(self.extractor.root + "/").text
-        self.csrf_token = token = text.extract(
-            page, "window.__CSRF_TOKEN__ = '", "'")[0]
+        self.csrf_token = token = text.extr(
+            page, "window.__CSRF_TOKEN__ = '", "'")
         return token
 
 

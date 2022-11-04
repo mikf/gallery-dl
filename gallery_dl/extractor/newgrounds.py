@@ -88,8 +88,8 @@ class NewgroundsExtractor(Extractor):
             return self.session.cookies
 
         headers = {"Origin": self.root, "Referer": url}
-        url = text.urljoin(self.root, text.extract(
-            response.text, 'action="', '"')[0])
+        url = text.urljoin(self.root, text.extr(
+            response.text, 'action="', '"'))
         data = {
             "username": username,
             "password": password,
@@ -140,7 +140,7 @@ class NewgroundsExtractor(Extractor):
         data["score"] = text.parse_float(extr('id="score_number">', '<'))
         data["tags"] = text.split_html(extr('<dd class="tags">', '</dd>'))
         data["artist"] = [
-            text.extract(user, '//', '.')[0]
+            text.extr(user, '//', '.')
             for user in text.extract_iter(page, '<div class="item-user">', '>')
         ]
 
@@ -275,7 +275,7 @@ class NewgroundsExtractor(Extractor):
 
             for year, items in items.items():
                 for item in items:
-                    page_url = text.extract(item, 'href="', '"')[0]
+                    page_url = text.extr(item, 'href="', '"')
                     if page_url[0] == "/":
                         page_url = self.root + page_url
                     yield page_url

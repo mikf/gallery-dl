@@ -57,8 +57,8 @@ class HentaihereChapterExtractor(HentaihereBase, ChapterExtractor):
         ChapterExtractor.__init__(self, match, url)
 
     def metadata(self, page):
-        title = text.extract(page, "<title>", "</title>")[0]
-        chapter_id = text.extract(page, 'report/C', '"')[0]
+        title = text.extr(page, "<title>", "</title>")
+        chapter_id = text.extr(page, 'report/C', '"')
         chapter, sep, minor = self.chapter.partition(".")
         pattern = r"Page 1 \| (.+) \(([^)]+)\) - Chapter \d+: (.+) by (.+) at "
         match = re.match(pattern, title)
@@ -77,7 +77,7 @@ class HentaihereChapterExtractor(HentaihereBase, ChapterExtractor):
 
     @staticmethod
     def images(page):
-        images = text.extract(page, "var rff_imageList = ", ";")[0]
+        images = text.extr(page, "var rff_imageList = ", ";")
         return [
             ("https://hentaicdn.com/hentai" + part, None)
             for part in json.loads(images)

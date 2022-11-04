@@ -60,8 +60,8 @@ class _2chanThreadExtractor(Extractor):
 
     def metadata(self, page):
         """Collect metadata for extractor-job"""
-        title = text.extract(page, "<title>", "</title>")[0]
-        title, _, boardname = title.rpartition(" - ")
+        title, _, boardname = text.extr(
+            page, "<title>", "</title>").rpartition(" - ")
         return {
             "server": self.server,
             "title": title,
@@ -72,8 +72,8 @@ class _2chanThreadExtractor(Extractor):
 
     def posts(self, page):
         """Build a list of all post-objects"""
-        page = text.extract(
-            page, '<div class="thre"', '<div style="clear:left"></div>')[0]
+        page = text.extr(
+            page, '<div class="thre"', '<div style="clear:left"></div>')
         return [
             self.parse(post)
             for post in page.split('<table border=0>')
@@ -84,7 +84,7 @@ class _2chanThreadExtractor(Extractor):
         data = self._extract_post(post)
         if data["name"]:
             data["name"] = data["name"].strip()
-        path = text.extract(post, '<a href="/', '"')[0]
+        path = text.extr(post, '<a href="/', '"')
         if path and not path.startswith("bin/jump"):
             self._extract_image(post, data)
             data["tim"], _, data["extension"] = data["filename"].partition(".")

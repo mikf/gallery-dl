@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2021 Mike Fährmann
+# Copyright 2019-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -124,7 +124,7 @@ class _35photoUserExtractor(_35photoExtractor):
     def metadata(self):
         url = "{}/{}/".format(self.root, self.user)
         page = self.request(url).text
-        self.user_id = text.parse_int(text.extract(page, "/user_", ".xml")[0])
+        self.user_id = text.parse_int(text.extr(page, "/user_", ".xml"))
         return {
             "user": self.user,
             "user_id": self.user_id,
@@ -189,10 +189,10 @@ class _35photoGenreExtractor(_35photoExtractor):
     def metadata(self):
         url = "{}/genre_{}{}".format(self.root, self.genre_id, self.new or "/")
         page = self.request(url).text
-        self.photo_ids = self._photo_ids(text.extract(
-            page, ' class="photo', '\n')[0])
+        self.photo_ids = self._photo_ids(text.extr(
+            page, ' class="photo', '\n'))
         return {
-            "genre": text.extract(page, " genre - ", ". ")[0],
+            "genre": text.extr(page, " genre - ", ". "),
             "genre_id": text.parse_int(self.genre_id),
         }
 

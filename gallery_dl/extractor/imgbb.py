@@ -71,7 +71,7 @@ class ImgbbExtractor(Extractor):
 
         url = self.root + "/login"
         page = self.request(url).text
-        token = text.extract(page, 'PF.obj.config.auth_token="', '"')[0]
+        token = text.extr(page, 'PF.obj.config.auth_token="', '"')
 
         headers = {"Referer": url}
         data = {
@@ -154,7 +154,7 @@ class ImgbbAlbumExtractor(ImgbbExtractor):
         }
 
     def images(self, page):
-        url = text.extract(page, '"og:url" content="', '"')[0]
+        url = text.extr(page, '"og:url" content="', '"')
         album_id = url.rpartition("/")[2].partition("?")[0]
 
         return self._pagination(page, "https://ibb.co/json", {
@@ -185,7 +185,7 @@ class ImgbbUserExtractor(ImgbbExtractor):
         return {"user": self.user}
 
     def images(self, page):
-        user = text.extract(page, '.obj.resource={"id":"', '"')[0]
+        user = text.extr(page, '.obj.resource={"id":"', '"')
         return self._pagination(page, self.page_url + "json", {
             "from"      : "user",
             "userid"    : user,

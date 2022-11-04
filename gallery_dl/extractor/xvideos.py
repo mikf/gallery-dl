@@ -113,8 +113,8 @@ class XvideosUserExtractor(XvideosBase, Extractor):
     def items(self):
         url = "{}/profiles/{}".format(self.root, self.user)
         page = self.request(url, notfound=self.subcategory).text
-        data = json.loads(text.extract(
-            page, "xv.conf=", ";</script>")[0])["data"]
+        data = json.loads(text.extr(
+            page, "xv.conf=", ";</script>"))["data"]
 
         if not isinstance(data["galleries"], dict):
             return

@@ -55,8 +55,8 @@ class EromeExtractor(Extractor):
             yield Message.Directory, data
             groups = page.split('<div class="media-group"')
             for data["num"], group in enumerate(util.advance(groups, 1), 1):
-                url = (text.extract(group, '<source src="', '"')[0] or
-                       text.extract(group, 'data-src="', '"')[0])
+                url = (text.extr(group, '<source src="', '"') or
+                       text.extr(group, 'data-src="', '"'))
                 if url:
                     yield Message.Url, url, text.nameext_from_url(url, data)
 

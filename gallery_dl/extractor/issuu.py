@@ -54,8 +54,8 @@ class IssuuPublicationExtractor(IssuuBase, GalleryExtractor):
     })
 
     def metadata(self, page):
-        data = json.loads(text.extract(
-            page, '<script data-json="', '"')[0].replace("&quot;", '"'))
+        data = json.loads(text.extr(
+            page, '<script data-json="', '"').replace("&quot;", '"'))
 
         doc = data["initialDocumentData"]["document"]
         doc["date"] = text.parse_datetime(

@@ -58,7 +58,7 @@ class FuskatorGalleryExtractor(GalleryExtractor):
             self.root + "/ajax/gal.aspx", params=params, headers=headers,
         ).json()
 
-        title = text.extract(page, "<title>", "</title>")[0].strip()
+        title = text.extr(page, "<title>", "</title>").strip()
         title, _, gallery_id = title.rpartition("#")
 
         return {
@@ -104,7 +104,7 @@ class FuskatorSearchExtractor(Extractor):
                     page, 'class="pic_pad"><a href="', '"'):
                 yield Message.Queue, self.root + path, data
 
-            pages = text.extract(page, 'class="pages"><span>', '>&gt;&gt;<')[0]
+            pages = text.extr(page, 'class="pages"><span>', '>&gt;&gt;<')
             if not pages:
                 return
             url = self.root + text.rextract(pages, 'href="', '"')[0]

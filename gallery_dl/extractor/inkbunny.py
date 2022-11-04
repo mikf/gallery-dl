@@ -236,7 +236,7 @@ class InkbunnySearchExtractor(InkbunnyExtractor):
             # get user_id from user profile
             url = "{}/{}".format(self.root, favsby)
             page = self.request(url).text
-            user_id = text.extract(page, "?user_id=", "'")[0]
+            user_id = text.extr(page, "?user_id=", "'")
             params["favs_user_id"] = user_id.partition("&")[0]
 
         return self.api.search(params)

@@ -160,7 +160,7 @@ class FuraffinityExtractor(Extractor):
         while path:
             page = self.request(self.root + path).text
             yield from text.extract_iter(page, 'id="sid-', '"')
-            path = text.extract(page, 'right" href="', '"')[0]
+            path = text.extr(page, 'right" href="', '"')
 
     def _pagination_search(self, query):
         url = self.root + "/search/"

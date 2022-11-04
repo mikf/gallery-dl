@@ -57,8 +57,8 @@ class MyportfolioGalleryExtractor(Extractor):
             raise exception.NotFoundError()
         page = response.text
 
-        projects = text.extract(
-            page, '<section class="project-covers', '</section>')[0]
+        projects = text.extr(
+            page, '<section class="project-covers', '</section>')
 
         if projects:
             data = {"_extractor": MyportfolioGalleryExtractor}

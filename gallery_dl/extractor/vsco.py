@@ -69,7 +69,7 @@ class VscoExtractor(Extractor):
 
     def _extract_preload_state(self, url):
         page = self.request(url, notfound=self.subcategory).text
-        return json.loads(text.extract(page, "__PRELOADED_STATE__ = ", "<")[0])
+        return json.loads(text.extr(page, "__PRELOADED_STATE__ = ", "<"))
 
     def _pagination(self, url, params, token, key, extra=None):
         headers = {

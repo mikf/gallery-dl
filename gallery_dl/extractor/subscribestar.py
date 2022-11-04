@@ -89,23 +89,23 @@ class SubscribestarExtractor(Extractor):
     def _media_from_post(html):
         media = []
 
-        gallery = text.extract(html, 'data-gallery="', '"')[0]
+        gallery = text.extr(html, 'data-gallery="', '"')
         if gallery:
             media.extend(
                 item for item in json.loads(text.unescape(gallery))
                 if "/previews/" not in item["url"]
             )
 
-        attachments = text.extract(
-            html, 'class="uploads-docs"', 'data-role="post-edit_form"')[0]
+        attachments = text.extr(
+            html, 'class="uploads-docs"', 'data-role="post-edit_form"')
         if attachments:
             for att in attachments.split('class="doc_preview"')[1:]:
                 media.append({
-                    "id"  : text.parse_int(text.extract(
-                        att, 'data-upload-id="', '"')[0]),
-                    "name": text.unescape(text.extract(
-                        att, 'doc_preview-title">', '<')[0] or ""),
-                    "url" : text.unescape(text.extract(att, 'href="', '"')[0]),
+                    "id"  : text.parse_int(text.extr(
+                        att, 'data-upload-id="', '"')),
+                    "name": text.unescape(text.extr(
+                        att, 'doc_preview-title">', '<')),
+                    "url" : text.unescape(text.extr(att, 'href="', '"')),
                     "type": "attachment",
                 })
 
@@ -175,7 +175,7 @@ class SubscribestarUserExtractor(SubscribestarExtractor):
                 return
             yield from posts
 
-            url = text.extract(posts[-1], needle_next_page, '"')[0]
+            url = text.extr(posts[-1], needle_next_page, '"')
             if not url:
                 return
             page = self.request(self.root + text.unescape(url)).json()["html"]

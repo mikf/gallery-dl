@@ -73,8 +73,8 @@ class PururinGalleryExtractor(GalleryExtractor):
 
         url = "{}/read/{}/01/x".format(self.root, self.gallery_id)
         page = self.request(url).text
-        info = json.loads(binascii.a2b_base64(text.extract(
-            page, '<gallery-read encoded="', '"')[0]).decode())
+        info = json.loads(binascii.a2b_base64(text.extr(
+            page, '<gallery-read encoded="', '"')).decode())
         self._ext = info["image_extension"]
         self._cnt = info["total_pages"]
 

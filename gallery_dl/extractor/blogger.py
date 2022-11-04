@@ -61,8 +61,8 @@ class BloggerExtractor(Extractor):
                 page = self.request(post["url"]).text
                 for url in findall_video(page):
                     page = self.request(url).text
-                    video_config = json.loads(text.extract(
-                        page, 'var VIDEO_CONFIG =', '\n')[0])
+                    video_config = json.loads(text.extr(
+                        page, 'var VIDEO_CONFIG =', '\n'))
                     files.append(max(
                         video_config["streams"],
                         key=lambda x: x["format_id"],

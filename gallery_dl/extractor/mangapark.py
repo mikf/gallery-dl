@@ -104,7 +104,7 @@ class MangaparkChapterExtractor(MangaparkBase, ChapterExtractor):
         return data
 
     def images(self, page):
-        data = json.loads(text.extract(page, "var _load_pages =", ";")[0])
+        data = json.loads(text.extr(page, "var _load_pages =", ";"))
         return [
             (text.urljoin(self.root, item["u"]), {
                 "width": text.parse_int(item["w"]),
@@ -136,10 +136,10 @@ class MangaparkMangaExtractor(MangaparkBase, MangaExtractor):
         results = []
         data = {"lang": "en", "language": "English"}
         data["manga"] = text.unescape(
-            text.extract(page, '<title>', ' Manga - ')[0])
+            text.extr(page, '<title>', ' Manga - '))
 
         for stream in page.split('<div id="stream_')[1:]:
-            data["stream"] = text.parse_int(text.extract(stream, '', '"')[0])
+            data["stream"] = text.parse_int(text.extr(stream, '', '"'))
 
             for chapter in text.extract_iter(stream, '<li ', '</li>'):
                 path  , pos = text.extract(chapter, 'href="', '"')

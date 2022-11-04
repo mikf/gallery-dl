@@ -44,7 +44,7 @@ class HotleakExtractor(Extractor):
 
             for item in text.extract_iter(
                     page, '<article class="movie-item', '</article>'):
-                yield text.extract(item, '<a href="', '"')[0]
+                yield text.extr(item, '<a href="', '"')
 
             params["page"] += 1
 
@@ -87,8 +87,8 @@ class HotleakPostExtractor(HotleakExtractor):
         url = "{}/{}/{}/{}".format(
             self.root, self.creator, self.type, self.id)
         page = self.request(url).text
-        page = text.extract(
-            page, '<div class="movie-image thumb">', '</article>')[0]
+        page = text.extr(
+            page, '<div class="movie-image thumb">', '</article>')
         data = {
             "id"     : text.parse_int(self.id),
             "creator": self.creator,
@@ -96,12 +96,12 @@ class HotleakPostExtractor(HotleakExtractor):
         }
 
         if self.type == "photo":
-            data["url"] = text.extract(page, 'data-src="', '"')[0]
+            data["url"] = text.extr(page, 'data-src="', '"')
             text.nameext_from_url(data["url"], data)
 
         elif self.type == "video":
-            data["url"] = "ytdl:" + text.extract(
-                text.unescape(page), '"src":"', '"')[0]
+            data["url"] = "ytdl:" + text.extr(
+                text.unescape(page), '"src":"', '"')
             text.nameext_from_url(data["url"], data)
             data["extension"] = "mp4"
 

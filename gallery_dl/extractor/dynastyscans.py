@@ -30,7 +30,7 @@ class DynastyscansBase():
         src = extr("class='btn-group'>", "</div>")
         url = extr(' src="', '"')
 
-        src = text.extract(src, 'href="', '"')[0] if "Source<" in src else ""
+        src = text.extr(src, 'href="', '"') if "Source<" in src else ""
 
         return {
             "url"     : self.root + url,
@@ -75,7 +75,7 @@ class DynastyscansChapterExtractor(DynastyscansBase, ChapterExtractor):
             "title"   : text.unescape(match.group(4) or ""),
             "author"  : text.remove_html(author),
             "group"   : (text.remove_html(group) or
-                         text.extract(group, ' alt="', '"')[0] or ""),
+                         text.extr(group, ' alt="', '"')),
             "date"    : text.parse_datetime(extr(
                 '"icon-calendar"></i> ', '<'), "%b %d, %Y"),
             "lang"    : "en",
@@ -83,7 +83,7 @@ class DynastyscansChapterExtractor(DynastyscansBase, ChapterExtractor):
         }
 
     def images(self, page):
-        data = text.extract(page, "var pages = ", ";\n")[0]
+        data = text.extr(page, "var pages = ", ";\n")
         return [
             (self.root + img["image"], None)
             for img in json.loads(data)

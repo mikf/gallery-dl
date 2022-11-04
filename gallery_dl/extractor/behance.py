@@ -119,8 +119,8 @@ class BehanceGalleryExtractor(BehanceExtractor):
         }
         page = self.request(url, cookies=cookies).text
 
-        data = json.loads(text.extract(
-            page, 'id="beconfig-store_state">', '</script>')[0])
+        data = json.loads(text.extr(
+            page, 'id="beconfig-store_state">', '</script>'))
         return self._update(data["project"]["project"])
 
     def get_images(self, data):
@@ -137,7 +137,7 @@ class BehanceGalleryExtractor(BehanceExtractor):
 
             elif mtype == "video":
                 page = self.request(module["src"]).text
-                url = text.extract(page, '<source src="', '"')[0]
+                url = text.extr(page, '<source src="', '"')
                 if text.ext_from_url(url) == "m3u8":
                     url = "ytdl:" + url
                 append((url, module))
@@ -150,8 +150,7 @@ class BehanceGalleryExtractor(BehanceExtractor):
             elif mtype == "embed":
                 embed = module.get("original_embed") or module.get("embed")
                 if embed:
-                    url = "ytdl:" + text.extract(embed, 'src="', '"')[0]
-                    append((url, module))
+                    append(("ytdl:" + text.extr(embed, 'src="', '"'), module))
 
         return result
 

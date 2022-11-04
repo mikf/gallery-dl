@@ -111,7 +111,7 @@ class SimplyhentaiImageExtractor(Extractor):
         url = extr('&quot;image&quot;:&quot;'  , '&')
         url = extr("&quot;content&quot;:&quot;", "&") or url
 
-        tags = text.extract(descr, " tagged with ", " online for free ")[0]
+        tags = text.extr(descr, " tagged with ", " online for free ")
         if tags:
             tags = tags.split(", ")
             tags[-1] = tags[-1].partition(" ")[2]
@@ -176,7 +176,7 @@ class SimplyhentaiVideoExtractor(Extractor):
             embed_url = text.extract(page, 'src="', '"', pos)[0].replace(
                 "embedplayer.php?link=", "embed.php?name=")
             embed_page = self.request(embed_url).text
-            video_url = text.extract(embed_page, '"file":"', '"')[0]
+            video_url = text.extr(embed_page, '"file":"', '"')
             title, _, episode = title.rpartition(" Episode ")
 
         if video_url.startswith("//"):

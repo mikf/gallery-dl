@@ -60,7 +60,7 @@ class HentaicosplaysGalleryExtractor(GalleryExtractor):
         self.session.headers["Referer"] = url
 
     def metadata(self, page):
-        title = text.extract(page, "<title>", "</title>")[0]
+        title = text.extr(page, "<title>", "</title>")
         return {
             "title": text.unescape(title.rpartition(" Story Viewer - ")[0]),
             "slug" : self.slug,

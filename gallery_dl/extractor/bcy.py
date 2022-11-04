@@ -97,7 +97,7 @@ class BcyExtractor(Extractor):
         url = "{}/item/detail/{}".format(self.root, post_id)
         page = self.request(url, notfound="post").text
         return json.loads(
-            text.extract(page, 'JSON.parse("', '");')[0]
+            text.extr(page, 'JSON.parse("', '");')
             .replace('\\\\u002F', '/')
             .replace('\\"', '"')
         )["detail"]

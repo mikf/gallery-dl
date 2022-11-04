@@ -115,7 +115,7 @@ class IdolcomplexExtractor(SankakuExtractor):
 
         if self.extags:
             tags = collections.defaultdict(list)
-            tags_html = text.extract(page, '<ul id=tag-sidebar>', '</ul>')[0]
+            tags_html = text.extr(page, '<ul id=tag-sidebar>', '</ul>')
             pattern = re.compile(r'tag-type-([^>]+)><a href="/\?tags=([^"]+)')
             for tag_type, tag_name in pattern.findall(tags_html or ""):
                 tags[tag_type].append(text.unquote(tag_name))

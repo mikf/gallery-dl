@@ -144,8 +144,8 @@ class XhamsterGalleryExtractor(XhamsterExtractor):
 
     def _data(self, url):
         page = self.request(url).text
-        return json.loads(text.extract(
-            page, "window.initials=", "</script>")[0].rstrip("\n\r;"))
+        return json.loads(text.extr(
+            page, "window.initials=", "</script>").rstrip("\n\r;"))
 
 
 class XhamsterUserExtractor(XhamsterExtractor):

@@ -257,7 +257,7 @@ class TumblrExtractor(Extractor):
         except Exception:
             return resized, True
         else:
-            updated = text.extract(response.text, '" src="', '"')[0]
+            updated = text.extr(response.text, '" src="', '"')
             return updated, (resized == updated)
 
     def _original_image_fallback(self, url, post_id):

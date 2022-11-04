@@ -76,7 +76,7 @@ class NaverwebtoonEpisodeExtractor(NaverwebtoonBase, GalleryExtractor):
 
     @staticmethod
     def images(page):
-        view_area = text.extract(page, 'id="comic_view_area"', '</div>')[0]
+        view_area = text.extr(page, 'id="comic_view_area"', '</div>')
         return [
             (url, None)
             for url in text.extract_iter(view_area, '<img src="', '"')

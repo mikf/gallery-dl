@@ -638,7 +638,7 @@ class PixivPixivisionExtractor(PixivExtractor):
         headers = {"User-Agent": "Mozilla/5.0"}
         self.page = self.request(url, headers=headers).text
 
-        title = text.extract(self.page, '<title>', '<')[0]
+        title = text.extr(self.page, '<title>', '<')
         return {
             "pixivision_id"   : self.pixivision_id,
             "pixivision_title": text.unescape(title),
@@ -692,7 +692,7 @@ class PixivSeriesExtractor(PixivExtractor):
             series = body["extraData"]["meta"]
             series["id"] = self.series_id
             series["total"] = page["total"]
-            series["title"] = text.extract(series["title"], '"', '"')[0]
+            series["title"] = text.extr(series["title"], '"', '"')
 
             for info in page["series"]:
                 work = self.api.illust_detail(info["workId"])
