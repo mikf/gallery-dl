@@ -1331,5 +1331,11 @@ Consider all sites to be NSFW unless otherwise known.
     <td>Albums</td>
     <td></td>
 </tr>
+<tr>
+    <td>xBunkr</td>
+    <td>https://xbunkr.com/</td>
+    <td>Albums</td>
+    <td></td>
+</tr>
 </tbody>
 </table>
