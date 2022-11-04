@@ -19,6 +19,7 @@ import binascii
 import datetime
 import functools
 import itertools
+import subprocess
 import urllib.parse
 from http.cookiejar import Cookie
 from email.utils import mktime_tz, parsedate_tz
@@ -271,6 +272,22 @@ Response Headers
         if headers:
             fp.write(b"\nContent\n-------\n")
         fp.write(response.content)
+
+
+@functools.lru_cache(maxsize=None)
+def git_head():
+    try:
+        out, err = subprocess.Popen(
+            ("git", "rev-parse", "--short", "HEAD"),
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            cwd=os.path.dirname(os.path.abspath(__file__)),
+        ).communicate()
+        if out and not err:
+            return out.decode().rstrip()
+    except (OSError, subprocess.SubprocessError):
+        pass
+    return None
 
 
 def expand_path(path):
