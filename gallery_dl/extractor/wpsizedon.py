@@ -84,7 +84,7 @@ class WpsizedonExtractor(Extractor):
             date_modified = json_data['dateModified']
 
             return {
-                "id": post_id,
+                "id": text.unescape(post_id),
                 "url": media_url,
                 "title": title,
                 "basename": basename,
