@@ -38,7 +38,7 @@ class MangoxoExtractor(Extractor):
 
         url = self.root + "/login"
         page = self.request(url).text
-        token = text.extract(page, 'id="loginToken" value="', '"')[0]
+        token = text.extr(page, 'id="loginToken" value="', '"')
 
         url = self.root + "/api/login"
         headers = {
@@ -115,7 +115,7 @@ class MangoxoAlbumExtractor(MangoxoExtractor):
 
         data["extension"] = None
         for data["num"], path in enumerate(imgs, 1):
-            data["id"] = text.parse_int(text.extract(path, "=", "&")[0])
+            data["id"] = text.parse_int(text.extr(path, "=", "&"))
             url = self.root + "/external/" + path.rpartition("url=")[2]
             yield Message.Url, url, text.nameext_from_url(url, data)
 

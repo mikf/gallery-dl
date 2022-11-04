@@ -192,7 +192,7 @@ class KemonopartyExtractor(Extractor):
                 "body": text.unescape(text.extract(
                     dm, "<pre>", "</pre></",
                 )[0].strip()),
-                "date": text.extract(dm, 'datetime="', '"')[0],
+                "date": text.extr(dm, 'datetime="', '"'),
             })
         return dms
 

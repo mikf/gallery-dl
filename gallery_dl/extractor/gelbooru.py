@@ -69,7 +69,7 @@ class GelbooruBase():
         yield "https://img1.gelbooru.com" + path
 
     def _notes(self, post, page):
-        notes_data = text.extract(page, '<section id="notes"', '</section>')[0]
+        notes_data = text.extr(page, '<section id="notes"', '</section>')
         if not notes_data:
             return
 

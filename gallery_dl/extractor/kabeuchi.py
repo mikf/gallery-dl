@@ -62,7 +62,7 @@ class KabeuchiUserExtractor(Extractor):
         response = self.request(url)
         if response.history and response.url == self.root + "/":
             raise exception.NotFoundError("user")
-        target_id = text.extract(response.text, 'user_friend_id = "', '"')[0]
+        target_id = text.extr(response.text, 'user_friend_id = "', '"')
         return self._pagination(target_id)
 
     def _pagination(self, target_id):

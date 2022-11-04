@@ -128,8 +128,7 @@ class AryionExtractor(Extractor):
 
             # get filename from 'Content-Disposition' header
             cdis = headers["content-disposition"]
-            fname, _, ext = text.extract(
-                cdis, 'filename="', '"')[0].rpartition(".")
+            fname, _, ext = text.extr(cdis, 'filename="', '"').rpartition(".")
             if not fname:
                 fname, ext = ext, fname
 

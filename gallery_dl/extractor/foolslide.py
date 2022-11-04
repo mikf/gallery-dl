@@ -114,7 +114,7 @@ class FoolslideChapterExtractor(FoolslideExtractor):
         })
 
     def images(self, page):
-        return json.loads(text.extract(page, "var pages = ", ";")[0])
+        return json.loads(text.extr(page, "var pages = ", ";"))
 
 
 class FoolslideMangaExtractor(FoolslideExtractor):

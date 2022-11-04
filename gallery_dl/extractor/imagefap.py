@@ -202,7 +202,7 @@ class ImagefapUserExtractor(ImagefapExtractor):
 
         response = self.request(url)
         self.user = response.url.split("/")[-2]
-        folders = text.extract(response.text, ' id="tgl_all" value="', '"')[0]
+        folders = text.extr(response.text, ' id="tgl_all" value="', '"')
         return folders.rstrip("|").split("|")
 
     def galleries(self, folder_id):

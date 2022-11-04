@@ -109,13 +109,13 @@ class ReactorExtractor(BaseExtractor):
         tags.sort()
 
         for image in images:
-            url = text.extract(image, ' src="', '"')[0]
+            url = text.extr(image, ' src="', '"')
             if not url:
                 continue
             if url.startswith("//"):
                 url = "http:" + url
-            width = text.extract(image, ' width="', '"')[0]
-            height = text.extract(image, ' height="', '"')[0]
+            width = text.extr(image, ' width="', '"')
+            height = text.extr(image, ' height="', '"')
             image_id = url.rpartition("-")[2].partition(".")[0]
             num += 1
 
@@ -125,7 +125,7 @@ class ReactorExtractor(BaseExtractor):
                 url = url.replace("/post/", "/post/full/")
 
             if self.gif and ("/post/webm/" in url or "/post/mp4/" in url):
-                gif_url = text.extract(image, '<a href="', '"')[0]
+                gif_url = text.extr(image, '<a href="', '"')
                 if not gif_url:
                     continue
                 url = gif_url

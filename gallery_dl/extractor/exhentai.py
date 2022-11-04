@@ -185,7 +185,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
 
         if self.gallery_token:
             gpage = self._gallery_page()
-            self.image_token = text.extract(gpage, 'hentai.org/s/', '"')[0]
+            self.image_token = text.extr(gpage, 'hentai.org/s/', '"')
             if not self.image_token:
                 self.log.error("Failed to extract initial image token")
                 self.log.debug("Page content:\n%s", gpage)
@@ -193,7 +193,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
             ipage = self._image_page()
         else:
             ipage = self._image_page()
-            part = text.extract(ipage, 'hentai.org/g/', '"')[0]
+            part = text.extr(ipage, 'hentai.org/g/', '"')
             if not part:
                 self.log.error("Failed to extract gallery token")
                 self.log.debug("Page content:\n%s", ipage)
@@ -271,8 +271,8 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
         }
 
         if data["uploader"].startswith("<"):
-            data["uploader"] = text.unescape(text.extract(
-                data["uploader"], ">", "<")[0])
+            data["uploader"] = text.unescape(text.extr(
+                data["uploader"], ">", "<"))
 
         f = data["favorites"][0]
         if f == "N":
@@ -400,7 +400,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
         }
 
         page = self.request(url, cookies=cookies).text
-        current = text.extract(page, "<strong>", "</strong>")[0]
+        current = text.extr(page, "<strong>", "</strong>")
         self.log.debug("Image Limits: %s/%s", current, self.limits)
         self._remaining = self.limits - text.parse_int(current)
 

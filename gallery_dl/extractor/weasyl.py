@@ -225,7 +225,7 @@ class WeasylFavoriteExtractor(WeasylExtractor):
             pos = page.index('id="favorites-content"')
 
             if not owner_login:
-                owner_login = text.extract(page, '<a href="/~', '"')[0]
+                owner_login = text.extr(page, '<a href="/~', '"')
 
             for submitid in text.extract_iter(page, "/submissions/", "/", pos):
                 if submitid == lastid:

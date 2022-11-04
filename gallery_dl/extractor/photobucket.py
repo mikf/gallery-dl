@@ -75,7 +75,7 @@ class PhotobucketAlbumExtractor(Extractor):
             page = self.request(url, params=params).text
             json_data = text.extract(page, "collectionData:", ",\n")[0]
             if not json_data:
-                msg = text.extract(page, 'libraryPrivacyBlock">', "</div>")[0]
+                msg = text.extr(page, 'libraryPrivacyBlock">', "</div>")
                 msg = ' ("{}")'.format(text.remove_html(msg)) if msg else ""
                 self.log.error("Unable to get JSON data%s", msg)
                 return

@@ -47,7 +47,7 @@ class LightroomGalleryExtractor(Extractor):
         url = "https://lightroom.adobe.com/shares/" + self.href
         response = self.request(url)
         album = json.loads(
-            text.extract(response.text, "albumAttributes: ", "\n")[0]
+            text.extr(response.text, "albumAttributes: ", "\n")
         )
 
         images = self.images(album)

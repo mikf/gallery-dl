@@ -139,7 +139,7 @@ class HiperdexMangaExtractor(HiperdexBase, MangaExtractor):
         self.manga_data(self.manga, page)
         results = []
 
-        shortlink = text.extract(page, "rel='shortlink' href='", "'")[0]
+        shortlink = text.extr(page, "rel='shortlink' href='", "'")
         data = {
             "action"   : "manga_get_reading_nav",
             "manga"    : shortlink.rpartition("=")[2],
@@ -182,6 +182,6 @@ class HiperdexArtistExtractor(HiperdexBase, MangaExtractor):
     def chapters(self, page):
         results = []
         for info in text.extract_iter(page, 'id="manga-item-', '<img'):
-            url = text.extract(info, 'href="', '"')[0]
+            url = text.extr(info, 'href="', '"')
             results.append((url, {}))
         return results

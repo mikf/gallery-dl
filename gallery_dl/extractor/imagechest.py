@@ -36,8 +36,8 @@ class ImagechestGalleryExtractor(GalleryExtractor):
 
         return {
             "gallery_id": self.gallery_id,
-            "title": text.unescape(text.extract(
-                page, 'property="og:title" content="', '"')[0].strip())
+            "title": text.unescape(text.extr(
+                page, 'property="og:title" content="', '"').strip())
         }
 
     def images(self, page):

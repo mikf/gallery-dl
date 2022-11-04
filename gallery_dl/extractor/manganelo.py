@@ -63,8 +63,8 @@ class ManganeloChapterExtractor(ChapterExtractor):
         }
 
     def images(self, page):
-        page = text.extract(
-            page, 'class="container-chapter-reader', '\n<div')[0]
+        page = text.extr(
+            page, 'class="container-chapter-reader', '\n<div')
         return [
             (url, None)
             for url in text.extract_iter(page, '<img src="', '"')

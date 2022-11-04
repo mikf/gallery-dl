@@ -62,13 +62,13 @@ class KomikcastChapterExtractor(KomikcastBase, ChapterExtractor):
     )
 
     def metadata(self, page):
-        info = text.extract(page, "<title>", " – Komikcast<")[0]
+        info = text.extr(page, "<title>", " – Komikcast<")
         return self.parse_chapter_string(info)
 
     @staticmethod
     def images(page):
-        readerarea = text.extract(
-            page, '<div class="main-reading-area', '</div')[0]
+        readerarea = text.extr(
+            page, '<div class="main-reading-area', '</div')
         return [
             (text.unescape(url), None)
             for url in re.findall(r"<img[^>]* src=[\"']([^\"']+)", readerarea)

@@ -57,8 +57,8 @@ class WarosuThreadExtractor(Extractor):
 
     def get_metadata(self, page):
         """Collect metadata for extractor-job"""
-        boardname = text.extract(page, "<title>", "</title>")[0]
-        title = text.extract(page, 'filetitle" itemprop="name">', '<')[0]
+        boardname = text.extr(page, "<title>", "</title>")
+        title = text.extr(page, 'filetitle" itemprop="name">', '<')
         return {
             "board": self.board,
             "board_name": boardname.rpartition(" - ")[2],
@@ -68,7 +68,7 @@ class WarosuThreadExtractor(Extractor):
 
     def posts(self, page):
         """Build a list of all post-objects"""
-        page = text.extract(page, '<div class="content">', '<table>')[0]
+        page = text.extr(page, '<div class="content">', '<table>')
         needle = '<table itemscope itemtype="http://schema.org/Comment">'
         return [self.parse(post) for post in page.split(needle)]
 

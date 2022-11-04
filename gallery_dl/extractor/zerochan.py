@@ -127,7 +127,7 @@ class ZerochanTagExtractor(ZerochanExtractor):
 
         while True:
             page = self.request(url, params=params).text
-            thumbs = text.extract(page, '<ul id="thumbs', '</ul>')[0]
+            thumbs = text.extr(page, '<ul id="thumbs', '</ul>')
             extr = text.extract_from(thumbs)
 
             while True:

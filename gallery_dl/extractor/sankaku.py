@@ -306,7 +306,7 @@ class SankakuAPI():
                         url = post["file_url"]
                         if url:
                             expires = text.parse_int(
-                                text.extract(url, "e=", "&")[0]) - 60
+                                text.extr(url, "e=", "&")) - 60
 
                     if 0 < expires <= time():
                         self.extractor.log.debug("Refreshing download URLs")

@@ -57,7 +57,7 @@ class FallenangelsChapterExtractor(ChapterExtractor):
         return [
             (img["page_image"], None)
             for img in json.loads(
-                text.extract(page, "var pages = ", ";")[0]
+                text.extr(page, "var pages = ", ";")
             )
         ]
 

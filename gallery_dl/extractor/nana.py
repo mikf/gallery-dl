@@ -44,10 +44,10 @@ class NanaGalleryExtractor(GalleryExtractor):
 
     def metadata(self, page):
         title = text.unescape(
-            text.extract(page, '</a>&nbsp; ', '</div>')[0])
-        artist = text.unescape(text.extract(
-            page, '<title>', '</title>')[0])[len(title):-10]
-        tags = text.extract(page, 'Reader.tags = "', '"')[0]
+            text.extr(page, '</a>&nbsp; ', '</div>'))
+        artist = text.unescape(text.extr(
+            page, '<title>', '</title>'))[len(title):-10]
+        tags = text.extr(page, 'Reader.tags = "', '"')
 
         return {
             "gallery_id": self.gallery_id,
@@ -59,7 +59,7 @@ class NanaGalleryExtractor(GalleryExtractor):
         }
 
     def images(self, page):
-        data = json.loads(text.extract(page, "Reader.pages = ", ".pages")[0])
+        data = json.loads(text.extr(page, "Reader.pages = ", ".pages"))
         return [
             ("https://nana.my.id" + image, None)
             for image in data["pages"]
@@ -108,8 +108,8 @@ class NanaSearchExtractor(Extractor):
 
             for gallery in text.extract_iter(
                     page, '<div class="id3">', '</div>'):
-                url = "https://nana.my.id" + text.extract(
-                    gallery, '<a href="', '"')[0]
+                url = "https://nana.my.id" + text.extr(
+                    gallery, '<a href="', '"')
                 yield Message.Queue, url, data
 
             self.params["p"] += 1

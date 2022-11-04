@@ -98,8 +98,8 @@ class GelbooruV02Extractor(booru.BooruExtractor):
             self.root, post["id"])).text
 
     def _tags(self, post, page):
-        tag_container = (text.extract(page, '<ul id="tag-', '</ul>')[0] or
-                         text.extract(page, '<ul class="tag-', '</ul>')[0])
+        tag_container = (text.extr(page, '<ul id="tag-', '</ul>') or
+                         text.extr(page, '<ul class="tag-', '</ul>'))
         if not tag_container:
             return
 
@@ -112,7 +112,7 @@ class GelbooruV02Extractor(booru.BooruExtractor):
             post["tags_" + key] = " ".join(value)
 
     def _notes(self, post, page):
-        note_container = text.extract(page, 'id="note-container"', "<img ")[0]
+        note_container = text.extr(page, 'id="note-container"', "<img ")
         if not note_container:
             return
 

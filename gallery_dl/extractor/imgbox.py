@@ -53,7 +53,7 @@ class ImgboxExtractor(Extractor):
     @staticmethod
     def get_image_url(page):
         """Extract download-url"""
-        return text.extract(page, 'property="og:image" content="', '"')[0]
+        return text.extr(page, 'property="og:image" content="', '"')
 
 
 class ImgboxGalleryExtractor(AsynchronousMixin, ImgboxExtractor):
@@ -89,7 +89,7 @@ class ImgboxGalleryExtractor(AsynchronousMixin, ImgboxExtractor):
             raise exception.NotFoundError("gallery")
         self.image_keys = re.findall(r'<a href="/([^"]+)"><img alt="', page)
 
-        title = text.extract(page, "<h1>", "</h1>")[0]
+        title = text.extr(page, "<h1>", "</h1>")
         title, _, count = title.rpartition(" - ")
         return {
             "gallery_key": self.gallery_key,

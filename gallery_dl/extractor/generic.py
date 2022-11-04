@@ -87,25 +87,25 @@ class GenericExtractor(Extractor):
         """Extract generic webpage metadata, return them in a dict."""
         data = {}
         data['pageurl'] = self.url
-        data['title'] = text.extract(page, '<title>', "</title>")[0] or ""
-        data['description'] = text.extract(
-            page, '<meta name="description" content="', '"')[0] or ""
-        data['keywords'] = text.extract(
-            page, '<meta name="keywords" content="', '"')[0] or ""
-        data['language'] = text.extract(
-            page, '<meta name="language" content="', '"')[0] or ""
-        data['name'] = text.extract(
-            page, '<meta itemprop="name" content="', '"')[0] or ""
-        data['copyright'] = text.extract(
-            page, '<meta name="copyright" content="', '"')[0] or ""
-        data['og_site'] = text.extract(
-            page, '<meta property="og:site" content="', '"')[0] or ""
-        data['og_site_name'] = text.extract(
-            page, '<meta property="og:site_name" content="', '"')[0] or ""
-        data['og_title'] = text.extract(
-            page, '<meta property="og:title" content="', '"')[0] or ""
-        data['og_description'] = text.extract(
-            page, '<meta property="og:description" content="', '"')[0] or ""
+        data['title'] = text.extr(page, '<title>', "</title>")
+        data['description'] = text.extr(
+            page, '<meta name="description" content="', '"')
+        data['keywords'] = text.extr(
+            page, '<meta name="keywords" content="', '"')
+        data['language'] = text.extr(
+            page, '<meta name="language" content="', '"')
+        data['name'] = text.extr(
+            page, '<meta itemprop="name" content="', '"')
+        data['copyright'] = text.extr(
+            page, '<meta name="copyright" content="', '"')
+        data['og_site'] = text.extr(
+            page, '<meta property="og:site" content="', '"')
+        data['og_site_name'] = text.extr(
+            page, '<meta property="og:site_name" content="', '"')
+        data['og_title'] = text.extr(
+            page, '<meta property="og:title" content="', '"')
+        data['og_description'] = text.extr(
+            page, '<meta property="og:description" content="', '"')
 
         data = {k: text.unescape(data[k]) for k in data if data[k] != ""}
 

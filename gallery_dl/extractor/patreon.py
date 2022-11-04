@@ -95,7 +95,7 @@ class PatreonExtractor(Extractor):
         if content:
             for img in text.extract_iter(
                     content, '<img data-media-id="', '>'):
-                url = text.extract(img, 'src="', '"')[0]
+                url = text.extr(img, 'src="', '"')
                 if url:
                     yield "content", url, self._filename(url) or url
 
@@ -181,7 +181,7 @@ class PatreonExtractor(Extractor):
         """Fetch filename from an URL's Content-Disposition header"""
         response = self.request(url, method="HEAD", fatal=False)
         cd = response.headers.get("Content-Disposition")
-        return text.extract(cd, 'filename="', '"')[0]
+        return text.extr(cd, 'filename="', '"')
 
     @staticmethod
     def _filehash(url):
@@ -284,7 +284,7 @@ class PatreonCreatorExtractor(PatreonExtractor):
             url = "{}/{}/posts".format(self.root, self.creator)
 
         page = self.request(url, notfound="creator").text
-        campaign_id = text.extract(page, "/campaign/", "/")[0]
+        campaign_id = text.extr(page, "/campaign/", "/")
         if not campaign_id:
             raise exception.NotFoundError("creator")
 

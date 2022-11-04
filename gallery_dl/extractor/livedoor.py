@@ -37,7 +37,7 @@ class LivedoorExtractor(Extractor):
 
     def _load(self, data, body):
         extr = text.extract_from(data)
-        tags = text.extract(body, 'class="article-tags">', '</dl>')[0]
+        tags = text.extr(body, 'class="article-tags">', '</dl>')
         about = extr('rdf:about="', '"')
 
         return {
@@ -57,8 +57,8 @@ class LivedoorExtractor(Extractor):
         body = post.pop("body")
 
         for num, img in enumerate(text.extract_iter(body, "<img ", ">"), 1):
-            src = text.extract(img, 'src="', '"')[0]
-            alt = text.extract(img, 'alt="', '"')[0]
+            src = text.extr(img, 'src="', '"')
+            alt = text.extr(img, 'alt="', '"')
 
             if not src:
                 continue

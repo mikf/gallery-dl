@@ -35,8 +35,8 @@ class KissgoddessGalleryExtractor(GalleryExtractor):
     def metadata(self, page):
         return {
             "gallery_id": text.parse_int(self.gallery_id),
-            "title"     : text.extract(
-                page, '<title>', "<")[0].rpartition(" | ")[0],
+            "title"     : text.extr(
+                page, '<title>', "<")[0].rpartition(" | "),
         }
 
     def images(self, page):

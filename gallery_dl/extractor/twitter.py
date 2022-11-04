@@ -227,8 +227,8 @@ class TwitterExtractor(Extractor):
                 response = self.request(url, fatal=False)
                 if response.status_code >= 400:
                     continue
-                url = text.extract(
-                    response.text, 'name="twitter:image" value="', '"')[0]
+                url = text.extr(
+                    response.text, 'name="twitter:image" value="', '"')
                 if url:
                     files.append({"url": url})
 

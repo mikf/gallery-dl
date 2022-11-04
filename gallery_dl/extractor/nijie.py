@@ -107,7 +107,7 @@ class NijieExtractor(AsynchronousMixin, BaseExtractor):
         """Extract image URLs from 'page'"""
         images = text.extract_iter(page, "/view_popup.php", "</a>")
         for num, image in enumerate(images):
-            src = text.extract(image, 'src="', '"')[0]
+            src = text.extr(image, 'src="', '"')
             if not src:
                 continue
             url = ("https:" + src).replace("/__rs_l120x120/", "/")
@@ -118,7 +118,7 @@ class NijieExtractor(AsynchronousMixin, BaseExtractor):
 
     @staticmethod
     def _extract_user_name(page):
-        return text.unescape(text.extract(page, "<br />", "<")[0] or "")
+        return text.unescape(text.extr(page, "<br />", "<"))
 
     def login(self):
         """Login and obtain session cookies"""
@@ -322,8 +322,7 @@ class NijieNuitaExtractor(NijieExtractor):
 
     @staticmethod
     def _extract_user_name(page):
-        return text.unescape(text.extract(
-            page, "<title>", "さんの抜いた")[0] or "")
+        return text.unescape(text.extr(page, "<title>", "さんの抜いた"))
 
 
 class NijieFeedExtractor(NijieExtractor):
