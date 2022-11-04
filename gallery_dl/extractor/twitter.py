@@ -1457,7 +1457,7 @@ class TwitterAPI():
 
     def _syndication_tweet(self, tweet_id):
         tweet = self.extractor.request(
-            "https://cdn.syndication.twimg.com/tweet?id=" + tweet_id).json()
+            "https://cdn.syndication.twimg.com/tweet-result?id=" + tweet_id).json()
 
         tweet["user"]["description"] = ""
         tweet["user"]["entities"] = {"description": {}}
