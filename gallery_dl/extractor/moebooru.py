@@ -31,22 +31,24 @@ class MoebooruExtractor(BooruExtractor):
             self.root, post["id"])).text
 
     def _tags(self, post, page):
-        html = text.extract(page, '<ul id="tag-', '</ul>')[0]
-        if html:
-            tags = collections.defaultdict(list)
-            pattern = re.compile(r"tag-type-([^\"' ]+).*?[?;]tags=([^\"'+]+)")
-            for tag_type, tag_name in pattern.findall(html):
-                tags[tag_type].append(text.unquote(tag_name))
-            for key, value in tags.items():
-                post["tags_" + key] = " ".join(value)
+        tag_container = text.extract(page, '<ul id="tag-', '</ul>')[0]
+        if not tag_container:
+            return
+
+        tags = collections.defaultdict(list)
+        pattern = re.compile(r"tag-type-([^\"' ]+).*?[?;]tags=([^\"'+]+)")
+        for tag_type, tag_name in pattern.findall(tag_container):
+            tags[tag_type].append(text.unquote(tag_name))
+        for key, value in tags.items():
+            post["tags_" + key] = " ".join(value)
 
     def _notes(self, post, page):
-        notes_container = text.extract(page, 'id="note-container"', "<img ")[0]
-        if not notes_container:
+        note_container = text.extract(page, 'id="note-container"', "<img ")[0]
+        if not note_container:
             return
 
         post["notes"] = notes = []
-        for note in notes_container.split('class="note-box"')[1:]:
+        for note in note_container.split('class="note-box"')[1:]:
             extr = text.extract_from(note)
             notes.append({
                 "width" : int(extr("width:", "p")),
@@ -54,7 +56,7 @@ class MoebooruExtractor(BooruExtractor):
                 "y"     : int(extr("top:", "p")),
                 "x"     : int(extr("left:", "p")),
                 "id"    : int(extr('id="note-body-', '"')),
-                "body"  : text.remove_html(extr(">", "</div>")),
+                "body"  : text.unescape(text.remove_html(extr(">", "</div>"))),
             })
 
     def _pagination(self, url, params):

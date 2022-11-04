@@ -98,17 +98,18 @@ class GelbooruV02Extractor(booru.BooruExtractor):
             self.root, post["id"])).text
 
     def _tags(self, post, page):
-        html = text.extract(page, '<ul id="tag-', '</ul>')[0]
-        if not html:
-            html = text.extract(page, '<ul class="tag-', '</ul>')[0]
-        if html:
-            tags = collections.defaultdict(list)
-            pattern = re.compile(
-                r"tag-type-([^\"' ]+).*?[?;]tags=([^\"'&]+)", re.S)
-            for tag_type, tag_name in pattern.findall(html):
-                tags[tag_type].append(text.unquote(tag_name))
-            for key, value in tags.items():
-                post["tags_" + key] = " ".join(value)
+        tag_container = (text.extract(page, '<ul id="tag-', '</ul>')[0] or
+                         text.extract(page, '<ul class="tag-', '</ul>')[0])
+        if not tag_container:
+            return
+
+        tags = collections.defaultdict(list)
+        pattern = re.compile(
+            r"tag-type-([^\"' ]+).*?[?;]tags=([^\"'&]+)", re.S)
+        for tag_type, tag_name in pattern.findall(tag_container):
+            tags[tag_type].append(text.unquote(tag_name))
+        for key, value in tags.items():
+            post["tags_" + key] = " ".join(value)
 
     def _notes(self, post, page):
         note_container = text.extract(page, 'id="note-container"', "<img ")[0]
