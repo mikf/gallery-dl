@@ -10,8 +10,6 @@
 
 from .common import Extractor, Message
 from .. import text
-from email.utils import parsedate_tz
-from datetime import datetime
 
 
 class UploadirFileExtractor(Extractor):
@@ -19,6 +17,8 @@ class UploadirFileExtractor(Extractor):
     category = "uploadir"
     subcategory = "file"
     root = "https://uploadir.com"
+    filename_fmt = "{filename} ({id}).{extension}"
+    archive_fmt = "{id}"
     pattern = r"(?:https?://)?uploadir\.com/(?:user/)?u(?:ploads)?/([^/?#]+)"
     test = (
         # image
@@ -28,6 +28,7 @@ class UploadirFileExtractor(Extractor):
             "keyword": {
                 "extension": "jpg",
                 "filename": "Chloe and Rachel 4K jpg",
+                "id": "rd3t46ry",
             },
         }),
         # archive
@@ -37,6 +38,7 @@ class UploadirFileExtractor(Extractor):
             "keyword": {
                 "extension": "zip",
                 "filename": "NYAN-Mods-Pack#1",
+                "id": "gxe8ti9v",
             },
         }),
         ("https://uploadir.com/uploads/rd3t46ry"),
@@ -49,10 +51,11 @@ class UploadirFileExtractor(Extractor):
 
     def items(self):
         url = "{}/u/{}".format(self.root, self.file_id)
-        response = self.request(url, method="HEAD")
+        response = self.request(url, method="HEAD", allow_redirects=False)
 
-        if response.history:
-            extr = text.extract_from(self.request(response.url).text)
+        if 300 <= response.status_code < 400:
+            url = response.headers["Location"]
+            extr = text.extract_from(self.request(url).text)
 
             name = text.unescape(extr("<h2>", "</h2>").strip())
             url = self.root + extr('class="form" action="', '"')
@@ -67,13 +70,9 @@ class UploadirFileExtractor(Extractor):
             })
 
         else:
-            hget = response.headers.get
-            hcd = hget("Content-Disposition")
-            hlm = hget("Last-Modified")
-
+            hcd = response.headers.get("Content-Disposition")
             data = text.nameext_from_url(text.extr(hcd, 'filename="', '"'))
-            if hlm:
-                data["date"] = datetime(*parsedate_tz(hlm)[:6])
 
+        data["id"] = self.file_id
         yield Message.Directory, data
         yield Message.Url, url, data
