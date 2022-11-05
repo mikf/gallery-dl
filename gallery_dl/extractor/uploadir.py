@@ -41,6 +41,16 @@ class UploadirFileExtractor(Extractor):
                 "id": "gxe8ti9v",
             },
         }),
+        # utf-8 filename
+        ("https://uploadir.com/u/fllda6xl", {
+            "pattern": r"https://uploadir\.com/u/fllda6xl",
+            "count": 1,
+            "keyword": {
+                "extension": "png",
+                "filename": "_圖片_🖼_image_",
+                "id": "fllda6xl",
+            },
+        }),
         ("https://uploadir.com/uploads/rd3t46ry"),
         ("https://uploadir.com/user/uploads/rd3t46ry"),
     )
@@ -71,7 +81,9 @@ class UploadirFileExtractor(Extractor):
 
         else:
             hcd = response.headers.get("Content-Disposition")
-            data = text.nameext_from_url(text.extr(hcd, 'filename="', '"'))
+            name = (hcd.partition("filename*=UTF-8''")[2] or
+                    text.extr(hcd, 'filename="', '"'))
+            data = text.nameext_from_url(name)
 
         data["id"] = self.file_id
         yield Message.Directory, data
