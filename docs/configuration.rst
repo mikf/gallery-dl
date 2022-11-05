@@ -586,6 +586,22 @@ Description
     to access the current file's filename as ``"[gdl_path.filename}"``.
 
 
+extractor.*.http-metadata
+-------------------------
+Type
+    ``string``
+Default
+    ``null``
+Description
+    Insert an ``object`` containing a file's HTTP headers and
+    ``filename``, ``extension``, and ``date`` parsed from them
+    into metadata dictionaries as the given name.
+
+    For example, setting this option to ``"gdl_http"`` would make it possible
+    to access the current file's ``Last-Modified`` header as ``"[gdl_http[Last-Modified]}"``
+    and its parsed form as .``"[gdl_http[date]}"``.
+
+
 extractor.*.category-transfer
 -----------------------------
 Type
