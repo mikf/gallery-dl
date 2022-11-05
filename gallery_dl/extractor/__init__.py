@@ -140,6 +140,7 @@ modules = [
     "twibooru",
     "twitter",
     "unsplash",
+    "uploadir",
     "vanillarock",
     "vichan",
     "vk",
