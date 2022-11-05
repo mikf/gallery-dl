@@ -842,6 +842,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
+    <td>Uploadir</td>
+    <td>https://uploadir.com/</td>
+    <td>Files</td>
+    <td></td>
+</tr>
+<tr>
     <td>Vipr</td>
     <td>https://vipr.im/</td>
     <td>individual Images</td>
