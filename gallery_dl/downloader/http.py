@@ -14,6 +14,8 @@ from requests.exceptions import RequestException, ConnectionError, Timeout
 from .common import DownloaderBase
 from .. import text, util
 
+from email.utils import parsedate_tz
+from datetime import datetime
 from ssl import SSLError
 try:
     from OpenSSL.SSL import Error as OpenSSLError
@@ -31,6 +33,7 @@ class HttpDownloader(DownloaderBase):
 
         self.adjust_extension = self.config("adjust-extensions", True)
         self.chunk_size = self.config("chunk-size", 32768)
+        self.metadata = extractor.config("http-metadata")
         self.progress = self.config("progress", 3.0)
         self.headers = self.config("headers")
         self.minsize = self.config("filesize-min")
@@ -171,13 +174,6 @@ class HttpDownloader(DownloaderBase):
                     self.log.warning("Invalid response")
                     return False
 
-            # set missing filename extension from MIME type
-            if not pathfmt.extension:
-                pathfmt.set_extension(self._find_extension(response))
-                if pathfmt.exists():
-                    pathfmt.temppath = ""
-                    return True
-
             # check file size
             size = text.parse_int(size, None)
             if size is not None:
@@ -191,6 +187,21 @@ class HttpDownloader(DownloaderBase):
                         "File size larger than allowed maximum (%s > %s)",
                         size, self.maxsize)
                     return False
+
+            # set missing filename extension from MIME type
+            if not pathfmt.extension:
+                pathfmt.set_extension(self._find_extension(response))
+                if pathfmt.exists():
+                    pathfmt.temppath = ""
+                    return True
+
+            # set metadata from HTTP headers
+            if self.metadata:
+                kwdict[self.metadata] = self._extract_metadata(response)
+                pathfmt.build_path()
+                if pathfmt.exists():
+                    pathfmt.temppath = ""
+                    return True
 
             content = response.iter_content(self.chunk_size)
 
@@ -293,6 +304,22 @@ class HttpDownloader(DownloaderBase):
                     t2 = time.time()
 
             t1 = t2
+
+    def _extract_metadata(self, response):
+        headers = response.headers
+        data = dict(headers)
+
+        hcd = headers.get("content-disposition")
+        if hcd:
+            name = text.extr(hcd, 'filename="', '"')
+            if name:
+                text.nameext_from_url(name, data)
+
+        hlm = headers.get("last-modified")
+        if hlm:
+            data["date"] = datetime(*parsedate_tz(hlm)[:6])
+
+        return data
 
     def _find_extension(self, response):
         """Get filename extension from MIME type"""
