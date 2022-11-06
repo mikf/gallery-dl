@@ -27,10 +27,6 @@ class PhilomenaExtractor(BooruExtractor):
     def _prepare(post):
         post["date"] = text.parse_datetime(post["created_at"])
 
-    @staticmethod
-    def _extended_tags(post):
-        pass
-
     def _pagination(self, url, params):
         params["page"] = 1
         params["per_page"] = self.per_page

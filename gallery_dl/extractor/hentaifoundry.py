@@ -156,8 +156,8 @@ class HentaifoundryExtractor(Extractor):
             "filter_media"    : "A",
             "filter_order"    : "date_new",
             "filter_type"     : "0",
-            "YII_CSRF_TOKEN"  : text.unquote(text.extract(
-                csrf_token, "%22", "%22")[0]),
+            "YII_CSRF_TOKEN"  : text.unquote(text.extr(
+                csrf_token, "%22", "%22")),
         }
         self.request(url, method="POST", data=data)
 

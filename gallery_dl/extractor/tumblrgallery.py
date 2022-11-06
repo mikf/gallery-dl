@@ -46,7 +46,7 @@ class TumblrgalleryTumblrblogExtractor(TumblrgalleryExtractor):
 
     def metadata(self, page):
         return {
-            "title" : text.unescape(text.extract(page, "<h1>", "</h1>"))[0],
+            "title" : text.unescape(text.extr(page, "<h1>", "</h1>")),
             "gallery_id": self.gallery_id,
         }
 
@@ -82,7 +82,7 @@ class TumblrgalleryPostExtractor(TumblrgalleryExtractor):
     def metadata(self, page):
         return {
             "title" : text.remove_html(
-                text.unescape(text.extract(page, "<title>", "</title>")[0])
+                text.unescape(text.extr(page, "<title>", "</title>"))
             ).replace("_", "-"),
             "gallery_id": self.gallery_id,
         }
@@ -127,12 +127,12 @@ class TumblrgallerySearchExtractor(TumblrgalleryExtractor):
                     data = self._data_from_url(url)
                     data["gallery_id"] = gallery_id
                     data["title"] = text.remove_html(text.unescape(
-                        text.extract(post_page, "<title>", "</title>")[0]
+                        text.extr(post_page, "<title>", "</title>")
                     )).replace("_", "-")
                     yield url, data
 
-            next_url = text.extract(
-                page, '</span> <a class="btn btn-primary" href="', '"')[0]
+            next_url = text.extr(
+                page, '</span> <a class="btn btn-primary" href="', '"')
             if not next_url or page_url == next_url:
                 return
             page_url = next_url

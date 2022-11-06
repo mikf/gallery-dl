@@ -125,6 +125,11 @@ def build_parser():
         help="Client-side IP address to bind to",
     )
     general.add_argument(
+        "--user-agent",
+        dest="user-agent", metavar="UA", action=ConfigAction,
+        help="User-Agent request header",
+    )
+    general.add_argument(
         "--clear-cache",
         dest="clear_cache", metavar="MODULE",
         help="Delete cached login sessions, cookies, etc. for MODULE "
@@ -261,6 +266,11 @@ def build_parser():
         "--filesize-max",
         dest="filesize-max", metavar="SIZE", action=ConfigAction,
         help="Do not download files larger than SIZE (e.g. 500k or 2.5M)",
+    )
+    downloader.add_argument(
+        "--chunk-size",
+        dest="chunk-size", metavar="SIZE", action=ConfigAction,
+        help="Size of in-memory data chunks (default: 32k)",
     )
     downloader.add_argument(
         "--no-part",

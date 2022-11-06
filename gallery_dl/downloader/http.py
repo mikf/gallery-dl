@@ -14,6 +14,8 @@ from requests.exceptions import RequestException, ConnectionError, Timeout
 from .common import DownloaderBase
 from .. import text, util
 
+from email.utils import parsedate_tz
+from datetime import datetime
 from ssl import SSLError
 try:
     from OpenSSL.SSL import Error as OpenSSLError
@@ -27,10 +29,11 @@ class HttpDownloader(DownloaderBase):
     def __init__(self, job):
         DownloaderBase.__init__(self, job)
         extractor = job.extractor
-        self.chunk_size = 16384
         self.downloading = False
 
         self.adjust_extension = self.config("adjust-extensions", True)
+        self.chunk_size = self.config("chunk-size", 32768)
+        self.metadata = extractor.config("http-metadata")
         self.progress = self.config("progress", 3.0)
         self.headers = self.config("headers")
         self.minsize = self.config("filesize-min")
@@ -55,6 +58,13 @@ class HttpDownloader(DownloaderBase):
                 self.log.warning(
                     "Invalid maximum file size (%r)", self.maxsize)
             self.maxsize = maxsize
+        if isinstance(self.chunk_size, str):
+            chunk_size = text.parse_bytes(self.chunk_size)
+            if not chunk_size:
+                self.log.warning(
+                    "Invalid chunk size (%r)", self.chunk_size)
+                chunk_size = 32768
+            self.chunk_size = chunk_size
         if self.rate:
             rate = text.parse_bytes(self.rate)
             if rate:
@@ -164,13 +174,6 @@ class HttpDownloader(DownloaderBase):
                     self.log.warning("Invalid response")
                     return False
 
-            # set missing filename extension from MIME type
-            if not pathfmt.extension:
-                pathfmt.set_extension(self._find_extension(response))
-                if pathfmt.exists():
-                    pathfmt.temppath = ""
-                    return True
-
             # check file size
             size = text.parse_int(size, None)
             if size is not None:
@@ -185,11 +188,26 @@ class HttpDownloader(DownloaderBase):
                         size, self.maxsize)
                     return False
 
+            # set missing filename extension from MIME type
+            if not pathfmt.extension:
+                pathfmt.set_extension(self._find_extension(response))
+                if pathfmt.exists():
+                    pathfmt.temppath = ""
+                    return True
+
+            # set metadata from HTTP headers
+            if self.metadata:
+                kwdict[self.metadata] = self._extract_metadata(response)
+                pathfmt.build_path()
+                if pathfmt.exists():
+                    pathfmt.temppath = ""
+                    return True
+
             content = response.iter_content(self.chunk_size)
 
             # check filename extension against file header
             if adjust_extension and not offset and \
-                    pathfmt.extension in FILE_SIGNATURES:
+                    pathfmt.extension in SIGNATURE_CHECKS:
                 try:
                     file_header = next(
                         content if response.raw.chunked
@@ -220,7 +238,7 @@ class HttpDownloader(DownloaderBase):
                     offset += len(file_header)
                 elif offset:
                     if adjust_extension and \
-                            pathfmt.extension in FILE_SIGNATURES:
+                            pathfmt.extension in SIGNATURE_CHECKS:
                         self._adjust_extension(pathfmt, fp.read(16))
                     fp.seek(offset)
 
@@ -287,6 +305,22 @@ class HttpDownloader(DownloaderBase):
 
             t1 = t2
 
+    def _extract_metadata(self, response):
+        headers = response.headers
+        data = dict(headers)
+
+        hcd = headers.get("content-disposition")
+        if hcd:
+            name = text.extr(hcd, 'filename="', '"')
+            if name:
+                text.nameext_from_url(name, data)
+
+        hlm = headers.get("last-modified")
+        if hlm:
+            data["date"] = datetime(*parsedate_tz(hlm)[:6])
+
+        return data
+
     def _find_extension(self, response):
         """Get filename extension from MIME type"""
         mtype = response.headers.get("Content-Type", "image/jpeg")
@@ -308,10 +342,9 @@ class HttpDownloader(DownloaderBase):
     @staticmethod
     def _adjust_extension(pathfmt, file_header):
         """Check filename extension against file header"""
-        sig = FILE_SIGNATURES[pathfmt.extension]
-        if not file_header.startswith(sig):
-            for ext, sig in FILE_SIGNATURES.items():
-                if file_header.startswith(sig):
+        if not SIGNATURE_CHECKS[pathfmt.extension](file_header):
+            for ext, check in SIGNATURE_CHECKS.items():
+                if check(file_header):
                     pathfmt.set_extension(ext)
                     return True
         return False
@@ -326,6 +359,7 @@ MIME_TYPES = {
     "image/x-bmp"   : "bmp",
     "image/x-ms-bmp": "bmp",
     "image/webp"    : "webp",
+    "image/avif"    : "avif",
     "image/svg+xml" : "svg",
     "image/ico"     : "ico",
     "image/icon"    : "ico",
@@ -362,27 +396,31 @@ MIME_TYPES = {
 }
 
 # https://en.wikipedia.org/wiki/List_of_file_signatures
-FILE_SIGNATURES = {
-    "jpg" : b"\xFF\xD8\xFF",
-    "png" : b"\x89PNG\r\n\x1A\n",
-    "gif" : (b"GIF87a", b"GIF89a"),
-    "bmp" : b"BM",
-    "webp": b"RIFF",
-    "svg" : b"<?xml",
-    "ico" : b"\x00\x00\x01\x00",
-    "cur" : b"\x00\x00\x02\x00",
-    "psd" : b"8BPS",
-    "webm": b"\x1A\x45\xDF\xA3",
-    "ogg" : b"OggS",
-    "wav" : b"RIFF",
-    "mp3" : (b"\xFF\xFB", b"\xFF\xF3", b"\xFF\xF2", b"ID3"),
-    "zip" : (b"PK\x03\x04", b"PK\x05\x06", b"PK\x07\x08"),
-    "rar" : b"\x52\x61\x72\x21\x1A\x07",
-    "7z"  : b"\x37\x7A\xBC\xAF\x27\x1C",
-    "pdf" : b"%PDF-",
-    "swf" : (b"CWS", b"FWS"),
+SIGNATURE_CHECKS = {
+    "jpg" : lambda s: s[0:3] == b"\xFF\xD8\xFF",
+    "png" : lambda s: s[0:8] == b"\x89PNG\r\n\x1A\n",
+    "gif" : lambda s: s[0:6] in (b"GIF87a", b"GIF89a"),
+    "bmp" : lambda s: s[0:2] == b"BM",
+    "webp": lambda s: (s[0:4] == b"RIFF" and
+                       s[8:12] == b"WEBP"),
+    "avif": lambda s: s[4:12] == b"ftypavif",
+    "svg" : lambda s: s[0:5] == b"<?xml",
+    "ico" : lambda s: s[0:4] == b"\x00\x00\x01\x00",
+    "cur" : lambda s: s[0:4] == b"\x00\x00\x02\x00",
+    "psd" : lambda s: s[0:4] == b"8BPS",
+    "webm": lambda s: s[0:4] == b"\x1A\x45\xDF\xA3",
+    "ogg" : lambda s: s[0:4] == b"OggS",
+    "wav" : lambda s: (s[0:4] == b"RIFF" and
+                       s[8:12] == b"WAVE"),
+    "mp3" : lambda s: (s[0:3] == b"ID3" or
+                       s[0:2] in (b"\xFF\xFB", b"\xFF\xF3", b"\xFF\xF2")),
+    "zip" : lambda s: s[0:4] in (b"PK\x03\x04", b"PK\x05\x06", b"PK\x07\x08"),
+    "rar" : lambda s: s[0:6] == b"\x52\x61\x72\x21\x1A\x07",
+    "7z"  : lambda s: s[0:6] == b"\x37\x7A\xBC\xAF\x27\x1C",
+    "pdf" : lambda s: s[0:5] == b"%PDF-",
+    "swf" : lambda s: s[0:3] in (b"CWS", b"FWS"),
     # check 'bin' files against all other file signatures
-    "bin" : b"\x00\x00\x00\x00\x00\x00\x00\x00",
+    "bin" : lambda s: False,
 }
 
 __downloader__ = HttpDownloader

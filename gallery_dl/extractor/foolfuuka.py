@@ -56,7 +56,7 @@ class FoolfuukaExtractor(BaseExtractor):
         """Resolve a remote media link"""
         needle = '<meta http-equiv="Refresh" content="0; url='
         page = self.request(media["remote_media_link"]).text
-        return text.extract(page, needle, '"')[0]
+        return text.extr(page, needle, '"')
 
     @staticmethod
     def _remote_direct(media):

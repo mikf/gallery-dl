@@ -76,7 +76,7 @@ class KhinsiderSoundtrackExtractor(AsynchronousMixin, Extractor):
             else:
                 fmt = fmt.lower().split(",")
 
-        page = text.extract(page, '<table id="songlist">', '</table>')[0]
+        page = text.extr(page, '<table id="songlist">', '</table>')
         for num, url in enumerate(text.extract_iter(
                 page, '<td class="clickable-row"><a href="', '"'), 1):
             url = text.urljoin(self.root, url)

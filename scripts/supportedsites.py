@@ -122,6 +122,7 @@ CATEGORY_MAP = {
     "webtoons"       : "Webtoon",
     "wikiart"        : "WikiArt.org",
     "wpsizedon"      : "さいずどんの森 (Sizedon Forest)",
+    "xbunkr"         : "xBunkr",
     "xhamster"       : "xHamster",
     "xvideos"        : "XVideos",
     "yandere"        : "yande.re",

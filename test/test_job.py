@@ -87,10 +87,10 @@ num
   1
 subcategory
   test_subcategory
-tags[]
-  - foo
-  - bar
-  - テスト
+tags[N]
+  0 foo
+  1 bar
+  2 テスト
 user[id]
   123
 user[name]

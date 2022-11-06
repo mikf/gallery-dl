@@ -93,47 +93,40 @@ class GelbooruV02Extractor(booru.BooruExtractor):
                 self.root, md5[0:2], md5[2:4], md5, url.rpartition(".")[2])
         return url
 
-    def _extended_tags(self, post, page=None):
-        if not page:
-            url = "{}/index.php?page=post&s=view&id={}".format(
-                self.root, post["id"])
-            page = self.request(url).text
-        html = text.extract(page, '<ul id="tag-', '</ul>')[0]
-        if not html:
-            html = text.extract(page, '<ul class="tag-', '</ul>')[0]
-        if html:
-            tags = collections.defaultdict(list)
-            pattern = re.compile(
-                r"tag-type-([^\"' ]+).*?[?;]tags=([^\"'&]+)", re.S)
-            for tag_type, tag_name in pattern.findall(html):
-                tags[tag_type].append(text.unquote(tag_name))
-            for key, value in tags.items():
-                post["tags_" + key] = " ".join(value)
-        return page
+    def _html(self, post):
+        return self.request("{}/index.php?page=post&s=view&id={}".format(
+            self.root, post["id"])).text
 
-    def _notes(self, post, page=None):
-        if not page:
-            url = "{}/index.php?page=post&s=view&id={}".format(
-                self.root, post["id"])
-            page = self.request(url).text
-        notes = []
-        notes_data = text.extract(page, '<section id="notes"', '</section>')[0]
-        if not notes_data:
+    def _tags(self, post, page):
+        tag_container = (text.extr(page, '<ul id="tag-', '</ul>') or
+                         text.extr(page, '<ul class="tag-', '</ul>'))
+        if not tag_container:
             return
 
-        note_iter = text.extract_iter(notes_data, '<article', '</article>')
-        extr = text.extract
-        for note_data in note_iter:
-            note = {
-                "width": int(extr(note_data, 'data-width="', '"')[0]),
-                "height": int(extr(note_data, 'data-height="', '"')[0]),
-                "x": int(extr(note_data, 'data-x="', '"')[0]),
-                "y": int(extr(note_data, 'data-y="', '"')[0]),
-                "body": extr(note_data, 'data-body="', '"')[0],
-            }
-            notes.append(note)
+        tags = collections.defaultdict(list)
+        pattern = re.compile(
+            r"tag-type-([^\"' ]+).*?[?;]tags=([^\"'&]+)", re.S)
+        for tag_type, tag_name in pattern.findall(tag_container):
+            tags[tag_type].append(text.unquote(tag_name))
+        for key, value in tags.items():
+            post["tags_" + key] = " ".join(value)
 
-        post["notes"] = notes
+    def _notes(self, post, page):
+        note_container = text.extr(page, 'id="note-container"', "<img ")
+        if not note_container:
+            return
+
+        post["notes"] = notes = []
+        for note in note_container.split('class="note-box"')[1:]:
+            extr = text.extract_from(note)
+            notes.append({
+                "width" : int(extr("width:", "p")),
+                "height": int(extr("height:", "p")),
+                "y"     : int(extr("top:", "p")),
+                "x"     : int(extr("left:", "p")),
+                "id"    : int(extr('id="note-body-', '"')),
+                "body"  : text.unescape(text.remove_html(extr(">", "</div>"))),
+            })
 
 
 INSTANCES = {
@@ -310,15 +303,81 @@ class GelbooruV02PostExtractor(GelbooruV02Extractor):
     archive_fmt = "{id}"
     pattern = BASE_PATTERN + r"/index\.php\?page=post&s=view&id=(\d+)"
     test = (
-        ("https://rule34.xxx/index.php?page=post&s=view&id=1995545", {
-            "content": "97e4bbf86c3860be18de384d02d544251afe1d45",
-            "options": (("tags", True),),
+        ("https://rule34.xxx/index.php?page=post&s=view&id=863", {
+            "pattern": r"https://api-cdn\.rule34\.xxx/images"
+                       r"/1/6aafbdb3e22f3f3b412ea2cf53321317a37063f3\.jpg",
+            "content": ("a43f418aa350039af0d11cae501396a33bbe2201",
+                        "67b516295950867e1c1ab6bc13b35d3b762ed2a3"),
+            "options": (("tags", True), ("notes", True)),
             "keyword": {
-                "tags_artist": "danraku",
-                "tags_character": "kashima_(kantai_collection)",
-                "tags_copyright": "kantai_collection",
+                "tags_artist": "reverse_noise yamu_(reverse_noise)",
+                "tags_character": "hong_meiling",
+                "tags_copyright": "touhou",
                 "tags_general": str,
-                "tags_metadata": str,
+                "tags_metadata": "censored translated",
+                "notes": [
+                    {
+                        "body": "It feels angry, I'm losing myself... "
+                                "It won't calm down!",
+                        "height": 65,
+                        "id": 93586,
+                        "width": 116,
+                        "x": 22,
+                        "y": 333,
+                    },
+                    {
+                        "body": "REPUTATION OF RAGE",
+                        "height": 272,
+                        "id": 93587,
+                        "width": 199,
+                        "x": 78,
+                        "y": 442,
+                    },
+                ],
+
+            },
+        }),
+        ("https://hypnohub.net/index.php?page=post&s=view&id=1439", {
+            "pattern": r"https://hypnohub\.net/images"
+                       r"/90/24/90245c3c5250c2a8173255d3923a010b\.jpg",
+            "content": "5987c5d2354f22e5fa9b7ee7ce4a6f7beb8b2b71",
+            "options": (("tags", True), ("notes", True)),
+            "keyword": {
+                "tags_artist": "brokenteapot",
+                "tags_character": "hsien-ko",
+                "tags_copyright": "capcom darkstalkers",
+                "tags_general": str,
+                "tags_metadata": "dialogue text translated",
+                "notes": [
+                    {
+                        "body": "Master Master Master "
+                                "Master Master Master",
+                        "height": 83,
+                        "id": 10577,
+                        "width": 129,
+                        "x": 259,
+                        "y": 20,
+                    },
+                    {
+                        "body": "Response Response Response "
+                                "Response Response Response",
+                        "height": 86,
+                        "id": 10578,
+                        "width": 125,
+                        "x": 126,
+                        "y": 20,
+                    },
+                    {
+                        "body": "Obedience Obedience Obedience "
+                                "Obedience Obedience Obedience",
+                        "height": 80,
+                        "id": 10579,
+                        "width": 98,
+                        "x": 20,
+                        "y": 20,
+                    },
+                ],
+
             },
         }),
         ("https://safebooru.org/index.php?page=post&s=view&id=1169132", {
@@ -340,11 +399,6 @@ class GelbooruV02PostExtractor(GelbooruV02Extractor):
         ("https://tbib.org/index.php?page=post&s=view&id=9233957", {
             "url": "5a6ebe07bfff8e6d27f7c30b5480f27abcb577d2",
             "content": "1c3831b6fbaa4686e3c79035b5d98460b1c85c43",
-        }),
-        ("https://hypnohub.net/index.php?page=post&s=view&id=73964", {
-            "pattern": r"https://hypnohub\.net/images/7a/37"
-                       r"/7a37c0ba372f35767fb10c904a398831\.png",
-            "content": "02d5f5a8396b621a6efc04c5f8ef1b7225dfc6ee",
         }),
     )
 

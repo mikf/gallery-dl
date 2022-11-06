@@ -44,6 +44,10 @@ class MastodonExtractor(BaseExtractor):
             del status["media_attachments"]
 
             status["instance"] = self.instance
+            acct = status["account"]["acct"]
+            status["instance_remote"] = \
+                acct.rpartition("@")[2] if "@" in acct else None
+
             status["tags"] = [tag["name"] for tag in status["tags"]]
             status["date"] = text.parse_datetime(
                 status["created_at"][:19], "%Y-%m-%dT%H:%M:%S")
@@ -92,7 +96,7 @@ INSTANCES = {
     }
 }
 
-BASE_PATTERN = MastodonExtractor.update(INSTANCES)
+BASE_PATTERN = MastodonExtractor.update(INSTANCES) + "(?:/web)?"
 
 
 class MastodonUserExtractor(MastodonExtractor):
@@ -111,9 +115,16 @@ class MastodonUserExtractor(MastodonExtractor):
             "count": 60,
         }),
         ("https://baraag.net/@pumpkinnsfw"),
+        ("https://mastodon.social/@yoru_nine@pawoo.net", {
+            "pattern": r"https://mastodon\.social/media_proxy/\d+/original",
+            "range": "1-10",
+            "count": 10,
+        }),
         ("https://mastodon.social/@id:10843"),
         ("https://mastodon.social/users/id:10843"),
         ("https://mastodon.social/users/jk"),
+        ("https://mastodon.social/users/yoru_nine@pawoo.net"),
+        ("https://mastodon.social/web/@jk"),
     )
 
     def statuses(self):
@@ -124,6 +135,20 @@ class MastodonUserExtractor(MastodonExtractor):
             only_media=not self.config("text-posts", False),
             exclude_replies=not self.replies,
         )
+
+
+class MastodonBookmarkExtractor(MastodonExtractor):
+    """Extractor for mastodon bookmarks"""
+    subcategory = "bookmark"
+    pattern = BASE_PATTERN + r"/bookmarks"
+    test = (
+        ("https://mastodon.social/bookmarks"),
+        ("https://pawoo.net/bookmarks"),
+        ("https://baraag.net/bookmarks"),
+    )
+
+    def statuses(self):
+        return MastodonAPI(self).account_bookmarks()
 
 
 class MastodonFollowingExtractor(MastodonExtractor):
@@ -197,12 +222,20 @@ class MastodonAPI():
         if username.startswith("id:"):
             return username[3:]
 
-        handle = "@{}@{}".format(username, self.extractor.instance)
+        if "@" in username:
+            handle = "@" + username
+        else:
+            handle = "@{}@{}".format(username, self.extractor.instance)
+
         for account in self.account_search(handle, 1):
-            if account["username"] == username:
+            if account["acct"] == username:
                 self.extractor._check_move(account)
                 return account["id"]
         raise exception.NotFoundError("account")
+
+    def account_bookmarks(self):
+        endpoint = "/v1/bookmarks"
+        return self._pagination(endpoint, None)
 
     def account_following(self, account_id):
         endpoint = "/v1/accounts/{}/following".format(account_id)

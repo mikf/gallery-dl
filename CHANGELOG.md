@@ -1,5 +1,37 @@
 # Changelog
 
+## 1.23.5 - 2022-10-30
+### Fixes
+- [instagram] fix AttributeError on user stories extraction ([#3123](https://github.com/mikf/gallery-dl/issues/3123))
+
+## 1.23.4 - 2022-10-29
+### Additions
+- [aibooru] add support for aibooru.online ([#3075](https://github.com/mikf/gallery-dl/issues/3075))
+- [instagram] add 'avatar' extractor ([#929](https://github.com/mikf/gallery-dl/issues/929), [#1097](https://github.com/mikf/gallery-dl/issues/1097), [#2992](https://github.com/mikf/gallery-dl/issues/2992))
+- [instagram] support 'instagram.com/s/' highlight URLs ([#3076](https://github.com/mikf/gallery-dl/issues/3076))
+- [instagram] extract 'coauthors' metadata ([#3107](https://github.com/mikf/gallery-dl/issues/3107))
+- [mangasee] add support for 'mangalife' ([#3086](https://github.com/mikf/gallery-dl/issues/3086))
+- [mastodon] add 'bookmark' extractor ([#3109](https://github.com/mikf/gallery-dl/issues/3109))
+- [mastodon] support cross-instance user references and '/web/' URLs ([#3109](https://github.com/mikf/gallery-dl/issues/3109))
+- [moebooru] implement 'notes' extraction ([#3094](https://github.com/mikf/gallery-dl/issues/3094))
+- [pixiv] extend 'metadata' option ([#3057](https://github.com/mikf/gallery-dl/issues/3057))
+- [reactor] match 'best', 'new', 'all' URLs ([#3073](https://github.com/mikf/gallery-dl/issues/3073))
+- [smugloli] add 'smugloli' extractors ([#3060](https://github.com/mikf/gallery-dl/issues/3060))
+- [tumblr] add 'fallback-delay' and 'fallback-retries' options ([#2957](https://github.com/mikf/gallery-dl/issues/2957))
+- [vichan] add generic extractors for vichan imageboards
+### Fixes
+- [bcy] fix extraction ([#3103](https://github.com/mikf/gallery-dl/issues/3103))
+- [gelbooru] support alternate parameter order in post URLs ([#2821](https://github.com/mikf/gallery-dl/issues/2821))
+- [hentai2read] support minor versions in chapter URLs ([#3089](https://github.com/mikf/gallery-dl/issues/3089))
+- [hentaihere] support minor versions in chapter URLs
+- [kemonoparty] fix 'dms' extraction ([#3106](https://github.com/mikf/gallery-dl/issues/3106))
+- [kemonoparty] update pagination offset
+- [manganelo] update domain to 'chapmanganato.com' ([#3097](https://github.com/mikf/gallery-dl/issues/3097))
+- [pixiv] use 'exact_match_for_tags' as default search mode ([#3092](https://github.com/mikf/gallery-dl/issues/3092))
+- [redgifs] fix 'token' extraction ([#3080](https://github.com/mikf/gallery-dl/issues/3080), [#3081](https://github.com/mikf/gallery-dl/issues/3081))
+- [skeb] fix extraction ([#3112](https://github.com/mikf/gallery-dl/issues/3112))
+- improve compatibility of DownloadArchive ([#3078](https://github.com/mikf/gallery-dl/issues/3078))
+
 ## 1.23.3 - 2022-10-15
 ### Additions
 - [2chen] Add `2chen.moe` extractor ([#2707](https://github.com/mikf/gallery-dl/issues/2707))

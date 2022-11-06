@@ -203,6 +203,19 @@ class TestText(unittest.TestCase):
             self.assertEqual(f(txt  , value, ">")  , (None, 0))
             self.assertEqual(f(txt  , "<"  , value), (None, 0))
 
+    def test_extr(self, f=text.extr):
+        txt = "<a><b>"
+        self.assertEqual(f(txt, "X", ">"), "")
+        self.assertEqual(f(txt, "<", "X"), "")
+        self.assertEqual(f(txt, "<", ">"), "a")
+        self.assertEqual(f(txt, "><", ">"), "b")
+
+        # invalid arguments
+        for value in INVALID:
+            self.assertEqual(f(value, "<"  , ">")  , "")
+            self.assertEqual(f(txt  , value, ">")  , "")
+            self.assertEqual(f(txt  , "<"  , value), "")
+
     def test_rextract(self, f=text.rextract):
         txt = "<a><b>"
         self.assertEqual(f(txt, "<", ">"), ("b" , 3))

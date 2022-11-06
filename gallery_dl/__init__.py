@@ -118,25 +118,15 @@ def main():
             config.set(("output",), "mode", "null")
         elif args.loglevel <= logging.DEBUG:
             import platform
-            import subprocess
-            import os.path
             import requests
 
             extra = ""
             if getattr(sys, "frozen", False):
                 extra = " - Executable"
             else:
-                try:
-                    out, err = subprocess.Popen(
-                        ("git", "rev-parse", "--short", "HEAD"),
-                        stdout=subprocess.PIPE,
-                        stderr=subprocess.PIPE,
-                        cwd=os.path.dirname(os.path.abspath(__file__)),
-                    ).communicate()
-                    if out and not err:
-                        extra = " - Git HEAD: " + out.decode().rstrip()
-                except (OSError, subprocess.SubprocessError):
-                    pass
+                git_head = util.git_head()
+                if git_head:
+                    extra = " - Git HEAD: " + git_head
 
             log.debug("Version %s%s", __version__, extra)
             log.debug("Python %s - %s",
@@ -201,7 +191,8 @@ def main():
                             if sys.stdin:
                                 urls += util.parse_inputfile(sys.stdin, log)
                             else:
-                                log.warning("input file: stdin is not readable")
+                                log.warning(
+                                    "input file: stdin is not readable")
                         else:
                             with open(inputfile, encoding="utf-8") as file:
                                 urls += util.parse_inputfile(file, log)
@@ -235,7 +226,7 @@ def main():
                 except exception.TerminateExtraction:
                     pass
                 except exception.NoExtractorError:
-                    log.error("No suitable extractor found for '%s'", url)
+                    log.error("Unsupported URL '%s'", url)
                     retval |= 64
             return retval
 

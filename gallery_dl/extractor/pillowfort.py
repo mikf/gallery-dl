@@ -98,7 +98,7 @@ class PillowfortExtractor(Extractor):
 
         url = "https://www.pillowfort.social/users/sign_in"
         page = self.request(url).text
-        auth = text.extract(page, 'name="authenticity_token" value="', '"')[0]
+        auth = text.extr(page, 'name="authenticity_token" value="', '"')
 
         headers = {"Origin": self.root, "Referer": url}
         data = {

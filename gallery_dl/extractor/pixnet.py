@@ -30,7 +30,7 @@ class PixnetExtractor(Extractor):
     def items(self):
         url = self.url_fmt.format(self.root, self.item_id)
         page = self.request(url, encoding="utf-8").text
-        user = text.extract(page, '<meta name="author" content="', '";')[0]
+        user = text.extr(page, '<meta name="author" content="', '";')
         data = {
             "blog": self.blog,
             "user": user.rpartition(" (")[0],
@@ -52,13 +52,13 @@ class PixnetExtractor(Extractor):
         while True:
             yield from text.extract_iter(page, '<li id="', '</li>')
 
-            pnext = text.extract(page, 'class="nextBtn"', '>')[0]
+            pnext = text.extr(page, 'class="nextBtn"', '>')
             if pnext is None and 'name="albumpass">' in page:
                 raise exception.StopExtraction(
                     "Album %s is password-protected.", self.item_id)
             if "href" not in pnext:
                 return
-            url = self.root + text.extract(pnext, 'href="', '"')[0]
+            url = self.root + text.extr(pnext, 'href="', '"')
             page = self.request(url, encoding="utf-8").text
 
 

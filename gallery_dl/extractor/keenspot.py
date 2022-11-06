@@ -96,7 +96,7 @@ class KeenspotComicExtractor(Extractor):
             self._image = '<div id="comic">'
             return "http://brawlinthefamily.keenspot.com/comic/theshowdown/"
 
-        url = text.extract(page, '<link rel="first" href="', '"')[0]
+        url = text.extr(page, '<link rel="first" href="', '"')
         if url:
             if self.comic == "porcelain":
                 self._needle = 'id="porArchivetop_"'
@@ -144,7 +144,7 @@ class KeenspotComicExtractor(Extractor):
 
     @staticmethod
     def _next_link(page):
-        return text.extract(page, '<link rel="next" href="', '"')[0]
+        return text.extr(page, '<link rel="next" href="', '"')
 
     @staticmethod
     def _next_id(page):

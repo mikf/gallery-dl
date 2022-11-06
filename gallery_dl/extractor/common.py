@@ -149,14 +149,13 @@ class Extractor():
 
                 msg = "'{} {}' for '{}'".format(code, response.reason, url)
                 server = response.headers.get("Server")
-                if server and server.startswith("cloudflare"):
-                    if code == 503 and \
-                            (b"_cf_chl_opt" in response.content or
-                             b"jschl-answer" in response.content):
+                if server and server.startswith("cloudflare") and \
+                        code in (403, 503):
+                    content = response.content
+                    if b"_cf_chl_opt" in content or b"jschl-answer" in content:
                         self.log.warning("Cloudflare IUAM challenge")
                         break
-                    if code == 403 and \
-                            b'name="captcha-bypass"' in response.content:
+                    if b'name="captcha-bypass"' in content:
                         self.log.warning("Cloudflare CAPTCHA")
                         break
                 if code < 500 and code != 429 and code != 430:

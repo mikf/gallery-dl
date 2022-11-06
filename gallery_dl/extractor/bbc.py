@@ -38,8 +38,8 @@ class BbcGalleryExtractor(GalleryExtractor):
     )
 
     def metadata(self, page):
-        data = json.loads(text.extract(
-            page, '<script type="application/ld+json">', '</script>')[0])
+        data = json.loads(text.extr(
+            page, '<script type="application/ld+json">', '</script>'))
         return {
             "programme": self.gallery_url.split("/")[4],
             "path": list(util.unique_sequence(

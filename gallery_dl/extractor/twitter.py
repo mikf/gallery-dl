@@ -227,8 +227,8 @@ class TwitterExtractor(Extractor):
                 response = self.request(url, fatal=False)
                 if response.status_code >= 400:
                     continue
-                url = text.extract(
-                    response.text, 'name="twitter:image" value="', '"')[0]
+                url = text.extr(
+                    response.text, 'name="twitter:image" value="', '"')
                 if url:
                     files.append({"url": url})
 
@@ -1456,8 +1456,8 @@ class TwitterAPI():
         self.extractor.log.debug("Skipping %s (\"%s\")", tweet_id, text)
 
     def _syndication_tweet(self, tweet_id):
-        tweet = self.extractor.request(
-            "https://cdn.syndication.twimg.com/tweet?id=" + tweet_id).json()
+        base_url = "https://cdn.syndication.twimg.com/tweet-result?id="
+        tweet = self.extractor.request(base_url + tweet_id).json()
 
         tweet["user"]["description"] = ""
         tweet["user"]["entities"] = {"description": {}}

@@ -44,7 +44,7 @@ class VanillarockPostExtractor(VanillarockExtractor):
             img = extr('<div class="main-img">', '</div>')
             if not img:
                 break
-            imgs.append(text.extract(img, 'href="', '"')[0])
+            imgs.append(text.extr(img, 'href="', '"'))
 
         data = {
             "count": len(imgs),
@@ -89,5 +89,5 @@ class VanillarockTagExtractor(VanillarockExtractor):
                 post = extr('<h2 class="entry-title">', '</h2>')
                 if not post:
                     break
-                yield Message.Queue, text.extract(post, 'href="', '"')[0], data
+                yield Message.Queue, text.extr(post, 'href="', '"'), data
             url = text.unescape(extr('class="next page-numbers" href="', '"'))

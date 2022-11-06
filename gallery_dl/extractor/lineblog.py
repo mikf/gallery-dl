@@ -22,8 +22,8 @@ class LineblogBase():
         body = post.pop("body")
 
         for num, img in enumerate(text.extract_iter(body, "<img ", ">"), 1):
-            src = text.extract(img, 'src="', '"')[0]
-            alt = text.extract(img, 'alt="', '"')[0]
+            src = text.extr(img, 'src="', '"')
+            alt = text.extr(img, 'alt="', '"')
 
             if not src:
                 continue

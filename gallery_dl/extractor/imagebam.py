@@ -83,8 +83,8 @@ class ImagebamGalleryExtractor(ImagebamExtractor):
 
     @staticmethod
     def metadata(page):
-        return {"title": text.unescape(text.extract(
-            page, 'id="gallery-name">', '<')[0].strip())}
+        return {"title": text.unescape(text.extr(
+            page, 'id="gallery-name">', '<').strip())}
 
     def images(self, page):
         findall = re.compile(r'<a href="https://www\.imagebam\.com'

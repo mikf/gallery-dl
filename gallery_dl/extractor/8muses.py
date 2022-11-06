@@ -76,9 +76,9 @@ class _8musesAlbumExtractor(Extractor):
         url = self.root + self.path + self.params
 
         while True:
-            data = self._unobfuscate(text.extract(
+            data = self._unobfuscate(text.extr(
                 self.request(url).text,
-                'id="ractive-public" type="text/plain">', '</script>')[0])
+                'id="ractive-public" type="text/plain">', '</script>'))
 
             images = data.get("pictures")
             if images:

@@ -68,9 +68,9 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
         url = self.root + "/a/" + self.album_id
 
         try:
-            data = json.loads(text.extract(
+            data = json.loads(text.extr(
                 self.request(url).text,
-                'id="__NEXT_DATA__" type="application/json">', '<')[0])
+                'id="__NEXT_DATA__" type="application/json">', '<'))
             album = data["props"]["pageProps"]["album"]
             files = album["files"]
         except Exception as exc:

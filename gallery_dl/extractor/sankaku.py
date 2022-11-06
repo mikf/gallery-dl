@@ -63,7 +63,7 @@ class SankakuExtractor(BooruExtractor):
     def _check_expired(self, response):
         return not response.history or '.com/expired.png' not in response.url
 
-    def _extended_tags(self, post):
+    def _tags(self, post, page):
         tags = collections.defaultdict(list)
         types = self.TAG_TYPES
         for tag in post["tags"]:
@@ -306,7 +306,7 @@ class SankakuAPI():
                         url = post["file_url"]
                         if url:
                             expires = text.parse_int(
-                                text.extract(url, "e=", "&")[0]) - 60
+                                text.extr(url, "e=", "&")) - 60
 
                     if 0 < expires <= time():
                         self.extractor.log.debug("Refreshing download URLs")

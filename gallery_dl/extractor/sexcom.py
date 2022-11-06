@@ -43,7 +43,7 @@ class SexcomExtractor(Extractor):
                 yield self.root + href
 
             pager = extr('id="pagenum"', '</div>')
-            url = text.extract(pager, ' href="', '"')[0]
+            url = text.extr(pager, ' href="', '"')
             if not url:
                 return
             url = text.urljoin(self.root, url)
@@ -71,7 +71,7 @@ class SexcomExtractor(Extractor):
             info = extr("player.updateSrc(", ");")
 
             if info:
-                path = text.extract(info, "src: '", "'")[0]
+                path = text.extr(info, "src: '", "'")
                 data["filename"] = path.rpartition("/")[2]
                 data["extension"] = "mp4"
                 if "'HD'" in info:
@@ -79,8 +79,8 @@ class SexcomExtractor(Extractor):
                 data["url"] = self.root + path
             else:
                 iframe = extr('<iframe', '>')
-                src = (text.extract(iframe, ' src="', '"')[0] or
-                       text.extract(iframe, " src='", "'")[0])
+                src = (text.extr(iframe, ' src="', '"') or
+                       text.extr(iframe, " src='", "'"))
                 if not src:
                     self.log.warning("Unable to fetch media from %s", url)
                     return None
