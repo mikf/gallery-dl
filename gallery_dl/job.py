@@ -32,11 +32,8 @@ class Job():
         self.pathfmt = None
         self.kwdict = {}
         self.status = 0
-        self.url_key = extr.config("url-metadata")
 
-        path_key = extr.config("path-metadata")
         path_proxy = output.PathfmtProxy(self)
-
         self._logger_extra = {
             "job"      : self,
             "extractor": extr,
@@ -56,12 +53,16 @@ class Job():
                 extr.category = pextr.category
                 extr.subcategory = pextr.subcategory
 
+        self.metadata_url = extr.config("url-metadata")
+        self.metadata_http = extr.config("http-metadata")
+        metadata_path = extr.config("path-metadata")
+
         # user-supplied metadata
         kwdict = extr.config("keywords")
         if kwdict:
             self.kwdict.update(kwdict)
-        if path_key:
-            self.kwdict[path_key] = path_proxy
+        if metadata_path:
+            self.kwdict[metadata_path] = path_proxy
 
         # predicates
         self.pred_url = self._prepare_predicates("image", True)
@@ -120,8 +121,8 @@ class Job():
         """Call the appropriate message handler"""
         if msg[0] == Message.Url:
             _, url, kwdict = msg
-            if self.url_key:
-                kwdict[self.url_key] = url
+            if self.metadata_url:
+                kwdict[self.metadata_url] = url
             if self.pred_url(url, kwdict):
                 self.update_kwdict(kwdict)
                 self.handle_url(url, kwdict)
@@ -132,8 +133,8 @@ class Job():
 
         elif msg[0] == Message.Queue:
             _, url, kwdict = msg
-            if self.url_key:
-                kwdict[self.url_key] = url
+            if self.metadata_url:
+                kwdict[self.metadata_url] = url
             if self.pred_queue(url, kwdict):
                 self.handle_queue(url, kwdict)
 
@@ -557,6 +558,11 @@ class KeywordJob(Job):
     def handle_url(self, url, kwdict):
         stdout_write("\nKeywords for filenames and --filter:\n"
                      "------------------------------------\n")
+
+        if self.metadata_http:
+            kwdict[self.metadata_http] = util.extract_headers(
+                self.extractor.request(url, method="HEAD"))
+
         self.print_kwdict(kwdict)
         raise exception.StopExtraction()
 

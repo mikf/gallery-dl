@@ -14,8 +14,6 @@ from requests.exceptions import RequestException, ConnectionError, Timeout
 from .common import DownloaderBase
 from .. import text, util
 
-from email.utils import parsedate_tz
-from datetime import datetime
 from ssl import SSLError
 try:
     from OpenSSL.SSL import Error as OpenSSLError
@@ -197,7 +195,7 @@ class HttpDownloader(DownloaderBase):
 
             # set metadata from HTTP headers
             if self.metadata:
-                kwdict[self.metadata] = self._extract_metadata(response)
+                kwdict[self.metadata] = util.extract_headers(response)
                 pathfmt.build_path()
                 if pathfmt.exists():
                     pathfmt.temppath = ""
@@ -304,22 +302,6 @@ class HttpDownloader(DownloaderBase):
                     t2 = time.time()
 
             t1 = t2
-
-    def _extract_metadata(self, response):
-        headers = response.headers
-        data = dict(headers)
-
-        hcd = headers.get("content-disposition")
-        if hcd:
-            name = text.extr(hcd, 'filename="', '"')
-            if name:
-                text.nameext_from_url(name, data)
-
-        hlm = headers.get("last-modified")
-        if hlm:
-            data["date"] = datetime(*parsedate_tz(hlm)[:6])
-
-        return data
 
     def _find_extension(self, response):
         """Get filename extension from MIME type"""
