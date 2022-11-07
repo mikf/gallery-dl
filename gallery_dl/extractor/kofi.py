@@ -13,7 +13,6 @@ from .. import text
 
 from os.path import basename
 import time
-from urllib.parse import urlparse
 
 
 class KofiExtractor(Extractor):
@@ -32,7 +31,8 @@ class KofiExtractor(Extractor):
     def items(self):
         url = "{}/{}/gallery".format(self.root, self.user)
         page = self.request(url).text
-        self.pageId = text.extr(page, 'buttonId: \'', '\'') # Author identifier for API requests
+        # Author identifier for API requests
+        self.pageId = text.extr(page, 'buttonId: \'', '\'')
 
         yield Message.Directory, {"user": self.user}
 
@@ -48,7 +48,8 @@ class KofiExtractor(Extractor):
 
     def _gallery(self, start):
         timestamp = int(time.time())
-        url = "{}/Buttons/LoadPageGallery?buttonId={}&start={}&_={}".format(self.root, self.pageId, start, timestamp)
+        url = "{}/Buttons/LoadPageGallery?buttonId={}&start={}&_={}"\
+            .format(self.root, self.pageId, start, timestamp)
         page = self.request(url).text
         return self.posts(page)
 
@@ -70,9 +71,12 @@ class KofiExtractor(Extractor):
             ("width"   , 'data-width=\'', 'px'),
             ("image", 'src=\'', '\''),
         ))[0]
-        data["image"] = data["image"].replace('post/', 'display/') # Use full resolution image
-        data["filename"], data["extension"] = basename(data["image"]).split("?")[0].rsplit(".", 1)
-        data["width"] = text.parse_int(data["width"]) if data["width"] is None else 0
+        # Use full resolution image
+        data["image"] = data["image"].replace('post/', 'display/')
+        data["filename"], data["extension"] = basename(data["image"])\
+            .split("?")[0].rsplit(".", 1)
+        data["width"] = text.parse_int(data["width"])\
+            if data["width"] is None else 0
         return data
 
     def _locked(self, post):
