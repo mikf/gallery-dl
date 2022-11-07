@@ -21,6 +21,9 @@ class MetadataPP(PostProcessor):
 
         mode = options.get("mode")
         cfmt = options.get("content-format") or options.get("format")
+        omode = "w"
+        filename = None
+
         if mode == "tags":
             self.write = self._write_tags
             ext = "txt"
@@ -41,6 +44,12 @@ class MetadataPP(PostProcessor):
                 cfmt = "\n".join(cfmt) + "\n"
             self._content_fmt = formatter.parse(cfmt).format_map
             ext = "txt"
+        elif mode == "jsonl":
+            self.write = self._write_json
+            self.indent = None
+            self.ascii = options.get("ascii", False)
+            omode = "a"
+            filename = "data.jsonl"
         else:
             self.write = self._write_json
             self.indent = options.get("indent", 4)
@@ -53,7 +62,7 @@ class MetadataPP(PostProcessor):
             sep = os.sep + (os.altsep or "")
             self._metadir = util.expand_path(directory).rstrip(sep) + os.sep
 
-        filename = options.get("filename")
+        filename = options.get("filename", filename)
         extfmt = options.get("extension-format")
         if filename:
             if filename == "-":
@@ -97,7 +106,7 @@ class MetadataPP(PostProcessor):
             self.archive = None
 
         self.mtime = options.get("mtime")
-        self.omode = options.get("open", "w")
+        self.omode = options.get("open", omode)
         self.encoding = options.get("encoding", "utf-8")
 
     def run(self, pathfmt):
