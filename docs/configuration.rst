@@ -598,8 +598,8 @@ Description
     into metadata dictionaries as the given name.
 
     For example, setting this option to ``"gdl_http"`` would make it possible
-    to access the current file's ``Last-Modified`` header as ``"[gdl_http[Last-Modified]}"``
-    and its parsed form as .``"[gdl_http[date]}"``.
+    to access the current file's ``Last-Modified`` header as ``"{gdl_http[Last-Modified]}"``
+    and its parsed form as ``"{gdl_http[date]}"``.
 
 
 extractor.*.category-transfer
@@ -3728,6 +3728,34 @@ Description
     Note: Only applies for ``"mode": "custom"``.
 
 
+metadata.open
+-------------
+Type
+    ``string``
+Defsult
+    ``"w"``
+Description
+    The ``mode`` in which metadata files get opened.
+
+    For example,
+    use ``"a"`` to append to a file's content
+    or ``"w"`` to truncate it.
+
+    See the ``mode`` parameter of |open()|_ for further details.
+
+
+metadata.encoding
+-----------------
+Type
+    ``string``
+Defsult
+    ``"utf-8"``
+Description
+    Name of the encoding used to encode a file's content.
+
+    See the ``encoding`` parameter of |open()|_ for further details.
+
+
 metadata.archive
 ----------------
 Type
@@ -4311,7 +4339,7 @@ Description
     * mode
         * Mode in which the file is opened;
           use ``"w"`` to truncate or ``"a"`` to append
-          (see `open() <https://docs.python.org/3/library/functions.html#open>`__)
+          (see |open()|_)
         * Default: ``"w"``
     * encoding
         * File encoding
@@ -4388,6 +4416,7 @@ Description
 .. |strptime| replace:: strftime() and strptime() Behavior
 .. |postprocessors| replace:: ``postprocessors``
 .. |mode: color| replace:: ``"mode": "color"``
+.. |open()| replace:: the built-in ``open()`` function
 
 .. _base-directory: `extractor.*.base-directory`_
 .. _date-format: `extractor.*.date-format`_
@@ -4401,6 +4430,7 @@ Description
 .. _datetime.max:       https://docs.python.org/3/library/datetime.html#datetime.datetime.max
 .. _strptime:           https://docs.python.org/3/library/datetime.html#strftime-strptime-behavior
 .. _webbrowser.open():  https://docs.python.org/3/library/webbrowser.html
+.. _open():             https://docs.python.org/3/library/functions.html#open
 .. _mature_content:     https://www.deviantart.com/developers/http/v1/20160316/object/deviation
 .. _Authentication:     https://github.com/mikf/gallery-dl#authentication
 .. _OAuth:              https://github.com/mikf/gallery-dl#oauth
