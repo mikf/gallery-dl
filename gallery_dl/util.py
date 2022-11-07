@@ -274,6 +274,23 @@ Response Headers
         fp.write(response.content)
 
 
+def extract_headers(response):
+    headers = response.headers
+    data = dict(headers)
+
+    hcd = headers.get("content-disposition")
+    if hcd:
+        name = text.extr(hcd, 'filename="', '"')
+        if name:
+            text.nameext_from_url(name, data)
+
+    hlm = headers.get("last-modified")
+    if hlm:
+        data["date"] = datetime.datetime(*parsedate_tz(hlm)[:6])
+
+    return data
+
+
 @functools.lru_cache(maxsize=None)
 def git_head():
     try:
