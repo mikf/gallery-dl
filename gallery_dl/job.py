@@ -232,11 +232,14 @@ class DownloadJob(Job):
             self.handle_skip()
             return
 
-        if pathfmt.exists():
-            if archive:
-                archive.add(kwdict)
-            self.handle_skip()
-            return
+        if pathfmt.extension and not self.metadata_http:
+            pathfmt.build_path()
+
+            if pathfmt.exists():
+                if archive:
+                    archive.add(kwdict)
+                self.handle_skip()
+                return
 
         if self.sleep:
             self.extractor.sleep(self.sleep(), "download")
@@ -536,12 +539,11 @@ class SimulationJob(DownloadJob):
     def handle_url(self, url, kwdict):
         if not kwdict["extension"]:
             kwdict["extension"] = "jpg"
-        self.pathfmt.set_filename(kwdict)
         if self.sleep:
             self.extractor.sleep(self.sleep(), "download")
         if self.archive:
             self.archive.add(kwdict)
-        self.out.skip(self.pathfmt.path)
+        self.out.skip(self.pathfmt.build_filename(kwdict))
 
     def handle_directory(self, kwdict):
         if not self.pathfmt:

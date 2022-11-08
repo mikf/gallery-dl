@@ -131,6 +131,7 @@ class TestDownloaderBase(unittest.TestCase):
         pathfmt = cls.job.pathfmt
         pathfmt.set_directory(kwdict)
         pathfmt.set_filename(kwdict)
+        pathfmt.build_path()
 
         if content:
             mode = "w" + ("b" if isinstance(content, bytes) else "")

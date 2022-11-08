@@ -97,6 +97,7 @@ class BasePostprocessorTest(unittest.TestCase):
         self.pathfmt = self.job.pathfmt
         self.pathfmt.set_directory(kwdict)
         self.pathfmt.set_filename(kwdict)
+        self.pathfmt.build_path()
 
         pp = postprocessor.find(self.__class__.__name__[:-4].lower())
         return pp(self.job, options)
@@ -118,6 +119,7 @@ class ClassifyTest(BasePostprocessorTest):
             for ext in exts
         })
         self.pathfmt.set_extension("jpg")
+        self.pathfmt.build_path()
 
         pp.prepare(self.pathfmt)
         path = os.path.join(self.dir.name, "test", "Pictures")
@@ -150,6 +152,7 @@ class ClassifyTest(BasePostprocessorTest):
             "bar": "foo/bar",
         })
         self.pathfmt.set_extension("foo")
+        self.pathfmt.build_path()
 
         pp.prepare(self.pathfmt)
         path = os.path.join(self.dir.name, "test", "foo", "bar")
