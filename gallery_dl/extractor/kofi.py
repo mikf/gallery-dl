@@ -59,11 +59,7 @@ class KofiExtractor(Extractor):
         posts = page.split(needle)
         if len(posts) > 0 and posts[0] == "":
             posts = posts[1:]
-        return [self.parse(post) for post in posts]
-
-    def parse(self, post):
-        """Build post-object by extracting data from an HTML post"""
-        return self._extract_post(post)
+        return [self._extract_post(post) for post in posts]
 
     def _extract_post(self, post):
         data = text.extract_all(post, (
