@@ -287,7 +287,7 @@ AUTH_MAP = {
     "idolcomplex"    : "Supported",
     "imgbb"          : "Supported",
     "inkbunny"       : "Supported",
-    "instagram"      : "Supported",
+    "instagram"      : _COOKIES,
     "kemonoparty"    : "Supported",
     "mangadex"       : "Supported",
     "mangoxo"        : "Supported",

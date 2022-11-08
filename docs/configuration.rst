@@ -377,7 +377,6 @@ Description
     * ``idolcomplex``
     * ``imgbb``
     * ``inkbunny``
-    * ``instagram``
     * ``kemonoparty``
     * ``mangadex``
     * ``mangoxo``
