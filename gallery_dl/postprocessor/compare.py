@@ -51,8 +51,9 @@ class ComparePP(PostProcessor):
         num = 1
         try:
             while not self._compare(pathfmt.realpath, pathfmt.temppath):
-                pathfmt.prefix = str(num) + "."
-                pathfmt.set_extension(pathfmt.extension, False)
+                pathfmt.prefix = prefix = format(num) + "."
+                pathfmt.kwdict["extension"] = prefix + pathfmt.extension
+                pathfmt.build_path()
                 num += 1
             return self._equal(pathfmt)
         except OSError:

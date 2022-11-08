@@ -15,16 +15,16 @@ import functools
 from . import util, formatter, exception
 
 WINDOWS = util.WINDOWS
+EXTENSION_MAP = {
+    "jpeg": "jpg",
+    "jpe" : "jpg",
+    "jfif": "jpg",
+    "jif" : "jpg",
+    "jfi" : "jpg",
+}
 
 
 class PathFormat():
-    EXTENSION_MAP = {
-        "jpeg": "jpg",
-        "jpe" : "jpg",
-        "jfif": "jpg",
-        "jif" : "jpg",
-        "jfi" : "jpg",
-    }
 
     def __init__(self, extractor):
         config = extractor.config
@@ -78,7 +78,7 @@ class PathFormat():
 
         extension_map = config("extension-map")
         if extension_map is None:
-            extension_map = self.EXTENSION_MAP
+            extension_map = EXTENSION_MAP
         self.extension_map = extension_map.get
 
         restrict = config("path-restrict", "auto")
@@ -161,12 +161,14 @@ class PathFormat():
         num = 1
         try:
             while True:
-                self.prefix = str(num) + "."
-                self.set_extension(self.extension, False)
+                prefix = format(num) + "."
+                self.kwdict["extension"] = prefix + self.extension
+                self.build_path()
                 os.stat(self.realpath)  # raises OSError if file doesn't exist
                 num += 1
         except OSError:
             pass
+        self.prefix = prefix
         return False
 
     def set_directory(self, kwdict):
@@ -198,28 +200,21 @@ class PathFormat():
     def set_filename(self, kwdict):
         """Set general filename data"""
         self.kwdict = kwdict
-        self.temppath = self.prefix = ""
+        self.filename = self.temppath = self.prefix = ""
 
         ext = kwdict["extension"]
         kwdict["extension"] = self.extension = self.extension_map(ext, ext)
 
-        if self.extension:
-            self.build_path()
-        else:
-            self.filename = ""
-
     def set_extension(self, extension, real=True):
         """Set filename extension"""
-        extension = self.extension_map(extension, extension)
-        if real:
-            self.extension = extension
+        self.extension = extension = self.extension_map(extension, extension)
         self.kwdict["extension"] = self.prefix + extension
-        self.build_path()
 
     def fix_extension(self, _=None):
         """Fix filenames without a given filename extension"""
         if not self.extension:
-            self.set_extension("", False)
+            self.kwdict["extension"] = self.prefix + self.extension_map("", "")
+            self.build_path()
             if self.path[-1] == ".":
                 self.path = self.path[:-1]
                 self.temppath = self.realpath = self.realpath[:-1]
@@ -296,7 +291,9 @@ class PathFormat():
         if self.extension:
             self.temppath += ".part"
         else:
-            self.set_extension("part", False)
+            self.kwdict["extension"] = self.prefix + self.extension_map(
+                "part", "part")
+            self.build_path()
         if part_directory:
             self.temppath = os.path.join(
                 part_directory,

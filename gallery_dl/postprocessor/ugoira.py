@@ -90,15 +90,17 @@ class UgoiraPP(PostProcessor):
         if pathfmt.extension != "zip":
             return
 
-        if "frames" in pathfmt.kwdict:
-            self._frames = pathfmt.kwdict["frames"]
-        elif "pixiv_ugoira_frame_data" in pathfmt.kwdict:
-            self._frames = pathfmt.kwdict["pixiv_ugoira_frame_data"]["data"]
+        kwdict = pathfmt.kwdict
+        if "frames" in kwdict:
+            self._frames = kwdict["frames"]
+        elif "pixiv_ugoira_frame_data" in kwdict:
+            self._frames = kwdict["pixiv_ugoira_frame_data"]["data"]
         else:
             return
 
         if self.delete:
             pathfmt.set_extension(self.extension)
+            pathfmt.build_path()
 
     def convert(self, pathfmt):
         if not self._frames:
@@ -115,6 +117,8 @@ class UgoiraPP(PostProcessor):
 
             # process frames and collect command-line arguments
             pathfmt.set_extension(self.extension)
+            pathfmt.build_path()
+
             args = self._process(pathfmt, tempdir)
             if self.args:
                 args += self.args
@@ -151,6 +155,7 @@ class UgoiraPP(PostProcessor):
                     pathfmt.delete = True
                 else:
                     pathfmt.set_extension("zip")
+                    pathfmt.build_path()
 
     def _exec(self, args):
         self.log.debug(args)

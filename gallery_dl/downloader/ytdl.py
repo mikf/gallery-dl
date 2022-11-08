@@ -98,6 +98,7 @@ class YoutubeDLDownloader(DownloaderBase):
                 pathfmt.realdirectory + filename)
         else:
             pathfmt.set_extension(info_dict["ext"])
+            pathfmt.build_path()
 
         if pathfmt.exists():
             pathfmt.temppath = ""
@@ -118,6 +119,7 @@ class YoutubeDLDownloader(DownloaderBase):
 
     def _download_playlist(self, ytdl_instance, pathfmt, info_dict):
         pathfmt.set_extension("%(playlist_index)s.%(ext)s")
+        pathfmt.build_path()
         self._set_outtmpl(ytdl_instance, pathfmt.realpath)
 
         for entry in info_dict["entries"]:

@@ -186,16 +186,19 @@ class HttpDownloader(DownloaderBase):
                         size, self.maxsize)
                     return False
 
+            build_path = False
+
             # set missing filename extension from MIME type
             if not pathfmt.extension:
                 pathfmt.set_extension(self._find_extension(response))
-                if pathfmt.exists():
-                    pathfmt.temppath = ""
-                    return True
+                build_path = True
 
             # set metadata from HTTP headers
             if self.metadata:
                 kwdict[self.metadata] = util.extract_headers(response)
+                build_path = True
+
+            if build_path:
                 pathfmt.build_path()
                 if pathfmt.exists():
                     pathfmt.temppath = ""
@@ -328,6 +331,7 @@ class HttpDownloader(DownloaderBase):
             for ext, check in SIGNATURE_CHECKS.items():
                 if check(file_header):
                     pathfmt.set_extension(ext)
+                    pathfmt.build_path()
                     return True
         return False
 
