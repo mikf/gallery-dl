@@ -573,7 +573,6 @@ Description
     * ``subscribestar``
     * ``tapas``
     * ``tsumino``
-    * ``twitter``
     * ``vipergirls``
     * ``zerochan``
 
@@ -6050,19 +6049,6 @@ Description
         Wait until rate limit reset
     ``"wait:N"``
         Wait for ``N`` seconds
-
-
-extractor.twitter.relogin
--------------------------
-Type
-    ``bool``
-Default
-    ``true``
-Description
-    When receiving a "Could not authenticate you" error while logged in with
-    `username & password <extractor.*.username & .password_>`__,
-    refresh the current login session and
-    try to continue from where it left off.
 
 
 extractor.twitter.locked
