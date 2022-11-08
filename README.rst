@@ -210,7 +210,6 @@ and optional for
 ``idolcomplex``,
 ``imgbb``,
 ``inkbunny``,
-``instagram``,
 ``mangadex``,
 ``mangoxo``,
 ``pillowfort``,

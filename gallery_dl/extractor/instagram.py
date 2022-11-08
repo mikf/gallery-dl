@@ -14,7 +14,6 @@ from .. import text, util, exception
 from ..cache import cache, memcache
 import binascii
 import json
-import time
 import re
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?instagram\.com"
@@ -975,63 +974,9 @@ class InstagramGraphqlAPI():
 
 @cache(maxage=90*24*3600, keyarg=1)
 def _login_impl(extr, username, password):
-    extr.log.info("Logging in as %s", username)
-
-    user_agent = ("Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 "
-                  "(KHTML, like Gecko) Chrome/106.0.5249.79 Mobile "
-                  "Safari/537.36 Instagram 255.1.0.17.102")
-
-    headers = {
-        "User-Agent"    : user_agent,
-        "Sec-Fetch-Dest": "document",
-        "Sec-Fetch-Mode": "navigate",
-        "Sec-Fetch-Site": "none",
-        "Sec-Fetch-User": "?1",
-    }
-    url = extr.root + "/accounts/login/"
-    response = extr.request(url, headers=headers)
-
-    extract = text.extract_from(response.text)
-    csrf_token = extract('"csrf_token":"', '"')
-    device_id = extract('"device_id":"', '"')
-    rollout_hash = extract('"rollout_hash":"', '"')
-
-    cset = extr.session.cookies.set
-    cset("csrftoken", csrf_token, domain=extr.cookiedomain)
-    cset("ig_did", device_id, domain=extr.cookiedomain)
-
-    headers = {
-        "User-Agent"      : user_agent,
-        "Accept"          : "*/*",
-        "X-CSRFToken"     : csrf_token,
-        "X-Instagram-AJAX": rollout_hash,
-        "X-IG-App-ID"     : "936619743392459",
-        "X-ASBD-ID"       : "198387",
-        "X-IG-WWW-Claim"  : "0",
-        "X-Requested-With": "XMLHttpRequest",
-        "Origin"          : extr.root,
-        "Referer"         : url,
-        "Sec-Fetch-Dest"  : "empty",
-        "Sec-Fetch-Mode"  : "cors",
-        "Sec-Fetch-Site"  : "same-origin",
-    }
-    data = {
-        "enc_password"        : "#PWD_INSTAGRAM_BROWSER:0:{}:{}".format(
-            int(time.time()), password),
-        "username"            : username,
-        "queryParams"         : "{}",
-        "optIntoOneTap"       : "false",
-        "stopDeletionNonce"   : "",
-        "trustedDeviceRecords": "{}",
-    }
-    url = extr.root + "/accounts/login/ajax/"
-    response = extr.request(url, method="POST", headers=headers, data=data)
-
-    if not response.json().get("authenticated"):
-        raise exception.AuthenticationError()
-
-    return {cookie.name: cookie.value
-            for cookie in extr.session.cookies}
+    extr.log.error("Login with username & password is no longer supported. "
+                   "Use browser cookies instead.")
+    return {}
 
 
 def id_from_shortcode(shortcode):
