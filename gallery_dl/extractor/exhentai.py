@@ -473,6 +473,10 @@ class ExhentaiSearchExtractor(ExhentaiExtractor):
             "pattern": ExhentaiGalleryExtractor.pattern,
             "range": "1-30",
             "count": 30,
+            "keyword": {
+                "gallery_id": int,
+                "gallery_token": r"re:^[0-9a-f]{10}$"
+            },
         }),
     )
 
@@ -508,6 +512,8 @@ class ExhentaiSearchExtractor(ExhentaiExtractor):
                 if url == last:
                     continue
                 last = url
+                data["gallery_id"] = text.parse_int(gallery.group(2))
+                data["gallery_token"] = gallery.group(3)
                 yield Message.Queue, url + "/", data
 
             next_url = text.extr(page, 'nexturl = "', '"', None)
