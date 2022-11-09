@@ -1021,7 +1021,7 @@ class TwitterAPI():
             "count": 100,
         }
         return self._pagination_tweets(
-            endpoint, variables, ("bookmark_timeline", "timeline"))
+            endpoint, variables, ("bookmark_timeline", "timeline"), False)
 
     def list_latest_tweets_timeline(self, list_id):
         endpoint = "/graphql/z3l-EHlx-fyg8OvGO4JN8A/ListLatestTweetsTimeline"
@@ -1253,7 +1253,8 @@ class TwitterAPI():
                 return
             params["cursor"] = cursor
 
-    def _pagination_tweets(self, endpoint, variables, path=None):
+    def _pagination_tweets(self, endpoint, variables,
+                           path=None, stop_tweets=True):
         extr = self.extractor
         variables.update(self.variables)
         original_retweets = (extr.retweets == "original")
@@ -1397,7 +1398,9 @@ class TwitterAPI():
                             tweet.get("rest_id"))
                         continue
 
-            if not tweet or not cursor:
+            if stop_tweets and not tweet:
+                return
+            if not cursor or cursor == variables.get("cursor"):
                 return
             variables["cursor"] = cursor
 
