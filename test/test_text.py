@@ -210,6 +210,11 @@ class TestText(unittest.TestCase):
         self.assertEqual(f(txt, "<", ">"), "a")
         self.assertEqual(f(txt, "><", ">"), "b")
 
+        # 'default' argument
+        self.assertEqual(f(txt, "<", "X", None), None)
+        self.assertEqual(f(txt, "<", "X", default=None), None)
+        self.assertEqual(f(txt, "<", "X", default=()), ())
+
         # invalid arguments
         for value in INVALID:
             self.assertEqual(f(value, "<"  , ">")  , "")
