@@ -91,11 +91,12 @@ class HttpDownloader(DownloaderBase):
         tries = 0
         msg = ""
 
+        metadata = self.metadata
         kwdict = pathfmt.kwdict
         adjust_extension = kwdict.get(
             "_http_adjust_extension", self.adjust_extension)
 
-        if self.part:
+        if self.part and not metadata:
             pathfmt.part_enable(self.partdir)
 
         while True:
@@ -194,15 +195,19 @@ class HttpDownloader(DownloaderBase):
                 build_path = True
 
             # set metadata from HTTP headers
-            if self.metadata:
-                kwdict[self.metadata] = util.extract_headers(response)
+            if metadata:
+                kwdict[metadata] = util.extract_headers(response)
                 build_path = True
 
+            # build and check file path
             if build_path:
                 pathfmt.build_path()
                 if pathfmt.exists():
                     pathfmt.temppath = ""
                     return True
+                if self.part and metadata:
+                    pathfmt.part_enable(self.partdir)
+                metadata = False
 
             content = response.iter_content(self.chunk_size)
 
