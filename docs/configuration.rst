@@ -3592,7 +3592,9 @@ Description
     Selects how to process metadata.
 
     * ``"json"``: write metadata using `json.dump()
-      <https://docs.python.org/3/library/json.html#json.dump>`_
+      <https://docs.python.org/3/library/json.html#json.dump>`__
+    * ``"jsonl"``: write metadata in `JSON Lines
+      <https://jsonlines.org/>`__ format
     * ``"tags"``: write ``tags`` separated by newlines
     * ``"custom"``: write the result of applying `metadata.content-format`_
       to a file's metadata dictionary
