@@ -274,42 +274,38 @@ class HttpDownloader(DownloaderBase):
         return True
 
     @staticmethod
-    def receive(fp, content, bytes_total, bytes_downloaded):
+    def receive(fp, content, bytes_total, bytes_start):
         write = fp.write
         for data in content:
             write(data)
 
-    def _receive_rate(self, fp, content, bytes_total, bytes_downloaded):
+    def _receive_rate(self, fp, content, bytes_total, bytes_start):
         rate = self.rate
-        progress = self.progress
-        bytes_start = bytes_downloaded
         write = fp.write
-        t1 = tstart = time.time()
+        progress = self.progress
+
+        bytes_downloaded = 0
+        time_start = time.time()
 
         for data in content:
-            write(data)
+            time_current = time.time()
+            time_elapsed = time_current - time_start
+            bytes_downloaded += len(data)
 
-            t2 = time.time()           # current time
-            elapsed = t2 - t1          # elapsed time
-            num_bytes = len(data)
+            write(data)
 
             if progress is not None:
-                bytes_downloaded += num_bytes
-                tdiff = t2 - tstart
-                if tdiff >= progress:
+                if time_elapsed >= progress:
                     self.out.progress(
-                        bytes_total, bytes_downloaded,
-                        int((bytes_downloaded - bytes_start) / tdiff),
+                        bytes_total,
+                        bytes_start + bytes_downloaded,
+                        int(bytes_downloaded / time_elapsed),
                     )
 
             if rate:
-                expected = num_bytes / rate  # expected elapsed time
-                if elapsed < expected:
-                    # sleep if less time elapsed than expected
-                    time.sleep(expected - elapsed)
-                    t2 = time.time()
-
-            t1 = t2
+                time_expected = bytes_downloaded / rate
+                if time_expected > time_elapsed:
+                    time.sleep(time_expected - time_elapsed)
 
     def _find_extension(self, response):
         """Get filename extension from MIME type"""
