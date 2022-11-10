@@ -87,8 +87,8 @@ class GelbooruV02Extractor(booru.BooruExtractor):
 
     def _file_url_realbooru(self, post):
         url = post["file_url"]
-        if url.count("/") == 5:
-            md5 = post["md5"]
+        md5 = post["md5"]
+        if md5 not in post["preview_url"] or url.count("/") == 5:
             url = "{}/images/{}/{}/{}.{}".format(
                 self.root, md5[0:2], md5[2:4], md5, url.rpartition(".")[2])
         return url
