@@ -31,6 +31,7 @@ class GelbooruV02Extractor(booru.BooruExtractor):
 
         if self.category == "realbooru":
             self._file_url = self._file_url_realbooru
+            self._tags = self._tags_realbooru
 
     def _api_request(self, params):
         url = self.api_root + "/index.php?page=dapi&s=post&q=index"
@@ -85,14 +86,6 @@ class GelbooruV02Extractor(booru.BooruExtractor):
         post["date"] = text.parse_datetime(
             post["created_at"], "%a %b %d %H:%M:%S %z %Y")
 
-    def _file_url_realbooru(self, post):
-        url = post["file_url"]
-        md5 = post["md5"]
-        if md5 not in post["preview_url"] or url.count("/") == 5:
-            url = "{}/images/{}/{}/{}.{}".format(
-                self.root, md5[0:2], md5[2:4], md5, url.rpartition(".")[2])
-        return url
-
     def _html(self, post):
         return self.request("{}/index.php?page=post&s=view&id={}".format(
             self.root, post["id"])).text
@@ -127,6 +120,24 @@ class GelbooruV02Extractor(booru.BooruExtractor):
                 "id"    : int(extr('id="note-body-', '"')),
                 "body"  : text.unescape(text.remove_html(extr(">", "</div>"))),
             })
+
+    def _file_url_realbooru(self, post):
+        url = post["file_url"]
+        md5 = post["md5"]
+        if md5 not in post["preview_url"] or url.count("/") == 5:
+            url = "{}/images/{}/{}/{}.{}".format(
+                self.root, md5[0:2], md5[2:4], md5, url.rpartition(".")[2])
+        return url
+
+    def _tags_realbooru(self, post, page):
+        tag_container = text.extr(page, 'id="tagLink"', '</div>')
+        tags = collections.defaultdict(list)
+        pattern = re.compile(
+            r'<a class="(?:tag-type-)?([^"]+).*?;tags=([^"&]+)')
+        for tag_type, tag_name in pattern.findall(tag_container):
+            tags[tag_type].append(text.unquote(tag_name))
+        for key, value in tags.items():
+            post["tags_" + key] = " ".join(value)
 
 
 INSTANCES = {
@@ -395,6 +406,13 @@ class GelbooruV02PostExtractor(GelbooruV02Extractor):
             "pattern": r"https://realbooru\.com/images/dc/b5"
                        r"/dcb5c0ce9ec0bf74a6930608985f4719\.jpeg",
             "content": "7f5873ce3b6cd295ea2e81fcb49583098ea9c8da",
+            "options": (("tags", True),),
+            "keyword": {
+                "tags_general": "1girl blonde blonde_hair blue_eyes cute "
+                                "female female_only looking_at_viewer smile "
+                                "solo solo_female teeth",
+                "tags_model": "jennifer_lawrence",
+            },
         }),
         ("https://tbib.org/index.php?page=post&s=view&id=9233957", {
             "url": "5a6ebe07bfff8e6d27f7c30b5480f27abcb577d2",
