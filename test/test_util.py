@@ -623,6 +623,20 @@ class TestOther(unittest.TestCase):
         self.assertIs(obj.attr, obj)
         self.assertIs(obj["key"], obj)
 
+    def test_hide_login_info_long(self):
+        result = util.hide_login_info(
+            ['gallery_dl', '--username', 'aaaa@gmail.com',
+             '--password', '123456', '-u', 'bbbb@gmail.com', '-p', '654321'])
+        
+        self.assertIn('--username', result)
+        self.assertNotIn('aaaa@gmail.com', result)
+        self.assertIn('--password', result)
+        self.assertNotIn('123456', result)
+        self.assertIn('-u', result)
+        self.assertNotIn('bbbb@gmail.com', result)
+        self.assertIn('-p', result)
+        self.assertNotIn('654321', result)
+
 
 class TestExtractor():
     category = "test_category"
