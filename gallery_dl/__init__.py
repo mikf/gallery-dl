@@ -128,7 +128,8 @@ def main():
                 if git_head:
                     extra = " - Git HEAD: " + git_head
 
-            log.debug("Command-line arguments: %s", util.hide_login_info(sys.argv))
+            log.debug("Command-line arguments: %s",
+                      util.hide_login_info(sys.argv))
             log.debug("Version %s%s", __version__, extra)
             log.debug("Python %s - %s",
                       platform.python_version(), platform.platform())

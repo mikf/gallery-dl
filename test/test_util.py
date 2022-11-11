@@ -623,19 +623,40 @@ class TestOther(unittest.TestCase):
         self.assertIs(obj.attr, obj)
         self.assertIs(obj["key"], obj)
 
-    def test_hide_login_info_long(self):
-        result = util.hide_login_info(
-            ['gallery_dl', '--username', 'aaaa@gmail.com',
-             '--password', '123456', '-u', 'bbbb@gmail.com', '-p', '654321'])
-        
-        self.assertIn('--username', result)
-        self.assertNotIn('aaaa@gmail.com', result)
-        self.assertIn('--password', result)
-        self.assertNotIn('123456', result)
-        self.assertIn('-u', result)
-        self.assertNotIn('bbbb@gmail.com', result)
-        self.assertIn('-p', result)
-        self.assertNotIn('654321', result)
+    def test_hide_login_info(self):
+        normal = util.hide_login_info(
+            ["gallery_dl", "--username", "aaaa@gmail.com",
+             "--password", "123456", "-u", "bbbb@gmail.com", "-p", "654321"])
+
+        short = util.hide_login_info(
+            ["gallery_dl", "--username=aaaa@gmail.com", "--password=123456",
+             "-u=bbbb@gmail.com", "-p=654321", "-ucccc@gmail.com", "-p123123"])
+
+        other = util.hide_login_info(
+            ["--username", "--password", "-u", "-p", "--", "123123"], False)
+
+        self.assertNotIn("gallery_dl", normal)
+        self.assertIn("--username", normal)
+        self.assertNotIn("aaaa@gmail.com", normal)
+        self.assertIn("--password", normal)
+        self.assertNotIn("123456", normal)
+        self.assertIn("-u", normal)
+        self.assertNotIn("bbbb@gmail.com", normal)
+        self.assertIn("-p", normal)
+        self.assertNotIn("654321", normal)
+
+        self.assertNotIn("--username=aaaa@gmail.com", short)
+        self.assertNotIn("--password=123456", short)
+        self.assertNotIn("-u=bbbb@gmail.com", short)
+        self.assertNotIn("-p=654321", short)
+        self.assertNotIn("-ucccc@gmail.com", short)
+        self.assertNotIn("-p123123", short)
+
+        self.assertIn("--username", other)
+        self.assertIn("--password", other)
+        self.assertIn("-u", other)
+        self.assertIn("-p", other)
+        self.assertIn("123123", other)
 
 
 class TestExtractor():
