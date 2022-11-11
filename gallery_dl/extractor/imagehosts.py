@@ -54,6 +54,7 @@ class ImagehostImageExtractor(Extractor):
 
         url, filename = self.get_info(page)
         data = text.nameext_from_url(filename, {"token": self.token})
+        data.update(self.metadata(page))
         if self.https and url.startswith("http:"):
             url = "https:" + url[5:]
 
@@ -62,6 +63,10 @@ class ImagehostImageExtractor(Extractor):
 
     def get_info(self, page):
         """Find image-url and string to get filename from"""
+
+    def metadata(self, page):
+        """Return additional metadata"""
+        return ()
 
 
 class ImxtoImageExtractor(ImagehostImageExtractor):
@@ -72,13 +77,23 @@ class ImxtoImageExtractor(ImagehostImageExtractor):
     test = (
         ("https://imx.to/i/1qdeva", {  # new-style URL
             "url": "ab2173088a6cdef631d7a47dec4a5da1c6a00130",
-            "keyword": "1153a986c939d7aed599905588f5c940048bc517",
             "content": "0c8768055e4e20e7c7259608b67799171b691140",
+            "keyword": {
+                "size"  : 18,
+                "width" : 64,
+                "height": 32,
+                "hash"  : "94d56c599223c59f3feb71ea603484d1",
+            },
         }),
         ("https://imx.to/img-57a2050547b97.html", {  # old-style URL
             "url": "a83fe6ef1909a318c4d49fcf2caf62f36c3f9204",
-            "keyword": "fd2240aee77a21b8252d5b829a1f7e542f927f09",
             "content": "54592f2635674c25677c6872db3709d343cdf92f",
+            "keyword": {
+                "size"  : 5284,
+                "width" : 320,
+                "height": 160,
+                "hash"  : "40da6aaa7b8c42b18ef74309bbc713fc",
+            },
         }),
         ("https://img.yt/img-57a2050547b97.html", {  # img.yt domain
             "url": "a83fe6ef1909a318c4d49fcf2caf62f36c3f9204",
@@ -107,6 +122,17 @@ class ImxtoImageExtractor(ImagehostImageExtractor):
         if self.url_ext and filename:
             filename += splitext(url)[1]
         return url, filename or url
+
+    def metadata(self, page):
+        extr = text.extract_from(page, page.index("[ FILESIZE <"))
+        size = extr(">", "</span>").replace(" ", "")[:-1]
+        width, _, height = extr(">", " px</span>").partition("x")
+        return {
+            "size"  : text.parse_bytes(size),
+            "width" : text.parse_int(width),
+            "height": text.parse_int(height),
+            "hash"  : extr(">", "</span>"),
+        }
 
 
 class AcidimgImageExtractor(ImagehostImageExtractor):
