@@ -695,6 +695,21 @@ def chain_predicates(predicates, url, kwdict):
     return True
 
 
+def hide_login_info(args, remove_first=True):
+    PRIVATE_OPTS = ('--username', '-u', '--password', '-p')
+    args = args[1 if remove_first else 0:]
+    is_private = False
+    for i, arg in enumerate(args):
+        if arg == '--':
+            break
+        if is_private and not arg.startswith("-"):
+            args[i] = "PRIVATE"
+            is_private = False
+            continue
+        if arg in PRIVATE_OPTS:
+            is_private = True
+    return args
+
 class RangePredicate():
     """Predicate; True if the current index is in the given range"""
     def __init__(self, rangespec):
