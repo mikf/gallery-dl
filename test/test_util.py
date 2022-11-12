@@ -633,7 +633,8 @@ class TestOther(unittest.TestCase):
              "-u=bbbb@gmail.com", "-p=654321", "-ucccc@gmail.com", "-p123123"])
 
         other = util.hide_login_info(
-            ["--username", "--password", "-u", "-p", "--", "123123"], False)
+            ["--username", "--password", "-u", "--not-hidden",
+             "not-hidden", "-p", "--", "123123"], False)
 
         self.assertNotIn("gallery_dl", normal)
         self.assertIn("--username", normal)
@@ -655,6 +656,8 @@ class TestOther(unittest.TestCase):
         self.assertIn("--username", other)
         self.assertIn("--password", other)
         self.assertIn("-u", other)
+        self.assertIn("--not-hidden", other)
+        self.assertIn("not-hidden", other)
         self.assertIn("-p", other)
         self.assertIn("123123", other)
 

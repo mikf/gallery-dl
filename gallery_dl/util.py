@@ -701,6 +701,7 @@ def hide_login_info(args, remove_first=True):
         "^((?:{})=|(?:{})=?).+$".format(
             "|".join(re.escape(x) for x in PRIVATE_OPTS if len(x) > 2),
             "|".join(re.escape(x) for x in PRIVATE_OPTS if len(x) == 2)))
+
     args = args[1 if remove_first else 0:]
     is_private = False
     for i, arg in enumerate(args):
@@ -713,6 +714,7 @@ def hide_login_info(args, remove_first=True):
         if arg in PRIVATE_OPTS:
             is_private = True
             continue
+        is_private = False
         match = pattern.match(arg)
         if match:
             args[i] = match.group(1) + "PRIVATE"
