@@ -72,6 +72,7 @@ CATEGORY_MAP = {
     "mangalife"      : "MangaLife",
     "manganelo"      : "Manganato",
     "mangapark"      : "MangaPark",
+    "mangaread"      : "MangaRead",
     "mangasee"       : "MangaSee",
     "mastodon.social": "mastodon.social",
     "mememuseum"     : "meme.museum",

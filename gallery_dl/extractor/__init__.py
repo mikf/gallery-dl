@@ -86,6 +86,7 @@ modules = [
     "mangakakalot",
     "manganelo",
     "mangapark",
+    "mangaread",
     "mangasee",
     "mangoxo",
     "mememuseum",
