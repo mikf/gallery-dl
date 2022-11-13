@@ -106,7 +106,7 @@ class MangareadChapterExtractor(MangareadBase, ChapterExtractor):
 class MangareadMangaExtractor(MangareadBase, MangaExtractor):
     """Extractor for manga from mangaread.org"""
     chapterclass = MangareadChapterExtractor
-    pattern = r"(?:https?://)?(?:www\.)?mangaread\.org(/manga/[^/?#]+)"
+    pattern = r"(?:https?://)?(?:www\.)?mangaread\.org(/manga/[^/?#]+)/?$"
     test = (
         ("https://www.mangaread.org/manga/kanan-sama-wa-akumade-choroi", {
             "pattern": (r"https://www\.mangaread\.org/manga"
