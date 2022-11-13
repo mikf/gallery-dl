@@ -20,7 +20,7 @@ import requests
 import threading
 from requests.adapters import HTTPAdapter
 from .message import Message
-from .. import config, text, util, exception
+from .. import config, text, util, cache, exception
 
 
 class Extractor():
@@ -262,9 +262,13 @@ class Extractor():
                             ssl.OP_NO_TLSv1 | ssl.OP_NO_TLSv1_1)
             ssl_ciphers = SSL_CIPHERS[browser]
         else:
-            headers["User-Agent"] = self.config("user-agent", (
-                "Mozilla/5.0 (Windows NT 10.0; Win64; x64; "
-                "rv:102.0) Gecko/20100101 Firefox/102.0"))
+            useragent = self.config("user-agent")
+            if useragent is None:
+                useragent = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64; "
+                             "rv:102.0) Gecko/20100101 Firefox/102.0")
+            elif useragent == "browser":
+                useragent = _browser_useragent()
+            headers["User-Agent"] = useragent
             headers["Accept"] = "*/*"
             headers["Accept-Language"] = "en-US,en;q=0.5"
 
@@ -722,6 +726,36 @@ def _build_requests_adapter(ssl_options, ssl_ciphers, source_address):
     adapter = _adapter_cache[key] = RequestsAdapter(
         ssl_context, source_address)
     return adapter
+
+
+@cache.cache(maxage=86400)
+def _browser_useragent():
+    """Get User-Agent header from default browser"""
+    import webbrowser
+    import socket
+
+    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    server.bind(("127.0.0.1", 6414))
+    server.listen(1)
+
+    webbrowser.open("http://127.0.0.1:6414/user-agent")
+
+    client = server.accept()[0]
+    server.close()
+
+    for line in client.recv(1024).split(b"\r\n"):
+        key, _, value = line.partition(b":")
+        if key.strip().lower() == b"user-agent":
+            useragent = value.strip()
+            break
+    else:
+        useragent = b""
+
+    client.send(b"HTTP/1.1 200 OK\r\n\r\n" + useragent)
+    client.close()
+
+    return useragent.decode()
 
 
 _adapter_cache = {}

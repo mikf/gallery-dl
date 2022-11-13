@@ -511,6 +511,9 @@ Default
 Description
     User-Agent header value to be used for HTTP requests.
 
+    Setting this value to ``"browser"`` will try to automatically detect
+    and use the User-Agent used by the system's default browser.
+
     Note: This option has no effect on `pixiv` extractors,
     as these need specific values to function correctly.
 
@@ -520,7 +523,8 @@ extractor.*.browser
 Type
     ``string``
 Default
-    ``"firefox"`` for ``patreon``, ``null`` everywhere else
+    * ``"firefox"`` for ``patreon``, ``mangapark``, and ``mangasee``
+    * ``null`` everywhere else
 Example
     * ``"chrome:macos"``
 Description
