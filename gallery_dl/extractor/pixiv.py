@@ -479,6 +479,8 @@ class PixivRankingExtractor(PixivExtractor):
         mode_map = {
             "daily": "day",
             "daily_r18": "day_r18",
+            "daily_ai": "day_ai",
+            "daily_r18_ai": "day_r18_ai",
             "weekly": "week",
             "weekly_r18": "week_r18",
             "monthly": "month",
