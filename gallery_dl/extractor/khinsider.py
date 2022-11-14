@@ -23,9 +23,9 @@ class KhinsiderSoundtrackExtractor(AsynchronousMixin, Extractor):
     root = "https://downloads.khinsider.com"
     test = (("https://downloads.khinsider.com"
              "/game-soundtracks/album/horizon-riders-wii"), {
-        "pattern": r"https?://vgm(site|downloads).com"
+        "pattern": r"https?://vgm(site|downloads)\.com"
                    r"/soundtracks/horizon-riders-wii/[^/]+"
-                   r"/Horizon%20Riders%20Wii%20-%20Full%20Soundtrack.mp3",
+                   r"/Horizon%20Riders%20Wii%20-%20Full%20Soundtrack\.mp3",
         "keyword": {
             "album": {
                 "count": 1,
@@ -83,8 +83,7 @@ class KhinsiderSoundtrackExtractor(AsynchronousMixin, Extractor):
             page = self.request(url, encoding="utf-8").text
             track = first = None
 
-            for url in text.extract_iter(
-                    page, 'style="color: #21363f;" href="', '"'):
+            for url in text.extract_iter(page, '<p><a href="', '"'):
                 track = text.nameext_from_url(url, {"num": num, "url": url})
                 if first is None:
                     first = track
