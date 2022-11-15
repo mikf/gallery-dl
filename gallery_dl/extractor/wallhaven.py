@@ -19,6 +19,10 @@ class WallhavenExtractor(Extractor):
     archive_fmt = "{id}"
     root = "https://wallhaven.cc"
 
+    def __init__(self, match):
+        Extractor.__init__(self, match)
+        self.api = WallhavenAPI(self)
+
     def items(self):
         metadata = self.metadata()
         for wp in self.wallpapers():
@@ -57,7 +61,8 @@ class WallhavenSearchExtractor(WallhavenExtractor):
         ("https://wallhaven.cc/search?q=touhou"),
         (("https://wallhaven.cc/search?q=id%3A87"
           "&categories=111&purity=100&sorting=date_added&order=asc&page=3"), {
-            "pattern": r"https://w.wallhaven.cc/full/\w\w/wallhaven-\w+\.\w+",
+            "pattern": (r"https://w\.wallhaven\.cc"
+                        r"/full/\w\w/wallhaven-\w+\.\w+"),
             "count": "<= 30",
         }),
     )
@@ -67,7 +72,7 @@ class WallhavenSearchExtractor(WallhavenExtractor):
         self.params = text.parse_query(match.group(1))
 
     def wallpapers(self):
-        return WallhavenAPI(self).search(self.params.copy())
+        return self.api.search(self.params.copy())
 
     def metadata(self):
         return {"search": self.params}
@@ -87,7 +92,7 @@ class WallhavenCollectionExtractor(WallhavenExtractor):
         self.username, self.collection_id = match.groups()
 
     def wallpapers(self):
-        return WallhavenAPI(self).collection(self.username, self.collection_id)
+        return self.api.collection(self.username, self.collection_id)
 
     def metadata(self):
         return {"username": self.username, "collection_id": self.collection_id}
@@ -107,11 +112,36 @@ class WallhavenCollectionsExtractor(WallhavenExtractor):
         self.username = match.group(1)
 
     def items(self):
-        for collection in WallhavenAPI(self).collections(self.username):
+        for collection in self.api.collections(self.username):
             collection["_extractor"] = WallhavenCollectionExtractor
             url = "https://wallhaven.cc/user/{}/favorites/{}".format(
                 self.username, collection["id"])
             yield Message.Queue, url, collection
+
+
+class WallhavenUserExtractor(WallhavenExtractor):
+    """Extractor for all uploads of a wallhaven user"""
+    subcategory = "user"
+    directory_fmt = ("{category}", "{username}")
+    archive_fmt = "u_{username}_{id}"
+    pattern = r"(?:https?://)?wallhaven\.cc/user/([^/?#]+)/uploads"
+    test = ("https://wallhaven.cc/user/AksumkA/uploads", {
+        "pattern": (r"https://[^.]+\.wallhaven\.cc"
+                    r"/full/\w\w/wallhaven-\w+\.\w+"),
+        "range": "1-100",
+        "count": 100,
+    })
+
+    def __init__(self, match):
+        WallhavenExtractor.__init__(self, match)
+        self.username = match.group(1)
+
+    def wallpapers(self):
+        params = {"q": "@" + self.username}
+        return self.api.search(params.copy())
+
+    def metadata(self):
+        return {"username": self.username}
 
 
 class WallhavenImageExtractor(WallhavenExtractor):
@@ -121,7 +151,8 @@ class WallhavenImageExtractor(WallhavenExtractor):
                r"|w\.wallhaven\.cc/[a-z]+/\w\w/wallhaven-)(\w+)")
     test = (
         ("https://wallhaven.cc/w/01w334", {
-            "pattern": "https://[^.]+.wallhaven.cc/full/01/[^-]+-01w334.jpg",
+            "pattern": (r"https://[^.]+\.wallhaven\.cc"
+                        r"/full/01/wallhaven-01w334\.jpg"),
             "content": "497212679383a465da1e35bd75873240435085a2",
             "keyword": {
                 "id"         : "01w334",
@@ -159,7 +190,7 @@ class WallhavenImageExtractor(WallhavenExtractor):
         self.wallpaper_id = match.group(1)
 
     def wallpapers(self):
-        return (WallhavenAPI(self).info(self.wallpaper_id),)
+        return (self.api.info(self.wallpaper_id),)
 
 
 class WallhavenAPI():

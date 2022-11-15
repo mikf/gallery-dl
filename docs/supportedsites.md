@@ -868,7 +868,7 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>Wallhaven</td>
     <td>https://wallhaven.cc/</td>
-    <td>Collections, individual Images, Search Results</td>
+    <td>Collections, individual Images, Search Results, User Profiles</td>
     <td><a href="configuration.rst#extractorwallhavenapi-key">API Key</a></td>
 </tr>
 <tr>
