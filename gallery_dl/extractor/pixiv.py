@@ -462,6 +462,9 @@ class PixivRankingExtractor(PixivExtractor):
         ("https://www.pixiv.net/ranking.php?mode=daily&date=20170818"),
         ("https://www.pixiv.net/ranking.php"),
         ("https://touch.pixiv.net/ranking.php"),
+        ("https://www.pixiv.net/ranking.php?mode=unknown", {
+            "exception": exception.StopExtraction,
+        }),
     )
 
     def __init__(self, match):
@@ -492,10 +495,10 @@ class PixivRankingExtractor(PixivExtractor):
             "rookie": "week_rookie",
             "r18g": "week_r18g",
         }
-        if mode not in mode_map:
-            self.log.warning("invalid mode '%s'", mode)
-            mode = "daily"
-        self.mode = mode_map[mode]
+        try:
+            self.mode = mode = mode_map[mode]
+        except KeyError:
+            raise exception.StopExtraction("Invalid mode '%s'", mode)
 
         date = query.get("date")
         if date:
@@ -527,6 +530,15 @@ class PixivSearchExtractor(PixivExtractor):
             "range": "1-10",
             "count": 10,
         }),
+        ("https://pixiv.net/en/tags/foo/artworks?order=week&s_mode=s_tag", {
+            "exception": exception.StopExtraction,
+        }),
+        ("https://pixiv.net/en/tags/foo/artworks?order=date&s_mode=tag", {
+            "exception": exception.StopExtraction,
+        }),
+        ("https://www.pixiv.net/search.php?s_mode=s_tag&name=Original", {
+            "exception": exception.StopExtraction,
+        }),
         ("https://www.pixiv.net/en/tags/foo/artworks?order=date&s_mode=s_tag"),
         ("https://www.pixiv.net/search.php?s_mode=s_tag&word=Original"),
         ("https://touch.pixiv.net/search.php?word=Original"),
@@ -548,19 +560,20 @@ class PixivSearchExtractor(PixivExtractor):
         if self.word:
             self.word = text.unquote(self.word)
         else:
-            if "word" not in query:
+            try:
+                self.word = query["word"]
+            except KeyError:
                 raise exception.StopExtraction("Missing search term")
-            self.word = query["word"]
 
         sort = query.get("order", "date_d")
         sort_map = {
             "date": "date_asc",
             "date_d": "date_desc",
         }
-        if sort not in sort_map:
-            self.log.warning("invalid sort order '%s'", sort)
-            sort = "date_d"
-        self.sort = sort_map[sort]
+        try:
+            self.sort = sort = sort_map[sort]
+        except KeyError:
+            raise exception.StopExtraction("Invalid search order '%s'", sort)
 
         target = query.get("s_mode", "s_tag_full")
         target_map = {
@@ -568,10 +581,10 @@ class PixivSearchExtractor(PixivExtractor):
             "s_tag_full": "exact_match_for_tags",
             "s_tc": "title_and_caption",
         }
-        if target not in target_map:
-            self.log.warning("invalid search target '%s'", target)
-            target = "s_tag_full"
-        self.target = target_map[target]
+        try:
+            self.target = target = target_map[target]
+        except KeyError:
+            raise exception.StopExtraction("Invalid search mode '%s'", target)
 
         self.date_start = query.get("scd")
         self.date_end = query.get("ecd")
