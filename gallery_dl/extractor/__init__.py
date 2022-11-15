@@ -97,6 +97,7 @@ modules = [
     "newgrounds",
     "nhentai",
     "nijie",
+    "nitter",
     "nozomi",
     "nsfwalbum",
     "paheal",

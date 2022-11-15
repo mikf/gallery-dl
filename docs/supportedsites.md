@@ -1057,6 +1057,46 @@ Consider all sites to be NSFW unless otherwise known.
 </tr>
 
 <tr>
+    <td colspan="4"><strong>Nitter Instances</strong></td>
+</tr>
+<tr>
+    <td>Nitter.net</td>
+    <td>https://nitter.net/</td>
+    <td>Media Files, Replies, Search Results, Tweets</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Nitter.lacontrevoie.fr</td>
+    <td>https://nitter.lacontrevoie.fr/</td>
+    <td>Media Files, Replies, Search Results, Tweets</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Nitter.pussthecat.org</td>
+    <td>https://nitter.pussthecat.org/</td>
+    <td>Media Files, Replies, Search Results, Tweets</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Nitter.1d4.us</td>
+    <td>https://nitter.1d4.us/</td>
+    <td>Media Files, Replies, Search Results, Tweets</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Nitter.kavin.rocks</td>
+    <td>https://nitter.kavin.rocks/</td>
+    <td>Media Files, Replies, Search Results, Tweets</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Nitter.unixfox.eu</td>
+    <td>https://nitter.unixfox.eu/</td>
+    <td>Media Files, Replies, Search Results, Tweets</td>
+    <td></td>
+</tr>
+
+<tr>
     <td colspan="4"><strong>Philomena Instances</strong></td>
 </tr>
 <tr>
