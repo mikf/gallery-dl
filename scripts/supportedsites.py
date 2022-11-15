@@ -233,6 +233,7 @@ SUBCATEGORY_MAP = {
     },
     "wallhaven": {
         "collections": "",
+        "uploads"    : "",
     },
     "wallpapercave": {
         "image": "individual Images, Search Results",

@@ -98,6 +98,24 @@ class WallhavenCollectionExtractor(WallhavenExtractor):
         return {"username": self.username, "collection_id": self.collection_id}
 
 
+class WallhavenUserExtractor(WallhavenExtractor):
+    """Extractor for a wallhaven user"""
+    subcategory = "user"
+    pattern = r"(?:https?://)?wallhaven\.cc/user/([^/?#]+)/?$"
+    test = ("https://wallhaven.cc/user/AksumkA/",)
+
+    def __init__(self, match):
+        WallhavenExtractor.__init__(self, match)
+        self.username = match.group(1)
+
+    def items(self):
+        base = "{}/user/{}/".format(self.root, self.username)
+        return self._dispatch_extractors((
+            (WallhavenUploadsExtractor    , base + "uploads"),
+            (WallhavenCollectionsExtractor, base + "favorites"),
+        ), ("uploads",))
+
+
 class WallhavenCollectionsExtractor(WallhavenExtractor):
     """Extractor for all collections of a wallhaven user"""
     subcategory = "collections"
@@ -119,9 +137,9 @@ class WallhavenCollectionsExtractor(WallhavenExtractor):
             yield Message.Queue, url, collection
 
 
-class WallhavenUserExtractor(WallhavenExtractor):
+class WallhavenUploadsExtractor(WallhavenExtractor):
     """Extractor for all uploads of a wallhaven user"""
-    subcategory = "user"
+    subcategory = "uploads"
     directory_fmt = ("{category}", "{username}")
     archive_fmt = "u_{username}_{id}"
     pattern = r"(?:https?://)?wallhaven\.cc/user/([^/?#]+)/uploads"

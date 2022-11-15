@@ -2750,6 +2750,26 @@ Description
     See https://wallhaven.cc/help/api for more information.
 
 
+extractor.wallhaven.include
+---------------------------
+Type
+    * ``string``
+    * ``list`` of ``strings``
+Default
+    ``"uploads"``
+Example
+    * ``"uploads,collections"``
+    * ``["uploads", "collections"]``
+Description
+    A (comma-separated) list of subcategories to include
+    when processing a user profile.
+
+    Possible values are
+    ``"uploads"``, ``"collections"``.
+
+    It is possible to use ``"all"`` instead of listing all values separately.
+
+
 extractor.wallhaven.metadata
 ----------------------------
 Type
