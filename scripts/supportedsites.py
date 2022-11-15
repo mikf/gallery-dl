@@ -143,6 +143,7 @@ SUBCATEGORY_MAP = {
     "search" : "Search Results",
     "status" : "Images from Statuses",
     "tag"    : "Tag Searches",
+    "tweets" : "",
     "user"   : "User Profiles",
     "watch"  : "Watches",
     "category"     : "Categories",

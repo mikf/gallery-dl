@@ -14,10 +14,7 @@ from ..cache import cache
 import itertools
 import json
 
-BASE_PATTERN = (
-    r"(?:https?://)?(?:www\.|mobile\.)?"
-    r"(?:(?:[fv]x)?twitter\.com|nitter\.net)"
-)
+BASE_PATTERN = r"(?:https?://)?(?:www\.|mobile\.)?(?:[fv]x)?twitter\.com"
 
 
 class TwitterExtractor(Extractor):
@@ -726,11 +723,6 @@ class TwitterTweetExtractor(TwitterExtractor):
             "options": (("twitpic", True), ("cards", False)),
             "pattern": r"https://\w+.cloudfront.net/photos/large/\d+.jpg",
             "count": 3,
-        }),
-        # Nitter tweet (#890)
-        ("https://nitter.net/ed1conf/status/1163841619336007680", {
-            "url": "4a9ea898b14d3c112f98562d0df75c9785e239d9",
-            "content": "f29501e44d88437fe460f5c927b7543fda0f6e34",
         }),
         # Twitter card (#1005)
         ("https://twitter.com/billboard/status/1306599586602135555", {
