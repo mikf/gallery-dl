@@ -390,11 +390,13 @@ SIGNATURE_CHECKS = {
     "bmp" : lambda s: s[0:2] == b"BM",
     "webp": lambda s: (s[0:4] == b"RIFF" and
                        s[8:12] == b"WEBP"),
-    "avif": lambda s: s[4:12] == b"ftypavif",
+    "avif": lambda s: s[4:11] == b"ftypavi" and s[11] in b"fs",
     "svg" : lambda s: s[0:5] == b"<?xml",
     "ico" : lambda s: s[0:4] == b"\x00\x00\x01\x00",
     "cur" : lambda s: s[0:4] == b"\x00\x00\x02\x00",
     "psd" : lambda s: s[0:4] == b"8BPS",
+    "mp4" : lambda s: (s[4:8] == b"ftyp" and s[8:11] in (
+                       b"mp4", b"avc", b"iso", b"M4V")),
     "webm": lambda s: s[0:4] == b"\x1A\x45\xDF\xA3",
     "ogg" : lambda s: s[0:4] == b"OggS",
     "wav" : lambda s: (s[0:4] == b"RIFF" and
@@ -402,7 +404,7 @@ SIGNATURE_CHECKS = {
     "mp3" : lambda s: (s[0:3] == b"ID3" or
                        s[0:2] in (b"\xFF\xFB", b"\xFF\xF3", b"\xFF\xF2")),
     "zip" : lambda s: s[0:4] in (b"PK\x03\x04", b"PK\x05\x06", b"PK\x07\x08"),
-    "rar" : lambda s: s[0:6] == b"\x52\x61\x72\x21\x1A\x07",
+    "rar" : lambda s: s[0:6] == b"Rar!\x1A\x07",
     "7z"  : lambda s: s[0:6] == b"\x37\x7A\xBC\xAF\x27\x1C",
     "pdf" : lambda s: s[0:5] == b"%PDF-",
     "swf" : lambda s: s[0:3] in (b"CWS", b"FWS"),
