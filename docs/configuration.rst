@@ -1514,13 +1514,12 @@ extractor.instagram.api
 Type
     ``string``
 Default
-    ``"auto"``
+    ``"rest"``
 Description
     Selects which API endpoints to use.
 
-    * ``"rest"``: REST API - higher-resolution media, only usable when logged in
-    * ``"graphql"``: GraphQL API - lower-resolution media, partially accessible when not logged in
-    * ``"auto"``: Use REST API when logged in, GraphQL API otherwise
+    * ``"rest"``: REST API - higher-resolution media
+    * ``"graphql"``: GraphQL API - lower-resolution media
 
 
 extractor.instagram.include
