@@ -138,6 +138,8 @@ def main():
             except AttributeError:
                 pass
 
+            log.debug("Configuration Files %s", config._files)
+
         if args.list_modules:
             extractor.modules.append("")
             sys.stdout.write("\n".join(extractor.modules))
