@@ -20,6 +20,7 @@ CATEGORY_MAP = {
     "archiveofsins"  : "Archive of Sins",
     "artstation"     : "ArtStation",
     "aryion"         : "Eka's Portal",
+    "atf"            : "All The Fallen",
     "atfbooru"       : "ATFBooru",
     "b4k"            : "arch.b4k.co",
     "baraag"         : "baraag",
@@ -273,6 +274,7 @@ _APIKEY_WY = \
 AUTH_MAP = {
     "aryion"         : "Supported",
     "atfbooru"       : "Supported",
+    "atf"            : _COOKIES,
     "baraag"         : _OAUTH,
     "coomerparty"    : "Supported",
     "danbooru"       : "Supported",
