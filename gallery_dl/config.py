@@ -21,6 +21,7 @@ log = logging.getLogger("config")
 # internals
 
 _config = {}
+_files = []
 
 if util.WINDOWS:
     _default_configs = [
@@ -61,8 +62,8 @@ def load(files=None, strict=False, fmt="json"):
     else:
         parsefunc = json.load
 
-    for path in files or _default_configs:
-        path = util.expand_path(path)
+    for pathfmt in files or _default_configs:
+        path = util.expand_path(pathfmt)
         try:
             with open(path, encoding="utf-8") as file:
                 confdict = parsefunc(file)
@@ -79,6 +80,7 @@ def load(files=None, strict=False, fmt="json"):
                 _config.update(confdict)
             else:
                 util.combine_dict(_config, confdict)
+            _files.append(pathfmt)
 
 
 def clear():
