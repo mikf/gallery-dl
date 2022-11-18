@@ -374,6 +374,24 @@ class TwitterExtractor(Extractor):
                 except Exception:
                     yield tweet
 
+    def _make_tweet(self, user, id_str, url, timestamp):
+        return {
+            "created_at": text.parse_timestamp(timestamp).strftime(
+                "%a %b %d %H:%M:%S +0000 %Y"),
+            "id_str": id_str,
+            "lang": None,
+            "user": user,
+            "entities": {},
+            "extended_entities": {
+                "media": [
+                    {
+                        "original_info": {},
+                        "media_url": url,
+                    },
+                ],
+            },
+        }
+
     def metadata(self):
         """Return general metadata"""
         return {}
@@ -840,6 +858,76 @@ class TwitterTweetExtractor(TwitterExtractor):
                 break
 
         return itertools.chain(buffer, tweets)
+
+
+class TwitterAvatarExtractor(TwitterExtractor):
+    subcategory = "avatar"
+    filename_fmt = "avatar {date}.{extension}"
+    archive_fmt = "AV_{user[id]}_{date}"
+    pattern = BASE_PATTERN + r"/(?!search)([^/?#]+)/photo"
+    test = (
+        ("https://twitter.com/supernaturepics/photo", {
+            "pattern": r"https://pbs\.twimg\.com/profile_images"
+                       r"/554585280938659841/FLVAlX18\.jpeg",
+            "keyword": {
+                "date": "dt:2015-01-12 10:26:49",
+                "extension": "jpeg",
+                "filename": "FLVAlX18",
+                "tweet_id": 554585280938659841,
+            },
+        }),
+        ("https://twitter.com/User16/photo", {
+            "count": 0,
+        }),
+    )
+
+    def tweets(self):
+        self.api._user_id_by_screen_name(self.user)
+        user = self._user_obj
+        url = user["legacy"]["profile_image_url_https"]
+
+        if url == ("https://abs.twimg.com/sticky"
+                   "/default_profile_images/default_profile_normal.png"):
+            return ()
+
+        url = url.replace("_normal.", ".")
+        id_str = url.rsplit("/", 2)[1]
+        timestamp = ((int(id_str) >> 22) + 1288834974657) // 1000
+
+        return (self._make_tweet(user, id_str, url, timestamp),)
+
+
+class TwitterBackgroundExtractor(TwitterExtractor):
+    subcategory = "background"
+    filename_fmt = "background {date}.{extension}"
+    archive_fmt = "BG_{user[id]}_{date}"
+    pattern = BASE_PATTERN + r"/(?!search)([^/?#]+)/header_photo"
+    test = (
+        ("https://twitter.com/supernaturepics/header_photo", {
+            "pattern": r"https://pbs\.twimg\.com/profile_banners"
+                       r"/2976459548/1421058583",
+            "keyword": {
+                "date": "dt:2015-01-12 10:29:43",
+                "filename": "1421058583",
+                "tweet_id": 0,
+            },
+        }),
+        ("https://twitter.com/User16/header_photo", {
+            "count": 0,
+        }),
+    )
+
+    def tweets(self):
+        self.api._user_id_by_screen_name(self.user)
+        user = user = self._user_obj
+
+        try:
+            url = user["legacy"]["profile_banner_url"]
+            _, timestamp = url.rsplit("/", 1)
+        except (KeyError, ValueError):
+            return ()
+
+        return (self._make_tweet(user, None, url, timestamp),)
 
 
 class TwitterImageExtractor(Extractor):
