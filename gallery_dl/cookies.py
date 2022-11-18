@@ -263,7 +263,7 @@ def _chrome_cookies_database(profile, config):
 
     path = _find_most_recently_used_file(search_root, "Cookies")
     if path is None:
-        raise FileNotFoundError("Unable tp find {} cookies database in "
+        raise FileNotFoundError("Unable to find {} cookies database in "
                                 "'{}'".format(config["browser"], search_root))
 
     logger.debug("Extracting cookies from %s", path)
