@@ -403,44 +403,7 @@ class TwitterExtractor(Extractor):
         if not self._check_cookies(self.cookienames):
             username, password = self._get_auth_info()
             if username:
-                self._update_cookies(self._login_impl(username, password))
-
-    @cache(maxage=360*24*3600, keyarg=1)
-    def _login_impl(self, username, password):
-        self.log.info("Logging in as %s", username)
-
-        token = util.generate_token()
-        self.session.cookies.clear()
-        self.request(self.root + "/login")
-
-        url = self.root + "/sessions"
-        cookies = {
-            "_mb_tk": token,
-        }
-        data = {
-            "redirect_after_login"      : "/",
-            "remember_me"               : "1",
-            "authenticity_token"        : token,
-            "wfa"                       : "1",
-            "ui_metrics"                : "{}",
-            "session[username_or_email]": username,
-            "session[password]"         : password,
-        }
-        response = self.request(
-            url, method="POST", cookies=cookies, data=data)
-
-        if "/account/login_verification" in response.url:
-            raise exception.AuthenticationError(
-                "Login with two-factor authentication is not supported")
-
-        cookies = {
-            cookie.name: cookie.value
-            for cookie in self.session.cookies
-        }
-
-        if "/error" in response.url or "auth_token" not in cookies:
-            raise exception.AuthenticationError()
-        return cookies
+                self._update_cookies(_login_impl(self, username, password))
 
 
 class TwitterTimelineExtractor(TwitterExtractor):
@@ -1583,3 +1546,174 @@ class TwitterAPI():
             "core"   : {"user_results": {"result": tweet["user"]}},
             "_retweet_id_str": retweet_id,
         }
+
+
+@cache(maxage=360*86400, keyarg=1)
+def _login_impl(extr, username, password):
+
+    import re
+    import random
+
+    if re.fullmatch(r"[\w.%+-]+@[\w.-]+\.\w{2,}", username):
+        extr.log.warning(
+            "Login with email is no longer possible. "
+            "You need to provide your username or phone number instead.")
+
+    extr.log.info("Logging in as %s", username)
+
+    def process(response):
+        try:
+            data = response.json()
+        except ValueError:
+            data = {"errors": ({"message": "Invalid response"},)}
+        else:
+            if response.status_code < 400:
+                return data["flow_token"]
+
+        errors = []
+        for error in data.get("errors") or ():
+            msg = error.get("message")
+            errors.append('"{}"'.format(msg) if msg else "Unknown error")
+        extr.log.debug(response.text)
+        raise exception.AuthenticationError(", ".join(errors))
+
+    extr.session.cookies.clear()
+    api = TwitterAPI(extr)
+    headers = api.headers
+    headers["Referer"] = "https://twitter.com/i/flow/login"
+
+    # init
+    data = {
+        "input_flow_data": {
+            "flow_context": {
+                "debug_overrides": {},
+                "start_location": {"location": "unknown"},
+            },
+        },
+        "subtask_versions": {
+            "action_list": 2,
+            "alert_dialog": 1,
+            "app_download_cta": 1,
+            "check_logged_in_account": 1,
+            "choice_selection": 3,
+            "contacts_live_sync_permission_prompt": 0,
+            "cta": 7,
+            "email_verification": 2,
+            "end_flow": 1,
+            "enter_date": 1,
+            "enter_email": 2,
+            "enter_password": 5,
+            "enter_phone": 2,
+            "enter_recaptcha": 1,
+            "enter_text": 5,
+            "enter_username": 2,
+            "generic_urt": 3,
+            "in_app_notification": 1,
+            "interest_picker": 3,
+            "js_instrumentation": 1,
+            "menu_dialog": 1,
+            "notifications_permission_prompt": 2,
+            "open_account": 2,
+            "open_home_timeline": 1,
+            "open_link": 1,
+            "phone_verification": 4,
+            "privacy_options": 1,
+            "security_key": 3,
+            "select_avatar": 4,
+            "select_banner": 2,
+            "settings_list": 7,
+            "show_code": 1,
+            "sign_up": 2,
+            "sign_up_review": 4,
+            "tweet_selection_urt": 1,
+            "update_users": 1,
+            "upload_media": 1,
+            "user_recommendations_list": 4,
+            "user_recommendations_urt": 1,
+            "wait_spinner": 3,
+            "web_modal": 1,
+        },
+    }
+    url = "https://twitter.com/i/api/1.1/onboarding/task.json?flow_name=login"
+    response = extr.request(url, method="POST", headers=headers, json=data)
+
+    data = {
+        "flow_token": process(response),
+        "subtask_inputs": [
+            {
+                "subtask_id": "LoginJsInstrumentationSubtask",
+                "js_instrumentation": {
+                    "response": "{}",
+                    "link": "next_link",
+                },
+            },
+        ],
+    }
+    url = "https://twitter.com/i/api/1.1/onboarding/task.json"
+    response = extr.request(
+        url, method="POST", headers=headers, json=data, fatal=None)
+
+    # username
+    data = {
+        "flow_token": process(response),
+        "subtask_inputs": [
+            {
+                "subtask_id": "LoginEnterUserIdentifierSSO",
+                "settings_list": {
+                    "setting_responses": [
+                        {
+                            "key": "user_identifier",
+                            "response_data": {
+                                "text_data": {"result": username},
+                            },
+                        },
+                    ],
+                    "link": "next_link",
+                },
+            },
+        ],
+    }
+    #  url = "https://twitter.com/i/api/1.1/onboarding/task.json"
+    extr.sleep(random.uniform(2.0, 4.0), "login (username)")
+    response = extr.request(
+        url, method="POST", headers=headers, json=data, fatal=None)
+
+    # password
+    data = {
+        "flow_token": process(response),
+        "subtask_inputs": [
+            {
+                "subtask_id": "LoginEnterPassword",
+                "enter_password": {
+                    "password": password,
+                    "link": "next_link",
+                },
+            },
+        ],
+    }
+    #  url = "https://twitter.com/i/api/1.1/onboarding/task.json"
+    extr.sleep(random.uniform(2.0, 4.0), "login (password)")
+    response = extr.request(
+        url, method="POST", headers=headers, json=data, fatal=None)
+
+    # account duplication check ?
+    data = {
+        "flow_token": process(response),
+        "subtask_inputs": [
+            {
+                "subtask_id": "AccountDuplicationCheck",
+                "check_logged_in_account": {
+                    "link": "AccountDuplicationCheck_false",
+                },
+            },
+        ],
+    }
+    #  url = "https://twitter.com/i/api/1.1/onboarding/task.json"
+    response = extr.request(
+        url, method="POST", headers=headers, json=data, fatal=None)
+    process(response)
+
+    return {
+        cookie.name: cookie.value
+        for cookie in extr.session.cookies
+    }
