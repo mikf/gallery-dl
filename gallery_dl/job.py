@@ -563,7 +563,7 @@ class KeywordJob(Job):
         stdout_write("\nKeywords for filenames and --filter:\n"
                      "------------------------------------\n")
 
-        if self.metadata_http:
+        if self.metadata_http and url.startswith("http"):
             kwdict[self.metadata_http] = util.extract_headers(
                 self.extractor.request(url, method="HEAD"))
 
