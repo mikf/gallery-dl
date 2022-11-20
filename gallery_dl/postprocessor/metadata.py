@@ -108,6 +108,7 @@ class MetadataPP(PostProcessor):
         self.mtime = options.get("mtime")
         self.omode = options.get("open", omode)
         self.encoding = options.get("encoding", "utf-8")
+        self.private = options.get("private", False)
 
     def run(self, pathfmt):
         archive = self.archive
@@ -209,7 +210,9 @@ class MetadataPP(PostProcessor):
         fp.write("\n".join(tags) + "\n")
 
     def _write_json(self, fp, kwdict):
-        util.dump_json(util.filter_dict(kwdict), fp, self.ascii, self.indent)
+        if not self.private:
+            kwdict = util.filter_dict(kwdict)
+        util.dump_json(kwdict, fp, self.ascii, self.indent)
 
 
 __postprocessor__ = MetadataPP

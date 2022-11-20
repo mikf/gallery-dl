@@ -3768,6 +3768,17 @@ Description
     See the ``mode`` parameter of |open()|_ for further details.
 
 
+metadata.private
+----------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Include private fields,
+    i.e. fields whose name starts with an underscore.
+
+
 metadata.encoding
 -----------------
 Type
