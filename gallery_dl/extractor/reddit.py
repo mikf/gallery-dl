@@ -334,14 +334,14 @@ class RedditAPI():
                 self._flatten(comments, link_id) if self.comments else ())
 
     def submissions_subreddit(self, subreddit, params):
-        """Collect all (submission, comments)-tuples of a subreddit"""
-        endpoint = subreddit + "/.json"
+        """Collect all (submission, comments)-tuples of a subreddit, newest first"""
+        endpoint = subreddit + "/new.json"
         params["limit"] = 100
         return self._pagination(endpoint, params)
 
     def submissions_user(self, user, params):
-        """Collect all (submission, comments)-tuples posted by a user"""
-        endpoint = "/user/" + user + "/.json"
+        """Collect all (submission, comments)-tuples posted by a user, newest first"""
+        endpoint = "/user/" + user + "/new.json"
         params["limit"] = 100
         return self._pagination(endpoint, params)
 
@@ -428,6 +428,18 @@ class RedditAPI():
 
         while True:
             data = self._call(endpoint, params)["data"]
+            # discard posts older than date_min
+            # NOTE: example valid cli option:
+            #           -odate_min=2022-11-19T00:00:01
+            # notice no space between o and date_min
+            # notice it is a complete datetime (Nov 19, 2022 @ 1s past midnight in this case)
+            data["children"] = list(filter(
+                lambda child: child["data"]["created_utc"] >= date_min, data["children"]))
+            # posts are in date order b/c of new.json
+            # so exit loop when there are no results from the filter
+            # instead of calling the API for no reason
+            if len(data["children"]) == 0:
+                return
 
             for child in data["children"]:
                 kind = child["kind"]
