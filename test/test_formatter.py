@@ -219,6 +219,21 @@ class TestFormatter(unittest.TestCase):
             time.timezone = orig_timezone
             time.altzone = orig_altzone
 
+    def test_sort(self):
+        self._run_test("{l:S}" , "['a', 'b', 'c']")
+        self._run_test("{l:Sa}", "['a', 'b', 'c']")
+        self._run_test("{l:Sd}", "['c', 'b', 'a']")
+        self._run_test("{l:Sr}", "['c', 'b', 'a']")
+
+        self._run_test(
+            "{a:S}", "[' ', 'E', 'L', 'L', 'O', 'd', 'h', 'l', 'o', 'r', 'w']")
+        self._run_test(
+            "{a:S-asc}",  # starts with 'S', contains 'a'
+            "[' ', 'E', 'L', 'L', 'O', 'd', 'h', 'l', 'o', 'r', 'w']")
+        self._run_test(
+            "{a:Sort-reverse}",  # starts with 'S', contains 'r'
+            "['w', 'r', 'o', 'l', 'h', 'd', 'O', 'L', 'L', 'E', ' ']")
+
     def test_chain_special(self):
         # multiple replacements
         self._run_test("{a:Rh/C/RE/e/RL/l/}", "Cello wOrld")
@@ -236,6 +251,9 @@ class TestFormatter(unittest.TestCase):
 
         # parse and format datetime
         self._run_test("{ds:D%Y-%m-%dT%H:%M:%S%z/%Y%m%d}", "20100101")
+
+        # sort and join
+        self._run_test("{a:S/J}", " ELLOdhlorw")
 
     def test_separator(self):
         orig_separator = formatter._SEPARATOR

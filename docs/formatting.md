@@ -173,6 +173,12 @@ Format specifiers can be used for advanced formatting by using the options provi
     <td><code>F()()&nbsp;Bar</code></td>
 </tr>
 <tr>
+    <td><code>S&lt;order&gt;/</code></td>
+    <td>Sort a list. <code>&lt;order&gt;</code> can be either <strong>a</strong>scending or <strong>d</strong>escending/<strong>r</strong>everse. (default: <strong>a</strong>)</td>
+    <td><code>{tags:Sd}</code></td>
+    <td><code>['water', 'tree', 'sun']</code></td>
+</tr>
+<tr>
     <td><code>D&lt;format&gt;/</code></td>
     <td>Parse a string value to a <code>datetime</code> object according to <a href="https://docs.python.org/3/library/datetime.html#strftime-and-strptime-format-codes"><code>&lt;format&gt;</code></a></td>
     <td><code>{updated:D%b %d %Y %I:%M %p/}</code></td>

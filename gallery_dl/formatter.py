@@ -347,6 +347,20 @@ def _parse_offset(format_spec, default):
     return off
 
 
+def _parse_sort(format_spec, default):
+    args, _, format_spec = format_spec.partition(_SEPARATOR)
+    fmt = _build_format_func(format_spec, default)
+
+    if "d" in args or "r" in args:
+        def sort_desc(obj):
+            return fmt(sorted(obj, reverse=True))
+        return sort_desc
+    else:
+        def sort_asc(obj):
+            return fmt(sorted(obj))
+        return sort_asc
+
+
 def _default_format(format_spec, default):
     def wrap(obj):
         return format(obj, format_spec)
@@ -395,4 +409,5 @@ _FORMAT_SPECIFIERS = {
     "J": _parse_join,
     "O": _parse_offset,
     "R": _parse_replace,
+    "S": _parse_sort,
 }
