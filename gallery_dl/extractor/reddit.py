@@ -426,7 +426,7 @@ class RedditAPI():
         id_max = self._parse_id("id-max", 2147483647)
         date_min, date_max = self.extractor._get_date_min_max(0, 253402210800)
 
-        stop_on_empty = self.config("stop-on-empty")
+        stop_on_empty = self.extractor.config("stop-on-empty")
         while True:
             data = self._call(endpoint, params)["data"]
             # discard posts older than date-min option
