@@ -426,6 +426,7 @@ class RedditAPI():
         id_max = self._parse_id("id-max", 2147483647)
         date_min, date_max = self.extractor._get_date_min_max(0, 253402210800)
 
+        stop_on_empty = self.config("stop-on-empty")
         while True:
             data = self._call(endpoint, params)["data"]
             # discard posts older than date-min option
@@ -436,9 +437,10 @@ class RedditAPI():
             data["children"] = list(filter(
                 lambda child: child["data"]["created_utc"] >= date_min, data["children"]))
 
-            # exit loop when there are no results from the filter
+            # exit loop when cli option -ostop-on-empty=True and there are no results from the filter
             # NOTE: this could have been better if new.json endpoint behaved better
-            if len(data["children"]) == 0:
+            is_empty = len(data["children"]) == 0
+            if stop_on_empty and is_empty:
                 return
 
             for child in data["children"]:
