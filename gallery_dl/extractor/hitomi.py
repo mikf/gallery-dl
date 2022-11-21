@@ -16,7 +16,6 @@ import string
 import json
 import re
 
-
 class HitomiGalleryExtractor(GalleryExtractor):
     """Extractor for image galleries from hitomi.la"""
     category = "hitomi"
@@ -108,23 +107,25 @@ class HitomiGalleryExtractor(GalleryExtractor):
             "parody"    : [o["parody"] for o in iget("parodys") or ()],
             "characters": [o["character"] for o in iget("characters") or ()]
         }
-
+    
     def images(self, _):
         # see https://ltn.hitomi.la/gg.js
         gg_m, gg_b, gg_default = _parse_gg(self)
 
-        fmt = self.config("format") or "webp"
-        if fmt == "original":
+        fmt_init = self.config("format") or "webp"
+
+        if fmt_init == "original":
             subdomain, fmt, ext, check = "b", "images", None, False
         else:
-            subdomain, ext, check = "a", fmt, True
+            subdomain, ext, check = "a", fmt_init, True
 
         result = []
         for image in self.info["files"]:
             if check:
-                if not image.get("has" + fmt):
+                if image.get("hasavif") and fmt_init != "webp":
+                    fmt = ext = "avif"
+                else:
                     fmt = ext = "webp"
-                check = False
             ihash = image["hash"]
             idata = text.nameext_from_url(image["name"])
             if ext:
