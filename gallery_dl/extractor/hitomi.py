@@ -16,6 +16,7 @@ import string
 import json
 import re
 
+
 class HitomiGalleryExtractor(GalleryExtractor):
     """Extractor for image galleries from hitomi.la"""
     category = "hitomi"
@@ -107,7 +108,7 @@ class HitomiGalleryExtractor(GalleryExtractor):
             "parody"    : [o["parody"] for o in iget("parodys") or ()],
             "characters": [o["character"] for o in iget("characters") or ()]
         }
-    
+
     def images(self, _):
         # see https://ltn.hitomi.la/gg.js
         gg_m, gg_b, gg_default = _parse_gg(self)
