@@ -433,12 +433,18 @@ class RedditAPI():
             # NOTE: example valid cli option:
             #           -odate-min=2022-11-19T00:00:01
             # notice no space between o and date-min
-            # notice it is a complete datetime (Nov 19, 2022 @ 1s past midnight in this case)
-            data["children"] = list(filter(
-                lambda child: child["data"]["created_utc"] >= date_min, data["children"]))
-
-            # exit loop when cli option -ostop-on-empty=True and there are no results from the filter
-            # NOTE: this could have been better if new.json endpoint behaved better
+            # notice it is a complete datetime
+            #   (Nov 19, 2022 @ 1s past midnight in this case)
+            data["children"] = list(
+                filter(
+                    lambda x: x["data"]["created_utc"] >= date_min,
+                    data["children"]
+                )
+            )
+            # exit loop when cli option -ostop-on-empty=True
+            #   and there are no results from the filter
+            # NOTE: this could have been better if new.json
+            #   endpoint behaved better
             is_empty = len(data["children"]) == 0
             if stop_on_empty and is_empty:
                 return
