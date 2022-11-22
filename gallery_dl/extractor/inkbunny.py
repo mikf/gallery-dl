@@ -30,10 +30,12 @@ class InkbunnyExtractor(Extractor):
 
     def items(self):
         self.api.authenticate()
+        metadata = self.metadata()
         to_bool = ("deleted", "favorite", "friends_only", "guest_block",
                    "hidden", "public", "scraps")
 
         for post in self.posts():
+            post.update(metadata)
             post["date"] = text.parse_datetime(
                 post["create_datetime"] + "00", "%Y-%m-%d %H:%M:%S.%f%z")
             post["tags"] = [kw["keyword_name"] for kw in post["keywords"]]
@@ -59,6 +61,12 @@ class InkbunnyExtractor(Extractor):
                 if "/private_files/" in url:
                     url += "?sid=" + self.api.session_id
                 yield Message.Url, url, post
+
+    def posts(self):
+        return ()
+
+    def metadata(self):
+        return ()
 
 
 class InkbunnyUserExtractor(InkbunnyExtractor):
@@ -144,6 +152,7 @@ class InkbunnyPoolExtractor(InkbunnyExtractor):
     test = (
         ("https://inkbunny.net/poolview_process.php?pool_id=28985", {
             "count": 9,
+            "keyword": {"pool_id": "28985"},
         }),
         ("https://inkbunny.net/submissionsviewall.php?rid=ffffffffff"
          "&mode=pool&pool_id=28985&page=1&orderby=pool_order&random=no"),
@@ -159,6 +168,9 @@ class InkbunnyPoolExtractor(InkbunnyExtractor):
             params = text.parse_query(match.group(2))
             self.pool_id = params.get("pool_id")
             self.orderby = params.get("orderby", "pool_order")
+
+    def metadata(self):
+        return {"pool_id": self.pool_id}
 
     def posts(self):
         params = {
@@ -179,6 +191,7 @@ class InkbunnyFavoriteExtractor(InkbunnyExtractor):
             "pattern": r"https://[\w.]+\.metapix\.net/files/full"
                        r"/\d+/\d+_\w+_.+",
             "range": "20-50",
+            "keyword": {"favs_user_id": "20969"},
         }),
         ("https://inkbunny.net/submissionsviewall.php?rid=ffffffffff"
          "&mode=userfavs&random=no&orderby=fav_datetime&page=1&user_id=20969"),
@@ -194,6 +207,9 @@ class InkbunnyFavoriteExtractor(InkbunnyExtractor):
             params = text.parse_query(match.group(2))
             self.user_id = params.get("user_id")
             self.orderby = params.get("orderby", "fav_datetime")
+
+    def metadata(self):
+        return {"favs_user_id": self.user_id}
 
     def posts(self):
         params = {
@@ -216,14 +232,30 @@ class InkbunnySearchExtractor(InkbunnyExtractor):
              "&favsby=&type=&days=&keyword_id=&user_id=&random=&md5="), {
         "range": "1-10",
         "count": 10,
+        "keyword": {
+            "search": {
+                "rid": "ffffffffff",
+                "mode": "search",
+                "page": "1",
+                "orderby": "create_datetime",
+                "text": "cute",
+                "stringtype": "and",
+                "keywords": "yes",
+                "title": "yes",
+                "description": "no",
+            },
+        },
     })
 
     def __init__(self, match):
         InkbunnyExtractor.__init__(self, match)
-        self.query = match.group(1)
+        self.params = text.parse_query(match.group(1))
+
+    def metadata(self):
+        return {"search": self.params}
 
     def posts(self):
-        params = text.parse_query(self.query)
+        params = self.params.copy()
         pop = params.pop
 
         pop("rid", None)
