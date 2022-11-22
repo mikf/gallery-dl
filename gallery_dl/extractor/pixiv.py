@@ -37,7 +37,7 @@ class PixivExtractor(Extractor):
             transform_tags = None
         elif tags == "translated":
             def transform_tags(work):
-                work["tags"] = list(set(
+                work["tags"] = list(dict.fromkeys(
                     tag["translated_name"] or tag["name"]
                     for tag in work["tags"]))
         else:
