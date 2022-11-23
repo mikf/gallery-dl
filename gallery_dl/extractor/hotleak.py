@@ -146,6 +146,7 @@ class HotleakCreatorExtractor(HotleakExtractor):
                     self.wait(
                         until=exc.response.headers.get("X-RateLimit-Reset"))
                     continue
+                raise
 
             posts = response.json()
             if not posts:
