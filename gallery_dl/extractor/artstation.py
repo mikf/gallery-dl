@@ -356,7 +356,8 @@ class ArtstationSearchExtractor(ArtstationExtractor):
             "page"             : None,
             "per_page"         : 50,
             "sorting"          : self.sorting,
-            "pro_first"        : "1",
+            "pro_first"        : ("1" if self.config("pro-first", True) else
+                                  "0"),
             "filters"          : filters,
             "additional_fields": (),
         }
