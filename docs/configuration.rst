@@ -885,6 +885,16 @@ Description
     Try to follow external URLs of embedded players.
 
 
+extractor.artstation.max-posts
+------------------------------
+Type
+    ``integer``
+Default
+    ``null``
+Description
+    Limit the number of posts/projects to download.
+
+
 extractor.artstation.search.pro-first
 -------------------------------------
 Type
