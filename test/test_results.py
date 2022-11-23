@@ -338,6 +338,9 @@ def setup_test_config():
     config.set(("extractor", "deviantart"), "client-secret",
                "ff14994c744d9208e5caeec7aab4a026")
 
+    config.set(("extractor", "hotleak", "cookies"), "cf_clearance",
+               "6ULVJJ97U06FPx1bIXCIFWgP1cOz6Zet2DPg_rTnzJM-1669222952-0-150")
+
     config.set(("extractor", "tumblr"), "api-key",
                "0cXoHfIqVzMQcc3HESZSNsVlulGxEXGDTTZCDrRrjaa0jmuTc6")
     config.set(("extractor", "tumblr"), "api-secret",
