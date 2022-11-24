@@ -98,7 +98,7 @@ class ItakuImageExtractor(ItakuExtractor):
                 "image": "https://d1wmr8tlk3viaj.cloudfront.net/gallery_imgs"
                          "/220504_oUNIAFT.png",
                 "image_xl": "https://d1wmr8tlk3viaj.cloudfront.net"
-                            "/gallery_imgs/220504_oUNIAFT/xl.jpg",
+                            "/gallery_imgs/220504_oUNIAFT/lg.jpg",
                 "liked_by_you": False,
                 "maturity_rating": "SFW",
                 "num_comments": int,
@@ -107,7 +107,7 @@ class ItakuImageExtractor(ItakuExtractor):
                 "obj_tags": 136446,
                 "owner": 16775,
                 "owner_avatar": "https://d1wmr8tlk3viaj.cloudfront.net"
-                                "/profile_pics/av2022r_vKYVywc/sm.jpg",
+                                "/profile_pics/av2022r_vKYVywc/md.jpg",
                 "owner_displayname": "Piku",
                 "owner_username": "piku",
                 "reshared_by_you": False,
@@ -115,8 +115,8 @@ class ItakuImageExtractor(ItakuExtractor):
                 "tags": list,
                 "tags_character": ["hatsune_miku"],
                 "tags_copyright": ["vocaloid"],
-                "tags_general"  : ["female", "green_eyes", "twintails",
-                                   "green_hair", "gloves", "flag",
+                "tags_general"  : ["twintails", "green_hair", "flag",
+                                   "gloves", "green_eyes", "female",
                                    "racing_miku"],
                 "title": "Racing Miku 2022 Ver.",
                 "too_mature": False,
@@ -153,7 +153,7 @@ class ItakuAPI():
             "owner"     : self.user(username)["owner"],
             "section"   : section,
             "date_range": "",
-            "maturity_rating": ("SFW", "Questionable", "NSFW", "Extreme"),
+            "maturity_rating": ("SFW", "Questionable", "NSFW"),
             "ordering"  : "-date_added",
             "page"      : "1",
             "page_size" : "30",
