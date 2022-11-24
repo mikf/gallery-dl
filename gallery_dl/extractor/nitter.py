@@ -37,9 +37,13 @@ class NitterExtractor(BaseExtractor):
 
                 for url in text.extract_iter(
                         attachments, 'href="', '"'):
+                    name = url.rpartition("%2F")[2]
                     if url[0] == "/":
                         url = self.root + url
-                    append({"url": url})
+                    file = {"url": url}
+                    file["filename"], _, file["extension"] = \
+                        name.rpartition(".")
+                    append(file)
 
                 if videos and not files:
                     if ytdl:
@@ -51,9 +55,14 @@ class NitterExtractor(BaseExtractor):
                     else:
                         for url in text.extract_iter(
                                 attachments, 'data-url="', '"'):
+                            name = url.rpartition("%2F")[2]
                             if url[0] == "/":
                                 url = self.root + url
-                            append({"url": "ytdl:" + url})
+                            append({
+                                "url"      : "ytdl:" + url,
+                                "filename" : name.rpartition(".")[0],
+                                "extension": "mp4",
+                            })
             else:
                 files = ()
             tweet["count"] = len(files)
@@ -62,8 +71,6 @@ class NitterExtractor(BaseExtractor):
             for tweet["num"], file in enumerate(files, 1):
                 url = file["url"]
                 file.update(tweet)
-                if "extension" not in file:
-                    text.nameext_from_url(url, file)
                 yield Message.Url, url, file
 
     def _tweet_from_html(self, html):
@@ -239,6 +246,25 @@ class NitterTweetExtractor(NitterExtractor):
         ("https://nitter.net/supernaturepics/status/604341487988576256", {
             "url": "3f2b64e175bf284aa672c3bb53ed275e470b919a",
             "content": "ab05e1d8d21f8d43496df284d31e8b362cd3bcab",
+            "keyword": {
+                "comments": 16,
+                "content": "Big Wedeene River, Canada",
+                "count": 1,
+                "date": "dt:2015-05-29 17:40:00",
+                "extension": "jpg",
+                "filename": "CGMNYZvW0AIVoom",
+                "likes": int,
+                "num": 1,
+                "quotes": 10,
+                "retweets": int,
+                "tweet_id": "604341487988576256",
+                "url": "https://nitter.net/pic/orig"
+                       "/media%2FCGMNYZvW0AIVoom.jpg",
+                "user": {
+                    "name": "supernaturepics",
+                    "nick": "Nature Pictures",
+                },
+            },
         }),
         # 4 images
         ("https://nitter.lacontrevoie.fr/i/status/894001459754180609", {
@@ -250,6 +276,10 @@ class NitterTweetExtractor(NitterExtractor):
                        r"/B875137EDC8FF/https%3A%2F%2Fvideo.twimg.com%2F"
                        r"ext_tw_video%2F1065691868439007232%2Fpu%2Fpl%2F"
                        r"nv8hUQC1R0SjhzcZ.m3u8%3Ftag%3D5",
+            "keyword": {
+                "extension": "mp4",
+                "filename": "nv8hUQC1R0SjhzcZ",
+            },
         }),
         # content with emoji, newlines, hashtags (#338)
         ("https://nitter.1d4.us/playpokemon/status/1263832915173048321", {
