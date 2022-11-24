@@ -24,31 +24,47 @@ class NitterExtractor(BaseExtractor):
         self.user = match.group(match.lastindex)
 
     def items(self):
+        videos = self.config("videos", True)
+        ytdl = (videos == "ytdl")
+
         for tweet_html in self.tweets():
             tweet = self._tweet_from_html(tweet_html)
 
-            attachments_html = tweet.pop("_attach", "")
-            if attachments_html:
-                attachments = list(text.extract_iter(
-                    attachments_html, 'href="', '"'))
-                attachments.extend(text.extract_iter(
-                    attachments_html, 'data-url="', '"'))
+            attachments = tweet.pop("_attach", "")
+            if attachments:
+                files = []
+                append = files.append
+
+                for url in text.extract_iter(
+                        attachments, 'href="', '"'):
+                    if url[0] == "/":
+                        url = self.root + url
+                    append({"url": url})
+
+                if videos and not files:
+                    if ytdl:
+                        append({
+                            "url": "ytdl:{}/i/status/{}".format(
+                                self.root, tweet["tweet_id"]),
+                            "extension": None,
+                        })
+                    else:
+                        for url in text.extract_iter(
+                                attachments, 'data-url="', '"'):
+                            if url[0] == "/":
+                                url = self.root + url
+                            append({"url": "ytdl:" + url})
             else:
-                attachments = ()
-            tweet["count"] = len(attachments)
+                files = ()
+            tweet["count"] = len(files)
 
             yield Message.Directory, tweet
-            for tweet["num"], url in enumerate(attachments, 1):
-                if url[0] == "/":
-                    url = self.root + url
-                if "/video/" in url:
-                    url = "ytdl:" + url
-                    tweet["filename"] = url.rpartition(
-                        "%2F")[2].partition(".")[0]
-                    tweet["extension"] = "mp4"
-                else:
-                    text.nameext_from_url(url, tweet)
-                yield Message.Url, url, tweet
+            for tweet["num"], file in enumerate(files, 1):
+                url = file["url"]
+                file.update(tweet)
+                if "extension" not in file:
+                    text.nameext_from_url(url, file)
+                yield Message.Url, url, file
 
     def _tweet_from_html(self, html):
         extr = text.extract_from(html)
