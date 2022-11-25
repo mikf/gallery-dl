@@ -26,6 +26,7 @@ class NitterExtractor(BaseExtractor):
         self.user_obj = None
 
     def items(self):
+        retweets = self.config("retweets", False)
         videos = self.config("videos", True)
         if videos:
             ytdl = (videos == "ytdl")
@@ -34,6 +35,10 @@ class NitterExtractor(BaseExtractor):
 
         for tweet_html in self.tweets():
             tweet = self._tweet_from_html(tweet_html)
+
+            if not retweets and tweet["retweet"]:
+                self.log.debug("Skipping %s (retweet)", tweet["tweet_id"])
+                continue
 
             attachments = tweet.pop("_attach", "")
             if attachments:
@@ -87,13 +92,13 @@ class NitterExtractor(BaseExtractor):
         extr('<span class="tweet-date', '')
         link = extr('href="', '"')
         return {
-            "author": author,
-            "user": self.user_obj or author,
-            "date": text.parse_datetime(
+            "author"  : author,
+            "user"    : self.user_obj or author,
+            "date"    : text.parse_datetime(
                 extr('title="', '"'), "%b %d, %Y · %I:%M %p %Z"),
             "tweet_id": link.rpartition("/")[2].partition("#")[0],
             "content": extr('class="tweet-content', "</div").partition(">")[2],
-            "_attach": extr('class="attachments', 'class="tweet-stats'),
+            "_attach" : extr('class="attachments', 'class="tweet-stats'),
             "comments": text.parse_int(extr(
                 'class="icon-comment', '</div>').rpartition(">")[2]),
             "retweets": text.parse_int(extr(
@@ -102,6 +107,7 @@ class NitterExtractor(BaseExtractor):
                 'class="icon-quote', '</div>').rpartition(">")[2]),
             "likes"   : text.parse_int(extr(
                 'class="icon-heart', '</div>').rpartition(">")[2]),
+            "retweet" : 'class="retweet-header' in html,
         }
 
     def _user_from_html(self, html):

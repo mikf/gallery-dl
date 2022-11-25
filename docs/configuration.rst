@@ -1860,6 +1860,16 @@ Description
     You can use ``"all"`` instead of listing all values separately.
 
 
+extractor.nitter.retweets
+-------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Fetch media from Retweets.
+
+
 extractor.nitter.videos
 -----------------------
 Type
