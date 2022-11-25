@@ -33,8 +33,7 @@ class NitterExtractor(BaseExtractor):
             videos = True
             self._cookiejar.set("hlsPlayback", "on", domain=self.cookiedomain)
 
-        for tweet_html in self.tweets():
-            tweet = self._tweet_from_html(tweet_html)
+        for tweet in self.tweets():
 
             if not retweets and tweet["retweet"]:
                 self.log.debug("Skipping %s (retweet)", tweet["tweet_id"])
@@ -145,7 +144,8 @@ class NitterExtractor(BaseExtractor):
             if self.user_obj is None:
                 self.user_obj = self._user_from_html(tweets_html[0])
 
-            yield from tweets_html[1:]
+            for html in tweets_html[1:]:
+                yield self._tweet_from_html(html)
 
             more = text.extr(
                 tweets_html[-1], '<div class="show-more"><a href="?', '"')
@@ -359,4 +359,7 @@ class NitterTweetExtractor(NitterExtractor):
 
     def tweets(self):
         url = "{}/i/status/{}".format(self.root, self.user)
-        return (self.request(url).text,)
+        html = text.extr(self.request(url).text, 'class="main-tweet', '''\
+                </div>
+              </div></div></div>''')
+        return (self._tweet_from_html(html),)
