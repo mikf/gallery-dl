@@ -23,6 +23,7 @@ class NitterExtractor(BaseExtractor):
         self.cookiedomain = self.root.partition("://")[2]
         BaseExtractor.__init__(self, match)
         self.user = match.group(match.lastindex)
+        self.user_obj = None
 
     def items(self):
         videos = self.config("videos", True)
@@ -79,14 +80,15 @@ class NitterExtractor(BaseExtractor):
 
     def _tweet_from_html(self, html):
         extr = text.extract_from(html)
-        user = {
+        author = {
             "name": extr('class="fullname" href="/', '"'),
             "nick": extr('title="', '"'),
         }
         extr('<span class="tweet-date', '')
         link = extr('href="', '"')
         return {
-            "user": user,
+            "author": author,
+            "user": self.user_obj or author,
             "date": text.parse_datetime(
                 extr('title="', '"'), "%b %d, %Y · %I:%M %p %Z"),
             "tweet_id": link.rpartition("/")[2].partition("#")[0],
@@ -102,15 +104,45 @@ class NitterExtractor(BaseExtractor):
                 'class="icon-heart', '</div>').rpartition(">")[2]),
         }
 
+    def _user_from_html(self, html):
+        extr = text.extract_from(html, html.index('class="profile-tabs'))
+        banner = extr('class="profile-banner"><a href="', '"')
+        return {
+            "id"              : banner.split("%2F")[4] if banner else None,
+            "profile_banner"  : self.root + banner if banner else "",
+            "profile_image"   : self.root + extr(
+                'class="profile-card-avatar" href="', '"'),
+            "nick"            : extr('title="', '"'),
+            "name"            : extr('title="@', '"'),
+            "description"     : extr('<p dir="auto">', '<'),
+            "date"            : text.parse_datetime(
+                extr('class="profile-joindate"><span title="', '"'),
+                "%I:%M %p - %d %b %Y"),
+            "statuses_count"  : extr(
+                'class="profile-stat-num">', '<').replace(",", ""),
+            "friends_count"   : extr(
+                'class="profile-stat-num">', '<').replace(",", ""),
+            "followers_count" : extr(
+                'class="profile-stat-num">', '<').replace(",", ""),
+            "favourites_count": extr(
+                'class="profile-stat-num">', '<').replace(",", ""),
+            "verified"        : 'title="Verified account"' in html,
+        }
+
     def _pagination(self, path):
         base_url = url = self.root + path
 
         while True:
-            page = self.request(url).text
+            tweets_html = self.request(url).text.split(
+                '<div class="timeline-item')
 
-            yield from page.split('<div class="timeline-item')[1:]
+            if self.user_obj is None:
+                self.user_obj = self._user_from_html(tweets_html[0])
 
-            more = text.extr(page, '<div class="show-more"><a href="?', '"')
+            yield from tweets_html[1:]
+
+            more = text.extr(
+                tweets_html[-1], '<div class="show-more"><a href="?', '"')
             if not more:
                 return
             url = base_url + "?" + text.unescape(more)
@@ -154,6 +186,10 @@ class NitterTweetsExtractor(NitterExtractor):
             "range": "1-20",
             "count": 20,
             "keyword": {
+                "author": {
+                    "name": "supernaturepics",
+                    "nick": "Nature Pictures"
+                },
                 "comments": int,
                 "content": str,
                 "count": 1,
@@ -163,8 +199,22 @@ class NitterTweetsExtractor(NitterExtractor):
                 "retweets": int,
                 "tweet_id": r"re:\d+",
                 "user": {
+                    "date": "dt:2015-01-12 10:25:00",
+                    "description": "The very best nature pictures.",
+                    "favourites_count": "22698",
+                    "followers_count": r"re:13\d{3}",
+                    "friends_count": "2477",
+                    "id": "2976459548",
                     "name": "supernaturepics",
-                    "nick": "Nature Pictures"
+                    "nick": "Nature Pictures",
+                    "profile_banner": "https://nitter.net/pic/https%3A%2F%2Fpb"
+                                      "s.twimg.com%2Fprofile_banners%2F2976459"
+                                      "548%2F1421058583%2F1500x500",
+                    "profile_image": "https://nitter.net/pic/pbs.twimg.com%2Fp"
+                                     "rofile_images%2F554585280938659841%2FFLV"
+                                     "AlX18.jpeg",
+                    "statuses_count": "1568",
+                    "verified": False,
                 },
             },
         }),
