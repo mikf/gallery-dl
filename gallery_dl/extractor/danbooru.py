@@ -145,7 +145,6 @@ class DanbooruExtractor(BaseExtractor):
         ).json()["media_metadata"]["metadata"]
 
         ext = data["ZIP:ZipFileName"].rpartition(".")[2]
-        print(post["id"], ext)
         fmt = ("{:>06}." + ext).format
         delays = data["Ugoira:FrameDelays"]
         return [{"file": fmt(index), "delay": delay}
