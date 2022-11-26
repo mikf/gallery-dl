@@ -69,6 +69,12 @@ class RedditExtractor(Extractor):
                                 submission["_ytdl_extra"] = {
                                     "title": submission["title"],
                                 }
+                                try:
+                                    url = submission.get("media") \
+                                        .get("reddit_video") \
+                                        .get("fallback_url")
+                                except KeyError:
+                                    pass
                             yield Message.Url, "ytdl:" + url, submission
 
                     elif not submission["is_self"]:
