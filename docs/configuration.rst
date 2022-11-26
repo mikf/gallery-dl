@@ -885,6 +885,27 @@ Description
     Try to follow external URLs of embedded players.
 
 
+extractor.artstation.max-posts
+------------------------------
+Type
+    ``integer``
+Default
+    ``null``
+Description
+    Limit the number of posts/projects to download.
+
+
+extractor.artstation.search.pro-first
+-------------------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Enable the "Show Studio and Pro member artwork first" checkbox
+    when retrieving search results.
+
+
 extractor.aryion.recursive
 --------------------------
 Type
@@ -1837,6 +1858,40 @@ Description
     ``"illustration"``, ``"doujin"``, ``"favorite"``, ``"nuita"``.
 
     You can use ``"all"`` instead of listing all values separately.
+
+
+extractor.nitter.quoted
+-----------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Fetch media from quoted Tweets.
+
+
+extractor.nitter.retweets
+-------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Fetch media from Retweets.
+
+
+extractor.nitter.videos
+-----------------------
+Type
+    ``bool`` or ``string``
+Default
+    ``true``
+Description
+    Control video download behavior.
+
+    * ``true``: Download videos
+    * ``"ytdl"``: Download videos using `youtube-dl`_
+    * ``false``: Skip video Tweets
 
 
 extractor.oauth.browser

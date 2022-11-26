@@ -20,51 +20,84 @@ class NitterExtractor(BaseExtractor):
     archive_fmt = "{tweet_id}_{num}"
 
     def __init__(self, match):
+        self.cookiedomain = self.root.partition("://")[2]
         BaseExtractor.__init__(self, match)
         self.user = match.group(match.lastindex)
+        self.user_obj = None
 
     def items(self):
-        for tweet_html in self.tweets():
-            tweet = self._tweet_from_html(tweet_html)
+        retweets = self.config("retweets", False)
+        videos = self.config("videos", True)
+        if videos:
+            ytdl = (videos == "ytdl")
+            videos = True
+            self._cookiejar.set("hlsPlayback", "on", domain=self.cookiedomain)
 
-            attachments_html = tweet.pop("_attach", "")
-            if attachments_html:
-                attachments = list(text.extract_iter(
-                    attachments_html, 'href="', '"'))
-                attachments.extend(text.extract_iter(
-                    attachments_html, 'data-url="', '"'))
+        for tweet in self.tweets():
+
+            if not retweets and tweet["retweet"]:
+                self.log.debug("Skipping %s (retweet)", tweet["tweet_id"])
+                continue
+
+            attachments = tweet.pop("_attach", "")
+            if attachments:
+                files = []
+                append = files.append
+
+                for url in text.extract_iter(
+                        attachments, 'href="', '"'):
+                    name = url.rpartition("%2F")[2]
+                    if url[0] == "/":
+                        url = self.root + url
+                    file = {"url": url}
+                    file["filename"], _, file["extension"] = \
+                        name.rpartition(".")
+                    append(file)
+
+                if videos and not files:
+                    if ytdl:
+                        append({
+                            "url": "ytdl:{}/i/status/{}".format(
+                                self.root, tweet["tweet_id"]),
+                            "extension": None,
+                        })
+                    else:
+                        for url in text.extract_iter(
+                                attachments, 'data-url="', '"'):
+                            name = url.rpartition("%2F")[2]
+                            if url[0] == "/":
+                                url = self.root + url
+                            append({
+                                "url"      : "ytdl:" + url,
+                                "filename" : name.rpartition(".")[0],
+                                "extension": "mp4",
+                            })
             else:
-                attachments = ()
-            tweet["count"] = len(attachments)
+                files = ()
+            tweet["count"] = len(files)
 
             yield Message.Directory, tweet
-            for tweet["num"], url in enumerate(attachments, 1):
-                if url[0] == "/":
-                    url = self.root + url
-                if "/video/" in url:
-                    url = "ytdl:" + url
-                    tweet["filename"] = url.rpartition(
-                        "%2F")[2].partition(".")[0]
-                    tweet["extension"] = "mp4"
-                else:
-                    text.nameext_from_url(url, tweet)
-                yield Message.Url, url, tweet
+            for tweet["num"], file in enumerate(files, 1):
+                url = file["url"]
+                file.update(tweet)
+                yield Message.Url, url, file
 
     def _tweet_from_html(self, html):
         extr = text.extract_from(html)
-        user = {
+        author = {
             "name": extr('class="fullname" href="/', '"'),
             "nick": extr('title="', '"'),
         }
         extr('<span class="tweet-date', '')
         link = extr('href="', '"')
         return {
-            "user": user,
-            "date": text.parse_datetime(
+            "author"  : author,
+            "user"    : self.user_obj or author,
+            "date"    : text.parse_datetime(
                 extr('title="', '"'), "%b %d, %Y · %I:%M %p %Z"),
             "tweet_id": link.rpartition("/")[2].partition("#")[0],
             "content": extr('class="tweet-content', "</div").partition(">")[2],
-            "_attach": extr('class="attachments', 'class="tweet-stats'),
+            "_attach" : extr('class="attachments', 'class="tweet-stats'),
             "comments": text.parse_int(extr(
                 'class="icon-comment', '</div>').rpartition(">")[2]),
             "retweets": text.parse_int(extr(
@@ -73,17 +106,81 @@ class NitterExtractor(BaseExtractor):
                 'class="icon-quote', '</div>').rpartition(">")[2]),
             "likes"   : text.parse_int(extr(
                 'class="icon-heart', '</div>').rpartition(">")[2]),
+            "retweet" : 'class="retweet-header' in html,
+            "quoted": False,
         }
 
+    def _tweet_from_quote(self, html):
+        extr = text.extract_from(html)
+        author = {
+            "name": extr('class="fullname" href="/', '"'),
+            "nick": extr('title="', '"'),
+        }
+        extr('<span class="tweet-date', '')
+        link = extr('href="', '"')
+        return {
+            "author"  : author,
+            "user"    : self.user_obj or author,
+            "date"    : text.parse_datetime(
+                extr('title="', '"'), "%b %d, %Y · %I:%M %p %Z"),
+            "tweet_id": link.rpartition("/")[2].partition("#")[0],
+            "content": extr('class="quote-text', "</div").partition(">")[2],
+            "_attach" : extr('class="attachments', '''
+                </div>'''),
+            "retweet" : False,
+            "quoted": True,
+        }
+
+    def _user_from_html(self, html):
+        extr = text.extract_from(html, html.index('class="profile-tabs'))
+        banner = extr('class="profile-banner"><a href="', '"')
+        return {
+            "id"              : banner.split("%2F")[4] if banner else None,
+            "profile_banner"  : self.root + banner if banner else "",
+            "profile_image"   : self.root + extr(
+                'class="profile-card-avatar" href="', '"'),
+            "nick"            : extr('title="', '"'),
+            "name"            : extr('title="@', '"'),
+            "description"     : extr('<p dir="auto">', '<'),
+            "date"            : text.parse_datetime(
+                extr('class="profile-joindate"><span title="', '"'),
+                "%I:%M %p - %d %b %Y"),
+            "statuses_count"  : text.parse_int(extr(
+                'class="profile-stat-num">', '<').replace(",", "")),
+            "friends_count"   : text.parse_int(extr(
+                'class="profile-stat-num">', '<').replace(",", "")),
+            "followers_count" : text.parse_int(extr(
+                'class="profile-stat-num">', '<').replace(",", "")),
+            "favourites_count": text.parse_int(extr(
+                'class="profile-stat-num">', '<').replace(",", "")),
+            "verified"        : 'title="Verified account"' in html,
+        }
+
+    def _extract_quote(self, html):
+        html, _, quote = html.partition('class="quote')
+        if quote:
+            quote, _, tail = quote.partition('class="tweet-published')
+            return (html + tail, quote)
+        return (html, None)
+
     def _pagination(self, path):
+        quoted = self.config("quoted", False)
         base_url = url = self.root + path
 
         while True:
-            page = self.request(url).text
+            tweets_html = self.request(url).text.split(
+                '<div class="timeline-item')
 
-            yield from page.split('<div class="timeline-item')[1:]
+            if self.user_obj is None:
+                self.user_obj = self._user_from_html(tweets_html[0])
 
-            more = text.extr(page, '<div class="show-more"><a href="?', '"')
+            for html, quote in map(self._extract_quote, tweets_html[1:]):
+                yield self._tweet_from_html(html)
+                if quoted and quote:
+                    yield self._tweet_from_quote(quote)
+
+            more = text.extr(
+                tweets_html[-1], '<div class="show-more"><a href="?', '"')
             if not more:
                 return
             url = base_url + "?" + text.unescape(more)
@@ -127,6 +224,10 @@ class NitterTweetsExtractor(NitterExtractor):
             "range": "1-20",
             "count": 20,
             "keyword": {
+                "author": {
+                    "name": "supernaturepics",
+                    "nick": "Nature Pictures"
+                },
                 "comments": int,
                 "content": str,
                 "count": 1,
@@ -136,8 +237,22 @@ class NitterTweetsExtractor(NitterExtractor):
                 "retweets": int,
                 "tweet_id": r"re:\d+",
                 "user": {
+                    "date": "dt:2015-01-12 10:25:00",
+                    "description": "The very best nature pictures.",
+                    "favourites_count": 22698,
+                    "followers_count": int,
+                    "friends_count": 2477,
+                    "id": "2976459548",
                     "name": "supernaturepics",
-                    "nick": "Nature Pictures"
+                    "nick": "Nature Pictures",
+                    "profile_banner": "https://nitter.net/pic/https%3A%2F%2Fpb"
+                                      "s.twimg.com%2Fprofile_banners%2F2976459"
+                                      "548%2F1421058583%2F1500x500",
+                    "profile_image": "https://nitter.net/pic/pbs.twimg.com%2Fp"
+                                     "rofile_images%2F554585280938659841%2FFLV"
+                                     "AlX18.jpeg",
+                    "statuses_count": 1568,
+                    "verified": False,
                 },
             },
         }),
@@ -223,6 +338,25 @@ class NitterTweetExtractor(NitterExtractor):
         ("https://nitter.net/supernaturepics/status/604341487988576256", {
             "url": "3f2b64e175bf284aa672c3bb53ed275e470b919a",
             "content": "ab05e1d8d21f8d43496df284d31e8b362cd3bcab",
+            "keyword": {
+                "comments": 16,
+                "content": "Big Wedeene River, Canada",
+                "count": 1,
+                "date": "dt:2015-05-29 17:40:00",
+                "extension": "jpg",
+                "filename": "CGMNYZvW0AIVoom",
+                "likes": int,
+                "num": 1,
+                "quotes": 10,
+                "retweets": int,
+                "tweet_id": "604341487988576256",
+                "url": "https://nitter.net/pic/orig"
+                       "/media%2FCGMNYZvW0AIVoom.jpg",
+                "user": {
+                    "name": "supernaturepics",
+                    "nick": "Nature Pictures",
+                },
+            },
         }),
         # 4 images
         ("https://nitter.lacontrevoie.fr/i/status/894001459754180609", {
@@ -234,6 +368,10 @@ class NitterTweetExtractor(NitterExtractor):
                        r"/B875137EDC8FF/https%3A%2F%2Fvideo.twimg.com%2F"
                        r"ext_tw_video%2F1065691868439007232%2Fpu%2Fpl%2F"
                        r"nv8hUQC1R0SjhzcZ.m3u8%3Ftag%3D5",
+            "keyword": {
+                "extension": "mp4",
+                "filename": "nv8hUQC1R0SjhzcZ",
+            },
         }),
         # content with emoji, newlines, hashtags (#338)
         ("https://nitter.1d4.us/playpokemon/status/1263832915173048321", {
@@ -249,8 +387,47 @@ class NitterTweetExtractor(NitterExtractor):
             "url": "e115bd1c86c660064e392b05269bbcafcd8c8b7a",
             "content": "f29501e44d88437fe460f5c927b7543fda0f6e34",
         }),
+        # Reply to deleted tweet (#403, #838)
+        ("https://nitter.unixfox.eu/i/status/1170041925560258560", {
+            "pattern": r"https://nitter\.unixfox\.eu/pic/orig"
+                       r"/media%2FEDzS7VrU0AAFL4_\.jpg",
+        }),
+        # "quoted" option (#854)
+        ("https://nitter.net/StobiesGalaxy/status/1270755918330896395", {
+            "options": (("quoted", True),),
+            "pattern": r"https://nitter\.net/pic/orig/media%2FEa[KG].+\.jpg",
+            "count": 8,
+        }),
+        # quoted tweet (#526, #854)
+        ("https://nitter.1d4.us/StobiesGalaxy/status/1270755918330896395", {
+            "pattern": r"https://nitter\.1d4\.us/pic/orig/media%2FEaK.+\.jpg",
+            "count": 4,
+        }),
+        # deleted quote tweet (#2225)
+        ("https://nitter.lacontrevoie.fr/i/status/1460044411165888515", {
+            "count": 0,
+        }),
+        # "Misleading" content
+        ("https://nitter.pussthecat.org/i/status/1486373748911575046", {
+            "count": 4,
+        }),
+        # age-restricted (#2354)
+        ("https://nitter.unixfox.eu/mightbecurse/status/1492954264909479936", {
+            "options": (("syndication", True),),
+            "keywords": {"date": "dt:2022-02-13 20:10:09"},
+            "count": 1,
+        }),
     )
 
     def tweets(self):
         url = "{}/i/status/{}".format(self.root, self.user)
-        return (self.request(url).text,)
+        html = text.extr(self.request(url).text, 'class="main-tweet', '''\
+                </div>
+              </div></div></div>''')
+        html, quote = self._extract_quote(html)
+        tweet = self._tweet_from_html(html)
+        if quote and self.config("quoted", False):
+            quoted = self._tweet_from_quote(quote)
+            quoted["user"] = tweet["user"]
+            return (tweet, quoted)
+        return (tweet,)
