@@ -895,6 +895,15 @@ Description
     Limit the number of posts/projects to download.
 
 
+extractor.artstation.max-per-post
+------------------------------
+Type
+    ``integer``
+Default
+    ``null``
+Description
+    Limit the number of downloads per post/project.
+
 extractor.artstation.search.pro-first
 -------------------------------------
 Type

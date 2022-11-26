@@ -37,9 +37,14 @@ class ArtstationExtractor(Extractor):
         if max_posts:
             projects = itertools.islice(projects, max_posts)
 
+        max_per_post = self.config("max-per-post")
+
         for project in projects:
             for num, asset in enumerate(
                     self.get_project_assets(project["hash_id"]), 1):
+                if max_per_post and num > max_per_post:
+                    break
+
                 asset.update(data)
                 adict = asset["asset"]
                 asset["num"] = num
