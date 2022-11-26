@@ -417,7 +417,11 @@ class TwitterTimelineExtractor(TwitterExtractor):
             "url": "c570ac1aae38ed1463be726cc46f31cac3d82a40",
         }),
         # suspended account (#2216)
-        ("https://twitter.com/realDonaldTrump", {
+        ("https://twitter.com/OptionalTypo", {
+            "exception": exception.NotFoundError,
+        }),
+        # suspended account user ID
+        ("https://twitter.com/id:772949683521978368", {
             "exception": exception.NotFoundError,
         }),
         ("https://mobile.twitter.com/supernaturepics?p=i"),
@@ -1149,25 +1153,21 @@ class TwitterAPI():
         return self._call(endpoint, params)["data"]["user"]["result"]
 
     def _user_id_by_screen_name(self, screen_name):
-        if screen_name.startswith("id:"):
-            user_id = screen_name[3:]
-            user = self.user_by_rest_id(user_id)
-
-        else:
-            user = ()
-            try:
+        user = ()
+        try:
+            if screen_name.startswith("id:"):
+                user = self.user_by_rest_id(screen_name[3:])
+            else:
                 user = self.user_by_screen_name(screen_name)
-                user_id = user["rest_id"]
-            except KeyError:
-                if "unavailable_message" in user:
-                    raise exception.NotFoundError("{} ({})".format(
-                        user["unavailable_message"].get("text"),
-                        user.get("reason")), False)
-                else:
-                    raise exception.NotFoundError("user")
-
-        self.extractor._assign_user(user)
-        return user_id
+            self.extractor._assign_user(user)
+            return user["rest_id"]
+        except KeyError:
+            if "unavailable_message" in user:
+                raise exception.NotFoundError("{} ({})".format(
+                    user["unavailable_message"].get("text"),
+                    user.get("reason")), False)
+            else:
+                raise exception.NotFoundError("user")
 
     @cache(maxage=3600)
     def _guest_token(self):
