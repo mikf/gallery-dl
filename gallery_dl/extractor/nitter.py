@@ -107,6 +107,28 @@ class NitterExtractor(BaseExtractor):
             "likes"   : text.parse_int(extr(
                 'class="icon-heart', '</div>').rpartition(">")[2]),
             "retweet" : 'class="retweet-header' in html,
+            "quoted": False,
+        }
+
+    def _tweet_from_quote(self, html):
+        extr = text.extract_from(html)
+        author = {
+            "name": extr('class="fullname" href="/', '"'),
+            "nick": extr('title="', '"'),
+        }
+        extr('<span class="tweet-date', '')
+        link = extr('href="', '"')
+        return {
+            "author"  : author,
+            "user"    : self.user_obj or author,
+            "date"    : text.parse_datetime(
+                extr('title="', '"'), "%b %d, %Y · %I:%M %p %Z"),
+            "tweet_id": link.rpartition("/")[2].partition("#")[0],
+            "content": extr('class="quote-text', "</div").partition(">")[2],
+            "_attach" : extr('class="attachments', '''
+                </div>'''),
+            "retweet" : False,
+            "quoted": True,
         }
 
     def _user_from_html(self, html):
@@ -123,18 +145,26 @@ class NitterExtractor(BaseExtractor):
             "date"            : text.parse_datetime(
                 extr('class="profile-joindate"><span title="', '"'),
                 "%I:%M %p - %d %b %Y"),
-            "statuses_count"  : extr(
-                'class="profile-stat-num">', '<').replace(",", ""),
-            "friends_count"   : extr(
-                'class="profile-stat-num">', '<').replace(",", ""),
-            "followers_count" : extr(
-                'class="profile-stat-num">', '<').replace(",", ""),
-            "favourites_count": extr(
-                'class="profile-stat-num">', '<').replace(",", ""),
+            "statuses_count"  : text.parse_int(extr(
+                'class="profile-stat-num">', '<').replace(",", "")),
+            "friends_count"   : text.parse_int(extr(
+                'class="profile-stat-num">', '<').replace(",", "")),
+            "followers_count" : text.parse_int(extr(
+                'class="profile-stat-num">', '<').replace(",", "")),
+            "favourites_count": text.parse_int(extr(
+                'class="profile-stat-num">', '<').replace(",", "")),
             "verified"        : 'title="Verified account"' in html,
         }
 
+    def _extract_quote(self, html):
+        html, _, quote = html.partition('class="quote')
+        if quote:
+            quote, _, tail = quote.partition('class="tweet-published')
+            return (html + tail, quote)
+        return (html, None)
+
     def _pagination(self, path):
+        quoted = self.config("quoted", False)
         base_url = url = self.root + path
 
         while True:
@@ -144,8 +174,10 @@ class NitterExtractor(BaseExtractor):
             if self.user_obj is None:
                 self.user_obj = self._user_from_html(tweets_html[0])
 
-            for html in tweets_html[1:]:
+            for html, quote in map(self._extract_quote, tweets_html[1:]):
                 yield self._tweet_from_html(html)
+                if quoted and quote:
+                    yield self._tweet_from_quote(quote)
 
             more = text.extr(
                 tweets_html[-1], '<div class="show-more"><a href="?', '"')
@@ -207,9 +239,9 @@ class NitterTweetsExtractor(NitterExtractor):
                 "user": {
                     "date": "dt:2015-01-12 10:25:00",
                     "description": "The very best nature pictures.",
-                    "favourites_count": "22698",
-                    "followers_count": r"re:13\d{3}",
-                    "friends_count": "2477",
+                    "favourites_count": 22698,
+                    "followers_count": int,
+                    "friends_count": 2477,
                     "id": "2976459548",
                     "name": "supernaturepics",
                     "nick": "Nature Pictures",
@@ -219,7 +251,7 @@ class NitterTweetsExtractor(NitterExtractor):
                     "profile_image": "https://nitter.net/pic/pbs.twimg.com%2Fp"
                                      "rofile_images%2F554585280938659841%2FFLV"
                                      "AlX18.jpeg",
-                    "statuses_count": "1568",
+                    "statuses_count": 1568,
                     "verified": False,
                 },
             },
@@ -355,6 +387,36 @@ class NitterTweetExtractor(NitterExtractor):
             "url": "e115bd1c86c660064e392b05269bbcafcd8c8b7a",
             "content": "f29501e44d88437fe460f5c927b7543fda0f6e34",
         }),
+        # Reply to deleted tweet (#403, #838)
+        ("https://nitter.unixfox.eu/i/status/1170041925560258560", {
+            "pattern": r"https://nitter\.unixfox\.eu/pic/orig"
+                       r"/media%2FEDzS7VrU0AAFL4_\.jpg",
+        }),
+        # "quoted" option (#854)
+        ("https://nitter.net/StobiesGalaxy/status/1270755918330896395", {
+            "options": (("quoted", True),),
+            "pattern": r"https://nitter\.net/pic/orig/media%2FEa[KG].+\.jpg",
+            "count": 8,
+        }),
+        # quoted tweet (#526, #854)
+        ("https://nitter.1d4.us/StobiesGalaxy/status/1270755918330896395", {
+            "pattern": r"https://nitter\.1d4\.us/pic/orig/media%2FEaK.+\.jpg",
+            "count": 4,
+        }),
+        # deleted quote tweet (#2225)
+        ("https://nitter.lacontrevoie.fr/i/status/1460044411165888515", {
+            "count": 0,
+        }),
+        # "Misleading" content
+        ("https://nitter.pussthecat.org/i/status/1486373748911575046", {
+            "count": 4,
+        }),
+        # age-restricted (#2354)
+        ("https://nitter.unixfox.eu/mightbecurse/status/1492954264909479936", {
+            "options": (("syndication", True),),
+            "keywords": {"date": "dt:2022-02-13 20:10:09"},
+            "count": 1,
+        }),
     )
 
     def tweets(self):
@@ -362,4 +424,10 @@ class NitterTweetExtractor(NitterExtractor):
         html = text.extr(self.request(url).text, 'class="main-tweet', '''\
                 </div>
               </div></div></div>''')
-        return (self._tweet_from_html(html),)
+        html, quote = self._extract_quote(html)
+        tweet = self._tweet_from_html(html)
+        if quote and self.config("quoted", False):
+            quoted = self._tweet_from_quote(quote)
+            quoted["user"] = tweet["user"]
+            return (tweet, quoted)
+        return (tweet,)
