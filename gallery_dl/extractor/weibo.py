@@ -106,6 +106,9 @@ class WeiboExtractor(Extractor):
                             key=lambda m: m["meta"]["quality_index"])
             except KeyError:
                 pass
+            except ValueError:
+                info = status["page_info"]["media_info"]
+                yield {"url": info.get("stream_url_hd") or info["stream_url"]}
             else:
                 yield media["play_info"].copy()
 
@@ -374,6 +377,13 @@ class WeiboStatusExtractor(WeiboExtractor):
         # missing 'playback_list' (#2792)
         ("https://weibo.com/2909128931/4409545658754086", {
             "count": 9,
+        }),
+        # empty 'playback_list' (#3301)
+        ("https://weibo.com/1501933722/4142890299009993", {
+            "pattern": r"https://f\.us\.sinaimg\.cn/004zstGKlx07dAHg4ZVu010f01"
+                       r"000OOl0k01\.mp4\?label=mp4_hd&template=template_7&ori"
+                       r"=0&ps=1CwnkDw1GXwCQx.+&KID=unistore,video",
+            "count": 1,
         }),
         ("https://m.weibo.cn/status/4339748116375525"),
         ("https://m.weibo.cn/5746766133/4339748116375525"),
