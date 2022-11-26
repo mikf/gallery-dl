@@ -1860,6 +1860,16 @@ Description
     You can use ``"all"`` instead of listing all values separately.
 
 
+extractor.nitter.quoted
+-----------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Fetch media from quoted Tweets.
+
+
 extractor.nitter.retweets
 -------------------------
 Type
