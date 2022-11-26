@@ -2203,6 +2203,20 @@ Description
     Ignore all submissions posted before/after this date.
 
 
+extractor.reddit.stop-on-empty
+------------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Works in conjunction with date-min option to filter API
+    results and prevents further API calls.
+    
+    Example Usage:
+    "-odate-min=2022-11-20T00:00:01" "-ostop-on-empty=True"
+
+
 extractor.reddit.id-min & .id-max
 ---------------------------------
 Type
