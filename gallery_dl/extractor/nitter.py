@@ -10,6 +10,7 @@
 
 from .common import BaseExtractor, Message
 from .. import text
+import binascii
 
 
 class NitterExtractor(BaseExtractor):
@@ -46,7 +47,13 @@ class NitterExtractor(BaseExtractor):
 
                 for url in text.extract_iter(
                         attachments, 'href="', '"'):
-                    name = url.rpartition("%2F")[2]
+
+                    if "/enc/" in url:
+                        name = binascii.a2b_base64(url.rpartition(
+                            "/")[2]).decode().rpartition("/")[2]
+                    else:
+                        name = url.rpartition("%2F")[2]
+
                     if url[0] == "/":
                         url = self.root + url
                     file = {"url": url}
@@ -64,7 +71,13 @@ class NitterExtractor(BaseExtractor):
                     else:
                         for url in text.extract_iter(
                                 attachments, 'data-url="', '"'):
-                            name = url.rpartition("%2F")[2]
+
+                            if "/enc/" in url:
+                                name = binascii.a2b_base64(url.rpartition(
+                                    "/")[2]).decode().rpartition("/")[2]
+                            else:
+                                name = url.rpartition("%2F")[2]
+
                             if url[0] == "/":
                                 url = self.root + url
                             append({
@@ -400,7 +413,9 @@ class NitterTweetExtractor(NitterExtractor):
         }),
         # quoted tweet (#526, #854)
         ("https://nitter.1d4.us/StobiesGalaxy/status/1270755918330896395", {
-            "pattern": r"https://nitter\.1d4\.us/pic/orig/media%2FEaK.+\.jpg",
+            "pattern": r"https://nitter\.1d4\.us/pic/orig"
+                       r"/enc/bWVkaWEvRWFL\w+LmpwZw==",
+            "keyword": {"filename": r"re:EaK.{12}"},
             "count": 4,
         }),
         # deleted quote tweet (#2225)
@@ -413,7 +428,6 @@ class NitterTweetExtractor(NitterExtractor):
         }),
         # age-restricted (#2354)
         ("https://nitter.unixfox.eu/mightbecurse/status/1492954264909479936", {
-            "options": (("syndication", True),),
             "keywords": {"date": "dt:2022-02-13 20:10:09"},
             "count": 1,
         }),
