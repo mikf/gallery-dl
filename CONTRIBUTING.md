@@ -1,6 +1,6 @@
 # Welcome to gallery-dl contributing guide <!-- omit in toc -->
 
-Thank you for investing your time and talents in contributing to gallery-dl! Please note this contribution guide is in early-stages and very much a work in progress.
+Thank you for investing your time and talents in contributing to gallery-dl! Please note this contribution guide is in early stages and very much a work in progress.
 
 ## Code Changes
 
