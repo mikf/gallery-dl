@@ -13,7 +13,7 @@ import logging
 import functools
 import collections
 from . import extractor, downloader, postprocessor
-from . import config, text, util, path, formatter, output, exception
+from . import config, text, util, path, formatter, output, exception, version
 from .extractor.message import Message
 from .output import stdout_write
 
@@ -55,6 +55,8 @@ class Job():
 
         self.metadata_url = extr.config("url-metadata")
         self.metadata_http = extr.config("http-metadata")
+
+        version_info = extr.config("version-metadata")
         metadata_path = extr.config("path-metadata")
 
         # user-supplied metadata
@@ -63,6 +65,12 @@ class Job():
             self.kwdict.update(kwdict)
         if metadata_path:
             self.kwdict[metadata_path] = path_proxy
+        if version_info:
+            self.kwdict[version_info] = {
+                "version"         : version.__version__,
+                "is_executable"   : getattr(sys, "frozen", False),
+                "current_git_head": util.git_head()
+            }
 
         # predicates
         self.pred_url = self._prepare_predicates("image", True)

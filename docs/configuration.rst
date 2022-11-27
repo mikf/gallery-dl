@@ -605,6 +605,27 @@ Description
     and its parsed form as ``"{gdl_http[date]}"``.
 
 
+extractor.*.version-metadata
+----------------------------
+Type
+    ``string``
+Default
+    ``null``
+Description
+    Insert an ``object`` containing gallery-dl's version info into
+    metadata dictionaries as the given name.
+
+    The content of the object is as follows:
+
+    .. code:: json
+
+        {
+            "version"         : "string",
+            "is_executable"   : "bool",
+            "current_git_head": "string or null"
+        }
+
+
 extractor.*.category-transfer
 -----------------------------
 Type
