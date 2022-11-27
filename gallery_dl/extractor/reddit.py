@@ -70,10 +70,9 @@ class RedditExtractor(Extractor):
                                     "title": submission["title"],
                                 }
                                 try:
-                                    url = submission.get("secure_media") \
-                                        .get("reddit_video") \
-                                        .get("dash_url")
-                                except KeyError:
+                                    url = (submission["secure_media"]
+                                           ["reddit_video"]["dash_url"])
+                                except (KeyError, TypeError):
                                     pass
                             yield Message.Url, "ytdl:" + url, submission
 
