@@ -53,12 +53,6 @@ class DeviantartExtractor(Extractor):
         else:
             self.unwatch = None
 
-        if self.original != "image":
-            self._update_content = self._update_content_default
-        else:
-            self._update_content = self._update_content_image
-            self.original = True
-
         self._premium_cache = {}
         self.commit_journal = {
             "html": self._commit_journal_html,
@@ -99,8 +93,10 @@ class DeviantartExtractor(Extractor):
             if "content" in deviation:
                 content = deviation["content"]
 
-                if self.original and deviation["is_downloadable"]:
-                    self._update_content(deviation, content)
+                if deviation["is_downloadable"] and self.original == "image":
+                    self._update_content_image(deviation, content)
+                elif deviation["is_downloadable"] and self.original:
+                    self._update_content_default(deviation, content)
                 else:
                     self._update_token(deviation, content)
 
