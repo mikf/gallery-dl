@@ -83,6 +83,7 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
             cdn = file["cdn"]
             if name.endswith((".mp4", ".m4v", ".mov")):
                 cdn = cdn.replace("//cdn", "//media-files")
+                file["_http_headers"] = {"Referer": "https://stream.bunkr.is/"}
             file["file"] = cdn + "/" + name
 
         return files, {
