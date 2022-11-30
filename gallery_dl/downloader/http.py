@@ -74,6 +74,8 @@ class HttpDownloader(DownloaderBase):
                 self.log.warning("Invalid rate limit (%r)", self.rate)
         if self.progress is not None:
             self.receive = self._receive_rate
+            if self.progress < 0.0:
+                self.progress = 0.0
 
     def download(self, url, pathfmt):
         try:
@@ -295,7 +297,7 @@ class HttpDownloader(DownloaderBase):
             write(data)
 
             if progress is not None:
-                if time_elapsed >= progress:
+                if time_elapsed > progress:
                     self.out.progress(
                         bytes_total,
                         bytes_start + bytes_downloaded,
