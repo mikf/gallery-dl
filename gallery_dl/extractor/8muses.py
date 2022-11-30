@@ -119,10 +119,11 @@ class _8musesAlbumExtractor(Extractor):
         return {
             "id"     : album["id"],
             "path"   : album["path"],
-            "parts"  : album["permalink"].split('/'),
+            "parts"  : album["permalink"],
             "title"  : album["name"],
             "private": album["isPrivate"],
-            "url"    : self.root + album["permalink"],
+            "permalink" : album["permalink"],
+            "url"    : self.root + "/" + album["permalink"],
             "parent" : text.parse_int(album["parentId"]),
             "views"  : text.parse_int(album["numberViews"]),
             "likes"  : text.parse_int(album["numberLikes"]),
