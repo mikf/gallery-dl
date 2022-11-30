@@ -1307,22 +1307,34 @@ class DeviantartOAuthAPI():
             if unpack:
                 results = [item["journal"] for item in results
                            if "journal" in item]
-            if extend:
-                if public and len(results) < params["limit"]:
-                    if self.refresh_token_key:
-                        self.log.debug("Switching to private access token")
-                        public = False
-                        continue
-                    elif data["has_more"] and warn:
-                        warn = False
-                        self.log.warning(
-                            "Private deviations detected! Run 'gallery-dl "
-                            "oauth:deviantart' and follow the instructions to "
-                            "be able to access them.")
-                if self.metadata:
-                    self._metadata(results)
-                if self.folders:
-                    self._folders(results)
+
+            if extend and public and len(results) < params["limit"]:
+                if self.refresh_token_key:
+                    self.log.debug("Switching to private access token")
+                    public = False
+                    continue
+                elif data["has_more"] and warn:
+                    warn = False
+                    self.log.warning(
+                        "Private deviations detected! Run 'gallery-dl "
+                        "oauth:deviantart' and follow the instructions to "
+                        "be able to access them.")
+                # there's no way to tell if the last page contains private
+                # deviations or not
+                elif warn:
+                    warn = False
+                    self.log.warning(
+                        "The end of pagination has been reached, and "
+                        "gallery-dl cannot guarantee that there are no "
+                        "private deviations. Run 'gallery-dl oauth:deviantart'"
+                        " and follow the instructions to be able to access "
+                        "them.")
+
+            if extend and self.metadata:
+                self._metadata(results)
+            if extend and self.folders:
+                self._folders(results)
+
             yield from results
 
             if not data["has_more"] and (
