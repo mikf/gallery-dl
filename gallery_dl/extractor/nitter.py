@@ -346,7 +346,7 @@ class NitterTweetExtractor(NitterExtractor):
     directory_fmt = ("{category}", "{user[name]}")
     filename_fmt = "{tweet_id}_{num}.{extension}"
     archive_fmt = "{tweet_id}_{num}"
-    pattern = BASE_PATTERN + r"/[^/?#]+/status/(\d+)"
+    pattern = BASE_PATTERN + r"/([^/?#]+|i/web)/status/(\d+)"
     test = (
         ("https://nitter.net/supernaturepics/status/604341487988576256", {
             "url": "3f2b64e175bf284aa672c3bb53ed275e470b919a",
@@ -401,7 +401,7 @@ class NitterTweetExtractor(NitterExtractor):
             "content": "f29501e44d88437fe460f5c927b7543fda0f6e34",
         }),
         # Reply to deleted tweet (#403, #838)
-        ("https://nitter.unixfox.eu/i/status/1170041925560258560", {
+        ("https://nitter.unixfox.eu/i/web/status/1170041925560258560", {
             "pattern": r"https://nitter\.unixfox\.eu/pic/orig"
                        r"/media%2FEDzS7VrU0AAFL4_\.jpg",
         }),
