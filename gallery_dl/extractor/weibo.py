@@ -11,7 +11,6 @@
 from .common import Extractor, Message
 from .. import text, exception
 from ..cache import cache
-import itertools
 import random
 import json
 
@@ -53,20 +52,20 @@ class WeiboExtractor(Extractor):
 
         for status in self.statuses():
 
+            files = []
             if self.retweets and "retweeted_status" in status:
                 if original_retweets:
                     status = status["retweeted_status"]
-                    files = self._files_from_status(status)
+                    self._extract_status(status, files)
                 else:
-                    files = itertools.chain(
-                        self._files_from_status(status),
-                        self._files_from_status(status["retweeted_status"]),
-                    )
+                    self._extract_status(status, files)
+                    self._extract_status(status["retweeted_status"], files)
             else:
-                files = self._files_from_status(status)
+                self._extract_status(status, files)
 
             status["date"] = text.parse_datetime(
                 status["created_at"], "%a %b %d %H:%M:%S %z %Y")
+            status["count"] = len(files)
             yield Message.Directory, status
 
             for num, file in enumerate(files, 1):
@@ -78,7 +77,9 @@ class WeiboExtractor(Extractor):
                 file["num"] = num
                 yield Message.Url, file["url"], file
 
-    def _files_from_status(self, status):
+    def _extract_status(self, status, files):
+        append = files.append
+
         pic_ids = status.get("pic_ids")
         if pic_ids:
             pics = status["pic_infos"]
@@ -87,18 +88,18 @@ class WeiboExtractor(Extractor):
                 pic_type = pic.get("type")
 
                 if pic_type == "gif" and self.videos:
-                    yield {"url": pic["video"]}
+                    append({"url": pic["video"]})
 
                 elif pic_type == "livephoto" and self.livephoto:
-                    yield pic["largest"].copy()
+                    append(pic["largest"].copy())
 
                     file = {"url": pic["video"]}
                     file["filehame"], _, file["extension"] = \
                         pic["video"].rpartition("%2F")[2].rpartition(".")
-                    yield file
+                    append(file)
 
                 else:
-                    yield pic["largest"].copy()
+                    append(pic["largest"].copy())
 
         if "page_info" in status and self.videos:
             try:
@@ -108,9 +109,10 @@ class WeiboExtractor(Extractor):
                 pass
             except ValueError:
                 info = status["page_info"]["media_info"]
-                yield {"url": info.get("stream_url_hd") or info["stream_url"]}
+                append({"url": (info.get("stream_url_hd") or
+                                info["stream_url"])})
             else:
-                yield media["play_info"].copy()
+                append(media["play_info"].copy())
 
     def _status_by_id(self, status_id):
         url = "{}/ajax/statuses/show?id={}".format(self.root, status_id)
@@ -347,7 +349,10 @@ class WeiboStatusExtractor(WeiboExtractor):
     test = (
         ("https://m.weibo.cn/detail/4323047042991618", {
             "pattern": r"https?://wx\d+.sinaimg.cn/large/\w+.jpg",
-            "keyword": {"status": {"date": "dt:2018-12-30 13:56:36"}},
+            "keyword": {"status": {
+                "count": 1,
+                "date": "dt:2018-12-30 13:56:36",
+            }},
         }),
         ("https://m.weibo.cn/detail/4339748116375525", {
             "pattern": r"https?://f.us.sinaimg.cn/\w+\.mp4\?label=mp4_1080p",
@@ -397,6 +402,6 @@ class WeiboStatusExtractor(WeiboExtractor):
         return (status,)
 
 
-@cache(maxage=356*86400)
+@cache(maxage=365*86400)
 def _cookie_cache():
     return None
