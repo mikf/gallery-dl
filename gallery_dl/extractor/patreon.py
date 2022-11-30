@@ -234,6 +234,10 @@ class PatreonExtractor(Extractor):
             filetypes = filetypes.split(",")
         return [genmap[ft] for ft in filetypes]
 
+    def _extract_bootstrap(self, page):
+        return json.loads(text.extr(
+            page, "window.patreon.bootstrap,", "\n});") + "}")
+
 
 class PatreonCreatorExtractor(PatreonExtractor):
     """Extractor for a creator's works"""
@@ -282,10 +286,12 @@ class PatreonCreatorExtractor(PatreonExtractor):
             url = "{}/user/posts?u={}".format(self.root, creator_id)
         else:
             url = "{}/{}/posts".format(self.root, self.creator)
-
         page = self.request(url, notfound="creator").text
-        campaign_id = text.extr(page, "/campaign/", "/")
-        if not campaign_id:
+
+        try:
+            data = self._extract_bootstrap(page)
+            campaign_id = data["creator"]["data"]["id"]
+        except (KeyError, ValueError):
             raise exception.NotFoundError("creator")
 
         filters = "".join(
@@ -347,8 +353,7 @@ class PatreonPostExtractor(PatreonExtractor):
     def posts(self):
         url = "{}/posts/{}".format(self.root, self.slug)
         page = self.request(url, notfound="post").text
-        data = text.extract(page, "window.patreon.bootstrap,", "\n});")[0]
-        post = json.loads(data + "}")["post"]
+        post = self._extract_bootstrap(page)["post"]
 
         included = self._transform(post["included"])
         return (self._process(post["data"], included),)
