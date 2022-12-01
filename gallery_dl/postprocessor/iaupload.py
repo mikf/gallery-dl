@@ -338,7 +338,7 @@ class InternetArchiveUploadPP(PostProcessor):
 
         if not metadata.get('scanner'):
             from ..version import __version__
-            scanner = 'ytdl-patched InternetArchiveUploadPP {0}'.format(__version__)
+            scanner = 'gallery-dl Internet Archive Upload PostProcessor {0}'.format(__version__)
             metadata['scanner'] = scanner
         prepared_metadata = metadata or {}
         prepared_file_metadata = file_metadata or {}
