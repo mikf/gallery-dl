@@ -1378,12 +1378,6 @@ Consider all sites to be NSFW unless otherwise known.
     <td colspan="4"><strong>lolisafe and chibisafe</strong></td>
 </tr>
 <tr>
-    <td>ZzZz</td>
-    <td>https://zz.ht/</td>
-    <td>Albums</td>
-    <td></td>
-</tr>
-<tr>
     <td>xBunkr</td>
     <td>https://xbunkr.com/</td>
     <td>Albums</td>
