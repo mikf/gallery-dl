@@ -103,7 +103,10 @@ class PatreonExtractor(Extractor):
         """Return all relevant post objects"""
 
     def _pagination(self, url):
-        headers = {"Referer": self.root}
+        headers = {
+            "Referer"     : self.root + "/",
+            "Content-Type": "application/vnd.api+json",
+        }
 
         while url:
             url = text.ensure_http_scheme(url)
