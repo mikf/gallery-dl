@@ -56,7 +56,10 @@ class NitterExtractor(BaseExtractor):
 
                     if url[0] == "/":
                         url = self.root + url
-                    file = {"url": url}
+                    file = {
+                        "url": url,
+                        "_http_retry_codes": (404,),
+                    }
                     file["filename"], _, file["extension"] = \
                         name.rpartition(".")
                     append(file)
