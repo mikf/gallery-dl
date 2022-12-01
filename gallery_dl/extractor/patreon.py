@@ -202,23 +202,36 @@ class PatreonExtractor(Extractor):
         return (
             "https://www.patreon.com/api/" + endpoint +
 
-            "?include=user,images,attachments,user_defined_tags,campaign,poll."
-            "choices,poll.current_user_responses.user,poll.current_user_respon"
-            "ses.choice,poll.current_user_responses.poll,access_rules.tier.nul"
-            "l"
+            "?include=campaign,access_rules,attachments,audio,images,media,"
+            "native_video_insights,poll.choices,"
+            "poll.current_user_responses.user,"
+            "poll.current_user_responses.choice,"
+            "poll.current_user_responses.poll,"
+            "user,user_defined_tags,ti_checks"
 
-            "&fields[post]=change_visibility_at,comment_count,content,current_"
-            "user_can_delete,current_user_can_view,current_user_has_liked,embe"
-            "d,image,is_paid,like_count,min_cents_pledged_to_view,post_file,pu"
-            "blished_at,patron_count,patreon_url,post_type,pledge_url,thumbnai"
-            "l_url,teaser_text,title,upgrade_url,url,was_posted_by_campaign_ow"
-            "ner"
+            "&fields[campaign]=currency,show_audio_post_download_links,"
+            "avatar_photo_url,avatar_photo_image_urls,earnings_visibility,"
+            "is_nsfw,is_monthly,name,url"
+
+            "&fields[post]=change_visibility_at,comment_count,commenter_count,"
+            "content,current_user_can_comment,current_user_can_delete,"
+            "current_user_can_view,current_user_has_liked,embed,image,"
+            "insights_last_updated_at,is_paid,like_count,meta_image_url,"
+            "min_cents_pledged_to_view,post_file,post_metadata,published_at,"
+            "patreon_url,post_type,pledge_url,preview_asset_type,thumbnail,"
+            "thumbnail_url,teaser_text,title,upgrade_url,url,"
+            "was_posted_by_campaign_owner,has_ti_violation,moderation_status,"
+            "post_level_suspension_removal_date,pls_one_liners_by_category,"
+            "video_preview,view_count"
+
+            "&fields[post_tag]=tag_type,value"
             "&fields[user]=image_url,full_name,url"
-            "&fields[campaign]=avatar_photo_url,earnings_visibility,is_nsfw,is"
-            "_monthly,name,url"
-            "&fields[access_rule]=access_rule_type,amount_cents" + query +
+            "&fields[access_rule]=access_rule_type,amount_cents"
+            "&fields[media]=id,image_urls,download_url,metadata,file_name"
+            "&fields[native_video_insights]=average_view_duration,"
+            "average_view_pct,has_preview,id,last_updated_at,num_views,"
+            "preview_views,video_duration" + query +
 
-            "&json-api-use-default-includes=false"
             "&json-api-version=1.0"
         )
 
@@ -304,10 +317,10 @@ class PatreonCreatorExtractor(PatreonExtractor):
         )
 
         url = self._build_url("posts", (
-            "&sort=" + query.get("sort", "-published_at") +
-            "&filter[is_draft]=false"
+            "&filter[campaign_id]=" + campaign_id +
             "&filter[contains_exclusive_posts]=true"
-            "&filter[campaign_id]=" + campaign_id + filters
+            "&filter[is_draft]=false" + filters +
+            "&sort=" + query.get("sort", "-published_at")
         ))
         return self._pagination(url)
 
@@ -322,6 +335,7 @@ class PatreonUserExtractor(PatreonExtractor):
         url = self._build_url("stream", (
             "&page[cursor]=null"
             "&filter[is_following]=true"
+            "&json-api-use-default-includes=false"
         ))
         return self._pagination(url)
 
