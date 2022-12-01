@@ -1,5 +1,5 @@
 from __future__ import unicode_literals
-
+"""Upload images to the Internet Archive"""
 import configparser
 import hashlib
 import itertools
@@ -16,7 +16,7 @@ from xml.dom.minidom import parseString
 
 from ._attachments import ShowsProgress
 from .exec import ExecPP
-from ..YoutubeDL import YoutubeDL
+from .common import PostProcessor
 from ..compat import compat_HTTPError
 from ..downloader import FileDownloader
 from ..options import instantiate_parser
@@ -139,7 +139,7 @@ class Skip(PostProcessingError):
     pass
 
 
-class InternetArchiveUploadPP(ExecPP):
+class InternetArchiveUploadPP(PostProcessor):
     # memo
     #  This item total number of bytes(666) is over the per item size limit of 1099511627776. Please contact info@archive.org for help fitting your data into the archive.
     def __init__(self, downloader, exec_cmd):
@@ -638,3 +638,5 @@ class ProgressByteIO(QuietByteIO, ShowsProgress):
             'total_bytes': self.filesize,
         })
         self.counter = None
+
+__postprocessor__ = InternetArchiveUploadPP
