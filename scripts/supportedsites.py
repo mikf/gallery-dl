@@ -96,7 +96,6 @@ CATEGORY_MAP = {
     "sankaku"        : "Sankaku Channel",
     "sankakucomplex" : "Sankaku Complex",
     "seiga"          : "Niconico Seiga",
-    "seisoparty"     : "Seiso",
     "senmanga"       : "Sen Manga",
     "sensescans"     : "Sense-Scans",
     "sexcom"         : "Sex.com",
@@ -110,14 +109,12 @@ CATEGORY_MAP = {
     "thatpervert"    : "ThatPervert",
     "thebarchive"    : "The /b/ Archive",
     "thecollection"  : "The /co/llection",
-    "theloudbooru"   : "The Loud Booru",
     "tokyochronos"   : "TokyoChronos",
     "tumblrgallery"  : "TumblrGallery",
     "vanillarock"    : "もえぴりあ",
     "vidyart"        : "/v/idyart",
     "vk"             : "VK",
     "vsco"           : "VSCO",
-    "wakarimasen"    : "Wakarimasen Archive",
     "wallpapercave"  : "Wallpaper Cave",
     "webtoons"       : "Webtoon",
     "wikiart"        : "WikiArt.org",
@@ -125,7 +122,6 @@ CATEGORY_MAP = {
     "xhamster"       : "xHamster",
     "xvideos"        : "XVideos",
     "yandere"        : "yande.re",
-    "zzzz"           : "ZzZz",
 }
 
 SUBCATEGORY_MAP = {
