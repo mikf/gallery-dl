@@ -26,8 +26,8 @@ class FapachiPostExtractor(Extractor):
             "pattern": (r"https://fapachi\.com/models/s/o/"
                         r"sonson/1/full/sonson_0082\.jpeg"),
             "keyword": {
-                "user"   : "sonson",
-                "id"     : "0082",
+                "user": "sonson",
+                "id"  : "0082",
             },
         }),
         # NSFW
