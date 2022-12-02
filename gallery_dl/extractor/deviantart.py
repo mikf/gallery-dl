@@ -1318,11 +1318,12 @@ class DeviantartOAuthAPI():
                 # there's no way to tell if the last page contains private
                 # deviations or not
                 msg = "Private deviations detected!" if data["has_more"] else \
-                    ("The end of pagination has been reached, and gallery-dl "
-                     "cannot guarantee that there are no private deviations.")
+                    ("End of pagination reached. gallery-dl cannot guarantee "
+                     "that there are no private deviations.")
                 self.log.warning(
                     msg + " Run 'gallery-dl oauth:deviantart' and follow the "
-                    "instructions to be able to access them.")
+                    "instructions to be able to access them (an account is "
+                    "required).")
 
             if extend and self.metadata:
                 self._metadata(results)
