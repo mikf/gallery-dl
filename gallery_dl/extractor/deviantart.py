@@ -100,7 +100,8 @@ class DeviantartExtractor(Extractor):
                     if mtype and mtype.startswith("image/"):
                         yield self.commit(deviation, deviation["download"])
                     else:
-                        yield self.commit(deviation, deviation["content"])
+                        yield self.commit(
+                            deviation, self._build_target(deviation))
 
                 elif deviation["is_downloadable"] and self.original:
                     public = "premium_folder_data" not in deviation
@@ -110,7 +111,7 @@ class DeviantartExtractor(Extractor):
 
                 else:
                     yield self.commit(
-                        deviation, self._handle_non_downloadable(deviation))
+                        deviation, self._build_target(deviation))
 
             # downloadable, but no "content" field (#307)
             elif deviation["is_downloadable"]:
@@ -287,40 +288,48 @@ class DeviantartExtractor(Extractor):
             yield url, folder
 
     @staticmethod
-    def _update_token(url):
-        """Replace JWT to be able to remove width/height limits
+    def _build_token(url):
+        """Build a new URL without width/height limits from the base URL
 
         All credit goes to @Ironchest337
         for discovering and implementing this method
         """
-        base_url, sep, _ = url.partition("/v1/")
-        if not sep:
-            return url
 
         payload = (
             b'{"sub":"urn:app:","iss":"urn:app:","obj":[[{"path":"/f/' +
-            base_url.partition("/f/")[2].encode() +
+            url.partition("/f/")[2].encode() +
             b'"}]],"aud":["urn:service:file.download"]}'
         )
 
         return (
             "{}?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0.{}.".format(
-                base_url,
+                url,
                 # base64 of the header (b'{"typ":"JWT","alg":"none"}')
                 # is precomputed as 'eyJ0eX...'
                 binascii.b2a_base64(payload).rstrip(b"=\n").decode())
         )
 
     @staticmethod
-    def _handle_non_downloadable(deviation):
+    def _build_target(deviation):
+        src = deviation["content"]["src"]
+        base_url, sep, tail = src.partition("/v1/")
         # preview == max resolution, no need to update token
-        if "/v1/" not in deviation["content"]["src"]:
+        # currently handles all non-image deviations
+        if not sep:
+            return deviation["content"]
+        # /i/.../v1/ URLs (if they ever appear in 'content')
+        if "?token=" not in tail:
+            updated_url = base_url
+        # resized images
+        elif "/f/" in base_url:
+            updated_url = DeviantartExtractor._build_token(base_url)
+        # unforeseen URL types
+        else:
             return deviation["content"]
 
-        deviation["_fallback"] = (deviation["content"]["src"],)
+        deviation["_fallback"] = (src,)
         return {
-            "src": DeviantartExtractor._update_token(
-                deviation["content"]["src"]),
+            "src": updated_url,
             # "filesize" and "transparency" seem to be
             # correct even for resized deviations
             "filesize": deviation["content"]["filesize"],

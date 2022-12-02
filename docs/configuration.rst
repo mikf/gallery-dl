@@ -1195,11 +1195,14 @@ Type
 Default
     ``true``
 Description
-    Download original files if available.
+    Download original files via the API if allowed.
 
-    Setting this option to ``"images"`` only downloads original
-    files if they are images and falls back to preview versions for
-    everything else (archives, etc.).
+    Setting this option to ``false`` ignores the download option and
+    handles all deviations as if downloading is not allowed.
+
+    Setting this option to ``"images"`` only downloads original files
+    if they are images. For everything else (archives, etc.), the image
+    versions as displayed on the website will be downloaded.
 
 
 extractor.deviantart.pagination
