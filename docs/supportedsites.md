@@ -194,7 +194,7 @@ Consider all sites to be NSFW unless otherwise known.
     <td><a href="https://github.com/mikf/gallery-dl#cookies">Cookies</a></td>
 </tr>
 <tr>
-    <td>Fapachi.com</td>
+    <td>Fapachi</td>
     <td>https://fapachi.com/</td>
     <td>Posts, User Profiles</td>
     <td></td>
