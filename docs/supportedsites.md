@@ -194,6 +194,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td><a href="https://github.com/mikf/gallery-dl#cookies">Cookies</a></td>
 </tr>
 <tr>
+    <td>Fapachi.com</td>
+    <td>https://fapachi.com/</td>
+    <td>Posts, User Profiles</td>
+    <td></td>
+</tr>
+<tr>
     <td>Fappic</td>
     <td>https://fappic.com/</td>
     <td>individual Images</td>
