@@ -25,8 +25,10 @@ class FapachiPostExtractor(Extractor):
         ("https://fapachi.com/sonson/media/0082", {
             "pattern": (r"https://fapachi\.com/models/s/o/"
                         r"sonson/1/full/sonson_0082\.jpeg"),
-            "user"   : "sonson",
-            "id"     : "0082",
+            "keyword": {
+                "user"   : "sonson",
+                "id"     : "0082",
+            },
         }),
         # NSFW
         ("https://fapachi.com/ferxiita/media/0159"),
