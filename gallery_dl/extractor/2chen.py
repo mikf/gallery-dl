@@ -16,13 +16,15 @@ class _2chenThreadExtractor(Extractor):
     subcategory = "thread"
     directory_fmt = ("{category}", "{board}", "{thread} {title}")
     filename_fmt = "{time} {filename}.{extension}"
-    archive_fmt = "{board}_{thread}_{hash}"
+    archive_fmt = "{board}_{thread}_{hash}_{time}"
     root = "https://2chen.moe"
     pattern = r"(?:https?://)?2chen\.moe/([^/?#]+)/(\d+)"
     test = (
-        ("https://2chen.moe/jp/303786", {
-            "count": ">= 10",
+        ("https://2chen.moe/tv/496715", {
+            "count": ">= 179",
         }),
+        # 404
+        ("https://2chen.moe/jp/303786"),
     )
 
     def __init__(self, match):
@@ -31,7 +33,7 @@ class _2chenThreadExtractor(Extractor):
 
     def items(self):
         url = "{}/{}/{}".format(self.root, self.board, self.thread)
-        page = self.request(url, encoding="utf-8").text
+        page = self.request(url, encoding="utf-8", notfound="thread").text
         data = self.metadata(page)
         yield Message.Directory, data
         for post in self.posts(page):
@@ -66,7 +68,7 @@ class _2chenThreadExtractor(Extractor):
                 "%d %b %Y (%a) %H:%M:%S"
             ),
             "no"      : extr('href="#p', '"'),
-            "url"     : extr('</span><a href="', '"'),
+            "url"     : extr('</a><a href="', '"'),
             "filename": text.unescape(extr('download="', '"')),
             "hash"    : extr('data-hash="', '"'),
         }
@@ -77,7 +79,7 @@ class _2chenBoardExtractor(Extractor):
     category = "2chen"
     subcategory = "board"
     root = "https://2chen.moe"
-    pattern = r"(?:https?://)?2chen\.moe/([^/?#]+)(?:/catalog)?/?$"
+    pattern = r"(?:https?://)?2chen\.moe/([^/?#]+)(?:/catalog|/?$)"
     test = (
         ("https://2chen.moe/co/", {
             "pattern": _2chenThreadExtractor.pattern
@@ -92,7 +94,7 @@ class _2chenBoardExtractor(Extractor):
 
     def items(self):
         url = "{}/{}/catalog".format(self.root, self.board)
-        page = self.request(url).text
+        page = self.request(url, notfound="board").text
         data = {"_extractor": _2chenThreadExtractor}
         for thread in text.extract_iter(
                 page, '<figure><a href="', '"'):
