@@ -75,6 +75,7 @@ modules = [
     "kemonoparty",
     "khinsider",
     "kissgoddess",
+    "kofi",
     "kohlchan",
     "komikcast",
     "lightroom",
