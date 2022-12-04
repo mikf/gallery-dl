@@ -23,7 +23,10 @@ class NitterExtractor(BaseExtractor):
     def __init__(self, match):
         self.cookiedomain = self.root.partition("://")[2]
         BaseExtractor.__init__(self, match)
-        self.user = match.group(match.lastindex)
+
+        lastindex = match.lastindex
+        self.user = match.group(lastindex)
+        self.user_id = match.group(lastindex + 1)
         self.user_obj = None
 
     def items(self):
@@ -181,7 +184,13 @@ class NitterExtractor(BaseExtractor):
 
     def _pagination(self, path):
         quoted = self.config("quoted", False)
-        base_url = url = self.root + path
+
+        if self.user_id:
+            self.user = self.request(
+                "{}/i/user/{}".format(self.root, self.user_id),
+                allow_redirects=False,
+            ).headers["location"].rpartition("/")[2]
+        base_url = url = "{}/{}{}".format(self.root, self.user, path)
 
         while True:
             tweets_html = self.request(url).text.split(
@@ -229,10 +238,12 @@ BASE_PATTERN = NitterExtractor.update({
     },
 })
 
+USER_PATTERN = BASE_PATTERN + r"/(i(?:/user/|d:)(\d+)|[^/?#]+)"
+
 
 class NitterTweetsExtractor(NitterExtractor):
     subcategory = "tweets"
-    pattern = BASE_PATTERN + r"/([^/?#]+)(?:/tweets)?(?:$|\?|#)"
+    pattern = USER_PATTERN + r"(?:/tweets)?(?:$|\?|#)"
     test = (
         ("https://nitter.net/supernaturepics", {
             "pattern": r"https://nitter\.net/pic/orig"
@@ -255,9 +266,9 @@ class NitterTweetsExtractor(NitterExtractor):
                 "user": {
                     "date": "dt:2015-01-12 10:25:00",
                     "description": "The very best nature pictures.",
-                    "favourites_count": 22698,
+                    "favourites_count": int,
                     "followers_count": int,
-                    "friends_count": 2477,
+                    "friends_count": int,
                     "id": "2976459548",
                     "name": "supernaturepics",
                     "nick": "Nature Pictures",
@@ -272,20 +283,25 @@ class NitterTweetsExtractor(NitterExtractor):
                 },
             },
         }),
+        ("https://nitter.pussthecat.org/i/user/2976459548", {
+            "url": "c740a2683db2c8ed2f350afc0494475c4444025b",
+            "pattern": r"https://nitter.pussthecat\.org/pic/orig"
+                       r"/media%2FCGMNYZvW0AIVoom\.jpg",
+            "range": "1",
+        }),
         ("https://nitter.lacontrevoie.fr/supernaturepics"),
-        ("https://nitter.pussthecat.org/supernaturepics"),
         ("https://nitter.1d4.us/supernaturepics"),
-        ("https://nitter.kavin.rocks/supernaturepics"),
+        ("https://nitter.kavin.rocks/id:2976459548"),
         ("https://nitter.unixfox.eu/supernaturepics"),
     )
 
     def tweets(self):
-        return self._pagination("/" + self.user)
+        return self._pagination("")
 
 
 class NitterRepliesExtractor(NitterExtractor):
     subcategory = "replies"
-    pattern = BASE_PATTERN + r"/([^/?#]+)/with_replies"
+    pattern = USER_PATTERN + r"/with_replies"
     test = (
         ("https://nitter.net/supernaturepics/with_replies", {
             "pattern": r"https://nitter\.net/pic/orig"
@@ -295,37 +311,41 @@ class NitterRepliesExtractor(NitterExtractor):
         ("https://nitter.lacontrevoie.fr/supernaturepics/with_replies"),
         ("https://nitter.pussthecat.org/supernaturepics/with_replies"),
         ("https://nitter.1d4.us/supernaturepics/with_replies"),
-        ("https://nitter.kavin.rocks/supernaturepics/with_replies"),
-        ("https://nitter.unixfox.eu/supernaturepics/with_replies"),
+        ("https://nitter.kavin.rocks/id:2976459548/with_replies"),
+        ("https://nitter.unixfox.eu/i/user/2976459548/with_replies"),
     )
 
     def tweets(self):
-        return self._pagination("/" + self.user + "/with_replies")
+        return self._pagination("/with_replies")
 
 
 class NitterMediaExtractor(NitterExtractor):
     subcategory = "media"
-    pattern = BASE_PATTERN + r"/([^/?#]+)/media"
+    pattern = USER_PATTERN + r"/media"
     test = (
         ("https://nitter.net/supernaturepics/media", {
             "pattern": r"https://nitter\.net/pic/orig"
                        r"/media%2F[\w-]+\.(jpg|png)$",
             "range": "1-20",
         }),
+        ("https://nitter.kavin.rocks/id:2976459548/media", {
+            "pattern": r"https://nitter\.kavin\.rocks/pic/orig"
+                       r"/media%2F[\w-]+\.(jpg|png)$",
+            "range": "1-20",
+        }),
         ("https://nitter.lacontrevoie.fr/supernaturepics/media"),
         ("https://nitter.pussthecat.org/supernaturepics/media"),
         ("https://nitter.1d4.us/supernaturepics/media"),
-        ("https://nitter.kavin.rocks/supernaturepics/media"),
-        ("https://nitter.unixfox.eu/supernaturepics/media"),
+        ("https://nitter.unixfox.eu/i/user/2976459548/media"),
     )
 
     def tweets(self):
-        return self._pagination("/" + self.user + "/media")
+        return self._pagination("/media")
 
 
 class NitterSearchExtractor(NitterExtractor):
     subcategory = "search"
-    pattern = BASE_PATTERN + r"/([^/?#]+)/search"
+    pattern = USER_PATTERN + r"/search"
     test = (
         ("https://nitter.net/supernaturepics/search", {
             "pattern": r"https://nitter\.net/pic/orig"
@@ -335,12 +355,12 @@ class NitterSearchExtractor(NitterExtractor):
         ("https://nitter.lacontrevoie.fr/supernaturepics/search"),
         ("https://nitter.pussthecat.org/supernaturepics/search"),
         ("https://nitter.1d4.us/supernaturepics/search"),
-        ("https://nitter.kavin.rocks/supernaturepics/search"),
-        ("https://nitter.unixfox.eu/supernaturepics/search"),
+        ("https://nitter.kavin.rocks/id:2976459548/search"),
+        ("https://nitter.unixfox.eu/i/user/2976459548/search"),
     )
 
     def tweets(self):
-        return self._pagination("/" + self.user + "/search")
+        return self._pagination("/search")
 
 
 class NitterTweetExtractor(NitterExtractor):
@@ -349,7 +369,7 @@ class NitterTweetExtractor(NitterExtractor):
     directory_fmt = ("{category}", "{user[name]}")
     filename_fmt = "{tweet_id}_{num}.{extension}"
     archive_fmt = "{tweet_id}_{num}"
-    pattern = BASE_PATTERN + r"/([^/?#]+|i/web)/status/(\d+)"
+    pattern = BASE_PATTERN + r"/(i/web|[^/?#]+)/status/(\d+())"
     test = (
         ("https://nitter.net/supernaturepics/status/604341487988576256", {
             "url": "3f2b64e175bf284aa672c3bb53ed275e470b919a",
