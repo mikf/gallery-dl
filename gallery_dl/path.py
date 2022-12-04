@@ -219,7 +219,7 @@ class PathFormat():
                 self.path = self.path[:-1]
                 self.temppath = self.realpath = self.realpath[:-1]
         elif not self.temppath:
-            self.build_path()
+            self.path = self.directory + "?"
         return True
 
     def build_filename(self, kwdict):
