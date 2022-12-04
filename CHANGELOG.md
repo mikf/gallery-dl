@@ -1,5 +1,41 @@
 # Changelog
 
+## 1.24.1 - 2022-12-04
+### Additions
+- [artstation] add `pro-first` option ([#3273](https://github.com/mikf/gallery-dl/issues/3273))
+- [artstation] add `max-posts` option ([#3270](https://github.com/mikf/gallery-dl/issues/3270))
+- [fapachi] add `post` and `user` extractors ([#3339](https://github.com/mikf/gallery-dl/issues/3339), [#3347](https://github.com/mikf/gallery-dl/issues/3347))
+- [inkbunny] provide additional metadata ([#3274](https://github.com/mikf/gallery-dl/issues/3274))
+- [nitter] add `retweets` option ([#3278](https://github.com/mikf/gallery-dl/issues/3278))
+- [nitter] add `videos` option ([#3279](https://github.com/mikf/gallery-dl/issues/3279))
+- [nitter] support `/i/web/` and `/i/user/` URLs ([#3310](https://github.com/mikf/gallery-dl/issues/3310))
+- [pixhost] add `gallery` support ([#3336](https://github.com/mikf/gallery-dl/issues/3336), [#3353](https://github.com/mikf/gallery-dl/issues/3353))
+- [weibo] add `count` metadata field ([#3305](https://github.com/mikf/gallery-dl/issues/3305))
+- [downloader:http] add `retry-codes` option ([#3313](https://github.com/mikf/gallery-dl/issues/3313))
+- [formatter] implement `S` format specifier to sort lists ([#3266](https://github.com/mikf/gallery-dl/issues/3266))
+- implement `version-metadata` option ([#3201](https://github.com/mikf/gallery-dl/issues/3201))
+### Fixes
+- [2chen] fix extraction ([#3354](https://github.com/mikf/gallery-dl/issues/3354), [#3356](https://github.com/mikf/gallery-dl/issues/3356))
+- [bcy] fix JSONDecodeError ([#3321](https://github.com/mikf/gallery-dl/issues/3321))
+- [bunkr] fix video downloads ([#3326](https://github.com/mikf/gallery-dl/issues/3326), [#3335](https://github.com/mikf/gallery-dl/issues/3335))
+- [bunkr] use `media-files` servers for more file types
+- [itaku] remove `Extreme` rating ([#3285](https://github.com/mikf/gallery-dl/issues/3285), [#3287](https://github.com/mikf/gallery-dl/issues/3287))
+- [hitomi] apply format check for every image ([#3280](https://github.com/mikf/gallery-dl/issues/3280))
+- [hotleak] fix UnboundLocalError ([#3288](https://github.com/mikf/gallery-dl/issues/3288), [#3293](https://github.com/mikf/gallery-dl/issues/3293))
+- [nitter] sanitize filenames ([#3294](https://github.com/mikf/gallery-dl/issues/3294))
+- [nitter] retry downloads on 404 ([#3313](https://github.com/mikf/gallery-dl/issues/3313))
+- [nitter] set `hlsPlayback` cookie
+- [patreon] fix `403 Forbidden` errors ([#3341](https://github.com/mikf/gallery-dl/issues/3341))
+- [patreon] improve `campaign_id` extraction ([#3235](https://github.com/mikf/gallery-dl/issues/3235))
+- [patreon] update API query parameters
+- [pixiv] preserve `tags` order ([#3266](https://github.com/mikf/gallery-dl/issues/3266))
+- [reddit] use `dash_url` for videos ([#3258](https://github.com/mikf/gallery-dl/issues/3258), [#3306](https://github.com/mikf/gallery-dl/issues/3306))
+- [twitter] fix error when using user IDs for suspended accounts
+- [weibo] fix bug with empty `playback_list` ([#3301](https://github.com/mikf/gallery-dl/issues/3301))
+- [downloader:http] fix potential `ZeroDivisionError` ([#3328](https://github.com/mikf/gallery-dl/issues/3328))
+### Removals
+- [lolisafe] remove `zz.ht`
+
 ## 1.24.0 - 2022-11-20
 ### Additions
 - [exhentai] add metadata to search results ([#3181](https://github.com/mikf/gallery-dl/issues/3181))
