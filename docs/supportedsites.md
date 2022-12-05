@@ -434,12 +434,6 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
-    <td>Kiss Goddess</td>
-    <td>https://kissgoddess.com/</td>
-    <td>Galleries, Models</td>
-    <td></td>
-</tr>
-<tr>
     <td>Kohlchan</td>
     <td>https://kohlchan.net/</td>
     <td>Boards, Threads</td>
