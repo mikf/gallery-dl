@@ -441,7 +441,7 @@ Consider all sites to be NSFW unless otherwise known.
 </tr>
 <tr>
     <td>Komikcast</td>
-    <td>https://komikcast.me/</td>
+    <td>https://komikcast.site/</td>
     <td>Chapters, Manga</td>
     <td></td>
 </tr>
