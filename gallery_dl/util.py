@@ -696,7 +696,10 @@ def chain_predicates(predicates, url, kwdict):
 
 
 def hide_login_info(args, remove_first=True):
-    PRIVATE_OPTS = ("--username", "-u", "--password", "-p")
+    PRIVATE_OPTS = (
+        "--username", "-u", "--password", "-p", "username", "password",
+        "refresh-token", "access-token", "access-token-secret", "api-token",
+        "website-token", "client-id", "client-secret", "api-key", "api-secret")
     pattern = re.compile(
         "^((?:{})=|(?:{})=?).+$".format(
             "|".join(re.escape(x) for x in PRIVATE_OPTS if len(x) > 2),
@@ -707,11 +710,12 @@ def hide_login_info(args, remove_first=True):
     for i, arg in enumerate(args):
         if arg == "--":
             break
-        if is_private and not arg.startswith("-"):
+        is_option = arg[0] == "-"
+        if is_private and not is_option:
             args[i] = "PRIVATE"
             is_private = False
             continue
-        if arg in PRIVATE_OPTS:
+        if is_option and arg in PRIVATE_OPTS:
             is_private = True
             continue
         is_private = False

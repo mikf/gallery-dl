@@ -632,9 +632,15 @@ class TestOther(unittest.TestCase):
             ["gallery_dl", "--username=aaaa@gmail.com", "--password=123456",
              "-u=bbbb@gmail.com", "-p=654321", "-ucccc@gmail.com", "-p123123"])
 
+        config = util.hide_login_info(
+            ["gallery_dl", "-o", "password=123456", "-o",
+             "username=abcd@gmail.com", "api-token=deadbeef",
+             "api-secret=cafebabe"])
+
         other = util.hide_login_info(
-            ["--username", "--password", "-u", "--not-hidden",
-             "not-hidden", "-p", "--", "123123"], False)
+            ["--username", "--password", "-u", "--not-hidden1", "not-hidden2",
+             "access-token", "not-hidden3", "api-key", "--not-hidden4", "-p",
+             "--", "123123"], False)
 
         self.assertNotIn("gallery_dl", normal)
         self.assertIn("--username", normal)
@@ -653,11 +659,21 @@ class TestOther(unittest.TestCase):
         self.assertNotIn("-ucccc@gmail.com", short)
         self.assertNotIn("-p123123", short)
 
+        self.assertIn("-o", config)
+        self.assertNotIn("password=123456", config)
+        self.assertNotIn("username=abcd@gmail.com", config)
+        self.assertNotIn("api-token=deadbeef", config)
+        self.assertNotIn("api-secret=cafebabe", config)
+
         self.assertIn("--username", other)
         self.assertIn("--password", other)
         self.assertIn("-u", other)
-        self.assertIn("--not-hidden", other)
-        self.assertIn("not-hidden", other)
+        self.assertIn("--not-hidden1", other)
+        self.assertIn("not-hidden2", other)
+        self.assertIn("access-token", other)
+        self.assertIn("not-hidden3", other)
+        self.assertIn("api-key", other)
+        self.assertIn("--not-hidden4", other)
         self.assertIn("-p", other)
         self.assertIn("123123", other)
 
