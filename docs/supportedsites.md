@@ -1264,12 +1264,6 @@ Consider all sites to be NSFW unless otherwise known.
     <td colspan="4"><strong>FoOlSlide Instances</strong></td>
 </tr>
 <tr>
-    <td>Kirei Cake</td>
-    <td>https://reader.kireicake.com/</td>
-    <td>Chapters, Manga</td>
-    <td></td>
-</tr>
-<tr>
     <td>PowerManga</td>
     <td>https://read.powermanga.org/</td>
     <td>Chapters, Manga</td>
