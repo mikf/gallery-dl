@@ -634,13 +634,14 @@ class TestOther(unittest.TestCase):
 
         config = util.hide_login_info(
             ["gallery_dl", "-o", "password=123456", "-o",
-             "username=abcd@gmail.com", "api-token=deadbeef",
+             "username=abcd@gmail.com", "foo.bar.api-token=deadbeef",
              "api-secret=cafebabe"])
 
         other = util.hide_login_info(
             ["--username", "--password", "-u", "--not-hidden1", "not-hidden2",
-             "access-token", "not-hidden3", "api-key", "--not-hidden4", "-p",
-             "--", "123123"], False)
+             "access-token", "not-hidden3", "api-key", "--not-hidden4",
+             ".client-id=1337", "foousername=bar", "-p", "--", "123123"],
+            False)
 
         self.assertNotIn("gallery_dl", normal)
         self.assertIn("--username", normal)
@@ -651,18 +652,24 @@ class TestOther(unittest.TestCase):
         self.assertNotIn("bbbb@gmail.com", normal)
         self.assertIn("-p", normal)
         self.assertNotIn("654321", normal)
+        self.assertIn("PRIVATE", normal)
 
         self.assertNotIn("--username=aaaa@gmail.com", short)
+        self.assertIn("--username=PRIVATE", short)
         self.assertNotIn("--password=123456", short)
         self.assertNotIn("-u=bbbb@gmail.com", short)
+        self.assertIn("-u=PRIVATE", short)
         self.assertNotIn("-p=654321", short)
         self.assertNotIn("-ucccc@gmail.com", short)
+        self.assertIn("-uPRIVATE", short)
         self.assertNotIn("-p123123", short)
 
         self.assertIn("-o", config)
         self.assertNotIn("password=123456", config)
+        self.assertIn("password=PRIVATE", config)
         self.assertNotIn("username=abcd@gmail.com", config)
-        self.assertNotIn("api-token=deadbeef", config)
+        self.assertNotIn("foo.bar.api-token=deadbeef", config)
+        self.assertIn("foo.bar.api-token=PRIVATE", config)
         self.assertNotIn("api-secret=cafebabe", config)
 
         self.assertIn("--username", other)
@@ -674,6 +681,8 @@ class TestOther(unittest.TestCase):
         self.assertIn("not-hidden3", other)
         self.assertIn("api-key", other)
         self.assertIn("--not-hidden4", other)
+        self.assertIn(".client-id=1337", other)
+        self.assertIn("foousername=bar", other)
         self.assertIn("-p", other)
         self.assertIn("123123", other)
 

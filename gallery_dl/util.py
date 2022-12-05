@@ -696,14 +696,17 @@ def chain_predicates(predicates, url, kwdict):
 
 
 def hide_login_info(args, remove_first=True):
-    PRIVATE_OPTS = (
-        "--username", "-u", "--password", "-p", "username", "password",
-        "refresh-token", "access-token", "access-token-secret", "api-token",
-        "website-token", "client-id", "client-secret", "api-key", "api-secret")
-    pattern = re.compile(
+    PRIVATE_OPTS = ("--username", "-u", "--password", "-p")
+    option_pattern = re.compile(
         "^((?:{})=|(?:{})=?).+$".format(
             "|".join(re.escape(x) for x in PRIVATE_OPTS if len(x) > 2),
             "|".join(re.escape(x) for x in PRIVATE_OPTS if len(x) == 2)))
+    PRIVATE_CONFIG = (
+        "username", "password", r"client\-id", r"api\-key",
+        r"(?:refresh|acccess|website|api)\-token",
+        r"(?:access\-token|client|api)\-secret")
+    config_pattern = re.compile(
+        r"^((?:.+\.)?(?:{})=).+$".format("|".join(PRIVATE_CONFIG)))
 
     args = args[1 if remove_first else 0:]
     is_private = False
@@ -715,10 +718,11 @@ def hide_login_info(args, remove_first=True):
             args[i] = "PRIVATE"
             is_private = False
             continue
-        if is_option and arg in PRIVATE_OPTS:
+        if arg in PRIVATE_OPTS:
             is_private = True
             continue
         is_private = False
+        pattern = option_pattern if is_option else config_pattern
         match = pattern.match(arg)
         if match:
             args[i] = match.group(1) + "PRIVATE"
@@ -727,6 +731,7 @@ def hide_login_info(args, remove_first=True):
 
 class RangePredicate():
     """Predicate; True if the current index is in the given range"""
+
     def __init__(self, rangespec):
         self.ranges = self.optimize_range(self.parse_range(rangespec))
         self.index = 0
@@ -798,6 +803,7 @@ class RangePredicate():
 
 class UniquePredicate():
     """Predicate; True if given URL has not been encountered before"""
+
     def __init__(self):
         self.urls = set()
 
@@ -828,6 +834,7 @@ class FilterPredicate():
 
 class ExtendedUrl():
     """URL with attached config key-value pairs"""
+
     def __init__(self, url, gconf, lconf):
         self.value, self.gconfig, self.lconfig = url, gconf, lconf
 
