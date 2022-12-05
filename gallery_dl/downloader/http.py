@@ -37,6 +37,7 @@ class HttpDownloader(DownloaderBase):
         self.minsize = self.config("filesize-min")
         self.maxsize = self.config("filesize-max")
         self.retries = self.config("retries", extractor._retries)
+        self.retry_codes = self.config("retry-codes")
         self.timeout = self.config("timeout", extractor._timeout)
         self.verify = self.config("verify", extractor._verify)
         self.mtime = self.config("mtime", True)
@@ -44,6 +45,8 @@ class HttpDownloader(DownloaderBase):
 
         if self.retries < 0:
             self.retries = float("inf")
+        if self.retry_codes is None:
+            self.retry_codes = [429]
         if self.minsize:
             minsize = text.parse_bytes(self.minsize)
             if not minsize:
@@ -74,6 +77,8 @@ class HttpDownloader(DownloaderBase):
                 self.log.warning("Invalid rate limit (%r)", self.rate)
         if self.progress is not None:
             self.receive = self._receive_rate
+            if self.progress < 0.0:
+                self.progress = 0.0
 
     def download(self, url, pathfmt):
         try:
@@ -95,6 +100,13 @@ class HttpDownloader(DownloaderBase):
         kwdict = pathfmt.kwdict
         adjust_extension = kwdict.get(
             "_http_adjust_extension", self.adjust_extension)
+
+        codes = kwdict.get("_http_retry_codes")
+        if codes:
+            retry_codes = self.retry_codes.copy()
+            retry_codes += codes
+        else:
+            retry_codes = self.retry_codes
 
         if self.part and not metadata:
             pathfmt.part_enable(self.partdir)
@@ -156,7 +168,7 @@ class HttpDownloader(DownloaderBase):
                 break
             else:
                 msg = "'{} {}' for '{}'".format(code, response.reason, url)
-                if code == 429 or 500 <= code < 600:  # Server Error
+                if code in retry_codes or 500 <= code < 600:
                     continue
                 self.log.warning(msg)
                 return False
@@ -295,7 +307,7 @@ class HttpDownloader(DownloaderBase):
             write(data)
 
             if progress is not None:
-                if time_elapsed >= progress:
+                if time_elapsed > progress:
                     self.out.progress(
                         bytes_total,
                         bytes_start + bytes_downloaded,

@@ -78,11 +78,15 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
             self.root = self.root.replace("bunkr", "app.bunkr", 1)
             return self._fetch_album_api(album_id)
 
+        headers = {"Referer": "https://stream.bunkr.is/"}
+
         for file in files:
             name = file["name"]
             cdn = file["cdn"]
-            if name.endswith((".mp4", ".m4v", ".mov")):
-                cdn = cdn.replace("//cdn", "//media-files")
+            if name.endswith((".mp4", ".m4v", ".mov", ".webm",
+                              ".zip", ".rar", ".7z")):
+                cdn = cdn.replace("//cdn", "//media-files", 1)
+                file["_http_headers"] = headers
             file["file"] = cdn + "/" + name
 
         return files, {

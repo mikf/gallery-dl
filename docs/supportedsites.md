@@ -194,6 +194,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td><a href="https://github.com/mikf/gallery-dl#cookies">Cookies</a></td>
 </tr>
 <tr>
+    <td>Fapachi</td>
+    <td>https://fapachi.com/</td>
+    <td>Posts, User Profiles</td>
+    <td></td>
+</tr>
+<tr>
     <td>Fappic</td>
     <td>https://fappic.com/</td>
     <td>individual Images</td>
@@ -628,7 +634,7 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>Pixhost</td>
     <td>https://pixhost.to/</td>
-    <td>individual Images</td>
+    <td>Galleries, individual Images</td>
     <td></td>
 </tr>
 <tr>
@@ -1370,12 +1376,6 @@ Consider all sites to be NSFW unless otherwise known.
 
 <tr>
     <td colspan="4"><strong>lolisafe and chibisafe</strong></td>
-</tr>
-<tr>
-    <td>ZzZz</td>
-    <td>https://zz.ht/</td>
-    <td>Albums</td>
-    <td></td>
 </tr>
 <tr>
     <td>xBunkr</td>

@@ -20,10 +20,6 @@ class LolisafeExtractor(BaseExtractor):
 
 
 BASE_PATTERN = LolisafeExtractor.update({
-    "zzzz" : {
-        "root": "https://zz.ht",
-        "pattern": r"zz\.(?:ht|fo)",
-    },
     "xbunkr": {
         "root": "https://xbunkr.com",
         "pattern": r"xbunkr\.com",
@@ -35,15 +31,6 @@ class LolisafeAlbumExtractor(LolisafeExtractor):
     subcategory = "album"
     pattern = BASE_PATTERN + "/a/([^/?#]+)"
     test = (
-        ("https://zz.ht/a/lop7W6EZ", {
-            "pattern": r"https://z\.zz\.fo/(4anuY|ih560)\.png",
-            "count": 2,
-            "keyword": {
-                "album_id": "lop7W6EZ",
-                "album_name": "ferris",
-            },
-        }),
-        ("https://zz.fo/a/lop7W6EZ"),
         ("https://xbunkr.com/a/TA0bu3F4", {
             "pattern": r"https://media\.xbunkr\.com/[^.]+\.\w+",
             "count": 861,
@@ -71,11 +58,10 @@ class LolisafeAlbumExtractor(LolisafeExtractor):
         yield Message.Directory, data
         for data["num"], file in enumerate(files, 1):
             url = file["file"]
-            if "_fallback" in file:
-                data["_fallback"] = file["_fallback"]
-            text.nameext_from_url(url, data)
-            data["name"], sep, data["id"] = data["filename"].rpartition("-")
-            yield Message.Url, url, data
+            file.update(data)
+            text.nameext_from_url(url, file)
+            file["name"], sep, file["id"] = file["filename"].rpartition("-")
+            yield Message.Url, url, file
 
     def fetch_album(self, album_id):
         url = "{}/api/album/get/{}".format(self.root, album_id)

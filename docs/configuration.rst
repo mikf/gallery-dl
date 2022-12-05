@@ -605,6 +605,27 @@ Description
     and its parsed form as ``"{gdl_http[date]}"``.
 
 
+extractor.*.version-metadata
+----------------------------
+Type
+    ``string``
+Default
+    ``null``
+Description
+    Insert an ``object`` containing gallery-dl's version info into
+    metadata dictionaries as the given name.
+
+    The content of the object is as follows:
+
+    .. code:: json
+
+        {
+            "version"         : "string",
+            "is_executable"   : "bool",
+            "current_git_head": "string or null"
+        }
+
+
 extractor.*.category-transfer
 -----------------------------
 Type
@@ -3257,6 +3278,24 @@ Example
     ``{"Accept": "image/webp,*/*", "Referer": "https://example.org/"}``
 Description
     Additional HTTP headers to send when downloading files,
+
+
+downloader.http.retry-codes
+---------------------------
+Type
+    ``list`` of ``integers``
+Default
+    ``[429]``
+Description
+    Additional `HTTP response status codes <https://developer.mozilla.org/en-US/docs/Web/HTTP/Status>`__
+    to retry a download on.
+
+    Codes ``200``, ``206``, and ``416`` (when resuming a `partial <downloader.*.part_>`__
+    download) will never be retried and always count as success,
+    regardless of this option.
+
+    Codes ``500`` - ``599`` (server error responses)  will always be retried,
+    regardless of this option.
 
 
 downloader.ytdl.format
