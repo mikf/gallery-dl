@@ -6,19 +6,19 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extractors for https://komikcast.me/"""
+"""Extractors for https://komikcast.site/"""
 
 from .common import ChapterExtractor, MangaExtractor
 from .. import text
 import re
 
-BASE_PATTERN = r"(?:https?://)?(?:www\.)?komikcast\.(?:me|com)"
+BASE_PATTERN = r"(?:https?://)?(?:www\.)?komikcast\.(?:site|me|com)"
 
 
 class KomikcastBase():
     """Base class for komikcast extractors"""
     category = "komikcast"
-    root = "https://komikcast.me"
+    root = "https://komikcast.site"
 
     @staticmethod
     def parse_chapter_string(chapter_string, data=None):
@@ -46,23 +46,23 @@ class KomikcastBase():
 
 
 class KomikcastChapterExtractor(KomikcastBase, ChapterExtractor):
-    """Extractor for manga-chapters from komikcast.me"""
+    """Extractor for manga-chapters from komikcast.site"""
     pattern = BASE_PATTERN + r"(/chapter/[^/?#]+/)"
     test = (
-        (("https://komikcast.me/chapter"
+        (("https://komikcast.site/chapter"
           "/apotheosis-chapter-02-2-bahasa-indonesia/"), {
-            "url": "74eca5c9b27b896816497f9b2d847f2a1fcfc209",
+            "url": "f6b43fbc027697749b3ea1c14931c83f878d7936",
             "keyword": "f3938e1aff9ad1f302f52447e9781b21f6da26d4",
         }),
         (("https://komikcast.me/chapter"
           "/soul-land-ii-chapter-300-1-bahasa-indonesia/"), {
-            "url": "243a5250e210b40d17217e83b7547cefea5638bd",
+            "url": "efd00a9bd95461272d51990d7bc54b79ff3ff2e6",
             "keyword": "cb646cfed3d45105bd645ab38b2e9f7d8c436436",
         }),
     )
 
     def metadata(self, page):
-        info = text.extr(page, "<title>", " – Komikcast<")
+        info = text.extr(page, "<title>", " - Komikcast<")
         return self.parse_chapter_string(info)
 
     @staticmethod
@@ -76,12 +76,12 @@ class KomikcastChapterExtractor(KomikcastBase, ChapterExtractor):
 
 
 class KomikcastMangaExtractor(KomikcastBase, MangaExtractor):
-    """Extractor for manga from komikcast.me"""
+    """Extractor for manga from komikcast.site"""
     chapterclass = KomikcastChapterExtractor
     pattern = BASE_PATTERN + r"(/(?:komik/)?[^/?#]+)/?$"
     test = (
-        ("https://komikcast.me/komik/090-eko-to-issho/", {
-            "url": "08204f0a703ec5272121abcf0632ecacba1e588f",
+        ("https://komikcast.site/komik/090-eko-to-issho/", {
+            "url": "19d3d50d532e84be6280a3d61ff0fd0ca04dd6b4",
             "keyword": "837a7e96867344ff59d840771c04c20dc46c0ab1",
         }),
         ("https://komikcast.me/tonari-no-kashiwagi-san/"),
@@ -101,7 +101,7 @@ class KomikcastMangaExtractor(KomikcastBase, MangaExtractor):
     @staticmethod
     def metadata(page):
         """Return a dict with general metadata"""
-        manga , pos = text.extract(page, "<title>" , " – Komikcast<")
+        manga , pos = text.extract(page, "<title>" , " - Komikcast<")
         genres, pos = text.extract(
             page, 'class="komik_info-content-genre">', "</span>", pos)
         author, pos = text.extract(page, ">Author:", "</span>", pos)
