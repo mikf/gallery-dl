@@ -913,6 +913,7 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
             "options": (("extra", 1),),
             "pattern": ("text:<!DOCTYPE html>\n|" +
                         DeviantartStashExtractor.pattern),
+            "count": 2,
         }),
         # video
         ("https://www.deviantart.com/chi-u/art/-VIDEO-Brushes-330774593", {
