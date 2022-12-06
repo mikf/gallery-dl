@@ -516,7 +516,7 @@ class ExhentaiSearchExtractor(ExhentaiExtractor):
                 data["gallery_token"] = gallery.group(3)
                 yield Message.Queue, url + "/", data
 
-            next_url = text.extr(page, 'nexturl = "', '"', None)
+            next_url = text.extr(page, 'nexturl="', '"', None)
             if next_url is not None:
                 if not next_url:
                     return
