@@ -124,9 +124,20 @@ class DeviantartExtractor(Extractor):
                     deviation["_journal"] = journal["html"]
                 yield self.commit_journal(deviation, journal)
 
-            if self.extra:
-                txt = (deviation.get("description", "") +
-                       deviation.get("_journal", ""))
+            if not self.extra:
+                continue
+
+            # ref: https://www.deviantart.com
+            #      /developers/http/v1/20210526/object/editor_text
+            # the value of "features" is a JSON string with forward
+            # slashes escaped
+            text_content = \
+                deviation["text_content"]["body"]["features"].replace(
+                    "\\/", "/") if "text_content" in deviation else None
+            for txt in (text_content, deviation.get("description"),
+                        deviation.get("_journal")):
+                if txt is None:
+                    continue
                 for match in DeviantartStashExtractor.pattern.finditer(txt):
                     url = text.ensure_http_scheme(match.group(0))
                     deviation["_extractor"] = DeviantartStashExtractor
@@ -895,6 +906,13 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
             "pattern": DeviantartStashExtractor.pattern,
             "range": "2-",
             "count": 4,
+        }),
+        # sta.sh URL from deviation["text_content"]["body"]["features"]
+        (("https://www.deviantart.com"
+          "/cimar-wildehopps/art/Honorary-Vixen-859809305"), {
+            "options": (("extra", 1),),
+            "pattern": ("text:<!DOCTYPE html>\n|" +
+                        DeviantartStashExtractor.pattern),
         }),
         # video
         ("https://www.deviantart.com/chi-u/art/-VIDEO-Brushes-330774593", {
