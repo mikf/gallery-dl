@@ -29,6 +29,8 @@ class PathFormat():
     def __init__(self, extractor):
         config = extractor.config
         kwdefault = config("keywords-default")
+        if kwdefault is None:
+            kwdefault = util.NONE
 
         filename_fmt = config("filename")
         try:
