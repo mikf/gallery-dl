@@ -97,12 +97,7 @@ class DanbooruExtractor(BaseExtractor):
                     post["extension"] = "webm"
 
             if self.extended_metadata:
-                template = (
-                    "{}/posts/{}.json"
-                    "?only=artist_commentary,children,notes,parent"
-                )
-                resp = self.request(template.format(self.root, post["id"]))
-                post.update(resp.json())
+                post.update(self._extended_metadata(post["id"]))
 
             if url[0] == "/":
                 url = self.root + url
@@ -116,6 +111,14 @@ class DanbooruExtractor(BaseExtractor):
 
     def posts(self):
         return ()
+
+    def _extended_metadata(self, post_id):
+        template = (
+            "{}/posts/{}.json"
+            "?only=artist_commentary,children,notes,parent"
+        )
+        resp = self.request(template.format(self.root, post_id))
+        return resp.json()
 
     def _pagination(self, endpoint, params, pagenum=False):
         url = self.root + endpoint
