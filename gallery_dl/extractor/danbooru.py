@@ -35,12 +35,14 @@ class DanbooruExtractor(BaseExtractor):
         self.request_interval_min = iget("request-interval-min", 0.0)
         self._pools = iget("pools")
         self._popular_endpoint = iget("popular", "/explore/posts/popular.json")
+        ext = iget("extended-metadata")
 
         BaseExtractor.__init__(self, match)
 
         self.ugoira = self.config("ugoira", False)
         self.external = self.config("external", False)
-        self.extended_metadata = self.config("metadata", False)
+        self.extended_metadata = ext if ext is not None \
+            else self.config("metadata", False)
 
         username, api_key = self._get_auth_info()
         if username:
@@ -161,6 +163,9 @@ INSTANCES = {
         "pattern": r"e(?:621|926)\.net",
         "headers": {"User-Agent": "gallery-dl/{} (by mikf)".format(
             __version__)},
+        # TODO: extract notes using the /notes.json API endpoint
+        # ref: https://e621.net/help/api#notes
+        "extended-metadata": False,
         "pools": "sort",
         "popular": "/popular.json",
         "page-limit": 750,
