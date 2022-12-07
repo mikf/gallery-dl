@@ -65,7 +65,7 @@ class KhinsiderSoundtrackExtractor(AsynchronousMixin, Extractor):
             "count": text.parse_int(extr("Number of Files: <b>", "<")),
             "size" : text.parse_bytes(extr("Total Filesize: <b>", "<")[:-1]),
             "date" : extr("Date Added: <b>", "<"),
-            "type" : extr("Album type: <b>", "<"),
+            "type" : text.remove_html(extr("Album type: <b>", "</b>")),
         }}
 
     def tracks(self, page):
