@@ -8,7 +8,6 @@
 
 """Extractor for https://fandom.com/"""
 
-import json
 import re
 from .common import GalleryExtractor
 from .. import text
@@ -52,9 +51,9 @@ class FandomMediaExtractor(GalleryExtractor):
             for match in matches:
                 href = text.unescape(match[0])
                 name, _, ext = text.unescape(match[1]).rpartition(".")
-                api_url = self.gallery_url + '/api.php?action=query&format=json' + \
+                api_url = self.gallery_url + '/api.php?action=query' + \
                     '&prop=imageinfo&titles=File%%3A%s' % match[1] + \
-                        '&iiprop=timestamp%7Csize%7Cdimensions'
+                    '&format=json&iiprop=timestamp%7Csize%7Cdimensions'
                 meta = self.request(api_url).json()
                 for pageid in meta["query"]["pages"]:
                     page = meta["query"]["pages"][pageid]
