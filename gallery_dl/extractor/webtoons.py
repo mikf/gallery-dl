@@ -57,6 +57,7 @@ class WebtoonsEpisodeExtractor(WebtoonsBase, GalleryExtractor):
         }),
         (("https://www.webtoons.com/en/challenge/punderworld"
           "/happy-earth-day-/viewer?title_no=312584&episode_no=40"), {
+            "exception": exception.NotFoundError,
             "keyword": {
                 "comic": "punderworld",
                 "description": str,
