@@ -13,7 +13,7 @@ from .common import GalleryExtractor
 from .. import text
 
 
-class FandomMediaExtractor(GalleryExtractor):
+class FandomGalleryExtractor(GalleryExtractor):
     """Extractor for Fandom/Wikia media"""
     category = "fandom"
     directory_fmt = ("{category}", "{wiki}")
