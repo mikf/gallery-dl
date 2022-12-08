@@ -38,6 +38,7 @@ modules = [
     "exhentai",
     "fallenangels",
     "fanbox",
+    "fandom",
     "fantia",
     "fapachi",
     "flickr",
