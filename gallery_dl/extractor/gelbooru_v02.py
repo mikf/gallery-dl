@@ -174,7 +174,8 @@ class GelbooruV02TagExtractor(GelbooruV02Extractor):
     pattern = BASE_PATTERN + r"/index\.php\?page=post&s=list&tags=([^&#]+)"
     test = (
         ("https://rule34.xxx/index.php?page=post&s=list&tags=danraku", {
-            "content": "5c6ae9ee13e6d4bc9cb8bdce224c84e67fbfa36c",
+            "content": ("5c6ae9ee13e6d4bc9cb8bdce224c84e67fbfa36c",
+                        "622e80be3f496672c44aab5c47fbc6941c61bc79"),
             "pattern": r"https?://.*rule34\.xxx/images/\d+/[0-9a-f]+\.jpg",
             "count": 2,
         }),
