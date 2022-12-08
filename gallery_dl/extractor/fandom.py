@@ -8,12 +8,13 @@
 
 """Extractor for https://fandom.com/"""
 
+import json
 import re
 from .common import GalleryExtractor
 from .. import text
 
 
-class FandomExtractor(GalleryExtractor):
+class FandomMediaExtractor(GalleryExtractor):
     """Extractor for Fandom/Wikia media"""
     category = "fandom"
     directory_fmt = ("{category}", "{wiki}")
@@ -51,10 +52,22 @@ class FandomExtractor(GalleryExtractor):
             for match in matches:
                 href = text.unescape(match[0])
                 name, _, ext = text.unescape(match[1]).rpartition(".")
-                yield href, {
-                    "filename": name,
-                    "extension": ext.lower(),
-                }
+                api_url = self.gallery_url + '/api.php?action=query&format=json' + \
+                    '&prop=imageinfo&titles=File%%3A%s' % match[1] + \
+                        '&iiprop=timestamp%7Csize%7Cdimensions'
+                meta = self.request(api_url).json()
+                for pageid in meta["query"]["pages"]:
+                    page = meta["query"]["pages"][pageid]
+                    info = page["imageinfo"][0]
+                    yield href, {
+                        "filename": name,
+                        "extension": ext.lower(),
+                        "pageid": pageid,
+                        "timestamp": text.parse_datetime(info["timestamp"]),
+                        "size": info["size"],
+                        "width": info["width"],
+                        "height": info["height"],
+                    }
             if len(matches) < limit:
                 return
             offset += limit
