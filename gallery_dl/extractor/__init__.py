@@ -130,6 +130,7 @@ modules = [
     "slickpic",
     "slideshare",
     "smugmug",
+    "soundgasm",
     "speakerdeck",
     "subscribestar",
     "tapas",
