@@ -60,8 +60,6 @@ CATEGORY_MAP = {
     "joyreactor"     : "JoyReactor",
     "kabeuchi"       : "かべうち",
     "kemonoparty"    : "Kemono",
-    "kireicake"      : "Kirei Cake",
-    "kissgoddess"    : "Kiss Goddess",
     "lineblog"       : "LINE BLOG",
     "livedoor"       : "livedoor Blog",
     "omgmiamiswimwear": "Omg Miami Swimwear",

@@ -142,10 +142,12 @@ def build_parser():
     )
     general.add_argument(
         "--cookies-from-browser",
-        dest="cookies_from_browser", metavar="BROWSER[+KEYRING][:PROFILE]",
+        dest="cookies_from_browser",
+        metavar="BROWSER[+KEYRING][:PROFILE][::CONTAINER]",
         help=("Name of the browser to load cookies from, "
-              "with optional keyring name prefixed with '+' and "
-              "profile prefixed with ':'"),
+              "with optional keyring name prefixed with '+', "
+              "profile prefixed with ':', and "
+              "container prefixed with '::' ('none' for no container)"),
     )
 
     output = parser.add_argument_group("Output Options")

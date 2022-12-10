@@ -633,7 +633,7 @@ class TwitterEventExtractor(TwitterExtractor):
     pattern = BASE_PATTERN + r"/i/events/(\d+)"
     test = ("https://twitter.com/i/events/1484669206993903616", {
         "range": "1-20",
-        "count": ">5",
+        "count": ">=1",
     })
 
     def metadata(self):
@@ -759,7 +759,7 @@ class TwitterTweetExtractor(TwitterExtractor):
         # retweet with missing media entities (#1555)
         ("https://twitter.com/morino_ya/status/1392763691599237121", {
             "options": (("retweets", True),),
-            "count": 4,
+            "count": 0,  # private
         }),
         # deleted quote tweet (#2225)
         ("https://twitter.com/i/web/status/1460044411165888515", {
@@ -782,7 +782,7 @@ class TwitterTweetExtractor(TwitterExtractor):
         # '?format=...&name=...'-style URLs
         ("https://twitter.com/poco_dandy/status/1150646424461176832", {
             "options": (("cards", True),),
-            "pattern": r"https://pbs.twimg.com/card_img/157\d+/\w+"
+            "pattern": r"https://pbs.twimg.com/card_img/157\d+/[\w-]+"
                        r"\?format=(jpg|png)&name=orig$",
             "range": "1-2",
         }),
