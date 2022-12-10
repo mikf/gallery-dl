@@ -434,12 +434,6 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
-    <td>Kiss Goddess</td>
-    <td>https://kissgoddess.com/</td>
-    <td>Galleries, Models</td>
-    <td></td>
-</tr>
-<tr>
     <td>Kohlchan</td>
     <td>https://kohlchan.net/</td>
     <td>Boards, Threads</td>
@@ -447,7 +441,7 @@ Consider all sites to be NSFW unless otherwise known.
 </tr>
 <tr>
     <td>Komikcast</td>
-    <td>https://komikcast.me/</td>
+    <td>https://komikcast.site/</td>
     <td>Chapters, Manga</td>
     <td></td>
 </tr>
@@ -1268,12 +1262,6 @@ Consider all sites to be NSFW unless otherwise known.
 
 <tr>
     <td colspan="4"><strong>FoOlSlide Instances</strong></td>
-</tr>
-<tr>
-    <td>Kirei Cake</td>
-    <td>https://reader.kireicake.com/</td>
-    <td>Chapters, Manga</td>
-    <td></td>
 </tr>
 <tr>
     <td>PowerManga</td>

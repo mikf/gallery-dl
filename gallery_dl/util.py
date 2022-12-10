@@ -528,8 +528,8 @@ def parse_inputfile(file, log):
                 yield line
 
 
-class UniversalNone():
-    """None-style object that supports more operations than None itself"""
+class CustomNone():
+    """None-style type that supports more operations than regular None"""
     __slots__ = ()
 
     def __getattribute__(self, _):
@@ -538,9 +538,27 @@ class UniversalNone():
     def __getitem__(self, _):
         return self
 
+    def __iter__(self):
+        return self
+
+    def __call__(self, *args, **kwargs):
+        return self
+
+    @staticmethod
+    def __next__():
+        raise StopIteration
+
     @staticmethod
     def __bool__():
         return False
+
+    @staticmethod
+    def __len__():
+        return 0
+
+    @staticmethod
+    def __format__(_):
+        return "None"
 
     @staticmethod
     def __str__():
@@ -549,7 +567,7 @@ class UniversalNone():
     __repr__ = __str__
 
 
-NONE = UniversalNone()
+NONE = CustomNone()
 EPOCH = datetime.datetime(1970, 1, 1)
 SECOND = datetime.timedelta(0, 1)
 WINDOWS = (os.name == "nt")

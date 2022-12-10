@@ -24,7 +24,7 @@ import tempfile
 from datetime import datetime, timedelta, timezone
 from hashlib import pbkdf2_hmac
 from http.cookiejar import Cookie
-from . import aes
+from . import aes, text
 
 
 SUPPORTED_BROWSERS_CHROMIUM = {
@@ -35,11 +35,10 @@ logger = logging.getLogger("cookies")
 
 
 def load_cookies(cookiejar, browser_specification):
-    browser_name, profile, keyring = \
+    browser_name, profile, keyring, container = \
         _parse_browser_specification(*browser_specification)
-
     if browser_name == "firefox":
-        load_cookies_firefox(cookiejar, profile)
+        load_cookies_firefox(cookiejar, profile, container)
     elif browser_name == "safari":
         load_cookies_safari(cookiejar, profile)
     elif browser_name in SUPPORTED_BROWSERS_CHROMIUM:
@@ -48,12 +47,24 @@ def load_cookies(cookiejar, browser_specification):
         raise ValueError("unknown browser '{}'".format(browser_name))
 
 
-def load_cookies_firefox(cookiejar, profile=None):
-    set_cookie = cookiejar.set_cookie
-    with _firefox_cookies_database(profile) as db:
+def load_cookies_firefox(cookiejar, profile=None, container=None):
+    path, container_id = _firefox_cookies_database(profile, container)
+    with DatabaseCopy(path) as db:
+
+        sql = ("SELECT name, value, host, path, isSecure, expiry "
+               "FROM moz_cookies")
+        parameters = ()
+
+        if container_id is False:
+            sql += " WHERE NOT INSTR(originAttributes,'userContextId=')"
+        elif container_id:
+            sql += " WHERE originAttributes LIKE ? OR originAttributes LIKE ?"
+            uid = "%userContextId={}".format(container_id)
+            parameters = (uid, uid + "&%")
+
+        set_cookie = cookiejar.set_cookie
         for name, value, domain, path, secure, expires in db.execute(
-                "SELECT name, value, host, path, isSecure, expiry  "
-                "FROM moz_cookies"):
+                sql, parameters):
             set_cookie(Cookie(
                 0, name, value, None, False,
                 domain, bool(domain), domain.startswith("."),
@@ -79,9 +90,10 @@ def load_cookies_safari(cookiejar, profile=None):
 
 def load_cookies_chrome(cookiejar, browser_name, profile, keyring):
     config = _get_chromium_based_browser_settings(browser_name)
+    path = _chrome_cookies_database(profile, config)
+    logger.debug("Extracting cookies from %s", path)
 
-    with _chrome_cookies_database(profile, config) as db:
-
+    with DatabaseCopy(path) as db:
         db.text_factory = bytes
         decryptor = get_cookie_decryptor(
             config["directory"], config["keyring"], keyring=keyring)
@@ -134,8 +146,8 @@ def load_cookies_chrome(cookiejar, browser_name, profile, keyring):
 # --------------------------------------------------------------------
 # firefox
 
-def _firefox_cookies_database(profile=None):
-    if profile is None:
+def _firefox_cookies_database(profile=None, container=None):
+    if not profile:
         search_root = _firefox_browser_directory()
     elif _is_path(profile):
         search_root = profile
@@ -146,14 +158,45 @@ def _firefox_cookies_database(profile=None):
     if path is None:
         raise FileNotFoundError("Unable to find Firefox cookies database in "
                                 "{}".format(search_root))
-
     logger.debug("Extracting cookies from %s", path)
-    return DatabaseCopy(path)
+
+    if container == "none":
+        container_id = False
+        logger.debug("Only loading cookies not belonging to any container")
+
+    elif container:
+        containers_path = os.path.join(
+            os.path.dirname(path), "containers.json")
+
+        try:
+            with open(containers_path) as containers:
+                identities = json.load(containers)["identities"]
+        except OSError:
+            logger.error("Unable to read Firefox container database at %s",
+                         containers_path)
+            raise
+        except KeyError:
+            identities = ()
+
+        for context in identities:
+            if container == context.get("name") or container == text.extr(
+                    context.get("l10nID", ""), "userContext", ".label"):
+                container_id = context["userContextId"]
+                break
+        else:
+            raise ValueError("Unable to find Firefox container {}".format(
+                container))
+        logger.debug("Only loading cookies from container '%s' (ID %s)",
+                     container, container_id)
+    else:
+        container_id = None
+
+    return path, container_id
 
 
 def _firefox_browser_directory():
     if sys.platform in ("win32", "cygwin"):
-        return os.path.expandvars(R"%APPDATA%\Mozilla\Firefox\Profiles")
+        return os.path.expandvars(r"%APPDATA%\Mozilla\Firefox\Profiles")
     if sys.platform == "darwin":
         return os.path.expanduser("~/Library/Application Support/Firefox")
     return os.path.expanduser("~/.mozilla/firefox")
@@ -237,7 +280,7 @@ def _safari_parse_cookies_record(data, cookiejar):
 
     cookiejar.set_cookie(Cookie(
         0, name, value, None, False,
-        domain, bool(domain), domain.startswith('.'),
+        domain, bool(domain), domain.startswith("."),
         path, bool(path), is_secure, expiration_date, False,
         None, None, {},
     ))
@@ -265,9 +308,7 @@ def _chrome_cookies_database(profile, config):
     if path is None:
         raise FileNotFoundError("Unable to find {} cookies database in "
                                 "'{}'".format(config["browser"], search_root))
-
-    logger.debug("Extracting cookies from %s", path)
-    return DatabaseCopy(path)
+    return path
 
 
 def _get_chromium_based_browser_settings(browser_name):
@@ -937,11 +978,12 @@ def _is_path(value):
     return os.path.sep in value
 
 
-def _parse_browser_specification(browser, profile=None, keyring=None):
+def _parse_browser_specification(
+        browser, profile=None, keyring=None, container=None):
     if browser not in SUPPORTED_BROWSERS:
         raise ValueError("unsupported browser '{}'".format(browser))
     if keyring and keyring not in SUPPORTED_KEYRINGS:
         raise ValueError("unsupported keyring '{}'".format(keyring))
     if profile and _is_path(profile):
         profile = os.path.expanduser(profile)
-    return browser, profile, keyring
+    return browser, profile, keyring, container

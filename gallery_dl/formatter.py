@@ -18,8 +18,10 @@ import operator
 import functools
 from . import text, util
 
+NONE = util.NONE
 
-def parse(format_string, default=None, fmt=format):
+
+def parse(format_string, default=NONE, fmt=format):
     key = format_string, default, fmt
 
     try:
@@ -88,7 +90,7 @@ class StringFormatter():
         Example: {f:R /_/} -> "f_o_o_b_a_r" (if "f" is "f o o b a r")
     """
 
-    def __init__(self, format_string, default=None, fmt=format):
+    def __init__(self, format_string, default=NONE, fmt=format):
         self.default = default
         self.format = fmt
         self.result = []
@@ -193,7 +195,7 @@ class StringFormatter():
 class TemplateFormatter(StringFormatter):
     """Read format_string from file"""
 
-    def __init__(self, path, default=None, fmt=format):
+    def __init__(self, path, default=NONE, fmt=format):
         with open(util.expand_path(path)) as fp:
             format_string = fp.read()
         StringFormatter.__init__(self, format_string, default, fmt)
@@ -202,14 +204,14 @@ class TemplateFormatter(StringFormatter):
 class ExpressionFormatter():
     """Generate text by evaluating a Python expression"""
 
-    def __init__(self, expression, default=None, fmt=None):
+    def __init__(self, expression, default=NONE, fmt=None):
         self.format_map = util.compile_expression(expression)
 
 
 class ModuleFormatter():
     """Generate text by calling an external function"""
 
-    def __init__(self, function_spec, default=None, fmt=None):
+    def __init__(self, function_spec, default=NONE, fmt=None):
         module_name, _, function_name = function_spec.partition(":")
         module = __import__(module_name)
         self.format_map = getattr(module, function_name)
@@ -218,7 +220,7 @@ class ModuleFormatter():
 class FStringFormatter():
     """Generate text by evaluaring an f-string literal"""
 
-    def __init__(self, fstring, default=None, fmt=None):
+    def __init__(self, fstring, default=NONE, fmt=None):
         self.format_map = util.compile_expression("f'''" + fstring + "'''")
 
 

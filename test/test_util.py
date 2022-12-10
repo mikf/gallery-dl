@@ -618,10 +618,21 @@ class TestOther(unittest.TestCase):
         obj = util.NONE
 
         self.assertFalse(obj)
+        self.assertEqual(len(obj), 0)
         self.assertEqual(str(obj), str(None))
         self.assertEqual(repr(obj), repr(None))
+        self.assertEqual(format(obj), str(None))
+        self.assertEqual(format(obj, "%F"), str(None))
         self.assertIs(obj.attr, obj)
         self.assertIs(obj["key"], obj)
+        self.assertIs(obj(), obj)
+        self.assertIs(obj(1, "a"), obj)
+        self.assertIs(obj(foo="bar"), obj)
+
+        i = 0
+        for _ in obj:
+            i += 1
+        self.assertEqual(i, 0)
 
 
 class TestExtractor():
