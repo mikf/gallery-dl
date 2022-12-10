@@ -20,14 +20,24 @@ class E621Extractor(danbooru.DanbooruExtractor):
         super().__init__(match)
 
 
+HEADER = {"User-Agent": "gallery-dl/{} (by mikf)".format(__version__)}
 INSTANCES = {
     "e621": {
-        "root": None,
-        "pattern": r"e(?:621|926)\.net",
-        "headers": {"User-Agent": "gallery-dl/{} (by mikf)".format(
-            __version__)},
+        "root": "https://e621.net",
+        "pattern": r"e621\.net",
+        "headers": HEADER,
         # TODO: extract notes using the /notes.json API endpoint
         # ref: https://e621.net/help/api#notes
+        "extended-metadata": False,
+        "pools": "sort",
+        "page-limit": 750,
+        "per-page": 320,
+        "request-interval-min": 1.0,
+    },
+    "e926": {
+        "root": "https://e926.net",
+        "pattern": r"e926\.net",
+        "headers": HEADER,
         "extended-metadata": False,
         "pools": "sort",
         "page-limit": 750,
