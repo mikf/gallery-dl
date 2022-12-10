@@ -770,6 +770,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td><a href="https://github.com/mikf/gallery-dl#oauth">OAuth</a></td>
 </tr>
 <tr>
+    <td>Soundgasm</td>
+    <td>https://soundgasm.net/</td>
+    <td>Sounds, User Profiles</td>
+    <td></td>
+</tr>
+<tr>
     <td>Speaker Deck</td>
     <td>https://speakerdeck.com/</td>
     <td>Presentations</td>
