@@ -343,4 +343,4 @@ class DanbooruPopularExtractor(DanbooruExtractor):
     def posts(self):
         if self.page_start is None:
             self.page_start = 1
-        return self._pagination(self._popular_endpoint, self.params, True)
+        return self._pagination("/explore/posts/popular.json", self.params, True)
