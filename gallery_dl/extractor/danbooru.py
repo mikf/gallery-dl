@@ -9,7 +9,6 @@
 """Extractors for https://danbooru.donmai.us/ and other Danbooru instances"""
 
 from .common import BaseExtractor, Message
-from ..version import __version__
 from .. import text
 import datetime
 
@@ -23,10 +22,10 @@ class DanbooruExtractor(BaseExtractor):
     per_page = 200
 
     def __init__(self, match):
-        self._init_category(match)
-
-        instance = INSTANCES.get(self.category) or {}
-        iget = instance.get
+        if not self.category:
+            self._init_category(match)
+            self.instance = INSTANCES.get(self.category) or {}
+        iget = self.instance.get
 
         self.headers = iget("headers")
         self.page_limit = iget("page-limit", 1000)
@@ -34,15 +33,12 @@ class DanbooruExtractor(BaseExtractor):
         self.per_page = iget("per-page", 200)
         self.request_interval_min = iget("request-interval-min", 0.0)
         self._pools = iget("pools")
-        self._popular_endpoint = iget("popular", "/explore/posts/popular.json")
-        ext = iget("extended-metadata")
 
         BaseExtractor.__init__(self, match)
 
         self.ugoira = self.config("ugoira", False)
         self.external = self.config("external", False)
-        self.extended_metadata = ext if ext is not None \
-            else self.config("metadata", False)
+        self.extended_metadata = self.config("metadata", False)
 
         username, api_key = self._get_auth_info()
         if username:
@@ -161,20 +157,6 @@ INSTANCES = {
         "root": None,
         "pattern": r"(?:danbooru|hijiribe|sonohara|safebooru)\.donmai\.us",
     },
-    "e621": {
-        "root": None,
-        "pattern": r"e(?:621|926)\.net",
-        "headers": {"User-Agent": "gallery-dl/{} (by mikf)".format(
-            __version__)},
-        # TODO: extract notes using the /notes.json API endpoint
-        # ref: https://e621.net/help/api#notes
-        "extended-metadata": False,
-        "pools": "sort",
-        "popular": "/popular.json",
-        "page-limit": 750,
-        "per-page": 320,
-        "request-interval-min": 1.0,
-    },
     "atfbooru": {
         "root": "https://booru.allthefallen.moe",
         "pattern": r"booru\.allthefallen\.moe",
@@ -208,10 +190,6 @@ class DanbooruTagExtractor(DanbooruExtractor):
             "options": (("external", True),),
             "pattern": r"https://i\.pximg\.net/img-original/img"
                        r"/2008/08/28/02/35/48/1476533_p0\.jpg",
-        }),
-        ("https://e621.net/posts?tags=anry", {
-            "url": "8021e5ea28d47c474c1ffc9bd44863c4d45700ba",
-            "content": "501d1e5d922da20ee8ff9806f5ed3ce3a684fd58",
         }),
         ("https://booru.allthefallen.moe/posts?tags=yume_shokunin", {
             "count": 12,
@@ -250,17 +228,12 @@ class DanbooruPoolExtractor(DanbooruExtractor):
         ("https://danbooru.donmai.us/pools/7659", {
             "content": "b16bab12bea5f7ea9e0a836bf8045f280e113d99",
         }),
-        ("https://e621.net/pools/73", {
-            "url": "1bd09a72715286a79eea3b7f09f51b3493eb579a",
-            "content": "91abe5d5334425d9787811d7f06d34c77974cd22",
-        }),
         ("https://booru.allthefallen.moe/pools/9", {
             "url": "902549ffcdb00fe033c3f63e12bc3cb95c5fd8d5",
             "count": 6,
         }),
         ("https://aibooru.online/pools/1"),
         ("https://danbooru.donmai.us/pool/show/7659"),
-        ("https://e621.net/pool/show/73"),
     )
 
     def __init__(self, match):
@@ -314,10 +287,6 @@ class DanbooruPostExtractor(DanbooruExtractor):
             "pattern": r"https?://.+\.zip$",
             "options": (("ugoira", True),)
         }),
-        ("https://e621.net/posts/535", {
-            "url": "f7f78b44c9b88f8f09caac080adc8d6d9fdaa529",
-            "content": "66f46e96a893fba8e694c4e049b23c2acc9af462",
-        }),
         ("https://booru.allthefallen.moe/posts/22", {
             "content": "21dda68e1d7e0a554078e62923f537d8e895cac8",
         }),
@@ -325,7 +294,6 @@ class DanbooruPostExtractor(DanbooruExtractor):
             "content": "54d548743cd67799a62c77cbae97cfa0fec1b7e9",
         }),
         ("https://danbooru.donmai.us/post/show/294929"),
-        ("https://e621.net/post/show/535"),
     )
 
     def __init__(self, match):
@@ -350,12 +318,6 @@ class DanbooruPopularExtractor(DanbooruExtractor):
           "?date=2013-06-06&scale=week"), {
             "range": "1-120",
             "count": 120,
-        }),
-        ("https://e621.net/popular"),
-        (("https://e621.net/explore/posts/popular"
-          "?date=2019-06-01&scale=month"), {
-            "pattern": r"https://static\d.e621.net/data/../../[0-9a-f]+",
-            "count": ">= 70",
         }),
         ("https://booru.allthefallen.moe/explore/posts/popular"),
         ("https://aibooru.online/explore/posts/popular"),
@@ -382,30 +344,3 @@ class DanbooruPopularExtractor(DanbooruExtractor):
         if self.page_start is None:
             self.page_start = 1
         return self._pagination(self._popular_endpoint, self.params, True)
-
-
-class DanbooruFavoriteExtractor(DanbooruExtractor):
-    """Extractor for e621 favorites"""
-    subcategory = "favorite"
-    directory_fmt = ("{category}", "Favorites", "{user_id}")
-    archive_fmt = "f_{user_id}_{id}"
-    pattern = BASE_PATTERN + r"/favorites(?:\?([^#]*))?"
-    test = (
-        ("https://e621.net/favorites"),
-        ("https://e621.net/favorites?page=2&user_id=53275", {
-            "pattern": r"https://static\d.e621.net/data/../../[0-9a-f]+",
-            "count": "> 260",
-        }),
-    )
-
-    def __init__(self, match):
-        DanbooruExtractor.__init__(self, match)
-        self.query = text.parse_query(match.group(match.lastindex))
-
-    def metadata(self):
-        return {"user_id": self.query.get("user_id", "")}
-
-    def posts(self):
-        if self.page_start is None:
-            self.page_start = 1
-        return self._pagination("/favorites.json", self.query, True)
