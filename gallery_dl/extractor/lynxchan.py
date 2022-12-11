@@ -58,10 +58,9 @@ class LynxchanThreadExtractor(LynxchanExtractor):
         url = "{}/{}/res/{}.json".format(self.root, self.board, self.thread)
         thread = self.request(url).json()
         thread["postId"] = thread["threadId"]
-        posts = thread.pop("posts")
+        posts = thread.pop("posts", ())
 
         yield Message.Directory, thread
-
         for post in itertools.chain((thread,), posts):
             files = post.pop("files", ())
             if files:
