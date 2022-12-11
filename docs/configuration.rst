@@ -971,7 +971,7 @@ extractor.cyberdrop.domain
 Type
     ``string``
 Default
-    ``"auto"``
+    ``null``
 Example
     ``"cyberdrop.to"``
 Description
@@ -1717,7 +1717,7 @@ extractor.lolisafe.domain
 Type
     ``string``
 Default
-    ``"auto"``
+    ``null``
 Description
     Specifies the domain used by a ``lolisafe`` extractor
     regardless of input URL.
