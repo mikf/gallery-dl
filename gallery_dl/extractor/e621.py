@@ -19,6 +19,16 @@ class E621Extractor(danbooru.DanbooruExtractor):
         self.instance = INSTANCES.get(self.category) or {}
         super().__init__(match)
 
+    def _extended_metadata(self, post):
+        """Provide additional metadata for an e621 post"""
+        # extract notes
+        # ref: https://e621.net/help/api#notes
+        if "has_notes" in post and not post["has_notes"]:
+            return
+        resp = self.request("{}/notes.json".format(self.root),
+                            params={"search[post_id]": post["id"]}).json()
+        return {"notes": resp}
+
 
 HEADER = {"User-Agent": "gallery-dl/{} (by mikf)".format(__version__)}
 INSTANCES = {
@@ -26,9 +36,6 @@ INSTANCES = {
         "root": "https://e621.net",
         "pattern": r"e621\.net",
         "headers": HEADER,
-        # TODO: extract notes using the /notes.json API endpoint
-        # ref: https://e621.net/help/api#notes
-        "extended-metadata": False,
         "pools": "sort",
         "page-limit": 750,
         "per-page": 320,
@@ -38,7 +45,6 @@ INSTANCES = {
         "root": "https://e926.net",
         "pattern": r"e926\.net",
         "headers": HEADER,
-        "extended-metadata": False,
         "pools": "sort",
         "page-limit": 750,
         "per-page": 320,
