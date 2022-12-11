@@ -434,12 +434,6 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
-    <td>Kohlchan</td>
-    <td>https://kohlchan.net/</td>
-    <td>Boards, Threads</td>
-    <td></td>
-</tr>
-<tr>
     <td>Komikcast</td>
     <td>https://komikcast.site/</td>
     <td>Chapters, Manga</td>
@@ -1037,6 +1031,22 @@ Consider all sites to be NSFW unless otherwise known.
     <td>Hypnohub</td>
     <td>https://hypnohub.net/</td>
     <td>Favorites, Pools, Posts, Tag Searches</td>
+    <td></td>
+</tr>
+
+<tr>
+    <td colspan="4"><strong>LynxChan Imageboards</strong></td>
+</tr>
+<tr>
+    <td>Kohlchan</td>
+    <td>https://kohlchan.net/</td>
+    <td>Boards, Threads</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Endchan</td>
+    <td>https://endchan.org/</td>
+    <td>Boards, Threads</td>
     <td></td>
 </tr>
 
