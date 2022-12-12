@@ -22,8 +22,8 @@ BASE_PATTERN = LynxchanExtractor.update({
         "pattern": r"kohlchan\.net"
     },
     "endchan": {
-        "root": "https://endchan.org",
-        "pattern": r"endchan\.org"
+        "root": None,
+        "pattern": r"endchan\.(?:org|net|gg)",
     },
 })
 
@@ -86,7 +86,7 @@ class LynxchanBoardExtractor(LynxchanExtractor):
         ("https://kohlchan.net/a/catalog.html"),
         ("https://endchan.org/yuri/", {
             "pattern": LynxchanThreadExtractor.pattern,
-            "count"  : ">= 10",
+            "count"  : ">= 9",
         }),
         ("https://endchan.org/yuri/catalog.html"),
     )
