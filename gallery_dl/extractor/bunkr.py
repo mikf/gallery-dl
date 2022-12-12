@@ -68,12 +68,12 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
                 "count"      : len(files),
             }
 
-        headers = {"Referer": root.replace("://", "://stream.", 1)}
+        headers = {"Referer": root.replace("://", "://stream.", 1) + "/"}
         for file in files:
             if file["file"].endswith(
                     (".mp4", ".m4v", ".mov", ".webm", ".zip", ".rar", ".7z")):
                 file["_http_headers"] = headers
                 file["file"] = file["file"].replace(
-                    "//cdn", "//media-files", 1)
+                    "://cdn", "://media-files", 1)
 
         return files, data

@@ -886,7 +886,7 @@ class TwitterBackgroundExtractor(TwitterExtractor):
 
     def tweets(self):
         self.api._user_id_by_screen_name(self.user)
-        user = user = self._user_obj
+        user = self._user_obj
 
         try:
             url = user["legacy"]["profile_banner_url"]
