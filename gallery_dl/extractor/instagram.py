@@ -65,6 +65,10 @@ class InstagramExtractor(Extractor):
 
             post["count"] = len(files)
             yield Message.Directory, post
+
+            if "date" in post:
+                del post["date"]
+
             for file in files:
                 file.update(post)
 
