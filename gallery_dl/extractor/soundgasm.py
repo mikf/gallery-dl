@@ -19,7 +19,7 @@ class SoundgasmAudioExtractor(Extractor):
     root = "https://soundgasm.net"
     directory_fmt = ("{category}", "{user}")
     filename_fmt = "{title}.{extension}"
-    archive_fmt = "{user}_{filename}"
+    archive_fmt = "{user}_{slug}"
     pattern = (r"(?:https?://)?(?:www\.)?soundgasm\.net"
                r"/u(?:ser)?/([^/?#]+)/([^/?#]+)")
     test = (

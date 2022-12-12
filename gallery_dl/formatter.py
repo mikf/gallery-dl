@@ -218,7 +218,7 @@ class ModuleFormatter():
 
 
 class FStringFormatter():
-    """Generate text by evaluaring an f-string literal"""
+    """Generate text by evaluating an f-string literal"""
 
     def __init__(self, fstring, default=NONE, fmt=None):
         self.format_map = util.compile_expression("f'''" + fstring + "'''")
