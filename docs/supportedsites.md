@@ -772,7 +772,7 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>Soundgasm</td>
     <td>https://soundgasm.net/</td>
-    <td>Audio</td>
+    <td>Audio, User Profiles</td>
     <td></td>
 </tr>
 <tr>
