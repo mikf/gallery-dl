@@ -890,6 +890,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td><a href="configuration.rst#extractorweasylapi-key">API Key</a></td>
 </tr>
 <tr>
+    <td>webmshare</td>
+    <td>https://webmshare.com/</td>
+    <td>Videos</td>
+    <td></td>
+</tr>
+<tr>
     <td>Webtoon</td>
     <td>https://www.webtoons.com/</td>
     <td>Comics, Episodes</td>
