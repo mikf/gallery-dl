@@ -6,6 +6,7 @@
 
 """Extractors for https://e621.net/ and https://e926.net/"""
 
+from ..cache import memcache
 from ..version import __version__
 from .. import text
 from . import danbooru
@@ -21,13 +22,31 @@ class E621Extractor(danbooru.DanbooruExtractor):
 
     def _extended_metadata(self, post):
         """Provide additional metadata for an e621 post"""
+        data = {}
         # extract notes
         # ref: https://e621.net/help/api#notes
-        if "has_notes" in post and not post["has_notes"]:
-            return
-        resp = self.request("{}/notes.json".format(self.root),
-                            params={"search[post_id]": post["id"]}).json()
-        return {"notes": resp}
+        if "has_notes" not in post or post["has_notes"]:
+            resp = self.request("{}/notes.json".format(self.root),
+                                params={"search[post_id]": post["id"]}).json()
+            data["notes"] = resp
+
+        if "pools" in post and len(post["pools"]) > 0:
+            resp = self._pool_metadata(','.join(map(str, post["pools"])))
+            data["all_pools"] = resp
+
+        return data
+
+    @memcache(keyarg=1)
+    def _pool_metadata(self, pool_ids):
+        """Provide additional metadata for a list of pools
+
+        Ref: https://e621.net/help/api#pools
+        """
+        pools = self.request("{}/pools.json".format(self.root),
+                            params={"search[id]": pool_ids}).json()
+        for pool in pools:
+            pool["name"] = pool["name"].replace("_", " ")
+        return pools
 
 
 HEADER = {"User-Agent": "gallery-dl/{} (by mikf)".format(__version__)}
@@ -76,7 +95,13 @@ class E621PoolExtractor(E621Extractor, danbooru.DanbooruPoolExtractor):
         }),
         ("https://e621.net/pool/show/73"),
     )
-
+    
+    def metadata(self):
+        # backward compatibility
+        (pool,) = self._pool_metadata(self.pool_id)
+        pool = pool.copy()
+        self.post_ids = pool.pop("post_ids", ())
+        return {"pool": pool}
 
 class E621PostExtractor(E621Extractor, danbooru.DanbooruPostExtractor):
     """Extractor for single e621 posts"""
