@@ -114,6 +114,7 @@ CATEGORY_MAP = {
     "vk"             : "VK",
     "vsco"           : "VSCO",
     "wallpapercave"  : "Wallpaper Cave",
+    "webmshare"      : "webmshare",
     "webtoons"       : "Webtoon",
     "wikiart"        : "WikiArt.org",
     "xbunkr"         : "xBunkr",

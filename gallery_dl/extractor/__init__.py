@@ -151,6 +151,7 @@ modules = [
     "wallpapercave",
     "warosu",
     "weasyl",
+    "webmshare",
     "webtoons",
     "weibo",
     "wikiart",
