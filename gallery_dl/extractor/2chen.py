@@ -20,6 +20,7 @@ class _2chenThreadExtractor(Extractor):
     pattern = r"(?:https?://)?2chen\.(?:moe|club)/([^/?#]+)/(\d+)"
     test = (
         ("https://2chen.moe/tv/496715", {
+            "pattern": r"https://2chen\.su/assets/images/src/\w{40}\.\w+$",
             "count": ">= 179",
         }),
         ("https://2chen.club/tv/1", {
@@ -39,13 +40,19 @@ class _2chenThreadExtractor(Extractor):
         page = self.request(url, encoding="utf-8", notfound="thread").text
         data = self.metadata(page)
         yield Message.Directory, data
+
         for post in self.posts(page):
-            if not post["url"]:
+
+            url = post["url"]
+            if not url:
                 continue
+            if url[0] == "/":
+                url = self.root + url
+            post["url"] = url = url.partition("?")[0]
+
             post.update(data)
-            post["url"] = self.root + post["url"]
             post["time"] = text.parse_int(post["date"].timestamp())
-            yield Message.Url, post["url"], text.nameext_from_url(
+            yield Message.Url, url, text.nameext_from_url(
                 post["filename"], post)
 
     def metadata(self, page):
