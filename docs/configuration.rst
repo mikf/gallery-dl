@@ -432,15 +432,17 @@ Description
             "isAdult"    : "1"
         }
 
-    * A ``list`` with up to 3 entries specifying a browser profile.
+    * A ``list`` with up to 4 entries specifying a browser profile.
 
       * The first entry is the browser name
       * The optional second entry is a profile name or an absolute path to a profile directory
       * The optional third entry is the keyring to retrieve passwords for decrypting cookies from
+      * The optional fourth entry is a (Firefox) container name (``"none"`` for only cookies with no container)
 
       .. code:: json
 
         ["firefox"]
+        ["firefox", null, null, "Personal"]
         ["chromium", "Private", "kwallet"]
 
 
@@ -969,7 +971,7 @@ extractor.cyberdrop.domain
 Type
     ``string``
 Default
-    ``"auto"``
+    ``null``
 Example
     ``"cyberdrop.to"``
 Description
@@ -1715,7 +1717,7 @@ extractor.lolisafe.domain
 Type
     ``string``
 Default
-    ``"auto"``
+    ``null``
 Description
     Specifies the domain used by a ``lolisafe`` extractor
     regardless of input URL.

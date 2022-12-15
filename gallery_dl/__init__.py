@@ -66,7 +66,12 @@ def main():
         if args.cookies_from_browser:
             browser, _, profile = args.cookies_from_browser.partition(":")
             browser, _, keyring = browser.partition("+")
-            config.set((), "cookies", (browser, profile, keyring))
+            if profile.startswith(":"):
+                container = profile[1:]
+                profile = None
+            else:
+                profile, _, container = profile.partition("::")
+            config.set((), "cookies", (browser, profile, keyring, container))
         for opts in args.options:
             config.set(*opts)
 

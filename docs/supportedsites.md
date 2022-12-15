@@ -111,7 +111,7 @@ Consider all sites to be NSFW unless otherwise known.
 </tr>
 <tr>
     <td>Bunkr</td>
-    <td>https://bunkr.is/</td>
+    <td>https://bunkr.ru/</td>
     <td>Albums</td>
     <td></td>
 </tr>
@@ -434,20 +434,8 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
-    <td>Kiss Goddess</td>
-    <td>https://kissgoddess.com/</td>
-    <td>Galleries, Models</td>
-    <td></td>
-</tr>
-<tr>
-    <td>Kohlchan</td>
-    <td>https://kohlchan.net/</td>
-    <td>Boards, Threads</td>
-    <td></td>
-</tr>
-<tr>
     <td>Komikcast</td>
-    <td>https://komikcast.me/</td>
+    <td>https://komikcast.site/</td>
     <td>Chapters, Manga</td>
     <td></td>
 </tr>
@@ -776,6 +764,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td><a href="https://github.com/mikf/gallery-dl#oauth">OAuth</a></td>
 </tr>
 <tr>
+    <td>Soundgasm</td>
+    <td>https://soundgasm.net/</td>
+    <td>Audio, User Profiles</td>
+    <td></td>
+</tr>
+<tr>
     <td>Speaker Deck</td>
     <td>https://speakerdeck.com/</td>
     <td>Presentations</td>
@@ -894,6 +888,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td>https://www.weasyl.com/</td>
     <td>Favorites, Folders, Journals, Submissions</td>
     <td><a href="configuration.rst#extractorweasylapi-key">API Key</a></td>
+</tr>
+<tr>
+    <td>webmshare</td>
+    <td>https://webmshare.com/</td>
+    <td>Videos</td>
+    <td></td>
 </tr>
 <tr>
     <td>Webtoon</td>
@@ -1043,6 +1043,22 @@ Consider all sites to be NSFW unless otherwise known.
     <td>Hypnohub</td>
     <td>https://hypnohub.net/</td>
     <td>Favorites, Pools, Posts, Tag Searches</td>
+    <td></td>
+</tr>
+
+<tr>
+    <td colspan="4"><strong>LynxChan Imageboards</strong></td>
+</tr>
+<tr>
+    <td>Kohlchan</td>
+    <td>https://kohlchan.net/</td>
+    <td>Boards, Threads</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Endchan</td>
+    <td>https://endchan.org/</td>
+    <td>Boards, Threads</td>
     <td></td>
 </tr>
 
@@ -1268,12 +1284,6 @@ Consider all sites to be NSFW unless otherwise known.
 
 <tr>
     <td colspan="4"><strong>FoOlSlide Instances</strong></td>
-</tr>
-<tr>
-    <td>Kirei Cake</td>
-    <td>https://reader.kireicake.com/</td>
-    <td>Chapters, Manga</td>
-    <td></td>
 </tr>
 <tr>
     <td>PowerManga</td>

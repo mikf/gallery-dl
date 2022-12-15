@@ -896,20 +896,6 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
             "range": "2-",
             "count": 4,
         }),
-        # video
-        ("https://www.deviantart.com/chi-u/art/-VIDEO-Brushes-330774593", {
-            "pattern": r"https://wixmp-.+wixmp.com/v/mp4/.+\.720p\.\w+.mp4",
-            "keyword": {
-                "filename": r"re:_video____brushes_\w+_by_chi_u-d5gxnb5",
-                "extension": "mp4",
-                "target": {
-                    "duration": 306,
-                    "filesize": 19367585,
-                    "quality": "720p",
-                    "src": str,
-                },
-            }
-        }),
         # journal
         ("https://www.deviantart.com/shimoda7/journal/ARTility-583755752", {
             "url": "d34b2c9f873423e665a1b8ced20fcb75951694a3",

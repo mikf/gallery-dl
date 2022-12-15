@@ -72,7 +72,7 @@ class RedgifsUserExtractor(RedgifsExtractor):
     pattern = r"(?:https?://)?(?:www\.)?redgifs\.com/users/([^/?#]+)"
     test = ("https://www.redgifs.com/users/Natalifiction", {
         "pattern": r"https://\w+\.redgifs\.com/[A-Za-z]+\.mp4",
-        "count": ">= 120",
+        "count": ">= 100",
     })
 
     def metadata(self):
@@ -89,7 +89,7 @@ class RedgifsSearchExtractor(RedgifsExtractor):
     pattern = r"(?:https?://)?(?:www\.)?redgifs\.com/browse/?\?([^#]+)"
     test = (
         ("https://www.redgifs.com/browse?tags=JAV", {
-            "pattern": r"https://\w+\.redgifs\.com/[A-Za-z-]+\.mp4",
+            "pattern": r"https://\w+\.redgifs\.com/[A-Za-z-]+\.(mp4|jpg)",
             "range": "1-10",
             "count": 10,
         }),

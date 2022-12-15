@@ -200,7 +200,7 @@ class ImagetwistImageExtractor(ImagehostImageExtractor):
         return self.request(self.page_url).cookies
 
     def get_info(self, page):
-        url     , pos = text.extract(page, 'center;"><img src="', '"')
+        url     , pos = text.extract(page, '<img src="', '"')
         filename, pos = text.extract(page, ' alt="', '"', pos)
         return url, filename
 
