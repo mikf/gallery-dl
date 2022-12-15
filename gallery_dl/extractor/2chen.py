@@ -17,11 +17,13 @@ class _2chenThreadExtractor(Extractor):
     directory_fmt = ("{category}", "{board}", "{thread} {title}")
     filename_fmt = "{time} {filename}.{extension}"
     archive_fmt = "{board}_{thread}_{hash}_{time}"
-    root = "https://2chen.moe"
-    pattern = r"(?:https?://)?2chen\.moe/([^/?#]+)/(\d+)"
+    pattern = r"(?:https?://)?2chen\.(?:moe|club)/([^/?#]+)/(\d+)"
     test = (
         ("https://2chen.moe/tv/496715", {
             "count": ">= 179",
+        }),
+        ("https://2chen.club/tv/1", {
+            "count": 5,
         }),
         # 404
         ("https://2chen.moe/jp/303786"),
@@ -29,6 +31,7 @@ class _2chenThreadExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
+        self.root = text.root_from_url(match.group(0))
         self.board, self.thread = match.groups()
 
     def items(self):
@@ -78,18 +81,19 @@ class _2chenBoardExtractor(Extractor):
     """Extractor for 2chen boards"""
     category = "2chen"
     subcategory = "board"
-    root = "https://2chen.moe"
-    pattern = r"(?:https?://)?2chen\.moe/([^/?#]+)(?:/catalog|/?$)"
+    pattern = r"(?:https?://)?2chen\.(?:moe|club)/([^/?#]+)(?:/catalog|/?$)"
     test = (
         ("https://2chen.moe/co/", {
             "pattern": _2chenThreadExtractor.pattern
         }),
         ("https://2chen.moe/co"),
-        ("https://2chen.moe/co/catalog")
+        ("https://2chen.club/tv"),
+        ("https://2chen.moe/co/catalog"),
     )
 
     def __init__(self, match):
         Extractor.__init__(self, match)
+        self.root = text.root_from_url(match.group(0))
         self.board = match.group(1)
 
     def items(self):
