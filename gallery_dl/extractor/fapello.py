@@ -15,6 +15,7 @@ class FapelloPostExtractor(Extractor):
     category = "fapello"
     subcategory = "post"
     directory_fmt = ("{category}", "{model}")
+    filename_fmt = "{model}_{id}.{extension}"
     archive_fmt = "{type}_{model}_{id}"
     pattern = (r"(?:https?://)?(?:www\.)?fapello\.com"
                r"/(?!search/|popular_videos/)([^/?#]+)/(\d+)")
