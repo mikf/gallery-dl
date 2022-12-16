@@ -41,6 +41,7 @@ class DanbooruExtractor(BaseExtractor):
         self.ugoira = self.config("ugoira", False)
         self.external = self.config("external", False)
         self.extended_metadata = self.config("metadata", False)
+        self.strategy = self.config("pagination", "length")
 
         username, api_key = self._get_auth_info()
         if username:
@@ -126,7 +127,7 @@ class DanbooruExtractor(BaseExtractor):
                 posts = posts["posts"]
             yield from posts
 
-            if len(posts) < self.per_page:
+            if self.strategy == "length" and len(posts) < self.per_page:
                 return
 
             if pagenum:
