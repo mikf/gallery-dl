@@ -1004,6 +1004,20 @@ Description
     Note: This requires 1 additional HTTP request for each post.
 
 
+extractor.danbooru.pagination
+-----------------------------
+Type
+    ``string``
+Default
+    ``"length"``
+Description
+    Controls when to stop paginating over API results.
+
+    * ``"length"``: Stop when the length of a batch of results is less than
+      the page limit.
+    * ``"manual"``: Only stop when a batch of results is empty.
+
+
 extractor.danbooru.ugoira
 -------------------------
 Type
