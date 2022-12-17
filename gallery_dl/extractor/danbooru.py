@@ -118,6 +118,7 @@ class DanbooruExtractor(BaseExtractor):
 
     def _pagination(self, endpoint, params, pagenum=False):
         url = self.root + endpoint
+        limit = self.per_page if self.strategy == "length" else 1
         params["limit"] = self.per_page
         params["page"] = self.page_start
 
@@ -127,7 +128,7 @@ class DanbooruExtractor(BaseExtractor):
                 posts = posts["posts"]
             yield from posts
 
-            if self.strategy == "length" and len(posts) < self.per_page:
+            if len(posts) < limit:
                 return
 
             if pagenum:
