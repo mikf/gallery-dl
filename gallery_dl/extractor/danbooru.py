@@ -41,6 +41,11 @@ class DanbooruExtractor(BaseExtractor):
         self.ugoira = self.config("ugoira", False)
         self.external = self.config("external", False)
         self.extended_metadata = self.config("metadata", False)
+        threshold = self.config("threshold")
+        if isinstance(threshold, int):
+            self.threshold = 1 if threshold < 1 else threshold
+        else:
+            self.threshold = self.per_page
 
         username, api_key = self._get_auth_info()
         if username:
@@ -126,7 +131,7 @@ class DanbooruExtractor(BaseExtractor):
                 posts = posts["posts"]
             yield from posts
 
-            if len(posts) < self.per_page:
+            if len(posts) < self.threshold:
                 return
 
             if pagenum:

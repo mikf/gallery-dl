@@ -1004,6 +1004,23 @@ Description
     Note: This requires 1 additional HTTP request for each post.
 
 
+extractor.danbooru.threshold
+----------------------------
+Type
+    ``string`` or ``int``
+Default
+    ``"auto"``
+Description
+    Stop paginating over API results if the length of a batch of returned
+    posts is less than the specified number. Defaults to the per-page limit
+    of the current instance, which is 320 for ``e621`` and 200 for
+    everything else.
+
+    Note: Changing this setting is normally not necessary. When the value is
+    greater than the per-page limit, gallery-dl will stop after the first
+    batch. The value cannot be less than 1.
+
+
 extractor.danbooru.ugoira
 -------------------------
 Type
