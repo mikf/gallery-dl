@@ -44,7 +44,11 @@ class SeigaExtractor(Extractor):
         url = "{}/image/source/{}".format(self.root, image_id)
         response = self.request(
             url, method="HEAD", allow_redirects=False, notfound="image")
-        return response.headers["Location"].replace("/o/", "/priv/", 1)
+        location = response.headers["location"]
+        if "nicovideo.jp/login" in location:
+            raise exception.StopExtraction(
+                "HTTP redirect to login page (%s)", location.partition("?")[0])
+        return location.replace("/o/", "/priv/", 1)
 
 
 class SeigaUserExtractor(SeigaExtractor):
