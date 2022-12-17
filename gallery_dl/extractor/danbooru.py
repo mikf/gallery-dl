@@ -41,7 +41,11 @@ class DanbooruExtractor(BaseExtractor):
         self.ugoira = self.config("ugoira", False)
         self.external = self.config("external", False)
         self.extended_metadata = self.config("metadata", False)
-        self.strategy = self.config("pagination", "length")
+        threshold = self.config("threshold")
+        if isinstance(threshold, int):
+            self.threshold = 1 if threshold < 1 else threshold
+        else:
+            self.threshold = self.per_page
 
         username, api_key = self._get_auth_info()
         if username:
@@ -118,7 +122,6 @@ class DanbooruExtractor(BaseExtractor):
 
     def _pagination(self, endpoint, params, pagenum=False):
         url = self.root + endpoint
-        limit = self.per_page if self.strategy == "length" else 1
         params["limit"] = self.per_page
         params["page"] = self.page_start
 
@@ -128,7 +131,7 @@ class DanbooruExtractor(BaseExtractor):
                 posts = posts["posts"]
             yield from posts
 
-            if len(posts) < limit:
+            if len(posts) < self.threshold:
                 return
 
             if pagenum:
