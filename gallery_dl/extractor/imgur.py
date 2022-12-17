@@ -12,7 +12,7 @@ from .common import Extractor, Message
 from .. import text, exception
 
 
-BASE_PATTERN = r"(?:https?://)?(?:www\.|[im]\.)?imgur\.com"
+BASE_PATTERN = r"(?:https?://)?(?:www\.|[im]\.)?imgur\.(?:com|io)"
 
 
 class ImgurExtractor(Extractor):
@@ -114,7 +114,9 @@ class ImgurImageExtractor(ImgurExtractor):
         ("https://www.imgur.com/21yMxCS"),     # www
         ("https://m.imgur.com/21yMxCS"),       # mobile
         ("https://imgur.com/zxaY6"),           # 5 character key
+        ("https://imgur.io/zxaY6"),            # .io
         ("https://i.imgur.com/21yMxCS.png"),   # direct link
+        ("https://i.imgur.io/21yMxCS.png"),    # direct link .io
         ("https://i.imgur.com/21yMxCSh.png"),  # direct link thumbnail
         ("https://i.imgur.com/zxaY6.gif"),     # direct link (short)
         ("https://i.imgur.com/zxaY6s.gif"),    # direct link (short; thumb)
@@ -205,7 +207,8 @@ class ImgurAlbumExtractor(ImgurExtractor):
             "count": 0,
         }),
         ("https://www.imgur.com/a/TcBmP"),  # www
-        ("https://m.imgur.com/a/TcBmP"),  # mobile
+        ("https://imgur.io/a/TcBmP"),       # .io
+        ("https://m.imgur.com/a/TcBmP"),    # mobile
     )
 
     def items(self):
@@ -248,6 +251,7 @@ class ImgurGalleryExtractor(ImgurExtractor):
         }),
         ("https://imgur.com/t/unmuted/26sEhNr"),
         ("https://imgur.com/t/cat/qSB8NbN"),
+        ("https://imgur.io/t/cat/qSB8NbN"),  # .io
     )
 
     def items(self):
