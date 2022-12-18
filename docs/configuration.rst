@@ -999,9 +999,24 @@ Type
 Default
     ``false``
 Description
-    Extract additional metadata (notes, artist commentary, parent, children)
+    Extract additional metadata if available. This includes:
 
-    Note: This requires 1 additional HTTP request for each post.
+    * notes
+    * artist's commentary
+    * parent
+    * children
+    * metadata of pool(s) which contain the post (``e621`` only)
+
+    The behavior differs depending on which Danbooru instance is in use.
+
+    For ``e621``, there is no specific field for the artist's commentary,
+    and the parent and children information is already included in the post.
+    The notes will be extracted if the ``has_notes`` field of a post is
+    ``true``. An additional HTTP request is required if the post belongs
+    to one or more pools.
+
+    For other instances, this setting requires 1 additional request for
+    each post.
 
 
 extractor.danbooru.ugoira
