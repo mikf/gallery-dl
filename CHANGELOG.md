@@ -1,5 +1,40 @@
 # Changelog
 
+## 1.24.2 - 2022-12-18
+### Additions
+- [2chen] support `.club` URLs ([#3406](https://github.com/mikf/gallery-dl/issues/3406))
+- [deviantart] extract sta.sh URLs from `text_content` ([#3366](https://github.com/mikf/gallery-dl/issues/3366))
+- [deviantart] add `/view` URL support ([#3367](https://github.com/mikf/gallery-dl/issues/3367))
+- [e621] implement `threshold` option to control pagination ([#3413](https://github.com/mikf/gallery-dl/issues/3413))
+- [fapello] add `post`, `user` and `path` extractors ([#3065](https://github.com/mikf/gallery-dl/issues/3065), [#3360](https://github.com/mikf/gallery-dl/issues/3360), [#3415](https://github.com/mikf/gallery-dl/issues/3415))
+- [imgur] add support for imgur.io URLs ([#3419](https://github.com/mikf/gallery-dl/issues/3419))
+- [lynxchan] add generic extractors for lynxchan imageboards ([#3389](https://github.com/mikf/gallery-dl/issues/3389), [#3394](https://github.com/mikf/gallery-dl/issues/3394))
+- [mangafox] extract more metadata ([#3167](https://github.com/mikf/gallery-dl/issues/3167))
+- [pixiv] extract `date_url` metadata ([#3405](https://github.com/mikf/gallery-dl/issues/3405))
+- [soundgasm] add `audio` and `user` extractors ([#3384](https://github.com/mikf/gallery-dl/issues/3384), [#3388](https://github.com/mikf/gallery-dl/issues/3388))
+- [webmshare] add `video` extractor ([#2410](https://github.com/mikf/gallery-dl/issues/2410))
+- support Firefox containers for `--cookies-from-browser` ([#3346](https://github.com/mikf/gallery-dl/issues/3346))
+### Fixes
+- [2chen] fix file URLs
+- [bunkr] update domain ([#3391](https://github.com/mikf/gallery-dl/issues/3391))
+- [exhentai] fix pagination
+- [imagetwist] fix extraction
+- [imgth] rewrite
+- [instagram] prevent post `date` overwriting file `date` ([#3392](https://github.com/mikf/gallery-dl/issues/3392))
+- [khinsider] fix metadata extraction
+- [komikcast] update domain and fix extraction
+- [reddit] increase `id-max` default value ([#3397](https://github.com/mikf/gallery-dl/issues/3397))
+- [seiga] raise error when redirected to login page ([#3401](https://github.com/mikf/gallery-dl/issues/3401))
+- [sexcom] fix video URLs ([#3408](https://github.com/mikf/gallery-dl/issues/3408), [#3414](https://github.com/mikf/gallery-dl/issues/3414))
+- [twitter] update `search` pagination ([#544](https://github.com/mikf/gallery-dl/issues/544))
+- [warosu] fix and update
+- [zerochan] update for layout v3
+- restore paths for archived files ([#3362](https://github.com/mikf/gallery-dl/issues/3362), [#3377](https://github.com/mikf/gallery-dl/issues/3377))
+- use `util.NONE` as `keyword-default` default value ([#3334](https://github.com/mikf/gallery-dl/issues/3334))
+### Removals
+- [foolslide] remove `kireicake`
+- [kissgoddess] remove module
+
 ## 1.24.1 - 2022-12-04
 ### Additions
 - [artstation] add `pro-first` option ([#3273](https://github.com/mikf/gallery-dl/issues/3273))
