@@ -203,7 +203,6 @@ class DanbooruTagExtractor(DanbooruExtractor):
         ("https://hijiribe.donmai.us/posts?tags=bonocho"),
         ("https://sonohara.donmai.us/posts?tags=bonocho"),
         ("https://safebooru.donmai.us/posts?tags=bonocho"),
-        ("https://e926.net/posts?tags=anry"),
         ("https://safe.aibooru.online/posts?tags=center_frills"),
     )
 
@@ -344,4 +343,10 @@ class DanbooruPopularExtractor(DanbooruExtractor):
     def posts(self):
         if self.page_start is None:
             self.page_start = 1
-        return self._pagination("/explore/posts/popular.json", self.params, True)
+        return self._pagination(
+            "/explore/posts/popular.json", self.params, True)
+
+
+# TODO: add support for aibooru.online favorites
+# example JSON: https://aibooru.online/favorites.json?user_id=1010
+# the response differs from that of e621

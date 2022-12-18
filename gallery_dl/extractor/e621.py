@@ -43,7 +43,7 @@ class E621Extractor(danbooru.DanbooruExtractor):
         Ref: https://e621.net/help/api#pools
         """
         pools = self.request("{}/pools.json".format(self.root),
-                            params={"search[id]": pool_ids}).json()
+                             params={"search[id]": pool_ids}).json()
         for pool in pools:
             pool["name"] = pool["name"].replace("_", " ")
         return pools
@@ -82,6 +82,7 @@ class E621TagExtractor(E621Extractor, danbooru.DanbooruTagExtractor):
             "url": "8021e5ea28d47c474c1ffc9bd44863c4d45700ba",
             "content": "501d1e5d922da20ee8ff9806f5ed3ce3a684fd58",
         }),
+        ("https://e926.net/posts?tags=anry"),
     )
 
 
@@ -95,13 +96,14 @@ class E621PoolExtractor(E621Extractor, danbooru.DanbooruPoolExtractor):
         }),
         ("https://e621.net/pool/show/73"),
     )
-    
+
     def metadata(self):
         # backward compatibility
         (pool,) = self._pool_metadata(self.pool_id)
         pool = pool.copy()
         self.post_ids = pool.pop("post_ids", ())
         return {"pool": pool}
+
 
 class E621PostExtractor(E621Extractor, danbooru.DanbooruPostExtractor):
     """Extractor for single e621 posts"""

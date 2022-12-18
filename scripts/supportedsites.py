@@ -31,6 +31,7 @@ CATEGORY_MAP = {
     "drawfriends"    : "Draw Friends",
     "dynastyscans"   : "Dynasty Reader",
     "e621"           : "e621",
+    "e926"           : "e926",
     "erome"          : "EroMe",
     "e-hentai"       : "E-Hentai",
     "exhentai"       : "ExHentai",
@@ -146,6 +147,9 @@ SUBCATEGORY_MAP = {
     "related-pin"  : "related Pins",
     "related-board": "",
 
+    "aibooru": {
+        "favorite": "",
+    },
     "artstation": {
         "artwork": "Artwork Listings",
     },
@@ -275,6 +279,7 @@ AUTH_MAP = {
     "derpibooru"     : _APIKEY_DB,
     "deviantart"     : _OAUTH,
     "e621"           : "Supported",
+    "e926"           : "Supported",
     "e-hentai"       : "Supported",
     "exhentai"       : "Supported",
     "fanbox"         : _COOKIES,

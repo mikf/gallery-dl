@@ -960,12 +960,6 @@ Consider all sites to be NSFW unless otherwise known.
     <td>Supported</td>
 </tr>
 <tr>
-    <td>e621</td>
-    <td>https://e621.net/</td>
-    <td>Favorites, Pools, Popular Images, Posts, Tag Searches</td>
-    <td>Supported</td>
-</tr>
-<tr>
     <td>ATFBooru</td>
     <td>https://booru.allthefallen.moe/</td>
     <td>Pools, Popular Images, Posts, Tag Searches</td>
@@ -974,8 +968,20 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>Aibooru</td>
     <td>https://aibooru.online/</td>
-    <td>Favorites, Pools, Popular Images, Posts, Tag Searches</td>
+    <td>Pools, Popular Images, Posts, Tag Searches</td>
     <td></td>
+</tr>
+<tr>
+    <td>e621</td>
+    <td>https://e621.net/</td>
+    <td>Favorites, Pools, Popular Images, Posts, Tag Searches</td>
+    <td>Supported</td>
+</tr>
+<tr>
+    <td>e926</td>
+    <td>https://e926.net/</td>
+    <td>Favorites, Pools, Popular Images, Posts, Tag Searches</td>
+    <td>Supported</td>
 </tr>
 
 <tr>
