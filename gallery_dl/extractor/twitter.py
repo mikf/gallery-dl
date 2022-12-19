@@ -1273,10 +1273,15 @@ class TwitterAPI():
                         tweet = retweet
                     elif retweet:
                         tweet["author"] = users[retweet["user_id_str"]]
-                        if "extended_entities" in retweet and \
-                                "extended_entities" not in tweet:
-                            tweet["extended_entities"] = \
-                                retweet["extended_entities"]
+                        key = "extended_entities"
+                        if key in retweet and key not in tweet:
+                            tweet[key] = retweet[key]
+                        key = "full_text"
+                        if tweet[key][-1] == "…":
+                            match = re.match(r"^RT @\w{1,15}: ", tweet[key])
+                            if match:
+                                tweet[key] = match.group() + retweet[key]
+
                 tweet["user"] = users[tweet["user_id_str"]]
                 yield tweet
 
