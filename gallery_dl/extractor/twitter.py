@@ -13,6 +13,7 @@ from .. import text, util, exception
 from ..cache import cache
 import itertools
 import json
+import re
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.|mobile\.)?(?:[fv]x)?twitter\.com"
 
@@ -1419,10 +1420,16 @@ class TwitterAPI():
                                 retweet["rest_id"]
                             tweet["author"] = \
                                 retweet["core"]["user_results"]["result"]
-                            if "extended_entities" in retweet["legacy"] and \
-                                    "extended_entities" not in legacy:
-                                legacy["extended_entities"] = \
-                                    retweet["legacy"]["extended_entities"]
+                            key = "extended_entities"
+                            if key in retweet["legacy"] and key not in legacy:
+                                legacy[key] = retweet["legacy"][key]
+                            key = "full_text"
+                            if legacy[key][-1] == "…":
+                                match = re.match(
+                                    r"^RT @\w{1,15}: ", legacy[key])
+                                if match:
+                                    legacy[key] = (
+                                        match.group() + retweet["legacy"][key])
                         except KeyError:
                             pass
 
@@ -1552,7 +1559,6 @@ class TwitterAPI():
 @cache(maxage=360*86400, keyarg=1)
 def _login_impl(extr, username, password):
 
-    import re
     import random
 
     if re.fullmatch(r"[\w.%+-]+@[\w.-]+\.\w{2,}", username):
