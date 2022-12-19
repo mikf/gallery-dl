@@ -1276,11 +1276,7 @@ class TwitterAPI():
                         key = "extended_entities"
                         if key in retweet and key not in tweet:
                             tweet[key] = retweet[key]
-                        key = "full_text"
-                        if tweet[key][-1] == "…":
-                            match = re.match(r"^RT @\w{1,15}: ", tweet[key])
-                            if match:
-                                tweet[key] = match.group() + retweet[key]
+                        self._restore_retweet_text(tweet, retweet)
 
                 tweet["user"] = users[tweet["user_id_str"]]
                 yield tweet
@@ -1428,13 +1424,8 @@ class TwitterAPI():
                             key = "extended_entities"
                             if key in retweet["legacy"] and key not in legacy:
                                 legacy[key] = retweet["legacy"][key]
-                            key = "full_text"
-                            if legacy[key][-1] == "…":
-                                match = re.match(
-                                    r"^RT @\w{1,15}: ", legacy[key])
-                                if match:
-                                    legacy[key] = (
-                                        match.group() + retweet["legacy"][key])
+                            self._restore_retweet_text(
+                                legacy, retweet["legacy"])
                         except KeyError:
                             pass
 
@@ -1459,6 +1450,14 @@ class TwitterAPI():
             if not cursor or cursor == variables.get("cursor"):
                 return
             variables["cursor"] = cursor
+
+    @staticmethod
+    def _restore_retweet_text(retweet, original_tweet, key="full_text"):
+        """Repair the text of the retweet according to the original tweet"""
+        if retweet[key][-1] == "…":
+            match = re.match(r"^RT @\w{1,15}: ", retweet[key])
+            if match:
+                retweet[key] = match.group() + original_tweet[key]
 
     def _pagination_users(self, endpoint, variables, path=None):
         variables.update(self.variables)
