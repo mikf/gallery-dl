@@ -1271,13 +1271,9 @@ class TwitterAPI():
                         retweet["retweeted_status_id_str"] = retweet["id_str"]
                         retweet["_retweet_id_str"] = tweet["id_str"]
                         tweet = retweet
-                    elif retweet:
+                    elif retweet:  # "retweet" is the original tweet
                         tweet["author"] = users[retweet["user_id_str"]]
-                        key = "extended_entities"
-                        if key in retweet and key not in tweet:
-                            tweet[key] = retweet[key]
-                        self._restore_retweet_text(tweet, retweet)
-
+                        self._repair_retweet(tweet, retweet)
                 tweet["user"] = users[tweet["user_id_str"]]
                 yield tweet
 
@@ -1421,11 +1417,7 @@ class TwitterAPI():
                                 retweet["rest_id"]
                             tweet["author"] = \
                                 retweet["core"]["user_results"]["result"]
-                            key = "extended_entities"
-                            if key in retweet["legacy"] and key not in legacy:
-                                legacy[key] = retweet["legacy"][key]
-                            self._restore_retweet_text(
-                                legacy, retweet["legacy"])
+                            self._repair_retweet(legacy, retweet["legacy"])
                         except KeyError:
                             pass
 
@@ -1452,8 +1444,12 @@ class TwitterAPI():
             variables["cursor"] = cursor
 
     @staticmethod
-    def _restore_retweet_text(retweet, original_tweet, key="full_text"):
-        """Repair the text of the retweet according to the original tweet"""
+    def _repair_retweet(retweet, original_tweet):
+        """Repair the retweet according to the original tweet"""
+        key = "extended_entities"
+        if key in original_tweet and key not in retweet:
+            retweet[key] = original_tweet[key]
+        key = "full_text"
         if retweet[key][-1] == "…":
             match = re.match(r"^RT @\w{1,15}: ", retweet[key])
             if match:
