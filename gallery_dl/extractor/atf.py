@@ -68,7 +68,7 @@ class AtfThreadExtractor(AtfExtractor):
             for href in re.findall(
                     r'href="/forum/index\.php\?attachments/(.+\.[0-9]+)/"',
                     html):
-                url = BASE_URL + "attachments/" + href
+                url = BASE_URL + "attachments/" + href + "/"
                 file = re.sub(r'-([0-9a-zA-Z]+)$', r'.\1',
                               href.rpartition(".")[0])
                 file_parts = file.rpartition(".")
