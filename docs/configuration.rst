@@ -58,7 +58,8 @@ option (see the example below).
 extractor.*.filename
 --------------------
 Type
-    ``string`` or ``object``
+    * ``string``
+    * ``object``
 Example
     * .. code:: json
 
@@ -115,7 +116,8 @@ Description
 extractor.*.directory
 ---------------------
 Type
-    ``list`` of ``strings`` or ``object``
+    * ``list`` of ``strings``
+    * ``object``
 Example
     * .. code:: json
 
@@ -165,7 +167,8 @@ Description
 extractor.*.parent-metadata
 ---------------------------
 Type
-    ``bool`` or ``string``
+    * ``bool``
+    * ``string``
 Default
     ``false``
 Description
@@ -197,7 +200,8 @@ Description
 extractor.*.path-restrict
 -------------------------
 Type
-    ``string`` or ``object``
+    * ``string``
+    * ``object``
 Default
     ``"auto"``
 Example
@@ -295,7 +299,8 @@ Description
 extractor.*.skip
 ----------------
 Type
-    ``bool`` or ``string``
+    * ``bool``
+    * ``string``
 Default
     ``true``
 Description
@@ -410,9 +415,9 @@ Description
 extractor.*.cookies
 -------------------
 Type
-    |Path|_ or ``object`` or ``list``
-Default
-    ``null``
+    * |Path|_
+    * ``object``
+    * ``list``
 Description
     Source to read additional cookies from. This can be
 
@@ -453,7 +458,7 @@ Type
 Default
     ``true``
 Description
-    If `extractor.*.cookies`_ specifies the |Path|_ to a cookies.txt
+    If `extractor.*.cookies`_ specifies the |Path|_ of a cookies.txt
     file and it can be opened and parsed without errors,
     update its contents with cookies received during data extraction.
 
@@ -461,7 +466,8 @@ Description
 extractor.*.proxy
 -----------------
 Type
-    ``string`` or ``object``
+    * ``string``
+    * ``object``
 Default
     ``null``
 Description
@@ -485,8 +491,8 @@ Description
             "http://10.20.1.128": "http://10.10.1.10:5323"
         }
 
-    Note: All proxy URLs should include a scheme,
-    otherwise ``http://`` is assumed.
+    Note: If a proxy URLs does not include a scheme,
+    ``http://`` is assumed.
 
 
 extractor.*.source-address
@@ -516,8 +522,9 @@ Description
     Setting this value to ``"browser"`` will try to automatically detect
     and use the User-Agent used by the system's default browser.
 
-    Note: This option has no effect on `pixiv` extractors,
-    as these need specific values to function correctly.
+    Note: This option has no effect on
+    `pixiv`, `e621`, and `mangadex`
+    extractors, as these need specific values to function correctly.
 
 
 extractor.*.browser
@@ -773,7 +780,8 @@ Description
 extractor.*.verify
 ------------------
 Type
-    ``bool`` or ``string``
+    * ``bool``
+    * ``string``
 Default
     ``true``
 Description
@@ -818,7 +826,7 @@ Example
     * ``"10-20"``
     * ``"-5, 10, 30-50, 100-"``
 Description
-    Index-range(s) specifying which images to download.
+    Index range(s) specifying which images to download.
 
     Note: The index of the first image is ``1``.
 
@@ -829,7 +837,7 @@ Type
     ``string``
 Description
     Like `image-range <extractor.*.image-range_>`__,
-    but applies to delegated URLs like manga-chapters, etc.
+    but applies to delegated URLs like manga chapters, etc.
 
 
 extractor.*.image-filter
@@ -855,7 +863,7 @@ Example
     * ``"language == 'French' and 10 <= chapter < 20"``
 Description
     Like `image-filter <extractor.*.image-filter_>`__,
-    but applies to delegated URLs like manga-chapters, etc.
+    but applies to delegated URLs like manga chapters, etc.
 
 
 extractor.*.image-unique
@@ -877,7 +885,7 @@ Default
     ``false``
 Description
     Like `image-unique <extractor.*.image-unique_>`__,
-    but applies to delegated URLs like manga-chapters, etc.
+    but applies to delegated URLs like manga chapters, etc.
 
 
 extractor.*.date-format
@@ -892,6 +900,11 @@ Description
 
     See |strptime|_ for a list of formatting directives.
 
+    Note: Despite its name, this option does **not** control how
+    ``{date}`` metadata fields are formatted.
+    To use a different formatting for those values other than the default
+    ``%Y-%m-%d %H:%M:%S``, put |strptime|_ formatting directives
+    after a colon ``:``, for example ``{date:%Y%m%d}``.
 
 
 Extractor-specific Options
@@ -946,7 +959,7 @@ Description
 extractor.bbc.width
 -------------------
 Type
-    ``int``
+    ``integer``
 Default
     ``1920``
 Description
@@ -1001,13 +1014,14 @@ Default
 Description
     Extract additional metadata (notes, artist commentary, parent, children)
 
-    Note: This requires 1 additional HTTP request for each post.
+    Note: This requires 1 additional HTTP request per post.
 
 
 extractor.danbooru.threshold
 ----------------------------
 Type
-    ``string`` or ``int``
+    * ``string``
+    * ``integer``
 Default
     ``"auto"``
 Description
@@ -1153,11 +1167,13 @@ Description
 extractor.deviantart.include
 ----------------------------
 Type
-    ``string`` or ``list`` of ``strings``
+    * ``string``
+    * ``list`` of ``strings``
 Default
     ``"gallery"``
 Example
-    ``"favorite,journal,scraps"`` or ``["favorite", "journal", "scraps"]``
+    * ``"favorite,journal,scraps"``
+    * ``["favorite", "journal", "scraps"]``
 Description
     A (comma-separated) list of subcategories to include
     when processing a user profile.
@@ -1165,7 +1181,7 @@ Description
     Possible values are
     ``"gallery"``, ``"scraps"``, ``"journal"``, ``"favorite"``.
 
-    You can use ``"all"`` instead of listing all values separately.
+    It is possible to use ``"all"`` instead of listing all values separately.
 
 
 extractor.deviantart.journals
@@ -1210,7 +1226,8 @@ Description
 extractor.deviantart.original
 -----------------------------
 Type
-    ``bool`` or ``string``
+    * ``bool``
+    * ``string``
 Default
     ``true``
 Description
@@ -1325,7 +1342,8 @@ Description
 extractor.fanbox.embeds
 -----------------------
 Type
-    ``bool`` or ``string``
+    * ``bool``
+    * ``string``
 Default
     ``true``
 Description
@@ -1362,7 +1380,8 @@ Description
 extractor.flickr.size-max
 --------------------------
 Type
-    ``integer`` or ``string``
+    * ``integer``
+    * ``string``
 Default
     ``null``
 Description
@@ -1401,11 +1420,13 @@ Description
 extractor.furaffinity.include
 -----------------------------
 Type
-    ``string`` or ``list`` of ``strings``
+    * ``string``
+    * ``list`` of ``strings``
 Default
     ``"gallery"``
 Example
-    ``"scraps,favorite"`` or ``["scraps", "favorite"]``
+    * ``"scraps,favorite"``
+    * ``["scraps", "favorite"]``
 Description
     A (comma-separated) list of subcategories to include
     when processing a user profile.
@@ -1413,7 +1434,7 @@ Description
     Possible values are
     ``"gallery"``, ``"scraps"``, ``"favorite"``.
 
-    You can use ``"all"`` instead of listing all values separately.
+    It is possible to use ``"all"`` instead of listing all values separately.
 
 
 extractor.furaffinity.layout
@@ -1456,8 +1477,8 @@ Description
 extractor.gfycat.format
 -----------------------
 Type
-    * ``list`` of ``strings``
     * ``string``
+    * ``list`` of ``strings``
 Default
     ``["mp4", "webm", "mobile", "gif"]``
 Description
@@ -1512,11 +1533,13 @@ Description
 extractor.hentaifoundry.include
 -------------------------------
 Type
-    ``string`` or ``list`` of ``strings``
+    * ``string``
+    * ``list`` of ``strings``
 Default
     ``"pictures"``
 Example
-    ``"scraps,stories"`` or ``["scraps", "stories"]``
+    * ``"scraps,stories"``
+    * ``["scraps", "stories"]``
 Description
     A (comma-separated) list of subcategories to include
     when processing a user profile.
@@ -1524,7 +1547,7 @@ Description
     Possible values are
     ``"pictures"``, ``"scraps"``, ``"stories"``, ``"favorite"``.
 
-    You can use ``"all"`` instead of listing all values separately.
+    It is possible to use ``"all"`` instead of listing all values separately.
 
 
 extractor.hitomi.format
@@ -1545,7 +1568,8 @@ Description
 extractor.imgur.mp4
 -------------------
 Type
-    ``bool`` or ``string``
+    * ``bool``
+    * ``string``
 Default
     ``true``
 Description
@@ -1586,11 +1610,13 @@ Description
 extractor.instagram.include
 ---------------------------
 Type
-    ``string`` or ``list`` of ``strings``
+    * ``string``
+    * ``list`` of ``strings``
 Default
     ``"posts"``
 Example
-    ``"stories,highlights,posts"`` or ``["stories", "highlights", "posts"]``
+    * ``"stories,highlights,posts"``
+    * ``["stories", "highlights", "posts"]``
 Description
     A (comma-separated) list of subcategories to include
     when processing a user profile.
@@ -1603,7 +1629,7 @@ Description
     ``"highlights"``,
     ``"avatar"``.
 
-    You can use ``"all"`` instead of listing all values separately.
+    It is possible to use ``"all"`` instead of listing all values separately.
 
 
 extractor.instagram.previews
@@ -1644,6 +1670,8 @@ Default
     ``false``
 Description
     Extract ``comments`` metadata.
+
+    Note: This requires 1 additional HTTP request per post.
 
 
 extractor.kemonoparty.duplicates
@@ -1786,7 +1814,7 @@ Type
 Example
     ``"en"``
 Description
-    `ISO 639-1 <https://en.wikipedia.org/wiki/ISO_639-1>`_ language code
+    `ISO 639-1 <https://en.wikipedia.org/wiki/ISO_639-1>`__ language code
     to filter chapters by.
 
 
@@ -1869,11 +1897,13 @@ Description
 extractor.newgrounds.include
 ----------------------------
 Type
-    ``string`` or ``list`` of ``strings``
+    * ``string``
+    * ``list`` of ``strings``
 Default
     ``"art"``
 Example
-    ``"movies,audio"`` or ``["movies", "audio"]``
+    * ``"movies,audio"``
+    * ``["movies", "audio"]``
 Description
     A (comma-separated) list of subcategories to include
     when processing a user profile.
@@ -1881,13 +1911,14 @@ Description
     Possible values are
     ``"art"``, ``"audio"``, ``"games"``, ``"movies"``.
 
-    You can use ``"all"`` instead of listing all values separately.
+    It is possible to use ``"all"`` instead of listing all values separately.
 
 
 extractor.nijie.include
 -----------------------
 Type
-    ``string`` or ``list`` of ``strings``
+    * ``string``
+    * ``list`` of ``strings``
 Default
     ``"illustration,doujin"``
 Description
@@ -1897,7 +1928,7 @@ Description
     Possible values are
     ``"illustration"``, ``"doujin"``, ``"favorite"``, ``"nuita"``.
 
-    You can use ``"all"`` instead of listing all values separately.
+    It is possible to use ``"all"`` instead of listing all values separately.
 
 
 extractor.nitter.quoted
@@ -1923,7 +1954,8 @@ Description
 extractor.nitter.videos
 -----------------------
 Type
-    ``bool`` or ``string``
+    * ``bool``
+    * ``string``
 Default
     ``true``
 Description
@@ -1978,7 +2010,7 @@ Default
 Description
     Port number to listen on during OAuth authorization.
 
-    Note: All redirects will go to http://localhost:6414/, regardless
+    Note: All redirects will go to port ``6414``, regardless
     of the port specified here. You'll have to manually adjust the
     port number in your browser's address bar when using a different
     port than the default.
@@ -2290,7 +2322,8 @@ Description
 extractor.reddit.videos
 -----------------------
 Type
-    ``bool`` or ``string``
+    * ``bool``
+    * ``string``
 Default
     ``true``
 Description
@@ -2306,8 +2339,8 @@ Description
 extractor.redgifs.format
 ------------------------
 Type
-    * ``list`` of ``strings``
     * ``string``
+    * ``list`` of ``strings``
 Default
     ``["hd", "sd", "gif"]``
 Description
@@ -2385,7 +2418,8 @@ Description
 extractor.skeb.search.filters
 -----------------------------
 Type
-    ``list`` or ``string``
+    * ``string``
+    * ``list`` of ``strings``
 Default
     ``["genre:art", "genre:voice", "genre:novel", "genre:video", "genre:music", "genre:correction"]``
 Example
@@ -2488,7 +2522,8 @@ Description
 extractor.tumblr.reblogs
 ------------------------
 Type
-    ``bool`` or ``string``
+    * ``bool``
+    * ``string``
 Default
     ``true``
 Description
@@ -2501,18 +2536,20 @@ Description
 extractor.tumblr.posts
 ----------------------
 Type
-    ``string`` or ``list`` of ``strings``
+    * ``string``
+    * ``list`` of ``strings``
 Default
     ``"all"``
 Example
-    ``"video,audio,link"`` or ``["video", "audio", "link"]``
+    * ``"video,audio,link"``
+    * ``["video", "audio", "link"]``
 Description
     A (comma-separated) list of post types to extract images, etc. from.
 
     Possible types are ``text``, ``quote``, ``link``, ``answer``,
     ``video``, ``audio``, ``photo``, ``chat``.
 
-    You can use ``"all"`` instead of listing all types separately.
+    It is possible to use ``"all"`` instead of listing all types separately.
 
 
 extractor.tumblr.fallback-delay
@@ -2565,7 +2602,8 @@ Description
 extractor.twitter.cards
 -----------------------
 Type
-    ``bool`` or ``string``
+    * ``bool``
+    * ``string``
 Default
     ``false``
 Description
@@ -2797,7 +2835,8 @@ Description
 extractor.twitter.videos
 ------------------------
 Type
-    ``bool`` or ``string``
+    * ``bool``
+    * ``string``
 Default
     ``true``
 Description
@@ -2873,7 +2912,7 @@ Default
 Description
     Extract additional metadata (tags, uploader)
 
-    Note: This requires 1 additional HTTP request for each post.
+    Note: This requires 1 additional HTTP request per post.
 
 
 extractor.weasyl.api-key
@@ -2913,7 +2952,12 @@ Description
     when processing a user profile.
 
     Possible values are
-    ``"home"``, ``"feed"``, ``"videos"``, ``"newvideo"``, ``"article"``, ``"album"``.
+    ``"home"``,
+    ``"feed"``,
+    ``"videos"``,
+    ``"newvideo"``,
+    ``"article"``,
+    ``"album"``.
 
     It is possible to use ``"all"`` instead of listing all values separately.
 
@@ -3064,7 +3108,7 @@ Default
 Description
     Extract additional metadata (date, md5, tags, ...)
 
-    Note: This requires 1-2 additional HTTP request for each post.
+    Note: This requires 1-2 additional HTTP requests per post.
 
 
 extractor.[booru].tags
@@ -3077,7 +3121,7 @@ Description
     Categorize tags by their respective types
     and provide them as ``tags_<type>`` metadata fields.
 
-    Note: This requires 1 additional HTTP request for each post.
+    Note: This requires 1 additional HTTP request per post.
 
 
 extractor.[booru].notes
@@ -3089,7 +3133,7 @@ Default
 Description
     Extract overlay notes (position and text).
 
-    Note: This requires 1 additional HTTP request for each post.
+    Note: This requires 1 additional HTTP request per post.
 
 
 extractor.[manga-extractor].chapter-reverse
@@ -3230,7 +3274,7 @@ Description
 downloader.*.timeout
 --------------------
 Type
-    ``float`` or ``null``
+    ``float``
 Default
     `extractor.*.timeout`_
 Description
@@ -3240,7 +3284,8 @@ Description
 downloader.*.verify
 -------------------
 Type
-    ``bool`` or ``string``
+    * ``bool``
+    * ``string``
 Default
     `extractor.*.verify`_
 Description
@@ -3250,12 +3295,14 @@ Description
 downloader.*.proxy
 ------------------
 Type
-    ``string`` or ``object``
+    * ``string``
+    * ``object``
 Default
     `extractor.*.proxy`_
 Description
-    | Proxy server used for file downloads.
-    | Disable the use of a proxy by explicitly setting this option to ``null``.
+    Proxy server used for file downloads.
+
+    Disable the use of a proxy by explicitly setting this option to ``null``.
 
 
 downloader.http.adjust-extensions
@@ -3276,7 +3323,8 @@ Description
 downloader.http.chunk-size
 --------------------------
 Type
-    ``integer`` or ``string``
+    * ``integer``
+    * ``string``
 Default
     ``32768``
 Example
@@ -3522,7 +3570,8 @@ Description
 output.progress
 ---------------
 Type
-    ``bool`` or ``string``
+    * ``bool``
+    * ``string``
 Default
     ``true``
 Description
@@ -3540,11 +3589,12 @@ Description
 output.log
 ----------
 Type
-    ``string`` or |Logging Configuration|_
+    * ``string``
+    * |Logging Configuration|_
 Default
     ``"[{name}][{levelname}] {message}"``
 Description
-    Configuration for standard logging output to stderr.
+    Configuration for logging output to stderr.
 
     If this is a simple ``string``, it specifies
     the format string for logging messages.
@@ -3553,9 +3603,8 @@ Description
 output.logfile
 --------------
 Type
-    |Path|_ or |Logging Configuration|_
-Default
-    ``null``
+    * |Path|_
+    * |Logging Configuration|_
 Description
     File to write logging output to.
 
@@ -3563,9 +3612,8 @@ Description
 output.unsupportedfile
 ----------------------
 Type
-    |Path|_ or |Logging Configuration|_
-Default
-    ``null``
+    * |Path|_
+    * |Logging Configuration|_
 Description
     File to write external URLs unsupported by *gallery-dl* to.
 
@@ -3687,7 +3735,8 @@ Description
 exec.command
 ------------
 Type
-    ``string`` or ``list`` of ``strings``
+    * ``string``
+    * ``list`` of ``strings``
 Example
     * ``"convert {} {}.png && rm {}"``
     * ``["echo", "{user[account]}", "{id}"]``
@@ -3855,7 +3904,8 @@ Description
 metadata.content-format
 -----------------------
 Type
-    ``string`` or ``list`` of ``strings``
+    * ``string``
+    * ``list`` of ``strings``
 Example
     * ``"tags:\n\n{tags:J\n}\n"``
     * ``["tags:", "", "{tags:J\n}"]``
@@ -4310,8 +4360,8 @@ How To
     * click "APPLY FOR A NON-COMMERCIAL KEY"
     * fill out the form with a random name and description
       and click "SUBMIT"
-    * copy ``Key`` and ``Secret`` and put them in your configuration
-      file
+    * copy ``Key`` and ``Secret`` and put them in your configuration file
+      as ``"api-key"`` and ``"api-secret"``
 
 
 extractor.reddit.client-id & .user-agent
@@ -4327,8 +4377,9 @@ How To
       "create app"
     * copy the client id (third line, under your application's name and
       "installed app") and put it in your configuration file
+      as ``"client-id"``
     * use "``Python:<application name>:v1.0 (by /u/<username>)``" as
-      user-agent and replace ``<application name>`` and ``<username>``
+      ``user-agent`` and replace ``<application name>`` and ``<username>``
       accordingly (see Reddit's
       `API access rules <https://github.com/reddit/reddit/wiki/API>`__)
 
@@ -4345,6 +4396,7 @@ How To
     * fill out the two checkboxes at the bottom and click "Apply"
     * copy ``API Key`` and ``API Secret``
       and put them in your configuration file
+      as ``"api-key"`` and ``"api-secret"``
 
 
 extractor.tumblr.api-key & .api-secret
@@ -4362,6 +4414,7 @@ How To
     * click "Show secret key" (below "OAuth Consumer Key")
     * copy your ``OAuth Consumer Key`` and ``Secret Key``
       and put them in your configuration file
+      as ``"api-key"`` and ``"api-secret"``
 
 
 
@@ -4582,8 +4635,8 @@ Description
 .. _mature_content:     https://www.deviantart.com/developers/http/v1/20160316/object/deviation
 .. _Authentication:     https://github.com/mikf/gallery-dl#authentication
 .. _OAuth:              https://github.com/mikf/gallery-dl#oauth
-.. _format string:      https://github.com/mikf/gallery-dl/blob/master/docs/formatting.md
-.. _format strings:     https://github.com/mikf/gallery-dl/blob/master/docs/formatting.md
+.. _format string:      formatting.md
+.. _format strings:     formatting.md
 .. _youtube-dl:         https://github.com/ytdl-org/youtube-dl
 .. _requests.request(): https://requests.readthedocs.io/en/master/api/#requests.request
 .. _timeout:            https://requests.readthedocs.io/en/master/user/advanced/#timeouts
