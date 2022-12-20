@@ -117,7 +117,7 @@ class SmugmugImageExtractor(SmugmugExtractor):
         # video
         ("https://tstravels.smugmug.com/Dailies/Daily-Dose-2015/i-39JFNzB", {
             "url": "04d0ab1ff829ca7d78f5acb5548953df08e9a5ee",
-            "keyword": "4cef98133ace511adc874c9d9abac5817ba0d856",
+            "keyword": "2b545184592c282b365fcbb7df6ca7952b8a3173",
         }),
     )
 

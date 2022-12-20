@@ -10,6 +10,7 @@
 
 from .common import Extractor, Message
 from .. import text, util, exception
+import itertools
 import random
 import string
 
@@ -31,7 +32,12 @@ class ArtstationExtractor(Extractor):
     def items(self):
         data = self.metadata()
 
-        for project in self.projects():
+        projects = self.projects()
+        max_posts = self.config("max-posts")
+        if max_posts:
+            projects = itertools.islice(projects, max_posts)
+
+        for project in projects:
             for num, asset in enumerate(
                     self.get_project_assets(project["hash_id"]), 1):
                 asset.update(data)
@@ -356,7 +362,8 @@ class ArtstationSearchExtractor(ArtstationExtractor):
             "page"             : None,
             "per_page"         : 50,
             "sorting"          : self.sorting,
-            "pro_first"        : "1",
+            "pro_first"        : ("1" if self.config("pro-first", True) else
+                                  "0"),
             "filters"          : filters,
             "additional_fields": (),
         }

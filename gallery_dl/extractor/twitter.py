@@ -374,6 +374,24 @@ class TwitterExtractor(Extractor):
                 except Exception:
                     yield tweet
 
+    def _make_tweet(self, user, id_str, url, timestamp):
+        return {
+            "created_at": text.parse_timestamp(timestamp).strftime(
+                "%a %b %d %H:%M:%S +0000 %Y"),
+            "id_str": id_str,
+            "lang": None,
+            "user": user,
+            "entities": {},
+            "extended_entities": {
+                "media": [
+                    {
+                        "original_info": {},
+                        "media_url": url,
+                    },
+                ],
+            },
+        }
+
     def metadata(self):
         """Return general metadata"""
         return {}
@@ -385,44 +403,7 @@ class TwitterExtractor(Extractor):
         if not self._check_cookies(self.cookienames):
             username, password = self._get_auth_info()
             if username:
-                self._update_cookies(self._login_impl(username, password))
-
-    @cache(maxage=360*24*3600, keyarg=1)
-    def _login_impl(self, username, password):
-        self.log.info("Logging in as %s", username)
-
-        token = util.generate_token()
-        self.session.cookies.clear()
-        self.request(self.root + "/login")
-
-        url = self.root + "/sessions"
-        cookies = {
-            "_mb_tk": token,
-        }
-        data = {
-            "redirect_after_login"      : "/",
-            "remember_me"               : "1",
-            "authenticity_token"        : token,
-            "wfa"                       : "1",
-            "ui_metrics"                : "{}",
-            "session[username_or_email]": username,
-            "session[password]"         : password,
-        }
-        response = self.request(
-            url, method="POST", cookies=cookies, data=data)
-
-        if "/account/login_verification" in response.url:
-            raise exception.AuthenticationError(
-                "Login with two-factor authentication is not supported")
-
-        cookies = {
-            cookie.name: cookie.value
-            for cookie in self.session.cookies
-        }
-
-        if "/error" in response.url or "auth_token" not in cookies:
-            raise exception.AuthenticationError()
-        return cookies
+                self._update_cookies(_login_impl(self, username, password))
 
 
 class TwitterTimelineExtractor(TwitterExtractor):
@@ -436,7 +417,11 @@ class TwitterTimelineExtractor(TwitterExtractor):
             "url": "c570ac1aae38ed1463be726cc46f31cac3d82a40",
         }),
         # suspended account (#2216)
-        ("https://twitter.com/realDonaldTrump", {
+        ("https://twitter.com/OptionalTypo", {
+            "exception": exception.NotFoundError,
+        }),
+        # suspended account user ID
+        ("https://twitter.com/id:772949683521978368", {
             "exception": exception.NotFoundError,
         }),
         ("https://mobile.twitter.com/supernaturepics?p=i"),
@@ -648,7 +633,7 @@ class TwitterEventExtractor(TwitterExtractor):
     pattern = BASE_PATTERN + r"/i/events/(\d+)"
     test = ("https://twitter.com/i/events/1484669206993903616", {
         "range": "1-20",
-        "count": ">5",
+        "count": ">=1",
     })
 
     def metadata(self):
@@ -774,7 +759,7 @@ class TwitterTweetExtractor(TwitterExtractor):
         # retweet with missing media entities (#1555)
         ("https://twitter.com/morino_ya/status/1392763691599237121", {
             "options": (("retweets", True),),
-            "count": 4,
+            "count": 0,  # private
         }),
         # deleted quote tweet (#2225)
         ("https://twitter.com/i/web/status/1460044411165888515", {
@@ -797,7 +782,7 @@ class TwitterTweetExtractor(TwitterExtractor):
         # '?format=...&name=...'-style URLs
         ("https://twitter.com/poco_dandy/status/1150646424461176832", {
             "options": (("cards", True),),
-            "pattern": r"https://pbs.twimg.com/card_img/157\d+/\w+"
+            "pattern": r"https://pbs.twimg.com/card_img/157\d+/[\w-]+"
                        r"\?format=(jpg|png)&name=orig$",
             "range": "1-2",
         }),
@@ -840,6 +825,76 @@ class TwitterTweetExtractor(TwitterExtractor):
                 break
 
         return itertools.chain(buffer, tweets)
+
+
+class TwitterAvatarExtractor(TwitterExtractor):
+    subcategory = "avatar"
+    filename_fmt = "avatar {date}.{extension}"
+    archive_fmt = "AV_{user[id]}_{date}"
+    pattern = BASE_PATTERN + r"/(?!search)([^/?#]+)/photo"
+    test = (
+        ("https://twitter.com/supernaturepics/photo", {
+            "pattern": r"https://pbs\.twimg\.com/profile_images"
+                       r"/554585280938659841/FLVAlX18\.jpeg",
+            "keyword": {
+                "date": "dt:2015-01-12 10:26:49",
+                "extension": "jpeg",
+                "filename": "FLVAlX18",
+                "tweet_id": 554585280938659841,
+            },
+        }),
+        ("https://twitter.com/User16/photo", {
+            "count": 0,
+        }),
+    )
+
+    def tweets(self):
+        self.api._user_id_by_screen_name(self.user)
+        user = self._user_obj
+        url = user["legacy"]["profile_image_url_https"]
+
+        if url == ("https://abs.twimg.com/sticky"
+                   "/default_profile_images/default_profile_normal.png"):
+            return ()
+
+        url = url.replace("_normal.", ".")
+        id_str = url.rsplit("/", 2)[1]
+        timestamp = ((int(id_str) >> 22) + 1288834974657) // 1000
+
+        return (self._make_tweet(user, id_str, url, timestamp),)
+
+
+class TwitterBackgroundExtractor(TwitterExtractor):
+    subcategory = "background"
+    filename_fmt = "background {date}.{extension}"
+    archive_fmt = "BG_{user[id]}_{date}"
+    pattern = BASE_PATTERN + r"/(?!search)([^/?#]+)/header_photo"
+    test = (
+        ("https://twitter.com/supernaturepics/header_photo", {
+            "pattern": r"https://pbs\.twimg\.com/profile_banners"
+                       r"/2976459548/1421058583",
+            "keyword": {
+                "date": "dt:2015-01-12 10:29:43",
+                "filename": "1421058583",
+                "tweet_id": 0,
+            },
+        }),
+        ("https://twitter.com/User16/header_photo", {
+            "count": 0,
+        }),
+    )
+
+    def tweets(self):
+        self.api._user_id_by_screen_name(self.user)
+        user = self._user_obj
+
+        try:
+            url = user["legacy"]["profile_banner_url"]
+            _, timestamp = url.rsplit("/", 1)
+        except (KeyError, ValueError):
+            return ()
+
+        return (self._make_tweet(user, None, url, timestamp),)
 
 
 class TwitterImageExtractor(Extractor):
@@ -1098,25 +1153,21 @@ class TwitterAPI():
         return self._call(endpoint, params)["data"]["user"]["result"]
 
     def _user_id_by_screen_name(self, screen_name):
-        if screen_name.startswith("id:"):
-            user_id = screen_name[3:]
-            user = self.user_by_rest_id(user_id)
-
-        else:
-            user = ()
-            try:
+        user = ()
+        try:
+            if screen_name.startswith("id:"):
+                user = self.user_by_rest_id(screen_name[3:])
+            else:
                 user = self.user_by_screen_name(screen_name)
-                user_id = user["rest_id"]
-            except KeyError:
-                if "unavailable_message" in user:
-                    raise exception.NotFoundError("{} ({})".format(
-                        user["unavailable_message"].get("text"),
-                        user.get("reason")), False)
-                else:
-                    raise exception.NotFoundError("user")
-
-        self.extractor._assign_user(user)
-        return user_id
+            self.extractor._assign_user(user)
+            return user["rest_id"]
+        except KeyError:
+            if "unavailable_message" in user:
+                raise exception.NotFoundError("{} ({})".format(
+                    user["unavailable_message"].get("text"),
+                    user.get("reason")), False)
+            else:
+                raise exception.NotFoundError("user")
 
     @cache(maxage=3600)
     def _guest_token(self):
@@ -1165,15 +1216,16 @@ class TwitterAPI():
         original_retweets = (self.extractor.retweets == "original")
 
         while True:
-            cursor = tweet = None
             data = self._call(endpoint, params)
 
             instr = data["timeline"]["instructions"]
             if not instr:
                 return
-            tweet_ids = []
+
             tweets = data["globalObjects"]["tweets"]
             users = data["globalObjects"]["users"]
+            tweet_id = cursor = None
+            tweet_ids = []
 
             # collect tweet IDs and cursor value
             for entry in instr[0]["addEntries"]["entries"]:
@@ -1192,7 +1244,7 @@ class TwitterAPI():
                     cursor = entry["content"]["operation"]["cursor"]
                     if not cursor.get("stopOnEmptyResponse", True):
                         # keep going even if there are no tweets
-                        tweet = True
+                        tweet_id = True
                     cursor = cursor["value"]
 
                 elif entry_startswith("conversationThread-"):
@@ -1241,7 +1293,7 @@ class TwitterAPI():
                 cursor = (instr[-1]["replaceEntry"]["entry"]
                           ["content"]["operation"]["cursor"]["value"])
 
-            if not cursor or not tweet:
+            if not cursor or (not tweets and not tweet_id):
                 return
             params["cursor"] = cursor
 
@@ -1495,3 +1547,174 @@ class TwitterAPI():
             "core"   : {"user_results": {"result": tweet["user"]}},
             "_retweet_id_str": retweet_id,
         }
+
+
+@cache(maxage=360*86400, keyarg=1)
+def _login_impl(extr, username, password):
+
+    import re
+    import random
+
+    if re.fullmatch(r"[\w.%+-]+@[\w.-]+\.\w{2,}", username):
+        extr.log.warning(
+            "Login with email is no longer possible. "
+            "You need to provide your username or phone number instead.")
+
+    extr.log.info("Logging in as %s", username)
+
+    def process(response):
+        try:
+            data = response.json()
+        except ValueError:
+            data = {"errors": ({"message": "Invalid response"},)}
+        else:
+            if response.status_code < 400:
+                return data["flow_token"]
+
+        errors = []
+        for error in data.get("errors") or ():
+            msg = error.get("message")
+            errors.append('"{}"'.format(msg) if msg else "Unknown error")
+        extr.log.debug(response.text)
+        raise exception.AuthenticationError(", ".join(errors))
+
+    extr.session.cookies.clear()
+    api = TwitterAPI(extr)
+    headers = api.headers
+    headers["Referer"] = "https://twitter.com/i/flow/login"
+
+    # init
+    data = {
+        "input_flow_data": {
+            "flow_context": {
+                "debug_overrides": {},
+                "start_location": {"location": "unknown"},
+            },
+        },
+        "subtask_versions": {
+            "action_list": 2,
+            "alert_dialog": 1,
+            "app_download_cta": 1,
+            "check_logged_in_account": 1,
+            "choice_selection": 3,
+            "contacts_live_sync_permission_prompt": 0,
+            "cta": 7,
+            "email_verification": 2,
+            "end_flow": 1,
+            "enter_date": 1,
+            "enter_email": 2,
+            "enter_password": 5,
+            "enter_phone": 2,
+            "enter_recaptcha": 1,
+            "enter_text": 5,
+            "enter_username": 2,
+            "generic_urt": 3,
+            "in_app_notification": 1,
+            "interest_picker": 3,
+            "js_instrumentation": 1,
+            "menu_dialog": 1,
+            "notifications_permission_prompt": 2,
+            "open_account": 2,
+            "open_home_timeline": 1,
+            "open_link": 1,
+            "phone_verification": 4,
+            "privacy_options": 1,
+            "security_key": 3,
+            "select_avatar": 4,
+            "select_banner": 2,
+            "settings_list": 7,
+            "show_code": 1,
+            "sign_up": 2,
+            "sign_up_review": 4,
+            "tweet_selection_urt": 1,
+            "update_users": 1,
+            "upload_media": 1,
+            "user_recommendations_list": 4,
+            "user_recommendations_urt": 1,
+            "wait_spinner": 3,
+            "web_modal": 1,
+        },
+    }
+    url = "https://twitter.com/i/api/1.1/onboarding/task.json?flow_name=login"
+    response = extr.request(url, method="POST", headers=headers, json=data)
+
+    data = {
+        "flow_token": process(response),
+        "subtask_inputs": [
+            {
+                "subtask_id": "LoginJsInstrumentationSubtask",
+                "js_instrumentation": {
+                    "response": "{}",
+                    "link": "next_link",
+                },
+            },
+        ],
+    }
+    url = "https://twitter.com/i/api/1.1/onboarding/task.json"
+    response = extr.request(
+        url, method="POST", headers=headers, json=data, fatal=None)
+
+    # username
+    data = {
+        "flow_token": process(response),
+        "subtask_inputs": [
+            {
+                "subtask_id": "LoginEnterUserIdentifierSSO",
+                "settings_list": {
+                    "setting_responses": [
+                        {
+                            "key": "user_identifier",
+                            "response_data": {
+                                "text_data": {"result": username},
+                            },
+                        },
+                    ],
+                    "link": "next_link",
+                },
+            },
+        ],
+    }
+    #  url = "https://twitter.com/i/api/1.1/onboarding/task.json"
+    extr.sleep(random.uniform(2.0, 4.0), "login (username)")
+    response = extr.request(
+        url, method="POST", headers=headers, json=data, fatal=None)
+
+    # password
+    data = {
+        "flow_token": process(response),
+        "subtask_inputs": [
+            {
+                "subtask_id": "LoginEnterPassword",
+                "enter_password": {
+                    "password": password,
+                    "link": "next_link",
+                },
+            },
+        ],
+    }
+    #  url = "https://twitter.com/i/api/1.1/onboarding/task.json"
+    extr.sleep(random.uniform(2.0, 4.0), "login (password)")
+    response = extr.request(
+        url, method="POST", headers=headers, json=data, fatal=None)
+
+    # account duplication check ?
+    data = {
+        "flow_token": process(response),
+        "subtask_inputs": [
+            {
+                "subtask_id": "AccountDuplicationCheck",
+                "check_logged_in_account": {
+                    "link": "AccountDuplicationCheck_false",
+                },
+            },
+        ],
+    }
+    #  url = "https://twitter.com/i/api/1.1/onboarding/task.json"
+    response = extr.request(
+        url, method="POST", headers=headers, json=data, fatal=None)
+    process(response)
+
+    return {
+        cookie.name: cookie.value
+        for cookie in extr.session.cookies
+    }

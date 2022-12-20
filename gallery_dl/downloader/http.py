@@ -37,6 +37,7 @@ class HttpDownloader(DownloaderBase):
         self.minsize = self.config("filesize-min")
         self.maxsize = self.config("filesize-max")
         self.retries = self.config("retries", extractor._retries)
+        self.retry_codes = self.config("retry-codes")
         self.timeout = self.config("timeout", extractor._timeout)
         self.verify = self.config("verify", extractor._verify)
         self.mtime = self.config("mtime", True)
@@ -44,6 +45,8 @@ class HttpDownloader(DownloaderBase):
 
         if self.retries < 0:
             self.retries = float("inf")
+        if self.retry_codes is None:
+            self.retry_codes = [429]
         if self.minsize:
             minsize = text.parse_bytes(self.minsize)
             if not minsize:
@@ -74,6 +77,8 @@ class HttpDownloader(DownloaderBase):
                 self.log.warning("Invalid rate limit (%r)", self.rate)
         if self.progress is not None:
             self.receive = self._receive_rate
+            if self.progress < 0.0:
+                self.progress = 0.0
 
     def download(self, url, pathfmt):
         try:
@@ -95,6 +100,13 @@ class HttpDownloader(DownloaderBase):
         kwdict = pathfmt.kwdict
         adjust_extension = kwdict.get(
             "_http_adjust_extension", self.adjust_extension)
+
+        codes = kwdict.get("_http_retry_codes")
+        if codes:
+            retry_codes = self.retry_codes.copy()
+            retry_codes += codes
+        else:
+            retry_codes = self.retry_codes
 
         if self.part and not metadata:
             pathfmt.part_enable(self.partdir)
@@ -156,7 +168,7 @@ class HttpDownloader(DownloaderBase):
                 break
             else:
                 msg = "'{} {}' for '{}'".format(code, response.reason, url)
-                if code == 429 or 500 <= code < 600:  # Server Error
+                if code in retry_codes or 500 <= code < 600:
                     continue
                 self.log.warning(msg)
                 return False
@@ -295,7 +307,7 @@ class HttpDownloader(DownloaderBase):
             write(data)
 
             if progress is not None:
-                if time_elapsed >= progress:
+                if time_elapsed > progress:
                     self.out.progress(
                         bytes_total,
                         bytes_start + bytes_downloaded,
@@ -390,11 +402,13 @@ SIGNATURE_CHECKS = {
     "bmp" : lambda s: s[0:2] == b"BM",
     "webp": lambda s: (s[0:4] == b"RIFF" and
                        s[8:12] == b"WEBP"),
-    "avif": lambda s: s[4:12] == b"ftypavif",
+    "avif": lambda s: s[4:11] == b"ftypavi" and s[11] in b"fs",
     "svg" : lambda s: s[0:5] == b"<?xml",
     "ico" : lambda s: s[0:4] == b"\x00\x00\x01\x00",
     "cur" : lambda s: s[0:4] == b"\x00\x00\x02\x00",
     "psd" : lambda s: s[0:4] == b"8BPS",
+    "mp4" : lambda s: (s[4:8] == b"ftyp" and s[8:11] in (
+                       b"mp4", b"avc", b"iso", b"M4V")),
     "webm": lambda s: s[0:4] == b"\x1A\x45\xDF\xA3",
     "ogg" : lambda s: s[0:4] == b"OggS",
     "wav" : lambda s: (s[0:4] == b"RIFF" and
@@ -402,7 +416,7 @@ SIGNATURE_CHECKS = {
     "mp3" : lambda s: (s[0:3] == b"ID3" or
                        s[0:2] in (b"\xFF\xFB", b"\xFF\xF3", b"\xFF\xF2")),
     "zip" : lambda s: s[0:4] in (b"PK\x03\x04", b"PK\x05\x06", b"PK\x07\x08"),
-    "rar" : lambda s: s[0:6] == b"\x52\x61\x72\x21\x1A\x07",
+    "rar" : lambda s: s[0:6] == b"Rar!\x1A\x07",
     "7z"  : lambda s: s[0:6] == b"\x37\x7A\xBC\xAF\x27\x1C",
     "pdf" : lambda s: s[0:5] == b"%PDF-",
     "swf" : lambda s: s[0:3] in (b"CWS", b"FWS"),

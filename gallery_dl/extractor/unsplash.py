@@ -78,11 +78,11 @@ class UnsplashImageExtractor(UnsplashExtractor):
     pattern = BASE_PATTERN + r"/photos/([^/?#]+)"
     test = ("https://unsplash.com/photos/lsoogGC_5dg", {
         "pattern": r"https://images\.unsplash\.com/photo-1586348943529-"
-                   r"beaae6c28db9\?ixid=\w+&ixlib=rb-1.2.1",
+                   r"beaae6c28db9\?ixid=\w+&ixlib=rb-4.0.3",
         "keyword": {
             "alt_description": "re:silhouette of trees near body of water ",
             "blur_hash": "LZP4uQS4jboe%#o0WCa}2doJNaaz",
-            "categories": list,
+            "?  categories": list,
             "color": "#f3c08c",
             "created_at": "2020-04-08T12:29:42Z",
             "date": "dt:2020-04-08 12:29:42",
@@ -108,9 +108,8 @@ class UnsplashImageExtractor(UnsplashExtractor):
                 "name": "Beaver Dam, WI 53916, USA",
                 "position": {
                     "latitude": 43.457769,
-                    "longitude": -88.837329
+                    "longitude": -88.837329,
                 },
-                "title": "Beaver Dam, WI 53916, USA"
             },
             "promoted_at": "2020-04-08T15:12:03Z",
             "sponsorship": None,
@@ -149,7 +148,7 @@ class UnsplashUserExtractor(UnsplashExtractor):
     pattern = BASE_PATTERN + r"/@(\w+)/?$"
     test = ("https://unsplash.com/@davehoefler", {
         "pattern": r"https://images\.unsplash\.com/(photo-\d+-\w+"
-                   r"|reserve/[^/?#]+)\?ixid=\w+&ixlib=rb-1\.2\.1$",
+                   r"|reserve/[^/?#]+)\?ixid=\w+&ixlib=rb-4\.0\.3$",
         "range": "1-30",
         "count": 30,
     })
@@ -166,7 +165,7 @@ class UnsplashFavoriteExtractor(UnsplashExtractor):
     pattern = BASE_PATTERN + r"/@(\w+)/likes"
     test = ("https://unsplash.com/@davehoefler/likes", {
         "pattern": r"https://images\.unsplash\.com/(photo-\d+-\w+"
-                   r"|reserve/[^/?#]+)\?ixid=\w+&ixlib=rb-1\.2\.1$",
+                   r"|reserve/[^/?#]+)\?ixid=\w+&ixlib=rb-4\.0\.3$",
         "range": "1-30",
         "count": 30,
     })
@@ -184,7 +183,7 @@ class UnsplashCollectionExtractor(UnsplashExtractor):
     test = (
         ("https://unsplash.com/collections/3178572/winter", {
             "pattern": r"https://images\.unsplash\.com/(photo-\d+-\w+"
-                       r"|reserve/[^/?#]+)\?ixid=\w+&ixlib=rb-1\.2\.1$",
+                       r"|reserve/[^/?#]+)\?ixid=\w+&ixlib=rb-4\.0\.3$",
             "keyword": {"collection_id": "3178572",
                         "collection_title": "winter"},
             "range": "1-30",
@@ -212,8 +211,9 @@ class UnsplashSearchExtractor(UnsplashExtractor):
     subcategory = "search"
     pattern = BASE_PATTERN + r"/s/photos/([^/?#]+)(?:\?([^#]+))?"
     test = ("https://unsplash.com/s/photos/hair-style", {
-        "pattern": r"https://images\.unsplash\.com/((flagged/)?photo-\d+-\w+"
-                   r"|reserve/[^/?#]+)\?ixid=\w+&ixlib=rb-1\.2\.1$",
+        "pattern": r"https://(images|plus)\.unsplash\.com"
+                   r"/((flagged/|premium_)?photo-\d+-\w+"
+                   r"|reserve/[^/?#]+)\?ixid=\w+&ixlib=rb-4\.0\.3$",
         "range": "1-30",
         "count": 30,
     })

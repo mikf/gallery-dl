@@ -73,7 +73,11 @@ def parse_command_line(module, argv):
 
     ytdlp = (module.__name__ == "yt_dlp")
     std_headers = module.std_headers
-    parse_bytes = module.FileDownloader.parse_bytes
+
+    try:
+        parse_bytes = module.parse_bytes
+    except AttributeError:
+        parse_bytes = module.FileDownloader.parse_bytes
 
     # HTTP headers
     if opts.user_agent is not None:

@@ -158,6 +158,7 @@ class TestDownloaderBase(unittest.TestCase):
         self.assertEqual(
             pathfmt.extension,
             expected_extension,
+            content[0:16],
         )
         self.assertEqual(
             os.path.splitext(pathfmt.realpath)[1][1:],
@@ -180,7 +181,7 @@ class TestHTTPDownloader(TestDownloaderBase):
     def _run_test(self, ext, input, output,
                   extension, expected_extension=None):
         TestDownloaderBase._run_test(
-            self, self.address + "/image." + ext, input, output,
+            self, self.address + "/" + ext, input, output,
             extension, expected_extension)
 
     def tearDown(self):
@@ -207,7 +208,7 @@ class TestHTTPDownloader(TestDownloaderBase):
         self._run_test("gif", None, DATA["gif"], "jpg", "gif")
 
     def test_http_filesize_min(self):
-        url = self.address + "/image.gif"
+        url = self.address + "/gif"
         pathfmt = self._prepare_destination(None, extension=None)
         self.downloader.minsize = 100
         with self.assertLogs(self.downloader.log, "WARNING"):
@@ -215,7 +216,7 @@ class TestHTTPDownloader(TestDownloaderBase):
         self.assertFalse(success)
 
     def test_http_filesize_max(self):
-        url = self.address + "/image.jpg"
+        url = self.address + "/jpg"
         pathfmt = self._prepare_destination(None, extension=None)
         self.downloader.maxsize = 100
         with self.assertLogs(self.downloader.log, "WARNING"):
@@ -243,19 +244,14 @@ class TestTextDownloader(TestDownloaderBase):
 class HttpRequestHandler(http.server.BaseHTTPRequestHandler):
 
     def do_GET(self):
-        if self.path.startswith("/image."):
-            ext = self.path.rpartition(".")[2]
-            content_type = MIME_TYPES.get(ext)
-            output = DATA[ext]
-        else:
+        try:
+            output = DATA[self.path[1:]]
+        except KeyError:
             self.send_response(404)
             self.wfile.write(self.path.encode())
             return
 
-        headers = {
-            "Content-Type": content_type,
-            "Content-Length": len(output),
-        }
+        headers = {"Content-Length": len(output)}
 
         if "Range" in self.headers:
             status = 206
@@ -276,36 +272,58 @@ class HttpRequestHandler(http.server.BaseHTTPRequestHandler):
         self.wfile.write(output)
 
 
-DATA = {
-    "jpg" : binascii.a2b_base64(
+SAMPLES = {
+    ("jpg" , binascii.a2b_base64(
         "/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEB"
         "AQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQH/2wBDAQEB"
         "AQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEB"
         "AQEBAQEBAQEBAQEBAQH/wAARCAABAAEDAREAAhEBAxEB/8QAFAABAAAAAAAAAAAA"
         "AAAAAAAACv/EABQQAQAAAAAAAAAAAAAAAAAAAAD/xAAUAQEAAAAAAAAAAAAAAAAA"
-        "AAAA/8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAwDAQACEQMRAD8AfwD/2Q=="),
-    "png" : binascii.a2b_base64(
+        "AAAA/8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAwDAQACEQMRAD8AfwD/2Q==")),
+    ("png" , binascii.a2b_base64(
         "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAAAAAA6fptVAAAACklEQVQIHWP4DwAB"
-        "AQEANl9ngAAAAABJRU5ErkJggg=="),
-    "gif" : binascii.a2b_base64(
-        "R0lGODdhAQABAIAAAP///////ywAAAAAAQABAAACAkQBADs="),
-    "bmp" : b"BM",
-    "webp": b"RIFF????WEBP",
-    "avif": b"????ftypavif",
-    "svg" : b"<?xml",
-    "ico" : b"\x00\x00\x01\x00",
-    "cur" : b"\x00\x00\x02\x00",
-    "psd" : b"8BPS",
-    "webm": b"\x1A\x45\xDF\xA3",
-    "ogg" : b"OggS",
-    "wav" : b"RIFF????WAVE",
-    "mp3" : b"ID3",
-    "zip" : b"PK\x03\x04",
-    "rar" : b"\x52\x61\x72\x21\x1A\x07",
-    "7z"  : b"\x37\x7A\xBC\xAF\x27\x1C",
-    "pdf" : b"%PDF-",
-    "swf" : b"CWS",
+        "AQEANl9ngAAAAABJRU5ErkJggg==")),
+    ("gif" , binascii.a2b_base64(
+        "R0lGODdhAQABAIAAAP///////ywAAAAAAQABAAACAkQBADs=")),
+    ("bmp" , b"BM"),
+    ("webp", b"RIFF????WEBP"),
+    ("avif", b"????ftypavif"),
+    ("avif", b"????ftypavis"),
+    ("svg" , b"<?xml"),
+    ("ico" , b"\x00\x00\x01\x00"),
+    ("cur" , b"\x00\x00\x02\x00"),
+    ("psd" , b"8BPS"),
+    ("mp4" , b"????ftypmp4"),
+    ("mp4" , b"????ftypavc1"),
+    ("mp4" , b"????ftypiso3"),
+    ("mp4" , b"????ftypM4V"),
+    ("webm", b"\x1A\x45\xDF\xA3"),
+    ("ogg" , b"OggS"),
+    ("wav" , b"RIFF????WAVE"),
+    ("mp3" , b"ID3"),
+    ("mp3" , b"\xFF\xFB"),
+    ("mp3" , b"\xFF\xF3"),
+    ("mp3" , b"\xFF\xF2"),
+    ("zip" , b"PK\x03\x04"),
+    ("zip" , b"PK\x05\x06"),
+    ("zip" , b"PK\x07\x08"),
+    ("rar" , b"Rar!\x1A\x07"),
+    ("rar" , b"\x52\x61\x72\x21\x1A\x07"),
+    ("7z"  , b"\x37\x7A\xBC\xAF\x27\x1C"),
+    ("pdf" , b"%PDF-"),
+    ("swf" , b"FWS"),
+    ("swf" , b"CWS"),
 }
+
+
+DATA = {}
+
+for ext, content in SAMPLES:
+    if ext not in DATA:
+        DATA[ext] = content
+
+for idx, (_, content) in enumerate(SAMPLES):
+    DATA["S{:>02}".format(idx)] = content
 
 
 # reverse mime types mapping
@@ -316,14 +334,14 @@ MIME_TYPES = {
 
 
 def generate_tests():
-    def _generate_test(ext):
+    def generate_test(idx, ext, content):
         def test(self):
-            self._run_test(ext, None, DATA[ext], "bin", ext)
-        test.__name__ = "test_http_ext_" + ext
+            self._run_test("S{:>02}".format(idx), None, content, "bin", ext)
+        test.__name__ = "test_http_ext_{:>02}_{}".format(idx, ext)
         return test
 
-    for ext in DATA:
-        test = _generate_test(ext)
+    for idx, (ext, content) in enumerate(SAMPLES):
+        test = generate_test(idx, ext, content)
         setattr(TestHTTPDownloader, test.__name__, test)
 
 

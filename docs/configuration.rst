@@ -432,15 +432,17 @@ Description
             "isAdult"    : "1"
         }
 
-    * A ``list`` with up to 3 entries specifying a browser profile.
+    * A ``list`` with up to 4 entries specifying a browser profile.
 
       * The first entry is the browser name
       * The optional second entry is a profile name or an absolute path to a profile directory
       * The optional third entry is the keyring to retrieve passwords for decrypting cookies from
+      * The optional fourth entry is a (Firefox) container name (``"none"`` for only cookies with no container)
 
       .. code:: json
 
         ["firefox"]
+        ["firefox", null, null, "Personal"]
         ["chromium", "Private", "kwallet"]
 
 
@@ -603,6 +605,27 @@ Description
     For example, setting this option to ``"gdl_http"`` would make it possible
     to access the current file's ``Last-Modified`` header as ``"{gdl_http[Last-Modified]}"``
     and its parsed form as ``"{gdl_http[date]}"``.
+
+
+extractor.*.version-metadata
+----------------------------
+Type
+    ``string``
+Default
+    ``null``
+Description
+    Insert an ``object`` containing gallery-dl's version info into
+    metadata dictionaries as the given name.
+
+    The content of the object is as follows:
+
+    .. code:: json
+
+        {
+            "version"         : "string",
+            "is_executable"   : "bool",
+            "current_git_head": "string or null"
+        }
 
 
 extractor.*.category-transfer
@@ -885,6 +908,27 @@ Description
     Try to follow external URLs of embedded players.
 
 
+extractor.artstation.max-posts
+------------------------------
+Type
+    ``integer``
+Default
+    ``null``
+Description
+    Limit the number of posts/projects to download.
+
+
+extractor.artstation.search.pro-first
+-------------------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Enable the "Show Studio and Pro member artwork first" checkbox
+    when retrieving search results.
+
+
 extractor.aryion.recursive
 --------------------------
 Type
@@ -927,7 +971,7 @@ extractor.cyberdrop.domain
 Type
     ``string``
 Default
-    ``"auto"``
+    ``null``
 Example
     ``"cyberdrop.to"``
 Description
@@ -958,6 +1002,23 @@ Description
     Extract additional metadata (notes, artist commentary, parent, children)
 
     Note: This requires 1 additional HTTP request for each post.
+
+
+extractor.danbooru.threshold
+----------------------------
+Type
+    ``string`` or ``int``
+Default
+    ``"auto"``
+Description
+    Stop paginating over API results if the length of a batch of returned
+    posts is less than the specified number. Defaults to the per-page limit
+    of the current instance, which is 320 for ``e621`` and 200 for
+    everything else.
+
+    Note: Changing this setting is normally not necessary. When the value is
+    greater than the per-page limit, gallery-dl will stop after the first
+    batch. The value cannot be less than 1.
 
 
 extractor.danbooru.ugoira
@@ -1514,13 +1575,12 @@ extractor.instagram.api
 Type
     ``string``
 Default
-    ``"auto"``
+    ``"rest"``
 Description
     Selects which API endpoints to use.
 
-    * ``"rest"``: REST API - higher-resolution media, only usable when logged in
-    * ``"graphql"``: GraphQL API - lower-resolution media, partially accessible when not logged in
-    * ``"auto"``: Use REST API when logged in, GraphQL API otherwise
+    * ``"rest"``: REST API - higher-resolution media
+    * ``"graphql"``: GraphQL API - lower-resolution media
 
 
 extractor.instagram.include
@@ -1674,7 +1734,7 @@ extractor.lolisafe.domain
 Type
     ``string``
 Default
-    ``"auto"``
+    ``null``
 Description
     Specifies the domain used by a ``lolisafe`` extractor
     regardless of input URL.
@@ -1838,6 +1898,40 @@ Description
     ``"illustration"``, ``"doujin"``, ``"favorite"``, ``"nuita"``.
 
     You can use ``"all"`` instead of listing all values separately.
+
+
+extractor.nitter.quoted
+-----------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Fetch media from quoted Tweets.
+
+
+extractor.nitter.retweets
+-------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Fetch media from Retweets.
+
+
+extractor.nitter.videos
+-----------------------
+Type
+    ``bool`` or ``string``
+Default
+    ``true``
+Description
+    Control video download behavior.
+
+    * ``true``: Download videos
+    * ``"ytdl"``: Download videos using `youtube-dl`_
+    * ``false``: Skip video Tweets
 
 
 extractor.oauth.browser
@@ -3205,6 +3299,24 @@ Description
     Additional HTTP headers to send when downloading files,
 
 
+downloader.http.retry-codes
+---------------------------
+Type
+    ``list`` of ``integers``
+Default
+    ``[429]``
+Description
+    Additional `HTTP response status codes <https://developer.mozilla.org/en-US/docs/Web/HTTP/Status>`__
+    to retry a download on.
+
+    Codes ``200``, ``206``, and ``416`` (when resuming a `partial <downloader.*.part_>`__
+    download) will never be retried and always count as success,
+    regardless of this option.
+
+    Codes ``500`` - ``599`` (server error responses)  will always be retried,
+    regardless of this option.
+
+
 downloader.ytdl.format
 ----------------------
 Type
@@ -3767,6 +3879,17 @@ Description
     or ``"w"`` to truncate it.
 
     See the ``mode`` parameter of |open()|_ for further details.
+
+
+metadata.private
+----------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Include private fields,
+    i.e. fields whose name starts with an underscore.
 
 
 metadata.encoding

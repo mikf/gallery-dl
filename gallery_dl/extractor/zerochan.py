@@ -11,8 +11,6 @@
 from .booru import BooruExtractor
 from ..cache import cache
 from .. import text, exception
-from xml.etree import ElementTree
-
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?zerochan\.net"
 
@@ -27,12 +25,13 @@ class ZerochanExtractor(BooruExtractor):
     cookienames = ("z_id", "z_hash")
 
     def login(self):
+        self._logged_in = True
         if not self._check_cookies(self.cookienames):
             username, password = self._get_auth_info()
             if username:
                 self._update_cookies(self._login_impl(username, password))
-        # force legacy layout
-        self.session.cookies.set("v3", "0", domain=self.cookiedomain)
+            else:
+                self._logged_in = False
 
     @cache(maxage=90*86400, keyarg=1)
     def _login_impl(self, username, password):
@@ -60,35 +59,49 @@ class ZerochanExtractor(BooruExtractor):
         url = "{}/{}".format(self.root, entry_id)
         extr = text.extract_from(self.request(url).text)
 
-        return {
-            "id"    : entry_id,
-            "author": extr('"author": "', '"'),
+        data = {
+            "id"      : text.parse_int(entry_id),
+            "author"  : extr('"author": "', '"'),
             "file_url": extr('"contentUrl": "', '"'),
-            "date"  : text.parse_datetime(extr(
-                '"datePublished": "', '"'), "%a %b %d %H:%M:%S %Y"),
-            "width" : extr('"width": "', ' '),
-            "height": extr('"height": "', ' '),
-            "size"  : text.parse_bytes(extr('"contentSize": "', 'B')),
-            "path"  : text.split_html(extr(
-                'class="breadcrumbs', '</p>'))[3::2],
-            "tags"  : extr('alt="Tags: Anime, ', '"').split(", ")
+            "date"    : text.parse_datetime(extr('"datePublished": "', '"')),
+            "width"   : text.parse_int(extr('"width": "', ' ')),
+            "height"  : text.parse_int(extr('"height": "', ' ')),
+            "size"    : text.parse_bytes(extr('"contentSize": "', 'B')),
+            "path"    : text.split_html(extr(
+                'class="breadcrumbs', '</p>'))[2:],
+            "uploader": extr('href="/user/', '"'),
+            "tags"    : extr('<ul id="tags"', '</ul>'),
+            "source"  : extr('<h2>Source</h2>', '</p><h2>').rpartition(
+                ">")[2] or None,
         }
 
-    def _parse_entry_xml(self, entry_id):
-        url = "{}/{}?xml".format(self.root, entry_id)
-        item = ElementTree.fromstring(self.request(url).text)[0][-1]
-        #  content = item[4].attrib
+        html = data["tags"]
+        tags = data["tags"] = []
+        for tag in html.split("<li class=")[1:]:
+            category, _, name = text.extr(tag, 'alt="', '<').partition('">')
+            tags.append(category + ":" + name.strip())
 
-        return {
-            #  "id"    : entry_id,
-            #  "file_url": content["url"],
-            #  "width" : content["width"],
-            #  "height": content["height"],
-            #  "size"  : content["filesize"],
-            "name"  : item[2].text,
-            "tags"  : item[5].text.lstrip().split(", "),
-            "md5"   : item[6].text,
+        return data
+
+    def _parse_entry_json(self, entry_id):
+        url = "{}/{}?json".format(self.root, entry_id)
+        item = self.request(url).json()
+
+        data = {
+            "id"      : item["id"],
+            "file_url": item["full"],
+            "width"   : item["width"],
+            "height"  : item["height"],
+            "size"    : item["size"],
+            "name"    : item["primary"],
+            "md5"     : item["hash"],
+            "source"  : item.get("source"),
         }
+
+        if not self._logged_in:
+            data["tags"] = item["tags"]
+
+        return data
 
 
 class ZerochanTagExtractor(ZerochanExtractor):
@@ -138,7 +151,7 @@ class ZerochanTagExtractor(ZerochanExtractor):
                 if metadata:
                     entry_id = extr('href="/', '"')
                     post = self._parse_entry_html(entry_id)
-                    post.update(self._parse_entry_xml(entry_id))
+                    post.update(self._parse_entry_json(entry_id))
                     yield post
                 else:
                     yield {
@@ -163,14 +176,34 @@ class ZerochanImageExtractor(ZerochanExtractor):
         "pattern": r"https://static\.zerochan\.net/"
                    r"Perth\.%28Kantai\.Collection%29\.full.2920445\.jpg",
         "keyword": {
-            "author": "YukinoTokisaki",
+            "author": "YeFan 葉凡",
             "date": "dt:2020-04-24 21:33:44",
-            "file_url": str,
+            "file_url": "https://static.zerochan.net"
+                        "/Perth.%28Kantai.Collection%29.full.2920445.jpg",
             "filename": "Perth.(Kantai.Collection).full.2920445",
-            "height": "1366",
-            "id": "2920445",
-            "size": "1929k",
-            "width": "1920",
+            "height": 1366,
+            "id": 2920445,
+            "path": ["Kantai Collection", "Perth (Kantai Collection)"],
+            "size": 1975296,
+            "tags": [
+                "Mangaka:YeFan 葉凡",
+                "Game:Kantai Collection",
+                "Character:Perth (Kantai Collection)",
+                "Theme:Blonde Hair",
+                "Theme:Braids",
+                "Theme:Coat",
+                "Theme:Female",
+                "Theme:Firefighter Outfit",
+                "Theme:Group",
+                "Theme:Long Sleeves",
+                "Theme:Personification",
+                "Theme:Pins",
+                "Theme:Ribbon",
+                "Theme:Shirt",
+                "Theme:Short Hair",
+            ],
+            "uploader": "YukinoTokisaki",
+            "width": 1920,
         },
     })
 
@@ -181,5 +214,5 @@ class ZerochanImageExtractor(ZerochanExtractor):
     def posts(self):
         post = self._parse_entry_html(self.image_id)
         if self.config("metadata"):
-            post.update(self._parse_entry_xml(self.image_id))
+            post.update(self._parse_entry_json(self.image_id))
         return (post,)
