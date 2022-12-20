@@ -42,10 +42,10 @@ class AtfExtractor(GalleryExtractor):
         while True:
             html = self.request(url).text
             yield html
-            if "pageNav-jump--next" not in page:
+            if "pageNav-jump--next" not in html:
                 return
             page += 1
-            url = self.gallery_url + "/page-" + page
+            url = self.gallery_url.rstrip('/') + "/page-" + str(page)
 
 
 class AtfThreadExtractor(AtfExtractor):
