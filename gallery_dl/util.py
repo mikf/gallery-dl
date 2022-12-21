@@ -802,6 +802,8 @@ class FilterPredicate():
     """Predicate; True if evaluating the given expression returns True"""
 
     def __init__(self, expr, target="image"):
+        if not isinstance(expr, str):
+            expr = "(" + ") and (".join(expr) + ")"
         name = "<{} filter>".format(target)
         self.expr = compile_expression(expr, name)
 

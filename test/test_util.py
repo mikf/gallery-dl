@@ -116,6 +116,14 @@ class TestPredicate(unittest.TestCase):
         with self.assertRaises(exception.FilterError):
             util.FilterPredicate("b > 1")(url, {"a": 2})
 
+        pred = util.FilterPredicate(["a < 3", "b < 4", "c < 5"])
+        self.assertTrue(pred(url, {"a": 2, "b": 3, "c": 4}))
+        self.assertFalse(pred(url, {"a": 3, "b": 3, "c": 4}))
+        self.assertFalse(pred(url, {"a": 2, "b": 4, "c": 4}))
+        self.assertFalse(pred(url, {"a": 2, "b": 3, "c": 5}))
+        with self.assertRaises(exception.FilterError):
+            pred(url, {"a": 2})
+
     def test_build_predicate(self):
         pred = util.build_predicate([])
         self.assertIsInstance(pred, type(lambda: True))
