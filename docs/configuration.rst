@@ -843,24 +843,27 @@ Description
 extractor.*.image-filter
 ------------------------
 Type
-    ``string``
-Example
-    * ``"width >= 1200 and width/height > 1.2"``
+    * ``string``
+    * ``list`` of ``strings``
+Examples
     * ``"re.search(r'foo(bar)+', description)"``
+    * ``["width >= 1200", "width/height > 1.2"]``
 Description
     Python expression controlling which files to download.
 
-    | Files for which the expression evaluates to ``False`` are ignored.
-    | Available keys are the filename-specific ones listed by ``-K`` or ``-j``.
+    A file only gets downloaded when *all* of the given expressions evaluate to ``True``.
+
+    Available values are the filename-specific ones listed by ``-K`` or ``-j``.
 
 
 extractor.*.chapter-filter
 --------------------------
 Type
-    ``string``
-Example
+    * ``string``
+    * ``list`` of ``strings``
+Examples
     * ``"lang == 'en'"``
-    * ``"language == 'French' and 10 <= chapter < 20"``
+    * ``["language == 'French'", "10 <= chapter < 20"]``
 Description
     Like `image-filter <extractor.*.image-filter_>`__,
     but applies to delegated URLs like manga chapters, etc.
