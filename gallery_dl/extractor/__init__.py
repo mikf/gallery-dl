@@ -71,6 +71,7 @@ modules = [
     "instagram",
     "issuu",
     "itaku",
+    "jschan",
     "kabeuchi",
     "keenspot",
     "kemonoparty",

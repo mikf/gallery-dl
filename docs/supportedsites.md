@@ -1053,6 +1053,16 @@ Consider all sites to be NSFW unless otherwise known.
 </tr>
 
 <tr>
+    <td colspan="4"><strong>jschan Imageboards</strong></td>
+</tr>
+<tr>
+    <td>94chan</td>
+    <td>https://94chan.org/</td>
+    <td>Boards, Threads</td>
+    <td></td>
+</tr>
+
+<tr>
     <td colspan="4"><strong>LynxChan Imageboards</strong></td>
 </tr>
 <tr>
