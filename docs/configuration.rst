@@ -2661,6 +2661,12 @@ Default
 Description
     Retrieve age-restricted content using Twitter's syndication API.
 
+    Note: This does not apply to search results (including
+    `timeline strategies <extractor.twitter.timeline.strategy_>`__).
+    To retrieve such content from search results, you must log in and
+    disable "Hide sensitive content" in your `search settings
+    <https://twitter.com/settings/search>`__.
+
 
 extractor.twitter.logout
 ------------------------
@@ -2703,6 +2709,13 @@ Description
 
     If this value is ``"self"``, only consider replies where
     reply and original Tweet are from the same user.
+
+    Note: Twitter will automatically expand conversations if you
+    use the ``/with_replies`` timeline while logged in. For example,
+    media from Tweets which the user replied to will also be downloaded.
+
+    It is possible to exclude unwanted Tweets using `image-filter
+    <extractor.*.image-filter_>`__.
 
 
 extractor.twitter.retweets
