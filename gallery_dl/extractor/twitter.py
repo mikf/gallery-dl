@@ -221,7 +221,8 @@ class TwitterExtractor(Extractor):
         for url in tweet["entities"].get("urls", ()):
             url = url["expanded_url"]
             if "//twitpic.com/" in url and "/photos/" not in url:
-                response = self.request(url, fatal=False)
+                response = self.request(
+                    url.replace("http:", "https:", 1), fatal=False)
                 if response.status_code >= 400:
                     continue
                 url = text.extr(
