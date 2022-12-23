@@ -24,39 +24,32 @@ from gallery_dl import util, text, exception  # noqa E402
 
 class TestRange(unittest.TestCase):
 
-    def test_parse_range(self, f=util.RangePredicate.parse_range):
+    def test_parse_range(self, f=util.RangePredicate._parse):
         self.assertEqual(
             f(""),
-            [])
+            [],
+        )
         self.assertEqual(
             f("1-2"),
-            [(1, 2)])
+            [range(1, 3)],
+        )
         self.assertEqual(
             f("-"),
-            [(1, sys.maxsize)])
+            [range(1, sys.maxsize)],
+        )
         self.assertEqual(
             f("-2,4,6-8,10-"),
-            [(1, 2), (4, 4), (6, 8), (10, sys.maxsize)])
+            [range(1, 3),
+             range(4, 5),
+             range(6, 9),
+             range(10, sys.maxsize)],
+        )
         self.assertEqual(
             f(" - 3 , 4-  4, 2-6"),
-            [(1, 3), (4, 4), (2, 6)])
-
-    def test_optimize_range(self, f=util.RangePredicate.optimize_range):
-        self.assertEqual(
-            f([]),
-            [])
-        self.assertEqual(
-            f([(2, 4)]),
-            [(2, 4)])
-        self.assertEqual(
-            f([(2, 4), (6, 8), (10, 12)]),
-            [(2, 4), (6, 8), (10, 12)])
-        self.assertEqual(
-            f([(2, 4), (4, 6), (5, 8)]),
-            [(2, 8)])
-        self.assertEqual(
-            f([(1, 1), (2, 2), (3, 6), (8, 9)]),
-            [(1, 6), (8, 9)])
+            [range(1, 4),
+             range(4, 5),
+             range(2, 7)],
+        )
 
 
 class TestPredicate(unittest.TestCase):
@@ -68,7 +61,7 @@ class TestPredicate(unittest.TestCase):
         for i in range(6):
             self.assertTrue(pred(dummy, dummy))
         with self.assertRaises(exception.StopExtraction):
-            bool(pred(dummy, dummy))
+            pred(dummy, dummy)
 
         pred = util.RangePredicate("1, 3, 5")
         self.assertTrue(pred(dummy, dummy))
@@ -77,11 +70,11 @@ class TestPredicate(unittest.TestCase):
         self.assertFalse(pred(dummy, dummy))
         self.assertTrue(pred(dummy, dummy))
         with self.assertRaises(exception.StopExtraction):
-            bool(pred(dummy, dummy))
+            pred(dummy, dummy)
 
         pred = util.RangePredicate("")
         with self.assertRaises(exception.StopExtraction):
-            bool(pred(dummy, dummy))
+            pred(dummy, dummy)
 
     def test_unique_predicate(self):
         dummy = None
