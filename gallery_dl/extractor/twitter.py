@@ -1008,7 +1008,6 @@ class TwitterAPI():
         self.headers["x-csrf-token"] = csrf_token
 
         self.logged_in = bool(cookies.get("auth_token", domain=cookiedomain))
-        self.authenticate()
 
     def authenticate(self):
         if self.logged_in:
@@ -1180,17 +1179,22 @@ class TwitterAPI():
             else:
                 raise exception.NotFoundError("user")
 
-    @cache(maxage=3600)
+    @cache(maxage=3*3600)
     def _guest_token(self):
         root = "https://api.twitter.com"
         endpoint = "/1.1/guest/activate.json"
-        return str(self._call(endpoint, None, root, "POST")["guest_token"])
+        return str(
+            self._call(endpoint, None, root, False, "POST")["guest_token"])
 
-    def _call(self, endpoint, params, root=None, method="GET"):
+    def _call(self, endpoint, params, root=None, authenticate=True,
+              method="GET"):
         if root is None:
             root = self.root
 
         while True:
+            if authenticate:
+                self.authenticate()
+
             response = self.extractor.request(
                 root + endpoint, method=method, params=params,
                 headers=self.headers, fatal=None)
@@ -1348,7 +1352,6 @@ class TwitterAPI():
                 blocked = bool(user.get("blocked_by"))
                 if blocked and self.logged_in and extr.config("logout"):
                     self.logged_in = False
-                    self.authenticate()
                     extr.log.info(
                         "{} blocked your account. Retrying API request as "
                         "guest".format(user["screen_name"]))
