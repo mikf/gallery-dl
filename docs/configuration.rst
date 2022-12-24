@@ -999,7 +999,8 @@ Type
 Default
     ``false``
 Description
-    Extract additional metadata (notes, artist commentary, parent, children)
+    Extract additional metadata
+    (notes, artist commentary, parent, children, uploader)
 
     Note: This requires 1 additional HTTP request for each post.
 
