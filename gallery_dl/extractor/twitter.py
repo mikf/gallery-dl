@@ -670,6 +670,17 @@ class TwitterTweetExtractor(TwitterExtractor):
                 "It’s our \\(Mystery\\) Gift to you, Trainers! \n\n❓🎁➡️ "
             )},
         }),
+        # truncated retweet
+        ("https://twitter.com/Aralyre/status/1603062622483537921", {
+            "options": (("retweets", True),),
+            "count": 1,
+            "keyword": {
+                "content"   : r"re:^RT @\w{1,15}: [^…]+$",
+                "tweet_id"  : 1603062622483537921,
+                "retweet_id": 1602715680662749184,
+                "date"      : "dt:2022-12-14 16:21:27",
+            },
+        }),
         # Reply to deleted tweet (#403, #838)
         ("https://twitter.com/i/web/status/1170041925560258560", {
             "pattern": r"https://pbs.twimg.com/media/EDzS7VrU0AAFL4_",
@@ -754,6 +765,7 @@ class TwitterTweetExtractor(TwitterExtractor):
             "options": (("retweets", "original"),),
             "count": 2,
             "keyword": {
+                "content"   : "",
                 "tweet_id"  : 1296296016002547713,
                 "retweet_id": 1296296016002547713,
                 "date"      : "dt:2020-08-20 04:00:28",
