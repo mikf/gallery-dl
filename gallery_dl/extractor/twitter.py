@@ -732,6 +732,13 @@ class TwitterTweetExtractor(TwitterExtractor):
             "pattern": r"https://video\.twimg\.com/amplify_video"
                        r"/1560607284333449216/vid/720x720/\w+\.mp4",
         }),
+        # unified_card video_app
+        ("https://twitter.com/poco_dandy/status/1150646424461176832", {
+            "options": (("cards", True),),
+            "pattern": r"https://video\.twimg\.com/amplify_video/\d+"
+                       r"/vid/\d+x\d+/\w+\.mp4",
+            "range": "2",
+        }),
         # unified_card without type
         ("https://twitter.com/i/web/status/1466183847628865544", {
             "count": 0,
@@ -783,9 +790,9 @@ class TwitterTweetExtractor(TwitterExtractor):
         # '?format=...&name=...'-style URLs
         ("https://twitter.com/poco_dandy/status/1150646424461176832", {
             "options": (("cards", True),),
-            "pattern": r"https://pbs.twimg.com/card_img/157\d+/[\w-]+"
+            "pattern": r"https://pbs\.twimg\.com/card_img/\d+/[\w-]+"
                        r"\?format=(jpg|png)&name=orig$",
-            "range": "1-2",
+            "range": "1",
         }),
     )
 
