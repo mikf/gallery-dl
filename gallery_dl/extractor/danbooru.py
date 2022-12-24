@@ -101,8 +101,8 @@ class DanbooruExtractor(BaseExtractor):
 
             if self.extended_metadata:
                 template = (
-                    "{}/posts/{}.json"
-                    "?only=artist_commentary,children,notes,parent"
+                    "{}/posts/{}.json?only=artist_commentary,children,notes,"
+                    "parent,uploader"
                 )
                 resp = self.request(template.format(self.root, post["id"]))
                 post.update(resp.json())
