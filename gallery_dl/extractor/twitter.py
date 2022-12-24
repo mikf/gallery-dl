@@ -1345,8 +1345,7 @@ class TwitterAPI():
 
                 user = extr._user_obj
                 if not user:
-                    raise exception.StopExtraction(
-                        "Unable to retrieve Tweets from this timeline")
+                    raise exception.StopExtraction("Unable to get user")
 
                 user = user["legacy"]
                 blocked = bool(user.get("blocked_by"))
@@ -1364,6 +1363,8 @@ class TwitterAPI():
                     raise exception.AuthorizationError(
                         "{}'s Tweets are protected".format(
                             user["screen_name"]))
+                raise exception.StopExtraction(
+                    "Unable to retrieve Tweets from this timeline")
 
             tweets = []
             tweet = cursor = None
