@@ -1329,30 +1329,34 @@ class TwitterAPI():
                 extr.log.debug(data)
 
                 user = extr._user_obj
-                if user:
-                    user = user["legacy"]
-                    if user.get("blocked_by"):
-                        if self.headers["x-twitter-auth-type"] and \
-                                extr.config("logout"):
-                            guest_token = self._guest_token()
-                            extr.session.cookies.set(
-                                "gt", guest_token, domain=extr.cookiedomain)
-                            extr._cookiefile = None
-                            del extr.session.cookies["auth_token"]
-                            self.headers["x-guest-token"] = guest_token
-                            self.headers["x-twitter-auth-type"] = None
-                            extr.log.info("Retrying API request as guest")
-                            continue
-                        raise exception.AuthorizationError(
-                            "{} blocked your account".format(
-                                user["screen_name"]))
-                    elif user.get("protected"):
-                        raise exception.AuthorizationError(
-                            "{}'s Tweets are protected".format(
-                                user["screen_name"]))
+                if not user:
+                    raise exception.StopExtraction(
+                        "Unable to retrieve Tweets from this timeline")
 
-                raise exception.StopExtraction(
-                    "Unable to retrieve Tweets from this timeline")
+                user = user["legacy"]
+                blocked = bool(user.get("blocked_by"))
+                logout = self.headers["x-twitter-auth-type"] and \
+                    extr.config("logout")
+                if blocked and logout:
+                    guest_token = self._guest_token()
+                    extr.session.cookies.set(
+                        "gt", guest_token, domain=extr.cookiedomain)
+                    extr._cookiefile = None
+                    del extr.session.cookies["auth_token"]
+                    self.headers["x-guest-token"] = guest_token
+                    self.headers["x-twitter-auth-type"] = None
+                    extr.log.info(
+                        "{} blocked your account. Retrying API request as "
+                        "guest".format(user["screen_name"]))
+                    continue
+                elif blocked:
+                    raise exception.AuthorizationError(
+                        "{} blocked your account. Set 'logout' to true to "
+                        "retry anonymously.".format(user["screen_name"]))
+                elif user.get("protected"):
+                    raise exception.AuthorizationError(
+                        "{}'s Tweets are protected".format(
+                            user["screen_name"]))
 
             tweets = []
             tweet = cursor = None
