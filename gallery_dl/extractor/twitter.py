@@ -1007,14 +1007,25 @@ class TwitterAPI():
             cookies.set("ct0", csrf_token, domain=cookiedomain)
         self.headers["x-csrf-token"] = csrf_token
 
-        if cookies.get("auth_token", domain=cookiedomain):
-            # logged in
+        self.logged_in = bool(cookies.get("auth_token", domain=cookiedomain))
+        self.authenticate()
+
+    def authenticate(self):
+        if self.logged_in:
             self.headers["x-twitter-auth-type"] = "OAuth2Session"
-        else:
-            # guest
-            guest_token = self._guest_token()
-            cookies.set("gt", guest_token, domain=cookiedomain)
-            self.headers["x-guest-token"] = guest_token
+            return
+
+        cookies = self.extractor.session.cookies
+        cookiedomain = self.extractor.cookiedomain
+        # log out
+        if "auth_token" in cookies:
+            del cookies["auth_token"]
+        self.headers["x-twitter-auth-type"] = None
+        self.extractor._cookiefile = None
+
+        guest_token = self._guest_token()
+        cookies.set("gt", guest_token, domain=cookiedomain)
+        self.headers["x-guest-token"] = guest_token
 
     def tweet_detail(self, tweet_id):
         endpoint = "/graphql/ItejhtHVxU7ksltgMmyaLA/TweetDetail"
@@ -1335,16 +1346,9 @@ class TwitterAPI():
 
                 user = user["legacy"]
                 blocked = bool(user.get("blocked_by"))
-                logout = self.headers["x-twitter-auth-type"] and \
-                    extr.config("logout")
-                if blocked and logout:
-                    guest_token = self._guest_token()
-                    extr.session.cookies.set(
-                        "gt", guest_token, domain=extr.cookiedomain)
-                    extr._cookiefile = None
-                    del extr.session.cookies["auth_token"]
-                    self.headers["x-guest-token"] = guest_token
-                    self.headers["x-twitter-auth-type"] = None
+                if blocked and self.logged_in and extr.config("logout"):
+                    self.logged_in = False
+                    self.authenticate()
                     extr.log.info(
                         "{} blocked your account. Retrying API request as "
                         "guest".format(user["screen_name"]))
