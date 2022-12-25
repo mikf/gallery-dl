@@ -245,6 +245,8 @@ class TwitterExtractor(Extractor):
         entities = tweet["entities"]
         tdata = {
             "tweet_id"      : text.parse_int(tweet["id_str"]),
+            "conversation_id": text.parse_int(
+                tget("conversation_id_str")),
             "retweet_id"    : text.parse_int(
                 tget("retweeted_status_id_str")),
             "quote_id"      : text.parse_int(
@@ -262,6 +264,13 @@ class TwitterExtractor(Extractor):
             "retweet_count" : tget("retweet_count"),
         }
 
+        source = tget("source")
+        if source:
+            client = text.extr(source, '">', "<")
+            if client:
+                tdata["client"] = client
+
+        # there is also a "symbols" field whose function is unknown
         hashtags = entities.get("hashtags")
         if hashtags:
             tdata["hashtags"] = [t["text"] for t in hashtags]
@@ -304,6 +313,8 @@ class TwitterExtractor(Extractor):
         except KeyError:
             pass
 
+        professional = user.get("professional")
+
         if "legacy" in user:
             user = user["legacy"]
 
@@ -328,6 +339,16 @@ class TwitterExtractor(Extractor):
             "media_count"     : uget("media_count"),
             "statuses_count"  : uget("statuses_count"),
         }
+
+        pinned = uget("pinned_tweet_ids_str")
+        if pinned:
+            udata["pinned_tweet_ids"] = [text.parse_int(id) for id in pinned]
+
+        if professional:
+            udata["professional_type"] = professional["professional_type"]
+            if professional["category"]:
+                udata["professional_categories"] = [
+                    c["name"] for c in professional["category"]]
 
         udata["urls"] = []
 
