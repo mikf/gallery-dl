@@ -275,10 +275,17 @@ class TwitterExtractor(Extractor):
             } for u in mentions]
 
         content = text.unescape(tget("full_text") or tget("text") or "")
+
         urls = entities.get("urls")
         if urls:
+            tdata["urls"] = []
             for url in urls:
+                tdata["urls"].append({
+                    "url": url["expanded_url"],
+                    "short_url": url["url"],
+                })
                 content = content.replace(url["url"], url["expanded_url"])
+
         txt, _, tco = content.rpartition(" ")
         tdata["content"] = txt if tco.startswith("https://t.co/") else content
 
@@ -322,16 +329,32 @@ class TwitterExtractor(Extractor):
             "statuses_count"  : uget("statuses_count"),
         }
 
+        udata["urls"] = []
+
+        if "url" in entities:
+            for i, url in enumerate(entities["url"]["urls"]):
+                expanded_url = url.get("expanded_url")
+                short_url = url.get("url")
+                # backward compatibility
+                if i == 0:
+                    udata["url"] = expanded_url or short_url
+                udata["urls"].append({
+                    "url": expanded_url,
+                    "short_url": short_url,
+                })
+
         descr = user["description"]
+
         urls = entities["description"].get("urls")
         if urls:
             for url in urls:
+                udata["urls"].append({
+                    "url": url["expanded_url"],
+                    "short_url": url["url"],
+                })
                 descr = descr.replace(url["url"], url["expanded_url"])
-        udata["description"] = descr
 
-        if "url" in entities:
-            url = entities["url"]["urls"][0]
-            udata["url"] = url.get("expanded_url") or url.get("url")
+        udata["description"] = descr
 
         return udata
 
