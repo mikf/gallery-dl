@@ -1179,7 +1179,7 @@ class TwitterAPI():
             else:
                 raise exception.NotFoundError("user")
 
-    @cache(maxage=3*3600)
+    @cache(maxage=3600)
     def _guest_token(self):
         root = "https://api.twitter.com"
         endpoint = "/1.1/guest/activate.json"
@@ -1355,11 +1355,11 @@ class TwitterAPI():
                         "{} blocked your account. Retrying API request as "
                         "guest".format(user["screen_name"]))
                     continue
-                elif blocked:
+                if blocked:
                     raise exception.AuthorizationError(
                         "{} blocked your account. Set 'logout' to true to "
                         "retry anonymously.".format(user["screen_name"]))
-                elif user.get("protected"):
+                if user.get("protected"):
                     raise exception.AuthorizationError(
                         "{}'s Tweets are protected".format(
                             user["screen_name"]))
