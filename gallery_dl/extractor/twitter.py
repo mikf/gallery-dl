@@ -220,15 +220,14 @@ class TwitterExtractor(Extractor):
     def _extract_twitpic(self, tweet, files):
         for url in tweet["entities"].get("urls", ()):
             url = url["expanded_url"]
-            if "//twitpic.com/" in url and "/photos/" not in url:
-                response = self.request(
-                    url.replace("http:", "https:", 1), fatal=False)
-                if response.status_code >= 400:
-                    continue
-                url = text.extr(
-                    response.text, 'name="twitter:image" value="', '"')
-                if url:
-                    files.append({"url": url})
+            if "//twitpic.com/" not in url or "/photos/" in url:
+                continue
+            resp = self.request(url.replace("http:", "https:", 1), fatal=False)
+            if resp.status_code >= 400:
+                continue
+            url = text.extr(resp.text, 'name="twitter:image" value="', '"')
+            if url:
+                files.append({"url": url})
 
     def _transform_tweet(self, tweet):
         if "author" in tweet:
