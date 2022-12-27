@@ -325,7 +325,7 @@ def build_parser():
     configuration.add_argument(
         "--ignore-config",
         dest="load_config", action="store_false",
-        help="Do not read the default configuration files",
+        help="Do not read default configuration files",
     )
 
     authentication = parser.add_argument_group("Authentication Options")
@@ -349,7 +349,7 @@ def build_parser():
     selection.add_argument(
         "--download-archive",
         dest="archive", metavar="FILE", action=ConfigAction,
-        help=("Record all downloaded files in the archive file and "
+        help=("Record all downloaded or skipped files in FILE and "
               "skip downloading any file already in it"),
     )
     selection.add_argument(
@@ -367,19 +367,20 @@ def build_parser():
     selection.add_argument(
         "--range",
         dest="image-range", metavar="RANGE", action=ConfigAction,
-        help=("Index-range(s) specifying which images to download. "
-              "For example '5-10' or '1,3-5,10-'"),
+        help=("Index range(s) specifying which files to download. "
+              "These can be either a constant value, range, or slice "
+              "(e.g. '5', '8-20', or '1:24:3')"),
     )
     selection.add_argument(
         "--chapter-range",
         dest="chapter-range", metavar="RANGE", action=ConfigAction,
-        help=("Like '--range', but applies to manga-chapters "
+        help=("Like '--range', but applies to manga chapters "
               "and other delegated URLs"),
     )
     selection.add_argument(
         "--filter",
         dest="image-filter", metavar="EXPR", action=ConfigAction,
-        help=("Python expression controlling which images to download. "
+        help=("Python expression controlling which files to download. "
               "Files for which the expression evaluates to False are ignored. "
               "Available keys are the filename-specific ones listed by '-K'. "
               "Example: --filter \"image_width >= 1000 and "
@@ -388,7 +389,7 @@ def build_parser():
     selection.add_argument(
         "--chapter-filter",
         dest="chapter-filter", metavar="EXPR", action=ConfigAction,
-        help=("Like '--filter', but applies to manga-chapters "
+        help=("Like '--filter', but applies to manga chapters "
               "and other delegated URLs"),
     )
 

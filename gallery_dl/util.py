@@ -722,7 +722,7 @@ class RangePredicate():
 
         if ranges:
             # technically wrong, but good enough for now
-            # and evaluating min/max for a öarge range is slow
+            # and evaluating min/max for a large range is slow
             self.lower = min(r.start for r in ranges)
             self.upper = max(r.stop for r in ranges) - 1
         else:
@@ -744,8 +744,9 @@ class RangePredicate():
         """Parse an integer range string and return the resulting ranges
 
         Examples:
-            parse_range("-2,4,6-8,10-") -> [(1,2), (4,4), (6,8), (10,INTMAX)]
-            parse_range(" - 3 , 4-  4, 2-6") -> [(1,3), (4,4), (2,6)]
+            _parse("-2,4,6-8,10-")      -> [(1,3), (4,5), (6,9), (10,INTMAX)]
+            _parse(" - 3 , 4-  4, 2-6") -> [(1,4), (4,5), (2,7)]
+            _parse("1:2,4:8:2")         -> [(1,1), (4,7,2)]
         """
         ranges = []
         append = ranges.append
@@ -757,42 +758,27 @@ class RangePredicate():
             if not group:
                 continue
 
-            first, sep, last = group.partition("-")
-            if sep:
+            elif ":" in group:
+                start, _, stop = group.partition(":")
+                stop, _, step = stop.partition(":")
                 append(range(
-                    int(first) if first.strip() else 1,
-                    int(last) + 1 if last.strip() else sys.maxsize,
+                    int(start) if start.strip() else 1,
+                    int(stop) if stop.strip() else sys.maxsize,
+                    int(step) if step.strip() else 1,
                 ))
+
+            elif "-" in group:
+                start, _, stop = group.partition("-")
+                append(range(
+                    int(start) if start.strip() else 1,
+                    int(stop) + 1 if stop.strip() else sys.maxsize,
+                ))
+
             else:
-                v = int(first)
-                append(range(v, v+1))
+                start = int(group)
+                append(range(start, start+1))
 
         return ranges
-
-    @staticmethod
-    def _optimize(ranges):
-        """Simplify/Combine a parsed list of ranges
-
-        Examples:
-            optimize_range([(2,4), (4,6), (5,8)]) -> [(2,8)]
-            optimize_range([(1,1), (2,2), (3,6), (8,9))]) -> [(1,6), (8,9)]
-        """
-        if len(ranges) <= 1:
-            return ranges
-
-        ranges.sort()
-        riter = iter(ranges)
-        result = []
-
-        beg, end = next(riter)
-        for lower, upper in riter:
-            if lower > end+1:
-                result.append((beg, end))
-                beg, end = lower, upper
-            elif upper > end:
-                end = upper
-        result.append((beg, end))
-        return result
 
 
 class UniquePredicate():

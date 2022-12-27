@@ -24,19 +24,26 @@ from gallery_dl import util, text, exception  # noqa E402
 
 class TestRange(unittest.TestCase):
 
+    def test_parse_empty(self, f=util.RangePredicate._parse):
+        self.assertEqual(f(""), [])
+        self.assertEqual(f([]), [])
+
+    def test_parse_digit(self, f=util.RangePredicate._parse):
+        self.assertEqual(f("2"), [range(2, 3)])
+
+        self.assertEqual(
+            f("2, 3, 4"),
+            [range(2, 3),
+             range(3, 4),
+             range(4, 5)],
+        )
+
     def test_parse_range(self, f=util.RangePredicate._parse):
-        self.assertEqual(
-            f(""),
-            [],
-        )
-        self.assertEqual(
-            f("1-2"),
-            [range(1, 3)],
-        )
-        self.assertEqual(
-            f("-"),
-            [range(1, sys.maxsize)],
-        )
+        self.assertEqual(f("1-2"), [range(1, 3)])
+        self.assertEqual(f("2-"), [range(2, sys.maxsize)])
+        self.assertEqual(f("-3"), [range(1, 4)])
+        self.assertEqual(f("-"), [range(1, sys.maxsize)])
+
         self.assertEqual(
             f("-2,4,6-8,10-"),
             [range(1, 3),
@@ -49,6 +56,29 @@ class TestRange(unittest.TestCase):
             [range(1, 4),
              range(4, 5),
              range(2, 7)],
+        )
+
+    def test_parse_slice(self, f=util.RangePredicate._parse):
+        self.assertEqual(f("2:4")  , [range(2, 4)])
+        self.assertEqual(f("3::")  , [range(3, sys.maxsize)])
+        self.assertEqual(f(":4:")  , [range(1, 4)])
+        self.assertEqual(f("::5")  , [range(1, sys.maxsize, 5)])
+        self.assertEqual(f("::")   , [range(1, sys.maxsize)])
+        self.assertEqual(f("2:3:4"), [range(2, 3, 4)])
+
+        self.assertEqual(
+            f("2:4, 4:, :4, :4:, ::4"),
+            [range(2, 4),
+             range(4, sys.maxsize),
+             range(1, 4),
+             range(1, 4),
+             range(1, sys.maxsize, 4)],
+        )
+        self.assertEqual(
+            f(" : 3 , 4:  4, 2:6"),
+            [range(1, 3),
+             range(4, 4),
+             range(2, 6)],
         )
 
 
