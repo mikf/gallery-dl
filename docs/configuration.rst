@@ -821,14 +821,27 @@ Description
 extractor.*.image-range
 -----------------------
 Type
-    ``string``
-Example
+    * ``string``
+    * ``list`` of ``strings``
+Examples
     * ``"10-20"``
     * ``"-5, 10, 30-50, 100-"``
+    * ``"10:21, 30:51:2, :5, 100:"``
+    * ``["-5", "10", "30-50", "100-"]``
 Description
-    Index range(s) specifying which images to download.
+    Index range(s) selecting which files to download.
 
-    Note: The index of the first image is ``1``.
+    These can be specified as
+
+    * index: ``3`` (file number 3)
+    * range: ``2-4`` (files 2, 3, and 4)
+    * `slice <https://docs.python.org/3/library/functions.html#slice>`__: ``3:8:2`` (files 3, 5, and 7)
+
+    | Arguments for range and slice notation are optional
+      and will default to begin (``1``) or end (``sys.maxsize``) if omitted.
+    | For example ``5-``, ``5:``, and ``5::`` all mean "Start at file number 5".
+
+    Note: The index of the first file is ``1``.
 
 
 extractor.*.chapter-range
