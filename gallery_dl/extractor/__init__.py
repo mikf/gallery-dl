@@ -154,6 +154,7 @@ modules = [
     "weasyl",
     "webmshare",
     "webtoons",
+    "webtoonxyz",
     "weibo",
     "wikiart",
     "xhamster",
