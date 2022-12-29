@@ -355,6 +355,16 @@ class TumblrPostExtractor(TumblrExtractor):
             "count": 2,  # high-quality images (#1344)
             "content": "6bc19a42787e46e1bba2ef4aeef5ca28fcd3cd34",
         }),
+        # wrong extension returned by api (#3095)
+        # note that the regex ends with 'gif' rather than 'gifv'
+        # this test should fail if tumblr fixes the bug
+        ("https://k-eke.tumblr.com/post/185341184856/be-proud", {
+            "options": (("fallback", True),),
+            "pattern": r"^https://\d+\.media\.tumblr\.com"
+                       r"/5e9d760aba24c65beaf0e72de5aae4dd"
+                       r"/tumblr_psj5yaqV871t1ig6no1_1280.gif$",
+            "content": "f1eca966272cb22fcad17c99b0309e82272b2495",
+        }),
         ("https://mikf123.tumblr.com/image/689860196535762944", {
             "pattern": r"^https://\d+\.media\.tumblr\.com"
                        r"/134791621559a79793563b636b5fe2c6"
