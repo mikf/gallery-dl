@@ -177,6 +177,7 @@ class ResultJob(job.DownloadJob):
         job.DownloadJob.__init__(self, url, parent)
         self.queue = False
         self.content = content
+        self.fallback = self.extractor.config("fallback", False)
 
         self.url_list = []
         self.url_hash = hashlib.sha1()
@@ -234,10 +235,22 @@ class ResultJob(job.DownloadJob):
         self.archive_hash.update(archive_id.encode())
 
     def _update_content(self, url, kwdict):
-        if self.content:
-            scheme = url.partition(":")[0]
-            self.fileobj.kwdict = kwdict
-            self.get_downloader(scheme).download(url, self.fileobj)
+        if not self.content:
+            return
+
+        scheme = url.partition(":")[0]
+        self.fileobj.kwdict = kwdict
+        downloader = self.get_downloader(scheme)
+        if downloader.download(url, self.fileobj):
+            return
+
+        if not self.fallback:
+            return
+
+        for num, fallback_url in enumerate(kwdict.get("_fallback", ()), 1):
+            print("Trying fallback URL #%d" % num)
+            if downloader.download(fallback_url, self.fileobj):
+                break
 
 
 class TestPathfmt():
