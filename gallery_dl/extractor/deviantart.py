@@ -92,14 +92,13 @@ class DeviantartExtractor(Extractor):
 
             if "content" in deviation:
                 if deviation["is_downloadable"] and self.original == "image":
-                    data = self.api.deviation_download(
+                    deviation["download"] = self.api.deviation_download(
                         deviation["deviationid"])
-                    url = data["src"].partition("?")[0]
+                    url = deviation["download"]["src"].partition("?")[0]
                     mtype = mimetypes.guess_type(url, False)[0]
 
                     if mtype and mtype.startswith("image/"):
-                        deviation["download"] = data
-                        yield self.commit(deviation, data)
+                        yield self.commit(deviation, deviation["download"])
                     else:
                         yield self.commit(deviation, deviation["content"])
 
