@@ -3500,7 +3500,8 @@ Output Options
 output.mode
 -----------
 Type
-    ``string``
+    * ``string``
+    * ``object``
 Default
     ``"auto"``
 Description
@@ -3510,7 +3511,46 @@ Description
     * ``"pipe"``: Suitable for piping to other processes or files
     * ``"terminal"``: Suitable for the standard Windows console
     * ``"color"``: Suitable for terminals that understand ANSI escape codes and colors
-    * ``"auto"``: Automatically choose the best suitable output mode
+    * ``"auto"``: ``"terminal"`` on Windows with `output.ansi`_ disabled,
+      ``"color"`` otherwise.
+
+    | It is possible to use custom output format strings
+      by setting this option to an ``object`` and specifying
+    | ``start``, ``success``, ``skip``, ``progress``, and ``progress-total``.
+
+    For example, the following will replicate the same output as |mode: color|:
+
+    .. code:: json
+
+        {
+            "start"  : "{}",
+            "success": "\r\u001b[1;32m{}\u001b[0m\n",
+            "skip"   : "\u001b[2m{}\u001b[0m\n",
+            "progress"      : "\r{0:>7}B {1:>7}B/s ",
+            "progress-total": "\r{3:>3}% {0:>7}B {1:>7}B/s "
+        }
+
+    ``start``, ``success``, and ``skip`` are used to output the current
+    filename, where ``{}`` or ``{0}`` is replaced with said filename.
+    If a given format string contains printable characters other than that,
+    their number needs to be specified as ``[<number>, <format string>]``
+    to get the correct results for `output.shorten`_. For example
+
+    .. code:: json
+
+            "start"  : [12, "Downloading {}"]
+
+    | ``progress`` and ``progress-total`` are used when displaying the
+      `download progress indicator <downloader.*.progress_>`__,
+    | ``progress`` when the total number of bytes to download is unknown,
+      ``progress-total`` otherwise.
+
+    For these format strings
+
+    * ``{0}`` is number of bytes downloaded
+    * ``{1}`` is number of downloaded bytes per second
+    * ``{2}`` is total number of bytes
+    * ``{3}`` is percent of bytes downloaded to total bytes
 
 
 output.shorten
