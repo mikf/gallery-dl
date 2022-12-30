@@ -91,21 +91,46 @@ class DeviantartExtractor(Extractor):
             yield Message.Directory, deviation
 
             if "content" in deviation:
-                content = deviation["content"]
-
                 if deviation["is_downloadable"] and self.original == "image":
-                    self._update_content_image(deviation, content)
+                    data = self.api.deviation_download(
+                        deviation["deviationid"])
+                    url = data["src"].partition("?")[0]
+                    mtype = mimetypes.guess_type(url, False)[0]
+
+                    if mtype and mtype.startswith("image/"):
+                        deviation["download"] = data
+                        yield self.commit(deviation, data)
+                    else:
+                        yield self.commit(deviation, deviation["content"])
+
                 elif deviation["is_downloadable"] and self.original:
-                    self._update_content_default(deviation, content)
+                    public = "premium_folder_data" not in deviation
+                    deviation["download"] = self.api.deviation_download(
+                        deviation["deviationid"], public)
+                    yield self.commit(deviation, deviation["download"])
+
+                # preview == max resolution, no need to update token
+                elif "/v1/" not in deviation["content"]["src"]:
+                    yield self.commit(deviation, deviation["content"])
+
                 else:
-                    self._update_token(deviation, content)
+                    deviation["_fallback"] = (deviation["content"]["src"],)
+                    updated_content = {
+                        "src": self._update_token(deviation["content"]["src"]),
+                        # "filesize" and "transparency" seem to be
+                        # correct even for resized deviations
+                        "filesize": deviation["content"]["filesize"],
+                        "transparency": deviation["content"]["transparency"]
+                    }
+                    yield self.commit(deviation, updated_content)
 
-                yield self.commit(deviation, content)
-
+            # downloadable, but no "content" field (#307)
             elif deviation["is_downloadable"]:
-                content = self.api.deviation_download(deviation["deviationid"])
-                yield self.commit(deviation, content)
+                deviation["download"] = self.api.deviation_download(
+                    deviation["deviationid"])
+                yield self.commit(deviation, deviation["download"])
 
+            # not downloadable, and no "content" field
             if "videos" in deviation and deviation["videos"]:
                 video = max(deviation["videos"],
                             key=lambda x: text.parse_int(x["quality"][:-1]))
@@ -273,41 +298,28 @@ class DeviantartExtractor(Extractor):
             url = "{}{}/{}".format(base, folder["folderid"], folder["name"])
             yield url, folder
 
-    def _update_content_default(self, deviation, content):
-        public = "premium_folder_data" not in deviation
-        data = self.api.deviation_download(deviation["deviationid"], public)
-        content.update(data)
-
-    def _update_content_image(self, deviation, content):
-        data = self.api.deviation_download(deviation["deviationid"])
-        url = data["src"].partition("?")[0]
-        mtype = mimetypes.guess_type(url, False)[0]
-        if mtype and mtype.startswith("image/"):
-            content.update(data)
-
-    def _update_token(self, deviation, content):
+    @staticmethod
+    def _update_token(url):
         """Replace JWT to be able to remove width/height limits
 
         All credit goes to @Ironchest337
         for discovering and implementing this method
         """
-        url, sep, _ = content["src"].partition("/v1/")
+        base_url, sep, _ = url.partition("/v1/")
         if not sep:
-            return
+            return url
 
-        #  header = b'{"typ":"JWT","alg":"none"}'
         payload = (
             b'{"sub":"urn:app:","iss":"urn:app:","obj":[[{"path":"/f/' +
-            url.partition("/f/")[2].encode() +
+            base_url.partition("/f/")[2].encode() +
             b'"}]],"aud":["urn:service:file.download"]}'
         )
 
-        deviation["_fallback"] = (content["src"],)
-        content["src"] = (
+        return (
             "{}?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0.{}.".format(
-                url,
-                #  base64 of 'header' is precomputed as 'eyJ0eX...'
-                #  binascii.a2b_base64(header).rstrip(b"=\n").decode(),
+                base_url,
+                # base64 of the header (b'{"typ":"JWT","alg":"none"}')
+                # is precomputed as 'eyJ0eX...'
                 binascii.b2a_base64(payload).rstrip(b"=\n").decode())
         )
 
@@ -435,6 +447,7 @@ class DeviantartGalleryExtractor(DeviantartExtractor):
                 "da_category": str,
                 "date": "type:datetime",
                 "deviationid": str,
+                "?download": dict,
                 "?download_filesize": int,
                 "extension": str,
                 "index": int,
@@ -893,6 +906,7 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
             "count": 4,
         }),
         # video
+        # BUG: deactivated account
         ("https://www.deviantart.com/chi-u/art/-VIDEO-Brushes-330774593", {
             "pattern": r"https://wixmp-.+wixmp.com/v/mp4/.+\.720p\.\w+.mp4",
             "keyword": {
