@@ -77,7 +77,8 @@ class FanleaksPostExtractor(FanleaksExtractor):
 class FanleaksModelExtractor(FanleaksExtractor):
     """Extractor for all posts from a fanleaks model"""
     subcategory = "model"
-    pattern = r"(?:https?://)?(?:www\.)?fanleaks\.club/(?!latest/?$)([^/?#]+)"
+    pattern = (r"(?:https?://)?(?:www\.)?fanleaks\.club"
+               r"/(?!latest/?$)([^/?#]+)/?$")
     test = (
         ("https://fanleaks.club/hannahowo", {
             "pattern": (r"https://fanleaks\.club//models"
