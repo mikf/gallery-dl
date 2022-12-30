@@ -2655,11 +2655,18 @@ Description
 extractor.twitter.syndication
 -----------------------------
 Type
-    ``bool``
+    ``bool`` or ``string``
 Default
     ``false``
 Description
-    Retrieve age-restricted content using Twitter's syndication API.
+    Controls how to retrieve age-restricted content when not logged in.
+
+    * ``false``: Skip age-restricted Tweets.
+    * ``true``: Download using Twitter's syndication API.
+    * ``"extended"``: Try to fetch Tweet metadata using the normal API
+    in addition to the syndication API. This requires additional HTTP
+    requests in some cases (e.g. when `retweets <extractor.twitter.retweets_>`_
+    is enabled).
 
 
 extractor.twitter.logout

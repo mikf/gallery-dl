@@ -39,6 +39,7 @@ class TwitterExtractor(Extractor):
         self.videos = self.config("videos", True)
         self.cards = self.config("cards", False)
         self.cards_blacklist = self.config("cards-blacklist")
+        self.syndication = self.config("syndication")
         self._user = self._user_obj = None
         self._user_cache = {}
         self._init_sizes()
@@ -297,8 +298,11 @@ class TwitterExtractor(Extractor):
         except KeyError:
             pass
 
+        # try to fetch extended user data
         if "legacy" in user:
             user = user["legacy"]
+        elif "statuses_count" not in user and self.syndication == "extended":
+            user = self.api.user_by_screen_name(user["screen_name"])["legacy"]
 
         uget = user.get
         entities = user["entities"]
@@ -991,7 +995,6 @@ class TwitterAPI():
         }
 
         self._nsfw_warning = True
-        self._syndication = extractor.config("syndication")
         self._json_dumps = json.JSONEncoder(separators=(",", ":")).encode
 
         cookies = extractor.session.cookies
@@ -1494,7 +1497,7 @@ class TwitterAPI():
         tweet_id = entry["entryId"].rpartition("-")[2]
 
         if text.startswith("Age-restricted"):
-            if self._syndication:
+            if self.extractor.syndication:
                 return self._syndication_tweet(tweet_id)
             elif self._nsfw_warning:
                 self._nsfw_warning = False
