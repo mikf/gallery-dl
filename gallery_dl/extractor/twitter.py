@@ -1520,6 +1520,12 @@ class TwitterAPI():
         else:
             retweet_id = None
 
+        # assume 'conversation_id' is the same as 'id' when the tweet
+        # is not a reply
+        if "conversation_id_str" not in tweet and \
+                "in_reply_to_status_id_str" not in tweet:
+            tweet["conversation_id_str"] = tweet["id_str"]
+
         tweet["created_at"] = text.parse_datetime(
             tweet["created_at"], "%Y-%m-%dT%H:%M:%S.%fZ").strftime(
             "%a %b %d %H:%M:%S +0000 %Y")
