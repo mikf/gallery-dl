@@ -108,20 +108,9 @@ class DeviantartExtractor(Extractor):
                         deviation["deviationid"], public)
                     yield self.commit(deviation, deviation["download"])
 
-                # preview == max resolution, no need to update token
-                elif "/v1/" not in deviation["content"]["src"]:
-                    yield self.commit(deviation, deviation["content"])
-
                 else:
-                    deviation["_fallback"] = (deviation["content"]["src"],)
-                    updated_content = {
-                        "src": self._update_token(deviation["content"]["src"]),
-                        # "filesize" and "transparency" seem to be
-                        # correct even for resized deviations
-                        "filesize": deviation["content"]["filesize"],
-                        "transparency": deviation["content"]["transparency"]
-                    }
-                    yield self.commit(deviation, updated_content)
+                    yield self.commit(
+                        deviation, self._handle_non_downloadable(deviation))
 
             # downloadable, but no "content" field (#307)
             elif deviation["is_downloadable"]:
@@ -321,6 +310,22 @@ class DeviantartExtractor(Extractor):
                 # is precomputed as 'eyJ0eX...'
                 binascii.b2a_base64(payload).rstrip(b"=\n").decode())
         )
+
+    @staticmethod
+    def _handle_non_downloadable(deviation):
+        # preview == max resolution, no need to update token
+        if "/v1/" not in deviation["content"]["src"]:
+            return deviation["content"]
+
+        deviation["_fallback"] = (deviation["content"]["src"],)
+        return {
+            "src": DeviantartExtractor._update_token(
+                deviation["content"]["src"]),
+            # "filesize" and "transparency" seem to be
+            # correct even for resized deviations
+            "filesize": deviation["content"]["filesize"],
+            "transparency": deviation["content"]["transparency"]
+        }
 
     def _limited_request(self, url, **kwargs):
         """Limits HTTP requests to one every 2 seconds"""
