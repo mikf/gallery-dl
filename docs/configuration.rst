@@ -2635,6 +2635,8 @@ Description
     for each Tweet in said timeline.
 
     Note: This requires at least 1 additional API call per initial Tweet.
+    Age-restricted Tweets cannot be expanded when using the
+    `syndication <extractor.twitter.syndication_>`__ API.
 
 
 extractor.twitter.size
