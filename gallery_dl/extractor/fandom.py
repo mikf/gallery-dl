@@ -71,7 +71,8 @@ class FandomGalleryExtractor(GalleryExtractor):
                             "filename": name,
                             "extension": ext.lower(),
                             "pageid": pageid,
-                            "timestamp": text.parse_datetime(info["timestamp"]),
+                            "timestamp":
+                                text.parse_datetime(info["timestamp"]),
                             "size": info["size"],
                             "width": info["width"],
                             "height": info["height"],
