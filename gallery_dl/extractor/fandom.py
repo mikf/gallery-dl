@@ -37,6 +37,12 @@ class FandomGalleryExtractor(GalleryExtractor):
                 extr('title>', '<').rpartition('|')[0].strip()),
         }
 
+    def image_metadata(self, filename):
+        api_url = self.gallery_url + '/api.php?action=query' + \
+            '&prop=imageinfo&titles=File%%3A%s' % filename + \
+            '&format=json&iiprop=timestamp%7Csize%7Cdimensions'
+        return self.request(api_url).json()
+
     def images(self, _):
         limit = 500
         base_url = self.gallery_url + '/wiki/Special:MIMESearch' + \
@@ -51,23 +57,26 @@ class FandomGalleryExtractor(GalleryExtractor):
             for match in matches:
                 href = text.unescape(match[0])
                 name, _, ext = text.unescape(match[1]).rpartition(".")
-                api_url = self.gallery_url + '/api.php?action=query' + \
-                    '&prop=imageinfo&titles=File%%3A%s' % match[1] + \
-                    '&format=json&iiprop=timestamp%7Csize%7Cdimensions'
-                meta = self.request(api_url).json()
-                for pageid in meta["query"]["pages"]:
-                    page = meta["query"]["pages"][pageid]
-                    info = page["imageinfo"][0]
+                if self.config("meta", False):
                     yield href, {
                         "filename": name,
                         "extension": ext.lower(),
-                        "pageid": pageid,
-                        "timestamp": text.parse_datetime(info["timestamp"]),
-                        "size": info["size"],
-                        "width": info["width"],
-                        "height": info["height"],
                     }
+                else:
+                    meta = self.image_metadata(match[1])
+                    for pageid in meta["query"]["pages"]:
+                        page = meta["query"]["pages"][pageid]
+                        info = page["imageinfo"][0]
+                        yield href, {
+                            "filename": name,
+                            "extension": ext.lower(),
+                            "pageid": pageid,
+                            "timestamp": text.parse_datetime(info["timestamp"]),
+                            "size": info["size"],
+                            "width": info["width"],
+                            "height": info["height"],
+                        }
             if len(matches) < limit:
                 return
             offset += limit
-            url = base_url + "&offset=" + offset
+            url = base_url + "&offset=" + str(offset)
