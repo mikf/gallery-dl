@@ -57,7 +57,7 @@ class FandomGalleryExtractor(GalleryExtractor):
             for match in matches:
                 href = text.unescape(match[0])
                 name, _, ext = text.unescape(match[1]).rpartition(".")
-                if self.config("meta", False):
+                if not self.config("meta", False):
                     yield href, {
                         "filename": name,
                         "extension": ext.lower(),
