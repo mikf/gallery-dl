@@ -908,6 +908,50 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
         (("https://www.deviantart.com/citizenfresh/art/Hverarond-789295466"), {
             "pattern": (r"https://images-wixmp-\w+\.wixmp\.com/f"
                         r"/[^/]+/[^.]+\.jpg\?token="),
+            "content": "e27b30b6f0d336619e5c16df9e336e6c9793a79c",
+            "keyword": {
+                "content": {
+                    "filesize": 1690563,  # correct
+                    "height": 854,
+                    "src": r"re:^https://images-wixmp-\w+\.wixmp\.com/f"
+                           r"/[^/]+/[^.]+\.jpg/v1/",
+                    "transparency": False,
+                    "width": 1280,
+                },
+                "target": {
+                    "filesize": 1690563,
+                    "src": str,
+                },
+            },
+        }),
+        # original=image (RAR archive)
+        (("https://www.deviantart.com/robertfiddler/art"
+          "/HexaGame-Beta-version-581292183"), {
+            "options": (("original", "image"),),
+            "pattern": r"^https://images-wixmp-\w+\.wixmp\.com/i"
+                       r"/[^/]+/[^.]+\.png$",
+            "content": "e1002035e72b54955fa5583b962aa5acd646811e",
+            "keyword": {
+                "content": {
+                    "filesize": 305767,
+                    "height": 485,
+                    "src": str,
+                    "width": 439,
+                },
+                "download": {
+                    "filesize": 3872441,
+                    "height": 0,
+                    "src": r"re:^https://wixmp-\w+\.wixmp\.com/f"
+                           r"/[^/]+/[^.]+\.rar\?token=",
+                    "width": 0,
+                },
+                "target": {
+                    "filesize": 305767,
+                    "height": 485,
+                    "src": str,
+                    "width": 439,
+                },
+            },
         }),
         # GIF (#242)
         (("https://www.deviantart.com/skatergators/art/COM-Moni-781571783"), {
@@ -931,6 +975,21 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
             "range": "2-",
             "count": 4,
         }),
+        # video
+        ("https://www.deviantart.com/blackgryph0n/art/"
+         "Twilight-Licious-289406198", {
+             "pattern": r"https://wixmp-.+wixmp.com/v/mp4/.+\.720p\.\w+.mp4",
+             "keyword": {
+                 "filename": "twilight_licious_by_blackgryph0n-d4saz92",
+                 "extension": "mp4",
+                 "target": {
+                     "duration": 11,
+                     "filesize": 1372051,
+                     "quality": "720p",
+                     "src": str,
+                 },
+             }
+         }),
         # sta.sh URL from deviation["text_content"]["body"]["features"]
         (("https://www.deviantart.com"
           "/cimar-wildehopps/art/Honorary-Vixen-859809305"), {
