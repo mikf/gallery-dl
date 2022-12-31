@@ -61,8 +61,6 @@ CATEGORY_MAP = {
     "joyreactor"     : "JoyReactor",
     "kabeuchi"       : "かべうち",
     "kemonoparty"    : "Kemono",
-    "kireicake"      : "Kirei Cake",
-    "kissgoddess"    : "Kiss Goddess",
     "lineblog"       : "LINE BLOG",
     "livedoor"       : "livedoor Blog",
     "omgmiamiswimwear": "Omg Miami Swimwear",
@@ -117,6 +115,7 @@ CATEGORY_MAP = {
     "vk"             : "VK",
     "vsco"           : "VSCO",
     "wallpapercave"  : "Wallpaper Cave",
+    "webmshare"      : "webmshare",
     "webtoons"       : "Webtoon",
     "wikiart"        : "WikiArt.org",
     "xbunkr"         : "xBunkr",
@@ -170,6 +169,9 @@ SUBCATEGORY_MAP = {
     },
     "fanbox": {
         "redirect": "",
+    },
+    "fapello": {
+        "path": "Videos, Trending Posts, Popular Videos, Top Models",
     },
     "gfycat": {
         "collections": "",
@@ -254,6 +256,7 @@ BASE_MAP = {
     "gelbooru_v01": "Gelbooru Beta 0.1.11",
     "gelbooru_v02": "Gelbooru Beta 0.2",
     "lolisafe"    : "lolisafe and chibisafe",
+    "lynxchan"    : "LynxChan Imageboards",
     "moebooru"    : "Moebooru and MyImouto",
     "vichan"      : "vichan Imageboards",
 }

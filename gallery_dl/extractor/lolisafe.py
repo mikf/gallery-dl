@@ -23,7 +23,7 @@ BASE_PATTERN = LolisafeExtractor.update({
     "xbunkr": {
         "root": "https://xbunkr.com",
         "pattern": r"xbunkr\.com",
-    }
+    },
 })
 
 
@@ -47,9 +47,9 @@ class LolisafeAlbumExtractor(LolisafeExtractor):
         self.album_id = match.group(match.lastindex)
 
         domain = self.config("domain")
-        if domain is None or domain == "auto":
+        if domain == "auto":
             self.root = text.root_from_url(match.group(0))
-        else:
+        elif domain:
             self.root = text.ensure_http_scheme(domain)
 
     def items(self):
