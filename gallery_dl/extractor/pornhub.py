@@ -173,7 +173,8 @@ class PornhubUserVideosExtractor(PornhubGalleryExtractor):
         PornhubGalleryExtractor.__init__(self, match)
         self.type, self.user = match.groups()
         if config.get(["downloader", "ytdl"], "outtmpl", None) is None:
-            config.set(["downloader", "ytdl"], "outtmpl", "%(title)s-%(id)s.%(ext)s")
+            config.set(["downloader", "ytdl"], "outtmpl",
+                       "%(title)s-%(id)s.%(ext)s")
 
     def metadata(self, page):
         extr = text.extract_from(page)
