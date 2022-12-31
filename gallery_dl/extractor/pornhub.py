@@ -9,7 +9,7 @@
 """Extractors for https://www.pornhub.com/"""
 
 from .common import Extractor, Message
-from .. import text, exception
+from .. import config, text, exception
 
 
 BASE_PATTERN = r"(?:https?://)?(?:[\w-]+\.)?pornhub\.com"
@@ -158,18 +158,22 @@ class PornhubUserExtractor(PornhubExtractor):
             params["page"] += 1
 
 
-class PornhubUserVideoExtractor(PornhubExtractor):
+class PornhubUserVideosExtractor(PornhubGalleryExtractor):
     """Extractor for all videos of a pornhub user"""
     subcategory = "user-videos"
     directory_fmt = ("{category}", "{user}")
+    filename_fmt = "{title}-{id}.{extension}"
+    archive_fmt = "v_{key}"
     pattern = (BASE_PATTERN + r"/(users|model|pornstar)/([^/?#]+)/videos/?$")
     test = (
         ("https://www.pornhub.com/pornstar/danika-mori/videos"),
     )
 
     def __init__(self, match):
-        PornhubExtractor.__init__(self, match)
+        PornhubGalleryExtractor.__init__(self, match)
         self.type, self.user = match.groups()
+        if config.get(["downloader", "ytdl"], "outtmpl", None) is None:
+            config.set(["downloader", "ytdl"], "outtmpl", "%(title)s-%(id)s.%(ext)s")
 
     def metadata(self, page):
         extr = text.extract_from(page)
@@ -186,15 +190,19 @@ class PornhubUserVideoExtractor(PornhubExtractor):
         }
 
         while True:
-            page = self.request(url, headers=headers, params=params).text
+            try:
+                page = self.request(url, headers=headers,
+                                    params=params, notfound=True).text
+            except exception.NotFoundError:
+                return
             if params["page"] == 1:
                 data = self.metadata(page)
                 yield Message.Directory, data
-            if not page:
-                return
             pos = page.find('id="mostRecentVideosSection"')
-            for key in text.extract_iter(page, 'href="/view_video.php?', '"',
+            for key in text.extract_iter(page,
+                                         'href="/view_video.php?viewkey=', '"',
                                          pos):
-                url = "ytdl:" + self.root + "/view_video.php?" + key
-                yield Message.Url, url, {"url": url, "extension": "mp4"}
+                video = self.root + "/view_video.php?viewkey=" + key
+                yield Message.Url, "ytdl:" + video, {"extension": None,
+                                                     "key": key}
             params["page"] += 1
