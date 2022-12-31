@@ -1,60 +1,73 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2019 Mike Fährmann
+# Copyright 2015-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract images from https://imgth.com/"""
+"""Extractors for https://imgth.com/"""
 
-from .common import Extractor, Message
+from .common import GalleryExtractor
 from .. import text
 
 
-class ImgthGalleryExtractor(Extractor):
+class ImgthGalleryExtractor(GalleryExtractor):
     """Extractor for image galleries from imgth.com"""
     category = "imgth"
-    subcategory = "gallery"
-    directory_fmt = ("{category}", "{gallery_id} {title}")
-    filename_fmt = "{category}_{gallery_id}_{num:>03}.{extension}"
-    archive_fmt = "{gallery_id}_{num}"
-    pattern = r"(?:https?://)?imgth\.com/gallery/(\d+)"
-    test = ("http://imgth.com/gallery/37/wallpaper-anime", {
-        "url": "4ae1d281ca2b48952cf5cca57e9914402ad72748",
-        "keyword": "6f8c00d6849ea89d1a028764675ec1fe9dbd87e2",
-    })
+    root = "https://imgth.com"
+    pattern = r"(?:https?://)?(?:www\.)?imgth\.com/gallery/(\d+)"
+    test = (
+        ("https://imgth.com/gallery/37/wallpaper-anime", {
+            "url": "4ae1d281ca2b48952cf5cca57e9914402ad72748",
+            "pattern": r"https://imgth\.com/images/2009/11/25"
+                       r"/wallpaper-anime_\w+\.jpg",
+            "keyword": {
+                "count": 12,
+                "date": "dt:2009-11-25 18:21:00",
+                "extension": "jpg",
+                "filename": r"re:wallpaper-anime_\w+",
+                "gallery_id": 37,
+                "num": int,
+                "title": "Wallpaper anime",
+                "user": "celebrities",
+            },
+        }),
+        ("https://www.imgth.com/gallery/37/wallpaper-anime"),
+    )
 
     def __init__(self, match):
-        Extractor.__init__(self, match)
-        self.gid = match.group(1)
-        self.url_base = "https://imgth.com/gallery/" + self.gid + "/g/page/"
+        self.gallery_id = gid = match.group(1)
+        url = "{}/gallery/{}/g/".format(self.root, gid)
+        GalleryExtractor.__init__(self, match, url)
 
-    def items(self):
-        page = self.request(self.url_base + "0").text
-        data = self.metadata(page)
-        yield Message.Directory, data
-        for data["num"], url in enumerate(self.images(page), 1):
-            yield Message.Url, url, text.nameext_from_url(url, data)
+    def metadata(self, page):
+        extr = text.extract_from(page)
+        return {
+            "gallery_id": text.parse_int(self.gallery_id),
+            "title": text.unescape(extr("<h1>", "</h1>")),
+            "count": text.parse_int(extr(
+                "total of images in this gallery: ", " ")),
+            "date" : text.parse_datetime(
+                extr("created on ", " by <")
+                .replace("th, ", " ", 1).replace("nd, ", " ", 1)
+                .replace("st, ", " ", 1), "%B %d %Y at %H:%M"),
+            "user" : text.unescape(extr(">", "<")),
+        }
 
     def images(self, page):
-        """Yield all image urls for this gallery"""
         pnum = 0
+
         while True:
             thumbs = text.extr(page, '<ul class="thumbnails">', '</ul>')
             for url in text.extract_iter(thumbs, '<img src="', '"'):
-                yield "https://imgth.com/images" + url[24:]
+                path = url.partition("/thumbs/")[2]
+                yield ("{}/images/{}".format(self.root, path), None)
+
             if '<li class="next">' not in page:
                 return
-            pnum += 1
-            page = self.request(self.url_base + str(pnum)).text
 
-    def metadata(self, page):
-        """Collect metadata for extractor-job"""
-        return text.extract_all(page, (
-            ("title", '<h1>', '</h1>'),
-            ("count", 'total of images in this gallery: ', ' '),
-            ("date" , 'created on ', ' by <'),
-            (None   , 'href="/users/', ''),
-            ("user" , '>', '<'),
-        ), values={"gallery_id": self.gid})[0]
+            pnum += 1
+            url = "{}/gallery/{}/g/page/{}".format(
+                self.root, self.gallery_id, pnum)
+            page = self.request(url).text

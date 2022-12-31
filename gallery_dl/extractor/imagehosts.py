@@ -200,7 +200,7 @@ class ImagetwistImageExtractor(ImagehostImageExtractor):
         return self.request(self.page_url).cookies
 
     def get_info(self, page):
-        url     , pos = text.extract(page, 'center;"><img src="', '"')
+        url     , pos = text.extract(page, '<img src="', '"')
         filename, pos = text.extract(page, ' alt="', '"', pos)
         return url, filename
 
@@ -240,6 +240,25 @@ class PixhostImageExtractor(ImagehostImageExtractor):
         url     , pos = text.extract(page, "class=\"image-img\" src=\"", "\"")
         filename, pos = text.extract(page, "alt=\"", "\"", pos)
         return url, filename
+
+
+class PixhostGalleryExtractor(ImagehostImageExtractor):
+    """Extractor for image galleries from pixhost.to"""
+    category = "pixhost"
+    subcategory = "gallery"
+    pattern = (r"(?:https?://)?((?:www\.)?pixhost\.(?:to|org)"
+               r"/gallery/([^/?#]+))")
+    test = ("https://pixhost.to/gallery/jSMFq", {
+        "pattern": PixhostImageExtractor.pattern,
+        "count": 3,
+    })
+
+    def items(self):
+        page = text.extr(self.request(
+            self.page_url).text, 'class="images"', "</div>")
+        data = {"_extractor": PixhostImageExtractor}
+        for url in text.extract_iter(page, '<a href="', '"'):
+            yield Message.Queue, url, data
 
 
 class PostimgImageExtractor(ImagehostImageExtractor):

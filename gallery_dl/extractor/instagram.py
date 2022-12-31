@@ -65,6 +65,10 @@ class InstagramExtractor(Extractor):
 
             post["count"] = len(files)
             yield Message.Directory, post
+
+            if "date" in post:
+                del post["date"]
+
             for file in files:
                 file.update(post)
 
@@ -93,10 +97,6 @@ class InstagramExtractor(Extractor):
 
             url = response.url
             if "/accounts/login/" in url:
-                if self._username:
-                    self.log.debug("Invalidating cached login session for "
-                                   "'%s'", self._username)
-                    _login_impl.invalidate(self._username)
                 page = "login"
             elif "/challenge/" in url:
                 page = "challenge"
@@ -117,11 +117,9 @@ class InstagramExtractor(Extractor):
         return response
 
     def login(self):
-        self._username = None
         if not self._check_cookies(self.cookienames):
             username, password = self._get_auth_info()
             if username:
-                self._username = username
                 self._update_cookies(_login_impl(self, username, password))
             else:
                 self._logged_in = False

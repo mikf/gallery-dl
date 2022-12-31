@@ -633,7 +633,7 @@ class TwitterEventExtractor(TwitterExtractor):
     pattern = BASE_PATTERN + r"/i/events/(\d+)"
     test = ("https://twitter.com/i/events/1484669206993903616", {
         "range": "1-20",
-        "count": ">5",
+        "count": ">=1",
     })
 
     def metadata(self):
@@ -759,7 +759,7 @@ class TwitterTweetExtractor(TwitterExtractor):
         # retweet with missing media entities (#1555)
         ("https://twitter.com/morino_ya/status/1392763691599237121", {
             "options": (("retweets", True),),
-            "count": 4,
+            "count": 0,  # private
         }),
         # deleted quote tweet (#2225)
         ("https://twitter.com/i/web/status/1460044411165888515", {
@@ -782,7 +782,7 @@ class TwitterTweetExtractor(TwitterExtractor):
         # '?format=...&name=...'-style URLs
         ("https://twitter.com/poco_dandy/status/1150646424461176832", {
             "options": (("cards", True),),
-            "pattern": r"https://pbs.twimg.com/card_img/157\d+/\w+"
+            "pattern": r"https://pbs.twimg.com/card_img/157\d+/[\w-]+"
                        r"\?format=(jpg|png)&name=orig$",
             "range": "1-2",
         }),
@@ -886,7 +886,7 @@ class TwitterBackgroundExtractor(TwitterExtractor):
 
     def tweets(self):
         self.api._user_id_by_screen_name(self.user)
-        user = user = self._user_obj
+        user = self._user_obj
 
         try:
             url = user["legacy"]["profile_banner_url"]
@@ -1216,15 +1216,16 @@ class TwitterAPI():
         original_retweets = (self.extractor.retweets == "original")
 
         while True:
-            cursor = tweet = None
             data = self._call(endpoint, params)
 
             instr = data["timeline"]["instructions"]
             if not instr:
                 return
-            tweet_ids = []
+
             tweets = data["globalObjects"]["tweets"]
             users = data["globalObjects"]["users"]
+            tweet_id = cursor = None
+            tweet_ids = []
 
             # collect tweet IDs and cursor value
             for entry in instr[0]["addEntries"]["entries"]:
@@ -1243,7 +1244,7 @@ class TwitterAPI():
                     cursor = entry["content"]["operation"]["cursor"]
                     if not cursor.get("stopOnEmptyResponse", True):
                         # keep going even if there are no tweets
-                        tweet = True
+                        tweet_id = True
                     cursor = cursor["value"]
 
                 elif entry_startswith("conversationThread-"):
@@ -1292,7 +1293,7 @@ class TwitterAPI():
                 cursor = (instr[-1]["replaceEntry"]["entry"]
                           ["content"]["operation"]["cursor"]["value"])
 
-            if not cursor or not tweet:
+            if not cursor or (not tweets and not tweet_id):
                 return
             params["cursor"] = cursor
 

@@ -29,6 +29,8 @@ class PathFormat():
     def __init__(self, extractor):
         config = extractor.config
         kwdefault = config("keywords-default")
+        if kwdefault is None:
+            kwdefault = util.NONE
 
         filename_fmt = config("filename")
         try:
@@ -212,14 +214,19 @@ class PathFormat():
 
     def fix_extension(self, _=None):
         """Fix filenames without a given filename extension"""
-        if not self.extension:
-            self.kwdict["extension"] = self.prefix + self.extension_map("", "")
-            self.build_path()
-            if self.path[-1] == ".":
-                self.path = self.path[:-1]
-                self.temppath = self.realpath = self.realpath[:-1]
-        elif not self.temppath:
-            self.build_path()
+        try:
+            if not self.extension:
+                self.kwdict["extension"] = \
+                    self.prefix + self.extension_map("", "")
+                self.build_path()
+                if self.path[-1] == ".":
+                    self.path = self.path[:-1]
+                    self.temppath = self.realpath = self.realpath[:-1]
+            elif not self.temppath:
+                self.build_path()
+        except Exception:
+            self.path = self.directory + "?"
+            self.realpath = self.temppath = self.realdirectory + "?"
         return True
 
     def build_filename(self, kwdict):

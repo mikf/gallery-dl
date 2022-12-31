@@ -88,18 +88,30 @@ class PixivExtractor(Extractor):
                 url = ugoira["zip_urls"]["medium"].replace(
                     "_ugoira600x600", "_ugoira1920x1080")
                 work["frames"] = ugoira["frames"]
+                work["date_url"] = self._date_from_url(url)
                 work["_http_adjust_extension"] = False
                 yield Message.Url, url, text.nameext_from_url(url, work)
 
             elif work["page_count"] == 1:
                 url = meta_single_page["original_image_url"]
+                work["date_url"] = self._date_from_url(url)
                 yield Message.Url, url, text.nameext_from_url(url, work)
 
             else:
                 for work["num"], img in enumerate(meta_pages):
                     url = img["image_urls"]["original"]
+                    work["date_url"] = self._date_from_url(url)
                     work["suffix"] = "_p{:02}".format(work["num"])
                     yield Message.Url, url, text.nameext_from_url(url, work)
+
+    @staticmethod
+    def _date_from_url(url, offset=timedelta(hours=9)):
+        try:
+            _, _, _, _, _, y, m, d, H, M, S, _ = url.split("/")
+            return datetime(
+                int(y), int(m), int(d), int(H), int(M), int(S)) - offset
+        except Exception:
+            return None
 
     @staticmethod
     def _make_work(kind, url, user):
@@ -309,6 +321,10 @@ class PixivWorkExtractor(PixivExtractor):
         ("https://www.pixiv.net/artworks/966412", {
             "url": "90c1715b07b0d1aad300bce256a0bc71f42540ba",
             "content": "69a8edfb717400d1c2e146ab2b30d2c235440c5a",
+            "keyword": {
+                "date"    : "dt:2008-06-12 15:29:13",
+                "date_url": "dt:2008-06-12 15:29:13",
+            },
         }),
         (("http://www.pixiv.net/member_illust.php"
           "?mode=medium&illust_id=966411"), {
@@ -318,7 +334,11 @@ class PixivWorkExtractor(PixivExtractor):
         (("https://www.pixiv.net/member_illust.php"
           "?mode=medium&illust_id=66806629"), {
             "url": "7267695a985c4db8759bebcf8d21dbdd2d2317ef",
-            "keywords": {"frames": list},
+            "keyword": {
+                "frames"  : list,
+                "date"    : "dt:2018-01-14 15:06:08",
+                "date_url": "dt:2018-01-15 04:24:48",
+            },
         }),
         # related works (#1237)
         ("https://www.pixiv.net/artworks/966412", {

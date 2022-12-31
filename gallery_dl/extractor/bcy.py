@@ -96,11 +96,13 @@ class BcyExtractor(Extractor):
     def _data_from_post(self, post_id):
         url = "{}/item/detail/{}".format(self.root, post_id)
         page = self.request(url, notfound="post").text
-        return json.loads(
-            text.extr(page, 'JSON.parse("', '");')
-            .replace('\\\\u002F', '/')
-            .replace('\\"', '"')
-        )["detail"]
+        data = (text.extr(page, 'JSON.parse("', '");')
+                .replace('\\\\u002F', '/')
+                .replace('\\"', '"'))
+        try:
+            return json.loads(data)["detail"]
+        except ValueError:
+            return json.loads(data.replace('\\"', '"'))["detail"]
 
 
 class BcyUserExtractor(BcyExtractor):
@@ -185,6 +187,10 @@ class BcyPostExtractor(BcyExtractor):
         }),
         # only visible to logged in users
         ("https://bcy.net/item/detail/6747523535150783495", {
+            "count": 0,
+        }),
+        # JSON decode error (#3321)
+        ("https://bcy.net/item/detail/7166939271872388110", {
             "count": 0,
         }),
     )

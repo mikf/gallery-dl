@@ -432,15 +432,17 @@ Description
             "isAdult"    : "1"
         }
 
-    * A ``list`` with up to 3 entries specifying a browser profile.
+    * A ``list`` with up to 4 entries specifying a browser profile.
 
       * The first entry is the browser name
       * The optional second entry is a profile name or an absolute path to a profile directory
       * The optional third entry is the keyring to retrieve passwords for decrypting cookies from
+      * The optional fourth entry is a (Firefox) container name (``"none"`` for only cookies with no container)
 
       .. code:: json
 
         ["firefox"]
+        ["firefox", null, null, "Personal"]
         ["chromium", "Private", "kwallet"]
 
 
@@ -969,7 +971,7 @@ extractor.cyberdrop.domain
 Type
     ``string``
 Default
-    ``"auto"``
+    ``null``
 Example
     ``"cyberdrop.to"``
 Description
@@ -1000,6 +1002,23 @@ Description
     Extract additional metadata (notes, artist commentary, parent, children)
 
     Note: This requires 1 additional HTTP request for each post.
+
+
+extractor.danbooru.threshold
+----------------------------
+Type
+    ``string`` or ``int``
+Default
+    ``"auto"``
+Description
+    Stop paginating over API results if the length of a batch of returned
+    posts is less than the specified number. Defaults to the per-page limit
+    of the current instance, which is 320 for ``e621`` and 200 for
+    everything else.
+
+    Note: Changing this setting is normally not necessary. When the value is
+    greater than the per-page limit, gallery-dl will stop after the first
+    batch. The value cannot be less than 1.
 
 
 extractor.danbooru.ugoira
@@ -1718,7 +1737,7 @@ extractor.lolisafe.domain
 Type
     ``string``
 Default
-    ``"auto"``
+    ``null``
 Description
     Specifies the domain used by a ``lolisafe`` extractor
     regardless of input URL.
@@ -3281,6 +3300,24 @@ Example
     ``{"Accept": "image/webp,*/*", "Referer": "https://example.org/"}``
 Description
     Additional HTTP headers to send when downloading files,
+
+
+downloader.http.retry-codes
+---------------------------
+Type
+    ``list`` of ``integers``
+Default
+    ``[429]``
+Description
+    Additional `HTTP response status codes <https://developer.mozilla.org/en-US/docs/Web/HTTP/Status>`__
+    to retry a download on.
+
+    Codes ``200``, ``206``, and ``416`` (when resuming a `partial <downloader.*.part_>`__
+    download) will never be retried and always count as success,
+    regardless of this option.
+
+    Codes ``500`` - ``599`` (server error responses)  will always be retried,
+    regardless of this option.
 
 
 downloader.ytdl.format

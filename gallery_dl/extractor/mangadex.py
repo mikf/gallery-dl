@@ -109,7 +109,7 @@ class MangadexChapterExtractor(MangadexExtractor):
         }),
         # 'externalUrl', but still downloadable (#2503)
         ("https://mangadex.org/chapter/364728a4-6909-4164-9eea-6b56354f7c78", {
-            "count": 39,
+            "count": 0,  # 404
         }),
     )
 
