@@ -69,14 +69,28 @@ class FanboxExtractor(Extractor):
             if post["type"] == "article":
                 post["articleBody"] = content_body.copy()
             if "blocks" in content_body:
-                content = []
+                content = []  # text content
+                images = []   # image IDs in 'body' order
+
                 append = content.append
+                append_img = images.append
                 for block in content_body["blocks"]:
                     if "text" in block:
                         append(block["text"])
                     if "links" in block:
                         for link in block["links"]:
                             append(link["url"])
+                    if "imageId" in block:
+                        append_img(block["imageId"])
+
+                if images and "imageMap" in content_body:
+                    # reorder 'imageMap' (#2718)
+                    image_map = content_body["imageMap"]
+                    content_body["imageMap"] = {
+                        image_id: image_map[image_id]
+                        for image_id in images
+                    }
+
                 post["content"] = "\n".join(content)
 
         post["date"] = text.parse_datetime(post["publishedDatetime"])
@@ -293,6 +307,10 @@ class FanboxPostExtractor(FanboxExtractor):
                            r"https://fanbox.pixiv.help/.+/10184952456601\n\n\n"
                            r"Thank you for your continued support of FANBOX.$",
             },
+        }),
+        # imageMap file order (#2718)
+        ("https://mochirong.fanbox.cc/posts/3746116", {
+            "url": "c92ddd06f2efc4a5fe30ec67e21544f79a5c4062",
         }),
     )
 
