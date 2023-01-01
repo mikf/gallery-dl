@@ -102,8 +102,8 @@ Scoop
 .. code:: powershell
 
     scoop install gallery-dl
-    
-    
+
+
 Homebrew
 --------
 
@@ -112,6 +112,7 @@ For macOS or Linux users using Homebrew:
 .. code:: bash
 
     brew install gallery-dl
+
 
 Usage
 =====
