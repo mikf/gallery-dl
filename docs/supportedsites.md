@@ -1056,6 +1056,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td colspan="4"><strong>LynxChan Imageboards</strong></td>
 </tr>
 <tr>
+    <td>Bbw-chan</td>
+    <td>https://bbw-chan.nl/</td>
+    <td>Boards, Threads</td>
+    <td></td>
+</tr>
+<tr>
     <td>Kohlchan</td>
     <td>https://kohlchan.net/</td>
     <td>Boards, Threads</td>
