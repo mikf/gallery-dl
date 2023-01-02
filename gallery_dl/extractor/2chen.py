@@ -17,11 +17,14 @@ class _2chenThreadExtractor(Extractor):
     directory_fmt = ("{category}", "{board}", "{thread} {title}")
     filename_fmt = "{time} {filename}.{extension}"
     archive_fmt = "{board}_{thread}_{hash}_{time}"
-    root = "https://2chen.moe"
-    pattern = r"(?:https?://)?2chen\.moe/([^/?#]+)/(\d+)"
+    pattern = r"(?:https?://)?2chen\.(?:moe|club)/([^/?#]+)/(\d+)"
     test = (
         ("https://2chen.moe/tv/496715", {
+            "pattern": r"https://2chen\.su/assets/images/src/\w{40}\.\w+$",
             "count": ">= 179",
+        }),
+        ("https://2chen.club/tv/1", {
+            "count": 5,
         }),
         # 404
         ("https://2chen.moe/jp/303786"),
@@ -29,6 +32,7 @@ class _2chenThreadExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
+        self.root = text.root_from_url(match.group(0))
         self.board, self.thread = match.groups()
 
     def items(self):
@@ -36,13 +40,19 @@ class _2chenThreadExtractor(Extractor):
         page = self.request(url, encoding="utf-8", notfound="thread").text
         data = self.metadata(page)
         yield Message.Directory, data
+
         for post in self.posts(page):
-            if not post["url"]:
+
+            url = post["url"]
+            if not url:
                 continue
+            if url[0] == "/":
+                url = self.root + url
+            post["url"] = url = url.partition("?")[0]
+
             post.update(data)
-            post["url"] = self.root + post["url"]
             post["time"] = text.parse_int(post["date"].timestamp())
-            yield Message.Url, post["url"], text.nameext_from_url(
+            yield Message.Url, url, text.nameext_from_url(
                 post["filename"], post)
 
     def metadata(self, page):
@@ -78,18 +88,19 @@ class _2chenBoardExtractor(Extractor):
     """Extractor for 2chen boards"""
     category = "2chen"
     subcategory = "board"
-    root = "https://2chen.moe"
-    pattern = r"(?:https?://)?2chen\.moe/([^/?#]+)(?:/catalog|/?$)"
+    pattern = r"(?:https?://)?2chen\.(?:moe|club)/([^/?#]+)(?:/catalog|/?$)"
     test = (
         ("https://2chen.moe/co/", {
             "pattern": _2chenThreadExtractor.pattern
         }),
         ("https://2chen.moe/co"),
-        ("https://2chen.moe/co/catalog")
+        ("https://2chen.club/tv"),
+        ("https://2chen.moe/co/catalog"),
     )
 
     def __init__(self, match):
         Extractor.__init__(self, match)
+        self.root = text.root_from_url(match.group(0))
         self.board = match.group(1)
 
     def items(self):

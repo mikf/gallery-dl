@@ -200,6 +200,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
+    <td>Fapello</td>
+    <td>https://fapello.com/</td>
+    <td>Models, Videos, Trending Posts, Popular Videos, Top Models, Posts</td>
+    <td></td>
+</tr>
+<tr>
     <td>Fappic</td>
     <td>https://fappic.com/</td>
     <td>individual Images</td>
@@ -1054,6 +1060,12 @@ Consider all sites to be NSFW unless otherwise known.
 
 <tr>
     <td colspan="4"><strong>LynxChan Imageboards</strong></td>
+</tr>
+<tr>
+    <td>Bbw-chan</td>
+    <td>https://bbw-chan.nl/</td>
+    <td>Boards, Threads</td>
+    <td></td>
 </tr>
 <tr>
     <td>Kohlchan</td>

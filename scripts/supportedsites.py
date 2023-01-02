@@ -173,6 +173,9 @@ SUBCATEGORY_MAP = {
     "fanbox": {
         "redirect": "",
     },
+    "fapello": {
+        "path": "Videos, Trending Posts, Popular Videos, Top Models",
+    },
     "gfycat": {
         "collections": "",
     },

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2022 Mike Fährmann
+# Copyright 2022-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -56,8 +56,12 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
             files = album["files"]
         except Exception as exc:
             self.log.debug("%s: %s", exc.__class__.__name__, exc)
+            self.log.debug("Falling back to lolisafe API")
             self.root = root.replace("://", "://app.", 1)
             files, data = LolisafeAlbumExtractor.fetch_album(self, album_id)
+            # fix file URLs (bunkr..ru -> bunkr.ru) (#3481)
+            for file in files:
+                file["file"] = file["file"].replace("bunkr..", "bunkr.", 1)
         else:
             for file in files:
                 file["file"] = file["cdn"] + "/" + file["name"]

@@ -40,6 +40,7 @@ modules = [
     "fallenangels",
     "fanbox",
     "fantia",
+    "fapello",
     "fapachi",
     "flickr",
     "furaffinity",

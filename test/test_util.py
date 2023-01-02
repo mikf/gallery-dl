@@ -24,39 +24,62 @@ from gallery_dl import util, text, exception  # noqa E402
 
 class TestRange(unittest.TestCase):
 
-    def test_parse_range(self, f=util.RangePredicate.parse_range):
+    def test_parse_empty(self, f=util.RangePredicate._parse):
+        self.assertEqual(f(""), [])
+        self.assertEqual(f([]), [])
+
+    def test_parse_digit(self, f=util.RangePredicate._parse):
+        self.assertEqual(f("2"), [range(2, 3)])
+
         self.assertEqual(
-            f(""),
-            [])
-        self.assertEqual(
-            f("1-2"),
-            [(1, 2)])
-        self.assertEqual(
-            f("-"),
-            [(1, sys.maxsize)])
+            f("2, 3, 4"),
+            [range(2, 3),
+             range(3, 4),
+             range(4, 5)],
+        )
+
+    def test_parse_range(self, f=util.RangePredicate._parse):
+        self.assertEqual(f("1-2"), [range(1, 3)])
+        self.assertEqual(f("2-"), [range(2, sys.maxsize)])
+        self.assertEqual(f("-3"), [range(1, 4)])
+        self.assertEqual(f("-"), [range(1, sys.maxsize)])
+
         self.assertEqual(
             f("-2,4,6-8,10-"),
-            [(1, 2), (4, 4), (6, 8), (10, sys.maxsize)])
+            [range(1, 3),
+             range(4, 5),
+             range(6, 9),
+             range(10, sys.maxsize)],
+        )
         self.assertEqual(
             f(" - 3 , 4-  4, 2-6"),
-            [(1, 3), (4, 4), (2, 6)])
+            [range(1, 4),
+             range(4, 5),
+             range(2, 7)],
+        )
 
-    def test_optimize_range(self, f=util.RangePredicate.optimize_range):
+    def test_parse_slice(self, f=util.RangePredicate._parse):
+        self.assertEqual(f("2:4")  , [range(2, 4)])
+        self.assertEqual(f("3::")  , [range(3, sys.maxsize)])
+        self.assertEqual(f(":4:")  , [range(1, 4)])
+        self.assertEqual(f("::5")  , [range(1, sys.maxsize, 5)])
+        self.assertEqual(f("::")   , [range(1, sys.maxsize)])
+        self.assertEqual(f("2:3:4"), [range(2, 3, 4)])
+
         self.assertEqual(
-            f([]),
-            [])
+            f("2:4, 4:, :4, :4:, ::4"),
+            [range(2, 4),
+             range(4, sys.maxsize),
+             range(1, 4),
+             range(1, 4),
+             range(1, sys.maxsize, 4)],
+        )
         self.assertEqual(
-            f([(2, 4)]),
-            [(2, 4)])
-        self.assertEqual(
-            f([(2, 4), (6, 8), (10, 12)]),
-            [(2, 4), (6, 8), (10, 12)])
-        self.assertEqual(
-            f([(2, 4), (4, 6), (5, 8)]),
-            [(2, 8)])
-        self.assertEqual(
-            f([(1, 1), (2, 2), (3, 6), (8, 9)]),
-            [(1, 6), (8, 9)])
+            f(" : 3 , 4:  4, 2:6"),
+            [range(1, 3),
+             range(4, 4),
+             range(2, 6)],
+        )
 
 
 class TestPredicate(unittest.TestCase):
@@ -68,7 +91,7 @@ class TestPredicate(unittest.TestCase):
         for i in range(6):
             self.assertTrue(pred(dummy, dummy))
         with self.assertRaises(exception.StopExtraction):
-            bool(pred(dummy, dummy))
+            pred(dummy, dummy)
 
         pred = util.RangePredicate("1, 3, 5")
         self.assertTrue(pred(dummy, dummy))
@@ -77,11 +100,11 @@ class TestPredicate(unittest.TestCase):
         self.assertFalse(pred(dummy, dummy))
         self.assertTrue(pred(dummy, dummy))
         with self.assertRaises(exception.StopExtraction):
-            bool(pred(dummy, dummy))
+            pred(dummy, dummy)
 
         pred = util.RangePredicate("")
         with self.assertRaises(exception.StopExtraction):
-            bool(pred(dummy, dummy))
+            pred(dummy, dummy)
 
     def test_unique_predicate(self):
         dummy = None
@@ -115,6 +138,14 @@ class TestPredicate(unittest.TestCase):
 
         with self.assertRaises(exception.FilterError):
             util.FilterPredicate("b > 1")(url, {"a": 2})
+
+        pred = util.FilterPredicate(["a < 3", "b < 4", "c < 5"])
+        self.assertTrue(pred(url, {"a": 2, "b": 3, "c": 4}))
+        self.assertFalse(pred(url, {"a": 3, "b": 3, "c": 4}))
+        self.assertFalse(pred(url, {"a": 2, "b": 4, "c": 4}))
+        self.assertFalse(pred(url, {"a": 2, "b": 3, "c": 5}))
+        with self.assertRaises(exception.FilterError):
+            pred(url, {"a": 2})
 
     def test_build_predicate(self):
         pred = util.build_predicate([])

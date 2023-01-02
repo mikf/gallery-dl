@@ -124,9 +124,20 @@ class DeviantartExtractor(Extractor):
                     deviation["_journal"] = journal["html"]
                 yield self.commit_journal(deviation, journal)
 
-            if self.extra:
-                txt = (deviation.get("description", "") +
-                       deviation.get("_journal", ""))
+            if not self.extra:
+                continue
+
+            # ref: https://www.deviantart.com
+            #      /developers/http/v1/20210526/object/editor_text
+            # the value of "features" is a JSON string with forward
+            # slashes escaped
+            text_content = \
+                deviation["text_content"]["body"]["features"].replace(
+                    "\\/", "/") if "text_content" in deviation else None
+            for txt in (text_content, deviation.get("description"),
+                        deviation.get("_journal")):
+                if txt is None:
+                    continue
                 for match in DeviantartStashExtractor.pattern.finditer(txt):
                     url = text.ensure_http_scheme(match.group(0))
                     deviation["_extractor"] = DeviantartStashExtractor
@@ -854,7 +865,9 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
     """Extractor for single deviations"""
     subcategory = "deviation"
     archive_fmt = "g_{_username}_{index}.{extension}"
-    pattern = BASE_PATTERN + r"/(art|journal)/(?:[^/?#]+-)?(\d+)"
+    pattern = (BASE_PATTERN + r"/(art|journal)/(?:[^/?#]+-)?(\d+)"
+               r"|(?:https?://)?(?:www\.)?deviantart\.com/"
+               r"(?:view/|view(?:-full)?\.php/*\?(?:[^#]+&)?id=)(\d+)")
     test = (
         (("https://www.deviantart.com/shimoda7/art/For-the-sake-10073852"), {
             "options": (("original", 0),),
@@ -896,6 +909,14 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
             "range": "2-",
             "count": 4,
         }),
+        # sta.sh URL from deviation["text_content"]["body"]["features"]
+        (("https://www.deviantart.com"
+          "/cimar-wildehopps/art/Honorary-Vixen-859809305"), {
+            "options": (("extra", 1),),
+            "pattern": ("text:<!DOCTYPE html>\n|" +
+                        DeviantartStashExtractor.pattern),
+            "count": 2,
+        }),
         # journal
         ("https://www.deviantart.com/shimoda7/journal/ARTility-583755752", {
             "url": "d34b2c9f873423e665a1b8ced20fcb75951694a3",
@@ -906,12 +927,28 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
             "url": "e2e0044bd255304412179b6118536dbd9bb3bb0e",
             "pattern": "text:<!DOCTYPE html>\n",
         }),
+        # /view/ URLs
+        ("https://deviantart.com/view/904858796/", {
+            "content": "8770ec40ad1c1d60f6b602b16301d124f612948f",
+        }),
+        ("http://www.deviantart.com/view/890672057", {
+            "content": "1497e13d925caeb13a250cd666b779a640209236",
+        }),
+        ("https://www.deviantart.com/view/706871727", {
+            "content": "3f62ae0c2fca2294ac28e41888ea06bb37c22c65",
+        }),
+        ("https://www.deviantart.com/view/1", {
+            "exception": exception.NotFoundError,
+        }),
         # old-style URLs
         ("https://shimoda7.deviantart.com"
          "/art/For-the-sake-of-a-memory-10073852"),
         ("https://myria-moon.deviantart.com"
          "/art/Aime-Moi-part-en-vadrouille-261986576"),
         ("https://zzz.deviantart.com/art/zzz-1234567890"),
+        # old /view/ URLs from the Wayback Machine
+        ("https://www.deviantart.com/view.php?id=14864502"),
+        ("http://www.deviantart.com/view-full.php?id=100842"),
     )
 
     skip = Extractor.skip
@@ -919,11 +956,12 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
     def __init__(self, match):
         DeviantartExtractor.__init__(self, match)
         self.type = match.group(3)
-        self.deviation_id = match.group(4)
+        self.deviation_id = match.group(4) or match.group(5)
 
     def deviations(self):
         url = "{}/{}/{}/{}".format(
-            self.root, self.user, self.type, self.deviation_id)
+            self.root, self.user or "u", self.type or "art", self.deviation_id)
+
         uuid = text.extract(self._limited_request(url).text,
                             '"deviationUuid\\":\\"', '\\')[0]
         if not uuid:

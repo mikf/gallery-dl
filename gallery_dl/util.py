@@ -714,74 +714,71 @@ def chain_predicates(predicates, url, kwdict):
 
 
 class RangePredicate():
-    """Predicate; True if the current index is in the given range"""
+    """Predicate; True if the current index is in the given range(s)"""
+
     def __init__(self, rangespec):
-        self.ranges = self.optimize_range(self.parse_range(rangespec))
+        self.ranges = ranges = self._parse(rangespec)
         self.index = 0
 
-        if self.ranges:
-            self.lower, self.upper = self.ranges[0][0], self.ranges[-1][1]
+        if ranges:
+            # technically wrong, but good enough for now
+            # and evaluating min/max for a large range is slow
+            self.lower = min(r.start for r in ranges)
+            self.upper = max(r.stop for r in ranges) - 1
         else:
-            self.lower, self.upper = 0, 0
+            self.lower = self.upper = 0
 
-    def __call__(self, url, _):
-        self.index += 1
+    def __call__(self, _url, _kwdict):
+        self.index = index = self.index + 1
 
-        if self.index > self.upper:
+        if index > self.upper:
             raise exception.StopExtraction()
 
-        for lower, upper in self.ranges:
-            if lower <= self.index <= upper:
+        for range in self.ranges:
+            if index in range:
                 return True
         return False
 
     @staticmethod
-    def parse_range(rangespec):
+    def _parse(rangespec):
         """Parse an integer range string and return the resulting ranges
 
         Examples:
-            parse_range("-2,4,6-8,10-") -> [(1,2), (4,4), (6,8), (10,INTMAX)]
-            parse_range(" - 3 , 4-  4, 2-6") -> [(1,3), (4,4), (2,6)]
+            _parse("-2,4,6-8,10-")      -> [(1,3), (4,5), (6,9), (10,INTMAX)]
+            _parse(" - 3 , 4-  4, 2-6") -> [(1,4), (4,5), (2,7)]
+            _parse("1:2,4:8:2")         -> [(1,1), (4,7,2)]
         """
         ranges = []
+        append = ranges.append
 
-        for group in rangespec.split(","):
+        if isinstance(rangespec, str):
+            rangespec = rangespec.split(",")
+
+        for group in rangespec:
             if not group:
                 continue
-            first, sep, last = group.partition("-")
-            if not sep:
-                beg = end = int(first)
+
+            elif ":" in group:
+                start, _, stop = group.partition(":")
+                stop, _, step = stop.partition(":")
+                append(range(
+                    int(start) if start.strip() else 1,
+                    int(stop) if stop.strip() else sys.maxsize,
+                    int(step) if step.strip() else 1,
+                ))
+
+            elif "-" in group:
+                start, _, stop = group.partition("-")
+                append(range(
+                    int(start) if start.strip() else 1,
+                    int(stop) + 1 if stop.strip() else sys.maxsize,
+                ))
+
             else:
-                beg = int(first) if first.strip() else 1
-                end = int(last) if last.strip() else sys.maxsize
-            ranges.append((beg, end) if beg <= end else (end, beg))
+                start = int(group)
+                append(range(start, start+1))
 
         return ranges
-
-    @staticmethod
-    def optimize_range(ranges):
-        """Simplify/Combine a parsed list of ranges
-
-        Examples:
-            optimize_range([(2,4), (4,6), (5,8)]) -> [(2,8)]
-            optimize_range([(1,1), (2,2), (3,6), (8,9))]) -> [(1,6), (8,9)]
-        """
-        if len(ranges) <= 1:
-            return ranges
-
-        ranges.sort()
-        riter = iter(ranges)
-        result = []
-
-        beg, end = next(riter)
-        for lower, upper in riter:
-            if lower > end+1:
-                result.append((beg, end))
-                beg, end = lower, upper
-            elif upper > end:
-                end = upper
-        result.append((beg, end))
-        return result
 
 
 class UniquePredicate():
@@ -802,6 +799,8 @@ class FilterPredicate():
     """Predicate; True if evaluating the given expression returns True"""
 
     def __init__(self, expr, target="image"):
+        if not isinstance(expr, str):
+            expr = "(" + ") and (".join(expr) + ")"
         name = "<{} filter>".format(target)
         self.expr = compile_expression(expr, name)
 
