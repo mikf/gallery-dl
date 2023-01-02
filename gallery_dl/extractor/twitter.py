@@ -298,10 +298,10 @@ class TwitterExtractor(Extractor):
         except KeyError:
             pass
 
-        # try to fetch extended user data
         if "legacy" in user:
             user = user["legacy"]
         elif "statuses_count" not in user and self.syndication == "extended":
+            # try to fetch extended user data
             user = self.api.user_by_screen_name(user["screen_name"])["legacy"]
 
         uget = user.get
@@ -995,6 +995,7 @@ class TwitterAPI():
         }
 
         self._nsfw_warning = True
+        self._syndication = self.extractor.syndication
         self._json_dumps = json.JSONEncoder(separators=(",", ":")).encode
 
         cookies = extractor.session.cookies
@@ -1497,7 +1498,7 @@ class TwitterAPI():
         tweet_id = entry["entryId"].rpartition("-")[2]
 
         if text.startswith("Age-restricted"):
-            if self.extractor.syndication:
+            if self._syndication:
                 return self._syndication_tweet(tweet_id)
             elif self._nsfw_warning:
                 self._nsfw_warning = False
