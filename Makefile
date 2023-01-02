@@ -6,7 +6,7 @@ SHAREDIR ?= $(PREFIX)/share
 PYTHON ?= /usr/bin/env python3
 
 
-all: man completion supportedsites
+all: man completion supportedsites options
 
 clean:
 	$(RM) -r build/
@@ -30,10 +30,15 @@ man: data/man/gallery-dl.1 data/man/gallery-dl.conf.5
 
 supportedsites: docs/supportedsites.md
 
-.PHONY: all clean install release test executable completion man supportedsites
+options: docs/options.md
+
+.PHONY: all clean install release test executable completion man supportedsites options
 
 docs/supportedsites.md: gallery_dl/*/*.py scripts/supportedsites.py
 	$(PYTHON) scripts/supportedsites.py
+
+docs/options.md: gallery_dl/option.py scripts/options.py
+	$(PYTHON) scripts/options.py
 
 data/man/gallery-dl.1: gallery_dl/option.py gallery_dl/version.py scripts/man.py
 	$(PYTHON) scripts/man.py
