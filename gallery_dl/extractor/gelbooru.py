@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2022 Mike Fährmann
+# Copyright 2014-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -195,7 +195,7 @@ class GelbooruPostExtractor(GelbooruBase,
         # notes
         ("https://gelbooru.com/index.php?page=post&s=view&id=5997331", {
             "options": (("notes", True),),
-            "keywords": {
+            "keyword": {
                 "notes": [
                     {
                         "body": "Look over this way when you talk~",
