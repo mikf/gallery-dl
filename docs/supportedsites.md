@@ -142,7 +142,7 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>Desktopography</td>
     <td>https://desktopography.net/</td>
-    <td>Entrys, Exhibitions</td>
+    <td>Entries, Exhibitions</td>
     <td></td>
 </tr>
 <tr>
