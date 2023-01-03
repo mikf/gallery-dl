@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2022 Mike Fährmann
+# Copyright 2022-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -980,6 +980,7 @@ def _is_path(value):
 
 def _parse_browser_specification(
         browser, profile=None, keyring=None, container=None):
+    browser = browser.lower()
     if browser not in SUPPORTED_BROWSERS:
         raise ValueError("unsupported browser '{}'".format(browser))
     if keyring and keyring not in SUPPORTED_KEYRINGS:
