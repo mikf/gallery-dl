@@ -199,6 +199,7 @@ SUBCATEGORY_MAP = {
         "board": "",
         "pinit": "pin.it Links",
         "created": "Created Pins",
+        "allpins": "All Pins",
     },
     "pixiv": {
         "me"  : "pixiv.me Links",
