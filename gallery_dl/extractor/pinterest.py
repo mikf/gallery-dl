@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2022 Mike Fährmann
+# Copyright 2016-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -142,7 +142,7 @@ class PinterestBoardExtractor(PinterestExtractor):
     directory_fmt = ("{category}", "{board[owner][username]}", "{board[name]}")
     archive_fmt = "{board[id]}_{id}"
     pattern = (BASE_PATTERN + r"/(?!pin/)([^/?#&]+)"
-               "/(?!_saved|_created)([^/?#&]+)/?$")
+               "/(?!_saved|_created|pins/)([^/?#&]+)/?$")
     test = (
         ("https://www.pinterest.com/g1952849/test-/", {
             "pattern": r"https://i\.pinimg\.com/originals/",
@@ -151,7 +151,7 @@ class PinterestBoardExtractor(PinterestExtractor):
         # board with sections (#835)
         ("https://www.pinterest.com/g1952849/stuff/", {
             "options": (("sections", True),),
-            "count": 5,
+            "count": 4,
         }),
         # secret board (#1055)
         ("https://www.pinterest.de/g1952849/secret/", {
@@ -194,11 +194,11 @@ class PinterestUserExtractor(PinterestExtractor):
     subcategory = "user"
     pattern = BASE_PATTERN + r"/(?!pin/)([^/?#&]+)(?:/_saved)?/?$"
     test = (
-        ("https://www.pinterest.de/g1952849/", {
+        ("https://www.pinterest.com/g1952849/", {
             "pattern": PinterestBoardExtractor.pattern,
             "count": ">= 2",
         }),
-        ("https://www.pinterest.de/g1952849/_saved/"),
+        ("https://www.pinterest.com/g1952849/_saved/"),
     )
 
     def __init__(self, match):
@@ -213,15 +213,38 @@ class PinterestUserExtractor(PinterestExtractor):
                 yield Message.Queue, self.root + url, board
 
 
+class PinterestAllpinsExtractor(PinterestExtractor):
+    """Extractor for a user's 'All Pins' feed"""
+    subcategory = "allpins"
+    directory_fmt = ("{category}", "{user}")
+    pattern = BASE_PATTERN + r"/(?!pin/)([^/?#&]+)/pins/?$"
+    test = ("https://www.pinterest.com/g1952849/pins/", {
+        "pattern": r"https://i\.pinimg\.com/originals/[0-9a-f]{2}"
+                   r"/[0-9a-f]{2}/[0-9a-f]{2}/[0-9a-f]{32}\.\w{3}",
+        "count": 7,
+    })
+
+    def __init__(self, match):
+        PinterestExtractor.__init__(self, match)
+        self.user = text.unquote(match.group(1))
+
+    def metadata(self):
+        return {"user": self.user}
+
+    def pins(self):
+        return self.api.user_pins(self.user)
+
+
 class PinterestCreatedExtractor(PinterestExtractor):
     """Extractor for a user's created pins"""
     subcategory = "created"
     directory_fmt = ("{category}", "{user}")
     pattern = BASE_PATTERN + r"/(?!pin/)([^/?#&]+)/_created/?$"
-    test = ("https://www.pinterest.com/amazon/_created", {
+    test = ("https://www.pinterest.de/digitalmomblog/_created/", {
         "pattern": r"https://i\.pinimg\.com/originals/[0-9a-f]{2}"
                    r"/[0-9a-f]{2}/[0-9a-f]{2}/[0-9a-f]{32}\.jpg",
         "count": 10,
+        "range": "1-10",
     })
 
     def __init__(self, match):
@@ -272,7 +295,7 @@ class PinterestSearchExtractor(PinterestExtractor):
     subcategory = "search"
     directory_fmt = ("{category}", "Search", "{search}")
     pattern = BASE_PATTERN + r"/search/pins/?\?q=([^&#]+)"
-    test = ("https://www.pinterest.de/search/pins/?q=nature", {
+    test = ("https://www.pinterest.com/search/pins/?q=nature", {
         "range": "1-50",
         "count": ">= 50",
     })
@@ -436,6 +459,16 @@ class PinterestAPI():
         """Yield related pins of a specific board"""
         options = {"board_id": board_id, "add_vase": True}
         return self._pagination("BoardRelatedPixieFeed", options)
+
+    def user_pins(self, user):
+        """Yield all pins from 'user'"""
+        options = {
+            "is_own_profile_pins": False,
+            "username"           : user,
+            "field_set_key"      : "grid_item",
+            "pin_filter"         : None,
+        }
+        return self._pagination("UserPins", options)
 
     def user_activity_pins(self, user):
         """Yield pins created by 'user'"""
