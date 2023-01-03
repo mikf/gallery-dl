@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2021-2022 Mike Fährmann
+# Copyright 2021-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -110,7 +110,7 @@ class VkPhotosExtractor(VkExtractor):
             "pattern": r"https://sun\d+-\d+\.userapi\.com/s/v1/if1"
                        r"/[\w-]+\.jpg\?size=\d+x\d+&quality=96&type=album",
             "count": ">= 35",
-            "keywords": {
+            "keyword": {
                 "id": r"re:\d+",
                 "user": {
                     "id": "398982326",
@@ -122,12 +122,11 @@ class VkPhotosExtractor(VkExtractor):
         }),
         ("https://vk.com/cosplayinrussia", {
             "range": "15-25",
-            "keywords": {
+            "keyword": {
                 "id": r"re:\d+",
                 "user": {
                     "id"  : "-165740836",
-                    "info": "Предложка открыта, кидайте ваши косплейчики. При "
-                            "правильном оформлении они будут опубликованы",
+                    "info": str,
                     "name": "cosplayinrussia",
                     "nick": "Косплей | Cosplay 18+",
                 },

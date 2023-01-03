@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2022 Mike Fährmann
+# Copyright 2022-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -451,7 +451,7 @@ class NitterTweetExtractor(NitterExtractor):
         }),
         # age-restricted (#2354)
         ("https://nitter.unixfox.eu/mightbecurse/status/1492954264909479936", {
-            "keywords": {"date": "dt:2022-02-13 20:10:09"},
+            "keyword": {"date": "dt:2022-02-13 20:10:00"},
             "count": 1,
         }),
     )
