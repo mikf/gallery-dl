@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2022 Mike Fährmann
+# Copyright 2015-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -987,13 +987,9 @@ class DeviantartScrapsExtractor(DeviantartExtractor):
     _warning = True
 
     def deviations(self):
-        eclipse_api = DeviantartEclipseAPI(self)
-        if self._warning:
-            DeviantartScrapsExtractor._warning = False
-            if not self._check_cookies(self.cookienames):
-                self.log.warning(
-                    "No session cookies set: Unable to fetch mature scraps.")
+        self.login()
 
+        eclipse_api = DeviantartEclipseAPI(self)
         for obj in eclipse_api.gallery_scraps(self.user, self.offset):
             deviation = obj["deviation"]
             deviation_uuid = eclipse_api.deviation_extended_fetch(
@@ -1003,6 +999,17 @@ class DeviantartScrapsExtractor(DeviantartExtractor):
             )["deviation"]["extended"]["deviationUuid"]
 
             yield self.api.deviation(deviation_uuid)
+
+    def login(self):
+        """Login and obtain session cookies"""
+        if not self._check_cookies(self.cookienames):
+            username, password = self._get_auth_info()
+            if username:
+                self._update_cookies(_login_impl(self, username, password))
+            elif self._warning:
+                self.log.warning(
+                    "No session cookies set: Unable to fetch mature scraps.")
+            DeviantartScrapsExtractor._warning = False
 
 
 class DeviantartFollowingExtractor(DeviantartExtractor):
@@ -1513,11 +1520,45 @@ class DeviantartEclipseAPI():
         return token
 
 
-@cache(maxage=100*365*24*3600, keyarg=0)
+@cache(maxage=100*365*86400, keyarg=0)
 def _refresh_token_cache(token):
     if token and token[0] == "#":
         return None
     return token
+
+
+@cache(maxage=28*86400, keyarg=1)
+def _login_impl(extr, username, password):
+    extr.log.info("Logging in as %s", username)
+
+    url = "https://www.deviantart.com/users/login"
+    page = extr.request(url).text
+
+    data = {}
+    for item in text.extract_iter(page, '<input type="hidden" name="', '"/>'):
+        name, _, value = item.partition('" value="')
+        data[name] = value
+
+    challenge = data.get("challenge")
+    if challenge and challenge != "0":
+        extr.log.warning("Login requires solving a CAPTCHA")
+        extr.log.debug(challenge)
+
+    data["username"] = username
+    data["password"] = password
+    data["remember"] = "on"
+
+    extr.sleep(2.0, "login")
+    url = "https://www.deviantart.com/_sisu/do/signin"
+    response = extr.request(url, method="POST", data=data)
+
+    if not response.history:
+        raise exception.AuthenticationError()
+
+    return {
+        cookie.name: cookie.value
+        for cookie in extr.session.cookies
+    }
 
 
 ###############################################################################
