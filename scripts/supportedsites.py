@@ -127,7 +127,6 @@ SUBCATEGORY_MAP = {
     "art"    : "Art",
     "audio"  : "Audio",
     "doujin" : "Doujin",
-    "gallery": "Galleries",
     "image"  : "individual Images",
     "index"  : "Site Index",
     "issue"  : "Comic Issues",
@@ -141,7 +140,6 @@ SUBCATEGORY_MAP = {
     "tweets" : "",
     "user"   : "User Profiles",
     "watch"  : "Watches",
-    "category"     : "Categories",
     "following"    : "",
     "related-pin"  : "related Pins",
     "related-board": "",
@@ -366,7 +364,11 @@ def subcategory_text(c, sc):
         return SUBCATEGORY_MAP[sc]
 
     sc = sc.capitalize()
-    return sc if sc.endswith("s") else sc + "s"
+    if sc.endswith("y"):
+        sc = sc[:-1] + "ies"
+    elif not sc.endswith("s"):
+        sc += "s"
+    return sc
 
 
 def category_key(c):
