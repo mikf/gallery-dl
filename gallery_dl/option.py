@@ -473,7 +473,7 @@ def build_parser():
         dest="postprocessors", metavar="CMD",
         action=AppendCommandAction, const={"name": "exec"},
         help=("Execute CMD for each downloaded file. "
-              "Example: --exec 'convert {} {}.png && rm {}'"),
+              "Example: --exec \"convert {} {}.png && rm {}\""),
     )
     postprocessor.add_argument(
         "--exec-after",
@@ -481,7 +481,7 @@ def build_parser():
         action=AppendCommandAction, const={
             "name": "exec", "event": "finalize"},
         help=("Execute CMD after all files were downloaded successfully. "
-              "Example: --exec-after 'cd {} && convert * ../doc.pdf'"),
+              "Example: --exec-after \"cd {} && convert * ../doc.pdf\""),
     )
     postprocessor.add_argument(
         "-P", "--postprocessor",
