@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright 2022 Mike Fährmann
+# Copyright 2022-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -263,10 +263,14 @@ class Test_CommandlineArguments_YtDlp(Test_CommandlineArguments):
     def test_metadata_from_title(self):
         opts = self._(["--metadata-from-title", "%(artist)s - %(title)s"])
         self.assertEqual(opts["postprocessors"][0], {
-            "key": "MetadataParser",
-            "when": "pre_process",
-            "actions": [self.module.MetadataFromFieldPP.to_action(
-                "title:%(artist)s - %(title)s")],
+            "key"    : "MetadataParser",
+            "when"   : "pre_process",
+            "actions": {
+                "pre_process": [
+                    self.module.MetadataFromFieldPP.to_action(
+                        "title:%(artist)s - %(title)s")
+                ],
+            },
         })
 
 
