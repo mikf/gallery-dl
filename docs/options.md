@@ -8,63 +8,75 @@
 <table>
 <tbody valign="top">
 <tr>
-    <td><code>-h</code></td>
-    <td width="28%"><code>--help</code></td>
+    <td><code>&#8209;h</code></td>
+    <td><code>&#8209;&#8209;help</code></td>
+    <td></td>
     <td>Print this help message and exit</td>
 </tr>
 <tr>
     <td></td>
-    <td><code>--version</code></td>
+    <td><code>&#8209;&#8209;version</code></td>
+    <td></td>
     <td>Print program version and exit</td>
 </tr>
 <tr>
-    <td><code>-i</code></td>
-    <td><code>--input-file</code></td>
+    <td><code>&#8209;i</code></td>
+    <td><code>&#8209;&#8209;input&#8209;file</code></td>
+    <td><code>FILE</code></td>
     <td>Download URLs found in FILE (<code>-</code> for stdin). More than one --input-file can be specified</td>
 </tr>
 <tr>
-    <td><code>-d</code></td>
-    <td><code>--destination</code></td>
+    <td><code>&#8209;d</code></td>
+    <td><code>&#8209;&#8209;destination</code></td>
+    <td><code>PATH</code></td>
     <td>Target location for file downloads</td>
 </tr>
 <tr>
-    <td><code>-D</code></td>
-    <td><code>--directory</code></td>
+    <td><code>&#8209;D</code></td>
+    <td><code>&#8209;&#8209;directory</code></td>
+    <td><code>PATH</code></td>
     <td>Exact location for file downloads</td>
 </tr>
 <tr>
-    <td><code>-f</code></td>
-    <td><code>--filename</code></td>
+    <td><code>&#8209;f</code></td>
+    <td><code>&#8209;&#8209;filename</code></td>
+    <td><code>FORMAT</code></td>
     <td>Filename format string for downloaded files (<code>/O</code> for "original" filenames)</td>
 </tr>
 <tr>
     <td></td>
-    <td><code>--proxy</code></td>
+    <td><code>&#8209;&#8209;proxy</code></td>
+    <td><code>URL</code></td>
     <td>Use the specified proxy</td>
 </tr>
 <tr>
     <td></td>
-    <td><code>--source-address</code></td>
+    <td><code>&#8209;&#8209;source&#8209;address</code></td>
+    <td><code>IP</code></td>
     <td>Client-side IP address to bind to</td>
 </tr>
 <tr>
     <td></td>
-    <td><code>--user-agent</code></td>
+    <td><code>&#8209;&#8209;user&#8209;agent</code></td>
+    <td><code>UA</code></td>
     <td>User-Agent request header</td>
 </tr>
 <tr>
     <td></td>
-    <td><code>--clear-cache</code></td>
+    <td><code>&#8209;&#8209;clear&#8209;cache</code></td>
+    <td><code>MODULE</code></td>
     <td>Delete cached login sessions, cookies, etc. for MODULE (ALL to delete everything)</td>
 </tr>
 <tr>
     <td></td>
-    <td><code>--cookies</code></td>
+    <td><code>&#8209;&#8209;cookies</code></td>
+    <td><code>FILE</code></td>
     <td>File to load additional cookies from</td>
 </tr>
 <tr>
     <td></td>
-    <td><code>--cookies-from-browser</code></td>
+    <td><code>&#8209;&#8209;cookies&#8209;from&#8209;browser</code></td>
+    <td><code>BROWSER</code></td>
     <td>Name of the browser to load cookies from, with optional keyring name prefixed with <code>+</code>, profile prefixed with <code>:</code>, and container prefixed with <code>::</code> (<code>none</code> for no container)</td>
 </tr>
 </tbody>
@@ -76,68 +88,81 @@
 <table>
 <tbody valign="top">
 <tr>
-    <td><code>-q</code></td>
-    <td width="28%"><code>--quiet</code></td>
+    <td><code>&#8209;q</code></td>
+    <td><code>&#8209;&#8209;quiet</code></td>
+    <td></td>
     <td>Activate quiet mode</td>
 </tr>
 <tr>
-    <td><code>-v</code></td>
-    <td><code>--verbose</code></td>
+    <td><code>&#8209;v</code></td>
+    <td><code>&#8209;&#8209;verbose</code></td>
+    <td></td>
     <td>Print various debugging information</td>
 </tr>
 <tr>
-    <td><code>-g</code></td>
-    <td><code>--get-urls</code></td>
+    <td><code>&#8209;g</code></td>
+    <td><code>&#8209;&#8209;get&#8209;urls</code></td>
+    <td></td>
     <td>Print URLs instead of downloading</td>
 </tr>
 <tr>
-    <td><code>-G</code></td>
-    <td><code>--resolve-urls</code></td>
+    <td><code>&#8209;G</code></td>
+    <td><code>&#8209;&#8209;resolve&#8209;urls</code></td>
+    <td></td>
     <td>Print URLs instead of downloading; resolve intermediary URLs</td>
 </tr>
 <tr>
-    <td><code>-j</code></td>
-    <td><code>--dump-json</code></td>
+    <td><code>&#8209;j</code></td>
+    <td><code>&#8209;&#8209;dump&#8209;json</code></td>
+    <td></td>
     <td>Print JSON information</td>
 </tr>
 <tr>
-    <td><code>-s</code></td>
-    <td><code>--simulate</code></td>
+    <td><code>&#8209;s</code></td>
+    <td><code>&#8209;&#8209;simulate</code></td>
+    <td></td>
     <td>Simulate data extraction; do not download anything</td>
 </tr>
 <tr>
-    <td><code>-E</code></td>
-    <td><code>--extractor-info</code></td>
+    <td><code>&#8209;E</code></td>
+    <td><code>&#8209;&#8209;extractor&#8209;info</code></td>
+    <td></td>
     <td>Print extractor defaults and settings</td>
 </tr>
 <tr>
-    <td><code>-K</code></td>
-    <td><code>--list-keywords</code></td>
+    <td><code>&#8209;K</code></td>
+    <td><code>&#8209;&#8209;list&#8209;keywords</code></td>
+    <td></td>
     <td>Print a list of available keywords and example values for the given URLs</td>
 </tr>
 <tr>
     <td></td>
-    <td><code>--list-modules</code></td>
+    <td><code>&#8209;&#8209;list&#8209;modules</code></td>
+    <td></td>
     <td>Print a list of available extractor modules</td>
 </tr>
 <tr>
     <td></td>
-    <td><code>--list-extractors</code></td>
+    <td><code>&#8209;&#8209;list&#8209;extractors</code></td>
+    <td></td>
     <td>Print a list of extractor classes with description, (sub)category and example URL</td>
 </tr>
 <tr>
     <td></td>
-    <td><code>--write-log</code></td>
+    <td><code>&#8209;&#8209;write&#8209;log</code></td>
+    <td><code>FILE</code></td>
     <td>Write logging output to FILE</td>
 </tr>
 <tr>
     <td></td>
-    <td><code>--write-unsupported</code></td>
+    <td><code>&#8209;&#8209;write&#8209;unsupported</code></td>
+    <td><code>FILE</code></td>
     <td>Write URLs, which get emitted by other extractors but cannot be handled, to FILE</td>
 </tr>
 <tr>
     <td></td>
-    <td><code>--write-pages</code></td>
+    <td><code>&#8209;&#8209;write&#8209;pages</code></td>
+    <td></td>
     <td>Write downloaded intermediary pages to files in the current directory to debug problems</td>
 </tr>
 </tbody>
@@ -149,78 +174,93 @@
 <table>
 <tbody valign="top">
 <tr>
-    <td><code>-r</code></td>
-    <td width="28%"><code>--limit-rate</code></td>
+    <td><code>&#8209;r</code></td>
+    <td><code>&#8209;&#8209;limit&#8209;rate</code></td>
+    <td><code>RATE</code></td>
     <td>Maximum download rate (e.g. 500k or 2.5M)</td>
 </tr>
 <tr>
-    <td><code>-R</code></td>
-    <td><code>--retries</code></td>
+    <td><code>&#8209;R</code></td>
+    <td><code>&#8209;&#8209;retries</code></td>
+    <td><code>N</code></td>
     <td>Maximum number of retries for failed HTTP requests or -1 for infinite retries (default: 4)</td>
 </tr>
 <tr>
     <td></td>
-    <td><code>--http-timeout</code></td>
+    <td><code>&#8209;&#8209;http&#8209;timeout</code></td>
+    <td><code>SECONDS</code></td>
     <td>Timeout for HTTP connections (default: 30.0)</td>
 </tr>
 <tr>
     <td></td>
-    <td><code>--sleep</code></td>
+    <td><code>&#8209;&#8209;sleep</code></td>
+    <td><code>SECONDS</code></td>
     <td>Number of seconds to wait before each download. This can be either a constant value or a range (e.g. 2.7 or 2.0-3.5)</td>
 </tr>
 <tr>
     <td></td>
-    <td><code>--sleep-request</code></td>
+    <td><code>&#8209;&#8209;sleep&#8209;request</code></td>
+    <td><code>SECONDS</code></td>
     <td>Number of seconds to wait between HTTP requests during data extraction</td>
 </tr>
 <tr>
     <td></td>
-    <td><code>--sleep-extractor</code></td>
+    <td><code>&#8209;&#8209;sleep&#8209;extractor</code></td>
+    <td><code>SECONDS</code></td>
     <td>Number of seconds to wait before starting data extraction for an input URL</td>
 </tr>
 <tr>
     <td></td>
-    <td><code>--filesize-min</code></td>
+    <td><code>&#8209;&#8209;filesize&#8209;min</code></td>
+    <td><code>SIZE</code></td>
     <td>Do not download files smaller than SIZE (e.g. 500k or 2.5M)</td>
 </tr>
 <tr>
     <td></td>
-    <td><code>--filesize-max</code></td>
+    <td><code>&#8209;&#8209;filesize&#8209;max</code></td>
+    <td><code>SIZE</code></td>
     <td>Do not download files larger than SIZE (e.g. 500k or 2.5M)</td>
 </tr>
 <tr>
     <td></td>
-    <td><code>--chunk-size</code></td>
+    <td><code>&#8209;&#8209;chunk&#8209;size</code></td>
+    <td><code>SIZE</code></td>
     <td>Size of in-memory data chunks (default: 32k)</td>
 </tr>
 <tr>
     <td></td>
-    <td><code>--no-part</code></td>
+    <td><code>&#8209;&#8209;no&#8209;part</code></td>
+    <td></td>
     <td>Do not use .part files</td>
 </tr>
 <tr>
     <td></td>
-    <td><code>--no-skip</code></td>
+    <td><code>&#8209;&#8209;no&#8209;skip</code></td>
+    <td></td>
     <td>Do not skip downloads; overwrite existing files</td>
 </tr>
 <tr>
     <td></td>
-    <td><code>--no-mtime</code></td>
+    <td><code>&#8209;&#8209;no&#8209;mtime</code></td>
+    <td></td>
     <td>Do not set file modification times according to Last-Modified HTTP response headers</td>
 </tr>
 <tr>
     <td></td>
-    <td><code>--no-download</code></td>
+    <td><code>&#8209;&#8209;no&#8209;download</code></td>
+    <td></td>
     <td>Do not download any files</td>
 </tr>
 <tr>
     <td></td>
-    <td><code>--no-postprocessors</code></td>
+    <td><code>&#8209;&#8209;no&#8209;postprocessors</code></td>
+    <td></td>
     <td>Do not run any post processors</td>
 </tr>
 <tr>
     <td></td>
-    <td><code>--no-check-certificate</code></td>
+    <td><code>&#8209;&#8209;no&#8209;check&#8209;certificate</code></td>
+    <td></td>
     <td>Disable HTTPS certificate validation</td>
 </tr>
 </tbody>
@@ -232,18 +272,21 @@
 <table>
 <tbody valign="top">
 <tr>
-    <td><code>-c</code></td>
-    <td width="28%"><code>--config</code></td>
+    <td><code>&#8209;c</code></td>
+    <td><code>&#8209;&#8209;config</code></td>
+    <td><code>FILE</code></td>
     <td>Additional configuration files</td>
 </tr>
 <tr>
-    <td><code>-o</code></td>
-    <td><code>--option</code></td>
+    <td><code>&#8209;o</code></td>
+    <td><code>&#8209;&#8209;option</code></td>
+    <td><code>OPT</code></td>
     <td>Additional <code>&lt;key&gt;=&lt;value&gt;</code> option values</td>
 </tr>
 <tr>
     <td></td>
-    <td><code>--ignore-config</code></td>
+    <td><code>&#8209;&#8209;ignore&#8209;config</code></td>
+    <td></td>
     <td>Do not read default configuration files</td>
 </tr>
 </tbody>
@@ -255,18 +298,21 @@
 <table>
 <tbody valign="top">
 <tr>
-    <td><code>-u</code></td>
-    <td width="28%"><code>--username</code></td>
+    <td><code>&#8209;u</code></td>
+    <td><code>&#8209;&#8209;username</code></td>
+    <td><code>USER</code></td>
     <td>Username to login with</td>
 </tr>
 <tr>
-    <td><code>-p</code></td>
-    <td><code>--password</code></td>
+    <td><code>&#8209;p</code></td>
+    <td><code>&#8209;&#8209;password</code></td>
+    <td><code>PASS</code></td>
     <td>Password belonging to the given username</td>
 </tr>
 <tr>
     <td></td>
-    <td><code>--netrc</code></td>
+    <td><code>&#8209;&#8209;netrc</code></td>
+    <td></td>
     <td>Enable .netrc authentication data</td>
 </tr>
 </tbody>
@@ -279,37 +325,44 @@
 <tbody valign="top">
 <tr>
     <td></td>
-    <td width="28%"><code>--download-archive</code></td>
+    <td><code>&#8209;&#8209;download&#8209;archive</code></td>
+    <td><code>FILE</code></td>
     <td>Record all downloaded or skipped files in FILE and skip downloading any file already in it</td>
 </tr>
 <tr>
-    <td><code>-A</code></td>
-    <td><code>--abort</code></td>
+    <td><code>&#8209;A</code></td>
+    <td><code>&#8209;&#8209;abort</code></td>
+    <td><code>N</code></td>
     <td>Stop current extractor run after N consecutive file downloads were skipped</td>
 </tr>
 <tr>
-    <td><code>-T</code></td>
-    <td><code>--terminate</code></td>
+    <td><code>&#8209;T</code></td>
+    <td><code>&#8209;&#8209;terminate</code></td>
+    <td><code>N</code></td>
     <td>Stop current and parent extractor runs after N consecutive file downloads were skipped</td>
 </tr>
 <tr>
     <td></td>
-    <td><code>--range</code></td>
+    <td><code>&#8209;&#8209;range</code></td>
+    <td><code>RANGE</code></td>
     <td>Index range(s) specifying which files to download. These can be either a constant value, range, or slice (e.g. <code>5</code>, <code>8-20</code>, or <code>1:24:3</code>)</td>
 </tr>
 <tr>
     <td></td>
-    <td><code>--chapter-range</code></td>
+    <td><code>&#8209;&#8209;chapter&#8209;range</code></td>
+    <td><code>RANGE</code></td>
     <td>Like <code>--range</code>, but applies to manga chapters and other delegated URLs</td>
 </tr>
 <tr>
     <td></td>
-    <td><code>--filter</code></td>
-    <td>Python expression controlling which files to download. Files for which the expression evaluates to False are ignored. Available keys are the filename-specific ones listed by <code>-K</code>. Example: --filter "image_width &gt;= 1000 and rating in (<code>s</code>, <code>q</code>)"</td>
+    <td><code>&#8209;&#8209;filter</code></td>
+    <td><code>EXPR</code></td>
+    <td>Python expression controlling which files to download. Files for which the expression evaluates to False are ignored. Available keys are the filename-specific ones listed by <code>-K</code>. <br />Example: --filter "image_width &gt;= 1000 and rating in ('s', 'q')"</td>
 </tr>
 <tr>
     <td></td>
-    <td><code>--chapter-filter</code></td>
+    <td><code>&#8209;&#8209;chapter&#8209;filter</code></td>
+    <td><code>EXPR</code></td>
     <td>Like <code>--filter</code>, but applies to manga chapters and other delegated URLs</td>
 </tr>
 </tbody>
@@ -322,57 +375,68 @@
 <tbody valign="top">
 <tr>
     <td></td>
-    <td width="28%"><code>--zip</code></td>
+    <td><code>&#8209;&#8209;zip</code></td>
+    <td></td>
     <td>Store downloaded files in a ZIP archive</td>
 </tr>
 <tr>
     <td></td>
-    <td><code>--ugoira-conv</code></td>
+    <td><code>&#8209;&#8209;ugoira&#8209;conv</code></td>
+    <td></td>
     <td>Convert Pixiv Ugoira to WebM (requires FFmpeg)</td>
 </tr>
 <tr>
     <td></td>
-    <td><code>--ugoira-conv-lossless</code></td>
+    <td><code>&#8209;&#8209;ugoira&#8209;conv&#8209;lossless</code></td>
+    <td></td>
     <td>Convert Pixiv Ugoira to WebM in VP9 lossless mode</td>
 </tr>
 <tr>
     <td></td>
-    <td><code>--ugoira-conv-copy</code></td>
+    <td><code>&#8209;&#8209;ugoira&#8209;conv&#8209;copy</code></td>
+    <td></td>
     <td>Convert Pixiv Ugoira to MKV without re-encoding any frames</td>
 </tr>
 <tr>
     <td></td>
-    <td><code>--write-metadata</code></td>
+    <td><code>&#8209;&#8209;write&#8209;metadata</code></td>
+    <td></td>
     <td>Write metadata to separate JSON files</td>
 </tr>
 <tr>
     <td></td>
-    <td><code>--write-info-json</code></td>
+    <td><code>&#8209;&#8209;write&#8209;info&#8209;json</code></td>
+    <td></td>
     <td>Write gallery metadata to a info.json file</td>
 </tr>
 <tr>
     <td></td>
-    <td><code>--write-tags</code></td>
+    <td><code>&#8209;&#8209;write&#8209;tags</code></td>
+    <td></td>
     <td>Write image tags to separate text files</td>
 </tr>
 <tr>
     <td></td>
-    <td><code>--mtime-from-date</code></td>
+    <td><code>&#8209;&#8209;mtime&#8209;from&#8209;date</code></td>
+    <td></td>
     <td>Set file modification times according to <code>date</code> metadata</td>
 </tr>
 <tr>
     <td></td>
-    <td><code>--exec</code></td>
-    <td>Execute CMD for each downloaded file. Example: --exec <code>convert {} {}.png && rm {}</code></td>
+    <td><code>&#8209;&#8209;exec</code></td>
+    <td><code>CMD</code></td>
+    <td>Execute CMD for each downloaded file. <br />Example: --exec "convert {} {}.png && rm {}"</td>
 </tr>
 <tr>
     <td></td>
-    <td><code>--exec-after</code></td>
-    <td>Execute CMD after all files were downloaded successfully. Example: --exec-after <code>cd {} && convert * ../doc.pdf</code></td>
+    <td><code>&#8209;&#8209;exec&#8209;after</code></td>
+    <td><code>CMD</code></td>
+    <td>Execute CMD after all files were downloaded successfully. <br />Example: --exec-after "cd {} && convert * ../doc.pdf"</td>
 </tr>
 <tr>
-    <td><code>-P</code></td>
-    <td><code>--postprocessor</code></td>
+    <td><code>&#8209;P</code></td>
+    <td><code>&#8209;&#8209;postprocessor</code></td>
+    <td><code>NAME</code></td>
     <td>Activate the specified post processor</td>
 </tr>
 </tbody>
