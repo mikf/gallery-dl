@@ -188,6 +188,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
+    <td>Fanleaks</td>
+    <td>https://fanleaks.club/</td>
+    <td>Models, Posts</td>
+    <td></td>
+</tr>
+<tr>
     <td>Fantia</td>
     <td>https://fantia.jp/</td>
     <td>Creators, Posts</td>
