@@ -36,24 +36,25 @@ TABLE = """
 
 ROW = """<tr>
     <td>{}</td>
-    <td{}>{}</td>
+    <td>{}</td>
+    <td>{}</td>
     <td>{}</td>
 </tr>""".format
 
 
-sub = re.compile(r"'([^']+)'").sub
 tables = []
+sub = re.compile(r"'([^']+)'").sub
+nb_hyphen = "&#8209;"  # non-breaking hyphen
 
 for group in option.build_parser()._action_groups[2:]:
 
     tbody = []
-    append = tbody.append
-    width = ' width="28%"'
 
     for action in group._group_actions:
         help = action.help
         if help == SUPPRESS:
             continue
+        meta = action.metavar or ""
 
         try:
             short, long = action.option_strings
@@ -65,15 +66,20 @@ for group in option.build_parser()._action_groups[2:]:
             short = ""
 
         if short:
-            short = "<code>" + short + "</code>"
+            short = "<code>" + short.replace("-", nb_hyphen) + "</code>"
         if long:
-            long = '<code>' + long + "</code>"
+            long = "<code>" + long.replace("-", nb_hyphen) + "</code>"
+        if meta:
+            meta = "<code>" + meta.partition("[")[0] + "</code>"
         if help:
             help = help.replace("<", "&lt;").replace(">", "&gt;")
-            help = sub("<code>\\1</code>", help)
+            if "Example: " in help:
+                help, sep, example = help.partition("Example: ")
+                help = sub("<code>\\1</code>", help) + "<br />" + sep + example
+            else:
+                help = sub("<code>\\1</code>", help)
 
-        append(ROW(short, width, long, help))
-        width = ""
+        tbody.append(ROW(short, long, meta, help))
 
     tables.append(TABLE(group.title, "\n".join(tbody)))
 
