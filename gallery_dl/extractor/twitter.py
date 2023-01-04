@@ -39,6 +39,7 @@ class TwitterExtractor(Extractor):
         self.videos = self.config("videos", True)
         self.cards = self.config("cards", False)
         self.cards_blacklist = self.config("cards-blacklist")
+        self.syndication = self.config("syndication")
         self._user = self._user_obj = None
         self._user_cache = {}
         self._init_sizes()
@@ -299,6 +300,9 @@ class TwitterExtractor(Extractor):
 
         if "legacy" in user:
             user = user["legacy"]
+        elif "statuses_count" not in user and self.syndication == "extended":
+            # try to fetch extended user data
+            user = self.api.user_by_screen_name(user["screen_name"])["legacy"]
 
         uget = user.get
         entities = user["entities"]
@@ -991,7 +995,7 @@ class TwitterAPI():
         }
 
         self._nsfw_warning = True
-        self._syndication = extractor.config("syndication")
+        self._syndication = self.extractor.syndication
         self._json_dumps = json.JSONEncoder(separators=(",", ":")).encode
 
         cookies = extractor.session.cookies
