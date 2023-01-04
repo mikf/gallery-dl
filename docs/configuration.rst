@@ -2098,6 +2098,19 @@ Description
     Extract media from reblogged posts.
 
 
+extractor.pinterest.domain
+--------------------------
+Type
+    ``string``
+Default
+    ``"auto"``
+Description
+    Specifies the domain used by ``pinterest`` extractots.
+
+    Setting this option to ``"auto"``
+    uses the same domain as a given input URL.
+
+
 extractor.pinterest.sections
 ----------------------------
 Type

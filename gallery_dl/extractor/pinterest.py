@@ -26,6 +26,13 @@ class PinterestExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
+
+        domain = self.config("domain")
+        if not domain or domain == "auto" :
+            self.root = text.root_from_url(match.group(0))
+        else:
+            self.root = text.ensure_http_scheme(domain)
+
         self.api = PinterestAPI(self)
 
     def items(self):
@@ -380,26 +387,23 @@ class PinterestAPI():
     - https://github.com/seregazhuk/php-pinterest-bot
     """
 
-    BASE_URL = "https://www.pinterest.com"
-    HEADERS = {
-        "Accept"              : "application/json, text/javascript, "
-                                "*/*, q=0.01",
-        "Accept-Language"     : "en-US,en;q=0.5",
-        "Referer"             : BASE_URL + "/",
-        "X-Requested-With"    : "XMLHttpRequest",
-        "X-APP-VERSION"       : "31461e0",
-        "X-CSRFToken"         : None,
-        "X-Pinterest-AppState": "active",
-        "Origin"              : BASE_URL,
-    }
-
     def __init__(self, extractor):
-        self.extractor = extractor
-
         csrf_token = util.generate_token()
-        self.headers = self.HEADERS.copy()
-        self.headers["X-CSRFToken"] = csrf_token
+
+        self.extractor = extractor
+        self.root = extractor.root
         self.cookies = {"csrftoken": csrf_token}
+        self.headers = {
+            "Accept"              : "application/json, text/javascript, "
+                                    "*/*, q=0.01",
+            "Accept-Language"     : "en-US,en;q=0.5",
+            "Referer"             : self.root + "/",
+            "X-Requested-With"    : "XMLHttpRequest",
+            "X-APP-VERSION"       : "0c4af40",
+            "X-CSRFToken"         : csrf_token,
+            "X-Pinterest-AppState": "active",
+            "Origin"              : self.root,
+        }
 
     def pin(self, pin_id):
         """Query information about a pin"""
@@ -495,7 +499,7 @@ class PinterestAPI():
     def _login_impl(self, username, password):
         self.extractor.log.info("Logging in as %s", username)
 
-        url = self.BASE_URL + "/resource/UserSessionResource/create/"
+        url = self.root + "/resource/UserSessionResource/create/"
         options = {
             "username_or_email": username,
             "password"         : password,
@@ -518,7 +522,7 @@ class PinterestAPI():
         }
 
     def _call(self, resource, options):
-        url = "{}/resource/{}Resource/get/".format(self.BASE_URL, resource)
+        url = "{}/resource/{}Resource/get/".format(self.root, resource)
         params = {"data": json.dumps({"options": options}), "source_url": ""}
 
         response = self.extractor.request(
@@ -530,10 +534,11 @@ class PinterestAPI():
         except ValueError:
             data = {}
 
-        if response.status_code < 400 and not response.history:
+        if response.history:
+            self.root = text.root_from_url(response.url)
+        if response.status_code < 400:
             return data
-
-        if response.status_code == 404 or response.history:
+        if response.status_code == 404:
             resource = self.extractor.subcategory.rpartition("-")[2]
             raise exception.NotFoundError(resource)
         self.extractor.log.debug("Server response: %s", response.text)
