@@ -365,18 +365,22 @@ class TwitterExtractor(Extractor):
     def _expand_tweets(self, tweets):
         seen = set()
         for tweet in tweets:
-
-            if "legacy" in tweet:
-                cid = tweet["legacy"]["conversation_id_str"]
-            else:
-                cid = tweet["conversation_id_str"]
-
-            if cid not in seen:
-                seen.add(cid)
-                try:
-                    yield from self.api.tweet_detail(cid)
-                except Exception:
-                    yield tweet
+            obj = tweet["legacy"] if "legacy" in tweet else tweet
+            cid = obj.get("conversation_id_str")
+            if not cid:
+                tid = obj["id_str"]
+                self.log.warning(
+                    "Unable to expand %s (no 'conversation_id')", tid)
+                continue
+            if cid in seen:
+                self.log.debug(
+                    "Skipping expansion of %s (previously seen)", cid)
+                continue
+            seen.add(cid)
+            try:
+                yield from self.api.tweet_detail(cid)
+            except Exception:
+                yield tweet
 
     def _make_tweet(self, user, id_str, url, timestamp):
         return {
@@ -1519,6 +1523,12 @@ class TwitterAPI():
             tweet["id_str"] = retweet_id = tweet_id
         else:
             retweet_id = None
+
+        # assume 'conversation_id' is the same as 'id' when the tweet
+        # is not a reply
+        if "conversation_id_str" not in tweet and \
+                "in_reply_to_status_id_str" not in tweet:
+            tweet["conversation_id_str"] = tweet["id_str"]
 
         tweet["created_at"] = text.parse_datetime(
             tweet["created_at"], "%Y-%m-%dT%H:%M:%S.%fZ").strftime(
