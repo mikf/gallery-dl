@@ -328,7 +328,10 @@ For example:
 OAuth
 -----
 
-*gallery-dl* supports user authentication via OAuth_ for
+*gallery-dl* supports user authentication via OAuth_ for some extractors.
+This is necessary for
+``pixiv``
+and optional for
 ``deviantart``,
 ``flickr``,
 ``reddit``,
@@ -336,12 +339,12 @@ OAuth
 ``tumblr``,
 and ``mastodon`` instances.
 
-This is mostly optional, but grants *gallery-dl* the ability
-to issue requests on your account's behalf and enables it to access resources
-which would otherwise be unavailable to a public user.
+Linking your account to *gallery-dl* grants it the ability to issue requests
+on your account's behalf and enables it to access resources which would
+otherwise be unavailable to a public user.
 
-To link your account to *gallery-dl*, start by invoking it with
-``oauth:<sitename>`` as an argument. For example:
+To do so, start by invoking it with ``oauth:<sitename>`` as an argument.
+For example:
 
 .. code:: bash
 
