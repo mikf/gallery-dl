@@ -327,7 +327,6 @@ class Extractor():
                 except Exception as exc:
                     self.log.warning("cookies: %s", exc)
                 else:
-                    self.log.debug("Loading cookies from '%s'", cookies)
                     self._cookiefile = cookiefile
 
             elif isinstance(cookies, (list, tuple)):
