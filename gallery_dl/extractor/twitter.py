@@ -222,10 +222,12 @@ class TwitterExtractor(Extractor):
             url = url["expanded_url"]
             if "//twitpic.com/" not in url or "/photos/" in url:
                 continue
-            resp = self.request(url.replace("http:", "https:", 1), fatal=False)
-            if resp.status_code >= 400:
+            if url.startswith("http:"):
+                url = "https" + url[4:]
+            response = self.request(url, fatal=False)
+            if response.status_code >= 400:
                 continue
-            url = text.extr(resp.text, 'name="twitter:image" value="', '"')
+            url = text.extr(response.text, 'name="twitter:image" value="', '"')
             if url:
                 files.append({"url": url})
 
