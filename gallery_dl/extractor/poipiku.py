@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2022 Mike Fährmann
+# Copyright 2022-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -78,6 +78,9 @@ class PoipikuExtractor(Extractor):
             }
             page = self.request(
                 url, method="POST", headers=headers, data=data).json()["html"]
+
+            if page.startswith("You need to"):
+                self.log.warning("'%s'", page)
 
             for thumb in text.extract_iter(
                     page, 'class="IllustItemThumbImg" src="', '"'):
