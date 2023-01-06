@@ -1845,8 +1845,24 @@ Description
     List of acceptable content ratings for returned chapters.
 
 
-extractor.mastodon.reblogs
---------------------------
+extractor.[mastodon].access-token
+---------------------------------
+Type
+    ``string``
+Default
+    ``null``
+Description
+    The ``access-token`` value you get from `linking your account to
+    gallery-dl <OAuth_>`__.
+
+    Note: gallery-dl comes with built-in tokens for ``mastodon.social``,
+    ``pawoo`` and ``baraag``. For other instances, you need to obtain an
+    ``access-token`` in order to use usernames in place of numerical
+    user IDs. 
+
+
+extractor.[mastodon].reblogs
+----------------------------
 Type
     ``bool``
 Default
@@ -1855,8 +1871,8 @@ Description
     Fetch media from reblogged posts.
 
 
-extractor.mastodon.replies
---------------------------
+extractor.[mastodon].replies
+----------------------------
 Type
     ``bool``
 Default
@@ -1865,8 +1881,8 @@ Description
     Fetch media from replies to other posts.
 
 
-extractor.mastodon.text-posts
------------------------------
+extractor.[mastodon].text-posts
+-------------------------------
 Type
     ``bool``
 Default
