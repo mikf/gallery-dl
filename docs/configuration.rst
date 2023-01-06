@@ -2775,6 +2775,9 @@ Default
 Description
     Fetch media from quoted Tweets.
 
+    If this option is enabled, gallery-dl will try to fetch
+    a quoted (original) Tweet when it sees the Tweet which quotes it.
+
 
 extractor.twitter.replies
 -------------------------

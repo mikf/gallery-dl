@@ -76,11 +76,6 @@ class TwitterExtractor(Extractor):
             else:
                 data = tweet
 
-            if seen_tweets is not None:
-                if data["id_str"] in seen_tweets:
-                    continue
-                seen_tweets.add(data["id_str"])
-
             if not self.retweets and "retweeted_status_id_str" in data:
                 self.log.debug("Skipping %s (retweet)", data["id_str"])
                 continue
@@ -97,6 +92,13 @@ class TwitterExtractor(Extractor):
             ):
                 self.log.debug("Skipping %s (reply)", data["id_str"])
                 continue
+
+            if seen_tweets is not None:
+                if data["id_str"] in seen_tweets:
+                    self.log.debug(
+                        "Skipping %s (previously seen)", data["id_str"])
+                    continue
+                seen_tweets.add(data["id_str"])
 
             files = []
             if "extended_entities" in data:
