@@ -136,6 +136,7 @@ modules = [
     "speakerdeck",
     "subscribestar",
     "tapas",
+    "tcbscans",
     "telegraph",
     "toyhouse",
     "tsumino",

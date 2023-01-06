@@ -800,6 +800,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td>Supported</td>
 </tr>
 <tr>
+    <td>TCB Scans</td>
+    <td>https://onepiecechapters.com/</td>
+    <td>Chapters, Manga</td>
+    <td></td>
+</tr>
+<tr>
     <td>Telegraph</td>
     <td>https://telegra.ph/</td>
     <td>Galleries</td>
