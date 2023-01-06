@@ -2691,12 +2691,8 @@ Default
 Description
     Fetch media from quoted Tweets.
 
-    If the value is ``true``, then gallery-dl will try to fetch
-    the quoted (original) Tweet when it sees the Tweet which quotes it.
-
-    Note: If the original Tweet later appears again in the timeline
-    (e.g. the author quoted their own Tweet), it will be handled
-    according to the `unique <extractor.twitter.unique_>`__ option.
+    If this option is enabled, gallery-dl will try to fetch
+    a quoted (original) Tweet when it sees the Tweet which quotes it.
 
 
 extractor.twitter.replies
@@ -2773,10 +2769,6 @@ Default
     ``true``
 Description
     Ignore previously seen Tweets.
-
-    If this option is ``false``, the Tweets may or may not be skipped
-    depending on the `archive-format <extractor.*.archive-format_>`__
-    you use.
 
 
 extractor.twitter.users
