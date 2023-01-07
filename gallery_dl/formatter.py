@@ -60,13 +60,20 @@ class StringFormatter():
     - "u": calls str.upper
     - "c": calls str.capitalize
     - "C": calls string.capwords
-    - "j". calls json.dumps
+    - "g": calls text.slugify()
+    - "j": calls json.dumps
     - "t": calls str.strip
+    - "T": calls util.datetime_to_timestamp_string()
     - "d": calls text.parse_timestamp
-    - "U": calls urllib.parse.unescape
+    - "s": calls str()
     - "S": calls util.to_string()
-    - "T": calls util.to_timestamü()
+    - "U": calls urllib.parse.unescape
+    - "r": calls repr()
+    - "a": calls ascii()
     - Example: {f!l} -> "example"; {f!u} -> "EXAMPLE"
+
+    # Go to _CONVERSIONS and _SPECIFIERS below to se all of them, read:
+    # https://github.com/mikf/gallery-dl/blob/master/docs/formatting.md
 
     Extra Format Specifiers:
     - "?<before>/<after>/":
