@@ -9,7 +9,7 @@
 """Extractors for https://www.imagefap.com/"""
 
 from .common import Extractor, Message
-from .. import text
+from .. import text, exception
 import json
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.|beta\.)?imagefap\.com"
@@ -27,6 +27,18 @@ class ImagefapExtractor(Extractor):
     def __init__(self, match):
         Extractor.__init__(self, match)
         self.session.headers["Referer"] = self.root
+
+    def request(self, url, **kwargs):
+        response = Extractor.request(self, url, **kwargs)
+
+        if response.history and response.url.endswith("/human-verification"):
+            msg = text.extr(response.text, '<div class="mt-4', '<')
+            if msg:
+                msg = " ".join(msg.partition(">")[2].split())
+                raise exception.StopExtraction("'%s'", msg)
+            self.log.warning("HTTP redirect to %s", response.url)
+
+        return response
 
 
 class ImagefapGalleryExtractor(ImagefapExtractor):
