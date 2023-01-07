@@ -584,7 +584,8 @@ Type
 Default
     ``null``
 Description
-    Insert a reference to the current `PathFormat <https://github.com/mikf/gallery-dl/blob/v1.22.4/gallery_dl/path.py#L20>`__
+    Insert a reference to the current
+    `PathFormat <https://github.com/mikf/gallery-dl/blob/v1.24.2/gallery_dl/path.py#L27>`__
     data structure into metadata dictionaries as the given name.
 
     For example, setting this option to ``"gdl_path"`` would make it possible
@@ -4468,9 +4469,9 @@ Description
           In addition to the default
           `LogRecord attributes <https://docs.python.org/3/library/logging.html#logrecord-attributes>`__,
           it is also possible to access the current
-          `extractor <https://github.com/mikf/gallery-dl/blob/9f06e79868eafb3d9747dde8ef3252ba5f4c0e23/gallery_dl/extractor/common.py#L26>`__,
-          `job <https://github.com/mikf/gallery-dl/blob/b14b33f19e6478c6bc6ac6b5a51c8b5cebf493f6/gallery_dl/job.py#L21>`__,
-          `path <https://github.com/mikf/gallery-dl/blob/master/gallery_dl/path.py#L27>`__,
+          `extractor <https://github.com/mikf/gallery-dl/blob/v1.24.2/gallery_dl/extractor/common.py#L26>`__,
+          `job <https://github.com/mikf/gallery-dl/blob/v1.24.2/gallery_dl/job.py#L21>`__,
+          `path <https://github.com/mikf/gallery-dl/blob/v1.24.2/gallery_dl/path.py#L27>`__,
           and `keywords` objects and their attributes, for example
           ``"{extractor.url}"``, ``"{path.filename}"``, ``"{keywords.title}"``
         * Default: ``"[{name}][{levelname}] {message}"``
