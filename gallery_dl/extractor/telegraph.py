@@ -12,7 +12,6 @@ from .. import text
 
 class TelegraphGalleryExtractor(GalleryExtractor):
     """Extractor for articles from telegra.ph"""
-
     category = "telegraph"
     root = "https://telegra.ph"
     directory_fmt = ("{category}", "{slug}")
@@ -52,6 +51,23 @@ class TelegraphGalleryExtractor(GalleryExtractor):
                 "url": "https://telegra.ph/file/3ea79d23b0dd0889f215a.jpg",
             },
         }),
+        ("https://telegra.ph/Vsyo-o-druzyah-moej-sestricy-05-27", {
+            "url": "c1f3048e5d94bee53af30a8c27f70b0d3b15438e",
+            "pattern": r"^https://pith1\.ru/uploads"
+                       r"/posts/2019-12/\d+_\d+\.jpg$",
+            "keyword": {
+                "author": "Shotacon - заходи сюда",
+                "caption": "",
+                "count": 19,
+                "date": "dt:2022-05-27 16:17:27",
+                "description": "",
+                "num_formatted": r"re:^\d{2}$",
+                "post_url": "https://telegra.ph"
+                            "/Vsyo-o-druzyah-moej-sestricy-05-27",
+                "slug": "Vsyo-o-druzyah-moej-sestricy-05-27",
+                "title": "Всё о друзьях моей сестрицы",
+            },
+        }),
     )
 
     def metadata(self, page):
@@ -79,11 +95,12 @@ class TelegraphGalleryExtractor(GalleryExtractor):
 
         result = []
         for figure in figures:
-            src, pos = text.extract(figure, 'src="', '"')
-            if src.startswith("/embed/"):
+            url, pos = text.extract(figure, 'src="', '"')
+            if url.startswith("/embed/"):
                 continue
+            elif url.startswith("/"):
+                url = self.root + url
             caption, pos = text.extract(figure, "<figcaption>", "<", pos)
-            url = self.root + src
             num += 1
 
             result.append((url, {
