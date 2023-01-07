@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2022 Mike Fährmann
+# Copyright 2014-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -45,7 +45,8 @@ class PixivExtractor(Extractor):
                 work["tags"] = [tag["name"] for tag in work["tags"]]
 
         ratings = {0: "General", 1: "R-18", 2: "R-18G"}
-        userdata = self.config("metadata")
+        meta_user = self.config("metadata")
+        meta_bookmark = self.config("metadata-bookmark")
         metadata = self.metadata()
 
         works = self.works()
@@ -61,8 +62,12 @@ class PixivExtractor(Extractor):
             del work["image_urls"]
             del work["meta_pages"]
 
-            if userdata:
+            if meta_user:
                 work.update(self.api.user_detail(work["user"]["id"]))
+            if meta_bookmark and work["is_bookmarked"]:
+                detail = self.api.illust_bookmark_detail(work["id"])
+                work["tags_bookmark"] = [tag["name"] for tag in detail["tags"]
+                                         if tag["is_registered"]]
             if transform_tags:
                 transform_tags(work)
             work["num"] = 0
@@ -398,6 +403,8 @@ class PixivFavoriteExtractor(PixivExtractor):
         # own bookmarks
         ("https://www.pixiv.net/bookmark.php", {
             "url": "90c1715b07b0d1aad300bce256a0bc71f42540ba",
+            "keyword": {"tags_bookmark": ["47", "hitman"]},
+            "options": (("metadata-bookmark", True),),
         }),
         # own bookmarks with tag (#596)
         ("https://www.pixiv.net/bookmark.php?tag=foobar", {
@@ -880,6 +887,11 @@ class PixivAppAPI():
         params = {"illust_id": illust_id}
         return self._call("/v1/illust/detail", params)["illust"]
 
+    def illust_bookmark_detail(self, illust_id):
+        params = {"illust_id": illust_id}
+        return self._call(
+            "/v2/illust/bookmark/detail", params)["bookmark_detail"]
+
     def illust_follow(self, restrict="all"):
         params = {"restrict": restrict}
         return self._pagination("/v2/illust/follow", params)
@@ -900,8 +912,15 @@ class PixivAppAPI():
         return self._pagination("/v1/search/illust", params)
 
     def user_bookmarks_illust(self, user_id, tag=None, restrict="public"):
+        """Return illusts bookmarked by a user"""
         params = {"user_id": user_id, "tag": tag, "restrict": restrict}
         return self._pagination("/v1/user/bookmarks/illust", params)
+
+    def user_bookmark_tags_illust(self, user_id, restrict="public"):
+        """Return bookmark tags defined by a user"""
+        params = {"user_id": user_id, "restrict": restrict}
+        return self._pagination(
+            "/v1/user/bookmark-tags/illust", params, "bookmark_tags")
 
     @memcache(keyarg=1)
     def user_detail(self, user_id):
