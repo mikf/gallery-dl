@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2022 Mike Fährmann
+# Copyright 2016-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -12,17 +12,17 @@ from .common import Extractor, Message
 from .. import text
 import json
 
-
 BASE_PATTERN = r"(?:https?://)?(?:www\.|beta\.)?imagefap\.com"
 
 
 class ImagefapExtractor(Extractor):
     """Base class for imagefap extractors"""
     category = "imagefap"
+    root = "https://www.imagefap.com"
     directory_fmt = ("{category}", "{gallery_id} {title}")
     filename_fmt = "{category}_{gallery_id}_{filename}.{extension}"
     archive_fmt = "{gallery_id}_{image_id}"
-    root = "https://www.imagefap.com"
+    request_interval = (2.0, 4.0)
 
     def __init__(self, match):
         Extractor.__init__(self, match)
