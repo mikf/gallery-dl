@@ -1859,7 +1859,7 @@ Description
     Note: gallery-dl comes with built-in tokens for ``mastodon.social``,
     ``pawoo`` and ``baraag``. For other instances, you need to obtain an
     ``access-token`` in order to use usernames in place of numerical
-    user IDs. 
+    user IDs.
 
 
 extractor.[mastodon].reblogs
@@ -2168,6 +2168,17 @@ Description
     It is possible to use ``"all"`` instead of listing all values separately.
 
 
+extractor.pixiv.refresh-token
+-----------------------------
+Type
+    ``string``
+Description
+    The ``refresh-token`` value you get
+    from running ``gallery-dl oauth:pixiv`` (see OAuth_) or
+    by using a third-party tool like
+    `gppt <https://github.com/eggplants/get-pixivpy-token>`__.
+
+
 extractor.pixiv.metadata
 ------------------------
 Type
@@ -2176,6 +2187,20 @@ Default
     ``false``
 Description
     Fetch extended ``user`` metadata.
+
+
+extractor.pixiv.metadata-bookmark
+---------------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    For works bookmarked by
+    `your own account <extractor.pixiv.refresh-token_>`__,
+    fetch bookmark tags as ``tags_bookmark`` metadata.
+
+    Note: This requires 1 additional API call per bookmarked post.
 
 
 extractor.pixiv.work.related
@@ -2309,7 +2334,7 @@ Description
     Retrieve additional comments by resolving the ``more`` comment
     stubs in the base comment tree.
 
-    This requires 1 additional API call for every 100 extra comments.
+    Note: This requires 1 additional API call for every 100 extra comments.
 
 
 extractor.reddit.date-min & .date-max
