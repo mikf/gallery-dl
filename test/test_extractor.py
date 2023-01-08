@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2020 Mike Fährmann
+# Copyright 2018-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -96,9 +96,10 @@ class TestExtractorModule(unittest.TestCase):
         test_urls = []
 
         # collect testcase URLs
+        append = test_urls.append
         for extr in extractor.extractors():
             for testcase in extr._get_tests():
-                test_urls.append((testcase[0], extr))
+                append((testcase[0], extr))
 
         # iterate over all testcase URLs
         for url, extr1 in test_urls:
@@ -114,19 +115,22 @@ class TestExtractorModule(unittest.TestCase):
 
                 match = extr2.pattern.match(url)
                 if match:
-                    matches.append(match)
+                    matches.append((match, extr2))
 
             # fail if more or less than 1 match happened
             if len(matches) > 1:
                 msg = "'{}' gets matched by more than one pattern:".format(url)
-                for match in matches:
-                    msg += "\n- "
-                    msg += match.re.pattern
+                for match, extr in matches:
+                    msg += "\n\n- {}:\n{}".format(
+                        extr.__name__, match.re.pattern)
                 self.fail(msg)
 
-            if len(matches) < 1:
+            elif len(matches) < 1:
                 msg = "'{}' isn't matched by any pattern".format(url)
                 self.fail(msg)
+
+            else:
+                self.assertIs(extr1, matches[0][1], url)
 
     def test_docstrings(self):
         """ensure docstring uniqueness"""
