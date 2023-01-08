@@ -270,6 +270,7 @@ _APIKEY_WY = \
     '<a href="configuration.rst#extractorweasylapi-key">API Key</a>'
 
 AUTH_MAP = {
+    "aibooru"        : "Supported",
     "aryion"         : "Supported",
     "atfbooru"       : "Supported",
     "baraag"         : _OAUTH,

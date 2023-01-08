@@ -993,7 +993,7 @@ Consider all sites to be NSFW unless otherwise known.
     <td>Aibooru</td>
     <td>https://aibooru.online/</td>
     <td>Favorites, Pools, Popular Images, Posts, Tag Searches</td>
-    <td></td>
+    <td>Supported</td>
 </tr>
 
 <tr>
