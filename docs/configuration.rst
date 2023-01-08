@@ -375,7 +375,9 @@ Description
 
     and optional for
 
+    * ``aibooru`` (*)
     * ``aryion``
+    * ``atfbooru`` (*)
     * ``danbooru`` (*)
     * ``e621`` (*)
     * ``exhentai``
@@ -398,7 +400,7 @@ Description
     ``-u/--username`` and ``-p/--password`` command-line options or
     by using a |.netrc|_ file. (see Authentication_)
 
-    (*) The password value for ``danbooru`` and ``e621`` should be
+    (*) The password value for these sites should be
     the API key found in your user profile, not the actual account password.
 
 
