@@ -118,6 +118,7 @@ CATEGORY_MAP = {
     "webmshare"      : "webmshare",
     "webtoons"       : "Webtoon",
     "wikiart"        : "WikiArt.org",
+    "wpsizedon"      : "さいずどんの森 (Sizedon Forest)",
     "xbunkr"         : "xBunkr",
     "xhamster"       : "xHamster",
     "xvideos"        : "XVideos",
@@ -246,6 +247,13 @@ SUBCATEGORY_MAP = {
     },
     "wikiart": {
         "artists": "Artist Listings",
+    },
+    "wpsizedon": {
+        "post": "Individual Posts",
+        "genre": "Posts by ジャンル/Genre",
+        "contributor": "Posts by 投稿者/Contributor",
+        "author": "Posts by Author",
+        "archive": "Posts by アーカイブ/Archive",
     },
 }
 
