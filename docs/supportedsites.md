@@ -346,7 +346,7 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>ImageFap</td>
     <td>https://www.imagefap.com/</td>
-    <td>Galleries, individual Images, User Profiles</td>
+    <td>Folders, Galleries, individual Images, User Profiles</td>
     <td></td>
 </tr>
 <tr>
