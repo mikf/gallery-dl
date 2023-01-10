@@ -1,5 +1,36 @@
 # Changelog
 
+## 1.24.3 - 2023-01-10
+### Additions
+- [danbooru] extract `uploader` metadata ([#3457](https://github.com/mikf/gallery-dl/issues/3457))
+- [deviantart] initial implementation of username & password login for `scraps` ([#1029](https://github.com/mikf/gallery-dl/issues/1029))
+- [fanleaks] add `post` and `model` extractors ([#3468](https://github.com/mikf/gallery-dl/issues/3468), [#3474](https://github.com/mikf/gallery-dl/issues/3474))
+- [imagefap] add `folder` extractor ([#3504](https://github.com/mikf/gallery-dl/issues/3504))
+- [lynxchan] support `bbw-chan.nl` ([#3456](https://github.com/mikf/gallery-dl/issues/3456), [#3463](https://github.com/mikf/gallery-dl/issues/3463))
+- [pinterest] support `All Pins` boards ([#2855](https://github.com/mikf/gallery-dl/issues/2855), [#3484](https://github.com/mikf/gallery-dl/issues/3484))
+- [pinterest] add `domain` option ([#3484](https://github.com/mikf/gallery-dl/issues/3484))
+- [pixiv] implement `metadata-bookmark` option ([#3417](https://github.com/mikf/gallery-dl/issues/3417))
+- [tcbscans] add `chapter` and `manga` extractors ([#3189](https://github.com/mikf/gallery-dl/issues/3189))
+- [twitter] implement `syndication=extended` ([#3483](https://github.com/mikf/gallery-dl/issues/3483))
+- implement slice notation for `range` options ([#918](https://github.com/mikf/gallery-dl/issues/918), [#2865](https://github.com/mikf/gallery-dl/issues/2865))
+- allow `filter` options to be a list of expressions
+### Fixes
+- [behance] use delay between requests ([#2507](https://github.com/mikf/gallery-dl/issues/2507))
+- [bunkr] fix URLs returned by API ([#3481](https://github.com/mikf/gallery-dl/issues/3481))
+- [fanbox] return `imageMap` files in order ([#2718](https://github.com/mikf/gallery-dl/issues/2718))
+- [imagefap] use delay between requests ([#1140](https://github.com/mikf/gallery-dl/issues/1140))
+- [imagefap] warn about redirects to `/human-verification` ([#1140](https://github.com/mikf/gallery-dl/issues/1140))
+- [kemonoparty] reject invalid/empty files ([#3510](https://github.com/mikf/gallery-dl/issues/3510))
+- [myhentaigallery] handle whitespace before title tag ([#3503](https://github.com/mikf/gallery-dl/issues/3503))
+- [poipiku] fix extraction for a different warning button style ([#3493](https://github.com/mikf/gallery-dl/issues/3493), [#3460](https://github.com/mikf/gallery-dl/issues/3460))
+- [poipiku] warn about login requirements
+- [telegraph] fix file URLs ([#3506](https://github.com/mikf/gallery-dl/issues/3506))
+- [twitter] fix crash when using `expand` and `syndication` ([#3473](https://github.com/mikf/gallery-dl/issues/3473))
+- [twitter] apply tweet type checks before uniqueness check ([#3439](https://github.com/mikf/gallery-dl/issues/3439), [#3455](https://github.com/mikf/gallery-dl/issues/3455))
+- [twitter] force `https://` for TwitPic URLs ([#3449](https://github.com/mikf/gallery-dl/issues/3449))
+- [ytdl] adapt to yt-dlp changes
+- updste and improve documentation ([#3453](https://github.com/mikf/gallery-dl/issues/3453), [#3462](https://github.com/mikf/gallery-dl/issues/3462), [#3496](https://github.com/mikf/gallery-dl/issues/3496))
+
 ## 1.24.2 - 2022-12-18
 ### Additions
 - [2chen] support `.club` URLs ([#3406](https://github.com/mikf/gallery-dl/issues/3406))
