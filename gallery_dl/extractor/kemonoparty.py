@@ -67,6 +67,7 @@ class KemonopartyExtractor(Extractor):
             headers["Referer"] = "{}/{}/user/{}/post/{}".format(
                 self.root, post["service"], post["user"], post["id"])
             post["_http_headers"] = headers
+            post["_http_validate"] = _validate
             post["date"] = text.parse_datetime(
                 post["published"] or post["added"],
                 "%a, %d %b %Y %H:%M:%S %Z")
@@ -197,6 +198,11 @@ class KemonopartyExtractor(Extractor):
         return dms
 
 
+def _validate(response):
+    return (response.headers["content-length"] != "9" and
+            response.content != b"not found")
+
+
 class KemonopartyUserExtractor(KemonopartyExtractor):
     """Extractor for all posts from a kemono.party user listing"""
     subcategory = "user"
@@ -308,6 +314,12 @@ class KemonopartyPostExtractor(KemonopartyExtractor):
         ("https://coomer.party/onlyfans/user/alinity/post/125962203", {
             "pattern": r"https://coomer\.party/data/7d/3f/7d3fd9804583dc224968"
                        r"c0591163ec91794552b04f00a6c2f42a15b68231d5a8\.jpg",
+        }),
+        # invalid file (#3510)
+        ("https://kemono.party/patreon/user/19623797/post/29035449", {
+            "pattern": r"907ba78b4545338d3539683e63ecb51c"
+                       r"f51c10adc9dabd86e92bd52339f298b9\.txt",
+            "content": "da39a3ee5e6b4b0d3255bfef95601890afd80709",
         }),
         ("https://kemono.party/subscribestar/user/alcorart/post/184330"),
         ("https://www.kemono.party/subscribestar/user/alcorart/post/184330"),
