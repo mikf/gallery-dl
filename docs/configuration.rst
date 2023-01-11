@@ -3466,6 +3466,19 @@ Description
     regardless of this option.
 
 
+downloader.http.validate
+------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Check for invalid responses.
+
+    Fail a download when a file does not pass
+    instead of downloading a potentially broken file.
+
+
 downloader.ytdl.format
 ----------------------
 Type
