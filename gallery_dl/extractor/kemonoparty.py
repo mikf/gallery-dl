@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2021-2022 Mike Fährmann
+# Copyright 2021-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -67,7 +67,6 @@ class KemonopartyExtractor(Extractor):
             headers["Referer"] = "{}/{}/user/{}/post/{}".format(
                 self.root, post["service"], post["user"], post["id"])
             post["_http_headers"] = headers
-            post["_http_validate"] = _validate
             post["date"] = text.parse_datetime(
                 post["published"] or post["added"],
                 "%a, %d %b %Y %H:%M:%S %Z")
@@ -103,13 +102,17 @@ class KemonopartyExtractor(Extractor):
             yield Message.Directory, post
 
             for post["num"], file in enumerate(files, 1):
+                post["_http_validate"] = None
                 post["hash"] = file["hash"]
                 post["type"] = file["type"]
                 url = file["path"]
 
                 text.nameext_from_url(file.get("name", url), post)
+                ext = text.ext_from_url(url)
                 if not post["extension"]:
-                    post["extension"] = text.ext_from_url(url)
+                    post["extension"] = ext
+                elif ext == "txt" and post["extension"] != "txt":
+                    post["_http_validate"] = _validate
 
                 if url[0] == "/":
                     url = self.root + "/data" + url
@@ -199,7 +202,7 @@ class KemonopartyExtractor(Extractor):
 
 
 def _validate(response):
-    return (response.headers["content-length"] != "9" and
+    return (response.headers["content-length"] != "9" or
             response.content != b"not found")
 
 
@@ -250,6 +253,7 @@ class KemonopartyPostExtractor(KemonopartyExtractor):
         ("https://kemono.party/fanbox/user/6993449/post/506575", {
             "pattern": r"https://kemono.party/data/21/0f"
                        r"/210f35388e28bbcf756db18dd516e2d82ce75[0-9a-f]+\.jpg",
+            "content": "900949cefc97ab8dc1979cc3664785aac5ba70dd",
             "keyword": {
                 "added": "Wed, 06 May 2020 20:28:02 GMT",
                 "content": str,
@@ -319,7 +323,7 @@ class KemonopartyPostExtractor(KemonopartyExtractor):
         ("https://kemono.party/patreon/user/19623797/post/29035449", {
             "pattern": r"907ba78b4545338d3539683e63ecb51c"
                        r"f51c10adc9dabd86e92bd52339f298b9\.txt",
-            "content": "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+            "content": "da39a3ee5e6b4b0d3255bfef95601890afd80709",  # empty
         }),
         ("https://kemono.party/subscribestar/user/alcorart/post/184330"),
         ("https://www.kemono.party/subscribestar/user/alcorart/post/184330"),
