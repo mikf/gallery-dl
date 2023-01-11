@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.24.4 - 2023-01-11
+### Additions
+- [downloader:http] add `validate` option
+### Fixes
+- [kemonoparty] fix regression from commit 473bd380 ([#3519](https://github.com/mikf/gallery-dl/issues/3519))
+
 ## 1.24.3 - 2023-01-10
 ### Additions
 - [danbooru] extract `uploader` metadata ([#3457](https://github.com/mikf/gallery-dl/issues/3457))
