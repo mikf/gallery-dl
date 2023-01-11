@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2022 Mike Fährmann
+# Copyright 2014-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -33,6 +33,7 @@ class HttpDownloader(DownloaderBase):
         self.chunk_size = self.config("chunk-size", 32768)
         self.metadata = extractor.config("http-metadata")
         self.progress = self.config("progress", 3.0)
+        self.validate = self.config("validate", True)
         self.headers = self.config("headers")
         self.minsize = self.config("filesize-min")
         self.maxsize = self.config("filesize-max")
@@ -175,7 +176,7 @@ class HttpDownloader(DownloaderBase):
 
             # check for invalid responses
             validate = kwdict.get("_http_validate")
-            if validate:
+            if validate and self.validate:
                 result = validate(response)
                 if isinstance(result, str):
                     url = result
