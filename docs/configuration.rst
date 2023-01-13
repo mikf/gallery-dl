@@ -3245,6 +3245,18 @@ Description
     Note: This requires 1 additional HTTP request per post.
 
 
+extractor.[booru].url
+---------------------
+Type
+    ``string``
+Default
+    ``"file_url"``
+Example
+    ``"preview_url"``
+Description
+    Alternate field name to retrieve download URLs from.
+
+
 extractor.[manga-extractor].chapter-reverse
 -------------------------------------------
 Type

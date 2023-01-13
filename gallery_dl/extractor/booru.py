@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2022 Mike Fährmann
+# Copyright 2015-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -26,6 +26,10 @@ class BooruExtractor(BaseExtractor):
         tags = self.config("tags", False)
         notes = self.config("notes", False)
         fetch_html = tags or notes
+
+        url_key = self.config("url")
+        if url_key:
+            self._file_url = operator.itemgetter(url_key)
 
         for post in self.posts():
             try:
