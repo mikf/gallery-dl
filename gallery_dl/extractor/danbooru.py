@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2022 Mike Fährmann
+# Copyright 2014-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -40,7 +40,17 @@ class DanbooruExtractor(BaseExtractor):
 
         self.ugoira = self.config("ugoira", False)
         self.external = self.config("external", False)
-        self.extended_metadata = self.config("metadata", False)
+
+        metadata = self.config("metadata", False)
+        if metadata:
+            if isinstance(metadata, (list, tuple)):
+                metadata = ",".join(metadata)
+            elif not isinstance(metadata, str):
+                metadata = "artist_commentary,children,notes,parent,uploader"
+            self.metadata_includes = metadata
+        else:
+            self.metadata_includes = None
+
         threshold = self.config("threshold")
         if isinstance(threshold, int):
             self.threshold = 1 if threshold < 1 else threshold
@@ -99,13 +109,10 @@ class DanbooruExtractor(BaseExtractor):
                     url = post["large_file_url"]
                     post["extension"] = "webm"
 
-            if self.extended_metadata:
-                template = (
-                    "{}/posts/{}.json?only=artist_commentary,children,notes,"
-                    "parent,uploader"
-                )
-                resp = self.request(template.format(self.root, post["id"]))
-                post.update(resp.json())
+            if self.metadata_includes:
+                meta_url = "{}/posts/{}.json?only={}".format(
+                    self.root, post["id"], self.metadata_includes)
+                post.update(self.request(meta_url).json())
 
             if url[0] == "/":
                 url = self.root + url

@@ -1027,12 +1027,21 @@ Description
 extractor.danbooru.metadata
 ---------------------------
 Type
-    ``bool``
+    * ``bool``
+    * ``string``
+    * ``list`` of ``strings``
 Default
     ``false``
+Example
+    * ``replacements,comments,ai_tags``
+    * ``["replacements", "comments", "ai_tags"]``
 Description
     Extract additional metadata
     (notes, artist commentary, parent, children, uploader)
+
+    It is possible to specify a custom list of metadata includes.
+    See `available_includes <https://github.com/danbooru/danbooru/blob/2cf7baaf6c5003c1a174a8f2d53db010cf05dca7/app/models/post.rb#L1842-L1849>`__
+    for possible field names. ``aibooru`` also supports ``ai_metadata``.
 
     Note: This requires 1 additional HTTP request per post.
 
