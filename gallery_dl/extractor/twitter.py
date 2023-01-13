@@ -945,7 +945,7 @@ class TwitterAPI():
     def __init__(self, extractor):
         self.extractor = extractor
 
-        self.root = "https://twitter.com/i/api"
+        self.root = "https://api.twitter.com"
         self.headers = {
             "authorization": "Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejR"
                              "COuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu"
@@ -955,6 +955,7 @@ class TwitterAPI():
             "x-twitter-client-language": "en",
             "x-twitter-active-user": "yes",
             "x-csrf-token": None,
+            "Origin": "https://twitter.com",
             "Referer": "https://twitter.com/",
         }
         self.params = {
@@ -967,24 +968,36 @@ class TwitterAPI():
             "include_can_dm": "1",
             "include_can_media_tag": "1",
             "include_ext_has_nft_avatar": "1",
+            "include_ext_is_blue_verified": "1",
+            "include_ext_verified_type": "1",
             "skip_status": "1",
             "cards_platform": "Web-12",
             "include_cards": "1",
             "include_ext_alt_text": "true",
+            "include_ext_limited_action_results": "false",
             "include_quote_count": "true",
             "include_reply_count": "1",
             "tweet_mode": "extended",
+            "include_ext_collab_control": "true",
+            "include_ext_views": "true",
             "include_entities": "true",
             "include_user_entities": "true",
             "include_ext_media_color": "true",
             "include_ext_media_availability": "true",
             "include_ext_sensitive_media_warning": "true",
+            "include_ext_trusted_friends_metadata": "true",
             "send_error_codes": "true",
             "simple_quoted_tweet": "true",
+            "q": None,
             "count": "100",
+            "query_source": None,
             "cursor": None,
-            "ext": "mediaStats,highlightedLabel,hasNftAvatar,"
-                   "voiceInfo,superFollowMetadata",
+            "pc": None,
+            "spelling_corrections": None,
+            "include_ext_edit_control": "true",
+            "ext": "mediaStats,highlightedLabel,hasNftAvatar,voiceInfo,"
+                   "enrichments,superFollowMetadata,unmentionInfo,editControl,"
+                   "collab_control,vibe",
         }
         self.variables = {
             "includePromotedContent": False,
@@ -1095,7 +1108,7 @@ class TwitterAPI():
         endpoint = "/2/search/adaptive.json"
         params = self.params.copy()
         params["q"] = query
-        params["tweet_search_mode"] = "live"
+        #  params["tweet_search_mode"] = "live"
         params["query_source"] = "typed_query"
         params["pc"] = "1"
         params["spelling_corrections"] = "1"
