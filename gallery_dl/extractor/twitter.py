@@ -947,15 +947,29 @@ class TwitterAPI():
         self.extractor = extractor
 
         self.root = "https://api.twitter.com"
+        cookies = extractor.session.cookies
+        cookiedomain = extractor.cookiedomain
+
+        csrf = extractor.config("csrf")
+        if csrf is None or csrf == "cookies":
+            csrf_token = cookies.get("ct0", domain=cookiedomain)
+        else:
+            csrf_token = None
+        if not csrf_token:
+            csrf_token = util.generate_token()
+            cookies.set("ct0", csrf_token, domain=cookiedomain)
+
+        auth_token = cookies.get("auth_token", domain=cookiedomain)
+
         self.headers = {
             "authorization": "Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejR"
                              "COuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu"
                              "4FA33AGWWjCpTnA",
             "x-guest-token": None,
-            "x-twitter-auth-type": None,
+            "x-twitter-auth-type": "OAuth2Session" if auth_token else None,
             "x-twitter-client-language": "en",
             "x-twitter-active-user": "yes",
-            "x-csrf-token": None,
+            "x-csrf-token": csrf_token,
             "Origin": "https://twitter.com",
             "Referer": "https://twitter.com/",
         }
@@ -1019,28 +1033,6 @@ class TwitterAPI():
         self._nsfw_warning = True
         self._syndication = self.extractor.syndication
         self._json_dumps = json.JSONEncoder(separators=(",", ":")).encode
-
-        cookies = extractor.session.cookies
-        cookiedomain = extractor.cookiedomain
-
-        csrf = extractor.config("csrf")
-        if csrf is None or csrf == "cookies":
-            csrf_token = cookies.get("ct0", domain=cookiedomain)
-        else:
-            csrf_token = None
-        if not csrf_token:
-            csrf_token = util.generate_token()
-            cookies.set("ct0", csrf_token, domain=cookiedomain)
-        self.headers["x-csrf-token"] = csrf_token
-
-        if cookies.get("auth_token", domain=cookiedomain):
-            # logged in
-            self.headers["x-twitter-auth-type"] = "OAuth2Session"
-        else:
-            # guest
-            guest_token = self._guest_token()
-            cookies.set("gt", guest_token, domain=cookiedomain)
-            self.headers["x-guest-token"] = guest_token
 
     def tweet_detail(self, tweet_id):
         endpoint = "/graphql/ItejhtHVxU7ksltgMmyaLA/TweetDetail"
@@ -1197,17 +1189,24 @@ class TwitterAPI():
 
     @cache(maxage=3600)
     def _guest_token(self):
-        root = "https://api.twitter.com"
         endpoint = "/1.1/guest/activate.json"
-        return str(self._call(endpoint, None, root, "POST")["guest_token"])
+        self.extractor.log.info("Requesting guest token")
+        return str(self._call(endpoint, None, "POST", False)["guest_token"])
 
-    def _call(self, endpoint, params, root=None, method="GET"):
-        if root is None:
-            root = self.root
+    def _call(self, endpoint, params, method="GET", auth=True):
+        url = self.root + endpoint
 
         while True:
+            if not self.headers["x-twitter-auth-type"] and auth:
+                # logged out -> refresh guest token
+                guest_token = self._guest_token()
+                if guest_token != self.headers["x-guest-token"]:
+                    self.headers["x-guest-token"] = guest_token
+                    self.extractor.session.cookies.set(
+                        "gt", guest_token, domain=self.extractor.cookiedomain)
+
             response = self.extractor.request(
-                root + endpoint, method=method, params=params,
+                url, method=method, params=params,
                 headers=self.headers, fatal=None)
 
             # update 'x-csrf-token' header (#1170)
@@ -1360,12 +1359,8 @@ class TwitterAPI():
                     if user.get("blocked_by"):
                         if self.headers["x-twitter-auth-type"] and \
                                 extr.config("logout"):
-                            guest_token = self._guest_token()
-                            extr.session.cookies.set(
-                                "gt", guest_token, domain=extr.cookiedomain)
                             extr._cookiefile = None
                             del extr.session.cookies["auth_token"]
-                            self.headers["x-guest-token"] = guest_token
                             self.headers["x-twitter-auth-type"] = None
                             extr.log.info("Retrying API request as guest")
                             continue
