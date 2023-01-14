@@ -102,23 +102,28 @@ class KemonopartyExtractor(Extractor):
             yield Message.Directory, post
 
             for post["num"], file in enumerate(files, 1):
-                post["_http_validate"] = None
                 post["hash"] = file["hash"]
-                post["type"] = file["type"]
-                url = file["path"]
 
-                text.nameext_from_url(file.get("name", url), post)
-                ext = text.ext_from_url(url)
-                if not post["extension"]:
-                    post["extension"] = ext
-                elif ext == "txt" and post["extension"] != "txt":
-                    post["_http_validate"] = _validate
+                yield self.commit(post, file)
 
-                if url[0] == "/":
-                    url = self.root + "/data" + url
-                elif url.startswith(self.root):
-                    url = self.root + "/data" + url[20:]
-                yield Message.Url, url, post
+    def commit(self, post, file):
+        post["_http_validate"] = None
+        post["type"] = file["type"]
+        url = file["path"]
+
+        text.nameext_from_url(file.get("name", url), post)
+
+        ext = text.ext_from_url(url)
+        if not post["extension"]:
+            post["extension"] = ext
+        elif ext == "txt" and post["extension"] != "txt":
+            post["_http_validate"] = _validate
+
+        if url[0] == "/":
+            url = self.root + "/data" + url
+        elif url.startswith(self.root):
+            url = self.root + "/data" + url[20:]
+        return Message.Url, url, post
 
     def login(self):
         username, password = self._get_auth_info()
@@ -406,18 +411,7 @@ class KemonopartyDiscordExtractor(KemonopartyExtractor):
             yield Message.Directory, post
 
             for post["num"], file in enumerate(files, 1):
-                post["type"] = file["type"]
-                url = file["path"]
-
-                text.nameext_from_url(file.get("name", url), post)
-                if not post["extension"]:
-                    post["extension"] = text.ext_from_url(url)
-
-                if url[0] == "/":
-                    url = self.root + "/data" + url
-                elif url.startswith(self.root):
-                    url = self.root + "/data" + url[20:]
-                yield Message.Url, url, post
+                yield self.commit(post, file)
 
     def posts(self):
         if self.channel is None:
