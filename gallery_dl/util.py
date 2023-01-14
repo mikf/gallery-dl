@@ -231,7 +231,14 @@ Status: {response.status_code} {response.reason}
 Request Headers
 ---------------
 {request_headers}
-
+"""
+        if request.body:
+            outfmt += """
+Request Body
+------------
+{request.body}
+"""
+        outfmt += """
 Response Headers
 ----------------
 {response_headers}
