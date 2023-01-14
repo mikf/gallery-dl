@@ -33,6 +33,11 @@ class KemonopartyExtractor(Extractor):
             self.cookiedomain = ".coomer.party"
         self.root = text.root_from_url(match.group(0))
         Extractor.__init__(self, match)
+        file_root = self.config("file-domain")
+        if not file_root or file_root == "auto":
+            self.file_root = None
+        else:
+            self.file_root = text.ensure_http_scheme(file_root)
         self.session.headers["Referer"] = self.root + "/"
 
     def items(self):
@@ -120,10 +125,20 @@ class KemonopartyExtractor(Extractor):
             post["_http_validate"] = _validate
 
         if url[0] == "/":
-            url = self.root + "/data" + url
+            path = url
         elif url.startswith(self.root):
-            url = self.root + "/data" + url[20:]
-        return Message.Url, url, post
+            path = url[len(self.root):]
+        else:  # url is complete
+            return Message.Url, url, post
+        # this url always returns a 302 and is expected to
+        # always work
+        dispatcher_url = self.root + "/data" + path
+        if not self.file_root:
+            return Message.Url, dispatcher_url, post
+        # custom file-domain
+        file_url = self.file_root + "/data" + path
+        post["_fallback"] = (dispatcher_url,)
+        return Message.Url, file_url, post
 
     def login(self):
         username, password = self._get_auth_info()
@@ -330,7 +345,12 @@ class KemonopartyPostExtractor(KemonopartyExtractor):
                        r"f51c10adc9dabd86e92bd52339f298b9\.txt",
             "content": "da39a3ee5e6b4b0d3255bfef95601890afd80709",  # empty
         }),
-        ("https://kemono.party/subscribestar/user/alcorart/post/184330"),
+        # 'file-domain' option
+        ("https://kemono.party/subscribestar/user/alcorart/post/184330", {
+            "options": (("file-domain", "c2.kemono.party"),),
+            "pattern": r"https://c2\.kemono.party/data/attachments/"
+                       r"subscribestar/alcorart/184330/07923b489299b79.+\.png",
+        }),
         ("https://www.kemono.party/subscribestar/user/alcorart/post/184330"),
         ("https://beta.kemono.party/subscribestar/user/alcorart/post/184330"),
     )

@@ -1729,6 +1729,21 @@ Description
     Available types are ``artist``, and ``post``.
 
 
+extractor.kemonoparty.file-domain
+---------------------------
+Type
+    ``string``
+Default
+    ``"auto"``
+Example
+    ``"c1.kemono.party"``
+Description
+    Specifies the domain used to download files.
+
+    Setting this option to ``"auto"``
+    uses the same domain as a given input URL.
+
+
 extractor.kemonoparty.files
 ---------------------------
 Type
