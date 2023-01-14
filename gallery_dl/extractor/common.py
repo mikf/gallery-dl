@@ -507,7 +507,10 @@ class Extractor():
         try:
             with open(path + ".txt", 'wb') as fp:
                 util.dump_response(
-                    response, fp, headers=(self._write_pages == "all"))
+                    response, fp,
+                    headers=(self._write_pages in ("all", "ALL")),
+                    hide_auth=(self._write_pages != "ALL")
+                )
         except Exception as e:
             self.log.warning("Failed to dump HTTP request (%s: %s)",
                              e.__class__.__name__, e)
