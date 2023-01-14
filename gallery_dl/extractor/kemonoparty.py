@@ -35,13 +35,17 @@ class KemonopartyExtractor(Extractor):
         Extractor.__init__(self, match)
         self.session.headers["Referer"] = self.root + "/"
 
+        self._find_hash = re.compile(
+            r"/(?:[0-9a-f]{2}/[0-9a-f]{2}/([0-9a-f]{64})|"  # sha256
+            r"attachments/\w+/\w+/\w+/([0-9a-f]{32}))"      # md5
+        ).match
+
     def items(self):
         self._prepare_ddosguard_cookies()
 
         self._find_inline = re.compile(
             r'src="(?:https?://(?:kemono|coomer)\.party)?(/inline/[^"]+'
             r'|/[0-9a-f]{2}/[0-9a-f]{2}/[0-9a-f]{64}\.[^"]+)').findall
-        find_hash = re.compile("/[0-9a-f]{2}/[0-9a-f]{2}/([0-9a-f]{64})").match
         generators = self._build_file_generators(self.config("files"))
         duplicates = self.config("duplicates")
         comments = self.config("comments")
@@ -86,15 +90,12 @@ class KemonopartyExtractor(Extractor):
                     g(post) for g in generators):
                 url = file["path"]
 
-                match = find_hash(url)
-                if match:
-                    file["hash"] = hash = match.group(1)
-                    if hash in hashes and not duplicates:
+                file["hash"] = hash = self._hash(url)
+                if hash and not duplicates:
+                    if hash in hashes:
                         self.log.debug("Skipping %s (duplicate)", url)
                         continue
                     hashes.add(hash)
-                else:
-                    file["hash"] = ""
 
                 files.append(file)
 
@@ -154,6 +155,12 @@ class KemonopartyExtractor(Extractor):
     def _inline(self, post):
         for path in self._find_inline(post["content"] or ""):
             yield {"path": path, "name": path, "type": "inline"}
+
+    def _hash(self, url, default=""):
+        match = self._find_hash(url)
+        if match:
+            return match.group(1) or match.group(2)
+        return default
 
     def _build_file_generators(self, filetypes):
         if filetypes is None:
@@ -325,7 +332,12 @@ class KemonopartyPostExtractor(KemonopartyExtractor):
                        r"f51c10adc9dabd86e92bd52339f298b9\.txt",
             "content": "da39a3ee5e6b4b0d3255bfef95601890afd80709",  # empty
         }),
-        ("https://kemono.party/subscribestar/user/alcorart/post/184330"),
+        # extract md5
+        ("https://kemono.party/subscribestar/user/alcorart/post/184330", {
+            "pattern": r"https://kemono.party/data/attachments/"
+                       r"subscribestar/alcorart/184330/07923b489299b79.+\.png",
+            "keyword": {"hash": "07923b489299b7990b4e374ce643b11d"},
+        }),
         ("https://www.kemono.party/subscribestar/user/alcorart/post/184330"),
         ("https://beta.kemono.party/subscribestar/user/alcorart/post/184330"),
     )
@@ -363,6 +375,7 @@ class KemonopartyDiscordExtractor(KemonopartyExtractor):
                        r"e3/77/e377e3525164559484ace2e64425b0cec1db08.*\.png|"
                        r"51/45/51453640a5e0a4d23fbf57fb85390f9c5ec154.*\.gif)",
             "count": ">= 2",
+            "keyword": {"hash": "re:^(e377e35251645594|51453640a5e0a4d2).+$"},
         }),
         # 'inline' files
         (("https://kemono.party/discord"
@@ -370,6 +383,7 @@ class KemonopartyDiscordExtractor(KemonopartyExtractor):
             "pattern": r"https://cdn\.discordapp\.com/attachments/\d+/\d+/.+$",
             "range": "1-5",
             "options": (("image-filter", "type == 'inline'"),),
+            "keyword": {"hash": ""},
         }),
     )
 
@@ -394,10 +408,15 @@ class KemonopartyDiscordExtractor(KemonopartyExtractor):
             append = files.append
             for attachment in post["attachments"]:
                 attachment["type"] = "attachment"
+                attachment["hash"] = self._hash(attachment["path"])
                 append(attachment)
             for path in find_inline(post["content"] or ""):
-                append({"path": "https://cdn.discordapp.com" + path,
-                        "name": path, "type": "inline"})
+                append({
+                    "hash": "",
+                    "path": "https://cdn.discordapp.com" + path,
+                    "name": path,
+                    "type": "inline",
+                })
 
             post["channel_name"] = self.channel_name
             post["date"] = text.parse_datetime(
@@ -406,6 +425,7 @@ class KemonopartyDiscordExtractor(KemonopartyExtractor):
             yield Message.Directory, post
 
             for post["num"], file in enumerate(files, 1):
+                post["hash"] = file["hash"]
                 post["type"] = file["type"]
                 url = file["path"]
 
