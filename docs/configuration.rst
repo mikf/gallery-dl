@@ -766,6 +766,25 @@ Description
     giving up, or ``-1`` for infinite retries.
 
 
+extractor.*.retry-codes
+-----------------------
+Type
+    ``list`` of ``integers``
+Example
+    ``[404, 429, 430]``
+Description
+    Additional `HTTP response status codes <https://developer.mozilla.org/en-US/docs/Web/HTTP/Status>`__
+    to retry an HTTP request on.
+
+    ``2xx`` codes (success responses) and
+    ``3xx`` codes (redirection messages)
+    will never be retried and always count as success,
+    regardless of this option.
+
+    ``5xx`` codes (server error responses)  will always be retried,
+    regardless of this option.
+
+
 extractor.*.timeout
 -------------------
 Type
@@ -3474,7 +3493,7 @@ downloader.http.retry-codes
 Type
     ``list`` of ``integers``
 Default
-    ``[429]``
+    `extractor.*.retry-codes`_
 Description
     Additional `HTTP response status codes <https://developer.mozilla.org/en-US/docs/Web/HTTP/Status>`__
     to retry a download on.
@@ -3483,7 +3502,7 @@ Description
     download) will never be retried and always count as success,
     regardless of this option.
 
-    Codes ``500`` - ``599`` (server error responses)  will always be retried,
+    ``5xx`` codes (server error responses)  will always be retried,
     regardless of this option.
 
 
