@@ -38,7 +38,7 @@ class HttpDownloader(DownloaderBase):
         self.minsize = self.config("filesize-min")
         self.maxsize = self.config("filesize-max")
         self.retries = self.config("retries", extractor._retries)
-        self.retry_codes = self.config("retry-codes")
+        self.retry_codes = self.config("retry-codes", extractor._retry_codes)
         self.timeout = self.config("timeout", extractor._timeout)
         self.verify = self.config("verify", extractor._verify)
         self.mtime = self.config("mtime", True)
@@ -46,8 +46,6 @@ class HttpDownloader(DownloaderBase):
 
         if self.retries < 0:
             self.retries = float("inf")
-        if self.retry_codes is None:
-            self.retry_codes = [429]
         if self.minsize:
             minsize = text.parse_bytes(self.minsize)
             if not minsize:
@@ -104,7 +102,7 @@ class HttpDownloader(DownloaderBase):
 
         codes = kwdict.get("_http_retry_codes")
         if codes:
-            retry_codes = self.retry_codes.copy()
+            retry_codes = list(self.retry_codes)
             retry_codes += codes
         else:
             retry_codes = self.retry_codes
