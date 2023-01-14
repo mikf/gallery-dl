@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2022 Mike Fährmann
+# Copyright 2019-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -31,8 +31,8 @@ class MastodonExtractor(BaseExtractor):
     def items(self):
         for status in self.statuses():
 
-            if self._check_move:
-                self._check_move(status["account"])
+            if self._check_moved:
+                self._check_moved(status["account"])
             if not self.reblogs and status["reblog"]:
                 self.log.debug("Skipping %s (reblog)", status["id"])
                 continue
@@ -62,8 +62,8 @@ class MastodonExtractor(BaseExtractor):
         """Return an iterable containing all relevant Status objects"""
         return ()
 
-    def _check_move(self, account):
-        self._check_move = None
+    def _check_moved(self, account):
+        self._check_moved = None
         if "moved" in account:
             self.log.warning("Account '%s' moved to '%s'",
                              account["acct"], account["moved"]["acct"])
@@ -229,7 +229,7 @@ class MastodonAPI():
 
         for account in self.account_search(handle, 1):
             if account["acct"] == username:
-                self.extractor._check_move(account)
+                self.extractor._check_moved(account)
                 return account["id"]
         raise exception.NotFoundError("account")
 
