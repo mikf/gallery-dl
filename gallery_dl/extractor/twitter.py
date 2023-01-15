@@ -26,7 +26,7 @@ class TwitterExtractor(Extractor):
     cookiedomain = ".twitter.com"
     cookienames = ("auth_token",)
     root = "https://twitter.com"
-    tls12 = False
+    browser = "firefox"
 
     def __init__(self, match):
         Extractor.__init__(self, match)
