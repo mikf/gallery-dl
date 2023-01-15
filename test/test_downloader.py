@@ -313,6 +313,9 @@ SAMPLES = {
     ("pdf" , b"%PDF-"),
     ("swf" , b"FWS"),
     ("swf" , b"CWS"),
+    ("blend", b"BLENDER-v303RENDH"),
+    ("obj" , b"# Blender v3.2.0 OBJ File: 'foo.blend'"),
+    ("clip", b"CSFCHUNK\x00\x00\x00\x00"),
 }
 
 
