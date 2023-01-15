@@ -1193,17 +1193,19 @@ class TwitterAPI():
         self.extractor.log.info("Requesting guest token")
         return str(self._call(endpoint, None, "POST", False)["guest_token"])
 
+    def _authenticate_guest(self):
+        guest_token = self._guest_token()
+        if guest_token != self.headers["x-guest-token"]:
+            self.headers["x-guest-token"] = guest_token
+            self.extractor.session.cookies.set(
+                "gt", guest_token, domain=self.extractor.cookiedomain)
+
     def _call(self, endpoint, params, method="GET", auth=True):
         url = self.root + endpoint
 
         while True:
             if not self.headers["x-twitter-auth-type"] and auth:
-                # logged out -> refresh guest token
-                guest_token = self._guest_token()
-                if guest_token != self.headers["x-guest-token"]:
-                    self.headers["x-guest-token"] = guest_token
-                    self.extractor.session.cookies.set(
-                        "gt", guest_token, domain=self.extractor.cookiedomain)
+                self._authenticate_guest()
 
             response = self.extractor.request(
                 url, method=method, params=params,
@@ -1587,8 +1589,6 @@ def _login_impl(extr, username, password):
             "Login with email is no longer possible. "
             "You need to provide your username or phone number instead.")
 
-    extr.log.info("Logging in as %s", username)
-
     def process(response):
         try:
             data = response.json()
@@ -1607,8 +1607,10 @@ def _login_impl(extr, username, password):
 
     extr.session.cookies.clear()
     api = TwitterAPI(extr)
+    api._authenticate_guest()
     headers = api.headers
-    headers["Referer"] = "https://twitter.com/i/flow/login"
+
+    extr.log.info("Logging in as %s", username)
 
     # init
     data = {
@@ -1662,7 +1664,7 @@ def _login_impl(extr, username, password):
             "web_modal": 1,
         },
     }
-    url = "https://twitter.com/i/api/1.1/onboarding/task.json?flow_name=login"
+    url = "https://api.twitter.com/1.1/onboarding/task.json?flow_name=login"
     response = extr.request(url, method="POST", headers=headers, json=data)
 
     data = {
@@ -1677,7 +1679,7 @@ def _login_impl(extr, username, password):
             },
         ],
     }
-    url = "https://twitter.com/i/api/1.1/onboarding/task.json"
+    url = "https://api.twitter.com/1.1/onboarding/task.json"
     response = extr.request(
         url, method="POST", headers=headers, json=data, fatal=None)
 
@@ -1701,7 +1703,7 @@ def _login_impl(extr, username, password):
             },
         ],
     }
-    #  url = "https://twitter.com/i/api/1.1/onboarding/task.json"
+    #  url = "https://api.twitter.com/1.1/onboarding/task.json"
     extr.sleep(random.uniform(2.0, 4.0), "login (username)")
     response = extr.request(
         url, method="POST", headers=headers, json=data, fatal=None)
@@ -1719,7 +1721,7 @@ def _login_impl(extr, username, password):
             },
         ],
     }
-    #  url = "https://twitter.com/i/api/1.1/onboarding/task.json"
+    #  url = "https://api.twitter.com/1.1/onboarding/task.json"
     extr.sleep(random.uniform(2.0, 4.0), "login (password)")
     response = extr.request(
         url, method="POST", headers=headers, json=data, fatal=None)
@@ -1736,7 +1738,7 @@ def _login_impl(extr, username, password):
             },
         ],
     }
-    #  url = "https://twitter.com/i/api/1.1/onboarding/task.json"
+    #  url = "https://api.twitter.com/1.1/onboarding/task.json"
     response = extr.request(
         url, method="POST", headers=headers, json=data, fatal=None)
     process(response)
