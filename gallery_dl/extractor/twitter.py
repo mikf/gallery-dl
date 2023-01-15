@@ -1251,10 +1251,12 @@ class TwitterAPI():
             tweets = data["globalObjects"]["tweets"]
             users = data["globalObjects"]["users"]
             tweet_id = cursor = None
+            entries = (instr[0]["addEntries"]["entries"]
+                       if "addEntries" in instr[0] else ())
             tweet_ids = []
 
             # collect tweet IDs and cursor value
-            for entry in instr[0]["addEntries"]["entries"]:
+            for entry in entries:
                 entry_startswith = entry["entryId"].startswith
 
                 if entry_startswith(("tweet-", "sq-I-t-")):
