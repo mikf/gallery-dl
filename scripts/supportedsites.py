@@ -437,6 +437,10 @@ def build_extractor_list():
     default["mangalife"] = default["mangasee"]
     domains["mangalife"] = "https://manga4life.com/"
 
+    # add wikifeetx.com
+    default["wikifeetx"] = default["wikifeet"]
+    domains["wikifeetx"] = "https://www.wikifeetx.com/"
+
     return categories, domains
 
 
