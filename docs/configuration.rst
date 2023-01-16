@@ -470,8 +470,19 @@ extractor.*.proxy
 Type
     * ``string``
     * ``object`` (`scheme` -> `proxy`)
-Default
-    ``null``
+Example
+    .. code:: json
+
+      "http://10.10.1.10:3128"
+
+    .. code:: json
+
+      {
+          "http" : "http://10.10.1.10:3128",
+          "https": "http://10.10.1.10:1080",
+          "http://10.20.1.128": "http://10.10.1.10:5323"
+      }
+
 Description
     Proxy (or proxies) to be used for remote connections.
 
@@ -482,16 +493,6 @@ Description
       It is also possible to set a proxy for a specific host by using
       ``scheme://host`` as key.
       See `Requests' proxy documentation`_ for more details.
-
-      Example:
-
-      .. code:: json
-
-        {
-            "http" : "http://10.10.1.10:3128",
-            "https": "http://10.10.1.10:1080",
-            "http://10.20.1.128": "http://10.10.1.10:5323"
-        }
 
     Note: If a proxy URLs does not include a scheme,
     ``http://`` is assumed.
@@ -547,6 +548,46 @@ Description
 
     Note: ``requests`` and ``urllib3`` only support HTTP/1.1, while a real
     browser would use HTTP/2.
+
+
+extractor.*.headers
+-------------------
+Type
+    ``object`` (`name` -> `value`)
+Default
+    .. code:: json
+
+      {
+          "User-Agent"     : "<extractor.*.user-agent>",
+          "Accept"         : "*/*",
+          "Accept-Language": "en-US,en;q=0.5",
+          "Accept-Encoding": "gzip, deflate"
+      }
+
+Description
+    Additional `HTTP headers <https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers>`__
+    to be sent with each HTTP request,
+
+    To disable sending a header, set its value to ``null``.
+
+
+extractor.*.ciphers
+-------------------
+Type
+    ``list`` of ``strings``
+Example
+    .. code:: json
+
+      ["ECDHE-ECDSA-AES128-GCM-SHA256",
+       "ECDHE-RSA-AES128-GCM-SHA256",
+       "ECDHE-ECDSA-CHACHA20-POLY1305",
+       "ECDHE-RSA-CHACHA20-POLY1305"]
+
+Description
+    List of TLS/SSL cipher suites in
+    `OpenSSL cipher list format <https://www.openssl.org/docs/manmaster/man1/openssl-ciphers.html>`__
+    to be passed to
+    `ssl.SSLContext.set_ciphers() <https://docs.python.org/3/library/ssl.html#ssl.SSLContext.set_ciphers>`__
 
 
 extractor.*.keywords
