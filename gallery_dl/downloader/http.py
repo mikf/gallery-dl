@@ -390,6 +390,8 @@ MIME_TYPES = {
     "application/x-shockwave-flash": "swf",
 
     "application/ogg": "ogg",
+    # https://www.iana.org/assignments/media-types/model/obj
+    "model/obj": "obj",
     "application/octet-stream": "bin",
 }
 
@@ -419,6 +421,13 @@ SIGNATURE_CHECKS = {
     "7z"  : lambda s: s[0:6] == b"\x37\x7A\xBC\xAF\x27\x1C",
     "pdf" : lambda s: s[0:5] == b"%PDF-",
     "swf" : lambda s: s[0:3] in (b"CWS", b"FWS"),
+    "blend": lambda s: s[0:7] == b"BLENDER",
+    # unfortunately the Wavefront .obj format doesn't have a signature,
+    # so we check for the existence of Blender's comment
+    "obj" : lambda s: s[0:11] == b"# Blender v",
+    # Celsys Clip Studio Paint format
+    # https://github.com/rasensuihei/cliputils/blob/master/README.md
+    "clip": lambda s: s[0:8] == b"CSFCHUNK",
     # check 'bin' files against all other file signatures
     "bin" : lambda s: False,
 }
