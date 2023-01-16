@@ -158,6 +158,7 @@ modules = [
     "webtoons",
     "weibo",
     "wikiart",
+    "wikifeet",
     "xhamster",
     "xvideos",
     "zerochan",
