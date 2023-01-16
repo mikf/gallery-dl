@@ -100,6 +100,7 @@ class KemonopartyExtractor(Extractor):
                 files.append(file)
 
             post["count"] = len(files)
+            post["_http_retry_on"] = _retry_on
             yield Message.Directory, post
 
             for post["num"], file in enumerate(files, 1):
@@ -211,6 +212,19 @@ class KemonopartyExtractor(Extractor):
 def _validate(response):
     return (response.headers["content-length"] != "9" or
             response.content != b"not found")
+
+
+def _retry_on(response):
+    if response.status_code != 403:
+        return False
+    server = response.headers.get("Server")
+    if not server or not server.startswith("ddos-guard"):
+        return False
+    len_str = response.headers.get("content-length")
+    # normal error pages tend to be short
+    if len_str and len(len_str) > 4:
+        return True
+    return b"check.ddos-guard.net" in response.content
 
 
 class KemonopartyUserExtractor(KemonopartyExtractor):
@@ -422,6 +436,7 @@ class KemonopartyDiscordExtractor(KemonopartyExtractor):
             post["date"] = text.parse_datetime(
                 post["published"], "%a, %d %b %Y %H:%M:%S %Z")
             post["count"] = len(files)
+            post["_http_retry_on"] = _retry_on
             yield Message.Directory, post
 
             for post["num"], file in enumerate(files, 1):
