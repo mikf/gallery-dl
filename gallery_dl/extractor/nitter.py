@@ -61,7 +61,7 @@ class NitterExtractor(BaseExtractor):
                         url = self.root + url
                     file = {
                         "url": url,
-                        "_http_retry_codes": (404,),
+                        "_http_retry_on": lambda resp: resp.status_code == 404,
                     }
                     file["filename"], _, file["extension"] = \
                         name.rpartition(".")
