@@ -1245,17 +1245,28 @@ class TwitterAPI():
         while True:
             data = self._call(endpoint, params)
 
-            instr = data["timeline"]["instructions"]
-            if not instr:
+            instructions = data["timeline"]["instructions"]
+            if not instructions:
                 return
 
             tweets = data["globalObjects"]["tweets"]
             users = data["globalObjects"]["users"]
             tweet_id = cursor = None
             tweet_ids = []
+            entries = ()
+
+            # process instructions
+            for instr in instructions:
+                if "addEntries" in instr:
+                    entries = instr["addEntries"]["entries"]
+                elif "replaceEntry" in instr:
+                    entry = instr["replaceEntry"]["entry"]
+                    if entry["entryId"].startswith("cursor-bottom-"):
+                        cursor = (entry["content"]["operation"]
+                                  ["cursor"]["value"])
 
             # collect tweet IDs and cursor value
-            for entry in instr[0]["addEntries"]["entries"]:
+            for entry in entries:
                 entry_startswith = entry["entryId"].startswith
 
                 if entry_startswith(("tweet-", "sq-I-t-")):
@@ -1315,11 +1326,7 @@ class TwitterAPI():
                         quoted["quoted_by_id_str"] = tweet["id_str"]
                         yield quoted
 
-            # update cursor value
-            if "replaceEntry" in instr[-1] :
-                cursor = (instr[-1]["replaceEntry"]["entry"]
-                          ["content"]["operation"]["cursor"]["value"])
-
+            # stop on empty response
             if not cursor or (not tweets and not tweet_id):
                 return
             params["cursor"] = cursor
