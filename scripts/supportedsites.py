@@ -162,7 +162,8 @@ SUBCATEGORY_MAP = {
         "site": "",
     },
     "deviantart": {
-        "stash": "Sta.sh",
+        "stash" : "Sta.sh",
+        "status": "Status Updates",
         "watch-posts": "",
     },
     "fanbox": {

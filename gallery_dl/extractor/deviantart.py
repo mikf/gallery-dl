@@ -118,11 +118,18 @@ class DeviantartExtractor(Extractor):
             if "flash" in deviation:
                 yield self.commit(deviation, deviation["flash"])
 
-            if "excerpt" in deviation and self.commit_journal:
-                journal = self.api.deviation_content(deviation["deviationid"])
-                if self.extra:
-                    deviation["_journal"] = journal["html"]
-                yield self.commit_journal(deviation, journal)
+            if self.commit_journal:
+                if "excerpt" in deviation:
+                    journal = self.api.deviation_content(
+                        deviation["deviationid"])
+                elif "body" in deviation:
+                    journal = {"html": deviation.pop("body")}
+                else:
+                    journal = None
+                if journal:
+                    if self.extra:
+                        deviation["_journal"] = journal["html"]
+                    yield self.commit_journal(deviation, journal)
 
             if not self.extra:
                 continue
@@ -170,7 +177,7 @@ class DeviantartExtractor(Extractor):
 
         if self.comments:
             deviation["comments"] = (
-                self.api.comments_deviation(deviation["deviationid"])
+                self.api.comments(deviation["deviationid"], target="deviation")
                 if deviation["stats"]["comments"] else ()
             )
 
@@ -253,9 +260,10 @@ class DeviantartExtractor(Extractor):
         html = journal["html"]
         if html.startswith("<style"):
             html = html.partition("</style>")[2]
+        head, _, tail = html.rpartition("<script")
         content = "\n".join(
             text.unescape(text.remove_html(txt))
-            for txt in html.rpartition("<script")[0].split("<br />")
+            for txt in (head or tail).split("<br />")
         )
         txt = JOURNAL_TEMPLATE_TEXT.format(
             title=deviation["title"],
@@ -402,8 +410,9 @@ class DeviantartUserExtractor(DeviantartExtractor):
         }),
         ("https://www.deviantart.com/shimoda7", {
             "options": (("include", "all"),),
-            "pattern": r"/shimoda7/(gallery(/scraps)?|posts|favourites)$",
-            "count": 4,
+            "pattern": r"/shimoda7/"
+                       r"(gallery(/scraps)?|posts(/statuses)?|favourites)$",
+            "count": 5,
         }),
         ("https://shimoda7.deviantart.com/"),
     )
@@ -414,6 +423,7 @@ class DeviantartUserExtractor(DeviantartExtractor):
             (DeviantartGalleryExtractor , base + "gallery"),
             (DeviantartScrapsExtractor  , base + "gallery/scraps"),
             (DeviantartJournalExtractor , base + "posts"),
+            (DeviantartStatusExtractor  , base + "posts/statuses"),
             (DeviantartFavoriteExtractor, base + "favourites"),
         ), ("gallery",))
 
@@ -744,6 +754,81 @@ class DeviantartJournalExtractor(DeviantartExtractor):
 
     def deviations(self):
         return self.api.browse_user_journals(self.user, self.offset)
+
+
+class DeviantartStatusExtractor(DeviantartExtractor):
+    """Extractor for an artist's status updates"""
+    subcategory = "status"
+    directory_fmt = ("{category}", "{username}", "Status")
+    filename_fmt = "{category}_{index}_{title}_{date}.{extension}"
+    archive_fmt = "S_{_username}_{index}.{extension}"
+    pattern = BASE_PATTERN + r"/posts/statuses/?(?:\?.*)?$"
+    test = (
+        ("https://www.deviantart.com/t1na/posts/statuses", {
+            "count": 0,
+        }),
+        ("https://www.deviantart.com/justgalym/posts/statuses", {
+            "count": 4,
+            "url": "bf4c44c0c60ff2648a880f4c3723464ad3e7d074",
+        }),
+        # shared deviation
+        ("https://www.deviantart.com/justgalym/posts/statuses", {
+            "options": (("journals", "none"),),
+            "count": 1,
+            "pattern": r"https://images-wixmp-\w+\.wixmp\.com/f"
+                       r"/[^/]+/[^.]+\.jpg\?token=",
+        }),
+        ("https://www.deviantart.com/justgalym/posts/statuses", {
+            "options": (("journals", "text"),),
+            "url": "c8744f7f733a3029116607b826321233c5ca452d",
+        }),
+    )
+
+    def deviations(self):
+        for status in self.api.user_statuses(self.user, self.offset):
+            for item in status.get("items", ()):  # do not trust is_share
+                # shared deviations/statuses
+                key = "deviation" if "deviation" in item else "status"
+                yield item[key].copy()
+            # assume is_deleted == true means necessary fields are missing
+            if status["is_deleted"]:
+                self.log.warning(
+                    "Skipping status %s (deleted)", status.get("statusid"))
+                continue
+            yield status
+
+    def prepare(self, deviation):
+        if "deviationid" in deviation:
+            return DeviantartExtractor.prepare(self, deviation)
+
+        try:
+            path = deviation["url"].split("/")
+            deviation["index"] = text.parse_int(path[-1] or path[-2])
+        except KeyError:
+            deviation["index"] = 0
+
+        if self.user:
+            deviation["username"] = self.user
+            deviation["_username"] = self.user.lower()
+        else:
+            deviation["username"] = deviation["author"]["username"]
+            deviation["_username"] = deviation["username"].lower()
+
+        deviation["date"] = dt = text.parse_datetime(deviation["ts"])
+        deviation["published_time"] = int(util.datetime_to_timestamp(dt))
+
+        deviation["da_category"] = "Status"
+        deviation["category_path"] = "status"
+        deviation["is_downloadable"] = False
+        deviation["title"] = "Status Update"
+
+        comments_count = deviation.pop("comments_count", 0)
+        deviation["stats"] = {"comments": comments_count}
+        if self.comments:
+            deviation["comments"] = (
+                self.api.comments(deviation["statusid"], target="status")
+                if comments_count else ()
+            )
 
 
 class DeviantartPopularExtractor(DeviantartExtractor):
@@ -1149,9 +1234,9 @@ class DeviantartOAuthAPI():
                   "mature_content": self.mature}
         return self._pagination_list(endpoint, params)
 
-    def comments_deviation(self, deviation_id, offset=0):
-        """Fetch comments posted on a deviation"""
-        endpoint = "/comments/deviation/" + deviation_id
+    def comments(self, id, target, offset=0):
+        """Fetch comments posted on a target"""
+        endpoint = "/comments/{}/{}".format(target, id)
         params = {"maxdepth": "5", "offset": offset, "limit": 50,
                   "mature_content": self.mature}
         return self._pagination_list(endpoint, params=params, key="thread")
@@ -1187,8 +1272,6 @@ class DeviantartOAuthAPI():
 
     def deviation_metadata(self, deviations):
         """ Fetch deviation metadata for a set of deviations"""
-        if not deviations:
-            return []
         endpoint = "/deviation/metadata?" + "&".join(
             "deviationids[{}]={}".format(num, deviation["deviationid"])
             for num, deviation in enumerate(deviations)
@@ -1223,6 +1306,12 @@ class DeviantartOAuthAPI():
         """Get user profile information"""
         endpoint = "/user/profile/" + username
         return self._call(endpoint, fatal=False)
+
+    def user_statuses(self, username, offset=0):
+        """Yield status updates of a specific user"""
+        endpoint = "/user/statuses/"
+        params = {"username": username, "offset": offset, "limit": 50}
+        return self._pagination(endpoint, params)
 
     def user_friends_watch(self, username):
         """Watch a user"""
@@ -1350,10 +1439,12 @@ class DeviantartOAuthAPI():
                             "Private deviations detected! Run 'gallery-dl "
                             "oauth:deviantart' and follow the instructions to "
                             "be able to access them.")
-                if self.metadata:
-                    self._metadata(results)
-                if self.folders:
-                    self._folders(results)
+                # "statusid" cannot be used instead
+                if results and "deviationid" in results[0]:
+                    if self.metadata:
+                        self._metadata(results)
+                    if self.folders:
+                        self._folders(results)
             yield from results
 
             if not data["has_more"] and (

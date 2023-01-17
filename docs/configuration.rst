@@ -1268,7 +1268,7 @@ Description
     when processing a user profile.
 
     Possible values are
-    ``"gallery"``, ``"scraps"``, ``"journal"``, ``"favorite"``.
+    ``"gallery"``, ``"scraps"``, ``"journal"``, ``"favorite"``, ``"status"``.
 
     It is possible to use ``"all"`` instead of listing all values separately.
 
@@ -1280,11 +1280,12 @@ Type
 Default
     ``"html"``
 Description
-    Selects the output format of journal entries.
+    Selects the output format for textual content. This includes journals,
+    literature and status updates.
 
     * ``"html"``: HTML with (roughly) the same layout as on DeviantArt.
     * ``"text"``: Plain text with image references and HTML tags removed.
-    * ``"none"``: Don't download journals.
+    * ``"none"``: Don't download textual content.
 
 
 extractor.deviantart.mature
