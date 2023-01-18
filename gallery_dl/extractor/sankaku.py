@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2022 Mike Fährmann
+# Copyright 2014-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -80,15 +80,19 @@ class SankakuTagExtractor(SankakuExtractor):
     subcategory = "tag"
     directory_fmt = ("{category}", "{search_tags}")
     archive_fmt = "t_{search_tags}_{id}"
-    pattern = BASE_PATTERN + r"/\?([^#]*)"
+    pattern = BASE_PATTERN + r"/?\?([^#]*)"
     test = (
         ("https://sankaku.app/?tags=bonocho", {
             "count": 5,
             "pattern": r"https://s\.sankakucomplex\.com/data/[^/]{2}/[^/]{2}"
-                       r"/[^/]{32}\.\w+\?e=\d+&(expires=\d+&)?m=[^&#]+",
+                       r"/[0-9a-f]{32}\.\w+\?e=\d+&(expires=\d+&)?m=[^&#]+",
         }),
         ("https://beta.sankakucomplex.com/?tags=bonocho"),
         ("https://chan.sankakucomplex.com/?tags=bonocho"),
+        ("https://black.sankakucomplex.com/?tags=bonocho"),
+        ("https://white.sankakucomplex.com/?tags=bonocho"),
+        ("https://sankaku.app/ja?tags=order%3Apopularity"),
+        ("https://sankaku.app/no/?tags=order%3Apopularity"),
         # error on five or more tags
         ("https://chan.sankakucomplex.com/?tags=bonocho+a+b+c+d", {
             "options": (("username", None),),
