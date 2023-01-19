@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2017-2022 Mike Fährmann
+# Copyright 2017-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -80,8 +80,14 @@ class OAuthBase(Extractor):
             "Remote server reported an error:\n\n{}\n".format(msg))
 
     def _oauth1_authorization_flow(
-            self, request_token_url, authorize_url, access_token_url):
+            self, default_key, default_secret,
+            request_token_url, authorize_url, access_token_url):
         """Perform the OAuth 1.0a authorization flow"""
+
+        api_key = self.oauth_config("api-key") or default_key
+        api_secret = self.oauth_config("api-secret") or default_secret
+        self.session = oauth.OAuth1Session(api_key, api_secret)
+
         # get a request token
         params = {"oauth_callback": self.redirect_uri}
         data = self.session.get(request_token_url, params=params).text
@@ -208,6 +214,61 @@ class OAuthBase(Extractor):
         return msg
 
 
+# --------------------------------------------------------------------
+# OAuth 1.0a
+
+class OAuthFlickr(OAuthBase):
+    subcategory = "flickr"
+    pattern = "oauth:flickr$"
+    redirect_uri = REDIRECT_URI_HTTPS
+
+    def items(self):
+        yield Message.Version, 1
+
+        self._oauth1_authorization_flow(
+            flickr.FlickrAPI.API_KEY,
+            flickr.FlickrAPI.API_SECRET,
+            "https://www.flickr.com/services/oauth/request_token",
+            "https://www.flickr.com/services/oauth/authorize",
+            "https://www.flickr.com/services/oauth/access_token",
+        )
+
+
+class OAuthSmugmug(OAuthBase):
+    subcategory = "smugmug"
+    pattern = "oauth:smugmug$"
+
+    def items(self):
+        yield Message.Version, 1
+
+        self._oauth1_authorization_flow(
+            smugmug.SmugmugAPI.API_KEY,
+            smugmug.SmugmugAPI.API_SECRET,
+            "https://api.smugmug.com/services/oauth/1.0a/getRequestToken",
+            "https://api.smugmug.com/services/oauth/1.0a/authorize",
+            "https://api.smugmug.com/services/oauth/1.0a/getAccessToken",
+        )
+
+
+class OAuthTumblr(OAuthBase):
+    subcategory = "tumblr"
+    pattern = "oauth:tumblr$"
+
+    def items(self):
+        yield Message.Version, 1
+
+        self._oauth1_authorization_flow(
+            tumblr.TumblrAPI.API_KEY,
+            tumblr.TumblrAPI.API_SECRET,
+            "https://www.tumblr.com/oauth/request_token",
+            "https://www.tumblr.com/oauth/authorize",
+            "https://www.tumblr.com/oauth/access_token",
+        )
+
+
+# --------------------------------------------------------------------
+# OAuth 2.0
+
 class OAuthDeviantart(OAuthBase):
     subcategory = "deviantart"
     pattern = "oauth:deviantart$"
@@ -228,28 +289,6 @@ class OAuthDeviantart(OAuthBase):
         )
 
 
-class OAuthFlickr(OAuthBase):
-    subcategory = "flickr"
-    pattern = "oauth:flickr$"
-    redirect_uri = REDIRECT_URI_HTTPS
-
-    def __init__(self, match):
-        OAuthBase.__init__(self, match)
-        self.session = oauth.OAuth1Session(
-            self.oauth_config("api-key", flickr.FlickrAPI.API_KEY),
-            self.oauth_config("api-secret", flickr.FlickrAPI.API_SECRET),
-        )
-
-    def items(self):
-        yield Message.Version, 1
-
-        self._oauth1_authorization_flow(
-            "https://www.flickr.com/services/oauth/request_token",
-            "https://www.flickr.com/services/oauth/authorize",
-            "https://www.flickr.com/services/oauth/access_token",
-        )
-
-
 class OAuthReddit(OAuthBase):
     subcategory = "reddit"
     pattern = "oauth:reddit$"
@@ -265,48 +304,6 @@ class OAuthReddit(OAuthBase):
             "https://www.reddit.com/api/v1/access_token",
             scope="read history",
             cache=reddit._refresh_token_cache,
-        )
-
-
-class OAuthSmugmug(OAuthBase):
-    subcategory = "smugmug"
-    pattern = "oauth:smugmug$"
-
-    def __init__(self, match):
-        OAuthBase.__init__(self, match)
-        self.session = oauth.OAuth1Session(
-            self.oauth_config("api-key", smugmug.SmugmugAPI.API_KEY),
-            self.oauth_config("api-secret", smugmug.SmugmugAPI.API_SECRET),
-        )
-
-    def items(self):
-        yield Message.Version, 1
-
-        self._oauth1_authorization_flow(
-            "https://api.smugmug.com/services/oauth/1.0a/getRequestToken",
-            "https://api.smugmug.com/services/oauth/1.0a/authorize",
-            "https://api.smugmug.com/services/oauth/1.0a/getAccessToken",
-        )
-
-
-class OAuthTumblr(OAuthBase):
-    subcategory = "tumblr"
-    pattern = "oauth:tumblr$"
-
-    def __init__(self, match):
-        OAuthBase.__init__(self, match)
-        self.session = oauth.OAuth1Session(
-            self.oauth_config("api-key", tumblr.TumblrAPI.API_KEY),
-            self.oauth_config("api-secret", tumblr.TumblrAPI.API_SECRET),
-        )
-
-    def items(self):
-        yield Message.Version, 1
-
-        self._oauth1_authorization_flow(
-            "https://www.tumblr.com/oauth/request_token",
-            "https://www.tumblr.com/oauth/authorize",
-            "https://www.tumblr.com/oauth/access_token",
         )
 
 
@@ -361,6 +358,8 @@ class OAuthMastodon(OAuthBase):
 
         return data
 
+
+# --------------------------------------------------------------------
 
 class OAuthPixiv(OAuthBase):
     subcategory = "pixiv"
