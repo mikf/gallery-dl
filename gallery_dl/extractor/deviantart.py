@@ -155,12 +155,23 @@ class DeviantartExtractor(Extractor):
 
     def prepare(self, deviation):
         """Adjust the contents of a Deviation-object"""
+        alphabet = "0123456789abcdefghijklmnopqrstuvwxyz"
         if "index" not in deviation:
             try:
-                deviation["index"] = text.parse_int(
-                    deviation["url"].rpartition("-")[2])
+                if deviation["url"].startswith("https://sta.sh"):
+                    filename = deviation["content"]["src"].split("/")[5]
+                    deviation["index_base36"] = filename.partition("-")[0][1:]
+                    deviation["index"] = \
+                        util.bdecode(deviation["index_base36"], alphabet)
+                else:
+                    deviation["index"] = text.parse_int(
+                        deviation["url"].rpartition("-")[2])
             except KeyError:
                 deviation["index"] = 0
+                deviation["index_base36"] = "0"
+        if "index_base36" not in deviation:
+            deviation["index_base36"] = \
+                util.bencode(deviation["index"], alphabet)
 
         if self.user:
             deviation["username"] = self.user
@@ -182,8 +193,6 @@ class DeviantartExtractor(Extractor):
             )
 
         # filename metadata
-        alphabet = "0123456789abcdefghijklmnopqrstuvwxyz"
-        deviation["index_base36"] = util.bencode(deviation["index"], alphabet)
         sub = re.compile(r"\W").sub
         deviation["filename"] = "".join((
             sub("_", deviation["title"].lower()), "_by_",
@@ -777,6 +786,10 @@ class DeviantartStatusExtractor(DeviantartExtractor):
             "count": 1,
             "pattern": r"https://images-wixmp-\w+\.wixmp\.com/f"
                        r"/[^/]+/[^.]+\.jpg\?token=",
+            "keyword": {
+                "index": int,
+                "index_base36": "re:^[0-9a-z]+$",
+            },
         }),
         ("https://www.deviantart.com/justgalym/posts/statuses", {
             "options": (("journals", "text"),),
