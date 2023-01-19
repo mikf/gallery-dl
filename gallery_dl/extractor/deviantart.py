@@ -786,16 +786,21 @@ class DeviantartStatusExtractor(DeviantartExtractor):
 
     def deviations(self):
         for status in self.api.user_statuses(self.user, self.offset):
-            for item in status.get("items", ()):  # do not trust is_share
-                # shared deviations/statuses
-                key = "deviation" if "deviation" in item else "status"
-                yield item[key].copy()
-            # assume is_deleted == true means necessary fields are missing
-            if status["is_deleted"]:
-                self.log.warning(
-                    "Skipping status %s (deleted)", status.get("statusid"))
-                continue
-            yield status
+            yield from self.status(status)
+
+    def status(self, status):
+        for item in status.get("items", ()):  # do not trust is_share
+            # shared deviations/statuses
+            if "deviation" in item:
+                yield item["deviation"].copy()
+            if "status" in item:
+                yield from self.status(item["status"].copy())
+        # assume is_deleted == true means necessary fields are missing
+        if status["is_deleted"]:
+            self.log.warning(
+                "Skipping status %s (deleted)", status.get("statusid"))
+            return
+        yield status
 
     def prepare(self, deviation):
         if "deviationid" in deviation:
