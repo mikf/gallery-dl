@@ -1101,7 +1101,7 @@ class TwitterAPI():
         endpoint = "/2/search/adaptive.json"
         params = self.params.copy()
         params["q"] = query
-        #  params["tweet_search_mode"] = "live"
+        params["tweet_search_mode"] = "live"
         params["query_source"] = "typed_query"
         params["pc"] = "1"
         params["spelling_corrections"] = "1"
@@ -1241,6 +1241,7 @@ class TwitterAPI():
 
     def _pagination_legacy(self, endpoint, params):
         original_retweets = (self.extractor.retweets == "original")
+        bottom = ("cursor-bottom-", "sq-cursor-bottom")
 
         while True:
             data = self._call(endpoint, params)
@@ -1261,7 +1262,7 @@ class TwitterAPI():
                     entries = instr["addEntries"]["entries"]
                 elif "replaceEntry" in instr:
                     entry = instr["replaceEntry"]["entry"]
-                    if entry["entryId"].startswith("cursor-bottom-"):
+                    if entry["entryId"].startswith(bottom):
                         cursor = (entry["content"]["operation"]
                                   ["cursor"]["value"])
 
@@ -1278,7 +1279,7 @@ class TwitterAPI():
                         entry["content"]["timelineModule"]["metadata"]
                         ["conversationMetadata"]["allTweetIds"][::-1])
 
-                elif entry_startswith(("cursor-bottom-", "sq-cursor-bottom")):
+                elif entry_startswith(bottom):
                     cursor = entry["content"]["operation"]["cursor"]
                     if not cursor.get("stopOnEmptyResponse", True):
                         # keep going even if there are no tweets
