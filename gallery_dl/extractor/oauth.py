@@ -68,11 +68,19 @@ class OAuthBase(Extractor):
 
     def open(self, url, params, recv=None):
         """Open 'url' in browser amd return response parameters"""
-        import webbrowser
         url += "?" + urllib.parse.urlencode(params)
-        if not self.config("browser", True) or not webbrowser.open(url):
-            stdout_write(
-                "Please open this URL in your browser:\n\n" + url + "\n\n")
+
+        browser = self.config("browser", True)
+        if browser:
+            import webbrowser
+            browser = webbrowser.get()
+
+        if browser and browser.open(url):
+            self.log.info("Opening URL in %s:", browser.name.capitalize())
+        else:
+            self.log.info("Please open this URL in your browser:")
+
+        stdout_write("\n{}\n\n".format(url))
         return (recv or self.recv)()
 
     def error(self, msg):
@@ -87,6 +95,10 @@ class OAuthBase(Extractor):
         api_key = self.oauth_config("api-key") or default_key
         api_secret = self.oauth_config("api-secret") or default_secret
         self.session = oauth.OAuth1Session(api_key, api_secret)
+
+        self.log.info("Using %s %s API key (%s)",
+                      "default" if api_key == default_key else "custom",
+                      self.subcategory, api_key)
 
         # get a request token
         params = {"oauth_callback": self.redirect_uri}
@@ -118,10 +130,17 @@ class OAuthBase(Extractor):
         ))
 
     def _oauth2_authorization_code_grant(
-            self, client_id, client_secret, auth_url, token_url, *,
-            scope="read", key="refresh_token", auth=True,
-            cache=None, instance=None):
+            self, client_id, client_secret, default_id, default_secret,
+            auth_url, token_url, *, scope="read", duration="permanent",
+            key="refresh_token", auth=True, cache=None, instance=None):
         """Perform an OAuth2 authorization code grant"""
+
+        client_id = str(client_id) if client_id else default_id
+        client_secret = client_secret or default_secret
+
+        self.log.info("Using %s %s client ID (%s)",
+                      "default" if client_id == default_id else "custom",
+                      instance or self.subcategory, client_id)
 
         state = "gallery-dl_{}_{}".format(
             self.subcategory,
@@ -133,7 +152,7 @@ class OAuthBase(Extractor):
             "response_type": "code",
             "state"        : state,
             "redirect_uri" : self.redirect_uri,
-            "duration"     : "permanent",
+            "duration"     : duration,
             "scope"        : scope,
         }
 
@@ -143,13 +162,12 @@ class OAuthBase(Extractor):
         # check authorization response
         if state != params.get("state"):
             self.send("'state' mismatch: expected {}, got {}.\n".format(
-                state, params.get("state")
-            ))
+                state, params.get("state")))
             return
         if "error" in params:
             return self.error(params)
 
-        # exchange the authorization code for a token
+        # exchange authorization code for a token
         data = {
             "grant_type"  : "authorization_code",
             "code"        : params["code"],
@@ -278,10 +296,10 @@ class OAuthDeviantart(OAuthBase):
         yield Message.Version, 1
 
         self._oauth2_authorization_code_grant(
-            self.oauth_config(
-                "client-id", deviantart.DeviantartOAuthAPI.CLIENT_ID),
-            self.oauth_config(
-                "client-secret", deviantart.DeviantartOAuthAPI.CLIENT_SECRET),
+            self.oauth_config("client-id"),
+            self.oauth_config("client-secret"),
+            deviantart.DeviantartOAuthAPI.CLIENT_ID,
+            deviantart.DeviantartOAuthAPI.CLIENT_SECRET,
             "https://www.deviantart.com/oauth2/authorize",
             "https://www.deviantart.com/oauth2/token",
             scope="browse user.manage",
@@ -298,7 +316,9 @@ class OAuthReddit(OAuthBase):
 
         self.session.headers["User-Agent"] = reddit.RedditAPI.USER_AGENT
         self._oauth2_authorization_code_grant(
-            self.oauth_config("client-id", reddit.RedditAPI.CLIENT_ID),
+            self.oauth_config("client-id"),
+            "",
+            reddit.RedditAPI.CLIENT_ID,
             "",
             "https://www.reddit.com/api/v1/authorize",
             "https://www.reddit.com/api/v1/access_token",
@@ -325,6 +345,8 @@ class OAuthMastodon(OAuthBase):
             application = self._register(self.instance)
 
         self._oauth2_authorization_code_grant(
+            application["client-id"],
+            application["client-secret"],
             application["client-id"],
             application["client-secret"],
             "https://{}/oauth/authorize".format(self.instance),
