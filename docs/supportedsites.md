@@ -932,6 +932,18 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
+    <td>Wikifeet</td>
+    <td>https://www.wikifeet.com/</td>
+    <td>Galleries</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Wikifeetx</td>
+    <td>https://www.wikifeetx.com/</td>
+    <td>Galleries</td>
+    <td></td>
+</tr>
+<tr>
     <td>xHamster</td>
     <td>https://xhamster.com/</td>
     <td>Galleries, User Profiles</td>
