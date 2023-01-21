@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # Copyright 2018-2020 Leonardo Taccari
-# Copyright 2018-2022 Mike Fährmann
+# Copyright 2018-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -794,7 +794,12 @@ class InstagramRestAPI():
 
     def user_clips(self, user_id):
         endpoint = "/v1/clips/user/"
-        data = {"target_user_id": user_id, "page_size": "50"}
+        data = {
+            "target_user_id": user_id,
+            "page_size": "50",
+            "max_id": None,
+            "include_feed_video": "true",
+        }
         return self._pagination_post(endpoint, data)
 
     def user_collection(self, collection_id):
@@ -820,14 +825,16 @@ class InstagramRestAPI():
     def _call(self, endpoint, **kwargs):
         extr = self.extractor
 
-        url = "https://i.instagram.com/api" + endpoint
+        url = "https://www.instagram.com/api" + endpoint
         kwargs["headers"] = {
+            "Accept"          : "*/*",
             "X-CSRFToken"     : extr.csrf_token,
             "X-Instagram-AJAX": "1006242110",
             "X-IG-App-ID"     : "936619743392459",
             "X-ASBD-ID"       : "198387",
             "X-IG-WWW-Claim"  : extr.www_claim,
-            "Origin"          : extr.root,
+            "X-Requested-With": "XMLHttpRequest",
+            "Alt-Used"        : "www.instagram.com",
             "Referer"         : extr.root + "/",
         }
         kwargs["cookies"] = {
