@@ -771,7 +771,7 @@ class DeviantartStatusExtractor(DeviantartExtractor):
     directory_fmt = ("{category}", "{username}", "Status")
     filename_fmt = "{category}_{index}_{title}_{date}.{extension}"
     archive_fmt = "S_{_username}_{index}.{extension}"
-    pattern = BASE_PATTERN + r"/posts/statuses/?(?:\?.*)?$"
+    pattern = BASE_PATTERN + r"/posts/statuses"
     test = (
         ("https://www.deviantart.com/t1na/posts/statuses", {
             "count": 0,
@@ -786,9 +786,16 @@ class DeviantartStatusExtractor(DeviantartExtractor):
             "count": 1,
             "pattern": r"https://images-wixmp-\w+\.wixmp\.com/f"
                        r"/[^/]+/[^.]+\.jpg\?token=",
+        }),
+        # shared sta.sh item
+        ("https://www.deviantart.com/vanillaghosties/posts/statuses", {
+            "options": (("journals", "none"), ("original", False)),
+            "range": "5-",
+            "count": 1,
             "keyword": {
-                "index": int,
+                "index"       : int,
                 "index_base36": "re:^[0-9a-z]+$",
+                "url"         : "re:^https://sta.sh",
             },
         }),
         ("https://www.deviantart.com/justgalym/posts/statuses", {
@@ -802,7 +809,7 @@ class DeviantartStatusExtractor(DeviantartExtractor):
             yield from self.status(status)
 
     def status(self, status):
-        for item in status.get("items", ()):  # do not trust is_share
+        for item in status.get("items") or ():  # do not trust is_share
             # shared deviations/statuses
             if "deviation" in item:
                 yield item["deviation"].copy()
