@@ -36,6 +36,7 @@ class Extractor():
     browser = None
     root = ""
     test = None
+    finalize = None
     request_interval = 0.0
     request_interval_min = 0.0
     request_timestamp = 0.0
@@ -44,7 +45,6 @@ class Extractor():
     def __init__(self, match):
         self.log = logging.getLogger(self.category)
         self.url = match.string
-        self.finalize = None
 
         if self.basecategory:
             self.config = self._config_shared

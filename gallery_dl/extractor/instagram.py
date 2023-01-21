@@ -90,6 +90,11 @@ class InstagramExtractor(Extractor):
     def posts(self):
         return ()
 
+    def finalize(self):
+        if self._cursor:
+            self.log.info("Use '-o cursor=%s' to continue downloading "
+                          "from the current position", self._cursor)
+
     def request(self, url, **kwargs):
         response = Extractor.request(self, url, **kwargs)
 
@@ -104,9 +109,6 @@ class InstagramExtractor(Extractor):
                 page = None
 
             if page:
-                if self._cursor:
-                    self.log.info("Use '-o cursor=%s' to continue downloading "
-                                  "from the current position", self._cursor)
                 raise exception.StopExtraction("HTTP redirect to %s page (%s)",
                                                page, url.partition("?")[0])
 
@@ -858,7 +860,7 @@ class InstagramRestAPI():
                 yield from data["items"]
 
             if not data.get("more_available"):
-                return
+                return extr._update_cursor(None)
             params["max_id"] = extr._update_cursor(data["next_max_id"])
 
     def _pagination_post(self, endpoint, params):
@@ -873,7 +875,7 @@ class InstagramRestAPI():
 
             info = data["paging_info"]
             if not info.get("more_available"):
-                return
+                return extr._update_cursor(None)
             params["max_id"] = extr._update_cursor(info["max_id"])
 
     def _pagination_sections(self, endpoint, params):
@@ -886,7 +888,7 @@ class InstagramRestAPI():
             yield from info["sections"]
 
             if not info.get("more_available"):
-                return
+                return extr._update_cursor(None)
             params["page"] = info["next_page"]
             params["max_id"] = extr._update_cursor(info["next_max_id"])
 
@@ -901,7 +903,7 @@ class InstagramRestAPI():
                 yield from item["media_items"]
 
             if "next_max_id" not in data:
-                return
+                return extr._update_cursor(None)
             params["max_id"] = extr._update_cursor(data["next_max_id"])
 
 
@@ -1010,7 +1012,7 @@ class InstagramGraphqlAPI():
 
             info = data["page_info"]
             if not info["has_next_page"]:
-                return
+                return extr._update_cursor(None)
             elif not data["edges"]:
                 s = "" if self.item.endswith("s") else "s"
                 raise exception.StopExtraction(
