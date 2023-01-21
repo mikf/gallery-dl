@@ -116,6 +116,10 @@ class InstagramExtractor(Extractor):
         if www_claim is not None:
             self.www_claim = www_claim
 
+        csrf_token = response.cookies.get("csrftoken")
+        if csrf_token:
+            self.csrf_token = csrf_token
+
         return response
 
     def login(self):
@@ -839,9 +843,6 @@ class InstagramRestAPI():
             "Alt-Used"        : "www.instagram.com",
             "Referer"         : extr.root + "/",
         }
-        kwargs["cookies"] = {
-            "csrftoken": extr.csrf_token,
-        }
         return extr.request(url, **kwargs).json()
 
     def _pagination(self, endpoint, params=None, media=False):
@@ -991,12 +992,7 @@ class InstagramGraphqlAPI():
             "X-Requested-With": "XMLHttpRequest",
             "Referer"         : extr.root + "/",
         }
-        cookies = {
-            "csrftoken": extr.csrf_token,
-        }
-        return extr.request(
-            url, params=params, headers=headers, cookies=cookies,
-        ).json()["data"]
+        return extr.request(url, params=params, headers=headers).json()["data"]
 
     def _pagination(self, query_hash, variables,
                     key_data="user", key_edge=None):
