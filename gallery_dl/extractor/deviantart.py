@@ -867,7 +867,8 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
     pattern = (BASE_PATTERN + r"/(art|journal)/(?:[^/?#]+-)?(\d+)"
                r"|(?:https?://)?(?:www\.)?deviantart\.com/"
                r"(?:view/|deviation/|view(?:-full)?\.php/*\?(?:[^#]+&)?id=)"
-               r"(\d+)")
+               r"(\d+)"  # bare deviation ID without slug
+               r"|(?:https?://)?fav\.me/d([0-9a-z]+)")  # base36
     test = (
         (("https://www.deviantart.com/shimoda7/art/For-the-sake-10073852"), {
             "options": (("original", 0),),
@@ -942,6 +943,13 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
         }),
         # /deviation/ (#3558)
         ("https://www.deviantart.com/deviation/817215762"),
+        # fav.me (#3558)
+        ("https://fav.me/ddijrpu", {
+            "count": 1,
+        }),
+        ("https://fav.me/dddd", {
+            "exception": exception.NotFoundError,
+        }),
         # old-style URLs
         ("https://shimoda7.deviantart.com"
          "/art/For-the-sake-of-a-memory-10073852"),
@@ -958,7 +966,8 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
     def __init__(self, match):
         DeviantartExtractor.__init__(self, match)
         self.type = match.group(3)
-        self.deviation_id = match.group(4) or match.group(5)
+        self.deviation_id = \
+            match.group(4) or match.group(5) or id_from_base36(match.group(6))
 
     def deviations(self):
         url = "{}/{}/{}/{}".format(
