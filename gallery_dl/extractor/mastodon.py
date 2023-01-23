@@ -48,12 +48,13 @@ class MastodonExtractor(BaseExtractor):
             status["instance_remote"] = \
                 acct.rpartition("@")[2] if "@" in acct else None
 
+            status["count"] = len(attachments)
             status["tags"] = [tag["name"] for tag in status["tags"]]
             status["date"] = text.parse_datetime(
                 status["created_at"][:19], "%Y-%m-%dT%H:%M:%S")
 
             yield Message.Directory, status
-            for media in attachments:
+            for status["num"], media in enumerate(attachments, 1):
                 status["media"] = media
                 url = media["url"]
                 yield Message.Url, url, text.nameext_from_url(url, status)
@@ -181,6 +182,10 @@ class MastodonStatusExtractor(MastodonExtractor):
     test = (
         ("https://mastodon.social/@jk/103794036899778366", {
             "count": 4,
+            "keyword": {
+                "count": 4,
+                "num": int,
+            },
         }),
         ("https://pawoo.net/@yoru_nine/105038878897832922", {
             "content": "b52e807f8ab548d6f896b09218ece01eba83987a",
