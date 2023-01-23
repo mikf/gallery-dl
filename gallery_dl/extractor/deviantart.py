@@ -175,8 +175,7 @@ class DeviantartExtractor(Extractor):
             )
 
         # filename metadata
-        alphabet = "0123456789abcdefghijklmnopqrstuvwxyz"
-        deviation["index_base36"] = util.bencode(deviation["index"], alphabet)
+        deviation["index_base36"] = base36_from_id(deviation["index"])
         sub = re.compile(r"\W").sub
         deviation["filename"] = "".join((
             sub("_", deviation["title"].lower()), "_by_",
@@ -1562,6 +1561,17 @@ def _login_impl(extr, username, password):
         cookie.name: cookie.value
         for cookie in extr.session.cookies
     }
+
+
+def id_from_base36(base36):
+    return util.bdecode(base36, _ALPHABET)
+
+
+def base36_from_id(deviation_id):
+    return util.bencode(int(deviation_id), _ALPHABET)
+
+
+_ALPHABET = "0123456789abcdefghijklmnopqrstuvwxyz"
 
 
 ###############################################################################
