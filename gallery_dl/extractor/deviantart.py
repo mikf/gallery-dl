@@ -867,7 +867,8 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
     archive_fmt = "g_{_username}_{index}.{extension}"
     pattern = (BASE_PATTERN + r"/(art|journal)/(?:[^/?#]+-)?(\d+)"
                r"|(?:https?://)?(?:www\.)?deviantart\.com/"
-               r"(?:view/|view(?:-full)?\.php/*\?(?:[^#]+&)?id=)(\d+)")
+               r"(?:view/|deviation/|view(?:-full)?\.php/*\?(?:[^#]+&)?id=)"
+               r"(\d+)")
     test = (
         (("https://www.deviantart.com/shimoda7/art/For-the-sake-10073852"), {
             "options": (("original", 0),),
@@ -940,6 +941,8 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
         ("https://www.deviantart.com/view/1", {
             "exception": exception.NotFoundError,
         }),
+        # /deviation/ (#3558)
+        ("https://www.deviantart.com/deviation/817215762"),
         # old-style URLs
         ("https://shimoda7.deviantart.com"
          "/art/For-the-sake-of-a-memory-10073852"),
