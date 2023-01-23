@@ -155,14 +155,13 @@ class DeviantartExtractor(Extractor):
 
     def prepare(self, deviation):
         """Adjust the contents of a Deviation-object"""
-        alphabet = "0123456789abcdefghijklmnopqrstuvwxyz"
         if "index" not in deviation:
             try:
                 if deviation["url"].startswith("https://sta.sh"):
                     filename = deviation["content"]["src"].split("/")[5]
                     deviation["index_base36"] = filename.partition("-")[0][1:]
-                    deviation["index"] = \
-                        util.bdecode(deviation["index_base36"], alphabet)
+                    deviation["index"] = id_from_base36(
+                        deviation["index_base36"])
                 else:
                     deviation["index"] = text.parse_int(
                         deviation["url"].rpartition("-")[2])
@@ -170,8 +169,7 @@ class DeviantartExtractor(Extractor):
                 deviation["index"] = 0
                 deviation["index_base36"] = "0"
         if "index_base36" not in deviation:
-            deviation["index_base36"] = \
-                util.bencode(deviation["index"], alphabet)
+            deviation["index_base36"] = base36_from_id(deviation["index"])
 
         if self.user:
             deviation["username"] = self.user
@@ -977,7 +975,9 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
     archive_fmt = "g_{_username}_{index}.{extension}"
     pattern = (BASE_PATTERN + r"/(art|journal)/(?:[^/?#]+-)?(\d+)"
                r"|(?:https?://)?(?:www\.)?deviantart\.com/"
-               r"(?:view/|view(?:-full)?\.php/*\?(?:[^#]+&)?id=)(\d+)")
+               r"(?:view/|deviation/|view(?:-full)?\.php/*\?(?:[^#]+&)?id=)"
+               r"(\d+)"  # bare deviation ID without slug
+               r"|(?:https?://)?fav\.me/d([0-9a-z]+)")  # base36
     test = (
         (("https://www.deviantart.com/shimoda7/art/For-the-sake-10073852"), {
             "options": (("original", 0),),
@@ -1050,6 +1050,15 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
         ("https://www.deviantart.com/view/1", {
             "exception": exception.NotFoundError,
         }),
+        # /deviation/ (#3558)
+        ("https://www.deviantart.com/deviation/817215762"),
+        # fav.me (#3558)
+        ("https://fav.me/ddijrpu", {
+            "count": 1,
+        }),
+        ("https://fav.me/dddd", {
+            "exception": exception.NotFoundError,
+        }),
         # old-style URLs
         ("https://shimoda7.deviantart.com"
          "/art/For-the-sake-of-a-memory-10073852"),
@@ -1066,7 +1075,8 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
     def __init__(self, match):
         DeviantartExtractor.__init__(self, match)
         self.type = match.group(3)
-        self.deviation_id = match.group(4) or match.group(5)
+        self.deviation_id = \
+            match.group(4) or match.group(5) or id_from_base36(match.group(6))
 
     def deviations(self):
         url = "{}/{}/{}/{}".format(
@@ -1675,6 +1685,17 @@ def _login_impl(extr, username, password):
         cookie.name: cookie.value
         for cookie in extr.session.cookies
     }
+
+
+def id_from_base36(base36):
+    return util.bdecode(base36, _ALPHABET)
+
+
+def base36_from_id(deviation_id):
+    return util.bencode(int(deviation_id), _ALPHABET)
+
+
+_ALPHABET = "0123456789abcdefghijklmnopqrstuvwxyz"
 
 
 ###############################################################################
