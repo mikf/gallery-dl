@@ -150,7 +150,7 @@ class GenericExtractor(Extractor):
         https://en.wikipedia.org/wiki/List_of_file_formats
 
         Compared to the "pattern" class variable, here we must exclude also
-        other special characters (space, ", ', >), since we are looking for
+        other special characters (space, ", ', <, >), since we are looking for
         urls in html tags.
         """
 
@@ -158,7 +158,7 @@ class GenericExtractor(Extractor):
             (?:[^?&#"'>\s]+)                    # anything until dot+extension
             \.(?:jpe?g|jpe|png|gif
                  |web[mp]|mp4|mkv|og[gmv]|opus) # dot + image/video extensions
-            (?:[^"'>\s]*)?                      # optional query and fragment
+            (?:[^"'<>\s]*)?                      # optional query and fragment
             """
 
         imageurls_src = re.findall(imageurl_pattern_src, page)
