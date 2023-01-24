@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2021-2022 Mike Fährmann
+# Copyright 2021-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -56,12 +56,12 @@ class PhilomenaExtractor(BooruExtractor):
 INSTANCES = {
     "derpibooru": {
         "root": "https://derpibooru.org",
-        "pattern": r"derpibooru\.org",
+        "pattern": r"(?:www\.)?derpibooru\.org",
         "filter_id": "56027",
     },
     "ponybooru": {
         "root": "https://ponybooru.org",
-        "pattern": r"ponybooru\.org",
+        "pattern": r"(?:www\.)?ponybooru\.org",
         "filter_id": "2",
     },
     "furbooru": {
@@ -128,9 +128,14 @@ class PhilomenaPostExtractor(PhilomenaExtractor):
             },
         }),
         ("https://derpibooru.org/1"),
+        ("https://www.derpibooru.org/1"),
+        ("https://www.derpibooru.org/images/1"),
+
         ("https://ponybooru.org/images/1", {
             "content": "bca26f58fafd791fe07adcd2a28efd7751824605",
         }),
+        ("https://www.ponybooru.org/images/1"),
+
         ("https://furbooru.org/images/1", {
             "content": "9eaa1e1b32fa0f16520912257dbefaff238d5fd2",
         }),
