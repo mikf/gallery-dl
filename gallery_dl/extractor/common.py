@@ -107,7 +107,7 @@ class Extractor():
         return values
 
     def request(self, url, *, method="GET", session=None,
-                retries=None, retry_codes=None, encoding=None,
+                retries=None, retry_codes=None, retry_on=None, encoding=None,
                 fatal=True, notfound=None, **kwargs):
         if session is None:
             session = self.session
@@ -165,7 +165,8 @@ class Extractor():
                         self.log.warning("Cloudflare CAPTCHA")
                         break
                 if code not in retry_codes and code < 500:
-                    break
+                    if not retry_on or not retry_on(response):
+                        break
 
             finally:
                 Extractor.request_timestamp = time.time()

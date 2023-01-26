@@ -208,6 +208,10 @@ class KemonopartyExtractor(Extractor):
             })
         return dms
 
+    def request(self, url, **kwargs):
+        kwargs["retry_on"] = _retry_on
+        return Extractor.request(self, url, **kwargs)
+
 
 def _validate(response):
     return (response.headers["content-length"] != "9" or
