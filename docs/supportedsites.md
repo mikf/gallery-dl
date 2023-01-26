@@ -309,7 +309,7 @@ Consider all sites to be NSFW unless otherwise known.
 </tr>
 <tr>
     <td>Hiperdex</td>
-    <td>https://hiperdex.com/</td>
+    <td>https://1sthiperdex.com/</td>
     <td>Artists, Chapters, Manga</td>
     <td></td>
 </tr>
