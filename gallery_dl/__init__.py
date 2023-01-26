@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2022 Mike Fährmann
+# Copyright 2014-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -72,6 +72,8 @@ def main():
             else:
                 profile, _, container = profile.partition("::")
             config.set((), "cookies", (browser, profile, keyring, container))
+        if args.options_pp:
+            config.set((), "postprocessor-options", args.options_pp)
         for opts in args.options:
             config.set(*opts)
 

@@ -796,6 +796,24 @@ Description
     for each downloaded ``pixiv`` file.
 
 
+extractor.*.postprocessor-options
+---------------------------------
+Type
+    ``object`` (`name` -> `value`)
+Example
+    .. code:: json
+
+        {
+            "archive": null,
+            "keep-files": true
+        }
+
+Description
+    Additional `Postprocessor Options`_ that get added to each individual
+    `post processor object <Postprocessor Configuration_>`__
+    before initializing it and evaluating filters.
+
+
 extractor.*.retries
 -------------------
 Type
