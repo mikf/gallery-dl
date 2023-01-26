@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2017-2022 Mike Fährmann
+# Copyright 2017-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -48,13 +48,16 @@ class DeprecatedConfigConstAction(argparse.Action):
 class ParseAction(argparse.Action):
     """Parse <key>=<value> options and set them as config values"""
     def __call__(self, parser, namespace, values, option_string=None):
-        key, _, value = values.partition("=")
-        try:
-            value = json.loads(value)
-        except ValueError:
-            pass
+        key, value = _parse_option(values)
         key = key.split(".")  # splitting an empty string becomes [""]
         namespace.options.append((key[:-1], key[-1], value))
+
+
+class OptionAction(argparse.Action):
+    """Parse <key>=<value> options for """
+    def __call__(self, parser, namespace, values, option_string=None):
+        key, value = _parse_option(values)
+        namespace.options_pp[key] = value
 
 
 class Formatter(argparse.HelpFormatter):
@@ -71,6 +74,15 @@ class Formatter(argparse.HelpFormatter):
             return ', '.join(opts)
         else:
             return self._metavar_formatter(action, action.dest)(1)[0]
+
+
+def _parse_option(opt):
+    key, _, value = opt.partition("=")
+    try:
+        value = json.loads(value)
+    except ValueError:
+        pass
+    return key, value
 
 
 def build_parser():
@@ -487,6 +499,11 @@ def build_parser():
         "-P", "--postprocessor",
         dest="postprocessors", metavar="NAME", action="append",
         help="Activate the specified post processor",
+    )
+    postprocessor.add_argument(
+        "-O", "--postprocessor-option",
+        dest="options_pp", metavar="OPT", action=OptionAction, default={},
+        help="Additional '<key>=<value>' post processor options",
     )
 
     parser.add_argument(

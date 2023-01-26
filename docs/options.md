@@ -119,3 +119,6 @@
                                 successfully. Example: --exec-after "cd {} &&
                                 convert * ../doc.pdf"
     -P, --postprocessor NAME    Activate the specified post processor
+    -O, --postprocessor-option OPT
+                                Additional '<key>=<value>' post processor
+                                options

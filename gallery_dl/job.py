@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2022 Mike Fährmann
+# Copyright 2015-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -473,13 +473,18 @@ class DownloadJob(Job):
         postprocessors = extr.config_accumulate("postprocessors")
         if postprocessors:
             self.hooks = collections.defaultdict(list)
+
             pp_log = self.get_logger("postprocessor")
+            pp_conf = config.get((), "postprocessor") or {}
+            pp_opts = cfg("postprocessor-options")
             pp_list = []
 
-            pp_conf = config.get((), "postprocessor") or {}
             for pp_dict in postprocessors:
                 if isinstance(pp_dict, str):
                     pp_dict = pp_conf.get(pp_dict) or {"name": pp_dict}
+                if pp_opts:
+                    pp_dict = pp_dict.copy()
+                    pp_dict.update(pp_opts)
 
                 clist = pp_dict.get("whitelist")
                 if clist is not None:
