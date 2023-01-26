@@ -1,25 +1,26 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2020-2021 Mike Fährmann
+# Copyright 2020-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extractors for https://hiperdex.com/"""
+"""Extractors for https://1sthiperdex.com/"""
 
 from .common import ChapterExtractor, MangaExtractor
 from .. import text
 from ..cache import memcache
 import re
 
-BASE_PATTERN = r"((?:https?://)?(?:www\.)?hiperdex\d?\.(?:com|net|info))"
+BASE_PATTERN = (r"((?:https?://)?(?:www\.)?"
+                r"(?:1st)?hiperdex\d?\.(?:com|net|info))")
 
 
 class HiperdexBase():
     """Base class for hiperdex extractors"""
     category = "hiperdex"
-    root = "https://hiperdex.com"
+    root = "https://1sthiperdex.com"
 
     @memcache(keyarg=1)
     def manga_data(self, manga, page=None):
@@ -52,6 +53,8 @@ class HiperdexBase():
         }
 
     def chapter_data(self, chapter):
+        if chapter.startswith("chapter-"):
+            chapter = chapter[8:]
         chapter, _, minor = chapter.partition("-")
         data = {
             "chapter"      : text.parse_int(chapter),
@@ -62,12 +65,13 @@ class HiperdexBase():
 
 
 class HiperdexChapterExtractor(HiperdexBase, ChapterExtractor):
-    """Extractor for manga chapters from hiperdex.com"""
+    """Extractor for manga chapters from 1sthiperdex.com"""
     pattern = BASE_PATTERN + r"(/manga/([^/?#]+)/([^/?#]+))"
     test = (
-        ("https://hiperdex.com/manga/domestic-na-kanojo/154-5/", {
-            "pattern": r"https://hiperdex\d?.(com|net|info)/wp-content/uploads"
-                       r"/WP-manga/data/manga_\w+/[0-9a-f]{32}/\d+\.webp",
+        ("https://1sthiperdex.com/manga/domestic-na-kanojo/154-5/", {
+            "pattern": r"https://(1st)?hiperdex\d?.(com|net|info)"
+                       r"/wp-content/uploads/WP-manga/data"
+                       r"/manga_\w+/[0-9a-f]{32}/\d+\.webp",
             "count": 9,
             "keyword": {
                 "artist" : "Sasuga Kei",
@@ -82,6 +86,7 @@ class HiperdexChapterExtractor(HiperdexBase, ChapterExtractor):
                 "type"   : "Manga",
             },
         }),
+        ("https://hiperdex.com/manga/domestic-na-kanojo/154-5/"),
         ("https://hiperdex2.com/manga/domestic-na-kanojo/154-5/"),
         ("https://hiperdex.net/manga/domestic-na-kanojo/154-5/"),
         ("https://hiperdex.info/manga/domestic-na-kanojo/154-5/"),
@@ -104,11 +109,11 @@ class HiperdexChapterExtractor(HiperdexBase, ChapterExtractor):
 
 
 class HiperdexMangaExtractor(HiperdexBase, MangaExtractor):
-    """Extractor for manga from hiperdex.com"""
+    """Extractor for manga from 1sthiperdex.com"""
     chapterclass = HiperdexChapterExtractor
     pattern = BASE_PATTERN + r"(/manga/([^/?#]+))/?$"
     test = (
-        ("https://hiperdex.com/manga/youre-not-that-special/", {
+        ("https://1sthiperdex.com/manga/youre-not-that-special/", {
             "count": 51,
             "pattern": HiperdexChapterExtractor.pattern,
             "keyword": {
@@ -125,6 +130,7 @@ class HiperdexMangaExtractor(HiperdexBase, MangaExtractor):
                 "type"   : "Manhwa",
             },
         }),
+        ("https://hiperdex.com/manga/youre-not-that-special/"),
         ("https://hiperdex2.com/manga/youre-not-that-special/"),
         ("https://hiperdex.net/manga/youre-not-that-special/"),
         ("https://hiperdex.info/manga/youre-not-that-special/"),
@@ -166,6 +172,7 @@ class HiperdexArtistExtractor(HiperdexBase, MangaExtractor):
     reverse = False
     pattern = BASE_PATTERN + r"(/manga-a(?:rtist|uthor)/(?:[^/?#]+))"
     test = (
+        ("https://1sthiperdex.com/manga-artist/beck-ho-an/"),
         ("https://hiperdex.net/manga-artist/beck-ho-an/"),
         ("https://hiperdex2.com/manga-artist/beck-ho-an/"),
         ("https://hiperdex.info/manga-artist/beck-ho-an/"),
