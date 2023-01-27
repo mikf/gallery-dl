@@ -33,10 +33,10 @@ opts = re.sub(r"(?m)^(\w+.*)", "## \\1", opts)  # group names to headings
 opts = opts.replace("\n  ", "\n    ")  # indent by 4
 
 
-outfile = sys.argv[1] if len(sys.argv) > 1 else util.path("docs", "options.md")
-with open(outfile, "w", encoding="utf-8") as fp:
-
-    fp.write(TEMPLATE.format(
+PATH = (sys.argv[1] if len(sys.argv) > 1 else
+        util.path("docs", "options.md"))
+with util.lazy(PATH) as file:
+    file.write(TEMPLATE.format(
         "/".join(os.path.normpath(__file__).split(os.sep)[-2:]),
         opts,
     ))

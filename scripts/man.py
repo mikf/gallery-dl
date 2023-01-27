@@ -100,7 +100,7 @@ and https://github.com/mikf/gallery-dl/graphs/contributors
 
     if not path:
         path = util.path("data/man/gallery-dl.1")
-    with open(path, "w", encoding="utf-8") as file:
+    with util.lazy(path) as file:
         file.write(TEMPLATE.lstrip() % {
             "options": "\n".join(options),
             "version": gallery_dl.version.__version__,
@@ -218,7 +218,7 @@ and https://github.com/mikf/gallery-dl/graphs/contributors
 
     if not path:
         path = util.path("data/man/gallery-dl.conf.5")
-    with open(path, "w", encoding="utf-8") as file:
+    with util.lazy(path) as file:
         file.write(TEMPLATE.lstrip() % {
             "options": "\n".join(content),
             "version": gallery_dl.version.__version__,

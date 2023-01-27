@@ -46,5 +46,5 @@ for action in option.build_parser()._actions:
 
 
 PATH = util.path("data/completion/_gallery-dl")
-with open(PATH, "w", encoding="utf-8") as file:
+with util.lazy(PATH) as file:
     file.write(TEMPLATE % {"opts": " \\\n".join(opts)})
