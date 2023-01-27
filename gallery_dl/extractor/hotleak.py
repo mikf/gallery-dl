@@ -8,7 +8,7 @@
 
 from .common import Extractor, Message
 from .. import text, exception
-from base64 import b64decode
+import base64
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?hotleak\.vip"
 
@@ -85,10 +85,9 @@ class HotleakPostExtractor(HotleakExtractor):
         self.creator, self.type, self.id = match.groups()
 
     def decode_video_url(self, encoded_url):
-        encoded_url = encoded_url[16:]
-        encoded_url = encoded_url[:-16]
-        encoded_url = encoded_url[::-1]
-        return b64decode(encoded_url).decode('utf-8')
+        sliced_url = encoded_url[16:-16]
+        reversed_url = sliced_url[::-1]
+        return base64.b64decode(reversed_url).decode('utf-8')
 
     def posts(self):
         url = "{}/{}/{}/{}".format(
@@ -141,10 +140,9 @@ class HotleakCreatorExtractor(HotleakExtractor):
         return self._pagination(url)
 
     def decode_video_url(self, encoded_url):
-        encoded_url = encoded_url[16:]
-        encoded_url = encoded_url[:-16]
-        encoded_url = encoded_url[::-1]
-        return b64decode(encoded_url).decode('utf-8')
+        sliced_url = encoded_url[16:-16]
+        reversed_url = sliced_url[::-1]
+        return base64.b64decode(reversed_url).decode('utf-8')
 
     def _pagination(self, url):
         headers = {"X-Requested-With": "XMLHttpRequest"}
@@ -176,7 +174,8 @@ class HotleakCreatorExtractor(HotleakExtractor):
 
                 elif post["type"] == 1:
                     data["type"] = "video"
-                    data["url"] = "ytdl:" + self.decode_video_url(post["stream_url_play"])
+                    data["url"] = "ytdl:" + self.decode_video_url(
+                        post["stream_url_play"])
                     text.nameext_from_url(data["url"], data)
                     data["extension"] = "mp4"
 
