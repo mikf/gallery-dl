@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 2 as
+# published by the Free Software Foundation.
+
 """Generate a Markdown document listing all supported sites"""
 
 import os
@@ -511,6 +515,7 @@ Consider all sites to be NSFW unless otherwise known.
 
 
 categories, domains = build_extractor_list()
-outfile = sys.argv[1] if len(sys.argv) > 1 else "supportedsites.md"
-with open(util.path("docs", outfile), "w") as fp:
-    fp.write(generate_output(COLUMNS, categories, domains))
+PATH = (sys.argv[1] if len(sys.argv) > 1 else
+        util.path("docs", "supportedsites.md"))
+with util.lazy(PATH) as file:
+    file.write(generate_output(COLUMNS, categories, domains))
