@@ -8,6 +8,7 @@
 
 from .common import Extractor, Message
 from .. import text, exception
+from base64 import b64decode
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?hotleak\.vip"
 
@@ -83,6 +84,12 @@ class HotleakPostExtractor(HotleakExtractor):
         HotleakExtractor.__init__(self, match)
         self.creator, self.type, self.id = match.groups()
 
+    def decode_video_url(self, encoded_url):
+        encoded_url = encoded_url[16:]
+        encoded_url = encoded_url[:-16]
+        encoded_url = encoded_url[::-1]
+        return b64decode(encoded_url).decode('utf-8')
+
     def posts(self):
         url = "{}/{}/{}/{}".format(
             self.root, self.creator, self.type, self.id)
@@ -100,8 +107,8 @@ class HotleakPostExtractor(HotleakExtractor):
             text.nameext_from_url(data["url"], data)
 
         elif self.type == "video":
-            data["url"] = "ytdl:" + text.extr(
-                text.unescape(page), '"src":"', '"')
+            data["url"] = "ytdl:" + self.decode_video_url(text.extr(
+                text.unescape(page), '"src":"', '"'))
             text.nameext_from_url(data["url"], data)
             data["extension"] = "mp4"
 
@@ -133,6 +140,12 @@ class HotleakCreatorExtractor(HotleakExtractor):
         url = "{}/{}".format(self.root, self.creator)
         return self._pagination(url)
 
+    def decode_video_url(self, encoded_url):
+        encoded_url = encoded_url[16:]
+        encoded_url = encoded_url[:-16]
+        encoded_url = encoded_url[::-1]
+        return b64decode(encoded_url).decode('utf-8')
+
     def _pagination(self, url):
         headers = {"X-Requested-With": "XMLHttpRequest"}
         params = {"page": 1}
@@ -163,7 +176,7 @@ class HotleakCreatorExtractor(HotleakExtractor):
 
                 elif post["type"] == 1:
                     data["type"] = "video"
-                    data["url"] = "ytdl:" + post["stream_url_play"]
+                    data["url"] = "ytdl:" + self.decode_video_url(post["stream_url_play"])
                     text.nameext_from_url(data["url"], data)
                     data["extension"] = "mp4"
 
