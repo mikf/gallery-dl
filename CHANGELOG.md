@@ -1,5 +1,35 @@
 # Changelog
 
+## 1.24.5 - 2023-01-28
+### Additions
+- [booru] add `url` option
+- [danbooru] extend `metadata` option ([#3505](https://github.com/mikf/gallery-dl/issues/3505))
+- [deviantart] add extractor for status updates ([#3539](https://github.com/mikf/gallery-dl/issues/3539), [#3541](https://github.com/mikf/gallery-dl/issues/3541))
+- [deviantart] add support for `/deviation/` and `fav.me` URLs ([#3558](https://github.com/mikf/gallery-dl/issues/3558), [#3560](https://github.com/mikf/gallery-dl/issues/3560))
+- [kemonoparty] extract `hash` metadata for discord files ([#3531](https://github.com/mikf/gallery-dl/issues/3531))
+- [lexica] add `search` extractor ([#3567](https://github.com/mikf/gallery-dl/issues/3567))
+- [mastodon] add `num` and `count` metadata fields ([#3517](https://github.com/mikf/gallery-dl/issues/3517))
+- [nudecollect] add `image` and `album` extractors ([#2430](https://github.com/mikf/gallery-dl/issues/2430), [#2818](https://github.com/mikf/gallery-dl/issues/2818), [#3575](https://github.com/mikf/gallery-dl/issues/3575))
+- [wikifeet] add `gallery` extractor ([#519](https://github.com/mikf/gallery-dl/issues/519), [#3537](https://github.com/mikf/gallery-dl/issues/3537))
+- [downloader:http] add signature checks for `.blend`, `.obj`, and `.clip` files ([#3535](https://github.com/mikf/gallery-dl/issues/3535))
+- add `extractor.retry-codes` option
+- add `-O/--postprocessor-option` command-line option ([#3565](https://github.com/mikf/gallery-dl/issues/3565))
+- improve `write-pages` output
+### Fixes
+- [bunkr] fix downloading `.mkv` and `.ts` files ([#3571](https://github.com/mikf/gallery-dl/issues/3571))
+- [fantia] send `X-CSRF-Token` headers ([#3576](https://github.com/mikf/gallery-dl/issues/3576))
+- [generic] fix regex for non-src image URLs ([#3555](https://github.com/mikf/gallery-dl/issues/3555))
+- [hiperdex] update domain ([#3572](https://github.com/mikf/gallery-dl/issues/3572))
+- [hotleak] fix video URLs ([#3516](https://github.com/mikf/gallery-dl/issues/3516), [#3525](https://github.com/mikf/gallery-dl/issues/3525), [#3563](https://github.com/mikf/gallery-dl/issues/3563), [#3581](https://github.com/mikf/gallery-dl/issues/3581))
+- [instagram] always show `cursor` value after errors ([#3440](https://github.com/mikf/gallery-dl/issues/3440))
+- [instagram] update API domain, headers, and csrf token handling
+- [oauth] show `client-id`/`api-key` values ([#3518](https://github.com/mikf/gallery-dl/issues/3518))
+- [philomena] match URLs with www subdomain
+- [sankaku] update URL pattern ([#3523](https://github.com/mikf/gallery-dl/issues/3523))
+- [twitter] refresh guest tokens ([#3445](https://github.com/mikf/gallery-dl/issues/3445), [#3458](https://github.com/mikf/gallery-dl/issues/3458))
+- [twitter] fix search pagination ([#3536](https://github.com/mikf/gallery-dl/issues/3536), [#3534](https://github.com/mikf/gallery-dl/issues/3534), [#3549](https://github.com/mikf/gallery-dl/issues/3549))
+- [twitter] use `"browser": "firefox"` by default ([#3522](https://github.com/mikf/gallery-dl/issues/3522))
+
 ## 1.24.4 - 2023-01-11
 ### Additions
 - [downloader:http] add `validate` option
