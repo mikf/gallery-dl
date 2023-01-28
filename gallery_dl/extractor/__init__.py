@@ -77,6 +77,7 @@ modules = [
     "kemonoparty",
     "khinsider",
     "komikcast",
+    "lexica",
     "lightroom",
     "lineblog",
     "livedoor",
