@@ -8,6 +8,7 @@
 
 from .common import Extractor, Message
 from .. import text, exception
+import binascii
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?hotleak\.vip"
 
@@ -47,6 +48,11 @@ class HotleakExtractor(Extractor):
                 yield text.extr(item, '<a href="', '"')
 
             params["page"] += 1
+
+
+def decode_video_url(url):
+    # cut first and last 16 characters, reverse, base64 decode
+    return binascii.a2b_base64(url[-17:15:-1]).decode()
 
 
 class HotleakPostExtractor(HotleakExtractor):
@@ -100,8 +106,8 @@ class HotleakPostExtractor(HotleakExtractor):
             text.nameext_from_url(data["url"], data)
 
         elif self.type == "video":
-            data["url"] = "ytdl:" + text.extr(
-                text.unescape(page), '"src":"', '"')
+            data["url"] = "ytdl:" + decode_video_url(text.extr(
+                text.unescape(page), '"src":"', '"'))
             text.nameext_from_url(data["url"], data)
             data["extension"] = "mp4"
 
@@ -163,7 +169,8 @@ class HotleakCreatorExtractor(HotleakExtractor):
 
                 elif post["type"] == 1:
                     data["type"] = "video"
-                    data["url"] = "ytdl:" + post["stream_url_play"]
+                    data["url"] = "ytdl:" + decode_video_url(
+                        post["stream_url_play"])
                     text.nameext_from_url(data["url"], data)
                     data["extension"] = "mp4"
 
