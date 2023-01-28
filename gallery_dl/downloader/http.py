@@ -159,12 +159,12 @@ class HttpDownloader(DownloaderBase):
             elif code == 416 and file_size:  # Requested Range Not Satisfiable
                 break
             else:
+                msg = "'{} {}' for '{}'".format(code, response.reason, url)
                 if code in self.retry_codes or 500 <= code < 600:
                     continue
                 retry_on = kwdict.get("_http_retry_on")
                 if retry_on and retry_on(response):
                     continue
-                msg = "'{} {}' for '{}'".format(code, response.reason, url)
                 self.log.warning(msg)
                 return False
 
