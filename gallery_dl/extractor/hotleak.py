@@ -8,7 +8,7 @@
 
 from .common import Extractor, Message
 from .. import text, exception
-import base64
+import binascii
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?hotleak\.vip"
 
@@ -50,10 +50,9 @@ class HotleakExtractor(Extractor):
             params["page"] += 1
 
 
-def decode_video_url(encoded_url):
-    sliced_url = encoded_url[16:-16]
-    reversed_url = sliced_url[::-1]
-    return base64.b64decode(reversed_url).decode('utf-8')
+def decode_video_url(url):
+    # cut first and last 16 characters, reverse, base64 decode
+    return binascii.a2b_base64(url[-17:15:-1]).decode()
 
 
 class HotleakPostExtractor(HotleakExtractor):
