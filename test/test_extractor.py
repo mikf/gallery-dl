@@ -46,7 +46,7 @@ class TestExtractorModule(unittest.TestCase):
 
     def setUp(self):
         extractor._cache.clear()
-        extractor._module_iter = iter(extractor.modules)
+        extractor._module_iter = extractor._modules_internal()
         extractor._list_classes = _list_classes
 
     def test_find(self):

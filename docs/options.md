@@ -8,10 +8,11 @@
     --version                   Print program version and exit
     -i, --input-file FILE       Download URLs found in FILE ('-' for stdin).
                                 More than one --input-file can be specified
-    -d, --destination PATH      Target location for file downloads
-    -D, --directory PATH        Exact location for file downloads
     -f, --filename FORMAT       Filename format string for downloaded files
                                 ('/O' for "original" filenames)
+    -d, --destination PATH      Target location for file downloads
+    -D, --directory PATH        Exact location for file downloads
+    -X, --extractors PATH       Load external extractors from PATH
     --proxy URL                 Use the specified proxy
     --source-address IP         Client-side IP address to bind to
     --user-agent UA             User-Agent request header

@@ -111,6 +111,12 @@ def build_parser():
               "More than one --input-file can be specified"),
     )
     general.add_argument(
+        "-f", "--filename",
+        dest="filename", metavar="FORMAT",
+        help=("Filename format string for downloaded files "
+              "('/O' for \"original\" filenames)"),
+    )
+    general.add_argument(
         "-d", "--destination",
         dest="base-directory", metavar="PATH", action=ConfigAction,
         help="Target location for file downloads",
@@ -121,10 +127,9 @@ def build_parser():
         help="Exact location for file downloads",
     )
     general.add_argument(
-        "-f", "--filename",
-        dest="filename", metavar="FORMAT",
-        help=("Filename format string for downloaded files "
-              "('/O' for \"original\" filenames)"),
+        "-X", "--extractors",
+        dest="extractor_sources", metavar="PATH", action="append",
+        help="Load external extractors from PATH",
     )
     general.add_argument(
         "--proxy",
