@@ -8,6 +8,7 @@
 
 from .common import GalleryExtractor
 from .. import text
+import re
 
 
 class TelegraphGalleryExtractor(GalleryExtractor):
@@ -68,6 +69,21 @@ class TelegraphGalleryExtractor(GalleryExtractor):
                 "title": "Всё о друзьях моей сестрицы",
             },
         }),
+        ("https://telegra.ph/DJAWA-Zia---Perrault-The-Milk-Thief-Last-Origin-12-13", {
+            "pattern": r"https://telegra\.ph/file/[0-9a-f]+\.png",
+            "keyword": {
+                "author": "cosmos",
+                "caption": "",
+                "count": 69,
+                "date": "dt:2021-12-13 00:12:18",
+                "description": "",
+                "num_formatted": r"re:^\d{2}$",
+                "post_url": "https://telegra.ph"
+                            "/DJAWA-Zia---Perrault-The-Milk-Thief-Last-Origin-12-13",
+                "slug": "DJAWA-Zia---Perrault-The-Milk-Thief-Last-Origin-12-13",
+                "title": "[DJAWA] Zia - Perrault The Milk Thief (Last Origin)",
+            },
+        })
     )
 
     def metadata(self, page):
@@ -90,7 +106,13 @@ class TelegraphGalleryExtractor(GalleryExtractor):
 
     def images(self, page):
         figures = tuple(text.extract_iter(page, "<figure>", "</figure>"))
-        num_zeroes = len(str(len(figures)))
+        total = len(figures)
+        mode = total
+        if total == 0 :
+            page = re.search(r'<article[^>]*>.*</article>', page).group()
+            figures = tuple(text.extract_iter(page, "<img ", ">"))
+            total = len(figures)
+        num_zeroes = len(str(total))
         num = 0
 
         result = []
@@ -100,7 +122,10 @@ class TelegraphGalleryExtractor(GalleryExtractor):
                 continue
             elif url.startswith("/"):
                 url = self.root + url
-            caption, pos = text.extract(figure, "<figcaption>", "<", pos)
+            if mode == 0:
+                caption = ""
+            else:
+                caption, pos = text.extract(figure, "<figcaption>", "<", pos)
             num += 1
 
             result.append((url, {
