@@ -69,7 +69,8 @@ class TelegraphGalleryExtractor(GalleryExtractor):
                 "title": "Всё о друзьях моей сестрицы",
             },
         }),
-        ("https://telegra.ph/DJAWA-Zia---Perrault-The-Milk-Thief-Last-Origin-12-13", {
+        ("https://telegra.ph"
+         "/DJAWA-Zia---Perrault-The-Milk-Thief-Last-Origin-12-13", {
             "pattern": r"https://telegra\.ph/file/[0-9a-f]+\.png",
             "keyword": {
                 "author": "cosmos",
@@ -79,8 +80,10 @@ class TelegraphGalleryExtractor(GalleryExtractor):
                 "description": "",
                 "num_formatted": r"re:^\d{2}$",
                 "post_url": "https://telegra.ph"
-                            "/DJAWA-Zia---Perrault-The-Milk-Thief-Last-Origin-12-13",
-                "slug": "DJAWA-Zia---Perrault-The-Milk-Thief-Last-Origin-12-13",
+                            "/DJAWA-Zia-"
+                            "--Perrault-The-Milk-Thief-Last-Origin-12-13",
+                "slug": "DJAWA-Zia-"
+                        "--Perrault-The-Milk-Thief-Last-Origin-12-13",
                 "title": "[DJAWA] Zia - Perrault The Milk Thief (Last Origin)",
             },
         })
