@@ -4518,8 +4518,27 @@ Default
 Example
     ``["reddit", "danbooru", "mangadex"]``
 Description
-    The list of modules to load when searching for a suitable
+    List of internal modules to load when searching for a suitable
     extractor class. Useful to reduce startup time and memory usage.
+
+
+extractor.module-sources
+------------------------
+Type
+    ``list`` of |Path|_ instances
+Example
+    ``["~/.config/gallery-dl/modules", null]``
+Description
+    List of directories to load external extractor modules from.
+
+    Any file in a specified directory with a ``.py`` filename extension
+    gets `imported <https://docs.python.org/3/reference/import.html>`__
+    and searched for potential extractors,
+    i.e. classes with a ``pattern`` attribute.
+
+    Note: ``null`` references internal extractors defined in
+    `extractor/__init__.py <../gallery_dl/extractor/__init__.py#L12>`__
+    or by `extractor.modules`_.
 
 
 cache.file
