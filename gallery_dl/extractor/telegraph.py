@@ -69,22 +69,19 @@ class TelegraphGalleryExtractor(GalleryExtractor):
                 "title": "Всё о друзьях моей сестрицы",
             },
         }),
-        ("https://telegra.ph"
-         "/DJAWA-Zia---Perrault-The-Milk-Thief-Last-Origin-12-13", {
+        ("https://telegra.ph/Disharmonica---Saber-Nero-02-21", {
             "pattern": r"https://telegra\.ph/file/[0-9a-f]+\.png",
             "keyword": {
                 "author": "cosmos",
                 "caption": "",
-                "count": 69,
-                "date": "dt:2021-12-13 00:12:18",
+                "count": 89,
+                "date": "dt:2022-02-21 05:57:39",
                 "description": "",
                 "num_formatted": r"re:^\d{2}$",
                 "post_url": "https://telegra.ph"
-                            "/DJAWA-Zia-"
-                            "--Perrault-The-Milk-Thief-Last-Origin-12-13",
-                "slug": "DJAWA-Zia-"
-                        "--Perrault-The-Milk-Thief-Last-Origin-12-13",
-                "title": "[DJAWA] Zia - Perrault The Milk Thief (Last Origin)",
+                            "/Disharmonica---Saber-Nero-02-21",
+                "slug": "Disharmonica---Saber-Nero-02-21",
+                "title": "Disharmonica - Saber Nero",
             },
         }),
     )
