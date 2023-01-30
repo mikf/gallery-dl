@@ -69,17 +69,21 @@ class DeviantartExtractor(Extractor):
         self.offset += num
         return num
 
+    def _init_user(self):
+        if not self.user or not self.config("group", True):
+            return
+        profile = self.api.user_profile(self.user)
+        self.group = not profile
+        if self.group:
+            self.subcategory = "group-" + self.subcategory
+            self.user = self.user.lower()
+        else:
+            self.user = profile["user"]["username"]
+
     def items(self):
         self.api = DeviantartOAuthAPI(self)
 
-        if self.user and self.config("group", True):
-            profile = self.api.user_profile(self.user)
-            self.group = not profile
-            if self.group:
-                self.subcategory = "group-" + self.subcategory
-                self.user = self.user.lower()
-            else:
-                self.user = profile["user"]["username"]
+        self._init_user()
 
         for deviation in self.deviations():
             if isinstance(deviation, tuple):
