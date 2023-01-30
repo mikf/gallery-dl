@@ -1286,7 +1286,12 @@ Description
     when processing a user profile.
 
     Possible values are
-    ``"gallery"``, ``"scraps"``, ``"journal"``, ``"favorite"``, ``"status"``.
+    ``"favorite"``,
+    ``"gallery"``,
+    ``"journal"``,
+    ``"profile"``,
+    ``"scraps"``,
+    and ``"status"``.
 
     It is possible to use ``"all"`` instead of listing all values separately.
 
