@@ -86,7 +86,7 @@ class TelegraphGalleryExtractor(GalleryExtractor):
                         "--Perrault-The-Milk-Thief-Last-Origin-12-13",
                 "title": "[DJAWA] Zia - Perrault The Milk Thief (Last Origin)",
             },
-        })
+        }),
     )
 
     def metadata(self, page):
