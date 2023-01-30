@@ -1111,6 +1111,11 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
         ("https://fav.me/dddd", {
             "exception": exception.NotFoundError,
         }),
+        # arbitrary username & slug (#3367)
+        (("https://www.deviantart.com/zzzzzz/art/foo-590297498"), {
+            "options": (("original", 0),),
+            "keyword": {"username": "uotapo"},
+        }),
         # old-style URLs
         ("https://shimoda7.deviantart.com"
          "/art/For-the-sake-of-a-memory-10073852"),
@@ -1130,6 +1135,9 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
         self.deviation_id = \
             match.group(4) or match.group(5) or id_from_base36(match.group(6))
 
+    def _init_user(self):
+        pass
+
     def deviations(self):
         url = "{}/{}/{}/{}".format(
             self.root, self.user or "u", self.type or "art", self.deviation_id)
@@ -1138,6 +1146,8 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
                             '"deviationUuid\\":\\"', '\\')[0]
         if not uuid:
             raise exception.NotFoundError("deviation")
+        # always use the most up-to-date name from deviation["author"]
+        self.user = None
         return (self.api.deviation(uuid),)
 
 
