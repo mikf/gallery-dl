@@ -11,7 +11,7 @@ import logging
 from . import version, config, option, output, extractor, job, util, exception
 
 __author__ = "Mike Fährmann"
-__copyright__ = "Copyright 2014-2022 Mike Fährmann"
+__copyright__ = "Copyright 2014-2023 Mike Fährmann"
 __license__ = "GPLv2"
 __maintainer__ = "Mike Fährmann"
 __email__ = "mike_faehrmann@web.de"
@@ -105,14 +105,6 @@ def main():
 
             output.ANSI = True
 
-        # extractor modules
-        modules = config.get(("extractor",), "modules")
-        if modules is not None:
-            if isinstance(modules, str):
-                modules = modules.split(",")
-            extractor.modules = modules
-            extractor._module_iter = iter(modules)
-
         # format string separator
         separator = config.get((), "format-separator")
         if separator:
@@ -146,6 +138,44 @@ def main():
                 pass
 
             log.debug("Configuration Files %s", config._files)
+
+        # extractor modules
+        modules = config.get(("extractor",), "modules")
+        if modules is not None:
+            if isinstance(modules, str):
+                modules = modules.split(",")
+            extractor.modules = modules
+
+        # external modules
+        if args.extractor_sources:
+            sources = args.extractor_sources
+            sources.append(None)
+        else:
+            sources = config.get(("extractor",), "module-sources")
+
+        if sources:
+            import os
+            modules = []
+
+            for source in sources:
+                if source:
+                    path = util.expand_path(source)
+                    try:
+                        files = os.listdir(path)
+                        modules.append(extractor._modules_path(path, files))
+                    except Exception as exc:
+                        log.warning("Unable to load modules from %s (%s: %s)",
+                                    path, exc.__class__.__name__, exc)
+                else:
+                    modules.append(extractor._modules_internal())
+
+            if len(modules) > 1:
+                import itertools
+                extractor._module_iter = itertools.chain(*modules)
+            elif not modules:
+                extractor._module_iter = ()
+            else:
+                extractor._module_iter = iter(modules[0])
 
         if args.list_modules:
             extractor.modules.append("")
