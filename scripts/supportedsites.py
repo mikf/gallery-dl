@@ -66,6 +66,7 @@ CATEGORY_MAP = {
     "kemonoparty"    : "Kemono",
     "lineblog"       : "LINE BLOG",
     "livedoor"       : "livedoor Blog",
+    "ohpolly"        : "Oh Polly",
     "omgmiamiswimwear": "Omg Miami Swimwear",
     "mangadex"       : "MangaDex",
     "mangafox"       : "Manga Fox",

@@ -63,6 +63,10 @@ BASE_PATTERN = ShopifyExtractor.update({
         "root": "https://modcloth.com",
         "pattern": r"modcloth\.com",
     },
+    "ohpolly": {
+        "root": "https://www.ohpolly.com",
+        "pattern": r"(?:www\.)?ohpolly\.com",
+    },
     "omgmiamiswimwear": {
         "root": "https://www.omgmiamiswimwear.com",
         "pattern": r"(?:www\.)?omgmiamiswimwear\.com",
@@ -102,6 +106,7 @@ class ShopifyCollectionExtractor(ShopifyExtractor):
         ("https://loungeunderwear.com/collections/apparel"),
         ("https://michaels.com.au/collections/microphones"),
         ("https://modcloth.com/collections/shoes"),
+        ("https://www.ohpolly.com/collections/dresses-mini-dresses"),
         ("https://www.omgmiamiswimwear.com/collections/fajas"),
         ("https://pinupgirlclothing.com/collections/evening"),
         ("https://www.raidlondon.com/collections/flats"),
@@ -141,6 +146,8 @@ class ShopifyProductExtractor(ShopifyExtractor):
         ("https://michaels.com.au/collections/audio/products"
          "/boya-by-wm4-pro-k5-2-4ghz-mic-android-1-1-101281"),
         ("https://modcloth.com/collections/shoes/products/heidii-brn"),
+        (("https://www.ohpolly.com/products/edonia-ruched-triangle-cup"
+          "-a-line-mini-dress-brown")),
         ("https://www.omgmiamiswimwear.com/products/la-medusa-maxi-dress", {
             "pattern": r"https://cdn\.shopify\.com/s/files/1/1819/6171/",
             "count": 5,
