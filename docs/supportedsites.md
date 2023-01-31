@@ -1402,6 +1402,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
+    <td>Oh Polly</td>
+    <td>https://www.ohpolly.com/</td>
+    <td>Collections, Products</td>
+    <td></td>
+</tr>
+<tr>
     <td>Omg Miami Swimwear</td>
     <td>https://www.omgmiamiswimwear.com/</td>
     <td>Collections, Products</td>
