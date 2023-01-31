@@ -47,7 +47,7 @@ class ImagefapGalleryExtractor(ImagefapExtractor):
     pattern = BASE_PATTERN + r"/(?:gallery\.php\?gid=|gallery/|pictures/)(\d+)"
 
     test = (
-        ("https://www.imagefap.com/pictures/7102714", {
+        ("https://www.imagefap.com/gallery/7102714", {
             "pattern": r"https://cdnh?\.imagefap\.com"
                        r"/images/full/\d+/\d+/\d+\.jpg",
             "keyword": "2ba96e84c2952c4750e9fa94a3f2b1f965cec2f3",
@@ -68,6 +68,7 @@ class ImagefapGalleryExtractor(ImagefapExtractor):
             },
             "count": 44,
         }),
+        ("https://www.imagefap.com/pictures/7102714"),
         ("https://www.imagefap.com/gallery.php?gid=7102714"),
         ("https://beta.imagefap.com/gallery.php?gid=7102714"),
     )
@@ -78,7 +79,7 @@ class ImagefapGalleryExtractor(ImagefapExtractor):
         self.image_id = ""
 
     def items(self):
-        url = "{}/pictures/{}/".format(self.root, self.gid)
+        url = "{}/gallery/{}".format(self.root, self.gid)
         page = self.request(url).text
         data = self.get_job_metadata(page)
         yield Message.Directory, data
