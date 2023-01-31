@@ -68,6 +68,21 @@ class TelegraphGalleryExtractor(GalleryExtractor):
                 "title": "Всё о друзьях моей сестрицы",
             },
         }),
+        ("https://telegra.ph/Disharmonica---Saber-Nero-02-21", {
+            "pattern": r"https://telegra\.ph/file/[0-9a-f]+\.(jpg|png)",
+            "keyword": {
+                "author": "cosmos",
+                "caption": "",
+                "count": 89,
+                "date": "dt:2022-02-21 05:57:39",
+                "description": "",
+                "num_formatted": r"re:^\d{2}$",
+                "post_url": "https://telegra.ph"
+                            "/Disharmonica---Saber-Nero-02-21",
+                "slug": "Disharmonica---Saber-Nero-02-21",
+                "title": "Disharmonica - Saber Nero",
+            },
+        }),
     )
 
     def metadata(self, page):
@@ -89,7 +104,8 @@ class TelegraphGalleryExtractor(GalleryExtractor):
         return data
 
     def images(self, page):
-        figures = tuple(text.extract_iter(page, "<figure>", "</figure>"))
+        figures = (tuple(text.extract_iter(page, "<figure>", "</figure>")) or
+                   tuple(text.extract_iter(page, "<img", ">")))
         num_zeroes = len(str(len(figures)))
         num = 0
 
@@ -105,7 +121,7 @@ class TelegraphGalleryExtractor(GalleryExtractor):
 
             result.append((url, {
                 "url"          : url,
-                "caption"      : text.unescape(caption),
+                "caption"      : text.unescape(caption) if caption else "",
                 "num"          : num,
                 "num_formatted": str(num).zfill(num_zeroes),
             }))
