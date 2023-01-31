@@ -128,7 +128,7 @@ class ImagefapGalleryExtractor(ImagefapExtractor):
                 data["image_id"] = text.parse_int(data["filename"])
                 yield image_url, data
 
-            if cnt < 24 and num >= total:
+            if not cnt or cnt < 24 and num >= total:
                 return
             params["idx"] += cnt
 
