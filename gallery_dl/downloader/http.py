@@ -296,11 +296,10 @@ class HttpDownloader(DownloaderBase):
         progress = self.progress
 
         bytes_downloaded = 0
-        time_start = time.time()
+        time_start = time.monotonic()
 
         for data in content:
-            time_current = time.time()
-            time_elapsed = time_current - time_start
+            time_elapsed = time.monotonic() - time_start
             bytes_downloaded += len(data)
 
             write(data)
