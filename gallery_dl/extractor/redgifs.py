@@ -69,11 +69,17 @@ class RedgifsUserExtractor(RedgifsExtractor):
     """Extractor for redgifs user profiles"""
     subcategory = "user"
     directory_fmt = ("{category}", "{userName}")
-    pattern = r"(?:https?://)?(?:www\.)?redgifs\.com/users/([^/?#]+)"
-    test = ("https://www.redgifs.com/users/Natalifiction", {
-        "pattern": r"https://\w+\.redgifs\.com/[A-Za-z]+\.mp4",
-        "count": ">= 100",
-    })
+    pattern = r"(?:https?://)?(?:\w+\.)?redgifs\.com/users/([^/?#]+)"
+    test = (
+        ("https://www.redgifs.com/users/Natalifiction", {
+            "pattern": r"https://\w+\.redgifs\.com/[\w-]+\.mp4",
+            "count": ">= 100",
+        }),
+        ("https://v3.redgifs.com/users/lamsinka89", {
+            "pattern": r"https://\w+\.redgifs\.com/[\w-]+\.(mp4|jpg)",
+            "count": ">= 100",
+        }),
+    )
 
     def metadata(self):
         return {"userName": self.key}
@@ -86,13 +92,14 @@ class RedgifsSearchExtractor(RedgifsExtractor):
     """Extractor for redgifs search results"""
     subcategory = "search"
     directory_fmt = ("{category}", "Search", "{search}")
-    pattern = r"(?:https?://)?(?:www\.)?redgifs\.com/browse/?\?([^#]+)"
+    pattern = r"(?:https?://)?(?:\w+\.)?redgifs\.com/browse/?\?([^#]+)"
     test = (
         ("https://www.redgifs.com/browse?tags=JAV", {
             "pattern": r"https://\w+\.redgifs\.com/[A-Za-z-]+\.(mp4|jpg)",
             "range": "1-10",
             "count": 10,
         }),
+        ("https://v3.redgifs.com/browse?tags=JAV"),
         ("https://www.redgifs.com/browse?type=i&verified=y&order=top7"),
     )
 
@@ -109,7 +116,7 @@ class RedgifsImageExtractor(RedgifsExtractor):
     """Extractor for individual gifs from redgifs.com"""
     subcategory = "image"
     pattern = (r"(?:https?://)?(?:"
-               r"(?:www\.)?redgifs\.com/(?:watch|ifr)|"
+               r"(?:\w+\.)?redgifs\.com/(?:watch|ifr)|"
                r"(?:www\.)?gifdeliverynetwork\.com|"
                r"i\.redgifs\.com/i)/([A-Za-z]+)")
     test = (
@@ -121,6 +128,7 @@ class RedgifsImageExtractor(RedgifsExtractor):
         ("https://redgifs.com/ifr/FoolishForkedAbyssiniancat"),
         ("https://i.redgifs.com/i/FoolishForkedAbyssiniancat"),
         ("https://www.gifdeliverynetwork.com/foolishforkedabyssiniancat"),
+        ("https://v3.redgifs.com/watch/FoolishForkedAbyssiniancat"),
     )
 
     def gifs(self):
