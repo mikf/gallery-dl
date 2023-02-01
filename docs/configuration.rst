@@ -3975,6 +3975,19 @@ Description
     Only compare file sizes. Do not read and compare their content.
 
 
+exec.archive
+------------
+Type
+    |Path|_
+Description
+    File to store IDs of executed commands in,
+    similar to `extractor.*.archive`_.
+
+    ``archive-format`` and ``archive-prefix`` options,
+    akin to `extractor.*.archive-format`_ and `extractor.*.archive-prefix`_,
+    are supported as well.
+
+
 exec.async
 ----------
 Type
