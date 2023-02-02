@@ -2839,6 +2839,16 @@ Description
     `syndication <extractor.twitter.syndication_>`__ API.
 
 
+extractor.twitter.transform
+---------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Transform Tweet and User metadata into a simpler, uniform format.
+
+
 extractor.twitter.size
 ----------------------
 Type

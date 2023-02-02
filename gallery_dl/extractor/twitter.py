@@ -41,6 +41,10 @@ class TwitterExtractor(Extractor):
         self.cards = self.config("cards", False)
         self.cards_blacklist = self.config("cards-blacklist")
         self.syndication = self.config("syndication")
+
+        if not self.config("transform", True):
+            self._transform_user = util.identity
+            self._transform_tweet = util.identity
         self._user = self._user_obj = None
         self._user_cache = {}
         self._init_sizes()
