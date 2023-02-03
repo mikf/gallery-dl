@@ -380,6 +380,7 @@ Description
     * ``atfbooru`` (*)
     * ``danbooru`` (*)
     * ``e621`` (*)
+    * ``e926`` (*)
     * ``exhentai``
     * ``idolcomplex``
     * ``imgbb``
