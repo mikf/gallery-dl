@@ -35,6 +35,7 @@ modules = [
     "desktopography",
     "deviantart",
     "dynastyscans",
+    "e621",
     "erome",
     "exhentai",
     "fallenangels",

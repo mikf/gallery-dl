@@ -35,6 +35,7 @@ CATEGORY_MAP = {
     "drawfriends"    : "Draw Friends",
     "dynastyscans"   : "Dynasty Reader",
     "e621"           : "e621",
+    "e926"           : "e926",
     "erome"          : "EroMe",
     "e-hentai"       : "E-Hentai",
     "exhentai"       : "ExHentai",
@@ -153,15 +154,9 @@ SUBCATEGORY_MAP = {
     "artstation": {
         "artwork": "Artwork Listings",
     },
-    "atfbooru": {
-        "favorite": "",
-    },
     "coomerparty": {
         "discord"       : "",
         "discord-server": "",
-    },
-    "danbooru": {
-        "favorite": "",
     },
     "desktopography": {
         "site": "",
@@ -256,6 +251,7 @@ SUBCATEGORY_MAP = {
 }
 
 BASE_MAP = {
+    "E621"        : "e621 Instances",
     "foolfuuka"   : "FoolFuuka 4chan Archives",
     "foolslide"   : "FoOlSlide Instances",
     "gelbooru_v01": "Gelbooru Beta 0.1.11",
@@ -285,6 +281,7 @@ AUTH_MAP = {
     "derpibooru"     : _APIKEY_DB,
     "deviantart"     : _OAUTH,
     "e621"           : "Supported",
+    "e926"           : "Supported",
     "e-hentai"       : "Supported",
     "exhentai"       : "Supported",
     "fanbox"         : _COOKIES,
