@@ -187,7 +187,8 @@ class ImagevenueImageExtractor(ImagehostImageExtractor):
 class ImagetwistImageExtractor(ImagehostImageExtractor):
     """Extractor for single images from imagetwist.com"""
     category = "imagetwist"
-    pattern = r"(?:https?://)?((?:www\.)?imagetwist\.com/([a-z0-9]{12}))"
+    pattern = (r"(?:https?://)?((?:www|phun\.)?"
+               r"(?:imagetwist|imagehaha)\.com/([a-z0-9]{12}))")
     test = ("https://imagetwist.com/f1i2s4vhvbrq/test.png", {
         "url": "8d5e168c0bee30211f821c6f3b2116e419d42671",
         "keyword": "d1060a4c2e3b73b83044e20681712c0ffdd6cfef",
