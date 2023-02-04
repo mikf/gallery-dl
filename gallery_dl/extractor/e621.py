@@ -29,6 +29,16 @@ class E621Extractor(danbooru.DanbooruExtractor):
         self.headers = {"User-Agent": "gallery-dl/{} (by mikf)".format(
             version.__version__)}
 
+        includes = self.config("metadata") or ()
+        if includes:
+            if isinstance(includes, str):
+                includes = includes.split(",")
+            elif not isinstance(includes, (list, tuple)):
+                includes = ("notes", "pools")
+
+        notes = ("notes" in includes)
+        pools = ("pools" in includes)
+
         data = self.metadata()
         for post in self.posts():
             file = post["file"]
@@ -37,6 +47,18 @@ class E621Extractor(danbooru.DanbooruExtractor):
                 md5 = file["md5"]
                 file["url"] = "https://static1.{}/data/{}/{}/{}.{}".format(
                     self.root[8:], md5[0:2], md5[2:4], md5, file["ext"])
+
+            if notes and post.get("has_notes"):
+                url = "{}/notes.json?search[post_id]={}".format(
+                    self.root, post["id"])
+                post["notes"] = self.request(url).json()
+
+            if pools and post["pools"]:
+                url = "{}/pools.json?search[id]={}".format(
+                    self.root, ",".join(map(str, post["pools"])))
+                post["pools"] = _pools = self.request(url).json()
+                for pool in _pools:
+                    pool["name"] = pool["name"].replace("_", " ")
 
             post["filename"] = file["md5"]
             post["extension"] = file["ext"]
@@ -123,6 +145,47 @@ class E621PostExtractor(E621Extractor, danbooru.DanbooruPostExtractor):
         ("https://e621.net/posts/535", {
             "url": "f7f78b44c9b88f8f09caac080adc8d6d9fdaa529",
             "content": "66f46e96a893fba8e694c4e049b23c2acc9af462",
+        }),
+        ("https://e621.net/posts/3181052", {
+            "options": (("metadata", "notes,pools"),),
+            "pattern": r"https://static\d\.e621\.net/data/c6/8c"
+                       r"/c68cca0643890b615f75fb2719589bff\.png",
+            "keyword": {
+                "notes": [
+                    {
+                        "body": "Little Legends 2",
+                        "created_at": "2022-05-16T13:58:38.877-04:00",
+                        "creator_id": 517450,
+                        "creator_name": "EeveeCuddler69",
+                        "height": 475,
+                        "id": 321296,
+                        "is_active": True,
+                        "post_id": 3181052,
+                        "updated_at": "2022-05-16T13:59:02.050-04:00",
+                        "version": 3,
+                        "width": 809,
+                        "x": 83,
+                        "y": 117,
+                    },
+                ],
+                "pools": [
+                    {
+                        "category": "series",
+                        "created_at": "2022-02-17T00:29:22.669-05:00",
+                        "creator_id": 1077440,
+                        "creator_name": "Yeetus90",
+                        "description": "* \"Little Legends\":/pools/27971\r\n"
+                                       "* Little Legends 2\r\n"
+                                       "* \"Little Legends 3\":/pools/27481",
+                        "id": 27492,
+                        "is_active": False,
+                        "name": "Little Legends 2",
+                        "post_count": 39,
+                        "post_ids": list,
+                        "updated_at": "2022-03-27T06:30:03.382-04:00"
+                    },
+                ],
+            },
         }),
         ("https://e621.net/post/show/535"),
 
