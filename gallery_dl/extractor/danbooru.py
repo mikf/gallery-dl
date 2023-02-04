@@ -26,16 +26,6 @@ class DanbooruExtractor(BaseExtractor):
         self.ugoira = self.config("ugoira", False)
         self.external = self.config("external", False)
 
-        metadata = self.config("metadata", False)
-        if metadata:
-            if isinstance(metadata, (list, tuple)):
-                metadata = ",".join(metadata)
-            elif not isinstance(metadata, str):
-                metadata = "artist_commentary,children,notes,parent,uploader"
-            self.metadata_includes = metadata
-        else:
-            self.metadata_includes = None
-
         threshold = self.config("threshold")
         if isinstance(threshold, int):
             self.threshold = 1 if threshold < 1 else threshold
@@ -55,6 +45,13 @@ class DanbooruExtractor(BaseExtractor):
         return pages * self.per_page
 
     def items(self):
+        includes = self.config("metadata")
+        if includes:
+            if isinstance(includes, (list, tuple)):
+                includes = ",".join(includes)
+            elif not isinstance(includes, str):
+                includes = "artist_commentary,children,notes,parent,uploader"
+
         data = self.metadata()
         for post in self.posts():
 
@@ -77,9 +74,9 @@ class DanbooruExtractor(BaseExtractor):
                     url = post["large_file_url"]
                     post["extension"] = "webm"
 
-            if self.metadata_includes:
+            if includes:
                 meta_url = "{}/posts/{}.json?only={}".format(
-                    self.root, post["id"], self.metadata_includes)
+                    self.root, post["id"], includes)
                 post.update(self.request(meta_url).json())
 
             if url[0] == "/":
