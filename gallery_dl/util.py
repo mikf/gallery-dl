@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2017-2022 Mike Fährmann
+# Copyright 2017-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -831,7 +831,8 @@ class ExtendedUrl():
 
 class DownloadArchive():
 
-    def __init__(self, path, format_string, cache_key="_archive_key"):
+    def __init__(self, path, format_string, pragma=None,
+                 cache_key="_archive_key"):
         try:
             con = sqlite3.connect(path, timeout=60, check_same_thread=False)
         except sqlite3.OperationalError:
@@ -839,20 +840,23 @@ class DownloadArchive():
             con = sqlite3.connect(path, timeout=60, check_same_thread=False)
         con.isolation_level = None
 
-        self.close = con.close
-        self.cursor = con.cursor()
-
         from . import formatter
         self.keygen = formatter.parse(format_string).format_map
+        self.close = con.close
+        self.cursor = cursor = con.cursor()
         self._cache_key = cache_key
 
+        if pragma:
+            for stmt in pragma:
+                cursor.execute("PRAGMA " + stmt)
+
         try:
-            self.cursor.execute("CREATE TABLE IF NOT EXISTS archive "
-                                "(entry TEXT PRIMARY KEY) WITHOUT ROWID")
+            cursor.execute("CREATE TABLE IF NOT EXISTS archive "
+                           "(entry TEXT PRIMARY KEY) WITHOUT ROWID")
         except sqlite3.OperationalError:
             # fallback for missing WITHOUT ROWID support (#553)
-            self.cursor.execute("CREATE TABLE IF NOT EXISTS archive "
-                                "(entry TEXT PRIMARY KEY)")
+            cursor.execute("CREATE TABLE IF NOT EXISTS archive "
+                           "(entry TEXT PRIMARY KEY)")
 
     def check(self, kwdict):
         """Return True if the item described by 'kwdict' exists in archive"""

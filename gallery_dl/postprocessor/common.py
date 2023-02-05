@@ -36,7 +36,9 @@ class PostProcessor():
                     archive = formatter.parse(archive).format_map(
                         job.pathfmt.kwdict)
                 self.archive = util.DownloadArchive(
-                    archive, archive_format, "_archive_" + self.name)
+                    archive, archive_format,
+                    options.get("archive-pragma"),
+                    "_archive_" + self.name)
             except Exception as exc:
                 self.log.warning(
                     "Failed to open %s archive at '%s' ('%s: %s')",
