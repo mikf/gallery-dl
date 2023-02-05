@@ -436,10 +436,12 @@ class DownloadJob(Job):
             archive = util.expand_path(archive)
             archive_format = (cfg("archive-prefix", extr.category) +
                               cfg("archive-format", extr.archive_fmt))
+            archive_pragma = (cfg("archive-pragma"))
             try:
                 if "{" in archive:
                     archive = formatter.parse(archive).format_map(kwdict)
-                self.archive = util.DownloadArchive(archive, archive_format)
+                self.archive = util.DownloadArchive(
+                    archive, archive_format, archive_pragma)
             except Exception as exc:
                 extr.log.warning(
                     "Failed to open download archive at '%s' ('%s: %s')",

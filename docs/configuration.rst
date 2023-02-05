@@ -760,6 +760,19 @@ Description
     Prefix for archive IDs.
 
 
+extractor.*.archive-pragma
+--------------------------
+Type
+    ``list`` of ``strings``
+Example
+    ``["journal_mode=WAL", "synchronous=NORMAL"]``
+Description
+    A list of SQLite ``PRAGMA`` statements to run during archive initialization.
+
+    See `<https://www.sqlite.org/pragma.html>`__
+    for available ``PRAGMA`` statements and further details.
+
+
 extractor.*.postprocessors
 --------------------------
 Type
@@ -4027,9 +4040,11 @@ Description
     File to store IDs of executed commands in,
     similar to `extractor.*.archive`_.
 
-    ``archive-format`` and ``archive-prefix`` options,
-    akin to `extractor.*.archive-format`_ and `extractor.*.archive-prefix`_,
-    are supported as well.
+    ``archive-format``, ``archive-prefix``, and ``archive-pragma`` options,
+    akin to
+    `extractor.*.archive-format`_,
+    `extractor.*.archive-prefix`_, and
+    `extractor.*.archive-pragma`_, are supported as well.
 
 
 exec.async
@@ -4287,9 +4302,11 @@ Description
     File to store IDs of generated metadata files in,
     similar to `extractor.*.archive`_.
 
-    ``archive-format`` and ``archive-prefix`` options,
-    akin to `extractor.*.archive-format`_ and `extractor.*.archive-prefix`_,
-    are supported as well.
+    ``archive-format``, ``archive-prefix``, and ``archive-pragma`` options,
+    akin to
+    `extractor.*.archive-format`_,
+    `extractor.*.archive-prefix`_, and
+    `extractor.*.archive-pragma`_, are supported as well.
 
 
 metadata.mtime
