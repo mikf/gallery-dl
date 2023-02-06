@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2022 Mike Fährmann
+# Copyright 2019-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -171,9 +171,8 @@ class MetadataTest(BasePostprocessorTest):
 
         # default arguments
         self.assertEqual(pp.write    , pp._write_json)
-        self.assertEqual(pp.ascii    , False)
-        self.assertEqual(pp.indent   , 4)
         self.assertEqual(pp.extension, "json")
+        self.assertTrue(callable(pp._json_encode))
 
     def test_metadata_json(self):
         pp = self._create({
@@ -182,26 +181,56 @@ class MetadataTest(BasePostprocessorTest):
             "indent"   : 2,
             "extension": "JSON",
         }, {
-            "public"   : "hello",
-            "_private" : "world",
+            "public"   : "hello ワールド",
+            "_private" : "foo バール",
         })
 
         self.assertEqual(pp.write    , pp._write_json)
-        self.assertEqual(pp.ascii    , True)
-        self.assertEqual(pp.indent   , 2)
         self.assertEqual(pp.extension, "JSON")
+        self.assertTrue(callable(pp._json_encode))
 
         with patch("builtins.open", mock_open()) as m:
             self._trigger()
 
         path = self.pathfmt.realpath + ".JSON"
         m.assert_called_once_with(path, "w", encoding="utf-8")
-        self.assertEqual(self._output(m), """{
+        self.assertEqual(self._output(m), r"""{
   "category": "test",
   "extension": "ext",
   "filename": "file",
-  "public": "hello"
+  "public": "hello \u30ef\u30fc\u30eb\u30c9"
 }
+""")
+
+    def test_metadata_json_options(self):
+        pp = self._create({
+            "mode"     : "json",
+            "ascii"    : False,
+            "private"  : True,
+            "indent"   : None,
+            "open"     : "a",
+            "encoding" : "UTF-8",
+            "extension": "JSON",
+        }, {
+            "public"   : "hello ワールド",
+            "_private" : "foo バール",
+        })
+
+        self.assertEqual(pp.write    , pp._write_json)
+        self.assertEqual(pp.extension, "JSON")
+        self.assertTrue(callable(pp._json_encode))
+
+        with patch("builtins.open", mock_open()) as m:
+            self._trigger()
+
+        path = self.pathfmt.realpath + ".JSON"
+        m.assert_called_once_with(path, "a", encoding="UTF-8")
+        self.assertEqual(self._output(m), """{\
+"_private": "foo バール", \
+"category": "test", \
+"extension": "ext", \
+"filename": "file", \
+"public": "hello ワールド"}
 """)
 
     def test_metadata_tags(self):

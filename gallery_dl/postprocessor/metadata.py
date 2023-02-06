@@ -10,6 +10,7 @@
 
 from .common import PostProcessor
 from .. import util, formatter
+import json
 import sys
 import os
 
@@ -46,14 +47,20 @@ class MetadataPP(PostProcessor):
             ext = "txt"
         elif mode == "jsonl":
             self.write = self._write_json
-            self.indent = None
-            self.ascii = options.get("ascii", False)
+            self._json_encode = json.JSONEncoder(
+                ensure_ascii=options.get("ascii", False),
+                sort_keys=True, indent=None, default=str,
+            ).encode
             omode = "a"
             filename = "data.jsonl"
         else:
             self.write = self._write_json
-            self.indent = options.get("indent", 4)
-            self.ascii = options.get("ascii", False)
+            self._json_encode = json.JSONEncoder(
+                ensure_ascii=options.get("ascii", False),
+                indent=options.get("indent", 4),
+                sort_keys=True,
+                default=str,
+            ).encode
             ext = "json"
 
         directory = options.get("directory")
@@ -191,7 +198,7 @@ class MetadataPP(PostProcessor):
     def _write_json(self, fp, kwdict):
         if not self.private:
             kwdict = util.filter_dict(kwdict)
-        util.dump_json(kwdict, fp, self.ascii, self.indent)
+        fp.write(self._json_encode(kwdict) + "\n")
 
 
 __postprocessor__ = MetadataPP
