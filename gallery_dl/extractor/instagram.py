@@ -40,6 +40,7 @@ class InstagramExtractor(Extractor):
         self._logged_in = True
         self._find_tags = re.compile(r"#\w+").findall
         self._cursor = None
+        self._user = None
 
     def items(self):
         self.login()
@@ -60,6 +61,8 @@ class InstagramExtractor(Extractor):
                 post = self._parse_post_graphql(post)
             else:
                 post = self._parse_post_rest(post)
+            if self._user:
+                post["user"] = self._user
             post.update(data)
             files = post.pop("_files")
 
@@ -362,6 +365,22 @@ class InstagramExtractor(Extractor):
         self.log.debug("Cursor: %s", cursor)
         self._cursor = cursor
         return cursor
+
+    def _assign_user(self, user):
+        self._user = user
+
+        for key, old in (
+                ("count_media"     , "edge_owner_to_timeline_media"),
+                ("count_video"     , "edge_felix_video_timeline"),
+                ("count_saved"     , "edge_saved_media"),
+                ("count_mutual"    , "edge_mutual_followed_by"),
+                ("count_follow"    , "edge_follow"),
+                ("count_followed"  , "edge_followed_by"),
+                ("count_collection", "edge_media_collections")):
+            try:
+                user[key] = user.pop(old)["count"]
+            except Exception:
+                user[key] = 0
 
 
 class InstagramUserExtractor(InstagramExtractor):
@@ -796,6 +815,7 @@ class InstagramRestAPI():
             name = user["username"]
             s = "" if name.endswith("s") else "s"
             raise exception.StopExtraction("%s'%s posts are private", name, s)
+        self.extractor._assign_user(user)
         return user["id"]
 
     def user_clips(self, user_id):
