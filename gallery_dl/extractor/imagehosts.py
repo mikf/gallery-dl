@@ -187,13 +187,19 @@ class ImagevenueImageExtractor(ImagehostImageExtractor):
 class ImagetwistImageExtractor(ImagehostImageExtractor):
     """Extractor for single images from imagetwist.com"""
     category = "imagetwist"
-    pattern = (r"(?:https?://)?((?:www|phun\.)?"
-               r"(?:imagetwist|imagehaha)\.com/([a-z0-9]{12}))")
-    test = ("https://imagetwist.com/f1i2s4vhvbrq/test.png", {
-        "url": "8d5e168c0bee30211f821c6f3b2116e419d42671",
-        "keyword": "d1060a4c2e3b73b83044e20681712c0ffdd6cfef",
-        "content": "0c8768055e4e20e7c7259608b67799171b691140",
-    })
+    pattern = (r"(?:https?://)?((?:www\.|phun\.)?"
+               r"image(?:twist|haha)\.com/([a-z0-9]{12}))")
+    test = (
+        ("https://imagetwist.com/f1i2s4vhvbrq/test.png", {
+            "url": "8d5e168c0bee30211f821c6f3b2116e419d42671",
+            "keyword": "d1060a4c2e3b73b83044e20681712c0ffdd6cfef",
+            "content": "0c8768055e4e20e7c7259608b67799171b691140",
+        }),
+        ("https://www.imagetwist.com/f1i2s4vhvbrq/test.png"),
+        ("https://phun.imagetwist.com/f1i2s4vhvbrq/test.png"),
+        ("https://imagehaha.com/f1i2s4vhvbrq/test.png"),
+        ("https://www.imagehaha.com/f1i2s4vhvbrq/test.png"),
+    )
 
     @property
     @memcache(maxage=3*3600)
