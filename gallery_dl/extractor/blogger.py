@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2022 Mike Fährmann
+# Copyright 2019-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -9,8 +9,7 @@
 """Extractors for Blogger blogs"""
 
 from .common import Extractor, Message
-from .. import text
-import json
+from .. import text, util
 import re
 
 BASE_PATTERN = (
@@ -61,7 +60,7 @@ class BloggerExtractor(Extractor):
                 page = self.request(post["url"]).text
                 for url in findall_video(page):
                     page = self.request(url).text
-                    video_config = json.loads(text.extr(
+                    video_config = util.json_loads(text.extr(
                         page, 'var VIDEO_CONFIG =', '\n'))
                     files.append(max(
                         video_config["streams"],

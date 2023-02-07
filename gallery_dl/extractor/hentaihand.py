@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2020-2022 Mike Fährmann
+# Copyright 2020-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -10,7 +10,6 @@
 
 from .common import GalleryExtractor, Extractor, Message
 from .. import text, util
-import json
 
 
 class HentaihandGalleryExtractor(GalleryExtractor):
@@ -46,7 +45,7 @@ class HentaihandGalleryExtractor(GalleryExtractor):
         GalleryExtractor.__init__(self, match, url)
 
     def metadata(self, page):
-        info = json.loads(page)
+        info = util.json_loads(page)
         data = {
             "gallery_id" : text.parse_int(info["id"]),
             "title"      : info["title"],

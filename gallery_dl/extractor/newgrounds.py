@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2022 Mike Fährmann
+# Copyright 2018-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -9,10 +9,9 @@
 """Extractors for https://www.newgrounds.com/"""
 
 from .common import Extractor, Message
-from .. import text, exception
+from .. import text, util, exception
 from ..cache import cache
 import itertools
-import json
 
 
 class NewgroundsExtractor(Extractor):
@@ -151,7 +150,8 @@ class NewgroundsExtractor(Extractor):
 
     @staticmethod
     def _extract_image_data(extr, url):
-        full = text.extract_from(json.loads(extr('"full_image_text":', '});')))
+        full = text.extract_from(util.json_loads(extr(
+            '"full_image_text":', '});')))
         data = {
             "title"      : text.unescape(extr('"og:title" content="', '"')),
             "description": text.unescape(extr(':description" content="', '"')),

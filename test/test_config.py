@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2020 Mike Fährmann
+# Copyright 2015-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -11,12 +11,11 @@ import os
 import sys
 import unittest
 
-import json
 import tempfile
 
 ROOTDIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOTDIR)
-from gallery_dl import config  # noqa E402
+from gallery_dl import config, util  # noqa E402
 
 
 class TestConfig(unittest.TestCase):
@@ -209,8 +208,8 @@ class TestConfigFiles(unittest.TestCase):
     def _load(name):
         path = os.path.join(ROOTDIR, "docs", name)
         try:
-            with open(path) as fp:
-                return json.load(fp)
+            with open(path) as file:
+                return util.json_loads(file.read())
         except FileNotFoundError:
             raise unittest.SkipTest(path + " not available")
 

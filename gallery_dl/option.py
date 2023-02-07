@@ -10,9 +10,8 @@
 
 import argparse
 import logging
-import json
 import sys
-from . import job, version
+from . import job, util, version
 
 
 class ConfigAction(argparse.Action):
@@ -79,7 +78,7 @@ class Formatter(argparse.HelpFormatter):
 def _parse_option(opt):
     key, _, value = opt.partition("=")
     try:
-        value = json.loads(value)
+        value = util.json_loads(value)
     except ValueError:
         pass
     return key, value

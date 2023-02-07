@@ -9,8 +9,7 @@
 """Extractors for https://www.behance.net/"""
 
 from .common import Extractor, Message
-from .. import text
-import json
+from .. import text, util
 
 
 class BehanceExtractor(Extractor):
@@ -120,7 +119,7 @@ class BehanceGalleryExtractor(BehanceExtractor):
         }
         page = self.request(url, cookies=cookies).text
 
-        data = json.loads(text.extr(
+        data = util.json_loads(text.extr(
             page, 'id="beconfig-store_state">', '</script>'))
         return self._update(data["project"]["project"])
 

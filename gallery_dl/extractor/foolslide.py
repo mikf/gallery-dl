@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2022 Mike Fährmann
+# Copyright 2016-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -10,7 +10,6 @@
 
 from .common import BaseExtractor, Message
 from .. import text, util
-import json
 
 
 class FoolslideExtractor(BaseExtractor):
@@ -106,7 +105,7 @@ class FoolslideChapterExtractor(FoolslideExtractor):
         })
 
     def images(self, page):
-        return json.loads(text.extr(page, "var pages = ", ";"))
+        return util.json_loads(text.extr(page, "var pages = ", ";"))
 
 
 class FoolslideMangaExtractor(FoolslideExtractor):

@@ -9,8 +9,7 @@
 """Extractors for https://bunkr.ru/"""
 
 from .lolisafe import LolisafeAlbumExtractor
-from .. import text
-import json
+from .. import text, util
 
 
 class BunkrAlbumExtractor(LolisafeAlbumExtractor):
@@ -49,7 +48,7 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
         root = self.root
 
         try:
-            data = json.loads(text.extr(
+            data = util.json_loads(text.extr(
                 self.request(root + "/a/" + self.album_id).text,
                 'id="__NEXT_DATA__" type="application/json">', '<'))
             album = data["props"]["pageProps"]["album"]

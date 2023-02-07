@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2022 Mike Fährmann
+# Copyright 2019-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -9,9 +9,8 @@
 """Generic extractors for *reactor sites"""
 
 from .common import BaseExtractor, Message
-from .. import text
+from .. import text, util
 import urllib.parse
-import json
 
 
 class ReactorExtractor(BaseExtractor):
@@ -84,13 +83,13 @@ class ReactorExtractor(BaseExtractor):
         script = script[:script.index("</")].strip()
 
         try:
-            data = json.loads(script)
+            data = util.json_loads(script)
         except ValueError:
             try:
                 # remove control characters and escape backslashes
                 mapping = dict.fromkeys(range(32))
                 script = script.translate(mapping).replace("\\", "\\\\")
-                data = json.loads(script)
+                data = util.json_loads(script)
             except ValueError as exc:
                 self.log.warning("Unable to parse JSON data: %s", exc)
                 return

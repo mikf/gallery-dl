@@ -7,8 +7,7 @@
 """Extractors for https://www.wikifeet.com/"""
 
 from .common import GalleryExtractor
-from .. import text
-import json
+from .. import text, util
 
 
 class WikifeetGalleryExtractor(GalleryExtractor):
@@ -114,5 +113,5 @@ class WikifeetGalleryExtractor(GalleryExtractor):
                 "height": data["ph"],
                 "tags"  : [tagmap[tag] for tag in data["tags"]],
             })
-            for data in json.loads(text.extr(page, "['gdata'] = ", ";"))
+            for data in util.json_loads(text.extr(page, "['gdata'] = ", ";"))
         ]
