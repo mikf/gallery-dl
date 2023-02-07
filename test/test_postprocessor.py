@@ -176,13 +176,11 @@ class MetadataTest(BasePostprocessorTest):
 
     def test_metadata_json(self):
         pp = self._create({
-            "mode"     : "json",
-            "ascii"    : True,
-            "indent"   : 2,
-            "extension": "JSON",
+            "mode"      : "json",
+            "extension" : "JSON",
         }, {
-            "public"   : "hello ワールド",
-            "_private" : "foo バール",
+            "public"    : "hello ワールド",
+            "_private"  : "foo バー",
         })
 
         self.assertEqual(pp.write    , pp._write_json)
@@ -194,26 +192,31 @@ class MetadataTest(BasePostprocessorTest):
 
         path = self.pathfmt.realpath + ".JSON"
         m.assert_called_once_with(path, "w", encoding="utf-8")
-        self.assertEqual(self._output(m), r"""{
-  "category": "test",
-  "extension": "ext",
-  "filename": "file",
-  "public": "hello \u30ef\u30fc\u30eb\u30c9"
+
+        if sys.hexversion >= 0x3060000:
+            # python 3.4 & 3.5 have random order without 'sort: True'
+            self.assertEqual(self._output(m), """{
+    "category": "test",
+    "filename": "file",
+    "extension": "ext",
+    "public": "hello ワールド"
 }
 """)
 
     def test_metadata_json_options(self):
         pp = self._create({
-            "mode"     : "json",
-            "ascii"    : False,
-            "private"  : True,
-            "indent"   : None,
-            "open"     : "a",
-            "encoding" : "UTF-8",
-            "extension": "JSON",
+            "mode"      : "json",
+            "ascii"     : True,
+            "sort"      : True,
+            "separators": [",", " : "],
+            "private"   : True,
+            "indent"    : None,
+            "open"      : "a",
+            "encoding"  : "UTF-8",
+            "extension" : "JSON",
         }, {
-            "public"   : "hello ワールド",
-            "_private" : "foo バール",
+            "public"    : "hello ワールド",
+            "_private"  : "foo バー",
         })
 
         self.assertEqual(pp.write    , pp._write_json)
@@ -226,11 +229,11 @@ class MetadataTest(BasePostprocessorTest):
         path = self.pathfmt.realpath + ".JSON"
         m.assert_called_once_with(path, "a", encoding="UTF-8")
         self.assertEqual(self._output(m), """{\
-"_private": "foo バール", \
-"category": "test", \
-"extension": "ext", \
-"filename": "file", \
-"public": "hello ワールド"}
+"_private" : "foo \\u30d0\\u30fc",\
+"category" : "test",\
+"extension" : "ext",\
+"filename" : "file",\
+"public" : "hello \\u30ef\\u30fc\\u30eb\\u30c9"}
 """)
 
     def test_metadata_tags(self):
@@ -363,7 +366,7 @@ class MetadataTest(BasePostprocessorTest):
         m.assert_called_once_with(path, "w", encoding="utf-8")
 
     def test_metadata_stdout(self):
-        self._create({"filename": "-", "indent": None})
+        self._create({"filename": "-", "indent": None, "sort": True})
 
         with patch("sys.stdout", Mock()) as m:
             self._trigger()

@@ -47,20 +47,12 @@ class MetadataPP(PostProcessor):
             ext = "txt"
         elif mode == "jsonl":
             self.write = self._write_json
-            self._json_encode = json.JSONEncoder(
-                ensure_ascii=options.get("ascii", False),
-                sort_keys=True, indent=None, default=str,
-            ).encode
+            self._json_encode = self._make_encoder(options).encode
             omode = "a"
             filename = "data.jsonl"
         else:
             self.write = self._write_json
-            self._json_encode = json.JSONEncoder(
-                ensure_ascii=options.get("ascii", False),
-                indent=options.get("indent", 4),
-                sort_keys=True,
-                default=str,
-            ).encode
+            self._json_encode = self._make_encoder(options, 4).encode
             ext = "json"
 
         directory = options.get("directory")
@@ -199,6 +191,16 @@ class MetadataPP(PostProcessor):
         if not self.private:
             kwdict = util.filter_dict(kwdict)
         fp.write(self._json_encode(kwdict) + "\n")
+
+    @staticmethod
+    def _make_encoder(options, indent=None):
+        return json.JSONEncoder(
+            ensure_ascii=options.get("ascii", False),
+            sort_keys=options.get("sort", False),
+            separators=options.get("separators"),
+            indent=options.get("indent", indent),
+            check_circular=False, default=str,
+        )
 
 
 __postprocessor__ = MetadataPP

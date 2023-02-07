@@ -4240,6 +4240,20 @@ Description
     Note: Only applies for ``"mode": "custom"``.
 
 
+metadata.ascii
+--------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Escape all non-ASCII characters.
+
+    See the ``ensure_ascii`` argument of |json.dump()|_ for further details.
+
+    Note: Only applies for ``"mode": "json"`` and ``"jsonl"``.
+
+
 metadata.indent
 ---------------
 Type
@@ -4253,6 +4267,35 @@ Description
     See the ``indent`` argument of |json.dump()|_ for further details.
 
     Note: Only applies for ``"mode": "json"``.
+
+
+metadata.separators
+-------------------
+Type
+    ``list`` with two ``string`` elements
+Default
+    ``[", ", ": "]``
+Description
+    ``<item separator>`` - ``<key separator>`` pair
+    to separate JSON keys and values with.
+
+    See the ``separators`` argument of |json.dump()|_ for further details.
+
+    Note: Only applies for ``"mode": "json"`` and ``"jsonl"``.
+
+
+metadata.sort
+-------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Sort output by `key`.
+
+    See the ``sort_keys`` argument of |json.dump()|_ for further details.
+
+    Note: Only applies for ``"mode": "json"`` and ``"jsonl"``.
 
 
 metadata.open
