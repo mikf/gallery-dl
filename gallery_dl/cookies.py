@@ -12,7 +12,6 @@
 import binascii
 import contextlib
 import ctypes
-import json
 import logging
 import os
 import shutil
@@ -24,7 +23,7 @@ import tempfile
 from datetime import datetime, timedelta, timezone
 from hashlib import pbkdf2_hmac
 from http.cookiejar import Cookie
-from . import aes, text
+from . import aes, text, util
 
 
 SUPPORTED_BROWSERS_CHROMIUM = {
@@ -169,8 +168,8 @@ def _firefox_cookies_database(profile=None, container=None):
             os.path.dirname(path), "containers.json")
 
         try:
-            with open(containers_path) as containers:
-                identities = json.load(containers)["identities"]
+            with open(containers_path) as file:
+                identities = util.json_loads(file.read())["identities"]
         except OSError:
             logger.error("Unable to read Firefox container database at %s",
                          containers_path)
@@ -716,8 +715,8 @@ def _get_windows_v10_key(browser_root):
         logger.error("could not find local state file")
         return None
     logger.debug("Found local state file at '%s'", path)
-    with open(path, encoding="utf8") as f:
-        data = json.load(f)
+    with open(path, encoding="utf-8") as file:
+        data = util.json_loads(file.read())
     try:
         base64_key = data["os_crypt"]["encrypted_key"]
     except KeyError:

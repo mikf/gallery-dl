@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2022 Mike Fährmann
+# Copyright 2015-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -9,8 +9,7 @@
 """Extractors for https://mangapark.net/"""
 
 from .common import ChapterExtractor, MangaExtractor
-from .. import text, exception
-import json
+from .. import text, util, exception
 import re
 
 
@@ -104,7 +103,7 @@ class MangaparkChapterExtractor(MangaparkBase, ChapterExtractor):
         return data
 
     def images(self, page):
-        data = json.loads(text.extr(page, "var _load_pages =", ";"))
+        data = util.json_loads(text.extr(page, "var _load_pages =", ";"))
         return [
             (text.urljoin(self.root, item["u"]), {
                 "width": text.parse_int(item["w"]),

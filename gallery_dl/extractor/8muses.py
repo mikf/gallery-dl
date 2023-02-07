@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2022 Mike Fährmann
+# Copyright 2019-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -9,8 +9,7 @@
 """Extractors for https://comics.8muses.com/"""
 
 from .common import Extractor, Message
-from .. import text
-import json
+from .. import text, util
 
 
 class _8musesAlbumExtractor(Extractor):
@@ -131,7 +130,7 @@ class _8musesAlbumExtractor(Extractor):
 
     @staticmethod
     def _unobfuscate(data):
-        return json.loads("".join([
+        return util.json_loads("".join([
             chr(33 + (ord(c) + 14) % 94) if "!" <= c <= "~" else c
             for c in text.unescape(data.strip("\t\n\r !"))
         ]))

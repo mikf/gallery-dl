@@ -9,8 +9,7 @@
 """Extractors for https://hentai2read.com/"""
 
 from .common import ChapterExtractor, MangaExtractor
-from .. import text
-import json
+from .. import text, util
 import re
 
 
@@ -78,7 +77,7 @@ class Hentai2readChapterExtractor(Hentai2readBase, ChapterExtractor):
         images = text.extract(page, "'images' : ", ",\n")[0]
         return [
             ("https://hentaicdn.com/hentai" + part, None)
-            for part in json.loads(images)
+            for part in util.json_loads(images)
         ]
 
 

@@ -9,9 +9,7 @@
 """Extractors for https://xhamster.com/"""
 
 from .common import Extractor, Message
-from .. import text
-import json
-
+from .. import text, util
 
 BASE_PATTERN = (r"(?:https?://)?((?:[\w-]+\.)?xhamster"
                 r"(?:\d?\.(?:com|one|desi)|\.porncache\.net))")
@@ -144,7 +142,7 @@ class XhamsterGalleryExtractor(XhamsterExtractor):
 
     def _data(self, url):
         page = self.request(url).text
-        return json.loads(text.extr(
+        return util.json_loads(text.extr(
             page, "window.initials=", "</script>").rstrip("\n\r;"))
 
 

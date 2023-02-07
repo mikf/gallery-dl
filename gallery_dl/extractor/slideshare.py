@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2022 Mike Fährmann, Leonardo Taccari
+# Copyright 2016-2023 Mike Fährmann, Leonardo Taccari
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -9,8 +9,7 @@
 """Extractors for https://www.slideshare.net/"""
 
 from .common import GalleryExtractor
-from .. import text
-import json
+from .. import text, util
 
 
 class SlidesharePresentationExtractor(GalleryExtractor):
@@ -97,7 +96,7 @@ class SlidesharePresentationExtractor(GalleryExtractor):
 
     @staticmethod
     def images(page):
-        data = json.loads(text.extract(
+        data = util.json_loads(text.extract(
             page, "xtend(true, slideshare_object.slideshow_config, ", ");")[0])
 
         # useing 'stripped_title' here is technically wrong, but it works all

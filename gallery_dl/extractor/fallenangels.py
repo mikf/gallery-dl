@@ -6,11 +6,10 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract manga-chapters from https://www.fascans.com/"""
+"""Extractors for https://www.fascans.com/"""
 
 from .common import ChapterExtractor, MangaExtractor
 from .. import text, util
-import json
 
 
 class FallenangelsChapterExtractor(ChapterExtractor):
@@ -56,7 +55,7 @@ class FallenangelsChapterExtractor(ChapterExtractor):
     def images(page):
         return [
             (img["page_image"], None)
-            for img in json.loads(
+            for img in util.json_loads(
                 text.extr(page, "var pages = ", ";")
             )
         ]

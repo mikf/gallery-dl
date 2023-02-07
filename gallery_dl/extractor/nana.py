@@ -7,8 +7,7 @@
 """Extractors for https://nana.my.id/"""
 
 from .common import GalleryExtractor, Extractor, Message
-from .. import text, exception
-import json
+from .. import text, util, exception
 
 
 class NanaGalleryExtractor(GalleryExtractor):
@@ -59,7 +58,7 @@ class NanaGalleryExtractor(GalleryExtractor):
         }
 
     def images(self, page):
-        data = json.loads(text.extr(page, "Reader.pages = ", ".pages"))
+        data = util.json_loads(text.extr(page, "Reader.pages = ", ".pages"))
         return [
             ("https://nana.my.id" + image, None)
             for image in data["pages"]

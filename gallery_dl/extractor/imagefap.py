@@ -9,8 +9,7 @@
 """Extractors for https://www.imagefap.com/"""
 
 from .common import Extractor, Message
-from .. import text, exception
-import json
+from .. import text, util, exception
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.|beta\.)?imagefap\.com"
 
@@ -173,7 +172,7 @@ class ImagefapImageExtractor(ImagefapExtractor):
             page, 'id="imageid_input" value="', '"', pos)
         gallery_id, pos = text.extract(
             page, 'id="galleryid_input" value="', '"', pos)
-        info = json.loads(info)
+        info = util.json_loads(info)
         url = info["contentUrl"]
 
         return url, text.nameext_from_url(url, {

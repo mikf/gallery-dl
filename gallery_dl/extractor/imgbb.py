@@ -9,9 +9,8 @@
 """Extractors for https://imgbb.com/"""
 
 from .common import Extractor, Message
-from .. import text, exception
+from .. import text, util, exception
 from ..cache import cache
-import json
 
 
 class ImgbbExtractor(Extractor):
@@ -98,7 +97,7 @@ class ImgbbExtractor(Extractor):
 
         while True:
             for img in text.extract_iter(page, "data-object='", "'"):
-                yield json.loads(text.unquote(img))
+                yield util.json_loads(text.unquote(img))
             if data:
                 if params["seek"] == data["seekEnd"]:
                     return

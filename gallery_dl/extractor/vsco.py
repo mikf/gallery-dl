@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2022 Mike Fährmann
+# Copyright 2019-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -9,8 +9,7 @@
 """Extractors for https://vsco.co/"""
 
 from .common import Extractor, Message
-from .. import text
-import json
+from .. import text, util
 
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?vsco\.co/([^/]+)"
@@ -69,7 +68,7 @@ class VscoExtractor(Extractor):
 
     def _extract_preload_state(self, url):
         page = self.request(url, notfound=self.subcategory).text
-        return json.loads(text.extr(page, "__PRELOADED_STATE__ = ", "<"))
+        return util.json_loads(text.extr(page, "__PRELOADED_STATE__ = ", "<"))
 
     def _pagination(self, url, params, token, key, extra=None):
         headers = {

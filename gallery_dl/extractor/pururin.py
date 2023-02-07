@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2021 Mike Fährmann
+# Copyright 2019-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -11,7 +11,6 @@
 from .common import GalleryExtractor
 from .. import text, util
 import binascii
-import json
 
 
 class PururinGalleryExtractor(GalleryExtractor):
@@ -73,7 +72,7 @@ class PururinGalleryExtractor(GalleryExtractor):
 
         url = "{}/read/{}/01/x".format(self.root, self.gallery_id)
         page = self.request(url).text
-        info = json.loads(binascii.a2b_base64(text.extr(
+        info = util.json_loads(binascii.a2b_base64(text.extr(
             page, '<gallery-read encoded="', '"')).decode())
         self._ext = info["image_extension"]
         self._cnt = info["total_pages"]

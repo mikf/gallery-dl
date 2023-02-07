@@ -7,8 +7,7 @@
 """Extractors for https://fantia.jp/"""
 
 from .common import Extractor, Message
-from .. import text
-import json
+from .. import text, util
 
 
 class FantiaExtractor(Extractor):
@@ -117,7 +116,7 @@ class FantiaExtractor(Extractor):
                 yield self.root+"/"+content["download_uri"], post
 
             if content["category"] == "blog" and "comment" in content:
-                comment_json = json.loads(content["comment"])
+                comment_json = util.json_loads(content["comment"])
                 ops = comment_json.get("ops", ())
 
                 # collect blogpost text first

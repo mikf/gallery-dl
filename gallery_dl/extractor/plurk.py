@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2022 Mike Fährmann
+# Copyright 2019-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -9,10 +9,9 @@
 """Extractors for https://www.plurk.com/"""
 
 from .common import Extractor, Message
-from .. import text, exception
+from .. import text, util, exception
 import datetime
 import time
-import json
 import re
 
 
@@ -66,7 +65,7 @@ class PlurkExtractor(Extractor):
     def _load(data):
         if not data:
             raise exception.NotFoundError("user")
-        return json.loads(re.sub(r"new Date\(([^)]+)\)", r"\1", data))
+        return util.json_loads(re.sub(r"new Date\(([^)]+)\)", r"\1", data))
 
 
 class PlurkTimelineExtractor(PlurkExtractor):

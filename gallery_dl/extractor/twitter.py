@@ -216,7 +216,7 @@ class TwitterExtractor(Extractor):
                             files.append(value)
                             return
         elif name == "unified_card":
-            data = json.loads(bvals["unified_card"]["string_value"])
+            data = util.json_loads(bvals["unified_card"]["string_value"])
             self._extract_media(tweet, data["media_entities"].values(), files)
             return
 

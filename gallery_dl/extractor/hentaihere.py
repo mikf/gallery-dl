@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2022 Mike Fährmann
+# Copyright 2016-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -9,8 +9,7 @@
 """Extractors for https://hentaihere.com/"""
 
 from .common import ChapterExtractor, MangaExtractor
-from .. import text
-import json
+from .. import text, util
 import re
 
 
@@ -80,7 +79,7 @@ class HentaihereChapterExtractor(HentaihereBase, ChapterExtractor):
         images = text.extr(page, "var rff_imageList = ", ";")
         return [
             ("https://hentaicdn.com/hentai" + part, None)
-            for part in json.loads(images)
+            for part in util.json_loads(images)
         ]
 
 

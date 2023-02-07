@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2022 Mike Fährmann
+# Copyright 2015-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -9,8 +9,7 @@
 """Extractors for https://dynasty-scans.com/"""
 
 from .common import ChapterExtractor, MangaExtractor, Extractor, Message
-from .. import text
-import json
+from .. import text, util
 import re
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?dynasty-scans\.com"
@@ -86,7 +85,7 @@ class DynastyscansChapterExtractor(DynastyscansBase, ChapterExtractor):
         data = text.extr(page, "var pages = ", ";\n")
         return [
             (self.root + img["image"], None)
-            for img in json.loads(data)
+            for img in util.json_loads(data)
         ]
 
 
