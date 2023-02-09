@@ -12,7 +12,6 @@ from .common import Extractor, Message
 from .. import text, util, exception
 from ..cache import cache
 import itertools
-import json
 
 BASE_PATTERN = r"(?:https?://)?(?:\w+\.)?pinterest\.[\w.]+"
 
@@ -504,7 +503,10 @@ class PinterestAPI():
             "username_or_email": username,
             "password"         : password,
         }
-        data = {"data": json.dumps({"options": options}), "source_url": ""}
+        data = {
+            "data"      : util.json_dumps({"options": options}),
+            "source_url": "",
+        }
 
         try:
             response = self.extractor.request(
@@ -523,7 +525,10 @@ class PinterestAPI():
 
     def _call(self, resource, options):
         url = "{}/resource/{}Resource/get/".format(self.root, resource)
-        params = {"data": json.dumps({"options": options}), "source_url": ""}
+        params = {
+            "data"      : util.json_dumps({"options": options}),
+            "source_url": "",
+        }
 
         response = self.extractor.request(
             url, params=params, headers=self.headers,

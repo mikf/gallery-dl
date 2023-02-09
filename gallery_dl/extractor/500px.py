@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2022 Mike Fährmann
+# Copyright 2019-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -9,7 +9,7 @@
 """Extractors for https://500px.com/"""
 
 from .common import Extractor, Message
-import json
+from .. import util
 
 BASE_PATTERN = r"(?:https?://)?(?:web\.)?500px\.com"
 
@@ -86,7 +86,7 @@ class _500pxExtractor(Extractor):
         }
         data = {
             "operationName": opname,
-            "variables"    : json.dumps(variables),
+            "variables"    : util.json_dumps(variables),
             "query"        : QUERIES[opname],
         }
         return self.request(

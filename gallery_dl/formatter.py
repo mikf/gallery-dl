@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2021-2022 Mike Fährmann
+# Copyright 2021-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -9,13 +9,11 @@
 """String formatters"""
 
 import os
-import json
 import time
 import string
 import _string
 import datetime
 import operator
-import functools
 from . import text, util
 
 NONE = util.NONE
@@ -399,7 +397,7 @@ _CONVERSIONS = {
     "u": str.upper,
     "c": str.capitalize,
     "C": string.capwords,
-    "j": functools.partial(json.dumps, default=str),
+    "j": util.json_dumps,
     "t": str.strip,
     "T": util.datetime_to_timestamp_string,
     "d": text.parse_timestamp,
