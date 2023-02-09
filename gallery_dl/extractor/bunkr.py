@@ -6,20 +6,20 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extractors for https://bunkr.ru/"""
+"""Extractors for https://bunkr.su/"""
 
 from .lolisafe import LolisafeAlbumExtractor
 from .. import text, util
 
 
 class BunkrAlbumExtractor(LolisafeAlbumExtractor):
-    """Extractor for bunkr.ru albums"""
+    """Extractor for bunkr.su albums"""
     category = "bunkr"
-    root = "https://bunkr.ru"
-    pattern = r"(?:https?://)?(?:app\.)?bunkr\.(?:ru|is|to)/a/([^/?#]+)"
+    root = "https://bunkr.su"
+    pattern = r"(?:https?://)?(?:app\.)?bunkr\.(?:[sr]u|is|to)/a/([^/?#]+)"
     test = (
-        ("https://bunkr.ru/a/Lktg9Keq", {
-            "pattern": r"https://cdn\.bunkr\.ru/test-テスト-\"&>-QjgneIQv\.png",
+        ("https://bunkr.su/a/Lktg9Keq", {
+            "pattern": r"https://cdn\.bunkr\.su/test-テスト-\"&>-QjgneIQv\.png",
             "content": "0c8768055e4e20e7c7259608b67799171b691140",
             "keyword": {
                 "album_id": "Lktg9Keq",
@@ -32,7 +32,7 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
             },
         }),
         # mp4 (#2239)
-        ("https://app.bunkr.is/a/ptRHaCn2", {
+        ("https://app.bunkr.ru/a/ptRHaCn2", {
             "pattern": r"https://media-files\.bunkr\.ru/_-RnHoW69L\.mp4",
             "content": "80e61d1dbc5896ae7ef9a28734c747b28b320471",
         }),
