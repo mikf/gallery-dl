@@ -205,6 +205,7 @@ def datetime_to_timestamp_string(dt):
 
 
 json_loads = json._default_decoder.decode
+json_dumps = json.JSONEncoder(default=str).encode
 
 
 def dump_json(obj, fp=sys.stdout, ensure_ascii=True, indent=4):

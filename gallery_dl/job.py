@@ -7,7 +7,6 @@
 # published by the Free Software Foundation.
 
 import sys
-import json
 import errno
 import logging
 import functools
@@ -711,17 +710,19 @@ class InfoJob(Job):
 
     def _print_multi(self, title, *values):
         stdout_write("{}\n  {}\n\n".format(
-            title, " / ".join(json.dumps(v) for v in values)))
+            title, " / ".join(map(util.json_dumps, values))))
 
     def _print_config(self, title, optname, value):
         optval = self.extractor.config(optname, util.SENTINEL)
         if optval is not util.SENTINEL:
             stdout_write(
                 "{} (custom):\n  {}\n{} (default):\n  {}\n\n".format(
-                    title, json.dumps(optval), title, json.dumps(value)))
+                    title, util.json_dumps(optval),
+                    title, util.json_dumps(value)))
         elif value:
             stdout_write(
-                "{} (default):\n  {}\n\n".format(title, json.dumps(value)))
+                "{} (default):\n  {}\n\n".format(
+                    title, util.json_dumps(value)))
 
 
 class DataJob(Job):
