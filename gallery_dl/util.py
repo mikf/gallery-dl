@@ -737,7 +737,8 @@ class RangePredicate():
             self.lower = min(r.start for r in ranges)
             self.upper = max(r.stop for r in ranges) - 1
         else:
-            self.lower = self.upper = 0
+            self.lower = 0
+            self.upper = 0
 
     def __call__(self, _url, _kwdict):
         self.index = index = self.index + 1
