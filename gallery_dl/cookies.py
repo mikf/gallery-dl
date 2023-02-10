@@ -793,7 +793,8 @@ class DatabaseCopy():
 
     def __init__(self, path):
         self.path = path
-        self.directory = self.database = None
+        self.database = None
+        self.directory = None
 
     def __enter__(self):
         try:

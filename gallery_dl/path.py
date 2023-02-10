@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2021-2022 Mike Fährmann
+# Copyright 2021-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -73,10 +73,15 @@ class PathFormat():
             raise exception.DirectoryFormatError(exc)
 
         self.kwdict = {}
-        self.directory = self.realdirectory = \
-            self.filename = self.extension = self.prefix = \
-            self.path = self.realpath = self.temppath = ""
         self.delete = False
+        self.prefix = ""
+        self.filename = ""
+        self.extension = ""
+        self.directory = ""
+        self.realdirectory = ""
+        self.path = ""
+        self.realpath = ""
+        self.temppath = ""
 
         extension_map = config("extension-map")
         if extension_map is None:
