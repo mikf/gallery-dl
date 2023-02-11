@@ -250,9 +250,13 @@ def main():
             pformat = config.get(("output",), "progress", True)
             if pformat and len(urls) > 1 and args.loglevel < logging.ERROR:
                 urls = progress(urls, pformat)
+            else:
+                urls = iter(urls)
 
             retval = 0
-            for url in urls:
+            url = next(urls, None)
+
+            while url is not None:
                 try:
                     log.debug("Starting %s for '%s'", jobtype.__name__, url)
                     if isinstance(url, util.ExtendedUrl):
@@ -264,9 +268,15 @@ def main():
                         retval |= jobtype(url).run()
                 except exception.TerminateExtraction:
                     pass
+                except exception.RestartExtraction:
+                    log.debug("Restarting '%s'", url)
+                    continue
                 except exception.NoExtractorError:
                     log.error("Unsupported URL '%s'", url)
                     retval |= 64
+
+                url = next(urls, None)
+
             return retval
 
     except KeyboardInterrupt:

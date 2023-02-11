@@ -592,6 +592,7 @@ GLOBALS = {
     "timedelta": datetime.timedelta,
     "abort"    : raises(exception.StopExtraction),
     "terminate": raises(exception.TerminateExtraction),
+    "restart"  : raises(exception.RestartExtraction),
     "re"       : re,
 }
 
