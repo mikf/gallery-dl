@@ -93,7 +93,7 @@ class Job():
             if exc.message:
                 log.error(exc.message)
             self.status |= exc.code
-        except exception.TerminateExtraction:
+        except (exception.TerminateExtraction, exception.RestartExtraction):
             raise
         except exception.GalleryDLException as exc:
             log.error("%s: %s", exc.__class__.__name__, exc)
@@ -343,12 +343,18 @@ class DownloadJob(Job):
                     if kwdict:
                         job.kwdict.update(kwdict)
 
-            if pextr.config("parent-skip"):
-                job._skipcnt = self._skipcnt
-                self.status |= job.run()
-                self._skipcnt = job._skipcnt
-            else:
-                self.status |= job.run()
+            while True:
+                try:
+                    if pextr.config("parent-skip"):
+                        job._skipcnt = self._skipcnt
+                        self.status |= job.run()
+                        self._skipcnt = job._skipcnt
+                    else:
+                        self.status |= job.run()
+                    break
+                except exception.RestartExtraction:
+                    pass
+
         else:
             self._write_unsupported(url)
 
