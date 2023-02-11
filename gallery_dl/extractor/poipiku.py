@@ -79,7 +79,7 @@ class PoipikuExtractor(Extractor):
             page = self.request(
                 url, method="POST", headers=headers, data=data).json()["html"]
 
-            if page.startswith("You need to"):
+            if page.startswith(("You need to", "Password is incorrect")):
                 self.log.warning("'%s'", page)
 
             for thumb in text.extract_iter(
