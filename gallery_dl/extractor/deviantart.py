@@ -157,6 +157,24 @@ class DeviantartExtractor(Extractor):
                     deviation["_extractor"] = DeviantartStashExtractor
                     yield Message.Queue, url, deviation
 
+            # extract sta.sh URLs from entityMap
+            try:
+                entity_map = \
+                    deviation["text_content"]["body"]["markup"]["entityMap"]
+            except KeyError:
+                continue
+
+            for entity in entity_map.values():
+                if "url" not in entity["data"]:
+                    continue
+                match = DeviantartStashExtractor.pattern.match(
+                    entity["data"]["url"])
+                if not match:
+                    continue
+                url = text.ensure_http_scheme(match.group(0))
+                deviation["_extractor"] = DeviantartStashExtractor
+                yield Message.Queue, url, deviation
+
     def deviations(self):
         """Return an iterable containing all relevant Deviation-objects"""
 
@@ -204,6 +222,28 @@ class DeviantartExtractor(Extractor):
             sub("_", deviation["author"]["username"].lower()), "-d",
             deviation["index_base36"],
         ))
+
+    @staticmethod
+    def embedded_image(target):
+        """Extract embedded images as deviations"""
+        try:
+            entity_map = target["text_content"]["body"]["markup"]["entityMap"]
+        except KeyError:
+            return
+        for entity in entity_map.values():
+            if "data" not in entity["data"]:
+                continue
+            data = entity["data"]["data"]
+            # wix-draft-plugin-image
+            if isinstance(data, dict) and "deviationid" in data:
+                yield data.copy()
+                continue
+            # wix-draft-plugin-gallery
+            if not isinstance(data, list):
+                continue
+            for deviation in data:
+                if isinstance(deviation, dict) and "deviationid" in deviation:
+                    yield deviation.copy()
 
     @staticmethod
     def commit(deviation, target):
@@ -816,6 +856,20 @@ class DeviantartStatusExtractor(DeviantartExtractor):
             "options": (("journals", "text"),),
             "url": "c8744f7f733a3029116607b826321233c5ca452d",
         }),
+        # embedded image in entityMap
+        ("https://www.deviantart.com/justgalym/posts/statuses", {
+            "options": (("journals", "none"), ("extra", True),
+                        ("original", False)),
+            "range": "1",
+            "count": 1,
+            "keyword": {
+                "description": str,
+                "is_watching": bool,
+                "license": str,
+                "tags": list,
+                "url": "https://sta.sh/0s0bz4c8yte"
+            },
+        }),
     )
 
     def deviations(self):
@@ -834,6 +888,8 @@ class DeviantartStatusExtractor(DeviantartExtractor):
             self.log.warning(
                 "Skipping status %s (deleted)", status.get("statusid"))
             return
+
+        yield from self.embedded_image(status)
         yield status
 
     def prepare(self, deviation):
@@ -1192,7 +1248,8 @@ class DeviantartOAuthAPI():
             self.mature = "true" if self.mature else "false"
 
         self.folders = extractor.config("folders", False)
-        self.metadata = extractor.extra or extractor.config("metadata", False)
+        self.extra = extractor.extra
+        self.metadata = self.extra or extractor.config("metadata", False)
         self.strategy = extractor.config("pagination")
 
         self.client_id = extractor.config("client-id")
@@ -1368,7 +1425,8 @@ class DeviantartOAuthAPI():
     def user_statuses(self, username, offset=0):
         """Yield status updates of a specific user"""
         endpoint = "/user/statuses/"
-        params = {"username": username, "offset": offset, "limit": 50}
+        params = {"username": username, "offset": offset, "limit": 50,
+                  "expand": "status.fulltext" if self.extra else None}
         return self._pagination(endpoint, params)
 
     def user_friends_watch(self, username):

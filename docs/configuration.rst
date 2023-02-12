@@ -1233,8 +1233,11 @@ Type
 Default
     ``false``
 Description
-    Download extra Sta.sh resources from
-    description texts and journals.
+    Download extra content. This includes:
+    
+    * Sta.sh URLs in description texts, journals, journal-like
+      deviations and status updates
+    * Embedded deviations in status updates
 
     Note: Enabling this option also enables deviantart.metadata_.
 
