@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2022 Mike Fährmann
+# Copyright 2015-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -10,8 +10,9 @@ import os
 import sys
 import shutil
 import logging
+import functools
 import unicodedata
-from . import config, util, formatter
+from . import config, util, formatter, exception
 
 
 # --------------------------------------------------------------------
@@ -23,7 +24,7 @@ LOG_LEVEL = logging.INFO
 
 
 class Logger(logging.Logger):
-    """Custom logger that includes extra info in log records"""
+    """Custom Logger that includes extra info in log records"""
 
     def makeRecord(self, name, level, fn, lno, msg, args, exc_info,
                    func=None, extra=None, sinfo=None,
@@ -61,6 +62,41 @@ class LoggerAdapter():
         if self.logger.isEnabledFor(logging.ERROR):
             kwargs["extra"] = self.extra
             self.logger._log(logging.ERROR, msg, args, **kwargs)
+
+
+class LoggerAdapterEx():
+
+    def __init__(self, logger, extra, job):
+        self.logger = logger
+        self.extra = extra
+        self.job = job
+
+        self.debug = functools.partial(self.log, logging.DEBUG)
+        self.info = functools.partial(self.log, logging.INFO)
+        self.warning = functools.partial(self.log, logging.WARNING)
+        self.error = functools.partial(self.log, logging.ERROR)
+
+    def log(self, level, msg, *args, **kwargs):
+        if args:
+            msg = msg % args
+            args = None
+
+        for search, action in self.job._logger_hooks:
+            match = search(msg)
+            if match:
+                if action == "wait+restart":
+                    kwargs["extra"] = self.extra
+                    self.logger._log(level, msg, args, **kwargs)
+                    input("Press Enter to continue")
+                    raise exception.RestartExtraction()
+                elif action.startswith("~"):
+                    level = logging._nameToLevel[action[1:]]
+                elif action.startswith("|"):
+                    self.job.status |= int(action[1:])
+
+        if self.logger.isEnabledFor(level):
+            kwargs["extra"] = self.extra
+            self.logger._log(level, msg, args, **kwargs)
 
 
 class PathfmtProxy():
