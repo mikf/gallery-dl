@@ -781,10 +781,17 @@ class DeviantartStatusExtractor(DeviantartExtractor):
         }),
         # shared deviation
         ("https://www.deviantart.com/justgalym/posts/statuses", {
-            "options": (("journals", "none"),),
+            "options": (("journals", "none"), ("metadata", 1), ("folders", 1)),
             "count": 1,
             "pattern": r"https://images-wixmp-\w+\.wixmp\.com/f"
                        r"/[^/]+/[^.]+\.jpg\?token=",
+            "keyword": {
+                "description": str,
+                "folders": list,
+                "is_watching": bool,
+                "license": str,
+                "tags": list,
+            }
         }),
         # shared sta.sh item
         ("https://www.deviantart.com/vanillaghosties/posts/statuses", {
@@ -1490,20 +1497,25 @@ class DeviantartOAuthAPI():
                             "Private deviations detected! Run 'gallery-dl "
                             "oauth:deviantart' and follow the instructions to "
                             "be able to access them.")
-                # "statusid" cannot be used instead
-                if results and "deviationid" in results[0]:
+
+                # 'statusid' cannot be used in place of 'deviationid'
+                deviations = results if \
+                    results and "deviationid" in results[0] else None
+                nested_deviations = self._embedded_shared_content(results)
+                for dev in nested_deviations:
+                    if not dev["is_deleted"]:
+                        continue
+                    patch = self._call(
+                        "/deviation/" + dev["deviationid"], fatal=False)
+                    if patch:
+                        dev.update(patch)
+                for devs in (deviations, nested_deviations):
+                    if not devs:
+                        continue
                     if self.metadata:
-                        self._metadata(results)
+                        self._metadata(devs)
                     if self.folders:
-                        self._folders(results)
-                else:  # attempt to fix "deleted" deviations
-                    for dev in self._shared_content(results):
-                        if not dev["is_deleted"]:
-                            continue
-                        patch = self._call(
-                            "/deviation/" + dev["deviationid"], fatal=False)
-                        if patch:
-                            dev.update(patch)
+                        self._folders(devs)
 
             yield from results
 
@@ -1523,12 +1535,50 @@ class DeviantartOAuthAPI():
                 params["offset"] = int(params["offset"]) + len(results)
 
     @staticmethod
-    def _shared_content(results):
-        """Return an iterable of shared deviations in 'results'"""
+    def _embedded_shared_content(results):
+        """Deduplicate and return an iterable of embedded/shared deviations
+        in 'results'
+        """
+        # gather deviations and condense duplicates
+        items = {}
         for result in results:
+            # shared content in statuses
             for item in result.get("items") or ():
-                if "deviation" in item:
-                    yield item["deviation"]
+                if "deviation" not in item:
+                    continue
+                dev = item["deviation"]
+                if dev["deviationid"] in items:
+                    item["deviation"] = items[dev["deviationid"]]
+                else:
+                    items[dev["deviationid"]] = dev
+            # embedded content in statuses and journals
+            # (/user/profile/posts endpoint)
+            try:
+                entity_map = \
+                    result["text_content"]["body"]["markup"]["entityMap"]
+            except KeyError:
+                continue
+            for entity in entity_map.values():
+                if "data" not in entity["data"]:
+                    continue
+                data = entity["data"]["data"]
+                if isinstance(data, dict) and "deviationid" in data:
+                    if data["deviationid"] in items:
+                        entity["data"]["data"] = items[data["deviationid"]]
+                    else:
+                        items[data["deviationid"]] = data
+                    continue
+                if not isinstance(data, list):
+                    continue
+                for idx, dev in enumerate(data):
+                    if not isinstance(dev, dict) or "deviationid" not in dev:
+                        continue
+                    if dev["deviationid"] in items:
+                        data[idx] = items[dev["deviationid"]]
+                    else:
+                        items[dev["deviationid"]] = dev
+
+        return items.values()
 
     def _pagination_list(self, endpoint, params, key="results"):
         result = []
@@ -1537,10 +1587,11 @@ class DeviantartOAuthAPI():
 
     def _metadata(self, deviations):
         """Add extended metadata to each deviation object"""
-        for deviation, metadata in zip(
-                deviations, self.deviation_metadata(deviations)):
-            deviation.update(metadata)
-            deviation["tags"] = [t["tag_name"] for t in deviation["tags"]]
+        for batch in util.batched(deviations, 50):
+            for deviation, metadata in zip(
+                    batch, self.deviation_metadata(batch)):
+                deviation.update(metadata)
+                deviation["tags"] = [t["tag_name"] for t in deviation["tags"]]
 
     def _folders(self, deviations):
         """Add a list of all containing folders to each deviation object"""

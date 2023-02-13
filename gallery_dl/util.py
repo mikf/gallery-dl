@@ -53,6 +53,20 @@ def advance(iterable, num):
     return iterator
 
 
+def batched(iterable, n):
+    """Batch 'iterable' into tuples of length 'n'"""
+    # batched('ABCDEFG', 3) --> ABC DEF G
+    # https://stackoverflow.com/questions/8991506
+    if n < 1:
+        raise ValueError("n must be at least one")
+    it = iter(iterable)
+    while True:
+        chunk = tuple(itertools.islice(it, n))
+        if not chunk:
+            return
+        yield chunk
+
+
 def unique(iterable):
     """Yield unique elements from 'iterable' while preserving order"""
     seen = set()
