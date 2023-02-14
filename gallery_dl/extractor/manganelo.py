@@ -11,7 +11,7 @@ from .. import text
 import re
 
 BASE_PATTERN = \
-    r"(?:https?://)?((?:(?:chap|read)?manganato|(?:www\.)?manganelo)\.com)"
+    r"(?:https?://)?((?:chap|read|www\.|m\.)?mangan(?:ato|elo)\.com)"
 
 
 class ManganeloChapterExtractor(ChapterExtractor):
@@ -26,6 +26,12 @@ class ManganeloChapterExtractor(ChapterExtractor):
             "keyword": "2c5cd59342f149375df9bcb50aa416b4d04a43cf",
             "count": 25,
         }),
+        ("https://chapmanganelo.com/manga-ti107776/chapter-4", {
+            "pattern": r"https://v\d+\.mkklcdnv6tempv5\.com/img/tab_17/01/92"
+                       r"/08/ti970565/chapter_4_caster/\d+-o\.jpg",
+            "keyword": "16ac03503c920fb98490ad2c3621c27fddcb6c4b",
+            "count": 45,
+        }),
         ("https://readmanganato.com/manga-gn983696/chapter-23"),
         ("https://manganelo.com/chapter/gamers/chapter_15"),
         ("https://manganelo.com/chapter/gq921227/chapter_23"),
@@ -37,13 +43,11 @@ class ManganeloChapterExtractor(ChapterExtractor):
         self.session.headers['Referer'] = self.root
 
     def metadata(self, page):
-        _     , pos = text.extract(page, '<a class="a-h" ', '/a>')
-        manga , pos = text.extract(page, '<a class="a-h" ', '/a>', pos)
-        info  , pos = text.extract(page, '<a class="a-h" ', '/a>', pos)
+        _     , pos = text.extract(page, 'class="a-h"', ">")
+        manga , pos = text.extract(page, 'title="', '"', pos)
+        info  , pos = text.extract(page, 'title="', '"', pos)
         author, pos = text.extract(page, '- Author(s) : ', '</p>', pos)
 
-        manga, _ = text.extract(manga, '">', '<')
-        info , _ = text.extract(info , '">', '<')
         match = re.match(
             r"(?:[Vv]ol\. *(\d+) )?"
             r"[Cc]hapter *([^:]*)"
@@ -68,6 +72,10 @@ class ManganeloChapterExtractor(ChapterExtractor):
         return [
             (url, None)
             for url in text.extract_iter(page, '<img src="', '"')
+        ] or [
+            (url, None)
+            for url in text.extract_iter(
+                page, '<img class="reader-content" src="', '"')
         ]
 
 
@@ -81,6 +89,10 @@ class ManganeloMangaExtractor(MangaExtractor):
         ("https://chapmanganato.com/manga-gn983696", {
             "pattern": ManganeloChapterExtractor.pattern,
             "count": ">= 25",
+        }),
+        ("https://m.manganelo.com/manga-ti107776", {
+            "pattern": ManganeloChapterExtractor.pattern,
+            "count": ">= 12",
         }),
         ("https://readmanganato.com/manga-gn983696"),
         ("https://manganelo.com/manga/read_otome_no_teikoku"),
@@ -97,7 +109,7 @@ class ManganeloMangaExtractor(MangaExtractor):
         data = self.parse_page(page, {"lang": "en", "language": "English"})
 
         needle = 'class="chapter-name text-nowrap" href="'
-        pos = page.index('<ul class="row-content-chapter">')
+        pos = page.index('class="row-content-chapter')
         while True:
             url, pos = text.extract(page, needle, '"', pos)
             if not url:
