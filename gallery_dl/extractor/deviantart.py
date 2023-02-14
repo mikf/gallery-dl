@@ -87,6 +87,13 @@ class DeviantartExtractor(Extractor):
                 yield Message.Queue, url, data
                 continue
 
+            if deviation["is_deleted"]:
+                # prevent crashing in case the deviation really is
+                # deleted
+                self.log.debug(
+                    "Skipping %s (deleted)", deviation["deviationid"])
+                continue
+
             if "premium_folder_data" in deviation:
                 data = self._fetch_premium(deviation)
                 if not data:
@@ -796,6 +803,14 @@ class DeviantartStatusExtractor(DeviantartExtractor):
                 "url"         : "re:^https://sta.sh",
             },
         }),
+        # "deleted" deviations in 'items'
+        ("https://www.deviantart.com/AndrejSKalin/posts/statuses", {
+            "options": (("journals", "none"), ("original", 0),
+                        ("image-filter", "deviationid[:8] == '147C8B03'")),
+            "count": 2,
+            "archive": False,
+            "keyword": {"deviationid": "147C8B03-7D34-AE93-9241-FA3C6DBBC655"}
+        }),
         ("https://www.deviantart.com/justgalym/posts/statuses", {
             "options": (("journals", "text"),),
             "url": "c8744f7f733a3029116607b826321233c5ca452d",
@@ -1475,11 +1490,26 @@ class DeviantartOAuthAPI():
                             "oauth:deviantart' and follow the instructions to "
                             "be able to access them.")
                 # "statusid" cannot be used instead
-                if results and "deviationid" in results[0]:
-                    if self.metadata:
-                        self._metadata(results)
-                    if self.folders:
-                        self._folders(results)
+                if results:
+                    if "deviationid" in results[0]:
+                        if self.metadata:
+                            self._metadata(results)
+                        if self.folders:
+                            self._folders(results)
+                    else:
+                        # attempt to fix "deleted" deviations
+                        for result in results:
+                            for item in result.get("items") or ():
+                                if "deviation" not in item or \
+                                        not item["deviation"]["is_deleted"]:
+                                    continue
+                                patch = self._call(
+                                    "/deviation/" +
+                                    item["deviation"]["deviationid"],
+                                    fatal=False)
+                                if patch:
+                                    item["deviation"] = patch
+
             yield from results
 
             if not data["has_more"] and (
