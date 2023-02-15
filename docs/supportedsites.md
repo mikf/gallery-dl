@@ -118,7 +118,7 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>Catbox</td>
     <td>https://catbox.moe/</td>
-    <td>Albums</td>
+    <td>Albums, Files</td>
     <td></td>
 </tr>
 <tr>
