@@ -308,7 +308,7 @@ class PinterestSearchExtractor(PinterestExtractor):
 
     def __init__(self, match):
         PinterestExtractor.__init__(self, match)
-        self.search = match.group(1)
+        self.search = text.unquote(match.group(1))
 
     def metadata(self):
         return {"search": self.search}
