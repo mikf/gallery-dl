@@ -1490,25 +1490,19 @@ class DeviantartOAuthAPI():
                             "oauth:deviantart' and follow the instructions to "
                             "be able to access them.")
                 # "statusid" cannot be used instead
-                if results:
-                    if "deviationid" in results[0]:
-                        if self.metadata:
-                            self._metadata(results)
-                        if self.folders:
-                            self._folders(results)
-                    else:
-                        # attempt to fix "deleted" deviations
-                        for result in results:
-                            for item in result.get("items") or ():
-                                if "deviation" not in item or \
-                                        not item["deviation"]["is_deleted"]:
-                                    continue
-                                patch = self._call(
-                                    "/deviation/" +
-                                    item["deviation"]["deviationid"],
-                                    fatal=False)
-                                if patch:
-                                    item["deviation"] = patch
+                if results and "deviationid" in results[0]:
+                    if self.metadata:
+                        self._metadata(results)
+                    if self.folders:
+                        self._folders(results)
+                else:  # attempt to fix "deleted" deviations
+                    for dev in self._shared_content(results):
+                        if not dev["is_deleted"]:
+                            continue
+                        patch = self._call(
+                            "/deviation/" + dev["deviationid"], fatal=False)
+                        if patch:
+                            dev.update(patch)
 
             yield from results
 
@@ -1526,6 +1520,14 @@ class DeviantartOAuthAPI():
                 if params.get("offset") is None:
                     return
                 params["offset"] = int(params["offset"]) + len(results)
+
+    @staticmethod
+    def _shared_content(results):
+        """Return an iterable of shared deviations in 'results'"""
+        for result in results:
+            for item in result.get("items") or ():
+                if "deviation" in item:
+                    yield item["deviation"]
 
     def _pagination_list(self, endpoint, params, key="results"):
         result = []
