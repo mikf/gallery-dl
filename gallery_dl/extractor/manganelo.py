@@ -10,12 +10,11 @@ from .common import ChapterExtractor, MangaExtractor
 from .. import text
 import re
 
-BASE_PATTERN = \
-    r"(?:https?://)?((?:chap|read|www\.|m\.)?mangan(?:ato|elo)\.com)"
+BASE_PATTERN = r"(?:https?://)?((?:chap|read|www\.|m\.)?mangan(?:at|el)o\.com)"
 
 
 class ManganeloChapterExtractor(ChapterExtractor):
-    """Extractor for manga-chapters from manganelo.com"""
+    """Extractor for manga chapters from manganelo.com"""
     category = "manganelo"
     root = "https://chapmanganato.com"
     pattern = BASE_PATTERN + r"(/(?:manga-\w+|chapter/\w+)/chapter[-_][^/?#]+)"
