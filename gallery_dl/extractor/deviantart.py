@@ -676,15 +676,9 @@ class DeviantartFavoriteExtractor(DeviantartExtractor):
     )
 
     def deviations(self):
-        folders = self.api.collections_folders(self.user)
         if self.flat:
-            deviations = itertools.chain.from_iterable(
-                self.api.collections(self.user, folder["folderid"])
-                for folder in folders
-            )
-            if self.offset:
-                deviations = util.advance(deviations, self.offset)
-            return deviations
+            return self.api.collections_all(self.user, self.offset)
+        folders = self.api.collections_folders(self.user)
         return self._folder_urls(
             folders, "favourites", DeviantartCollectionExtractor)
 
@@ -1257,6 +1251,13 @@ class DeviantartOAuthAPI():
     def collections(self, username, folder_id, offset=0):
         """Yield all Deviation-objects contained in a collection folder"""
         endpoint = "/collections/" + folder_id
+        params = {"username": username, "offset": offset, "limit": 24,
+                  "mature_content": self.mature}
+        return self._pagination(endpoint, params)
+
+    def collections_all(self, username, offset=0):
+        """Yield all deviations in a user's collection"""
+        endpoint = "/collections/all"
         params = {"username": username, "offset": offset, "limit": 24,
                   "mature_content": self.mature}
         return self._pagination(endpoint, params)
