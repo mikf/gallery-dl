@@ -694,7 +694,7 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>PornPics.com</td>
     <td>https://www.pornpics.com/</td>
-    <td>Galleries</td>
+    <td>Galleries, Search Results, Tag Searches</td>
     <td></td>
 </tr>
 <tr>

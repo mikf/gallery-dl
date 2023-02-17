@@ -8,25 +8,59 @@
 
 """Extractors for https://www.pornpics.com/"""
 
-from .common import GalleryExtractor, Extractor
+from .common import GalleryExtractor, Extractor, Message
 from .. import text
 
-BASE_PATTERN = r"(?:https?://)?(?:www\.)?pornpics\.com"
+BASE_PATTERN = r"(?:https?://)?(?:www\.)?pornpics\.com(?:/\w\w)?"
 
 
 class PornpicsExtractor(Extractor):
     """Base class for pornpics extractors"""
     category = "pornpics"
-    root = "https://www.pornpics.com/"
+    root = "https://www.pornpics.com"
+    request_interval = (0.5, 1.5)
 
     def __init__(self, match):
         super().__init__(match)
         self.session.headers["Referer"] = self.root
 
+    def items(self):
+        for gallery in self.galleries():
+            gallery["_extractor"] = PornpicsGalleryExtractor
+            yield Message.Queue, gallery["g_url"], gallery
+
+    def _pagination(self, url, params):
+        offset = params["offset"]
+        limit = params["limit"] = 20
+
+        headers = {
+            "Accept": "application/json, text/javascript, */*; q=0.01",
+            "Referer": url if offset else self.root + "/",
+            "X-Requested-With": "XMLHttpRequest",
+        }
+
+        if offset:
+            # fetch first 20 galleries from HTML
+            # since '"offset": 0' does not return a JSON response
+            page = self.request(url).text
+            for path in text.extract_iter(
+                    page, 'class="rel-link" href="', '"'):
+                yield {"g_url": self.root + path}
+            del page
+
+        while True:
+            galleries = self.request(
+                url, params=params, headers=headers).json()
+            yield from galleries
+
+            if len(galleries) < limit:
+                return
+            params["offset"] += limit
+
 
 class PornpicsGalleryExtractor(PornpicsExtractor, GalleryExtractor):
     """Extractor for pornpics galleries"""
-    pattern = BASE_PATTERN + r"(?:/\w\w)?(/galleries/(?:[^/?#]+-)?(\d+))"
+    pattern = BASE_PATTERN + r"(/galleries/(?:[^/?#]+-)?(\d+))"
     test = (
         (("https://www.pornpics.com/galleries/british-beauty-danielle-flashes-"
           "hot-breasts-ass-and-snatch-in-the-forest-62610699/"), {
@@ -56,8 +90,10 @@ class PornpicsGalleryExtractor(PornpicsExtractor, GalleryExtractor):
     )
 
     def __init__(self, match):
-        self.gallery_id = match.group(2)
         PornpicsExtractor.__init__(self, match)
+        self.gallery_id = match.group(2)
+
+    items = GalleryExtractor.items
 
     def metadata(self, page):
         extr = text.extract_from(page)
@@ -81,3 +117,53 @@ class PornpicsGalleryExtractor(PornpicsExtractor, GalleryExtractor):
             (url, None)
             for url in text.extract_iter(page, "class='rel-link' href='", "'")
         ]
+
+
+class PornpicsTagExtractor(PornpicsExtractor):
+    """Extractor for galleries from pornpics tag searches"""
+    subcategory = "tag"
+    pattern = BASE_PATTERN + r"/tags/([^/?#]+)"
+    test = (
+        ("https://www.pornpics.com/tags/summer-dress/", {
+            "pattern": PornpicsGalleryExtractor.pattern,
+            "range": "1-50",
+            "count": 50,
+        }),
+        ("https://pornpics.com/fr/tags/summer-dress"),
+    )
+
+    def __init__(self, match):
+        PornpicsExtractor.__init__(self, match)
+        self.tag = match.group(1)
+
+    def galleries(self):
+        url = "{}/tags/{}/".format(self.root, self.tag)
+        params = {"offset": 20}
+        return self._pagination(url, params)
+
+
+class PornpicsSearchExtractor(PornpicsExtractor):
+    """Extractor for galleries from pornpics tag searches"""
+    subcategory = "search"
+    pattern = BASE_PATTERN + r"/\?q=([^&#]+)"
+    test = (
+        ("https://www.pornpics.com/?q=nature", {
+            "pattern": PornpicsGalleryExtractor.pattern,
+            "range": "1-50",
+            "count": 50,
+        }),
+        ("https://pornpics.com/jp/?q=nature"),
+    )
+
+    def __init__(self, match):
+        PornpicsExtractor.__init__(self, match)
+        self.search = match.group(1)
+
+    def galleries(self):
+        url = self.root + "/search/srch.php"
+        params = {
+            "q"     : self.search,
+            "lang"  : "en",
+            "offset": 0,
+        }
+        return self._pagination(url, params)
