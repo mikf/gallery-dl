@@ -120,6 +120,7 @@ modules = [
     "plurk",
     "poipiku",
     "pornhub",
+    "pornpics",
     "pururin",
     "reactor",
     "readcomiconline",
