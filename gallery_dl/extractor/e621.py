@@ -8,7 +8,7 @@
 
 """Extractors for https://e621.net/ and other e621 instances"""
 
-from .common import Extractor, Message
+from .common import Message
 from . import danbooru
 from .. import text, version
 
@@ -21,13 +21,9 @@ class E621Extractor(danbooru.DanbooruExtractor):
     per_page = 320
     request_interval_min = 1.0
 
-    def request(self, url, **kwargs):
-        kwargs["headers"] = self.headers
-        return Extractor.request(self, url, **kwargs)
-
     def items(self):
-        self.headers = {"User-Agent": "gallery-dl/{} (by mikf)".format(
-            version.__version__)}
+        self.session.headers["User-Agent"] = \
+            version.__useragent__ + " (by mikf)"
 
         includes = self.config("metadata") or ()
         if includes:

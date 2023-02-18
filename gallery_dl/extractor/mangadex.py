@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2022 Mike Fährmann
+# Copyright 2018-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -9,9 +9,8 @@
 """Extractors for https://mangadex.org/"""
 
 from .common import Extractor, Message
-from .. import text, util, exception
+from .. import text, util, version, exception
 from ..cache import cache, memcache
-from ..version import __version__
 from collections import defaultdict
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?mangadex\.(?:org|cc)"
@@ -28,10 +27,10 @@ class MangadexExtractor(Extractor):
     archive_fmt = "{chapter_id}_{page}"
     root = "https://mangadex.org"
     _cache = {}
-    _headers = {"User-Agent": "gallery-dl/" + __version__}
 
     def __init__(self, match):
         Extractor.__init__(self, match)
+        self.session.headers["User-Agent"] = version.__useragent__
         self.api = MangadexAPI(self)
         self.uuid = match.group(1)
 
@@ -127,7 +126,6 @@ class MangadexChapterExtractor(MangadexExtractor):
                 data["chapter"], data["chapter_minor"], data["_external_url"])
 
         yield Message.Directory, data
-        data["_http_headers"] = self._headers
 
         server = self.api.athome_server(self.uuid)
         chapter = server["chapter"]
@@ -192,7 +190,7 @@ class MangadexAPI():
 
     def __init__(self, extr):
         self.extractor = extr
-        self.headers = extr._headers.copy()
+        self.headers = {}
 
         self.username, self.password = self.extractor._get_auth_info()
         if not self.username:
