@@ -718,7 +718,7 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>RedGIFs</td>
     <td>https://redgifs.com/</td>
-    <td>individual Images, Search Results, User Profiles</td>
+    <td>Collections, individual Images, Search Results, User Profiles</td>
     <td></td>
 </tr>
 <tr>

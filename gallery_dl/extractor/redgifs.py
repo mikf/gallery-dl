@@ -93,7 +93,7 @@ class RedgifsCollectionExtractor(RedgifsExtractor):
     """Extractor for an individual user collection"""
     subcategory = "collection"
     directory_fmt = ("{category}", "{userName}", "{folderName}")
-    archive_fmt = "{collection_id}_{id}"
+    archive_fmt = "{folderId}_{id}"
     pattern = (r"(?:https?://)?(?:www\.)?redgifs\.com/users"
                r"/([^/?#]+)/collections/([^/?#]+)")
     test = (
@@ -114,11 +114,9 @@ class RedgifsCollectionExtractor(RedgifsExtractor):
         self.collection_id = match.group(2)
 
     def metadata(self):
-        return {
-            "collection_id": self.collection_id,
-            "userName": self.key,
-            **self.api.collection_getInfo(self.key, self.collection_id),
-        }
+        data = {"userName": self.key}
+        data.update(self.api.collection_info(self.key, self.collection_id))
+        return data
 
     def gifs(self):
         return self.api.collection(self.key, self.collection_id)
@@ -191,6 +189,8 @@ class RedgifsImageExtractor(RedgifsExtractor):
 
 
 class RedgifsAPI():
+    """https://api.redgifs.com/docs/index.html"""
+
     API_ROOT = "https://api.redgifs.com"
 
     def __init__(self, extractor):
@@ -212,14 +212,14 @@ class RedgifsAPI():
         params = {"order": order}
         return self._pagination(endpoint, params)
 
-    def collection_getInfo(self, user, collection_id):
-        endpoint = "/v2/users/{}/collections/{}".format(user, collection_id)
-        return self._call(endpoint)
-
     def collection(self, user, collection_id):
         endpoint = "/v2/users/{}/collections/{}/gifs".format(
             user, collection_id)
         return self._pagination(endpoint)
+
+    def collection_info(self, user, collection_id):
+        endpoint = "/v2/users/{}/collections/{}".format(user, collection_id)
+        return self._call(endpoint)
 
     def collections(self, user):
         endpoint = "/v2/users/{}/collections".format(user)
