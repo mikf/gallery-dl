@@ -212,6 +212,9 @@ SUBCATEGORY_MAP = {
     "reddit": {
         "home": "Home Feed",
     },
+    "redgifs": {
+        "collections": "",
+    },
     "sankaku": {
         "books": "Book Searches",
     },
