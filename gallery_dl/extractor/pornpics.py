@@ -22,6 +22,7 @@ class PornpicsExtractor(Extractor):
 
     def __init__(self, match):
         super().__init__(match)
+        self.item = match.group(1)
         self.session.headers["Referer"] = self.root
 
     def items(self):
@@ -29,17 +30,8 @@ class PornpicsExtractor(Extractor):
             gallery["_extractor"] = PornpicsGalleryExtractor
             yield Message.Queue, gallery["g_url"], gallery
 
-    def _pagination(self, url, params):
-        offset = params["offset"]
-        limit = params["limit"] = 20
-
-        headers = {
-            "Accept": "application/json, text/javascript, */*; q=0.01",
-            "Referer": url if offset else self.root + "/",
-            "X-Requested-With": "XMLHttpRequest",
-        }
-
-        if offset:
+    def _pagination(self, url, params=None):
+        if params is None:
             # fetch first 20 galleries from HTML
             # since '"offset": 0' does not return a JSON response
             page = self.request(url).text
@@ -47,6 +39,15 @@ class PornpicsExtractor(Extractor):
                     page, 'class="rel-link" href="', '"'):
                 yield {"g_url": self.root + path}
             del page
+            params = {"offset": 20}
+
+        limit = params["limit"] = 20
+
+        headers = {
+            "Accept": "application/json, text/javascript, */*; q=0.01",
+            "Referer": url if params["offset"] else self.root + "/",
+            "X-Requested-With": "XMLHttpRequest",
+        }
 
         while True:
             galleries = self.request(
@@ -132,37 +133,40 @@ class PornpicsTagExtractor(PornpicsExtractor):
         ("https://pornpics.com/fr/tags/summer-dress"),
     )
 
-    def __init__(self, match):
-        PornpicsExtractor.__init__(self, match)
-        self.tag = match.group(1)
-
     def galleries(self):
-        url = "{}/tags/{}/".format(self.root, self.tag)
-        params = {"offset": 20}
-        return self._pagination(url, params)
+        url = "{}/tags/{}/".format(self.root, self.item)
+        return self._pagination(url)
 
 
 class PornpicsSearchExtractor(PornpicsExtractor):
-    """Extractor for galleries from pornpics tag searches"""
+    """Extractor for galleries from pornpics search results"""
     subcategory = "search"
-    pattern = BASE_PATTERN + r"/\?q=([^&#]+)"
+    pattern = BASE_PATTERN + r"/(?:\?q=|pornstars/|channels/)([^/&#]+)"
     test = (
         ("https://www.pornpics.com/?q=nature", {
             "pattern": PornpicsGalleryExtractor.pattern,
             "range": "1-50",
             "count": 50,
         }),
+        ("https://www.pornpics.com/channels/femjoy/", {
+            "pattern": PornpicsGalleryExtractor.pattern,
+            "range": "1-50",
+            "count": 50,
+        }),
+        ("https://www.pornpics.com/pornstars/emma-brown/", {
+            "pattern": PornpicsGalleryExtractor.pattern,
+            "range": "1-50",
+            "count": 50,
+        }),
         ("https://pornpics.com/jp/?q=nature"),
+        ("https://pornpics.com/it/channels/femjoy"),
+        ("https://pornpics.com/pt/pornstars/emma-brown"),
     )
-
-    def __init__(self, match):
-        PornpicsExtractor.__init__(self, match)
-        self.search = match.group(1)
 
     def galleries(self):
         url = self.root + "/search/srch.php"
         params = {
-            "q"     : self.search,
+            "q"     : self.item.replace("-", " "),
             "lang"  : "en",
             "offset": 0,
         }
