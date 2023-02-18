@@ -7,3 +7,4 @@
 # published by the Free Software Foundation.
 
 __version__ = "1.25.0-dev"
+__useragent__ = "gallery-dl/" + __version__
