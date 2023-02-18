@@ -87,6 +87,13 @@ class DeviantartExtractor(Extractor):
                 yield Message.Queue, url, data
                 continue
 
+            if deviation["is_deleted"]:
+                # prevent crashing in case the deviation really is
+                # deleted
+                self.log.debug(
+                    "Skipping %s (deleted)", deviation["deviationid"])
+                continue
+
             if "premium_folder_data" in deviation:
                 data = self._fetch_premium(deviation)
                 if not data:
@@ -790,6 +797,14 @@ class DeviantartStatusExtractor(DeviantartExtractor):
                 "url"         : "re:^https://sta.sh",
             },
         }),
+        # "deleted" deviations in 'items'
+        ("https://www.deviantart.com/AndrejSKalin/posts/statuses", {
+            "options": (("journals", "none"), ("original", 0),
+                        ("image-filter", "deviationid[:8] == '147C8B03'")),
+            "count": 2,
+            "archive": False,
+            "keyword": {"deviationid": "147C8B03-7D34-AE93-9241-FA3C6DBBC655"}
+        }),
         ("https://www.deviantart.com/justgalym/posts/statuses", {
             "options": (("journals", "text"),),
             "url": "c8744f7f733a3029116607b826321233c5ca452d",
@@ -1481,6 +1496,15 @@ class DeviantartOAuthAPI():
                         self._metadata(results)
                     if self.folders:
                         self._folders(results)
+                else:  # attempt to fix "deleted" deviations
+                    for dev in self._shared_content(results):
+                        if not dev["is_deleted"]:
+                            continue
+                        patch = self._call(
+                            "/deviation/" + dev["deviationid"], fatal=False)
+                        if patch:
+                            dev.update(patch)
+
             yield from results
 
             if not data["has_more"] and (
@@ -1497,6 +1521,14 @@ class DeviantartOAuthAPI():
                 if params.get("offset") is None:
                     return
                 params["offset"] = int(params["offset"]) + len(results)
+
+    @staticmethod
+    def _shared_content(results):
+        """Return an iterable of shared deviations in 'results'"""
+        for result in results:
+            for item in result.get("items") or ():
+                if "deviation" in item:
+                    yield item["deviation"]
 
     def _pagination_list(self, endpoint, params, key="results"):
         result = []
