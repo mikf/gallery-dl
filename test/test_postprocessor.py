@@ -287,7 +287,7 @@ class MetadataTest(BasePostprocessorTest):
             self._trigger()
         self.assertEqual(self._output(m), "foobar1\nfoobar2\nfoobarbaz\n")
 
-    def test_metadata_tags_array_of_dict(self):
+    def test_metadata_tags_list_of_dict(self):
         self._create(
             {"mode": "tags"},
             {"tags": [{"g": "foobar1", "m": "foobar2"}, {"g": None, "m": "foobarbaz"}]},
