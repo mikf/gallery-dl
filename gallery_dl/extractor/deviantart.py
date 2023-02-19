@@ -1234,7 +1234,7 @@ class DeviantartOAuthAPI():
         endpoint = "/browse/newest"
         params = {
             "q"             : query,
-            "limit"         : 50 if self.metadata else 120,
+            "limit"         : 100 if self.metadata else 120,
             "offset"        : offset,
             "mature_content": self.mature,
         }
@@ -1245,7 +1245,7 @@ class DeviantartOAuthAPI():
         endpoint = "/browse/popular"
         params = {
             "q"             : query,
-            "limit"         : 50 if self.metadata else 120,
+            "limit"         : 100 if self.metadata else 120,
             "timerange"     : timerange,
             "offset"        : offset,
             "mature_content": self.mature,
