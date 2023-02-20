@@ -6,7 +6,7 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract images from https://www.deviantart.com/"""
+"""Extractors for https://www.deviantart.com/"""
 
 from .common import Extractor, Message
 from .. import text, util, exception
@@ -29,21 +29,23 @@ BASE_PATTERN = (
 class DeviantartExtractor(Extractor):
     """Base class for deviantart extractors"""
     category = "deviantart"
+    root = "https://www.deviantart.com"
     directory_fmt = ("{category}", "{username}")
     filename_fmt = "{category}_{index}_{title}.{extension}"
     cookiedomain = None
-    root = "https://www.deviantart.com"
+    cookienames = ("auth", "auth_secure", "userinfo")
+    _warning = True
     _last_request = 0
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.offset = 0
         self.flat = self.config("flat", True)
         self.extra = self.config("extra", False)
         self.original = self.config("original", True)
         self.comments = self.config("comments", False)
         self.user = match.group(1) or match.group(2)
         self.group = False
+        self.offset = 0
         self.api = None
 
         unwatch = self.config("auto-unwatch")
@@ -68,6 +70,17 @@ class DeviantartExtractor(Extractor):
     def skip(self, num):
         self.offset += num
         return num
+
+    def login(self):
+        if not self._check_cookies(self.cookienames):
+            username, password = self._get_auth_info()
+            if username:
+                self._update_cookies(_login_impl(self, username, password))
+            elif self._warning:
+                self.log.warning(
+                    "No session cookies or login credentials available. "
+                    "Unable to fetch mature-rated content.")
+            DeviantartExtractor._warning = False
 
     def items(self):
         self.api = DeviantartOAuthAPI(self)
@@ -412,6 +425,16 @@ class DeviantartExtractor(Extractor):
         for username in self.unwatch:
             self.log.info("Unwatching %s", username)
             self.api.user_friends_unwatch(username)
+
+    def _eclipse_to_oauth(self, eclipse_api, deviations):
+        for obj in deviations:
+            deviation = obj["deviation"] if "deviation" in obj else obj
+            deviation_uuid = eclipse_api.deviation_extended_fetch(
+                deviation["deviationId"],
+                deviation["author"]["username"],
+                "journal" if deviation["isJournal"] else "art",
+            )["deviation"]["extended"]["deviationUuid"]
+            yield self.api.deviation(deviation_uuid)
 
 
 class DeviantartUserExtractor(DeviantartExtractor):
@@ -870,8 +893,7 @@ class DeviantartPopularExtractor(DeviantartExtractor):
                      "{popular[range]}", "{popular[search]}")
     archive_fmt = "P_{popular[range]}_{popular[search]}_{index}.{extension}"
     pattern = (r"(?:https?://)?www\.deviantart\.com/(?:"
-               r"search(?:/deviations)?"
-               r"|(?:deviations/?)?\?order=(popular-[^/?#]+)"
+               r"(?:deviations/?)?\?order=(popular-[^/?#]+)"
                r"|((?:[\w-]+/)*)(popular-[^/?#]+)"
                r")/?(?:\?([^#]*))?")
     test = (
@@ -885,8 +907,6 @@ class DeviantartPopularExtractor(DeviantartExtractor):
             "range": "1-30",
             "count": 30,
         }),
-        ("https://www.deviantart.com/search?q=tree"),
-        ("https://www.deviantart.com/search/deviations?order=popular-1-week"),
         ("https://www.deviantart.com/artisan/popular-all-time/?q=tree"),
     )
 
@@ -1112,33 +1132,42 @@ class DeviantartScrapsExtractor(DeviantartExtractor):
         ("https://shimoda7.deviantart.com/gallery/?catpath=scraps"),
     )
     cookiedomain = ".deviantart.com"
-    cookienames = ("auth", "auth_secure", "userinfo")
-    _warning = True
 
     def deviations(self):
         self.login()
 
         eclipse_api = DeviantartEclipseAPI(self)
-        for obj in eclipse_api.gallery_scraps(self.user, self.offset):
-            deviation = obj["deviation"]
-            deviation_uuid = eclipse_api.deviation_extended_fetch(
-                deviation["deviationId"],
-                deviation["author"]["username"],
-                "journal" if deviation["isJournal"] else "art",
-            )["deviation"]["extended"]["deviationUuid"]
+        return self._eclipse_to_oauth(
+            eclipse_api, eclipse_api.gallery_scraps(self.user, self.offset))
 
-            yield self.api.deviation(deviation_uuid)
 
-    def login(self):
-        """Login and obtain session cookies"""
-        if not self._check_cookies(self.cookienames):
-            username, password = self._get_auth_info()
-            if username:
-                self._update_cookies(_login_impl(self, username, password))
-            elif self._warning:
-                self.log.warning(
-                    "No session cookies set: Unable to fetch mature scraps.")
-            DeviantartScrapsExtractor._warning = False
+class DeviantartSearchExtractor(DeviantartExtractor):
+    """Extractor for deviantart search results"""
+    subcategory = "search"
+    directory_fmt = ("{category}", "Search", "{search_tags}")
+    archive_fmt = "Q_{search_tags}_{index}.{extension}"
+    pattern = (r"(?:https?://)?www\.deviantart\.com"
+               r"/search(?:/deviations)?/?\?([^#]+)")
+    test = (
+        ("https://www.deviantart.com/search?q=tree"),
+        ("https://www.deviantart.com/search/deviations?order=popular-1-week"),
+    )
+    cookiedomain = ".deviantart.com"
+
+    def deviations(self):
+        self.login()
+
+        query = text.parse_query(self.user)
+        self.search = query.get("q", "")
+        self.user = ""
+
+        eclipse_api = DeviantartEclipseAPI(self)
+        return self._eclipse_to_oauth(
+            eclipse_api, eclipse_api.search_deviations(query))
+
+    def prepare(self, deviation):
+        DeviantartExtractor.prepare(self, deviation)
+        deviation["search_tags"] = self.search
 
 
 class DeviantartFollowingExtractor(DeviantartExtractor):
@@ -1618,6 +1647,10 @@ class DeviantartEclipseAPI():
         }
         return self._pagination(endpoint, params)
 
+    def search_deviations(self, params):
+        endpoint = "/da-browse/api/networkbar/search/deviations"
+        return self._pagination(endpoint, params, key="deviations")
+
     def user_watching(self, user, offset=None):
         endpoint = "/da-user-profile/api/module/watching"
         params = {
@@ -1644,11 +1677,11 @@ class DeviantartEclipseAPI():
         except Exception:
             return {"error": response.text}
 
-    def _pagination(self, endpoint, params):
+    def _pagination(self, endpoint, params, key="results"):
         while True:
             data = self._call(endpoint, params)
 
-            results = data.get("results")
+            results = data.get(key)
             if results is None:
                 return
             yield from results
@@ -1656,11 +1689,16 @@ class DeviantartEclipseAPI():
             if not data.get("hasMore"):
                 return
 
-            next_offset = data.get("nextOffset")
-            if next_offset:
-                params["offset"] = next_offset
+            if "nextCursor" in data:
+                params["offset"] = None
+                params["cursor"] = data["nextCursor"]
+            elif "nextOffset" in data:
+                params["offset"] = data["nextOffset"]
+                params["cursor"] = None
+            elif params.get("offset") is None:
+                return
             else:
-                params["offset"] += params["limit"]
+                params["offset"] = int(params["offset"]) + len(results)
 
     def _module_id_watching(self, user):
         url = "{}/{}/about".format(self.extractor.root, user)

@@ -323,7 +323,7 @@ def setup_test_config():
     config.set(("extractor", "mangoxo")   , "password", "5zbQF10_5u25259Ma")
 
     for category in ("danbooru", "atfbooru", "aibooru", "e621", "e926",
-                     "instagram", "twitter", "subscribestar",
+                     "instagram", "twitter", "subscribestar", "deviantart",
                      "inkbunny", "tapas", "pillowfort", "mangadex"):
         config.set(("extractor", category), "username", None)
 
