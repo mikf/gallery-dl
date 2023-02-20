@@ -69,17 +69,21 @@ class DeviantartExtractor(Extractor):
         self.offset += num
         return num
 
+    def _init_user(self):
+        if not self.user or not self.config("group", True):
+            return
+        profile = self.api.user_profile(self.user, fatal=False)
+        self.group = not profile
+        if self.group:
+            self.subcategory = "group-" + self.subcategory
+            self.user = self.user.lower()
+        else:
+            self.user = profile["user"]["username"]
+
     def items(self):
         self.api = DeviantartOAuthAPI(self)
 
-        if self.user and self.config("group", True):
-            profile = self.api.user_profile(self.user)
-            self.group = not profile
-            if self.group:
-                self.subcategory = "group-" + self.subcategory
-                self.user = self.user.lower()
-            else:
-                self.user = profile["user"]["username"]
+        self._init_user()
 
         for deviation in self.deviations():
             if isinstance(deviation, tuple):
@@ -106,14 +110,14 @@ class DeviantartExtractor(Extractor):
             if "content" in deviation:
                 content = deviation["content"]
 
-                if self.original and deviation["is_downloadable"]:
+                if self.original and deviation.get("is_downloadable"):
                     self._update_content(deviation, content)
                 else:
                     self._update_token(deviation, content)
 
                 yield self.commit(deviation, content)
 
-            elif deviation["is_downloadable"]:
+            elif deviation.get("is_downloadable"):
                 content = self.api.deviation_download(deviation["deviationid"])
                 yield self.commit(deviation, content)
 
@@ -425,8 +429,9 @@ class DeviantartUserExtractor(DeviantartExtractor):
         ("https://www.deviantart.com/shimoda7", {
             "options": (("include", "all"),),
             "pattern": r"/shimoda7/"
-                       r"(gallery(/scraps)?|posts(/statuses)?|favourites)$",
-            "count": 5,
+                       r"(about|gallery(/scraps)?"
+                       r"|posts(/statuses)?|favourites)$",
+            "count": 6,
         }),
         ("https://shimoda7.deviantart.com/"),
     )
@@ -434,6 +439,7 @@ class DeviantartUserExtractor(DeviantartExtractor):
     def items(self):
         base = "{}/{}/".format(self.root, self.user)
         return self._dispatch_extractors((
+            (DeviantartProfileExtractor , base + "about"),
             (DeviantartGalleryExtractor , base + "gallery"),
             (DeviantartScrapsExtractor  , base + "gallery/scraps"),
             (DeviantartJournalExtractor , base + "posts"),
@@ -753,6 +759,9 @@ class DeviantartJournalExtractor(DeviantartExtractor):
             "count": 0,
             "options": (("journals", "none"),),
         }),
+        ("https://www.deviantart.com/angrywhitewan/posts/journals/", {
+            "exception": exception.NotFoundError,
+        }),
         ("https://www.deviantart.com/shimoda7/posts/"),
         ("https://www.deviantart.com/shimoda7/journal/"),
         ("https://www.deviantart.com/shimoda7/journal/?catpath=/"),
@@ -860,6 +869,49 @@ class DeviantartStatusExtractor(DeviantartExtractor):
             deviation["comments"] = (
                 self.api.comments(deviation["statusid"], target="status")
                 if comments_count else ()
+            )
+
+
+class DeviantartProfileExtractor(DeviantartExtractor):
+    """Extractor for an artist's profile and cover deviation (if it exists)"""
+    subcategory = "profile"
+    archive_fmt = "p_{_username}_{index}.{extension}"
+    filename_fmt = "{category}_{subcategory}_{index}_{title}.{extension}"
+    pattern = BASE_PATTERN + r"/about(?!#watching)"
+    test = (
+        ("https://www.deviantart.com/foobarowouwu/about/", {
+            "exception": exception.NotFoundError,
+        }),
+        ("https://www.deviantart.com/justatest235723/about", {
+            "count": 0,
+        }),
+        # sta.sh-ed deviation as cover
+        ("https://www.deviantart.com/vanillaghosties/about", {
+            "options": (("original", False),),
+            "count": 1,
+        }),
+    )
+
+    def _init_user(self):
+        self.profile = self.api.user_profile(self.user, fatal=True)
+
+    def deviations(self):
+        if "cover_deviation" in self.profile:
+            yield self.profile["cover_deviation"]["cover_deviation"].copy()
+        yield self.profile  # website, stats, etc.
+
+    def prepare(self, deviation):
+        if "deviationid" in deviation:
+            return DeviantartExtractor.prepare(self, deviation)
+
+        deviation["username"] = username = deviation["user"]["username"]
+        deviation["_username"] = username.lower()
+
+        # profile comments
+        if self.comments:
+            deviation["comments"] = (
+                self.api.comments(username, target="profile")
+                if deviation["stats"]["profile_comments"] else ()
             )
 
 
@@ -1068,6 +1120,11 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
         ("https://fav.me/dddd", {
             "exception": exception.NotFoundError,
         }),
+        # arbitrary username & slug (#3367)
+        (("https://www.deviantart.com/zzzzzz/art/foo-590297498"), {
+            "options": (("original", 0),),
+            "keyword": {"username": "uotapo"},
+        }),
         # old-style URLs
         ("https://shimoda7.deviantart.com"
          "/art/For-the-sake-of-a-memory-10073852"),
@@ -1087,6 +1144,9 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
         self.deviation_id = \
             match.group(4) or match.group(5) or id_from_base36(match.group(6))
 
+    def _init_user(self):
+        pass
+
     def deviations(self):
         url = "{}/{}/{}/{}".format(
             self.root, self.user or "u", self.type or "art", self.deviation_id)
@@ -1095,6 +1155,8 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
                             '"deviationUuid\\":\\"', '\\')[0]
         if not uuid:
             raise exception.NotFoundError("deviation")
+        # always use the most up-to-date name from deviation["author"]
+        self.user = None
         return (self.api.deviation(uuid),)
 
 
@@ -1353,10 +1415,13 @@ class DeviantartOAuthAPI():
         return self._pagination_list(endpoint, params)
 
     @memcache(keyarg=1)
-    def user_profile(self, username):
+    def user_profile(self, username, fatal):
         """Get user profile information"""
         endpoint = "/user/profile/" + username
-        return self._call(endpoint, fatal=False)
+        # do not expand when profile metadata is optional
+        params = ({"expand": "user.details,user.geo,user.stats"}
+                  if self.metadata and fatal else None)
+        return self._call(endpoint, fatal=fatal, params=params)
 
     def user_statuses(self, username, offset=0):
         """Yield status updates of a specific user"""
@@ -1441,7 +1506,8 @@ class DeviantartOAuthAPI():
                 return data
             if not fatal and status != 429:
                 return None
-            if data.get("error_description") == "User not found.":
+            descr = data.get("error_description")
+            if descr and descr.lower().startswith("user not found"):
                 raise exception.NotFoundError("user or group")
 
             self.log.debug(response.text)
