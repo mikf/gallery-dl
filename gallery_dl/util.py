@@ -14,6 +14,7 @@ import sys
 import json
 import time
 import random
+import hashlib
 import sqlite3
 import binascii
 import datetime
@@ -110,6 +111,24 @@ def false(_):
 
 def noop():
     """Does nothing"""
+
+
+def md5(s):
+    """Generate MD5 hexdigest of 's'"""
+    if not s:
+        s = b""
+    elif isinstance(s, str):
+        s = s.encode()
+    return hashlib.md5(s).hexdigest()
+
+
+def sha1(s):
+    """Generate SHA1 hexdigest of 's'"""
+    if not s:
+        s = b""
+    elif isinstance(s, str):
+        s = s.encode()
+    return hashlib.sha1(s).hexdigest()
 
 
 def generate_token(size=16):
@@ -593,6 +612,8 @@ GLOBALS = {
     "abort"    : raises(exception.StopExtraction),
     "terminate": raises(exception.TerminateExtraction),
     "restart"  : raises(exception.RestartExtraction),
+    "hash_sha1": sha1,
+    "hash_md5" : md5,
     "re"       : re,
 }
 

@@ -394,6 +394,46 @@ class TestOther(unittest.TestCase):
     def test_noop(self):
         self.assertEqual(util.noop(), None)
 
+    def test_md5(self):
+        self.assertEqual(util.md5(b""),
+                         "d41d8cd98f00b204e9800998ecf8427e")
+        self.assertEqual(util.md5(b"hello"),
+                         "5d41402abc4b2a76b9719d911017c592")
+
+        self.assertEqual(util.md5(""),
+                         "d41d8cd98f00b204e9800998ecf8427e")
+        self.assertEqual(util.md5("hello"),
+                         "5d41402abc4b2a76b9719d911017c592")
+        self.assertEqual(util.md5("ワルド"),
+                         "051f29cd6c942cf110a0ccc5729871d2")
+
+        self.assertEqual(util.md5(0),
+                         "d41d8cd98f00b204e9800998ecf8427e")
+        self.assertEqual(util.md5(()),
+                         "d41d8cd98f00b204e9800998ecf8427e")
+        self.assertEqual(util.md5(None),
+                         "d41d8cd98f00b204e9800998ecf8427e")
+
+    def test_sha1(self):
+        self.assertEqual(util.sha1(b""),
+                         "da39a3ee5e6b4b0d3255bfef95601890afd80709")
+        self.assertEqual(util.sha1(b"hello"),
+                         "aaf4c61ddcc5e8a2dabede0f3b482cd9aea9434d")
+
+        self.assertEqual(util.sha1(""),
+                         "da39a3ee5e6b4b0d3255bfef95601890afd80709")
+        self.assertEqual(util.sha1("hello"),
+                         "aaf4c61ddcc5e8a2dabede0f3b482cd9aea9434d")
+        self.assertEqual(util.sha1("ワルド"),
+                         "0cbe319081aa0e9298448ec2bb16df8c494aa04e")
+
+        self.assertEqual(util.sha1(0),
+                         "da39a3ee5e6b4b0d3255bfef95601890afd80709")
+        self.assertEqual(util.sha1(()),
+                         "da39a3ee5e6b4b0d3255bfef95601890afd80709")
+        self.assertEqual(util.sha1(None),
+                         "da39a3ee5e6b4b0d3255bfef95601890afd80709")
+
     def test_compile_expression(self):
         expr = util.compile_expression("1 + 2 * 3")
         self.assertEqual(expr(), 7)
