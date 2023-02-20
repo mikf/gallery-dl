@@ -290,7 +290,10 @@ class MetadataTest(BasePostprocessorTest):
     def test_metadata_tags_list_of_dict(self):
         self._create(
             {"mode": "tags"},
-            {"tags": [{"g": "foobar1", "m": "foobar2"}, {"g": None, "m": "foobarbaz"}]},
+            {"tags": [
+                {"g": "foobar1", "m": "foobar2"},
+                {"g": None, "m": "foobarbaz"}
+            ]},
         )
         with patch("builtins.open", mock_open()) as m:
             self._trigger()
