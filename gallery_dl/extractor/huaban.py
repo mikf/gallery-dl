@@ -46,7 +46,7 @@ q=0.5,en-US;q=0.3,en;q=0.2",
         )
 
 
-class PinExtractor(BaseExtractor):
+class HuabanPinExtractor(BaseExtractor):
     """Extractor for image from a pin"""
 
     subcategory = "pin"
@@ -70,7 +70,7 @@ class PinExtractor(BaseExtractor):
         yield Message.Url, self.pin_img_url(pin), pin
 
 
-class BoardExtractor(BaseExtractor):
+class HuabanBoardExtractor(BaseExtractor):
     """Extractor for images from a board"""
 
     subcategory = "board"
@@ -117,7 +117,7 @@ class BoardExtractor(BaseExtractor):
             ).json()
 
 
-class UserExtractor(BaseExtractor):
+class HuabanUserExtractor(BaseExtractor):
     """Extractor for images from  a user's boards"""
 
     subcategory = "user"
@@ -140,11 +140,11 @@ class UserExtractor(BaseExtractor):
 
             last_board = None
             for board in boards:
-                board["_extractor"] = BoardExtractor
+                board["_extractor"] = HuabanBoardExtractor
                 yield Message.Queue, "%s/boards/%s" % (
                     self.root,
                     board["board_id"],
-                ), {"_extractor": BoardExtractor}
+                ), {"_extractor": HuabanBoardExtractor}
                 last_board = board
 
             boards_data = self.api_request(
