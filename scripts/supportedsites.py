@@ -163,6 +163,7 @@ SUBCATEGORY_MAP = {
         "site": "",
     },
     "deviantart": {
+        "gallery-search": "Gallery Searches",
         "stash" : "Sta.sh",
         "status": "Status Updates",
         "watch-posts": "",

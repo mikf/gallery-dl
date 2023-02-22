@@ -1123,6 +1123,7 @@ class DeviantartScrapsExtractor(DeviantartExtractor):
     subcategory = "scraps"
     directory_fmt = ("{category}", "{username}", "Scraps")
     archive_fmt = "s_{_username}_{index}.{extension}"
+    cookiedomain = ".deviantart.com"
     pattern = BASE_PATTERN + r"/gallery/(?:\?catpath=)?scraps\b"
     test = (
         ("https://www.deviantart.com/shimoda7/gallery/scraps", {
@@ -1131,7 +1132,6 @@ class DeviantartScrapsExtractor(DeviantartExtractor):
         ("https://www.deviantart.com/shimoda7/gallery/?catpath=scraps"),
         ("https://shimoda7.deviantart.com/gallery/?catpath=scraps"),
     )
-    cookiedomain = ".deviantart.com"
 
     def deviations(self):
         self.login()
@@ -1146,13 +1146,13 @@ class DeviantartSearchExtractor(DeviantartExtractor):
     subcategory = "search"
     directory_fmt = ("{category}", "Search", "{search_tags}")
     archive_fmt = "Q_{search_tags}_{index}.{extension}"
+    cookiedomain = ".deviantart.com"
     pattern = (r"(?:https?://)?www\.deviantart\.com"
                r"/search(?:/deviations)?/?\?([^#]+)")
     test = (
         ("https://www.deviantart.com/search?q=tree"),
         ("https://www.deviantart.com/search/deviations?order=popular-1-week"),
     )
-    cookiedomain = ".deviantart.com"
 
     def deviations(self):
         self.login()
@@ -1164,6 +1164,46 @@ class DeviantartSearchExtractor(DeviantartExtractor):
         eclipse_api = DeviantartEclipseAPI(self)
         return self._eclipse_to_oauth(
             eclipse_api, eclipse_api.search_deviations(query))
+
+    def prepare(self, deviation):
+        DeviantartExtractor.prepare(self, deviation)
+        deviation["search_tags"] = self.search
+
+
+class DeviantartGallerySearchExtractor(DeviantartExtractor):
+    """Extractor for deviantart gallery searches"""
+    subcategory = "gallery-search"
+    archive_fmt = "g_{_username}_{index}.{extension}"
+    cookiedomain = ".deviantart.com"
+    pattern = BASE_PATTERN + r"/gallery/?\?(q=[^#]+)"
+    test = (
+        ("https://www.deviantart.com/shimoda7/gallery?q=memory", {
+            "options": (("original", 0),),
+            "content": "6a7c74dc823ebbd457bdd9b3c2838a6ee728091e",
+        }),
+        ("https://www.deviantart.com/shimoda7/gallery?q=memory&sort=popular"),
+    )
+
+    def __init__(self, match):
+        DeviantartExtractor.__init__(self, match)
+        self.query = match.group(3)
+
+    def deviations(self):
+        self.login()
+
+        eclipse_api = DeviantartEclipseAPI(self)
+        info = eclipse_api.user_info(self.user)
+
+        query = text.parse_query(self.query)
+        self.search = query["q"]
+
+        return self._eclipse_to_oauth(
+            eclipse_api, eclipse_api.galleries_search(
+                info["user"]["userId"],
+                self.search,
+                self.offset,
+                query.get("sort", "most-recent"),
+            ))
 
     def prepare(self, deviation):
         DeviantartExtractor.prepare(self, deviation)
@@ -1647,9 +1687,28 @@ class DeviantartEclipseAPI():
         }
         return self._pagination(endpoint, params)
 
+    def galleries_search(self, user_id, query,
+                         offset=None, order="most-recent"):
+        endpoint = "/shared_api/galleries/search"
+        params = {
+            "userid": user_id,
+            "order" : order,
+            "q"     : query,
+            "offset": offset,
+            "limit" : 24,
+        }
+        return self._pagination(endpoint, params)
+
     def search_deviations(self, params):
         endpoint = "/da-browse/api/networkbar/search/deviations"
         return self._pagination(endpoint, params, key="deviations")
+
+    def user_info(self, user, expand=False):
+        endpoint = "/shared_api/user/info"
+        params = {"username": user}
+        if expand:
+            params["expand"] = "user.stats,user.profile,user.watch"
+        return self._call(endpoint, params)
 
     def user_watching(self, user, offset=None):
         endpoint = "/da-user-profile/api/module/watching"
