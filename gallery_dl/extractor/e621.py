@@ -10,7 +10,7 @@
 
 from .common import Message
 from . import danbooru
-from .. import text, version
+from .. import text, util
 
 
 class E621Extractor(danbooru.DanbooruExtractor):
@@ -22,8 +22,7 @@ class E621Extractor(danbooru.DanbooruExtractor):
     request_interval_min = 1.0
 
     def items(self):
-        self.session.headers["User-Agent"] = \
-            version.__useragent__ + " (by mikf)"
+        self.session.headers["User-Agent"] = util.USERAGENT + " (by mikf)"
 
         includes = self.config("metadata") or ()
         if includes:

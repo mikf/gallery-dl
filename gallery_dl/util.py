@@ -24,7 +24,7 @@ import subprocess
 import urllib.parse
 from http.cookiejar import Cookie
 from email.utils import mktime_tz, parsedate_tz
-from . import text, exception
+from . import text, version, exception
 
 
 def bencode(num, alphabet="0123456789"):
@@ -602,6 +602,7 @@ EPOCH = datetime.datetime(1970, 1, 1)
 SECOND = datetime.timedelta(0, 1)
 WINDOWS = (os.name == "nt")
 SENTINEL = object()
+USERAGENT = "gallery-dl/" + version.__version__
 SPECIAL_EXTRACTORS = {"oauth", "recursive", "test"}
 GLOBALS = {
     "contains" : contains,
