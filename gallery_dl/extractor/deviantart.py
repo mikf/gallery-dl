@@ -366,9 +366,7 @@ class DeviantartExtractor(Extractor):
         kwargs["fatal"] = None
         diff = time.time() - DeviantartExtractor._last_request
         if diff < 2.0:
-            delay = 2.0 - diff
-            self.log.debug("Sleeping %.2f seconds", delay)
-            time.sleep(delay)
+            self.sleep(2.0 - diff, "request")
 
         while True:
             response = self.request(url, **kwargs)
@@ -1496,7 +1494,7 @@ class DeviantartOAuthAPI():
 
         while True:
             if self.delay:
-                time.sleep(self.delay)
+                self.extractor.sleep(self.delay, "api")
 
             self.authenticate(None if public else self.refresh_token_key)
             kwargs["headers"] = self.headers
