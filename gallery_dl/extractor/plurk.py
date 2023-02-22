@@ -11,7 +11,6 @@
 from .common import Extractor, Message
 from .. import text, util, exception
 import datetime
-import time
 import re
 
 
@@ -19,6 +18,7 @@ class PlurkExtractor(Extractor):
     """Base class for plurk extractors"""
     category = "plurk"
     root = "https://www.plurk.com"
+    request_interval = 1.0
 
     def items(self):
         urls = self._urls_ex if self.config("comments", False) else self._urls
@@ -58,7 +58,6 @@ class PlurkExtractor(Extractor):
                 return
             elif info["has_newer"] < 200:
                 del data["count"]
-            time.sleep(1)
             data["from_response_id"] = info["responses"][-1]["id"] + 1
 
     @staticmethod

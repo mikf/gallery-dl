@@ -12,7 +12,6 @@ from .common import Extractor, Message
 from .. import text, util, exception
 from ..cache import cache
 import itertools
-import time
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?erome\.com"
 
@@ -75,7 +74,7 @@ class EromeExtractor(Extractor):
             if response.content.find(
                     b"<title>Please wait a few moments</title>", 0, 600) < 0:
                 return response
-            time.sleep(5)
+            self.sleep(5.0, "check")
 
     def _pagination(self, url, params):
         for params["page"] in itertools.count(1):
