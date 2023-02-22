@@ -9,7 +9,7 @@
 """Extractors for https://danbooru.donmai.us/ and other Danbooru instances"""
 
 from .common import BaseExtractor, Message
-from .. import text, version
+from .. import text, util
 import datetime
 
 
@@ -20,6 +20,7 @@ class DanbooruExtractor(BaseExtractor):
     page_limit = 1000
     page_start = None
     per_page = 200
+    request_interval = 1.0
 
     def __init__(self, match):
         BaseExtractor.__init__(self, match)
@@ -45,7 +46,7 @@ class DanbooruExtractor(BaseExtractor):
         return pages * self.per_page
 
     def items(self):
-        self.session.headers["User-Agent"] = version.__useragent__
+        self.session.headers["User-Agent"] = util.USERAGENT
 
         includes = self.config("metadata")
         if includes:

@@ -9,7 +9,7 @@
 """Extractors for https://mangadex.org/"""
 
 from .common import Extractor, Message
-from .. import text, util, version, exception
+from .. import text, util, exception
 from ..cache import cache, memcache
 from collections import defaultdict
 
@@ -30,7 +30,7 @@ class MangadexExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.session.headers["User-Agent"] = version.__useragent__
+        self.session.headers["User-Agent"] = util.USERAGENT
         self.api = MangadexAPI(self)
         self.uuid = match.group(1)
 
