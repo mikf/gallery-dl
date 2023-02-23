@@ -89,6 +89,7 @@ class FanboxExtractor(Extractor):
                     content_body["imageMap"] = {
                         image_id: image_map[image_id]
                         for image_id in images
+                        if image_id in image_map
                     }
 
                 post["content"] = "\n".join(content)
@@ -256,7 +257,6 @@ class FanboxCreatorExtractor(FanboxExtractor):
 
     def posts(self):
         url = "https://api.fanbox.cc/post.listCreator?creatorId={}&limit=10"
-
         return self._pagination(url.format(self.creator_id))
 
 
