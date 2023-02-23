@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2021-2022 Mike Fährmann
+# Copyright 2021-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -199,13 +199,27 @@ def parse_command_line(module, argv):
                     action += args
                     yield action
 
-        if getattr(opts, "parse_metadata", None) is None:
-            opts.parse_metadata = []
-        if opts.metafromtitle is not None:
-            opts.parse_metadata.append("title:%s" % opts.metafromtitle)
-            opts.metafromtitle = None
-        opts.parse_metadata = list(itertools.chain.from_iterable(map(
-            metadataparser_actions, opts.parse_metadata)))
+        parse_metadata = getattr(opts, "parse_metadata", None)
+        if isinstance(parse_metadata, dict):
+            if opts.metafromtitle is not None:
+                if "pre_process" not in parse_metadata:
+                    parse_metadata["pre_process"] = []
+                parse_metadata["pre_process"].append(
+                    "title:%s" % opts.metafromtitle)
+            opts.parse_metadata = {
+                k: list(itertools.chain.from_iterable(map(
+                        metadataparser_actions, v)))
+                for k, v in parse_metadata.items()
+            }
+        else:
+            if parse_metadata is None:
+                parse_metadata = []
+            if opts.metafromtitle is not None:
+                parse_metadata.append("title:%s" % opts.metafromtitle)
+            opts.parse_metadata = list(itertools.chain.from_iterable(map(
+                metadataparser_actions, parse_metadata)))
+
+        opts.metafromtitle = None
     else:
         opts.parse_metadata = ()
 

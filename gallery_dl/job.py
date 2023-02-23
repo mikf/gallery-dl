@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2022 Mike Fährmann
+# Copyright 2015-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
+import re
 import sys
-import json
 import errno
 import logging
 import functools
@@ -32,6 +32,16 @@ class Job():
         self.pathfmt = None
         self.kwdict = {}
         self.status = 0
+
+        hooks = extr.config("hooks")
+        if hooks:
+            if isinstance(hooks, dict):
+                hooks = hooks.items()
+            self._wrap_logger = self._wrap_logger_hooks
+            self._logger_hooks = [
+                (re.compile(pattern).search, hook)
+                for pattern, hook in hooks
+            ]
 
         path_proxy = output.PathfmtProxy(self)
         self._logger_extra = {
@@ -94,7 +104,7 @@ class Job():
             if exc.message:
                 log.error(exc.message)
             self.status |= exc.code
-        except exception.TerminateExtraction:
+        except (exception.TerminateExtraction, exception.RestartExtraction):
             raise
         except exception.GalleryDLException as exc:
             log.error("%s: %s", exc.__class__.__name__, exc)
@@ -202,6 +212,10 @@ class Job():
 
     def _wrap_logger(self, logger):
         return output.LoggerAdapter(logger, self._logger_extra)
+
+    def _wrap_logger_hooks(self, logger):
+        return output.LoggerAdapterEx(
+            logger, self._logger_extra, self)
 
     def _write_unsupported(self, url):
         if self.ulog:
@@ -344,12 +358,18 @@ class DownloadJob(Job):
                     if kwdict:
                         job.kwdict.update(kwdict)
 
-            if pextr.config("parent-skip"):
-                job._skipcnt = self._skipcnt
-                self.status |= job.run()
-                self._skipcnt = job._skipcnt
-            else:
-                self.status |= job.run()
+            while True:
+                try:
+                    if pextr.config("parent-skip"):
+                        job._skipcnt = self._skipcnt
+                        self.status |= job.run()
+                        self._skipcnt = job._skipcnt
+                    else:
+                        self.status |= job.run()
+                    break
+                except exception.RestartExtraction:
+                    pass
+
         else:
             self._write_unsupported(url)
 
@@ -436,10 +456,12 @@ class DownloadJob(Job):
             archive = util.expand_path(archive)
             archive_format = (cfg("archive-prefix", extr.category) +
                               cfg("archive-format", extr.archive_fmt))
+            archive_pragma = (cfg("archive-pragma"))
             try:
                 if "{" in archive:
                     archive = formatter.parse(archive).format_map(kwdict)
-                self.archive = util.DownloadArchive(archive, archive_format)
+                self.archive = util.DownloadArchive(
+                    archive, archive_format, archive_pragma)
             except Exception as exc:
                 extr.log.warning(
                     "Failed to open download archive at '%s' ('%s: %s')",
@@ -473,13 +495,18 @@ class DownloadJob(Job):
         postprocessors = extr.config_accumulate("postprocessors")
         if postprocessors:
             self.hooks = collections.defaultdict(list)
+
             pp_log = self.get_logger("postprocessor")
+            pp_conf = config.get((), "postprocessor") or {}
+            pp_opts = cfg("postprocessor-options")
             pp_list = []
 
-            pp_conf = config.get((), "postprocessor") or {}
             for pp_dict in postprocessors:
                 if isinstance(pp_dict, str):
                     pp_dict = pp_conf.get(pp_dict) or {"name": pp_dict}
+                if pp_opts:
+                    pp_dict = pp_dict.copy()
+                    pp_dict.update(pp_opts)
 
                 clist = pp_dict.get("whitelist")
                 if clist is not None:
@@ -704,17 +731,19 @@ class InfoJob(Job):
 
     def _print_multi(self, title, *values):
         stdout_write("{}\n  {}\n\n".format(
-            title, " / ".join(json.dumps(v) for v in values)))
+            title, " / ".join(map(util.json_dumps, values))))
 
     def _print_config(self, title, optname, value):
         optval = self.extractor.config(optname, util.SENTINEL)
         if optval is not util.SENTINEL:
             stdout_write(
                 "{} (custom):\n  {}\n{} (default):\n  {}\n\n".format(
-                    title, json.dumps(optval), title, json.dumps(value)))
+                    title, util.json_dumps(optval),
+                    title, util.json_dumps(value)))
         elif value:
             stdout_write(
-                "{} (default):\n  {}\n\n".format(title, json.dumps(value)))
+                "{} (default):\n  {}\n\n".format(
+                    title, util.json_dumps(value)))
 
 
 class DataJob(Job):

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2022 Mike Fährmann
+# Copyright 2019-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -9,10 +9,9 @@
 """Extractors for https://www.weibo.com/"""
 
 from .common import Extractor, Message
-from .. import text, exception
+from .. import text, util, exception
 from ..cache import cache
 import random
-import json
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.|m\.)?weibo\.c(?:om|n)"
 USER_PATTERN = BASE_PATTERN + r"/(?:(u|n|p(?:rofile)?)/)?([^/?#]+)(?:/home)?"
@@ -179,7 +178,7 @@ class WeiboExtractor(Extractor):
 
         page = Extractor.request(
             self, passport_url, method="POST", headers=headers, data=data).text
-        data = json.loads(text.extr(page, "(", ");"))["data"]
+        data = util.json_loads(text.extr(page, "(", ");"))["data"]
 
         passport_url = "https://passport.weibo.com/visitor/visitor"
         params = {

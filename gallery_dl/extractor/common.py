@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2022 Mike Fährmann
+# Copyright 2014-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -36,6 +36,7 @@ class Extractor():
     browser = None
     root = ""
     test = None
+    finalize = None
     request_interval = 0.0
     request_interval_min = 0.0
     request_timestamp = 0.0
@@ -44,7 +45,6 @@ class Extractor():
     def __init__(self, match):
         self.log = logging.getLogger(self.category)
         self.url = match.string
-        self.finalize = None
 
         if self.basecategory:
             self.config = self._config_shared
@@ -53,6 +53,7 @@ class Extractor():
         self._parentdir = ""
 
         self._write_pages = self.config("write-pages", False)
+        self._retry_codes = self.config("retry-codes")
         self._retries = self.config("retries", 4)
         self._timeout = self.config("timeout", 30)
         self._verify = self.config("verify", True)
@@ -64,6 +65,8 @@ class Extractor():
 
         if self._retries < 0:
             self._retries = float("inf")
+        if not self._retry_codes:
+            self._retry_codes = ()
 
         self._init_session()
         self._init_cookies()
@@ -103,12 +106,15 @@ class Extractor():
             values[:0] = config.accumulate((self.subcategory,), key, conf=conf)
         return values
 
-    def request(self, url, *, method="GET", session=None, retries=None,
-                encoding=None, fatal=True, notfound=None, **kwargs):
+    def request(self, url, *, method="GET", session=None,
+                retries=None, retry_codes=None, encoding=None,
+                fatal=True, notfound=None, **kwargs):
         if session is None:
             session = self.session
         if retries is None:
             retries = self._retries
+        if retry_codes is None:
+            retry_codes = self._retry_codes
         if "proxies" not in kwargs:
             kwargs["proxies"] = self._proxies
         if "timeout" not in kwargs:
@@ -153,12 +159,12 @@ class Extractor():
                         code in (403, 503):
                     content = response.content
                     if b"_cf_chl_opt" in content or b"jschl-answer" in content:
-                        self.log.warning("Cloudflare IUAM challenge")
+                        self.log.warning("Cloudflare challenge")
                         break
                     if b'name="captcha-bypass"' in content:
                         self.log.warning("Cloudflare CAPTCHA")
                         break
-                if code < 500 and code != 429 and code != 430:
+                if code not in retry_codes and code < 500:
                     break
 
             finally:
@@ -327,6 +333,7 @@ class Extractor():
                 except Exception as exc:
                     self.log.warning("cookies: %s", exc)
                 else:
+                    self.log.debug("Loading cookies from '%s'", cookies)
                     self._cookiefile = cookiefile
 
             elif isinstance(cookies, (list, tuple)):
@@ -500,7 +507,10 @@ class Extractor():
         try:
             with open(path + ".txt", 'wb') as fp:
                 util.dump_response(
-                    response, fp, headers=(self._write_pages == "all"))
+                    response, fp,
+                    headers=(self._write_pages in ("all", "ALL")),
+                    hide_auth=(self._write_pages != "ALL")
+                )
         except Exception as e:
             self.log.warning("Failed to dump HTTP request (%s: %s)",
                              e.__class__.__name__, e)

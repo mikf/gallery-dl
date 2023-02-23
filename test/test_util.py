@@ -24,39 +24,62 @@ from gallery_dl import util, text, exception  # noqa E402
 
 class TestRange(unittest.TestCase):
 
-    def test_parse_range(self, f=util.RangePredicate.parse_range):
+    def test_parse_empty(self, f=util.RangePredicate._parse):
+        self.assertEqual(f(""), [])
+        self.assertEqual(f([]), [])
+
+    def test_parse_digit(self, f=util.RangePredicate._parse):
+        self.assertEqual(f("2"), [range(2, 3)])
+
         self.assertEqual(
-            f(""),
-            [])
-        self.assertEqual(
-            f("1-2"),
-            [(1, 2)])
-        self.assertEqual(
-            f("-"),
-            [(1, sys.maxsize)])
+            f("2, 3, 4"),
+            [range(2, 3),
+             range(3, 4),
+             range(4, 5)],
+        )
+
+    def test_parse_range(self, f=util.RangePredicate._parse):
+        self.assertEqual(f("1-2"), [range(1, 3)])
+        self.assertEqual(f("2-"), [range(2, sys.maxsize)])
+        self.assertEqual(f("-3"), [range(1, 4)])
+        self.assertEqual(f("-"), [range(1, sys.maxsize)])
+
         self.assertEqual(
             f("-2,4,6-8,10-"),
-            [(1, 2), (4, 4), (6, 8), (10, sys.maxsize)])
+            [range(1, 3),
+             range(4, 5),
+             range(6, 9),
+             range(10, sys.maxsize)],
+        )
         self.assertEqual(
             f(" - 3 , 4-  4, 2-6"),
-            [(1, 3), (4, 4), (2, 6)])
+            [range(1, 4),
+             range(4, 5),
+             range(2, 7)],
+        )
 
-    def test_optimize_range(self, f=util.RangePredicate.optimize_range):
+    def test_parse_slice(self, f=util.RangePredicate._parse):
+        self.assertEqual(f("2:4")  , [range(2, 4)])
+        self.assertEqual(f("3::")  , [range(3, sys.maxsize)])
+        self.assertEqual(f(":4:")  , [range(1, 4)])
+        self.assertEqual(f("::5")  , [range(1, sys.maxsize, 5)])
+        self.assertEqual(f("::")   , [range(1, sys.maxsize)])
+        self.assertEqual(f("2:3:4"), [range(2, 3, 4)])
+
         self.assertEqual(
-            f([]),
-            [])
+            f("2:4, 4:, :4, :4:, ::4"),
+            [range(2, 4),
+             range(4, sys.maxsize),
+             range(1, 4),
+             range(1, 4),
+             range(1, sys.maxsize, 4)],
+        )
         self.assertEqual(
-            f([(2, 4)]),
-            [(2, 4)])
-        self.assertEqual(
-            f([(2, 4), (6, 8), (10, 12)]),
-            [(2, 4), (6, 8), (10, 12)])
-        self.assertEqual(
-            f([(2, 4), (4, 6), (5, 8)]),
-            [(2, 8)])
-        self.assertEqual(
-            f([(1, 1), (2, 2), (3, 6), (8, 9)]),
-            [(1, 6), (8, 9)])
+            f(" : 3 , 4:  4, 2:6"),
+            [range(1, 3),
+             range(4, 4),
+             range(2, 6)],
+        )
 
 
 class TestPredicate(unittest.TestCase):
@@ -68,7 +91,7 @@ class TestPredicate(unittest.TestCase):
         for i in range(6):
             self.assertTrue(pred(dummy, dummy))
         with self.assertRaises(exception.StopExtraction):
-            bool(pred(dummy, dummy))
+            pred(dummy, dummy)
 
         pred = util.RangePredicate("1, 3, 5")
         self.assertTrue(pred(dummy, dummy))
@@ -77,11 +100,11 @@ class TestPredicate(unittest.TestCase):
         self.assertFalse(pred(dummy, dummy))
         self.assertTrue(pred(dummy, dummy))
         with self.assertRaises(exception.StopExtraction):
-            bool(pred(dummy, dummy))
+            pred(dummy, dummy)
 
         pred = util.RangePredicate("")
         with self.assertRaises(exception.StopExtraction):
-            bool(pred(dummy, dummy))
+            pred(dummy, dummy)
 
     def test_unique_predicate(self):
         dummy = None
@@ -115,6 +138,14 @@ class TestPredicate(unittest.TestCase):
 
         with self.assertRaises(exception.FilterError):
             util.FilterPredicate("b > 1")(url, {"a": 2})
+
+        pred = util.FilterPredicate(["a < 3", "b < 4", "c < 5"])
+        self.assertTrue(pred(url, {"a": 2, "b": 3, "c": 4}))
+        self.assertFalse(pred(url, {"a": 3, "b": 3, "c": 4}))
+        self.assertFalse(pred(url, {"a": 2, "b": 4, "c": 4}))
+        self.assertFalse(pred(url, {"a": 2, "b": 3, "c": 5}))
+        with self.assertRaises(exception.FilterError):
+            pred(url, {"a": 2})
 
     def test_build_predicate(self):
         pred = util.build_predicate([])
@@ -362,6 +393,46 @@ class TestOther(unittest.TestCase):
 
     def test_noop(self):
         self.assertEqual(util.noop(), None)
+
+    def test_md5(self):
+        self.assertEqual(util.md5(b""),
+                         "d41d8cd98f00b204e9800998ecf8427e")
+        self.assertEqual(util.md5(b"hello"),
+                         "5d41402abc4b2a76b9719d911017c592")
+
+        self.assertEqual(util.md5(""),
+                         "d41d8cd98f00b204e9800998ecf8427e")
+        self.assertEqual(util.md5("hello"),
+                         "5d41402abc4b2a76b9719d911017c592")
+        self.assertEqual(util.md5("ワルド"),
+                         "051f29cd6c942cf110a0ccc5729871d2")
+
+        self.assertEqual(util.md5(0),
+                         "d41d8cd98f00b204e9800998ecf8427e")
+        self.assertEqual(util.md5(()),
+                         "d41d8cd98f00b204e9800998ecf8427e")
+        self.assertEqual(util.md5(None),
+                         "d41d8cd98f00b204e9800998ecf8427e")
+
+    def test_sha1(self):
+        self.assertEqual(util.sha1(b""),
+                         "da39a3ee5e6b4b0d3255bfef95601890afd80709")
+        self.assertEqual(util.sha1(b"hello"),
+                         "aaf4c61ddcc5e8a2dabede0f3b482cd9aea9434d")
+
+        self.assertEqual(util.sha1(""),
+                         "da39a3ee5e6b4b0d3255bfef95601890afd80709")
+        self.assertEqual(util.sha1("hello"),
+                         "aaf4c61ddcc5e8a2dabede0f3b482cd9aea9434d")
+        self.assertEqual(util.sha1("ワルド"),
+                         "0cbe319081aa0e9298448ec2bb16df8c494aa04e")
+
+        self.assertEqual(util.sha1(0),
+                         "da39a3ee5e6b4b0d3255bfef95601890afd80709")
+        self.assertEqual(util.sha1(()),
+                         "da39a3ee5e6b4b0d3255bfef95601890afd80709")
+        self.assertEqual(util.sha1(None),
+                         "da39a3ee5e6b4b0d3255bfef95601890afd80709")
 
     def test_compile_expression(self):
         expr = util.compile_expression("1 + 2 * 3")
@@ -618,10 +689,21 @@ class TestOther(unittest.TestCase):
         obj = util.NONE
 
         self.assertFalse(obj)
+        self.assertEqual(len(obj), 0)
         self.assertEqual(str(obj), str(None))
         self.assertEqual(repr(obj), repr(None))
+        self.assertEqual(format(obj), str(None))
+        self.assertEqual(format(obj, "%F"), str(None))
         self.assertIs(obj.attr, obj)
         self.assertIs(obj["key"], obj)
+        self.assertIs(obj(), obj)
+        self.assertIs(obj(1, "a"), obj)
+        self.assertIs(obj(foo="bar"), obj)
+
+        i = 0
+        for _ in obj:
+            i += 1
+        self.assertEqual(i, 0)
 
 
 class TestExtractor():

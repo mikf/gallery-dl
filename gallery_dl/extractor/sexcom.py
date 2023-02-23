@@ -74,9 +74,7 @@ class SexcomExtractor(Extractor):
                 path = text.extr(info, "src: '", "'")
                 data["filename"] = path.rpartition("/")[2]
                 data["extension"] = "mp4"
-                if "'HD'" in info:
-                    path += "/hd"
-                data["url"] = self.root + path
+                data["url"] = path
             else:
                 iframe = extr('<iframe', '>')
                 src = (text.extr(iframe, ' src="', '"') or

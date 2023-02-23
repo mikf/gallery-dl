@@ -10,7 +10,6 @@
 
 from .common import ChapterExtractor, MangaExtractor
 from .. import text
-import re
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.|m\.)?(?:fanfox\.net|mangafox\.me)"
 
@@ -44,14 +43,14 @@ class MangafoxChapterExtractor(ChapterExtractor):
         cid  , pos = text.extract(page, "var chapter_id =", ";", pos)
 
         return {
-            "manga": text.unescape(manga),
-            "volume": text.parse_int(self.volume),
-            "chapter": text.parse_int(self.chapter),
-            "chapter_minor": self.minor or "",
+            "manga"         : text.unescape(manga),
+            "volume"        : text.parse_int(self.volume),
+            "chapter"       : text.parse_int(self.chapter),
+            "chapter_minor" : self.minor or "",
             "chapter_string": self.cstr,
-            "count": text.parse_int(count),
-            "sid": text.parse_int(sid),
-            "cid": text.parse_int(cid),
+            "count"         : text.parse_int(count),
+            "sid"           : text.parse_int(sid),
+            "cid"           : text.parse_int(cid),
         }
 
     def images(self, page):
@@ -76,6 +75,25 @@ class MangafoxMangaExtractor(MangaExtractor):
         ("https://fanfox.net/manga/kanojo_mo_kanojo", {
             "pattern": MangafoxChapterExtractor.pattern,
             "count": ">=60",
+            "keyword": {
+                "author": "HIROYUKI",
+                "chapter": int,
+                "chapter_minor": r"re:^(\.\d+)?$",
+                "chapter_string": r"re:(v\d+/)?c\d+",
+                "date": "type:datetime",
+                "description": "High school boy Naoya gets a confession from M"
+                               "omi, a cute and friendly girl. However, Naoya "
+                               "already has a girlfriend, Seki... but Momi is "
+                               "too good a catch to let go. Momi and Nagoya's "
+                               "goal becomes clear: convince Seki to accept be"
+                               "ing an item with the two of them. Will she bud"
+                               "ge?",
+                "lang": "en",
+                "language": "English",
+                "manga": "Kanojo mo Kanojo",
+                "tags": ["Comedy", "Romance", "School Life", "Shounen"],
+                "volume": int,
+            },
         }),
         ("https://mangafox.me/manga/shangri_la_frontier", {
             "pattern": MangafoxChapterExtractor.pattern,
@@ -85,34 +103,41 @@ class MangafoxMangaExtractor(MangaExtractor):
     )
 
     def chapters(self, page):
-        match_info = re.compile(r"Ch (\d+)(\S*)(?: (.*))?").match
-        manga, pos = text.extract(page, '<p class="title">', '</p>')
-        author, pos = text.extract(page, '<p>Author(s):', '</p>', pos)
+        results = []
+        chapter_match = MangafoxChapterExtractor.pattern.match
+
+        extr = text.extract_from(page)
+        manga = extr('<p class="title">', '</p>')
+        author = extr('<p>Author(s):', '</p>')
+        extr('<dd class="chlist">', '')
+
+        genres, _, summary = text.extr(
+            page, '<div class="manga-genres">', '</section>'
+        ).partition('<div class="manga-summary">')
+
         data = {
-            "manga"   : text.unescape(manga),
-            "author"  : text.remove_html(author),
-            "lang"    : "en",
-            "language": "English",
+            "manga"      : text.unescape(manga),
+            "author"     : text.remove_html(author),
+            "description": text.unescape(text.remove_html(summary)),
+            "tags"       : text.split_html(genres),
+            "lang"       : "en",
+            "language"   : "English",
         }
 
-        results = []
-        pos = page.index('<dd class="chlist">')
         while True:
-            url, pos = text.extract(page, '<a href="//', '"', pos)
-            if url == 'mangafox.la?f=mobile':
+            url = "https://" + extr('<a href="//', '"')
+            match = chapter_match(url)
+            if not match:
                 return results
-            info, pos = text.extract(page, '>', '<span', pos)
-            date, pos = text.extract(page, 'right">', '</span>', pos)
+            _, cstr, volume, chapter, minor = match.groups()
 
-            match = match_info(text.unescape(info))
-            if match:
-                chapter, minor, title = match.groups()
-                chapter_minor = minor
-            else:
-                chapter, _, minor = url[:-7].rpartition("/c")[2].partition(".")
-                chapter_minor = "." + minor
-
-            data["chapter"] = text.parse_int(chapter)
-            data["chapter_minor"] = chapter_minor if minor else ""
-            data["date"] = date
-            results.append(("https://" + url, data.copy()))
+            chapter = {
+                "volume"        : text.parse_int(volume),
+                "chapter"       : text.parse_int(chapter),
+                "chapter_minor" : minor or "",
+                "chapter_string": cstr,
+                "date"          : text.parse_datetime(
+                    extr('right">', '</span>'), "%b %d, %Y"),
+            }
+            chapter.update(data)
+            results.append((url, chapter))

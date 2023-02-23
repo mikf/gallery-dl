@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2021 Mike Fährmann
+# Copyright 2015-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -11,7 +11,6 @@
 from .common import GalleryExtractor, Extractor, Message
 from .. import text, util
 import collections
-import json
 
 
 class NhentaiGalleryExtractor(GalleryExtractor):
@@ -48,7 +47,7 @@ class NhentaiGalleryExtractor(GalleryExtractor):
         GalleryExtractor.__init__(self, match, url)
 
     def metadata(self, page):
-        self.data = data = json.loads(page)
+        self.data = data = util.json_loads(page)
 
         title_en = data["title"].get("english", "")
         title_ja = data["title"].get("japanese", "")

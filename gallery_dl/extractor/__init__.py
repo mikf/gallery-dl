@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2022 Mike Fährmann
+# Copyright 2015-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
+import sys
 import re
 
 modules = [
@@ -34,11 +35,14 @@ modules = [
     "desktopography",
     "deviantart",
     "dynastyscans",
+    "e621",
     "erome",
     "exhentai",
     "fallenangels",
     "fanbox",
+    "fanleaks",
     "fantia",
+    "fapello",
     "fapachi",
     "flickr",
     "furaffinity",
@@ -74,13 +78,13 @@ modules = [
     "keenspot",
     "kemonoparty",
     "khinsider",
-    "kissgoddess",
-    "kohlchan",
     "komikcast",
+    "lexica",
     "lightroom",
     "lineblog",
     "livedoor",
     "luscious",
+    "lynxchan",
     "mangadex",
     "mangafox",
     "mangahere",
@@ -101,6 +105,7 @@ modules = [
     "nitter",
     "nozomi",
     "nsfwalbum",
+    "nudecollect",
     "paheal",
     "patreon",
     "philomena",
@@ -115,6 +120,7 @@ modules = [
     "plurk",
     "poipiku",
     "pornhub",
+    "pornpics",
     "pururin",
     "reactor",
     "readcomiconline",
@@ -131,9 +137,11 @@ modules = [
     "slickpic",
     "slideshare",
     "smugmug",
+    "soundgasm",
     "speakerdeck",
     "subscribestar",
     "tapas",
+    "tcbscans",
     "telegraph",
     "toyhouse",
     "tsumino",
@@ -151,9 +159,11 @@ modules = [
     "wallpapercave",
     "warosu",
     "weasyl",
+    "webmshare",
     "webtoons",
     "weibo",
     "wikiart",
+    "wikifeet",
     "xhamster",
     "xvideos",
     "zerochan",
@@ -210,20 +220,33 @@ def extractors():
 # --------------------------------------------------------------------
 # internals
 
-_cache = []
-_module_iter = iter(modules)
-
 
 def _list_classes():
-    """Yield all available extractor classes"""
+    """Yield available extractor classes"""
     yield from _cache
 
-    globals_ = globals()
-    for module_name in _module_iter:
-        module = __import__(module_name, globals_, None, (), 1)
+    for module in _module_iter:
         yield from add_module(module)
 
-    globals_["_list_classes"] = lambda : _cache
+    globals()["_list_classes"] = lambda : _cache
+
+
+def _modules_internal():
+    globals_ = globals()
+    for module_name in modules:
+        yield __import__(module_name, globals_, None, (), 1)
+
+
+def _modules_path(path, files):
+    sys.path.insert(0, path)
+    try:
+        return [
+            __import__(name[:-3])
+            for name in files
+            if name.endswith(".py")
+        ]
+    finally:
+        del sys.path[0]
 
 
 def _get_classes(module):
@@ -233,3 +256,7 @@ def _get_classes(module):
             hasattr(cls, "pattern") and cls.__module__ == module.__name__
         )
     ]
+
+
+_cache = []
+_module_iter = _modules_internal()

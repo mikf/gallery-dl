@@ -146,6 +146,7 @@ class _35photoTagExtractor(_35photoExtractor):
     test = ("https://35photo.pro/tags/landscape/", {
         "range": "1-25",
         "count": 25,
+        "archive": False,
     })
 
     def __init__(self, match):

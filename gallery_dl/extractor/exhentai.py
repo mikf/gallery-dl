@@ -117,9 +117,10 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
                r"|/s/([\da-f]{10})/(\d+)-(\d+))")
     test = (
         ("https://exhentai.org/g/1200119/d55c44d3d0/", {
+            "options": (("original", False),),
             "keyword": {
                 "cost": int,
-                "date": "dt:2018-03-18 20:15:00",
+                "date": "dt:2018-03-18 20:14:00",
                 "eh_category": "Non-H",
                 "expunged": False,
                 "favorites": r"re:^[12]\d$",
@@ -150,7 +151,8 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
                 "uploader": "klorpa",
                 "width": int,
             },
-            "content": "e9891a4c017ed0bb734cd1efba5cd03f594d31ff",
+            "content": ("2c68cff8a7ca540a78c36fdbf5fbae0260484f87",
+                        "e9891a4c017ed0bb734cd1efba5cd03f594d31ff"),
         }),
         ("https://exhentai.org/g/960461/4f0e369d82/", {
             "exception": exception.NotFoundError,
@@ -159,9 +161,11 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
             "exception": exception.AuthorizationError,
         }),
         ("https://exhentai.org/s/f68367b4c8/1200119-3", {
+            "options": (("original", False),),
             "count": 2,
         }),
         ("https://e-hentai.org/s/f68367b4c8/1200119-3", {
+            "options": (("original", False),),
             "count": 2,
         }),
         ("https://g.e-hentai.org/g/1200119/d55c44d3d0/"),
@@ -516,7 +520,7 @@ class ExhentaiSearchExtractor(ExhentaiExtractor):
                 data["gallery_token"] = gallery.group(3)
                 yield Message.Queue, url + "/", data
 
-            next_url = text.extr(page, 'nexturl = "', '"', None)
+            next_url = text.extr(page, 'nexturl="', '"', None)
             if next_url is not None:
                 if not next_url:
                     return

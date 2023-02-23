@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2021 Mike Fährmann
+# Copyright 2015-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -9,7 +9,6 @@
 """Global configuration module"""
 
 import sys
-import json
 import os.path
 import logging
 from . import util
@@ -55,18 +54,18 @@ def load(files=None, strict=False, fmt="json"):
     if fmt == "yaml":
         try:
             import yaml
-            parsefunc = yaml.safe_load
+            load = yaml.safe_load
         except ImportError:
             log.error("Could not import 'yaml' module")
             return
     else:
-        parsefunc = json.load
+        load = util.json_loads
 
     for pathfmt in files or _default_configs:
         path = util.expand_path(pathfmt)
         try:
             with open(path, encoding="utf-8") as file:
-                confdict = parsefunc(file)
+                conf = load(file.read())
         except OSError as exc:
             if strict:
                 log.error(exc)
@@ -77,9 +76,9 @@ def load(files=None, strict=False, fmt="json"):
                 sys.exit(2)
         else:
             if not _config:
-                _config.update(confdict)
+                _config.update(conf)
             else:
-                util.combine_dict(_config, confdict)
+                util.combine_dict(_config, conf)
             _files.append(pathfmt)
 
 

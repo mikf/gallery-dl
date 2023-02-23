@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2021 Mike Fährmann
+# Copyright 2021-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -92,16 +92,29 @@ class EromeAlbumExtractor(EromeExtractor):
     """Extractor for albums on erome.com"""
     subcategory = "album"
     pattern = BASE_PATTERN + r"/a/(\w+)"
-    test = ("https://www.erome.com/a/TyFMI7ik", {
-        "pattern": r"https://s\d+\.erome\.com/\d+/TyFMI7ik/\w+",
-        "count": 9,
-        "keyword": {
-            "album_id": "TyFMI7ik",
-            "num": int,
-            "title": "Ryan Ryans",
-            "user": "xanub",
-        },
-    })
+    test = (
+        ("https://www.erome.com/a/NQgdlWvk", {
+            "pattern": r"https://v\d+\.erome\.com/\d+"
+                       r"/NQgdlWvk/j7jlzmYB_480p\.mp4",
+            "count": 1,
+            "keyword": {
+                "album_id": "NQgdlWvk",
+                "num": 1,
+                "title": "porn",
+                "user": "yYgWBZw8o8qsMzM",
+            },
+        }),
+        ("https://www.erome.com/a/TdbZ4ogi", {
+            "pattern": r"https://s\d+\.erome\.com/\d+/TdbZ4ogi/\w+",
+            "count": 6,
+            "keyword": {
+                "album_id": "TdbZ4ogi",
+                "num": int,
+                "title": "82e78cfbb461ad87198f927fcb1fda9a1efac9ff.",
+                "user": "yYgWBZw8o8qsMzM",
+            },
+        }),
+    )
 
     def albums(self):
         return (self.item,)
@@ -110,7 +123,7 @@ class EromeAlbumExtractor(EromeExtractor):
 class EromeUserExtractor(EromeExtractor):
     subcategory = "user"
     pattern = BASE_PATTERN + r"/(?!a/|search\?)([^/?#]+)"
-    test = ("https://www.erome.com/xanub", {
+    test = ("https://www.erome.com/yYgWBZw8o8qsMzM", {
         "range": "1-25",
         "count": 25,
     })

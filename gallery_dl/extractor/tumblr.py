@@ -286,7 +286,11 @@ class TumblrUserExtractor(TumblrExtractor):
             "count": 3,
             "options": (("posts", "all"), ("external", True))
         }),
-        ("https://mikf123-hidden.tumblr.com/", {  # dashbord-only
+        ("https://mikf123-hidden.tumblr.com/", {  # dashboard-only
+            "options": (("access-token", None),),
+            "exception": exception.AuthorizationError,
+        }),
+        ("https://mikf123-hidden.tumblr.com/", {  # dashboard-only
             "count": 2,
             "keyword": {"tags": ["test", "hidden"]},
         }),
@@ -498,12 +502,24 @@ class TumblrAPI(oauth.OAuth1API):
             if 200 <= status < 400:
                 return data["response"]
 
+        self.log.debug(data)
         if status == 403:
             raise exception.AuthorizationError()
-        elif status == 404:
-            raise exception.NotFoundError("user or post")
-        elif status == 429:
 
+        elif status == 404:
+            try:
+                error = data["errors"][0]["detail"]
+                board = ("only viewable within the Tumblr dashboard" in error)
+            except Exception:
+                board = False
+
+            if board:
+                self.log.info("Run 'gallery-dl oauth:tumblr' "
+                              "to access dashboard-only blogs")
+                raise exception.AuthorizationError(error)
+            raise exception.NotFoundError("user or post")
+
+        elif status == 429:
             # daily rate limit
             if response.headers.get("x-ratelimit-perday-remaining") == "0":
                 self.log.info("Daily API rate limit exceeded")

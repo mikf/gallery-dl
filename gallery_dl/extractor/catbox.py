@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2022 Mike Fährmann
+# Copyright 2022-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -8,7 +8,7 @@
 
 """Extractors for https://catbox.moe/"""
 
-from .common import GalleryExtractor
+from .common import GalleryExtractor, Extractor, Message
 from .. import text
 
 
@@ -54,3 +54,26 @@ class CatboxAlbumExtractor(GalleryExtractor):
             for path in text.extract_iter(
                 page, ">https://files.catbox.moe/", "<")
         ]
+
+
+class CatboxFileExtractor(Extractor):
+    """Extractor for catbox files"""
+    category = "catbox"
+    subcategory = "file"
+    archive_fmt = "{filename}"
+    pattern = r"(?:https?://)?(?:files|litter|de)\.catbox\.moe/([^/?#]+)"
+    test = (
+        ("https://files.catbox.moe/8ih3y7.png", {
+            "pattern": r"^https://files\.catbox\.moe/8ih3y7\.png$",
+            "content": "0c8768055e4e20e7c7259608b67799171b691140",
+            "count": 1,
+        }),
+        ("https://litter.catbox.moe/t8v3n9.png"),
+        ("https://de.catbox.moe/bjdmz1.jpg"),
+    )
+
+    def items(self):
+        url = text.ensure_http_scheme(self.url)
+        file = text.nameext_from_url(url, {"url": url})
+        yield Message.Directory, file
+        yield Message.Url, url, file

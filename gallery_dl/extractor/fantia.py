@@ -7,8 +7,7 @@
 """Extractors for https://fantia.jp/"""
 
 from .common import Extractor, Message
-from .. import text
-import json
+from .. import text, util
 
 
 class FantiaExtractor(Extractor):
@@ -21,6 +20,10 @@ class FantiaExtractor(Extractor):
     _warning = True
 
     def items(self):
+        self.headers = {
+            "Accept" : "application/json, text/plain, */*",
+            "Referer": self.root,
+        }
 
         if self._warning:
             if not self._check_cookies(("_session_id",)):
@@ -43,10 +46,11 @@ class FantiaExtractor(Extractor):
 
     def _pagination(self, url):
         params = {"page": 1}
-        headers = {"Referer": self.root}
+        headers = self.headers
 
         while True:
             page = self.request(url, params=params, headers=headers).text
+            self._csrf_token(page)
 
             post_id = None
             for post_id in text.extract_iter(
@@ -57,11 +61,16 @@ class FantiaExtractor(Extractor):
                 return
             params["page"] += 1
 
+    def _csrf_token(self, page=None):
+        if not page:
+            page = self.request(self.root + "/").text
+        self.headers["X-CSRF-Token"] = text.extr(
+            page, 'name="csrf-token" content="', '"')
+
     def _get_post_data(self, post_id):
         """Fetch and process post data"""
-        headers = {"Referer": self.root}
         url = self.root+"/api/v1/posts/"+post_id
-        resp = self.request(url, headers=headers).json()["post"]
+        resp = self.request(url, headers=self.headers).json()["post"]
         post = {
             "post_id": resp["id"],
             "post_url": self.root + "/posts/" + str(resp["id"]),
@@ -107,7 +116,7 @@ class FantiaExtractor(Extractor):
                 yield self.root+"/"+content["download_uri"], post
 
             if content["category"] == "blog" and "comment" in content:
-                comment_json = json.loads(content["comment"])
+                comment_json = util.json_loads(content["comment"])
                 ops = comment_json.get("ops", ())
 
                 # collect blogpost text first
@@ -173,4 +182,5 @@ class FantiaPostExtractor(FantiaExtractor):
         self.post_id = match.group(1)
 
     def posts(self):
+        self._csrf_token()
         return (self.post_id,)

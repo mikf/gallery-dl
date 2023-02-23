@@ -10,51 +10,33 @@ from .common import ChapterExtractor, MangaExtractor
 from .. import text
 import re
 
-BASE_PATTERN = \
-    r"(?:https?://)?((?:(?:chap|read)?manganato|(?:www\.)?manganelo)\.com)"
+BASE_PATTERN = r"(?:https?://)?((?:chap|read|www\.|m\.)?mangan(?:at|el)o\.com)"
 
 
-class ManganeloChapterExtractor(ChapterExtractor):
-    """Extractor for manga-chapters from manganelo.com"""
+class ManganeloBase():
     category = "manganelo"
     root = "https://chapmanganato.com"
-    pattern = BASE_PATTERN + r"(/(?:manga-\w+|chapter/\w+)/chapter[-_][^/?#]+)"
-    test = (
-        ("https://chapmanganato.com/manga-gn983696/chapter-23", {
-            "pattern": r"https://v\d+\.mkklcdnv6tempv5\.com/img/tab_17/03/23"
-                       r"/39/gn983696/vol_3_chapter_23_24_yen/\d+-[no]\.jpg",
-            "keyword": "2c5cd59342f149375df9bcb50aa416b4d04a43cf",
-            "count": 25,
-        }),
-        ("https://readmanganato.com/manga-gn983696/chapter-23"),
-        ("https://manganelo.com/chapter/gamers/chapter_15"),
-        ("https://manganelo.com/chapter/gq921227/chapter_23"),
-    )
 
     def __init__(self, match):
         domain, path = match.groups()
-        ChapterExtractor.__init__(self, match, "https://" + domain + path)
+        super().__init__(match, "https://" + domain + path)
         self.session.headers['Referer'] = self.root
 
-    def metadata(self, page):
-        _     , pos = text.extract(page, '<a class="a-h" ', '/a>')
-        manga , pos = text.extract(page, '<a class="a-h" ', '/a>', pos)
-        info  , pos = text.extract(page, '<a class="a-h" ', '/a>', pos)
-        author, pos = text.extract(page, '- Author(s) : ', '</p>', pos)
+        self._match_chapter = re.compile(
+            r"(?:[Vv]ol\.?\s*(\d+)\s?)?"
+            r"[Cc]hapter\s*([^:]+)"
+            r"(?::\s*(.+))?").match
 
-        manga, _ = text.extract(manga, '">', '<')
-        info , _ = text.extract(info , '">', '<')
-        match = re.match(
-            r"(?:[Vv]ol\. *(\d+) )?"
-            r"[Cc]hapter *([^:]*)"
-            r"(?:: *(.+))?", info)
+    def _parse_chapter(self, info, manga, author, date=None):
+        match = self._match_chapter(info)
         volume, chapter, title = match.groups() if match else ("", "", info)
         chapter, sep, minor = chapter.partition(".")
 
         return {
-            "manga"        : text.unescape(manga),
+            "manga"        : manga,
+            "author"       : author,
+            "date"         : date,
             "title"        : text.unescape(title) if title else "",
-            "author"       : text.unescape(author) if author else "",
             "volume"       : text.parse_int(volume),
             "chapter"      : text.parse_int(chapter),
             "chapter_minor": sep + minor,
@@ -62,19 +44,53 @@ class ManganeloChapterExtractor(ChapterExtractor):
             "language"     : "English",
         }
 
+
+class ManganeloChapterExtractor(ManganeloBase, ChapterExtractor):
+    """Extractor for manga chapters from manganelo.com"""
+    pattern = BASE_PATTERN + r"(/(?:manga-\w+|chapter/\w+)/chapter[-_][^/?#]+)"
+    test = (
+        ("https://chapmanganato.com/manga-gn983696/chapter-23", {
+            "pattern": r"https://v\d+\.mkklcdnv6tempv5\.com/img/tab_17/03/23"
+                       r"/39/gn983696/vol_3_chapter_23_24_yen/\d+-[no]\.jpg",
+            "keyword": "17faaea7f0fb8c2675a327bf3aa0bcd7a6311d68",
+            "count": 25,
+        }),
+        ("https://chapmanganelo.com/manga-ti107776/chapter-4", {
+            "pattern": r"https://v\d+\.mkklcdnv6tempv5\.com/img/tab_17/01/92"
+                       r"/08/ti970565/chapter_4_caster/\d+-o\.jpg",
+            "keyword": "06e01fa9b3fc9b5b954c0d4a98f0153b40922ded",
+            "count": 45,
+        }),
+        ("https://readmanganato.com/manga-gn983696/chapter-23"),
+        ("https://manganelo.com/chapter/gamers/chapter_15"),
+        ("https://manganelo.com/chapter/gq921227/chapter_23"),
+    )
+
+    def metadata(self, page):
+        extr = text.extract_from(page)
+        extr('class="a-h"', ">")
+        manga = extr('title="', '"')
+        info = extr('title="', '"')
+        author = extr("- Author(s) : ", "</p>")
+
+        return self._parse_chapter(
+            info, text.unescape(manga), text.unescape(author))
+
     def images(self, page):
         page = text.extr(
             page, 'class="container-chapter-reader', '\n<div')
         return [
             (url, None)
             for url in text.extract_iter(page, '<img src="', '"')
+        ] or [
+            (url, None)
+            for url in text.extract_iter(
+                page, '<img class="reader-content" src="', '"')
         ]
 
 
-class ManganeloMangaExtractor(MangaExtractor):
+class ManganeloMangaExtractor(ManganeloBase, MangaExtractor):
     """Extractor for manga from manganelo.com"""
-    category = "manganelo"
-    root = "https://chapmanganato.com"
     chapterclass = ManganeloChapterExtractor
     pattern = BASE_PATTERN + r"(/(?:manga[-/]|read_)\w+)/?$"
     test = (
@@ -82,40 +98,28 @@ class ManganeloMangaExtractor(MangaExtractor):
             "pattern": ManganeloChapterExtractor.pattern,
             "count": ">= 25",
         }),
+        ("https://m.manganelo.com/manga-ti107776", {
+            "pattern": ManganeloChapterExtractor.pattern,
+            "count": ">= 12",
+        }),
         ("https://readmanganato.com/manga-gn983696"),
         ("https://manganelo.com/manga/read_otome_no_teikoku"),
         ("https://manganelo.com/manga/ol921234/"),
     )
 
-    def __init__(self, match):
-        domain, path = match.groups()
-        MangaExtractor.__init__(self, match, "https://" + domain + path)
-        self.session.headers['Referer'] = self.root
-
     def chapters(self, page):
         results = []
-        data = self.parse_page(page, {"lang": "en", "language": "English"})
+        append = results.append
 
-        needle = 'class="chapter-name text-nowrap" href="'
-        pos = page.index('<ul class="row-content-chapter">')
+        extr = text.extract_from(page)
+        manga = text.unescape(extr("<h1>", "<"))
+        author = text.remove_html(extr("</i>Author(s) :</td>", "</tr>"))
+
+        extr('class="row-content-chapter', '')
         while True:
-            url, pos = text.extract(page, needle, '"', pos)
+            url = extr('class="chapter-name text-nowrap" href="', '"')
             if not url:
                 return results
-            data["title"], pos = text.extract(page, '>', '</a>', pos)
-            data["date"] , pos = text.extract(
-                page, 'class="chapter-time text-nowrap" title="', '">', pos)
-            chapter, sep, minor = url.rpartition("/chapter_")[2].partition(".")
-            data["chapter"] = text.parse_int(chapter)
-            data["chapter_minor"] = sep + minor
-            results.append((url, data.copy()))
-
-    @staticmethod
-    def parse_page(page, data):
-        """Parse metadata on 'page' and add it to 'data'"""
-        text.extract_all(page, (
-            ("manga"  , '<h1>', '</h1>'),
-            ('author' , '</i>Author(s) :</td>', '</tr>'),
-        ), values=data)
-        data["author"] = text.remove_html(data["author"])
-        return data
+            info = extr(">", "<")
+            date = extr('class="chapter-time text-nowrap" title="', '"')
+            append((url, self._parse_chapter(info, manga, author, date)))

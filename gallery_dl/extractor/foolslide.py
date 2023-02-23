@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2022 Mike Fährmann
+# Copyright 2016-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -10,7 +10,6 @@
 
 from .common import BaseExtractor, Message
 from .. import text, util
-import json
 
 
 class FoolslideExtractor(BaseExtractor):
@@ -39,10 +38,6 @@ class FoolslideExtractor(BaseExtractor):
 
 
 BASE_PATTERN = FoolslideExtractor.update({
-    "kireicake": {
-        "root": "https://reader.kireicake.com",
-        "pattern": r"reader\.kireicake\.com",
-    },
     "powermanga": {
         "root": "https://read.powermanga.org",
         "pattern": r"read(?:er)?\.powermanga\.org",
@@ -64,10 +59,6 @@ class FoolslideChapterExtractor(FoolslideExtractor):
     archive_fmt = "{id}"
     pattern = BASE_PATTERN + r"(/read/[^/?#]+/[a-z-]+/\d+/\d+(?:/\d+)?)"
     test = (
-        ("https://reader.kireicake.com/read/wonderland/en/1/1/", {
-            "url": "b2d36bc0bc67e4c461c3a4d6444a2fd339f5d07e",
-            "keyword": "9f80947920a325e33aea7f5cd69ea669171903b6",
-        }),
         (("https://read.powermanga.org"
           "/read/one_piece_digital_colour_comics/en/0/75/"), {
             "url": "854c5817f8f767e1bccd05fa9d58ffb5a4b09384",
@@ -114,7 +105,7 @@ class FoolslideChapterExtractor(FoolslideExtractor):
         })
 
     def images(self, page):
-        return json.loads(text.extr(page, "var pages = ", ";"))
+        return util.json_loads(text.extr(page, "var pages = ", ";"))
 
 
 class FoolslideMangaExtractor(FoolslideExtractor):
@@ -123,10 +114,6 @@ class FoolslideMangaExtractor(FoolslideExtractor):
     categorytransfer = True
     pattern = BASE_PATTERN + r"(/series/[^/?#]+)"
     test = (
-        ("https://reader.kireicake.com/series/wonderland/", {
-            "url": "d067b649af1cc88fa8c8b698fde04a10909fd169",
-            "keyword": "268f43772fb239888ca5c5f6a4f65f99ffb3eefb",
-        }),
         (("https://read.powermanga.org"
           "/series/one_piece_digital_colour_comics/"), {
             "count": ">= 1",

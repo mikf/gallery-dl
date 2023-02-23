@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2022 Mike Fährmann
+# Copyright 2015-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -24,6 +24,7 @@ Exception
       +-- NoExtractorError
       +-- StopExtraction
       +-- TerminateExtraction
+      +-- RestartExtraction
 """
 
 
@@ -114,4 +115,9 @@ class StopExtraction(GalleryDLException):
 
 class TerminateExtraction(GalleryDLException):
     """Terminate data extraction"""
+    code = 0
+
+
+class RestartExtraction(GalleryDLException):
+    """Restart data extraction"""
     code = 0

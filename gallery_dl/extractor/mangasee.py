@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2021-2022 Mike Fährmann
+# Copyright 2021-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -10,7 +10,6 @@
 
 from .common import ChapterExtractor, MangaExtractor
 from .. import text, util
-import json
 
 
 class MangaseeBase():
@@ -94,7 +93,7 @@ class MangaseeChapterExtractor(MangaseeBase, ChapterExtractor):
 
     def metadata(self, page):
         extr = text.extract_from(page)
-        self.chapter = data = json.loads(extr("vm.CurChapter =", ";\r\n"))
+        self.chapter = data = util.json_loads(extr("vm.CurChapter =", ";\r\n"))
         self.domain = extr('vm.CurPathName = "', '"')
         self.slug = extr('vm.IndexName = "', '"')
 
@@ -143,7 +142,7 @@ class MangaseeMangaExtractor(MangaseeBase, MangaExtractor):
 
     def chapters(self, page):
         slug, pos = text.extract(page, 'vm.IndexName = "', '"')
-        chapters = json.loads(text.extract(
+        chapters = util.json_loads(text.extract(
             page, "vm.Chapters = ", ";\r\n", pos)[0])
 
         result = []

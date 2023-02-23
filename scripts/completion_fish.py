@@ -41,5 +41,5 @@ for action in option.build_parser()._actions:
     opts.append(opt)
 
 PATH = util.path("data/completion/gallery-dl.fish")
-with open(PATH, "w", encoding="utf-8") as file:
+with util.lazy(PATH) as file:
     file.write(TEMPLATE % {"opts": "\n".join(opts)})

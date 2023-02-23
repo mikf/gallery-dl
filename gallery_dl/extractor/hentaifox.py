@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2021 Mike Fährmann
+# Copyright 2019-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -9,8 +9,7 @@
 """Extractors for https://hentaifox.com/"""
 
 from .common import GalleryExtractor, Extractor, Message
-from .. import text
-import json
+from .. import text, util
 
 
 class HentaifoxBase():
@@ -90,7 +89,7 @@ class HentaifoxGalleryExtractor(HentaifoxBase, GalleryExtractor):
         server1 = "https://i.hentaifox.com"
         server2 = "https://i2.hentaifox.com"
 
-        for num, image in json.loads(data).items():
+        for num, image in util.json_loads(data).items():
             ext, width, height = image.split(",")
             path = urlfmt(num, extmap[ext])
             append((server1 + path, {

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # Copyright 2018-2020 Leonardo Taccari
-# Copyright 2018-2022 Mike Fährmann
+# Copyright 2018-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -40,6 +40,7 @@ class InstagramExtractor(Extractor):
         self._logged_in = True
         self._find_tags = re.compile(r"#\w+").findall
         self._cursor = None
+        self._user = None
 
     def items(self):
         self.login()
@@ -60,11 +61,17 @@ class InstagramExtractor(Extractor):
                 post = self._parse_post_graphql(post)
             else:
                 post = self._parse_post_rest(post)
+            if self._user:
+                post["user"] = self._user
             post.update(data)
             files = post.pop("_files")
 
             post["count"] = len(files)
             yield Message.Directory, post
+
+            if "date" in post:
+                del post["date"]
+
             for file in files:
                 file.update(post)
 
@@ -86,6 +93,11 @@ class InstagramExtractor(Extractor):
     def posts(self):
         return ()
 
+    def finalize(self):
+        if self._cursor:
+            self.log.info("Use '-o cursor=%s' to continue downloading "
+                          "from the current position", self._cursor)
+
     def request(self, url, **kwargs):
         response = Extractor.request(self, url, **kwargs)
 
@@ -93,10 +105,6 @@ class InstagramExtractor(Extractor):
 
             url = response.url
             if "/accounts/login/" in url:
-                if self._username:
-                    self.log.debug("Invalidating cached login session for "
-                                   "'%s'", self._username)
-                    _login_impl.invalidate(self._username)
                 page = "login"
             elif "/challenge/" in url:
                 page = "challenge"
@@ -104,9 +112,6 @@ class InstagramExtractor(Extractor):
                 page = None
 
             if page:
-                if self._cursor:
-                    self.log.info("Use '-o cursor=%s' to continue downloading "
-                                  "from the current position", self._cursor)
                 raise exception.StopExtraction("HTTP redirect to %s page (%s)",
                                                page, url.partition("?")[0])
 
@@ -114,14 +119,16 @@ class InstagramExtractor(Extractor):
         if www_claim is not None:
             self.www_claim = www_claim
 
+        csrf_token = response.cookies.get("csrftoken")
+        if csrf_token:
+            self.csrf_token = csrf_token
+
         return response
 
     def login(self):
-        self._username = None
         if not self._check_cookies(self.cookienames):
             username, password = self._get_auth_info()
             if username:
-                self._username = username
                 self._update_cookies(_login_impl(self, username, password))
             else:
                 self._logged_in = False
@@ -358,6 +365,22 @@ class InstagramExtractor(Extractor):
         self.log.debug("Cursor: %s", cursor)
         self._cursor = cursor
         return cursor
+
+    def _assign_user(self, user):
+        self._user = user
+
+        for key, old in (
+                ("count_media"     , "edge_owner_to_timeline_media"),
+                ("count_video"     , "edge_felix_video_timeline"),
+                ("count_saved"     , "edge_saved_media"),
+                ("count_mutual"    , "edge_mutual_followed_by"),
+                ("count_follow"    , "edge_follow"),
+                ("count_followed"  , "edge_followed_by"),
+                ("count_collection", "edge_media_collections")):
+            try:
+                user[key] = user.pop(old)["count"]
+            except Exception:
+                user[key] = 0
 
 
 class InstagramUserExtractor(InstagramExtractor):
@@ -792,11 +815,17 @@ class InstagramRestAPI():
             name = user["username"]
             s = "" if name.endswith("s") else "s"
             raise exception.StopExtraction("%s'%s posts are private", name, s)
+        self.extractor._assign_user(user)
         return user["id"]
 
     def user_clips(self, user_id):
         endpoint = "/v1/clips/user/"
-        data = {"target_user_id": user_id, "page_size": "50"}
+        data = {
+            "target_user_id": user_id,
+            "page_size": "50",
+            "max_id": None,
+            "include_feed_video": "true",
+        }
         return self._pagination_post(endpoint, data)
 
     def user_collection(self, collection_id):
@@ -822,18 +851,17 @@ class InstagramRestAPI():
     def _call(self, endpoint, **kwargs):
         extr = self.extractor
 
-        url = "https://i.instagram.com/api" + endpoint
+        url = "https://www.instagram.com/api" + endpoint
         kwargs["headers"] = {
+            "Accept"          : "*/*",
             "X-CSRFToken"     : extr.csrf_token,
             "X-Instagram-AJAX": "1006242110",
             "X-IG-App-ID"     : "936619743392459",
             "X-ASBD-ID"       : "198387",
             "X-IG-WWW-Claim"  : extr.www_claim,
-            "Origin"          : extr.root,
+            "X-Requested-With": "XMLHttpRequest",
+            "Alt-Used"        : "www.instagram.com",
             "Referer"         : extr.root + "/",
-        }
-        kwargs["cookies"] = {
-            "csrftoken": extr.csrf_token,
         }
         return extr.request(url, **kwargs).json()
 
@@ -853,7 +881,7 @@ class InstagramRestAPI():
                 yield from data["items"]
 
             if not data.get("more_available"):
-                return
+                return extr._update_cursor(None)
             params["max_id"] = extr._update_cursor(data["next_max_id"])
 
     def _pagination_post(self, endpoint, params):
@@ -868,7 +896,7 @@ class InstagramRestAPI():
 
             info = data["paging_info"]
             if not info.get("more_available"):
-                return
+                return extr._update_cursor(None)
             params["max_id"] = extr._update_cursor(info["max_id"])
 
     def _pagination_sections(self, endpoint, params):
@@ -881,7 +909,7 @@ class InstagramRestAPI():
             yield from info["sections"]
 
             if not info.get("more_available"):
-                return
+                return extr._update_cursor(None)
             params["page"] = info["next_page"]
             params["max_id"] = extr._update_cursor(info["next_max_id"])
 
@@ -896,7 +924,7 @@ class InstagramRestAPI():
                 yield from item["media_items"]
 
             if "next_max_id" not in data:
-                return
+                return extr._update_cursor(None)
             params["max_id"] = extr._update_cursor(data["next_max_id"])
 
 
@@ -984,12 +1012,7 @@ class InstagramGraphqlAPI():
             "X-Requested-With": "XMLHttpRequest",
             "Referer"         : extr.root + "/",
         }
-        cookies = {
-            "csrftoken": extr.csrf_token,
-        }
-        return extr.request(
-            url, params=params, headers=headers, cookies=cookies,
-        ).json()["data"]
+        return extr.request(url, params=params, headers=headers).json()["data"]
 
     def _pagination(self, query_hash, variables,
                     key_data="user", key_edge=None):
@@ -1005,7 +1028,7 @@ class InstagramGraphqlAPI():
 
             info = data["page_info"]
             if not info["has_next_page"]:
-                return
+                return extr._update_cursor(None)
             elif not data["edges"]:
                 s = "" if self.item.endswith("s") else "s"
                 raise exception.StopExtraction(
