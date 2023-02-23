@@ -34,7 +34,6 @@ class DeviantartExtractor(Extractor):
     filename_fmt = "{category}_{index}_{title}.{extension}"
     cookiedomain = None
     cookienames = ("auth", "auth_secure", "userinfo")
-    _warning = True
     _last_request = 0
 
     def __init__(self, match):
@@ -74,13 +73,10 @@ class DeviantartExtractor(Extractor):
     def login(self):
         if not self._check_cookies(self.cookienames):
             username, password = self._get_auth_info()
-            if username:
-                self._update_cookies(_login_impl(self, username, password))
-            elif self._warning:
-                self.log.warning(
-                    "No session cookies or login credentials available. "
-                    "Unable to fetch mature-rated content.")
-            DeviantartExtractor._warning = False
+            if not username:
+                return False
+            self._update_cookies(_login_impl(self, username, password))
+        return True
 
     def items(self):
         self.api = DeviantartOAuthAPI(self)
@@ -1735,12 +1731,21 @@ class DeviantartEclipseAPI():
             return {"error": response.text}
 
     def _pagination(self, endpoint, params, key="results"):
+        limit = params.get("limit", 24)
+        warn = True
+
         while True:
             data = self._call(endpoint, params)
 
             results = data.get(key)
             if results is None:
                 return
+            if len(results) < limit and warn and data.get("hasMore"):
+                warn = False
+                self.log.warning(
+                    "Private deviations detected! "
+                    "Provide login credentials or session cookies "
+                    "to be able to access them.")
             yield from results
 
             if not data.get("hasMore"):
