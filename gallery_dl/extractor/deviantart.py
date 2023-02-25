@@ -1148,20 +1148,47 @@ class DeviantartSearchExtractor(DeviantartExtractor):
         ("https://www.deviantart.com/search/deviations?order=popular-1-week"),
     )
 
-    def deviations(self):
-        self.login()
+    skip = Extractor.skip
 
-        query = text.parse_query(self.user)
-        self.search = query.get("q", "")
+    def __init__(self, match):
+        DeviantartExtractor.__init__(self, match)
+        self.query = text.parse_query(self.user)
+        self.search = self.query.get("q", "")
         self.user = ""
 
+    def deviations(self):
+        logged_in = self.login()
+
         eclipse_api = DeviantartEclipseAPI(self)
-        return self._eclipse_to_oauth(
-            eclipse_api, eclipse_api.search_deviations(query))
+        search = (eclipse_api.search_deviations
+                  if logged_in else self._search_html)
+        return self._eclipse_to_oauth(eclipse_api, search(self.query))
 
     def prepare(self, deviation):
         DeviantartExtractor.prepare(self, deviation)
         deviation["search_tags"] = self.search
+
+    def _search_html(self, params):
+        url = self.root + "/search"
+        deviation = {
+            "deviationId": None,
+            "author": {"username": "u"},
+            "isJournal": False,
+        }
+
+        while True:
+            page = self.request(url, params=params).text
+
+            items , pos = text.rextract(page, r'\"items\":[', ']')
+            cursor, pos = text.extract(page, r'\"cursor\":\"', '\\', pos)
+
+            for deviation_id in items.split(","):
+                deviation["deviationId"] = deviation_id
+                yield deviation
+
+            if not cursor:
+                return
+            params["cursor"] = cursor
 
 
 class DeviantartGallerySearchExtractor(DeviantartExtractor):
