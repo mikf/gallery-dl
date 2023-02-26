@@ -33,9 +33,6 @@ def progress(urls, pformat):
 
 def main():
     try:
-        if sys.stdout and sys.stdout.encoding.lower() != "utf-8":
-            output.replace_std_streams()
-
         parser = option.build_parser()
         args = parser.parse_args()
         log = output.initialize_logging(args.loglevel)
@@ -76,6 +73,8 @@ def main():
             config.set((), "postprocessor-options", args.options_pp)
         for opts in args.options:
             config.set(*opts)
+
+        output.configure_standard_streams()
 
         # signals
         signals = config.get((), "signals-ignore")

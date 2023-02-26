@@ -3808,6 +3808,42 @@ Description
     * ``{3}`` is percent of bytes downloaded to total bytes
 
 
+output.stdout & .stdin & .stderr
+--------------------------------
+Type
+    * ``string``
+    * ``object``
+Example
+    .. code:: json
+
+        "utf-8"
+
+    .. code:: json
+
+        {
+            "encoding": "utf-8",
+            "errors": "replace",
+            "line_buffering": true
+        }
+
+Description
+    `Reconfigure <https://docs.python.org/3/library/io.html#io.TextIOWrapper.reconfigure>`__
+    a `standard stream <https://docs.python.org/3/library/sys.html#sys.stdin>`__.
+
+    Possible options are
+
+    * ``encoding``
+    * ``errors``
+    * ``newline``
+    * ``line_buffering``
+    * ``write_through``
+
+    When this option is specified as a simple ``string``,
+    it is interpreted as ``{"encoding": "<string-value>", "errors": "replace"}``
+
+    Note: ``errors`` always defaults to ``"replace"``
+
+
 output.shorten
 --------------
 Type
