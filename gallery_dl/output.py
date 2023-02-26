@@ -271,16 +271,32 @@ else:
     stderr_write = stderr_write_flush
 
 
-def replace_std_streams(errors="replace"):
-    """Replace standard streams and set their error handlers to 'errors'"""
-    for name in ("stdout", "stdin", "stderr"):
-        stream = getattr(sys, name)
-        if stream:
+def configure_standard_streams():
+    for name in ("stdout", "stderr", "stdin"):
+        options = config.get(("output",), name)
+        if not options:
+            continue
+
+        stream = getattr(sys, name, None)
+        if not stream:
+            continue
+
+        if isinstance(options, str):
+            options = {"encoding": options, "errors": "replace"}
+        elif not options.get("errors"):
+            options["errors"] = "replace"
+
+        try:
+            stream.reconfigure(**options)
+        except AttributeError:
+            # no 'reconfigure' support
+            oget = options.get
             setattr(sys, name, stream.__class__(
                 stream.buffer,
-                errors=errors,
-                newline=stream.newlines,
-                line_buffering=stream.line_buffering,
+                encoding=oget("encoding", stream.encoding),
+                errors=oget("errors", "replace"),
+                newline=oget("newline", stream.newlines),
+                line_buffering=oget("line_buffering", stream.line_buffering),
             ))
 
 
