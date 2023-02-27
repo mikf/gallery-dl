@@ -244,7 +244,7 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>Gelbooru</td>
     <td>https://gelbooru.com/</td>
-    <td>Pools, Posts, Redirects, Tag Searches</td>
+    <td>Favorites, Pools, Posts, Redirects, Tag Searches</td>
     <td></td>
 </tr>
 <tr>
