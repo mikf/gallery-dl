@@ -49,29 +49,8 @@ if getattr(sys, "frozen", False):
 # --------------------------------------------------------------------
 # public interface
 
-def load(files=None, strict=False, fmt="json"):
+def load(files=None, strict=False, load=util.json_loads):
     """Load JSON configuration files"""
-    if fmt == "yaml":
-        try:
-            import yaml
-            load = yaml.safe_load
-        except ImportError:
-            log.error("Could not import 'yaml' module")
-            return
-    elif fmt == "toml":
-        try:
-            import tomllib
-            load = tomllib.loads
-        except ImportError:
-            try:
-                import toml
-                load = toml.loads
-            except ImportError:
-                log.error("Could not import 'toml' module")
-                return
-    else:
-        load = util.json_loads
-
     for pathfmt in files or _default_configs:
         path = util.expand_path(pathfmt)
         try:

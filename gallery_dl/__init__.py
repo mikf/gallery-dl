@@ -43,9 +43,14 @@ def main():
         if args.configs_json:
             config.load(args.configs_json, strict=True)
         if args.configs_yaml:
-            config.load(args.configs_yaml, strict=True, fmt="yaml")
+            import yaml
+            config.load(args.configs_yaml, strict=True, load=yaml.safe_load)
         if args.configs_toml:
-            config.load(args.configs_toml, strict=True, fmt="toml")
+            try:
+                import tomllib as toml
+            except ImportError:
+                import toml
+            config.load(args.configs_toml, strict=True, load=toml.loads)
         if args.filename:
             filename = args.filename
             if filename == "/O":
