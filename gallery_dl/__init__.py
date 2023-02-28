@@ -40,10 +40,12 @@ def main():
         # configuration
         if args.load_config:
             config.load()
-        if args.cfgfiles:
-            config.load(args.cfgfiles, strict=True)
-        if args.yamlfiles:
-            config.load(args.yamlfiles, strict=True, fmt="yaml")
+        if args.configs_json:
+            config.load(args.configs_json, strict=True)
+        if args.configs_yaml:
+            config.load(args.configs_yaml, strict=True, fmt="yaml")
+        if args.configs_toml:
+            config.load(args.configs_toml, strict=True, fmt="toml")
         if args.filename:
             filename = args.filename
             if filename == "/O":

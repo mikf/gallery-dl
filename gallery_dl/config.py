@@ -58,6 +58,17 @@ def load(files=None, strict=False, fmt="json"):
         except ImportError:
             log.error("Could not import 'yaml' module")
             return
+    elif fmt == "toml":
+        try:
+            import tomllib
+            load = tomllib.loads
+        except ImportError:
+            try:
+                import toml
+                load = toml.loads
+            except ImportError:
+                log.error("Could not import 'toml' module")
+                return
     else:
         load = util.json_loads
 

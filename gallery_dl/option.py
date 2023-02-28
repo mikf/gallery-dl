@@ -321,14 +321,25 @@ def build_parser():
 
     configuration = parser.add_argument_group("Configuration Options")
     configuration.add_argument(
+        "-o", "--option",
+        dest="options", metavar="KEY=VALUE", action=ParseAction, default=[],
+        help=("Additional options. "
+              "Example: -o browser=firefox")   ,
+    )
+    configuration.add_argument(
         "-c", "--config",
-        dest="cfgfiles", metavar="FILE", action="append",
+        dest="configs_json", metavar="FILE", action="append",
         help="Additional configuration files",
     )
     configuration.add_argument(
         "--config-yaml",
-        dest="yamlfiles", metavar="FILE", action="append",
-        help=argparse.SUPPRESS,
+        dest="configs_yaml", metavar="FILE", action="append",
+        help="Additional configuration files in YAML format",
+    )
+    configuration.add_argument(
+        "--config-toml",
+        dest="configs_toml", metavar="FILE", action="append",
+        help="Additional configuration files in TOML format",
     )
     configuration.add_argument(
         "--config-ignore",
@@ -339,11 +350,6 @@ def build_parser():
         "--ignore-config",
         dest="load_config", action="store_false",
         help=argparse.SUPPRESS,
-    )
-    configuration.add_argument(
-        "-o", "--option",
-        dest="options", metavar="OPT", action=ParseAction, default=[],
-        help="Additional '<key>=<value>' option values",
     )
 
     authentication = parser.add_argument_group("Authentication Options")

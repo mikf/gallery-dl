@@ -72,9 +72,11 @@
     --no-check-certificate      Disable HTTPS certificate validation
 
 ## Configuration Options:
+    -o, --option KEY=VALUE      Additional options. Example: -o browser=firefox
     -c, --config FILE           Additional configuration files
-    -o, --option OPT            Additional '<key>=<value>' option values
-    --ignore-config             Do not read default configuration files
+    --config-yaml FILE          Additional configuration files in YAML format
+    --config-toml FILE          Additional configuration files in TOML format
+    --config-ignore             Do not read default configuration files
 
 ## Authentication Options:
     -u, --username USER         Username to login with
