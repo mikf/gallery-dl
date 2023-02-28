@@ -131,7 +131,7 @@ def main():
             import requests
 
             extra = ""
-            if getattr(sys, "frozen", False):
+            if util.EXECUTABLE:
                 extra = " - Executable"
             else:
                 git_head = util.git_head()

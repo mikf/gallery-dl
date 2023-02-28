@@ -603,6 +603,7 @@ SECOND = datetime.timedelta(0, 1)
 WINDOWS = (os.name == "nt")
 SENTINEL = object()
 USERAGENT = "gallery-dl/" + version.__version__
+EXECUTABLE = getattr(sys, "frozen", False)
 SPECIAL_EXTRACTORS = {"oauth", "recursive", "test"}
 GLOBALS = {
     "contains" : contains,

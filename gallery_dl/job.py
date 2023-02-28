@@ -78,7 +78,7 @@ class Job():
         if version_info:
             self.kwdict[version_info] = {
                 "version"         : version.__version__,
-                "is_executable"   : getattr(sys, "frozen", False),
+                "is_executable"   : util.EXECUTABLE,
                 "current_git_head": util.git_head()
             }
 
