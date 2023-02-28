@@ -4694,6 +4694,29 @@ Description
     or by `extractor.modules`_.
 
 
+globals
+-------
+Type
+    * |Path|_
+    * ``string``
+Example
+    * ``"~/.local/share/gdl-globals.py"``
+    * ``"gdl-globals"``
+Default
+    The ``GLOBALS`` dict in
+    `util.py <../gallery_dl/util.py>`__
+Description
+    Path to or name of an
+    `importable <https://docs.python.org/3/reference/import.html>`__
+    Python module whose namespace gets used as an alternative
+    |globals parameter|__
+    for compiled Python expressions.
+
+.. |globals parameter| replace:: ``globals`` parameter
+.. __: https://docs.python.org/3/library/functions.html#eval
+
+
+
 cache.file
 ----------
 Type
