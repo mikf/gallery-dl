@@ -61,18 +61,15 @@ class OptionAction(argparse.Action):
 
 class Formatter(argparse.HelpFormatter):
     """Custom HelpFormatter class to customize help output"""
-    def __init__(self, *args, **kwargs):
-        super().__init__(max_help_position=30, *args, **kwargs)
+    def __init__(self, prog):
+        argparse.HelpFormatter.__init__(self, prog, max_help_position=30)
 
-    def _format_action_invocation(self, action):
-        opts = action.option_strings[:]
-        if opts:
-            if action.nargs != 0:
-                args_string = self._format_args(action, "ARG")
-                opts[-1] += " " + args_string
-            return ', '.join(opts)
-        else:
-            return self._metavar_formatter(action, action.dest)(1)[0]
+    def _format_action_invocation(self, action, join=", ".join):
+        opts = action.option_strings
+        if action.metavar:
+            opts = opts.copy()
+            opts[-1] += " " + action.metavar
+        return join(opts)
 
 
 def _parse_option(opt):
