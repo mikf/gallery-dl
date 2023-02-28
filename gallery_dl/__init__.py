@@ -110,6 +110,11 @@ def main():
             from . import formatter
             formatter._SEPARATOR = separator
 
+        # eval globals
+        path = config.get((), "globals")
+        if path:
+            util.GLOBALS = util.import_file(path).__dict__
+
         # loglevels
         output.configure_logging(args.loglevel)
         if args.loglevel >= logging.ERROR:
