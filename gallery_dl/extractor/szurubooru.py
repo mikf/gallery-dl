@@ -22,6 +22,11 @@ class SzurubooruExtractor(GalleryExtractor):
     directory_fmt = ("{domain}", "{query}")
     filename_fmt = "{id}_{version}_{tags_str}.{extension}"
 
+    test = ("https://booru.foalcon.com/posts/query=artist%5C%3Abobdude0", {
+        "pattern": r"https://booru.foalcon.com/data/posts/\d+.png",
+        "count": ">=1"
+    })
+
     def __init__(self, match: re.Match):
         super().__init__(match)
         self.auth_token = self.config("token")
@@ -88,6 +93,9 @@ class SzurubooruExtractor(GalleryExtractor):
                                 f" {api_result['title']} ({api_result['description']})")
 
         for result in api_result['results']:
+            if not result['contentUrl'].startswith('http'):
+                # Relative path
+                result['contentUrl'] = f"{self.base_url}/{result['contentUrl']}"
             result['extension'] = result['contentUrl'].split('.')[-1]
             result['tags_str'] = ','.join([tag['names'][0] for tag in result['tags']])[:250]
 
