@@ -812,6 +812,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td>Supported</td>
 </tr>
 <tr>
+    <td>Szurubooru</td>
+    <td>Various instances (<a href="https://github.com/rr-/szurubooru/">project</a>)</td>
+    <td>Search Results</td>
+    <td>Supported</td>
+</tr>
+<tr>
     <td>Tapas</td>
     <td>https://tapas.io/</td>
     <td>Episodes, Series</td>

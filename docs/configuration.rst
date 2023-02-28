@@ -4838,6 +4838,17 @@ How To
       and put them in your configuration file
       as ``"api-key"`` and ``"api-secret"``
 
+extractor.szurubooru.username & .token
+--------------------------------------
+Type
+    ``string``
+How To
+    * login and click your username on the top right
+    * click "create token"
+    * configure put your username in ``username`` and your newly created token in ``token``
+When To Use
+    By default, every user can access the read-only API so this should not be necessary.
+
 
 extractor.tumblr.api-key & .api-secret
 --------------------------------------
