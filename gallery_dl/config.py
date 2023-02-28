@@ -38,7 +38,7 @@ else:
     ]
 
 
-if getattr(sys, "frozen", False):
+if util.EXECUTABLE:
     # look for config file in PyInstaller executable directory (#682)
     _default_configs.append(os.path.join(
         os.path.dirname(sys.executable),
