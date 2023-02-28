@@ -331,14 +331,19 @@ def build_parser():
         help=argparse.SUPPRESS,
     )
     configuration.add_argument(
-        "-o", "--option",
-        dest="options", metavar="OPT", action=ParseAction, default=[],
-        help="Additional '<key>=<value>' option values",
+        "--config-ignore",
+        dest="load_config", action="store_false",
+        help="Do not read default configuration files",
     )
     configuration.add_argument(
         "--ignore-config",
         dest="load_config", action="store_false",
-        help="Do not read default configuration files",
+        help=argparse.SUPPRESS,
+    )
+    configuration.add_argument(
+        "-o", "--option",
+        dest="options", metavar="OPT", action=ParseAction, default=[],
+        help="Additional '<key>=<value>' option values",
     )
 
     authentication = parser.add_argument_group("Authentication Options")
