@@ -8,13 +8,13 @@ import sys
 
 class SzurubooruExtractor(GalleryExtractor):
     """Extractor for szurubooru hosted boorus (https://github.com/rr-/szurubooru/)"""
-    auth_token: str | None = None
-    username: str | None = None
-    page_size: int = 40
+    auth_token = None
+    username = None
+    page_size = 40
 
-    specifies_protocol: bool = False
-    base_url: str | None = None
-    query: str | None = None
+    specifies_protocol = False
+    base_url = None
+    query = None
 
     pattern = r"((https?://)?[^/]+)/posts/query=([^#]*)"
     category = "szurubooru"
@@ -27,7 +27,7 @@ class SzurubooruExtractor(GalleryExtractor):
         "count": ">=1"
     })
 
-    def __init__(self, match: re.Match):
+    def __init__(self, match):
         super().__init__(match)
         self.auth_token = self.config("token")
         self.username = self.config("username")
@@ -83,7 +83,7 @@ class SzurubooruExtractor(GalleryExtractor):
 
         return headers
 
-    def _get_page(self, tags: str, headers: dict[str, str], offset: int = 0) -> dict:
+    def _get_page(self, tags, headers, offset = 0) -> dict:
         api_url = f'{self.base_url}/api/posts/?offset={offset}&limit={self.page_size}&query={tags}'
         api_result = self.request(api_url, headers=headers).json()
 
