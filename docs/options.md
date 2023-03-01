@@ -76,6 +76,7 @@
     -c, --config FILE           Additional configuration files
     --config-yaml FILE          Additional configuration files in YAML format
     --config-toml FILE          Additional configuration files in TOML format
+    --config-create             Create a basic configuration file
     --config-ignore             Do not read default configuration files
 
 ## Authentication Options:

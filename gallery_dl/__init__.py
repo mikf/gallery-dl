@@ -38,7 +38,7 @@ def main():
         log = output.initialize_logging(args.loglevel)
 
         # configuration
-        if args.load_config:
+        if args.config_load:
             config.load()
         if args.configs_json:
             config.load(args.configs_json, strict=True)
@@ -218,6 +218,10 @@ def main():
                     "Deleted %d %s from '%s'",
                     cnt, "entry" if cnt == 1 else "entries", cache._path(),
                 )
+
+        elif args.config_init:
+            return config.initialize()
+
         else:
             if not args.urls and not args.inputfiles:
                 parser.error(
