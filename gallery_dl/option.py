@@ -342,13 +342,18 @@ def build_parser():
         help="Additional configuration files in TOML format",
     )
     configuration.add_argument(
+        "--config-create",
+        dest="config_init", action="store_true",
+        help="Create a basic configuration file",
+    )
+    configuration.add_argument(
         "--config-ignore",
-        dest="load_config", action="store_false",
+        dest="config_load", action="store_false",
         help="Do not read default configuration files",
     )
     configuration.add_argument(
         "--ignore-config",
-        dest="load_config", action="store_false",
+        dest="config_load", action="store_false",
         help=argparse.SUPPRESS,
     )
 
