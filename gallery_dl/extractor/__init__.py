@@ -140,6 +140,7 @@ modules = [
     "soundgasm",
     "speakerdeck",
     "subscribestar",
+    "szurubooru",
     "tapas",
     "tcbscans",
     "telegraph",

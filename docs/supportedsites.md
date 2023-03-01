@@ -1233,6 +1233,22 @@ Consider all sites to be NSFW unless otherwise known.
 </tr>
 
 <tr>
+    <td colspan="4"><strong>szurubooru Instances</strong></td>
+</tr>
+<tr>
+    <td>Foalcon</td>
+    <td>https://booru.foalcon.com/</td>
+    <td>Posts, Tag Searches</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Bcbnsfw</td>
+    <td>https://booru.bcbnsfw.space/</td>
+    <td>Posts, Tag Searches</td>
+    <td></td>
+</tr>
+
+<tr>
     <td colspan="4"><strong>vichan Imageboards</strong></td>
 </tr>
 <tr>

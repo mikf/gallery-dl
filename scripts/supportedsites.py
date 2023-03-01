@@ -264,6 +264,7 @@ BASE_MAP = {
     "lolisafe"    : "lolisafe and chibisafe",
     "lynxchan"    : "LynxChan Imageboards",
     "moebooru"    : "Moebooru and MyImouto",
+    "szurubooru"  : "szurubooru Instances",
     "vichan"      : "vichan Imageboards",
 }
 
