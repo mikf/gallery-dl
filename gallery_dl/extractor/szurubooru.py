@@ -1,5 +1,4 @@
 import base64
-import re
 import urllib.parse
 
 from .common import Message, GalleryExtractor
@@ -7,7 +6,10 @@ import sys
 
 
 class SzurubooruExtractor(GalleryExtractor):
-    """Extractor for szurubooru hosted boorus (https://github.com/rr-/szurubooru/)"""
+    """
+    Extractor for szurubooru hosted boorus
+    (https://github.com/rr-/szurubooru/)
+    """
     auth_token = None
     username = None
     page_size = 40
@@ -45,17 +47,21 @@ class SzurubooruExtractor(GalleryExtractor):
     def items(self):
         headers = self._get_headers()
 
-        yield Message.Directory, {'domain': self.domain, 'query': self.query}, self.query
+        params = {'domain': self.domain, 'query': self.query}
+        yield Message.Directory, params, self.query
 
         try:
             offset = 0
             while True:
-                page_content = self._get_page(self.query, headers=headers, offset=offset)
+                page_content = self._get_page(self.query,
+                                              headers=headers,
+                                              offset=offset)
 
                 offset = page_content['offset']
 
                 for image_metadata in page_content['results']:
-                    yield Message.Url, image_metadata['contentUrl'], image_metadata
+                    url = image_metadata['contentUrl']
+                    yield Message.Url, url, image_metadata
 
                 offset += len(page_content['results'])
                 if offset >= int(page_content['total']):
@@ -78,25 +84,34 @@ class SzurubooruExtractor(GalleryExtractor):
                 and len(self.auth_token) > 0 and \
                 len(self.username) > 0:
             # https://github.com/rr-/szurubooru/blob/master/doc/API.md#user-token-authentication
-            concatenation = f"{self.username}:{self.auth_token}".encode('ascii')
-            headers['Authorization'] = f'Token {base64.b64encode(concatenation).decode("ascii")}'
+
+            concatenation = (str(self.username) + ":" + str(self.auth_token))
+            concatenation = concatenation.encode('ascii')
+
+            b64token = base64.b64encode(concatenation).decode("ascii")
+            headers['Authorization'] = f'Token {b64token}'
 
         return headers
 
-    def _get_page(self, tags, headers, offset = 0) -> dict:
-        api_url = f'{self.base_url}/api/posts/?offset={offset}&limit={self.page_size}&query={tags}'
+    def _get_page(self, tags, headers, offset=0) -> dict:
+        api_url = self.base_url + '/api/posts/?offset=' + offset\
+                                + '&limit=' + str(self.page_size)\
+                                + '&query=' + str(tags)
         api_result = self.request(api_url, headers=headers).json()
 
         for error_tag in ['name', 'title', 'description']:
             if error_tag in api_result:
-                raise Exception(f"{api_result['name']} while fetching data:"
-                                f" {api_result['title']} ({api_result['description']})")
+                raise Exception(api_result['name'] + " while fetching data:" +
+                                api_result['title'] + " (" +
+                                api_result['description'] + ")")
 
         for result in api_result['results']:
             if not result['contentUrl'].startswith('http'):
                 # Relative path
-                result['contentUrl'] = f"{self.base_url}/{result['contentUrl']}"
+                url = self.base_url + "/" + result['contentUrl']
+                result['contentUrl'] = url
             result['extension'] = result['contentUrl'].split('.')[-1]
-            result['tags_str'] = ','.join([tag['names'][0] for tag in result['tags']])[:250]
+            tag_names = [tag['names'][0] for tag in result['tags']]
+            result['tags_str'] = ','.join(tag_names)[:250]
 
         return api_result
