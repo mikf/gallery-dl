@@ -2647,6 +2647,17 @@ Description
     Download video files.
 
 
+extractor.[szurubooru].username & .token
+----------------------------------------
+Type
+    ``string``
+Description
+    Username and login token of your account to access private resources.
+
+    To generate a token, visit ``/user/USERNAME/list-tokens``
+    and click ``Create Token``.
+
+
 extractor.tumblr.avatar
 -----------------------
 Type
