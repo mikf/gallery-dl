@@ -89,7 +89,7 @@ class SzurubooruExtractor(GalleryExtractor):
             concatenation = concatenation.encode('ascii')
 
             b64token = base64.b64encode(concatenation).decode("ascii")
-            headers['Authorization'] = f'Token {b64token}'
+            headers['Authorization'] = 'Token ' + b64token
 
         return headers
 
