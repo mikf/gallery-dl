@@ -1127,6 +1127,28 @@ Consider all sites to be NSFW unless otherwise known.
 </tr>
 
 <tr>
+    <td colspan="4"><strong>Misskey Instances</strong></td>
+</tr>
+<tr>
+    <td>Misskey.io</td>
+    <td>https://misskey.io/</td>
+    <td>Images from Notes, User Profiles</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Lesbian.energy</td>
+    <td>https://lesbian.energy/</td>
+    <td>Images from Notes, User Profiles</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Sushi.ski</td>
+    <td>https://sushi.ski/</td>
+    <td>Images from Notes, User Profiles</td>
+    <td></td>
+</tr>
+
+<tr>
     <td colspan="4"><strong>Nijie Instances</strong></td>
 </tr>
 <tr>
