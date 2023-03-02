@@ -94,6 +94,7 @@ modules = [
     "mangasee",
     "mangoxo",
     "mememuseum",
+    "misskey",
     "myhentaigallery",
     "myportfolio",
     "nana",
