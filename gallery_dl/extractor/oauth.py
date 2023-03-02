@@ -14,8 +14,8 @@ from .. import text, oauth, util, config, exception
 from ..output import stdout_write
 from ..cache import cache
 import urllib.parse
+import binascii
 import hashlib
-import base64
 
 REDIRECT_URI_LOCALHOST = "http://localhost:6414/"
 REDIRECT_URI_HTTPS = "https://mikf.github.io/gallery-dl/oauth-redirect.html"
@@ -392,9 +392,9 @@ class OAuthPixiv(OAuthBase):
         yield Message.Version, 1
 
         code_verifier = util.generate_token(32)
-        digest = hashlib.sha256(code_verifier.encode("ascii")).digest()
-        code_challenge = base64.urlsafe_b64encode(
-            digest).rstrip(b"=").decode("ascii")
+        digest = hashlib.sha256(code_verifier.encode()).digest()
+        code_challenge = binascii.b2a_base64(
+            digest)[:-2].decode().replace("+", "-").replace("/", "_")
 
         url = "https://app-api.pixiv.net/web/v1/login"
         params = {
