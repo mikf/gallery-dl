@@ -184,6 +184,13 @@ class MetadataPP(PostProcessor):
             for taglist in taglists:
                 extend(taglist)
             tags.sort()
+        elif all(isinstance(e, dict) for e in tags):
+            taglists = tags
+            tags = []
+            extend = tags.extend
+            for tagdict in taglists:
+                extend([x for x in tagdict.values() if x is not None])
+            tags.sort()
 
         fp.write("\n".join(tags) + "\n")
 
