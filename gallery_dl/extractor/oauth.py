@@ -9,7 +9,6 @@
 """Utility classes to setup OAuth and link accounts to gallery-dl"""
 
 from .common import Extractor, Message
-from . import deviantart, flickr, mastodon, pixiv, reddit, smugmug, tumblr
 from .. import text, oauth, util, config, exception
 from ..output import stdout_write
 from ..cache import cache
@@ -243,6 +242,7 @@ class OAuthFlickr(OAuthBase):
 
     def items(self):
         yield Message.Version, 1
+        from . import flickr
 
         self._oauth1_authorization_flow(
             flickr.FlickrAPI.API_KEY,
@@ -259,6 +259,7 @@ class OAuthSmugmug(OAuthBase):
 
     def items(self):
         yield Message.Version, 1
+        from . import smugmug
 
         self._oauth1_authorization_flow(
             smugmug.SmugmugAPI.API_KEY,
@@ -275,6 +276,7 @@ class OAuthTumblr(OAuthBase):
 
     def items(self):
         yield Message.Version, 1
+        from . import tumblr
 
         self._oauth1_authorization_flow(
             tumblr.TumblrAPI.API_KEY,
@@ -295,6 +297,7 @@ class OAuthDeviantart(OAuthBase):
 
     def items(self):
         yield Message.Version, 1
+        from . import deviantart
 
         self._oauth2_authorization_code_grant(
             self.oauth_config("client-id"),
@@ -314,6 +317,7 @@ class OAuthReddit(OAuthBase):
 
     def items(self):
         yield Message.Version, 1
+        from . import reddit
 
         self.session.headers["User-Agent"] = reddit.RedditAPI.USER_AGENT
         self._oauth2_authorization_code_grant(
@@ -338,6 +342,7 @@ class OAuthMastodon(OAuthBase):
 
     def items(self):
         yield Message.Version, 1
+        from . import mastodon
 
         for application in mastodon.INSTANCES.values():
             if self.instance == application["root"].partition("://")[2]:
@@ -390,6 +395,7 @@ class OAuthPixiv(OAuthBase):
 
     def items(self):
         yield Message.Version, 1
+        from . import pixiv
 
         code_verifier = util.generate_token(32)
         digest = hashlib.sha256(code_verifier.encode()).digest()
