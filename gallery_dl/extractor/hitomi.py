@@ -159,10 +159,10 @@ class HitomiGalleryExtractor(GalleryExtractor):
 class HitomiIndexExtractor(Extractor):
     """Extractor for galleries from index searches on hitomi.la"""
     category = "hitomi"
-    subcategory = "tag"
+    subcategory = "index"
     root = "https://hitomi.la"
     pattern = (r"(?:https?://)?hitomi\.la/"
-               r"([^/?#]+)\.html")
+               r"([a-zA-Z0-9_]+)-([a-zA-Z0-9_]+)\.html")
     test = (
         ("https://hitomi.la/index-japanese.html", {
             "pattern": HitomiGalleryExtractor.pattern,
@@ -172,15 +172,11 @@ class HitomiIndexExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.tag = match.group(1)
-
-        tag, _, num = self.tag.rpartition("-")
-        if num.isdecimal():
-            self.tag = tag
+        self.tag, self.language = match.groups()
 
     def items(self):
         data = {"_extractor": HitomiGalleryExtractor}
-        nozomi_url = "https://ltn.hitomi.la/{}.nozomi".format(self.tag)
+        nozomi_url = "https://ltn.hitomi.la/{}-{}.nozomi".format(self.tag, self.language)
         headers = {
             "Origin": self.root,
             "Cache-Control": "max-age=0",
@@ -189,8 +185,8 @@ class HitomiIndexExtractor(Extractor):
         offset = 0
         total = None
         while True:
-            headers["Referer"] = "{}/{}.html?page={}".format(
-                self.root, self.tag, offset // 100 + 1)
+            headers["Referer"] = "{}/{}-{}.html?page={}".format(
+                self.root, self.tag, self.language, offset // 100 + 1)
             headers["Range"] = "bytes={}-{}".format(offset, offset+99)
             response = self.request(nozomi_url, headers=headers)
 
@@ -268,7 +264,7 @@ class HitomiTagExtractor(Extractor):
 class HitomiSearchExtractor(Extractor):
     """Extractor for galleries from multiple tag searches on hitomi.la"""
     category = "hitomi"
-    subcategory = "tag"
+    subcategory = "search"
     root = "https://hitomi.la"
     pattern = (r"(?:https?://)?hitomi\.la/search.html"
                r"\?([^/?#]+)")
@@ -290,7 +286,7 @@ class HitomiSearchExtractor(Extractor):
         self.tags = text.unquote(self.query).split(" ")
 
     def get_nozomi_items(self, full_tag):
-        area, tag, language = self.get_nozomi_args(full_tag)
+        area, tag, language = get_nozomi_args(full_tag)
 
         if area:
             referer_base = "{}/n/{}/{}-{}.html".format(self.root, area, tag, language)
