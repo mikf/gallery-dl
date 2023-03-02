@@ -10,10 +10,10 @@
 
 import hmac
 import time
-import base64
 import random
 import string
 import hashlib
+import binascii
 import urllib.parse
 
 import requests
@@ -100,7 +100,7 @@ class OAuth1Client(requests.auth.AuthBase):
         key = concat(self.consumer_secret, self.token_secret or "").encode()
         signature = hmac.new(key, message, hashlib.sha1).digest()
 
-        return quote(base64.b64encode(signature).decode())
+        return quote(binascii.b2a_base64(signature)[:-1].decode())
 
 
 class OAuth1API():
