@@ -20,10 +20,26 @@ class MisskeyExtractor(BaseExtractor):
         self.api = MisskeyAPI(self)
         self.instance = self.root.rpartition("://")[2]
         self.item = match.group(match.lastindex)
+        self.renotes = self.config("renotes", False)
+        self.replies = self.config("replies", True)
 
     def items(self):
         for note in self.notes():
-            files = note.pop("files") or ()
+            files = note.pop("files") or []
+            renote = note.get("renote")
+            if renote:
+                if not self.renotes:
+                    self.log.debug("Skipping %s (renote)", note["id"])
+                    continue
+                files.extend(renote.get("files") or ())
+
+            reply = note.get("reply")
+            if reply:
+                if not self.replies:
+                    self.log.debug("Skipping %s (reply)", note["id"])
+                    continue
+                files.extend(reply.get("files") or ())
+
             note["instance"] = self.instance
             note["instance_remote"] = note["user"]["host"]
             note["count"] = len(files)
