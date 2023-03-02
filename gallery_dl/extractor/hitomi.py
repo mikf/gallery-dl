@@ -16,6 +16,22 @@ import string
 import re
 
 
+def get_nozomi_args(query):
+    ns, tag = query.strip().split(":")
+    area = ns
+    language = "all"
+
+    if ns == "female" or ns == "male":
+        area = "tag"
+        tag = query
+    elif "language" == ns:
+        area = None
+        language = tag
+        tag = "index"
+
+    return area, tag, language
+
+
 class HitomiGalleryExtractor(GalleryExtractor):
     """Extractor for image galleries from hitomi.la"""
     category = "hitomi"
@@ -140,6 +156,57 @@ class HitomiGalleryExtractor(GalleryExtractor):
         return result
 
 
+class HitomiIndexExtractor(Extractor):
+    """Extractor for galleries from index searches on hitomi.la"""
+    category = "hitomi"
+    subcategory = "tag"
+    root = "https://hitomi.la"
+    pattern = (r"(?:https?://)?hitomi\.la/"
+               r"([^/?#]+)\.html")
+    test = (
+        ("https://hitomi.la/index-japanese.html", {
+            "pattern": HitomiGalleryExtractor.pattern,
+            "count": ">= 35",
+        }),
+    )
+
+    def __init__(self, match):
+        Extractor.__init__(self, match)
+        self.tag = match.group(1)
+
+        tag, _, num = self.tag.rpartition("-")
+        if num.isdecimal():
+            self.tag = tag
+
+    def items(self):
+        data = {"_extractor": HitomiGalleryExtractor}
+        nozomi_url = "https://ltn.hitomi.la/{}.nozomi".format(self.tag)
+        headers = {
+            "Origin": self.root,
+            "Cache-Control": "max-age=0",
+        }
+
+        offset = 0
+        total = None
+        while True:
+            headers["Referer"] = "{}/{}.html?page={}".format(
+                self.root, self.tag, offset // 100 + 1)
+            headers["Range"] = "bytes={}-{}".format(offset, offset+99)
+            response = self.request(nozomi_url, headers=headers)
+
+            for gallery_id in decode_nozomi(response.content):
+                gallery_url = "{}/galleries/{}.html".format(
+                    self.root, gallery_id)
+                yield Message.Queue, gallery_url, data
+
+            offset += 100
+            if total is None:
+                total = text.parse_int(
+                    response.headers["content-range"].rpartition("/")[2])
+            if offset >= total:
+                return
+
+
 class HitomiTagExtractor(Extractor):
     """Extractor for galleries from tag searches on hitomi.la"""
     category = "hitomi"
@@ -221,20 +288,6 @@ class HitomiSearchExtractor(Extractor):
         Extractor.__init__(self, match)
         self.query = match.group(1)
         self.tags = text.unquote(self.query).split(" ")
-
-    def get_nozomi_args(self, query):
-        ns, tag = query.strip().split(":")
-        area = ns
-        language = "all"
-        if ns == "female" or ns == "male":
-            area = "tag"
-            tag = query
-        elif "language" == ns:
-            area = None
-            language = tag
-            tag = "index"
-
-        return area, tag, language
 
     def get_nozomi_items(self, full_tag):
         area, tag, language = self.get_nozomi_args(full_tag)
