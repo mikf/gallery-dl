@@ -140,6 +140,7 @@ SUBCATEGORY_MAP = {
     "issue"  : "Comic Issues",
     "manga"  : "Manga",
     "media"  : "Media Files",
+    "note"   : "Images from Notes",
     "popular": "Popular Images",
     "recent" : "Recent Images",
     "search" : "Search Results",

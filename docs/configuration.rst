@@ -2029,6 +2029,26 @@ Description
     Also emit metadata for text-only posts without media content.
 
 
+extractor.[misskey].renotes
+----------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Fetch media from renoted notes.
+
+
+extractor.[misskey].replies
+----------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Fetch media from replies to other notes.
+
+
 extractor.nana.favkey
 ---------------------
 Type
