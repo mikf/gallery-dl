@@ -198,6 +198,77 @@ class HitomiTagExtractor(Extractor):
                 return
 
 
+class HitomiSearchExtractor(Extractor):
+    """Extractor for galleries from multiple tag searches on hitomi.la"""
+    category = "hitomi"
+    subcategory = "tag"
+    root = "https://hitomi.la"
+    pattern = (r"(?:https?://)?hitomi\.la/search.html"
+               r"\?([^/?#]+)")
+    test = (
+        ("https://hitomi.la/search.html?tag%3Ascreenshots%20language%3Ajapanese", {
+            "pattern": HitomiGalleryExtractor.pattern,
+            "count": ">= 35",
+        }),
+        ("https://hitomi.la/search.html?language%3Ajapanese%20artist%3Asumiya"),
+        ("https://hitomi.la/search.html?group:initial_g"),
+        ("https://hitomi.la/search.html?series:amnesia"),
+        ("https://hitomi.la/search.html?type%3Adoujinshi"),
+        ("https://hitomi.la/search.html?character%3Aa2"),
+    )
+
+    def __init__(self, match):
+        Extractor.__init__(self, match)
+        self.query = match.group(1)
+        self.tags = text.unquote(self.query).split(" ")
+
+    def get_nozomi_args(self, query):
+        ns, tag = query.strip().split(":")
+        area = ns
+        language = "all"
+        if ns == "female" or ns == "male":
+            area = "tag"
+            tag = query
+        elif "language" == ns:
+            area = None
+            language = tag
+            tag = "index"
+
+        return area, tag, language
+
+    def get_nozomi_items(self, full_tag):
+        area, tag, language = self.get_nozomi_args(full_tag)
+
+        if area:
+            referer_base = "{}/n/{}/{}-{}.html".format(self.root, area, tag, language)
+            nozomi_url = "https://ltn.hitomi.la/{}/{}-{}.nozomi".format(area, tag, language)
+        else:
+            referer_base = "{}/n/{}-{}.html".format(self.root, tag, language)
+            nozomi_url = "https://ltn.hitomi.la/{}-{}.nozomi".format(tag, language)
+
+        headers = {
+            "Origin": self.root,
+            "Cache-Control": "max-age=0",
+        }
+
+        headers["Referer"] = f"{referer_base}/search.html?{self.query}"
+        response = self.request(nozomi_url, headers=headers)
+
+        result = set(decode_nozomi(response.content))
+        return result
+
+    def items(self):
+        data = {"_extractor": HitomiGalleryExtractor}
+
+        results = [self.get_nozomi_items(tag) for tag in self.tags]
+        intersects = set.intersection(*results)
+
+        for gallery_id in sorted(intersects, reverse=True):
+            gallery_url = "{}/galleries/{}.html".format(
+                self.root, gallery_id)
+            yield Message.Queue, gallery_url, data
+
+
 @memcache(maxage=1800)
 def _parse_gg(extr):
     page = extr.request("https://ltn.hitomi.la/gg.js").text
