@@ -226,7 +226,7 @@ class FStringFormatter():
     """Generate text by evaluating an f-string literal"""
 
     def __init__(self, fstring, default=NONE, fmt=None):
-        self.format_map = util.compile_expression("f'''" + fstring + "'''")
+        self.format_map = util.compile_expression('f"""' + fstring + '"""')
 
 
 def parse_field_name(field_name):
