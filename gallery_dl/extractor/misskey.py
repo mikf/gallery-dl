@@ -4,6 +4,8 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
+"""Extractors for Misskey instances"""
+
 from .common import BaseExtractor, Message
 from .. import text
 
