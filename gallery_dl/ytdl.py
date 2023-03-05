@@ -237,139 +237,13 @@ def parse_command_line(module, argv):
             getattr(opts, "sponsorblock_mark", None) or set()
         opts.sponsorblock_remove = \
             getattr(opts, "sponsorblock_remove", None) or set()
-    sponsorblock_query = opts.sponsorblock_mark | opts.sponsorblock_remove
     opts.remove_chapters = getattr(opts, "remove_chapters", None) or ()
 
-    # PostProcessors
-    postprocessors = []
-    if opts.metafromtitle:
-        postprocessors.append({
-            "key": "MetadataFromTitle",
-            "titleformat": opts.metafromtitle,
-        })
-    if getattr(opts, "add_postprocessors", None):
-        postprocessors += list(opts.add_postprocessors)
-    if sponsorblock_query:
-        postprocessors.append({
-            "key": "SponsorBlock",
-            "categories": sponsorblock_query,
-            "api": opts.sponsorblock_api,
-            "when": "pre_process",
-        })
-    if opts.parse_metadata:
-        postprocessors.append({
-            "key": "MetadataParser",
-            "actions": opts.parse_metadata,
-            "when": "pre_process",
-        })
-    if opts.convertsubtitles:
-        pp = {"key": "FFmpegSubtitlesConvertor",
-              "format": opts.convertsubtitles}
-        if ytdlp:
-            pp["when"] = "before_dl"
-        postprocessors.append(pp)
-    if getattr(opts, "convertthumbnails", None):
-        postprocessors.append({
-            "key": "FFmpegThumbnailsConvertor",
-            "format": opts.convertthumbnails,
-            "when": "before_dl",
-        })
-    if getattr(opts, "exec_before_dl_cmd", None):
-        postprocessors.append({
-            "key": "Exec",
-            "exec_cmd": opts.exec_before_dl_cmd,
-            "when": "before_dl",
-        })
-    if opts.extractaudio:
-        postprocessors.append({
-            "key": "FFmpegExtractAudio",
-            "preferredcodec": opts.audioformat,
-            "preferredquality": opts.audioquality,
-            "nopostoverwrites": opts.nopostoverwrites,
-        })
-    if getattr(opts, "remuxvideo", None):
-        postprocessors.append({
-            "key": "FFmpegVideoRemuxer",
-            "preferedformat": opts.remuxvideo,
-        })
-    if opts.recodevideo:
-        postprocessors.append({
-            "key": "FFmpegVideoConvertor",
-            "preferedformat": opts.recodevideo,
-        })
-    if opts.embedsubtitles:
-        pp = {"key": "FFmpegEmbedSubtitle"}
-        if ytdlp:
-            pp["already_have_subtitle"] = (
-                opts.writesubtitles and "no-keep-subs" not in compat_opts)
-        postprocessors.append(pp)
-        if not opts.writeautomaticsub and "no-keep-subs" not in compat_opts:
-            opts.writesubtitles = True
-    if opts.allsubtitles and not opts.writeautomaticsub:
-        opts.writesubtitles = True
-    remove_chapters_patterns, remove_ranges = [], []
-    for regex in opts.remove_chapters:
-        if regex.startswith("*"):
-            dur = list(map(module.parse_duration, regex[1:].split("-")))
-            if len(dur) == 2 and all(t is not None for t in dur):
-                remove_ranges.append(tuple(dur))
-                continue
-        remove_chapters_patterns.append(re.compile(regex))
-    if opts.remove_chapters or sponsorblock_query:
-        postprocessors.append({
-            "key": "ModifyChapters",
-            "remove_chapters_patterns": remove_chapters_patterns,
-            "remove_sponsor_segments": opts.sponsorblock_remove,
-            "remove_ranges": remove_ranges,
-            "sponsorblock_chapter_title": opts.sponsorblock_chapter_title,
-            "force_keyframes": opts.force_keyframes_at_cuts,
-        })
-    addchapters = getattr(opts, "addchapters", None)
-    embed_infojson = getattr(opts, "embed_infojson", None)
-    if opts.addmetadata or addchapters or embed_infojson:
-        pp = {"key": "FFmpegMetadata"}
-        if ytdlp:
-            if embed_infojson is None:
-                embed_infojson = "if_exists"
-            pp["add_metadata"] = opts.addmetadata
-            pp["add_chapters"] = addchapters
-            pp["add_infojson"] = embed_infojson
-
-        postprocessors.append(pp)
-    if getattr(opts, "sponskrub", False) is not False:
-        postprocessors.append({
-            "key": "SponSkrub",
-            "path": opts.sponskrub_path,
-            "args": opts.sponskrub_args,
-            "cut": opts.sponskrub_cut,
-            "force": opts.sponskrub_force,
-            "ignoreerror": opts.sponskrub is None,
-            "_from_cli": True,
-        })
-    if opts.embedthumbnail:
-        already_have_thumbnail = (opts.writethumbnail or
-                                  getattr(opts, "write_all_thumbnails", False))
-        postprocessors.append({
-            "key": "EmbedThumbnail",
-            "already_have_thumbnail": already_have_thumbnail,
-        })
-        if not already_have_thumbnail:
-            opts.writethumbnail = True
-            if isinstance(opts.outtmpl, dict):
-                opts.outtmpl["pl_thumbnail"] = ""
-    if getattr(opts, "split_chapters", None):
-        postprocessors.append({
-            "key": "FFmpegSplitChapters",
-            "force_keyframes": opts.force_keyframes_at_cuts,
-        })
-    if opts.xattrs:
-        postprocessors.append({"key": "XAttrMetadata"})
-    if opts.exec_cmd:
-        postprocessors.append({
-            "key": "Exec",
-            "exec_cmd": opts.exec_cmd,
-            "when": "after_move",
-        })
+    try:
+        postprocessors = list(module.get_postprocessors(opts))
+    except AttributeError:
+        postprocessors = legacy_postprocessors(
+            opts, module, ytdlp, compat_opts)
 
     match_filter = (
         None if opts.match_filter is None
@@ -546,3 +420,139 @@ def parse_retries(retries, name=""):
     if retries in ("inf", "infinite"):
         return float("inf")
     return int(retries)
+
+
+def legacy_postprocessors(opts, module, ytdlp, compat_opts):
+    postprocessors = []
+
+    sponsorblock_query = opts.sponsorblock_mark | opts.sponsorblock_remove
+    if opts.metafromtitle:
+        postprocessors.append({
+            "key": "MetadataFromTitle",
+            "titleformat": opts.metafromtitle,
+        })
+    if getattr(opts, "add_postprocessors", None):
+        postprocessors += list(opts.add_postprocessors)
+    if sponsorblock_query:
+        postprocessors.append({
+            "key": "SponsorBlock",
+            "categories": sponsorblock_query,
+            "api": opts.sponsorblock_api,
+            "when": "pre_process",
+        })
+    if opts.parse_metadata:
+        postprocessors.append({
+            "key": "MetadataParser",
+            "actions": opts.parse_metadata,
+            "when": "pre_process",
+        })
+    if opts.convertsubtitles:
+        pp = {"key": "FFmpegSubtitlesConvertor",
+              "format": opts.convertsubtitles}
+        if ytdlp:
+            pp["when"] = "before_dl"
+        postprocessors.append(pp)
+    if getattr(opts, "convertthumbnails", None):
+        postprocessors.append({
+            "key": "FFmpegThumbnailsConvertor",
+            "format": opts.convertthumbnails,
+            "when": "before_dl",
+        })
+    if getattr(opts, "exec_before_dl_cmd", None):
+        postprocessors.append({
+            "key": "Exec",
+            "exec_cmd": opts.exec_before_dl_cmd,
+            "when": "before_dl",
+        })
+    if opts.extractaudio:
+        postprocessors.append({
+            "key": "FFmpegExtractAudio",
+            "preferredcodec": opts.audioformat,
+            "preferredquality": opts.audioquality,
+            "nopostoverwrites": opts.nopostoverwrites,
+        })
+    if getattr(opts, "remuxvideo", None):
+        postprocessors.append({
+            "key": "FFmpegVideoRemuxer",
+            "preferedformat": opts.remuxvideo,
+        })
+    if opts.recodevideo:
+        postprocessors.append({
+            "key": "FFmpegVideoConvertor",
+            "preferedformat": opts.recodevideo,
+        })
+    if opts.embedsubtitles:
+        pp = {"key": "FFmpegEmbedSubtitle"}
+        if ytdlp:
+            pp["already_have_subtitle"] = (
+                opts.writesubtitles and "no-keep-subs" not in compat_opts)
+        postprocessors.append(pp)
+        if not opts.writeautomaticsub and "no-keep-subs" not in compat_opts:
+            opts.writesubtitles = True
+    if opts.allsubtitles and not opts.writeautomaticsub:
+        opts.writesubtitles = True
+    remove_chapters_patterns, remove_ranges = [], []
+    for regex in opts.remove_chapters:
+        if regex.startswith("*"):
+            dur = list(map(module.parse_duration, regex[1:].split("-")))
+            if len(dur) == 2 and all(t is not None for t in dur):
+                remove_ranges.append(tuple(dur))
+                continue
+        remove_chapters_patterns.append(re.compile(regex))
+    if opts.remove_chapters or sponsorblock_query:
+        postprocessors.append({
+            "key": "ModifyChapters",
+            "remove_chapters_patterns": remove_chapters_patterns,
+            "remove_sponsor_segments": opts.sponsorblock_remove,
+            "remove_ranges": remove_ranges,
+            "sponsorblock_chapter_title": opts.sponsorblock_chapter_title,
+            "force_keyframes": opts.force_keyframes_at_cuts,
+        })
+    addchapters = getattr(opts, "addchapters", None)
+    embed_infojson = getattr(opts, "embed_infojson", None)
+    if opts.addmetadata or addchapters or embed_infojson:
+        pp = {"key": "FFmpegMetadata"}
+        if ytdlp:
+            if embed_infojson is None:
+                embed_infojson = "if_exists"
+            pp["add_metadata"] = opts.addmetadata
+            pp["add_chapters"] = addchapters
+            pp["add_infojson"] = embed_infojson
+
+        postprocessors.append(pp)
+    if getattr(opts, "sponskrub", False) is not False:
+        postprocessors.append({
+            "key": "SponSkrub",
+            "path": opts.sponskrub_path,
+            "args": opts.sponskrub_args,
+            "cut": opts.sponskrub_cut,
+            "force": opts.sponskrub_force,
+            "ignoreerror": opts.sponskrub is None,
+            "_from_cli": True,
+        })
+    if opts.embedthumbnail:
+        already_have_thumbnail = (opts.writethumbnail or
+                                  getattr(opts, "write_all_thumbnails", False))
+        postprocessors.append({
+            "key": "EmbedThumbnail",
+            "already_have_thumbnail": already_have_thumbnail,
+        })
+        if not already_have_thumbnail:
+            opts.writethumbnail = True
+            if isinstance(opts.outtmpl, dict):
+                opts.outtmpl["pl_thumbnail"] = ""
+    if getattr(opts, "split_chapters", None):
+        postprocessors.append({
+            "key": "FFmpegSplitChapters",
+            "force_keyframes": opts.force_keyframes_at_cuts,
+        })
+    if opts.xattrs:
+        postprocessors.append({"key": "XAttrMetadata"})
+    if opts.exec_cmd:
+        postprocessors.append({
+            "key": "Exec",
+            "exec_cmd": opts.exec_cmd,
+            "when": "after_move",
+        })
+
+    return postprocessors
