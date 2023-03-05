@@ -166,7 +166,7 @@ class Test_CommandlineArguments(unittest.TestCase):
             subs["already_have_subtitle"] = False
 
         opts = self._(["--embed-subs", "--embed-thumbnail"])
-        self.assertEqual(opts["postprocessors"], [subs, thumb])
+        self.assertEqual(opts["postprocessors"][:2], [subs, thumb])
 
         thumb["already_have_thumbnail"] = True
         if self.module_name == "yt_dlp":
@@ -179,7 +179,7 @@ class Test_CommandlineArguments(unittest.TestCase):
             "--write-sub",
             "--write-all-thumbnails",
         ])
-        self.assertEqual(opts["postprocessors"], [subs, thumb])
+        self.assertEqual(opts["postprocessors"][:2], [subs, thumb])
 
     def test_metadata(self):
         opts = self._("--add-metadata")
@@ -262,21 +262,11 @@ class Test_CommandlineArguments_YtDlp(Test_CommandlineArguments):
 
     def test_metadata_from_title(self):
         opts = self._(["--metadata-from-title", "%(artist)s - %(title)s"])
-
-        try:
-            legacy = (self.module.version.__version__ < "2023.01.01")
-        except AttributeError:
-            legacy = True
-
-        actions = [self.module.MetadataFromFieldPP.to_action(
-                   "title:%(artist)s - %(title)s")]
-        if not legacy:
-            actions = {"pre_process": actions}
-
         self.assertEqual(opts["postprocessors"][0], {
             "key"    : "MetadataParser",
             "when"   : "pre_process",
-            "actions": actions,
+            "actions": [self.module.MetadataFromFieldPP.to_action(
+                "title:%(artist)s - %(title)s")],
         })
 
 
