@@ -44,6 +44,10 @@ class DirectlinkExtractor(Extractor):
         ("https://post-phinf.pstatic.net/MjAxOTA1MjlfMTQ4/MDAxNTU5MTI2NjcyNTkw"
          ".JUzkGb4V6dj9DXjLclrOoqR64uDxHFUO5KDriRdKpGwg.88mCtd4iT1NHlpVKSCaUpP"
          "mZPiDgT8hmQdQ5K_gYyu0g.JPEG/2.JPG"),
+        # internationalized domain name
+        ("https://räksmörgås.josefsson.org/raksmorgas.jpg", {
+            "content": "f7e00768ab009c969e70d775047cdd302ca51762",
+        }),
     )
 
     def __init__(self, match):
