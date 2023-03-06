@@ -26,9 +26,9 @@ class FandomGalleryExtractor(GalleryExtractor):
 
     def __init__(self, match):
         self.wiki, self.category = match.groups()
-        self.mime = self.config("mime", "image/*")
         url = 'https://' + self.wiki + '.' + self.category + '.com'
         GalleryExtractor.__init__(self, match, url)
+        self.mime = self.config("mime", "image/*")
 
     def metadata(self, page):
         extr = text.extract_from(page)
