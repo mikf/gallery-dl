@@ -18,7 +18,7 @@ class FandomGalleryExtractor(GalleryExtractor):
     category = "fandom"
     directory_fmt = ("{category}", "{wiki}")
     filename_fmt = "{filename}.{extension}"
-    archive_fmt = "{wiki}_{num}"
+    archive_fmt = "{wiki}_{filename}"
     pattern = (r"(?:https?://)?([\w-]+)\.(fandom|wikia)?\.com/?")
     test = (
         ("https://projectsekai.fandom.com"),
@@ -26,6 +26,7 @@ class FandomGalleryExtractor(GalleryExtractor):
 
     def __init__(self, match):
         self.wiki, self.category = match.groups()
+        self.mime = self.config("mime", "image/*")
         url = 'https://' + self.wiki + '.' + self.category + '.com'
         GalleryExtractor.__init__(self, match, url)
 
@@ -46,7 +47,7 @@ class FandomGalleryExtractor(GalleryExtractor):
     def images(self, _):
         limit = 500
         base_url = self.gallery_url + '/wiki/Special:MIMESearch' + \
-            '?limit=%d&mime=image%%2F*' % limit
+            '?limit=%d&mime=%s' % (limit, text.quote(self.mime, ''))
         url = base_url
         offset = 0
         while True:

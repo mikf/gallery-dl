@@ -1338,6 +1338,16 @@ Description
     * ``false``: Ignore embeds.
 
 
+extractor.fandom.mime
+-----------------------
+Type
+    ``string``
+Default
+    ``image/*``
+Description
+    Filters which media content types are downloaded.
+
+
 extractor.flickr.access-token & .access-token-secret
 ----------------------------------------------------
 Type
