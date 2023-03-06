@@ -19,7 +19,7 @@ class NewgroundsExtractor(Extractor):
     category = "newgrounds"
     directory_fmt = ("{category}", "{artist[:10]:J, }")
     filename_fmt = "{category}_{_index}_{title}.{extension}"
-    archive_fmt = "{_index}"
+    archive_fmt = "{_type}{_index}"
     root = "https://www.newgrounds.com"
     cookiedomain = ".newgrounds.com"
     cookienames = ("NG_GG_username", "vmk1du5I8m")
@@ -156,6 +156,7 @@ class NewgroundsExtractor(Extractor):
             "title"      : text.unescape(extr('"og:title" content="', '"')),
             "description": text.unescape(extr(':description" content="', '"')),
             "type"       : extr('og:type" content="', '"'),
+            "_type"      : "i",
             "date"       : text.parse_datetime(extr(
                 'itemprop="datePublished" content="', '"')),
             "rating"     : extr('class="rated-', '"'),
@@ -175,6 +176,7 @@ class NewgroundsExtractor(Extractor):
             "title"      : text.unescape(extr('"og:title" content="', '"')),
             "description": text.unescape(extr(':description" content="', '"')),
             "type"       : extr('og:type" content="', '"'),
+            "_type"      : "a",
             "date"       : text.parse_datetime(extr(
                 'itemprop="datePublished" content="', '"')),
             "url"        : extr('{"url":"', '"').replace("\\/", "/"),
@@ -227,6 +229,7 @@ class NewgroundsExtractor(Extractor):
             "url"        : src,
             "date"       : date,
             "type"       : type,
+            "_type"      : "",
             "description": text.unescape(descr or extr(
                 'itemprop="description" content="', '"')),
             "rating"     : extr('class="rated-', '"'),
