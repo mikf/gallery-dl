@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2021 Mike Fährmann
+# Copyright 2018-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -43,11 +43,18 @@ class ExecPP(PostProcessor):
             events = events.split(",")
         job.register_hooks({event: execute for event in events}, options)
 
+        self._init_archive(job, options)
+
     def exec_list(self, pathfmt, status=None):
         if status:
             return
 
+        archive = self.archive
         kwdict = pathfmt.kwdict
+
+        if archive and archive.check(kwdict):
+            return
+
         kwdict["_directory"] = pathfmt.realdirectory
         kwdict["_filename"] = pathfmt.filename
         kwdict["_path"] = pathfmt.realpath
@@ -55,8 +62,15 @@ class ExecPP(PostProcessor):
         args = [arg.format_map(kwdict) for arg in self.args]
         self._exec(args, False)
 
+        if archive:
+            archive.add(kwdict)
+
     def exec_string(self, pathfmt, status=None):
         if status:
+            return
+
+        archive = self.archive
+        if archive and archive.check(pathfmt.kwdict):
             return
 
         if status is None and pathfmt.realpath:
@@ -65,6 +79,9 @@ class ExecPP(PostProcessor):
             args = self.args.replace("{}", quote(pathfmt.realdirectory))
 
         self._exec(args, True)
+
+        if archive:
+            archive.add(pathfmt.kwdict)
 
     def _exec(self, args, shell):
         self.log.debug("Running '%s'", args)

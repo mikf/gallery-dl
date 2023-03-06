@@ -1,25 +1,24 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2022 Mike Fährmann
+# Copyright 2022-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extractors for https://bunkr.ru/"""
+"""Extractors for https://bunkr.su/"""
 
 from .lolisafe import LolisafeAlbumExtractor
 from .. import text
-import json
 
 
 class BunkrAlbumExtractor(LolisafeAlbumExtractor):
-    """Extractor for bunkr.ru albums"""
+    """Extractor for bunkr.su albums"""
     category = "bunkr"
-    root = "https://bunkr.ru"
-    pattern = r"(?:https?://)?(?:app\.)?bunkr\.(?:ru|is|to)/a/([^/?#]+)"
+    root = "https://bunkr.su"
+    pattern = r"(?:https?://)?(?:app\.)?bunkr\.(?:[sr]u|is|to)/a/([^/?#]+)"
     test = (
-        ("https://bunkr.ru/a/Lktg9Keq", {
+        ("https://bunkr.su/a/Lktg9Keq", {
             "pattern": r"https://cdn\.bunkr\.ru/test-テスト-\"&>-QjgneIQv\.png",
             "content": "0c8768055e4e20e7c7259608b67799171b691140",
             "keyword": {
@@ -33,7 +32,7 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
             },
         }),
         # mp4 (#2239)
-        ("https://app.bunkr.is/a/ptRHaCn2", {
+        ("https://app.bunkr.ru/a/ptRHaCn2", {
             "pattern": r"https://media-files\.bunkr\.ru/_-RnHoW69L\.mp4",
             "content": "80e61d1dbc5896ae7ef9a28734c747b28b320471",
         }),
@@ -41,39 +40,57 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
         ("https://bunkr.is/a/iXTTc1o2", {
             "pattern": r"https://(cdn|media-files)4\.bunkr\.ru/",
             "content": "da29aae371b7adc8c5ef8e6991b66b69823791e8",
+            "keyword": {
+                "album_id": "iXTTc1o2",
+                "album_name": "test2",
+                "album_size": "691.1 KB",
+                "count": 2,
+                "description": "072022",
+                "filename": "re:video-wFO9FtxG|image-sZrQUeOx",
+                "id": "re:wFO9FtxG|sZrQUeOx",
+                "name": "re:video|image",
+                "num": int,
+            },
         }),
         ("https://bunkr.to/a/Lktg9Keq"),
     )
 
     def fetch_album(self, album_id):
-        root = self.root
+        # album metadata
+        page = self.request(self.root + "/a/" + self.album_id).text
+        info = text.split_html(text.extr(
+            page, "<h1", "</div>").partition(">")[2])
+        count, _, size = info[1].split(None, 2)
 
-        try:
-            data = json.loads(text.extr(
-                self.request(root + "/a/" + self.album_id).text,
-                'id="__NEXT_DATA__" type="application/json">', '<'))
-            album = data["props"]["pageProps"]["album"]
-            files = album["files"]
-        except Exception as exc:
-            self.log.debug("%s: %s", exc.__class__.__name__, exc)
-            self.root = root.replace("://", "://app.", 1)
-            files, data = LolisafeAlbumExtractor.fetch_album(self, album_id)
-        else:
-            for file in files:
-                file["file"] = file["cdn"] + "/" + file["name"]
-            data = {
-                "album_id"   : self.album_id,
-                "album_name" : text.unescape(album["name"]),
-                "description": text.unescape(album["description"]),
-                "count"      : len(files),
-            }
+        # files
+        cdn = None
+        files = []
+        append = files.append
+        headers = {"Referer": self.root.replace("://", "://stream.", 1) + "/"}
 
-        headers = {"Referer": root.replace("://", "://stream.", 1) + "/"}
-        for file in files:
-            if file["file"].endswith(
-                    (".mp4", ".m4v", ".mov", ".webm", ".zip", ".rar", ".7z")):
-                file["_http_headers"] = headers
-                file["file"] = file["file"].replace(
-                    "://cdn", "://media-files", 1)
+        pos = page.index('class="grid-images')
+        for url in text.extract_iter(page, '<a href="', '"', pos):
+            if url.startswith("/"):
+                if not cdn:
+                    # fetch cdn root from download page
+                    durl = "{}/d/{}".format(self.root, url[3:])
+                    cdn = text.extr(self.request(
+                        durl).text, 'link.href = "', '"')
+                    cdn = cdn[:cdn.index("/", 8)]
+                url = cdn + url[2:]
 
-        return files, data
+            url = text.unescape(url)
+            if url.endswith((".mp4", ".m4v", ".mov", ".webm", ".mkv", ".ts",
+                             ".zip", ".rar", ".7z")):
+                append({"file": url.replace("://cdn", "://media-files", 1),
+                        "_http_headers": headers})
+            else:
+                append({"file": url})
+
+        return files, {
+            "album_id"   : self.album_id,
+            "album_name" : text.unescape(info[0]),
+            "album_size" : size[1:-1],
+            "description": text.unescape(info[2]) if len(info) > 2 else "",
+            "count"      : len(files),
+        }

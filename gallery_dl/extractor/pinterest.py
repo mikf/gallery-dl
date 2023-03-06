@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2022 Mike Fährmann
+# Copyright 2016-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -12,7 +12,6 @@ from .common import Extractor, Message
 from .. import text, util, exception
 from ..cache import cache
 import itertools
-import json
 
 BASE_PATTERN = r"(?:https?://)?(?:\w+\.)?pinterest\.[\w.]+"
 
@@ -26,6 +25,13 @@ class PinterestExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
+
+        domain = self.config("domain")
+        if not domain or domain == "auto" :
+            self.root = text.root_from_url(match.group(0))
+        else:
+            self.root = text.ensure_http_scheme(domain)
+
         self.api = PinterestAPI(self)
 
     def items(self):
@@ -142,7 +148,7 @@ class PinterestBoardExtractor(PinterestExtractor):
     directory_fmt = ("{category}", "{board[owner][username]}", "{board[name]}")
     archive_fmt = "{board[id]}_{id}"
     pattern = (BASE_PATTERN + r"/(?!pin/)([^/?#&]+)"
-               "/(?!_saved|_created)([^/?#&]+)/?$")
+               "/(?!_saved|_created|pins/)([^/?#&]+)/?$")
     test = (
         ("https://www.pinterest.com/g1952849/test-/", {
             "pattern": r"https://i\.pinimg\.com/originals/",
@@ -151,7 +157,7 @@ class PinterestBoardExtractor(PinterestExtractor):
         # board with sections (#835)
         ("https://www.pinterest.com/g1952849/stuff/", {
             "options": (("sections", True),),
-            "count": 5,
+            "count": 4,
         }),
         # secret board (#1055)
         ("https://www.pinterest.de/g1952849/secret/", {
@@ -194,11 +200,11 @@ class PinterestUserExtractor(PinterestExtractor):
     subcategory = "user"
     pattern = BASE_PATTERN + r"/(?!pin/)([^/?#&]+)(?:/_saved)?/?$"
     test = (
-        ("https://www.pinterest.de/g1952849/", {
+        ("https://www.pinterest.com/g1952849/", {
             "pattern": PinterestBoardExtractor.pattern,
             "count": ">= 2",
         }),
-        ("https://www.pinterest.de/g1952849/_saved/"),
+        ("https://www.pinterest.com/g1952849/_saved/"),
     )
 
     def __init__(self, match):
@@ -213,15 +219,38 @@ class PinterestUserExtractor(PinterestExtractor):
                 yield Message.Queue, self.root + url, board
 
 
+class PinterestAllpinsExtractor(PinterestExtractor):
+    """Extractor for a user's 'All Pins' feed"""
+    subcategory = "allpins"
+    directory_fmt = ("{category}", "{user}")
+    pattern = BASE_PATTERN + r"/(?!pin/)([^/?#&]+)/pins/?$"
+    test = ("https://www.pinterest.com/g1952849/pins/", {
+        "pattern": r"https://i\.pinimg\.com/originals/[0-9a-f]{2}"
+                   r"/[0-9a-f]{2}/[0-9a-f]{2}/[0-9a-f]{32}\.\w{3}",
+        "count": 7,
+    })
+
+    def __init__(self, match):
+        PinterestExtractor.__init__(self, match)
+        self.user = text.unquote(match.group(1))
+
+    def metadata(self):
+        return {"user": self.user}
+
+    def pins(self):
+        return self.api.user_pins(self.user)
+
+
 class PinterestCreatedExtractor(PinterestExtractor):
     """Extractor for a user's created pins"""
     subcategory = "created"
     directory_fmt = ("{category}", "{user}")
     pattern = BASE_PATTERN + r"/(?!pin/)([^/?#&]+)/_created/?$"
-    test = ("https://www.pinterest.com/amazon/_created", {
+    test = ("https://www.pinterest.de/digitalmomblog/_created/", {
         "pattern": r"https://i\.pinimg\.com/originals/[0-9a-f]{2}"
                    r"/[0-9a-f]{2}/[0-9a-f]{2}/[0-9a-f]{32}\.jpg",
         "count": 10,
+        "range": "1-10",
     })
 
     def __init__(self, match):
@@ -272,14 +301,14 @@ class PinterestSearchExtractor(PinterestExtractor):
     subcategory = "search"
     directory_fmt = ("{category}", "Search", "{search}")
     pattern = BASE_PATTERN + r"/search/pins/?\?q=([^&#]+)"
-    test = ("https://www.pinterest.de/search/pins/?q=nature", {
+    test = ("https://www.pinterest.com/search/pins/?q=nature", {
         "range": "1-50",
         "count": ">= 50",
     })
 
     def __init__(self, match):
         PinterestExtractor.__init__(self, match)
-        self.search = match.group(1)
+        self.search = text.unquote(match.group(1))
 
     def metadata(self):
         return {"search": self.search}
@@ -357,26 +386,23 @@ class PinterestAPI():
     - https://github.com/seregazhuk/php-pinterest-bot
     """
 
-    BASE_URL = "https://www.pinterest.com"
-    HEADERS = {
-        "Accept"              : "application/json, text/javascript, "
-                                "*/*, q=0.01",
-        "Accept-Language"     : "en-US,en;q=0.5",
-        "Referer"             : BASE_URL + "/",
-        "X-Requested-With"    : "XMLHttpRequest",
-        "X-APP-VERSION"       : "31461e0",
-        "X-CSRFToken"         : None,
-        "X-Pinterest-AppState": "active",
-        "Origin"              : BASE_URL,
-    }
-
     def __init__(self, extractor):
-        self.extractor = extractor
-
         csrf_token = util.generate_token()
-        self.headers = self.HEADERS.copy()
-        self.headers["X-CSRFToken"] = csrf_token
+
+        self.extractor = extractor
+        self.root = extractor.root
         self.cookies = {"csrftoken": csrf_token}
+        self.headers = {
+            "Accept"              : "application/json, text/javascript, "
+                                    "*/*, q=0.01",
+            "Accept-Language"     : "en-US,en;q=0.5",
+            "Referer"             : self.root + "/",
+            "X-Requested-With"    : "XMLHttpRequest",
+            "X-APP-VERSION"       : "0c4af40",
+            "X-CSRFToken"         : csrf_token,
+            "X-Pinterest-AppState": "active",
+            "Origin"              : self.root,
+        }
 
     def pin(self, pin_id):
         """Query information about a pin"""
@@ -437,6 +463,16 @@ class PinterestAPI():
         options = {"board_id": board_id, "add_vase": True}
         return self._pagination("BoardRelatedPixieFeed", options)
 
+    def user_pins(self, user):
+        """Yield all pins from 'user'"""
+        options = {
+            "is_own_profile_pins": False,
+            "username"           : user,
+            "field_set_key"      : "grid_item",
+            "pin_filter"         : None,
+        }
+        return self._pagination("UserPins", options)
+
     def user_activity_pins(self, user):
         """Yield pins created by 'user'"""
         options = {
@@ -462,12 +498,15 @@ class PinterestAPI():
     def _login_impl(self, username, password):
         self.extractor.log.info("Logging in as %s", username)
 
-        url = self.BASE_URL + "/resource/UserSessionResource/create/"
+        url = self.root + "/resource/UserSessionResource/create/"
         options = {
             "username_or_email": username,
             "password"         : password,
         }
-        data = {"data": json.dumps({"options": options}), "source_url": ""}
+        data = {
+            "data"      : util.json_dumps({"options": options}),
+            "source_url": "",
+        }
 
         try:
             response = self.extractor.request(
@@ -485,8 +524,11 @@ class PinterestAPI():
         }
 
     def _call(self, resource, options):
-        url = "{}/resource/{}Resource/get/".format(self.BASE_URL, resource)
-        params = {"data": json.dumps({"options": options}), "source_url": ""}
+        url = "{}/resource/{}Resource/get/".format(self.root, resource)
+        params = {
+            "data"      : util.json_dumps({"options": options}),
+            "source_url": "",
+        }
 
         response = self.extractor.request(
             url, params=params, headers=self.headers,
@@ -497,10 +539,11 @@ class PinterestAPI():
         except ValueError:
             data = {}
 
-        if response.status_code < 400 and not response.history:
+        if response.history:
+            self.root = text.root_from_url(response.url)
+        if response.status_code < 400:
             return data
-
-        if response.status_code == 404 or response.history:
+        if response.status_code == 404:
             resource = self.extractor.subcategory.rpartition("-")[2]
             raise exception.NotFoundError(resource)
         self.extractor.log.debug("Server response: %s", response.text)

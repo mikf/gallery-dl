@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2022 Mike Fährmann
+# Copyright 2022-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -59,7 +59,7 @@ class PoipikuExtractor(Extractor):
                     "//img.", "//img-org.", 1)
                 yield Message.Url, url, text.nameext_from_url(url, post)
 
-            if not extr('> show all', '<'):
+            if not extr(' show all(+', '<'):
                 continue
 
             url = self.root + "/f/ShowAppendFileF.jsp"
@@ -78,6 +78,9 @@ class PoipikuExtractor(Extractor):
             }
             page = self.request(
                 url, method="POST", headers=headers, data=data).json()["html"]
+
+            if page.startswith(("You need to", "Password is incorrect")):
+                self.log.warning("'%s'", page)
 
             for thumb in text.extract_iter(
                     page, 'class="IllustItemThumbImg" src="', '"'):
@@ -160,6 +163,21 @@ class PoipikuPostExtractor(PoipikuExtractor):
                 "post_id": "6411749",
                 "user_id": "2166245",
                 "user_name": "wadahito",
+            },
+        }),
+        # different warning button style
+        ("https://poipiku.com/3572553/5776587.html", {
+            "pattern": r"https://img-org\.poipiku.com/user_img\d+/003572553"
+                       r"/005776587_(\d+_)?\w+\.jpeg$",
+            "count": 3,
+            "keyword": {
+                "count": "3",
+                "description": "ORANGE OASISボスネタバレ",
+                "num": int,
+                "post_category": "SPOILER",
+                "post_id": "5776587",
+                "user_id": "3572553",
+                "user_name": "nagakun",
             },
         }),
     )

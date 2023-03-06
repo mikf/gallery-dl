@@ -17,9 +17,13 @@ class LynxchanExtractor(BaseExtractor):
 
 
 BASE_PATTERN = LynxchanExtractor.update({
+    "bbw-chan": {
+        "root": "https://bbw-chan.nl",
+        "pattern": r"bbw-chan\.nl",
+    },
     "kohlchan": {
         "root": "https://kohlchan.net",
-        "pattern": r"kohlchan\.net"
+        "pattern": r"kohlchan\.net",
     },
     "endchan": {
         "root": None,
@@ -37,6 +41,11 @@ class LynxchanThreadExtractor(LynxchanExtractor):
     archive_fmt = "{boardUri}_{postId}_{num}"
     pattern = BASE_PATTERN + r"/([^/?#]+)/res/(\d+)"
     test = (
+        ("https://bbw-chan.nl/bbwdraw/res/499.html", {
+            "pattern": r"https://bbw-chan\.nl/\.media/[0-9a-f]{64}(\.\w+)?$",
+            "count": ">= 352",
+        }),
+        ("https://bbw-chan.nl/bbwdraw/res/489.html"),
         ("https://kohlchan.net/a/res/4594.html", {
             "pattern": r"https://kohlchan\.net/\.media/[0-9a-f]{64}(\.\w+)?$",
             "count": ">= 80",
@@ -78,6 +87,11 @@ class LynxchanBoardExtractor(LynxchanExtractor):
     subcategory = "board"
     pattern = BASE_PATTERN + r"/([^/?#]+)(?:/index|/catalog|/\d+|/?$)"
     test = (
+        ("https://bbw-chan.nl/bbwdraw/", {
+            "pattern": LynxchanThreadExtractor.pattern,
+            "count": ">= 148",
+        }),
+        ("https://bbw-chan.nl/bbwdraw/2.html"),
         ("https://kohlchan.net/a/", {
             "pattern": LynxchanThreadExtractor.pattern,
             "count": ">= 100",

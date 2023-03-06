@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2022 Mike Fährmann
+# Copyright 2018-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -9,10 +9,9 @@
 """Extractors for https://www.newgrounds.com/"""
 
 from .common import Extractor, Message
-from .. import text, exception
+from .. import text, util, exception
 from ..cache import cache
 import itertools
-import json
 
 
 class NewgroundsExtractor(Extractor):
@@ -20,7 +19,7 @@ class NewgroundsExtractor(Extractor):
     category = "newgrounds"
     directory_fmt = ("{category}", "{artist[:10]:J, }")
     filename_fmt = "{category}_{_index}_{title}.{extension}"
-    archive_fmt = "{_index}"
+    archive_fmt = "{_type}{_index}"
     root = "https://www.newgrounds.com"
     cookiedomain = ".newgrounds.com"
     cookienames = ("NG_GG_username", "vmk1du5I8m")
@@ -151,11 +150,13 @@ class NewgroundsExtractor(Extractor):
 
     @staticmethod
     def _extract_image_data(extr, url):
-        full = text.extract_from(json.loads(extr('"full_image_text":', '});')))
+        full = text.extract_from(util.json_loads(extr(
+            '"full_image_text":', '});')))
         data = {
             "title"      : text.unescape(extr('"og:title" content="', '"')),
             "description": text.unescape(extr(':description" content="', '"')),
             "type"       : extr('og:type" content="', '"'),
+            "_type"      : "i",
             "date"       : text.parse_datetime(extr(
                 'itemprop="datePublished" content="', '"')),
             "rating"     : extr('class="rated-', '"'),
@@ -175,6 +176,7 @@ class NewgroundsExtractor(Extractor):
             "title"      : text.unescape(extr('"og:title" content="', '"')),
             "description": text.unescape(extr(':description" content="', '"')),
             "type"       : extr('og:type" content="', '"'),
+            "_type"      : "a",
             "date"       : text.parse_datetime(extr(
                 'itemprop="datePublished" content="', '"')),
             "url"        : extr('{"url":"', '"').replace("\\/", "/"),
@@ -227,6 +229,7 @@ class NewgroundsExtractor(Extractor):
             "url"        : src,
             "date"       : date,
             "type"       : type,
+            "_type"      : "",
             "description": text.unescape(descr or extr(
                 'itemprop="description" content="', '"')),
             "rating"     : extr('class="rated-', '"'),

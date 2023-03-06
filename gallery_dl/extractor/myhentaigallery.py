@@ -44,7 +44,10 @@ class MyhentaigalleryGalleryExtractor(GalleryExtractor):
         extr = text.extract_from(page)
         split = text.split_html
 
-        title = extr('<div class="comic-description">\n<h1>', '</h1>')
+        title = extr('<div class="comic-description">\n', '</h1>').lstrip()
+        if title.startswith("<h1>"):
+            title = title[len("<h1>"):]
+
         if not title:
             raise exception.NotFoundError("gallery")
 

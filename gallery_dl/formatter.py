@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2021-2022 Mike Fährmann
+# Copyright 2021-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -9,13 +9,11 @@
 """String formatters"""
 
 import os
-import json
 import time
 import string
 import _string
 import datetime
 import operator
-import functools
 from . import text, util
 
 NONE = util.NONE
@@ -60,13 +58,20 @@ class StringFormatter():
     - "u": calls str.upper
     - "c": calls str.capitalize
     - "C": calls string.capwords
-    - "j". calls json.dumps
+    - "g": calls text.slugify()
+    - "j": calls json.dumps
     - "t": calls str.strip
+    - "T": calls util.datetime_to_timestamp_string()
     - "d": calls text.parse_timestamp
-    - "U": calls urllib.parse.unescape
+    - "s": calls str()
     - "S": calls util.to_string()
-    - "T": calls util.to_timestamü()
+    - "U": calls urllib.parse.unescape
+    - "r": calls repr()
+    - "a": calls ascii()
     - Example: {f!l} -> "example"; {f!u} -> "EXAMPLE"
+
+    # Go to _CONVERSIONS and _SPECIFIERS below to se all of them, read:
+    # https://github.com/mikf/gallery-dl/blob/master/docs/formatting.md
 
     Extra Format Specifiers:
     - "?<before>/<after>/":
@@ -221,7 +226,7 @@ class FStringFormatter():
     """Generate text by evaluating an f-string literal"""
 
     def __init__(self, fstring, default=NONE, fmt=None):
-        self.format_map = util.compile_expression("f'''" + fstring + "'''")
+        self.format_map = util.compile_expression('f"""' + fstring + '"""')
 
 
 def parse_field_name(field_name):
@@ -392,7 +397,7 @@ _CONVERSIONS = {
     "u": str.upper,
     "c": str.capitalize,
     "C": string.capwords,
-    "j": functools.partial(json.dumps, default=str),
+    "j": util.json_dumps,
     "t": str.strip,
     "T": util.datetime_to_timestamp_string,
     "d": text.parse_timestamp,

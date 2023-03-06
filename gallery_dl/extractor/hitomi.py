@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2022 Mike Fährmann
+# Copyright 2015-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -13,7 +13,6 @@ from .nozomi import decode_nozomi
 from ..cache import memcache
 from .. import text, util
 import string
-import json
 import re
 
 
@@ -75,7 +74,7 @@ class HitomiGalleryExtractor(GalleryExtractor):
             self.root, gid)
 
     def metadata(self, page):
-        self.info = info = json.loads(page.partition("=")[2])
+        self.info = info = util.json_loads(page.partition("=")[2])
         iget = info.get
 
         language = iget("language")

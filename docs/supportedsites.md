@@ -111,14 +111,14 @@ Consider all sites to be NSFW unless otherwise known.
 </tr>
 <tr>
     <td>Bunkr</td>
-    <td>https://bunkr.ru/</td>
+    <td>https://bunkr.su/</td>
     <td>Albums</td>
     <td></td>
 </tr>
 <tr>
     <td>Catbox</td>
     <td>https://catbox.moe/</td>
-    <td>Albums</td>
+    <td>Albums, Files</td>
     <td></td>
 </tr>
 <tr>
@@ -142,13 +142,13 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>Desktopography</td>
     <td>https://desktopography.net/</td>
-    <td>Entrys, Exhibitions</td>
+    <td>Entries, Exhibitions</td>
     <td></td>
 </tr>
 <tr>
     <td>DeviantArt</td>
     <td>https://www.deviantart.com/</td>
-    <td>Collections, Deviations, Favorites, Folders, Galleries, Journals, Popular Images, Scraps, Sta.sh, Tag Searches, User Profiles, Watches</td>
+    <td>Collections, Deviations, Favorites, Folders, Galleries, Gallery Searches, Journals, Popular Images, Scraps, Search Results, Sta.sh, Status Updates, Tag Searches, User Profiles, Watches</td>
     <td><a href="https://github.com/mikf/gallery-dl#oauth">OAuth</a></td>
 </tr>
 <tr>
@@ -185,6 +185,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td>Fallen Angels Scans</td>
     <td>https://www.fascans.com/</td>
     <td>Chapters, Manga</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Fanleaks</td>
+    <td>https://fanleaks.club/</td>
+    <td>Models, Posts</td>
     <td></td>
 </tr>
 <tr>
@@ -238,7 +244,7 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>Gelbooru</td>
     <td>https://gelbooru.com/</td>
-    <td>Pools, Posts, Redirects, Tag Searches</td>
+    <td>Favorites, Pools, Posts, Redirects, Tag Searches</td>
     <td></td>
 </tr>
 <tr>
@@ -303,7 +309,7 @@ Consider all sites to be NSFW unless otherwise known.
 </tr>
 <tr>
     <td>Hiperdex</td>
-    <td>https://hiperdex.com/</td>
+    <td>https://1sthiperdex.com/</td>
     <td>Artists, Chapters, Manga</td>
     <td></td>
 </tr>
@@ -340,7 +346,7 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>ImageFap</td>
     <td>https://www.imagefap.com/</td>
-    <td>Galleries, individual Images, User Profiles</td>
+    <td>Folders, Galleries, individual Images, User Profiles</td>
     <td></td>
 </tr>
 <tr>
@@ -443,6 +449,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td>Komikcast</td>
     <td>https://komikcast.site/</td>
     <td>Chapters, Manga</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Lexica</td>
+    <td>https://lexica.art/</td>
+    <td>Search Results</td>
     <td></td>
 </tr>
 <tr>
@@ -584,6 +596,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
+    <td>Nudecollect</td>
+    <td>https://nudecollect.com/</td>
+    <td>Albums, individual Images</td>
+    <td></td>
+</tr>
+<tr>
     <td>Patreon</td>
     <td>https://www.patreon.com/</td>
     <td>Creators, Posts, User Profiles</td>
@@ -622,7 +640,7 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>Pinterest</td>
     <td>https://www.pinterest.com/</td>
-    <td>Created Pins, Pins, pin.it Links, related Pins, Search Results, Sections, User Profiles</td>
+    <td>All Pins, Created Pins, Pins, pin.it Links, related Pins, Search Results, Sections, User Profiles</td>
     <td><a href="https://github.com/mikf/gallery-dl#cookies">Cookies</a></td>
 </tr>
 <tr>
@@ -674,6 +692,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
+    <td>PornPics.com</td>
+    <td>https://www.pornpics.com/</td>
+    <td>Galleries, Search Results, Tag Searches</td>
+    <td></td>
+</tr>
+<tr>
     <td>Postimg</td>
     <td>https://postimages.org/</td>
     <td>individual Images</td>
@@ -700,7 +724,7 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>RedGIFs</td>
     <td>https://redgifs.com/</td>
-    <td>individual Images, Search Results, User Profiles</td>
+    <td>Collections, individual Images, Search Results, User Profiles</td>
     <td></td>
 </tr>
 <tr>
@@ -792,6 +816,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td>https://tapas.io/</td>
     <td>Episodes, Series</td>
     <td>Supported</td>
+</tr>
+<tr>
+    <td>TCB Scans</td>
+    <td>https://onepiecechapters.com/</td>
+    <td>Chapters, Manga</td>
+    <td></td>
 </tr>
 <tr>
     <td>Telegraph</td>
@@ -920,6 +950,18 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
+    <td>Wikifeet</td>
+    <td>https://www.wikifeet.com/</td>
+    <td>Galleries</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Wikifeetx</td>
+    <td>https://www.wikifeetx.com/</td>
+    <td>Galleries</td>
+    <td></td>
+</tr>
+<tr>
     <td>xHamster</td>
     <td>https://xhamster.com/</td>
     <td>Galleries, User Profiles</td>
@@ -966,12 +1008,6 @@ Consider all sites to be NSFW unless otherwise known.
     <td>Supported</td>
 </tr>
 <tr>
-    <td>e621</td>
-    <td>https://e621.net/</td>
-    <td>Favorites, Pools, Popular Images, Posts, Tag Searches</td>
-    <td>Supported</td>
-</tr>
-<tr>
     <td>ATFBooru</td>
     <td>https://booru.allthefallen.moe/</td>
     <td>Pools, Popular Images, Posts, Tag Searches</td>
@@ -980,8 +1016,24 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>Aibooru</td>
     <td>https://aibooru.online/</td>
+    <td>Pools, Popular Images, Posts, Tag Searches</td>
+    <td>Supported</td>
+</tr>
+
+<tr>
+    <td colspan="4"><strong>e621 Instances</strong></td>
+</tr>
+<tr>
+    <td>e621</td>
+    <td>https://e621.net/</td>
     <td>Favorites, Pools, Popular Images, Posts, Tag Searches</td>
-    <td></td>
+    <td>Supported</td>
+</tr>
+<tr>
+    <td>e926</td>
+    <td>https://e926.net/</td>
+    <td>Favorites, Pools, Popular Images, Posts, Tag Searches</td>
+    <td>Supported</td>
 </tr>
 
 <tr>
@@ -1056,6 +1108,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td colspan="4"><strong>LynxChan Imageboards</strong></td>
 </tr>
 <tr>
+    <td>Bbw-chan</td>
+    <td>https://bbw-chan.nl/</td>
+    <td>Boards, Threads</td>
+    <td></td>
+</tr>
+<tr>
     <td>Kohlchan</td>
     <td>https://kohlchan.net/</td>
     <td>Boards, Threads</td>
@@ -1065,6 +1123,28 @@ Consider all sites to be NSFW unless otherwise known.
     <td>Endchan</td>
     <td>https://endchan.org/</td>
     <td>Boards, Threads</td>
+    <td></td>
+</tr>
+
+<tr>
+    <td colspan="4"><strong>Misskey Instances</strong></td>
+</tr>
+<tr>
+    <td>Misskey.io</td>
+    <td>https://misskey.io/</td>
+    <td>Images from Notes, User Profiles</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Lesbian.energy</td>
+    <td>https://lesbian.energy/</td>
+    <td>Images from Notes, User Profiles</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Sushi.ski</td>
+    <td>https://sushi.ski/</td>
+    <td>Images from Notes, User Profiles</td>
     <td></td>
 </tr>
 
@@ -1171,6 +1251,22 @@ Consider all sites to be NSFW unless otherwise known.
     <td>ThatPervert</td>
     <td>http://thatpervert.com/</td>
     <td>Posts, Search Results, Tag Searches, User Profiles</td>
+    <td></td>
+</tr>
+
+<tr>
+    <td colspan="4"><strong>szurubooru Instances</strong></td>
+</tr>
+<tr>
+    <td>Foalcon</td>
+    <td>https://booru.foalcon.com/</td>
+    <td>Posts, Tag Searches</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Bcbnsfw</td>
+    <td>https://booru.bcbnsfw.space/</td>
+    <td>Posts, Tag Searches</td>
     <td></td>
 </tr>
 
@@ -1356,6 +1452,12 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>Modcloth</td>
     <td>https://modcloth.com/</td>
+    <td>Collections, Products</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Oh Polly</td>
+    <td>https://www.ohpolly.com/</td>
     <td>Collections, Products</td>
     <td></td>
 </tr>

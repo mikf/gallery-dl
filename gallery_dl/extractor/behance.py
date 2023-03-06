@@ -1,22 +1,22 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2022 Mike Fährmann
+# Copyright 2018-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract images from https://www.behance.net/"""
+"""Extractors for https://www.behance.net/"""
 
 from .common import Extractor, Message
-from .. import text
-import json
+from .. import text, util
 
 
 class BehanceExtractor(Extractor):
     """Base class for behance extractors"""
     category = "behance"
     root = "https://www.behance.net"
+    request_interval = (2.0, 4.0)
 
     def items(self):
         for gallery in self.galleries():
@@ -119,7 +119,7 @@ class BehanceGalleryExtractor(BehanceExtractor):
         }
         page = self.request(url, cookies=cookies).text
 
-        data = json.loads(text.extr(
+        data = util.json_loads(text.extr(
             page, 'id="beconfig-store_state">', '</script>'))
         return self._update(data["project"]["project"])
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2017-2022 Mike Fährmann
+# Copyright 2017-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -9,13 +9,12 @@
 """Utility classes to setup OAuth and link accounts to gallery-dl"""
 
 from .common import Extractor, Message
-from . import deviantart, flickr, mastodon, pixiv, reddit, smugmug, tumblr
 from .. import text, oauth, util, config, exception
 from ..output import stdout_write
 from ..cache import cache
 import urllib.parse
+import binascii
 import hashlib
-import base64
 
 REDIRECT_URI_LOCALHOST = "http://localhost:6414/"
 REDIRECT_URI_HTTPS = "https://mikf.github.io/gallery-dl/oauth-redirect.html"
@@ -68,11 +67,20 @@ class OAuthBase(Extractor):
 
     def open(self, url, params, recv=None):
         """Open 'url' in browser amd return response parameters"""
-        import webbrowser
         url += "?" + urllib.parse.urlencode(params)
-        if not self.config("browser", True) or not webbrowser.open(url):
-            stdout_write(
-                "Please open this URL in your browser:\n\n" + url + "\n\n")
+
+        browser = self.config("browser", True)
+        if browser:
+            import webbrowser
+            browser = webbrowser.get()
+
+        if browser and browser.open(url):
+            name = getattr(browser, "name", "Browser")
+            self.log.info("Opening URL in %s:", name.capitalize())
+        else:
+            self.log.info("Please open this URL in your browser:")
+
+        stdout_write("\n{}\n\n".format(url))
         return (recv or self.recv)()
 
     def error(self, msg):
@@ -80,8 +88,18 @@ class OAuthBase(Extractor):
             "Remote server reported an error:\n\n{}\n".format(msg))
 
     def _oauth1_authorization_flow(
-            self, request_token_url, authorize_url, access_token_url):
+            self, default_key, default_secret,
+            request_token_url, authorize_url, access_token_url):
         """Perform the OAuth 1.0a authorization flow"""
+
+        api_key = self.oauth_config("api-key") or default_key
+        api_secret = self.oauth_config("api-secret") or default_secret
+        self.session = oauth.OAuth1Session(api_key, api_secret)
+
+        self.log.info("Using %s %s API key (%s)",
+                      "default" if api_key == default_key else "custom",
+                      self.subcategory, api_key)
+
         # get a request token
         params = {"oauth_callback": self.redirect_uri}
         data = self.session.get(request_token_url, params=params).text
@@ -112,10 +130,17 @@ class OAuthBase(Extractor):
         ))
 
     def _oauth2_authorization_code_grant(
-            self, client_id, client_secret, auth_url, token_url, *,
-            scope="read", key="refresh_token", auth=True,
-            cache=None, instance=None):
+            self, client_id, client_secret, default_id, default_secret,
+            auth_url, token_url, *, scope="read", duration="permanent",
+            key="refresh_token", auth=True, cache=None, instance=None):
         """Perform an OAuth2 authorization code grant"""
+
+        client_id = str(client_id) if client_id else default_id
+        client_secret = client_secret or default_secret
+
+        self.log.info("Using %s %s client ID (%s)",
+                      "default" if client_id == default_id else "custom",
+                      instance or self.subcategory, client_id)
 
         state = "gallery-dl_{}_{}".format(
             self.subcategory,
@@ -127,7 +152,7 @@ class OAuthBase(Extractor):
             "response_type": "code",
             "state"        : state,
             "redirect_uri" : self.redirect_uri,
-            "duration"     : "permanent",
+            "duration"     : duration,
             "scope"        : scope,
         }
 
@@ -137,13 +162,12 @@ class OAuthBase(Extractor):
         # check authorization response
         if state != params.get("state"):
             self.send("'state' mismatch: expected {}, got {}.\n".format(
-                state, params.get("state")
-            ))
+                state, params.get("state")))
             return
         if "error" in params:
             return self.error(params)
 
-        # exchange the authorization code for a token
+        # exchange authorization code for a token
         data = {
             "grant_type"  : "authorization_code",
             "code"        : params["code"],
@@ -208,63 +232,24 @@ class OAuthBase(Extractor):
         return msg
 
 
-class OAuthDeviantart(OAuthBase):
-    subcategory = "deviantart"
-    pattern = "oauth:deviantart$"
-    redirect_uri = REDIRECT_URI_HTTPS
-
-    def items(self):
-        yield Message.Version, 1
-
-        self._oauth2_authorization_code_grant(
-            self.oauth_config(
-                "client-id", deviantart.DeviantartOAuthAPI.CLIENT_ID),
-            self.oauth_config(
-                "client-secret", deviantart.DeviantartOAuthAPI.CLIENT_SECRET),
-            "https://www.deviantart.com/oauth2/authorize",
-            "https://www.deviantart.com/oauth2/token",
-            scope="browse user.manage",
-            cache=deviantart._refresh_token_cache,
-        )
-
+# --------------------------------------------------------------------
+# OAuth 1.0a
 
 class OAuthFlickr(OAuthBase):
     subcategory = "flickr"
     pattern = "oauth:flickr$"
     redirect_uri = REDIRECT_URI_HTTPS
 
-    def __init__(self, match):
-        OAuthBase.__init__(self, match)
-        self.session = oauth.OAuth1Session(
-            self.oauth_config("api-key", flickr.FlickrAPI.API_KEY),
-            self.oauth_config("api-secret", flickr.FlickrAPI.API_SECRET),
-        )
-
     def items(self):
         yield Message.Version, 1
+        from . import flickr
 
         self._oauth1_authorization_flow(
+            flickr.FlickrAPI.API_KEY,
+            flickr.FlickrAPI.API_SECRET,
             "https://www.flickr.com/services/oauth/request_token",
             "https://www.flickr.com/services/oauth/authorize",
             "https://www.flickr.com/services/oauth/access_token",
-        )
-
-
-class OAuthReddit(OAuthBase):
-    subcategory = "reddit"
-    pattern = "oauth:reddit$"
-
-    def items(self):
-        yield Message.Version, 1
-
-        self.session.headers["User-Agent"] = reddit.RedditAPI.USER_AGENT
-        self._oauth2_authorization_code_grant(
-            self.oauth_config("client-id", reddit.RedditAPI.CLIENT_ID),
-            "",
-            "https://www.reddit.com/api/v1/authorize",
-            "https://www.reddit.com/api/v1/access_token",
-            scope="read history",
-            cache=reddit._refresh_token_cache,
         )
 
 
@@ -272,17 +257,13 @@ class OAuthSmugmug(OAuthBase):
     subcategory = "smugmug"
     pattern = "oauth:smugmug$"
 
-    def __init__(self, match):
-        OAuthBase.__init__(self, match)
-        self.session = oauth.OAuth1Session(
-            self.oauth_config("api-key", smugmug.SmugmugAPI.API_KEY),
-            self.oauth_config("api-secret", smugmug.SmugmugAPI.API_SECRET),
-        )
-
     def items(self):
         yield Message.Version, 1
+        from . import smugmug
 
         self._oauth1_authorization_flow(
+            smugmug.SmugmugAPI.API_KEY,
+            smugmug.SmugmugAPI.API_SECRET,
             "https://api.smugmug.com/services/oauth/1.0a/getRequestToken",
             "https://api.smugmug.com/services/oauth/1.0a/authorize",
             "https://api.smugmug.com/services/oauth/1.0a/getAccessToken",
@@ -293,20 +274,61 @@ class OAuthTumblr(OAuthBase):
     subcategory = "tumblr"
     pattern = "oauth:tumblr$"
 
-    def __init__(self, match):
-        OAuthBase.__init__(self, match)
-        self.session = oauth.OAuth1Session(
-            self.oauth_config("api-key", tumblr.TumblrAPI.API_KEY),
-            self.oauth_config("api-secret", tumblr.TumblrAPI.API_SECRET),
-        )
-
     def items(self):
         yield Message.Version, 1
+        from . import tumblr
 
         self._oauth1_authorization_flow(
+            tumblr.TumblrAPI.API_KEY,
+            tumblr.TumblrAPI.API_SECRET,
             "https://www.tumblr.com/oauth/request_token",
             "https://www.tumblr.com/oauth/authorize",
             "https://www.tumblr.com/oauth/access_token",
+        )
+
+
+# --------------------------------------------------------------------
+# OAuth 2.0
+
+class OAuthDeviantart(OAuthBase):
+    subcategory = "deviantart"
+    pattern = "oauth:deviantart$"
+    redirect_uri = REDIRECT_URI_HTTPS
+
+    def items(self):
+        yield Message.Version, 1
+        from . import deviantart
+
+        self._oauth2_authorization_code_grant(
+            self.oauth_config("client-id"),
+            self.oauth_config("client-secret"),
+            deviantart.DeviantartOAuthAPI.CLIENT_ID,
+            deviantart.DeviantartOAuthAPI.CLIENT_SECRET,
+            "https://www.deviantart.com/oauth2/authorize",
+            "https://www.deviantart.com/oauth2/token",
+            scope="browse user.manage",
+            cache=deviantart._refresh_token_cache,
+        )
+
+
+class OAuthReddit(OAuthBase):
+    subcategory = "reddit"
+    pattern = "oauth:reddit$"
+
+    def items(self):
+        yield Message.Version, 1
+        from . import reddit
+
+        self.session.headers["User-Agent"] = reddit.RedditAPI.USER_AGENT
+        self._oauth2_authorization_code_grant(
+            self.oauth_config("client-id"),
+            "",
+            reddit.RedditAPI.CLIENT_ID,
+            "",
+            "https://www.reddit.com/api/v1/authorize",
+            "https://www.reddit.com/api/v1/access_token",
+            scope="read history",
+            cache=reddit._refresh_token_cache,
         )
 
 
@@ -320,6 +342,7 @@ class OAuthMastodon(OAuthBase):
 
     def items(self):
         yield Message.Version, 1
+        from . import mastodon
 
         for application in mastodon.INSTANCES.values():
             if self.instance == application["root"].partition("://")[2]:
@@ -328,6 +351,8 @@ class OAuthMastodon(OAuthBase):
             application = self._register(self.instance)
 
         self._oauth2_authorization_code_grant(
+            application["client-id"],
+            application["client-secret"],
             application["client-id"],
             application["client-secret"],
             "https://{}/oauth/authorize".format(self.instance),
@@ -362,17 +387,20 @@ class OAuthMastodon(OAuthBase):
         return data
 
 
+# --------------------------------------------------------------------
+
 class OAuthPixiv(OAuthBase):
     subcategory = "pixiv"
     pattern = "oauth:pixiv$"
 
     def items(self):
         yield Message.Version, 1
+        from . import pixiv
 
         code_verifier = util.generate_token(32)
-        digest = hashlib.sha256(code_verifier.encode("ascii")).digest()
-        code_challenge = base64.urlsafe_b64encode(
-            digest).rstrip(b"=").decode("ascii")
+        digest = hashlib.sha256(code_verifier.encode()).digest()
+        code_challenge = binascii.b2a_base64(
+            digest)[:-2].decode().replace("+", "-").replace("/", "_")
 
         url = "https://app-api.pixiv.net/web/v1/login"
         params = {

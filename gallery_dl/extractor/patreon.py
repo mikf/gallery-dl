@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2022 Mike Fährmann
+# Copyright 2019-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -9,11 +9,10 @@
 """Extractors for https://www.patreon.com/"""
 
 from .common import Extractor, Message
-from .. import text, exception
+from .. import text, util, exception
 from ..cache import memcache
 import collections
 import itertools
-import json
 
 
 class PatreonExtractor(Extractor):
@@ -251,7 +250,7 @@ class PatreonExtractor(Extractor):
         return [genmap[ft] for ft in filetypes]
 
     def _extract_bootstrap(self, page):
-        return json.loads(text.extr(
+        return util.json_loads(text.extr(
             page, "window.patreon.bootstrap,", "\n});") + "}")
 
 

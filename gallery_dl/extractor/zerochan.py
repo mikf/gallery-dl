@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2022 Mike Fährmann
+# Copyright 2022-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -111,13 +111,15 @@ class ZerochanTagExtractor(ZerochanExtractor):
     test = ("https://www.zerochan.net/Perth+%28Kantai+Collection%29", {
         "pattern": r"https://static\.zerochan\.net/.+\.full\.\d+\.(jpg|png)",
         "count": "> 24",
-        "keywords": {
+        "keyword": {
             "extension": r"re:jpg|png",
-            "file_url": "",
-            "filename": r"re:Perth.\(Kantai.Collection\).full.\d+",
+            "file_url": r"re:https://static\.zerochan\.net"
+                        r"/.+\.full\.\d+\.(jpg|png)",
+            "filename": r"re:(Perth\.\(Kantai\.Collection\)"
+                        r"|Kantai\.Collection)\.full\.\d+",
             "height": r"re:^\d+$",
             "id": r"re:^\d+$",
-            "name": "Perth (Kantai Collection)",
+            "name": r"re:(Perth \(Kantai Collection\)|Kantai Collection)",
             "search_tags": "Perth (Kantai Collection)",
             "size": r"re:^\d+k$",
             "width": r"re:^\d+$",

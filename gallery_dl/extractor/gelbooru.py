@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2022 Mike Fährmann
+# Copyright 2014-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -12,6 +12,8 @@ from .common import Extractor, Message
 from . import gelbooru_v02
 from .. import text, exception
 import binascii
+
+BASE_PATTERN = r"(?:https?://)?(?:www\.)?gelbooru\.com/(?:index\.php)?\?"
 
 
 class GelbooruBase():
@@ -53,6 +55,23 @@ class GelbooruBase():
                 del params["pid"]
             params["tags"] = "{} id:<{}".format(self.tags, post["id"])
 
+    def _pagination_html(self, params):
+        url = self.root + "/index.php"
+        params["pid"] = self.page_start * self.per_page
+
+        data = {}
+        while True:
+            num_ids = 0
+            page = self.request(url, params=params).text
+
+            for data["id"] in text.extract_iter(page, '" id="p', '"'):
+                num_ids += 1
+                yield from self._api_request(data)
+
+            if num_ids < self.per_page:
+                return
+            params["pid"] += self.per_page
+
     @staticmethod
     def _file_url(post):
         url = post["file_url"]
@@ -88,8 +107,7 @@ class GelbooruBase():
 class GelbooruTagExtractor(GelbooruBase,
                            gelbooru_v02.GelbooruV02TagExtractor):
     """Extractor for images from gelbooru.com based on search-tags"""
-    pattern = (r"(?:https?://)?(?:www\.)?gelbooru\.com/(?:index\.php)?"
-               r"\?page=post&s=list&tags=(?P<tags>[^&#]+)")
+    pattern = BASE_PATTERN + r"page=post&s=list&tags=([^&#]+)"
     test = (
         ("https://gelbooru.com/index.php?page=post&s=list&tags=bonocho", {
             "count": 5,
@@ -108,8 +126,7 @@ class GelbooruPoolExtractor(GelbooruBase,
                             gelbooru_v02.GelbooruV02PoolExtractor):
     """Extractor for gelbooru pools"""
     per_page = 45
-    pattern = (r"(?:https?://)?(?:www\.)?gelbooru\.com/(?:index\.php)?"
-               r"\?page=pool&s=show&id=(?P<pool>\d+)")
+    pattern = BASE_PATTERN + r"page=pool&s=show&id=(\d+)"
     test = (
         ("https://gelbooru.com/index.php?page=pool&s=show&id=761", {
             "count": 6,
@@ -124,9 +141,9 @@ class GelbooruPoolExtractor(GelbooruBase,
             "id"  : self.pool_id,
             "pid" : self.page_start,
         }
-        self._page = self.request(url, params=self._params).text
+        page = self.request(url, params=self._params).text
 
-        name, pos = text.extract(self._page, "<h3>Now Viewing: ", "</h3>")
+        name, pos = text.extract(page, "<h3>Now Viewing: ", "</h3>")
         if not name:
             raise exception.NotFoundError("pool")
 
@@ -136,29 +153,19 @@ class GelbooruPoolExtractor(GelbooruBase,
         }
 
     def posts(self):
-        url = self.root + "/index.php"
-        params = self._params
+        return self._pagination_html(self._params)
 
-        page = self._page
-        del self._page
-        data = {}
 
-        while True:
-            num_ids = 0
-            for data["id"] in text.extract_iter(page, '" id="p', '"'):
-                num_ids += 1
-                yield from self._api_request(data)
-
-            if num_ids < self.per_page:
-                return
-            params["pid"] += self.per_page
-            page = self.request(url, params=params).text
+class GelbooruFavoriteExtractor(GelbooruBase,
+                                gelbooru_v02.GelbooruV02FavoriteExtractor):
+    pattern = BASE_PATTERN + r"page=favorites&s=view&id=(\d+)"
+    test = ("https://gelbooru.com/index.php?page=favorites&s=view&id=12345",)
 
 
 class GelbooruPostExtractor(GelbooruBase,
                             gelbooru_v02.GelbooruV02PostExtractor):
     """Extractor for single images from gelbooru.com"""
-    pattern = (r"(?:https?://)?(?:www\.)?gelbooru\.com/(?:index\.php)?\?"
+    pattern = (BASE_PATTERN +
                r"(?=(?:[^#]+&)?page=post(?:&|#|$))"
                r"(?=(?:[^#]+&)?s=view(?:&|#|$))"
                r"(?:[^#]+&)?id=(\d+)")
@@ -195,7 +202,7 @@ class GelbooruPostExtractor(GelbooruBase,
         # notes
         ("https://gelbooru.com/index.php?page=post&s=view&id=5997331", {
             "options": (("notes", True),),
-            "keywords": {
+            "keyword": {
                 "notes": [
                     {
                         "body": "Look over this way when you talk~",

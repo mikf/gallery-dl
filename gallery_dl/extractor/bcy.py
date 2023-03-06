@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2020-2022 Mike Fährmann
+# Copyright 2020-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -9,8 +9,7 @@
 """Extractors for https://bcy.net/"""
 
 from .common import Extractor, Message
-from .. import text, exception
-import json
+from .. import text, util, exception
 import re
 
 
@@ -100,9 +99,9 @@ class BcyExtractor(Extractor):
                 .replace('\\\\u002F', '/')
                 .replace('\\"', '"'))
         try:
-            return json.loads(data)["detail"]
+            return util.json_loads(data)["detail"]
         except ValueError:
-            return json.loads(data.replace('\\"', '"'))["detail"]
+            return util.json_loads(data.replace('\\"', '"'))["detail"]
 
 
 class BcyUserExtractor(BcyExtractor):

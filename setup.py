@@ -50,7 +50,8 @@ PACKAGES = [
 
 DESCRIPTION = ("Command-line program to download image galleries and "
                "collections from several image hosting sites")
-LONG_DESCRIPTION = read("README.rst")
+LONG_DESCRIPTION = read("README.rst").replace(
+    "<docs/", "<https://github.com/mikf/gallery-dl/blob/master/docs/")
 
 
 def build_py2exe():

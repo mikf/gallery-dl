@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2022 Mike Fährmann
+# Copyright 2019-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -9,10 +9,8 @@
 """Extractors for https://www.plurk.com/"""
 
 from .common import Extractor, Message
-from .. import text, exception
+from .. import text, util, exception
 import datetime
-import time
-import json
 import re
 
 
@@ -20,6 +18,7 @@ class PlurkExtractor(Extractor):
     """Base class for plurk extractors"""
     category = "plurk"
     root = "https://www.plurk.com"
+    request_interval = 1.0
 
     def items(self):
         urls = self._urls_ex if self.config("comments", False) else self._urls
@@ -59,14 +58,13 @@ class PlurkExtractor(Extractor):
                 return
             elif info["has_newer"] < 200:
                 del data["count"]
-            time.sleep(1)
             data["from_response_id"] = info["responses"][-1]["id"] + 1
 
     @staticmethod
     def _load(data):
         if not data:
             raise exception.NotFoundError("user")
-        return json.loads(re.sub(r"new Date\(([^)]+)\)", r"\1", data))
+        return util.json_loads(re.sub(r"new Date\(([^)]+)\)", r"\1", data))
 
 
 class PlurkTimelineExtractor(PlurkExtractor):

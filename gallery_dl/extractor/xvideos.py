@@ -9,8 +9,7 @@
 """Extractors for https://www.xvideos.com/"""
 
 from .common import GalleryExtractor, Extractor, Message
-from .. import text
-import json
+from .. import text, util
 
 
 class XvideosBase():
@@ -113,7 +112,7 @@ class XvideosUserExtractor(XvideosBase, Extractor):
     def items(self):
         url = "{}/profiles/{}".format(self.root, self.user)
         page = self.request(url, notfound=self.subcategory).text
-        data = json.loads(text.extr(
+        data = util.json_loads(text.extr(
             page, "xv.conf=", ";</script>"))["data"]
 
         if not isinstance(data["galleries"], dict):

@@ -12,7 +12,6 @@ from .. import text
 
 class TelegraphGalleryExtractor(GalleryExtractor):
     """Extractor for articles from telegra.ph"""
-
     category = "telegraph"
     root = "https://telegra.ph"
     directory_fmt = ("{category}", "{slug}")
@@ -52,6 +51,38 @@ class TelegraphGalleryExtractor(GalleryExtractor):
                 "url": "https://telegra.ph/file/3ea79d23b0dd0889f215a.jpg",
             },
         }),
+        ("https://telegra.ph/Vsyo-o-druzyah-moej-sestricy-05-27", {
+            "url": "c1f3048e5d94bee53af30a8c27f70b0d3b15438e",
+            "pattern": r"^https://pith1\.ru/uploads"
+                       r"/posts/2019-12/\d+_\d+\.jpg$",
+            "keyword": {
+                "author": "Shotacon - заходи сюда",
+                "caption": "",
+                "count": 19,
+                "date": "dt:2022-05-27 16:17:27",
+                "description": "",
+                "num_formatted": r"re:^\d{2}$",
+                "post_url": "https://telegra.ph"
+                            "/Vsyo-o-druzyah-moej-sestricy-05-27",
+                "slug": "Vsyo-o-druzyah-moej-sestricy-05-27",
+                "title": "Всё о друзьях моей сестрицы",
+            },
+        }),
+        ("https://telegra.ph/Disharmonica---Saber-Nero-02-21", {
+            "pattern": r"https://telegra\.ph/file/[0-9a-f]+\.(jpg|png)",
+            "keyword": {
+                "author": "cosmos",
+                "caption": "",
+                "count": 89,
+                "date": "dt:2022-02-21 05:57:39",
+                "description": "",
+                "num_formatted": r"re:^\d{2}$",
+                "post_url": "https://telegra.ph"
+                            "/Disharmonica---Saber-Nero-02-21",
+                "slug": "Disharmonica---Saber-Nero-02-21",
+                "title": "Disharmonica - Saber Nero",
+            },
+        }),
     )
 
     def metadata(self, page):
@@ -73,22 +104,24 @@ class TelegraphGalleryExtractor(GalleryExtractor):
         return data
 
     def images(self, page):
-        figures = tuple(text.extract_iter(page, "<figure>", "</figure>"))
+        figures = (tuple(text.extract_iter(page, "<figure>", "</figure>")) or
+                   tuple(text.extract_iter(page, "<img", ">")))
         num_zeroes = len(str(len(figures)))
         num = 0
 
         result = []
         for figure in figures:
-            src, pos = text.extract(figure, 'src="', '"')
-            if src.startswith("/embed/"):
+            url, pos = text.extract(figure, 'src="', '"')
+            if url.startswith("/embed/"):
                 continue
+            elif url.startswith("/"):
+                url = self.root + url
             caption, pos = text.extract(figure, "<figcaption>", "<", pos)
-            url = self.root + src
             num += 1
 
             result.append((url, {
                 "url"          : url,
-                "caption"      : text.unescape(caption),
+                "caption"      : text.unescape(caption) if caption else "",
                 "num"          : num,
                 "num_formatted": str(num).zfill(num_zeroes),
             }))

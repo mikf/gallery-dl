@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2022 Mike Fährmann
+# Copyright 2019-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -171,37 +171,69 @@ class MetadataTest(BasePostprocessorTest):
 
         # default arguments
         self.assertEqual(pp.write    , pp._write_json)
-        self.assertEqual(pp.ascii    , False)
-        self.assertEqual(pp.indent   , 4)
         self.assertEqual(pp.extension, "json")
+        self.assertTrue(callable(pp._json_encode))
 
     def test_metadata_json(self):
         pp = self._create({
-            "mode"     : "json",
-            "ascii"    : True,
-            "indent"   : 2,
-            "extension": "JSON",
+            "mode"      : "json",
+            "extension" : "JSON",
         }, {
-            "public"   : "hello",
-            "_private" : "world",
+            "public"    : "hello ワールド",
+            "_private"  : "foo バー",
         })
 
         self.assertEqual(pp.write    , pp._write_json)
-        self.assertEqual(pp.ascii    , True)
-        self.assertEqual(pp.indent   , 2)
         self.assertEqual(pp.extension, "JSON")
+        self.assertTrue(callable(pp._json_encode))
 
         with patch("builtins.open", mock_open()) as m:
             self._trigger()
 
         path = self.pathfmt.realpath + ".JSON"
         m.assert_called_once_with(path, "w", encoding="utf-8")
-        self.assertEqual(self._output(m), """{
-  "category": "test",
-  "extension": "ext",
-  "filename": "file",
-  "public": "hello"
+
+        if sys.hexversion >= 0x3060000:
+            # python 3.4 & 3.5 have random order without 'sort: True'
+            self.assertEqual(self._output(m), """{
+    "category": "test",
+    "filename": "file",
+    "extension": "ext",
+    "public": "hello ワールド"
 }
+""")
+
+    def test_metadata_json_options(self):
+        pp = self._create({
+            "mode"      : "json",
+            "ascii"     : True,
+            "sort"      : True,
+            "separators": [",", " : "],
+            "private"   : True,
+            "indent"    : None,
+            "open"      : "a",
+            "encoding"  : "UTF-8",
+            "extension" : "JSON",
+        }, {
+            "public"    : "hello ワールド",
+            "_private"  : "foo バー",
+        })
+
+        self.assertEqual(pp.write    , pp._write_json)
+        self.assertEqual(pp.extension, "JSON")
+        self.assertTrue(callable(pp._json_encode))
+
+        with patch("builtins.open", mock_open()) as m:
+            self._trigger()
+
+        path = self.pathfmt.realpath + ".JSON"
+        m.assert_called_once_with(path, "a", encoding="UTF-8")
+        self.assertEqual(self._output(m), """{\
+"_private" : "foo \\u30d0\\u30fc",\
+"category" : "test",\
+"extension" : "ext",\
+"filename" : "file",\
+"public" : "hello \\u30ef\\u30fc\\u30eb\\u30c9"}
 """)
 
     def test_metadata_tags(self):
@@ -250,6 +282,18 @@ class MetadataTest(BasePostprocessorTest):
         self._create(
             {"mode": "tags"},
             {"tags": {"g": ["foobar1", "foobar2"], "m": ["foobarbaz"]}},
+        )
+        with patch("builtins.open", mock_open()) as m:
+            self._trigger()
+        self.assertEqual(self._output(m), "foobar1\nfoobar2\nfoobarbaz\n")
+
+    def test_metadata_tags_list_of_dict(self):
+        self._create(
+            {"mode": "tags"},
+            {"tags": [
+                {"g": "foobar1", "m": "foobar2"},
+                {"g": None, "m": "foobarbaz"}
+            ]},
         )
         with patch("builtins.open", mock_open()) as m:
             self._trigger()
@@ -334,7 +378,7 @@ class MetadataTest(BasePostprocessorTest):
         m.assert_called_once_with(path, "w", encoding="utf-8")
 
     def test_metadata_stdout(self):
-        self._create({"filename": "-", "indent": None})
+        self._create({"filename": "-", "indent": None, "sort": True})
 
         with patch("sys.stdout", Mock()) as m:
             self._trigger()
