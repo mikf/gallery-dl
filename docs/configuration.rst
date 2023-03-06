@@ -2562,7 +2562,14 @@ Description
       HLS and DASH manifests
     * ``"ytdl"``: Download videos and let `youtube-dl`_ handle all of
       video extraction and download
+    * ``"dash"``: Extract DASH manifest URLs and use `youtube-dl`_
+      to download and merge them. (*)
     * ``false``: Ignore videos
+
+    (*)
+    This saves 1 HTTP request per video
+    and might potentially be able to download otherwise deleted videos,
+    but it will not always get the best video quality available.
 
 
 extractor.redgifs.format
