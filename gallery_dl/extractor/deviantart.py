@@ -21,8 +21,8 @@ import re
 
 BASE_PATTERN = (
     r"(?:https?://)?(?:"
-    r"(?:www\.)?deviantart\.com/(?!watch/)([\w-]+)|"
-    r"(?!www\.)([\w-]+)\.deviantart\.com)"
+    r"(?:www\.)?(?:fx)?deviantart\.com/(?!watch/)([\w-]+)|"
+    r"(?!www\.)([\w-]+)\.(?:fx)?deviantart\.com)"
 )
 
 
@@ -997,7 +997,7 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
     subcategory = "deviation"
     archive_fmt = "g_{_username}_{index}.{extension}"
     pattern = (BASE_PATTERN + r"/(art|journal)/(?:[^/?#]+-)?(\d+)"
-               r"|(?:https?://)?(?:www\.)?deviantart\.com/"
+               r"|(?:https?://)?(?:www\.)?(?:fx)?deviantart\.com/"
                r"(?:view/|deviation/|view(?:-full)?\.php/*\?(?:[^#]+&)?id=)"
                r"(\d+)"  # bare deviation ID without slug
                r"|(?:https?://)?fav\.me/d([0-9a-z]+)")  # base36
@@ -1091,6 +1091,9 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
         # old /view/ URLs from the Wayback Machine
         ("https://www.deviantart.com/view.php?id=14864502"),
         ("http://www.deviantart.com/view-full.php?id=100842"),
+
+        ("https://www.fxdeviantart.com/zzz/art/zzz-1234567890"),
+        ("https://www.fxdeviantart.com/view/1234567890"),
     )
 
     skip = Extractor.skip
