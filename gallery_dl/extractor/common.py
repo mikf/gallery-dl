@@ -791,15 +791,21 @@ HTTP_HEADERS = {
         ("TE", "trailers"),
     ),
     "chrome": (
+        ("Connection", "keep-alive"),
         ("Upgrade-Insecure-Requests", "1"),
         ("User-Agent", "Mozilla/5.0 ({}) AppleWebKit/537.36 (KHTML, "
-                       "like Gecko) Chrome/92.0.4515.131 Safari/537.36"),
+                       "like Gecko) Chrome/111.0.0.0 Safari/537.36"),
         ("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,"
-                   "image/webp,image/apng,*/*;q=0.8"),
+                   "image/avif,image/webp,image/apng,*/*;q=0.8,"
+                   "application/signed-exchange;v=b3;q=0.7"),
         ("Referer", None),
+        ("Sec-Fetch-Site", "same-origin"),
+        ("Sec-Fetch-Mode", "no-cors"),
+        ("Sec-Fetch-Dest", "empty"),
         ("Accept-Encoding", None),
         ("Accept-Language", "en-US,en;q=0.9"),
-        ("Cookie", None),
+        ("cookie", None),
+        ("content-length", None),
     ),
 }
 
@@ -838,8 +844,7 @@ SSL_CIPHERS = {
         "AES128-GCM-SHA256:"
         "AES256-GCM-SHA384:"
         "AES128-SHA:"
-        "AES256-SHA:"
-        "DES-CBC3-SHA"
+        "AES256-SHA"
     ),
 }
 
