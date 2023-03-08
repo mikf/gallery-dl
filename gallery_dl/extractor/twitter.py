@@ -1440,6 +1440,8 @@ class TwitterAPI():
 
                 if "retweeted_status_result" in legacy:
                     retweet = legacy["retweeted_status_result"]["result"]
+                    if "tweet" in retweet:
+                        retweet = retweet["tweet"]
                     if original_retweets:
                         try:
                             retweet["legacy"]["retweeted_status_id_str"] = \
