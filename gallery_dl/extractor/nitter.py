@@ -59,10 +59,7 @@ class NitterExtractor(BaseExtractor):
 
                     if url[0] == "/":
                         url = self.root + url
-                    file = {
-                        "url": url,
-                        "_http_retry_codes": (404,),
-                    }
+                    file = {"url": url, "_http_retry": _retry_on_404}
                     file["filename"], _, file["extension"] = \
                         name.rpartition(".")
                     append(file)
@@ -468,3 +465,7 @@ class NitterTweetExtractor(NitterExtractor):
             quoted["user"] = tweet["user"]
             return (tweet, quoted)
         return (tweet,)
+
+
+def _retry_on_404(response):
+    return response.status_code == 404
