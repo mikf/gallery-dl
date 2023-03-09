@@ -407,6 +407,7 @@ _CONVERSIONS = {
     "s": str,
     "r": repr,
     "a": ascii,
+    "i": util.remove_invisible_chars_strip,
 }
 _FORMAT_SPECIFIERS = {
     "?": _parse_optional,
