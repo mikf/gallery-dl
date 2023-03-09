@@ -46,7 +46,8 @@ class DirectlinkExtractor(Extractor):
          "mZPiDgT8hmQdQ5K_gYyu0g.JPEG/2.JPG"),
         # internationalized domain name
         ("https://räksmörgås.josefsson.org/raksmorgas.jpg", {
-            "content": "f7e00768ab009c969e70d775047cdd302ca51762",
+            "url": "a65667f670b194afbd1e3ea5e7a78938d36747da",
+            "keyword": "fd5037fe86eebd4764e176cbaf318caec0f700be",
         }),
     )
 
