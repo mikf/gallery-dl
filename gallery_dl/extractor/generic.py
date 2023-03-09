@@ -26,7 +26,7 @@ class GenericExtractor(Extractor):
     # Based on: https://tools.ietf.org/html/rfc3986#appendix-B
     pattern += r"""
         (?P<scheme>https?://)?          # optional http(s) scheme
-        (?P<domain>[^/?#]+)             # required domain
+        (?P<domain>[-\w\.]+)            # required domain
         (?P<path>/[^?#]*)?              # optional path
         (?:\?(?P<query>[^#]*))?         # optional query
         (?:\#(?P<fragment>.*))?         # optional fragment
