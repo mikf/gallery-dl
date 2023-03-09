@@ -1180,12 +1180,6 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
-    <td>Nitter.pussthecat.org</td>
-    <td>https://nitter.pussthecat.org/</td>
-    <td>Media Files, Replies, Search Results, Tweets</td>
-    <td></td>
-</tr>
-<tr>
     <td>Nitter.1d4.us</td>
     <td>https://nitter.1d4.us/</td>
     <td>Media Files, Replies, Search Results, Tweets</td>
