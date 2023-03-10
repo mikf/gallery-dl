@@ -12,7 +12,7 @@ import shutil
 import logging
 import functools
 import unicodedata
-from . import config, util, formatter, exception
+from . import config, util, formatter
 
 
 # --------------------------------------------------------------------
@@ -39,9 +39,9 @@ class LoggerAdapter():
     """Trimmed-down version of logging.LoggingAdapter"""
     __slots__ = ("logger", "extra")
 
-    def __init__(self, logger, extra):
+    def __init__(self, logger, job):
         self.logger = logger
-        self.extra = extra
+        self.extra = job._logger_extra
 
     def debug(self, msg, *args, **kwargs):
         if self.logger.isEnabledFor(logging.DEBUG):
@@ -64,12 +64,12 @@ class LoggerAdapter():
             self.logger._log(logging.ERROR, msg, args, **kwargs)
 
 
-class LoggerAdapterEx():
+class LoggerAdapterActions():
 
-    def __init__(self, logger, extra, job):
+    def __init__(self, logger, job):
         self.logger = logger
-        self.extra = extra
-        self.job = job
+        self.extra = job._logger_extra
+        self.actions = job._logger_actions
 
         self.debug = functools.partial(self.log, logging.DEBUG)
         self.info = functools.partial(self.log, logging.INFO)
@@ -79,24 +79,21 @@ class LoggerAdapterEx():
     def log(self, level, msg, *args, **kwargs):
         if args:
             msg = msg % args
-            args = None
 
-        for search, action in self.job._logger_hooks:
-            match = search(msg)
-            if match:
-                if action == "wait+restart":
-                    kwargs["extra"] = self.extra
-                    self.logger._log(level, msg, args, **kwargs)
-                    input("Press Enter to continue")
-                    raise exception.RestartExtraction()
-                elif action.startswith("~"):
-                    level = logging._nameToLevel[action[1:]]
-                elif action.startswith("|"):
-                    self.job.status |= int(action[1:])
+        actions = self.actions[level]
+        if actions:
+            args = self.extra.copy()
+            args["level"] = level
+
+            for cond, action in actions:
+                if cond(msg):
+                    action(args)
+
+            level = args["level"]
 
         if self.logger.isEnabledFor(level):
             kwargs["extra"] = self.extra
-            self.logger._log(level, msg, args, **kwargs)
+            self.logger._log(level, msg, (), **kwargs)
 
 
 class PathfmtProxy():
