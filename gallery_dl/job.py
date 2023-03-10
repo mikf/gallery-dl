@@ -6,7 +6,6 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-import re
 import sys
 import errno
 import logging
@@ -33,15 +32,11 @@ class Job():
         self.kwdict = {}
         self.status = 0
 
-        hooks = extr.config("hooks")
-        if hooks:
-            if isinstance(hooks, dict):
-                hooks = hooks.items()
-            self._wrap_logger = self._wrap_logger_hooks
-            self._logger_hooks = [
-                (re.compile(pattern).search, hook)
-                for pattern, hook in hooks
-            ]
+        actions = extr.config("actions")
+        if actions:
+            from .actions import parse
+            self._logger_actions = parse(actions)
+            self._wrap_logger = self._wrap_logger_actions
 
         path_proxy = output.PathfmtProxy(self)
         self._logger_extra = {
@@ -211,11 +206,10 @@ class Job():
         return self._wrap_logger(logging.getLogger(name))
 
     def _wrap_logger(self, logger):
-        return output.LoggerAdapter(logger, self._logger_extra)
+        return output.LoggerAdapter(logger, self)
 
-    def _wrap_logger_hooks(self, logger):
-        return output.LoggerAdapterEx(
-            logger, self._logger_extra, self)
+    def _wrap_logger_actions(self, logger):
+        return output.LoggerAdapterActions(logger, self)
 
     def _write_unsupported(self, url):
         if self.ulog:
