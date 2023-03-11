@@ -296,8 +296,15 @@ class HttpDownloader(DownloaderBase):
 
     def release_conn(self, response):
         """Release connection back to pool by consuming response body"""
-        for _ in response.iter_content(self.chunk_size):
-            pass
+        try:
+            for _ in response.iter_content(self.chunk_size):
+                pass
+        except (RequestException, SSLError, OpenSSLError) as exc:
+            print()
+            self.log.debug(
+                "Unable to consume response body (%s); "
+                "closing the connection anyway", exc)
+            response.close()
 
     @staticmethod
     def receive(fp, content, bytes_total, bytes_start):
