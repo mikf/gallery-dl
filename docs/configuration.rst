@@ -3617,7 +3617,7 @@ Description
 
 
 downloader.http.consume-content
----------------------------------
+-------------------------------
 Type
     ``bool``
 Default
