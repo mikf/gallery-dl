@@ -974,6 +974,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
+    <td>YouPic</td>
+    <td>https://youpic.com</td>
+    <td>individual Images, User Profiles</td>
+    <td></td>
+</tr>
+<tr>
     <td>Zerochan</td>
     <td>https://www.zerochan.net/</td>
     <td>individual Images, Tag Searches</td>

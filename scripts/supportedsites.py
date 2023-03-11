@@ -129,6 +129,7 @@ CATEGORY_MAP = {
     "xhamster"       : "xHamster",
     "xvideos"        : "XVideos",
     "yandere"        : "yande.re",
+    "youpic"         : "YouPic",
 }
 
 SUBCATEGORY_MAP = {
