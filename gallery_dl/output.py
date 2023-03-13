@@ -270,16 +270,15 @@ else:
 
 def configure_standard_streams():
     for name in ("stdout", "stderr", "stdin"):
-        options = config.get(("output",), name)
-        if not options:
-            continue
-
         stream = getattr(sys, name, None)
         if not stream:
             continue
 
-        if isinstance(options, str):
-            options = {"encoding": options, "errors": "replace"}
+        options = config.get(("output",), name)
+        if not options:
+            options = {"errors": "replace"}
+        elif isinstance(options, str):
+            options = {"errors": "replace", "encoding": options}
         elif not options.get("errors"):
             options["errors"] = "replace"
 
