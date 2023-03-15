@@ -56,6 +56,9 @@ class GelbooruBase():
             params["tags"] = "{} id:<{}".format(self.tags, post["id"])
 
     def _pagination_html(self, params):
+        if self.cookiedomain and not self._check_cookies(self.cookienames):
+            self.log.warning("no 'user_id' or 'pass_hash' cookies set")
+
         url = self.root + "/index.php"
         params["pid"] = self.page_start * self.per_page
 
@@ -158,7 +161,10 @@ class GelbooruPoolExtractor(GelbooruBase,
 
 class GelbooruFavoriteExtractor(GelbooruBase,
                                 gelbooru_v02.GelbooruV02FavoriteExtractor):
+    """Extractor for gelbooru favorites"""
     pattern = BASE_PATTERN + r"page=favorites&s=view&id=(\d+)"
+    cookiedomain = "gelbooru.com"
+    cookienames = ("user_id", "pass_hash")
     test = ("https://gelbooru.com/index.php?page=favorites&s=view&id=12345",)
 
 
