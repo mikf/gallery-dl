@@ -22,17 +22,19 @@ class GelbooruBase():
     basecategory = "booru"
     root = "https://gelbooru.com"
 
-    def _api_request(self, params):
+    def _api_request(self, params, key="post"):
+        if "s" not in params:
+            params["s"] = "post"
         params["api_key"] = self.api_key
         params["user_id"] = self.user_id
 
-        url = self.root + "/index.php?page=dapi&s=post&q=index&json=1"
+        url = self.root + "/index.php?page=dapi&q=index&json=1"
         data = self.request(url, params=params).json()
 
-        if "post" not in data:
+        if key not in data:
             return ()
 
-        posts = data["post"]
+        posts = data[key]
         if not isinstance(posts, list):
             return (posts,)
         return posts
@@ -56,9 +58,6 @@ class GelbooruBase():
             params["tags"] = "{} id:<{}".format(self.tags, post["id"])
 
     def _pagination_html(self, params):
-        if self.cookiedomain and not self._check_cookies(self.cookienames):
-            self.log.warning("no 'user_id' or 'pass_hash' cookies set")
-
         url = self.root + "/index.php"
         params["pid"] = self.page_start * self.per_page
 
@@ -162,10 +161,35 @@ class GelbooruPoolExtractor(GelbooruBase,
 class GelbooruFavoriteExtractor(GelbooruBase,
                                 gelbooru_v02.GelbooruV02FavoriteExtractor):
     """Extractor for gelbooru favorites"""
+    per_page = 100
     pattern = BASE_PATTERN + r"page=favorites&s=view&id=(\d+)"
-    cookiedomain = "gelbooru.com"
-    cookienames = ("user_id", "pass_hash")
-    test = ("https://gelbooru.com/index.php?page=favorites&s=view&id=12345",)
+    test = ("https://gelbooru.com/index.php?page=favorites&s=view&id=279415", {
+        "count": 3,
+    })
+
+    def posts(self):
+        # get number of favorites
+        params = {
+            "s"    : "favorite",
+            "id"   : self.favorite_id,
+            "limit": "1"
+        }
+        count = self._api_request(params, "@attributes")[0]["count"]
+
+        # paginate over them in reverse
+        params["pid"] = count // self.per_page
+        params["limit"] = self.per_page
+
+        while True:
+            favs = self._api_request(params, "favorite")
+
+            favs.reverse()
+            for fav in favs:
+                yield from self._api_request({"id": fav["favorite"]})
+
+            params["pid"] -= 1
+            if params["pid"] < 0:
+                return
 
 
 class GelbooruPostExtractor(GelbooruBase,
