@@ -120,7 +120,7 @@ def main():
         # eval globals
         path = config.get((), "globals")
         if path:
-            util.GLOBALS = util.import_file(path).__dict__
+            util.GLOBALS.update(util.import_file(path).__dict__)
 
         # loglevels
         output.configure_logging(args.loglevel)
