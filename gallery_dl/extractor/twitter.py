@@ -993,6 +993,9 @@ class TwitterAPI():
 
         auth_token = cookies.get("auth_token", domain=cookiedomain)
 
+        if not auth_token:
+            self.user_media = self.user_media_legacy
+
         self.headers = {
             "Accept": "*/*",
             "authorization": "Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejR"
@@ -1138,6 +1141,26 @@ class TwitterAPI():
             "withV2Timeline": True,
         }
         return self._pagination_tweets(endpoint, variables)
+
+    def user_media_legacy(self, screen_name):
+        endpoint = "/graphql/nRybED9kRbN-TOWioHq1ng/UserMedia"
+        variables = {
+            "userId": self._user_id_by_screen_name(screen_name),
+            "count": 100,
+            "includePromotedContent": False,
+            "withSuperFollowsUserFields": True,
+            "withBirdwatchPivots": False,
+            "withSuperFollowsTweetFields": True,
+            "withClientEventToken": False,
+            "withBirdwatchNotes": False,
+            "withVoice": True,
+            "withV2Timeline": False,
+            "__fs_interactive_text": False,
+            "__fs_dont_mention_me_view_api_enabled": False,
+        }
+        return self._pagination_tweets(
+            endpoint, variables, ("user", "result", "timeline", "timeline"),
+            features=False)
 
     def user_likes(self, screen_name):
         endpoint = "/graphql/XbHBYpgURwtklXj8NNxTDw/Likes"
@@ -1413,15 +1436,18 @@ class TwitterAPI():
             params["cursor"] = cursor
 
     def _pagination_tweets(self, endpoint, variables,
-                           path=None, stop_tweets=True):
+                           path=None, stop_tweets=True, features=True):
         extr = self.extractor
         variables.update(self.variables)
         original_retweets = (extr.retweets == "original")
         pinned_tweet = extr.pinned
 
+        params = {"variables": None}
+        if features:
+            params["features"] = self._json_dumps(self.features_pagination)
+
         while True:
-            params = {"variables": self._json_dumps(variables),
-                      "features" : self._json_dumps(self.features_pagination)}
+            params["variables"] = self._json_dumps(variables)
             data = self._call(endpoint, params)["data"]
 
             try:
@@ -1564,11 +1590,12 @@ class TwitterAPI():
 
     def _pagination_users(self, endpoint, variables, path=None):
         variables.update(self.variables)
+        params = {"variables": None,
+                  "features" : self._json_dumps(self.features_pagination)}
 
         while True:
             cursor = entry = stop = None
-            params = {"variables": self._json_dumps(variables),
-                      "features" : self._json_dumps(self.features_pagination)}
+            params["variables"] = self._json_dumps(variables)
             data = self._call(endpoint, params)["data"]
 
             try:
