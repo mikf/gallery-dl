@@ -248,11 +248,15 @@ class TwitterExtractor(Extractor):
             author = tweet["user"]
         author = self._transform_user(author)
 
+        if "note_tweet" in tweet:
+            note = tweet["note_tweet"]["note_tweet_results"]["result"]
+        else:
+            note = None
+
         if "legacy" in tweet:
             tweet = tweet["legacy"]
 
         tget = tweet.get
-        entities = tweet["entities"]
         tdata = {
             "tweet_id"      : text.parse_int(tweet["id_str"]),
             "retweet_id"    : text.parse_int(
@@ -272,6 +276,8 @@ class TwitterExtractor(Extractor):
             "retweet_count" : tget("retweet_count"),
         }
 
+        entities = note["entity_set"] if note else tweet["entities"]
+
         hashtags = entities.get("hashtags")
         if hashtags:
             tdata["hashtags"] = [t["text"] for t in hashtags]
@@ -284,7 +290,8 @@ class TwitterExtractor(Extractor):
                 "nick": u["name"],
             } for u in mentions]
 
-        content = text.unescape(tget("full_text") or tget("text") or "")
+        content = text.unescape(
+            note["text"] if note else tget("full_text") or tget("text") or "")
         urls = entities.get("urls")
         if urls:
             for url in urls:
@@ -802,6 +809,23 @@ class TwitterTweetExtractor(TwitterExtractor):
             "pattern": r"https://pbs.twimg.com/card_img/157\d+/[\w-]+"
                        r"\?format=(jpg|png)&name=orig$",
             "range": "1-2",
+        }),
+        # note tweet with long 'content'
+        ("https://twitter.com/i/web/status/1629193457112686592", {
+            "keyword": {
+                "content": """\
+BREAKING - DEADLY LIES: Independent researchers at Texas A&M University have \
+just contradicted federal government regulators, saying that toxic air \
+pollutants in East Palestine, Ohio, could pose long-term risks. \n\nThe \
+Washington Post writes, "Three weeks after the toxic train derailment in \
+Ohio, an analysis of Environmental Protection Agency data has found nine air \
+pollutants at levels that could raise long-term health concerns in and around \
+East Palestine, according to an independent analysis. \n\n\"The analysis by \
+Texas A&M University seems to contradict statements by state and federal \
+regulators that air near the crash site is completely safe, despite residents \
+complaining about rashes, breathing problems and other health effects." \
+Your reaction.""",
+            },
         }),
     )
 
