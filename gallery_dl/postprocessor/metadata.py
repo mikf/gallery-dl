@@ -87,6 +87,7 @@ class MetadataPP(PostProcessor):
         self.omode = options.get("open", omode)
         self.encoding = options.get("encoding", "utf-8")
         self.private = options.get("private", False)
+        self.skip = options.get("skip", False)
 
     def run(self, pathfmt):
         archive = self.archive
@@ -95,6 +96,9 @@ class MetadataPP(PostProcessor):
 
         directory = self._directory(pathfmt)
         path = directory + self._filename(pathfmt)
+
+        if self.skip and os.path.exists(path):
+            return
 
         try:
             with open(path, self.omode, encoding=self.encoding) as fp:
