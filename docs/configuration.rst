@@ -4411,6 +4411,16 @@ Description
     i.e. fields whose name starts with an underscore.
 
 
+metadata.skip
+-------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Do not overwrite already existing files.
+
+
 metadata.archive
 ----------------
 Type

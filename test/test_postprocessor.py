@@ -428,10 +428,45 @@ class MetadataTest(BasePostprocessorTest):
         self.assertNotIn("baz", pdict["bar"])
         self.assertEqual(kwdict["bar"], pdict["bar"])
 
+        # no errors for deleted/undefined fields
         self._trigger()
         self.assertNotIn("foo", pdict)
         self.assertNotIn("baz", pdict["bar"])
         self.assertEqual(kwdict["bar"], pdict["bar"])
+
+    def test_metadata_option_skip(self):
+        self._create({"skip": True})
+
+        with patch("builtins.open", mock_open()) as m, \
+                patch("os.path.exists") as e:
+            e.return_value = True
+            self._trigger()
+
+        self.assertTrue(e.called)
+        self.assertTrue(not m.called)
+        self.assertTrue(not len(self._output(m)))
+
+        with patch("builtins.open", mock_open()) as m, \
+                patch("os.path.exists") as e:
+            e.return_value = False
+            self._trigger()
+
+        self.assertTrue(e.called)
+        self.assertTrue(m.called)
+        self.assertGreater(len(self._output(m)), 0)
+
+        path = self.pathfmt.realdirectory + "file.ext.json"
+        m.assert_called_once_with(path, "w", encoding="utf-8")
+
+    def test_metadata_option_skip_false(self):
+        self._create({"skip": False})
+
+        with patch("builtins.open", mock_open()) as m, \
+                patch("os.path.exists") as e:
+            self._trigger()
+
+        self.assertTrue(not e.called)
+        self.assertTrue(m.called)
 
     @staticmethod
     def _output(mock):
