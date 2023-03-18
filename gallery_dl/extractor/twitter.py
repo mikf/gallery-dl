@@ -13,6 +13,7 @@ from .. import text, util, exception
 from ..cache import cache
 import itertools
 import json
+import re
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.|mobile\.)?(?:[fv]x)?twitter\.com"
 
@@ -73,6 +74,10 @@ class TwitterExtractor(Extractor):
             seen_tweets = set()
         else:
             seen_tweets = None
+
+        if self.twitpic:
+            self._find_twitpic = re.compile(
+                r"https?://(twitpic\.com/\w+)").finditer
 
         for tweet in self.tweets():
 
@@ -226,12 +231,27 @@ class TwitterExtractor(Extractor):
             files.append({"url": url})
 
     def _extract_twitpic(self, tweet, files):
-        for url in tweet["entities"].get("urls", ()):
+        # collect urls
+        urls = []
+        for url in tweet["entities"].get("urls") or ():
             url = url["expanded_url"]
             if "//twitpic.com/" not in url or "/photos/" in url:
                 continue
             if url.startswith("http:"):
                 url = "https" + url[4:]
+            urls.append(url)
+        tget = tweet.get
+        for match in self._find_twitpic(
+                tget("full_text") or tget("text") or ""):
+            urls.append(text.ensure_http_scheme(match.group(1)))
+
+        # extract actual urls
+        seen = set()
+        for url in urls:
+            if url in seen:
+                self.log.debug("Skipping %s (previously seen)", url)
+                continue
+            seen.add(url)
             response = self.request(url, fatal=False)
             if response.status_code >= 400:
                 continue
@@ -724,7 +744,13 @@ class TwitterTweetExtractor(TwitterExtractor):
         ("https://twitter.com/i/web/status/112900228289540096", {
             "options": (("twitpic", True), ("cards", False)),
             "pattern": r"https://\w+.cloudfront.net/photos/large/\d+.jpg",
-            "count": 3,
+            "count": 2,  # 1 duplicate
+        }),
+        # TwitPic URL not in 'urls' (#3792)
+        ("https://twitter.com/shimoigusaP/status/8138669971", {
+            "options": (("twitpic", True),),
+            "pattern": r"https://\w+.cloudfront.net/photos/large/\d+.png",
+            "count": 1,
         }),
         # Twitter card (#1005)
         ("https://twitter.com/billboard/status/1306599586602135555", {
