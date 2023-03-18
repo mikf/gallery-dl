@@ -255,6 +255,8 @@ class TwitterExtractor(Extractor):
         entities = tweet["entities"]
         tdata = {
             "tweet_id"      : text.parse_int(tweet["id_str"]),
+            "conversation_id": text.parse_int(
+                tget("conversation_id_str")),
             "retweet_id"    : text.parse_int(
                 tget("retweeted_status_id_str")),
             "quote_id"      : text.parse_int(
@@ -272,6 +274,13 @@ class TwitterExtractor(Extractor):
             "retweet_count" : tget("retweet_count"),
         }
 
+        source = tget("source")
+        if source:
+            client = text.extr(source, '">', "<")
+            if client:
+                tdata["client"] = client
+
+        # there is also a "symbols" field whose function is unknown
         hashtags = entities.get("hashtags")
         if hashtags:
             tdata["hashtags"] = [t["text"] for t in hashtags]
@@ -285,10 +294,17 @@ class TwitterExtractor(Extractor):
             } for u in mentions]
 
         content = text.unescape(tget("full_text") or tget("text") or "")
+
         urls = entities.get("urls")
         if urls:
+            tdata["urls"] = []
             for url in urls:
+                tdata["urls"].append({
+                    "url": url["expanded_url"],
+                    "short_url": url["url"],
+                })
                 content = content.replace(url["url"], url["expanded_url"])
+
         txt, _, tco = content.rpartition(" ")
         tdata["content"] = txt if tco.startswith("https://t.co/") else content
 
@@ -306,6 +322,8 @@ class TwitterExtractor(Extractor):
             return self._user_cache[uid]
         except KeyError:
             pass
+
+        professional = user.get("professional")
 
         if "legacy" in user:
             user = user["legacy"]
@@ -335,16 +353,38 @@ class TwitterExtractor(Extractor):
             "statuses_count"  : uget("statuses_count"),
         }
 
-        descr = user["description"]
-        urls = entities["description"].get("urls")
-        if urls:
-            for url in urls:
-                descr = descr.replace(url["url"], url["expanded_url"])
-        udata["description"] = descr
+        pinned = uget("pinned_tweet_ids_str")
+        if pinned:
+            udata["pinned_tweet_ids"] = [text.parse_int(id) for id in pinned]
+
+        if professional:
+            udata["professional_type"] = professional["professional_type"]
+            if professional["category"]:
+                udata["professional_categories"] = [
+                    c["name"] for c in professional["category"]]
 
         if "url" in entities:
-            url = entities["url"]["urls"][0]
-            udata["url"] = url.get("expanded_url") or url.get("url")
+            urls = [{
+                "url": u.get("expanded_url"),
+                "short_url": u.get("url"),
+            } for u in entities["url"]["urls"]]
+            udata["url"] = urls[0]["url"] or urls[0]["short_url"]
+        else:
+            urls = []
+
+        descr = user["description"]
+
+        urls_in_descr = entities["description"].get("urls", ())
+        for url in urls_in_descr:
+            urls.append({
+                "url": url["expanded_url"],
+                "short_url": url["url"],
+            })
+            descr = descr.replace(url["url"], url["expanded_url"])
+        if urls:
+            udata["urls"] = urls
+
+        udata["description"] = descr
 
         return udata
 
