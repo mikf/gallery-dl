@@ -272,9 +272,10 @@ Starting a format string with '\f<Type> ' allows to set a different format strin
 </tr>
 <tr>
     <td align="center"><code>M</code></td>
-    <td> Name of a Python module followed by one of its functions.
-     This function gets called with the current metadata dict as
-     argument and should return a string.</td>
+    <td>Path or name of a Python module
+        followed by the name of one of its functions.
+        This function gets called with the current metadata dict as
+        argument and should return a string.</td>
     <td><code>\fM my_module:generate_text</code></td>
 </tr>
 </tbody>
