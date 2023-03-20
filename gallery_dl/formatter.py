@@ -34,6 +34,8 @@ def parse(format_string, default=NONE, fmt=format):
 
         if kind == "T":
             cls = TemplateFormatter
+        elif kind == "TF":
+            cls = TemplateFStringFormatter
         elif kind == "E":
             cls = ExpressionFormatter
         elif kind == "M":
@@ -197,15 +199,6 @@ class StringFormatter():
             return lambda obj: fmt(conversion(obj))
 
 
-class TemplateFormatter(StringFormatter):
-    """Read format_string from file"""
-
-    def __init__(self, path, default=NONE, fmt=format):
-        with open(util.expand_path(path)) as fp:
-            format_string = fp.read()
-        StringFormatter.__init__(self, format_string, default, fmt)
-
-
 class ExpressionFormatter():
     """Generate text by evaluating a Python expression"""
 
@@ -227,6 +220,24 @@ class FStringFormatter():
 
     def __init__(self, fstring, default=NONE, fmt=None):
         self.format_map = util.compile_expression('f"""' + fstring + '"""')
+
+
+class TemplateFormatter(StringFormatter):
+    """Read format_string from file"""
+
+    def __init__(self, path, default=NONE, fmt=format):
+        with open(util.expand_path(path)) as fp:
+            format_string = fp.read()
+        StringFormatter.__init__(self, format_string, default, fmt)
+
+
+class TemplateFStringFormatter(FStringFormatter):
+    """Read f-string from file"""
+
+    def __init__(self, path, default=NONE, fmt=format):
+        with open(util.expand_path(path)) as fp:
+            format_string = fp.read()
+        FStringFormatter.__init__(self, format_string, default, fmt)
 
 
 def parse_field_name(field_name):
