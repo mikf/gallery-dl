@@ -348,6 +348,27 @@ class TestFormatter(unittest.TestCase):
         self._run_test("\fF foo-'\"{a.upper()}\"'-bar",
                        """foo-'"{}"'-bar""".format(self.kwdict["a"].upper()))
 
+    @unittest.skipIf(sys.hexversion < 0x3060000, "no fstring support")
+    def test_template_fstring(self):
+        with tempfile.TemporaryDirectory() as tmpdirname:
+            path1 = os.path.join(tmpdirname, "tpl1")
+            path2 = os.path.join(tmpdirname, "tpl2")
+
+            with open(path1, "w") as fp:
+                fp.write("{a}")
+            fmt1 = formatter.parse("\fTF " + path1)
+
+            with open(path2, "w") as fp:
+                fp.write("foo-'\"{a.upper()}\"'-bar")
+            fmt2 = formatter.parse("\fTF " + path2)
+
+        self.assertEqual(fmt1.format_map(self.kwdict), self.kwdict["a"])
+        self.assertEqual(fmt2.format_map(self.kwdict),
+                         """foo-'"{}"'-bar""".format(self.kwdict["a"].upper()))
+
+        with self.assertRaises(OSError):
+            formatter.parse("\fTF /")
+
     def test_module(self):
         with tempfile.TemporaryDirectory() as tmpdirname:
             path = os.path.join(tmpdirname, "testmod.py")
