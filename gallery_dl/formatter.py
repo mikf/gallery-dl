@@ -218,7 +218,7 @@ class ModuleFormatter():
 
     def __init__(self, function_spec, default=NONE, fmt=None):
         module_name, _, function_name = function_spec.partition(":")
-        module = __import__(module_name)
+        module = util.import_file(module_name)
         self.format_map = getattr(module, function_name)
 
 

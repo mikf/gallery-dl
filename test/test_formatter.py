@@ -374,7 +374,7 @@ def noarg():
             try:
                 fmt1 = formatter.parse("\fM testmod:gentext")
                 fmt2 = formatter.parse("\fM testmod:lengths")
-                fmt3 = formatter.parse("\fM testmod:noarg")
+                fmt0 = formatter.parse("\fM testmod:noarg")
 
                 with self.assertRaises(AttributeError):
                     formatter.parse("\fM testmod:missing")
@@ -383,11 +383,17 @@ def noarg():
             finally:
                 sys.path.pop(0)
 
+            fmt3 = formatter.parse("\fM " + path + ":gentext")
+            fmt4 = formatter.parse("\fM " + path + ":lengths")
+
         self.assertEqual(fmt1.format_map(self.kwdict), "'Title' by Name")
         self.assertEqual(fmt2.format_map(self.kwdict), "89")
 
+        self.assertEqual(fmt3.format_map(self.kwdict), "'Title' by Name")
+        self.assertEqual(fmt4.format_map(self.kwdict), "89")
+
         with self.assertRaises(TypeError):
-            self.assertEqual(fmt3.format_map(self.kwdict), "")
+            self.assertEqual(fmt0.format_map(self.kwdict), "")
 
     def _run_test(self, format_string, result, default=None, fmt=format):
         fmt = formatter.parse(format_string, default, fmt)
