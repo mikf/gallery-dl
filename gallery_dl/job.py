@@ -639,7 +639,7 @@ class KeywordJob(Job):
         if markers is None:
             markers = {markerid}
         elif markerid in markers:
-            write("{}\n  <circular reference>\n".format(prefix[:-1]))
+            write("{}\n  <circular reference>\n".format(prefix[:-2]))
             return  # ignore circular reference
         else:
             markers.add(markerid)
@@ -666,6 +666,8 @@ class KeywordJob(Job):
             else:
                 # string or number
                 write("{}\n  {}\n".format(key, value))
+
+        markers.remove(markerid)
 
 
 class UrlJob(Job):
