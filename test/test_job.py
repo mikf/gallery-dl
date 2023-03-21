@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright 2021 Mike Fährmann
+# Copyright 2021-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -91,9 +91,9 @@ tags[N]
   0 foo
   1 bar
   2 テスト
-user[id]
+user['id']
   123
-user[name]
+user['name']
   test
 """)
 

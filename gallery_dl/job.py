@@ -633,7 +633,7 @@ class KeywordJob(Job):
     def print_kwdict(self, kwdict, prefix="", markers=None):
         """Print key-value pairs in 'kwdict' with formatting"""
         write = sys.stdout.write
-        suffix = "]" if prefix else ""
+        suffix = "']" if prefix else ""
 
         markerid = id(kwdict)
         if markers is None:
@@ -650,13 +650,13 @@ class KeywordJob(Job):
             key = prefix + key + suffix
 
             if isinstance(value, dict):
-                self.print_kwdict(value, key + "[", markers)
+                self.print_kwdict(value, key + "['", markers)
 
             elif isinstance(value, list):
                 if not value:
                     pass
                 elif isinstance(value[0], dict):
-                    self.print_kwdict(value[0], key + "[N][", markers)
+                    self.print_kwdict(value[0], key + "[N]['", markers)
                 else:
                     fmt = ("  {:>%s} {}\n" % len(str(len(value)))).format
                     write(key + "[N]\n")
