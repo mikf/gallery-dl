@@ -256,6 +256,8 @@ def parse_field_name(field_name):
             try:
                 if ":" in key:
                     key = _slice(key)
+                else:
+                    key = key.strip("\"'")
             except TypeError:
                 pass  # key is an integer
 
