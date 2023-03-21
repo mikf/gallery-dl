@@ -69,9 +69,9 @@ Standalone Executable
 Prebuilt executable files with a Python interpreter and
 required Python packages included are available for
 
-- `Windows <https://github.com/mikf/gallery-dl/releases/download/v1.24.5/gallery-dl.exe>`__
+- `Windows <https://github.com/mikf/gallery-dl/releases/download/v1.25.0/gallery-dl.exe>`__
   (Requires `Microsoft Visual C++ Redistributable Package (x86) <https://aka.ms/vs/17/release/vc_redist.x86.exe>`__)
-- `Linux   <https://github.com/mikf/gallery-dl/releases/download/v1.24.5/gallery-dl.bin>`__
+- `Linux   <https://github.com/mikf/gallery-dl/releases/download/v1.25.0/gallery-dl.bin>`__
 
 
 Nightly Builds
@@ -285,7 +285,8 @@ This can be done via the
 option in your configuration file by specifying
 
 - | the path to a Mozilla/Netscape format cookies.txt file exported by a browser addon
-  | (e.g. `Export Cookies <https://addons.mozilla.org/en-US/firefox/addon/export-cookies-txt/>`__ for Firefox)
+  | (e.g. `Get cookies.txt LOCALLY <https://chrome.google.com/webstore/detail/get-cookiestxt-locally/cclelndahbckbenkjhflpdbgdldlbecc>`__ for Chrome,
+    `Export Cookies <https://addons.mozilla.org/en-US/firefox/addon/export-cookies-txt/>`__ for Firefox)
 
 - | a list of name-value pairs gathered from your browser's web developer tools
   | (in `Chrome <https://developers.google.com/web/tools/chrome-devtools/storage/cookies>`__,

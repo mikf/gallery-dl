@@ -309,7 +309,7 @@ Consider all sites to be NSFW unless otherwise known.
 </tr>
 <tr>
     <td>Hiperdex</td>
-    <td>https://1sthiperdex.com/</td>
+    <td>https://hiperdex.com/</td>
     <td>Artists, Chapters, Manga</td>
     <td></td>
 </tr>
@@ -1176,12 +1176,6 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>Nitter.lacontrevoie.fr</td>
     <td>https://nitter.lacontrevoie.fr/</td>
-    <td>Media Files, Replies, Search Results, Tweets</td>
-    <td></td>
-</tr>
-<tr>
-    <td>Nitter.pussthecat.org</td>
-    <td>https://nitter.pussthecat.org/</td>
     <td>Media Files, Replies, Search Results, Tweets</td>
     <td></td>
 </tr>
