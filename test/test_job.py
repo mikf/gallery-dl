@@ -66,17 +66,36 @@ class TestKeywordJob(TestJob):
     jobclass = job.KeywordJob
 
     def test_default(self):
-        extr = TestExtractor.from_url("test:")
+        self.maxDiff = None
+        extr = TestExtractor.from_url("test:self")
         self.assertEqual(self._capture_stdout(extr), """\
 Keywords for directory names:
 -----------------------------
+author['id']
+  123
+author['name']
+  test
+author['self']
+  <circular reference>
 category
   test_category
 subcategory
   test_subcategory
+user['id']
+  123
+user['name']
+  test
+user['self']
+  <circular reference>
 
 Keywords for filenames and --filter:
 ------------------------------------
+author['id']
+  123
+author['name']
+  test
+author['self']
+  <circular reference>
 category
   test_category
 extension
@@ -95,6 +114,8 @@ user['id']
   123
 user['name']
   test
+user['self']
+  <circular reference>
 """)
 
 
@@ -209,6 +230,7 @@ class TestDataJob(TestJob):
     def test_default(self):
         extr = TestExtractor.from_url("test:")
         tjob = self.jobclass(extr, file=io.StringIO())
+        user = {"id": 123, "name": "test"}
 
         tjob.run()
 
@@ -216,6 +238,8 @@ class TestDataJob(TestJob):
             (Message.Directory, {
                 "category"   : "test_category",
                 "subcategory": "test_subcategory",
+                "user"       : user,
+                "author"     : user,
             }),
             (Message.Url, "https://example.org/1.jpg", {
                 "category"   : "test_category",
@@ -224,7 +248,8 @@ class TestDataJob(TestJob):
                 "extension"  : "jpg",
                 "num"        : 1,
                 "tags"       : ["foo", "bar", "テスト"],
-                "user"       : {"id": 123, "name": "test"},
+                "user"       : user,
+                "author"     : user,
             }),
             (Message.Url, "https://example.org/2.jpg", {
                 "category"   : "test_category",
@@ -233,7 +258,8 @@ class TestDataJob(TestJob):
                 "extension"  : "jpg",
                 "num"        : 2,
                 "tags"       : ["foo", "bar", "テスト"],
-                "user"       : {"id": 123, "name": "test"},
+                "user"       : user,
+                "author"     : user,
             }),
             (Message.Url, "https://example.org/3.jpg", {
                 "category"   : "test_category",
@@ -242,7 +268,8 @@ class TestDataJob(TestJob):
                 "extension"  : "jpg",
                 "num"        : 3,
                 "tags"       : ["foo", "bar", "テスト"],
-                "user"       : {"id": 123, "name": "test"},
+                "user"       : user,
+                "author"     : user,
             }),
         ])
 
@@ -316,7 +343,7 @@ class TestDataJob(TestJob):
         config.set(("output",), "num-to-str", True)
         with patch("gallery_dl.util.number_to_string") as nts:
             tjob.run()
-        self.assertEqual(len(nts.call_args_list), 52)
+        self.assertEqual(len(nts.call_args_list), 72)
 
         tjob.run()
         self.assertEqual(tjob.data[-1][0], Message.Url)
@@ -328,18 +355,30 @@ class TestExtractor(Extractor):
     subcategory = "test_subcategory"
     directory_fmt = ("{category}",)
     filename_fmt = "test_{filename}.{extension}"
-    pattern = r"test:(child)?$"
+    pattern = r"test:(child|self)?$"
+
+    def __init__(self, match):
+        Extractor.__init__(self, match)
+        self.user = {"id": 123, "name": "test"}
+        if match.group(1) == "self":
+            self.user["self"] = self.user
 
     def items(self):
         root = "https://example.org"
+        user = self.user
 
-        yield Message.Directory, {}
+        yield Message.Directory, {
+            "user": user,
+            "author": user,
+        }
+
         for i in range(1, 4):
             url = "{}/{}.jpg".format(root, i)
             yield Message.Url, url, text.nameext_from_url(url, {
                 "num" : i,
                 "tags": ["foo", "bar", "テスト"],
-                "user": {"id": 123, "name": "test"},
+                "user": user,
+                "author": user,
                 "_fallback": ("{}/alt/{}.jpg".format(root, i),),
             })
 
