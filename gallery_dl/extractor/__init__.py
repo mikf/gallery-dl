@@ -183,6 +183,7 @@ modules = [
     "test",
     "ytdl",
     "generic",
+    "miyoushe",
 ]
 
 
