@@ -67,3 +67,5 @@ target/
 
 /*.snap
 /*_source.tar.bz2
+
+/.vscode
