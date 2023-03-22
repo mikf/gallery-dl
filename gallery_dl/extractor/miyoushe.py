@@ -12,9 +12,11 @@ import re
 
 from .common import Extractor, Message
 from .. import text, exception
-from ..cache import cache
 
-BASE_PATTERN = r"(?:https?://)?(?:www\.|bbs\.)?(?:miyoushe|mihoyo)\.com/([^/?#]+)/"
+
+BASE_PATTERN = r"(?:https?://)?(?:www\.|bbs\.)?\
+    (?:miyoushe|mihoyo)\.com/([^/?#]+)/"
+
 
 class MiyousheExtractor(Extractor):
     """Base class for miyoushe extractors"""
@@ -30,7 +32,6 @@ class MiyousheExtractor(Extractor):
         self.max_posts = self.config("max-posts", 0)
         self.api = MiyousheWebAPI(self)
 
-
     def items(self):
         self._prepare_ddosguard_cookies()
 
@@ -43,7 +44,8 @@ class MiyousheExtractor(Extractor):
             data = {
                 "id": post["post"]["post_id"],
                 # image_list.len = vod_list.len(video cover) + post.images.len
-                "media_number": len(post['vod_list']) + len(post['post']['images']),
+                "media_number":
+                    len(post['vod_list']) + len(post['post']['images']),
                 "num": -1,
                 "game_id": post["post"]["game_id"],
                 "forum_id": post["post"]["f_forum_id"],
@@ -56,8 +58,10 @@ class MiyousheExtractor(Extractor):
                 "title": post["post"]["subject"],
                 "content": post["post"]["content"],
                 "stat": post["stat"],
-                "create_date": text.parse_timestamp(post["post"]["created_at"]),
-                "last_modify_time": text.parse_timestamp(post["last_modify_time"]),
+                "create_date":
+                    text.parse_timestamp(post["post"]["created_at"]),
+                "last_modify_time":
+                    text.parse_timestamp(post["last_modify_time"]),
             }
             for topic in post["topics"]:
                 data["topics"].append(topic["name"])
@@ -66,22 +70,26 @@ class MiyousheExtractor(Extractor):
             yield Message.Directory, data
             self.log.debug("id: " + data["id"])
 
-            if not post["vod_list"]: # only picture
+            if not post["vod_list"]:  # only picture
                 for data['num'], imgUrl in enumerate(post["post"]["images"]):
-                    yield Message.Url, imgUrl, text.nameext_from_url(imgUrl, data)
-            else: # video and picture
+                    yield Message.Url, imgUrl, text.nameext_from_url(
+                        imgUrl, data)
+            else:  # video and picture
                 content = json.loads(post['post']['structured_content'])
                 for c in content:
                     mediaUrl = self._get_url_from_insert(c["insert"], post)
                     if mediaUrl:
                         data['num'] = data['num'] + 1
-                        yield Message.Url, mediaUrl, text.nameext_from_url(mediaUrl, data)
+                        yield Message.Url, mediaUrl, text.nameext_from_url(
+                            mediaUrl, data)
 
             if (data['num'] != data['media_number'] - 1):
-                self.log.warning("The number of files does not appear to be correct", data['id'])
+                self.log.warning(
+                    "The number of files does not appear to be correct",
+                    data['id'])
 
     def _get_url_from_insert(self, insert, post):
-        if isinstance(insert, dict) == False:
+        if isinstance(insert, dict) is False:
             return None
 
         if "image" in insert:
@@ -96,7 +104,7 @@ class MiyousheExtractor(Extractor):
             for v in post['vod_list']:
                 if v['id'] == vod_id:
                     return v['resolutions'][-1]['url']
-        else: # link_card, divider
+        else:  # link_card, divider
             return None
 
     def posts(self):
@@ -105,6 +113,7 @@ class MiyousheExtractor(Extractor):
     def metadata(self):
         """Collect metadata for extractor job"""
         return {}
+
 
 class MiyousheArticleExtractor(MiyousheExtractor):
     """Extractor for a single miyoushe article"""
@@ -115,9 +124,9 @@ class MiyousheArticleExtractor(MiyousheExtractor):
         ("https://www.miyoushe.com/ys/article/36907872", {}),
         # only video
         ("https://bbs.mihoyo.com/ys/article/36611810", {}),
-        # video and picture
+        # mix media
         ("https://www.miyoushe.com/ys/article/14221110", {}),
-        # multi video
+        # mix media
         ("https://www.miyoushe.com/ys/article/25417490", {}),
         # image id
         ("https://www.miyoushe.com/ys/article/27741796", {}),
@@ -130,19 +139,24 @@ class MiyousheArticleExtractor(MiyousheExtractor):
     def posts(self):
         return (self.api.get_post_full(self.article_id),)
 
+
 class MiyousheFavouriteExtractor(MiyousheExtractor):
     """Extractor for all favorites of a miyoushe-user"""
     subcategory = "favourite"
     pattern = BASE_PATTERN + r"accountCenter/bookList\?id=([^/?#]+)"
     test = (
-        ("https://www.miyoushe.com/ys/accountCenter/bookList?id=82229637",{})
+        ("https://www.miyoushe.com/ys/accountCenter/bookList?id=82229637", {
+            "options": (("max-posts", 25),),
+        })
     )
+
     def __init__(self, match):
         MiyousheExtractor.__init__(self, match)
         self.uid = match.group(2)
 
     def posts(self):
         return self.api.user_favourite_post(uid=self.uid)
+
 
 class MiyousheWebAPI:
 
@@ -155,11 +169,9 @@ class MiyousheWebAPI:
     def get_post_full(self, post_id):
         return self._call("/getPostFull", {
             "post_id": post_id,
-            # "gids": 2,
-            # "read": 1
         })['post']
 
-    def user_favourite_post(self, uid = None, offset = None):
+    def user_favourite_post(self, uid=None, offset=None):
         params = {}
         if uid:
             params["uid"] = uid
@@ -167,7 +179,7 @@ class MiyousheWebAPI:
             params["offset"] = offset
         return self._pagination("/userFavouritePost", params, "list")
 
-    def _call(self, endpoint, params = None):
+    def _call(self, endpoint, params=None):
         url = "https://bbs-api.miyoushe.com/post/wapi" + endpoint
 
         response = self.extractor.request(url, params=params)
@@ -176,7 +188,8 @@ class MiyousheWebAPI:
         if data['message'] == "OK":
             return data["data"]
         else:
-            raise exception.StopExtraction("API request failed: %s", data['message'])
+            raise exception.StopExtraction("API request failed: %s",
+                                           data['message'])
 
     def _pagination(self, endpoint, params, key="list"):
         while True:
