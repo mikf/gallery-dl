@@ -649,6 +649,21 @@ class TwitterSearchExtractor(TwitterExtractor):
         return self.api.search_adaptive(query)
 
 
+class TwitterHashtagExtractor(TwitterExtractor):
+    """Extractor for Twitter hashtags"""
+    subcategory = "hashtag"
+    pattern = BASE_PATTERN + r"/hashtag/([^/?#]+)"
+    test = ("https://twitter.com/hashtag/nature", {
+        "pattern": TwitterSearchExtractor.pattern,
+        "url": "3571c3a53b7647ea35517041fdc17f77ec5b2cb9",
+    })
+
+    def items(self):
+        url = "{}/search?q=%23{}".format(self.root, self.user)
+        data = {"_extractor": TwitterSearchExtractor}
+        yield Message.Queue, url, data
+
+
 class TwitterEventExtractor(TwitterExtractor):
     """Extractor for Tweets from a Twitter Event"""
     subcategory = "event"
