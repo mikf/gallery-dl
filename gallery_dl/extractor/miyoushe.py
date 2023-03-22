@@ -14,8 +14,8 @@ from .common import Extractor, Message
 from .. import text, exception
 
 
-BASE_PATTERN = r"(?:https?://)?(?:www\.|bbs\.)?\
-    (?:miyoushe|mihoyo)\.com/([^/?#]+)/"
+BASE_PATTERN = (r"(?:https?://)?(?:www\.|bbs\.)?"
+                r"(?:miyoushe|mihoyo)\.com/([^/?#]+)/")
 
 
 class MiyousheExtractor(Extractor):
