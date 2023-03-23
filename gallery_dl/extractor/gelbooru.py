@@ -173,23 +173,39 @@ class GelbooruFavoriteExtractor(GelbooruBase,
         "count": 3,
     })
 
+    skip = GelbooruBase._skip_offset
+
     def posts(self):
         # get number of favorites
         params = {
             "s"    : "favorite",
             "id"   : self.favorite_id,
-            "limit": "1"
+            "limit": "1",
         }
         count = self._api_request(params, "@attributes")[0]["count"]
 
+        if count <= self.offset:
+            return
+        pnum, last = divmod(count + 1, self.per_page)
+
+        if self.offset >= last:
+            self.offset -= last
+            diff, self.offset = divmod(self.offset, self.per_page)
+            pnum -= diff + 1
+        skip = self.offset
+
         # paginate over them in reverse
-        params["pid"] = count // self.per_page
+        params["pid"] = pnum
         params["limit"] = self.per_page
 
         while True:
             favs = self._api_request(params, "favorite")
 
             favs.reverse()
+            if skip:
+                favs = favs[skip:]
+                skip = 0
+
             for fav in favs:
                 yield from self._api_request({"id": fav["favorite"]})
 
