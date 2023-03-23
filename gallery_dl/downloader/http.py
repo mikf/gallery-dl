@@ -182,7 +182,11 @@ class HttpDownloader(DownloaderBase):
             # check for invalid responses
             validate = kwdict.get("_http_validate")
             if validate and self.validate:
-                result = validate(response)
+                try:
+                    result = validate(response)
+                except Exception:
+                    self.release_conn(response)
+                    raise
                 if isinstance(result, str):
                     url = result
                     tries -= 1
