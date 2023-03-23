@@ -21,6 +21,7 @@ class GelbooruBase():
     category = "gelbooru"
     basecategory = "booru"
     root = "https://gelbooru.com"
+    offset = 0
 
     def _api_request(self, params, key="post"):
         if "s" not in params:
@@ -59,7 +60,7 @@ class GelbooruBase():
 
     def _pagination_html(self, params):
         url = self.root + "/index.php"
-        params["pid"] = self.page_start * self.per_page
+        params["pid"] = self.offset
 
         data = {}
         while True:
@@ -105,6 +106,10 @@ class GelbooruBase():
                 "body"  : extr(note, 'data-body="', '"')[0],
             })
 
+    def _skip_offset(self, num):
+        self.offset += num
+        return num
+
 
 class GelbooruTagExtractor(GelbooruBase,
                            gelbooru_v02.GelbooruV02TagExtractor):
@@ -135,13 +140,14 @@ class GelbooruPoolExtractor(GelbooruBase,
         }),
     )
 
+    skip = GelbooruBase._skip_offset
+
     def metadata(self):
         url = self.root + "/index.php"
         self._params = {
             "page": "pool",
             "s"   : "show",
             "id"  : self.pool_id,
-            "pid" : self.page_start,
         }
         page = self.request(url, params=self._params).text
 
