@@ -51,6 +51,11 @@ class NitterExtractor(BaseExtractor):
                 for url in text.extract_iter(
                         attachments, 'href="', '"'):
 
+                    if "/i/broadcasts/" in url:
+                        self.log.debug(
+                            "Skipping unsupported broadcast '%s'", url)
+                        continue
+
                     if "/enc/" in url:
                         name = binascii.a2b_base64(url.rpartition(
                             "/")[2]).decode().rpartition("/")[2]
@@ -123,7 +128,7 @@ class NitterExtractor(BaseExtractor):
             "likes"   : text.parse_int(extr(
                 'class="icon-heart', '</div>').rpartition(">")[2]),
             "retweet" : 'class="retweet-header' in html,
-            "quoted": False,
+            "quoted"  : False,
         }
 
     def _tweet_from_quote(self, html):
@@ -140,11 +145,11 @@ class NitterExtractor(BaseExtractor):
             "date"    : text.parse_datetime(
                 extr('title="', '"'), "%b %d, %Y · %I:%M %p %Z"),
             "tweet_id": link.rpartition("/")[2].partition("#")[0],
-            "content": extr('class="quote-text', "</div").partition(">")[2],
+            "content" : extr('class="quote-text', "</div").partition(">")[2],
             "_attach" : extr('class="attachments', '''
                 </div>'''),
             "retweet" : False,
-            "quoted": True,
+            "quoted"  : True,
         }
 
     def _user_from_html(self, html):
@@ -449,6 +454,10 @@ class NitterTweetExtractor(NitterExtractor):
             "keyword": {"date": "dt:2022-02-13 20:10:00"},
             "count": 1,
         }),
+        # broadcast
+        ("https://nitter.lacontrevoie.fr/POTUS/status/1639409307878928384", {
+            "count": 0,
+        })
     )
 
     def tweets(self):
