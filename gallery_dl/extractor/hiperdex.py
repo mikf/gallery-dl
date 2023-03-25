@@ -32,6 +32,8 @@ class HiperdexBase():
         return {
             "manga"  : text.unescape(extr(
                 "<title>", "<").rpartition(" - ")[0].strip()),
+            "url"    : text.unescape(extr(
+                'property="og:url" content="', '"')),
             "score"  : text.parse_float(extr(
                 'id="averagerate">', '<')),
             "author" : text.remove_html(extr(
@@ -113,7 +115,7 @@ class HiperdexMangaExtractor(HiperdexBase, MangaExtractor):
     chapterclass = HiperdexChapterExtractor
     pattern = BASE_PATTERN + r"(/manga/([^/?#]+))/?$"
     test = (
-        ("https://hiperdex.com/manga/youre-not-that-special/", {
+        ("https://hiperdex.com/manga/1603231576-youre-not-that-special/", {
             "count": 51,
             "pattern": HiperdexChapterExtractor.pattern,
             "keyword": {
@@ -130,6 +132,7 @@ class HiperdexMangaExtractor(HiperdexBase, MangaExtractor):
                 "type"   : "Manhwa",
             },
         }),
+        ("https://hiperdex.com/manga/youre-not-that-special/"),
         ("https://1sthiperdex.com/manga/youre-not-that-special/"),
         ("https://hiperdex2.com/manga/youre-not-that-special/"),
         ("https://hiperdex.net/manga/youre-not-that-special/"),
@@ -142,15 +145,24 @@ class HiperdexMangaExtractor(HiperdexBase, MangaExtractor):
         MangaExtractor.__init__(self, match, self.root + path + "/")
 
     def chapters(self, page):
-        self.manga_data(self.manga, page)
+        data = self.manga_data(self.manga, page)
+        self.manga_url = url = data["url"]
+
+        url = self.manga_url + "ajax/chapters/"
+        headers = {
+            "Accept": "*/*",
+            "X-Requested-With": "XMLHttpRequest",
+            "Origin": self.root,
+            "Referer": self.manga_url,
+        }
+        html = self.request(url, method="POST", headers=headers).text
+
         results = []
-
-        for html in text.extract_iter(
-                page, '<li class="wp-manga-chapter', '</li>'):
-            url = text.extr(html, 'href="', '"')
-            chapter = url.rpartition("/")[2]
+        for item in text.extract_iter(
+                html, '<li class="wp-manga-chapter', '</li>'):
+            url = text.extr(item, 'href="', '"')
+            chapter = url.rstrip("/").rpartition("/")[2]
             results.append((url, self.chapter_data(chapter)))
-
         return results
 
 
