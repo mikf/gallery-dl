@@ -150,8 +150,14 @@ class NitterExtractor(BaseExtractor):
     def _user_from_html(self, html):
         extr = text.extract_from(html, html.index('class="profile-tabs'))
         banner = extr('class="profile-banner"><a href="', '"')
+
+        try:
+            uid = banner.split("%2F")[4]
+        except Exception:
+            uid = 0
+
         return {
-            "id"              : banner.split("%2F")[4] if banner else None,
+            "id"              : uid,
             "profile_banner"  : self.root + banner if banner else "",
             "profile_image"   : self.root + extr(
                 'class="profile-card-avatar" href="', '"'),
