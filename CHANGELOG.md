@@ -1,10 +1,32 @@
 # Changelog
 
+## 1.25.1 - 2023-03-25
+### Additions
+- [nitter] support nitter.it ([#3819](https://github.com/mikf/gallery-dl/issues/3819))
+- [twitter] add `hashtag` extractor ([#3783](https://github.com/mikf/gallery-dl/issues/3783))
+- [twitter] support Tweet content with >280 characters
+- [formatter] support loading f-strings from template files ([#3800](https://github.com/mikf/gallery-dl/issues/3800))
+- [formatter] support filesystem paths for `\fM` modules ([#3399](https://github.com/mikf/gallery-dl/issues/3399))
+- [formatter] support putting keys in quotes (e.g. `user['name']`) ([#2559](https://github.com/mikf/gallery-dl/issues/2559))
+- [postprocessor:metadata] add `skip` option ([#3786](https://github.com/mikf/gallery-dl/issues/3786))
+### Fixes
+- [output] set `errors=replace` for output streams ([#3765](https://github.com/mikf/gallery-dl/issues/3765))
+- [gelbooru] extract favorites without needing cookies ([#3704](https://github.com/mikf/gallery-dl/issues/3704))
+- [gelbooru] fix and improve `--range` for pools
+- [hiperdex] fix extraction ([#3768](https://github.com/mikf/gallery-dl/issues/3768))
+- [naverwebtoon] fix extraction ([#3729](https://github.com/mikf/gallery-dl/issues/3729))
+- [nitter] fix extraction for instances without user banners
+- [twitter] update API query hashes and parameters
+- [weibo] support `mix_media_info` entries ([#3793](https://github.com/mikf/gallery-dl/issues/3793))
+- fix circular reference detection for `-K`
+### Changes
+- update `globals` instead of overwriting the default ([#3773](https://github.com/mikf/gallery-dl/issues/3773))
+
 ## 1.25.0 - 2023-03-11
 ### Changes
 - [e621] split `e621` extractors from `danbooru` module ([#3425](https://github.com/mikf/gallery-dl/issues/3425))
 - [deviantart] remove mature scraps warning ([#3691](https://github.com/mikf/gallery-dl/issues/3691))
-- [deviantart] use `/collections/all` endpoint for favorites ([#3666](https://github.com/mikf/gallery-dl/issues/3666) ,#3668)
+- [deviantart] use `/collections/all` endpoint for favorites ([#3666](https://github.com/mikf/gallery-dl/issues/3666), [#3668](https://github.com/mikf/gallery-dl/issues/3668))
 - [newgrounds] update default image and audio archive IDs to prevent ID overlap ([#3681](https://github.com/mikf/gallery-dl/issues/3681))
 - rename `--ignore-config` to `--config-ignore`
 ### Extractors
