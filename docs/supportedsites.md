@@ -1197,6 +1197,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td>Media Files, Replies, Search Results, Tweets</td>
     <td></td>
 </tr>
+<tr>
+    <td>Nitter.it</td>
+    <td>https://nitter.it/</td>
+    <td>Media Files, Replies, Search Results, Tweets</td>
+    <td></td>
+</tr>
 
 <tr>
     <td colspan="4"><strong>Philomena Instances</strong></td>
