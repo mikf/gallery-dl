@@ -240,6 +240,10 @@ BASE_PATTERN = NitterExtractor.update({
         "root": "https://nitter.unixfox.eu",
         "pattern": r"nitter\.unixfox\.eu",
     },
+    "nitter.it": {
+        "root": "https://nitter.it",
+        "pattern": r"nitter\.it",
+    },
 })
 
 USER_PATTERN = BASE_PATTERN + r"/(i(?:/user/|d:)(\d+)|[^/?#]+)"
@@ -455,7 +459,7 @@ class NitterTweetExtractor(NitterExtractor):
             "count": 1,
         }),
         # broadcast
-        ("https://nitter.lacontrevoie.fr/POTUS/status/1639409307878928384", {
+        ("https://nitter.it/POTUS/status/1639409307878928384", {
             "count": 0,
         })
     )
