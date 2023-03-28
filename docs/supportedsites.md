@@ -1271,6 +1271,22 @@ Consider all sites to be NSFW unless otherwise known.
 </tr>
 
 <tr>
+    <td colspan="4"><strong>URL Shorteners</strong></td>
+</tr>
+<tr>
+    <td>Bitly</td>
+    <td>https://bit.ly/</td>
+    <td></td>
+    <td></td>
+</tr>
+<tr>
+    <td>Twitter t.co</td>
+    <td>https://t.co/</td>
+    <td></td>
+    <td></td>
+</tr>
+
+<tr>
     <td colspan="4"><strong>vichan Imageboards</strong></td>
 </tr>
 <tr>
