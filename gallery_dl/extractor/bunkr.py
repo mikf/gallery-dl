@@ -6,19 +6,19 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extractors for https://bunkr.su/"""
+"""Extractors for https://bunkr.la/"""
 
 from .lolisafe import LolisafeAlbumExtractor
 from .. import text
 
 
 class BunkrAlbumExtractor(LolisafeAlbumExtractor):
-    """Extractor for bunkr.su albums"""
+    """Extractor for bunkr.la albums"""
     category = "bunkr"
-    root = "https://bunkr.su"
-    pattern = r"(?:https?://)?(?:app\.)?bunkr\.(?:[sr]u|is|to)/a/([^/?#]+)"
+    root = "https://bunkr.la"
+    pattern = r"(?:https?://)?(?:app\.)?bunkr\.(?:la|[sr]u|is|to)/a/([^/?#]+)"
     test = (
-        ("https://bunkr.su/a/Lktg9Keq", {
+        ("https://bunkr.la/a/Lktg9Keq", {
             "pattern": r"https://cdn\.bunkr\.ru/test-テスト-\"&>-QjgneIQv\.png",
             "content": "0c8768055e4e20e7c7259608b67799171b691140",
             "keyword": {
@@ -52,6 +52,10 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
                 "num": int,
             },
         }),
+        ("https://bunkr.la/a/Lktg9Keq"),
+        ("https://bunkr.su/a/Lktg9Keq"),
+        ("https://bunkr.ru/a/Lktg9Keq"),
+        ("https://bunkr.is/a/Lktg9Keq"),
         ("https://bunkr.to/a/Lktg9Keq"),
     )
 
