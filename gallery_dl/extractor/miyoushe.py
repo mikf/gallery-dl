@@ -24,7 +24,7 @@ class MiyousheExtractor(Extractor):
     root = "https://miyoushe.com"
     directory_fmt = ("{category}", "{user[id]}")
     filename_fmt = "{id}_p{num}.{extension}"
-    archive_fmt = "{id}_{num}.{extension}"
+    archive_fmt = "{id}_{filename}"
     cookiedomain = ".miyoushe.com"
 
     def __init__(self, match):
@@ -46,7 +46,7 @@ class MiyousheExtractor(Extractor):
                 # image_list.len = vod_list.len(video cover) + post.images.len
                 "media_number":
                     len(post['vod_list']) + len(post['post']['images']),
-                "num": -1,
+                "num": 0,
                 "game_id": post["post"]["game_id"],
                 "forum_id": post["post"]["f_forum_id"],
                 "topics": [],
@@ -71,7 +71,8 @@ class MiyousheExtractor(Extractor):
             self.log.debug("id: " + data["id"])
 
             if not post["vod_list"]:  # only picture
-                for data['num'], imgUrl in enumerate(post["post"]["images"]):
+                for imgUrl in post["post"]["images"]:
+                    data['num'] = data['num'] + 1
                     yield Message.Url, imgUrl, text.nameext_from_url(
                         imgUrl, data)
             else:  # video and picture
@@ -83,7 +84,7 @@ class MiyousheExtractor(Extractor):
                         yield Message.Url, mediaUrl, text.nameext_from_url(
                             mediaUrl, data)
 
-            if (data['num'] != data['media_number'] - 1):
+            if (data['num'] != data['media_number']):
                 self.log.warning(
                     "The number of files does not appear to be correct",
                     data['id'])
