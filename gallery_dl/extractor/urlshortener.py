@@ -11,7 +11,7 @@ from .. import exception
 
 
 class UrlshortenerExtractor(BaseExtractor):
-    """Base class for general-purpose URL shorteners"""
+    """Extractor for general-purpose URL shorteners"""
     basecategory = "urlshortener"
     test = (
         ("https://bit.ly/3cWIUgq", {
