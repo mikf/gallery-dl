@@ -16,7 +16,7 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
     """Extractor for bunkr.su albums"""
     category = "bunkr"
     root = "https://bunkr.su"
-    pattern = r"(?:https?://)?(?:app\.)?bunkr\.(?:[sr]u|is|to)/a/([^/?#]+)"
+    pattern = r"(?:https?://)?(?:app\.)?bunkr\.(?:[sr]u|is|la|to)/a/([^/?#]+)"
     test = (
         ("https://bunkr.su/a/Lktg9Keq", {
             "pattern": r"https://cdn\.bunkr\.ru/test-テスト-\"&>-QjgneIQv\.png",
