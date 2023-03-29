@@ -128,6 +128,11 @@ class TestFormatter(unittest.TestCase):
         self._run_test("{l[0]}" , "a")
         self._run_test("{a[6]}" , "w")
 
+    def test_dict_access(self):
+        self._run_test("{d[a]}"  , "foo")
+        self._run_test("{d['a']}", "foo")
+        self._run_test('{d["a"]}', "foo")
+
     def test_slicing(self):
         v = self.kwdict["a"]
         self._run_test("{a[1:10]}"  , v[1:10])
@@ -348,6 +353,27 @@ class TestFormatter(unittest.TestCase):
         self._run_test("\fF foo-'\"{a.upper()}\"'-bar",
                        """foo-'"{}"'-bar""".format(self.kwdict["a"].upper()))
 
+    @unittest.skipIf(sys.hexversion < 0x3060000, "no fstring support")
+    def test_template_fstring(self):
+        with tempfile.TemporaryDirectory() as tmpdirname:
+            path1 = os.path.join(tmpdirname, "tpl1")
+            path2 = os.path.join(tmpdirname, "tpl2")
+
+            with open(path1, "w") as fp:
+                fp.write("{a}")
+            fmt1 = formatter.parse("\fTF " + path1)
+
+            with open(path2, "w") as fp:
+                fp.write("foo-'\"{a.upper()}\"'-bar")
+            fmt2 = formatter.parse("\fTF " + path2)
+
+        self.assertEqual(fmt1.format_map(self.kwdict), self.kwdict["a"])
+        self.assertEqual(fmt2.format_map(self.kwdict),
+                         """foo-'"{}"'-bar""".format(self.kwdict["a"].upper()))
+
+        with self.assertRaises(OSError):
+            formatter.parse("\fTF /")
+
     def test_module(self):
         with tempfile.TemporaryDirectory() as tmpdirname:
             path = os.path.join(tmpdirname, "testmod.py")
@@ -374,7 +400,7 @@ def noarg():
             try:
                 fmt1 = formatter.parse("\fM testmod:gentext")
                 fmt2 = formatter.parse("\fM testmod:lengths")
-                fmt3 = formatter.parse("\fM testmod:noarg")
+                fmt0 = formatter.parse("\fM testmod:noarg")
 
                 with self.assertRaises(AttributeError):
                     formatter.parse("\fM testmod:missing")
@@ -383,11 +409,17 @@ def noarg():
             finally:
                 sys.path.pop(0)
 
+            fmt3 = formatter.parse("\fM " + path + ":gentext")
+            fmt4 = formatter.parse("\fM " + path + ":lengths")
+
         self.assertEqual(fmt1.format_map(self.kwdict), "'Title' by Name")
         self.assertEqual(fmt2.format_map(self.kwdict), "89")
 
+        self.assertEqual(fmt3.format_map(self.kwdict), "'Title' by Name")
+        self.assertEqual(fmt4.format_map(self.kwdict), "89")
+
         with self.assertRaises(TypeError):
-            self.assertEqual(fmt3.format_map(self.kwdict), "")
+            self.assertEqual(fmt0.format_map(self.kwdict), "")
 
     def _run_test(self, format_string, result, default=None, fmt=format):
         fmt = formatter.parse(format_string, default, fmt)

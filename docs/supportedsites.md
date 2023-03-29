@@ -868,7 +868,7 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>Twitter</td>
     <td>https://twitter.com/</td>
-    <td>Avatars, Backgrounds, Bookmarks, Events, individual Images, Likes, Lists, List Members, Media Timelines, Search Results, Timelines, Tweets</td>
+    <td>Avatars, Backgrounds, Bookmarks, Events, Hashtags, individual Images, Likes, Lists, List Members, Media Timelines, Search Results, Timelines, Tweets</td>
     <td>Supported</td>
 </tr>
 <tr>
@@ -1194,6 +1194,12 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>Nitter.unixfox.eu</td>
     <td>https://nitter.unixfox.eu/</td>
+    <td>Media Files, Replies, Search Results, Tweets</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Nitter.it</td>
+    <td>https://nitter.it/</td>
     <td>Media Files, Replies, Search Results, Tweets</td>
     <td></td>
 </tr>

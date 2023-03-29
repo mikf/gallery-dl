@@ -21,6 +21,7 @@ class GelbooruBase():
     category = "gelbooru"
     basecategory = "booru"
     root = "https://gelbooru.com"
+    offset = 0
 
     def _api_request(self, params, key="post"):
         if "s" not in params:
@@ -59,7 +60,7 @@ class GelbooruBase():
 
     def _pagination_html(self, params):
         url = self.root + "/index.php"
-        params["pid"] = self.page_start * self.per_page
+        params["pid"] = self.offset
 
         data = {}
         while True:
@@ -105,6 +106,10 @@ class GelbooruBase():
                 "body"  : extr(note, 'data-body="', '"')[0],
             })
 
+    def _skip_offset(self, num):
+        self.offset += num
+        return num
+
 
 class GelbooruTagExtractor(GelbooruBase,
                            gelbooru_v02.GelbooruV02TagExtractor):
@@ -135,13 +140,14 @@ class GelbooruPoolExtractor(GelbooruBase,
         }),
     )
 
+    skip = GelbooruBase._skip_offset
+
     def metadata(self):
         url = self.root + "/index.php"
         self._params = {
             "page": "pool",
             "s"   : "show",
             "id"  : self.pool_id,
-            "pid" : self.page_start,
         }
         page = self.request(url, params=self._params).text
 
@@ -167,23 +173,39 @@ class GelbooruFavoriteExtractor(GelbooruBase,
         "count": 3,
     })
 
+    skip = GelbooruBase._skip_offset
+
     def posts(self):
         # get number of favorites
         params = {
             "s"    : "favorite",
             "id"   : self.favorite_id,
-            "limit": "1"
+            "limit": "1",
         }
         count = self._api_request(params, "@attributes")[0]["count"]
 
+        if count <= self.offset:
+            return
+        pnum, last = divmod(count + 1, self.per_page)
+
+        if self.offset >= last:
+            self.offset -= last
+            diff, self.offset = divmod(self.offset, self.per_page)
+            pnum -= diff + 1
+        skip = self.offset
+
         # paginate over them in reverse
-        params["pid"] = count // self.per_page
+        params["pid"] = pnum
         params["limit"] = self.per_page
 
         while True:
             favs = self._api_request(params, "favorite")
 
             favs.reverse()
+            if skip:
+                favs = favs[skip:]
+                skip = 0
+
             for fav in favs:
                 yield from self._api_request({"id": fav["favorite"]})
 
