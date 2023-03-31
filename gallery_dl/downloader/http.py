@@ -306,8 +306,8 @@ class HttpDownloader(DownloaderBase):
         except (RequestException, SSLError, OpenSSLError) as exc:
             print()
             self.log.debug(
-                "Unable to consume response body (%s); "
-                "closing the connection anyway", exc)
+                "Unable to consume response body (%s: %s); "
+                "closing the connection anyway", exc.__class__.__name__, exc)
             response.close()
 
     @staticmethod
