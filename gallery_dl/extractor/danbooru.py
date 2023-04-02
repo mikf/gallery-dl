@@ -26,6 +26,7 @@ class DanbooruExtractor(BaseExtractor):
         BaseExtractor.__init__(self, match)
         self.ugoira = self.config("ugoira", False)
         self.external = self.config("external", False)
+        self.includes = False
 
         threshold = self.config("threshold")
         if isinstance(threshold, int):
@@ -54,6 +55,7 @@ class DanbooruExtractor(BaseExtractor):
                 includes = ",".join(includes)
             elif not isinstance(includes, str):
                 includes = "artist_commentary,children,notes,parent,uploader"
+            self.includes = includes + ",id"
 
         data = self.metadata()
         for post in self.posts():
@@ -77,11 +79,6 @@ class DanbooruExtractor(BaseExtractor):
                     url = post["large_file_url"]
                     post["extension"] = "webm"
 
-            if includes:
-                meta_url = "{}/posts/{}.json?only={}".format(
-                    self.root, post["id"], includes)
-                post.update(self.request(meta_url).json())
-
             if url[0] == "/":
                 url = self.root + url
 
@@ -104,6 +101,19 @@ class DanbooruExtractor(BaseExtractor):
             posts = self.request(url, params=params).json()
             if "posts" in posts:
                 posts = posts["posts"]
+
+            if self.includes and posts:
+                if not pages and "only" not in params:
+                    params["page"] = "b{}".format(posts[0]["id"] + 1)
+                params["only"] = self.includes
+                data = {
+                    meta["id"]: meta
+                    for meta in self.request(url, params=params).json()
+                }
+                for post in posts:
+                    post.update(data[post["id"]])
+                params["only"] = None
+
             yield from posts
 
             if len(posts) < self.threshold:
@@ -255,7 +265,11 @@ class DanbooruPostExtractor(DanbooruExtractor):
 
     def posts(self):
         url = "{}/posts/{}.json".format(self.root, self.post_id)
-        return (self.request(url).json(),)
+        post = self.request(url).json()
+        if self.includes:
+            params = {"only": self.includes}
+            post.update(self.request(url, params=params).json())
+        return (post,)
 
 
 class DanbooruPopularExtractor(DanbooruExtractor):
