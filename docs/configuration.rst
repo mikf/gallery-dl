@@ -1148,7 +1148,7 @@ Description
     See `available_includes <https://github.com/danbooru/danbooru/blob/2cf7baaf6c5003c1a174a8f2d53db010cf05dca7/app/models/post.rb#L1842-L1849>`__
     for possible field names. ``aibooru`` also supports ``ai_metadata``.
 
-    Note: This requires 1 additional HTTP request per post.
+    Note: This requires 1 additional HTTP request per 200-post batch.
 
 
 extractor.{Danbooru].threshold
