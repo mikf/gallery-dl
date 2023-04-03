@@ -1180,7 +1180,11 @@ class DeviantartSearchExtractor(DeviantartExtractor):
         }
 
         while True:
-            page = self.request(url, params=params).text
+            response = self.request(url, params=params)
+
+            if response.history and "/users/login" in response.url:
+                raise exception.StopExtraction("HTTP redirect to login page")
+            page = response.text
 
             items , pos = text.rextract(page, r'\"items\":[', ']')
             cursor, pos = text.extract(page, r'\"cursor\":\"', '\\', pos)
