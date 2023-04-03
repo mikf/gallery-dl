@@ -1079,7 +1079,7 @@ class TwitterAPI():
             "responsive_web_graphql_timeline_navigation_enabled": True,
         }
         self.features_pagination = {
-            "graphql_timeline_v2_bookmark_timeline": False,
+            "blue_business_profile_image_shape_enabled": False,
             "responsive_web_twitter_blue_verified_badge_is_enabled": True,
             "responsive_web_graphql_exclude_directive_enabled": True,
             "verified_phone_label_enabled": False,
@@ -1196,8 +1196,11 @@ class TwitterAPI():
         variables = {
             "count": 100,
         }
+        features = self.features_pagination.copy()
+        features["graphql_timeline_v2_bookmark_timeline"] = False
         return self._pagination_tweets(
-            endpoint, variables, ("bookmark_timeline", "timeline"), False)
+            endpoint, variables, ("bookmark_timeline", "timeline"), False,
+            features=features)
 
     def list_latest_tweets_timeline(self, list_id):
         endpoint = "/graphql/FDI9EiIp54KxEOWGiv3B4A/ListLatestTweetsTimeline"
@@ -1452,15 +1455,17 @@ class TwitterAPI():
             params["cursor"] = cursor
 
     def _pagination_tweets(self, endpoint, variables,
-                           path=None, stop_tweets=True, features=True):
+                           path=None, stop_tweets=True, features=None):
         extr = self.extractor
         variables.update(self.variables)
         original_retweets = (extr.retweets == "original")
         pinned_tweet = extr.pinned
 
         params = {"variables": None}
+        if features is None:
+            features = self.features_pagination
         if features:
-            params["features"] = self._json_dumps(self.features_pagination)
+            params["features"] = self._json_dumps(features)
 
         while True:
             params["variables"] = self._json_dumps(variables)
