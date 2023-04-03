@@ -1079,6 +1079,7 @@ class TwitterAPI():
             "responsive_web_graphql_timeline_navigation_enabled": True,
         }
         self.features_pagination = {
+            "graphql_timeline_v2_bookmark_timeline": False,
             "responsive_web_twitter_blue_verified_badge_is_enabled": True,
             "responsive_web_graphql_exclude_directive_enabled": True,
             "verified_phone_label_enabled": False,
