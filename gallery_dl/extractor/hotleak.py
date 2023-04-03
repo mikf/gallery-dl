@@ -118,7 +118,7 @@ class HotleakCreatorExtractor(HotleakExtractor):
     """Extractor for all posts from a hotleak creator"""
     subcategory = "creator"
     pattern = (BASE_PATTERN + r"/(?!(?:hot|creators|videos|photos)(?:$|/))"
-              r"([^/?#]+)/?$")
+               r"([^/?#]+)/?$")
     test = (
         ("https://hotleak.vip/kaiyakawaii", {
             "range": "1-200",
