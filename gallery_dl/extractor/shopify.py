@@ -119,15 +119,14 @@ class ShopifyCollectionExtractor(ShopifyExtractor):
 
     def products(self):
         url = self.item_url + "/products.json"
+        params = {"page": 1}
 
-        while url:
-            response = self.request(url)
-            yield from response.json()["products"]
-
-            url = response.links.get("next")
-            if not url:
+        while True:
+            data = self.request(url, params=params).json()["products"]
+            if not data:
                 return
-            url = url["url"]
+            yield from data
+            params["page"] += 1
 
 
 class ShopifyProductExtractor(ShopifyExtractor):
