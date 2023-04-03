@@ -1192,14 +1192,14 @@ class TwitterAPI():
         return self._pagination_tweets(endpoint, variables)
 
     def user_bookmarks(self):
-        endpoint = "/graphql/Xq0wQSWHlcfnXARLJGqTxg/Bookmarks"
+        endpoint = "/graphql/RV1g3b8n_SGOHwkqKYSCFw/Bookmarks"
         variables = {
             "count": 100,
         }
         features = self.features_pagination.copy()
-        features["graphql_timeline_v2_bookmark_timeline"] = False
+        features["graphql_timeline_v2_bookmark_timeline"] = True
         return self._pagination_tweets(
-            endpoint, variables, ("bookmark_timeline", "timeline"), False,
+            endpoint, variables, ("bookmark_timeline_v2", "timeline"), False,
             features=features)
 
     def list_latest_tweets_timeline(self, list_id):
