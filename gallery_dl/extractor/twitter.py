@@ -105,6 +105,10 @@ class TwitterExtractor(Extractor):
                     continue
                 seen_tweets.add(data["id_str"])
 
+            if "withheld_scope" in data:
+                txt = data.get("full_text") or data.get("text") or ""
+                self.log.warning("'%s' (%s)", txt, data["id_str"])
+
             files = []
             if "extended_entities" in data:
                 self._extract_media(
@@ -321,8 +325,10 @@ class TwitterExtractor(Extractor):
             user = self.api.user_by_screen_name(user["screen_name"])["legacy"]
 
         uget = user.get
-        entities = user["entities"]
+        if uget("withheld_scope"):
+            self.log.warning("'%s'", uget("description"))
 
+        entities = user["entities"]
         self._user_cache[uid] = udata = {
             "id"              : text.parse_int(uid),
             "name"            : user["screen_name"],
@@ -1582,10 +1588,17 @@ class TwitterAPI():
                                 retweet["rest_id"]
                             tweet["author"] = \
                                 retweet["core"]["user_results"]["result"]
-                            if "extended_entities" in retweet["legacy"] and \
+
+                            rtlegacy = retweet["legacy"]
+                            if "extended_entities" in rtlegacy and \
                                     "extended_entities" not in legacy:
                                 legacy["extended_entities"] = \
-                                    retweet["legacy"]["extended_entities"]
+                                    rtlegacy["extended_entities"]
+                            if "withheld_scope" in rtlegacy and \
+                                    "withheld_scope" not in legacy:
+                                legacy["withheld_scope"] = \
+                                    rtlegacy["withheld_scope"]
+                                legacy["full_text"] = rtlegacy["full_text"]
                         except KeyError:
                             pass
 
