@@ -58,7 +58,7 @@ def decode_video_url(url):
 class HotleakPostExtractor(HotleakExtractor):
     """Extractor for individual posts on hotleak"""
     subcategory = "post"
-    pattern = (BASE_PATTERN + r"/(?!hot|creators|videos|photos)"
+    pattern = (BASE_PATTERN + r"/(?!(?:hot|creators|videos|photos)(?:$|/))"
                r"([^/]+)/(photo|video)/(\d+)")
     test = (
         ("https://hotleak.vip/kaiyakawaii/photo/1617145", {
@@ -117,7 +117,8 @@ class HotleakPostExtractor(HotleakExtractor):
 class HotleakCreatorExtractor(HotleakExtractor):
     """Extractor for all posts from a hotleak creator"""
     subcategory = "creator"
-    pattern = BASE_PATTERN + r"/(?!hot|creators|videos|photos)([^/?#]+)/?$"
+    pattern = (BASE_PATTERN + r"/(?!(?:hot|creators|videos|photos)(?:$|/))"
+               r"([^/?#]+)/?$")
     test = (
         ("https://hotleak.vip/kaiyakawaii", {
             "range": "1-200",
