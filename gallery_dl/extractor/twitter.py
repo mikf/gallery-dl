@@ -260,19 +260,26 @@ class TwitterExtractor(Extractor):
         if "legacy" in tweet:
             tweet = tweet["legacy"]
 
+        tweet_id = int(tweet["id_str"])
+        if tweet_id >= 300000000000000:
+            date = text.parse_timestamp(
+                ((tweet_id >> 22) + 1288834974657) // 1000)
+        else:
+            date = text.parse_datetime(
+                tweet["created_at"], "%a %b %d %H:%M:%S %z %Y")
+
         tget = tweet.get
         tdata = {
-            "tweet_id"      : text.parse_int(tweet["id_str"]),
+            "tweet_id"      : tweet_id,
             "retweet_id"    : text.parse_int(
                 tget("retweeted_status_id_str")),
             "quote_id"      : text.parse_int(
                 tget("quoted_by_id_str")),
             "reply_id"      : text.parse_int(
                 tget("in_reply_to_status_id_str")),
-            "date"          : text.parse_datetime(
-                tweet["created_at"], "%a %b %d %H:%M:%S %z %Y"),
-            "user"          : self._user or author,
+            "date"          : date,
             "author"        : author,
+            "user"          : self._user or author,
             "lang"          : tweet["lang"],
             "favorite_count": tget("favorite_count"),
             "quote_count"   : tget("quote_count"),
@@ -404,10 +411,8 @@ class TwitterExtractor(Extractor):
             except Exception:
                 yield tweet
 
-    def _make_tweet(self, user, id_str, url, timestamp):
+    def _make_tweet(self, user, url, id_str):
         return {
-            "created_at": text.parse_timestamp(timestamp).strftime(
-                "%a %b %d %H:%M:%S +0000 %Y"),
             "id_str": id_str,
             "lang": None,
             "user": user,
@@ -790,6 +795,16 @@ class TwitterTweetExtractor(TwitterExtractor):
                         ("cards-blacklist", ("twitch.tv",))),
             "count": 0,
         }),
+        # retweet
+        ("https://twitter.com/jessica_3978/status/1296304589591810048", {
+            "options": (("retweets", True),),
+            "count": 2,
+            "keyword": {
+                "tweet_id"  : 1296304589591810048,
+                "retweet_id": 1296296016002547713,
+                "date"      : "dt:2020-08-20 04:34:32",
+            },
+        }),
         # original retweets (#1026)
         ("https://twitter.com/jessica_3978/status/1296304589591810048", {
             "options": (("retweets", "original"),),
@@ -925,9 +940,8 @@ class TwitterAvatarExtractor(TwitterExtractor):
 
         url = url.replace("_normal.", ".")
         id_str = url.rsplit("/", 2)[1]
-        timestamp = ((int(id_str) >> 22) + 1288834974657) // 1000
 
-        return (self._make_tweet(user, id_str, url, timestamp),)
+        return (self._make_tweet(user, url, id_str),)
 
 
 class TwitterBackgroundExtractor(TwitterExtractor):
@@ -942,7 +956,7 @@ class TwitterBackgroundExtractor(TwitterExtractor):
             "keyword": {
                 "date": "dt:2015-01-12 10:29:43",
                 "filename": "1421058583",
-                "tweet_id": 0,
+                "tweet_id": 554586009367478272,
             },
         }),
         ("https://twitter.com/User16/header_photo", {
@@ -960,7 +974,8 @@ class TwitterBackgroundExtractor(TwitterExtractor):
         except (KeyError, ValueError):
             return ()
 
-        return (self._make_tweet(user, None, url, timestamp),)
+        id_str = str((int(timestamp) * 1000 - 1288834974657) << 22)
+        return (self._make_tweet(user, url, id_str),)
 
 
 class TwitterImageExtractor(Extractor):
@@ -1700,9 +1715,10 @@ class TwitterAPI():
                 "in_reply_to_status_id_str" not in tweet:
             tweet["conversation_id_str"] = tweet["id_str"]
 
-        tweet["created_at"] = text.parse_datetime(
-            tweet["created_at"], "%Y-%m-%dT%H:%M:%S.%fZ").strftime(
-            "%a %b %d %H:%M:%S +0000 %Y")
+        if int(tweet_id) < 300000000000000:
+            tweet["created_at"] = text.parse_datetime(
+                tweet["created_at"], "%Y-%m-%dT%H:%M:%S.%fZ").strftime(
+                "%a %b %d %H:%M:%S +0000 %Y")
 
         if "video" in tweet:
             video = tweet["video"]
