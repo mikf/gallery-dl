@@ -1585,7 +1585,7 @@ class TwitterAPI():
                     if "tweet" in tweet:
                         tweet = tweet["tweet"]
                     legacy = tweet["legacy"]
-                    tweet["sortIndex"] = entry["sortIndex"]
+                    tweet["sortIndex"] = entry.get("sortIndex")
                 except KeyError:
                     extr.log.debug(
                         "Skipping %s (deleted)",
@@ -1633,7 +1633,8 @@ class TwitterAPI():
                             tweet["core"]["user_results"]["result"]
                             ["legacy"]["screen_name"])
                         quoted["legacy"]["quoted_by_id_str"] = tweet["rest_id"]
-                        quoted["sortIndex"] = entry["sortIndex"]
+                        quoted["sortIndex"] = entry.get("sortIndex")
+
                         yield quoted
                     except KeyError:
                         extr.log.debug(
