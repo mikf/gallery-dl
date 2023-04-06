@@ -591,6 +591,12 @@ class TwitterBookmarkExtractor(TwitterExtractor):
     def tweets(self):
         return self.api.user_bookmarks()
 
+    def _transform_tweet(self, tweet):
+        tdata = TwitterExtractor._transform_tweet(self, tweet)
+        tdata["date_bookmarked"] = text.parse_timestamp(
+            (int(tweet["sortIndex"]) >> 20) // 1000)
+        return tdata
+
 
 class TwitterListExtractor(TwitterExtractor):
     """Extractor for Twitter lists"""
