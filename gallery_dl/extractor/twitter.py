@@ -575,6 +575,12 @@ class TwitterLikesExtractor(TwitterExtractor):
     def tweets(self):
         return self.api.user_likes(self.user)
 
+    def _transform_tweet(self, tweet):
+        tdata = TwitterExtractor._transform_tweet(self, tweet)
+        tdata["date_liked"] = text.parse_timestamp(
+            (int(tweet["sortIndex"]) >> 20) // 1000)
+        return tdata
+
 
 class TwitterBookmarkExtractor(TwitterExtractor):
     """Extractor for bookmarked tweets"""
@@ -1579,6 +1585,7 @@ class TwitterAPI():
                     if "tweet" in tweet:
                         tweet = tweet["tweet"]
                     legacy = tweet["legacy"]
+                    tweet["sortIndex"] = entry["sortIndex"]
                 except KeyError:
                     extr.log.debug(
                         "Skipping %s (deleted)",
@@ -1626,6 +1633,7 @@ class TwitterAPI():
                             tweet["core"]["user_results"]["result"]
                             ["legacy"]["screen_name"])
                         quoted["legacy"]["quoted_by_id_str"] = tweet["rest_id"]
+                        quoted["sortIndex"] = entry["sortIndex"]
                         yield quoted
                     except KeyError:
                         extr.log.debug(
