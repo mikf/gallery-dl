@@ -1372,6 +1372,19 @@ Description
     * ``"manual"``: Disregard ``has_more`` and only stop when a batch of results is empty.
 
 
+extractor.deviantart.public
+---------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Use a public access token for API requests.
+
+    Disable this option to *force* using a private token for all requests
+    when a `refresh token <extractor.deviantart.refresh-token_>`__ is provided.
+
+
 extractor.deviantart.refresh-token
 ----------------------------------
 Type
