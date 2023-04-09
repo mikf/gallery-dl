@@ -28,7 +28,7 @@ class UrlshortenerExtractor(BaseExtractor):
     def __init__(self, match):
         BaseExtractor.__init__(self, match)
         self.headers = INSTANCES[self.category].get("headers")
-        self.url = match.group()
+        self.id = match.group(match.lastindex)
 
     def request(self, url, **kwargs):
         kwargs["headers"] = self.headers
@@ -36,7 +36,8 @@ class UrlshortenerExtractor(BaseExtractor):
 
     def items(self):
         response = self.request(
-            self.url, method="HEAD", allow_redirects=False, notfound="URL")
+            "{}/{}".format(self.root, self.id), method="HEAD",
+            allow_redirects=False, notfound="URL")
         if "location" not in response.headers:
             raise exception.StopExtraction("Unable to resolve short URL")
         yield Message.Queue, response.headers["location"], {}
@@ -56,4 +57,4 @@ INSTANCES = {
 }
 
 UrlshortenerExtractor.pattern = \
-    UrlshortenerExtractor.update(INSTANCES) + r"/[^/?#&]+"
+    UrlshortenerExtractor.update(INSTANCES) + r"/([^/?#&]+)"
