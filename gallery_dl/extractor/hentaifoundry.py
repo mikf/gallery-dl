@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2022 Mike Fährmann
+# Copyright 2015-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -153,7 +153,6 @@ class HentaifoundryExtractor(Extractor):
             "rating_scat"     : "1",
             "rating_incest"   : "1",
             "rating_rape"     : "1",
-            "filter_media"    : "A",
             "filter_order"    : "date_new",
             "filter_type"     : "0",
             "YII_CSRF_TOKEN"  : text.unquote(text.extr(
