@@ -54,12 +54,6 @@ class DeviantartExtractor(Extractor):
         else:
             self.unwatch = None
 
-        if self.original != "image":
-            self._update_content = self._update_content_default
-        else:
-            self._update_content = self._update_content_image
-            self.original = True
-
         self._premium_cache = {}
         self.commit_journal = {
             "html": self._commit_journal_html,
@@ -113,19 +107,35 @@ class DeviantartExtractor(Extractor):
             yield Message.Directory, deviation
 
             if "content" in deviation:
-                content = deviation["content"]
+                if deviation["is_downloadable"] and self.original == "image":
+                    deviation["download"] = self.api.deviation_download(
+                        deviation["deviationid"])
+                    url = deviation["download"]["src"].partition("?")[0]
+                    mtype = mimetypes.guess_type(url, False)[0]
 
-                if self.original and deviation["is_downloadable"]:
-                    self._update_content(deviation, content)
+                    if mtype and mtype.startswith("image/"):
+                        yield self.commit(deviation, deviation["download"])
+                    else:
+                        yield self.commit(
+                            deviation, self._build_target(deviation))
+
+                elif deviation["is_downloadable"] and self.original:
+                    public = "premium_folder_data" not in deviation
+                    deviation["download"] = self.api.deviation_download(
+                        deviation["deviationid"], public)
+                    yield self.commit(deviation, deviation["download"])
+
                 else:
-                    self._update_token(deviation, content)
+                    yield self.commit(
+                        deviation, self._build_target(deviation))
 
-                yield self.commit(deviation, content)
-
+            # downloadable, but no "content" field (#307)
             elif deviation["is_downloadable"]:
-                content = self.api.deviation_download(deviation["deviationid"])
-                yield self.commit(deviation, content)
+                deviation["download"] = self.api.deviation_download(
+                    deviation["deviationid"])
+                yield self.commit(deviation, deviation["download"])
 
+            # not downloadable, and no "content" field
             if "videos" in deviation and deviation["videos"]:
                 video = max(deviation["videos"],
                             key=lambda x: text.parse_int(x["quality"][:-1]))
@@ -319,43 +329,54 @@ class DeviantartExtractor(Extractor):
             url = "{}{}/{}".format(base, folder["folderid"], folder["name"])
             yield url, folder
 
-    def _update_content_default(self, deviation, content):
-        public = "premium_folder_data" not in deviation
-        data = self.api.deviation_download(deviation["deviationid"], public)
-        content.update(data)
-
-    def _update_content_image(self, deviation, content):
-        data = self.api.deviation_download(deviation["deviationid"])
-        url = data["src"].partition("?")[0]
-        mtype = mimetypes.guess_type(url, False)[0]
-        if mtype and mtype.startswith("image/"):
-            content.update(data)
-
-    def _update_token(self, deviation, content):
-        """Replace JWT to be able to remove width/height limits
+    @staticmethod
+    def _build_token(url):
+        """Build a new URL without width/height limits from the base URL
 
         All credit goes to @Ironchest337
         for discovering and implementing this method
         """
-        url, sep, _ = content["src"].partition("/v1/")
-        if not sep:
-            return
 
-        #  header = b'{"typ":"JWT","alg":"none"}'
         payload = (
             b'{"sub":"urn:app:","iss":"urn:app:","obj":[[{"path":"/f/' +
             url.partition("/f/")[2].encode() +
             b'"}]],"aud":["urn:service:file.download"]}'
         )
 
-        deviation["_fallback"] = (content["src"],)
-        content["src"] = (
+        return (
             "{}?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0.{}.".format(
                 url,
-                #  base64 of 'header' is precomputed as 'eyJ0eX...'
-                #  binascii.a2b_base64(header).rstrip(b"=\n").decode(),
+                # base64 of the header (b'{"typ":"JWT","alg":"none"}')
+                # is precomputed as 'eyJ0eX...'
                 binascii.b2a_base64(payload).rstrip(b"=\n").decode())
         )
+
+    @staticmethod
+    def _build_target(deviation):
+        src = deviation["content"]["src"]
+        base_url, sep, tail = src.partition("/v1/")
+        # preview == max resolution, no need to update token
+        # currently handles all non-image deviations
+        if not sep:
+            return deviation["content"]
+        # /i/.../v1/ URLs (if they ever appear in 'content')
+        if "?token=" not in tail:
+            updated_url = base_url
+        # resized images
+        elif "/f/" in base_url:
+            updated_url = DeviantartExtractor._build_token(base_url)
+        # unforeseen URL types
+        else:
+            return deviation["content"]
+
+        deviation["_fallback"] = (src,)
+        return {
+            "src": updated_url,
+            # "filesize" and "transparency" seem to be
+            # correct even for resized deviations
+            "filesize": deviation["content"]["filesize"],
+            "transparency": deviation["content"]["transparency"]
+        }
 
     def _limited_request(self, url, **kwargs):
         """Limits HTTP requests to one every 2 seconds"""
@@ -491,6 +512,7 @@ class DeviantartGalleryExtractor(DeviantartExtractor):
                 "da_category": str,
                 "date": "type:datetime",
                 "deviationid": str,
+                "?download": dict,
                 "?download_filesize": int,
                 "extension": str,
                 "index": int,
@@ -1019,6 +1041,50 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
         (("https://www.deviantart.com/citizenfresh/art/Hverarond-789295466"), {
             "pattern": (r"https://images-wixmp-\w+\.wixmp\.com/f"
                         r"/[^/]+/[^.]+\.jpg\?token="),
+            "content": "e27b30b6f0d336619e5c16df9e336e6c9793a79c",
+            "keyword": {
+                "content": {
+                    "filesize": 1690563,  # correct
+                    "height": 854,
+                    "src": r"re:^https://images-wixmp-\w+\.wixmp\.com/f"
+                           r"/[^/]+/[^.]+\.jpg/v1/",
+                    "transparency": False,
+                    "width": 1280,
+                },
+                "target": {
+                    "filesize": 1690563,
+                    "src": str,
+                },
+            },
+        }),
+        # original=image (RAR archive)
+        (("https://www.deviantart.com/robertfiddler/art"
+          "/HexaGame-Beta-version-581292183"), {
+            "options": (("original", "image"),),
+            "pattern": r"^https://images-wixmp-\w+\.wixmp\.com/i"
+                       r"/[^/]+/[^.]+\.png$",
+            "content": "e1002035e72b54955fa5583b962aa5acd646811e",
+            "keyword": {
+                "content": {
+                    "filesize": 305767,
+                    "height": 485,
+                    "src": str,
+                    "width": 439,
+                },
+                "download": {
+                    "filesize": 3872441,
+                    "height": 0,
+                    "src": r"re:^https://wixmp-\w+\.wixmp\.com/f"
+                           r"/[^/]+/[^.]+\.rar\?token=",
+                    "width": 0,
+                },
+                "target": {
+                    "filesize": 305767,
+                    "height": 485,
+                    "src": str,
+                    "width": 439,
+                },
+            },
         }),
         # GIF (#242)
         (("https://www.deviantart.com/skatergators/art/COM-Moni-781571783"), {
@@ -1042,6 +1108,21 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
             "range": "2-",
             "count": 4,
         }),
+        # video
+        ("https://www.deviantart.com/blackgryph0n/art/"
+         "Twilight-Licious-289406198", {
+             "pattern": r"https://wixmp-.+wixmp.com/v/mp4/.+\.720p\.\w+.mp4",
+             "keyword": {
+                 "filename": "twilight_licious_by_blackgryph0n-d4saz92",
+                 "extension": "mp4",
+                 "target": {
+                     "duration": 11,
+                     "filesize": 1372051,
+                     "quality": "720p",
+                     "src": str,
+                 },
+             }
+         }),
         # sta.sh URL from deviation["text_content"]["body"]["features"]
         (("https://www.deviantart.com"
           "/cimar-wildehopps/art/Honorary-Vixen-859809305"), {
