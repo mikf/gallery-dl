@@ -1569,6 +1569,11 @@ class DeviantartOAuthAPI():
     def _pagination(self, endpoint, params,
                     extend=True, public=None, unpack=False, key="results"):
         warn = True
+        if public is None:
+            public = self.public
+        elif not public:
+            self.public = False
+
         while True:
             data = self._call(endpoint, params=params, public=public)
             if key not in data:
@@ -1583,7 +1588,7 @@ class DeviantartOAuthAPI():
                 if public and len(results) < params["limit"]:
                     if self.refresh_token_key:
                         self.log.debug("Switching to private access token")
-                        public = False
+                        self.public = public = False
                         continue
                     elif data["has_more"] and warn:
                         warn = False
