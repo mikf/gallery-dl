@@ -35,6 +35,7 @@ class SexcomExtractor(Extractor):
     def _pagination(self, url):
         while True:
             extr = text.extract_from(self.request(url).text)
+            url = extr('<link rel="next" href="', '"')
 
             while True:
                 href = extr('<a class="image_wrapper" href="', '"')
@@ -42,11 +43,9 @@ class SexcomExtractor(Extractor):
                     break
                 yield self.root + href
 
-            pager = extr('id="pagenum"', '</div>')
-            url = text.extr(pager, ' href="', '"')
             if not url:
                 return
-            url = text.urljoin(self.root, url)
+            url = text.urljoin(self.root, text.unescape(url))
 
     def _parse_pin(self, url):
         response = self.request(url, fatal=False)
