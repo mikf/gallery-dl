@@ -70,9 +70,12 @@ class SexcomExtractor(Extractor):
             info = extr("player.updateSrc(", ");")
 
             if info:
-                path = text.extr(info, "src: '", "'")
-                data["filename"] = path.rpartition("/")[2]
-                data["extension"] = "mp4"
+                try:
+                    path, _ = text.rextract(
+                        info, "src: '", "'", info.index("label: 'HD'"))
+                except ValueError:
+                    path = text.extr(info, "src: '", "'")
+                text.nameext_from_url(path, data)
                 data["url"] = path
             else:
                 iframe = extr('<iframe', '>')
@@ -131,7 +134,8 @@ class SexcomPinExtractor(SexcomExtractor):
         }),
         # video
         ("https://www.sex.com/pin/55748341/", {
-            "pattern": "https://www.sex.com/video/stream/776229/hd",
+            "pattern": r"https://cdn\.sex\.com/videos/pinporn"
+                       r"/2018/02/10/776229_hd\.mp4",
             "content": "e1a5834869163e2c4d1ca2677f5b7b367cf8cfff",
         }),
         # pornhub embed
