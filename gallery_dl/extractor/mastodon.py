@@ -227,6 +227,12 @@ class MastodonAPI():
         if username.startswith("id:"):
             return username[3:]
 
+        try:
+            return self.account_lookup(username)["id"]
+        except Exception:
+            # fall back to account search
+            pass
+
         if "@" in username:
             handle = "@" + username
         else:
@@ -245,6 +251,11 @@ class MastodonAPI():
     def account_following(self, account_id):
         endpoint = "/v1/accounts/{}/following".format(account_id)
         return self._pagination(endpoint, None)
+
+    def account_lookup(self, username):
+        endpoint = "/v1/accounts/lookup"
+        params = {"acct": username}
+        return self._call(endpoint, params).json()
 
     def account_search(self, query, limit=40):
         """Search for accounts"""
