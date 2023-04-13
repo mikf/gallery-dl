@@ -123,6 +123,9 @@ class HentaifoundryExtractor(Extractor):
 
     def _init_site_filters(self):
         """Set site-internal filters to show all images"""
+        if self.session.cookies.get("PHPSESSID", domain=self.cookiedomain):
+            return
+
         url = self.root + "/?enterAgree=1"
         self.request(url, method="HEAD")
 
