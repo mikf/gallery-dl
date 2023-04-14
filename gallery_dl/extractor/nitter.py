@@ -93,6 +93,11 @@ class NitterExtractor(BaseExtractor):
                                 "filename" : name.rpartition(".")[0],
                                 "extension": "mp4",
                             })
+
+                        for url in text.extract_iter(
+                                attachments, '<source src="', '"'):
+                            append(text.nameext_from_url(url, {"url": url}))
+
             else:
                 files = ()
             tweet["count"] = len(files)
