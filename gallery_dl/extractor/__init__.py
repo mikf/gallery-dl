@@ -153,6 +153,7 @@ modules = [
     "twitter",
     "unsplash",
     "uploadir",
+    "urlshortener",
     "vanillarock",
     "vichan",
     "vk",
