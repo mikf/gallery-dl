@@ -1276,13 +1276,13 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>Bitly</td>
     <td>https://bit.ly/</td>
-    <td></td>
+    <td>Links</td>
     <td></td>
 </tr>
 <tr>
     <td>Twitter t.co</td>
     <td>https://t.co/</td>
-    <td></td>
+    <td>Links</td>
     <td></td>
 </tr>
 
