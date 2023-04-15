@@ -112,6 +112,7 @@ CATEGORY_MAP = {
     "subscribestar"  : "SubscribeStar",
     "tbib"           : "The Big ImageBoard",
     "tcbscans"       : "TCB Scans",
+    "tco"            : "Twitter t.co",
     "thatpervert"    : "ThatPervert",
     "thebarchive"    : "The /b/ Archive",
     "thecollection"  : "The /co/llection",
@@ -132,6 +133,7 @@ CATEGORY_MAP = {
 }
 
 SUBCATEGORY_MAP = {
+    ""       : "",
     "art"    : "Art",
     "audio"  : "Audio",
     "doujin" : "Doujin",
@@ -266,6 +268,7 @@ BASE_MAP = {
     "lynxchan"    : "LynxChan Imageboards",
     "moebooru"    : "Moebooru and MyImouto",
     "szurubooru"  : "szurubooru Instances",
+    "urlshortener": "URL Shorteners",
     "vichan"      : "vichan Imageboards",
 }
 
