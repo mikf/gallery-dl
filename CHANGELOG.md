@@ -1,5 +1,32 @@
 # Changelog
 
+## 1.25.2 - 2023-04-15
+### Additions
+- [deviantart] add `public` option
+- [nitter] extract videos from `source` elements ([#3912](https://github.com/mikf/gallery-dl/issues/3912))
+- [twitter] add `date_liked` and `date_bookmarked` metadata for liked and bookmarked Tweets ([#3816](https://github.com/mikf/gallery-dl/issues/3816))
+- [urlshortener] add support for bit.ly & t.co ([#3841](https://github.com/mikf/gallery-dl/issues/3841))
+- [downloader:http] add MIME type and signature for `.heic` files ([#3915](https://github.com/mikf/gallery-dl/issues/3915))
+### Fixes
+- [blogger] update regex to get the highest resolution URLs ([#3863](https://github.com/mikf/gallery-dl/issues/3863), [#3870](https://github.com/mikf/gallery-dl/issues/3870))
+- [bunkr] update domain to `bunkr.la` ([#3813](https://github.com/mikf/gallery-dl/issues/3813), [#3877](https://github.com/mikf/gallery-dl/issues/3877))
+- [deviantart] keep using private access tokens when requesting download URLs ([#3845](https://github.com/mikf/gallery-dl/issues/3845), [#3857](https://github.com/mikf/gallery-dl/issues/3857), [#3896](https://github.com/mikf/gallery-dl/issues/3896))
+- [hentaifoundry] fix content filters ([#3887](https://github.com/mikf/gallery-dl/issues/3887))
+- [hotleak] fix downloading of creators whose name starts with a category name ([#3871](https://github.com/mikf/gallery-dl/issues/3871))
+- [imagechest] fix extraction ([#3914](https://github.com/mikf/gallery-dl/issues/3914))
+- [realbooru] fix extraction ([#2530](https://github.com/mikf/gallery-dl/issues/2530))
+- [sexcom] fix pagination ([#3906](https://github.com/mikf/gallery-dl/issues/3906))
+- [sexcom] fix HD video extraction
+- [shopify] fix `collection` extractor ([#3866](https://github.com/mikf/gallery-dl/issues/3866), [#3868](https://github.com/mikf/gallery-dl/issues/3868))
+- [twitter] update to bookmark timeline v2 ([#3859](https://github.com/mikf/gallery-dl/issues/3859), [#3854](https://github.com/mikf/gallery-dl/issues/3854))
+- [twitter] warn about "withheld" Tweets and users ([#3864](https://github.com/mikf/gallery-dl/issues/3864))
+### Improvements
+- [danbooru] reduce number of API requests when fetching extended `metadata`
+- [deviantart:search] detect login redirects ([#3860](https://github.com/mikf/gallery-dl/issues/3860))
+- [generic] write regular expressions without `x` flags
+- [mastodon] try to get account IDs without access token
+- [twitter] calculate `date` from Tweet IDs
+
 ## 1.25.1 - 2023-03-25
 ### Additions
 - [nitter] support nitter.it ([#3819](https://github.com/mikf/gallery-dl/issues/3819))
