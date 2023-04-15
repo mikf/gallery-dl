@@ -353,6 +353,8 @@ MIME_TYPES = {
     "image/x-ms-bmp": "bmp",
     "image/webp"    : "webp",
     "image/avif"    : "avif",
+    "image/heic"    : "heic",
+    "image/heif"    : "heif",
     "image/svg+xml" : "svg",
     "image/ico"     : "ico",
     "image/icon"    : "ico",
@@ -399,6 +401,8 @@ SIGNATURE_CHECKS = {
     "webp": lambda s: (s[0:4] == b"RIFF" and
                        s[8:12] == b"WEBP"),
     "avif": lambda s: s[4:11] == b"ftypavi" and s[11] in b"fs",
+    "heic": lambda s: (s[4:10] == b"ftyphe" and s[10:12] in (
+                       b"ic", b"im", b"is", b"ix", b"vc", b"vm", b"vs")),
     "svg" : lambda s: s[0:5] == b"<?xml",
     "ico" : lambda s: s[0:4] == b"\x00\x00\x01\x00",
     "cur" : lambda s: s[0:4] == b"\x00\x00\x02\x00",
