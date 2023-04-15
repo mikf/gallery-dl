@@ -105,6 +105,10 @@ class TwitterExtractor(Extractor):
                     continue
                 seen_tweets.add(data["id_str"])
 
+            if "withheld_scope" in data:
+                txt = data.get("full_text") or data.get("text") or ""
+                self.log.warning("'%s' (%s)", txt, data["id_str"])
+
             files = []
             if "extended_entities" in data:
                 self._extract_media(
@@ -248,29 +252,42 @@ class TwitterExtractor(Extractor):
             author = tweet["user"]
         author = self._transform_user(author)
 
+        if "note_tweet" in tweet:
+            note = tweet["note_tweet"]["note_tweet_results"]["result"]
+        else:
+            note = None
+
         if "legacy" in tweet:
             tweet = tweet["legacy"]
 
+        tweet_id = int(tweet["id_str"])
+        if tweet_id >= 300000000000000:
+            date = text.parse_timestamp(
+                ((tweet_id >> 22) + 1288834974657) // 1000)
+        else:
+            date = text.parse_datetime(
+                tweet["created_at"], "%a %b %d %H:%M:%S %z %Y")
+
         tget = tweet.get
-        entities = tweet["entities"]
         tdata = {
-            "tweet_id"      : text.parse_int(tweet["id_str"]),
+            "tweet_id"      : tweet_id,
             "retweet_id"    : text.parse_int(
                 tget("retweeted_status_id_str")),
             "quote_id"      : text.parse_int(
                 tget("quoted_by_id_str")),
             "reply_id"      : text.parse_int(
                 tget("in_reply_to_status_id_str")),
-            "date"          : text.parse_datetime(
-                tweet["created_at"], "%a %b %d %H:%M:%S %z %Y"),
-            "user"          : self._user or author,
+            "date"          : date,
             "author"        : author,
+            "user"          : self._user or author,
             "lang"          : tweet["lang"],
             "favorite_count": tget("favorite_count"),
             "quote_count"   : tget("quote_count"),
             "reply_count"   : tget("reply_count"),
             "retweet_count" : tget("retweet_count"),
         }
+
+        entities = note["entity_set"] if note else tweet["entities"]
 
         hashtags = entities.get("hashtags")
         if hashtags:
@@ -284,7 +301,8 @@ class TwitterExtractor(Extractor):
                 "nick": u["name"],
             } for u in mentions]
 
-        content = text.unescape(tget("full_text") or tget("text") or "")
+        content = text.unescape(
+            note["text"] if note else tget("full_text") or tget("text") or "")
         urls = entities.get("urls")
         if urls:
             for url in urls:
@@ -314,8 +332,10 @@ class TwitterExtractor(Extractor):
             user = self.api.user_by_screen_name(user["screen_name"])["legacy"]
 
         uget = user.get
-        entities = user["entities"]
+        if uget("withheld_scope"):
+            self.log.warning("'%s'", uget("description"))
 
+        entities = user["entities"]
         self._user_cache[uid] = udata = {
             "id"              : text.parse_int(uid),
             "name"            : user["screen_name"],
@@ -391,10 +411,8 @@ class TwitterExtractor(Extractor):
             except Exception:
                 yield tweet
 
-    def _make_tweet(self, user, id_str, url, timestamp):
+    def _make_tweet(self, user, url, id_str):
         return {
-            "created_at": text.parse_timestamp(timestamp).strftime(
-                "%a %b %d %H:%M:%S +0000 %Y"),
             "id_str": id_str,
             "lang": None,
             "user": user,
@@ -557,6 +575,12 @@ class TwitterLikesExtractor(TwitterExtractor):
     def tweets(self):
         return self.api.user_likes(self.user)
 
+    def _transform_tweet(self, tweet):
+        tdata = TwitterExtractor._transform_tweet(self, tweet)
+        tdata["date_liked"] = text.parse_timestamp(
+            (int(tweet["sortIndex"]) >> 20) // 1000)
+        return tdata
+
 
 class TwitterBookmarkExtractor(TwitterExtractor):
     """Extractor for bookmarked tweets"""
@@ -566,6 +590,12 @@ class TwitterBookmarkExtractor(TwitterExtractor):
 
     def tweets(self):
         return self.api.user_bookmarks()
+
+    def _transform_tweet(self, tweet):
+        tdata = TwitterExtractor._transform_tweet(self, tweet)
+        tdata["date_bookmarked"] = text.parse_timestamp(
+            (int(tweet["sortIndex"]) >> 20) // 1000)
+        return tdata
 
 
 class TwitterListExtractor(TwitterExtractor):
@@ -586,7 +616,11 @@ class TwitterListMembersExtractor(TwitterExtractor):
     """Extractor for members of a Twitter list"""
     subcategory = "list-members"
     pattern = BASE_PATTERN + r"/i/lists/(\d+)/members"
-    test = ("https://twitter.com/i/lists/784214683683127296/members",)
+    test = ("https://twitter.com/i/lists/784214683683127296/members", {
+        "pattern": TwitterTimelineExtractor.pattern,
+        "range": "1-40",
+        "count": 40,
+    })
 
     def items(self):
         self.login()
@@ -640,6 +674,21 @@ class TwitterSearchExtractor(TwitterExtractor):
                 pass
 
         return self.api.search_adaptive(query)
+
+
+class TwitterHashtagExtractor(TwitterExtractor):
+    """Extractor for Twitter hashtags"""
+    subcategory = "hashtag"
+    pattern = BASE_PATTERN + r"/hashtag/([^/?#]+)"
+    test = ("https://twitter.com/hashtag/nature", {
+        "pattern": TwitterSearchExtractor.pattern,
+        "url": "3571c3a53b7647ea35517041fdc17f77ec5b2cb9",
+    })
+
+    def items(self):
+        url = "{}/search?q=%23{}".format(self.root, self.user)
+        data = {"_extractor": TwitterSearchExtractor}
+        yield Message.Queue, url, data
 
 
 class TwitterEventExtractor(TwitterExtractor):
@@ -758,6 +807,16 @@ class TwitterTweetExtractor(TwitterExtractor):
                         ("cards-blacklist", ("twitch.tv",))),
             "count": 0,
         }),
+        # retweet
+        ("https://twitter.com/jessica_3978/status/1296304589591810048", {
+            "options": (("retweets", True),),
+            "count": 2,
+            "keyword": {
+                "tweet_id"  : 1296304589591810048,
+                "retweet_id": 1296296016002547713,
+                "date"      : "dt:2020-08-20 04:34:32",
+            },
+        }),
         # original retweets (#1026)
         ("https://twitter.com/jessica_3978/status/1296304589591810048", {
             "options": (("retweets", "original"),),
@@ -802,6 +861,23 @@ class TwitterTweetExtractor(TwitterExtractor):
             "pattern": r"https://pbs.twimg.com/card_img/157\d+/[\w-]+"
                        r"\?format=(jpg|png)&name=orig$",
             "range": "1-2",
+        }),
+        # note tweet with long 'content'
+        ("https://twitter.com/i/web/status/1629193457112686592", {
+            "keyword": {
+                "content": """\
+BREAKING - DEADLY LIES: Independent researchers at Texas A&M University have \
+just contradicted federal government regulators, saying that toxic air \
+pollutants in East Palestine, Ohio, could pose long-term risks. \n\nThe \
+Washington Post writes, "Three weeks after the toxic train derailment in \
+Ohio, an analysis of Environmental Protection Agency data has found nine air \
+pollutants at levels that could raise long-term health concerns in and around \
+East Palestine, according to an independent analysis. \n\n\"The analysis by \
+Texas A&M University seems to contradict statements by state and federal \
+regulators that air near the crash site is completely safe, despite residents \
+complaining about rashes, breathing problems and other health effects." \
+Your reaction.""",
+            },
         }),
     )
 
@@ -876,9 +952,8 @@ class TwitterAvatarExtractor(TwitterExtractor):
 
         url = url.replace("_normal.", ".")
         id_str = url.rsplit("/", 2)[1]
-        timestamp = ((int(id_str) >> 22) + 1288834974657) // 1000
 
-        return (self._make_tweet(user, id_str, url, timestamp),)
+        return (self._make_tweet(user, url, id_str),)
 
 
 class TwitterBackgroundExtractor(TwitterExtractor):
@@ -893,7 +968,7 @@ class TwitterBackgroundExtractor(TwitterExtractor):
             "keyword": {
                 "date": "dt:2015-01-12 10:29:43",
                 "filename": "1421058583",
-                "tweet_id": 0,
+                "tweet_id": 554586009367478272,
             },
         }),
         ("https://twitter.com/User16/header_photo", {
@@ -911,7 +986,8 @@ class TwitterBackgroundExtractor(TwitterExtractor):
         except (KeyError, ValueError):
             return ()
 
-        return (self._make_tweet(user, None, url, timestamp),)
+        id_str = str((int(timestamp) * 1000 - 1288834974657) << 22)
+        return (self._make_tweet(user, url, id_str),)
 
 
 class TwitterImageExtractor(Extractor):
@@ -951,6 +1027,10 @@ class TwitterAPI():
         self.extractor = extractor
 
         self.root = "https://api.twitter.com"
+        self._nsfw_warning = True
+        self._syndication = self.extractor.syndication
+        self._json_dumps = json.JSONEncoder(separators=(",", ":")).encode
+
         cookies = extractor.session.cookies
         cookiedomain = extractor.cookiedomain
 
@@ -966,6 +1046,7 @@ class TwitterAPI():
         auth_token = cookies.get("auth_token", domain=cookiedomain)
 
         self.headers = {
+            "Accept": "*/*",
             "authorization": "Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejR"
                              "COuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu"
                              "4FA33AGWWjCpTnA",
@@ -1019,12 +1100,107 @@ class TwitterAPI():
                    "collab_control,vibe",
         }
         self.variables = {
-            "includePromotedContent": False,
-            "withSuperFollowsUserFields": True,
-            "withBirdwatchPivots": False,
             "withDownvotePerspective": False,
             "withReactionsMetadata": False,
             "withReactionsPerspective": False,
+        }
+        self.features = {
+            "blue_business_profile_image_shape_enabled": False,
+            "responsive_web_twitter_blue_verified_badge_is_enabled": True,
+            "responsive_web_graphql_exclude_directive_enabled": True,
+            "verified_phone_label_enabled": False,
+            "responsive_web_graphql_skip_user_profile_"
+            "image_extensions_enabled": False,
+            "responsive_web_graphql_timeline_navigation_enabled": True,
+        }
+        self.features_pagination = {
+            "blue_business_profile_image_shape_enabled": False,
+            "responsive_web_twitter_blue_verified_badge_is_enabled": True,
+            "responsive_web_graphql_exclude_directive_enabled": True,
+            "verified_phone_label_enabled": False,
+            "responsive_web_graphql_timeline_navigation_enabled": True,
+            "responsive_web_graphql_skip_user_profile_"
+            "image_extensions_enabled": False,
+            "tweetypie_unmention_optimization_enabled": True,
+            "vibe_api_enabled": True,
+            "responsive_web_edit_tweet_api_enabled": True,
+            "graphql_is_translatable_rweb_tweet_is_translatable_enabled": True,
+            "view_counts_everywhere_api_enabled": True,
+            "longform_notetweets_consumption_enabled": True,
+            "tweet_awards_web_tipping_enabled": False,
+            "freedom_of_speech_not_reach_fetch_enabled": False,
+            "standardized_nudges_misinfo": True,
+            "tweet_with_visibility_results_prefer_gql_"
+            "limited_actions_policy_enabled": False,
+            "interactive_text_enabled": True,
+            "responsive_web_text_conversations_enabled": False,
+            "longform_notetweets_richtext_consumption_enabled": False,
+            "responsive_web_enhance_cards_enabled": False,
+        }
+
+    def tweet_detail(self, tweet_id):
+        endpoint = "/graphql/AV_lPTkN6Fc6LgerQpK8Zg/TweetDetail"
+        variables = {
+            "focalTweetId": tweet_id,
+            "referrer": "profile",
+            "with_rux_injections": False,
+            "includePromotedContent": True,
+            "withCommunity": True,
+            "withQuickPromoteEligibilityTweetFields": True,
+            "withBirdwatchNotes": False,
+            "withSuperFollowsUserFields": True,
+            "withSuperFollowsTweetFields": True,
+            "withVoice": True,
+            "withV2Timeline": True,
+        }
+        return self._pagination_tweets(
+            endpoint, variables, ("threaded_conversation_with_injections_v2",))
+
+    def user_tweets(self, screen_name):
+        endpoint = "/graphql/BeHK76TOCY3P8nO-FWocjA/UserTweets"
+        variables = {
+            "userId": self._user_id_by_screen_name(screen_name),
+            "count": 100,
+            "includePromotedContent": True,
+            "withQuickPromoteEligibilityTweetFields": True,
+            "withVoice": True,
+            "withV2Timeline": True,
+        }
+        return self._pagination_tweets(endpoint, variables)
+
+    def user_tweets_and_replies(self, screen_name):
+        endpoint = "/graphql/eZVlZu_1gwb6hMUDXBnZoQ/UserTweetsAndReplies"
+        variables = {
+            "userId": self._user_id_by_screen_name(screen_name),
+            "count": 100,
+            "includePromotedContent": True,
+            "withCommunity": True,
+            "withVoice": True,
+            "withV2Timeline": True,
+        }
+        return self._pagination_tweets(endpoint, variables)
+
+    def user_media(self, screen_name):
+        endpoint = "/graphql/d_ONZLUHGCsErBCriRsLXg/UserMedia"
+        variables = {
+            "userId": self._user_id_by_screen_name(screen_name),
+            "count": 100,
+            "includePromotedContent": False,
+            "withClientEventToken": False,
+            "withBirdwatchNotes": False,
+            "withVoice": True,
+            "withV2Timeline": True,
+        }
+        return self._pagination_tweets(endpoint, variables)
+
+    def user_media_legacy(self, screen_name):
+        endpoint = "/graphql/nRybED9kRbN-TOWioHq1ng/UserMedia"
+        variables = {
+            "userId": self._user_id_by_screen_name(screen_name),
+            "count": 100,
+            "includePromotedContent": False,
+            "withSuperFollowsUserFields": True,
+            "withBirdwatchPivots": False,
             "withSuperFollowsTweetFields": True,
             "withClientEventToken": False,
             "withBirdwatchNotes": False,
@@ -1033,67 +1209,36 @@ class TwitterAPI():
             "__fs_interactive_text": False,
             "__fs_dont_mention_me_view_api_enabled": False,
         }
-
-        self._nsfw_warning = True
-        self._syndication = self.extractor.syndication
-        self._json_dumps = json.JSONEncoder(separators=(",", ":")).encode
-
-    def tweet_detail(self, tweet_id):
-        endpoint = "/graphql/ItejhtHVxU7ksltgMmyaLA/TweetDetail"
-        variables = {
-            "focalTweetId": tweet_id,
-            "with_rux_injections": False,
-            "withCommunity": True,
-            "withQuickPromoteEligibilityTweetFields": True,
-            "withBirdwatchNotes": False,
-        }
         return self._pagination_tweets(
-            endpoint, variables, ("threaded_conversation_with_injections",))
-
-    def user_tweets(self, screen_name):
-        endpoint = "/graphql/WZT7sCTrLvSOaWOXLDsWbQ/UserTweets"
-        variables = {
-            "userId": self._user_id_by_screen_name(screen_name),
-            "count": 100,
-            "withQuickPromoteEligibilityTweetFields": True,
-        }
-        return self._pagination_tweets(endpoint, variables)
-
-    def user_tweets_and_replies(self, screen_name):
-        endpoint = "/graphql/t4wEKVulW4Mbv1P0kgxTEw/UserTweetsAndReplies"
-        variables = {
-            "userId": self._user_id_by_screen_name(screen_name),
-            "count": 100,
-            "withCommunity": True,
-        }
-        return self._pagination_tweets(endpoint, variables)
-
-    def user_media(self, screen_name):
-        endpoint = "/graphql/nRybED9kRbN-TOWioHq1ng/UserMedia"
-        variables = {
-            "userId": self._user_id_by_screen_name(screen_name),
-            "count": 100,
-        }
-        return self._pagination_tweets(endpoint, variables)
+            endpoint, variables, ("user", "result", "timeline", "timeline"),
+            features=False)
 
     def user_likes(self, screen_name):
-        endpoint = "/graphql/9MSTt44HoGjVFSg_u3rHDw/Likes"
+        endpoint = "/graphql/fN4-E0MjFJ9Cn7IYConL7g/Likes"
         variables = {
             "userId": self._user_id_by_screen_name(screen_name),
             "count": 100,
+            "includePromotedContent": False,
+            "withClientEventToken": False,
+            "withBirdwatchNotes": False,
+            "withVoice": True,
+            "withV2Timeline": True,
         }
         return self._pagination_tweets(endpoint, variables)
 
     def user_bookmarks(self):
-        endpoint = "/graphql/uKP9v_I31k0_VSBmlpq2Xg/Bookmarks"
+        endpoint = "/graphql/RV1g3b8n_SGOHwkqKYSCFw/Bookmarks"
         variables = {
             "count": 100,
         }
+        features = self.features_pagination.copy()
+        features["graphql_timeline_v2_bookmark_timeline"] = True
         return self._pagination_tweets(
-            endpoint, variables, ("bookmark_timeline", "timeline"), False)
+            endpoint, variables, ("bookmark_timeline_v2", "timeline"), False,
+            features=features)
 
     def list_latest_tweets_timeline(self, list_id):
-        endpoint = "/graphql/z3l-EHlx-fyg8OvGO4JN8A/ListLatestTweetsTimeline"
+        endpoint = "/graphql/5DAiJG3bD77SiWEs4xViBw/ListLatestTweetsTimeline"
         variables = {
             "listId": list_id,
             "count": 100,
@@ -1128,18 +1273,21 @@ class TwitterAPI():
                 ["twitter_objects"]["live_events"][event_id])
 
     def list_by_rest_id(self, list_id):
-        endpoint = "/graphql/BWEhzAk7k8TwbU4lKH2dpw/ListByRestId"
-        params = {"variables": self._json_dumps({
-            "listId": list_id,
-            "withSuperFollowsUserFields": True,
-        })}
+        endpoint = "/graphql/D0EoyrDcct2MEqC-LnPzFg/ListByRestId"
+        params = {
+            "variables": self._json_dumps({
+                "listId": list_id,
+                "withSuperFollowsUserFields": True,
+            }),
+            "features": self._json_dumps(self.features),
+        }
         try:
             return self._call(endpoint, params)["data"]["list"]
         except KeyError:
             raise exception.NotFoundError("list")
 
     def list_members(self, list_id):
-        endpoint = "/graphql/snESM0DPs3c7M1SBm4rvVw/ListMembers"
+        endpoint = "/graphql/tzsIIbGUH9RyFCVmtO2W2w/ListMembers"
         variables = {
             "listId": list_id,
             "count": 100,
@@ -1149,29 +1297,34 @@ class TwitterAPI():
             endpoint, variables, ("list", "members_timeline", "timeline"))
 
     def user_following(self, screen_name):
-        endpoint = "/graphql/mIwX8GogcobVlRwlgpHNYA/Following"
+        endpoint = "/graphql/FaBzCqZXuQCb4PhB0RHqHw/Following"
         variables = {
             "userId": self._user_id_by_screen_name(screen_name),
             "count": 100,
+            "includePromotedContent": False,
         }
         return self._pagination_users(endpoint, variables)
 
     def user_by_rest_id(self, rest_id):
-        endpoint = "/graphql/I5nvpI91ljifos1Y3Lltyg/UserByRestId"
-        params = {"variables": self._json_dumps({
-            "userId": rest_id,
-            "withSafetyModeUserFields": True,
-            "withSuperFollowsUserFields": True,
-        })}
+        endpoint = "/graphql/S2BkcAyFMG--jef2N6Dgzw/UserByRestId"
+        params = {
+            "variables": self._json_dumps({
+                "userId": rest_id,
+                "withSafetyModeUserFields": True,
+            }),
+            "features": self._json_dumps(self.features),
+        }
         return self._call(endpoint, params)["data"]["user"]["result"]
 
     def user_by_screen_name(self, screen_name):
-        endpoint = "/graphql/7mjxD3-C6BxitPMVQ6w0-Q/UserByScreenName"
-        params = {"variables": self._json_dumps({
-            "screen_name": screen_name,
-            "withSafetyModeUserFields": True,
-            "withSuperFollowsUserFields": True,
-        })}
+        endpoint = "/graphql/k26ASEiniqy4eXMdknTSoQ/UserByScreenName"
+        params = {
+            "variables": self._json_dumps({
+                "screen_name": screen_name,
+                "withSafetyModeUserFields": True,
+            }),
+            "features": self._json_dumps(self.features),
+        }
         return self._call(endpoint, params)["data"]["user"]["result"]
 
     def _user_id_by_screen_name(self, screen_name):
@@ -1337,19 +1490,25 @@ class TwitterAPI():
             params["cursor"] = cursor
 
     def _pagination_tweets(self, endpoint, variables,
-                           path=None, stop_tweets=True):
+                           path=None, stop_tweets=True, features=None):
         extr = self.extractor
         variables.update(self.variables)
         original_retweets = (extr.retweets == "original")
         pinned_tweet = extr.pinned
 
+        params = {"variables": None}
+        if features is None:
+            features = self.features_pagination
+        if features:
+            params["features"] = self._json_dumps(features)
+
         while True:
-            params = {"variables": self._json_dumps(variables)}
+            params["variables"] = self._json_dumps(variables)
             data = self._call(endpoint, params)["data"]
 
             try:
                 if path is None:
-                    instructions = (data["user"]["result"]["timeline"]
+                    instructions = (data["user"]["result"]["timeline_v2"]
                                     ["timeline"]["instructions"])
                 else:
                     instructions = data
@@ -1432,6 +1591,7 @@ class TwitterAPI():
                     if "tweet" in tweet:
                         tweet = tweet["tweet"]
                     legacy = tweet["legacy"]
+                    tweet["sortIndex"] = entry.get("sortIndex")
                 except KeyError:
                     extr.log.debug(
                         "Skipping %s (deleted)",
@@ -1440,6 +1600,8 @@ class TwitterAPI():
 
                 if "retweeted_status_result" in legacy:
                     retweet = legacy["retweeted_status_result"]["result"]
+                    if "tweet" in retweet:
+                        retweet = retweet["tweet"]
                     if original_retweets:
                         try:
                             retweet["legacy"]["retweeted_status_id_str"] = \
@@ -1454,10 +1616,17 @@ class TwitterAPI():
                                 retweet["rest_id"]
                             tweet["author"] = \
                                 retweet["core"]["user_results"]["result"]
-                            if "extended_entities" in retweet["legacy"] and \
+
+                            rtlegacy = retweet["legacy"]
+                            if "extended_entities" in rtlegacy and \
                                     "extended_entities" not in legacy:
                                 legacy["extended_entities"] = \
-                                    retweet["legacy"]["extended_entities"]
+                                    rtlegacy["extended_entities"]
+                            if "withheld_scope" in rtlegacy and \
+                                    "withheld_scope" not in legacy:
+                                legacy["withheld_scope"] = \
+                                    rtlegacy["withheld_scope"]
+                                legacy["full_text"] = rtlegacy["full_text"]
                         except KeyError:
                             pass
 
@@ -1470,6 +1639,8 @@ class TwitterAPI():
                             tweet["core"]["user_results"]["result"]
                             ["legacy"]["screen_name"])
                         quoted["legacy"]["quoted_by_id_str"] = tweet["rest_id"]
+                        quoted["sortIndex"] = entry.get("sortIndex")
+
                         yield quoted
                     except KeyError:
                         extr.log.debug(
@@ -1485,10 +1656,12 @@ class TwitterAPI():
 
     def _pagination_users(self, endpoint, variables, path=None):
         variables.update(self.variables)
+        params = {"variables": None,
+                  "features" : self._json_dumps(self.features_pagination)}
 
         while True:
             cursor = entry = stop = None
-            params = {"variables": self._json_dumps(variables)}
+            params["variables"] = self._json_dumps(variables)
             data = self._call(endpoint, params)["data"]
 
             try:
@@ -1557,9 +1730,10 @@ class TwitterAPI():
                 "in_reply_to_status_id_str" not in tweet:
             tweet["conversation_id_str"] = tweet["id_str"]
 
-        tweet["created_at"] = text.parse_datetime(
-            tweet["created_at"], "%Y-%m-%dT%H:%M:%S.%fZ").strftime(
-            "%a %b %d %H:%M:%S +0000 %Y")
+        if int(tweet_id) < 300000000000000:
+            tweet["created_at"] = text.parse_datetime(
+                tweet["created_at"], "%Y-%m-%dT%H:%M:%S.%fZ").strftime(
+                "%a %b %d %H:%M:%S +0000 %Y")
 
         if "video" in tweet:
             video = tweet["video"]

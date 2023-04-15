@@ -21,18 +21,21 @@ class GelbooruBase():
     category = "gelbooru"
     basecategory = "booru"
     root = "https://gelbooru.com"
+    offset = 0
 
-    def _api_request(self, params):
+    def _api_request(self, params, key="post"):
+        if "s" not in params:
+            params["s"] = "post"
         params["api_key"] = self.api_key
         params["user_id"] = self.user_id
 
-        url = self.root + "/index.php?page=dapi&s=post&q=index&json=1"
+        url = self.root + "/index.php?page=dapi&q=index&json=1"
         data = self.request(url, params=params).json()
 
-        if "post" not in data:
+        if key not in data:
             return ()
 
-        posts = data["post"]
+        posts = data[key]
         if not isinstance(posts, list):
             return (posts,)
         return posts
@@ -57,7 +60,7 @@ class GelbooruBase():
 
     def _pagination_html(self, params):
         url = self.root + "/index.php"
-        params["pid"] = self.page_start * self.per_page
+        params["pid"] = self.offset
 
         data = {}
         while True:
@@ -103,6 +106,10 @@ class GelbooruBase():
                 "body"  : extr(note, 'data-body="', '"')[0],
             })
 
+    def _skip_offset(self, num):
+        self.offset += num
+        return num
+
 
 class GelbooruTagExtractor(GelbooruBase,
                            gelbooru_v02.GelbooruV02TagExtractor):
@@ -133,13 +140,14 @@ class GelbooruPoolExtractor(GelbooruBase,
         }),
     )
 
+    skip = GelbooruBase._skip_offset
+
     def metadata(self):
         url = self.root + "/index.php"
         self._params = {
             "page": "pool",
             "s"   : "show",
             "id"  : self.pool_id,
-            "pid" : self.page_start,
         }
         page = self.request(url, params=self._params).text
 
@@ -158,8 +166,52 @@ class GelbooruPoolExtractor(GelbooruBase,
 
 class GelbooruFavoriteExtractor(GelbooruBase,
                                 gelbooru_v02.GelbooruV02FavoriteExtractor):
+    """Extractor for gelbooru favorites"""
+    per_page = 100
     pattern = BASE_PATTERN + r"page=favorites&s=view&id=(\d+)"
-    test = ("https://gelbooru.com/index.php?page=favorites&s=view&id=12345",)
+    test = ("https://gelbooru.com/index.php?page=favorites&s=view&id=279415", {
+        "count": 3,
+    })
+
+    skip = GelbooruBase._skip_offset
+
+    def posts(self):
+        # get number of favorites
+        params = {
+            "s"    : "favorite",
+            "id"   : self.favorite_id,
+            "limit": "1",
+        }
+        count = self._api_request(params, "@attributes")[0]["count"]
+
+        if count <= self.offset:
+            return
+        pnum, last = divmod(count + 1, self.per_page)
+
+        if self.offset >= last:
+            self.offset -= last
+            diff, self.offset = divmod(self.offset, self.per_page)
+            pnum -= diff + 1
+        skip = self.offset
+
+        # paginate over them in reverse
+        params["pid"] = pnum
+        params["limit"] = self.per_page
+
+        while True:
+            favs = self._api_request(params, "favorite")
+
+            favs.reverse()
+            if skip:
+                favs = favs[skip:]
+                skip = 0
+
+            for fav in favs:
+                yield from self._api_request({"id": fav["favorite"]})
+
+            params["pid"] -= 1
+            if params["pid"] < 0:
+                return
 
 
 class GelbooruPostExtractor(GelbooruBase,

@@ -100,13 +100,6 @@ class HttpDownloader(DownloaderBase):
         adjust_extension = kwdict.get(
             "_http_adjust_extension", self.adjust_extension)
 
-        codes = kwdict.get("_http_retry_codes")
-        if codes:
-            retry_codes = list(self.retry_codes)
-            retry_codes += codes
-        else:
-            retry_codes = self.retry_codes
-
         if self.part and not metadata:
             pathfmt.part_enable(self.partdir)
 
@@ -167,7 +160,10 @@ class HttpDownloader(DownloaderBase):
                 break
             else:
                 msg = "'{} {}' for '{}'".format(code, response.reason, url)
-                if code in retry_codes or 500 <= code < 600:
+                if code in self.retry_codes or 500 <= code < 600:
+                    continue
+                retry = kwdict.get("_http_retry")
+                if retry and retry(response):
                     continue
                 self.log.warning(msg)
                 return False

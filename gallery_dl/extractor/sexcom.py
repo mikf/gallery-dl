@@ -35,6 +35,7 @@ class SexcomExtractor(Extractor):
     def _pagination(self, url):
         while True:
             extr = text.extract_from(self.request(url).text)
+            url = extr('<link rel="next" href="', '"')
 
             while True:
                 href = extr('<a class="image_wrapper" href="', '"')
@@ -42,11 +43,9 @@ class SexcomExtractor(Extractor):
                     break
                 yield self.root + href
 
-            pager = extr('id="pagenum"', '</div>')
-            url = text.extr(pager, ' href="', '"')
             if not url:
                 return
-            url = text.urljoin(self.root, url)
+            url = text.urljoin(self.root, text.unescape(url))
 
     def _parse_pin(self, url):
         response = self.request(url, fatal=False)
@@ -71,9 +70,12 @@ class SexcomExtractor(Extractor):
             info = extr("player.updateSrc(", ");")
 
             if info:
-                path = text.extr(info, "src: '", "'")
-                data["filename"] = path.rpartition("/")[2]
-                data["extension"] = "mp4"
+                try:
+                    path, _ = text.rextract(
+                        info, "src: '", "'", info.index("label: 'HD'"))
+                except ValueError:
+                    path = text.extr(info, "src: '", "'")
+                text.nameext_from_url(path, data)
                 data["url"] = path
             else:
                 iframe = extr('<iframe', '>')
@@ -132,7 +134,8 @@ class SexcomPinExtractor(SexcomExtractor):
         }),
         # video
         ("https://www.sex.com/pin/55748341/", {
-            "pattern": "https://www.sex.com/video/stream/776229/hd",
+            "pattern": r"https://cdn\.sex\.com/videos/pinporn"
+                       r"/2018/02/10/776229_hd\.mp4",
             "content": "e1a5834869163e2c4d1ca2677f5b7b367cf8cfff",
         }),
         # pornhub embed

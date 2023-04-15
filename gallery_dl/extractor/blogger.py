@@ -40,7 +40,7 @@ class BloggerExtractor(Extractor):
         blog["date"] = text.parse_datetime(blog["published"])
         del blog["selfLink"]
 
-        sub = re.compile(r"(/|=)(?:s\d+|w\d+-h\d+)(?=/|$)").sub
+        sub = re.compile(r"(/|=)(?:[sw]\d+|w\d+-h\d+)(?=/|$)").sub
         findall_image = re.compile(
             r'src="(https?://(?:'
             r'blogger\.googleusercontent\.com/img|'

@@ -1148,7 +1148,7 @@ Description
     See `available_includes <https://github.com/danbooru/danbooru/blob/2cf7baaf6c5003c1a174a8f2d53db010cf05dca7/app/models/post.rb#L1842-L1849>`__
     for possible field names. ``aibooru`` also supports ``ai_metadata``.
 
-    Note: This requires 1 additional HTTP request per post.
+    Note: This requires 1 additional HTTP request per 200-post batch.
 
 
 extractor.{Danbooru].threshold
@@ -1370,6 +1370,19 @@ Description
 
     * ``"api"``: Trust the API and stop when ``has_more`` is ``false``.
     * ``"manual"``: Disregard ``has_more`` and only stop when a batch of results is empty.
+
+
+extractor.deviantart.public
+---------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Use a public access token for API requests.
+
+    Disable this option to *force* using a private token for all requests
+    when a `refresh token <extractor.deviantart.refresh-token_>`__ is provided.
 
 
 extractor.deviantart.refresh-token
@@ -4421,6 +4434,16 @@ Description
     i.e. fields whose name starts with an underscore.
 
 
+metadata.skip
+-------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Do not overwrite already existing files.
+
+
 metadata.archive
 ----------------
 Type
@@ -4750,15 +4773,13 @@ Type
 Example
     * ``"~/.local/share/gdl-globals.py"``
     * ``"gdl-globals"``
-Default
-    The ``GLOBALS`` dict in
-    `util.py <../gallery_dl/util.py>`__
 Description
-    Path to or name of an
-    `importable <https://docs.python.org/3/reference/import.html>`__
-    Python module whose namespace gets used as an alternative
-    |globals parameter|__
-    for compiled Python expressions.
+    | Path to or name of an
+      `importable <https://docs.python.org/3/reference/import.html>`__
+      Python module,
+    | whose namespace,
+      in addition to the ``GLOBALS`` dict in `util.py <../gallery_dl/util.py>`__,
+      gets used as |globals parameter|__ for compiled Python expressions.
 
 .. |globals parameter| replace:: ``globals`` parameter
 .. __: https://docs.python.org/3/library/functions.html#eval

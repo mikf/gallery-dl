@@ -1,16 +1,19 @@
 # -*- coding: utf-8 -*-
 
-"""Extractor for images in a generic web page."""
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 2 as
+# published by the Free Software Foundation.
+
+"""Generic information extractor"""
 
 from .common import Extractor, Message
 from .. import config, text
-import re
 import os.path
+import re
 
 
 class GenericExtractor(Extractor):
     """Extractor for images in a generic web page."""
-
     category = "generic"
     directory_fmt = ("{category}", "{pageurl}")
     archive_fmt = "{imageurl}"
@@ -18,28 +21,51 @@ class GenericExtractor(Extractor):
     # By default, the generic extractor is disabled
     # and the "g(eneric):" prefix in url is required.
     # If the extractor is enabled, make the prefix optional
-    pattern = r"(?ix)(?P<generic>g(?:eneric)?:)"
+    pattern = r"(?i)(?P<generic>g(?:eneric)?:)"
     if config.get(("extractor", "generic"), "enabled"):
         pattern += r"?"
 
     # The generic extractor pattern should match (almost) any valid url
     # Based on: https://tools.ietf.org/html/rfc3986#appendix-B
-    pattern += r"""
-        (?P<scheme>https?://)?          # optional http(s) scheme
-        (?P<domain>[-\w\.]+)            # required domain
-        (?P<path>/[^?#]*)?              # optional path
-        (?:\?(?P<query>[^#]*))?         # optional query
-        (?:\#(?P<fragment>.*))?         # optional fragment
-        """
+    pattern += (
+        r"(?P<scheme>https?://)?"          # optional http(s) scheme
+        r"(?P<domain>[-\w\.]+)"            # required domain
+        r"(?P<path>/[^?#]*)?"              # optional path
+        r"(?:\?(?P<query>[^#]*))?"         # optional query
+        r"(?:\#(?P<fragment>.*))?"         # optional fragment
+    )
+
+    test = (
+        ("generic:https://www.nongnu.org/lzip/", {
+            "count": 1,
+            "content": "40be5c77773d3e91db6e1c5df720ee30afb62368",
+            "keyword": {
+                "description": "Lossless data compressor",
+                "imageurl": "https://www.nongnu.org/lzip/lzip.png",
+                "keywords": "lzip, clzip, plzip, lzlib, LZMA, bzip2, "
+                            "gzip, data compression, GNU, free software",
+                "pageurl": "https://www.nongnu.org/lzip/",
+            },
+        }),
+        # internationalized domain name
+        ("generic:https://räksmörgås.josefsson.org/", {
+            "count": 2,
+            "pattern": "^https://räksmörgås.josefsson.org/",
+        }),
+        ("g:https://en.wikipedia.org/Main_Page"),
+        ("g:https://example.org/path/to/file?que=1?&ry=2/#fragment"),
+        ("g:https://example.org/%27%3C%23/%23%3E%27.htm?key=%3C%26%3E"),
+        ("generic:https://en.wikipedia.org/Main_Page"),
+        ("generic:https://example.org/path/to/file?que=1?&ry=2/#fragment"),
+        ("generic:https://example.org/%27%3C%23/%23%3E%27.htm?key=%3C%26%3E"),
+    )
 
     def __init__(self, match):
-        """Init."""
         Extractor.__init__(self, match)
 
         # Strip the "g(eneric):" prefix
         # and inform about "forced" or "fallback" mode
         if match.group('generic'):
-            self.log.info("Forcing use of generic information extractor.")
             self.url = match.group(0).partition(":")[2]
         else:
             self.log.info("Falling back on generic information extractor.")
@@ -56,7 +82,7 @@ class GenericExtractor(Extractor):
         self.root = self.scheme + match.group('domain')
 
     def items(self):
-        """Get page, extract metadata & images, yield them in suitable messages.
+        """Get page, extract metadata & images, yield them in suitable messages
 
         Adapted from common.GalleryExtractor.items()
 
@@ -71,7 +97,6 @@ class GenericExtractor(Extractor):
             pass
         images = enumerate(imgs, 1)
 
-        yield Message.Version, 1
         yield Message.Directory, data
 
         for data["num"], (url, imgdata) in images:
@@ -136,11 +161,13 @@ class GenericExtractor(Extractor):
         image urls; this pattern matches only the first url; remaining urls
         will be matched by the "imageurl_pattern_ext" pattern below.
         """
-        imageurl_pattern_src = r"""(?ix)
-            <(?:img|video|source)\s.*?      # <img>, <video> or <source>
-            src(?:set)?=["']?               # src or srcset attributes
-            (?P<URL>[^"'\s>]+)              # url
-            """
+
+        imageurl_pattern_src = (
+            r"(?i)"
+            r"<(?:img|video|source)\s[^>]*"    # <img>, <video> or <source>
+            r"src(?:set)?=[\"']?"              # src or srcset attributes
+            r"(?P<URL>[^\"'\s>]+)"             # url
+        )
 
         """
         2: Look anywhere for urls containing common image/video extensions
@@ -154,12 +181,13 @@ class GenericExtractor(Extractor):
         urls in html tags.
         """
 
-        imageurl_pattern_ext = r"""(?ix)
-            (?:[^?&#"'>\s]+)                    # anything until dot+extension
-            \.(?:jpe?g|jpe|png|gif
-                 |web[mp]|mp4|mkv|og[gmv]|opus) # dot + image/video extensions
-            (?:[^"'<>\s]*)?                      # optional query and fragment
-            """
+        imageurl_pattern_ext = (
+            r"(?i)"
+            r"(?:[^?&#\"'>\s]+)"           # anything until dot+extension
+                                           # dot + image/video extensions
+            r"\.(?:jpe?g|jpe|png|gif|web[mp]|mp4|mkv|og[gmv]|opus)"
+            r"(?:[^\"'<>\s]*)?"            # optional query and fragment
+        )
 
         imageurls_src = re.findall(imageurl_pattern_src, page)
         imageurls_ext = re.findall(imageurl_pattern_ext, page)
@@ -199,7 +227,7 @@ class GenericExtractor(Extractor):
                 absimageurls.append(self.baseurl + '/' + u)
 
         # Remove duplicates
-        absimageurls = set(absimageurls)
+        absimageurls = dict.fromkeys(absimageurls)
 
         # Create the image metadata dict and add imageurl to it
         # (image filename and extension are added by items())

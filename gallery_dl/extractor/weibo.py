@@ -79,6 +79,18 @@ class WeiboExtractor(Extractor):
     def _extract_status(self, status, files):
         append = files.append
 
+        if "mix_media_info" in status:
+            for item in status["mix_media_info"]["items"]:
+                type = item.get("type")
+                if type == "video":
+                    if self.videos:
+                        append(self._extract_video(item["data"]["media_info"]))
+                elif type == "pic":
+                    append(item["data"]["largest"].copy())
+                else:
+                    self.log.warning("Unknown media type '%s'", type)
+            return
+
         pic_ids = status.get("pic_ids")
         if pic_ids:
             pics = status["pic_infos"]
@@ -100,18 +112,20 @@ class WeiboExtractor(Extractor):
                 else:
                     append(pic["largest"].copy())
 
-        if "page_info" in status and self.videos:
-            try:
-                media = max(status["page_info"]["media_info"]["playback_list"],
-                            key=lambda m: m["meta"]["quality_index"])
-            except KeyError:
-                pass
-            except ValueError:
-                info = status["page_info"]["media_info"]
-                append({"url": (info.get("stream_url_hd") or
-                                info["stream_url"])})
-            else:
-                append(media["play_info"].copy())
+        if "page_info" in status:
+            info = status["page_info"]
+            if "media_info" in info and self.videos:
+                append(self._extract_video(info["media_info"]))
+
+    def _extract_video(self, info):
+        try:
+            media = max(info["playback_list"],
+                        key=lambda m: m["meta"]["quality_index"])
+        except Exception:
+            return {"url": (info.get("stream_url_hd") or
+                            info["stream_url"])}
+        else:
+            return media["play_info"].copy()
 
     def _status_by_id(self, status_id):
         url = "{}/ajax/statuses/show?id={}".format(self.root, status_id)
@@ -380,7 +394,7 @@ class WeiboStatusExtractor(WeiboExtractor):
         }),
         # missing 'playback_list' (#2792)
         ("https://weibo.com/2909128931/4409545658754086", {
-            "count": 9,
+            "count": 10,
         }),
         # empty 'playback_list' (#3301)
         ("https://weibo.com/1501933722/4142890299009993", {
@@ -388,6 +402,10 @@ class WeiboStatusExtractor(WeiboExtractor):
                        r"000OOl0k01\.mp4\?label=mp4_hd&template=template_7&ori"
                        r"=0&ps=1CwnkDw1GXwCQx.+&KID=unistore,video",
             "count": 1,
+        }),
+        # mix_media_info (#3793)
+        ("https://weibo.com/2427303621/MxojLlLgQ", {
+            "count": 9,
         }),
         ("https://m.weibo.cn/status/4339748116375525"),
         ("https://m.weibo.cn/5746766133/4339748116375525"),

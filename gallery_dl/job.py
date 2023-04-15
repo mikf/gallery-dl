@@ -6,7 +6,6 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-import re
 import sys
 import errno
 import logging
@@ -33,15 +32,11 @@ class Job():
         self.kwdict = {}
         self.status = 0
 
-        hooks = extr.config("hooks")
-        if hooks:
-            if isinstance(hooks, dict):
-                hooks = hooks.items()
-            self._wrap_logger = self._wrap_logger_hooks
-            self._logger_hooks = [
-                (re.compile(pattern).search, hook)
-                for pattern, hook in hooks
-            ]
+        actions = extr.config("actions")
+        if actions:
+            from .actions import parse
+            self._logger_actions = parse(actions)
+            self._wrap_logger = self._wrap_logger_actions
 
         path_proxy = output.PathfmtProxy(self)
         self._logger_extra = {
@@ -211,11 +206,10 @@ class Job():
         return self._wrap_logger(logging.getLogger(name))
 
     def _wrap_logger(self, logger):
-        return output.LoggerAdapter(logger, self._logger_extra)
+        return output.LoggerAdapter(logger, self)
 
-    def _wrap_logger_hooks(self, logger):
-        return output.LoggerAdapterEx(
-            logger, self._logger_extra, self)
+    def _wrap_logger_actions(self, logger):
+        return output.LoggerAdapterActions(logger, self)
 
     def _write_unsupported(self, url):
         if self.ulog:
@@ -639,13 +633,13 @@ class KeywordJob(Job):
     def print_kwdict(self, kwdict, prefix="", markers=None):
         """Print key-value pairs in 'kwdict' with formatting"""
         write = sys.stdout.write
-        suffix = "]" if prefix else ""
+        suffix = "']" if prefix else ""
 
         markerid = id(kwdict)
         if markers is None:
             markers = {markerid}
         elif markerid in markers:
-            write("{}\n  <circular reference>\n".format(prefix[:-1]))
+            write("{}\n  <circular reference>\n".format(prefix[:-2]))
             return  # ignore circular reference
         else:
             markers.add(markerid)
@@ -656,13 +650,13 @@ class KeywordJob(Job):
             key = prefix + key + suffix
 
             if isinstance(value, dict):
-                self.print_kwdict(value, key + "[", markers)
+                self.print_kwdict(value, key + "['", markers)
 
             elif isinstance(value, list):
                 if not value:
                     pass
                 elif isinstance(value[0], dict):
-                    self.print_kwdict(value[0], key + "[N][", markers)
+                    self.print_kwdict(value[0], key + "[N]['", markers)
                 else:
                     fmt = ("  {:>%s} {}\n" % len(str(len(value)))).format
                     write(key + "[N]\n")
@@ -672,6 +666,8 @@ class KeywordJob(Job):
             else:
                 # string or number
                 write("{}\n  {}\n".format(key, value))
+
+        markers.remove(markerid)
 
 
 class UrlJob(Job):

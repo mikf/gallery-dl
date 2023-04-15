@@ -34,6 +34,8 @@ def parse(format_string, default=NONE, fmt=format):
 
         if kind == "T":
             cls = TemplateFormatter
+        elif kind == "TF":
+            cls = TemplateFStringFormatter
         elif kind == "E":
             cls = ExpressionFormatter
         elif kind == "M":
@@ -197,15 +199,6 @@ class StringFormatter():
             return lambda obj: fmt(conversion(obj))
 
 
-class TemplateFormatter(StringFormatter):
-    """Read format_string from file"""
-
-    def __init__(self, path, default=NONE, fmt=format):
-        with open(util.expand_path(path)) as fp:
-            format_string = fp.read()
-        StringFormatter.__init__(self, format_string, default, fmt)
-
-
 class ExpressionFormatter():
     """Generate text by evaluating a Python expression"""
 
@@ -218,7 +211,7 @@ class ModuleFormatter():
 
     def __init__(self, function_spec, default=NONE, fmt=None):
         module_name, _, function_name = function_spec.partition(":")
-        module = __import__(module_name)
+        module = util.import_file(module_name)
         self.format_map = getattr(module, function_name)
 
 
@@ -227,6 +220,24 @@ class FStringFormatter():
 
     def __init__(self, fstring, default=NONE, fmt=None):
         self.format_map = util.compile_expression('f"""' + fstring + '"""')
+
+
+class TemplateFormatter(StringFormatter):
+    """Read format_string from file"""
+
+    def __init__(self, path, default=NONE, fmt=format):
+        with open(util.expand_path(path)) as fp:
+            format_string = fp.read()
+        StringFormatter.__init__(self, format_string, default, fmt)
+
+
+class TemplateFStringFormatter(FStringFormatter):
+    """Read f-string from file"""
+
+    def __init__(self, path, default=NONE, fmt=format):
+        with open(util.expand_path(path)) as fp:
+            format_string = fp.read()
+        FStringFormatter.__init__(self, format_string, default, fmt)
 
 
 def parse_field_name(field_name):
@@ -245,6 +256,8 @@ def parse_field_name(field_name):
             try:
                 if ":" in key:
                     key = _slice(key)
+                else:
+                    key = key.strip("\"'")
             except TypeError:
                 pass  # key is an integer
 
