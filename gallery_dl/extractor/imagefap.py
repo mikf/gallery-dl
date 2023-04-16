@@ -49,7 +49,7 @@ class ImagefapGalleryExtractor(ImagefapExtractor):
         ("https://www.imagefap.com/gallery/7102714", {
             "pattern": r"https://cdnh?\.imagefap\.com"
                        r"/images/full/\d+/\d+/\d+\.jpg",
-            "keyword": "2ba96e84c2952c4750e9fa94a3f2b1f965cec2f3",
+            "keyword": "a9a17103fbd61f9e228f1ccc458eb0284b1fb0d2",
             "content": "694a0a57385980a6f90fbc296cadcd6c11ba2dab",
         }),
         ("https://www.imagefap.com/gallery/7876223", {
@@ -57,6 +57,7 @@ class ImagefapGalleryExtractor(ImagefapExtractor):
                        r"/images/full/\d+/\d+/\d+\.jpg",
             "keyword": {
                 "count": 44,
+                "description": "",
                 "gallery_id": 7876223,
                 "image_id": int,
                 "num": int,
@@ -66,6 +67,20 @@ class ImagefapGalleryExtractor(ImagefapExtractor):
                 "uploader": "BdRachel",
             },
             "count": 44,
+        }),
+        # description (#3905)
+        ("https://www.imagefap.com/gallery/6180555", {
+            "range": "1",
+            "keyword": {
+                "count": 36,
+                "description": "Nude and dressed sluts showing off the goods",
+                "gallery_id": 6180555,
+                "image_id": int,
+                "num": int,
+                "tags": list,
+                "title": "Dressed or Undressed MG*",
+                "uploader": "splitopen",
+            },
         }),
         ("https://www.imagefap.com/pictures/7102714"),
         ("https://www.imagefap.com/gallery.php?gid=7102714"),
@@ -95,6 +110,8 @@ class ImagefapGalleryExtractor(ImagefapExtractor):
             "tags": extr('name="keywords" content="', '"').split(", "),
             "uploader": extr("porn picture gallery by ", " to see hottest"),
             "title": text.unescape(extr("<title>", "<")),
+            "description": text.unescape(extr(
+                'id="gdesc_text"', '<').partition(">")[2]),
             "count": text.parse_int(extr(' 1 of ', ' pics"')),
         }
 
