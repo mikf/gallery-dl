@@ -49,13 +49,14 @@ class ImagefapGalleryExtractor(ImagefapExtractor):
         ("https://www.imagefap.com/gallery/7102714", {
             "pattern": r"https://cdnh?\.imagefap\.com"
                        r"/images/full/\d+/\d+/\d+\.jpg",
-            "keyword": "a9a17103fbd61f9e228f1ccc458eb0284b1fb0d2",
+            "keyword": "bdcb75b1e4b9dddc718f3d66e1a58afa9d81a38b",
             "content": "694a0a57385980a6f90fbc296cadcd6c11ba2dab",
         }),
         ("https://www.imagefap.com/gallery/7876223", {
             "pattern": r"https://cdnh?\.imagefap\.com"
                        r"/images/full/\d+/\d+/\d+\.jpg",
             "keyword": {
+                "categories": ["Asses", "Softcore", "Pornstars"],
                 "count": 44,
                 "description": "",
                 "gallery_id": 7876223,
@@ -72,12 +73,13 @@ class ImagefapGalleryExtractor(ImagefapExtractor):
         ("https://www.imagefap.com/gallery/6180555", {
             "range": "1",
             "keyword": {
+                "categories": ["Amateur", "Softcore", "Homemade"],
                 "count": 36,
                 "description": "Nude and dressed sluts showing off the goods",
                 "gallery_id": 6180555,
                 "image_id": int,
                 "num": int,
-                "tags": list,
+                "tags": []  ,
                 "title": "Dressed or Undressed MG*",
                 "uploader": "splitopen",
             },
@@ -107,11 +109,14 @@ class ImagefapGalleryExtractor(ImagefapExtractor):
 
         data = {
             "gallery_id": text.parse_int(self.gid),
-            "tags": extr('name="keywords" content="', '"').split(", "),
             "uploader": extr("porn picture gallery by ", " to see hottest"),
             "title": text.unescape(extr("<title>", "<")),
             "description": text.unescape(extr(
                 'id="gdesc_text"', '<').partition(">")[2]),
+            "categories": text.split_html(extr(
+                'id="cnt_cats"', '</div>'))[1::2],
+            "tags": text.split_html(extr(
+                'id="cnt_tags"', '</div>'))[1::2],
             "count": text.parse_int(extr(' 1 of ', ' pics"')),
         }
 
