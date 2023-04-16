@@ -45,7 +45,8 @@ class TwitterExtractor(Extractor):
         if not self.config("transform", True):
             self._transform_user = util.identity
             self._transform_tweet = util.identity
-        self._user = self._user_obj = None
+        self._user = None
+        self._user_obj = None
         self._user_cache = {}
         self._init_sizes()
 
@@ -369,8 +370,9 @@ class TwitterExtractor(Extractor):
         return udata
 
     def _assign_user(self, user):
-        self._user_obj = user
-        self._user = self._transform_user(user)
+        if self._user_obj is None:
+            self._user_obj = user
+            self._user = self._transform_user(user)
 
     def _users_result(self, users):
         userfmt = self.config("users")
@@ -768,6 +770,13 @@ class TwitterTweetExtractor(TwitterExtractor):
         ("https://twitter.com/StobiesGalaxy/status/1270755918330896395", {
             "pattern": r"https://pbs\.twimg\.com/media/EaK.+=jpg",
             "count": 4,
+        }),
+        # different 'user' and 'author' in quoted Tweet (#3922)
+        ("https://twitter.com/web/status/1644907989109751810", {
+            "keyword": {
+                "author": {"id": 321629993         , "name": "Cakes_Comics"},
+                "user"  : {"id": 718928225360080897, "name": "StobiesGalaxy"},
+            },
         }),
         # TwitPic embeds (#579)
         ("https://twitter.com/i/web/status/112900228289540096", {
