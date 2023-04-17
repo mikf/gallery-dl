@@ -135,6 +135,28 @@ class ImxtoImageExtractor(ImagehostImageExtractor):
         }
 
 
+class ImxtoGalleryExtractor(ImagehostImageExtractor):
+    """Extractor for image galleries from imx.to"""
+    category = "imxto"
+    subcategory = "gallery"
+    pattern = r"(?:https?://)?(?:www\.)?(imx\.to/g/([^/?#]+))"
+    test = ("https://imx.to/g/ozdy", {
+        "pattern": ImxtoImageExtractor.pattern,
+        "keyword": {"title": "untitled gallery"},
+        "count": 40,
+    })
+
+    def items(self):
+        page = self.request(self.page_url).text
+        title, pos = text.extract(page, '<div class="title', '<')
+        data = {
+            "_extractor": ImxtoImageExtractor,
+            "title": text.unescape(title.partition(">")[2]).strip(),
+        }
+        for url in text.extract_iter(page, '<a href="', '"', pos):
+            yield Message.Queue, url, data
+
+
 class AcidimgImageExtractor(ImagehostImageExtractor):
     """Extractor for single images from acidimg.cc"""
     category = "acidimg"
