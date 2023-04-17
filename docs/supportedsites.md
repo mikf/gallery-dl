@@ -400,7 +400,7 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>Imxto</td>
     <td>https://imx.to/</td>
-    <td>individual Images</td>
+    <td>Galleries, individual Images</td>
     <td></td>
 </tr>
 <tr>
