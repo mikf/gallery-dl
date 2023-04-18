@@ -370,9 +370,8 @@ class TwitterExtractor(Extractor):
         return udata
 
     def _assign_user(self, user):
-        if self._user_obj is None:
-            self._user_obj = user
-            self._user = self._transform_user(user)
+        self._user_obj = user
+        self._user = self._transform_user(user)
 
     def _users_result(self, users):
         userfmt = self.config("users")
@@ -906,7 +905,8 @@ Your reaction.""",
         for tweet in self.api.tweet_detail(tweet_id):
             if tweet["rest_id"] == tweet_id or \
                     tweet.get("_retweet_id_str") == tweet_id:
-                self._assign_user(tweet["core"]["user_results"]["result"])
+                if self._user_obj is None:
+                    self._assign_user(tweet["core"]["user_results"]["result"])
                 tweets.append(tweet)
 
                 tweet_id = tweet["legacy"].get("quoted_status_id_str")
