@@ -4,35 +4,46 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extractors for https://2chen.moe/"""
+"""Extractors for https://sturdychan.help/"""
 
 from .common import Extractor, Message
 from .. import text
+
+BASE_PATTERN = r"(?:https?://)?(?:sturdychan.help|2chen\.(?:moe|club))"
 
 
 class _2chenThreadExtractor(Extractor):
     """Extractor for 2chen threads"""
     category = "2chen"
     subcategory = "thread"
+    root = "https://sturdychan.help"
     directory_fmt = ("{category}", "{board}", "{thread} {title}")
     filename_fmt = "{time} {filename}.{extension}"
     archive_fmt = "{board}_{thread}_{hash}_{time}"
-    pattern = r"(?:https?://)?2chen\.(?:moe|club)/([^/?#]+)/(\d+)"
+    pattern = BASE_PATTERN + r"/([^/?#]+)/(\d+)"
     test = (
-        ("https://2chen.moe/tv/496715", {
-            "pattern": r"https://2chen\.su/assets/images/src/\w{40}\.\w+$",
+        ("https://sturdychan.help/tv/268929", {
+            "pattern": r"https://sturdychan\.help/assets/images"
+                       r"/src/\w{40}\.\w+$",
             "count": ">= 179",
+            "keyword": {
+                "board": "tv",
+                "date": "type:datetime",
+                "hash": r"re:[0-9a-f]{40}",
+                "name": "Anonymous",
+                "no": r"re:\d+",
+                "thread": "268929",
+                "time": int,
+                "title": "「/ttg/ #118: 🇧🇷 edition」",
+                "url": str,
+            },
         }),
-        ("https://2chen.club/tv/1", {
-            "count": 5,
-        }),
-        # 404
+        ("https://2chen.club/tv/1"),
         ("https://2chen.moe/jp/303786"),
     )
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.root = text.root_from_url(match.group(0))
         self.board, self.thread = match.groups()
 
     def items(self):
@@ -88,9 +99,10 @@ class _2chenBoardExtractor(Extractor):
     """Extractor for 2chen boards"""
     category = "2chen"
     subcategory = "board"
-    pattern = r"(?:https?://)?2chen\.(?:moe|club)/([^/?#]+)(?:/catalog|/?$)"
+    root = "https://sturdychan.help"
+    pattern = BASE_PATTERN + r"/([^/?#]+)(?:/catalog|/?$)"
     test = (
-        ("https://2chen.moe/co/", {
+        ("https://sturdychan.help/co/", {
             "pattern": _2chenThreadExtractor.pattern
         }),
         ("https://2chen.moe/co"),
@@ -100,7 +112,6 @@ class _2chenBoardExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.root = text.root_from_url(match.group(0))
         self.board = match.group(1)
 
     def items(self):
