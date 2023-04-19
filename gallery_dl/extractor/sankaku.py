@@ -13,6 +13,7 @@ from .common import Message
 from .. import text, util, exception
 from ..cache import cache
 import collections
+import re
 
 BASE_PATTERN = r"(?:https?://)?" \
     r"(?:(?:chan|beta|black|white)\.sankakucomplex\.com|sankaku\.app)" \
@@ -101,12 +102,26 @@ class SankakuTagExtractor(SankakuExtractor):
         # match arbitrary query parameters
         ("https://chan.sankakucomplex.com"
          "/?tags=marie_rose&page=98&next=3874906&commit=Search"),
+        # 'date:' tags (#1790)
+        ("https://chan.sankakucomplex.com/?tags=date:2023-03-20", {
+            "range": "1",
+            "count": 1,
+        }),
     )
 
     def __init__(self, match):
         SankakuExtractor.__init__(self, match)
         query = text.parse_query(match.group(1))
         self.tags = text.unquote(query.get("tags", "").replace("+", " "))
+
+        if "date:" in self.tags:
+            # rewrite 'date:' tags (#1790)
+            self.tags = re.sub(
+                r"date:(\d\d)[.-](\d\d)[.-](\d\d\d\d)",
+                r"date:\3.\2.\1", self.tags)
+            self.tags = re.sub(
+                r"date:(\d\d\d\d)[.-](\d\d)[.-](\d\d)",
+                r"date:\1.\2.\3", self.tags)
 
     def metadata(self):
         return {"search_tags": self.tags}
