@@ -18,7 +18,6 @@ jobs:
           architecture: "x64"
           python-version: "3.11"
           python-packages: "secretstorage"
-        include:
         - os: "windows-2019"
           architecture: "x86"
           python-version: "3.8"
