@@ -884,6 +884,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
+    <td>Vipergirls</td>
+    <td>https://vipergirls.to/</td>
+    <td>Posts, Threads</td>
+    <td></td>
+</tr>
+<tr>
     <td>Vipr</td>
     <td>https://vipr.im/</td>
     <td>individual Images</td>

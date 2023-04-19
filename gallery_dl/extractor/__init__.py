@@ -156,6 +156,7 @@ modules = [
     "urlshortener",
     "vanillarock",
     "vichan",
+    "vipergirls",
     "vk",
     "vsco",
     "wallhaven",
