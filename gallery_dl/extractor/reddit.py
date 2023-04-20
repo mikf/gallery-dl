@@ -303,8 +303,8 @@ class RedditImageExtractor(Extractor):
     category = "reddit"
     subcategory = "image"
     archive_fmt = "{filename}"
-    pattern = (r"(?:https?://)?i\.redd(?:\.it|ituploads\.com)"
-               r"/[^/?#]+(?:\?[^#]*)?")
+    pattern = (r"(?:https?://)?((?:i|preview)\.redd\.it|i\.reddituploads\.com)"
+               r"/([^/?#]+)(\?[^#]*)?")
     test = (
         ("https://i.redd.it/upjtjcx2npzz.jpg", {
             "url": "0de614900feef103e580b632190458c0b62b641a",
@@ -315,12 +315,29 @@ class RedditImageExtractor(Extractor):
             "url": "f24f25efcedaddeec802e46c60d77ef975dc52a5",
             "content": "541dbcc3ad77aa01ee21ca49843c5e382371fae7",
         }),
+        # preview.redd.it -> i.redd.it
+        (("https://preview.redd.it/00af44lpn0u51.jpg?width=960&crop=smart"
+         "&auto=webp&v=enabled&s=dbca8ab84033f4a433772d9c15dbe0429c74e8ac"), {
+            "pattern": r"^https://i\.redd\.it/00af44lpn0u51\.jpg$"
+        }),
     )
 
+    def __init__(self, match):
+        Extractor.__init__(self, match)
+        domain = match.group(1)
+        self.path = match.group(2)
+        if domain == "preview.redd.it":
+            self.domain = "i.redd.it"
+            self.query = ""
+        else:
+            self.domain = domain
+            self.query = match.group(3) or ""
+
     def items(self):
-        data = text.nameext_from_url(self.url)
+        url = "https://{}/{}{}".format(self.domain, self.path, self.query)
+        data = text.nameext_from_url(url)
         yield Message.Directory, data
-        yield Message.Url, self.url, data
+        yield Message.Url, url, data
 
 
 class RedditAPI():
