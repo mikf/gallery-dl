@@ -1651,7 +1651,11 @@ Default
     ``["mp4", "webm", "mobile", "gif"]``
 Description
     List of names of the preferred animation format, which can be
-    ``"mp4"``, ``"webm"``, ``"mobile"``, ``"gif"``, or ``"webp"``.
+    ``"mp4"``,
+    ``"webm"``,
+    ``"mobile"``,
+    ``"gif"``, or
+    ``"webp"``.
 
     If a selected format is not available, the next one in the list will be
     tried until an available format is found.
@@ -2602,7 +2606,12 @@ Default
     ``["hd", "sd", "gif"]``
 Description
     List of names of the preferred animation format, which can be
-    ``"hd"``, ``"sd"``, `"gif"``, `"vthumbnail"``, `"thumbnail"``, or ``"poster"``.
+    ``"hd"``,
+    ``"sd"``,
+    ``"gif"``,
+    ``"thumbnail"``,
+    ``"vthumbnail"``, or
+    ``"poster"``.
 
     If a selected format is not available, the next one in the list will be
     tried until an available format is found.
