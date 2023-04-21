@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2022 Mike Fährmann
+# Copyright 2015-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -347,8 +347,8 @@ class ImgurAPI():
     def __init__(self, extractor):
         self.extractor = extractor
         self.headers = {
-            "Authorization": "Client-ID " + extractor.config(
-                "client-id", "546c25a59c58ad7"),
+            "Authorization": "Client-ID " + (
+                extractor.config("client-id") or "546c25a59c58ad7"),
         }
 
     def account_favorites(self, account):
