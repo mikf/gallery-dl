@@ -1570,9 +1570,9 @@ class TwitterAPI():
 
                 if esw("tweet-"):
                     tweets.append(entry)
-                elif esw("homeConversation-"):
-                    tweets.extend(entry["content"]["items"])
-                elif esw("conversationthread-"):
+                elif esw(("homeConversation-",
+                          "profile-conversation-",
+                          "conversationthread-")):
                     tweets.extend(entry["content"]["items"])
                 elif esw("tombstone-"):
                     item = entry["content"]["itemContent"]
