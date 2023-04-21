@@ -1733,6 +1733,14 @@ Description
     but is most likely going to fail with ``403 Forbidden`` errors.
 
 
+extractor.imgur.client-id
+-------------------------
+Type
+    ``string``
+Description
+    Custom Client ID value for API requests.
+
+
 extractor.imgur.mp4
 -------------------
 Type
