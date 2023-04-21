@@ -20,19 +20,23 @@ class NanaGalleryExtractor(GalleryExtractor):
           "059f7de55a4297413bfbd432ce7d6e724dd42bae"), {
             "pattern": r"https://nana\.my\.id/reader/"
                        r"\w+/image/page\?path=.*\.\w+",
-            "title"  : "Everybody Loves Shion",
-            "artist" : "fuzui",
-            "tags"   : list,
-            "count"  : 29,
+            "keyword": {
+                "title" : "Everybody Loves Shion",
+                "artist": "fuzui",
+                "tags"  : list,
+                "count" : 29,
+            },
         }),
         (("https://nana.my.id/reader/"
           "77c8712b67013e427923573379f5bafcc0c72e46"), {
             "pattern": r"https://nana\.my\.id/reader/"
                        r"\w+/image/page\?path=.*\.\w+",
-            "title"  : "Lovey-Dovey With an Otaku-Friendly Gyaru",
-            "artist" : "Sueyuu",
-            "tags"   : ["Sueyuu"],
-            "count"  : 58,
+            "keyword": {
+                "title" : "Lovey-Dovey With an Otaku-Friendly Gyaru",
+                "artist": "Sueyuu",
+                "tags"  : ["Sueyuu"],
+                "count" : 58,
+            },
         }),
     )
 
