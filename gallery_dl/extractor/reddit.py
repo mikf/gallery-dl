@@ -459,6 +459,9 @@ class RedditAPI():
     def _pagination(self, endpoint, params):
         id_min = self._parse_id("id-min", 0)
         id_max = self._parse_id("id-max", float("inf"))
+        if id_max == 2147483647:
+            self.log.debug("Ignoring 'id-max' setting \"zik0zj\"")
+            id_max = float("inf")
         date_min, date_max = self.extractor._get_date_min_max(0, 253402210800)
 
         while True:
