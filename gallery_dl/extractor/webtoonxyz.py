@@ -8,7 +8,7 @@
 
 """Extractors for https://www.webtoon.xyz/"""
 
-from .. import exception, text, util
+from .. import text, util
 from .common import Extractor, GalleryExtractor, Message
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?webtoon\.xyz/read/([^/?#]+)"
@@ -47,7 +47,7 @@ class WebtoonXYZChapterExtractor(WebtoonXYZBase, GalleryExtractor):
                 "count": 5,
                 "keyword": {
                     "comic": "learning-the-hard-way",
-                    "description": r"re:^Bullied ruthlessly by girls in high school,.+",
+                    "description": r"re:^Bullied ruthlessly by girls .+",
                     "chapter_no": "1",
                     "title": "Learning The Hard Way",
                 },
@@ -64,8 +64,12 @@ class WebtoonXYZChapterExtractor(WebtoonXYZBase, GalleryExtractor):
         self.setup_agegate_cookies()
 
     def metadata(self, page):
-        locale, pos = text.extract(page, '<meta property="og:locale" content="', '"')
-        title, pos = text.extract(page, '<meta property="og:title" content="', '"', pos)
+        locale, pos = text.extract(
+            page, '<meta property="og:locale" content="', '"'
+        )
+        title, pos = text.extract(
+            page, '<meta property="og:title" content="', '"', pos
+        )
         descr, pos = text.extract(
             page, '<meta property="og:description" content="', '"', pos
         )
@@ -74,7 +78,9 @@ class WebtoonXYZChapterExtractor(WebtoonXYZBase, GalleryExtractor):
             "comic": self.comic,
             "chapter": self.chapter,
             "chapter_no": self.chapter.removeprefix("chapter-"),
-            "title": text.unescape(title).removesuffix(" Manhwa : Read Manhwa Free at WEBTOON XYZ"),
+            "title": text.unescape(title).removesuffix(
+                " Manhwa : Read Manhwa Free at WEBTOON XYZ"
+            ),
             "description": text.unescape(descr),
             "lang": locale[0:2],
             "language": util.code_to_language(locale[0:2]),
@@ -112,7 +118,7 @@ class WebtoonXYZComicExtractor(WebtoonXYZBase, Extractor):
                 "count": 5,
                 "keyword": {
                     "comic": "learning-the-hard-way",
-                    "description": r"re:^Bullied ruthlessly by girls in high school,.+",
+                    "description": r"re:^Bullied ruthlessly by girls .+",
                     "title": "Learning The Hard Way",
                 },
             },
