@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2022 Mike Fährmann
+# Copyright 2022-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -51,6 +51,11 @@ class NitterExtractor(BaseExtractor):
                 for url in text.extract_iter(
                         attachments, 'href="', '"'):
 
+                    if "/i/broadcasts/" in url:
+                        self.log.debug(
+                            "Skipping unsupported broadcast '%s'", url)
+                        continue
+
                     if "/enc/" in url:
                         name = binascii.a2b_base64(url.rpartition(
                             "/")[2]).decode().rpartition("/")[2]
@@ -59,10 +64,7 @@ class NitterExtractor(BaseExtractor):
 
                     if url[0] == "/":
                         url = self.root + url
-                    file = {
-                        "url": url,
-                        "_http_retry_codes": (404,),
-                    }
+                    file = {"url": url, "_http_retry": _retry_on_404}
                     file["filename"], _, file["extension"] = \
                         name.rpartition(".")
                     append(file)
@@ -91,6 +93,11 @@ class NitterExtractor(BaseExtractor):
                                 "filename" : name.rpartition(".")[0],
                                 "extension": "mp4",
                             })
+
+                        for url in text.extract_iter(
+                                attachments, '<source src="', '"'):
+                            append(text.nameext_from_url(url, {"url": url}))
+
             else:
                 files = ()
             tweet["count"] = len(files)
@@ -126,7 +133,7 @@ class NitterExtractor(BaseExtractor):
             "likes"   : text.parse_int(extr(
                 'class="icon-heart', '</div>').rpartition(">")[2]),
             "retweet" : 'class="retweet-header' in html,
-            "quoted": False,
+            "quoted"  : False,
         }
 
     def _tweet_from_quote(self, html):
@@ -143,18 +150,24 @@ class NitterExtractor(BaseExtractor):
             "date"    : text.parse_datetime(
                 extr('title="', '"'), "%b %d, %Y · %I:%M %p %Z"),
             "tweet_id": link.rpartition("/")[2].partition("#")[0],
-            "content": extr('class="quote-text', "</div").partition(">")[2],
+            "content" : extr('class="quote-text', "</div").partition(">")[2],
             "_attach" : extr('class="attachments', '''
                 </div>'''),
             "retweet" : False,
-            "quoted": True,
+            "quoted"  : True,
         }
 
     def _user_from_html(self, html):
         extr = text.extract_from(html, html.index('class="profile-tabs'))
         banner = extr('class="profile-banner"><a href="', '"')
+
+        try:
+            uid = banner.split("%2F")[4]
+        except Exception:
+            uid = 0
+
         return {
-            "id"              : banner.split("%2F")[4] if banner else None,
+            "id"              : uid,
             "profile_banner"  : self.root + banner if banner else "",
             "profile_image"   : self.root + extr(
                 'class="profile-card-avatar" href="', '"'),
@@ -220,10 +233,6 @@ BASE_PATTERN = NitterExtractor.update({
         "root": "https://nitter.lacontrevoie.fr",
         "pattern": r"nitter\.lacontrevoie\.fr",
     },
-    "nitter.pussthecat.org": {
-        "root": "https://nitter.pussthecat.org",
-        "pattern": r"nitter\.pussthecat\.org",
-    },
     "nitter.1d4.us": {
         "root": "https://nitter.1d4.us",
         "pattern": r"nitter\.1d4\.us",
@@ -235,6 +244,10 @@ BASE_PATTERN = NitterExtractor.update({
     "nitter.unixfox.eu": {
         "root": "https://nitter.unixfox.eu",
         "pattern": r"nitter\.unixfox\.eu",
+    },
+    "nitter.it": {
+        "root": "https://nitter.it",
+        "pattern": r"nitter\.it",
     },
 })
 
@@ -283,13 +296,12 @@ class NitterTweetsExtractor(NitterExtractor):
                 },
             },
         }),
-        ("https://nitter.pussthecat.org/i/user/2976459548", {
-            "url": "c740a2683db2c8ed2f350afc0494475c4444025b",
-            "pattern": r"https://nitter.pussthecat\.org/pic/orig"
+        ("https://nitter.lacontrevoie.fr/supernaturepics", {
+            "url": "54f4b55f2099dcc248f3fb7bfacf1349e08d8e2d",
+            "pattern": r"https://nitter\.lacontrevoie\.fr/pic/orig"
                        r"/media%2FCGMNYZvW0AIVoom\.jpg",
             "range": "1",
         }),
-        ("https://nitter.lacontrevoie.fr/supernaturepics"),
         ("https://nitter.1d4.us/supernaturepics"),
         ("https://nitter.kavin.rocks/id:2976459548"),
         ("https://nitter.unixfox.eu/supernaturepics"),
@@ -309,7 +321,6 @@ class NitterRepliesExtractor(NitterExtractor):
             "range": "1-20",
         }),
         ("https://nitter.lacontrevoie.fr/supernaturepics/with_replies"),
-        ("https://nitter.pussthecat.org/supernaturepics/with_replies"),
         ("https://nitter.1d4.us/supernaturepics/with_replies"),
         ("https://nitter.kavin.rocks/id:2976459548/with_replies"),
         ("https://nitter.unixfox.eu/i/user/2976459548/with_replies"),
@@ -334,7 +345,6 @@ class NitterMediaExtractor(NitterExtractor):
             "range": "1-20",
         }),
         ("https://nitter.lacontrevoie.fr/supernaturepics/media"),
-        ("https://nitter.pussthecat.org/supernaturepics/media"),
         ("https://nitter.1d4.us/supernaturepics/media"),
         ("https://nitter.unixfox.eu/i/user/2976459548/media"),
     )
@@ -353,7 +363,6 @@ class NitterSearchExtractor(NitterExtractor):
             "range": "1-20",
         }),
         ("https://nitter.lacontrevoie.fr/supernaturepics/search"),
-        ("https://nitter.pussthecat.org/supernaturepics/search"),
         ("https://nitter.1d4.us/supernaturepics/search"),
         ("https://nitter.kavin.rocks/id:2976459548/search"),
         ("https://nitter.unixfox.eu/i/user/2976459548/search"),
@@ -375,7 +384,7 @@ class NitterTweetExtractor(NitterExtractor):
             "url": "3f2b64e175bf284aa672c3bb53ed275e470b919a",
             "content": "ab05e1d8d21f8d43496df284d31e8b362cd3bcab",
             "keyword": {
-                "comments": 16,
+                "comments": 19,
                 "content": "Big Wedeene River, Canada",
                 "count": 1,
                 "date": "dt:2015-05-29 17:40:00",
@@ -399,9 +408,9 @@ class NitterTweetExtractor(NitterExtractor):
             "url": "9c51b3a4a1114535eb9b168bba97ad95db0d59ff",
         }),
         # video
-        ("https://nitter.pussthecat.org/i/status/1065692031626829824", {
-            "pattern": r"ytdl:https://nitter.pussthecat.org/video"
-                       r"/B875137EDC8FF/https%3A%2F%2Fvideo.twimg.com%2F"
+        ("https://nitter.lacontrevoie.fr/i/status/1065692031626829824", {
+            "pattern": r"ytdl:https://nitter\.lacontrevoie\.fr/video"
+                       r"/[0-9A-F]{10,}/https%3A%2F%2Fvideo.twimg.com%2F"
                        r"ext_tw_video%2F1065691868439007232%2Fpu%2Fpl%2F"
                        r"nv8hUQC1R0SjhzcZ.m3u8%3Ftag%3D5",
             "keyword": {
@@ -446,14 +455,18 @@ class NitterTweetExtractor(NitterExtractor):
             "count": 0,
         }),
         # "Misleading" content
-        ("https://nitter.pussthecat.org/i/status/1486373748911575046", {
+        ("https://nitter.lacontrevoie.fr/i/status/1486373748911575046", {
             "count": 4,
         }),
         # age-restricted (#2354)
         ("https://nitter.unixfox.eu/mightbecurse/status/1492954264909479936", {
-            "keywords": {"date": "dt:2022-02-13 20:10:09"},
+            "keyword": {"date": "dt:2022-02-13 20:10:00"},
             "count": 1,
         }),
+        # broadcast
+        ("https://nitter.it/POTUS/status/1639409307878928384", {
+            "count": 0,
+        })
     )
 
     def tweets(self):
@@ -468,3 +481,7 @@ class NitterTweetExtractor(NitterExtractor):
             quoted["user"] = tweet["user"]
             return (tweet, quoted)
         return (tweet,)
+
+
+def _retry_on_404(response):
+    return response.status_code == 404

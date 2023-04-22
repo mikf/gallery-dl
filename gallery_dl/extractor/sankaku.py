@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2022 Mike Fährmann
+# Copyright 2014-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -13,6 +13,7 @@ from .common import Message
 from .. import text, util, exception
 from ..cache import cache
 import collections
+import re
 
 BASE_PATTERN = r"(?:https?://)?" \
     r"(?:(?:chan|beta|black|white)\.sankakucomplex\.com|sankaku\.app)" \
@@ -80,15 +81,19 @@ class SankakuTagExtractor(SankakuExtractor):
     subcategory = "tag"
     directory_fmt = ("{category}", "{search_tags}")
     archive_fmt = "t_{search_tags}_{id}"
-    pattern = BASE_PATTERN + r"/\?([^#]*)"
+    pattern = BASE_PATTERN + r"/?\?([^#]*)"
     test = (
         ("https://sankaku.app/?tags=bonocho", {
             "count": 5,
             "pattern": r"https://s\.sankakucomplex\.com/data/[^/]{2}/[^/]{2}"
-                       r"/[^/]{32}\.\w+\?e=\d+&(expires=\d+&)?m=[^&#]+",
+                       r"/[0-9a-f]{32}\.\w+\?e=\d+&(expires=\d+&)?m=[^&#]+",
         }),
         ("https://beta.sankakucomplex.com/?tags=bonocho"),
         ("https://chan.sankakucomplex.com/?tags=bonocho"),
+        ("https://black.sankakucomplex.com/?tags=bonocho"),
+        ("https://white.sankakucomplex.com/?tags=bonocho"),
+        ("https://sankaku.app/ja?tags=order%3Apopularity"),
+        ("https://sankaku.app/no/?tags=order%3Apopularity"),
         # error on five or more tags
         ("https://chan.sankakucomplex.com/?tags=bonocho+a+b+c+d", {
             "options": (("username", None),),
@@ -97,12 +102,26 @@ class SankakuTagExtractor(SankakuExtractor):
         # match arbitrary query parameters
         ("https://chan.sankakucomplex.com"
          "/?tags=marie_rose&page=98&next=3874906&commit=Search"),
+        # 'date:' tags (#1790)
+        ("https://chan.sankakucomplex.com/?tags=date:2023-03-20", {
+            "range": "1",
+            "count": 1,
+        }),
     )
 
     def __init__(self, match):
         SankakuExtractor.__init__(self, match)
         query = text.parse_query(match.group(1))
         self.tags = text.unquote(query.get("tags", "").replace("+", " "))
+
+        if "date:" in self.tags:
+            # rewrite 'date:' tags (#1790)
+            self.tags = re.sub(
+                r"date:(\d\d)[.-](\d\d)[.-](\d\d\d\d)",
+                r"date:\3.\2.\1", self.tags)
+            self.tags = re.sub(
+                r"date:(\d\d\d\d)[.-](\d\d)[.-](\d\d)",
+                r"date:\1.\2.\3", self.tags)
 
     def metadata(self):
         return {"search_tags": self.tags}

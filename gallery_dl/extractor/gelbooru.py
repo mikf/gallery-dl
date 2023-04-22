@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2022 Mike Fährmann
+# Copyright 2014-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -13,24 +13,29 @@ from . import gelbooru_v02
 from .. import text, exception
 import binascii
 
+BASE_PATTERN = r"(?:https?://)?(?:www\.)?gelbooru\.com/(?:index\.php)?\?"
+
 
 class GelbooruBase():
     """Base class for gelbooru extractors"""
     category = "gelbooru"
     basecategory = "booru"
     root = "https://gelbooru.com"
+    offset = 0
 
-    def _api_request(self, params):
+    def _api_request(self, params, key="post"):
+        if "s" not in params:
+            params["s"] = "post"
         params["api_key"] = self.api_key
         params["user_id"] = self.user_id
 
-        url = self.root + "/index.php?page=dapi&s=post&q=index&json=1"
+        url = self.root + "/index.php?page=dapi&q=index&json=1"
         data = self.request(url, params=params).json()
 
-        if "post" not in data:
+        if key not in data:
             return ()
 
-        posts = data["post"]
+        posts = data[key]
         if not isinstance(posts, list):
             return (posts,)
         return posts
@@ -52,6 +57,23 @@ class GelbooruBase():
             if "pid" in params:
                 del params["pid"]
             params["tags"] = "{} id:<{}".format(self.tags, post["id"])
+
+    def _pagination_html(self, params):
+        url = self.root + "/index.php"
+        params["pid"] = self.offset
+
+        data = {}
+        while True:
+            num_ids = 0
+            page = self.request(url, params=params).text
+
+            for data["id"] in text.extract_iter(page, '" id="p', '"'):
+                num_ids += 1
+                yield from self._api_request(data)
+
+            if num_ids < self.per_page:
+                return
+            params["pid"] += self.per_page
 
     @staticmethod
     def _file_url(post):
@@ -84,12 +106,15 @@ class GelbooruBase():
                 "body"  : extr(note, 'data-body="', '"')[0],
             })
 
+    def _skip_offset(self, num):
+        self.offset += num
+        return num
+
 
 class GelbooruTagExtractor(GelbooruBase,
                            gelbooru_v02.GelbooruV02TagExtractor):
     """Extractor for images from gelbooru.com based on search-tags"""
-    pattern = (r"(?:https?://)?(?:www\.)?gelbooru\.com/(?:index\.php)?"
-               r"\?page=post&s=list&tags=(?P<tags>[^&#]+)")
+    pattern = BASE_PATTERN + r"page=post&s=list&tags=([^&#]+)"
     test = (
         ("https://gelbooru.com/index.php?page=post&s=list&tags=bonocho", {
             "count": 5,
@@ -108,13 +133,14 @@ class GelbooruPoolExtractor(GelbooruBase,
                             gelbooru_v02.GelbooruV02PoolExtractor):
     """Extractor for gelbooru pools"""
     per_page = 45
-    pattern = (r"(?:https?://)?(?:www\.)?gelbooru\.com/(?:index\.php)?"
-               r"\?page=pool&s=show&id=(?P<pool>\d+)")
+    pattern = BASE_PATTERN + r"page=pool&s=show&id=(\d+)"
     test = (
         ("https://gelbooru.com/index.php?page=pool&s=show&id=761", {
             "count": 6,
         }),
     )
+
+    skip = GelbooruBase._skip_offset
 
     def metadata(self):
         url = self.root + "/index.php"
@@ -122,11 +148,10 @@ class GelbooruPoolExtractor(GelbooruBase,
             "page": "pool",
             "s"   : "show",
             "id"  : self.pool_id,
-            "pid" : self.page_start,
         }
-        self._page = self.request(url, params=self._params).text
+        page = self.request(url, params=self._params).text
 
-        name, pos = text.extract(self._page, "<h3>Now Viewing: ", "</h3>")
+        name, pos = text.extract(page, "<h3>Now Viewing: ", "</h3>")
         if not name:
             raise exception.NotFoundError("pool")
 
@@ -136,29 +161,63 @@ class GelbooruPoolExtractor(GelbooruBase,
         }
 
     def posts(self):
-        url = self.root + "/index.php"
-        params = self._params
+        return self._pagination_html(self._params)
 
-        page = self._page
-        del self._page
-        data = {}
+
+class GelbooruFavoriteExtractor(GelbooruBase,
+                                gelbooru_v02.GelbooruV02FavoriteExtractor):
+    """Extractor for gelbooru favorites"""
+    per_page = 100
+    pattern = BASE_PATTERN + r"page=favorites&s=view&id=(\d+)"
+    test = ("https://gelbooru.com/index.php?page=favorites&s=view&id=279415", {
+        "count": 3,
+    })
+
+    skip = GelbooruBase._skip_offset
+
+    def posts(self):
+        # get number of favorites
+        params = {
+            "s"    : "favorite",
+            "id"   : self.favorite_id,
+            "limit": "1",
+        }
+        count = self._api_request(params, "@attributes")[0]["count"]
+
+        if count <= self.offset:
+            return
+        pnum, last = divmod(count + 1, self.per_page)
+
+        if self.offset >= last:
+            self.offset -= last
+            diff, self.offset = divmod(self.offset, self.per_page)
+            pnum -= diff + 1
+        skip = self.offset
+
+        # paginate over them in reverse
+        params["pid"] = pnum
+        params["limit"] = self.per_page
 
         while True:
-            num_ids = 0
-            for data["id"] in text.extract_iter(page, '" id="p', '"'):
-                num_ids += 1
-                yield from self._api_request(data)
+            favs = self._api_request(params, "favorite")
 
-            if num_ids < self.per_page:
+            favs.reverse()
+            if skip:
+                favs = favs[skip:]
+                skip = 0
+
+            for fav in favs:
+                yield from self._api_request({"id": fav["favorite"]})
+
+            params["pid"] -= 1
+            if params["pid"] < 0:
                 return
-            params["pid"] += self.per_page
-            page = self.request(url, params=params).text
 
 
 class GelbooruPostExtractor(GelbooruBase,
                             gelbooru_v02.GelbooruV02PostExtractor):
     """Extractor for single images from gelbooru.com"""
-    pattern = (r"(?:https?://)?(?:www\.)?gelbooru\.com/(?:index\.php)?\?"
+    pattern = (BASE_PATTERN +
                r"(?=(?:[^#]+&)?page=post(?:&|#|$))"
                r"(?=(?:[^#]+&)?s=view(?:&|#|$))"
                r"(?:[^#]+&)?id=(\d+)")
@@ -195,7 +254,7 @@ class GelbooruPostExtractor(GelbooruBase,
         # notes
         ("https://gelbooru.com/index.php?page=post&s=view&id=5997331", {
             "options": (("notes", True),),
-            "keywords": {
+            "keyword": {
                 "notes": [
                     {
                         "body": "Look over this way when you talk~",

@@ -9,13 +9,19 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ["windows-latest", "ubuntu-latest", "macOS-latest"]
-        python-version: ["3.11"]
+        os: ["windows-latest", "macOS-latest"]
         architecture: ["x64"]
+        python-version: ["3.11"]
+        python-packages: [""]
         include:
+        - os: "ubuntu-latest"
+          architecture: "x64"
+          python-version: "3.11"
+          python-packages: "secretstorage"
         - os: "windows-2019"
-          python-version: "3.8"
           architecture: "x86"
+          python-version: "3.8"
+          python-packages: "toml"
 
     steps:
     - uses: actions/checkout@v3
@@ -28,7 +34,7 @@ jobs:
 
     - name: Build executable
       run: |
-        pip install requests requests[socks] yt-dlp pyinstaller
+        pip install requests requests[socks] yt-dlp pyyaml ${{ matrix.python-packages }} pyinstaller
         python scripts/pyinstaller.py
 
     - name: Upload executable

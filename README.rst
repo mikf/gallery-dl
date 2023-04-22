@@ -2,13 +2,16 @@
 gallery-dl
 ==========
 
-*gallery-dl* is a command-line program to download image galleries and
-collections from several image hosting sites (see `Supported Sites`_).
-It is a cross-platform tool with many configuration options
-and powerful `filenaming capabilities <Formatting_>`_.
+*gallery-dl* is a command-line program
+to download image galleries and collections
+from several image hosting sites
+(see `Supported Sites <docs/supportedsites.md>`__).
+It is a cross-platform tool
+with many `configuration options <docs/configuration.rst>`__
+and powerful `filenaming capabilities <docs/formatting.md>`__.
 
 
-|pypi| |build| |gitter|
+|pypi| |build|
 
 .. contents::
 
@@ -22,10 +25,13 @@ Dependencies
 Optional
 --------
 
-- FFmpeg_: Pixiv Ugoira to WebM conversion
+- FFmpeg_: Pixiv Ugoira conversion
 - yt-dlp_ or youtube-dl_: Video downloads
 - PySocks_: SOCKS proxy support
 - brotli_ or brotlicffi_: Brotli compression support
+- PyYAML_: YAML configuration file support
+- toml_: TOML configuration file support for Python<3.11
+- SecretStorage_: GNOME keyring passwords for ``--cookies-from-browser``
 
 
 Installation
@@ -66,9 +72,13 @@ Standalone Executable
 Prebuilt executable files with a Python interpreter and
 required Python packages included are available for
 
-- `Windows <https://github.com/mikf/gallery-dl/releases/download/v1.24.2/gallery-dl.exe>`__
+- `Windows <https://github.com/mikf/gallery-dl/releases/download/v1.25.2/gallery-dl.exe>`__
   (Requires `Microsoft Visual C++ Redistributable Package (x86) <https://aka.ms/vs/17/release/vc_redist.x86.exe>`__)
-- `Linux   <https://github.com/mikf/gallery-dl/releases/download/v1.24.2/gallery-dl.bin>`__
+- `Linux   <https://github.com/mikf/gallery-dl/releases/download/v1.25.2/gallery-dl.bin>`__
+
+
+Nightly Builds
+--------------
 
 | Executables build from the latest commit can be found at
 | https://github.com/mikf/gallery-dl/actions/workflows/executables.yml
@@ -104,6 +114,16 @@ Scoop
     scoop install gallery-dl
 
 
+Homebrew
+--------
+
+For macOS or Linux users using Homebrew:
+
+.. code:: bash
+
+    brew install gallery-dl
+
+
 Usage
 =====
 
@@ -112,9 +132,10 @@ from:
 
 .. code:: bash
 
-    gallery-dl [OPTION]... URL...
+    gallery-dl [OPTIONS]... URLS...
 
-See also :code:`gallery-dl --help`.
+Use :code:`gallery-dl --help` or see `<docs/options.md>`__
+for a full list of all command-line options.
 
 
 Examples
@@ -162,13 +183,22 @@ Configuration
 
 Configuration files for *gallery-dl* use a JSON-based file format.
 
-| For a (more or less) complete example with options set to their default values,
-  see gallery-dl.conf_.
-| For a configuration file example with more involved settings and options,
-  see gallery-dl-example.conf_.
-| A list of all available configuration options and their
-  descriptions can be found in configuration.rst_.
-|
+
+Documentation
+-------------
+
+A list of all available configuration options and their descriptions
+can be found in `<docs/configuration.rst>`__.
+
+| For a default configuration file with available options set to their
+  default values, see `<docs/gallery-dl.conf>`__.
+
+| For a commented example with more involved settings and option usage,
+  see `<docs/gallery-dl-example.conf>`__.
+
+
+Locations
+---------
 
 *gallery-dl* searches for configuration files in the following places:
 
@@ -177,7 +207,7 @@ Windows:
     * ``%USERPROFILE%\gallery-dl\config.json``
     * ``%USERPROFILE%\gallery-dl.conf``
 
-    (``%USERPROFILE%`` usually refers to the user's home directory,
+    (``%USERPROFILE%`` usually refers to a user's home directory,
     i.e. ``C:\Users\<username>\``)
 
 Linux, macOS, etc.:
@@ -186,12 +216,13 @@ Linux, macOS, etc.:
     * ``${HOME}/.config/gallery-dl/config.json``
     * ``${HOME}/.gallery-dl.conf``
 
-Values in later configuration files will override previous ones.
+When run as `executable <Standalone Executable_>`__,
+*gallery-dl* will also look for a ``gallery-dl.conf`` file
+in the same directory as said executable.
 
-Command line options will override all related settings in the configuration file(s),
-e.g. using ``--write-metadata`` will enable writing metadata using the default values
-for all ``postprocessors.metadata.*`` settings, overriding any specific settings in
-configuration files.
+It is possible to use more than one configuration file at a time.
+In this case, any values from files after the first will get merged
+into the already loaded settings and potentially override previous ones.
 
 
 Authentication
@@ -221,8 +252,8 @@ and optional for
 ``twitter``,
 and ``zerochan``.
 
-You can set the necessary information in your configuration file
-(cf. gallery-dl.conf_)
+You can set the necessary information in your
+`configuration file <Configuration_>`__
 
 .. code:: json
 
@@ -241,8 +272,8 @@ or you can provide them directly via the
 
 .. code:: bash
 
-    gallery-dl -u <username> -p <password> URL
-    gallery-dl -o username=<username> -o password=<password> URL
+    gallery-dl -u "<username>" -p "<password>" "URL"
+    gallery-dl -o "username=<username>" -o "password=<password>" "URL"
 
 
 Cookies
@@ -253,16 +284,19 @@ CAPTCHA or similar, or has not been implemented yet, you can use the
 cookies from a browser login session and input them into *gallery-dl*.
 
 This can be done via the
-`cookies <https://github.com/mikf/gallery-dl/blob/master/docs/configuration.rst#extractorcookies>`__
+`cookies <docs/configuration.rst#extractorcookies>`__
 option in your configuration file by specifying
 
 - | the path to a Mozilla/Netscape format cookies.txt file exported by a browser addon
-  | (e.g. `Get cookies.txt <https://chrome.google.com/webstore/detail/get-cookiestxt/bgaddhkoddajcdgocldbbfleckgcbcid/>`__ for Chrome,
+  | (e.g. `Get cookies.txt LOCALLY <https://chrome.google.com/webstore/detail/get-cookiestxt-locally/cclelndahbckbenkjhflpdbgdldlbecc>`__ for Chrome,
     `Export Cookies <https://addons.mozilla.org/en-US/firefox/addon/export-cookies-txt/>`__ for Firefox)
 
 - | a list of name-value pairs gathered from your browser's web developer tools
   | (in `Chrome <https://developers.google.com/web/tools/chrome-devtools/storage/cookies>`__,
      in `Firefox <https://developer.mozilla.org/en-US/docs/Tools/Storage_Inspector>`__)
+
+- | the name of a browser to extract cookies from
+  | (supported browsers are Chromium-based ones, Firefox, and Safari)
 
 For example:
 
@@ -277,30 +311,43 @@ For example:
                 "cookies": {
                     "session_id": "K1T57EKu19TR49C51CDjOJoXNQLF7VbdVOiBrC9ye0a"
                 }
+            },
+            "twitter": {
+                "cookies": ["firefox"]
             }
         }
     }
 
-You can also specify a cookies.txt file with
-the :code:`--cookies` command-line option:
+| You can also specify a cookies.txt file with
+  the :code:`--cookies` command-line option
+| or a browser to extract cookies from with :code:`--cookies-from-browser`:
 
 .. code:: bash
 
-    gallery-dl --cookies "$HOME/path/to/cookies.txt" URL
+    gallery-dl --cookies "$HOME/path/to/cookies.txt" "URL"
+    gallery-dl --cookies-from-browser firefox "URL"
 
 
 OAuth
 -----
 
-*gallery-dl* supports user authentication via OAuth_ for
-``deviantart``, ``flickr``, ``reddit``, ``smugmug``, ``tumblr``,
+*gallery-dl* supports user authentication via OAuth_ for some extractors.
+This is necessary for
+``pixiv``
+and optional for
+``deviantart``,
+``flickr``,
+``reddit``,
+``smugmug``,
+``tumblr``,
 and ``mastodon`` instances.
-This is mostly optional, but grants *gallery-dl* the ability
-to issue requests on your account's behalf and enables it to access resources
-which would otherwise be unavailable to a public user.
 
-To link your account to *gallery-dl*, start by invoking it with
-``oauth:<sitename>`` as an argument. For example:
+Linking your account to *gallery-dl* grants it the ability to issue requests
+on your account's behalf and enables it to access resources which would
+otherwise be unavailable to a public user.
+
+To do so, start by invoking it with ``oauth:<sitename>`` as an argument.
+For example:
 
 .. code:: bash
 
@@ -319,13 +366,6 @@ To authenticate with a ``mastodon`` instance, run *gallery-dl* with
     gallery-dl oauth:mastodon:https://mastodon.social/
 
 
-
-.. _gallery-dl.conf:         https://github.com/mikf/gallery-dl/blob/master/docs/gallery-dl.conf
-.. _gallery-dl-example.conf: https://github.com/mikf/gallery-dl/blob/master/docs/gallery-dl-example.conf
-.. _configuration.rst:       https://github.com/mikf/gallery-dl/blob/master/docs/configuration.rst
-.. _Supported Sites:         https://github.com/mikf/gallery-dl/blob/master/docs/supportedsites.md
-.. _Formatting:              https://github.com/mikf/gallery-dl/blob/master/docs/formatting.md
-
 .. _Python:     https://www.python.org/downloads/
 .. _PyPI:       https://pypi.org/
 .. _pip:        https://pip.pypa.io/en/stable/
@@ -336,7 +376,9 @@ To authenticate with a ``mastodon`` instance, run *gallery-dl* with
 .. _PySocks:    https://pypi.org/project/PySocks/
 .. _brotli:     https://github.com/google/brotli
 .. _brotlicffi: https://github.com/python-hyper/brotlicffi
-.. _pyOpenSSL:  https://pyopenssl.org/
+.. _PyYAML:     https://pyyaml.org/
+.. _toml:       https://pypi.org/project/toml/
+.. _SecretStorage: https://pypi.org/project/SecretStorage/
 .. _Snapd:      https://docs.snapcraft.io/installing-snapd
 .. _OAuth:      https://en.wikipedia.org/wiki/OAuth
 .. _Chocolatey: https://chocolatey.org/install

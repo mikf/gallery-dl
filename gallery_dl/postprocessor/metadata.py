@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2022 Mike Fährmann
+# Copyright 2019-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -10,6 +10,7 @@
 
 from .common import PostProcessor
 from .. import util, formatter
+import json
 import sys
 import os
 
@@ -46,14 +47,12 @@ class MetadataPP(PostProcessor):
             ext = "txt"
         elif mode == "jsonl":
             self.write = self._write_json
-            self.indent = None
-            self.ascii = options.get("ascii", False)
+            self._json_encode = self._make_encoder(options).encode
             omode = "a"
             filename = "data.jsonl"
         else:
             self.write = self._write_json
-            self.indent = options.get("indent", 4)
-            self.ascii = options.get("ascii", False)
+            self._json_encode = self._make_encoder(options, 4).encode
             ext = "json"
 
         directory = options.get("directory")
@@ -83,32 +82,12 @@ class MetadataPP(PostProcessor):
             events = events.split(",")
         job.register_hooks({event: self.run for event in events}, options)
 
-        archive = options.get("archive")
-        if archive:
-            extr = job.extractor
-            archive = util.expand_path(archive)
-            archive_format = (
-                options.get("archive-prefix", extr.category) +
-                options.get("archive-format", "_MD_" + extr.archive_fmt))
-            try:
-                if "{" in archive:
-                    archive = formatter.parse(archive).format_map(
-                        job.pathfmt.kwdict)
-                self.archive = util.DownloadArchive(
-                    archive, archive_format, "_archive_metadata")
-            except Exception as exc:
-                self.log.warning(
-                    "Failed to open download archive at '%s' ('%s: %s')",
-                    archive, exc.__class__.__name__, exc)
-            else:
-                self.log.debug("Using download archive '%s'", archive)
-        else:
-            self.archive = None
-
+        self._init_archive(job, options, "_MD_")
         self.mtime = options.get("mtime")
         self.omode = options.get("open", omode)
         self.encoding = options.get("encoding", "utf-8")
         self.private = options.get("private", False)
+        self.skip = options.get("skip", False)
 
     def run(self, pathfmt):
         archive = self.archive
@@ -117,6 +96,9 @@ class MetadataPP(PostProcessor):
 
         directory = self._directory(pathfmt)
         path = directory + self._filename(pathfmt)
+
+        if self.skip and os.path.exists(path):
+            return
 
         try:
             with open(path, self.omode, encoding=self.encoding) as fp:
@@ -206,13 +188,30 @@ class MetadataPP(PostProcessor):
             for taglist in taglists:
                 extend(taglist)
             tags.sort()
+        elif all(isinstance(e, dict) for e in tags):
+            taglists = tags
+            tags = []
+            extend = tags.extend
+            for tagdict in taglists:
+                extend([x for x in tagdict.values() if x is not None])
+            tags.sort()
 
         fp.write("\n".join(tags) + "\n")
 
     def _write_json(self, fp, kwdict):
         if not self.private:
             kwdict = util.filter_dict(kwdict)
-        util.dump_json(kwdict, fp, self.ascii, self.indent)
+        fp.write(self._json_encode(kwdict) + "\n")
+
+    @staticmethod
+    def _make_encoder(options, indent=None):
+        return json.JSONEncoder(
+            ensure_ascii=options.get("ascii", False),
+            sort_keys=options.get("sort", False),
+            separators=options.get("separators"),
+            indent=options.get("indent", indent),
+            check_circular=False, default=str,
+        )
 
 
 __postprocessor__ = MetadataPP

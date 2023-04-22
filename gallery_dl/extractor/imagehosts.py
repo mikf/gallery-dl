@@ -135,6 +135,28 @@ class ImxtoImageExtractor(ImagehostImageExtractor):
         }
 
 
+class ImxtoGalleryExtractor(ImagehostImageExtractor):
+    """Extractor for image galleries from imx.to"""
+    category = "imxto"
+    subcategory = "gallery"
+    pattern = r"(?:https?://)?(?:www\.)?(imx\.to/g/([^/?#]+))"
+    test = ("https://imx.to/g/ozdy", {
+        "pattern": ImxtoImageExtractor.pattern,
+        "keyword": {"title": "untitled gallery"},
+        "count": 40,
+    })
+
+    def items(self):
+        page = self.request(self.page_url).text
+        title, pos = text.extract(page, '<div class="title', '<')
+        data = {
+            "_extractor": ImxtoImageExtractor,
+            "title": text.unescape(title.partition(">")[2]).strip(),
+        }
+        for url in text.extract_iter(page, '<a href="', '"', pos):
+            yield Message.Queue, url, data
+
+
 class AcidimgImageExtractor(ImagehostImageExtractor):
     """Extractor for single images from acidimg.cc"""
     category = "acidimg"
@@ -187,12 +209,19 @@ class ImagevenueImageExtractor(ImagehostImageExtractor):
 class ImagetwistImageExtractor(ImagehostImageExtractor):
     """Extractor for single images from imagetwist.com"""
     category = "imagetwist"
-    pattern = r"(?:https?://)?((?:www\.)?imagetwist\.com/([a-z0-9]{12}))"
-    test = ("https://imagetwist.com/f1i2s4vhvbrq/test.png", {
-        "url": "8d5e168c0bee30211f821c6f3b2116e419d42671",
-        "keyword": "d1060a4c2e3b73b83044e20681712c0ffdd6cfef",
-        "content": "0c8768055e4e20e7c7259608b67799171b691140",
-    })
+    pattern = (r"(?:https?://)?((?:www\.|phun\.)?"
+               r"image(?:twist|haha)\.com/([a-z0-9]{12}))")
+    test = (
+        ("https://imagetwist.com/f1i2s4vhvbrq/test.png", {
+            "url": "8d5e168c0bee30211f821c6f3b2116e419d42671",
+            "keyword": "d1060a4c2e3b73b83044e20681712c0ffdd6cfef",
+            "content": "0c8768055e4e20e7c7259608b67799171b691140",
+        }),
+        ("https://www.imagetwist.com/f1i2s4vhvbrq/test.png"),
+        ("https://phun.imagetwist.com/f1i2s4vhvbrq/test.png"),
+        ("https://imagehaha.com/f1i2s4vhvbrq/test.png"),
+        ("https://www.imagehaha.com/f1i2s4vhvbrq/test.png"),
+    )
 
     @property
     @memcache(maxage=3*3600)

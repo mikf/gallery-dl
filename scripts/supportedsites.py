@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 2 as
+# published by the Free Software Foundation.
+
 """Generate a Markdown document listing all supported sites"""
 
 import os
@@ -31,6 +35,7 @@ CATEGORY_MAP = {
     "drawfriends"    : "Draw Friends",
     "dynastyscans"   : "Dynasty Reader",
     "e621"           : "e621",
+    "e926"           : "e926",
     "erome"          : "EroMe",
     "e-hentai"       : "E-Hentai",
     "exhentai"       : "ExHentai",
@@ -62,6 +67,7 @@ CATEGORY_MAP = {
     "kemonoparty"    : "Kemono",
     "lineblog"       : "LINE BLOG",
     "livedoor"       : "livedoor Blog",
+    "ohpolly"        : "Oh Polly",
     "omgmiamiswimwear": "Omg Miami Swimwear",
     "mangadex"       : "MangaDex",
     "mangafox"       : "Manga Fox",
@@ -83,6 +89,7 @@ CATEGORY_MAP = {
     "paheal"         : "rule #34",
     "photovogue"     : "PhotoVogue",
     "pornimagesxxx"  : "Porn Image",
+    "pornpics"       : "PornPics.com",
     "pornreactor"    : "PornReactor",
     "powermanga"     : "PowerManga",
     "readcomiconline": "Read Comic Online",
@@ -104,6 +111,8 @@ CATEGORY_MAP = {
     "speakerdeck"    : "Speaker Deck",
     "subscribestar"  : "SubscribeStar",
     "tbib"           : "The Big ImageBoard",
+    "tcbscans"       : "TCB Scans",
+    "tco"            : "Twitter t.co",
     "thatpervert"    : "ThatPervert",
     "thebarchive"    : "The /b/ Archive",
     "thecollection"  : "The /co/llection",
@@ -125,15 +134,16 @@ CATEGORY_MAP = {
 }
 
 SUBCATEGORY_MAP = {
+    ""       : "",
     "art"    : "Art",
     "audio"  : "Audio",
     "doujin" : "Doujin",
-    "gallery": "Galleries",
     "image"  : "individual Images",
     "index"  : "Site Index",
     "issue"  : "Comic Issues",
     "manga"  : "Manga",
     "media"  : "Media Files",
+    "note"   : "Images from Notes",
     "popular": "Popular Images",
     "recent" : "Recent Images",
     "search" : "Search Results",
@@ -142,7 +152,6 @@ SUBCATEGORY_MAP = {
     "tweets" : "",
     "user"   : "User Profiles",
     "watch"  : "Watches",
-    "category"     : "Categories",
     "following"    : "",
     "related-pin"  : "related Pins",
     "related-board": "",
@@ -150,21 +159,17 @@ SUBCATEGORY_MAP = {
     "artstation": {
         "artwork": "Artwork Listings",
     },
-    "atfbooru": {
-        "favorite": "",
-    },
     "coomerparty": {
         "discord"       : "",
         "discord-server": "",
-    },
-    "danbooru": {
-        "favorite": "",
     },
     "desktopography": {
         "site": "",
     },
     "deviantart": {
-        "stash": "Sta.sh",
+        "gallery-search": "Gallery Searches",
+        "stash" : "Sta.sh",
+        "status": "Status Updates",
         "watch-posts": "",
     },
     "fanbox": {
@@ -202,6 +207,7 @@ SUBCATEGORY_MAP = {
         "board": "",
         "pinit": "pin.it Links",
         "created": "Created Pins",
+        "allpins": "All Pins",
     },
     "pixiv": {
         "me"  : "pixiv.me Links",
@@ -211,6 +217,9 @@ SUBCATEGORY_MAP = {
     },
     "reddit": {
         "home": "Home Feed",
+    },
+    "redgifs": {
+        "collections": "",
     },
     "sankaku": {
         "books": "Book Searches",
@@ -251,6 +260,7 @@ SUBCATEGORY_MAP = {
 }
 
 BASE_MAP = {
+    "E621"        : "e621 Instances",
     "foolfuuka"   : "FoolFuuka 4chan Archives",
     "foolslide"   : "FoOlSlide Instances",
     "gelbooru_v01": "Gelbooru Beta 0.1.11",
@@ -258,6 +268,8 @@ BASE_MAP = {
     "lolisafe"    : "lolisafe and chibisafe",
     "lynxchan"    : "LynxChan Imageboards",
     "moebooru"    : "Moebooru and MyImouto",
+    "szurubooru"  : "szurubooru Instances",
+    "urlshortener": "URL Shorteners",
     "vichan"      : "vichan Imageboards",
 }
 
@@ -271,6 +283,7 @@ _APIKEY_WY = \
     '<a href="configuration.rst#extractorweasylapi-key">API Key</a>'
 
 AUTH_MAP = {
+    "aibooru"        : "Supported",
     "aryion"         : "Supported",
     "atfbooru"       : "Supported",
     "baraag"         : _OAUTH,
@@ -279,6 +292,7 @@ AUTH_MAP = {
     "derpibooru"     : _APIKEY_DB,
     "deviantart"     : _OAUTH,
     "e621"           : "Supported",
+    "e926"           : "Supported",
     "e-hentai"       : "Supported",
     "exhentai"       : "Supported",
     "fanbox"         : _COOKIES,
@@ -367,7 +381,11 @@ def subcategory_text(c, sc):
         return SUBCATEGORY_MAP[sc]
 
     sc = sc.capitalize()
-    return sc if sc.endswith("s") else sc + "s"
+    if sc.endswith("y"):
+        sc = sc[:-1] + "ies"
+    elif not sc.endswith("s"):
+        sc += "s"
+    return sc
 
 
 def category_key(c):
@@ -432,6 +450,10 @@ def build_extractor_list():
     # add manga4life.com
     default["mangalife"] = default["mangasee"]
     domains["mangalife"] = "https://manga4life.com/"
+
+    # add wikifeetx.com
+    default["wikifeetx"] = default["wikifeet"]
+    domains["wikifeetx"] = "https://www.wikifeetx.com/"
 
     return categories, domains
 
@@ -502,6 +524,7 @@ Consider all sites to be NSFW unless otherwise known.
 
 
 categories, domains = build_extractor_list()
-outfile = sys.argv[1] if len(sys.argv) > 1 else "supportedsites.md"
-with open(util.path("docs", outfile), "w") as fp:
-    fp.write(generate_output(COLUMNS, categories, domains))
+PATH = (sys.argv[1] if len(sys.argv) > 1 else
+        util.path("docs", "supportedsites.md"))
+with util.lazy(PATH) as file:
+    file.write(generate_output(COLUMNS, categories, domains))

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2020-2022 Mike Fährmann
+# Copyright 2020-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -9,9 +9,8 @@
 """Extractors for https://www.subscribestar.com/"""
 
 from .common import Extractor, Message
-from .. import text, exception
+from .. import text, util, exception
 from ..cache import cache
-import json
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?subscribestar\.(com|adult)"
 
@@ -92,7 +91,7 @@ class SubscribestarExtractor(Extractor):
         gallery = text.extr(html, 'data-gallery="', '"')
         if gallery:
             media.extend(
-                item for item in json.loads(text.unescape(gallery))
+                item for item in util.json_loads(text.unescape(gallery))
                 if "/previews/" not in item["url"]
             )
 

@@ -10,7 +10,7 @@
 
 from .common import Extractor, Message
 from .. import text, exception
-import base64
+import binascii
 import json
 
 
@@ -168,7 +168,7 @@ class PhotobucketImageExtractor(Extractor):
         image["titleOrFilename"] = image["title"] or name
         image["tags"] = image.pop("clarifaiTagList", [])
 
-        mtype, _, mid = base64.b64decode(image["id"]).partition(b":")
+        mtype, _, mid = binascii.a2b_base64(image["id"]).partition(b":")
         image["pictureId"] = mid.decode() if mtype == b"mediaId" else ""
 
         yield Message.Directory, image

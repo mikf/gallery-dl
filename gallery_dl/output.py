@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2022 Mike Fährmann
+# Copyright 2015-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -10,6 +10,7 @@ import os
 import sys
 import shutil
 import logging
+import functools
 import unicodedata
 from . import config, util, formatter
 
@@ -23,7 +24,7 @@ LOG_LEVEL = logging.INFO
 
 
 class Logger(logging.Logger):
-    """Custom logger that includes extra info in log records"""
+    """Custom Logger that includes extra info in log records"""
 
     def makeRecord(self, name, level, fn, lno, msg, args, exc_info,
                    func=None, extra=None, sinfo=None,
@@ -38,9 +39,9 @@ class LoggerAdapter():
     """Trimmed-down version of logging.LoggingAdapter"""
     __slots__ = ("logger", "extra")
 
-    def __init__(self, logger, extra):
+    def __init__(self, logger, job):
         self.logger = logger
-        self.extra = extra
+        self.extra = job._logger_extra
 
     def debug(self, msg, *args, **kwargs):
         if self.logger.isEnabledFor(logging.DEBUG):
@@ -61,6 +62,38 @@ class LoggerAdapter():
         if self.logger.isEnabledFor(logging.ERROR):
             kwargs["extra"] = self.extra
             self.logger._log(logging.ERROR, msg, args, **kwargs)
+
+
+class LoggerAdapterActions():
+
+    def __init__(self, logger, job):
+        self.logger = logger
+        self.extra = job._logger_extra
+        self.actions = job._logger_actions
+
+        self.debug = functools.partial(self.log, logging.DEBUG)
+        self.info = functools.partial(self.log, logging.INFO)
+        self.warning = functools.partial(self.log, logging.WARNING)
+        self.error = functools.partial(self.log, logging.ERROR)
+
+    def log(self, level, msg, *args, **kwargs):
+        if args:
+            msg = msg % args
+
+        actions = self.actions[level]
+        if actions:
+            args = self.extra.copy()
+            args["level"] = level
+
+            for cond, action in actions:
+                if cond(msg):
+                    action(args)
+
+            level = args["level"]
+
+        if self.logger.isEnabledFor(level):
+            kwargs["extra"] = self.extra
+            self.logger._log(level, msg, (), **kwargs)
 
 
 class PathfmtProxy():
@@ -235,16 +268,31 @@ else:
     stderr_write = stderr_write_flush
 
 
-def replace_std_streams(errors="replace"):
-    """Replace standard streams and set their error handlers to 'errors'"""
-    for name in ("stdout", "stdin", "stderr"):
-        stream = getattr(sys, name)
-        if stream:
+def configure_standard_streams():
+    for name in ("stdout", "stderr", "stdin"):
+        stream = getattr(sys, name, None)
+        if not stream:
+            continue
+
+        options = config.get(("output",), name)
+        if not options:
+            options = {"errors": "replace"}
+        elif isinstance(options, str):
+            options = {"errors": "replace", "encoding": options}
+        elif not options.get("errors"):
+            options["errors"] = "replace"
+
+        try:
+            stream.reconfigure(**options)
+        except AttributeError:
+            # no 'reconfigure' support
+            oget = options.get
             setattr(sys, name, stream.__class__(
                 stream.buffer,
-                errors=errors,
-                newline=stream.newlines,
-                line_buffering=stream.line_buffering,
+                encoding=oget("encoding", stream.encoding),
+                errors=oget("errors", "replace"),
+                newline=oget("newline", stream.newlines),
+                line_buffering=oget("line_buffering", stream.line_buffering),
             ))
 
 

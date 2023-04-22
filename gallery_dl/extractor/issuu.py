@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2022 Mike Fährmann
+# Copyright 2019-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -9,8 +9,7 @@
 """Extractors for https://issuu.com/"""
 
 from .common import GalleryExtractor, Extractor, Message
-from .. import text
-import json
+from .. import text, util
 
 
 class IssuuBase():
@@ -54,7 +53,7 @@ class IssuuPublicationExtractor(IssuuBase, GalleryExtractor):
     })
 
     def metadata(self, page):
-        data = json.loads(text.extr(
+        data = util.json_loads(text.extr(
             page, '<script data-json="', '"').replace("&quot;", '"'))
 
         doc = data["initialDocumentData"]["document"]

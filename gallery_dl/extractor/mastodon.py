@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2022 Mike Fährmann
+# Copyright 2019-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -31,8 +31,8 @@ class MastodonExtractor(BaseExtractor):
     def items(self):
         for status in self.statuses():
 
-            if self._check_move:
-                self._check_move(status["account"])
+            if self._check_moved:
+                self._check_moved(status["account"])
             if not self.reblogs and status["reblog"]:
                 self.log.debug("Skipping %s (reblog)", status["id"])
                 continue
@@ -48,12 +48,13 @@ class MastodonExtractor(BaseExtractor):
             status["instance_remote"] = \
                 acct.rpartition("@")[2] if "@" in acct else None
 
+            status["count"] = len(attachments)
             status["tags"] = [tag["name"] for tag in status["tags"]]
             status["date"] = text.parse_datetime(
                 status["created_at"][:19], "%Y-%m-%dT%H:%M:%S")
 
             yield Message.Directory, status
-            for media in attachments:
+            for status["num"], media in enumerate(attachments, 1):
                 status["media"] = media
                 url = media["url"]
                 yield Message.Url, url, text.nameext_from_url(url, status)
@@ -62,8 +63,8 @@ class MastodonExtractor(BaseExtractor):
         """Return an iterable containing all relevant Status objects"""
         return ()
 
-    def _check_move(self, account):
-        self._check_move = None
+    def _check_moved(self, account):
+        self._check_moved = None
         if "moved" in account:
             self.log.warning("Account '%s' moved to '%s'",
                              account["acct"], account["moved"]["acct"])
@@ -181,6 +182,10 @@ class MastodonStatusExtractor(MastodonExtractor):
     test = (
         ("https://mastodon.social/@jk/103794036899778366", {
             "count": 4,
+            "keyword": {
+                "count": 4,
+                "num": int,
+            },
         }),
         ("https://pawoo.net/@yoru_nine/105038878897832922", {
             "content": "b52e807f8ab548d6f896b09218ece01eba83987a",
@@ -222,6 +227,12 @@ class MastodonAPI():
         if username.startswith("id:"):
             return username[3:]
 
+        try:
+            return self.account_lookup(username)["id"]
+        except Exception:
+            # fall back to account search
+            pass
+
         if "@" in username:
             handle = "@" + username
         else:
@@ -229,7 +240,7 @@ class MastodonAPI():
 
         for account in self.account_search(handle, 1):
             if account["acct"] == username:
-                self.extractor._check_move(account)
+                self.extractor._check_moved(account)
                 return account["id"]
         raise exception.NotFoundError("account")
 
@@ -240,6 +251,11 @@ class MastodonAPI():
     def account_following(self, account_id):
         endpoint = "/v1/accounts/{}/following".format(account_id)
         return self._pagination(endpoint, None)
+
+    def account_lookup(self, username):
+        endpoint = "/v1/accounts/lookup"
+        params = {"acct": username}
+        return self._call(endpoint, params).json()
 
     def account_search(self, query, limit=40):
         """Search for accounts"""

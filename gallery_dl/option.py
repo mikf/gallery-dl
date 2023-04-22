@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2017-2022 Mike Fährmann
+# Copyright 2017-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -10,9 +10,8 @@
 
 import argparse
 import logging
-import json
 import sys
-from . import job, version
+from . import job, util, version
 
 
 class ConfigAction(argparse.Action):
@@ -48,29 +47,38 @@ class DeprecatedConfigConstAction(argparse.Action):
 class ParseAction(argparse.Action):
     """Parse <key>=<value> options and set them as config values"""
     def __call__(self, parser, namespace, values, option_string=None):
-        key, _, value = values.partition("=")
-        try:
-            value = json.loads(value)
-        except ValueError:
-            pass
+        key, value = _parse_option(values)
         key = key.split(".")  # splitting an empty string becomes [""]
         namespace.options.append((key[:-1], key[-1], value))
 
 
+class OptionAction(argparse.Action):
+    """Parse <key>=<value> options for """
+    def __call__(self, parser, namespace, values, option_string=None):
+        key, value = _parse_option(values)
+        namespace.options_pp[key] = value
+
+
 class Formatter(argparse.HelpFormatter):
     """Custom HelpFormatter class to customize help output"""
-    def __init__(self, *args, **kwargs):
-        super().__init__(max_help_position=30, *args, **kwargs)
+    def __init__(self, prog):
+        argparse.HelpFormatter.__init__(self, prog, max_help_position=30)
 
-    def _format_action_invocation(self, action):
-        opts = action.option_strings[:]
-        if opts:
-            if action.nargs != 0:
-                args_string = self._format_args(action, "ARG")
-                opts[-1] += " " + args_string
-            return ', '.join(opts)
-        else:
-            return self._metavar_formatter(action, action.dest)(1)[0]
+    def _format_action_invocation(self, action, join=", ".join):
+        opts = action.option_strings
+        if action.metavar:
+            opts = opts.copy()
+            opts[-1] += " " + action.metavar
+        return join(opts)
+
+
+def _parse_option(opt):
+    key, _, value = opt.partition("=")
+    try:
+        value = util.json_loads(value)
+    except ValueError:
+        pass
+    return key, value
 
 
 def build_parser():
@@ -99,6 +107,12 @@ def build_parser():
               "More than one --input-file can be specified"),
     )
     general.add_argument(
+        "-f", "--filename",
+        dest="filename", metavar="FORMAT",
+        help=("Filename format string for downloaded files "
+              "('/O' for \"original\" filenames)"),
+    )
+    general.add_argument(
         "-d", "--destination",
         dest="base-directory", metavar="PATH", action=ConfigAction,
         help="Target location for file downloads",
@@ -109,10 +123,9 @@ def build_parser():
         help="Exact location for file downloads",
     )
     general.add_argument(
-        "-f", "--filename",
-        dest="filename", metavar="FORMAT",
-        help=("Filename format string for downloaded files "
-              "('/O' for \"original\" filenames)"),
+        "-X", "--extractors",
+        dest="extractor_sources", metavar="PATH", action="append",
+        help="Load external extractors from PATH",
     )
     general.add_argument(
         "--proxy",
@@ -308,24 +321,40 @@ def build_parser():
 
     configuration = parser.add_argument_group("Configuration Options")
     configuration.add_argument(
+        "-o", "--option",
+        dest="options", metavar="KEY=VALUE", action=ParseAction, default=[],
+        help=("Additional options. "
+              "Example: -o browser=firefox")   ,
+    )
+    configuration.add_argument(
         "-c", "--config",
-        dest="cfgfiles", metavar="FILE", action="append",
+        dest="configs_json", metavar="FILE", action="append",
         help="Additional configuration files",
     )
     configuration.add_argument(
         "--config-yaml",
-        dest="yamlfiles", metavar="FILE", action="append",
-        help=argparse.SUPPRESS,
+        dest="configs_yaml", metavar="FILE", action="append",
+        help="Additional configuration files in YAML format",
     )
     configuration.add_argument(
-        "-o", "--option",
-        dest="options", metavar="OPT", action=ParseAction, default=[],
-        help="Additional '<key>=<value>' option values",
+        "--config-toml",
+        dest="configs_toml", metavar="FILE", action="append",
+        help="Additional configuration files in TOML format",
+    )
+    configuration.add_argument(
+        "--config-create",
+        dest="config_init", action="store_true",
+        help="Create a basic configuration file",
+    )
+    configuration.add_argument(
+        "--config-ignore",
+        dest="config_load", action="store_false",
+        help="Do not read default configuration files",
     )
     configuration.add_argument(
         "--ignore-config",
-        dest="load_config", action="store_false",
-        help="Do not read the default configuration files",
+        dest="config_load", action="store_false",
+        help=argparse.SUPPRESS,
     )
 
     authentication = parser.add_argument_group("Authentication Options")
@@ -349,7 +378,7 @@ def build_parser():
     selection.add_argument(
         "--download-archive",
         dest="archive", metavar="FILE", action=ConfigAction,
-        help=("Record all downloaded files in the archive file and "
+        help=("Record all downloaded or skipped files in FILE and "
               "skip downloading any file already in it"),
     )
     selection.add_argument(
@@ -367,19 +396,20 @@ def build_parser():
     selection.add_argument(
         "--range",
         dest="image-range", metavar="RANGE", action=ConfigAction,
-        help=("Index-range(s) specifying which images to download. "
-              "For example '5-10' or '1,3-5,10-'"),
+        help=("Index range(s) specifying which files to download. "
+              "These can be either a constant value, range, or slice "
+              "(e.g. '5', '8-20', or '1:24:3')"),
     )
     selection.add_argument(
         "--chapter-range",
         dest="chapter-range", metavar="RANGE", action=ConfigAction,
-        help=("Like '--range', but applies to manga-chapters "
+        help=("Like '--range', but applies to manga chapters "
               "and other delegated URLs"),
     )
     selection.add_argument(
         "--filter",
         dest="image-filter", metavar="EXPR", action=ConfigAction,
-        help=("Python expression controlling which images to download. "
+        help=("Python expression controlling which files to download. "
               "Files for which the expression evaluates to False are ignored. "
               "Available keys are the filename-specific ones listed by '-K'. "
               "Example: --filter \"image_width >= 1000 and "
@@ -388,7 +418,7 @@ def build_parser():
     selection.add_argument(
         "--chapter-filter",
         dest="chapter-filter", metavar="EXPR", action=ConfigAction,
-        help=("Like '--filter', but applies to manga-chapters "
+        help=("Like '--filter', but applies to manga chapters "
               "and other delegated URLs"),
     )
 
@@ -472,7 +502,7 @@ def build_parser():
         dest="postprocessors", metavar="CMD",
         action=AppendCommandAction, const={"name": "exec"},
         help=("Execute CMD for each downloaded file. "
-              "Example: --exec 'convert {} {}.png && rm {}'"),
+              "Example: --exec \"convert {} {}.png && rm {}\""),
     )
     postprocessor.add_argument(
         "--exec-after",
@@ -480,12 +510,17 @@ def build_parser():
         action=AppendCommandAction, const={
             "name": "exec", "event": "finalize"},
         help=("Execute CMD after all files were downloaded successfully. "
-              "Example: --exec-after 'cd {} && convert * ../doc.pdf'"),
+              "Example: --exec-after \"cd {} && convert * ../doc.pdf\""),
     )
     postprocessor.add_argument(
         "-P", "--postprocessor",
         dest="postprocessors", metavar="NAME", action="append",
         help="Activate the specified post processor",
+    )
+    postprocessor.add_argument(
+        "-O", "--postprocessor-option",
+        dest="options_pp", metavar="OPT", action=OptionAction, default={},
+        help="Additional '<key>=<value>' post processor options",
     )
 
     parser.add_argument(

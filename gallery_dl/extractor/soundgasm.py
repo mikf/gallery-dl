@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2022 Mike Fährmann
+# Copyright 2022-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -11,17 +11,46 @@
 from .common import Extractor, Message
 from .. import text
 
+BASE_PATTERN = r"(?:https?://)?(?:www\.)?soundgasm\.net/u(?:ser)?"
 
-class SoundgasmAudioExtractor(Extractor):
-    """Extractor for audio clips from soundgasm.net"""
+
+class SoundgasmExtractor(Extractor):
+    """Base class for soundgasm extractors"""
     category = "soundgasm"
-    subcategory = "audio"
     root = "https://soundgasm.net"
+    request_interval = (0.5, 1.5)
     directory_fmt = ("{category}", "{user}")
     filename_fmt = "{title}.{extension}"
     archive_fmt = "{user}_{slug}"
-    pattern = (r"(?:https?://)?(?:www\.)?soundgasm\.net"
-               r"/u(?:ser)?/([^/?#]+)/([^/?#]+)")
+
+    def items(self):
+        for sound in map(self._extract_sound, self.sounds()):
+            url = sound["url"]
+            yield Message.Directory, sound
+            yield Message.Url, url, text.nameext_from_url(url, sound)
+
+    def _extract_sound(self, url):
+        extr = text.extract_from(self.request(url).text)
+
+        _, user, slug = url.rstrip("/").rsplit("/", 2)
+        data = {
+            "user" : user,
+            "slug" : slug,
+            "title": text.unescape(extr('aria-label="title">', "<")),
+            "description": text.unescape(text.remove_html(extr(
+                'class="jp-description">', '</div>'))),
+        }
+
+        formats = extr('"setMedia", {', '}')
+        data["url"] = text.extr(formats, ': "', '"')
+
+        return data
+
+
+class SoundgasmAudioExtractor(SoundgasmExtractor):
+    """Extractor for audio clips from soundgasm.net"""
+    subcategory = "audio"
+    pattern = BASE_PATTERN + r"/([^/?#]+)/([^/?#]+)"
     test = (
         (("https://soundgasm.net/u/ClassWarAndPuppies2"
           "/687-Otto-von-Toontown-12822"), {
@@ -47,47 +76,39 @@ class SoundgasmAudioExtractor(Extractor):
     )
 
     def __init__(self, match):
-        Extractor.__init__(self, match)
+        SoundgasmExtractor.__init__(self, match)
         self.user, self.slug = match.groups()
 
-    def items(self):
-        url = "{}/u/{}/{}".format(self.root, self.user, self.slug)
-        extr = text.extract_from(self.request(url).text)
-
-        data = {
-            "user" : self.user,
-            "slug" : self.slug,
-            "title": text.unescape(extr('aria-label="title">', "<")),
-            "description": text.unescape(text.remove_html(extr(
-                'class="jp-description">', '</div>'))),
-        }
-
-        formats = extr('"setMedia", {', '}')
-        url = text.extr(formats, ': "', '"')
-
-        yield Message.Directory, data
-        yield Message.Url, url, text.nameext_from_url(url, data)
+    def sounds(self):
+        return ("{}/u/{}/{}".format(self.root, self.user, self.slug),)
 
 
-class SoundgasmUserExtractor(Extractor):
+class SoundgasmUserExtractor(SoundgasmExtractor):
     """Extractor for all sounds from a soundgasm user"""
-    category = "soundgasm"
     subcategory = "user"
-    root = "https://soundgasm.net"
-    pattern = (r"(?:https?://)?(?:www\.)?soundgasm\.net"
-               r"/u(?:ser)?/([^/?#]+)/?$")
+    pattern = BASE_PATTERN + r"/([^/?#]+)/?$"
     test = ("https://soundgasm.net/u/fierce-aphrodite", {
-        "pattern": SoundgasmAudioExtractor.pattern,
+        "pattern": r"https://media\.soundgasm\.net/sounds/[0-9a-f]{40}\.m4a",
         "count"  : ">= 15",
+        "keyword": {
+            "description": str,
+            "extension": "m4a",
+            "filename": "re:^[0-9a-f]{40}$",
+            "slug": str,
+            "title": str,
+            "url": str,
+            "user": "fierce-aphrodite"
+        },
     })
 
     def __init__(self, match):
-        Extractor.__init__(self, match)
+        SoundgasmExtractor.__init__(self, match)
         self.user = match.group(1)
 
-    def items(self):
+    def sounds(self):
         page = self.request(self.root + "/user/" + self.user).text
-        data = {"_extractor": SoundgasmAudioExtractor}
-        for sound in text.extract_iter(
-                page, 'class="sound-details">', "</a>"):
-            yield Message.Queue, text.extr(sound, '<a href="', '"'), data
+        return [
+            text.extr(sound, '<a href="', '"')
+            for sound in text.extract_iter(
+                page, 'class="sound-details">', "</a>")
+        ]

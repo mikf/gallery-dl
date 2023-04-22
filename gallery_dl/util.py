@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2017-2022 Mike Fährmann
+# Copyright 2017-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -14,6 +14,7 @@ import sys
 import json
 import time
 import random
+import hashlib
 import sqlite3
 import binascii
 import datetime
@@ -23,7 +24,7 @@ import subprocess
 import urllib.parse
 from http.cookiejar import Cookie
 from email.utils import mktime_tz, parsedate_tz
-from . import text, exception
+from . import text, version, exception
 
 
 def bencode(num, alphabet="0123456789"):
@@ -110,6 +111,24 @@ def false(_):
 
 def noop():
     """Does nothing"""
+
+
+def md5(s):
+    """Generate MD5 hexdigest of 's'"""
+    if not s:
+        s = b""
+    elif isinstance(s, str):
+        s = s.encode()
+    return hashlib.md5(s).hexdigest()
+
+
+def sha1(s):
+    """Generate SHA1 hexdigest of 's'"""
+    if not s:
+        s = b""
+    elif isinstance(s, str):
+        s = s.encode()
+    return hashlib.sha1(s).hexdigest()
 
 
 def generate_token(size=16):
@@ -204,6 +223,10 @@ def datetime_to_timestamp_string(dt):
         return ""
 
 
+json_loads = json._default_decoder.decode
+json_dumps = json.JSONEncoder(default=str).encode
+
+
 def dump_json(obj, fp=sys.stdout, ensure_ascii=True, indent=4):
     """Serialize 'obj' as JSON and write it to 'fp'"""
     json.dump(
@@ -231,7 +254,14 @@ Status: {response.status_code} {response.reason}
 Request Headers
 ---------------
 {request_headers}
-
+"""
+        if request.body:
+            outfmt += """
+Request Body
+------------
+{request.body}
+"""
+        outfmt += """
 Response Headers
 ----------------
 {response_headers}
@@ -506,7 +536,7 @@ def parse_inputfile(file, log):
                 continue
 
             try:
-                value = json.loads(value.strip())
+                value = json_loads(value.strip())
             except ValueError as exc:
                 log.warning("input file: unable to parse '%s': %s", value, exc)
                 continue
@@ -572,6 +602,8 @@ EPOCH = datetime.datetime(1970, 1, 1)
 SECOND = datetime.timedelta(0, 1)
 WINDOWS = (os.name == "nt")
 SENTINEL = object()
+USERAGENT = "gallery-dl/" + version.__version__
+EXECUTABLE = getattr(sys, "frozen", False)
 SPECIAL_EXTRACTORS = {"oauth", "recursive", "test"}
 GLOBALS = {
     "contains" : contains,
@@ -581,13 +613,35 @@ GLOBALS = {
     "timedelta": datetime.timedelta,
     "abort"    : raises(exception.StopExtraction),
     "terminate": raises(exception.TerminateExtraction),
+    "restart"  : raises(exception.RestartExtraction),
+    "hash_sha1": sha1,
+    "hash_md5" : md5,
     "re"       : re,
 }
 
 
-def compile_expression(expr, name="<expr>", globals=GLOBALS):
+def compile_expression(expr, name="<expr>", globals=None):
     code_object = compile(expr, name, "eval")
-    return functools.partial(eval, code_object, globals)
+    return functools.partial(eval, code_object, globals or GLOBALS)
+
+
+def import_file(path):
+    """Import a Python module from a filesystem path"""
+    path, name = os.path.split(path)
+
+    name, sep, ext = name.rpartition(".")
+    if not sep:
+        name = ext
+
+    if path:
+        path = expand_path(path)
+        sys.path.insert(0, path)
+        try:
+            return __import__(name)
+        finally:
+            del sys.path[0]
+    else:
+        return __import__(name)
 
 
 def build_duration_func(duration, min=0.0):
@@ -714,74 +768,72 @@ def chain_predicates(predicates, url, kwdict):
 
 
 class RangePredicate():
-    """Predicate; True if the current index is in the given range"""
+    """Predicate; True if the current index is in the given range(s)"""
+
     def __init__(self, rangespec):
-        self.ranges = self.optimize_range(self.parse_range(rangespec))
+        self.ranges = ranges = self._parse(rangespec)
         self.index = 0
 
-        if self.ranges:
-            self.lower, self.upper = self.ranges[0][0], self.ranges[-1][1]
+        if ranges:
+            # technically wrong, but good enough for now
+            # and evaluating min/max for a large range is slow
+            self.lower = min(r.start for r in ranges)
+            self.upper = max(r.stop for r in ranges) - 1
         else:
-            self.lower, self.upper = 0, 0
+            self.lower = 0
+            self.upper = 0
 
-    def __call__(self, url, _):
-        self.index += 1
+    def __call__(self, _url, _kwdict):
+        self.index = index = self.index + 1
 
-        if self.index > self.upper:
+        if index > self.upper:
             raise exception.StopExtraction()
 
-        for lower, upper in self.ranges:
-            if lower <= self.index <= upper:
+        for range in self.ranges:
+            if index in range:
                 return True
         return False
 
     @staticmethod
-    def parse_range(rangespec):
+    def _parse(rangespec):
         """Parse an integer range string and return the resulting ranges
 
         Examples:
-            parse_range("-2,4,6-8,10-") -> [(1,2), (4,4), (6,8), (10,INTMAX)]
-            parse_range(" - 3 , 4-  4, 2-6") -> [(1,3), (4,4), (2,6)]
+            _parse("-2,4,6-8,10-")      -> [(1,3), (4,5), (6,9), (10,INTMAX)]
+            _parse(" - 3 , 4-  4, 2-6") -> [(1,4), (4,5), (2,7)]
+            _parse("1:2,4:8:2")         -> [(1,1), (4,7,2)]
         """
         ranges = []
+        append = ranges.append
 
-        for group in rangespec.split(","):
+        if isinstance(rangespec, str):
+            rangespec = rangespec.split(",")
+
+        for group in rangespec:
             if not group:
                 continue
-            first, sep, last = group.partition("-")
-            if not sep:
-                beg = end = int(first)
+
+            elif ":" in group:
+                start, _, stop = group.partition(":")
+                stop, _, step = stop.partition(":")
+                append(range(
+                    int(start) if start.strip() else 1,
+                    int(stop) if stop.strip() else sys.maxsize,
+                    int(step) if step.strip() else 1,
+                ))
+
+            elif "-" in group:
+                start, _, stop = group.partition("-")
+                append(range(
+                    int(start) if start.strip() else 1,
+                    int(stop) + 1 if stop.strip() else sys.maxsize,
+                ))
+
             else:
-                beg = int(first) if first.strip() else 1
-                end = int(last) if last.strip() else sys.maxsize
-            ranges.append((beg, end) if beg <= end else (end, beg))
+                start = int(group)
+                append(range(start, start+1))
 
         return ranges
-
-    @staticmethod
-    def optimize_range(ranges):
-        """Simplify/Combine a parsed list of ranges
-
-        Examples:
-            optimize_range([(2,4), (4,6), (5,8)]) -> [(2,8)]
-            optimize_range([(1,1), (2,2), (3,6), (8,9))]) -> [(1,6), (8,9)]
-        """
-        if len(ranges) <= 1:
-            return ranges
-
-        ranges.sort()
-        riter = iter(ranges)
-        result = []
-
-        beg, end = next(riter)
-        for lower, upper in riter:
-            if lower > end+1:
-                result.append((beg, end))
-                beg, end = lower, upper
-            elif upper > end:
-                end = upper
-        result.append((beg, end))
-        return result
 
 
 class UniquePredicate():
@@ -802,6 +854,8 @@ class FilterPredicate():
     """Predicate; True if evaluating the given expression returns True"""
 
     def __init__(self, expr, target="image"):
+        if not isinstance(expr, str):
+            expr = "(" + ") and (".join(expr) + ")"
         name = "<{} filter>".format(target)
         self.expr = compile_expression(expr, name)
 
@@ -825,7 +879,8 @@ class ExtendedUrl():
 
 class DownloadArchive():
 
-    def __init__(self, path, format_string, cache_key="_archive_key"):
+    def __init__(self, path, format_string, pragma=None,
+                 cache_key="_archive_key"):
         try:
             con = sqlite3.connect(path, timeout=60, check_same_thread=False)
         except sqlite3.OperationalError:
@@ -833,20 +888,23 @@ class DownloadArchive():
             con = sqlite3.connect(path, timeout=60, check_same_thread=False)
         con.isolation_level = None
 
-        self.close = con.close
-        self.cursor = con.cursor()
-
         from . import formatter
         self.keygen = formatter.parse(format_string).format_map
+        self.close = con.close
+        self.cursor = cursor = con.cursor()
         self._cache_key = cache_key
 
+        if pragma:
+            for stmt in pragma:
+                cursor.execute("PRAGMA " + stmt)
+
         try:
-            self.cursor.execute("CREATE TABLE IF NOT EXISTS archive "
-                                "(entry TEXT PRIMARY KEY) WITHOUT ROWID")
+            cursor.execute("CREATE TABLE IF NOT EXISTS archive "
+                           "(entry TEXT PRIMARY KEY) WITHOUT ROWID")
         except sqlite3.OperationalError:
             # fallback for missing WITHOUT ROWID support (#553)
-            self.cursor.execute("CREATE TABLE IF NOT EXISTS archive "
-                                "(entry TEXT PRIMARY KEY)")
+            cursor.execute("CREATE TABLE IF NOT EXISTS archive "
+                           "(entry TEXT PRIMARY KEY)")
 
     def check(self, kwdict):
         """Return True if the item described by 'kwdict' exists in archive"""

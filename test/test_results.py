@@ -322,9 +322,9 @@ def setup_test_config():
     config.set(("extractor", "mangoxo")   , "username", "LiQiang3")
     config.set(("extractor", "mangoxo")   , "password", "5zbQF10_5u25259Ma")
 
-    for category in ("danbooru", "instagram", "twitter", "subscribestar",
-                     "e621", "atfbooru", "inkbunny", "tapas", "pillowfort",
-                     "mangadex", "aibooru"):
+    for category in ("danbooru", "atfbooru", "aibooru", "e621", "e926",
+                     "instagram", "twitter", "subscribestar", "deviantart",
+                     "inkbunny", "tapas", "pillowfort", "mangadex"):
         config.set(("extractor", category), "username", None)
 
     config.set(("extractor", "mastodon.social"), "access-token",

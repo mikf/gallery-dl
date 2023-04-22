@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2022 Mike Fährmann
+# Copyright 2014-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -33,11 +33,12 @@ class HttpDownloader(DownloaderBase):
         self.chunk_size = self.config("chunk-size", 32768)
         self.metadata = extractor.config("http-metadata")
         self.progress = self.config("progress", 3.0)
+        self.validate = self.config("validate", True)
         self.headers = self.config("headers")
         self.minsize = self.config("filesize-min")
         self.maxsize = self.config("filesize-max")
         self.retries = self.config("retries", extractor._retries)
-        self.retry_codes = self.config("retry-codes")
+        self.retry_codes = self.config("retry-codes", extractor._retry_codes)
         self.timeout = self.config("timeout", extractor._timeout)
         self.verify = self.config("verify", extractor._verify)
         self.mtime = self.config("mtime", True)
@@ -45,8 +46,6 @@ class HttpDownloader(DownloaderBase):
 
         if self.retries < 0:
             self.retries = float("inf")
-        if self.retry_codes is None:
-            self.retry_codes = [429]
         if self.minsize:
             minsize = text.parse_bytes(self.minsize)
             if not minsize:
@@ -100,13 +99,6 @@ class HttpDownloader(DownloaderBase):
         kwdict = pathfmt.kwdict
         adjust_extension = kwdict.get(
             "_http_adjust_extension", self.adjust_extension)
-
-        codes = kwdict.get("_http_retry_codes")
-        if codes:
-            retry_codes = self.retry_codes.copy()
-            retry_codes += codes
-        else:
-            retry_codes = self.retry_codes
 
         if self.part and not metadata:
             pathfmt.part_enable(self.partdir)
@@ -168,14 +160,17 @@ class HttpDownloader(DownloaderBase):
                 break
             else:
                 msg = "'{} {}' for '{}'".format(code, response.reason, url)
-                if code in retry_codes or 500 <= code < 600:
+                if code in self.retry_codes or 500 <= code < 600:
+                    continue
+                retry = kwdict.get("_http_retry")
+                if retry and retry(response):
                     continue
                 self.log.warning(msg)
                 return False
 
             # check for invalid responses
             validate = kwdict.get("_http_validate")
-            if validate:
+            if validate and self.validate:
                 result = validate(response)
                 if isinstance(result, str):
                     url = result
@@ -297,11 +292,10 @@ class HttpDownloader(DownloaderBase):
         progress = self.progress
 
         bytes_downloaded = 0
-        time_start = time.time()
+        time_start = time.monotonic()
 
         for data in content:
-            time_current = time.time()
-            time_elapsed = time_current - time_start
+            time_elapsed = time.monotonic() - time_start
             bytes_downloaded += len(data)
 
             write(data)
@@ -359,6 +353,8 @@ MIME_TYPES = {
     "image/x-ms-bmp": "bmp",
     "image/webp"    : "webp",
     "image/avif"    : "avif",
+    "image/heic"    : "heic",
+    "image/heif"    : "heif",
     "image/svg+xml" : "svg",
     "image/ico"     : "ico",
     "image/icon"    : "ico",
@@ -391,6 +387,8 @@ MIME_TYPES = {
     "application/x-shockwave-flash": "swf",
 
     "application/ogg": "ogg",
+    # https://www.iana.org/assignments/media-types/model/obj
+    "model/obj": "obj",
     "application/octet-stream": "bin",
 }
 
@@ -403,6 +401,8 @@ SIGNATURE_CHECKS = {
     "webp": lambda s: (s[0:4] == b"RIFF" and
                        s[8:12] == b"WEBP"),
     "avif": lambda s: s[4:11] == b"ftypavi" and s[11] in b"fs",
+    "heic": lambda s: (s[4:10] == b"ftyphe" and s[10:12] in (
+                       b"ic", b"im", b"is", b"ix", b"vc", b"vm", b"vs")),
     "svg" : lambda s: s[0:5] == b"<?xml",
     "ico" : lambda s: s[0:4] == b"\x00\x00\x01\x00",
     "cur" : lambda s: s[0:4] == b"\x00\x00\x02\x00",
@@ -420,6 +420,13 @@ SIGNATURE_CHECKS = {
     "7z"  : lambda s: s[0:6] == b"\x37\x7A\xBC\xAF\x27\x1C",
     "pdf" : lambda s: s[0:5] == b"%PDF-",
     "swf" : lambda s: s[0:3] in (b"CWS", b"FWS"),
+    "blend": lambda s: s[0:7] == b"BLENDER",
+    # unfortunately the Wavefront .obj format doesn't have a signature,
+    # so we check for the existence of Blender's comment
+    "obj" : lambda s: s[0:11] == b"# Blender v",
+    # Celsys Clip Studio Paint format
+    # https://github.com/rasensuihei/cliputils/blob/master/README.md
+    "clip": lambda s: s[0:8] == b"CSFCHUNK",
     # check 'bin' files against all other file signatures
     "bin" : lambda s: False,
 }

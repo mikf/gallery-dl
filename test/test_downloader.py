@@ -289,6 +289,10 @@ SAMPLES = {
     ("webp", b"RIFF????WEBP"),
     ("avif", b"????ftypavif"),
     ("avif", b"????ftypavis"),
+    ("heic", b"????ftypheic"),
+    ("heic", b"????ftypheim"),
+    ("heic", b"????ftypheis"),
+    ("heic", b"????ftypheix"),
     ("svg" , b"<?xml"),
     ("ico" , b"\x00\x00\x01\x00"),
     ("cur" , b"\x00\x00\x02\x00"),
@@ -313,6 +317,9 @@ SAMPLES = {
     ("pdf" , b"%PDF-"),
     ("swf" , b"FWS"),
     ("swf" , b"CWS"),
+    ("blend", b"BLENDER-v303RENDH"),
+    ("obj" , b"# Blender v3.2.0 OBJ File: 'foo.blend'"),
+    ("clip", b"CSFCHUNK\x00\x00\x00\x00"),
 }
 
 

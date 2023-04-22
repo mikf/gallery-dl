@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2022 Mike Fährmann
+# Copyright 2015-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
 import sys
-import json
 import errno
 import logging
 import functools
@@ -32,6 +31,12 @@ class Job():
         self.pathfmt = None
         self.kwdict = {}
         self.status = 0
+
+        actions = extr.config("actions")
+        if actions:
+            from .actions import parse
+            self._logger_actions = parse(actions)
+            self._wrap_logger = self._wrap_logger_actions
 
         path_proxy = output.PathfmtProxy(self)
         self._logger_extra = {
@@ -68,7 +73,7 @@ class Job():
         if version_info:
             self.kwdict[version_info] = {
                 "version"         : version.__version__,
-                "is_executable"   : getattr(sys, "frozen", False),
+                "is_executable"   : util.EXECUTABLE,
                 "current_git_head": util.git_head()
             }
 
@@ -94,7 +99,7 @@ class Job():
             if exc.message:
                 log.error(exc.message)
             self.status |= exc.code
-        except exception.TerminateExtraction:
+        except (exception.TerminateExtraction, exception.RestartExtraction):
             raise
         except exception.GalleryDLException as exc:
             log.error("%s: %s", exc.__class__.__name__, exc)
@@ -201,7 +206,10 @@ class Job():
         return self._wrap_logger(logging.getLogger(name))
 
     def _wrap_logger(self, logger):
-        return output.LoggerAdapter(logger, self._logger_extra)
+        return output.LoggerAdapter(logger, self)
+
+    def _wrap_logger_actions(self, logger):
+        return output.LoggerAdapterActions(logger, self)
 
     def _write_unsupported(self, url):
         if self.ulog:
@@ -344,12 +352,18 @@ class DownloadJob(Job):
                     if kwdict:
                         job.kwdict.update(kwdict)
 
-            if pextr.config("parent-skip"):
-                job._skipcnt = self._skipcnt
-                self.status |= job.run()
-                self._skipcnt = job._skipcnt
-            else:
-                self.status |= job.run()
+            while True:
+                try:
+                    if pextr.config("parent-skip"):
+                        job._skipcnt = self._skipcnt
+                        self.status |= job.run()
+                        self._skipcnt = job._skipcnt
+                    else:
+                        self.status |= job.run()
+                    break
+                except exception.RestartExtraction:
+                    pass
+
         else:
             self._write_unsupported(url)
 
@@ -436,10 +450,12 @@ class DownloadJob(Job):
             archive = util.expand_path(archive)
             archive_format = (cfg("archive-prefix", extr.category) +
                               cfg("archive-format", extr.archive_fmt))
+            archive_pragma = (cfg("archive-pragma"))
             try:
                 if "{" in archive:
                     archive = formatter.parse(archive).format_map(kwdict)
-                self.archive = util.DownloadArchive(archive, archive_format)
+                self.archive = util.DownloadArchive(
+                    archive, archive_format, archive_pragma)
             except Exception as exc:
                 extr.log.warning(
                     "Failed to open download archive at '%s' ('%s: %s')",
@@ -473,13 +489,18 @@ class DownloadJob(Job):
         postprocessors = extr.config_accumulate("postprocessors")
         if postprocessors:
             self.hooks = collections.defaultdict(list)
+
             pp_log = self.get_logger("postprocessor")
+            pp_conf = config.get((), "postprocessor") or {}
+            pp_opts = cfg("postprocessor-options")
             pp_list = []
 
-            pp_conf = config.get((), "postprocessor") or {}
             for pp_dict in postprocessors:
                 if isinstance(pp_dict, str):
                     pp_dict = pp_conf.get(pp_dict) or {"name": pp_dict}
+                if pp_opts:
+                    pp_dict = pp_dict.copy()
+                    pp_dict.update(pp_opts)
 
                 clist = pp_dict.get("whitelist")
                 if clist is not None:
@@ -612,13 +633,13 @@ class KeywordJob(Job):
     def print_kwdict(self, kwdict, prefix="", markers=None):
         """Print key-value pairs in 'kwdict' with formatting"""
         write = sys.stdout.write
-        suffix = "]" if prefix else ""
+        suffix = "']" if prefix else ""
 
         markerid = id(kwdict)
         if markers is None:
             markers = {markerid}
         elif markerid in markers:
-            write("{}\n  <circular reference>\n".format(prefix[:-1]))
+            write("{}\n  <circular reference>\n".format(prefix[:-2]))
             return  # ignore circular reference
         else:
             markers.add(markerid)
@@ -629,13 +650,13 @@ class KeywordJob(Job):
             key = prefix + key + suffix
 
             if isinstance(value, dict):
-                self.print_kwdict(value, key + "[", markers)
+                self.print_kwdict(value, key + "['", markers)
 
             elif isinstance(value, list):
                 if not value:
                     pass
                 elif isinstance(value[0], dict):
-                    self.print_kwdict(value[0], key + "[N][", markers)
+                    self.print_kwdict(value[0], key + "[N]['", markers)
                 else:
                     fmt = ("  {:>%s} {}\n" % len(str(len(value)))).format
                     write(key + "[N]\n")
@@ -645,6 +666,8 @@ class KeywordJob(Job):
             else:
                 # string or number
                 write("{}\n  {}\n".format(key, value))
+
+        markers.remove(markerid)
 
 
 class UrlJob(Job):
@@ -704,17 +727,19 @@ class InfoJob(Job):
 
     def _print_multi(self, title, *values):
         stdout_write("{}\n  {}\n\n".format(
-            title, " / ".join(json.dumps(v) for v in values)))
+            title, " / ".join(map(util.json_dumps, values))))
 
     def _print_config(self, title, optname, value):
         optval = self.extractor.config(optname, util.SENTINEL)
         if optval is not util.SENTINEL:
             stdout_write(
                 "{} (custom):\n  {}\n{} (default):\n  {}\n\n".format(
-                    title, json.dumps(optval), title, json.dumps(value)))
+                    title, util.json_dumps(optval),
+                    title, util.json_dumps(value)))
         elif value:
             stdout_write(
-                "{} (default):\n  {}\n\n".format(title, json.dumps(value)))
+                "{} (default):\n  {}\n\n".format(
+                    title, util.json_dumps(value)))
 
 
 class DataJob(Job):

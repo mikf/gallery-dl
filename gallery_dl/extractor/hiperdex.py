@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2020-2021 Mike Fährmann
+# Copyright 2020-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -13,7 +13,8 @@ from .. import text
 from ..cache import memcache
 import re
 
-BASE_PATTERN = r"((?:https?://)?(?:www\.)?hiperdex\d?\.(?:com|net|info))"
+BASE_PATTERN = (r"((?:https?://)?(?:www\.)?"
+                r"(?:1st)?hiperdex\d?\.(?:com|net|info))")
 
 
 class HiperdexBase():
@@ -30,7 +31,9 @@ class HiperdexBase():
 
         return {
             "manga"  : text.unescape(extr(
-                "<title>", "<").rpartition("&")[0].strip()),
+                "<title>", "<").rpartition(" - ")[0].strip()),
+            "url"    : text.unescape(extr(
+                'property="og:url" content="', '"')),
             "score"  : text.parse_float(extr(
                 'id="averagerate">', '<')),
             "author" : text.remove_html(extr(
@@ -52,6 +55,8 @@ class HiperdexBase():
         }
 
     def chapter_data(self, chapter):
+        if chapter.startswith("chapter-"):
+            chapter = chapter[8:]
         chapter, _, minor = chapter.partition("-")
         data = {
             "chapter"      : text.parse_int(chapter),
@@ -66,8 +71,9 @@ class HiperdexChapterExtractor(HiperdexBase, ChapterExtractor):
     pattern = BASE_PATTERN + r"(/manga/([^/?#]+)/([^/?#]+))"
     test = (
         ("https://hiperdex.com/manga/domestic-na-kanojo/154-5/", {
-            "pattern": r"https://hiperdex\d?.(com|net|info)/wp-content/uploads"
-                       r"/WP-manga/data/manga_\w+/[0-9a-f]{32}/\d+\.webp",
+            "pattern": r"https://(1st)?hiperdex\d?.(com|net|info)"
+                       r"/wp-content/uploads/WP-manga/data"
+                       r"/manga_\w+/[0-9a-f]{32}/\d+\.webp",
             "count": 9,
             "keyword": {
                 "artist" : "Sasuga Kei",
@@ -82,6 +88,7 @@ class HiperdexChapterExtractor(HiperdexBase, ChapterExtractor):
                 "type"   : "Manga",
             },
         }),
+        ("https://1sthiperdex.com/manga/domestic-na-kanojo/154-5/"),
         ("https://hiperdex2.com/manga/domestic-na-kanojo/154-5/"),
         ("https://hiperdex.net/manga/domestic-na-kanojo/154-5/"),
         ("https://hiperdex.info/manga/domestic-na-kanojo/154-5/"),
@@ -108,7 +115,7 @@ class HiperdexMangaExtractor(HiperdexBase, MangaExtractor):
     chapterclass = HiperdexChapterExtractor
     pattern = BASE_PATTERN + r"(/manga/([^/?#]+))/?$"
     test = (
-        ("https://hiperdex.com/manga/youre-not-that-special/", {
+        ("https://hiperdex.com/manga/1603231576-youre-not-that-special/", {
             "count": 51,
             "pattern": HiperdexChapterExtractor.pattern,
             "keyword": {
@@ -125,6 +132,8 @@ class HiperdexMangaExtractor(HiperdexBase, MangaExtractor):
                 "type"   : "Manhwa",
             },
         }),
+        ("https://hiperdex.com/manga/youre-not-that-special/"),
+        ("https://1sthiperdex.com/manga/youre-not-that-special/"),
         ("https://hiperdex2.com/manga/youre-not-that-special/"),
         ("https://hiperdex.net/manga/youre-not-that-special/"),
         ("https://hiperdex.info/manga/youre-not-that-special/"),
@@ -136,25 +145,24 @@ class HiperdexMangaExtractor(HiperdexBase, MangaExtractor):
         MangaExtractor.__init__(self, match, self.root + path + "/")
 
     def chapters(self, page):
-        self.manga_data(self.manga, page)
-        results = []
+        data = self.manga_data(self.manga, page)
+        self.manga_url = url = data["url"]
 
-        shortlink = text.extr(page, "rel='shortlink' href='", "'")
-        data = {
-            "action"   : "manga_get_reading_nav",
-            "manga"    : shortlink.rpartition("=")[2],
-            "chapter"  : "",
-            "volume_id": "",
-            "style"    : "list",
-            "type"     : "manga",
+        url = self.manga_url + "ajax/chapters/"
+        headers = {
+            "Accept": "*/*",
+            "X-Requested-With": "XMLHttpRequest",
+            "Origin": self.root,
+            "Referer": self.manga_url,
         }
-        url = self.root + "/wp-admin/admin-ajax.php"
-        page = self.request(url, method="POST", data=data).text
+        html = self.request(url, method="POST", headers=headers).text
 
-        for url in text.extract_iter(page, 'data-redirect="', '"'):
-            chapter = url.rpartition("/")[2]
+        results = []
+        for item in text.extract_iter(
+                html, '<li class="wp-manga-chapter', '</li>'):
+            url = text.extr(item, 'href="', '"')
+            chapter = url.rstrip("/").rpartition("/")[2]
             results.append((url, self.chapter_data(chapter)))
-
         return results
 
 
@@ -166,6 +174,7 @@ class HiperdexArtistExtractor(HiperdexBase, MangaExtractor):
     reverse = False
     pattern = BASE_PATTERN + r"(/manga-a(?:rtist|uthor)/(?:[^/?#]+))"
     test = (
+        ("https://1sthiperdex.com/manga-artist/beck-ho-an/"),
         ("https://hiperdex.net/manga-artist/beck-ho-an/"),
         ("https://hiperdex2.com/manga-artist/beck-ho-an/"),
         ("https://hiperdex.info/manga-artist/beck-ho-an/"),

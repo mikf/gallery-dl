@@ -7,8 +7,7 @@
 """Extractors for https://lightroom.adobe.com/"""
 
 from .common import Extractor, Message
-from .. import text
-import json
+from .. import text, util
 
 
 class LightroomGalleryExtractor(Extractor):
@@ -46,7 +45,7 @@ class LightroomGalleryExtractor(Extractor):
         # Get config
         url = "https://lightroom.adobe.com/shares/" + self.href
         response = self.request(url)
-        album = json.loads(
+        album = util.json_loads(
             text.extr(response.text, "albumAttributes: ", "\n")
         )
 
@@ -75,7 +74,7 @@ class LightroomGalleryExtractor(Extractor):
             url = base_url + next_url
             page = self.request(url).text
             # skip 1st line as it's a JS loop
-            data = json.loads(page[page.index("\n") + 1:])
+            data = util.json_loads(page[page.index("\n") + 1:])
 
             base_url = data["base"]
             for res in data["resources"]:

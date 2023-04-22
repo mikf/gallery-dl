@@ -64,6 +64,8 @@ class YoutubeDLDownloader(DownloaderBase):
             try:
                 info_dict = ytdl_instance.extract_info(url[5:], download=False)
             except Exception:
+                pass
+            if not info_dict:
                 return False
 
         if "entries" in info_dict:

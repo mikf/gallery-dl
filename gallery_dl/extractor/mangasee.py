@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2021-2022 Mike Fährmann
+# Copyright 2021-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -10,7 +10,6 @@
 
 from .common import ChapterExtractor, MangaExtractor
 from .. import text, util
-import json
 
 
 class MangaseeBase():
@@ -43,6 +42,7 @@ class MangaseeChapterExtractor(MangaseeBase, ChapterExtractor):
             "pattern": r"https://[^/]+/manga/Tokyo-Innocent/0004\.5-00\d\.png",
             "count": 8,
             "keyword": {
+                "author": ["NARUMI Naru"],
                 "chapter": 4,
                 "chapter_minor": ".5",
                 "chapter_string": "100045",
@@ -50,6 +50,8 @@ class MangaseeChapterExtractor(MangaseeBase, ChapterExtractor):
                 "date": "dt:2020-01-20 21:52:53",
                 "extension": "png",
                 "filename": r"re:0004\.5-00\d",
+                "genre": ["Comedy", "Fantasy", "Harem", "Romance", "Shounen",
+                          "Supernatural"],
                 "index": "1",
                 "lang": "en",
                 "language": "English",
@@ -63,6 +65,7 @@ class MangaseeChapterExtractor(MangaseeBase, ChapterExtractor):
             "pattern": r"https://[^/]+/manga/One-Piece/1063-0\d\d\.png",
             "count": 13,
             "keyword": {
+                "author": ["ODA Eiichiro"],
                 "chapter": 1063,
                 "chapter_minor": "",
                 "chapter_string": "110630",
@@ -70,6 +73,8 @@ class MangaseeChapterExtractor(MangaseeBase, ChapterExtractor):
                 "date": "dt:2022-10-16 17:32:54",
                 "extension": "png",
                 "filename": r"re:1063-0\d\d",
+                "genre": ["Action", "Adventure", "Comedy", "Drama", "Fantasy",
+                          "Shounen"],
                 "index": "1",
                 "lang": "en",
                 "language": "English",
@@ -94,12 +99,16 @@ class MangaseeChapterExtractor(MangaseeBase, ChapterExtractor):
 
     def metadata(self, page):
         extr = text.extract_from(page)
-        self.chapter = data = json.loads(extr("vm.CurChapter =", ";\r\n"))
+        author = util.json_loads(extr('"author":', '],') + "]")
+        genre = util.json_loads(extr('"genre":', '],') + "]")
+        self.chapter = data = util.json_loads(extr("vm.CurChapter =", ";\r\n"))
         self.domain = extr('vm.CurPathName = "', '"')
         self.slug = extr('vm.IndexName = "', '"')
 
         data = self._transform_chapter(data)
         data["manga"] = text.unescape(extr('vm.SeriesName = "', '"'))
+        data["author"] = author
+        data["genre"] = genre
         return data
 
     def images(self, page):
@@ -128,10 +137,38 @@ class MangaseeMangaExtractor(MangaseeBase, MangaExtractor):
           "/Nakamura-Koedo-To-Daizu-Keisuke-Wa-Umaku-Ikanai"), {
             "pattern": MangaseeChapterExtractor.pattern,
             "count": ">= 17",
+            "keyword": {
+                "author": ["TAKASE Masaya"],
+                "chapter": int,
+                "chapter_minor": r"re:^|\.5$",
+                "chapter_string": r"re:100\d\d\d",
+                "date": "type:datetime",
+                "genre": ["Comedy", "Romance", "School Life", "Shounen",
+                          "Slice of Life"],
+                "index": "1",
+                "lang": "en",
+                "language": "English",
+                "manga": "Nakamura-Koedo-To-Daizu-Keisuke-Wa-Umaku-Ikanai",
+                "title": "",
+            },
         }),
         ("https://manga4life.com/manga/Ano-Musume-Ni-Kiss-To-Shirayuri-O", {
             "pattern": MangaseeChapterExtractor.pattern,
             "count": ">= 50",
+            "keyword": {
+                "author": ["Canno"],
+                "chapter": int,
+                "chapter_minor": r"re:^|\.5$",
+                "chapter_string": r"re:100\d\d\d",
+                "date": "type:datetime",
+                "genre": ["Comedy", "Romance", "School Life", "Seinen",
+                          "Shoujo Ai"],
+                "index": "1",
+                "lang": "en",
+                "language": "English",
+                "manga": "Ano-Musume-Ni-Kiss-To-Shirayuri-O",
+                "title": ""
+            },
         }),
     )
 
@@ -142,9 +179,11 @@ class MangaseeMangaExtractor(MangaseeBase, MangaExtractor):
         MangaExtractor.__init__(self, match, self.root + match.group(2))
 
     def chapters(self, page):
-        slug, pos = text.extract(page, 'vm.IndexName = "', '"')
-        chapters = json.loads(text.extract(
-            page, "vm.Chapters = ", ";\r\n", pos)[0])
+        extr = text.extract_from(page)
+        author = util.json_loads(extr('"author":', '],') + "]")
+        genre = util.json_loads(extr('"genre":', '],') + "]")
+        slug = extr('vm.IndexName = "', '"')
+        chapters = util.json_loads(extr("vm.Chapters = ", ";\r\n"))
 
         result = []
         for data in map(self._transform_chapter, chapters):
@@ -155,5 +194,7 @@ class MangaseeMangaExtractor(MangaseeBase, MangaExtractor):
             url += "-page-1.html"
 
             data["manga"] = slug
+            data["author"] = author
+            data["genre"] = genre
             result.append((url, data))
         return result

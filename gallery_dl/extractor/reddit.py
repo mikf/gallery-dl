@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2017-2022 Mike Fährmann
+# Copyright 2017-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -29,7 +29,14 @@ class RedditExtractor(Extractor):
 
         parentdir = self.config("parent-directory")
         max_depth = self.config("recursion", 0)
+
         videos = self.config("videos", True)
+        if videos:
+            if videos == "ytdl":
+                self._extract_video = self._extract_video_ytdl
+            elif videos == "dash":
+                self._extract_video = self._extract_video_dash
+            videos = True
 
         submissions = self.submissions()
         visited = set()
@@ -62,19 +69,8 @@ class RedditExtractor(Extractor):
                     elif submission["is_video"]:
                         if videos:
                             text.nameext_from_url(url, submission)
-                            if videos == "ytdl":
-                                url = "https://www.reddit.com" + \
-                                    submission["permalink"]
-                            else:
-                                submission["_ytdl_extra"] = {
-                                    "title": submission["title"],
-                                }
-                                try:
-                                    url = (submission["secure_media"]
-                                           ["reddit_video"]["dash_url"])
-                                except (KeyError, TypeError):
-                                    pass
-                            yield Message.Url, "ytdl:" + url, submission
+                            url = "ytdl:" + self._extract_video(submission)
+                            yield Message.Url, url, submission
 
                     elif not submission["is_self"]:
                         urls.append((url, submission))
@@ -144,6 +140,21 @@ class RedditExtractor(Extractor):
                     "gallery %s: unable to fetch download URL for item %s",
                     submission["id"], item["media_id"])
                 self.log.debug(src)
+
+    def _extract_video_ytdl(self, submission):
+        return "https://www.reddit.com" + submission["permalink"]
+
+    def _extract_video_dash(self, submission):
+        submission["_ytdl_extra"] = {"title": submission["title"]}
+        try:
+            return (submission["secure_media"]["reddit_video"]["dash_url"] +
+                    "#__youtubedl_smuggle=%7B%22to_generic%22%3A+1%7D")
+        except Exception:
+            return submission["url"]
+
+    def _extract_video(self, submission):
+        submission["_ytdl_extra"] = {"title": submission["title"]}
+        return submission["url"]
 
 
 class RedditSubredditExtractor(RedditExtractor):
@@ -232,6 +243,25 @@ class RedditSubmissionExtractor(RedditExtractor):
             "url": "25b91ede15459470274dd17291424b037ed8b0ae",
             "content": "1e7dde4ee7d5f4c4b45749abfd15b2dbfa27df3f",
             "count": 3,
+        }),
+        # video
+        ("https://www.reddit.com/r/aww/comments/90bu6w/", {
+            "pattern": r"ytdl:https://v.redd.it/gyh95hiqc0b11",
+            "count": 1,
+        }),
+        # video (ytdl)
+        ("https://www.reddit.com/r/aww/comments/90bu6w/", {
+            "options": (("videos", "ytdl"),),
+            "pattern": r"ytdl:https://www.reddit.com/r/aww/comments/90bu6w"
+                       r"/heat_index_was_110_degrees_so_we_offered_him_a/",
+            "count": 1,
+        }),
+        # video (dash)
+        ("https://www.reddit.com/r/aww/comments/90bu6w/", {
+            "options": (("videos", "dash"),),
+            "pattern": r"ytdl:https://v.redd.it/gyh95hiqc0b11"
+                       r"/DASHPlaylist.mpd\?a=",
+            "count": 1,
         }),
         # deleted gallery (#953)
         ("https://www.reddit.com/gallery/icfgzv", {
@@ -429,6 +459,9 @@ class RedditAPI():
     def _pagination(self, endpoint, params):
         id_min = self._parse_id("id-min", 0)
         id_max = self._parse_id("id-max", float("inf"))
+        if id_max == 2147483647:
+            self.log.debug("Ignoring 'id-max' setting \"zik0zj\"")
+            id_max = float("inf")
         date_min, date_max = self.extractor._get_date_min_max(0, 253402210800)
 
         while True:

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2021-2022 Mike Fährmann
+# Copyright 2021-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -16,6 +16,7 @@ import re
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.|beta\.)?(kemono|coomer)\.party"
 USER_PATTERN = BASE_PATTERN + r"/([^/?#]+)/user/([^/?#]+)"
+HASH_PATTERN = r"/[0-9a-f]{2}/[0-9a-f]{2}/([0-9a-f]{64})"
 
 
 class KemonopartyExtractor(Extractor):
@@ -41,7 +42,7 @@ class KemonopartyExtractor(Extractor):
         self._find_inline = re.compile(
             r'src="(?:https?://(?:kemono|coomer)\.party)?(/inline/[^"]+'
             r'|/[0-9a-f]{2}/[0-9a-f]{2}/[0-9a-f]{64}\.[^"]+)').findall
-        find_hash = re.compile("/[0-9a-f]{2}/[0-9a-f]{2}/([0-9a-f]{64})").match
+        find_hash = re.compile(HASH_PATTERN).match
         generators = self._build_file_generators(self.config("files"))
         duplicates = self.config("duplicates")
         comments = self.config("comments")
@@ -89,10 +90,11 @@ class KemonopartyExtractor(Extractor):
                 match = find_hash(url)
                 if match:
                     file["hash"] = hash = match.group(1)
-                    if hash in hashes and not duplicates:
-                        self.log.debug("Skipping %s (duplicate)", url)
-                        continue
-                    hashes.add(hash)
+                    if not duplicates:
+                        if hash in hashes:
+                            self.log.debug("Skipping %s (duplicate)", url)
+                            continue
+                        hashes.add(hash)
                 else:
                     file["hash"] = ""
 
@@ -102,13 +104,17 @@ class KemonopartyExtractor(Extractor):
             yield Message.Directory, post
 
             for post["num"], file in enumerate(files, 1):
+                post["_http_validate"] = None
                 post["hash"] = file["hash"]
                 post["type"] = file["type"]
                 url = file["path"]
 
                 text.nameext_from_url(file.get("name", url), post)
+                ext = text.ext_from_url(url)
                 if not post["extension"]:
-                    post["extension"] = text.ext_from_url(url)
+                    post["extension"] = ext
+                elif ext == "txt" and post["extension"] != "txt":
+                    post["_http_validate"] = _validate
 
                 if url[0] == "/":
                     url = self.root + "/data" + url
@@ -197,6 +203,11 @@ class KemonopartyExtractor(Extractor):
         return dms
 
 
+def _validate(response):
+    return (response.headers["content-length"] != "9" or
+            response.content != b"not found")
+
+
 class KemonopartyUserExtractor(KemonopartyExtractor):
     """Extractor for all posts from a kemono.party user listing"""
     subcategory = "user"
@@ -244,6 +255,7 @@ class KemonopartyPostExtractor(KemonopartyExtractor):
         ("https://kemono.party/fanbox/user/6993449/post/506575", {
             "pattern": r"https://kemono.party/data/21/0f"
                        r"/210f35388e28bbcf756db18dd516e2d82ce75[0-9a-f]+\.jpg",
+            "content": "900949cefc97ab8dc1979cc3664785aac5ba70dd",
             "keyword": {
                 "added": "Wed, 06 May 2020 20:28:02 GMT",
                 "content": str,
@@ -309,6 +321,12 @@ class KemonopartyPostExtractor(KemonopartyExtractor):
             "pattern": r"https://coomer\.party/data/7d/3f/7d3fd9804583dc224968"
                        r"c0591163ec91794552b04f00a6c2f42a15b68231d5a8\.jpg",
         }),
+        # invalid file (#3510)
+        ("https://kemono.party/patreon/user/19623797/post/29035449", {
+            "pattern": r"907ba78b4545338d3539683e63ecb51c"
+                       r"f51c10adc9dabd86e92bd52339f298b9\.txt",
+            "content": "da39a3ee5e6b4b0d3255bfef95601890afd80709",  # empty
+        }),
         ("https://kemono.party/subscribestar/user/alcorart/post/184330"),
         ("https://www.kemono.party/subscribestar/user/alcorart/post/184330"),
         ("https://beta.kemono.party/subscribestar/user/alcorart/post/184330"),
@@ -346,14 +364,17 @@ class KemonopartyDiscordExtractor(KemonopartyExtractor):
             "pattern": r"https://kemono\.party/data/("
                        r"e3/77/e377e3525164559484ace2e64425b0cec1db08.*\.png|"
                        r"51/45/51453640a5e0a4d23fbf57fb85390f9c5ec154.*\.gif)",
+            "keyword": {"hash": "re:e377e3525164559484ace2e64425b0cec1db08"
+                                "|51453640a5e0a4d23fbf57fb85390f9c5ec154"},
             "count": ">= 2",
         }),
         # 'inline' files
         (("https://kemono.party/discord"
           "/server/315262215055736843/channel/315262215055736843#general"), {
             "pattern": r"https://cdn\.discordapp\.com/attachments/\d+/\d+/.+$",
-            "range": "1-5",
             "options": (("image-filter", "type == 'inline'"),),
+            "keyword": {"hash": ""},
+            "range": "1-5",
         }),
     )
 
@@ -367,6 +388,7 @@ class KemonopartyDiscordExtractor(KemonopartyExtractor):
         find_inline = re.compile(
             r"https?://(?:cdn\.discordapp.com|media\.discordapp\.net)"
             r"(/[A-Za-z0-9-._~:/?#\[\]@!$&'()*+,;%=]+)").findall
+        find_hash = re.compile(HASH_PATTERN).match
 
         posts = self.posts()
         max_posts = self.config("max-posts")
@@ -377,11 +399,13 @@ class KemonopartyDiscordExtractor(KemonopartyExtractor):
             files = []
             append = files.append
             for attachment in post["attachments"]:
+                match = find_hash(attachment["path"])
+                attachment["hash"] = match.group(1) if match else ""
                 attachment["type"] = "attachment"
                 append(attachment)
             for path in find_inline(post["content"] or ""):
                 append({"path": "https://cdn.discordapp.com" + path,
-                        "name": path, "type": "inline"})
+                        "name": path, "type": "inline", "hash": ""})
 
             post["channel_name"] = self.channel_name
             post["date"] = text.parse_datetime(
@@ -390,6 +414,7 @@ class KemonopartyDiscordExtractor(KemonopartyExtractor):
             yield Message.Directory, post
 
             for post["num"], file in enumerate(files, 1):
+                post["hash"] = file["hash"]
                 post["type"] = file["type"]
                 url = file["path"]
 

@@ -1,16 +1,15 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2019 Mike Fährmann
+# Copyright 2015-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract images from https://www.hbrowse.com/"""
+"""Extractors for https://www.hbrowse.com/"""
 
 from .common import ChapterExtractor, MangaExtractor
-from .. import text, exception
-import json
+from .. import text, util, exception
 
 
 class HbrowseBase():
@@ -68,7 +67,7 @@ class HbrowseChapterExtractor(HbrowseBase, ChapterExtractor):
     def images(self, page):
         base = self.root + "/data" + self.path
         json_data = text.extract(page, ';list = ', ',"zzz"')[0] + "]"
-        return [(base + name, None) for name in json.loads(json_data)]
+        return [(base + name, None) for name in util.json_loads(json_data)]
 
 
 class HbrowseMangaExtractor(HbrowseBase, MangaExtractor):
