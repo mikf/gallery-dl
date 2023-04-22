@@ -910,7 +910,7 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>Webtoon.xyz</td>
     <td>https://www.webtoon.xyz/</td>
-    <td>Comics, Episodes</td>
+    <td>Chapters, Comics</td>
     <td></td>
 </tr>
 <tr>

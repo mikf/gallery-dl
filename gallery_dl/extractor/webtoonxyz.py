@@ -26,13 +26,13 @@ class WebtoonXYZBase:
         )
 
 
-class WebtoonXYZEpisodeExtractor(WebtoonXYZBase, GalleryExtractor):
-    """Extractor for an episode on webtoon.xyz"""
+class WebtoonXYZChapterExtractor(WebtoonXYZBase, GalleryExtractor):
+    """Extractor for a chapter on webtoon.xyz"""
 
-    subcategory = "episode"
+    subcategory = "chapter"
     directory_fmt = ("{category}", "{comic}")
-    filename_fmt = "{episode_no:>02}-{num:>02}.{extension}"
-    archive_fmt = "{comic}_{episode_no:>02}_{num}"
+    filename_fmt = "{chapter_no:>02}-{num:>02}.{extension}"
+    archive_fmt = "{comic}_{chapter_no:>02}_{num}"
     pattern = BASE_PATTERN + r"/([^/?#]+)/?"
     test = (
         (
@@ -48,7 +48,7 @@ class WebtoonXYZEpisodeExtractor(WebtoonXYZBase, GalleryExtractor):
                 "keyword": {
                     "comic": "learning-the-hard-way",
                     "description": r"re:^Bullied ruthlessly by girls in high school,.+",
-                    "episode_no": "1",
+                    "chapter_no": "1",
                     "title": "Learning The Hard Way",
                 },
             },
@@ -56,9 +56,9 @@ class WebtoonXYZEpisodeExtractor(WebtoonXYZBase, GalleryExtractor):
     )
 
     def __init__(self, match):
-        self.comic, self.episode = match.groups()
+        self.comic, self.chapter = match.groups()
 
-        url = "{}/read/{}/{}/".format(self.root, self.comic, self.episode)
+        url = "{}/read/{}/{}/".format(self.root, self.comic, self.chapter)
         GalleryExtractor.__init__(self, match, url)
         self.session.headers["Referer"] = self.root + "/"
         self.setup_agegate_cookies()
@@ -72,9 +72,9 @@ class WebtoonXYZEpisodeExtractor(WebtoonXYZBase, GalleryExtractor):
 
         return {
             "comic": self.comic,
-            "episode": self.episode,
-            "episode_no": self.episode.removeprefix("chapter-"),
-            "title": text.unescape(title),
+            "chapter": self.chapter,
+            "chapter_no": self.chapter.removeprefix("chapter-"),
+            "title": text.unescape(title).removesuffix(" Manhwa : Read Manhwa Free at WEBTOON XYZ"),
             "description": text.unescape(descr),
             "lang": locale[0:2],
             "language": util.code_to_language(locale[0:2]),
@@ -127,15 +127,15 @@ class WebtoonXYZComicExtractor(WebtoonXYZBase, Extractor):
         (self.comic,) = match.groups()
 
     def items(self):
-        data = {"_extractor": WebtoonXYZEpisodeExtractor}
+        data = {"_extractor": WebtoonXYZChapterExtractor}
         url = "{}/read/{}/".format(self.root, self.comic)
 
         page = self.request(url).text
         page = text.extr(page, '<ul class="main version-chap', "</ul>")
-        episode_urls = [
+        chapter_urls = [
             match.group(0)
-            for match in WebtoonXYZEpisodeExtractor.pattern.finditer(page)
+            for match in WebtoonXYZChapterExtractor.pattern.finditer(page)
         ]
 
-        for episode_url in episode_urls:
-            yield Message.Queue, episode_url, data
+        for chapter_url in chapter_urls:
+            yield Message.Queue, chapter_url, data
