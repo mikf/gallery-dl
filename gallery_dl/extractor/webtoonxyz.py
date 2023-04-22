@@ -14,7 +14,7 @@ from .common import Extractor, GalleryExtractor, Message
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?webtoon\.xyz/read/([^/?#]+)"
 
 
-class WebtoonXYZBase:
+class WebtoonxyzBase:
     category = "webtoonxyz"
     root = "https://www.webtoon.xyz"
 
@@ -26,7 +26,7 @@ class WebtoonXYZBase:
         )
 
 
-class WebtoonXYZChapterExtractor(WebtoonXYZBase, GalleryExtractor):
+class WebtoonxyzChapterExtractor(WebtoonxyzBase, GalleryExtractor):
     """Extractor for a chapter on webtoon.xyz"""
 
     subcategory = "chapter"
@@ -99,7 +99,7 @@ class WebtoonXYZChapterExtractor(WebtoonXYZBase, GalleryExtractor):
         return images[:-1]
 
 
-class WebtoonXYZComicExtractor(WebtoonXYZBase, Extractor):
+class WebtoonxyzComicExtractor(WebtoonxyzBase, Extractor):
     """Extractor for an entire comic on webtoon.xyz"""
 
     subcategory = "comic"
@@ -133,14 +133,14 @@ class WebtoonXYZComicExtractor(WebtoonXYZBase, Extractor):
         (self.comic,) = match.groups()
 
     def items(self):
-        data = {"_extractor": WebtoonXYZChapterExtractor}
+        data = {"_extractor": WebtoonxyzChapterExtractor}
         url = "{}/read/{}/".format(self.root, self.comic)
 
         page = self.request(url).text
         page = text.extr(page, '<ul class="main version-chap', "</ul>")
         chapter_urls = [
             match.group(0)
-            for match in WebtoonXYZChapterExtractor.pattern.finditer(page)
+            for match in WebtoonxyzChapterExtractor.pattern.finditer(page)
         ]
 
         for chapter_url in chapter_urls:
