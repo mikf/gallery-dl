@@ -168,7 +168,7 @@ class SankakuPostExtractor(SankakuExtractor):
     """Extractor for single posts from sankaku.app"""
     subcategory = "post"
     archive_fmt = "{id}"
-    pattern = BASE_PATTERN + r"/post/show/(\d+)"
+    pattern = BASE_PATTERN + r"/post/show/([0-9a-f]+)"
     test = (
         ("https://sankaku.app/post/show/360451", {
             "content": "5e255713cbf0a8e0801dc423563c34d896bb9229",
@@ -194,6 +194,17 @@ class SankakuPostExtractor(SankakuExtractor):
             "keyword": {
                 "tags": list,
                 "tags_general": ["key(mangaka)", "key(mangaka)"],
+            },
+        }),
+        # md5 hexdigest instead of ID (#3952)
+        (("https://chan.sankakucomplex.com/post/show"
+          "/f8ba89043078f0e4be2d9c46550b840a"), {
+            "pattern": r"https://s\.sankakucomplex\.com"
+                       r"/data/f8/ba/f8ba89043078f0e4be2d9c46550b840a\.jpg",
+            "count": 1,
+            "keyword": {
+                "id": 33195194,
+                "md5": "f8ba89043078f0e4be2d9c46550b840a",
             },
         }),
         ("https://chan.sankakucomplex.com/post/show/360451"),
@@ -263,7 +274,7 @@ class SankakuAPI():
             "lang" : "en",
             "page" : "1",
             "limit": "1",
-            "tags" : "id_range:" + post_id,
+            "tags" : ("md5:" if len(post_id) == 32 else "id_range:") + post_id,
         }
         return self._call("/posts", params)
 
