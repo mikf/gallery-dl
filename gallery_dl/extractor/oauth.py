@@ -71,8 +71,11 @@ class OAuthBase(Extractor):
 
         browser = self.config("browser", True)
         if browser:
-            import webbrowser
-            browser = webbrowser.get()
+            try:
+                import webbrowser
+                browser = webbrowser.get()
+            except Exception:
+                browser = None
 
         if browser and browser.open(url):
             name = getattr(browser, "name", "Browser")
