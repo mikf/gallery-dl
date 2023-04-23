@@ -7,7 +7,7 @@
 """Extractors for Misskey instances"""
 
 from .common import BaseExtractor, Message
-from .. import text
+from .. import text, exception
 
 
 class MisskeyExtractor(BaseExtractor):
@@ -152,6 +152,33 @@ class MisskeyNoteExtractor(MisskeyExtractor):
         return (self.api.notes_show(self.item),)
 
 
+class MisskeyMyFavoritesExtractor(MisskeyExtractor):
+    """Extractor for images from favorites"""
+    subcategory = "favorites"
+    pattern = BASE_PATTERN + r"(/my/favorites|/api/i/favorites)"
+    test = (
+        ("https://misskey.io/my/favorites",),
+        ("https://misskey.io/api/i/favorites",),
+    )
+
+    def items(self):
+        for fav in self.api.i_favorites():
+            note = fav.get("note")
+            note["instance"] = self.instance
+            note["instance_remote"] = note["user"]["host"]
+            note["count"] = len(note["files"])
+            note["date"] = text.parse_datetime(
+                note["createdAt"], "%Y-%m-%dT%H:%M:%S.%f%z")
+
+            yield Message.Directory, note
+            for note["num"], file in enumerate(note["files"], 1):
+                file["date"] = text.parse_datetime(
+                    file["createdAt"], "%Y-%m-%dT%H:%M:%S.%f%z")
+                note["file"] = file
+                url = file["url"]
+                yield Message.Url, url, text.nameext_from_url(url, note)
+
+
 class MisskeyAPI():
     """Interface for Misskey API
 
@@ -164,6 +191,7 @@ class MisskeyAPI():
         self.root = extractor.root
         self.extractor = extractor
         self.headers = {"Content-Type": "application/json"}
+        self.access_token = extractor.config("access-token")
 
     def user_id_by_username(self, username):
         endpoint = "/users/show"
@@ -186,6 +214,14 @@ class MisskeyAPI():
         endpoint = "/notes/show"
         data = {"noteId": note_id}
         return self._call(endpoint, data)
+
+    def i_favorites(self):
+        endpoint = "/i/favorites"
+        data = {}
+        if not self.access_token:
+            raise exception.AuthenticationError()
+        data["i"] = self.access_token
+        return self._pagination(endpoint, data)
 
     def _call(self, endpoint, data):
         url = self.root + "/api" + endpoint
