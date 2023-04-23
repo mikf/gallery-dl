@@ -162,7 +162,11 @@ class NitterExtractor(BaseExtractor):
         banner = extr('class="profile-banner"><a href="', '"')
 
         try:
-            uid = banner.split("%2F")[4]
+            if "/enc/" in banner:
+                uid = binascii.a2b_base64(banner.rpartition(
+                    "/")[2]).decode().split("/")[4]
+            else:
+                uid = banner.split("%2F")[4]
         except Exception:
             uid = 0
 
@@ -302,7 +306,10 @@ class NitterTweetsExtractor(NitterExtractor):
                        r"/media%2FCGMNYZvW0AIVoom\.jpg",
             "range": "1",
         }),
-        ("https://nitter.1d4.us/supernaturepics"),
+        ("https://nitter.1d4.us/supernaturepics", {
+            "range": "1",
+            "keyword": {"user": {"id": "2976459548"}},
+        }),
         ("https://nitter.kavin.rocks/id:2976459548"),
         ("https://nitter.unixfox.eu/supernaturepics"),
     )
