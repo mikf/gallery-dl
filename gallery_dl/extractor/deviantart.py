@@ -1417,7 +1417,14 @@ class DeviantartOAuthAPI():
         """Get the original file download (if allowed)"""
         endpoint = "/deviation/download/" + deviation_id
         params = {"mature_content": self.mature}
-        return self._call(endpoint, params=params, public=public)
+
+        try:
+            return self._call(
+                endpoint, params=params, public=public, log=False)
+        except Exception:
+            if not self.refresh_token_key:
+                raise
+            return self._call(endpoint, params=params, public=False)
 
     def deviation_metadata(self, deviations):
         """ Fetch deviation metadata for a set of deviations"""
@@ -1518,7 +1525,7 @@ class DeviantartOAuthAPI():
                 refresh_token_key, data["refresh_token"])
         return "Bearer " + data["access_token"]
 
-    def _call(self, endpoint, fatal=True, public=None, **kwargs):
+    def _call(self, endpoint, fatal=True, log=True, public=None, **kwargs):
         """Call an API endpoint"""
         url = "https://www.deviantart.com/api/v1/oauth2" + endpoint
         kwargs["fatal"] = None
@@ -1563,7 +1570,8 @@ class DeviantartOAuthAPI():
                             "cs/configuration.rst#extractordeviantartclient-id"
                             "--client-secret")
             else:
-                self.log.error(msg)
+                if log:
+                    self.log.error(msg)
                 return data
 
     def _pagination(self, endpoint, params,
@@ -1571,15 +1579,14 @@ class DeviantartOAuthAPI():
         warn = True
         if public is None:
             public = self.public
-        elif not public:
-            self.public = False
 
         while True:
             data = self._call(endpoint, params=params, public=public)
-            if key not in data:
+            try:
+                results = data[key]
+            except KeyError:
                 self.log.error("Unexpected API response: %s", data)
                 return
-            results = data[key]
 
             if unpack:
                 results = [item["journal"] for item in results
@@ -1588,7 +1595,7 @@ class DeviantartOAuthAPI():
                 if public and len(results) < params["limit"]:
                     if self.refresh_token_key:
                         self.log.debug("Switching to private access token")
-                        self.public = public = False
+                        public = False
                         continue
                     elif data["has_more"] and warn:
                         warn = False
