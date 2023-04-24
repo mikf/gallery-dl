@@ -844,7 +844,7 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>Tumblr</td>
     <td>https://www.tumblr.com/</td>
-    <td>Likes, Posts, Tag Searches, User Profiles</td>
+    <td>Days, Likes, Posts, Tag Searches, User Profiles</td>
     <td><a href="https://github.com/mikf/gallery-dl#oauth">OAuth</a></td>
 </tr>
 <tr>
