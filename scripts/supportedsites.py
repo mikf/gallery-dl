@@ -229,6 +229,9 @@ SUBCATEGORY_MAP = {
     "smugmug": {
         "path": "Images from Users and Folders",
     },
+    "tumblr": {
+        "day": "Days",
+    },
     "twitter": {
         "media": "Media Timelines",
         "tweets": "",

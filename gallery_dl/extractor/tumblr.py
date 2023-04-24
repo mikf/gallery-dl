@@ -10,7 +10,7 @@
 
 from .common import Extractor, Message
 from .. import text, oauth, exception
-from datetime import datetime, timedelta
+from datetime import datetime, date, timedelta
 import re
 
 
@@ -419,6 +419,35 @@ class TumblrTagExtractor(TumblrExtractor):
 
     def posts(self):
         return self.api.posts(self.blog, {"tag": self.tag})
+
+
+class TumblrDayExtractor(TumblrExtractor):
+    """Extractor for Tumblr user's posts by day"""
+    subcategory = "day"
+    pattern = BASE_PATTERN + r"/day/(\d\d\d\d/\d\d/\d\d)"
+    test = (
+        ("https://mikf123.tumblr.com/day/2018/01/05", {
+            "pattern": r"https://64\.media\.tumblr\.com"
+                       r"/1a2be8c63f1df58abd2622861696c72a"
+                       r"/tumblr_ozm9nqst9t1wgha4yo1_1280\.jpg",
+            "keyword": {"id": 169341068404},
+            "count": 1,
+        }),
+        ("https://www.tumblr.com/blog/view/mikf123/day/2018/01/05"),
+        ("https://www.tumblr.com/blog/mikf123/day/2018/01/05"),
+        ("https://www.tumblr.com/mikf123/day/2018/01/05"),
+    )
+
+    def __init__(self, match):
+        TumblrExtractor.__init__(self, match)
+        year, month, day = match.group(4).split("/")
+        self.date_min = ts = (
+            # 719163 == date(1970, 1, 1).toordinal()
+            date(int(year), int(month), int(day)).toordinal() - 719163) * 86400
+        self.api.before = ts + 86400
+
+    def posts(self):
+        return self.api.posts(self.blog, {})
 
 
 class TumblrLikesExtractor(TumblrExtractor):
