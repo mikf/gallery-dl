@@ -175,8 +175,8 @@ class HttpDownloader(DownloaderBase):
                 msg = "'{} {}' for '{}'".format(code, response.reason, url)
                 if code in retry_codes or 500 <= code < 600:
                     continue
-                self.log.warning(msg)
                 self.release_conn(response)
+                self.log.warning(msg)
                 return False
 
             # check for invalid responses
@@ -192,24 +192,24 @@ class HttpDownloader(DownloaderBase):
                     tries -= 1
                     continue
                 if not result:
-                    self.log.warning("Invalid response")
                     self.release_conn(response)
+                    self.log.warning("Invalid response")
                     return False
 
             # check file size
             size = text.parse_int(size, None)
             if size is not None:
                 if self.minsize and size < self.minsize:
+                    self.release_conn(response)
                     self.log.warning(
                         "File size smaller than allowed minimum (%s < %s)",
                         size, self.minsize)
-                    self.release_conn(response)
                     return False
                 if self.maxsize and size > self.maxsize:
+                    self.release_conn(response)
                     self.log.warning(
                         "File size larger than allowed maximum (%s > %s)",
                         size, self.maxsize)
-                    self.release_conn(response)
                     return False
 
             build_path = False
