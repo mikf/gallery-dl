@@ -392,11 +392,11 @@ class MetadataTest(BasePostprocessorTest):
         self._create({
             "mode": "modify",
             "fields": {
-                "foo"        : "{filename}-{foo!s}",
-                "foo2"       : "\fE bar['bax'] + 122",
-                "bar[baz]"   : "{_now}",
-                "bar[ba2]"   : "\fE {}",
-                "bar[ba2][a]": "test",
+                "foo"          : "{filename}-{foo!s}",
+                "foo2"         : "\fE bar['bax'] + 122",
+                "bar['baz']"   : "{_now}",
+                "bar[\"ba2\"]" : "\fE {}",
+                "bar['ba2'][a]": "test",
             },
         }, kwdict)
 
@@ -423,7 +423,7 @@ class MetadataTest(BasePostprocessorTest):
         }
         self._create({
             "mode": "delete",
-            "fields": ["foo", "bar[bax]", "bar[baz][a]"],
+            "fields": ["foo", "bar['bax']", "bar[\"baz\"][a]"],
         }, kwdict)
 
         pdict = self.pathfmt.kwdict

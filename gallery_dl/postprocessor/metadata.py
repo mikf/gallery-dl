@@ -216,9 +216,9 @@ def _traverse(obj, key):
 
     while "[" in key:
         name, _, key = key.partition("[")
-        obj = obj[name.rstrip("]")]
+        obj = obj[name.strip("\"']")]
 
-    return obj, key.strip("]")
+    return obj, key.strip("\"']")
 
 
 __postprocessor__ = MetadataPP
