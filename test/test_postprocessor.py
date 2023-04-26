@@ -388,14 +388,13 @@ class MetadataTest(BasePostprocessorTest):
 """)
 
     def test_metadata_modify(self):
-        kwdict = {"foo": 0, "bar": {"bax": 1, "bay": 2, "baz": 3}}
+        kwdict = {"foo": 0, "bar": {"bax": 1, "bay": 2, "baz": 3, "ba2": {}}}
         self._create({
             "mode": "modify",
             "fields": {
                 "foo"          : "{filename}-{foo!s}",
                 "foo2"         : "\fE bar['bax'] + 122",
-                "bar['baz']"   : "{_now}",
-                "bar[\"ba2\"]" : "\fE {}",
+                "bar[\"baz\"]" : "{_now}",
                 "bar['ba2'][a]": "test",
             },
         }, kwdict)
