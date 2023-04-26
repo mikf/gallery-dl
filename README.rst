@@ -123,6 +123,15 @@ For macOS or Linux users using Homebrew:
 
     brew install gallery-dl
 
+MacPorts
+--------
+
+For macOS users with MacPorts:
+
+.. code:: bash
+
+    sudo port install gallery-dl
+
 
 Usage
 =====
