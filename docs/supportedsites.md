@@ -428,6 +428,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
+    <td>itch.io</td>
+    <td>https://itch.io/</td>
+    <td>Games</td>
+    <td></td>
+</tr>
+<tr>
     <td>Keenspot</td>
     <td>http://www.keenspot.com/</td>
     <td>Comics</td>

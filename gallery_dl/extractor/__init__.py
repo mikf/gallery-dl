@@ -74,6 +74,7 @@ modules = [
     "instagram",
     "issuu",
     "itaku",
+    "itchio",
     "kabeuchi",
     "keenspot",
     "kemonoparty",
