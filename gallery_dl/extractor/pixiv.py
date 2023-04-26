@@ -596,6 +596,9 @@ class PixivSearchExtractor(PixivExtractor):
         sort_map = {
             "date": "date_asc",
             "date_d": "date_desc",
+            "popular_d": "popular_desc",
+            "popular_male_d": "popular_male_desc",
+            "popular_female_d": "popular_female_desc",
         }
         try:
             self.sort = sort = sort_map[sort]
