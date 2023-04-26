@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2022 Mike Fährmann
+# Copyright 2018-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -14,7 +14,7 @@ from .. import text
 
 class PahealExtractor(Extractor):
     """Base class for paheal extractors"""
-    basecategory = "booru"
+    basecategory = "shimmie2"
     category = "paheal"
     filename_fmt = "{category}_{id}_{md5}.{extension}"
     archive_fmt = "{id}"

@@ -542,12 +542,6 @@ Consider all sites to be NSFW unless otherwise known.
     <td>Supported</td>
 </tr>
 <tr>
-    <td>meme.museum</td>
-    <td>https://meme.museum/</td>
-    <td>Posts, Tag Searches</td>
-    <td></td>
-</tr>
-<tr>
     <td>My Hentai Gallery</td>
     <td>https://myhentaigallery.com/</td>
     <td>Galleries</td>
@@ -1263,6 +1257,40 @@ Consider all sites to be NSFW unless otherwise known.
     <td>ThatPervert</td>
     <td>http://thatpervert.com/</td>
     <td>Posts, Search Results, Tag Searches, User Profiles</td>
+    <td></td>
+</tr>
+
+<tr>
+    <td colspan="4"><strong>Shimmie2 Instances</strong></td>
+</tr>
+<tr>
+    <td>meme.museum</td>
+    <td>https://meme.museum/</td>
+    <td>Posts, Tag Searches</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Loudbooru</td>
+    <td>https://loudbooru.com/</td>
+    <td>Posts, Tag Searches</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Giantessbooru</td>
+    <td>https://giantessbooru.com/</td>
+    <td>Posts, Tag Searches</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Tentaclerape</td>
+    <td>https://tentaclerape.net/</td>
+    <td>Posts, Tag Searches</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Cavemanon</td>
+    <td>https://booru.cavemanon.xyz/</td>
+    <td>Posts, Tag Searches</td>
     <td></td>
 </tr>
 
