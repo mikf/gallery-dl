@@ -16,21 +16,26 @@ BASE_PATTERN = r"(?:https?://)?((?:chap|read|www\.|m\.)?mangan(?:at|el)o\.com)"
 class ManganeloBase():
     category = "manganelo"
     root = "https://chapmanganato.com"
+    _match_chapter = None
 
     def __init__(self, match):
         domain, path = match.groups()
         super().__init__(match, "https://" + domain + path)
         self.session.headers['Referer'] = self.root
 
-        self._match_chapter = re.compile(
-            r"(?:[Vv]ol\.?\s*(\d+)\s?)?"
-            r"[Cc]hapter\s*([^:]+)"
-            r"(?::\s*(.+))?").match
+        if self._match_chapter is None:
+            ManganeloBase._match_chapter = re.compile(
+                r"(?:[Vv]ol\.?\s*(\d+)\s?)?"
+                r"[Cc]hapter\s*(\d+)([^:]*)"
+                r"(?::\s*(.+))?").match
 
     def _parse_chapter(self, info, manga, author, date=None):
         match = self._match_chapter(info)
-        volume, chapter, title = match.groups() if match else ("", "", info)
-        chapter, sep, minor = chapter.partition(".")
+        if match:
+            volume, chapter, minor, title = match.groups()
+        else:
+            volume = chapter = minor = ""
+            title = info
 
         return {
             "manga"        : manga,
@@ -39,7 +44,7 @@ class ManganeloBase():
             "title"        : text.unescape(title) if title else "",
             "volume"       : text.parse_int(volume),
             "chapter"      : text.parse_int(chapter),
-            "chapter_minor": sep + minor,
+            "chapter_minor": minor,
             "lang"         : "en",
             "language"     : "English",
         }
@@ -60,6 +65,10 @@ class ManganeloChapterExtractor(ManganeloBase, ChapterExtractor):
                        r"/08/ti970565/chapter_4_caster/\d+-o\.jpg",
             "keyword": "06e01fa9b3fc9b5b954c0d4a98f0153b40922ded",
             "count": 45,
+        }),
+        ("https://chapmanganato.com/manga-no991297/chapter-8", {
+            "keyword": {"chapter": 8, "chapter_minor": "-1"},
+            "count": 20,
         }),
         ("https://readmanganato.com/manga-gn983696/chapter-23"),
         ("https://manganelo.com/chapter/gamers/chapter_15"),
