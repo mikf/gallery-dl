@@ -56,17 +56,26 @@ class RedditExtractor(Extractor):
                     submission["num"] = 0
 
                     url = submission["url"]
-                    if url and url.startswith("https://i.redd.it/"):
+                    if not url:
+                        continue
+
+                    if url.startswith("https://i.redd.it/"):
                         text.nameext_from_url(url, submission)
                         yield Message.Url, url, submission
 
-                    elif "gallery_data" in submission:
+                    elif url.startswith("https://www.reddit.com/gallery/"):
+                        submission_with_gallery = submission
+                        if "crosspost_parent_list" in submission_with_gallery:
+                            submission_with_gallery = submission["crosspost_parent_list"][-1]
+                        if "gallery_data" not in submission_with_gallery:
+                            continue
+
                         for submission["num"], url in enumerate(
-                                self._extract_gallery(submission), 1):
+                            self._extract_gallery(submission_with_gallery), 1):
                             text.nameext_from_url(url, submission)
                             yield Message.Url, url, submission
 
-                    elif submission["is_video"]:
+                    elif url.startswith("https://v.redd.it/"):
                         if videos:
                             text.nameext_from_url(url, submission)
                             url = "ytdl:" + self._extract_video(submission)
