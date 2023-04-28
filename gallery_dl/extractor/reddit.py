@@ -64,14 +64,16 @@ class RedditExtractor(Extractor):
                         yield Message.Url, url, submission
 
                     elif url.startswith("https://www.reddit.com/gallery/"):
-                        submission_with_gallery = submission
-                        if "crosspost_parent_list" in submission_with_gallery:
-                            submission_with_gallery = submission["crosspost_parent_list"][-1]
-                        if "gallery_data" not in submission_with_gallery:
+                        gallery_submission = submission
+                        if "crosspost_parent_list" in gallery_submission:
+                            gallery_submission = \
+                                submission["crosspost_parent_list"][-1]
+                        if "gallery_data" not in gallery_submission:
                             continue
 
-                        for submission["num"], url in enumerate(
-                            self._extract_gallery(submission_with_gallery), 1):
+                        gallery = self._extract_gallery(gallery_submission)
+
+                        for submission["num"], url in enumerate(gallery, 1):
                             text.nameext_from_url(url, submission)
                             yield Message.Url, url, submission
 
