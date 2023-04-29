@@ -409,9 +409,12 @@ def parse_command_line(module, argv):
         "postprocessor_args": opts.postprocessor_args,
         "cn_verification_proxy": opts.cn_verification_proxy,
         "geo_verification_proxy": opts.geo_verification_proxy,
-        "geo_bypass": opts.geo_bypass,
-        "geo_bypass_country": opts.geo_bypass_country,
-        "geo_bypass_ip_block": opts.geo_bypass_ip_block,
+        "geo_bypass": getattr(
+            opts, "geo_bypass", "default"),
+        "geo_bypass_country": getattr(
+            opts, "geo_bypass_country", None),
+        "geo_bypass_ip_block": getattr(
+            opts, "geo_bypass_ip_block", None),
         "compat_opts": compat_opts,
     }
 
