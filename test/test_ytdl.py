@@ -235,6 +235,12 @@ class Test_CommandlineArguments(unittest.TestCase):
 class Test_CommandlineArguments_YtDlp(Test_CommandlineArguments):
     module_name = "yt_dlp"
 
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        if cls.module.version.__version__ > "2023.03.04":
+            cls.test_geo_bypass = cls._test_geo_bypass_xff
+
     def test_retries_extractor(self):
         inf = float("inf")
 
@@ -269,7 +275,7 @@ class Test_CommandlineArguments_YtDlp(Test_CommandlineArguments):
                 "title:%(artist)s - %(title)s")],
         })
 
-    def test_geo_bypass(self):
+    def _test_geo_bypass_xff(self):
         self._("--geo-bypass",
                "geo_bypass", "default")
         self._("--no-geo-bypass",
