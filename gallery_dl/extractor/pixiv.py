@@ -673,7 +673,7 @@ class PixivPixivisionExtractor(PixivExtractor):
 
     def works(self):
         return (
-            self.api.illust_detail(illust_id)
+            self.api.illust_detail(illust_id.partition("?")[0])
             for illust_id in util.unique_sequence(text.extract_iter(
                 self.page, '<a href="https://www.pixiv.net/en/artworks/', '"'))
         )
