@@ -152,7 +152,7 @@ class BehanceGalleryExtractor(BehanceExtractor):
 
             elif mtype == "MediaCollectionModule":
                 for component in module["components"]:
-                    for name, size in component["imageSizes"].items():
+                    for size in component["imageSizes"].values():
                         if size:
                             parts = size["url"].split("/")
                             parts[4] = "source"
