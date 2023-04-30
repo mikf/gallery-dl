@@ -1,5 +1,36 @@
 # Changelog
 
+## 1.25.3 - 2023-04-30
+### Additions
+- [imagefap] extract `description` and `categories` metadata ([#3905](https://github.com/mikf/gallery-dl/issues/3905))
+- [imxto] add `gallery` extractor ([#1289](https://github.com/mikf/gallery-dl/issues/1289))
+- [itchio] add `game` extractor ([#3923](https://github.com/mikf/gallery-dl/issues/3923))
+- [nitter] extract user IDs from encoded banner URLs
+- [pixiv] allow sorting search results by popularity ([#3970](https://github.com/mikf/gallery-dl/issues/3970))
+- [reddit] match `preview.redd.it` URLs ([#3935](https://github.com/mikf/gallery-dl/issues/3935))
+- [sankaku] support post URLs with MD5 hashes ([#3952](https://github.com/mikf/gallery-dl/issues/3952))
+- [shimmie2] add generic extractors for Shimmie2 sites ([#3734](https://github.com/mikf/gallery-dl/issues/3734), [#943](https://github.com/mikf/gallery-dl/issues/943))
+- [tumblr] add `day` extractor ([#3951](https://github.com/mikf/gallery-dl/issues/3951))
+- [twitter] support `profile-conversation` entries ([#3938](https://github.com/mikf/gallery-dl/issues/3938))
+- [vipergirls] add `thread` and `post` extractors ([#3812](https://github.com/mikf/gallery-dl/issues/3812), [#2720](https://github.com/mikf/gallery-dl/issues/2720), [#731](https://github.com/mikf/gallery-dl/issues/731))
+- [downloader:http] add `consume-content` option ([#3748](https://github.com/mikf/gallery-dl/issues/3748))
+### Fixes
+- [2chen] update domain to sturdychan.help
+- [behance] fix extraction ([#3980](https://github.com/mikf/gallery-dl/issues/3980))
+- [deviantart] retry downloads with private token ([#3941](https://github.com/mikf/gallery-dl/issues/3941))
+- [imagefap] fix empty `tags` metadata
+- [manganelo] support arbitrary minor version separators ([#3972](https://github.com/mikf/gallery-dl/issues/3972))
+- [nozomi] fix file URLs ([#3925](https://github.com/mikf/gallery-dl/issues/3925))
+- [oauth] catch exceptions from `webbrowser.get()` ([#3947](https://github.com/mikf/gallery-dl/issues/3947))
+- [pixiv] fix `pixivision` extraction
+- [reddit] ignore `id-max` value `"zik0zj"`/`2147483647` ([#3939](https://github.com/mikf/gallery-dl/issues/3939), [#3862](https://github.com/mikf/gallery-dl/issues/3862), [#3697](https://github.com/mikf/gallery-dl/issues/3697), [#3606](https://github.com/mikf/gallery-dl/issues/3606), [#3546](https://github.com/mikf/gallery-dl/issues/3546), [#3521](https://github.com/mikf/gallery-dl/issues/3521), [#3412](https://github.com/mikf/gallery-dl/issues/3412))
+- [sankaku] sanitize `date:` tags ([#1790](https://github.com/mikf/gallery-dl/issues/1790))
+- [tumblr] fix and update pagination logic ([#2191](https://github.com/mikf/gallery-dl/issues/2191))
+- [twitter] fix `user` metadata when downloading quoted Tweets ([#3922](https://github.com/mikf/gallery-dl/issues/3922))
+- [ytdl] fix crash due to `--geo-bypass` deprecation ([#3975](https://github.com/mikf/gallery-dl/issues/3975))
+- [postprocessor:metadata] support putting keys in quotes
+- include more optional dependencies in executables ([#3907](https://github.com/mikf/gallery-dl/issues/3907))
+
 ## 1.25.2 - 2023-04-15
 ### Additions
 - [deviantart] add `public` option
