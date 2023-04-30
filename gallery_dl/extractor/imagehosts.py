@@ -153,8 +153,9 @@ class ImxtoGalleryExtractor(ImagehostImageExtractor):
             "_extractor": ImxtoImageExtractor,
             "title": text.unescape(title.partition(">")[2]).strip(),
         }
-        for url in text.extract_iter(page, '<a href="', '"', pos):
-            yield Message.Queue, url, data
+
+        for url in text.extract_iter(page, "<a href=", " ", pos):
+            yield Message.Queue, url.strip("\"'"), data
 
 
 class AcidimgImageExtractor(ImagehostImageExtractor):
