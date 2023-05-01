@@ -26,13 +26,26 @@ jobs:
         python-version: ${{ matrix.python-version }}
 
     - name: Install dependencies
-      env:
-        PYV: ${{ matrix.python-version }}
       run: |
         pip install -r requirements.txt
         pip install "flake8<4" "importlib-metadata<5"
         pip install youtube-dl
-        if [[ "$PYV" != "3.4" && "$PYV" != "3.5" ]]; then pip install yt-dlp; fi
+
+    - name: Install yt-dlp
+      run: |
+        case "${{ matrix.python-version }}" in
+            3.4|3.5)
+                # don't install yt-dlp
+                ;;
+            3.6)
+                # install from PyPI
+                pip install yt-dlp
+                ;;
+            *)
+                # install from master
+                pip install https://github.com/yt-dlp/yt-dlp/archive/refs/heads/master.tar.gz
+                ;;
+        esac
 
     - name: Lint with flake8
       run: |

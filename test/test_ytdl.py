@@ -238,7 +238,7 @@ class Test_CommandlineArguments_YtDlp(Test_CommandlineArguments):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        if cls.module.version.__version__ > "2023.03.04":
+        if cls.module.version.__version__ > "2022.07.18":  # last 3.6 release
             cls.test_geo_bypass = cls._test_geo_bypass_xff
 
     def test_retries_extractor(self):
@@ -276,6 +276,15 @@ class Test_CommandlineArguments_YtDlp(Test_CommandlineArguments):
         })
 
     def _test_geo_bypass_xff(self):
+        self._(["--xff", "default"],
+               "geo_bypass", "default")
+        self._(["--xff", "never"],
+               "geo_bypass", "never")
+        self._(["--xff", "EN"],
+               "geo_bypass", "EN")
+        self._(["--xff", "198.51.100.14/24"],
+               "geo_bypass", "198.51.100.14/24")
+
         self._("--geo-bypass",
                "geo_bypass", "default")
         self._("--no-geo-bypass",
