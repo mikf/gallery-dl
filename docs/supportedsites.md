@@ -1443,12 +1443,6 @@ Consider all sites to be NSFW unless otherwise known.
     <td>Chapters, Manga</td>
     <td></td>
 </tr>
-<tr>
-    <td>Sense-Scans</td>
-    <td>https://sensescans.com/reader/</td>
-    <td>Chapters, Manga</td>
-    <td></td>
-</tr>
 
 <tr>
     <td colspan="4"><strong>Mastodon Instances</strong></td>
