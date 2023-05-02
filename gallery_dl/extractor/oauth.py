@@ -134,7 +134,7 @@ class OAuthBase(Extractor):
 
     def _oauth2_authorization_code_grant(
             self, client_id, client_secret, default_id, default_secret,
-            auth_url, token_url, *, scope="read", duration="permanent",
+            auth_url, token_url, scope="read", duration="permanent",
             key="refresh_token", auth=True, cache=None, instance=None):
         """Perform an OAuth2 authorization code grant"""
 

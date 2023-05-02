@@ -106,7 +106,7 @@ class Extractor():
             values[:0] = config.accumulate((self.subcategory,), key, conf=conf)
         return values
 
-    def request(self, url, *, method="GET", session=None,
+    def request(self, url, method="GET", session=None,
                 retries=None, retry_codes=None, encoding=None,
                 fatal=True, notfound=None, **kwargs):
         if session is None:
@@ -180,7 +180,7 @@ class Extractor():
 
         raise exception.HttpError(msg, response)
 
-    def wait(self, *, seconds=None, until=None, adjust=1.0,
+    def wait(self, seconds=None, until=None, adjust=1.0,
              reason="rate limit reset"):
         now = time.time()
 
@@ -371,7 +371,7 @@ class Extractor():
             except OSError as exc:
                 self.log.warning("cookies: %s", exc)
 
-    def _update_cookies(self, cookies, *, domain=""):
+    def _update_cookies(self, cookies, domain=""):
         """Update the session's cookiejar with 'cookies'"""
         if isinstance(cookies, dict):
             self._update_cookies_dict(cookies, domain or self.cookiedomain)
@@ -391,7 +391,7 @@ class Extractor():
         for name, value in cookiedict.items():
             setcookie(name, value, domain=domain)
 
-    def _check_cookies(self, cookienames, *, domain=None):
+    def _check_cookies(self, cookienames, domain=None):
         """Check if all 'cookienames' are in the session's cookiejar"""
         if not self._cookiejar:
             return False
