@@ -1416,6 +1416,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
+    <td>Palanq</td>
+    <td>https://archive.palanq.win/</td>
+    <td>Boards, Galleries, Search Results, Threads</td>
+    <td></td>
+</tr>
+<tr>
     <td>RebeccaBlackTech</td>
     <td>https://rbt.asia/</td>
     <td>Boards, Galleries, Search Results, Threads</td>
