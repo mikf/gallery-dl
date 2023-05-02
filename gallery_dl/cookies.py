@@ -412,18 +412,17 @@ class ChromeCookieDecryptor:
         raise NotImplementedError("Must be implemented by sub classes")
 
 
-def get_cookie_decryptor(browser_root, browser_keyring_name, *, keyring=None):
+def get_cookie_decryptor(browser_root, browser_keyring_name, keyring=None):
     if sys.platform in ("win32", "cygwin"):
         return WindowsChromeCookieDecryptor(browser_root)
     elif sys.platform == "darwin":
         return MacChromeCookieDecryptor(browser_keyring_name)
     else:
-        return LinuxChromeCookieDecryptor(
-            browser_keyring_name, keyring=keyring)
+        return LinuxChromeCookieDecryptor(browser_keyring_name, keyring)
 
 
 class LinuxChromeCookieDecryptor(ChromeCookieDecryptor):
-    def __init__(self, browser_keyring_name, *, keyring=None):
+    def __init__(self, browser_keyring_name, keyring=None):
         self._v10_key = self.derive_key(b"peanuts")
         password = _get_linux_keyring_password(browser_keyring_name, keyring)
         self._v11_key = None if password is None else self.derive_key(password)
