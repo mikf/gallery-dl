@@ -1416,12 +1416,6 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
-    <td>Rozen Arcana</td>
-    <td>https://archive.alice.al/</td>
-    <td>Boards, Galleries, Search Results, Threads</td>
-    <td></td>
-</tr>
-<tr>
     <td>TokyoChronos</td>
     <td>https://www.tokyochronos.net/</td>
     <td>Boards, Galleries, Search Results, Threads</td>
