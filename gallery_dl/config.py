@@ -102,7 +102,8 @@ def load(files=None, strict=False, load=util.json_loads):
                 log.error(exc)
                 sys.exit(1)
         except Exception as exc:
-            log.warning("Could not parse '%s': %s", path, exc)
+            log.error("%s when loading '%s': %s",
+                      exc.__class__.__name__, path, exc)
             if strict:
                 sys.exit(2)
         else:
