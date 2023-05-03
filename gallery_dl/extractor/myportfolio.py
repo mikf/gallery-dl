@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2022 Mike Fährmann
+# Copyright 2018-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract images from https://www.myportfolio.com/"""
+"""Extractors for https://www.myportfolio.com/"""
 
 from .common import Extractor, Message
 from .. import text, exception
@@ -21,7 +21,7 @@ class MyportfolioGalleryExtractor(Extractor):
     archive_fmt = "{user}_{filename}"
     pattern = (r"(?:myportfolio:(?:https?://)?([^/]+)|"
                r"(?:https?://)?([\w-]+\.myportfolio\.com))"
-               r"(/[^/?&#]+)?")
+               r"(/[^/?#]+)?")
     test = (
         ("https://andrewling.myportfolio.com/volvo-xc-90-hybrid", {
             "url": "acea0690c76db0e5cf267648cefd86e921bc3499",

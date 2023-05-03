@@ -112,7 +112,7 @@ class PinterestExtractor(Extractor):
 class PinterestPinExtractor(PinterestExtractor):
     """Extractor for images from a single pin from pinterest.com"""
     subcategory = "pin"
-    pattern = BASE_PATTERN + r"/pin/([^/?#&]+)(?!.*#related$)"
+    pattern = BASE_PATTERN + r"/pin/([^/?#]+)(?!.*#related$)"
     test = (
         ("https://www.pinterest.com/pin/858146903966145189/", {
             "url": "afb3c26719e3a530bb0e871c480882a801a4e8a5",
@@ -147,8 +147,8 @@ class PinterestBoardExtractor(PinterestExtractor):
     subcategory = "board"
     directory_fmt = ("{category}", "{board[owner][username]}", "{board[name]}")
     archive_fmt = "{board[id]}_{id}"
-    pattern = (BASE_PATTERN + r"/(?!pin/)([^/?#&]+)"
-               "/(?!_saved|_created|pins/)([^/?#&]+)/?$")
+    pattern = (BASE_PATTERN + r"/(?!pin/)([^/?#]+)"
+               "/(?!_saved|_created|pins/)([^/?#]+)/?$")
     test = (
         ("https://www.pinterest.com/g1952849/test-/", {
             "pattern": r"https://i\.pinimg\.com/originals/",
@@ -198,7 +198,7 @@ class PinterestBoardExtractor(PinterestExtractor):
 class PinterestUserExtractor(PinterestExtractor):
     """Extractor for a user's boards"""
     subcategory = "user"
-    pattern = BASE_PATTERN + r"/(?!pin/)([^/?#&]+)(?:/_saved)?/?$"
+    pattern = BASE_PATTERN + r"/(?!pin/)([^/?#]+)(?:/_saved)?/?$"
     test = (
         ("https://www.pinterest.com/g1952849/", {
             "pattern": PinterestBoardExtractor.pattern,
@@ -223,7 +223,7 @@ class PinterestAllpinsExtractor(PinterestExtractor):
     """Extractor for a user's 'All Pins' feed"""
     subcategory = "allpins"
     directory_fmt = ("{category}", "{user}")
-    pattern = BASE_PATTERN + r"/(?!pin/)([^/?#&]+)/pins/?$"
+    pattern = BASE_PATTERN + r"/(?!pin/)([^/?#]+)/pins/?$"
     test = ("https://www.pinterest.com/g1952849/pins/", {
         "pattern": r"https://i\.pinimg\.com/originals/[0-9a-f]{2}"
                    r"/[0-9a-f]{2}/[0-9a-f]{2}/[0-9a-f]{32}\.\w{3}",
@@ -245,7 +245,7 @@ class PinterestCreatedExtractor(PinterestExtractor):
     """Extractor for a user's created pins"""
     subcategory = "created"
     directory_fmt = ("{category}", "{user}")
-    pattern = BASE_PATTERN + r"/(?!pin/)([^/?#&]+)/_created/?$"
+    pattern = BASE_PATTERN + r"/(?!pin/)([^/?#]+)/_created/?$"
     test = ("https://www.pinterest.de/digitalmomblog/_created/", {
         "pattern": r"https://i\.pinimg\.com/originals/[0-9a-f]{2}"
                    r"/[0-9a-f]{2}/[0-9a-f]{2}/[0-9a-f]{32}\.(jpg|png)",
@@ -270,7 +270,7 @@ class PinterestSectionExtractor(PinterestExtractor):
     directory_fmt = ("{category}", "{board[owner][username]}",
                      "{board[name]}", "{section[title]}")
     archive_fmt = "{board[id]}_{id}"
-    pattern = BASE_PATTERN + r"/(?!pin/)([^/?#&]+)/([^/?#&]+)/([^/?#&]+)"
+    pattern = BASE_PATTERN + r"/(?!pin/)([^/?#]+)/([^/?#]+)/([^/?#]+)"
     test = ("https://www.pinterest.com/g1952849/stuff/section", {
         "count": 2,
     })
@@ -321,7 +321,7 @@ class PinterestRelatedPinExtractor(PinterestPinExtractor):
     """Extractor for related pins of another pin from pinterest.com"""
     subcategory = "related-pin"
     directory_fmt = ("{category}", "related {original_pin[id]}")
-    pattern = BASE_PATTERN + r"/pin/([^/?#&]+).*#related$"
+    pattern = BASE_PATTERN + r"/pin/([^/?#]+).*#related$"
     test = ("https://www.pinterest.com/pin/858146903966145189/#related", {
         "range": "31-70",
         "count": 40,
@@ -340,7 +340,7 @@ class PinterestRelatedBoardExtractor(PinterestBoardExtractor):
     subcategory = "related-board"
     directory_fmt = ("{category}", "{board[owner][username]}",
                      "{board[name]}", "related")
-    pattern = BASE_PATTERN + r"/(?!pin/)([^/?#&]+)/([^/?#&]+)/?#related$"
+    pattern = BASE_PATTERN + r"/(?!pin/)([^/?#]+)/([^/?#]+)/?#related$"
     test = ("https://www.pinterest.com/g1952849/test-/#related", {
         "range": "31-70",
         "count": 40,
@@ -354,7 +354,7 @@ class PinterestRelatedBoardExtractor(PinterestBoardExtractor):
 class PinterestPinitExtractor(PinterestExtractor):
     """Extractor for images from a pin.it URL"""
     subcategory = "pinit"
-    pattern = r"(?:https?://)?pin\.it/([^/?#&]+)"
+    pattern = r"(?:https?://)?pin\.it/([^/?#]+)"
 
     test = (
         ("https://pin.it/Hvt8hgT", {
