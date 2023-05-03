@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2022 Mike Fährmann
+# Copyright 2014-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -21,8 +21,7 @@ class ExhentaiExtractor(Extractor):
     """Base class for exhentai extractors"""
     category = "exhentai"
     directory_fmt = ("{category}", "{gid} {title[:247]}")
-    filename_fmt = (
-        "{gid}_{num:>04}_{image_token}_{filename}.{extension}")
+    filename_fmt = "{gid}_{num:>04}_{image_token}_{filename}.{extension}"
     archive_fmt = "{gid}_{num}"
     cookienames = ("ipb_member_id", "ipb_pass_hash")
     cookiedomain = ".exhentai.org"
@@ -56,10 +55,10 @@ class ExhentaiExtractor(Extractor):
         if version != "ex":
             self.session.cookies.set("nw", "1", domain=self.cookiedomain)
 
-    def request(self, *args, **kwargs):
-        response = Extractor.request(self, *args, **kwargs)
-        if self._is_sadpanda(response):
-            self.log.info("sadpanda.jpg")
+    def request(self, url, **kwargs):
+        response = Extractor.request(self, url, **kwargs)
+        if response.history and response.headers.get("Content-Length") == "0":
+            self.log.info("blank page")
             raise exception.AuthorizationError()
         return response
 
@@ -99,14 +98,6 @@ class ExhentaiExtractor(Extractor):
         if b"You are now logged in as:" not in response.content:
             raise exception.AuthenticationError()
         return {c: response.cookies[c] for c in self.cookienames}
-
-    @staticmethod
-    def _is_sadpanda(response):
-        """Return True if the response object contains a sad panda"""
-        return (
-            response.headers.get("Content-Length") == "9615" and
-            "sadpanda.jpg" in response.headers.get("Content-Disposition", "")
-        )
 
 
 class ExhentaiGalleryExtractor(ExhentaiExtractor):
