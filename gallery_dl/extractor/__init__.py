@@ -96,7 +96,6 @@ modules = [
     "misskey",
     "myhentaigallery",
     "myportfolio",
-    "nana",
     "naver",
     "naverwebtoon",
     "newgrounds",
