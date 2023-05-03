@@ -34,7 +34,7 @@ BASE_PATTERN = UrlshortenerExtractor.update(INSTANCES)
 class UrlshortenerLinkExtractor(UrlshortenerExtractor):
     """Extractor for general-purpose URL shorteners"""
     subcategory = "link"
-    pattern = BASE_PATTERN + r"/([^/?&#]+)"
+    pattern = BASE_PATTERN + r"/([^/?#]+)"
     test = (
         ("https://bit.ly/3cWIUgq", {
             "count": 1,

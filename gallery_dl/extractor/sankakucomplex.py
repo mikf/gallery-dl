@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2021 Mike Fährmann
+# Copyright 2019-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -112,7 +112,7 @@ class SankakucomplexTagExtractor(SankakucomplexExtractor):
     """Extractor for sankakucomplex blog articles by tag or author"""
     subcategory = "tag"
     pattern = (r"(?:https?://)?www\.sankakucomplex\.com"
-               r"/((?:tag|category|author)/[^/&?#]+)")
+               r"/((?:tag|category|author)/[^/?#]+)")
     test = (
         ("https://www.sankakucomplex.com/tag/cosplay/", {
             "range": "1-50",
