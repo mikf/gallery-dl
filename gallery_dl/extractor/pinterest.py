@@ -370,7 +370,7 @@ class PinterestPinitExtractor(PinterestExtractor):
         self.shortened_id = match.group(1)
 
     def items(self):
-        url = "https://api.pinterest.com/url_shortener/{}/redirect".format(
+        url = "https://api.pinterest.com/url_shortener/{}/redirect/".format(
             self.shortened_id)
         response = self.request(url, method="HEAD", allow_redirects=False)
         location = response.headers.get("Location")
