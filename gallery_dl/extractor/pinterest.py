@@ -121,7 +121,7 @@ class PinterestPinExtractor(PinterestExtractor):
         }),
         # video pin (#1189)
         ("https://www.pinterest.com/pin/422564377542934214/", {
-            "pattern": r"https://v\.pinimg\.com/videos/mc/hls/d7/22/ff"
+            "pattern": r"https://v\d*\.pinimg\.com/videos/mc/hls/d7/22/ff"
                        r"/d722ff00ab2352981b89974b37909de8.m3u8",
         }),
         ("https://www.pinterest.com/pin/858146903966145188/", {
@@ -248,7 +248,7 @@ class PinterestCreatedExtractor(PinterestExtractor):
     pattern = BASE_PATTERN + r"/(?!pin/)([^/?#&]+)/_created/?$"
     test = ("https://www.pinterest.de/digitalmomblog/_created/", {
         "pattern": r"https://i\.pinimg\.com/originals/[0-9a-f]{2}"
-                   r"/[0-9a-f]{2}/[0-9a-f]{2}/[0-9a-f]{32}\.jpg",
+                   r"/[0-9a-f]{2}/[0-9a-f]{2}/[0-9a-f]{32}\.(jpg|png)",
         "count": 10,
         "range": "1-10",
     })
@@ -348,7 +348,7 @@ class PinterestRelatedBoardExtractor(PinterestBoardExtractor):
     })
 
     def pins(self):
-        return self.api.board_related(self.board["id"])
+        return self.api.board_content_recommendation(self.board["id"])
 
 
 class PinterestPinitExtractor(PinterestExtractor):
@@ -458,10 +458,10 @@ class PinterestAPI():
         options = {"section_id": section_id}
         return self._pagination("BoardSectionPins", options)
 
-    def board_related(self, board_id):
+    def board_content_recommendation(self, board_id):
         """Yield related pins of a specific board"""
-        options = {"board_id": board_id, "add_vase": True}
-        return self._pagination("BoardRelatedPixieFeed", options)
+        options = {"id": board_id, "type": "board", "add_vase": True}
+        return self._pagination("BoardContentRecommendation", options)
 
     def user_pins(self, user):
         """Yield all pins from 'user'"""
