@@ -90,6 +90,21 @@ class Extractor():
     def config(self, key, default=None):
         return config.interpolate(self._cfgpath, key, default)
 
+    def config_deprecated(self, key, deprecated, default=None,
+                          sentinel=util.SENTINEL, history=set()):
+        value = self.config(deprecated, sentinel)
+        if value is not sentinel:
+            if deprecated not in history:
+                history.add(deprecated)
+                self.log.warning("'%s' is deprecated. Use '%s' instead.",
+                                 deprecated, key)
+            default = value
+
+        value = self.config(key, sentinel)
+        if value is not sentinel:
+            return value
+        return default
+
     def config_accumulate(self, key):
         return config.accumulate(self._cfgpath, key)
 
