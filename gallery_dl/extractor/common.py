@@ -379,12 +379,22 @@ class Extractor():
 
     def _store_cookies(self):
         """Store the session's cookiejar in a cookies.txt file"""
-        if self._cookiefile and self.config("cookies-update", True):
-            try:
-                with open(self._cookiefile, "w") as fp:
-                    util.cookiestxt_store(fp, self._cookiejar)
-            except OSError as exc:
-                self.log.warning("cookies: %s", exc)
+        export = self.config("cookies-update", True)
+        if not export:
+            return
+
+        if isinstance(export, str):
+            path = util.expand_path(export)
+        else:
+            path = self._cookiefile
+            if not path:
+                return
+
+        try:
+            with open(path, "w") as fp:
+                util.cookiestxt_store(fp, self._cookiejar)
+        except OSError as exc:
+            self.log.warning("cookies: %s", exc)
 
     def _update_cookies(self, cookies, domain=""):
         """Update the session's cookiejar with 'cookies'"""
