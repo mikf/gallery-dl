@@ -19,11 +19,12 @@
     --clear-cache MODULE        Delete cached login sessions, cookies, etc. for
                                 MODULE (ALL to delete everything)
     --cookies FILE              File to load additional cookies from
-    --cookies-from-browser BROWSER[+KEYRING][:PROFILE][::CONTAINER]
+    --cookies-from-browser BROWSER[/DOMAIN][+KEYRING][:PROFILE][::CONTAINER]
                                 Name of the browser to load cookies from, with
-                                optional keyring name prefixed with '+', profile
-                                prefixed with ':', and container prefixed with
-                                '::' ('none' for no container)
+                                optional domain prefixed with '/', keyring name
+                                prefixed with '+', profile prefixed with ':',
+                                and container prefixed with '::' ('none' for no
+                                container)
 
 ## Output Options:
     -q, --quiet                 Activate quiet mode
