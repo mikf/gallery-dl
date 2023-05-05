@@ -20,7 +20,6 @@ import struct
 import subprocess
 import sys
 import tempfile
-from datetime import datetime, timedelta, timezone
 from hashlib import pbkdf2_hmac
 from http.cookiejar import Cookie
 from . import aes, text, util
@@ -921,8 +920,8 @@ def _get_linux_desktop_environment(env):
 
 
 def _mac_absolute_time_to_posix(timestamp):
-    return int((datetime(2001, 1, 1, 0, 0, tzinfo=timezone.utc) +
-                timedelta(seconds=timestamp)).timestamp())
+    # 978307200 is timestamp of 2001-01-01 00:00:00
+    return 978307200 + int(timestamp)
 
 
 def pbkdf2_sha1(password, salt, iterations, key_length):
