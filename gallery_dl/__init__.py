@@ -70,12 +70,14 @@ def main():
         if args.cookies_from_browser:
             browser, _, profile = args.cookies_from_browser.partition(":")
             browser, _, keyring = browser.partition("+")
+            browser, _, domain = browser.partition("/")
             if profile.startswith(":"):
                 container = profile[1:]
                 profile = None
             else:
                 profile, _, container = profile.partition("::")
-            config.set((), "cookies", (browser, profile, keyring, container))
+            config.set((), "cookies", (
+                browser, profile, keyring, container, domain))
         if args.options_pp:
             config.set((), "postprocessor-options", args.options_pp)
         for opts in args.options:
