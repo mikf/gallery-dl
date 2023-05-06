@@ -130,7 +130,10 @@ class _4chanarchivesBoardExtractor(Extractor):
             url = "{}/board/{}/{}".format(self.root, self.board, pnum)
             page = self.request(url).text
 
+            thread = None
             for thread in text.extract_iter(page, needle, '"'):
                 yield Message.Queue, thread, data
 
+            if thread is None:
+                return
             pnum += 1
