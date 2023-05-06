@@ -38,6 +38,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
+    <td>4chanarchives</td>
+    <td>https://4chanarchives.com/</td>
+    <td>Boards, Threads</td>
+    <td></td>
+</tr>
+<tr>
     <td>500px</td>
     <td>https://500px.com/</td>
     <td>Favorites, Galleries, individual Images, User Profiles</td>
