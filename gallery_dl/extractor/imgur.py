@@ -47,8 +47,13 @@ class ImgurExtractor(Extractor):
         image_ex = ImgurImageExtractor
 
         for item in items:
-            item["_extractor"] = album_ex if item["is_album"] else image_ex
-            yield Message.Queue, item["link"], item
+            if item["is_album"]:
+                url = "https://imgur.com/a/" + item["id"]
+                item["_extractor"] = album_ex
+            else:
+                url = "https://imgur.com/" + item["id"]
+                item["_extractor"] = image_ex
+            yield Message.Queue, url, item
 
 
 class ImgurImageExtractor(ImgurExtractor):
@@ -272,7 +277,7 @@ class ImgurUserExtractor(ImgurExtractor):
         ("https://imgur.com/user/Miguenzo", {
             "range": "1-100",
             "count": 100,
-            "pattern": r"https?://(i.imgur.com|imgur.com/a)/[\w.]+",
+            "pattern": r"https://imgur\.com(/a)?/\w+$",
         }),
         ("https://imgur.com/user/Miguenzo/posts"),
         ("https://imgur.com/user/Miguenzo/submitted"),
@@ -289,7 +294,7 @@ class ImgurFavoriteExtractor(ImgurExtractor):
     test = ("https://imgur.com/user/Miguenzo/favorites", {
         "range": "1-100",
         "count": 100,
-        "pattern": r"https?://(i.imgur.com|imgur.com/a)/[\w.]+",
+        "pattern": r"https://imgur\.com(/a)?/\w+$",
     })
 
     def items(self):
@@ -302,9 +307,11 @@ class ImgurFavoriteFolderExtractor(ImgurExtractor):
     pattern = BASE_PATTERN + r"/user/([^/?#]+)/favorites/folder/(\d+)"
     test = (
         ("https://imgur.com/user/mikf1/favorites/folder/11896757/public", {
+            "pattern": r"https://imgur\.com(/a)?/\w+$",
             "count": 3,
         }),
         ("https://imgur.com/user/mikf1/favorites/folder/11896741/private", {
+            "pattern": r"https://imgur\.com(/a)?/\w+$",
             "count": 5,
         }),
     )
@@ -325,7 +332,7 @@ class ImgurSubredditExtractor(ImgurExtractor):
     test = ("https://imgur.com/r/pics", {
         "range": "1-100",
         "count": 100,
-        "pattern": r"https?://(i.imgur.com|imgur.com/a)/[\w.]+",
+        "pattern": r"https://imgur\.com(/a)?/\w+$",
     })
 
     def items(self):
@@ -339,7 +346,7 @@ class ImgurTagExtractor(ImgurExtractor):
     test = ("https://imgur.com/t/animals", {
         "range": "1-100",
         "count": 100,
-        "pattern": r"https?://(i.imgur.com|imgur.com/a)/[\w.]+",
+        "pattern": r"https://imgur\.com(/a)?/\w+$",
     })
 
     def items(self):
@@ -353,7 +360,7 @@ class ImgurSearchExtractor(ImgurExtractor):
     test = ("https://imgur.com/search?q=cute+cat", {
         "range": "1-100",
         "count": 100,
-        "pattern": r"https?://(i.imgur.com|imgur.com/a)/[\w.]+",
+        "pattern": r"https://imgur\.com(/a)?/\w+$",
     })
 
     def items(self):
