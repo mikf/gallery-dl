@@ -183,6 +183,9 @@ SUBCATEGORY_MAP = {
     "hentaifoundry": {
         "story": "",
     },
+    "imgur": {
+        "favorite-folder": "Favorites Folders",
+    },
     "instagram": {
         "posts": "",
         "saved": "Saved Posts",
