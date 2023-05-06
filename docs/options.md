@@ -19,6 +19,7 @@
     --clear-cache MODULE        Delete cached login sessions, cookies, etc. for
                                 MODULE (ALL to delete everything)
     --cookies FILE              File to load additional cookies from
+    --cookies-export FILE       Export session cookies to FILE
     --cookies-from-browser BROWSER[/DOMAIN][+KEYRING][:PROFILE][::CONTAINER]
                                 Name of the browser to load cookies from, with
                                 optional domain prefixed with '/', keyring name

@@ -154,6 +154,11 @@ def build_parser():
         help="File to load additional cookies from",
     )
     general.add_argument(
+        "--cookies-export",
+        dest="cookies-update", metavar="FILE", action=ConfigAction,
+        help="Export session cookies to FILE",
+    )
+    general.add_argument(
         "--cookies-from-browser",
         dest="cookies_from_browser",
         metavar="BROWSER[/DOMAIN][+KEYRING][:PROFILE][::CONTAINER]",
