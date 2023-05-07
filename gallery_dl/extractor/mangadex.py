@@ -83,8 +83,12 @@ class MangadexExtractor(Extractor):
         data["author"] = [author["attributes"]["name"]
                           for author in relationships["author"]]
         data["group"] = [group["attributes"]["name"]
-                         for group in relationships["scanlation_group"]]
+                         for group in relationships["scanlation_group"]]   
 
+        data["status"] = mattributes["status"]
+        data["tags"] = [tag["attributes"]["name"]["en"]
+                        for tag in mattributes["tags"]]
+        
         return data
 
 
