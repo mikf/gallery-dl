@@ -85,6 +85,10 @@ class MangadexExtractor(Extractor):
         data["group"] = [group["attributes"]["name"]
                          for group in relationships["scanlation_group"]]
 
+        data["status"] = mattributes["status"]
+        data["tags"] = [tag["attributes"]["name"]["en"]
+                        for tag in mattributes["tags"]]
+
         return data
 
 
@@ -94,13 +98,13 @@ class MangadexChapterExtractor(MangadexExtractor):
     pattern = BASE_PATTERN + r"/chapter/([0-9a-f-]+)"
     test = (
         ("https://mangadex.org/chapter/f946ac53-0b71-4b5d-aeb2-7931b13c4aaa", {
-            "keyword": "86fb262cf767dac6d965cd904ad499adba466404",
+            "keyword": "e86128a79ebe7201b648f1caa828496a2878dc8f",
             #  "content": "50383a4c15124682057b197d40261641a98db514",
         }),
         # oneshot
         ("https://mangadex.org/chapter/61a88817-9c29-4281-bdf1-77b3c1be9831", {
             "count": 64,
-            "keyword": "6abcbe1e24eeb1049dc931958853cd767ee483fb",
+            "keyword": "d11ed057a919854696853362be35fc0ba7dded4c",
         }),
         # MANGA Plus (#1154)
         ("https://mangadex.org/chapter/74149a55-e7c4-44ea-8a37-98e879c1096f", {
@@ -157,6 +161,9 @@ class MangadexMangaExtractor(MangadexExtractor):
                 "language": str,
                 "artist"  : ["Arakawa Hiromu"],
                 "author"  : ["Arakawa Hiromu"],
+                "status"  : "completed",
+                "tags"    : ["Oneshot", "Historical", "Action",
+                             "Martial Arts", "Drama", "Tragedy"],
             },
         }),
         ("https://mangadex.cc/manga/d0c88e3b-ea64-4e07-9841-c1d2ac982f4a/", {
