@@ -1,5 +1,28 @@
 # Changelog
 
+## 1.25.4 - 2023-05-07
+### Additions
+- [4chanarchives] add `thread` and `board` extractors ([#4012](https://github.com/mikf/gallery-dl/issues/4012))
+- [foolfuuka] add `archive.palanq.win`
+- [imgur] add `favorite-folder` extractor ([#4016](https://github.com/mikf/gallery-dl/issues/4016))
+- [mangadex] add `status` and `tags` metadata ([#4031](https://github.com/mikf/gallery-dl/issues/4031))
+- allow selecting a domain with `--cookies-from-browser`
+- add `--cookies-export` command-line option
+- add `-C` as short option for `--cookies`
+- include exception type in config error messages
+### Fixes
+- [exhentai] update sadpanda check
+- [imagechest] load all images when a "Load More" button is present ([#4028](https://github.com/mikf/gallery-dl/issues/4028))
+- [imgur] fix bug causing some images/albums from user profiles and favorites to be ignored
+- [pinterest] update endpoint for related board pins
+- [pinterest] fix `pin.it` extractor
+- [ytdl] fix yt-dlp `--xff/--geo-bypass` tests ([#3989](https://github.com/mikf/gallery-dl/issues/3989))
+### Removals
+- [420chan] remove module
+- [foolfuuka] remove `archive.alice.al` and `tokyochronos.net`
+- [foolslide] remove `sensescans.com`
+- [nana] remove module
+
 ## 1.25.3 - 2023-04-30
 ### Additions
 - [imagefap] extract `description` and `categories` metadata ([#3905](https://github.com/mikf/gallery-dl/issues/3905))
