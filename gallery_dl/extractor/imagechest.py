@@ -31,6 +31,12 @@ class ImagechestGalleryExtractor(GalleryExtractor):
             "content": "076959e65be30249a2c651fbe6090dc30ba85193",
             "count": 3
         }),
+        # "Load More Files" button (#4028)
+        ("https://imgchest.com/p/9p4n3q2z7nq", {
+            "pattern": r"https://cdn\.imgchest\.com/files/\w+\.(jpg|png)",
+            "url": "f5674e8ba79d336193c9f698708d9dcc10e78cc7",
+            "count": 52,
+        }),
     )
 
     def __init__(self, match):
@@ -49,6 +55,18 @@ class ImagechestGalleryExtractor(GalleryExtractor):
         }
 
     def images(self, page):
+        if " More Files</button>" in page:
+            url = "{}/p/{}/loadAll".format(self.root, self.gallery_id)
+            headers = {
+                "X-Requested-With": "XMLHttpRequest",
+                "Origin"          : self.root,
+                "Referer"         : self.gallery_url,
+            }
+            csrf_token = text.extr(page, 'name="csrf-token" content="', '"')
+            data = {"_token": csrf_token}
+            page += self.request(
+                url, method="POST", headers=headers, data=data).text
+
         return [
             (url, None)
             for url in text.extract_iter(page, 'data-url="', '"')
