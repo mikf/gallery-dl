@@ -57,6 +57,8 @@ class E621Extractor(danbooru.DanbooruExtractor):
 
             post["filename"] = file["md5"]
             post["extension"] = file["ext"]
+            post["date"] = text.parse_datetime(
+                post["created_at"], "%Y-%m-%dT%H:%M:%S.%f%z")
 
             post.update(data)
             yield Message.Directory, post
@@ -140,6 +142,7 @@ class E621PostExtractor(E621Extractor, danbooru.DanbooruPostExtractor):
         ("https://e621.net/posts/535", {
             "url": "f7f78b44c9b88f8f09caac080adc8d6d9fdaa529",
             "content": "66f46e96a893fba8e694c4e049b23c2acc9af462",
+            "keyword": {"date": "dt:2007-02-17 19:02:32"},
         }),
         ("https://e621.net/posts/3181052", {
             "options": (("metadata", "notes,pools"),),
