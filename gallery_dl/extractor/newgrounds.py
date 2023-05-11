@@ -23,6 +23,7 @@ class NewgroundsExtractor(Extractor):
     root = "https://www.newgrounds.com"
     cookiedomain = ".newgrounds.com"
     cookienames = ("NG_GG_username", "vmk1du5I8m")
+    request_interval = 1.0
 
     def __init__(self, match):
         Extractor.__init__(self, match)
