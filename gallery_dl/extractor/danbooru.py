@@ -70,6 +70,8 @@ class DanbooruExtractor(BaseExtractor):
                 continue
 
             text.nameext_from_url(url, post)
+            post["date"] = text.parse_datetime(
+                post["created_at"], "%Y-%m-%dT%H:%M:%S.%f%z")
 
             if post["extension"] == "zip":
                 if self.ugoira:
@@ -181,7 +183,7 @@ class DanbooruTagExtractor(DanbooruExtractor):
             "count": 12,
         }),
         ("https://aibooru.online/posts?tags=center_frills&z=1", {
-            "pattern": r"https://aibooru\.online/data/original"
+            "pattern": r"https://cdn\.aibooru\.online/original"
                        r"/[0-9a-f]{2}/[0-9a-f]{2}/[0-9a-f]{32}\.\w+",
             "count": ">= 3",
         }),
@@ -245,6 +247,7 @@ class DanbooruPostExtractor(DanbooruExtractor):
     test = (
         ("https://danbooru.donmai.us/posts/294929", {
             "content": "5e255713cbf0a8e0801dc423563c34d896bb9229",
+            "keyword": {"date": "dt:2008-08-12 04:46:05"},
         }),
         ("https://danbooru.donmai.us/posts/3613024", {
             "pattern": r"https?://.+\.zip$",
