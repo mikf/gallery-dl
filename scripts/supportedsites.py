@@ -213,6 +213,8 @@ SUBCATEGORY_MAP = {
     },
     "pixiv": {
         "me"  : "pixiv.me Links",
+        "novel-series": "Novel Series",
+        "novel-user": "",
         "pixivision": "pixivision",
         "sketch": "Sketch",
         "work": "individual Images",
