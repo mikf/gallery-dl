@@ -172,6 +172,7 @@ class PixivUserExtractor(PixivExtractor):
             (PixivBackgroundExtractor, base + "background"),
             (PixivArtworksExtractor  , base + "artworks"),
             (PixivFavoriteExtractor  , base + "bookmarks/artworks"),
+            (PixivNovelUserExtractor , base + "novels"),
         ), ("artworks",))
 
 
@@ -750,6 +751,125 @@ class PixivSeriesExtractor(PixivExtractor):
             params["p"] += 1
 
 
+class PixivNovelExtractor(PixivExtractor):
+    """Extractor for pixiv novels"""
+    subcategory = "novel"
+    request_interval = 1.0
+    pattern = (r"(?:https?://)?(?:www\.|touch\.)?pixiv\.net"
+               r"/novel/show\.php\?id=(\d+)")
+    test = ("https://www.pixiv.net/novel/show.php?id=19612040", {
+        "count": 1,
+        "content": "c6f22167f9df7aeaf63b51933b4c8ef6fc5e6a1e",
+        "keyword": {
+            "caption": r"re:「無能な名無し」と呼ばれ虐げられて育った鈴\(すず\)は、",
+            "comment_access_control": 0,
+            "create_date": "2023-04-02T15:18:58+09:00",
+            "date": "dt:2023-04-02 06:18:58",
+            "id": 19612040,
+            "is_bookmarked": False,
+            "is_muted": False,
+            "is_mypixiv_only": False,
+            "is_original": True,
+            "is_x_restricted": False,
+            "novel_ai_type": 1,
+            "page_count": 1,
+            "rating": "General",
+            "restrict": 0,
+            "series": {
+                "id": 10278364,
+                "title": "龍の贄嫁〜虐げられた少女は運命の番として愛される〜"
+            },
+            "tags": ["和風ファンタジー", "溺愛", "神様", "ヤンデレ", "執着",
+                     "異能", "ざまぁ", "学園", "神嫁"],
+            "text_length": 5977,
+            "title": "異母妹から「無能な名無し」と虐げられていた私、"
+                     "どうやら異母妹に霊力を搾取されていたようです（１）",
+            "user": {
+                "account": "yukinaga_chifuyu",
+                "id": 77055466,
+            },
+            "visible": True,
+            "x_restrict": 0,
+        },
+    })
+
+    def __init__(self, match):
+        PixivExtractor.__init__(self, match)
+        self.novel_id = match.group(1)
+
+    def items(self):
+        tags = self.config("tags", "japanese")
+        if tags == "original":
+            transform_tags = None
+        elif tags == "translated":
+            def transform_tags(work):
+                work["tags"] = list(dict.fromkeys(
+                    tag["translated_name"] or tag["name"]
+                    for tag in work["tags"]))
+        else:
+            def transform_tags(work):
+                work["tags"] = [tag["name"] for tag in work["tags"]]
+
+        ratings = {0: "General", 1: "R-18", 2: "R-18G"}
+        meta_user = self.config("metadata")
+        meta_bookmark = self.config("metadata-bookmark")
+
+        novels = self.novels()
+        if self.max_posts:
+            novels = itertools.islice(novels, self.max_posts)
+        for novel in novels:
+            if meta_user:
+                novel.update(self.api.user_detail(novel["user"]["id"]))
+            if meta_bookmark and novel["is_bookmarked"]:
+                detail = self.api.novel_bookmark_detail(novel["id"])
+                novel["tags_bookmark"] = [tag["name"] for tag in detail["tags"]
+                                          if tag["is_registered"]]
+            if transform_tags:
+                transform_tags(novel)
+            novel["num"] = 0
+            novel["date"] = text.parse_datetime(novel["create_date"])
+            novel["rating"] = ratings.get(novel["x_restrict"])
+            novel["suffix"] = ""
+
+            yield Message.Directory, novel
+
+            novel["extension"] = "txt"
+            content = self.api.novel_text(novel["id"])["novel_text"]
+            yield Message.Url, "text:" + content, novel
+
+    def novels(self):
+        return (self.api.novel_detail(self.novel_id),)
+
+
+class PixivNovelUserExtractor(PixivNovelExtractor):
+    """Extractor for pixiv users' novels"""
+    subcategory = "novel-user"
+    pattern = (r"(?:https?://)?(?:www\.|touch\.)?pixiv\.net"
+               r"/(?:en/)?users/(\d+)/novels")
+    test = ("https://www.pixiv.net/en/users/77055466/novels", {
+        "pattern": "^text:",
+        "range": "1-5",
+        "count": 5,
+    })
+
+    def novels(self):
+        return self.api.user_novels(self.novel_id)
+
+
+class PixivNovelSeriesExtractor(PixivNovelExtractor):
+    """Extractor for pixiv novel series"""
+    subcategory = "novel-series"
+    pattern = (r"(?:https?://)?(?:www\.|touch\.)?pixiv\.net"
+               r"/novel/series/(\d+)")
+    test = ("https://www.pixiv.net/novel/series/10278364", {
+        "count": 4,
+        "content": "b06abed001b3f6ccfb1579699e9a238b46d38ea2",
+    })
+
+    def novels(self):
+        return self.api.novel_series(self.novel_id)
+
+
 class PixivSketchExtractor(Extractor):
     """Extractor for user pages on sketch.pixiv.net"""
     category = "pixiv"
@@ -907,6 +1027,23 @@ class PixivAppAPI():
         params = {"illust_id": illust_id}
         return self._pagination("/v2/illust/related", params)
 
+    def novel_bookmark_detail(self, novel_id):
+        params = {"novel_id": novel_id}
+        return self._call(
+            "/v2/novel/bookmark/detail", params)["bookmark_detail"]
+
+    def novel_detail(self, novel_id):
+        params = {"novel_id": novel_id}
+        return self._call("/v2/novel/detail", params)["novel"]
+
+    def novel_series(self, series_id):
+        params = {"series_id": series_id}
+        return self._pagination("/v1/novel/series", params, "novels")
+
+    def novel_text(self, novel_id):
+        params = {"novel_id": novel_id}
+        return self._call("/v1/novel/text", params)
+
     def search_illust(self, word, sort=None, target=None, duration=None,
                       date_start=None, date_end=None):
         params = {"word": word, "search_target": target,
@@ -937,6 +1074,10 @@ class PixivAppAPI():
     def user_illusts(self, user_id):
         params = {"user_id": user_id}
         return self._pagination("/v1/user/illusts", params)
+
+    def user_novels(self, user_id):
+        params = {"user_id": user_id}
+        return self._pagination("/v1/user/novels", params, "novels")
 
     def ugoira_metadata(self, illust_id):
         params = {"illust_id": illust_id}
