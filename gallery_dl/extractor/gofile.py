@@ -7,6 +7,7 @@
 from .common import Extractor, Message
 from .. import text, exception
 from ..cache import memcache
+import hashlib
 
 
 class GofileFolderExtractor(Extractor):
@@ -66,6 +67,7 @@ class GofileFolderExtractor(Extractor):
 
     def items(self):
         recursive = self.config("recursive")
+        password = self.config("password")
 
         token = self.config("api-token")
         if not token:
@@ -78,7 +80,7 @@ class GofileFolderExtractor(Extractor):
             token = self._get_website_token()
         self.website_token = token
 
-        folder = self._get_content(self.content_id)
+        folder = self._get_content(self.content_id, password)
         yield Message.Directory, folder
 
         num = 0
@@ -115,11 +117,14 @@ class GofileFolderExtractor(Extractor):
         page = self.request(self.root + "/contents/files.html").text
         return text.extract(page, "websiteToken:", ",")[0].strip("\" ")
 
-    def _get_content(self, content_id):
+    def _get_content(self, content_id, password=None):
+        if password is not None:
+            password = hashlib.sha256(password.encode()).hexdigest()
         return self._api_request("getContent", {
             "contentId"   : content_id,
             "token"       : self.api_token,
             "websiteToken": self.website_token,
+            "password"    : password,
         })
 
     def _api_request(self, endpoint, params=None):
