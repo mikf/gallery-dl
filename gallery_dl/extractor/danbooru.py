@@ -105,16 +105,17 @@ class DanbooruExtractor(BaseExtractor):
                 posts = posts["posts"]
 
             if self.includes and posts:
-                if not pages and "only" not in params:
-                    params["page"] = "b{}".format(posts[0]["id"] + 1)
-                params["only"] = self.includes
+                params_meta = {
+                    "only" : self.includes,
+                    "limit": len(posts),
+                    "tags" : "id:" + ",".join(str(p["id"]) for p in posts),
+                }
                 data = {
                     meta["id"]: meta
-                    for meta in self.request(url, params=params).json()
+                    for meta in self.request(url, params=params_meta).json()
                 }
                 for post in posts:
                     post.update(data[post["id"]])
-                params["only"] = None
 
             yield from posts
 
@@ -155,7 +156,7 @@ BASE_PATTERN = DanbooruExtractor.update({
     "aibooru": {
         "root": None,
         "pattern": r"(?:safe.)?aibooru\.online",
-    }
+    },
 })
 
 
