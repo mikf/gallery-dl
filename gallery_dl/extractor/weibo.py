@@ -132,7 +132,7 @@ class WeiboExtractor(Extractor):
         return self.request(url).json()
 
     def _user_id(self):
-        if self.user.isdecimal():
+        if len(self.user) >= 10 and self.user.isdecimal():
             return self.user[-10:]
         else:
             url = "{}/ajax/profile/info?{}={}".format(
