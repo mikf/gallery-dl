@@ -94,43 +94,47 @@ class DanbooruExtractor(BaseExtractor):
     def posts(self):
         return ()
 
-    def _pagination(self, endpoint, params, pages=False):
+    def _pagination(self, endpoint, params, prefix=None):
         url = self.root + endpoint
         params["limit"] = self.per_page
         params["page"] = self.page_start
 
+        first = True
         while True:
             posts = self.request(url, params=params).json()
-            if "posts" in posts:
+            if isinstance(posts, dict):
                 posts = posts["posts"]
 
-            if self.includes and posts:
-                params_meta = {
-                    "only" : self.includes,
-                    "limit": len(posts),
-                    "tags" : "id:" + ",".join(str(p["id"]) for p in posts),
-                }
-                data = {
-                    meta["id"]: meta
-                    for meta in self.request(url, params=params_meta).json()
-                }
-                for post in posts:
-                    post.update(data[post["id"]])
+            if posts:
+                if self.includes:
+                    params_meta = {
+                        "only" : self.includes,
+                        "limit": len(posts),
+                        "tags" : "id:" + ",".join(str(p["id"]) for p in posts),
+                    }
+                    data = {
+                        meta["id"]: meta
+                        for meta in self.request(
+                            url, params=params_meta).json()
+                    }
+                    for post in posts:
+                        post.update(data[post["id"]])
 
-            yield from posts
+                if prefix == "a" and not first:
+                    posts.reverse()
+
+                yield from posts
 
             if len(posts) < self.threshold:
                 return
 
-            if pages:
+            if prefix:
+                params["page"] = "{}{}".format(prefix, posts[-1]["id"])
+            elif params["page"]:
                 params["page"] += 1
             else:
-                for post in reversed(posts):
-                    if "id" in post:
-                        params["page"] = "b{}".format(post["id"])
-                        break
-                else:
-                    return
+                params["page"] = 2
+            first = False
 
     def _ugoira_frames(self, post):
         data = self.request("{}/posts/{}.json?only=media_metadata".format(
@@ -203,7 +207,21 @@ class DanbooruTagExtractor(DanbooruExtractor):
         return {"search_tags": self.tags}
 
     def posts(self):
-        return self._pagination("/posts.json", {"tags": self.tags})
+        prefix = "b"
+        for tag in self.tags.split():
+            if tag.startswith("order:"):
+                if tag == "order:id" or tag == "order:id_asc":
+                    prefix = "a"
+                elif tag == "order:id_desc":
+                    prefix = "b"
+                else:
+                    prefix = None
+            elif tag.startswith(
+                    ("id:", "md5", "ordfav:", "ordfavgroup:", "ordpool:")):
+                prefix = None
+                break
+
+        return self._pagination("/posts.json", {"tags": self.tags}, prefix)
 
 
 class DanbooruPoolExtractor(DanbooruExtractor):
@@ -237,7 +255,7 @@ class DanbooruPoolExtractor(DanbooruExtractor):
 
     def posts(self):
         params = {"tags": "pool:" + self.pool_id}
-        return self._pagination("/posts.json", params)
+        return self._pagination("/posts.json", params, "b")
 
 
 class DanbooruPostExtractor(DanbooruExtractor):
@@ -311,7 +329,4 @@ class DanbooruPopularExtractor(DanbooruExtractor):
         return {"date": date, "scale": scale}
 
     def posts(self):
-        if self.page_start is None:
-            self.page_start = 1
-        return self._pagination(
-            "/explore/posts/popular.json", self.params, True)
+        return self._pagination("/explore/posts/popular.json", self.params)

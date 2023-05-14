@@ -219,9 +219,7 @@ class E621PopularExtractor(E621Extractor, danbooru.DanbooruPopularExtractor):
     )
 
     def posts(self):
-        if self.page_start is None:
-            self.page_start = 1
-        return self._pagination("/popular.json", self.params, True)
+        return self._pagination("/popular.json", self.params)
 
 
 class E621FavoriteExtractor(E621Extractor):
@@ -252,6 +250,4 @@ class E621FavoriteExtractor(E621Extractor):
         return {"user_id": self.query.get("user_id", "")}
 
     def posts(self):
-        if self.page_start is None:
-            self.page_start = 1
-        return self._pagination("/favorites.json", self.query, True)
+        return self._pagination("/favorites.json", self.query)
