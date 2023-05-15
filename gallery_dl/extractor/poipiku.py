@@ -41,7 +41,7 @@ class PoipikuExtractor(Extractor):
                 "user_name"  : text.unescape(extr(
                     '<h2 class="UserInfoUserName">', '</').rpartition(">")[2]),
                 "description": text.unescape(extr(
-                    'class="IllustItemDesc" >', '<')),
+                    'class="IllustItemDesc" >', '</h1>')),
                 "_http_headers": {"Referer": post_url},
             }
 
@@ -172,7 +172,9 @@ class PoipikuPostExtractor(PoipikuExtractor):
             "count": 3,
             "keyword": {
                 "count": "3",
-                "description": "ORANGE OASISボスネタバレ",
+                "description": "ORANGE OASISボスネタバレ<br />曲も大好き<br />"
+                               "2枚目以降はほとんど見えなかった1枚目背景"
+                               "のヒエログリフ小ネタです𓀀",
                 "num": int,
                 "post_category": "SPOILER",
                 "post_id": "5776587",
