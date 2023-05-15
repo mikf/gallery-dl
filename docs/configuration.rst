@@ -1687,7 +1687,7 @@ extractor.gofile.website-token
 Type
     ``string``
 Default
-    ``"12345"``
+    ``"abcde"``
 Description
     API token value used during API requests.
 
