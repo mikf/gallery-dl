@@ -75,7 +75,7 @@ class GofileFolderExtractor(Extractor):
         self.session.cookies.set("accountToken", token, domain=".gofile.io")
         self.api_token = token
 
-        token = self.config("website-token", "12345")
+        token = self.config("website-token", "abcde")
         if not token:
             token = self._get_website_token()
         self.website_token = token
@@ -114,8 +114,8 @@ class GofileFolderExtractor(Extractor):
     @memcache()
     def _get_website_token(self):
         self.log.debug("Fetching website token")
-        page = self.request(self.root + "/contents/files.html").text
-        return text.extract(page, "websiteToken:", ",")[0].strip("\" ")
+        page = self.request(self.root + "/dist/js/alljs.js").text
+        return text.extr(page, 'fetchData.websiteToken = "', '"')
 
     def _get_content(self, content_id, password=None):
         if password is not None:
