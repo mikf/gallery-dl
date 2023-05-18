@@ -1834,6 +1834,24 @@ Description
     To enumerate files in reverse order, use ``count - num + 1``.
 
 
+extractor.instagram.order-posts
+-------------------------------
+Type
+    ``string``
+Default
+    ``"asc"``
+Description
+    Controls the order in which posts are returned.
+
+    * ``"asc"``: Same order as displayed
+    * ``"desc"``: Reverse order as displayed
+    * ``"id"`` or ``"id_asc"``: Ascending order by ID
+    * ``"id_desc"``: Descending order by ID
+    * ``"reverse"``: Same as ``"desc"``
+
+    Note: This option only affects ``highlights``.
+
+
 extractor.instagram.previews
 ----------------------------
 Type
