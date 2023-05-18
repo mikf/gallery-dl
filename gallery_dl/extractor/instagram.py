@@ -55,6 +55,9 @@ class InstagramExtractor(Extractor):
         previews = self.config("previews", False)
         video_headers = {"User-Agent": "Mozilla/5.0"}
 
+        order = self.config("order-files")
+        reverse = order[0] in ("r", "d") if order else False
+
         for post in self.posts():
 
             if "__typename" in post:
@@ -71,6 +74,8 @@ class InstagramExtractor(Extractor):
 
             if "date" in post:
                 del post["date"]
+            if reverse:
+                files.reverse()
 
             for file in files:
                 file.update(post)
