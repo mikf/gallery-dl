@@ -1817,6 +1817,23 @@ Description
     It is possible to use ``"all"`` instead of listing all values separately.
 
 
+extractor.instagram.order-files
+-------------------------------
+Type
+    ``string``
+Default
+    ``"asc"``
+Description
+    Controls the order in which files of each post are returned.
+
+    * ``"asc"``: Same order as displayed in a post
+    * ``"desc"``: Reverse order as displayed in a post
+    * ``"reverse"``: Same as ``"desc"``
+
+    Note: This option does *not* affect ``{num}``.
+    To enumerate files in reverse order, use ``count - num + 1``.
+
+
 extractor.instagram.previews
 ----------------------------
 Type
