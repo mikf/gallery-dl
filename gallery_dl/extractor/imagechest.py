@@ -37,14 +37,23 @@ class ImagechestGalleryExtractor(GalleryExtractor):
             "url": "f5674e8ba79d336193c9f698708d9dcc10e78cc7",
             "count": 52,
         }),
+        ("https://imgchest.com/p/xxxxxxxxxxx", {
+            "exception": exception.NotFoundError,
+        }),
     )
 
     def __init__(self, match):
         self.gallery_id = match.group(1)
         url = self.root + "/p/" + self.gallery_id
         GalleryExtractor.__init__(self, match, url)
+        self.access_token = self.config("access-token")
 
     def metadata(self, page):
+        if self.access_token:
+            return self._metadata_api()
+        return self._metadata_html(page)
+
+    def _metadata_html(self, page):
         if "Sorry, but the page you requested could not be found." in page:
             raise exception.NotFoundError("gallery")
 
@@ -54,7 +63,28 @@ class ImagechestGalleryExtractor(GalleryExtractor):
                 page, 'property="og:title" content="', '"').strip())
         }
 
+    def _metadata_api(self):
+        api = ImagechestAPI(self, self.access_token)
+        post = api.post(self.gallery_id)
+
+        post["date"] = text.parse_datetime(
+            post["created"], "%Y-%m-%dT%H:%M:%S.%fZ")
+        for img in post["images"]:
+            img["date"] = text.parse_datetime(
+                img["created"], "%Y-%m-%dT%H:%M:%S.%fZ")
+
+        post["gallery_id"] = self.gallery_id
+        post.pop("image_count", None)
+        self._image_list = post.pop("images")
+
+        return post
+
     def images(self, page):
+        if self.access_token:
+            return self._images_api()
+        return self._images_html(page)
+
+    def _images_html(self, page):
         if " More Files</button>" in page:
             url = "{}/p/{}/loadAll".format(self.root, self.gallery_id)
             headers = {
@@ -71,3 +101,45 @@ class ImagechestGalleryExtractor(GalleryExtractor):
             (url, None)
             for url in text.extract_iter(page, 'data-url="', '"')
         ]
+
+    def _images_api(self):
+        return [
+            (img["link"], img)
+            for img in self._image_list
+        ]
+
+
+class ImagechestAPI():
+    """Interface for the Image Chest API
+
+    https://imgchest.com/docs/api/1.0/general/overview
+    """
+    root = "https://api.imgchest.com"
+
+    def __init__(self, extractor, access_token):
+        self.extractor = extractor
+        self.headers = {"Authorization": "Bearer " + access_token}
+
+    def post(self, post_id):
+        endpoint = "/v1/post/" + post_id
+        return self._call(endpoint)
+
+    def _call(self, endpoint):
+        url = self.root + endpoint
+
+        while True:
+            response = self.extractor.request(
+                url, headers=self.headers, fatal=None, allow_redirects=False)
+
+            if response.status_code < 300:
+                return response.json()["data"]
+
+            elif response.status_code < 400:
+                raise exception.AuthenticationError("Invalid API access token")
+
+            elif response.status_code == 429:
+                self.extractor.wait(seconds=600)
+
+            else:
+                self.extractor.log.debug(response.text)
+                raise exception.StopExtraction("API request failed")
