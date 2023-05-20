@@ -813,7 +813,7 @@ Consider all sites to be NSFW unless otherwise known.
 </tr>
 <tr>
     <td>TCB Scans</td>
-    <td>https://onepiecechapters.com/</td>
+    <td>https://tcbscans.com/</td>
     <td>Chapters, Manga</td>
     <td></td>
 </tr>
