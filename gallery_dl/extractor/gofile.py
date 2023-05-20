@@ -6,7 +6,7 @@
 
 from .common import Extractor, Message
 from .. import text, exception
-from ..cache import memcache
+from ..cache import cache, memcache
 import hashlib
 
 
@@ -75,10 +75,8 @@ class GofileFolderExtractor(Extractor):
         self.session.cookies.set("accountToken", token, domain=".gofile.io")
         self.api_token = token
 
-        token = self.config("website-token", "abcde")
-        if not token:
-            token = self._get_website_token()
-        self.website_token = token
+        self.website_token = (self.config("website-token") or
+                              self._get_website_token())
 
         folder = self._get_content(self.content_id, password)
         yield Message.Directory, folder
@@ -111,7 +109,7 @@ class GofileFolderExtractor(Extractor):
         self.log.debug("Creating temporary account")
         return self._api_request("createAccount")["token"]
 
-    @memcache()
+    @cache(maxage=86400)
     def _get_website_token(self):
         self.log.debug("Fetching website token")
         page = self.request(self.root + "/dist/js/alljs.js").text
