@@ -1686,15 +1686,14 @@ extractor.gofile.website-token
 ------------------------------
 Type
     ``string``
-Default
-    ``"abcde"``
 Description
     API token value used during API requests.
 
-    A not up-to-date value will result in ``401 Unauthorized`` errors.
+    An invalid or not up-to-date value
+    will result in ``401 Unauthorized`` errors.
 
-    Setting this value to ``null`` will do an extra HTTP request to fetch
-    the current value used by gofile.
+    Keeping this option unset will use an extra HTTP request
+    to attempt to fetch the current value used by gofile.
 
 
 extractor.gofile.recursive
