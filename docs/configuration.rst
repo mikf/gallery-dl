@@ -1741,6 +1741,21 @@ Description
     but is most likely going to fail with ``403 Forbidden`` errors.
 
 
+extractor.imagechest.access-token
+---------------------------------
+Type
+    ``string``
+Description
+    Your personal Image Chest access token.
+
+    These tokens allow using the API instead of having to scrape HTML pages,
+    providing more detailed metadata.
+    (``date``, ``description``, etc)
+
+    See https://imgchest.com/docs/api/1.0/general/authorization
+    for instructions on how to generate such a token.
+
+
 extractor.imgur.client-id
 -------------------------
 Type
