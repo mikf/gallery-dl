@@ -4,19 +4,20 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extractors for https://onepiecechapters.com/"""
+"""Extractors for https://tcbscans.com/"""
 
 from .common import ChapterExtractor, MangaExtractor
 from .. import text
 
+BASE_PATTERN = r"(?:https?://)?(?:tcbscans|onepiecechapters)\.com"
+
 
 class TcbscansChapterExtractor(ChapterExtractor):
     category = "tcbscans"
-    pattern = (r"(?:https?://)?onepiecechapters\.com"
-               r"(/chapters/\d+/[^/?#]+)")
-    root = "https://onepiecechapters.com"
+    root = "https://tcbscans.com"
+    pattern = BASE_PATTERN + r"(/chapters/\d+/[^/?#]+)"
     test = (
-        (("https://onepiecechapters.com"
+        (("https://tcbscans.com"
           "/chapters/4708/chainsaw-man-chapter-108"), {
             "pattern": (r"https://cdn\.[^/]+"
                         r"/(file|attachments/[^/]+)/[^/]+/[^.]+\.\w+"),
@@ -66,12 +67,11 @@ class TcbscansChapterExtractor(ChapterExtractor):
 
 class TcbscansMangaExtractor(MangaExtractor):
     category = "tcbscans"
+    root = "https://tcbscans.com"
     chapterclass = TcbscansChapterExtractor
-    pattern = (r"(?:https?://)?onepiecechapters\.com"
-               r"(/mangas/\d+/[^/?#]+)")
-    root = "https://onepiecechapters.com"
+    pattern = BASE_PATTERN + r"(/mangas/\d+/[^/?#]+)"
     test = (
-        ("https://onepiecechapters.com/mangas/13/chainsaw-man", {
+        ("https://tcbscans.com/mangas/13/chainsaw-man", {
             "pattern": TcbscansChapterExtractor.pattern,
             "range"  : "1-50",
             "count"  : 50,
