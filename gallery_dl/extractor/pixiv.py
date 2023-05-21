@@ -756,42 +756,45 @@ class PixivNovelExtractor(PixivExtractor):
     subcategory = "novel"
     request_interval = 1.0
     pattern = (r"(?:https?://)?(?:www\.|touch\.)?pixiv\.net"
-               r"/novel/show\.php\?id=(\d+)")
-    test = ("https://www.pixiv.net/novel/show.php?id=19612040", {
-        "count": 1,
-        "content": "c6f22167f9df7aeaf63b51933b4c8ef6fc5e6a1e",
-        "keyword": {
-            "caption": r"re:「無能な名無し」と呼ばれ虐げられて育った鈴\(すず\)は、",
-            "comment_access_control": 0,
-            "create_date": "2023-04-02T15:18:58+09:00",
-            "date": "dt:2023-04-02 06:18:58",
-            "id": 19612040,
-            "is_bookmarked": False,
-            "is_muted": False,
-            "is_mypixiv_only": False,
-            "is_original": True,
-            "is_x_restricted": False,
-            "novel_ai_type": 1,
-            "page_count": 1,
-            "rating": "General",
-            "restrict": 0,
-            "series": {
-                "id": 10278364,
-                "title": "龍の贄嫁〜虐げられた少女は運命の番として愛される〜"
+               r"/n(?:ovel/show\.php\?id=|/)(\d+)")
+    test = (
+        ("https://www.pixiv.net/novel/show.php?id=19612040", {
+            "count": 1,
+            "content": "c6f22167f9df7aeaf63b51933b4c8ef6fc5e6a1e",
+            "keyword": {
+                "caption": r"re:「無能な名無し」と呼ばれ虐げられて育った鈴\(すず\)は、",
+                "comment_access_control": 0,
+                "create_date": "2023-04-02T15:18:58+09:00",
+                "date": "dt:2023-04-02 06:18:58",
+                "id": 19612040,
+                "is_bookmarked": False,
+                "is_muted": False,
+                "is_mypixiv_only": False,
+                "is_original": True,
+                "is_x_restricted": False,
+                "novel_ai_type": 1,
+                "page_count": 1,
+                "rating": "General",
+                "restrict": 0,
+                "series": {
+                    "id": 10278364,
+                    "title": "龍の贄嫁〜虐げられた少女は運命の番として愛される〜"
+                },
+                "tags": ["和風ファンタジー", "溺愛", "神様", "ヤンデレ", "執着",
+                         "異能", "ざまぁ", "学園", "神嫁"],
+                "text_length": 5977,
+                "title": "異母妹から「無能な名無し」と虐げられていた私、"
+                         "どうやら異母妹に霊力を搾取されていたようです（１）",
+                "user": {
+                    "account": "yukinaga_chifuyu",
+                    "id": 77055466,
+                },
+                "visible": True,
+                "x_restrict": 0,
             },
-            "tags": ["和風ファンタジー", "溺愛", "神様", "ヤンデレ", "執着",
-                     "異能", "ざまぁ", "学園", "神嫁"],
-            "text_length": 5977,
-            "title": "異母妹から「無能な名無し」と虐げられていた私、"
-                     "どうやら異母妹に霊力を搾取されていたようです（１）",
-            "user": {
-                "account": "yukinaga_chifuyu",
-                "id": 77055466,
-            },
-            "visible": True,
-            "x_restrict": 0,
-        },
-    })
+        }),
+        ("https://www.pixiv.net/n/19612040"),
+    )
 
     def __init__(self, match):
         PixivExtractor.__init__(self, match)
