@@ -555,7 +555,13 @@ class GalleryExtractor(Extractor):
 
     def items(self):
         self.login()
-        page = self.request(self.gallery_url, notfound=self.subcategory).text
+
+        if self.gallery_url:
+            page = self.request(
+                self.gallery_url, notfound=self.subcategory).text
+        else:
+            page = None
+
         data = self.metadata(page)
         imgs = self.images(page)
 
