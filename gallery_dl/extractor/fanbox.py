@@ -52,8 +52,11 @@ class FanboxExtractor(Extractor):
             url = text.ensure_http_scheme(url)
             body = self.request(url, headers=headers).json()["body"]
             for item in body["items"]:
-                yield self._get_post_data(item["id"])
-
+                try:
+                    yield self._get_post_data(item["id"])
+                except Exception as exc:
+                    self.log.warning("Skipping post %s (%s: %s)",
+                                     item["id"], exc.__class__.__name__, exc)
             url = body["nextUrl"]
 
     def _get_post_data(self, post_id):
