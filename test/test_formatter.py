@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright 2021-2022 Mike Fährmann
+# Copyright 2021-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -23,6 +23,7 @@ class TestFormatter(unittest.TestCase):
     kwdict = {
         "a": "hElLo wOrLd",
         "b": "äöü",
+        "j": "げんそうきょう",
         "d": {"a": "foo", "b": 0, "c": None},
         "l": ["a", "b", "c"],
         "n": None,
@@ -133,7 +134,7 @@ class TestFormatter(unittest.TestCase):
         self._run_test("{d['a']}", "foo")
         self._run_test('{d["a"]}', "foo")
 
-    def test_slicing(self):
+    def test_slice_str(self):
         v = self.kwdict["a"]
         self._run_test("{a[1:10]}"  , v[1:10])
         self._run_test("{a[-10:-1]}", v[-10:-1])
@@ -164,6 +165,26 @@ class TestFormatter(unittest.TestCase):
         self._run_test("{a:[:5:2]}" , v[:5:2])
         self._run_test("{a:[:50:2]}", v[:50:2])
         self._run_test("{a:[::]}"   , v)
+
+    def test_slice_bytes(self):
+        v = self.kwdict["j"]
+        self._run_test("{j[b1:10]}"  , v[1:3])
+        self._run_test("{j[b-10:-1]}", v[-3:-1])
+        self._run_test("{j[b5:]}"    , v[2:])
+        self._run_test("{j[b50:]}"   , v[50:])
+        self._run_test("{j[b:5]}"    , v[:1])
+        self._run_test("{j[b:50]}"   , v[:50])
+        self._run_test("{j[b:]}"     , v)
+        self._run_test("{j[b::]}"    , v)
+
+        self._run_test("{j:[b1:10]}"  , v[1:3])
+        self._run_test("{j:[b-10:-1]}", v[-3:-1])
+        self._run_test("{j:[b5:]}"    , v[2:])
+        self._run_test("{j:[b50:]}"   , v[50:])
+        self._run_test("{j:[b:5]}"    , v[:1])
+        self._run_test("{j:[b:50]}"   , v[:50])
+        self._run_test("{j:[b:]}"     , v)
+        self._run_test("{j:[b::]}"    , v)
 
     def test_maxlen(self):
         v = self.kwdict["a"]
@@ -413,10 +434,10 @@ def noarg():
             fmt4 = formatter.parse("\fM " + path + ":lengths")
 
         self.assertEqual(fmt1.format_map(self.kwdict), "'Title' by Name")
-        self.assertEqual(fmt2.format_map(self.kwdict), "89")
+        self.assertEqual(fmt2.format_map(self.kwdict), "96")
 
         self.assertEqual(fmt3.format_map(self.kwdict), "'Title' by Name")
-        self.assertEqual(fmt4.format_map(self.kwdict), "89")
+        self.assertEqual(fmt4.format_map(self.kwdict), "96")
 
         with self.assertRaises(TypeError):
             self.assertEqual(fmt0.format_map(self.kwdict), "")

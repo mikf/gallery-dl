@@ -11,14 +11,15 @@ Field names select the metadata value to use in a replacement field.
 
 While simple names are usually enough, more complex forms like accessing values by attribute, element index, or slicing are also supported.
 
-|                      | Example           | Result                 |
-| -------------------- | ----------------- | ---------------------- |
-| Name                 | `{title}`         | `Hello World`          |
-| Element Index        | `{title[6]}`      | `W`                    |
-| Slicing              | `{title[3:8]}`    | `lo Wo`                |
-| Alternatives         | `{empty\|title}`  | `Hello World`          |
-| Element Access       | `{user[name]}`    | `John Doe`             |
-| Attribute Access     | `{extractor.url}` | `https://example.org/` |
+|                      | Example             | Result                 |
+| -------------------- | ------------------- | ---------------------- |
+| Name                 | `{title}`           | `Hello World`          |
+| Element Index        | `{title[6]}`        | `W`                    |
+| Slicing              | `{title[3:8]}`      | `lo Wo`                |
+| Slicing (Bytes)      | `{title_ja[b3:18]}` | `ロー・ワー`           |
+| Alternatives         | `{empty\|title}`    | `Hello World`          |
+| Element Access       | `{user[name]}`      | `John Doe`             |
+| Attribute Access     | `{extractor.url}`   | `https://example.org/` |
 
 All of these methods can be combined as needed.
 For example `{title[24]|empty|extractor.url[15:-1]}` would result in `.org`.
@@ -149,6 +150,12 @@ Format specifiers can be used for advanced formatting by using the options provi
     <td>Applies a <a href="https://python-reference.readthedocs.io/en/latest/docs/brackets/slicing.html">Slicing</a> operation to the current value, similar to <a href="#field-names">Field Names</a></td>
     <td><code>{foo:[1:-1]}</code></td>
     <td><code>oo&nbsp;Ba</code></td>
+</tr>
+<tr>
+    <td><code>[b&lt;start&gt;:&lt;stop&gt;]</code></td>
+    <td>Same as above, but applies to the <a href="https://docs.python.org/3/library/stdtypes.html#bytes"><code>bytes()</code></a> representation of a string in <a href="https://docs.python.org/3/library/sys.html#sys.getfilesystemencoding">filesystem encoding</a></td>
+    <td><code>{foo_ja:[b3:-1]}</code></td>
+    <td><code>ー・バ</code></td>
 </tr>
 <tr>
     <td rowspan="2"><code>L&lt;maxlen&gt;/&lt;repl&gt;/</code></td>
