@@ -46,14 +46,14 @@ class ImagechestGalleryExtractor(GalleryExtractor):
         self.gallery_id = match.group(1)
         url = self.root + "/p/" + self.gallery_id
         GalleryExtractor.__init__(self, match, url)
+
         self.access_token = self.config("access-token")
+        if self.access_token:
+            self.gallery_url = None
+            self.metadata = self._metadata_api
+            self.images = self._images_api
 
     def metadata(self, page):
-        if self.access_token:
-            return self._metadata_api()
-        return self._metadata_html(page)
-
-    def _metadata_html(self, page):
         if "Sorry, but the page you requested could not be found." in page:
             raise exception.NotFoundError("gallery")
 
@@ -63,28 +63,7 @@ class ImagechestGalleryExtractor(GalleryExtractor):
                 page, 'property="og:title" content="', '"').strip())
         }
 
-    def _metadata_api(self):
-        api = ImagechestAPI(self, self.access_token)
-        post = api.post(self.gallery_id)
-
-        post["date"] = text.parse_datetime(
-            post["created"], "%Y-%m-%dT%H:%M:%S.%fZ")
-        for img in post["images"]:
-            img["date"] = text.parse_datetime(
-                img["created"], "%Y-%m-%dT%H:%M:%S.%fZ")
-
-        post["gallery_id"] = self.gallery_id
-        post.pop("image_count", None)
-        self._image_list = post.pop("images")
-
-        return post
-
     def images(self, page):
-        if self.access_token:
-            return self._images_api()
-        return self._images_html(page)
-
-    def _images_html(self, page):
         if " More Files</button>" in page:
             url = "{}/p/{}/loadAll".format(self.root, self.gallery_id)
             headers = {
@@ -102,7 +81,23 @@ class ImagechestGalleryExtractor(GalleryExtractor):
             for url in text.extract_iter(page, 'data-url="', '"')
         ]
 
-    def _images_api(self):
+    def _metadata_api(self, page):
+        api = ImagechestAPI(self, self.access_token)
+        post = api.post(self.gallery_id)
+
+        post["date"] = text.parse_datetime(
+            post["created"], "%Y-%m-%dT%H:%M:%S.%fZ")
+        for img in post["images"]:
+            img["date"] = text.parse_datetime(
+                img["created"], "%Y-%m-%dT%H:%M:%S.%fZ")
+
+        post["gallery_id"] = self.gallery_id
+        post.pop("image_count", None)
+        self._image_list = post.pop("images")
+
+        return post
+
+    def _images_api(self, page):
         return [
             (img["link"], img)
             for img in self._image_list
@@ -120,8 +115,16 @@ class ImagechestAPI():
         self.extractor = extractor
         self.headers = {"Authorization": "Bearer " + access_token}
 
+    def file(self, file_id):
+        endpoint = "/v1/file/" + file_id
+        return self._call(endpoint)
+
     def post(self, post_id):
         endpoint = "/v1/post/" + post_id
+        return self._call(endpoint)
+
+    def user(self, username):
+        endpoint = "/v1/user/" + username
         return self._call(endpoint)
 
     def _call(self, endpoint):
