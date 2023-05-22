@@ -18,8 +18,9 @@ While simple names are usually enough, more complex forms like accessing values 
 | Slicing              | `{title[3:8]}`      | `lo Wo`                |
 | Slicing (Bytes)      | `{title_ja[b3:18]}` | `ロー・ワー`           |
 | Alternatives         | `{empty\|title}`    | `Hello World`          |
-| Element Access       | `{user[name]}`      | `John Doe`             |
 | Attribute Access     | `{extractor.url}`   | `https://example.org/` |
+| Element Access       | `{user[name]}`      | `John Doe`             |
+|                      | `{user['name']}`    | `John Doe`             |
 
 All of these methods can be combined as needed.
 For example `{title[24]|empty|extractor.url[15:-1]}` would result in `.org`.
@@ -200,7 +201,9 @@ Format specifiers can be used for advanced formatting by using the options provi
 </tbody>
 </table>
 
-All special format specifiers (`?`, `L`, `J`, `R`, `D`, `O`) can be chained and combined with one another, but must always come before any standard format specifiers:
+All special format specifiers (`?`, `L`, `J`, `R`, `D`, `O`, etc)
+can be chained and combined with one another,
+but must always appear before any standard format specifiers:
 
 For example `{foo:?//RF/B/Ro/e/> 10}` -> `   Bee Bar`
 - `?//` - Tests if `foo` has a value
@@ -251,7 +254,7 @@ Replacement field names that are available in all format strings.
 
 ## Special Type Format Strings
 
-Starting a format string with '\f<Type> ' allows to set a different format string type than the default. Available ones are:
+Starting a format string with `\f<Type> ` allows to set a different format string type than the default. Available ones are:
 
 <table>
 <thead>
@@ -292,13 +295,3 @@ Starting a format string with '\f<Type> ' allows to set a different format strin
 </tr>
 </tbody>
 </table>
-
-> **Note:**
->
-> `\f` is the [Form Feed](https://en.wikipedia.org/w/index.php?title=Page_break&oldid=1027475805#Form_feed)
-> character. (ASCII code 12 or 0xc)
->
-> Writing it as `\f` is native to JSON, but will *not* get interpreted
-> as such by most shells. To use this character there:
-> * hold `Ctrl`, then press `v` followed by `l`, resulting in `^L` or
-> * use `echo` or `printf` (e.g. `gallery-dl -f "$(echo -ne \\fM) my_module:generate_text"`)
