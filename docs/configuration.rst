@@ -2059,8 +2059,16 @@ Description
     Also emit metadata for text-only posts without media content.
 
 
+extractor.[misskey].access-token
+--------------------------------
+Type
+    ``string``
+Description
+    Your access token, necessary to fetch favorited notes.
+
+
 extractor.[misskey].renotes
-----------------------------
+---------------------------
 Type
     ``bool``
 Default
@@ -2070,7 +2078,7 @@ Description
 
 
 extractor.[misskey].replies
-----------------------------
+---------------------------
 Type
     ``bool``
 Default

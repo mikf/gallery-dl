@@ -70,7 +70,7 @@ BASE_PATTERN = MisskeyExtractor.update({
     },
     "lesbian.energy": {
         "root": "https://lesbian.energy",
-        "pattern": r"lesbian\.energy"
+        "pattern": r"lesbian\.energy",
     },
     "sushi.ski": {
         "root": "https://sushi.ski",
@@ -154,13 +154,15 @@ class MisskeyNoteExtractor(MisskeyExtractor):
         return (self.api.notes_show(self.item),)
 
 
-class MisskeyMyFavoritesExtractor(MisskeyExtractor):
-    """Extractor for images from favorites"""
-    subcategory = "favorites"
-    pattern = BASE_PATTERN + r"(/my/favorites|/api/i/favorites)"
+class MisskeyFavoriteExtractor(MisskeyExtractor):
+    """Extractor for favorited notes"""
+    subcategory = "favorite"
+    pattern = BASE_PATTERN + r"/(?:my|api/i)/favorites"
     test = (
         ("https://misskey.io/my/favorites"),
         ("https://misskey.io/api/i/favorites"),
+        ("https://lesbian.energy/my/favorites"),
+        ("https://sushi.ski/my/favorites"),
     )
 
     def notes(self):
