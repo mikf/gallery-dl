@@ -2404,6 +2404,16 @@ Description
     `gppt <https://github.com/eggplants/get-pixivpy-token>`__.
 
 
+extractor.pixiv.embeds
+----------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Download images embedded in novels.
+
+
 extractor.pixiv.metadata
 ------------------------
 Type

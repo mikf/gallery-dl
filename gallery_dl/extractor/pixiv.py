@@ -760,7 +760,7 @@ class PixivNovelExtractor(PixivExtractor):
     test = (
         ("https://www.pixiv.net/novel/show.php?id=19612040", {
             "count": 1,
-            "content": "c6f22167f9df7aeaf63b51933b4c8ef6fc5e6a1e",
+            "content": "8c818474153cbd2f221ee08766e1d634c821d8b4",
             "keyword": {
                 "caption": r"re:「無能な名無し」と呼ばれ虐げられて育った鈴\(すず\)は、",
                 "comment_access_control": 0,
@@ -778,11 +778,12 @@ class PixivNovelExtractor(PixivExtractor):
                 "restrict": 0,
                 "series": {
                     "id": 10278364,
-                    "title": "龍の贄嫁〜虐げられた少女は運命の番として愛される〜"
+                    "title": "龍の贄嫁〜無能な名無しと虐げられていましたが、"
+                             "どうやら異母妹に霊力を搾取されていたようです〜",
                 },
                 "tags": ["和風ファンタジー", "溺愛", "神様", "ヤンデレ", "執着",
                          "異能", "ざまぁ", "学園", "神嫁"],
-                "text_length": 5977,
+                "text_length": 5974,
                 "title": "異母妹から「無能な名無し」と虐げられていた私、"
                          "どうやら異母妹に霊力を搾取されていたようです（１）",
                 "user": {
@@ -792,6 +793,11 @@ class PixivNovelExtractor(PixivExtractor):
                 "visible": True,
                 "x_restrict": 0,
             },
+        }),
+        # embeds
+        ("https://www.pixiv.net/novel/show.php?id=16422450", {
+            "options": (("embeds", True),),
+            "count": 3,
         }),
         ("https://www.pixiv.net/n/19612040"),
     )
@@ -816,6 +822,17 @@ class PixivNovelExtractor(PixivExtractor):
         ratings = {0: "General", 1: "R-18", 2: "R-18G"}
         meta_user = self.config("metadata")
         meta_bookmark = self.config("metadata-bookmark")
+        embeds = self.config("embeds")
+
+        if embeds:
+            headers = {
+                "User-Agent"    : "Mozilla/5.0",
+                "App-OS"        : None,
+                "App-OS-Version": None,
+                "App-Version"   : None,
+                "Referer"       : self.root + "/",
+                "Authorization" : None,
+            }
 
         novels = self.novels()
         if self.max_posts:
@@ -839,6 +856,43 @@ class PixivNovelExtractor(PixivExtractor):
             novel["extension"] = "txt"
             content = self.api.novel_text(novel["id"])["novel_text"]
             yield Message.Url, "text:" + content, novel
+
+            if embeds:
+                desktop = False
+                illusts = {}
+
+                for marker in text.extract_iter(content, "[", "]"):
+                    if marker.startswith("[jumpuri:"):
+                        desktop = True
+                    elif marker.startswith("pixivimage:"):
+                        illusts[marker[11:].partition("-")[0]] = None
+
+                if desktop:
+                    novel_id = str(novel["id"])
+                    url = "{}/novel/show.php?id={}".format(
+                        self.root, novel_id)
+                    data = util.json_loads(text.extr(
+                        self.request(url, headers=headers).text,
+                        "id=\"meta-preload-data\" content='", "'"))
+
+                    for image in (data["novel"][novel_id]
+                                  ["textEmbeddedImages"]).values():
+                        url = image.pop("urls")["original"]
+                        novel.update(image)
+                        novel["date_url"] = self._date_from_url(url)
+                        novel["num"] += 1
+                        novel["suffix"] = "_p{:02}".format(novel["num"])
+                        text.nameext_from_url(url, novel)
+                        yield Message.Url, url, novel
+
+                if illusts:
+                    novel["_extractor"] = PixivWorkExtractor
+                    novel["date_url"] = None
+                    for illust_id in illusts:
+                        novel["num"] += 1
+                        novel["suffix"] = "_p{:02}".format(novel["num"])
+                        url = "{}/artworks/{}".format(self.root, illust_id)
+                        yield Message.Queue, url, novel
 
     def novels(self):
         return (self.api.novel_detail(self.novel_id),)
