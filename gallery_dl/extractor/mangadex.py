@@ -193,7 +193,10 @@ class MangadexFeedExtractor(MangadexExtractor):
 
 
 class MangadexAPI():
-    """Interface for the MangaDex API v5"""
+    """Interface for the MangaDex API v5
+
+    https://api.mangadex.org/docs/
+    """
 
     def __init__(self, extr):
         self.extractor = extr
