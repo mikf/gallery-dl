@@ -87,7 +87,7 @@ class MangareadChapterExtractor(MangareadBase, ChapterExtractor):
     )
 
     def metadata(self, page):
-        data = {"tags": list(text.extract_iter(page, 'class="">', "<"))}
+        data = {"tags": list(text.extract_iter(page, "class>", "<"))}
         info = text.extr(page, '<h1 id="chapter-heading">', "</h1>")
         if not info:
             raise exception.NotFoundError("chapter")
@@ -148,11 +148,13 @@ class MangareadMangaExtractor(MangareadBase, MangaExtractor):
             }
         }),
         ("https://www.mangaread.org/manga/doesnotexist", {
-            "exception": exception.HttpError,
+            "exception": exception.NotFoundError,
         }),
     )
 
     def chapters(self, page):
+        if 'class="error404' in page:
+            raise exception.NotFoundError("manga")
         data = self.metadata(page)
         result = []
         for chapter in text.extract_iter(
