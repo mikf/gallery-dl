@@ -399,7 +399,7 @@ def parse_command_line(module, argv):
         "playlist_items": opts.playlist_items,
         "xattr_set_filesize": opts.xattr_set_filesize,
         "match_filter": match_filter,
-        "no_color": opts.no_color,
+        "no_color": getattr(opts, "no_color", None),
         "ffmpeg_location": opts.ffmpeg_location,
         "hls_prefer_native": opts.hls_prefer_native,
         "hls_use_mpegts": opts.hls_use_mpegts,
