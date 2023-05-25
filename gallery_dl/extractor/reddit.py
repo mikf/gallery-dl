@@ -55,32 +55,26 @@ class RedditExtractor(Extractor):
                     visited.add(submission["id"])
                     submission["num"] = 0
 
-                    url = submission["url"]
-                    if not url:
-                        continue
+                    if "crosspost_parent_list" in submission:
+                        media = submission["crosspost_parent_list"][-1]
+                    else:
+                        media = submission
 
-                    if url.startswith("https://i.redd.it/"):
+                    url = media["url"]
+                    if url and url.startswith("https://i.redd.it/"):
                         text.nameext_from_url(url, submission)
                         yield Message.Url, url, submission
 
-                    elif url.startswith("https://www.reddit.com/gallery/"):
-                        gallery_submission = submission
-                        if "crosspost_parent_list" in gallery_submission:
-                            gallery_submission = \
-                                submission["crosspost_parent_list"][-1]
-                        if "gallery_data" not in gallery_submission:
-                            continue
-
-                        gallery = self._extract_gallery(gallery_submission)
-
-                        for submission["num"], url in enumerate(gallery, 1):
+                    elif "gallery_data" in media:
+                        for submission["num"], url in enumerate(
+                                self._extract_gallery(media), 1):
                             text.nameext_from_url(url, submission)
                             yield Message.Url, url, submission
 
-                    elif url.startswith("https://v.redd.it/"):
+                    elif media["is_video"]:
                         if videos:
                             text.nameext_from_url(url, submission)
-                            url = "ytdl:" + self._extract_video(submission)
+                            url = "ytdl:" + self._extract_video(media)
                             yield Message.Url, url, submission
 
                     elif not submission["is_self"]:
@@ -291,14 +285,19 @@ class RedditSubmissionExtractor(RedditExtractor):
         ("https://www.reddit.com/r/kpopfap/comments/qjj04q/", {
             "count": 0,
         }),
-        ("https://old.reddit.com/r/lavaporn/comments/2a00np/"),
-        ("https://np.reddit.com/r/lavaporn/comments/2a00np/"),
-        ("https://m.reddit.com/r/lavaporn/comments/2a00np/"),
-        ("https://redd.it/2a00np/"),
+        # user page submission (#2301)
         ("https://www.reddit.com/user/TheSpiritTree/comments/srilyf/", {
             "pattern": r"https://i.redd.it/8fpgv17yqlh81.jpg",
             "count": 1,
         }),
+        # cross-posted video (#887, #3586, #3976)
+        ("https://www.reddit.com/r/kittengifs/comments/12m0b8d", {
+            "pattern": r"ytdl:https://v\.redd\.it/cvabpjacrvta1",
+        }),
+        ("https://old.reddit.com/r/lavaporn/comments/2a00np/"),
+        ("https://np.reddit.com/r/lavaporn/comments/2a00np/"),
+        ("https://m.reddit.com/r/lavaporn/comments/2a00np/"),
+        ("https://redd.it/2a00np/"),
     )
 
     def __init__(self, match):
