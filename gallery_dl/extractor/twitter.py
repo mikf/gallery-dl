@@ -78,7 +78,7 @@ class TwitterExtractor(Extractor):
 
         if self.twitpic:
             self._find_twitpic = re.compile(
-                r"https?://(twitpic\.com/\w+)").finditer
+                r"https?(://twitpic\.com/(?!photos/)\w+)").findall
 
         for tweet in self.tweets():
 
@@ -236,27 +236,24 @@ class TwitterExtractor(Extractor):
             files.append({"url": url})
 
     def _extract_twitpic(self, tweet, files):
-        # collect urls
-        urls = []
+        urls = {}
+
+        # collect URLs from entities
         for url in tweet["entities"].get("urls") or ():
             url = url["expanded_url"]
             if "//twitpic.com/" not in url or "/photos/" in url:
                 continue
             if url.startswith("http:"):
                 url = "https" + url[4:]
-            urls.append(url)
-        tget = tweet.get
-        for match in self._find_twitpic(
-                tget("full_text") or tget("text") or ""):
-            urls.append(text.ensure_http_scheme(match.group(1)))
+            urls[url] = None
 
-        # extract actual urls
-        seen = set()
+        # collect URLs from text
+        for url in self._find_twitpic(
+                tweet.get("full_text") or tweet.get("text") or ""):
+            urls["https" + url] = None
+
+        # extract actual URLs
         for url in urls:
-            if url in seen:
-                self.log.debug("Skipping %s (previously seen)", url)
-                continue
-            seen.add(url)
             response = self.request(url, fatal=False)
             if response.status_code >= 400:
                 continue
