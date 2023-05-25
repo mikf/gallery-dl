@@ -58,7 +58,7 @@ CATEGORY_MAP = {
     "imgth"          : "imgth",
     "imgur"          : "imgur",
     "joyreactor"     : "JoyReactor",
-    "jpgchurch"      : "Jpgchurch",
+    "jpgfish"        : "JPG Fish",
     "kabeuchi"       : "かべうち",
     "kemonoparty"    : "Kemono",
     "kireicake"      : "Kirei Cake",
