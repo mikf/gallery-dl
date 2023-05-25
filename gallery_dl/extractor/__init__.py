@@ -75,6 +75,7 @@ modules = [
     "issuu",
     "itaku",
     "itchio",
+    "jpgfish",
     "kabeuchi",
     "keenspot",
     "kemonoparty",

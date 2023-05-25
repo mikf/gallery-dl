@@ -64,6 +64,7 @@ CATEGORY_MAP = {
     "imgur"          : "imgur",
     "joyreactor"     : "JoyReactor",
     "itchio"         : "itch.io",
+    "jpgfish"        : "JPG Fish",
     "kabeuchi"       : "かべうち",
     "kemonoparty"    : "Kemono",
     "lineblog"       : "LINE BLOG",
