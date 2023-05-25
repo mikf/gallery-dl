@@ -35,8 +35,10 @@ class _8musesAlbumExtractor(Extractor):
                     "id"     : 10467,
                     "title"  : "Liar",
                     "path"   : "Fakku Comics/mogg/Liar",
+                    "parts"  : ["Fakku Comics", "mogg", "Liar"],
                     "private": False,
-                    "url"    : str,
+                    "url"    : "https://comics.8muses.com/comics"
+                               "/album/Fakku-Comics/mogg/Liar",
                     "parent" : 10464,
                     "views"  : int,
                     "likes"  : int,
@@ -118,9 +120,10 @@ class _8musesAlbumExtractor(Extractor):
         return {
             "id"     : album["id"],
             "path"   : album["path"],
+            "parts"  : album["path"].split("/"),
             "title"  : album["name"],
             "private": album["isPrivate"],
-            "url"    : self.root + album["permalink"],
+            "url"    : self.root + "/comics/album/" + album["permalink"],
             "parent" : text.parse_int(album["parentId"]),
             "views"  : text.parse_int(album["numberViews"]),
             "likes"  : text.parse_int(album["numberLikes"]),
