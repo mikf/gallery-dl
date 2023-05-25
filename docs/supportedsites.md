@@ -392,8 +392,8 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
-    <td>Jpgchurch</td>
-    <td>https://jpg.church/</td>
+    <td>JPG Fish</td>
+    <td>https://jpg.fishing/</td>
     <td>Albums, individual Images, User Profiles</td>
     <td></td>
 </tr>

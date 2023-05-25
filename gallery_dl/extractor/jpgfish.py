@@ -1,21 +1,21 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2022 Mike Fährmann
-#
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
+"""Extractors for https://jpg.fishing/"""
+
 from .common import Extractor, Message
 from .. import text
 
-BASE_PATTERN = r"(?:https?://)?jpg\.church"
+BASE_PATTERN = r"(?:https?://)?jpg\.(?:fishing|church)"
 
 
-class JpgchurchExtractor(Extractor):
-    """Base class for Jpgchurch extractors"""
-    category = "jpgchurch"
-    root = "https://jpg.church"
+class JpgfishExtractor(Extractor):
+    """Base class for jpgfish extractors"""
+    category = "jpgfish"
+    root = "https://jpg.fishing"
     directory_fmt = ("{category}", "{user}", "{album}",)
     archive_fmt = "{user}_{filename}"
 
@@ -60,12 +60,12 @@ class JpgchurchExtractor(Extractor):
                 yield image
 
 
-class JpgchurchImageExtractor(JpgchurchExtractor):
-    """Extractor for Jpgchurch Images"""
+class JpgfishImageExtractor(JpgfishExtractor):
+    """Extractor for jpgfish Images"""
     subcategory = "image"
     pattern = BASE_PATTERN + r"/img/([^/?#]+)"
     test = (
-        ("https://jpg.church/img/funnymeme.LecXGS", {
+        ("https://jpg.fishing/img/funnymeme.LecXGS", {
             "pattern": r"^https://[^/]+/.*\.(jpg|png)",
         }),
         ("https://jpg.church/img/hannahowo-00457.auCruA", {
@@ -75,7 +75,7 @@ class JpgchurchImageExtractor(JpgchurchExtractor):
     )
 
     def __init__(self, match):
-        JpgchurchExtractor.__init__(self, match)
+        JpgfishExtractor.__init__(self, match)
         self.image = match.group(1)
 
     def items(self):
@@ -87,12 +87,12 @@ class JpgchurchImageExtractor(JpgchurchExtractor):
         yield Message.Url, image["url"], image
 
 
-class JpgchurchAlbumExtractor(JpgchurchExtractor):
-    """Extractor for Jpgchurch Albums"""
+class JpgfishAlbumExtractor(JpgfishExtractor):
+    """Extractor for jpgfish Albums"""
     subcategory = "album"
     pattern = BASE_PATTERN + r"/a(?:lbum)?/([^/?#]+)(/sub)?"
     test = (
-        ("https://jpg.church/album/CDilP/?sort=date_desc&page=1", {
+        ("https://jpg.fishing/album/CDilP/?sort=date_desc&page=1", {
             "count": 2,
         }),
         ("https://jpg.church/a/gunggingnsk.N9OOI", {
@@ -107,12 +107,12 @@ class JpgchurchAlbumExtractor(JpgchurchExtractor):
     )
 
     def __init__(self, match):
-        JpgchurchExtractor.__init__(self, match)
+        JpgfishExtractor.__init__(self, match)
         self.album, self.is_sub = match.groups()
 
     def items(self):
         url = "{}/a/{}".format(self.root, self.album)
-        data = {"_extractor": JpgchurchImageExtractor}
+        data = {"_extractor": JpgfishImageExtractor}
         if self.is_sub:
             url += "/sub"
             for album in self._get_albums(url):
@@ -123,12 +123,12 @@ class JpgchurchAlbumExtractor(JpgchurchExtractor):
                 yield Message.Queue, image, data
 
 
-class JpgchurchUserExtractor(JpgchurchExtractor):
-    """Extractor for Jpgchurch Users"""
+class JpgfishUserExtractor(JpgfishExtractor):
+    """Extractor for jpgfish Users"""
     subcategory = "user"
     pattern = BASE_PATTERN + r"/(?!img|a(?:lbum)?)([^/?#]+)(/albums)?"
     test = (
-        ("https://jpg.church/exearco", {
+        ("https://jpg.fishing/exearco", {
             "count": 3,
         }),
         ("https://jpg.church/exearco/albums", {
@@ -137,17 +137,17 @@ class JpgchurchUserExtractor(JpgchurchExtractor):
     )
 
     def __init__(self, match):
-        JpgchurchExtractor.__init__(self, match)
+        JpgfishExtractor.__init__(self, match)
         self.user, self.is_album = match.groups()
 
     def items(self):
         url = "{}/{}".format(self.root, self.user)
         if self.is_album:
             url += "/albums"
-            data = {"_extractor": JpgchurchAlbumExtractor}
+            data = {"_extractor": JpgfishAlbumExtractor}
             for album in self._get_albums(url):
                 yield Message.Queue, album, data
         else:
-            data = {"_extractor": JpgchurchImageExtractor}
+            data = {"_extractor": JpgfishImageExtractor}
             for image in self._get_albums(url):
                 yield Message.Queue, image, data
