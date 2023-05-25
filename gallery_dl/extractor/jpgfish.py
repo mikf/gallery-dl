@@ -17,72 +17,61 @@ class JpgfishExtractor(Extractor):
     category = "jpgfish"
     root = "https://jpg.fishing"
     directory_fmt = ("{category}", "{user}", "{album}",)
-    archive_fmt = "{user}_{filename}"
-
-    @staticmethod
-    def _extract_user(page):
-        return text.extract(page, 'username: "', '"')[0]
-
-    @staticmethod
-    def _extract_album(page):
-        album = text.extract(page, 'Added to <a', '<span')[0]
-        album = text.extract(album, '">', '</a>')[0]
-        return album
-
-    def _extract_image(self, url):
-        page = self.request(url).text
-        data = {
-            "url": text.extract(
-                page, '<meta property="og:image" content="', '" />')[0],
-        }
-        text.nameext_from_url(data["url"], data)
-        data["user"] = self._extract_user(page)
-        data["album"] = self._extract_album(page)
-        return data
+    archive_fmt = "{id}"
 
     def _pagination(self, url):
-        while True:
-            yield url
+        while url:
             page = self.request(url).text
-            _next = text.extract(
-                page, '<a data-pagination="next" href="', '" ><')[0]
-            if not _next:
-                return
-            url = _next
 
-    def _get_albums(self, url):
-        for url in self._pagination(url):
-            page = self.request(url).text
-            page = text.extract_iter(
-                page, '<div class="list-item-image ', 'image-container')
-            for image in page:
-                image = text.extract(image, '<a href="', '"')[0]
-                yield image
+            for item in text.extract_iter(
+                    page, '<div class="list-item-image ', 'image-container'):
+                yield text.extract(item, '<a href="', '"')[0]
+
+            url = text.extract(
+                page, '<a data-pagination="next" href="', '" ><')[0]
 
 
 class JpgfishImageExtractor(JpgfishExtractor):
     """Extractor for jpgfish Images"""
     subcategory = "image"
-    pattern = BASE_PATTERN + r"/img/([^/?#]+)"
+    pattern = BASE_PATTERN + r"/img/((?:[^/?#]+\.)?(\w+))"
     test = (
         ("https://jpg.fishing/img/funnymeme.LecXGS", {
-            "pattern": r"^https://[^/]+/.*\.(jpg|png)",
+            "pattern": r"https://simp3\.jpg\.church/images/funnymeme\.jpg",
+            "content": "098e5e9b17ad634358426e0ffd1c93871474d13c",
+            "keyword": {
+                "album": "",
+                "extension": "jpg",
+                "filename": "funnymeme",
+                "id": "LecXGS",
+                "url": "https://simp3.jpg.church/images/funnymeme.jpg",
+                "user": "exearco",
+            },
         }),
-        ("https://jpg.church/img/hannahowo-00457.auCruA", {
+        ("https://jpg.church/img/auCruA", {
             "pattern": r"https://simp2\.jpg\.church/hannahowo_00457\.jpg",
+            "keyword": {"album": "401-500"},
         }),
         ("https://jpg.church/img/hannahowo-00424.au64iA"),
     )
 
     def __init__(self, match):
         JpgfishExtractor.__init__(self, match)
-        self.image = match.group(1)
+        self.path, self.image_id = match.groups()
 
     def items(self):
-        url = "{}/img/{}".format(self.root, self.image)
-        image = self._extract_image(url)
-        if not image["album"]:
-            self.directory_fmt = ("{category}", "{user}",)
+        url = "{}/img/{}".format(self.root, self.path)
+        extr = text.extract_from(self.request(url).text)
+
+        image = {
+            "id"   : self.image_id,
+            "url"  : extr('<meta property="og:image" content="', '"'),
+            "album": text.extract(extr(
+                "Added to <a", "/a>"), ">", "<")[0] or "",
+            "user" : extr('username: "', '"'),
+        }
+
+        text.nameext_from_url(image["url"], image)
         yield Message.Directory, image
         yield Message.Url, image["url"], image
 
@@ -108,18 +97,19 @@ class JpgfishAlbumExtractor(JpgfishExtractor):
 
     def __init__(self, match):
         JpgfishExtractor.__init__(self, match)
-        self.album, self.is_sub = match.groups()
+        self.album, self.sub_albums = match.groups()
 
     def items(self):
         url = "{}/a/{}".format(self.root, self.album)
         data = {"_extractor": JpgfishImageExtractor}
-        if self.is_sub:
-            url += "/sub"
-            for album in self._get_albums(url):
-                for image in self._get_albums(album):
-                    yield Message.Queue, image, data
+
+        if self.sub_albums:
+            albums = self._pagination(url + "/sub")
         else:
-            for image in self._get_albums(url):
+            albums = (url,)
+
+        for album in albums:
+            for image in self._pagination(album):
                 yield Message.Queue, image, data
 
 
@@ -138,16 +128,16 @@ class JpgfishUserExtractor(JpgfishExtractor):
 
     def __init__(self, match):
         JpgfishExtractor.__init__(self, match)
-        self.user, self.is_album = match.groups()
+        self.user, self.albums = match.groups()
 
     def items(self):
         url = "{}/{}".format(self.root, self.user)
-        if self.is_album:
+
+        if self.albums:
             url += "/albums"
             data = {"_extractor": JpgfishAlbumExtractor}
-            for album in self._get_albums(url):
-                yield Message.Queue, album, data
         else:
             data = {"_extractor": JpgfishImageExtractor}
-            for image in self._get_albums(url):
-                yield Message.Queue, image, data
+
+        for url in self._pagination(url):
+            yield Message.Queue, url, data
