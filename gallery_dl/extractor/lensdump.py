@@ -97,6 +97,7 @@ class LensdumpAlbumExtractor(LensdumpExtractor):
 
 class LensdumpAlbumsExtractor(LensdumpExtractor):
     """Extractor for album list from lensdump.com"""
+    subcategory = "albums"
     pattern = r"(?:https?://)?lensdump\.com/\w+/albums"
 
     def __init__(self, match):
