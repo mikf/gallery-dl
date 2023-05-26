@@ -14,7 +14,7 @@ class LensdumpExtractor(GalleryExtractor):
     root = "https://lensdump.com"
 
     def get_meta_prop(self, page, name):
-        return text.extr(page, f'property="{name}" content="', '"')
+        return text.extr(page, 'property="{}" content="'.format(name), '"')
 
     def nodes(self, page=None):
         if page is None:
