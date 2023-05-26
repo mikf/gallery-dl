@@ -197,6 +197,9 @@ SUBCATEGORY_MAP = {
         "discord": "Discord Servers",
         "discord-server": "",
     },
+    "lensdump": {
+        "albums": "",
+    },
     "mangadex": {
         "feed" : "Followed Feed",
     },
