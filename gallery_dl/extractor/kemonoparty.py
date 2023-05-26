@@ -125,10 +125,12 @@ class KemonopartyExtractor(Extractor):
     def login(self):
         username, password = self._get_auth_info()
         if username:
-            self._update_cookies(self._login_impl(username, password))
+            self._update_cookies(self._login_impl(
+                (username, self.cookiedomain), password))
 
     @cache(maxage=28*24*3600, keyarg=1)
     def _login_impl(self, username, password):
+        username = username[0]
         self.log.info("Logging in as %s", username)
 
         url = self.root + "/account/login"
