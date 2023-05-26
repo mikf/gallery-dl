@@ -464,6 +464,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
+    <td>Lensdump</td>
+    <td>https://lensdump.com/</td>
+    <td>Albums, individual Images</td>
+    <td></td>
+</tr>
+<tr>
     <td>Lexica</td>
     <td>https://lexica.art/</td>
     <td>Search Results</td>
