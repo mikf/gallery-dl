@@ -814,13 +814,17 @@ class InstagramRestAPI():
         params = {"username": screen_name}
         return self._call(endpoint, params=params)["data"]["user"]
 
+    @memcache(keyarg=1)
     def user_by_id(self, user_id):
         endpoint = "/v1/users/{}/info/".format(user_id)
         return self._call(endpoint)["user"]
 
     def user_id(self, screen_name, check_private=True):
         if screen_name.startswith("id:"):
+            if self.extractor.config("metadata"):
+                self.extractor._user = self.user_by_id(screen_name[3:])
             return screen_name[3:]
+
         user = self.user_by_name(screen_name)
         if user is None:
             raise exception.AuthorizationError(
