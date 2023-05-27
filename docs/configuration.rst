@@ -1831,6 +1831,20 @@ Description
     It is possible to use ``"all"`` instead of listing all values separately.
 
 
+extractor.instagram.metadata
+----------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Provide extended ``user`` metadata even when referring to a user by ID,
+    e.g. ``instagram.com/id:12345678``.
+
+    Note: This metadata is always available when referring to a user by name,
+    e.g. ``instagram.com/USERNAME``.
+
+
 extractor.instagram.order-files
 -------------------------------
 Type
