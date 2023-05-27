@@ -1,5 +1,38 @@
 # Changelog
 
+## 1.25.5 - 2023-05-27
+### Additions
+- [8muses] add `parts` metadata field ([#3329](https://github.com/mikf/gallery-dl/issues/3329))
+- [danbooru] add `date` metadata field ([#4047](https://github.com/mikf/gallery-dl/issues/4047))
+- [e621] add `date` metadata field ([#4047](https://github.com/mikf/gallery-dl/issues/4047))
+- [gofile] add basic password support ([#4056](https://github.com/mikf/gallery-dl/issues/4056))
+- [imagechest] implement API support ([#4065](https://github.com/mikf/gallery-dl/issues/4065))
+- [instagram] add `order-files` option ([#3993](https://github.com/mikf/gallery-dl/issues/3993), [#4017](https://github.com/mikf/gallery-dl/issues/4017))
+- [instagram] add `order-posts` option ([#3993](https://github.com/mikf/gallery-dl/issues/3993), [#4017](https://github.com/mikf/gallery-dl/issues/4017))
+- [instagram] add `metadata` option ([#3107](https://github.com/mikf/gallery-dl/issues/3107))
+- [jpgfish] add `jpg.fishing` extractors ([#2657](https://github.com/mikf/gallery-dl/issues/2657), [#2719](https://github.com/mikf/gallery-dl/issues/2719))
+- [lensdump] add `lensdump.com` extractors ([#2078](https://github.com/mikf/gallery-dl/issues/2078), [#4104](https://github.com/mikf/gallery-dl/issues/4104))
+- [mangaread] add `mangaread.org` extractors ([#2425](https://github.com/mikf/gallery-dl/issues/2425), [#2781](https://github.com/mikf/gallery-dl/issues/2781))
+- [misskey] add `favorite` extractor ([#3950](https://github.com/mikf/gallery-dl/issues/3950))
+- [pixiv] add `novel` support ([#1241](https://github.com/mikf/gallery-dl/issues/1241), [#4044](https://github.com/mikf/gallery-dl/issues/4044))
+- [reddit] support cross-posted media ([#887](https://github.com/mikf/gallery-dl/issues/887), [#3586](https://github.com/mikf/gallery-dl/issues/3586), [#3976](https://github.com/mikf/gallery-dl/issues/3976))
+- [postprocessor:exec] support tilde expansion for `command`
+- [formatter] support slicing strings as bytes ([#4087](https://github.com/mikf/gallery-dl/issues/4087))
+### Fixes
+- [8muses] fix value of `album[url]` ([#3329](https://github.com/mikf/gallery-dl/issues/3329))
+- [danbooru] refactor pagination logic ([#4002](https://github.com/mikf/gallery-dl/issues/4002))
+- [fanbox] skip invalid posts ([#4088](https://github.com/mikf/gallery-dl/issues/4088))
+- [gofile] automatically fetch `website-token`
+- [kemonoparty] fix kemono and coomer logins sharing the same cache ([#4098](https://github.com/mikf/gallery-dl/issues/4098))
+- [newgrounds] add default delay between requests ([#4046](https://github.com/mikf/gallery-dl/issues/4046))
+- [nsfwalbum] detect placeholder images
+- [poipiku] extract full `descriptions` ([#4066](https://github.com/mikf/gallery-dl/issues/4066))
+- [tcbscans] update domain to `tcbscans.com` ([#4080](https://github.com/mikf/gallery-dl/issues/4080))
+- [twitter] extract TwitPic URLs in text ([#3792](https://github.com/mikf/gallery-dl/issues/3792), [#3796](https://github.com/mikf/gallery-dl/issues/3796))
+- [weibo] require numeric IDs to have length >= 10 ([#4059](https://github.com/mikf/gallery-dl/issues/4059))
+- [ytdl] fix crash due to removed `no_color` attribute
+- [cookies] improve logging behavior ([#4050](https://github.com/mikf/gallery-dl/issues/4050))
+
 ## 1.25.4 - 2023-05-07
 ### Additions
 - [4chanarchives] add `thread` and `board` extractors ([#4012](https://github.com/mikf/gallery-dl/issues/4012))
