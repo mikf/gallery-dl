@@ -218,6 +218,7 @@ SUBCATEGORY_MAP = {
     },
     "pixiv": {
         "me"  : "pixiv.me Links",
+        "novel-bookmark": "Novel Bookmarks",
         "novel-series": "Novel Series",
         "novel-user": "",
         "pixivision": "pixivision",
