@@ -168,11 +168,12 @@ class PixivUserExtractor(PixivExtractor):
     def items(self):
         base = "{}/users/{}/".format(self.root, self.user_id)
         return self._dispatch_extractors((
-            (PixivAvatarExtractor    , base + "avatar"),
-            (PixivBackgroundExtractor, base + "background"),
-            (PixivArtworksExtractor  , base + "artworks"),
-            (PixivFavoriteExtractor  , base + "bookmarks/artworks"),
-            (PixivNovelUserExtractor , base + "novels"),
+            (PixivAvatarExtractor       , base + "avatar"),
+            (PixivBackgroundExtractor   , base + "background"),
+            (PixivArtworksExtractor     , base + "artworks"),
+            (PixivFavoriteExtractor     , base + "bookmarks/artworks"),
+            (PixivNovelBookmarkExtractor, base + "bookmarks/novels"),
+            (PixivNovelUserExtractor    , base + "novels"),
         ), ("artworks",))
 
 
@@ -799,6 +800,7 @@ class PixivNovelExtractor(PixivExtractor):
             "options": (("embeds", True),),
             "count": 3,
         }),
+        # short URL
         ("https://www.pixiv.net/n/19612040"),
     )
 
@@ -925,6 +927,38 @@ class PixivNovelSeriesExtractor(PixivNovelExtractor):
 
     def novels(self):
         return self.api.novel_series(self.novel_id)
+
+
+class PixivNovelBookmarkExtractor(PixivNovelExtractor):
+    """Extractor for bookmarked pixiv novels"""
+    subcategory = "novel-bookmark"
+    pattern = (r"(?:https?://)?(?:www\.|touch\.)?pixiv\.net"
+               r"/(?:en/)?users/(\d+)/bookmarks/novels"
+               r"(?:/([^/?#]+))?(?:/?\?([^#]+))?")
+    test = (
+        ("https://www.pixiv.net/en/users/77055466/bookmarks/novels", {
+            "count": 1,
+            "content": "7194e8faa876b2b536f185ee271a2b6e46c69089",
+        }),
+        ("https://www.pixiv.net/en/users/11/bookmarks/novels/TAG?rest=hide"),
+    )
+
+    def __init__(self, match):
+        PixivNovelExtractor.__init__(self, match)
+        self.user_id, self.tag, self.query = match.groups()
+
+    def novels(self):
+        if self.tag:
+            tag = text.unquote(self.tag)
+        else:
+            tag = None
+
+        if text.parse_query(self.query).get("rest") == "hide":
+            restrict = "private"
+        else:
+            restrict = "public"
+
+        return self.api.user_bookmarks_novel(self.user_id, tag, restrict)
 
 
 class PixivSketchExtractor(Extractor):
@@ -1112,6 +1146,11 @@ class PixivAppAPI():
         """Return illusts bookmarked by a user"""
         params = {"user_id": user_id, "tag": tag, "restrict": restrict}
         return self._pagination("/v1/user/bookmarks/illust", params)
+
+    def user_bookmarks_novel(self, user_id, tag=None, restrict="public"):
+        """Return novels bookmarked by a user"""
+        params = {"user_id": user_id, "tag": tag, "restrict": restrict}
+        return self._pagination("/v1/user/bookmarks/novel", params, "novels")
 
     def user_bookmark_tags_illust(self, user_id, restrict="public"):
         """Return bookmark tags defined by a user"""
