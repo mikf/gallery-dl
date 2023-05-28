@@ -44,6 +44,7 @@ class BloggerExtractor(Extractor):
         findall_image = re.compile(
             r'src="(https?://(?:'
             r'blogger\.googleusercontent\.com/img|'
+            r'lh\d+\.googleusercontent\.com/|'
             r'\d+\.bp\.blogspot\.com)/[^"]+)').findall
         findall_video = re.compile(
             r'src="(https?://www\.blogger\.com/video\.g\?token=[^"]+)').findall
