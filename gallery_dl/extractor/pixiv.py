@@ -15,6 +15,9 @@ from datetime import datetime, timedelta
 import itertools
 import hashlib
 
+BASE_PATTERN = r"(?:https?://)?(?:www\.|touch\.)?pixiv\.net"
+USER_PATTERN = BASE_PATTERN + r"/(?:en/)?users/(\d+)"
+
 
 class PixivExtractor(Extractor):
     """Base class for pixiv extractors"""
@@ -150,7 +153,7 @@ class PixivExtractor(Extractor):
 class PixivUserExtractor(PixivExtractor):
     """Extractor for a pixiv user profile"""
     subcategory = "user"
-    pattern = (r"(?:https?://)?(?:www\.|touch\.)?pixiv\.net/(?:"
+    pattern = (BASE_PATTERN + r"/(?:"
                r"(?:en/)?u(?:sers)?/|member\.php\?id=|(?:mypage\.php)?#id="
                r")(\d+)(?:$|[?#])")
     test = (
@@ -180,7 +183,7 @@ class PixivUserExtractor(PixivExtractor):
 class PixivArtworksExtractor(PixivExtractor):
     """Extractor for artworks of a pixiv user"""
     subcategory = "artworks"
-    pattern = (r"(?:https?://)?(?:www\.|touch\.)?pixiv\.net/(?:"
+    pattern = (BASE_PATTERN + r"/(?:"
                r"(?:en/)?users/(\d+)/(?:artworks|illustrations|manga)"
                r"(?:/([^/?#]+))?/?(?:$|[?#])"
                r"|member_illust\.php\?id=(\d+)(?:&([^#]+))?)")
@@ -241,8 +244,7 @@ class PixivAvatarExtractor(PixivExtractor):
     subcategory = "avatar"
     filename_fmt = "avatar{date:?_//%Y-%m-%d}.{extension}"
     archive_fmt = "avatar_{user[id]}_{date}"
-    pattern = (r"(?:https?://)?(?:www\.)?pixiv\.net"
-               r"/(?:en/)?users/(\d+)/avatar")
+    pattern = USER_PATTERN + r"/avatar"
     test = ("https://www.pixiv.net/en/users/173530/avatar", {
         "content": "4e57544480cc2036ea9608103e8f024fa737fe66",
     })
@@ -262,8 +264,7 @@ class PixivBackgroundExtractor(PixivExtractor):
     subcategory = "background"
     filename_fmt = "background{date:?_//%Y-%m-%d}.{extension}"
     archive_fmt = "background_{user[id]}_{date}"
-    pattern = (r"(?:https?://)?(?:www\.)?pixiv\.net"
-               r"/(?:en/)?users/(\d+)/background")
+    pattern = USER_PATTERN + "/background"
     test = ("https://www.pixiv.net/en/users/194921/background", {
         "pattern": r"https://i\.pximg\.net/background/img/2021/01/30/16/12/02"
                    r"/194921_af1f71e557a42f499213d4b9eaccc0f8\.jpg",
@@ -377,12 +378,12 @@ class PixivWorkExtractor(PixivExtractor):
 
 
 class PixivFavoriteExtractor(PixivExtractor):
-    """Extractor for all favorites/bookmarks of a pixiv-user"""
+    """Extractor for all favorites/bookmarks of a pixiv user"""
     subcategory = "favorite"
     directory_fmt = ("{category}", "bookmarks",
                      "{user_bookmark[id]} {user_bookmark[account]}")
     archive_fmt = "f_{user_bookmark[id]}_{id}{num}.{extension}"
-    pattern = (r"(?:https?://)?(?:www\.|touch\.)?pixiv\.net/(?:(?:en/)?"
+    pattern = (BASE_PATTERN + r"/(?:(?:en/)?"
                r"users/(\d+)/(bookmarks/artworks|following)(?:/([^/?#]+))?"
                r"|bookmark\.php)(?:\?([^#]*))?")
     test = (
@@ -485,8 +486,7 @@ class PixivRankingExtractor(PixivExtractor):
     archive_fmt = "r_{ranking[mode]}_{ranking[date]}_{id}{num}.{extension}"
     directory_fmt = ("{category}", "rankings",
                      "{ranking[mode]}", "{ranking[date]}")
-    pattern = (r"(?:https?://)?(?:www\.|touch\.)?pixiv\.net"
-               r"/ranking\.php(?:\?([^#]*))?")
+    pattern = BASE_PATTERN + r"/ranking\.php(?:\?([^#]*))?"
     test = (
         ("https://www.pixiv.net/ranking.php?mode=daily&date=20170818"),
         ("https://www.pixiv.net/ranking.php"),
@@ -551,8 +551,7 @@ class PixivSearchExtractor(PixivExtractor):
     subcategory = "search"
     archive_fmt = "s_{search[word]}_{id}{num}.{extension}"
     directory_fmt = ("{category}", "search", "{search[word]}")
-    pattern = (r"(?:https?://)?(?:www\.|touch\.)?pixiv\.net"
-               r"/(?:(?:en/)?tags/([^/?#]+)(?:/[^/?#]+)?/?"
+    pattern = (BASE_PATTERN + r"/(?:(?:en/)?tags/([^/?#]+)(?:/[^/?#]+)?/?"
                r"|search\.php)(?:\?([^#]+))?")
     test = (
         ("https://www.pixiv.net/en/tags/Original", {
@@ -635,8 +634,7 @@ class PixivFollowExtractor(PixivExtractor):
     subcategory = "follow"
     archive_fmt = "F_{user_follow[id]}_{id}{num}.{extension}"
     directory_fmt = ("{category}", "following")
-    pattern = (r"(?:https?://)?(?:www\.|touch\.)?pixiv\.net"
-               r"/bookmark_new_illust\.php")
+    pattern = BASE_PATTERN + r"/bookmark_new_illust\.php"
     test = (
         ("https://www.pixiv.net/bookmark_new_illust.php"),
         ("https://touch.pixiv.net/bookmark_new_illust.php"),
@@ -698,8 +696,7 @@ class PixivSeriesExtractor(PixivExtractor):
     directory_fmt = ("{category}", "{user[id]} {user[account]}",
                      "{series[id]} {series[title]}")
     filename_fmt = "{num_series:>03}_{id}_p{num}.{extension}"
-    pattern = (r"(?:https?://)?(?:www\.)?pixiv\.net"
-               r"/user/(\d+)/series/(\d+)")
+    pattern = BASE_PATTERN + r"/user/(\d+)/series/(\d+)"
     test = ("https://www.pixiv.net/user/10509347/series/21859", {
         "range": "1-10",
         "count": 10,
@@ -756,8 +753,7 @@ class PixivNovelExtractor(PixivExtractor):
     """Extractor for pixiv novels"""
     subcategory = "novel"
     request_interval = 1.0
-    pattern = (r"(?:https?://)?(?:www\.|touch\.)?pixiv\.net"
-               r"/n(?:ovel/show\.php\?id=|/)(\d+)")
+    pattern = BASE_PATTERN + r"/n(?:ovel/show\.php\?id=|/)(\d+)"
     test = (
         ("https://www.pixiv.net/novel/show.php?id=19612040", {
             "count": 1,
@@ -903,8 +899,7 @@ class PixivNovelExtractor(PixivExtractor):
 class PixivNovelUserExtractor(PixivNovelExtractor):
     """Extractor for pixiv users' novels"""
     subcategory = "novel-user"
-    pattern = (r"(?:https?://)?(?:www\.|touch\.)?pixiv\.net"
-               r"/(?:en/)?users/(\d+)/novels")
+    pattern = USER_PATTERN + r"/novels"
     test = ("https://www.pixiv.net/en/users/77055466/novels", {
         "pattern": "^text:",
         "range": "1-5",
@@ -918,8 +913,7 @@ class PixivNovelUserExtractor(PixivNovelExtractor):
 class PixivNovelSeriesExtractor(PixivNovelExtractor):
     """Extractor for pixiv novel series"""
     subcategory = "novel-series"
-    pattern = (r"(?:https?://)?(?:www\.|touch\.)?pixiv\.net"
-               r"/novel/series/(\d+)")
+    pattern = BASE_PATTERN + r"/novel/series/(\d+)"
     test = ("https://www.pixiv.net/novel/series/10278364", {
         "count": 4,
         "content": "b06abed001b3f6ccfb1579699e9a238b46d38ea2",
@@ -932,8 +926,7 @@ class PixivNovelSeriesExtractor(PixivNovelExtractor):
 class PixivNovelBookmarkExtractor(PixivNovelExtractor):
     """Extractor for bookmarked pixiv novels"""
     subcategory = "novel-bookmark"
-    pattern = (r"(?:https?://)?(?:www\.|touch\.)?pixiv\.net"
-               r"/(?:en/)?users/(\d+)/bookmarks/novels"
+    pattern = (USER_PATTERN + r"/bookmarks/novels"
                r"(?:/([^/?#]+))?(?:/?\?([^#]+))?")
     test = (
         ("https://www.pixiv.net/en/users/77055466/bookmarks/novels", {
