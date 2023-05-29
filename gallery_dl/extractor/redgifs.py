@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2020-2022 Mike Fährmann
+# Copyright 2020-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -16,7 +16,8 @@ from ..cache import memcache
 class RedgifsExtractor(Extractor):
     """Base class for redgifs extractors"""
     category = "redgifs"
-    filename_fmt = "{category}_{id}.{extension}"
+    filename_fmt = \
+        "{category}_{gallery:?//[:11]}{num:?_/_/>02}{id}.{extension}"
     archive_fmt = "{id}"
     root = "https://www.redgifs.com"
 
@@ -34,16 +35,32 @@ class RedgifsExtractor(Extractor):
 
     def items(self):
         metadata = self.metadata()
+
         for gif in self.gifs():
-            url = self._process(gif)
-            if not url:
-                self.log.warning("Skipping '%s' (format not available)",
-                                 gif["id"])
-                continue
+
+            gallery = gif.get("gallery")
+            if gallery:
+                gifs = self.api.gallery(gallery)["gifs"]
+                enum = 1
+                cnt = len(gifs)
+            else:
+                gifs = (gif,)
+                enum = 0
+                cnt = 1
 
             gif.update(metadata)
+            gif["count"] = cnt
             yield Message.Directory, gif
-            yield Message.Url, url, gif
+
+            for num, gif in enumerate(gifs, enum):
+                url = self._process(gif)
+                if not url:
+                    self.log.warning(
+                        "Skipping '%s' (format not available)", gif["id"])
+                    continue
+                gif["num"] = num
+                gif["count"] = cnt
+                yield Message.Url, url, gif
 
     def _process(self, gif):
         gif["_fallback"] = formats = self._formats(gif)
@@ -178,6 +195,16 @@ class RedgifsImageExtractor(RedgifsExtractor):
                        r"/FoolishForkedAbyssiniancat\.mp4",
             "content": "f6e03f1df9a2ff2a74092f53ee7580d2fb943533",
         }),
+        # gallery (#4021)
+        ("https://www.redgifs.com/watch/desertedbaregraywolf", {
+            "pattern": r"https://\w+\.redgifs\.com/[A-Za-z-]+\.jpg",
+            "count": 4,
+            "keyword": {
+                "num": int,
+                "count": 4,
+                "gallery": "187ad979693-1922-fc66-0000-a96fb07b8a5d",
+            },
+        }),
         ("https://redgifs.com/ifr/FoolishForkedAbyssiniancat"),
         ("https://i.redgifs.com/i/FoolishForkedAbyssiniancat"),
         ("https://www.gifdeliverynetwork.com/foolishforkedabyssiniancat"),
@@ -206,6 +233,10 @@ class RedgifsAPI():
     def gif(self, gif_id):
         endpoint = "/v2/gifs/" + gif_id.lower()
         return self._call(endpoint)["gif"]
+
+    def gallery(self, gallery_id):
+        endpoint = "/v2/gallery/" + gallery_id
+        return self._call(endpoint)
 
     def user(self, user, order="best"):
         endpoint = "/v2/users/{}/search".format(user.lower())
