@@ -162,21 +162,36 @@ class RedgifsSearchExtractor(RedgifsExtractor):
     """Extractor for redgifs search results"""
     subcategory = "search"
     directory_fmt = ("{category}", "Search", "{search}")
-    pattern = r"(?:https?://)?(?:\w+\.)?redgifs\.com/browse/?\?([^#]+)"
+    pattern = (r"(?:https?://)?(?:\w+\.)?redgifs\.com"
+               r"/(?:gifs/([^/?#]+)|browse)(?:/?\?([^#]+))?")
     test = (
+        ("https://www.redgifs.com/gifs/jav", {
+            "pattern": r"https://\w+\.redgifs\.com/[A-Za-z-]+\.(mp4|jpg)",
+            "range": "1-10",
+            "count": 10,
+        }),
         ("https://www.redgifs.com/browse?tags=JAV", {
             "pattern": r"https://\w+\.redgifs\.com/[A-Za-z-]+\.(mp4|jpg)",
             "range": "1-10",
             "count": 10,
         }),
-        ("https://v3.redgifs.com/browse?tags=JAV"),
+        ("https://www.redgifs.com/gifs/jav?order=best&verified=1"),
         ("https://www.redgifs.com/browse?type=i&verified=y&order=top7"),
+        ("https://v3.redgifs.com/browse?tags=JAV"),
     )
 
+    def __init__(self, match):
+        RedgifsExtractor.__init__(self, match)
+        self.search, self.query = match.groups()
+
     def metadata(self):
-        self.params = params = text.parse_query(self.key)
-        search = params.get("tags") or params.get("order") or "trending"
-        return {"search": search}
+        self.params = text.parse_query(self.query)
+        if self.search:
+            self.params["tags"] = text.unquote(self.search)
+
+        return {"search": (self.params.get("tags") or
+                           self.params.get("order") or
+                           "trending")}
 
     def gifs(self):
         return self.api.search(self.params)
@@ -259,7 +274,6 @@ class RedgifsAPI():
     def search(self, params):
         endpoint = "/v2/gifs/search"
         params["search_text"] = params.pop("tags", None)
-        params.pop("needSendGtm", None)
         return self._pagination(endpoint, params)
 
     def _call(self, endpoint, params=None):
