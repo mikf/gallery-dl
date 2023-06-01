@@ -666,9 +666,8 @@ class TwitterSearchExtractor(TwitterExtractor):
     subcategory = "search"
     pattern = BASE_PATTERN + r"/search/?\?(?:[^&#]+&)*q=([^&#]+)"
     test = ("https://twitter.com/search?q=nature", {
-        "exception": exception.AuthorizationError,
-        "range": "1-40",
-        "count": 40,
+        "range": "1-20",
+        "count": 20,
         "archive": False,
     })
 
@@ -1080,6 +1079,10 @@ class TwitterAPI():
 
         auth_token = cookies.get("auth_token", domain=cookiedomain)
 
+        search = extractor.config("search-endpoint")
+        if search == "graphql" or not auth_token and search in ("auto", None):
+            self.search_adaptive = self.search_timeline
+
         self.headers = {
             "Accept": "*/*",
             "authorization": "Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejR"
@@ -1284,6 +1287,24 @@ class TwitterAPI():
         params["pc"] = "1"
         params["spelling_corrections"] = "1"
         return self._pagination_legacy(endpoint, params)
+
+    def search_timeline(self, query):
+        endpoint = "/graphql/7jT5GT59P8IFjgxwqnEdQw/SearchTimeline"
+        variables = {
+            "rawQuery": query,
+            "count": 20,
+            "product": "Latest",
+            "withDownvotePerspective": False,
+            "withReactionsMetadata": False,
+            "withReactionsPerspective": False,
+        }
+        features = self.features_pagination.copy()
+        features["blue_business_profile_image_shape_enabled"] = False
+        features["vibe_api_enabled"] = True
+        return self._pagination_tweets(
+            endpoint, variables,
+            ("search_by_raw_query", "search_timeline", "timeline"),
+            features=features)
 
     def live_event_timeline(self, event_id):
         endpoint = "/2/live_event/timeline/{}.json".format(event_id)
@@ -1553,11 +1574,17 @@ class TwitterAPI():
                         instructions = instructions[key]
                     instructions = instructions["instructions"]
 
+                cursor = None
+                entries = None
                 for instr in instructions:
-                    if instr.get("type") == "TimelineAddEntries":
+                    instr_type = instr.get("type")
+                    if instr_type == "TimelineAddEntries":
                         entries = instr["entries"]
-                        break
-                else:
+                    elif instr_type == "TimelineReplaceEntry":
+                        entry = instr["entry"]
+                        if entry["entryId"].startswith("cursor-bottom-"):
+                            cursor = entry["content"]["value"]
+                if entries is None:
                     raise KeyError()
 
             except LookupError:
@@ -1586,7 +1613,7 @@ class TwitterAPI():
                     "Unable to retrieve Tweets from this timeline")
 
             tweets = []
-            tweet = cursor = None
+            tweet = None
 
             if pinned_tweet:
                 pinned_tweet = False
