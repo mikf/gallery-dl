@@ -796,6 +796,11 @@ class PixivNovelExtractor(PixivExtractor):
             "options": (("embeds", True),),
             "count": 3,
         }),
+        # full series
+        ("https://www.pixiv.net/novel/show.php?id=19612040", {
+            "options": (("full-series", True),),
+            "count": 4,
+        }),
         # short URL
         ("https://www.pixiv.net/n/19612040"),
     )
@@ -893,7 +898,11 @@ class PixivNovelExtractor(PixivExtractor):
                         yield Message.Queue, url, novel
 
     def novels(self):
-        return (self.api.novel_detail(self.novel_id),)
+        novel = self.api.novel_detail(self.novel_id)
+        if self.config("full-series") and novel["series"]:
+            self.subcategory = PixivNovelSeriesExtractor.subcategory
+            return self.api.novel_series(novel["series"]["id"])
+        return (novel,)
 
 
 class PixivNovelUserExtractor(PixivNovelExtractor):
