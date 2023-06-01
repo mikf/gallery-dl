@@ -2436,6 +2436,17 @@ Description
     Download images embedded in novels.
 
 
+extractor.pixiv.novel.full-series
+---------------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    When downloading a novel being part of a series,
+    download all novels of that series.
+
+
 extractor.pixiv.metadata
 ------------------------
 Type
