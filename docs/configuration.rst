@@ -3155,6 +3155,20 @@ Description
     will be taken from the original Tweets, not the Retweets.
 
 
+extractor.twitter.search-endpoint
+---------------------------------
+Type
+    ``string``
+Default
+    ``"auto"``
+Description
+    Selects the API endpoint used to retrieve search results.
+
+    * ``"rest"``: Legacy REST endpoint - returns a ``403 Forbidden`` error when not logged in
+    * ``"graphql"``: New GraphQL endpoint
+    * ``"auto"``: ``"rest"`` when logged in, ``"graphql"`` otherwise
+
+
 extractor.twitter.timeline.strategy
 -----------------------------------
 Type
