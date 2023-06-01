@@ -56,7 +56,10 @@ class RedditExtractor(Extractor):
                     submission["num"] = 0
 
                     if "crosspost_parent_list" in submission:
-                        media = submission["crosspost_parent_list"][-1]
+                        try:
+                            media = submission["crosspost_parent_list"][-1]
+                        except Exception:
+                            media = submission
                     else:
                         media = submission
 
