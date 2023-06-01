@@ -295,6 +295,8 @@ class TwitterExtractor(Extractor):
                 tget("quoted_by_id_str")),
             "reply_id"      : text.parse_int(
                 tget("in_reply_to_status_id_str")),
+            "conversation_id": text.parse_int(
+                tget("conversation_id_str")),
             "date"          : date,
             "author"        : author,
             "user"          : self._user or author,
