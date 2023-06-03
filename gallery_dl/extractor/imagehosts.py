@@ -295,17 +295,36 @@ class PostimgImageExtractor(ImagehostImageExtractor):
     """Extractor for single images from postimages.org"""
     category = "postimg"
     pattern = (r"(?:https?://)?((?:www\.)?(?:postimg|pixxxels)\.(?:cc|org)"
-               r"/(?:image/)?([^/?#]+)/?)")
+               r"/(?!gallery/)(?:image/)?([^/?#]+)/?)")
     test = ("https://postimg.cc/Wtn2b3hC", {
-        "url": "0794cfda9b8951a8ac3aa692472484200254ab86",
+        "url": "72f3c8b1d6c6601a20ad58f35635494b4891a99e",
         "keyword": "2d05808d04e4e83e33200db83521af06e3147a84",
         "content": "cfaa8def53ed1a575e0c665c9d6d8cf2aac7a0ee",
     })
 
     def get_info(self, page):
-        url     , pos = text.extract(page, 'id="main-image" src="', '"')
+        pos = page.index(' id="download"')
+        url     , pos = text.rextract(page, ' href="', '"', pos)
         filename, pos = text.extract(page, 'class="imagename">', '<', pos)
         return url, text.unescape(filename)
+
+
+class PostimgGalleryExtractor(ImagehostImageExtractor):
+    """Extractor for images galleries from postimages.org"""
+    category = "postimg"
+    subcategory = "gallery"
+    pattern = (r"(?:https?://)?((?:www\.)?(?:postimg|pixxxels)\.(?:cc|org)"
+               r"/(?:gallery/)([^/?#]+)/?)")
+    test = ("https://postimg.cc/gallery/wxpDLgX", {
+        "pattern": PostimgImageExtractor.pattern,
+        "count": 22,
+    })
+
+    def items(self):
+        page = self.request(self.page_url).text
+        data = {"_extractor": PostimgImageExtractor}
+        for url in text.extract_iter(page, ' class="thumb"><a href="', '"'):
+            yield Message.Queue, url, data
 
 
 class TurboimagehostImageExtractor(ImagehostImageExtractor):
