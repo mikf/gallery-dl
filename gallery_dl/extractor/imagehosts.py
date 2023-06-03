@@ -164,17 +164,17 @@ class AcidimgImageExtractor(ImagehostImageExtractor):
     pattern = r"(?:https?://)?((?:www\.)?acidimg\.cc/img-([a-z0-9]+)\.html)"
     test = ("https://acidimg.cc/img-5acb6b9de4640.html", {
         "url": "f132a630006e8d84f52d59555191ed82b3b64c04",
-        "keyword": "a8bb9ab8b2f6844071945d31f8c6e04724051f37",
+        "keyword": "135347ab4345002fc013863c0d9419ba32d98f78",
         "content": "0c8768055e4e20e7c7259608b67799171b691140",
     })
     params = "simple"
     encoding = "utf-8"
 
     def get_info(self, page):
-        url, pos = text.extract(page, "<img class='centred' src='", "'")
+        url, pos = text.extract(page, '<img class="centred" src="', '"')
         if not url:
             raise exception.NotFoundError("image")
-        filename, pos = text.extract(page, " alt='", "'", pos)
+        filename, pos = text.extract(page, ' alt="', '"', pos)
         return url, (filename + splitext(url)[1]) if filename else url
 
 
