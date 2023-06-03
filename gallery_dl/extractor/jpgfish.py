@@ -9,7 +9,7 @@
 from .common import Extractor, Message
 from .. import text
 
-BASE_PATTERN = r"(?:https?://)?jpg\.(?:fishing|church)"
+BASE_PATTERN = r"(?:https?://)?jpg\.(?:fishing|church|pet)"
 
 
 class JpgfishExtractor(Extractor):
