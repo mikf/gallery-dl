@@ -214,9 +214,15 @@ class FanboxExtractor(Extractor):
             # to a proper Fanbox URL
             url = "https://www.pixiv.net/fanbox/"+content_id
             # resolve redirect
-            response = self.request(url, method="HEAD", allow_redirects=False)
-            url = response.headers["Location"]
-            final_post["_extractor"] = FanboxPostExtractor
+            try:
+                url = self.request(url, method="HEAD",
+                                   allow_redirects=False).headers["location"]
+            except Exception as exc:
+                url = None
+                self.log.warning("Unable to extract fanbox embed %s (%s: %s)",
+                                 content_id, exc.__class__.__name__, exc)
+            else:
+                final_post["_extractor"] = FanboxPostExtractor
         elif provider == "twitter":
             url = "https://twitter.com/_/status/"+content_id
         elif provider == "google_forms":
