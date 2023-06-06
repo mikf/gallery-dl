@@ -14,7 +14,7 @@ from ..cache import cache
 import itertools
 import re
 
-BASE_PATTERN = r"(?:https?://)?(?:www\.|beta\.)?(kemono|coomer)\.party"
+BASE_PATTERN = r"(?:https?://)?(?:www\.|beta\.)?(kemono|coomer)\.(party|su)"
 USER_PATTERN = BASE_PATTERN + r"/([^/?#]+)/user/([^/?#]+)"
 HASH_PATTERN = r"/[0-9a-f]{2}/[0-9a-f]{2}/([0-9a-f]{64})"
 
@@ -29,10 +29,11 @@ class KemonopartyExtractor(Extractor):
     cookiedomain = ".kemono.party"
 
     def __init__(self, match):
-        if match.group(1) == "coomer":
-            self.category = "coomerparty"
-            self.cookiedomain = ".coomer.party"
+        domain = match.group(1)
+        tld = match.group(2)
+        self.category = domain + "party"
         self.root = text.root_from_url(match.group(0))
+        self.cookiedomain = ".{}.{}".format(domain, tld)
         Extractor.__init__(self, match)
         self.session.headers["Referer"] = self.root + "/"
 
@@ -40,7 +41,7 @@ class KemonopartyExtractor(Extractor):
         self._prepare_ddosguard_cookies()
 
         self._find_inline = re.compile(
-            r'src="(?:https?://(?:kemono|coomer)\.party)?(/inline/[^"]+'
+            r'src="(?:https?://(?:kemono|coomer)\.(?:party|su))?(/inline/[^"]+'
             r'|/[0-9a-f]{2}/[0-9a-f]{2}/[0-9a-f]{64}\.[^"]+)').findall
         find_hash = re.compile(HASH_PATTERN).match
         generators = self._build_file_generators(self.config("files"))
@@ -224,11 +225,12 @@ class KemonopartyUserExtractor(KemonopartyExtractor):
             "options": (("max-posts", 25),),
             "count": "< 100",
         }),
+        ("https://kemono.su/subscribestar/user/alcorart"),
         ("https://kemono.party/subscribestar/user/alcorart"),
     )
 
     def __init__(self, match):
-        _, service, user_id, offset = match.groups()
+        _, _, service, user_id, offset = match.groups()
         self.subcategory = service
         KemonopartyExtractor.__init__(self, match)
         self.api_url = "{}/api/{}/user/{}".format(self.root, service, user_id)
@@ -329,13 +331,14 @@ class KemonopartyPostExtractor(KemonopartyExtractor):
                        r"f51c10adc9dabd86e92bd52339f298b9\.txt",
             "content": "da39a3ee5e6b4b0d3255bfef95601890afd80709",  # empty
         }),
+        ("https://kemono.su/subscribestar/user/alcorart/post/184330"),
         ("https://kemono.party/subscribestar/user/alcorart/post/184330"),
         ("https://www.kemono.party/subscribestar/user/alcorart/post/184330"),
         ("https://beta.kemono.party/subscribestar/user/alcorart/post/184330"),
     )
 
     def __init__(self, match):
-        _, service, user_id, post_id = match.groups()
+        _, _, service, user_id, post_id = match.groups()
         self.subcategory = service
         KemonopartyExtractor.__init__(self, match)
         self.api_url = "{}/api/{}/user/{}/post/{}".format(
@@ -361,9 +364,9 @@ class KemonopartyDiscordExtractor(KemonopartyExtractor):
             "count": 4,
             "keyword": {"channel_name": "finish-work"},
         }),
-        (("https://kemono.party/discord"
+        (("https://kemono.su/discord"
           "/server/256559665620451329/channel/462437519519383555#"), {
-            "pattern": r"https://kemono\.party/data/("
+            "pattern": r"https://kemono\.su/data/("
                        r"e3/77/e377e3525164559484ace2e64425b0cec1db08.*\.png|"
                        r"51/45/51453640a5e0a4d23fbf57fb85390f9c5ec154.*\.gif)",
             "keyword": {"hash": "re:e377e3525164559484ace2e64425b0cec1db08"
@@ -382,7 +385,7 @@ class KemonopartyDiscordExtractor(KemonopartyExtractor):
 
     def __init__(self, match):
         KemonopartyExtractor.__init__(self, match)
-        _, self.server, self.channel, self.channel_name = match.groups()
+        _, _, self.server, self.channel, self.channel_name = match.groups()
 
     def items(self):
         self._prepare_ddosguard_cookies()
@@ -457,14 +460,20 @@ class KemonopartyDiscordExtractor(KemonopartyExtractor):
 class KemonopartyDiscordServerExtractor(KemonopartyExtractor):
     subcategory = "discord-server"
     pattern = BASE_PATTERN + r"/discord/server/(\d+)$"
-    test = ("https://kemono.party/discord/server/488668827274444803", {
-        "pattern": KemonopartyDiscordExtractor.pattern,
-        "count": 13,
-    })
+    test = (
+        ("https://kemono.party/discord/server/488668827274444803", {
+            "pattern": KemonopartyDiscordExtractor.pattern,
+            "count": 13,
+        }),
+        ("https://kemono.su/discord/server/488668827274444803", {
+            "pattern": KemonopartyDiscordExtractor.pattern,
+            "count": 13,
+        }),
+    )
 
     def __init__(self, match):
         KemonopartyExtractor.__init__(self, match)
-        self.server = match.group(2)
+        self.server = match.group(3)
 
     def items(self):
         url = "{}/api/discord/channels/lookup?q={}".format(
@@ -493,11 +502,16 @@ class KemonopartyFavoriteExtractor(KemonopartyExtractor):
             "url": "ecfccf5f0d50b8d14caa7bbdcf071de5c1e5b90f",
             "count": 3,
         }),
+        ("https://kemono.su/favorites?type=post", {
+            "pattern": KemonopartyPostExtractor.pattern,
+            "url": "4be8e84cb384a907a8e7997baaf6287b451783b5",
+            "count": 3,
+        }),
     )
 
     def __init__(self, match):
         KemonopartyExtractor.__init__(self, match)
-        self.favorites = (text.parse_query(match.group(2)).get("type") or
+        self.favorites = (text.parse_query(match.group(3)).get("type") or
                           self.config("favorites") or
                           "artist")
 
