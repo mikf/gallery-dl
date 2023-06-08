@@ -123,7 +123,7 @@ class WeiboExtractor(Extractor):
                         key=lambda m: m["meta"]["quality_index"])
         except Exception:
             return {"url": (info.get("stream_url_hd") or
-                            info["stream_url"])}
+                            info.get("stream_url") or "")}
         else:
             return media["play_info"].copy()
 
