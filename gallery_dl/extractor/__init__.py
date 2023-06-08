@@ -76,6 +76,7 @@ modules = [
     "itaku",
     "itchio",
     "jpgfish",
+    "jschan",
     "kabeuchi",
     "keenspot",
     "kemonoparty",
