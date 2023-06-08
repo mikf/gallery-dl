@@ -111,7 +111,7 @@ Consider all sites to be NSFW unless otherwise known.
 </tr>
 <tr>
     <td>Bunkr</td>
-    <td>https://bunkr.la/</td>
+    <td>https://bunkrr.su/</td>
     <td>Albums</td>
     <td></td>
 </tr>
