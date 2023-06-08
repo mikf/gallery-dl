@@ -71,7 +71,7 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
         cdn = None
         files = []
         append = files.append
-        headers = {"Referer": self.root.replace("://", "://stream.", 1) + "/"}
+        headers = {"Referer": self.root + "/"}
 
         pos = page.index('class="grid-images')
         for url in text.extract_iter(page, '<a href="', '"', pos):
