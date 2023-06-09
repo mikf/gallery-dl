@@ -864,7 +864,7 @@ class InstagramRestAPI():
 
     def user_tagged(self, user_id):
         endpoint = "/v1/usertags/{}/feed/".format(user_id)
-        params = {"count": 50}
+        params = {"count": 20}
         return self._pagination(endpoint, params)
 
     def _call(self, endpoint, **kwargs):
