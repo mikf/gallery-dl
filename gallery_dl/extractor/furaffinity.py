@@ -63,9 +63,6 @@ class FuraffinityExtractor(Extractor):
     def metadata(self):
         return None
 
-    def _fa_extra_post_data(self, post_id):
-        return None
-
     def skip(self, num):
         self.offset += num
         return num
@@ -135,10 +132,6 @@ class FuraffinityExtractor(Extractor):
         data["date"] = text.parse_timestamp(data["filename"].partition(".")[0])
         data["description"] = self._process_description(data["_description"])
 
-        extra_data = self._fa_extra_post_data(post_id)
-        if extra_data:
-            data.update(extra_data)
-
         return data
 
     @staticmethod
@@ -171,10 +164,7 @@ class FuraffinityExtractor(Extractor):
                 post_id = extr('id="sid-', '"')
                 if not post_id:
                     break
-                if hasattr(self, '_fa_extra_data_fav_dict'):
-                    self._fa_extra_data_fav_dict[post_id] = {
-                        'fav_id': text.parse_int(extr('data-fav-id="', '"')),
-                    }
+                self._favorite_id = text.parse_int(extr('data-fav-id="', '"'))
                 yield post_id
             path = text.extr(page, 'right" href="', '"')
 
@@ -254,10 +244,10 @@ class FuraffinityFavoriteExtractor(FuraffinityExtractor):
     subcategory = "favorite"
     directory_fmt = ("{category}", "{user!l}", "Favorites")
     pattern = BASE_PATTERN + r"/favorites/([^/?#]+)"
-    _fa_extra_data_fav_dict = {}
     test = ("https://www.furaffinity.net/favorites/mirlinthloth/", {
         "pattern": r"https://d\d?\.f(uraffinity|acdn)\.net"
                    r"/art/[^/]+/\d+/\d+.\w+\.\w+",
+        "keyword": {"favorite_id": int},
         "range": "45-50",
         "count": 6,
     })
@@ -265,8 +255,11 @@ class FuraffinityFavoriteExtractor(FuraffinityExtractor):
     def posts(self):
         return self._pagination_favorites()
 
-    def _fa_extra_post_data(self, post_id):
-        return self._fa_extra_data_fav_dict.pop(post_id, None)
+    def _parse_post(self, post_id):
+        post = FuraffinityExtractor._parse_post(self, post_id)
+        if post:
+            post["favorite_id"] = self._favorite_id
+        return post
 
 
 class FuraffinitySearchExtractor(FuraffinityExtractor):
