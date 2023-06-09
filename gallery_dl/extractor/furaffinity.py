@@ -159,7 +159,13 @@ class FuraffinityExtractor(Extractor):
 
         while path:
             page = self.request(self.root + path).text
-            yield from text.extract_iter(page, 'id="sid-', '"')
+            extr = text.extract_from(page)
+            while True:
+                post_id = extr('id="sid-', '"')
+                if not post_id:
+                    break
+                self._favorite_id = text.parse_int(extr('data-fav-id="', '"'))
+                yield post_id
             path = text.extr(page, 'right" href="', '"')
 
     def _pagination_search(self, query):
@@ -241,12 +247,19 @@ class FuraffinityFavoriteExtractor(FuraffinityExtractor):
     test = ("https://www.furaffinity.net/favorites/mirlinthloth/", {
         "pattern": r"https://d\d?\.f(uraffinity|acdn)\.net"
                    r"/art/[^/]+/\d+/\d+.\w+\.\w+",
+        "keyword": {"favorite_id": int},
         "range": "45-50",
         "count": 6,
     })
 
     def posts(self):
         return self._pagination_favorites()
+
+    def _parse_post(self, post_id):
+        post = FuraffinityExtractor._parse_post(self, post_id)
+        if post:
+            post["favorite_id"] = self._favorite_id
+        return post
 
 
 class FuraffinitySearchExtractor(FuraffinityExtractor):
