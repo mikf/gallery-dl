@@ -18,6 +18,8 @@ class VipergirlsExtractor(Extractor):
     """Base class for vipergirls extractors"""
     category = "vipergirls"
     root = "https://vipergirls.to"
+    request_interval = 0.5
+    request_interval_min = 0.2
 
     def __init__(self, match):
         Extractor.__init__(self, match)
