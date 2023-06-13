@@ -865,7 +865,7 @@ class PixivNovelExtractor(PixivExtractor):
                 illusts = {}
 
                 for marker in text.extract_iter(content, "[", "]"):
-                    if marker.startswith("[jumpuri:"):
+                    if marker.startswith("[jumpuri:If you would like to "):
                         desktop = True
                     elif marker.startswith("pixivimage:"):
                         illusts[marker[11:].partition("-")[0]] = None
