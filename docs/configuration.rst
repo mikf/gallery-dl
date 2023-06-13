@@ -395,6 +395,7 @@ Description
     * ``tapas``
     * ``tsumino``
     * ``twitter``
+    * ``vipergirls``
     * ``zerochan``
 
     These values can also be specified via the

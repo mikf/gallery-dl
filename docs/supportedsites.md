@@ -712,7 +712,7 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>Postimg</td>
     <td>https://postimages.org/</td>
-    <td>individual Images</td>
+    <td>Galleries, individual Images</td>
     <td></td>
 </tr>
 <tr>
@@ -899,7 +899,7 @@ Consider all sites to be NSFW unless otherwise known.
     <td>Vipergirls</td>
     <td>https://vipergirls.to/</td>
     <td>Posts, Threads</td>
-    <td></td>
+    <td>Supported</td>
 </tr>
 <tr>
     <td>Vipr</td>
@@ -995,7 +995,7 @@ Consider all sites to be NSFW unless otherwise known.
     <td>Zerochan</td>
     <td>https://www.zerochan.net/</td>
     <td>individual Images, Tag Searches</td>
-    <td></td>
+    <td>Supported</td>
 </tr>
 <tr>
     <td>かべうち</td>

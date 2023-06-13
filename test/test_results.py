@@ -324,7 +324,8 @@ def setup_test_config():
 
     for category in ("danbooru", "atfbooru", "aibooru", "e621", "e926",
                      "instagram", "twitter", "subscribestar", "deviantart",
-                     "inkbunny", "tapas", "pillowfort", "mangadex"):
+                     "inkbunny", "tapas", "pillowfort", "mangadex",
+                     "vipergirls"):
         config.set(("extractor", category), "username", None)
 
     config.set(("extractor", "mastodon.social"), "access-token",
