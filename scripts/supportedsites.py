@@ -340,8 +340,10 @@ AUTH_MAP = {
     "tsumino"        : "Supported",
     "tumblr"         : _OAUTH,
     "twitter"        : "Supported",
+    "vipergirls"     : "Supported",
     "wallhaven"      : _APIKEY_WH,
     "weasyl"         : _APIKEY_WY,
+    "zerochan"       : "Supported",
 }
 
 IGNORE_LIST = (

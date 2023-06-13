@@ -9,7 +9,8 @@
 """Extractors for https://vipergirls.to/"""
 
 from .common import Extractor, Message
-from .. import text, util
+from .. import text, util, exception
+from ..cache import cache
 
 from xml.etree import ElementTree
 
@@ -30,6 +31,8 @@ class VipergirlsExtractor(Extractor):
         self.session.headers["Referer"] = self.root
 
     def items(self):
+        self.login()
+
         for post in self.posts():
             data = post.attrib
             data["thread_id"] = self.thread_id
@@ -37,6 +40,31 @@ class VipergirlsExtractor(Extractor):
             yield Message.Directory, data
             for image in post:
                 yield Message.Queue, image.attrib["main_url"], data
+
+    def login(self):
+        if not self._check_cookies(self.cookienames):
+            username, password = self._get_auth_info()
+            if username:
+                self._update_cookies(self._login_impl(username, password))
+
+    @cache(maxage=90*24*3600, keyarg=1)
+    def _login_impl(self, username, password):
+        self.log.info("Logging in as %s", username)
+
+        url = "{}/login.php?do=login".format(self.root)
+        data = {
+            "vb_login_username": username,
+            "vb_login_password": password,
+            "do"               : "login",
+            "cookieuser"       : "1",
+        }
+
+        response = self.request(url, method="POST", data=data)
+        if not response.cookies.get("vg_password"):
+            raise exception.AuthenticationError()
+
+        return {cookie.name: cookie.value
+                for cookie in response.cookies}
 
 
 class VipergirlsThreadExtractor(VipergirlsExtractor):
