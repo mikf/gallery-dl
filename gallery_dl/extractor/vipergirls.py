@@ -9,7 +9,9 @@
 """Extractors for https://vipergirls.to/"""
 
 from .common import Extractor, Message
-from .. import text, exception
+from .. import text, util
+
+from xml.etree import ElementTree
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?vipergirls\.to"
 
@@ -20,26 +22,21 @@ class VipergirlsExtractor(Extractor):
     root = "https://vipergirls.to"
     request_interval = 0.5
     request_interval_min = 0.2
+    cookiedomain = ".vipergirls.to"
+    cookienames = ("vg_userid", "vg_password")
 
     def __init__(self, match):
         Extractor.__init__(self, match)
         self.session.headers["Referer"] = self.root
 
     def items(self):
-        for html in self.posts():
-
-            pos = html.find('<a href="')
-            if pos < 0:
-                continue
-
-            title = text.extr(html, '<h2 class="title', '<')
-            data = {
-                "title": text.unescape(title.partition(">")[2].strip()),
-            }
+        for post in self.posts():
+            data = post.attrib
+            data["thread_id"] = self.thread_id
 
             yield Message.Directory, data
-            for href in text.extract_iter(html, '<a href="', '"', pos):
-                yield Message.Queue, href, data
+            for image in post:
+                yield Message.Queue, image.attrib["main_url"], data
 
 
 class VipergirlsThreadExtractor(VipergirlsExtractor):
@@ -49,11 +46,11 @@ class VipergirlsThreadExtractor(VipergirlsExtractor):
     test = (
         (("https://vipergirls.to/threads/4328304"
           "-2011-05-28-Danica-Simply-Beautiful-x112-4500x3000"), {
-            "url": "b22feaa35a358bb36086c2b9353aee28989e1d7a",
-            "count": 227,
+            "url": "0d75cb42777f5bebc0d284d1d38cb90c750c61d9",
+            "count": 225,
         }),
         ("https://vipergirls.to/threads/6858916-Karina/page4", {
-            "count": 1294,
+            "count": 1279,
         }),
         ("https://vipergirls.to/threads/4328304"),
     )
@@ -63,25 +60,20 @@ class VipergirlsThreadExtractor(VipergirlsExtractor):
         self.thread_id, self.page = match.groups()
 
     def posts(self):
-        url = "{}/threads/{}{}".format(
-            self.root, self.thread_id, self.page or "")
+        url = "{}/vr.php?t={}".format(self.root, self.thread_id)
+        root = ElementTree.fromstring(self.request(url).text)
+        posts = root.iter("post")
 
-        while True:
-            page = self.request(url).text
-            yield from text.extract_iter(
-                page, '<div class="postbody">', '</blockquote>')
-
-            url = text.extr(page, '<a rel="next" href="', '"')
-            if not url:
-                return
-            url = "{}/{}".format(self.root, url)
+        if self.page:
+            util.advance(posts, (text.parse_int(self.page[5:]) - 1) * 15)
+        return posts
 
 
 class VipergirlsPostExtractor(VipergirlsExtractor):
     """Extractor for vipergirls posts"""
     subcategory = "post"
     pattern = (BASE_PATTERN +
-               r"/threads/(\d+)(?:-[^/?#]+)?\?(p=\d+[^#]*)#post(\d+)")
+               r"/threads/(\d+)(?:-[^/?#]+)?\?p=\d+[^#]*#post(\d+)")
     test = (
         (("https://vipergirls.to/threads/4328304-2011-05-28-Danica-Simply-"
           "Beautiful-x112-4500x3000?p=116038081&viewfull=1#post116038081"), {
@@ -89,6 +81,10 @@ class VipergirlsPostExtractor(VipergirlsExtractor):
             "range": "2-113",
             "count": 112,
             "keyword": {
+                "id": "116038081",
+                "imagecount": "113",
+                "number": "116038081",
+                "thread_id": "4328304",
                 "title": "FemJoy Danica - Simply Beautiful (x112) 3000x4500",
             },
         }),
@@ -96,15 +92,9 @@ class VipergirlsPostExtractor(VipergirlsExtractor):
 
     def __init__(self, match):
         VipergirlsExtractor.__init__(self, match)
-        self.thread_id, self.query, self.post_id = match.groups()
+        self.thread_id, self.post_id = match.groups()
 
     def posts(self):
-        url = "{}/threads/{}?{}".format(self.root, self.thread_id, self.query)
-        page = self.request(url).text
-
-        try:
-            pos = page.index('id="post_' + self.post_id + '"')
-            return (text.extract(
-                page, '<div class="postbody">', '</blockquote>', pos)[0],)
-        except Exception:
-            raise exception.NotFoundError("post")
+        url = "{}/vr.php?p={}".format(self.root, self.post_id)
+        root = ElementTree.fromstring(self.request(url).text)
+        return root.iter("post")
