@@ -72,6 +72,8 @@ class WeiboExtractor(Extractor):
                     file["url"] = "https:" + file["url"][5:]
                 if "filename" not in file:
                     text.nameext_from_url(file["url"], file)
+                    if file["extension"] == "json":
+                        file["extension"] = "mp4"
                 file["status"] = status
                 file["num"] = num
                 yield Message.Url, file["url"], file
