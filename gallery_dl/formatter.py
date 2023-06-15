@@ -437,6 +437,7 @@ _CONVERSIONS = {
     "T": util.datetime_to_timestamp_string,
     "d": text.parse_timestamp,
     "U": text.unescape,
+    "H": lambda s: text.unescape(text.remove_html(s)),
     "g": text.slugify,
     "S": util.to_string,
     "s": str,
