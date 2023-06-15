@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2021 Mike Fährmann
+# Copyright 2019-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -10,7 +10,6 @@
 
 from .common import Extractor, Message
 from .. import text, exception
-
 
 BASE_PATTERN = r"(?:https?://)?(?:[\w-]+\.)?pornhub\.com"
 
@@ -146,10 +145,20 @@ class PornhubUserExtractor(PornhubExtractor):
 
         data = {"_extractor": PornhubGalleryExtractor}
         while True:
-            page = self.request(
-                url, method="POST", headers=headers, params=params).text
-            if not page:
-                return
-            for gid in text.extract_iter(page, 'id="albumphoto', '"'):
+            response = self.request(
+                url, method="POST", headers=headers, params=params,
+                allow_redirects=False)
+
+            if 300 <= response.status_code < 400:
+                url = "{}{}/photos/{}/ajax".format(
+                    self.root, response.headers["location"],
+                    self.cat or "public")
+                continue
+
+            gid = None
+            for gid in text.extract_iter(response.text, 'id="albumphoto', '"'):
                 yield Message.Queue, self.root + "/album/" + gid, data
+            if gid is None:
+                return
+
             params["page"] += 1
