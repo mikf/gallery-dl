@@ -95,6 +95,18 @@ Conversion specifiers allow to *convert* the value to a different form or type. 
     <td><code>2010-01-01 00:00:00</code></td>
 </tr>
 <tr>
+    <td align="center"><code>U</code></td>
+    <td>Convert HTML entities</td>
+    <td><code>{html!U}</code></td>
+    <td><code>&lt;p&gt;foo &amp; bar&lt;/p&gt;</code></td>
+</tr>
+<tr>
+    <td align="center"><code>H</code></td>
+    <td>Convert HTML entities &amp; remove HTML tags</td>
+    <td><code>{html!H}</code></td>
+    <td><code>foo &amp; bar</code></td>
+</tr>
+<tr>
     <td align="center"><code>s</code></td>
     <td>Convert value to <a href="https://docs.python.org/3/library/stdtypes.html#text-sequence-type-str" rel="nofollow"><code>str</code></a></td>
     <td><code>{tags!s}</code></td>
