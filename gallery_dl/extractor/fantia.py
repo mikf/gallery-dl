@@ -24,6 +24,14 @@ class FantiaExtractor(Extractor):
             "Accept" : "application/json, text/plain, */*",
             "Referer": self.root,
         }
+        _empty_plan = {
+            "id"   : 0,
+            "price": 0,
+            "limit": 0,
+            "name" : "",
+            "description": "",
+            "thumb": self.root + "/images/fallback/plan/thumb_default.png",
+        }
 
         if self._warning:
             if not self._check_cookies(("_session_id",)):
@@ -39,6 +47,7 @@ class FantiaExtractor(Extractor):
                 post["content_title"] = content["title"]
                 post["content_filename"] = content.get("filename", "")
                 post["content_id"] = content["id"]
+                post["plan"] = content["plan"] or _empty_plan
                 yield Message.Directory, post
 
                 if content["visible_status"] != "visible":
@@ -116,6 +125,7 @@ class FantiaExtractor(Extractor):
                 "category": "thumb",
                 "download_uri": url,
                 "visible_status": "visible",
+                "plan": None,
             })
 
         return contents
