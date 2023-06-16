@@ -41,6 +41,12 @@ class FantiaExtractor(Extractor):
                 post["content_id"] = content["id"]
                 yield Message.Directory, post
 
+                if content["visible_status"] != "visible":
+                    self.log.warning(
+                        "Unable to download '%s' files from "
+                        "%s#post-content-id-%s", content["visible_status"],
+                        post["post_url"], content["id"])
+
                 for url in self._get_content_urls(post, content):
                     text.nameext_from_url(
                         post["content_filename"] or url, post)
@@ -109,6 +115,7 @@ class FantiaExtractor(Extractor):
                 "title": "thumb",
                 "category": "thumb",
                 "download_uri": url,
+                "visible_status": "visible",
             })
 
         return contents
