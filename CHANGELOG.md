@@ -1,5 +1,38 @@
 # Changelog
 
+## 1.25.6 - 2023-06-17
+### Additions
+- [blogger] download files from `lh*.googleusercontent.com` ([#4070](https://github.com/mikf/gallery-dl/issues/4070))
+- [fantia] extract `plan` metadata ([#2477](https://github.com/mikf/gallery-dl/issues/2477))
+- [fantia] emit warning for non-visible content sections ([#4128](https://github.com/mikf/gallery-dl/issues/4128))
+- [furaffinity] extract `favorite_id` metadata ([#4133](https://github.com/mikf/gallery-dl/issues/4133))
+- [jschan] add generic extractors for jschan image boards ([#3447](https://github.com/mikf/gallery-dl/issues/3447))
+- [kemonoparty] support `.su` TLDs ([#4139](https://github.com/mikf/gallery-dl/issues/4139))
+- [pixiv:novel] add `novel-bookmark` extractor ([#4111](https://github.com/mikf/gallery-dl/issues/4111))
+- [pixiv:novel] add `full-series` option ([#4111](https://github.com/mikf/gallery-dl/issues/4111))
+- [postimage] add gallery support, update image extractor ([#3115](https://github.com/mikf/gallery-dl/issues/3115), [#4134](https://github.com/mikf/gallery-dl/issues/4134))
+- [redgifs] support galleries ([#4021](https://github.com/mikf/gallery-dl/issues/4021))
+- [twitter] extract `conversation_id` metadata ([#3839](https://github.com/mikf/gallery-dl/issues/3839))
+- [vipergirls] add login support ([#4166](https://github.com/mikf/gallery-dl/issues/4166))
+- [vipergirls] use API endpoints ([#4166](https://github.com/mikf/gallery-dl/issues/4166))
+- [formatter] implement `H` conversion ([#4164](https://github.com/mikf/gallery-dl/issues/4164))
+### Fixes
+- [acidimg] fix extraction ([#4136](https://github.com/mikf/gallery-dl/issues/4136))
+- [bunkr] update domain to bunkrr.su ([#4159](https://github.com/mikf/gallery-dl/issues/4159), [#4189](https://github.com/mikf/gallery-dl/issues/4189))
+- [bunkr] fix video downloads
+- [fanbox] prevent exception due to missing embeds ([#4088](https://github.com/mikf/gallery-dl/issues/4088))
+- [instagram] fix retrieving `/tagged` posts ([#4122](https://github.com/mikf/gallery-dl/issues/4122))
+- [jpgfish] update domain to `jpg.pet` ([#4138](https://github.com/mikf/gallery-dl/issues/4138))
+- [pixiv:novel] fix error with embeds extraction ([#4175](https://github.com/mikf/gallery-dl/issues/4175))
+- [pornhub] improve redirect handling ([#4188](https://github.com/mikf/gallery-dl/issues/4188))
+- [reddit] fix crash due to empty `crosspost_parent_lists` ([#4120](https://github.com/mikf/gallery-dl/issues/4120), [#4172](https://github.com/mikf/gallery-dl/issues/4172))
+- [redgifs] update `search` URL pattern ([#4115](https://github.com/mikf/gallery-dl/issues/4115), [#4185](https://github.com/mikf/gallery-dl/issues/4185))
+- [senmanga] fix and update ([#4160](https://github.com/mikf/gallery-dl/issues/4160))
+- [twitter] use GraphQL API search endpoint ([#3942](https://github.com/mikf/gallery-dl/issues/3942))
+- [wallhaven] improve HTTP error handling ([#4192](https://github.com/mikf/gallery-dl/issues/4192))
+- [weibo] prevent fatal exception due to missing video data ([#4150](https://github.com/mikf/gallery-dl/issues/4150))
+- [weibo] fix `.json` extension for some videos
+
 ## 1.25.5 - 2023-05-27
 ### Additions
 - [8muses] add `parts` metadata field ([#3329](https://github.com/mikf/gallery-dl/issues/3329))
