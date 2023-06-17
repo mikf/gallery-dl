@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2022 Mike Fährmann
+# Copyright 2018-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -9,15 +9,16 @@
 """Extractors for https://wallhaven.cc/"""
 
 from .common import Extractor, Message
-from .. import text
+from .. import text, exception
 
 
 class WallhavenExtractor(Extractor):
     """Base class for wallhaven extractors"""
     category = "wallhaven"
+    root = "https://wallhaven.cc"
     filename_fmt = "{category}_{id}_{resolution}.{extension}"
     archive_fmt = "{id}"
-    root = "https://wallhaven.cc"
+    request_interval = 1.4
 
     def __init__(self, match):
         Extractor.__init__(self, match)
@@ -246,8 +247,21 @@ class WallhavenAPI():
 
     def _call(self, endpoint, params=None):
         url = "https://wallhaven.cc/api" + endpoint
-        return self.extractor.request(
-            url, headers=self.headers, params=params).json()
+
+        while True:
+            response = self.extractor.request(
+                url, params=params, headers=self.headers, fatal=None)
+
+            if response.status_code < 400:
+                return response.json()
+            if response.status_code == 429:
+                self.extractor.wait(seconds=60)
+                continue
+
+            self.extractor.log.debug("Server response: %s", response.text)
+            raise exception.StopExtraction(
+                "API request failed (%s: %s)",
+                response.status_code, response.reason)
 
     def _pagination(self, endpoint, params=None, metadata=None):
         if params is None:
