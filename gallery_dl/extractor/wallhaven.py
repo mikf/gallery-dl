@@ -260,7 +260,7 @@ class WallhavenAPI():
 
             self.extractor.log.debug("Server response: %s", response.text)
             raise exception.StopExtraction(
-                "API request failed (%s: %s)",
+                "API request failed (%s %s)",
                 response.status_code, response.reason)
 
     def _pagination(self, endpoint, params=None, metadata=None):
