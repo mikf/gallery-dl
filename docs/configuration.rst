@@ -2411,7 +2411,12 @@ Description
     when processing a user profile.
 
     Possible values are
-    ``"artworks"``, ``"avatar"``, ``"background"``, ``"favorite"``.
+    ``"artworks"``,
+    ``"avatar"``,
+    ``"background"``,
+    ``"favorite"``,
+    ``"novel-user"``,
+    ``"novel-bookmark"``.
 
     It is possible to use ``"all"`` instead of listing all values separately.
 
