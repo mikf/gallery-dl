@@ -20,6 +20,10 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
+    - name: Check file mode bits
+      run: |
+        [ "$(find ./gallery_dl -type f -not -perm 644)" ] && exit 1
+
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4
       with:
