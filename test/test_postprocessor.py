@@ -164,6 +164,76 @@ class ClassifyTest(BasePostprocessorTest):
             mkdirs.assert_called_once_with(path, exist_ok=True)
 
 
+class ExecTest(BasePostprocessorTest):
+
+    def test_command_string(self):
+        self._create({
+            "command": "echo {} && rm {};",
+        })
+
+        with patch("subprocess.Popen") as p:
+            i = Mock()
+            i.wait.return_value = 0
+            p.return_value = i
+            self._trigger(("after",))
+
+        p.assert_called_once_with(
+            "echo {0} && rm {0};".format(self.pathfmt.realpath), shell=True)
+        i.wait.assert_called_once_with()
+
+    def test_command_list(self):
+        self._create({
+            "command": ["~/script.sh", "{category}",
+                        "\fF {_directory.upper()}"],
+        })
+
+        with patch("subprocess.Popen") as p:
+            i = Mock()
+            i.wait.return_value = 0
+            p.return_value = i
+            self._trigger(("after",))
+
+        p.assert_called_once_with(
+            [
+                os.path.expanduser("~/script.sh"),
+                self.pathfmt.kwdict["category"],
+                self.pathfmt.realdirectory.upper(),
+            ],
+            shell=False,
+        )
+
+    def test_command_returncode(self):
+        self._create({
+            "command": "echo {}",
+        })
+
+        with patch("subprocess.Popen") as p:
+            i = Mock()
+            i.wait.return_value = 123
+            p.return_value = i
+
+            with self.assertLogs() as log:
+                self._trigger(("after",))
+
+        msg = ("WARNING:postprocessor.exec:'echo {}' returned with "
+               "non-zero exit status (123)".format(self.pathfmt.realpath))
+        self.assertEqual(log.output[0], msg)
+
+    def test_async(self):
+        self._create({
+            "async"  : True,
+            "command": "echo {}",
+        })
+
+        with patch("subprocess.Popen") as p:
+            i = Mock()
+            p.return_value = i
+            self._trigger(("after",))
+
+        self.assertTrue(p.called)
+        self.assertFalse(i.wait.called)
+
+
 class MetadataTest(BasePostprocessorTest):
 
     def test_metadata_default(self):
