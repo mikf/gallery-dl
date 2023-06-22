@@ -42,6 +42,10 @@ class GelbooruV01Extractor(booru.BooruExtractor):
 
         return post
 
+    def skip(self, num):
+        self.page_start += num
+        return num
+
     def _pagination(self, url, begin, end):
         pid = self.page_start
 
