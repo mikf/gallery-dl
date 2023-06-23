@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2020-2022 Mike Fährmann
+# Copyright 2020-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -98,7 +98,9 @@ class FuraffinityExtractor(Extractor):
                 'class="tags-row">', '</section>'))
             data["title"] = text.unescape(extr("<h2><p>", "</p></h2>"))
             data["artist"] = extr("<strong>", "<")
-            data["_description"] = extr('class="section-body">', '</div>')
+            data["_description"] = extr(
+                'class="submission-description user-submitted-links">',
+                '                                    </div>')
             data["views"] = pi(rh(extr('class="views">', '</span>')))
             data["favorites"] = pi(rh(extr('class="favorites">', '</span>')))
             data["comments"] = pi(rh(extr('class="comments">', '</span>')))
@@ -125,7 +127,9 @@ class FuraffinityExtractor(Extractor):
             data["tags"] = text.split_html(extr(
                 'id="keywords">', '</div>'))[::2]
             data["rating"] = extr('<img alt="', ' ')
-            data["_description"] = extr("</table>", "</table>")
+            data["_description"] = extr(
+                '<td valign="top" align="left" width="70%" class="alt1" '
+                'style="padding:8px">', '                               </td>')
 
         data["artist_url"] = data["artist"].replace("_", "").lower()
         data["user"] = self.user or data["artist_url"]
