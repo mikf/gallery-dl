@@ -20,9 +20,9 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - name: Check file mode bits
+    - name: Check file permissions
       run: |
-        [ "$(find ./gallery_dl -type f -not -perm 644)" ] && exit 1
+        if [[ "$(find ./gallery_dl -type f -not -perm 644)" ]]; then exit 1; fi
 
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4
