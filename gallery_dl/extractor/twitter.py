@@ -919,7 +919,9 @@ Your reaction.""",
         self.tweet_id = match.group(2)
 
     def tweets(self):
-        if self.config("conversations", False):
+        conversations = self.config("conversations")
+        if conversations:
+            self._accessible = (conversations == "accessible")
             return self._tweets_conversation(self.tweet_id)
         else:
             return self._tweets_single(self.tweet_id)
@@ -950,6 +952,11 @@ Your reaction.""",
                     tweet.get("_retweet_id_str") == tweet_id:
                 self._assign_user(tweet["core"]["user_results"]["result"])
                 break
+        else:
+            # initial Tweet not accessible
+            if self._accessible:
+                return ()
+            return buffer
 
         return itertools.chain(buffer, tweets)
 

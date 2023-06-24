@@ -3002,15 +3002,19 @@ Description
 extractor.twitter.conversations
 -------------------------------
 Type
-    ``bool``
+    * ``bool``
+    * ``string``
 Default
     ``false``
 Description
     For input URLs pointing to a single Tweet,
     e.g. `https://twitter.com/i/web/status/<TweetID>`,
     fetch media from all Tweets and replies in this `conversation
-    <https://help.twitter.com/en/using-twitter/twitter-conversations>`__
-    or thread.
+    <https://help.twitter.com/en/using-twitter/twitter-conversations>`__.
+
+    If this option is equal to ``"accessible"``,
+    only download from conversation Tweets
+    if the given initial Tweet is accessible.
 
 
 extractor.twitter.csrf
