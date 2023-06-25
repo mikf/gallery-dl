@@ -184,7 +184,7 @@ class ExecTest(BasePostprocessorTest):
     def test_command_list(self):
         self._create({
             "command": ["~/script.sh", "{category}",
-                        "\fF {_directory.upper()}"],
+                        "\fE _directory.upper()"],
         })
 
         with patch("subprocess.Popen") as p:
