@@ -451,9 +451,19 @@ class FlickrAPI(oauth.OAuth1API):
         return data
 
     def _pagination(self, method, params, key="photos"):
-        params["extras"] = ("description,date_upload,tags,views,media,"
-                            "path_alias,owner_name,")
-        params["extras"] += ",".join("url_" + fmt[0] for fmt in self.formats)
+        extras = ("description,date_upload,tags,views,media,"
+                  "path_alias,owner_name,")
+        includes = self.extractor.config("metadata")
+        if includes:
+            if isinstance(includes, (list, tuple)):
+                includes = ",".join(includes)
+            elif not isinstance(includes, str):
+                includes = ("license,date_taken,original_format,last_update,"
+                            "geo,machine_tags,o_dims")
+            extras = extras + includes + ","
+        extras += ",".join("url_" + fmt[0] for fmt in self.formats)
+
+        params["extras"] = extras
         params["page"] = 1
 
         while True:

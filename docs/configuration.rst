@@ -1541,6 +1541,27 @@ Description
     from `linking your Flickr account to gallery-dl <OAuth_>`__.
 
 
+extractor.flickr.metadata
+-------------------------
+Type
+    * ``bool``
+    * ``string``
+    * ``list`` of ``strings``
+Default
+    ``false``
+Example
+    * ``license,last_update,machine_tags``
+    * ``["license", "last_update", "machine_tags"]``
+Description
+    Extract additional metadata
+    (license, date_taken, original_format, last_update, geo, machine_tags, o_dims)
+
+    It is possible to specify a custom list of metadata includes.
+    See `the extras parameter <https://www.flickr.com/services/api/flickr.people.getPhotos.html>`__
+    in `Flickr API docs <https://www.flickr.com/services/api/>`__
+    for possible field names.
+
+
 extractor.flickr.videos
 -----------------------
 Type
