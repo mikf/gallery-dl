@@ -58,6 +58,12 @@ class SenmangaChapterExtractor(ChapterExtractor):
                 "manga": "Akabane Honeko no Bodyguard",
             },
         }),
+        # no http scheme ()
+        ("https://raw.senmanga.com/amama-cinderella/3", {
+            "pattern": r"^https://kumacdn.club/image-new-2/a/amama-cinderella"
+                       r"/chapter-3/.+\.jpg",
+            "count": 30,
+        }),
     )
 
     def __init__(self, match):
@@ -82,7 +88,7 @@ class SenmangaChapterExtractor(ChapterExtractor):
 
     def images(self, page):
         return [
-            (url, None)
+            (text.ensure_http_scheme(url), None)
             for url in text.extract_iter(
                 page, '<img class="picture" src="', '"')
         ]
