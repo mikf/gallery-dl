@@ -76,11 +76,12 @@ class PoipikuExtractor(Extractor):
                 "MD" : "0",
                 "TWF": "-1",
             }
-            page = self.request(
-                url, method="POST", headers=headers, data=data).json()["html"]
+            resp = self.request(
+                url, method="POST", headers=headers, data=data).json()
 
-            if page.startswith(("You need to", "Password is incorrect")):
-                self.log.warning("'%s'", page)
+            page = resp["html"]
+            if (resp.get("result_num") or 0) < 0:
+                self.log.warning("'%s'", page.replace("<br/>", " "))
 
             for thumb in text.extract_iter(
                     page, 'class="IllustItemThumbImg" src="', '"'):
