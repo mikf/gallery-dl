@@ -9,15 +9,15 @@
 """Extractors for https://mangapark.net/"""
 
 from .common import ChapterExtractor, MangaExtractor
-from .. import text, util, exception
+from .. import text, util
 import re
+
+BASE_PATTERN = r"(?:https?://)?(?:www\.)?mangapark\.(?:net|com|org|io|me)"
 
 
 class MangaparkBase():
     """Base class for mangapark extractors"""
     category = "mangapark"
-    root_fmt = "https://v2.mangapark.{}"
-    browser = "firefox"
 
     @staticmethod
     def parse_chapter_path(path, data):
@@ -50,66 +50,85 @@ class MangaparkBase():
 
 class MangaparkChapterExtractor(MangaparkBase, ChapterExtractor):
     """Extractor for manga-chapters from mangapark.net"""
-    pattern = (r"(?:https?://)?(?:www\.|v2\.)?mangapark\.(me|net|com)"
-               r"/manga/([^?#]+/i\d+)")
+    pattern = BASE_PATTERN + r"/title/[^/?#]+/(\d+)"
     test = (
-        ("https://mangapark.net/manga/gosu/i811653/c055/1", {
-            "count": 50,
-            "keyword": "db1ed9af4f972756a25dbfa5af69a8f155b043ff",
+        ("https://mangapark.net/title/114972-aria/6710214-en-ch.60.2", {
+            "count": 70,
+            "pattern": r"https://[\w-]+\.mpcdn\.org/comic/2002/e67"
+                       r"/61e29278a583b9227964076e/\d+_\d+_\d+_\d+\.jpeg"
+                       r"\?acc=[^&#]+&exp=\d+",
+            "keyword": {
+                "artist": [],
+                "author": ["Amano Kozue"],
+                "chapter": 60,
+                "chapter_id": 6710214,
+                "chapter_minor": ".2",
+                "count": 70,
+                "date": "dt:2022-01-15 09:25:03",
+                "extension": "jpeg",
+                "filename": str,
+                "genre": ["adventure", "comedy", "drama", "sci_fi",
+                          "shounen", "slice_of_life"],
+                "lang": "en",
+                "language": "English",
+                "manga": "Aria",
+                "manga_id": 114972,
+                "page": int,
+                "source": "Koala",
+                "title": "Special Navigation - Aquaria Ii",
+                "volume": 12,
+            },
         }),
-        (("https://mangapark.net/manga"
-          "/ad-astra-per-aspera-hata-kenjirou/i662051/c001.2/1"), {
-            "count": 40,
-            "keyword": "2bb3a8f426383ea13f17ff5582f3070d096d30ac",
-        }),
-        (("https://mangapark.net/manga"
-          "/gekkan-shoujo-nozaki-kun/i2067426/v7/c70/1"), {
-            "count": 15,
-            "keyword": "edc14993c4752cee3a76e09b2f024d40d854bfd1",
-        }),
-        ("https://mangapark.me/manga/gosu/i811615/c55/1"),
-        ("https://mangapark.com/manga/gosu/i811615/c55/1"),
+        ("https://mangapark.com/title/114972-aria/6710214-en-ch.60.2"),
+        ("https://mangapark.org/title/114972-aria/6710214-en-ch.60.2"),
+        ("https://mangapark.io/title/114972-aria/6710214-en-ch.60.2"),
+        ("https://mangapark.me/title/114972-aria/6710214-en-ch.60.2"),
     )
 
     def __init__(self, match):
-        tld, self.path = match.groups()
-        self.root = self.root_fmt.format(tld)
-        url = "{}/manga/{}?zoom=2".format(self.root, self.path)
+        self.root = text.root_from_url(match.group(0))
+        url = "{}/title/_/{}".format(self.root, match.group(1))
         ChapterExtractor.__init__(self, match, url)
 
     def metadata(self, page):
-        data = text.extract_all(page, (
-            ("manga_id"  , "var _manga_id = '", "'"),
-            ("chapter_id", "var _book_id = '", "'"),
-            ("stream"    , "var _stream = '", "'"),
-            ("path"      , "var _book_link = '", "'"),
-            ("manga"     , "<h2>", "</h2>"),
-            ("title"     , "</a>", "<"),
-        ), values={"lang": "en", "language": "English"})[0]
+        data = util.json_loads(text.extr(
+            page, 'id="__NEXT_DATA__" type="application/json">', '<'))
+        chapter = (data["props"]["pageProps"]["dehydratedState"]
+                   ["queries"][0]["state"]["data"]["data"])
+        manga = chapter["comicNode"]["data"]
+        source = chapter["sourceNode"]["data"]
 
-        if not data["path"]:
-            raise exception.NotFoundError("chapter")
+        self._urls = chapter["imageSet"]["httpLis"]
+        self._params = chapter["imageSet"]["wordLis"]
 
-        self.parse_chapter_path(data["path"], data)
-        if "chapter" not in data:
-            self.parse_chapter_title(data["title"], data)
+        match = re.match(
+            r"(?i)"
+            r"(?:vol(?:\.|ume)?\s*(\d+)\s*)?"
+            r"ch(?:\.|apter)?\s*(\d+)([^\s:]*)"
+            r"(?:\s*:\s*(.*))?", chapter["dname"])
+        vol, ch, minor, title = match.groups() if match else (0, 0, "", "")
 
-        data["manga"], _, data["type"] = data["manga"].rpartition(" ")
-        data["manga"] = text.unescape(data["manga"])
-        data["title"] = data["title"].partition(": ")[2]
-        for key in ("manga_id", "chapter_id", "stream"):
-            data[key] = text.parse_int(data[key])
-
-        return data
+        return {
+            "manga"     : manga["name"],
+            "manga_id"  : manga["id"],
+            "artist"    : source["artists"],
+            "author"    : source["authors"],
+            "genre"     : source["genres"],
+            "volume"    : text.parse_int(vol),
+            "chapter"   : text.parse_int(ch),
+            "chapter_minor": minor,
+            "chapter_id": chapter["id"],
+            "title"     : chapter["title"] or title or "",
+            "lang"      : chapter["lang"],
+            "language"  : util.code_to_language(chapter["lang"]),
+            "source"    : chapter["srcTitle"],
+            "date"      : text.parse_timestamp(chapter["dateCreate"] // 1000),
+        }
 
     def images(self, page):
-        data = util.json_loads(text.extr(page, "var _load_pages =", ";"))
         return [
-            (text.urljoin(self.root, item["u"]), {
-                "width": text.parse_int(item["w"]),
-                "height": text.parse_int(item["h"]),
-            })
-            for item in data
+            (url + "?" + params, None)
+            for url, params in zip(self._urls, self._params)
         ]
 
 
