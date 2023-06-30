@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2022 Mike Fährmann
+# Copyright 2018-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -19,7 +19,7 @@ class PiczelExtractor(Extractor):
     filename_fmt = "{category}_{id}_{title}_{num:>02}.{extension}"
     archive_fmt = "{id}_{num}"
     root = "https://piczel.tv"
-    api_root = "https://tombstone.piczel.tv"
+    api_root = root
 
     def items(self):
         for post in self.posts():
