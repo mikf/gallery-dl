@@ -106,6 +106,8 @@ class FlickrImageExtractor(FlickrExtractor):
 
     def items(self):
         photo = self.api.photos_getInfo(self.item_id)
+        if self.api.exif:
+            photo.update(self.api.photos_getExif(self.item_id))
 
         if photo["media"] == "video" and self.api.videos:
             self.api._extract_video(photo)
@@ -323,6 +325,7 @@ class FlickrAPI(oauth.OAuth1API):
     def __init__(self, extractor):
         oauth.OAuth1API.__init__(self, extractor)
 
+        self.exif = extractor.config("exif", False)
         self.videos = extractor.config("videos", True)
         self.maxsize = extractor.config("size-max")
         if isinstance(self.maxsize, str):
@@ -366,6 +369,11 @@ class FlickrAPI(oauth.OAuth1API):
         """Return photos from the given user's photostream."""
         params = {"user_id": user_id}
         return self._pagination("people.getPhotos", params)
+
+    def photos_getExif(self, photo_id):
+        """Retrieves a list of EXIF/TIFF/GPS tags for a given photo."""
+        params = {"photo_id": photo_id}
+        return self._call("photos.getExif", params)["photo"]
 
     def photos_getInfo(self, photo_id):
         """Get information about a photo."""
@@ -488,6 +496,9 @@ class FlickrAPI(oauth.OAuth1API):
         photo["views"] = text.parse_int(photo["views"])
         photo["date"] = text.parse_timestamp(photo["dateupload"])
         photo["tags"] = photo["tags"].split()
+
+        if self.exif:
+            photo.update(self.photos_getExif(photo["id"]))
         photo["id"] = text.parse_int(photo["id"])
 
         if "owner" in photo:
