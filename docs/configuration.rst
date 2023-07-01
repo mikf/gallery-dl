@@ -1541,6 +1541,18 @@ Description
     from `linking your Flickr account to gallery-dl <OAuth_>`__.
 
 
+extractor.flickr.exif
+---------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Fetch `exif` and `camera` metadata for each photo.
+
+    Note: This requires 1 additional API call per photo.
+
+
 extractor.flickr.metadata
 -------------------------
 Type
