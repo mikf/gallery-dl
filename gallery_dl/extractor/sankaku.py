@@ -46,10 +46,15 @@ class SankakuExtractor(BooruExtractor):
 
     def _file_url(self, post):
         url = post["file_url"]
-        if not url and self._warning:
-            self.log.warning(
-                "Login required to download 'contentious_content' posts")
-            SankakuExtractor._warning = False
+        if not url:
+            if post["status"] != "active":
+                self.log.warning(
+                    "Unable to download post %s (%s)",
+                    post["id"], post["status"])
+            elif self._warning:
+                self.log.warning(
+                    "Login required to download 'contentious_content' posts")
+                SankakuExtractor._warning = False
         elif url[8] == "v":
             url = "https://s.sankakucomplex.com" + url[url.index("/", 8):]
         return url
