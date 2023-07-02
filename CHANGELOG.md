@@ -1,5 +1,21 @@
 # Changelog
 
+## 1.25.7 - 2023-07-02
+### Additions
+- [flickr] add 'exif' option
+- [flickr] add 'metadata' option ([#4227](https://github.com/mikf/gallery-dl/issues/4227))
+- [mangapark] add 'source' option ([#3969](https://github.com/mikf/gallery-dl/issues/3969))
+- [twitter] extend 'conversations' option ([#4211](https://github.com/mikf/gallery-dl/issues/4211))
+### Fixes
+- [furaffinity] improve 'description' HTML ([#4224](https://github.com/mikf/gallery-dl/issues/4224))
+- [gelbooru_v01] fix '--range' ([#4167](https://github.com/mikf/gallery-dl/issues/4167))
+- [hentaifox] fix titles containing '@' ([#4201](https://github.com/mikf/gallery-dl/issues/4201))
+- [mangapark] update to v5 ([#3969](https://github.com/mikf/gallery-dl/issues/3969))
+- [piczel] update API server address ([#4244](https://github.com/mikf/gallery-dl/issues/4244))
+- [poipiku] improve error detection ([#4206](https://github.com/mikf/gallery-dl/issues/4206))
+- [sankaku] improve warnings for unavailable posts
+- [senmanga] ensure download URLs have a scheme ([#4235](https://github.com/mikf/gallery-dl/issues/4235))
+
 ## 1.25.6 - 2023-06-17
 ### Additions
 - [blogger] download files from `lh*.googleusercontent.com` ([#4070](https://github.com/mikf/gallery-dl/issues/4070))
