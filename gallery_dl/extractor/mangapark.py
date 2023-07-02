@@ -9,7 +9,7 @@
 """Extractors for https://mangapark.net/"""
 
 from .common import ChapterExtractor, Extractor, Message
-from .. import text, util
+from .. import text, util, exception
 import re
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?mangapark\.(?:net|com|org|io|me)"
@@ -99,7 +99,8 @@ class MangaparkChapterExtractor(MangaparkBase, ChapterExtractor):
             "title"     : chapter["title"] or title or "",
             "lang"      : chapter["lang"],
             "language"  : util.code_to_language(chapter["lang"]),
-            "source"    : chapter["srcTitle"],
+            "source"    : source["srcTitle"],
+            "source_id" : source["id"],
             "date"      : text.parse_timestamp(chapter["dateCreate"] // 1000),
         }
 
@@ -127,8 +128,19 @@ class MangaparkMangaExtractor(MangaparkBase, Extractor):
                 "language": "English",
                 "manga_id": 114972,
                 "source": "re:Horse|Koala",
+                "source_id": int,
                 "title": str,
                 "volume": int,
+            },
+        }),
+        # 'source' option
+        ("https://mangapark.net/title/114972-aria", {
+            "options": (("source", "koala"),),
+            "count": 70,
+            "pattern": MangaparkChapterExtractor.pattern,
+            "keyword": {
+                "source": "Koala",
+                "source_id": 15150116,
             },
         }),
         ("https://mangapark.com/title/114972-"),
@@ -168,9 +180,12 @@ class MangaparkMangaExtractor(MangaparkBase, Extractor):
 
     def chapters(self):
         source = self.config("source")
-        if source:
-            return self.chapters_source(source)
-        return self.chapters_all()
+        if not source:
+            return self.chapters_all()
+
+        source_id = self._select_source(source)
+        self.log.debug("Requesting chapters for source_id %s", source_id)
+        return self.chapters_source(source_id)
 
     def chapters_all(self):
         pnum = 0
@@ -202,9 +217,34 @@ class MangaparkMangaExtractor(MangaparkBase, Extractor):
         variables = {
             "sourceId": source_id,
         }
-
-        yield from self._request_graphql(
+        chapters = self._request_graphql(
             "get_content_source_chapterList", variables)
+
+        if self.config("chapter-reverse"):
+            chapters.reverse()
+        return chapters
+
+    def _select_source(self, source):
+        if isinstance(source, int):
+            return source
+
+        group, _, lang = source.partition(":")
+        group = group.lower()
+
+        variables = {
+            "comicId"    : self.manga_id,
+            "dbStatuss"  : ["normal"],
+            "haveChapter": True,
+        }
+        for item in self._request_graphql(
+                "get_content_comic_sources", variables):
+            data = item["data"]
+            if (not group or data["srcTitle"].lower() == group) and (
+                    not lang or data["lang"] == lang):
+                return data["id"]
+
+        raise exception.StopExtraction(
+            "'%s' does not match any available source", source)
 
     def _request_graphql(self, opname, variables):
         url = self.root + "/apo/"
@@ -373,6 +413,56 @@ is_adm is_mod is_vip is_upr
 
 
   }
+
+    }
+  }
+""",
+
+    "get_content_comic_sources": """
+  query get_content_comic_sources($comicId: Int!, $dbStatuss: [String] = [], $userId: Int, $haveChapter: Boolean, $sortFor: String) {
+    get_content_comic_sources(
+      comicId: $comicId
+      dbStatuss: $dbStatuss
+      userId: $userId
+      haveChapter: $haveChapter
+      sortFor: $sortFor
+    ) {
+
+id
+data{
+
+  id
+
+  dbStatus
+  isNormal
+  isHidden
+  isDeleted
+
+  lang name altNames authors artists
+
+  release
+  genres summary{code} extraInfo{code}
+
+  urlCover600
+  urlCover300
+  urlCoverOri
+
+  srcTitle srcColor
+
+  chapterCount
+  chapterNode_last {
+    id
+    data {
+      dateCreate datePublic dateModify
+      volume serial
+      dname title
+      urlPath
+      userNode {
+        id data {uniq name}
+      }
+    }
+  }
+}
 
     }
   }
