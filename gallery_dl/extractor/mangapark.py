@@ -172,6 +172,7 @@ class MangaparkMangaExtractor(MangaparkBase, Extractor):
                 "lang"      : chapter["lang"],
                 "language"  : util.code_to_language(chapter["lang"]),
                 "source"    : chapter["srcTitle"],
+                "source_id" : chapter["sourceId"],
                 "date"      : text.parse_timestamp(
                     chapter["dateCreate"] // 1000),
                 "_extractor": MangaparkChapterExtractor,
