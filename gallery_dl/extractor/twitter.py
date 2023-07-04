@@ -510,13 +510,13 @@ class TwitterTimelineExtractor(TwitterExtractor):
         if not self.textonly:
             # try to search for media-only tweets
             tweet = None
-            for tweet in self.api.search_adaptive(query + " filter:links"):
+            for tweet in self.api.search_timeline(query + " filter:links"):
                 yield tweet
             if tweet is not None:
                 return
 
         # yield unfiltered search results
-        yield from self.api.search_adaptive(query)
+        yield from self.api.search_timeline(query)
 
     def _select_tweet_source(self):
         strategy = self.config("strategy")
@@ -693,7 +693,7 @@ class TwitterSearchExtractor(TwitterExtractor):
             except KeyError:
                 pass
 
-        return self.api.search_adaptive(query)
+        return self.api.search_timeline(query)
 
 
 class TwitterHashtagExtractor(TwitterExtractor):
@@ -1087,8 +1087,8 @@ class TwitterAPI():
         auth_token = cookies.get("auth_token", domain=cookiedomain)
 
         search = extractor.config("search-endpoint")
-        if search == "graphql" or not auth_token and search in ("auto", None):
-            self.search_adaptive = self.search_timeline
+        if search == "rest":
+            self.search_timeline = self.search_adaptive
 
         self.headers = {
             "Accept": "*/*",
