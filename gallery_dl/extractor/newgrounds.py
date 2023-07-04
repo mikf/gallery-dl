@@ -90,11 +90,13 @@ class NewgroundsExtractor(Extractor):
         headers = {"Origin": self.root, "Referer": url}
         url = text.urljoin(self.root, text.extr(
             response.text, 'action="', '"'))
+        auth_token = text.extr(response.text, 'name="auth" value="', '"')
         data = {
             "username": username,
             "password": password,
             "remember": "1",
             "login"   : "1",
+            "auth"    : auth_token
         }
 
         response = self.request(url, method="POST", headers=headers, data=data)
