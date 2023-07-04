@@ -3183,6 +3183,19 @@ Description
     a quoted (original) Tweet when it sees the Tweet which quotes it.
 
 
+extractor.twitter.ratelimit
+---------------------------
+Type
+    ``string``
+Default
+    ``"wait"``
+Description
+    Selects how to handle exceeding the API rate limit.
+
+    * ``"abort"``: Raise an error and stop extraction
+    * ``"wait"``: Wait until rate limit reset
+
+
 extractor.twitter.replies
 -------------------------
 Type

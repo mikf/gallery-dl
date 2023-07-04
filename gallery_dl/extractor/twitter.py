@@ -1439,6 +1439,9 @@ class TwitterAPI():
 
             if response.status_code == 429:
                 # rate limit exceeded
+                if self.extractor.config("ratelimit") == "abort":
+                    raise exception.StopExtraction("Rate limit exceeded")
+
                 until = response.headers.get("x-rate-limit-reset")
                 seconds = None if until else 60
                 self.extractor.wait(until=until, seconds=seconds)
