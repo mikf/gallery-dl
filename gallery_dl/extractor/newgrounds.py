@@ -87,16 +87,15 @@ class NewgroundsExtractor(Extractor):
         if response.history and response.url.endswith("/social"):
             return self.session.cookies
 
+        page = response.text
         headers = {"Origin": self.root, "Referer": url}
-        url = text.urljoin(self.root, text.extr(
-            response.text, 'action="', '"'))
-        auth_token = text.extr(response.text, 'name="auth" value="', '"')
+        url = text.urljoin(self.root, text.extr(page, 'action="', '"'))
         data = {
             "username": username,
             "password": password,
             "remember": "1",
             "login"   : "1",
-            "auth"    : auth_token
+            "auth"    : text.extr(page, 'name="auth" value="', '"'),
         }
 
         response = self.request(url, method="POST", headers=headers, data=data)
