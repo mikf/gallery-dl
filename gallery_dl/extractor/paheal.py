@@ -96,8 +96,9 @@ class PahealTagExtractor(PahealExtractor):
             url = "{}/post/list/{}/{}".format(self.root, self.tags, pnum)
             page = self.request(url).text
 
+            pos = page.find("id='image-list'")
             for post in text.extract_iter(
-                    page, '<img id="thumb_', 'Only</a>'):
+                    page, "<img id='thumb_", "Only</a>", pos):
                 yield self._extract_data(post)
 
             if ">Next<" not in page:
@@ -106,10 +107,10 @@ class PahealTagExtractor(PahealExtractor):
 
     @staticmethod
     def _extract_data(post):
-        pid , pos = text.extract(post, '', '"')
-        data, pos = text.extract(post, 'title="', '"', pos)
-        md5 , pos = text.extract(post, '/_thumbs/', '/', pos)
-        url , pos = text.extract(post, '<a href="', '"', pos)
+        pid , pos = text.extract(post, "", "'")
+        data, pos = text.extract(post, "title='", "'", pos)
+        md5 , pos = text.extract(post, "/_thumbs/", "/", pos)
+        url , pos = text.extract(post, "<a href='", "'", pos)
 
         tags, data, date = data.split("\n")
         dimensions, size, ext = data.split(" // ")
@@ -139,19 +140,19 @@ class PahealPostExtractor(PahealExtractor):
         ("https://rule34.paheal.net/post/view/481609", {
             "pattern": r"https://tulip\.paheal\.net/_images"
                        r"/bbdc1c33410c2cdce7556c7990be26b7/481609%20-%20"
-                       r"Azumanga_Daioh%20Osaka%20Vuvuzela%20inanimate\.jpg",
+                       r"Azumanga_Daioh%20inanimate%20Osaka%20Vuvuzela\.jpg",
             "content": "7b924bcf150b352ac75c9d281d061e174c851a11",
             "keyword": {
                 "date": "dt:2010-06-17 15:40:23",
                 "extension": "jpg",
                 "file_url": "re:https://tulip.paheal.net/_images/bbdc1c33410c",
-                "filename": "481609 - Azumanga_Daioh Osaka Vuvuzela inanimate",
+                "filename": "481609 - Azumanga_Daioh inanimate Osaka Vuvuzela",
                 "height": 660,
                 "id": 481609,
                 "md5": "bbdc1c33410c2cdce7556c7990be26b7",
                 "size": 157389,
                 "source": None,
-                "tags": "Azumanga_Daioh Osaka Vuvuzela inanimate",
+                "tags": "Azumanga_Daioh inanimate Osaka Vuvuzela",
                 "uploader": "CaptainButtface",
                 "width": 614,
             },
@@ -163,7 +164,7 @@ class PahealPostExtractor(PahealExtractor):
                 "md5": "b39edfe455a0381110c710d6ed2ef57d",
                 "size": 758989,
                 "source": "http://www.furaffinity.net/view/4057821/",
-                "tags": "Vuvuzela inanimate thelost-dragon",
+                "tags": "inanimate thelost-dragon Vuvuzela",
                 "uploader": "leacheate_soup",
                 "width": 1200,
             },
@@ -171,8 +172,8 @@ class PahealPostExtractor(PahealExtractor):
         # video
         ("https://rule34.paheal.net/post/view/3864982", {
             "pattern": r"https://[\w]+\.paheal\.net/_images/7629fc0ff77e32637d"
-                       r"de5bf4f992b2cb/3864982%20-%20Metal_Gear%20Metal_Gear_"
-                       r"Solid_V%20Quiet%20Vg_erotica%20animated%20webm\.webm",
+                       r"de5bf4f992b2cb/3864982%20-%20animated%20Metal_Gear%20"
+                       r"Metal_Gear_Solid_V%20Quiet%20Vg_erotica%20webm\.webm",
             "keyword": {
                 "date": "dt:2020-09-06 01:59:03",
                 "duration": 30.0,
@@ -183,8 +184,8 @@ class PahealPostExtractor(PahealExtractor):
                 "size": 18454938,
                 "source": "https://twitter.com/VG_Worklog"
                           "/status/1302407696294055936",
-                "tags": "Metal_Gear Metal_Gear_Solid_V Quiet "
-                        "Vg_erotica animated webm",
+                "tags": "animated Metal_Gear Metal_Gear_Solid_V "
+                        "Quiet Vg_erotica webm",
                 "uploader": "justausername",
                 "width": 1768,
             },
