@@ -170,6 +170,8 @@ class WeiboExtractor(Extractor):
             yield from statuses
 
             if "next_cursor" in data:  # videos, newvideo
+                if data["next_cursor"] == -1:
+                    return
                 params["cursor"] = data["next_cursor"]
             elif "page" in params:     # home, article
                 params["page"] += 1
