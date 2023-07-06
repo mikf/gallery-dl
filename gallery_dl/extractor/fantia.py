@@ -23,6 +23,7 @@ class FantiaExtractor(Extractor):
         self.headers = {
             "Accept" : "application/json, text/plain, */*",
             "Referer": self.root,
+            "X-Requested-With": "XMLHttpRequest",
         }
         _empty_plan = {
             "id"   : 0,
