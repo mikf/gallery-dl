@@ -251,7 +251,7 @@ Consider all sites to be NSFW unless otherwise known.
     <td>Gfycat</td>
     <td>https://gfycat.com/</td>
     <td>Collections, individual Images, Search Results, User Profiles</td>
-    <td></td>
+    <td>Supported</td>
 </tr>
 <tr>
     <td>Gofile</td>
