@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2017-2022 Mike Fährmann
+# Copyright 2017-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -80,6 +80,8 @@ class GfycatUserExtractor(GfycatExtractor):
     })
 
     def gfycats(self):
+        if self.key == "me":
+            return GfycatAPI(self).me()
         return GfycatAPI(self).user(self.key)
 
 
@@ -220,15 +222,6 @@ class GfycatAPI():
     def __init__(self, extractor):
         self.extractor = extractor
 
-    def gfycat(self, gfycat_id):
-        endpoint = "/v1/gfycats/" + gfycat_id
-        return self._call(endpoint)["gfyItem"]
-
-    def user(self, user):
-        endpoint = "/v1/users/{}/gfycats".format(user.lower())
-        params = {"count": 100}
-        return self._pagination(endpoint, params)
-
     def collection(self, user, collection):
         endpoint = "/v1/users/{}/collections/{}/gfycats".format(
             user, collection)
@@ -240,9 +233,23 @@ class GfycatAPI():
         params = {"count": 100}
         return self._pagination(endpoint, params, "gfyCollections")
 
+    def gfycat(self, gfycat_id):
+        endpoint = "/v1/gfycats/" + gfycat_id
+        return self._call(endpoint)["gfyItem"]
+
+    def me(self):
+        endpoint = "/v1/me/gfycats"
+        params = {"count": 100}
+        return self._pagination(endpoint, params)
+
     def search(self, query):
         endpoint = "/v1/gfycats/search"
         params = {"search_text": query, "count": 150}
+        return self._pagination(endpoint, params)
+
+    def user(self, user):
+        endpoint = "/v1/users/{}/gfycats".format(user.lower())
+        params = {"count": 100}
         return self._pagination(endpoint, params)
 
     def _call(self, endpoint, params=None):
