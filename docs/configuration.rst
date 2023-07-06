@@ -382,6 +382,7 @@ Description
     * ``e621`` (*)
     * ``e926`` (*)
     * ``exhentai``
+    * ``gfycat``
     * ``idolcomplex``
     * ``imgbb``
     * ``inkbunny``

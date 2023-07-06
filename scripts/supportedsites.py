@@ -312,6 +312,7 @@ AUTH_MAP = {
     "fanbox"         : _COOKIES,
     "fantia"         : _COOKIES,
     "flickr"         : _OAUTH,
+    "gfycat"         : "Supported",
     "furaffinity"    : _COOKIES,
     "horne"          : "Required",
     "idolcomplex"    : "Supported",

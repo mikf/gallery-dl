@@ -10,6 +10,7 @@
 
 from .common import Extractor, Message
 from .. import text, exception
+from ..cache import cache
 
 
 class GfycatExtractor(Extractor):
@@ -221,6 +222,8 @@ class GfycatAPI():
 
     def __init__(self, extractor):
         self.extractor = extractor
+        self.headers = {}
+        self.username, self.password = extractor._get_auth_info()
 
     def collection(self, user, collection):
         endpoint = "/v1/users/{}/collections/{}/gfycats".format(
@@ -252,9 +255,45 @@ class GfycatAPI():
         params = {"count": 100}
         return self._pagination(endpoint, params)
 
+    def authenticate(self):
+        self.headers["Authorization"] = \
+            self._authenticate_impl(self.username, self.password)
+
+    @cache(maxage=3600, keyarg=1)
+    def _authenticate_impl(self, username, password):
+        self.extractor.log.info("Logging in as %s", username)
+
+        url = "https://weblogin.gfycat.com/oauth/webtoken"
+        headers = {"Origin": "https://gfycat.com"}
+        data = {
+            "access_key": "Anr96uuqt9EdamSCwK4txKPjMsf2"
+                          "M95Rfa5FLLhPFucu8H5HTzeutyAa",
+        }
+        response = self.extractor.request(
+            url, method="POST", headers=headers, json=data).json()
+
+        url = "https://weblogin.gfycat.com/oauth/weblogin"
+        headers["authorization"] = "Bearer " + response["access_token"]
+        data = {
+            "grant_type": "password",
+            "username"  : username,
+            "password"  : password,
+        }
+        response = self.extractor.request(
+            url, method="POST", headers=headers, json=data, fatal=None).json()
+
+        if "errorMessage" in response:
+            raise exception.AuthenticationError(
+                response["errorMessage"]["description"])
+        return "Bearer " + response["access_token"]
+
     def _call(self, endpoint, params=None):
+        if self.username:
+            self.authenticate()
+
         url = self.API_ROOT + endpoint
-        return self.extractor.request(url, params=params).json()
+        return self.extractor.request(
+            url, params=params, headers=self.headers).json()
 
     def _pagination(self, endpoint, params, key="gfycats"):
         while True:
