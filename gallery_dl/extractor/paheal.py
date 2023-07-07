@@ -127,7 +127,7 @@ class PahealTagExtractor(PahealExtractor):
         }
 
     def _extract_data_ex(self, post):
-        pid = post[:post.index('"')]
+        pid = post[:post.index("'")]
         return self._extract_post(pid)
 
 
