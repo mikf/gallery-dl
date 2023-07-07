@@ -55,8 +55,8 @@ class PahealExtractor(Extractor):
                 "class='username' href='/user/", "'")),
             "date"    : text.parse_datetime(
                 extr("datetime='", "'"), "%Y-%m-%dT%H:%M:%S%z"),
-            "source"  : text.extract(
-                extr(">Source&nbsp;Link<", "</td>"), "href='", "'")[0],
+            "source"  : text.unescape(text.extr(
+                extr(">Source&nbsp;Link<", "</td>"), "href='", "'")),
         }
 
         dimensions, size, ext = extr("Info</th><td>", ">").split(" // ")
@@ -74,10 +74,34 @@ class PahealTagExtractor(PahealExtractor):
     directory_fmt = ("{category}", "{search_tags}")
     pattern = (r"(?:https?://)?(?:rule34|rule63|cosplay)\.paheal\.net"
                r"/post/list/([^/?#]+)")
-    test = ("https://rule34.paheal.net/post/list/Ayane_Suzuki/1", {
-        "pattern": r"https://[^.]+\.paheal\.net/_images/\w+/\d+%20-%20",
-        "count": ">= 15"
-    })
+    test = (
+        ("https://rule34.paheal.net/post/list/Ayane_Suzuki/1", {
+            "pattern": r"https://[^.]+\.paheal\.net/_images/\w+/\d+%20-%20",
+            "count": ">= 15"
+        }),
+        ("https://rule34.paheal.net/post/list/Ayane_Suzuki/1", {
+            "range": "1",
+            "options": (("metadata", True),),
+            "keyword": {
+                "date": "dt:2018-01-07 07:04:05",
+                "duration": 0.0,
+                "extension": "jpg",
+                "filename": "2446128 - Ayane_Suzuki Idolmaster "
+                            "idolmaster_dearly_stars Zanzi",
+                "height": 768,
+                "id": 2446128,
+                "md5": "b0ceda9d860df1d15b60293a7eb465c1",
+                "search_tags": "Ayane_Suzuki",
+                "size": 205312,
+                "source": "https://www.pixiv.net/member_illust.php"
+                          "?mode=medium&illust_id=19957280",
+                "tags": "Ayane_Suzuki Idolmaster "
+                        "idolmaster_dearly_stars Zanzi",
+                "uploader": "XXXname",
+                "width": 1024,
+            },
+        }),
+    )
     per_page = 70
 
     def __init__(self, match):
@@ -151,7 +175,7 @@ class PahealPostExtractor(PahealExtractor):
                 "id": 481609,
                 "md5": "bbdc1c33410c2cdce7556c7990be26b7",
                 "size": 157389,
-                "source": None,
+                "source": "",
                 "tags": "Azumanga_Daioh inanimate Osaka Vuvuzela",
                 "uploader": "CaptainButtface",
                 "width": 614,
