@@ -69,7 +69,8 @@ class FantiaExtractor(Extractor):
 
     def _pagination(self, url):
         params = {"page": 1}
-        headers = self.headers
+        headers = self.headers.copy()
+        del headers["X-Requested-With"]
 
         while True:
             page = self.request(url, params=params, headers=headers).text
