@@ -87,6 +87,8 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
             url = text.unescape(url)
             if url.endswith((".mp4", ".m4v", ".mov", ".webm", ".mkv", ".ts",
                              ".zip", ".rar", ".7z")):
+                if "12.bunkr.ru" in url:
+                    url = url.replace("12.bunkr.la")
                 append({"file": url.replace("://cdn", "://media-files", 1),
                         "_http_headers": headers})
             else:
