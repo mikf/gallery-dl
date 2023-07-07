@@ -52,6 +52,11 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
                 "num": int,
             },
         }),
+        # cdn12 .ru TLD (#4147)
+        ("https://bunkrr.su/a/j1G29CnD", {
+            "pattern": r"https://(cdn12.bunkr.ru|media-files12.bunkr.la)/\w+",
+            "count": 8,
+        }),
         ("https://bunkrr.su/a/Lktg9Keq"),
         ("https://bunkr.la/a/Lktg9Keq"),
         ("https://bunkr.su/a/Lktg9Keq"),
@@ -87,10 +92,12 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
             url = text.unescape(url)
             if url.endswith((".mp4", ".m4v", ".mov", ".webm", ".mkv", ".ts",
                              ".zip", ".rar", ".7z")):
-                append({"file": url.replace("://cdn", "://media-files", 1),
-                        "_http_headers": headers})
-            else:
-                append({"file": url})
+                if url.startswith("https://cdn12."):
+                    url = ("https://media-files12.bunkr.la" +
+                           url[url.find("/", 14):])
+                else:
+                    url = url.replace("://cdn", "://media-files", 1)
+            append({"file": url, "_http_headers": headers})
 
         return files, {
             "album_id"   : self.album_id,
