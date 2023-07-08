@@ -929,16 +929,15 @@ Your reaction.""",
     def _tweets_single(self, tweet_id):
         tweets = []
 
-        for tweet in self.api.tweet_detail(tweet_id):
-            if tweet["rest_id"] == tweet_id or \
-                    tweet.get("_retweet_id_str") == tweet_id:
-                if self._user_obj is None:
-                    self._assign_user(tweet["core"]["user_results"]["result"])
-                tweets.append(tweet)
+        tweet = self.api.tweet_result_by_rest_id(tweet_id)
+        self._assign_user(tweet["core"]["user_results"]["result"])
 
-                tweet_id = tweet["legacy"].get("quoted_status_id_str")
-                if not tweet_id:
-                    break
+        while True:
+            tweets.append(tweet)
+            tweet_id = tweet["legacy"].get("quoted_status_id_str")
+            if not tweet_id:
+                break
+            tweet = self.api.tweet_result_by_rest_id(tweet_id)
 
         return tweets
 
@@ -1178,6 +1177,46 @@ class TwitterAPI():
             "longform_notetweets_inline_media_enabled": False,
             "responsive_web_enhance_cards_enabled": False,
         }
+
+    def tweet_result_by_rest_id(self, tweet_id):
+        endpoint = "/graphql/2ICDjqPd81tulZcYrtpTuQ/TweetResultByRestId"
+        params = {
+            "variables": self._json_dumps({
+                "tweetId": tweet_id,
+                "withCommunity": False,
+                "includePromotedContent": False,
+                "withVoice": False,
+            }),
+            "features": self._json_dumps({
+                "creator_subscriptions_tweet_preview_api_enabled": True,
+                "tweetypie_unmention_optimization_enabled": True,
+                "responsive_web_edit_tweet_api_enabled": True,
+                "graphql_is_translatable_rweb_tweet_is_translatable_enabled":
+                    True,
+                "view_counts_everywhere_api_enabled": True,
+                "longform_notetweets_consumption_enabled": True,
+                "responsive_web_twitter_article_tweet_consumption_enabled":
+                    False,
+                "tweet_awards_web_tipping_enabled": False,
+                "freedom_of_speech_not_reach_fetch_enabled": True,
+                "standardized_nudges_misinfo": True,
+                "tweet_with_visibility_results_prefer_gql_"
+                "limited_actions_policy_enabled": True,
+                "longform_notetweets_rich_text_read_enabled": True,
+                "longform_notetweets_inline_media_enabled": True,
+                "responsive_web_graphql_exclude_directive_enabled": True,
+                "verified_phone_label_enabled": False,
+                "responsive_web_media_download_video_enabled": False,
+                "responsive_web_graphql_skip_user_profile_"
+                "image_extensions_enabled": False,
+                "responsive_web_graphql_timeline_navigation_enabled": True,
+                "responsive_web_enhance_cards_enabled": False,
+            }),
+            "fieldToggles": self._json_dumps({
+                "withArticleRichContentState": False,
+            }),
+        }
+        return self._call(endpoint, params)["data"]["tweetResult"]["result"]
 
     def tweet_detail(self, tweet_id):
         endpoint = "/graphql/JlLZj42Ltr2qwjasw-l5lQ/TweetDetail"
