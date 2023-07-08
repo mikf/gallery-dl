@@ -1762,9 +1762,8 @@ class TwitterAPI():
                                     yield user
                         elif entry["entryId"].startswith("cursor-bottom-"):
                             cursor = entry["content"]["value"]
-                elif instr["type"] == "TimelineTerminateTimeline":
-                    if instr["direction"] == "Bottom":
-                        stop = True
+                            if (cursor.startswith("-1|") or cursor.startswith("0|")):
+                                stop = True
 
             if stop or not cursor or not entry:
                 return
