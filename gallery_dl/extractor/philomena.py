@@ -19,6 +19,7 @@ class PhilomenaExtractor(BooruExtractor):
     filename_fmt = "{filename}.{extension}"
     archive_fmt = "{id}"
     request_interval = 1.0
+    page_start = 1
     per_page = 50
 
     _file_url = operator.itemgetter("view_url")
@@ -28,7 +29,7 @@ class PhilomenaExtractor(BooruExtractor):
         post["date"] = text.parse_datetime(post["created_at"])
 
     def _pagination(self, url, params):
-        params["page"] = 1
+        params["page"] = self.page_start
         params["per_page"] = self.per_page
 
         api_key = self.config("api-key")
