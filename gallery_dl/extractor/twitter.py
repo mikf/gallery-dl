@@ -1595,7 +1595,9 @@ class TwitterAPI():
                         if entry["entryId"].startswith("cursor-bottom-"):
                             cursor = entry["content"]["value"]
                 if entries is None:
-                    raise KeyError()
+                    if not cursor:
+                        return
+                    entries = ()
 
             except LookupError:
                 extr.log.debug(data)
