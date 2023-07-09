@@ -32,7 +32,7 @@ class WikifeetGalleryExtractor(GalleryExtractor):
                 "pid"       : int,
                 "width"     : int,
                 "height"    : int,
-                "shoesize"  : "7.5 US",
+                "shoesize"  : "9 US",
                 "type"      : "women",
                 "tags"      : list,
             },
@@ -50,7 +50,7 @@ class WikifeetGalleryExtractor(GalleryExtractor):
                 "pid"       : int,
                 "width"     : int,
                 "height"    : int,
-                "shoesize"  : "[NOT SET]",
+                "shoesize"  : "4 US",
                 "type"      : "women",
                 "tags"      : list,
             },
@@ -111,7 +111,10 @@ class WikifeetGalleryExtractor(GalleryExtractor):
                 "pid"   : data["pid"],
                 "width" : data["pw"],
                 "height": data["ph"],
-                "tags"  : [tagmap[tag] for tag in data["tags"]],
+                "tags"  : [
+                    tagmap[tag]
+                    for tag in data["tags"] if tag in tagmap
+                ],
             })
             for data in util.json_loads(text.extr(page, "['gdata'] = ", ";"))
         ]
