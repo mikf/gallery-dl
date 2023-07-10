@@ -1733,7 +1733,7 @@ class TwitterAPI():
                   "features" : self._json_dumps(self.features_pagination)}
 
         while True:
-            cursor = entry = stop = None
+            cursor = entry = None
             params["variables"] = self._json_dumps(variables)
             data = self._call(endpoint, params)["data"]
 
@@ -1762,11 +1762,8 @@ class TwitterAPI():
                                     yield user
                         elif entry["entryId"].startswith("cursor-bottom-"):
                             cursor = entry["content"]["value"]
-                            if cursor.startswith("-1|") or \
-                                    cursor.startswith("0|"):
-                                stop = True
 
-            if stop or not cursor or not entry:
+            if not cursor or cursor.startswith(("-1|", "0|")) or not entry:
                 return
             variables["cursor"] = cursor
 
