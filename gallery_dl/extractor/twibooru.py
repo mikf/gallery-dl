@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2022 Mike Fährmann
+# Copyright 2022-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -22,6 +22,7 @@ class TwibooruExtractor(BooruExtractor):
     filename_fmt = "{id}_{filename}.{extension}"
     archive_fmt = "{id}"
     request_interval = 6.05
+    page_start = 1
     per_page = 50
     root = "https://twibooru.org"
 
@@ -230,7 +231,7 @@ class TwibooruAPI():
         elif not api_key:
             params["filter_id"] = "2"
 
-        params["page"] = 1
+        params["page"] = extr.page_start
         params["per_page"] = per_page = extr.per_page
 
         while True:
