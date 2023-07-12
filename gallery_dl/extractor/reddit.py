@@ -377,6 +377,18 @@ class RedditAPI():
             self.client_id = client_id
             self.headers = {"User-Agent": config("user-agent")}
 
+        if self.client_id == self.CLIENT_ID:
+            client_id = self.client_id
+            self._warn_429 = True
+            kind = "default"
+        else:
+            client_id = client_id[:5] + "*" * (len(client_id)-5)
+            self._warn_429 = False
+            kind = "custom"
+
+        self.log.debug(
+            "Using %s API credentials (client-id %s)", kind, client_id)
+
         token = config("refresh-token")
         if token is None or token == "cache":
             key = "#" + self.client_id
@@ -463,28 +475,39 @@ class RedditAPI():
     def _call(self, endpoint, params):
         url = "https://oauth.reddit.com" + endpoint
         params["raw_json"] = "1"
-        self.authenticate()
-        response = self.extractor.request(
-            url, params=params, headers=self.headers, fatal=None)
 
-        remaining = response.headers.get("x-ratelimit-remaining")
-        if remaining and float(remaining) < 2:
-            self.extractor.wait(seconds=response.headers["x-ratelimit-reset"])
-            return self._call(endpoint, params)
+        while True:
+            self.authenticate()
+            response = self.extractor.request(
+                url, params=params, headers=self.headers, fatal=None)
 
-        try:
-            data = response.json()
-        except ValueError:
-            raise exception.StopExtraction(text.remove_html(response.text))
+            remaining = response.headers.get("x-ratelimit-remaining")
+            if remaining and float(remaining) < 2:
+                if self._warn_429:
+                    self._warn_429 = False
+                    self.log.info(
+                        "Register your own OAuth application and use its "
+                        "credentials to prevent this error: "
+                        "https://github.com/mikf/gallery-dl/blob/master"
+                        "/docs/configuration.rst"
+                        "#extractorredditclient-id--user-agent")
+                self.extractor.wait(
+                    seconds=response.headers["x-ratelimit-reset"])
+                continue
 
-        if "error" in data:
-            if data["error"] == 403:
-                raise exception.AuthorizationError()
-            if data["error"] == 404:
-                raise exception.NotFoundError()
-            self.log.debug(data)
-            raise exception.StopExtraction(data.get("message"))
-        return data
+            try:
+                data = response.json()
+            except ValueError:
+                raise exception.StopExtraction(text.remove_html(response.text))
+
+            if "error" in data:
+                if data["error"] == 403:
+                    raise exception.AuthorizationError()
+                if data["error"] == 404:
+                    raise exception.NotFoundError()
+                self.log.debug(data)
+                raise exception.StopExtraction(data.get("message"))
+            return data
 
     def _pagination(self, endpoint, params):
         id_min = self._parse_id("id-min", 0)
