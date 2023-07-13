@@ -24,7 +24,6 @@ modules = [
     "artstation",
     "aryion",
     "bbc",
-    "bcy",
     "behance",
     "blogger",
     "bunkr",

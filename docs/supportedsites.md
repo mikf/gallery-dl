@@ -1009,12 +1009,6 @@ Consider all sites to be NSFW unless otherwise known.
     <td>Posts, Tag Searches</td>
     <td></td>
 </tr>
-<tr>
-    <td>半次元</td>
-    <td>https://bcy.net/</td>
-    <td>Posts, User Profiles</td>
-    <td></td>
-</tr>
 
 <tr>
     <td colspan="4"><strong>Danbooru Instances</strong></td>
