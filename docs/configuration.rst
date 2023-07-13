@@ -5114,6 +5114,10 @@ How To
       ``user-agent`` and replace ``<application name>`` and ``<username>``
       accordingly (see Reddit's
       `API access rules <https://github.com/reddit/reddit/wiki/API>`__)
+    * clear your `cache <cache.file_>`__ to delete any remaining
+      ``access-token`` entries. (``gallery-dl --clear-cache reddit``)
+    * get a `refresh-token <extractor.reddit.refresh-token_>`__ for the
+      new ``client-id`` (``gallery-dl oauth:reddit``)
 
 
 extractor.smugmug.api-key & .api-secret
