@@ -28,7 +28,6 @@ CATEGORY_MAP = {
     "b4k"            : "arch.b4k.co",
     "baraag"         : "baraag",
     "bbc"            : "BBC",
-    "bcy"            : "半次元",
     "comicvine"      : "Comic Vine",
     "coomerparty"    : "Coomer",
     "deviantart"     : "DeviantArt",
