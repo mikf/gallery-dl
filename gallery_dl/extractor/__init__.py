@@ -84,7 +84,6 @@ modules = [
     "lensdump",
     "lexica",
     "lightroom",
-    "lineblog",
     "livedoor",
     "luscious",
     "lynxchan",
