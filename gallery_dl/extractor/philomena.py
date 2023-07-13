@@ -22,36 +22,15 @@ class PhilomenaExtractor(BooruExtractor):
     page_start = 1
     per_page = 50
 
+    def __init__(self, match):
+        BooruExtractor.__init__(self, match)
+        self.api = PhilomenaAPI(self)
+
     _file_url = operator.itemgetter("view_url")
 
     @staticmethod
     def _prepare(post):
         post["date"] = text.parse_datetime(post["created_at"])
-
-    def _pagination(self, url, params):
-        params["page"] = self.page_start
-        params["per_page"] = self.per_page
-
-        api_key = self.config("api-key")
-        if api_key:
-            params["key"] = api_key
-
-        filter_id = self.config("filter")
-        if filter_id:
-            params["filter_id"] = filter_id
-        elif not api_key:
-            try:
-                params["filter_id"] = INSTANCES[self.category]["filter_id"]
-            except (KeyError, TypeError):
-                params["filter_id"] = "2"
-
-        while True:
-            data = self.request(url, params=params).json()
-            yield from data["images"]
-
-            if len(data["images"]) < self.per_page:
-                return
-            params["page"] += 1
 
 
 INSTANCES = {
@@ -147,8 +126,7 @@ class PhilomenaPostExtractor(PhilomenaExtractor):
         self.image_id = match.group(match.lastindex)
 
     def posts(self):
-        url = self.root + "/api/v1/json/images/" + self.image_id
-        return (self.request(url).json()["image"],)
+        return (self.api.image(self.image_id),)
 
 
 class PhilomenaSearchExtractor(PhilomenaExtractor):
@@ -202,8 +180,7 @@ class PhilomenaSearchExtractor(PhilomenaExtractor):
         return {"search_tags": self.params.get("q", "")}
 
     def posts(self):
-        url = self.root + "/api/v1/json/search/images"
-        return self._pagination(url, self.params)
+        return self.api.search(self.params)
 
 
 class PhilomenaGalleryExtractor(PhilomenaExtractor):
@@ -240,15 +217,81 @@ class PhilomenaGalleryExtractor(PhilomenaExtractor):
         self.gallery_id = match.group(match.lastindex)
 
     def metadata(self):
-        url = self.root + "/api/v1/json/search/galleries"
-        params = {"q": "id:" + self.gallery_id}
-        galleries = self.request(url, params=params).json()["galleries"]
-        if not galleries:
+        try:
+            return {"gallery": self.api.gallery(self.gallery_id)}
+        except IndexError:
             raise exception.NotFoundError("gallery")
-        return {"gallery": galleries[0]}
 
     def posts(self):
         gallery_id = "gallery_id:" + self.gallery_id
-        url = self.root + "/api/v1/json/search/images"
         params = {"sd": "desc", "sf": gallery_id, "q": gallery_id}
-        return self._pagination(url, params)
+        return self.api.search(params)
+
+
+class PhilomenaAPI():
+    """Interface for the Philomena API
+
+    https://www.derpibooru.org/pages/api
+    """
+
+    def __init__(self, extractor):
+        self.extractor = extractor
+        self.root = extractor.root + "/api"
+
+    def gallery(self, gallery_id):
+        endpoint = "/v1/json/search/galleries"
+        params = {"q": "id:" + gallery_id}
+        return self._call(endpoint, params)["galleries"][0]
+
+    def image(self, image_id):
+        endpoint = "/v1/json/images/" + image_id
+        return self._call(endpoint)["image"]
+
+    def search(self, params):
+        endpoint = "/v1/json/search/images"
+        return self._pagination(endpoint, params)
+
+    def _call(self, endpoint, params=None):
+        url = self.root + endpoint
+
+        while True:
+            response = self.extractor.request(url, params=params, fatal=None)
+
+            if response.status_code < 400:
+                return response.json()
+
+            if response.status_code == 429:
+                self.extractor.wait(seconds=600)
+                continue
+
+            # error
+            self.extractor.log.debug(response.content)
+            raise exception.StopExtraction(
+                "%s %s", response.status_code, response.reason)
+
+    def _pagination(self, endpoint, params):
+        extr = self.extractor
+
+        api_key = extr.config("api-key")
+        if api_key:
+            params["key"] = api_key
+
+        filter_id = extr.config("filter")
+        if filter_id:
+            params["filter_id"] = filter_id
+        elif not api_key:
+            try:
+                params["filter_id"] = INSTANCES[extr.category]["filter_id"]
+            except (KeyError, TypeError):
+                params["filter_id"] = "2"
+
+        params["page"] = extr.page_start
+        params["per_page"] = extr.per_page
+
+        while True:
+            data = self._call(endpoint, params)
+            yield from data["images"]
+
+            if len(data["images"]) < extr.per_page:
+                return
+            params["page"] += 1
