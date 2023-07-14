@@ -58,6 +58,9 @@ class PornhubGalleryExtractor(PornhubExtractor):
         self._first = None
 
     def items(self):
+        self.session.cookies.set(
+            "accessAgeDisclaimerPH", "1", domain=".pornhub.com")
+
         data = self.metadata()
         yield Message.Directory, data
         for num, image in enumerate(self.images(), 1):
