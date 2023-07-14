@@ -87,7 +87,8 @@ class MangareadChapterExtractor(MangareadBase, ChapterExtractor):
     )
 
     def metadata(self, page):
-        data = {"tags": list(text.extract_iter(page, "class>", "<"))}
+        tags = text.extr(page, 'class="wp-manga-tags-list">', '</div>')
+        data = {"tags": list(text.split_html(tags)[::2])}
         info = text.extr(page, '<h1 id="chapter-heading">', "</h1>")
         if not info:
             raise exception.NotFoundError("chapter")
@@ -148,7 +149,7 @@ class MangareadMangaExtractor(MangareadBase, MangaExtractor):
             }
         }),
         ("https://www.mangaread.org/manga/doesnotexist", {
-            "exception": exception.NotFoundError,
+            "exception": exception.HttpError,
         }),
     )
 
