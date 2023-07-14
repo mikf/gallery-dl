@@ -1070,8 +1070,8 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
-    <td>/v/idyart</td>
-    <td>https://vidyart.booru.org/</td>
+    <td>/v/idyart2</td>
+    <td>https://vidyart2.booru.org/</td>
     <td>Favorites, Posts, Tag Searches</td>
     <td></td>
 </tr>

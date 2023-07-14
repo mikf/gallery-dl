@@ -78,9 +78,9 @@ BASE_PATTERN = GelbooruV01Extractor.update({
         "root": "https://drawfriends.booru.org",
         "pattern": r"drawfriends\.booru\.org",
     },
-    "vidyart": {
-        "root": "https://vidyart.booru.org",
-        "pattern": r"vidyart\.booru\.org",
+    "vidyart2": {
+        "root": "https://vidyart2.booru.org",
+        "pattern": r"vidyart2\.booru\.org",
     },
 })
 
@@ -106,7 +106,7 @@ class GelbooruV01TagExtractor(GelbooruV01Extractor):
             "count": 25,
         }),
         ("https://drawfriends.booru.org/index.php?page=post&s=list&tags=all"),
-        ("https://vidyart.booru.org/index.php?page=post&s=list&tags=all"),
+        ("https://vidyart2.booru.org/index.php?page=post&s=list&tags=all"),
     )
 
     def __init__(self, match):
@@ -141,7 +141,7 @@ class GelbooruV01FavoriteExtractor(GelbooruV01Extractor):
             "count": 4,
         }),
         ("https://drawfriends.booru.org/index.php?page=favorites&s=view&id=1"),
-        ("https://vidyart.booru.org/index.php?page=favorites&s=view&id=1"),
+        ("https://vidyart2.booru.org/index.php?page=favorites&s=view&id=1"),
     )
 
     def __init__(self, match):
@@ -193,7 +193,7 @@ class GelbooruV01PostExtractor(GelbooruV01Extractor):
             },
         }),
         ("https://drawfriends.booru.org/index.php?page=post&s=view&id=107474"),
-        ("https://vidyart.booru.org/index.php?page=post&s=view&id=383111"),
+        ("https://vidyart2.booru.org/index.php?page=post&s=view&id=39168"),
     )
 
     def __init__(self, match):
