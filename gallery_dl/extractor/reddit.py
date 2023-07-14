@@ -20,6 +20,7 @@ class RedditExtractor(Extractor):
     filename_fmt = "{id}{num:? //>02} {title[:220]}.{extension}"
     archive_fmt = "{filename}"
     cookiedomain = ".reddit.com"
+    request_interval = 0.6
 
     def items(self):
         self.api = RedditAPI(self)
