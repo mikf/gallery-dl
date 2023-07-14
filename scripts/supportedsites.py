@@ -119,7 +119,7 @@ CATEGORY_MAP = {
     "thecollection"  : "The /co/llection",
     "tumblrgallery"  : "TumblrGallery",
     "vanillarock"    : "もえぴりあ",
-    "vidyart"        : "/v/idyart",
+    "vidyart2"       : "/v/idyart2",
     "vk"             : "VK",
     "vsco"           : "VSCO",
     "wallpapercave"  : "Wallpaper Cave",
