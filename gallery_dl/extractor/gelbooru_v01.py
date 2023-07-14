@@ -27,7 +27,7 @@ class GelbooruV01Extractor(booru.BooruExtractor):
             "uploader"  : extr('By: ', ' <'),
             "width"     : extr('Size: ', 'x'),
             "height"    : extr('', ' <'),
-            "source"    : extr('Source: <a href="', '"'),
+            "source"    : extr('Source: ', ' <'),
             "rating"    : (extr('Rating: ', '<') or "?")[0].lower(),
             "score"     : extr('Score: ', ' <'),
             "file_url"  : extr('<img alt="img" src="', '"'),
