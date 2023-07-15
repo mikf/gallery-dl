@@ -1,5 +1,41 @@
 # Changelog
 
+## 1.25.8 - 2023-07-15
+### Changes
+- update default User-Agent header to Firefox 115 ESR
+### Additions
+- [gfycat] support `@me` user ([#3770](https://github.com/mikf/gallery-dl/issues/3770), [#4271](https://github.com/mikf/gallery-dl/issues/4271))
+- [gfycat] implement login support ([#3770](https://github.com/mikf/gallery-dl/issues/3770), [#4271](https://github.com/mikf/gallery-dl/issues/4271))
+- [reddit] notify users about registering an OAuth application ([#4292](https://github.com/mikf/gallery-dl/issues/4292))
+- [twitter] add `ratelimit` option ([#4251](https://github.com/mikf/gallery-dl/issues/4251))
+- [twitter] use `TweetResultByRestId` endpoint that allows accessing single Tweets without login ([#4250](https://github.com/mikf/gallery-dl/issues/4250))
+### Fixes
+- [bunkr] use `.la` TLD for `media-files12` servers ([#4147](https://github.com/mikf/gallery-dl/issues/4147), [#4276](https://github.com/mikf/gallery-dl/issues/4276))
+- [erome] ignore duplicate album IDs
+- [fantia] send `X-Requested-With` header ([#4273](https://github.com/mikf/gallery-dl/issues/4273))
+- [gelbooru_v01] fix `source` metadata ([#4302](https://github.com/mikf/gallery-dl/issues/4302), [#4303](https://github.com/mikf/gallery-dl/issues/4303))
+- [gelbooru_v01] update `vidyart` domain
+- [jpgfish] update domain to `jpeg.pet`
+- [mangaread] fix `tags` metadata extraction
+- [naverwebtoon] fix `comic` metadata extraction
+- [newgrounds] extract & pass auth token during login ([#4268](https://github.com/mikf/gallery-dl/issues/4268))
+- [paheal] fix extraction ([#4262](https://github.com/mikf/gallery-dl/issues/4262), [#4293](https://github.com/mikf/gallery-dl/issues/4293))
+- [paheal] unescape `source`
+- [philomena] fix `--range` ([#4288](https://github.com/mikf/gallery-dl/issues/4288))
+- [philomena] handle `429 Too Many Requests` errors ([#4288](https://github.com/mikf/gallery-dl/issues/4288))
+- [pornhub] set `accessAgeDisclaimerPH` cookie ([#4301](https://github.com/mikf/gallery-dl/issues/4301))
+- [reddit] use 0.6s delay between API requests ([#4292](https://github.com/mikf/gallery-dl/issues/4292))
+- [seiga] set `skip_fetish_warning` cookie ([#4242](https://github.com/mikf/gallery-dl/issues/4242))
+- [slideshare] fix extraction
+- [twitter] fix `following` extractor not getting all users ([#4287](https://github.com/mikf/gallery-dl/issues/4287))
+- [twitter] use GraphQL search endpoint by default ([#4264](https://github.com/mikf/gallery-dl/issues/4264))
+- [twitter] do not treat missing `TimelineAddEntries` instruction as fatal ([#4278](https://github.com/mikf/gallery-dl/issues/4278))
+- [weibo] fix cursor based pagination
+- [wikifeet] fix `tag` extraction ([#4289](https://github.com/mikf/gallery-dl/issues/4289), [#4291](https://github.com/mikf/gallery-dl/issues/4291))
+### Removals
+- [bcy] remove module
+- [lineblog] remove module
+
 ## 1.25.7 - 2023-07-02
 ### Additions
 - [flickr] add 'exif' option
