@@ -24,7 +24,7 @@ class KemonopartyExtractor(Extractor):
     category = "kemonoparty"
     root = "https://kemono.party"
     directory_fmt = ("{category}", "{service}", "{user}")
-    filename_fmt = "{id}_{title}_{num:>02}_{filename[:180]}.{extension}"
+    filename_fmt = "{id}_{title[:180]}_{num:>02}_{filename[:180]}.{extension}"
     archive_fmt = "{service}_{user}_{id}_{num}"
     cookiedomain = ".kemono.party"
 
@@ -100,6 +100,14 @@ class KemonopartyExtractor(Extractor):
                     file["hash"] = ""
 
                 files.append(file)
+
+            sorted_hashes = self._get_sorted_hashes(post["service"], post["user"], post["id"])
+
+            for hash in reversed(sorted_hashes):
+                for i, file in enumerate(files):
+                    if file["hash"] == hash:
+                        files.insert(0, files.pop(i))
+                        break
 
             post["count"] = len(files)
             yield Message.Directory, post
@@ -204,6 +212,26 @@ class KemonopartyExtractor(Extractor):
                 "date": text.extr(dm, 'datetime="', '"'),
             })
         return dms
+
+    def _get_sorted_hashes(self, service, user_id, post_id):
+        # Extracts post order from main page
+        page_url = "{}/{}/user/{}/post/{}".format(
+            self.root, service, user_id, post_id)
+        try:
+            page = self.request(page_url)
+        except Exception:
+            return []
+
+        sorted_urls = re.findall(
+            r'<a[\s\n]+class="fileThumb"[\s\n]+href="[^"]+"[\s\n]+download=',
+            page.content.decode("utf-8"))
+        sorted_hashes = []
+
+        for url in sorted_urls:
+            match = re.search(HASH_PATTERN, url)
+            if match:
+                sorted_hashes.append(match.group(1))
+        return sorted_hashes
 
 
 def _validate(response):
