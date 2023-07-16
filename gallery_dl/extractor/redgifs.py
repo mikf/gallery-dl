@@ -158,6 +158,27 @@ class RedgifsCollectionsExtractor(RedgifsExtractor):
             yield Message.Queue, url, collection
 
 
+class RedgifsNichesExtractor(RedgifsExtractor):
+    """Extractor for redgifs niches"""
+    subcategory = "niches"
+    pattern = r"(?:https?://)?(?:www\.)?redgifs\.com/niches/([^/?#]+)"
+    test = (
+        ("https://www.redgifs.com/niches/boobs", {
+            "pattern": r"https://\w+\.redgifs\.com/[\w-]+\.mp4",
+            "range": "1-20",
+            "count": 20,
+        }),
+        ("https://www.redgifs.com/niches/ass", {
+            "pattern": r"https://\w+\.redgifs\.com/[\w-]+\.mp4",
+            "range": "1-20",
+            "count": 20,
+        }),
+    )
+
+    def gifs(self):
+        return self.api.niches(self.key)
+
+
 class RedgifsSearchExtractor(RedgifsExtractor):
     """Extractor for redgifs search results"""
     subcategory = "search"
@@ -270,6 +291,10 @@ class RedgifsAPI():
     def collections(self, user):
         endpoint = "/v2/users/{}/collections".format(user)
         return self._pagination(endpoint, key="collections")
+
+    def niches(self, niche):
+        endpoint = "/v2/niches/{}/gifs".format(niche)
+        return self._pagination(endpoint)
 
     def search(self, params):
         endpoint = "/v2/gifs/search"
