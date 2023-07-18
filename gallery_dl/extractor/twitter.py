@@ -952,8 +952,13 @@ Your reaction.""",
         if conversations:
             self._accessible = (conversations == "accessible")
             return self._tweets_conversation(self.tweet_id)
-        else:
-            return self._tweets_single(self.tweet_id)
+
+        endpoint = self.config("tweet-endpoint")
+        if endpoint == "detail" or endpoint in (None, "auto") and \
+                self.api.headers["x-twitter-auth-type"]:
+            return self._tweets_detail(self.tweet_id)
+
+        return self._tweets_single(self.tweet_id)
 
     def _tweets_single(self, tweet_id):
         tweets = []
@@ -967,6 +972,22 @@ Your reaction.""",
             if not tweet_id:
                 break
             tweet = self.api.tweet_result_by_rest_id(tweet_id)
+
+        return tweets
+
+    def _tweets_detail(self, tweet_id):
+        tweets = []
+
+        for tweet in self.api.tweet_detail(tweet_id):
+            if tweet["rest_id"] == tweet_id or \
+                    tweet.get("_retweet_id_str") == tweet_id:
+                if self._user_obj is None:
+                    self._assign_user(tweet["core"]["user_results"]["result"])
+                tweets.append(tweet)
+
+                tweet_id = tweet["legacy"].get("quoted_status_id_str")
+                if not tweet_id:
+                    break
 
         return tweets
 
