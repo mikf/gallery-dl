@@ -3102,6 +3102,32 @@ Description
     `syndication <extractor.twitter.syndication_>`__ API.
 
 
+extractor.twitter.include
+-------------------------
+Type
+    * ``string``
+    * ``list`` of ``strings``
+Default
+    ``"timeline"``
+Example
+    * ``"avatar,background,media"``
+    * ``["avatar", "background", "media"]``
+Description
+    A (comma-separated) list of subcategories to include
+    when processing a user profile.
+
+    Possible values are
+    ``"avatar"``,
+    ``"background"``,
+    ``"timeline"``,
+    ``"tweets"``,
+    ``"media"``,
+    ``"replies"``,
+    ``"likes"``.
+
+    It is possible to use ``"all"`` instead of listing all values separately.
+
+
 extractor.twitter.transform
 ---------------------------
 Type
