@@ -1085,10 +1085,6 @@ class TwitterAPI():
 
         auth_token = cookies.get("auth_token", domain=cookiedomain)
 
-        search = extractor.config("search-endpoint")
-        if search == "rest":
-            self.search_timeline = self.search_adaptive
-
         self.headers = {
             "Accept": "*/*",
             "authorization": "Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejR"
@@ -1323,16 +1319,6 @@ class TwitterAPI():
         }
         return self._pagination_tweets(
             endpoint, variables, ("list", "tweets_timeline", "timeline"))
-
-    def search_adaptive(self, query):
-        endpoint = "/2/search/adaptive.json"
-        params = self.params.copy()
-        params["q"] = query
-        params["tweet_search_mode"] = "live"
-        params["query_source"] = "typed_query"
-        params["pc"] = "1"
-        params["spelling_corrections"] = "1"
-        return self._pagination_legacy(endpoint, params)
 
     def search_timeline(self, query):
         endpoint = "/graphql/7jT5GT59P8IFjgxwqnEdQw/SearchTimeline"

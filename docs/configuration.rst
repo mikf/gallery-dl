@@ -3230,19 +3230,6 @@ Description
     will be taken from the original Tweets, not the Retweets.
 
 
-extractor.twitter.search-endpoint
----------------------------------
-Type
-    ``string``
-Default
-    ``"graphql"``
-Description
-    Selects the API endpoint used to retrieve search results.
-
-    * ``"graphql"``: GraphQL endpoint
-    * ``"rest"``: Legacy REST endpoint
-
-
 extractor.twitter.timeline.strategy
 -----------------------------------
 Type
