@@ -1041,6 +1041,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td>Favorites, Pools, Popular Images, Posts, Tag Searches</td>
     <td>Supported</td>
 </tr>
+<tr>
+    <td>e6AI</td>
+    <td>https://e6ai.net/</td>
+    <td>Favorites, Pools, Popular Images, Posts, Tag Searches</td>
+    <td></td>
+</tr>
 
 <tr>
     <td colspan="4"><strong>Gelbooru Beta 0.1.11</strong></td>

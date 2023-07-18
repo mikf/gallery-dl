@@ -35,6 +35,7 @@ CATEGORY_MAP = {
     "dynastyscans"   : "Dynasty Reader",
     "e621"           : "e621",
     "e926"           : "e926",
+    "e6ai"           : "e6AI",
     "erome"          : "EroMe",
     "e-hentai"       : "E-Hentai",
     "exhentai"       : "ExHentai",

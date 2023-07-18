@@ -74,6 +74,10 @@ BASE_PATTERN = E621Extractor.update({
         "root": "https://e926.net",
         "pattern": r"e926\.net",
     },
+    "e6ai": {
+        "root": "https://e6ai.net",
+        "pattern": r"e6ai\.net",
+    },
 })
 
 
@@ -94,6 +98,10 @@ class E621TagExtractor(E621Extractor, danbooru.DanbooruTagExtractor):
         }),
         ("https://e926.net/post/index/1/anry"),
         ("https://e926.net/post?tags=anry"),
+
+        ("https://e6ai.net/posts?tags=anry"),
+        ("https://e6ai.net/post/index/1/anry"),
+        ("https://e6ai.net/post?tags=anry"),
     )
 
 
@@ -112,6 +120,11 @@ class E621PoolExtractor(E621Extractor, danbooru.DanbooruPoolExtractor):
             "content": "91abe5d5334425d9787811d7f06d34c77974cd22",
         }),
         ("https://e926.net/pool/show/73"),
+
+        ("https://e6ai.net/pools/3", {
+            "url": "a6d1ad67a3fa9b9f73731d34d5f6f26f7e85855f",
+        }),
+        ("https://e6ai.net/pool/show/3"),
     )
 
     def posts(self):
@@ -192,6 +205,12 @@ class E621PostExtractor(E621Extractor, danbooru.DanbooruPostExtractor):
             "content": "66f46e96a893fba8e694c4e049b23c2acc9af462",
         }),
         ("https://e926.net/post/show/535"),
+
+        ("https://e6ai.net/posts/23", {
+            "url": "3c85a806b3d9eec861948af421fe0e8ad6b8f881",
+            "content": "a05a484e4eb64637d56d751c02e659b4bc8ea5d5",
+        }),
+        ("https://e6ai.net/post/show/23"),
     )
 
     def posts(self):
@@ -216,6 +235,8 @@ class E621PopularExtractor(E621Extractor, danbooru.DanbooruPopularExtractor):
             "pattern": r"https://static\d.e926.net/data/../../[0-9a-f]+",
             "count": ">= 70",
         }),
+
+        ("https://e6ai.net/explore/posts/popular"),
     )
 
     def posts(self):
@@ -240,6 +261,8 @@ class E621FavoriteExtractor(E621Extractor):
             "pattern": r"https://static\d.e926.net/data/../../[0-9a-f]+",
             "count": "> 260",
         }),
+
+        ("https://e6ai.net/favorites"),
     )
 
     def __init__(self, match):
