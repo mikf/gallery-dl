@@ -283,7 +283,7 @@ class ImagefapFolderExtractor(ImagefapExtractor):
                 yield gid, extr("<b>", "<")
                 cnt += 1
 
-            if cnt < 25:
+            if cnt < 20:
                 break
             params["page"] += 1
 
