@@ -78,7 +78,8 @@ class ZerochanExtractor(BooruExtractor):
         html = data["tags"]
         tags = data["tags"] = []
         for tag in html.split("<li class=")[1:]:
-            category, _, name = text.extr(tag, 'alt="', '<').partition('">')
+            category = text.extr(tag, 'alt="', '"')
+            name = text.extr(tag, ">-->", "</a>")
             tags.append(category + ":" + name.strip())
 
         return data
