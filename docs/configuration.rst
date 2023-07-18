@@ -3138,6 +3138,20 @@ Description
     Transform Tweet and User metadata into a simpler, uniform format.
 
 
+extractor.twitter.tweet-endpoint
+--------------------------------
+Type
+    ``string``
+Default
+    ``"auto"``
+Description
+    Selects the API endpoint used to retrieve single Tweets.
+
+    * ``"restid"``: ``/TweetResultByRestId`` - accessible to guest users
+    * ``"detail"``: ``/TweetDetail`` - more stable
+    * ``"auto"``: ``"detail"`` when logged in, ``"restid"`` otherwise
+
+
 extractor.twitter.size
 ----------------------
 Type
