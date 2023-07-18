@@ -1025,6 +1025,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td>Pools, Popular Images, Posts, Tag Searches</td>
     <td>Supported</td>
 </tr>
+<tr>
+    <td>Booruvar</td>
+    <td>https://booru.borvar.art/</td>
+    <td>Pools, Popular Images, Posts, Tag Searches</td>
+    <td></td>
+</tr>
 
 <tr>
     <td colspan="4"><strong>e621 Instances</strong></td>

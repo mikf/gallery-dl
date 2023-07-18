@@ -161,6 +161,10 @@ BASE_PATTERN = DanbooruExtractor.update({
         "root": None,
         "pattern": r"(?:safe.)?aibooru\.online",
     },
+    "booruvar": {
+        "root": "https://booru.borvar.art",
+        "pattern": r"booru\.borvar\.art",
+    },
 })
 
 
@@ -189,6 +193,11 @@ class DanbooruTagExtractor(DanbooruExtractor):
         }),
         ("https://aibooru.online/posts?tags=center_frills&z=1", {
             "pattern": r"https://cdn\.aibooru\.online/original"
+                       r"/[0-9a-f]{2}/[0-9a-f]{2}/[0-9a-f]{32}\.\w+",
+            "count": ">= 3",
+        }),
+        ("https://booru.borvar.art/posts?tags=chibi&z=1", {
+            "pattern": r"https://booru\.borvar\.art/data/original"
                        r"/[0-9a-f]{2}/[0-9a-f]{2}/[0-9a-f]{32}\.\w+",
             "count": ">= 3",
         }),
@@ -238,6 +247,10 @@ class DanbooruPoolExtractor(DanbooruExtractor):
             "url": "902549ffcdb00fe033c3f63e12bc3cb95c5fd8d5",
             "count": 6,
         }),
+        ("https://booru.borvar.art/pools/2", {
+            "url": "77fa3559a3fc919f72611f4e3dd0f919d19d3e0d",
+            "count": 4,
+        }),
         ("https://aibooru.online/pools/1"),
         ("https://danbooru.donmai.us/pool/show/7659"),
     )
@@ -278,6 +291,9 @@ class DanbooruPostExtractor(DanbooruExtractor):
         ("https://aibooru.online/posts/1", {
             "content": "54d548743cd67799a62c77cbae97cfa0fec1b7e9",
         }),
+        ("https://booru.borvar.art/posts/1487", {
+            "content": "91273ac1ea413a12be468841e2b5804656a50bff",
+        }),
         ("https://danbooru.donmai.us/post/show/294929"),
     )
 
@@ -309,6 +325,7 @@ class DanbooruPopularExtractor(DanbooruExtractor):
         }),
         ("https://booru.allthefallen.moe/explore/posts/popular"),
         ("https://aibooru.online/explore/posts/popular"),
+        ("https://booru.borvar.art/explore/posts/popular"),
     )
 
     def __init__(self, match):
