@@ -1105,11 +1105,14 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
             match.group(4) or match.group(5) or id_from_base36(match.group(6))
 
     def deviations(self):
-        url = "{}/{}/{}/{}".format(
-            self.root, self.user or "u", self.type or "art", self.deviation_id)
+        if self.user:
+            url = "{}/{}/{}/{}".format(
+                self.root, self.user, self.type or "art", self.deviation_id)
+        else:
+            url = "{}/view/{}/".format(self.root, self.deviation_id)
 
-        uuid = text.extract(self._limited_request(url).text,
-                            '"deviationUuid\\":\\"', '\\')[0]
+        uuid = text.extr(self._limited_request(url).text,
+                         '"deviationUuid\\":\\"', '\\')
         if not uuid:
             raise exception.NotFoundError("deviation")
         return (self.api.deviation(uuid),)
