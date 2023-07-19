@@ -897,13 +897,3 @@ if action:
     except Exception:
         pass
 del action
-
-# Undo automatic pyOpenSSL injection by requests
-pyopenssl = config.get((), "pyopenssl", False)
-if not pyopenssl:
-    try:
-        from requests.packages.urllib3.contrib import pyopenssl  # noqa
-        pyopenssl.extract_from_urllib3()
-    except ImportError:
-        pass
-del pyopenssl
