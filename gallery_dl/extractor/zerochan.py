@@ -21,17 +21,19 @@ class ZerochanExtractor(BooruExtractor):
     root = "https://www.zerochan.net"
     filename_fmt = "{id}.{extension}"
     archive_fmt = "{id}"
-    cookiedomain = ".zerochan.net"
-    cookienames = ("z_id", "z_hash")
+    cookies_domain = ".zerochan.net"
+    cookies_names = ("z_id", "z_hash")
 
     def login(self):
         self._logged_in = True
-        if not self._check_cookies(self.cookienames):
-            username, password = self._get_auth_info()
-            if username:
-                self._update_cookies(self._login_impl(username, password))
-            else:
-                self._logged_in = False
+        if self.cookies_check(self.cookies_names):
+            return
+
+        username, password = self._get_auth_info()
+        if username:
+            return self.cookies_update(self._login_impl(username, password))
+
+        self._logged_in = False
 
     @cache(maxage=90*86400, keyarg=1)
     def _login_impl(self, username, password):

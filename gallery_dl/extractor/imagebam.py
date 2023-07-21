@@ -21,7 +21,7 @@ class ImagebamExtractor(Extractor):
     def __init__(self, match):
         Extractor.__init__(self, match)
         self.path = match.group(1)
-        self.session.cookies.set("nsfw_inter", "1", domain="www.imagebam.com")
+        self.cookies.set("nsfw_inter", "1", domain="www.imagebam.com")
 
     def _parse_image_page(self, path):
         page = self.request(self.root + path).text

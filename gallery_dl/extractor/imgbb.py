@@ -62,7 +62,7 @@ class ImgbbExtractor(Extractor):
     def login(self):
         username, password = self._get_auth_info()
         if username:
-            self._update_cookies(self._login_impl(username, password))
+            self.cookies_update(self._login_impl(username, password))
 
     @cache(maxage=360*24*3600, keyarg=1)
     def _login_impl(self, username, password):
@@ -82,7 +82,7 @@ class ImgbbExtractor(Extractor):
 
         if not response.history:
             raise exception.AuthenticationError()
-        return self.session.cookies
+        return self.cookies
 
     def _pagination(self, page, endpoint, params):
         data = None

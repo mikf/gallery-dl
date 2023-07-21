@@ -76,7 +76,7 @@ class YoutubeDLExtractor(Extractor):
             ytdl_module, self, user_opts, extr_opts)
 
         # transfer cookies to ytdl
-        cookies = self.session.cookies
+        cookies = self.cookies
         if cookies:
             set_cookie = ytdl_instance.cookiejar.set_cookie
             for cookie in cookies:

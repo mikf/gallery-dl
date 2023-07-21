@@ -27,7 +27,7 @@ class _8chanExtractor(Extractor):
         Extractor.__init__(self, match)
 
     @memcache()
-    def _prepare_cookies(self):
+    def cookies_prepare(self):
         # fetch captcha cookies
         # (necessary to download without getting interrupted)
         now = datetime.utcnow()
@@ -39,14 +39,14 @@ class _8chanExtractor(Extractor):
         # - remove 'expires' timestamp
         # - move 'captchaexpiration' value forward by 1 month)
         domain = self.root.rpartition("/")[2]
-        for cookie in self.session.cookies:
+        for cookie in self.cookies:
             if cookie.domain.endswith(domain):
                 cookie.expires = None
                 if cookie.name == "captchaexpiration":
                     cookie.value = (now + timedelta(30, 300)).strftime(
                         "%a, %d %b %Y %H:%M:%S GMT")
 
-        return self.session.cookies
+        return self.cookies
 
 
 class _8chanThreadExtractor(_8chanExtractor):
@@ -113,7 +113,7 @@ class _8chanThreadExtractor(_8chanExtractor):
         thread["_http_headers"] = {"Referer": url + "html"}
 
         try:
-            self.session.cookies = self._prepare_cookies()
+            self.cookies = self.cookies_prepare()
         except Exception as exc:
             self.log.debug("Failed to fetch captcha cookies:  %s: %s",
                            exc.__class__.__name__, exc, exc_info=True)

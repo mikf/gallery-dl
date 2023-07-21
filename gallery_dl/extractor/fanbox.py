@@ -32,9 +32,8 @@ class FanboxExtractor(Extractor):
         self.embeds = self.config("embeds", True)
 
     def items(self):
-
         if self._warning:
-            if not self._check_cookies(("FANBOXSESSID",)):
+            if not self.cookies_check(("FANBOXSESSID",)):
                 self.log.warning("no 'FANBOXSESSID' cookie set")
             FanboxExtractor._warning = False
 

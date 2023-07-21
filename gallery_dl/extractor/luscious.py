@@ -15,7 +15,7 @@ from .. import text, exception
 class LusciousExtractor(Extractor):
     """Base class for luscious extractors"""
     category = "luscious"
-    cookiedomain = ".luscious.net"
+    cookies_domain = ".luscious.net"
     root = "https://members.luscious.net"
 
     def _graphql(self, op, variables, query):

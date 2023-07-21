@@ -65,7 +65,7 @@ class EromeExtractor(Extractor):
     def request(self, url, **kwargs):
         if self.__cookies:
             self.__cookies = False
-            self.session.cookies.update(_cookie_cache())
+            self.cookies.update(_cookie_cache())
 
         for _ in range(5):
             response = Extractor.request(self, url, **kwargs)

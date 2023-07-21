@@ -18,10 +18,10 @@ BASE_PATTERN = r"(?:https?://)?(?:www\.)?webtoons\.com/(([^/?#]+)"
 class WebtoonsBase():
     category = "webtoons"
     root = "https://www.webtoons.com"
-    cookiedomain = ".webtoons.com"
+    cookies_domain = ".webtoons.com"
 
     def setup_agegate_cookies(self):
-        self._update_cookies({
+        self.cookies_update({
             "atGDPR"     : "AD_CONSENT",
             "needCCPA"   : "false",
             "needCOPPA"  : "false",

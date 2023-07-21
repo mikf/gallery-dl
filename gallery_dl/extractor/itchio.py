@@ -63,7 +63,7 @@ class ItchioGameExtractor(Extractor):
             "Origin": "https://{}.itch.io".format(self.user),
         }
         data = {
-            "csrf_token": text.unquote(self.session.cookies["itchio_token"]),
+            "csrf_token": text.unquote(self.cookies["itchio_token"]),
         }
 
         for upload_id in text.extract_iter(page, 'data-upload_id="', '"'):

@@ -16,7 +16,7 @@ class SeigaExtractor(Extractor):
     """Base class for seiga extractors"""
     category = "seiga"
     archive_fmt = "{image_id}"
-    cookiedomain = ".nicovideo.jp"
+    cookies_domain = ".nicovideo.jp"
     root = "https://seiga.nicovideo.jp"
 
     def __init__(self, match):
@@ -24,7 +24,7 @@ class SeigaExtractor(Extractor):
         self.start_image = 0
 
     def items(self):
-        if not self._check_cookies(("user_session",)):
+        if not self.cookies_check(("user_session",)):
             raise exception.StopExtraction("'user_session' cookie required")
 
         images = iter(self.get_images())
@@ -186,7 +186,7 @@ class SeigaImageExtractor(SeigaExtractor):
         return num
 
     def get_images(self):
-        self.session.cookies.set(
+        self.cookies.set(
             "skip_fetish_warning", "1", domain="seiga.nicovideo.jp")
 
         url = "{}/seiga/im{}".format(self.root, self.image_id)

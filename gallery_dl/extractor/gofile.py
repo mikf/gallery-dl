@@ -72,7 +72,7 @@ class GofileFolderExtractor(Extractor):
         token = self.config("api-token")
         if not token:
             token = self._create_account()
-        self.session.cookies.set("accountToken", token, domain=".gofile.io")
+        self.cookies.set("accountToken", token, domain=".gofile.io")
         self.api_token = token
 
         self.website_token = (self.config("website-token") or

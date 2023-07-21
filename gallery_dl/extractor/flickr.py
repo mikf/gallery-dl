@@ -20,7 +20,7 @@ class FlickrExtractor(Extractor):
     filename_fmt = "{category}_{id}.{extension}"
     directory_fmt = ("{category}", "{user[username]}")
     archive_fmt = "{id}"
-    cookiedomain = None
+    cookies_domain = None
 
     def __init__(self, match):
         Extractor.__init__(self, match)

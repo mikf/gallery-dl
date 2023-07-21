@@ -19,14 +19,14 @@ class MangoxoExtractor(Extractor):
     """Base class for mangoxo extractors"""
     category = "mangoxo"
     root = "https://www.mangoxo.com"
-    cookiedomain = "www.mangoxo.com"
-    cookienames = ("SESSION",)
+    cookies_domain = "www.mangoxo.com"
+    cookies_names = ("SESSION",)
     _warning = True
 
     def login(self):
         username, password = self._get_auth_info()
         if username:
-            self._update_cookies(self._login_impl(username, password))
+            self.cookies_update(self._login_impl(username, password))
         elif MangoxoExtractor._warning:
             MangoxoExtractor._warning = False
             self.log.warning("Unauthenticated users cannot see "
@@ -51,7 +51,7 @@ class MangoxoExtractor(Extractor):
         data = response.json()
         if str(data.get("result")) != "1":
             raise exception.AuthenticationError(data.get("msg"))
-        return {"SESSION": self.session.cookies.get("SESSION")}
+        return {"SESSION": self.cookies.get("SESSION")}
 
     @staticmethod
     def _sign_by_md5(username, password, token):

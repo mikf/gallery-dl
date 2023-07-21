@@ -35,7 +35,7 @@ class FantiaExtractor(Extractor):
         }
 
         if self._warning:
-            if not self._check_cookies(("_session_id",)):
+            if not self.cookies_check(("_session_id",)):
                 self.log.warning("no '_session_id' cookie set")
             FantiaExtractor._warning = False
 

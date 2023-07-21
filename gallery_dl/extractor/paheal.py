@@ -21,7 +21,7 @@ class PahealExtractor(Extractor):
     root = "https://rule34.paheal.net"
 
     def items(self):
-        self.session.cookies.set(
+        self.cookies.set(
             "ui-tnc-agreed", "true", domain="rule34.paheal.net")
         data = self.get_metadata()
 

@@ -21,7 +21,7 @@ class NitterExtractor(BaseExtractor):
     archive_fmt = "{tweet_id}_{num}"
 
     def __init__(self, match):
-        self.cookiedomain = self.root.partition("://")[2]
+        self.cookies_domain = self.root.partition("://")[2]
         BaseExtractor.__init__(self, match)
 
         lastindex = match.lastindex
@@ -35,7 +35,7 @@ class NitterExtractor(BaseExtractor):
         if videos:
             ytdl = (videos == "ytdl")
             videos = True
-            self._cookiejar.set("hlsPlayback", "on", domain=self.cookiedomain)
+            self.cookies.set("hlsPlayback", "on", domain=self.cookies_domain)
 
         for tweet in self.tweets():
 

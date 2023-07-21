@@ -27,8 +27,8 @@ class InstagramExtractor(Extractor):
     filename_fmt = "{sidecar_media_id:?/_/}{media_id}.{extension}"
     archive_fmt = "{media_id}"
     root = "https://www.instagram.com"
-    cookiedomain = ".instagram.com"
-    cookienames = ("sessionid",)
+    cookies_domain = ".instagram.com"
+    cookies_names = ("sessionid",)
     request_interval = (6.0, 12.0)
 
     def __init__(self, match):
@@ -44,6 +44,8 @@ class InstagramExtractor(Extractor):
 
     def items(self):
         self.login()
+        self.cookies.set(
+            "csrftoken", self.csrf_token, domain=self.cookies_domain)
 
         if self.config("api") == "graphql":
             self.api = InstagramGraphqlAPI(self)
@@ -131,14 +133,14 @@ class InstagramExtractor(Extractor):
         return response
 
     def login(self):
-        if not self._check_cookies(self.cookienames):
-            username, password = self._get_auth_info()
-            if username:
-                self._update_cookies(_login_impl(self, username, password))
-            else:
-                self._logged_in = False
-        self.session.cookies.set(
-            "csrftoken", self.csrf_token, domain=self.cookiedomain)
+        if self.cookies_check(self.cookies_names):
+            return
+
+        username, password = self._get_auth_info()
+        if username:
+            return self.cookies_update(_login_impl(self, username, password))
+
+        self._logged_in = False
 
     def _parse_post_rest(self, post):
         if "items" in post:  # story or highlight

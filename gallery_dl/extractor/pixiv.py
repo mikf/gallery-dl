@@ -26,7 +26,7 @@ class PixivExtractor(Extractor):
     directory_fmt = ("{category}", "{user[id]} {user[account]}")
     filename_fmt = "{id}_p{num}.{extension}"
     archive_fmt = "{id}{suffix}.{extension}"
-    cookiedomain = None
+    cookies_domain = None
 
     def __init__(self, match):
         Extractor.__init__(self, match)
@@ -971,7 +971,7 @@ class PixivSketchExtractor(Extractor):
     filename_fmt = "{post_id} {id}.{extension}"
     archive_fmt = "S{user[id]}_{id}"
     root = "https://sketch.pixiv.net"
-    cookiedomain = ".pixiv.net"
+    cookies_domain = ".pixiv.net"
     pattern = r"(?:https?://)?sketch\.pixiv\.net/@([^/?#]+)"
     test = ("https://sketch.pixiv.net/@nicoby", {
         "pattern": r"https://img\-sketch\.pixiv\.net/uploads/medium"

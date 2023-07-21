@@ -378,7 +378,7 @@ class DownloadJob(Job):
                 for callback in hooks["post-after"]:
                     callback(pathfmt)
 
-            self.extractor._store_cookies()
+            self.extractor.cookies_store()
             if "finalize" in hooks:
                 status = self.status
                 for callback in hooks["finalize"]:

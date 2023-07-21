@@ -26,14 +26,14 @@ class KemonopartyExtractor(Extractor):
     directory_fmt = ("{category}", "{service}", "{user}")
     filename_fmt = "{id}_{title}_{num:>02}_{filename[:180]}.{extension}"
     archive_fmt = "{service}_{user}_{id}_{num}"
-    cookiedomain = ".kemono.party"
+    cookies_domain = ".kemono.party"
 
     def __init__(self, match):
         domain = match.group(1)
         tld = match.group(2)
         self.category = domain + "party"
         self.root = text.root_from_url(match.group(0))
-        self.cookiedomain = ".{}.{}".format(domain, tld)
+        self.cookies_domain = ".{}.{}".format(domain, tld)
         Extractor.__init__(self, match)
         self.session.headers["Referer"] = self.root + "/"
 
@@ -126,8 +126,8 @@ class KemonopartyExtractor(Extractor):
     def login(self):
         username, password = self._get_auth_info()
         if username:
-            self._update_cookies(self._login_impl(
-                (username, self.cookiedomain), password))
+            self.cookies_update(self._login_impl(
+                (username, self.cookies_domain), password))
 
     @cache(maxage=28*24*3600, keyarg=1)
     def _login_impl(self, username, password):
