@@ -114,7 +114,7 @@ class MangahereMangaExtractor(MangahereBase, MangaExtractor):
 
     def __init__(self, match):
         MangaExtractor.__init__(self, match)
-        self.session.cookies.set("isAdult", "1", domain="www.mangahere.cc")
+        self.cookies.set("isAdult", "1", domain="www.mangahere.cc")
 
     def chapters(self, page):
         results = []

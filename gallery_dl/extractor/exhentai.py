@@ -23,8 +23,8 @@ class ExhentaiExtractor(Extractor):
     directory_fmt = ("{category}", "{gid} {title[:247]}")
     filename_fmt = "{gid}_{num:>04}_{image_token}_{filename}.{extension}"
     archive_fmt = "{gid}_{num}"
-    cookienames = ("ipb_member_id", "ipb_pass_hash")
-    cookiedomain = ".exhentai.org"
+    cookies_domain = ".exhentai.org"
+    cookies_names = ("ipb_member_id", "ipb_pass_hash")
     root = "https://exhentai.org"
     request_interval = 5.0
 
@@ -39,7 +39,7 @@ class ExhentaiExtractor(Extractor):
         if domain == "auto":
             domain = ("ex" if version == "ex" else "e-") + "hentai.org"
         self.root = "https://" + domain
-        self.cookiedomain = "." + domain
+        self.cookies_domain = "." + domain
 
         Extractor.__init__(self, match)
         self.original = self.config("original", True)
@@ -53,7 +53,7 @@ class ExhentaiExtractor(Extractor):
 
         self.session.headers["Referer"] = self.root + "/"
         if version != "ex":
-            self.session.cookies.set("nw", "1", domain=self.cookiedomain)
+            self.cookies.set("nw", "1", domain=self.cookies_domain)
 
     def request(self, url, **kwargs):
         response = Extractor.request(self, url, **kwargs)
@@ -66,17 +66,20 @@ class ExhentaiExtractor(Extractor):
         """Login and set necessary cookies"""
         if self.LIMIT:
             raise exception.StopExtraction("Image limit reached!")
-        if self._check_cookies(self.cookienames):
+
+        if self.cookies_check(self.cookies_names):
             return
+
         username, password = self._get_auth_info()
         if username:
-            self._update_cookies(self._login_impl(username, password))
-        else:
-            self.log.info("no username given; using e-hentai.org")
-            self.root = "https://e-hentai.org"
-            self.original = False
-            self.limits = False
-            self.session.cookies["nw"] = "1"
+            return self.cookies_update(self._login_impl(username, password))
+
+        self.log.info("no username given; using e-hentai.org")
+        self.root = "https://e-hentai.org"
+        self.cookies_domain = ".e-hentai.org"
+        self.cookies.set("nw", "1", domain=self.cookies_domain)
+        self.original = False
+        self.limits = False
 
     @cache(maxage=90*24*3600, keyarg=1)
     def _login_impl(self, username, password):
@@ -97,7 +100,7 @@ class ExhentaiExtractor(Extractor):
         response = self.request(url, method="POST", headers=headers, data=data)
         if b"You are now logged in as:" not in response.content:
             raise exception.AuthenticationError()
-        return {c: response.cookies[c] for c in self.cookienames}
+        return {c: response.cookies[c] for c in self.cookies_names}
 
 
 class ExhentaiGalleryExtractor(ExhentaiExtractor):
@@ -390,8 +393,9 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
         url = "https://e-hentai.org/home.php"
         cookies = {
             cookie.name: cookie.value
-            for cookie in self.session.cookies
-            if cookie.domain == self.cookiedomain and cookie.name != "igneous"
+            for cookie in self.cookies
+            if cookie.domain == self.cookies_domain and
+            cookie.name != "igneous"
         }
 
         page = self.request(url, cookies=cookies).text

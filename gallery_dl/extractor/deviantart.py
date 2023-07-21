@@ -32,8 +32,8 @@ class DeviantartExtractor(Extractor):
     root = "https://www.deviantart.com"
     directory_fmt = ("{category}", "{username}")
     filename_fmt = "{category}_{index}_{title}.{extension}"
-    cookiedomain = None
-    cookienames = ("auth", "auth_secure", "userinfo")
+    cookies_domain = None
+    cookies_names = ("auth", "auth_secure", "userinfo")
     _last_request = 0
 
     def __init__(self, match):
@@ -71,12 +71,13 @@ class DeviantartExtractor(Extractor):
         return num
 
     def login(self):
-        if not self._check_cookies(self.cookienames):
-            username, password = self._get_auth_info()
-            if not username:
-                return False
-            self._update_cookies(_login_impl(self, username, password))
-        return True
+        if self.cookies_check(self.cookies_names):
+            return True
+
+        username, password = self._get_auth_info()
+        if username:
+            self.cookies_update(_login_impl(self, username, password))
+            return True
 
     def items(self):
         self.api = DeviantartOAuthAPI(self)
@@ -1123,7 +1124,7 @@ class DeviantartScrapsExtractor(DeviantartExtractor):
     subcategory = "scraps"
     directory_fmt = ("{category}", "{username}", "Scraps")
     archive_fmt = "s_{_username}_{index}.{extension}"
-    cookiedomain = ".deviantart.com"
+    cookies_domain = ".deviantart.com"
     pattern = BASE_PATTERN + r"/gallery/(?:\?catpath=)?scraps\b"
     test = (
         ("https://www.deviantart.com/shimoda7/gallery/scraps", {
@@ -1146,7 +1147,7 @@ class DeviantartSearchExtractor(DeviantartExtractor):
     subcategory = "search"
     directory_fmt = ("{category}", "Search", "{search_tags}")
     archive_fmt = "Q_{search_tags}_{index}.{extension}"
-    cookiedomain = ".deviantart.com"
+    cookies_domain = ".deviantart.com"
     pattern = (r"(?:https?://)?www\.deviantart\.com"
                r"/search(?:/deviations)?/?\?([^#]+)")
     test = (
@@ -1205,7 +1206,7 @@ class DeviantartGallerySearchExtractor(DeviantartExtractor):
     """Extractor for deviantart gallery searches"""
     subcategory = "gallery-search"
     archive_fmt = "g_{_username}_{index}.{extension}"
-    cookiedomain = ".deviantart.com"
+    cookies_domain = ".deviantart.com"
     pattern = BASE_PATTERN + r"/gallery/?\?(q=[^#]+)"
     test = (
         ("https://www.deviantart.com/shimoda7/gallery?q=memory", {
@@ -1869,7 +1870,7 @@ def _login_impl(extr, username, password):
 
     return {
         cookie.name: cookie.value
-        for cookie in extr.session.cookies
+        for cookie in extr.cookies
     }
 
 

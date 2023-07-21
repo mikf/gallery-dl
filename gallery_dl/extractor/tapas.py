@@ -22,8 +22,8 @@ class TapasExtractor(Extractor):
     directory_fmt = ("{category}", "{series[title]}", "{id} {title}")
     filename_fmt = "{num:>02}.{extension}"
     archive_fmt = "{id}_{num}"
-    cookiedomain = ".tapas.io"
-    cookienames = ("_cpc_",)
+    cookies_domain = ".tapas.io"
+    cookies_names = ("_cpc_",)
     _cache = None
 
     def __init__(self, match):
@@ -70,14 +70,17 @@ class TapasExtractor(Extractor):
                     yield Message.Url, url, text.nameext_from_url(url, episode)
 
     def login(self):
-        if not self._check_cookies(self.cookienames):
-            username, password = self._get_auth_info()
-            if username:
-                self._update_cookies(self._login_impl(username, password))
-            else:
-                sc = self.session.cookies.set
-                sc("birthDate"        , "1981-02-03", domain=self.cookiedomain)
-                sc("adjustedBirthDate", "1981-02-03", domain=self.cookiedomain)
+        if self.cookies_check(self.cookies_names):
+            return
+
+        username, password = self._get_auth_info()
+        if username:
+            return self.cookies_update(self._login_impl(username, password))
+
+        self.cookies.set(
+            "birthDate"        , "1981-02-03", domain=self.cookies_domain)
+        self.cookies.set(
+            "adjustedBirthDate", "1981-02-03", domain=self.cookies_domain)
 
     @cache(maxage=14*24*3600, keyarg=1)
     def _login_impl(self, username, password):

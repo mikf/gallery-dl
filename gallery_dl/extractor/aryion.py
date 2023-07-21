@@ -23,8 +23,8 @@ class AryionExtractor(Extractor):
     directory_fmt = ("{category}", "{user!l}", "{path:J - }")
     filename_fmt = "{id} {title}.{extension}"
     archive_fmt = "{id}"
-    cookiedomain = ".aryion.com"
-    cookienames = ("phpbb3_rl7a3_sid",)
+    cookies_domain = ".aryion.com"
+    cookies_names = ("phpbb3_rl7a3_sid",)
     root = "https://aryion.com"
 
     def __init__(self, match):
@@ -33,11 +33,12 @@ class AryionExtractor(Extractor):
         self.recursive = True
 
     def login(self):
-        if self._check_cookies(self.cookienames):
+        if self.cookies_check(self.cookies_names):
             return
+
         username, password = self._get_auth_info()
         if username:
-            self._update_cookies(self._login_impl(username, password))
+            self.cookies_update(self._login_impl(username, password))
 
     @cache(maxage=14*24*3600, keyarg=1)
     def _login_impl(self, username, password):
@@ -53,7 +54,7 @@ class AryionExtractor(Extractor):
         response = self.request(url, method="POST", data=data)
         if b"You have been successfully logged in." not in response.content:
             raise exception.AuthenticationError()
-        return {c: response.cookies[c] for c in self.cookienames}
+        return {c: response.cookies[c] for c in self.cookies_names}
 
     def items(self):
         self.login()

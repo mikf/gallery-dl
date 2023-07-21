@@ -20,7 +20,8 @@ class FuraffinityExtractor(Extractor):
     directory_fmt = ("{category}", "{user!l}")
     filename_fmt = "{id}{title:? //}.{extension}"
     archive_fmt = "{id}"
-    cookiedomain = ".furaffinity.net"
+    cookies_domain = ".furaffinity.net"
+    cookies_names = ("a", "b")
     root = "https://www.furaffinity.net"
     _warning = True
 
@@ -39,9 +40,8 @@ class FuraffinityExtractor(Extractor):
             self._new_layout = None
 
     def items(self):
-
         if self._warning:
-            if not self._check_cookies(("a", "b")):
+            if not self.cookies_check(self.cookies_names):
                 self.log.warning("no 'a' and 'b' session cookies set")
             FuraffinityExtractor._warning = False
 
@@ -371,7 +371,7 @@ class FuraffinityPostExtractor(FuraffinityExtractor):
 class FuraffinityUserExtractor(FuraffinityExtractor):
     """Extractor for furaffinity user profiles"""
     subcategory = "user"
-    cookiedomain = None
+    cookies_domain = None
     pattern = BASE_PATTERN + r"/user/([^/?#]+)"
     test = (
         ("https://www.furaffinity.net/user/mirlinthloth/", {

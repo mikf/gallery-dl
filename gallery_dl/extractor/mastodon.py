@@ -19,7 +19,7 @@ class MastodonExtractor(BaseExtractor):
     directory_fmt = ("mastodon", "{instance}", "{account[username]}")
     filename_fmt = "{category}_{id}_{media[id]}.{extension}"
     archive_fmt = "{media[id]}"
-    cookiedomain = None
+    cookies_domain = None
 
     def __init__(self, match):
         BaseExtractor.__init__(self, match)

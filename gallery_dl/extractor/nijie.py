@@ -22,8 +22,8 @@ class NijieExtractor(AsynchronousMixin, BaseExtractor):
 
     def __init__(self, match):
         self._init_category(match)
-        self.cookiedomain = "." + self.root.rpartition("/")[2]
-        self.cookienames = (self.category + "_tok",)
+        self.cookies_domain = "." + self.root.rpartition("/")[2]
+        self.cookies_names = (self.category + "_tok",)
 
         if self.category == "horne":
             self._extract_data = self._extract_data_horne
@@ -121,10 +121,11 @@ class NijieExtractor(AsynchronousMixin, BaseExtractor):
         return text.unescape(text.extr(page, "<br />", "<"))
 
     def login(self):
-        """Login and obtain session cookies"""
-        if not self._check_cookies(self.cookienames):
-            username, password = self._get_auth_info()
-            self._update_cookies(self._login_impl(username, password))
+        if self.cookies_check(self.cookies_names):
+            return
+
+        username, password = self._get_auth_info()
+        self.cookies_update(self._login_impl(username, password))
 
     @cache(maxage=90*24*3600, keyarg=1)
     def _login_impl(self, username, password):
@@ -139,7 +140,7 @@ class NijieExtractor(AsynchronousMixin, BaseExtractor):
         response = self.request(url, method="POST", data=data)
         if "/login.php" in response.text:
             raise exception.AuthenticationError()
-        return self.session.cookies
+        return self.cookies
 
     def _pagination(self, path):
         url = "{}/{}.php".format(self.root, path)
@@ -172,7 +173,7 @@ BASE_PATTERN = NijieExtractor.update({
 class NijieUserExtractor(NijieExtractor):
     """Extractor for nijie user profiles"""
     subcategory = "user"
-    cookiedomain = None
+    cookies_domain = None
     pattern = BASE_PATTERN + r"/members\.php\?id=(\d+)"
     test = (
         ("https://nijie.info/members.php?id=44"),

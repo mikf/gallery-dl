@@ -19,7 +19,7 @@ class RedditExtractor(Extractor):
     directory_fmt = ("{category}", "{subreddit}")
     filename_fmt = "{id}{num:? //>02} {title[:220]}.{extension}"
     archive_fmt = "{filename}"
-    cookiedomain = ".reddit.com"
+    cookies_domain = ".reddit.com"
     request_interval = 0.6
 
     def items(self):
@@ -399,9 +399,9 @@ class RedditAPI():
 
         if not self.refresh_token:
             # allow downloading from quarantined subreddits (#2180)
-            extractor._cookiejar.set(
+            extractor.cookies.set(
                 "_options", '%7B%22pref_quarantine_optin%22%3A%20true%7D',
-                domain=extractor.cookiedomain)
+                domain=extractor.cookies_domain)
 
     def submission(self, submission_id):
         """Fetch the (submission, comments)=-tuple for a submission id"""

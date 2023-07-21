@@ -25,7 +25,7 @@ class SankakuExtractor(BooruExtractor):
     basecategory = "booru"
     category = "sankaku"
     filename_fmt = "{category}_{id}_{md5}.{extension}"
-    cookiedomain = None
+    cookies_domain = None
     _warning = True
 
     TAG_TYPES = {

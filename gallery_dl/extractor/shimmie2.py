@@ -29,7 +29,7 @@ class Shimmie2Extractor(BaseExtractor):
             cookies = instance.get("cookies")
             if cookies:
                 domain = self.root.rpartition("/")[2]
-                self._update_cookies_dict(cookies, domain=domain)
+                self.cookies_update_dict(cookies, domain=domain)
             file_url = instance.get("file_url")
             if file_url:
                 self.file_url_fmt = file_url

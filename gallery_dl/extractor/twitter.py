@@ -24,8 +24,8 @@ class TwitterExtractor(Extractor):
     directory_fmt = ("{category}", "{user[name]}")
     filename_fmt = "{tweet_id}_{num}.{extension}"
     archive_fmt = "{tweet_id}_{retweet_id}_{num}"
-    cookiedomain = ".twitter.com"
-    cookienames = ("auth_token",)
+    cookies_domain = ".twitter.com"
+    cookies_names = ("auth_token",)
     root = "https://twitter.com"
     browser = "firefox"
 
@@ -455,10 +455,12 @@ class TwitterExtractor(Extractor):
         """Yield all relevant tweet objects"""
 
     def login(self):
-        if not self._check_cookies(self.cookienames):
-            username, password = self._get_auth_info()
-            if username:
-                self._update_cookies(_login_impl(self, username, password))
+        if self.cookies_check(self.cookies_names):
+            return
+
+        username, password = self._get_auth_info()
+        if username:
+            self.cookies_update(_login_impl(self, username, password))
 
 
 class TwitterUserExtractor(TwitterExtractor):
@@ -1121,19 +1123,19 @@ class TwitterAPI():
         self._syndication = self.extractor.syndication
         self._json_dumps = json.JSONEncoder(separators=(",", ":")).encode
 
-        cookies = extractor.session.cookies
-        cookiedomain = extractor.cookiedomain
+        cookies = extractor.cookies
+        cookies_domain = extractor.cookies_domain
 
         csrf = extractor.config("csrf")
         if csrf is None or csrf == "cookies":
-            csrf_token = cookies.get("ct0", domain=cookiedomain)
+            csrf_token = cookies.get("ct0", domain=cookies_domain)
         else:
             csrf_token = None
         if not csrf_token:
             csrf_token = util.generate_token()
-            cookies.set("ct0", csrf_token, domain=cookiedomain)
+            cookies.set("ct0", csrf_token, domain=cookies_domain)
 
-        auth_token = cookies.get("auth_token", domain=cookiedomain)
+        auth_token = cookies.get("auth_token", domain=cookies_domain)
 
         self.headers = {
             "Accept": "*/*",
@@ -1489,8 +1491,8 @@ class TwitterAPI():
         guest_token = self._guest_token()
         if guest_token != self.headers["x-guest-token"]:
             self.headers["x-guest-token"] = guest_token
-            self.extractor.session.cookies.set(
-                "gt", guest_token, domain=self.extractor.cookiedomain)
+            self.extractor.cookies.set(
+                "gt", guest_token, domain=self.extractor.cookies_domain)
 
     def _call(self, endpoint, params, method="GET", auth=True, root=None):
         url = (root or self.root) + endpoint
@@ -1683,8 +1685,8 @@ class TwitterAPI():
                     if user.get("blocked_by"):
                         if self.headers["x-twitter-auth-type"] and \
                                 extr.config("logout"):
-                            extr._cookiefile = None
-                            del extr.session.cookies["auth_token"]
+                            extr.cookies_file = None
+                            del extr.cookies["auth_token"]
                             self.headers["x-twitter-auth-type"] = None
                             extr.log.info("Retrying API request as guest")
                             continue
@@ -1938,7 +1940,7 @@ def _login_impl(extr, username, password):
         extr.log.debug(response.text)
         raise exception.AuthenticationError(", ".join(errors))
 
-    extr.session.cookies.clear()
+    extr.cookies.clear()
     api = TwitterAPI(extr)
     api._authenticate_guest()
     headers = api.headers
@@ -2078,5 +2080,5 @@ def _login_impl(extr, username, password):
 
     return {
         cookie.name: cookie.value
-        for cookie in extr.session.cookies
+        for cookie in extr.cookies
     }

@@ -93,7 +93,7 @@ class MangaseeChapterExtractor(MangaseeBase, ChapterExtractor):
         self.session.headers["Referer"] = self.gallery_url
 
         domain = self.root.rpartition("/")[2]
-        cookies = self.session.cookies
+        cookies = self.cookies
         if not cookies.get("PHPSESSID", domain=domain):
             cookies.set("PHPSESSID", util.generate_token(13), domain=domain)
 

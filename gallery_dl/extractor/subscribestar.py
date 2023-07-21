@@ -22,14 +22,14 @@ class SubscribestarExtractor(Extractor):
     directory_fmt = ("{category}", "{author_name}")
     filename_fmt = "{post_id}_{id}.{extension}"
     archive_fmt = "{id}"
-    cookiedomain = "www.subscribestar.com"
-    cookienames = ("auth_token",)
+    cookies_domain = "www.subscribestar.com"
+    cookies_names = ("auth_token",)
 
     def __init__(self, match):
         tld, self.item = match.groups()
         if tld == "adult":
             self.root = "https://subscribestar.adult"
-            self.cookiedomain = "subscribestar.adult"
+            self.cookies_domain = "subscribestar.adult"
             self.subcategory += "-adult"
         Extractor.__init__(self, match)
 
@@ -49,12 +49,12 @@ class SubscribestarExtractor(Extractor):
         """Yield HTML content of all relevant posts"""
 
     def login(self):
-        if self._check_cookies(self.cookienames):
+        if self.cookies_check(self.cookies_names):
             return
+
         username, password = self._get_auth_info()
         if username:
-            cookies = self._login_impl(username, password)
-            self._update_cookies(cookies)
+            self.cookies_update(self._login_impl(username, password))
 
     @cache(maxage=28*24*3600, keyarg=1)
     def _login_impl(self, username, password):

@@ -71,7 +71,7 @@ class SenmangaChapterExtractor(ChapterExtractor):
         self.session.headers["Referer"] = self.gallery_url
 
         # select "All pages" viewer
-        self.session.cookies.set(
+        self.cookies.set(
             "viewer", "1", domain="raw.senmanga.com")
 
     def metadata(self, page):

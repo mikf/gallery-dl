@@ -32,7 +32,7 @@ class Extractor():
     directory_fmt = ("{category}",)
     filename_fmt = "{filename}.{extension}"
     archive_fmt = ""
-    cookiedomain = ""
+    cookies_domain = ""
     browser = None
     root = ""
     test = None
@@ -330,26 +330,26 @@ class Extractor():
 
     def _init_cookies(self):
         """Populate the session's cookiejar"""
-        self._cookiefile = None
-        self._cookiejar = self.session.cookies
-        if self.cookiedomain is None:
+        self.cookies = self.session.cookies
+        self.cookies_file = None
+        if self.cookies_domain is None:
             return
 
         cookies = self.config("cookies")
         if cookies:
             if isinstance(cookies, dict):
-                self._update_cookies_dict(cookies, self.cookiedomain)
+                self.cookies_update_dict(cookies, self.cookies_domain)
 
             elif isinstance(cookies, str):
-                cookiefile = util.expand_path(cookies)
+                path = util.expand_path(cookies)
                 try:
-                    with open(cookiefile) as fp:
-                        util.cookiestxt_load(fp, self._cookiejar)
+                    with open(path) as fp:
+                        util.cookiestxt_load(fp, self.cookies)
                 except Exception as exc:
                     self.log.warning("cookies: %s", exc)
                 else:
                     self.log.debug("Loading cookies from '%s'", cookies)
-                    self._cookiefile = cookiefile
+                    self.cookies_file = path
 
             elif isinstance(cookies, (list, tuple)):
                 key = tuple(cookies)
@@ -357,7 +357,7 @@ class Extractor():
 
                 if cookiejar is None:
                     from ..cookies import load_cookies
-                    cookiejar = self._cookiejar.__class__()
+                    cookiejar = self.cookies.__class__()
                     try:
                         load_cookies(cookiejar, cookies)
                     except Exception as exc:
@@ -367,9 +367,9 @@ class Extractor():
                 else:
                     self.log.debug("Using cached cookies from %s", key)
 
-                setcookie = self._cookiejar.set_cookie
+                set_cookie = self.cookies.set_cookie
                 for cookie in cookiejar:
-                    setcookie(cookie)
+                    set_cookie(cookie)
 
             else:
                 self.log.warning(
@@ -377,8 +377,8 @@ class Extractor():
                     "option, got '%s' (%s)",
                     cookies.__class__.__name__, cookies)
 
-    def _store_cookies(self):
-        """Store the session's cookiejar in a cookies.txt file"""
+    def cookies_store(self):
+        """Store the session's cookies in a cookies.txt file"""
         export = self.config("cookies-update", True)
         if not export:
             return
@@ -386,47 +386,47 @@ class Extractor():
         if isinstance(export, str):
             path = util.expand_path(export)
         else:
-            path = self._cookiefile
+            path = self.cookies_file
             if not path:
                 return
 
         try:
             with open(path, "w") as fp:
-                util.cookiestxt_store(fp, self._cookiejar)
+                util.cookiestxt_store(fp, self.cookies)
         except OSError as exc:
             self.log.warning("cookies: %s", exc)
 
-    def _update_cookies(self, cookies, domain=""):
+    def cookies_update(self, cookies, domain=""):
         """Update the session's cookiejar with 'cookies'"""
         if isinstance(cookies, dict):
-            self._update_cookies_dict(cookies, domain or self.cookiedomain)
+            self.cookies_update_dict(cookies, domain or self.cookies_domain)
         else:
-            setcookie = self._cookiejar.set_cookie
+            set_cookie = self.cookies.set_cookie
             try:
                 cookies = iter(cookies)
             except TypeError:
-                setcookie(cookies)
+                set_cookie(cookies)
             else:
                 for cookie in cookies:
-                    setcookie(cookie)
+                    set_cookie(cookie)
 
-    def _update_cookies_dict(self, cookiedict, domain):
+    def cookies_update_dict(self, cookiedict, domain):
         """Update cookiejar with name-value pairs from a dict"""
-        setcookie = self._cookiejar.set
+        set_cookie = self.cookies.set
         for name, value in cookiedict.items():
-            setcookie(name, value, domain=domain)
+            set_cookie(name, value, domain=domain)
 
-    def _check_cookies(self, cookienames, domain=None):
-        """Check if all 'cookienames' are in the session's cookiejar"""
-        if not self._cookiejar:
+    def cookies_check(self, cookies_names, domain=None):
+        """Check if all 'cookies_names' are in the session's cookiejar"""
+        if not self.cookies:
             return False
 
         if domain is None:
-            domain = self.cookiedomain
-        names = set(cookienames)
+            domain = self.cookies_domain
+        names = set(cookies_names)
         now = time.time()
 
-        for cookie in self._cookiejar:
+        for cookie in self.cookies:
             if cookie.name in names and (
                     not domain or cookie.domain == domain):
 
@@ -450,9 +450,9 @@ class Extractor():
         return False
 
     def _prepare_ddosguard_cookies(self):
-        if not self._cookiejar.get("__ddg2", domain=self.cookiedomain):
-            self._cookiejar.set(
-                "__ddg2", util.generate_token(), domain=self.cookiedomain)
+        if not self.cookies.get("__ddg2", domain=self.cookies_domain):
+            self.cookies.set(
+                "__ddg2", util.generate_token(), domain=self.cookies_domain)
 
     def _get_date_min_max(self, dmin=None, dmax=None):
         """Retrieve and parse 'date-min' and 'date-max' config values"""

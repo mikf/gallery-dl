@@ -20,7 +20,7 @@ class HentaifoundryExtractor(Extractor):
     directory_fmt = ("{category}", "{user}")
     filename_fmt = "{category}_{index}_{title}.{extension}"
     archive_fmt = "{index}"
-    cookiedomain = "www.hentai-foundry.com"
+    cookies_domain = "www.hentai-foundry.com"
     root = "https://www.hentai-foundry.com"
     per_page = 25
 
@@ -123,14 +123,14 @@ class HentaifoundryExtractor(Extractor):
 
     def _init_site_filters(self):
         """Set site-internal filters to show all images"""
-        if self.session.cookies.get("PHPSESSID", domain=self.cookiedomain):
+        if self.cookies.get("PHPSESSID", domain=self.cookies_domain):
             return
 
         url = self.root + "/?enterAgree=1"
         self.request(url, method="HEAD")
 
-        csrf_token = self.session.cookies.get(
-            "YII_CSRF_TOKEN", domain=self.cookiedomain)
+        csrf_token = self.cookies.get(
+            "YII_CSRF_TOKEN", domain=self.cookies_domain)
         if not csrf_token:
             self.log.warning("Unable to update site content filters")
             return

@@ -21,7 +21,7 @@ class _500pxExtractor(Extractor):
     filename_fmt = "{id}_{name}.{extension}"
     archive_fmt = "{id}"
     root = "https://500px.com"
-    cookiedomain = ".500px.com"
+    cookies_domain = ".500px.com"
 
     def __init__(self, match):
         Extractor.__init__(self, match)
@@ -73,7 +73,7 @@ class _500pxExtractor(Extractor):
     def _request_api(self, url, params):
         headers = {
             "Origin": self.root,
-            "x-csrf-token": self.session.cookies.get(
+            "x-csrf-token": self.cookies.get(
                 "x-csrf-token", domain=".500px.com"),
         }
         return self.request(url, headers=headers, params=params).json()
@@ -81,7 +81,7 @@ class _500pxExtractor(Extractor):
     def _request_graphql(self, opname, variables):
         url = "https://api.500px.com/graphql"
         headers = {
-            "x-csrf-token": self.session.cookies.get(
+            "x-csrf-token": self.cookies.get(
                 "x-csrf-token", domain=".500px.com"),
         }
         data = {

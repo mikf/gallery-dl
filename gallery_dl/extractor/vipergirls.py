@@ -23,8 +23,8 @@ class VipergirlsExtractor(Extractor):
     root = "https://vipergirls.to"
     request_interval = 0.5
     request_interval_min = 0.2
-    cookiedomain = ".vipergirls.to"
-    cookienames = ("vg_userid", "vg_password")
+    cookies_domain = ".vipergirls.to"
+    cookies_names = ("vg_userid", "vg_password")
 
     def __init__(self, match):
         Extractor.__init__(self, match)
@@ -42,10 +42,12 @@ class VipergirlsExtractor(Extractor):
                 yield Message.Queue, image.attrib["main_url"], data
 
     def login(self):
-        if not self._check_cookies(self.cookienames):
-            username, password = self._get_auth_info()
-            if username:
-                self._update_cookies(self._login_impl(username, password))
+        if self.cookies_check(self.cookies_names):
+            return
+
+        username, password = self._get_auth_info()
+        if username:
+            self.cookies_update(self._login_impl(username, password))
 
     @cache(maxage=90*24*3600, keyarg=1)
     def _login_impl(self, username, password):
