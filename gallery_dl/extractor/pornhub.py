@@ -111,7 +111,7 @@ class PornhubGalleryExtractor(PornhubExtractor):
                 "views"  : text.parse_int(img["times_viewed"]),
                 "score"  : text.parse_int(img["vote_percent"]),
             }
-            key = img["next"]
+            key = str(img["next"])
             if key == end:
                 return
 
