@@ -153,7 +153,7 @@ class HiperdexMangaExtractor(HiperdexBase, MangaExtractor):
             "Accept": "*/*",
             "X-Requested-With": "XMLHttpRequest",
             "Origin": self.root,
-            "Referer": self.manga_url,
+            "Referer": "https://" + text.quote(self.manga_url[8:]),
         }
         html = self.request(url, method="POST", headers=headers).text
 
