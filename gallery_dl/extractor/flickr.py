@@ -21,6 +21,8 @@ class FlickrExtractor(Extractor):
     directory_fmt = ("{category}", "{user[username]}")
     archive_fmt = "{id}"
     cookies_domain = None
+    request_interval = (1.0, 2.0)
+    request_interval_min = 0.2
 
     def __init__(self, match):
         Extractor.__init__(self, match)
@@ -289,8 +291,8 @@ class FlickrAPI(oauth.OAuth1API):
     """
 
     API_URL = "https://api.flickr.com/services/rest/"
-    API_KEY = "ac4fd7aa98585b9eee1ba761c209de68"
-    API_SECRET = "3adb0f568dc68393"
+    API_KEY = "f8f78d1a40debf471f0b22fa2d00525f"
+    API_SECRET = "4f9dae1113e45556"
     FORMATS = [
         ("o" , "Original"    , None),
         ("6k", "X-Large 6K"  , 6144),
