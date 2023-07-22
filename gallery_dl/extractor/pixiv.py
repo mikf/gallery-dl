@@ -47,6 +47,8 @@ class PixivExtractor(Extractor):
             def transform_tags(work):
                 work["tags"] = [tag["name"] for tag in work["tags"]]
 
+        url_sanity = ("https://s.pximg.net/common/images"
+                      "/limit_sanity_level_360.png")
         ratings = {0: "General", 1: "R-18", 2: "R-18G"}
         meta_user = self.config("metadata")
         meta_bookmark = self.config("metadata-bookmark")
@@ -102,6 +104,10 @@ class PixivExtractor(Extractor):
 
             elif work["page_count"] == 1:
                 url = meta_single_page["original_image_url"]
+                if url == url_sanity:
+                    self.log.debug("Skipping 'sanity_level' warning (%s)",
+                                   work["id"])
+                    continue
                 work["date_url"] = self._date_from_url(url)
                 yield Message.Url, url, text.nameext_from_url(url, work)
 
