@@ -45,5 +45,7 @@ class PostProcessor():
                     self.name, archive, exc.__class__.__name__, exc)
             else:
                 self.log.debug("Using %s archive '%s'", self.name, archive)
+                return True
         else:
             self.archive = None
+        return False

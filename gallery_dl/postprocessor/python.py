@@ -22,8 +22,7 @@ class PythonPP(PostProcessor):
         module = util.import_file(module_name)
         self.function = getattr(module, function_name)
 
-        self._init_archive(job, options)
-        if self.archive:
+        if self._init_archive(job, options):
             self.run = self.run_archive
 
         events = options.get("event")
