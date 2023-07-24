@@ -4748,6 +4748,50 @@ Description
     |datetime|_ object.
 
 
+python.archive
+--------------
+Type
+    |Path|_
+Description
+    File to store IDs of called Python functions in,
+    similar to `extractor.*.archive`_.
+
+    ``archive-format``, ``archive-prefix``, and ``archive-pragma`` options,
+    akin to
+    `extractor.*.archive-format`_,
+    `extractor.*.archive-prefix`_, and
+    `extractor.*.archive-pragma`_, are supported as well.
+
+
+python.event
+------------
+Type
+    ``string``
+Default
+    ``"file"``
+Description
+    The event for which `python.function`_ gets called.
+
+    See `metadata.event`_ for a list of available events.
+
+
+python.function
+---------------
+Type
+    ``string``
+Example
+    * ``"my_module:generate_text"``
+    * ``"~/.local/share/gdl-utils.py:resize"``
+Description
+    The Python function to call.
+
+    This function gets specified as ``<module>:<function name>``
+    and gets called with the current metadata dict as argument.
+
+    ``module`` is either an importable Python module name
+    or the |Path|_ to a `.py` file,
+
+
 ugoira.extension
 ----------------
 Type
@@ -5345,6 +5389,8 @@ Description
         Write metadata to separate files
     ``mtime``
         Set file modification time according to its metadata
+    ``python``
+        Call Python functions
     ``ugoira``
         Convert Pixiv Ugoira to WebM using `FFmpeg <https://www.ffmpeg.org/>`__
     ``zip``
