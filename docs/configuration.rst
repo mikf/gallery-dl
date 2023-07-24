@@ -442,7 +442,7 @@ Description
             "isAdult"    : "1"
         }
 
-    * A ``list`` with up to 4 entries specifying a browser profile.
+    * A ``list`` with up to 5 entries specifying a browser profile.
 
       * The first entry is the browser name
       * The optional second entry is a profile name or an absolute path to a profile directory
@@ -3277,8 +3277,8 @@ Type
 Default
     ``"auto"``
 Description
-    Controls the strategy / tweet source used for user URLs
-    (``https://twitter.com/USER``).
+    Controls the strategy / tweet source used for timeline URLs
+    (``https://twitter.com/USER/timeline``).
 
     * ``"tweets"``: `/tweets <https://twitter.com/USER/tweets>`__ timeline + search
     * ``"media"``: `/media <https://twitter.com/USER/media>`__ timeline + search
@@ -4726,7 +4726,7 @@ Default
 Description
     Name of the metadata field whose value should be used.
 
-    This value must either be a UNIX timestamp or a
+    This value must be either a UNIX timestamp or a
     |datetime|_ object.
 
     Note: This option gets ignored if `mtime.value`_ is set.
@@ -4744,7 +4744,7 @@ Example
 Description
     A `format string`_ whose value should be used.
 
-    The resulting value must either be a UNIX timestamp or a
+    The resulting value must be either a UNIX timestamp or a
     |datetime|_ object.
 
 
