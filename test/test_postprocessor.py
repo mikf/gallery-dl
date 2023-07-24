@@ -579,6 +579,40 @@ class MtimeTest(BasePostprocessorTest):
         self.assertEqual(self.pathfmt.kwdict["_mtime"], 315532800)
 
 
+class PythonTest(BasePostprocessorTest):
+
+    def test_module(self):
+        path = os.path.join(self.dir.name, "module.py")
+        self._write_module(path)
+
+        sys.path.insert(0, self.dir.name)
+        try:
+            self._create({"function": "module:calc"}, {"_value": 123})
+        finally:
+            del sys.path[0]
+
+        self.assertNotIn("_result", self.pathfmt.kwdict)
+        self._trigger()
+        self.assertEqual(self.pathfmt.kwdict["_result"], 246)
+
+    def test_path(self):
+        path = os.path.join(self.dir.name, "module.py")
+        self._write_module(path)
+
+        self._create({"function": path + ":calc"}, {"_value": 12})
+
+        self.assertNotIn("_result", self.pathfmt.kwdict)
+        self._trigger()
+        self.assertEqual(self.pathfmt.kwdict["_result"], 24)
+
+    def _write_module(self, path):
+        with open(path, "w") as fp:
+            fp.write("""
+def calc(kwdict):
+    kwdict["_result"] = kwdict["_value"] * 2
+""")
+
+
 class ZipTest(BasePostprocessorTest):
 
     def test_zip_default(self):
