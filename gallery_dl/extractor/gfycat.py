@@ -24,6 +24,7 @@ class GfycatExtractor(Extractor):
         Extractor.__init__(self, match)
         self.key = match.group(1).lower()
 
+    def _init(self):
         formats = self.config("format")
         if formats is None:
             formats = ("mp4", "webm", "mobile", "gif")

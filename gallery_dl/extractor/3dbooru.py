@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2020 Mike Fährmann
+# Copyright 2015-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -17,12 +17,10 @@ class _3dbooruBase():
     basecategory = "booru"
     root = "http://behoimi.org"
 
-    def __init__(self, match):
-        super().__init__(match)
-        self.session.headers.update({
-            "Referer": "http://behoimi.org/post/show/",
-            "Accept-Encoding": "identity",
-        })
+    def _init(self):
+        headers = self.session.headers
+        headers["Referer"] = "http://behoimi.org/post/show/"
+        headers["Accept-Encoding"] = "identity"
 
 
 class _3dbooruTagExtractor(_3dbooruBase, moebooru.MoebooruTagExtractor):

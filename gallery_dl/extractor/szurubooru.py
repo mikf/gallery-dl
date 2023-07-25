@@ -20,8 +20,7 @@ class SzurubooruExtractor(booru.BooruExtractor):
     filename_fmt = "{id}_{version}_{checksumMD5}.{extension}"
     per_page = 100
 
-    def __init__(self, match):
-        booru.BooruExtractor.__init__(self, match)
+    def _init(self):
         self.headers = {
             "Accept": "application/json",
             "Content-Type": "application/json",

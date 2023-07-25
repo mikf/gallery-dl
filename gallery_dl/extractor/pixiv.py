@@ -28,8 +28,7 @@ class PixivExtractor(Extractor):
     archive_fmt = "{id}{suffix}.{extension}"
     cookies_domain = None
 
-    def __init__(self, match):
-        Extractor.__init__(self, match)
+    def _init(self):
         self.api = PixivAppAPI(self)
         self.load_ugoira = self.config("ugoira", True)
         self.max_posts = self.config("max-posts", 0)
@@ -173,6 +172,9 @@ class PixivUserExtractor(PixivExtractor):
     def __init__(self, match):
         PixivExtractor.__init__(self, match)
         self.user_id = match.group(1)
+
+    def initialize(self):
+        pass
 
     def items(self):
         base = "{}/users/{}/".format(self.root, self.user_id)

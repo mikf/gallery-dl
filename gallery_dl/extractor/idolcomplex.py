@@ -29,6 +29,8 @@ class IdolcomplexExtractor(SankakuExtractor):
         self.logged_in = True
         self.start_page = 1
         self.start_post = 0
+
+    def _init(self):
         self.extags = self.config("tags", False)
 
     def items(self):

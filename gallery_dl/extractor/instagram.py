@@ -34,16 +34,8 @@ class InstagramExtractor(Extractor):
     def __init__(self, match):
         Extractor.__init__(self, match)
         self.item = match.group(1)
-        self.api = None
-        self.www_claim = "0"
-        self.csrf_token = util.generate_token()
-        self._logged_in = True
-        self._find_tags = re.compile(r"#\w+").findall
-        self._cursor = None
-        self._user = None
 
-    def items(self):
-        self.login()
+    def _init(self):
         self.cookies.set(
             "csrftoken", self.csrf_token, domain=self.cookies_domain)
 
@@ -51,6 +43,16 @@ class InstagramExtractor(Extractor):
             self.api = InstagramGraphqlAPI(self)
         else:
             self.api = InstagramRestAPI(self)
+
+        self.www_claim = "0"
+        self.csrf_token = util.generate_token()
+        self._find_tags = re.compile(r"#\w+").findall
+        self._logged_in = True
+        self._cursor = None
+        self._user = None
+
+    def items(self):
+        self.login()
 
         data = self.metadata()
         videos = self.config("videos", True)
@@ -399,6 +401,9 @@ class InstagramUserExtractor(InstagramExtractor):
         ("https://www.instagram.com/instagram/?hl=en"),
         ("https://www.instagram.com/id:25025320/"),
     )
+
+    def initialize(self):
+        pass
 
     def items(self):
         base = "{}/{}/".format(self.root, self.item)

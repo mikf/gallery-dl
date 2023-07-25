@@ -20,8 +20,7 @@ class WallhavenExtractor(Extractor):
     archive_fmt = "{id}"
     request_interval = 1.4
 
-    def __init__(self, match):
-        Extractor.__init__(self, match)
+    def _init(self):
         self.api = WallhavenAPI(self)
 
     def items(self):
@@ -108,6 +107,9 @@ class WallhavenUserExtractor(WallhavenExtractor):
     def __init__(self, match):
         WallhavenExtractor.__init__(self, match)
         self.username = match.group(1)
+
+    def initialize(self):
+        pass
 
     def items(self):
         base = "{}/user/{}/".format(self.root, self.username)

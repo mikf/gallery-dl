@@ -38,7 +38,9 @@ class MyhentaigalleryGalleryExtractor(GalleryExtractor):
         self.gallery_id = match.group(1)
         url = "{}/gallery/thumbnails/{}".format(self.root, self.gallery_id)
         GalleryExtractor.__init__(self, match, url)
-        self.session.headers["Referer"] = url
+
+    def _init(self):
+        self.session.headers["Referer"] = self.gallery_url
 
     def metadata(self, page):
         extr = text.extract_from(page)

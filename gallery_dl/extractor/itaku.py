@@ -26,8 +26,10 @@ class ItakuExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.api = ItakuAPI(self)
         self.item = match.group(1)
+
+    def _init(self):
+        self.api = ItakuAPI(self)
         self.videos = self.config("videos", True)
 
     def items(self):

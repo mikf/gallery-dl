@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2022 Mike Fährmann
+# Copyright 2022-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -150,6 +150,8 @@ class _8chanBoardExtractor(_8chanExtractor):
     def __init__(self, match):
         _8chanExtractor.__init__(self, match)
         _, self.board, self.page = match.groups()
+
+    def _init(self):
         self.session.headers["Referer"] = self.root + "/"
 
     def items(self):

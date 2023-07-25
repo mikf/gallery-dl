@@ -23,12 +23,10 @@ class PinterestExtractor(Extractor):
     archive_fmt = "{id}{media_id}"
     root = "https://www.pinterest.com"
 
-    def __init__(self, match):
-        Extractor.__init__(self, match)
-
+    def _init(self):
         domain = self.config("domain")
         if not domain or domain == "auto" :
-            self.root = text.root_from_url(match.group(0))
+            self.root = text.root_from_url(self.url)
         else:
             self.root = text.ensure_http_scheme(domain)
 

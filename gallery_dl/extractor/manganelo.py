@@ -21,7 +21,9 @@ class ManganeloBase():
     def __init__(self, match):
         domain, path = match.groups()
         super().__init__(match, "https://" + domain + path)
-        self.session.headers['Referer'] = self.root
+
+    def _init(self):
+        self.session.headers['Referer'] = self.root + "/"
 
         if self._match_chapter is None:
             ManganeloBase._match_chapter = re.compile(

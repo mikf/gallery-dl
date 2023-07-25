@@ -26,8 +26,7 @@ class TapasExtractor(Extractor):
     cookies_names = ("_cpc_",)
     _cache = None
 
-    def __init__(self, match):
-        Extractor.__init__(self, match)
+    def _init(self):
         if self._cache is None:
             TapasExtractor._cache = {}
 

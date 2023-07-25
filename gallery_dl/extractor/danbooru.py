@@ -22,8 +22,7 @@ class DanbooruExtractor(BaseExtractor):
     per_page = 200
     request_interval = 1.0
 
-    def __init__(self, match):
-        BaseExtractor.__init__(self, match)
+    def _init(self):
         self.ugoira = self.config("ugoira", False)
         self.external = self.config("external", False)
         self.includes = False

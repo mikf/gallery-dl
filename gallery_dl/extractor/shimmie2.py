@@ -18,21 +18,20 @@ class Shimmie2Extractor(BaseExtractor):
     filename_fmt = "{category}_{id}{md5:?_//}.{extension}"
     archive_fmt = "{id}"
 
-    def __init__(self, match):
-        BaseExtractor.__init__(self, match)
-
+    def _init(self):
         try:
             instance = INSTANCES[self.category]
         except KeyError:
-            pass
-        else:
-            cookies = instance.get("cookies")
-            if cookies:
-                domain = self.root.rpartition("/")[2]
-                self.cookies_update_dict(cookies, domain=domain)
-            file_url = instance.get("file_url")
-            if file_url:
-                self.file_url_fmt = file_url
+            return
+
+        cookies = instance.get("cookies")
+        if cookies:
+            domain = self.root.rpartition("/")[2]
+            self.cookies_update_dict(cookies, domain=domain)
+
+        file_url = instance.get("file_url")
+        if file_url:
+            self.file_url_fmt = file_url
 
     def items(self):
         data = self.metadata()

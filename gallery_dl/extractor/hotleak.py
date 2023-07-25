@@ -21,9 +21,8 @@ class HotleakExtractor(Extractor):
     archive_fmt = "{type}_{creator}_{id}"
     root = "https://hotleak.vip"
 
-    def __init__(self, match):
-        Extractor.__init__(self, match)
-        self.session.headers["Referer"] = self.root
+    def _init(self):
+        self.session.headers["Referer"] = self.root + "/"
 
     def items(self):
         for post in self.posts():

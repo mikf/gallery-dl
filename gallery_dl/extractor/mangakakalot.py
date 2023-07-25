@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # Copyright 2020 Jake Mannens
-# Copyright 2021-2022 Mike Fährmann
+# Copyright 2021-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -39,7 +39,9 @@ class MangakakalotChapterExtractor(MangakakalotBase, ChapterExtractor):
     def __init__(self, match):
         self.path = match.group(1)
         ChapterExtractor.__init__(self, match, self.root + self.path)
-        self.session.headers['Referer'] = self.root
+
+    def _init(self):
+        self.session.headers['Referer'] = self.root + "/"
 
     def metadata(self, page):
         _     , pos = text.extract(page, '<span itemprop="title">', '<')

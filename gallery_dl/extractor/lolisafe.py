@@ -46,9 +46,10 @@ class LolisafeAlbumExtractor(LolisafeExtractor):
         LolisafeExtractor.__init__(self, match)
         self.album_id = match.group(match.lastindex)
 
+    def _init(self):
         domain = self.config("domain")
         if domain == "auto":
-            self.root = text.root_from_url(match.group(0))
+            self.root = text.root_from_url(self.url)
         elif domain:
             self.root = text.ensure_http_scheme(domain)
 

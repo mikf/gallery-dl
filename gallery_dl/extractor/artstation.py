@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2022 Mike Fährmann
+# Copyright 2018-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -27,12 +27,12 @@ class ArtstationExtractor(Extractor):
     def __init__(self, match):
         Extractor.__init__(self, match)
         self.user = match.group(1) or match.group(2)
-        self.external = self.config("external", False)
 
     def items(self):
         data = self.metadata()
 
         projects = self.projects()
+        external = self.config("external", False)
         max_posts = self.config("max-posts")
         if max_posts:
             projects = itertools.islice(projects, max_posts)
@@ -45,7 +45,7 @@ class ArtstationExtractor(Extractor):
                 asset["num"] = num
                 yield Message.Directory, asset
 
-                if adict["has_embedded_player"] and self.external:
+                if adict["has_embedded_player"] and external:
                     player = adict["player_embedded"]
                     url = (text.extr(player, 'src="', '"') or
                            text.extr(player, "src='", "'"))

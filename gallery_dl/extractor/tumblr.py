@@ -42,6 +42,7 @@ class TumblrExtractor(Extractor):
         else:
             self.blog = match.group(1) or match.group(3)
 
+    def _init(self):
         self.api = TumblrAPI(self)
         self.types = self._setup_posttypes()
         self.avatar = self.config("avatar", False)

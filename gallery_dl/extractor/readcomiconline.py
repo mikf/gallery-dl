@@ -57,8 +57,10 @@ class ReadcomiconlineIssueExtractor(ReadcomiconlineBase, ChapterExtractor):
 
     def __init__(self, match):
         ChapterExtractor.__init__(self, match)
+        self.params = match.group(2)
 
-        params = text.parse_query(match.group(2))
+    def _init(self):
+        params = text.parse_query(self.params)
         quality = self.config("quality")
 
         if quality is None or quality == "auto":

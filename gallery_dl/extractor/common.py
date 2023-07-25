@@ -52,25 +52,6 @@ class Extractor():
         self._cfgpath = ("extractor", self.category, self.subcategory)
         self._parentdir = ""
 
-        self._write_pages = self.config("write-pages", False)
-        self._retry_codes = self.config("retry-codes")
-        self._retries = self.config("retries", 4)
-        self._timeout = self.config("timeout", 30)
-        self._verify = self.config("verify", True)
-        self._proxies = util.build_proxy_map(self.config("proxy"), self.log)
-        self._interval = util.build_duration_func(
-            self.config("sleep-request", self.request_interval),
-            self.request_interval_min,
-        )
-
-        if self._retries < 0:
-            self._retries = float("inf")
-        if not self._retry_codes:
-            self._retry_codes = ()
-
-        self._init_session()
-        self._init_cookies()
-
     @classmethod
     def from_url(cls, url):
         if isinstance(cls.pattern, str):
@@ -79,7 +60,15 @@ class Extractor():
         return cls(match) if match else None
 
     def __iter__(self):
+        self.initialize()
         return self.items()
+
+    def initialize(self):
+        self._init_options()
+        self._init_session()
+        self._init_cookies()
+        self._init()
+        self.initialize = util.noop
 
     def items(self):
         yield Message.Version, 1
@@ -244,6 +233,26 @@ class Extractor():
                 self.log.warning("netrc: No authentication info")
 
         return username, password
+
+    def _init(self):
+        pass
+
+    def _init_options(self):
+        self._write_pages = self.config("write-pages", False)
+        self._retry_codes = self.config("retry-codes")
+        self._retries = self.config("retries", 4)
+        self._timeout = self.config("timeout", 30)
+        self._verify = self.config("verify", True)
+        self._proxies = util.build_proxy_map(self.config("proxy"), self.log)
+        self._interval = util.build_duration_func(
+            self.config("sleep-request", self.request_interval),
+            self.request_interval_min,
+        )
+
+        if self._retries < 0:
+            self._retries = float("inf")
+        if not self._retry_codes:
+            self._retry_codes = ()
 
     def _init_session(self):
         self.session = session = requests.Session()
@@ -454,6 +463,13 @@ class Extractor():
             self.cookies.set(
                 "__ddg2", util.generate_token(), domain=self.cookies_domain)
 
+    def _cache(self, func, maxage, keyarg=None):
+        #  return cache.DatabaseCacheDecorator(func, maxage, keyarg)
+        return cache.DatabaseCacheDecorator(func, keyarg, maxage)
+
+    def _cache_memory(self, func, maxage=None, keyarg=None):
+        return cache.Memcache()
+
     def _get_date_min_max(self, dmin=None, dmax=None):
         """Retrieve and parse 'date-min' and 'date-max' config values"""
         def get(key, default):
@@ -654,6 +670,8 @@ class AsynchronousMixin():
     """Run info extraction in a separate thread"""
 
     def __iter__(self):
+        self.initialize()
+
         messages = queue.Queue(5)
         thread = threading.Thread(
             target=self.async_items,

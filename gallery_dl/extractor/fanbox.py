@@ -6,9 +6,9 @@
 
 """Extractors for https://www.fanbox.cc/"""
 
-import re
 from .common import Extractor, Message
 from .. import text
+import re
 
 
 BASE_PATTERN = (
@@ -27,8 +27,7 @@ class FanboxExtractor(Extractor):
     archive_fmt = "{id}_{num}"
     _warning = True
 
-    def __init__(self, match):
-        Extractor.__init__(self, match)
+    def _init(self):
         self.embeds = self.config("embeds", True)
 
     def items(self):
