@@ -38,14 +38,18 @@ class DeviantartExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
+        self.user = match.group(1) or match.group(2)
+
+    def _init(self):
         self.flat = self.config("flat", True)
         self.extra = self.config("extra", False)
         self.original = self.config("original", True)
         self.comments = self.config("comments", False)
-        self.user = match.group(1) or match.group(2)
+
+        self.api = DeviantartOAuthAPI(self)
         self.group = False
         self.offset = 0
-        self.api = None
+        self._premium_cache = {}
 
         unwatch = self.config("auto-unwatch")
         if unwatch:
@@ -60,11 +64,13 @@ class DeviantartExtractor(Extractor):
             self._update_content = self._update_content_image
             self.original = True
 
-        self._premium_cache = {}
-        self.commit_journal = {
-            "html": self._commit_journal_html,
-            "text": self._commit_journal_text,
-        }.get(self.config("journals", "html"))
+        journals = self.config("journals", "html")
+        if journals == "html":
+            self.commit_journal = self._commit_journal_html
+        elif journals == "text":
+            self.commit_journal = self._commit_journal_text
+        else:
+            self.commit_journal = None
 
     def skip(self, num):
         self.offset += num
@@ -80,8 +86,6 @@ class DeviantartExtractor(Extractor):
             return True
 
     def items(self):
-        self.api = DeviantartOAuthAPI(self)
-
         if self.user and self.config("group", True):
             profile = self.api.user_profile(self.user)
             self.group = not profile
@@ -448,6 +452,9 @@ class DeviantartUserExtractor(DeviantartExtractor):
         }),
         ("https://shimoda7.deviantart.com/"),
     )
+
+    def initialize(self):
+        pass
 
     def items(self):
         base = "{}/{}/".format(self.root, self.user)

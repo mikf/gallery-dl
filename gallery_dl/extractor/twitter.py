@@ -32,6 +32,8 @@ class TwitterExtractor(Extractor):
     def __init__(self, match):
         Extractor.__init__(self, match)
         self.user = match.group(1)
+
+    def _init(self):
         self.textonly = self.config("text-tweets", False)
         self.retweets = self.config("retweets", False)
         self.replies = self.config("replies", True)
@@ -489,6 +491,9 @@ class TwitterUserExtractor(TwitterExtractor):
         user_id = match.group(2)
         if user_id:
             self.user = "id:" + user_id
+
+    def initialize(self):
+        pass
 
     def items(self):
         base = "{}/{}/".format(self.root, self.user)

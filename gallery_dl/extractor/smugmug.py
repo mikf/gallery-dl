@@ -34,8 +34,7 @@ class SmugmugExtractor(Extractor):
         "Uris": None,
     }
 
-    def __init__(self, match):
-        Extractor.__init__(self, match)
+    def _init(self):
         self.api = SmugmugAPI(self)
         self.videos = self.config("videos", True)
         self.session = self.api.session

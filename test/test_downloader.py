@@ -34,6 +34,7 @@ class FakeJob():
 
     def __init__(self):
         self.extractor = extractor.find("test:")
+        self.extractor.initialize()
         self.pathfmt = path.PathFormat(self.extractor)
         self.out = output.NullOutput()
         self.get_logger = logging.getLogger

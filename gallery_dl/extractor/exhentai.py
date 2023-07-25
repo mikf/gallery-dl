@@ -31,17 +31,21 @@ class ExhentaiExtractor(Extractor):
     LIMIT = False
 
     def __init__(self, match):
-        # allow calling 'self.config()' before 'Extractor.__init__()'
-        self._cfgpath = ("extractor", self.category, self.subcategory)
+        Extractor.__init__(self, match)
+        self.version = match.group(1)
 
-        version = match.group(1)
+    def initialize(self):
         domain = self.config("domain", "auto")
         if domain == "auto":
-            domain = ("ex" if version == "ex" else "e-") + "hentai.org"
+            domain = ("ex" if self.version == "ex" else "e-") + "hentai.org"
         self.root = "https://" + domain
         self.cookies_domain = "." + domain
 
-        Extractor.__init__(self, match)
+        Extractor.initialize(self)
+
+        if self.version != "ex":
+            self.cookies.set("nw", "1", domain=self.cookies_domain)
+        self.session.headers["Referer"] = self.root + "/"
         self.original = self.config("original", True)
 
         limits = self.config("limits", False)
@@ -50,10 +54,6 @@ class ExhentaiExtractor(Extractor):
             self._remaining = 0
         else:
             self.limits = False
-
-        self.session.headers["Referer"] = self.root + "/"
-        if version != "ex":
-            self.cookies.set("nw", "1", domain=self.cookies_domain)
 
     def request(self, url, **kwargs):
         response = Extractor.request(self, url, **kwargs)
@@ -174,6 +174,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
         self.image_token = match.group(4)
         self.image_num = text.parse_int(match.group(6), 1)
 
+    def _init(self):
         source = self.config("source")
         if source == "hitomi":
             self.items = self._items_hitomi

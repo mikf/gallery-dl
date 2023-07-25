@@ -189,8 +189,10 @@ class AryionGalleryExtractor(AryionExtractor):
 
     def __init__(self, match):
         AryionExtractor.__init__(self, match)
-        self.recursive = self.config("recursive", True)
         self.offset = 0
+
+    def _init(self):
+        self.recursive = self.config("recursive", True)
 
     def skip(self, num):
         if self.recursive:
@@ -217,9 +219,11 @@ class AryionTagExtractor(AryionExtractor):
         "count": ">= 5",
     })
 
-    def metadata(self):
+    def _init(self):
         self.params = text.parse_query(self.user)
         self.user = None
+
+    def metadata(self):
         return {"search_tags": self.params.get("tag")}
 
     def posts(self):

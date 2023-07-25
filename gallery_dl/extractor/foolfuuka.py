@@ -22,9 +22,11 @@ class FoolfuukaExtractor(BaseExtractor):
 
     def __init__(self, match):
         BaseExtractor.__init__(self, match)
-        self.session.headers["Referer"] = self.root
         if self.category == "b4k":
             self.remote = self._remote_direct
+
+    def _init(self):
+        self.session.headers["Referer"] = self.root + "/"
 
     def items(self):
         yield Message.Directory, self.metadata()

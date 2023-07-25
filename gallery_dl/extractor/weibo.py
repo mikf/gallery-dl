@@ -28,6 +28,8 @@ class WeiboExtractor(Extractor):
     def __init__(self, match):
         Extractor.__init__(self, match)
         self._prefix, self.user = match.groups()
+
+    def _init(self):
         self.retweets = self.config("retweets", True)
         self.videos = self.config("videos", True)
         self.livephoto = self.config("livephoto", True)
@@ -227,6 +229,9 @@ class WeiboUserExtractor(WeiboExtractor):
         ("https://m.weibo.cn/p/2304132314621010_-_WEIBO_SECOND_PROFILE_WEIBO"),
         ("https://www.weibo.com/p/1003062314621010/home"),
     )
+
+    def initialize(self):
+        pass
 
     def items(self):
         base = "{}/u/{}?tabtype=".format(self.root, self._user_id())

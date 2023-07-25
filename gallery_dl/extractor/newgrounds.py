@@ -29,6 +29,8 @@ class NewgroundsExtractor(Extractor):
         Extractor.__init__(self, match)
         self.user = match.group(1)
         self.user_root = "https://{}.newgrounds.com".format(self.user)
+
+    def _init(self):
         self.flash = self.config("flash", True)
 
         fmt = self.config("format", "original")
@@ -516,6 +518,9 @@ class NewgroundsUserExtractor(NewgroundsExtractor):
             "count": 3,
         }),
     )
+
+    def initialize(self):
+        pass
 
     def items(self):
         base = self.user_root + "/"

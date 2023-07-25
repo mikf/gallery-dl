@@ -19,9 +19,11 @@ class MisskeyExtractor(BaseExtractor):
 
     def __init__(self, match):
         BaseExtractor.__init__(self, match)
+        self.item = match.group(match.lastindex)
+
+    def _init(self):
         self.api = MisskeyAPI(self)
         self.instance = self.root.rpartition("://")[2]
-        self.item = match.group(match.lastindex)
         self.renotes = self.config("renotes", False)
         self.replies = self.config("replies", True)
 

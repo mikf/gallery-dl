@@ -54,6 +54,7 @@ class UrlshortenerLinkExtractor(UrlshortenerExtractor):
         UrlshortenerExtractor.__init__(self, match)
         self.id = match.group(match.lastindex)
 
+    def _init(self):
         try:
             self.headers = INSTANCES[self.category]["headers"]
         except Exception:

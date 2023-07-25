@@ -28,6 +28,8 @@ class OAuthBase(Extractor):
     def __init__(self, match):
         Extractor.__init__(self, match)
         self.client = None
+
+    def _init(self):
         self.cache = config.get(("extractor", self.category), "cache", True)
 
     def oauth_config(self, key, default=None):

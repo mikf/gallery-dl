@@ -24,6 +24,8 @@ class RedgifsExtractor(Extractor):
     def __init__(self, match):
         Extractor.__init__(self, match)
         self.key = match.group(1)
+
+    def _init(self):
         self.api = RedgifsAPI(self)
 
         formats = self.config("format")

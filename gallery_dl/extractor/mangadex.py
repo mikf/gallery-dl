@@ -30,9 +30,11 @@ class MangadexExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
+        self.uuid = match.group(1)
+
+    def _init(self):
         self.session.headers["User-Agent"] = util.USERAGENT
         self.api = MangadexAPI(self)
-        self.uuid = match.group(1)
 
     def items(self):
         for chapter in self.chapters():
@@ -202,7 +204,7 @@ class MangadexAPI():
         self.extractor = extr
         self.headers = {}
 
-        self.username, self.password = self.extractor._get_auth_info()
+        self.username, self.password = extr._get_auth_info()
         if not self.username:
             self.authenticate = util.noop
 

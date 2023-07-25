@@ -26,8 +26,7 @@ class TwibooruExtractor(BooruExtractor):
     per_page = 50
     root = "https://twibooru.org"
 
-    def __init__(self, match):
-        BooruExtractor.__init__(self, match)
+    def _init(self):
         self.api = TwibooruAPI(self)
 
     _file_url = operator.itemgetter("view_url")

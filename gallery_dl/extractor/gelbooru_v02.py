@@ -19,8 +19,7 @@ import re
 class GelbooruV02Extractor(booru.BooruExtractor):
     basecategory = "gelbooru_v02"
 
-    def __init__(self, match):
-        booru.BooruExtractor.__init__(self, match)
+    def _init(self):
         self.api_key = self.config("api-key")
         self.user_id = self.config("user-id")
 

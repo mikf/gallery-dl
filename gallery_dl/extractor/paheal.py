@@ -108,6 +108,7 @@ class PahealTagExtractor(PahealExtractor):
         PahealExtractor.__init__(self, match)
         self.tags = text.unquote(match.group(1))
 
+    def _init(self):
         if self.config("metadata"):
             self._extract_data = self._extract_data_ex
 

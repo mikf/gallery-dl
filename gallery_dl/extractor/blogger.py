@@ -28,12 +28,13 @@ class BloggerExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.videos = self.config("videos", True)
         self.blog = match.group(1) or match.group(2)
+
+    def _init(self):
         self.api = BloggerAPI(self)
+        self.videos = self.config("videos", True)
 
     def items(self):
-
         blog = self.api.blog_by_url("http://" + self.blog)
         blog["pages"] = blog["pages"]["totalItems"]
         blog["posts"] = blog["posts"]["totalItems"]

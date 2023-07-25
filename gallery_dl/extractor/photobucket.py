@@ -48,9 +48,10 @@ class PhotobucketAlbumExtractor(Extractor):
     )
 
     def __init__(self, match):
-        Extractor.__init__(self, match)
-        self.album_path = ""
         self.root = "https://" + match.group(1)
+        Extractor.__init__(self, match)
+
+    def _init(self):
         self.session.headers["Referer"] = self.url
 
     def items(self):
@@ -129,6 +130,8 @@ class PhotobucketImageExtractor(Extractor):
         Extractor.__init__(self, match)
         self.user = match.group(1) or match.group(3)
         self.media_id = match.group(2)
+
+    def _init(self):
         self.session.headers["Referer"] = self.url
 
     def items(self):

@@ -170,6 +170,9 @@ class HentaifoundryUserExtractor(HentaifoundryExtractor):
     pattern = BASE_PATTERN + r"/user/([^/?#]+)/profile"
     test = ("https://www.hentai-foundry.com/user/Tenpura/profile",)
 
+    def initialize(self):
+        pass
+
     def items(self):
         root = self.root
         user = "/user/" + self.user

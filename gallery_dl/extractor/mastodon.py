@@ -23,8 +23,10 @@ class MastodonExtractor(BaseExtractor):
 
     def __init__(self, match):
         BaseExtractor.__init__(self, match)
-        self.instance = self.root.partition("://")[2]
         self.item = match.group(match.lastindex)
+
+    def _init(self):
+        self.instance = self.root.partition("://")[2]
         self.reblogs = self.config("reblogs", False)
         self.replies = self.config("replies", True)
 

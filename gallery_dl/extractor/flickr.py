@@ -26,8 +26,10 @@ class FlickrExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.api = FlickrAPI(self)
         self.item_id = match.group(1)
+
+    def _init(self):
+        self.api = FlickrAPI(self)
         self.user = None
 
     def items(self):

@@ -47,8 +47,10 @@ class ImagechestGalleryExtractor(GalleryExtractor):
         url = self.root + "/p/" + self.gallery_id
         GalleryExtractor.__init__(self, match, url)
 
-        self.access_token = self.config("access-token")
-        if self.access_token:
+    def _init(self):
+        access_token = self.config("access-token")
+        if access_token:
+            self.api = ImagechestAPI(self, access_token)
             self.gallery_url = None
             self.metadata = self._metadata_api
             self.images = self._images_api
@@ -82,8 +84,7 @@ class ImagechestGalleryExtractor(GalleryExtractor):
         ]
 
     def _metadata_api(self, page):
-        api = ImagechestAPI(self, self.access_token)
-        post = api.post(self.gallery_id)
+        post = self.api.post(self.gallery_id)
 
         post["date"] = text.parse_datetime(
             post["created"], "%Y-%m-%dT%H:%M:%S.%fZ")

@@ -22,8 +22,10 @@ class ImgurExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.api = ImgurAPI(self)
         self.key = match.group(1)
+
+    def _init(self):
+        self.api = ImgurAPI(self)
         self.mp4 = self.config("mp4", True)
 
     def _prepare(self, image):

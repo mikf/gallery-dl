@@ -22,8 +22,7 @@ class PhilomenaExtractor(BooruExtractor):
     page_start = 1
     per_page = 50
 
-    def __init__(self, match):
-        BooruExtractor.__init__(self, match)
+    def _init(self):
         self.api = PhilomenaAPI(self)
 
     _file_url = operator.itemgetter("view_url")

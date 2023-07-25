@@ -66,13 +66,11 @@ class SenmangaChapterExtractor(ChapterExtractor):
         }),
     )
 
-    def __init__(self, match):
-        ChapterExtractor.__init__(self, match)
+    def _init(self):
         self.session.headers["Referer"] = self.gallery_url
 
         # select "All pages" viewer
-        self.cookies.set(
-            "viewer", "1", domain="raw.senmanga.com")
+        self.cookies.set("viewer", "1", domain="raw.senmanga.com")
 
     def metadata(self, page):
         title = text.extr(page, "<title>", "</title>")

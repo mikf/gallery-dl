@@ -21,18 +21,19 @@ class NijieExtractor(AsynchronousMixin, BaseExtractor):
     archive_fmt = "{image_id}_{num}"
 
     def __init__(self, match):
-        self._init_category(match)
+        BaseExtractor.__init__(self, match)
+        self.user_id = text.parse_int(match.group(match.lastindex))
+
+    def initialize(self):
         self.cookies_domain = "." + self.root.rpartition("/")[2]
         self.cookies_names = (self.category + "_tok",)
 
+        BaseExtractor.initialize(self)
+
+        self.session.headers["Referer"] = self.root + "/"
+        self.user_name = None
         if self.category == "horne":
             self._extract_data = self._extract_data_horne
-
-        BaseExtractor.__init__(self, match)
-
-        self.user_id = text.parse_int(match.group(match.lastindex))
-        self.user_name = None
-        self.session.headers["Referer"] = self.root + "/"
 
     def items(self):
         self.login()
@@ -179,6 +180,9 @@ class NijieUserExtractor(NijieExtractor):
         ("https://nijie.info/members.php?id=44"),
         ("https://horne.red/members.php?id=58000"),
     )
+
+    def initialize(self):
+        pass
 
     def items(self):
         fmt = "{}/{{}}.php?id={}".format(self.root, self.user_id).format

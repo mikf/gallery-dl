@@ -22,6 +22,8 @@ class SkebExtractor(Extractor):
     def __init__(self, match):
         Extractor.__init__(self, match)
         self.user_name = match.group(1)
+
+    def _init(self):
         self.thumbnails = self.config("thumbnails", False)
         self.article = self.config("article", False)
 

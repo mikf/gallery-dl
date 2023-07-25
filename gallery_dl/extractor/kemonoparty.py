@@ -35,14 +35,15 @@ class KemonopartyExtractor(Extractor):
         self.root = text.root_from_url(match.group(0))
         self.cookies_domain = ".{}.{}".format(domain, tld)
         Extractor.__init__(self, match)
+
+    def _init(self):
         self.session.headers["Referer"] = self.root + "/"
-
-    def items(self):
         self._prepare_ddosguard_cookies()
-
         self._find_inline = re.compile(
             r'src="(?:https?://(?:kemono|coomer)\.(?:party|su))?(/inline/[^"]+'
             r'|/[0-9a-f]{2}/[0-9a-f]{2}/[0-9a-f]{64}\.[^"]+)').findall
+
+    def items(self):
         find_hash = re.compile(HASH_PATTERN).match
         generators = self._build_file_generators(self.config("files"))
         duplicates = self.config("duplicates")
