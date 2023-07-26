@@ -2093,11 +2093,14 @@ Description
 extractor.mangadex.lang
 -----------------------
 Type
-    ``string``
+    * ``string``
+    * ``list`` of ``strings``
 Example
-    ``"en"``
+    * ``"en"``
+    * ``"fr,it"``
+    * ``["fr", "it"]``
 Description
-    `ISO 639-1 <https://en.wikipedia.org/wiki/ISO_639-1>`__ language code
+    `ISO 639-1 <https://en.wikipedia.org/wiki/ISO_639-1>`__ language codes
     to filter chapters by.
 
 

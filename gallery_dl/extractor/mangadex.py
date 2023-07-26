@@ -150,6 +150,7 @@ class MangadexMangaExtractor(MangadexExtractor):
     pattern = BASE_PATTERN + r"/(?:title|manga)/(?!feed$)([0-9a-f-]+)"
     test = (
         ("https://mangadex.org/title/f90c4398-8aad-4f51-8a1f-024ca09fdcbc", {
+            "count": ">= 5",
             "keyword": {
                 "manga"   : "Souten no Koumori",
                 "manga_id": "f90c4398-8aad-4f51-8a1f-024ca09fdcbc",
@@ -166,6 +167,16 @@ class MangadexMangaExtractor(MangadexExtractor):
                 "status"  : "completed",
                 "tags"    : ["Oneshot", "Historical", "Action",
                              "Martial Arts", "Drama", "Tragedy"],
+            },
+        }),
+        # mutliple values for 'lang' (#4093)
+        ("https://mangadex.org/title/f90c4398-8aad-4f51-8a1f-024ca09fdcbc", {
+            "options": (("lang", "fr,it"),),
+            "count": 2,
+            "keyword": {
+                "manga"   : "Souten no Koumori",
+                "lang"    : "re:fr|it",
+                "language": "re:French|Italian",
             },
         }),
         ("https://mangadex.cc/manga/d0c88e3b-ea64-4e07-9841-c1d2ac982f4a/", {
@@ -290,9 +301,13 @@ class MangadexAPI():
         if ratings is None:
             ratings = ("safe", "suggestive", "erotica", "pornographic")
 
+        lang = config("lang")
+        if isinstance(lang, str) and "," in lang:
+            lang = lang.split(",")
+
         params["contentRating[]"] = ratings
+        params["translatedLanguage[]"] = lang
         params["includes[]"] = ("scanlation_group",)
-        params["translatedLanguage[]"] = config("lang")
         params["offset"] = 0
 
         api_params = config("api-parameters")
