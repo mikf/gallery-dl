@@ -50,7 +50,7 @@ class LensdumpAlbumExtractor(LensdumpBase, GalleryExtractor):
     pattern = BASE_PATTERN + r"/(?:((?!\w+/albums|a/|i/)\w+)|a/(\w+))"
     test = (
         ("https://lensdump.com/a/1IhJr", {
-            "url": "7428cc906e7b291c778d446a11c602b81ba72840",
+            "pattern": r"https://[abcd]\.l3n\.co/i/tq\w{4}\.png",
             "keyword": {
                 "extension": "png",
                 "name": str,
@@ -77,6 +77,7 @@ class LensdumpAlbumExtractor(LensdumpBase, GalleryExtractor):
         for node in self.nodes(page):
             # get urls and filenames of images in current page
             json_data = util.json_loads(text.unquote(
+                text.extr(node, "data-object='", "'") or
                 text.extr(node, 'data-object="', '"')))
             image_id = json_data.get('name')
             image_url = json_data.get('url')
@@ -118,8 +119,7 @@ class LensdumpImageExtractor(LensdumpBase, Extractor):
     pattern = BASE_PATTERN + r"/i/(\w+)"
     test = (
         ("https://lensdump.com/i/tyoAyM", {
-            "pattern": r"https://i\d\.lensdump\.com/i/tyoAyM\.webp",
-            "url": "ae9933f5f3bd9497bfc34e3e70a0fbef6c562d38",
+            "pattern": r"https://c\.l3n\.co/i/tyoAyM\.webp",
             "content": "1aa749ed2c0cf679ec8e1df60068edaf3875de46",
             "keyword": {
                 "date": "dt:2022-08-01 08:24:28",
@@ -128,7 +128,7 @@ class LensdumpImageExtractor(LensdumpBase, Extractor):
                 "height": 400,
                 "id": "tyoAyM",
                 "title": "MYOBI clovis bookcaseset",
-                "url": "https://i2.lensdump.com/i/tyoAyM.webp",
+                "url": "https://c.l3n.co/i/tyoAyM.webp",
                 "width": 620,
             },
         }),
