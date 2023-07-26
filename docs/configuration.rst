@@ -1158,7 +1158,7 @@ Description
     Note: This requires 1 additional HTTP request per 200-post batch.
 
 
-extractor.{Danbooru].threshold
+extractor.[Danbooru].threshold
 ------------------------------
 Type
     * ``string``
