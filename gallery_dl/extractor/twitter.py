@@ -340,7 +340,11 @@ class TwitterExtractor(Extractor):
         return tdata
 
     def _transform_user(self, user):
-        uid = user.get("rest_id") or user["id_str"]
+        try:
+            uid = user.get("rest_id") or user["id_str"]
+        except KeyError:
+            # private/invalid user (#4349)
+            return {}
 
         try:
             return self._user_cache[uid]
