@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2020-2022 Mike Fährmann
+# Copyright 2020-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -166,7 +166,7 @@ class MoebooruTagExtractor(MoebooruExtractor):
     subcategory = "tag"
     directory_fmt = ("{category}", "{search_tags}")
     archive_fmt = "t_{search_tags}_{id}"
-    pattern = BASE_PATTERN + r"/post\?(?:[^&#]*&)*tags=([^&#]+)"
+    pattern = BASE_PATTERN + r"/post\?(?:[^&#]*&)*tags=([^&#]*)"
     test = (
         ("https://yande.re/post?tags=ouzoku+armor", {
             "content": "59201811c728096b2d95ce6896fd0009235fe683",
@@ -174,6 +174,8 @@ class MoebooruTagExtractor(MoebooruExtractor):
         ("https://konachan.com/post?tags=patata", {
             "content": "838cfb815e31f48160855435655ddf7bfc4ecb8d",
         }),
+        # empty 'tags' (#4354)
+        ("https://konachan.com/post?tags="),
         ("https://konachan.net/post?tags=patata"),
         ("https://www.sakugabooru.com/post?tags=nichijou"),
         ("https://lolibooru.moe/post?tags=ruu_%28tksymkw%29"),
