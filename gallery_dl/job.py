@@ -32,6 +32,21 @@ class Job():
         self.kwdict = {}
         self.status = 0
 
+        cfgpath = []
+        if parent and parent.extractor.category != extr.category:
+            cat = "{}>{}".format(
+                parent.extractor.category, extr.category)
+            cfgpath.append((cat, extr.subcategory))
+            cfgpath.append((extr.category, extr.subcategory))
+        if extr.basecategory:
+            if not cfgpath:
+                cfgpath.append((extr.category, extr.subcategory))
+            cfgpath.append((extr.basecategory, extr.subcategory))
+        if cfgpath:
+            extr._cfgpath = cfgpath
+            extr.config = extr._config_shared
+            extr.config_accumulate = extr._config_shared_accumulate
+
         actions = extr.config("actions")
         if actions:
             from .actions import parse

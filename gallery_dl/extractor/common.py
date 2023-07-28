@@ -45,10 +45,6 @@ class Extractor():
     def __init__(self, match):
         self.log = logging.getLogger(self.category)
         self.url = match.string
-
-        if self.basecategory:
-            self.config = self._config_shared
-            self.config_accumulate = self._config_shared_accumulate
         self._cfgpath = ("extractor", self.category, self.subcategory)
         self._parentdir = ""
 
@@ -98,16 +94,22 @@ class Extractor():
         return config.accumulate(self._cfgpath, key)
 
     def _config_shared(self, key, default=None):
-        return config.interpolate_common(("extractor",), (
-            (self.category, self.subcategory),
-            (self.basecategory, self.subcategory),
-        ), key, default)
+        return config.interpolate_common(
+            ("extractor",), self._cfgpath, key, default)
 
     def _config_shared_accumulate(self, key):
-        values = config.accumulate(self._cfgpath, key)
-        conf = config.get(("extractor",), self.basecategory)
-        if conf:
-            values[:0] = config.accumulate((self.subcategory,), key, conf=conf)
+        first = True
+        extr = ("extractor",)
+
+        for path in self._cfgpath:
+            if first:
+                first = False
+                values = config.accumulate(extr + path, key)
+            else:
+                conf = config.get(extr, path[0])
+                if conf:
+                    values[:0] = config.accumulate(
+                        (self.subcategory,), key, conf=conf)
         return values
 
     def request(self, url, method="GET", session=None,
