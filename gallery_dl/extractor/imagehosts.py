@@ -171,10 +171,16 @@ class AcidimgImageExtractor(ImagehostImageExtractor):
     _encoding = "utf-8"
 
     def get_info(self, page):
-        url, pos = text.extract(page, '<img class="centred" src="', '"')
+        url, pos = text.extract(page, "<img class='centred' src='", "'")
         if not url:
-            raise exception.NotFoundError("image")
-        filename, pos = text.extract(page, ' alt="', '"', pos)
+            url, pos = text.extract(page, '<img class="centred" src="', '"')
+            if not url:
+                raise exception.NotFoundError("image")
+
+        filename, pos = text.extract(page, "alt='", "'", pos)
+        if not filename:
+            filename, pos = text.extract(page, 'alt="', '"', pos)
+
         return url, (filename + splitext(url)[1]) if filename else url
 
 
