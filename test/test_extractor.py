@@ -132,8 +132,16 @@ class TestExtractorModule(unittest.TestCase):
             else:
                 self.assertIs(extr1, matches[0][1], url)
 
+    def test_init(self):
+        """Test for exceptions in Extractor.initialize(()"""
+        for cls in extractor.extractors():
+            for test in cls._get_tests():
+                extr = cls.from_url(test[0])
+                extr.initialize()
+                break
+
     def test_docstrings(self):
-        """ensure docstring uniqueness"""
+        """Ensure docstring uniqueness"""
         for extr1 in extractor.extractors():
             for extr2 in extractor.extractors():
                 if extr1 != extr2 and extr1.__doc__ and extr2.__doc__:

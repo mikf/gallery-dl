@@ -114,8 +114,7 @@ class MangahereMangaExtractor(MangahereBase, MangaExtractor):
         ("https://m.mangahere.co/manga/aria/"),
     )
 
-    def __init__(self, match):
-        MangaExtractor.__init__(self, match)
+    def _init(self):
         self.cookies.set("isAdult", "1", domain="www.mangahere.cc")
 
     def chapters(self, page):
