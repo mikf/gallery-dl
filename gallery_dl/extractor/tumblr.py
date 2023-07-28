@@ -442,10 +442,13 @@ class TumblrDayExtractor(TumblrExtractor):
     def __init__(self, match):
         TumblrExtractor.__init__(self, match)
         year, month, day = match.group(4).split("/")
-        self.date_min = ts = (
+        self.date_min = (
             # 719163 == date(1970, 1, 1).toordinal()
             date(int(year), int(month), int(day)).toordinal() - 719163) * 86400
-        self.api.before = ts + 86400
+
+    def _init(self):
+        TumblrExtractor._init(self)
+        self.api.before = self.date_min + 86400
 
     def posts(self):
         return self.api.posts(self.blog, {})
