@@ -36,6 +36,13 @@ class InstagramExtractor(Extractor):
         self.item = match.group(1)
 
     def _init(self):
+        self.www_claim = "0"
+        self.csrf_token = util.generate_token()
+        self._find_tags = re.compile(r"#\w+").findall
+        self._logged_in = True
+        self._cursor = None
+        self._user = None
+
         self.cookies.set(
             "csrftoken", self.csrf_token, domain=self.cookies_domain)
 
@@ -43,13 +50,6 @@ class InstagramExtractor(Extractor):
             self.api = InstagramGraphqlAPI(self)
         else:
             self.api = InstagramRestAPI(self)
-
-        self.www_claim = "0"
-        self.csrf_token = util.generate_token()
-        self._find_tags = re.compile(r"#\w+").findall
-        self._logged_in = True
-        self._cursor = None
-        self._user = None
 
     def items(self):
         self.login()
