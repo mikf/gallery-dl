@@ -135,11 +135,24 @@ class TestExtractorModule(unittest.TestCase):
     def test_init(self):
         """Test for exceptions in Extractor.initialize(()"""
         for cls in extractor.extractors():
+            if cls.category == "ytdl":
+                continue
             for test in cls._get_tests():
                 extr = cls.from_url(test[0])
                 extr.initialize()
                 extr.finalize()
                 break
+
+    def test_init_ytdl(self):
+        try:
+            extr = extractor.find("ytdl:")
+            extr.initialize()
+            extr.finalize()
+        except ImportError as exc:
+            if exc.name in ("youtube_dl", "yt_dlp"):
+                raise unittest.SkipTest("cannot import module '{}'".format(
+                    exc.name))
+            raise
 
     def test_docstrings(self):
         """Ensure docstring uniqueness"""
