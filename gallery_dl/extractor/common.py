@@ -36,7 +36,6 @@ class Extractor():
     browser = None
     root = ""
     test = None
-    finalize = None
     request_interval = 0.0
     request_interval_min = 0.0
     request_timestamp = 0.0
@@ -65,6 +64,9 @@ class Extractor():
         self._init_cookies()
         self._init()
         self.initialize = util.noop
+
+    def finalize(self):
+        pass
 
     def items(self):
         yield Message.Version, 1

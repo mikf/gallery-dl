@@ -405,6 +405,9 @@ class InstagramUserExtractor(InstagramExtractor):
     def initialize(self):
         pass
 
+    def finalize(self):
+        pass
+
     def items(self):
         base = "{}/{}/".format(self.root, self.item)
         stories = "{}/stories/{}/".format(self.root, self.item)

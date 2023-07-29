@@ -138,6 +138,7 @@ class TestExtractorModule(unittest.TestCase):
             for test in cls._get_tests():
                 extr = cls.from_url(test[0])
                 extr.initialize()
+                extr.finalize()
                 break
 
     def test_docstrings(self):
