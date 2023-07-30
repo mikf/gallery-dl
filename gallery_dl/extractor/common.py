@@ -32,11 +32,10 @@ class Extractor():
     directory_fmt = ("{category}",)
     filename_fmt = "{filename}.{extension}"
     archive_fmt = ""
-    cookiedomain = ""
+    cookies_domain = ""
     browser = None
     root = ""
     test = None
-    finalize = None
     request_interval = 0.0
     request_interval_min = 0.0
     request_timestamp = 0.0
@@ -45,31 +44,8 @@ class Extractor():
     def __init__(self, match):
         self.log = logging.getLogger(self.category)
         self.url = match.string
-
-        if self.basecategory:
-            self.config = self._config_shared
-            self.config_accumulate = self._config_shared_accumulate
         self._cfgpath = ("extractor", self.category, self.subcategory)
         self._parentdir = ""
-
-        self._write_pages = self.config("write-pages", False)
-        self._retry_codes = self.config("retry-codes")
-        self._retries = self.config("retries", 4)
-        self._timeout = self.config("timeout", 30)
-        self._verify = self.config("verify", True)
-        self._proxies = util.build_proxy_map(self.config("proxy"), self.log)
-        self._interval = util.build_duration_func(
-            self.config("sleep-request", self.request_interval),
-            self.request_interval_min,
-        )
-
-        if self._retries < 0:
-            self._retries = float("inf")
-        if not self._retry_codes:
-            self._retry_codes = ()
-
-        self._init_session()
-        self._init_cookies()
 
     @classmethod
     def from_url(cls, url):
@@ -79,7 +55,18 @@ class Extractor():
         return cls(match) if match else None
 
     def __iter__(self):
+        self.initialize()
         return self.items()
+
+    def initialize(self):
+        self._init_options()
+        self._init_session()
+        self._init_cookies()
+        self._init()
+        self.initialize = util.noop
+
+    def finalize(self):
+        pass
 
     def items(self):
         yield Message.Version, 1
@@ -90,23 +77,44 @@ class Extractor():
     def config(self, key, default=None):
         return config.interpolate(self._cfgpath, key, default)
 
+    def config_deprecated(self, key, deprecated, default=None,
+                          sentinel=util.SENTINEL, history=set()):
+        value = self.config(deprecated, sentinel)
+        if value is not sentinel:
+            if deprecated not in history:
+                history.add(deprecated)
+                self.log.warning("'%s' is deprecated. Use '%s' instead.",
+                                 deprecated, key)
+            default = value
+
+        value = self.config(key, sentinel)
+        if value is not sentinel:
+            return value
+        return default
+
     def config_accumulate(self, key):
         return config.accumulate(self._cfgpath, key)
 
     def _config_shared(self, key, default=None):
-        return config.interpolate_common(("extractor",), (
-            (self.category, self.subcategory),
-            (self.basecategory, self.subcategory),
-        ), key, default)
+        return config.interpolate_common(
+            ("extractor",), self._cfgpath, key, default)
 
     def _config_shared_accumulate(self, key):
-        values = config.accumulate(self._cfgpath, key)
-        conf = config.get(("extractor",), self.basecategory)
-        if conf:
-            values[:0] = config.accumulate((self.subcategory,), key, conf=conf)
+        first = True
+        extr = ("extractor",)
+
+        for path in self._cfgpath:
+            if first:
+                first = False
+                values = config.accumulate(extr + path, key)
+            else:
+                conf = config.get(extr, path[0])
+                if conf:
+                    values[:0] = config.accumulate(
+                        (self.subcategory,), key, conf=conf)
         return values
 
-    def request(self, url, *, method="GET", session=None,
+    def request(self, url, method="GET", session=None,
                 retries=None, retry_codes=None, encoding=None,
                 fatal=True, notfound=None, **kwargs):
         if session is None:
@@ -180,7 +188,7 @@ class Extractor():
 
         raise exception.HttpError(msg, response)
 
-    def wait(self, *, seconds=None, until=None, adjust=1.0,
+    def wait(self, seconds=None, until=None, adjust=1.0,
              reason="rate limit reset"):
         now = time.time()
 
@@ -230,6 +238,26 @@ class Extractor():
 
         return username, password
 
+    def _init(self):
+        pass
+
+    def _init_options(self):
+        self._write_pages = self.config("write-pages", False)
+        self._retry_codes = self.config("retry-codes")
+        self._retries = self.config("retries", 4)
+        self._timeout = self.config("timeout", 30)
+        self._verify = self.config("verify", True)
+        self._proxies = util.build_proxy_map(self.config("proxy"), self.log)
+        self._interval = util.build_duration_func(
+            self.config("sleep-request", self.request_interval),
+            self.request_interval_min,
+        )
+
+        if self._retries < 0:
+            self._retries = float("inf")
+        if not self._retry_codes:
+            self._retry_codes = ()
+
     def _init_session(self):
         self.session = session = requests.Session()
         headers = session.headers
@@ -271,7 +299,7 @@ class Extractor():
             useragent = self.config("user-agent")
             if useragent is None:
                 useragent = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64; "
-                             "rv:102.0) Gecko/20100101 Firefox/102.0")
+                             "rv:115.0) Gecko/20100101 Firefox/115.0")
             elif useragent == "browser":
                 useragent = _browser_useragent()
             headers["User-Agent"] = useragent
@@ -315,26 +343,26 @@ class Extractor():
 
     def _init_cookies(self):
         """Populate the session's cookiejar"""
-        self._cookiefile = None
-        self._cookiejar = self.session.cookies
-        if self.cookiedomain is None:
+        self.cookies = self.session.cookies
+        self.cookies_file = None
+        if self.cookies_domain is None:
             return
 
         cookies = self.config("cookies")
         if cookies:
             if isinstance(cookies, dict):
-                self._update_cookies_dict(cookies, self.cookiedomain)
+                self.cookies_update_dict(cookies, self.cookies_domain)
 
             elif isinstance(cookies, str):
-                cookiefile = util.expand_path(cookies)
+                path = util.expand_path(cookies)
                 try:
-                    with open(cookiefile) as fp:
-                        util.cookiestxt_load(fp, self._cookiejar)
+                    with open(path) as fp:
+                        util.cookiestxt_load(fp, self.cookies)
                 except Exception as exc:
                     self.log.warning("cookies: %s", exc)
                 else:
                     self.log.debug("Loading cookies from '%s'", cookies)
-                    self._cookiefile = cookiefile
+                    self.cookies_file = path
 
             elif isinstance(cookies, (list, tuple)):
                 key = tuple(cookies)
@@ -342,7 +370,7 @@ class Extractor():
 
                 if cookiejar is None:
                     from ..cookies import load_cookies
-                    cookiejar = self._cookiejar.__class__()
+                    cookiejar = self.cookies.__class__()
                     try:
                         load_cookies(cookiejar, cookies)
                     except Exception as exc:
@@ -352,9 +380,9 @@ class Extractor():
                 else:
                     self.log.debug("Using cached cookies from %s", key)
 
-                setcookie = self._cookiejar.set_cookie
+                set_cookie = self.cookies.set_cookie
                 for cookie in cookiejar:
-                    setcookie(cookie)
+                    set_cookie(cookie)
 
             else:
                 self.log.warning(
@@ -362,46 +390,56 @@ class Extractor():
                     "option, got '%s' (%s)",
                     cookies.__class__.__name__, cookies)
 
-    def _store_cookies(self):
-        """Store the session's cookiejar in a cookies.txt file"""
-        if self._cookiefile and self.config("cookies-update", True):
-            try:
-                with open(self._cookiefile, "w") as fp:
-                    util.cookiestxt_store(fp, self._cookiejar)
-            except OSError as exc:
-                self.log.warning("cookies: %s", exc)
+    def cookies_store(self):
+        """Store the session's cookies in a cookies.txt file"""
+        export = self.config("cookies-update", True)
+        if not export:
+            return
 
-    def _update_cookies(self, cookies, *, domain=""):
+        if isinstance(export, str):
+            path = util.expand_path(export)
+        else:
+            path = self.cookies_file
+            if not path:
+                return
+
+        try:
+            with open(path, "w") as fp:
+                util.cookiestxt_store(fp, self.cookies)
+        except OSError as exc:
+            self.log.warning("cookies: %s", exc)
+
+    def cookies_update(self, cookies, domain=""):
         """Update the session's cookiejar with 'cookies'"""
         if isinstance(cookies, dict):
-            self._update_cookies_dict(cookies, domain or self.cookiedomain)
+            self.cookies_update_dict(cookies, domain or self.cookies_domain)
         else:
-            setcookie = self._cookiejar.set_cookie
+            set_cookie = self.cookies.set_cookie
             try:
                 cookies = iter(cookies)
             except TypeError:
-                setcookie(cookies)
+                set_cookie(cookies)
             else:
                 for cookie in cookies:
-                    setcookie(cookie)
+                    set_cookie(cookie)
 
-    def _update_cookies_dict(self, cookiedict, domain):
+    def cookies_update_dict(self, cookiedict, domain):
         """Update cookiejar with name-value pairs from a dict"""
-        setcookie = self._cookiejar.set
+        set_cookie = self.cookies.set
         for name, value in cookiedict.items():
-            setcookie(name, value, domain=domain)
+            set_cookie(name, value, domain=domain)
 
-    def _check_cookies(self, cookienames, *, domain=None):
-        """Check if all 'cookienames' are in the session's cookiejar"""
-        if not self._cookiejar:
+    def cookies_check(self, cookies_names, domain=None):
+        """Check if all 'cookies_names' are in the session's cookiejar"""
+        if not self.cookies:
             return False
 
         if domain is None:
-            domain = self.cookiedomain
-        names = set(cookienames)
+            domain = self.cookies_domain
+        names = set(cookies_names)
         now = time.time()
 
-        for cookie in self._cookiejar:
+        for cookie in self.cookies:
             if cookie.name in names and (
                     not domain or cookie.domain == domain):
 
@@ -425,9 +463,16 @@ class Extractor():
         return False
 
     def _prepare_ddosguard_cookies(self):
-        if not self._cookiejar.get("__ddg2", domain=self.cookiedomain):
-            self._cookiejar.set(
-                "__ddg2", util.generate_token(), domain=self.cookiedomain)
+        if not self.cookies.get("__ddg2", domain=self.cookies_domain):
+            self.cookies.set(
+                "__ddg2", util.generate_token(), domain=self.cookies_domain)
+
+    def _cache(self, func, maxage, keyarg=None):
+        #  return cache.DatabaseCacheDecorator(func, maxage, keyarg)
+        return cache.DatabaseCacheDecorator(func, keyarg, maxage)
+
+    def _cache_memory(self, func, maxage=None, keyarg=None):
+        return cache.Memcache()
 
     def _get_date_min_max(self, dmin=None, dmax=None):
         """Retrieve and parse 'date-min' and 'date-max' config values"""
@@ -530,7 +575,13 @@ class GalleryExtractor(Extractor):
 
     def items(self):
         self.login()
-        page = self.request(self.gallery_url, notfound=self.subcategory).text
+
+        if self.gallery_url:
+            page = self.request(
+                self.gallery_url, notfound=self.subcategory).text
+        else:
+            page = None
+
         data = self.metadata(page)
         imgs = self.images(page)
 
@@ -623,6 +674,8 @@ class AsynchronousMixin():
     """Run info extraction in a separate thread"""
 
     def __iter__(self):
+        self.initialize()
+
         messages = queue.Queue(5)
         thread = threading.Thread(
             target=self.async_items,
@@ -774,8 +827,8 @@ _browser_cookies = {}
 
 HTTP_HEADERS = {
     "firefox": (
-        ("User-Agent", "Mozilla/5.0 ({}; rv:102.0) "
-                       "Gecko/20100101 Firefox/102.0"),
+        ("User-Agent", "Mozilla/5.0 ({}; rv:115.0) "
+                       "Gecko/20100101 Firefox/115.0"),
         ("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,"
                    "image/avif,image/webp,*/*;q=0.8"),
         ("Accept-Language", "en-US,en;q=0.5"),
@@ -866,13 +919,3 @@ if action:
     except Exception:
         pass
 del action
-
-# Undo automatic pyOpenSSL injection by requests
-pyopenssl = config.get((), "pyopenssl", False)
-if not pyopenssl:
-    try:
-        from requests.packages.urllib3.contrib import pyopenssl  # noqa
-        pyopenssl.extract_from_urllib3()
-    except ImportError:
-        pass
-del pyopenssl

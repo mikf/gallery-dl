@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2022 Mike Fährmann
+# Copyright 2016-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -16,7 +16,7 @@ class SeigaExtractor(Extractor):
     """Base class for seiga extractors"""
     category = "seiga"
     archive_fmt = "{image_id}"
-    cookiedomain = ".nicovideo.jp"
+    cookies_domain = ".nicovideo.jp"
     root = "https://seiga.nicovideo.jp"
 
     def __init__(self, match):
@@ -24,7 +24,7 @@ class SeigaExtractor(Extractor):
         self.start_image = 0
 
     def items(self):
-        if not self._check_cookies(("user_session",)):
+        if not self.cookies_check(("user_session",)):
             raise exception.StopExtraction("'user_session' cookie required")
 
         images = iter(self.get_images())
@@ -164,6 +164,10 @@ class SeigaImageExtractor(SeigaExtractor):
         ("https://seiga.nicovideo.jp/seiga/im123", {
             "exception": exception.NotFoundError,
         }),
+        ("https://seiga.nicovideo.jp/seiga/im10877923", {
+            "pattern": r"https://lohas\.nicoseiga\.jp/priv/5936a2a6c860a600e46"
+                       r"5e0411c0822e0b510e286/1688757110/10877923",
+        }),
         ("https://seiga.nicovideo.jp/image/source/5977527"),
         ("https://sp.seiga.nicovideo.jp/seiga/#!/im5977527"),
         ("https://lohas.nicoseiga.jp/thumb/5977527i"),
@@ -182,6 +186,9 @@ class SeigaImageExtractor(SeigaExtractor):
         return num
 
     def get_images(self):
+        self.cookies.set(
+            "skip_fetish_warning", "1", domain="seiga.nicovideo.jp")
+
         url = "{}/seiga/im{}".format(self.root, self.image_id)
         page = self.request(url, notfound="image").text
 

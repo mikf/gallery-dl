@@ -30,8 +30,7 @@ class WeasylExtractor(Extractor):
             return True
         return False
 
-    def __init__(self, match):
-        Extractor.__init__(self, match)
+    def _init(self):
         self.session.headers['X-Weasyl-API-Key'] = self.config("api-key")
 
     def request_submission(self, submitid):

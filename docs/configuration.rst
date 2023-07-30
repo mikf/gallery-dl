@@ -382,6 +382,7 @@ Description
     * ``e621`` (*)
     * ``e926`` (*)
     * ``exhentai``
+    * ``gfycat``
     * ``idolcomplex``
     * ``imgbb``
     * ``inkbunny``
@@ -395,6 +396,7 @@ Description
     * ``tapas``
     * ``tsumino``
     * ``twitter``
+    * ``vipergirls``
     * ``zerochan``
 
     These values can also be specified via the
@@ -440,30 +442,35 @@ Description
             "isAdult"    : "1"
         }
 
-    * A ``list`` with up to 4 entries specifying a browser profile.
+    * A ``list`` with up to 5 entries specifying a browser profile.
 
       * The first entry is the browser name
       * The optional second entry is a profile name or an absolute path to a profile directory
       * The optional third entry is the keyring to retrieve passwords for decrypting cookies from
       * The optional fourth entry is a (Firefox) container name (``"none"`` for only cookies with no container)
+      * The optional fifth entry is the domain to extract cookies for. Prefix it with a dot ``.`` to include cookies for subdomains. Has no effect when also specifying a container.
 
       .. code:: json
 
         ["firefox"]
         ["firefox", null, null, "Personal"]
-        ["chromium", "Private", "kwallet"]
+        ["chromium", "Private", "kwallet", null, ".twitter.com"]
 
 
 extractor.*.cookies-update
 --------------------------
 Type
-    ``bool``
+    * ``bool``
+    * |Path|_
 Default
     ``true``
 Description
-    If `extractor.*.cookies`_ specifies the |Path|_ of a cookies.txt
-    file and it can be opened and parsed without errors,
-    update its contents with cookies received during data extraction.
+    Export session cookies in cookies.txt format.
+
+    * If this is a |Path|_, write cookies to the given file path.
+
+    * If this is ``true`` and `extractor.*.cookies`_ specifies the |Path|_
+      of a valid cookies.txt file, update its contents.
 
 
 extractor.*.proxy
@@ -519,7 +526,7 @@ extractor.*.user-agent
 Type
     ``string``
 Default
-    ``"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101 Firefox/102.0"``
+    ``"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:115.0) Gecko/20100101 Firefox/115.0"``
 Description
     User-Agent header value to be used for HTTP requests.
 
@@ -1151,7 +1158,7 @@ Description
     Note: This requires 1 additional HTTP request per 200-post batch.
 
 
-extractor.{Danbooru].threshold
+extractor.[Danbooru].threshold
 ------------------------------
 Type
     * ``string``
@@ -1535,6 +1542,39 @@ Description
     from `linking your Flickr account to gallery-dl <OAuth_>`__.
 
 
+extractor.flickr.exif
+---------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Fetch `exif` and `camera` metadata for each photo.
+
+    Note: This requires 1 additional API call per photo.
+
+
+extractor.flickr.metadata
+-------------------------
+Type
+    * ``bool``
+    * ``string``
+    * ``list`` of ``strings``
+Default
+    ``false``
+Example
+    * ``license,last_update,machine_tags``
+    * ``["license", "last_update", "machine_tags"]``
+Description
+    Extract additional metadata
+    (license, date_taken, original_format, last_update, geo, machine_tags, o_dims)
+
+    It is possible to specify a custom list of metadata includes.
+    See `the extras parameter <https://www.flickr.com/services/api/flickr.people.getPhotos.html>`__
+    in `Flickr API docs <https://www.flickr.com/services/api/>`__
+    for possible field names.
+
+
 extractor.flickr.videos
 -----------------------
 Type
@@ -1651,7 +1691,11 @@ Default
     ``["mp4", "webm", "mobile", "gif"]``
 Description
     List of names of the preferred animation format, which can be
-    ``"mp4"``, ``"webm"``, ``"mobile"``, ``"gif"``, or ``"webp"``.
+    ``"mp4"``,
+    ``"webm"``,
+    ``"mobile"``,
+    ``"gif"``, or
+    ``"webp"``.
 
     If a selected format is not available, the next one in the list will be
     tried until an available format is found.
@@ -1677,15 +1721,14 @@ extractor.gofile.website-token
 ------------------------------
 Type
     ``string``
-Default
-    ``"12345"``
 Description
     API token value used during API requests.
 
-    A not up-to-date value will result in ``401 Unauthorized`` errors.
+    An invalid or not up-to-date value
+    will result in ``401 Unauthorized`` errors.
 
-    Setting this value to ``null`` will do an extra HTTP request to fetch
-    the current value used by gofile.
+    Keeping this option unset will use an extra HTTP request
+    to attempt to fetch the current value used by gofile.
 
 
 extractor.gofile.recursive
@@ -1731,6 +1774,21 @@ Description
 
     ``"original"`` will try to download the original ``jpg`` or ``png`` versions,
     but is most likely going to fail with ``403 Forbidden`` errors.
+
+
+extractor.imagechest.access-token
+---------------------------------
+Type
+    ``string``
+Description
+    Your personal Image Chest access token.
+
+    These tokens allow using the API instead of having to scrape HTML pages,
+    providing more detailed metadata.
+    (``date``, ``description``, etc)
+
+    See https://imgchest.com/docs/api/1.0/general/authorization
+    for instructions on how to generate such a token.
 
 
 extractor.imgur.client-id
@@ -1806,6 +1864,55 @@ Description
     ``"avatar"``.
 
     It is possible to use ``"all"`` instead of listing all values separately.
+
+
+extractor.instagram.metadata
+----------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Provide extended ``user`` metadata even when referring to a user by ID,
+    e.g. ``instagram.com/id:12345678``.
+
+    Note: This metadata is always available when referring to a user by name,
+    e.g. ``instagram.com/USERNAME``.
+
+
+extractor.instagram.order-files
+-------------------------------
+Type
+    ``string``
+Default
+    ``"asc"``
+Description
+    Controls the order in which files of each post are returned.
+
+    * ``"asc"``: Same order as displayed in a post
+    * ``"desc"``: Reverse order as displayed in a post
+    * ``"reverse"``: Same as ``"desc"``
+
+    Note: This option does *not* affect ``{num}``.
+    To enumerate files in reverse order, use ``count - num + 1``.
+
+
+extractor.instagram.order-posts
+-------------------------------
+Type
+    ``string``
+Default
+    ``"asc"``
+Description
+    Controls the order in which posts are returned.
+
+    * ``"asc"``: Same order as displayed
+    * ``"desc"``: Reverse order as displayed
+    * ``"id"`` or ``"id_asc"``: Ascending order by ID
+    * ``"id_desc"``: Descending order by ID
+    * ``"reverse"``: Same as ``"desc"``
+
+    Note: This option only affects ``highlights``.
 
 
 extractor.instagram.previews
@@ -1979,18 +2086,21 @@ Example
 Description
     Additional query parameters to send when fetching manga chapters.
 
-    (See `/manga/{id}/feed <https://api.mangadex.org/docs.html#operation/get-manga-id-feed>`_
-    and `/user/follows/manga/feed <https://api.mangadex.org/docs.html#operation/get-user-follows-manga-feed>`_)
+    (See `/manga/{id}/feed <https://api.mangadex.org/docs/swagger.html#/Manga/get-manga-id-feed>`__
+    and `/user/follows/manga/feed <https://api.mangadex.org/docs/swagger.html#/Feed/get-user-follows-manga-feed>`__)
 
 
 extractor.mangadex.lang
 -----------------------
 Type
-    ``string``
+    * ``string``
+    * ``list`` of ``strings``
 Example
-    ``"en"``
+    * ``"en"``
+    * ``"fr,it"``
+    * ``["fr", "it"]``
 Description
-    `ISO 639-1 <https://en.wikipedia.org/wiki/ISO_639-1>`__ language code
+    `ISO 639-1 <https://en.wikipedia.org/wiki/ISO_639-1>`__ language codes
     to filter chapters by.
 
 
@@ -2002,6 +2112,24 @@ Default
     ``["safe", "suggestive", "erotica", "pornographic"]``
 Description
     List of acceptable content ratings for returned chapters.
+
+
+extractor.mangapark.source
+--------------------------
+Type
+    * ``string``
+    * ``integer``
+Example
+    * ``"koala:en"``
+    * ``15150116``
+Description
+    Select chapter source and language for a manga.
+
+    | The general syntax is ``"<source name>:<ISO 639-1 language code>"``.
+    | Both are optional, meaning ``"koala"``, ``"koala:"``, ``":en"``,
+      or even just ``":"`` are possible as well.
+
+    Specifying the numeric ``ID`` of a source is also supported.
 
 
 extractor.[mastodon].access-token
@@ -2050,8 +2178,16 @@ Description
     Also emit metadata for text-only posts without media content.
 
 
+extractor.[misskey].access-token
+--------------------------------
+Type
+    ``string``
+Description
+    Your access token, necessary to fetch favorited notes.
+
+
 extractor.[misskey].renotes
-----------------------------
+---------------------------
 Type
     ``bool``
 Default
@@ -2061,24 +2197,13 @@ Description
 
 
 extractor.[misskey].replies
-----------------------------
+---------------------------
 Type
     ``bool``
 Default
     ``true``
 Description
     Fetch media from replies to other notes.
-
-
-extractor.nana.favkey
----------------------
-Type
-    ``string``
-Default
-    ``null``
-Description
-    Your `Nana Favorite Key <https://nana.my.id/tutorial>`__,
-    used to access your favorite archives.
 
 
 extractor.newgrounds.flash
@@ -2341,7 +2466,12 @@ Description
     when processing a user profile.
 
     Possible values are
-    ``"artworks"``, ``"avatar"``, ``"background"``, ``"favorite"``.
+    ``"artworks"``,
+    ``"avatar"``,
+    ``"background"``,
+    ``"favorite"``,
+    ``"novel-user"``,
+    ``"novel-bookmark"``.
 
     It is possible to use ``"all"`` instead of listing all values separately.
 
@@ -2355,6 +2485,27 @@ Description
     from running ``gallery-dl oauth:pixiv`` (see OAuth_) or
     by using a third-party tool like
     `gppt <https://github.com/eggplants/get-pixivpy-token>`__.
+
+
+extractor.pixiv.embeds
+----------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Download images embedded in novels.
+
+
+extractor.pixiv.novel.full-series
+---------------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    When downloading a novel being part of a series,
+    download all novels of that series.
 
 
 extractor.pixiv.metadata
@@ -2602,7 +2753,12 @@ Default
     ``["hd", "sd", "gif"]``
 Description
     List of names of the preferred animation format, which can be
-    ``"hd"``, ``"sd"``, `"gif"``, `"vthumbnail"``, `"thumbnail"``, or ``"poster"``.
+    ``"hd"``,
+    ``"sd"``,
+    ``"gif"``,
+    ``"thumbnail"``,
+    ``"vthumbnail"``, or
+    ``"poster"``.
 
     If a selected format is not available, the next one in the list will be
     tried until an available format is found.
@@ -2901,15 +3057,19 @@ Description
 extractor.twitter.conversations
 -------------------------------
 Type
-    ``bool``
+    * ``bool``
+    * ``string``
 Default
     ``false``
 Description
     For input URLs pointing to a single Tweet,
     e.g. `https://twitter.com/i/web/status/<TweetID>`,
     fetch media from all Tweets and replies in this `conversation
-    <https://help.twitter.com/en/using-twitter/twitter-conversations>`__
-    or thread.
+    <https://help.twitter.com/en/using-twitter/twitter-conversations>`__.
+
+    If this option is equal to ``"accessible"``,
+    only download from conversation Tweets
+    if the given initial Tweet is accessible.
 
 
 extractor.twitter.csrf
@@ -2945,6 +3105,32 @@ Description
     `syndication <extractor.twitter.syndication_>`__ API.
 
 
+extractor.twitter.include
+-------------------------
+Type
+    * ``string``
+    * ``list`` of ``strings``
+Default
+    ``"timeline"``
+Example
+    * ``"avatar,background,media"``
+    * ``["avatar", "background", "media"]``
+Description
+    A (comma-separated) list of subcategories to include
+    when processing a user profile.
+
+    Possible values are
+    ``"avatar"``,
+    ``"background"``,
+    ``"timeline"``,
+    ``"tweets"``,
+    ``"media"``,
+    ``"replies"``,
+    ``"likes"``.
+
+    It is possible to use ``"all"`` instead of listing all values separately.
+
+
 extractor.twitter.transform
 ---------------------------
 Type
@@ -2953,6 +3139,20 @@ Default
     ``true``
 Description
     Transform Tweet and User metadata into a simpler, uniform format.
+
+
+extractor.twitter.tweet-endpoint
+--------------------------------
+Type
+    ``string``
+Default
+    ``"auto"``
+Description
+    Selects the API endpoint used to retrieve single Tweets.
+
+    * ``"restid"``: ``/TweetResultByRestId`` - accessible to guest users
+    * ``"detail"``: ``/TweetDetail`` - more stable
+    * ``"auto"``: ``"detail"`` when logged in, ``"restid"`` otherwise
 
 
 extractor.twitter.size
@@ -3027,6 +3227,19 @@ Description
     a quoted (original) Tweet when it sees the Tweet which quotes it.
 
 
+extractor.twitter.ratelimit
+---------------------------
+Type
+    ``string``
+Default
+    ``"wait"``
+Description
+    Selects how to handle exceeding the API rate limit.
+
+    * ``"abort"``: Raise an error and stop extraction
+    * ``"wait"``: Wait until rate limit reset
+
+
 extractor.twitter.replies
 -------------------------
 Type
@@ -3067,8 +3280,8 @@ Type
 Default
     ``"auto"``
 Description
-    Controls the strategy / tweet source used for user URLs
-    (``https://twitter.com/USER``).
+    Controls the strategy / tweet source used for timeline URLs
+    (``https://twitter.com/USER/timeline``).
 
     * ``"tweets"``: `/tweets <https://twitter.com/USER/tweets>`__ timeline + search
     * ``"media"``: `/media <https://twitter.com/USER/media>`__ timeline + search
@@ -3635,6 +3848,25 @@ Description
     For example, this will change the filename extension (``{extension}``)
     of a file called ``example.png`` from ``png`` to ``jpg`` when said file
     contains JPEG/JFIF data.
+
+
+downloader.http.consume-content
+-------------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Controls the behavior when an HTTP response is considered
+    unsuccessful
+
+    If the value is ``true``, consume the response body. This
+    avoids closing the connection and therefore improves connection
+    reuse.
+
+    If the value is ``false``, immediately close the connection
+    without reading the response. This can be useful if the server
+    is known to send large bodies for error responses.
 
 
 downloader.http.chunk-size
@@ -4497,7 +4729,7 @@ Default
 Description
     Name of the metadata field whose value should be used.
 
-    This value must either be a UNIX timestamp or a
+    This value must be either a UNIX timestamp or a
     |datetime|_ object.
 
     Note: This option gets ignored if `mtime.value`_ is set.
@@ -4515,8 +4747,52 @@ Example
 Description
     A `format string`_ whose value should be used.
 
-    The resulting value must either be a UNIX timestamp or a
+    The resulting value must be either a UNIX timestamp or a
     |datetime|_ object.
+
+
+python.archive
+--------------
+Type
+    |Path|_
+Description
+    File to store IDs of called Python functions in,
+    similar to `extractor.*.archive`_.
+
+    ``archive-format``, ``archive-prefix``, and ``archive-pragma`` options,
+    akin to
+    `extractor.*.archive-format`_,
+    `extractor.*.archive-prefix`_, and
+    `extractor.*.archive-pragma`_, are supported as well.
+
+
+python.event
+------------
+Type
+    ``string``
+Default
+    ``"file"``
+Description
+    The event for which `python.function`_ gets called.
+
+    See `metadata.event`_ for a list of available events.
+
+
+python.function
+---------------
+Type
+    ``string``
+Example
+    * ``"my_module:generate_text"``
+    * ``"~/.local/share/gdl-utils.py:resize"``
+Description
+    The Python function to call.
+
+    This function gets specified as ``<module>:<function name>``
+    and gets called with the current metadata dict as argument.
+
+    ``module`` is either an importable Python module name
+    or the |Path|_ to a `.py` file,
 
 
 ugoira.extension
@@ -4836,17 +5112,6 @@ Description
     used for (urllib3) warnings.
 
 
-pyopenssl
----------
-Type
-    ``bool``
-Default
-    ``false``
-Description
-    Use `pyOpenSSL <https://www.pyopenssl.org/en/stable/>`__-backed
-    SSL-support.
-
-
 
 API Tokens & IDs
 ================
@@ -4912,6 +5177,10 @@ How To
       ``user-agent`` and replace ``<application name>`` and ``<username>``
       accordingly (see Reddit's
       `API access rules <https://github.com/reddit/reddit/wiki/API>`__)
+    * clear your `cache <cache.file_>`__ to delete any remaining
+      ``access-token`` entries. (``gallery-dl --clear-cache reddit``)
+    * get a `refresh-token <extractor.reddit.refresh-token_>`__ for the
+      new ``client-id`` (``gallery-dl oauth:reddit``)
 
 
 extractor.smugmug.api-key & .api-secret
@@ -5123,6 +5392,8 @@ Description
         Write metadata to separate files
     ``mtime``
         Set file modification time according to its metadata
+    ``python``
+        Call Python functions
     ``ugoira``
         Convert Pixiv Ugoira to WebM using `FFmpeg <https://www.ffmpeg.org/>`__
     ``zip``

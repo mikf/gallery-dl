@@ -19,7 +19,7 @@ class PatreonExtractor(Extractor):
     """Base class for patreon extractors"""
     category = "patreon"
     root = "https://www.patreon.com"
-    cookiedomain = ".patreon.com"
+    cookies_domain = ".patreon.com"
     directory_fmt = ("{category}", "{creator[full_name]}")
     filename_fmt = "{id}_{title}_{num:>02}.{extension}"
     archive_fmt = "{id}_{num}"
@@ -28,11 +28,11 @@ class PatreonExtractor(Extractor):
     _warning = True
 
     def items(self):
-
         if self._warning:
-            if not self._check_cookies(("session_id",)):
+            if not self.cookies_check(("session_id",)):
                 self.log.warning("no 'session_id' cookie set")
             PatreonExtractor._warning = False
+
         generators = self._build_file_generators(self.config("files"))
 
         for post in self.posts():

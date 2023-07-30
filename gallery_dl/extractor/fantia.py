@@ -23,30 +23,54 @@ class FantiaExtractor(Extractor):
         self.headers = {
             "Accept" : "application/json, text/plain, */*",
             "Referer": self.root,
+            "X-Requested-With": "XMLHttpRequest",
+        }
+        _empty_plan = {
+            "id"   : 0,
+            "price": 0,
+            "limit": 0,
+            "name" : "",
+            "description": "",
+            "thumb": self.root + "/images/fallback/plan/thumb_default.png",
         }
 
         if self._warning:
-            if not self._check_cookies(("_session_id",)):
+            if not self.cookies_check(("_session_id",)):
                 self.log.warning("no '_session_id' cookie set")
             FantiaExtractor._warning = False
 
         for post_id in self.posts():
-            full_response, post = self._get_post_data(post_id)
-            yield Message.Directory, post
+            post = self._get_post_data(post_id)
             post["num"] = 0
-            for url, url_data in self._get_urls_from_post(full_response, post):
-                post["num"] += 1
-                fname = url_data["content_filename"] or url
-                text.nameext_from_url(fname, url_data)
-                url_data["file_url"] = url
-                yield Message.Url, url, url_data
+
+            for content in self._get_post_contents(post):
+                post["content_category"] = content["category"]
+                post["content_title"] = content["title"]
+                post["content_filename"] = content.get("filename", "")
+                post["content_id"] = content["id"]
+                post["plan"] = content["plan"] or _empty_plan
+                yield Message.Directory, post
+
+                if content["visible_status"] != "visible":
+                    self.log.warning(
+                        "Unable to download '%s' files from "
+                        "%s#post-content-id-%s", content["visible_status"],
+                        post["post_url"], content["id"])
+
+                for url in self._get_content_urls(post, content):
+                    text.nameext_from_url(
+                        post["content_filename"] or url, post)
+                    post["file_url"] = url
+                    post["num"] += 1
+                    yield Message.Url, url, post
 
     def posts(self):
         """Return post IDs"""
 
     def _pagination(self, url):
         params = {"page": 1}
-        headers = self.headers
+        headers = self.headers.copy()
+        del headers["X-Requested-With"]
 
         while True:
             page = self.request(url, params=params, headers=headers).text
@@ -71,7 +95,7 @@ class FantiaExtractor(Extractor):
         """Fetch and process post data"""
         url = self.root+"/api/v1/posts/"+post_id
         resp = self.request(url, headers=self.headers).json()["post"]
-        post = {
+        return {
             "post_id": resp["id"],
             "post_url": self.root + "/posts/" + str(resp["id"]),
             "post_title": resp["title"],
@@ -85,55 +109,65 @@ class FantiaExtractor(Extractor):
             "fanclub_user_name": resp["fanclub"]["user"]["name"],
             "fanclub_name": resp["fanclub"]["name"],
             "fanclub_url": self.root+"/fanclubs/"+str(resp["fanclub"]["id"]),
-            "tags": resp["tags"]
+            "tags": resp["tags"],
+            "_data": resp,
         }
-        return resp, post
 
-    def _get_urls_from_post(self, resp, post):
+    def _get_post_contents(self, post):
+        contents = post["_data"]["post_contents"]
+
+        try:
+            url = post["_data"]["thumb"]["original"]
+        except Exception:
+            pass
+        else:
+            contents.insert(0, {
+                "id": "thumb",
+                "title": "thumb",
+                "category": "thumb",
+                "download_uri": url,
+                "visible_status": "visible",
+                "plan": None,
+            })
+
+        return contents
+
+    def _get_content_urls(self, post, content):
         """Extract individual URL data from the response"""
-        if "thumb" in resp and resp["thumb"] and "original" in resp["thumb"]:
-            post["content_filename"] = ""
-            post["content_category"] = "thumb"
-            post["file_id"] = "thumb"
-            yield resp["thumb"]["original"], post
+        if "comment" in content:
+            post["content_comment"] = content["comment"]
 
-        for content in resp["post_contents"]:
-            post["content_category"] = content["category"]
-            post["content_title"] = content["title"]
-            post["content_filename"] = content.get("filename", "")
-            post["content_id"] = content["id"]
+        if "post_content_photos" in content:
+            for photo in content["post_content_photos"]:
+                post["file_id"] = photo["id"]
+                yield photo["url"]["original"]
 
-            if "comment" in content:
-                post["content_comment"] = content["comment"]
+        if "download_uri" in content:
+            post["file_id"] = content["id"]
+            url = content["download_uri"]
+            if url[0] == "/":
+                url = self.root + url
+            yield url
 
-            if "post_content_photos" in content:
-                for photo in content["post_content_photos"]:
-                    post["file_id"] = photo["id"]
-                    yield photo["url"]["original"], post
+        if content["category"] == "blog" and "comment" in content:
+            comment_json = util.json_loads(content["comment"])
+            ops = comment_json.get("ops") or ()
 
-            if "download_uri" in content:
-                post["file_id"] = content["id"]
-                yield self.root+"/"+content["download_uri"], post
+            # collect blogpost text first
+            blog_text = ""
+            for op in ops:
+                insert = op.get("insert")
+                if isinstance(insert, str):
+                    blog_text += insert
+            post["blogpost_text"] = blog_text
 
-            if content["category"] == "blog" and "comment" in content:
-                comment_json = util.json_loads(content["comment"])
-                ops = comment_json.get("ops", ())
-
-                # collect blogpost text first
-                blog_text = ""
-                for op in ops:
-                    insert = op.get("insert")
-                    if isinstance(insert, str):
-                        blog_text += insert
-                post["blogpost_text"] = blog_text
-
-                # collect images
-                for op in ops:
-                    insert = op.get("insert")
-                    if isinstance(insert, dict) and "fantiaImage" in insert:
-                        img = insert["fantiaImage"]
-                        post["file_id"] = img["id"]
-                        yield "https://fantia.jp" + img["original_url"], post
+            # collect images
+            for op in ops:
+                insert = op.get("insert")
+                if isinstance(insert, dict) and "fantiaImage" in insert:
+                    img = insert["fantiaImage"]
+                    post["file_id"] = img["id"]
+                    yield self.root + img["original_url"]
 
 
 class FantiaCreatorExtractor(FantiaExtractor):

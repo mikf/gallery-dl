@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2022 Mike Fährmann
+# Copyright 2015-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -42,6 +42,8 @@ class MangahereChapterExtractor(MangahereBase, ChapterExtractor):
         self.part, self.volume, self.chapter = match.groups()
         url = self.url_fmt.format(self.part, 1)
         ChapterExtractor.__init__(self, match, url)
+
+    def _init(self):
         self.session.headers["Referer"] = self.root_mobile + "/"
 
     def metadata(self, page):
@@ -112,9 +114,8 @@ class MangahereMangaExtractor(MangahereBase, MangaExtractor):
         ("https://m.mangahere.co/manga/aria/"),
     )
 
-    def __init__(self, match):
-        MangaExtractor.__init__(self, match)
-        self.session.cookies.set("isAdult", "1", domain="www.mangahere.cc")
+    def _init(self):
+        self.cookies.set("isAdult", "1", domain="www.mangahere.cc")
 
     def chapters(self, page):
         results = []

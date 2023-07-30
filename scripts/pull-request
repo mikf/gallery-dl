@@ -1,0 +1,55 @@
+#!/bin/bash
+set -e
+
+RE="https://github.com/([^/?#]+)/([^/?#]+)(/tree/(.+))?"
+if [[ "$1" =~ $RE ]]; then
+    USER="${BASH_REMATCH[1]}"
+    REPO="${BASH_REMATCH[2]}"
+    BRANCH="${BASH_REMATCH[4]:-master}"
+
+else
+    echo "invalid github repository identifier: '$1'"
+    exit 1
+
+fi
+
+
+call() { echo "$@"; "$@"; echo; }
+
+# {x,,} transforms value to lowercase
+case "${2,,}" in
+
+""|"f"|"fetch")
+    call git remote add "$USER" git@github.com:"$USER"/"$REPO".git || true
+    call git fetch "$USER" "$BRANCH"
+    call git checkout -b "$USER-$BRANCH" "$USER/$BRANCH"
+    ;;
+
+"m"|"merge")
+    RE='\s*(.+)\s+#([0-9]+)'
+    if [[ "$3" =~ $RE ]]; then
+        TITLE="${BASH_REMATCH[1]}"
+        PULL="${BASH_REMATCH[2]}"
+    fi
+
+    call git switch master
+    call git merge --no-ff --edit -m "merge #${PULL-_}: ${TITLE-_}" "$USER-$BRANCH"
+    call git branch -d "$USER-$BRANCH"
+    ;;
+
+"p"|"push")
+    call git push "$USER" HEAD:"$BRANCH"
+    ;;
+
+"d"|"delete")
+    call git switch master
+    call git branch -D "$USER-$BRANCH"
+    call git remote remove "$USER"
+    ;;
+
+*)
+    echo "invalid action: '$2'"
+    exit 2
+    ;;
+
+esac

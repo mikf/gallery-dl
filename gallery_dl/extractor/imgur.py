@@ -22,8 +22,10 @@ class ImgurExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.api = ImgurAPI(self)
         self.key = match.group(1)
+
+    def _init(self):
+        self.api = ImgurAPI(self)
         self.mp4 = self.config("mp4", True)
 
     def _prepare(self, image):
@@ -47,8 +49,13 @@ class ImgurExtractor(Extractor):
         image_ex = ImgurImageExtractor
 
         for item in items:
-            item["_extractor"] = album_ex if item["is_album"] else image_ex
-            yield Message.Queue, item["link"], item
+            if item["is_album"]:
+                url = "https://imgur.com/a/" + item["id"]
+                item["_extractor"] = album_ex
+            else:
+                url = "https://imgur.com/" + item["id"]
+                item["_extractor"] = image_ex
+            yield Message.Queue, url, item
 
 
 class ImgurImageExtractor(ImgurExtractor):
@@ -272,7 +279,7 @@ class ImgurUserExtractor(ImgurExtractor):
         ("https://imgur.com/user/Miguenzo", {
             "range": "1-100",
             "count": 100,
-            "pattern": r"https?://(i.imgur.com|imgur.com/a)/[\w.]+",
+            "pattern": r"https://imgur\.com(/a)?/\w+$",
         }),
         ("https://imgur.com/user/Miguenzo/posts"),
         ("https://imgur.com/user/Miguenzo/submitted"),
@@ -285,15 +292,39 @@ class ImgurUserExtractor(ImgurExtractor):
 class ImgurFavoriteExtractor(ImgurExtractor):
     """Extractor for a user's favorites"""
     subcategory = "favorite"
-    pattern = BASE_PATTERN + r"/user/([^/?#]+)/favorites"
+    pattern = BASE_PATTERN + r"/user/([^/?#]+)/favorites/?$"
     test = ("https://imgur.com/user/Miguenzo/favorites", {
         "range": "1-100",
         "count": 100,
-        "pattern": r"https?://(i.imgur.com|imgur.com/a)/[\w.]+",
+        "pattern": r"https://imgur\.com(/a)?/\w+$",
     })
 
     def items(self):
         return self._items_queue(self.api.account_favorites(self.key))
+
+
+class ImgurFavoriteFolderExtractor(ImgurExtractor):
+    """Extractor for a user's favorites folder"""
+    subcategory = "favorite-folder"
+    pattern = BASE_PATTERN + r"/user/([^/?#]+)/favorites/folder/(\d+)"
+    test = (
+        ("https://imgur.com/user/mikf1/favorites/folder/11896757/public", {
+            "pattern": r"https://imgur\.com(/a)?/\w+$",
+            "count": 3,
+        }),
+        ("https://imgur.com/user/mikf1/favorites/folder/11896741/private", {
+            "pattern": r"https://imgur\.com(/a)?/\w+$",
+            "count": 5,
+        }),
+    )
+
+    def __init__(self, match):
+        ImgurExtractor.__init__(self, match)
+        self.folder_id = match.group(2)
+
+    def items(self):
+        return self._items_queue(self.api.account_favorites_folder(
+            self.key, self.folder_id))
 
 
 class ImgurSubredditExtractor(ImgurExtractor):
@@ -303,7 +334,7 @@ class ImgurSubredditExtractor(ImgurExtractor):
     test = ("https://imgur.com/r/pics", {
         "range": "1-100",
         "count": 100,
-        "pattern": r"https?://(i.imgur.com|imgur.com/a)/[\w.]+",
+        "pattern": r"https://imgur\.com(/a)?/\w+$",
     })
 
     def items(self):
@@ -317,7 +348,7 @@ class ImgurTagExtractor(ImgurExtractor):
     test = ("https://imgur.com/t/animals", {
         "range": "1-100",
         "count": 100,
-        "pattern": r"https?://(i.imgur.com|imgur.com/a)/[\w.]+",
+        "pattern": r"https://imgur\.com(/a)?/\w+$",
     })
 
     def items(self):
@@ -331,7 +362,7 @@ class ImgurSearchExtractor(ImgurExtractor):
     test = ("https://imgur.com/search?q=cute+cat", {
         "range": "1-100",
         "count": 100,
-        "pattern": r"https?://(i.imgur.com|imgur.com/a)/[\w.]+",
+        "pattern": r"https://imgur\.com(/a)?/\w+$",
     })
 
     def items(self):
@@ -346,14 +377,17 @@ class ImgurAPI():
     """
     def __init__(self, extractor):
         self.extractor = extractor
-        self.headers = {
-            "Authorization": "Client-ID " + (
-                extractor.config("client-id") or "546c25a59c58ad7"),
-        }
+        self.client_id = extractor.config("client-id") or "546c25a59c58ad7"
+        self.headers = {"Authorization": "Client-ID " + self.client_id}
 
     def account_favorites(self, account):
         endpoint = "/3/account/{}/gallery_favorites".format(account)
         return self._pagination(endpoint)
+
+    def account_favorites_folder(self, account, folder_id):
+        endpoint = "/3/account/{}/folders/{}/favorites".format(
+            account, folder_id)
+        return self._pagination_v2(endpoint)
 
     def gallery_search(self, query):
         endpoint = "/3/gallery/search"
@@ -386,12 +420,12 @@ class ImgurAPI():
         endpoint = "/post/v1/posts/" + gallery_hash
         return self._call(endpoint)
 
-    def _call(self, endpoint, params=None):
+    def _call(self, endpoint, params=None, headers=None):
         while True:
             try:
                 return self.extractor.request(
                     "https://api.imgur.com" + endpoint,
-                    params=params, headers=self.headers,
+                    params=params, headers=(headers or self.headers),
                 ).json()
             except exception.HttpError as exc:
                 if exc.status not in (403, 429) or \
@@ -410,3 +444,23 @@ class ImgurAPI():
                 return
             yield from data
             num += 1
+
+    def _pagination_v2(self, endpoint, params=None, key=None):
+        if params is None:
+            params = {}
+        params["client_id"] = self.client_id
+        params["page"] = 0
+        params["sort"] = "newest"
+
+        headers = {
+            "Referer": "https://imgur.com/",
+            "Origin": "https://imgur.com",
+        }
+
+        while True:
+            data = self._call(endpoint, params, headers)["data"]
+            if not data:
+                return
+            yield from data
+
+            params["page"] += 1

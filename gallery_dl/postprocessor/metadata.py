@@ -124,10 +124,8 @@ class MetadataPP(PostProcessor):
         for key, func in self.fields.items():
             obj = kwdict
             try:
-                while "[" in key:
-                    name, _, key = key.partition("[")
-                    obj = obj[name]
-                    key = key.rstrip("]")
+                if "[" in key:
+                    obj, key = _traverse(obj, key)
                 obj[key] = func(kwdict)
             except Exception:
                 pass
@@ -137,10 +135,8 @@ class MetadataPP(PostProcessor):
         for key in self.fields:
             obj = kwdict
             try:
-                while "[" in key:
-                    name, _, key = key.partition("[")
-                    obj = obj[name]
-                    key = key.rstrip("]")
+                if "[" in key:
+                    obj, key = _traverse(obj, key)
                 del obj[key]
             except Exception:
                 pass
@@ -212,6 +208,17 @@ class MetadataPP(PostProcessor):
             indent=options.get("indent", indent),
             check_circular=False, default=str,
         )
+
+
+def _traverse(obj, key):
+    name, _, key = key.partition("[")
+    obj = obj[name]
+
+    while "[" in key:
+        name, _, key = key.partition("[")
+        obj = obj[name.strip("\"']")]
+
+    return obj, key.strip("\"']")
 
 
 __postprocessor__ = MetadataPP

@@ -27,33 +27,40 @@ class InstagramExtractor(Extractor):
     filename_fmt = "{sidecar_media_id:?/_/}{media_id}.{extension}"
     archive_fmt = "{media_id}"
     root = "https://www.instagram.com"
-    cookiedomain = ".instagram.com"
-    cookienames = ("sessionid",)
+    cookies_domain = ".instagram.com"
+    cookies_names = ("sessionid",)
     request_interval = (6.0, 12.0)
 
     def __init__(self, match):
         Extractor.__init__(self, match)
         self.item = match.group(1)
-        self.api = None
+
+    def _init(self):
         self.www_claim = "0"
         self.csrf_token = util.generate_token()
-        self._logged_in = True
         self._find_tags = re.compile(r"#\w+").findall
+        self._logged_in = True
         self._cursor = None
         self._user = None
 
-    def items(self):
-        self.login()
+        self.cookies.set(
+            "csrftoken", self.csrf_token, domain=self.cookies_domain)
 
         if self.config("api") == "graphql":
             self.api = InstagramGraphqlAPI(self)
         else:
             self.api = InstagramRestAPI(self)
 
+    def items(self):
+        self.login()
+
         data = self.metadata()
         videos = self.config("videos", True)
         previews = self.config("previews", False)
         video_headers = {"User-Agent": "Mozilla/5.0"}
+
+        order = self.config("order-files")
+        reverse = order[0] in ("r", "d") if order else False
 
         for post in self.posts():
 
@@ -71,6 +78,8 @@ class InstagramExtractor(Extractor):
 
             if "date" in post:
                 del post["date"]
+            if reverse:
+                files.reverse()
 
             for file in files:
                 file.update(post)
@@ -126,14 +135,14 @@ class InstagramExtractor(Extractor):
         return response
 
     def login(self):
-        if not self._check_cookies(self.cookienames):
-            username, password = self._get_auth_info()
-            if username:
-                self._update_cookies(_login_impl(self, username, password))
-            else:
-                self._logged_in = False
-        self.session.cookies.set(
-            "csrftoken", self.csrf_token, domain=self.cookiedomain)
+        if self.cookies_check(self.cookies_names):
+            return
+
+        username, password = self._get_auth_info()
+        if username:
+            return self.cookies_update(_login_impl(self, username, password))
+
+        self._logged_in = False
 
     def _parse_post_rest(self, post):
         if "items" in post:  # story or highlight
@@ -392,6 +401,12 @@ class InstagramUserExtractor(InstagramExtractor):
         ("https://www.instagram.com/instagram/?hl=en"),
         ("https://www.instagram.com/id:25025320/"),
     )
+
+    def initialize(self):
+        pass
+
+    def finalize(self):
+        pass
 
     def items(self):
         base = "{}/{}/".format(self.root, self.item)
@@ -756,9 +771,19 @@ class InstagramRestAPI():
         endpoint = "/v1/guides/guide/{}/".format(guide_id)
         return self._pagination_guides(endpoint)
 
-    def highlights_media(self, user_id):
-        chunk_size = 5
+    def highlights_media(self, user_id, chunk_size=5):
         reel_ids = [hl["id"] for hl in self.highlights_tray(user_id)]
+
+        order = self.extractor.config("order-posts")
+        if order:
+            if order in ("desc", "reverse"):
+                reel_ids.reverse()
+            elif order in ("id", "id_asc"):
+                reel_ids.sort(key=lambda r: int(r[10:]))
+            elif order == "id_desc":
+                reel_ids.sort(key=lambda r: int(r[10:]), reverse=True)
+            elif order != "asc":
+                self.extractor.log.warning("Unknown posts order '%s'", order)
 
         for offset in range(0, len(reel_ids), chunk_size):
             yield from self.reels_media(
@@ -799,13 +824,17 @@ class InstagramRestAPI():
         params = {"username": screen_name}
         return self._call(endpoint, params=params)["data"]["user"]
 
+    @memcache(keyarg=1)
     def user_by_id(self, user_id):
         endpoint = "/v1/users/{}/info/".format(user_id)
         return self._call(endpoint)["user"]
 
     def user_id(self, screen_name, check_private=True):
         if screen_name.startswith("id:"):
+            if self.extractor.config("metadata"):
+                self.extractor._user = self.user_by_id(screen_name[3:])
             return screen_name[3:]
+
         user = self.user_by_name(screen_name)
         if user is None:
             raise exception.AuthorizationError(
@@ -845,7 +874,7 @@ class InstagramRestAPI():
 
     def user_tagged(self, user_id):
         endpoint = "/v1/usertags/{}/feed/".format(user_id)
-        params = {"count": 50}
+        params = {"count": 20}
         return self._pagination(endpoint, params)
 
     def _call(self, endpoint, **kwargs):

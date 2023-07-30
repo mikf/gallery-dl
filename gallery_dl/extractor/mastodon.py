@@ -19,12 +19,14 @@ class MastodonExtractor(BaseExtractor):
     directory_fmt = ("mastodon", "{instance}", "{account[username]}")
     filename_fmt = "{category}_{id}_{media[id]}.{extension}"
     archive_fmt = "{media[id]}"
-    cookiedomain = None
+    cookies_domain = None
 
     def __init__(self, match):
         BaseExtractor.__init__(self, match)
-        self.instance = self.root.partition("://")[2]
         self.item = match.group(match.lastindex)
+
+    def _init(self):
+        self.instance = self.root.partition("://")[2]
         self.reblogs = self.config("reblogs", False)
         self.replies = self.config("replies", True)
 

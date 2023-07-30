@@ -91,7 +91,7 @@ class NaverwebtoonEpisodeExtractor(NaverwebtoonBase, GalleryExtractor):
         return {
             "title_id": self.title_id,
             "episode" : self.episode,
-            "comic"   : extr("titleName: '", "'"),
+            "comic"   : extr('titleName: "', '"'),
             "tags"    : [t.strip() for t in text.extract_iter(
                 extr("tagList: [", "}],"), '"tagName":"', '"')],
             "title"   : extr('"subtitle":"', '"'),

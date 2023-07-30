@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2022 Mike Fährmann
+# Copyright 2014-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -21,7 +21,9 @@ class ImagebamExtractor(Extractor):
     def __init__(self, match):
         Extractor.__init__(self, match)
         self.path = match.group(1)
-        self.session.cookies.set("nsfw_inter", "1", domain="www.imagebam.com")
+
+    def _init(self):
+        self.cookies.set("nsfw_inter", "1", domain="www.imagebam.com")
 
     def _parse_image_page(self, path):
         page = self.request(self.root + path).text

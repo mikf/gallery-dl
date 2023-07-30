@@ -20,12 +20,16 @@ class FlickrExtractor(Extractor):
     filename_fmt = "{category}_{id}.{extension}"
     directory_fmt = ("{category}", "{user[username]}")
     archive_fmt = "{id}"
-    cookiedomain = None
+    cookies_domain = None
+    request_interval = (1.0, 2.0)
+    request_interval_min = 0.2
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.api = FlickrAPI(self)
         self.item_id = match.group(1)
+
+    def _init(self):
+        self.api = FlickrAPI(self)
         self.user = None
 
     def items(self):
@@ -106,6 +110,8 @@ class FlickrImageExtractor(FlickrExtractor):
 
     def items(self):
         photo = self.api.photos_getInfo(self.item_id)
+        if self.api.exif:
+            photo.update(self.api.photos_getExif(self.item_id))
 
         if photo["media"] == "video" and self.api.videos:
             self.api._extract_video(photo)
@@ -287,8 +293,8 @@ class FlickrAPI(oauth.OAuth1API):
     """
 
     API_URL = "https://api.flickr.com/services/rest/"
-    API_KEY = "ac4fd7aa98585b9eee1ba761c209de68"
-    API_SECRET = "3adb0f568dc68393"
+    API_KEY = "f8f78d1a40debf471f0b22fa2d00525f"
+    API_SECRET = "4f9dae1113e45556"
     FORMATS = [
         ("o" , "Original"    , None),
         ("6k", "X-Large 6K"  , 6144),
@@ -323,6 +329,7 @@ class FlickrAPI(oauth.OAuth1API):
     def __init__(self, extractor):
         oauth.OAuth1API.__init__(self, extractor)
 
+        self.exif = extractor.config("exif", False)
         self.videos = extractor.config("videos", True)
         self.maxsize = extractor.config("size-max")
         if isinstance(self.maxsize, str):
@@ -366,6 +373,11 @@ class FlickrAPI(oauth.OAuth1API):
         """Return photos from the given user's photostream."""
         params = {"user_id": user_id}
         return self._pagination("people.getPhotos", params)
+
+    def photos_getExif(self, photo_id):
+        """Retrieves a list of EXIF/TIFF/GPS tags for a given photo."""
+        params = {"photo_id": photo_id}
+        return self._call("photos.getExif", params)["photo"]
 
     def photos_getInfo(self, photo_id):
         """Get information about a photo."""
@@ -451,9 +463,19 @@ class FlickrAPI(oauth.OAuth1API):
         return data
 
     def _pagination(self, method, params, key="photos"):
-        params["extras"] = ("description,date_upload,tags,views,media,"
-                            "path_alias,owner_name,")
-        params["extras"] += ",".join("url_" + fmt[0] for fmt in self.formats)
+        extras = ("description,date_upload,tags,views,media,"
+                  "path_alias,owner_name,")
+        includes = self.extractor.config("metadata")
+        if includes:
+            if isinstance(includes, (list, tuple)):
+                includes = ",".join(includes)
+            elif not isinstance(includes, str):
+                includes = ("license,date_taken,original_format,last_update,"
+                            "geo,machine_tags,o_dims")
+            extras = extras + includes + ","
+        extras += ",".join("url_" + fmt[0] for fmt in self.formats)
+
+        params["extras"] = extras
         params["page"] = 1
 
         while True:
@@ -478,6 +500,9 @@ class FlickrAPI(oauth.OAuth1API):
         photo["views"] = text.parse_int(photo["views"])
         photo["date"] = text.parse_timestamp(photo["dateupload"])
         photo["tags"] = photo["tags"].split()
+
+        if self.exif:
+            photo.update(self.photos_getExif(photo["id"]))
         photo["id"] = text.parse_int(photo["id"])
 
         if "owner" in photo:

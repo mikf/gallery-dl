@@ -11,6 +11,7 @@
 from .common import PostProcessor
 from .. import util, formatter
 import subprocess
+import os
 
 
 if util.WINDOWS:
@@ -60,6 +61,7 @@ class ExecPP(PostProcessor):
         kwdict["_path"] = pathfmt.realpath
 
         args = [arg.format_map(kwdict) for arg in self.args]
+        args[0] = os.path.expanduser(args[0])
         self._exec(args, False)
 
         if archive:

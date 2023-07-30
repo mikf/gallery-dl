@@ -23,12 +23,10 @@ class PinterestExtractor(Extractor):
     archive_fmt = "{id}{media_id}"
     root = "https://www.pinterest.com"
 
-    def __init__(self, match):
-        Extractor.__init__(self, match)
-
+    def _init(self):
         domain = self.config("domain")
         if not domain or domain == "auto" :
-            self.root = text.root_from_url(match.group(0))
+            self.root = text.root_from_url(self.url)
         else:
             self.root = text.ensure_http_scheme(domain)
 
@@ -112,7 +110,7 @@ class PinterestExtractor(Extractor):
 class PinterestPinExtractor(PinterestExtractor):
     """Extractor for images from a single pin from pinterest.com"""
     subcategory = "pin"
-    pattern = BASE_PATTERN + r"/pin/([^/?#&]+)(?!.*#related$)"
+    pattern = BASE_PATTERN + r"/pin/([^/?#]+)(?!.*#related$)"
     test = (
         ("https://www.pinterest.com/pin/858146903966145189/", {
             "url": "afb3c26719e3a530bb0e871c480882a801a4e8a5",
@@ -121,7 +119,7 @@ class PinterestPinExtractor(PinterestExtractor):
         }),
         # video pin (#1189)
         ("https://www.pinterest.com/pin/422564377542934214/", {
-            "pattern": r"https://v\.pinimg\.com/videos/mc/hls/d7/22/ff"
+            "pattern": r"https://v\d*\.pinimg\.com/videos/mc/hls/d7/22/ff"
                        r"/d722ff00ab2352981b89974b37909de8.m3u8",
         }),
         ("https://www.pinterest.com/pin/858146903966145188/", {
@@ -147,8 +145,8 @@ class PinterestBoardExtractor(PinterestExtractor):
     subcategory = "board"
     directory_fmt = ("{category}", "{board[owner][username]}", "{board[name]}")
     archive_fmt = "{board[id]}_{id}"
-    pattern = (BASE_PATTERN + r"/(?!pin/)([^/?#&]+)"
-               "/(?!_saved|_created|pins/)([^/?#&]+)/?$")
+    pattern = (BASE_PATTERN + r"/(?!pin/)([^/?#]+)"
+               "/(?!_saved|_created|pins/)([^/?#]+)/?$")
     test = (
         ("https://www.pinterest.com/g1952849/test-/", {
             "pattern": r"https://i\.pinimg\.com/originals/",
@@ -198,7 +196,7 @@ class PinterestBoardExtractor(PinterestExtractor):
 class PinterestUserExtractor(PinterestExtractor):
     """Extractor for a user's boards"""
     subcategory = "user"
-    pattern = BASE_PATTERN + r"/(?!pin/)([^/?#&]+)(?:/_saved)?/?$"
+    pattern = BASE_PATTERN + r"/(?!pin/)([^/?#]+)(?:/_saved)?/?$"
     test = (
         ("https://www.pinterest.com/g1952849/", {
             "pattern": PinterestBoardExtractor.pattern,
@@ -223,7 +221,7 @@ class PinterestAllpinsExtractor(PinterestExtractor):
     """Extractor for a user's 'All Pins' feed"""
     subcategory = "allpins"
     directory_fmt = ("{category}", "{user}")
-    pattern = BASE_PATTERN + r"/(?!pin/)([^/?#&]+)/pins/?$"
+    pattern = BASE_PATTERN + r"/(?!pin/)([^/?#]+)/pins/?$"
     test = ("https://www.pinterest.com/g1952849/pins/", {
         "pattern": r"https://i\.pinimg\.com/originals/[0-9a-f]{2}"
                    r"/[0-9a-f]{2}/[0-9a-f]{2}/[0-9a-f]{32}\.\w{3}",
@@ -245,10 +243,10 @@ class PinterestCreatedExtractor(PinterestExtractor):
     """Extractor for a user's created pins"""
     subcategory = "created"
     directory_fmt = ("{category}", "{user}")
-    pattern = BASE_PATTERN + r"/(?!pin/)([^/?#&]+)/_created/?$"
+    pattern = BASE_PATTERN + r"/(?!pin/)([^/?#]+)/_created/?$"
     test = ("https://www.pinterest.de/digitalmomblog/_created/", {
         "pattern": r"https://i\.pinimg\.com/originals/[0-9a-f]{2}"
-                   r"/[0-9a-f]{2}/[0-9a-f]{2}/[0-9a-f]{32}\.jpg",
+                   r"/[0-9a-f]{2}/[0-9a-f]{2}/[0-9a-f]{32}\.(jpg|png)",
         "count": 10,
         "range": "1-10",
     })
@@ -270,7 +268,7 @@ class PinterestSectionExtractor(PinterestExtractor):
     directory_fmt = ("{category}", "{board[owner][username]}",
                      "{board[name]}", "{section[title]}")
     archive_fmt = "{board[id]}_{id}"
-    pattern = BASE_PATTERN + r"/(?!pin/)([^/?#&]+)/([^/?#&]+)/([^/?#&]+)"
+    pattern = BASE_PATTERN + r"/(?!pin/)([^/?#]+)/([^/?#]+)/([^/?#]+)"
     test = ("https://www.pinterest.com/g1952849/stuff/section", {
         "count": 2,
     })
@@ -321,7 +319,7 @@ class PinterestRelatedPinExtractor(PinterestPinExtractor):
     """Extractor for related pins of another pin from pinterest.com"""
     subcategory = "related-pin"
     directory_fmt = ("{category}", "related {original_pin[id]}")
-    pattern = BASE_PATTERN + r"/pin/([^/?#&]+).*#related$"
+    pattern = BASE_PATTERN + r"/pin/([^/?#]+).*#related$"
     test = ("https://www.pinterest.com/pin/858146903966145189/#related", {
         "range": "31-70",
         "count": 40,
@@ -340,7 +338,7 @@ class PinterestRelatedBoardExtractor(PinterestBoardExtractor):
     subcategory = "related-board"
     directory_fmt = ("{category}", "{board[owner][username]}",
                      "{board[name]}", "related")
-    pattern = BASE_PATTERN + r"/(?!pin/)([^/?#&]+)/([^/?#&]+)/?#related$"
+    pattern = BASE_PATTERN + r"/(?!pin/)([^/?#]+)/([^/?#]+)/?#related$"
     test = ("https://www.pinterest.com/g1952849/test-/#related", {
         "range": "31-70",
         "count": 40,
@@ -348,13 +346,13 @@ class PinterestRelatedBoardExtractor(PinterestBoardExtractor):
     })
 
     def pins(self):
-        return self.api.board_related(self.board["id"])
+        return self.api.board_content_recommendation(self.board["id"])
 
 
 class PinterestPinitExtractor(PinterestExtractor):
     """Extractor for images from a pin.it URL"""
     subcategory = "pinit"
-    pattern = r"(?:https?://)?pin\.it/([^/?#&]+)"
+    pattern = r"(?:https?://)?pin\.it/([^/?#]+)"
 
     test = (
         ("https://pin.it/Hvt8hgT", {
@@ -370,7 +368,7 @@ class PinterestPinitExtractor(PinterestExtractor):
         self.shortened_id = match.group(1)
 
     def items(self):
-        url = "https://api.pinterest.com/url_shortener/{}/redirect".format(
+        url = "https://api.pinterest.com/url_shortener/{}/redirect/".format(
             self.shortened_id)
         response = self.request(url, method="HEAD", allow_redirects=False)
         location = response.headers.get("Location")
@@ -458,10 +456,10 @@ class PinterestAPI():
         options = {"section_id": section_id}
         return self._pagination("BoardSectionPins", options)
 
-    def board_related(self, board_id):
+    def board_content_recommendation(self, board_id):
         """Yield related pins of a specific board"""
-        options = {"board_id": board_id, "add_vase": True}
-        return self._pagination("BoardRelatedPixieFeed", options)
+        options = {"id": board_id, "type": "board", "add_vase": True}
+        return self._pagination("BoardContentRecommendation", options)
 
     def user_pins(self, user):
         """Yield all pins from 'user'"""

@@ -57,6 +57,8 @@ class E621Extractor(danbooru.DanbooruExtractor):
 
             post["filename"] = file["md5"]
             post["extension"] = file["ext"]
+            post["date"] = text.parse_datetime(
+                post["created_at"], "%Y-%m-%dT%H:%M:%S.%f%z")
 
             post.update(data)
             yield Message.Directory, post
@@ -71,6 +73,10 @@ BASE_PATTERN = E621Extractor.update({
     "e926": {
         "root": "https://e926.net",
         "pattern": r"e926\.net",
+    },
+    "e6ai": {
+        "root": "https://e6ai.net",
+        "pattern": r"e6ai\.net",
     },
 })
 
@@ -92,6 +98,10 @@ class E621TagExtractor(E621Extractor, danbooru.DanbooruTagExtractor):
         }),
         ("https://e926.net/post/index/1/anry"),
         ("https://e926.net/post?tags=anry"),
+
+        ("https://e6ai.net/posts?tags=anry"),
+        ("https://e6ai.net/post/index/1/anry"),
+        ("https://e6ai.net/post?tags=anry"),
     )
 
 
@@ -110,6 +120,11 @@ class E621PoolExtractor(E621Extractor, danbooru.DanbooruPoolExtractor):
             "content": "91abe5d5334425d9787811d7f06d34c77974cd22",
         }),
         ("https://e926.net/pool/show/73"),
+
+        ("https://e6ai.net/pools/3", {
+            "url": "a6d1ad67a3fa9b9f73731d34d5f6f26f7e85855f",
+        }),
+        ("https://e6ai.net/pool/show/3"),
     )
 
     def posts(self):
@@ -140,6 +155,7 @@ class E621PostExtractor(E621Extractor, danbooru.DanbooruPostExtractor):
         ("https://e621.net/posts/535", {
             "url": "f7f78b44c9b88f8f09caac080adc8d6d9fdaa529",
             "content": "66f46e96a893fba8e694c4e049b23c2acc9af462",
+            "keyword": {"date": "dt:2007-02-17 19:02:32"},
         }),
         ("https://e621.net/posts/3181052", {
             "options": (("metadata", "notes,pools"),),
@@ -189,6 +205,12 @@ class E621PostExtractor(E621Extractor, danbooru.DanbooruPostExtractor):
             "content": "66f46e96a893fba8e694c4e049b23c2acc9af462",
         }),
         ("https://e926.net/post/show/535"),
+
+        ("https://e6ai.net/posts/23", {
+            "url": "3c85a806b3d9eec861948af421fe0e8ad6b8f881",
+            "content": "a05a484e4eb64637d56d751c02e659b4bc8ea5d5",
+        }),
+        ("https://e6ai.net/post/show/23"),
     )
 
     def posts(self):
@@ -213,12 +235,12 @@ class E621PopularExtractor(E621Extractor, danbooru.DanbooruPopularExtractor):
             "pattern": r"https://static\d.e926.net/data/../../[0-9a-f]+",
             "count": ">= 70",
         }),
+
+        ("https://e6ai.net/explore/posts/popular"),
     )
 
     def posts(self):
-        if self.page_start is None:
-            self.page_start = 1
-        return self._pagination("/popular.json", self.params, True)
+        return self._pagination("/popular.json", self.params)
 
 
 class E621FavoriteExtractor(E621Extractor):
@@ -239,6 +261,8 @@ class E621FavoriteExtractor(E621Extractor):
             "pattern": r"https://static\d.e926.net/data/../../[0-9a-f]+",
             "count": "> 260",
         }),
+
+        ("https://e6ai.net/favorites"),
     )
 
     def __init__(self, match):
@@ -249,6 +273,4 @@ class E621FavoriteExtractor(E621Extractor):
         return {"user_id": self.query.get("user_id", "")}
 
     def posts(self):
-        if self.page_start is None:
-            self.page_start = 1
-        return self._pagination("/favorites.json", self.query, True)
+        return self._pagination("/favorites.json", self.query)

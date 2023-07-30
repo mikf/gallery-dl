@@ -34,7 +34,7 @@ BASE_PATTERN = UrlshortenerExtractor.update(INSTANCES)
 class UrlshortenerLinkExtractor(UrlshortenerExtractor):
     """Extractor for general-purpose URL shorteners"""
     subcategory = "link"
-    pattern = BASE_PATTERN + r"/([^/?&#]+)"
+    pattern = BASE_PATTERN + r"/([^/?#]+)"
     test = (
         ("https://bit.ly/3cWIUgq", {
             "count": 1,
@@ -54,6 +54,7 @@ class UrlshortenerLinkExtractor(UrlshortenerExtractor):
         UrlshortenerExtractor.__init__(self, match)
         self.id = match.group(match.lastindex)
 
+    def _init(self):
         try:
             self.headers = INSTANCES[self.category]["headers"]
         except Exception:

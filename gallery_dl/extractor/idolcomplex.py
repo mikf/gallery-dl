@@ -19,9 +19,9 @@ import re
 class IdolcomplexExtractor(SankakuExtractor):
     """Base class for idolcomplex extractors"""
     category = "idolcomplex"
-    cookienames = ("login", "pass_hash")
-    cookiedomain = "idol.sankakucomplex.com"
-    root = "https://" + cookiedomain
+    cookies_domain = "idol.sankakucomplex.com"
+    cookies_names = ("login", "pass_hash")
+    root = "https://" + cookies_domain
     request_interval = 5.0
 
     def __init__(self, match):
@@ -29,6 +29,8 @@ class IdolcomplexExtractor(SankakuExtractor):
         self.logged_in = True
         self.start_page = 1
         self.start_post = 0
+
+    def _init(self):
         self.extags = self.config("tags", False)
 
     def items(self):
@@ -51,14 +53,14 @@ class IdolcomplexExtractor(SankakuExtractor):
         """Return an iterable containing all relevant post ids"""
 
     def login(self):
-        if self._check_cookies(self.cookienames):
+        if self.cookies_check(self.cookies_names):
             return
+
         username, password = self._get_auth_info()
         if username:
-            cookies = self._login_impl(username, password)
-            self._update_cookies(cookies)
-        else:
-            self.logged_in = False
+            return self.cookies_update(self._login_impl(username, password))
+
+        self.logged_in = False
 
     @cache(maxage=90*24*3600, keyarg=1)
     def _login_impl(self, username, password):
@@ -76,7 +78,7 @@ class IdolcomplexExtractor(SankakuExtractor):
         if not response.history or response.url != self.root + "/user/home":
             raise exception.AuthenticationError()
         cookies = response.history[0].cookies
-        return {c: cookies[c] for c in self.cookienames}
+        return {c: cookies[c] for c in self.cookies_names}
 
     def _parse_post(self, post_id):
         """Extract metadata of a single post"""

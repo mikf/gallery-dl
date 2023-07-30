@@ -28,6 +28,8 @@ class OAuthBase(Extractor):
     def __init__(self, match):
         Extractor.__init__(self, match)
         self.client = None
+
+    def _init(self):
         self.cache = config.get(("extractor", self.category), "cache", True)
 
     def oauth_config(self, key, default=None):
@@ -71,8 +73,11 @@ class OAuthBase(Extractor):
 
         browser = self.config("browser", True)
         if browser:
-            import webbrowser
-            browser = webbrowser.get()
+            try:
+                import webbrowser
+                browser = webbrowser.get()
+            except Exception:
+                browser = None
 
         if browser and browser.open(url):
             name = getattr(browser, "name", "Browser")
@@ -131,7 +136,7 @@ class OAuthBase(Extractor):
 
     def _oauth2_authorization_code_grant(
             self, client_id, client_secret, default_id, default_secret,
-            auth_url, token_url, *, scope="read", duration="permanent",
+            auth_url, token_url, scope="read", duration="permanent",
             key="refresh_token", auth=True, cache=None, instance=None):
         """Perform an OAuth2 authorization code grant"""
 

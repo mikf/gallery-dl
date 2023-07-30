@@ -28,7 +28,6 @@ CATEGORY_MAP = {
     "b4k"            : "arch.b4k.co",
     "baraag"         : "baraag",
     "bbc"            : "BBC",
-    "bcy"            : "半次元",
     "comicvine"      : "Comic Vine",
     "coomerparty"    : "Coomer",
     "deviantart"     : "DeviantArt",
@@ -36,6 +35,7 @@ CATEGORY_MAP = {
     "dynastyscans"   : "Dynasty Reader",
     "e621"           : "e621",
     "e926"           : "e926",
+    "e6ai"           : "e6AI",
     "erome"          : "EroMe",
     "e-hentai"       : "E-Hentai",
     "exhentai"       : "ExHentai",
@@ -63,9 +63,10 @@ CATEGORY_MAP = {
     "imgth"          : "imgth",
     "imgur"          : "imgur",
     "joyreactor"     : "JoyReactor",
+    "itchio"         : "itch.io",
+    "jpgfish"        : "JPG Fish",
     "kabeuchi"       : "かべうち",
     "kemonoparty"    : "Kemono",
-    "lineblog"       : "LINE BLOG",
     "livedoor"       : "livedoor Blog",
     "ohpolly"        : "Oh Polly",
     "omgmiamiswimwear": "Omg Miami Swimwear",
@@ -76,6 +77,7 @@ CATEGORY_MAP = {
     "mangalife"      : "MangaLife",
     "manganelo"      : "Manganato",
     "mangapark"      : "MangaPark",
+    "mangaread"      : "MangaRead",
     "mangasee"       : "MangaSee",
     "mastodon.social": "mastodon.social",
     "mememuseum"     : "meme.museum",
@@ -116,10 +118,9 @@ CATEGORY_MAP = {
     "thatpervert"    : "ThatPervert",
     "thebarchive"    : "The /b/ Archive",
     "thecollection"  : "The /co/llection",
-    "tokyochronos"   : "TokyoChronos",
     "tumblrgallery"  : "TumblrGallery",
     "vanillarock"    : "もえぴりあ",
-    "vidyart"        : "/v/idyart",
+    "vidyart2"       : "/v/idyart2",
     "vk"             : "VK",
     "vsco"           : "VSCO",
     "wallpapercave"  : "Wallpaper Cave",
@@ -184,6 +185,9 @@ SUBCATEGORY_MAP = {
     "hentaifoundry": {
         "story": "",
     },
+    "imgur": {
+        "favorite-folder": "Favorites Folders",
+    },
     "instagram": {
         "posts": "",
         "saved": "Saved Posts",
@@ -192,6 +196,9 @@ SUBCATEGORY_MAP = {
     "kemonoparty": {
         "discord": "Discord Servers",
         "discord-server": "",
+    },
+    "lensdump": {
+        "albums": "",
     },
     "mangadex": {
         "feed" : "Followed Feed",
@@ -211,6 +218,9 @@ SUBCATEGORY_MAP = {
     },
     "pixiv": {
         "me"  : "pixiv.me Links",
+        "novel-bookmark": "Novel Bookmarks",
+        "novel-series": "Novel Series",
+        "novel-user": "",
         "pixivision": "pixivision",
         "sketch": "Sketch",
         "work": "individual Images",
@@ -229,6 +239,9 @@ SUBCATEGORY_MAP = {
     },
     "smugmug": {
         "path": "Images from Users and Folders",
+    },
+    "tumblr": {
+        "day": "Days",
     },
     "twitter": {
         "media": "Media Timelines",
@@ -265,6 +278,7 @@ BASE_MAP = {
     "foolslide"   : "FoOlSlide Instances",
     "gelbooru_v01": "Gelbooru Beta 0.1.11",
     "gelbooru_v02": "Gelbooru Beta 0.2",
+    "jschan"      : "jschan Imageboards",
     "lolisafe"    : "lolisafe and chibisafe",
     "lynxchan"    : "LynxChan Imageboards",
     "moebooru"    : "Moebooru and MyImouto",
@@ -298,6 +312,7 @@ AUTH_MAP = {
     "fanbox"         : _COOKIES,
     "fantia"         : _COOKIES,
     "flickr"         : _OAUTH,
+    "gfycat"         : "Supported",
     "furaffinity"    : _COOKIES,
     "horne"          : "Required",
     "idolcomplex"    : "Supported",
@@ -326,8 +341,10 @@ AUTH_MAP = {
     "tsumino"        : "Supported",
     "tumblr"         : _OAUTH,
     "twitter"        : "Supported",
+    "vipergirls"     : "Supported",
     "wallhaven"      : _APIKEY_WH,
     "weasyl"         : _APIKEY_WY,
+    "zerochan"       : "Supported",
 }
 
 IGNORE_LIST = (

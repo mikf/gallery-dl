@@ -24,8 +24,7 @@ class InkbunnyExtractor(Extractor):
     archive_fmt = "{file_id}"
     root = "https://inkbunny.net"
 
-    def __init__(self, match):
-        Extractor.__init__(self, match)
+    def _init(self):
         self.api = InkbunnyAPI(self)
 
     def items(self):

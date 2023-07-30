@@ -23,9 +23,8 @@ class ImagefapExtractor(Extractor):
     archive_fmt = "{gallery_id}_{image_id}"
     request_interval = (2.0, 4.0)
 
-    def __init__(self, match):
-        Extractor.__init__(self, match)
-        self.session.headers["Referer"] = self.root
+    def _init(self):
+        self.session.headers["Referer"] = self.root + "/"
 
     def request(self, url, **kwargs):
         response = Extractor.request(self, url, **kwargs)
@@ -283,7 +282,7 @@ class ImagefapFolderExtractor(ImagefapExtractor):
                 yield gid, extr("<b>", "<")
                 cnt += 1
 
-            if cnt < 25:
+            if cnt < 20:
                 break
             params["page"] += 1
 

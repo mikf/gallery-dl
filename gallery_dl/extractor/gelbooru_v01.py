@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2021-2022 Mike Fährmann
+# Copyright 2021-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -19,28 +19,31 @@ class GelbooruV01Extractor(booru.BooruExtractor):
     def _parse_post(self, post_id):
         url = "{}/index.php?page=post&s=view&id={}".format(
             self.root, post_id)
-        page = self.request(url).text
+        extr = text.extract_from(self.request(url).text)
 
-        post = text.extract_all(page, (
-            ("created_at", 'Posted: ', ' <'),
-            ("uploader"  , 'By: ', ' <'),
-            ("width"     , 'Size: ', 'x'),
-            ("height"    , '', ' <'),
-            ("source"    , 'Source: <a href="', '"'),
-            ("rating"    , 'Rating: ', '<'),
-            ("score"     , 'Score: ', ' <'),
-            ("file_url"  , '<img alt="img" src="', '"'),
-            ("tags"      , 'id="tags" name="tags" cols="40" rows="5">', '<'),
-        ))[0]
+        post = {
+            "id"        : post_id,
+            "created_at": extr('Posted: ', ' <'),
+            "uploader"  : extr('By: ', ' <'),
+            "width"     : extr('Size: ', 'x'),
+            "height"    : extr('', ' <'),
+            "source"    : extr('Source: ', ' <'),
+            "rating"    : (extr('Rating: ', '<') or "?")[0].lower(),
+            "score"     : extr('Score: ', ' <'),
+            "file_url"  : extr('<img alt="img" src="', '"'),
+            "tags"      : text.unescape(extr(
+                'id="tags" name="tags" cols="40" rows="5">', '<')),
+        }
 
-        post["id"] = post_id
         post["md5"] = post["file_url"].rpartition("/")[2].partition(".")[0]
-        post["rating"] = (post["rating"] or "?")[0].lower()
-        post["tags"] = text.unescape(post["tags"])
         post["date"] = text.parse_datetime(
             post["created_at"], "%Y-%m-%d %H:%M:%S")
 
         return post
+
+    def skip(self, num):
+        self.page_start += num
+        return num
 
     def _pagination(self, url, begin, end):
         pid = self.page_start
@@ -75,9 +78,9 @@ BASE_PATTERN = GelbooruV01Extractor.update({
         "root": "https://drawfriends.booru.org",
         "pattern": r"drawfriends\.booru\.org",
     },
-    "vidyart": {
-        "root": "https://vidyart.booru.org",
-        "pattern": r"vidyart\.booru\.org",
+    "vidyart2": {
+        "root": "https://vidyart2.booru.org",
+        "pattern": r"vidyart2\.booru\.org",
     },
 })
 
@@ -103,7 +106,7 @@ class GelbooruV01TagExtractor(GelbooruV01Extractor):
             "count": 25,
         }),
         ("https://drawfriends.booru.org/index.php?page=post&s=list&tags=all"),
-        ("https://vidyart.booru.org/index.php?page=post&s=list&tags=all"),
+        ("https://vidyart2.booru.org/index.php?page=post&s=list&tags=all"),
     )
 
     def __init__(self, match):
@@ -138,7 +141,7 @@ class GelbooruV01FavoriteExtractor(GelbooruV01Extractor):
             "count": 4,
         }),
         ("https://drawfriends.booru.org/index.php?page=favorites&s=view&id=1"),
-        ("https://vidyart.booru.org/index.php?page=favorites&s=view&id=1"),
+        ("https://vidyart2.booru.org/index.php?page=favorites&s=view&id=1"),
     )
 
     def __init__(self, match):
@@ -182,7 +185,7 @@ class GelbooruV01PostExtractor(GelbooruV01Extractor):
                 "md5": "2aaa0438d58fc7baa75a53b4a9621bb89a9d3fdb",
                 "rating": "s",
                 "score": str,
-                "source": None,
+                "source": "",
                 "tags": "blush dress green_eyes green_hair hatsune_miku "
                         "long_hair twintails vocaloid",
                 "uploader": "Honochi31",
@@ -190,7 +193,7 @@ class GelbooruV01PostExtractor(GelbooruV01Extractor):
             },
         }),
         ("https://drawfriends.booru.org/index.php?page=post&s=view&id=107474"),
-        ("https://vidyart.booru.org/index.php?page=post&s=view&id=383111"),
+        ("https://vidyart2.booru.org/index.php?page=post&s=view&id=39168"),
     )
 
     def __init__(self, match):

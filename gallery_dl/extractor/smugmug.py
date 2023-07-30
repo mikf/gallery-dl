@@ -21,7 +21,7 @@ class SmugmugExtractor(Extractor):
     category = "smugmug"
     filename_fmt = ("{category}_{User[NickName]:?/_/}"
                     "{Image[UploadKey]}_{Image[ImageKey]}.{extension}")
-    cookiedomain = None
+    cookies_domain = None
     empty_user = {
         "Uri": "",
         "ResponseLevel": "Public",
@@ -34,8 +34,7 @@ class SmugmugExtractor(Extractor):
         "Uris": None,
     }
 
-    def __init__(self, match):
-        Extractor.__init__(self, match)
+    def _init(self):
         self.api = SmugmugAPI(self)
         self.videos = self.config("videos", True)
         self.session = self.api.session

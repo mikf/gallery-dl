@@ -19,7 +19,8 @@ class RedditExtractor(Extractor):
     directory_fmt = ("{category}", "{subreddit}")
     filename_fmt = "{id}{num:? //>02} {title[:220]}.{extension}"
     archive_fmt = "{filename}"
-    cookiedomain = ".reddit.com"
+    cookies_domain = ".reddit.com"
+    request_interval = 0.6
 
     def items(self):
         self.api = RedditAPI(self)
@@ -55,21 +56,29 @@ class RedditExtractor(Extractor):
                     visited.add(submission["id"])
                     submission["num"] = 0
 
-                    url = submission["url"]
+                    if "crosspost_parent_list" in submission:
+                        try:
+                            media = submission["crosspost_parent_list"][-1]
+                        except Exception:
+                            media = submission
+                    else:
+                        media = submission
+
+                    url = media["url"]
                     if url and url.startswith("https://i.redd.it/"):
                         text.nameext_from_url(url, submission)
                         yield Message.Url, url, submission
 
-                    elif "gallery_data" in submission:
+                    elif "gallery_data" in media:
                         for submission["num"], url in enumerate(
-                                self._extract_gallery(submission), 1):
+                                self._extract_gallery(media), 1):
                             text.nameext_from_url(url, submission)
                             yield Message.Url, url, submission
 
-                    elif submission["is_video"]:
+                    elif media["is_video"]:
                         if videos:
                             text.nameext_from_url(url, submission)
-                            url = "ytdl:" + self._extract_video(submission)
+                            url = "ytdl:" + self._extract_video(media)
                             yield Message.Url, url, submission
 
                     elif not submission["is_self"]:
@@ -280,14 +289,19 @@ class RedditSubmissionExtractor(RedditExtractor):
         ("https://www.reddit.com/r/kpopfap/comments/qjj04q/", {
             "count": 0,
         }),
-        ("https://old.reddit.com/r/lavaporn/comments/2a00np/"),
-        ("https://np.reddit.com/r/lavaporn/comments/2a00np/"),
-        ("https://m.reddit.com/r/lavaporn/comments/2a00np/"),
-        ("https://redd.it/2a00np/"),
+        # user page submission (#2301)
         ("https://www.reddit.com/user/TheSpiritTree/comments/srilyf/", {
             "pattern": r"https://i.redd.it/8fpgv17yqlh81.jpg",
             "count": 1,
         }),
+        # cross-posted video (#887, #3586, #3976)
+        ("https://www.reddit.com/r/kittengifs/comments/12m0b8d", {
+            "pattern": r"ytdl:https://v\.redd\.it/cvabpjacrvta1",
+        }),
+        ("https://old.reddit.com/r/lavaporn/comments/2a00np/"),
+        ("https://np.reddit.com/r/lavaporn/comments/2a00np/"),
+        ("https://m.reddit.com/r/lavaporn/comments/2a00np/"),
+        ("https://redd.it/2a00np/"),
     )
 
     def __init__(self, match):
@@ -303,8 +317,8 @@ class RedditImageExtractor(Extractor):
     category = "reddit"
     subcategory = "image"
     archive_fmt = "{filename}"
-    pattern = (r"(?:https?://)?i\.redd(?:\.it|ituploads\.com)"
-               r"/[^/?#]+(?:\?[^#]*)?")
+    pattern = (r"(?:https?://)?((?:i|preview)\.redd\.it|i\.reddituploads\.com)"
+               r"/([^/?#]+)(\?[^#]*)?")
     test = (
         ("https://i.redd.it/upjtjcx2npzz.jpg", {
             "url": "0de614900feef103e580b632190458c0b62b641a",
@@ -315,12 +329,29 @@ class RedditImageExtractor(Extractor):
             "url": "f24f25efcedaddeec802e46c60d77ef975dc52a5",
             "content": "541dbcc3ad77aa01ee21ca49843c5e382371fae7",
         }),
+        # preview.redd.it -> i.redd.it
+        (("https://preview.redd.it/00af44lpn0u51.jpg?width=960&crop=smart"
+         "&auto=webp&v=enabled&s=dbca8ab84033f4a433772d9c15dbe0429c74e8ac"), {
+            "pattern": r"^https://i\.redd\.it/00af44lpn0u51\.jpg$"
+        }),
     )
 
+    def __init__(self, match):
+        Extractor.__init__(self, match)
+        domain = match.group(1)
+        self.path = match.group(2)
+        if domain == "preview.redd.it":
+            self.domain = "i.redd.it"
+            self.query = ""
+        else:
+            self.domain = domain
+            self.query = match.group(3) or ""
+
     def items(self):
-        data = text.nameext_from_url(self.url)
+        url = "https://{}/{}{}".format(self.domain, self.path, self.query)
+        data = text.nameext_from_url(url)
         yield Message.Directory, data
-        yield Message.Url, self.url, data
+        yield Message.Url, url, data
 
 
 class RedditAPI():
@@ -347,6 +378,18 @@ class RedditAPI():
             self.client_id = client_id
             self.headers = {"User-Agent": config("user-agent")}
 
+        if self.client_id == self.CLIENT_ID:
+            client_id = self.client_id
+            self._warn_429 = True
+            kind = "default"
+        else:
+            client_id = client_id[:5] + "*" * (len(client_id)-5)
+            self._warn_429 = False
+            kind = "custom"
+
+        self.log.debug(
+            "Using %s API credentials (client-id %s)", kind, client_id)
+
         token = config("refresh-token")
         if token is None or token == "cache":
             key = "#" + self.client_id
@@ -356,9 +399,9 @@ class RedditAPI():
 
         if not self.refresh_token:
             # allow downloading from quarantined subreddits (#2180)
-            extractor._cookiejar.set(
+            extractor.cookies.set(
                 "_options", '%7B%22pref_quarantine_optin%22%3A%20true%7D',
-                domain=extractor.cookiedomain)
+                domain=extractor.cookies_domain)
 
     def submission(self, submission_id):
         """Fetch the (submission, comments)=-tuple for a submission id"""
@@ -433,28 +476,39 @@ class RedditAPI():
     def _call(self, endpoint, params):
         url = "https://oauth.reddit.com" + endpoint
         params["raw_json"] = "1"
-        self.authenticate()
-        response = self.extractor.request(
-            url, params=params, headers=self.headers, fatal=None)
 
-        remaining = response.headers.get("x-ratelimit-remaining")
-        if remaining and float(remaining) < 2:
-            self.extractor.wait(seconds=response.headers["x-ratelimit-reset"])
-            return self._call(endpoint, params)
+        while True:
+            self.authenticate()
+            response = self.extractor.request(
+                url, params=params, headers=self.headers, fatal=None)
 
-        try:
-            data = response.json()
-        except ValueError:
-            raise exception.StopExtraction(text.remove_html(response.text))
+            remaining = response.headers.get("x-ratelimit-remaining")
+            if remaining and float(remaining) < 2:
+                if self._warn_429:
+                    self._warn_429 = False
+                    self.log.info(
+                        "Register your own OAuth application and use its "
+                        "credentials to prevent this error: "
+                        "https://github.com/mikf/gallery-dl/blob/master"
+                        "/docs/configuration.rst"
+                        "#extractorredditclient-id--user-agent")
+                self.extractor.wait(
+                    seconds=response.headers["x-ratelimit-reset"])
+                continue
 
-        if "error" in data:
-            if data["error"] == 403:
-                raise exception.AuthorizationError()
-            if data["error"] == 404:
-                raise exception.NotFoundError()
-            self.log.debug(data)
-            raise exception.StopExtraction(data.get("message"))
-        return data
+            try:
+                data = response.json()
+            except ValueError:
+                raise exception.StopExtraction(text.remove_html(response.text))
+
+            if "error" in data:
+                if data["error"] == 403:
+                    raise exception.AuthorizationError()
+                if data["error"] == 404:
+                    raise exception.NotFoundError()
+                self.log.debug(data)
+                raise exception.StopExtraction(data.get("message"))
+            return data
 
     def _pagination(self, endpoint, params):
         id_min = self._parse_id("id-min", 0)

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2022 Mike Fährmann
+# Copyright 2014-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -21,28 +21,31 @@ class ExhentaiExtractor(Extractor):
     """Base class for exhentai extractors"""
     category = "exhentai"
     directory_fmt = ("{category}", "{gid} {title[:247]}")
-    filename_fmt = (
-        "{gid}_{num:>04}_{image_token}_{filename}.{extension}")
+    filename_fmt = "{gid}_{num:>04}_{image_token}_{filename}.{extension}"
     archive_fmt = "{gid}_{num}"
-    cookienames = ("ipb_member_id", "ipb_pass_hash")
-    cookiedomain = ".exhentai.org"
+    cookies_domain = ".exhentai.org"
+    cookies_names = ("ipb_member_id", "ipb_pass_hash")
     root = "https://exhentai.org"
     request_interval = 5.0
 
     LIMIT = False
 
     def __init__(self, match):
-        # allow calling 'self.config()' before 'Extractor.__init__()'
-        self._cfgpath = ("extractor", self.category, self.subcategory)
+        Extractor.__init__(self, match)
+        self.version = match.group(1)
 
-        version = match.group(1)
+    def initialize(self):
         domain = self.config("domain", "auto")
         if domain == "auto":
-            domain = ("ex" if version == "ex" else "e-") + "hentai.org"
+            domain = ("ex" if self.version == "ex" else "e-") + "hentai.org"
         self.root = "https://" + domain
-        self.cookiedomain = "." + domain
+        self.cookies_domain = "." + domain
 
-        Extractor.__init__(self, match)
+        Extractor.initialize(self)
+
+        if self.version != "ex":
+            self.cookies.set("nw", "1", domain=self.cookies_domain)
+        self.session.headers["Referer"] = self.root + "/"
         self.original = self.config("original", True)
 
         limits = self.config("limits", False)
@@ -52,14 +55,10 @@ class ExhentaiExtractor(Extractor):
         else:
             self.limits = False
 
-        self.session.headers["Referer"] = self.root + "/"
-        if version != "ex":
-            self.session.cookies.set("nw", "1", domain=self.cookiedomain)
-
-    def request(self, *args, **kwargs):
-        response = Extractor.request(self, *args, **kwargs)
-        if self._is_sadpanda(response):
-            self.log.info("sadpanda.jpg")
+    def request(self, url, **kwargs):
+        response = Extractor.request(self, url, **kwargs)
+        if response.history and response.headers.get("Content-Length") == "0":
+            self.log.info("blank page")
             raise exception.AuthorizationError()
         return response
 
@@ -67,17 +66,20 @@ class ExhentaiExtractor(Extractor):
         """Login and set necessary cookies"""
         if self.LIMIT:
             raise exception.StopExtraction("Image limit reached!")
-        if self._check_cookies(self.cookienames):
+
+        if self.cookies_check(self.cookies_names):
             return
+
         username, password = self._get_auth_info()
         if username:
-            self._update_cookies(self._login_impl(username, password))
-        else:
-            self.log.info("no username given; using e-hentai.org")
-            self.root = "https://e-hentai.org"
-            self.original = False
-            self.limits = False
-            self.session.cookies["nw"] = "1"
+            return self.cookies_update(self._login_impl(username, password))
+
+        self.log.info("no username given; using e-hentai.org")
+        self.root = "https://e-hentai.org"
+        self.cookies_domain = ".e-hentai.org"
+        self.cookies.set("nw", "1", domain=self.cookies_domain)
+        self.original = False
+        self.limits = False
 
     @cache(maxage=90*24*3600, keyarg=1)
     def _login_impl(self, username, password):
@@ -98,15 +100,7 @@ class ExhentaiExtractor(Extractor):
         response = self.request(url, method="POST", headers=headers, data=data)
         if b"You are now logged in as:" not in response.content:
             raise exception.AuthenticationError()
-        return {c: response.cookies[c] for c in self.cookienames}
-
-    @staticmethod
-    def _is_sadpanda(response):
-        """Return True if the response object contains a sad panda"""
-        return (
-            response.headers.get("Content-Length") == "9615" and
-            "sadpanda.jpg" in response.headers.get("Content-Disposition", "")
-        )
+        return {c: response.cookies[c] for c in self.cookies_names}
 
 
 class ExhentaiGalleryExtractor(ExhentaiExtractor):
@@ -180,6 +174,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
         self.image_token = match.group(4)
         self.image_num = text.parse_int(match.group(6), 1)
 
+    def _init(self):
         source = self.config("source")
         if source == "hitomi":
             self.items = self._items_hitomi
@@ -399,8 +394,9 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
         url = "https://e-hentai.org/home.php"
         cookies = {
             cookie.name: cookie.value
-            for cookie in self.session.cookies
-            if cookie.domain == self.cookiedomain and cookie.name != "igneous"
+            for cookie in self.cookies
+            if cookie.domain == self.cookies_domain and
+            cookie.name != "igneous"
         }
 
         page = self.request(url, cookies=cookies).text

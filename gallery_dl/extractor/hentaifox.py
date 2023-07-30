@@ -45,6 +45,15 @@ class HentaifoxGalleryExtractor(HentaifoxBase, GalleryExtractor):
                 "type": "doujinshi",
             },
         }),
+        # email-protected title (#4201)
+        ("https://hentaifox.com/gallery/35261/", {
+            "keyword": {
+                "gallery_id": 35261,
+                "title": "ManageM@ster!",
+                "artist": ["haritama hiroki"],
+                "group": ["studio n.ball"],
+            },
+        }),
     )
 
     def __init__(self, match):
@@ -65,13 +74,14 @@ class HentaifoxGalleryExtractor(HentaifoxBase, GalleryExtractor):
 
         return {
             "gallery_id": text.parse_int(self.gallery_id),
-            "title"     : text.unescape(extr("<h1>", "</h1>")),
             "parody"    : split(extr(">Parodies:"  , "</ul>")),
             "characters": split(extr(">Characters:", "</ul>")),
             "tags"      : split(extr(">Tags:"      , "</ul>")),
             "artist"    : split(extr(">Artists:"   , "</ul>")),
             "group"     : split(extr(">Groups:"    , "</ul>")),
             "type"      : text.remove_html(extr(">Category:", "<span")),
+            "title"     : text.unescape(extr(
+                'id="gallery_title" value="', '"')),
             "language"  : "English",
             "lang"      : "en",
         }

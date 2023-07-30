@@ -148,20 +148,6 @@ def build_parser():
         help="Delete cached login sessions, cookies, etc. for MODULE "
              "(ALL to delete everything)",
     )
-    general.add_argument(
-        "--cookies",
-        dest="cookies", metavar="FILE", action=ConfigAction,
-        help="File to load additional cookies from",
-    )
-    general.add_argument(
-        "--cookies-from-browser",
-        dest="cookies_from_browser",
-        metavar="BROWSER[+KEYRING][:PROFILE][::CONTAINER]",
-        help=("Name of the browser to load cookies from, "
-              "with optional keyring name prefixed with '+', "
-              "profile prefixed with ':', and "
-              "container prefixed with '::' ('none' for no container)"),
-    )
 
     output = parser.add_argument_group("Output Options")
     output.add_argument(
@@ -372,6 +358,28 @@ def build_parser():
         "--netrc",
         dest="netrc", nargs=0, action=ConfigConstAction, const=True,
         help="Enable .netrc authentication data",
+    )
+
+    cookies = parser.add_argument_group("Cookie Options")
+    cookies.add_argument(
+        "-C", "--cookies",
+        dest="cookies", metavar="FILE", action=ConfigAction,
+        help="File to load additional cookies from",
+    )
+    cookies.add_argument(
+        "--cookies-export",
+        dest="cookies-update", metavar="FILE", action=ConfigAction,
+        help="Export session cookies to FILE",
+    )
+    cookies.add_argument(
+        "--cookies-from-browser",
+        dest="cookies_from_browser",
+        metavar="BROWSER[/DOMAIN][+KEYRING][:PROFILE][::CONTAINER]",
+        help=("Name of the browser to load cookies from, with optional "
+              "domain prefixed with '/', "
+              "keyring name prefixed with '+', "
+              "profile prefixed with ':', and "
+              "container prefixed with '::' ('none' for no container)"),
     )
 
     selection = parser.add_argument_group("Selection Options")

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2017-2022 Mike Fährmann
+# Copyright 2017-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -10,6 +10,7 @@
 
 from .common import Extractor, Message
 from .. import text, exception
+from ..cache import cache
 
 
 class GfycatExtractor(Extractor):
@@ -23,6 +24,7 @@ class GfycatExtractor(Extractor):
         Extractor.__init__(self, match)
         self.key = match.group(1).lower()
 
+    def _init(self):
         formats = self.config("format")
         if formats is None:
             formats = ("mp4", "webm", "mobile", "gif")
@@ -80,6 +82,8 @@ class GfycatUserExtractor(GfycatExtractor):
     })
 
     def gfycats(self):
+        if self.key == "me":
+            return GfycatAPI(self).me()
         return GfycatAPI(self).user(self.key)
 
 
@@ -219,15 +223,8 @@ class GfycatAPI():
 
     def __init__(self, extractor):
         self.extractor = extractor
-
-    def gfycat(self, gfycat_id):
-        endpoint = "/v1/gfycats/" + gfycat_id
-        return self._call(endpoint)["gfyItem"]
-
-    def user(self, user):
-        endpoint = "/v1/users/{}/gfycats".format(user.lower())
-        params = {"count": 100}
-        return self._pagination(endpoint, params)
+        self.headers = {}
+        self.username, self.password = extractor._get_auth_info()
 
     def collection(self, user, collection):
         endpoint = "/v1/users/{}/collections/{}/gfycats".format(
@@ -240,14 +237,64 @@ class GfycatAPI():
         params = {"count": 100}
         return self._pagination(endpoint, params, "gfyCollections")
 
+    def gfycat(self, gfycat_id):
+        endpoint = "/v1/gfycats/" + gfycat_id
+        return self._call(endpoint)["gfyItem"]
+
+    def me(self):
+        endpoint = "/v1/me/gfycats"
+        params = {"count": 100}
+        return self._pagination(endpoint, params)
+
     def search(self, query):
         endpoint = "/v1/gfycats/search"
         params = {"search_text": query, "count": 150}
         return self._pagination(endpoint, params)
 
+    def user(self, user):
+        endpoint = "/v1/users/{}/gfycats".format(user.lower())
+        params = {"count": 100}
+        return self._pagination(endpoint, params)
+
+    def authenticate(self):
+        self.headers["Authorization"] = \
+            self._authenticate_impl(self.username, self.password)
+
+    @cache(maxage=3600, keyarg=1)
+    def _authenticate_impl(self, username, password):
+        self.extractor.log.info("Logging in as %s", username)
+
+        url = "https://weblogin.gfycat.com/oauth/webtoken"
+        headers = {"Origin": "https://gfycat.com"}
+        data = {
+            "access_key": "Anr96uuqt9EdamSCwK4txKPjMsf2"
+                          "M95Rfa5FLLhPFucu8H5HTzeutyAa",
+        }
+        response = self.extractor.request(
+            url, method="POST", headers=headers, json=data).json()
+
+        url = "https://weblogin.gfycat.com/oauth/weblogin"
+        headers["authorization"] = "Bearer " + response["access_token"]
+        data = {
+            "grant_type": "password",
+            "username"  : username,
+            "password"  : password,
+        }
+        response = self.extractor.request(
+            url, method="POST", headers=headers, json=data, fatal=None).json()
+
+        if "errorMessage" in response:
+            raise exception.AuthenticationError(
+                response["errorMessage"]["description"])
+        return "Bearer " + response["access_token"]
+
     def _call(self, endpoint, params=None):
+        if self.username:
+            self.authenticate()
+
         url = self.API_ROOT + endpoint
-        return self.extractor.request(url, params=params).json()
+        return self.extractor.request(
+            url, params=params, headers=self.headers).json()
 
     def _pagination(self, endpoint, params, key="gfycats"):
         while True:

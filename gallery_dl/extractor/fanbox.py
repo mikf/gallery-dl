@@ -6,9 +6,9 @@
 
 """Extractors for https://www.fanbox.cc/"""
 
-import re
 from .common import Extractor, Message
 from .. import text
+import re
 
 
 BASE_PATTERN = (
@@ -27,14 +27,12 @@ class FanboxExtractor(Extractor):
     archive_fmt = "{id}_{num}"
     _warning = True
 
-    def __init__(self, match):
-        Extractor.__init__(self, match)
+    def _init(self):
         self.embeds = self.config("embeds", True)
 
     def items(self):
-
         if self._warning:
-            if not self._check_cookies(("FANBOXSESSID",)):
+            if not self.cookies_check(("FANBOXSESSID",)):
                 self.log.warning("no 'FANBOXSESSID' cookie set")
             FanboxExtractor._warning = False
 
@@ -52,8 +50,11 @@ class FanboxExtractor(Extractor):
             url = text.ensure_http_scheme(url)
             body = self.request(url, headers=headers).json()["body"]
             for item in body["items"]:
-                yield self._get_post_data(item["id"])
-
+                try:
+                    yield self._get_post_data(item["id"])
+                except Exception as exc:
+                    self.log.warning("Skipping post %s (%s: %s)",
+                                     item["id"], exc.__class__.__name__, exc)
             url = body["nextUrl"]
 
     def _get_post_data(self, post_id):
@@ -211,9 +212,15 @@ class FanboxExtractor(Extractor):
             # to a proper Fanbox URL
             url = "https://www.pixiv.net/fanbox/"+content_id
             # resolve redirect
-            response = self.request(url, method="HEAD", allow_redirects=False)
-            url = response.headers["Location"]
-            final_post["_extractor"] = FanboxPostExtractor
+            try:
+                url = self.request(url, method="HEAD",
+                                   allow_redirects=False).headers["location"]
+            except Exception as exc:
+                url = None
+                self.log.warning("Unable to extract fanbox embed %s (%s: %s)",
+                                 content_id, exc.__class__.__name__, exc)
+            else:
+                final_post["_extractor"] = FanboxPostExtractor
         elif provider == "twitter":
             url = "https://twitter.com/_/status/"+content_id
         elif provider == "google_forms":

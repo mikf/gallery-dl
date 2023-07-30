@@ -22,17 +22,20 @@ class ReactorExtractor(BaseExtractor):
 
     def __init__(self, match):
         BaseExtractor.__init__(self, match)
+
         url = text.ensure_http_scheme(match.group(0), "http://")
         pos = url.index("/", 10)
-
-        self.root, self.path = url[:pos], url[pos:]
-        self.session.headers["Referer"] = self.root
-        self.gif = self.config("gif", False)
+        self.root = url[:pos]
+        self.path = url[pos:]
 
         if self.category == "reactor":
             # set category based on domain name
             netloc = urllib.parse.urlsplit(self.root).netloc
             self.category = netloc.rpartition(".")[0]
+
+    def _init(self):
+        self.session.headers["Referer"] = self.root
+        self.gif = self.config("gif", False)
 
     def items(self):
         data = self.metadata()

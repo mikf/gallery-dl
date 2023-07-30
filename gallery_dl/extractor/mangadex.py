@@ -30,9 +30,11 @@ class MangadexExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
+        self.uuid = match.group(1)
+
+    def _init(self):
         self.session.headers["User-Agent"] = util.USERAGENT
         self.api = MangadexAPI(self)
-        self.uuid = match.group(1)
 
     def items(self):
         for chapter in self.chapters():
@@ -85,6 +87,10 @@ class MangadexExtractor(Extractor):
         data["group"] = [group["attributes"]["name"]
                          for group in relationships["scanlation_group"]]
 
+        data["status"] = mattributes["status"]
+        data["tags"] = [tag["attributes"]["name"]["en"]
+                        for tag in mattributes["tags"]]
+
         return data
 
 
@@ -94,13 +100,13 @@ class MangadexChapterExtractor(MangadexExtractor):
     pattern = BASE_PATTERN + r"/chapter/([0-9a-f-]+)"
     test = (
         ("https://mangadex.org/chapter/f946ac53-0b71-4b5d-aeb2-7931b13c4aaa", {
-            "keyword": "86fb262cf767dac6d965cd904ad499adba466404",
+            "keyword": "e86128a79ebe7201b648f1caa828496a2878dc8f",
             #  "content": "50383a4c15124682057b197d40261641a98db514",
         }),
         # oneshot
         ("https://mangadex.org/chapter/61a88817-9c29-4281-bdf1-77b3c1be9831", {
             "count": 64,
-            "keyword": "6abcbe1e24eeb1049dc931958853cd767ee483fb",
+            "keyword": "d11ed057a919854696853362be35fc0ba7dded4c",
         }),
         # MANGA Plus (#1154)
         ("https://mangadex.org/chapter/74149a55-e7c4-44ea-8a37-98e879c1096f", {
@@ -144,6 +150,7 @@ class MangadexMangaExtractor(MangadexExtractor):
     pattern = BASE_PATTERN + r"/(?:title|manga)/(?!feed$)([0-9a-f-]+)"
     test = (
         ("https://mangadex.org/title/f90c4398-8aad-4f51-8a1f-024ca09fdcbc", {
+            "count": ">= 5",
             "keyword": {
                 "manga"   : "Souten no Koumori",
                 "manga_id": "f90c4398-8aad-4f51-8a1f-024ca09fdcbc",
@@ -157,6 +164,19 @@ class MangadexMangaExtractor(MangadexExtractor):
                 "language": str,
                 "artist"  : ["Arakawa Hiromu"],
                 "author"  : ["Arakawa Hiromu"],
+                "status"  : "completed",
+                "tags"    : ["Oneshot", "Historical", "Action",
+                             "Martial Arts", "Drama", "Tragedy"],
+            },
+        }),
+        # mutliple values for 'lang' (#4093)
+        ("https://mangadex.org/title/f90c4398-8aad-4f51-8a1f-024ca09fdcbc", {
+            "options": (("lang", "fr,it"),),
+            "count": 2,
+            "keyword": {
+                "manga"   : "Souten no Koumori",
+                "lang"    : "re:fr|it",
+                "language": "re:French|Italian",
             },
         }),
         ("https://mangadex.cc/manga/d0c88e3b-ea64-4e07-9841-c1d2ac982f4a/", {
@@ -186,13 +206,16 @@ class MangadexFeedExtractor(MangadexExtractor):
 
 
 class MangadexAPI():
-    """Interface for the MangaDex API v5"""
+    """Interface for the MangaDex API v5
+
+    https://api.mangadex.org/docs/
+    """
 
     def __init__(self, extr):
         self.extractor = extr
         self.headers = {}
 
-        self.username, self.password = self.extractor._get_auth_info()
+        self.username, self.password = extr._get_auth_info()
         if not self.username:
             self.authenticate = util.noop
 
@@ -278,9 +301,13 @@ class MangadexAPI():
         if ratings is None:
             ratings = ("safe", "suggestive", "erotica", "pornographic")
 
+        lang = config("lang")
+        if isinstance(lang, str) and "," in lang:
+            lang = lang.split(",")
+
         params["contentRating[]"] = ratings
+        params["translatedLanguage[]"] = lang
         params["includes[]"] = ("scanlation_group",)
-        params["translatedLanguage[]"] = config("lang")
         params["offset"] = 0
 
         api_params = config("api-parameters")

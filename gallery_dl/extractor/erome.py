@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2021-2022 Mike Fährmann
+# Copyright 2021-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -65,7 +65,7 @@ class EromeExtractor(Extractor):
     def request(self, url, **kwargs):
         if self.__cookies:
             self.__cookies = False
-            self.session.cookies.update(_cookie_cache())
+            self.cookies.update(_cookie_cache())
 
         for _ in range(5):
             response = Extractor.request(self, url, **kwargs)
@@ -80,7 +80,7 @@ class EromeExtractor(Extractor):
         for params["page"] in itertools.count(1):
             page = self.request(url, params=params).text
 
-            album_ids = EromeAlbumExtractor.pattern.findall(page)
+            album_ids = EromeAlbumExtractor.pattern.findall(page)[::2]
             yield from album_ids
 
             if len(album_ids) < 36:

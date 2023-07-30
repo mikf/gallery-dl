@@ -22,8 +22,7 @@ class DanbooruExtractor(BaseExtractor):
     per_page = 200
     request_interval = 1.0
 
-    def __init__(self, match):
-        BaseExtractor.__init__(self, match)
+    def _init(self):
         self.ugoira = self.config("ugoira", False)
         self.external = self.config("external", False)
         self.includes = False
@@ -70,6 +69,8 @@ class DanbooruExtractor(BaseExtractor):
                 continue
 
             text.nameext_from_url(url, post)
+            post["date"] = text.parse_datetime(
+                post["created_at"], "%Y-%m-%dT%H:%M:%S.%f%z")
 
             if post["extension"] == "zip":
                 if self.ugoira:
@@ -92,42 +93,47 @@ class DanbooruExtractor(BaseExtractor):
     def posts(self):
         return ()
 
-    def _pagination(self, endpoint, params, pages=False):
+    def _pagination(self, endpoint, params, prefix=None):
         url = self.root + endpoint
         params["limit"] = self.per_page
         params["page"] = self.page_start
 
+        first = True
         while True:
             posts = self.request(url, params=params).json()
-            if "posts" in posts:
+            if isinstance(posts, dict):
                 posts = posts["posts"]
 
-            if self.includes and posts:
-                if not pages and "only" not in params:
-                    params["page"] = "b{}".format(posts[0]["id"] + 1)
-                params["only"] = self.includes
-                data = {
-                    meta["id"]: meta
-                    for meta in self.request(url, params=params).json()
-                }
-                for post in posts:
-                    post.update(data[post["id"]])
-                params["only"] = None
+            if posts:
+                if self.includes:
+                    params_meta = {
+                        "only" : self.includes,
+                        "limit": len(posts),
+                        "tags" : "id:" + ",".join(str(p["id"]) for p in posts),
+                    }
+                    data = {
+                        meta["id"]: meta
+                        for meta in self.request(
+                            url, params=params_meta).json()
+                    }
+                    for post in posts:
+                        post.update(data[post["id"]])
 
-            yield from posts
+                if prefix == "a" and not first:
+                    posts.reverse()
+
+                yield from posts
 
             if len(posts) < self.threshold:
                 return
 
-            if pages:
+            if prefix:
+                params["page"] = "{}{}".format(prefix, posts[-1]["id"])
+            elif params["page"]:
                 params["page"] += 1
             else:
-                for post in reversed(posts):
-                    if "id" in post:
-                        params["page"] = "b{}".format(post["id"])
-                        break
-                else:
-                    return
+                params["page"] = 2
+            first = False
 
     def _ugoira_frames(self, post):
         data = self.request("{}/posts/{}.json?only=media_metadata".format(
@@ -153,7 +159,11 @@ BASE_PATTERN = DanbooruExtractor.update({
     "aibooru": {
         "root": None,
         "pattern": r"(?:safe.)?aibooru\.online",
-    }
+    },
+    "booruvar": {
+        "root": "https://booru.borvar.art",
+        "pattern": r"booru\.borvar\.art",
+    },
 })
 
 
@@ -181,7 +191,12 @@ class DanbooruTagExtractor(DanbooruExtractor):
             "count": 12,
         }),
         ("https://aibooru.online/posts?tags=center_frills&z=1", {
-            "pattern": r"https://aibooru\.online/data/original"
+            "pattern": r"https://cdn\.aibooru\.online/original"
+                       r"/[0-9a-f]{2}/[0-9a-f]{2}/[0-9a-f]{32}\.\w+",
+            "count": ">= 3",
+        }),
+        ("https://booru.borvar.art/posts?tags=chibi&z=1", {
+            "pattern": r"https://booru\.borvar\.art/data/original"
                        r"/[0-9a-f]{2}/[0-9a-f]{2}/[0-9a-f]{32}\.\w+",
             "count": ">= 3",
         }),
@@ -200,7 +215,21 @@ class DanbooruTagExtractor(DanbooruExtractor):
         return {"search_tags": self.tags}
 
     def posts(self):
-        return self._pagination("/posts.json", {"tags": self.tags})
+        prefix = "b"
+        for tag in self.tags.split():
+            if tag.startswith("order:"):
+                if tag == "order:id" or tag == "order:id_asc":
+                    prefix = "a"
+                elif tag == "order:id_desc":
+                    prefix = "b"
+                else:
+                    prefix = None
+            elif tag.startswith(
+                    ("id:", "md5", "ordfav:", "ordfavgroup:", "ordpool:")):
+                prefix = None
+                break
+
+        return self._pagination("/posts.json", {"tags": self.tags}, prefix)
 
 
 class DanbooruPoolExtractor(DanbooruExtractor):
@@ -216,6 +245,10 @@ class DanbooruPoolExtractor(DanbooruExtractor):
         ("https://booru.allthefallen.moe/pools/9", {
             "url": "902549ffcdb00fe033c3f63e12bc3cb95c5fd8d5",
             "count": 6,
+        }),
+        ("https://booru.borvar.art/pools/2", {
+            "url": "77fa3559a3fc919f72611f4e3dd0f919d19d3e0d",
+            "count": 4,
         }),
         ("https://aibooru.online/pools/1"),
         ("https://danbooru.donmai.us/pool/show/7659"),
@@ -234,7 +267,7 @@ class DanbooruPoolExtractor(DanbooruExtractor):
 
     def posts(self):
         params = {"tags": "pool:" + self.pool_id}
-        return self._pagination("/posts.json", params)
+        return self._pagination("/posts.json", params, "b")
 
 
 class DanbooruPostExtractor(DanbooruExtractor):
@@ -245,6 +278,7 @@ class DanbooruPostExtractor(DanbooruExtractor):
     test = (
         ("https://danbooru.donmai.us/posts/294929", {
             "content": "5e255713cbf0a8e0801dc423563c34d896bb9229",
+            "keyword": {"date": "dt:2008-08-12 04:46:05"},
         }),
         ("https://danbooru.donmai.us/posts/3613024", {
             "pattern": r"https?://.+\.zip$",
@@ -255,6 +289,9 @@ class DanbooruPostExtractor(DanbooruExtractor):
         }),
         ("https://aibooru.online/posts/1", {
             "content": "54d548743cd67799a62c77cbae97cfa0fec1b7e9",
+        }),
+        ("https://booru.borvar.art/posts/1487", {
+            "content": "91273ac1ea413a12be468841e2b5804656a50bff",
         }),
         ("https://danbooru.donmai.us/post/show/294929"),
     )
@@ -287,6 +324,7 @@ class DanbooruPopularExtractor(DanbooruExtractor):
         }),
         ("https://booru.allthefallen.moe/explore/posts/popular"),
         ("https://aibooru.online/explore/posts/popular"),
+        ("https://booru.borvar.art/explore/posts/popular"),
     )
 
     def __init__(self, match):
@@ -307,7 +345,4 @@ class DanbooruPopularExtractor(DanbooruExtractor):
         return {"date": date, "scale": scale}
 
     def posts(self):
-        if self.page_start is None:
-            self.page_start = 1
-        return self._pagination(
-            "/explore/posts/popular.json", self.params, True)
+        return self._pagination("/explore/posts/popular.json", self.params)

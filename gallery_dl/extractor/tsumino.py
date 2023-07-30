@@ -16,15 +16,15 @@ from ..cache import cache
 class TsuminoBase():
     """Base class for tsumino extractors"""
     category = "tsumino"
-    cookiedomain = "www.tsumino.com"
+    cookies_domain = "www.tsumino.com"
     root = "https://www.tsumino.com"
 
     def login(self):
         username, password = self._get_auth_info()
         if username:
-            self._update_cookies(self._login_impl(username, password))
+            self.cookies_update(self._login_impl(username, password))
         else:
-            self.session.cookies.setdefault(
+            self.cookies.setdefault(
                 "ASP.NET_SessionId", "x1drgggilez4cpkttneukrc5")
 
     @cache(maxage=14*24*3600, keyarg=1)
@@ -37,7 +37,7 @@ class TsuminoBase():
         response = self.request(url, method="POST", headers=headers, data=data)
         if not response.history:
             raise exception.AuthenticationError()
-        return self.session.cookies
+        return self.cookies
 
 
 class TsuminoGalleryExtractor(TsuminoBase, GalleryExtractor):

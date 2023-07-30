@@ -399,7 +399,7 @@ def parse_command_line(module, argv):
         "playlist_items": opts.playlist_items,
         "xattr_set_filesize": opts.xattr_set_filesize,
         "match_filter": match_filter,
-        "no_color": opts.no_color,
+        "no_color": getattr(opts, "no_color", None),
         "ffmpeg_location": opts.ffmpeg_location,
         "hls_prefer_native": opts.hls_prefer_native,
         "hls_use_mpegts": opts.hls_use_mpegts,
@@ -409,9 +409,12 @@ def parse_command_line(module, argv):
         "postprocessor_args": opts.postprocessor_args,
         "cn_verification_proxy": opts.cn_verification_proxy,
         "geo_verification_proxy": opts.geo_verification_proxy,
-        "geo_bypass": opts.geo_bypass,
-        "geo_bypass_country": opts.geo_bypass_country,
-        "geo_bypass_ip_block": opts.geo_bypass_ip_block,
+        "geo_bypass": getattr(
+            opts, "geo_bypass", "default"),
+        "geo_bypass_country": getattr(
+            opts, "geo_bypass_country", None),
+        "geo_bypass_ip_block": getattr(
+            opts, "geo_bypass_ip_block", None),
         "compat_opts": compat_opts,
     }
 

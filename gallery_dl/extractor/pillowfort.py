@@ -24,7 +24,7 @@ class PillowfortExtractor(Extractor):
     filename_fmt = ("{post_id} {title|original_post[title]:?/ /}"
                     "{num:>02}.{extension}")
     archive_fmt = "{id}"
-    cookiedomain = "www.pillowfort.social"
+    cookies_domain = "www.pillowfort.social"
 
     def __init__(self, match):
         Extractor.__init__(self, match)
@@ -82,15 +82,14 @@ class PillowfortExtractor(Extractor):
                 yield msgtype, url, post
 
     def login(self):
-        cget = self.session.cookies.get
-        if cget("_Pf_new_session", domain=self.cookiedomain) \
-                or cget("remember_user_token", domain=self.cookiedomain):
+        if self.cookies.get("_Pf_new_session", domain=self.cookies_domain):
+            return
+        if self.cookies.get("remember_user_token", domain=self.cookies_domain):
             return
 
         username, password = self._get_auth_info()
         if username:
-            cookies = self._login_impl(username, password)
-            self._update_cookies(cookies)
+            self.cookies_update(self._login_impl(username, password))
 
     @cache(maxage=14*24*3600, keyarg=1)
     def _login_impl(self, username, password):

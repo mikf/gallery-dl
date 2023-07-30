@@ -269,6 +269,31 @@ class Test_CommandlineArguments_YtDlp(Test_CommandlineArguments):
                 "title:%(artist)s - %(title)s")],
         })
 
+    def test_geo_bypass(self):
+        try:
+            ytdl.parse_command_line(self.module, ["--xff", "default"])
+        except Exception:
+            # before --xff (c16644642)
+            return Test_CommandlineArguments.test_geo_bypass(self)
+
+        self._(["--xff", "default"],
+               "geo_bypass", "default")
+        self._(["--xff", "never"],
+               "geo_bypass", "never")
+        self._(["--xff", "EN"],
+               "geo_bypass", "EN")
+        self._(["--xff", "198.51.100.14/24"],
+               "geo_bypass", "198.51.100.14/24")
+
+        self._("--geo-bypass",
+               "geo_bypass", "default")
+        self._("--no-geo-bypass",
+               "geo_bypass", "never")
+        self._(["--geo-bypass-country", "EN"],
+               "geo_bypass", "EN")
+        self._(["--geo-bypass-ip-block", "198.51.100.14/24"],
+               "geo_bypass", "198.51.100.14/24")
+
 
 if __name__ == "__main__":
     unittest.main(warnings="ignore")

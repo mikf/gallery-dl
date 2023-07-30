@@ -81,10 +81,13 @@ class BehanceGalleryExtractor(BehanceExtractor):
         ("https://www.behance.net/gallery/88276087/Audi-R8-RWD", {
             "count": 20,
             "url": "6bebff0d37f85349f9ad28bd8b76fd66627c1e2f",
+            "pattern": r"https://mir-s3-cdn-cf\.behance\.net/project_modules"
+                       r"/source/[0-9a-f]+.[0-9a-f]+\.jpg"
         }),
         # 'video' modules (#1282)
         ("https://www.behance.net/gallery/101185577/COLCCI", {
-            "pattern": r"ytdl:https://cdn-prod-ccv\.adobe\.com/",
+            "pattern": r"https://cdn-prod-ccv\.adobe\.com/\w+"
+                       r"/rend/\w+_720\.mp4\?",
             "count": 3,
         }),
     )
@@ -129,26 +132,35 @@ class BehanceGalleryExtractor(BehanceExtractor):
         append = result.append
 
         for module in data["modules"]:
-            mtype = module["type"]
+            mtype = module["__typename"]
 
-            if mtype == "image":
-                url = module["sizes"]["original"]
+            if mtype == "ImageModule":
+                url = module["imageSizes"]["size_original"]["url"]
                 append((url, module))
 
-            elif mtype == "video":
-                page = self.request(module["src"]).text
-                url = text.extr(page, '<source src="', '"')
-                if text.ext_from_url(url) == "m3u8":
-                    url = "ytdl:" + url
+            elif mtype == "VideoModule":
+                renditions = module["videoData"]["renditions"]
+                try:
+                    url = [
+                        r["url"] for r in renditions
+                        if text.ext_from_url(r["url"]) != "m3u8"
+                    ][-1]
+                except Exception as exc:
+                    self.log.debug("%s: %s", exc.__class__.__name__, exc)
+                    url = "ytdl:" + renditions[-1]["url"]
                 append((url, module))
 
-            elif mtype == "media_collection":
+            elif mtype == "MediaCollectionModule":
                 for component in module["components"]:
-                    url = component["sizes"]["source"]
-                    append((url, module))
+                    for size in component["imageSizes"].values():
+                        if size:
+                            parts = size["url"].split("/")
+                            parts[4] = "source"
+                            append(("/".join(parts), module))
+                            break
 
-            elif mtype == "embed":
-                embed = module.get("original_embed") or module.get("embed")
+            elif mtype == "EmbedModule":
+                embed = module.get("originalEmbed") or module.get("fluidEmbed")
                 if embed:
                     append(("ytdl:" + text.extr(embed, 'src="', '"'), module))
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2020-2022 Mike Fährmann
+# Copyright 2020-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -16,13 +16,16 @@ from ..cache import memcache
 class RedgifsExtractor(Extractor):
     """Base class for redgifs extractors"""
     category = "redgifs"
-    filename_fmt = "{category}_{id}.{extension}"
+    filename_fmt = \
+        "{category}_{gallery:?//[:11]}{num:?_/_/>02}{id}.{extension}"
     archive_fmt = "{id}"
     root = "https://www.redgifs.com"
 
     def __init__(self, match):
         Extractor.__init__(self, match)
         self.key = match.group(1)
+
+    def _init(self):
         self.api = RedgifsAPI(self)
 
         formats = self.config("format")
@@ -34,16 +37,32 @@ class RedgifsExtractor(Extractor):
 
     def items(self):
         metadata = self.metadata()
+
         for gif in self.gifs():
-            url = self._process(gif)
-            if not url:
-                self.log.warning("Skipping '%s' (format not available)",
-                                 gif["id"])
-                continue
+
+            gallery = gif.get("gallery")
+            if gallery:
+                gifs = self.api.gallery(gallery)["gifs"]
+                enum = 1
+                cnt = len(gifs)
+            else:
+                gifs = (gif,)
+                enum = 0
+                cnt = 1
 
             gif.update(metadata)
+            gif["count"] = cnt
             yield Message.Directory, gif
-            yield Message.Url, url, gif
+
+            for num, gif in enumerate(gifs, enum):
+                url = self._process(gif)
+                if not url:
+                    self.log.warning(
+                        "Skipping '%s' (format not available)", gif["id"])
+                    continue
+                gif["num"] = num
+                gif["count"] = cnt
+                yield Message.Url, url, gif
 
     def _process(self, gif):
         gif["_fallback"] = formats = self._formats(gif)
@@ -141,25 +160,61 @@ class RedgifsCollectionsExtractor(RedgifsExtractor):
             yield Message.Queue, url, collection
 
 
+class RedgifsNichesExtractor(RedgifsExtractor):
+    """Extractor for redgifs niches"""
+    subcategory = "niches"
+    pattern = r"(?:https?://)?(?:www\.)?redgifs\.com/niches/([^/?#]+)"
+    test = (
+        ("https://www.redgifs.com/niches/boobs", {
+            "pattern": r"https://\w+\.redgifs\.com/[\w-]+\.mp4",
+            "range": "1-20",
+            "count": 20,
+        }),
+        ("https://www.redgifs.com/niches/ass", {
+            "pattern": r"https://\w+\.redgifs\.com/[\w-]+\.mp4",
+            "range": "1-20",
+            "count": 20,
+        }),
+    )
+
+    def gifs(self):
+        return self.api.niches(self.key)
+
+
 class RedgifsSearchExtractor(RedgifsExtractor):
     """Extractor for redgifs search results"""
     subcategory = "search"
     directory_fmt = ("{category}", "Search", "{search}")
-    pattern = r"(?:https?://)?(?:\w+\.)?redgifs\.com/browse/?\?([^#]+)"
+    pattern = (r"(?:https?://)?(?:\w+\.)?redgifs\.com"
+               r"/(?:gifs/([^/?#]+)|browse)(?:/?\?([^#]+))?")
     test = (
+        ("https://www.redgifs.com/gifs/jav", {
+            "pattern": r"https://\w+\.redgifs\.com/[A-Za-z-]+\.(mp4|jpg)",
+            "range": "1-10",
+            "count": 10,
+        }),
         ("https://www.redgifs.com/browse?tags=JAV", {
             "pattern": r"https://\w+\.redgifs\.com/[A-Za-z-]+\.(mp4|jpg)",
             "range": "1-10",
             "count": 10,
         }),
-        ("https://v3.redgifs.com/browse?tags=JAV"),
+        ("https://www.redgifs.com/gifs/jav?order=best&verified=1"),
         ("https://www.redgifs.com/browse?type=i&verified=y&order=top7"),
+        ("https://v3.redgifs.com/browse?tags=JAV"),
     )
 
+    def __init__(self, match):
+        RedgifsExtractor.__init__(self, match)
+        self.search, self.query = match.groups()
+
     def metadata(self):
-        self.params = params = text.parse_query(self.key)
-        search = params.get("tags") or params.get("order") or "trending"
-        return {"search": search}
+        self.params = text.parse_query(self.query)
+        if self.search:
+            self.params["tags"] = text.unquote(self.search)
+
+        return {"search": (self.params.get("tags") or
+                           self.params.get("order") or
+                           "trending")}
 
     def gifs(self):
         return self.api.search(self.params)
@@ -177,6 +232,16 @@ class RedgifsImageExtractor(RedgifsExtractor):
             "pattern": r"https://\w+\.redgifs\.com"
                        r"/FoolishForkedAbyssiniancat\.mp4",
             "content": "f6e03f1df9a2ff2a74092f53ee7580d2fb943533",
+        }),
+        # gallery (#4021)
+        ("https://www.redgifs.com/watch/desertedbaregraywolf", {
+            "pattern": r"https://\w+\.redgifs\.com/[A-Za-z-]+\.jpg",
+            "count": 4,
+            "keyword": {
+                "num": int,
+                "count": 4,
+                "gallery": "187ad979693-1922-fc66-0000-a96fb07b8a5d",
+            },
         }),
         ("https://redgifs.com/ifr/FoolishForkedAbyssiniancat"),
         ("https://i.redgifs.com/i/FoolishForkedAbyssiniancat"),
@@ -207,6 +272,10 @@ class RedgifsAPI():
         endpoint = "/v2/gifs/" + gif_id.lower()
         return self._call(endpoint)["gif"]
 
+    def gallery(self, gallery_id):
+        endpoint = "/v2/gallery/" + gallery_id
+        return self._call(endpoint)
+
     def user(self, user, order="best"):
         endpoint = "/v2/users/{}/search".format(user.lower())
         params = {"order": order}
@@ -225,10 +294,13 @@ class RedgifsAPI():
         endpoint = "/v2/users/{}/collections".format(user)
         return self._pagination(endpoint, key="collections")
 
+    def niches(self, niche):
+        endpoint = "/v2/niches/{}/gifs".format(niche)
+        return self._pagination(endpoint)
+
     def search(self, params):
         endpoint = "/v2/gifs/search"
         params["search_text"] = params.pop("tags", None)
-        params.pop("needSendGtm", None)
         return self._pagination(endpoint, params)
 
     def _call(self, endpoint, params=None):

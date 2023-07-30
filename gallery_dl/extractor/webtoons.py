@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # Copyright 2020 Leonardo Taccari
-# Copyright 2021-2022 Mike Fährmann
+# Copyright 2021-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -18,10 +18,10 @@ BASE_PATTERN = r"(?:https?://)?(?:www\.)?webtoons\.com/(([^/?#]+)"
 class WebtoonsBase():
     category = "webtoons"
     root = "https://www.webtoons.com"
-    cookiedomain = ".webtoons.com"
+    cookies_domain = ".webtoons.com"
 
     def setup_agegate_cookies(self):
-        self._update_cookies({
+        self.cookies_update({
             "atGDPR"     : "AD_CONSENT",
             "needCCPA"   : "false",
             "needCOPPA"  : "false",
@@ -71,15 +71,18 @@ class WebtoonsEpisodeExtractor(WebtoonsBase, GalleryExtractor):
     )
 
     def __init__(self, match):
-        self.path, self.lang, self.genre, self.comic, query = match.groups()
+        self.path, self.lang, self.genre, self.comic, self.query = \
+            match.groups()
 
-        url = "{}/{}/viewer?{}".format(self.root, self.path, query)
+        url = "{}/{}/viewer?{}".format(self.root, self.path, self.query)
         GalleryExtractor.__init__(self, match, url)
+
+    def _init(self):
         self.setup_agegate_cookies()
 
-        query = text.parse_query(query)
-        self.title_no = query.get("title_no")
-        self.episode_no = query.get("episode_no")
+        params = text.parse_query(self.query)
+        self.title_no = params.get("title_no")
+        self.episode_no = params.get("episode_no")
 
     def metadata(self, page):
         keywords, pos = text.extract(
@@ -141,12 +144,15 @@ class WebtoonsComicExtractor(WebtoonsBase, Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
+        self.path, self.lang, self.genre, self.comic, self.query = \
+            match.groups()
+
+    def _init(self):
         self.setup_agegate_cookies()
 
-        self.path, self.lang, self.genre, self.comic, query = match.groups()
-        query = text.parse_query(query)
-        self.title_no = query.get("title_no")
-        self.page_no = text.parse_int(query.get("page"), 1)
+        params = text.parse_query(self.query)
+        self.title_no = params.get("title_no")
+        self.page_no = text.parse_int(params.get("page"), 1)
 
     def items(self):
         page = None

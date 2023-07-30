@@ -21,13 +21,16 @@ class NewgroundsExtractor(Extractor):
     filename_fmt = "{category}_{_index}_{title}.{extension}"
     archive_fmt = "{_type}{_index}"
     root = "https://www.newgrounds.com"
-    cookiedomain = ".newgrounds.com"
-    cookienames = ("NG_GG_username", "vmk1du5I8m")
+    cookies_domain = ".newgrounds.com"
+    cookies_names = ("NG_GG_username", "vmk1du5I8m")
+    request_interval = 1.0
 
     def __init__(self, match):
         Extractor.__init__(self, match)
         self.user = match.group(1)
         self.user_root = "https://{}.newgrounds.com".format(self.user)
+
+    def _init(self):
         self.flash = self.config("flash", True)
 
         fmt = self.config("format", "original")
@@ -71,11 +74,12 @@ class NewgroundsExtractor(Extractor):
         """Return general metadata"""
 
     def login(self):
-        if self._check_cookies(self.cookienames):
+        if self.cookies_check(self.cookies_names):
             return
+
         username, password = self._get_auth_info()
         if username:
-            self._update_cookies(self._login_impl(username, password))
+            self.cookies_update(self._login_impl(username, password))
 
     @cache(maxage=360*24*3600, keyarg=1)
     def _login_impl(self, username, password):
@@ -84,16 +88,17 @@ class NewgroundsExtractor(Extractor):
         url = self.root + "/passport/"
         response = self.request(url)
         if response.history and response.url.endswith("/social"):
-            return self.session.cookies
+            return self.cookies
 
+        page = response.text
         headers = {"Origin": self.root, "Referer": url}
-        url = text.urljoin(self.root, text.extr(
-            response.text, 'action="', '"'))
+        url = text.urljoin(self.root, text.extr(page, 'action="', '"'))
         data = {
             "username": username,
             "password": password,
             "remember": "1",
             "login"   : "1",
+            "auth"    : text.extr(page, 'name="auth" value="', '"'),
         }
 
         response = self.request(url, method="POST", headers=headers, data=data)
@@ -103,7 +108,7 @@ class NewgroundsExtractor(Extractor):
         return {
             cookie.name: cookie.value
             for cookie in response.history[0].cookies
-            if cookie.expires and cookie.domain == self.cookiedomain
+            if cookie.expires and cookie.domain == self.cookies_domain
         }
 
     def extract_post(self, post_url):
@@ -513,6 +518,9 @@ class NewgroundsUserExtractor(NewgroundsExtractor):
             "count": 3,
         }),
     )
+
+    def initialize(self):
+        pass
 
     def items(self):
         base = self.user_root + "/"

@@ -72,9 +72,9 @@ Standalone Executable
 Prebuilt executable files with a Python interpreter and
 required Python packages included are available for
 
-- `Windows <https://github.com/mikf/gallery-dl/releases/download/v1.25.2/gallery-dl.exe>`__
+- `Windows <https://github.com/mikf/gallery-dl/releases/download/v1.25.8/gallery-dl.exe>`__
   (Requires `Microsoft Visual C++ Redistributable Package (x86) <https://aka.ms/vs/17/release/vc_redist.x86.exe>`__)
-- `Linux   <https://github.com/mikf/gallery-dl/releases/download/v1.25.2/gallery-dl.bin>`__
+- `Linux   <https://github.com/mikf/gallery-dl/releases/download/v1.25.8/gallery-dl.bin>`__
 
 
 Nightly Builds
@@ -122,6 +122,15 @@ For macOS or Linux users using Homebrew:
 .. code:: bash
 
     brew install gallery-dl
+
+MacPorts
+--------
+
+For macOS users with MacPorts:
+
+.. code:: bash
+
+    sudo port install gallery-dl
 
 
 Usage

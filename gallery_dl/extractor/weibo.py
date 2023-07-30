@@ -28,13 +28,15 @@ class WeiboExtractor(Extractor):
     def __init__(self, match):
         Extractor.__init__(self, match)
         self._prefix, self.user = match.groups()
+
+    def _init(self):
         self.retweets = self.config("retweets", True)
         self.videos = self.config("videos", True)
         self.livephoto = self.config("livephoto", True)
 
         cookies = _cookie_cache()
         if cookies is not None:
-            self.session.cookies.update(cookies)
+            self.cookies.update(cookies)
         self.session.headers["Referer"] = self.root + "/"
 
     def request(self, url, **kwargs):
@@ -72,6 +74,8 @@ class WeiboExtractor(Extractor):
                     file["url"] = "https:" + file["url"][5:]
                 if "filename" not in file:
                     text.nameext_from_url(file["url"], file)
+                    if file["extension"] == "json":
+                        file["extension"] = "mp4"
                 file["status"] = status
                 file["num"] = num
                 yield Message.Url, file["url"], file
@@ -123,7 +127,7 @@ class WeiboExtractor(Extractor):
                         key=lambda m: m["meta"]["quality_index"])
         except Exception:
             return {"url": (info.get("stream_url_hd") or
-                            info["stream_url"])}
+                            info.get("stream_url") or "")}
         else:
             return media["play_info"].copy()
 
@@ -132,7 +136,7 @@ class WeiboExtractor(Extractor):
         return self.request(url).json()
 
     def _user_id(self):
-        if self.user.isdecimal():
+        if len(self.user) >= 10 and self.user.isdecimal():
             return self.user[-10:]
         else:
             url = "{}/ajax/profile/info?{}={}".format(
@@ -168,6 +172,8 @@ class WeiboExtractor(Extractor):
             yield from statuses
 
             if "next_cursor" in data:  # videos, newvideo
+                if data["next_cursor"] == -1:
+                    return
                 params["cursor"] = data["next_cursor"]
             elif "page" in params:     # home, article
                 params["page"] += 1
@@ -223,6 +229,9 @@ class WeiboUserExtractor(WeiboExtractor):
         ("https://m.weibo.cn/p/2304132314621010_-_WEIBO_SECOND_PROFILE_WEIBO"),
         ("https://www.weibo.com/p/1003062314621010/home"),
     )
+
+    def initialize(self):
+        pass
 
     def items(self):
         base = "{}/u/{}?tabtype=".format(self.root, self._user_id())

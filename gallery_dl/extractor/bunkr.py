@@ -6,19 +6,19 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extractors for https://bunkr.la/"""
+"""Extractors for https://bunkrr.su/"""
 
 from .lolisafe import LolisafeAlbumExtractor
 from .. import text
 
 
 class BunkrAlbumExtractor(LolisafeAlbumExtractor):
-    """Extractor for bunkr.la albums"""
+    """Extractor for bunkrr.su albums"""
     category = "bunkr"
-    root = "https://bunkr.la"
-    pattern = r"(?:https?://)?(?:app\.)?bunkr\.(?:la|[sr]u|is|to)/a/([^/?#]+)"
+    root = "https://bunkrr.su"
+    pattern = r"(?:https?://)?(?:app\.)?bunkr+\.(?:la|[sr]u|is|to)/a/([^/?#]+)"
     test = (
-        ("https://bunkr.la/a/Lktg9Keq", {
+        ("https://bunkrr.su/a/Lktg9Keq", {
             "pattern": r"https://cdn\.bunkr\.ru/test-テスト-\"&>-QjgneIQv\.png",
             "content": "0c8768055e4e20e7c7259608b67799171b691140",
             "keyword": {
@@ -52,6 +52,12 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
                 "num": int,
             },
         }),
+        # cdn12 .ru TLD (#4147)
+        ("https://bunkrr.su/a/j1G29CnD", {
+            "pattern": r"https://(cdn12.bunkr.ru|media-files12.bunkr.la)/\w+",
+            "count": 8,
+        }),
+        ("https://bunkrr.su/a/Lktg9Keq"),
         ("https://bunkr.la/a/Lktg9Keq"),
         ("https://bunkr.su/a/Lktg9Keq"),
         ("https://bunkr.ru/a/Lktg9Keq"),
@@ -70,7 +76,7 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
         cdn = None
         files = []
         append = files.append
-        headers = {"Referer": self.root.replace("://", "://stream.", 1) + "/"}
+        headers = {"Referer": self.root + "/"}
 
         pos = page.index('class="grid-images')
         for url in text.extract_iter(page, '<a href="', '"', pos):
@@ -86,10 +92,12 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
             url = text.unescape(url)
             if url.endswith((".mp4", ".m4v", ".mov", ".webm", ".mkv", ".ts",
                              ".zip", ".rar", ".7z")):
-                append({"file": url.replace("://cdn", "://media-files", 1),
-                        "_http_headers": headers})
-            else:
-                append({"file": url})
+                if url.startswith("https://cdn12."):
+                    url = ("https://media-files12.bunkr.la" +
+                           url[url.find("/", 14):])
+                else:
+                    url = url.replace("://cdn", "://media-files", 1)
+            append({"file": url, "_http_headers": headers})
 
         return files, {
             "album_id"   : self.album_id,

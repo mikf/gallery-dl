@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2022 Mike Fährmann
+# Copyright 2016-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -19,23 +19,23 @@ class ImagehostImageExtractor(Extractor):
     basecategory = "imagehost"
     subcategory = "image"
     archive_fmt = "{token}"
-    https = True
-    params = None
-    cookies = None
-    encoding = None
+    _https = True
+    _params = None
+    _cookies = None
+    _encoding = None
 
     def __init__(self, match):
         Extractor.__init__(self, match)
         self.page_url = "http{}://{}".format(
-            "s" if self.https else "", match.group(1))
+            "s" if self._https else "", match.group(1))
         self.token = match.group(2)
 
-        if self.params == "simple":
-            self.params = {
+        if self._params == "simple":
+            self._params = {
                 "imgContinue": "Continue+to+image+...+",
             }
-        elif self.params == "complex":
-            self.params = {
+        elif self._params == "complex":
+            self._params = {
                 "op": "view",
                 "id": self.token,
                 "pre": "1",
@@ -46,16 +46,16 @@ class ImagehostImageExtractor(Extractor):
     def items(self):
         page = self.request(
             self.page_url,
-            method=("POST" if self.params else "GET"),
-            data=self.params,
-            cookies=self.cookies,
-            encoding=self.encoding,
+            method=("POST" if self._params else "GET"),
+            data=self._params,
+            cookies=self._cookies,
+            encoding=self._encoding,
         ).text
 
         url, filename = self.get_info(page)
         data = text.nameext_from_url(filename, {"token": self.token})
         data.update(self.metadata(page))
-        if self.https and url.startswith("http:"):
+        if self._https and url.startswith("http:"):
             url = "https:" + url[5:]
 
         yield Message.Directory, data
@@ -102,8 +102,8 @@ class ImxtoImageExtractor(ImagehostImageExtractor):
             "exception": exception.NotFoundError,
         }),
     )
-    params = "simple"
-    encoding = "utf-8"
+    _params = "simple"
+    _encoding = "utf-8"
 
     def __init__(self, match):
         ImagehostImageExtractor.__init__(self, match)
@@ -153,8 +153,9 @@ class ImxtoGalleryExtractor(ImagehostImageExtractor):
             "_extractor": ImxtoImageExtractor,
             "title": text.unescape(title.partition(">")[2]).strip(),
         }
-        for url in text.extract_iter(page, '<a href="', '"', pos):
-            yield Message.Queue, url, data
+
+        for url in text.extract_iter(page, "<a href=", " ", pos):
+            yield Message.Queue, url.strip("\"'"), data
 
 
 class AcidimgImageExtractor(ImagehostImageExtractor):
@@ -163,17 +164,23 @@ class AcidimgImageExtractor(ImagehostImageExtractor):
     pattern = r"(?:https?://)?((?:www\.)?acidimg\.cc/img-([a-z0-9]+)\.html)"
     test = ("https://acidimg.cc/img-5acb6b9de4640.html", {
         "url": "f132a630006e8d84f52d59555191ed82b3b64c04",
-        "keyword": "a8bb9ab8b2f6844071945d31f8c6e04724051f37",
+        "keyword": "135347ab4345002fc013863c0d9419ba32d98f78",
         "content": "0c8768055e4e20e7c7259608b67799171b691140",
     })
-    params = "simple"
-    encoding = "utf-8"
+    _params = "simple"
+    _encoding = "utf-8"
 
     def get_info(self, page):
         url, pos = text.extract(page, "<img class='centred' src='", "'")
         if not url:
-            raise exception.NotFoundError("image")
-        filename, pos = text.extract(page, " alt='", "'", pos)
+            url, pos = text.extract(page, '<img class="centred" src="', '"')
+            if not url:
+                raise exception.NotFoundError("image")
+
+        filename, pos = text.extract(page, "alt='", "'", pos)
+        if not filename:
+            filename, pos = text.extract(page, 'alt="', '"', pos)
+
         return url, (filename + splitext(url)[1]) if filename else url
 
 
@@ -225,7 +232,7 @@ class ImagetwistImageExtractor(ImagehostImageExtractor):
 
     @property
     @memcache(maxage=3*3600)
-    def cookies(self):
+    def _cookies(self):
         return self.request(self.page_url).cookies
 
     def get_info(self, page):
@@ -263,7 +270,7 @@ class PixhostImageExtractor(ImagehostImageExtractor):
         "keyword": "3bad6d59db42a5ebbd7842c2307e1c3ebd35e6b0",
         "content": "0c8768055e4e20e7c7259608b67799171b691140",
     })
-    cookies = {"pixhostads": "1", "pixhosttest": "1"}
+    _cookies = {"pixhostads": "1", "pixhosttest": "1"}
 
     def get_info(self, page):
         url     , pos = text.extract(page, "class=\"image-img\" src=\"", "\"")
@@ -294,17 +301,36 @@ class PostimgImageExtractor(ImagehostImageExtractor):
     """Extractor for single images from postimages.org"""
     category = "postimg"
     pattern = (r"(?:https?://)?((?:www\.)?(?:postimg|pixxxels)\.(?:cc|org)"
-               r"/(?:image/)?([^/?#]+)/?)")
+               r"/(?!gallery/)(?:image/)?([^/?#]+)/?)")
     test = ("https://postimg.cc/Wtn2b3hC", {
-        "url": "0794cfda9b8951a8ac3aa692472484200254ab86",
+        "url": "72f3c8b1d6c6601a20ad58f35635494b4891a99e",
         "keyword": "2d05808d04e4e83e33200db83521af06e3147a84",
         "content": "cfaa8def53ed1a575e0c665c9d6d8cf2aac7a0ee",
     })
 
     def get_info(self, page):
-        url     , pos = text.extract(page, 'id="main-image" src="', '"')
+        pos = page.index(' id="download"')
+        url     , pos = text.rextract(page, ' href="', '"', pos)
         filename, pos = text.extract(page, 'class="imagename">', '<', pos)
         return url, text.unescape(filename)
+
+
+class PostimgGalleryExtractor(ImagehostImageExtractor):
+    """Extractor for images galleries from postimages.org"""
+    category = "postimg"
+    subcategory = "gallery"
+    pattern = (r"(?:https?://)?((?:www\.)?(?:postimg|pixxxels)\.(?:cc|org)"
+               r"/(?:gallery/)([^/?#]+)/?)")
+    test = ("https://postimg.cc/gallery/wxpDLgX", {
+        "pattern": PostimgImageExtractor.pattern,
+        "count": 22,
+    })
+
+    def items(self):
+        page = self.request(self.page_url).text
+        data = {"_extractor": PostimgImageExtractor}
+        for url in text.extract_iter(page, ' class="thumb"><a href="', '"'):
+            yield Message.Queue, url, data
 
 
 class TurboimagehostImageExtractor(ImagehostImageExtractor):
@@ -315,7 +341,7 @@ class TurboimagehostImageExtractor(ImagehostImageExtractor):
     test = ("https://www.turboimagehost.com/p/39078423/test--.png.html", {
         "url": "b94de43612318771ced924cb5085976f13b3b90e",
         "keyword": "704757ca8825f51cec516ec44c1e627c1f2058ca",
-        "content": "0c8768055e4e20e7c7259608b67799171b691140",
+        "content": "f38b54b17cd7462e687b58d83f00fca88b1b105a",
     })
 
     def get_info(self, page):
@@ -346,8 +372,8 @@ class ImgclickImageExtractor(ImagehostImageExtractor):
         "keyword": "6895256143eab955622fc149aa367777a8815ba3",
         "content": "0c8768055e4e20e7c7259608b67799171b691140",
     })
-    https = False
-    params = "complex"
+    _https = False
+    _params = "complex"
 
     def get_info(self, page):
         url     , pos = text.extract(page, '<br><img src="', '"')

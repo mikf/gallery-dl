@@ -90,10 +90,12 @@ class MangaseeChapterExtractor(MangaseeBase, ChapterExtractor):
             self.category = "mangalife"
             self.root = "https://manga4life.com"
         ChapterExtractor.__init__(self, match, self.root + match.group(2))
+
+    def _init(self):
         self.session.headers["Referer"] = self.gallery_url
 
         domain = self.root.rpartition("/")[2]
-        cookies = self.session.cookies
+        cookies = self.cookies
         if not cookies.get("PHPSESSID", domain=domain):
             cookies.set("PHPSESSID", util.generate_token(13), domain=domain)
 

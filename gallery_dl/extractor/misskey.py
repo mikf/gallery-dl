@@ -7,7 +7,7 @@
 """Extractors for Misskey instances"""
 
 from .common import BaseExtractor, Message
-from .. import text
+from .. import text, exception
 
 
 class MisskeyExtractor(BaseExtractor):
@@ -19,14 +19,18 @@ class MisskeyExtractor(BaseExtractor):
 
     def __init__(self, match):
         BaseExtractor.__init__(self, match)
+        self.item = match.group(match.lastindex)
+
+    def _init(self):
         self.api = MisskeyAPI(self)
         self.instance = self.root.rpartition("://")[2]
-        self.item = match.group(match.lastindex)
         self.renotes = self.config("renotes", False)
         self.replies = self.config("replies", True)
 
     def items(self):
         for note in self.notes():
+            if "note" in note:
+                note = note["note"]
             files = note.pop("files") or []
             renote = note.get("renote")
             if renote:
@@ -68,7 +72,7 @@ BASE_PATTERN = MisskeyExtractor.update({
     },
     "lesbian.energy": {
         "root": "https://lesbian.energy",
-        "pattern": r"lesbian\.energy"
+        "pattern": r"lesbian\.energy",
     },
     "sushi.ski": {
         "root": "https://sushi.ski",
@@ -152,6 +156,21 @@ class MisskeyNoteExtractor(MisskeyExtractor):
         return (self.api.notes_show(self.item),)
 
 
+class MisskeyFavoriteExtractor(MisskeyExtractor):
+    """Extractor for favorited notes"""
+    subcategory = "favorite"
+    pattern = BASE_PATTERN + r"/(?:my|api/i)/favorites"
+    test = (
+        ("https://misskey.io/my/favorites"),
+        ("https://misskey.io/api/i/favorites"),
+        ("https://lesbian.energy/my/favorites"),
+        ("https://sushi.ski/my/favorites"),
+    )
+
+    def notes(self):
+        return self.api.i_favorites()
+
+
 class MisskeyAPI():
     """Interface for Misskey API
 
@@ -164,6 +183,7 @@ class MisskeyAPI():
         self.root = extractor.root
         self.extractor = extractor
         self.headers = {"Content-Type": "application/json"}
+        self.access_token = extractor.config("access-token")
 
     def user_id_by_username(self, username):
         endpoint = "/users/show"
@@ -186,6 +206,13 @@ class MisskeyAPI():
         endpoint = "/notes/show"
         data = {"noteId": note_id}
         return self._call(endpoint, data)
+
+    def i_favorites(self):
+        endpoint = "/i/favorites"
+        if not self.access_token:
+            raise exception.AuthenticationError()
+        data = {"i": self.access_token}
+        return self._pagination(endpoint, data)
 
     def _call(self, endpoint, data):
         url = self.root + "/api" + endpoint

@@ -44,6 +44,12 @@ class HttpDownloader(DownloaderBase):
         self.mtime = self.config("mtime", True)
         self.rate = self.config("rate")
 
+        if not self.config("consume-content", False):
+            # this resets the underlying TCP connection, and therefore
+            # if the program makes another request to the same domain,
+            # a new connection (either TLS or plain TCP) must be made
+            self.release_conn = lambda resp: resp.close()
+
         if self.retries < 0:
             self.retries = float("inf")
         if self.minsize:
@@ -106,7 +112,7 @@ class HttpDownloader(DownloaderBase):
         while True:
             if tries:
                 if response:
-                    response.close()
+                    self.release_conn(response)
                     response = None
                 self.log.warning("%s (%s/%s)", msg, tries, self.retries+1)
                 if tries > self.retries:
@@ -165,18 +171,24 @@ class HttpDownloader(DownloaderBase):
                 retry = kwdict.get("_http_retry")
                 if retry and retry(response):
                     continue
+                self.release_conn(response)
                 self.log.warning(msg)
                 return False
 
             # check for invalid responses
             validate = kwdict.get("_http_validate")
             if validate and self.validate:
-                result = validate(response)
+                try:
+                    result = validate(response)
+                except Exception:
+                    self.release_conn(response)
+                    raise
                 if isinstance(result, str):
                     url = result
                     tries -= 1
                     continue
                 if not result:
+                    self.release_conn(response)
                     self.log.warning("Invalid response")
                     return False
 
@@ -184,11 +196,13 @@ class HttpDownloader(DownloaderBase):
             size = text.parse_int(size, None)
             if size is not None:
                 if self.minsize and size < self.minsize:
+                    self.release_conn(response)
                     self.log.warning(
                         "File size smaller than allowed minimum (%s < %s)",
                         size, self.minsize)
                     return False
                 if self.maxsize and size > self.maxsize:
+                    self.release_conn(response)
                     self.log.warning(
                         "File size larger than allowed maximum (%s > %s)",
                         size, self.maxsize)
@@ -279,6 +293,18 @@ class HttpDownloader(DownloaderBase):
             kwdict["_mtime"] = None
 
         return True
+
+    def release_conn(self, response):
+        """Release connection back to pool by consuming response body"""
+        try:
+            for _ in response.iter_content(self.chunk_size):
+                pass
+        except (RequestException, SSLError, OpenSSLError) as exc:
+            print()
+            self.log.debug(
+                "Unable to consume response body (%s: %s); "
+                "closing the connection anyway", exc.__class__.__name__, exc)
+            response.close()
 
     @staticmethod
     def receive(fp, content, bytes_total, bytes_start):
