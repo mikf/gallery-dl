@@ -19,13 +19,13 @@ class FantiaExtractor(Extractor):
     archive_fmt = "{post_id}_{file_id}"
     _warning = True
 
-    def items(self):
+    def _init(self):
         self.headers = {
             "Accept" : "application/json, text/plain, */*",
             "Referer": self.root,
             "X-Requested-With": "XMLHttpRequest",
         }
-        _empty_plan = {
+        self._empty_plan = {
             "id"   : 0,
             "price": 0,
             "limit": 0,
@@ -33,22 +33,18 @@ class FantiaExtractor(Extractor):
             "description": "",
             "thumb": self.root + "/images/fallback/plan/thumb_default.png",
         }
-
         if self._warning:
             if not self.cookies_check(("_session_id",)):
                 self.log.warning("no '_session_id' cookie set")
             FantiaExtractor._warning = False
 
+    def items(self):
         for post_id in self.posts():
             post = self._get_post_data(post_id)
             post["num"] = 0
 
             for content in self._get_post_contents(post):
-                post["content_category"] = content["category"]
-                post["content_title"] = content["title"]
-                post["content_filename"] = content.get("filename", "")
-                post["content_id"] = content["id"]
-                post["plan"] = content["plan"] or _empty_plan
+                files = self._process_content(post, content)
                 yield Message.Directory, post
 
                 if content["visible_status"] != "visible":
@@ -57,12 +53,12 @@ class FantiaExtractor(Extractor):
                         "%s#post-content-id-%s", content["visible_status"],
                         post["post_url"], content["id"])
 
-                for url in self._get_content_urls(post, content):
-                    text.nameext_from_url(
-                        post["content_filename"] or url, post)
-                    post["file_url"] = url
+                for file in files:
+                    post.update(file)
                     post["num"] += 1
-                    yield Message.Url, url, post
+                    text.nameext_from_url(
+                        post["content_filename"] or file["file_url"], post)
+                    yield Message.Url, file["file_url"], post
 
     def posts(self):
         """Return post IDs"""
@@ -132,42 +128,45 @@ class FantiaExtractor(Extractor):
 
         return contents
 
-    def _get_content_urls(self, post, content):
-        """Extract individual URL data from the response"""
-        if "comment" in content:
-            post["content_comment"] = content["comment"]
+    def _process_content(self, post, content):
+        post["content_category"] = content["category"]
+        post["content_title"] = content["title"]
+        post["content_filename"] = content.get("filename") or ""
+        post["content_id"] = content["id"]
+        post["content_comment"] = content.get("comment") or ""
+        post["plan"] = content["plan"] or self._empty_plan
+
+        files = []
 
         if "post_content_photos" in content:
             for photo in content["post_content_photos"]:
-                post["file_id"] = photo["id"]
-                yield photo["url"]["original"]
+                files.append({"file_id" : photo["id"],
+                              "file_url": photo["url"]["original"]})
 
         if "download_uri" in content:
-            post["file_id"] = content["id"]
             url = content["download_uri"]
             if url[0] == "/":
                 url = self.root + url
-            yield url
+            files.append({"file_id" : content["id"],
+                          "file_url": url})
 
         if content["category"] == "blog" and "comment" in content:
             comment_json = util.json_loads(content["comment"])
-            ops = comment_json.get("ops") or ()
 
-            # collect blogpost text first
             blog_text = ""
-            for op in ops:
+            for op in comment_json.get("ops") or ():
                 insert = op.get("insert")
                 if isinstance(insert, str):
                     blog_text += insert
-            post["blogpost_text"] = blog_text
-
-            # collect images
-            for op in ops:
-                insert = op.get("insert")
-                if isinstance(insert, dict) and "fantiaImage" in insert:
+                elif isinstance(insert, dict) and "fantiaImage" in insert:
                     img = insert["fantiaImage"]
-                    post["file_id"] = img["id"]
-                    yield self.root + img["original_url"]
+                    files.append({"file_id" : img["id"],
+                                  "file_url": self.root + img["original_url"]})
+            post["blogpost_text"] = blog_text
+        else:
+            post["blogpost_text"] = ""
+
+        return files
 
 
 class FantiaCreatorExtractor(FantiaExtractor):
@@ -200,6 +199,42 @@ class FantiaPostExtractor(FantiaExtractor):
     subcategory = "post"
     pattern = r"(?:https?://)?(?:www\.)?fantia\.jp/posts/(\d+)"
     test = (
+        ("https://fantia.jp/posts/1166373", {
+            "pattern": r"https://("
+                       r"c\.fantia\.jp/uploads/post/file/1166373/|"
+                       r"cc\.fantia\.jp/uploads/post_content_photo"
+                       r"/file/732549[01]|"
+                       r"fantia\.jp/posts/1166373/album_image\?)",
+            "keyword": {
+                "blogpost_text": r"re:^$|"
+                                 r"This is a test.\n\nThis is a test.\n\n|"
+                                 r"Link to video:\nhttps://www.youtube.com"
+                                 r"/watch\?v=5SSdvNcAagI\n\nhtml img from "
+                                 r"another site:\n\n\n\n\n\n",
+                "comment": "\n\n",
+                "content_category": "re:thumb|blog|photo_gallery",
+                "content_comment": str,
+                "content_filename": "re:|",
+                "content_title": r"re:Test (Blog Content \d+|Image Gallery)"
+                                 r"|thumb",
+                "date": "dt:2022-03-09 16:46:12",
+                "fanclub_id": 356320,
+                "fanclub_name": "Test Fantia",
+                "fanclub_url": "https://fantia.jp/fanclubs/356320",
+                "fanclub_user_id": 7487131,
+                "fanclub_user_name": "2022/03/08 15:13:52の名無し",
+                "file_url": str,
+                "filename": str,
+                "num": int,
+                "plan": dict,
+                "post_id": 1166373,
+                "post_title": "Test Fantia Post",
+                "post_url": "https://fantia.jp/posts/1166373",
+                "posted_at": "Thu, 10 Mar 2022 01:46:12 +0900",
+                "rating": "general",
+                "tags": [],
+            },
+        }),
         ("https://fantia.jp/posts/508363", {
             "count": 6,
             "keyword": {
