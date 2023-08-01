@@ -206,7 +206,7 @@ Default
     ``"auto"``
 Example
     * ``"/!? (){}"``
-    * ``{" ": "_", "/": "-", "|": "-", ":": "-", "*": "+"}``
+    * ``{" ": "_", "/": "-", "|": "-", ":": "_-_", "*": "_+_"}``
 Description
     | A string of characters to be replaced with the value of
       `path-replace <extractor.*.path-replace_>`__
@@ -219,7 +219,8 @@ Description
       depending on the local operating system
     * ``"unix"``: ``"/"``
     * ``"windows"``: ``"\\\\|/<>:\"?*"``
-    * ``"ascii"``: ``"^0-9A-Za-z_."``
+    * ``"ascii"``: ``"^0-9A-Za-z_."`` (only ASCII digits, letters, underscores, and dots)
+    * ``"ascii+"``: ``"^0-9@-[\\]-{ #-)+-.;=!}~"`` (all ASCII characters except the ones not allowed by Windows)
 
     Note: In a string with 2 or more characters, ``[]^-\`` need to be
     escaped with backslashes, e.g. ``"\\[\\]"``
