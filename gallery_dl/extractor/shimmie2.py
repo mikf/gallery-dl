@@ -88,7 +88,7 @@ INSTANCES = {
     },
 }
 
-BASE_PATTERN = Shimmie2Extractor.update(INSTANCES) + r"/(?:index\.php\?q=)?"
+BASE_PATTERN = Shimmie2Extractor.update(INSTANCES) + r"/(?:index\.php\?q=/?)?"
 
 
 class Shimmie2TagExtractor(Shimmie2Extractor):
@@ -296,6 +296,7 @@ class Shimmie2PostExtractor(Shimmie2Extractor):
                 "width": 459,
             },
         }),
+        ("https://giantessbooru.com/index.php?q=/post/view/41"),
     )
 
     def __init__(self, match):
