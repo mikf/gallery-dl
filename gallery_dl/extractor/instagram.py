@@ -754,7 +754,7 @@ class InstagramPostExtractor(InstagramExtractor):
     )
 
     def posts(self):
-        return self.api.media(id_from_shortcode(self.item))
+        return self.api.media(self.item)
 
 
 class InstagramRestAPI():
@@ -793,8 +793,10 @@ class InstagramRestAPI():
         endpoint = "/v1/highlights/{}/highlights_tray/".format(user_id)
         return self._call(endpoint)["tray"]
 
-    def media(self, post_id):
-        endpoint = "/v1/media/{}/info/".format(post_id)
+    def media(self, shortcode):
+        if len(shortcode) > 28:
+            shortcode = shortcode[:-28]
+        endpoint = "/v1/media/{}/info/".format(id_from_shortcode(shortcode))
         return self._pagination(endpoint)
 
     def reels_media(self, reel_ids):
@@ -990,10 +992,10 @@ class InstagramGraphqlAPI():
                  ["edge_highlight_reels"]["edges"])
         return [edge["node"] for edge in edges]
 
-    def media(self, post_id):
+    def media(self, shortcode):
         query_hash = "9f8827793ef34641b2fb195d4d41151c"
         variables = {
-            "shortcode": shortcode_from_id(post_id),
+            "shortcode": shortcode,
             "child_comment_count": 3,
             "fetch_comment_count": 40,
             "parent_comment_count": 24,
