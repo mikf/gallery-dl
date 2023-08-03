@@ -33,6 +33,8 @@ class Shimmie2Extractor(BaseExtractor):
         if file_url:
             self.file_url_fmt = file_url
 
+        self._pid_needle = instance.get("needle")
+
     def items(self):
         data = self.metadata()
 
@@ -76,6 +78,8 @@ INSTANCES = {
         "root": "https://giantessbooru.com",
         "pattern": r"giantessbooru\.com",
         "cookies": {"agreed": "true"},
+        "needle" : ("href='./index.php?q=/post/view/", "&"),
+        "file_url": "{0}/index.php?q=image/{2}.{4}",
     },
     "tentaclerape": {
         "root": "https://tentaclerape.net",
@@ -84,7 +88,7 @@ INSTANCES = {
     "cavemanon": {
         "root": "https://booru.cavemanon.xyz",
         "pattern": r"booru\.cavemanon\.xyz",
-        "file_url": "{0}/index.php?q=image/{2}.{4}"
+        "file_url": "{0}/index.php?q=image/{2}.{4}",
     },
 }
 
@@ -107,11 +111,13 @@ class Shimmie2TagExtractor(Shimmie2Extractor):
             "range": "1-100",
             "count": 100,
         }),
-        ("https://giantessbooru.com/post/list/smiling/1", {
-            "pattern": r"https://giantessbooru\.com/_images/[0-9a-f]{32}/\d+",
+        ("https://giantessbooru.com/index.php?q=/post/list/drawing/1", {
+            "pattern": r"https://giantessbooru\.com/index\.php"
+                       r"\?q=image/\d+\.(jpg|png)",
             "range": "1-100",
             "count": 100,
         }),
+        ("https://giantessbooru.com/post/list/drawing/1"),
         ("https://tentaclerape.net/post/list/comic/1", {
             "pattern": r"https://tentaclerape\.net/_images/[0-9a-f]{32}/\d+",
             "range": "1-100",
@@ -123,6 +129,7 @@ class Shimmie2TagExtractor(Shimmie2Extractor):
             "range": "1-100",
             "count": 100,
         }),
+        ("https://booru.cavemanon.xyz/post/list/Amber/1"),
     )
 
     def __init__(self, match):
@@ -137,6 +144,12 @@ class Shimmie2TagExtractor(Shimmie2Extractor):
     def posts(self):
         pnum = text.parse_int(self.page, 1)
         file_url_fmt = self.file_url_fmt.format
+
+        if self._pid_needle:
+            pid_begin, pid_end = self._pid_needle
+        else:
+            pid_begin = "href='/post/view/"
+            pid_end = "?"
 
         init = True
         mime = ""
@@ -157,7 +170,7 @@ class Shimmie2TagExtractor(Shimmie2Extractor):
                 if has_pid:
                     pid = extr("data-post-id='", "'")
                 else:
-                    pid = extr("href='/post/view/", "?")
+                    pid = extr(pid_begin, pid_end)
 
                 if not pid:
                     break
@@ -233,18 +246,18 @@ class Shimmie2PostExtractor(Shimmie2Extractor):
                 "width": 1078,
             },
         }),
-        ("https://giantessbooru.com/post/view/41", {
-            "pattern": r"https://giantessbooru\.com/_images"
-                       r"/3f67e1986496806b7b14ff3e82ac5af4/41\.jpg",
+        ("https://giantessbooru.com/index.php?q=/post/view/41", {
+            "pattern": r"https://giantessbooru\.com/index\.php"
+                       r"\?q=/image/41\.jpg",
             "content": "79115ed309d1f4e82e7bead6948760e889139c91",
             "keyword": {
                 "extension": "jpg",
-                "file_url": "https://giantessbooru.com/_images"
-                            "/3f67e1986496806b7b14ff3e82ac5af4/41.jpg",
+                "file_url": "https://giantessbooru.com/index.php"
+                            "?q=/image/41.jpg",
                 "filename": "41",
                 "height": 0,
                 "id": 41,
-                "md5": "3f67e1986496806b7b14ff3e82ac5af4",
+                "md5": "",
                 "size": 0,
                 "tags": "anime bare_midriff color drawing gentle giantess "
                         "karbo looking_at_tinies negeyari outdoors smiling "
@@ -254,6 +267,7 @@ class Shimmie2PostExtractor(Shimmie2Extractor):
 
             },
         }),
+        ("https://giantessbooru.com/post/view/41"),
         ("https://tentaclerape.net/post/view/10", {
             "pattern": r"https://tentaclerape\.net/\./index\.php"
                        r"\?q=/image/10\.jpg",
@@ -292,11 +306,11 @@ class Shimmie2PostExtractor(Shimmie2Extractor):
                 "id": 8335,
                 "md5": "",
                 "size": 0,
-                "tags": "Color Fang",
+                "tags": "Color Fang Food Pterodactyl "
+                        "discord_emote transparent",
                 "width": 459,
             },
         }),
-        ("https://giantessbooru.com/index.php?q=/post/view/41"),
     )
 
     def __init__(self, match):
@@ -313,7 +327,7 @@ class Shimmie2PostExtractor(Shimmie2Extractor):
             "md5"     : extr("/_thumbs/", "/"),
             "file_url": self.root + (
                 extr("id='main_image' src='", "'") or
-                extr("<source src='", "'")),
+                extr("<source src='", "'")).lstrip("."),
             "width"   : extr("data-width=", " ").strip("\"'"),
             "height"  : extr("data-height=", ">").partition(
                 " ")[0].strip("\"'"),
