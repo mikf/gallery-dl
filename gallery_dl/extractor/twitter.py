@@ -972,19 +972,26 @@ Your reaction.""",
         return self._tweets_single(self.tweet_id)
 
     def _tweets_single(self, tweet_id):
-        tweets = []
-
         tweet = self.api.tweet_result_by_rest_id(tweet_id)
-        self._assign_user(tweet["core"]["user_results"]["result"])
+
+        try:
+            self._assign_user(tweet["core"]["user_results"]["result"])
+        except KeyError:
+            raise exception.StopExtraction(
+                "'%s'", tweet.get("reason") or "Unavailable")
+
+        yield tweet
+
+        if not self.quoted:
+            return
 
         while True:
-            tweets.append(tweet)
             tweet_id = tweet["legacy"].get("quoted_status_id_str")
             if not tweet_id:
                 break
             tweet = self.api.tweet_result_by_rest_id(tweet_id)
-
-        return tweets
+            tweet["legacy"]["quoted_by_id_str"] = tweet_id
+            yield tweet
 
     def _tweets_detail(self, tweet_id):
         tweets = []
@@ -1273,7 +1280,17 @@ class TwitterAPI():
                 "withArticleRichContentState": False,
             }),
         }
-        return self._call(endpoint, params)["data"]["tweetResult"]["result"]
+        tweet = self._call(endpoint, params)["data"]["tweetResult"]["result"]
+
+        if tweet.get("__typename") == "TweetUnavailable":
+            reason = tweet.get("reason")
+            if reason == "NsfwLoggedOut":
+                raise exception.AuthorizationError("NSFW Tweet")
+            if reason == "Protected":
+                raise exception.AuthorizationError("Protected Tweet")
+            raise exception.StopExtraction("Tweet unavailable ('%s')", reason)
+
+        return tweet
 
     def tweet_detail(self, tweet_id):
         endpoint = "/graphql/JlLZj42Ltr2qwjasw-l5lQ/TweetDetail"
