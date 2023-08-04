@@ -24,6 +24,7 @@ class SankakuExtractor(BooruExtractor):
     """Base class for sankaku channel extractors"""
     basecategory = "booru"
     category = "sankaku"
+    root = "https://sankaku.app"
     filename_fmt = "{category}_{id}_{md5}.{extension}"
     cookies_domain = None
     _warning = True
@@ -258,9 +259,10 @@ class SankakuAPI():
     def __init__(self, extractor):
         self.extractor = extractor
         self.headers = {
-            "Accept" : "application/vnd.sankaku.api+json;v=2",
-            "Origin" : extractor.root,
-            "Referer": extractor.root + "/",
+            "Accept"  : "application/vnd.sankaku.api+json;v=2",
+            "Referer" : extractor.root + "/",
+            "Platform": "web-app",
+            "Origin"  : extractor.root,
         }
 
         self.username, self.password = self.extractor._get_auth_info()
