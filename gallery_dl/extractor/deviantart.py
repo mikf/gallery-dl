@@ -1184,11 +1184,6 @@ class DeviantartSearchExtractor(DeviantartExtractor):
 
     def _search_html(self, params):
         url = self.root + "/search"
-        deviation = {
-            "deviationId": None,
-            "author": {"username": "u"},
-            "isJournal": False,
-        }
 
         while True:
             response = self.request(url, params=params)
@@ -1197,13 +1192,15 @@ class DeviantartSearchExtractor(DeviantartExtractor):
                 raise exception.StopExtraction("HTTP redirect to login page")
             page = response.text
 
-            items , pos = text.rextract(page, r'\"items\":[', ']')
-            cursor, pos = text.extract(page, r'\"cursor\":\"', '\\', pos)
+            for dev in DeviantartDeviationExtractor.pattern.findall(
+                    page)[2::3]:
+                yield {
+                    "deviationId": dev[3],
+                    "author": {"username": dev[0]},
+                    "isJournal": dev[2] == "journal",
+                }
 
-            for deviation_id in items.split(","):
-                deviation["deviationId"] = deviation_id
-                yield deviation
-
+            cursor = text.extr(page, r'\"cursor\":\"', '\\',)
             if not cursor:
                 return
             params["cursor"] = cursor
@@ -1722,7 +1719,7 @@ class DeviantartEclipseAPI():
         self.request = self.extractor._limited_request
         self.csrf_token = None
 
-    def deviation_extended_fetch(self, deviation_id, user=None, kind=None):
+    def deviation_extended_fetch(self, deviation_id, user, kind=None):
         endpoint = "/da-browse/shared_api/deviation/extended_fetch"
         params = {
             "deviationid"    : deviation_id,
