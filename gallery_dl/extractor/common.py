@@ -523,6 +523,10 @@ class Extractor():
                 test = (test, None)
             yield test
 
+    @classmethod
+    def _dump(cls, obj):
+        util.dump_json(obj, ensure_ascii=False, indent=2)
+
     def _dump_response(self, response, history=True):
         """Write the response content to a .dump file in the current directory.
 
