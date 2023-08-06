@@ -1281,6 +1281,8 @@ class TwitterAPI():
             }),
         }
         tweet = self._call(endpoint, params)["data"]["tweetResult"]["result"]
+        if "tweet" in tweet:
+            tweet = tweet["tweet"]
 
         if tweet.get("__typename") == "TweetUnavailable":
             reason = tweet.get("reason")
