@@ -18,7 +18,7 @@ from .output import stdout_write
 
 
 class Job():
-    """Base class for Job-types"""
+    """Base class for Job types"""
     ulog = None
 
     def __init__(self, extr, parent=None):
@@ -33,15 +33,29 @@ class Job():
         self.status = 0
 
         cfgpath = []
-        if parent and parent.extractor.category != extr.category:
-            cat = "{}>{}".format(
-                parent.extractor.category, extr.category)
-            cfgpath.append((cat, extr.subcategory))
-            cfgpath.append((extr.category, extr.subcategory))
+        if parent:
+            if extr.category == parent.extractor.category or \
+                    extr.category in parent.parents:
+                parents = parent.parents
+            else:
+                parents = parent.parents + (parent.extractor.category,)
+
+            if parents:
+                for category in parents:
+                    cat = "{}>{}".format(category, extr.category)
+                    cfgpath.append((cat, extr.subcategory))
+                cfgpath.append((extr.category, extr.subcategory))
+                self.parents = parents
+            else:
+                self.parents = ()
+        else:
+            self.parents = ()
+
         if extr.basecategory:
             if not cfgpath:
                 cfgpath.append((extr.category, extr.subcategory))
             cfgpath.append((extr.basecategory, extr.subcategory))
+
         if cfgpath:
             extr._cfgpath = cfgpath
             extr.config = extr._config_shared
