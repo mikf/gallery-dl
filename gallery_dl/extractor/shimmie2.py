@@ -74,13 +74,6 @@ INSTANCES = {
         "pattern": r"loudbooru\.com",
         "cookies": {"ui-tnc-agreed": "true"},
     },
-    "giantessbooru": {
-        "root": "https://giantessbooru.com",
-        "pattern": r"giantessbooru\.com",
-        "cookies": {"agreed": "true"},
-        "needle" : ("href='./index.php?q=/post/view/", "&"),
-        "file_url": "{0}/index.php?q=image/{2}.{4}",
-    },
     "tentaclerape": {
         "root": "https://tentaclerape.net",
         "pattern": r"tentaclerape\.net",
@@ -111,13 +104,6 @@ class Shimmie2TagExtractor(Shimmie2Extractor):
             "range": "1-100",
             "count": 100,
         }),
-        ("https://giantessbooru.com/index.php?q=/post/list/drawing/1", {
-            "pattern": r"https://giantessbooru\.com/index\.php"
-                       r"\?q=image/\d+\.(jpg|png)",
-            "range": "1-100",
-            "count": 100,
-        }),
-        ("https://giantessbooru.com/post/list/drawing/1"),
         ("https://tentaclerape.net/post/list/comic/1", {
             "pattern": r"https://tentaclerape\.net/_images/[0-9a-f]{32}/\d+",
             "range": "1-100",
@@ -246,28 +232,6 @@ class Shimmie2PostExtractor(Shimmie2Extractor):
                 "width": 1078,
             },
         }),
-        ("https://giantessbooru.com/index.php?q=/post/view/41", {
-            "pattern": r"https://giantessbooru\.com/index\.php"
-                       r"\?q=/image/41\.jpg",
-            "content": "79115ed309d1f4e82e7bead6948760e889139c91",
-            "keyword": {
-                "extension": "jpg",
-                "file_url": "https://giantessbooru.com/index.php"
-                            "?q=/image/41.jpg",
-                "filename": "41",
-                "height": 0,
-                "id": 41,
-                "md5": "",
-                "size": 0,
-                "tags": "anime bare_midriff color drawing gentle giantess "
-                        "karbo looking_at_tinies negeyari outdoors smiling "
-                        "snake_girl white_hair",
-                "width": 0
-
-
-            },
-        }),
-        ("https://giantessbooru.com/post/view/41"),
         ("https://tentaclerape.net/post/view/10", {
             "pattern": r"https://tentaclerape\.net/\./index\.php"
                        r"\?q=/image/10\.jpg",
