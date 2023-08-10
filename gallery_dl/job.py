@@ -407,10 +407,18 @@ class DownloadJob(Job):
                     callback(pathfmt)
 
             self.extractor.cookies_store()
+
             if "finalize" in hooks:
-                status = self.status
                 for callback in hooks["finalize"]:
-                    callback(pathfmt, status)
+                    callback(pathfmt)
+            if self.status:
+                if "finalize-error" in hooks:
+                    for callback in hooks["finalize-error"]:
+                        callback(pathfmt)
+            else:
+                if "finalize-success" in hooks:
+                    for callback in hooks["finalize-success"]:
+                        callback(pathfmt)
 
     def handle_skip(self):
         pathfmt = self.pathfmt
