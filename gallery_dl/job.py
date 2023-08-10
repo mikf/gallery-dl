@@ -287,6 +287,10 @@ class DownloadJob(Job):
                 self.handle_skip()
                 return
 
+        if "prepare-after" in hooks:
+            for callback in hooks["prepare-after"]:
+                callback(pathfmt)
+
         if self.sleep:
             self.extractor.sleep(self.sleep(), "download")
 
