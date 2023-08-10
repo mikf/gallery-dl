@@ -225,6 +225,14 @@ class HttpDownloader(DownloaderBase):
                 pathfmt.build_path()
                 if pathfmt.exists():
                     pathfmt.temppath = ""
+                    # release the connection back to pool by explicitly
+                    # calling .close()
+                    # see https://requests.readthedocs.io/en/latest/user
+                    # /advanced/#body-content-workflow
+                    # when the image size is on the order of megabytes,
+                    # re-establishing a TLS connection will typically be faster
+                    # than consuming the whole response
+                    response.close()
                     return True
                 if self.part and metadata:
                     pathfmt.part_enable(self.partdir)
@@ -246,6 +254,7 @@ class HttpDownloader(DownloaderBase):
                 if self._adjust_extension(pathfmt, file_header) and \
                         pathfmt.exists():
                     pathfmt.temppath = ""
+                    response.close()
                     return True
 
             # set open mode
