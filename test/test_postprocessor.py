@@ -102,10 +102,10 @@ class BasePostprocessorTest(unittest.TestCase):
         pp = postprocessor.find(self.__class__.__name__[:-4].lower())
         return pp(self.job, options)
 
-    def _trigger(self, events=None, *args):
+    def _trigger(self, events=None):
         for event in (events or ("prepare", "file")):
             for callback in self.job.hooks[event]:
-                callback(self.pathfmt, *args)
+                callback(self.pathfmt)
 
 
 class ClassifyTest(BasePostprocessorTest):
@@ -679,7 +679,7 @@ class ZipTest(BasePostprocessorTest):
             self.assertEqual(len(pp.zfile.NameToInfo), 4)
 
         # close file
-        self._trigger(("finalize",), 0)
+        self._trigger(("finalize",))
 
         # reopen to check persistence
         with zipfile.ZipFile(pp.zfile.filename) as file:
@@ -712,7 +712,7 @@ class ZipTest(BasePostprocessorTest):
         self._trigger()
 
         # close file
-        self._trigger(("finalize",), 0)
+        self._trigger(("finalize",))
 
         self.assertEqual(pp.zfile.write.call_count, 3)
         for call in pp.zfile.write.call_args_list:

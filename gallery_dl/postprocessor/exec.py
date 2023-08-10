@@ -46,10 +46,7 @@ class ExecPP(PostProcessor):
 
         self._init_archive(job, options)
 
-    def exec_list(self, pathfmt, status=None):
-        if status:
-            return
-
+    def exec_list(self, pathfmt):
         archive = self.archive
         kwdict = pathfmt.kwdict
 
@@ -67,15 +64,12 @@ class ExecPP(PostProcessor):
         if archive:
             archive.add(kwdict)
 
-    def exec_string(self, pathfmt, status=None):
-        if status:
-            return
-
+    def exec_string(self, pathfmt):
         archive = self.archive
         if archive and archive.check(pathfmt.kwdict):
             return
 
-        if status is None and pathfmt.realpath:
+        if pathfmt.realpath:
             args = self.args.replace("{}", quote(pathfmt.realpath))
         else:
             args = self.args.replace("{}", quote(pathfmt.realdirectory))
