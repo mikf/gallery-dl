@@ -120,6 +120,8 @@ class UgoiraPP(PostProcessor):
             pathfmt.build_path()
 
             args = self._process(pathfmt, tempdir)
+            if self.prevent_odd:
+                args += ("-vf", "crop=iw-mod(iw\\,2):ih-mod(ih\\,2)")
             if self.args:
                 args += self.args
 
