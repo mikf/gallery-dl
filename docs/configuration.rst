@@ -222,8 +222,15 @@ Description
     * ``"ascii"``: ``"^0-9A-Za-z_."`` (only ASCII digits, letters, underscores, and dots)
     * ``"ascii+"``: ``"^0-9@-[\\]-{ #-)+-.;=!}~"`` (all ASCII characters except the ones not allowed by Windows)
 
-    Note: In a string with 2 or more characters, ``[]^-\`` need to be
-    escaped with backslashes, e.g. ``"\\[\\]"``
+    Implementation Detail: For ``strings`` with length >= 2, this option uses a
+    `Regular Expression Character Set <https://www.regular-expressions.info/charclass.html>`__,
+    meaning that:
+
+    * using a caret ``^`` as first character inverts the set
+    * character ranges are supported (``0-9a-z``)
+    * ``]``, ``-``, and ``\`` need to be escaped as
+      ``\\]``, ``\\-``, and ``\\\\`` respectively
+      to use them as literal characters
 
 
 extractor.*.path-replace
