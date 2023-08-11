@@ -211,7 +211,7 @@ class ModuleFormatter():
     """Generate text by calling an external function"""
 
     def __init__(self, function_spec, default=NONE, fmt=None):
-        module_name, _, function_name = function_spec.partition(":")
+        module_name, _, function_name = function_spec.rpartition(":")
         module = util.import_file(module_name)
         self.format_map = getattr(module, function_name)
 
@@ -235,10 +235,10 @@ class TemplateFormatter(StringFormatter):
 class TemplateFStringFormatter(FStringFormatter):
     """Read f-string from file"""
 
-    def __init__(self, path, default=NONE, fmt=format):
+    def __init__(self, path, default=NONE, fmt=None):
         with open(util.expand_path(path)) as fp:
-            format_string = fp.read()
-        FStringFormatter.__init__(self, format_string, default, fmt)
+            fstring = fp.read()
+        FStringFormatter.__init__(self, fstring, default, fmt)
 
 
 def parse_field_name(field_name):
