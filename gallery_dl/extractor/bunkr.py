@@ -11,6 +11,11 @@
 from .lolisafe import LolisafeAlbumExtractor
 from .. import text
 
+CDN_HOSTED_EXTENSIONS = (
+    ".mp4", ".m4v", ".mov", ".webm", ".mkv", ".ts", ".wmv",
+    ".zip", ".rar", ".7z",
+)
+
 
 class BunkrAlbumExtractor(LolisafeAlbumExtractor):
     """Extractor for bunkrr.su albums"""
@@ -90,8 +95,7 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
                 url = cdn + url[2:]
 
             url = text.unescape(url)
-            if url.endswith((".mp4", ".m4v", ".mov", ".webm", ".mkv", ".ts",
-                             ".zip", ".rar", ".7z")):
+            if url.lower().endswith(CDN_HOSTED_EXTENSIONS):
                 if url.startswith("https://cdn12."):
                     url = ("https://media-files12.bunkr.la" +
                            url[url.find("/", 14):])
