@@ -17,6 +17,11 @@ MEDIA_DOMAIN_OVERRIDES = {
     "cdn12.bunkr.ru": "media-files12.bunkr.la",
 }
 
+CDN_HOSTED_EXTENSIONS = (
+    ".mp4", ".m4v", ".mov", ".webm", ".mkv", ".ts", ".wmv",
+    ".zip", ".rar", ".7z",
+)
+
 
 class BunkrAlbumExtractor(LolisafeAlbumExtractor):
     """Extractor for bunkrr.su albums"""
@@ -96,8 +101,7 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
                 url = cdn + url[2:]
 
             url = text.unescape(url)
-            if url.endswith((".mp4", ".m4v", ".mov", ".webm", ".mkv", ".ts",
-                             ".zip", ".rar", ".7z")):
+            if url.lower().endswith(CDN_HOSTED_EXTENSIONS):
                 scheme, domain, path, query, fragment = urlsplit(url)
                 if domain in MEDIA_DOMAIN_OVERRIDES:
                     domain = MEDIA_DOMAIN_OVERRIDES[domain]
