@@ -44,6 +44,9 @@ class BehanceExtractor(Extractor):
             tags = [tag["title"] for tag in tags]
         data["tags"] = tags
 
+        data["date"] = text.parse_timestamp(
+            data.get("publishedOn") or data.get("conceived_on") or 0)
+
         # backwards compatibility
         data["gallery_id"] = data["id"]
         data["title"] = data["name"]
@@ -70,6 +73,7 @@ class BehanceGalleryExtractor(BehanceExtractor):
                 "fields": ["Animation", "Character Design", "Directing"],
                 "tags": list,
                 "module": dict,
+                "date": "dt:2014-06-03 15:41:51",
             },
         }),
         ("https://www.behance.net/gallery/21324767/Nevada-City", {
