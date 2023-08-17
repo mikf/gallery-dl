@@ -9,7 +9,7 @@
 """Extractors for https://www.behance.net/"""
 
 from .common import Extractor, Message
-from .. import text, util
+from .. import text, util, exception
 
 
 class BehanceExtractor(Extractor):
@@ -90,6 +90,10 @@ class BehanceGalleryExtractor(BehanceExtractor):
                        r"/rend/\w+_720\.mp4\?",
             "count": 3,
         }),
+        # mature content (#4417)
+        ("https://www.behance.net/gallery/177464639/Kimori", {
+            "exception": exception.AuthorizationError,
+        }),
     )
 
     def __init__(self, match):
@@ -128,6 +132,18 @@ class BehanceGalleryExtractor(BehanceExtractor):
 
     def get_images(self, data):
         """Extract image results from an API response"""
+        if not data["modules"]:
+            access = data.get("matureAccess")
+            if access == "logged-out":
+                raise exception.AuthorizationError(
+                    "Logged-in cookies required to access mature content")
+            if access == "restricted-safe":
+                raise exception.AuthorizationError(
+                    "Mature content blocked in account settings")
+            if access and access != "allowed":
+                raise exception.AuthorizationError()
+            return ()
+
         result = []
         append = result.append
 
