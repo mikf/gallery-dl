@@ -18,6 +18,12 @@ class BehanceExtractor(Extractor):
     root = "https://www.behance.net"
     request_interval = (2.0, 4.0)
 
+    def _init(self):
+        self._bcp = self.cookies.get("bcp", domain="www.behance.net")
+        if not self._bcp:
+            self._bcp = "4c34489d-914c-46cd-b44c-dfd0e661136d"
+            self.cookies.set("bcp", self._bcp, domain="www.behance.net")
+
     def items(self):
         for gallery in self.galleries():
             gallery["_extractor"] = BehanceGalleryExtractor
@@ -31,14 +37,8 @@ class BehanceExtractor(Extractor):
         headers = {
             "Origin" : self.root,
             "Referer": self.root + "/",
-            "X-BCP"           : "4c34489d-914c-46cd-b44c-dfd0e661136d",
-            "X-NewRelic-ID"   : "VgUFVldbGwsFU1BRDwUBVw==",
+            "X-BCP"  : self._bcp,
             "X-Requested-With": "XMLHttpRequest",
-        }
-        cookies = {
-            "bcp"    : "4c34489d-914c-46cd-b44c-dfd0e661136d",
-            "gk_suid": "62735605",
-            "ilo0"   : "true",
         }
         data = {
             "query"    : GRAPHQL_QUERIES[endpoint],
@@ -46,7 +46,7 @@ class BehanceExtractor(Extractor):
         }
 
         return self.request(url, method="POST", headers=headers,
-                            cookies=cookies, json=data).json()["data"]
+                            json=data).json()["data"]
 
     def _update(self, data):
         # compress data to simple lists
@@ -141,10 +141,6 @@ class BehanceGalleryExtractor(BehanceExtractor):
         """Collect gallery info dict"""
         url = "{}/gallery/{}/a".format(self.root, self.gallery_id)
         cookies = {
-            "_evidon_consent_cookie":
-                '{"consent_date":"2019-01-31T09:41:15.132Z"}',
-            "bcp": "4c34489d-914c-46cd-b44c-dfd0e661136d",
-            "gk_suid": "66981391",
             "gki": '{"feature_project_view":false,'
                    '"feature_discover_login_prompt":false,'
                    '"feature_project_login_prompt":false}',
@@ -162,7 +158,7 @@ class BehanceGalleryExtractor(BehanceExtractor):
             access = data.get("matureAccess")
             if access == "logged-out":
                 raise exception.AuthorizationError(
-                    "Logged-in cookies required to access mature content")
+                    "Mature content galleries require logged-in cookies")
             if access == "restricted-safe":
                 raise exception.AuthorizationError(
                     "Mature content blocked in account settings")
