@@ -282,10 +282,14 @@ class UgoiraPP(PostProcessor):
         return timecodes
 
     def calculate_framerate(self, frames):
-        uniform = self._delay_is_uniform(frames)
-        if uniform:
+        if self._delay_is_uniform(frames):
             return ("1000/{}".format(frames[0]["delay"]), None)
-        return (None, "1000/{}".format(self._delay_gcd(frames)))
+
+        gcd = self._delay_gcd(frames)
+        if gcd >= 10:
+            return (None, "1000/{}".format(gcd))
+
+        return (None, None)
 
     @staticmethod
     def _delay_gcd(frames):
