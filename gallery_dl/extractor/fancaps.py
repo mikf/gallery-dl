@@ -170,7 +170,7 @@ class FancapsAnimeSeriesExtractor(Extractor):
             page_idx += 1
 
 
-class FancapsTVEpisodeExtractor(Extractor):
+class FancapsTvEpisodeExtractor(Extractor):
     """Extractor for a TV episode on fancaps.net"""
 
     category = "fancaps"
@@ -257,7 +257,7 @@ class FancapsTVEpisodeExtractor(Extractor):
             page_idx += 1
 
 
-class FancapsTVSeriesExtractor(Extractor):
+class FancapsTvSeriesExtractor(Extractor):
     """Extractor for a TV series on fancaps.net"""
 
     category = "fancaps"
@@ -295,7 +295,7 @@ class FancapsTVSeriesExtractor(Extractor):
                     "https://fancaps.net/tv/episodeimages.php"
                     f"?{episode_id}"
                 ), {
-                    "_extractor": FancapsTVEpisodeExtractor
+                    "_extractor": FancapsTvEpisodeExtractor
                 }
 
             if re.search('<a href="#">Next', page) is not None:
