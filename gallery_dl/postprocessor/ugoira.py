@@ -36,6 +36,7 @@ class UgoiraPP(PostProcessor):
         self.delete = not options.get("keep-files", False)
         self.repeat = options.get("repeat-last-frame", True)
         self.mtime = options.get("mtime", True)
+        self.uniform = False
 
         ffmpeg = options.get("ffmpeg-location")
         self.ffmpeg = util.expand_path(ffmpeg) if ffmpeg else "ffmpeg"
@@ -63,7 +64,9 @@ class UgoiraPP(PostProcessor):
         self.log.debug("using %s demuxer", demuxer)
 
         rate = options.get("framerate", "auto")
-        if rate != "auto":
+        if rate == "uniform":
+            self.uniform = True
+        elif rate != "auto":
             self.calculate_framerate = lambda _: (None, rate)
 
         if options.get("libx264-prevent-odd", True):
@@ -285,9 +288,10 @@ class UgoiraPP(PostProcessor):
         if self._delay_is_uniform(frames):
             return ("1000/{}".format(frames[0]["delay"]), None)
 
-        gcd = self._delay_gcd(frames)
-        if gcd >= 10:
-            return (None, "1000/{}".format(gcd))
+        if not self.uniform:
+            gcd = self._delay_gcd(frames)
+            if gcd >= 10:
+                return (None, "1000/{}".format(gcd))
 
         return (None, None)
 

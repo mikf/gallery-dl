@@ -4906,6 +4906,8 @@ Description
 
     * ``"auto"``: Automatically assign a fitting frame rate
       based on delays between frames.
+    * ``"uniform"``: Like ``auto``, but assign an explicit frame rate
+      only to Ugoira with uniform frame delays.
     * any other ``string``:  Use this value as argument for ``-r``.
     * ``null`` or an empty ``string``: Don't set an explicit frame rate.
 
