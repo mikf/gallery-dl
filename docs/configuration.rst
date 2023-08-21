@@ -4872,11 +4872,17 @@ Description
 ugoira.ffmpeg-output
 --------------------
 Type
-    ``bool``
+    * ``bool``
+    * ``string``
 Default
-    ``true``
+    ``"error"``
 Description
-    Show FFmpeg output.
+    Controls FFmpeg output.
+
+    * ``true``: Enable FFmpeg output
+    * ``false``: Disable all FFmpeg output
+    * any ``string``: Pass ``-hide_banner`` and ``-loglevel``
+      with this value as argument to FFmpeg
 
 
 ugoira.ffmpeg-twopass
