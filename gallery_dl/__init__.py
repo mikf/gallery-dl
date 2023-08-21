@@ -297,7 +297,7 @@ def main():
             return retval
 
     except KeyboardInterrupt:
-        sys.exit("\nKeyboardInterrupt")
+        raise SystemExit("\nKeyboardInterrupt")
     except BrokenPipeError:
         pass
     except OSError as exc:

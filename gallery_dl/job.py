@@ -515,7 +515,7 @@ class DownloadJob(Job):
                 elif skip == "terminate":
                     self._skipexc = exception.TerminateExtraction
                 elif skip == "exit":
-                    self._skipexc = sys.exit
+                    self._skipexc = SystemExit
                 self._skipmax = text.parse_int(smax)
         else:
             # monkey-patch methods to always return False
