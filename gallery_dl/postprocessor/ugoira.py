@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2022 Mike Fährmann
+# Copyright 2018-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -32,7 +32,7 @@ class UgoiraPP(PostProcessor):
         self.extension = options.get("extension") or "webm"
         self.args = options.get("ffmpeg-args") or ()
         self.twopass = options.get("ffmpeg-twopass", False)
-        self.output = options.get("ffmpeg-output", True)
+        self.output = options.get("ffmpeg-output", "error")
         self.delete = not options.get("keep-files", False)
         self.repeat = options.get("repeat-last-frame", True)
         self.mtime = options.get("mtime", True)
@@ -81,6 +81,12 @@ class UgoiraPP(PostProcessor):
         else:
             self.prevent_odd = False
 
+        self.args_pp = args = []
+        if isinstance(self.output, str):
+            args += ("-hide_banner", "-loglevel", self.output)
+        if self.prevent_odd:
+            args += ("-vf", "crop=iw-mod(iw\\,2):ih-mod(ih\\,2)")
+
         job.register_hooks(
             {"prepare": self.prepare, "file": self.convert}, options)
 
@@ -120,8 +126,8 @@ class UgoiraPP(PostProcessor):
             pathfmt.build_path()
 
             args = self._process(pathfmt, tempdir)
-            if self.prevent_odd:
-                args += ("-vf", "crop=iw-mod(iw\\,2):ih-mod(ih\\,2)")
+            if self.args_pp:
+                args += self.args_pp
             if self.args:
                 args += self.args
 
