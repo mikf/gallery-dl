@@ -15,7 +15,7 @@ import itertools
 import json
 import re
 
-BASE_PATTERN = r"(?:https?://)?(?:www\.|mobile\.)?(?:[fv]x)?twitter\.com"
+BASE_PATTERN = r"(?:https?://)?(?:www\.|mobile\.)?(?:(?:[fv]x)?twitter|x)\.com"
 
 
 class TwitterExtractor(Extractor):
@@ -488,6 +488,7 @@ class TwitterUserExtractor(TwitterExtractor):
         ("https://twitter.com/intent/user?user_id=2976459548"),
         ("https://fxtwitter.com/supernaturepics"),
         ("https://vxtwitter.com/supernaturepics"),
+        ("https://x.com/supernaturepics"),
     )
 
     def __init__(self, match):
