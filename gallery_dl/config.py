@@ -100,12 +100,12 @@ def load(files=None, strict=False, loads=util.json_loads):
         except OSError as exc:
             if strict:
                 log.error(exc)
-                sys.exit(1)
+                raise SystemExit(1)
         except Exception as exc:
             log.error("%s when loading '%s': %s",
                       exc.__class__.__name__, path, exc)
             if strict:
-                sys.exit(2)
+                raise SystemExit(2)
         else:
             if not _config:
                 _config.update(conf)

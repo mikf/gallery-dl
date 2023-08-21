@@ -9,7 +9,6 @@
 """ """
 
 import re
-import sys
 import logging
 import operator
 from . import util, exception
@@ -98,7 +97,7 @@ def action_exit(opts):
         pass
 
     def _exit(args):
-        sys.exit(opts)
+        raise SystemExit(opts)
     return _exit
 
 
