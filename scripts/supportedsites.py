@@ -41,6 +41,7 @@ CATEGORY_MAP = {
     "exhentai"       : "ExHentai",
     "fallenangels"   : "Fallen Angels Scans",
     "fanbox"         : "pixivFANBOX",
+    "fancaps"        : "FanCaps.net",
     "fashionnova"    : "Fashion Nova",
     "furaffinity"    : "Fur Affinity",
     "hbrowse"        : "HBrowse",
