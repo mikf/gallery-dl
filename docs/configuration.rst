@@ -5124,6 +5124,16 @@ Description
     as signal handler for.
 
 
+subconfigs
+----------
+Type
+    ``list`` of |Path|_
+Example
+    ``["~/cfg-twitter.json", "~/cfg-reddit.json"]``
+Description
+    Additional configuration files to load.
+
+
 warnings
 --------
 Type

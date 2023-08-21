@@ -44,13 +44,13 @@ def main():
             config.load(args.configs_json, strict=True)
         if args.configs_yaml:
             import yaml
-            config.load(args.configs_yaml, strict=True, load=yaml.safe_load)
+            config.load(args.configs_yaml, strict=True, loads=yaml.safe_load)
         if args.configs_toml:
             try:
                 import tomllib as toml
             except ImportError:
                 import toml
-            config.load(args.configs_toml, strict=True, load=toml.loads)
+            config.load(args.configs_toml, strict=True, loads=toml.loads)
         if args.filename:
             filename = args.filename
             if filename == "/O":

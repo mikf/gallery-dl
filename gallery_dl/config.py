@@ -90,13 +90,13 @@ def initialize():
     return 0
 
 
-def load(files=None, strict=False, load=util.json_loads):
+def load(files=None, strict=False, loads=util.json_loads):
     """Load JSON configuration files"""
     for pathfmt in files or _default_configs:
         path = util.expand_path(pathfmt)
         try:
             with open(path, encoding="utf-8") as file:
-                conf = load(file.read())
+                conf = loads(file.read())
         except OSError as exc:
             if strict:
                 log.error(exc)
@@ -112,6 +112,13 @@ def load(files=None, strict=False, load=util.json_loads):
             else:
                 util.combine_dict(_config, conf)
             _files.append(pathfmt)
+
+            if "subconfigs" in conf:
+                subconfigs = conf["subconfigs"]
+                if subconfigs:
+                    if isinstance(subconfigs, str):
+                        subconfigs = (subconfigs,)
+                    load(subconfigs, strict, loads)
 
 
 def clear():
