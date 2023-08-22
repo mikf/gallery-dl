@@ -4872,11 +4872,17 @@ Description
 ugoira.ffmpeg-output
 --------------------
 Type
-    ``bool``
+    * ``bool``
+    * ``string``
 Default
-    ``true``
+    ``"error"``
 Description
-    Show FFmpeg output.
+    Controls FFmpeg output.
+
+    * ``true``: Enable FFmpeg output
+    * ``false``: Disable all FFmpeg output
+    * any ``string``: Pass ``-hide_banner`` and ``-loglevel``
+      with this value as argument to FFmpeg
 
 
 ugoira.ffmpeg-twopass
@@ -4900,6 +4906,8 @@ Description
 
     * ``"auto"``: Automatically assign a fitting frame rate
       based on delays between frames.
+    * ``"uniform"``: Like ``auto``, but assign an explicit frame rate
+      only to Ugoira with uniform frame delays.
     * any other ``string``:  Use this value as argument for ``-r``.
     * ``null`` or an empty ``string``: Don't set an explicit frame rate.
 
@@ -5114,6 +5122,16 @@ Description
     The list of signal names to ignore, i.e. set
     `SIG_IGN <https://docs.python.org/3/library/signal.html#signal.SIG_IGN>`_
     as signal handler for.
+
+
+subconfigs
+----------
+Type
+    ``list`` of |Path|_
+Example
+    ``["~/cfg-twitter.json", "~/cfg-reddit.json"]``
+Description
+    Additional configuration files to load.
 
 
 warnings
