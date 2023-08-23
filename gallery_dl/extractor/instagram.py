@@ -90,7 +90,9 @@ class InstagramExtractor(Extractor):
                         file["_http_headers"] = video_headers
                         text.nameext_from_url(url, file)
                         yield Message.Url, url, file
-                    if not previews:
+                    if previews:
+                        file["media_id"] += "p"
+                    else:
                         continue
 
                 url = file["display_url"]
