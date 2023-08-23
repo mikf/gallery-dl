@@ -1475,6 +1475,22 @@ Description
     * ``"exhentai.org"``: Use ``exhentai.org`` for all URLs
 
 
+extractor.exhentai.fav
+----------------------
+Type
+    ``string``
+Example
+    ``"4"``
+Description
+    After downloading a gallery,
+    add it to your account's favorites as the given category number.
+
+    Note: Set this to `"favdel"` to remove galleries from your favorites.
+
+    Note: This will remove any Favorite Notes when applied
+    to already favorited galleries.
+
+
 extractor.exhentai.limits
 -------------------------
 Type
