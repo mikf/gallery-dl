@@ -482,7 +482,6 @@ class ExhentaiSearchExtractor(ExhentaiExtractor):
 
     def __init__(self, match):
         ExhentaiExtractor.__init__(self, match)
-        self.search_url = self.root
 
         _, query, tag = match.groups()
         if tag:
@@ -496,6 +495,9 @@ class ExhentaiSearchExtractor(ExhentaiExtractor):
             self.params = text.parse_query(query)
             if "next" not in self.params:
                 self.params["page"] = text.parse_int(self.params.get("page"))
+
+    def _init(self):
+        self.search_url = self.root
 
     def items(self):
         self.login()
@@ -542,6 +544,5 @@ class ExhentaiFavoriteExtractor(ExhentaiSearchExtractor):
          "&f_apply=Search+Favorites"),
     )
 
-    def __init__(self, match):
-        ExhentaiSearchExtractor.__init__(self, match)
+    def _init(self):
         self.search_url = self.root + "/favorites.php"
