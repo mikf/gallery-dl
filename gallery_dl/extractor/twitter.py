@@ -336,6 +336,9 @@ class TwitterExtractor(Extractor):
             tdata["reply_to"] = tweet["in_reply_to_screen_name"]
         if "quoted_by" in tweet:
             tdata["quote_by"] = tweet["quoted_by"]
+        if tdata["retweet_id"]:
+            tdata["date_original"] = text.parse_timestamp(
+                ((tdata["retweet_id"] >> 22) + 1288834974657) // 1000)
 
         return tdata
 
@@ -886,9 +889,10 @@ class TwitterTweetExtractor(TwitterExtractor):
             "options": (("retweets", True),),
             "count": 2,
             "keyword": {
-                "tweet_id"  : 1296304589591810048,
-                "retweet_id": 1296296016002547713,
-                "date"      : "dt:2020-08-20 04:34:32",
+                "tweet_id"     : 1296304589591810048,
+                "retweet_id"   : 1296296016002547713,
+                "date"         : "dt:2020-08-20 04:34:32",
+                "date_original": "dt:2020-08-20 04:00:28",
             },
         }),
         # original retweets (#1026)
@@ -896,9 +900,10 @@ class TwitterTweetExtractor(TwitterExtractor):
             "options": (("retweets", "original"),),
             "count": 2,
             "keyword": {
-                "tweet_id"  : 1296296016002547713,
-                "retweet_id": 1296296016002547713,
-                "date"      : "dt:2020-08-20 04:00:28",
+                "tweet_id"     : 1296296016002547713,
+                "retweet_id"   : 1296296016002547713,
+                "date"         : "dt:2020-08-20 04:00:28",
+                "date_original": "dt:2020-08-20 04:00:28",
             },
         }),
         # all Tweets from a 'conversation' (#1319)
