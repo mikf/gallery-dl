@@ -179,6 +179,20 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
         if source == "hitomi":
             self.items = self._items_hitomi
 
+    def favorite(self, slot="0"):
+        url = self.root + "/gallerypopups.php"
+        params = {
+            "gid": self.gallery_id,
+            "t"  : self.gallery_token,
+            "act": "addfav",
+        }
+        data = {
+            "favcat" : slot,
+            "apply"  : "Apply Changes",
+            "update" : "1",
+        }
+        self.request(url, method="POST", params=params, data=data)
+
     def items(self):
         self.login()
 
@@ -222,6 +236,10 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
             else:
                 data["_http_validate"] = None
             yield Message.Url, url, data
+
+        fav = self.config("fav")
+        if fav is not None:
+            self.favorite(fav)
 
     def _items_hitomi(self):
         if self.config("metadata", False):
