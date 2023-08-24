@@ -108,7 +108,11 @@ class RedditExtractor(Extractor):
                     if match:
                         extra.append(match.group(1))
                     elif not match_user(url) and not match_subreddit(url):
+                        if "preview" in data:
+                            data["_fallback"] = self._previews(data)
                         yield Message.Queue, text.unescape(url), data
+                        if "_fallback" in data:
+                            del data["_fallback"]
 
             if not extra or depth == max_depth:
                 return
@@ -164,6 +168,13 @@ class RedditExtractor(Extractor):
     def _extract_video(self, submission):
         submission["_ytdl_extra"] = {"title": submission["title"]}
         return submission["url"]
+
+    def _previews(self, post):
+        try:
+            for image in post["preview"]["images"]:
+                yield image["source"]["url"]
+        except Exception as exc:
+            self.log.debug("%s: %s", exc.__class__.__name__, exc)
 
 
 class RedditSubredditExtractor(RedditExtractor):
