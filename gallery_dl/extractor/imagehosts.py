@@ -265,7 +265,7 @@ class PixhostImageExtractor(ImagehostImageExtractor):
     category = "pixhost"
     pattern = (r"(?:https?://)?((?:www\.)?pixhost\.(?:to|org)"
                r"/show/\d+/(\d+)_[^/?#]+)")
-    test = ("http://pixhost.to/show/190/130327671_test-.png", {
+    test = ("https://pixhost.to/show/190/130327671_test-.png", {
         "url": "4e5470dcf6513944773044d40d883221bbc46cff",
         "keyword": "3bad6d59db42a5ebbd7842c2307e1c3ebd35e6b0",
         "content": "0c8768055e4e20e7c7259608b67799171b691140",
@@ -300,13 +300,18 @@ class PixhostGalleryExtractor(ImagehostImageExtractor):
 class PostimgImageExtractor(ImagehostImageExtractor):
     """Extractor for single images from postimages.org"""
     category = "postimg"
-    pattern = (r"(?:https?://)?((?:www\.)?(?:postimg|pixxxels)\.(?:cc|org)"
-               r"/(?!gallery/)(?:image/)?([^/?#]+)/?)")
-    test = ("https://postimg.cc/Wtn2b3hC", {
-        "url": "72f3c8b1d6c6601a20ad58f35635494b4891a99e",
-        "keyword": "2d05808d04e4e83e33200db83521af06e3147a84",
-        "content": "cfaa8def53ed1a575e0c665c9d6d8cf2aac7a0ee",
-    })
+    pattern = (r"(?:https?://)?((?:www\.)?(?:postim(?:ages|g)|pixxxels)"
+               r"\.(?:cc|org)/(?!gallery/)(?:image/)?([^/?#]+)/?)")
+    test = (
+        ("https://postimages.org/Wtn2b3hC"),
+        ("https://www.postimages.org/Wtn2b3hC"),
+        ("https://pixxxels.cc/Wtn2b3hC"),
+        ("https://postimg.cc/Wtn2b3hC", {
+            "url": "72f3c8b1d6c6601a20ad58f35635494b4891a99e",
+            "keyword": "2d05808d04e4e83e33200db83521af06e3147a84",
+            "content": "cfaa8def53ed1a575e0c665c9d6d8cf2aac7a0ee",
+        }),
+    )
 
     def get_info(self, page):
         pos = page.index(' id="download"')
@@ -385,11 +390,14 @@ class FappicImageExtractor(ImagehostImageExtractor):
     """Extractor for single images from fappic.com"""
     category = "fappic"
     pattern = r"(?:https?://)?((?:www\.)?fappic\.com/(\w+)/[^/?#]+)"
-    test = ("https://www.fappic.com/98wxqcklyh8k/test.png", {
-        "pattern": r"https://img\d+\.fappic\.com/img/\w+/test\.png",
-        "keyword": "433b1d310b0ff12ad8a71ac7b9d8ba3f8cd1e898",
-        "content": "0c8768055e4e20e7c7259608b67799171b691140",
-    })
+    test = (
+        ("https://fappic.com/98wxqcklyh8k/test.png"),
+        ("https://www.fappic.com/98wxqcklyh8k/test.png", {
+            "pattern": r"https://img\d+\.fappic\.com/img/\w+/test\.png",
+            "keyword": "433b1d310b0ff12ad8a71ac7b9d8ba3f8cd1e898",
+            "content": "0c8768055e4e20e7c7259608b67799171b691140",
+        }),
+    )
 
     def get_info(self, page):
         url     , pos = text.extract(page, '<a href="#"><img src="', '"')
