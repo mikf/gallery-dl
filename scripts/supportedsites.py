@@ -152,7 +152,7 @@ SUBCATEGORY_MAP = {
     "tweets" : "",
     "user"   : "User Profiles",
     "watch"  : "Watches",
-    "following"    : "",
+    "following"    : "Followed Users",
     "related-pin"  : "related Pins",
     "related-board": "",
 
