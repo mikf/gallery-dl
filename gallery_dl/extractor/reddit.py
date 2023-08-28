@@ -65,7 +65,10 @@ class RedditExtractor(Extractor):
                         media = submission
 
                     url = media["url"]
-                    if url and url.startswith("https://i.redd.it/"):
+                    if url and url.startswith((
+                        "https://i.redd.it/",
+                        "https://preview.redd.it/",
+                    )):
                         text.nameext_from_url(url, submission)
                         yield Message.Url, url, submission
 
@@ -308,6 +311,11 @@ class RedditSubmissionExtractor(RedditExtractor):
         # cross-posted video (#887, #3586, #3976)
         ("https://www.reddit.com/r/kittengifs/comments/12m0b8d", {
             "pattern": r"ytdl:https://v\.redd\.it/cvabpjacrvta1",
+        }),
+        # preview.redd.it (#4470)
+        ("https://www.reddit.com/r/europe/comments/pm4531/the_name_of/", {
+            "pattern": r"https://preview.redd.it/u9ud4k6xaf271.jpg?auto=webp"
+                       r"&s=19b1334cb4409111cda136c01f7b44c2c42bf9fb",
         }),
         ("https://old.reddit.com/r/lavaporn/comments/2a00np/"),
         ("https://np.reddit.com/r/lavaporn/comments/2a00np/"),
