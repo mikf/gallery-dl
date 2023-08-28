@@ -174,6 +174,16 @@ class RedditExtractor(Extractor):
 
     def _previews(self, post):
         try:
+            if "reddit_video_preview" in post["preview"]:
+                video = post["preview"]["reddit_video_preview"]
+                if "dash_url" in video:
+                    yield "ytdl:" + video["dash_url"]
+                if "hls_url" in video:
+                    yield "ytdl:" + video["hls_url"]
+        except Exception as exc:
+            self.log.debug("%s: %s", exc.__class__.__name__, exc)
+
+        try:
             for image in post["preview"]["images"]:
                 yield image["source"]["url"]
         except Exception as exc:

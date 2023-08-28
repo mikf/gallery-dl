@@ -404,6 +404,8 @@ class DownloadJob(Job):
                                 pass
                             else:
                                 text.nameext_from_url(url, kwdict)
+                                if url.startswith("ytdl:"):
+                                    kwdict["extension"] = ""
                                 self.handle_url(url, kwdict)
                     break
                 except exception.RestartExtraction:
