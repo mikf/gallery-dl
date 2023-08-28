@@ -277,6 +277,8 @@ class TwitterExtractor(Extractor):
         else:
             note = None
 
+        source = tweet["source"]
+
         if "legacy" in tweet:
             tweet = tweet["legacy"]
 
@@ -303,6 +305,7 @@ class TwitterExtractor(Extractor):
             "author"        : author,
             "user"          : self._user or author,
             "lang"          : tweet["lang"],
+            "source"        : text.extr(source, ">", "<"),
             "favorite_count": tget("favorite_count"),
             "quote_count"   : tget("quote_count"),
             "reply_count"   : tget("reply_count"),
