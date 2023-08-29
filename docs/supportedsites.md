@@ -694,7 +694,7 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>Pornhub</td>
     <td>https://www.pornhub.com/</td>
-    <td>Galleries, User Profiles</td>
+    <td>Galleries, Gifs, Photos, User Profiles</td>
     <td></td>
 </tr>
 <tr>
