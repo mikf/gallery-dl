@@ -209,6 +209,8 @@ class ImagevenueImageExtractor(ImagehostImageExtractor):
     def get_info(self, page):
         pos = page.index('class="card-body')
         url, pos = text.extract(page, '<img src="', '"', pos)
+        if url.endswith("/loader.svg"):
+            url, pos = text.extract(page, '<img src="', '"', pos)
         filename, pos = text.extract(page, 'alt="', '"', pos)
         return url, text.unescape(filename)
 
