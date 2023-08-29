@@ -224,6 +224,9 @@ SUBCATEGORY_MAP = {
         "sketch": "Sketch",
         "work": "individual Images",
     },
+    "pornhub": {
+        "gifs": "",
+    },
     "reddit": {
         "home": "Home Feed",
     },
