@@ -248,7 +248,7 @@ class GfycatAPI():
 
     def search(self, query):
         endpoint = "/v1/gfycats/search"
-        params = {"search_text": query, "count": 150}
+        params = {"search_text": query, "count": 100}
         return self._pagination(endpoint, params)
 
     def user(self, user):
@@ -301,6 +301,12 @@ class GfycatAPI():
             data = self._call(endpoint, params)
             yield from data[key]
 
-            if not data["cursor"]:
+            if data["cursor"]:
+                params["cursor"] = data["cursor"]
+            elif "cursor" in params:
                 return
-            params["cursor"] = data["cursor"]
+            else:
+                start = params.get("start", 0)
+                if start + len(data[key]) >= data.get("found", 0):
+                    return
+                params["start"] = start + params["count"]
