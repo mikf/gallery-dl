@@ -1210,6 +1210,10 @@ class PixivAppAPI():
                 self.extractor.wait(seconds=300)
                 continue
 
+            if response.status_code == 403 \
+                    and "Artist has made their work private" in (error.get("message") or "").lower():
+                raise exception.NotFoundError()
+
             raise exception.StopExtraction("API request failed: %s", error)
 
     def _pagination(self, endpoint, params, key="illusts"):
