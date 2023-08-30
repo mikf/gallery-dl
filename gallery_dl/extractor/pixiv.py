@@ -863,9 +863,14 @@ class PixivNovelExtractor(PixivExtractor):
             novel["suffix"] = ""
 
             yield Message.Directory, novel
+            
+            try:
+                content = self.api.novel_text(novel["id"])["novel_text"]
+            except Exception:
+                self.log.warning("Unable to download novel %s", novel["id"])
+                continue
 
             novel["extension"] = "txt"
-            content = self.api.novel_text(novel["id"])["novel_text"]
             yield Message.Url, "text:" + content, novel
 
             if embeds:
@@ -1209,10 +1214,6 @@ class PixivAppAPI():
             if "rate limit" in (error.get("message") or "").lower():
                 self.extractor.wait(seconds=300)
                 continue
-
-            if response.status_code == 403 \
-                    and "Artist has made their work private" in (error.get("message") or "").lower():
-                raise exception.NotFoundError()
 
             raise exception.StopExtraction("API request failed: %s", error)
 
