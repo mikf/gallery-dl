@@ -15,6 +15,7 @@ from urllib.parse import urlsplit, urlunsplit
 MEDIA_DOMAIN_OVERRIDES = {
     "cdn9.bunkr.ru" : "c9.bunkr.ru",
     "cdn12.bunkr.ru": "media-files12.bunkr.la",
+    "cdn-pizza.bunkr.ru": "pizza.bunkr.ru",
 }
 
 CDN_HOSTED_EXTENSIONS = (
