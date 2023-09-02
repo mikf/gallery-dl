@@ -863,7 +863,7 @@ class PixivNovelExtractor(PixivExtractor):
             novel["suffix"] = ""
 
             yield Message.Directory, novel
-            
+
             try:
                 content = self.api.novel_text(novel["id"])["novel_text"]
             except Exception:
