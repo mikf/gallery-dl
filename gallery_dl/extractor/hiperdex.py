@@ -31,7 +31,7 @@ class HiperdexBase():
 
         return {
             "manga"  : text.unescape(extr(
-                "<title>", "<").rpartition(" - ")[0].strip()),
+                "<title>", "<").rpartition(" Manga - ")[0].strip()),
             "url"    : text.unescape(extr(
                 'property="og:url" content="', '"')),
             "score"  : text.parse_float(extr(
