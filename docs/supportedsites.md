@@ -435,7 +435,7 @@ Consider all sites to be NSFW unless otherwise known.
 </tr>
 <tr>
     <td>JPG Fish</td>
-    <td>https://jpeg.pet/</td>
+    <td>https://jpg1.su/</td>
     <td>Albums, individual Images, User Profiles</td>
     <td></td>
 </tr>
