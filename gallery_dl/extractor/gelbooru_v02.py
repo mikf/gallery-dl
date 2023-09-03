@@ -183,6 +183,10 @@ INSTANCES = {
         "root": "https://hypnohub.net",
         "pattern": r"hypnohub\.net",
     },
+    "xbooru": {
+        "root": "https://xbooru.com",
+        "pattern": r"xbooru\.com",
+    },
 }
 
 BASE_PATTERN = GelbooruV02Extractor.update(INSTANCES)
@@ -212,6 +216,9 @@ class GelbooruV02TagExtractor(GelbooruV02Extractor):
         }),
         ("https://hypnohub.net/index.php?page=post&s=list&tags=gonoike_biwa", {
             "url": "fe662b86d38c331fcac9c62af100167d404937dc",
+        }),
+        ("https://xbooru.com/index.php?page=post&s=list&tags=konoyan", {
+            "count": 11,
         }),
     )
 
@@ -245,6 +252,10 @@ class GelbooruV02PoolExtractor(GelbooruV02Extractor):
         ("https://hypnohub.net/index.php?page=pool&s=show&id=61", {
             "url": "d314826280073441a2da609f70ee814d1f4b9407",
             "count": 3,
+        }),
+        ("https://xbooru.com/index.php?page=pool&s=show&id=757", {
+            "url": "ceeac56c179ec72301bd0b6add6355a138fdea01",
+            "count": 5,
         }),
     )
 
@@ -313,6 +324,9 @@ class GelbooruV02FavoriteExtractor(GelbooruV02Extractor):
         }),
         ("https://hypnohub.net/index.php?page=favorites&s=view&id=43546", {
             "count": 3,
+        }),
+        ("https://xbooru.com/index.php?page=favorites&s=view&id=45206", {
+            "count": 4,
         }),
     )
 
@@ -439,6 +453,11 @@ class GelbooruV02PostExtractor(GelbooruV02Extractor):
         ("https://tbib.org/index.php?page=post&s=view&id=9233957", {
             "url": "5a6ebe07bfff8e6d27f7c30b5480f27abcb577d2",
             "content": "1c3831b6fbaa4686e3c79035b5d98460b1c85c43",
+        }),
+        ("https://xbooru.com/index.php?page=post&s=view&id=1025649", {
+            "pattern": r"https://img\.xbooru\.com/images/444"
+                       r"/f3eda549ad8b9db244ac335c7406c92f\.jpeg",
+            "content": "086668afd445438d491ecc11cee3ac69b4d65530",
         }),
     )
 

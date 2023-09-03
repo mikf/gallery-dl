@@ -1121,6 +1121,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td>Favorites, Pools, Posts, Tag Searches</td>
     <td></td>
 </tr>
+<tr>
+    <td>Xbooru</td>
+    <td>https://xbooru.com/</td>
+    <td>Favorites, Pools, Posts, Tag Searches</td>
+    <td></td>
+</tr>
 
 <tr>
     <td colspan="4"><strong>jschan Imageboards</strong></td>
