@@ -645,7 +645,7 @@ class TwitterLikesExtractor(TwitterExtractor):
     def _transform_tweet(self, tweet):
         tdata = TwitterExtractor._transform_tweet(self, tweet)
         tdata["date_liked"] = text.parse_timestamp(
-            (int(tweet["sortIndex"]) >> 20) // 1000)
+            (int(tweet["sortIndex"] or 0) >> 20) // 1000)
         return tdata
 
 
@@ -661,7 +661,7 @@ class TwitterBookmarkExtractor(TwitterExtractor):
     def _transform_tweet(self, tweet):
         tdata = TwitterExtractor._transform_tweet(self, tweet)
         tdata["date_bookmarked"] = text.parse_timestamp(
-            (int(tweet["sortIndex"]) >> 20) // 1000)
+            (int(tweet["sortIndex"] or 0) >> 20) // 1000)
         return tdata
 
 
