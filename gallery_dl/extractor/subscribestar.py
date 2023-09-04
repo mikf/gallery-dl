@@ -84,16 +84,16 @@ class SubscribestarExtractor(Extractor):
             if cookie.name.startswith("auth")
         }
 
-    @staticmethod
-    def _media_from_post(html):
+    def _media_from_post(self, html):
         media = []
 
         gallery = text.extr(html, 'data-gallery="', '"')
         if gallery:
-            media.extend(
-                item for item in util.json_loads(text.unescape(gallery))
-                if "/previews/" not in item["url"]
-            )
+            for item in util.json_loads(text.unescape(gallery)):
+                if "/previews" in item["url"]:
+                    self._warn_preview()
+                else:
+                    media.append(item)
 
         attachments = text.extr(
             html, 'class="uploads-docs"', 'data-role="post-edit_form"')
@@ -130,6 +130,10 @@ class SubscribestarExtractor(Extractor):
             date = text.parse_datetime(dt, "%B %d, %Y %I:%M %p")
         return date
 
+    def _warn_preview(self):
+        self.log.warning("Preview image detected")
+        self._warn_preview = util.noop
+
 
 class SubscribestarUserExtractor(SubscribestarExtractor):
     """Extractor for media from a subscribestar user"""
@@ -138,7 +142,8 @@ class SubscribestarUserExtractor(SubscribestarExtractor):
     test = (
         ("https://www.subscribestar.com/subscribestar", {
             "count": ">= 20",
-            "pattern": r"https://\w+\.cloudfront\.net/uploads(_v2)?/users/11/",
+            "pattern": r"https://(ss-uploads-prod\.b-cdn|\w+\.cloudfront)\.net"
+                       r"/uploads(_v2)?/users/11/",
             "keyword": {
                 "author_id": 11,
                 "author_name": "subscribestar",
