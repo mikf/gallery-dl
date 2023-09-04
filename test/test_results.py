@@ -326,7 +326,7 @@ def setup_test_config():
                      "e621", "e926", "e6ai",
                      "instagram", "twitter", "subscribestar", "deviantart",
                      "inkbunny", "tapas", "pillowfort", "mangadex",
-                     "vipergirls", "gfycat"):
+                     "vipergirls"):
         config.set(("extractor", category), "username", None)
 
     config.set(("extractor", "mastodon.social"), "access-token",

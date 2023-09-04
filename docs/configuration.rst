@@ -390,7 +390,6 @@ Description
     * ``e621`` (*)
     * ``e926`` (*)
     * ``exhentai``
-    * ``gfycat``
     * ``idolcomplex``
     * ``imgbb``
     * ``inkbunny``
@@ -714,7 +713,7 @@ Type
 Default
     ``["oauth", "recursive", "test"]`` + current extractor category
 Example
-    ``["imgur", "gfycat:user", "*:image"]``
+    ``["imgur", "redgifs:user", "*:image"]``
 Description
     A list of extractor identifiers to ignore (or allow)
     when spawning child extractors for unknown URLs,
@@ -723,7 +722,7 @@ Description
     Each identifier can be
 
     * A category or basecategory name (``"imgur"``, ``"mastodon"``)
-    * | A (base)category-subcategory pair, where both names are separated by a colon (``"gfycat:user"``).
+    * | A (base)category-subcategory pair, where both names are separated by a colon (``"redgifs:user"``).
       | Both names can be a `*` or left empty, matching all possible names (``"*:image"``, ``":user"``).
 
     Note: Any ``blacklist`` setting will automatically include
@@ -1704,29 +1703,6 @@ Default
 Description
     Match **all** URLs not otherwise supported by gallery-dl,
     even ones without a ``generic:`` prefix.
-
-
-extractor.gfycat.format
------------------------
-Type
-    * ``string``
-    * ``list`` of ``strings``
-Default
-    ``["mp4", "webm", "mobile", "gif"]``
-Description
-    List of names of the preferred animation format, which can be
-    ``"mp4"``,
-    ``"webm"``,
-    ``"mobile"``,
-    ``"gif"``, or
-    ``"webp"``.
-
-    If a selected format is not available, the next one in the list will be
-    tried until an available format is found.
-
-    If the format is given as ``string``, it will be extended with
-    ``["mp4", "webm", "mobile", "gif"]``. Use a list with one element to
-    restrict it to only one possible format.
 
 
 extractor.gofile.api-token
