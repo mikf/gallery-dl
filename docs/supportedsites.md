@@ -248,12 +248,6 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
-    <td>Gfycat</td>
-    <td>https://gfycat.com/</td>
-    <td>Collections, individual Images, Search Results, User Profiles</td>
-    <td>Supported</td>
-</tr>
-<tr>
     <td>Gofile</td>
     <td>https://gofile.io/</td>
     <td>Folders</td>

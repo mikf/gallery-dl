@@ -49,7 +49,6 @@ modules = [
     "gelbooru",
     "gelbooru_v01",
     "gelbooru_v02",
-    "gfycat",
     "gofile",
     "hbrowse",
     "hentai2read",
