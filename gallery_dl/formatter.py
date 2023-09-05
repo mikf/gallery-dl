@@ -182,9 +182,10 @@ class StringFormatter():
                     if obj:
                         break
                 except Exception:
-                    pass
+                    obj = None
             else:
-                obj = self.default
+                if obj is None:
+                    obj = self.default
             return fmt(obj)
         return wrap
 
