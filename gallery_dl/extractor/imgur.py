@@ -104,29 +104,42 @@ class ImgurImageExtractor(ImgurExtractor):
                 "width"         : 64,
             },
         }),
-        ("http://imgur.com/0gybAXR", {  # gifv/mp4 video
+        # gifv/mp4 video
+        ("http://imgur.com/0gybAXR", {
             "url": "a2220eb265a55b0c95e0d3d721ec7665460e3fd7",
             "content": "a3c080e43f58f55243ab830569ba02309d59abfc",
         }),
-        ("https://imgur.com/XFfsmuC", {  # missing title in API response (#467)
+        # missing title in API response (#467)
+        ("https://imgur.com/XFfsmuC", {
             "keyword": {"title": "Tears are a natural response to irritants"},
         }),
-        ("https://imgur.com/1Nily2P", {  # animated png
+        # animated png
+        ("https://imgur.com/1Nily2P", {
             "pattern": "https://i.imgur.com/1Nily2P.png",
         }),
-        ("https://imgur.com/zzzzzzz", {  # not found
+        # not found
+        ("https://imgur.com/zzzzzzz", {
             "exception": exception.HttpError,
         }),
         ("https://m.imgur.com/r/Celebs/iHJ7tsM"),
-        ("https://www.imgur.com/21yMxCS"),     # www
-        ("https://m.imgur.com/21yMxCS"),       # mobile
-        ("https://imgur.com/zxaY6"),           # 5 character key
-        ("https://imgur.io/zxaY6"),            # .io
-        ("https://i.imgur.com/21yMxCS.png"),   # direct link
-        ("https://i.imgur.io/21yMxCS.png"),    # direct link .io
-        ("https://i.imgur.com/21yMxCSh.png"),  # direct link thumbnail
-        ("https://i.imgur.com/zxaY6.gif"),     # direct link (short)
-        ("https://i.imgur.com/zxaY6s.gif"),    # direct link (short; thumb)
+        # www
+        ("https://www.imgur.com/21yMxCS"),
+        # mobile
+        ("https://m.imgur.com/21yMxCS"),
+        # 5 character key
+        ("https://imgur.com/zxaY6"),
+        # .io
+        ("https://imgur.io/zxaY6"),
+        # direct link
+        ("https://i.imgur.com/21yMxCS.png"),
+        # direct link .io
+        ("https://i.imgur.io/21yMxCS.png"),
+        # direct link thumbnail
+        ("https://i.imgur.com/21yMxCSh.png"),
+        # direct link (short)
+        ("https://i.imgur.com/zxaY6.gif"),
+        # direct link (short; thumb)
+        ("https://i.imgur.com/zxaY6s.gif"),
     )
 
     def items(self):
@@ -201,21 +214,27 @@ class ImgurAlbumExtractor(ImgurExtractor):
                 "width"      : int,
             },
         }),
-        ("https://imgur.com/a/eD9CT", {  # large album
+        # large album
+        ("https://imgur.com/a/eD9CT", {
             "url": "de748c181a04d18bef1de9d4f4866ef0a06d632b",
         }),
-        ("https://imgur.com/a/RhJXhVT/all", {  # 7 character album hash
+        # 7 character album hash
+        ("https://imgur.com/a/RhJXhVT/all", {
             "url": "695ef0c950023362a0163ee5041796300db76674",
         }),
         ("https://imgur.com/a/TcBmQ", {
             "exception": exception.HttpError,
         }),
-        ("https://imgur.com/a/pjOnJA0", {  # empty, no 'media' (#2557)
+        # empty, no 'media' (#2557)
+        ("https://imgur.com/a/pjOnJA0", {
             "count": 0,
         }),
-        ("https://www.imgur.com/a/TcBmP"),  # www
-        ("https://imgur.io/a/TcBmP"),       # .io
-        ("https://m.imgur.com/a/TcBmP"),    # mobile
+        # www
+        ("https://www.imgur.com/a/TcBmP"),
+        # .io
+        ("https://imgur.io/a/TcBmP"),
+        # mobile
+        ("https://m.imgur.com/a/TcBmP"),
     )
 
     def items(self):
@@ -250,7 +269,8 @@ class ImgurGalleryExtractor(ImgurExtractor):
     subcategory = "gallery"
     pattern = BASE_PATTERN + r"/(?:gallery|t/\w+)/(\w{7}|\w{5})"
     test = (
-        ("https://imgur.com/gallery/zf2fIms", {  # non-album gallery (#380)
+        # non-album gallery (#380)
+        ("https://imgur.com/gallery/zf2fIms", {
             "pattern": "https://imgur.com/zf2fIms",
         }),
         ("https://imgur.com/gallery/eD9CT", {
@@ -258,7 +278,8 @@ class ImgurGalleryExtractor(ImgurExtractor):
         }),
         ("https://imgur.com/t/unmuted/26sEhNr"),
         ("https://imgur.com/t/cat/qSB8NbN"),
-        ("https://imgur.io/t/cat/qSB8NbN"),  # .io
+        # .io
+        ("https://imgur.io/t/cat/qSB8NbN"),
     )
 
     def items(self):

@@ -287,23 +287,28 @@ class TumblrUserExtractor(TumblrExtractor):
             "count": 3,
             "options": (("posts", "all"), ("external", True))
         }),
-        ("https://mikf123-hidden.tumblr.com/", {  # dashboard-only
+        # dashboard-only
+        ("https://mikf123-hidden.tumblr.com/", {
             "options": (("access-token", None),),
             "exception": exception.AuthorizationError,
         }),
-        ("https://mikf123-hidden.tumblr.com/", {  # dashboard-only
+        # dashboard-only
+        ("https://mikf123-hidden.tumblr.com/", {
             "count": 2,
             "keyword": {"tags": ["test", "hidden"]},
         }),
-        ("https://mikf123-private.tumblr.com/", {  # password protected
+        # password protected
+        ("https://mikf123-private.tumblr.com/", {
             "count": 2,
             "keyword": {"tags": ["test", "private"]},
         }),
-        ("https://mikf123-private-hidden.tumblr.com/", {  # both
+        # dashboard-only & password protected
+        ("https://mikf123-private-hidden.tumblr.com/", {
             "count": 2,
             "keyword": {"tags": ["test", "private", "hidden"]},
         }),
-        ("https://mikf123.tumblr.com/", {  # date-min/-max/-format (#337)
+        # date-min/-max/-format (#337)
+        ("https://mikf123.tumblr.com/", {
             "count": 4,
             "options": (("date-min", "201804"), ("date-max", "201805"),
                         ("date-format", "%Y%m"))
@@ -362,12 +367,14 @@ class TumblrPostExtractor(TumblrExtractor):
         ("https://mikf123.tumblr.com/post/181022380064/chat-post", {
             "count": 0,
         }),
+        # high-quality images (#1846)
         ("https://kichatundk.tumblr.com/post/654953419288821760", {
-            "count": 2,  # high-quality images (#1846)
+            "count": 2,
             "content": "d6fcc7b6f750d835d55c7f31fa3b63be26c9f89b",
         }),
+        # high-quality images (#1344)
         ("https://hameru-is-cool.tumblr.com/post/639261855227002880", {
-            "count": 2,  # high-quality images (#1344)
+            "count": 2,
             "content": "6bc19a42787e46e1bba2ef4aeef5ca28fcd3cd34",
         }),
         ("https://mikf123.tumblr.com/image/689860196535762944", {
@@ -376,8 +383,9 @@ class TumblrPostExtractor(TumblrExtractor):
                        r"/8f1131551cef6e74-bc/s99999x99999"
                        r"/188cf9b8915b0d0911c6c743d152fc62e8f38491\.png$",
         }),
+        # HTML response (#297)
         ("http://ziemniax.tumblr.com/post/109697912859/", {
-            "exception": exception.NotFoundError,  # HTML response (#297)
+            "exception": exception.NotFoundError,
         }),
         ("http://demo.tumblr.com/image/459265350"),
         ("https://www.tumblr.com/blog/view/smarties-art/686047436641353728"),

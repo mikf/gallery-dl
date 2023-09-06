@@ -265,27 +265,32 @@ class ReactorPostExtractor(ReactorExtractor):
             "url": "dfc74d150d7267384d8c229c4b82aa210755daa0",
         }),
         ("http://anime.reactor.cc/post/3576250"),
-        ("http://joyreactor.com/post/3721876", {  # single image
+        # single image
+        ("http://joyreactor.com/post/3721876", {
             "pattern": r"http://img\d\.joyreactor\.com/pics/post/full"
                        r"/cartoon-painting-monster-lake-4841316.jpeg",
             "count": 1,
             "keyword": "2207a7dfed55def2042b6c2554894c8d7fda386e",
         }),
-        ("http://joyreactor.com/post/3713804", {  # 4 images
+        # 4 images
+        ("http://joyreactor.com/post/3713804", {
             "pattern": r"http://img\d\.joyreactor\.com/pics/post/full"
                        r"/movie-tv-godzilla-monsters-\d+\.jpeg",
             "count": 4,
             "keyword": "d7da9ba7809004c809eedcf6f1c06ad0fbb3df21",
         }),
-        ("http://joyreactor.com/post/3726210", {  # gif / video
+        # gif / video
+        ("http://joyreactor.com/post/3726210", {
             "url": "60f3b9a0a3918b269bea9b4f8f1a5ab3c2c550f8",
             "keyword": "8949d9d5fc469dab264752432efbaa499561664a",
         }),
-        ("http://joyreactor.com/post/3668724", {  # youtube embed
+        # youtube embed
+        ("http://joyreactor.com/post/3668724", {
             "url": "bf1666eddcff10c9b58f6be63fa94e4e13074214",
             "keyword": "e18b1ffbd79d76f9a0e90b6d474cc2499e343f0b",
         }),
-        ("http://joyreactor.cc/post/1299", {  # "malformed" JSON
+        # "malformed" JSON
+        ("http://joyreactor.cc/post/1299", {
             "url": "ab02c6eb7b4035ad961b29ee0770ee41be2fcc39",
         }),
         ("http://pornreactor.cc/post/863166", {

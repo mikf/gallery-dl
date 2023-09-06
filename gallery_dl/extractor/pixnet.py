@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2020 Mike Fährmann
+# Copyright 2016-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -10,7 +10,6 @@
 
 from .common import Extractor, Message
 from .. import text, exception
-
 
 BASE_PATTERN = r"(?:https?://)?(?!www\.)([\w-]+)\.pixnet.net"
 
@@ -109,8 +108,9 @@ class PixnetSetExtractor(PixnetExtractor):
             "url": "b3eb6431aea0bcf5003432a4a0f3a3232084fc13",
             "keyword": "bf7004faa1cea18cf9bd856f0955a69be51b1ec6",
         }),
+        # password-protected
         ("https://sky92100.pixnet.net/album/set/17492544", {
-            "count": 0,  # password-protected
+            "count": 0,
         }),
     )
 
