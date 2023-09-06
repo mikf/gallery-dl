@@ -75,7 +75,8 @@ class ImxtoImageExtractor(ImagehostImageExtractor):
     pattern = (r"(?:https?://)?(?:www\.)?((?:imx\.to|img\.yt)"
                r"/(?:i/|img-)(\w+)(\.html)?)")
     test = (
-        ("https://imx.to/i/1qdeva", {  # new-style URL
+        # new-style URL
+        ("https://imx.to/i/1qdeva", {
             "url": "ab2173088a6cdef631d7a47dec4a5da1c6a00130",
             "content": "0c8768055e4e20e7c7259608b67799171b691140",
             "keyword": {
@@ -85,7 +86,8 @@ class ImxtoImageExtractor(ImagehostImageExtractor):
                 "hash"  : "94d56c599223c59f3feb71ea603484d1",
             },
         }),
-        ("https://imx.to/img-57a2050547b97.html", {  # old-style URL
+        # old-style URL
+        ("https://imx.to/img-57a2050547b97.html", {
             "url": "a83fe6ef1909a318c4d49fcf2caf62f36c3f9204",
             "content": "54592f2635674c25677c6872db3709d343cdf92f",
             "keyword": {
@@ -95,7 +97,8 @@ class ImxtoImageExtractor(ImagehostImageExtractor):
                 "hash"  : "40da6aaa7b8c42b18ef74309bbc713fc",
             },
         }),
-        ("https://img.yt/img-57a2050547b97.html", {  # img.yt domain
+        # img.yt domain
+        ("https://img.yt/img-57a2050547b97.html", {
             "url": "a83fe6ef1909a318c4d49fcf2caf62f36c3f9204",
         }),
         ("https://imx.to/img-57a2050547b98.html", {

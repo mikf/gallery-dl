@@ -693,8 +693,9 @@ class DeviantartFavoriteExtractor(DeviantartExtractor):
     archive_fmt = "f_{_username}_{index}.{extension}"
     pattern = BASE_PATTERN + r"/favourites(?:/all|/?\?catpath=)?/?$"
     test = (
+        # (#271)
         ("https://www.deviantart.com/h3813067/favourites/", {
-            "options": (("metadata", True), ("flat", False)),  # issue #271
+            "options": (("metadata", True), ("flat", False)),
             "count": 1,
         }),
         ("https://www.deviantart.com/h3813067/favourites/", {

@@ -112,9 +112,9 @@ class MangadexChapterExtractor(MangadexExtractor):
         ("https://mangadex.org/chapter/74149a55-e7c4-44ea-8a37-98e879c1096f", {
             "exception": exception.StopExtraction,
         }),
-        # 'externalUrl', but still downloadable (#2503)
+        # 'externalUrl', but still downloadable / 404 (#2503)
         ("https://mangadex.org/chapter/364728a4-6909-4164-9eea-6b56354f7c78", {
-            "count": 0,  # 404
+            "count": 0,
         }),
     )
 
