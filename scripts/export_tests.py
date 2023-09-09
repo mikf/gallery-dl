@@ -206,6 +206,8 @@ def build_test(extr, data):
             instr["#sha1_metadata"] = metadata
             metadata = {}
     if (content := data.pop("content", None)):
+        if isinstance(content, tuple):
+            content = list(content)
         instr["#sha1_content"] = content
 
     if data:
@@ -224,20 +226,22 @@ def collect_patterns():
     }
 
 
-def collect_tests():
+def collect_tests(whitelist=None):
     tests = collections.defaultdict(list)
 
     for cls in extractor._list_classes():
         for url, data in cls._get_tests():
 
             extr = cls.from_url(url)
+            if whitelist and extr.category not in whitelist:
+                continue
             test = build_test(extr, data)
-            tests[extr.category].append(test)
+            tests[f"{extr.category}_{extr.subcategory}"].append(test)
 
     return tests
 
 
-def export_tests(category, data):
+def export_tests(data):
     imports = {}
     tests = []
 
@@ -285,14 +289,33 @@ DIRECTORY = "/tmp/_/results"
 
 
 def main():
-    os.makedirs(DIRECTORY, exist_ok=True)
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "-t", "--target",
+        help="target directory",
+    )
+    parser.add_argument(
+        "-c", "--category", action="append",
+        help="extractor categories to export",
+    )
+
+    args = parser.parse_args()
+
+    if not args.target:
+        args.target = os.path.join(
+            os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+            "test", "results",
+        )
 
     global PATTERNS
     PATTERNS = collect_patterns()
 
-    for category, tests in collect_tests().items():
-        with open(f"{DIRECTORY}/{category}.py", "w") as fp:
-            fp.write(export_tests(category, tests))
+    os.makedirs(args.target, exist_ok=True)
+    for name, tests in collect_tests(args.category).items():
+        with open(f"{args.target}/{name}.py", "w") as fp:
+            fp.write(export_tests(tests))
 
 
 if __name__ == "__main__":
