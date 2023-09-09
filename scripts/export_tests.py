@@ -12,6 +12,8 @@ import re
 import sys
 import itertools
 import collections
+
+import util
 from gallery_dl import extractor
 
 
@@ -314,8 +316,9 @@ def main():
 
     os.makedirs(args.target, exist_ok=True)
     for name, tests in collect_tests(args.category).items():
-        with open(f"{args.target}/{name}.py", "w") as fp:
-            fp.write(export_tests(tests))
+        name = name.replace(".", "")
+        with util.lazy(f"{args.target}/{name}.py") as file:
+            file.write(export_tests(tests))
 
 
 if __name__ == "__main__":
