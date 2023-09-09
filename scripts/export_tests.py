@@ -38,8 +38,20 @@ def pprint(obj, indent=0, lmin=9, lmax=16):
     if isinstance(obj, str):
         if obj.startswith("lit:"):
             return f'''{obj[4:]}'''
-        prefix = "r" if "\\" in obj or obj.startswith("re:") else ""
-        quote = '"""' if "\n" in obj else '"'
+
+        if "\\" in obj or obj.startswith("re:"):
+            prefix = "r"
+        else:
+            prefix = ""
+
+        if "\n" in obj:
+            quote = '"""'
+        elif '"' in obj:
+            obj = re.sub(r'(?<!\\)"', '\\"', obj)
+            quote = '"'
+        else:
+            quote = '"'
+
         return f'''{prefix}{quote}{obj}{quote}'''
 
     if isinstance(obj, bytes):
