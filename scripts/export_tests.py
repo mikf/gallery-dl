@@ -250,7 +250,7 @@ def collect_tests(whitelist=None):
             if whitelist and extr.category not in whitelist:
                 continue
             test = build_test(extr, data)
-            tests[f"{extr.category}_{extr.subcategory}"].append(test)
+            tests[extr.category].append(test)
 
     return tests
 
