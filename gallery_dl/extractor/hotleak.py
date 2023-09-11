@@ -59,30 +59,7 @@ class HotleakPostExtractor(HotleakExtractor):
     subcategory = "post"
     pattern = (BASE_PATTERN + r"/(?!(?:hot|creators|videos|photos)(?:$|/))"
                r"([^/]+)/(photo|video)/(\d+)")
-    test = (
-        ("https://hotleak.vip/kaiyakawaii/photo/1617145", {
-            "pattern": r"https://hotleak\.vip/storage/images/3625"
-                       r"/1617145/fefdd5988dfcf6b98cc9e11616018868\.jpg",
-            "keyword": {
-                "id": 1617145,
-                "creator": "kaiyakawaii",
-                "type": "photo",
-                "filename": "fefdd5988dfcf6b98cc9e11616018868",
-                "extension": "jpg",
-            },
-        }),
-        ("https://hotleak.vip/lilmochidoll/video/1625538", {
-            "pattern": r"ytdl:https://cdn8-leak\.camhdxx\.com"
-                       r"/1661/1625538/index\.m3u8",
-            "keyword": {
-                "id": 1625538,
-                "creator": "lilmochidoll",
-                "type": "video",
-                "filename": "index",
-                "extension": "mp4",
-            },
-        }),
-    )
+    example = "https://hotleak.vip/MODEL/photo/12345"
 
     def __init__(self, match):
         HotleakExtractor.__init__(self, match)
@@ -118,18 +95,7 @@ class HotleakCreatorExtractor(HotleakExtractor):
     subcategory = "creator"
     pattern = (BASE_PATTERN + r"/(?!(?:hot|creators|videos|photos)(?:$|/))"
                r"([^/?#]+)/?$")
-    test = (
-        ("https://hotleak.vip/kaiyakawaii", {
-            "range": "1-200",
-            "count": 200,
-        }),
-        ("https://hotleak.vip/stellaviolet", {
-            "count": "> 600"
-        }),
-        ("https://hotleak.vip/doesnotexist", {
-            "exception": exception.NotFoundError,
-        }),
-    )
+    example = "https://hotleak.vip/MODEL"
 
     def __init__(self, match):
         HotleakExtractor.__init__(self, match)
@@ -182,20 +148,7 @@ class HotleakCategoryExtractor(HotleakExtractor):
     """Extractor for hotleak categories"""
     subcategory = "category"
     pattern = BASE_PATTERN + r"/(hot|creators|videos|photos)(?:/?\?([^#]+))?"
-    test = (
-        ("https://hotleak.vip/photos", {
-            "pattern": HotleakPostExtractor.pattern,
-            "range": "1-50",
-            "count": 50,
-        }),
-        ("https://hotleak.vip/videos"),
-        ("https://hotleak.vip/creators", {
-            "pattern": HotleakCreatorExtractor.pattern,
-            "range": "1-50",
-            "count": 50,
-        }),
-        ("https://hotleak.vip/hot"),
-    )
+    example = "https://hotleak.vip/photos"
 
     def __init__(self, match):
         HotleakExtractor.__init__(self, match)
@@ -217,14 +170,7 @@ class HotleakSearchExtractor(HotleakExtractor):
     """Extractor for hotleak search results"""
     subcategory = "search"
     pattern = BASE_PATTERN + r"/search(?:/?\?([^#]+))"
-    test = (
-        ("https://hotleak.vip/search?search=gallery-dl", {
-            "count": 0,
-        }),
-        ("https://hotleak.vip/search?search=hannah", {
-            "count": "> 30",
-        }),
-    )
+    example = "https://hotleak.vip/search?search=QUERY"
 
     def __init__(self, match):
         HotleakExtractor.__init__(self, match)

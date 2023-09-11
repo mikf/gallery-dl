@@ -20,37 +20,7 @@ class LexicaSearchExtractor(Extractor):
     directory_fmt = ("{category}", "{search_tags}")
     archive_fmt = "{id}"
     pattern = r"(?:https?://)?lexica\.art/?\?q=([^&#]+)"
-    test = (
-        ("https://lexica.art/?q=tree", {
-            "pattern": r"https://lexica-serve-encoded-images2\.sharif\."
-                       r"workers.dev/full_jpg/[0-9a-f-]{36}$",
-            "range": "1-80",
-            "count": 80,
-            "keyword": {
-                "height": int,
-                "id": str,
-                "upscaled_height": int,
-                "upscaled_width": int,
-                "userid": str,
-                "width": int,
-                "prompt": {
-                    "c": int,
-                    "grid": bool,
-                    "height": int,
-                    "id": str,
-                    "images": list,
-                    "initImage": None,
-                    "initImageStrength": None,
-                    "model": "lexica-aperture-v2",
-                    "negativePrompt": str,
-                    "prompt": str,
-                    "seed": str,
-                    "timestamp": r"re:\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d.\d\d\dZ",
-                    "width": int,
-                },
-            },
-        }),
-    )
+    example = "https://lexica.art/?q=QUERY"
 
     def __init__(self, match):
         Extractor.__init__(self, match)

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2022 Mike Fährmann
+# Copyright 2015-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -17,24 +17,7 @@ class ImgthGalleryExtractor(GalleryExtractor):
     category = "imgth"
     root = "https://imgth.com"
     pattern = r"(?:https?://)?(?:www\.)?imgth\.com/gallery/(\d+)"
-    test = (
-        ("https://imgth.com/gallery/37/wallpaper-anime", {
-            "url": "4ae1d281ca2b48952cf5cca57e9914402ad72748",
-            "pattern": r"https://imgth\.com/images/2009/11/25"
-                       r"/wallpaper-anime_\w+\.jpg",
-            "keyword": {
-                "count": 12,
-                "date": "dt:2009-11-25 18:21:00",
-                "extension": "jpg",
-                "filename": r"re:wallpaper-anime_\w+",
-                "gallery_id": 37,
-                "num": int,
-                "title": "Wallpaper anime",
-                "user": "celebrities",
-            },
-        }),
-        ("https://www.imgth.com/gallery/37/wallpaper-anime"),
-    )
+    example = "https://imgth.com/gallery/123/TITLE"
 
     def __init__(self, match):
         self.gallery_id = gid = match.group(1)

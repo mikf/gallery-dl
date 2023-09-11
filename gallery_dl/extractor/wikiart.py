@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2022 Mike Fährmann
+# Copyright 2019-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -69,10 +69,7 @@ class WikiartArtistExtractor(WikiartExtractor):
     subcategory = "artist"
     directory_fmt = ("{category}", "{artist[artistName]}")
     pattern = BASE_PATTERN + r"/(?!\w+-by-)([\w-]+)/?$"
-    test = ("https://www.wikiart.org/en/thomas-cole", {
-        "url": "6844f207a5063c499fc1d5651b03127bc4fe2f73",
-        "keyword": "09230b5f504697119e267349bf92487e657a7384",
-    })
+    example = "https://www.wikiart.org/en/ARTIST"
 
     def __init__(self, match):
         WikiartExtractor.__init__(self, match)
@@ -94,16 +91,7 @@ class WikiartImageExtractor(WikiartArtistExtractor):
     """Extractor for individual paintings on wikiart.org"""
     subcategory = "image"
     pattern = BASE_PATTERN + r"/(?!(?:paintings|artists)-by-)([\w-]+)/([\w-]+)"
-    test = (
-        ("https://www.wikiart.org/en/thomas-cole/the-departure-1838", {
-            "url": "976cc2545f308a650b5dbb35c29d3cee0f4673b3",
-            "keyword": "8e80cdcb01c1fedb934633d1c4c3ab0419cfbedf",
-        }),
-        # no year or '-' in slug
-        ("https://www.wikiart.org/en/huang-shen/summer", {
-            "url": "d7f60118c34067b2b37d9577e412dc1477b94207",
-        }),
-    )
+    example = "https://www.wikiart.org/en/ARTIST/TITLE"
 
     def __init__(self, match):
         WikiartArtistExtractor.__init__(self, match)
@@ -125,9 +113,7 @@ class WikiartArtworksExtractor(WikiartExtractor):
     subcategory = "artworks"
     directory_fmt = ("{category}", "Artworks by {group!c}", "{type}")
     pattern = BASE_PATTERN + r"/paintings-by-([\w-]+)/([\w-]+)"
-    test = ("https://www.wikiart.org/en/paintings-by-media/grisaille", {
-        "url": "36e054fcb3363b7f085c81f4778e6db3994e56a3",
-    })
+    example = "https://www.wikiart.org/en/paintings-by-GROUP/TYPE"
 
     def __init__(self, match):
         WikiartExtractor.__init__(self, match)
@@ -147,10 +133,7 @@ class WikiartArtistsExtractor(WikiartExtractor):
     """Extractor for artist collections on wikiart.org"""
     subcategory = "artists"
     pattern = (BASE_PATTERN + r"/artists-by-([\w-]+)/([\w-]+)")
-    test = ("https://www.wikiart.org/en/artists-by-century/12", {
-        "pattern": WikiartArtistExtractor.pattern,
-        "count": ">= 8",
-    })
+    example = "https://www.wikiart.org/en/artists-by-GROUP/TYPE"
 
     def __init__(self, match):
         WikiartExtractor.__init__(self, match)

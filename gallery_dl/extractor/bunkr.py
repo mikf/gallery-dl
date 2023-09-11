@@ -29,53 +29,7 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
     category = "bunkr"
     root = "https://bunkrr.su"
     pattern = r"(?:https?://)?(?:app\.)?bunkr+\.(?:la|[sr]u|is|to)/a/([^/?#]+)"
-    test = (
-        ("https://bunkrr.su/a/Lktg9Keq", {
-            "pattern": r"https://cdn\.bunkr\.ru/test-テスト-\"&>-QjgneIQv\.png",
-            "content": "0c8768055e4e20e7c7259608b67799171b691140",
-            "keyword": {
-                "album_id": "Lktg9Keq",
-                "album_name": 'test テスト "&>',
-                "count": 1,
-                "filename": 'test-テスト-"&>-QjgneIQv',
-                "id": "QjgneIQv",
-                "name": 'test-テスト-"&>',
-                "num": int,
-            },
-        }),
-        # mp4 (#2239)
-        ("https://app.bunkr.ru/a/ptRHaCn2", {
-            "pattern": r"https://media-files\.bunkr\.ru/_-RnHoW69L\.mp4",
-            "content": "80e61d1dbc5896ae7ef9a28734c747b28b320471",
-        }),
-        # cdn4
-        ("https://bunkr.is/a/iXTTc1o2", {
-            "pattern": r"https://(cdn|media-files)4\.bunkr\.ru/",
-            "content": "da29aae371b7adc8c5ef8e6991b66b69823791e8",
-            "keyword": {
-                "album_id": "iXTTc1o2",
-                "album_name": "test2",
-                "album_size": "691.1 KB",
-                "count": 2,
-                "description": "072022",
-                "filename": "re:video-wFO9FtxG|image-sZrQUeOx",
-                "id": "re:wFO9FtxG|sZrQUeOx",
-                "name": "re:video|image",
-                "num": int,
-            },
-        }),
-        # cdn12 .ru TLD (#4147)
-        ("https://bunkrr.su/a/j1G29CnD", {
-            "pattern": r"https://(cdn12.bunkr.ru|media-files12.bunkr.la)/\w+",
-            "count": 8,
-        }),
-        ("https://bunkrr.su/a/Lktg9Keq"),
-        ("https://bunkr.la/a/Lktg9Keq"),
-        ("https://bunkr.su/a/Lktg9Keq"),
-        ("https://bunkr.ru/a/Lktg9Keq"),
-        ("https://bunkr.is/a/Lktg9Keq"),
-        ("https://bunkr.to/a/Lktg9Keq"),
-    )
+    example = "https://bunkrr.su/a/ID"
 
     def fetch_album(self, album_id):
         # album metadata

@@ -111,23 +111,7 @@ class ZerochanTagExtractor(ZerochanExtractor):
     subcategory = "tag"
     directory_fmt = ("{category}", "{search_tags}")
     pattern = BASE_PATTERN + r"/(?!\d+$)([^/?#]+)/?(?:\?([^#]+))?"
-    test = ("https://www.zerochan.net/Perth+%28Kantai+Collection%29", {
-        "pattern": r"https://static\.zerochan\.net/.+\.full\.\d+\.(jpg|png)",
-        "count": "> 24",
-        "keyword": {
-            "extension": r"re:jpg|png",
-            "file_url": r"re:https://static\.zerochan\.net"
-                        r"/.+\.full\.\d+\.(jpg|png)",
-            "filename": r"re:(Perth\.\(Kantai\.Collection\)"
-                        r"|Kantai\.Collection)\.full\.\d+",
-            "height": r"re:^\d+$",
-            "id": r"re:^\d+$",
-            "name": r"re:(Perth \(Kantai Collection\)|Kantai Collection)",
-            "search_tags": "Perth (Kantai Collection)",
-            "size": r"re:^\d+k$",
-            "width": r"re:^\d+$",
-        },
-    })
+    example = "https://www.zerochan.net/TAG"
 
     def __init__(self, match):
         ZerochanExtractor.__init__(self, match)
@@ -177,40 +161,7 @@ class ZerochanTagExtractor(ZerochanExtractor):
 class ZerochanImageExtractor(ZerochanExtractor):
     subcategory = "image"
     pattern = BASE_PATTERN + r"/(\d+)"
-    test = ("https://www.zerochan.net/2920445", {
-        "pattern": r"https://static\.zerochan\.net/"
-                   r"Perth\.%28Kantai\.Collection%29\.full.2920445\.jpg",
-        "keyword": {
-            "author": "YeFan 葉凡",
-            "date": "dt:2020-04-24 21:33:44",
-            "file_url": "https://static.zerochan.net"
-                        "/Perth.%28Kantai.Collection%29.full.2920445.jpg",
-            "filename": "Perth.(Kantai.Collection).full.2920445",
-            "height": 1366,
-            "id": 2920445,
-            "path": ["Kantai Collection", "Perth (Kantai Collection)"],
-            "size": 1975296,
-            "tags": [
-                "Mangaka:YeFan 葉凡",
-                "Game:Kantai Collection",
-                "Character:Perth (Kantai Collection)",
-                "Theme:Blonde Hair",
-                "Theme:Braids",
-                "Theme:Coat",
-                "Theme:Female",
-                "Theme:Firefighter Outfit",
-                "Theme:Group",
-                "Theme:Long Sleeves",
-                "Theme:Personification",
-                "Theme:Pins",
-                "Theme:Ribbon",
-                "Theme:Shirt",
-                "Theme:Short Hair",
-            ],
-            "uploader": "YukinoTokisaki",
-            "width": 1920,
-        },
-    })
+    example = "https://www.zerochan.net/12345"
 
     def __init__(self, match):
         ZerochanExtractor.__init__(self, match)

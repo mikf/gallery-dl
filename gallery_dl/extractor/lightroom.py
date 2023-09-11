@@ -18,24 +18,7 @@ class LightroomGalleryExtractor(Extractor):
     filename_fmt = "{num:>04}_{id}.{extension}"
     archive_fmt = "{id}"
     pattern = r"(?:https?://)?lightroom\.adobe\.com/shares/([0-9a-f]+)"
-    test = (
-        (("https://lightroom.adobe.com/shares/"
-          "0c9cce2033f24d24975423fe616368bf"), {
-            "keyword": {
-                "title": "Sterne und Nachtphotos",
-                "user": "Christian Schrang",
-            },
-            "count": ">= 55",
-        }),
-        (("https://lightroom.adobe.com/shares/"
-          "7ba68ad5a97e48608d2e6c57e6082813"), {
-            "keyword": {
-                "title": "HEBFC Snr/Res v Brighton",
-                "user": "",
-            },
-            "count": ">= 180",
-        }),
-    )
+    example = "https://lightroom.adobe.com/shares/0123456789abcdef"
 
     def __init__(self, match):
         Extractor.__init__(self, match)

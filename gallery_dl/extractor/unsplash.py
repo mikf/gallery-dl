@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2021-2022 Mike Fährmann
+# Copyright 2021-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -76,66 +76,7 @@ class UnsplashImageExtractor(UnsplashExtractor):
     """Extractor for a single unsplash photo"""
     subcategory = "image"
     pattern = BASE_PATTERN + r"/photos/([^/?#]+)"
-    test = ("https://unsplash.com/photos/lsoogGC_5dg", {
-        "pattern": r"https://images\.unsplash\.com/photo-1586348943529-"
-                   r"beaae6c28db9\?ixid=\w+&ixlib=rb-4.0.3",
-        "keyword": {
-            "alt_description": "re:silhouette of trees near body of water ",
-            "blur_hash": "LZP4uQS4jboe%#o0WCa}2doJNaaz",
-            "?  categories": list,
-            "color": "#f3c08c",
-            "created_at": "2020-04-08T12:29:42Z",
-            "date": "dt:2020-04-08 12:29:42",
-            "description": "The Island",
-            "downloads": int,
-            "exif": {
-                "aperture": "11",
-                "exposure_time": "30",
-                "focal_length": "70.0",
-                "iso": 200,
-                "make": "Canon",
-                "model": "Canon EOS 5D Mark IV"
-            },
-            "extension": "jpg",
-            "filename": "photo-1586348943529-beaae6c28db9",
-            "height": 6272,
-            "id": "lsoogGC_5dg",
-            "liked_by_user": False,
-            "likes": int,
-            "location": {
-                "city": "Beaver Dam",
-                "country": "United States",
-                "name": "Beaver Dam, WI 53916, USA",
-                "position": {
-                    "latitude": 43.457769,
-                    "longitude": -88.837329,
-                },
-            },
-            "promoted_at": "2020-04-08T15:12:03Z",
-            "sponsorship": None,
-            "tags": list,
-            "updated_at": str,
-            "user": {
-                "accepted_tos": True,
-                "bio": str,
-                "first_name": "Dave",
-                "id": "uMJXuywXLiU",
-                "instagram_username": "just_midwest_rock",
-                "last_name": "Hoefler",
-                "location": None,
-                "name": "Dave Hoefler",
-                "portfolio_url": None,
-                "total_collections": int,
-                "total_likes": int,
-                "total_photos": int,
-                "twitter_username": None,
-                "updated_at": str,
-                "username": "davehoefler",
-            },
-            "views": int,
-            "width": 4480,
-        },
-    })
+    example = "https://unsplash.com/photos/ID"
 
     def photos(self):
         url = "{}/napi/photos/{}".format(self.root, self.item)
@@ -146,12 +87,7 @@ class UnsplashUserExtractor(UnsplashExtractor):
     """Extractor for all photos of an unsplash user"""
     subcategory = "user"
     pattern = BASE_PATTERN + r"/@(\w+)/?$"
-    test = ("https://unsplash.com/@davehoefler", {
-        "pattern": r"https://images\.unsplash\.com/(photo-\d+-\w+"
-                   r"|reserve/[^/?#]+)\?ixid=\w+&ixlib=rb-4\.0\.3$",
-        "range": "1-30",
-        "count": 30,
-    })
+    example = "https://unsplash.com/@USER"
 
     def photos(self):
         url = "{}/napi/users/{}/photos".format(self.root, self.item)
@@ -163,12 +99,7 @@ class UnsplashFavoriteExtractor(UnsplashExtractor):
     """Extractor for all likes of an unsplash user"""
     subcategory = "favorite"
     pattern = BASE_PATTERN + r"/@(\w+)/likes"
-    test = ("https://unsplash.com/@davehoefler/likes", {
-        "pattern": r"https://images\.unsplash\.com/(photo-\d+-\w+"
-                   r"|reserve/[^/?#]+)\?ixid=\w+&ixlib=rb-4\.0\.3$",
-        "range": "1-30",
-        "count": 30,
-    })
+    example = "https://unsplash.com/@USER/likes"
 
     def photos(self):
         url = "{}/napi/users/{}/likes".format(self.root, self.item)
@@ -180,18 +111,7 @@ class UnsplashCollectionExtractor(UnsplashExtractor):
     """Extractor for an unsplash collection"""
     subcategory = "collection"
     pattern = BASE_PATTERN + r"/collections/([^/?#]+)(?:/([^/?#]+))?"
-    test = (
-        ("https://unsplash.com/collections/3178572/winter", {
-            "pattern": r"https://images\.unsplash\.com/(photo-\d+-\w+"
-                       r"|reserve/[^/?#]+)\?ixid=\w+&ixlib=rb-4\.0\.3$",
-            "keyword": {"collection_id": "3178572",
-                        "collection_title": "winter"},
-            "range": "1-30",
-            "count": 30,
-        }),
-        ("https://unsplash.com/collections/3178572/"),
-        ("https://unsplash.com/collections/_8qJQ2bCMWE/2021.05"),
-    )
+    example = "https://unsplash.com/collections/12345/TITLE"
 
     def __init__(self, match):
         UnsplashExtractor.__init__(self, match)
@@ -210,13 +130,7 @@ class UnsplashSearchExtractor(UnsplashExtractor):
     """Extractor for unsplash search results"""
     subcategory = "search"
     pattern = BASE_PATTERN + r"/s/photos/([^/?#]+)(?:\?([^#]+))?"
-    test = ("https://unsplash.com/s/photos/hair-style", {
-        "pattern": r"https://(images|plus)\.unsplash\.com"
-                   r"/((flagged/|premium_)?photo-\d+-\w+"
-                   r"|reserve/[^/?#]+)\?ixid=\w+&ixlib=rb-4\.0\.3$",
-        "range": "1-30",
-        "count": 30,
-    })
+    example = "https://unsplash.com/s/photos/QUERY"
 
     def __init__(self, match):
         UnsplashExtractor.__init__(self, match)

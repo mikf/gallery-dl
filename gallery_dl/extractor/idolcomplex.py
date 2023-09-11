@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2021 Mike Fährmann
+# Copyright 2018-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -133,20 +133,7 @@ class IdolcomplexTagExtractor(IdolcomplexExtractor):
     directory_fmt = ("{category}", "{search_tags}")
     archive_fmt = "t_{search_tags}_{id}"
     pattern = r"(?:https?://)?idol\.sankakucomplex\.com/\?([^#]*)"
-    test = (
-        ("https://idol.sankakucomplex.com/?tags=lyumos", {
-            "count": 5,
-            "range": "18-22",
-            "pattern": r"https://is\.sankakucomplex\.com/data/[^/]{2}/[^/]{2}"
-                       r"/[^/]{32}\.\w+\?e=\d+&m=[^&#]+",
-        }),
-        ("https://idol.sankakucomplex.com/?tags=order:favcount", {
-            "count": 5,
-            "range": "18-22",
-        }),
-        ("https://idol.sankakucomplex.com"
-         "/?tags=lyumos+wreath&page=3&next=694215"),
-    )
+    example = "https://idol.sankakucomplex.com/?tags=TAGS"
     per_page = 20
 
     def __init__(self, match):
@@ -214,9 +201,7 @@ class IdolcomplexPoolExtractor(IdolcomplexExtractor):
     directory_fmt = ("{category}", "pool", "{pool}")
     archive_fmt = "p_{pool}_{id}"
     pattern = r"(?:https?://)?idol\.sankakucomplex\.com/pool/show/(\d+)"
-    test = ("https://idol.sankakucomplex.com/pool/show/145", {
-        "count": 3,
-    })
+    example = "https://idol.sankakucomplex.com/pool/show/12345"
     per_page = 24
 
     def __init__(self, match):
@@ -251,17 +236,7 @@ class IdolcomplexPostExtractor(IdolcomplexExtractor):
     subcategory = "post"
     archive_fmt = "{id}"
     pattern = r"(?:https?://)?idol\.sankakucomplex\.com/post/show/(\d+)"
-    test = ("https://idol.sankakucomplex.com/post/show/694215", {
-        "content": "694ec2491240787d75bf5d0c75d0082b53a85afd",
-        "options": (("tags", True),),
-        "keyword": {
-            "tags_character": "shani_(the_witcher)",
-            "tags_copyright": "the_witcher",
-            "tags_idol": str,
-            "tags_medium": str,
-            "tags_general": str,
-        },
-    })
+    example = "https://idol.sankakucomplex.com/post/show/12345"
 
     def __init__(self, match):
         IdolcomplexExtractor.__init__(self, match)

@@ -21,26 +21,7 @@ class _2chenThreadExtractor(Extractor):
     filename_fmt = "{time} {filename}.{extension}"
     archive_fmt = "{board}_{thread}_{hash}_{time}"
     pattern = BASE_PATTERN + r"/([^/?#]+)/(\d+)"
-    test = (
-        ("https://sturdychan.help/tv/268929", {
-            "pattern": r"https://sturdychan\.help/assets/images"
-                       r"/src/\w{40}\.\w+$",
-            "count": ">= 179",
-            "keyword": {
-                "board": "tv",
-                "date": "type:datetime",
-                "hash": r"re:[0-9a-f]{40}",
-                "name": "Anonymous",
-                "no": r"re:\d+",
-                "thread": "268929",
-                "time": int,
-                "title": "「/ttg/ #118: 🇧🇷 edition」",
-                "url": str,
-            },
-        }),
-        ("https://2chen.club/tv/1"),
-        ("https://2chen.moe/jp/303786"),
-    )
+    example = "https://sturdychan.help/a/12345/"
 
     def __init__(self, match):
         Extractor.__init__(self, match)
@@ -101,14 +82,7 @@ class _2chenBoardExtractor(Extractor):
     subcategory = "board"
     root = "https://sturdychan.help"
     pattern = BASE_PATTERN + r"/([^/?#]+)(?:/catalog|/?$)"
-    test = (
-        ("https://sturdychan.help/co/", {
-            "pattern": _2chenThreadExtractor.pattern
-        }),
-        ("https://2chen.moe/co"),
-        ("https://2chen.club/tv"),
-        ("https://2chen.moe/co/catalog"),
-    )
+    example = "https://sturdychan.help/a/"
 
     def __init__(self, match):
         Extractor.__init__(self, match)

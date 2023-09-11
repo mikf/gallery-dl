@@ -21,28 +21,7 @@ class ItchioGameExtractor(Extractor):
     filename_fmt = "{game[title]} ({id}).{extension}"
     archive_fmt = "{id}"
     pattern = r"(?:https?://)?(\w+).itch\.io/([\w-]+)"
-    test = (
-        ("https://sirtartarus.itch.io/a-craft-of-mine", {
-            "pattern": r"https://\w+\.ssl\.hwcdn\.net/upload2"
-                       r"/game/1983311/7723751\?",
-            "count": 1,
-            "keyword": {
-                "extension": "",
-                "filename": "7723751",
-                "game": {
-                    "id": 1983311,
-                    "noun": "game",
-                    "title": "A Craft Of Mine",
-                    "url": "https://sirtartarus.itch.io/a-craft-of-mine",
-                },
-                "user": {
-                    "id": 4060052,
-                    "name": "SirTartarus",
-                    "url": "https://sirtartarus.itch.io",
-                },
-            },
-        }),
-    )
+    example = "https://USER.itch.io/GAME"
 
     def __init__(self, match):
         self.user, self.slug = match.groups()

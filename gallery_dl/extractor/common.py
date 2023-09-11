@@ -34,8 +34,8 @@ class Extractor():
     archive_fmt = ""
     cookies_domain = ""
     browser = None
+    example = ""
     root = ""
-    test = None
     request_interval = 0.0
     request_interval_min = 0.0
     request_timestamp = 0.0

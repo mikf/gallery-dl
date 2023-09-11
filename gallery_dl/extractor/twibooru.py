@@ -19,12 +19,12 @@ class TwibooruExtractor(BooruExtractor):
     """Base class for twibooru extractors"""
     category = "twibooru"
     basecategory = "philomena"
+    root = "https://twibooru.org"
     filename_fmt = "{id}_{filename}.{extension}"
     archive_fmt = "{id}"
     request_interval = 6.05
     page_start = 1
     per_page = 50
-    root = "https://twibooru.org"
 
     def _init(self):
         self.api = TwibooruAPI(self)
@@ -46,50 +46,7 @@ class TwibooruPostExtractor(TwibooruExtractor):
     subcategory = "post"
     request_interval = 1.0
     pattern = BASE_PATTERN + r"/(\d+)"
-    test = ("https://twibooru.org/1", {
-        "pattern": r"https://cdn.twibooru.org/img/2020/7/8/1/full.png",
-        "content": "aac4d1dba611883ac701aaa8f0b2b322590517ae",
-        "keyword": {
-            "animated": False,
-            "aspect_ratio": 1.0,
-            "comment_count": int,
-            "created_at": "2020-07-08T22:26:55.743Z",
-            "date": "dt:2020-07-08 22:26:55",
-            "description": "Why have I done this?",
-            "downvotes": 0,
-            "duration": 0.0,
-            "faves": int,
-            "first_seen_at": "2020-07-08T22:26:55.743Z",
-            "format": "png",
-            "height": 576,
-            "hidden_from_users": False,
-            "id": 1,
-            "intensities": dict,
-            "locations": [],
-            "media_type": "image",
-            "mime_type": "image/png",
-            "name": "1676547__safe_artist-colon-scraggleman_oc_oc-colon-"
-                    "floor+bored_oc+only_bags+under+eyes_bust_earth+pony_"
-                    "female_goggles_helmet_mare_meme_neet_neet+home+g.png",
-            "orig_sha512_hash": "re:8b4c00d2[0-9a-f]{120}",
-            "processed": True,
-            "representations": dict,
-            "score": int,
-            "sha512_hash": "8b4c00d2eff52d51ad9647e14738944ab306fd1d8e1bf6"
-                           "34fbb181b32f44070aa588938e26c4eb072b1eb61489aa"
-                           "f3062fb644a76c79f936b97723a2c3e0e5d3",
-            "size": 70910,
-            "source_url": "",
-            "tag_ids": list,
-            "tags": list,
-            "thumbnails_generated": True,
-            "updated_at": "2022-11-27T00:34:50.483Z",
-            "upvotes": int,
-            "view_url": "https://cdn.twibooru.org/img/2020/7/8/1/full.png",
-            "width": 576,
-            "wilson_score": float,
-        },
-    })
+    example = "https://twibooru.org/12345"
 
     def __init__(self, match):
         TwibooruExtractor.__init__(self, match)
@@ -104,16 +61,7 @@ class TwibooruSearchExtractor(TwibooruExtractor):
     subcategory = "search"
     directory_fmt = ("{category}", "{search_tags}")
     pattern = BASE_PATTERN + r"/(?:search/?\?([^#]+)|tags/([^/?#]+))"
-    test = (
-        ("https://twibooru.org/search?q=cute", {
-            "range": "40-60",
-            "count": 21,
-        }),
-        ("https://twibooru.org/tags/cute", {
-            "range": "1-20",
-            "count": 20,
-        }),
-    )
+    example = "https://twibooru.org/search?q=TAG"
 
     def __init__(self, match):
         TwibooruExtractor.__init__(self, match)
@@ -147,19 +95,7 @@ class TwibooruGalleryExtractor(TwibooruExtractor):
     directory_fmt = ("{category}", "galleries",
                      "{gallery[id]} {gallery[title]}")
     pattern = BASE_PATTERN + r"/galleries/(\d+)"
-    test = ("https://twibooru.org/galleries/1", {
-        "range": "1-20",
-        "keyword": {
-            "gallery": {
-                "description": "Best nation pone and "
-                               "russian related pics.",
-                "id": 1,
-                "spoiler_warning": "Russia",
-                "thumbnail_id": 694923,
-                "title": "Marussiaverse",
-            },
-        },
-    })
+    example = "https://twibooru.org/galleries/12345"
 
     def __init__(self, match):
         TwibooruExtractor.__init__(self, match)

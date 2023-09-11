@@ -116,16 +116,7 @@ class VscoUserExtractor(VscoExtractor):
     """Extractor for images from a user on vsco.co"""
     subcategory = "user"
     pattern = BASE_PATTERN + r"(?:/gallery|/images(?:/\d+)?)?/?(?:$|[?#])"
-    test = (
-        ("https://vsco.co/missuri/gallery", {
-            "pattern": r"https://image(-aws.+)?\.vsco\.co"
-                       r"/[0-9a-f/]+/[\w-]+\.\w+",
-            "range": "1-80",
-            "count": 80,
-        }),
-        ("https://vsco.co/missuri/images/1"),
-        ("https://vsco.co/missuri"),
-    )
+    example = "https://vsco.co/USER/gallery"
 
     def images(self):
         url = "{}/{}/gallery".format(self.root, self.user)
@@ -149,11 +140,7 @@ class VscoCollectionExtractor(VscoExtractor):
     directory_fmt = ("{category}", "{user}", "collection")
     archive_fmt = "c_{user}_{id}"
     pattern = BASE_PATTERN + r"/collection/"
-    test = ("https://vsco.co/vsco/collection/1", {
-        "pattern": r"https://image(-aws.+)?\.vsco\.co/[0-9a-f/]+/[\w-]+\.\w+",
-        "range": "1-80",
-        "count": 80,
-    })
+    example = "https://vsco.co/USER/collection/12345"
 
     def images(self):
         url = "{}/{}/collection/1".format(self.root, self.user)
@@ -176,29 +163,7 @@ class VscoImageExtractor(VscoExtractor):
     """Extractor for individual images on vsco.co"""
     subcategory = "image"
     pattern = BASE_PATTERN + r"/media/([0-9a-fA-F]+)"
-    test = (
-        ("https://vsco.co/erenyildiz/media/5d34b93ef632433030707ce2", {
-            "url": "a45f9712325b42742324b330c348b72477996031",
-            "content": "1394d070828d82078035f19a92f404557b56b83f",
-            "keyword": {
-                "id"    : "5d34b93ef632433030707ce2",
-                "user"  : "erenyildiz",
-                "grid"  : "erenyildiz",
-                "meta"  : dict,
-                "tags"  : list,
-                "date"  : "dt:2019-07-21 19:12:11",
-                "video" : False,
-                "width" : 1537,
-                "height": 1537,
-                "description": "re:Ni seviyorum. #vsco #vscox #vscochallenges",
-            },
-        }),
-        ("https://vsco.co/jimenalazof/media/5b4feec558f6c45c18c040fd", {
-            "url": "08e7eef3301756ce81206c0b47c1e9373756a74a",
-            "content": "e739f058d726ee42c51c180a505747972a7dfa47",
-            "keyword": {"video" : True},
-        }),
-    )
+    example = "https://vsco.co/USER/media/0123456789abcdef"
 
     def __init__(self, match):
         VscoExtractor.__init__(self, match)

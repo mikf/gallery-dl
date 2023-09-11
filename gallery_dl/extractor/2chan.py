@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2017-2022 Mike Fährmann
+# Copyright 2017-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -20,26 +20,8 @@ class _2chanThreadExtractor(Extractor):
     filename_fmt = "{tim}.{extension}"
     archive_fmt = "{board}_{thread}_{tim}"
     url_fmt = "https://{server}.2chan.net/{board}/src/{filename}"
-    pattern = r"(?:https?://)?([\w-]+)\.2chan\.net/([^/]+)/res/(\d+)"
-    test = ("https://dec.2chan.net/70/res/14565.htm", {
-        "pattern": r"https://dec\.2chan\.net/70/src/\d{13}\.jpg",
-        "count": ">= 3",
-        "keyword": {
-            "board": "70",
-            "board_name": "新板提案",
-            "com": str,
-            "fsize": r"re:\d+",
-            "name": "名無し",
-            "no": r"re:1[45]\d\d\d",
-            "now": r"re:22/../..\(.\)..:..:..",
-            "post": "無題",
-            "server": "dec",
-            "thread": "14565",
-            "tim": r"re:^\d{13}$",
-            "time": r"re:^\d{10}$",
-            "title": "ﾋﾛｱｶ板"
-        },
-    })
+    pattern = r"(?:https?://)?([\w-]+)\.2chan\.net/([^/?#]+)/res/(\d+)"
+    example = "https://dec.2chan.net/12/res/12345.htm"
 
     def __init__(self, match):
         Extractor.__init__(self, match)

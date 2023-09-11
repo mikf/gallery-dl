@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2022 Mike Fährmann
+# Copyright 2019-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -11,7 +11,6 @@
 from .common import Extractor, Message
 from .. import text
 import time
-
 
 BASE_PATTERN = r"(?:https?://)?([\w-]+)\.slickpic\.com"
 
@@ -34,22 +33,7 @@ class SlickpicAlbumExtractor(SlickpicExtractor):
     filename_fmt = "{num:>03}_{id}{title:?_//}.{extension}"
     archive_fmt = "{id}"
     pattern = BASE_PATTERN + r"/albums/([^/?#]+)"
-    test = (
-        ("https://mattcrandall.slickpic.com/albums/LamborghiniMurcielago/", {
-            "pattern": r"https://stored-cf\.slickpic\.com/NDk5MjNmYTc1MzU0MQ,,"
-                       r"/20160807/\w+/p/o/JSBFSS-\d+\.jpg",
-            "keyword": "c37c4ce9c54c09abc6abdf295855d46f11529cbf",
-            "count": 102,
-        }),
-        ("https://mattcrandall.slickpic.com/albums/LamborghiniMurcielago/", {
-            "range": "34",
-            "content": ("276eb2c902187bb177ae8013e310e1d6641fba9a",
-                        "52b5a310587de1048030ab13a912f6a3a9cc7dab",
-                        "cec6630e659dc72db1ee1a9a6f3b525189261988",
-                        "6f81e1e74c6cd6db36844e7211eef8e7cd30055d",
-                        "22e83645fc242bc3584eca7ec982c8a53a4d8a44"),
-        }),
-    )
+    example = "https://USER.slickpic.com/albums/TITLE/"
 
     def __init__(self, match):
         SlickpicExtractor.__init__(self, match)
@@ -127,13 +111,7 @@ class SlickpicAlbumExtractor(SlickpicExtractor):
 class SlickpicUserExtractor(SlickpicExtractor):
     subcategory = "user"
     pattern = BASE_PATTERN + r"(?:/gallery)?/?(?:$|[?#])"
-    test = (
-        ("https://mattcrandall.slickpic.com/gallery/", {
-            "count": ">= 358",
-            "pattern": SlickpicAlbumExtractor.pattern,
-        }),
-        ("https://mattcrandall.slickpic.com/"),
-    )
+    example = "https://USER.slickpic.com/"
 
     def items(self):
         page = self.request(self.root + "/gallery?viewer").text

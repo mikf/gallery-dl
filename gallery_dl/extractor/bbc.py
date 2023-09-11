@@ -23,18 +23,7 @@ class BbcGalleryExtractor(GalleryExtractor):
     filename_fmt = "{num:>02}.{extension}"
     archive_fmt = "{programme}_{num}"
     pattern = BASE_PATTERN + r"[^/?#]+(?!/galleries)(?:/[^/?#]+)?)$"
-    test = (
-        ("https://www.bbc.co.uk/programmes/p084qtzs/p085g9kg", {
-            "pattern": r"https://ichef\.bbci\.co\.uk"
-                       r"/images/ic/1920xn/\w+\.jpg",
-            "count": 37,
-            "keyword": {
-                "programme": "p084qtzs",
-                "path": ["BBC One", "Doctor Who", "The Timeless Children"],
-            },
-        }),
-        ("https://www.bbc.co.uk/programmes/p084qtzs"),
-    )
+    example = "https://www.bbc.co.uk/programmes/PATH"
 
     def metadata(self, page):
         data = util.json_loads(text.extr(
@@ -72,17 +61,7 @@ class BbcProgrammeExtractor(Extractor):
     subcategory = "programme"
     root = "https://www.bbc.co.uk"
     pattern = BASE_PATTERN + r"[^/?#]+/galleries)(?:/?\?page=(\d+))?"
-    test = (
-        ("https://www.bbc.co.uk/programmes/b006q2x0/galleries", {
-            "pattern": BbcGalleryExtractor.pattern,
-            "range": "1-50",
-            "count": ">= 50",
-        }),
-        ("https://www.bbc.co.uk/programmes/b006q2x0/galleries?page=40", {
-            "pattern": BbcGalleryExtractor.pattern,
-            "count": ">= 100",
-        }),
-    )
+    example = "https://www.bbc.co.uk/programmes/ID/galleries"
 
     def __init__(self, match):
         Extractor.__init__(self, match)

@@ -20,33 +20,7 @@ class KeenspotComicExtractor(Extractor):
     filename_fmt = "{filename}.{extension}"
     archive_fmt = "{comic}_{filename}"
     pattern = r"(?:https?://)?(?!www\.|forums\.)([\w-]+)\.keenspot\.com(/.+)?"
-    test = (
-        # link
-        ("http://marksmen.keenspot.com/", {
-            "range": "1-3",
-            "url": "83bcf029103bf8bc865a1988afa4aaeb23709ba6",
-        }),
-        # id
-        ("http://barkercomic.keenspot.com/", {
-            "range": "1-3",
-            "url": "c4080926db18d00bac641fdd708393b7d61379e6",
-        }),
-        # id v2
-        ("http://crowscare.keenspot.com/", {
-            "range": "1-3",
-            "url": "a00e66a133dd39005777317da90cef921466fcaa"
-        }),
-        # ks
-        ("http://supernovas.keenspot.com/", {
-            "range": "1-3",
-            "url": "de21b12887ef31ff82edccbc09d112e3885c3aab"
-        }),
-        # "random" access
-        ("http://twokinds.keenspot.com/comic/1066/", {
-            "range": "1-3",
-            "url": "6a784e11370abfb343dcad9adbb7718f9b7be350",
-        })
-    )
+    example = "http://COMIC.keenspot.com/"
 
     def __init__(self, match):
         Extractor.__init__(self, match)

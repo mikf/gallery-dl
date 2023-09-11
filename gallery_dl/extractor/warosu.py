@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2017-2022 Mike Fährmann
+# Copyright 2017-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -21,17 +21,7 @@ class WarosuThreadExtractor(Extractor):
     filename_fmt = "{tim}-{filename}.{extension}"
     archive_fmt = "{board}_{thread}_{tim}"
     pattern = r"(?:https?://)?(?:www\.)?warosu\.org/([^/]+)/thread/(\d+)"
-    test = (
-        ("https://warosu.org/jp/thread/16656025", {
-            "url": "889d57246ed67e491e5b8f7f124e50ea7991e770",
-            "keyword": "c00ea4c5460c5986994f17bb8416826d42ca57c0",
-        }),
-        ("https://warosu.org/jp/thread/16658073", {
-            "url": "4500cf3184b067424fd9883249bd543c905fbecd",
-            "keyword": "7534edf4ec51891dbf44d775b73fbbefd52eec71",
-            "content": "d48df0a701e6599312bfff8674f4aa5d4fb8db1c",
-        }),
-    )
+    example = "https://warosu.org/a/thread/12345"
 
     def __init__(self, match):
         Extractor.__init__(self, match)

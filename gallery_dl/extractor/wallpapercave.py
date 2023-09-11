@@ -18,9 +18,7 @@ class WallpapercaveImageExtractor(Extractor):
     subcategory = "image"
     root = "https://wallpapercave.com"
     pattern = r"(?:https?://)?(?:www\.)?wallpapercave\.com"
-    test = ("https://wallpapercave.com/w/wp10270355", {
-        "content": "58b088aaa1cf1a60e347015019eb0c5a22b263a6",
-    })
+    example = "https://wallpapercave.com/w/wp12345"
 
     def items(self):
         page = self.request(text.ensure_http_scheme(self.url)).text

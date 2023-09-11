@@ -88,32 +88,7 @@ class SankakuTagExtractor(SankakuExtractor):
     directory_fmt = ("{category}", "{search_tags}")
     archive_fmt = "t_{search_tags}_{id}"
     pattern = BASE_PATTERN + r"/?\?([^#]*)"
-    test = (
-        ("https://sankaku.app/?tags=bonocho", {
-            "count": 5,
-            "pattern": r"https://s\.sankakucomplex\.com/data/[^/]{2}/[^/]{2}"
-                       r"/[0-9a-f]{32}\.\w+\?e=\d+&(expires=\d+&)?m=[^&#]+",
-        }),
-        ("https://beta.sankakucomplex.com/?tags=bonocho"),
-        ("https://chan.sankakucomplex.com/?tags=bonocho"),
-        ("https://black.sankakucomplex.com/?tags=bonocho"),
-        ("https://white.sankakucomplex.com/?tags=bonocho"),
-        ("https://sankaku.app/ja?tags=order%3Apopularity"),
-        ("https://sankaku.app/no/?tags=order%3Apopularity"),
-        # error on five or more tags
-        ("https://chan.sankakucomplex.com/?tags=bonocho+a+b+c+d", {
-            "options": (("username", None),),
-            "exception": exception.StopExtraction,
-        }),
-        # match arbitrary query parameters
-        ("https://chan.sankakucomplex.com"
-         "/?tags=marie_rose&page=98&next=3874906&commit=Search"),
-        # 'date:' tags (#1790)
-        ("https://chan.sankakucomplex.com/?tags=date:2023-03-20", {
-            "range": "1",
-            "count": 1,
-        }),
-    )
+    example = "https://sankaku.app/?tags=TAG"
 
     def __init__(self, match):
         SankakuExtractor.__init__(self, match)
@@ -143,13 +118,7 @@ class SankakuPoolExtractor(SankakuExtractor):
     directory_fmt = ("{category}", "pool", "{pool[id]} {pool[name_en]}")
     archive_fmt = "p_{pool}_{id}"
     pattern = BASE_PATTERN + r"/(?:books|pool/show)/(\d+)"
-    test = (
-        ("https://sankaku.app/books/90", {
-            "count": 5,
-        }),
-        ("https://beta.sankakucomplex.com/books/90"),
-        ("https://chan.sankakucomplex.com/pool/show/90"),
-    )
+    example = "https://sankaku.app/books/12345"
 
     def __init__(self, match):
         SankakuExtractor.__init__(self, match)
@@ -175,50 +144,7 @@ class SankakuPostExtractor(SankakuExtractor):
     subcategory = "post"
     archive_fmt = "{id}"
     pattern = BASE_PATTERN + r"/post/show/([0-9a-f]+)"
-    test = (
-        ("https://sankaku.app/post/show/360451", {
-            "content": "5e255713cbf0a8e0801dc423563c34d896bb9229",
-            "options": (("tags", True),),
-            "keyword": {
-                "tags_artist"   : ["bonocho"],
-                "tags_studio"   : ["dc_comics"],
-                "tags_medium"   : list,
-                "tags_copyright": list,
-                "tags_character": list,
-                "tags_general"  : list,
-            },
-        }),
-        # 'contentious_content'
-        ("https://sankaku.app/post/show/21418978", {
-            "pattern": r"https://s\.sankakucomplex\.com"
-                       r"/data/13/3c/133cda3bfde249c504284493903fb985\.jpg",
-        }),
-        # empty tags (#1617)
-        ("https://sankaku.app/post/show/20758561", {
-            "options": (("tags", True),),
-            "count": 1,
-            "keyword": {
-                "tags": list,
-                "tags_general": ["key(mangaka)", "key(mangaka)"],
-            },
-        }),
-        # md5 hexdigest instead of ID (#3952)
-        (("https://chan.sankakucomplex.com/post/show"
-          "/f8ba89043078f0e4be2d9c46550b840a"), {
-            "pattern": r"https://s\.sankakucomplex\.com"
-                       r"/data/f8/ba/f8ba89043078f0e4be2d9c46550b840a\.jpg",
-            "count": 1,
-            "keyword": {
-                "id": 33195194,
-                "md5": "f8ba89043078f0e4be2d9c46550b840a",
-            },
-        }),
-        ("https://chan.sankakucomplex.com/post/show/360451"),
-        ("https://chan.sankakucomplex.com/ja/post/show/360451"),
-        ("https://beta.sankakucomplex.com/post/show/360451"),
-        ("https://white.sankakucomplex.com/post/show/360451"),
-        ("https://black.sankakucomplex.com/post/show/360451"),
-    )
+    example = "https://sankaku.app/post/show/12345"
 
     def __init__(self, match):
         SankakuExtractor.__init__(self, match)
@@ -232,13 +158,7 @@ class SankakuBooksExtractor(SankakuExtractor):
     """Extractor for books by tag search on sankaku.app"""
     subcategory = "books"
     pattern = BASE_PATTERN + r"/books/?\?([^#]*)"
-    test = (
-        ("https://sankaku.app/books?tags=aiue_oka", {
-            "range": "1-20",
-            "count": 20,
-        }),
-        ("https://beta.sankakucomplex.com/books?tags=aiue_oka"),
-    )
+    example = "https://sankaku.app/books?tags=TAG"
 
     def __init__(self, match):
         SankakuExtractor.__init__(self, match)

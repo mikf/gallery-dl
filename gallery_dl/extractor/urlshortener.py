@@ -35,20 +35,7 @@ class UrlshortenerLinkExtractor(UrlshortenerExtractor):
     """Extractor for general-purpose URL shorteners"""
     subcategory = "link"
     pattern = BASE_PATTERN + r"/([^/?#]+)"
-    test = (
-        ("https://bit.ly/3cWIUgq", {
-            "count": 1,
-            "pattern": "^https://gumroad.com/l/storm_b1",
-        }),
-        ("https://t.co/bCgBY8Iv5n", {
-            "count": 1,
-            "pattern": "^https://twitter.com/elonmusk/status/"
-                       "1421395561324896257/photo/1",
-        }),
-        ("https://t.co/abcdefghij", {
-            "exception": exception.NotFoundError,
-        }),
-    )
+    example = "https://bit.ly/abcde"
 
     def __init__(self, match):
         UrlshortenerExtractor.__init__(self, match)

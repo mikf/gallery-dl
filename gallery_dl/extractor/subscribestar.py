@@ -139,35 +139,7 @@ class SubscribestarUserExtractor(SubscribestarExtractor):
     """Extractor for media from a subscribestar user"""
     subcategory = "user"
     pattern = BASE_PATTERN + r"/(?!posts/)([^/?#]+)"
-    test = (
-        ("https://www.subscribestar.com/subscribestar", {
-            "count": ">= 20",
-            "pattern": r"https://(ss-uploads-prod\.b-cdn|\w+\.cloudfront)\.net"
-                       r"/uploads(_v2)?/users/11/",
-            "keyword": {
-                "author_id": 11,
-                "author_name": "subscribestar",
-                "author_nick": "SubscribeStar",
-                "content": str,
-                "date"   : "type:datetime",
-                "id"     : int,
-                "num"    : int,
-                "post_id": int,
-                "type"   : "re:image|video|attachment",
-                "url"    : str,
-                "?pinned": bool,
-            },
-        }),
-        ("https://www.subscribestar.com/subscribestar", {
-            "options": (("metadata", True),),
-            "keyword": {"date": "type:datetime"},
-            "range": "1",
-        }),
-        ("https://subscribestar.adult/kanashiipanda", {
-            "range": "1-10",
-            "count": 10,
-        }),
-    )
+    example = "https://www.subscribestar.com/USER"
 
     def posts(self):
         needle_next_page = 'data-role="infinite_scroll-next_page" href="'
@@ -189,32 +161,7 @@ class SubscribestarPostExtractor(SubscribestarExtractor):
     """Extractor for media from a single subscribestar post"""
     subcategory = "post"
     pattern = BASE_PATTERN + r"/posts/(\d+)"
-    test = (
-        ("https://www.subscribestar.com/posts/102468", {
-            "count": 1,
-            "keyword": {
-                "author_id": 11,
-                "author_name": "subscribestar",
-                "author_nick": "SubscribeStar",
-                "content": "re:<h1>Brand Guidelines and Assets</h1>",
-                "date": "dt:2020-05-07 12:33:00",
-                "extension": "jpg",
-                "filename": "8ff61299-b249-47dc-880a-cdacc9081c62",
-                "group": "imgs_and_videos",
-                "height": 291,
-                "id": 203885,
-                "num": 1,
-                "pinned": False,
-                "post_id": 102468,
-                "type": "image",
-                "width": 700,
-            },
-        }),
-        ("https://subscribestar.adult/posts/22950", {
-            "count": 1,
-            "keyword": {"date": "dt:2019-04-28 07:32:00"},
-        }),
-    )
+    example = "https://www.subscribestar.com/posts/12345"
 
     def posts(self):
         url = "{}/posts/{}".format(self.root, self.item)

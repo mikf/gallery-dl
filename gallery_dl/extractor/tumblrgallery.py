@@ -38,7 +38,7 @@ class TumblrgalleryTumblrblogExtractor(TumblrgalleryExtractor):
     """Extractor for Tumblrblog on tumblrgallery.xyz"""
     subcategory = "tumblrblog"
     pattern = BASE_PATTERN + r"(/tumblrblog/gallery/(\d+)\.html)"
-    test = ("https://tumblrgallery.xyz/tumblrblog/gallery/103975.html",)
+    example = "https://tumblrgallery.xyz/tumblrblog/gallery/12345.html"
 
     def __init__(self, match):
         TumblrgalleryExtractor.__init__(self, match)
@@ -69,11 +69,7 @@ class TumblrgalleryPostExtractor(TumblrgalleryExtractor):
     """Extractor for Posts on tumblrgallery.xyz"""
     subcategory = "post"
     pattern = BASE_PATTERN + r"(/post/(\d+)\.html)"
-    test = ("https://tumblrgallery.xyz/post/405674.html", {
-        "pattern": r"https://78\.media\.tumblr\.com/bec67072219c1f3bc04fd9711d"
-                   r"ec42ef/tumblr_p51qq1XCHS1txhgk3o1_1280\.jpg",
-        "count": 3,
-    })
+    example = "https://tumblrgallery.xyz/post/12345.html"
 
     def __init__(self, match):
         TumblrgalleryExtractor.__init__(self, match)
@@ -98,10 +94,7 @@ class TumblrgallerySearchExtractor(TumblrgalleryExtractor):
     filename_fmt = "{category}_{num:>03}_{gallery_id}_{id}_{title}.{extension}"
     directory_fmt = ("{category}", "{search_term}")
     pattern = BASE_PATTERN + r"(/s\.php\?q=([^&#]+))"
-    test = ("https://tumblrgallery.xyz/s.php?q=everyday-life", {
-        "pattern": r"https://\d+\.media\.tumblr\.com/.+",
-        "count": "< 1000",
-    })
+    example = "https://tumblrgallery.xyz/s.php?q=QUERY"
 
     def __init__(self, match):
         TumblrgalleryExtractor.__init__(self, match)
