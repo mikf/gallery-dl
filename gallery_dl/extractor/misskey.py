@@ -85,24 +85,7 @@ class MisskeyUserExtractor(MisskeyExtractor):
     """Extractor for all images of a Misskey user"""
     subcategory = "user"
     pattern = BASE_PATTERN + r"/@([^/?#]+)/?$"
-    test = (
-        ("https://misskey.io/@lithla", {
-            "pattern": r"https://s\d+\.arkjp\.net/misskey/[\w-]+\.\w+",
-            "range": "1-50",
-            "count": 50,
-        }),
-        ("https://misskey.io/@blooddj@pawoo.net", {
-            "range": "1-50",
-            "count": 50,
-        }),
-        ("https://lesbian.energy/@rerorero", {
-            "pattern": r"https://lesbian.energy/files/\w+",
-            "range": "1-50",
-            "count": 50,
-        }),
-        ("https://lesbian.energy/@nano@mk.yopo.work"),
-        ("https://sushi.ski/@ui@misskey.04.si"),
-    )
+    example = "https://misskey.io/@USER"
 
     def notes(self):
         return self.api.users_notes(self.api.user_id_by_username(self.item))
@@ -112,13 +95,7 @@ class MisskeyFollowingExtractor(MisskeyExtractor):
     """Extractor for followed Misskey users"""
     subcategory = "following"
     pattern = BASE_PATTERN + r"/@([^/?#]+)/following"
-    test = (
-        ("https://misskey.io/@blooddj@pawoo.net/following", {
-            "extractor": False,
-            "count": ">= 6",
-        }),
-        ("https://sushi.ski/@hatusimo_sigure/following"),
-    )
+    example = "https://misskey.io/@USER/following"
 
     def items(self):
         user_id = self.api.user_id_by_username(self.item)
@@ -136,21 +113,7 @@ class MisskeyNoteExtractor(MisskeyExtractor):
     """Extractor for images from a Note"""
     subcategory = "note"
     pattern = BASE_PATTERN + r"/notes/(\w+)"
-    test = (
-        ("https://misskey.io/notes/9bhqfo835v", {
-            "pattern": r"https://s\d+\.arkjp\.net/misskey/[\w-]+\.\w+",
-            "count": 4,
-        }),
-        ("https://misskey.io/notes/9brq7z1re6"),
-        ("https://sushi.ski/notes/9bm3x4ksqw", {
-            "pattern": r"https://media\.sushi\.ski/files/[\w-]+\.png",
-            "count": 1,
-        }),
-        ("https://lesbian.energy/notes/995ig09wqy", {
-            "count": 1,
-        }),
-        ("https://lesbian.energy/notes/96ynd9w5kc"),
-    )
+    example = "https://misskey.io/notes/98765"
 
     def notes(self):
         return (self.api.notes_show(self.item),)
@@ -160,12 +123,7 @@ class MisskeyFavoriteExtractor(MisskeyExtractor):
     """Extractor for favorited notes"""
     subcategory = "favorite"
     pattern = BASE_PATTERN + r"/(?:my|api/i)/favorites"
-    test = (
-        ("https://misskey.io/my/favorites"),
-        ("https://misskey.io/api/i/favorites"),
-        ("https://lesbian.energy/my/favorites"),
-        ("https://sushi.ski/my/favorites"),
-    )
+    example = "https://misskey.io/my/favorites"
 
     def notes(self):
         return self.api.i_favorites()

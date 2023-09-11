@@ -21,21 +21,7 @@ class _4chanarchivesThreadExtractor(Extractor):
     filename_fmt = "{no}-{filename}.{extension}"
     archive_fmt = "{board}_{thread}_{no}"
     pattern = r"(?:https?://)?4chanarchives\.com/board/([^/?#]+)/thread/(\d+)"
-    test = (
-        ("https://4chanarchives.com/board/c/thread/2707110", {
-            "pattern": r"https://i\.imgur\.com/(0wLGseE|qbByWDc)\.jpg",
-            "count": 2,
-            "keyword": {
-                "board": "c",
-                "com": str,
-                "name": "Anonymous",
-                "no": int,
-                "thread": "2707110",
-                "time": r"re:2016-07-1\d \d\d:\d\d:\d\d",
-                "title": "Ren Kagami from 'Oyako Neburi'",
-            },
-        }),
-    )
+    example = "https://4chanarchives.com/board/a/thread/12345/"
 
     def __init__(self, match):
         Extractor.__init__(self, match)
@@ -106,15 +92,7 @@ class _4chanarchivesBoardExtractor(Extractor):
     subcategory = "board"
     root = "https://4chanarchives.com"
     pattern = r"(?:https?://)?4chanarchives\.com/board/([^/?#]+)(?:/(\d+))?/?$"
-    test = (
-        ("https://4chanarchives.com/board/c/", {
-            "pattern": _4chanarchivesThreadExtractor.pattern,
-            "range": "1-40",
-            "count": 40,
-        }),
-        ("https://4chanarchives.com/board/c"),
-        ("https://4chanarchives.com/board/c/10"),
-    )
+    example = "https://4chanarchives.com/board/a/"
 
     def __init__(self, match):
         Extractor.__init__(self, match)

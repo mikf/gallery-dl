@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2022 Mike Fährmann
+# Copyright 2016-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -23,31 +23,7 @@ class Hentai2readChapterExtractor(Hentai2readBase, ChapterExtractor):
     """Extractor for a single manga chapter from hentai2read.com"""
     archive_fmt = "{chapter_id}_{page}"
     pattern = r"(?:https?://)?(?:www\.)?hentai2read\.com(/[^/?#]+/([^/?#]+))"
-    test = (
-        ("https://hentai2read.com/amazon_elixir/1/", {
-            "url": "964b942cf492b3a129d2fe2608abfc475bc99e71",
-            "keyword": "85645b02d34aa11b3deb6dadd7536863476e1bad",
-        }),
-        ("https://hentai2read.com/popuni_kei_joshi_panic/2.5/", {
-            "pattern": r"https://hentaicdn\.com/hentai"
-                       r"/13088/2\.5y/ccdn00\d+\.jpg",
-            "count": 36,
-            "keyword": {
-                "author": "Kurisu",
-                "chapter": 2,
-                "chapter_id": 75152,
-                "chapter_minor": ".5",
-                "count": 36,
-                "lang": "en",
-                "language": "English",
-                "manga": "Popuni Kei Joshi Panic!",
-                "manga_id": 13088,
-                "page": int,
-                "title": "Popuni Kei Joshi Panic! 2.5",
-                "type": "Original",
-            },
-        }),
-    )
+    example = "https://hentai2read.com/TITLE/1/"
 
     def __init__(self, match):
         self.chapter = match.group(2)
@@ -85,31 +61,7 @@ class Hentai2readMangaExtractor(Hentai2readBase, MangaExtractor):
     """Extractor for hmanga from hentai2read.com"""
     chapterclass = Hentai2readChapterExtractor
     pattern = r"(?:https?://)?(?:www\.)?hentai2read\.com(/[^/?#]+)/?$"
-    test = (
-        ("https://hentai2read.com/amazon_elixir/", {
-            "url": "273073752d418ec887d7f7211e42b832e8c403ba",
-            "keyword": "5c1b712258e78e120907121d3987c71f834d13e1",
-        }),
-        ("https://hentai2read.com/oshikage_riot/", {
-            "url": "6595f920a3088a15c2819c502862d45f8eb6bea6",
-            "keyword": "a2e9724acb221040d4b29bf9aa8cb75b2240d8af",
-        }),
-        ("https://hentai2read.com/popuni_kei_joshi_panic/", {
-            "pattern": Hentai2readChapterExtractor.pattern,
-            "range": "2-3",
-            "keyword": {
-                "chapter": int,
-                "chapter_id": int,
-                "chapter_minor": ".5",
-                "lang": "en",
-                "language": "English",
-                "manga": "Popuni Kei Joshi Panic!",
-                "manga_id": 13088,
-                "title": str,
-                "type": "Original",
-            },
-        }),
-    )
+    example = "https://hentai2read.com/TITLE/"
 
     def chapters(self, page):
         results = []

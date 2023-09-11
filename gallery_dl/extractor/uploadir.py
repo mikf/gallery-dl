@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2022 Mike Fährmann
+# Copyright 2022-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -20,40 +20,7 @@ class UploadirFileExtractor(Extractor):
     filename_fmt = "{filename} ({id}).{extension}"
     archive_fmt = "{id}"
     pattern = r"(?:https?://)?uploadir\.com/(?:user/)?u(?:ploads)?/([^/?#]+)"
-    test = (
-        # image
-        ("https://uploadir.com/u/rd3t46ry", {
-            "pattern": r"https://uploadir\.com/u/rd3t46ry",
-            "count": 1,
-            "keyword": {
-                "extension": "jpg",
-                "filename": "Chloe and Rachel 4K jpg",
-                "id": "rd3t46ry",
-            },
-        }),
-        # archive
-        ("https://uploadir.com/uploads/gxe8ti9v/downloads/new", {
-            "pattern": r"https://uploadir\.com/uploads/gxe8ti9v/downloads",
-            "count": 1,
-            "keyword": {
-                "extension": "zip",
-                "filename": "NYAN-Mods-Pack#1",
-                "id": "gxe8ti9v",
-            },
-        }),
-        # utf-8 filename
-        ("https://uploadir.com/u/fllda6xl", {
-            "pattern": r"https://uploadir\.com/u/fllda6xl",
-            "count": 1,
-            "keyword": {
-                "extension": "png",
-                "filename": "_圖片_🖼_image_",
-                "id": "fllda6xl",
-            },
-        }),
-        ("https://uploadir.com/uploads/rd3t46ry"),
-        ("https://uploadir.com/user/uploads/rd3t46ry"),
-    )
+    example = "https://uploadir.com/u/ID"
 
     def __init__(self, match):
         Extractor.__init__(self, match)

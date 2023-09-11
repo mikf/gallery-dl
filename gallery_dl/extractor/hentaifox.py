@@ -21,40 +21,7 @@ class HentaifoxBase():
 class HentaifoxGalleryExtractor(HentaifoxBase, GalleryExtractor):
     """Extractor for image galleries on hentaifox.com"""
     pattern = r"(?:https?://)?(?:www\.)?hentaifox\.com(/gallery/(\d+))"
-    test = (
-        ("https://hentaifox.com/gallery/56622/", {
-            "pattern": r"https://i\d*\.hentaifox\.com/\d+/\d+/\d+\.jpg",
-            "keyword": "bcd6b67284f378e5cc30b89b761140e3e60fcd92",
-            "count": 24,
-        }),
-        # 'split_tag' element (#1378)
-        ("https://hentaifox.com/gallery/630/", {
-            "keyword": {
-                "artist": ["beti", "betty", "magi", "mimikaki"],
-                "characters": [
-                    "aerith gainsborough",
-                    "tifa lockhart",
-                    "yuffie kisaragi"
-                ],
-                "count": 32,
-                "gallery_id": 630,
-                "group": ["cu-little2"],
-                "parody": ["darkstalkers | vampire", "final fantasy vii"],
-                "tags": ["femdom", "fingering", "masturbation", "yuri"],
-                "title": "Cu-Little Bakanyaï½ž",
-                "type": "doujinshi",
-            },
-        }),
-        # email-protected title (#4201)
-        ("https://hentaifox.com/gallery/35261/", {
-            "keyword": {
-                "gallery_id": 35261,
-                "title": "ManageM@ster!",
-                "artist": ["haritama hiroki"],
-                "group": ["studio n.ball"],
-            },
-        }),
-    )
+    example = "https://hentaifox.com/gallery/12345/"
 
     def __init__(self, match):
         GalleryExtractor.__init__(self, match)
@@ -116,22 +83,7 @@ class HentaifoxSearchExtractor(HentaifoxBase, Extractor):
     subcategory = "search"
     pattern = (r"(?:https?://)?(?:www\.)?hentaifox\.com"
                r"(/(?:parody|tag|artist|character|search|group)/[^/?%#]+)")
-    test = (
-        ("https://hentaifox.com/parody/touhou-project/"),
-        ("https://hentaifox.com/character/reimu-hakurei/"),
-        ("https://hentaifox.com/artist/distance/"),
-        ("https://hentaifox.com/search/touhou/"),
-        ("https://hentaifox.com/group/v-slash/"),
-        ("https://hentaifox.com/tag/heterochromia/", {
-            "pattern": HentaifoxGalleryExtractor.pattern,
-            "count": ">= 60",
-            "keyword": {
-                "url"       : str,
-                "gallery_id": int,
-                "title"     : str,
-            },
-        }),
-    )
+    example = "https://hentaifox.com/tag/TAG/"
 
     def __init__(self, match):
         Extractor.__init__(self, match)

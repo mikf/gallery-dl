@@ -96,15 +96,7 @@ class PoipikuUserExtractor(PoipikuExtractor):
     subcategory = "user"
     pattern = (BASE_PATTERN + r"/(?:IllustListPcV\.jsp\?PG=(\d+)&ID=)?"
                r"(\d+)/?(?:$|[?&#])")
-    test = (
-        ("https://poipiku.com/25049/", {
-            "pattern": r"https://img-org\.poipiku\.com/user_img\d+/000025049"
-                       r"/\d+_\w+\.(jpe?g|png)$",
-            "range": "1-10",
-            "count": 10,
-        }),
-        ("https://poipiku.com/IllustListPcV.jsp?PG=1&ID=25049&KWD=")
-    )
+    example = "https://poipiku.com/12345/"
 
     def __init__(self, match):
         PoipikuExtractor.__init__(self, match)
@@ -136,54 +128,7 @@ class PoipikuPostExtractor(PoipikuExtractor):
     """Extractor for a poipiku post"""
     subcategory = "post"
     pattern = BASE_PATTERN + r"/(\d+)/(\d+)"
-    test = (
-        ("https://poipiku.com/25049/5864576.html", {
-            "pattern": r"https://img-org\.poipiku\.com/user_img\d+/000025049"
-                       r"/005864576_EWN1Y65gQ\.png$",
-            "keyword": {
-                "count": "1",
-                "description": "",
-                "extension": "png",
-                "filename": "005864576_EWN1Y65gQ",
-                "num": 1,
-                "post_category": "DOODLE",
-                "post_id": "5864576",
-                "user_id": "25049",
-                "user_name": "ユキウサギ",
-            },
-        }),
-        ("https://poipiku.com/2166245/6411749.html", {
-            "pattern": r"https://img-org\.poipiku\.com/user_img\d+/002166245"
-                       r"/006411749_\w+\.jpeg$",
-            "count": 4,
-            "keyword": {
-                "count": "4",
-                "description": "絵茶の産物ネタバレあるやつ",
-                "num": int,
-                "post_category": "SPOILER",
-                "post_id": "6411749",
-                "user_id": "2166245",
-                "user_name": "wadahito",
-            },
-        }),
-        # different warning button style
-        ("https://poipiku.com/3572553/5776587.html", {
-            "pattern": r"https://img-org\.poipiku.com/user_img\d+/003572553"
-                       r"/005776587_(\d+_)?\w+\.jpeg$",
-            "count": 3,
-            "keyword": {
-                "count": "3",
-                "description": "ORANGE OASISボスネタバレ<br />曲も大好き<br />"
-                               "2枚目以降はほとんど見えなかった1枚目背景"
-                               "のヒエログリフ小ネタです𓀀",
-                "num": int,
-                "post_category": "SPOILER",
-                "post_id": "5776587",
-                "user_id": "3572553",
-                "user_name": "nagakun",
-            },
-        }),
-    )
+    example = "https://poipiku.com/12345/12345.html"
 
     def __init__(self, match):
         PoipikuExtractor.__init__(self, match)

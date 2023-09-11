@@ -10,7 +10,6 @@ from .common import Extractor, Message
 from .. import text
 import re
 
-
 BASE_PATTERN = (
     r"(?:https?://)?(?:"
     r"(?!www\.)([\w-]+)\.fanbox\.cc|"
@@ -30,12 +29,12 @@ class FanboxExtractor(Extractor):
     def _init(self):
         self.embeds = self.config("embeds", True)
 
-    def items(self):
         if self._warning:
             if not self.cookies_check(("FANBOXSESSID",)):
                 self.log.warning("no 'FANBOXSESSID' cookie set")
             FanboxExtractor._warning = False
 
+    def items(self):
         for content_body, post in self.posts():
             yield Message.Directory, post
             yield from self._get_urls_from_post(content_body, post)
@@ -243,20 +242,7 @@ class FanboxCreatorExtractor(FanboxExtractor):
     """Extractor for a Fanbox creator's works"""
     subcategory = "creator"
     pattern = BASE_PATTERN + r"(?:/posts)?/?$"
-    test = (
-        ("https://xub.fanbox.cc", {
-            "range": "1-15",
-            "count": ">= 15",
-            "keyword": {
-                "creatorId" : "xub",
-                "tags"       : list,
-                "title"      : str,
-            },
-        }),
-        ("https://xub.fanbox.cc/posts"),
-        ("https://www.fanbox.cc/@xub/"),
-        ("https://www.fanbox.cc/@xub/posts"),
-    )
+    example = "https://USER.fanbox.cc/"
 
     def __init__(self, match):
         FanboxExtractor.__init__(self, match)
@@ -271,55 +257,7 @@ class FanboxPostExtractor(FanboxExtractor):
     """Extractor for media from a single Fanbox post"""
     subcategory = "post"
     pattern = BASE_PATTERN + r"/posts/(\d+)"
-    test = (
-        ("https://www.fanbox.cc/@xub/posts/1910054", {
-            "count": 3,
-            "keyword": {
-                "title": "えま★おうがすと",
-                "tags": list,
-                "hasAdultContent": True,
-                "isCoverImage": False
-            },
-        }),
-        # entry post type, image embedded in html of the post
-        ("https://nekoworks.fanbox.cc/posts/915", {
-            "count": 2,
-            "keyword": {
-                "title": "【SAYORI FAN CLUB】お届け内容",
-                "tags": list,
-                "html": str,
-                "hasAdultContent": True
-            },
-        }),
-        # article post type, imageMap, 2 twitter embeds, fanbox embed
-        ("https://steelwire.fanbox.cc/posts/285502", {
-            "options": (("embeds", True),),
-            "count": 10,
-            "keyword": {
-                "title": "イラスト+SS｜義足の炭鉱少年が義足を見せてくれるだけ 【全体公開版】",
-                "tags": list,
-                "articleBody": dict,
-                "hasAdultContent": True
-            },
-        }),
-        # 'content' metadata (#3020)
-        ("https://www.fanbox.cc/@official-en/posts/4326303", {
-            "keyword": {
-                "content": r"re:(?s)^Greetings from FANBOX.\n \nAs of Monday, "
-                           r"September 5th, 2022, we are happy to announce "
-                           r"the start of the FANBOX hashtag event "
-                           r"#MySetupTour ! \nAbout the event\nTo join this "
-                           r"event .+ \nPlease check this page for further "
-                           r"details regarding the Privacy & Terms.\n"
-                           r"https://fanbox.pixiv.help/.+/10184952456601\n\n\n"
-                           r"Thank you for your continued support of FANBOX.$",
-            },
-        }),
-        # imageMap file order (#2718)
-        ("https://mochirong.fanbox.cc/posts/3746116", {
-            "url": "c92ddd06f2efc4a5fe30ec67e21544f79a5c4062",
-        }),
-    )
+    example = "https://USER.fanbox.cc/posts/12345"
 
     def __init__(self, match):
         FanboxExtractor.__init__(self, match)
@@ -334,9 +272,7 @@ class FanboxRedirectExtractor(Extractor):
     category = "fanbox"
     subcategory = "redirect"
     pattern = r"(?:https?://)?(?:www\.)?pixiv\.net/fanbox/creator/(\d+)"
-    test = ("https://www.pixiv.net/fanbox/creator/52336352", {
-        "pattern": FanboxCreatorExtractor.pattern,
-    })
+    example = "https://www.pixiv.net/fanbox/creator/12345"
 
     def __init__(self, match):
         Extractor.__init__(self, match)

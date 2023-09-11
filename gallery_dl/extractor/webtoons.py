@@ -46,6 +46,8 @@ class WebtoonsEpisodeExtractor(WebtoonsBase, GalleryExtractor):
     archive_fmt = "{title_no}_{episode_no}_{num}"
     pattern = (BASE_PATTERN + r"/([^/?#]+)/([^/?#]+)/(?:[^/?#]+))"
                r"/viewer(?:\?([^#'\"]+))")
+    example = ("https://www.webtoons.com/en/GENRE/TITLE/NAME/viewer"
+               "?title_no=123&episode_no=12345")
     test = (
         (("https://www.webtoons.com/en/comedy/safely-endangered"
           "/ep-572-earth/viewer?title_no=352&episode_no=572"), {
@@ -119,28 +121,7 @@ class WebtoonsComicExtractor(WebtoonsBase, Extractor):
     categorytransfer = True
     pattern = (BASE_PATTERN + r"/([^/?#]+)/([^/?#]+))"
                r"/list(?:\?([^#]+))")
-    test = (
-        # english
-        (("https://www.webtoons.com/en/comedy/live-with-yourself/"
-          "list?title_no=919"), {
-            "pattern": WebtoonsEpisodeExtractor.pattern,
-            "range": "1-15",
-            "count": ">= 15",
-        }),
-        # french
-        (("https://www.webtoons.com/fr/romance/subzero/"
-          "list?title_no=1845&page=3"), {
-            "count": ">= 15",
-        }),
-        # (#820)
-        (("https://www.webtoons.com/en/challenge/scoob-and-shag/"
-          "list?title_no=210827&page=9"), {
-            "count": ">= 18",
-        }),
-        # (#1643)
-        ("https://www.webtoons.com/es/romance/lore-olympus/"
-         "list?title_no=1725"),
-    )
+    example = "https://www.webtoons.com/en/GENRE/TITLE/list?title_no=123"
 
     def __init__(self, match):
         Extractor.__init__(self, match)

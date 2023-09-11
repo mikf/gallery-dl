@@ -15,37 +15,9 @@ from .. import text, util
 class PururinGalleryExtractor(GalleryExtractor):
     """Extractor for image galleries on pururin.io"""
     category = "pururin"
-    pattern = r"(?:https?://)?(?:www\.)?pururin\.[ti]o/(?:gallery|read)/(\d+)"
-    test = (
-        ("https://pururin.to/gallery/38661/iowant-2", {
-            "pattern": r"https://i\.pururin\.to/38661/\d+\.jpg",
-            "keyword": {
-                "title"     : "re:I ?owant 2!!",
-                "title_en"  : "re:I ?owant 2!!",
-                "title_ja"  : "",
-                "gallery_id": 38661,
-                "count"     : 19,
-                "artist"    : ["Shoda Norihiro"],
-                "group"     : ["Obsidian Order"],
-                "parody"    : ["Kantai Collection"],
-                "characters": ["Iowa", "Teitoku"],
-                "tags"      : list,
-                "type"      : "Doujinshi",
-                "collection": ["I owant you!"],
-                "convention": ["C92"],
-                "rating"    : float,
-                "uploader"  : "demo",
-                "scanlator" : ["mrwayne", "The Lost Light"],
-                "lang"      : "en",
-                "language"  : "English",
-            }
-        }),
-        ("https://pururin.to/gallery/7661/unisis-team-vanilla", {
-            "count": 17,
-        }),
-        ("https://pururin.io/gallery/38661/iowant-2"),
-    )
     root = "https://pururin.to"
+    pattern = r"(?:https?://)?(?:www\.)?pururin\.[ti]o/(?:gallery|read)/(\d+)"
+    example = "https://pururin.to/gallery/12345/TITLE"
 
     def __init__(self, match):
         self.gallery_id = match.group(1)

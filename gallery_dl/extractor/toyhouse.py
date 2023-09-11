@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2022 Mike Fährmann
+# Copyright 2022-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -99,28 +99,7 @@ class ToyhouseArtExtractor(ToyhouseExtractor):
     """Extractor for artworks of a toyhouse user"""
     subcategory = "art"
     pattern = BASE_PATTERN + r"/([^/?#]+)/art"
-
-    test = (
-        ("https://www.toyhou.se/d-floe/art", {
-            "range": "1-30",
-            "count": 30,
-            "pattern": r"https://f\d+\.toyhou\.se/file/f\d+-toyhou-se"
-                       r"/images/\d+_\w+\.\w+$",
-            "keyword": {
-                "artists": list,
-                "characters": list,
-                "date": "type:datetime",
-                "hash": r"re:\w+",
-                "id": r"re:\d+",
-                "url": str,
-                "user": "d-floe",
-            },
-        }),
-        # protected by Content Warning
-        ("https://www.toyhou.se/kroksoc/art", {
-            "count": ">= 19",
-        }),
-    )
+    example = "https://www.toyhou.se/USER/art"
 
     def posts(self):
         return self._pagination("/{}/art".format(self.user))
@@ -136,37 +115,7 @@ class ToyhouseImageExtractor(ToyhouseExtractor):
                r"(?:www\.)?toyhou\.se/~images|"
                r"f\d+\.toyhou\.se/file/[^/?#]+/(?:image|watermark)s"
                r")/(\d+)")
-    test = (
-        ("https://toyhou.se/~images/40587320", {
-            "content": "058ec8427977ab432c4cc5be5a6dd39ce18713ef",
-            "keyword": {
-                "artists": ["d-floe"],
-                "characters": ["Sumi"],
-                "date": "dt:2021-10-08 01:32:47",
-                "extension": "png",
-                "filename": "40587320_TT1NaBUr3FLkS1p",
-                "hash": "TT1NaBUr3FLkS1p",
-                "id": "40587320",
-                "url": "https://f2.toyhou.se/file/f2-toyhou-se/images"
-                       "/40587320_TT1NaBUr3FLkS1p.png",
-            },
-        }),
-        # direct link, multiple artists
-        (("https://f2.toyhou.se/file/f2-toyhou-se"
-          "/watermarks/36817425_bqhGcwcnU.png?1625561467"), {
-            "keyword": {
-                "artists": [
-                    "http://aminoapps.com/p/92sf3z",
-                    "kroksoc (Color)"],
-                "characters": ["❀Reiichi❀"],
-                "date": "dt:2021-07-03 20:02:02",
-                "hash": "bqhGcwcnU",
-                "id": "36817425",
-            },
-        }),
-        ("https://f2.toyhou.se/file/f2-toyhou-se"
-         "/images/40587320_TT1NaBUr3FLkS1p.png"),
-    )
+    example = "https://toyhou.se/~images/12345"
 
     def posts(self):
         url = "{}/~images/{}".format(self.root, self.user)

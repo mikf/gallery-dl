@@ -55,27 +55,7 @@ class ManganeloBase():
 class ManganeloChapterExtractor(ManganeloBase, ChapterExtractor):
     """Extractor for manga chapters from manganelo.com"""
     pattern = BASE_PATTERN + r"(/(?:manga-\w+|chapter/\w+)/chapter[-_][^/?#]+)"
-    test = (
-        ("https://chapmanganato.com/manga-gn983696/chapter-23", {
-            "pattern": r"https://v\d+\.mkklcdnv6tempv5\.com/img/tab_17/03/23"
-                       r"/39/gn983696/vol_3_chapter_23_24_yen/\d+-[no]\.jpg",
-            "keyword": "17faaea7f0fb8c2675a327bf3aa0bcd7a6311d68",
-            "count": 25,
-        }),
-        ("https://chapmanganelo.com/manga-ti107776/chapter-4", {
-            "pattern": r"https://v\d+\.mkklcdnv6tempv5\.com/img/tab_17/01/92"
-                       r"/08/ti970565/chapter_4_caster/\d+-o\.jpg",
-            "keyword": "06e01fa9b3fc9b5b954c0d4a98f0153b40922ded",
-            "count": 45,
-        }),
-        ("https://chapmanganato.com/manga-no991297/chapter-8", {
-            "keyword": {"chapter": 8, "chapter_minor": "-1"},
-            "count": 20,
-        }),
-        ("https://readmanganato.com/manga-gn983696/chapter-23"),
-        ("https://manganelo.com/chapter/gamers/chapter_15"),
-        ("https://manganelo.com/chapter/gq921227/chapter_23"),
-    )
+    example = "https://chapmanganato.com/manga-ID/chapter-01"
 
     def metadata(self, page):
         extr = text.extract_from(page)
@@ -104,19 +84,7 @@ class ManganeloMangaExtractor(ManganeloBase, MangaExtractor):
     """Extractor for manga from manganelo.com"""
     chapterclass = ManganeloChapterExtractor
     pattern = BASE_PATTERN + r"(/(?:manga[-/]|read_)\w+)/?$"
-    test = (
-        ("https://chapmanganato.com/manga-gn983696", {
-            "pattern": ManganeloChapterExtractor.pattern,
-            "count": ">= 25",
-        }),
-        ("https://m.manganelo.com/manga-ti107776", {
-            "pattern": ManganeloChapterExtractor.pattern,
-            "count": ">= 12",
-        }),
-        ("https://readmanganato.com/manga-gn983696"),
-        ("https://manganelo.com/manga/read_otome_no_teikoku"),
-        ("https://manganelo.com/manga/ol921234/"),
-    )
+    example = "https://manganato.com/manga-ID"
 
     def chapters(self, page):
         results = []

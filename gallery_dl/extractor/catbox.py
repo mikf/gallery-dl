@@ -21,22 +21,7 @@ class CatboxAlbumExtractor(GalleryExtractor):
     directory_fmt = ("{category}", "{album_name} ({album_id})")
     archive_fmt = "{album_id}_{filename}"
     pattern = r"(?:https?://)?(?:www\.)?catbox\.moe(/c/[^/?#]+)"
-    test = (
-        ("https://catbox.moe/c/1igcbe", {
-            "url": "35866a88c29462814f103bc22ec031eaeb380f8a",
-            "content": "70ddb9de3872e2d17cc27e48e6bf395e5c8c0b32",
-            "pattern": r"https://files\.catbox\.moe/\w+\.\w{3}$",
-            "count": 3,
-            "keyword": {
-                "album_id": "1igcbe",
-                "album_name": "test",
-                "date": "dt:2022-08-18 00:00:00",
-                "description": "album test &>",
-            },
-        }),
-        ("https://www.catbox.moe/c/cd90s1"),
-        ("https://catbox.moe/c/w7tm47#"),
-    )
+    example = "https://catbox.moe/c/ID"
 
     def metadata(self, page):
         extr = text.extract_from(page)
@@ -62,15 +47,7 @@ class CatboxFileExtractor(Extractor):
     subcategory = "file"
     archive_fmt = "{filename}"
     pattern = r"(?:https?://)?(?:files|litter|de)\.catbox\.moe/([^/?#]+)"
-    test = (
-        ("https://files.catbox.moe/8ih3y7.png", {
-            "pattern": r"^https://files\.catbox\.moe/8ih3y7\.png$",
-            "content": "0c8768055e4e20e7c7259608b67799171b691140",
-            "count": 1,
-        }),
-        ("https://litter.catbox.moe/t8v3n9.png"),
-        ("https://de.catbox.moe/bjdmz1.jpg"),
-    )
+    example = "https://files.catbox.moe/NAME.EXT"
 
     def items(self):
         url = text.ensure_http_scheme(self.url)

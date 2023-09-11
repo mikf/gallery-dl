@@ -57,48 +57,7 @@ class _8chanThreadExtractor(_8chanExtractor):
     filename_fmt = "{postId}{num:?-//} {filename[:200]}.{extension}"
     archive_fmt = "{boardUri}_{postId}_{num}"
     pattern = BASE_PATTERN + r"/([^/?#]+)/res/(\d+)"
-    test = (
-        ("https://8chan.moe/vhs/res/4.html", {
-            "pattern": r"https://8chan\.moe/\.media/[0-9a-f]{64}\.\w+$",
-            "count": 14,
-            "keyword": {
-                "archived": False,
-                "autoSage": False,
-                "boardDescription": "Film and Cinema",
-                "boardMarkdown": None,
-                "boardName": "Movies",
-                "boardUri": "vhs",
-                "creation": r"re:\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z",
-                "cyclic": False,
-                "email": None,
-                "id": "re:^[0-9a-f]{6}$",
-                "locked": False,
-                "markdown": str,
-                "maxFileCount": 5,
-                "maxFileSize": "32.00 MB",
-                "maxMessageLength": 8001,
-                "message": str,
-                "mime": str,
-                "name": "Anonymous",
-                "num": int,
-                "originalName": str,
-                "path": r"re:/.media/[0-9a-f]{64}\.\w+$",
-                "pinned": False,
-                "postId": int,
-                "signedRole": None,
-                "size": int,
-                "threadId": 4,
-                "thumb": r"re:/.media/t_[0-9a-f]{64}$",
-                "uniquePosters": 9,
-                "usesCustomCss": True,
-                "usesCustomJs": False,
-                "?wsPort": 8880,
-                "?wssPort": 2087,
-            },
-        }),
-        ("https://8chan.se/vhs/res/4.html"),
-        ("https://8chan.cc/vhs/res/4.html"),
-    )
+    example = "https://8chan.moe/a/res/12345.html"
 
     def __init__(self, match):
         _8chanExtractor.__init__(self, match)
@@ -137,15 +96,7 @@ class _8chanBoardExtractor(_8chanExtractor):
     """Extractor for 8chan boards"""
     subcategory = "board"
     pattern = BASE_PATTERN + r"/([^/?#]+)/(?:(\d+)\.html)?$"
-    test = (
-        ("https://8chan.moe/vhs/"),
-        ("https://8chan.moe/vhs/2.html", {
-            "pattern": _8chanThreadExtractor.pattern,
-            "count": 23,
-        }),
-        ("https://8chan.se/vhs/"),
-        ("https://8chan.cc/vhs/"),
-    )
+    example = "https://8chan.moe/a/"
 
     def __init__(self, match):
         _8chanExtractor.__init__(self, match)

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2023 Mike Fährmann, Leonardo Taccari
+# Copyright 2016-2017 Leonardo Taccari
+# Copyright 2017-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -21,45 +22,7 @@ class SlidesharePresentationExtractor(GalleryExtractor):
     archive_fmt = "{presentation}_{num}"
     pattern = (r"(?:https?://)?(?:www\.)?slideshare\.net"
                r"/(?:mobile/)?([^/?#]+)/([^/?#]+)")
-    test = (
-        (("https://www.slideshare.net"
-          "/Slideshare/get-started-with-slide-share"), {
-            "pattern": r"https://image\.slidesharecdn\.com/getstartedwithslide"
-                       r"share-150520173821-lva1-app6892/95/get-started-with-s"
-                       r"lide-share-\d+-1024\.jpg\?cb=\d+",
-            "count": 19,
-            "content": "2b6a191eab60b3978fdacfecf2da302dd45bc108",
-            "keyword": {
-                "description": "Get Started with SlideShare - "
-                               "A Beginngers Guide for Creators",
-                "likes": int,
-                "presentation": "get-started-with-slide-share",
-                "date": "dt:2015-05-20 17:38:21",
-                "title": "Getting Started With SlideShare",
-                "user": "Slideshare",
-                "views": int,
-            },
-        }),
-        # long title and description
-        (("https://www.slideshare.net/pragmaticsolutions/warum-sie-nicht-ihren"
-          "-mitarbeitenden-ndern-sollten-sondern-ihr-managementsystem"), {
-            "url": "d8952260f8bec337dd809a958ec8091350393f6b",
-            "keyword": {
-                "title": "Warum Sie nicht Ihren Mitarbeitenden ändern "
-                         "sollten, sondern Ihr Managementsystem",
-                "description": "Mitarbeitende verhalten sich mehrheitlich so, "
-                               "wie das System es ihnen vorgibt. Welche Voraus"
-                               "setzungen es braucht, damit Ihre Mitarbeitende"
-                               "n ihr ganzes Herzblut einsetzen, bespricht Fre"
-                               "di Schmidli in diesem Referat.",
-            },
-        }),
-        # mobile URL
-        (("https://www.slideshare.net"
-          "/mobile/uqudent/introduction-to-fixed-prosthodontics"), {
-            "url": "72c431cb1eccbb6794f608ecbbc01d52e8768159",
-        }),
-    )
+    example = "https://www.slideshare.net/USER/PRESENTATION"
 
     def __init__(self, match):
         self.user, self.presentation = match.groups()

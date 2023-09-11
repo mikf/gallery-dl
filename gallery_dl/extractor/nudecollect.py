@@ -37,26 +37,8 @@ class NudecollectImageExtractor(NudecollectExtractor):
     pattern = (r"(?:https?://)?(?:www\.)?nudecollect\.com"
                r"(/content/([^/?#]+)/image-(\d+)-pics-(\d+)"
                r"-mirror-(\d+)\.html)")
-    test = (
-        (("https://www.nudecollect.com/content/20201220_Teenpornstorage_"
-          "Patritcy_Vanessa_Lesbian_Lust/image-4-pics-108-mirror-43.html"), {
-            "pattern": (r"https://mirror\d+\.nudecollect\.com/showimage"
-                        r"/nudecollect-8769086487/image00004-5896498214-43"
-                        r"-9689595623/20201220_Teenpornstorage_Patritcy_Vaness"
-                        r"a_Lesbian_Lust/9879560327/nudecollect\.com\.jpg"),
-            "keyword": {
-                "slug"  : ("20201220_Teenpornstorage_Patritcy"
-                           "_Vanessa_Lesbian_Lust"),
-                "title" : ("20201220 Teenpornstorage Patritcy"
-                           " Vanessa Lesbian Lust"),
-                "num"   : 4,
-                "count" : 108,
-                "mirror": 43,
-            },
-        }),
-        (("https://www.nudecollect.com/content/20201220_Teenpornstorage_"
-          "Patritcy_Vanessa_Lesbian_Lust/image-10-pics-108-mirror-43.html")),
-    )
+    example = ("https://www.nudecollect.com/content/12345_TITLE"
+               "/image-1-pics-108-mirror-1.html")
 
     def __init__(self, match):
         NudecollectExtractor.__init__(self, match)
@@ -80,45 +62,8 @@ class NudecollectAlbumExtractor(NudecollectExtractor):
     pattern = (r"(?:https?://)?(?:www\.)?nudecollect\.com"
                r"/content/([^/?#]+)/(?:index-mirror-(\d+)-(\d+)"
                r"|page-\d+-pics-(\d+)-mirror-(\d+))\.html")
-    test = (
-        (("https://www.nudecollect.com/content/20170219_TheWhiteBoxxx_"
-          "Caprice_Tracy_Loves_Hot_ass_fingering_and_sensual_lesbian_sex"
-          "_with_alluring_Czech_babes_x125_1080px/index-mirror-67-125.html"), {
-            "pattern": (r"https://mirror\d+\.nudecollect\.com/showimage"
-                        r"/nudecollect-8769086487/image00\d\d\d-5896498214-67"
-                        r"-9689595623/20170219_TheWhiteBoxxx_Caprice"
-                        r"_Tracy_Loves_Hot_ass_fingering_and_sensual_"
-                        r"lesbian_sex_with_alluring_Czech_babes_x125_1080px"
-                        r"/9879560327/nudecollect\.com\.jpg"),
-            "count"  : 125,
-            "keyword": {
-                "slug"  : ("20170219_TheWhiteBoxxx_Caprice_Tracy_Loves_Hot_"
-                           "ass_fingering_and_sensual_lesbian_sex_with_"
-                           "alluring_Czech_babes_x125_1080px"),
-                "title" : ("20170219 TheWhiteBoxxx Caprice Tracy Loves Hot ass"
-                           " fingering and sensual lesbian sex with alluring"
-                           " Czech babes x125 1080px"),
-                "num"   : int,
-                "mirror": 67,
-            },
-        }),
-        (("https://www.nudecollect.com/content/20201220_Teenpornstorage_"
-          "Patritcy_Vanessa_Lesbian_Lust/page-1-pics-108-mirror-43.html"), {
-            "pattern": (r"https://mirror\d+\.nudecollect\.com/showimage"
-                        r"/nudecollect-8769086487/image00\d\d\d-5896498214-43"
-                        r"-9689595623/20201220_Teenpornstorage_Patritcy_Vaness"
-                        r"a_Lesbian_Lust/9879560327/nudecollect\.com\.jpg"),
-            "count"  : 108,
-            "keyword": {
-                "slug"  : ("20201220_Teenpornstorage_Patritcy"
-                           "_Vanessa_Lesbian_Lust"),
-                "title" : ("20201220 Teenpornstorage Patritcy"
-                           " Vanessa Lesbian Lust"),
-                "num"   : int,
-                "mirror": 43,
-            },
-        }),
-    )
+    example = ("https://www.nudecollect.com/content/12345_TITLE"
+               "/index-mirror-01-123.html")
 
     def __init__(self, match):
         self.slug = match.group(1)

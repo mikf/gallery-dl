@@ -195,16 +195,7 @@ class RedditSubredditExtractor(RedditExtractor):
     subcategory = "subreddit"
     pattern = (r"(?:https?://)?(?:\w+\.)?reddit\.com"
                r"(/r/[^/?#]+(?:/([a-z]+))?)/?(?:\?([^#]*))?(?:$|#)")
-    test = (
-        ("https://www.reddit.com/r/lavaporn/", {
-            "range": "1-20",
-            "count": ">= 20",
-        }),
-        ("https://www.reddit.com/r/lavaporn/top/?sort=top&t=month"),
-        ("https://old.reddit.com/r/lavaporn/"),
-        ("https://np.reddit.com/r/lavaporn/"),
-        ("https://m.reddit.com/r/lavaporn/"),
-    )
+    example = "https://www.reddit.com/r/SUBREDDIT/"
 
     def __init__(self, match):
         self.subreddit, sub, params = match.groups()
@@ -222,13 +213,7 @@ class RedditHomeExtractor(RedditSubredditExtractor):
     subcategory = "home"
     pattern = (r"(?:https?://)?(?:\w+\.)?reddit\.com"
                r"((?:/([a-z]+))?)/?(?:\?([^#]*))?(?:$|#)")
-    test = (
-        ("https://www.reddit.com/", {
-            "range": "1-20",
-            "count": ">= 20",
-        }),
-        ("https://old.reddit.com/top/?sort=top&t=month"),
-    )
+    example = "https://www.reddit.com/"
 
 
 class RedditUserExtractor(RedditExtractor):
@@ -236,14 +221,7 @@ class RedditUserExtractor(RedditExtractor):
     subcategory = "user"
     pattern = (r"(?:https?://)?(?:\w+\.)?reddit\.com/u(?:ser)?/"
                r"([^/?#]+(?:/([a-z]+))?)/?(?:\?([^#]*))?$")
-    test = (
-        ("https://www.reddit.com/user/username/", {
-            "count": ">= 2",
-        }),
-        ("https://www.reddit.com/user/username/gilded/?sort=top&t=month"),
-        ("https://old.reddit.com/user/username/"),
-        ("https://www.reddit.com/u/username/"),
-    )
+    example = "https://www.reddit.com/user/USER/"
 
     def __init__(self, match):
         self.user, sub, params = match.groups()
@@ -262,76 +240,7 @@ class RedditSubmissionExtractor(RedditExtractor):
     pattern = (r"(?:https?://)?(?:"
                r"(?:\w+\.)?reddit\.com/(?:(?:r|u|user)/[^/?#]+"
                r"/comments|gallery)|redd\.it)/([a-z0-9]+)")
-    test = (
-        ("https://www.reddit.com/r/lavaporn/comments/8cqhub/", {
-            "pattern": r"https://c2.staticflickr.com/8/7272/\w+_k.jpg",
-            "count": 1,
-        }),
-        ("https://www.reddit.com/r/lavaporn/comments/8cqhub/", {
-            "options": (("comments", 500),),
-            "pattern": r"https://",
-            "count": 3,
-        }),
-        ("https://www.reddit.com/gallery/hrrh23", {
-            "url": "25b91ede15459470274dd17291424b037ed8b0ae",
-            "content": "1e7dde4ee7d5f4c4b45749abfd15b2dbfa27df3f",
-            "count": 3,
-        }),
-        # video
-        ("https://www.reddit.com/r/aww/comments/90bu6w/", {
-            "pattern": r"ytdl:https://v.redd.it/gyh95hiqc0b11",
-            "count": 1,
-        }),
-        # video (ytdl)
-        ("https://www.reddit.com/r/aww/comments/90bu6w/", {
-            "options": (("videos", "ytdl"),),
-            "pattern": r"ytdl:https://www.reddit.com/r/aww/comments/90bu6w"
-                       r"/heat_index_was_110_degrees_so_we_offered_him_a/",
-            "count": 1,
-        }),
-        # video (dash)
-        ("https://www.reddit.com/r/aww/comments/90bu6w/", {
-            "options": (("videos", "dash"),),
-            "pattern": r"ytdl:https://v.redd.it/gyh95hiqc0b11"
-                       r"/DASHPlaylist.mpd\?a=",
-            "count": 1,
-        }),
-        # deleted gallery (#953)
-        ("https://www.reddit.com/gallery/icfgzv", {
-            "count": 0,
-        }),
-        # animated gallery items (#955)
-        ("https://www.reddit.com/r/araragi/comments/ib32hm", {
-            "pattern": r"https://i\.redd\.it/\w+\.gif",
-            "count": 2,
-        }),
-        # "failed" gallery item (#1127)
-        ("https://www.reddit.com/r/cosplay/comments/jvwaqr", {
-            "count": 1,
-        }),
-        # gallery with no 'media_metadata' (#2001)
-        ("https://www.reddit.com/r/kpopfap/comments/qjj04q/", {
-            "count": 0,
-        }),
-        # user page submission (#2301)
-        ("https://www.reddit.com/user/TheSpiritTree/comments/srilyf/", {
-            "pattern": r"https://i.redd.it/8fpgv17yqlh81.jpg",
-            "count": 1,
-        }),
-        # cross-posted video (#887, #3586, #3976)
-        ("https://www.reddit.com/r/kittengifs/comments/12m0b8d", {
-            "pattern": r"ytdl:https://v\.redd\.it/cvabpjacrvta1",
-        }),
-        # preview.redd.it (#4470)
-        ("https://www.reddit.com/r/europe/comments/pm4531/the_name_of/", {
-            "pattern": r"https://preview.redd.it/u9ud4k6xaf271.jpg?auto=webp"
-                       r"&s=19b1334cb4409111cda136c01f7b44c2c42bf9fb",
-        }),
-        ("https://old.reddit.com/r/lavaporn/comments/2a00np/"),
-        ("https://np.reddit.com/r/lavaporn/comments/2a00np/"),
-        ("https://m.reddit.com/r/lavaporn/comments/2a00np/"),
-        ("https://redd.it/2a00np/"),
-    )
+    example = "https://www.reddit.com/r/SUBREDDIT/comments/ID/"
 
     def __init__(self, match):
         RedditExtractor.__init__(self, match)
@@ -348,22 +257,7 @@ class RedditImageExtractor(Extractor):
     archive_fmt = "{filename}"
     pattern = (r"(?:https?://)?((?:i|preview)\.redd\.it|i\.reddituploads\.com)"
                r"/([^/?#]+)(\?[^#]*)?")
-    test = (
-        ("https://i.redd.it/upjtjcx2npzz.jpg", {
-            "url": "0de614900feef103e580b632190458c0b62b641a",
-            "content": "cc9a68cf286708d5ce23c68e79cd9cf7826db6a3",
-        }),
-        (("https://i.reddituploads.com/0f44f1b1fca2461f957c713d9592617d"
-          "?fit=max&h=1536&w=1536&s=e96ce7846b3c8e1f921d2ce2671fb5e2"), {
-            "url": "f24f25efcedaddeec802e46c60d77ef975dc52a5",
-            "content": "541dbcc3ad77aa01ee21ca49843c5e382371fae7",
-        }),
-        # preview.redd.it -> i.redd.it
-        (("https://preview.redd.it/00af44lpn0u51.jpg?width=960&crop=smart"
-         "&auto=webp&v=enabled&s=dbca8ab84033f4a433772d9c15dbe0429c74e8ac"), {
-            "pattern": r"^https://i\.redd\.it/00af44lpn0u51\.jpg$"
-        }),
-    )
+    example = "https://i.redd.it/NAME.EXT"
 
     def __init__(self, match):
         Extractor.__init__(self, match)

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019 Mike Fährmann
+# Copyright 2019-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -27,17 +27,7 @@ class NaverPostExtractor(NaverBase, GalleryExtractor):
     archive_fmt = "{blog[id]}_{post[num]}_{num}"
     pattern = (r"(?:https?://)?blog\.naver\.com/"
                r"(?:PostView\.nhn\?blogId=(\w+)&logNo=(\d+)|(\w+)/(\d+)/?$)")
-    test = (
-        ("https://blog.naver.com/rlfqjxm0/221430673006", {
-            "url": "6c694f3aced075ed5e9511f1e796d14cb26619cc",
-            "keyword": "a6e23d19afbee86b37d6e7ad934650c379d2cb1e",
-        }),
-        (("https://blog.naver.com/PostView.nhn"
-          "?blogId=rlfqjxm0&logNo=221430673006"), {
-            "url": "6c694f3aced075ed5e9511f1e796d14cb26619cc",
-            "keyword": "a6e23d19afbee86b37d6e7ad934650c379d2cb1e",
-        }),
-    )
+    example = "https://blog.naver.com/BLOGID/12345"
 
     def __init__(self, match):
         blog_id = match.group(1)
@@ -84,18 +74,7 @@ class NaverBlogExtractor(NaverBase, Extractor):
     categorytransfer = True
     pattern = (r"(?:https?://)?blog\.naver\.com/"
                r"(?:PostList.nhn\?(?:[^&#]+&)*blogId=([^&#]+)|(\w+)/?$)")
-    test = (
-        ("https://blog.naver.com/gukjung", {
-            "pattern": NaverPostExtractor.pattern,
-            "count": 12,
-            "range": "1-12",
-        }),
-        ("https://blog.naver.com/PostList.nhn?blogId=gukjung", {
-            "pattern": NaverPostExtractor.pattern,
-            "count": 12,
-            "range": "1-12",
-        }),
-    )
+    example = "https://blog.naver.com/BLOGID"
 
     def __init__(self, match):
         Extractor.__init__(self, match)
