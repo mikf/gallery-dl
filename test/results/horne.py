@@ -68,7 +68,7 @@ __tests__ = (
 {
     "#url"     : "https://horne.red/like_my.php",
     "#category": ("Nijie", "horne", "followed"),
-    "#class"   : nijie.NijiefollowedExtractor,
+    "#class"   : nijie.NijieFollowedExtractor,
 },
 
 {
