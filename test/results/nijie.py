@@ -86,7 +86,7 @@ __tests__ = (
 {
     "#url"     : "https://nijie.info/like_my.php",
     "#category": ("Nijie", "nijie", "followed"),
-    "#class"   : nijie.NijiefollowedExtractor,
+    "#class"   : nijie.NijieFollowedExtractor,
 },
 
 {

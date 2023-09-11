@@ -19,6 +19,8 @@ __tests__ = (
 
 {
     "#url"     : "https://35photo.pro/suhoveev",
+    "#comment" : "last photo ID (1267028) isn't given as 'photo-id=\"<id>\" - "
+                 "there are only 23 photos without the last one",
     "#category": ("", "35photo", "user"),
     "#class"   : _35photo._35photoUserExtractor,
     "#count"   : ">= 33",

@@ -9,7 +9,7 @@ from gallery_dl.extractor import generic
 
 __tests__ = (
 {
-    "#url"     : "https://www.nongnu.org/lzip/",
+    "#url"     : "generic:https://www.nongnu.org/lzip/",
     "#category": ("", "generic", ""),
     "#class"   : generic.GenericExtractor,
     "#count"       : 1,
@@ -22,7 +22,7 @@ __tests__ = (
 },
 
 {
-    "#url"     : "https://räksmörgås.josefsson.org/",
+    "#url"     : "generic:https://räksmörgås.josefsson.org/",
     "#category": ("", "generic", ""),
     "#class"   : generic.GenericExtractor,
     "#pattern" : "^https://räksmörgås.josefsson.org/",
@@ -30,37 +30,37 @@ __tests__ = (
 },
 
 {
-    "#url"     : "https://en.wikipedia.org/Main_Page",
+    "#url"     : "generic:https://en.wikipedia.org/Main_Page",
     "#category": ("", "generic", ""),
     "#class"   : generic.GenericExtractor,
 },
 
 {
-    "#url"     : "https://example.org/path/to/file?que=1?&ry=2/#fragment",
+    "#url"     : "generic:https://example.org/path/to/file?que=1?&ry=2/#fragment",
     "#category": ("", "generic", ""),
     "#class"   : generic.GenericExtractor,
 },
 
 {
-    "#url"     : "https://example.org/%27%3C%23/%23%3E%27.htm?key=%3C%26%3E",
+    "#url"     : "generic:https://example.org/%27%3C%23/%23%3E%27.htm?key=%3C%26%3E",
     "#category": ("", "generic", ""),
     "#class"   : generic.GenericExtractor,
 },
 
 {
-    "#url"     : "https://en.wikipedia.org/Main_Page",
+    "#url"     : "generic:https://en.wikipedia.org/Main_Page",
     "#category": ("", "generic", ""),
     "#class"   : generic.GenericExtractor,
 },
 
 {
-    "#url"     : "https://example.org/path/to/file?que=1?&ry=2/#fragment",
+    "#url"     : "generic:https://example.org/path/to/file?que=1?&ry=2/#fragment",
     "#category": ("", "generic", ""),
     "#class"   : generic.GenericExtractor,
 },
 
 {
-    "#url"     : "https://example.org/%27%3C%23/%23%3E%27.htm?key=%3C%26%3E",
+    "#url"     : "generic:https://example.org/%27%3C%23/%23%3E%27.htm?key=%3C%26%3E",
     "#category": ("", "generic", ""),
     "#class"   : generic.GenericExtractor,
 },
