@@ -196,16 +196,15 @@ def main():
 
         elif args.list_extractors:
             write = sys.stdout.write
-            fmt = "{}\n{}\nCategory: {} - Subcategory: {}{}\n\n".format
+            fmt = ("{}{}\nCategory: {} - Subcategory: {}"
+                   "\nExample : {}\n\n").format
 
             for extr in extractor.extractors():
-                if not extr.__doc__:
-                    continue
-                test = next(extr._get_tests(), None)
                 write(fmt(
-                    extr.__name__, extr.__doc__,
+                    extr.__name__,
+                    "\n" + extr.__doc__ if extr.__doc__ else "",
                     extr.category, extr.subcategory,
-                    "\nExample : " + test[0] if test else "",
+                    extr.example,
                 ))
 
         elif args.clear_cache:
