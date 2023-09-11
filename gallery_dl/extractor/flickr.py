@@ -110,18 +110,7 @@ class FlickrAlbumExtractor(FlickrExtractor):
                      "Albums", "{album[id]} {album[title]}")
     archive_fmt = "a_{album[id]}_{id}"
     pattern = BASE_PATTERN + r"/photos/([^/?#]+)/(?:album|set)s(?:/(\d+))?"
-    test = (
-        (("https://www.flickr.com/photos/shona_s/albums/72157633471741607"), {
-            "pattern": FlickrImageExtractor.pattern,
-            "count": 6,
-        }),
-        ("https://www.flickr.com/photos/shona_s/albums", {
-            "pattern": pattern,
-            "count": 2,
-        }),
-        ("https://secure.flickr.com/photos/shona_s/albums"),
-        ("https://m.flickr.com/photos/shona_s/albums"),
-    )
+    example = "https://www.flickr.com/photos/USER/albums/12345"
 
     def __init__(self, match):
         FlickrExtractor.__init__(self, match)
