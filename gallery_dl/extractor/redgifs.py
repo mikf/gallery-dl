@@ -111,8 +111,9 @@ class RedgifsUserExtractor(RedgifsExtractor):
 class RedgifsCollectionExtractor(RedgifsExtractor):
     """Extractor for an individual user collection"""
     subcategory = "collection"
-    directory_fmt = ("{category}", "{userName}", "{folderName}")
-    archive_fmt = "{folderId}_{id}"
+    directory_fmt = (
+        "{category}", "{collection[userName]}", "{collection[folderName]}")
+    archive_fmt = "{collection[folderId]}_{id}"
     pattern = (r"(?:https?://)?(?:www\.)?redgifs\.com/users"
                r"/([^/?#]+)/collections/([^/?#]+)")
     test = (
@@ -133,9 +134,9 @@ class RedgifsCollectionExtractor(RedgifsExtractor):
         self.collection_id = match.group(2)
 
     def metadata(self):
-        data = {"userName": self.key}
-        data.update(self.api.collection_info(self.key, self.collection_id))
-        return data
+        collection = self.api.collection_info(self.key, self.collection_id)
+        collection["userName"] = self.key
+        return {"collection": collection}
 
     def gifs(self):
         return self.api.collection(self.key, self.collection_id)
