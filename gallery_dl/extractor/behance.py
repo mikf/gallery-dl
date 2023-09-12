@@ -177,7 +177,13 @@ class BehanceGalleryExtractor(BehanceExtractor):
                 append((url, module))
 
             elif mtype == "VideoModule":
-                renditions = module["videoData"]["renditions"]
+                try:
+                    renditions = module["videoData"]["renditions"]
+                except Exception:
+                    self.log.warning("No download URLs for video %s",
+                                     module.get("id") or "???")
+                    continue
+
                 try:
                     url = [
                         r["url"] for r in renditions
@@ -186,6 +192,7 @@ class BehanceGalleryExtractor(BehanceExtractor):
                 except Exception as exc:
                     self.log.debug("%s: %s", exc.__class__.__name__, exc)
                     url = "ytdl:" + renditions[-1]["url"]
+
                 append((url, module))
 
             elif mtype == "MediaCollectionModule":
