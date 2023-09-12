@@ -97,9 +97,13 @@ class RedditExtractor(Extractor):
                                 ' href="', '"'):
                             urls.append((url, submission))
                     for comment in comments:
-                        for url in text.extract_iter(
-                                comment["body_html"] or "", ' href="', '"'):
-                            urls.append((url, comment))
+                        html = comment["body_html"] or ""
+                        if ' href="' in html:
+                            comment["submission"] = submission
+                            comment["date"] = text.parse_timestamp(
+                                comment["created_utc"])
+                            for url in text.extract_iter(html, ' href="', '"'):
+                                urls.append((url, comment))
 
                 for url, data in urls:
                     if not url or url[0] == "#":
