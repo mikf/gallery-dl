@@ -71,6 +71,12 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://mastodon.social/@0x4f/following",
+    "#category": ("mastodon", "mastodon.social", "following"),
+    "#class"   : mastodon.MastodonFollowingExtractor,
+},
+
+{
     "#url"     : "https://mastodon.social/users/id:10843/following",
     "#category": ("mastodon", "mastodon.social", "following"),
     "#class"   : mastodon.MastodonFollowingExtractor,
