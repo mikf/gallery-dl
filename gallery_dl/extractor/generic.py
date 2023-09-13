@@ -34,31 +34,7 @@ class GenericExtractor(Extractor):
         r"(?:\?(?P<query>[^#]*))?"         # optional query
         r"(?:\#(?P<fragment>.*))?"         # optional fragment
     )
-
-    test = (
-        ("generic:https://www.nongnu.org/lzip/", {
-            "count": 1,
-            "content": "40be5c77773d3e91db6e1c5df720ee30afb62368",
-            "keyword": {
-                "description": "Lossless data compressor",
-                "imageurl": "https://www.nongnu.org/lzip/lzip.png",
-                "keywords": "lzip, clzip, plzip, lzlib, LZMA, bzip2, "
-                            "gzip, data compression, GNU, free software",
-                "pageurl": "https://www.nongnu.org/lzip/",
-            },
-        }),
-        # internationalized domain name
-        ("generic:https://räksmörgås.josefsson.org/", {
-            "count": 2,
-            "pattern": "^https://räksmörgås.josefsson.org/",
-        }),
-        ("g:https://en.wikipedia.org/Main_Page"),
-        ("g:https://example.org/path/to/file?que=1?&ry=2/#fragment"),
-        ("g:https://example.org/%27%3C%23/%23%3E%27.htm?key=%3C%26%3E"),
-        ("generic:https://en.wikipedia.org/Main_Page"),
-        ("generic:https://example.org/path/to/file?que=1?&ry=2/#fragment"),
-        ("generic:https://example.org/%27%3C%23/%23%3E%27.htm?key=%3C%26%3E"),
-    )
+    example = "generic:https://www.nongnu.org/lzip/"
 
     def __init__(self, match):
         Extractor.__init__(self, match)

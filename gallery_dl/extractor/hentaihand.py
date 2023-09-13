@@ -17,27 +17,7 @@ class HentaihandGalleryExtractor(GalleryExtractor):
     category = "hentaihand"
     root = "https://hentaihand.com"
     pattern = r"(?:https?://)?(?:www\.)?hentaihand\.com/\w+/comic/([\w-]+)"
-    test = (
-        (("https://hentaihand.com/en/comic/c75-takumi-na-muchi-choudenji-hou-"
-          "no-aishi-kata-how-to-love-a-super-electromagnetic-gun-toaru-kagaku-"
-          "no-railgun-english"), {
-            "pattern": r"https://cdn.hentaihand.com/.*/images/37387/\d+.jpg$",
-            "count": 50,
-            "keyword": {
-                "artists"   : ["Takumi Na Muchi"],
-                "date"      : "dt:2014-06-28 00:00:00",
-                "gallery_id": 37387,
-                "lang"      : "en",
-                "language"  : "English",
-                "parodies"  : ["Toaru Kagaku No Railgun"],
-                "relationships": list,
-                "tags"      : list,
-                "title"     : r"re:\(C75\) \[Takumi na Muchi\] Choudenji Hou ",
-                "title_alt" : r"re:\(C75\) \[たくみなむち\] 超電磁砲のあいしかた",
-                "type"      : "Doujinshi",
-            },
-        }),
-    )
+    example = "https://hentaihand.com/en/comic/TITLE"
 
     def __init__(self, match):
         self.slug = match.group(1)
@@ -76,15 +56,7 @@ class HentaihandTagExtractor(Extractor):
     pattern = (r"(?i)(?:https?://)?(?:www\.)?hentaihand\.com"
                r"/\w+/(parody|character|tag|artist|group|language"
                r"|category|relationship)/([^/?#]+)")
-    test = (
-        ("https://hentaihand.com/en/artist/takumi-na-muchi", {
-            "pattern": HentaihandGalleryExtractor.pattern,
-            "count": ">= 6",
-        }),
-        ("https://hentaihand.com/en/tag/full-color"),
-        ("https://hentaihand.com/fr/language/japanese"),
-        ("https://hentaihand.com/zh/category/manga"),
-    )
+    example = "https://hentaihand.com/en/tag/TAG"
 
     def __init__(self, match):
         Extractor.__init__(self, match)

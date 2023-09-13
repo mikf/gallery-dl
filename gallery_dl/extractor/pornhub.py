@@ -56,30 +56,7 @@ class PornhubGalleryExtractor(PornhubExtractor):
     filename_fmt = "{num:>03}_{id}.{extension}"
     archive_fmt = "{id}"
     pattern = BASE_PATTERN + r"/album/(\d+)"
-    test = (
-        ("https://www.pornhub.com/album/19289801", {
-            "pattern": r"https://\w+.phncdn.com/pics/albums/\d+/\d+/\d+/\d+/",
-            "count": ">= 300",
-            "keyword": {
-                "id"     : int,
-                "num"    : int,
-                "score"  : int,
-                "views"  : int,
-                "caption": str,
-                "user"   : "Danika Mori",
-                "gallery": {
-                    "id"   : 19289801,
-                    "score": int,
-                    "views": int,
-                    "tags" : list,
-                    "title": "Danika Mori Best Moments",
-                },
-            },
-        }),
-        ("https://www.pornhub.com/album/69040172", {
-            "exception": exception.AuthorizationError,
-        }),
-    )
+    example = "https://www.pornhub.com/album/12345"
 
     def __init__(self, match):
         PornhubExtractor.__init__(self, match)
@@ -149,22 +126,7 @@ class PornhubGifExtractor(PornhubExtractor):
     filename_fmt = "{id} {title}.{extension}"
     archive_fmt = "{id}"
     pattern = BASE_PATTERN + r"/gif/(\d+)"
-    test = (
-        ("https://www.pornhub.com/gif/33643461", {
-            "pattern": r"https://\w+\.phncdn\.com/pics/gifs"
-                       r"/033/643/461/33643461a\.webm",
-            "keyword": {
-                "date": "dt:2020-10-31 00:00:00",
-                "extension": "webm",
-                "filename": "33643461a",
-                "id": "33643461",
-                "tags": ["big boobs", "lana rhoades"],
-                "title": "Big boobs",
-                "url": str,
-                "user": "Lana Rhoades",
-            },
-        }),
-    )
+    example = "https://www.pornhub.com/gif/12345"
 
     def __init__(self, match):
         PornhubExtractor.__init__(self, match)
@@ -192,7 +154,7 @@ class PornhubUserExtractor(PornhubExtractor):
     """Extractor for a pornhub user"""
     subcategory = "user"
     pattern = BASE_PATTERN + r"/((?:users|model|pornstar)/[^/?#]+)/?$"
-    test = ("https://www.pornhub.com/pornstar/danika-mori",)
+    example = "https://www.pornhub.com/model/USER"
 
     def __init__(self, match):
         PornhubExtractor.__init__(self, match)
@@ -214,16 +176,7 @@ class PornhubPhotosExtractor(PornhubExtractor):
     subcategory = "photos"
     pattern = (BASE_PATTERN + r"/((?:users|model|pornstar)/[^/?#]+)"
                "/(photos(?:/[^/?#]+)?)")
-    test = (
-        ("https://www.pornhub.com/pornstar/danika-mori/photos", {
-            "pattern": PornhubGalleryExtractor.pattern,
-            "count": ">= 6",
-        }),
-        ("https://www.pornhub.com/users/flyings0l0/photos/public"),
-        ("https://www.pornhub.com/users/flyings0l0/photos/private"),
-        ("https://www.pornhub.com/users/flyings0l0/photos/favorites"),
-        ("https://www.pornhub.com/model/bossgirl/photos"),
-    )
+    example = "https://www.pornhub.com/model/USER/photos"
 
     def __init__(self, match):
         PornhubExtractor.__init__(self, match)
@@ -244,14 +197,7 @@ class PornhubGifsExtractor(PornhubExtractor):
     subcategory = "gifs"
     pattern = (BASE_PATTERN + r"/((?:users|model|pornstar)/[^/?#]+)"
                "/(gifs(?:/[^/?#]+)?)")
-    test = (
-        ("https://www.pornhub.com/pornstar/danika-mori/gifs", {
-            "pattern": PornhubGifExtractor.pattern,
-            "count": ">= 42",
-        }),
-        ("https://www.pornhub.com/users/flyings0l0/gifs"),
-        ("https://www.pornhub.com/model/bossgirl/gifs/video"),
-    )
+    example = "https://www.pornhub.com/model/USER/gifs"
 
     def __init__(self, match):
         PornhubExtractor.__init__(self, match)

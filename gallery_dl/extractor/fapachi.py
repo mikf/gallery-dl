@@ -14,25 +14,13 @@ class FapachiPostExtractor(Extractor):
     """Extractor for individual posts on fapachi.com"""
     category = "fapachi"
     subcategory = "post"
+    root = "https://fapachi.com"
     directory_fmt = ("{category}", "{user}")
     filename_fmt = "{user}_{id}.{extension}"
     archive_fmt = "{user}_{id}"
     pattern = (r"(?:https?://)?(?:www\.)?fapachi\.com"
                r"/(?!search/)([^/?#]+)/media/(\d+)")
-    root = "https://fapachi.com"
-    test = (
-        # NSFW
-        ("https://fapachi.com/sonson/media/0082", {
-            "pattern": (r"https://fapachi\.com/models/s/o/"
-                        r"sonson/1/full/sonson_0082\.jpeg"),
-            "keyword": {
-                "user": "sonson",
-                "id"  : "0082",
-            },
-        }),
-        # NSFW
-        ("https://fapachi.com/ferxiita/media/0159"),
-    )
+    example = "https://fapachi.com/MODEL/media/12345"
 
     def __init__(self, match):
         Extractor.__init__(self, match)
@@ -54,17 +42,10 @@ class FapachiUserExtractor(Extractor):
     """Extractor for all posts from a fapachi user"""
     category = "fapachi"
     subcategory = "user"
+    root = "https://fapachi.com"
     pattern = (r"(?:https?://)?(?:www\.)?fapachi\.com"
                r"/(?!search(?:/|$))([^/?#]+)(?:/page/(\d+))?$")
-    root = "https://fapachi.com"
-    test = (
-        ("https://fapachi.com/sonson", {
-            "pattern": FapachiPostExtractor.pattern,
-            "range"  : "1-50",
-            "count"  : 50,
-        }),
-        ("https://fapachi.com/ferxiita/page/3"),
-    )
+    example = "https://fapachi.com/MODEL"
 
     def __init__(self, match):
         Extractor.__init__(self, match)

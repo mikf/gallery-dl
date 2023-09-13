@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019 Mike Fährmann
+# Copyright 2019-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -18,17 +18,7 @@ class AdultempireGalleryExtractor(GalleryExtractor):
     root = "https://www.adultempire.com"
     pattern = (r"(?:https?://)?(?:www\.)?adult(?:dvd)?empire\.com"
                r"(/(\d+)/gallery\.html)")
-    test = (
-        ("https://www.adultempire.com/5998/gallery.html", {
-            "range": "1",
-            "keyword": "5b3266e69801db0d78c22181da23bc102886e027",
-            "content": "5c6beb31e5e3cdc90ee5910d5c30f9aaec977b9e",
-        }),
-        ("https://www.adultdvdempire.com/5683/gallery.html", {
-            "url": "b12cd1a65cae8019d837505adb4d6a2c1ed4d70d",
-            "keyword": "8d448d79c4ac5f5b10a3019d5b5129ddb43655e5",
-        }),
-    )
+    example = "https://www.adultempire.com/12345/gallery.html"
 
     def __init__(self, match):
         GalleryExtractor.__init__(self, match)

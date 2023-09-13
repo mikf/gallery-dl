@@ -72,17 +72,7 @@ class VipergirlsThreadExtractor(VipergirlsExtractor):
     """Extractor for vipergirls threads"""
     subcategory = "thread"
     pattern = BASE_PATTERN + r"/threads/(\d+)(?:-[^/?#]+)?(/page\d+)?$"
-    test = (
-        (("https://vipergirls.to/threads/4328304"
-          "-2011-05-28-Danica-Simply-Beautiful-x112-4500x3000"), {
-            "url": "0d75cb42777f5bebc0d284d1d38cb90c750c61d9",
-            "count": 225,
-        }),
-        ("https://vipergirls.to/threads/6858916-Karina/page4", {
-            "count": 1279,
-        }),
-        ("https://vipergirls.to/threads/4328304"),
-    )
+    example = "https://vipergirls.to/threads/12345-TITLE"
 
     def __init__(self, match):
         VipergirlsExtractor.__init__(self, match)
@@ -103,21 +93,7 @@ class VipergirlsPostExtractor(VipergirlsExtractor):
     subcategory = "post"
     pattern = (BASE_PATTERN +
                r"/threads/(\d+)(?:-[^/?#]+)?\?p=\d+[^#]*#post(\d+)")
-    test = (
-        (("https://vipergirls.to/threads/4328304-2011-05-28-Danica-Simply-"
-          "Beautiful-x112-4500x3000?p=116038081&viewfull=1#post116038081"), {
-            "pattern": r"https://vipr\.im/\w{12}$",
-            "range": "2-113",
-            "count": 112,
-            "keyword": {
-                "id": "116038081",
-                "imagecount": "113",
-                "number": "116038081",
-                "thread_id": "4328304",
-                "title": "FemJoy Danica - Simply Beautiful (x112) 3000x4500",
-            },
-        }),
-    )
+    example = "https://vipergirls.to/threads/12345-TITLE?p=23456#post23456"
 
     def __init__(self, match):
         VipergirlsExtractor.__init__(self, match)

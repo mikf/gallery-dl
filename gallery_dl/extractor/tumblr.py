@@ -273,59 +273,7 @@ class TumblrUserExtractor(TumblrExtractor):
     """Extractor for a Tumblr user's posts"""
     subcategory = "user"
     pattern = BASE_PATTERN + r"(?:/page/\d+|/archive)?/?$"
-    test = (
-        ("http://demo.tumblr.com/", {
-            "pattern": r"https://\d+\.media\.tumblr\.com"
-                       r"/tumblr_[^/_]+_\d+\.jpg",
-            "count": 1,
-            "options": (("posts", "photo"),),
-        }),
-        ("http://demo.tumblr.com/", {
-            "pattern": (r"https?://(?:$|"
-                        r"\d+\.media\.tumblr\.com/.+_1280\.jpg|"
-                        r"a\.tumblr\.com/tumblr_\w+)"),
-            "count": 3,
-            "options": (("posts", "all"), ("external", True))
-        }),
-        ("https://mikf123-hidden.tumblr.com/", {  # dashboard-only
-            "options": (("access-token", None),),
-            "exception": exception.AuthorizationError,
-        }),
-        ("https://mikf123-hidden.tumblr.com/", {  # dashboard-only
-            "count": 2,
-            "keyword": {"tags": ["test", "hidden"]},
-        }),
-        ("https://mikf123-private.tumblr.com/", {  # password protected
-            "count": 2,
-            "keyword": {"tags": ["test", "private"]},
-        }),
-        ("https://mikf123-private-hidden.tumblr.com/", {  # both
-            "count": 2,
-            "keyword": {"tags": ["test", "private", "hidden"]},
-        }),
-        ("https://mikf123.tumblr.com/", {  # date-min/-max/-format (#337)
-            "count": 4,
-            "options": (("date-min", "201804"), ("date-max", "201805"),
-                        ("date-format", "%Y%m"))
-        }),
-        # pagination with 'date-max' (#2191) and 'api-key'
-        ("https://donttrustthetits.tumblr.com/", {
-            "options": (
-                ("access-token", None),
-                ("original", False),
-                ("date-max", "2015-04-25T00:00:00"),
-                ("date-min", "2015-04-01T00:00:00"),
-            ),
-            "count": 316,
-        }),
-        ("https://demo.tumblr.com/page/2"),
-        ("https://demo.tumblr.com/archive"),
-        ("tumblr:http://www.b-authentique.com/"),
-        ("tumblr:www.b-authentique.com"),
-        ("https://www.tumblr.com/blog/view/smarties-art"),
-        ("https://www.tumblr.com/blog/smarties-art"),
-        ("https://www.tumblr.com/smarties-art"),
-    )
+    example = "https://www.tumblr.com/BLOG"
 
     def posts(self):
         return self.api.posts(self.blog, {})
@@ -335,55 +283,7 @@ class TumblrPostExtractor(TumblrExtractor):
     """Extractor for a single Tumblr post"""
     subcategory = "post"
     pattern = BASE_PATTERN + r"/(?:post/|image/)?(\d+)"
-    test = (
-        ("http://demo.tumblr.com/post/459265350", {
-            "pattern": (r"https://\d+\.media\.tumblr\.com"
-                        r"/tumblr_[^/_]+_1280.jpg"),
-            "count": 1,
-        }),
-        ("https://mikf123.tumblr.com/post/167770226574/text-post", {
-            "count": 2,
-        }),
-        ("https://mikf123.tumblr.com/post/181022561719/quote-post", {
-            "count": 1,
-        }),
-        ("https://mikf123.tumblr.com/post/167623351559/link-post", {
-            "count": 2,
-        }),
-        ("https://mikf123.tumblr.com/post/167633596145/video-post", {
-            "count": 2,
-        }),
-        ("https://mikf123.tumblr.com/post/167770026604/audio-post", {
-            "count": 2,
-        }),
-        ("https://mikf123.tumblr.com/post/172687798174/photo-post", {
-            "count": 4,
-        }),
-        ("https://mikf123.tumblr.com/post/181022380064/chat-post", {
-            "count": 0,
-        }),
-        ("https://kichatundk.tumblr.com/post/654953419288821760", {
-            "count": 2,  # high-quality images (#1846)
-            "content": "d6fcc7b6f750d835d55c7f31fa3b63be26c9f89b",
-        }),
-        ("https://hameru-is-cool.tumblr.com/post/639261855227002880", {
-            "count": 2,  # high-quality images (#1344)
-            "content": "6bc19a42787e46e1bba2ef4aeef5ca28fcd3cd34",
-        }),
-        ("https://mikf123.tumblr.com/image/689860196535762944", {
-            "pattern": r"^https://\d+\.media\.tumblr\.com"
-                       r"/134791621559a79793563b636b5fe2c6"
-                       r"/8f1131551cef6e74-bc/s99999x99999"
-                       r"/188cf9b8915b0d0911c6c743d152fc62e8f38491\.png$",
-        }),
-        ("http://ziemniax.tumblr.com/post/109697912859/", {
-            "exception": exception.NotFoundError,  # HTML response (#297)
-        }),
-        ("http://demo.tumblr.com/image/459265350"),
-        ("https://www.tumblr.com/blog/view/smarties-art/686047436641353728"),
-        ("https://www.tumblr.com/blog/smarties-art/686047436641353728"),
-        ("https://www.tumblr.com/smarties-art/686047436641353728"),
-    )
+    example = "https://www.tumblr.com/BLOG/12345"
 
     def __init__(self, match):
         TumblrExtractor.__init__(self, match)
@@ -403,16 +303,7 @@ class TumblrTagExtractor(TumblrExtractor):
     """Extractor for Tumblr user's posts by tag"""
     subcategory = "tag"
     pattern = BASE_PATTERN + r"/tagged/([^/?#]+)"
-    test = (
-        ("http://demo.tumblr.com/tagged/Times%20Square", {
-            "pattern": r"https://\d+\.media\.tumblr\.com"
-                       r"/tumblr_[^/_]+_1280.jpg",
-            "count": 1,
-        }),
-        ("https://www.tumblr.com/blog/view/smarties-art/tagged/undertale"),
-        ("https://www.tumblr.com/blog/smarties-art/tagged/undertale"),
-        ("https://www.tumblr.com/smarties-art/tagged/undertale"),
-    )
+    example = "https://www.tumblr.com/BLOG/tagged/TAG"
 
     def __init__(self, match):
         TumblrExtractor.__init__(self, match)
@@ -426,18 +317,7 @@ class TumblrDayExtractor(TumblrExtractor):
     """Extractor for Tumblr user's posts by day"""
     subcategory = "day"
     pattern = BASE_PATTERN + r"/day/(\d\d\d\d/\d\d/\d\d)"
-    test = (
-        ("https://mikf123.tumblr.com/day/2018/01/05", {
-            "pattern": r"https://64\.media\.tumblr\.com"
-                       r"/1a2be8c63f1df58abd2622861696c72a"
-                       r"/tumblr_ozm9nqst9t1wgha4yo1_1280\.jpg",
-            "keyword": {"id": 169341068404},
-            "count": 1,
-        }),
-        ("https://www.tumblr.com/blog/view/mikf123/day/2018/01/05"),
-        ("https://www.tumblr.com/blog/mikf123/day/2018/01/05"),
-        ("https://www.tumblr.com/mikf123/day/2018/01/05"),
-    )
+    example = "https://www.tumblr.com/BLOG/day/1970/01/01"
 
     def __init__(self, match):
         TumblrExtractor.__init__(self, match)
@@ -460,14 +340,7 @@ class TumblrLikesExtractor(TumblrExtractor):
     directory_fmt = ("{category}", "{blog_name}", "likes")
     archive_fmt = "f_{blog[name]}_{id}_{num}"
     pattern = BASE_PATTERN + r"/likes"
-    test = (
-        ("http://mikf123.tumblr.com/likes", {
-            "count": 1,
-        }),
-        ("https://www.tumblr.com/blog/view/mikf123/likes"),
-        ("https://www.tumblr.com/blog/mikf123/likes"),
-        ("https://www.tumblr.com/mikf123/likes"),
-    )
+    example = "https://www.tumblr.com/BLOG/likes"
 
     def posts(self):
         return self.api.likes(self.blog)

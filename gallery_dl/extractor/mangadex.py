@@ -98,25 +98,8 @@ class MangadexChapterExtractor(MangadexExtractor):
     """Extractor for manga-chapters from mangadex.org"""
     subcategory = "chapter"
     pattern = BASE_PATTERN + r"/chapter/([0-9a-f-]+)"
-    test = (
-        ("https://mangadex.org/chapter/f946ac53-0b71-4b5d-aeb2-7931b13c4aaa", {
-            "keyword": "e86128a79ebe7201b648f1caa828496a2878dc8f",
-            #  "content": "50383a4c15124682057b197d40261641a98db514",
-        }),
-        # oneshot
-        ("https://mangadex.org/chapter/61a88817-9c29-4281-bdf1-77b3c1be9831", {
-            "count": 64,
-            "keyword": "d11ed057a919854696853362be35fc0ba7dded4c",
-        }),
-        # MANGA Plus (#1154)
-        ("https://mangadex.org/chapter/74149a55-e7c4-44ea-8a37-98e879c1096f", {
-            "exception": exception.StopExtraction,
-        }),
-        # 'externalUrl', but still downloadable (#2503)
-        ("https://mangadex.org/chapter/364728a4-6909-4164-9eea-6b56354f7c78", {
-            "count": 0,  # 404
-        }),
-    )
+    example = ("https://mangadex.org/chapter"
+               "/01234567-89ab-cdef-0123-456789abcdef")
 
     def items(self):
         try:
@@ -148,48 +131,8 @@ class MangadexMangaExtractor(MangadexExtractor):
     """Extractor for manga from mangadex.org"""
     subcategory = "manga"
     pattern = BASE_PATTERN + r"/(?:title|manga)/(?!feed$)([0-9a-f-]+)"
-    test = (
-        ("https://mangadex.org/title/f90c4398-8aad-4f51-8a1f-024ca09fdcbc", {
-            "count": ">= 5",
-            "keyword": {
-                "manga"   : "Souten no Koumori",
-                "manga_id": "f90c4398-8aad-4f51-8a1f-024ca09fdcbc",
-                "title"   : "re:One[Ss]hot",
-                "volume"  : 0,
-                "chapter" : 0,
-                "chapter_minor": "",
-                "chapter_id": str,
-                "date"    : "type:datetime",
-                "lang"    : str,
-                "language": str,
-                "artist"  : ["Arakawa Hiromu"],
-                "author"  : ["Arakawa Hiromu"],
-                "status"  : "completed",
-                "tags"    : ["Oneshot", "Historical", "Action",
-                             "Martial Arts", "Drama", "Tragedy"],
-            },
-        }),
-        # mutliple values for 'lang' (#4093)
-        ("https://mangadex.org/title/f90c4398-8aad-4f51-8a1f-024ca09fdcbc", {
-            "options": (("lang", "fr,it"),),
-            "count": 2,
-            "keyword": {
-                "manga"   : "Souten no Koumori",
-                "lang"    : "re:fr|it",
-                "language": "re:French|Italian",
-            },
-        }),
-        ("https://mangadex.cc/manga/d0c88e3b-ea64-4e07-9841-c1d2ac982f4a/", {
-            "options": (("lang", "en"),),
-            "count": ">= 100",
-        }),
-        ("https://mangadex.org/title/7c1e2742-a086-4fd3-a3be-701fd6cf0be9", {
-            "count": 1,
-        }),
-        ("https://mangadex.org/title/584ef094-b2ab-40ce-962c-bce341fb9d10", {
-            "count": ">= 20",
-        })
-    )
+    example = ("https://mangadex.org/title"
+               "/01234567-89ab-cdef-0123-456789abcdef")
 
     def chapters(self):
         return self.api.manga_feed(self.uuid)
@@ -199,7 +142,7 @@ class MangadexFeedExtractor(MangadexExtractor):
     """Extractor for chapters from your Followed Feed"""
     subcategory = "feed"
     pattern = BASE_PATTERN + r"/title/feed$()"
-    test = ("https://mangadex.org/title/feed",)
+    example = "https://mangadex.org/title/feed"
 
     def chapters(self):
         return self.api.user_follows_manga_feed()

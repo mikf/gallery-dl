@@ -18,29 +18,7 @@ class NhentaiGalleryExtractor(GalleryExtractor):
     category = "nhentai"
     root = "https://nhentai.net"
     pattern = r"(?:https?://)?nhentai\.net/g/(\d+)"
-    test = ("https://nhentai.net/g/147850/", {
-        "url": "5179dbf0f96af44005a0ff705a0ad64ac26547d0",
-        "keyword": {
-            "title"     : r"re:\[Morris\] Amazon no Hiyaku \| Amazon Elixir",
-            "title_en"  : str,
-            "title_ja"  : str,
-            "gallery_id": 147850,
-            "media_id"  : 867789,
-            "count"     : 16,
-            "date"      : 1446050915,
-            "scanlator" : "",
-            "artist"    : ["morris"],
-            "group"     : list,
-            "parody"    : list,
-            "characters": list,
-            "tags"      : list,
-            "type"      : "manga",
-            "lang"      : "en",
-            "language"  : "English",
-            "width"     : int,
-            "height"    : int,
-        },
-    })
+    example = "https://nhentai.net/g/12345/"
 
     def __init__(self, match):
         url = self.root + "/api/gallery/" + match.group(1)
@@ -127,34 +105,18 @@ class NhentaiTagExtractor(NhentaiExtractor):
     pattern = (r"(?:https?://)?nhentai\.net("
                r"/(?:artist|category|character|group|language|parody|tag)"
                r"/[^/?#]+(?:/popular[^/?#]*)?/?)(?:\?([^#]+))?")
-    test = (
-        ("https://nhentai.net/tag/sole-female/", {
-            "pattern": NhentaiGalleryExtractor.pattern,
-            "count": 30,
-            "range": "1-30",
-        }),
-        ("https://nhentai.net/artist/itou-life/"),
-        ("https://nhentai.net/group/itou-life/"),
-        ("https://nhentai.net/parody/touhou-project/"),
-        ("https://nhentai.net/character/patchouli-knowledge/popular"),
-        ("https://nhentai.net/category/doujinshi/popular-today"),
-        ("https://nhentai.net/language/english/popular-week"),
-    )
+    example = "https://nhentai.net/tag/TAG/"
 
 
 class NhentaiSearchExtractor(NhentaiExtractor):
     """Extractor for nhentai search results"""
     subcategory = "search"
     pattern = r"(?:https?://)?nhentai\.net(/search/?)\?([^#]+)"
-    test = ("https://nhentai.net/search/?q=touhou", {
-        "pattern": NhentaiGalleryExtractor.pattern,
-        "count": 30,
-        "range": "1-30",
-    })
+    example = "https://nhentai.net/search/?q=QUERY"
 
 
 class NhentaiFavoriteExtractor(NhentaiExtractor):
     """Extractor for nhentai favorites"""
     subcategory = "favorite"
     pattern = r"(?:https?://)?nhentai\.net(/favorites/?)(?:\?([^#]+))?"
-    test = ("https://nhentai.net/favorites/",)
+    example = "https://nhentai.net/favorites/"

@@ -161,13 +161,7 @@ class PixivUserExtractor(PixivExtractor):
     pattern = (BASE_PATTERN + r"/(?:"
                r"(?:en/)?u(?:sers)?/|member\.php\?id=|(?:mypage\.php)?#id="
                r")(\d+)(?:$|[?#])")
-    test = (
-        ("https://www.pixiv.net/en/users/173530"),
-        ("https://www.pixiv.net/u/173530"),
-        ("https://www.pixiv.net/member.php?id=173530"),
-        ("https://www.pixiv.net/mypage.php#id=173530"),
-        ("https://www.pixiv.net/#id=173530"),
-    )
+    example = "https://www.pixiv.net/en/users/12345"
 
     def __init__(self, match):
         PixivExtractor.__init__(self, match)
@@ -195,29 +189,7 @@ class PixivArtworksExtractor(PixivExtractor):
                r"(?:en/)?users/(\d+)/(?:artworks|illustrations|manga)"
                r"(?:/([^/?#]+))?/?(?:$|[?#])"
                r"|member_illust\.php\?id=(\d+)(?:&([^#]+))?)")
-    test = (
-        ("https://www.pixiv.net/en/users/173530/artworks", {
-            "url": "852c31ad83b6840bacbce824d85f2a997889efb7",
-        }),
-        # illusts with specific tag
-        (("https://www.pixiv.net/en/users/173530/artworks"
-          "/%E6%89%8B%E3%81%B6%E3%82%8D"), {
-            "url": "25b1cd81153a8ff82eec440dd9f20a4a22079658",
-        }),
-        (("https://www.pixiv.net/member_illust.php?id=173530"
-          "&tag=%E6%89%8B%E3%81%B6%E3%82%8D"), {
-            "url": "25b1cd81153a8ff82eec440dd9f20a4a22079658",
-        }),
-        # deleted account
-        ("http://www.pixiv.net/member_illust.php?id=173531", {
-            "options": (("metadata", True),),
-            "exception": exception.NotFoundError,
-        }),
-        ("https://www.pixiv.net/en/users/173530/manga"),
-        ("https://www.pixiv.net/en/users/173530/illustrations"),
-        ("https://www.pixiv.net/member_illust.php?id=173530"),
-        ("https://touch.pixiv.net/member_illust.php?id=173530"),
-    )
+    example = "https://www.pixiv.net/en/users/12345/artworks"
 
     def __init__(self, match):
         PixivExtractor.__init__(self, match)
@@ -253,9 +225,7 @@ class PixivAvatarExtractor(PixivExtractor):
     filename_fmt = "avatar{date:?_//%Y-%m-%d}.{extension}"
     archive_fmt = "avatar_{user[id]}_{date}"
     pattern = USER_PATTERN + r"/avatar"
-    test = ("https://www.pixiv.net/en/users/173530/avatar", {
-        "content": "4e57544480cc2036ea9608103e8f024fa737fe66",
-    })
+    example = "https://www.pixiv.net/en/users/12345/avatar"
 
     def __init__(self, match):
         PixivExtractor.__init__(self, match)
@@ -273,10 +243,7 @@ class PixivBackgroundExtractor(PixivExtractor):
     filename_fmt = "background{date:?_//%Y-%m-%d}.{extension}"
     archive_fmt = "background_{user[id]}_{date}"
     pattern = USER_PATTERN + "/background"
-    test = ("https://www.pixiv.net/en/users/194921/background", {
-        "pattern": r"https://i\.pximg\.net/background/img/2021/01/30/16/12/02"
-                   r"/194921_af1f71e557a42f499213d4b9eaccc0f8\.jpg",
-    })
+    example = "https://www.pixiv.net/en/users/12345/background"
 
     def __init__(self, match):
         PixivExtractor.__init__(self, match)
@@ -303,14 +270,7 @@ class PixivMeExtractor(PixivExtractor):
     """Extractor for pixiv.me URLs"""
     subcategory = "me"
     pattern = r"(?:https?://)?pixiv\.me/([^/?#]+)"
-    test = (
-        ("https://pixiv.me/del_shannon", {
-            "url": "29c295ce75150177e6b0a09089a949804c708fbf",
-        }),
-        ("https://pixiv.me/del_shanno", {
-            "exception": exception.NotFoundError,
-        }),
-    )
+    example = "https://pixiv.me/USER"
 
     def __init__(self, match):
         PixivExtractor.__init__(self, match)
@@ -333,45 +293,7 @@ class PixivWorkExtractor(PixivExtractor):
                r"|(?:i(?:\d+\.pixiv|\.pximg)\.net"
                r"/(?:(?:.*/)?img-[^/]+/img/\d{4}(?:/\d\d){5}|img\d+/img/[^/]+)"
                r"|img\d*\.pixiv\.net/img/[^/]+|(?:www\.)?pixiv\.net/i)/(\d+))")
-    test = (
-        ("https://www.pixiv.net/artworks/966412", {
-            "url": "90c1715b07b0d1aad300bce256a0bc71f42540ba",
-            "content": "69a8edfb717400d1c2e146ab2b30d2c235440c5a",
-            "keyword": {
-                "date"    : "dt:2008-06-12 15:29:13",
-                "date_url": "dt:2008-06-12 15:29:13",
-            },
-        }),
-        (("http://www.pixiv.net/member_illust.php"
-          "?mode=medium&illust_id=966411"), {
-            "exception": exception.NotFoundError,
-        }),
-        # ugoira
-        (("https://www.pixiv.net/member_illust.php"
-          "?mode=medium&illust_id=66806629"), {
-            "url": "7267695a985c4db8759bebcf8d21dbdd2d2317ef",
-            "keyword": {
-                "frames"  : list,
-                "date"    : "dt:2018-01-14 15:06:08",
-                "date_url": "dt:2018-01-15 04:24:48",
-            },
-        }),
-        # related works (#1237)
-        ("https://www.pixiv.net/artworks/966412", {
-            "options": (("related", True),),
-            "range": "1-10",
-            "count": ">= 10",
-        }),
-        ("https://www.pixiv.net/en/artworks/966412"),
-        ("http://www.pixiv.net/member_illust.php?mode=medium&illust_id=96641"),
-        ("http://i1.pixiv.net/c/600x600/img-master"
-         "/img/2008/06/13/00/29/13/966412_p0_master1200.jpg"),
-        ("https://i.pximg.net/img-original"
-         "/img/2017/04/25/07/33/29/62568267_p0.png"),
-        ("https://www.pixiv.net/i/966412"),
-        ("http://img.pixiv.net/img/soundcross/42626136.jpg"),
-        ("http://i2.pixiv.net/img76/img/snailrin/42672235.jpg"),
-    )
+    example = "https://www.pixiv.net/artworks/12345"
 
     def __init__(self, match):
         PixivExtractor.__init__(self, match)
@@ -394,47 +316,7 @@ class PixivFavoriteExtractor(PixivExtractor):
     pattern = (BASE_PATTERN + r"/(?:(?:en/)?"
                r"users/(\d+)/(bookmarks/artworks|following)(?:/([^/?#]+))?"
                r"|bookmark\.php)(?:\?([^#]*))?")
-    test = (
-        ("https://www.pixiv.net/en/users/173530/bookmarks/artworks", {
-            "url": "85a3104eaaaf003c7b3947117ca2f1f0b1cfc949",
-        }),
-        ("https://www.pixiv.net/bookmark.php?id=173530", {
-            "url": "85a3104eaaaf003c7b3947117ca2f1f0b1cfc949",
-        }),
-        # bookmarks with specific tag
-        (("https://www.pixiv.net/en/users/3137110"
-          "/bookmarks/artworks/%E3%81%AF%E3%82%93%E3%82%82%E3%82%93"), {
-            "url": "379b28275f786d946e01f721e54afe346c148a8c",
-        }),
-        # bookmarks with specific tag (legacy url)
-        (("https://www.pixiv.net/bookmark.php?id=3137110"
-          "&tag=%E3%81%AF%E3%82%93%E3%82%82%E3%82%93&p=1"), {
-            "url": "379b28275f786d946e01f721e54afe346c148a8c",
-        }),
-        # own bookmarks
-        ("https://www.pixiv.net/bookmark.php", {
-            "url": "90c1715b07b0d1aad300bce256a0bc71f42540ba",
-            "keyword": {"tags_bookmark": ["47", "hitman"]},
-            "options": (("metadata-bookmark", True),),
-        }),
-        # own bookmarks with tag (#596)
-        ("https://www.pixiv.net/bookmark.php?tag=foobar", {
-            "count": 0,
-        }),
-        # followed users (#515)
-        ("https://www.pixiv.net/en/users/173530/following", {
-            "pattern": PixivUserExtractor.pattern,
-            "count": ">= 12",
-        }),
-        # followed users (legacy url) (#515)
-        ("https://www.pixiv.net/bookmark.php?id=173530&type=user", {
-            "pattern": PixivUserExtractor.pattern,
-            "count": ">= 12",
-        }),
-        # touch URLs
-        ("https://touch.pixiv.net/bookmark.php?id=173530"),
-        ("https://touch.pixiv.net/bookmark.php"),
-    )
+    example = "https://www.pixiv.net/en/users/12345/bookmarks/artworks"
 
     def __init__(self, match):
         uid, kind, self.tag, query = match.groups()
@@ -495,14 +377,7 @@ class PixivRankingExtractor(PixivExtractor):
     directory_fmt = ("{category}", "rankings",
                      "{ranking[mode]}", "{ranking[date]}")
     pattern = BASE_PATTERN + r"/ranking\.php(?:\?([^#]*))?"
-    test = (
-        ("https://www.pixiv.net/ranking.php?mode=daily&date=20170818"),
-        ("https://www.pixiv.net/ranking.php"),
-        ("https://touch.pixiv.net/ranking.php"),
-        ("https://www.pixiv.net/ranking.php?mode=unknown", {
-            "exception": exception.StopExtraction,
-        }),
-    )
+    example = "https://www.pixiv.net/ranking.php"
 
     def __init__(self, match):
         PixivExtractor.__init__(self, match)
@@ -561,24 +436,7 @@ class PixivSearchExtractor(PixivExtractor):
     directory_fmt = ("{category}", "search", "{search[word]}")
     pattern = (BASE_PATTERN + r"/(?:(?:en/)?tags/([^/?#]+)(?:/[^/?#]+)?/?"
                r"|search\.php)(?:\?([^#]+))?")
-    test = (
-        ("https://www.pixiv.net/en/tags/Original", {
-            "range": "1-10",
-            "count": 10,
-        }),
-        ("https://pixiv.net/en/tags/foo/artworks?order=week&s_mode=s_tag", {
-            "exception": exception.StopExtraction,
-        }),
-        ("https://pixiv.net/en/tags/foo/artworks?order=date&s_mode=tag", {
-            "exception": exception.StopExtraction,
-        }),
-        ("https://www.pixiv.net/search.php?s_mode=s_tag&name=Original", {
-            "exception": exception.StopExtraction,
-        }),
-        ("https://www.pixiv.net/en/tags/foo/artworks?order=date&s_mode=s_tag"),
-        ("https://www.pixiv.net/search.php?s_mode=s_tag&word=Original"),
-        ("https://touch.pixiv.net/search.php?word=Original"),
-    )
+    example = "https://www.pixiv.net/en/tags/TAG"
 
     def __init__(self, match):
         PixivExtractor.__init__(self, match)
@@ -643,10 +501,7 @@ class PixivFollowExtractor(PixivExtractor):
     archive_fmt = "F_{user_follow[id]}_{id}{num}.{extension}"
     directory_fmt = ("{category}", "following")
     pattern = BASE_PATTERN + r"/bookmark_new_illust\.php"
-    test = (
-        ("https://www.pixiv.net/bookmark_new_illust.php"),
-        ("https://touch.pixiv.net/bookmark_new_illust.php"),
-    )
+    example = "https://www.pixiv.net/bookmark_new_illust.php"
 
     def works(self):
         return self.api.illust_follow()
@@ -663,17 +518,7 @@ class PixivPixivisionExtractor(PixivExtractor):
                      "{pixivision_id} {pixivision_title}")
     archive_fmt = "V{pixivision_id}_{id}{suffix}.{extension}"
     pattern = r"(?:https?://)?(?:www\.)?pixivision\.net/(?:en/)?a/(\d+)"
-    test = (
-        ("https://www.pixivision.net/en/a/2791"),
-        ("https://pixivision.net/a/2791", {
-            "count": 7,
-            "keyword": {
-                "pixivision_id": "2791",
-                "pixivision_title": "What's your favorite music? Editor’s "
-                                    "picks featuring: “CD Covers”!",
-            },
-        }),
-    )
+    example = "https://www.pixivision.net/en/a/12345"
 
     def __init__(self, match):
         PixivExtractor.__init__(self, match)
@@ -705,22 +550,7 @@ class PixivSeriesExtractor(PixivExtractor):
                      "{series[id]} {series[title]}")
     filename_fmt = "{num_series:>03}_{id}_p{num}.{extension}"
     pattern = BASE_PATTERN + r"/user/(\d+)/series/(\d+)"
-    test = ("https://www.pixiv.net/user/10509347/series/21859", {
-        "range": "1-10",
-        "count": 10,
-        "keyword": {
-            "num_series": int,
-            "series": {
-                "canonical": "https://www.pixiv.net/user/10509347"
-                             "/series/21859",
-                "description": str,
-                "ogp": dict,
-                "title": "先輩がうざい後輩の話",
-                "total": int,
-                "twitter": dict,
-            },
-        },
-    })
+    example = "https://www.pixiv.net/user/12345/series/12345"
 
     def __init__(self, match):
         PixivExtractor.__init__(self, match)
@@ -762,56 +592,7 @@ class PixivNovelExtractor(PixivExtractor):
     subcategory = "novel"
     request_interval = 1.0
     pattern = BASE_PATTERN + r"/n(?:ovel/show\.php\?id=|/)(\d+)"
-    test = (
-        ("https://www.pixiv.net/novel/show.php?id=19612040", {
-            "count": 1,
-            "content": "8c818474153cbd2f221ee08766e1d634c821d8b4",
-            "keyword": {
-                "caption": r"re:「無能な名無し」と呼ばれ虐げられて育った鈴\(すず\)は、",
-                "comment_access_control": 0,
-                "create_date": "2023-04-02T15:18:58+09:00",
-                "date": "dt:2023-04-02 06:18:58",
-                "id": 19612040,
-                "is_bookmarked": False,
-                "is_muted": False,
-                "is_mypixiv_only": False,
-                "is_original": True,
-                "is_x_restricted": False,
-                "novel_ai_type": 1,
-                "page_count": 1,
-                "rating": "General",
-                "restrict": 0,
-                "series": {
-                    "id": 10278364,
-                    "title": "龍の贄嫁〜無能な名無しと虐げられていましたが、"
-                             "どうやら異母妹に霊力を搾取されていたようです〜",
-                },
-                "tags": ["和風ファンタジー", "溺愛", "神様", "ヤンデレ", "執着",
-                         "異能", "ざまぁ", "学園", "神嫁"],
-                "text_length": 5974,
-                "title": "異母妹から「無能な名無し」と虐げられていた私、"
-                         "どうやら異母妹に霊力を搾取されていたようです（１）",
-                "user": {
-                    "account": "yukinaga_chifuyu",
-                    "id": 77055466,
-                },
-                "visible": True,
-                "x_restrict": 0,
-            },
-        }),
-        # embeds
-        ("https://www.pixiv.net/novel/show.php?id=16422450", {
-            "options": (("embeds", True),),
-            "count": 3,
-        }),
-        # full series
-        ("https://www.pixiv.net/novel/show.php?id=19612040", {
-            "options": (("full-series", True),),
-            "count": 4,
-        }),
-        # short URL
-        ("https://www.pixiv.net/n/19612040"),
-    )
+    example = "https://www.pixiv.net/novel/show.php?id=12345"
 
     def __init__(self, match):
         PixivExtractor.__init__(self, match)
@@ -922,11 +703,7 @@ class PixivNovelUserExtractor(PixivNovelExtractor):
     """Extractor for pixiv users' novels"""
     subcategory = "novel-user"
     pattern = USER_PATTERN + r"/novels"
-    test = ("https://www.pixiv.net/en/users/77055466/novels", {
-        "pattern": "^text:",
-        "range": "1-5",
-        "count": 5,
-    })
+    example = "https://www.pixiv.net/en/users/12345/novels"
 
     def novels(self):
         return self.api.user_novels(self.novel_id)
@@ -936,10 +713,7 @@ class PixivNovelSeriesExtractor(PixivNovelExtractor):
     """Extractor for pixiv novel series"""
     subcategory = "novel-series"
     pattern = BASE_PATTERN + r"/novel/series/(\d+)"
-    test = ("https://www.pixiv.net/novel/series/10278364", {
-        "count": 4,
-        "content": "b06abed001b3f6ccfb1579699e9a238b46d38ea2",
-    })
+    example = "https://www.pixiv.net/novel/series/12345"
 
     def novels(self):
         return self.api.novel_series(self.novel_id)
@@ -950,13 +724,7 @@ class PixivNovelBookmarkExtractor(PixivNovelExtractor):
     subcategory = "novel-bookmark"
     pattern = (USER_PATTERN + r"/bookmarks/novels"
                r"(?:/([^/?#]+))?(?:/?\?([^#]+))?")
-    test = (
-        ("https://www.pixiv.net/en/users/77055466/bookmarks/novels", {
-            "count": 1,
-            "content": "7194e8faa876b2b536f185ee271a2b6e46c69089",
-        }),
-        ("https://www.pixiv.net/en/users/11/bookmarks/novels/TAG?rest=hide"),
-    )
+    example = "https://www.pixiv.net/en/users/12345/bookmarks/novels"
 
     def __init__(self, match):
         PixivNovelExtractor.__init__(self, match)
@@ -986,11 +754,7 @@ class PixivSketchExtractor(Extractor):
     root = "https://sketch.pixiv.net"
     cookies_domain = ".pixiv.net"
     pattern = r"(?:https?://)?sketch\.pixiv\.net/@([^/?#]+)"
-    test = ("https://sketch.pixiv.net/@nicoby", {
-        "pattern": r"https://img\-sketch\.pixiv\.net/uploads/medium"
-                   r"/file/\d+/\d+\.(jpg|png)",
-        "count": ">= 35",
-    })
+    example = "https://sketch.pixiv.net/@USER"
 
     def __init__(self, match):
         Extractor.__init__(self, match)

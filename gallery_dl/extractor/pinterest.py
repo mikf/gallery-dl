@@ -111,21 +111,7 @@ class PinterestPinExtractor(PinterestExtractor):
     """Extractor for images from a single pin from pinterest.com"""
     subcategory = "pin"
     pattern = BASE_PATTERN + r"/pin/([^/?#]+)(?!.*#related$)"
-    test = (
-        ("https://www.pinterest.com/pin/858146903966145189/", {
-            "url": "afb3c26719e3a530bb0e871c480882a801a4e8a5",
-            "content": ("4c435a66f6bb82bb681db2ecc888f76cf6c5f9ca",
-                        "d3e24bc9f7af585e8c23b9136956bd45a4d9b947"),
-        }),
-        # video pin (#1189)
-        ("https://www.pinterest.com/pin/422564377542934214/", {
-            "pattern": r"https://v\d*\.pinimg\.com/videos/mc/hls/d7/22/ff"
-                       r"/d722ff00ab2352981b89974b37909de8.m3u8",
-        }),
-        ("https://www.pinterest.com/pin/858146903966145188/", {
-            "exception": exception.NotFoundError,
-        }),
-    )
+    example = "https://www.pinterest.com/pin/12345/"
 
     def __init__(self, match):
         PinterestExtractor.__init__(self, match)
@@ -147,26 +133,7 @@ class PinterestBoardExtractor(PinterestExtractor):
     archive_fmt = "{board[id]}_{id}"
     pattern = (BASE_PATTERN + r"/(?!pin/)([^/?#]+)"
                "/(?!_saved|_created|pins/)([^/?#]+)/?$")
-    test = (
-        ("https://www.pinterest.com/g1952849/test-/", {
-            "pattern": r"https://i\.pinimg\.com/originals/",
-            "count": 2,
-        }),
-        # board with sections (#835)
-        ("https://www.pinterest.com/g1952849/stuff/", {
-            "options": (("sections", True),),
-            "count": 4,
-        }),
-        # secret board (#1055)
-        ("https://www.pinterest.de/g1952849/secret/", {
-            "count": 2,
-        }),
-        ("https://www.pinterest.com/g1952848/test/", {
-            "exception": exception.GalleryDLException,
-        }),
-        # .co.uk TLD (#914)
-        ("https://www.pinterest.co.uk/hextra7519/based-animals/"),
-    )
+    example = "https://www.pinterest.com/USER/BOARD/"
 
     def __init__(self, match):
         PinterestExtractor.__init__(self, match)
@@ -197,13 +164,7 @@ class PinterestUserExtractor(PinterestExtractor):
     """Extractor for a user's boards"""
     subcategory = "user"
     pattern = BASE_PATTERN + r"/(?!pin/)([^/?#]+)(?:/_saved)?/?$"
-    test = (
-        ("https://www.pinterest.com/g1952849/", {
-            "pattern": PinterestBoardExtractor.pattern,
-            "count": ">= 2",
-        }),
-        ("https://www.pinterest.com/g1952849/_saved/"),
-    )
+    example = "https://www.pinterest.com/USER/"
 
     def __init__(self, match):
         PinterestExtractor.__init__(self, match)
@@ -222,11 +183,7 @@ class PinterestAllpinsExtractor(PinterestExtractor):
     subcategory = "allpins"
     directory_fmt = ("{category}", "{user}")
     pattern = BASE_PATTERN + r"/(?!pin/)([^/?#]+)/pins/?$"
-    test = ("https://www.pinterest.com/g1952849/pins/", {
-        "pattern": r"https://i\.pinimg\.com/originals/[0-9a-f]{2}"
-                   r"/[0-9a-f]{2}/[0-9a-f]{2}/[0-9a-f]{32}\.\w{3}",
-        "count": 7,
-    })
+    example = "https://www.pinterest.com/USER/pins/"
 
     def __init__(self, match):
         PinterestExtractor.__init__(self, match)
@@ -244,12 +201,7 @@ class PinterestCreatedExtractor(PinterestExtractor):
     subcategory = "created"
     directory_fmt = ("{category}", "{user}")
     pattern = BASE_PATTERN + r"/(?!pin/)([^/?#]+)/_created/?$"
-    test = ("https://www.pinterest.de/digitalmomblog/_created/", {
-        "pattern": r"https://i\.pinimg\.com/originals/[0-9a-f]{2}"
-                   r"/[0-9a-f]{2}/[0-9a-f]{2}/[0-9a-f]{32}\.(jpg|png)",
-        "count": 10,
-        "range": "1-10",
-    })
+    example = "https://www.pinterest.com/USER/_created/"
 
     def __init__(self, match):
         PinterestExtractor.__init__(self, match)
@@ -269,9 +221,7 @@ class PinterestSectionExtractor(PinterestExtractor):
                      "{board[name]}", "{section[title]}")
     archive_fmt = "{board[id]}_{id}"
     pattern = BASE_PATTERN + r"/(?!pin/)([^/?#]+)/([^/?#]+)/([^/?#]+)"
-    test = ("https://www.pinterest.com/g1952849/stuff/section", {
-        "count": 2,
-    })
+    example = "https://www.pinterest.com/USER/BOARD/SEcTION"
 
     def __init__(self, match):
         PinterestExtractor.__init__(self, match)
@@ -299,10 +249,7 @@ class PinterestSearchExtractor(PinterestExtractor):
     subcategory = "search"
     directory_fmt = ("{category}", "Search", "{search}")
     pattern = BASE_PATTERN + r"/search/pins/?\?q=([^&#]+)"
-    test = ("https://www.pinterest.com/search/pins/?q=nature", {
-        "range": "1-50",
-        "count": ">= 50",
-    })
+    example = "https://www.pinterest.com/search/pins/?q=QUERY"
 
     def __init__(self, match):
         PinterestExtractor.__init__(self, match)
@@ -320,11 +267,7 @@ class PinterestRelatedPinExtractor(PinterestPinExtractor):
     subcategory = "related-pin"
     directory_fmt = ("{category}", "related {original_pin[id]}")
     pattern = BASE_PATTERN + r"/pin/([^/?#]+).*#related$"
-    test = ("https://www.pinterest.com/pin/858146903966145189/#related", {
-        "range": "31-70",
-        "count": 40,
-        "archive": False,
-    })
+    example = "https://www.pinterest.com/pin/12345/#related"
 
     def metadata(self):
         return {"original_pin": self.api.pin(self.pin_id)}
@@ -339,11 +282,7 @@ class PinterestRelatedBoardExtractor(PinterestBoardExtractor):
     directory_fmt = ("{category}", "{board[owner][username]}",
                      "{board[name]}", "related")
     pattern = BASE_PATTERN + r"/(?!pin/)([^/?#]+)/([^/?#]+)/?#related$"
-    test = ("https://www.pinterest.com/g1952849/test-/#related", {
-        "range": "31-70",
-        "count": 40,
-        "archive": False,
-    })
+    example = "https://www.pinterest.com/USER/BOARD/#related"
 
     def pins(self):
         return self.api.board_content_recommendation(self.board["id"])
@@ -353,15 +292,7 @@ class PinterestPinitExtractor(PinterestExtractor):
     """Extractor for images from a pin.it URL"""
     subcategory = "pinit"
     pattern = r"(?:https?://)?pin\.it/([^/?#]+)"
-
-    test = (
-        ("https://pin.it/Hvt8hgT", {
-            "url": "8daad8558382c68f0868bdbd17d05205184632fa",
-        }),
-        ("https://pin.it/Hvt8hgS", {
-            "exception": exception.NotFoundError,
-        }),
-    )
+    example = "https://pin.it/abcde"
 
     def __init__(self, match):
         PinterestExtractor.__init__(self, match)

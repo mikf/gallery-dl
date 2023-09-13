@@ -173,17 +173,7 @@ class FantiaCreatorExtractor(FantiaExtractor):
     """Extractor for a Fantia creator's works"""
     subcategory = "creator"
     pattern = r"(?:https?://)?(?:www\.)?fantia\.jp/fanclubs/(\d+)"
-    test = (
-        ("https://fantia.jp/fanclubs/6939", {
-            "range": "1-25",
-            "count": ">= 25",
-            "keyword": {
-                "fanclub_user_id" : 52152,
-                "tags"            : list,
-                "title"           : str,
-            },
-        }),
-    )
+    example = "https://fantia.jp/fanclubs/12345"
 
     def __init__(self, match):
         FantiaExtractor.__init__(self, match)
@@ -198,53 +188,7 @@ class FantiaPostExtractor(FantiaExtractor):
     """Extractor for media from a single Fantia post"""
     subcategory = "post"
     pattern = r"(?:https?://)?(?:www\.)?fantia\.jp/posts/(\d+)"
-    test = (
-        ("https://fantia.jp/posts/1166373", {
-            "pattern": r"https://("
-                       r"c\.fantia\.jp/uploads/post/file/1166373/|"
-                       r"cc\.fantia\.jp/uploads/post_content_photo"
-                       r"/file/732549[01]|"
-                       r"fantia\.jp/posts/1166373/album_image\?)",
-            "keyword": {
-                "blogpost_text": r"re:^$|"
-                                 r"This is a test.\n\nThis is a test.\n\n|"
-                                 r"Link to video:\nhttps://www.youtube.com"
-                                 r"/watch\?v=5SSdvNcAagI\n\nhtml img from "
-                                 r"another site:\n\n\n\n\n\n",
-                "comment": "\n\n",
-                "content_category": "re:thumb|blog|photo_gallery",
-                "content_comment": str,
-                "content_filename": "re:|",
-                "content_title": r"re:Test (Blog Content \d+|Image Gallery)"
-                                 r"|thumb",
-                "date": "dt:2022-03-09 16:46:12",
-                "fanclub_id": 356320,
-                "fanclub_name": "Test Fantia",
-                "fanclub_url": "https://fantia.jp/fanclubs/356320",
-                "fanclub_user_id": 7487131,
-                "fanclub_user_name": "2022/03/08 15:13:52の名無し",
-                "file_url": str,
-                "filename": str,
-                "num": int,
-                "plan": dict,
-                "post_id": 1166373,
-                "post_title": "Test Fantia Post",
-                "post_url": "https://fantia.jp/posts/1166373",
-                "posted_at": "Thu, 10 Mar 2022 01:46:12 +0900",
-                "rating": "general",
-                "tags": [],
-            },
-        }),
-        ("https://fantia.jp/posts/508363", {
-            "count": 6,
-            "keyword": {
-                "post_title": "zunda逆バニーでおしりｺｯｼｮﾘ",
-                "tags": list,
-                "rating": "adult",
-                "post_id": 508363
-            },
-        }),
-    )
+    example = "https://fantia.jp/posts/12345"
 
     def __init__(self, match):
         FantiaExtractor.__init__(self, match)

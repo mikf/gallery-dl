@@ -216,19 +216,7 @@ class KemonopartyUserExtractor(KemonopartyExtractor):
     """Extractor for all posts from a kemono.party user listing"""
     subcategory = "user"
     pattern = USER_PATTERN + r"/?(?:\?o=(\d+))?(?:$|[?#])"
-    test = (
-        ("https://kemono.party/fanbox/user/6993449", {
-            "range": "1-25",
-            "count": 25,
-        }),
-        # 'max-posts' option, 'o' query parameter (#1674)
-        ("https://kemono.party/patreon/user/881792?o=150", {
-            "options": (("max-posts", 25),),
-            "count": "< 100",
-        }),
-        ("https://kemono.su/subscribestar/user/alcorart"),
-        ("https://kemono.party/subscribestar/user/alcorart"),
-    )
+    example = "https://kemono.party/SERVICE/user/12345"
 
     def __init__(self, match):
         _, _, service, user_id, offset = match.groups()
@@ -256,87 +244,7 @@ class KemonopartyPostExtractor(KemonopartyExtractor):
     """Extractor for a single kemono.party post"""
     subcategory = "post"
     pattern = USER_PATTERN + r"/post/([^/?#]+)"
-    test = (
-        ("https://kemono.party/fanbox/user/6993449/post/506575", {
-            "pattern": r"https://kemono.party/data/21/0f"
-                       r"/210f35388e28bbcf756db18dd516e2d82ce75[0-9a-f]+\.jpg",
-            "content": "900949cefc97ab8dc1979cc3664785aac5ba70dd",
-            "keyword": {
-                "added": "Wed, 06 May 2020 20:28:02 GMT",
-                "content": str,
-                "count": 1,
-                "date": "dt:2019-08-11 02:09:04",
-                "edited": None,
-                "embed": dict,
-                "extension": "jpeg",
-                "filename": "P058kDFYus7DbqAkGlfWTlOr",
-                "hash": "210f35388e28bbcf756db18dd516e2d8"
-                        "2ce758e0d32881eeee76d43e1716d382",
-                "id": "506575",
-                "num": 1,
-                "published": "Sun, 11 Aug 2019 02:09:04 GMT",
-                "service": "fanbox",
-                "shared_file": False,
-                "subcategory": "fanbox",
-                "title": "c96取り置き",
-                "type": "file",
-                "user": "6993449",
-            },
-        }),
-        # inline image (#1286)
-        ("https://kemono.party/fanbox/user/7356311/post/802343", {
-            "pattern": r"https://kemono\.party/data/47/b5/47b5c014ecdcfabdf2c8"
-                       r"5eec53f1133a76336997ae8596f332e97d956a460ad2\.jpg",
-            "keyword": {"hash": "47b5c014ecdcfabdf2c85eec53f1133a"
-                                "76336997ae8596f332e97d956a460ad2"},
-        }),
-        # kemono.party -> data.kemono.party
-        ("https://kemono.party/gumroad/user/trylsc/post/IURjT", {
-            "pattern": r"https://kemono\.party/data/("
-                       r"a4/7b/a47bfe938d8c1682eef06e885927484cd8df1b.+\.jpg|"
-                       r"c6/04/c6048f5067fd9dbfa7a8be565ac194efdfb6e4.+\.zip)",
-        }),
-        # username (#1548, #1652)
-        ("https://kemono.party/gumroad/user/3252870377455/post/aJnAH", {
-            "options": (("metadata", True),),
-            "keyword": {"username": "Kudalyn's Creations"},
-        }),
-        # skip patreon duplicates
-        ("https://kemono.party/patreon/user/4158582/post/32099982", {
-            "count": 2,
-        }),
-        # allow duplicates (#2440)
-        ("https://kemono.party/patreon/user/4158582/post/32099982", {
-            "options": (("duplicates", True),),
-            "count": 3,
-        }),
-        # DMs (#2008)
-        ("https://kemono.party/patreon/user/34134344/post/38129255", {
-            "options": (("dms", True),),
-            "keyword": {"dms": [{
-                "body": r"re:Hi! Thank you very much for supporting the work I"
-                        r" did in May. Here's your reward pack! I hope you fin"
-                        r"d something you enjoy in it. :\)\n\nhttps://www.medi"
-                        r"afire.com/file/\w+/Set13_tier_2.zip/file",
-                "date": "2021-07-31 02:47:51.327865",
-            }]},
-        }),
-        # coomer.party (#2100)
-        ("https://coomer.party/onlyfans/user/alinity/post/125962203", {
-            "pattern": r"https://coomer\.party/data/7d/3f/7d3fd9804583dc224968"
-                       r"c0591163ec91794552b04f00a6c2f42a15b68231d5a8\.jpg",
-        }),
-        # invalid file (#3510)
-        ("https://kemono.party/patreon/user/19623797/post/29035449", {
-            "pattern": r"907ba78b4545338d3539683e63ecb51c"
-                       r"f51c10adc9dabd86e92bd52339f298b9\.txt",
-            "content": "da39a3ee5e6b4b0d3255bfef95601890afd80709",  # empty
-        }),
-        ("https://kemono.su/subscribestar/user/alcorart/post/184330"),
-        ("https://kemono.party/subscribestar/user/alcorart/post/184330"),
-        ("https://www.kemono.party/subscribestar/user/alcorart/post/184330"),
-        ("https://beta.kemono.party/subscribestar/user/alcorart/post/184330"),
-    )
+    example = "https://kemono.party/SERVICE/user/12345/post/12345"
 
     def __init__(self, match):
         _, _, service, user_id, post_id = match.groups()
@@ -359,30 +267,7 @@ class KemonopartyDiscordExtractor(KemonopartyExtractor):
     filename_fmt = "{id}_{num:>02}_{filename}.{extension}"
     archive_fmt = "discord_{server}_{id}_{num}"
     pattern = BASE_PATTERN + r"/discord/server/(\d+)(?:/channel/(\d+))?#(.*)"
-    test = (
-        (("https://kemono.party/discord"
-          "/server/488668827274444803#finish-work"), {
-            "count": 4,
-            "keyword": {"channel_name": "finish-work"},
-        }),
-        (("https://kemono.su/discord"
-          "/server/256559665620451329/channel/462437519519383555#"), {
-            "pattern": r"https://kemono\.su/data/("
-                       r"e3/77/e377e3525164559484ace2e64425b0cec1db08.*\.png|"
-                       r"51/45/51453640a5e0a4d23fbf57fb85390f9c5ec154.*\.gif)",
-            "keyword": {"hash": "re:e377e3525164559484ace2e64425b0cec1db08"
-                                "|51453640a5e0a4d23fbf57fb85390f9c5ec154"},
-            "count": ">= 2",
-        }),
-        # 'inline' files
-        (("https://kemono.party/discord"
-          "/server/315262215055736843/channel/315262215055736843#general"), {
-            "pattern": r"https://cdn\.discordapp\.com/attachments/\d+/\d+/.+$",
-            "options": (("image-filter", "type == 'inline'"),),
-            "keyword": {"hash": ""},
-            "range": "1-5",
-        }),
-    )
+    example = "https://kemono.party/discard/server/12345/channel/12345"
 
     def __init__(self, match):
         KemonopartyExtractor.__init__(self, match)
@@ -461,16 +346,7 @@ class KemonopartyDiscordExtractor(KemonopartyExtractor):
 class KemonopartyDiscordServerExtractor(KemonopartyExtractor):
     subcategory = "discord-server"
     pattern = BASE_PATTERN + r"/discord/server/(\d+)$"
-    test = (
-        ("https://kemono.party/discord/server/488668827274444803", {
-            "pattern": KemonopartyDiscordExtractor.pattern,
-            "count": 13,
-        }),
-        ("https://kemono.su/discord/server/488668827274444803", {
-            "pattern": KemonopartyDiscordExtractor.pattern,
-            "count": 13,
-        }),
-    )
+    example = "https://kemono.party/discard/server/12345"
 
     def __init__(self, match):
         KemonopartyExtractor.__init__(self, match)
@@ -492,23 +368,7 @@ class KemonopartyFavoriteExtractor(KemonopartyExtractor):
     """Extractor for kemono.party favorites"""
     subcategory = "favorite"
     pattern = BASE_PATTERN + r"/favorites(?:/?\?([^#]+))?"
-    test = (
-        ("https://kemono.party/favorites", {
-            "pattern": KemonopartyUserExtractor.pattern,
-            "url": "f4b5b796979bcba824af84206578c79101c7f0e1",
-            "count": 3,
-        }),
-        ("https://kemono.party/favorites?type=post", {
-            "pattern": KemonopartyPostExtractor.pattern,
-            "url": "ecfccf5f0d50b8d14caa7bbdcf071de5c1e5b90f",
-            "count": 3,
-        }),
-        ("https://kemono.su/favorites?type=post", {
-            "pattern": KemonopartyPostExtractor.pattern,
-            "url": "4be8e84cb384a907a8e7997baaf6287b451783b5",
-            "count": 3,
-        }),
-    )
+    example = "https://kemono.party/favorites"
 
     def __init__(self, match):
         KemonopartyExtractor.__init__(self, match)

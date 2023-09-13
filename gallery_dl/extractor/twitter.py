@@ -480,22 +480,7 @@ class TwitterUserExtractor(TwitterExtractor):
     subcategory = "user"
     pattern = (BASE_PATTERN + r"/(?!search)(?:([^/?#]+)/?(?:$|[?#])"
                r"|i(?:/user/|ntent/user\?user_id=)(\d+))")
-    test = (
-        ("https://twitter.com/supernaturepics", {
-            "options": (("include", "all"),),
-            "pattern": r"https://twitter\.com/supernaturepics"
-                       r"/(photo|header_photo|timeline|tweets"
-                       r"|media|with_replies|likes)$",
-            "count": 7,
-        }),
-        ("https://mobile.twitter.com/supernaturepics?p=i"),
-        ("https://www.twitter.com/id:2976459548"),
-        ("https://twitter.com/i/user/2976459548"),
-        ("https://twitter.com/intent/user?user_id=2976459548"),
-        ("https://fxtwitter.com/supernaturepics"),
-        ("https://vxtwitter.com/supernaturepics"),
-        ("https://x.com/supernaturepics"),
-    )
+    example = "https://twitter.com/USER"
 
     def __init__(self, match):
         TwitterExtractor.__init__(self, match)
@@ -523,22 +508,7 @@ class TwitterTimelineExtractor(TwitterExtractor):
     """Extractor for a Twitter user timeline"""
     subcategory = "timeline"
     pattern = BASE_PATTERN + r"/(?!search)([^/?#]+)/timeline(?!\w)"
-    test = (
-        ("https://twitter.com/supernaturepics/timeline", {
-            "range": "1-40",
-            "url": "c570ac1aae38ed1463be726cc46f31cac3d82a40",
-        }),
-        # suspended account (#2216)
-        ("https://twitter.com/OptionalTypo/timeline", {
-            "exception": exception.NotFoundError,
-        }),
-        # suspended account user ID
-        ("https://twitter.com/id:772949683521978368/timeline", {
-            "exception": exception.NotFoundError,
-        }),
-        ("https://mobile.twitter.com/supernaturepics/timeline#t"),
-        ("https://www.twitter.com/id:2976459548/timeline"),
-    )
+    example = "https://twitter.com/USER/timeline"
 
     def tweets(self):
         # yield initial batch of (media) tweets
@@ -583,14 +553,7 @@ class TwitterTweetsExtractor(TwitterExtractor):
     """Extractor for Tweets from a user's Tweets timeline"""
     subcategory = "tweets"
     pattern = BASE_PATTERN + r"/(?!search)([^/?#]+)/tweets(?!\w)"
-    test = (
-        ("https://twitter.com/supernaturepics/tweets", {
-            "range": "1-40",
-            "url": "c570ac1aae38ed1463be726cc46f31cac3d82a40",
-        }),
-        ("https://mobile.twitter.com/supernaturepics/tweets#t"),
-        ("https://www.twitter.com/id:2976459548/tweets"),
-    )
+    example = "https://twitter.com/USER/tweets"
 
     def tweets(self):
         return self.api.user_tweets(self.user)
@@ -600,14 +563,7 @@ class TwitterRepliesExtractor(TwitterExtractor):
     """Extractor for Tweets from a user's timeline including replies"""
     subcategory = "replies"
     pattern = BASE_PATTERN + r"/(?!search)([^/?#]+)/with_replies(?!\w)"
-    test = (
-        ("https://twitter.com/supernaturepics/with_replies", {
-            "range": "1-40",
-            "url": "c570ac1aae38ed1463be726cc46f31cac3d82a40",
-        }),
-        ("https://mobile.twitter.com/supernaturepics/with_replies#t"),
-        ("https://www.twitter.com/id:2976459548/with_replies"),
-    )
+    example = "https://twitter.com/USER/with_replies"
 
     def tweets(self):
         return self.api.user_tweets_and_replies(self.user)
@@ -617,14 +573,7 @@ class TwitterMediaExtractor(TwitterExtractor):
     """Extractor for Tweets from a user's Media timeline"""
     subcategory = "media"
     pattern = BASE_PATTERN + r"/(?!search)([^/?#]+)/media(?!\w)"
-    test = (
-        ("https://twitter.com/supernaturepics/media", {
-            "range": "1-40",
-            "url": "c570ac1aae38ed1463be726cc46f31cac3d82a40",
-        }),
-        ("https://mobile.twitter.com/supernaturepics/media#t"),
-        ("https://www.twitter.com/id:2976459548/media"),
-    )
+    example = "https://twitter.com/USER/media"
 
     def tweets(self):
         return self.api.user_media(self.user)
@@ -634,7 +583,7 @@ class TwitterLikesExtractor(TwitterExtractor):
     """Extractor for liked tweets"""
     subcategory = "likes"
     pattern = BASE_PATTERN + r"/(?!search)([^/?#]+)/likes(?!\w)"
-    test = ("https://twitter.com/supernaturepics/likes",)
+    example = "https://twitter.com/USER/likes"
 
     def metadata(self):
         return {"user_likes": self.user}
@@ -653,7 +602,7 @@ class TwitterBookmarkExtractor(TwitterExtractor):
     """Extractor for bookmarked tweets"""
     subcategory = "bookmark"
     pattern = BASE_PATTERN + r"/i/bookmarks()"
-    test = ("https://twitter.com/i/bookmarks",)
+    example = "https://twitter.com/i/bookmarks"
 
     def tweets(self):
         return self.api.user_bookmarks()
@@ -669,11 +618,7 @@ class TwitterListExtractor(TwitterExtractor):
     """Extractor for Twitter lists"""
     subcategory = "list"
     pattern = BASE_PATTERN + r"/i/lists/(\d+)/?$"
-    test = ("https://twitter.com/i/lists/784214683683127296", {
-        "range": "1-40",
-        "count": 40,
-        "archive": False,
-    })
+    example = "https://twitter.com/i/lists/12345"
 
     def tweets(self):
         return self.api.list_latest_tweets_timeline(self.user)
@@ -683,11 +628,7 @@ class TwitterListMembersExtractor(TwitterExtractor):
     """Extractor for members of a Twitter list"""
     subcategory = "list-members"
     pattern = BASE_PATTERN + r"/i/lists/(\d+)/members"
-    test = ("https://twitter.com/i/lists/784214683683127296/members", {
-        "pattern": TwitterTimelineExtractor.pattern,
-        "range": "1-40",
-        "count": 40,
-    })
+    example = "https://twitter.com/i/lists/12345/members"
 
     def items(self):
         self.login()
@@ -698,10 +639,7 @@ class TwitterFollowingExtractor(TwitterExtractor):
     """Extractor for followed users"""
     subcategory = "following"
     pattern = BASE_PATTERN + r"/(?!search)([^/?#]+)/following(?!\w)"
-    test = (
-        ("https://twitter.com/supernaturepics/following"),
-        ("https://www.twitter.com/id:2976459548/following"),
-    )
+    example = "https://twitter.com/USER/following"
 
     def items(self):
         self.login()
@@ -712,11 +650,7 @@ class TwitterSearchExtractor(TwitterExtractor):
     """Extractor for Twitter search results"""
     subcategory = "search"
     pattern = BASE_PATTERN + r"/search/?\?(?:[^&#]+&)*q=([^&#]+)"
-    test = ("https://twitter.com/search?q=nature", {
-        "range": "1-20",
-        "count": 20,
-        "archive": False,
-    })
+    example = "https://twitter.com/search?q=QUERY"
 
     def metadata(self):
         return {"search": text.unquote(self.user)}
@@ -747,10 +681,7 @@ class TwitterHashtagExtractor(TwitterExtractor):
     """Extractor for Twitter hashtags"""
     subcategory = "hashtag"
     pattern = BASE_PATTERN + r"/hashtag/([^/?#]+)"
-    test = ("https://twitter.com/hashtag/nature", {
-        "pattern": TwitterSearchExtractor.pattern,
-        "url": "3571c3a53b7647ea35517041fdc17f77ec5b2cb9",
-    })
+    example = "https://twitter.com/hashtag/NAME"
 
     def items(self):
         url = "{}/search?q=%23{}".format(self.root, self.user)
@@ -764,10 +695,7 @@ class TwitterEventExtractor(TwitterExtractor):
     directory_fmt = ("{category}", "Events",
                      "{event[id]} {event[short_title]}")
     pattern = BASE_PATTERN + r"/i/events/(\d+)"
-    test = ("https://twitter.com/i/events/1484669206993903616", {
-        "range": "1-20",
-        "count": ">=1",
-    })
+    example = "https://twitter.com/i/events/12345"
 
     def metadata(self):
         return {"event": self.api.live_event(self.user)}
@@ -780,188 +708,7 @@ class TwitterTweetExtractor(TwitterExtractor):
     """Extractor for images from individual tweets"""
     subcategory = "tweet"
     pattern = BASE_PATTERN + r"/([^/?#]+|i/web)/status/(\d+)"
-    test = (
-        ("https://twitter.com/supernaturepics/status/604341487988576256", {
-            "url": "88a40f7d25529c2501c46f2218f9e0de9aa634b4",
-            "content": "ab05e1d8d21f8d43496df284d31e8b362cd3bcab",
-        }),
-        # 4 images
-        ("https://twitter.com/perrypumas/status/894001459754180609", {
-            "url": "3a2a43dc5fb79dd5432c701d8e55e87c4e551f47",
-        }),
-        # video
-        ("https://twitter.com/perrypumas/status/1065692031626829824", {
-            "pattern": r"https://video.twimg.com/ext_tw_video/.+\.mp4\?tag=5",
-        }),
-        # content with emoji, newlines, hashtags (#338)
-        ("https://twitter.com/playpokemon/status/1263832915173048321", {
-            "keyword": {"content": (
-                r"re:Gear up for #PokemonSwordShieldEX with special Mystery "
-                "Gifts! \n\nYou’ll be able to receive four Galarian form "
-                "Pokémon with Hidden Abilities, plus some very useful items. "
-                "It’s our \\(Mystery\\) Gift to you, Trainers! \n\n❓🎁➡️ "
-            )},
-        }),
-        # Reply to deleted tweet (#403, #838)
-        ("https://twitter.com/i/web/status/1170041925560258560", {
-            "pattern": r"https://pbs.twimg.com/media/EDzS7VrU0AAFL4_",
-        }),
-        # 'replies' option (#705)
-        ("https://twitter.com/i/web/status/1170041925560258560", {
-            "options": (("replies", False),),
-            "count": 0,
-        }),
-        # 'replies' to self (#1254)
-        ("https://twitter.com/i/web/status/1424882930803908612", {
-            "options": (("replies", "self"),),
-            "count": 4,
-            "keyword": {"user": {
-                "description": "re:business email-- rhettaro.bloom@gmail.com "
-                               "patreon- http://patreon.com/Princecanary",
-                "url": "http://princecanary.tumblr.com",
-            }},
-        }),
-        ("https://twitter.com/i/web/status/1424898916156284928", {
-            "options": (("replies", "self"),),
-            "count": 1,
-        }),
-        # "quoted" option (#854)
-        ("https://twitter.com/StobiesGalaxy/status/1270755918330896395", {
-            "options": (("quoted", True),),
-            "pattern": r"https://pbs\.twimg\.com/media/Ea[KG].+=jpg",
-            "count": 8,
-        }),
-        # quoted tweet (#526, #854)
-        ("https://twitter.com/StobiesGalaxy/status/1270755918330896395", {
-            "pattern": r"https://pbs\.twimg\.com/media/EaK.+=jpg",
-            "count": 4,
-        }),
-        # different 'user' and 'author' in quoted Tweet (#3922)
-        ("https://twitter.com/web/status/1644907989109751810", {
-            "keyword": {
-                "author": {"id": 321629993         , "name": "Cakes_Comics"},
-                "user"  : {"id": 718928225360080897, "name": "StobiesGalaxy"},
-            },
-        }),
-        # TwitPic embeds (#579)
-        ("https://twitter.com/i/web/status/112900228289540096", {
-            "options": (("twitpic", True), ("cards", False)),
-            "pattern": r"https://\w+.cloudfront.net/photos/large/\d+.jpg",
-            "count": 2,  # 1 duplicate
-        }),
-        # TwitPic URL not in 'urls' (#3792)
-        ("https://twitter.com/shimoigusaP/status/8138669971", {
-            "options": (("twitpic", True),),
-            "pattern": r"https://\w+.cloudfront.net/photos/large/\d+.png",
-            "count": 1,
-        }),
-        # Twitter card (#1005)
-        ("https://twitter.com/billboard/status/1306599586602135555", {
-            "options": (("cards", True),),
-            "pattern": r"https://pbs.twimg.com/card_img/\d+/",
-        }),
-        # unified_card image_website (#2875)
-        ("https://twitter.com/i/web/status/1561674543323910144", {
-            "options": (("cards", True),),
-            "pattern": r"https://pbs\.twimg\.com/media/F.+=jpg",
-        }),
-        # unified_card image_carousel_website
-        ("https://twitter.com/doax_vv_staff/status/1479438945662685184", {
-            "options": (("cards", True),),
-            "pattern": r"https://pbs\.twimg\.com/media/F.+=png",
-            "count": 6,
-        }),
-        # unified_card video_website (#2875)
-        ("https://twitter.com/bang_dream_1242/status/1561548715348746241", {
-            "options": (("cards", True),),
-            "pattern": r"https://video\.twimg\.com/amplify_video"
-                       r"/1560607284333449216/vid/720x720/\w+\.mp4",
-        }),
-        # unified_card without type
-        ("https://twitter.com/i/web/status/1466183847628865544", {
-            "count": 0,
-        }),
-        # 'cards-blacklist' option
-        ("https://twitter.com/i/web/status/1571141912295243776", {
-            "options": (("cards", "ytdl"),
-                        ("cards-blacklist", ("twitch.tv",))),
-            "count": 0,
-        }),
-        # retweet
-        ("https://twitter.com/jessica_3978/status/1296304589591810048", {
-            "options": (("retweets", True),),
-            "count": 2,
-            "keyword": {
-                "tweet_id"     : 1296304589591810048,
-                "retweet_id"   : 1296296016002547713,
-                "date"         : "dt:2020-08-20 04:34:32",
-                "date_original": "dt:2020-08-20 04:00:28",
-            },
-        }),
-        # original retweets (#1026)
-        ("https://twitter.com/jessica_3978/status/1296304589591810048", {
-            "options": (("retweets", "original"),),
-            "count": 2,
-            "keyword": {
-                "tweet_id"     : 1296296016002547713,
-                "retweet_id"   : 1296296016002547713,
-                "date"         : "dt:2020-08-20 04:00:28",
-                "date_original": "dt:2020-08-20 04:00:28",
-            },
-        }),
-        # all Tweets from a 'conversation' (#1319)
-        ("https://twitter.com/supernaturepics/status/604341487988576256", {
-            "options": (("conversations", True),),
-            "count": 5,
-        }),
-        # retweet with missing media entities (#1555)
-        ("https://twitter.com/morino_ya/status/1392763691599237121", {
-            "options": (("retweets", True),),
-            "count": 0,  # private
-        }),
-        # deleted quote tweet (#2225)
-        ("https://twitter.com/i/web/status/1460044411165888515", {
-            "count": 0,
-        }),
-        # "Misleading" content
-        ("https://twitter.com/i/web/status/1486373748911575046", {
-            "count": 4,
-        }),
-        # age-restricted (#2354)
-        ("https://twitter.com/mightbecursed/status/1492954264909479936", {
-            "options": (("syndication", True),),
-            "keyword": {"date": "dt:2022-02-13 20:10:09"},
-            "count": 1,
-        }),
-        # media alt texts / descriptions (#2617)
-        ("https://twitter.com/my0nruri/status/1528379296041299968", {
-            "keyword": {"description": "oc"}
-        }),
-        # '?format=...&name=...'-style URLs
-        ("https://twitter.com/poco_dandy/status/1150646424461176832", {
-            "options": (("cards", True),),
-            "pattern": r"https://pbs.twimg.com/card_img/157\d+/[\w-]+"
-                       r"\?format=(jpg|png)&name=orig$",
-            "range": "1-2",
-        }),
-        # note tweet with long 'content'
-        ("https://twitter.com/i/web/status/1629193457112686592", {
-            "keyword": {
-                "content": """\
-BREAKING - DEADLY LIES: Independent researchers at Texas A&M University have \
-just contradicted federal government regulators, saying that toxic air \
-pollutants in East Palestine, Ohio, could pose long-term risks. \n\nThe \
-Washington Post writes, "Three weeks after the toxic train derailment in \
-Ohio, an analysis of Environmental Protection Agency data has found nine air \
-pollutants at levels that could raise long-term health concerns in and around \
-East Palestine, according to an independent analysis. \n\n\"The analysis by \
-Texas A&M University seems to contradict statements by state and federal \
-regulators that air near the crash site is completely safe, despite residents \
-complaining about rashes, breathing problems and other health effects." \
-Your reaction.""",
-            },
-        }),
-    )
+    example = "https://twitter.com/USER/status/12345"
 
     def __init__(self, match):
         TwitterExtractor.__init__(self, match)
@@ -1042,21 +789,7 @@ class TwitterAvatarExtractor(TwitterExtractor):
     filename_fmt = "avatar {date}.{extension}"
     archive_fmt = "AV_{user[id]}_{date}"
     pattern = BASE_PATTERN + r"/(?!search)([^/?#]+)/photo"
-    test = (
-        ("https://twitter.com/supernaturepics/photo", {
-            "pattern": r"https://pbs\.twimg\.com/profile_images"
-                       r"/554585280938659841/FLVAlX18\.jpeg",
-            "keyword": {
-                "date": "dt:2015-01-12 10:26:49",
-                "extension": "jpeg",
-                "filename": "FLVAlX18",
-                "tweet_id": 554585280938659841,
-            },
-        }),
-        ("https://twitter.com/User16/photo", {
-            "count": 0,
-        }),
-    )
+    example = "https://twitter.com/USER/photo"
 
     def tweets(self):
         self.api._user_id_by_screen_name(self.user)
@@ -1078,20 +811,7 @@ class TwitterBackgroundExtractor(TwitterExtractor):
     filename_fmt = "background {date}.{extension}"
     archive_fmt = "BG_{user[id]}_{date}"
     pattern = BASE_PATTERN + r"/(?!search)([^/?#]+)/header_photo"
-    test = (
-        ("https://twitter.com/supernaturepics/header_photo", {
-            "pattern": r"https://pbs\.twimg\.com/profile_banners"
-                       r"/2976459548/1421058583",
-            "keyword": {
-                "date": "dt:2015-01-12 10:29:43",
-                "filename": "1421058583",
-                "tweet_id": 554586009367478272,
-            },
-        }),
-        ("https://twitter.com/User16/header_photo", {
-            "count": 0,
-        }),
-    )
+    example = "https://twitter.com/USER/header_photo"
 
     def tweets(self):
         self.api._user_id_by_screen_name(self.user)
@@ -1111,13 +831,7 @@ class TwitterImageExtractor(Extractor):
     category = "twitter"
     subcategory = "image"
     pattern = r"https?://pbs\.twimg\.com/media/([\w-]+)(?:\?format=|\.)(\w+)"
-    test = (
-        ("https://pbs.twimg.com/media/EqcpviCVoAAG-QG?format=jpg&name=orig", {
-            "options": (("size", "4096x4096,orig"),),
-            "url": "cb3042a6f6826923da98f0d2b66c427e9385114c",
-        }),
-        ("https://pbs.twimg.com/media/EqcpviCVoAAG-QG.jpg:orig"),
-    )
+    example = "https://pbs.twimg.com/media/ABCDE?format=jpg&name=orig"
 
     def __init__(self, match):
         Extractor.__init__(self, match)

@@ -43,18 +43,7 @@ class DynastyscansBase():
 class DynastyscansChapterExtractor(DynastyscansBase, ChapterExtractor):
     """Extractor for manga-chapters from dynasty-scans.com"""
     pattern = BASE_PATTERN + r"(/chapters/[^/?#]+)"
-    test = (
-        (("http://dynasty-scans.com/chapters/"
-          "hitoribocchi_no_oo_seikatsu_ch33"), {
-            "url": "dce64e8c504118f1ab4135c00245ea12413896cb",
-            "keyword": "b67599703c27316a2fe4f11c3232130a1904e032",
-        }),
-        (("http://dynasty-scans.com/chapters/"
-          "new_game_the_spinoff_special_13"), {
-            "url": "dbe5bbb74da2edcfb1832895a484e2a40bc8b538",
-            "keyword": "6b674eb3a274999153f6be044973b195008ced2f",
-        }),
-    )
+    example = "https://dynasty-scans.com/chapters/NAME"
 
     def metadata(self, page):
         extr = text.extract_from(page)
@@ -93,10 +82,7 @@ class DynastyscansMangaExtractor(DynastyscansBase, MangaExtractor):
     chapterclass = DynastyscansChapterExtractor
     reverse = False
     pattern = BASE_PATTERN + r"(/series/[^/?#]+)"
-    test = ("https://dynasty-scans.com/series/hitoribocchi_no_oo_seikatsu", {
-        "pattern": DynastyscansChapterExtractor.pattern,
-        "count": ">= 100",
-    })
+    example = "https://dynasty-scans.com/series/NAME"
 
     def chapters(self, page):
         return [
@@ -112,16 +98,7 @@ class DynastyscansSearchExtractor(DynastyscansBase, Extractor):
     filename_fmt = "{image_id}.{extension}"
     archive_fmt = "i_{image_id}"
     pattern = BASE_PATTERN + r"/images/?(?:\?([^#]+))?$"
-    test = (
-        ("https://dynasty-scans.com/images?with[]=4930&with[]=5211", {
-            "url": "22cf0fb64e12b29e79b0a3d26666086a48f9916a",
-            "keyword": "11cbc555a15528d25567977b8808e10369c4c3ee",
-        }),
-        ("https://dynasty-scans.com/images", {
-            "range": "1",
-            "count": 1,
-        }),
-    )
+    example = "https://dynasty-scans.com/images?QUERY"
 
     def __init__(self, match):
         Extractor.__init__(self, match)
@@ -150,10 +127,7 @@ class DynastyscansImageExtractor(DynastyscansSearchExtractor):
     """Extractor for individual images on dynasty-scans.com"""
     subcategory = "image"
     pattern = BASE_PATTERN + r"/images/(\d+)"
-    test = ("https://dynasty-scans.com/images/1245", {
-        "url": "15e54bd94148a07ed037f387d046c27befa043b2",
-        "keyword": "0d8976c2d6fbc9ed6aa712642631b96e456dc37f",
-    })
+    example = "https://dynasty-scans.com/images/12345"
 
     def images(self):
         return (self.query,)

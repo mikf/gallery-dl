@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2020 Mike Fährmann
+# Copyright 2019-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -84,32 +84,7 @@ class LivedoorBlogExtractor(LivedoorExtractor):
     """Extractor for a user's blog on blog.livedoor.jp"""
     subcategory = "blog"
     pattern = r"(?:https?://)?blog\.livedoor\.jp/(\w+)/?(?:$|[?#])"
-    test = (
-        ("http://blog.livedoor.jp/zatsu_ke/", {
-            "range": "1-50",
-            "count": 50,
-            "archive": False,
-            "pattern": r"https?://livedoor.blogimg.jp/\w+/imgs/\w/\w/\w+\.\w+",
-            "keyword": {
-                "post": {
-                    "categories" : tuple,
-                    "date"       : "type:datetime",
-                    "description": str,
-                    "id"         : int,
-                    "tags"       : list,
-                    "title"      : str,
-                    "user"       : "zatsu_ke"
-                },
-                "filename": str,
-                "hash"    : r"re:\w{4,}",
-                "num"     : int,
-            },
-        }),
-        ("http://blog.livedoor.jp/uotapo/", {
-            "range": "1-5",
-            "count": 5,
-        }),
-    )
+    example = "http://blog.livedoor.jp/USER/"
 
     def posts(self):
         url = "{}/{}".format(self.root, self.user)
@@ -129,20 +104,7 @@ class LivedoorPostExtractor(LivedoorExtractor):
     """Extractor for images from a blog post on blog.livedoor.jp"""
     subcategory = "post"
     pattern = r"(?:https?://)?blog\.livedoor\.jp/(\w+)/archives/(\d+)"
-    test = (
-        ("http://blog.livedoor.jp/zatsu_ke/archives/51493859.html", {
-            "url": "9ca3bbba62722c8155be79ad7fc47be409e4a7a2",
-            "keyword": "1f5b558492e0734f638b760f70bfc0b65c5a97b9",
-        }),
-        ("http://blog.livedoor.jp/amaumauma/archives/7835811.html", {
-            "url": "204bbd6a9db4969c50e0923855aeede04f2e4a62",
-            "keyword": "05821c7141360e6057ef2d382b046f28326a799d",
-        }),
-        ("http://blog.livedoor.jp/uotapo/archives/1050616939.html", {
-            "url": "4b5ab144b7309eb870d9c08f8853d1abee9946d2",
-            "keyword": "84fbf6e4eef16675013d6333039a7cfcb22c2d50",
-        }),
-    )
+    example = "http://blog.livedoor.jp/USER/archives/12345.html"
 
     def __init__(self, match):
         LivedoorExtractor.__init__(self, match)

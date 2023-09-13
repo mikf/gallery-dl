@@ -16,35 +16,7 @@ class TcbscansChapterExtractor(ChapterExtractor):
     category = "tcbscans"
     root = "https://tcbscans.com"
     pattern = BASE_PATTERN + r"(/chapters/\d+/[^/?#]+)"
-    test = (
-        (("https://tcbscans.com"
-          "/chapters/4708/chainsaw-man-chapter-108"), {
-            "pattern": (r"https://cdn\.[^/]+"
-                        r"/(file|attachments/[^/]+)/[^/]+/[^.]+\.\w+"),
-            "count"  : 17,
-            "keyword": {
-                "manga": "Chainsaw Man",
-                "chapter": 108,
-                "chapter_minor": "",
-                "lang": "en",
-                "language": "English",
-            },
-        }),
-        ("https://onepiecechapters.com/chapters/4716/one-piece-chapter-1065", {
-            "pattern": (r"https://cdn\.[^/]+"
-                        r"/(file|attachments/[^/]+)/[^/]+/[^.]+\.\w+"),
-            "count"  : 18,
-            "keyword": {
-                "manga": "One Piece",
-                "chapter": 1065,
-                "chapter_minor": "",
-                "lang": "en",
-                "language": "English",
-            },
-        }),
-        (("https://onepiecechapters.com/"
-          "chapters/44/ace-novel-manga-adaptation-chapter-1")),
-    )
+    example = "https://tcbscans.com/chapters/12345/MANGA-chapter-123"
 
     def images(self, page):
         return [
@@ -70,19 +42,7 @@ class TcbscansMangaExtractor(MangaExtractor):
     root = "https://tcbscans.com"
     chapterclass = TcbscansChapterExtractor
     pattern = BASE_PATTERN + r"(/mangas/\d+/[^/?#]+)"
-    test = (
-        ("https://tcbscans.com/mangas/13/chainsaw-man", {
-            "pattern": TcbscansChapterExtractor.pattern,
-            "range"  : "1-50",
-            "count"  : 50,
-        }),
-        ("https://onepiecechapters.com/mangas/4/jujutsu-kaisen", {
-            "pattern": TcbscansChapterExtractor.pattern,
-            "range"  : "1-50",
-            "count"  : 50,
-        }),
-        ("https://onepiecechapters.com/mangas/15/hunter-x-hunter"),
-    )
+    example = "https://tcbscans.com/mangas/123/MANGA"
 
     def chapters(self, page):
         data = {

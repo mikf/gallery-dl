@@ -145,53 +145,7 @@ class SkebPostExtractor(SkebExtractor):
     """Extractor for a single skeb post"""
     subcategory = "post"
     pattern = r"(?:https?://)?skeb\.jp/@([^/?#]+)/works/(\d+)"
-    test = ("https://skeb.jp/@kanade_cocotte/works/38", {
-        "count": 2,
-        "keyword": {
-            "anonymous": False,
-            "body": "re:はじめまして。私はYouTubeにてVTuberとして活動をしている湊ラ",
-            "client": {
-                "avatar_url": r"re:https://pbs.twimg.com/profile_images"
-                              r"/\d+/\w+\.jpg",
-                "header_url": r"re:https://pbs.twimg.com/profile_banners"
-                              r"/1375007870291300358/\d+/1500x500",
-                "id": 1196514,
-                "name": str,
-                "screen_name": "minato_ragi",
-            },
-            "content_category": "preview",
-            "creator": {
-                "avatar_url": "https://pbs.twimg.com/profile_images"
-                              "/1225470417063645184/P8_SiB0V.jpg",
-                "header_url": "https://pbs.twimg.com/profile_banners"
-                              "/71243217/1647958329/1500x500",
-                "id": 159273,
-                "name": "イチノセ奏",
-                "screen_name": "kanade_cocotte",
-            },
-            "file_id": int,
-            "file_url": str,
-            "genre": "art",
-            "nsfw": False,
-            "original": {
-                "byte_size": int,
-                "duration": None,
-                "extension": "re:psd|png",
-                "frame_rate": None,
-                "height": 3727,
-                "is_movie": False,
-                "width": 2810,
-            },
-            "post_num": "38",
-            "post_url": "https://skeb.jp/@kanade_cocotte/works/38",
-            "source_body": None,
-            "source_thanks": None,
-            "tags": list,
-            "thanks": None,
-            "translated_body": False,
-            "translated_thanks": None,
-        }
-    })
+    example = "https://skeb.jp/@USER/works/123"
 
     def __init__(self, match):
         SkebExtractor.__init__(self, match)
@@ -205,13 +159,7 @@ class SkebUserExtractor(SkebExtractor):
     """Extractor for all posts from a skeb user"""
     subcategory = "user"
     pattern = r"(?:https?://)?skeb\.jp/@([^/?#]+)/?$"
-    test = ("https://skeb.jp/@kanade_cocotte", {
-        "pattern": r"https://skeb\.imgix\.net/uploads/origins/[\w-]+"
-                   r"\?bg=%23fff&auto=format&txtfont=bold&txtshad=70"
-                   r"&txtclr=BFFFFFFF&txtalign=middle%2Ccenter&txtsize=150"
-                   r"&txt=SAMPLE&fm=webp&w=800&s=\w+",
-        "range": "1-5",
-    })
+    example = "https://skeb.jp/@USER"
 
     def posts(self):
         url = "{}/api/users/{}/works".format(self.root, self.user_name)
@@ -230,10 +178,7 @@ class SkebSearchExtractor(SkebExtractor):
     """Extractor for skeb search results"""
     subcategory = "search"
     pattern = r"(?:https?://)?skeb\.jp/search\?q=([^&#]+)"
-    test = ("https://skeb.jp/search?q=bunny%20tree&t=works", {
-        "count": ">= 18",
-        "keyword": {"search_tags": "bunny tree"},
-    })
+    example = "https://skeb.jp/search?q=QUERY"
 
     def metadata(self):
         return {"search_tags": text.unquote(self.user_name)}
@@ -286,7 +231,7 @@ class SkebFollowingExtractor(SkebExtractor):
     """Extractor for all creators followed by a skeb user"""
     subcategory = "following"
     pattern = r"(?:https?://)?skeb\.jp/@([^/?#]+)/following_creators"
-    test = ("https://skeb.jp/@user/following_creators",)
+    example = "https://skeb.jp/@USER/following_creators"
 
     def items(self):
         for user in self.users():
