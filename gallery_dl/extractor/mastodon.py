@@ -131,8 +131,8 @@ class MastodonBookmarkExtractor(MastodonExtractor):
 class MastodonFollowingExtractor(MastodonExtractor):
     """Extractor for followed mastodon users"""
     subcategory = "following"
-    pattern = BASE_PATTERN + r"/users/([^/?#]+)/following"
-    example = "https://mastodon.social/users/USER/following"
+    pattern = BASE_PATTERN + r"/(?:@|users/)([^/?#]+)/following"
+    example = "https://mastodon.social/@USER/following"
 
     def items(self):
         api = MastodonAPI(self)
