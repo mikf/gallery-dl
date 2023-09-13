@@ -171,6 +171,24 @@ class DeviantartExtractor(Extractor):
                     deviation["_extractor"] = DeviantartStashExtractor
                     yield Message.Queue, url, deviation
 
+            # extract sta.sh URLs from entityMap
+            try:
+                entity_map = \
+                    deviation["text_content"]["body"]["markup"]["entityMap"]
+            except KeyError:
+                continue
+
+            for entity in entity_map.values():
+                if "url" not in entity["data"]:
+                    continue
+                match = DeviantartStashExtractor.pattern.match(
+                    entity["data"]["url"])
+                if not match:
+                    continue
+                url = text.ensure_http_scheme(match.group(0))
+                deviation["_extractor"] = DeviantartStashExtractor
+                yield Message.Queue, url, deviation
+
     def deviations(self):
         """Return an iterable containing all relevant Deviation-objects"""
 
@@ -218,6 +236,28 @@ class DeviantartExtractor(Extractor):
             sub("_", deviation["author"]["username"].lower()), "-d",
             deviation["index_base36"],
         ))
+
+    @staticmethod
+    def embedded_image(target):
+        """Extract embedded images as deviations"""
+        try:
+            entity_map = target["text_content"]["body"]["markup"]["entityMap"]
+        except KeyError:
+            return
+        for entity in entity_map.values():
+            if "data" not in entity["data"]:
+                continue
+            data = entity["data"]["data"]
+            # wix-draft-plugin-image
+            if isinstance(data, dict) and "deviationid" in data:
+                yield data.copy()
+                continue
+            # wix-draft-plugin-gallery
+            if not isinstance(data, list):
+                continue
+            for deviation in data:
+                if isinstance(deviation, dict) and "deviationid" in deviation:
+                    yield deviation.copy()
 
     @staticmethod
     def commit(deviation, target):
@@ -806,10 +846,17 @@ class DeviantartStatusExtractor(DeviantartExtractor):
         }),
         # shared deviation
         ("https://www.deviantart.com/justgalym/posts/statuses", {
-            "options": (("journals", "none"),),
+            "options": (("journals", "none"), ("metadata", 1), ("folders", 1)),
             "count": 1,
             "pattern": r"https://images-wixmp-\w+\.wixmp\.com/f"
                        r"/[^/]+/[^.]+\.jpg\?token=",
+            "keyword": {
+                "description": str,
+                "folders": list,
+                "is_watching": bool,
+                "license": str,
+                "tags": list,
+            }
         }),
         # shared sta.sh item
         ("https://www.deviantart.com/vanillaghosties/posts/statuses", {
@@ -834,6 +881,20 @@ class DeviantartStatusExtractor(DeviantartExtractor):
             "options": (("journals", "text"),),
             "url": "c8744f7f733a3029116607b826321233c5ca452d",
         }),
+        # embedded image in entityMap
+        ("https://www.deviantart.com/justgalym/posts/statuses", {
+            "options": (("journals", "none"), ("extra", True),
+                        ("original", False)),
+            "range": "1",
+            "count": 1,
+            "keyword": {
+                "description": str,
+                "is_watching": bool,
+                "license": str,
+                "tags": list,
+                "url": "https://sta.sh/0s0bz4c8yte"
+            },
+        }),
     )
 
     def deviations(self):
@@ -852,6 +913,8 @@ class DeviantartStatusExtractor(DeviantartExtractor):
             self.log.warning(
                 "Skipping status %s (deleted)", status.get("statusid"))
             return
+
+        yield from self.embedded_image(status)
         yield status
 
     def prepare(self, deviation):
@@ -1290,7 +1353,8 @@ class DeviantartOAuthAPI():
             self.mature = "true" if self.mature else "false"
 
         self.folders = extractor.config("folders", False)
-        self.metadata = extractor.extra or extractor.config("metadata", False)
+        self.extra = extractor.extra
+        self.metadata = self.extra or extractor.config("metadata", False)
         self.strategy = extractor.config("pagination")
         self.public = extractor.config("public", True)
 
@@ -1333,7 +1397,7 @@ class DeviantartOAuthAPI():
         endpoint = "/browse/newest"
         params = {
             "q"             : query,
-            "limit"         : 50 if self.metadata else 120,
+            "limit"         : 100 if self.metadata else 120,
             "offset"        : offset,
             "mature_content": self.mature,
         }
@@ -1344,7 +1408,7 @@ class DeviantartOAuthAPI():
         endpoint = "/browse/popular"
         params = {
             "q"             : query,
-            "limit"         : 50 if self.metadata else 120,
+            "limit"         : 100 if self.metadata else 120,
             "timerange"     : timerange,
             "offset"        : offset,
             "mature_content": self.mature,
@@ -1474,7 +1538,8 @@ class DeviantartOAuthAPI():
     def user_statuses(self, username, offset=0):
         """Yield status updates of a specific user"""
         endpoint = "/user/statuses/"
-        params = {"username": username, "offset": offset, "limit": 50}
+        params = {"username": username, "offset": offset, "limit": 50,
+                  "expand": "status.fulltext" if self.extra else None}
         return self._pagination(endpoint, params)
 
     def user_friends_watch(self, username):
@@ -1611,20 +1676,25 @@ class DeviantartOAuthAPI():
                             "Private deviations detected! Run 'gallery-dl "
                             "oauth:deviantart' and follow the instructions to "
                             "be able to access them.")
-                # "statusid" cannot be used instead
-                if results and "deviationid" in results[0]:
+
+                # 'statusid' cannot be used in place of 'deviationid'
+                deviations = results if \
+                    results and "deviationid" in results[0] else None
+                nested_deviations = self._embedded_shared_content(results)
+                for dev in nested_deviations:
+                    if not dev["is_deleted"]:
+                        continue
+                    patch = self._call(
+                        "/deviation/" + dev["deviationid"], fatal=False)
+                    if patch:
+                        dev.update(patch)
+                for devs in (deviations, nested_deviations):
+                    if not devs:
+                        continue
                     if self.metadata:
-                        self._metadata(results)
+                        self._metadata(devs)
                     if self.folders:
-                        self._folders(results)
-                else:  # attempt to fix "deleted" deviations
-                    for dev in self._shared_content(results):
-                        if not dev["is_deleted"]:
-                            continue
-                        patch = self._call(
-                            "/deviation/" + dev["deviationid"], fatal=False)
-                        if patch:
-                            dev.update(patch)
+                        self._folders(devs)
 
             yield from results
 
@@ -1644,12 +1714,50 @@ class DeviantartOAuthAPI():
                 params["offset"] = int(params["offset"]) + len(results)
 
     @staticmethod
-    def _shared_content(results):
-        """Return an iterable of shared deviations in 'results'"""
+    def _embedded_shared_content(results):
+        """Deduplicate and return an iterable of embedded/shared deviations
+        in 'results'
+        """
+        # gather deviations and condense duplicates
+        items = {}
         for result in results:
+            # shared content in statuses
             for item in result.get("items") or ():
-                if "deviation" in item:
-                    yield item["deviation"]
+                if "deviation" not in item:
+                    continue
+                dev = item["deviation"]
+                if dev["deviationid"] in items:
+                    item["deviation"] = items[dev["deviationid"]]
+                else:
+                    items[dev["deviationid"]] = dev
+            # embedded content in statuses and journals
+            # (/user/profile/posts endpoint)
+            try:
+                entity_map = \
+                    result["text_content"]["body"]["markup"]["entityMap"]
+            except KeyError:
+                continue
+            for entity in entity_map.values():
+                if "data" not in entity["data"]:
+                    continue
+                data = entity["data"]["data"]
+                if isinstance(data, dict) and "deviationid" in data:
+                    if data["deviationid"] in items:
+                        entity["data"]["data"] = items[data["deviationid"]]
+                    else:
+                        items[data["deviationid"]] = data
+                    continue
+                if not isinstance(data, list):
+                    continue
+                for idx, dev in enumerate(data):
+                    if not isinstance(dev, dict) or "deviationid" not in dev:
+                        continue
+                    if dev["deviationid"] in items:
+                        data[idx] = items[dev["deviationid"]]
+                    else:
+                        items[dev["deviationid"]] = dev
+
+        return items.values()
 
     def _pagination_list(self, endpoint, params, key="results"):
         result = []
@@ -1658,10 +1766,11 @@ class DeviantartOAuthAPI():
 
     def _metadata(self, deviations):
         """Add extended metadata to each deviation object"""
-        for deviation, metadata in zip(
-                deviations, self.deviation_metadata(deviations)):
-            deviation.update(metadata)
-            deviation["tags"] = [t["tag_name"] for t in deviation["tags"]]
+        for batch in util.batched(deviations, 50):
+            for deviation, metadata in zip(
+                    batch, self.deviation_metadata(batch)):
+                deviation.update(metadata)
+                deviation["tags"] = [t["tag_name"] for t in deviation["tags"]]
 
     def _folders(self, deviations):
         """Add a list of all containing folders to each deviation object"""
