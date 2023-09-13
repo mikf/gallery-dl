@@ -105,52 +105,7 @@ class NozomiPostExtractor(NozomiExtractor):
     """Extractor for individual posts on nozomi.la"""
     subcategory = "post"
     pattern = r"(?:https?://)?nozomi\.la/post/(\d+)"
-    test = (
-        ("https://nozomi.la/post/3649262.html", {
-            "url": "e5525e717aec712843be8b88592d6406ae9e60ba",
-            "pattern": r"https://w\.nozomi\.la/2/15/aaa9f7c632cde1e1a5baaff3fb"
-                       r"6a6d857ec73df7fdc5cf5a358caf604bf73152\.webp",
-            "content": "6d62c4a7fea50c0a89d499603c4e7a2b4b9bffa8",
-            "keyword": {
-                "artist"   : ["hammer (sunset beach)"],
-                "character": ["patchouli knowledge"],
-                "copyright": ["touhou"],
-                "dataid"   : "re:aaa9f7c632cde1e1a5baaff3fb6a6d857ec73df7fdc5",
-                "date"     : "dt:2016-07-26 02:32:03",
-                "extension": "webp",
-                "filename" : str,
-                "height"   : 768,
-                "is_video" : False,
-                "postid"   : 3649262,
-                "tags"     : list,
-                "type"     : "jpg",
-                "url"      : str,
-                "width"    : 1024,
-            },
-        }),
-        #  multiple images per post
-        ("https://nozomi.la/post/25588032.html", {
-            "url": "fb956ccedcf2cf509739d26e2609e910244aa56c",
-            "keyword": "516ca5cbd0d2a46a8ce26679d6e08de5ac42184b",
-            "count": 7,
-        }),
-        # empty 'date' (#1163)
-        ("https://nozomi.la/post/130309.html", {
-            "keyword": {"date": None},
-        }),
-        # gif
-        ("https://nozomi.la/post/1647.html", {
-            "pattern": r"https://g\.nozomi\.la/a/f0/d1b06469e00d72e4f6346209c1"
-                       r"49db459d76b58a074416c260ed93cc31fa9f0a\.gif",
-            "content": "952efb78252bbc9fb56df2e8fafb68d5e6364181",
-        }),
-        # video
-        ("https://nozomi.la/post/2269847.html", {
-            "pattern": r"https://v\.nozomi\.la/d/0e/ff88398862669783691b31519f"
-                       r"2bea3a35c24b6e62e3ba2d89b4409e41c660ed\.webm",
-            "content": "57065e6c16da7b1c7098a63b36fb0c6c6f1b9bca",
-        }),
-    )
+    example = "https://nozomi.la/post/12345.html"
 
     def __init__(self, match):
         NozomiExtractor.__init__(self, match)
@@ -165,11 +120,7 @@ class NozomiIndexExtractor(NozomiExtractor):
     subcategory = "index"
     pattern = (r"(?:https?://)?nozomi\.la/"
                r"(?:(index(?:-Popular)?)-(\d+)\.html)?(?:$|#|\?)")
-    test = (
-        ("https://nozomi.la/"),
-        ("https://nozomi.la/index-2.html"),
-        ("https://nozomi.la/index-Popular-33.html"),
-    )
+    example = "https://nozomi.la/index-1.html"
 
     def __init__(self, match):
         NozomiExtractor.__init__(self, match)
@@ -183,11 +134,7 @@ class NozomiTagExtractor(NozomiExtractor):
     directory_fmt = ("{category}", "{search_tags}")
     archive_fmt = "t_{search_tags}_{dataid}"
     pattern = r"(?:https?://)?nozomi\.la/tag/([^/?#]+)-(\d+)\."
-    test = ("https://nozomi.la/tag/3:1_aspect_ratio-1.html", {
-        "pattern": r"^https://[wgv]\.nozomi\.la/\w/\w\w/\w+\.\w+$",
-        "count": ">= 25",
-        "range": "1-25",
-    })
+    example = "https://nozomi.la/tag/TAG-1.html"
 
     def __init__(self, match):
         NozomiExtractor.__init__(self, match)
@@ -205,9 +152,7 @@ class NozomiSearchExtractor(NozomiExtractor):
     directory_fmt = ("{category}", "{search_tags:J }")
     archive_fmt = "t_{search_tags}_{dataid}"
     pattern = r"(?:https?://)?nozomi\.la/search\.html\?q=([^&#]+)"
-    test = ("https://nozomi.la/search.html?q=hibiscus%203:4_ratio#1", {
-        "count": ">= 5",
-    })
+    example = "https://nozomi.la/search.html?q=QUERY"
 
     def __init__(self, match):
         NozomiExtractor.__init__(self, match)

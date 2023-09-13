@@ -7,7 +7,7 @@
 """Extractors for https://fanleaks.club/"""
 
 from .common import Extractor, Message
-from .. import text, exception
+from .. import text
 
 
 class FanleaksExtractor(Extractor):
@@ -36,34 +36,10 @@ class FanleaksExtractor(Extractor):
 
 
 class FanleaksPostExtractor(FanleaksExtractor):
-    """Extractor for individual posts on fanleak.club"""
+    """Extractor for individual posts on fanleaks.club"""
     subcategory = "post"
     pattern = r"(?:https?://)?(?:www\.)?fanleaks\.club/([^/?#]+)/(\d+)"
-    test = (
-        ("https://fanleaks.club/selti/880", {
-            "pattern": (r"https://fanleaks\.club//models"
-                        r"/selti/images/selti_0880\.jpg"),
-            "keyword": {
-                "model_id": "selti",
-                "model"   : "Selti",
-                "id"      : 880,
-                "type"    : "photo",
-            },
-        }),
-        ("https://fanleaks.club/daisy-keech/1038", {
-            "pattern": (r"https://fanleaks\.club//models"
-                        r"/daisy-keech/videos/daisy-keech_1038\.mp4"),
-            "keyword": {
-                "model_id": "daisy-keech",
-                "model"   : "Daisy Keech",
-                "id"      : 1038,
-                "type"    : "video",
-            },
-        }),
-        ("https://fanleaks.club/hannahowo/000", {
-            "exception": exception.NotFoundError,
-        }),
-    )
+    example = "https://fanleaks.club/MODEL/12345"
 
     def __init__(self, match):
         FanleaksExtractor.__init__(self, match)
@@ -79,22 +55,7 @@ class FanleaksModelExtractor(FanleaksExtractor):
     subcategory = "model"
     pattern = (r"(?:https?://)?(?:www\.)?fanleaks\.club"
                r"/(?!latest/?$)([^/?#]+)/?$")
-    test = (
-        ("https://fanleaks.club/hannahowo", {
-            "pattern": (r"https://fanleaks\.club//models"
-                        r"/hannahowo/(images|videos)/hannahowo_\d+\.\w+"),
-            "range"  : "1-100",
-            "count"  : 100,
-        }),
-        ("https://fanleaks.club/belle-delphine", {
-            "pattern": (r"https://fanleaks\.club//models"
-                        r"/belle-delphine/(images|videos)"
-                        r"/belle-delphine_\d+\.\w+"),
-            "range"  : "1-100",
-            "count"  : 100,
-        }),
-        ("https://fanleaks.club/daisy-keech"),
-    )
+    example = "https://fanleaks.club/MODEL"
 
     def items(self):
         page_num = 1
@@ -102,8 +63,7 @@ class FanleaksModelExtractor(FanleaksExtractor):
             self.root + "/" + self.model_id, notfound="model").text
         data = {
             "model_id": self.model_id,
-            "model"   : text.unescape(
-                text.extr(page, 'mt-4">', "</h1>")),
+            "model"   : text.unescape(text.extr(page, 'mt-4">', "</h1>")),
             "type"    : "photo",
         }
         page_url = text.extr(page, "url: '", "'")

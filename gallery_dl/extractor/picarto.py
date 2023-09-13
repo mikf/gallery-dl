@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2021 Mike Fährmann
+# Copyright 2021-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -21,12 +21,7 @@ class PicartoGalleryExtractor(Extractor):
     filename_fmt = "{id} {title}.{extension}"
     archive_fmt = "{id}"
     pattern = r"(?:https?://)?picarto\.tv/([^/?#]+)/gallery"
-    test = ("https://picarto.tv/fnook/gallery/default/", {
-        "pattern": r"https://images\.picarto\.tv/gallery/\d/\d\d/\d+/artwork"
-                   r"/[0-9a-f-]+/large-[0-9a-f]+\.(jpg|png|gif)",
-        "count": ">= 7",
-        "keyword": {"date": "type:datetime"},
-    })
+    example = "https://picarto.tv/USER/gallery/TITLE/"
 
     def __init__(self, match):
         Extractor.__init__(self, match)

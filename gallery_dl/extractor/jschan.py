@@ -31,12 +31,7 @@ class JschanThreadExtractor(JschanExtractor):
     filename_fmt = "{postId}{num:?-//} {filename}.{extension}"
     archive_fmt = "{board}_{postId}_{num}"
     pattern = BASE_PATTERN + r"/([^/?#]+)/thread/(\d+)\.html"
-    test = (
-        ("https://94chan.org/art/thread/25.html", {
-            "pattern": r"https://94chan.org/file/[0-9a-f]{64}(\.\w+)?",
-            "count": ">= 15"
-        })
-    )
+    example = "https://94chan.org/a/thread/12345.html"
 
     def __init__(self, match):
         JschanExtractor.__init__(self, match)
@@ -71,15 +66,7 @@ class JschanBoardExtractor(JschanExtractor):
     subcategory = "board"
     pattern = (BASE_PATTERN + r"/([^/?#]+)"
                r"(?:/index\.html|/catalog\.html|/\d+\.html|/?$)")
-    test = (
-        ("https://94chan.org/art/", {
-            "pattern": JschanThreadExtractor.pattern,
-            "count": ">= 30"
-        }),
-        ("https://94chan.org/art/2.html"),
-        ("https://94chan.org/art/catalog.html"),
-        ("https://94chan.org/art/index.html"),
-    )
+    example = "https://94chan.org/a/"
 
     def __init__(self, match):
         JschanExtractor.__init__(self, match)

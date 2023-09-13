@@ -40,22 +40,7 @@ class LynxchanThreadExtractor(LynxchanExtractor):
     filename_fmt = "{postId}{num:?-//} {filename}.{extension}"
     archive_fmt = "{boardUri}_{postId}_{num}"
     pattern = BASE_PATTERN + r"/([^/?#]+)/res/(\d+)"
-    test = (
-        ("https://bbw-chan.nl/bbwdraw/res/499.html", {
-            "pattern": r"https://bbw-chan\.nl/\.media/[0-9a-f]{64}(\.\w+)?$",
-            "count": ">= 352",
-        }),
-        ("https://bbw-chan.nl/bbwdraw/res/489.html"),
-        ("https://kohlchan.net/a/res/4594.html", {
-            "pattern": r"https://kohlchan\.net/\.media/[0-9a-f]{64}(\.\w+)?$",
-            "count": ">= 80",
-        }),
-        ("https://endchan.org/yuri/res/193483.html", {
-            "pattern": r"https://endchan\.org/\.media/[^.]+(\.\w+)?$",
-            "count"  : ">= 19",
-        }),
-        ("https://endchan.org/yuri/res/33621.html"),
-    )
+    example = "https://bbw-chan.nl/a/res/12345.html"
 
     def __init__(self, match):
         LynxchanExtractor.__init__(self, match)
@@ -86,24 +71,7 @@ class LynxchanBoardExtractor(LynxchanExtractor):
     """Extractor for LynxChan boards"""
     subcategory = "board"
     pattern = BASE_PATTERN + r"/([^/?#]+)(?:/index|/catalog|/\d+|/?$)"
-    test = (
-        ("https://bbw-chan.nl/bbwdraw/", {
-            "pattern": LynxchanThreadExtractor.pattern,
-            "count": ">= 148",
-        }),
-        ("https://bbw-chan.nl/bbwdraw/2.html"),
-        ("https://kohlchan.net/a/", {
-            "pattern": LynxchanThreadExtractor.pattern,
-            "count": ">= 100",
-        }),
-        ("https://kohlchan.net/a/2.html"),
-        ("https://kohlchan.net/a/catalog.html"),
-        ("https://endchan.org/yuri/", {
-            "pattern": LynxchanThreadExtractor.pattern,
-            "count"  : ">= 9",
-        }),
-        ("https://endchan.org/yuri/catalog.html"),
-    )
+    example = "https://bbw-chan.nl/a/"
 
     def __init__(self, match):
         LynxchanExtractor.__init__(self, match)

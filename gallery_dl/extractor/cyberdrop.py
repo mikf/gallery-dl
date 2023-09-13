@@ -14,32 +14,7 @@ class CyberdropAlbumExtractor(lolisafe.LolisafeAlbumExtractor):
     category = "cyberdrop"
     root = "https://cyberdrop.me"
     pattern = r"(?:https?://)?(?:www\.)?cyberdrop\.(?:me|to)/a/([^/?#]+)"
-    test = (
-        # images
-        ("https://cyberdrop.me/a/keKRjm4t", {
-            "pattern": r"https://fs-\d+\.cyberdrop\.to/.*\.(jpg|png|webp)$",
-            "keyword": {
-                "album_id": "keKRjm4t",
-                "album_name": "Fate (SFW)",
-                "album_size": 150069254,
-                "count": 62,
-                "date": "dt:2020-06-18 13:14:20",
-                "description": "",
-                "id": r"re:\w{8}",
-            },
-        }),
-        # videos
-        ("https://cyberdrop.to/a/l8gIAXVD", {
-            "pattern": r"https://fs-\d+\.cyberdrop\.to/.*\.mp4$",
-            "count": 31,
-            "keyword": {
-                "album_id": "l8gIAXVD",
-                "album_name": "Achelois17 videos",
-                "album_size": 652037121,
-                "date": "dt:2020-06-16 15:40:44",
-            },
-        }),
-    )
+    example = "https://cyberdrop.me/a/ID"
 
     def fetch_album(self, album_id):
         url = self.root + "/a/" + self.album_id

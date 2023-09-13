@@ -57,68 +57,7 @@ class PhilomenaPostExtractor(PhilomenaExtractor):
     """Extractor for single posts on a Philomena booru"""
     subcategory = "post"
     pattern = BASE_PATTERN + r"/(?:images/)?(\d+)"
-    test = (
-        ("https://derpibooru.org/images/1", {
-            "content": "88449eeb0c4fa5d3583d0b794f6bc1d70bf7f889",
-            "count": 1,
-            "keyword": {
-                "animated": False,
-                "aspect_ratio": 1.0,
-                "comment_count": int,
-                "created_at": "2012-01-02T03:12:33Z",
-                "date": "dt:2012-01-02 03:12:33",
-                "deletion_reason": None,
-                "description": "",
-                "downvotes": int,
-                "duplicate_of": None,
-                "duration": 0.04,
-                "extension": "png",
-                "faves": int,
-                "first_seen_at": "2012-01-02T03:12:33Z",
-                "format": "png",
-                "height": 900,
-                "hidden_from_users": False,
-                "id": 1,
-                "mime_type": "image/png",
-                "name": "1__safe_fluttershy_solo_cloud_happy_flying_upvotes+ga"
-                        "lore_artist-colon-speccysy_get_sunshine",
-                "orig_sha512_hash": None,
-                "processed": True,
-                "representations": dict,
-                "score": int,
-                "sha512_hash": "f16c98e2848c2f1bfff3985e8f1a54375cc49f78125391"
-                               "aeb80534ce011ead14e3e452a5c4bc98a66f56bdfcd07e"
-                               "f7800663b994f3f343c572da5ecc22a9660f",
-                "size": 860914,
-                "source_url": "https://www.deviantart.com/speccysy/art"
-                              "/Afternoon-Flight-215193985",
-                "spoilered": False,
-                "tag_count": int,
-                "tag_ids": list,
-                "tags": list,
-                "thumbnails_generated": True,
-                "updated_at": r"re:\d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\dZ",
-                "uploader": "Clover the Clever",
-                "uploader_id": 211188,
-                "upvotes": int,
-                "view_url": str,
-                "width": 900,
-                "wilson_score": float,
-            },
-        }),
-        ("https://derpibooru.org/1"),
-        ("https://www.derpibooru.org/1"),
-        ("https://www.derpibooru.org/images/1"),
-
-        ("https://ponybooru.org/images/1", {
-            "content": "bca26f58fafd791fe07adcd2a28efd7751824605",
-        }),
-        ("https://www.ponybooru.org/images/1"),
-
-        ("https://furbooru.org/images/1", {
-            "content": "9eaa1e1b32fa0f16520912257dbefaff238d5fd2",
-        }),
-    )
+    example = "https://derpibooru.org/images/12345"
 
     def __init__(self, match):
         PhilomenaExtractor.__init__(self, match)
@@ -133,28 +72,7 @@ class PhilomenaSearchExtractor(PhilomenaExtractor):
     subcategory = "search"
     directory_fmt = ("{category}", "{search_tags}")
     pattern = BASE_PATTERN + r"/(?:search/?\?([^#]+)|tags/([^/?#]+))"
-    test = (
-        ("https://derpibooru.org/search?q=cute", {
-            "range": "40-60",
-            "count": 21,
-        }),
-        ("https://derpibooru.org/tags/cute", {
-            "range": "40-60",
-            "count": 21,
-        }),
-        (("https://derpibooru.org/tags/"
-          "artist-colon--dash-_-fwslash--fwslash-%255Bkorroki%255D_aternak"), {
-            "count": ">= 2",
-        }),
-        ("https://ponybooru.org/search?q=cute", {
-            "range": "40-60",
-            "count": 21,
-        }),
-        ("https://furbooru.org/search?q=cute", {
-            "range": "40-60",
-            "count": 21,
-        }),
-    )
+    example = "https://derpibooru.org/search?q=QUERY"
 
     def __init__(self, match):
         PhilomenaExtractor.__init__(self, match)
@@ -188,28 +106,7 @@ class PhilomenaGalleryExtractor(PhilomenaExtractor):
     directory_fmt = ("{category}", "galleries",
                      "{gallery[id]} {gallery[title]}")
     pattern = BASE_PATTERN + r"/galleries/(\d+)"
-    test = (
-        ("https://derpibooru.org/galleries/1", {
-            "pattern": r"https://derpicdn\.net/img/view/\d+/\d+/\d+/\d+[^/]+$",
-            "keyword": {
-                "gallery": {
-                    "description": "Indexes start at 1 :P",
-                    "id": 1,
-                    "spoiler_warning": "",
-                    "thumbnail_id": 1,
-                    "title": "The Very First Gallery",
-                    "user": "DeliciousBlackInk",
-                    "user_id": 365446,
-                },
-            },
-        }),
-        ("https://ponybooru.org/galleries/27", {
-            "count": ">= 24",
-        }),
-        ("https://furbooru.org/galleries/27", {
-            "count": ">= 13",
-        }),
-    )
+    example = "https://derpibooru.org/galleries/12345"
 
     def __init__(self, match):
         PhilomenaExtractor.__init__(self, match)

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2017-2019 Mike Fährmann
+# Copyright 2017-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -28,30 +28,7 @@ class XvideosGalleryExtractor(XvideosBase, GalleryExtractor):
     pattern = (r"(?:https?://)?(?:www\.)?xvideos\.com"
                r"/(?:profiles|amateur-channels|model-channels)"
                r"/([^/?#]+)/photos/(\d+)")
-    test = (
-        ("https://www.xvideos.com/profiles/pervertedcouple/photos/751031", {
-            "count": 8,
-            "pattern": r"https://profile-pics-cdn\d+\.xvideos-cdn\.com"
-                       r"/[^/]+\,\d+/videos/profiles/galleries/84/ca/37"
-                       r"/pervertedcouple/gal751031/pic_\d+_big\.jpg",
-            "keyword": {
-                "gallery": {
-                    "id"   : 751031,
-                    "title": "Random Stuff",
-                    "tags" : list,
-                },
-                "user": {
-                    "id"         : 20245371,
-                    "name"       : "pervertedcouple",
-                    "display"    : "Pervertedcouple",
-                    "sex"        : "Woman",
-                    "description": str,
-                },
-            },
-        }),
-        ("https://www.xvideos.com/amateur-channels/pervertedcouple/photos/12"),
-        ("https://www.xvideos.com/model-channels/pervertedcouple/photos/12"),
-    )
+    example = "https://www.xvideos.com/profiles/USER/photos/12345"
 
     def __init__(self, match):
         self.user, self.gallery_id = match.groups()
@@ -97,13 +74,7 @@ class XvideosUserExtractor(XvideosBase, Extractor):
     categorytransfer = True
     pattern = (r"(?:https?://)?(?:www\.)?xvideos\.com"
                r"/profiles/([^/?#]+)/?(?:#.*)?$")
-    test = (
-        ("https://www.xvideos.com/profiles/pervertedcouple", {
-            "url": "a413f3e60d6d3a2de79bd44fa3b7a9c03db4336e",
-            "keyword": "335a3304941ff2e666c0201e9122819b61b34adb",
-        }),
-        ("https://www.xvideos.com/profiles/pervertedcouple#_tabPhotos"),
-    )
+    example = "https://www.xvideos.com/profiles/USER"
 
     def __init__(self, match):
         Extractor.__init__(self, match)

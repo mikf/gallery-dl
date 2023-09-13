@@ -48,19 +48,7 @@ class LensdumpBase():
 class LensdumpAlbumExtractor(LensdumpBase, GalleryExtractor):
     subcategory = "album"
     pattern = BASE_PATTERN + r"/(?:((?!\w+/albums|a/|i/)\w+)|a/(\w+))"
-    test = (
-        ("https://lensdump.com/a/1IhJr", {
-            "pattern": r"https://[abcd]\.l3n\.co/i/tq\w{4}\.png",
-            "keyword": {
-                "extension": "png",
-                "name": str,
-                "num": int,
-                "title": str,
-                "url": str,
-                "width": int,
-            },
-        }),
-    )
+    example = "https://lensdump.com/a/ID"
 
     def __init__(self, match):
         GalleryExtractor.__init__(self, match, match.string)
@@ -100,7 +88,7 @@ class LensdumpAlbumsExtractor(LensdumpBase, Extractor):
     """Extractor for album list from lensdump.com"""
     subcategory = "albums"
     pattern = BASE_PATTERN + r"/\w+/albums"
-    test = ("https://lensdump.com/vstar925/albums",)
+    example = "https://lensdump.com/USER/albums"
 
     def items(self):
         for node in self.nodes():
@@ -117,22 +105,7 @@ class LensdumpImageExtractor(LensdumpBase, Extractor):
     directory_fmt = ("{category}",)
     archive_fmt = "{id}"
     pattern = BASE_PATTERN + r"/i/(\w+)"
-    test = (
-        ("https://lensdump.com/i/tyoAyM", {
-            "pattern": r"https://c\.l3n\.co/i/tyoAyM\.webp",
-            "content": "1aa749ed2c0cf679ec8e1df60068edaf3875de46",
-            "keyword": {
-                "date": "dt:2022-08-01 08:24:28",
-                "extension": "webp",
-                "filename": "tyoAyM",
-                "height": 400,
-                "id": "tyoAyM",
-                "title": "MYOBI clovis bookcaseset",
-                "url": "https://c.l3n.co/i/tyoAyM.webp",
-                "width": 620,
-            },
-        }),
-    )
+    example = "https://lensdump.com/i/ID"
 
     def __init__(self, match):
         Extractor.__init__(self, match)

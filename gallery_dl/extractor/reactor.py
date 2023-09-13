@@ -173,25 +173,7 @@ class ReactorTagExtractor(ReactorExtractor):
     directory_fmt = ("{category}", "{search_tags}")
     archive_fmt = "{search_tags}_{post_id}_{num}"
     pattern = BASE_PATTERN + r"/tag/([^/?#]+)(?:/[^/?#]+)?"
-    test = (
-        ("http://reactor.cc/tag/gif"),
-        ("http://anime.reactor.cc/tag/Anime+Art"),
-        ("http://joyreactor.cc/tag/Advent+Cirno", {
-            "count": ">= 15",
-        }),
-        ("http://joyreactor.com/tag/Cirno", {
-            "url": "aa59090590b26f4654881301fe8fe748a51625a8",
-        }),
-        # 'best' rating (#3073)
-        ("http://joyreactor.com/tag/Dark+Souls+2/best", {
-            "count": 4,
-        }),
-        ("http://pornreactor.cc/tag/RiceGnat", {
-            "range": "1-25",
-            "count": ">= 25",
-        }),
-        ("http://fapreactor.com/tag/RiceGnat"),
-    )
+    example = "http://reactor.cc/tag/TAG"
 
     def __init__(self, match):
         ReactorExtractor.__init__(self, match)
@@ -207,19 +189,7 @@ class ReactorSearchExtractor(ReactorExtractor):
     directory_fmt = ("{category}", "search", "{search_tags}")
     archive_fmt = "s_{search_tags}_{post_id}_{num}"
     pattern = BASE_PATTERN + r"/search(?:/|\?q=)([^/?#]+)"
-    test = (
-        ("http://reactor.cc/search?q=Art"),
-        ("http://joyreactor.cc/search/Nature", {
-            "range": "1-25",
-            "count": ">= 20",
-        }),
-        ("http://joyreactor.com/search?q=Nature", {
-            "range": "1-25",
-            "count": ">= 20",
-        }),
-        ("http://pornreactor.cc/search?q=ecchi+hentai"),
-        ("http://fapreactor.com/search/ecchi+hentai"),
-    )
+    example = "http://reactor.cc/search?q=QUERY"
 
     def __init__(self, match):
         ReactorExtractor.__init__(self, match)
@@ -234,19 +204,7 @@ class ReactorUserExtractor(ReactorExtractor):
     subcategory = "user"
     directory_fmt = ("{category}", "user", "{user}")
     pattern = BASE_PATTERN + r"/user/([^/?#]+)"
-    test = (
-        ("http://reactor.cc/user/Dioklet"),
-        ("http://anime.reactor.cc/user/Shuster"),
-        ("http://joyreactor.cc/user/hemantic"),
-        ("http://joyreactor.com/user/Tacoman123", {
-            "url": "60ce9a3e3db791a0899f7fb7643b5b87d09ae3b5",
-        }),
-        ("http://pornreactor.cc/user/Disillusion", {
-            "range": "1-25",
-            "count": ">= 20",
-        }),
-        ("http://fapreactor.com/user/Disillusion"),
-    )
+    example = "http://reactor.cc/user/USER"
 
     def __init__(self, match):
         ReactorExtractor.__init__(self, match)
@@ -260,42 +218,7 @@ class ReactorPostExtractor(ReactorExtractor):
     """Extractor for single posts on *reactor.cc sites"""
     subcategory = "post"
     pattern = BASE_PATTERN + r"/post/(\d+)"
-    test = (
-        ("http://reactor.cc/post/4999736", {
-            "url": "dfc74d150d7267384d8c229c4b82aa210755daa0",
-        }),
-        ("http://anime.reactor.cc/post/3576250"),
-        ("http://joyreactor.com/post/3721876", {  # single image
-            "pattern": r"http://img\d\.joyreactor\.com/pics/post/full"
-                       r"/cartoon-painting-monster-lake-4841316.jpeg",
-            "count": 1,
-            "keyword": "2207a7dfed55def2042b6c2554894c8d7fda386e",
-        }),
-        ("http://joyreactor.com/post/3713804", {  # 4 images
-            "pattern": r"http://img\d\.joyreactor\.com/pics/post/full"
-                       r"/movie-tv-godzilla-monsters-\d+\.jpeg",
-            "count": 4,
-            "keyword": "d7da9ba7809004c809eedcf6f1c06ad0fbb3df21",
-        }),
-        ("http://joyreactor.com/post/3726210", {  # gif / video
-            "url": "60f3b9a0a3918b269bea9b4f8f1a5ab3c2c550f8",
-            "keyword": "8949d9d5fc469dab264752432efbaa499561664a",
-        }),
-        ("http://joyreactor.com/post/3668724", {  # youtube embed
-            "url": "bf1666eddcff10c9b58f6be63fa94e4e13074214",
-            "keyword": "e18b1ffbd79d76f9a0e90b6d474cc2499e343f0b",
-        }),
-        ("http://joyreactor.cc/post/1299", {  # "malformed" JSON
-            "url": "ab02c6eb7b4035ad961b29ee0770ee41be2fcc39",
-        }),
-        ("http://pornreactor.cc/post/863166", {
-            "url": "a09fb0577489e1f9564c25d0ad576f81b19c2ef3",
-            "content": "ec6b0568bfb1803648744077da082d14de844340",
-        }),
-        ("http://fapreactor.com/post/863166", {
-            "url": "2a956ce0c90e8bc47b4392db4fa25ad1342f3e54",
-        }),
-    )
+    example = "http://reactor.cc/post/12345"
 
     def __init__(self, match):
         ReactorExtractor.__init__(self, match)

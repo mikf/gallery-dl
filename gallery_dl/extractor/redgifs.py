@@ -90,16 +90,7 @@ class RedgifsUserExtractor(RedgifsExtractor):
     subcategory = "user"
     directory_fmt = ("{category}", "{userName}")
     pattern = r"(?:https?://)?(?:\w+\.)?redgifs\.com/users/([^/?#]+)/?$"
-    test = (
-        ("https://www.redgifs.com/users/Natalifiction", {
-            "pattern": r"https://\w+\.redgifs\.com/[\w-]+\.mp4",
-            "count": ">= 100",
-        }),
-        ("https://v3.redgifs.com/users/lamsinka89", {
-            "pattern": r"https://\w+\.redgifs\.com/[\w-]+\.(mp4|jpg)",
-            "count": ">= 100",
-        }),
-    )
+    example = "https://www.redgifs.com/users/USER"
 
     def metadata(self):
         return {"userName": self.key}
@@ -116,18 +107,7 @@ class RedgifsCollectionExtractor(RedgifsExtractor):
     archive_fmt = "{collection[folderId]}_{id}"
     pattern = (r"(?:https?://)?(?:www\.)?redgifs\.com/users"
                r"/([^/?#]+)/collections/([^/?#]+)")
-    test = (
-        ("https://www.redgifs.com/users/boombah123/collections/2631326bbd", {
-            "pattern": r"https://\w+\.redgifs\.com/[\w-]+\.mp4",
-            "range": "1-20",
-            "count": 20,
-        }),
-        ("https://www.redgifs.com/users/boombah123/collections/9e6f7dd41f", {
-            "pattern": r"https://\w+\.redgifs\.com/[\w-]+\.mp4",
-            "range": "1-20",
-            "count": 20,
-        }),
-    )
+    example = "https://www.redgifs.com/users/USER/collections/ID"
 
     def __init__(self, match):
         RedgifsExtractor.__init__(self, match)
@@ -147,11 +127,7 @@ class RedgifsCollectionsExtractor(RedgifsExtractor):
     subcategory = "collections"
     pattern = (r"(?:https?://)?(?:www\.)?redgifs\.com/users"
                r"/([^/?#]+)/collections/?$")
-    test = ("https://www.redgifs.com/users/boombah123/collections", {
-        "pattern": (r"https://www\.redgifs\.com/users"
-                    r"/boombah123/collections/\w+"),
-        "count": ">= 3",
-    })
+    example = "https://www.redgifs.com/users/USER/collections"
 
     def items(self):
         for collection in self.api.collections(self.key):
@@ -165,18 +141,7 @@ class RedgifsNichesExtractor(RedgifsExtractor):
     """Extractor for redgifs niches"""
     subcategory = "niches"
     pattern = r"(?:https?://)?(?:www\.)?redgifs\.com/niches/([^/?#]+)"
-    test = (
-        ("https://www.redgifs.com/niches/boobs", {
-            "pattern": r"https://\w+\.redgifs\.com/[\w-]+\.mp4",
-            "range": "1-20",
-            "count": 20,
-        }),
-        ("https://www.redgifs.com/niches/ass", {
-            "pattern": r"https://\w+\.redgifs\.com/[\w-]+\.mp4",
-            "range": "1-20",
-            "count": 20,
-        }),
-    )
+    example = "https://www.redgifs.com/niches/NAME"
 
     def gifs(self):
         return self.api.niches(self.key)
@@ -188,21 +153,7 @@ class RedgifsSearchExtractor(RedgifsExtractor):
     directory_fmt = ("{category}", "Search", "{search}")
     pattern = (r"(?:https?://)?(?:\w+\.)?redgifs\.com"
                r"/(?:gifs/([^/?#]+)|browse)(?:/?\?([^#]+))?")
-    test = (
-        ("https://www.redgifs.com/gifs/jav", {
-            "pattern": r"https://\w+\.redgifs\.com/[A-Za-z-]+\.(mp4|jpg)",
-            "range": "1-10",
-            "count": 10,
-        }),
-        ("https://www.redgifs.com/browse?tags=JAV", {
-            "pattern": r"https://\w+\.redgifs\.com/[A-Za-z-]+\.(mp4|jpg)",
-            "range": "1-10",
-            "count": 10,
-        }),
-        ("https://www.redgifs.com/gifs/jav?order=best&verified=1"),
-        ("https://www.redgifs.com/browse?type=i&verified=y&order=top7"),
-        ("https://v3.redgifs.com/browse?tags=JAV"),
-    )
+    example = "https://www.redgifs.com/gifs/TAG"
 
     def __init__(self, match):
         RedgifsExtractor.__init__(self, match)
@@ -228,27 +179,7 @@ class RedgifsImageExtractor(RedgifsExtractor):
                r"(?:\w+\.)?redgifs\.com/(?:watch|ifr)|"
                r"(?:www\.)?gifdeliverynetwork\.com|"
                r"i\.redgifs\.com/i)/([A-Za-z]+)")
-    test = (
-        ("https://redgifs.com/watch/foolishforkedabyssiniancat", {
-            "pattern": r"https://\w+\.redgifs\.com"
-                       r"/FoolishForkedAbyssiniancat\.mp4",
-            "content": "f6e03f1df9a2ff2a74092f53ee7580d2fb943533",
-        }),
-        # gallery (#4021)
-        ("https://www.redgifs.com/watch/desertedbaregraywolf", {
-            "pattern": r"https://\w+\.redgifs\.com/[A-Za-z-]+\.jpg",
-            "count": 4,
-            "keyword": {
-                "num": int,
-                "count": 4,
-                "gallery": "187ad979693-1922-fc66-0000-a96fb07b8a5d",
-            },
-        }),
-        ("https://redgifs.com/ifr/FoolishForkedAbyssiniancat"),
-        ("https://i.redgifs.com/i/FoolishForkedAbyssiniancat"),
-        ("https://www.gifdeliverynetwork.com/foolishforkedabyssiniancat"),
-        ("https://v3.redgifs.com/watch/FoolishForkedAbyssiniancat"),
-    )
+    example = "https://redgifs.com/watch/ID"
 
     def gifs(self):
         return (self.api.gif(self.key),)

@@ -35,29 +35,7 @@ class JpgfishImageExtractor(JpgfishExtractor):
     """Extractor for jpgfish Images"""
     subcategory = "image"
     pattern = BASE_PATTERN + r"/img/((?:[^/?#]+\.)?(\w+))"
-    test = (
-        ("https://jpg1.su/img/funnymeme.LecXGS", {
-            "pattern": r"https://simp3\.jpg\.church/images/funnymeme\.jpg",
-            "content": "098e5e9b17ad634358426e0ffd1c93871474d13c",
-            "keyword": {
-                "album": "",
-                "extension": "jpg",
-                "filename": "funnymeme",
-                "id": "LecXGS",
-                "url": "https://simp3.jpg.church/images/funnymeme.jpg",
-                "user": "exearco",
-            },
-        }),
-        ("https://jpg.church/img/auCruA", {
-            "pattern": r"https://simp2\.jpg\.church/hannahowo_00457\.jpg",
-            "keyword": {"album": "401-500"},
-        }),
-        ("https://jpeg.pet/img/funnymeme.LecXGS"),
-        ("https://jpg.pet/img/funnymeme.LecXGS"),
-        ("https://jpg.fishing/img/funnymeme.LecXGS"),
-        ("https://jpg.fish/img/funnymeme.LecXGS"),
-        ("https://jpg.church/img/funnymeme.LecXGS"),
-    )
+    example = "https://jpg1.su/img/TITLE.ID"
 
     def __init__(self, match):
         JpgfishExtractor.__init__(self, match)
@@ -84,22 +62,7 @@ class JpgfishAlbumExtractor(JpgfishExtractor):
     """Extractor for jpgfish Albums"""
     subcategory = "album"
     pattern = BASE_PATTERN + r"/a(?:lbum)?/([^/?#]+)(/sub)?"
-    test = (
-        ("https://jpg1.su/album/CDilP/?sort=date_desc&page=1", {
-            "count": 2,
-        }),
-        ("https://jpg.fishing/a/gunggingnsk.N9OOI", {
-            "count": 114,
-        }),
-        ("https://jpg.fish/a/101-200.aNJ6A/", {
-            "count": 100,
-        }),
-        ("https://jpg.church/a/hannahowo.aNTdH/sub", {
-            "count": 606,
-        }),
-        ("https://jpeg.pet/album/CDilP/?sort=date_desc&page=1"),
-        ("https://jpg.pet/album/CDilP/?sort=date_desc&page=1"),
-    )
+    example = "https://jpg1.su/album/TITLE.ID"
 
     def __init__(self, match):
         JpgfishExtractor.__init__(self, match)
@@ -123,19 +86,7 @@ class JpgfishUserExtractor(JpgfishExtractor):
     """Extractor for jpgfish Users"""
     subcategory = "user"
     pattern = BASE_PATTERN + r"/(?!img|a(?:lbum)?)([^/?#]+)(/albums)?"
-    test = (
-        ("https://jpg1.su/exearco", {
-            "count": 3,
-        }),
-        ("https://jpg.church/exearco/albums", {
-            "count": 1,
-        }),
-        ("https://jpeg.pet/exearco"),
-        ("https://jpg.pet/exearco"),
-        ("https://jpg.fishing/exearco"),
-        ("https://jpg.fish/exearco"),
-        ("https://jpg.church/exearco"),
-    )
+    example = "https://jpg1.su/USER"
 
     def __init__(self, match):
         JpgfishExtractor.__init__(self, match)

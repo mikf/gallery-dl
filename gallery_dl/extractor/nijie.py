@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2022 Mike Fährmann
+# Copyright 2015-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -176,10 +176,7 @@ class NijieUserExtractor(NijieExtractor):
     subcategory = "user"
     cookies_domain = None
     pattern = BASE_PATTERN + r"/members\.php\?id=(\d+)"
-    test = (
-        ("https://nijie.info/members.php?id=44"),
-        ("https://horne.red/members.php?id=58000"),
-    )
+    example = "https://nijie.info/members.php?id=12345"
 
     def initialize(self):
         pass
@@ -198,48 +195,7 @@ class NijieIllustrationExtractor(NijieExtractor):
     """Extractor for all illustrations of a nijie-user"""
     subcategory = "illustration"
     pattern = BASE_PATTERN + r"/members_illust\.php\?id=(\d+)"
-    test = (
-        ("https://nijie.info/members_illust.php?id=44", {
-            "url": "1553e5144df50a676f5947d02469299b401ad6c0",
-            "keyword": {
-                "artist_id": 44,
-                "artist_name": "ED",
-                "date": "type:datetime",
-                "description": str,
-                "extension": "jpg",
-                "filename": str,
-                "image_id": int,
-                "num": int,
-                "tags": list,
-                "title": str,
-                "url": r"re:https://pic.nijie.net/\d+/nijie/.*jpg$",
-                "user_id": 44,
-                "user_name": "ED",
-            },
-        }),
-        ("https://horne.red/members_illust.php?id=58000", {
-            "pattern": r"https://pic\.nijie\.net/\d+/horne/\d+/\d+/\d+"
-                       r"/illust/\d+_\d+_[0-9a-f]+_[0-9a-f]+\.png",
-            "range": "1-20",
-            "count": 20,
-            "keyword": {
-                "artist_id": 58000,
-                "artist_name": "のえるわ",
-                "date": "type:datetime",
-                "description": str,
-                "image_id": int,
-                "num": int,
-                "tags": list,
-                "title": str,
-                "url": str,
-                "user_id": 58000,
-                "user_name": "のえるわ",
-            },
-        }),
-        ("https://nijie.info/members_illust.php?id=43", {
-            "exception": exception.NotFoundError,
-        }),
-    )
+    example = "https://nijie.info/members_illust.php?id=12345"
 
     def image_ids(self):
         return self._pagination("members_illust")
@@ -249,16 +205,7 @@ class NijieDoujinExtractor(NijieExtractor):
     """Extractor for doujin entries of a nijie user"""
     subcategory = "doujin"
     pattern = BASE_PATTERN + r"/members_dojin\.php\?id=(\d+)"
-    test = (
-        ("https://nijie.info/members_dojin.php?id=6782", {
-            "count": ">= 18",
-            "keyword": {
-                "user_id"  : 6782,
-                "user_name": "ジョニー＠アビオン村",
-            },
-        }),
-        ("https://horne.red/members_dojin.php?id=58000"),
-    )
+    example = "https://nijie.info/members_dojin.php?id=12345"
 
     def image_ids(self):
         return self._pagination("members_dojin")
@@ -270,23 +217,7 @@ class NijieFavoriteExtractor(NijieExtractor):
     directory_fmt = ("{category}", "bookmarks", "{user_id}")
     archive_fmt = "f_{user_id}_{image_id}_{num}"
     pattern = BASE_PATTERN + r"/user_like_illust_view\.php\?id=(\d+)"
-    test = (
-        ("https://nijie.info/user_like_illust_view.php?id=44", {
-            "count": ">= 16",
-            "keyword": {
-                "user_id"  : 44,
-                "user_name": "ED",
-            },
-        }),
-        ("https://horne.red/user_like_illust_view.php?id=58000", {
-            "range": "1-5",
-            "count": 5,
-            "keyword": {
-                "user_id"  : 58000,
-                "user_name": "のえるわ",
-            },
-        }),
-    )
+    example = "https://nijie.info/user_like_illust_view.php?id=12345"
 
     def image_ids(self):
         return self._pagination("user_like_illust_view")
@@ -304,17 +235,7 @@ class NijieNuitaExtractor(NijieExtractor):
     directory_fmt = ("{category}", "nuita", "{user_id}")
     archive_fmt = "n_{user_id}_{image_id}_{num}"
     pattern = BASE_PATTERN + r"/history_nuita\.php\?id=(\d+)"
-    test = (
-        ("https://nijie.info/history_nuita.php?id=728995", {
-            "range": "1-10",
-            "count": 10,
-            "keyword": {
-                "user_id"  : 728995,
-                "user_name": "莚",
-            },
-        }),
-        ("https://horne.red/history_nuita.php?id=58000"),
-    )
+    example = "https://nijie.info/history_nuita.php?id=12345"
 
     def image_ids(self):
         return self._pagination("history_nuita")
@@ -334,13 +255,7 @@ class NijieFeedExtractor(NijieExtractor):
     """Extractor for nijie liked user feed"""
     subcategory = "feed"
     pattern = BASE_PATTERN + r"/like_user_view\.php"
-    test = (
-        ("https://nijie.info/like_user_view.php", {
-            "range": "1-10",
-            "count": 10,
-        }),
-        ("https://horne.red/like_user_view.php"),
-    )
+    example = "https://nijie.info/like_user_view.php"
 
     def image_ids(self):
         return self._pagination("like_user_view")
@@ -350,14 +265,11 @@ class NijieFeedExtractor(NijieExtractor):
         return ""
 
 
-class NijiefollowedExtractor(NijieExtractor):
+class NijieFollowedExtractor(NijieExtractor):
     """Extractor for followed nijie users"""
     subcategory = "followed"
     pattern = BASE_PATTERN + r"/like_my\.php"
-    test = (
-        ("https://nijie.info/like_my.php"),
-        ("https://horne.red/like_my.php"),
-    )
+    example = "https://nijie.info/like_my.php"
 
     def items(self):
         self.login()
@@ -383,32 +295,7 @@ class NijieImageExtractor(NijieExtractor):
     """Extractor for a nijie work/image"""
     subcategory = "image"
     pattern = BASE_PATTERN + r"/view(?:_popup)?\.php\?id=(\d+)"
-    test = (
-        ("https://nijie.info/view.php?id=70720", {
-            "url": "3d654e890212ba823c9647754767336aebc0a743",
-            "keyword": "41da5d0e178b04f01fe72460185df52fadc3c91b",
-            "content": "d85e3ea896ed5e4da0bca2390ad310a4df716ca6",
-        }),
-        ("https://nijie.info/view.php?id=70724", {
-            "count": 0,
-        }),
-        ("https://nijie.info/view_popup.php?id=70720"),
-        ("https://horne.red/view.php?id=8716", {
-            "count": 4,
-            "keyword": {
-                "artist_id": 58000,
-                "artist_name": "のえるわ",
-                "date": "dt:2018-02-04 14:47:24",
-                "description": "ノエル「そんなことしなくても、"
-                               "言ってくれたら咥えるのに・・・♡」",
-                "image_id": 8716,
-                "tags": ["男の娘", "フェラ", "オリキャラ", "うちのこ"],
-                "title": "ノエル「いまどきそんな、恵方巻ネタなんてやらなくても・・・」",
-                "user_id": 58000,
-                "user_name": "のえるわ",
-            },
-        }),
-    )
+    example = "https://nijie.info/view.php?id=12345"
 
     def __init__(self, match):
         NijieExtractor.__init__(self, match)

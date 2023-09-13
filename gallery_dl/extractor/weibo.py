@@ -219,16 +219,7 @@ class WeiboUserExtractor(WeiboExtractor):
     """Extractor for weibo user profiles"""
     subcategory = "user"
     pattern = USER_PATTERN + r"(?:$|#)"
-    test = (
-        ("https://weibo.com/1758989602", {
-            "pattern": r"^https://weibo\.com/u/1758989602\?tabtype=feed$",
-        }),
-        ("https://weibo.com/u/1758989602"),
-        ("https://weibo.com/p/1758989602"),
-        ("https://m.weibo.cn/profile/2314621010"),
-        ("https://m.weibo.cn/p/2304132314621010_-_WEIBO_SECOND_PROFILE_WEIBO"),
-        ("https://www.weibo.com/p/1003062314621010/home"),
-    )
+    example = "https://weibo.com/USER"
 
     def initialize(self):
         pass
@@ -248,10 +239,7 @@ class WeiboHomeExtractor(WeiboExtractor):
     """Extractor for weibo 'home' listings"""
     subcategory = "home"
     pattern = USER_PATTERN + r"\?tabtype=home"
-    test = ("https://weibo.com/1758989602?tabtype=home", {
-        "range": "1-30",
-        "count": 30,
-    })
+    example = "https://weibo.com/USER?tabtype=home"
 
     def statuses(self):
         endpoint = "/profile/myhot"
@@ -263,24 +251,7 @@ class WeiboFeedExtractor(WeiboExtractor):
     """Extractor for weibo user feeds"""
     subcategory = "feed"
     pattern = USER_PATTERN + r"\?tabtype=feed"
-    test = (
-        ("https://weibo.com/1758989602?tabtype=feed", {
-            "range": "1-30",
-            "count": 30,
-        }),
-        ("https://weibo.com/zhouyuxi77?tabtype=feed", {
-            "keyword": {"status": {"user": {"id": 7488709788}}},
-            "range": "1",
-        }),
-        ("https://www.weibo.com/n/周于希Sally?tabtype=feed", {
-            "keyword": {"status": {"user": {"id": 7488709788}}},
-            "range": "1",
-        }),
-        # deleted (#2521)
-        ("https://weibo.com/u/7500315942?tabtype=feed", {
-            "count": 0,
-        }),
-    )
+    example = "https://weibo.com/USER?tabtype=feed"
 
     def statuses(self):
         endpoint = "/statuses/mymblog"
@@ -292,12 +263,7 @@ class WeiboVideosExtractor(WeiboExtractor):
     """Extractor for weibo 'video' listings"""
     subcategory = "videos"
     pattern = USER_PATTERN + r"\?tabtype=video"
-    test = ("https://weibo.com/1758989602?tabtype=video", {
-        "pattern": r"https://f\.(video\.weibocdn\.com|us\.sinaimg\.cn)"
-                   r"/(../)?\w+\.mp4\?label=mp",
-        "range": "1-30",
-        "count": 30,
-    })
+    example = "https://weibo.com/USER?tabtype=video"
 
     def statuses(self):
         endpoint = "/profile/getprofilevideolist"
@@ -311,11 +277,7 @@ class WeiboNewvideoExtractor(WeiboExtractor):
     """Extractor for weibo 'newVideo' listings"""
     subcategory = "newvideo"
     pattern = USER_PATTERN + r"\?tabtype=newVideo"
-    test = ("https://weibo.com/1758989602?tabtype=newVideo", {
-        "pattern": r"https://f\.video\.weibocdn\.com/(../)?\w+\.mp4\?label=mp",
-        "range": "1-30",
-        "count": 30,
-    })
+    example = "https://weibo.com/USER?tabtype=newVideo"
 
     def statuses(self):
         endpoint = "/profile/getWaterFallContent"
@@ -327,9 +289,7 @@ class WeiboArticleExtractor(WeiboExtractor):
     """Extractor for weibo 'article' listings"""
     subcategory = "article"
     pattern = USER_PATTERN + r"\?tabtype=article"
-    test = ("https://weibo.com/1758989602?tabtype=article", {
-        "count": 0,
-    })
+    example = "https://weibo.com/USER?tabtype=article"
 
     def statuses(self):
         endpoint = "/statuses/mymblog"
@@ -341,12 +301,7 @@ class WeiboAlbumExtractor(WeiboExtractor):
     """Extractor for weibo 'album' listings"""
     subcategory = "album"
     pattern = USER_PATTERN + r"\?tabtype=album"
-    test = ("https://weibo.com/1758989602?tabtype=album", {
-        "pattern": r"https://(wx\d+\.sinaimg\.cn/large/\w{32}\.(jpg|png|gif)"
-                   r"|g\.us\.sinaimg\.cn/../\w+\.mp4)",
-        "range": "1-3",
-        "count": 3,
-    })
+    example = "https://weibo.com/USER?tabtype=album"
 
     def statuses(self):
         endpoint = "/profile/getImageWall"
@@ -368,57 +323,7 @@ class WeiboStatusExtractor(WeiboExtractor):
     """Extractor for images from a status on weibo.cn"""
     subcategory = "status"
     pattern = BASE_PATTERN + r"/(detail|status|\d+)/(\w+)"
-    test = (
-        ("https://m.weibo.cn/detail/4323047042991618", {
-            "pattern": r"https?://wx\d+.sinaimg.cn/large/\w+.jpg",
-            "keyword": {"status": {
-                "count": 1,
-                "date": "dt:2018-12-30 13:56:36",
-            }},
-        }),
-        ("https://m.weibo.cn/detail/4339748116375525", {
-            "pattern": r"https?://f.us.sinaimg.cn/\w+\.mp4\?label=mp4_1080p",
-        }),
-        # unavailable video (#427)
-        ("https://m.weibo.cn/status/4268682979207023", {
-            "exception": exception.NotFoundError,
-        }),
-        # non-numeric status ID (#664)
-        ("https://weibo.com/3314883543/Iy7fj4qVg"),
-        # original retweets (#1542)
-        ("https://m.weibo.cn/detail/4600272267522211", {
-            "options": (("retweets", "original"),),
-            "keyword": {"status": {"id": 4600167083287033}},
-        }),
-        # type == livephoto (#2146)
-        ("https://weibo.com/5643044717/KkuDZ4jAA", {
-            "range": "2,4,6",
-            "pattern": r"https://video\.weibo\.com/media/play\?livephoto="
-                       r"https%3A%2F%2Fus.sinaimg.cn%2F\w+\.mov",
-        }),
-        # type == gif
-        ("https://weibo.com/1758989602/LvBhm5DiP", {
-            "pattern": r"https://g\.us\.sinaimg.cn/o0/qNZcaAAglx07Wuf921CM0104"
-                       r"120005tc0E010\.mp4\?label=gif_mp4",
-        }),
-        # missing 'playback_list' (#2792)
-        ("https://weibo.com/2909128931/4409545658754086", {
-            "count": 10,
-        }),
-        # empty 'playback_list' (#3301)
-        ("https://weibo.com/1501933722/4142890299009993", {
-            "pattern": r"https://f\.us\.sinaimg\.cn/004zstGKlx07dAHg4ZVu010f01"
-                       r"000OOl0k01\.mp4\?label=mp4_hd&template=template_7&ori"
-                       r"=0&ps=1CwnkDw1GXwCQx.+&KID=unistore,video",
-            "count": 1,
-        }),
-        # mix_media_info (#3793)
-        ("https://weibo.com/2427303621/MxojLlLgQ", {
-            "count": 9,
-        }),
-        ("https://m.weibo.cn/status/4339748116375525"),
-        ("https://m.weibo.cn/5746766133/4339748116375525"),
-    )
+    example = "https://weibo.com/detail/12345"
 
     def statuses(self):
         status = self._status_by_id(self.user)

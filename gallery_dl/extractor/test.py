@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2017 Mike Fährmann
+# Copyright 2016-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -33,11 +33,7 @@ class TestExtractor(Extractor):
     """
     category = "test"
     pattern = r"t(?:est)?:([^:]*)(?::([^:]*)(?::(\*|[\d,]*))?)?$"
-    test = (
-        ("test:pixiv"),
-        ("test:pixiv:user,favorite:0"),
-        ("test:"),
-    )
+    example = "test:CATEGORY"
 
     def __init__(self, match):
         Extractor.__init__(self, match)

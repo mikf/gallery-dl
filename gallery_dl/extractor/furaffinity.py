@@ -31,6 +31,7 @@ class FuraffinityExtractor(Extractor):
 
     def _init(self):
         self.offset = 0
+        self.external = self.config("external", False)
 
         if self.config("descriptions") == "html":
             self._process_description = str.strip
@@ -41,13 +42,12 @@ class FuraffinityExtractor(Extractor):
         else:
             self._new_layout = None
 
-    def items(self):
         if self._warning:
             if not self.cookies_check(self.cookies_names):
                 self.log.warning("no 'a' and 'b' session cookies set")
             FuraffinityExtractor._warning = False
 
-        external = self.config("external", False)
+    def items(self):
         metadata = self.metadata()
         for post_id in util.advance(self.posts(), self.offset):
             post = self._parse_post(post_id)
@@ -57,7 +57,7 @@ class FuraffinityExtractor(Extractor):
                 yield Message.Directory, post
                 yield Message.Url, post["url"], post
 
-                if external:
+                if self.external:
                     for url in text.extract_iter(
                             post["_description"], 'href="http', '"'):
                         yield Message.Queue, "http" + url, post
@@ -219,12 +219,7 @@ class FuraffinityGalleryExtractor(FuraffinityExtractor):
     """Extractor for a furaffinity user's gallery"""
     subcategory = "gallery"
     pattern = BASE_PATTERN + r"/gallery/([^/?#]+)"
-    test = ("https://www.furaffinity.net/gallery/mirlinthloth/", {
-        "pattern": r"https://d\d?\.f(uraffinity|acdn)\.net"
-                   r"/art/mirlinthloth/\d+/\d+.\w+\.\w+",
-        "range": "45-50",
-        "count": 6,
-    })
+    example = "https://www.furaffinity.net/gallery/USER/"
 
     def posts(self):
         return self._pagination("gallery")
@@ -235,11 +230,7 @@ class FuraffinityScrapsExtractor(FuraffinityExtractor):
     subcategory = "scraps"
     directory_fmt = ("{category}", "{user!l}", "Scraps")
     pattern = BASE_PATTERN + r"/scraps/([^/?#]+)"
-    test = ("https://www.furaffinity.net/scraps/mirlinthloth/", {
-        "pattern": r"https://d\d?\.f(uraffinity|acdn)\.net"
-                   r"/art/[^/]+(/stories)?/\d+/\d+.\w+.",
-        "count": ">= 3",
-    })
+    example = "https://www.furaffinity.net/scraps/USER/"
 
     def posts(self):
         return self._pagination("scraps")
@@ -250,13 +241,7 @@ class FuraffinityFavoriteExtractor(FuraffinityExtractor):
     subcategory = "favorite"
     directory_fmt = ("{category}", "{user!l}", "Favorites")
     pattern = BASE_PATTERN + r"/favorites/([^/?#]+)"
-    test = ("https://www.furaffinity.net/favorites/mirlinthloth/", {
-        "pattern": r"https://d\d?\.f(uraffinity|acdn)\.net"
-                   r"/art/[^/]+/\d+/\d+.\w+\.\w+",
-        "keyword": {"favorite_id": int},
-        "range": "45-50",
-        "count": 6,
-    })
+    example = "https://www.furaffinity.net/favorites/USER/"
 
     def posts(self):
         return self._pagination_favorites()
@@ -273,19 +258,7 @@ class FuraffinitySearchExtractor(FuraffinityExtractor):
     subcategory = "search"
     directory_fmt = ("{category}", "Search", "{search}")
     pattern = BASE_PATTERN + r"/search(?:/([^/?#]+))?/?[?&]([^#]+)"
-    test = (
-        ("https://www.furaffinity.net/search/?q=cute", {
-            "pattern": r"https://d\d?\.f(uraffinity|acdn)\.net"
-                       r"/art/[^/]+/\d+/\d+.\w+\.\w+",
-            "range": "45-50",
-            "count": 6,
-        }),
-        # first page of search results (#2402)
-        ("https://www.furaffinity.net/search/?q=leaf&range=1day", {
-            "range": "1-3",
-            "count": 3,
-        }),
-    )
+    example = "https://www.furaffinity.net/search/?q=QUERY"
 
     def __init__(self, match):
         FuraffinityExtractor.__init__(self, match)
@@ -304,65 +277,7 @@ class FuraffinityPostExtractor(FuraffinityExtractor):
     """Extractor for individual posts on furaffinity"""
     subcategory = "post"
     pattern = BASE_PATTERN + r"/(?:view|full)/(\d+)"
-    test = (
-        ("https://www.furaffinity.net/view/21835115/", {
-            "pattern": r"https://d\d*\.f(uraffinity|acdn)\.net/(download/)?art"
-                       r"/mirlinthloth/music/1488278723/1480267446.mirlinthlot"
-                       r"h_dj_fennmink_-_bude_s_4_ever\.mp3",
-            "keyword": {
-                "artist"     : "mirlinthloth",
-                "artist_url" : "mirlinthloth",
-                "date"       : "dt:2016-11-27 17:24:06",
-                "description": "A Song made playing the game Cosmic DJ.",
-                "extension"  : "mp3",
-                "filename"   : r"re:\d+\.\w+_dj_fennmink_-_bude_s_4_ever",
-                "id"         : 21835115,
-                "tags"       : list,
-                "title"      : "Bude's 4 Ever",
-                "url"        : r"re:https://d\d?\.f(uraffinity|acdn)\.net/art",
-                "user"       : "mirlinthloth",
-                "views"      : int,
-                "favorites"  : int,
-                "comments"   : int,
-                "rating"     : "General",
-                "fa_category": "Music",
-                "theme"      : "All",
-                "species"    : "Unspecified / Any",
-                "gender"     : "Any",
-                "width"      : 120,
-                "height"     : 120,
-            },
-        }),
-        # 'external' option (#1492)
-        ("https://www.furaffinity.net/view/42166511/", {
-            "options": (("external", True),),
-            "pattern": r"https://d\d*\.f(uraffinity|acdn)\.net/"
-                       r"|http://www\.postybirb\.com",
-            "count": 2,
-        }),
-        # no tags (#2277)
-        ("https://www.furaffinity.net/view/45331225/", {
-            "keyword": {
-                "artist": "Kota_Remminders",
-                "artist_url": "kotaremminders",
-                "date": "dt:2022-01-03 17:49:33",
-                "fa_category": "Adoptables",
-                "filename": "1641232173.kotaremminders_chidopts1",
-                "gender": "Any",
-                "height": 905,
-                "id": 45331225,
-                "rating": "General",
-                "species": "Unspecified / Any",
-                "tags": [],
-                "theme": "All",
-                "title": "REMINDER",
-                "width": 1280,
-            },
-        }),
-        ("https://furaffinity.net/view/21835115/"),
-        ("https://sfw.furaffinity.net/view/21835115/"),
-        ("https://www.furaffinity.net/full/21835115/"),
-    )
+    example = "https://www.furaffinity.net/view/12345/"
 
     def posts(self):
         post_id = self.user
@@ -375,16 +290,7 @@ class FuraffinityUserExtractor(FuraffinityExtractor):
     subcategory = "user"
     cookies_domain = None
     pattern = BASE_PATTERN + r"/user/([^/?#]+)"
-    test = (
-        ("https://www.furaffinity.net/user/mirlinthloth/", {
-            "pattern": r"/gallery/mirlinthloth/$",
-        }),
-        ("https://www.furaffinity.net/user/mirlinthloth/", {
-            "options": (("include", "all"),),
-            "pattern": r"/(gallery|scraps|favorites)/mirlinthloth/$",
-            "count": 3,
-        }),
-    )
+    example = "https://www.furaffinity.net/user/USER/"
 
     def initialize(self):
         pass
@@ -402,11 +308,7 @@ class FuraffinityFollowingExtractor(FuraffinityExtractor):
     """Extractor for a furaffinity user's watched users"""
     subcategory = "following"
     pattern = BASE_PATTERN + "/watchlist/by/([^/?#]+)"
-    test = ("https://www.furaffinity.net/watchlist/by/mirlinthloth/", {
-        "pattern": FuraffinityUserExtractor.pattern,
-        "range": "176-225",
-        "count": 50,
-    })
+    example = "https://www.furaffinity.net/watchlist/by/USER/"
 
     def items(self):
         url = "{}/watchlist/by/{}/".format(self.root, self.user)

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019 Mike Fährmann
+# Copyright 2019-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -20,28 +20,7 @@ class KeenspotComicExtractor(Extractor):
     filename_fmt = "{filename}.{extension}"
     archive_fmt = "{comic}_{filename}"
     pattern = r"(?:https?://)?(?!www\.|forums\.)([\w-]+)\.keenspot\.com(/.+)?"
-    test = (
-        ("http://marksmen.keenspot.com/", {  # link
-            "range": "1-3",
-            "url": "83bcf029103bf8bc865a1988afa4aaeb23709ba6",
-        }),
-        ("http://barkercomic.keenspot.com/", {  # id
-            "range": "1-3",
-            "url": "c4080926db18d00bac641fdd708393b7d61379e6",
-        }),
-        ("http://crowscare.keenspot.com/", {  # id v2
-            "range": "1-3",
-            "url": "a00e66a133dd39005777317da90cef921466fcaa"
-        }),
-        ("http://supernovas.keenspot.com/", {  # ks
-            "range": "1-3",
-            "url": "de21b12887ef31ff82edccbc09d112e3885c3aab"
-        }),
-        ("http://twokinds.keenspot.com/comic/1066/", {  # "random" access
-            "range": "1-3",
-            "url": "6a784e11370abfb343dcad9adbb7718f9b7be350",
-        })
-    )
+    example = "http://COMIC.keenspot.com/"
 
     def __init__(self, match):
         Extractor.__init__(self, match)

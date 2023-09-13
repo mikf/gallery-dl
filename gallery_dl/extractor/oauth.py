@@ -243,6 +243,7 @@ class OAuthBase(Extractor):
 class OAuthFlickr(OAuthBase):
     subcategory = "flickr"
     pattern = "oauth:flickr$"
+    example = "oauth:flickr"
     redirect_uri = REDIRECT_URI_HTTPS
 
     def items(self):
@@ -261,6 +262,7 @@ class OAuthFlickr(OAuthBase):
 class OAuthSmugmug(OAuthBase):
     subcategory = "smugmug"
     pattern = "oauth:smugmug$"
+    example = "oauth:smugmug"
 
     def items(self):
         yield Message.Version, 1
@@ -278,6 +280,7 @@ class OAuthSmugmug(OAuthBase):
 class OAuthTumblr(OAuthBase):
     subcategory = "tumblr"
     pattern = "oauth:tumblr$"
+    example = "oauth:tumblr"
 
     def items(self):
         yield Message.Version, 1
@@ -298,6 +301,7 @@ class OAuthTumblr(OAuthBase):
 class OAuthDeviantart(OAuthBase):
     subcategory = "deviantart"
     pattern = "oauth:deviantart$"
+    example = "oauth:deviantart"
     redirect_uri = REDIRECT_URI_HTTPS
 
     def items(self):
@@ -319,6 +323,7 @@ class OAuthDeviantart(OAuthBase):
 class OAuthReddit(OAuthBase):
     subcategory = "reddit"
     pattern = "oauth:reddit$"
+    example = "oauth:reddit"
 
     def items(self):
         yield Message.Version, 1
@@ -340,6 +345,7 @@ class OAuthReddit(OAuthBase):
 class OAuthMastodon(OAuthBase):
     subcategory = "mastodon"
     pattern = "oauth:mastodon:(?:https?://)?([^/?#]+)"
+    example = "oauth:mastodon:mastodon.social"
 
     def __init__(self, match):
         OAuthBase.__init__(self, match)
@@ -397,6 +403,7 @@ class OAuthMastodon(OAuthBase):
 class OAuthPixiv(OAuthBase):
     subcategory = "pixiv"
     pattern = "oauth:pixiv$"
+    example = "oauth:pixiv"
 
     def items(self):
         yield Message.Version, 1

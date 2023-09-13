@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2022 Mike Fährmann
+# Copyright 2019-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -101,20 +101,7 @@ class _35photoUserExtractor(_35photoExtractor):
     subcategory = "user"
     pattern = (r"(?:https?://)?(?:[a-z]+\.)?35photo\.pro"
                r"/(?!photo_|genre_|tags/|rating/)([^/?#]+)")
-    test = (
-        ("https://35photo.pro/liya", {
-            "pattern": r"https://([a-z][0-9]\.)?35photo\.pro"
-                       r"/photos_(main|series)/.*\.jpg",
-            "count": 9,
-        }),
-        ("https://35photo.pro/suhoveev", {
-            # last photo ID (1267028) isn't given as 'photo-id="<id>"
-            # there are only 23 photos without the last one
-            "count": ">= 33",
-        }),
-        ("https://en.35photo.pro/liya"),
-        ("https://ru.35photo.pro/liya"),
-    )
+    example = "https://35photo.pro/USER"
 
     def __init__(self, match):
         _35photoExtractor.__init__(self, match)
@@ -143,11 +130,7 @@ class _35photoTagExtractor(_35photoExtractor):
     directory_fmt = ("{category}", "Tags", "{search_tag}")
     archive_fmt = "t{search_tag}_{id}_{num}"
     pattern = r"(?:https?://)?(?:[a-z]+\.)?35photo\.pro/tags/([^/?#]+)"
-    test = ("https://35photo.pro/tags/landscape/", {
-        "range": "1-25",
-        "count": 25,
-        "archive": False,
-    })
+    example = "https://35photo.pro/tags/TAG/"
 
     def __init__(self, match):
         _35photoExtractor.__init__(self, match)
@@ -180,7 +163,7 @@ class _35photoGenreExtractor(_35photoExtractor):
     directory_fmt = ("{category}", "Genre", "{genre}")
     archive_fmt = "g{genre_id}_{id}_{num}"
     pattern = r"(?:https?://)?(?:[a-z]+\.)?35photo\.pro/genre_(\d+)(/new/)?"
-    test = ("https://35photo.pro/genre_109/",)
+    example = "https://35photo.pro/genre_12345/"
 
     def __init__(self, match):
         _35photoExtractor.__init__(self, match)
@@ -212,24 +195,7 @@ class _35photoImageExtractor(_35photoExtractor):
     """Extractor for individual images from 35photo.pro"""
     subcategory = "image"
     pattern = r"(?:https?://)?(?:[a-z]+\.)?35photo\.pro/photo_(\d+)"
-    test = ("https://35photo.pro/photo_753340/", {
-        "count": 1,
-        "keyword": {
-            "url"        : r"re:https://35photo\.pro/photos_main/.*\.jpg",
-            "id"         : 753340,
-            "title"      : "Winter walk",
-            "description": str,
-            "tags"       : list,
-            "views"      : int,
-            "favorites"  : int,
-            "score"      : int,
-            "type"       : 0,
-            "date"       : "15 авг, 2014",
-            "user"       : "liya",
-            "user_id"    : 20415,
-            "user_name"  : "Liya Mirzaeva",
-        },
-    })
+    example = "https://35photo.pro/photo_12345/"
 
     def __init__(self, match):
         _35photoExtractor.__init__(self, match)

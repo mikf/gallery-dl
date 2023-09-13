@@ -261,58 +261,7 @@ USER_PATTERN = BASE_PATTERN + r"/(i(?:/user/|d:)(\d+)|[^/?#]+)"
 class NitterTweetsExtractor(NitterExtractor):
     subcategory = "tweets"
     pattern = USER_PATTERN + r"(?:/tweets)?(?:$|\?|#)"
-    test = (
-        ("https://nitter.net/supernaturepics", {
-            "pattern": r"https://nitter\.net/pic/orig"
-                       r"/media%2F[\w-]+\.(jpg|png)$",
-            "range": "1-20",
-            "count": 20,
-            "keyword": {
-                "author": {
-                    "name": "supernaturepics",
-                    "nick": "Nature Pictures"
-                },
-                "comments": int,
-                "content": str,
-                "count": 1,
-                "date": "type:datetime",
-                "likes": int,
-                "quotes": int,
-                "retweets": int,
-                "tweet_id": r"re:\d+",
-                "user": {
-                    "date": "dt:2015-01-12 10:25:00",
-                    "description": "The very best nature pictures.",
-                    "favourites_count": int,
-                    "followers_count": int,
-                    "friends_count": int,
-                    "id": "2976459548",
-                    "name": "supernaturepics",
-                    "nick": "Nature Pictures",
-                    "profile_banner": "https://nitter.net/pic/https%3A%2F%2Fpb"
-                                      "s.twimg.com%2Fprofile_banners%2F2976459"
-                                      "548%2F1421058583%2F1500x500",
-                    "profile_image": "https://nitter.net/pic/pbs.twimg.com%2Fp"
-                                     "rofile_images%2F554585280938659841%2FFLV"
-                                     "AlX18.jpeg",
-                    "statuses_count": 1568,
-                    "verified": False,
-                },
-            },
-        }),
-        ("https://nitter.lacontrevoie.fr/supernaturepics", {
-            "url": "54f4b55f2099dcc248f3fb7bfacf1349e08d8e2d",
-            "pattern": r"https://nitter\.lacontrevoie\.fr/pic/orig"
-                       r"/media%2FCGMNYZvW0AIVoom\.jpg",
-            "range": "1",
-        }),
-        ("https://nitter.1d4.us/supernaturepics", {
-            "range": "1",
-            "keyword": {"user": {"id": "2976459548"}},
-        }),
-        ("https://nitter.kavin.rocks/id:2976459548"),
-        ("https://nitter.unixfox.eu/supernaturepics"),
-    )
+    example = "https://nitter.net/USER"
 
     def tweets(self):
         return self._pagination("")
@@ -321,17 +270,7 @@ class NitterTweetsExtractor(NitterExtractor):
 class NitterRepliesExtractor(NitterExtractor):
     subcategory = "replies"
     pattern = USER_PATTERN + r"/with_replies"
-    test = (
-        ("https://nitter.net/supernaturepics/with_replies", {
-            "pattern": r"https://nitter\.net/pic/orig"
-                       r"/media%2F[\w-]+\.(jpg|png)$",
-            "range": "1-20",
-        }),
-        ("https://nitter.lacontrevoie.fr/supernaturepics/with_replies"),
-        ("https://nitter.1d4.us/supernaturepics/with_replies"),
-        ("https://nitter.kavin.rocks/id:2976459548/with_replies"),
-        ("https://nitter.unixfox.eu/i/user/2976459548/with_replies"),
-    )
+    example = "https://nitter.net/USER/with_replies"
 
     def tweets(self):
         return self._pagination("/with_replies")
@@ -340,21 +279,7 @@ class NitterRepliesExtractor(NitterExtractor):
 class NitterMediaExtractor(NitterExtractor):
     subcategory = "media"
     pattern = USER_PATTERN + r"/media"
-    test = (
-        ("https://nitter.net/supernaturepics/media", {
-            "pattern": r"https://nitter\.net/pic/orig"
-                       r"/media%2F[\w-]+\.(jpg|png)$",
-            "range": "1-20",
-        }),
-        ("https://nitter.kavin.rocks/id:2976459548/media", {
-            "pattern": r"https://nitter\.kavin\.rocks/pic/orig"
-                       r"/media%2F[\w-]+\.(jpg|png)$",
-            "range": "1-20",
-        }),
-        ("https://nitter.lacontrevoie.fr/supernaturepics/media"),
-        ("https://nitter.1d4.us/supernaturepics/media"),
-        ("https://nitter.unixfox.eu/i/user/2976459548/media"),
-    )
+    example = "https://nitter.net/USER/media"
 
     def tweets(self):
         return self._pagination("/media")
@@ -363,17 +288,7 @@ class NitterMediaExtractor(NitterExtractor):
 class NitterSearchExtractor(NitterExtractor):
     subcategory = "search"
     pattern = USER_PATTERN + r"/search"
-    test = (
-        ("https://nitter.net/supernaturepics/search", {
-            "pattern": r"https://nitter\.net/pic/orig"
-                       r"/media%2F[\w-]+\.(jpg|png)$",
-            "range": "1-20",
-        }),
-        ("https://nitter.lacontrevoie.fr/supernaturepics/search"),
-        ("https://nitter.1d4.us/supernaturepics/search"),
-        ("https://nitter.kavin.rocks/id:2976459548/search"),
-        ("https://nitter.unixfox.eu/i/user/2976459548/search"),
-    )
+    example = "https://nitter.net/USER/search"
 
     def tweets(self):
         return self._pagination("/search")
@@ -386,95 +301,7 @@ class NitterTweetExtractor(NitterExtractor):
     filename_fmt = "{tweet_id}_{num}.{extension}"
     archive_fmt = "{tweet_id}_{num}"
     pattern = BASE_PATTERN + r"/(i/web|[^/?#]+)/status/(\d+())"
-    test = (
-        ("https://nitter.net/supernaturepics/status/604341487988576256", {
-            "url": "3f2b64e175bf284aa672c3bb53ed275e470b919a",
-            "content": "ab05e1d8d21f8d43496df284d31e8b362cd3bcab",
-            "keyword": {
-                "comments": 19,
-                "content": "Big Wedeene River, Canada",
-                "count": 1,
-                "date": "dt:2015-05-29 17:40:00",
-                "extension": "jpg",
-                "filename": "CGMNYZvW0AIVoom",
-                "likes": int,
-                "num": 1,
-                "quotes": 10,
-                "retweets": int,
-                "tweet_id": "604341487988576256",
-                "url": "https://nitter.net/pic/orig"
-                       "/media%2FCGMNYZvW0AIVoom.jpg",
-                "user": {
-                    "name": "supernaturepics",
-                    "nick": "Nature Pictures",
-                },
-            },
-        }),
-        # 4 images
-        ("https://nitter.lacontrevoie.fr/i/status/894001459754180609", {
-            "url": "9c51b3a4a1114535eb9b168bba97ad95db0d59ff",
-        }),
-        # video
-        ("https://nitter.lacontrevoie.fr/i/status/1065692031626829824", {
-            "pattern": r"ytdl:https://nitter\.lacontrevoie\.fr/video"
-                       r"/[0-9A-F]{10,}/https%3A%2F%2Fvideo.twimg.com%2F"
-                       r"ext_tw_video%2F1065691868439007232%2Fpu%2Fpl%2F"
-                       r"nv8hUQC1R0SjhzcZ.m3u8%3Ftag%3D5",
-            "keyword": {
-                "extension": "mp4",
-                "filename": "nv8hUQC1R0SjhzcZ",
-            },
-        }),
-        # content with emoji, newlines, hashtags (#338)
-        ("https://nitter.1d4.us/playpokemon/status/1263832915173048321", {
-            "keyword": {"content": (
-                r"re:Gear up for #PokemonSwordShieldEX with special Mystery "
-                "Gifts! \n\nYou’ll be able to receive four Galarian form "
-                "Pokémon with Hidden Abilities, plus some very useful items. "
-                "It’s our \\(Mystery\\) Gift to you, Trainers! \n\n❓🎁➡️ "
-            )},
-        }),
-        # Nitter tweet (#890)
-        ("https://nitter.kavin.rocks/ed1conf/status/1163841619336007680", {
-            "url": "e115bd1c86c660064e392b05269bbcafcd8c8b7a",
-            "content": "f29501e44d88437fe460f5c927b7543fda0f6e34",
-        }),
-        # Reply to deleted tweet (#403, #838)
-        ("https://nitter.unixfox.eu/i/web/status/1170041925560258560", {
-            "pattern": r"https://nitter\.unixfox\.eu/pic/orig"
-                       r"/media%2FEDzS7VrU0AAFL4_\.jpg",
-        }),
-        # "quoted" option (#854)
-        ("https://nitter.net/StobiesGalaxy/status/1270755918330896395", {
-            "options": (("quoted", True),),
-            "pattern": r"https://nitter\.net/pic/orig/media%2FEa[KG].+\.jpg",
-            "count": 8,
-        }),
-        # quoted tweet (#526, #854)
-        ("https://nitter.1d4.us/StobiesGalaxy/status/1270755918330896395", {
-            "pattern": r"https://nitter\.1d4\.us/pic/orig"
-                       r"/enc/bWVkaWEvRWFL\w+LmpwZw==",
-            "keyword": {"filename": r"re:EaK.{12}"},
-            "count": 4,
-        }),
-        # deleted quote tweet (#2225)
-        ("https://nitter.lacontrevoie.fr/i/status/1460044411165888515", {
-            "count": 0,
-        }),
-        # "Misleading" content
-        ("https://nitter.lacontrevoie.fr/i/status/1486373748911575046", {
-            "count": 4,
-        }),
-        # age-restricted (#2354)
-        ("https://nitter.unixfox.eu/mightbecurse/status/1492954264909479936", {
-            "keyword": {"date": "dt:2022-02-13 20:10:00"},
-            "count": 1,
-        }),
-        # broadcast
-        ("https://nitter.it/POTUS/status/1639409307878928384", {
-            "count": 0,
-        })
-    )
+    example = "https://nitter.net/USER/status/12345"
 
     def tweets(self):
         url = "{}/i/status/{}".format(self.root, self.user)

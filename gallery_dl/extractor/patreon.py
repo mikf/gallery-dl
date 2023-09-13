@@ -260,34 +260,7 @@ class PatreonCreatorExtractor(PatreonExtractor):
     pattern = (r"(?:https?://)?(?:www\.)?patreon\.com"
                r"/(?!(?:home|join|posts|login|signup)(?:$|[/?#]))"
                r"([^/?#]+)(?:/posts)?/?(?:\?([^#]+))?")
-    test = (
-        ("https://www.patreon.com/koveliana", {
-            "range": "1-25",
-            "count": ">= 25",
-            "keyword": {
-                "attachments"  : list,
-                "comment_count": int,
-                "content"      : str,
-                "creator"      : dict,
-                "date"         : "type:datetime",
-                "id"           : int,
-                "images"       : list,
-                "like_count"   : int,
-                "post_type"    : str,
-                "published_at" : str,
-                "title"        : str,
-            },
-        }),
-        ("https://www.patreon.com/koveliana/posts?filters[month]=2020-3", {
-            "count": 1,
-            "keyword": {"date": "dt:2020-03-30 21:21:44"},
-        }),
-        ("https://www.patreon.com/kovelianot", {
-            "exception": exception.NotFoundError,
-        }),
-        ("https://www.patreon.com/user?u=2931440"),
-        ("https://www.patreon.com/user/posts/?u=2931440"),
-    )
+    example = "https://www.patreon.com/USER"
 
     def __init__(self, match):
         PatreonExtractor.__init__(self, match)
@@ -328,7 +301,7 @@ class PatreonUserExtractor(PatreonExtractor):
     """Extractor for media from creators supported by you"""
     subcategory = "user"
     pattern = r"(?:https?://)?(?:www\.)?patreon\.com/home$"
-    test = ("https://www.patreon.com/home",)
+    example = "https://www.patreon.com/home"
 
     def posts(self):
         url = self._build_url("stream", (
@@ -343,24 +316,7 @@ class PatreonPostExtractor(PatreonExtractor):
     """Extractor for media from a single post"""
     subcategory = "post"
     pattern = r"(?:https?://)?(?:www\.)?patreon\.com/posts/([^/?#]+)"
-    test = (
-        # postfile + attachments
-        ("https://www.patreon.com/posts/precious-metal-23563293", {
-            "count": 4,
-        }),
-        # postfile + content
-        ("https://www.patreon.com/posts/56127163", {
-            "count": 3,
-            "keyword": {"filename": r"re:^(?!1).+$"},
-        }),
-        # tags (#1539)
-        ("https://www.patreon.com/posts/free-post-12497641", {
-            "keyword": {"tags": ["AWMedia"]},
-        }),
-        ("https://www.patreon.com/posts/not-found-123", {
-            "exception": exception.NotFoundError,
-        }),
-    )
+    example = "https://www.patreon.com/posts/TITLE-12345"
 
     def __init__(self, match):
         PatreonExtractor.__init__(self, match)

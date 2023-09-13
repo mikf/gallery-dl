@@ -35,7 +35,6 @@ class Extractor():
     cookies_domain = ""
     browser = None
     root = ""
-    test = None
     request_interval = 0.0
     request_interval_min = 0.0
     request_timestamp = 0.0
@@ -507,21 +506,6 @@ class Extractor():
                 extr, url = extractors[category]
                 result.append((Message.Queue, url, {"_extractor": extr}))
         return iter(result)
-
-    @classmethod
-    def _get_tests(cls):
-        """Yield an extractor's test cases as (URL, RESULTS) tuples"""
-        tests = cls.test
-        if not tests:
-            return
-
-        if len(tests) == 2 and (not tests[1] or isinstance(tests[1], dict)):
-            tests = (tests,)
-
-        for test in tests:
-            if isinstance(test, str):
-                test = (test, None)
-            yield test
 
     @classmethod
     def _dump(cls, obj):

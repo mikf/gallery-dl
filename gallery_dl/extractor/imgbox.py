@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2019 Mike Fährmann
+# Copyright 2014-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract images from galleries at https://imgbox.com/"""
+"""Extractors for https://imgbox.com/"""
 
 from .common import Extractor, Message, AsynchronousMixin
 from .. import text, exception
@@ -63,20 +63,7 @@ class ImgboxGalleryExtractor(AsynchronousMixin, ImgboxExtractor):
     filename_fmt = "{num:>03}-{filename}.{extension}"
     archive_fmt = "{gallery_key}_{image_key}"
     pattern = r"(?:https?://)?(?:www\.)?imgbox\.com/g/([A-Za-z0-9]{10})"
-    test = (
-        ("https://imgbox.com/g/JaX5V5HX7g", {
-            "url": "da4f15b161461119ee78841d4b8e8d054d95f906",
-            "keyword": "4b1e62820ac2c6205b7ad0b6322cc8e00dbe1b0c",
-            "content": "d20307dc8511ac24d688859c55abf2e2cc2dd3cc",
-        }),
-        ("https://imgbox.com/g/cUGEkRbdZZ", {
-            "url": "76506a3aab175c456910851f66227e90484ca9f7",
-            "keyword": "fb0427b87983197849fb2887905e758f3e50cb6e",
-        }),
-        ("https://imgbox.com/g/JaX5V5HX7h", {
-            "exception": exception.NotFoundError,
-        }),
-    )
+    example = "https://imgbox.com/g/12345abcde"
 
     def __init__(self, match):
         ImgboxExtractor.__init__(self, match)
@@ -106,16 +93,7 @@ class ImgboxImageExtractor(ImgboxExtractor):
     subcategory = "image"
     archive_fmt = "{image_key}"
     pattern = r"(?:https?://)?(?:www\.)?imgbox\.com/([A-Za-z0-9]{8})"
-    test = (
-        ("https://imgbox.com/qHhw7lpG", {
-            "url": "ee9cdea6c48ad0161c1b5f81f6b0c9110997038c",
-            "keyword": "dfc72310026b45f3feb4f9cada20c79b2575e1af",
-            "content": "0c8768055e4e20e7c7259608b67799171b691140",
-        }),
-        ("https://imgbox.com/qHhw7lpH", {
-            "exception": exception.NotFoundError,
-        }),
-    )
+    example = "https://imgbox.com/1234abcd"
 
     def __init__(self, match):
         ImgboxExtractor.__init__(self, match)

@@ -58,32 +58,7 @@ class SeigaUserExtractor(SeigaExtractor):
     filename_fmt = "{category}_{user[id]}_{image_id}.{extension}"
     pattern = (r"(?:https?://)?(?:www\.|(?:sp\.)?seiga\.)?nicovideo\.jp/"
                r"user/illust/(\d+)(?:\?(?:[^&]+&)*sort=([^&#]+))?")
-    test = (
-        ("https://seiga.nicovideo.jp/user/illust/39537793", {
-            "pattern": r"https://lohas\.nicoseiga\.jp/priv/[0-9a-f]+/\d+/\d+",
-            "count": ">= 4",
-            "keyword": {
-                "user": {
-                    "id": 39537793,
-                    "message": str,
-                    "name": str,
-                },
-                "clips": int,
-                "comments": int,
-                "count": int,
-                "extension": None,
-                "image_id": int,
-                "title": str,
-                "views": int,
-            },
-        }),
-        ("https://seiga.nicovideo.jp/user/illust/79433", {
-            "exception": exception.NotFoundError,
-        }),
-        ("https://seiga.nicovideo.jp/user/illust/39537793"
-         "?sort=image_view&target=illust_all"),
-        ("https://sp.seiga.nicovideo.jp/user/illust/39537793"),
-    )
+    example = "https://seiga.nicovideo.jp/user/illust/12345"
 
     def __init__(self, match):
         SeigaExtractor.__init__(self, match)
@@ -156,26 +131,7 @@ class SeigaImageExtractor(SeigaExtractor):
                r"(?:seiga\.|www\.)?nicovideo\.jp/(?:seiga/im|image/source/)"
                r"|sp\.seiga\.nicovideo\.jp/seiga/#!/im"
                r"|lohas\.nicoseiga\.jp/(?:thumb|(?:priv|o)/[^/]+/\d+)/)(\d+)")
-    test = (
-        ("https://seiga.nicovideo.jp/seiga/im5977527", {
-            "keyword": "c8339781da260f7fc44894ad9ada016f53e3b12a",
-            "content": "d9202292012178374d57fb0126f6124387265297",
-        }),
-        ("https://seiga.nicovideo.jp/seiga/im123", {
-            "exception": exception.NotFoundError,
-        }),
-        ("https://seiga.nicovideo.jp/seiga/im10877923", {
-            "pattern": r"https://lohas\.nicoseiga\.jp/priv/5936a2a6c860a600e46"
-                       r"5e0411c0822e0b510e286/1688757110/10877923",
-        }),
-        ("https://seiga.nicovideo.jp/image/source/5977527"),
-        ("https://sp.seiga.nicovideo.jp/seiga/#!/im5977527"),
-        ("https://lohas.nicoseiga.jp/thumb/5977527i"),
-        ("https://lohas.nicoseiga.jp/priv"
-         "/759a4ef1c639106ba4d665ee6333832e647d0e4e/1549727594/5977527"),
-        ("https://lohas.nicoseiga.jp/o"
-         "/759a4ef1c639106ba4d665ee6333832e647d0e4e/1549727594/5977527"),
-    )
+    example = "https://seiga.nicovideo.jp/seiga/im12345"
 
     def __init__(self, match):
         SeigaExtractor.__init__(self, match)

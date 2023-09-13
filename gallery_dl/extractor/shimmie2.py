@@ -100,36 +100,7 @@ class Shimmie2TagExtractor(Shimmie2Extractor):
     directory_fmt = ("{category}", "{search_tags}")
     file_url_fmt = "{}/_images/{}/{}%20-%20{}.{}"
     pattern = BASE_PATTERN + r"post/list/([^/?#]+)(?:/(\d+))?()"
-    test = (
-        ("https://meme.museum/post/list/animated/1", {
-            "pattern": r"https://meme\.museum/_images/\w+/\d+%20-%20",
-            "count": ">= 30"
-        }),
-        ("https://loudbooru.com/post/list/original_character/1", {
-            "pattern": r"https://loudbooru\.com/_images/[0-9a-f]{32}/\d+",
-            "range": "1-100",
-            "count": 100,
-        }),
-        ("https://giantessbooru.com/index.php?q=/post/list/drawing/1", {
-            "pattern": r"https://giantessbooru\.com/index\.php"
-                       r"\?q=/image/\d+\.jpg",
-            "range": "1-100",
-            "count": 100,
-        }),
-        ("https://giantessbooru.com/post/list/drawing/1"),
-        ("https://tentaclerape.net/post/list/comic/1", {
-            "pattern": r"https://tentaclerape\.net/_images/[0-9a-f]{32}/\d+",
-            "range": "1-100",
-            "count": 100,
-        }),
-        ("https://booru.cavemanon.xyz/index.php?q=post/list/Amber/1", {
-            "pattern": r"https://booru\.cavemanon\.xyz"
-                       r"/index\.php\?q=image/\d+\.\w+",
-            "range": "1-100",
-            "count": 100,
-        }),
-        ("https://booru.cavemanon.xyz/post/list/Amber/1"),
-    )
+    example = "https://loudbooru.com/post/list/TAG/1"
 
     def __init__(self, match):
         Shimmie2Extractor.__init__(self, match)
@@ -225,115 +196,7 @@ class Shimmie2PostExtractor(Shimmie2Extractor):
     """Extractor for single shimmie2 posts"""
     subcategory = "post"
     pattern = BASE_PATTERN + r"post/view/(\d+)"
-    test = (
-        ("https://meme.museum/post/view/10243", {
-            "pattern": r"https://meme\.museum/_images/105febebcd5ca791ee332adc"
-                       r"49971f78/10243%20-%20g%20beard%20open_source%20richar"
-                       r"d_stallman%20stallman%20tagme%20text\.jpg",
-            "content": "45565f3f141fc960a8ae1168b80e718a494c52d2",
-            "keyword": {
-                "extension": "jpg",
-                "file_url": "https://meme.museum/_images/105febebcd5ca791ee332"
-                            "adc49971f78/10243%20-%20g%20beard%20open_source%2"
-                            "0richard_stallman%20stallman%20tagme%20text.jpg",
-                "filename": "10243 - g beard open_source richard_stallman "
-                            "stallman tagme text",
-                "height": 451,
-                "id": 10243,
-                "md5": "105febebcd5ca791ee332adc49971f78",
-                "size": 0,
-                "subcategory": "post",
-                "tags": "/g/ beard open_source "
-                        "richard_stallman stallman tagme text",
-                "width": 480,
-            },
-        }),
-        ("https://loudbooru.com/post/view/33828", {
-            "pattern": r"https://loudbooru\.com/_images/.+\.png",
-            "content": "a4755f787ba23ae2aa297a46810f802ca9032739",
-            "keyword": {
-                "extension": "png",
-                "file_url": "https://loudbooru.com/_images/ca2638d903c86e8337f"
-                            "e9aeb4974be88/33828%20-%202020%20artist%3Astikyfi"
-                            "nkaz%20character%3Alisa_loud%20cover%20fanfiction"
-                            "%3Aplatz_eins%20frowning%20half-closed_eyes%20sol"
-                            "o%20text%20title_card.png",
-                "filename": "33828 - 2020 artist:stikyfinkaz character:lisa_"
-                            "loud cover fanfiction:platz_eins frowning "
-                            "half-closed_eyes solo text title_card",
-                "height": 1920,
-                "id": 33828,
-                "md5": "ca2638d903c86e8337fe9aeb4974be88",
-                "tags": "2020 artist:stikyfinkaz character:lisa_loud cover "
-                        "fanfiction:platz_eins frowning half-closed_eyes "
-                        "solo text title_card",
-                "width": 1078,
-            },
-        }),
-        ("https://giantessbooru.com/index.php?q=/post/view/41", {
-            "pattern": r"https://giantessbooru\.com/index\.php"
-                       r"\?q=/image/41\.jpg",
-            "content": "79115ed309d1f4e82e7bead6948760e889139c91",
-            "keyword": {
-                "extension": "jpg",
-                "file_url": "https://giantessbooru.com/index.php"
-                            "?q=/image/41.jpg",
-                "filename": "41",
-                "height": 0,
-                "id": 41,
-                "md5": "",
-                "size": 0,
-                "tags": "anime bare_midriff color drawing gentle giantess "
-                        "karbo looking_at_tinies negeyari outdoors smiling "
-                        "snake_girl white_hair",
-                "width": 1387,
-            },
-        }),
-        ("https://giantessbooru.com/post/view/41"),
-        ("https://tentaclerape.net/post/view/10", {
-            "pattern": r"https://tentaclerape\.net/\./index\.php"
-                       r"\?q=/image/10\.jpg",
-            "content": "d0fd8f0f6517a76cb5e23ba09f3844950bf2c516",
-            "keyword": {
-                "extension": "jpg",
-                "file_url": "https://tentaclerape.net/./index.php"
-                            "?q=/image/10.jpg",
-                "filename": "10",
-                "height": 427,
-                "id": 10,
-                "md5": "945db71eeccaef82ce44b77564260c0b",
-                "size": 0,
-                "subcategory": "post",
-                "tags": "Deviant_Art Pet Tentacle artist_sche blonde_hair "
-                        "blouse boots green_eyes highheels leash miniskirt "
-                        "octopus schoolgirl white_skin willing",
-                "width": 300,
-            },
-        }),
-        # video
-        ("https://tentaclerape.net/post/view/91267", {
-            "pattern": r"https://tentaclerape\.net/\./index\.php"
-                       r"\?q=/image/91267\.mp4",
-        }),
-        ("https://booru.cavemanon.xyz/index.php?q=post/view/8335", {
-            "pattern": r"https://booru\.cavemanon\.xyz"
-                       r"/index\.php\?q=image/8335\.png",
-            "content": "7158f7e4abbbf143bad5835eb93dbe4d68c1d4ab",
-            "keyword": {
-                "extension": "png",
-                "file_url": "https://booru.cavemanon.xyz"
-                            "/index.php?q=image/8335.png",
-                "filename": "8335",
-                "height": 460,
-                "id": 8335,
-                "md5": "",
-                "size": 0,
-                "tags": "Color Fang Food Pterodactyl "
-                        "discord_emote transparent",
-                "width": 459,
-            },
-        }),
-    )
+    example = "https://loudbooru.com/post/view/12345"
 
     def __init__(self, match):
         Shimmie2Extractor.__init__(self, match)
