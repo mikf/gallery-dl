@@ -53,7 +53,14 @@ jobs:
 
     - name: Lint with flake8
       run: |
-        flake8 .
+        case "${{ matrix.python-version }}" in
+            3.4|3.5|3.6|3.7)
+                flake8 --extend-exclude scripts/export_tests.py .
+                ;;
+            *)
+                flake8 .
+                ;;
+        esac
 
     - name: Run tests
       run: |
