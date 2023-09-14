@@ -11,6 +11,7 @@
 from .lolisafe import LolisafeAlbumExtractor
 from .. import text
 from urllib.parse import urlsplit, urlunsplit
+import html
 
 MEDIA_DOMAIN_OVERRIDES = {
     "cdn9.bunkr.ru" : "c9.bunkr.ru",
@@ -95,12 +96,13 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
             if url.startswith("/"):
                 if not cdn:
                     # fetch cdn root from download page
-                    vurl = "{}/v/{}".format(self.root, url[3:])
-                    cdn = text.extr(self.request(
-                        vurl).text, '<source src="', '"')
+                    durl = text.unescape("{}/{}/{}".format(self.root, url[1], url[3:]))
+                    if url[1] == 'v':
+                        cdn = text.extr(self.request(durl).text, '<source src="', '"')
+                    else:
+                        cdn = text.extr(self.request(durl).text, '<img src="', '"')
                     cdn = cdn[:cdn.index("/", 8)]
                 url = cdn + url[2:]
-
             url = text.unescape(url)
             if url.lower().endswith(CDN_HOSTED_EXTENSIONS):
                 scheme, domain, path, query, fragment = urlsplit(url)
