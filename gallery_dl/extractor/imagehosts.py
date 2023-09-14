@@ -246,8 +246,8 @@ class PostimgGalleryExtractor(ImagehostImageExtractor):
     """Extractor for images galleries from postimages.org"""
     category = "postimg"
     subcategory = "gallery"
-    pattern = (r"(?:https?://)?((?:www\.)?(?:postimg|pixxxels)\.(?:cc|org)"
-               r"/(?:gallery/)([^/?#]+)/?)")
+    pattern = (r"(?:https?://)?((?:www\.)?(?:postim(?:ages|g)|pixxxels)"
+               r"\.(?:cc|org)/gallery/([^/?#]+))")
     example = "https://postimages.org/gallery/ID"
 
     def items(self):

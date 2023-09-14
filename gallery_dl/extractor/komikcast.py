@@ -48,7 +48,7 @@ class KomikcastBase():
 class KomikcastChapterExtractor(KomikcastBase, ChapterExtractor):
     """Extractor for manga-chapters from komikcast.site"""
     pattern = BASE_PATTERN + r"(/chapter/[^/?#]+/)"
-    example = "https://komikcast.site/chapter/TITLE"
+    example = "https://komikcast.site/chapter/TITLE/"
 
     def metadata(self, page):
         info = text.extr(page, "<title>", " - Komikcast<")

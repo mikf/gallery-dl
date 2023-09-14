@@ -144,7 +144,6 @@ class TestExtractorModule(unittest.TestCase):
             extr = cls.from_url(cls.example)
             extr.initialize()
             extr.finalize()
-            break
 
     @unittest.skipIf(sys.hexversion < 0x3060000, "test fails in CI")
     def test_init_ytdl(self):

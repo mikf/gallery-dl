@@ -267,7 +267,7 @@ class KemonopartyDiscordExtractor(KemonopartyExtractor):
     filename_fmt = "{id}_{num:>02}_{filename}.{extension}"
     archive_fmt = "discord_{server}_{id}_{num}"
     pattern = BASE_PATTERN + r"/discord/server/(\d+)(?:/channel/(\d+))?#(.*)"
-    example = "https://kemono.party/discard/server/12345/channel/12345"
+    example = "https://kemono.party/discord/server/12345#CHANNEL"
 
     def __init__(self, match):
         KemonopartyExtractor.__init__(self, match)
@@ -346,7 +346,7 @@ class KemonopartyDiscordExtractor(KemonopartyExtractor):
 class KemonopartyDiscordServerExtractor(KemonopartyExtractor):
     subcategory = "discord-server"
     pattern = BASE_PATTERN + r"/discord/server/(\d+)$"
-    example = "https://kemono.party/discard/server/12345"
+    example = "https://kemono.party/discord/server/12345"
 
     def __init__(self, match):
         KemonopartyExtractor.__init__(self, match)

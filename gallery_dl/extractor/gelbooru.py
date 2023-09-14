@@ -215,9 +215,10 @@ class GelbooruRedirectExtractor(GelbooruBase, Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.redirect_url = text.ensure_http_scheme(
-            binascii.a2b_base64(match.group(1)).decode())
+        self.url_base64 = match.group(1)
 
     def items(self):
+        url = text.ensure_http_scheme(binascii.a2b_base64(
+            self.url_base64).decode())
         data = {"_extractor": GelbooruPostExtractor}
-        yield Message.Queue, self.redirect_url, data
+        yield Message.Queue, url, data

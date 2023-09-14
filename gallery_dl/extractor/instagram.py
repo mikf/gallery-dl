@@ -469,7 +469,7 @@ class InstagramGuideExtractor(InstagramExtractor):
     """Extractor for an Instagram guide"""
     subcategory = "guide"
     pattern = USER_PATTERN + r"/guide/[^/?#]+/(\d+)"
-    example = "https://www.instagram.com/USER/guide/"
+    example = "https://www.instagram.com/USER/guide/NAME/12345"
 
     def __init__(self, match):
         InstagramExtractor.__init__(self, match)

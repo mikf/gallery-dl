@@ -25,7 +25,7 @@ class ComicvineTagExtractor(BooruExtractor):
     archive_fmt = "{id}"
     pattern = (r"(?:https?://)?comicvine\.gamespot\.com"
                r"(/([^/?#]+)/(\d+-\d+)/images/.*)")
-    example = "https://comicvine.gamespot.com/TAG/ID/images/"
+    example = "https://comicvine.gamespot.com/TAG/123-45/images/"
 
     def __init__(self, match):
         BooruExtractor.__init__(self, match)

@@ -244,7 +244,7 @@ class RedditSubmissionExtractor(RedditExtractor):
     pattern = (r"(?:https?://)?(?:"
                r"(?:\w+\.)?reddit\.com/(?:(?:r|u|user)/[^/?#]+"
                r"/comments|gallery)|redd\.it)/([a-z0-9]+)")
-    example = "https://www.reddit.com/r/SUBREDDIT/comments/ID/"
+    example = "https://www.reddit.com/r/SUBREDDIT/comments/id/"
 
     def __init__(self, match):
         RedditExtractor.__init__(self, match)

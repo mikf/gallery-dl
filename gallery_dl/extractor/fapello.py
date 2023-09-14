@@ -80,7 +80,7 @@ class FapelloPathExtractor(Extractor):
     pattern = (r"(?:https?://)?(?:www\.)?fapello\.com"
                r"/(?!search/?$)(top-(?:likes|followers)|videos|trending"
                r"|popular_videos/[^/?#]+)/?$")
-    example = "https://fapello.com/PATH/"
+    example = "https://fapello.com/trending/"
 
     def __init__(self, match):
         Extractor.__init__(self, match)
