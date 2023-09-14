@@ -95,7 +95,8 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
             if url.startswith("/"):
                 if not cdn:
                     # fetch cdn root from download page
-                    durl = text.unescape("{}/{}/{}".format(self.root, url[1], url[3:]))
+                    durl = text.unescape("{}/{}/{}".format(
+                         self.root, url[1], url[3:]))
                     if url[1] == 'v':
                         cdn = text.extr(self.request(
                             durl).text, '<source src="', '"')
