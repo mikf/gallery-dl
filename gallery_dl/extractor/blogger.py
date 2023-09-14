@@ -96,7 +96,7 @@ class BloggerPostExtractor(BloggerExtractor):
     """Extractor for a single blog post"""
     subcategory = "post"
     pattern = BASE_PATTERN + r"(/\d\d\d\d/\d\d/[^/?#]+\.html)"
-    example = "https://BLOG.blogspot.com/YYYY/MM/TITLE.html"
+    example = "https://BLOG.blogspot.com/1970/01/TITLE.html"
 
     def __init__(self, match):
         BloggerExtractor.__init__(self, match)

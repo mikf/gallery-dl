@@ -135,7 +135,7 @@ class InkbunnyFavoriteExtractor(InkbunnyExtractor):
                r"userfavorites_process\.php\?favs_user_id=(\d+)|"
                r"submissionsviewall\.php\?([^#]+&mode=userfavs&[^#]+))")
     example = ("https://inkbunny.net/userfavorites_process.php"
-               "?mode=userfavs&favs_user_id=12345")
+               "?favs_user_id=12345")
 
     def __init__(self, match):
         InkbunnyExtractor.__init__(self, match)
@@ -167,7 +167,7 @@ class InkbunnySearchExtractor(InkbunnyExtractor):
     pattern = (BASE_PATTERN +
                r"/submissionsviewall\.php\?([^#]+&mode=search&[^#]+)")
     example = ("https://inkbunny.net/submissionsviewall.php"
-               "?mode=search&text=TAG")
+               "?text=TAG&mode=search&type=")
 
     def __init__(self, match):
         InkbunnyExtractor.__init__(self, match)

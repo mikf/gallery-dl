@@ -111,7 +111,7 @@ class GelbooruV01FavoriteExtractor(GelbooruV01Extractor):
     archive_fmt = "f_{favorite_id}_{id}"
     per_page = 50
     pattern = BASE_PATTERN + r"/index\.php\?page=favorites&s=view&id=(\d+)"
-    example = "https://allgirl.booru.org/index.php?page=favorites&s=view&id=N"
+    example = "https://allgirl.booru.org/index.php?page=favorites&s=view&id=1"
 
     def __init__(self, match):
         GelbooruV01Extractor.__init__(self, match)

@@ -21,7 +21,7 @@ class WebmshareVideoExtractor(Extractor):
     archive_fmt = "{id}"
     pattern = (r"(?:https?://)?(?:s\d+\.)?webmshare\.com"
                r"/(?:play/|download-webm/)?(\w{3,})")
-    example = "https://webmshare.com/ID"
+    example = "https://webmshare.com/_ID_"
 
     def __init__(self, match):
         Extractor.__init__(self, match)

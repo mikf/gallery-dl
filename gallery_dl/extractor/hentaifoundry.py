@@ -232,7 +232,7 @@ class HentaifoundryRecentExtractor(HentaifoundryExtractor):
     directory_fmt = ("{category}", "Recent Pictures", "{date}")
     archive_fmt = "r_{index}"
     pattern = BASE_PATTERN + r"/pictures/recent/(\d\d\d\d-\d\d-\d\d)"
-    example = "https://www.hentai-foundry.com/pictures/recent/YYYY-MM-DD"
+    example = "https://www.hentai-foundry.com/pictures/recent/1970-01-01"
 
     def __init__(self, match):
         HentaifoundryExtractor.__init__(self, match)

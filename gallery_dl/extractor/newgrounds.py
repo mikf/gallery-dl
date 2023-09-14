@@ -349,7 +349,7 @@ class NewgroundsMoviesExtractor(NewgroundsExtractor):
     """Extractor for all movies of a newgrounds user"""
     subcategory = _path = "movies"
     pattern = r"(?:https?://)?([\w-]+)\.newgrounds\.com/movies/?$"
-    example = "https://USER.newgrounds.com/movies<"
+    example = "https://USER.newgrounds.com/movies"
 
 
 class NewgroundsGamesExtractor(NewgroundsExtractor):

@@ -83,7 +83,7 @@ class MangaparkMangaExtractor(MangaparkBase, Extractor):
     """Extractor for manga from mangapark.net"""
     subcategory = "manga"
     pattern = BASE_PATTERN + r"/title/(\d+)(?:-[^/?#]*)?/?$"
-    example = "https://mangapark.net/title/MANGA"
+    example = "https://mangapark.net/title/12345-MANGA"
 
     def __init__(self, match):
         self.root = text.root_from_url(match.group(0))
