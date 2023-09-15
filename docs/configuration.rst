@@ -3328,7 +3328,7 @@ extractor.twitter.users
 Type
     ``string``
 Default
-    ``"timeline"``
+    ``"user"``
 Example
     ``"https://twitter.com/search?q=from:{legacy[screen_name]}"``
 Description
@@ -3339,7 +3339,8 @@ Description
 
     Special values:
 
-    * ``"timeline"``: ``https://twitter.com/i/user/{rest_id}``
+    * ``"user"``: ``https://twitter.com/i/user/{rest_id}``
+    * ``"timeline"``: ``https://twitter.com/id:{rest_id}/timeline``
     * ``"tweets"``: ``https://twitter.com/id:{rest_id}/tweets``
     * ``"media"``: ``https://twitter.com/id:{rest_id}/media``
 
