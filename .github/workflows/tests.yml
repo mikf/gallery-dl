@@ -32,8 +32,7 @@ jobs:
     - name: Install dependencies
       run: |
         pip install -r requirements.txt
-        pip install "flake8<4" "importlib-metadata<5"
-        pip install youtube-dl
+        pip install flake8 youtube-dl
 
     - name: Install yt-dlp
       run: |
