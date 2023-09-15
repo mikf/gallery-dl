@@ -406,9 +406,12 @@ class TwitterExtractor(Extractor):
 
     def _users_result(self, users):
         userfmt = self.config("users")
-        if not userfmt or userfmt == "timeline":
-            cls = TwitterTimelineExtractor
+        if not userfmt or userfmt == "user":
+            cls = TwitterUserExtractor
             fmt = (self.root + "/i/user/{rest_id}").format_map
+        elif userfmt == "timeline":
+            cls = TwitterTimelineExtractor
+            fmt = (self.root + "/id:{rest_id}/timeline").format_map
         elif userfmt == "media":
             cls = TwitterMediaExtractor
             fmt = (self.root + "/id:{rest_id}/media").format_map
