@@ -93,18 +93,16 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
         pos = page.index('class="grid-images')
         for url in text.extract_iter(page, '<a href="', '"', pos):
             if url.startswith("/"):
-                if not cdn:
-                    # fetch cdn root from download page
-                    durl = text.unescape("{}/{}/{}".format(
-                        self.root, url[1], url[3:]))
-                    if url[1] == 'v':
-                        cdn = text.extr(self.request(
-                            durl).text, '<source src="', '"')
-                    else:
-                        cdn = text.extr(self.request(
-                            durl).text, '<img src="', '"')
-                    cdn = cdn[:cdn.index("/", 8)]
-                url = cdn + url[2:]
+                # fetch cdn root from download page
+                durl = text.unescape("{}/{}/{}".format(
+                    self.root, url[1], url[3:]))
+                if url[1] == 'v':
+                    cdn = text.extr(self.request(
+                        durl).text, '<source src="', '"')
+                else:
+                    cdn = text.extr(self.request(
+                        durl).text, '<img src="', '"')
+                url = cdn
 
             url = text.unescape(url)
             if url.lower().endswith(CDN_HOSTED_EXTENSIONS):
