@@ -81,7 +81,7 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
             if cdn is None:
                 url = self._get_download_url(media_url)
                 cdn = text.root_from_url(url)
-                self.log.debug(f"Using CDN URL: {cdn}")
+                self.log.debug("Using CDN URL: {}".format(cdn))
 
             # We can assemble the correct download URL for media files using:
             #   1. The CDN hostname (e.g. "https://nugget.bunkr.ru")
