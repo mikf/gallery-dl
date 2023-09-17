@@ -90,7 +90,7 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
             # The thumbnail file name has the sanitized file name and file ID
             # but we need the file extension from the original file name.
             thumbnail_url = text.extr(html, 'src="', '"')
-            if "no-image.svg" not in thumbnail_url:
+            if "no-image.svg" in thumbnail_url:
                 thumbnail_url = None
 
             details = re.findall(r"<p[^>]+> (.*?) </p>", html, re.VERBOSE)
