@@ -106,7 +106,7 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
                 # thumbnail because the file has no preview.
                 #   e.g. "/d/Resources-iwizfcKl.url"
                 download_path = text.filename_from_url(media_path)
-                url = f"{cdn}/{download_path}"
+                url = "{}/{}".format(cdn, download_path)
 
             elif media_path.startswith("/i/") or media_path.startswith("/v/"):
                 # For media preview pages, derive the download URL.
@@ -114,7 +114,7 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
                     thumb_name = text.filename_from_url(thumbnail_url)
                     thumb_base, _, thumb_ext = thumb_name.rpartition(".")
                     orig_base, _, orig_ext = original_name.rpartition(".")
-                    url = f"{cdn}/{thumb_base}.{orig_ext}"
+                    url = "{}/{}.{}".format(cdn, thumb_base, orig_ext)
 
             # If we still don't have a download URL, use the slow method.
             # This is always required for MP3 files as they use a `/v/` media
