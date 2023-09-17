@@ -8,9 +8,11 @@
 
 """Extractors for https://bunkrr.su/"""
 
+import re
+
 from .lolisafe import LolisafeAlbumExtractor
 from .. import text
-from urllib.parse import urlsplit, urlunsplit
+from urllib.parse import urlparse, urlsplit, urlunsplit
 
 MEDIA_DOMAIN_OVERRIDES = {
     "cdn9.bunkr.ru" : "c9.bunkr.ru",
@@ -29,7 +31,17 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
     category = "bunkr"
     root = "https://bunkrr.su"
     pattern = r"(?:https?://)?(?:app\.)?bunkr+\.(?:la|[sr]u|is|to)/a/([^/?#]+)"
-    example = "https://bunkrr.su/a/ID"
+    example = "https://bunkrr.su/a/PoXwD1oA"
+
+    def _get_download_url(self, media_url):
+        if media_url.startswith("/"):
+            media_url = self.root + media_url
+        # The download URL is in the first <a> after the last <h1>.
+        # Media preview pages only have one <h1> but other pages have two.
+        html = self.request(media_url).text
+        header_pos = html.rindex("<h1")
+        download_url = text.extr(html[header_pos:], 'href="', '"')
+        return download_url
 
     def fetch_album(self, album_id):
         # album metadata
@@ -44,16 +56,71 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
         append = files.append
         headers = {"Referer": self.root + "/"}
 
-        pos = page.index('class="grid-images')
-        for url in text.extract_iter(page, '<a href="', '"', pos):
-            if url.startswith("/"):
-                if not cdn:
-                    # fetch cdn root from download page
-                    durl = "{}/d/{}".format(self.root, url[3:])
-                    cdn = text.extr(self.request(
-                        durl).text, 'link.href = "', '"')
-                    cdn = cdn[:cdn.index("/", 8)]
-                url = cdn + url[2:]
+        # NOTE: we must use `finditer` instead of `findall` because we need
+        # the original Match object, not just the first capture group.
+        grid_tiles = re.finditer(
+            # A <div> containing the class "grid-images_box"
+            r"^ (\s*) <div[^>]+ \bgrid-images_box\b"
+            # The contents of the <div>, ungreedy
+            r".*?"
+            # A closing </div> at the same indentation as the opening <div>
+            r"^ \1 </div>",
+            page,
+            re.DOTALL | re.MULTILINE | re.VERBOSE
+        )
+        for match in grid_tiles:
+            html = match.group()
+            url = None
+
+            # The whole URL and path for viewing a single media.
+            media_url = text.extr(html, 'href="', '"')
+
+            # Only get the CDN hostname once as it causes extra HTTP requests.
+            # We could get each media's download URL this way but doing so
+            # results in getting rate-limited, blocked, or a CAPTCHA page.
+            if cdn is None:
+                url = self._get_download_url(media_url)
+                cdn = text.root_from_url(url)
+                self.log.debug(f"Using CDN URL: {cdn}")
+
+            # We can assemble the correct download URL for media files using:
+            #   1. The CDN hostname (e.g. "https://nugget.bunkr.ru")
+            #   2. The thumbnail file name (e.g. "File-1--rIrVIhmb.png")
+            #   3. The original file name (e.g. "File (1).mp4")
+            # The thumbnail file name has the sanitized file name and file ID
+            # but we need the file extension from the original file name.
+            thumbnail_url = text.extr(html, 'src="', '"')
+            if "no-image.svg" not in thumbnail_url:
+                thumbnail_url = None
+
+            details = re.findall(r"<p[^>]+> (.*?) </p>", html, re.VERBOSE)
+            try:
+                original_name = details[0].strip()
+            except IndexError:
+                original_name = None
+
+            media_path = urlparse(media_url).path
+            if media_path.startswith("/d/"):
+                # Download pages already have the file name and ID in the URL.
+                # However, their album tiles usually have a placeholder
+                # thumbnail because the file has no preview.
+                #   e.g. "/d/Resources-iwizfcKl.url"
+                download_path = text.filename_from_url(media_path)
+                url = f"{cdn}/{download_path}"
+
+            elif media_path.startswith("/i/") or media_path.startswith("/v/"):
+                # For media preview pages, derive the download URL.
+                if thumbnail_url and original_name:
+                    thumb_name = text.filename_from_url(thumbnail_url)
+                    thumb_base, _, thumb_ext = thumb_name.rpartition(".")
+                    orig_base, _, orig_ext = original_name.rpartition(".")
+                    url = f"{cdn}/{thumb_base}.{orig_ext}"
+
+            # If we still don't have a download URL, use the slow method.
+            # This is always required for MP3 files as they use a `/v/` media
+            # path like videos but don't have a preview thumbnail.
+            if not url:
+                url = self._get_download_url(media_url)
 
             url = text.unescape(url)
             if url.lower().endswith(CDN_HOSTED_EXTENSIONS):
