@@ -37,7 +37,7 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
         if media_url.startswith("/"):
             media_url = self.root + media_url
         # The download URL is in the first <a> after the last <h1>.
-        # Video/image preview pages only have one <h1> but other pages have two.
+        # Media preview pages only have one <h1> but other pages have two.
         html = self.request(media_url).text
         header_pos = html.rindex("<h1")
         download_url = text.extr(html[header_pos:], 'href="', '"')
@@ -75,21 +75,24 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
             # The whole URL and path for viewing a single media.
             media_url = text.extr(html, 'href="', '"')
 
-            # Only calculate the CDN hostname once as it requires an extra HTTP request.
-            # We could get each media's download URL this way but doing so usually
+            # Only get the CDN hostname once as it causes extra HTTP requests.
+            # We could get each media's download URL this way but doing so
             # results in getting rate-limited, blocked, or a CAPTCHA page.
             if cdn is None:
                 url = self._get_download_url(media_url)
                 cdn = text.root_from_url(url)
                 self.log.debug(f"Using CDN URL: {cdn}")
 
-            # We can assemble the correct download URL for media files using three things:
+            # We can assemble the correct download URL for media files using:
             #   1. The CDN hostname (e.g. "https://nugget.bunkr.ru")
             #   2. The thumbnail file name (e.g. "File-1--rIrVIhmb.png")
             #   3. The original file name (e.g. "File (1).mp4")
-            # The thumbnail file name gives us the sanitized file name and file ID
+            # The thumbnail file name has the sanitized file name and file ID
             # but we need the file extension from the original file name.
             thumbnail_url = text.extr(html, 'src="', '"')
+            if "no-image.svg" not in thumbnail_url:
+                thumbnail_url = None
+
             details = re.findall(r"<p[^>]+> (.*?) </p>", html, re.VERBOSE)
             try:
                 original_name = details[0].strip()
@@ -98,23 +101,23 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
 
             media_path = urlparse(media_url).path
             if media_path.startswith("/d/"):
-                # Direct download pages already have the file name and ID in the URL.
-                # These album entries typically have a placeholder thumbnail because
-                # the file has no preview.
+                # Download pages already have the file name and ID in the URL.
+                # However, their album tiles usually have a placeholder
+                # thumbnail because the file has no preview.
                 #   e.g. "/d/Resources-iwizfcKl.url"
                 download_path = text.filename_from_url(media_path)
                 url = f"{cdn}/{download_path}"
 
             elif media_path.startswith("/i/") or media_path.startswith("/v/"):
-                # For media preview pages, derive the download URL if possible.
-                if thumbnail_url and original_name and "no-image.svg" not in thumbnail_url:
-                    thumbnail_name = text.filename_from_url(thumbnail_url)
-                    thumbnail_base, _, thumbnail_ext = thumbnail_name.rpartition(".")
-                    original_base, _, original_ext = original_name.rpartition(".")
-                    url = f"{cdn}/{thumbnail_base}.{original_ext}"
+                # For media preview pages, derive the download URL.
+                if thumbnail_url and original_name:
+                    thumb_name = text.filename_from_url(thumb_url)
+                    thumb_base, _, thumb_ext = thumb_name.rpartition(".")
+                    orig_base, _, orig_ext = original_name.rpartition(".")
+                    url = f"{cdn}/{thumb_base}.{orig_ext}"
 
-            # If we still don't have a download URL, fallback to the slow method.
-            # This path is always required for MP3 files as they use a `/v/` media
+            # If we still don't have a download URL, use the slow method.
+            # This is always required for MP3 files as they use a `/v/` media
             # path like videos but don't have a preview thumbnail.
             if not url:
                 url = self._get_download_url(media_url)
