@@ -19,7 +19,7 @@ BASE_PATTERN = r"(?:https?://)?(?:ww[\dw]?\.)?mangakakalot\.tv"
 class MangakakalotBase():
     """Base class for mangakakalot extractors"""
     category = "mangakakalot"
-    root = "https://ww3.mangakakalot.tv"
+    root = "https://ww6.mangakakalot.tv"
 
 
 class MangakakalotChapterExtractor(MangakakalotBase, ChapterExtractor):
