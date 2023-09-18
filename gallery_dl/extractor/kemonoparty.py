@@ -37,7 +37,6 @@ class KemonopartyExtractor(Extractor):
         Extractor.__init__(self, match)
 
     def _init(self):
-        self.session.headers["Referer"] = self.root + "/"
         self._prepare_ddosguard_cookies()
         self._find_inline = re.compile(
             r'src="(?:https?://(?:kemono|coomer)\.(?:party|su))?(/inline/[^"]+'

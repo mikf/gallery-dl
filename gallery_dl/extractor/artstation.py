@@ -117,7 +117,6 @@ class ArtstationExtractor(Extractor):
         headers = {
             "Accept" : "application/json, text/plain, */*",
             "Origin" : self.root,
-            "Referer": self.root + "/",
         }
 
         if json:
@@ -147,7 +146,6 @@ class ArtstationExtractor(Extractor):
         headers = {
             "Accept" : "*/*",
             "Origin" : self.root,
-            "Referer": self.root + "/",
         }
         return self.request(
             url, method="POST", headers=headers, json={},

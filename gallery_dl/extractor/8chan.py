@@ -102,9 +102,6 @@ class _8chanBoardExtractor(_8chanExtractor):
         _8chanExtractor.__init__(self, match)
         _, self.board, self.page = match.groups()
 
-    def _init(self):
-        self.session.headers["Referer"] = self.root + "/"
-
     def items(self):
         page = text.parse_int(self.page, 1)
         url = "{}/{}/{}.json".format(self.root, self.board, page)

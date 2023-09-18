@@ -22,7 +22,6 @@ class FantiaExtractor(Extractor):
     def _init(self):
         self.headers = {
             "Accept" : "application/json, text/plain, */*",
-            "Referer": self.root,
             "X-Requested-With": "XMLHttpRequest",
         }
         self._empty_plan = {
@@ -65,11 +64,9 @@ class FantiaExtractor(Extractor):
 
     def _pagination(self, url):
         params = {"page": 1}
-        headers = self.headers.copy()
-        del headers["X-Requested-With"]
 
         while True:
-            page = self.request(url, params=params, headers=headers).text
+            page = self.request(url, params=params).text
             self._csrf_token(page)
 
             post_id = None

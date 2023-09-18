@@ -180,7 +180,6 @@ class SankakuAPI():
         self.extractor = extractor
         self.headers = {
             "Accept"  : "application/vnd.sankaku.api+json;v=2",
-            "Referer" : extractor.root + "/",
             "Platform": "web-app",
             "Origin"  : extractor.root,
         }

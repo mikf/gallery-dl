@@ -281,11 +281,7 @@ class ImgurAPI():
         params["client_id"] = self.client_id
         params["page"] = 0
         params["sort"] = "newest"
-
-        headers = {
-            "Referer": "https://imgur.com/",
-            "Origin": "https://imgur.com",
-        }
+        headers = {"Origin": "https://imgur.com"}
 
         while True:
             data = self._call(endpoint, params, headers)["data"]

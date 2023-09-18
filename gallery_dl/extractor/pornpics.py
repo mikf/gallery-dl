@@ -24,9 +24,6 @@ class PornpicsExtractor(Extractor):
         super().__init__(match)
         self.item = match.group(1)
 
-    def _init(self):
-        self.session.headers["Referer"] = self.root + "/"
-
     def items(self):
         for gallery in self.galleries():
             gallery["_extractor"] = PornpicsGalleryExtractor

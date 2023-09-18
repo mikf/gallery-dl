@@ -45,7 +45,7 @@ class SkebExtractor(Extractor):
         """Return additional metadata"""
 
     def _pagination(self, url, params):
-        headers = {"Referer": self.root, "Authorization": "Bearer null"}
+        headers = {"Authorization": "Bearer null"}
         params["offset"] = 0
 
         while True:
@@ -69,7 +69,7 @@ class SkebExtractor(Extractor):
     def _get_post_data(self, user_name, post_num):
         url = "{}/api/users/{}/works/{}".format(
             self.root, user_name, post_num)
-        headers = {"Referer": self.root, "Authorization": "Bearer null"}
+        headers = {"Authorization": "Bearer null"}
         resp = self.request(url, headers=headers).json()
         creator = resp["creator"]
         post = {
@@ -190,7 +190,6 @@ class SkebSearchExtractor(SkebExtractor):
         }
         headers = {
             "Origin": self.root,
-            "Referer": self.root + "/",
             "x-algolia-api-key": "9a4ce7d609e71bf29e977925e4c6740c",
             "x-algolia-application-id": "HB1JT3KRE9",
         }
@@ -243,7 +242,7 @@ class SkebFollowingExtractor(SkebExtractor):
         url = "{}/api/users/{}/following_creators".format(
             self.root, self.user_name)
         params = {"sort": "date", "offset": 0, "limit": 90}
-        headers = {"Referer": self.root, "Authorization": "Bearer null"}
+        headers = {"Authorization": "Bearer null"}
 
         while True:
             data = self.request(url, params=params, headers=headers).json()

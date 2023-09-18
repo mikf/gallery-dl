@@ -1422,11 +1422,9 @@ class DeviantartEclipseAPI():
 
     def _call(self, endpoint, params):
         url = "https://www.deviantart.com/_napi" + endpoint
-        headers = {"Referer": "https://www.deviantart.com/"}
         params["csrf_token"] = self.csrf_token or self._fetch_csrf_token()
 
-        response = self.request(
-            url, params=params, headers=headers, fatal=None)
+        response = self.request(url, params=params, fatal=None)
 
         if response.status_code == 404:
             raise exception.StopExtraction(

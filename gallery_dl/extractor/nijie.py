@@ -30,7 +30,6 @@ class NijieExtractor(AsynchronousMixin, BaseExtractor):
 
         BaseExtractor.initialize(self)
 
-        self.session.headers["Referer"] = self.root + "/"
         self.user_name = None
         if self.category == "horne":
             self._extract_data = self._extract_data_horne

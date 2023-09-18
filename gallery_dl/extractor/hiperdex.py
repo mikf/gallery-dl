@@ -22,9 +22,6 @@ class HiperdexBase():
     category = "hiperdex"
     root = "https://hiperdex.com"
 
-    def _init(self):
-        self.session.headers["Referer"] = self.root + "/"
-
     @memcache(keyarg=1)
     def manga_data(self, manga, page=None):
         if not page:

@@ -26,9 +26,6 @@ class VipergirlsExtractor(Extractor):
     cookies_domain = ".vipergirls.to"
     cookies_names = ("vg_userid", "vg_password")
 
-    def _init(self):
-        self.session.headers["Referer"] = self.root + "/"
-
     def items(self):
         self.login()
 

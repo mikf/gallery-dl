@@ -23,8 +23,6 @@ class ManganeloBase():
         super().__init__(match, "https://" + domain + path)
 
     def _init(self):
-        self.session.headers['Referer'] = self.root + "/"
-
         if self._match_chapter is None:
             ManganeloBase._match_chapter = re.compile(
                 r"(?:[Vv]ol\.?\s*(\d+)\s?)?"

@@ -207,7 +207,6 @@ class NewgroundsExtractor(Extractor):
             headers = {
                 "Accept": "application/json, text/javascript, */*; q=0.01",
                 "X-Requested-With": "XMLHttpRequest",
-                "Referer": self.root,
             }
             sources = self.request(url, headers=headers).json()["sources"]
 
@@ -478,7 +477,6 @@ class NewgroundsSearchExtractor(NewgroundsExtractor):
         headers = {
             "Accept": "application/json, text/javascript, */*; q=0.01",
             "X-Requested-With": "XMLHttpRequest",
-            "Referer": self.root,
         }
         params["inner"] = "1"
         params["page"] = 1
