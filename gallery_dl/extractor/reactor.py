@@ -34,7 +34,6 @@ class ReactorExtractor(BaseExtractor):
             self.category = netloc.rpartition(".")[0]
 
     def _init(self):
-        self.session.headers["Referer"] = self.root
         self.gif = self.config("gif", False)
 
     def items(self):

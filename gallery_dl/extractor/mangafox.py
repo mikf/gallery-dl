@@ -27,9 +27,6 @@ class MangafoxChapterExtractor(ChapterExtractor):
         self.urlbase = self.root + base
         ChapterExtractor.__init__(self, match, self.urlbase + "/1.html")
 
-    def _init(self):
-        self.session.headers["Referer"] = self.root + "/"
-
     def metadata(self, page):
         manga, pos = text.extract(page, "<title>", "</title>")
         count, pos = text.extract(

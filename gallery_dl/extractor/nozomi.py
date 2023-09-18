@@ -24,11 +24,11 @@ class NozomiExtractor(Extractor):
     filename_fmt = "{postid} {dataid}.{extension}"
     archive_fmt = "{dataid}"
 
-    def items(self):
-
-        data = self.metadata()
+    def _init(self):
         self.session.headers["Origin"] = self.root
-        self.session.headers["Referer"] = self.root + "/"
+
+    def items(self):
+        data = self.metadata()
 
         for post_id in map(str, self.posts()):
             url = "https://j.nozomi.la/post/{}/{}/{}.json".format(

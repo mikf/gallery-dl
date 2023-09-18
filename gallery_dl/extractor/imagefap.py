@@ -23,9 +23,6 @@ class ImagefapExtractor(Extractor):
     archive_fmt = "{gallery_id}_{image_id}"
     request_interval = (2.0, 4.0)
 
-    def _init(self):
-        self.session.headers["Referer"] = self.root + "/"
-
     def request(self, url, **kwargs):
         response = Extractor.request(self, url, **kwargs)
 

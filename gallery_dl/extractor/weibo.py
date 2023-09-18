@@ -37,7 +37,6 @@ class WeiboExtractor(Extractor):
         cookies = _cookie_cache()
         if cookies is not None:
             self.cookies.update(cookies)
-        self.session.headers["Referer"] = self.root + "/"
 
     def request(self, url, **kwargs):
         response = Extractor.request(self, url, **kwargs)

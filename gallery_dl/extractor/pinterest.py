@@ -325,7 +325,6 @@ class PinterestAPI():
             "Accept"              : "application/json, text/javascript, "
                                     "*/*, q=0.01",
             "Accept-Language"     : "en-US,en;q=0.5",
-            "Referer"             : self.root + "/",
             "X-Requested-With"    : "XMLHttpRequest",
             "X-APP-VERSION"       : "0c4af40",
             "X-CSRFToken"         : csrf_token,

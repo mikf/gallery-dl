@@ -103,7 +103,6 @@ class PatreonExtractor(Extractor):
 
     def _pagination(self, url):
         headers = {
-            "Referer"     : self.root + "/",
             "Content-Type": "application/vnd.api+json",
         }
 

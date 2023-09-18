@@ -25,9 +25,6 @@ class FoolfuukaExtractor(BaseExtractor):
         if self.category == "b4k":
             self.remote = self._remote_direct
 
-    def _init(self):
-        self.session.headers["Referer"] = self.root + "/"
-
     def items(self):
         yield Message.Directory, self.metadata()
         for post in self.posts():

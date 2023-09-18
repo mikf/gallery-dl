@@ -85,7 +85,6 @@ class ItakuAPI():
         self.root = extractor.root + "/api"
         self.headers = {
             "Accept": "application/json, text/plain, */*",
-            "Referer": extractor.root + "/",
         }
 
     def galleries_images(self, username, section=None):

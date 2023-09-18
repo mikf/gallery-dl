@@ -42,7 +42,6 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
         cdn = None
         files = []
         append = files.append
-        headers = {"Referer": self.root + "/"}
 
         pos = page.index('class="grid-images')
         for url in text.extract_iter(page, '<a href="', '"', pos):
@@ -63,7 +62,7 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
                 else:
                     domain = domain.replace("cdn", "media-files", 1)
                 url = urlunsplit((scheme, domain, path, query, fragment))
-            append({"file": url, "_http_headers": headers})
+            append({"file": url})
 
         return files, {
             "album_id"   : self.album_id,

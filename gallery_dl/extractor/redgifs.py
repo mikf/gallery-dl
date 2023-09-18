@@ -193,7 +193,6 @@ class RedgifsAPI():
     def __init__(self, extractor):
         self.extractor = extractor
         self.headers = {
-            "Referer"       : extractor.root + "/",
             "authorization" : None,
             "content-type"  : "application/json",
             "x-customheader": extractor.root + "/",

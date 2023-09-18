@@ -85,7 +85,6 @@ class NaverwebtoonComicExtractor(NaverwebtoonBase, Extractor):
         url = self.root + "/api/article/list"
         headers = {
             "Accept": "application/json, text/plain, */*",
-            "Referer": self.root + "/",
         }
         params = {
             "titleId": self.title_id,

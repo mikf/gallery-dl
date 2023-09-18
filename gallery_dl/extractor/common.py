@@ -310,6 +310,13 @@ class Extractor():
         else:
             headers["Accept-Encoding"] = "gzip, deflate"
 
+        custom_referer = self.config("referer", True)
+        if custom_referer:
+            if isinstance(custom_referer, str):
+                headers["Referer"] = custom_referer
+            elif self.root:
+                headers["Referer"] = self.root + "/"
+
         custom_headers = self.config("headers")
         if custom_headers:
             headers.update(custom_headers)
