@@ -250,7 +250,7 @@ class PatreonExtractor(Extractor):
 
     def _extract_bootstrap(self, page):
         return util.json_loads(text.extr(
-            page, "window.patreon.bootstrap,", "\n});") + "}")
+            page, "window.patreon.bootstrap,", "});") + "}")
 
 
 class PatreonCreatorExtractor(PatreonExtractor):
