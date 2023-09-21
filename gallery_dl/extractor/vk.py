@@ -105,43 +105,7 @@ class VkPhotosExtractor(VkExtractor):
     pattern = (BASE_PATTERN + r"/(?:"
                r"(?:albums|photos|id)(-?\d+)"
                r"|(?!(?:album|tag)-?\d+_?)([^/?#]+))")
-    test = (
-        ("https://vk.com/id398982326", {
-            "pattern": r"https://sun\d+-\d+\.userapi\.com/s/v1/if1"
-                       r"/[\w-]+\.jpg\?size=\d+x\d+&quality=96&type=album",
-            "count": ">= 35",
-            "keyword": {
-                "id": r"re:\d+",
-                "user": {
-                    "id": "398982326",
-                    "info": "Мы за Движуху! – m1ni SounD #4 [EROmusic]",
-                    "name": "",
-                    "nick": "Dobrov Kurva",
-                },
-            },
-        }),
-        ("https://vk.com/cosplayinrussia", {
-            "range": "15-25",
-            "keyword": {
-                "id": r"re:\d+",
-                "user": {
-                    "id"  : "-165740836",
-                    "info": str,
-                    "name": "cosplayinrussia",
-                    "nick": "Косплей | Cosplay 18+",
-                },
-            },
-        }),
-        # photos without width/height (#2535)
-        ("https://vk.com/id76957806", {
-            "pattern": r"https://sun\d+-\d+\.userapi\.com/",
-            "range": "1-9",
-            "count": 9,
-        }),
-        ("https://m.vk.com/albums398982326"),
-        ("https://www.vk.com/id398982326?profile=1"),
-        ("https://vk.com/albums-165740836"),
-    )
+    example = "https://vk.com/id12345"
 
     def __init__(self, match):
         VkExtractor.__init__(self, match)
@@ -181,18 +145,7 @@ class VkAlbumExtractor(VkExtractor):
     subcategory = "album"
     directory_fmt = ("{category}", "{user[id]}", "{album[id]}")
     pattern = BASE_PATTERN + r"/album(-?\d+)_(\d+)$"
-    test = (
-        ("https://vk.com/album-165740836_281339889", {
-            "count": 12,
-        }),
-        # "Access denied" (#2556)
-        ("https://vk.com/album-53775183_00", {
-            "exception": exception.AuthorizationError,
-        }),
-        ("https://vk.com/album232175027_00", {
-            "exception": exception.AuthorizationError,
-        }),
-    )
+    example = "https://vk.com/album12345_00"
 
     def __init__(self, match):
         VkExtractor.__init__(self, match)
@@ -214,11 +167,7 @@ class VkTaggedExtractor(VkExtractor):
     subcategory = "tagged"
     directory_fmt = ("{category}", "{user[id]}", "tags")
     pattern = BASE_PATTERN + r"/tag(-?\d+)$"
-    test = (
-        ("https://vk.com/tag304303884", {
-            "count": 44,
-        }),
-    )
+    example = "https://vk.com/tag12345"
 
     def __init__(self, match):
         VkExtractor.__init__(self, match)

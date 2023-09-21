@@ -51,29 +51,7 @@ class SoundgasmAudioExtractor(SoundgasmExtractor):
     """Extractor for audio clips from soundgasm.net"""
     subcategory = "audio"
     pattern = BASE_PATTERN + r"/([^/?#]+)/([^/?#]+)"
-    test = (
-        (("https://soundgasm.net/u/ClassWarAndPuppies2"
-          "/687-Otto-von-Toontown-12822"), {
-            "pattern": r"https://media\.soundgasm\.net/sounds"
-                       r"/26cb2b23b2f2c6094b40ee3a9167271e274b570a\.m4a",
-            "keyword": {
-                "description": "We celebrate today’s important prisoner swap, "
-                               "and finally bring the 2022 mid-terms to a clos"
-                               "e with Raphael Warnock’s defeat of Herschel Wa"
-                               "lker in Georgia. Then, we take a look at the Q"
-                               "anon-addled attempt to overthrow the German go"
-                               "vernment and install Heinrich XIII Prince of R"
-                               "euss as kaiser.",
-                "extension": "m4a",
-                "filename": "26cb2b23b2f2c6094b40ee3a9167271e274b570a",
-                "slug": "687-Otto-von-Toontown-12822",
-                "title": "687 - Otto von Toontown (12/8/22)",
-                "user": "ClassWarAndPuppies2",
-            },
-        }),
-        ("https://www.soundgasm.net/user/ClassWarAndPuppies2"
-         "/687-Otto-von-Toontown-12822"),
-    )
+    example = "https://soundgasm.net/u/USER/TITLE"
 
     def __init__(self, match):
         SoundgasmExtractor.__init__(self, match)
@@ -87,19 +65,7 @@ class SoundgasmUserExtractor(SoundgasmExtractor):
     """Extractor for all sounds from a soundgasm user"""
     subcategory = "user"
     pattern = BASE_PATTERN + r"/([^/?#]+)/?$"
-    test = ("https://soundgasm.net/u/fierce-aphrodite", {
-        "pattern": r"https://media\.soundgasm\.net/sounds/[0-9a-f]{40}\.m4a",
-        "count"  : ">= 15",
-        "keyword": {
-            "description": str,
-            "extension": "m4a",
-            "filename": "re:^[0-9a-f]{40}$",
-            "slug": str,
-            "title": str,
-            "url": str,
-            "user": "fierce-aphrodite"
-        },
-    })
+    example = "https://soundgasm.net/u/USER"
 
     def __init__(self, match):
         SoundgasmExtractor.__init__(self, match)

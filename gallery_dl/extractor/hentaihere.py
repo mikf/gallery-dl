@@ -23,32 +23,7 @@ class HentaihereChapterExtractor(HentaihereBase, ChapterExtractor):
     """Extractor for a single manga chapter from hentaihere.com"""
     archive_fmt = "{chapter_id}_{page}"
     pattern = r"(?:https?://)?(?:www\.)?hentaihere\.com/m/S(\d+)/([^/?#]+)"
-    test = (
-        ("https://hentaihere.com/m/S13812/1/1/", {
-            "url": "964b942cf492b3a129d2fe2608abfc475bc99e71",
-            "keyword": "0207d20eea3a15d2a8d1496755bdfa49de7cfa9d",
-        }),
-        ("https://hentaihere.com/m/S23048/1.5/1/", {
-            "pattern": r"https://hentaicdn\.com/hentai"
-                       r"/23048/1\.5/ccdn00\d+\.jpg",
-            "count": 32,
-            "keyword": {
-                "author": "Shinozuka Yuuji",
-                "chapter": 1,
-                "chapter_id": 80186,
-                "chapter_minor": ".5",
-                "count": 32,
-                "lang": "en",
-                "language": "English",
-                "manga": "High School Slut's Love Consultation",
-                "manga_id": 23048,
-                "page": int,
-                "title": "High School Slut's Love Consultation + "
-                         "Girlfriend [Full Color]",
-                "type": "Original",
-            },
-        }),
-    )
+    example = "https://hentaihere.com/m/S12345/1/1/"
 
     def __init__(self, match):
         self.manga_id, self.chapter = match.groups()
@@ -87,26 +62,7 @@ class HentaihereMangaExtractor(HentaihereBase, MangaExtractor):
     """Extractor for hmanga from hentaihere.com"""
     chapterclass = HentaihereChapterExtractor
     pattern = r"(?:https?://)?(?:www\.)?hentaihere\.com(/m/S\d+)/?$"
-    test = (
-        ("https://hentaihere.com/m/S13812", {
-            "url": "d1ba6e28bb2162e844f8559c2b2725ba0a093559",
-            "keyword": "5c1b712258e78e120907121d3987c71f834d13e1",
-        }),
-        ("https://hentaihere.com/m/S7608", {
-            "url": "6c5239758dc93f6b1b4175922836c10391b174f7",
-            "keyword": {
-                "chapter": int,
-                "chapter_id": int,
-                "chapter_minor": "",
-                "lang": "en",
-                "language": "English",
-                "manga": "Oshikake Riot",
-                "manga_id": 7608,
-                "title": r"re:Oshikake Riot( \d+)?",
-                "type": "Original",
-            },
-        }),
-    )
+    example = "https://hentaihere.com/m/S12345"
 
     def chapters(self, page):
         results = []

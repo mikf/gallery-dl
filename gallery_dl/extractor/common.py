@@ -35,7 +35,6 @@ class Extractor():
     cookies_domain = ""
     browser = None
     root = ""
-    test = None
     request_interval = 0.0
     request_interval_min = 0.0
     request_timestamp = 0.0
@@ -299,7 +298,7 @@ class Extractor():
             useragent = self.config("user-agent")
             if useragent is None:
                 useragent = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64; "
-                             "rv:115.0) Gecko/20100101 Firefox/115.0")
+                             "rv:109.0) Gecko/20100101 Firefox/115.0")
             elif useragent == "browser":
                 useragent = _browser_useragent()
             headers["User-Agent"] = useragent
@@ -310,6 +309,13 @@ class Extractor():
             headers["Accept-Encoding"] = "gzip, deflate, br"
         else:
             headers["Accept-Encoding"] = "gzip, deflate"
+
+        custom_referer = self.config("referer", True)
+        if custom_referer:
+            if isinstance(custom_referer, str):
+                headers["Referer"] = custom_referer
+            elif self.root:
+                headers["Referer"] = self.root + "/"
 
         custom_headers = self.config("headers")
         if custom_headers:
@@ -507,21 +513,6 @@ class Extractor():
                 extr, url = extractors[category]
                 result.append((Message.Queue, url, {"_extractor": extr}))
         return iter(result)
-
-    @classmethod
-    def _get_tests(cls):
-        """Yield an extractor's test cases as (URL, RESULTS) tuples"""
-        tests = cls.test
-        if not tests:
-            return
-
-        if len(tests) == 2 and (not tests[1] or isinstance(tests[1], dict)):
-            tests = (tests,)
-
-        for test in tests:
-            if isinstance(test, str):
-                test = (test, None)
-            yield test
 
     @classmethod
     def _dump(cls, obj):
@@ -831,8 +822,8 @@ _browser_cookies = {}
 
 HTTP_HEADERS = {
     "firefox": (
-        ("User-Agent", "Mozilla/5.0 ({}; rv:115.0) "
-                       "Gecko/20100101 Firefox/115.0"),
+        ("User-Agent", "Mozilla/5.0 ({}; "
+                       "rv:109.0) Gecko/20100101 Firefox/115.0"),
         ("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,"
                    "image/avif,image/webp,*/*;q=0.8"),
         ("Accept-Language", "en-US,en;q=0.5"),

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2021-2022 Mike Fährmann
+# Copyright 2021-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -122,69 +122,7 @@ class PillowfortPostExtractor(PillowfortExtractor):
     """Extractor for a single pillowfort post"""
     subcategory = "post"
     pattern = BASE_PATTERN + r"/posts/(\d+)"
-    test = (
-        ("https://www.pillowfort.social/posts/27510", {
-            "pattern": r"https://img\d+\.pillowfort\.social"
-                       r"/posts/\w+_out\d+\.png",
-            "count": 4,
-            "keyword": {
-                "avatar_url": str,
-                "col": 0,
-                "commentable": True,
-                "comments_count": int,
-                "community_id": None,
-                "content": str,
-                "created_at": str,
-                "date": "type:datetime",
-                "deleted": None,
-                "deleted_at": None,
-                "deleted_by_mod": None,
-                "deleted_for_flag_id": None,
-                "embed_code": None,
-                "id": int,
-                "last_activity": str,
-                "last_activity_elapsed": str,
-                "last_edited_at": str,
-                "likes_count": int,
-                "media_type": "picture",
-                "nsfw": False,
-                "num": int,
-                "original_post_id": None,
-                "original_post_user_id": None,
-                "picture_content_type": None,
-                "picture_file_name": None,
-                "picture_file_size": None,
-                "picture_updated_at": None,
-                "post_id": 27510,
-                "post_type": "picture",
-                "privacy": "public",
-                "reblog_copy_info": list,
-                "rebloggable": True,
-                "reblogged_from_post_id": None,
-                "reblogged_from_user_id": None,
-                "reblogs_count": int,
-                "row": int,
-                "small_image_url": None,
-                "tags": list,
-                "time_elapsed": str,
-                "timestamp": str,
-                "title": "What is Pillowfort.social?",
-                "updated_at": str,
-                "url": r"re:https://img3.pillowfort.social/posts/.*\.png",
-                "user_id": 5,
-                "username": "Staff"
-            },
-        }),
-        ("https://www.pillowfort.social/posts/1557500", {
-            "options": (("external", True), ("inline", False)),
-            "pattern": r"https://twitter\.com/Aliciawitdaart/status"
-                       r"/1282862493841457152",
-        }),
-        ("https://www.pillowfort.social/posts/1672518", {
-            "options": (("inline", True),),
-            "count": 3,
-        }),
-    )
+    example = "https://www.pillowfort.social/posts/12345"
 
     def posts(self):
         url = "{}/posts/{}/json/".format(self.root, self.item)
@@ -195,11 +133,7 @@ class PillowfortUserExtractor(PillowfortExtractor):
     """Extractor for all posts of a pillowfort user"""
     subcategory = "user"
     pattern = BASE_PATTERN + r"/(?!posts/)([^/?#]+)"
-    test = ("https://www.pillowfort.social/Pome", {
-        "pattern": r"https://img\d+\.pillowfort\.social/posts/",
-        "range": "1-15",
-        "count": 15,
-    })
+    example = "https://www.pillowfort.social/USER"
 
     def posts(self):
         url = "{}/{}/json/".format(self.root, self.item)

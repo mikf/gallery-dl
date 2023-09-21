@@ -91,29 +91,7 @@ class EromeAlbumExtractor(EromeExtractor):
     """Extractor for albums on erome.com"""
     subcategory = "album"
     pattern = BASE_PATTERN + r"/a/(\w+)"
-    test = (
-        ("https://www.erome.com/a/NQgdlWvk", {
-            "pattern": r"https://v\d+\.erome\.com/\d+"
-                       r"/NQgdlWvk/j7jlzmYB_480p\.mp4",
-            "count": 1,
-            "keyword": {
-                "album_id": "NQgdlWvk",
-                "num": 1,
-                "title": "porn",
-                "user": "yYgWBZw8o8qsMzM",
-            },
-        }),
-        ("https://www.erome.com/a/TdbZ4ogi", {
-            "pattern": r"https://s\d+\.erome\.com/\d+/TdbZ4ogi/\w+",
-            "count": 6,
-            "keyword": {
-                "album_id": "TdbZ4ogi",
-                "num": int,
-                "title": "82e78cfbb461ad87198f927fcb1fda9a1efac9ff.",
-                "user": "yYgWBZw8o8qsMzM",
-            },
-        }),
-    )
+    example = "https://www.erome.com/a/ID"
 
     def albums(self):
         return (self.item,)
@@ -122,10 +100,7 @@ class EromeAlbumExtractor(EromeExtractor):
 class EromeUserExtractor(EromeExtractor):
     subcategory = "user"
     pattern = BASE_PATTERN + r"/(?!a/|search\?)([^/?#]+)"
-    test = ("https://www.erome.com/yYgWBZw8o8qsMzM", {
-        "range": "1-25",
-        "count": 25,
-    })
+    example = "https://www.erome.com/USER"
 
     def albums(self):
         url = "{}/{}".format(self.root, self.item)
@@ -135,10 +110,7 @@ class EromeUserExtractor(EromeExtractor):
 class EromeSearchExtractor(EromeExtractor):
     subcategory = "search"
     pattern = BASE_PATTERN + r"/search\?q=([^&#]+)"
-    test = ("https://www.erome.com/search?q=cute", {
-        "range": "1-25",
-        "count": 25,
-    })
+    example = "https://www.erome.com/search?q=QUERY"
 
     def albums(self):
         url = self.root + "/search"

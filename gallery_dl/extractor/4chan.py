@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2019 Mike Fährmann
+# Copyright 2015-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -21,17 +21,7 @@ class _4chanThreadExtractor(Extractor):
     archive_fmt = "{board}_{thread}_{tim}"
     pattern = (r"(?:https?://)?boards\.4chan(?:nel)?\.org"
                r"/([^/]+)/thread/(\d+)")
-    test = (
-        ("https://boards.4chan.org/tg/thread/15396072/", {
-            "url": "39082ad166161966d7ba8e37f2173a824eb540f0",
-            "keyword": "7ae2f4049adf0d2f835eb91b6b26b7f4ec882e0a",
-            "content": "20b7b51afa51c9c31a0020a0737b889532c8d7ec",
-        }),
-        ("https://boards.4channel.org/tg/thread/15396072/", {
-            "url": "39082ad166161966d7ba8e37f2173a824eb540f0",
-            "keyword": "7ae2f4049adf0d2f835eb91b6b26b7f4ec882e0a",
-        }),
-    )
+    example = "https://boards.4channel.org/a/thread/12345/"
 
     def __init__(self, match):
         Extractor.__init__(self, match)
@@ -65,10 +55,7 @@ class _4chanBoardExtractor(Extractor):
     category = "4chan"
     subcategory = "board"
     pattern = r"(?:https?://)?boards\.4chan(?:nel)?\.org/([^/?#]+)/\d*$"
-    test = ("https://boards.4channel.org/po/", {
-        "pattern": _4chanThreadExtractor.pattern,
-        "count": ">= 100",
-    })
+    example = "https://boards.4channel.org/a/"
 
     def __init__(self, match):
         Extractor.__init__(self, match)

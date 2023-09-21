@@ -88,7 +88,7 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>ArtStation</td>
     <td>https://www.artstation.com/</td>
-    <td>Albums, Artwork Listings, Challenges, individual Images, Likes, Search Results, User Profiles</td>
+    <td>Albums, Artwork Listings, Challenges, Followed Users, individual Images, Likes, Search Results, User Profiles</td>
     <td></td>
 </tr>
 <tr>
@@ -148,7 +148,7 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>DeviantArt</td>
     <td>https://www.deviantart.com/</td>
-    <td>Collections, Deviations, Favorites, Folders, Galleries, Gallery Searches, Journals, Popular Images, Scraps, Search Results, Sta.sh, Status Updates, Tag Searches, User Profiles, Watches</td>
+    <td>Collections, Deviations, Favorites, Folders, Followed Users, Galleries, Gallery Searches, Journals, Popular Images, Scraps, Search Results, Sta.sh, Status Updates, Tag Searches, User Profiles, Watches</td>
     <td><a href="https://github.com/mikf/gallery-dl#oauth">OAuth</a></td>
 </tr>
 <tr>
@@ -226,7 +226,7 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>Fur Affinity</td>
     <td>https://www.furaffinity.net/</td>
-    <td>Favorites, Galleries, Posts, Scraps, Search Results, User Profiles</td>
+    <td>Favorites, Followed Users, Galleries, Posts, Scraps, Search Results, User Profiles</td>
     <td><a href="https://github.com/mikf/gallery-dl#cookies">Cookies</a></td>
 </tr>
 <tr>
@@ -246,12 +246,6 @@ Consider all sites to be NSFW unless otherwise known.
     <td>https://gelbooru.com/</td>
     <td>Favorites, Pools, Posts, Redirects, Tag Searches</td>
     <td></td>
-</tr>
-<tr>
-    <td>Gfycat</td>
-    <td>https://gfycat.com/</td>
-    <td>Collections, individual Images, Search Results, User Profiles</td>
-    <td>Supported</td>
 </tr>
 <tr>
     <td>Gofile</td>
@@ -357,7 +351,7 @@ Consider all sites to be NSFW unless otherwise known.
 </tr>
 <tr>
     <td>Imagevenue</td>
-    <td>https://imagevenue.com/</td>
+    <td>https://www.imagevenue.com/</td>
     <td>individual Images</td>
     <td></td>
 </tr>
@@ -406,13 +400,13 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>Inkbunny</td>
     <td>https://inkbunny.net/</td>
-    <td>Favorites, Pools, Posts, Search Results, User Profiles</td>
+    <td>Favorites, Followed Users, Pools, Posts, Search Results, User Profiles</td>
     <td>Supported</td>
 </tr>
 <tr>
     <td>Instagram</td>
     <td>https://www.instagram.com/</td>
-    <td>Avatars, Collections, Guides, Highlights, Posts, Reels, Saved Posts, Stories, Tag Searches, Tagged Posts, User Profiles</td>
+    <td>Avatars, Collections, Followed Users, Guides, Highlights, Posts, Reels, Saved Posts, Stories, Tag Searches, Tagged Posts, User Profiles</td>
     <td><a href="https://github.com/mikf/gallery-dl#cookies">Cookies</a></td>
 </tr>
 <tr>
@@ -435,7 +429,7 @@ Consider all sites to be NSFW unless otherwise known.
 </tr>
 <tr>
     <td>JPG Fish</td>
-    <td>https://jpeg.pet/</td>
+    <td>https://jpg1.su/</td>
     <td>Albums, individual Images, User Profiles</td>
     <td></td>
 </tr>
@@ -574,7 +568,7 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>Newgrounds</td>
     <td>https://www.newgrounds.com/</td>
-    <td>Art, Audio, Favorites, Games, individual Images, Media Files, Movies, Search Results, User Profiles</td>
+    <td>Art, Audio, Favorites, Followed Users, Games, individual Images, Media Files, Movies, Search Results, User Profiles</td>
     <td>Supported</td>
 </tr>
 <tr>
@@ -699,7 +693,7 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>Pornhub</td>
     <td>https://www.pornhub.com/</td>
-    <td>Galleries, User Profiles</td>
+    <td>Galleries, Gifs, Photos, User Profiles</td>
     <td></td>
 </tr>
 <tr>
@@ -783,7 +777,7 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>Skeb</td>
     <td>https://skeb.jp/</td>
-    <td>Posts, Search Results, User Profiles</td>
+    <td>Followed Users, Posts, Search Results, User Profiles</td>
     <td></td>
 </tr>
 <tr>
@@ -879,7 +873,7 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>Twitter</td>
     <td>https://twitter.com/</td>
-    <td>Avatars, Backgrounds, Bookmarks, Events, Hashtags, individual Images, Likes, Lists, List Members, Media Timelines, Search Results, Timelines, Tweets, User Profiles</td>
+    <td>Avatars, Backgrounds, Bookmarks, Events, Followed Users, Hashtags, individual Images, Likes, Lists, List Members, Media Timelines, Search Results, Timelines, Tweets, User Profiles</td>
     <td>Supported</td>
 </tr>
 <tr>
@@ -1126,6 +1120,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td>Favorites, Pools, Posts, Tag Searches</td>
     <td></td>
 </tr>
+<tr>
+    <td>Xbooru</td>
+    <td>https://xbooru.com/</td>
+    <td>Favorites, Pools, Posts, Tag Searches</td>
+    <td></td>
+</tr>
 
 <tr>
     <td colspan="4"><strong>jschan Imageboards</strong></td>
@@ -1165,19 +1165,19 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>Misskey.io</td>
     <td>https://misskey.io/</td>
-    <td>Favorites, Images from Notes, User Profiles</td>
+    <td>Favorites, Followed Users, Images from Notes, User Profiles</td>
     <td></td>
 </tr>
 <tr>
     <td>Lesbian.energy</td>
     <td>https://lesbian.energy/</td>
-    <td>Favorites, Images from Notes, User Profiles</td>
+    <td>Favorites, Followed Users, Images from Notes, User Profiles</td>
     <td></td>
 </tr>
 <tr>
     <td>Sushi.ski</td>
     <td>https://sushi.ski/</td>
-    <td>Favorites, Images from Notes, User Profiles</td>
+    <td>Favorites, Followed Users, Images from Notes, User Profiles</td>
     <td></td>
 </tr>
 
@@ -1477,19 +1477,19 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>mastodon.social</td>
     <td>https://mastodon.social/</td>
-    <td>Bookmarks, Images from Statuses, User Profiles</td>
+    <td>Bookmarks, Followed Users, Images from Statuses, User Profiles</td>
     <td><a href="https://github.com/mikf/gallery-dl#oauth">OAuth</a></td>
 </tr>
 <tr>
     <td>Pawoo</td>
     <td>https://pawoo.net/</td>
-    <td>Bookmarks, Images from Statuses, User Profiles</td>
+    <td>Bookmarks, Followed Users, Images from Statuses, User Profiles</td>
     <td><a href="https://github.com/mikf/gallery-dl#oauth">OAuth</a></td>
 </tr>
 <tr>
     <td>baraag</td>
     <td>https://baraag.net/</td>
-    <td>Bookmarks, Images from Statuses, User Profiles</td>
+    <td>Bookmarks, Followed Users, Images from Statuses, User Profiles</td>
     <td><a href="https://github.com/mikf/gallery-dl#oauth">OAuth</a></td>
 </tr>
 

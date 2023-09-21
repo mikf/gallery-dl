@@ -390,7 +390,6 @@ Description
     * ``e621`` (*)
     * ``e926`` (*)
     * ``exhentai``
-    * ``gfycat``
     * ``idolcomplex``
     * ``imgbb``
     * ``inkbunny``
@@ -534,7 +533,7 @@ extractor.*.user-agent
 Type
     ``string``
 Default
-    ``"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:115.0) Gecko/20100101 Firefox/115.0"``
+    ``"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/115.0"``
 Description
     User-Agent header value to be used for HTTP requests.
 
@@ -566,6 +565,21 @@ Description
     browser would use HTTP/2.
 
 
+extractor.*.referer
+-------------------
+Type
+    * ``bool``
+    * ``string``
+Default
+    ``true``
+Description
+    Send `Referer <https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referer>`__
+    headers with all outgoing HTTP requests.
+
+    If this is a ``string``, send it as Referer
+    instead of the extractor's ``root`` domain.
+
+
 extractor.*.headers
 -------------------
 Type
@@ -577,7 +591,8 @@ Default
           "User-Agent"     : "<extractor.*.user-agent>",
           "Accept"         : "*/*",
           "Accept-Language": "en-US,en;q=0.5",
-          "Accept-Encoding": "gzip, deflate"
+          "Accept-Encoding": "gzip, deflate",
+          "Referer"        : "<extractor.*.referer>"
       }
 
 Description
@@ -714,7 +729,7 @@ Type
 Default
     ``["oauth", "recursive", "test"]`` + current extractor category
 Example
-    ``["imgur", "gfycat:user", "*:image"]``
+    ``["imgur", "redgifs:user", "*:image"]``
 Description
     A list of extractor identifiers to ignore (or allow)
     when spawning child extractors for unknown URLs,
@@ -723,7 +738,7 @@ Description
     Each identifier can be
 
     * A category or basecategory name (``"imgur"``, ``"mastodon"``)
-    * | A (base)category-subcategory pair, where both names are separated by a colon (``"gfycat:user"``).
+    * | A (base)category-subcategory pair, where both names are separated by a colon (``"redgifs:user"``).
       | Both names can be a `*` or left empty, matching all possible names (``"*:image"``, ``":user"``).
 
     Note: Any ``blacklist`` setting will automatically include
@@ -1475,6 +1490,22 @@ Description
     * ``"exhentai.org"``: Use ``exhentai.org`` for all URLs
 
 
+extractor.exhentai.fav
+----------------------
+Type
+    ``string``
+Example
+    ``"4"``
+Description
+    After downloading a gallery,
+    add it to your account's favorites as the given category number.
+
+    Note: Set this to `"favdel"` to remove galleries from your favorites.
+
+    Note: This will remove any Favorite Notes when applied
+    to already favorited galleries.
+
+
 extractor.exhentai.limits
 -------------------------
 Type
@@ -1688,29 +1719,6 @@ Default
 Description
     Match **all** URLs not otherwise supported by gallery-dl,
     even ones without a ``generic:`` prefix.
-
-
-extractor.gfycat.format
------------------------
-Type
-    * ``string``
-    * ``list`` of ``strings``
-Default
-    ``["mp4", "webm", "mobile", "gif"]``
-Description
-    List of names of the preferred animation format, which can be
-    ``"mp4"``,
-    ``"webm"``,
-    ``"mobile"``,
-    ``"gif"``, or
-    ``"webp"``.
-
-    If a selected format is not available, the next one in the list will be
-    tried until an available format is found.
-
-    If the format is given as ``string``, it will be extended with
-    ``["mp4", "webm", "mobile", "gif"]``. Use a list with one element to
-    restrict it to only one possible format.
 
 
 extractor.gofile.api-token
@@ -3336,7 +3344,7 @@ extractor.twitter.users
 Type
     ``string``
 Default
-    ``"timeline"``
+    ``"user"``
 Example
     ``"https://twitter.com/search?q=from:{legacy[screen_name]}"``
 Description
@@ -3347,7 +3355,8 @@ Description
 
     Special values:
 
-    * ``"timeline"``: ``https://twitter.com/i/user/{rest_id}``
+    * ``"user"``: ``https://twitter.com/i/user/{rest_id}``
+    * ``"timeline"``: ``https://twitter.com/id:{rest_id}/timeline``
     * ``"tweets"``: ``https://twitter.com/id:{rest_id}/tweets``
     * ``"media"``: ``https://twitter.com/id:{rest_id}/media``
 

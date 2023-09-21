@@ -106,29 +106,7 @@ class MastodonUserExtractor(MastodonExtractor):
     """Extractor for all images of an account/user"""
     subcategory = "user"
     pattern = BASE_PATTERN + r"/(?:@|users/)([^/?#]+)(?:/media)?/?$"
-    test = (
-        ("https://mastodon.social/@jk", {
-            "pattern": r"https://files.mastodon.social/media_attachments"
-                       r"/files/(\d+/){3,}original/\w+",
-            "range": "1-60",
-            "count": 60,
-        }),
-        ("https://pawoo.net/@yoru_nine/", {
-            "range": "1-60",
-            "count": 60,
-        }),
-        ("https://baraag.net/@pumpkinnsfw"),
-        ("https://mastodon.social/@yoru_nine@pawoo.net", {
-            "pattern": r"https://mastodon\.social/media_proxy/\d+/original",
-            "range": "1-10",
-            "count": 10,
-        }),
-        ("https://mastodon.social/@id:10843"),
-        ("https://mastodon.social/users/id:10843"),
-        ("https://mastodon.social/users/jk"),
-        ("https://mastodon.social/users/yoru_nine@pawoo.net"),
-        ("https://mastodon.social/web/@jk"),
-    )
+    example = "https://mastodon.social/@USER"
 
     def statuses(self):
         api = MastodonAPI(self)
@@ -144,11 +122,7 @@ class MastodonBookmarkExtractor(MastodonExtractor):
     """Extractor for mastodon bookmarks"""
     subcategory = "bookmark"
     pattern = BASE_PATTERN + r"/bookmarks"
-    test = (
-        ("https://mastodon.social/bookmarks"),
-        ("https://pawoo.net/bookmarks"),
-        ("https://baraag.net/bookmarks"),
-    )
+    example = "https://mastodon.social/bookmarks"
 
     def statuses(self):
         return MastodonAPI(self).account_bookmarks()
@@ -157,16 +131,8 @@ class MastodonBookmarkExtractor(MastodonExtractor):
 class MastodonFollowingExtractor(MastodonExtractor):
     """Extractor for followed mastodon users"""
     subcategory = "following"
-    pattern = BASE_PATTERN + r"/users/([^/?#]+)/following"
-    test = (
-        ("https://mastodon.social/users/0x4f/following", {
-            "extractor": False,
-            "count": ">= 20",
-        }),
-        ("https://mastodon.social/users/id:10843/following"),
-        ("https://pawoo.net/users/yoru_nine/following"),
-        ("https://baraag.net/users/pumpkinnsfw/following"),
-    )
+    pattern = BASE_PATTERN + r"/(?:@|users/)([^/?#]+)/following"
+    example = "https://mastodon.social/@USER/following"
 
     def items(self):
         api = MastodonAPI(self)
@@ -181,21 +147,7 @@ class MastodonStatusExtractor(MastodonExtractor):
     """Extractor for images from a status"""
     subcategory = "status"
     pattern = BASE_PATTERN + r"/@[^/?#]+/(\d+)"
-    test = (
-        ("https://mastodon.social/@jk/103794036899778366", {
-            "count": 4,
-            "keyword": {
-                "count": 4,
-                "num": int,
-            },
-        }),
-        ("https://pawoo.net/@yoru_nine/105038878897832922", {
-            "content": "b52e807f8ab548d6f896b09218ece01eba83987a",
-        }),
-        ("https://baraag.net/@pumpkinnsfw/104364170556898443", {
-            "content": "67748c1b828c58ad60d0fe5729b59fb29c872244",
-        }),
-    )
+    example = "https://mastodon.social/@USER/12345"
 
     def statuses(self):
         return (MastodonAPI(self).status(self.item),)

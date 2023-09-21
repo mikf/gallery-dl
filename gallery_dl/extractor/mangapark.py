@@ -35,39 +35,7 @@ class MangaparkBase():
 class MangaparkChapterExtractor(MangaparkBase, ChapterExtractor):
     """Extractor for manga-chapters from mangapark.net"""
     pattern = BASE_PATTERN + r"/title/[^/?#]+/(\d+)"
-    test = (
-        ("https://mangapark.net/title/114972-aria/6710214-en-ch.60.2", {
-            "count": 70,
-            "pattern": r"https://[\w-]+\.mpcdn\.org/comic/2002/e67"
-                       r"/61e29278a583b9227964076e/\d+_\d+_\d+_\d+\.jpeg"
-                       r"\?acc=[^&#]+&exp=\d+",
-            "keyword": {
-                "artist": [],
-                "author": ["Amano Kozue"],
-                "chapter": 60,
-                "chapter_id": 6710214,
-                "chapter_minor": ".2",
-                "count": 70,
-                "date": "dt:2022-01-15 09:25:03",
-                "extension": "jpeg",
-                "filename": str,
-                "genre": ["adventure", "comedy", "drama", "sci_fi",
-                          "shounen", "slice_of_life"],
-                "lang": "en",
-                "language": "English",
-                "manga": "Aria",
-                "manga_id": 114972,
-                "page": int,
-                "source": "Koala",
-                "title": "Special Navigation - Aquaria Ii",
-                "volume": 12,
-            },
-        }),
-        ("https://mangapark.com/title/114972-aria/6710214-en-ch.60.2"),
-        ("https://mangapark.org/title/114972-aria/6710214-en-ch.60.2"),
-        ("https://mangapark.io/title/114972-aria/6710214-en-ch.60.2"),
-        ("https://mangapark.me/title/114972-aria/6710214-en-ch.60.2"),
-    )
+    example = "https://mangapark.net/title/MANGA/12345-en-ch.01"
 
     def __init__(self, match):
         self.root = text.root_from_url(match.group(0))
@@ -115,41 +83,7 @@ class MangaparkMangaExtractor(MangaparkBase, Extractor):
     """Extractor for manga from mangapark.net"""
     subcategory = "manga"
     pattern = BASE_PATTERN + r"/title/(\d+)(?:-[^/?#]*)?/?$"
-    test = (
-        ("https://mangapark.net/title/114972-aria", {
-            "count": 141,
-            "pattern": MangaparkChapterExtractor.pattern,
-            "keyword": {
-                "chapter": int,
-                "chapter_id": int,
-                "chapter_minor": str,
-                "date": "type:datetime",
-                "lang": "en",
-                "language": "English",
-                "manga_id": 114972,
-                "source": "re:Horse|Koala",
-                "source_id": int,
-                "title": str,
-                "volume": int,
-            },
-        }),
-        # 'source' option
-        ("https://mangapark.net/title/114972-aria", {
-            "options": (("source", "koala"),),
-            "count": 70,
-            "pattern": MangaparkChapterExtractor.pattern,
-            "keyword": {
-                "source": "Koala",
-                "source_id": 15150116,
-            },
-        }),
-        ("https://mangapark.com/title/114972-"),
-        ("https://mangapark.com/title/114972"),
-        ("https://mangapark.com/title/114972-aria"),
-        ("https://mangapark.org/title/114972-aria"),
-        ("https://mangapark.io/title/114972-aria"),
-        ("https://mangapark.me/title/114972-aria"),
-    )
+    example = "https://mangapark.net/title/12345-MANGA"
 
     def __init__(self, match):
         self.root = text.root_from_url(match.group(0))

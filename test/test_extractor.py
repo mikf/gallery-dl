@@ -93,20 +93,24 @@ class TestExtractorModule(unittest.TestCase):
                 FakeExtractor.from_url(invalid)
 
     def test_unique_pattern_matches(self):
-        test_urls = []
+        try:
+            import test.results
+        except ImportError:
+            raise unittest.SkipTest("no test data")
 
         # collect testcase URLs
+        test_urls = []
         append = test_urls.append
-        for extr in extractor.extractors():
-            for testcase in extr._get_tests():
-                append((testcase[0], extr))
+
+        for result in test.results.all():
+            append((result["#url"], result["#class"]))
 
         # iterate over all testcase URLs
         for url, extr1 in test_urls:
             matches = []
 
             # ... and apply all regex patterns to each one
-            for extr2 in extractor._cache:
+            for extr2 in _list_classes():
 
                 # skip DirectlinkExtractor pattern if it isn't tested
                 if extr1 != DirectlinkExtractor and \
@@ -133,15 +137,13 @@ class TestExtractorModule(unittest.TestCase):
                 self.assertIs(extr1, matches[0][1], url)
 
     def test_init(self):
-        """Test for exceptions in Extractor.initialize(()"""
+        """Test for exceptions in Extractor.initialize() and .finalize()"""
         for cls in extractor.extractors():
             if cls.category == "ytdl":
                 continue
-            for test in cls._get_tests():
-                extr = cls.from_url(test[0])
-                extr.initialize()
-                extr.finalize()
-                break
+            extr = cls.from_url(cls.example)
+            extr.initialize()
+            extr.finalize()
 
     @unittest.skipIf(sys.hexversion < 0x3060000, "test fails in CI")
     def test_init_ytdl(self):

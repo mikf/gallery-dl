@@ -168,7 +168,7 @@ class HentaifoundryUserExtractor(HentaifoundryExtractor):
     """Extractor for a hentaifoundry user profile"""
     subcategory = "user"
     pattern = BASE_PATTERN + r"/user/([^/?#]+)/profile"
-    test = ("https://www.hentai-foundry.com/user/Tenpura/profile",)
+    example = "https://www.hentai-foundry.com/user/USER/profile"
 
     def initialize(self):
         pass
@@ -192,12 +192,7 @@ class HentaifoundryPicturesExtractor(HentaifoundryExtractor):
     """Extractor for all pictures of a hentaifoundry user"""
     subcategory = "pictures"
     pattern = BASE_PATTERN + r"/pictures/user/([^/?#]+)(?:/page/(\d+))?/?$"
-    test = (
-        ("https://www.hentai-foundry.com/pictures/user/Tenpura", {
-            "url": "ebbc981a85073745e3ca64a0f2ab31fab967fc28",
-        }),
-        ("https://www.hentai-foundry.com/pictures/user/Tenpura/page/3"),
-    )
+    example = "https://www.hentai-foundry.com/pictures/user/USER"
 
     def __init__(self, match):
         HentaifoundryExtractor.__init__(self, match)
@@ -209,13 +204,7 @@ class HentaifoundryScrapsExtractor(HentaifoundryExtractor):
     subcategory = "scraps"
     directory_fmt = ("{category}", "{user}", "Scraps")
     pattern = BASE_PATTERN + r"/pictures/user/([^/?#]+)/scraps"
-    test = (
-        ("https://www.hentai-foundry.com/pictures/user/Evulchibi/scraps", {
-            "url": "7cd9c6ec6258c4ab8c44991f7731be82337492a7",
-        }),
-        ("https://www.hentai-foundry.com"
-         "/pictures/user/Evulchibi/scraps/page/3"),
-    )
+    example = "https://www.hentai-foundry.com/pictures/user/USER/scraps"
 
     def __init__(self, match):
         HentaifoundryExtractor.__init__(self, match)
@@ -229,13 +218,7 @@ class HentaifoundryFavoriteExtractor(HentaifoundryExtractor):
     directory_fmt = ("{category}", "{user}", "Favorites")
     archive_fmt = "f_{user}_{index}"
     pattern = BASE_PATTERN + r"/user/([^/?#]+)/faves/pictures"
-    test = (
-        ("https://www.hentai-foundry.com/user/Tenpura/faves/pictures", {
-            "url": "56f9ae2e89fe855e9fe1da9b81e5ec6212b0320b",
-        }),
-        ("https://www.hentai-foundry.com"
-         "/user/Tenpura/faves/pictures/page/3"),
-    )
+    example = "https://www.hentai-foundry.com/user/USER/faves/pictures"
 
     def __init__(self, match):
         HentaifoundryExtractor.__init__(self, match)
@@ -249,10 +232,7 @@ class HentaifoundryRecentExtractor(HentaifoundryExtractor):
     directory_fmt = ("{category}", "Recent Pictures", "{date}")
     archive_fmt = "r_{index}"
     pattern = BASE_PATTERN + r"/pictures/recent/(\d\d\d\d-\d\d-\d\d)"
-    test = ("https://www.hentai-foundry.com/pictures/recent/2018-09-20", {
-        "pattern": r"https://pictures.hentai-foundry.com/[^/]/[^/?#]+/\d+/",
-        "range": "20-30",
-    })
+    example = "https://www.hentai-foundry.com/pictures/recent/1970-01-01"
 
     def __init__(self, match):
         HentaifoundryExtractor.__init__(self, match)
@@ -268,10 +248,7 @@ class HentaifoundryPopularExtractor(HentaifoundryExtractor):
     directory_fmt = ("{category}", "Popular Pictures")
     archive_fmt = "p_{index}"
     pattern = BASE_PATTERN + r"/pictures/popular()"
-    test = ("https://www.hentai-foundry.com/pictures/popular", {
-        "pattern": r"https://pictures.hentai-foundry.com/[^/]/[^/?#]+/\d+/",
-        "range": "20-30",
-    })
+    example = "https://www.hentai-foundry.com/pictures/popular"
 
     def __init__(self, match):
         HentaifoundryExtractor.__init__(self, match)
@@ -283,34 +260,8 @@ class HentaifoundryImageExtractor(HentaifoundryExtractor):
     subcategory = "image"
     pattern = (r"(https?://)?(?:www\.|pictures\.)?hentai-foundry\.com"
                r"/(?:pictures/user|[^/?#])/([^/?#]+)/(\d+)")
-    test = (
-        (("https://www.hentai-foundry.com"
-          "/pictures/user/Tenpura/407501/shimakaze"), {
-            "url": "fbf2fd74906738094e2575d2728e8dc3de18a8a3",
-            "content": "91bf01497c39254b6dfb234a18e8f01629c77fd1",
-            "keyword": {
-                "artist" : "Tenpura",
-                "date"   : "dt:2016-02-22 14:41:19",
-                "description": "Thank you!",
-                "height" : 700,
-                "index"  : 407501,
-                "media"  : "Other digital art",
-                "ratings": ["Sexual content", "Contains female nudity"],
-                "score"  : int,
-                "tags"   : ["collection", "kancolle", "kantai", "shimakaze"],
-                "title"  : "shimakaze",
-                "user"   : "Tenpura",
-                "views"  : int,
-                "width"  : 495,
-            },
-        }),
-        ("http://www.hentai-foundry.com/pictures/user/Tenpura/407501/", {
-            "pattern": "http://pictures.hentai-foundry.com/t/Tenpura/407501/",
-        }),
-        ("https://www.hentai-foundry.com/pictures/user/Tenpura/407501/"),
-        ("https://pictures.hentai-foundry.com"
-         "/t/Tenpura/407501/Tenpura-407501-shimakaze.png"),
-    )
+    example = "https://www.hentai-foundry.com/pictures/user/USER/12345/TITLE"
+
     skip = Extractor.skip
 
     def __init__(self, match):
@@ -331,24 +282,7 @@ class HentaifoundryStoriesExtractor(HentaifoundryExtractor):
     subcategory = "stories"
     archive_fmt = "s_{index}"
     pattern = BASE_PATTERN + r"/stories/user/([^/?#]+)(?:/page/(\d+))?/?$"
-    test = ("https://www.hentai-foundry.com/stories/user/SnowWolf35", {
-        "count": ">= 35",
-        "keyword": {
-            "author"     : "SnowWolf35",
-            "chapters"   : int,
-            "comments"   : int,
-            "date"       : "type:datetime",
-            "description": str,
-            "index"      : int,
-            "rating"     : int,
-            "ratings"    : list,
-            "status"     : "re:(Inc|C)omplete",
-            "title"      : str,
-            "user"       : "SnowWolf35",
-            "views"      : int,
-            "words"      : int,
-        },
-    })
+    example = "https://www.hentai-foundry.com/stories/user/USER"
 
     def items(self):
         self._init_site_filters()
@@ -367,11 +301,8 @@ class HentaifoundryStoryExtractor(HentaifoundryExtractor):
     subcategory = "story"
     archive_fmt = "s_{index}"
     pattern = BASE_PATTERN + r"/stories/user/([^/?#]+)/(\d+)"
-    test = (("https://www.hentai-foundry.com/stories/user/SnowWolf35"
-             "/26416/Overwatch-High-Chapter-Voting-Location"), {
-        "url": "5a67cfa8c3bf7634c8af8485dd07c1ea74ee0ae8",
-        "keyword": {"title": "Overwatch High Chapter Voting Location"},
-    })
+    example = "https://www.hentai-foundry.com/stories/user/USER/12345/TITLE"
+
     skip = Extractor.skip
 
     def __init__(self, match):

@@ -90,7 +90,9 @@ class InstagramExtractor(Extractor):
                         file["_http_headers"] = video_headers
                         text.nameext_from_url(url, file)
                         yield Message.Url, url, file
-                    if not previews:
+                    if previews:
+                        file["media_id"] += "p"
+                    else:
                         continue
 
                 url = file["display_url"]
@@ -396,11 +398,7 @@ class InstagramUserExtractor(InstagramExtractor):
     """Extractor for an Instagram user profile"""
     subcategory = "user"
     pattern = USER_PATTERN + r"/?(?:$|[?#])"
-    test = (
-        ("https://www.instagram.com/instagram/"),
-        ("https://www.instagram.com/instagram/?hl=en"),
-        ("https://www.instagram.com/id:25025320/"),
-    )
+    example = "https://www.instagram.com/USER/"
 
     def initialize(self):
         pass
@@ -425,10 +423,7 @@ class InstagramPostsExtractor(InstagramExtractor):
     """Extractor for an Instagram user's posts"""
     subcategory = "posts"
     pattern = USER_PATTERN + r"/posts"
-    test = ("https://www.instagram.com/instagram/posts/", {
-        "range": "1-16",
-        "count": ">= 16",
-    })
+    example = "https://www.instagram.com/USER/posts/"
 
     def posts(self):
         uid = self.api.user_id(self.item)
@@ -439,10 +434,7 @@ class InstagramReelsExtractor(InstagramExtractor):
     """Extractor for an Instagram user's reels"""
     subcategory = "reels"
     pattern = USER_PATTERN + r"/reels"
-    test = ("https://www.instagram.com/instagram/reels/", {
-        "range": "40-60",
-        "count": ">= 20",
-    })
+    example = "https://www.instagram.com/USER/reels/"
 
     def posts(self):
         uid = self.api.user_id(self.item)
@@ -453,15 +445,7 @@ class InstagramTaggedExtractor(InstagramExtractor):
     """Extractor for an Instagram user's tagged posts"""
     subcategory = "tagged"
     pattern = USER_PATTERN + r"/tagged"
-    test = ("https://www.instagram.com/instagram/tagged/", {
-        "range": "1-16",
-        "count": ">= 16",
-        "keyword": {
-            "tagged_owner_id" : "25025320",
-            "tagged_username" : "instagram",
-            "tagged_full_name": "Instagram",
-        },
-    })
+    example = "https://www.instagram.com/USER/tagged/"
 
     def metadata(self):
         if self.item.startswith("id:"):
@@ -485,11 +469,7 @@ class InstagramGuideExtractor(InstagramExtractor):
     """Extractor for an Instagram guide"""
     subcategory = "guide"
     pattern = USER_PATTERN + r"/guide/[^/?#]+/(\d+)"
-    test = (("https://www.instagram.com/kadakaofficial/guide"
-             "/knit-i-need-collection/18131821684305217/"), {
-        "range": "1-16",
-        "count": ">= 16",
-    })
+    example = "https://www.instagram.com/USER/guide/NAME/12345"
 
     def __init__(self, match):
         InstagramExtractor.__init__(self, match)
@@ -506,10 +486,7 @@ class InstagramSavedExtractor(InstagramExtractor):
     """Extractor for an Instagram user's saved media"""
     subcategory = "saved"
     pattern = USER_PATTERN + r"/saved(?:/all-posts)?/?$"
-    test = (
-        ("https://www.instagram.com/instagram/saved/"),
-        ("https://www.instagram.com/instagram/saved/all-posts/"),
-    )
+    example = "https://www.instagram.com/USER/saved/"
 
     def posts(self):
         return self.api.user_saved()
@@ -519,9 +496,7 @@ class InstagramCollectionExtractor(InstagramExtractor):
     """Extractor for Instagram collection"""
     subcategory = "collection"
     pattern = USER_PATTERN + r"/saved/([^/?#]+)/([^/?#]+)"
-    test = (
-        "https://www.instagram.com/instagram/saved/collection_name/123456789/",
-    )
+    example = "https://www.instagram.com/USER/saved/COLLECTION/12345"
 
     def __init__(self, match):
         InstagramExtractor.__init__(self, match)
@@ -543,14 +518,7 @@ class InstagramStoriesExtractor(InstagramExtractor):
     pattern = (r"(?:https?://)?(?:www\.)?instagram\.com"
                r"/s(?:tories/(?:highlights/(\d+)|([^/?#]+)(?:/(\d+))?)"
                r"|/(aGlnaGxpZ2h0[^?#]+)(?:\?story_media_id=(\d+))?)")
-    test = (
-        ("https://www.instagram.com/stories/instagram/"),
-        ("https://www.instagram.com/stories/highlights/18042509488170095/"),
-        ("https://instagram.com/stories/geekmig/2724343156064789461"),
-        ("https://www.instagram.com/s/aGlnaGxpZ2h0OjE4MDQyNTA5NDg4MTcwMDk1"),
-        ("https://www.instagram.com/s/aGlnaGxpZ2h0OjE4MDQyNTA5NDg4MTcwMDk1"
-         "?story_media_id=2724343156064789461"),
-    )
+    example = "https://www.instagram.com/stories/USER/"
 
     def __init__(self, match):
         h1, self.user, m1, h2, m2 = match.groups()
@@ -585,11 +553,25 @@ class InstagramHighlightsExtractor(InstagramExtractor):
     """Extractor for an Instagram user's story highlights"""
     subcategory = "highlights"
     pattern = USER_PATTERN + r"/highlights"
-    test = ("https://www.instagram.com/instagram/highlights",)
+    example = "https://www.instagram.com/USER/highlights/"
 
     def posts(self):
         uid = self.api.user_id(self.item)
         return self.api.highlights_media(uid)
+
+
+class InstagramFollowingExtractor(InstagramExtractor):
+    """Extractor for an Instagram user's followed users"""
+    subcategory = "following"
+    pattern = USER_PATTERN + r"/following"
+    example = "https://www.instagram.com/USER/following/"
+
+    def items(self):
+        uid = self.api.user_id(self.item)
+        for user in self.api.user_following(uid):
+            user["_extractor"] = InstagramUserExtractor
+            url = "{}/{}".format(self.root, user["username"])
+            yield Message.Queue, url, user
 
 
 class InstagramTagExtractor(InstagramExtractor):
@@ -597,10 +579,7 @@ class InstagramTagExtractor(InstagramExtractor):
     subcategory = "tag"
     directory_fmt = ("{category}", "{subcategory}", "{tag}")
     pattern = BASE_PATTERN + r"/explore/tags/([^/?#]+)"
-    test = ("https://www.instagram.com/explore/tags/instagram/", {
-        "range": "1-16",
-        "count": ">= 16",
-    })
+    example = "https://www.instagram.com/explore/tags/TAG/"
 
     def metadata(self):
         return {"tag": text.unquote(self.item)}
@@ -613,10 +592,7 @@ class InstagramAvatarExtractor(InstagramExtractor):
     """Extractor for an Instagram user's avatar"""
     subcategory = "avatar"
     pattern = USER_PATTERN + r"/avatar"
-    test = ("https://www.instagram.com/instagram/avatar", {
-        "pattern": r"https://instagram\.[\w.-]+\.fbcdn\.net/v/t51\.2885-19"
-                   r"/281440578_1088265838702675_6233856337905829714_n\.jpg",
-    })
+    example = "https://www.instagram.com/USER/avatar/"
 
     def posts(self):
         if self._logged_in:
@@ -656,102 +632,7 @@ class InstagramPostExtractor(InstagramExtractor):
     subcategory = "post"
     pattern = (r"(?:https?://)?(?:www\.)?instagram\.com"
                r"/(?:[^/?#]+/)?(?:p|tv|reel)/([^/?#]+)")
-    test = (
-        # GraphImage
-        ("https://www.instagram.com/p/BqvsDleB3lV/", {
-            "pattern": r"https://[^/]+\.(cdninstagram\.com|fbcdn\.net)"
-                       r"/v(p/[0-9a-f]+/[0-9A-F]+)?/t51.2885-15/e35"
-                       r"/44877605_725955034447492_3123079845831750529_n.jpg",
-            "keyword": {
-                "date": "dt:2018-11-29 01:04:04",
-                "description": str,
-                "height": int,
-                "likes": int,
-                "location_id": "214424288",
-                "location_slug": "hong-kong",
-                "location_url": "re:/explore/locations/214424288/hong-kong/",
-                "media_id": "1922949326347663701",
-                "shortcode": "BqvsDleB3lV",
-                "post_id": "1922949326347663701",
-                "post_shortcode": "BqvsDleB3lV",
-                "post_url": "https://www.instagram.com/p/BqvsDleB3lV/",
-                "tags": ["#WHPsquares"],
-                "typename": "GraphImage",
-                "username": "instagram",
-                "width": int,
-            }
-        }),
-        # GraphSidecar
-        ("https://www.instagram.com/p/BoHk1haB5tM/", {
-            "count": 5,
-            "keyword": {
-                "sidecar_media_id": "1875629777499953996",
-                "sidecar_shortcode": "BoHk1haB5tM",
-                "post_id": "1875629777499953996",
-                "post_shortcode": "BoHk1haB5tM",
-                "post_url": "https://www.instagram.com/p/BoHk1haB5tM/",
-                "num": int,
-                "likes": int,
-                "username": "instagram",
-            }
-        }),
-        # GraphVideo
-        ("https://www.instagram.com/p/Bqxp0VSBgJg/", {
-            "pattern": r"/46840863_726311431074534_7805566102611403091_n\.mp4",
-            "keyword": {
-                "date": "dt:2018-11-29 19:23:58",
-                "description": str,
-                "height": int,
-                "likes": int,
-                "media_id": "1923502432034620000",
-                "post_url": "https://www.instagram.com/p/Bqxp0VSBgJg/",
-                "shortcode": "Bqxp0VSBgJg",
-                "tags": ["#ASMR"],
-                "typename": "GraphVideo",
-                "username": "instagram",
-                "width": int,
-            }
-        }),
-        # GraphVideo (IGTV)
-        ("https://www.instagram.com/tv/BkQjCfsBIzi/", {
-            "pattern": r"/10000000_597132547321814_702169244961988209_n\.mp4",
-            "keyword": {
-                "date": "dt:2018-06-20 19:51:32",
-                "description": str,
-                "height": int,
-                "likes": int,
-                "media_id": "1806097553666903266",
-                "post_url": "https://www.instagram.com/p/BkQjCfsBIzi/",
-                "shortcode": "BkQjCfsBIzi",
-                "typename": "GraphVideo",
-                "username": "instagram",
-                "width": int,
-            }
-        }),
-        # GraphSidecar with 2 embedded GraphVideo objects
-        ("https://www.instagram.com/p/BtOvDOfhvRr/", {
-            "count": 2,
-            "keyword": {
-                "post_url": "https://www.instagram.com/p/BtOvDOfhvRr/",
-                "sidecar_media_id": "1967717017113261163",
-                "sidecar_shortcode": "BtOvDOfhvRr",
-                "video_url": str,
-            }
-        }),
-        # GraphImage with tagged user
-        ("https://www.instagram.com/p/B_2lf3qAd3y/", {
-            "keyword": {
-                "tagged_users": [{
-                    "id"       : "1246468638",
-                    "username" : "kaaymbl",
-                    "full_name": "Call Me Kay",
-                }]
-            }
-        }),
-        # URL with username (#2085)
-        ("https://www.instagram.com/dm/p/CW042g7B9CY/"),
-        ("https://www.instagram.com/reel/CDg_6Y1pxWu/"),
-    )
+    example = "https://www.instagram.com/p/abcdefg/"
 
     def posts(self):
         return self.api.media(self.item)
@@ -869,6 +750,11 @@ class InstagramRestAPI():
         params = {"count": 30}
         return self._pagination(endpoint, params)
 
+    def user_following(self, user_id):
+        endpoint = "/v1/friendships/{}/following/".format(user_id)
+        params = {"count": 12}
+        return self._pagination_following(endpoint, params)
+
     def user_saved(self):
         endpoint = "/v1/feed/saved/posts/"
         params = {"count": 50}
@@ -957,6 +843,20 @@ class InstagramRestAPI():
             if "next_max_id" not in data:
                 return extr._update_cursor(None)
             params["max_id"] = extr._update_cursor(data["next_max_id"])
+
+    def _pagination_following(self, endpoint, params):
+        extr = self.extractor
+        params["max_id"] = text.parse_int(extr._init_cursor())
+
+        while True:
+            data = self._call(endpoint, params=params)
+
+            yield from data["users"]
+
+            if len(data["users"]) < params["count"]:
+                return extr._update_cursor(None)
+            params["max_id"] = extr._update_cursor(
+                params["max_id"] + params["count"])
 
 
 class InstagramGraphqlAPI():

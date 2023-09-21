@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019 Mike Fährmann
+# Copyright 2019-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -114,27 +114,7 @@ class ImgbbAlbumExtractor(ImgbbExtractor):
     subcategory = "album"
     directory_fmt = ("{category}", "{user}", "{album_name} {album_id}")
     pattern = r"(?:https?://)?ibb\.co/album/([^/?#]+)/?(?:\?([^#]+))?"
-    test = (
-        ("https://ibb.co/album/i5PggF", {
-            "range": "1-80",
-            "url": "70afec9fcc3a6de62a6b644b487d892d8d47cf1a",
-            "keyword": "569e1d88ebdd27655387559cdf1cd526a3e1ab69",
-        }),
-        ("https://ibb.co/album/i5PggF?sort=title_asc", {
-            "range": "1-80",
-            "url": "afdf5fc95d8e09d77e8f44312f3e9b843987bb5a",
-            "keyword": "f090e14d0e5f7868595082b2c95da1309c84872d",
-        }),
-        # no user data (#471)
-        ("https://ibb.co/album/kYKpwF", {
-            "url": "ac0abcfcb89f4df6adc2f7e4ff872f3b03ef1bc7",
-            "keyword": {"user": ""},
-        }),
-        # private
-        ("https://ibb.co/album/hqgWrF", {
-            "exception": exception.HttpError,
-        }),
-    )
+    example = "https://ibb.co/album/ID"
 
     def __init__(self, match):
         ImgbbExtractor.__init__(self, match)
@@ -169,10 +149,7 @@ class ImgbbUserExtractor(ImgbbExtractor):
     """Extractor for user profiles in imgbb.com"""
     subcategory = "user"
     pattern = r"(?:https?://)?([\w-]+)\.imgbb\.com/?(?:\?([^#]+))?$"
-    test = ("https://folkie.imgbb.com", {
-        "range": "1-80",
-        "pattern": r"https?://i\.ibb\.co/\w+/[^/?#]+",
-    })
+    example = "https://USER.imgbb.com"
 
     def __init__(self, match):
         ImgbbExtractor.__init__(self, match)
@@ -196,19 +173,7 @@ class ImgbbUserExtractor(ImgbbExtractor):
 class ImgbbImageExtractor(ImgbbExtractor):
     subcategory = "image"
     pattern = r"(?:https?://)?ibb\.co/(?!album/)([^/?#]+)"
-    test = ("https://ibb.co/fUqh5b", {
-        "pattern": r"https://i\.ibb\.co/g3kvx80/Arundel-Ireeman-5\.jpg",
-        "content": "c5a0965178a8b357acd8aa39660092918c63795e",
-        "keyword": {
-            "id"    : "fUqh5b",
-            "title" : "Arundel Ireeman 5",
-            "url"   : "https://i.ibb.co/g3kvx80/Arundel-Ireeman-5.jpg",
-            "width" : 960,
-            "height": 719,
-            "user"  : "folkie",
-            "extension": "jpg",
-        },
-    })
+    example = "https://ibb.co/ID"
 
     def __init__(self, match):
         ImgbbExtractor.__init__(self, match)

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2021 Mike Fährmann
+# Copyright 2021-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -25,19 +25,7 @@ class ComicvineTagExtractor(BooruExtractor):
     archive_fmt = "{id}"
     pattern = (r"(?:https?://)?comicvine\.gamespot\.com"
                r"(/([^/?#]+)/(\d+-\d+)/images/.*)")
-    test = (
-        ("https://comicvine.gamespot.com/jock/4040-5653/images/", {
-            "pattern": r"https://comicvine\.gamespot\.com/a/uploads"
-                       r"/original/\d+/\d+/\d+-.+\.(jpe?g|png)",
-            "count": ">= 140",
-        }),
-        (("https://comicvine.gamespot.com/batman/4005-1699"
-          "/images/?tag=Fan%20Art%20%26%20Cosplay"), {
-            "pattern": r"https://comicvine\.gamespot\.com/a/uploads"
-                       r"/original/\d+/\d+/\d+-.+",
-            "count": ">= 450",
-        }),
-    )
+    example = "https://comicvine.gamespot.com/TAG/123-45/images/"
 
     def __init__(self, match):
         BooruExtractor.__init__(self, match)

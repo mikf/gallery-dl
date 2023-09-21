@@ -14,6 +14,11 @@ import collections
 import util
 from gallery_dl import extractor
 
+try:
+    from test import results
+except ImportError:
+    results = None
+
 
 CATEGORY_MAP = {
     "2chan"          : "Futaba Channel",
@@ -153,7 +158,7 @@ SUBCATEGORY_MAP = {
     "tweets" : "",
     "user"   : "User Profiles",
     "watch"  : "Watches",
-    "following"    : "",
+    "following"    : "Followed Users",
     "related-pin"  : "related Pins",
     "related-board": "",
 
@@ -178,9 +183,6 @@ SUBCATEGORY_MAP = {
     },
     "fapello": {
         "path": "Videos, Trending Posts, Popular Videos, Top Models",
-    },
-    "gfycat": {
-        "collections": "",
     },
     "hentaifoundry": {
         "story": "",
@@ -224,6 +226,9 @@ SUBCATEGORY_MAP = {
         "pixivision": "pixivision",
         "sketch": "Sketch",
         "work": "individual Images",
+    },
+    "pornhub": {
+        "gifs": "",
     },
     "reddit": {
         "home": "Home Feed",
@@ -312,7 +317,6 @@ AUTH_MAP = {
     "fanbox"         : _COOKIES,
     "fantia"         : _COOKIES,
     "flickr"         : _OAUTH,
-    "gfycat"         : "Supported",
     "furaffinity"    : _COOKIES,
     "horne"          : "Required",
     "idolcomplex"    : "Supported",
@@ -369,17 +373,8 @@ def domain(cls):
     if hasattr(cls, "root") and cls.root:
         return cls.root + "/"
 
-    if hasattr(cls, "https"):
-        scheme = "https" if cls.https else "http"
-        netloc = cls.__doc__.split()[-1]
-        return "{}://{}/".format(scheme, netloc)
-
-    test = next(cls._get_tests(), None)
-    if test:
-        url = test[0]
-        return url[:url.find("/", 8)+1]
-
-    return ""
+    url = cls.example
+    return url[:url.find("/", 8)+1]
 
 
 def category_text(c):
@@ -434,14 +429,10 @@ def build_extractor_list():
             for category, root in extr.instances:
                 base[category].append(extr.subcategory)
                 if category not in domains:
-                    if not root:
+                    if not root and results:
                         # use domain from first matching test
-                        for url, _ in extr._get_tests():
-                            if extr.from_url(url).category == category:
-                                root = url[:url.index("/", 8)]
-                                break
-                        else:
-                            continue
+                        test = results.category(category)[0]
+                        root = test["#class"].from_url(test["#url"]).root
                     domains[category] = root + "/"
 
     # sort subcategory lists

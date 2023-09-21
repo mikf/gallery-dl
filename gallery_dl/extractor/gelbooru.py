@@ -115,18 +115,7 @@ class GelbooruTagExtractor(GelbooruBase,
                            gelbooru_v02.GelbooruV02TagExtractor):
     """Extractor for images from gelbooru.com based on search-tags"""
     pattern = BASE_PATTERN + r"page=post&s=list&tags=([^&#]+)"
-    test = (
-        ("https://gelbooru.com/index.php?page=post&s=list&tags=bonocho", {
-            "count": 5,
-        }),
-        ("https://gelbooru.com/index.php?page=post&s=list&tags=meiya_neon", {
-            "range": "196-204",
-            "url": "845a61aa1f90fb4ced841e8b7e62098be2e967bf",
-            "pattern": r"https://img\d\.gelbooru\.com"
-                       r"/images/../../[0-9a-f]{32}\.jpg",
-            "count": 9,
-        }),
-    )
+    example = "https://gelbooru.com/index.php?page=post&s=list&tags=TAG"
 
 
 class GelbooruPoolExtractor(GelbooruBase,
@@ -134,11 +123,7 @@ class GelbooruPoolExtractor(GelbooruBase,
     """Extractor for gelbooru pools"""
     per_page = 45
     pattern = BASE_PATTERN + r"page=pool&s=show&id=(\d+)"
-    test = (
-        ("https://gelbooru.com/index.php?page=pool&s=show&id=761", {
-            "count": 6,
-        }),
-    )
+    example = "https://gelbooru.com/index.php?page=pool&s=show&id=12345"
 
     skip = GelbooruBase._skip_offset
 
@@ -169,9 +154,7 @@ class GelbooruFavoriteExtractor(GelbooruBase,
     """Extractor for gelbooru favorites"""
     per_page = 100
     pattern = BASE_PATTERN + r"page=favorites&s=view&id=(\d+)"
-    test = ("https://gelbooru.com/index.php?page=favorites&s=view&id=279415", {
-        "count": 3,
-    })
+    example = "https://gelbooru.com/index.php?page=favorites&s=view&id=12345"
 
     skip = GelbooruBase._skip_offset
 
@@ -221,76 +204,21 @@ class GelbooruPostExtractor(GelbooruBase,
                r"(?=(?:[^#]+&)?page=post(?:&|#|$))"
                r"(?=(?:[^#]+&)?s=view(?:&|#|$))"
                r"(?:[^#]+&)?id=(\d+)")
-    test = (
-        ("https://gelbooru.com/index.php?page=post&s=view&id=313638", {
-            "content": "5e255713cbf0a8e0801dc423563c34d896bb9229",
-            "count": 1,
-        }),
-
-        ("https://gelbooru.com/index.php?page=post&s=view&id=313638"),
-        ("https://gelbooru.com/index.php?s=view&page=post&id=313638"),
-        ("https://gelbooru.com/index.php?page=post&id=313638&s=view"),
-        ("https://gelbooru.com/index.php?s=view&id=313638&page=post"),
-        ("https://gelbooru.com/index.php?id=313638&page=post&s=view"),
-        ("https://gelbooru.com/index.php?id=313638&s=view&page=post"),
-
-        ("https://gelbooru.com/index.php?page=post&s=view&id=6018318", {
-            "options": (("tags", True),),
-            "content": "977caf22f27c72a5d07ea4d4d9719acdab810991",
-            "keyword": {
-                "tags_artist": "kirisaki_shuusei",
-                "tags_character": str,
-                "tags_copyright": "vocaloid",
-                "tags_general": str,
-                "tags_metadata": str,
-            },
-        }),
-        # video
-        ("https://gelbooru.com/index.php?page=post&s=view&id=5938076", {
-            "content": "6360452fa8c2f0c1137749e81471238564df832a",
-            "pattern": r"https://img\d\.gelbooru\.com/images"
-                       r"/22/61/226111273615049235b001b381707bd0\.webm",
-        }),
-        # notes
-        ("https://gelbooru.com/index.php?page=post&s=view&id=5997331", {
-            "options": (("notes", True),),
-            "keyword": {
-                "notes": [
-                    {
-                        "body": "Look over this way when you talk~",
-                        "height": 553,
-                        "width": 246,
-                        "x": 35,
-                        "y": 72,
-                    },
-                    {
-                        "body": "Hey~\nAre you listening~?",
-                        "height": 557,
-                        "width": 246,
-                        "x": 1233,
-                        "y": 109,
-                    },
-                ],
-            },
-        }),
-    )
+    example = "https://gelbooru.com/index.php?page=post&s=view&id=12345"
 
 
 class GelbooruRedirectExtractor(GelbooruBase, Extractor):
     subcategory = "redirect"
     pattern = (r"(?:https?://)?(?:www\.)?gelbooru\.com"
                r"/redirect\.php\?s=([^&#]+)")
-    test = (("https://gelbooru.com/redirect.php?s=Ly9nZWxib29ydS5jb20vaW5kZXgu"
-             "cGhwP3BhZ2U9cG9zdCZzPXZpZXcmaWQ9MTgzMDA0Ng=="), {
-        "pattern": r"https://gelbooru.com/index.php"
-                   r"\?page=post&s=view&id=1830046"
-    })
+    example = "https://gelbooru.com/redirect.php?s=BASE64"
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.redirect_url = text.ensure_http_scheme(
-            binascii.a2b_base64(match.group(1)).decode())
+        self.url_base64 = match.group(1)
 
     def items(self):
+        url = text.ensure_http_scheme(binascii.a2b_base64(
+            self.url_base64).decode())
         data = {"_extractor": GelbooruPostExtractor}
-        yield Message.Queue, self.redirect_url, data
+        yield Message.Queue, url, data

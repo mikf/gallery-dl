@@ -13,26 +13,11 @@ from .. import text, exception
 class MyhentaigalleryGalleryExtractor(GalleryExtractor):
     """Extractor for image galleries from myhentaigallery.com"""
     category = "myhentaigallery"
+    root = "https://myhentaigallery.com"
     directory_fmt = ("{category}", "{gallery_id} {artist:?[/] /J, }{title}")
     pattern = (r"(?:https?://)?myhentaigallery\.com"
                r"/gallery/(?:thumbnails|show)/(\d+)")
-    test = (
-        ("https://myhentaigallery.com/gallery/thumbnails/16247", {
-            "pattern": r"https://images.myhentaicomics\.com/imagesgallery"
-                       r"/images/[^/]+/original/\d+\.jpg",
-            "keyword": {
-                "artist"    : list,
-                "count"     : 11,
-                "gallery_id": 16247,
-                "group"     : list,
-                "parodies"  : list,
-                "tags"      : ["Giantess"],
-                "title"     : "Attack Of The 50ft Woman 1",
-            },
-        }),
-        ("https://myhentaigallery.com/gallery/show/16247/1"),
-    )
-    root = "https://myhentaigallery.com"
+    example = "https://myhentaigallery.com/gallery/thumbnails/12345"
 
     def __init__(self, match):
         self.gallery_id = match.group(1)

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2022 Mike Fährmann
+# Copyright 2016-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -49,11 +49,7 @@ class ReadcomiconlineIssueExtractor(ReadcomiconlineBase, ChapterExtractor):
     """Extractor for comic-issues from readcomiconline.li"""
     subcategory = "issue"
     pattern = BASE_PATTERN + r"(/Comic/[^/?#]+/[^/?#]+\?)([^#]+)"
-    test = ("https://readcomiconline.li/Comic/W-i-t-c-h/Issue-130?id=22289", {
-        "pattern": r"https://2\.bp\.blogspot\.com/[\w-]+=s0\?.+",
-        "keyword": "2d9ec81ce1b11fac06ebf96ce33cdbfca0e85eb5",
-        "count": 36,
-    })
+    example = "https://readcomiconline.li/Comic/TITLE/Issue-123?id=12345"
 
     def __init__(self, match):
         ChapterExtractor.__init__(self, match)
@@ -98,16 +94,7 @@ class ReadcomiconlineComicExtractor(ReadcomiconlineBase, MangaExtractor):
     chapterclass = ReadcomiconlineIssueExtractor
     subcategory = "comic"
     pattern = BASE_PATTERN + r"(/Comic/[^/?#]+/?)$"
-    test = (
-        ("https://readcomiconline.li/Comic/W-i-t-c-h", {
-            "url": "74eb8b9504b4084fcc9367b341300b2c52260918",
-            "keyword": "3986248e4458fa44a201ec073c3684917f48ee0c",
-        }),
-        ("https://readcomiconline.to/Comic/Bazooka-Jules", {
-            "url": "2f66a467a772df4d4592e97a059ddbc3e8991799",
-            "keyword": "f5ba5246cd787bb750924d9690cb1549199bd516",
-        }),
-    )
+    example = "https://readcomiconline.li/Comic/TITLE"
 
     def chapters(self, page):
         results = []

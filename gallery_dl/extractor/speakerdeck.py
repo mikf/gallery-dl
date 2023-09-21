@@ -6,7 +6,7 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract images from https://speakerdeck.com/"""
+"""Extractors for https://speakerdeck.com/"""
 
 from .common import Extractor, Message
 from .. import text
@@ -19,16 +19,8 @@ class SpeakerdeckPresentationExtractor(Extractor):
     directory_fmt = ("{category}", "{user}")
     filename_fmt = "{presentation}-{num:>02}.{extension}"
     archive_fmt = "{presentation}_{num}"
-    pattern = (r"(?:https?://)?(?:www\.)?speakerdeck\.com"
-               r"/([^/?#]+)/([^/?#]+)")
-    test = (
-        (("https://speakerdeck.com/speakerdeck/introduction-to-speakerdeck"), {
-            "pattern": r"https://files.speakerdeck.com/presentations/"
-                       r"50021f75cf1db900020005e7/slide_\d+.jpg",
-            "content": "75c7abf0969b0bcab23e0da9712c95ee5113db3a",
-            "count": 6,
-        }),
-    )
+    pattern = r"(?:https?://)?(?:www\.)?speakerdeck\.com/([^/?#]+)/([^/?#]+)"
+    example = "https://speakerdeck.com/USER/PRESENTATION"
 
     def __init__(self, match):
         Extractor.__init__(self, match)

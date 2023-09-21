@@ -340,6 +340,8 @@ class TestFormatter(unittest.TestCase):
         self._run_test("{'foobar'[:3]}", value)
         self._run_test("{z|'foo'}"     , value)
         self._run_test("{z|''|'foo'}"  , value)
+        self._run_test("{z|''}"        , "")
+        self._run_test("{''|''}"       , "")
 
         self._run_test("{_lit[foo]}"       , value)
         self._run_test("{_lit[foo]!u}"     , value.upper())

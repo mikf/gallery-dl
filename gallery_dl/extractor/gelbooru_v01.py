@@ -90,24 +90,7 @@ class GelbooruV01TagExtractor(GelbooruV01Extractor):
     directory_fmt = ("{category}", "{search_tags}")
     archive_fmt = "t_{search_tags}_{id}"
     pattern = BASE_PATTERN + r"/index\.php\?page=post&s=list&tags=([^&#]+)"
-    test = (
-        (("https://the-collection.booru.org"
-          "/index.php?page=post&s=list&tags=parody"), {
-            "range": "1-25",
-            "count": 25,
-        }),
-        (("https://illusioncards.booru.org"
-          "/index.php?page=post&s=list&tags=koikatsu"), {
-            "range": "1-25",
-            "count": 25,
-        }),
-        ("https://allgirl.booru.org/index.php?page=post&s=list&tags=dress", {
-            "range": "1-25",
-            "count": 25,
-        }),
-        ("https://drawfriends.booru.org/index.php?page=post&s=list&tags=all"),
-        ("https://vidyart2.booru.org/index.php?page=post&s=list&tags=all"),
-    )
+    example = "https://allgirl.booru.org/index.php?page=post&s=list&tags=TAG"
 
     def __init__(self, match):
         GelbooruV01Extractor.__init__(self, match)
@@ -128,21 +111,7 @@ class GelbooruV01FavoriteExtractor(GelbooruV01Extractor):
     archive_fmt = "f_{favorite_id}_{id}"
     per_page = 50
     pattern = BASE_PATTERN + r"/index\.php\?page=favorites&s=view&id=(\d+)"
-    test = (
-        (("https://the-collection.booru.org"
-          "/index.php?page=favorites&s=view&id=1166"), {
-            "count": 2,
-        }),
-        (("https://illusioncards.booru.org"
-          "/index.php?page=favorites&s=view&id=84887"), {
-            "count": 2,
-        }),
-        ("https://allgirl.booru.org/index.php?page=favorites&s=view&id=380", {
-            "count": 4,
-        }),
-        ("https://drawfriends.booru.org/index.php?page=favorites&s=view&id=1"),
-        ("https://vidyart2.booru.org/index.php?page=favorites&s=view&id=1"),
-    )
+    example = "https://allgirl.booru.org/index.php?page=favorites&s=view&id=1"
 
     def __init__(self, match):
         GelbooruV01Extractor.__init__(self, match)
@@ -161,40 +130,7 @@ class GelbooruV01PostExtractor(GelbooruV01Extractor):
     subcategory = "post"
     archive_fmt = "{id}"
     pattern = BASE_PATTERN + r"/index\.php\?page=post&s=view&id=(\d+)"
-    test = (
-        (("https://the-collection.booru.org"
-          "/index.php?page=post&s=view&id=100520"), {
-            "url": "0329ac8588bb93cf242ca0edbe3e995b4ba554e8",
-            "content": "1e585874e7b874f7937df1060dd1517fef2f4dfb",
-        }),
-        (("https://illusioncards.booru.org"
-          "/index.php?page=post&s=view&id=82746"), {
-            "url": "3f9cd2fadf78869b90bc5422f27b48f1af0e0909",
-            "content": "159e60b92d05597bd1bb63510c2c3e4a4bada1dc",
-        }),
-        ("https://allgirl.booru.org/index.php?page=post&s=view&id=107213", {
-            "url": "b416800d2d2b072f80d3b37cfca9cb806fb25d51",
-            "content": "3e3c65e0854a988696e11adf0de52f8fa90a51c7",
-            "keyword": {
-                "created_at": "2021-02-13 16:27:39",
-                "date": "dt:2021-02-13 16:27:39",
-                "file_url": "https://img.booru.org/allgirl//images/107"
-                            "/2aaa0438d58fc7baa75a53b4a9621bb89a9d3fdb.jpg",
-                "height": "1200",
-                "id": "107213",
-                "md5": "2aaa0438d58fc7baa75a53b4a9621bb89a9d3fdb",
-                "rating": "s",
-                "score": str,
-                "source": "",
-                "tags": "blush dress green_eyes green_hair hatsune_miku "
-                        "long_hair twintails vocaloid",
-                "uploader": "Honochi31",
-                "width": "1600"
-            },
-        }),
-        ("https://drawfriends.booru.org/index.php?page=post&s=view&id=107474"),
-        ("https://vidyart2.booru.org/index.php?page=post&s=view&id=39168"),
-    )
+    example = "https://allgirl.booru.org/index.php?page=post&s=view&id=12345"
 
     def __init__(self, match):
         GelbooruV01Extractor.__init__(self, match)

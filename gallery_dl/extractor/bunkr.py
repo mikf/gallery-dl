@@ -15,6 +15,7 @@ from urllib.parse import urlsplit, urlunsplit
 MEDIA_DOMAIN_OVERRIDES = {
     "cdn9.bunkr.ru" : "c9.bunkr.ru",
     "cdn12.bunkr.ru": "media-files12.bunkr.la",
+    "cdn-pizza.bunkr.ru": "pizza.bunkr.ru",
 }
 
 CDN_HOSTED_EXTENSIONS = (
@@ -28,53 +29,7 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
     category = "bunkr"
     root = "https://bunkrr.su"
     pattern = r"(?:https?://)?(?:app\.)?bunkr+\.(?:la|[sr]u|is|to)/a/([^/?#]+)"
-    test = (
-        ("https://bunkrr.su/a/Lktg9Keq", {
-            "pattern": r"https://cdn\.bunkr\.ru/test-テスト-\"&>-QjgneIQv\.png",
-            "content": "0c8768055e4e20e7c7259608b67799171b691140",
-            "keyword": {
-                "album_id": "Lktg9Keq",
-                "album_name": 'test テスト "&>',
-                "count": 1,
-                "filename": 'test-テスト-"&>-QjgneIQv',
-                "id": "QjgneIQv",
-                "name": 'test-テスト-"&>',
-                "num": int,
-            },
-        }),
-        # mp4 (#2239)
-        ("https://app.bunkr.ru/a/ptRHaCn2", {
-            "pattern": r"https://media-files\.bunkr\.ru/_-RnHoW69L\.mp4",
-            "content": "80e61d1dbc5896ae7ef9a28734c747b28b320471",
-        }),
-        # cdn4
-        ("https://bunkr.is/a/iXTTc1o2", {
-            "pattern": r"https://(cdn|media-files)4\.bunkr\.ru/",
-            "content": "da29aae371b7adc8c5ef8e6991b66b69823791e8",
-            "keyword": {
-                "album_id": "iXTTc1o2",
-                "album_name": "test2",
-                "album_size": "691.1 KB",
-                "count": 2,
-                "description": "072022",
-                "filename": "re:video-wFO9FtxG|image-sZrQUeOx",
-                "id": "re:wFO9FtxG|sZrQUeOx",
-                "name": "re:video|image",
-                "num": int,
-            },
-        }),
-        # cdn12 .ru TLD (#4147)
-        ("https://bunkrr.su/a/j1G29CnD", {
-            "pattern": r"https://(cdn12.bunkr.ru|media-files12.bunkr.la)/\w+",
-            "count": 8,
-        }),
-        ("https://bunkrr.su/a/Lktg9Keq"),
-        ("https://bunkr.la/a/Lktg9Keq"),
-        ("https://bunkr.su/a/Lktg9Keq"),
-        ("https://bunkr.ru/a/Lktg9Keq"),
-        ("https://bunkr.is/a/Lktg9Keq"),
-        ("https://bunkr.to/a/Lktg9Keq"),
-    )
+    example = "https://bunkrr.su/a/ID"
 
     def fetch_album(self, album_id):
         # album metadata
@@ -87,7 +42,6 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
         cdn = None
         files = []
         append = files.append
-        headers = {"Referer": self.root + "/"}
 
         pos = page.index('class="grid-images')
         for url in text.extract_iter(page, '<a href="', '"', pos):
@@ -108,7 +62,7 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
                 else:
                     domain = domain.replace("cdn", "media-files", 1)
                 url = urlunsplit((scheme, domain, path, query, fragment))
-            append({"file": url, "_http_headers": headers})
+            append({"file": url})
 
         return files, {
             "album_id"   : self.album_id,

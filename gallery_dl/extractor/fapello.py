@@ -19,32 +19,7 @@ class FapelloPostExtractor(Extractor):
     archive_fmt = "{type}_{model}_{id}"
     pattern = (r"(?:https?://)?(?:www\.)?fapello\.com"
                r"/(?!search/|popular_videos/)([^/?#]+)/(\d+)")
-    test = (
-        ("https://fapello.com/carrykey/530/", {
-            "pattern": (r"https://fapello\.com/content/c/a"
-                        r"/carrykey/1000/carrykey_0530\.jpg"),
-            "keyword": {
-                "model": "carrykey",
-                "id"   : 530,
-                "type" : "photo",
-                "thumbnail": "",
-            },
-        }),
-        ("https://fapello.com/vladislava-661/693/", {
-            "pattern": (r"https://cdn\.fapello\.com/content/v/l"
-                        r"/vladislava-661/1000/vladislava-661_0693\.mp4"),
-            "keyword": {
-                "model": "vladislava-661",
-                "id"   : 693,
-                "type" : "video",
-                "thumbnail": ("https://fapello.com/content/v/l"
-                              "/vladislava-661/1000/vladislava-661_0693.jpg"),
-            },
-        }),
-        ("https://fapello.com/carrykey/000/", {
-            "exception": exception.NotFoundError,
-        }),
-    )
+    example = "https://fapello.com/MODEL/12345/"
 
     def __init__(self, match):
         Extractor.__init__(self, match)
@@ -77,14 +52,7 @@ class FapelloModelExtractor(Extractor):
                r"/(?!top-(?:likes|followers)|popular_videos"
                r"|videos|trending|search/?$)"
                r"([^/?#]+)/?$")
-    test = (
-        ("https://fapello.com/hyoon/", {
-            "pattern": FapelloPostExtractor.pattern,
-            "range"  : "1-50",
-            "count"  : 50,
-        }),
-        ("https://fapello.com/kobaebeefboo/"),
-    )
+    example = "https://fapello.com/model/"
 
     def __init__(self, match):
         Extractor.__init__(self, match)
@@ -112,22 +80,7 @@ class FapelloPathExtractor(Extractor):
     pattern = (r"(?:https?://)?(?:www\.)?fapello\.com"
                r"/(?!search/?$)(top-(?:likes|followers)|videos|trending"
                r"|popular_videos/[^/?#]+)/?$")
-    test = (
-        ("https://fapello.com/top-likes/", {
-            "pattern": FapelloModelExtractor.pattern,
-            "range"  : "1-10",
-            "count"  : 10,
-        }),
-        ("https://fapello.com/videos/", {
-            "pattern": FapelloPostExtractor.pattern,
-            "range"  : "1-10",
-            "count"  : 10,
-        }),
-        ("https://fapello.com/top-followers/"),
-        ("https://fapello.com/trending/"),
-        ("https://fapello.com/popular_videos/twelve_hours/"),
-        ("https://fapello.com/popular_videos/week/"),
-    )
+    example = "https://fapello.com/trending/"
 
     def __init__(self, match):
         Extractor.__init__(self, match)

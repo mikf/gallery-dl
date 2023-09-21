@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2022 Mike Fährmann
+# Copyright 2022-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -21,36 +21,7 @@ class WebmshareVideoExtractor(Extractor):
     archive_fmt = "{id}"
     pattern = (r"(?:https?://)?(?:s\d+\.)?webmshare\.com"
                r"/(?:play/|download-webm/)?(\w{3,})")
-    test = (
-        ("https://webmshare.com/O9mWY", {
-            "keyword": {
-                "date": "dt:2022-12-04 00:00:00",
-                "extension": "webm",
-                "filename": "O9mWY",
-                "height": 568,
-                "id": "O9mWY",
-                "thumb": "https://s1.webmshare.com/t/O9mWY.jpg",
-                "title": "Yeah buddy over here",
-                "url": "https://s1.webmshare.com/O9mWY.webm",
-                "views": int,
-                "width": 320,
-            },
-        }),
-        ("https://s1.webmshare.com/zBGAg.webm", {
-            "keyword": {
-                "date": "dt:2018-12-07 00:00:00",
-                "height": 1080,
-                "id": "zBGAg",
-                "thumb": "https://s1.webmshare.com/t/zBGAg.jpg",
-                "title": "",
-                "url": "https://s1.webmshare.com/zBGAg.webm",
-                "views": int,
-                "width": 1920,
-            },
-        }),
-        ("https://webmshare.com/play/zBGAg"),
-        ("https://webmshare.com/download-webm/zBGAg"),
-    )
+    example = "https://webmshare.com/_ID_"
 
     def __init__(self, match):
         Extractor.__init__(self, match)

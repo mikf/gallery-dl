@@ -4,18 +4,18 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extractors for https://jpeg.pet/"""
+"""Extractors for https://jpg1.su/"""
 
 from .common import Extractor, Message
 from .. import text
 
-BASE_PATTERN = r"(?:https?://)?jpe?g\.(?:pet|fish(?:ing)?|church)"
+BASE_PATTERN = r"(?:https?://)?jpe?g\d?\.(?:su|pet|fish(?:ing)?|church)"
 
 
 class JpgfishExtractor(Extractor):
     """Base class for jpgfish extractors"""
     category = "jpgfish"
-    root = "https://jpeg.pet"
+    root = "https://jpg1.su"
     directory_fmt = ("{category}", "{user}", "{album}",)
     archive_fmt = "{id}"
 
@@ -35,28 +35,7 @@ class JpgfishImageExtractor(JpgfishExtractor):
     """Extractor for jpgfish Images"""
     subcategory = "image"
     pattern = BASE_PATTERN + r"/img/((?:[^/?#]+\.)?(\w+))"
-    test = (
-        ("https://jpeg.pet/img/funnymeme.LecXGS", {
-            "pattern": r"https://simp3\.jpg\.church/images/funnymeme\.jpg",
-            "content": "098e5e9b17ad634358426e0ffd1c93871474d13c",
-            "keyword": {
-                "album": "",
-                "extension": "jpg",
-                "filename": "funnymeme",
-                "id": "LecXGS",
-                "url": "https://simp3.jpg.church/images/funnymeme.jpg",
-                "user": "exearco",
-            },
-        }),
-        ("https://jpg.church/img/auCruA", {
-            "pattern": r"https://simp2\.jpg\.church/hannahowo_00457\.jpg",
-            "keyword": {"album": "401-500"},
-        }),
-        ("https://jpg.pet/img/funnymeme.LecXGS"),
-        ("https://jpg.fishing/img/funnymeme.LecXGS"),
-        ("https://jpg.fish/img/funnymeme.LecXGS"),
-        ("https://jpg.church/img/funnymeme.LecXGS"),
-    )
+    example = "https://jpg1.su/img/TITLE.ID"
 
     def __init__(self, match):
         JpgfishExtractor.__init__(self, match)
@@ -83,21 +62,7 @@ class JpgfishAlbumExtractor(JpgfishExtractor):
     """Extractor for jpgfish Albums"""
     subcategory = "album"
     pattern = BASE_PATTERN + r"/a(?:lbum)?/([^/?#]+)(/sub)?"
-    test = (
-        ("https://jpeg.pet/album/CDilP/?sort=date_desc&page=1", {
-            "count": 2,
-        }),
-        ("https://jpg.fishing/a/gunggingnsk.N9OOI", {
-            "count": 114,
-        }),
-        ("https://jpg.fish/a/101-200.aNJ6A/", {
-            "count": 100,
-        }),
-        ("https://jpg.church/a/hannahowo.aNTdH/sub", {
-            "count": 606,
-        }),
-        ("https://jpg.pet/album/CDilP/?sort=date_desc&page=1"),
-    )
+    example = "https://jpg1.su/album/TITLE.ID"
 
     def __init__(self, match):
         JpgfishExtractor.__init__(self, match)
@@ -121,18 +86,7 @@ class JpgfishUserExtractor(JpgfishExtractor):
     """Extractor for jpgfish Users"""
     subcategory = "user"
     pattern = BASE_PATTERN + r"/(?!img|a(?:lbum)?)([^/?#]+)(/albums)?"
-    test = (
-        ("https://jpeg.pet/exearco", {
-            "count": 3,
-        }),
-        ("https://jpg.church/exearco/albums", {
-            "count": 1,
-        }),
-        ("https://jpg.pet/exearco"),
-        ("https://jpg.fishing/exearco"),
-        ("https://jpg.fish/exearco"),
-        ("https://jpg.church/exearco"),
-    )
+    example = "https://jpg1.su/USER"
 
     def __init__(self, match):
         JpgfishExtractor.__init__(self, match)

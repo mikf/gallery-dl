@@ -35,9 +35,8 @@ class BehanceExtractor(Extractor):
     def _request_graphql(self, endpoint, variables):
         url = self.root + "/v3/graphql"
         headers = {
-            "Origin" : self.root,
-            "Referer": self.root + "/",
-            "X-BCP"  : self._bcp,
+            "Origin": self.root,
+            "X-BCP" : self._bcp,
             "X-Requested-With": "XMLHttpRequest",
         }
         data = {
@@ -84,43 +83,7 @@ class BehanceGalleryExtractor(BehanceExtractor):
     filename_fmt = "{category}_{id}_{num:>02}.{extension}"
     archive_fmt = "{id}_{num}"
     pattern = r"(?:https?://)?(?:www\.)?behance\.net/gallery/(\d+)"
-    test = (
-        ("https://www.behance.net/gallery/17386197/A-Short-Story", {
-            "count": 2,
-            "url": "ab79bd3bef8d3ae48e6ac74fd995c1dfaec1b7d2",
-            "keyword": {
-                "id": 17386197,
-                "name": 're:"Hi". A short story about the important things ',
-                "owners": ["Place Studio", "Julio César Velazquez"],
-                "fields": ["Animation", "Character Design", "Directing"],
-                "tags": list,
-                "module": dict,
-                "date": "dt:2014-06-03 15:41:51",
-            },
-        }),
-        ("https://www.behance.net/gallery/21324767/Nevada-City", {
-            "count": 6,
-            "url": "0258fe194fe7d828d6f2c7f6086a9a0a4140db1d",
-            "keyword": {"owners": ["Alex Strohl"]},
-        }),
-        # 'media_collection' modules
-        ("https://www.behance.net/gallery/88276087/Audi-R8-RWD", {
-            "count": 20,
-            "url": "6bebff0d37f85349f9ad28bd8b76fd66627c1e2f",
-            "pattern": r"https://mir-s3-cdn-cf\.behance\.net/project_modules"
-                       r"/source/[0-9a-f]+.[0-9a-f]+\.jpg"
-        }),
-        # 'video' modules (#1282)
-        ("https://www.behance.net/gallery/101185577/COLCCI", {
-            "pattern": r"https://cdn-prod-ccv\.adobe\.com/\w+"
-                       r"/rend/\w+_720\.mp4\?",
-            "count": 3,
-        }),
-        # mature content (#4417)
-        ("https://www.behance.net/gallery/177464639/Kimori", {
-            "exception": exception.AuthorizationError,
-        }),
-    )
+    example = "https://www.behance.net/gallery/12345/TITLE"
 
     def __init__(self, match):
         BehanceExtractor.__init__(self, match)
@@ -177,7 +140,13 @@ class BehanceGalleryExtractor(BehanceExtractor):
                 append((url, module))
 
             elif mtype == "VideoModule":
-                renditions = module["videoData"]["renditions"]
+                try:
+                    renditions = module["videoData"]["renditions"]
+                except Exception:
+                    self.log.warning("No download URLs for video %s",
+                                     module.get("id") or "???")
+                    continue
+
                 try:
                     url = [
                         r["url"] for r in renditions
@@ -186,6 +155,7 @@ class BehanceGalleryExtractor(BehanceExtractor):
                 except Exception as exc:
                     self.log.debug("%s: %s", exc.__class__.__name__, exc)
                     url = "ytdl:" + renditions[-1]["url"]
+
                 append((url, module))
 
             elif mtype == "MediaCollectionModule":
@@ -210,10 +180,7 @@ class BehanceUserExtractor(BehanceExtractor):
     subcategory = "user"
     categorytransfer = True
     pattern = r"(?:https?://)?(?:www\.)?behance\.net/([^/?#]+)/?$"
-    test = ("https://www.behance.net/alexstrohl", {
-        "count": ">= 11",
-        "pattern": BehanceGalleryExtractor.pattern,
-    })
+    example = "https://www.behance.net/USER"
 
     def __init__(self, match):
         BehanceExtractor.__init__(self, match)
@@ -223,7 +190,7 @@ class BehanceUserExtractor(BehanceExtractor):
         endpoint = "GetProfileProjects"
         variables = {
             "username": self.user,
-            "after"   : "MAo=",
+            "after"   : "MAo=",  # "0" in base64
         }
 
         while True:
@@ -241,10 +208,7 @@ class BehanceCollectionExtractor(BehanceExtractor):
     subcategory = "collection"
     categorytransfer = True
     pattern = r"(?:https?://)?(?:www\.)?behance\.net/collection/(\d+)"
-    test = ("https://www.behance.net/collection/71340149/inspiration", {
-        "count": ">= 150",
-        "pattern": BehanceGalleryExtractor.pattern,
-    })
+    example = "https://www.behance.net/collection/12345/TITLE"
 
     def __init__(self, match):
         BehanceExtractor.__init__(self, match)
@@ -253,7 +217,7 @@ class BehanceCollectionExtractor(BehanceExtractor):
     def galleries(self):
         endpoint = "GetMoodboardItemsAndRecommendations"
         variables = {
-            "afterItem": "MAo=",
+            "afterItem": "MAo=",  # "0" in base64
             "firstItem": 40,
             "id"       : int(self.collection_id),
             "shouldGetItems"          : True,

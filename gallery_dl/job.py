@@ -388,10 +388,25 @@ class DownloadJob(Job):
                 try:
                     if pextr.config("parent-skip"):
                         job._skipcnt = self._skipcnt
-                        self.status |= job.run()
+                        status = job.run()
                         self._skipcnt = job._skipcnt
                     else:
-                        self.status |= job.run()
+                        status = job.run()
+
+                    if status:
+                        self.status |= status
+                        if "_fallback" in kwdict and self.fallback:
+                            fallback = kwdict["_fallback"] = \
+                                iter(kwdict["_fallback"])
+                            try:
+                                url = next(fallback)
+                            except StopIteration:
+                                pass
+                            else:
+                                text.nameext_from_url(url, kwdict)
+                                if url.startswith("ytdl:"):
+                                    kwdict["extension"] = ""
+                                self.handle_url(url, kwdict)
                     break
                 except exception.RestartExtraction:
                     pass
@@ -515,7 +530,7 @@ class DownloadJob(Job):
                 elif skip == "terminate":
                     self._skipexc = exception.TerminateExtraction
                 elif skip == "exit":
-                    self._skipexc = sys.exit
+                    self._skipexc = SystemExit
                 self._skipmax = text.parse_int(smax)
         else:
             # monkey-patch methods to always return False

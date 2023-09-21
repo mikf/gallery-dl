@@ -239,8 +239,7 @@ def dump_json(obj, fp=sys.stdout, ensure_ascii=True, indent=4):
     fp.write("\n")
 
 
-def dump_response(response, fp, *,
-                  headers=False, content=True, hide_auth=True):
+def dump_response(response, fp, headers=False, content=True, hide_auth=True):
     """Write the contents of 'response' into a file-like object"""
 
     if headers:

@@ -53,13 +53,7 @@ class FoolslideChapterExtractor(FoolslideExtractor):
         "{manga}_c{chapter:>03}{chapter_minor:?//}_{page:>03}.{extension}")
     archive_fmt = "{id}"
     pattern = BASE_PATTERN + r"(/read/[^/?#]+/[a-z-]+/\d+/\d+(?:/\d+)?)"
-    test = (
-        (("https://read.powermanga.org"
-          "/read/one_piece_digital_colour_comics/en/0/75/"), {
-            "url": "854c5817f8f767e1bccd05fa9d58ffb5a4b09384",
-            "keyword": "a60c42f2634b7387899299d411ff494ed0ad6dbe",
-        }),
-    )
+    example = "https://read.powermanga.org/read/MANGA/en/0/123/"
 
     def items(self):
         page = self.request(self.gallery_url).text
@@ -103,23 +97,7 @@ class FoolslideMangaExtractor(FoolslideExtractor):
     subcategory = "manga"
     categorytransfer = True
     pattern = BASE_PATTERN + r"(/series/[^/?#]+)"
-    test = (
-        (("https://read.powermanga.org"
-          "/series/one_piece_digital_colour_comics/"), {
-            "count": ">= 1",
-            "keyword": {
-                "chapter": int,
-                "chapter_minor": str,
-                "chapter_string": str,
-                "group": "PowerManga",
-                "lang": "en",
-                "language": "English",
-                "manga": "One Piece Digital Colour Comics",
-                "title": str,
-                "volume": int,
-            },
-        }),
-    )
+    example = "https://read.powermanga.org/series/MANGA/"
 
     def items(self):
         page = self.request(self.gallery_url).text

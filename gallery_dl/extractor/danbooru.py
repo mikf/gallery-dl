@@ -173,38 +173,7 @@ class DanbooruTagExtractor(DanbooruExtractor):
     directory_fmt = ("{category}", "{search_tags}")
     archive_fmt = "t_{search_tags}_{id}"
     pattern = BASE_PATTERN + r"/posts\?(?:[^&#]*&)*tags=([^&#]*)"
-    test = (
-        ("https://danbooru.donmai.us/posts?tags=bonocho", {
-            "content": "b196fb9f1668109d7774a0a82efea3ffdda07746",
-        }),
-        # test page transitions
-        ("https://danbooru.donmai.us/posts?tags=mushishi", {
-            "count": ">= 300",
-        }),
-        # 'external' option (#1747)
-        ("https://danbooru.donmai.us/posts?tags=pixiv_id%3A1476533", {
-            "options": (("external", True),),
-            "pattern": r"https://i\.pximg\.net/img-original/img"
-                       r"/2008/08/28/02/35/48/1476533_p0\.jpg",
-        }),
-        ("https://booru.allthefallen.moe/posts?tags=yume_shokunin", {
-            "count": 12,
-        }),
-        ("https://aibooru.online/posts?tags=center_frills&z=1", {
-            "pattern": r"https://cdn\.aibooru\.online/original"
-                       r"/[0-9a-f]{2}/[0-9a-f]{2}/[0-9a-f]{32}\.\w+",
-            "count": ">= 3",
-        }),
-        ("https://booru.borvar.art/posts?tags=chibi&z=1", {
-            "pattern": r"https://booru\.borvar\.art/data/original"
-                       r"/[0-9a-f]{2}/[0-9a-f]{2}/[0-9a-f]{32}\.\w+",
-            "count": ">= 3",
-        }),
-        ("https://hijiribe.donmai.us/posts?tags=bonocho"),
-        ("https://sonohara.donmai.us/posts?tags=bonocho"),
-        ("https://safebooru.donmai.us/posts?tags=bonocho"),
-        ("https://safe.aibooru.online/posts?tags=center_frills"),
-    )
+    example = "https://danbooru.donmai.us/posts?tags=TAG"
 
     def __init__(self, match):
         DanbooruExtractor.__init__(self, match)
@@ -238,21 +207,7 @@ class DanbooruPoolExtractor(DanbooruExtractor):
     directory_fmt = ("{category}", "pool", "{pool[id]} {pool[name]}")
     archive_fmt = "p_{pool[id]}_{id}"
     pattern = BASE_PATTERN + r"/pool(?:s|/show)/(\d+)"
-    test = (
-        ("https://danbooru.donmai.us/pools/7659", {
-            "content": "b16bab12bea5f7ea9e0a836bf8045f280e113d99",
-        }),
-        ("https://booru.allthefallen.moe/pools/9", {
-            "url": "902549ffcdb00fe033c3f63e12bc3cb95c5fd8d5",
-            "count": 6,
-        }),
-        ("https://booru.borvar.art/pools/2", {
-            "url": "77fa3559a3fc919f72611f4e3dd0f919d19d3e0d",
-            "count": 4,
-        }),
-        ("https://aibooru.online/pools/1"),
-        ("https://danbooru.donmai.us/pool/show/7659"),
-    )
+    example = "https://danbooru.donmai.us/pools/12345"
 
     def __init__(self, match):
         DanbooruExtractor.__init__(self, match)
@@ -275,26 +230,7 @@ class DanbooruPostExtractor(DanbooruExtractor):
     subcategory = "post"
     archive_fmt = "{id}"
     pattern = BASE_PATTERN + r"/post(?:s|/show)/(\d+)"
-    test = (
-        ("https://danbooru.donmai.us/posts/294929", {
-            "content": "5e255713cbf0a8e0801dc423563c34d896bb9229",
-            "keyword": {"date": "dt:2008-08-12 04:46:05"},
-        }),
-        ("https://danbooru.donmai.us/posts/3613024", {
-            "pattern": r"https?://.+\.zip$",
-            "options": (("ugoira", True),)
-        }),
-        ("https://booru.allthefallen.moe/posts/22", {
-            "content": "21dda68e1d7e0a554078e62923f537d8e895cac8",
-        }),
-        ("https://aibooru.online/posts/1", {
-            "content": "54d548743cd67799a62c77cbae97cfa0fec1b7e9",
-        }),
-        ("https://booru.borvar.art/posts/1487", {
-            "content": "91273ac1ea413a12be468841e2b5804656a50bff",
-        }),
-        ("https://danbooru.donmai.us/post/show/294929"),
-    )
+    example = "https://danbooru.donmai.us/posts/12345"
 
     def __init__(self, match):
         DanbooruExtractor.__init__(self, match)
@@ -315,17 +251,7 @@ class DanbooruPopularExtractor(DanbooruExtractor):
     directory_fmt = ("{category}", "popular", "{scale}", "{date}")
     archive_fmt = "P_{scale[0]}_{date}_{id}"
     pattern = BASE_PATTERN + r"/(?:explore/posts/)?popular(?:\?([^#]*))?"
-    test = (
-        ("https://danbooru.donmai.us/explore/posts/popular"),
-        (("https://danbooru.donmai.us/explore/posts/popular"
-          "?date=2013-06-06&scale=week"), {
-            "range": "1-120",
-            "count": 120,
-        }),
-        ("https://booru.allthefallen.moe/explore/posts/popular"),
-        ("https://aibooru.online/explore/posts/popular"),
-        ("https://booru.borvar.art/explore/posts/popular"),
-    )
+    example = "https://danbooru.donmai.us/explore/posts/popular"
 
     def __init__(self, match):
         DanbooruExtractor.__init__(self, match)
