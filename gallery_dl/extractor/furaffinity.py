@@ -28,9 +28,9 @@ class FuraffinityExtractor(Extractor):
     def __init__(self, match):
         Extractor.__init__(self, match)
         self.user = match.group(1)
+        self.offset = 0
 
     def _init(self):
-        self.offset = 0
         self.external = self.config("external", False)
 
         if self.config("descriptions") == "html":
@@ -294,6 +294,8 @@ class FuraffinityUserExtractor(FuraffinityExtractor):
 
     def initialize(self):
         pass
+
+    skip = Extractor.skip
 
     def items(self):
         base = "{}/{{}}/{}/".format(self.root, self.user)

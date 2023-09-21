@@ -106,16 +106,15 @@ class Job():
                 "current_git_head": util.git_head()
             }
 
-        # predicates
-        self.pred_url = self._prepare_predicates("image", True)
-        self.pred_queue = self._prepare_predicates("chapter", False)
-
     def run(self):
         """Execute or run the job"""
         extractor = self.extractor
         log = extractor.log
         msg = None
 
+        self._init()
+
+        # sleep before extractor start
         sleep = util.build_duration_func(
             extractor.config("sleep-extractor"))
         if sleep:
@@ -200,6 +199,11 @@ class Job():
             kwdict.pop(self.metadata_http, None)
         if self.kwdict:
             kwdict.update(self.kwdict)
+
+    def _init(self):
+        self.extractor.initialize()
+        self.pred_url = self._prepare_predicates("image", True)
+        self.pred_queue = self._prepare_predicates("chapter", False)
 
     def _prepare_predicates(self, target, skip=True):
         predicates = []
@@ -810,6 +814,8 @@ class DataJob(Job):
         self.filter = dict.copy if private else util.filter_dict
 
     def run(self):
+        self._init()
+
         extractor = self.extractor
         sleep = util.build_duration_func(
             extractor.config("sleep-extractor"))
