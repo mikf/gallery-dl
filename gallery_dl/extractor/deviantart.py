@@ -39,6 +39,7 @@ class DeviantartExtractor(Extractor):
     def __init__(self, match):
         Extractor.__init__(self, match)
         self.user = match.group(1) or match.group(2)
+        self.offset = 0
 
     def _init(self):
         self.flat = self.config("flat", True)
@@ -48,7 +49,6 @@ class DeviantartExtractor(Extractor):
 
         self.api = DeviantartOAuthAPI(self)
         self.group = False
-        self.offset = 0
         self._premium_cache = {}
 
         unwatch = self.config("auto-unwatch")
@@ -444,6 +444,8 @@ class DeviantartUserExtractor(DeviantartExtractor):
 
     def initialize(self):
         pass
+
+    skip = Extractor.skip
 
     def items(self):
         base = "{}/{}/".format(self.root, self.user)

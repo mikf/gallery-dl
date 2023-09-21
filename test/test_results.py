@@ -206,6 +206,7 @@ class ResultJob(job.DownloadJob):
             self.extractor.filename_fmt).format_map
 
     def run(self):
+        self._init()
         for msg in self.extractor:
             self.dispatch(msg)
 

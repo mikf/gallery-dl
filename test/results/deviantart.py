@@ -37,7 +37,7 @@ __tests__ = (
     "#category": ("", "deviantart", "gallery"),
     "#class"   : deviantart.DeviantartGalleryExtractor,
     "#pattern" : r"https://(images-)?wixmp-[^.]+\.wixmp\.com/f/.+/.+\.(jpg|png)\?token=.+",
-    "#count"   : ">= 30",
+    "#count"   : ">= 38",
 
     "allows_comments" : bool,
     "author"          : {
@@ -80,6 +80,17 @@ __tests__ = (
     "title"           : str,
     "url"             : r"re:https://www.deviantart.com/shimoda7/art/[^/]+-\d+",
     "username"        : "shimoda7",
+},
+
+{
+    "#url"     : "https://www.deviantart.com/shimoda7/gallery/",
+    "#comment" : "range/skip (#4557)",
+    "#category": ("", "deviantart", "gallery"),
+    "#class"   : deviantart.DeviantartGalleryExtractor,
+    "#options" : {"original": False},
+    "#pattern" : r"https://images-wixmp-[0-9a-f]+\.wixmp\.com/f/0e474835-ec35-4937-b647-b6830ed58bd1/d2idul-6158ded2-37ac-413d-802e-0689f0f020ad\.jpg\?token=[\w.]+",
+    "#range"   : "38-",
+    "#count"   : 1,
 },
 
 {
