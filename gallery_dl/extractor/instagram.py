@@ -210,7 +210,12 @@ class InstagramExtractor(Extractor):
         data["_files"] = files = []
         for num, item in enumerate(items, 1):
 
-            image = item["image_versions2"]["candidates"][0]
+            try:
+                image = item["image_versions2"]["candidates"][0]
+            except Exception:
+                self.log.warning("Missing media in post %s",
+                                 data["post_shortcode"])
+                continue
 
             if "video_versions" in item:
                 video = max(
