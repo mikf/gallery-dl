@@ -30,6 +30,7 @@ class RedditExtractor(Extractor):
 
         parentdir = self.config("parent-directory")
         max_depth = self.config("recursion", 0)
+        previews = self.config("previews", True)
 
         videos = self.config("videos", True)
         if videos:
@@ -119,7 +120,7 @@ class RedditExtractor(Extractor):
                     if match:
                         extra.append(match.group(1))
                     elif not match_user(url) and not match_subreddit(url):
-                        if "preview" in data:
+                        if previews and "preview" in data:
                             data["_fallback"] = self._previews(data)
                         yield Message.Queue, text.unescape(url), data
                         if "_fallback" in data:

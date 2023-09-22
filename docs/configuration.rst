@@ -2716,6 +2716,17 @@ Description
     Ignore all submissions posted before/after the submission with this ID.
 
 
+extractor.reddit.previews
+-------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    For failed downloads from external URLs / child extractors,
+    download Reddit's preview image/video if available.
+
+
 extractor.reddit.recursion
 --------------------------
 Type
