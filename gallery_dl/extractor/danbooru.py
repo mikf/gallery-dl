@@ -150,7 +150,8 @@ class DanbooruExtractor(BaseExtractor):
 BASE_PATTERN = DanbooruExtractor.update({
     "danbooru": {
         "root": None,
-        "pattern": r"(?:danbooru|hijiribe|sonohara|safebooru)\.donmai\.us",
+        "pattern": r"(?:(?:danbooru|hijiribe|sonohara|safebooru)\.donmai\.us"
+                   r"|donmai\.moe)",
     },
     "atfbooru": {
         "root": "https://booru.allthefallen.moe",
@@ -158,7 +159,7 @@ BASE_PATTERN = DanbooruExtractor.update({
     },
     "aibooru": {
         "root": None,
-        "pattern": r"(?:safe.)?aibooru\.online",
+        "pattern": r"(?:safe\.)?aibooru\.online",
     },
     "booruvar": {
         "root": "https://booru.borvar.art",
