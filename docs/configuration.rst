@@ -1349,6 +1349,20 @@ Description
     * ``"none"``: Don't download textual content.
 
 
+extractor.deviantart.jwt
+------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Update `JSON Web Tokens <https://jwt.io/>`__ (the ``token`` URL parameter)
+    of otherwise non-downloadable, low-resolution images
+    to be able to download them in full resolution.
+
+    Note: This got patched by DeviantArt on 2023-09-19 and no longer works.
+
+
 extractor.deviantart.mature
 ---------------------------
 Type
