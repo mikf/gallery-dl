@@ -172,4 +172,12 @@ __tests__ = (
     "#count"   : 15,
 },
 
+{
+    "#url"     : "https://www.pillowfort.social/Staff/tagged/funding",
+    "#category": ("", "pillowfort", "user"),
+    "#class"   : pillowfort.PillowfortUserExtractor,
+    "#pattern" : r"https://img\d+\.pillowfort\.social/posts/",
+    "#count"   : 6,
+},
+
 )
