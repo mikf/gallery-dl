@@ -51,6 +51,12 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://donmai.moe/posts?tags=bonocho",
+    "#category": ("Danbooru", "danbooru", "tag"),
+    "#class"   : danbooru.DanbooruTagExtractor,
+},
+
+{
     "#url"     : "https://danbooru.donmai.us/pools/7659",
     "#category": ("Danbooru", "danbooru", "pool"),
     "#class"   : danbooru.DanbooruPoolExtractor,
