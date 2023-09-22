@@ -42,6 +42,7 @@ class DeviantartExtractor(Extractor):
         self.offset = 0
 
     def _init(self):
+        self.jwt = self.config("jwt", False)
         self.flat = self.config("flat", True)
         self.extra = self.config("extra", False)
         self.original = self.config("original", True)
@@ -122,7 +123,7 @@ class DeviantartExtractor(Extractor):
 
                 if self.original and deviation["is_downloadable"]:
                     self._update_content(deviation, content)
-                else:
+                elif self.jwt:
                     self._update_token(deviation, content)
 
                 yield self.commit(deviation, content)
