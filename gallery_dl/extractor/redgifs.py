@@ -177,6 +177,7 @@ class RedgifsImageExtractor(RedgifsExtractor):
     subcategory = "image"
     pattern = (r"(?:https?://)?(?:"
                r"(?:\w+\.)?redgifs\.com/(?:watch|ifr)|"
+               r"(?:\w+\.)?gfycat\.com(?:/gifs/detail|/\w+)?|"
                r"(?:www\.)?gifdeliverynetwork\.com|"
                r"i\.redgifs\.com/i)/([A-Za-z]+)")
     example = "https://redgifs.com/watch/ID"

@@ -149,4 +149,10 @@ __tests__ = (
     "#class"   : redgifs.RedgifsImageExtractor,
 },
 
+{
+    "#url"     : "https://www.gfycat.com/foolishforkedabyssiniancat",
+    "#category": ("", "redgifs", "image"),
+    "#class"   : redgifs.RedgifsImageExtractor,
+},
+
 )
