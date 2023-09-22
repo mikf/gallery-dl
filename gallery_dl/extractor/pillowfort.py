@@ -132,7 +132,7 @@ class PillowfortPostExtractor(PillowfortExtractor):
 class PillowfortUserExtractor(PillowfortExtractor):
     """Extractor for all posts of a pillowfort user"""
     subcategory = "user"
-    pattern = BASE_PATTERN + r"/(?!posts/)([^/?#]+)"
+    pattern = BASE_PATTERN + r"/(?!posts/)([^/?#]+(?:/tagged/[^/?#]+)?)"
     example = "https://www.pillowfort.social/USER"
 
     def posts(self):
