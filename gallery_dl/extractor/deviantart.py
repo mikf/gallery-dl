@@ -130,14 +130,17 @@ class DeviantartExtractor(Extractor):
 
             elif deviation["is_downloadable"]:
                 content = self.api.deviation_download(deviation["deviationid"])
+                deviation["is_original"] = True
                 yield self.commit(deviation, content)
 
             if "videos" in deviation and deviation["videos"]:
                 video = max(deviation["videos"],
                             key=lambda x: text.parse_int(x["quality"][:-1]))
+                deviation["is_original"] = False
                 yield self.commit(deviation, video)
 
             if "flash" in deviation:
+                deviation["is_original"] = True
                 yield self.commit(deviation, deviation["flash"])
 
             if self.commit_journal:
@@ -151,6 +154,7 @@ class DeviantartExtractor(Extractor):
                 if journal:
                     if self.extra:
                         deviation["_journal"] = journal["html"]
+                    deviation["is_original"] = True
                     yield self.commit_journal(deviation, journal)
 
             if not self.extra:
@@ -228,6 +232,8 @@ class DeviantartExtractor(Extractor):
         target["filename"] = deviation["filename"]
         deviation["target"] = target
         deviation["extension"] = target["extension"] = text.ext_from_url(name)
+        if "is_original" not in deviation:
+            deviation["is_original"] = ("/v1/" not in url)
         return Message.Url, url, deviation
 
     def _commit_journal_html(self, deviation, journal):
@@ -329,6 +335,7 @@ class DeviantartExtractor(Extractor):
         public = False if "premium_folder_data" in deviation else None
         data = self.api.deviation_download(deviation["deviationid"], public)
         content.update(data)
+        deviation["is_original"] = True
 
     def _update_content_image(self, deviation, content):
         data = self.api.deviation_download(deviation["deviationid"])
@@ -336,6 +343,7 @@ class DeviantartExtractor(Extractor):
         mtype = mimetypes.guess_type(url, False)[0]
         if mtype and mtype.startswith("image/"):
             content.update(data)
+            deviation["is_original"] = True
 
     def _update_token(self, deviation, content):
         """Replace JWT to be able to remove width/height limits
