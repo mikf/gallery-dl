@@ -56,7 +56,7 @@ class PillowfortExtractor(Extractor):
 
             post["num"] = 0
             for file in files:
-                url = file["url"]
+                url = file["url"] or file.get("b2_lg_url")
                 if not url:
                     continue
 
