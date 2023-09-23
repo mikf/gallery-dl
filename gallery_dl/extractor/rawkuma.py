@@ -2,7 +2,7 @@
 
 """Extractors for https://rawkuma.com/"""
 
-from .common import MangaExtractor, ChapterExtractor, Extractor, Message
+from .common import MangaExtractor, ChapterExtractor
 from .. import text, util
 import re
 
@@ -50,7 +50,7 @@ class RawkumaChapterExtractor(RawkumaBase, ChapterExtractor):
         results = []
         pos = 0
         json, pos = text.extract(page, "<script>ts_reader.run(",
-            ");</script>", pos)
+                                 ");</script>", pos)
         json_data = util.json_loads(json)
         source = json_data.get("sources", [{}])[0]
         images = source.get("images", [])
@@ -77,9 +77,10 @@ class RawkumaMangaExtractor(RawkumaBase, MangaExtractor):
         title = self.get_title(page)
 
         while True:
-            chapter_id, pos = text.extract(page,
-                '<div class="eph-num">\n<a href="https://rawkuma.com/',
-                '/"', pos)
+            chapter_id, pos = \
+                text.extract(page, '<div class="eph-num">\n'
+                             '<a href="https://rawkuma.com/',
+                             '/"', pos)
             if not chapter_id:
                 return results
             url = text.urljoin(self.root, chapter_id)
