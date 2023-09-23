@@ -123,6 +123,7 @@ modules = [
     "pornhub",
     "pornpics",
     "pururin",
+    "rawkuma",
     "reactor",
     "readcomiconline",
     "reddit",
