@@ -91,7 +91,7 @@ class RawkumaMangaExtractor(RawkumaBase, MangaExtractor):
                 "chapter_id": chapter_id,
                 "title": title,
             }
-            chapter_match = re.search(chapter_id, r"\d+$")
+            chapter_match = re.search(r"\d+$", chapter_id)
             if chapter_match:
                 data["chapter"] = chapter_match.group(0)
             results.append((url, data))
