@@ -48,6 +48,13 @@ class TestExtractorResults(unittest.TestCase):
             for url, exc in cls._skipped:
                 print('- {} ("{}")'.format(url, exc))
 
+    def assertRange(self, value, range, msg=None):
+        if range.step > 1:
+            self.assertIn(value, range, msg=msg)
+        else:
+            self.assertLessEqual(value, range.stop, msg=msg)
+            self.assertGreaterEqual(value, range.start, msg=msg)
+
     def _run_test(self, result):
         result.pop("#comment", None)
         only_matching = (len(result) <= 3)
@@ -129,12 +136,15 @@ class TestExtractorResults(unittest.TestCase):
 
         if "#count" in result:
             count = result["#count"]
+            len_urls = len(tjob.url_list)
             if isinstance(count, str):
                 self.assertRegex(count, r"^ *(==|!=|<|<=|>|>=) *\d+ *$")
-                expr = "{} {}".format(len(tjob.url_list), count)
+                expr = "{} {}".format(len_urls, count)
                 self.assertTrue(eval(expr), msg=expr)
+            elif isinstance(count, range):
+                self.assertRange(len_urls, count)
             else:  # assume integer
-                self.assertEqual(len(tjob.url_list), count)
+                self.assertEqual(len_urls, count)
 
         if "#pattern" in result:
             self.assertGreater(len(tjob.url_list), 0)
@@ -159,6 +169,8 @@ class TestExtractorResults(unittest.TestCase):
                 self._test_kwdict(value, test)
             elif isinstance(test, type):
                 self.assertIsInstance(value, test, msg=key)
+            elif isinstance(test, range):
+                self.assertRange(value, test, msg=key)
             elif isinstance(test, list):
                 subtest = False
                 for idx, item in enumerate(test):
