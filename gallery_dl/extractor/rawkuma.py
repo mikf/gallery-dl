@@ -41,9 +41,9 @@ class RawkumaChapterExtractor(RawkumaBase, ChapterExtractor):
         return {
             "manga": title,
             "manga_id": self.gid,
-            "chapter": text.parse_int(self.chapter),
+            "chapter": text.parse_int(chapter),
             "chapter_minor": sep + minor,
-            "chapter_id": f"{self.gid}-chapter-{self.chapter}",
+            "chapter_id": "%s-chapter-%s" % (self.gid, self.chapter),
         }
 
     def images(self, page):
