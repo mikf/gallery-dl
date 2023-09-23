@@ -151,6 +151,12 @@ class TestExtractorResults(unittest.TestCase):
             for url in tjob.url_list:
                 self.assertRegex(url, result["#pattern"])
 
+        if "#urls" in result:
+            expected = result["#urls"]
+            if isinstance(expected, str):
+                expected = (expected,)
+            self.assertSequenceEqual(tjob.url_list, expected)
+
         metadata = {k: v for k, v in result.items() if k[0] != "#"}
         if metadata:
             for kwdict in tjob.kwdict_list:
