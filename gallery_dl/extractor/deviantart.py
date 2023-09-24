@@ -42,7 +42,7 @@ class DeviantartExtractor(Extractor):
         self.offset = 0
 
     def _init(self):
-        self.jwt = self.config("jwt", False)
+        self.jwt = self.config("jwt", True)
         self.flat = self.config("flat", True)
         self.extra = self.config("extra", False)
         self.original = self.config("original", True)
@@ -355,6 +355,9 @@ class DeviantartExtractor(Extractor):
         if not sep:
             return
 
+        # 'images-wixmp' returns 401 errors, but just 'wixmp' still works
+        url = url.replace("//images-wixmp", "//wixmp", 1)
+
         #  header = b'{"typ":"JWT","alg":"none"}'
         payload = (
             b'{"sub":"urn:app:","iss":"urn:app:","obj":[[{"path":"/f/' +
@@ -367,7 +370,7 @@ class DeviantartExtractor(Extractor):
             "{}?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0.{}.".format(
                 url,
                 #  base64 of 'header' is precomputed as 'eyJ0eX...'
-                #  binascii.a2b_base64(header).rstrip(b"=\n").decode(),
+                #  binascii.b2a_base64(header).rstrip(b"=\n").decode(),
                 binascii.b2a_base64(payload).rstrip(b"=\n").decode())
         )
 
