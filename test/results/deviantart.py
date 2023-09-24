@@ -524,7 +524,16 @@ __tests__ = (
     "#comment" : "wixmp URL rewrite",
     "#category": ("", "deviantart", "deviation"),
     "#class"   : deviantart.DeviantartDeviationExtractor,
-    "#pattern" : r"https://images-wixmp-\w+\.wixmp\.com/f/[^/]+/[^.]+\.jpg\?token=",
+    "#pattern" : r"https://wixmp-\w+\.wixmp\.com/f/[^/]+/[^.]+\.jpg\?token=",
+},
+
+{
+    "#url"     : "https://www.deviantart.com/citizenfresh/art/Hverarond-789295466",
+    "#comment" : "wixmp URL rewrite /intermediary/",
+    "#category": ("", "deviantart", "deviation"),
+    "#class"   : deviantart.DeviantartDeviationExtractor,
+    "#options" : {"jwt": False},
+    "#pattern" : r"https://images-wixmp-\w+\.wixmp\.com/intermediary/f/[^/]+/[^.]+\.jpg",
 },
 
 {

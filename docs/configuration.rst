@@ -1427,6 +1427,19 @@ Description
     when a `refresh token <extractor.deviantart.refresh-token_>`__ is provided.
 
 
+extractor.deviantart.quality
+----------------------------
+Type
+    ``integer``
+Default
+    ``100``
+Description
+    JPEG quality level of newer images for which
+    an original file download is not available.
+
+    Note: Only has an effect when `deviantart.jwt <extractor.deviantart.jwt_>`__ is disabled.
+
+
 extractor.deviantart.refresh-token
 ----------------------------------
 Type

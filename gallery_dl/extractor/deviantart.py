@@ -45,6 +45,7 @@ class DeviantartExtractor(Extractor):
         self.jwt = self.config("jwt", True)
         self.flat = self.config("flat", True)
         self.extra = self.config("extra", False)
+        self.quality = self.config("quality", "100")
         self.original = self.config("original", True)
         self.comments = self.config("comments", False)
 
@@ -58,6 +59,9 @@ class DeviantartExtractor(Extractor):
             self.finalize = self._unwatch_premium
         else:
             self.unwatch = None
+
+        if self.quality:
+            self.quality = ",q_{}".format(self.quality)
 
         if self.original != "image":
             self._update_content = self._update_content_default
@@ -125,6 +129,18 @@ class DeviantartExtractor(Extractor):
                     self._update_content(deviation, content)
                 elif self.jwt:
                     self._update_token(deviation, content)
+                elif content["src"].startswith("https://images-wixmp-"):
+                    if deviation["index"] <= 790677560:
+                        # https://github.com/r888888888/danbooru/issues/4069
+                        intermediary, count = re.subn(
+                            r"(/f/[^/]+/[^/]+)/v\d+/.*",
+                            r"/intermediary\1", content["src"], 1)
+                        if count:
+                            deviation["_fallback"] = (content["src"],)
+                            content["src"] = intermediary
+                    if self.quality:
+                        content["src"] = re.sub(
+                            r",q_\d+", self.quality, content["src"], 1)
 
                 yield self.commit(deviation, content)
 
