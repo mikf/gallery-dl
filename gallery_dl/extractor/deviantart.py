@@ -348,7 +348,11 @@ class DeviantartExtractor(Extractor):
             yield url, folder
 
     def _update_content_default(self, deviation, content):
-        public = False if "premium_folder_data" in deviation else None
+        if "premium_folder_data" in deviation or deviation.get("is_mature"):
+            public = False
+        else:
+            public = None
+
         data = self.api.deviation_download(deviation["deviationid"], public)
         content.update(data)
         deviation["is_original"] = True
@@ -382,6 +386,7 @@ class DeviantartExtractor(Extractor):
         )
 
         deviation["_fallback"] = (content["src"],)
+        deviation["is_original"] = True
         content["src"] = (
             "{}?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0.{}.".format(
                 url,
@@ -1077,7 +1082,12 @@ class DeviantartOAuthAPI():
     def deviation(self, deviation_id, public=None):
         """Query and return info about a single Deviation"""
         endpoint = "/deviation/" + deviation_id
+
         deviation = self._call(endpoint, public=public)
+        if deviation.get("is_mature") and public is None and \
+                self.refresh_token_key:
+            deviation = self._call(endpoint, public=False)
+
         if self.metadata:
             self._metadata((deviation,))
         if self.folders:
@@ -1233,8 +1243,12 @@ class DeviantartOAuthAPI():
                 return data
             if not fatal and status != 429:
                 return None
-            if data.get("error_description") == "User not found.":
+
+            error = data.get("error_description")
+            if error == "User not found.":
                 raise exception.NotFoundError("user or group")
+            if error == "Deviation not downloadable.":
+                raise exception.AuthorizationError()
 
             self.log.debug(response.text)
             msg = "API responded with {} {}".format(
@@ -1258,6 +1272,17 @@ class DeviantartOAuthAPI():
                     self.log.error(msg)
                 return data
 
+    def _switch_tokens(self, results, params):
+        if len(results) < params["limit"]:
+            return True
+
+        if not self.extractor.jwt:
+            for item in results:
+                if item.get("is_mature"):
+                    return True
+
+        return False
+
     def _pagination(self, endpoint, params,
                     extend=True, public=None, unpack=False, key="results"):
         warn = True
@@ -1276,7 +1301,7 @@ class DeviantartOAuthAPI():
                 results = [item["journal"] for item in results
                            if "journal" in item]
             if extend:
-                if public and len(results) < params["limit"]:
+                if public and self._switch_tokens(results, params):
                     if self.refresh_token_key:
                         self.log.debug("Switching to private access token")
                         public = False
@@ -1284,9 +1309,10 @@ class DeviantartOAuthAPI():
                     elif data["has_more"] and warn:
                         warn = False
                         self.log.warning(
-                            "Private deviations detected! Run 'gallery-dl "
-                            "oauth:deviantart' and follow the instructions to "
-                            "be able to access them.")
+                            "Private or mature deviations detected! "
+                            "Run 'gallery-dl oauth:deviantart' and follow the "
+                            "instructions to be able to access them.")
+
                 # "statusid" cannot be used instead
                 if results and "deviationid" in results[0]:
                     if self.metadata:
