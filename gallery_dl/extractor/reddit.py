@@ -115,8 +115,10 @@ class RedditExtractor(Extractor):
                         continue
                     if url[0] == "/":
                         url = "https://www.reddit.com" + url
-                    if url.startswith(
-                            "https://www.reddit.com/message/compose"):
+                    if url.startswith((
+                        "https://www.reddit.com/message/compose",
+                        "https://reddit.com/message/compose",
+                    )):
                         continue
 
                     match = match_submission(url)
