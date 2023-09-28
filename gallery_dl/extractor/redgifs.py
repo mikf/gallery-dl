@@ -89,14 +89,20 @@ class RedgifsUserExtractor(RedgifsExtractor):
     """Extractor for redgifs user profiles"""
     subcategory = "user"
     directory_fmt = ("{category}", "{userName}")
-    pattern = r"(?:https?://)?(?:\w+\.)?redgifs\.com/users/([^/?#]+)/?$"
+    pattern = (r"(?:https?://)?(?:\w+\.)?redgifs\.com/users/([^/?#]+)/?"
+               r"(?:\?([^#]+))?$")
     example = "https://www.redgifs.com/users/USER"
+
+    def __init__(self, match):
+        RedgifsExtractor.__init__(self, match)
+        self.query = match.group(2)
 
     def metadata(self):
         return {"userName": self.key}
 
     def gifs(self):
-        return self.api.user(self.key)
+        order = text.parse_query(self.query).get("order")
+        return self.api.user(self.key, order or "new")
 
 
 class RedgifsCollectionExtractor(RedgifsExtractor):
@@ -208,7 +214,7 @@ class RedgifsAPI():
         endpoint = "/v2/gallery/" + gallery_id
         return self._call(endpoint)
 
-    def user(self, user, order="best"):
+    def user(self, user, order="new"):
         endpoint = "/v2/users/{}/search".format(user.lower())
         params = {"order": order}
         return self._pagination(endpoint, params)
