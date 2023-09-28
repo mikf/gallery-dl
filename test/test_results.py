@@ -148,8 +148,13 @@ class TestExtractorResults(unittest.TestCase):
 
         if "#pattern" in result:
             self.assertGreater(len(tjob.url_list), 0)
-            for url in tjob.url_list:
-                self.assertRegex(url, result["#pattern"])
+            pattern = result["#pattern"]
+            if isinstance(pattern, str):
+                for url in tjob.url_list:
+                    self.assertRegex(url, pattern, msg="#pattern")
+            else:
+                for url, pat in zip(tjob.url_list, pattern):
+                    self.assertRegex(url, pat, msg="#pattern")
 
         if "#urls" in result:
             expected = result["#urls"]
