@@ -9,15 +9,31 @@ from gallery_dl.extractor import redgifs
 
 __tests__ = (
 {
-    "#url"     : "https://www.redgifs.com/users/Natalifiction",
+    "#url"     : "https://www.redgifs.com/users/mmj",
     "#category": ("", "redgifs", "user"),
     "#class"   : redgifs.RedgifsUserExtractor,
     "#pattern" : r"https://\w+\.redgifs\.com/[\w-]+\.mp4",
-    "#count"   : ">= 100",
+    "#count"   : range(50, 60),
+},
+
+{
+    "#url"     : "https://www.redgifs.com/users/mmj?order=old",
+    "#comment" : "'order' URL parameter (#4583)",
+    "#category": ("", "redgifs", "user"),
+    "#class"   : redgifs.RedgifsUserExtractor,
+    "#range"   : "1-5",
+    "#patterns": (
+        r"https://thumbs\d+\.redgifs\.com/ShoddyOilyHarlequinbug\.mp4",
+        r"https://thumbs\d+\.redgifs\.com/UnevenPrestigiousKilldeer\.mp4",
+        r"https://thumbs\d+\.redgifs\.com/EveryShockingFlickertailsquirrel\.mp4",
+        r"https://thumbs\d+\.redgifs\.com/NegativeWarlikeAmericancurl\.mp4",
+        r"https://thumbs\d+\.redgifs\.com/PopularTerribleFritillarybutterfly\.mp4",
+    ),
 },
 
 {
     "#url"     : "https://v3.redgifs.com/users/lamsinka89",
+    "#comment" : "'v3' subdomain (#3588, #3589)",
     "#category": ("", "redgifs", "user"),
     "#class"   : redgifs.RedgifsUserExtractor,
     "#pattern" : r"https://\w+\.redgifs\.com/[\w-]+\.(mp4|jpg)",
