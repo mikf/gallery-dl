@@ -219,8 +219,19 @@ __tests__ = (
     "#comment" : "high-quality images (#1344)",
     "#category": ("", "tumblr", "post"),
     "#class"   : tumblr.TumblrPostExtractor,
+    "#exception"   : exception.NotFoundError,
     "#count"       : 2,
     "#sha1_content": "6bc19a42787e46e1bba2ef4aeef5ca28fcd3cd34",
+},
+
+{
+    "#url"     : "https://k-eke.tumblr.com/post/185341184856",
+    "#comment" : "wrong extension returned by api (#3095)",
+    "#category": ("", "tumblr", "post"),
+    "#class"   : tumblr.TumblrPostExtractor,
+    "#options"     : {"retries": 0},
+    "#urls"        : "https://64.media.tumblr.com/5e9d760aba24c65beaf0e72de5aae4dd/tumblr_psj5yaqV871t1ig6no1_1280.gif",
+    "#sha1_content": "3508d894b6cc25e364d182a8e1ff370d706965fb",
 },
 
 {

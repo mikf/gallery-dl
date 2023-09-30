@@ -222,6 +222,8 @@ class ResultJob(job.DownloadJob):
 
         if content:
             self.fileobj = TestPathfmt(self.content_hash)
+        else:
+            self._update_content = lambda url, kwdict: None
 
         self.format_directory = TestFormatter(
             "".join(self.extractor.directory_fmt)).format_map
@@ -269,10 +271,17 @@ class ResultJob(job.DownloadJob):
         self.archive_hash.update(archive_id.encode())
 
     def _update_content(self, url, kwdict):
-        if self.content:
-            scheme = url.partition(":")[0]
-            self.fileobj.kwdict = kwdict
-            self.get_downloader(scheme).download(url, self.fileobj)
+        self.fileobj.kwdict = kwdict
+
+        downloader = self.get_downloader(url.partition(":")[0])
+        if downloader.download(url, self.fileobj):
+            return
+
+        for num, url in enumerate(kwdict.get("_fallback") or (), 1):
+            self.log.warning("Trying fallback URL #%d", num)
+            downloader = self.get_downloader(url.partition(":")[0])
+            if downloader.download(url, self.fileobj):
+                return
 
 
 class TestPathfmt():
