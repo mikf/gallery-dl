@@ -32,13 +32,14 @@ class Extractor():
     directory_fmt = ("{category}",)
     filename_fmt = "{filename}.{extension}"
     archive_fmt = ""
-    cookies_domain = ""
-    browser = None
     root = ""
+    cookies_domain = ""
+    referer = True
+    tls12 = True
+    browser = None
     request_interval = 0.0
     request_interval_min = 0.0
     request_timestamp = 0.0
-    tls12 = True
 
     def __init__(self, match):
         self.log = logging.getLogger(self.category)
@@ -310,10 +311,10 @@ class Extractor():
         else:
             headers["Accept-Encoding"] = "gzip, deflate"
 
-        custom_referer = self.config("referer", True)
-        if custom_referer:
-            if isinstance(custom_referer, str):
-                headers["Referer"] = custom_referer
+        referer = self.config("referer", self.referer)
+        if referer:
+            if isinstance(referer, str):
+                headers["Referer"] = referer
             elif self.root:
                 headers["Referer"] = self.root + "/"
 
