@@ -407,7 +407,13 @@ def generate_tests():
         category, _, subcategory = sys.argv[1].partition(":")
         del sys.argv[1:]
 
-        tests = results.category(category)
+        if category.startswith("+"):
+            basecategory = category[1:].lower()
+            tests = [t for t in results.all()
+                     if t["#category"][0].lower() == basecategory]
+        else:
+            tests = results.category(category)
+
         if subcategory:
             tests = [t for t in tests if t["#category"][-1] == subcategory]
     else:
