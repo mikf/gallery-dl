@@ -72,13 +72,13 @@ class TestExtractorResults(unittest.TestCase):
             content = ("#sha1_content" in result)
 
         tjob = ResultJob(result["#url"], content=content)
-        self.assertEqual(result["#class"], tjob.extractor.__class__)
+        self.assertEqual(result["#class"], tjob.extractor.__class__, "#class")
 
         if only_matching:
             return
 
         if "#exception" in result:
-            with self.assertRaises(result["#exception"]):
+            with self.assertRaises(result["#exception"], msg="#exception"):
                 tjob.run()
             return
 
@@ -98,8 +98,7 @@ class TestExtractorResults(unittest.TestCase):
             self.assertEqual(
                 len(set(tjob.archive_list)),
                 len(tjob.archive_list),
-                "archive-id uniqueness",
-            )
+                msg="archive-id uniqueness")
 
         if tjob.queue:
             # test '_extractor' entries
@@ -113,41 +112,44 @@ class TestExtractorResults(unittest.TestCase):
         else:
             # test 'extension' entries
             for kwdict in tjob.kwdict_list:
-                self.assertIn("extension", kwdict)
+                self.assertIn("extension", kwdict, msg="#extension")
 
         # test extraction results
         if "#sha1_url" in result:
             self.assertEqual(
-                result["#sha1_url"], tjob.url_hash.hexdigest())
+                result["#sha1_url"],
+                tjob.url_hash.hexdigest(),
+                msg="#sha1_url")
 
         if "#sha1_content" in result:
             expected = result["#sha1_content"]
             digest = tjob.content_hash.hexdigest()
             if isinstance(expected, str):
-                self.assertEqual(
-                    expected, digest, "content")
+                self.assertEqual(expected, digest, msg="#sha1_content")
             else:  # iterable
-                self.assertIn(
-                    digest, expected, "content")
+                self.assertIn(digest, expected, msg="#sha1_content")
 
         if "#sha1_metadata" in result:
             self.assertEqual(
-                result["#sha1_metadata"], tjob.kwdict_hash.hexdigest())
+                result["#sha1_metadata"],
+                tjob.kwdict_hash.hexdigest(),
+                "#sha1_metadata")
 
         if "#count" in result:
             count = result["#count"]
             len_urls = len(tjob.url_list)
             if isinstance(count, str):
-                self.assertRegex(count, r"^ *(==|!=|<|<=|>|>=) *\d+ *$")
+                self.assertRegex(
+                    count, r"^ *(==|!=|<|<=|>|>=) *\d+ *$", msg="#count")
                 expr = "{} {}".format(len_urls, count)
                 self.assertTrue(eval(expr), msg=expr)
             elif isinstance(count, range):
-                self.assertRange(len_urls, count)
+                self.assertRange(len_urls, count, msg="#count")
             else:  # assume integer
-                self.assertEqual(len_urls, count)
+                self.assertEqual(len_urls, count, msg="#count")
 
         if "#pattern" in result:
-            self.assertGreater(len(tjob.url_list), 0)
+            self.assertGreater(len(tjob.url_list), 0, msg="#pattern")
             pattern = result["#pattern"]
             if isinstance(pattern, str):
                 for url in tjob.url_list:
@@ -159,8 +161,9 @@ class TestExtractorResults(unittest.TestCase):
         if "#urls" in result:
             expected = result["#urls"]
             if isinstance(expected, str):
-                expected = (expected,)
-            self.assertSequenceEqual(tjob.url_list, expected)
+                self.assertEqual(tjob.url_list[0], expected, msg="#urls")
+            else:
+                self.assertSequenceEqual(tjob.url_list, expected, msg="#urls")
 
         metadata = {k: v for k, v in result.items() if k[0] != "#"}
         if metadata:
@@ -173,7 +176,7 @@ class TestExtractorResults(unittest.TestCase):
                 key = key[1:]
                 if key not in kwdict:
                     continue
-            self.assertIn(key, kwdict)
+            self.assertIn(key, kwdict, msg=key)
             value = kwdict[key]
 
             if isinstance(test, dict):
