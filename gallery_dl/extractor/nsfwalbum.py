@@ -20,6 +20,7 @@ class NsfwalbumAlbumExtractor(GalleryExtractor):
     filename_fmt = "{album_id}_{num:>03}_{id}.{extension}"
     directory_fmt = ("{category}", "{album_id} {title}")
     archive_fmt = "{id}"
+    referer = False
     pattern = r"(?:https?://)?(?:www\.)?nsfwalbum\.com(/album/(\d+))"
     example = "https://nsfwalbum.com/album/12345"
 
