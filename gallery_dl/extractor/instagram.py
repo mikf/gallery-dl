@@ -710,7 +710,8 @@ class InstagramRestAPI():
     def user_by_name(self, screen_name):
         endpoint = "/v1/users/web_profile_info/"
         params = {"username": screen_name}
-        return self._call(endpoint, params=params)["data"]["user"]
+        return self._call(
+            endpoint, params=params, notfound="user")["data"]["user"]
 
     @memcache(keyarg=1)
     def user_by_id(self, user_id):
