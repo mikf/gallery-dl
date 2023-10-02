@@ -85,7 +85,6 @@ CATEGORY_MAP = {
     "mangaread"      : "MangaRead",
     "mangasee"       : "MangaSee",
     "mastodon.social": "mastodon.social",
-    "mememuseum"     : "meme.museum",
     "myhentaigallery": "My Hentai Gallery",
     "myportfolio"    : "Adobe Portfolio",
     "naverwebtoon"   : "NaverWebtoon",
