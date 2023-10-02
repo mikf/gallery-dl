@@ -72,8 +72,8 @@ class NsfwalbumAlbumExtractor(GalleryExtractor):
 
     @staticmethod
     def _validate_response(response):
-        return not response.request.url.endswith(
-            ("/no_image.jpg", "/placeholder.png"))
+        return not response.url.endswith(
+            ("/no_image.jpg", "/placeholder.png", "/error.jpg"))
 
     @staticmethod
     def _annihilate(value, base=6):
