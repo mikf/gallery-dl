@@ -66,10 +66,6 @@ class Shimmie2Extractor(BaseExtractor):
 
 
 INSTANCES = {
-    "mememuseum": {
-        "root": "https://meme.museum",
-        "pattern": r"meme\.museum",
-    },
     "loudbooru": {
         "root": "https://loudbooru.com",
         "pattern": r"loudbooru\.com",

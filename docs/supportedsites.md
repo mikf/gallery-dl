@@ -1286,12 +1286,6 @@ Consider all sites to be NSFW unless otherwise known.
     <td colspan="4"><strong>Shimmie2 Instances</strong></td>
 </tr>
 <tr>
-    <td>meme.museum</td>
-    <td>https://meme.museum/</td>
-    <td>Posts, Tag Searches</td>
-    <td></td>
-</tr>
-<tr>
     <td>Loudbooru</td>
     <td>https://loudbooru.com/</td>
     <td>Posts, Tag Searches</td>
