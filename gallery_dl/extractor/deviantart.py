@@ -1422,12 +1422,14 @@ class DeviantartEclipseAPI():
         self.csrf_token = None
 
     def deviation_extended_fetch(self, deviation_id, user, kind=None):
-        endpoint = "/_napi/da-browse/shared_api/deviation/extended_fetch"
+        endpoint = "/_puppy/dadeviation/init"
         params = {
-            "deviationid"    : deviation_id,
-            "username"       : user,
-            "type"           : kind,
-            "include_session": "false",
+            "deviationid"     : deviation_id,
+            "username"        : user,
+            "type"            : kind,
+            "include_session" : "false",
+            "expand"          : "deviation.related",
+            "da_minor_version": "20230710",
         }
         return self._call(endpoint, params)
 
@@ -1455,7 +1457,7 @@ class DeviantartEclipseAPI():
         return self._pagination(endpoint, params)
 
     def search_deviations(self, params):
-        endpoint = "/_napi/da-browse/api/networkbar/search/deviations"
+        endpoint = "/_puppy/dabrowse/search/deviations"
         return self._pagination(endpoint, params, key="deviations")
 
     def user_info(self, user, expand=False):
