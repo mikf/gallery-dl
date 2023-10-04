@@ -254,10 +254,9 @@ __tests__ = (
     "#category": ("", "twitter", "tweet"),
     "#class"   : twitter.TwitterTweetExtractor,
 
-    "content": r"""re:Gear up for #PokemonSwordShieldEX with special Mystery Gifts! 
-
-You’ll be able to receive four Galarian form Pokémon with Hidden Abilities, plus some very useful items. It’s our \(Mystery\) Gift to you, Trainers! 
-
+    "source" : "Sprinklr",
+    "content": r"""re:Gear up for #PokemonSwordShieldEX with special Mystery Gifts! \n
+You’ll be able to receive four Galarian form Pokémon with Hidden Abilities, plus some very useful items. It’s our \(Mystery\) Gift to you, Trainers! \n
 ❓🎁➡️ """,
 },
 
@@ -482,8 +481,9 @@ You’ll be able to receive four Galarian form Pokémon with Hidden Abilities, p
     "#comment" : "age-restricted (#2354)",
     "#category": ("", "twitter", "tweet"),
     "#class"   : twitter.TwitterTweetExtractor,
-    "#options" : {"syndication": True},
-    "#count"   : 1,
+    "#exception": exception.AuthorizationError,
+    "#options"  : {"syndication": True},
+    "#count"    : 1,
 
     "date": "dt:2022-02-13 20:10:09",
 },
@@ -513,10 +513,8 @@ You’ll be able to receive four Galarian form Pokémon with Hidden Abilities, p
     "#category": ("", "twitter", "tweet"),
     "#class"   : twitter.TwitterTweetExtractor,
 
-    "content": """BREAKING - DEADLY LIES: Independent researchers at Texas A&M University have just contradicted federal government regulators, saying that toxic air pollutants in East Palestine, Ohio, could pose long-term risks. 
-
-The Washington Post writes, "Three weeks after the toxic train derailment in Ohio, an analysis of Environmental Protection Agency data has found nine air pollutants at levels that could raise long-term health concerns in and around East Palestine, according to an independent analysis. 
-
+    "content": """BREAKING - DEADLY LIES: Independent researchers at Texas A&M University have just contradicted federal government regulators, saying that toxic air pollutants in East Palestine, Ohio, could pose long-term risks. \n
+The Washington Post writes, "Three weeks after the toxic train derailment in Ohio, an analysis of Environmental Protection Agency data has found nine air pollutants at levels that could raise long-term health concerns in and around East Palestine, according to an independent analysis. \n
 "The analysis by Texas A&M University seems to contradict statements by state and federal regulators that air near the crash site is completely safe, despite residents complaining about rashes, breathing problems and other health effects." Your reaction.""",
 },
 

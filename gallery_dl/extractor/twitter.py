@@ -451,6 +451,7 @@ class TwitterExtractor(Extractor):
             "id_str": id_str,
             "lang": None,
             "user": user,
+            "source": "><",
             "entities": {},
             "extended_entities": {
                 "media": [
