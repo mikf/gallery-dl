@@ -14,9 +14,9 @@ class FantiaExtractor(Extractor):
     """Base class for Fantia extractors"""
     category = "fantia"
     root = "https://fantia.jp"
-    directory_fmt = ("{category}", "{fanclub_id}")
-    filename_fmt = "{post_id}_{file_id}.{extension}"
-    archive_fmt = "{post_id}_{file_id}"
+    directory_fmt = ("{category}", "{fanclub['id']}")
+    filename_fmt = "{id}_{file_id}.{extension}"
+    archive_fmt = "{id}_{file_id}"
     _warning = True
 
     def _init(self):
