@@ -134,7 +134,7 @@ class FantiaExtractor(Extractor):
         modified_resp = self._build_new_dict(resp, self._template_post)
         modified_resp.update(
             {
-                "post_url": f"{self.root}/posts/{str(resp['id'])}",
+                "post_url": self.root + "/posts/" + str(resp["id"]),
                 "date": text.parse_datetime(
                     resp["posted_at"], "%a, %d %b %Y %H:%M:%S %z"),
                 "_data": resp["post_contents"],
