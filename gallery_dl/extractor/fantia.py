@@ -32,6 +32,39 @@ class FantiaExtractor(Extractor):
             "description": "",
             "thumb": self.root + "/images/fallback/plan/thumb_default.png",
         }
+        self._template_post = {
+            "id": None,
+            "title": None,
+            "comment": None,
+            "rating": None,
+            "thumb": {
+                "main": None,
+                "original": None
+            },
+            "posted_at": None,
+            "fanclub": {
+                "id": None,
+                "user": {
+                    "id": None,
+                    "name": None,
+                    "image": {
+                        "large": None
+                    }
+                },
+                "name": None,
+                "creator_name": None,
+                "title": None,
+                "cover": {
+                    "main": None,
+                    "original": None
+                },
+                "icon": {
+                    "main": None,
+                    "original": None
+                },
+            },
+            "tags": None
+        }
         if self._warning:
             if not self.cookies_check(("_session_id",)):
                 self.log.warning("no '_session_id' cookie set")
@@ -56,7 +89,7 @@ class FantiaExtractor(Extractor):
                     post.update(file)
                     post["num"] += 1
                     text.nameext_from_url(
-                        post["content_filename"] or file["file_url"], post)
+                        post["content"]["filename"] or file["file_url"], post)
                     yield Message.Url, file["file_url"], post
 
     def posts(self):
@@ -84,53 +117,59 @@ class FantiaExtractor(Extractor):
         self.headers["X-CSRF-Token"] = text.extr(
             page, 'name="csrf-token" content="', '"')
 
+    def _build_new_dict(self, data, structure):
+        new_data = {}
+        for key, value in structure.items():
+            if key in data:
+                if isinstance(value, dict) and isinstance(data[key], dict):
+                    new_data[key] = self._build_new_dict(data[key], value)
+                elif value is None:
+                    new_data[key] = data[key]
+        return new_data
+
     def _get_post_data(self, post_id):
         """Fetch and process post data"""
-        url = self.root+"/api/v1/posts/"+post_id
+        url = self.root + "/api/v1/posts/" + post_id
         resp = self.request(url, headers=self.headers).json()["post"]
-        return {
-            "post_id": resp["id"],
-            "post_url": self.root + "/posts/" + str(resp["id"]),
-            "post_title": resp["title"],
-            "comment": resp["comment"],
-            "rating": resp["rating"],
-            "posted_at": resp["posted_at"],
-            "date": text.parse_datetime(
-                resp["posted_at"], "%a, %d %b %Y %H:%M:%S %z"),
-            "fanclub_id": resp["fanclub"]["id"],
-            "fanclub_user_id": resp["fanclub"]["user"]["id"],
-            "fanclub_user_name": resp["fanclub"]["user"]["name"],
-            "fanclub_name": resp["fanclub"]["name"],
-            "fanclub_url": self.root+"/fanclubs/"+str(resp["fanclub"]["id"]),
-            "tags": resp["tags"],
-            "_data": resp,
-        }
+        modified_resp = self._build_new_dict(resp, self._template_post)
+        modified_resp.update(
+            {
+                "post_url": f"{self.root}/posts/{str(resp['id'])}",
+                "date": text.parse_datetime(
+                    resp["posted_at"], "%a, %d %b %Y %H:%M:%S %z"),
+                "_data": resp["post_contents"],
+                "content": {}
+            }
+        )
+
+        return modified_resp
 
     def _get_post_contents(self, post):
-        contents = post["_data"]["post_contents"]
+        contents = post["_data"]
 
         try:
-            url = post["_data"]["thumb"]["original"]
+            url = post["thumb"]["original"]
         except Exception:
             pass
         else:
             contents.insert(0, {
                 "id": "thumb",
                 "title": "thumb",
+                "visible_status": "visible",
                 "category": "thumb",
                 "download_uri": url,
-                "visible_status": "visible",
                 "plan": None,
             })
 
         return contents
 
     def _process_content(self, post, content):
-        post["content_category"] = content["category"]
-        post["content_title"] = content["title"]
-        post["content_filename"] = content.get("filename") or ""
-        post["content_id"] = content["id"]
-        post["content_comment"] = content.get("comment") or ""
+        post["content"]["id"] = content["id"]
+        post["content"]["title"] = content["title"]
+        post["content"]["visible_status"] = content["visible_status"]
+        post["content"]["category"] = content["category"]
+        post["content"]["filename"] = content.get("filename") or ""
+        post["content"]["comment"] = content.get("comment") or ""
         post["plan"] = content["plan"] or self._empty_plan
 
         files = []
