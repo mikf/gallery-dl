@@ -306,6 +306,7 @@ class TwitterExtractor(Extractor):
             "user"          : self._user or author,
             "lang"          : tweet["lang"],
             "source"        : text.extr(source, ">", "<"),
+            "sensitive"     : tget("possibly_sensitive"),
             "favorite_count": tget("favorite_count"),
             "quote_count"   : tget("quote_count"),
             "reply_count"   : tget("reply_count"),
