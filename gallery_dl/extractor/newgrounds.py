@@ -57,7 +57,8 @@ class NewgroundsExtractor(Extractor):
                 yield Message.Url, url, text.nameext_from_url(url, post)
 
                 for num, url in enumerate(text.extract_iter(
-                        post["_comment"], 'data-smartload-src="', '"'), 1):
+                        post["_images"] + post["_comment"],
+                        'data-smartload-src="', '"'), 1):
                     post["num"] = num
                     post["_index"] = "{}_{:>02}".format(post["index"], num)
                     url = text.ensure_http_scheme(url)
@@ -135,6 +136,7 @@ class NewgroundsExtractor(Extractor):
         extr = text.extract_from(page)
         data = extract_data(extr, post_url)
 
+        data["_images"] = extr('<div class="art-images', '\n</div>')
         data["_comment"] = extr(
             'id="author_comments"', '</div>').partition(">")[2]
         data["comment"] = text.unescape(text.remove_html(
