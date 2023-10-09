@@ -168,7 +168,7 @@ class ExecTest(BasePostprocessorTest):
 
     def test_command_string(self):
         self._create({
-            "command": "echo {} && rm {};",
+            "command": "echo {} {_path} {_directory} {_filename} && rm {};",
         })
 
         with patch("subprocess.Popen") as p:
@@ -178,7 +178,11 @@ class ExecTest(BasePostprocessorTest):
             self._trigger(("after",))
 
         p.assert_called_once_with(
-            "echo {0} && rm {0};".format(self.pathfmt.realpath), shell=True)
+            "echo {0} {0} {1} {2} && rm {0};".format(
+                self.pathfmt.realpath,
+                self.pathfmt.realdirectory,
+                self.pathfmt.filename),
+            shell=True)
         i.wait.assert_called_once_with()
 
     def test_command_list(self):
