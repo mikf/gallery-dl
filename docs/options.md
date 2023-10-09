@@ -121,11 +121,13 @@
     --write-tags                Write image tags to separate text files
     --mtime-from-date           Set file modification times according to 'date'
                                 metadata
-    --exec CMD                  Execute CMD for each downloaded file. Example:
-                                --exec "convert {} {}.png && rm {}"
+    --exec CMD                  Execute CMD for each downloaded file. Supported
+                                replacement fields are {} or {_path},
+                                {_directory}, {_filename}. Example: --exec
+                                "convert {} {}.png && rm {}"
     --exec-after CMD            Execute CMD after all files were downloaded
-                                successfully. Example: --exec-after "cd {} &&
-                                convert * ../doc.pdf"
+                                successfully. Example: --exec-after "cd
+                                {_directory} && convert * ../doc.pdf"
     -P, --postprocessor NAME    Activate the specified post processor
     -O, --postprocessor-option OPT
                                 Additional '<key>=<value>' post processor
