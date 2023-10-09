@@ -12,17 +12,17 @@ __tests__ = (
     "#url"     : "https://www.newgrounds.com/art/view/tomfulp/ryu-is-hawt",
     "#category": ("", "newgrounds", "image"),
     "#class"   : newgrounds.NewgroundsImageExtractor,
-    "#sha1_url"    : "57f182bcbbf2612690c3a54f16ffa1da5105245e",
+    "#urls"        : "https://art.ngfiles.com/images/1993000/1993615_4474_tomfulp_ryu-is-hawt.44f81090378ae9c257a5e46a8e17cc4d.gif?f1695674895",
     "#sha1_content": "8f395e08333eb2457ba8d8b715238f8910221365",
 
     "artist"     : ["tomfulp"],
-    "comment"    : r"re:Consider this the bottom threshold for ",
+    "comment"    : "Consider this the bottom threshold for scouted artists.In fact consider it BELOW the bottom threshold.",
     "date"       : "dt:2009-06-04 14:44:05",
-    "description": r"re:Consider this the bottom threshold for ",
+    "description": "Consider this the bottom threshold for scouted artists.  In fact consider it BELOW the bottom threshold.   ",
     "favorites"  : int,
-    "filename"   : "94_tomfulp_ryu-is-hawt",
+    "filename"   : "1993615_4474_tomfulp_ryu-is-hawt.44f81090378ae9c257a5e46a8e17cc4d",
     "height"     : 476,
-    "index"      : 94,
+    "index"      : 1993615,
     "rating"     : "e",
     "score"      : float,
     "tags"       : [
@@ -39,15 +39,32 @@ __tests__ = (
     "#url"     : "https://art.ngfiles.com/images/0/94_tomfulp_ryu-is-hawt.gif",
     "#category": ("", "newgrounds", "image"),
     "#class"   : newgrounds.NewgroundsImageExtractor,
-    "#sha1_url": "57f182bcbbf2612690c3a54f16ffa1da5105245e",
+    "#urls"    : "https://art.ngfiles.com/images/1993000/1993615_4474_tomfulp_ryu-is-hawt.44f81090378ae9c257a5e46a8e17cc4d.gif?f1695674895",
 },
 
 {
     "#url"     : "https://www.newgrounds.com/art/view/sailoryon/yon-dream-buster",
+    "#comment" : "embedded file in 'comments' (#1033)",
     "#category": ("", "newgrounds", "image"),
     "#class"   : newgrounds.NewgroundsImageExtractor,
-    "#count"   : 2,
-    "#sha1_url": "84eec95e663041a80630df72719f231e157e5f5d",
+    "#urls"    : (
+        "https://art.ngfiles.com/images/1438000/1438673_sailoryon_yon-dream-buster.jpg?f1601058173",
+        "https://art.ngfiles.com/comments/172000/iu_172374_7112211.jpg",
+    ),
+},
+
+{
+    "#url"     : "https://www.newgrounds.com/art/view/zedrinbot/lewd-animation-tutorial",
+    "#comment" : "extra files in 'art-image-row' elements (#4642)",
+    "#category": ("", "newgrounds", "image"),
+    "#class"   : newgrounds.NewgroundsImageExtractor,
+    "#urls"    : (
+        "https://art.ngfiles.com/images/5091000/5091275_45067_zedrinbot_untitled-5091275.0a9d27ed2bc265a7e89478ed6ad6f86f.gif?f1696187399",
+        "https://art.ngfiles.com/medium_views/5091000/5091275_45071_zedrinbot_untitled-5091275.6fdc62eaef43528fb1c9bda624d30a3d.webp?f1696187437",
+        "https://art.ngfiles.com/medium_views/5091000/5091275_45070_zedrinbot_untitled-5091275.0d7334746374465bd448908b88d1f810.webp?f1696187435",
+        "https://art.ngfiles.com/medium_views/5091000/5091275_45072_zedrinbot_untitled-5091275.6fdc62eaef43528fb1c9bda624d30a3d.webp?f1696187438",
+        "https://art.ngfiles.com/medium_views/5091000/5091275_45073_zedrinbot_untitled-5091275.20aa05c1cd22fd058e8c68ce58f5a302.webp?f1696187439",
+    ),
 },
 
 {
