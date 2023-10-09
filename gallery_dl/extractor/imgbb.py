@@ -99,7 +99,7 @@ class ImgbbExtractor(Extractor):
             for img in text.extract_iter(page, "data-object='", "'"):
                 yield util.json_loads(text.unquote(img))
             if data:
-                if params["seek"] == data["seekEnd"]:
+                if not data["seekEnd"] or params["seek"] == data["seekEnd"]:
                     return
                 params["seek"] = data["seekEnd"]
                 params["page"] += 1
