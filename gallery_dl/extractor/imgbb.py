@@ -125,13 +125,13 @@ class ImgbbAlbumExtractor(ImgbbExtractor):
 
     def metadata(self, page):
         album      , pos = text.extract(page, '"og:title" content="', '"')
-        user       , pos = text.extract(page, ',"username":"', '"', pos)
-        displayname, pos = text.extract(page, '"user":{"name":"', '"')
+        displayname, pos = text.extract(page, '"user":{"name":"', '"', pos)
+        username   , pos = text.extract(page, ',"username":"', '"', pos)
         return {
             "album_id"   : self.album_id,
             "album_name" : text.unescape(album),
-            "user"       : user.lower() if user else "",
-            "displayname": displayname if displayname else "",
+            "user"       : username.lower() if username else "",
+            "displayname": displayname or "",
         }
 
     def images(self, page):
@@ -161,9 +161,10 @@ class ImgbbUserExtractor(ImgbbExtractor):
 
     def metadata(self, page):
         displayname, pos = text.extract(page, '"user":{"name":"', '"')
+        username   , pos = text.extract(page, ',"username":"', '"', pos)
         return {
-            "user"       : self.user,
-            "displayname": displayname if displayname else "",
+            "user"       : username or self.user,
+            "displayname": displayname or "",
         }
 
     def images(self, page):
@@ -191,7 +192,8 @@ class ImgbbImageExtractor(ImgbbExtractor):
 
         image = {
             "id"    : self.image_id,
-            "title" : text.unescape(extr('"og:title" content="', ' hosted at ImgBB"')),
+            "title" : text.unescape(extr(
+                '"og:title" content="', ' hosted at ImgBB"')),
             "url"   : extr('"og:image" content="', '"'),
             "width" : text.parse_int(extr('"og:image:width" content="', '"')),
             "height": text.parse_int(extr('"og:image:height" content="', '"')),
