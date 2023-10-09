@@ -72,13 +72,11 @@ class HentaifoundryExtractor(Extractor):
         extr = text.extract_from(page, page.index('id="picBox"'))
 
         data = {
+            "index"      : text.parse_int(path.rsplit("/", 2)[1]),
             "title"      : text.unescape(extr('class="imageTitle">', '<')),
             "artist"     : text.unescape(extr('/profile">', '<')),
-            "width"      : text.parse_int(extr('width="', '"')),
-            "height"     : text.parse_int(extr('height="', '"')),
-            "index"      : text.parse_int(path.rsplit("/", 2)[1]),
-            "src"        : text.urljoin(self.root, text.unescape(extr(
-                'src="', '"'))),
+            "_body"      : extr(
+                '<div class="boxbody"', '<div class="boxfooter"'),
             "description": text.unescape(text.remove_html(extr(
                 '>Description</div>', '</section>')
                 .replace("\r\n", "\n"), "", "")),
@@ -91,6 +89,20 @@ class HentaifoundryExtractor(Extractor):
             "tags"       : text.split_html(extr(
                 ">Tags </span>", "</div>")),
         }
+
+        body = data["_body"]
+        if "<object " in body:
+            data["src"] = text.urljoin(self.root, text.unescape(text.extr(
+                body, 'name="movie" value="', '"')))
+            data["width"] = text.parse_int(text.extr(
+                body, "name='width' value='", "'"))
+            data["height"] = text.parse_int(text.extr(
+                body, "name='height' value='", "'"))
+        else:
+            data["src"] = text.urljoin(self.root, text.unescape(text.extr(
+                body, 'src="', '"')))
+            data["width"] = text.parse_int(text.extr(body, 'width="', '"'))
+            data["height"] = text.parse_int(text.extr(body, 'height="', '"'))
 
         return text.nameext_from_url(data["src"], data)
 
