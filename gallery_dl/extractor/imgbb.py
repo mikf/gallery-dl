@@ -124,12 +124,14 @@ class ImgbbAlbumExtractor(ImgbbExtractor):
         self.page_url = "https://ibb.co/album/" + self.album_id
 
     def metadata(self, page):
-        album, pos = text.extract(page, '"og:title" content="', '"')
-        user , pos = text.extract(page, 'rel="author">', '<', pos)
+        album      , pos = text.extract(page, '"og:title" content="', '"')
+        displayname, pos = text.extract(page, '"user":{"name":"', '"', pos)
+        username   , pos = text.extract(page, ',"username":"', '"', pos)
         return {
-            "album_id"  : self.album_id,
-            "album_name": text.unescape(album),
-            "user"      : user.lower() if user else "",
+            "album_id"   : self.album_id,
+            "album_name" : text.unescape(album),
+            "user"       : username.lower() if username else "",
+            "displayname": displayname or "",
         }
 
     def images(self, page):
@@ -158,7 +160,12 @@ class ImgbbUserExtractor(ImgbbExtractor):
         self.page_url = "https://{}.imgbb.com/".format(self.user)
 
     def metadata(self, page):
-        return {"user": self.user}
+        displayname, pos = text.extract(page, '"user":{"name":"', '"')
+        username   , pos = text.extract(page, ',"username":"', '"', pos)
+        return {
+            "user"       : username or self.user,
+            "displayname": displayname or "",
+        }
 
     def images(self, page):
         user = text.extr(page, '.obj.resource={"id":"', '"')
@@ -185,11 +192,12 @@ class ImgbbImageExtractor(ImgbbExtractor):
 
         image = {
             "id"    : self.image_id,
-            "title" : text.unescape(extr('"og:title" content="', '"')),
+            "title" : text.unescape(extr(
+                '"og:title" content="', ' hosted at ImgBB"')),
             "url"   : extr('"og:image" content="', '"'),
             "width" : text.parse_int(extr('"og:image:width" content="', '"')),
             "height": text.parse_int(extr('"og:image:height" content="', '"')),
-            "user"  : extr('rel="author">', '<').lower(),
+            "user"  : extr(',"username":"', '"').lower(),
         }
         image["extension"] = text.ext_from_url(image["url"])
 
