@@ -277,7 +277,7 @@ class PatreonCreatorExtractor(PatreonExtractor):
 
         try:
             data = self._extract_bootstrap(page)
-            campaign_id = data["creator"]["data"]["id"]
+            campaign_id = data["campaign"]["data"]["id"]
         except (KeyError, ValueError):
             raise exception.NotFoundError("creator")
 
