@@ -5,6 +5,7 @@
 # published by the Free Software Foundation.
 
 from gallery_dl.extractor import moebooru
+from gallery_dl import exception
 
 
 __tests__ = (
@@ -52,6 +53,15 @@ __tests__ = (
     "#category": ("moebooru", "konachan", "pool"),
     "#class"   : moebooru.MoebooruPoolExtractor,
     "#sha1_content": "cf0546e38a93c2c510a478f8744e60687b7a8426",
+},
+
+{
+    "#url"     : "https://konachan.com/pool/show/95",
+    "#comment" : "'metadata' option (#4646)",
+    "#category": ("moebooru", "konachan", "pool"),
+    "#class"   : moebooru.MoebooruPoolExtractor,
+    "#options"  : {"metadata": True},
+    "#exception": exception.HttpError,
 },
 
 {
