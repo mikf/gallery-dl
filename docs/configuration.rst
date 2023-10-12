@@ -2247,6 +2247,18 @@ Description
     Fetch media from replies to other notes.
 
 
+extractor.[moebooru].pool.metadata
+----------------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Extract extended ``pool`` metadata.
+
+    Note: Not supported by all ``moebooru`` instances.
+
+
 extractor.newgrounds.flash
 --------------------------
 Type
