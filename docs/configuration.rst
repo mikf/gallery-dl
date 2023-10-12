@@ -1306,12 +1306,20 @@ Description
 extractor.deviantart.group
 --------------------------
 Type
-    ``bool``
+    * ``bool``
+    * ``string``
 Default
     ``true``
 Description
     Check whether the profile name in a given URL
     belongs to a group or a regular user.
+
+    When disabled, assume every given profile name
+    belongs to a regular user.
+
+    Special values:
+
+    * ``"skip"``: Skip groups
 
 
 extractor.deviantart.include

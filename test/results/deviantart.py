@@ -124,6 +124,16 @@ __tests__ = (
 },
 
 {
+    "#url"      : "https://www.deviantart.com/yakuzafc/gallery",
+    "#comment"  : "'group': 'skip' (#4630)",
+    "#category" : ("", "deviantart", "gallery"),
+    "#class"    : deviantart.DeviantartGalleryExtractor,
+    "#options"  : {"group": "skip"},
+    "#exception": exception.StopExtraction,
+    "#count"    : 0,
+},
+
+{
     "#url"     : "https://www.deviantart.com/justatest235723/gallery",
     "#comment" : "'folders' option (#276)",
     "#category": ("", "deviantart", "gallery"),
@@ -725,7 +735,7 @@ __tests__ = (
 
 {
     "#url"     : "https://www.deviantart.com/chain-man/gallery/scraps",
-    "#comment" : "deactivated account"
+    "#comment" : "deactivated account",
     "#category": ("", "deviantart", "scraps"),
     "#class"   : deviantart.DeviantartScrapsExtractor,
 },
