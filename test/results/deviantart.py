@@ -94,6 +94,27 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.deviantart.com/AlloyRabbit/gallery",
+    "#comment" : "deactivated account",
+    "#category": ("", "deviantart", "gallery"),
+    "#class"   : deviantart.DeviantartGalleryExtractor,
+},
+
+{
+    "#url"     : "https://www.deviantart.com/Shydude/gallery",
+    "#comment" : "deactivated account",
+    "#category": ("", "deviantart", "gallery"),
+    "#class"   : deviantart.DeviantartGalleryExtractor,
+},
+
+{
+    "#url"     : "https://www.deviantart.com/zapor666/gallery",
+    "#comment" : "deactivated account",
+    "#category": ("", "deviantart", "gallery"),
+    "#class"   : deviantart.DeviantartGalleryExtractor,
+},
+
+{
     "#url"     : "https://www.deviantart.com/yakuzafc/gallery",
     "#comment" : "group",
     "#category": ("", "deviantart", "gallery"),
@@ -700,6 +721,13 @@ __tests__ = (
     "#category": ("", "deviantart", "scraps"),
     "#class"   : deviantart.DeviantartScrapsExtractor,
     "#count"   : 12,
+},
+
+{
+    "#url"     : "https://www.deviantart.com/chain-man/gallery/scraps",
+    "#comment" : "deactivated account"
+    "#category": ("", "deviantart", "scraps"),
+    "#class"   : deviantart.DeviantartScrapsExtractor,
 },
 
 {
