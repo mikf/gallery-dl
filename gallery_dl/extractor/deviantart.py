@@ -42,7 +42,7 @@ class DeviantartExtractor(Extractor):
         self.offset = 0
 
     def _init(self):
-        self.jwt = self.config("jwt", True)
+        self.jwt = self.config("jwt", False)
         self.flat = self.config("flat", True)
         self.extra = self.config("extra", False)
         self.quality = self.config("quality", "100")

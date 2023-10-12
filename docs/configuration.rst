@@ -1354,11 +1354,13 @@ extractor.deviantart.jwt
 Type
     ``bool``
 Default
-    ``true``
+    ``false``
 Description
     Update `JSON Web Tokens <https://jwt.io/>`__ (the ``token`` URL parameter)
     of otherwise non-downloadable, low-resolution images
     to be able to download them in full resolution.
+
+    Note: No longer functional as of 2023-10-11
 
 
 extractor.deviantart.mature
