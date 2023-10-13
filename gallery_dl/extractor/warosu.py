@@ -47,7 +47,7 @@ class WarosuThreadExtractor(Extractor):
 
     def metadata(self, page):
         boardname = text.extr(page, "<title>", "</title>")
-        title = text.extr(page, 'filetitle" itemprop="name">', '<')
+        title = text.unescape(text.extr(page, "class=filetitle>", "<"))
         return {
             "board"     : self.board,
             "board_name": boardname.rpartition(" - ")[2],
@@ -57,39 +57,37 @@ class WarosuThreadExtractor(Extractor):
 
     def posts(self, page):
         """Build a list of all post objects"""
-        page = text.extr(page, '<div class="content">', '<table>')
-        needle = '<table itemscope itemtype="http://schema.org/Comment">'
+        page = text.extr(page, "<div class=content", "</form>")
+        needle = "<table>"
         return [self.parse(post) for post in page.split(needle)]
 
     def parse(self, post):
         """Build post object by extracting data from an HTML post"""
         data = self._extract_post(post)
-        if "<span>File:" in post:
+        if "<span> File:" in post:
             self._extract_image(post, data)
             part = data["image"].rpartition("/")[2]
             data["tim"], _, data["extension"] = part.partition(".")
             data["ext"] = "." + data["extension"]
         return data
 
-    @staticmethod
-    def _extract_post(post):
+    def _extract_post(self, post):
         extr = text.extract_from(post)
         return {
-            "no"  : extr('id="p', '"'),
-            "name": extr('<span itemprop="name">', "</span>"),
-            "time": extr('<span class="posttime" title="', '000">'),
-            "now" : extr("", "<"),
+            "no"  : extr("id=p", ">"),
+            "name": extr("class=postername>", "<").strip(),
+            "time": extr("class=posttime title=", "000>"),
+            "now" : extr("", "<").strip(),
             "com" : text.unescape(text.remove_html(extr(
-                '<blockquote><p itemprop="text">', '</p></blockquote>'
-            ).strip())),
+                "<blockquote>", "</blockquote>").strip())),
         }
 
-    @staticmethod
-    def _extract_image(post, data):
+    def _extract_image(self, post, data):
         extr = text.extract_from(post)
-        data["fsize"] = extr("<span>File: ", ", ")
+        data["fsize"] = extr("<span> File: ", ", ")
         data["w"] = extr("", "x")
         data["h"] = extr("", ", ")
-        data["filename"] = text.unquote(extr("", "<").rpartition(".")[0])
-        extr("<br />", "")
-        data["image"] = "https:" + extr('<a href="', '"')
+        data["filename"] = text.unquote(extr(
+            "", "<").rstrip().rpartition(".")[0])
+        extr("<br>", "")
+        data["image"] = self.root + extr("<a href=", ">")
