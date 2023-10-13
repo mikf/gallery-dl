@@ -63,6 +63,8 @@ class FantiaExtractor(Extractor):
                         post["content_filename"] or file["file_url"], post)
                     yield Message.Url, file["file_url"], post
 
+            post["content_num"] += 1
+
     def posts(self):
         """Return post IDs"""
 
