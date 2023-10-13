@@ -55,15 +55,30 @@ __tests__ = (
 
 {
     "#url"     : "https://www.newgrounds.com/art/view/zedrinbot/lewd-animation-tutorial",
-    "#comment" : "extra files in 'art-image-row' elements (#4642)",
+    "#comment" : "extra files in 'art-image-row' elements - WebP to GIF (#4642)",
     "#category": ("", "newgrounds", "image"),
     "#class"   : newgrounds.NewgroundsImageExtractor,
     "#urls"    : (
         "https://art.ngfiles.com/images/5091000/5091275_45067_zedrinbot_untitled-5091275.0a9d27ed2bc265a7e89478ed6ad6f86f.gif?f1696187399",
-        "https://art.ngfiles.com/medium_views/5091000/5091275_45071_zedrinbot_untitled-5091275.6fdc62eaef43528fb1c9bda624d30a3d.webp?f1696187437",
-        "https://art.ngfiles.com/medium_views/5091000/5091275_45070_zedrinbot_untitled-5091275.0d7334746374465bd448908b88d1f810.webp?f1696187435",
-        "https://art.ngfiles.com/medium_views/5091000/5091275_45072_zedrinbot_untitled-5091275.6fdc62eaef43528fb1c9bda624d30a3d.webp?f1696187438",
-        "https://art.ngfiles.com/medium_views/5091000/5091275_45073_zedrinbot_untitled-5091275.20aa05c1cd22fd058e8c68ce58f5a302.webp?f1696187439",
+        "https://art.ngfiles.com/images/5091000/5091275_45071_zedrinbot_untitled-5091275.6fdc62eaef43528fb1c9bda624d30a3d.gif?f1696187437",
+        "https://art.ngfiles.com/images/5091000/5091275_45070_zedrinbot_untitled-5091275.0d7334746374465bd448908b88d1f810.gif?f1696187435",
+        "https://art.ngfiles.com/images/5091000/5091275_45072_zedrinbot_untitled-5091275.6fdc62eaef43528fb1c9bda624d30a3d.gif?f1696187438",
+        "https://art.ngfiles.com/images/5091000/5091275_45073_zedrinbot_untitled-5091275.20aa05c1cd22fd058e8c68ce58f5a302.gif?f1696187439",
+    ),
+},
+
+{
+    "#url"     : "https://www.newgrounds.com/art/view/zedrinbot/nazrin-tanlines",
+    "#comment" : "extra files in 'art-image-row' elements - native PNG files (#4642)",
+    "#category": ("", "newgrounds", "image"),
+    "#class"   : newgrounds.NewgroundsImageExtractor,
+    "#urls"    : (
+        "https://art.ngfiles.com/images/5009000/5009916_14628_zedrinbot_nazrin-tanlines.265f7b6beec5855a349e2646e90cbc01.png?f1695698131",
+        "https://art.ngfiles.com/images/5009000/5009916_14632_zedrinbot_nazrin-tanlines.40bd62fbf5875806cda6b004b348114a.png?f1695698148",
+        "https://art.ngfiles.com/images/5009000/5009916_14634_zedrinbot_nazrin-tanlines.40bd62fbf5875806cda6b004b348114a.png?f1695698148",
+        "https://art.ngfiles.com/images/5009000/5009916_14633_zedrinbot_nazrin-tanlines.40bd62fbf5875806cda6b004b348114a.png?f1695698148",
+        "https://art.ngfiles.com/images/5009000/5009916_14635_zedrinbot_nazrin-tanlines.6a7aa4fd63e5f8077ad29314568246cc.png?f1695698149",
+        "https://art.ngfiles.com/images/5009000/5009916_14636_zedrinbot_nazrin-tanlines.6a7aa4fd63e5f8077ad29314568246cc.png?f1695698149",
     ),
 },
 
@@ -73,7 +88,7 @@ __tests__ = (
     "#category": ("", "newgrounds", "image"),
     "#class"   : newgrounds.NewgroundsImageExtractor,
     "#options" : {"username": None},
-    "#count"   : 1,
+    "#count"   : 0,
 },
 
 {

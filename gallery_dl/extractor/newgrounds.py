@@ -56,13 +56,26 @@ class NewgroundsExtractor(Extractor):
                 yield Message.Directory, post
                 yield Message.Url, url, text.nameext_from_url(url, post)
 
+                ext = post["extension"]
                 for num, url in enumerate(text.extract_iter(
                         post["_images"] + post["_comment"],
                         'data-smartload-src="', '"'), 1):
                     post["num"] = num
                     post["_index"] = "{}_{:>02}".format(post["index"], num)
                     url = text.ensure_http_scheme(url)
-                    yield Message.Url, url, text.nameext_from_url(url, post)
+                    text.nameext_from_url(url, post)
+
+                    if "_fallback" in post:
+                        del post["_fallback"]
+
+                    if "/comments/" not in url:
+                        url = url.replace("/medium_views/", "/images/", 1)
+                        if post["extension"] == "webp":
+                            post["_fallback"] = (url,)
+                            post["extension"] = ext
+                            url = url.replace(".webp", "." + ext)
+
+                    yield Message.Url, url, post
             else:
                 self.log.warning(
                     "Unable to get download URL for '%s'", post_url)
