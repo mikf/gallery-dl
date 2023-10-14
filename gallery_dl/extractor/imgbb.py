@@ -84,6 +84,13 @@ class ImgbbExtractor(Extractor):
             raise exception.AuthenticationError()
         return self.cookies
 
+    def _extract_resource(self, page):
+        return util.json_loads(text.extr(
+            page, "CHV.obj.resource=", "};") + "}")
+
+    def _extract_user(self, page):
+        return self._extract_resource(page).get("user") or {}
+
     def _pagination(self, page, endpoint, params):
         data = None
         seek, pos = text.extract(page, 'data-seek="', '"')
@@ -124,14 +131,14 @@ class ImgbbAlbumExtractor(ImgbbExtractor):
         self.page_url = "https://ibb.co/album/" + self.album_id
 
     def metadata(self, page):
-        album      , pos = text.extract(page, '"og:title" content="', '"')
-        displayname, pos = text.extract(page, '"user":{"name":"', '"', pos)
-        username   , pos = text.extract(page, ',"username":"', '"', pos)
+        album = text.extr(page, '"og:title" content="', '"')
+        user = self._extract_user(page)
         return {
             "album_id"   : self.album_id,
             "album_name" : text.unescape(album),
-            "user"       : username.lower() if username else "",
-            "displayname": displayname or "",
+            "user"       : user.get("username") or "",
+            "user_id"    : user.get("id") or "",
+            "displayname": user.get("name") or "",
         }
 
     def images(self, page):
@@ -160,11 +167,11 @@ class ImgbbUserExtractor(ImgbbExtractor):
         self.page_url = "https://{}.imgbb.com/".format(self.user)
 
     def metadata(self, page):
-        displayname, pos = text.extract(page, '"user":{"name":"', '"')
-        username   , pos = text.extract(page, ',"username":"', '"', pos)
+        user = self._extract_user(page)
         return {
-            "user"       : username or self.user,
-            "displayname": displayname or "",
+            "user"       : user.get("username") or self.user,
+            "user_id"    : user.get("id") or "",
+            "displayname": user.get("name") or "",
         }
 
     def images(self, page):
@@ -188,7 +195,9 @@ class ImgbbImageExtractor(ImgbbExtractor):
 
     def items(self):
         url = "https://ibb.co/" + self.image_id
-        extr = text.extract_from(self.request(url).text)
+        page = self.request(url).text
+        extr = text.extract_from(page)
+        user = self._extract_user(page)
 
         image = {
             "id"    : self.image_id,
@@ -197,7 +206,9 @@ class ImgbbImageExtractor(ImgbbExtractor):
             "url"   : extr('"og:image" content="', '"'),
             "width" : text.parse_int(extr('"og:image:width" content="', '"')),
             "height": text.parse_int(extr('"og:image:height" content="', '"')),
-            "user"  : extr(',"username":"', '"').lower(),
+            "user"       : user.get("username") or "",
+            "user_id"    : user.get("id") or "",
+            "displayname": user.get("name") or "",
         }
         image["extension"] = text.ext_from_url(image["url"])
 
