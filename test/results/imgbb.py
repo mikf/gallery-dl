@@ -13,18 +13,34 @@ __tests__ = (
     "#url"     : "https://ibb.co/album/i5PggF",
     "#category": ("", "imgbb", "album"),
     "#class"   : imgbb.ImgbbAlbumExtractor,
-    "#range"        : "1-80",
-    "#sha1_url"     : "70afec9fcc3a6de62a6b644b487d892d8d47cf1a",
-    "#sha1_metadata": "569e1d88ebdd27655387559cdf1cd526a3e1ab69",
+    "#patten"       : r"https://i\.ibb\.co/\w{7}/[\w-]+\.jpg",
+    "#count"        : 91,
+    "#sha1_url"     : "efe7e5a76531436e3b82c87e4ebd34c4dfeb484c",
+    "#sha1_metadata": "f1ab5492adb6333409f3367566a6dd7110537e21",
+
+    "album_id"   : "i5PggF",
+    "album_name" : "British Scrap Book",
+    "extension"  : "jpg",
+    "id"         : "re:^\w{7}$",
+    "title"      : str,
+    "url"        : r"re:https://i\.ibb\.co/\w{7}/[\w-]+\.jpg",
+    "user"       : "folkie",
+    "user_id"    : "GvFMGK",
+    "displayname": "Folkie",
+    "width"      : range(501, 1034),
+    "height"     : range(335, 768),
+    "size"       : range(74758, 439037),
 },
 
 {
     "#url"     : "https://ibb.co/album/i5PggF?sort=title_asc",
+    "#comment" : "'sort' query argument",
     "#category": ("", "imgbb", "album"),
     "#class"   : imgbb.ImgbbAlbumExtractor,
-    "#range"        : "1-80",
-    "#sha1_url"     : "afdf5fc95d8e09d77e8f44312f3e9b843987bb5a",
-    "#sha1_metadata": "f090e14d0e5f7868595082b2c95da1309c84872d",
+    "#patten"       : r"https://i\.ibb\.co/\w{7}/[\w-]+\.jpg",
+    "#count"        : 91,
+    "#sha1_url"     : "cde36552cc132a27178f22a1b9aceaa4df7e1575",
+    "#sha1_metadata": "b98bbb7671e31ebf9c7585fb9fc691b71bcdb546",
 },
 
 {
@@ -34,7 +50,9 @@ __tests__ = (
     "#class"   : imgbb.ImgbbAlbumExtractor,
     "#sha1_url": "ac0abcfcb89f4df6adc2f7e4ff872f3b03ef1bc7",
 
-    "user": "",
+    "displayname": "",
+    "user"       : "",
+    "user_id"    : "",
 },
 
 {
@@ -49,7 +67,7 @@ __tests__ = (
     "#url"     : "https://folkie.imgbb.com",
     "#category": ("", "imgbb", "user"),
     "#class"   : imgbb.ImgbbUserExtractor,
-    "#pattern" : r"https?://i\.ibb\.co/\w+/[^/?#]+",
+    "#patten"  : r"https://i\.ibb\.co/\w{7}/[\w-]+\.jpg",
     "#range"   : "1-80",
 },
 
@@ -60,13 +78,15 @@ __tests__ = (
     "#pattern"     : r"https://i\.ibb\.co/g3kvx80/Arundel-Ireeman-5\.jpg",
     "#sha1_content": "c5a0965178a8b357acd8aa39660092918c63795e",
 
-    "id"       : "fUqh5b",
-    "title"    : "Arundel Ireeman 5",
-    "url"      : "https://i.ibb.co/g3kvx80/Arundel-Ireeman-5.jpg",
-    "width"    : 960,
-    "height"   : 719,
-    "user"     : "folkie",
-    "extension": "jpg",
+    "id"         : "fUqh5b",
+    "title"      : "Arundel Ireeman 5",
+    "url"        : "https://i.ibb.co/g3kvx80/Arundel-Ireeman-5.jpg",
+    "width"      : 960,
+    "height"     : 719,
+    "user"       : "folkie",
+    "user_id"    : "GvFMGK",
+    "displayname": "Folkie",
+    "extension"  : "jpg",
 },
 
 )
