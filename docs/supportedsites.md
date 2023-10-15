@@ -428,12 +428,6 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
-    <td>JPG Fish</td>
-    <td>https://jpg1.su/</td>
-    <td>Albums, individual Images, User Profiles</td>
-    <td></td>
-</tr>
-<tr>
     <td>Keenspot</td>
     <td>http://www.keenspot.com/</td>
     <td>Comics</td>
@@ -995,6 +989,22 @@ Consider all sites to be NSFW unless otherwise known.
     <td>もえぴりあ</td>
     <td>https://vanilla-rock.com/</td>
     <td>Posts, Tag Searches</td>
+    <td></td>
+</tr>
+
+<tr>
+    <td colspan="4"><strong>Chevereto Instances</strong></td>
+</tr>
+<tr>
+    <td>JPG Fish</td>
+    <td>https://jpg2.su/</td>
+    <td>Albums, individual Images, User Profiles</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Pixl</td>
+    <td>https://pixl.li/</td>
+    <td>Albums, individual Images, User Profiles</td>
     <td></td>
 </tr>
 
