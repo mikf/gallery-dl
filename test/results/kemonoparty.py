@@ -117,9 +117,9 @@ __tests__ = (
     "#options" : {"dms": True},
 
     "dms": [{
-    "body"     : r"re:Hi! Thank you very much for supporting the work I did in May. Here's your reward pack! I hope you find something you enjoy in it. :\)\n\nhttps://www.mediafire.com/file/\w+/Set13_tier_2.zip/file",
-    "date"     : "2021-07-31 02:47:51.327865",
-}],
+        "body": r"re:Hi! Thank you very much for supporting the work I did in May. Here's your reward pack! I hope you find something you enjoy in it. :\)\n\nhttps://www.mediafire.com/file/\w+/Set13_tier_2.zip/file",
+        "date": "2021-06",
+    }],
 },
 
 {

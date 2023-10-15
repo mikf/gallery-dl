@@ -197,11 +197,12 @@ class KemonopartyExtractor(Extractor):
 
         dms = []
         for dm in text.extract_iter(page, "<article", "</article>"):
+            footer = text.extr(dm, "<footer", "</footer>")
             dms.append({
-                "body": text.unescape(text.extract(
+                "body": text.unescape(text.extr(
                     dm, "<pre>", "</pre></",
-                )[0].strip()),
-                "date": text.extr(dm, 'datetime="', '"'),
+                ).strip()),
+                "date": text.extr(footer, 'Published: ', '\n'),
             })
         return dms
 
