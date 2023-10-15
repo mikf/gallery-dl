@@ -156,11 +156,32 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://kemono.party/discord/server/488668827274444803#608504710906904576",
+    "#category": ("", "kemonoparty", "discord"),
+    "#class"   : kemonoparty.KemonopartyDiscordExtractor,
+    "#count"   : 4,
+
+    "channel"     : "608504710906904576",
+    "channel_name": "finish-work",
+},
+
+{
     "#url"     : "https://kemono.party/discord/server/488668827274444803#finish-work",
     "#category": ("", "kemonoparty", "discord"),
     "#class"   : kemonoparty.KemonopartyDiscordExtractor,
     "#count"   : 4,
 
+    "channel"     : "608504710906904576",
+    "channel_name": "finish-work",
+},
+
+{
+    "#url"     : "https://kemono.party/discord/server/488668827274444803/channel/608504710906904576#finish-work",
+    "#category": ("", "kemonoparty", "discord"),
+    "#class"   : kemonoparty.KemonopartyDiscordExtractor,
+    "#count"   : 4,
+
+    "channel"     : "608504710906904576",
     "channel_name": "finish-work",
 },
 

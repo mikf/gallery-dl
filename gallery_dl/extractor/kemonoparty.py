@@ -10,7 +10,7 @@
 
 from .common import Extractor, Message
 from .. import text, exception
-from ..cache import cache
+from ..cache import cache, memcache
 import itertools
 import re
 
@@ -205,6 +205,12 @@ class KemonopartyExtractor(Extractor):
             })
         return dms
 
+    @memcache(keyarg=1)
+    def _discord_channels(self, server):
+        url = "{}/api/discord/channels/lookup?q={}".format(
+            self.root, server)
+        return self.request(url).json()
+
 
 def _validate(response):
     return (response.headers["content-length"] != "9" or
@@ -270,10 +276,28 @@ class KemonopartyDiscordExtractor(KemonopartyExtractor):
 
     def __init__(self, match):
         KemonopartyExtractor.__init__(self, match)
-        _, _, self.server, self.channel, self.channel_name = match.groups()
+        _, _, self.server, self.channel_id, self.channel = match.groups()
+        self.channel_name = ""
 
     def items(self):
         self._prepare_ddosguard_cookies()
+
+        if self.channel_id:
+            self.channel_name = self.channel
+        else:
+            if self.channel.isdecimal() and len(self.channel) >= 16:
+                key = "id"
+            else:
+                key = "name"
+
+            for channel in self._discord_channels(self.server):
+                if channel[key] == self.channel:
+                    break
+            else:
+                raise exception.NotFoundError("channel")
+
+            self.channel_id = channel["id"]
+            self.channel_name = channel["name"]
 
         find_inline = re.compile(
             r"https?://(?:cdn\.discordapp.com|media\.discordapp\.net)"
@@ -319,17 +343,7 @@ class KemonopartyDiscordExtractor(KemonopartyExtractor):
                 yield Message.Url, url, post
 
     def posts(self):
-        if self.channel is None:
-            url = "{}/api/discord/channels/lookup?q={}".format(
-                self.root, self.server)
-            for channel in self.request(url).json():
-                if channel["name"] == self.channel_name:
-                    self.channel = channel["id"]
-                    break
-            else:
-                raise exception.NotFoundError("channel")
-
-        url = "{}/api/discord/channel/{}".format(self.root, self.channel)
+        url = "{}/api/discord/channel/{}".format(self.root, self.channel_id)
         params = {"skip": 0}
 
         while True:
@@ -352,11 +366,7 @@ class KemonopartyDiscordServerExtractor(KemonopartyExtractor):
         self.server = match.group(3)
 
     def items(self):
-        url = "{}/api/discord/channels/lookup?q={}".format(
-            self.root, self.server)
-        channels = self.request(url).json()
-
-        for channel in channels:
+        for channel in self._discord_channels(self.server):
             url = "{}/discord/server/{}/channel/{}#{}".format(
                 self.root, self.server, channel["id"], channel["name"])
             channel["_extractor"] = KemonopartyDiscordExtractor
