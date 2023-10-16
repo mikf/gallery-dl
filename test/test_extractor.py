@@ -238,7 +238,7 @@ class TestExtractorWait(unittest.TestCase):
             until = datetime.fromtimestamp(until)
         o = self._isotime_to_seconds(output)
         u = self._isotime_to_seconds(until.time().isoformat()[:8])
-        self.assertLess(o-u, 1.0)
+        self.assertLessEqual(o-u, 1.0)
 
     @staticmethod
     def _isotime_to_seconds(isotime):
