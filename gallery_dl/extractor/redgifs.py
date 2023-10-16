@@ -146,11 +146,17 @@ class RedgifsCollectionsExtractor(RedgifsExtractor):
 class RedgifsNichesExtractor(RedgifsExtractor):
     """Extractor for redgifs niches"""
     subcategory = "niches"
-    pattern = r"(?:https?://)?(?:www\.)?redgifs\.com/niches/([^/?#]+)"
+    pattern = (r"(?:https?://)?(?:www\.)?redgifs\.com/niches/([^/?#]+)/?"
+               r"(?:\?([^#]+))?$")
     example = "https://www.redgifs.com/niches/NAME"
 
+    def __init__(self, match):
+        RedgifsExtractor.__init__(self, match)
+        self.query = match.group(2)
+
     def gifs(self):
-        return self.api.niches(self.key)
+        order = text.parse_query(self.query).get("order")
+        return self.api.niches(self.key, order or "new")
 
 
 class RedgifsSearchExtractor(RedgifsExtractor):
@@ -232,9 +238,10 @@ class RedgifsAPI():
         endpoint = "/v2/users/{}/collections".format(user)
         return self._pagination(endpoint, key="collections")
 
-    def niches(self, niche):
+    def niches(self, niche, order):
         endpoint = "/v2/niches/{}/gifs".format(niche)
-        return self._pagination(endpoint)
+        params = {"count": 30, "order": order}
+        return self._pagination(endpoint, params)
 
     def search(self, params):
         endpoint = "/v2/gifs/search"

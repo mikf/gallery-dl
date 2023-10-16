@@ -67,19 +67,19 @@ __tests__ = (
 },
 
 {
-    "#url"     : "https://www.redgifs.com/niches/boobs",
+    "#url"     : "https://www.redgifs.com/niches/just-boobs",
     "#category": ("", "redgifs", "niches"),
     "#class"   : redgifs.RedgifsNichesExtractor,
-    "#pattern" : r"https://\w+\.redgifs\.com/[\w-]+\.mp4",
+    "#pattern" : r"https://\w+\.redgifs\.com/[\w-]+\.(mp4|jpg)",
     "#range"   : "1-20",
     "#count"   : 20,
 },
 
 {
-    "#url"     : "https://www.redgifs.com/niches/ass",
+    "#url"     : "https://www.redgifs.com/niches/thick-booty",
     "#category": ("", "redgifs", "niches"),
     "#class"   : redgifs.RedgifsNichesExtractor,
-    "#pattern" : r"https://\w+\.redgifs\.com/[\w-]+\.mp4",
+    "#pattern" : r"https://\w+\.redgifs\.com/[\w-]+\.(mp4|jpg)",
     "#range"   : "1-20",
     "#count"   : 20,
 },
