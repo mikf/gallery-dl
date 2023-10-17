@@ -234,7 +234,7 @@ class DeviantartExtractor(Extractor):
 
         if self.comments:
             deviation["comments"] = (
-                self.api.comments(deviation["deviationid"], target="deviation")
+                self._extract_comments(deviation["deviationid"], "deviation")
                 if deviation["stats"]["comments"] else ()
             )
 
@@ -400,6 +400,28 @@ class DeviantartExtractor(Extractor):
                 #  binascii.b2a_base64(header).rstrip(b"=\n").decode(),
                 binascii.b2a_base64(payload).rstrip(b"=\n").decode())
         )
+
+    def _extract_comments(self, target_id, target_type="deviation"):
+        results = None
+        comment_ids = [None]
+
+        while comment_ids:
+            comments = self.api.comments(
+                target_id, target_type, comment_ids.pop())
+
+            if results:
+                results.extend(comments)
+            else:
+                results = comments
+
+            # parent comments, i.e. nodes with at least one child
+            parents = {c["parentid"] for c in comments}
+            # comments with more than one reply
+            replies = {c["commentid"] for c in comments if c["replies"]}
+            # add comment UUIDs with replies that are not parent to any node
+            comment_ids.extend(replies - parents)
+
+        return results
 
     def _limited_request(self, url, **kwargs):
         """Limits HTTP requests to one every 2 seconds"""
@@ -704,7 +726,7 @@ class DeviantartStatusExtractor(DeviantartExtractor):
         deviation["stats"] = {"comments": comments_count}
         if self.comments:
             deviation["comments"] = (
-                self.api.comments(deviation["statusid"], target="status")
+                self._extract_comments(deviation["statusid"], "status")
                 if comments_count else ()
             )
 
@@ -1078,11 +1100,17 @@ class DeviantartOAuthAPI():
                   "mature_content": self.mature}
         return self._pagination_list(endpoint, params)
 
-    def comments(self, id, target, offset=0):
+    def comments(self, target_id, target_type="deviation",
+                 comment_id=None, offset=0):
         """Fetch comments posted on a target"""
-        endpoint = "/comments/{}/{}".format(target, id)
-        params = {"maxdepth": "5", "offset": offset, "limit": 50,
-                  "mature_content": self.mature}
+        endpoint = "/comments/{}/{}".format(target_type, target_id)
+        params = {
+            "commentid"     : comment_id,
+            "maxdepth"      : "5",
+            "offset"        : offset,
+            "limit"         : 50,
+            "mature_content": self.mature,
+        }
         return self._pagination_list(endpoint, params=params, key="thread")
 
     def deviation(self, deviation_id, public=None):

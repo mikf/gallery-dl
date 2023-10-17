@@ -547,15 +547,20 @@ __tests__ = (
     "#options" : {"comments": True},
     "#pattern" : r"https://wixmp-[^.]+\.wixmp\.com/f/.+/.+\.jpg\?token=.+",
 
-    "comments": list,
+    "comments": "len:44",
 },
 
 {
-    "#url"     : "https://www.deviantart.com/citizenfresh/art/Hverarond-789295466",
-    "#comment" : "wixmp URL rewrite",
+    "#url"     : "https://www.deviantart.com/justatest235723/art/Blue-811519058",
+    "#comment" : "nested comments (#4653)",
     "#category": ("", "deviantart", "deviation"),
     "#class"   : deviantart.DeviantartDeviationExtractor,
-    "#pattern" : r"https://wixmp-\w+\.wixmp\.com/f/[^/]+/[^.]+\.jpg\?token=",
+    "#options" : {
+        "original": False,
+        "comments": True,
+    },
+
+    "comments": "len:20",
 },
 
 {
@@ -563,7 +568,6 @@ __tests__ = (
     "#comment" : "wixmp URL rewrite /intermediary/",
     "#category": ("", "deviantart", "deviation"),
     "#class"   : deviantart.DeviantartDeviationExtractor,
-    "#options" : {"jwt": False},
     "#pattern" : r"https://images-wixmp-\w+\.wixmp\.com/intermediary/f/[^/]+/[^.]+\.jpg",
 },
 
