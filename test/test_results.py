@@ -201,6 +201,9 @@ class TestExtractorResults(unittest.TestCase):
                     self.assertEqual(str(value), test[3:], msg=key)
                 elif test.startswith("type:"):
                     self.assertEqual(type(value).__name__, test[5:], msg=key)
+                elif test.startswith("len:"):
+                    self.assertIsInstance(value, (list, tuple), msg=key)
+                    self.assertEqual(len(value), int(test[4:]), msg=key)
                 else:
                     self.assertEqual(value, test, msg=key)
             else:
