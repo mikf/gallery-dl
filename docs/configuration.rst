@@ -3437,6 +3437,16 @@ Description
     Note: Not supported by all ``moebooru`` instances.
 
 
+extractor.naver.videos
+----------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Download videos.
+
+
 extractor.newgrounds.flash
 --------------------------
 Type
