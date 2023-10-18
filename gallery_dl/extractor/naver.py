@@ -10,7 +10,7 @@
 
 from .common import GalleryExtractor, Extractor, Message
 from .. import text
-
+from datetime import date
 
 class NaverBase():
     """Base class for naver extractors"""
@@ -59,6 +59,11 @@ class NaverPostExtractor(NaverBase, GalleryExtractor):
         data["post"]["date"] = text.parse_datetime(
             extr('se_publishDate pcol2">', '<') or
             extr('_postAddDate">', '<'), "%Y. %m. %d. %H:%M")
+
+        # fixes directory error for posts created less than 24 hours ago
+        if "전" in str(data["post"]["date"]):
+            data["post"]["date"] = text.parse_datetime(date.today().isoformat(), format="%Y-%m-%d")
+
         return data
 
     def images(self, page):
