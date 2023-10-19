@@ -186,6 +186,18 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://kemono.party/discord/server/818188637329031199#818343747275456522",
+    "#comment" : "pagination",
+    "#category": ("", "kemonoparty", "discord"),
+    "#class"   : kemonoparty.KemonopartyDiscordExtractor,
+    "#range"   : "1-250",
+    "#count"   : 250,
+
+    "channel"     : "818343747275456522",
+    "channel_name": "wraith-sfw-gallery",
+},
+
+{
     "#url"     : "https://kemono.su/discord/server/256559665620451329/channel/462437519519383555#",
     "#category": ("", "kemonoparty", "discord"),
     "#class"   : kemonoparty.KemonopartyDiscordExtractor,

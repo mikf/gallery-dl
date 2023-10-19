@@ -344,8 +344,15 @@ class KemonopartyDiscordExtractor(KemonopartyExtractor):
     def posts(self):
         url = "{}/api/v1/discord/channel/{}".format(
             self.root, self.channel_id)
-        params = {"skip": 0}
-        return self.request(url, params=params).json()
+        params = {"o": 0}
+
+        while True:
+            posts = self.request(url, params=params).json()
+            yield from posts
+
+            if len(posts) < 150:
+                break
+            params["o"] += 150
 
 
 class KemonopartyDiscordServerExtractor(KemonopartyExtractor):
