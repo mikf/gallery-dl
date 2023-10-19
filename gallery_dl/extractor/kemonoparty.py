@@ -70,8 +70,7 @@ class KemonopartyExtractor(Extractor):
                 self.root, post["service"], post["user"], post["id"])
             post["_http_headers"] = headers
             post["date"] = text.parse_datetime(
-                post["published"] or post["added"],
-                "%a, %d %b %Y %H:%M:%S %Z")
+                post["published"] or post["added"], "%Y-%m-%dT%H:%M:%S")
             if username:
                 post["username"] = username
             if comments:
@@ -208,7 +207,7 @@ class KemonopartyExtractor(Extractor):
 
     @memcache(keyarg=1)
     def _discord_channels(self, server):
-        url = "{}/api/v1/discord/channels/lookup/{}".format(
+        url = "{}/api/v1/discord/channel/lookup/{}".format(
             self.root, server)
         return self.request(url).json()
 
@@ -241,10 +240,9 @@ class KemonopartyUserExtractor(KemonopartyExtractor):
             posts = self.request(url, params=params).json()
             yield from posts
 
-            cnt = len(posts)
-            if cnt < 25:
-                return
-            params["o"] += cnt
+            if len(posts) < 50:
+                break
+            params["o"] += 50
 
 
 class KemonopartyPostExtractor(KemonopartyExtractor):
@@ -262,8 +260,7 @@ class KemonopartyPostExtractor(KemonopartyExtractor):
         self.user_url = "{}/{}/user/{}".format(self.root, service, user_id)
 
     def posts(self):
-        posts = self.request(self.api_url).json()
-        return (posts[0],) if len(posts) > 1 else posts
+        return (self.request(self.api_url).json(),)
 
 
 class KemonopartyDiscordExtractor(KemonopartyExtractor):
@@ -325,7 +322,7 @@ class KemonopartyDiscordExtractor(KemonopartyExtractor):
 
             post["channel_name"] = self.channel_name
             post["date"] = text.parse_datetime(
-                post["published"], "%a, %d %b %Y %H:%M:%S %Z")
+                post["published"], "%Y-%m-%dT%H:%M:%S.%f")
             post["count"] = len(files)
             yield Message.Directory, post
 
@@ -348,15 +345,7 @@ class KemonopartyDiscordExtractor(KemonopartyExtractor):
         url = "{}/api/v1/discord/channel/{}".format(
             self.root, self.channel_id)
         params = {"skip": 0}
-
-        while True:
-            posts = self.request(url, params=params).json()
-            yield from posts
-
-            cnt = len(posts)
-            if cnt < 25:
-                break
-            params["skip"] += cnt
+        return self.request(url, params=params).json()
 
 
 class KemonopartyDiscordServerExtractor(KemonopartyExtractor):
