@@ -12,8 +12,7 @@ __tests__ = (
     "#url"     : "https://kemono.party/fanbox/user/6993449",
     "#category": ("", "kemonoparty", "fanbox"),
     "#class"   : kemonoparty.KemonopartyUserExtractor,
-    "#range"   : "1-25",
-    "#count"   : 25,
+    "#count"   : 847,
 },
 
 {
@@ -21,8 +20,8 @@ __tests__ = (
     "#comment" : "'max-posts' option, 'o' query parameter (#1674)",
     "#category": ("", "kemonoparty", "patreon"),
     "#class"   : kemonoparty.KemonopartyUserExtractor,
-    "#options" : {"max-posts": 25},
-    "#count"   : "< 100",
+    "#options" : {"max-posts": 100},
+    "#count"   : range(200, 300),
 },
 
 {
@@ -44,7 +43,7 @@ __tests__ = (
     "#pattern"     : r"https://kemono.party/data/21/0f/210f35388e28bbcf756db18dd516e2d82ce75[0-9a-f]+\.jpg",
     "#sha1_content": "900949cefc97ab8dc1979cc3664785aac5ba70dd",
 
-    "added"      : "Wed, 06 May 2020 20:28:02 GMT",
+    "added"      : "2020-05-06T20:28:02.302000",
     "content"    : str,
     "count"      : 1,
     "date"       : "dt:2019-08-11 02:09:04",
@@ -55,7 +54,7 @@ __tests__ = (
     "hash"       : "210f35388e28bbcf756db18dd516e2d82ce758e0d32881eeee76d43e1716d382",
     "id"         : "506575",
     "num"        : 1,
-    "published"  : "Sun, 11 Aug 2019 02:09:04 GMT",
+    "published"  : "2019-08-11T02:09:04",
     "service"    : "fanbox",
     "shared_file": False,
     "subcategory": "fanbox",
@@ -183,6 +182,7 @@ __tests__ = (
 
     "channel"     : "608504710906904576",
     "channel_name": "finish-work",
+    "date"        : "type:datetime",
 },
 
 {
