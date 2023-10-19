@@ -224,21 +224,21 @@ def _validate(response):
 class KemonopartyUserExtractor(KemonopartyExtractor):
     """Extractor for all posts from a kemono.party user listing"""
     subcategory = "user"
-    pattern = USER_PATTERN + r"/?(?:\?o=(\d+))?(?:$|[?#])"
+    pattern = USER_PATTERN + r"/?(?:\?([^#]+))?(?:$|[?#])"
     example = "https://kemono.party/SERVICE/user/12345"
 
     def __init__(self, match):
-        _, _, service, user_id, offset = match.groups()
+        _, _, service, user_id, self.query = match.groups()
         self.subcategory = service
         KemonopartyExtractor.__init__(self, match)
         self.api_url = "{}/api/v1/{}/user/{}".format(
             self.root, service, user_id)
         self.user_url = "{}/{}/user/{}".format(self.root, service, user_id)
-        self.offset = text.parse_int(offset)
 
     def posts(self):
         url = self.api_url
-        params = {"o": self.offset}
+        params = text.parse_query(self.query)
+        params["o"] = text.parse_int(params.get("o"))
 
         while True:
             posts = self.request(url, params=params).json()

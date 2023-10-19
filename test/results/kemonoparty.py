@@ -26,6 +26,19 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://kemono.party/fanbox/user/6993449?q=お蔵入りになった",
+    "#comment" : "search / 'q' query parameter (#3385, #4057)",
+    "#category": ("", "kemonoparty", "fanbox"),
+    "#class"   : kemonoparty.KemonopartyUserExtractor,
+    "#urls"    : (
+        "https://kemono.party/data/ef/7b/ef7b4398a2f4ada597421fd3c116cff86e85695911f7cd2a459b0e566b864e46.png",
+        "https://kemono.party/data/73/e6/73e615f6645b9d1af6329448601673c9275f07fd11eb37670c97e307e29a9ee9.png",
+    ),
+
+    "id": "8779",
+},
+
+{
     "#url"     : "https://kemono.su/subscribestar/user/alcorart",
     "#category": ("", "kemonoparty", "subscribestar"),
     "#class"   : kemonoparty.KemonopartyUserExtractor,
