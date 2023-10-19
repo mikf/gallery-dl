@@ -228,7 +228,8 @@ class KemonopartyUserExtractor(KemonopartyExtractor):
         _, _, service, user_id, offset = match.groups()
         self.subcategory = service
         KemonopartyExtractor.__init__(self, match)
-        self.api_url = "{}/api/v1/{}/user/{}".format(self.root, service, user_id)
+        self.api_url = "{}/api/v1/{}/user/{}".format(
+            self.root, service, user_id)
         self.user_url = "{}/{}/user/{}".format(self.root, service, user_id)
         self.offset = text.parse_int(offset)
 
@@ -344,7 +345,8 @@ class KemonopartyDiscordExtractor(KemonopartyExtractor):
                 yield Message.Url, url, post
 
     def posts(self):
-        url = "{}/api/v1/discord/channel/{}".format(self.root, self.channel_id)
+        url = "{}/api/v1/discord/channel/{}".format(
+            self.root, self.channel_id)
         params = {"skip": 0}
 
         while True:
