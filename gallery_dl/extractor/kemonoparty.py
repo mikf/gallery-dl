@@ -211,6 +211,10 @@ class KemonopartyExtractor(Extractor):
             self.root, server)
         return self.request(url).json()
 
+    @memcache(keyarg=1)
+    def _post_revisions(self, url):
+        return self.request(url + "/revisions").json()
+
 
 def _validate(response):
     return (response.headers["content-length"] != "9" or
@@ -248,11 +252,12 @@ class KemonopartyUserExtractor(KemonopartyExtractor):
 class KemonopartyPostExtractor(KemonopartyExtractor):
     """Extractor for a single kemono.party post"""
     subcategory = "post"
-    pattern = USER_PATTERN + r"/post/([^/?#]+)"
+    pattern = USER_PATTERN + r"/post/([^/?#]+)(/revisions?(?:/(\d*))?)?"
     example = "https://kemono.party/SERVICE/user/12345/post/12345"
 
     def __init__(self, match):
-        _, _, service, user_id, post_id = match.groups()
+        _, _, service, user_id, post_id, self.revision, self.revision_id = \
+            match.groups()
         self.subcategory = service
         KemonopartyExtractor.__init__(self, match)
         self.api_url = "{}/api/v1/{}/user/{}/post/{}".format(
@@ -260,7 +265,18 @@ class KemonopartyPostExtractor(KemonopartyExtractor):
         self.user_url = "{}/{}/user/{}".format(self.root, service, user_id)
 
     def posts(self):
-        return (self.request(self.api_url).json(),)
+        if not self.revision:
+            return (self.request(self.api_url).json(),)
+
+        revs = self._post_revisions(self.api_url)
+        if not self.revision_id:
+            return revs
+
+        for rev in revs:
+            if str(rev["revision_id"]) == self.revision_id:
+                return (rev,)
+
+        raise exception.NotFoundError("revision")
 
 
 class KemonopartyDiscordExtractor(KemonopartyExtractor):
