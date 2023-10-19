@@ -2072,7 +2072,19 @@ Type
 Default
     ``false``
 Description
-    Extract ``username`` metadata
+    Extract ``username`` metadata.
+
+
+extractor.kemonoparty.revisions
+-------------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Extract post revisions.
+
+    Note: This requires 1 additional HTTP request per post.
 
 
 extractor.khinsider.format

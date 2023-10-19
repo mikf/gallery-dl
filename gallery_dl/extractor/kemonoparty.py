@@ -239,10 +239,24 @@ class KemonopartyUserExtractor(KemonopartyExtractor):
         url = self.api_url
         params = text.parse_query(self.query)
         params["o"] = text.parse_int(params.get("o"))
+        revisions = self.config("revisions")
 
         while True:
             posts = self.request(url, params=params).json()
-            yield from posts
+
+            if revisions:
+                for post in posts:
+                    post["revision_id"] = 0
+                    yield post
+                    post_url = "{}/post/{}".format(self.api_url, post["id"])
+                    try:
+                        revs = self._post_revisions(post_url)
+                    except exception.HttpError:
+                        pass
+                    else:
+                        yield from revs
+            else:
+                yield from posts
 
             if len(posts) < 50:
                 break
@@ -266,7 +280,16 @@ class KemonopartyPostExtractor(KemonopartyExtractor):
 
     def posts(self):
         if not self.revision:
-            return (self.request(self.api_url).json(),)
+            post = self.request(self.api_url).json()
+            if self.config("revisions"):
+                post["revision_id"] = 0
+                try:
+                    revs = self._post_revisions(self.api_url)
+                except exception.HttpError:
+                    pass
+                else:
+                    return itertools.chain((post,), revs)
+            return (post,)
 
         revs = self._post_revisions(self.api_url)
         if not self.revision_id:
