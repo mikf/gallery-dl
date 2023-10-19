@@ -5,6 +5,7 @@
 # published by the Free Software Foundation.
 
 from gallery_dl.extractor import kemonoparty
+from gallery_dl import exception
 
 
 __tests__ = (
@@ -152,6 +153,37 @@ __tests__ = (
     "#url"     : "https://beta.kemono.party/subscribestar/user/alcorart/post/184330",
     "#category": ("", "kemonoparty", "subscribestar"),
     "#class"   : kemonoparty.KemonopartyPostExtractor,
+},
+
+{
+    "#url"     : "https://kemono.party/patreon/user/3161935/post/68231671/revision/134996",
+    "#comment" : "revisions (#4498)",
+    "#category": ("", "kemonoparty", "patreon"),
+    "#class"   : kemonoparty.KemonopartyPostExtractor,
+    "#urls"    : "https://kemono.party/data/88/52/88521f71822dfa2f42df3beba319ea4fceda2a2d6dc59da0276a75238f743f86.jpg",
+
+    "revision_id": 134996,
+},
+
+{
+    "#url"     : "https://kemono.party/patreon/user/3161935/post/68231671/revisions",
+    "#comment" : "revisions (#4498)",
+    "#category": ("", "kemonoparty", "patreon"),
+    "#class"   : kemonoparty.KemonopartyPostExtractor,
+    "#pattern" : r"https://kemono\.party/data/88/52/88521f71822dfa2f42df3beba319ea4fceda2a2d6dc59da0276a75238f743f86\.jpg",
+    "#count"   : 9,
+    "#archive" : False,
+
+    "revision_id": range(134996, 3052965),
+},
+
+
+{
+    "#url"     : "https://kemono.party/patreon/user/3161935/post/68231671/revision/12345",
+    "#comment" : "revisions (#4498)",
+    "#category": ("", "kemonoparty", "patreon"),
+    "#class"   : kemonoparty.KemonopartyPostExtractor,
+    "#exception": exception.NotFoundError,
 },
 
 {
