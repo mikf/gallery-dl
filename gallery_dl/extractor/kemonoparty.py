@@ -208,7 +208,7 @@ class KemonopartyExtractor(Extractor):
 
     @memcache(keyarg=1)
     def _discord_channels(self, server):
-        url = "{}/api/discord/channels/lookup?q={}".format(
+        url = "{}/api/v1/discord/channels/lookup/{}".format(
             self.root, server)
         return self.request(url).json()
 
@@ -228,7 +228,7 @@ class KemonopartyUserExtractor(KemonopartyExtractor):
         _, _, service, user_id, offset = match.groups()
         self.subcategory = service
         KemonopartyExtractor.__init__(self, match)
-        self.api_url = "{}/api/{}/user/{}".format(self.root, service, user_id)
+        self.api_url = "{}/api/v1/{}/user/{}".format(self.root, service, user_id)
         self.user_url = "{}/{}/user/{}".format(self.root, service, user_id)
         self.offset = text.parse_int(offset)
 
@@ -256,7 +256,7 @@ class KemonopartyPostExtractor(KemonopartyExtractor):
         _, _, service, user_id, post_id = match.groups()
         self.subcategory = service
         KemonopartyExtractor.__init__(self, match)
-        self.api_url = "{}/api/{}/user/{}/post/{}".format(
+        self.api_url = "{}/api/v1/{}/user/{}/post/{}".format(
             self.root, service, user_id, post_id)
         self.user_url = "{}/{}/user/{}".format(self.root, service, user_id)
 
@@ -344,7 +344,7 @@ class KemonopartyDiscordExtractor(KemonopartyExtractor):
                 yield Message.Url, url, post
 
     def posts(self):
-        url = "{}/api/discord/channel/{}".format(self.root, self.channel_id)
+        url = "{}/api/v1/discord/channel/{}".format(self.root, self.channel_id)
         params = {"skip": 0}
 
         while True:
