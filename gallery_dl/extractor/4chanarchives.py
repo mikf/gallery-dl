@@ -20,6 +20,7 @@ class _4chanarchivesThreadExtractor(Extractor):
     directory_fmt = ("{category}", "{board}", "{thread} - {title}")
     filename_fmt = "{no}-{filename}.{extension}"
     archive_fmt = "{board}_{thread}_{no}"
+    referer = False
     pattern = r"(?:https?://)?4chanarchives\.com/board/([^/?#]+)/thread/(\d+)"
     example = "https://4chanarchives.com/board/a/thread/12345/"
 
