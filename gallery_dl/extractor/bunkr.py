@@ -12,6 +12,8 @@ from .lolisafe import LolisafeAlbumExtractor
 from .. import text
 from urllib.parse import urlsplit, urlunsplit
 
+BASE_PATTERN = r"(?:https?://)?(?:app\.)?bunkr+\.(?:la|[sr]u|is|to)"
+
 MEDIA_DOMAIN_OVERRIDES = {
     "cdn9.bunkr.ru" : "c9.bunkr.ru",
     "cdn12.bunkr.ru": "media-files12.bunkr.la",
@@ -28,7 +30,7 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
     """Extractor for bunkrr.su albums"""
     category = "bunkr"
     root = "https://bunkrr.su"
-    pattern = r"(?:https?://)?(?:app\.)?bunkr+\.(?:la|[sr]u|is|to)/a/([^/?#]+)"
+    pattern = BASE_PATTERN + r"/a/([^/?#]+)"
     example = "https://bunkrr.su/a/ID"
 
     def fetch_album(self, album_id):
@@ -72,3 +74,33 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
                     url = urlunsplit((scheme, domain, path, query, fragment))
 
             yield {"file": text.unescape(url)}
+
+
+class BunkrMediaExtractor(LolisafeAlbumExtractor):
+    """Extractor for bunkrr.su media links"""
+    category = "bunkr"
+    subcategory = "media"
+    root = "https://bunkrr.su"
+    directory_fmt = ("{category}",)
+    pattern = BASE_PATTERN + r"/[vi]/([^/?#]+)"
+    example = "https://bunkrr.su/v/FILENAME"
+
+    def fetch_album(self, album_id):
+        try:
+            path = urlsplit(self.url).path
+            page = self.request(self.root + path).text
+            if path[1] == "v":
+                url = text.extr(page, '<source src="', '"')
+            else:
+                url = text.extr(page, '<img src="', '"')
+        except Exception as exc:
+            self.log.error("%s: %s", exc.__class__.__name__, exc)
+            return (), {}
+
+        return ({"file": text.unescape(url)},), {
+            "album_id"   : "",
+            "album_name" : "",
+            "album_size" : -1,
+            "description": "",
+            "count"      : 1,
+        }
