@@ -55,11 +55,7 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
         for url in urls:
             if url.startswith("/"):
                 try:
-                    page = self.request(self.root + text.unescape(url)).text
-                    if url[1] == "v":
-                        url = text.extr(page, '<source src="', '"')
-                    else:
-                        url = text.extr(page, '<img src="', '"')
+                    url = self._extract_file(text.unescape(url))
                 except Exception as exc:
                     self.log.error("%s: %s", exc.__class__.__name__, exc)
                     continue
@@ -75,24 +71,28 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
 
             yield {"file": text.unescape(url)}
 
+    def _extract_file(self, path):
+        page = self.request(self.root + path).text
+        if path[1] == "v":
+            url = text.extr(page, '<source src="', '"')
+        else:
+            url = text.extr(page, '<img src="', '"')
+        if not url:
+            url = text.rextract(
+                page, ' href="', '"', page.rindex("Download"))[0]
+        return url
 
-class BunkrMediaExtractor(LolisafeAlbumExtractor):
+
+class BunkrMediaExtractor(BunkrAlbumExtractor):
     """Extractor for bunkrr.su media links"""
-    category = "bunkr"
     subcategory = "media"
-    root = "https://bunkrr.su"
     directory_fmt = ("{category}",)
-    pattern = BASE_PATTERN + r"/[vi]/([^/?#]+)"
+    pattern = BASE_PATTERN + r"/[vid]/([^/?#]+)"
     example = "https://bunkrr.su/v/FILENAME"
 
     def fetch_album(self, album_id):
         try:
-            path = urlsplit(self.url).path
-            page = self.request(self.root + path).text
-            if path[1] == "v":
-                url = text.extr(page, '<source src="', '"')
-            else:
-                url = text.extr(page, '<img src="', '"')
+            url = self._extract_file(urlsplit(self.url).path)
         except Exception as exc:
             self.log.error("%s: %s", exc.__class__.__name__, exc)
             return (), {}
