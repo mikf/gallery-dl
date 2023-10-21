@@ -141,6 +141,7 @@ modules = [
     "smugmug",
     "soundgasm",
     "speakerdeck",
+    "stocksnap",
     "subscribestar",
     "szurubooru",
     "tapas",
