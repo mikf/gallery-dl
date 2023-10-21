@@ -1,5 +1,45 @@
 # Changelog
 
+## 1.26.1 - 2023-10-21
+### Extractors
+#### Additions
+- [bunkr] add extractor for media URLs ([#4684](https://github.com/mikf/gallery-dl/issues/4684))
+- [chevereto] add generic extractors for `chevereto` sites ([#4664](https://github.com/mikf/gallery-dl/issues/4664))
+  - `deltaporno.com` ([#1381](https://github.com/mikf/gallery-dl/issues/1381))
+  - `img.kiwi`
+  - `jpgfish`
+  - `pixl.li` ([#3179](https://github.com/mikf/gallery-dl/issues/3179), [#4357](https://github.com/mikf/gallery-dl/issues/4357))
+- [deviantart] implement `"group": "skip"` ([#4630](https://github.com/mikf/gallery-dl/issues/4630))
+- [fantia] add `content_count` and `content_num` metadata fields ([#4627](https://github.com/mikf/gallery-dl/issues/4627))
+- [imgbb] add `displayname` and `user_id` metadata ([#4626](https://github.com/mikf/gallery-dl/issues/4626))
+- [kemonoparty] support post revisions; add `revisions` option ([#4498](https://github.com/mikf/gallery-dl/issues/4498), [#4597](https://github.com/mikf/gallery-dl/issues/4597))
+- [kemonoparty] support searches ([#3385](https://github.com/mikf/gallery-dl/issues/3385), [#4057](https://github.com/mikf/gallery-dl/issues/4057))
+- [kemonoparty] support discord URLs with channel IDs ([#4662](https://github.com/mikf/gallery-dl/issues/4662))
+- [moebooru] add `metadata` option ([#4646](https://github.com/mikf/gallery-dl/issues/4646))
+- [newgrounds] support multi-image posts ([#4642](https://github.com/mikf/gallery-dl/issues/4642))
+- [sankaku] support `/posts/` URLs ([#4688](https://github.com/mikf/gallery-dl/issues/4688))
+- [twitter] add `sensitive` metadata field ([#4619](https://github.com/mikf/gallery-dl/issues/4619))
+#### Fixes
+- [4chanarchives] disable Referer headers by default ([#4686](https://github.com/mikf/gallery-dl/issues/4686))
+- [bunkr] fix `/d/` file URLs ([#4685](https://github.com/mikf/gallery-dl/issues/4685))
+- [deviantart] expand nested comment replies ([#4653](https://github.com/mikf/gallery-dl/issues/4653))
+- [deviantart] disable `jwt` ([#4652](https://github.com/mikf/gallery-dl/issues/4652))
+- [hentaifoundry] fix `.swf` file downloads ([#4641](https://github.com/mikf/gallery-dl/issues/4641))
+- [imgbb] fix `user` metadata extraction ([#4626](https://github.com/mikf/gallery-dl/issues/4626))
+- [imgbb] update pagination end condition ([#4626](https://github.com/mikf/gallery-dl/issues/4626))
+- [kemonoparty] update API endpoints ([#4676](https://github.com/mikf/gallery-dl/issues/4676), [#4677](https://github.com/mikf/gallery-dl/issues/4677))
+- [patreon] update `campaign_id` path ([#4639](https://github.com/mikf/gallery-dl/issues/4639))
+- [reddit] fix wrong previews ([#4649](https://github.com/mikf/gallery-dl/issues/4649))
+- [redgifs] fix `niches` extraction ([#4666](https://github.com/mikf/gallery-dl/issues/4666), [#4667](https://github.com/mikf/gallery-dl/issues/4667))
+- [twitter] fix crash due to missing `source` ([#4620](https://github.com/mikf/gallery-dl/issues/4620))
+- [warosu] fix extraction ([#4634](https://github.com/mikf/gallery-dl/issues/4634))
+### Post Processors
+#### Additions
+- support `{_filename}`, `{_directory}`, and `{_path}` replacement fields for `--exec` ([#4633](https://github.com/mikf/gallery-dl/issues/4633))
+### Miscellaneous
+#### Improvements
+- avoid temporary copies with `--cookies-from-browser` by opening cookie databases in read-only mode
+
 ## 1.26.0 - 2023-10-03
 - ### Extractors
     #### Additions

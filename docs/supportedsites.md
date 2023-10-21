@@ -112,7 +112,7 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>Bunkr</td>
     <td>https://bunkrr.su/</td>
-    <td>Albums</td>
+    <td>Albums, Media Files</td>
     <td></td>
 </tr>
 <tr>
