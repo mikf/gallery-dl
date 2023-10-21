@@ -240,4 +240,12 @@ __tests__ = (
     "#pattern" : r"^https://i\.redd\.it/00af44lpn0u51\.jpg$",
 },
 
+{
+    "#url"     : "https://www.reddit.com/r/analog/s/hKrTTvFVwZ",
+    "#comment" : "Mobile share URL",
+    "#category": ("", "reddit", "redirect"),
+    "#class"   : reddit.RedditRedirectExtractor,
+    "#pattern" : r"^https://www\.reddit\.com/r/analog/comments/179exao/photographing_the_recent_annular_eclipse_with_a",
+},
+
 )
