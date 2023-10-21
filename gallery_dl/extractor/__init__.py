@@ -116,6 +116,7 @@ modules = [
     "piczel",
     "pillowfort",
     "pinterest",
+    "pixabay",
     "pixiv",
     "pixnet",
     "plurk",
