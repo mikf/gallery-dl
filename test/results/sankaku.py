@@ -148,6 +148,18 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://chan.sankakucomplex.com/posts/f8ba89043078f0e4be2d9c46550b840a",
+    "#comment" : "/posts/ instead of /post/show/ (#4688)",
+    "#category": ("booru", "sankaku", "post"),
+    "#class"   : sankaku.SankakuPostExtractor,
+    "#pattern" : r"https://s\.sankakucomplex\.com/data/f8/ba/f8ba89043078f0e4be2d9c46550b840a\.jpg",
+    "#count"   : 1,
+
+    "id" : 33195194,
+    "md5": "f8ba89043078f0e4be2d9c46550b840a",
+},
+
+{
     "#url"     : "https://chan.sankakucomplex.com/post/show/360451",
     "#category": ("booru", "sankaku", "post"),
     "#class"   : sankaku.SankakuPostExtractor,
