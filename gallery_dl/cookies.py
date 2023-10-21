@@ -832,8 +832,9 @@ class DatabaseConnection():
             self.database = sqlite3.connect(
                 uri, uri=True, isolation_level=None, check_same_thread=False)
             return self.database
-        except Exception:
-            _log_debug("Falling back to temporary database copy")
+        except Exception as exc:
+            _log_debug("Falling back to temporary database copy (%s: %s)",
+                       exc.__class__.__name__, exc)
 
         try:
             self.directory = tempfile.TemporaryDirectory(prefix="gallery-dl-")
