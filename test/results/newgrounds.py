@@ -83,6 +83,17 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.newgrounds.com/art/view/bacun/kill-la-kill-10th-anniversary",
+    "#comment" : "extra files in 'imageData' block (#4642)",
+    "#category": ("", "newgrounds", "image"),
+    "#class"   : newgrounds.NewgroundsImageExtractor,
+    "#urls"    : (
+        "https://art.ngfiles.com/images/5127000/5127150_93307_bacun_kill-la-kill-10th-anniversary.61adfe309bec342f9db55fd44397235b.png?f1697310027",
+        "https://art.ngfiles.com/images/5127000/5127150_94250_bacun_kill-la-kill-10th-anniversary.64fdf525fa38c1ab34defac4b354bc7a.png?f1697332109",
+    ),
+},
+
+{
     "#url"     : "https://www.newgrounds.com/art/view/kekiiro/red",
     "#comment" : "'adult' rated (#2456)",
     "#category": ("", "newgrounds", "image"),
