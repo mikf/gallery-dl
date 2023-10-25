@@ -712,7 +712,7 @@ Consider all sites to be NSFW unless otherwise known.
 <tr>
     <td>Reddit</td>
     <td>https://www.reddit.com/</td>
-    <td>Home Feed, individual Images, Submissions, Subreddits, User Profiles</td>
+    <td>Home Feed, individual Images, Redirects, Submissions, Subreddits, User Profiles</td>
     <td><a href="https://github.com/mikf/gallery-dl#oauth">OAuth</a></td>
 </tr>
 <tr>
