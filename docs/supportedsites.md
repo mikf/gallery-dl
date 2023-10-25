@@ -32,6 +32,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
+    <td>4archive</td>
+    <td>https://4archive.org/</td>
+    <td>Boards, Threads</td>
+    <td></td>
+</tr>
+<tr>
     <td>4chan</td>
     <td>https://www.4chan.org/</td>
     <td>Boards, Threads</td>
