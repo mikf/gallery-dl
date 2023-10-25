@@ -1186,6 +1186,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
+    <td>Misskey.design</td>
+    <td>https://misskey.design/</td>
+    <td>Favorites, Followed Users, Images from Notes, User Profiles</td>
+    <td></td>
+</tr>
+<tr>
     <td>Lesbian.energy</td>
     <td>https://lesbian.energy/</td>
     <td>Favorites, Followed Users, Images from Notes, User Profiles</td>
