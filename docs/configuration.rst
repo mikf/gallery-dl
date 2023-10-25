@@ -2440,6 +2440,20 @@ Description
     Note: This requires 1 additional HTTP request per post.
 
 
+extractor.patreon.campaign-id
+-----------------------------
+Type
+    ``string``
+Default
+    ``"auto"``
+Description
+    Alternative way of specifying the ``campaign_id`` value of a creator
+    in case the automatic extraction method no longer functions.
+
+    Another way of specifying this value is using a ``c`` or ``campaign_id``
+    URL query parameter, e,g, ``https://www.patreon.com/NAME?c=12345``.
+
+
 extractor.patreon.files
 -----------------------
 Type

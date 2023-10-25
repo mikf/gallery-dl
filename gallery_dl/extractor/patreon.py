@@ -267,25 +267,10 @@ class PatreonCreatorExtractor(PatreonExtractor):
 
     def posts(self):
         query = text.parse_query(self.query)
+        campaign_id = self._get_campaign_id(query)
+        filters = self._get_filters(query)
 
-        creator_id = query.get("u")
-        if creator_id:
-            url = "{}/user/posts?u={}".format(self.root, creator_id)
-        else:
-            url = "{}/{}/posts".format(self.root, self.creator)
-        page = self.request(url, notfound="creator").text
-
-        try:
-            data = self._extract_bootstrap(page)
-            campaign_id = data["campaign"]["data"]["id"]
-        except (KeyError, ValueError):
-            raise exception.NotFoundError("creator")
-
-        filters = "".join(
-            "&filter[{}={}".format(key[8:], text.escape(value))
-            for key, value in query.items()
-            if key.startswith("filters[")
-        )
+        self.log.debug("campaign_id: %s", campaign_id)
 
         url = self._build_url("posts", (
             "&filter[campaign_id]=" + campaign_id +
@@ -294,6 +279,39 @@ class PatreonCreatorExtractor(PatreonExtractor):
             "&sort=" + query.get("sort", "-published_at")
         ))
         return self._pagination(url)
+
+    def _get_campaign_id(self, query):
+        campaign_id = self.config("campaign-id")
+        if campaign_id and campaign_id != "auto":
+            return str(campaign_id)
+
+        campaign_id = query.get("c") or query.get("campaign_id")
+        if campaign_id:
+            return campaign_id
+
+        user_id = query.get("u")
+        if user_id:
+            url = "{}/user/posts?u={}".format(self.root, user_id)
+        else:
+            url = "{}/{}/posts".format(self.root, self.creator)
+        page = self.request(url, notfound="creator").text
+
+        try:
+            data = None
+            data = self._extract_bootstrap(page)
+            return data["campaign"]["data"]["id"]
+        except (KeyError, ValueError) as exc:
+            self.log.debug(data)
+            raise exception.StopExtraction(
+                "Unable to extract campaign ID (%s: %s)",
+                exc.__class__.__name__, exc)
+
+    def _get_filters(self, query):
+        return "".join(
+            "&filter[{}={}".format(key[8:], text.escape(value))
+            for key, value in query.items()
+            if key.startswith("filters[")
+        )
 
 
 class PatreonUserExtractor(PatreonExtractor):
