@@ -10,7 +10,7 @@
 
 from .common import Extractor, Message
 from .. import text, util, exception
-from ..cache import cache
+from ..cache import cache, memcache
 import itertools
 import json
 import re
@@ -1194,6 +1194,7 @@ class TwitterAPI():
         }
         return self._pagination_users(endpoint, variables)
 
+    @memcache(keyarg=1)
     def user_by_rest_id(self, rest_id):
         endpoint = "/graphql/1YAM811Q8Ry4XyPpJclURQ/UserByRestId"
         features = self.features.copy()
@@ -1207,6 +1208,7 @@ class TwitterAPI():
         }
         return self._call(endpoint, params)["data"]["user"]["result"]
 
+    @memcache(keyarg=1)
     def user_by_screen_name(self, screen_name):
         endpoint = "/graphql/XA6F1nJELYg65hxOC2Ekmg/UserByScreenName"
         params = {
