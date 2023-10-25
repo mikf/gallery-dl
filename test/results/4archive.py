@@ -44,7 +44,6 @@ __tests__ = (
     "#category": ("", "4archive", "board"),
     "#class"   : _4archive._4archiveBoardExtractor,
     "#pattern" : _4archive._4archiveThreadExtractor.pattern,
-    "#board"   : "u",
     "#range"   : "1-20",
     "#count"   : 20,
 },
@@ -54,7 +53,6 @@ __tests__ = (
     "#category": ("", "4archive", "board"),
     "#class"   : _4archive._4archiveBoardExtractor,
     "#pattern" : _4archive._4archiveThreadExtractor.pattern,
-    "#board"   : "jp",
     "#range"   : "1-50",
     "#count"   : 50,
 }

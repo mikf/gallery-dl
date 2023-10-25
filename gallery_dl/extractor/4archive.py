@@ -7,7 +7,7 @@
 """Extractors for https://4archive.org/"""
 
 from .common import Extractor, Message
-from .. import text
+from .. import text, util
 
 
 class _4archiveThreadExtractor(Extractor):
@@ -17,8 +17,9 @@ class _4archiveThreadExtractor(Extractor):
     directory_fmt = ("{category}", "{board}", "{thread} {title}")
     filename_fmt = "{no} {filename}.{extension}"
     archive_fmt = "{board}_{thread}_{no}"
-    pattern = r"(?:https?://)?4archive\.org/board/([^/?#]+)/thread/(\d+)"
     root = "https://4archive.org"
+    referer = False
+    pattern = r"(?:https?://)?4archive\.org/board/([^/?#]+)/thread/(\d+)"
     example = "https://4archive.org/board/a/thread/12345/"
 
     def __init__(self, match):
@@ -37,8 +38,8 @@ class _4archiveThreadExtractor(Extractor):
 
         for post in posts:
             post.update(data)
-            post["time"] = text.parse_int(post["date"].timestamp())
-            yield Message.Directory, data
+            post["time"] = int(util.datetime_to_timestamp(post["date"]))
+            yield Message.Directory, post
             if "url" in post:
                 yield Message.Url, post["url"], text.nameext_from_url(
                     post["filename"], post)
@@ -87,8 +88,8 @@ class _4archiveBoardExtractor(Extractor):
     """Extractor for 4archive boards"""
     category = "4archive"
     subcategory = "board"
-    pattern = r"(?:https?://)?4archive\.org/board/([^/?#]+)(?:/(\d+))?/?$"
     root = "https://4archive.org"
+    pattern = r"(?:https?://)?4archive\.org/board/([^/?#]+)(?:/(\d+))?/?$"
     example = "https://4archive.org/board/a/"
 
     def __init__(self, match):
