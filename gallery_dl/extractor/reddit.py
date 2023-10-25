@@ -292,6 +292,29 @@ class RedditImageExtractor(Extractor):
         yield Message.Url, url, data
 
 
+class RedditRedirectExtractor(Extractor):
+    """Extractor for personalized share URLs produced by the mobile app"""
+    category = "reddit"
+    subcategory = "redirect"
+    pattern = (r"(?:https?://)?(?:"
+               r"(?:\w+\.)?reddit\.com/(?:(?:r)/([^/?#]+)))"
+               r"/s/([a-zA-Z0-9]{10})")
+    example = "https://www.reddit.com/r/SUBREDDIT/s/abc456GHIJ"
+
+    def __init__(self, match):
+        Extractor.__init__(self, match)
+        self.subreddit = match.group(1)
+        self.share_url = match.group(2)
+
+    def items(self):
+        url = "https://www.reddit.com/r/" + self.subreddit + "/s/" + \
+              self.share_url
+        data = {"_extractor": RedditSubmissionExtractor}
+        response = self.request(url, method="HEAD", allow_redirects=False,
+                                notfound="submission")
+        yield Message.Queue, response.headers["Location"], data
+
+
 class RedditAPI():
     """Interface for the Reddit API
 
