@@ -116,6 +116,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
+    <td>Bluesky</td>
+    <td>https://bsky.app/</td>
+    <td>Posts</td>
+    <td></td>
+</tr>
+<tr>
     <td>Bunkr</td>
     <td>https://bunkrr.su/</td>
     <td>Albums, Media Files</td>
