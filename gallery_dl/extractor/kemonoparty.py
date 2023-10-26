@@ -219,7 +219,14 @@ class KemonopartyExtractor(Extractor):
 
     @memcache(keyarg=1)
     def _post_revisions(self, url):
-        return self.request(url + "/revisions").json()
+        revs = self.request(url + "/revisions").json()
+
+        idx = len(revs)
+        for rev in revs:
+            rev["revision_index"] = idx
+            idx -= 1
+
+        return revs
 
 
 def _validate(response):
@@ -253,13 +260,15 @@ class KemonopartyUserExtractor(KemonopartyExtractor):
             if revisions:
                 for post in posts:
                     post["revision_id"] = 0
-                    yield post
                     post_url = "{}/post/{}".format(self.api_url, post["id"])
                     try:
                         revs = self._post_revisions(post_url)
                     except exception.HttpError:
-                        pass
+                        post["revision_index"] = 1
+                        yield post
                     else:
+                        post["revision_index"] = len(revs) + 1
+                        yield post
                         yield from revs
             else:
                 yield from posts
@@ -292,8 +301,9 @@ class KemonopartyPostExtractor(KemonopartyExtractor):
                 try:
                     revs = self._post_revisions(self.api_url)
                 except exception.HttpError:
-                    pass
+                    post["revision_index"] = 1
                 else:
+                    post["revision_index"] = len(revs) + 1
                     return itertools.chain((post,), revs)
             return (post,)
 
