@@ -11,7 +11,6 @@ from .. import text, util
 
 import json
 import dataclasses
-import netrc
 import posixpath
 
 import chitose
@@ -31,10 +30,9 @@ class BlueskyAPI():
         # BSKY_USER = extractor.config("username"),
         # BSKY_PASSWD = extractor.config("password")
 
-        rc = netrc.netrc()
-        (BSKY_USER, _, BSKY_PASSWD) = rc.authenticators(instance)
+        username, password = extractor._get_auth_info()
 
-        self.agent.login(BSKY_USER, BSKY_PASSWD)
+        self.agent.login(username, password)
 
     def bskyGetDid(self, user_id: str) -> str:
         return json.loads(self.agent.get_profile(actor=user_id))['did']
@@ -60,7 +58,7 @@ class BlueskyAPI():
 
 class _BlueskyPostExtractor(Extractor):
     """Extractor for bluesky posts"""
-    category = "bluesky"
+    category = "bsky.social"
     subcategory = "post"
     directory_fmt = ("{category}", "{user_id}")
     filename_fmt = "{post_id} {filename}.{extension}"
@@ -72,9 +70,10 @@ class _BlueskyPostExtractor(Extractor):
     def __init__(self, match):
         Extractor.__init__(self, match)
         self.user_id, self.post_id = match.groups()
-        self.api = BlueskyAPI(self)
-        self.json_obj = self.api.getSkeetJson(PostReference(self.user_id, self.post_id))
 
+        self.api = BlueskyAPI(self)
+
+        self.json_obj = self.api.getSkeetJson(PostReference(self.user_id, self.post_id))
         self.metadata = self.json_obj
         self.metadata.update(match.groupdict())
 
