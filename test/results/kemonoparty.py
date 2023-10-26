@@ -169,13 +169,14 @@ __tests__ = (
 },
 
 {
-    "#url"     : "https://kemono.party/patreon/user/3161935/post/68231671/revision/134996",
+    "#url"     : "https://kemono.su/patreon/user/3161935/post/68231671/revision/142470",
     "#comment" : "revisions (#4498)",
     "#category": ("", "kemonoparty", "patreon"),
     "#class"   : kemonoparty.KemonopartyPostExtractor,
-    "#urls"    : "https://kemono.party/data/88/52/88521f71822dfa2f42df3beba319ea4fceda2a2d6dc59da0276a75238f743f86.jpg",
+    "#urls"    : "https://kemono.su/data/88/52/88521f71822dfa2f42df3beba319ea4fceda2a2d6dc59da0276a75238f743f86.jpg",
 
-    "revision_id": 134996,
+    "revision_id": 142470,
+    "revision_index": 2,
 },
 
 {
@@ -188,6 +189,7 @@ __tests__ = (
     "#archive" : False,
 
     "revision_id": range(134996, 3052965),
+    "revision_index": range(1, 9),
 },
 
 
