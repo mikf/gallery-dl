@@ -182,6 +182,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
+    <td>Erooups</td>
+    <td>http://erooups.com/</td>
+    <td>Albums, Search Results, User Profiles</td>
+    <td></td>
+</tr>
+<tr>
     <td>ExHentai</td>
     <td>https://exhentai.org/</td>
     <td>Favorites, Galleries, Search Results</td>
