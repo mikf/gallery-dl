@@ -22,6 +22,7 @@ class IdolcomplexExtractor(SankakuExtractor):
     cookies_domain = "idol.sankakucomplex.com"
     cookies_names = ("login", "pass_hash")
     root = "https://" + cookies_domain
+    referer = False
     request_interval = 5.0
 
     def __init__(self, match):
