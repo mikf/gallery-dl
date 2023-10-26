@@ -10,7 +10,7 @@ from .common import Extractor, Message
 from .. import text
 
 
-class ErooupsExtractor(Extractor):
+class ErooupsGalleryExtractor(Extractor):
     category = 'erooups'
     directory_fmt = ('{category}', '{title}')
     filename_fmt = '{filename}.{extension}'
@@ -18,6 +18,7 @@ class ErooupsExtractor(Extractor):
     subcategory = 'gallery'
     pattern = r'(?:http?://)?(?:www\.)?erooups\.com'
     root = 'http://erooups.com'
+    example = 'http://erooups.com/2023/10/25/page-title-11-pics.html'
 
     def items(self):
         page = self.request(
