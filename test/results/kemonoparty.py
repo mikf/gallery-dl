@@ -200,6 +200,16 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://kemono.su/patreon/user/6298789/post/69764693",
+    "#comment" : "'published' metadata with extra microsecond data",
+    "#category": ("", "kemonoparty", "patreon"),
+    "#class"   : kemonoparty.KemonopartyPostExtractor,
+
+    "date"     : "dt:2022-07-29 21:12:11",
+    "published": "2022-07-29T21:12:11.483000",
+},
+
+{
     "#url"     : "https://kemono.party/discord/server/488668827274444803#608504710906904576",
     "#category": ("", "kemonoparty", "discord"),
     "#class"   : kemonoparty.KemonopartyDiscordExtractor,

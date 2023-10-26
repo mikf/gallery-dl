@@ -69,8 +69,9 @@ class KemonopartyExtractor(Extractor):
             headers["Referer"] = "{}/{}/user/{}/post/{}".format(
                 self.root, post["service"], post["user"], post["id"])
             post["_http_headers"] = headers
-            post["date"] = text.parse_datetime(
-                post["published"] or post["added"], "%Y-%m-%dT%H:%M:%S")
+            post["date"] = self._parse_datetime(
+                post["published"] or post["added"])
+
             if username:
                 post["username"] = username
             if comments:
@@ -204,6 +205,11 @@ class KemonopartyExtractor(Extractor):
                 "date": text.extr(footer, 'Published: ', '\n'),
             })
         return dms
+
+    def _parse_datetime(self, date_string):
+        if len(date_string) > 19:
+            date_string = date_string[:19]
+        return text.parse_datetime(date_string, "%Y-%m-%dT%H:%M:%S")
 
     @memcache(keyarg=1)
     def _discord_channels(self, server):
@@ -360,8 +366,7 @@ class KemonopartyDiscordExtractor(KemonopartyExtractor):
                         "name": path, "type": "inline", "hash": ""})
 
             post["channel_name"] = self.channel_name
-            post["date"] = text.parse_datetime(
-                post["published"], "%Y-%m-%dT%H:%M:%S.%f")
+            post["date"] = self._parse_datetime(post["published"])
             post["count"] = len(files)
             yield Message.Directory, post
 
