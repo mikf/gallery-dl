@@ -287,8 +287,11 @@ class TwitterExtractor(Extractor):
             date = text.parse_timestamp(
                 ((tweet_id >> 22) + 1288834974657) // 1000)
         else:
-            date = text.parse_datetime(
-                tweet["created_at"], "%a %b %d %H:%M:%S %z %Y")
+            try:
+                date = text.parse_datetime(
+                    tweet["created_at"], "%a %b %d %H:%M:%S %z %Y")
+            except Exception:
+                date = util.NONE
 
         tget = tweet.get
         tdata = {

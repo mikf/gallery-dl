@@ -5,7 +5,7 @@
 # published by the Free Software Foundation.
 
 from gallery_dl.extractor import twitter
-from gallery_dl import exception
+from gallery_dl import util, exception
 
 
 __tests__ = (
@@ -522,7 +522,7 @@ The Washington Post writes, "Three weeks after the toxic train derailment in Ohi
     "#url"     : "https://twitter.com/supernaturepics/photo",
     "#category": ("", "twitter", "avatar"),
     "#class"   : twitter.TwitterAvatarExtractor,
-    "#pattern" : r"https://pbs\.twimg\.com/profile_images/554585280938659841/FLVAlX18\.jpeg",
+    "#urls"    : "https://pbs.twimg.com/profile_images/554585280938659841/FLVAlX18.jpeg",
 
     "date"     : "dt:2015-01-12 10:26:49",
     "extension": "jpeg",
@@ -535,6 +535,17 @@ The Washington Post writes, "Three weeks after the toxic train derailment in Ohi
     "#category": ("", "twitter", "avatar"),
     "#class"   : twitter.TwitterAvatarExtractor,
     "#count"   : 0,
+},
+
+{
+    "#url"     : "https://twitter.com/i_n_u/photo",
+    "#comment" : "old avatar with small ID and no valid 'date' (#4696)",
+    "#category": ("", "twitter", "avatar"),
+    "#class"   : twitter.TwitterAvatarExtractor,
+    "#urls"    : "https://pbs.twimg.com/profile_images/2946444489/32028c6affdab425e037ff5a6bf77c1d.jpeg",
+
+    "date"     : util.NONE,
+    "tweet_id" : 2946444489,
 },
 
 {
