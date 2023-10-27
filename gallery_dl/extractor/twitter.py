@@ -272,28 +272,23 @@ class TwitterExtractor(Extractor):
             author = tweet["user"]
         author = self._transform_user(author)
 
-        if "note_tweet" in tweet:
-            note = tweet["note_tweet"]["note_tweet_results"]["result"]
-        else:
-            note = None
-
-        source = tweet["source"]
-
         if "legacy" in tweet:
-            tweet = tweet["legacy"]
+            legacy = tweet["legacy"]
+        else:
+            legacy = tweet
+        tget = legacy.get
 
-        tweet_id = int(tweet["id_str"])
+        tweet_id = int(legacy["id_str"])
         if tweet_id >= 300000000000000:
             date = text.parse_timestamp(
                 ((tweet_id >> 22) + 1288834974657) // 1000)
         else:
             try:
                 date = text.parse_datetime(
-                    tweet["created_at"], "%a %b %d %H:%M:%S %z %Y")
+                    legacy["created_at"], "%a %b %d %H:%M:%S %z %Y")
             except Exception:
                 date = util.NONE
 
-        tget = tweet.get
         tdata = {
             "tweet_id"      : tweet_id,
             "retweet_id"    : text.parse_int(
@@ -307,8 +302,8 @@ class TwitterExtractor(Extractor):
             "date"          : date,
             "author"        : author,
             "user"          : self._user or author,
-            "lang"          : tweet["lang"],
-            "source"        : text.extr(source, ">", "<"),
+            "lang"          : legacy["lang"],
+            "source"        : text.extr(tweet["source"], ">", "<"),
             "sensitive"     : tget("possibly_sensitive"),
             "favorite_count": tget("favorite_count"),
             "quote_count"   : tget("quote_count"),
@@ -316,7 +311,13 @@ class TwitterExtractor(Extractor):
             "retweet_count" : tget("retweet_count"),
         }
 
-        entities = note["entity_set"] if note else tweet["entities"]
+        if "note_tweet" in tweet:
+            note = tweet["note_tweet"]["note_tweet_results"]["result"]
+            content = note["text"]
+            entities = note["entity_set"]
+        else:
+            content = tget("full_text") or tget("text") or ""
+            entities = legacy["entities"]
 
         hashtags = entities.get("hashtags")
         if hashtags:
@@ -330,8 +331,7 @@ class TwitterExtractor(Extractor):
                 "nick": u["name"],
             } for u in mentions]
 
-        content = text.unescape(
-            note["text"] if note else tget("full_text") or tget("text") or "")
+        content = text.unescape(content)
         urls = entities.get("urls")
         if urls:
             for url in urls:
@@ -339,11 +339,13 @@ class TwitterExtractor(Extractor):
         txt, _, tco = content.rpartition(" ")
         tdata["content"] = txt if tco.startswith("https://t.co/") else content
 
-        if "in_reply_to_screen_name" in tweet:
-            tdata["reply_to"] = tweet["in_reply_to_screen_name"]
-        if "quoted_by" in tweet:
-            tdata["quote_by"] = tweet["quoted_by"]
+        if "in_reply_to_screen_name" in legacy:
+            tdata["reply_to"] = legacy["in_reply_to_screen_name"]
+        if "quoted_by" in legacy:
+            tdata["quote_by"] = legacy["quoted_by"]
         if tdata["retweet_id"]:
+            tdata["content"] = "RT @{}: {}".format(
+                author["name"], tdata["content"])
             tdata["date_original"] = text.parse_timestamp(
                 ((tdata["retweet_id"] >> 22) + 1288834974657) // 1000)
 
@@ -1532,15 +1534,21 @@ class TwitterAPI():
                                 retweet["core"]["user_results"]["result"]
 
                             rtlegacy = retweet["legacy"]
+
+                            if "note_tweet" in retweet:
+                                tweet["note_tweet"] = retweet["note_tweet"]
+
                             if "extended_entities" in rtlegacy and \
                                     "extended_entities" not in legacy:
                                 legacy["extended_entities"] = \
                                     rtlegacy["extended_entities"]
+
                             if "withheld_scope" in rtlegacy and \
                                     "withheld_scope" not in legacy:
                                 legacy["withheld_scope"] = \
                                     rtlegacy["withheld_scope"]
-                                legacy["full_text"] = rtlegacy["full_text"]
+
+                            legacy["full_text"] = rtlegacy["full_text"]
                         except KeyError:
                             pass
 
