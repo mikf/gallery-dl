@@ -778,13 +778,15 @@ class InstagramRestAPI():
         kwargs["headers"] = {
             "Accept"          : "*/*",
             "X-CSRFToken"     : extr.csrf_token,
-            "X-Instagram-AJAX": "1006242110",
             "X-IG-App-ID"     : "936619743392459",
-            "X-ASBD-ID"       : "198387",
+            "X-ASBD-ID"       : "129477",
             "X-IG-WWW-Claim"  : extr.www_claim,
             "X-Requested-With": "XMLHttpRequest",
-            "Alt-Used"        : "www.instagram.com",
+            "Connection"      : "keep-alive",
             "Referer"         : extr.root + "/",
+            "Sec-Fetch-Dest"  : "empty",
+            "Sec-Fetch-Mode"  : "cors",
+            "Sec-Fetch-Site"  : "same-origin",
         }
         return extr.request(url, **kwargs).json()
 
