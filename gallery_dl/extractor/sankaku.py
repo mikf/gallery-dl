@@ -87,7 +87,7 @@ class SankakuTagExtractor(SankakuExtractor):
     subcategory = "tag"
     directory_fmt = ("{category}", "{search_tags}")
     archive_fmt = "t_{search_tags}_{id}"
-    pattern = BASE_PATTERN + r"/?\?([^#]*)"
+    pattern = BASE_PATTERN + r"(?:/posts)?/?\?([^#]*)"
     example = "https://sankaku.app/?tags=TAG"
 
     def __init__(self, match):
