@@ -254,14 +254,14 @@ def stderr_write_flush(s):
     sys.stderr.flush()
 
 
-if sys.stdout.line_buffering:
+if getattr(sys.stdout, "line_buffering", None):
     def stdout_write(s):
         sys.stdout.write(s)
 else:
     stdout_write = stdout_write_flush
 
 
-if sys.stderr.line_buffering:
+if getattr(sys.stderr, "line_buffering", None):
     def stderr_write(s):
         sys.stderr.write(s)
 else:
