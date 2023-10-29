@@ -54,6 +54,20 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://chan.sankakucomplex.com/posts?tags=TAG",
+    "#comment" : "'/posts' in tag search URL (#4740)",
+    "#category": ("booru", "sankaku", "tag"),
+    "#class"   : sankaku.SankakuTagExtractor,
+},
+
+{
+    "#url"     : "https://chan.sankakucomplex.com/ja/posts/?tags=あえいおう",
+    "#comment" : "'/posts' in tag search URL (#4740)",
+    "#category": ("booru", "sankaku", "tag"),
+    "#class"   : sankaku.SankakuTagExtractor,
+},
+
+{
     "#url"     : "https://chan.sankakucomplex.com/?tags=bonocho+a+b+c+d",
     "#comment" : "error on five or more tags",
     "#category": ("booru", "sankaku", "tag"),
