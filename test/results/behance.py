@@ -13,8 +13,10 @@ __tests__ = (
     "#url"     : "https://www.behance.net/gallery/17386197/A-Short-Story",
     "#category": ("", "behance", "gallery"),
     "#class"   : behance.BehanceGalleryExtractor,
-    "#count"   : 2,
-    "#sha1_url": "ab79bd3bef8d3ae48e6ac74fd995c1dfaec1b7d2",
+    "#urls"    : (
+        "ytdl:https://player.vimeo.com/video/97189640?title=0&byline=0&portrait=0&color=ffffff",
+        "https://mir-s3-cdn-cf.behance.net/project_modules/source/a5a12417386197.562bc055a107d.jpg",
+    ),
 
     "id"    : 17386197,
     "name"  : r"re:\"Hi\". A short story about the important things ",

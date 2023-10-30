@@ -170,7 +170,8 @@ class BehanceGalleryExtractor(BehanceExtractor):
             elif mtype == "EmbedModule":
                 embed = module.get("originalEmbed") or module.get("fluidEmbed")
                 if embed:
-                    append(("ytdl:" + text.extr(embed, 'src="', '"'), module))
+                    embed = text.unescape(text.extr(embed, 'src="', '"'))
+                    append(("ytdl:" + embed, module))
 
         return result
 
