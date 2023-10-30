@@ -40,7 +40,7 @@ __tests__ = (
         "group:seventh lowlife",
         "other:sample",
     ],
-    "thumb"       : "https://exhentai.org/t/ce/0a/ce0a5bcb583229a9b07c0f83bcb1630ab1350640-624622-736-1036-jpg_250.jpg",
+    "thumb"       : "https://s.exhentai.org/t/ce/0a/ce0a5bcb583229a9b07c0f83bcb1630ab1350640-624622-736-1036-jpg_250.jpg",
     "title"       : "C93 [Seventh_Lowlife] Komi-san ha Tokidoki Daitan desu (Komi-san wa Komyushou desu) [Sample]",
     "title_jpn"   : "(C93) [Comiketjack (わ！)] 古見さんは、時々大胆です。 (古見さんは、コミュ症です。) [見本]",
     "token"       : "d55c44d3d0",
