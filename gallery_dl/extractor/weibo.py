@@ -191,7 +191,7 @@ class WeiboExtractor(Extractor):
         headers = {"Referer": response.url}
         data = {
             "cb": "gen_callback",
-            "fp": '{"os":"1","browser":"Gecko91,0,0,0","fonts":"undefined",'
+            "fp": '{"os":"1","browser":"Gecko109,0,0,0","fonts":"undefined",'
                   '"screenInfo":"1920*1080*24","plugins":""}',
         }
 
@@ -203,8 +203,8 @@ class WeiboExtractor(Extractor):
         params = {
             "a"    : "incarnate",
             "t"    : data["tid"],
-            "w"    : "2",
-            "c"    : "{:>03}".format(data["confidence"]),
+            "w"    : "3" if data.get("new_tid") else "2",
+            "c"    : "{:>03}".format(data.get("confidence") or 100),
             "gc"   : "",
             "cb"   : "cross_domain",
             "from" : "weibo",
