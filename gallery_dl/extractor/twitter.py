@@ -15,7 +15,8 @@ import itertools
 import json
 import re
 
-BASE_PATTERN = r"(?:https?://)?(?:www\.|mobile\.)?(?:(?:[fv]x)?twitter|x)\.com"
+BASE_PATTERN = (r"(?:https?://)?(?:www\.|mobile\.)?"
+                r"(?:(?:[fv]x)?twitter|(?:fixup)?x)\.com")
 
 
 class TwitterExtractor(Extractor):
