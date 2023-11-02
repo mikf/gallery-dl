@@ -55,6 +55,12 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://fixupx.com/supernaturepics",
+    "#category": ("", "twitter", "user"),
+    "#class"   : twitter.TwitterUserExtractor,
+},
+
+{
     "#url"     : "https://x.com/supernaturepics",
     "#category": ("", "twitter", "user"),
     "#class"   : twitter.TwitterUserExtractor,
