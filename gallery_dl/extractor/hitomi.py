@@ -21,7 +21,7 @@ class HitomiGalleryExtractor(GalleryExtractor):
     category = "hitomi"
     root = "https://hitomi.la"
     pattern = (r"(?:https?://)?hitomi\.la"
-               r"/(?:manga|doujinshi|cg|gamecg|galleries|reader)"
+               r"/(?:manga|doujinshi|cg|gamecg|imageset|galleries|reader)"
                r"/(?:[^/?#]+-)?(\d+)")
     example = "https://hitomi.la/manga/TITLE-867789.html"
 
