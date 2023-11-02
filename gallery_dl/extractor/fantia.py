@@ -108,7 +108,7 @@ class FantiaExtractor(Extractor):
             "fanclub_user_name": resp["fanclub"]["user"]["name"],
             "fanclub_name": resp["fanclub"]["name"],
             "fanclub_url": self.root+"/fanclubs/"+str(resp["fanclub"]["id"]),
-            "tags": resp["tags"],
+            "tags": [t["name"] for t in resp["tags"]],
             "_data": resp,
         }
 
