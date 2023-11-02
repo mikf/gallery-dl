@@ -179,7 +179,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
             data.update(image)
             if self.limits:
                 self._check_limits(data)
-            if "/fullimg.php" in url:
+            if "/fullimg" in url:
                 data["_http_validate"] = _validate_response
             else:
                 data["_http_validate"] = None
@@ -275,11 +275,11 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
 
         self.key_next = extr("'", "'")
         iurl = extr('<img id="img" src="', '"')
-        orig = extr('hentai.org/fullimg.php', '"')
+        orig = extr('hentai.org/fullimg', '"')
 
         try:
             if self.original and orig:
-                url = self.root + "/fullimg.php" + text.unescape(orig)
+                url = self.root + "/fullimg" + text.unescape(orig)
                 data = self._parse_original_info(extr('ownload original', '<'))
             else:
                 url = iurl
@@ -294,7 +294,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
         self.key_show = extr('var showkey="', '";')
 
         self._check_509(iurl, data)
-        return url, text.nameext_from_url(iurl, data)
+        return url, text.nameext_from_url(url, data)
 
     def images_from_api(self):
         """Get image url and data from api calls"""
@@ -319,7 +319,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
             imgurl , pos = text.extract(i3, 'id="img" src="', '"', pos)
 
             try:
-                pos = i6.find('hentai.org/fullimg.php')
+                pos = i6.find("hentai.org/fullimg")
                 if self.original and pos >= 0:
                     origurl, pos = text.rextract(i6, '"', '"', pos)
                     url = text.unescape(origurl)
@@ -337,7 +337,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
             data["image_token"] = imgkey
 
             self._check_509(imgurl, data)
-            yield url, text.nameext_from_url(imgurl, data)
+            yield url, text.nameext_from_url(url, data)
 
             request["imgkey"] = nextkey
 
