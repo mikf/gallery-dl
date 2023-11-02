@@ -206,7 +206,8 @@ class MetadataPP(PostProcessor):
             sort_keys=options.get("sort", False),
             separators=options.get("separators"),
             indent=options.get("indent", indent),
-            check_circular=False, default=str,
+            check_circular=False,
+            default=util.json_default,
         )
 
 

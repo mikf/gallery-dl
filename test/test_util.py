@@ -750,6 +750,7 @@ def hash(value):
         self.assertIs(obj(), obj)
         self.assertIs(obj(1, "a"), obj)
         self.assertIs(obj(foo="bar"), obj)
+        self.assertEqual(util.json_dumps(obj), "null")
 
         i = 0
         for _ in obj:
