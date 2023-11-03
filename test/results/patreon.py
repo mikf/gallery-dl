@@ -14,8 +14,8 @@ __tests__ = (
     "#url"     : "https://www.patreon.com/koveliana",
     "#category": ("", "patreon", "creator"),
     "#class"   : patreon.PatreonCreatorExtractor,
-    "#range"   : "1-25",
-    "#count"   : ">= 25",
+    "#range"   : "1-15",
+    "#count"   : 15,
 
     "attachments"  : list,
     "comment_count": int,
@@ -54,6 +54,18 @@ __tests__ = (
 
 {
     "#url"     : "https://www.patreon.com/user/posts/?u=2931440",
+    "#category": ("", "patreon", "creator"),
+    "#class"   : patreon.PatreonCreatorExtractor,
+},
+
+{
+    "#url"     : "https://www.patreon.com/user?c=369707",
+    "#category": ("", "patreon", "creator"),
+    "#class"   : patreon.PatreonCreatorExtractor,
+},
+
+{
+    "#url"     : "https://www.patreon.com/id:369707",
     "#category": ("", "patreon", "creator"),
     "#class"   : patreon.PatreonCreatorExtractor,
 },
