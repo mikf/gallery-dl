@@ -517,6 +517,7 @@ class PixivPixivisionExtractor(PixivExtractor):
     directory_fmt = ("{category}", "pixivision",
                      "{pixivision_id} {pixivision_title}")
     archive_fmt = "V{pixivision_id}_{id}{suffix}.{extension}"
+    cookies_domain = ".pixiv.net"
     pattern = r"(?:https?://)?(?:www\.)?pixivision\.net/(?:en/)?a/(\d+)"
     example = "https://www.pixivision.net/en/a/12345"
 
@@ -549,6 +550,9 @@ class PixivSeriesExtractor(PixivExtractor):
     directory_fmt = ("{category}", "{user[id]} {user[account]}",
                      "{series[id]} {series[title]}")
     filename_fmt = "{num_series:>03}_{id}_p{num}.{extension}"
+    cookies_domain = ".pixiv.net"
+    browser = "firefox"
+    tls12 = False
     pattern = BASE_PATTERN + r"/user/(\d+)/series/(\d+)"
     example = "https://www.pixiv.net/user/12345/series/12345"
 
