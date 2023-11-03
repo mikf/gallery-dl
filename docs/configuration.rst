@@ -5279,9 +5279,14 @@ How To
     * login and visit the `apps <https://www.reddit.com/prefs/apps/>`__
       section of your account's preferences
     * click the "are you a developer? create an app..." button
-    * fill out the form, choose "installed app", preferably set
-      "http://localhost:6414/" as "redirect uri" and finally click
-      "create app"
+    * fill out the form:
+
+      * choose a name
+      * select "installed app"
+      * set ``http://localhost:6414/`` as "redirect uri"
+      * solve the "I'm not a rebot" reCATCHA if needed
+      * click "create app"
+
     * copy the client id (third line, under your application's name and
       "installed app") and put it in your configuration file
       as ``"client-id"``
