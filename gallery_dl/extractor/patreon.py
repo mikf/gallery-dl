@@ -296,9 +296,8 @@ class PatreonCreatorExtractor(PatreonExtractor):
         return self._pagination(url)
 
     def _get_campaign_id(self, query):
-        campaign_id = self.config("campaign-id")
-        if campaign_id and campaign_id != "auto":
-            return str(campaign_id)
+        if self.creator.startswith("id:"):
+            return self.creator[3:]
 
         campaign_id = query.get("c") or query.get("campaign_id")
         if campaign_id:
@@ -316,7 +315,8 @@ class PatreonCreatorExtractor(PatreonExtractor):
             data = self._extract_bootstrap(page)
             return data["campaign"]["data"]["id"]
         except (KeyError, ValueError) as exc:
-            self.log.debug(data)
+            if data:
+                self.log.debug(data)
             raise exception.StopExtraction(
                 "Unable to extract campaign ID (%s: %s)",
                 exc.__class__.__name__, exc)
