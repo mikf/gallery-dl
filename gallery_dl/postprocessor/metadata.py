@@ -189,7 +189,7 @@ class MetadataPP(PostProcessor):
             tags = []
             extend = tags.extend
             for tagdict in taglists:
-                extend([x for x in tagdict.values() if x is not None])
+                extend([x for x in tagdict.values() if isinstance(x, str)])
             tags.sort()
 
         fp.write("\n".join(tags) + "\n")

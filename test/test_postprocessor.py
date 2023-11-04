@@ -365,8 +365,8 @@ class MetadataTest(BasePostprocessorTest):
         self._create(
             {"mode": "tags"},
             {"tags": [
-                {"g": "foobar1", "m": "foobar2"},
-                {"g": None, "m": "foobarbaz"}
+                {"g": "foobar1", "m": "foobar2", "u": True},
+                {"g": None, "m": "foobarbaz", "u": [3, 4]},
             ]},
         )
         with patch("builtins.open", mock_open()) as m:
