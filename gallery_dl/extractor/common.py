@@ -35,6 +35,7 @@ class Extractor():
     root = ""
     cookies_domain = ""
     referer = True
+    ciphers = None
     tls12 = True
     browser = None
     request_interval = 0.0
@@ -305,6 +306,7 @@ class Extractor():
             headers["User-Agent"] = useragent
             headers["Accept"] = "*/*"
             headers["Accept-Language"] = "en-US,en;q=0.5"
+            ssl_ciphers = self.ciphers
 
         if BROTLI:
             headers["Accept-Encoding"] = "gzip, deflate, br"

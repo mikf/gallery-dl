@@ -27,6 +27,7 @@ class ExhentaiExtractor(Extractor):
     cookies_names = ("ipb_member_id", "ipb_pass_hash")
     root = "https://exhentai.org"
     request_interval = 5.0
+    ciphers = "DEFAULT:!DH"
 
     LIMIT = False
 
