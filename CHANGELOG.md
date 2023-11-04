@@ -1,5 +1,44 @@
 # Changelog
 
+## 1.26.2 - 2023-11-04
+### Extractors
+#### Additions
+- [4archive] add `thread` and `board` extractors ([#1262](https://github.com/mikf/gallery-dl/issues/1262), [#2418](https://github.com/mikf/gallery-dl/issues/2418), [#4400](https://github.com/mikf/gallery-dl/issues/4400), [#4710](https://github.com/mikf/gallery-dl/issues/4710), [#4714](https://github.com/mikf/gallery-dl/issues/4714))
+- [hitomi] recognize `imageset` gallery URLs ([#4756](https://github.com/mikf/gallery-dl/issues/4756))
+- [kemonoparty] add `revision_index` metadata field ([#4727](https://github.com/mikf/gallery-dl/issues/4727))
+- [misskey] support `misskey.design` ([#4713](https://github.com/mikf/gallery-dl/issues/4713))
+- [reddit] support Reddit Mobile share links ([#4693](https://github.com/mikf/gallery-dl/issues/4693))
+- [sankaku] support `/posts/` tag search URLs ([#4740](https://github.com/mikf/gallery-dl/issues/4740))
+- [twitter] recognize `fixupx.com` URLs ([#4755](https://github.com/mikf/gallery-dl/issues/4755))
+#### Fixes
+- [exhentai] update to site layout changes ([#4730](https://github.com/mikf/gallery-dl/issues/4730), [#4754](https://github.com/mikf/gallery-dl/issues/4754))
+- [exhentai] provide fallback URLs ([#1021](https://github.com/mikf/gallery-dl/issues/1021), [#4745](https://github.com/mikf/gallery-dl/issues/4745))
+- [exhentai] disable `DH` ciphers to avoid `DH_KEY_TOO_SMALL` errors ([#1021](https://github.com/mikf/gallery-dl/issues/1021), [#4593](https://github.com/mikf/gallery-dl/issues/4593))
+- [idolcomplex] disable sending Referer headers ([#4726](https://github.com/mikf/gallery-dl/issues/4726))
+- [instagram] update API headers
+- [kemonoparty] fix parsing of non-standard `date` values ([#4676](https://github.com/mikf/gallery-dl/issues/4676))
+- [patreon] fix `campaign_id` extraction ([#4699](https://github.com/mikf/gallery-dl/issues/4699), [#4715](https://github.com/mikf/gallery-dl/issues/4715), [#4736](https://github.com/mikf/gallery-dl/issues/4736), [#4738](https://github.com/mikf/gallery-dl/issues/4738))
+- [pixiv] load cookies for non-OAuth URLs ([#4760](https://github.com/mikf/gallery-dl/issues/4760))
+- [twitter] fix avatars without `date` information ([#4696](https://github.com/mikf/gallery-dl/issues/4696))
+- [twitter] restore truncated retweet texts ([#3430](https://github.com/mikf/gallery-dl/issues/3430), [#4690](https://github.com/mikf/gallery-dl/issues/4690))
+- [weibo] fix Sina Visitor requests
+#### Improvements
+- [behance] unescape embed URLs ([#4742](https://github.com/mikf/gallery-dl/issues/4742))
+- [fantia] simplify `tags` to a list of strings ([#4752](https://github.com/mikf/gallery-dl/issues/4752))
+- [kemonoparty] limit `title` length ([#4741](https://github.com/mikf/gallery-dl/issues/4741))
+- [nijie] set 1-2s delay between requests to avoid 429 errors
+- [patreon] provide ways to manually specify a user's campaign_id
+  - `https://www.patreon.com/id:12345`
+  - `https://www.patreon.com/USER?c=12345`
+  - `https://www.patreon.com/USER?campaign_id=12345`
+- [twitter] cache `user_by_…` results ([#4719](https://github.com/mikf/gallery-dl/issues/4719))
+### Post Processors
+#### Fixes
+- [metadata] ignore non-string tag values ([#4764](https://github.com/mikf/gallery-dl/issues/4764))
+### Miscellaneous
+#### Fixes
+- prevent crash when `stdout.line_buffering` is not defined ([#642](https://github.com/mikf/gallery-dl/issues/642))
+
 ## 1.26.1 - 2023-10-21
 ### Extractors
 #### Additions
