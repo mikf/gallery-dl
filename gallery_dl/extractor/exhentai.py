@@ -275,15 +275,19 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
 
         self.key_next = extr("'", "'")
         iurl = extr('<img id="img" src="', '"')
+        nl = extr(" nl(", ")").strip("\"'")
         orig = extr('hentai.org/fullimg', '"')
 
         try:
             if self.original and orig:
                 url = self.root + "/fullimg" + text.unescape(orig)
                 data = self._parse_original_info(extr('ownload original', '<'))
+                data["_fallback"] = ("{}?nl={}".format(url, nl),)
             else:
                 url = iurl
                 data = self._parse_image_info(url)
+                data["_fallback"] = self._fallback(
+                    None, self.image_num, nl)
         except IndexError:
             self.log.debug("Page content:\n%s", page)
             raise exception.StopExtraction(
@@ -317,6 +321,8 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
             imgkey = nextkey
             nextkey, pos = text.extract(i3, "'", "'")
             imgurl , pos = text.extract(i3, 'id="img" src="', '"', pos)
+            nl     , pos = text.extract(i3, " nl(", ")", pos)
+            nl = (nl or "").strip("\"'")
 
             try:
                 pos = i6.find("hentai.org/fullimg")
@@ -325,9 +331,12 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
                     url = text.unescape(origurl)
                     data = self._parse_original_info(text.extract(
                         i6, "ownload original", "<", pos)[0])
+                    data["_fallback"] = ("{}?nl={}".format(url, nl),)
                 else:
                     url = imgurl
                     data = self._parse_image_info(url)
+                    data["_fallback"] = self._fallback(
+                        imgkey, request["page"], nl)
             except IndexError:
                 self.log.debug("Page content:\n%s", page)
                 raise exception.StopExtraction(
@@ -400,6 +409,14 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
         if page.startswith(("Invalid page", "Keep trying")):
             raise exception.NotFoundError("image page")
         return page
+
+    def _fallback(self, imgkey, num, nl):
+        url = "{}/s/{}/{}-{}?nl={}".format(
+            self.root, imgkey or self.key_start, self.gallery_id, num, nl)
+        page = self.request(url, fatal=False).text
+        if page.startswith(("Invalid page", "Keep trying")):
+            return
+        yield self.image_from_page(page)[0]
 
     @staticmethod
     def _parse_image_info(url):
