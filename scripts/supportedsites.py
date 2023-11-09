@@ -89,6 +89,7 @@ CATEGORY_MAP = {
     "mastodon.social": "mastodon.social",
     "myhentaigallery": "My Hentai Gallery",
     "myportfolio"    : "Adobe Portfolio",
+    "naverpost"      : "NaverPost",
     "naverwebtoon"   : "NaverWebtoon",
     "nhentai"        : "nhentai",
     "nijie"          : "nijie",
