@@ -313,9 +313,19 @@ def extract_headers(response):
     headers = response.headers
     data = dict(headers)
 
+    # ref: https://developer.mozilla.org
+    #      /en-US/docs/Web/HTTP/Headers/Content-Disposition
     hcd = headers.get("content-disposition")
     if hcd:
-        name = text.extr(hcd, 'filename="', '"')
+        encoding, _, quoted_name = (
+            text.extr(hcd, "filename*=", ";") or
+            hcd.partition("filename*=")[-1]).partition("''")
+        # prefer 'filename*' if present
+        name = (text.unquote(quoted_name, encoding or None) or
+                text.extr(hcd, 'filename="', '"') or
+                # no quotes (non-standard)
+                text.extr(hcd, "filename=", ";") or
+                hcd.partition("filename=")[-1])
         if name:
             text.nameext_from_url(name, data)
 
@@ -843,6 +853,7 @@ class RangePredicate():
 
 class UniquePredicate():
     """Predicate; True if given URL has not been encountered before"""
+
     def __init__(self):
         self.urls = set()
 
@@ -875,6 +886,7 @@ class FilterPredicate():
 
 class ExtendedUrl():
     """URL with attached config key-value pairs"""
+
     def __init__(self, url, gconf, lconf):
         self.value, self.gconfig, self.lconfig = url, gconf, lconf
 
