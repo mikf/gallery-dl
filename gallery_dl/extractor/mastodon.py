@@ -45,6 +45,9 @@ class MastodonExtractor(BaseExtractor):
             attachments = status["media_attachments"]
             del status["media_attachments"]
 
+            if status["reblog"]:
+                attachments.extend(status["reblog"]["media_attachments"])
+
             status["instance"] = self.instance
             acct = status["account"]["acct"]
             status["instance_remote"] = \
@@ -113,7 +116,10 @@ class MastodonUserExtractor(MastodonExtractor):
 
         return api.account_statuses(
             api.account_id_by_username(self.item),
-            only_media=not self.config("text-posts", False),
+            only_media=(
+                not self.reblogs and
+                not self.config("text-posts", False)
+            ),
             exclude_replies=not self.replies,
         )
 
