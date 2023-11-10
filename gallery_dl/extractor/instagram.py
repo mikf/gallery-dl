@@ -217,9 +217,10 @@ class InstagramExtractor(Extractor):
                                  data["post_shortcode"])
                 continue
 
-            if "video_versions" in item:
+            video_versions = item.get("video_versions")
+            if video_versions:
                 video = max(
-                    item["video_versions"],
+                    video_versions,
                     key=lambda x: (x["width"], x["height"], x["type"]),
                 )
                 media = video
