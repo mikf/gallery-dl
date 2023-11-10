@@ -43,6 +43,7 @@ class TwitterExtractor(Extractor):
         self.quoted = self.config("quoted", False)
         self.videos = self.config("videos", True)
         self.cards = self.config("cards", False)
+        self.ads = self.config("ads", False)
         self.cards_blacklist = self.config("cards-blacklist")
         self.syndication = self.config("syndication")
 
@@ -1034,7 +1035,7 @@ class TwitterAPI():
             "focalTweetId": tweet_id,
             "referrer": "profile",
             "with_rux_injections": False,
-            "includePromotedContent": True,
+            "includePromotedContent": False,
             "withCommunity": True,
             "withQuickPromoteEligibilityTweetFields": True,
             "withBirdwatchNotes": True,
@@ -1049,7 +1050,7 @@ class TwitterAPI():
         variables = {
             "userId": self._user_id_by_screen_name(screen_name),
             "count": 100,
-            "includePromotedContent": True,
+            "includePromotedContent": False,
             "withQuickPromoteEligibilityTweetFields": True,
             "withVoice": True,
             "withV2Timeline": True,
@@ -1061,7 +1062,7 @@ class TwitterAPI():
         variables = {
             "userId": self._user_id_by_screen_name(screen_name),
             "count": 100,
-            "includePromotedContent": True,
+            "includePromotedContent": False,
             "withCommunity": True,
             "withVoice": True,
             "withV2Timeline": True,
@@ -1498,13 +1499,21 @@ class TwitterAPI():
 
             for entry in tweets:
                 try:
-                    tweet = ((entry.get("content") or entry["item"])
-                             ["itemContent"]["tweet_results"]["result"])
+                    item = ((entry.get("content") or entry["item"])
+                            ["itemContent"])
+                    if "promotedMetadata" in item and not extr.ads:
+                        extr.log.debug(
+                            "Skipping %s (ad)",
+                            (entry.get("entryId") or "").rpartition("-")[2])
+                        continue
+
+                    tweet = item["tweet_results"]["result"]
                     if "tombstone" in tweet:
                         tweet = self._process_tombstone(
                             entry, tweet["tombstone"])
                         if not tweet:
                             continue
+
                     if "tweet" in tweet:
                         tweet = tweet["tweet"]
                     legacy = tweet["legacy"]

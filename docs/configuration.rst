@@ -3109,6 +3109,16 @@ Description
     See `Filters <https://twibooru.org/filters>`__ for details.
 
 
+extractor.twitter.ads
+---------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Fetch media from promoted Tweets.
+
+
 extractor.twitter.cards
 -----------------------
 Type
