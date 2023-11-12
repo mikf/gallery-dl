@@ -171,6 +171,14 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
             # declared inside 'items()' to be able to access 'data'
             if not response.history and response.headers.get(
                     "content-type", "").startswith("text/html"):
+                page = response.text
+                self.log.warning("'%s'", page)
+
+                if " requires GP" in page:
+                    self.log.info("Falling back to non-original downloads")
+                    self.original = False
+                    return data["_url_1280"]
+
                 self._report_limits(data)
             return True
 
@@ -296,6 +304,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
 
         data["num"] = self.image_num
         data["image_token"] = self.key_start = extr('var startkey="', '";')
+        data["_url_1280"] = iurl
         self.key_show = extr('var showkey="', '";')
 
         self._check_509(iurl, data)
@@ -345,6 +354,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
 
             data["num"] = request["page"]
             data["image_token"] = imgkey
+            data["_url_1280"] = imgurl
 
             self._check_509(imgurl, data)
             yield url, text.nameext_from_url(url, data)
