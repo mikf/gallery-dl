@@ -133,9 +133,25 @@ class HentaifoundryExtractor(Extractor):
 
         return text.nameext_from_url(data["src"], data)
 
-    def _init_site_filters(self):
+    def _request_check(self, url, **kwargs):
+        self.request = self._request_original
+
+        # check for Enter button / front page
+        # and update PHPSESSID and content filters if necessary
+        response = self.request(url, **kwargs)
+        content = response.content
+        if len(content) < 5000 and \
+                b'<div id="entryButtonContainer"' in content:
+            self._init_site_filters(False)
+            response = self.request(url, **kwargs)
+        return response
+
+    def _init_site_filters(self, check_cookies=True):
         """Set site-internal filters to show all images"""
-        if self.cookies.get("PHPSESSID", domain=self.cookies_domain):
+        if check_cookies and self.cookies.get(
+                "PHPSESSID", domain=self.cookies_domain):
+            self._request_original = self.request
+            self.request = self._request_check
             return
 
         url = self.root + "/?enterAgree=1"
