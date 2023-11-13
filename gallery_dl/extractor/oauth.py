@@ -11,7 +11,7 @@
 from .common import Extractor, Message
 from .. import text, oauth, util, config, exception
 from ..output import stdout_write
-from ..cache import cache
+from ..cache import cache, memcache
 import urllib.parse
 import binascii
 import hashlib
@@ -31,6 +31,9 @@ class OAuthBase(Extractor):
 
     def _init(self):
         self.cache = config.get(("extractor", self.category), "cache", True)
+        if self.cache and cache is memcache:
+            self.log.warning("cache file is not writeable")
+            self.cache = False
 
     def oauth_config(self, key, default=None):
         value = config.interpolate(("extractor", self.subcategory), key)
