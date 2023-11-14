@@ -119,6 +119,7 @@
 
 ## Post-processing Options:
     --zip                       Store downloaded files in a ZIP archive
+    --cbz                       Store downloaded files in a CBZ archive
     --ugoira-conv               Convert Pixiv Ugoira to WebM (requires FFmpeg)
     --ugoira-conv-lossless      Convert Pixiv Ugoira to WebM in VP9 lossless
                                 mode
