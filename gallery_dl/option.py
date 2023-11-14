@@ -469,6 +469,15 @@ def build_parser():
         help="Store downloaded files in a ZIP archive",
     )
     postprocessor.add_argument(
+        "--cbz",
+        dest="postprocessors",
+        action="append_const", const={
+            "name"     : "zip",
+            "extension": "cbz",
+        },
+        help="Store downloaded files in a CBZ archive",
+    )
+    postprocessor.add_argument(
         "--ugoira-conv",
         dest="postprocessors", action="append_const", const={
             "name"          : "ugoira",
