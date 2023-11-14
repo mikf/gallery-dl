@@ -487,82 +487,6 @@ CODES = {
 }
 
 
-def parse_inputfile(file, log):
-    """Filter and process strings from an input file.
-
-    Lines starting with '#' and empty lines will be ignored.
-    Lines starting with '-' will be interpreted as a key-value pair separated
-      by an '='. where 'key' is a dot-separated option name and 'value' is a
-      JSON-parsable value. These configuration options will be applied while
-      processing the next URL.
-    Lines starting with '-G' are the same as above, except these options will
-      be applied for *all* following URLs, i.e. they are Global.
-    Everything else will be used as a potential URL.
-
-    Example input file:
-
-    # settings global options
-    -G base-directory = "/tmp/"
-    -G skip = false
-
-    # setting local options for the next URL
-    -filename="spaces_are_optional.jpg"
-    -skip    = true
-
-    https://example.org/
-
-    # next URL uses default filename and 'skip' is false.
-    https://example.com/index.htm # comment1
-    https://example.com/404.htm   # comment2
-    """
-    gconf = []
-    lconf = []
-    strip_comment = None
-
-    for line in file:
-        line = line.strip()
-
-        if not line or line[0] == "#":
-            # empty line or comment
-            continue
-
-        elif line[0] == "-":
-            # config spec
-            if len(line) >= 2 and line[1] == "G":
-                conf = gconf
-                line = line[2:]
-            else:
-                conf = lconf
-                line = line[1:]
-
-            key, sep, value = line.partition("=")
-            if not sep:
-                log.warning("input file: invalid <key>=<value> pair: %s", line)
-                continue
-
-            try:
-                value = json_loads(value.strip())
-            except ValueError as exc:
-                log.warning("input file: unable to parse '%s': %s", value, exc)
-                continue
-
-            key = key.strip().split(".")
-            conf.append((key[:-1], key[-1], value))
-
-        else:
-            # url
-            if " #" in line or "\t#" in line:
-                if strip_comment is None:
-                    strip_comment = re.compile(r"\s+#.*").sub
-                line = strip_comment("", line)
-            if gconf or lconf:
-                yield ExtendedUrl(line, gconf, lconf)
-                gconf = []
-                lconf = []
-            else:
-                yield line
-
-
 class CustomNone():
     """None-style type that supports more operations than regular None"""
     __slots__ = ()
@@ -871,15 +795,6 @@ class FilterPredicate():
             raise
         except Exception as exc:
             raise exception.FilterError(exc)
-
-
-class ExtendedUrl():
-    """URL with attached config key-value pairs"""
-    def __init__(self, url, gconf, lconf):
-        self.value, self.gconfig, self.lconfig = url, gconf, lconf
-
-    def __str__(self):
-        return self.value
 
 
 class DownloadArchive():

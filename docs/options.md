@@ -6,8 +6,6 @@
 ## General Options:
     -h, --help                  Print this help message and exit
     --version                   Print program version and exit
-    -i, --input-file FILE       Download URLs found in FILE ('-' for stdin).
-                                More than one --input-file can be specified
     -f, --filename FORMAT       Filename format string for downloaded files
                                 ('/O' for "original" filenames)
     -d, --destination PATH      Target location for file downloads
@@ -18,6 +16,16 @@
     --user-agent UA             User-Agent request header
     --clear-cache MODULE        Delete cached login sessions, cookies, etc. for
                                 MODULE (ALL to delete everything)
+
+## Input Options:
+    -i, --input-file FILE       Download URLs found in FILE ('-' for stdin).
+                                More than one --input-file can be specified
+    -I, --input-file-comment FILE
+                                Download URLs found in FILE. Comment them out
+                                after they were downloaded successfully.
+    -x, --input-file-delete FILE
+                                Download URLs found in FILE. Delete them after
+                                they were downloaded successfully.
 
 ## Output Options:
     -q, --quiet                 Activate quiet mode

@@ -59,6 +59,12 @@ class OptionAction(argparse.Action):
         namespace.options_pp[key] = value
 
 
+class InputfileAction(argparse.Action):
+    """Process input files"""
+    def __call__(self, parser, namespace, value, option_string=None):
+        namespace.input_files.append((value, self.const))
+
+
 class Formatter(argparse.HelpFormatter):
     """Custom HelpFormatter class to customize help output"""
     def __init__(self, prog):
@@ -101,12 +107,6 @@ def build_parser():
         help="Print program version and exit",
     )
     general.add_argument(
-        "-i", "--input-file",
-        dest="inputfiles", metavar="FILE", action="append",
-        help=("Download URLs found in FILE ('-' for stdin). "
-              "More than one --input-file can be specified"),
-    )
-    general.add_argument(
         "-f", "--filename",
         dest="filename", metavar="FORMAT",
         help=("Filename format string for downloaded files "
@@ -147,6 +147,32 @@ def build_parser():
         dest="clear_cache", metavar="MODULE",
         help="Delete cached login sessions, cookies, etc. for MODULE "
              "(ALL to delete everything)",
+    )
+
+    input = parser.add_argument_group("Input Options")
+    input.add_argument(
+        "urls",
+        metavar="URL", nargs="*",
+        help=argparse.SUPPRESS,
+    )
+    input.add_argument(
+        "-i", "--input-file",
+        dest="input_files", metavar="FILE", action=InputfileAction, const=None,
+        default=[],
+        help=("Download URLs found in FILE ('-' for stdin). "
+              "More than one --input-file can be specified"),
+    )
+    input.add_argument(
+        "-I", "--input-file-comment",
+        dest="input_files", metavar="FILE", action=InputfileAction, const="c",
+        help=("Download URLs found in FILE. "
+              "Comment them out after they were downloaded successfully."),
+    )
+    input.add_argument(
+        "-x", "--input-file-delete",
+        dest="input_files", metavar="FILE", action=InputfileAction, const="d",
+        help=("Download URLs found in FILE. "
+              "Delete them after they were downloaded successfully."),
     )
 
     output = parser.add_argument_group("Output Options")
@@ -532,12 +558,6 @@ def build_parser():
         "-O", "--postprocessor-option",
         dest="options_pp", metavar="OPT", action=OptionAction, default={},
         help="Additional '<key>=<value>' post processor options",
-    )
-
-    parser.add_argument(
-        "urls",
-        metavar="URL", nargs="*",
-        help=argparse.SUPPRESS,
     )
 
     return parser
