@@ -128,8 +128,9 @@
     --write-metadata            Write metadata to separate JSON files
     --write-info-json           Write gallery metadata to a info.json file
     --write-tags                Write image tags to separate text files
-    --mtime-from-date           Set file modification times according to 'date'
-                                metadata
+    --mtime FORMAT              Set file modification times according to
+                                metadata selected by FORMAT. Examples: 'date' or
+                                'status[date]'
     --exec CMD                  Execute CMD for each downloaded file. Supported
                                 replacement fields are {} or {_path},
                                 {_directory}, {_filename}. Example: --exec
@@ -138,6 +139,5 @@
                                 successfully. Example: --exec-after "cd
                                 {_directory} && convert * ../doc.pdf"
     -P, --postprocessor NAME    Activate the specified post processor
-    -O, --postprocessor-option OPT
-                                Additional '<key>=<value>' post processor
-                                options
+    -O, --postprocessor-option KEY=VALUE
+                                Additional post processor options

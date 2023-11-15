@@ -65,6 +65,15 @@ class InputfileAction(argparse.Action):
         namespace.input_files.append((value, self.const))
 
 
+class MtimeAction(argparse.Action):
+    """Configure mtime post processor"""
+    def __call__(self, parser, namespace, value, option_string=None):
+        namespace.postprocessors.append({
+            "name": "mtime",
+            "value": "{" + (self.const or value) + "}",
+        })
+
+
 class Formatter(argparse.HelpFormatter):
     """Custom HelpFormatter class to customize help output"""
     def __init__(self, prog):
@@ -466,7 +475,7 @@ def build_parser():
     postprocessor.add_argument(
         "--zip",
         dest="postprocessors",
-        action="append_const", const="zip",
+        action="append_const", const="zip", default=[],
         help="Store downloaded files in a ZIP archive",
     )
     postprocessor.add_argument(
@@ -536,10 +545,16 @@ def build_parser():
         help="Write image tags to separate text files",
     )
     postprocessor.add_argument(
+        "--mtime",
+        dest="postprocessors", metavar="FORMAT", action=MtimeAction,
+        help=("Set file modification times according to metadata "
+              "selected by FORMAT. Examples: 'date' or 'status[date]'"),
+    )
+    postprocessor.add_argument(
         "--mtime-from-date",
-        dest="postprocessors",
-        action="append_const", const="mtime",
-        help="Set file modification times according to 'date' metadata",
+        dest="postprocessors", nargs=0, action=MtimeAction,
+        const="date|status[date]",
+        help=argparse.SUPPRESS,
     )
     postprocessor.add_argument(
         "--exec",
