@@ -44,23 +44,23 @@ class DeprecatedConfigConstAction(argparse.Action):
         namespace.options.append(((), self.dest, self.const))
 
 
-class ParseAction(argparse.Action):
-    """Parse <key>=<value> options and set them as config values"""
+class ConfigParseAction(argparse.Action):
+    """Parse KEY=VALUE config options"""
     def __call__(self, parser, namespace, values, option_string=None):
         key, value = _parse_option(values)
         key = key.split(".")  # splitting an empty string becomes [""]
         namespace.options.append((key[:-1], key[-1], value))
 
 
-class OptionAction(argparse.Action):
-    """Parse <key>=<value> options for """
+class PPParseAction(argparse.Action):
+    """Parse KEY=VALUE post processor options"""
     def __call__(self, parser, namespace, values, option_string=None):
         key, value = _parse_option(values)
         namespace.options_pp[key] = value
 
 
 class InputfileAction(argparse.Action):
-    """Process input files"""
+    """Collect input files"""
     def __call__(self, parser, namespace, value, option_string=None):
         namespace.input_files.append((value, self.const))
 
@@ -334,7 +334,8 @@ def build_parser():
     configuration = parser.add_argument_group("Configuration Options")
     configuration.add_argument(
         "-o", "--option",
-        dest="options", metavar="KEY=VALUE", action=ParseAction, default=[],
+        dest="options", metavar="KEY=VALUE",
+        action=ConfigParseAction, default=[],
         help=("Additional options. "
               "Example: -o browser=firefox")   ,
     )
@@ -565,8 +566,9 @@ def build_parser():
     )
     postprocessor.add_argument(
         "-O", "--postprocessor-option",
-        dest="options_pp", metavar="OPT", action=OptionAction, default={},
-        help="Additional '<key>=<value>' post processor options",
+        dest="options_pp", metavar="KEY=VALUE",
+        action=PPParseAction, default={},
+        help="Additional post processor options",
     )
 
     return parser
