@@ -66,12 +66,70 @@ class InputfileAction(argparse.Action):
 
 
 class MtimeAction(argparse.Action):
-    """Configure mtime post processor"""
+    """Configure mtime post processors"""
     def __call__(self, parser, namespace, value, option_string=None):
         namespace.postprocessors.append({
             "name": "mtime",
             "value": "{" + (self.const or value) + "}",
         })
+
+
+class UgoiraAction(argparse.Action):
+    """Configure ugoira post processors"""
+    def __call__(self, parser, namespace, value, option_string=None):
+        if self.const:
+            value = self.const
+        else:
+            value = value.strip().lower()
+
+        if value in ("webm", "vp9"):
+            pp = {
+                "extension"        : "webm",
+                "ffmpeg-args"      : ("-c:v", "libvpx-vp9",
+                                      "-crf", "12",
+                                      "-b:v", "0", "-an"),
+            }
+        elif value == "vp9-lossless":
+            pp = {
+                "extension"        : "webm",
+                "ffmpeg-args"      : ("-c:v", "libvpx-vp9",
+                                      "-lossless", "1",
+                                      "-pix_fmt", "yuv420p", "-an"),
+            }
+        elif value == "vp8":
+            pp = {
+                "extension"        : "webm",
+                "ffmpeg-args"      : ("-c:v", "libvpx",
+                                      "-crf", "4",
+                                      "-b:v", "5000k", "-an"),
+            }
+        elif value == "mp4":
+            pp = {
+                "extension"        : "mp4",
+                "ffmpeg-args"      : ("-c:v", "libx264", "-an", "-b:v", "5M"),
+                "libx264-prevent-odd": True,
+            }
+        elif value == "gif":
+            pp = {
+                "extension"        : "gif",
+                "ffmpeg-args"      : ("-filter_complex", "[0:v] split [a][b];"
+                                      "[a] palettegen [p];[b][p] paletteuse"),
+                "repeat-last-frame": False,
+            }
+        elif value in ("mkv", "copy"):
+            pp = {
+                "extension"        : "mkv",
+                "ffmpeg-args"      : ("-c:v", "copy"),
+                "repeat-last-frame": False,
+            }
+        else:
+            parser.error("Unsupported Ugoira format '{}'".format(value))
+
+        pp["name"] = "ugoira"
+        pp["whitelist"] = ("pixiv", "danbooru")
+
+        namespace.options.append(((), "ugoira", True))
+        namespace.postprocessors.append(pp)
 
 
 class Formatter(argparse.HelpFormatter):
@@ -488,37 +546,27 @@ def build_parser():
         help="Store downloaded files in a CBZ archive",
     )
     postprocessor.add_argument(
+        "--ugoira",
+        dest="postprocessors", metavar="FORMAT", action=UgoiraAction,
+        help=("Convert Pixiv Ugoira to FORMAT using FFmpeg. "
+              "Supported formats are 'webm', 'mp4', 'gif', "
+              "'vp8', 'vp9', 'vp9-lossless', 'copy'."),
+    )
+    postprocessor.add_argument(
         "--ugoira-conv",
-        dest="postprocessors", action="append_const", const={
-            "name"          : "ugoira",
-            "ffmpeg-args"   : ("-c:v", "libvpx", "-crf", "4", "-b:v", "5000k"),
-            "ffmpeg-twopass": True,
-            "whitelist"     : ("pixiv", "danbooru"),
-        },
-        help="Convert Pixiv Ugoira to WebM (requires FFmpeg)",
+        dest="postprocessors", nargs=0, action=UgoiraAction, const="vp8",
+        help=argparse.SUPPRESS,
     )
     postprocessor.add_argument(
         "--ugoira-conv-lossless",
-        dest="postprocessors", action="append_const", const={
-            "name"          : "ugoira",
-            "ffmpeg-args"   : ("-c:v", "libvpx-vp9", "-lossless", "1",
-                               "-pix_fmt", "yuv420p"),
-            "ffmpeg-twopass": False,
-            "whitelist"     : ("pixiv", "danbooru"),
-        },
-        help="Convert Pixiv Ugoira to WebM in VP9 lossless mode",
+        dest="postprocessors", nargs=0, action=UgoiraAction,
+        const="vp9-lossless",
+        help=argparse.SUPPRESS,
     )
     postprocessor.add_argument(
         "--ugoira-conv-copy",
-        dest="postprocessors", action="append_const", const={
-            "name"             : "ugoira",
-            "extension"        : "mkv",
-            "ffmpeg-args"      : ("-c:v", "copy"),
-            "ffmpeg-twopass"   : False,
-            "repeat-last-frame": False,
-            "whitelist"        : ("pixiv", "danbooru"),
-        },
-        help="Convert Pixiv Ugoira to MKV without re-encoding any frames",
+        dest="postprocessors", nargs=0, action=UgoiraAction, const="copy",
+        help=argparse.SUPPRESS,
     )
     postprocessor.add_argument(
         "--write-metadata",
