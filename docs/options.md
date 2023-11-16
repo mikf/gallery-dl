@@ -120,11 +120,9 @@
 ## Post-processing Options:
     --zip                       Store downloaded files in a ZIP archive
     --cbz                       Store downloaded files in a CBZ archive
-    --ugoira-conv               Convert Pixiv Ugoira to WebM (requires FFmpeg)
-    --ugoira-conv-lossless      Convert Pixiv Ugoira to WebM in VP9 lossless
-                                mode
-    --ugoira-conv-copy          Convert Pixiv Ugoira to MKV without re-encoding
-                                any frames
+    --ugoira FORMAT             Convert Pixiv Ugoira to FORMAT using FFmpeg.
+                                Supported formats are 'webm', 'mp4', 'gif',
+                                'vp8', 'vp9', 'vp9-lossless', 'copy'.
     --write-metadata            Write metadata to separate JSON files
     --write-info-json           Write gallery metadata to a info.json file
     --write-tags                Write image tags to separate text files
