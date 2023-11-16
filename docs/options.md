@@ -118,24 +118,24 @@
                                 and other delegated URLs
 
 ## Post-processing Options:
-    --zip                       Store downloaded files in a ZIP archive
-    --cbz                       Store downloaded files in a CBZ archive
-    --ugoira FORMAT             Convert Pixiv Ugoira to FORMAT using FFmpeg.
-                                Supported formats are 'webm', 'mp4', 'gif',
-                                'vp8', 'vp9', 'vp9-lossless', 'copy'.
+    -P, --postprocessor NAME    Activate the specified post processor
+    -O, --postprocessor-option KEY=VALUE
+                                Additional post processor options
     --write-metadata            Write metadata to separate JSON files
     --write-info-json           Write gallery metadata to a info.json file
     --write-tags                Write image tags to separate text files
-    --mtime FORMAT              Set file modification times according to
-                                metadata selected by FORMAT. Examples: 'date' or
+    --zip                       Store downloaded files in a ZIP archive
+    --cbz                       Store downloaded files in a CBZ archive
+    --mtime NAME                Set file modification times according to
+                                metadata selected by NAME. Examples: 'date' or
                                 'status[date]'
+    --ugoira FORMAT             Convert Pixiv Ugoira to FORMAT using FFmpeg.
+                                Supported formats are 'webm', 'mp4', 'gif',
+                                'vp8', 'vp9', 'vp9-lossless', 'copy'.
     --exec CMD                  Execute CMD for each downloaded file. Supported
                                 replacement fields are {} or {_path},
                                 {_directory}, {_filename}. Example: --exec
                                 "convert {} {}.png && rm {}"
-    --exec-after CMD            Execute CMD after all files were downloaded
-                                successfully. Example: --exec-after "cd
-                                {_directory} && convert * ../doc.pdf"
-    -P, --postprocessor NAME    Activate the specified post processor
-    -O, --postprocessor-option KEY=VALUE
-                                Additional post processor options
+    --exec-after CMD            Execute CMD after all files were downloaded.
+                                Example: --exec-after "cd {_directory} &&
+                                convert * ../doc.pdf"

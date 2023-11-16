@@ -531,42 +531,15 @@ def build_parser():
     }
     postprocessor = parser.add_argument_group("Post-processing Options")
     postprocessor.add_argument(
-        "--zip",
-        dest="postprocessors",
-        action="append_const", const="zip", default=[],
-        help="Store downloaded files in a ZIP archive",
+        "-P", "--postprocessor",
+        dest="postprocessors", metavar="NAME", action="append", default=[],
+        help="Activate the specified post processor",
     )
     postprocessor.add_argument(
-        "--cbz",
-        dest="postprocessors",
-        action="append_const", const={
-            "name"     : "zip",
-            "extension": "cbz",
-        },
-        help="Store downloaded files in a CBZ archive",
-    )
-    postprocessor.add_argument(
-        "--ugoira",
-        dest="postprocessors", metavar="FORMAT", action=UgoiraAction,
-        help=("Convert Pixiv Ugoira to FORMAT using FFmpeg. "
-              "Supported formats are 'webm', 'mp4', 'gif', "
-              "'vp8', 'vp9', 'vp9-lossless', 'copy'."),
-    )
-    postprocessor.add_argument(
-        "--ugoira-conv",
-        dest="postprocessors", nargs=0, action=UgoiraAction, const="vp8",
-        help=argparse.SUPPRESS,
-    )
-    postprocessor.add_argument(
-        "--ugoira-conv-lossless",
-        dest="postprocessors", nargs=0, action=UgoiraAction,
-        const="vp9-lossless",
-        help=argparse.SUPPRESS,
-    )
-    postprocessor.add_argument(
-        "--ugoira-conv-copy",
-        dest="postprocessors", nargs=0, action=UgoiraAction, const="copy",
-        help=argparse.SUPPRESS,
+        "-O", "--postprocessor-option",
+        dest="options_pp", metavar="KEY=VALUE",
+        action=PPParseAction, default={},
+        help="Additional post processor options",
     )
     postprocessor.add_argument(
         "--write-metadata",
@@ -593,15 +566,53 @@ def build_parser():
         help="Write image tags to separate text files",
     )
     postprocessor.add_argument(
+        "--zip",
+        dest="postprocessors",
+        action="append_const", const="zip",
+        help="Store downloaded files in a ZIP archive",
+    )
+    postprocessor.add_argument(
+        "--cbz",
+        dest="postprocessors",
+        action="append_const", const={
+            "name"     : "zip",
+            "extension": "cbz",
+        },
+        help="Store downloaded files in a CBZ archive",
+    )
+    postprocessor.add_argument(
         "--mtime",
-        dest="postprocessors", metavar="FORMAT", action=MtimeAction,
+        dest="postprocessors", metavar="NAME", action=MtimeAction,
         help=("Set file modification times according to metadata "
-              "selected by FORMAT. Examples: 'date' or 'status[date]'"),
+              "selected by NAME. Examples: 'date' or 'status[date]'"),
     )
     postprocessor.add_argument(
         "--mtime-from-date",
         dest="postprocessors", nargs=0, action=MtimeAction,
         const="date|status[date]",
+        help=argparse.SUPPRESS,
+    )
+    postprocessor.add_argument(
+        "--ugoira",
+        dest="postprocessors", metavar="FORMAT", action=UgoiraAction,
+        help=("Convert Pixiv Ugoira to FORMAT using FFmpeg. "
+              "Supported formats are 'webm', 'mp4', 'gif', "
+              "'vp8', 'vp9', 'vp9-lossless', 'copy'."),
+    )
+    postprocessor.add_argument(
+        "--ugoira-conv",
+        dest="postprocessors", nargs=0, action=UgoiraAction, const="vp8",
+        help=argparse.SUPPRESS,
+    )
+    postprocessor.add_argument(
+        "--ugoira-conv-lossless",
+        dest="postprocessors", nargs=0, action=UgoiraAction,
+        const="vp9-lossless",
+        help=argparse.SUPPRESS,
+    )
+    postprocessor.add_argument(
+        "--ugoira-conv-copy",
+        dest="postprocessors", nargs=0, action=UgoiraAction, const="copy",
         help=argparse.SUPPRESS,
     )
     postprocessor.add_argument(
@@ -618,20 +629,9 @@ def build_parser():
         dest="postprocessors", metavar="CMD",
         action=AppendCommandAction, const={
             "name": "exec", "event": "finalize"},
-        help=("Execute CMD after all files were downloaded successfully. "
+        help=("Execute CMD after all files were downloaded. "
               "Example: --exec-after \"cd {_directory} "
               "&& convert * ../doc.pdf\""),
-    )
-    postprocessor.add_argument(
-        "-P", "--postprocessor",
-        dest="postprocessors", metavar="NAME", action="append",
-        help="Activate the specified post processor",
-    )
-    postprocessor.add_argument(
-        "-O", "--postprocessor-option",
-        dest="options_pp", metavar="KEY=VALUE",
-        action=PPParseAction, default={},
-        help="Additional post processor options",
     )
 
     return parser
