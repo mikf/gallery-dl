@@ -97,7 +97,8 @@ class BehanceGalleryExtractor(BehanceExtractor):
         yield Message.Directory, data
         for data["num"], (url, module) in enumerate(imgs, 1):
             data["module"] = module
-            data["extension"] = text.ext_from_url(url)
+            data["extension"] = (module.get("extension") or
+                                 text.ext_from_url(url))
             yield Message.Url, url, data
 
     def get_gallery_data(self):
@@ -171,7 +172,12 @@ class BehanceGalleryExtractor(BehanceExtractor):
                 embed = module.get("originalEmbed") or module.get("fluidEmbed")
                 if embed:
                     embed = text.unescape(text.extr(embed, 'src="', '"'))
+                    module["extension"] = "mp4"
                     append(("ytdl:" + embed, module))
+
+            elif mtype == "TextModule":
+                module["extension"] = "txt"
+                append(("text:" + module["text"], module))
 
         return result
 
