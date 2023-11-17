@@ -214,7 +214,8 @@ class TestHTTPDownloader(TestDownloaderBase):
         self.downloader.minsize = 100
         with self.assertLogs(self.downloader.log, "WARNING"):
             success = self.downloader.download(url, pathfmt)
-        self.assertFalse(success)
+        self.assertTrue(success)
+        self.assertEqual(pathfmt.temppath, "")
 
     def test_http_filesize_max(self):
         url = self.address + "/jpg"
@@ -222,7 +223,8 @@ class TestHTTPDownloader(TestDownloaderBase):
         self.downloader.maxsize = 100
         with self.assertLogs(self.downloader.log, "WARNING"):
             success = self.downloader.download(url, pathfmt)
-        self.assertFalse(success)
+        self.assertTrue(success)
+        self.assertEqual(pathfmt.temppath, "")
 
 
 class TestTextDownloader(TestDownloaderBase):
