@@ -40,7 +40,7 @@ jobs:
             3.4|3.5)
                 # don't install yt-dlp
                 ;;
-            3.6)
+            3.6|3.7)
                 # install from PyPI
                 pip install yt-dlp
                 ;;
