@@ -200,13 +200,15 @@ class HttpDownloader(DownloaderBase):
                     self.log.warning(
                         "File size smaller than allowed minimum (%s < %s)",
                         size, self.minsize)
-                    return False
+                    pathfmt.temppath = ""
+                    return True
                 if self.maxsize and size > self.maxsize:
                     self.release_conn(response)
                     self.log.warning(
                         "File size larger than allowed maximum (%s > %s)",
                         size, self.maxsize)
-                    return False
+                    pathfmt.temppath = ""
+                    return True
 
             build_path = False
 
