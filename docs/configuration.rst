@@ -1110,6 +1110,19 @@ Description
     The maximum possible value appears to be ``1920``.
 
 
+extractor.behance.modules
+-------------------------
+Type
+    ``list`` of ``strings``
+Default
+    ``["image", "video", "mediacollection", "embed"]``
+Description
+    Selects which gallery modules to download from.
+
+    Supported module types are
+    ``image``, ``video``, ``mediacollection``, ``embed``, ``text``.
+
+
 extractor.blogger.videos
 ------------------------
 Type

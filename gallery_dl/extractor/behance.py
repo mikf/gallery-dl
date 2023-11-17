@@ -89,6 +89,17 @@ class BehanceGalleryExtractor(BehanceExtractor):
         BehanceExtractor.__init__(self, match)
         self.gallery_id = match.group(1)
 
+    def _init(self):
+        BehanceExtractor._init(self)
+
+        modules = self.config("modules")
+        if modules:
+            if isinstance(modules, str):
+                modules = modules.split(",")
+            self.modules = set(modules)
+        else:
+            self.modules = {"image", "video", "mediacollection", "embed"}
+
     def items(self):
         data = self.get_gallery_data()
         imgs = self.get_images(data)
@@ -134,13 +145,17 @@ class BehanceGalleryExtractor(BehanceExtractor):
         append = result.append
 
         for module in data["modules"]:
-            mtype = module["__typename"]
+            mtype = module["__typename"][:-6].lower()
 
-            if mtype == "ImageModule":
+            if mtype not in self.modules:
+                self.log.debug("Skipping '%s' module", mtype)
+                continue
+
+            if mtype == "image":
                 url = module["imageSizes"]["size_original"]["url"]
                 append((url, module))
 
-            elif mtype == "VideoModule":
+            elif mtype == "video":
                 try:
                     renditions = module["videoData"]["renditions"]
                 except Exception:
@@ -159,7 +174,7 @@ class BehanceGalleryExtractor(BehanceExtractor):
 
                 append((url, module))
 
-            elif mtype == "MediaCollectionModule":
+            elif mtype == "mediacollection":
                 for component in module["components"]:
                     for size in component["imageSizes"].values():
                         if size:
@@ -168,14 +183,14 @@ class BehanceGalleryExtractor(BehanceExtractor):
                             append(("/".join(parts), module))
                             break
 
-            elif mtype == "EmbedModule":
+            elif mtype == "embed":
                 embed = module.get("originalEmbed") or module.get("fluidEmbed")
                 if embed:
                     embed = text.unescape(text.extr(embed, 'src="', '"'))
                     module["extension"] = "mp4"
                     append(("ytdl:" + embed, module))
 
-            elif mtype == "TextModule":
+            elif mtype == "text":
                 module["extension"] = "txt"
                 append(("text:" + module["text"], module))
 

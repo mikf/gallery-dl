@@ -64,6 +64,15 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.behance.net/gallery/89270715/Moevir",
+    "#comment" : "'text' modules (#4799)",
+    "#category": ("", "behance", "gallery"),
+    "#class"   : behance.BehanceGalleryExtractor,
+    "#options" : {"modules": "text"},
+    "#urls"    : """text:<div>Make Shift<br><a href="https://www.moevir.com/News/make-shif?fbclid=IwAR2MXL7mVDskdXHitLs4tv_RQFqB1tpAYix2EMIzea4lOSIPdPOR45wEJMA" target="_blank" rel="nofollow">https://www.moevir.com/News/make-shif</a><br>Moevir Magazine November Issue 2019<br>Photography by Caesar Lima @caephoto <br>Model: Bee @phamhuongbee <br>Makeup by Monica Alvarez @monicaalvarezmakeup <br>Styling by Jessica Boal @jessicaboal <br>Hair by James Gilbert @brandnewjames<br>Shot at Vila Sophia<br></div>""",
+},
+
+{
     "#url"     : "https://www.behance.net/gallery/177464639/Kimori",
     "#comment" : "mature content (#4417)",
     "#category": ("", "behance", "gallery"),
