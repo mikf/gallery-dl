@@ -16,8 +16,8 @@ class TmohentaiExtractor(Extractor):
     category = 'tmohentai'
     root = 'http://tmohentai.com'
     directory_fmt = ('{category}', '{title}')
-    filename_fmt = '{filename}.{extension}'
-    archive_fmt = '{title}_{filename}'
+    filename_fmt = '{title}_{filename}.{extension}'
+    archive_fmt = '{id_string}_{filename}'
     pattern = BASE_PATTERN + r'/((contents)|(reader))/(\w+)'
     example = 'https://tmohentai.com/contents/12345a67b89c0'
 
@@ -31,8 +31,19 @@ class TmohentaiExtractor(Extractor):
         if self.contents:
             url = f'{self.root}/reader/{self.id_string}/paginated'
         else:
-            url = self.url
+            url_str = self.url.rpartition('/')
+            if url_str[-1].isdigit():
+                url = url_str[0]
+            else:
+                url = self.url
         return url
+
+    @staticmethod
+    def get_file_info(page_src):
+        file = text.extr(page_src, 'data-original="', '"')
+        file_loc, _, file_name = file.rpartition('/')
+        start_num, ext = file_name.split('.')
+        return file_loc, start_num, ext
 
     def items(self):
         url = self.parse_location()
@@ -42,13 +53,16 @@ class TmohentaiExtractor(Extractor):
         data = self.metadata()
         yield Message.Directory, data
 
-        page_nums = text.extract_iter(page_src, 'option value="', '"')
-        pages = [text.extr(page_src, 'data-original="', '"')]
-        base_page = pages[0].rpartition('/')[0]
-        for num, page in enumerate(page_nums, start=1):
-            file = f'{base_page}/{num:>03}.webp'
+        file_loc, start_num, ext = self.get_file_info(page_src)
+        page_nums = text.extract_iter(
+            page_src, 'option value="', '"')
+
+        for num, page in enumerate(page_nums, start=int(start_num)):
+            file = f'{file_loc}/{num:>03}.{ext}'
             img = text.nameext_from_url(file, {
-                'num': num,
+                'num'      : num,
+                'title'    : data['title'],
+                'id_string': self.id_string,
             })
             yield Message.Url, file, img
 
@@ -64,7 +78,7 @@ class TmohentaiExtractor(Extractor):
 
         upload_src = text.extr(contents_src, 'Uploaded By</label>', '/a>')
         data = {
-            'title'    : text.extr(contents_src, '<h3>', '</h3>'),
+            'title'    : text.extr(contents_src, '<h3>', '</h3>').strip(),
             'id_string': self.id_string,
             'artists'  : text.remove_html(
                 text.extr(contents_src, 'tag tag-accepted">', '</a>')),
