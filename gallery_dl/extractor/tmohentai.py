@@ -29,7 +29,7 @@ class TmohentaiExtractor(Extractor):
 
     def parse_location(self):
         if self.contents:
-            url = f'{self.root}/reader/{self.id_string}/paginated'
+            url = '{}/reader/{}/paginated'.format(self.root, self.id_string)
         else:
             url_str = self.url.rpartition('/')
             if url_str[-1].isdigit():
@@ -58,7 +58,7 @@ class TmohentaiExtractor(Extractor):
             page_src, 'option value="', '"')
 
         for num, page in enumerate(page_nums, start=int(start_num)):
-            file = f'{file_loc}/{num:>03}.{ext}'
+            file = '{}/{:>03}.{}'.format(file_loc, num, ext)
             img = text.nameext_from_url(file, {
                 'num'      : num,
                 'title'    : data['title'],
@@ -67,7 +67,7 @@ class TmohentaiExtractor(Extractor):
             yield Message.Url, file, img
 
     def metadata(self):
-        contents = f'{self.root}/contents/{self.id_string}'
+        contents = '{}/contents/{}'.format(self.root, self.id_string)
         contents_src = self.request(text.ensure_http_scheme(contents)).text
 
         genders_src = text.extr(contents_src, 'Genders</label>', '</ul>')
