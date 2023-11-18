@@ -78,6 +78,12 @@ class Extractor():
     def config(self, key, default=None):
         return config.interpolate(self._cfgpath, key, default)
 
+    def config2(self, key, key2, default=None, sentinel=util.SENTINEL):
+        value = self.config(key, sentinel)
+        if value is not sentinel:
+            return value
+        return self.config(key2, default)
+
     def config_deprecated(self, key, deprecated, default=None,
                           sentinel=util.SENTINEL, history=set()):
         value = self.config(deprecated, sentinel)
