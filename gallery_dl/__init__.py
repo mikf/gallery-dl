@@ -115,6 +115,7 @@ def main():
         output.configure_logging(args.loglevel)
         if args.loglevel >= logging.ERROR:
             config.set(("output",), "mode", "null")
+            config.set(("downloader",), "progress", None)
         elif args.loglevel <= logging.DEBUG:
             import platform
             import requests
