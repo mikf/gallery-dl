@@ -40,6 +40,7 @@ class ExhentaiExtractor(Extractor):
         if domain == "auto":
             domain = ("ex" if self.version == "ex" else "e-") + "hentai.org"
         self.root = "https://" + domain
+        self.api_url = self.root + "/api.php"
         self.cookies_domain = "." + domain
 
         Extractor.initialize(self)
@@ -120,7 +121,6 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
         self.key_start = None
         self.key_show = None
         self.key_next = None
-        self.api_url = ""
         self.count = 0
 
     def _init(self):
@@ -220,7 +220,10 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
 
     def metadata_from_page(self, page):
         extr = text.extract_from(page)
-        self.api_url = extr('var api_url = "', '"') or (self.root + "/api.php")
+
+        api_url = extr('var api_url = "', '"')
+        if api_url:
+            self.api_url = api_url
 
         data = {
             "gid"          : self.gallery_id,
