@@ -44,11 +44,15 @@ class EromeExtractor(Extractor):
             pos = page.index('<div class="user-profile', pos)
             user, pos = text.extract(
                 page, 'href="https://www.erome.com/', '"', pos)
+            count, pos = text.extract(
+                page, 'fa-camera"></i>', '</span>', pos)
+
             data = {
                 "album_id"     : album_id,
                 "title"        : text.unescape(title),
                 "user"         : text.unquote(user),
                 "_http_headers": {"Referer": url},
+                "count"        : text.parse_int(count),
             }
 
             yield Message.Directory, data

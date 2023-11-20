@@ -16,6 +16,7 @@ __tests__ = (
     "#count"   : 1,
 
     "album_id": "NQgdlWvk",
+    "count"   : 1,
     "num"     : 1,
     "title"   : "porn",
     "user"    : "yYgWBZw8o8qsMzM",
@@ -29,6 +30,7 @@ __tests__ = (
     "#count"   : 6,
 
     "album_id": "TdbZ4ogi",
+    "count"   : 6,
     "num"     : int,
     "title"   : "82e78cfbb461ad87198f927fcb1fda9a1efac9ff.",
     "user"    : "yYgWBZw8o8qsMzM",
