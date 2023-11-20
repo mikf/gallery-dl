@@ -91,19 +91,23 @@ class Job():
         self.metadata_http = extr.config2("metadata-http", "http-metadata")
         metadata_path = extr.config2("metadata-path", "path-metadata")
         metadata_version = extr.config2("metadata-version", "version-metadata")
+        metadata_extractor = extr.config2(
+            "metadata-extractor", "extractor-metadata")
 
-        # user-supplied metadata
-        kwdict = extr.config("keywords")
-        if kwdict:
-            self.kwdict.update(kwdict)
         if metadata_path:
             self.kwdict[metadata_path] = path_proxy
+        if metadata_extractor:
+            self.kwdict[metadata_extractor] = extr
         if metadata_version:
             self.kwdict[metadata_version] = {
                 "version"         : version.__version__,
                 "is_executable"   : util.EXECUTABLE,
                 "current_git_head": util.git_head()
             }
+        # user-supplied metadata
+        kwdict = extr.config("keywords")
+        if kwdict:
+            self.kwdict.update(kwdict)
 
     def run(self):
         """Execute or run the job"""

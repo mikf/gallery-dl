@@ -675,6 +675,18 @@ Description
     to access the current file's filename as ``"{gdl_path.filename}"``.
 
 
+extractor.*.metadata-extractor
+------------------------------
+extractor.*.extractor-metadata
+------------------------------
+Type
+    ``string``
+Description
+    Insert a reference to the current
+    `Extractor <https://github.com/mikf/gallery-dl/blob/v1.26.2/gallery_dl/extractor/common.py#L26>`__
+    object into metadata dictionaries as the given name.
+
+
 extractor.*.metadata-http
 -------------------------
 extractor.*.http-metadata
