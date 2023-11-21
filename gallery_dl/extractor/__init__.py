@@ -147,6 +147,7 @@ modules = [
     "tapas",
     "tcbscans",
     "telegraph",
+    "tmohentai",
     "toyhouse",
     "tsumino",
     "tumblr",
