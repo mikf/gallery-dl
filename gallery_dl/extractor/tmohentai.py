@@ -19,25 +19,17 @@ class TmohentaiGalleryExtractor(GalleryExtractor):
     directory_fmt = ('{category}', '{title}')
     filename_fmt = '{title}_{filename}.{extension}'
     archive_fmt = '{id_string}_{filename}'
-    pattern = BASE_PATTERN + r'/((contents)|(reader))/(\w+)'
+    pattern = BASE_PATTERN + r'/(contents)|(reader)/(\w+)'
     example = 'https://tmohentai.com/contents/12345a67b89c0'
 
     def __init__(self, match):
-        GalleryExtractor.__init__(self, match)
-        self.contents = match.group(2)
-        self.reader = match.group(3)
-        self.id_string = match.group(4)
-
-    def parse_location(self):
-        url = self.url
-        if self.reader:
-            url = '{}/contents/{}'.format(self.root, self.id_string)
-        return url
+        self.id_string = match.group(2)
+        url = '{}/contents/{}'.format(self.root, self.id_string)
+        GalleryExtractor.__init__(self, match, url)
 
     def items(self):
-        url = self.parse_location()
         page = self.request(
-            text.ensure_http_scheme(url)).text
+            text.ensure_http_scheme(self.url)).text
         data = self.metadata(page)
 
         yield Message.Directory, data
@@ -61,7 +53,7 @@ class TmohentaiGalleryExtractor(GalleryExtractor):
     def metadata(self, page):
         extr = text.extract_from(page, page.index('tag tag-accepted">'))
 
-        data = {
+        return {
             'title'    : text.extr(page, '<h3>', '</h3>').strip(),
             'id_string': self.id_string,
             'artists'  : text.remove_html(extr('">', '</a>')),
@@ -70,4 +62,3 @@ class TmohentaiGalleryExtractor(GalleryExtractor):
             'uploader' : text.remove_html(extr('Uploaded By</label>', '</a>')),
             'language' : extr('&nbsp;', '\n</a>'),
         }
-        return data
