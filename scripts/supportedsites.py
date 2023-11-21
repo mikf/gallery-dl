@@ -87,6 +87,7 @@ CATEGORY_MAP = {
     "mangaread"      : "MangaRead",
     "mangasee"       : "MangaSee",
     "mastodon.social": "mastodon.social",
+    "micmicidol"     : "MIC MIC IDOL",
     "myhentaigallery": "My Hentai Gallery",
     "myportfolio"    : "Adobe Portfolio",
     "naverwebtoon"   : "NaverWebtoon",
@@ -292,6 +293,10 @@ BASE_MAP = {
     "vichan"      : "vichan Imageboards",
 }
 
+URL_MAP = {
+    "blogspot": "https://www.blogger.com/",
+}
+
 _OAUTH = '<a href="https://github.com/mikf/gallery-dl#oauth">OAuth</a>'
 _COOKIES = '<a href="https://github.com/mikf/gallery-dl#cookies">Cookies</a>'
 _APIKEY_DB = \
@@ -362,7 +367,7 @@ IGNORE_LIST = (
 
 
 def domain(cls):
-    """Return the web-domain related to an extractor class"""
+    """Return the domain name associated with an extractor class"""
     try:
         url = sys.modules[cls.__module__].__doc__.split()[-1]
         if url.startswith("http"):
@@ -429,10 +434,13 @@ def build_extractor_list():
             for category, root in extr.instances:
                 base[category].append(extr.subcategory)
                 if category not in domains:
-                    if not root and results:
-                        # use domain from first matching test
-                        test = results.category(category)[0]
-                        root = test["#class"].from_url(test["#url"]).root
+                    if not root:
+                        if category in URL_MAP:
+                            root = URL_MAP[category].rstrip("/")
+                        elif results:
+                            # use domain from first matching test
+                            test = results.category(category)[0]
+                            root = test["#class"].from_url(test["#url"]).root
                     domains[category] = root + "/"
 
     # sort subcategory lists

@@ -110,12 +110,6 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
-    <td>Blogger</td>
-    <td>https://www.blogger.com/</td>
-    <td>Blogs, Labels, Posts, Search Results</td>
-    <td></td>
-</tr>
-<tr>
     <td>Bunkr</td>
     <td>https://bunkrr.su/</td>
     <td>Albums, Media Files</td>
@@ -995,6 +989,22 @@ Consider all sites to be NSFW unless otherwise known.
     <td>もえぴりあ</td>
     <td>https://vanilla-rock.com/</td>
     <td>Posts, Tag Searches</td>
+    <td></td>
+</tr>
+
+<tr>
+    <td colspan="4"><strong>Blogger Instances</strong></td>
+</tr>
+<tr>
+    <td>Blogspot</td>
+    <td>https://www.blogger.com/</td>
+    <td>Blogs, Labels, Posts, Search Results</td>
+    <td></td>
+</tr>
+<tr>
+    <td>MIC MIC IDOL</td>
+    <td>https://www.micmicidol.club/</td>
+    <td>Blogs, Labels, Posts, Search Results</td>
     <td></td>
 </tr>
 
