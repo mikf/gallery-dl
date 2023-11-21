@@ -16,7 +16,7 @@ __tests__ = (
     "#count"   : 46,
 
     "artists"   : ["Andoryu"],
-    "categories": [
+    "genres"    : [
         "Big Breasts",
         "BlowJob",
         "Cheating",

@@ -38,7 +38,7 @@ class TmohentaiGalleryExtractor(GalleryExtractor):
             "title"     : text.unescape(extr("<h3>", "<").strip()),
             "artists"   : text.split_html(extr(
                 "<label>Artists and Artists Groups</label>", "</ul>")),
-            "categories": text.split_html(extr(
+            "genres"    : text.split_html(extr(
                 "<label>Genders</label>", "</ul>")),
             "tags"      : text.split_html(extr(
                 "<label>Tags</label>", "</ul>")),
