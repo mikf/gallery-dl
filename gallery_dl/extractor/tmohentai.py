@@ -6,59 +6,43 @@
 
 """Extractors for https://tmohentai.com/"""
 
-from .common import GalleryExtractor, Message
+from .common import GalleryExtractor
 from .. import text
 
-BASE_PATTERN = r'(?:https?://)?tmohentai\.com'
+BASE_PATTERN = r"(?:https?://)?tmohentai\.com"
 
 
 class TmohentaiGalleryExtractor(GalleryExtractor):
-    category = 'tmohentai'
-    subcategory = 'gallery'
-    root = 'http://tmohentai.com'
-    directory_fmt = ('{category}', '{title}')
-    filename_fmt = '{title}_{filename}.{extension}'
-    archive_fmt = '{id_string}_{filename}'
-    pattern = BASE_PATTERN + r'/(contents)|(reader)/(\w+)'
-    example = 'https://tmohentai.com/contents/12345a67b89c0'
+    category = "tmohentai"
+    root = "http://tmohentai.com"
+    directory_fmt = ("{category}", "{title} ({gallery_id})")
+    pattern = BASE_PATTERN + r"/(?:contents|reader)/(\w+)"
+    example = "https://tmohentai.com/contents/12345a67b89c0"
 
     def __init__(self, match):
-        self.id_string = match.group(2)
-        url = '{}/contents/{}'.format(self.root, self.id_string)
+        self.gallery_id = match.group(1)
+        url = "{}/contents/{}".format(self.root, self.gallery_id)
         GalleryExtractor.__init__(self, match, url)
 
-    def items(self):
-        page = self.request(
-            text.ensure_http_scheme(self.url)).text
-        data = self.metadata(page)
-
-        yield Message.Directory, data
-        imgs = self.images(page)
-
-        cdn = 'https://imgrojo.tmohentai.com/contents'
-        for num, _ in enumerate(imgs, start=0):
-            url = ('{}/{}/{:>03}.webp'.format(cdn, self.id_string, num))
-            img = text.nameext_from_url(url, {
-                'num'      : num + 1,
-                'title'    : data['title'],
-                'id_string': self.id_string,
-            })
-            yield Message.Url, url, img
-
     def images(self, page):
-        pages = text.extract_iter(
-            page, 'class="lanzador', '>')
-        return pages
+        fmt = "https://imgrojo.tmohentai.com/contents/{}/{{:>03}}.webp".format(
+            self.gallery_id).format
+        cnt = page.count('class="lanzador')
+        return [(fmt(i), None) for i in range(0, cnt)]
 
     def metadata(self, page):
-        extr = text.extract_from(page, page.index('tag tag-accepted">'))
+        extr = text.extract_from(page)
 
         return {
-            'title'    : text.extr(page, '<h3>', '</h3>').strip(),
-            'id_string': self.id_string,
-            'artists'  : text.remove_html(extr('">', '</a>')),
-            'genders'  : text.split_html(extr('Genders</label>', '<div')),
-            'tags'     : text.split_html(extr('Tags</label>', '</ul>')),
-            'uploader' : text.remove_html(extr('Uploaded By</label>', '</a>')),
-            'language' : extr('&nbsp;', '\n</a>'),
+            "gallery_id": self.gallery_id,
+            "title"     : text.unescape(extr("<h3>", "<").strip()),
+            "artists"   : text.split_html(extr(
+                "<label>Artists and Artists Groups</label>", "</ul>")),
+            "categories": text.split_html(extr(
+                "<label>Genders</label>", "</ul>")),
+            "tags"      : text.split_html(extr(
+                "<label>Tags</label>", "</ul>")),
+            "uploader"  : text.remove_html(extr(
+                "<label>Uploaded By</label>", "</ul>")),
+            "language"  : extr("&nbsp;", "\n"),
         }
