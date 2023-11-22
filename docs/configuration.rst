@@ -2553,6 +2553,14 @@ Description
     Download from video pins.
 
 
+extractor.pixeldrain.api-key
+----------------------------
+Type
+    ``string``
+Description
+    Your account's `API key <https://pixeldrain.com/user/api_keys>`__
+
+
 extractor.pixiv.include
 -----------------------
 Type

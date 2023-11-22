@@ -20,6 +20,11 @@ class PixeldrainExtractor(Extractor):
     root = "https://pixeldrain.com"
     archive_fmt = "{id}"
 
+    def _init(self):
+        api_key = self.config("api-key")
+        if api_key:
+            self.session.auth = ("", api_key)
+
     def parse_datetime(self, date_string):
         return text.parse_datetime(
             date_string, "%Y-%m-%dT%H:%M:%S.%fZ")
