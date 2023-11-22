@@ -175,6 +175,13 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
                 self.log.warning("'%s'", page)
 
                 if " requires GP" in page:
+                    gp = self.config("gp")
+                    if gp == "stop":
+                        raise exception.StopExtraction("Not enough GP")
+                    elif gp == "wait":
+                        input("Press ENTER to continue.")
+                        return response.url
+
                     self.log.info("Falling back to non-original downloads")
                     self.original = False
                     return data["_url_1280"]
