@@ -1572,7 +1572,7 @@ extractor.exhentai.gp
 ---------------------
 Type
     ``string``
-Example
+Default
     ``"resized"``
 Description
     Selects how to handle "you do not have enough GP" errors.
