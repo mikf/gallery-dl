@@ -638,6 +638,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td><a href="https://github.com/mikf/gallery-dl#cookies">Cookies</a></td>
 </tr>
 <tr>
+    <td>pixeldrain</td>
+    <td>https://pixeldrain.com/</td>
+    <td>Albums, Files</td>
+    <td></td>
+</tr>
+<tr>
     <td>Pixhost</td>
     <td>https://pixhost.to/</td>
     <td>Galleries, individual Images</td>
