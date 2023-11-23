@@ -405,7 +405,17 @@ def generate_tests():
     def _generate_method(result):
         def test(self):
             print("\n" + result["#url"])
-            self._run_test(result)
+            try:
+                self._run_test(result)
+            except KeyboardInterrupt as exc:
+                v = input("\n[e]xit | [f]ail | [S]kip ? ").strip().lower()
+                if v in ("e", "exit"):
+                    raise
+                if v in ("f", "fail"):
+                    self.fail("manual test failure")
+                else:
+                    self._skipped.append((result["#url"], exc))
+                    self.skipTest(exc)
         return test
 
     # enable selective testing for direct calls
