@@ -117,7 +117,7 @@ class SankakuPoolExtractor(SankakuExtractor):
     subcategory = "pool"
     directory_fmt = ("{category}", "pool", "{pool[id]} {pool[name_en]}")
     archive_fmt = "p_{pool}_{id}"
-    pattern = BASE_PATTERN + r"/(?:books|pool/show)/(\d+)"
+    pattern = BASE_PATTERN + r"/(?:books|pools?/show)/(\d+)"
     example = "https://sankaku.app/books/12345"
 
     def __init__(self, match):
@@ -143,7 +143,7 @@ class SankakuPostExtractor(SankakuExtractor):
     """Extractor for single posts from sankaku.app"""
     subcategory = "post"
     archive_fmt = "{id}"
-    pattern = BASE_PATTERN + r"/post(?:s|/show)/([0-9a-f]+)"
+    pattern = BASE_PATTERN + r"/posts?(?:/show)?/([0-9a-f]+)"
     example = "https://sankaku.app/post/show/12345"
 
     def __init__(self, match):
