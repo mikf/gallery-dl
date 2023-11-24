@@ -146,7 +146,12 @@ class WebtoonsComicExtractor(WebtoonsBase, Extractor):
             if page and path not in page:
                 return
 
-            page = self.request(self.root + path).text
+            response = self.request(self.root + path)
+            if response.history:
+                parts = response.url.split("/")
+                self.path = "/".join(parts[3:-1])
+
+            page = response.text
             data["page"] = self.page_no
 
             for url in self.get_episode_urls(page):
