@@ -112,6 +112,12 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://chan.sankakucomplex.com/pools/show/90",
+    "#category": ("booru", "sankaku", "pool"),
+    "#class"   : sankaku.SankakuPoolExtractor,
+},
+
+{
     "#url"     : "https://sankaku.app/post/show/360451",
     "#category": ("booru", "sankaku", "post"),
     "#class"   : sankaku.SankakuPostExtractor,
@@ -171,6 +177,16 @@ __tests__ = (
 
     "id" : 33195194,
     "md5": "f8ba89043078f0e4be2d9c46550b840a",
+},
+
+{
+    "#url"     : "https://chan.sankakucomplex.com/en/posts/show/ac8e3b92ea328ce9cf7211e69c905bf9",
+    "#comment" : "/en/posts/show/HEX",
+    "#category": ("booru", "sankaku", "post"),
+    "#class"   : sankaku.SankakuPostExtractor,
+
+    "id" : 360451,
+    "md5": "ac8e3b92ea328ce9cf7211e69c905bf9",
 },
 
 {
