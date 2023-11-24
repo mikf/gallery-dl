@@ -90,4 +90,7 @@ class WarosuThreadExtractor(Extractor):
         data["filename"] = text.unquote(extr(
             "", "<").rstrip().rpartition(".")[0])
         extr("<br>", "")
-        data["image"] = self.root + extr("<a href=", ">")
+
+        data["image"] = url = extr("<a href=", ">")
+        if url[0] == "/":
+            data["image"] = self.root + url
