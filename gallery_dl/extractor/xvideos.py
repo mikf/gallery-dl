@@ -38,13 +38,13 @@ class XvideosGalleryExtractor(XvideosBase, GalleryExtractor):
 
     def metadata(self, page):
         extr = text.extract_from(page)
-        title = extr('"title":"', '"')
         user = {
             "id"     : text.parse_int(extr('"id_user":', ',')),
             "display": extr('"display":"', '"'),
             "sex"    : extr('"sex":"', '"'),
             "name"   : self.user,
         }
+        title = extr('"title":"', '"')
         user["description"] = extr(
             '<small class="mobile-hide">', '</small>').strip()
         tags = extr('<em>Tagged:</em>', '<').strip()
