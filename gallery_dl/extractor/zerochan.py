@@ -63,14 +63,14 @@ class ZerochanExtractor(BooruExtractor):
 
         data = {
             "id"      : text.parse_int(entry_id),
-            "author"  : extr('"author": "', '"'),
+            "author"  : text.parse_unicode_escapes(extr('    "name": "', '"')),
             "file_url": extr('"contentUrl": "', '"'),
             "date"    : text.parse_datetime(extr('"datePublished": "', '"')),
             "width"   : text.parse_int(extr('"width": "', ' ')),
             "height"  : text.parse_int(extr('"height": "', ' ')),
             "size"    : text.parse_bytes(extr('"contentSize": "', 'B')),
             "path"    : text.split_html(extr(
-                'class="breadcrumbs', '</p>'))[2:],
+                'class="breadcrumbs', '</nav>'))[2:],
             "uploader": extr('href="/user/', '"'),
             "tags"    : extr('<ul id="tags"', '</ul>'),
             "source"  : extr('<h2>Source</h2>', '</p><h2>').rpartition(
@@ -80,9 +80,9 @@ class ZerochanExtractor(BooruExtractor):
         html = data["tags"]
         tags = data["tags"] = []
         for tag in html.split("<li class=")[1:]:
-            category = text.extr(tag, 'alt="', '"')
-            name = text.extr(tag, ">-->", "</a>")
-            tags.append(category + ":" + name.strip())
+            category = text.extr(tag, 'data-type="', '"')
+            name = text.extr(tag, 'data-tag="', '"')
+            tags.append(category.capitalize() + ":" + name)
 
         return data
 
