@@ -50,8 +50,8 @@ class MangareadChapterExtractor(MangareadBase, ChapterExtractor):
         page = text.extr(
             page, '<div class="reading-content">', '<div class="entry-header')
         return [
-            (url.strip(), None)
-            for url in text.extract_iter(page, 'data-src="', '"')
+            (text.extr(img, 'src="', '"').strip(), None)
+            for img in text.extract_iter(page, '<img id="image-', '>')
         ]
 
 
