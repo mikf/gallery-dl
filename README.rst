@@ -146,12 +146,12 @@ To run the container you will probably want to attach some directories on the ho
 
 Make sure to either download the example config file reference in the repo and place it in the mounted volume location or touch an empty file there.  
 
-If you gave the container a different tag or are using podman then make sure you adjust.  Run `docker image ls`` to check the name if you are not sure.
+If you gave the container a different tag or are using podman then make sure you adjust.  Run ``docker image ls`` to check the name if you are not sure.
 
-This will remove the container after every use so you will always have a fresh environment for it to run. If you setup a ci-cd pipeline to autobuild the container you can also add a --pull=newer flag so that when you run it docker will check to see if there is a newer container and download it before running.
+This will remove the container after every use so you will always have a fresh environment for it to run. If you setup a ci-cd pipeline to autobuild the container you can also add a ``--pull=newer`` flag so that when you run it docker will check to see if there is a newer container and download it before running.
 
 .. code:: bash
-    
+
     docker run --rm  -v $HOME/Downloads/:/gallery-dl/ -v $HOME/.config/gallery-dl/gallery-dl.conf:/etc/gallery-dl.conf -it gallery-dl:latest
 
 You can also add an alias to your shell for "gallery-dl" or create a simple bash script and drop it somewhere in your $PATH to act as a shim for this command.
