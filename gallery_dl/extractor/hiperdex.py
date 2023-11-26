@@ -30,10 +30,10 @@ class HiperdexBase():
         extr = text.extract_from(page)
 
         return {
-            "manga"  : text.unescape(extr(
-                "<title>", "<").rpartition(" Manga - ")[0].strip()),
             "url"    : text.unescape(extr(
                 'property="og:url" content="', '"')),
+            "manga"  : text.unescape(extr(
+                '"headline": "', '"')),
             "score"  : text.parse_float(extr(
                 'id="averagerate">', '<')),
             "author" : text.remove_html(extr(
