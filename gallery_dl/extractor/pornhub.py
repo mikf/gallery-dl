@@ -143,7 +143,7 @@ class PornhubGifExtractor(PornhubExtractor):
             "url"  : extr('"contentUrl": "', '"'),
             "date" : text.parse_datetime(
                 extr('"uploadDate": "', '"'), "%Y-%m-%d"),
-            "user" : extr('data-mxptext="', '"'),
+            "user" : text.remove_html(extr("Created by:", "</div>")),
         }
 
         yield Message.Directory, gif
