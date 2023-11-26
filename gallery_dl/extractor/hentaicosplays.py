@@ -42,7 +42,7 @@ class HentaicosplaysGalleryExtractor(GalleryExtractor):
 
     def images(self, page):
         return [
-            (url, None)
+            (url.replace("http:", "https:", 1), None)
             for url in text.extract_iter(
                 page, '<amp-img class="auto-style" src="', '"')
         ]
