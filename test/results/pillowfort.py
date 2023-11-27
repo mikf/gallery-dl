@@ -177,7 +177,7 @@ __tests__ = (
     "#category": ("", "pillowfort", "user"),
     "#class"   : pillowfort.PillowfortUserExtractor,
     "#pattern" : r"https://img\d+\.pillowfort\.social/posts/",
-    "#count"   : 6,
+    "#count"   : range(10, 20),
 },
 
 )

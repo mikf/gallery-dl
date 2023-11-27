@@ -26,8 +26,8 @@ __tests__ = (
         "posts"   : "all",
         "external": True,
     },
-    "#pattern" : r"https?://(?:$|\d+\.media\.tumblr\.com/.+_1280\.jpg|a\.tumblr\.com/tumblr_\w+)",
-    "#count"   : 3,
+    "#pattern" : r"https?://(?:$|\d+\.media\.tumblr\.com/.+\.(jpg|png|gif|mp3|mp4)|v?a\.(media\.)?tumblr\.com/tumblr_\w+)",
+    "#count"   : 27,
 },
 
 {
@@ -103,7 +103,7 @@ __tests__ = (
         "date-max"    : "2015-04-25T00:00:00",
         "date-min"    : "2015-04-01T00:00:00",
     },
-    "#count"   : 316,
+    "#count"   : 197,
 },
 
 {

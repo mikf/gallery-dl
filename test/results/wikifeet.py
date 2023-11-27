@@ -23,7 +23,7 @@ __tests__ = (
     "pid"       : int,
     "width"     : int,
     "height"    : int,
-    "shoesize"  : "9 US",
+    "shoesize"  : "10 US",
     "type"      : "women",
     "tags"      : list,
 },

@@ -13,8 +13,24 @@ __tests__ = (
     "#category": ("", "nsfwalbum", "album"),
     "#class"   : nsfwalbum.NsfwalbumAlbumExtractor,
     "#range"        : "1-5",
-    "#sha1_url"     : "b0481fc7fad5982da397b6359fbed8421b8ba284",
-    "#sha1_metadata": "e98f9b0d473c00000831618d0235863b1dd78294",
+    "#urls"         : (
+        "https://img70.imgspice.com/i/05457/mio2bu5xbrxe.jpg",
+        "https://img70.imgspice.com/i/05457/zgpxa8kr4h1d.jpg",
+        "https://img70.imgspice.com/i/05457/3379nxsm9lx8.jpg",
+        "https://img70.imgspice.com/i/05457/pncrkhspuoa3.jpg",
+        "https://img70.imgspice.com/i/05457/128b2odt216a.jpg",
+    ),
+
+    "album_id" : 401611,
+    "extension": "jpg",
+    "filename" : str,
+    "height"   : range(1365, 2048),
+    "id"       : int,
+    "models"   : [],
+    "num"      : range(1, 5),
+    "studio"   : "Met-Art",
+    "title"    : "Met-Art - Katherine A - Difuza 25.05.2014 (134 photos)(4368 X 2912)",
+    "width"    : range(1365, 2048),
 },
 
 )

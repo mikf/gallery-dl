@@ -16,10 +16,11 @@ __tests__ = (
 
 {
     "#url"     : "https://booru.bcbnsfw.space/post/1599",
+    "#comment" : "now only available as WebP",
     "#category": ("szurubooru", "bcbnsfw", "post"),
     "#class"   : szurubooru.SzurubooruPostExtractor,
     "#pattern"     : r"https://booru\.bcbnsfw\.space/data/posts/1599_53784518e92086bd\.png",
-    "#sha1_content": "0c38fc612ba1f03950fad31c4f80a1fccdab1096",
+    "#sha1_content": "55f8b8d187adc82f2dcaf2aa89db0ae21b08c0b0",
 },
 
 )

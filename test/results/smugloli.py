@@ -9,15 +9,15 @@ from gallery_dl.extractor import vichan
 
 __tests__ = (
 {
-    "#url"     : "https://smuglo.li/a/res/1154380.html",
+    "#url"     : "https://smuglo.li/a/res/1187531.html",
     "#category": ("vichan", "smugloli", "thread"),
     "#class"   : vichan.VichanThreadExtractor,
     "#pattern" : r"https://smug.+/a/src/\d+(-\d)?\.\w+",
-    "#count"   : ">= 18",
+    "#count"   : ">= 50",
 
     "board" : "a",
-    "thread": "1154380",
-    "title" : "Mob Psycho 100 Season 3",
+    "thread": "1187531",
+    "title" : "Buta no Liver wa Kanetsu Shiro",
 },
 
 {
