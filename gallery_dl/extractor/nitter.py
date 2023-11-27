@@ -96,6 +96,8 @@ class NitterExtractor(BaseExtractor):
 
                         for url in text.extract_iter(
                                 attachments, '<source src="', '"'):
+                            if url[0] == "/":
+                                url = self.root + url
                             append(text.nameext_from_url(url, {"url": url}))
 
             else:
