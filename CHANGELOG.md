@@ -1,5 +1,64 @@
 # Changelog
 
+## 1.26.3 - 2023-11-27
+### Extractors
+#### Additions
+- [behance] support `text` modules ([#4799](https://github.com/mikf/gallery-dl/issues/4799))
+- [behance] add `modules` option ([#4799](https://github.com/mikf/gallery-dl/issues/4799))
+- [blogger] support `www.micmicidol.club` ([#4759](https://github.com/mikf/gallery-dl/issues/4759))
+- [erome] add `count` metadata ([#4812](https://github.com/mikf/gallery-dl/issues/4812))
+- [exhentai] add `gp` option ([#4576](https://github.com/mikf/gallery-dl/issues/4576))
+- [fapello] support `.su` TLD ([#4840](https://github.com/mikf/gallery-dl/issues/4840), [#4841](https://github.com/mikf/gallery-dl/issues/4841))
+- [pixeldrain] add `file` and `album` extractors ([#4839](https://github.com/mikf/gallery-dl/issues/4839))
+- [pixeldrain] add `api-key` option ([#4839](https://github.com/mikf/gallery-dl/issues/4839))
+- [tmohentai] add `gallery` extractor ([#4808](https://github.com/mikf/gallery-dl/issues/4808), [#4832](https://github.com/mikf/gallery-dl/issues/4832))
+#### Fixes
+- [cyberdrop] update to site layout changes
+- [exhentai] handle `Downloading … requires GP` errors ([#4576](https://github.com/mikf/gallery-dl/issues/4576), [#4763](https://github.com/mikf/gallery-dl/issues/4763))
+- [exhentai] fix empty API URL with `"source": "hitomi"` ([#4829](https://github.com/mikf/gallery-dl/issues/4829))
+- [hentaifoundry] check for and update expired sessions ([#4694](https://github.com/mikf/gallery-dl/issues/4694))
+- [hiperdex] fix `manga` metadata
+- [idolcomplex] update to site layout changes
+- [imagefap] fix resolution of single images
+- [instagram] fix exception on empty `video_versions` ([#4795](https://github.com/mikf/gallery-dl/issues/4795))
+- [mangaread] fix extraction
+- [mastodon] fix reblogs ([#4580](https://github.com/mikf/gallery-dl/issues/4580))
+- [nitter] fix video extraction ([#4853](https://github.com/mikf/gallery-dl/issues/4853), [#4855](https://github.com/mikf/gallery-dl/issues/4855))
+- [pornhub] fix `user` metadata for gifs
+- [tumblr] fix `day` extractor
+- [wallpapercave] fix extraction
+- [warosu] fix file URLs
+- [webtoons] fix pagination when receiving an HTTP redirect
+- [xvideos] fix metadata extraction
+- [zerochan] fix metadata extraction
+#### Improvements
+- [hentaicosplays] force `https://` for download URLs
+- [oauth] warn when cache is enabled but not writeable ([#4771](https://github.com/mikf/gallery-dl/issues/4771))
+- [sankaku] update URL patterns
+- [twitter] ignore promoted Tweets ([#3894](https://github.com/mikf/gallery-dl/issues/3894), [#4790](https://github.com/mikf/gallery-dl/issues/4790))
+- [weibo] detect redirects to login page ([#4773](https://github.com/mikf/gallery-dl/issues/4773))
+#### Removals
+- [foolslide] remove `powermanga.org`
+### Downloaders
+#### Changes
+- [http] treat files not passing `filesize-min`/`-max` as skipped ([#4821](https://github.com/mikf/gallery-dl/issues/4821))
+### Options
+#### Additions
+- add `metadata-extractor` option ([#4549](https://github.com/mikf/gallery-dl/issues/4549))
+- support `metadata-*` names for `*-metadata` options
+  (for example `url-metadata` is now also recognized as `metadata-url`)
+### CLI
+#### Additions
+- implement `-I/--input-file-comment` and `-x/--input-file-delete` options ([#4732](https://github.com/mikf/gallery-dl/issues/4732))
+- add `--ugoira` as a general version of `--ugoira-conv` and co.
+- add `--mtime` as a general version of `--mtime-from-date`
+- add `--cbz`
+#### Fixes
+- allow `--mtime-from-date` to work with Weibo`s metadata structure
+### Miscellaneous
+#### Additions
+- add a simple Dockerfile ([#4831](https://github.com/mikf/gallery-dl/issues/4831))
+
 ## 1.26.2 - 2023-11-04
 ### Extractors
 #### Additions
