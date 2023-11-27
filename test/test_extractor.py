@@ -142,6 +142,8 @@ class TestExtractorModule(unittest.TestCase):
             if cls.category == "ytdl":
                 continue
             extr = cls.from_url(cls.example)
+            if not extr and cls.basecategory and not cls.instances:
+                continue
             extr.initialize()
             extr.finalize()
 
