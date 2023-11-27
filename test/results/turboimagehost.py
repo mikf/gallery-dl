@@ -14,7 +14,10 @@ __tests__ = (
     "#class"   : imagehosts.TurboimagehostImageExtractor,
     "#sha1_url"     : "b94de43612318771ced924cb5085976f13b3b90e",
     "#sha1_metadata": "704757ca8825f51cec516ec44c1e627c1f2058ca",
-    "#sha1_content" : "f38b54b17cd7462e687b58d83f00fca88b1b105a",
+    "#sha1_content" : (
+        "f38b54b17cd7462e687b58d83f00fca88b1b105a",
+        "0c8768055e4e20e7c7259608b67799171b691140",
+    ),
 },
 
 )

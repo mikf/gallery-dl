@@ -59,36 +59,42 @@ __tests__ = (
     "#options" : {"metadata": "notes,pools"},
     "#pattern" : r"https://static\d\.e621\.net/data/c6/8c/c68cca0643890b615f75fb2719589bff\.png",
 
-    "notes": [{
-    "body"        : "Little Legends 2",
-    "created_at"  : "2022-05-16T13:58:38.877-04:00",
-    "creator_id"  : 517450,
-    "creator_name": "EeveeCuddler69",
-    "height"      : 475,
-    "id"          : 321296,
-    "is_active"   : True,
-    "post_id"     : 3181052,
-    "updated_at"  : "2022-05-16T13:59:02.050-04:00",
-    "version"     : 3,
-    "width"       : 809,
-    "x"           : 83,
-    "y"           : 117,
-}],
-    "pools": [{
-    "category"    : "series",
-    "created_at"  : "2022-02-17T00:29:22.669-05:00",
-    "creator_id"  : 1077440,
-    "creator_name": "Yeetus90",
-    "description" : """* "Little Legends":/pools/27971
-* Little Legends 2
-* "Little Legends 3":/pools/27481""",
-    "id"          : 27492,
-    "is_active"   : False,
-    "name"        : "Little Legends 2",
-    "post_count"  : 39,
-    "post_ids"    : list,
-    "updated_at"  : "2022-03-27T06:30:03.382-04:00",
-}],
+    "notes": [
+        {
+            "body"        : "Little Legends 2",
+            "created_at"  : "2022-05-16T13:58:38.877-04:00",
+            "creator_id"  : 517450,
+            "creator_name": "EeveeCuddler69",
+            "height"      : 475,
+            "id"          : 321296,
+            "is_active"   : True,
+            "post_id"     : 3181052,
+            "updated_at"  : "2022-05-16T13:59:02.050-04:00",
+            "version"     : 3,
+            "width"       : 809,
+            "x"           : 83,
+            "y"           : 117,
+        },
+    ],
+    "pools": [
+        {
+            "category"    : "series",
+            "created_at"  : "2022-02-17T00:29:22.669-05:00",
+            "creator_id"  : 1077440,
+            "creator_name": "Yeetus90",
+            "description" : """\
+* "Little Legends":/pools/27971\r
+* Little Legends 2\r
+* "Little Legends 3":/pools/27481\
+""",
+            "id"          : 27492,
+            "is_active"   : False,
+            "name"        : "Little Legends 2",
+            "post_count"  : 39,
+            "post_ids"    : list,
+            "updated_at"  : "2022-03-27T06:30:03.382-04:00",
+        },
+    ],
 },
 
 {

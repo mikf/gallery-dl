@@ -51,10 +51,9 @@ __tests__ = (
 
 {
     "#url"     : "https://www.sex.com/pin/55847384-very-nicely-animated/",
-    "#comment" : "pornhub embed",
+    "#comment" : "pornhub embed (404 gone)",
     "#category": ("", "sexcom", "pin"),
     "#class"   : sexcom.SexcomPinExtractor,
-    "#pattern" : "ytdl:https://www.pornhub.com/embed/ph56ef24b6750f2",
 },
 
 {

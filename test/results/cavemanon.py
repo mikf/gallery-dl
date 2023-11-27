@@ -37,7 +37,7 @@ __tests__ = (
     "id"       : 8335,
     "md5"      : "",
     "size"     : 0,
-    "tags"     : "Color Fang Food Pterodactyl discord_emote transparent",
+    "tags"     : "Color discord_emote Fang Food Pterodactyl transparent",
     "width"    : 459,
 },
 

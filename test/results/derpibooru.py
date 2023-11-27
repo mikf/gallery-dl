@@ -40,7 +40,7 @@ __tests__ = (
     "score"           : int,
     "sha512_hash"     : "f16c98e2848c2f1bfff3985e8f1a54375cc49f78125391aeb80534ce011ead14e3e452a5c4bc98a66f56bdfcd07ef7800663b994f3f343c572da5ecc22a9660f",
     "size"            : 860914,
-    "source_url"      : "https://www.deviantart.com/speccysy/art/Afternoon-Flight-215193985",
+    "source_url"      : "https://web.archive.org/web/20110702164313/http://speccysy.deviantart.com:80/art/Afternoon-Flight-215193985",
     "spoilered"       : False,
     "tag_count"       : int,
     "tag_ids"         : list,

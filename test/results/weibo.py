@@ -48,6 +48,7 @@ __tests__ = (
 
 {
     "#url"     : "https://weibo.com/1758989602?tabtype=home",
+    "#comment" : "'tabtype=home' is broken on website itself",
     "#category": ("", "weibo", "home"),
     "#class"   : weibo.WeiboHomeExtractor,
     "#range"   : "1-30",

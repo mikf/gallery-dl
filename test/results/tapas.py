@@ -12,7 +12,7 @@ __tests__ = (
     "#url"     : "https://tapas.io/series/just-leave-me-be",
     "#category": ("", "tapas", "series"),
     "#class"   : tapas.TapasSeriesExtractor,
-    "#pattern" : r"https://\w+\.cloudfront\.net/pc/\w\w/[0-9a-f-]+\.jpg",
+    "#pattern" : r"https://us-a\.tapas\.io/pc/\w\w/[0-9a-f-]+\.jpg",
     "#count"   : 132,
 },
 
@@ -64,7 +64,7 @@ __tests__ = (
         "has_top_banner": True,
         "id"            : 199931,
         "premium"       : True,
-        "sale_type"     : "PAID",
+        "sale_type"     : "WAIT_OR_MUST_PAY",
         "subscribed"    : bool,
         "thumbsup_cnt"  : int,
         "title"         : "Tomb Raider King",

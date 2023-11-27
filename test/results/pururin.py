@@ -12,7 +12,7 @@ __tests__ = (
     "#url"     : "https://pururin.to/gallery/38661/iowant-2",
     "#category": ("", "pururin", "gallery"),
     "#class"   : pururin.PururinGalleryExtractor,
-    "#pattern" : r"https://i\.pururin\.to/38661/\d+\.jpg",
+    "#pattern" : r"https://i\.pururin\.[ct]o/38661/\d+\.jpg",
 
     "title"     : r"re:I ?owant 2!!",
     "title_en"  : r"re:I ?owant 2!!",

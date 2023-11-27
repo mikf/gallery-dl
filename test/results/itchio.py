@@ -12,11 +12,11 @@ __tests__ = (
     "#url"     : "https://sirtartarus.itch.io/a-craft-of-mine",
     "#category": ("", "itchio", "game"),
     "#class"   : itchio.ItchioGameExtractor,
-    "#pattern" : r"https://\w+\.ssl\.hwcdn\.net/upload2/game/1983311/7723751\?",
-    "#count"   : 1,
+    "#pattern" : r"https://(dl.itch.zone|itchio-mirror.\w+.r2.cloudflarestorage.com)/upload2/game/1983311/\d+\?",
+    "#count"   : 3,
 
     "extension": "",
-    "filename" : "7723751",
+    "filename" : r"re:\d+",
     "game"     : {
         "id"   : 1983311,
         "noun" : "game",

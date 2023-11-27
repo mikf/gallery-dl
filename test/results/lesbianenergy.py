@@ -12,7 +12,7 @@ __tests__ = (
     "#url"     : "https://lesbian.energy/@rerorero",
     "#category": ("misskey", "lesbian.energy", "user"),
     "#class"   : misskey.MisskeyUserExtractor,
-    "#pattern" : r"https://lesbian.energy/files/\w+",
+    "#pattern" : r"https://(lesbian.energy/files/\w+|.+/media_attachments/files/.+)",
     "#range"   : "1-50",
     "#count"   : 50,
 },

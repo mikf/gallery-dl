@@ -73,7 +73,7 @@ __tests__ = (
     "#category": ("", "8chan", "board"),
     "#class"   : _8chan._8chanBoardExtractor,
     "#pattern" : _8chan._8chanThreadExtractor.pattern,
-    "#count"   : 23,
+    "#count"   : 27,
 },
 
 {

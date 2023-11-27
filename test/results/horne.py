@@ -19,7 +19,7 @@ __tests__ = (
     "#url"     : "https://horne.red/members_illust.php?id=58000",
     "#category": ("Nijie", "horne", "illustration"),
     "#class"   : nijie.NijieIllustrationExtractor,
-    "#pattern" : r"https://pic\.nijie\.net/\d+/horne/\d+/\d+/\d+/illust/\d+_\d+_[0-9a-f]+_[0-9a-f]+\.png",
+    "#pattern" : r"https://pic\.nijie\.net/\d+/horne/\w+/\d+/\d+/illust/\d+_\d+_[0-9a-f]+_[0-9a-f]+\.png",
     "#range"   : "1-20",
     "#count"   : 20,
 

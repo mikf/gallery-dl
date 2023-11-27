@@ -97,7 +97,7 @@ __tests__ = (
     "#url"     : "https://mangadex.org/title/7c1e2742-a086-4fd3-a3be-701fd6cf0be9",
     "#category": ("", "mangadex", "manga"),
     "#class"   : mangadex.MangadexMangaExtractor,
-    "#count"   : 1,
+    "#count"   : ">= 25",
 },
 
 {

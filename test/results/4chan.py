@@ -15,7 +15,7 @@ __tests__ = (
     "#class"   : _4chan._4chanThreadExtractor,
     "#sha1_url"     : "39082ad166161966d7ba8e37f2173a824eb540f0",
     "#sha1_metadata": "7ae2f4049adf0d2f835eb91b6b26b7f4ec882e0a",
-    "#sha1_content" : "20b7b51afa51c9c31a0020a0737b889532c8d7ec",
+    "#sha1_content" : "551e432d52700ff3711f14752124e9af86ecbbdf",
 },
 
 {
