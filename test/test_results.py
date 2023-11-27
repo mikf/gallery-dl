@@ -192,22 +192,22 @@ class TestExtractorResults(unittest.TestCase):
                         subtest = True
                         self._test_kwdict(value[idx], item)
                 if not subtest:
-                    self.assertEqual(value, test, msg=key)
+                    self.assertEqual(test, value, msg=key)
             elif isinstance(test, str):
                 if test.startswith("re:"):
                     self.assertRegex(value, test[3:], msg=key)
                 elif test.startswith("dt:"):
                     self.assertIsInstance(value, datetime.datetime, msg=key)
-                    self.assertEqual(str(value), test[3:], msg=key)
+                    self.assertEqual(test[3:], str(value), msg=key)
                 elif test.startswith("type:"):
-                    self.assertEqual(type(value).__name__, test[5:], msg=key)
+                    self.assertEqual(test[5:], type(value).__name__, msg=key)
                 elif test.startswith("len:"):
                     self.assertIsInstance(value, (list, tuple), msg=key)
-                    self.assertEqual(len(value), int(test[4:]), msg=key)
+                    self.assertEqual(int(test[4:]), len(value), msg=key)
                 else:
-                    self.assertEqual(value, test, msg=key)
+                    self.assertEqual(test, value, msg=key)
             else:
-                self.assertEqual(value, test, msg=key)
+                self.assertEqual(test, value, msg=key)
 
 
 class ResultJob(job.DownloadJob):
