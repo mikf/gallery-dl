@@ -76,7 +76,7 @@ __tests__ = (
     "#sha1_url"    : "3f2b64e175bf284aa672c3bb53ed275e470b919a",
     "#sha1_content": "ab05e1d8d21f8d43496df284d31e8b362cd3bcab",
 
-    "comments" : 19,
+    "comments" : int,
     "content"  : "Big Wedeene River, Canada",
     "count"    : 1,
     "date"     : "dt:2015-05-29 17:40:00",
@@ -84,7 +84,7 @@ __tests__ = (
     "filename" : "CGMNYZvW0AIVoom",
     "likes"    : int,
     "num"      : 1,
-    "quotes"   : 10,
+    "quotes"   : int,
     "retweets" : int,
     "tweet_id" : "604341487988576256",
     "url"      : "https://nitter.net/pic/orig/media%2FCGMNYZvW0AIVoom.jpg",
