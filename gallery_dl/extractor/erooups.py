@@ -14,7 +14,6 @@ class ErooupsGalleryExtractor(GalleryExtractor):
     category = "erooups"
     directory_fmt = ("{category}", "{title}")
     archive_fmt = "{date}_{filename}"
-    subcategory = "gallery"
     pattern = (r"(?:http?://)?(?:www\.)?erooups\.com"
                r"/(\d+)/(\d+)/(\d+)/([^/?#]+)")
     root = "http://erooups.com"
@@ -30,11 +29,10 @@ class ErooupsGalleryExtractor(GalleryExtractor):
         GalleryExtractor.__init__(self, match, url)
 
     def images(self, page):
-        fmt = "http://content.erooups.com/{}".format
-        extr = text.extr(page, 'class="imgs"', "</section>")
+        extr = text.extr(page, 'class="imgs">', "</section>")
         return [
-            (fmt(i), None) for i in text.extract_iter(
-                extr, 'src="http://content.erooups.com', '"')
+            (self.root + i if "erooups" not in i else i, None) for i in
+            text.extract_iter(extr, 'img src="', '"')
         ]
 
     def metadata(self, page):
