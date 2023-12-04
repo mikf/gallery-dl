@@ -85,6 +85,7 @@ class ExhentaiExtractor(Extractor):
     @cache(maxage=90*24*3600, keyarg=1)
     def _login_impl(self, username, password):
         self.log.info("Logging in as %s", username)
+
         url = "https://forums.e-hentai.org/index.php?act=Login&CODE=01"
         headers = {
             "Referer": "https://e-hentai.org/bounce_login.php?b=d&bt=1-1",
@@ -98,10 +99,19 @@ class ExhentaiExtractor(Extractor):
             "ipb_login_submit": "Login!",
         }
 
+        self.cookies.clear()
+
         response = self.request(url, method="POST", headers=headers, data=data)
         if b"You are now logged in as:" not in response.content:
             raise exception.AuthenticationError()
-        return {c: response.cookies[c] for c in self.cookies_names}
+
+        # collect more cookies
+        url = self.root + "/favorites.php"
+        response = self.request(url)
+        if response.history:
+            self.request(url)
+
+        return self.cookies
 
 
 class ExhentaiGalleryExtractor(ExhentaiExtractor):
