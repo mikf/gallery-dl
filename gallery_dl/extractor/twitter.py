@@ -1276,8 +1276,18 @@ class TwitterAPI():
                 self.headers["x-csrf-token"] = csrf_token
 
             if response.status_code < 400:
-                # success
-                return response.json()
+                data = response.json()
+                if not data.get("errors"):
+                    return data  # success
+
+                msg = data["errors"][0].get("message") or "Unspecified"
+                self.extractor.log.debug("internal error: '%s'", msg)
+
+                if self.headers["x-twitter-auth-type"]:
+                    continue  # retry
+
+                # fall through to "Login Required"
+                response.status_code = 404
 
             if response.status_code == 429:
                 # rate limit exceeded
