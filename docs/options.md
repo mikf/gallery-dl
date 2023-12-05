@@ -39,6 +39,7 @@
     -E, --extractor-info        Print extractor defaults and settings
     -K, --list-keywords         Print a list of available keywords and example
                                 values for the given URLs
+    -e, --error-file FILE       Add input URLs which returned an error to FILE
     --list-modules              Print a list of available extractor modules
     --list-extractors           Print a list of extractor classes with
                                 description, (sub)category and example URL
@@ -51,7 +52,8 @@
 ## Downloader Options:
     -r, --limit-rate RATE       Maximum download rate (e.g. 500k or 2.5M)
     -R, --retries N             Maximum number of retries for failed HTTP
-                                requests or -1 for infinite retries (default: 4)
+                                requests or -1 for infinite retries (default:
+                                4)
     --http-timeout SECONDS      Timeout for HTTP connections (default: 30.0)
     --sleep SECONDS             Number of seconds to wait before each download.
                                 This can be either a constant value or a range
