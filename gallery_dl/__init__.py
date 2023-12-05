@@ -249,6 +249,9 @@ def main():
                         input_log.error(exc)
                         return getattr(exc, "code", 128)
 
+            if args.error_file:
+                input_manager.error_file(args.error_file)
+
             pformat = config.get(("output",), "progress", True)
             if pformat and len(input_manager.urls) > 1 and \
                     args.loglevel < logging.ERROR:
@@ -270,6 +273,7 @@ def main():
 
                     if status:
                         retval |= status
+                        input_manager.error()
                     else:
                         input_manager.success()
 
@@ -281,6 +285,7 @@ def main():
                 except exception.NoExtractorError:
                     log.error("Unsupported URL '%s'", url)
                     retval |= 64
+                    input_manager.error()
 
                 input_manager.next()
             return retval
@@ -301,9 +306,12 @@ class InputManager():
     def __init__(self):
         self.urls = []
         self.files = ()
+
+        self._url = ""
+        self._item = None
         self._index = 0
-        self._current = None
         self._pformat = None
+        self._error_fp = None
 
     def add_url(self, url):
         self.urls.append(url)
@@ -428,6 +436,15 @@ class InputManager():
                 else:
                     append(url)
 
+    def error_file(self, path):
+        try:
+            path = util.expand_path(path)
+            self._error_fp = open(path, "a", encoding="utf-8")
+        except Exception as exc:
+            self.log.warning(
+                "Unable to open error file (%s: %s)",
+                exc.__class__.__name__, exc)
+
     def progress(self, pformat=True):
         if pformat is True:
             pformat = "[{current}/{total}] {url}\n"
@@ -439,17 +456,37 @@ class InputManager():
         self._index += 1
 
     def success(self):
-        if self._current:
-            url, path, action, indicies = self._current
-            lines = self.files[path]
-            action(lines, indicies)
+        if self._item:
+            self._rewrite()
+
+    def error(self):
+        if self._error_fp:
+            if self._item:
+                url, path, action, indicies = self._item
+                lines = self.files[path]
+                out = "".join(lines[i] for i in indicies)
+                self._rewrite()
+            else:
+                out = str(self._url) + "\n"
+
             try:
-                with open(path, "w", encoding="utf-8") as fp:
-                    fp.writelines(lines)
+                self._error_fp.write(out)
             except Exception as exc:
                 self.log.warning(
                     "Unable to update '%s' (%s: %s)",
-                    path, exc.__class__.__name__, exc)
+                    self._error_fp.name, exc.__class__.__name__, exc)
+
+    def _rewrite(self):
+        url, path, action, indicies = self._item
+        lines = self.files[path]
+        action(lines, indicies)
+        try:
+            with open(path, "w", encoding="utf-8") as fp:
+                fp.writelines(lines)
+        except Exception as exc:
+            self.log.warning(
+                "Unable to update '%s' (%s: %s)",
+                path, exc.__class__.__name__, exc)
 
     @staticmethod
     def _action_comment(lines, indicies):
@@ -467,23 +504,24 @@ class InputManager():
 
     def __next__(self):
         try:
-            item = self.urls[self._index]
+            url = self.urls[self._index]
         except IndexError:
             raise StopIteration
 
-        if isinstance(item, tuple):
-            self._current = item
-            item = item[0]
+        if isinstance(url, tuple):
+            self._item = url
+            url = url[0]
         else:
-            self._current = None
+            self._item = None
+        self._url = url
 
         if self._pformat:
             output.stderr_write(self._pformat({
                 "total"  : len(self.urls),
                 "current": self._index + 1,
-                "url"    : item,
+                "url"    : url,
             }))
-        return item
+        return url
 
 
 class ExtendedUrl():

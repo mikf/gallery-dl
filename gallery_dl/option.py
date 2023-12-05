@@ -287,6 +287,11 @@ def build_parser():
               "for the given URLs"),
     )
     output.add_argument(
+        "-e", "--error-file",
+        dest="error_file", metavar="FILE",
+        help="Add input URLs which returned an error to FILE",
+    )
+    output.add_argument(
         "--list-modules",
         dest="list_modules", action="store_true",
         help="Print a list of available extractor modules",
