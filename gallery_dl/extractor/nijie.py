@@ -57,7 +57,11 @@ class NijieExtractor(AsynchronousMixin, BaseExtractor):
                 data["user_name"] = data["artist_name"]
             yield Message.Directory, data
 
-            for image in self._extract_images(page):
+            for num, url in enumerate(self._extract_images(image_id, page)):
+                image = text.nameext_from_url(url, {
+                    "num": num,
+                    "url": "https:" + url,
+                })
                 image.update(data)
                 if not image["extension"]:
                     image["extension"] = "jpg"
@@ -72,7 +76,7 @@ class NijieExtractor(AsynchronousMixin, BaseExtractor):
         extr = text.extract_from(page)
         keywords = text.unescape(extr(
             'name="keywords" content="', '" />')).split(",")
-        data = {
+        return {
             "title"      : keywords[0].strip(),
             "description": text.unescape(extr(
                 '"description": "', '"').replace("&amp;", "&")),
@@ -82,7 +86,6 @@ class NijieExtractor(AsynchronousMixin, BaseExtractor):
             "artist_name": keywords[1],
             "tags"       : keywords[2:-1],
         }
-        return data
 
     @staticmethod
     def _extract_data_horne(page):
@@ -90,7 +93,7 @@ class NijieExtractor(AsynchronousMixin, BaseExtractor):
         extr = text.extract_from(page)
         keywords = text.unescape(extr(
             'name="keywords" content="', '" />')).split(",")
-        data = {
+        return {
             "title"      : keywords[0].strip(),
             "description": text.unescape(extr(
                 'property="og:description" content="', '"')),
@@ -101,21 +104,16 @@ class NijieExtractor(AsynchronousMixin, BaseExtractor):
                 "itemprop='datePublished' content=", "<").rpartition(">")[2],
                 "%Y-%m-%d %H:%M:%S", 9),
         }
-        return data
 
-    @staticmethod
-    def _extract_images(page):
-        """Extract image URLs from 'page'"""
-        images = text.extract_iter(page, "/view_popup.php", "</a>")
-        for num, image in enumerate(images):
-            src = text.extr(image, 'src="', '"')
-            if not src:
-                continue
-            url = ("https:" + src).replace("/__rs_l120x120/", "/")
-            yield text.nameext_from_url(url, {
-                "num": num,
-                "url": url,
-            })
+    def _extract_images(self, image_id, page):
+        if '&#diff_1" ' in page:
+            # multiple images
+            url = "{}/view_popup.php?id={}".format(self.root, image_id)
+            page = self.request(url).text
+            yield from text.extract_iter(
+                page, 'href="javascript:void(0);"><img src="', '"')
+        else:
+            yield text.extr(page, 'itemprop="image" src="', '"')
 
     @staticmethod
     def _extract_user_name(page):
