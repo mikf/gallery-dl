@@ -10,7 +10,7 @@ from .common import GalleryExtractor
 from .. import text
 
 
-class UrlgalleriesExtractor(GalleryExtractor):
+class UrlgalleriesGalleryExtractor(GalleryExtractor):
     """Base class for Urlgalleries extractors"""
     category = "urlgalleries"
     root = "urlgalleries.net"
