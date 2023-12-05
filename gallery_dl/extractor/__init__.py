@@ -155,6 +155,7 @@ modules = [
     "tumblrgallery",
     "twibooru",
     "twitter",
+    "urlgalleries",
     "unsplash",
     "uploadir",
     "urlshortener",
