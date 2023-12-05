@@ -1289,11 +1289,9 @@ class TwitterAPI():
                 self.extractor.wait(until=until, seconds=seconds)
                 continue
 
-            if response.status_code == 403 and \
-                    not self.headers["x-twitter-auth-type"] and \
-                    endpoint == "/2/search/adaptive.json":
-                raise exception.AuthorizationError(
-                    "Login required to access search results")
+            if response.status_code in (403, 404) and \
+                    not self.headers["x-twitter-auth-type"]:
+                raise exception.AuthorizationError("Login required")
 
             # error
             try:
