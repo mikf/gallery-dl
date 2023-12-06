@@ -275,7 +275,7 @@ Response Headers
         if hide_auth:
             authorization = req_headers.get("Authorization")
             if authorization:
-                atype, sep, _ = authorization.partition(" ")
+                atype, sep, _ = str(authorization).partition(" ")
                 req_headers["Authorization"] = atype + " ***" if sep else "***"
 
             cookie = req_headers.get("Cookie")
@@ -291,15 +291,17 @@ Response Headers
                     r"(^|, )([^ =]+)=[^,;]*", r"\1\2=***", set_cookie,
                 )
 
+        fmt_nv = "{}: {}".format
+
         fp.write(outfmt.format(
             request=request,
             response=response,
             request_headers="\n".join(
-                name + ": " + value
+                fmt_nv(name, value)
                 for name, value in req_headers.items()
             ),
             response_headers="\n".join(
-                name + ": " + value
+                fmt_nv(name, value)
                 for name, value in res_headers.items()
             ),
         ).encode())
