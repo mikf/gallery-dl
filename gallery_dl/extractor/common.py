@@ -233,7 +233,7 @@ class Extractor():
         password = None
 
         if username:
-            password = self.config("password")
+            password = self.config("password") or util.LazyPrompt()
         elif self.config("netrc", False):
             try:
                 info = netrc.netrc().authenticators(self.category)

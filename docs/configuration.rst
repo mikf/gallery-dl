@@ -379,7 +379,7 @@ Description
     The username and password to use when attempting to log in to
     another site.
 
-    Specifying a username and password is required for
+    Specifying username and password is required for
 
     * ``nijie``
 
@@ -414,6 +414,10 @@ Description
 
     (*) The password value for these sites should be
     the API key found in your user profile, not the actual account password.
+
+    Note: Leave the ``password`` value empty or undefined
+    to get prompted for a passeword when performing a login
+    (see `getpass() <https://docs.python.org/3/library/getpass.html#getpass.getpass>`__).
 
 
 extractor.*.netrc
