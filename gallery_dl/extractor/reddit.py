@@ -423,9 +423,10 @@ class RedditAPI():
                                    "grants/installed_client"),
                     "device_id": "DO_NOT_TRACK_THIS_DEVICE"}
 
+        auth = util.HTTPBasicAuth(self.client_id, "")
         response = self.extractor.request(
             url, method="POST", headers=self.headers,
-            data=data, auth=(self.client_id, ""), fatal=False)
+            data=data, auth=auth, fatal=False)
         data = response.json()
 
         if response.status_code != 200:

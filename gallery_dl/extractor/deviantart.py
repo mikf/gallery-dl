@@ -1239,7 +1239,7 @@ class DeviantartOAuthAPI():
             self.log.info("Requesting public access token")
             data = {"grant_type": "client_credentials"}
 
-        auth = (self.client_id, self.client_secret)
+        auth = util.HTTPBasicAuth(self.client_id, self.client_secret)
         response = self.extractor.request(
             url, method="POST", data=data, auth=auth, fatal=False)
         data = response.json()

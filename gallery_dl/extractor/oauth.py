@@ -183,7 +183,7 @@ class OAuthBase(Extractor):
         }
 
         if auth:
-            auth = (client_id, client_secret)
+            auth = util.HTTPBasicAuth(client_id, client_secret)
         else:
             auth = None
             data["client_id"] = client_id
