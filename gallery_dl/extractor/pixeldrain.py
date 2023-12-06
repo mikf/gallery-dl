@@ -9,7 +9,7 @@
 """Extractors for https://pixeldrain.com/"""
 
 from .common import Extractor, Message
-from .. import text
+from .. import text, util
 
 BASE_PATTERN = r"(?:https?://)?pixeldrain\.com"
 
@@ -23,7 +23,7 @@ class PixeldrainExtractor(Extractor):
     def _init(self):
         api_key = self.config("api-key")
         if api_key:
-            self.session.auth = ("", api_key)
+            self.session.auth = util.HTTPBasicAuth("", api_key)
 
     def parse_datetime(self, date_string):
         return text.parse_datetime(

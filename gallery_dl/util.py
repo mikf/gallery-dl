@@ -490,6 +490,19 @@ CODES = {
 }
 
 
+class HTTPBasicAuth():
+    __slots__ = ("authorization",)
+
+    def __init__(self, username, password):
+        self.authorization = b"Basic " + binascii.b2a_base64(
+            username.encode("latin1") + b":" + str(password).encode("latin1")
+        )[:-1]
+
+    def __call__(self, request):
+        request.headers["Authorization"] = self.authorization
+        return request
+
+
 class LazyPrompt():
     __slots__ = ()
 
