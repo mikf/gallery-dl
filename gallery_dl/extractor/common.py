@@ -136,6 +136,18 @@ class Extractor():
             kwargs["timeout"] = self._timeout
         if "verify" not in kwargs:
             kwargs["verify"] = self._verify
+
+        if "json" in kwargs:
+            json = kwargs["json"]
+            if json is not None:
+                kwargs["data"] = util.json_dumps(json).encode()
+                del kwargs["json"]
+                headers = kwargs.get("headers")
+                if headers:
+                    headers["Content-Type"] = "application/json"
+                else:
+                    kwargs["headers"] = {"Content-Type": "application/json"}
+
         response = None
         tries = 1
 
