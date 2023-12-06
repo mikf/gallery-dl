@@ -14,6 +14,7 @@ import sys
 import json
 import time
 import random
+import getpass
 import hashlib
 import sqlite3
 import binascii
@@ -485,6 +486,13 @@ CODES = {
     "vi": "Vietnamese",
     "zh": "Chinese",
 }
+
+
+class LazyPrompt():
+    __slots__ = ()
+
+    def __str__(self):
+        return getpass.getpass()
 
 
 class CustomNone():
