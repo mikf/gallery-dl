@@ -249,8 +249,10 @@ def main():
                         input_log.error(exc)
                         return getattr(exc, "code", 128)
 
-            if args.error_file:
-                input_manager.error_file(args.error_file)
+            error_file = (args.error_file or
+                          config.get(("output",), "errorfile"))
+            if error_file:
+                input_manager.error_file(error_file)
 
             pformat = config.get(("output",), "progress", True)
             if pformat and len(input_manager.urls) > 1 and \
