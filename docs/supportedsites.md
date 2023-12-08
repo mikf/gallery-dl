@@ -890,6 +890,12 @@ Consider all sites to be NSFW unless otherwise known.
     <td></td>
 </tr>
 <tr>
+    <td>Urlgalleries</td>
+    <td>https://urlgalleries.net/</td>
+    <td>Galleries</td>
+    <td></td>
+</tr>
+<tr>
     <td>Vipergirls</td>
     <td>https://vipergirls.to/</td>
     <td>Posts, Threads</td>
