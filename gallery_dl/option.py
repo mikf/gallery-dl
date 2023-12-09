@@ -288,7 +288,7 @@ def build_parser():
     )
     output.add_argument(
         "-e", "--error-file",
-        dest="error_file", metavar="FILE",
+        dest="errorfile", metavar="FILE", action=ConfigAction,
         help="Add input URLs which returned an error to FILE",
     )
     output.add_argument(

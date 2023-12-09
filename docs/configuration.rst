@@ -4422,14 +4422,17 @@ Description
 output.errorfile
 ----------------
 Type
-    |Path|_
+    * |Path|_
+    * |Logging Configuration|_
 Description
     File to write input URLs which returned an error to.
+
+    The default format string here is also ``"{message}"``.
 
     When combined with
     ``-I``/``--input-file-comment`` or
     ``-x``/``--input-file-delete``,
-    this option will cause all input URLs from these files
+    this option will cause *all* input URLs from these files
     to be commented/deleted after processing them
     and not just successful ones.
 
