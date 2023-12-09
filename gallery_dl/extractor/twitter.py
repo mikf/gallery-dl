@@ -1439,7 +1439,12 @@ class TwitterAPI():
                 for instr in instructions:
                     instr_type = instr.get("type")
                     if instr_type == "TimelineAddEntries":
-                        entries = instr["entries"]
+                        if entries:
+                            entries.extend(instr["entries"])
+                        else:
+                            entries = instr["entries"]
+                    elif instr_type == "TimelineAddToModule":
+                        entries = instr["moduleItems"]
                     elif instr_type == "TimelineReplaceEntry":
                         entry = instr["entry"]
                         if entry["entryId"].startswith("cursor-bottom-"):
@@ -1487,6 +1492,11 @@ class TwitterAPI():
 
                 if esw("tweet-"):
                     tweets.append(entry)
+                elif esw("profile-grid-"):
+                    if "content" in entry:
+                        tweets.extend(entry["content"]["items"])
+                    else:
+                        tweets.append(entry)
                 elif esw(("homeConversation-",
                           "profile-conversation-",
                           "conversationthread-")):
