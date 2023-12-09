@@ -1556,6 +1556,17 @@ Description
     * ``"exhentai.org"``: Use ``exhentai.org`` for all URLs
 
 
+extractor.exhentai.fallback-retries
+-----------------------------------
+Type
+    ``integer``
+Default
+    ``2``
+Description
+    Number of times a failed image gets retried.
+    Use ``-1`` for infinite retries
+
+
 extractor.exhentai.fav
 ----------------------
 Type
