@@ -226,18 +226,26 @@ def main():
             else:
                 jobtype = args.jobtype or job.DownloadJob
 
+            input_manager = InputManager()
+            input_manager.log = input_log = logging.getLogger("inputfile")
+
             # unsupported file logging handler
             handler = output.setup_logging_handler(
                 "unsupportedfile", fmt="{message}")
             if handler:
-                ulog = logging.getLogger("unsupported")
+                ulog = job.Job.ulog = logging.getLogger("unsupported")
                 ulog.addHandler(handler)
                 ulog.propagate = False
-                job.Job.ulog = ulog
+
+            # error file logging handler
+            handler = output.setup_logging_handler(
+                "errorfile", fmt="{message}", mode="a")
+            if handler:
+                elog = input_manager.err = logging.getLogger("errorfile")
+                elog.addHandler(handler)
+                elog.propagate = False
 
             # collect input URLs
-            input_manager = InputManager()
-            input_manager.log = input_log = logging.getLogger("inputfile")
             input_manager.add_list(args.urls)
 
             if args.input_files:
@@ -248,11 +256,6 @@ def main():
                     except Exception as exc:
                         input_log.error(exc)
                         return getattr(exc, "code", 128)
-
-            error_file = (args.error_file or
-                          config.get(("output",), "errorfile"))
-            if error_file:
-                input_manager.error_file(error_file)
 
             pformat = config.get(("output",), "progress", True)
             if pformat and len(input_manager.urls) > 1 and \
@@ -308,12 +311,12 @@ class InputManager():
     def __init__(self):
         self.urls = []
         self.files = ()
+        self.log = self.err = None
 
         self._url = ""
         self._item = None
         self._index = 0
         self._pformat = None
-        self._error_fp = None
 
     def add_url(self, url):
         self.urls.append(url)
@@ -438,15 +441,6 @@ class InputManager():
                 else:
                     append(url)
 
-    def error_file(self, path):
-        try:
-            path = util.expand_path(path)
-            self._error_fp = open(path, "a", encoding="utf-8")
-        except Exception as exc:
-            self.log.warning(
-                "Unable to open error file (%s: %s)",
-                exc.__class__.__name__, exc)
-
     def progress(self, pformat=True):
         if pformat is True:
             pformat = "[{current}/{total}] {url}\n"
@@ -462,21 +456,17 @@ class InputManager():
             self._rewrite()
 
     def error(self):
-        if self._error_fp:
+        if self.err:
             if self._item:
                 url, path, action, indicies = self._item
                 lines = self.files[path]
                 out = "".join(lines[i] for i in indicies)
+                if out and out[-1] == "\n":
+                    out = out[:-1]
                 self._rewrite()
             else:
-                out = str(self._url) + "\n"
-
-            try:
-                self._error_fp.write(out)
-            except Exception as exc:
-                self.log.warning(
-                    "Unable to update '%s' (%s: %s)",
-                    self._error_fp.name, exc.__class__.__name__, exc)
+                out = str(self._url)
+            self.err.info(out)
 
     def _rewrite(self):
         url, path, action, indicies = self._item
