@@ -1277,13 +1277,16 @@ class TwitterAPI():
 
             if response.status_code < 400:
                 data = response.json()
-                if not data.get("errors"):
-                    return data  # success
+                if not data.get("errors") or not any(
+                        (e.get("message") or "").lower().startswith("timeout")
+                        for e in data["errors"]):
+                    return data  # success or non-timeout errors
 
                 msg = data["errors"][0].get("message") or "Unspecified"
-                self.extractor.log.debug("internal error: '%s'", msg)
+                self.extractor.log.debug("Internal Twitter error: '%s'", msg)
 
                 if self.headers["x-twitter-auth-type"]:
+                    self.extractor.log.debug("Retrying API request")
                     continue  # retry
 
                 # fall through to "Login Required"
