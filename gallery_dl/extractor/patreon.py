@@ -249,23 +249,18 @@ class PatreonExtractor(Extractor):
         return [genmap[ft] for ft in filetypes]
 
     def _extract_bootstrap(self, page):
-        bootstrap = text.extr(
-            page, 'window.patreon = {"bootstrap":', '},"apiServer"')
-        if bootstrap:
-            return util.json_loads(bootstrap + "}")
-
-        bootstrap = text.extr(page, "window.patreon.bootstrap,", "});")
-        if bootstrap:
-            return util.json_loads(bootstrap + "}")
-
-        data = text.extr(page, "window.patreon = {", "};\n")
-        if data:
-            try:
-                return util.json_loads("{" + data + "}")["bootstrap"]
-            except Exception:
-                pass
-
-        raise exception.StopExtraction("Unable to extract bootstrap data")
+        if "window.patreon.bootstrap," in page:
+            page_content = text.extr(page, "window.patreon.bootstrap,", "});")
+            json_string = page_content + "}"
+        elif 'window.patreon = {"bootstrap":' in page:
+            page_content = text.extr(page, 'window.patreon = {"bootstrap":', '},"apiServer"')
+            json_string = page_content + "}"
+        elif 'window.patreon = wrapInProxy({"bootstrap":' in page:
+            page_content = text.extr(page, 'window.patreon = wrapInProxy({"bootstrap":', '},"apiServer"')
+            json_string = page_content + "}"
+        else:
+            raise Exception(f"Unknown HTML and JS structure. Page content is: {page}")
+        return util.json_loads(json_string)
 
 
 class PatreonCreatorExtractor(PatreonExtractor):
