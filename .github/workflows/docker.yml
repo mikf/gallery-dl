@@ -45,9 +45,6 @@ jobs:
         tags: |
           type=sha,format=long,prefix=
           type=ref,event=tag
-        # https://github.com/docker/metadata-action/issues/112
-        flavor: |
-          latest=${{ github.ref == 'refs/heads/master' }}
 
     # https://github.com/docker/build-push-action
     - name: Build image
