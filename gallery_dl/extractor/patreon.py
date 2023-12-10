@@ -255,7 +255,9 @@ class PatreonExtractor(Extractor):
             return util.json_loads(bootstrap + "}")
 
         bootstrap = text.extr(
-            page, 'window.patreon = wrapInProxy({"bootstrap":', '},"apiServer"')
+            page,
+            'window.patreon = wrapInProxy({"bootstrap":',
+            '},"apiServer"')
         if bootstrap:
             return util.json_loads(bootstrap + "}")
 
