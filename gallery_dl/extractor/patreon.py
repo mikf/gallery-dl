@@ -250,16 +250,19 @@ class PatreonExtractor(Extractor):
 
     def _extract_bootstrap(self, page):
         if "window.patreon.bootstrap," in page:
-            page_content = text.extr(page, "window.patreon.bootstrap,", "});")
-            json_string = page_content + "}"
+            content_begin = "window.patreon.bootstrap,"
+            content_end = "});"
+            json_string = text.extr(page, content_begin, content_end) + "}"
         elif 'window.patreon = {"bootstrap":' in page:
-            page_content = text.extr(page, 'window.patreon = {"bootstrap":', '},"apiServer"')
-            json_string = page_content + "}"
+            content_begin = 'window.patreon = {"bootstrap":'
+            content_end = '},"apiServer"'
+            json_string = text.extr(page, content_begin, content_end) + "}"
         elif 'window.patreon = wrapInProxy({"bootstrap":' in page:
-            page_content = text.extr(page, 'window.patreon = wrapInProxy({"bootstrap":', '},"apiServer"')
-            json_string = page_content + "}"
+            content_begin = 'window.patreon = wrapInProxy({"bootstrap":'
+            content_end = '},"apiServer"'
+            json_string = text.extr(page, content_begin, content_end) + "}"
         else:
-            raise Exception(f"Unknown HTML and JS structure. Page content is: {page}")
+            raise Exception("Unknown HTML and JS structure. Page:" + page)
         return util.json_loads(json_string)
 
 
