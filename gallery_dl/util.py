@@ -55,6 +55,13 @@ def advance(iterable, num):
     return iterator
 
 
+def repeat(times):
+    """Return an iterator that returns None"""
+    if times < 0:
+        return itertools.repeat(None)
+    return itertools.repeat(None, times)
+
+
 def unique(iterable):
     """Yield unique elements from 'iterable' while preserving order"""
     seen = set()
