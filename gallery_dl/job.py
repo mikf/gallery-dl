@@ -520,7 +520,7 @@ class DownloadJob(Job):
                     archive, archive_format, archive_pragma)
             except Exception as exc:
                 extr.log.warning(
-                    "Failed to open download archive at '%s' ('%s: %s')",
+                    "Failed to open download archive at '%s' (%s: %s)",
                     archive, exc.__class__.__name__, exc)
             else:
                 extr.log.debug("Using download archive '%s'", archive)
