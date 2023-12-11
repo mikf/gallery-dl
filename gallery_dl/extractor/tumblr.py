@@ -9,7 +9,7 @@
 """Extractors for https://www.tumblr.com/"""
 
 from .common import Extractor, Message
-from .. import text, oauth, exception
+from .. import text, util, oauth, exception
 from datetime import datetime, date, timedelta
 import re
 
@@ -262,7 +262,7 @@ class TumblrExtractor(Extractor):
             return updated, (resized == updated)
 
     def _original_image_fallback(self, url, post_id):
-        for _ in range(self.fallback_retries):
+        for _ in util.repeat(self.fallback_retries):
             self.sleep(self.fallback_delay, "image token")
             yield self._update_image_token(url)[0]
         self.log.warning("Unable to fetch higher-resolution "

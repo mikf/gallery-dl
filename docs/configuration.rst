@@ -1563,8 +1563,8 @@ Type
 Default
     ``2``
 Description
-    Number of times a failed image gets retried.
-    Use ``-1`` for infinite retries
+    Number of times a failed image gets retried
+    or ``-1`` for infinite retries.
 
 
 extractor.exhentai.fav
@@ -3144,7 +3144,8 @@ Type
 Default
     ``2``
 Description
-    Number of retries for fetching full-resolution images.
+    Number of retries for fetching full-resolution images
+    or ``-1`` for infinite retries.
 
 
 extractor.twibooru.api-key
