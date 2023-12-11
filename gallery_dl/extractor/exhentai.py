@@ -138,9 +138,6 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
             self.limits = False
 
         self.fallback_retries = self.config("fallback-retries", 2)
-        if self.fallback_retries < 0:
-            self.fallback_retries = float("inf")
-
         self.original = self.config("original", True)
 
     def favorite(self, slot="0"):
@@ -449,14 +446,14 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
 
     def _fallback_original(self, nl, fullimg):
         url = "{}?nl={}".format(fullimg, nl)
-        for _ in range(self.fallback_retries):
+        for _ in util.repeat(self.fallback_retries):
             yield url
 
     def _fallback_1280(self, nl, num, token=None):
         if not token:
             token = self.key_start
 
-        for _ in range(self.fallback_retries):
+        for _ in util.repeat(self.fallback_retries):
             url = "{}/s/{}/{}-{}?nl={}".format(
                 self.root, token, self.gallery_id, num, nl)
 
