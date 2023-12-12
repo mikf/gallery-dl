@@ -16,12 +16,12 @@ class MyhentaigalleryGalleryExtractor(GalleryExtractor):
     root = "https://myhentaigallery.com"
     directory_fmt = ("{category}", "{gallery_id} {artist:?[/] /J, }{title}")
     pattern = (r"(?:https?://)?myhentaigallery\.com"
-               r"/gallery/(?:thumbnails|show)/(\d+)")
-    example = "https://myhentaigallery.com/gallery/thumbnails/12345"
+               r"/g(?:allery/(?:thumbnails|show))?/(\d+)")
+    example = "https://myhentaigallery.com/g/12345"
 
     def __init__(self, match):
         self.gallery_id = match.group(1)
-        url = "{}/gallery/thumbnails/{}".format(self.root, self.gallery_id)
+        url = "{}/g/{}".format(self.root, self.gallery_id)
         GalleryExtractor.__init__(self, match, url)
 
     def _init(self):
