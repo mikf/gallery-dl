@@ -404,66 +404,70 @@ class TumblrAPI(oauth.OAuth1API):
     def _call(self, endpoint, params, **kwargs):
         url = self.ROOT + endpoint
         kwargs["params"] = params
-        response = self.request(url, **kwargs)
 
-        try:
-            data = response.json()
-        except ValueError:
-            data = response.text
-            status = response.status_code
-        else:
-            status = data["meta"]["status"]
-            if 200 <= status < 400:
-                return data["response"]
+        while True:
+            response = self.request(url, **kwargs)
 
-        self.log.debug(data)
-        if status == 403:
-            raise exception.AuthorizationError()
-
-        elif status == 404:
             try:
-                error = data["errors"][0]["detail"]
-                board = ("only viewable within the Tumblr dashboard" in error)
-            except Exception:
-                board = False
+                data = response.json()
+            except ValueError:
+                data = response.text
+                status = response.status_code
+            else:
+                status = data["meta"]["status"]
+                if 200 <= status < 400:
+                    return data["response"]
 
-            if board:
-                self.log.info("Run 'gallery-dl oauth:tumblr' "
-                              "to access dashboard-only blogs")
-                raise exception.AuthorizationError(error)
-            raise exception.NotFoundError("user or post")
+            self.log.debug(data)
 
-        elif status == 429:
-            # daily rate limit
-            if response.headers.get("x-ratelimit-perday-remaining") == "0":
-                self.log.info("Daily API rate limit exceeded")
-                reset = response.headers.get("x-ratelimit-perday-reset")
+            if status == 403:
+                raise exception.AuthorizationError()
 
-                api_key = self.api_key or self.session.auth.consumer_key
-                if api_key == self.API_KEY:
-                    self.log.info("Register your own OAuth application and "
-                                  "use its credentials to prevent this error: "
-                                  "https://github.com/mikf/gallery-dl/blob/mas"
-                                  "ter/docs/configuration.rst#extractortumblra"
-                                  "pi-key--api-secret")
+            elif status == 404:
+                try:
+                    error = data["errors"][0]["detail"]
+                    board = ("only viewable within the Tumblr dashboard"
+                             in error)
+                except Exception:
+                    board = False
 
-                if self.extractor.config("ratelimit") == "wait":
+                if board:
+                    self.log.info("Run 'gallery-dl oauth:tumblr' "
+                                  "to access dashboard-only blogs")
+                    raise exception.AuthorizationError(error)
+                raise exception.NotFoundError("user or post")
+
+            elif status == 429:
+                # daily rate limit
+                if response.headers.get("x-ratelimit-perday-remaining") == "0":
+                    self.log.info("Daily API rate limit exceeded")
+                    reset = response.headers.get("x-ratelimit-perday-reset")
+
+                    api_key = self.api_key or self.session.auth.consumer_key
+                    if api_key == self.API_KEY:
+                        self.log.info(
+                            "Register your own OAuth application and use its "
+                            "credentials to prevent this error: https://githu"
+                            "b.com/mikf/gallery-dl/blob/master/docs/configurat"
+                            "ion.rst#extractortumblrapi-key--api-secret")
+
+                    if self.extractor.config("ratelimit") == "wait":
+                        self.extractor.wait(seconds=reset)
+                        continue
+
+                    t = (datetime.now() + timedelta(0, float(reset))).time()
+                    raise exception.StopExtraction(
+                        "Aborting - Rate limit will reset at %s",
+                        "{:02}:{:02}:{:02}".format(t.hour, t.minute, t.second))
+
+                # hourly rate limit
+                reset = response.headers.get("x-ratelimit-perhour-reset")
+                if reset:
+                    self.log.info("Hourly API rate limit exceeded")
                     self.extractor.wait(seconds=reset)
-                    return self._call(endpoint, params, **kwargs)
+                    continue
 
-                t = (datetime.now() + timedelta(seconds=float(reset))).time()
-                raise exception.StopExtraction(
-                    "Aborting - Rate limit will reset at %s",
-                    "{:02}:{:02}:{:02}".format(t.hour, t.minute, t.second))
-
-            # hourly rate limit
-            reset = response.headers.get("x-ratelimit-perhour-reset")
-            if reset:
-                self.log.info("Hourly API rate limit exceeded")
-                self.extractor.wait(seconds=reset)
-                return self._call(endpoint, params, **kwargs)
-
-        raise exception.StopExtraction(data)
+            raise exception.StopExtraction(data)
 
     def _pagination(self, blog, endpoint, params, key="posts", cache=False):
         endpoint = "/v2/blog/{}{}".format(blog, endpoint)
