@@ -1005,6 +1005,8 @@ class DeviantartOAuthAPI():
 
         self.client_id = extractor.config("client-id")
         if self.client_id:
+            if not isinstance(self.client_id, str):
+                self.client_id = str(self.client_id)
             self.client_secret = extractor.config("client-secret")
         else:
             self.client_id = self.CLIENT_ID
