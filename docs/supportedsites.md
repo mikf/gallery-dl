@@ -400,7 +400,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Inkbunny</td>
     <td>https://inkbunny.net/</td>
-    <td>Favorites, Followed Users, Pools, Posts, Search Results, User Profiles</td>
+    <td>Favorites, Followed Users, Pools, Posts, Search Results, Unread Submissions, User Profiles</td>
     <td>Supported</td>
 </tr>
 <tr>

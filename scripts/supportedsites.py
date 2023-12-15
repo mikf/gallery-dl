@@ -192,6 +192,9 @@ SUBCATEGORY_MAP = {
     "imgur": {
         "favorite-folder": "Favorites Folders",
     },
+    "inkbunny": {
+        "unread": "Unread Submissions",
+    },
     "instagram": {
         "posts": "",
         "saved": "Saved Posts",
