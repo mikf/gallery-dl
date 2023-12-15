@@ -249,6 +249,15 @@ class PatreonExtractor(Extractor):
         return [genmap[ft] for ft in filetypes]
 
     def _extract_bootstrap(self, page):
+        data = text.extr(
+            page, 'id="__NEXT_DATA__" type="application/json">', '</script')
+        if data:
+            try:
+                return (util.json_loads(data)["props"]["pageProps"]
+                        ["bootstrapEnvelope"]["bootstrap"])
+            except Exception as exc:
+                self.log.debug("%s: %s", exc.__class__.__name__, exc)
+
         bootstrap = text.extr(
             page, 'window.patreon = {"bootstrap":', '},"apiServer"')
         if bootstrap:
