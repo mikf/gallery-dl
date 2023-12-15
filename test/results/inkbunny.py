@@ -95,6 +95,12 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://inkbunny.net/submissionsviewall.php?rid=ffffffffff&mode=unreadsubs&page=1&orderby=unread_datetime",
+    "#category": ("", "inkbunny", "unread"),
+    "#class"   : inkbunny.InkbunnyUnreadExtractor,
+},
+
+{
     "#url"     : "https://inkbunny.net/submissionsviewall.php?rid=ffffffffff&mode=search&page=1&orderby=create_datetime&text=cute&stringtype=and&keywords=yes&title=yes&description=no&artist=&favsby=&type=&days=&keyword_id=&user_id=&random=&md5=",
     "#category": ("", "inkbunny", "search"),
     "#class"   : inkbunny.InkbunnySearchExtractor,

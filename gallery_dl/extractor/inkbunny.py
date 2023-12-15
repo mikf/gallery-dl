@@ -161,6 +161,26 @@ class InkbunnyFavoriteExtractor(InkbunnyExtractor):
         return self.api.search(params)
 
 
+class InkbunnyUnreadExtractor(InkbunnyExtractor):
+    """Extractor for unread inkbunny submissions"""
+    subcategory = "unread"
+    pattern = (BASE_PATTERN +
+               r"/submissionsviewall\.php\?([^#]+&mode=unreadsubs&[^#]+)")
+    example = ("https://inkbunny.net/submissionsviewall.php"
+               "?text=&mode=unreadsubs&type=")
+
+    def __init__(self, match):
+        InkbunnyExtractor.__init__(self, match)
+        self.params = text.parse_query(match.group(1))
+
+    def posts(self):
+        params = self.params.copy()
+        params.pop("rid", None)
+        params.pop("mode", None)
+        params["unread_submissions"] = "yes"
+        return self.api.search(params)
+
+
 class InkbunnySearchExtractor(InkbunnyExtractor):
     """Extractor for inkbunny search results"""
     subcategory = "search"
