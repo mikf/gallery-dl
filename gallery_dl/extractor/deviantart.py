@@ -1003,10 +1003,9 @@ class DeviantartOAuthAPI():
         self.strategy = extractor.config("pagination")
         self.public = extractor.config("public", True)
 
-        self.client_id = extractor.config("client-id")
-        if self.client_id:
-            if not isinstance(self.client_id, str):
-                self.client_id = str(self.client_id)
+        client_id = extractor.config("client-id")
+        if client_id:
+            self.client_id = str(client_id)
             self.client_secret = extractor.config("client-secret")
         else:
             self.client_id = self.CLIENT_ID
@@ -1014,7 +1013,7 @@ class DeviantartOAuthAPI():
 
         token = extractor.config("refresh-token")
         if token is None or token == "cache":
-            token = "#" + str(self.client_id)
+            token = "#" + self.client_id
             if not _refresh_token_cache(token):
                 token = None
         self.refresh_token_key = token
