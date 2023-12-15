@@ -324,6 +324,9 @@ class InkbunnyAPI():
 
         while True:
             data = self._call("search", params)
+            if not data["submissions"]:
+                return
+
             yield from self.detail(data["submissions"])
 
             if data["page"] >= data["pages_count"]:
