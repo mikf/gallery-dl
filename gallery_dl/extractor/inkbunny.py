@@ -103,7 +103,8 @@ class InkbunnyPoolExtractor(InkbunnyExtractor):
     subcategory = "pool"
     pattern = (BASE_PATTERN + r"/(?:"
                r"poolview_process\.php\?pool_id=(\d+)|"
-               r"submissionsviewall\.php\?([^#]+&mode=pool&[^#]+))")
+               r"submissionsviewall\.php"
+               r"\?((?:[^#]+&)?mode=pool(?:&[^#]+)?))")
     example = "https://inkbunny.net/poolview_process.php?pool_id=12345"
 
     def __init__(self, match):
@@ -133,7 +134,8 @@ class InkbunnyFavoriteExtractor(InkbunnyExtractor):
     subcategory = "favorite"
     pattern = (BASE_PATTERN + r"/(?:"
                r"userfavorites_process\.php\?favs_user_id=(\d+)|"
-               r"submissionsviewall\.php\?([^#]+&mode=userfavs&[^#]+))")
+               r"submissionsviewall\.php"
+               r"\?((?:[^#]+&)?mode=userfavs(?:&[^#]+)?))")
     example = ("https://inkbunny.net/userfavorites_process.php"
                "?favs_user_id=12345")
 
@@ -164,8 +166,8 @@ class InkbunnyFavoriteExtractor(InkbunnyExtractor):
 class InkbunnyUnreadExtractor(InkbunnyExtractor):
     """Extractor for unread inkbunny submissions"""
     subcategory = "unread"
-    pattern = (BASE_PATTERN +
-               r"/submissionsviewall\.php\?([^#]+&mode=unreadsubs&[^#]+)")
+    pattern = (BASE_PATTERN + r"/submissionsviewall\.php"
+               r"\?((?:[^#]+&)?mode=unreadsubs(?:&[^#]+)?)")
     example = ("https://inkbunny.net/submissionsviewall.php"
                "?text=&mode=unreadsubs&type=")
 
@@ -184,8 +186,8 @@ class InkbunnyUnreadExtractor(InkbunnyExtractor):
 class InkbunnySearchExtractor(InkbunnyExtractor):
     """Extractor for inkbunny search results"""
     subcategory = "search"
-    pattern = (BASE_PATTERN +
-               r"/submissionsviewall\.php\?([^#]+&mode=search&[^#]+)")
+    pattern = (BASE_PATTERN + r"/submissionsviewall\.php"
+               r"\?((?:[^#]+&)?mode=search(?:&[^#]+)?)")
     example = ("https://inkbunny.net/submissionsviewall.php"
                "?text=TAG&mode=search&type=")
 
@@ -221,7 +223,8 @@ class InkbunnyFollowingExtractor(InkbunnyExtractor):
     subcategory = "following"
     pattern = (BASE_PATTERN + r"/(?:"
                r"watchlist_process\.php\?mode=watching&user_id=(\d+)|"
-               r"usersviewall\.php\?([^#]+&mode=watching&[^#]+))")
+               r"usersviewall\.php"
+               r"\?((?:[^#]+&)?mode=watching(?:&[^#]+)?))")
     example = ("https://inkbunny.net/watchlist_process.php"
                "?mode=watching&user_id=12345")
 
