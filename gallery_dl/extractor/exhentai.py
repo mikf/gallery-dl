@@ -124,6 +124,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
         self.key_show = None
         self.key_next = None
         self.count = 0
+        self.data = None
 
     def _init(self):
         source = self.config("source")
@@ -139,6 +140,13 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
 
         self.fallback_retries = self.config("fallback-retries", 2)
         self.original = self.config("original", True)
+
+    def finalize(self):
+        if self.data:
+            self.log.info("Use '%s/s/%s/%s-%s' as input URL "
+                          "to continue downloading from the current position",
+                          self.root, self.data["image_token"],
+                          self.gallery_id, self.data["num"])
 
     def favorite(self, slot="0"):
         url = self.root + "/gallerypopups.php"
@@ -175,31 +183,9 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
             self.gallery_token = part.split("/")[1]
             gpage = self._gallery_page()
 
-        data = self.get_metadata(gpage)
+        self.data = data = self.get_metadata(gpage)
         self.count = text.parse_int(data["filecount"])
         yield Message.Directory, data
-
-        def _validate_response(response):
-            # declared inside 'items()' to be able to access 'data'
-            if not response.history and response.headers.get(
-                    "content-type", "").startswith("text/html"):
-                page = response.text
-                self.log.warning("'%s'", page)
-
-                if " requires GP" in page:
-                    gp = self.config("gp")
-                    if gp == "stop":
-                        raise exception.StopExtraction("Not enough GP")
-                    elif gp == "wait":
-                        input("Press ENTER to continue.")
-                        return response.url
-
-                    self.log.info("Falling back to non-original downloads")
-                    self.original = False
-                    return data["_url_1280"]
-
-                self._report_limits(data)
-            return True
 
         images = itertools.chain(
             (self.image_from_page(ipage),), self.images_from_api())
@@ -208,7 +194,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
             if self.limits:
                 self._check_limits(data)
             if "/fullimg" in url:
-                data["_http_validate"] = _validate_response
+                data["_http_validate"] = self._validate_response
             else:
                 data["_http_validate"] = None
             yield Message.Url, url, data
@@ -216,6 +202,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
         fav = self.config("fav")
         if fav is not None:
             self.favorite(fav)
+        self.data = None
 
     def _items_hitomi(self):
         if self.config("metadata", False):
@@ -329,7 +316,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
         data["_nl"] = nl
         self.key_show = extr('var showkey="', '";')
 
-        self._check_509(iurl, data)
+        self._check_509(iurl)
         return url, text.nameext_from_url(url, data)
 
     def images_from_api(self):
@@ -379,33 +366,51 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
             data["_url_1280"] = imgurl
             data["_nl"] = nl
 
-            self._check_509(imgurl, data)
+            self._check_509(imgurl)
             yield url, text.nameext_from_url(url, data)
 
             request["imgkey"] = nextkey
 
-    def _report_limits(self, data):
+    def _validate_response(self, response):
+        if not response.history and response.headers.get(
+                "content-type", "").startswith("text/html"):
+            page = response.text
+            self.log.warning("'%s'", page)
+
+            if " requires GP" in page:
+                gp = self.config("gp")
+                if gp == "stop":
+                    raise exception.StopExtraction("Not enough GP")
+                elif gp == "wait":
+                    input("Press ENTER to continue.")
+                    return response.url
+
+                self.log.info("Falling back to non-original downloads")
+                self.original = False
+                return self.data["_url_1280"]
+
+            self._report_limits()
+        return True
+
+    def _report_limits(self):
         ExhentaiExtractor.LIMIT = True
-        raise exception.StopExtraction(
-            "Image limit reached! "
-            "Continue with '%s/s/%s/%s-%s' as URL after resetting it.",
-            self.root, data["image_token"], self.gallery_id, data["num"])
+        raise exception.StopExtraction("Image limit reached!")
 
     def _check_limits(self, data):
         if not self._remaining or data["num"] % 25 == 0:
             self._update_limits()
         self._remaining -= data["cost"]
         if self._remaining <= 0:
-            self._report_limits(data)
+            self._report_limits()
 
-    def _check_509(self, url, data):
+    def _check_509(self, url):
         # full 509.gif URLs
         # - https://exhentai.org/img/509.gif
         # - https://ehgt.org/g/509.gif
         if url.endswith(("hentai.org/img/509.gif",
                          "ehgt.org/g/509.gif")):
             self.log.debug(url)
-            self._report_limits(data)
+            self._report_limits()
 
     def _update_limits(self):
         url = "https://e-hentai.org/home.php"
