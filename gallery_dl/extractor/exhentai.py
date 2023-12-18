@@ -67,10 +67,11 @@ class ExhentaiExtractor(Extractor):
         if username:
             return self.cookies_update(self._login_impl(username, password))
 
-        self.log.info("no username given; using e-hentai.org")
-        self.root = "https://e-hentai.org"
-        self.cookies_domain = ".e-hentai.org"
-        self.cookies.set("nw", "1", domain=self.cookies_domain)
+        if self.version == "ex":
+            self.log.info("No username or cookies given; using e-hentai.org")
+            self.root = "https://e-hentai.org"
+            self.cookies_domain = ".e-hentai.org"
+            self.cookies.set("nw", "1", domain=self.cookies_domain)
         self.original = False
         self.limits = False
 
