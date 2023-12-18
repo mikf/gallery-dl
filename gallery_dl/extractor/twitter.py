@@ -1713,7 +1713,7 @@ class TwitterAPI():
         }
 
 
-@cache(maxage=360*86400, keyarg=1)
+@cache(maxage=365*86400, keyarg=1)
 def _login_impl(extr, username, password):
 
     import re

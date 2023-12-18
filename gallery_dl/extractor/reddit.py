@@ -531,7 +531,7 @@ class RedditAPI():
         return util.bdecode(sid, "0123456789abcdefghijklmnopqrstuvwxyz")
 
 
-@cache(maxage=100*365*24*3600, keyarg=0)
+@cache(maxage=36500*86400, keyarg=0)
 def _refresh_token_cache(token):
     if token and token[0] == "#":
         return None

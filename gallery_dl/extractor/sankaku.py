@@ -285,7 +285,7 @@ class SankakuAPI():
                 return
 
 
-@cache(maxage=365*24*3600, keyarg=1)
+@cache(maxage=365*86400, keyarg=1)
 def _authenticate_impl(extr, username, password):
     extr.log.info("Logging in as %s", username)
 

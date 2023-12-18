@@ -129,7 +129,7 @@ class KemonopartyExtractor(Extractor):
             self.cookies_update(self._login_impl(
                 (username, self.cookies_domain), password))
 
-    @cache(maxage=28*24*3600, keyarg=1)
+    @cache(maxage=28*86400, keyarg=1)
     def _login_impl(self, username, password):
         username = username[0]
         self.log.info("Logging in as %s", username)

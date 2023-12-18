@@ -977,7 +977,7 @@ class InstagramGraphqlAPI():
             variables["after"] = extr._update_cursor(info["end_cursor"])
 
 
-@cache(maxage=90*24*3600, keyarg=1)
+@cache(maxage=90*86400, keyarg=1)
 def _login_impl(extr, username, password):
     extr.log.error("Login with username & password is no longer supported. "
                    "Use browser cookies instead.")

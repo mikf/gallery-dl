@@ -376,7 +376,7 @@ class OAuthMastodon(OAuthBase):
             cache=mastodon._access_token_cache,
         )
 
-    @cache(maxage=10*365*24*3600, keyarg=1)
+    @cache(maxage=36500*86400, keyarg=1)
     def _register(self, instance):
         self.log.info("Registering application for '%s'", instance)
 
