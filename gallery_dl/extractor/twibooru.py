@@ -22,7 +22,7 @@ class TwibooruExtractor(BooruExtractor):
     root = "https://twibooru.org"
     filename_fmt = "{id}_{filename}.{extension}"
     archive_fmt = "{id}"
-    request_interval = 6.05
+    request_interval = (6.0, 6.1)
     page_start = 1
     per_page = 50
 
@@ -44,7 +44,7 @@ class TwibooruExtractor(BooruExtractor):
 class TwibooruPostExtractor(TwibooruExtractor):
     """Extractor for single twibooru posts"""
     subcategory = "post"
-    request_interval = 1.0
+    request_interval = (0.5, 1.5)
     pattern = BASE_PATTERN + r"/(\d+)"
     example = "https://twibooru.org/12345"
 

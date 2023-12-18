@@ -169,7 +169,7 @@ class FoolfuukaSearchExtractor(FoolfuukaExtractor):
     directory_fmt = ("{category}", "search", "{search}")
     pattern = BASE_PATTERN + r"/([^/?#]+)/search((?:/[^/?#]+/[^/?#]+)+)"
     example = "https://archived.moe/_/search/text/QUERY/"
-    request_interval = 1.0
+    request_interval = (0.5, 1.5)
 
     def __init__(self, match):
         FoolfuukaExtractor.__init__(self, match)

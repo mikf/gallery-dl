@@ -18,7 +18,7 @@ class PlurkExtractor(Extractor):
     """Base class for plurk extractors"""
     category = "plurk"
     root = "https://www.plurk.com"
-    request_interval = 1.0
+    request_interval = (0.5, 1.5)
 
     def items(self):
         urls = self._urls_ex if self.config("comments", False) else self._urls

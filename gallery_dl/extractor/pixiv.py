@@ -594,7 +594,7 @@ class PixivSeriesExtractor(PixivExtractor):
 class PixivNovelExtractor(PixivExtractor):
     """Extractor for pixiv novels"""
     subcategory = "novel"
-    request_interval = 1.0
+    request_interval = (0.5, 1.5)
     pattern = BASE_PATTERN + r"/n(?:ovel/show\.php\?id=|/)(\d+)"
     example = "https://www.pixiv.net/novel/show.php?id=12345"
 

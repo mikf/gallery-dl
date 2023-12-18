@@ -18,7 +18,7 @@ class PhilomenaExtractor(BooruExtractor):
     basecategory = "philomena"
     filename_fmt = "{filename}.{extension}"
     archive_fmt = "{id}"
-    request_interval = 1.0
+    request_interval = (0.5, 1.5)
     page_start = 1
     per_page = 50
 
