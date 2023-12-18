@@ -20,7 +20,7 @@ class DanbooruExtractor(BaseExtractor):
     page_limit = 1000
     page_start = None
     per_page = 200
-    request_interval = 1.0
+    request_interval = (0.5, 1.5)
 
     def _init(self):
         self.ugoira = self.config("ugoira", False)

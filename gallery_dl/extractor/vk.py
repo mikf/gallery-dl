@@ -21,7 +21,7 @@ class VkExtractor(Extractor):
     filename_fmt = "{id}.{extension}"
     archive_fmt = "{id}"
     root = "https://vk.com"
-    request_interval = 1.0
+    request_interval = (0.5, 1.5)
 
     def items(self):
         sizes = "wzyxrqpo"
