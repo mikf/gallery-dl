@@ -422,7 +422,7 @@ class PinterestAPI():
         if username:
             self.cookies.update(self._login_impl(username, password))
 
-    @cache(maxage=180*24*3600, keyarg=1)
+    @cache(maxage=180*86400, keyarg=1)
     def _login_impl(self, username, password):
         self.extractor.log.info("Logging in as %s", username)
 

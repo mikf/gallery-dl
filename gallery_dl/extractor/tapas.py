@@ -81,7 +81,7 @@ class TapasExtractor(Extractor):
         self.cookies.set(
             "adjustedBirthDate", "1981-02-03", domain=self.cookies_domain)
 
-    @cache(maxage=14*24*3600, keyarg=1)
+    @cache(maxage=14*86400, keyarg=1)
     def _login_impl(self, username, password):
         self.log.info("Logging in as %s", username)
 

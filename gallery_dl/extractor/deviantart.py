@@ -1579,7 +1579,7 @@ class DeviantartEclipseAPI():
         return token
 
 
-@cache(maxage=100*365*86400, keyarg=0)
+@cache(maxage=36500*86400, keyarg=0)
 def _refresh_token_cache(token):
     if token and token[0] == "#":
         return None

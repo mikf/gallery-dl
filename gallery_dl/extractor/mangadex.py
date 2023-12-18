@@ -266,6 +266,6 @@ class MangadexAPI():
                 return
 
 
-@cache(maxage=28*24*3600, keyarg=0)
+@cache(maxage=28*86400, keyarg=0)
 def _refresh_token_cache(username):
     return None
