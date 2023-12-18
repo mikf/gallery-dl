@@ -124,15 +124,15 @@ class NijieExtractor(AsynchronousMixin, BaseExtractor):
             return
 
         username, password = self._get_auth_info()
-        self.cookies_update(self._login_impl(username, password))
+        if username:
+            return self.cookies_update(self._login_impl(username, password))
+
+        raise exception.AuthenticationError("Username and password required")
 
     @cache(maxage=90*86400, keyarg=1)
     def _login_impl(self, username, password):
-        if not username or not password:
-            raise exception.AuthenticationError(
-                "Username and password required")
-
         self.log.info("Logging in as %s", username)
+
         url = "{}/login_int.php".format(self.root)
         data = {"email": username, "password": password, "save": "on"}
 
