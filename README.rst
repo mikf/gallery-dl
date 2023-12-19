@@ -142,9 +142,23 @@ Using the Dockerfile in the repository:
     cd gallery-dl/
     docker build -t gallery-dl:latest .
 
+Pulling image from `Docker Hub <https://hub.docker.com/r/mikf123/gallery-dl>`__:
+
+.. code:: bash
+
+    docker pull mikf123/gallery-dl
+    docker tag mikf123/gallery-dl gallery-dl
+
+Pulling image from `GitHub Container Registry <https://github.com/mikf/gallery-dl/pkgs/container/gallery-dl>`__:
+
+.. code:: bash
+
+    docker pull ghcr.io/mikf/gallery-dl
+    docker tag ghcr.io/mikf/gallery-dl gallery-dl
+
 To run the container you will probably want to attach some directories on the host so that the config file and downloads can persist across runs.
 
-Make sure to either download the example config file reference in the repo and place it in the mounted volume location or touch an empty file there.  
+Make sure to either download the example config file reference in the repo and place it in the mounted volume location or touch an empty file there.
 
 If you gave the container a different tag or are using podman then make sure you adjust.  Run ``docker image ls`` to check the name if you are not sure.
 
