@@ -45,7 +45,6 @@ class TwitterExtractor(Extractor):
         self.cards = self.config("cards", False)
         self.ads = self.config("ads", False)
         self.cards_blacklist = self.config("cards-blacklist")
-        self.syndication = self.config("syndication")
 
         if not self.config("transform", True):
             self._transform_user = util.identity
@@ -367,9 +366,6 @@ class TwitterExtractor(Extractor):
 
         if "legacy" in user:
             user = user["legacy"]
-        elif "statuses_count" not in user and self.syndication == "extended":
-            # try to fetch extended user data
-            user = self.api.user_by_screen_name(user["screen_name"])["legacy"]
 
         uget = user.get
         if uget("withheld_scope"):
@@ -865,7 +861,6 @@ class TwitterAPI():
 
         self.root = "https://twitter.com/i/api"
         self._nsfw_warning = True
-        self._syndication = self.extractor.syndication
         self._json_dumps = json.JSONEncoder(separators=(",", ":")).encode
 
         cookies = extractor.cookies
@@ -1645,66 +1640,11 @@ class TwitterAPI():
         tweet_id = entry["entryId"].rpartition("-")[2]
 
         if text.startswith("Age-restricted"):
-            if self._syndication:
-                return self._syndication_tweet(tweet_id)
-            elif self._nsfw_warning:
+            if self._nsfw_warning:
                 self._nsfw_warning = False
                 self.extractor.log.warning('"%s"', text)
 
         self.extractor.log.debug("Skipping %s (\"%s\")", tweet_id, text)
-
-    def _syndication_tweet(self, tweet_id):
-        base_url = "https://cdn.syndication.twimg.com/tweet-result?id="
-        tweet = self.extractor.request(base_url + tweet_id).json()
-
-        tweet["user"]["description"] = ""
-        tweet["user"]["entities"] = {"description": {}}
-        tweet["user_id_str"] = tweet["user"]["id_str"]
-
-        if tweet["id_str"] != tweet_id:
-            tweet["retweeted_status_id_str"] = tweet["id_str"]
-            tweet["id_str"] = retweet_id = tweet_id
-        else:
-            retweet_id = None
-
-        # assume 'conversation_id' is the same as 'id' when the tweet
-        # is not a reply
-        if "conversation_id_str" not in tweet and \
-                "in_reply_to_status_id_str" not in tweet:
-            tweet["conversation_id_str"] = tweet["id_str"]
-
-        if int(tweet_id) < 300000000000000:
-            tweet["created_at"] = text.parse_datetime(
-                tweet["created_at"], "%Y-%m-%dT%H:%M:%S.%fZ").strftime(
-                "%a %b %d %H:%M:%S +0000 %Y")
-
-        if "video" in tweet:
-            video = tweet["video"]
-            video["variants"] = (max(
-                (v for v in video["variants"] if v["type"] == "video/mp4"),
-                key=lambda v: text.parse_int(
-                    v["src"].split("/")[-2].partition("x")[0])
-            ),)
-            video["variants"][0]["url"] = video["variants"][0]["src"]
-            tweet["extended_entities"] = {"media": [{
-                "video_info"   : video,
-                "original_info": {"width" : 0, "height": 0},
-            }]}
-        elif "photos" in tweet:
-            for p in tweet["photos"]:
-                p["media_url_https"] = p["url"]
-                p["original_info"] = {
-                    "width" : p["width"],
-                    "height": p["height"],
-                }
-            tweet["extended_entities"] = {"media": tweet["photos"]}
-
-        return {
-            "rest_id": tweet["id_str"],
-            "legacy" : tweet,
-            "core"   : {"user_results": {"result": tweet["user"]}},
-            "_retweet_id_str": retweet_id,
-        }
 
 
 @cache(maxage=365*86400, keyarg=1)
