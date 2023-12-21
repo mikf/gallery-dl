@@ -680,6 +680,12 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
+    <td>Poringa</td>
+    <td>http://www.poringa.net/</td>
+    <td>Posts Images, Search Results, User Profiles</td>
+    <td></td>
+</tr>
+<tr>
     <td>Porn Image</td>
     <td>https://porn-images-xxx.com/</td>
     <td>Galleries</td>
