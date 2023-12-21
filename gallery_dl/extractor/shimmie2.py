@@ -35,6 +35,8 @@ class Shimmie2Extractor(BaseExtractor):
 
         if self.category == "giantessbooru":
             self.posts = self._posts_giantessbooru
+        elif self.category == "rule34hentai":
+            self.posts = self._posts_rule34hentai
 
     def items(self):
         data = self.metadata()
@@ -84,6 +86,10 @@ INSTANCES = {
         "root": "https://booru.cavemanon.xyz",
         "pattern": r"booru\.cavemanon\.xyz",
         "file_url": "{0}/index.php?q=image/{2}.{4}",
+    },
+    "rule34hentai": {
+        "root": "https://rule34hentai.net",
+        "pattern": r"rule34hentai\.net",
     },
 }
 
@@ -187,6 +193,56 @@ class Shimmie2TagExtractor(Shimmie2Extractor):
             if not extr('/{}">{}<'.format(pnum, pnum), ">"):
                 return
 
+    def _posts_rule34hentai(self):
+        pnum = text.parse_int(self.page, 1)
+        file_url_fmt = self.file_url_fmt.format
+
+        init = True
+        mime = ""
+
+        while True:
+            url = "{}/post/list/{}/{}".format(self.root, self.tags, pnum)
+            page = self.request(url).text
+            extr = text.extract_from(page)
+
+            if init:
+                init = False
+                has_mime = ("data-mime=\"" in page)
+                has_pid = ("data-post-id=\"" in page)
+
+            while True:
+                if has_mime:
+                    mime = extr("data-mime=\"", "\"")
+                if has_pid:
+                    pid = extr("data-post-id=\"", "\"")
+                else:
+                    pid = extr("href='/post/view/", "?")
+
+                if not pid:
+                    break
+
+                tags, dimensions, size, ext = extr(
+                    "title=\"", "\"").split(" // ")
+                width, _, height = dimensions.partition("x")
+                md5 = extr("/_thumbs/", "/")
+
+                yield {
+                    "file_url": file_url_fmt(
+                        self.root, md5, pid, text.quote(tags),
+                        mime.rpartition("/")[2] if mime else "jpg"),
+                    "id": pid,
+                    "md5": md5,
+                    "tags": tags,
+                    "width": width,
+                    "height": height,
+                    "size": text.parse_bytes(size[:-1]),
+                }
+
+            pnum += 1
+            if not extr(">Next<", ">"):
+                if not extr("/{}'>{}<".format(pnum, pnum), ">"):
+                    return
+
 
 class Shimmie2PostExtractor(Shimmie2Extractor):
     """Extractor for single shimmie2 posts"""
@@ -234,3 +290,25 @@ class Shimmie2PostExtractor(Shimmie2Extractor):
             "height"  : 0,
             "size"    : 0,
         },)
+
+    def _posts_rule34hentai(self):
+        url = "{}/post/view/{}".format(self.root, self.post_id)
+        extr = text.extract_from(self.request(url).text)
+
+        post = {
+            "id"      : self.post_id,
+            "tags"    : extr(": ", "<").partition(" - ")[0].rstrip(")"),
+            "md5"     : extr("/_thumbs/", "/"),
+            "file_url": self.root + (
+                extr('id="main_image" src="', '"') or
+                extr('<source src="', '"')).lstrip("."),
+            "width"   : extr("data-width=", " ").strip("\"'"),
+            "height"  : extr("data-height=", ">").partition(
+                " ")[0].strip("\"'"),
+            "size"    : 0,
+        }
+
+        if not post["md5"]:
+            post["md5"] = text.extr(post["file_url"], "/_images/", "/")
+
+        return (post,)
