@@ -72,6 +72,25 @@ class DanbooruExtractor(BaseExtractor):
             post["date"] = text.parse_datetime(
                 post["created_at"], "%Y-%m-%dT%H:%M:%S.%f%z")
 
+            post["tags"] = (
+                post["tag_string"].split(" ")
+                if post["tag_string"] else ())
+            post["tags_artist"] = (
+                post["tag_string_artist"].split(" ")
+                if post["tag_string_artist"] else ())
+            post["tags_character"] = (
+                post["tag_string_character"].split(" ")
+                if post["tag_string_character"] else ())
+            post["tags_copyright"] = (
+                post["tag_string_copyright"].split(" ")
+                if post["tag_string_copyright"] else ())
+            post["tags_general"] = (
+                post["tag_string_general"].split(" ")
+                if post["tag_string_general"] else ())
+            post["tags_meta"] = (
+                post["tag_string_meta"].split(" ")
+                if post["tag_string_meta"] else ())
+
             if post["extension"] == "zip":
                 if self.ugoira:
                     post["frames"] = self._ugoira_frames(post)
