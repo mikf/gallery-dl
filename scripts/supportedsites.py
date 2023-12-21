@@ -106,6 +106,7 @@ CATEGORY_MAP = {
     "redgifs"        : "RedGIFs",
     "rozenarcana"    : "Rozen Arcana",
     "rule34"         : "Rule 34",
+    "rule34hentai"   : "Rule34Hentai",
     "rule34us"       : "Rule 34",
     "sankaku"        : "Sankaku Channel",
     "sankakucomplex" : "Sankaku Complex",
