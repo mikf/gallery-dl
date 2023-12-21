@@ -35,9 +35,8 @@ class Shimmie2Extractor(BaseExtractor):
 
         if self.category == "giantessbooru":
             self.posts = self._posts_giantessbooru
-
-        if self.category == "rule34hentai":
-            self.posts = self._posts_giantessbooru
+        elif self.category == "rule34hentai":
+            self.posts = self._posts_rule34hentai
 
     def items(self):
         data = self.metadata()
@@ -301,8 +300,8 @@ class Shimmie2PostExtractor(Shimmie2Extractor):
             "tags"    : extr(": ", "<").partition(" - ")[0].rstrip(")"),
             "md5"     : extr("/_thumbs/", "/"),
             "file_url": self.root + (
-                extr("id='main_image' src=\"", "\"") or
-                extr("<source src=\"", "\"")).lstrip("."),
+                extr('id="main_image" src="', '"') or
+                extr('<source src="', '"')).lstrip("."),
             "width"   : extr("data-width=", " ").strip("\"'"),
             "height"  : extr("data-height=", ">").partition(
                 " ")[0].strip("\"'"),
