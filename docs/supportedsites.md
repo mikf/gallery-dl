@@ -1371,6 +1371,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Posts, Tag Searches</td>
     <td></td>
 </tr>
+<tr>
+    <td>Rule34Hentai</td>
+    <td>https://rule34hentai.net/</td>
+    <td>Posts, Tag Searches</td>
+    <td></td>
+</tr>
 
 <tr>
     <td colspan="4"><strong>szurubooru Instances</strong></td>
