@@ -1373,6 +1373,17 @@ Description
     It is possible to use ``"all"`` instead of listing all values separately.
 
 
+extractor.deviantart.intermediary
+---------------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    For older non-downloadable images,
+    download a higher-quality ``/intermediary/`` version.
+
+
 extractor.deviantart.journals
 -----------------------------
 Type

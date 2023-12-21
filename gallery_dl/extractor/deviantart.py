@@ -48,6 +48,7 @@ class DeviantartExtractor(Extractor):
         self.quality = self.config("quality", "100")
         self.original = self.config("original", True)
         self.comments = self.config("comments", False)
+        self.intermediary = self.config("intermediary", True)
 
         self.api = DeviantartOAuthAPI(self)
         self.group = False
@@ -136,7 +137,7 @@ class DeviantartExtractor(Extractor):
                 elif self.jwt:
                     self._update_token(deviation, content)
                 elif content["src"].startswith("https://images-wixmp-"):
-                    if deviation["index"] <= 790677560:
+                    if self.intermediary and deviation["index"] <= 790677560:
                         # https://github.com/r888888888/danbooru/issues/4069
                         intermediary, count = re.subn(
                             r"(/f/[^/]+/[^/]+)/v\d+/.*",
