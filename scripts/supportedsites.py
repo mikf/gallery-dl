@@ -234,6 +234,9 @@ SUBCATEGORY_MAP = {
         "sketch": "Sketch",
         "work": "individual Images",
     },
+    "poringa": {
+        "post": "Posts Images",
+    },
     "pornhub": {
         "gifs": "",
     },
