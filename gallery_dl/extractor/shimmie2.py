@@ -41,8 +41,9 @@ class Shimmie2Extractor(BaseExtractor):
 
         for post in self.posts():
 
-            for key in ("id", "width", "height"):
-                post[key] = text.parse_int(post[key])
+            post["id"] = text.parse_int(post["id"])
+            post["width"] = text.parse_int(post["width"])
+            post["height"] = text.parse_int(post["height"])
             post["tags"] = text.unquote(post["tags"])
             post.update(data)
 
@@ -147,8 +148,11 @@ class Shimmie2TagExtractor(Shimmie2Extractor):
                 if not pid:
                     break
 
-                tags, dimensions, size = extr(
-                    "title="+quote, quote).split(" // ")[:3]
+                data = extr("title="+quote, quote).split(" // ")
+                tags = data[0]
+                dimensions = data[1]
+                size = data[2]
+
                 width, _, height = dimensions.partition("x")
                 md5 = extr("/_thumbs/", "/")
 
