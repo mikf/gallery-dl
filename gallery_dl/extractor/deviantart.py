@@ -143,6 +143,7 @@ class DeviantartExtractor(Extractor):
                             r"(/f/[^/]+/[^/]+)/v\d+/.*",
                             r"/intermediary\1", content["src"], 1)
                         if count:
+                            deviation["is_original"] = False
                             deviation["_fallback"] = (content["src"],)
                             content["src"] = intermediary
                     if self.quality:
