@@ -1317,6 +1317,16 @@ Consider all listed sites to potentially be NSFW.
 </tr>
 
 <tr>
+    <td colspan="4"><strong>Postmill Instances</strong></td>
+</tr>
+<tr>
+    <td>Raddle</td>
+    <td>https://raddle.me/</td>
+    <td>Forums, Home Feed, Individual Posts, Search Results, Tag Searches, User Profiles</td>
+    <td></td>
+</tr>
+
+<tr>
     <td colspan="4"><strong>Reactor Instances</strong></td>
 </tr>
 <tr>

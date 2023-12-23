@@ -2745,6 +2745,16 @@ Description
     Also search Plurk comments for URLs.
 
 
+extractor.[postmill].save-link-post-body
+----------------------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Whether or not to save the body for link/image posts.
+
+
 extractor.reactor.gif
 ---------------------
 Type
