@@ -2735,7 +2735,7 @@ Description
 
 
 extractor.[postmill].save-link-post-body
-------------------------
+----------------------------------------
 Type
     ``bool``
 Default
