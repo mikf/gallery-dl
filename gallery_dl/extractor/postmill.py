@@ -7,7 +7,6 @@
 """Extractors for Postmill instances"""
 
 import re
-import urllib.parse
 from .common import BaseExtractor, Message
 from .. import text, exception
 
@@ -28,8 +27,8 @@ class PostmillExtractor(BaseExtractor):
 
     def items(self):
         for post_url in self.post_urls():
-            response = self.request(post_url)
-            extr = text.extract_from(response.text)
+            page = self.request(post_url).text
+            extr = text.extract_from(page)
 
             title = text.unescape(extr(
                 '<meta property="og:title" content="', '">'))
@@ -52,7 +51,7 @@ class PostmillExtractor(BaseExtractor):
             id = int(match.group(2))
 
             is_text_post = url.startswith("/")
-            is_image_post = self._search_image_tag(response.text) is not None
+            is_image_post = self._search_image_tag(page) is not None
             data = {
                 "title": title,
                 "date": date,
@@ -60,7 +59,7 @@ class PostmillExtractor(BaseExtractor):
                 "forum": forum,
                 "id": id,
                 "flair": [text.unescape(i) for i in text.extract_iter(
-                    response.text, '<span class="flair__label">', '</span>')],
+                    page, '<span class="flair__label">', '</span>')],
                 "instance": self.instance,
             }
 
@@ -90,32 +89,32 @@ class PostmillSubmissionsExtractor(PostmillExtractor):
 
     def __init__(self, match):
         PostmillExtractor.__init__(self, match)
-        self.base = match.group(3)
-        self.sorting_path = match.group(4) or ""
+        groups = match.groups()
+        self.base = groups[-3]
+        self.sorting_path = groups[-2] or ""
         self.query = {key: value for key, value in text.parse_query(
-            match.group(5) or "").items() if self.acceptable_query(key)}
+            groups[-1]).items() if self.acceptable_query(key)}
 
     def items(self):
         url = self.root + self.base + self.sorting_path
-        if self.query:
-            url += "?" + urllib.parse.urlencode(self.query)
 
         while url:
-            response = self.request(url)
+            response = self.request(url, params=self.query)
             if response.history:
                 redirect_url = response.url
                 if redirect_url == self.root + "/login":
                     raise exception.StopExtraction(
                         "HTTP redirect to login page (%s)", redirect_url)
+            page = response.text
 
-            for nav in text.extract_iter(response.text,
+            for nav in text.extract_iter(page,
                                          '<nav class="submission__nav">',
                                          '</nav>'):
                 post_url = text.unescape(text.extr(nav, '<a href="', '"'))
                 yield Message.Queue, text.urljoin(url, post_url), \
                     {"_extractor": PostmillPostExtractor}
 
-            url = text.unescape(text.extr(response.text,
+            url = text.unescape(text.extr(page,
                                           '<link rel="next" href="', '">'))
 
     def acceptable_query(self, key):
@@ -131,14 +130,15 @@ BASE_PATTERN = PostmillExtractor.update({
                     r"\.onion)"),
     }
 })
-SORTING_RE = r"(/(?:hot|new|active|top|controversial|most_commented))?"
-QUERY_RE = r"(?:\?([^#]+))?"
+QUERY_RE = r"(?:\?([^#]+))?$"
+SORTING_RE = r"(/(?:hot|new|active|top|controversial|most_commented))?" + \
+    QUERY_RE
 
 
 class PostmillPostExtractor(PostmillExtractor):
     """Extractor for a single submission URL"""
     subcategory = "post"
-    pattern = BASE_PATTERN + r"/f/([\w\d_]+)/(\d+)(?:/.+)?$"
+    pattern = BASE_PATTERN + r"/f/(\w+)/(\d+)"
     example = "https://raddle.me/f/FORUM/123/TITLE"
 
     def __init__(self, match):
@@ -170,29 +170,28 @@ class PostmillShortURLExtractor(PostmillExtractor):
 class PostmillHomeExtractor(PostmillSubmissionsExtractor):
     """Extractor for the home page"""
     subcategory = "home"
-    pattern = BASE_PATTERN + r"(/(?:featured|subscribed|all)?)" + SORTING_RE \
-        + QUERY_RE + "$"
+    pattern = BASE_PATTERN + r"(/(?:featured|subscribed|all)?)" + SORTING_RE
     example = "https://raddle.me/"
 
 
 class PostmillForumExtractor(PostmillSubmissionsExtractor):
     """Extractor for submissions on a forum"""
     subcategory = "forum"
-    pattern = BASE_PATTERN + r"(/f/[\w\d_]+)" + SORTING_RE + QUERY_RE + "$"
+    pattern = BASE_PATTERN + r"(/f/\w+)" + SORTING_RE
     example = "https://raddle.me/f/FORUM"
 
 
 class PostmillUserSubmissionsExtractor(PostmillSubmissionsExtractor):
     """Extractor for submissions made by a user"""
     subcategory = "usersubmissions"
-    pattern = BASE_PATTERN + r"(/user/[\w\d_]+/submissions)()" + QUERY_RE + "$"
+    pattern = BASE_PATTERN + r"(/user/\w+/submissions)()" + QUERY_RE
     example = "https://raddle.me/user/USER/submissions"
 
 
 class PostmillTagExtractor(PostmillSubmissionsExtractor):
     """Extractor for submissions on a forum with a specific tag"""
     subcategory = "tag"
-    pattern = BASE_PATTERN + r"(/tag/[\w\d_]+)" + SORTING_RE + QUERY_RE + "$"
+    pattern = BASE_PATTERN + r"(/tag/\w+)" + SORTING_RE
     example = "https://raddle.me/tag/TAG"
 
 
