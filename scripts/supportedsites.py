@@ -101,6 +101,7 @@ CATEGORY_MAP = {
     "pornimagesxxx"  : "Porn Image",
     "pornpics"       : "PornPics.com",
     "pornreactor"    : "PornReactor",
+    "postmill"       : "Postmill",
     "readcomiconline": "Read Comic Online",
     "rbt"            : "RebeccaBlackTech",
     "redgifs"        : "RedGIFs",
@@ -235,6 +236,12 @@ SUBCATEGORY_MAP = {
     },
     "pornhub": {
         "gifs": "",
+    },
+    "raddle": {
+        "home"           : "Home Feed",
+        "usersubmissions": "User Profiles",
+        "post"           : "Individual Posts",
+        "shorturl"       : "",
     },
     "reddit": {
         "home": "Home Feed",
