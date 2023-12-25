@@ -9,10 +9,10 @@ from gallery_dl.extractor import lynxchan
 
 __tests__ = (
 {
-    "#url"     : "https://bbw-chan.nl/bbwdraw/res/499.html",
+    "#url"     : "https://bbw-chan.link/bbwdraw/res/499.html",
     "#category": ("lynxchan", "bbw-chan", "thread"),
     "#class"   : lynxchan.LynxchanThreadExtractor,
-    "#pattern" : r"https://bbw-chan\.nl/\.media/[0-9a-f]{64}(\.\w+)?$",
+    "#pattern" : r"https://bbw-chan\.link/\.media/[0-9a-f]{64}(\.\w+)?$",
     "#count"   : ">= 352",
 },
 
@@ -23,7 +23,7 @@ __tests__ = (
 },
 
 {
-    "#url"     : "https://bbw-chan.nl/bbwdraw/",
+    "#url"     : "https://bbw-chan.link/bbwdraw/",
     "#category": ("lynxchan", "bbw-chan", "board"),
     "#class"   : lynxchan.LynxchanBoardExtractor,
     "#pattern" : lynxchan.LynxchanThreadExtractor.pattern,

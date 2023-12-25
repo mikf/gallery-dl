@@ -18,8 +18,8 @@ class LynxchanExtractor(BaseExtractor):
 
 BASE_PATTERN = LynxchanExtractor.update({
     "bbw-chan": {
-        "root": "https://bbw-chan.nl",
-        "pattern": r"bbw-chan\.nl",
+        "root": "https://bbw-chan.link",
+        "pattern": r"bbw-chan\.(?:link|nl)",
     },
     "kohlchan": {
         "root": "https://kohlchan.net",
@@ -40,7 +40,7 @@ class LynxchanThreadExtractor(LynxchanExtractor):
     filename_fmt = "{postId}{num:?-//} {filename}.{extension}"
     archive_fmt = "{boardUri}_{postId}_{num}"
     pattern = BASE_PATTERN + r"/([^/?#]+)/res/(\d+)"
-    example = "https://bbw-chan.nl/a/res/12345.html"
+    example = "https://endchan.org/a/res/12345.html"
 
     def __init__(self, match):
         LynxchanExtractor.__init__(self, match)
@@ -71,7 +71,7 @@ class LynxchanBoardExtractor(LynxchanExtractor):
     """Extractor for LynxChan boards"""
     subcategory = "board"
     pattern = BASE_PATTERN + r"/([^/?#]+)(?:/index|/catalog|/\d+|/?$)"
-    example = "https://bbw-chan.nl/a/"
+    example = "https://endchan.org/a/"
 
     def __init__(self, match):
         LynxchanExtractor.__init__(self, match)
