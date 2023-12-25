@@ -1193,7 +1193,7 @@ Consider all listed sites to potentially be NSFW.
 </tr>
 <tr>
     <td>Bbw-chan</td>
-    <td>https://bbw-chan.nl/</td>
+    <td>https://bbw-chan.link/</td>
     <td>Boards, Threads</td>
     <td></td>
 </tr>
