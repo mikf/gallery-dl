@@ -12,8 +12,21 @@ __tests__ = (
     "#url"     : "https://rule34.paheal.net/post/list/Ayane_Suzuki/1",
     "#category": ("shimmie2", "paheal", "tag"),
     "#class"   : paheal.PahealTagExtractor,
-    "#pattern" : r"https://[^.]+\.paheal\.net/_images/\w+/\d+%20-%20",
-    "#count"   : ">= 15",
+    "#pattern" : "https://[^.]+\.paheal\.net/_images/\w+/\d+%20-%20|https://r34i\.paheal-cdn\.net/[0-9a-f]{2}/[0-9a-f]{2}/[0-9a-f]{32}$",
+    "#count"   : range(70, 200),
+
+    "date"     : "type:datetime",
+    "extension": r"re:jpg|png",
+    "filename" : r"re:\d+ - \w+",
+    "duration" : float,
+    "height"   : int,
+    "id"       : int,
+    "md5"      : r"re:[0-9a-f]{32}",
+    "search_tags": "Ayane_Suzuki",
+    "size"     : int,
+    "tags"     : str,
+    "width"    : int,
+
 },
 
 {
@@ -42,12 +55,12 @@ __tests__ = (
     "#url"     : "https://rule34.paheal.net/post/view/481609",
     "#category": ("shimmie2", "paheal", "post"),
     "#class"   : paheal.PahealPostExtractor,
-    "#pattern"     : r"https://tulip\.paheal\.net/_images/bbdc1c33410c2cdce7556c7990be26b7/481609%20-.+\.jpg",
+    "#urls"        : "https://r34i.paheal-cdn.net/bb/dc/bbdc1c33410c2cdce7556c7990be26b7",
     "#sha1_content": "7b924bcf150b352ac75c9d281d061e174c851a11",
 
     "date"     : "dt:2010-06-17 15:40:23",
     "extension": "jpg",
-    "file_url" : r"re:https://tulip.paheal.net/_images/bbdc1c33410c",
+    "file_url" : "https://r34i.paheal-cdn.net/bb/dc/bbdc1c33410c2cdce7556c7990be26b7",
     "filename" : "481609 - Ayumu_Kasuga Azumanga_Daioh inanimate Vuvuzela",
     "height"   : 660,
     "id"       : 481609,
@@ -79,7 +92,7 @@ __tests__ = (
     "#comment" : "video",
     "#category": ("shimmie2", "paheal", "post"),
     "#class"   : paheal.PahealPostExtractor,
-    "#pattern" : r"https://[\w]+\.paheal\.net/_images/7629fc0ff77e32637dde5bf4f992b2cb/3864982%20-%20animated%20Metal_Gear%20Metal_Gear_Solid_V%20Quiet%20Vg_erotica%20webm\.webm",
+    "#urls"    : "https://r34i.paheal-cdn.net/76/29/7629fc0ff77e32637dde5bf4f992b2cb",
 
     "date"     : "dt:2020-09-06 01:59:03",
     "duration" : 30.0,
