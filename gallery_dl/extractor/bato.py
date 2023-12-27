@@ -10,7 +10,8 @@ from .common import ChapterExtractor, MangaExtractor
 from .. import text, exception
 import re
 
-BASE_PATTERN = r"(?:https?://)?(?:bato\.to|dto\.to|batotoo\.com|wto\.to)"
+BASE_PATTERN = r"(?:https?://)?" \
+    r"(?:bato\.to|dto\.to|batotoo\.com|wto\.to|mangatoto\.com)"
 MANGA_PATTERN = r"/title/\d+(?:-[0-9a-z]+)*/?"
 CHAPTER_PATTERN = r"/\d+(?:-vol_\d+)?-ch_\d+\.?\d*/?"
 
