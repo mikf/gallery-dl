@@ -49,8 +49,8 @@ class BatoChapterExtractor(BatoBase, ChapterExtractor):
             r"Chapter *([\d\.]+)", info)
         manga, volume, chapter = match.groups() if match else ("", "", info)
         chapter, sep, minor = chapter.partition(".")
-        title_container = text.extr(page, f'<a href="{self.path}"', "</a>")
-        title = text.extr(title_container, "<!-- -->", "</span>")
+        title_section = text.extr(page, '<a href="' + self.path + '"', "</a>")
+        title = text.extr(title_section, "<!-- -->", "</span>")
 
         return {
             "manga"        : text.unescape(manga),
