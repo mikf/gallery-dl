@@ -38,7 +38,7 @@ class BatoChapterExtractor(BatoBase, ChapterExtractor):
         ChapterExtractor.__init__(self, match, self.root + self.path)
 
     def metadata(self, page):
-        info, _ = text.extract(
+        info = text.extr(
             page, "<title>", r" - Read Free Manga Online at Bato.To</title>"
         )
         info = info.encode('latin-1').decode('utf-8').replace("\n", "")
@@ -83,13 +83,13 @@ class BatoMangaExtractor(BatoBase, MangaExtractor):
 
     def chapters(self, page):
         data = {}
-        num_chapters, _ = text.extract(page, ">Chapters<", "</div>")
-        num_chapters, _ = text.extract(num_chapters, r"<!-- -->", r"<!-- -->")
+        num_chapters = text.extr(page, ">Chapters<", "</div>")
+        num_chapters = text.extr(num_chapters, r"<!-- -->", r"<!-- -->")
         num_chapters = text.parse_int(num_chapters)
         if num_chapters == 0:
             raise exception.NotFoundError("chapter")
 
-        manga, _ = text.extract(
+        manga = text.extr(
             page, "<title>", r" - Read Free Manga Online at Bato.To</title>"
         )
         manga = manga.encode('latin-1').decode('utf-8').replace("\n", "")
@@ -97,7 +97,7 @@ class BatoMangaExtractor(BatoBase, MangaExtractor):
 
         results = []
         for chapter_num in range(num_chapters):
-            chapter, _ = text.extract(
+            chapter = text.extr(
                 page, f'<div data-hk="0-0-{chapter_num}-0"', r"</time><!--/-->"
             )
             chapter += r"</time><!--/-->"  # so we can match the date
@@ -105,15 +105,15 @@ class BatoMangaExtractor(BatoBase, MangaExtractor):
 
             chapter_no = re.search(r"-ch_([\d\.]+)", url).group(1)
             chapter_major, sep, chapter_minor = chapter_no.partition(".")
-            title, _ = text.extract(
+            title = text.extr(
                 chapter, f'<span data-hk="0-0-{chapter_num}-1"', "</span>"
             )
-            title, _ = text.extract(title, r"<!--#-->", r"<!--/-->")
+            title = text.extr(title, r"<!--#-->", r"<!--/-->")
             if title is None or title == "" or title == "<!--/-->":
                 title, _ = text.extract(chapter, ">", "</a>", pos)
 
-            date, _ = text.extract(chapter, "<time", "</time>")
-            date, _ = text.extract(date, 'time="', '"')
+            date = text.extr(chapter, "<time", "</time>")
+            date = text.extr(date, 'time="', '"')
 
             data["date"] = date
             data["title"] = title
