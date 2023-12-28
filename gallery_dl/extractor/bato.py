@@ -97,32 +97,33 @@ class BatoMangaExtractor(BatoBase, MangaExtractor):
 
         results = []
         for chapter_num in range(num_chapters):
-            chapter = text.extr(
+            chapter_info = text.extr(
                 page,
                 '<div data-hk="0-0-{}-0"'.format(chapter_num),
                 r"</time><!--/-->"
             )
-            chapter += r"</time><!--/-->"  # so we can match the date
-            url, pos = text.extract(chapter, '<a href="', '"')
+            chapter_info += r"</time><!--/-->"  # so we can match the date
+            url, pos = text.extract(chapter_info, '<a href="', '"')
 
-            chapter_no = re.search(r"-ch_([\d\.]+)", url).group(1)
-            chapter_major, sep, chapter_minor = chapter_no.partition(".")
+            chapter = re.search(r"-ch_([\d\.]+)", url)
+            if chapter:
+                chapt_major, sep, chapt_minor = chapter.group(1).partition(".")
             title = text.extr(
-                chapter,
+                chapter_info,
                 '<span data-hk="0-0-{}-1"'.format(chapter_num),
                 "</span>"
             )
             title = text.extr(title, r"<!--#-->", r"<!--/-->")
             if title is None or title == "" or title == "<!--/-->":
-                title, _ = text.extract(chapter, ">", "</a>", pos)
+                title, _ = text.extract(chapter_info, ">", "</a>", pos)
 
-            date = text.extr(chapter, "<time", "</time>")
+            date = text.extr(chapter_info, "<time", "</time>")
             date = text.extr(date, 'time="', '"')
 
             data["date"] = date
             data["title"] = title
-            data["chapter"] = text.parse_int(chapter_major)
-            data["chapter_minor"] = sep + chapter_minor
+            data["chapter"] = text.parse_int(chapt_major)
+            data["chapter_minor"] = sep + chapt_minor
 
             if url.startswith("/"):
                 url = self.root + url
