@@ -526,12 +526,15 @@ class Extractor():
         if include == "all":
             include = extractors
         elif isinstance(include, str):
-            include = include.split(",")
+            include = include.replace(" ", "").split(",")
 
         result = [(Message.Version, 1)]
         for category in include:
-            if category in extractors:
+            try:
                 extr, url = extractors[category]
+            except KeyError:
+                self.log.warning("Invalid include '%s'", category)
+            else:
                 result.append((Message.Queue, url, {"_extractor": extr}))
         return iter(result)
 
