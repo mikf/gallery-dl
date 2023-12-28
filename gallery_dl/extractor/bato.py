@@ -98,7 +98,9 @@ class BatoMangaExtractor(BatoBase, MangaExtractor):
         results = []
         for chapter_num in range(num_chapters):
             chapter = text.extr(
-                page, f'<div data-hk="0-0-{chapter_num}-0"', r"</time><!--/-->"
+                page,
+                '<div data-hk="0-0-{}-0"'.format(chapter_num),
+                r"</time><!--/-->"
             )
             chapter += r"</time><!--/-->"  # so we can match the date
             url, pos = text.extract(chapter, '<a href="', '"')
@@ -106,7 +108,9 @@ class BatoMangaExtractor(BatoBase, MangaExtractor):
             chapter_no = re.search(r"-ch_([\d\.]+)", url).group(1)
             chapter_major, sep, chapter_minor = chapter_no.partition(".")
             title = text.extr(
-                chapter, f'<span data-hk="0-0-{chapter_num}-1"', "</span>"
+                chapter,
+                '<span data-hk="0-0-{}-1"'.format(chapter_num),
+                "</span>"
             )
             title = text.extr(title, r"<!--#-->", r"<!--/-->")
             if title is None or title == "" or title == "<!--/-->":
