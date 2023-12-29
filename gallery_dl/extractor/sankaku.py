@@ -13,6 +13,7 @@ from .common import Message
 from .. import text, util, exception
 from ..cache import cache
 import collections
+import re
 
 BASE_PATTERN = r"(?:https?://)?" \
     r"(?:(?:chan|beta|black|white)\.sankakucomplex\.com|sankaku\.app)" \
@@ -23,8 +24,9 @@ class SankakuExtractor(BooruExtractor):
     """Base class for sankaku channel extractors"""
     basecategory = "booru"
     category = "sankaku"
+    root = "https://sankaku.app"
     filename_fmt = "{category}_{id}_{md5}.{extension}"
-    cookiedomain = None
+    cookies_domain = None
     _warning = True
 
     TAG_TYPES = {
@@ -45,10 +47,15 @@ class SankakuExtractor(BooruExtractor):
 
     def _file_url(self, post):
         url = post["file_url"]
-        if not url and self._warning:
-            self.log.warning(
-                "Login required to download 'contentious_content' posts")
-            SankakuExtractor._warning = False
+        if not url:
+            if post["status"] != "active":
+                self.log.warning(
+                    "Unable to download post %s (%s)",
+                    post["id"], post["status"])
+            elif self._warning:
+                self.log.warning(
+                    "Login required to download 'contentious_content' posts")
+                SankakuExtractor._warning = False
         elif url[8] == "v":
             url = "https://s.sankakucomplex.com" + url[url.index("/", 8):]
         return url
@@ -80,33 +87,22 @@ class SankakuTagExtractor(SankakuExtractor):
     subcategory = "tag"
     directory_fmt = ("{category}", "{search_tags}")
     archive_fmt = "t_{search_tags}_{id}"
-    pattern = BASE_PATTERN + r"/?\?([^#]*)"
-    test = (
-        ("https://sankaku.app/?tags=bonocho", {
-            "count": 5,
-            "pattern": r"https://s\.sankakucomplex\.com/data/[^/]{2}/[^/]{2}"
-                       r"/[0-9a-f]{32}\.\w+\?e=\d+&(expires=\d+&)?m=[^&#]+",
-        }),
-        ("https://beta.sankakucomplex.com/?tags=bonocho"),
-        ("https://chan.sankakucomplex.com/?tags=bonocho"),
-        ("https://black.sankakucomplex.com/?tags=bonocho"),
-        ("https://white.sankakucomplex.com/?tags=bonocho"),
-        ("https://sankaku.app/ja?tags=order%3Apopularity"),
-        ("https://sankaku.app/no/?tags=order%3Apopularity"),
-        # error on five or more tags
-        ("https://chan.sankakucomplex.com/?tags=bonocho+a+b+c+d", {
-            "options": (("username", None),),
-            "exception": exception.StopExtraction,
-        }),
-        # match arbitrary query parameters
-        ("https://chan.sankakucomplex.com"
-         "/?tags=marie_rose&page=98&next=3874906&commit=Search"),
-    )
+    pattern = BASE_PATTERN + r"(?:/posts)?/?\?([^#]*)"
+    example = "https://sankaku.app/?tags=TAG"
 
     def __init__(self, match):
         SankakuExtractor.__init__(self, match)
         query = text.parse_query(match.group(1))
         self.tags = text.unquote(query.get("tags", "").replace("+", " "))
+
+        if "date:" in self.tags:
+            # rewrite 'date:' tags (#1790)
+            self.tags = re.sub(
+                r"date:(\d\d)[.-](\d\d)[.-](\d\d\d\d)",
+                r"date:\3.\2.\1", self.tags)
+            self.tags = re.sub(
+                r"date:(\d\d\d\d)[.-](\d\d)[.-](\d\d)",
+                r"date:\1.\2.\3", self.tags)
 
     def metadata(self):
         return {"search_tags": self.tags}
@@ -121,14 +117,8 @@ class SankakuPoolExtractor(SankakuExtractor):
     subcategory = "pool"
     directory_fmt = ("{category}", "pool", "{pool[id]} {pool[name_en]}")
     archive_fmt = "p_{pool}_{id}"
-    pattern = BASE_PATTERN + r"/(?:books|pool/show)/(\d+)"
-    test = (
-        ("https://sankaku.app/books/90", {
-            "count": 5,
-        }),
-        ("https://beta.sankakucomplex.com/books/90"),
-        ("https://chan.sankakucomplex.com/pool/show/90"),
-    )
+    pattern = BASE_PATTERN + r"/(?:books|pools?/show)/(\d+)"
+    example = "https://sankaku.app/books/12345"
 
     def __init__(self, match):
         SankakuExtractor.__init__(self, match)
@@ -153,40 +143,8 @@ class SankakuPostExtractor(SankakuExtractor):
     """Extractor for single posts from sankaku.app"""
     subcategory = "post"
     archive_fmt = "{id}"
-    pattern = BASE_PATTERN + r"/post/show/(\d+)"
-    test = (
-        ("https://sankaku.app/post/show/360451", {
-            "content": "5e255713cbf0a8e0801dc423563c34d896bb9229",
-            "options": (("tags", True),),
-            "keyword": {
-                "tags_artist"   : ["bonocho"],
-                "tags_studio"   : ["dc_comics"],
-                "tags_medium"   : list,
-                "tags_copyright": list,
-                "tags_character": list,
-                "tags_general"  : list,
-            },
-        }),
-        # 'contentious_content'
-        ("https://sankaku.app/post/show/21418978", {
-            "pattern": r"https://s\.sankakucomplex\.com"
-                       r"/data/13/3c/133cda3bfde249c504284493903fb985\.jpg",
-        }),
-        # empty tags (#1617)
-        ("https://sankaku.app/post/show/20758561", {
-            "options": (("tags", True),),
-            "count": 1,
-            "keyword": {
-                "tags": list,
-                "tags_general": ["key(mangaka)", "key(mangaka)"],
-            },
-        }),
-        ("https://chan.sankakucomplex.com/post/show/360451"),
-        ("https://chan.sankakucomplex.com/ja/post/show/360451"),
-        ("https://beta.sankakucomplex.com/post/show/360451"),
-        ("https://white.sankakucomplex.com/post/show/360451"),
-        ("https://black.sankakucomplex.com/post/show/360451"),
-    )
+    pattern = BASE_PATTERN + r"/posts?(?:/show)?/([0-9a-f]+)"
+    example = "https://sankaku.app/post/show/12345"
 
     def __init__(self, match):
         SankakuExtractor.__init__(self, match)
@@ -200,13 +158,7 @@ class SankakuBooksExtractor(SankakuExtractor):
     """Extractor for books by tag search on sankaku.app"""
     subcategory = "books"
     pattern = BASE_PATTERN + r"/books/?\?([^#]*)"
-    test = (
-        ("https://sankaku.app/books?tags=aiue_oka", {
-            "range": "1-20",
-            "count": 20,
-        }),
-        ("https://beta.sankakucomplex.com/books?tags=aiue_oka"),
-    )
+    example = "https://sankaku.app/books?tags=TAG"
 
     def __init__(self, match):
         SankakuExtractor.__init__(self, match)
@@ -227,9 +179,9 @@ class SankakuAPI():
     def __init__(self, extractor):
         self.extractor = extractor
         self.headers = {
-            "Accept" : "application/vnd.sankaku.api+json;v=2",
-            "Origin" : extractor.root,
-            "Referer": extractor.root + "/",
+            "Accept"  : "application/vnd.sankaku.api+json;v=2",
+            "Platform": "web-app",
+            "Origin"  : extractor.root,
         }
 
         self.username, self.password = self.extractor._get_auth_info()
@@ -248,7 +200,7 @@ class SankakuAPI():
             "lang" : "en",
             "page" : "1",
             "limit": "1",
-            "tags" : "id_range:" + post_id,
+            "tags" : ("md5:" if len(post_id) == 32 else "id_range:") + post_id,
         }
         return self._call("/posts", params)
 
@@ -333,7 +285,7 @@ class SankakuAPI():
                 return
 
 
-@cache(maxage=365*24*3600, keyarg=1)
+@cache(maxage=365*86400, keyarg=1)
 def _authenticate_impl(extr, username, password):
     extr.log.info("Logging in as %s", username)
 

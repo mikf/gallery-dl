@@ -21,43 +21,16 @@ class HentaicosplaysGalleryExtractor(GalleryExtractor):
     pattern = r"((?:https?://)?(?:\w{2}\.)?" \
               r"(hentai-cosplays|hentai-img|porn-images-xxx)\.com)/" \
               r"(?:image|story)/([\w-]+)"
-    test = (
-        ("https://hentai-cosplays.com/image/---devilism--tide-kurihara-/", {
-            "pattern": r"https://static\d?.hentai-cosplays.com/upload/"
-                       r"\d+/\d+/\d+/\d+.jpg$",
-            "keyword": {
-                "count": 18,
-                "site": "hentai-cosplays",
-                "slug": "---devilism--tide-kurihara-",
-                "title": "艦 こ れ-devilism の tide Kurihara 憂",
-            },
-        }),
-        ("https://fr.porn-images-xxx.com/image/enako-enako-24/", {
-            "pattern": r"https://static\d?.porn-images-xxx.com/upload/"
-                       r"\d+/\d+/\d+/\d+.jpg$",
-            "keyword": {
-                "count": 11,
-                "site": "porn-images-xxx",
-                "title": str,
-            },
-        }),
-        ("https://ja.hentai-img.com/image/hollow-cora-502/", {
-            "pattern": r"https://static\d?.hentai-img.com/upload/"
-                       r"\d+/\d+/\d+/\d+.jpg$",
-            "keyword": {
-                "count": 2,
-                "site": "hentai-img",
-                "title": str,
-            },
-        }),
-    )
+    example = "https://hentai-cosplays.com/image/TITLE/"
 
     def __init__(self, match):
         root, self.site, self.slug = match.groups()
         self.root = text.ensure_http_scheme(root)
         url = "{}/story/{}/".format(self.root, self.slug)
         GalleryExtractor.__init__(self, match, url)
-        self.session.headers["Referer"] = url
+
+    def _init(self):
+        self.session.headers["Referer"] = self.gallery_url
 
     def metadata(self, page):
         title = text.extr(page, "<title>", "</title>")
@@ -69,7 +42,7 @@ class HentaicosplaysGalleryExtractor(GalleryExtractor):
 
     def images(self, page):
         return [
-            (url, None)
+            (url.replace("http:", "https:", 1), None)
             for url in text.extract_iter(
                 page, '<amp-img class="auto-style" src="', '"')
         ]

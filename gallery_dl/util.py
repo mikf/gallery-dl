@@ -14,6 +14,7 @@ import sys
 import json
 import time
 import random
+import getpass
 import hashlib
 import sqlite3
 import binascii
@@ -52,6 +53,13 @@ def advance(iterable, num):
     iterator = iter(iterable)
     next(itertools.islice(iterator, num, num), None)
     return iterator
+
+
+def repeat(times):
+    """Return an iterator that returns None"""
+    if times < 0:
+        return itertools.repeat(None)
+    return itertools.repeat(None, times)
 
 
 def unique(iterable):
@@ -223,8 +231,14 @@ def datetime_to_timestamp_string(dt):
         return ""
 
 
+def json_default(obj):
+    if isinstance(obj, CustomNone):
+        return None
+    return str(obj)
+
+
 json_loads = json._default_decoder.decode
-json_dumps = json.JSONEncoder(default=str).encode
+json_dumps = json.JSONEncoder(default=json_default).encode
 
 
 def dump_json(obj, fp=sys.stdout, ensure_ascii=True, indent=4):
@@ -233,14 +247,13 @@ def dump_json(obj, fp=sys.stdout, ensure_ascii=True, indent=4):
         obj, fp,
         ensure_ascii=ensure_ascii,
         indent=indent,
-        default=str,
+        default=json_default,
         sort_keys=True,
     )
     fp.write("\n")
 
 
-def dump_response(response, fp, *,
-                  headers=False, content=True, hide_auth=True):
+def dump_response(response, fp, headers=False, content=True, hide_auth=True):
     """Write the contents of 'response' into a file-like object"""
 
     if headers:
@@ -269,7 +282,7 @@ Response Headers
         if hide_auth:
             authorization = req_headers.get("Authorization")
             if authorization:
-                atype, sep, _ = authorization.partition(" ")
+                atype, sep, _ = str(authorization).partition(" ")
                 req_headers["Authorization"] = atype + " ***" if sep else "***"
 
             cookie = req_headers.get("Cookie")
@@ -285,15 +298,17 @@ Response Headers
                     r"(^|, )([^ =]+)=[^,;]*", r"\1\2=***", set_cookie,
                 )
 
+        fmt_nv = "{}: {}".format
+
         fp.write(outfmt.format(
             request=request,
             response=response,
             request_headers="\n".join(
-                name + ": " + value
+                fmt_nv(name, value)
                 for name, value in req_headers.items()
             ),
             response_headers="\n".join(
-                name + ": " + value
+                fmt_nv(name, value)
                 for name, value in res_headers.items()
             ),
         ).encode())
@@ -482,80 +497,24 @@ CODES = {
 }
 
 
-def parse_inputfile(file, log):
-    """Filter and process strings from an input file.
+class HTTPBasicAuth():
+    __slots__ = ("authorization",)
 
-    Lines starting with '#' and empty lines will be ignored.
-    Lines starting with '-' will be interpreted as a key-value pair separated
-      by an '='. where 'key' is a dot-separated option name and 'value' is a
-      JSON-parsable value. These configuration options will be applied while
-      processing the next URL.
-    Lines starting with '-G' are the same as above, except these options will
-      be applied for *all* following URLs, i.e. they are Global.
-    Everything else will be used as a potential URL.
+    def __init__(self, username, password):
+        self.authorization = b"Basic " + binascii.b2a_base64(
+            username.encode("latin1") + b":" + str(password).encode("latin1")
+        )[:-1]
 
-    Example input file:
+    def __call__(self, request):
+        request.headers["Authorization"] = self.authorization
+        return request
 
-    # settings global options
-    -G base-directory = "/tmp/"
-    -G skip = false
 
-    # setting local options for the next URL
-    -filename="spaces_are_optional.jpg"
-    -skip    = true
+class LazyPrompt():
+    __slots__ = ()
 
-    https://example.org/
-
-    # next URL uses default filename and 'skip' is false.
-    https://example.com/index.htm # comment1
-    https://example.com/404.htm   # comment2
-    """
-    gconf = []
-    lconf = []
-    strip_comment = None
-
-    for line in file:
-        line = line.strip()
-
-        if not line or line[0] == "#":
-            # empty line or comment
-            continue
-
-        elif line[0] == "-":
-            # config spec
-            if len(line) >= 2 and line[1] == "G":
-                conf = gconf
-                line = line[2:]
-            else:
-                conf = lconf
-                line = line[1:]
-
-            key, sep, value = line.partition("=")
-            if not sep:
-                log.warning("input file: invalid <key>=<value> pair: %s", line)
-                continue
-
-            try:
-                value = json_loads(value.strip())
-            except ValueError as exc:
-                log.warning("input file: unable to parse '%s': %s", value, exc)
-                continue
-
-            key = key.strip().split(".")
-            conf.append((key[:-1], key[-1], value))
-
-        else:
-            # url
-            if " #" in line or "\t#" in line:
-                if strip_comment is None:
-                    strip_comment = re.compile(r"\s+#.*").sub
-                line = strip_comment("", line)
-            if gconf or lconf:
-                yield ExtendedUrl(line, gconf, lconf)
-                gconf = []
-                lconf = []
-            else:
-                yield line
+    def __str__(self):
+        return getpass.getpass()
 
 
 class CustomNone():
@@ -867,15 +826,6 @@ class FilterPredicate():
             raise
         except Exception as exc:
             raise exception.FilterError(exc)
-
-
-class ExtendedUrl():
-    """URL with attached config key-value pairs"""
-    def __init__(self, url, gconf, lconf):
-        self.value, self.gconfig, self.lconfig = url, gconf, lconf
-
-    def __str__(self):
-        return self.value
 
 
 class DownloadArchive():

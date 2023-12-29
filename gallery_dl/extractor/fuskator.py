@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019 Mike Fährmann
+# Copyright 2019-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -18,22 +18,7 @@ class FuskatorGalleryExtractor(GalleryExtractor):
     category = "fuskator"
     root = "https://fuskator.com"
     pattern = r"(?:https?://)?fuskator\.com/(?:thumbs|expanded)/([^/?#]+)"
-    test = (
-        ("https://fuskator.com/thumbs/d0GnIzXrSKU/", {
-            "pattern": r"https://i\d+.fuskator.com/large/d0GnIzXrSKU/.+\.jpg",
-            "count": 22,
-            "keyword": {
-                "gallery_id": 473023,
-                "gallery_hash": "d0GnIzXrSKU",
-                "title": "re:Shaved Brunette Babe Maria Ryabushkina with ",
-                "views": int,
-                "score": float,
-                "count": 22,
-                "tags": list,
-            },
-        }),
-        ("https://fuskator.com/expanded/gXpKzjgIidA/index.html"),
-    )
+    example = "https://fuskator.com/thumbs/ID/"
 
     def __init__(self, match):
         self.gallery_hash = match.group(1)
@@ -82,13 +67,7 @@ class FuskatorSearchExtractor(Extractor):
     subcategory = "search"
     root = "https://fuskator.com"
     pattern = r"(?:https?://)?fuskator\.com(/(?:search|page)/.+)"
-    test = (
-        ("https://fuskator.com/search/red_swimsuit/", {
-            "pattern": FuskatorGalleryExtractor.pattern,
-            "count": ">= 40",
-        }),
-        ("https://fuskator.com/page/3/swimsuit/quality/"),
-    )
+    example = "https://fuskator.com/search/TAG/"
 
     def __init__(self, match):
         Extractor.__init__(self, match)

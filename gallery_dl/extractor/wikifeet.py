@@ -18,62 +18,7 @@ class WikifeetGalleryExtractor(GalleryExtractor):
     archive_fmt = "{type}_{celeb}_{pid}"
     pattern = (r"(?:https?://)(?:(?:www\.)?wikifeetx?|"
                r"men\.wikifeet)\.com/([^/?#]+)")
-    test = (
-        ("https://www.wikifeet.com/Madison_Beer", {
-            "pattern": (r"https://pics\.wikifeet\.com/Madison_Beer"
-                        r"-Feet-\d+\.jpg"),
-            "count"  : ">= 352",
-            "keyword": {
-                "celeb"     : "Madison_Beer",
-                "celebrity" : "Madison Beer",
-                "birthday"  : "dt:1999-03-05 00:00:00",
-                "birthplace": "United States",
-                "rating"    : float,
-                "pid"       : int,
-                "width"     : int,
-                "height"    : int,
-                "shoesize"  : "7.5 US",
-                "type"      : "women",
-                "tags"      : list,
-            },
-        }),
-        ("https://www.wikifeetx.com/Tifa_Quinn", {
-            "pattern": (r"https://pics\.wikifeet\.com/Tifa_Quinn"
-                        r"-Feet-\d+\.jpg"),
-            "count"  : ">= 9",
-            "keyword": {
-                "celeb"     : "Tifa_Quinn",
-                "celebrity" : "Tifa Quinn",
-                "birthday"  : "[NOT SET]",
-                "birthplace": "United States",
-                "rating"    : float,
-                "pid"       : int,
-                "width"     : int,
-                "height"    : int,
-                "shoesize"  : "[NOT SET]",
-                "type"      : "women",
-                "tags"      : list,
-            },
-        }),
-        ("https://men.wikifeet.com/Chris_Hemsworth", {
-            "pattern": (r"https://pics\.wikifeet\.com/Chris_Hemsworth"
-                        r"-Feet-\d+\.jpg"),
-            "count"  : ">= 860",
-            "keyword": {
-                "celeb"     : "Chris_Hemsworth",
-                "celebrity" : "Chris Hemsworth",
-                "birthday"  : "dt:1983-08-11 00:00:00",
-                "birthplace": "Australia",
-                "rating"    : float,
-                "pid"       : int,
-                "width"     : int,
-                "height"    : int,
-                "shoesize"  : "12.5 US",
-                "type"      : "men",
-                "tags"      : list,
-            },
-        }),
-    )
+    example = "https://www.wikifeet.com/CELEB"
 
     def __init__(self, match):
         self.root = text.root_from_url(match.group(0))
@@ -111,7 +56,10 @@ class WikifeetGalleryExtractor(GalleryExtractor):
                 "pid"   : data["pid"],
                 "width" : data["pw"],
                 "height": data["ph"],
-                "tags"  : [tagmap[tag] for tag in data["tags"]],
+                "tags"  : [
+                    tagmap[tag]
+                    for tag in data["tags"] if tag in tagmap
+                ],
             })
             for data in util.json_loads(text.extr(page, "['gdata'] = ", ";"))
         ]

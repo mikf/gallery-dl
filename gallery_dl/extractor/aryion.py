@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2020-2022 Mike Fährmann
+# Copyright 2020-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -23,8 +23,8 @@ class AryionExtractor(Extractor):
     directory_fmt = ("{category}", "{user!l}", "{path:J - }")
     filename_fmt = "{id} {title}.{extension}"
     archive_fmt = "{id}"
-    cookiedomain = ".aryion.com"
-    cookienames = ("phpbb3_rl7a3_sid",)
+    cookies_domain = ".aryion.com"
+    cookies_names = ("phpbb3_rl7a3_sid",)
     root = "https://aryion.com"
 
     def __init__(self, match):
@@ -33,13 +33,14 @@ class AryionExtractor(Extractor):
         self.recursive = True
 
     def login(self):
-        if self._check_cookies(self.cookienames):
+        if self.cookies_check(self.cookies_names):
             return
+
         username, password = self._get_auth_info()
         if username:
-            self._update_cookies(self._login_impl(username, password))
+            self.cookies_update(self._login_impl(username, password))
 
-    @cache(maxage=14*24*3600, keyarg=1)
+    @cache(maxage=14*86400, keyarg=1)
     def _login_impl(self, username, password):
         self.log.info("Logging in as %s", username)
 
@@ -53,7 +54,7 @@ class AryionExtractor(Extractor):
         response = self.request(url, method="POST", data=data)
         if b"You have been successfully logged in." not in response.content:
             raise exception.AuthenticationError()
-        return {c: response.cookies[c] for c in self.cookienames}
+        return {c: response.cookies[c] for c in self.cookies_names}
 
     def items(self):
         self.login()
@@ -175,21 +176,14 @@ class AryionGalleryExtractor(AryionExtractor):
     subcategory = "gallery"
     categorytransfer = True
     pattern = BASE_PATTERN + r"/(?:gallery/|user/|latest.php\?name=)([^/?#]+)"
-    test = (
-        ("https://aryion.com/g4/gallery/jameshoward", {
-            "options": (("recursive", False),),
-            "pattern": r"https://aryion\.com/g4/data\.php\?id=\d+$",
-            "range": "48-52",
-            "count": 5,
-        }),
-        ("https://aryion.com/g4/user/jameshoward"),
-        ("https://aryion.com/g4/latest.php?name=jameshoward"),
-    )
+    example = "https://aryion.com/g4/gallery/USER"
 
     def __init__(self, match):
         AryionExtractor.__init__(self, match)
-        self.recursive = self.config("recursive", True)
         self.offset = 0
+
+    def _init(self):
+        self.recursive = self.config("recursive", True)
 
     def skip(self, num):
         if self.recursive:
@@ -212,13 +206,13 @@ class AryionTagExtractor(AryionExtractor):
     directory_fmt = ("{category}", "tags", "{search_tags}")
     archive_fmt = "t_{search_tags}_{id}"
     pattern = BASE_PATTERN + r"/tags\.php\?([^#]+)"
-    test = ("https://aryion.com/g4/tags.php?tag=star+wars&p=19", {
-        "count": ">= 5",
-    })
+    example = "https://aryion.com/g4/tags.php?tag=TAG"
 
-    def metadata(self):
+    def _init(self):
         self.params = text.parse_query(self.user)
         self.user = None
+
+    def metadata(self):
         return {"search_tags": self.params.get("tag")}
 
     def posts(self):
@@ -230,40 +224,7 @@ class AryionPostExtractor(AryionExtractor):
     """Extractor for individual posts on eka's portal"""
     subcategory = "post"
     pattern = BASE_PATTERN + r"/view/(\d+)"
-    test = (
-        ("https://aryion.com/g4/view/510079", {
-            "url": "f233286fa5558c07ae500f7f2d5cb0799881450e",
-            "keyword": {
-                "artist"   : "jameshoward",
-                "user"     : "jameshoward",
-                "filename" : "jameshoward-510079-subscribestar_150",
-                "extension": "jpg",
-                "id"       : 510079,
-                "width"    : 1665,
-                "height"   : 1619,
-                "size"     : 784239,
-                "title"    : "I'm on subscribestar now too!",
-                "description": r"re:Doesn't hurt to have a backup, right\?",
-                "tags"     : ["Non-Vore", "subscribestar"],
-                "date"     : "dt:2019-02-16 19:30:34",
-                "path"     : [],
-                "views"    : int,
-                "favorites": int,
-                "comments" : int,
-                "_mtime"   : "Sat, 16 Feb 2019 19:30:34 GMT",
-            },
-        }),
-        # x-folder (#694)
-        ("https://aryion.com/g4/view/588928", {
-            "pattern": pattern,
-            "count": ">= 8",
-        }),
-        # x-comic-folder (#945)
-        ("https://aryion.com/g4/view/537379", {
-            "pattern": pattern,
-            "count": 2,
-        }),
-    )
+    example = "https://aryion.com/g4/view/12345"
 
     def posts(self):
         post_id, self.user = self.user, None

@@ -21,57 +21,18 @@ class HitomiGalleryExtractor(GalleryExtractor):
     category = "hitomi"
     root = "https://hitomi.la"
     pattern = (r"(?:https?://)?hitomi\.la"
-               r"/(?:manga|doujinshi|cg|gamecg|galleries|reader)"
+               r"/(?:manga|doujinshi|cg|gamecg|imageset|galleries|reader)"
                r"/(?:[^/?#]+-)?(\d+)")
-    test = (
-        ("https://hitomi.la/galleries/867789.html", {
-            "pattern": r"https://[a-c]a\.hitomi\.la/webp/\d+/\d+"
-                       r"/[0-9a-f]{64}\.webp",
-            "keyword": "86af5371f38117a07407f11af689bdd460b09710",
-            "count": 16,
-        }),
-        # download test
-        ("https://hitomi.la/galleries/1401410.html", {
-            "range": "1",
-            "content": "d75d5a3d1302a48469016b20e53c26b714d17745",
-        }),
-        # Game CG with scenes (#321)
-        ("https://hitomi.la/galleries/733697.html", {
-            "count": 210,
-        }),
-        # fallback for galleries only available through /reader/ URLs
-        ("https://hitomi.la/galleries/1045954.html", {
-            "count": 1413,
-        }),
-        # gallery with "broken" redirect
-        ("https://hitomi.la/cg/scathacha-sama-okuchi-ecchi-1291900.html", {
-            "count": 10,
-            "options": (("format", "original"),),
-            "pattern": r"https://[a-c]b\.hitomi\.la/images/\d+/\d+"
-                       r"/[0-9a-f]{64}\.jpg",
-        }),
-        # no tags
-        ("https://hitomi.la/cg/1615823.html", {
-            "count": 22,
-            "options": (("format", "avif"),),
-            "pattern": r"https://[a-c]a\.hitomi\.la/avif/\d+/\d+"
-                       r"/[0-9a-f]{64}\.avif",
-        }),
-        ("https://hitomi.la/manga/amazon-no-hiyaku-867789.html"),
-        ("https://hitomi.la/manga/867789.html"),
-        ("https://hitomi.la/doujinshi/867789.html"),
-        ("https://hitomi.la/cg/867789.html"),
-        ("https://hitomi.la/gamecg/867789.html"),
-        ("https://hitomi.la/reader/867789.html"),
-    )
+    example = "https://hitomi.la/manga/TITLE-867789.html"
 
     def __init__(self, match):
-        gid = match.group(1)
-        url = "https://ltn.hitomi.la/galleries/{}.js".format(gid)
+        self.gid = match.group(1)
+        url = "https://ltn.hitomi.la/galleries/{}.js".format(self.gid)
         GalleryExtractor.__init__(self, match, url)
-        self.info = None
+
+    def _init(self):
         self.session.headers["Referer"] = "{}/reader/{}.html".format(
-            self.root, gid)
+            self.root, self.gid)
 
     def metadata(self, page):
         self.info = info = util.json_loads(page.partition("=")[2])
@@ -148,17 +109,7 @@ class HitomiTagExtractor(Extractor):
     pattern = (r"(?:https?://)?hitomi\.la/"
                r"(tag|artist|group|series|type|character)/"
                r"([^/?#]+)\.html")
-    test = (
-        ("https://hitomi.la/tag/screenshots-japanese.html", {
-            "pattern": HitomiGalleryExtractor.pattern,
-            "count": ">= 35",
-        }),
-        ("https://hitomi.la/artist/a1-all-1.html"),
-        ("https://hitomi.la/group/initial%2Dg-all-1.html"),
-        ("https://hitomi.la/series/amnesia-all-1.html"),
-        ("https://hitomi.la/type/doujinshi-all-1.html"),
-        ("https://hitomi.la/character/a2-all-1.html"),
-    )
+    example = "https://hitomi.la/tag/TAG-LANG.html"
 
     def __init__(self, match):
         Extractor.__init__(self, match)

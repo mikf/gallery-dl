@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2021 Mike Fährmann
+# Copyright 2018-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -15,28 +15,35 @@ from .. import text, util, exception
 import collections
 import re
 
+BASE_PATTERN = r"(?:https?://)?idol\.sankakucomplex\.com(?:/[a-z]{2})?"
+
 
 class IdolcomplexExtractor(SankakuExtractor):
     """Base class for idolcomplex extractors"""
     category = "idolcomplex"
-    cookienames = ("login", "pass_hash")
-    cookiedomain = "idol.sankakucomplex.com"
-    root = "https://" + cookiedomain
-    request_interval = 5.0
+    root = "https://idol.sankakucomplex.com"
+    cookies_domain = "idol.sankakucomplex.com"
+    cookies_names = ("_idolcomplex_session",)
+    referer = False
+    request_interval = (3.0, 6.0)
 
     def __init__(self, match):
         SankakuExtractor.__init__(self, match)
         self.logged_in = True
         self.start_page = 1
         self.start_post = 0
-        self.extags = self.config("tags", False)
+
+    def _init(self):
+        self.find_tags = re.compile(
+            r'tag-type-([^"]+)">\s*<div [^>]+>\s*<a href="/\?tags=([^"]+)'
+        ).findall
 
     def items(self):
         self.login()
         data = self.metadata()
 
         for post_id in util.advance(self.post_ids(), self.start_post):
-            post = self._parse_post(post_id)
+            post = self._extract_post(post_id)
             url = post["file_url"]
             post.update(data)
             text.nameext_from_url(url, post)
@@ -51,76 +58,88 @@ class IdolcomplexExtractor(SankakuExtractor):
         """Return an iterable containing all relevant post ids"""
 
     def login(self):
-        if self._check_cookies(self.cookienames):
+        if self.cookies_check(self.cookies_names):
             return
+
         username, password = self._get_auth_info()
         if username:
-            cookies = self._login_impl(username, password)
-            self._update_cookies(cookies)
-        else:
-            self.logged_in = False
+            return self.cookies_update(self._login_impl(username, password))
 
-    @cache(maxage=90*24*3600, keyarg=1)
+        self.logged_in = False
+
+    @cache(maxage=90*86400, keyarg=1)
     def _login_impl(self, username, password):
         self.log.info("Logging in as %s", username)
 
-        url = self.root + "/user/authenticate"
+        url = self.root + "/users/login"
+        page = self.request(url).text
+
+        headers = {
+            "Referer": url,
+        }
+        url = self.root + (text.extr(page, '<form action="', '"') or
+                           "/en/user/authenticate")
         data = {
+            "authenticity_token": text.unescape(text.extr(
+                page, 'name="authenticity_token" value="', '"')),
             "url"           : "",
             "user[name]"    : username,
             "user[password]": password,
             "commit"        : "Login",
         }
-        response = self.request(url, method="POST", data=data)
+        response = self.request(url, method="POST", headers=headers, data=data)
 
-        if not response.history or response.url != self.root + "/user/home":
+        if not response.history or response.url.endswith("/user/home"):
             raise exception.AuthenticationError()
-        cookies = response.history[0].cookies
-        return {c: cookies[c] for c in self.cookienames}
+        return {c.name: c.value for c in response.history[0].cookies}
 
-    def _parse_post(self, post_id):
-        """Extract metadata of a single post"""
-        url = self.root + "/post/show/" + post_id
+    def _extract_post(self, post_id):
+        url = self.root + "/posts/" + post_id
         page = self.request(url, retries=10).text
-        extr = text.extract
+        extr = text.extract_from(page)
 
-        tags   , pos = extr(page, "<title>", " | ")
-        vavg   , pos = extr(page, "itemprop=ratingValue>", "<", pos)
-        vcnt   , pos = extr(page, "itemprop=reviewCount>", "<", pos)
-        _      , pos = extr(page, "Posted: <", "", pos)
-        created, pos = extr(page, ' title="', '"', pos)
-        rating = extr(page, "<li>Rating: ", "<", pos)[0]
+        tags = extr("<title>", " | ")
+        vavg = extr('itemprop="ratingValue">', "<")
+        vcnt = extr('itemprop="reviewCount">', "<")
+        pid = extr(">Post ID:", "<")
+        created = extr(' title="', '"')
 
-        file_url, pos = extr(page, '<li>Original: <a href="', '"', pos)
+        file_url = extr('>Original:', 'id=')
         if file_url:
-            width , pos = extr(page, '>', 'x', pos)
-            height, pos = extr(page, '', ' ', pos)
+            file_url = extr(' href="', '"')
+            width = extr(">", "x")
+            height = extr("", " ")
         else:
-            width , pos = extr(page, '<object width=', ' ', pos)
-            height, pos = extr(page, 'height=', '>', pos)
-            file_url = extr(page, '<embed src="', '"', pos)[0]
+            width = extr('<object width=', ' ')
+            height = extr('height=', '>')
+            file_url = extr('<embed src="', '"')
+
+        rating = extr(">Rating:", "<br")
 
         data = {
-            "id": text.parse_int(post_id),
-            "md5": file_url.rpartition("/")[2].partition(".")[0],
-            "tags": text.unescape(tags),
+            "id"          : text.parse_int(pid),
+            "md5"         : file_url.rpartition("/")[2].partition(".")[0],
+            "tags"        : text.unescape(tags),
             "vote_average": text.parse_float(vavg),
-            "vote_count": text.parse_int(vcnt),
-            "created_at": created,
-            "rating": (rating or "?")[0].lower(),
-            "file_url": "https:" + text.unescape(file_url),
-            "width": text.parse_int(width),
-            "height": text.parse_int(height),
+            "vote_count"  : text.parse_int(vcnt),
+            "created_at"  : created,
+            "date"        : text.parse_datetime(
+                created, "%Y-%m-%d %H:%M:%S.%f"),
+            "rating"      : text.remove_html(rating).lower(),
+            "file_url"    : "https:" + text.unescape(file_url),
+            "width"       : text.parse_int(width),
+            "height"      : text.parse_int(height),
         }
 
-        if self.extags:
-            tags = collections.defaultdict(list)
-            tags_html = text.extr(page, '<ul id=tag-sidebar>', '</ul>')
-            pattern = re.compile(r'tag-type-([^>]+)><a href="/\?tags=([^"]+)')
-            for tag_type, tag_name in pattern.findall(tags_html or ""):
-                tags[tag_type].append(text.unquote(tag_name))
-            for key, value in tags.items():
-                data["tags_" + key] = " ".join(value)
+        tags = collections.defaultdict(list)
+        tags_list = []
+        tags_html = text.extr(page, '<ul id="tag-sidebar"', '</ul>')
+        for tag_type, tag_name in self.find_tags(tags_html or ""):
+            tags[tag_type].append(text.unquote(tag_name))
+        for key, value in tags.items():
+            data["tags_" + key] = " ".join(value)
+            tags_list += value
+        data["tags"] = " ".join(tags_list)
 
         return data
 
@@ -131,20 +150,7 @@ class IdolcomplexTagExtractor(IdolcomplexExtractor):
     directory_fmt = ("{category}", "{search_tags}")
     archive_fmt = "t_{search_tags}_{id}"
     pattern = r"(?:https?://)?idol\.sankakucomplex\.com/\?([^#]*)"
-    test = (
-        ("https://idol.sankakucomplex.com/?tags=lyumos", {
-            "count": 5,
-            "range": "18-22",
-            "pattern": r"https://is\.sankakucomplex\.com/data/[^/]{2}/[^/]{2}"
-                       r"/[^/]{32}\.\w+\?e=\d+&m=[^&#]+",
-        }),
-        ("https://idol.sankakucomplex.com/?tags=order:favcount", {
-            "count": 5,
-            "range": "18-22",
-        }),
-        ("https://idol.sankakucomplex.com"
-         "/?tags=lyumos+wreath&page=3&next=694215"),
-    )
+    example = "https://idol.sankakucomplex.com/?tags=TAGS"
     per_page = 20
 
     def __init__(self, match):
@@ -188,15 +194,16 @@ class IdolcomplexTagExtractor(IdolcomplexExtractor):
 
         while True:
             page = self.request(self.root, params=params, retries=10).text
-            pos = page.find("<div id=more-popular-posts-link>") + 1
-            yield from text.extract_iter(page, '" id=p', '>', pos)
+            pos = ((page.find('id="more-popular-posts-link"') + 1) or
+                   (page.find('<span class="thumb') + 1))
+            yield from text.extract_iter(page, ' href="/posts/', '"', pos)
 
             next_url = text.extract(page, 'next-page-url="', '"', pos)[0]
             if not next_url:
                 return
 
-            next_params = text.parse_query(text.unescape(
-                next_url).lstrip("?/"))
+            next_params = text.parse_query(text.unescape(text.unescape(
+                next_url).lstrip("?/")))
 
             if "next" in next_params:
                 # stop if the same "next" value occurs twice in a row (#265)
@@ -211,10 +218,8 @@ class IdolcomplexPoolExtractor(IdolcomplexExtractor):
     subcategory = "pool"
     directory_fmt = ("{category}", "pool", "{pool}")
     archive_fmt = "p_{pool}_{id}"
-    pattern = r"(?:https?://)?idol\.sankakucomplex\.com/pool/show/(\d+)"
-    test = ("https://idol.sankakucomplex.com/pool/show/145", {
-        "count": 3,
-    })
+    pattern = r"(?:https?://)?idol\.sankakucomplex\.com/pools?/show/(\d+)"
+    example = "https://idol.sankakucomplex.com/pools/show/12345"
     per_page = 24
 
     def __init__(self, match):
@@ -231,15 +236,17 @@ class IdolcomplexPoolExtractor(IdolcomplexExtractor):
         return {"pool": self.pool_id}
 
     def post_ids(self):
-        url = self.root + "/pool/show/" + self.pool_id
+        url = self.root + "/pools/show/" + self.pool_id
         params = {"page": self.start_page}
 
         while True:
             page = self.request(url, params=params, retries=10).text
-            ids = list(text.extract_iter(page, '" id=p', '>'))
+            pos = page.find('id="pool-show"') + 1
+            post_ids = list(text.extract_iter(
+                page, ' href="/posts/', '"', pos))
 
-            yield from ids
-            if len(ids) < self.per_page:
+            yield from post_ids
+            if len(post_ids) < self.per_page:
                 return
             params["page"] += 1
 
@@ -248,18 +255,8 @@ class IdolcomplexPostExtractor(IdolcomplexExtractor):
     """Extractor for single images from idol.sankakucomplex.com"""
     subcategory = "post"
     archive_fmt = "{id}"
-    pattern = r"(?:https?://)?idol\.sankakucomplex\.com/post/show/(\d+)"
-    test = ("https://idol.sankakucomplex.com/post/show/694215", {
-        "content": "694ec2491240787d75bf5d0c75d0082b53a85afd",
-        "options": (("tags", True),),
-        "keyword": {
-            "tags_character": "shani_(the_witcher)",
-            "tags_copyright": "the_witcher",
-            "tags_idol": str,
-            "tags_medium": str,
-            "tags_general": str,
-        },
-    })
+    pattern = BASE_PATTERN + r"/posts?/(?:show/)?([0-9a-f]+)"
+    example = "https://idol.sankakucomplex.com/posts/0123456789abcdef"
 
     def __init__(self, match):
         IdolcomplexExtractor.__init__(self, match)

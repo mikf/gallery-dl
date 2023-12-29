@@ -11,6 +11,8 @@
 from .common import PostProcessor
 from .. import util, formatter
 import subprocess
+import os
+import re
 
 
 if util.WINDOWS:
@@ -31,6 +33,7 @@ class ExecPP(PostProcessor):
         args = options["command"]
         if isinstance(args, str):
             self.args = args
+            self._sub = re.compile(r"\{(_directory|_filename|_path|)\}").sub
             execute = self.exec_string
         else:
             self.args = [formatter.parse(arg) for arg in args]
@@ -45,10 +48,7 @@ class ExecPP(PostProcessor):
 
         self._init_archive(job, options)
 
-    def exec_list(self, pathfmt, status=None):
-        if status:
-            return
-
+    def exec_list(self, pathfmt):
         archive = self.archive
         kwdict = pathfmt.kwdict
 
@@ -60,24 +60,19 @@ class ExecPP(PostProcessor):
         kwdict["_path"] = pathfmt.realpath
 
         args = [arg.format_map(kwdict) for arg in self.args]
+        args[0] = os.path.expanduser(args[0])
         self._exec(args, False)
 
         if archive:
             archive.add(kwdict)
 
-    def exec_string(self, pathfmt, status=None):
-        if status:
-            return
-
+    def exec_string(self, pathfmt):
         archive = self.archive
         if archive and archive.check(pathfmt.kwdict):
             return
 
-        if status is None and pathfmt.realpath:
-            args = self.args.replace("{}", quote(pathfmt.realpath))
-        else:
-            args = self.args.replace("{}", quote(pathfmt.realdirectory))
-
+        self.pathfmt = pathfmt
+        args = self._sub(self._replace, self.args)
         self._exec(args, True)
 
         if archive:
@@ -93,6 +88,14 @@ class ExecPP(PostProcessor):
     def _exec_async(self, args, shell):
         self.log.debug("Running '%s'", args)
         subprocess.Popen(args, shell=shell)
+
+    def _replace(self, match):
+        name = match.group(1)
+        if name == "_directory":
+            return quote(self.pathfmt.realdirectory)
+        if name == "_filename":
+            return quote(self.pathfmt.filename)
+        return quote(self.pathfmt.realpath)
 
 
 __postprocessor__ = ExecPP

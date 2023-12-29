@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2020-2022 Mike Fährmann
+# Copyright 2020-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -24,8 +24,7 @@ class InkbunnyExtractor(Extractor):
     archive_fmt = "{file_id}"
     root = "https://inkbunny.net"
 
-    def __init__(self, match):
-        Extractor.__init__(self, match)
+    def _init(self):
         self.api = InkbunnyAPI(self)
 
     def items(self):
@@ -73,51 +72,7 @@ class InkbunnyUserExtractor(InkbunnyExtractor):
     """Extractor for inkbunny user profiles"""
     subcategory = "user"
     pattern = BASE_PATTERN + r"/(?!s/)(gallery/|scraps/)?(\w+)(?:$|[/?#])"
-    test = (
-        ("https://inkbunny.net/soina", {
-            "pattern": r"https://[\w.]+\.metapix\.net/files/full"
-                       r"/\d+/\d+_soina_.+",
-            "range": "20-50",
-            "keyword": {
-                "date"         : "type:datetime",
-                "deleted"      : bool,
-                "file_id"      : "re:[0-9]+",
-                "filename"     : r"re:[0-9]+_soina_\w+",
-                "full_file_md5": "re:[0-9a-f]{32}",
-                "mimetype"     : str,
-                "submission_id": "re:[0-9]+",
-                "user_id"      : "20969",
-                "comments_count" : "re:[0-9]+",
-                "deleted"        : bool,
-                "favorite"       : bool,
-                "favorites_count": "re:[0-9]+",
-                "friends_only"   : bool,
-                "guest_block"    : bool,
-                "hidden"         : bool,
-                "pagecount"      : "re:[0-9]+",
-                "pools"          : list,
-                "pools_count"    : int,
-                "public"         : bool,
-                "rating_id"      : "re:[0-9]+",
-                "rating_name"    : str,
-                "ratings"        : list,
-                "scraps"         : bool,
-                "tags"           : list,
-                "title"          : str,
-                "type_name"      : str,
-                "username"       : "soina",
-                "views"          : str,
-            },
-        }),
-        ("https://inkbunny.net/gallery/soina", {
-            "range": "1-25",
-            "keyword": {"scraps": False},
-        }),
-        ("https://inkbunny.net/scraps/soina", {
-            "range": "1-25",
-            "keyword": {"scraps": True},
-        }),
-    )
+    example = "https://inkbunny.net/USER"
 
     def __init__(self, match):
         kind, self.user = match.groups()
@@ -148,15 +103,9 @@ class InkbunnyPoolExtractor(InkbunnyExtractor):
     subcategory = "pool"
     pattern = (BASE_PATTERN + r"/(?:"
                r"poolview_process\.php\?pool_id=(\d+)|"
-               r"submissionsviewall\.php\?([^#]+&mode=pool&[^#]+))")
-    test = (
-        ("https://inkbunny.net/poolview_process.php?pool_id=28985", {
-            "count": 9,
-            "keyword": {"pool_id": "28985"},
-        }),
-        ("https://inkbunny.net/submissionsviewall.php?rid=ffffffffff"
-         "&mode=pool&pool_id=28985&page=1&orderby=pool_order&random=no"),
-    )
+               r"submissionsviewall\.php"
+               r"\?((?:[^#]+&)?mode=pool(?:&[^#]+)?))")
+    example = "https://inkbunny.net/poolview_process.php?pool_id=12345"
 
     def __init__(self, match):
         InkbunnyExtractor.__init__(self, match)
@@ -185,17 +134,10 @@ class InkbunnyFavoriteExtractor(InkbunnyExtractor):
     subcategory = "favorite"
     pattern = (BASE_PATTERN + r"/(?:"
                r"userfavorites_process\.php\?favs_user_id=(\d+)|"
-               r"submissionsviewall\.php\?([^#]+&mode=userfavs&[^#]+))")
-    test = (
-        ("https://inkbunny.net/userfavorites_process.php?favs_user_id=20969", {
-            "pattern": r"https://[\w.]+\.metapix\.net/files/full"
-                       r"/\d+/\d+_\w+_.+",
-            "range": "20-50",
-            "keyword": {"favs_user_id": "20969"},
-        }),
-        ("https://inkbunny.net/submissionsviewall.php?rid=ffffffffff"
-         "&mode=userfavs&random=no&orderby=fav_datetime&page=1&user_id=20969"),
-    )
+               r"submissionsviewall\.php"
+               r"\?((?:[^#]+&)?mode=userfavs(?:&[^#]+)?))")
+    example = ("https://inkbunny.net/userfavorites_process.php"
+               "?favs_user_id=12345")
 
     def __init__(self, match):
         InkbunnyExtractor.__init__(self, match)
@@ -221,31 +163,33 @@ class InkbunnyFavoriteExtractor(InkbunnyExtractor):
         return self.api.search(params)
 
 
+class InkbunnyUnreadExtractor(InkbunnyExtractor):
+    """Extractor for unread inkbunny submissions"""
+    subcategory = "unread"
+    pattern = (BASE_PATTERN + r"/submissionsviewall\.php"
+               r"\?((?:[^#]+&)?mode=unreadsubs(?:&[^#]+)?)")
+    example = ("https://inkbunny.net/submissionsviewall.php"
+               "?text=&mode=unreadsubs&type=")
+
+    def __init__(self, match):
+        InkbunnyExtractor.__init__(self, match)
+        self.params = text.parse_query(match.group(1))
+
+    def posts(self):
+        params = self.params.copy()
+        params.pop("rid", None)
+        params.pop("mode", None)
+        params["unread_submissions"] = "yes"
+        return self.api.search(params)
+
+
 class InkbunnySearchExtractor(InkbunnyExtractor):
     """Extractor for inkbunny search results"""
     subcategory = "search"
-    pattern = (BASE_PATTERN +
-               r"/submissionsviewall\.php\?([^#]+&mode=search&[^#]+)")
-    test = (("https://inkbunny.net/submissionsviewall.php?rid=ffffffffff"
-             "&mode=search&page=1&orderby=create_datetime&text=cute"
-             "&stringtype=and&keywords=yes&title=yes&description=no&artist="
-             "&favsby=&type=&days=&keyword_id=&user_id=&random=&md5="), {
-        "range": "1-10",
-        "count": 10,
-        "keyword": {
-            "search": {
-                "rid": "ffffffffff",
-                "mode": "search",
-                "page": "1",
-                "orderby": "create_datetime",
-                "text": "cute",
-                "stringtype": "and",
-                "keywords": "yes",
-                "title": "yes",
-                "description": "no",
-            },
-        },
-    })
+    pattern = (BASE_PATTERN + r"/submissionsviewall\.php"
+               r"\?((?:[^#]+&)?mode=search(?:&[^#]+)?)")
+    example = ("https://inkbunny.net/submissionsviewall.php"
+               "?text=TAG&mode=search&type=")
 
     def __init__(self, match):
         InkbunnyExtractor.__init__(self, match)
@@ -279,16 +223,10 @@ class InkbunnyFollowingExtractor(InkbunnyExtractor):
     subcategory = "following"
     pattern = (BASE_PATTERN + r"/(?:"
                r"watchlist_process\.php\?mode=watching&user_id=(\d+)|"
-               r"usersviewall\.php\?([^#]+&mode=watching&[^#]+))")
-    test = (
-        (("https://inkbunny.net/watchlist_process.php"
-          "?mode=watching&user_id=20969"), {
-            "pattern": InkbunnyUserExtractor.pattern,
-            "count": ">= 90",
-        }),
-        ("https://inkbunny.net/usersviewall.php?rid=ffffffffff"
-         "&mode=watching&page=1&user_id=20969&orderby=added&namesonly="),
-    )
+               r"usersviewall\.php"
+               r"\?((?:[^#]+&)?mode=watching(?:&[^#]+)?))")
+    example = ("https://inkbunny.net/watchlist_process.php"
+               "?mode=watching&user_id=12345")
 
     def __init__(self, match):
         InkbunnyExtractor.__init__(self, match)
@@ -325,16 +263,7 @@ class InkbunnyPostExtractor(InkbunnyExtractor):
     """Extractor for individual Inkbunny posts"""
     subcategory = "post"
     pattern = BASE_PATTERN + r"/s/(\d+)"
-    test = (
-        ("https://inkbunny.net/s/1829715", {
-            "pattern": r"https://[\w.]+\.metapix\.net/files/full"
-                       r"/2626/2626843_soina_dscn2296\.jpg",
-            "content": "cf69d8dddf0822a12b4eef1f4b2258bd600b36c8",
-        }),
-        ("https://inkbunny.net/s/2044094", {
-            "count": 4,
-        }),
-    )
+    example = "https://inkbunny.net/s/12345"
 
     def __init__(self, match):
         InkbunnyExtractor.__init__(self, match)
@@ -418,6 +347,9 @@ class InkbunnyAPI():
 
         while True:
             data = self._call("search", params)
+            if not data["submissions"]:
+                return
+
             yield from self.detail(data["submissions"])
 
             if data["page"] >= data["pages_count"]:
@@ -428,7 +360,7 @@ class InkbunnyAPI():
             params["page"] += 1
 
 
-@cache(maxage=360*24*3600, keyarg=1)
+@cache(maxage=365*86400, keyarg=1)
 def _authenticate_impl(api, username, password):
     api.extractor.log.info("Logging in as %s", username)
 

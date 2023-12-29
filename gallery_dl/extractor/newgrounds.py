@@ -21,13 +21,16 @@ class NewgroundsExtractor(Extractor):
     filename_fmt = "{category}_{_index}_{title}.{extension}"
     archive_fmt = "{_type}{_index}"
     root = "https://www.newgrounds.com"
-    cookiedomain = ".newgrounds.com"
-    cookienames = ("NG_GG_username", "vmk1du5I8m")
+    cookies_domain = ".newgrounds.com"
+    cookies_names = ("NG_GG_username", "vmk1du5I8m")
+    request_interval = (0.5, 1.5)
 
     def __init__(self, match):
         Extractor.__init__(self, match)
         self.user = match.group(1)
         self.user_root = "https://{}.newgrounds.com".format(self.user)
+
+    def _init(self):
         self.flash = self.config("flash", True)
 
         fmt = self.config("format", "original")
@@ -51,14 +54,31 @@ class NewgroundsExtractor(Extractor):
                 if metadata:
                     post.update(metadata)
                 yield Message.Directory, post
+                post["num"] = 0
                 yield Message.Url, url, text.nameext_from_url(url, post)
 
-                for num, url in enumerate(text.extract_iter(
-                        post["_comment"], 'data-smartload-src="', '"'), 1):
-                    post["num"] = num
-                    post["_index"] = "{}_{:>02}".format(post["index"], num)
+                if "_multi" in post:
+                    for data in post["_multi"]:
+                        post["num"] += 1
+                        post["_index"] = "{}_{:>02}".format(
+                            post["index"], post["num"])
+                        post.update(data)
+                        url = data["image"]
+
+                        text.nameext_from_url(url, post)
+                        yield Message.Url, url, post
+
+                        if "_fallback" in post:
+                            del post["_fallback"]
+
+                for url in text.extract_iter(
+                        post["_comment"], 'data-smartload-src="', '"'):
+                    post["num"] += 1
+                    post["_index"] = "{}_{:>02}".format(
+                        post["index"], post["num"])
                     url = text.ensure_http_scheme(url)
-                    yield Message.Url, url, text.nameext_from_url(url, post)
+                    text.nameext_from_url(url, post)
+                    yield Message.Url, url, post
             else:
                 self.log.warning(
                     "Unable to get download URL for '%s'", post_url)
@@ -71,29 +91,31 @@ class NewgroundsExtractor(Extractor):
         """Return general metadata"""
 
     def login(self):
-        if self._check_cookies(self.cookienames):
+        if self.cookies_check(self.cookies_names):
             return
+
         username, password = self._get_auth_info()
         if username:
-            self._update_cookies(self._login_impl(username, password))
+            self.cookies_update(self._login_impl(username, password))
 
-    @cache(maxage=360*24*3600, keyarg=1)
+    @cache(maxage=365*86400, keyarg=1)
     def _login_impl(self, username, password):
         self.log.info("Logging in as %s", username)
 
         url = self.root + "/passport/"
         response = self.request(url)
         if response.history and response.url.endswith("/social"):
-            return self.session.cookies
+            return self.cookies
 
+        page = response.text
         headers = {"Origin": self.root, "Referer": url}
-        url = text.urljoin(self.root, text.extr(
-            response.text, 'action="', '"'))
+        url = text.urljoin(self.root, text.extr(page, 'action="', '"'))
         data = {
             "username": username,
             "password": password,
             "remember": "1",
             "login"   : "1",
+            "auth"    : text.extr(page, 'name="auth" value="', '"'),
         }
 
         response = self.request(url, method="POST", headers=headers, data=data)
@@ -103,7 +125,7 @@ class NewgroundsExtractor(Extractor):
         return {
             cookie.name: cookie.value
             for cookie in response.history[0].cookies
-            if cookie.expires and cookie.domain == self.cookiedomain
+            if cookie.expires and cookie.domain == self.cookies_domain
         }
 
     def extract_post(self, post_url):
@@ -148,8 +170,7 @@ class NewgroundsExtractor(Extractor):
         data["post_url"] = post_url
         return data
 
-    @staticmethod
-    def _extract_image_data(extr, url):
+    def _extract_image_data(self, extr, url):
         full = text.extract_from(util.json_loads(extr(
             '"full_image_text":', '});')))
         data = {
@@ -167,7 +188,33 @@ class NewgroundsExtractor(Extractor):
         index = data["url"].rpartition("/")[2].partition("_")[0]
         data["index"] = text.parse_int(index)
         data["_index"] = index
+
+        image_data = extr("let imageData =", "\n];")
+        if image_data:
+            data["_multi"] = self._extract_images_multi(image_data)
+        else:
+            art_images = extr('<div class="art-images', '\n</div>')
+            if art_images:
+                data["_multi"] = self._extract_images_art(art_images, data)
+
         return data
+
+    def _extract_images_multi(self, html):
+        data = util.json_loads(html + "]")
+        yield from data[1:]
+
+    def _extract_images_art(self, html, data):
+        ext = text.ext_from_url(data["url"])
+        for url in text.extract_iter(html, 'data-smartload-src="', '"'):
+            url = text.ensure_http_scheme(url)
+            url = url.replace("/medium_views/", "/images/", 1)
+            if text.ext_from_url(url) == "webp":
+                yield {
+                    "image"    : url.replace(".webp", "." + ext),
+                    "_fallback": (url,),
+                }
+            else:
+                yield {"image": url}
 
     @staticmethod
     def _extract_audio_data(extr, url):
@@ -202,7 +249,6 @@ class NewgroundsExtractor(Extractor):
             headers = {
                 "Accept": "application/json, text/javascript, */*; q=0.01",
                 "X-Requested-With": "XMLHttpRequest",
-                "Referer": self.root,
             }
             sources = self.request(url, headers=headers).json()["sources"]
 
@@ -295,41 +341,7 @@ class NewgroundsImageExtractor(NewgroundsExtractor):
     pattern = (r"(?:https?://)?(?:"
                r"(?:www\.)?newgrounds\.com/art/view/([^/?#]+)/[^/?#]+"
                r"|art\.ngfiles\.com/images/\d+/\d+_([^_]+)_([^.]+))")
-    test = (
-        ("https://www.newgrounds.com/art/view/tomfulp/ryu-is-hawt", {
-            "url": "57f182bcbbf2612690c3a54f16ffa1da5105245e",
-            "content": "8f395e08333eb2457ba8d8b715238f8910221365",
-            "keyword": {
-                "artist"     : ["tomfulp"],
-                "comment"    : "re:Consider this the bottom threshold for ",
-                "date"       : "dt:2009-06-04 14:44:05",
-                "description": "re:Consider this the bottom threshold for ",
-                "favorites"  : int,
-                "filename"   : "94_tomfulp_ryu-is-hawt",
-                "height"     : 476,
-                "index"      : 94,
-                "rating"     : "e",
-                "score"      : float,
-                "tags"       : ["ryu", "streetfighter"],
-                "title"      : "Ryu is Hawt",
-                "type"       : "article",
-                "user"       : "tomfulp",
-                "width"      : 447,
-            },
-        }),
-        ("https://art.ngfiles.com/images/0/94_tomfulp_ryu-is-hawt.gif", {
-            "url": "57f182bcbbf2612690c3a54f16ffa1da5105245e",
-        }),
-        ("https://www.newgrounds.com/art/view/sailoryon/yon-dream-buster", {
-            "url": "84eec95e663041a80630df72719f231e157e5f5d",
-            "count": 2,
-        }),
-        # "adult" rated (#2456)
-        ("https://www.newgrounds.com/art/view/kekiiro/red", {
-            "options": (("username", None),),
-            "count": 1,
-        }),
-    )
+    example = "https://www.newgrounds.com/art/view/USER/TITLE"
 
     def __init__(self, match):
         NewgroundsExtractor.__init__(self, match)
@@ -349,104 +361,7 @@ class NewgroundsMediaExtractor(NewgroundsExtractor):
     subcategory = "media"
     pattern = (r"(?:https?://)?(?:www\.)?newgrounds\.com"
                r"(/(?:portal/view|audio/listen)/\d+)")
-    test = (
-        ("https://www.newgrounds.com/portal/view/595355", {
-            "pattern": r"https://uploads\.ungrounded\.net/alternate/564000"
-                       r"/564957_alternate_31\.mp4\?1359712249",
-            "keyword": {
-                "artist"     : ["kickinthehead", "danpaladin", "tomfulp"],
-                "comment"    : "re:My fan trailer for Alien Hominid HD!",
-                "date"       : "dt:2013-02-01 09:50:49",
-                "description": "Fan trailer for Alien Hominid HD!",
-                "favorites"  : int,
-                "filename"   : "564957_alternate_31",
-                "index"      : 595355,
-                "rating"     : "e",
-                "score"      : float,
-                "tags"       : ["alienhominid", "trailer"],
-                "title"      : "Alien Hominid Fan Trailer",
-                "type"       : "movie",
-                "user"       : "kickinthehead",
-            },
-        }),
-        ("https://www.newgrounds.com/audio/listen/609768", {
-            "url": "f4c5490ae559a3b05e46821bb7ee834f93a43c95",
-            "keyword": {
-                "artist"     : ["zj", "tomfulp"],
-                "comment"    : "re:RECORDED 12-09-2014\n\nFrom The ZJ \"Late ",
-                "date"       : "dt:2015-02-23 19:31:59",
-                "description": "From The ZJ Report Show!",
-                "favorites"  : int,
-                "index"      : 609768,
-                "rating"     : "",
-                "score"      : float,
-                "tags"       : ["fulp", "interview", "tom", "zj"],
-                "title"      : "ZJ Interviews Tom Fulp!",
-                "type"       : "music.song",
-                "user"       : "zj",
-            },
-        }),
-        # flash animation (#1257)
-        ("https://www.newgrounds.com/portal/view/161181/format/flash", {
-            "pattern": r"https://uploads\.ungrounded\.net/161000"
-                       r"/161181_ddautta_mask__550x281_\.swf\?f1081628129",
-            "keyword": {"type": "movie"},
-        }),
-        # format selection (#1729)
-        ("https://www.newgrounds.com/portal/view/758545", {
-            "options": (("format", "720p"),),
-            "pattern": r"https://uploads\.ungrounded\.net/alternate/1482000"
-                       r"/1482860_alternate_102516\.720p\.mp4\?\d+",
-        }),
-        # "adult" rated (#2456)
-        ("https://www.newgrounds.com/portal/view/717744", {
-            "options": (("username", None),),
-            "count": 1,
-        }),
-        # flash game
-        ("https://www.newgrounds.com/portal/view/829032", {
-            "pattern": r"https://uploads\.ungrounded\.net/829000"
-                       r"/829032_picovsbeardx\.swf\?f1641968445",
-            "range": "1",
-            "keyword": {
-                "artist"     : [
-                    "dungeonation",
-                    "carpetbakery",
-                    "animalspeakandrews",
-                    "bill",
-                    "chipollo",
-                    "dylz49",
-                    "gappyshamp",
-                    "pinktophat",
-                    "rad",
-                    "shapeshiftingblob",
-                    "tomfulp",
-                    "voicesbycorey",
-                    "psychogoldfish",
-                ],
-                "comment"    : "re:The children are expendable. Take out the ",
-                "date"       : "dt:2022-01-10 23:00:57",
-                "description": "Bloodshed in The Big House that Blew...again!",
-                "favorites"  : int,
-                "index"      : 829032,
-                "post_url"   : "https://www.newgrounds.com/portal/view/829032",
-                "rating"     : "m",
-                "score"      : float,
-                "tags"       : [
-                    "assassin",
-                    "boyfriend",
-                    "darnell",
-                    "nene",
-                    "pico",
-                    "picos-school",
-                ],
-                "title"      : "PICO VS BEAR DX",
-                "type"       : "game",
-                "url"        : "https://uploads.ungrounded.net/829000"
-                               "/829032_picovsbeardx.swf?f1641968445",
-            },
-        }),
-    )
+    example = "https://www.newgrounds.com/portal/view/12345"
 
     def __init__(self, match):
         NewgroundsExtractor.__init__(self, match)
@@ -461,58 +376,38 @@ class NewgroundsArtExtractor(NewgroundsExtractor):
     """Extractor for all images of a newgrounds user"""
     subcategory = _path = "art"
     pattern = r"(?:https?://)?([\w-]+)\.newgrounds\.com/art/?$"
-    test = ("https://tomfulp.newgrounds.com/art", {
-        "pattern": NewgroundsImageExtractor.pattern,
-        "count": ">= 3",
-    })
+    example = "https://USER.newgrounds.com/art"
 
 
 class NewgroundsAudioExtractor(NewgroundsExtractor):
     """Extractor for all audio submissions of a newgrounds user"""
     subcategory = _path = "audio"
     pattern = r"(?:https?://)?([\w-]+)\.newgrounds\.com/audio/?$"
-    test = ("https://tomfulp.newgrounds.com/audio", {
-        "pattern": r"https://audio.ngfiles.com/\d+/\d+_.+\.mp3",
-        "count": ">= 4",
-    })
+    example = "https://USER.newgrounds.com/audio"
 
 
 class NewgroundsMoviesExtractor(NewgroundsExtractor):
     """Extractor for all movies of a newgrounds user"""
     subcategory = _path = "movies"
     pattern = r"(?:https?://)?([\w-]+)\.newgrounds\.com/movies/?$"
-    test = ("https://tomfulp.newgrounds.com/movies", {
-        "pattern": r"https://uploads.ungrounded.net(/alternate)?/\d+/\d+_.+",
-        "range": "1-10",
-        "count": 10,
-    })
+    example = "https://USER.newgrounds.com/movies"
 
 
 class NewgroundsGamesExtractor(NewgroundsExtractor):
     """Extractor for a newgrounds user's games"""
     subcategory = _path = "games"
     pattern = r"(?:https?://)?([\w-]+)\.newgrounds\.com/games/?$"
-    test = ("https://tomfulp.newgrounds.com/games", {
-        "pattern": r"https://uploads.ungrounded.net(/alternate)?/\d+/\d+_.+",
-        "range": "1-10",
-        "count": 10,
-    })
+    example = "https://USER.newgrounds.com/games"
 
 
 class NewgroundsUserExtractor(NewgroundsExtractor):
     """Extractor for a newgrounds user profile"""
     subcategory = "user"
     pattern = r"(?:https?://)?([\w-]+)\.newgrounds\.com/?$"
-    test = (
-        ("https://tomfulp.newgrounds.com", {
-            "pattern": "https://tomfulp.newgrounds.com/art$",
-        }),
-        ("https://tomfulp.newgrounds.com", {
-            "options": (("include", "all"),),
-            "pattern": "https://tomfulp.newgrounds.com/(art|audio|movies)$",
-            "count": 3,
-        }),
-    )
+    example = "https://USER.newgrounds.com"
+
+    def initialize(self):
+        pass
 
     def items(self):
         base = self.user_root + "/"
@@ -530,15 +425,7 @@ class NewgroundsFavoriteExtractor(NewgroundsExtractor):
     directory_fmt = ("{category}", "{user}", "Favorites")
     pattern = (r"(?:https?://)?([\w-]+)\.newgrounds\.com"
                r"/favorites(?!/following)(?:/(art|audio|movies))?/?")
-    test = (
-        ("https://tomfulp.newgrounds.com/favorites/art", {
-            "range": "1-10",
-            "count": ">= 10",
-        }),
-        ("https://tomfulp.newgrounds.com/favorites/audio"),
-        ("https://tomfulp.newgrounds.com/favorites/movies"),
-        ("https://tomfulp.newgrounds.com/favorites/"),
-    )
+    example = "https://USER.newgrounds.com/favorites"
 
     def __init__(self, match):
         NewgroundsExtractor.__init__(self, match)
@@ -587,11 +474,7 @@ class NewgroundsFollowingExtractor(NewgroundsFavoriteExtractor):
     """Extractor for a newgrounds user's favorited users"""
     subcategory = "following"
     pattern = r"(?:https?://)?([\w-]+)\.newgrounds\.com/favorites/(following)"
-    test = ("https://tomfulp.newgrounds.com/favorites/following", {
-        "pattern": NewgroundsUserExtractor.pattern,
-        "range": "76-125",
-        "count": 50,
-    })
+    example = "https://USER.newgrounds.com/favorites/following"
 
     def items(self):
         data = {"_extractor": NewgroundsUserExtractor}
@@ -612,21 +495,7 @@ class NewgroundsSearchExtractor(NewgroundsExtractor):
     directory_fmt = ("{category}", "search", "{search_tags}")
     pattern = (r"(?:https?://)?(?:www\.)?newgrounds\.com"
                r"/search/conduct/([^/?#]+)/?\?([^#]+)")
-    test = (
-        ("https://www.newgrounds.com/search/conduct/art?terms=tree", {
-            "pattern": NewgroundsImageExtractor.pattern,
-            "keyword": {"search_tags": "tree"},
-            "range": "1-10",
-            "count": 10,
-        }),
-        ("https://www.newgrounds.com/search/conduct/movies?terms=tree", {
-            "pattern": r"https://uploads.ungrounded.net(/alternate)?/\d+/\d+",
-            "range": "1-10",
-            "count": 10,
-        }),
-        ("https://www.newgrounds.com/search/conduct/audio?advanced=1"
-         "&terms=tree+green+nature&match=tdtu&genre=5&suitabilities=e%2Cm"),
-    )
+    example = "https://www.newgrounds.com/search/conduct/art?terms=QUERY"
 
     def __init__(self, match):
         NewgroundsExtractor.__init__(self, match)
@@ -650,7 +519,6 @@ class NewgroundsSearchExtractor(NewgroundsExtractor):
         headers = {
             "Accept": "application/json, text/javascript, */*; q=0.01",
             "X-Requested-With": "XMLHttpRequest",
-            "Referer": self.root,
         }
         params["inner"] = "1"
         params["page"] = 1

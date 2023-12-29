@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2022 Mike Fährmann
+# Copyright 2022-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -27,7 +27,7 @@ class _8chanExtractor(Extractor):
         Extractor.__init__(self, match)
 
     @memcache()
-    def _prepare_cookies(self):
+    def cookies_prepare(self):
         # fetch captcha cookies
         # (necessary to download without getting interrupted)
         now = datetime.utcnow()
@@ -39,14 +39,14 @@ class _8chanExtractor(Extractor):
         # - remove 'expires' timestamp
         # - move 'captchaexpiration' value forward by 1 month)
         domain = self.root.rpartition("/")[2]
-        for cookie in self.session.cookies:
+        for cookie in self.cookies:
             if cookie.domain.endswith(domain):
                 cookie.expires = None
                 if cookie.name == "captchaexpiration":
                     cookie.value = (now + timedelta(30, 300)).strftime(
                         "%a, %d %b %Y %H:%M:%S GMT")
 
-        return self.session.cookies
+        return self.cookies
 
 
 class _8chanThreadExtractor(_8chanExtractor):
@@ -57,48 +57,7 @@ class _8chanThreadExtractor(_8chanExtractor):
     filename_fmt = "{postId}{num:?-//} {filename[:200]}.{extension}"
     archive_fmt = "{boardUri}_{postId}_{num}"
     pattern = BASE_PATTERN + r"/([^/?#]+)/res/(\d+)"
-    test = (
-        ("https://8chan.moe/vhs/res/4.html", {
-            "pattern": r"https://8chan\.moe/\.media/[0-9a-f]{64}\.\w+$",
-            "count": 14,
-            "keyword": {
-                "archived": False,
-                "autoSage": False,
-                "boardDescription": "Film and Cinema",
-                "boardMarkdown": None,
-                "boardName": "Movies",
-                "boardUri": "vhs",
-                "creation": r"re:\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z",
-                "cyclic": False,
-                "email": None,
-                "id": "re:^[0-9a-f]{6}$",
-                "locked": False,
-                "markdown": str,
-                "maxFileCount": 5,
-                "maxFileSize": "32.00 MB",
-                "maxMessageLength": 8001,
-                "message": str,
-                "mime": str,
-                "name": "Anonymous",
-                "num": int,
-                "originalName": str,
-                "path": r"re:/.media/[0-9a-f]{64}\.\w+$",
-                "pinned": False,
-                "postId": int,
-                "signedRole": None,
-                "size": int,
-                "threadId": 4,
-                "thumb": r"re:/.media/t_[0-9a-f]{64}$",
-                "uniquePosters": 9,
-                "usesCustomCss": True,
-                "usesCustomJs": False,
-                "?wsPort": 8880,
-                "?wssPort": 2087,
-            },
-        }),
-        ("https://8chan.se/vhs/res/4.html"),
-        ("https://8chan.cc/vhs/res/4.html"),
-    )
+    example = "https://8chan.moe/a/res/12345.html"
 
     def __init__(self, match):
         _8chanExtractor.__init__(self, match)
@@ -113,7 +72,7 @@ class _8chanThreadExtractor(_8chanExtractor):
         thread["_http_headers"] = {"Referer": url + "html"}
 
         try:
-            self.session.cookies = self._prepare_cookies()
+            self.cookies = self.cookies_prepare()
         except Exception as exc:
             self.log.debug("Failed to fetch captcha cookies:  %s: %s",
                            exc.__class__.__name__, exc, exc_info=True)
@@ -137,20 +96,11 @@ class _8chanBoardExtractor(_8chanExtractor):
     """Extractor for 8chan boards"""
     subcategory = "board"
     pattern = BASE_PATTERN + r"/([^/?#]+)/(?:(\d+)\.html)?$"
-    test = (
-        ("https://8chan.moe/vhs/"),
-        ("https://8chan.moe/vhs/2.html", {
-            "pattern": _8chanThreadExtractor.pattern,
-            "count": 23,
-        }),
-        ("https://8chan.se/vhs/"),
-        ("https://8chan.cc/vhs/"),
-    )
+    example = "https://8chan.moe/a/"
 
     def __init__(self, match):
         _8chanExtractor.__init__(self, match)
         _, self.board, self.page = match.groups()
-        self.session.headers["Referer"] = self.root + "/"
 
     def items(self):
         page = text.parse_int(self.page, 1)

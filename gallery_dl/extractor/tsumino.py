@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2020 Mike Fährmann
+# Copyright 2019-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -16,18 +16,18 @@ from ..cache import cache
 class TsuminoBase():
     """Base class for tsumino extractors"""
     category = "tsumino"
-    cookiedomain = "www.tsumino.com"
+    cookies_domain = "www.tsumino.com"
     root = "https://www.tsumino.com"
 
     def login(self):
         username, password = self._get_auth_info()
         if username:
-            self._update_cookies(self._login_impl(username, password))
+            self.cookies_update(self._login_impl(username, password))
         else:
-            self.session.cookies.setdefault(
+            self.cookies.setdefault(
                 "ASP.NET_SessionId", "x1drgggilez4cpkttneukrc5")
 
-    @cache(maxage=14*24*3600, keyarg=1)
+    @cache(maxage=14*86400, keyarg=1)
     def _login_impl(self, username, password):
         self.log.info("Logging in as %s", username)
         url = "{}/Account/Login".format(self.root)
@@ -37,41 +37,14 @@ class TsuminoBase():
         response = self.request(url, method="POST", headers=headers, data=data)
         if not response.history:
             raise exception.AuthenticationError()
-        return self.session.cookies
+        return self.cookies
 
 
 class TsuminoGalleryExtractor(TsuminoBase, GalleryExtractor):
     """Extractor for image galleries on tsumino.com"""
     pattern = (r"(?i)(?:https?://)?(?:www\.)?tsumino\.com"
                r"/(?:entry|Book/Info|Read/(?:Index|View))/(\d+)")
-    test = (
-        ("https://www.tsumino.com/entry/40996", {
-            "pattern": r"https://content.tsumino.com/parts/40996/\d+\?key=\w+",
-            "keyword": {
-                "title"     : r"re:Shikoshiko Daisuki Nightingale \+ Kaijou",
-                "title_en"  : r"re:Shikoshiko Daisuki Nightingale \+ Kaijou",
-                "title_jp"  : "シコシコ大好きナイチンゲール + 会場限定おまけ本",
-                "gallery_id": 40996,
-                "date"      : "dt:2018-06-29 00:00:00",
-                "count"     : 42,
-                "collection": "",
-                "artist"    : ["Itou Life"],
-                "group"     : ["Itou Life"],
-                "parody"    : list,
-                "characters": list,
-                "tags"      : list,
-                "type"      : "Doujinshi",
-                "rating"    : float,
-                "uploader"  : "sehki",
-                "lang"      : "en",
-                "language"  : "English",
-                "thumbnail" : "https://content.tsumino.com/thumbs/40996/1",
-            },
-        }),
-        ("https://www.tsumino.com/Book/Info/40996"),
-        ("https://www.tsumino.com/Read/View/45834"),
-        ("https://www.tsumino.com/Read/Index/45834"),
-    )
+    example = "https://www.tsumino.com/entry/12345"
 
     def __init__(self, match):
         self.gallery_id = match.group(1)
@@ -131,21 +104,8 @@ class TsuminoGalleryExtractor(TsuminoBase, GalleryExtractor):
 class TsuminoSearchExtractor(TsuminoBase, Extractor):
     """Extractor for search results on tsumino.com"""
     subcategory = "search"
-    pattern = (r"(?i)(?:https?://)?(?:www\.)?tsumino\.com"
-               r"/(?:Books/?)?#(.+)")
-    test = (
-        ("https://www.tsumino.com/Books#?Character=Reimu+Hakurei", {
-            "pattern": TsuminoGalleryExtractor.pattern,
-            "range": "1-40",
-            "count": 40,
-        }),
-        (("http://www.tsumino.com/Books#~(Tags~(~"
-          "(Type~7~Text~'Reimu*20Hakurei~Exclude~false)~"
-          "(Type~'1~Text~'Pantyhose~Exclude~false)))#"), {
-            "pattern": TsuminoGalleryExtractor.pattern,
-            "count": ">= 3",
-        }),
-    )
+    pattern = r"(?i)(?:https?://)?(?:www\.)?tsumino\.com/(?:Books/?)?#(.+)"
+    example = "https://www.tsumino.com/Books#QUERY"
 
     def __init__(self, match):
         Extractor.__init__(self, match)

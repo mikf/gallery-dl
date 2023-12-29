@@ -88,7 +88,7 @@ class ZipPP(PostProcessor):
                 if self.delete:
                     util.remove_file(path)
 
-    def finalize(self, pathfmt, status):
+    def finalize(self, pathfmt):
         if self.zfile:
             self.zfile.close()
 

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # Copyright 2020 Jake Mannens
-# Copyright 2021-2022 Mike Fährmann
+# Copyright 2021-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -19,27 +19,17 @@ BASE_PATTERN = r"(?:https?://)?(?:ww[\dw]?\.)?mangakakalot\.tv"
 class MangakakalotBase():
     """Base class for mangakakalot extractors"""
     category = "mangakakalot"
-    root = "https://ww3.mangakakalot.tv"
+    root = "https://ww6.mangakakalot.tv"
 
 
 class MangakakalotChapterExtractor(MangakakalotBase, ChapterExtractor):
     """Extractor for manga chapters from mangakakalot.tv"""
     pattern = BASE_PATTERN + r"(/chapter/[^/?#]+/chapter[_-][^/?#]+)"
-    test = (
-        ("https://ww3.mangakakalot.tv/chapter/manga-jk986845/chapter-34.2", {
-            "pattern": r"https://cm\.blazefast\.co"
-                       r"/[0-9a-f]{2}/[0-9a-f]{2}/[0-9a-f]{32}\.jpg",
-            "keyword": "0f1586ff52f0f9cbbb25306ae64ab718f8a6a633",
-            "count": 9,
-        }),
-        ("https://mangakakalot.tv/chapter"
-         "/hatarakanai_futari_the_jobless_siblings/chapter_20.1"),
-    )
+    example = "https://ww6.mangakakalot.tv/chapter/manga-ID/chapter-01"
 
     def __init__(self, match):
         self.path = match.group(1)
         ChapterExtractor.__init__(self, match, self.root + self.path)
-        self.session.headers['Referer'] = self.root
 
     def metadata(self, page):
         _     , pos = text.extract(page, '<span itemprop="title">', '<')
@@ -76,13 +66,7 @@ class MangakakalotMangaExtractor(MangakakalotBase, MangaExtractor):
     """Extractor for manga from mangakakalot.tv"""
     chapterclass = MangakakalotChapterExtractor
     pattern = BASE_PATTERN + r"(/manga/[^/?#]+)"
-    test = (
-        ("https://ww3.mangakakalot.tv/manga/manga-jk986845", {
-            "pattern": MangakakalotChapterExtractor.pattern,
-            "count": ">= 30",
-        }),
-        ("https://mangakakalot.tv/manga/lk921810"),
-    )
+    example = "https://ww6.mangakakalot.tv/manga/manga-ID"
 
     def chapters(self, page):
         data = {"lang": "en", "language": "English"}

@@ -27,33 +27,40 @@ class InstagramExtractor(Extractor):
     filename_fmt = "{sidecar_media_id:?/_/}{media_id}.{extension}"
     archive_fmt = "{media_id}"
     root = "https://www.instagram.com"
-    cookiedomain = ".instagram.com"
-    cookienames = ("sessionid",)
+    cookies_domain = ".instagram.com"
+    cookies_names = ("sessionid",)
     request_interval = (6.0, 12.0)
 
     def __init__(self, match):
         Extractor.__init__(self, match)
         self.item = match.group(1)
-        self.api = None
+
+    def _init(self):
         self.www_claim = "0"
         self.csrf_token = util.generate_token()
-        self._logged_in = True
         self._find_tags = re.compile(r"#\w+").findall
+        self._logged_in = True
         self._cursor = None
         self._user = None
 
-    def items(self):
-        self.login()
+        self.cookies.set(
+            "csrftoken", self.csrf_token, domain=self.cookies_domain)
 
         if self.config("api") == "graphql":
             self.api = InstagramGraphqlAPI(self)
         else:
             self.api = InstagramRestAPI(self)
 
+    def items(self):
+        self.login()
+
         data = self.metadata()
         videos = self.config("videos", True)
         previews = self.config("previews", False)
         video_headers = {"User-Agent": "Mozilla/5.0"}
+
+        order = self.config("order-files")
+        reverse = order[0] in ("r", "d") if order else False
 
         for post in self.posts():
 
@@ -71,6 +78,8 @@ class InstagramExtractor(Extractor):
 
             if "date" in post:
                 del post["date"]
+            if reverse:
+                files.reverse()
 
             for file in files:
                 file.update(post)
@@ -81,7 +90,9 @@ class InstagramExtractor(Extractor):
                         file["_http_headers"] = video_headers
                         text.nameext_from_url(url, file)
                         yield Message.Url, url, file
-                    if not previews:
+                    if previews:
+                        file["media_id"] += "p"
+                    else:
                         continue
 
                 url = file["display_url"]
@@ -126,14 +137,14 @@ class InstagramExtractor(Extractor):
         return response
 
     def login(self):
-        if not self._check_cookies(self.cookienames):
-            username, password = self._get_auth_info()
-            if username:
-                self._update_cookies(_login_impl(self, username, password))
-            else:
-                self._logged_in = False
-        self.session.cookies.set(
-            "csrftoken", self.csrf_token, domain=self.cookiedomain)
+        if self.cookies_check(self.cookies_names):
+            return
+
+        username, password = self._get_auth_info()
+        if username:
+            return self.cookies_update(_login_impl(self, username, password))
+
+        self._logged_in = False
 
     def _parse_post_rest(self, post):
         if "items" in post:  # story or highlight
@@ -199,11 +210,17 @@ class InstagramExtractor(Extractor):
         data["_files"] = files = []
         for num, item in enumerate(items, 1):
 
-            image = item["image_versions2"]["candidates"][0]
+            try:
+                image = item["image_versions2"]["candidates"][0]
+            except Exception:
+                self.log.warning("Missing media in post %s",
+                                 data["post_shortcode"])
+                continue
 
-            if "video_versions" in item:
+            video_versions = item.get("video_versions")
+            if video_versions:
                 video = max(
-                    item["video_versions"],
+                    video_versions,
                     key=lambda x: (x["width"], x["height"], x["type"]),
                 )
                 media = video
@@ -387,11 +404,13 @@ class InstagramUserExtractor(InstagramExtractor):
     """Extractor for an Instagram user profile"""
     subcategory = "user"
     pattern = USER_PATTERN + r"/?(?:$|[?#])"
-    test = (
-        ("https://www.instagram.com/instagram/"),
-        ("https://www.instagram.com/instagram/?hl=en"),
-        ("https://www.instagram.com/id:25025320/"),
-    )
+    example = "https://www.instagram.com/USER/"
+
+    def initialize(self):
+        pass
+
+    def finalize(self):
+        pass
 
     def items(self):
         base = "{}/{}/".format(self.root, self.item)
@@ -410,10 +429,7 @@ class InstagramPostsExtractor(InstagramExtractor):
     """Extractor for an Instagram user's posts"""
     subcategory = "posts"
     pattern = USER_PATTERN + r"/posts"
-    test = ("https://www.instagram.com/instagram/posts/", {
-        "range": "1-16",
-        "count": ">= 16",
-    })
+    example = "https://www.instagram.com/USER/posts/"
 
     def posts(self):
         uid = self.api.user_id(self.item)
@@ -424,10 +440,7 @@ class InstagramReelsExtractor(InstagramExtractor):
     """Extractor for an Instagram user's reels"""
     subcategory = "reels"
     pattern = USER_PATTERN + r"/reels"
-    test = ("https://www.instagram.com/instagram/reels/", {
-        "range": "40-60",
-        "count": ">= 20",
-    })
+    example = "https://www.instagram.com/USER/reels/"
 
     def posts(self):
         uid = self.api.user_id(self.item)
@@ -438,15 +451,7 @@ class InstagramTaggedExtractor(InstagramExtractor):
     """Extractor for an Instagram user's tagged posts"""
     subcategory = "tagged"
     pattern = USER_PATTERN + r"/tagged"
-    test = ("https://www.instagram.com/instagram/tagged/", {
-        "range": "1-16",
-        "count": ">= 16",
-        "keyword": {
-            "tagged_owner_id" : "25025320",
-            "tagged_username" : "instagram",
-            "tagged_full_name": "Instagram",
-        },
-    })
+    example = "https://www.instagram.com/USER/tagged/"
 
     def metadata(self):
         if self.item.startswith("id:"):
@@ -470,11 +475,7 @@ class InstagramGuideExtractor(InstagramExtractor):
     """Extractor for an Instagram guide"""
     subcategory = "guide"
     pattern = USER_PATTERN + r"/guide/[^/?#]+/(\d+)"
-    test = (("https://www.instagram.com/kadakaofficial/guide"
-             "/knit-i-need-collection/18131821684305217/"), {
-        "range": "1-16",
-        "count": ">= 16",
-    })
+    example = "https://www.instagram.com/USER/guide/NAME/12345"
 
     def __init__(self, match):
         InstagramExtractor.__init__(self, match)
@@ -491,10 +492,7 @@ class InstagramSavedExtractor(InstagramExtractor):
     """Extractor for an Instagram user's saved media"""
     subcategory = "saved"
     pattern = USER_PATTERN + r"/saved(?:/all-posts)?/?$"
-    test = (
-        ("https://www.instagram.com/instagram/saved/"),
-        ("https://www.instagram.com/instagram/saved/all-posts/"),
-    )
+    example = "https://www.instagram.com/USER/saved/"
 
     def posts(self):
         return self.api.user_saved()
@@ -504,9 +502,7 @@ class InstagramCollectionExtractor(InstagramExtractor):
     """Extractor for Instagram collection"""
     subcategory = "collection"
     pattern = USER_PATTERN + r"/saved/([^/?#]+)/([^/?#]+)"
-    test = (
-        "https://www.instagram.com/instagram/saved/collection_name/123456789/",
-    )
+    example = "https://www.instagram.com/USER/saved/COLLECTION/12345"
 
     def __init__(self, match):
         InstagramExtractor.__init__(self, match)
@@ -528,14 +524,7 @@ class InstagramStoriesExtractor(InstagramExtractor):
     pattern = (r"(?:https?://)?(?:www\.)?instagram\.com"
                r"/s(?:tories/(?:highlights/(\d+)|([^/?#]+)(?:/(\d+))?)"
                r"|/(aGlnaGxpZ2h0[^?#]+)(?:\?story_media_id=(\d+))?)")
-    test = (
-        ("https://www.instagram.com/stories/instagram/"),
-        ("https://www.instagram.com/stories/highlights/18042509488170095/"),
-        ("https://instagram.com/stories/geekmig/2724343156064789461"),
-        ("https://www.instagram.com/s/aGlnaGxpZ2h0OjE4MDQyNTA5NDg4MTcwMDk1"),
-        ("https://www.instagram.com/s/aGlnaGxpZ2h0OjE4MDQyNTA5NDg4MTcwMDk1"
-         "?story_media_id=2724343156064789461"),
-    )
+    example = "https://www.instagram.com/stories/USER/"
 
     def __init__(self, match):
         h1, self.user, m1, h2, m2 = match.groups()
@@ -570,11 +559,25 @@ class InstagramHighlightsExtractor(InstagramExtractor):
     """Extractor for an Instagram user's story highlights"""
     subcategory = "highlights"
     pattern = USER_PATTERN + r"/highlights"
-    test = ("https://www.instagram.com/instagram/highlights",)
+    example = "https://www.instagram.com/USER/highlights/"
 
     def posts(self):
         uid = self.api.user_id(self.item)
         return self.api.highlights_media(uid)
+
+
+class InstagramFollowingExtractor(InstagramExtractor):
+    """Extractor for an Instagram user's followed users"""
+    subcategory = "following"
+    pattern = USER_PATTERN + r"/following"
+    example = "https://www.instagram.com/USER/following/"
+
+    def items(self):
+        uid = self.api.user_id(self.item)
+        for user in self.api.user_following(uid):
+            user["_extractor"] = InstagramUserExtractor
+            url = "{}/{}".format(self.root, user["username"])
+            yield Message.Queue, url, user
 
 
 class InstagramTagExtractor(InstagramExtractor):
@@ -582,10 +585,7 @@ class InstagramTagExtractor(InstagramExtractor):
     subcategory = "tag"
     directory_fmt = ("{category}", "{subcategory}", "{tag}")
     pattern = BASE_PATTERN + r"/explore/tags/([^/?#]+)"
-    test = ("https://www.instagram.com/explore/tags/instagram/", {
-        "range": "1-16",
-        "count": ">= 16",
-    })
+    example = "https://www.instagram.com/explore/tags/TAG/"
 
     def metadata(self):
         return {"tag": text.unquote(self.item)}
@@ -598,10 +598,7 @@ class InstagramAvatarExtractor(InstagramExtractor):
     """Extractor for an Instagram user's avatar"""
     subcategory = "avatar"
     pattern = USER_PATTERN + r"/avatar"
-    test = ("https://www.instagram.com/instagram/avatar", {
-        "pattern": r"https://instagram\.[\w.-]+\.fbcdn\.net/v/t51\.2885-19"
-                   r"/281440578_1088265838702675_6233856337905829714_n\.jpg",
-    })
+    example = "https://www.instagram.com/USER/avatar/"
 
     def posts(self):
         if self._logged_in:
@@ -641,105 +638,10 @@ class InstagramPostExtractor(InstagramExtractor):
     subcategory = "post"
     pattern = (r"(?:https?://)?(?:www\.)?instagram\.com"
                r"/(?:[^/?#]+/)?(?:p|tv|reel)/([^/?#]+)")
-    test = (
-        # GraphImage
-        ("https://www.instagram.com/p/BqvsDleB3lV/", {
-            "pattern": r"https://[^/]+\.(cdninstagram\.com|fbcdn\.net)"
-                       r"/v(p/[0-9a-f]+/[0-9A-F]+)?/t51.2885-15/e35"
-                       r"/44877605_725955034447492_3123079845831750529_n.jpg",
-            "keyword": {
-                "date": "dt:2018-11-29 01:04:04",
-                "description": str,
-                "height": int,
-                "likes": int,
-                "location_id": "214424288",
-                "location_slug": "hong-kong",
-                "location_url": "re:/explore/locations/214424288/hong-kong/",
-                "media_id": "1922949326347663701",
-                "shortcode": "BqvsDleB3lV",
-                "post_id": "1922949326347663701",
-                "post_shortcode": "BqvsDleB3lV",
-                "post_url": "https://www.instagram.com/p/BqvsDleB3lV/",
-                "tags": ["#WHPsquares"],
-                "typename": "GraphImage",
-                "username": "instagram",
-                "width": int,
-            }
-        }),
-        # GraphSidecar
-        ("https://www.instagram.com/p/BoHk1haB5tM/", {
-            "count": 5,
-            "keyword": {
-                "sidecar_media_id": "1875629777499953996",
-                "sidecar_shortcode": "BoHk1haB5tM",
-                "post_id": "1875629777499953996",
-                "post_shortcode": "BoHk1haB5tM",
-                "post_url": "https://www.instagram.com/p/BoHk1haB5tM/",
-                "num": int,
-                "likes": int,
-                "username": "instagram",
-            }
-        }),
-        # GraphVideo
-        ("https://www.instagram.com/p/Bqxp0VSBgJg/", {
-            "pattern": r"/46840863_726311431074534_7805566102611403091_n\.mp4",
-            "keyword": {
-                "date": "dt:2018-11-29 19:23:58",
-                "description": str,
-                "height": int,
-                "likes": int,
-                "media_id": "1923502432034620000",
-                "post_url": "https://www.instagram.com/p/Bqxp0VSBgJg/",
-                "shortcode": "Bqxp0VSBgJg",
-                "tags": ["#ASMR"],
-                "typename": "GraphVideo",
-                "username": "instagram",
-                "width": int,
-            }
-        }),
-        # GraphVideo (IGTV)
-        ("https://www.instagram.com/tv/BkQjCfsBIzi/", {
-            "pattern": r"/10000000_597132547321814_702169244961988209_n\.mp4",
-            "keyword": {
-                "date": "dt:2018-06-20 19:51:32",
-                "description": str,
-                "height": int,
-                "likes": int,
-                "media_id": "1806097553666903266",
-                "post_url": "https://www.instagram.com/p/BkQjCfsBIzi/",
-                "shortcode": "BkQjCfsBIzi",
-                "typename": "GraphVideo",
-                "username": "instagram",
-                "width": int,
-            }
-        }),
-        # GraphSidecar with 2 embedded GraphVideo objects
-        ("https://www.instagram.com/p/BtOvDOfhvRr/", {
-            "count": 2,
-            "keyword": {
-                "post_url": "https://www.instagram.com/p/BtOvDOfhvRr/",
-                "sidecar_media_id": "1967717017113261163",
-                "sidecar_shortcode": "BtOvDOfhvRr",
-                "video_url": str,
-            }
-        }),
-        # GraphImage with tagged user
-        ("https://www.instagram.com/p/B_2lf3qAd3y/", {
-            "keyword": {
-                "tagged_users": [{
-                    "id"       : "1246468638",
-                    "username" : "kaaymbl",
-                    "full_name": "Call Me Kay",
-                }]
-            }
-        }),
-        # URL with username (#2085)
-        ("https://www.instagram.com/dm/p/CW042g7B9CY/"),
-        ("https://www.instagram.com/reel/CDg_6Y1pxWu/"),
-    )
+    example = "https://www.instagram.com/p/abcdefg/"
 
     def posts(self):
-        return self.api.media(id_from_shortcode(self.item))
+        return self.api.media(self.item)
 
 
 class InstagramRestAPI():
@@ -756,9 +658,19 @@ class InstagramRestAPI():
         endpoint = "/v1/guides/guide/{}/".format(guide_id)
         return self._pagination_guides(endpoint)
 
-    def highlights_media(self, user_id):
-        chunk_size = 5
+    def highlights_media(self, user_id, chunk_size=5):
         reel_ids = [hl["id"] for hl in self.highlights_tray(user_id)]
+
+        order = self.extractor.config("order-posts")
+        if order:
+            if order in ("desc", "reverse"):
+                reel_ids.reverse()
+            elif order in ("id", "id_asc"):
+                reel_ids.sort(key=lambda r: int(r[10:]))
+            elif order == "id_desc":
+                reel_ids.sort(key=lambda r: int(r[10:]), reverse=True)
+            elif order != "asc":
+                self.extractor.log.warning("Unknown posts order '%s'", order)
 
         for offset in range(0, len(reel_ids), chunk_size):
             yield from self.reels_media(
@@ -768,8 +680,10 @@ class InstagramRestAPI():
         endpoint = "/v1/highlights/{}/highlights_tray/".format(user_id)
         return self._call(endpoint)["tray"]
 
-    def media(self, post_id):
-        endpoint = "/v1/media/{}/info/".format(post_id)
+    def media(self, shortcode):
+        if len(shortcode) > 28:
+            shortcode = shortcode[:-28]
+        endpoint = "/v1/media/{}/info/".format(id_from_shortcode(shortcode))
         return self._pagination(endpoint)
 
     def reels_media(self, reel_ids):
@@ -797,15 +711,20 @@ class InstagramRestAPI():
     def user_by_name(self, screen_name):
         endpoint = "/v1/users/web_profile_info/"
         params = {"username": screen_name}
-        return self._call(endpoint, params=params)["data"]["user"]
+        return self._call(
+            endpoint, params=params, notfound="user")["data"]["user"]
 
+    @memcache(keyarg=1)
     def user_by_id(self, user_id):
         endpoint = "/v1/users/{}/info/".format(user_id)
         return self._call(endpoint)["user"]
 
     def user_id(self, screen_name, check_private=True):
         if screen_name.startswith("id:"):
+            if self.extractor.config("metadata"):
+                self.extractor._user = self.user_by_id(screen_name[3:])
             return screen_name[3:]
+
         user = self.user_by_name(screen_name)
         if user is None:
             raise exception.AuthorizationError(
@@ -838,6 +757,11 @@ class InstagramRestAPI():
         params = {"count": 30}
         return self._pagination(endpoint, params)
 
+    def user_following(self, user_id):
+        endpoint = "/v1/friendships/{}/following/".format(user_id)
+        params = {"count": 12}
+        return self._pagination_following(endpoint, params)
+
     def user_saved(self):
         endpoint = "/v1/feed/saved/posts/"
         params = {"count": 50}
@@ -845,7 +769,7 @@ class InstagramRestAPI():
 
     def user_tagged(self, user_id):
         endpoint = "/v1/usertags/{}/feed/".format(user_id)
-        params = {"count": 50}
+        params = {"count": 20}
         return self._pagination(endpoint, params)
 
     def _call(self, endpoint, **kwargs):
@@ -855,13 +779,15 @@ class InstagramRestAPI():
         kwargs["headers"] = {
             "Accept"          : "*/*",
             "X-CSRFToken"     : extr.csrf_token,
-            "X-Instagram-AJAX": "1006242110",
             "X-IG-App-ID"     : "936619743392459",
-            "X-ASBD-ID"       : "198387",
+            "X-ASBD-ID"       : "129477",
             "X-IG-WWW-Claim"  : extr.www_claim,
             "X-Requested-With": "XMLHttpRequest",
-            "Alt-Used"        : "www.instagram.com",
+            "Connection"      : "keep-alive",
             "Referer"         : extr.root + "/",
+            "Sec-Fetch-Dest"  : "empty",
+            "Sec-Fetch-Mode"  : "cors",
+            "Sec-Fetch-Site"  : "same-origin",
         }
         return extr.request(url, **kwargs).json()
 
@@ -927,6 +853,20 @@ class InstagramRestAPI():
                 return extr._update_cursor(None)
             params["max_id"] = extr._update_cursor(data["next_max_id"])
 
+    def _pagination_following(self, endpoint, params):
+        extr = self.extractor
+        params["max_id"] = text.parse_int(extr._init_cursor())
+
+        while True:
+            data = self._call(endpoint, params=params)
+
+            yield from data["users"]
+
+            if len(data["users"]) < params["count"]:
+                return extr._update_cursor(None)
+            params["max_id"] = extr._update_cursor(
+                params["max_id"] + params["count"])
+
 
 class InstagramGraphqlAPI():
 
@@ -961,10 +901,10 @@ class InstagramGraphqlAPI():
                  ["edge_highlight_reels"]["edges"])
         return [edge["node"] for edge in edges]
 
-    def media(self, post_id):
+    def media(self, shortcode):
         query_hash = "9f8827793ef34641b2fb195d4d41151c"
         variables = {
-            "shortcode": shortcode_from_id(post_id),
+            "shortcode": shortcode,
             "child_comment_count": 3,
             "fetch_comment_count": 40,
             "parent_comment_count": 24,
@@ -1037,7 +977,7 @@ class InstagramGraphqlAPI():
             variables["after"] = extr._update_cursor(info["end_cursor"])
 
 
-@cache(maxage=90*24*3600, keyarg=1)
+@cache(maxage=90*86400, keyarg=1)
 def _login_impl(extr, username, password):
     extr.log.error("Login with username & password is no longer supported. "
                    "Use browser cookies instead.")

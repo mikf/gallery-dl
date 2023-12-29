@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2020 Mike Fährmann
+# Copyright 2019-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -19,14 +19,14 @@ class MangoxoExtractor(Extractor):
     """Base class for mangoxo extractors"""
     category = "mangoxo"
     root = "https://www.mangoxo.com"
-    cookiedomain = "www.mangoxo.com"
-    cookienames = ("SESSION",)
+    cookies_domain = "www.mangoxo.com"
+    cookies_names = ("SESSION",)
     _warning = True
 
     def login(self):
         username, password = self._get_auth_info()
         if username:
-            self._update_cookies(self._login_impl(username, password))
+            self.cookies_update(self._login_impl(username, password))
         elif MangoxoExtractor._warning:
             MangoxoExtractor._warning = False
             self.log.warning("Unauthenticated users cannot see "
@@ -51,7 +51,7 @@ class MangoxoExtractor(Extractor):
         data = response.json()
         if str(data.get("result")) != "1":
             raise exception.AuthenticationError(data.get("msg"))
-        return {"SESSION": self.session.cookies.get("SESSION")}
+        return {"SESSION": self.cookies.get("SESSION")}
 
     @staticmethod
     def _sign_by_md5(username, password, token):
@@ -80,25 +80,7 @@ class MangoxoAlbumExtractor(MangoxoExtractor):
     directory_fmt = ("{category}", "{channel[name]}", "{album[name]}")
     archive_fmt = "{album[id]}_{num}"
     pattern = r"(?:https?://)?(?:www\.)?mangoxo\.com/album/(\w+)"
-    test = ("https://www.mangoxo.com/album/lzVOv1Q9", {
-        "url": "ad921fe62663b06e7d73997f7d00646cab7bdd0d",
-        "keyword": {
-            "channel": {
-                "id": "gaxO16d8",
-                "name": "Phoenix",
-                "cover": str,
-            },
-            "album": {
-                "id": "lzVOv1Q9",
-                "name": "re:池永康晟 Ikenaga Yasunari 透出古朴",
-                "date": "dt:2019-03-22 14:42:00",
-                "description": str,
-            },
-            "id": int,
-            "num": int,
-            "count": 65,
-        },
-    })
+    example = "https://www.mangoxo.com/album/ID"
 
     def __init__(self, match):
         MangoxoExtractor.__init__(self, match)
@@ -163,11 +145,7 @@ class MangoxoChannelExtractor(MangoxoExtractor):
     """Extractor for all albums on a mangoxo channel"""
     subcategory = "channel"
     pattern = r"(?:https?://)?(?:www\.)?mangoxo\.com/(\w+)/album"
-    test = ("https://www.mangoxo.com/phoenix/album", {
-        "pattern": MangoxoAlbumExtractor.pattern,
-        "range": "1-30",
-        "count": "> 20",
-    })
+    example = "https://www.mangoxo.com/USER/album"
 
     def __init__(self, match):
         MangoxoExtractor.__init__(self, match)

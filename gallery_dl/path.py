@@ -98,6 +98,8 @@ class PathFormat():
             restrict = "\\\\|/<>:\"?*"
         elif restrict == "ascii":
             restrict = "^0-9A-Za-z_."
+        elif restrict == "ascii+":
+            restrict = "^0-9@-[\\]-{ #-)+-.;=!}~"
         self.clean_segment = self._build_cleanfunc(restrict, replace)
 
         remove = config("path-remove", "\x00-\x1f\x7f")

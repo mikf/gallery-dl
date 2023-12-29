@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2022 Mike Fährmann
+# Copyright 2022-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -40,33 +40,7 @@ class VichanThreadExtractor(VichanExtractor):
     filename_fmt = "{time}{num:?-//} {filename}.{extension}"
     archive_fmt = "{board}_{thread}_{tim}"
     pattern = BASE_PATTERN + r"/([^/?#]+)/res/(\d+)"
-    test = (
-        ("https://8kun.top/test/res/65248.html", {
-            "pattern": r"https://media\.128ducks\.com/file_store/\w{64}\.\w+",
-            "count": ">= 8",
-        }),
-        # old-style file URLs (#1101)
-        #  ("https://8kun.top/d/res/13258.html", {
-        #      "pattern": r"https://media\.128ducks\.com/d/src/\d+(-\d)?\.\w+",
-        #      "range": "1-20",
-        #  }),
-
-        ("https://wikieat.club/cel/res/25321.html", {
-            "pattern": r"https://wikieat\.club/cel/src/\d+(-\d)?\.\w+",
-            "count": ">= 200",
-        }),
-
-        ("https://smuglo.li/a/res/1154380.html", {
-            "pattern": r"https://smug.+/a/src/\d+(-\d)?\.\w+",
-            "count": ">= 18",
-            "keyword": {
-                "board": "a",
-                "thread": "1154380",
-                "title": "Mob Psycho 100 Season 3",
-            },
-        }),
-        ("https://smugloli.net/a/res/1145409.html"),
-    )
+    example = "https://8kun.top/a/res/12345.html"
 
     def __init__(self, match):
         VichanExtractor.__init__(self, match)
@@ -123,28 +97,7 @@ class VichanBoardExtractor(VichanExtractor):
     """Extractor for vichan boards"""
     subcategory = "board"
     pattern = BASE_PATTERN + r"/([^/?#]+)(?:/index|/catalog|/\d+|/?$)"
-    test = (
-        ("https://8kun.top/v/index.html", {
-            "pattern": VichanThreadExtractor.pattern,
-            "count": ">= 100",
-        }),
-        ("https://8kun.top/v/2.html"),
-        ("https://8kun.top/v/index.html?PageSpeed=noscript"),
-
-        ("https://wikieat.club/cel/index.html", {
-            "pattern": VichanThreadExtractor.pattern,
-            "count": ">= 100",
-        }),
-        ("https://wikieat.club/cel/catalog.html"),
-        ("https://wikieat.club/cel/2.html"),
-
-        ("https://smuglo.li/a", {
-            "pattern": VichanThreadExtractor.pattern,
-            "count": ">= 100",
-        }),
-        ("https://smuglo.li/a/1.html"),
-        ("https://smugloli.net/cute/catalog.html"),
-    )
+    example = "https://8kun.top/a/"
 
     def __init__(self, match):
         VichanExtractor.__init__(self, match)

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2022 Mike Fährmann
+# Copyright 2015-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -25,23 +25,14 @@ class MangahereChapterExtractor(MangahereBase, ChapterExtractor):
     """Extractor for manga-chapters from mangahere.cc"""
     pattern = (r"(?:https?://)?(?:www\.|m\.)?mangahere\.c[co]/manga/"
                r"([^/]+(?:/v0*(\d+))?/c([^/?#]+))")
-    test = (
-        ("https://www.mangahere.cc/manga/dongguo_xiaojie/c004.2/", {
-            "keyword": "7c98d7b50a47e6757b089aa875a53aa970cac66f",
-            "content": "708d475f06893b88549cbd30df1e3f9428f2c884",
-        }),
-        # URLs without HTTP scheme (#1070)
-        ("https://www.mangahere.cc/manga/beastars/c196/1.html", {
-            "pattern": "https://zjcdn.mangahere.org/.*",
-        }),
-        ("http://www.mangahere.co/manga/dongguo_xiaojie/c003.2/"),
-        ("http://m.mangahere.co/manga/dongguo_xiaojie/c003.2/"),
-    )
+    example = "https://www.mangahere.cc/manga/TITLE/c001/1.html"
 
     def __init__(self, match):
         self.part, self.volume, self.chapter = match.groups()
         url = self.url_fmt.format(self.part, 1)
         ChapterExtractor.__init__(self, match, url)
+
+    def _init(self):
         self.session.headers["Referer"] = self.root_mobile + "/"
 
     def metadata(self, page):
@@ -93,28 +84,10 @@ class MangahereMangaExtractor(MangahereBase, MangaExtractor):
     chapterclass = MangahereChapterExtractor
     pattern = (r"(?:https?://)?(?:www\.|m\.)?mangahere\.c[co]"
                r"(/manga/[^/?#]+/?)(?:#.*)?$")
-    test = (
-        ("https://www.mangahere.cc/manga/aria/", {
-            "url": "9c2e54ec42e9a87ad53096c328b33c90750af3e4",
-            "keyword": "71503c682c5d0c277a50409a8c5fd78e871e3d69",
-            "count": 71,
-        }),
-        ("https://www.mangahere.cc/manga/hiyokoi/#50", {
-            "url": "654850570aa03825cd57e2ae2904af489602c523",
-            "keyword": "c8084d89a9ea6cf40353093669f9601a39bf5ca2",
-        }),
-        # adult filter (#556)
-        ("http://www.mangahere.cc/manga/gunnm_mars_chronicle/", {
-            "pattern": MangahereChapterExtractor.pattern,
-            "count": ">= 50",
-        }),
-        ("https://www.mangahere.co/manga/aria/"),
-        ("https://m.mangahere.co/manga/aria/"),
-    )
+    example = "https://www.mangahere.cc/manga/TITLE"
 
-    def __init__(self, match):
-        MangaExtractor.__init__(self, match)
-        self.session.cookies.set("isAdult", "1", domain="www.mangahere.cc")
+    def _init(self):
+        self.cookies.set("isAdult", "1", domain="www.mangahere.cc")
 
     def chapters(self, page):
         results = []

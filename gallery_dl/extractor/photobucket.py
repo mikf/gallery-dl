@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019 Mike Fährmann
+# Copyright 2019-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract images from https://photobucket.com/"""
+"""Extractors for https://photobucket.com/"""
 
 from .common import Extractor, Message
 from .. import text, exception
@@ -23,34 +23,13 @@ class PhotobucketAlbumExtractor(Extractor):
     archive_fmt = "{id}"
     pattern = (r"(?:https?://)?((?:[\w-]+\.)?photobucket\.com)"
                r"/user/[^/?&#]+/library(?:/[^?&#]*)?")
-    test = (
-        ("https://s369.photobucket.com/user/CrpyLrkr/library", {
-            "pattern": r"https?://[oi]+\d+.photobucket.com/albums/oo139/",
-            "count": ">= 50"
-        }),
-        # subalbums of main "directory"
-        ("https://s271.photobucket.com/user/lakerfanryan/library/", {
-            "options": (("image-filter", "False"),),
-            "pattern": pattern,
-            "count": 1,
-        }),
-        # subalbums of subalbum without images
-        ("https://s271.photobucket.com/user/lakerfanryan/library/Basketball", {
-            "pattern": pattern,
-            "count": ">= 9",
-        }),
-        # private (missing JSON data)
-        ("https://s1277.photobucket.com/user/sinisterkat44/library/", {
-            "count": 0,
-        }),
-        ("https://s1110.photobucket.com/user/chndrmhn100/library/"
-         "Chandu%20is%20the%20King?sort=3&page=1"),
-    )
+    example = "https://s123.photobucket.com/user/USER/library"
 
     def __init__(self, match):
-        Extractor.__init__(self, match)
-        self.album_path = ""
         self.root = "https://" + match.group(1)
+        Extractor.__init__(self, match)
+
+    def _init(self):
         self.session.headers["Referer"] = self.url
 
     def items(self):
@@ -112,23 +91,14 @@ class PhotobucketImageExtractor(Extractor):
     pattern = (r"(?:https?://)?(?:[\w-]+\.)?photobucket\.com"
                r"(?:/gallery/user/([^/?&#]+)/media/([^/?&#]+)"
                r"|/user/([^/?&#]+)/media/[^?&#]+\.html)")
-    test = (
-        (("https://s271.photobucket.com/user/lakerfanryan"
-          "/media/Untitled-3-1.jpg.html"), {
-            "url": "3b647deeaffc184cc48c89945f67574559c9051f",
-            "keyword": "69732741b2b351db7ecaa77ace2fdb39f08ca5a3",
-        }),
-        (("https://s271.photobucket.com/user/lakerfanryan"
-          "/media/IsotopeswBros.jpg.html?sort=3&o=2"), {
-            "url": "12c1890c09c9cdb8a88fba7eec13f324796a8d7b",
-            "keyword": "61200a223df6c06f45ac3d30c88b3f5b048ce9a8",
-        }),
-    )
+    example = "https://s123.photobucket.com/user/USER/media/NAME.EXT.html"
 
     def __init__(self, match):
         Extractor.__init__(self, match)
         self.user = match.group(1) or match.group(3)
         self.media_id = match.group(2)
+
+    def _init(self):
         self.session.headers["Referer"] = self.url
 
     def items(self):

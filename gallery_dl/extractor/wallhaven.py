@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2022 Mike Fährmann
+# Copyright 2018-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -9,18 +9,18 @@
 """Extractors for https://wallhaven.cc/"""
 
 from .common import Extractor, Message
-from .. import text
+from .. import text, exception
 
 
 class WallhavenExtractor(Extractor):
     """Base class for wallhaven extractors"""
     category = "wallhaven"
+    root = "https://wallhaven.cc"
     filename_fmt = "{category}_{id}_{resolution}.{extension}"
     archive_fmt = "{id}"
-    root = "https://wallhaven.cc"
+    request_interval = 1.4
 
-    def __init__(self, match):
-        Extractor.__init__(self, match)
+    def _init(self):
         self.api = WallhavenAPI(self)
 
     def items(self):
@@ -57,15 +57,7 @@ class WallhavenSearchExtractor(WallhavenExtractor):
     directory_fmt = ("{category}", "{search[q]}")
     archive_fmt = "s_{search[q]}_{id}"
     pattern = r"(?:https?://)?wallhaven\.cc/search(?:/?\?([^#]+))?"
-    test = (
-        ("https://wallhaven.cc/search?q=touhou"),
-        (("https://wallhaven.cc/search?q=id%3A87"
-          "&categories=111&purity=100&sorting=date_added&order=asc&page=3"), {
-            "pattern": (r"https://w\.wallhaven\.cc"
-                        r"/full/\w\w/wallhaven-\w+\.\w+"),
-            "count": "<= 30",
-        }),
-    )
+    example = "https://wallhaven.cc/search?q=QUERY"
 
     def __init__(self, match):
         WallhavenExtractor.__init__(self, match)
@@ -83,9 +75,7 @@ class WallhavenCollectionExtractor(WallhavenExtractor):
     subcategory = "collection"
     directory_fmt = ("{category}", "{username}", "{collection_id}")
     pattern = r"(?:https?://)?wallhaven\.cc/user/([^/?#]+)/favorites/(\d+)"
-    test = ("https://wallhaven.cc/user/AksumkA/favorites/74", {
-        "count": ">= 50",
-    })
+    example = "https://wallhaven.cc/user/USER/favorites/12345"
 
     def __init__(self, match):
         WallhavenExtractor.__init__(self, match)
@@ -102,11 +92,14 @@ class WallhavenUserExtractor(WallhavenExtractor):
     """Extractor for a wallhaven user"""
     subcategory = "user"
     pattern = r"(?:https?://)?wallhaven\.cc/user/([^/?#]+)/?$"
-    test = ("https://wallhaven.cc/user/AksumkA/",)
+    example = "https://wallhaven.cc/user/USER"
 
     def __init__(self, match):
         WallhavenExtractor.__init__(self, match)
         self.username = match.group(1)
+
+    def initialize(self):
+        pass
 
     def items(self):
         base = "{}/user/{}/".format(self.root, self.username)
@@ -120,10 +113,7 @@ class WallhavenCollectionsExtractor(WallhavenExtractor):
     """Extractor for all collections of a wallhaven user"""
     subcategory = "collections"
     pattern = r"(?:https?://)?wallhaven\.cc/user/([^/?#]+)/favorites/?$"
-    test = ("https://wallhaven.cc/user/AksumkA/favorites", {
-        "pattern": WallhavenCollectionExtractor.pattern,
-        "count": 4,
-    })
+    example = "https://wallhaven.cc/user/USER/favorites"
 
     def __init__(self, match):
         WallhavenExtractor.__init__(self, match)
@@ -143,12 +133,7 @@ class WallhavenUploadsExtractor(WallhavenExtractor):
     directory_fmt = ("{category}", "{username}")
     archive_fmt = "u_{username}_{id}"
     pattern = r"(?:https?://)?wallhaven\.cc/user/([^/?#]+)/uploads"
-    test = ("https://wallhaven.cc/user/AksumkA/uploads", {
-        "pattern": (r"https://[^.]+\.wallhaven\.cc"
-                    r"/full/\w\w/wallhaven-\w+\.\w+"),
-        "range": "1-100",
-        "count": 100,
-    })
+    example = "https://wallhaven.cc/user/USER/uploads"
 
     def __init__(self, match):
         WallhavenExtractor.__init__(self, match)
@@ -167,41 +152,7 @@ class WallhavenImageExtractor(WallhavenExtractor):
     subcategory = "image"
     pattern = (r"(?:https?://)?(?:wallhaven\.cc/w/|whvn\.cc/"
                r"|w\.wallhaven\.cc/[a-z]+/\w\w/wallhaven-)(\w+)")
-    test = (
-        ("https://wallhaven.cc/w/01w334", {
-            "pattern": (r"https://[^.]+\.wallhaven\.cc"
-                        r"/full/01/wallhaven-01w334\.jpg"),
-            "content": "497212679383a465da1e35bd75873240435085a2",
-            "keyword": {
-                "id"         : "01w334",
-                "width"      : 1920,
-                "height"     : 1200,
-                "resolution" : "1920x1200",
-                "ratio"      : "1.6",
-                "colors"     : list,
-                "tags"       : list,
-                "file_size"  : 278799,
-                "file_type"  : "image/jpeg",
-                "purity"     : "sfw",
-                "short_url"  : "https://whvn.cc/01w334",
-                "source"     : str,
-                "uploader"   : {
-                    "group"    : "Owner/Developer",
-                    "username" : "AksumkA",
-                },
-                "date"       : "dt:2014-08-31 06:17:19",
-                "wh_category": "anime",
-                "views"      : int,
-                "favorites"  : int,
-            },
-        }),
-        # NSFW
-        ("https://wallhaven.cc/w/dge6v3", {
-            "url": "e4b802e70483f659d790ad5d0bd316245badf2ec",
-        }),
-        ("https://whvn.cc/01w334"),
-        ("https://w.wallhaven.cc/full/01/wallhaven-01w334.jpg"),
-    )
+    example = "https://wallhaven.cc/w/ID"
 
     def __init__(self, match):
         WallhavenExtractor.__init__(self, match)
@@ -246,8 +197,21 @@ class WallhavenAPI():
 
     def _call(self, endpoint, params=None):
         url = "https://wallhaven.cc/api" + endpoint
-        return self.extractor.request(
-            url, headers=self.headers, params=params).json()
+
+        while True:
+            response = self.extractor.request(
+                url, params=params, headers=self.headers, fatal=None)
+
+            if response.status_code < 400:
+                return response.json()
+            if response.status_code == 429:
+                self.extractor.wait(seconds=60)
+                continue
+
+            self.extractor.log.debug("Server response: %s", response.text)
+            raise exception.StopExtraction(
+                "API request failed (%s %s)",
+                response.status_code, response.reason)
 
     def _pagination(self, endpoint, params=None, metadata=None):
         if params is None:

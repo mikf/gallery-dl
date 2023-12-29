@@ -9,7 +9,7 @@
 """Extractors for https://www.behance.net/"""
 
 from .common import Extractor, Message
-from .. import text, util
+from .. import text, util, exception
 
 
 class BehanceExtractor(Extractor):
@@ -17,6 +17,12 @@ class BehanceExtractor(Extractor):
     category = "behance"
     root = "https://www.behance.net"
     request_interval = (2.0, 4.0)
+
+    def _init(self):
+        self._bcp = self.cookies.get("bcp", domain="www.behance.net")
+        if not self._bcp:
+            self._bcp = "4c34489d-914c-46cd-b44c-dfd0e661136d"
+            self.cookies.set("bcp", self._bcp, domain="www.behance.net")
 
     def items(self):
         for gallery in self.galleries():
@@ -26,14 +32,29 @@ class BehanceExtractor(Extractor):
     def galleries(self):
         """Return all relevant gallery URLs"""
 
-    @staticmethod
-    def _update(data):
+    def _request_graphql(self, endpoint, variables):
+        url = self.root + "/v3/graphql"
+        headers = {
+            "Origin": self.root,
+            "X-BCP" : self._bcp,
+            "X-Requested-With": "XMLHttpRequest",
+        }
+        data = {
+            "query"    : GRAPHQL_QUERIES[endpoint],
+            "variables": variables,
+        }
+
+        return self.request(url, method="POST", headers=headers,
+                            json=data).json()["data"]
+
+    def _update(self, data):
         # compress data to simple lists
         if data["fields"] and isinstance(data["fields"][0], dict):
             data["fields"] = [
                 field.get("name") or field.get("label")
                 for field in data["fields"]
             ]
+
         data["owners"] = [
             owner.get("display_name") or owner.get("displayName")
             for owner in data["owners"]
@@ -43,6 +64,9 @@ class BehanceExtractor(Extractor):
         if tags and isinstance(tags[0], dict):
             tags = [tag["title"] for tag in tags]
         data["tags"] = tags
+
+        data["date"] = text.parse_timestamp(
+            data.get("publishedOn") or data.get("conceived_on") or 0)
 
         # backwards compatibility
         data["gallery_id"] = data["id"]
@@ -59,39 +83,22 @@ class BehanceGalleryExtractor(BehanceExtractor):
     filename_fmt = "{category}_{id}_{num:>02}.{extension}"
     archive_fmt = "{id}_{num}"
     pattern = r"(?:https?://)?(?:www\.)?behance\.net/gallery/(\d+)"
-    test = (
-        ("https://www.behance.net/gallery/17386197/A-Short-Story", {
-            "count": 2,
-            "url": "ab79bd3bef8d3ae48e6ac74fd995c1dfaec1b7d2",
-            "keyword": {
-                "id": 17386197,
-                "name": 're:"Hi". A short story about the important things ',
-                "owners": ["Place Studio", "Julio César Velazquez"],
-                "fields": ["Animation", "Character Design", "Directing"],
-                "tags": list,
-                "module": dict,
-            },
-        }),
-        ("https://www.behance.net/gallery/21324767/Nevada-City", {
-            "count": 6,
-            "url": "0258fe194fe7d828d6f2c7f6086a9a0a4140db1d",
-            "keyword": {"owners": ["Alex Strohl"]},
-        }),
-        # 'media_collection' modules
-        ("https://www.behance.net/gallery/88276087/Audi-R8-RWD", {
-            "count": 20,
-            "url": "6bebff0d37f85349f9ad28bd8b76fd66627c1e2f",
-        }),
-        # 'video' modules (#1282)
-        ("https://www.behance.net/gallery/101185577/COLCCI", {
-            "pattern": r"ytdl:https://cdn-prod-ccv\.adobe\.com/",
-            "count": 3,
-        }),
-    )
+    example = "https://www.behance.net/gallery/12345/TITLE"
 
     def __init__(self, match):
         BehanceExtractor.__init__(self, match)
         self.gallery_id = match.group(1)
+
+    def _init(self):
+        BehanceExtractor._init(self)
+
+        modules = self.config("modules")
+        if modules:
+            if isinstance(modules, str):
+                modules = modules.split(",")
+            self.modules = set(modules)
+        else:
+            self.modules = {"image", "video", "mediacollection", "embed"}
 
     def items(self):
         data = self.get_gallery_data()
@@ -101,17 +108,14 @@ class BehanceGalleryExtractor(BehanceExtractor):
         yield Message.Directory, data
         for data["num"], (url, module) in enumerate(imgs, 1):
             data["module"] = module
-            data["extension"] = text.ext_from_url(url)
+            data["extension"] = (module.get("extension") or
+                                 text.ext_from_url(url))
             yield Message.Url, url, data
 
     def get_gallery_data(self):
         """Collect gallery info dict"""
         url = "{}/gallery/{}/a".format(self.root, self.gallery_id)
         cookies = {
-            "_evidon_consent_cookie":
-                '{"consent_date":"2019-01-31T09:41:15.132Z"}',
-            "bcp": "4c34489d-914c-46cd-b44c-dfd0e661136d",
-            "gk_suid": "66981391",
             "gki": '{"feature_project_view":false,'
                    '"feature_discover_login_prompt":false,'
                    '"feature_project_login_prompt":false}',
@@ -125,32 +129,70 @@ class BehanceGalleryExtractor(BehanceExtractor):
 
     def get_images(self, data):
         """Extract image results from an API response"""
+        if not data["modules"]:
+            access = data.get("matureAccess")
+            if access == "logged-out":
+                raise exception.AuthorizationError(
+                    "Mature content galleries require logged-in cookies")
+            if access == "restricted-safe":
+                raise exception.AuthorizationError(
+                    "Mature content blocked in account settings")
+            if access and access != "allowed":
+                raise exception.AuthorizationError()
+            return ()
+
         result = []
         append = result.append
 
         for module in data["modules"]:
-            mtype = module["type"]
+            mtype = module["__typename"][:-6].lower()
+
+            if mtype not in self.modules:
+                self.log.debug("Skipping '%s' module", mtype)
+                continue
 
             if mtype == "image":
-                url = module["sizes"]["original"]
+                url = module["imageSizes"]["size_original"]["url"]
                 append((url, module))
 
             elif mtype == "video":
-                page = self.request(module["src"]).text
-                url = text.extr(page, '<source src="', '"')
-                if text.ext_from_url(url) == "m3u8":
-                    url = "ytdl:" + url
+                try:
+                    renditions = module["videoData"]["renditions"]
+                except Exception:
+                    self.log.warning("No download URLs for video %s",
+                                     module.get("id") or "???")
+                    continue
+
+                try:
+                    url = [
+                        r["url"] for r in renditions
+                        if text.ext_from_url(r["url"]) != "m3u8"
+                    ][-1]
+                except Exception as exc:
+                    self.log.debug("%s: %s", exc.__class__.__name__, exc)
+                    url = "ytdl:" + renditions[-1]["url"]
+
                 append((url, module))
 
-            elif mtype == "media_collection":
+            elif mtype == "mediacollection":
                 for component in module["components"]:
-                    url = component["sizes"]["source"]
-                    append((url, module))
+                    for size in component["imageSizes"].values():
+                        if size:
+                            parts = size["url"].split("/")
+                            parts[4] = "source"
+                            append(("/".join(parts), module))
+                            break
 
             elif mtype == "embed":
-                embed = module.get("original_embed") or module.get("embed")
+                embed = module.get("originalEmbed") or module.get("fluidEmbed")
                 if embed:
-                    append(("ytdl:" + text.extr(embed, 'src="', '"'), module))
+                    embed = text.unescape(text.extr(embed, 'src="', '"'))
+                    module["extension"] = "mp4"
+                    append(("ytdl:" + embed, module))
+
+            elif mtype == "text":
+                module["extension"] = "txt"
+                append(("text:" + module["text"], module))
 
         return result
 
@@ -160,27 +202,27 @@ class BehanceUserExtractor(BehanceExtractor):
     subcategory = "user"
     categorytransfer = True
     pattern = r"(?:https?://)?(?:www\.)?behance\.net/([^/?#]+)/?$"
-    test = ("https://www.behance.net/alexstrohl", {
-        "count": ">= 8",
-        "pattern": BehanceGalleryExtractor.pattern,
-    })
+    example = "https://www.behance.net/USER"
 
     def __init__(self, match):
         BehanceExtractor.__init__(self, match)
         self.user = match.group(1)
 
     def galleries(self):
-        url = "{}/{}/projects".format(self.root, self.user)
-        params = {"offset": 0}
-        headers = {"X-Requested-With": "XMLHttpRequest"}
+        endpoint = "GetProfileProjects"
+        variables = {
+            "username": self.user,
+            "after"   : "MAo=",  # "0" in base64
+        }
 
         while True:
-            data = self.request(url, params=params, headers=headers).json()
-            work = data["profile"]["activeSection"]["work"]
-            yield from work["projects"]
-            if not work["hasMore"]:
+            data = self._request_graphql(endpoint, variables)
+            items = data["user"]["profileProjects"]
+            yield from items["nodes"]
+
+            if not items["pageInfo"]["hasNextPage"]:
                 return
-            params["offset"] += len(work["projects"])
+            variables["after"] = items["pageInfo"]["endCursor"]
 
 
 class BehanceCollectionExtractor(BehanceExtractor):
@@ -188,31 +230,193 @@ class BehanceCollectionExtractor(BehanceExtractor):
     subcategory = "collection"
     categorytransfer = True
     pattern = r"(?:https?://)?(?:www\.)?behance\.net/collection/(\d+)"
-    test = ("https://www.behance.net/collection/71340149/inspiration", {
-        "count": ">= 145",
-        "pattern": BehanceGalleryExtractor.pattern,
-    })
+    example = "https://www.behance.net/collection/12345/TITLE"
 
     def __init__(self, match):
         BehanceExtractor.__init__(self, match)
         self.collection_id = match.group(1)
 
     def galleries(self):
-        url = self.root + "/v3/graphql"
-        headers = {
-            "Origin" : self.root,
-            "Referer": self.root + "/collection/" + self.collection_id,
-            "X-BCP"           : "4c34489d-914c-46cd-b44c-dfd0e661136d",
-            "X-NewRelic-ID"   : "VgUFVldbGwsFU1BRDwUBVw==",
-            "X-Requested-With": "XMLHttpRequest",
-        }
-        cookies = {
-            "bcp"    : "4c34489d-914c-46cd-b44c-dfd0e661136d",
-            "gk_suid": "66981391",
-            "ilo0"   : "true",
+        endpoint = "GetMoodboardItemsAndRecommendations"
+        variables = {
+            "afterItem": "MAo=",  # "0" in base64
+            "firstItem": 40,
+            "id"       : int(self.collection_id),
+            "shouldGetItems"          : True,
+            "shouldGetMoodboardFields": False,
+            "shouldGetRecommendations": False,
         }
 
-        query = """
+        while True:
+            data = self._request_graphql(endpoint, variables)
+            items = data["moodboard"]["items"]
+
+            for node in items["nodes"]:
+                yield node["entity"]
+
+            if not items["pageInfo"]["hasNextPage"]:
+                return
+            variables["afterItem"] = items["pageInfo"]["endCursor"]
+
+
+GRAPHQL_QUERIES = {
+    "GetProfileProjects": """\
+query GetProfileProjects($username: String, $after: String) {
+  user(username: $username) {
+    profileProjects(first: 12, after: $after) {
+      pageInfo {
+        endCursor
+        hasNextPage
+      }
+      nodes {
+        __typename
+        adminFlags {
+          mature_lock
+          privacy_lock
+          dmca_lock
+          flagged_lock
+          privacy_violation_lock
+          trademark_lock
+          spam_lock
+          eu_ip_lock
+        }
+        colors {
+          r
+          g
+          b
+        }
+        covers {
+          size_202 {
+            url
+          }
+          size_404 {
+            url
+          }
+          size_808 {
+            url
+          }
+        }
+        features {
+          url
+          name
+          featuredOn
+          ribbon {
+            image
+            image2x
+            image3x
+          }
+        }
+        fields {
+          id
+          label
+          slug
+          url
+        }
+        hasMatureContent
+        id
+        isFeatured
+        isHiddenFromWorkTab
+        isMatureReviewSubmitted
+        isOwner
+        isFounder
+        isPinnedToSubscriptionOverview
+        isPrivate
+        linkedAssets {
+          ...sourceLinkFields
+        }
+        linkedAssetsCount
+        sourceFiles {
+          ...sourceFileFields
+        }
+        matureAccess
+        modifiedOn
+        name
+        owners {
+          ...OwnerFields
+          images {
+            size_50 {
+              url
+            }
+          }
+        }
+        premium
+        publishedOn
+        stats {
+          appreciations {
+            all
+          }
+          views {
+            all
+          }
+          comments {
+            all
+          }
+        }
+        slug
+        tools {
+          id
+          title
+          category
+          categoryLabel
+          categoryId
+          approved
+          url
+          backgroundColor
+        }
+        url
+      }
+    }
+  }
+}
+
+fragment sourceFileFields on SourceFile {
+  __typename
+  sourceFileId
+  projectId
+  userId
+  title
+  assetId
+  renditionUrl
+  mimeType
+  size
+  category
+  licenseType
+  unitAmount
+  currency
+  tier
+  hidden
+  extension
+  hasUserPurchased
+}
+
+fragment sourceLinkFields on LinkedAsset {
+  __typename
+  name
+  premium
+  url
+  category
+  licenseType
+}
+
+fragment OwnerFields on User {
+  displayName
+  hasPremiumAccess
+  id
+  isFollowing
+  isProfileOwner
+  location
+  locationUrl
+  url
+  username
+  availabilityInfo {
+    availabilityTimeline
+    isAvailableFullTime
+    isAvailableFreelance
+  }
+}
+""",
+
+    "GetMoodboardItemsAndRecommendations": """\
 query GetMoodboardItemsAndRecommendations(
   $id: Int!
   $firstItem: Int!
@@ -257,13 +461,7 @@ fragment moodboardFields on Moodboard {
   url
   isOwner
   owners {
-    id
-    displayName
-    url
-    firstName
-    location
-    locationUrl
-    isFollowing
+    ...OwnerFields
     images {
       size_50 {
         url
@@ -288,6 +486,7 @@ fragment moodboardFields on Moodboard {
 }
 
 fragment projectFields on Project {
+  __typename
   id
   isOwner
   publishedOn
@@ -316,13 +515,7 @@ fragment projectFields on Project {
     b
   }
   owners {
-    url
-    displayName
-    id
-    location
-    locationUrl
-    isProfileOwner
-    isFollowing
+    ...OwnerFields
     images {
       size_50 {
         url
@@ -456,26 +649,23 @@ fragment nodesFields on MoodboardItem {
     }
   }
 }
-"""
-        variables = {
-            "afterItem": "MAo=",
-            "firstItem": 40,
-            "id"       : int(self.collection_id),
-            "shouldGetItems"          : True,
-            "shouldGetMoodboardFields": False,
-            "shouldGetRecommendations": False,
-        }
-        data = {"query": query, "variables": variables}
 
-        while True:
-            items = self.request(
-                url, method="POST", headers=headers,
-                cookies=cookies, json=data,
-            ).json()["data"]["moodboard"]["items"]
+fragment OwnerFields on User {
+  displayName
+  hasPremiumAccess
+  id
+  isFollowing
+  isProfileOwner
+  location
+  locationUrl
+  url
+  username
+  availabilityInfo {
+    availabilityTimeline
+    isAvailableFullTime
+    isAvailableFreelance
+  }
+}
+""",
 
-            for node in items["nodes"]:
-                yield node["entity"]
-
-            if not items["pageInfo"]["hasNextPage"]:
-                return
-            variables["afterItem"] = items["pageInfo"]["endCursor"]
+}

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2021 Mike Fährmann
+# Copyright 2019-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -20,12 +20,9 @@ class NsfwalbumAlbumExtractor(GalleryExtractor):
     filename_fmt = "{album_id}_{num:>03}_{id}.{extension}"
     directory_fmt = ("{category}", "{album_id} {title}")
     archive_fmt = "{id}"
+    referer = False
     pattern = r"(?:https?://)?(?:www\.)?nsfwalbum\.com(/album/(\d+))"
-    test = ("https://nsfwalbum.com/album/401611", {
-        "range": "1-5",
-        "url": "b0481fc7fad5982da397b6359fbed8421b8ba284",
-        "keyword": "e98f9b0d473c00000831618d0235863b1dd78294",
-    })
+    example = "https://nsfwalbum.com/album/12345"
 
     def __init__(self, match):
         self.album_id = match.group(2)
@@ -75,7 +72,8 @@ class NsfwalbumAlbumExtractor(GalleryExtractor):
 
     @staticmethod
     def _validate_response(response):
-        return not response.request.url.endswith("/no_image.jpg")
+        return not response.url.endswith(
+            ("/no_image.jpg", "/placeholder.png", "/error.jpg"))
 
     @staticmethod
     def _annihilate(value, base=6):

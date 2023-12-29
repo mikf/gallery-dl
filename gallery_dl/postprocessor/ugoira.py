@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2022 Mike Fährmann
+# Copyright 2018-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -32,10 +32,11 @@ class UgoiraPP(PostProcessor):
         self.extension = options.get("extension") or "webm"
         self.args = options.get("ffmpeg-args") or ()
         self.twopass = options.get("ffmpeg-twopass", False)
-        self.output = options.get("ffmpeg-output", True)
+        self.output = options.get("ffmpeg-output", "error")
         self.delete = not options.get("keep-files", False)
         self.repeat = options.get("repeat-last-frame", True)
         self.mtime = options.get("mtime", True)
+        self.uniform = False
 
         ffmpeg = options.get("ffmpeg-location")
         self.ffmpeg = util.expand_path(ffmpeg) if ffmpeg else "ffmpeg"
@@ -63,7 +64,9 @@ class UgoiraPP(PostProcessor):
         self.log.debug("using %s demuxer", demuxer)
 
         rate = options.get("framerate", "auto")
-        if rate != "auto":
+        if rate == "uniform":
+            self.uniform = True
+        elif rate != "auto":
             self.calculate_framerate = lambda _: (None, rate)
 
         if options.get("libx264-prevent-odd", True):
@@ -80,6 +83,12 @@ class UgoiraPP(PostProcessor):
                 not vcodec and self.extension.lower() in ("mp4", "mkv"))
         else:
             self.prevent_odd = False
+
+        self.args_pp = args = []
+        if isinstance(self.output, str):
+            args += ("-hide_banner", "-loglevel", self.output)
+        if self.prevent_odd:
+            args += ("-vf", "crop=iw-mod(iw\\,2):ih-mod(ih\\,2)")
 
         job.register_hooks(
             {"prepare": self.prepare, "file": self.convert}, options)
@@ -120,6 +129,8 @@ class UgoiraPP(PostProcessor):
             pathfmt.build_path()
 
             args = self._process(pathfmt, tempdir)
+            if self.args_pp:
+                args += self.args_pp
             if self.args:
                 args += self.args
 
@@ -274,10 +285,15 @@ class UgoiraPP(PostProcessor):
         return timecodes
 
     def calculate_framerate(self, frames):
-        uniform = self._delay_is_uniform(frames)
-        if uniform:
+        if self._delay_is_uniform(frames):
             return ("1000/{}".format(frames[0]["delay"]), None)
-        return (None, "1000/{}".format(self._delay_gcd(frames)))
+
+        if not self.uniform:
+            gcd = self._delay_gcd(frames)
+            if gcd >= 10:
+                return (None, "1000/{}".format(gcd))
+
+        return (None, None)
 
     @staticmethod
     def _delay_gcd(frames):

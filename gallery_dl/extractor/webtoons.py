@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # Copyright 2020 Leonardo Taccari
-# Copyright 2021-2022 Mike Fährmann
+# Copyright 2021-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -18,10 +18,10 @@ BASE_PATTERN = r"(?:https?://)?(?:www\.)?webtoons\.com/(([^/?#]+)"
 class WebtoonsBase():
     category = "webtoons"
     root = "https://www.webtoons.com"
-    cookiedomain = ".webtoons.com"
+    cookies_domain = ".webtoons.com"
 
     def setup_agegate_cookies(self):
-        self._update_cookies({
+        self.cookies_update({
             "atGDPR"     : "AD_CONSENT",
             "needCCPA"   : "false",
             "needCOPPA"  : "false",
@@ -46,6 +46,8 @@ class WebtoonsEpisodeExtractor(WebtoonsBase, GalleryExtractor):
     archive_fmt = "{title_no}_{episode_no}_{num}"
     pattern = (BASE_PATTERN + r"/([^/?#]+)/([^/?#]+)/(?:[^/?#]+))"
                r"/viewer(?:\?([^#'\"]+))")
+    example = ("https://www.webtoons.com/en/GENRE/TITLE/NAME/viewer"
+               "?title_no=123&episode_no=12345")
     test = (
         (("https://www.webtoons.com/en/comedy/safely-endangered"
           "/ep-572-earth/viewer?title_no=352&episode_no=572"), {
@@ -71,15 +73,18 @@ class WebtoonsEpisodeExtractor(WebtoonsBase, GalleryExtractor):
     )
 
     def __init__(self, match):
-        self.path, self.lang, self.genre, self.comic, query = match.groups()
+        self.path, self.lang, self.genre, self.comic, self.query = \
+            match.groups()
 
-        url = "{}/{}/viewer?{}".format(self.root, self.path, query)
+        url = "{}/{}/viewer?{}".format(self.root, self.path, self.query)
         GalleryExtractor.__init__(self, match, url)
+
+    def _init(self):
         self.setup_agegate_cookies()
 
-        query = text.parse_query(query)
-        self.title_no = query.get("title_no")
-        self.episode_no = query.get("episode_no")
+        params = text.parse_query(self.query)
+        self.title_no = params.get("title_no")
+        self.episode_no = params.get("episode_no")
 
     def metadata(self, page):
         keywords, pos = text.extract(
@@ -116,37 +121,19 @@ class WebtoonsComicExtractor(WebtoonsBase, Extractor):
     categorytransfer = True
     pattern = (BASE_PATTERN + r"/([^/?#]+)/([^/?#]+))"
                r"/list(?:\?([^#]+))")
-    test = (
-        # english
-        (("https://www.webtoons.com/en/comedy/live-with-yourself/"
-          "list?title_no=919"), {
-            "pattern": WebtoonsEpisodeExtractor.pattern,
-            "range": "1-15",
-            "count": ">= 15",
-        }),
-        # french
-        (("https://www.webtoons.com/fr/romance/subzero/"
-          "list?title_no=1845&page=3"), {
-            "count": ">= 15",
-        }),
-        # (#820)
-        (("https://www.webtoons.com/en/challenge/scoob-and-shag/"
-          "list?title_no=210827&page=9"), {
-            "count": ">= 18",
-        }),
-        # (#1643)
-        ("https://www.webtoons.com/es/romance/lore-olympus/"
-         "list?title_no=1725"),
-    )
+    example = "https://www.webtoons.com/en/GENRE/TITLE/list?title_no=123"
 
     def __init__(self, match):
         Extractor.__init__(self, match)
+        self.path, self.lang, self.genre, self.comic, self.query = \
+            match.groups()
+
+    def _init(self):
         self.setup_agegate_cookies()
 
-        self.path, self.lang, self.genre, self.comic, query = match.groups()
-        query = text.parse_query(query)
-        self.title_no = query.get("title_no")
-        self.page_no = text.parse_int(query.get("page"), 1)
+        params = text.parse_query(self.query)
+        self.title_no = params.get("title_no")
+        self.page_no = text.parse_int(params.get("page"), 1)
 
     def items(self):
         page = None
@@ -159,7 +146,12 @@ class WebtoonsComicExtractor(WebtoonsBase, Extractor):
             if page and path not in page:
                 return
 
-            page = self.request(self.root + path).text
+            response = self.request(self.root + path)
+            if response.history:
+                parts = response.url.split("/")
+                self.path = "/".join(parts[3:-1])
+
+            page = response.text
             data["page"] = self.page_no
 
             for url in self.get_episode_urls(page):

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2022 Mike Fährmann
+# Copyright 2019-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -24,11 +24,11 @@ class NozomiExtractor(Extractor):
     filename_fmt = "{postid} {dataid}.{extension}"
     archive_fmt = "{dataid}"
 
-    def items(self):
-
-        data = self.metadata()
+    def _init(self):
         self.session.headers["Origin"] = self.root
-        self.session.headers["Referer"] = self.root + "/"
+
+    def items(self):
+        data = self.metadata()
 
         for post_id in map(str, self.posts()):
             url = "https://j.nozomi.la/post/{}/{}/{}.json".format(
@@ -63,10 +63,20 @@ class NozomiExtractor(Extractor):
             yield Message.Directory, post
             for post["num"], image in enumerate(images, 1):
                 post["filename"] = post["dataid"] = did = image["dataid"]
-                post["extension"] = ext = image["type"]
                 post["is_video"] = video = bool(image.get("is_video"))
+
+                ext = image["type"]
+                if video:
+                    subdomain = "v"
+                elif ext == "gif":
+                    subdomain = "g"
+                else:
+                    subdomain = "w"
+                    ext = "webp"
+
+                post["extension"] = ext
                 post["url"] = url = "https://{}.nozomi.la/{}/{}/{}.{}".format(
-                    "v" if video else "i", did[-1], did[-3:-1], did, ext)
+                    subdomain, did[-1], did[-3:-1], did, ext)
                 yield Message.Url, url, post
 
     def posts(self):
@@ -95,38 +105,7 @@ class NozomiPostExtractor(NozomiExtractor):
     """Extractor for individual posts on nozomi.la"""
     subcategory = "post"
     pattern = r"(?:https?://)?nozomi\.la/post/(\d+)"
-    test = (
-        ("https://nozomi.la/post/3649262.html", {
-            "url": "f4522adfc8159355fd0476de28761b5be0f02068",
-            "content": "cd20d2c5149871a0b80a1b0ce356526278964999",
-            "keyword": {
-                "artist"   : ["hammer (sunset beach)"],
-                "character": ["patchouli knowledge"],
-                "copyright": ["touhou"],
-                "dataid"   : "re:aaa9f7c632cde1e1a5baaff3fb6a6d857ec73df7fdc5",
-                "date"     : "dt:2016-07-26 02:32:03",
-                "extension": "jpg",
-                "filename" : str,
-                "height"   : 768,
-                "is_video" : False,
-                "postid"   : 3649262,
-                "tags"     : list,
-                "type"     : "jpg",
-                "url"      : str,
-                "width"    : 1024,
-            },
-        }),
-        #  multiple images per post
-        ("https://nozomi.la/post/25588032.html", {
-            "url": "6aa3b7db385abcc9d374bdffd19187bccbf8f228",
-            "keyword": "2a2998af93c6438863c4077bd386b613b8bc2957",
-            "count": 7,
-        }),
-        # empty 'date' (#1163)
-        ("https://nozomi.la/post/130309.html", {
-            "keyword": {"date": None},
-        })
-    )
+    example = "https://nozomi.la/post/12345.html"
 
     def __init__(self, match):
         NozomiExtractor.__init__(self, match)
@@ -141,11 +120,7 @@ class NozomiIndexExtractor(NozomiExtractor):
     subcategory = "index"
     pattern = (r"(?:https?://)?nozomi\.la/"
                r"(?:(index(?:-Popular)?)-(\d+)\.html)?(?:$|#|\?)")
-    test = (
-        ("https://nozomi.la/"),
-        ("https://nozomi.la/index-2.html"),
-        ("https://nozomi.la/index-Popular-33.html"),
-    )
+    example = "https://nozomi.la/index-1.html"
 
     def __init__(self, match):
         NozomiExtractor.__init__(self, match)
@@ -159,11 +134,7 @@ class NozomiTagExtractor(NozomiExtractor):
     directory_fmt = ("{category}", "{search_tags}")
     archive_fmt = "t_{search_tags}_{dataid}"
     pattern = r"(?:https?://)?nozomi\.la/tag/([^/?#]+)-(\d+)\."
-    test = ("https://nozomi.la/tag/3:1_aspect_ratio-1.html", {
-        "pattern": r"^https://[iv]\.nozomi\.la/\w/\w\w/\w+\.\w+$",
-        "count": ">= 25",
-        "range": "1-25",
-    })
+    example = "https://nozomi.la/tag/TAG-1.html"
 
     def __init__(self, match):
         NozomiExtractor.__init__(self, match)
@@ -181,9 +152,7 @@ class NozomiSearchExtractor(NozomiExtractor):
     directory_fmt = ("{category}", "{search_tags:J }")
     archive_fmt = "t_{search_tags}_{dataid}"
     pattern = r"(?:https?://)?nozomi\.la/search\.html\?q=([^&#]+)"
-    test = ("https://nozomi.la/search.html?q=hibiscus%203:4_ratio#1", {
-        "count": ">= 5",
-    })
+    example = "https://nozomi.la/search.html?q=QUERY"
 
     def __init__(self, match):
         NozomiExtractor.__init__(self, match)

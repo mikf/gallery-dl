@@ -18,72 +18,7 @@ class TelegraphGalleryExtractor(GalleryExtractor):
     filename_fmt = "{num_formatted}_{filename}.{extension}"
     archive_fmt = "{slug}_{num}"
     pattern = r"(?:https?://)(?:www\.)??telegra\.ph(/[^/?#]+)"
-    test = (
-        ("https://telegra.ph/Telegraph-Test-03-28", {
-            "pattern": r"https://telegra\.ph/file/[0-9a-f]+\.png",
-            "keyword": {
-                "author": "mikf",
-                "caption": r"re:test|",
-                "count": 2,
-                "date": "dt:2022-03-28 16:01:36",
-                "description": "Just a test",
-                "post_url": "https://telegra.ph/Telegraph-Test-03-28",
-                "slug": "Telegraph-Test-03-28",
-                "title": "Telegra.ph Test",
-            },
-        }),
-        ("https://telegra.ph/森-03-28", {
-            "pattern": "https://telegra.ph/file/3ea79d23b0dd0889f215a.jpg",
-            "count": 1,
-            "keyword": {
-                "author": "&",
-                "caption": "kokiri",
-                "count": 1,
-                "date": "dt:2022-03-28 16:31:26",
-                "description": "コキリの森",
-                "extension": "jpg",
-                "filename": "3ea79d23b0dd0889f215a",
-                "num": 1,
-                "num_formatted": "1",
-                "post_url": "https://telegra.ph/森-03-28",
-                "slug": "森-03-28",
-                "title": '"森"',
-                "url": "https://telegra.ph/file/3ea79d23b0dd0889f215a.jpg",
-            },
-        }),
-        ("https://telegra.ph/Vsyo-o-druzyah-moej-sestricy-05-27", {
-            "url": "c1f3048e5d94bee53af30a8c27f70b0d3b15438e",
-            "pattern": r"^https://pith1\.ru/uploads"
-                       r"/posts/2019-12/\d+_\d+\.jpg$",
-            "keyword": {
-                "author": "Shotacon - заходи сюда",
-                "caption": "",
-                "count": 19,
-                "date": "dt:2022-05-27 16:17:27",
-                "description": "",
-                "num_formatted": r"re:^\d{2}$",
-                "post_url": "https://telegra.ph"
-                            "/Vsyo-o-druzyah-moej-sestricy-05-27",
-                "slug": "Vsyo-o-druzyah-moej-sestricy-05-27",
-                "title": "Всё о друзьях моей сестрицы",
-            },
-        }),
-        ("https://telegra.ph/Disharmonica---Saber-Nero-02-21", {
-            "pattern": r"https://telegra\.ph/file/[0-9a-f]+\.(jpg|png)",
-            "keyword": {
-                "author": "cosmos",
-                "caption": "",
-                "count": 89,
-                "date": "dt:2022-02-21 05:57:39",
-                "description": "",
-                "num_formatted": r"re:^\d{2}$",
-                "post_url": "https://telegra.ph"
-                            "/Disharmonica---Saber-Nero-02-21",
-                "slug": "Disharmonica---Saber-Nero-02-21",
-                "title": "Disharmonica - Saber Nero",
-            },
-        }),
-    )
+    example = "https://telegra.ph/TITLE"
 
     def metadata(self, page):
         extr = text.extract_from(page)

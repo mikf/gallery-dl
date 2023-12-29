@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2021-2022 Mike Fährmann
+# Copyright 2021-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -44,11 +44,15 @@ class EromeExtractor(Extractor):
             pos = page.index('<div class="user-profile', pos)
             user, pos = text.extract(
                 page, 'href="https://www.erome.com/', '"', pos)
+            count, pos = text.extract(
+                page, 'fa-camera"></i>', '</span>', pos)
+
             data = {
                 "album_id"     : album_id,
                 "title"        : text.unescape(title),
                 "user"         : text.unquote(user),
                 "_http_headers": {"Referer": url},
+                "count"        : text.parse_int(count),
             }
 
             yield Message.Directory, data
@@ -65,7 +69,7 @@ class EromeExtractor(Extractor):
     def request(self, url, **kwargs):
         if self.__cookies:
             self.__cookies = False
-            self.session.cookies.update(_cookie_cache())
+            self.cookies.update(_cookie_cache())
 
         for _ in range(5):
             response = Extractor.request(self, url, **kwargs)
@@ -80,7 +84,7 @@ class EromeExtractor(Extractor):
         for params["page"] in itertools.count(1):
             page = self.request(url, params=params).text
 
-            album_ids = EromeAlbumExtractor.pattern.findall(page)
+            album_ids = EromeAlbumExtractor.pattern.findall(page)[::2]
             yield from album_ids
 
             if len(album_ids) < 36:
@@ -91,29 +95,7 @@ class EromeAlbumExtractor(EromeExtractor):
     """Extractor for albums on erome.com"""
     subcategory = "album"
     pattern = BASE_PATTERN + r"/a/(\w+)"
-    test = (
-        ("https://www.erome.com/a/NQgdlWvk", {
-            "pattern": r"https://v\d+\.erome\.com/\d+"
-                       r"/NQgdlWvk/j7jlzmYB_480p\.mp4",
-            "count": 1,
-            "keyword": {
-                "album_id": "NQgdlWvk",
-                "num": 1,
-                "title": "porn",
-                "user": "yYgWBZw8o8qsMzM",
-            },
-        }),
-        ("https://www.erome.com/a/TdbZ4ogi", {
-            "pattern": r"https://s\d+\.erome\.com/\d+/TdbZ4ogi/\w+",
-            "count": 6,
-            "keyword": {
-                "album_id": "TdbZ4ogi",
-                "num": int,
-                "title": "82e78cfbb461ad87198f927fcb1fda9a1efac9ff.",
-                "user": "yYgWBZw8o8qsMzM",
-            },
-        }),
-    )
+    example = "https://www.erome.com/a/ID"
 
     def albums(self):
         return (self.item,)
@@ -122,10 +104,7 @@ class EromeAlbumExtractor(EromeExtractor):
 class EromeUserExtractor(EromeExtractor):
     subcategory = "user"
     pattern = BASE_PATTERN + r"/(?!a/|search\?)([^/?#]+)"
-    test = ("https://www.erome.com/yYgWBZw8o8qsMzM", {
-        "range": "1-25",
-        "count": 25,
-    })
+    example = "https://www.erome.com/USER"
 
     def albums(self):
         url = "{}/{}".format(self.root, self.item)
@@ -135,10 +114,7 @@ class EromeUserExtractor(EromeExtractor):
 class EromeSearchExtractor(EromeExtractor):
     subcategory = "search"
     pattern = BASE_PATTERN + r"/search\?q=([^&#]+)"
-    test = ("https://www.erome.com/search?q=cute", {
-        "range": "1-25",
-        "count": 25,
-    })
+    example = "https://www.erome.com/search?q=QUERY"
 
     def albums(self):
         url = self.root + "/search"

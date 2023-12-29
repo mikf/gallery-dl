@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2022 Mike Fährmann
+# Copyright 2018-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extract images from https://www.myportfolio.com/"""
+"""Extractors for https://www.myportfolio.com/"""
 
 from .common import Extractor, Message
 from .. import text, exception
@@ -21,28 +21,8 @@ class MyportfolioGalleryExtractor(Extractor):
     archive_fmt = "{user}_{filename}"
     pattern = (r"(?:myportfolio:(?:https?://)?([^/]+)|"
                r"(?:https?://)?([\w-]+\.myportfolio\.com))"
-               r"(/[^/?&#]+)?")
-    test = (
-        ("https://andrewling.myportfolio.com/volvo-xc-90-hybrid", {
-            "url": "acea0690c76db0e5cf267648cefd86e921bc3499",
-            "keyword": "6ac6befe2ee0af921d24cf1dd4a4ed71be06db6d",
-        }),
-        ("https://andrewling.myportfolio.com/", {
-            "pattern": r"https://andrewling\.myportfolio\.com/[^/?#+]+$",
-            "count": ">= 6",
-        }),
-        ("https://stevenilousphotography.myportfolio.com/society", {
-            "exception": exception.NotFoundError,
-        }),
-        # custom domain
-        ("myportfolio:https://tooco.com.ar/6-of-diamonds-paradise-bird", {
-            "count": 3,
-        }),
-        ("myportfolio:https://tooco.com.ar/", {
-            "pattern": pattern,
-            "count": ">= 40",
-        }),
-    )
+               r"(/[^/?#]+)?")
+    example = "https://USER.myportfolio.com/TITLE"
 
     def __init__(self, match):
         Extractor.__init__(self, match)

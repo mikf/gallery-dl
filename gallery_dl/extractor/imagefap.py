@@ -23,10 +23,6 @@ class ImagefapExtractor(Extractor):
     archive_fmt = "{gallery_id}_{image_id}"
     request_interval = (2.0, 4.0)
 
-    def __init__(self, match):
-        Extractor.__init__(self, match)
-        self.session.headers["Referer"] = self.root
-
     def request(self, url, **kwargs):
         response = Extractor.request(self, url, **kwargs)
 
@@ -44,33 +40,7 @@ class ImagefapGalleryExtractor(ImagefapExtractor):
     """Extractor for image galleries from imagefap.com"""
     subcategory = "gallery"
     pattern = BASE_PATTERN + r"/(?:gallery\.php\?gid=|gallery/|pictures/)(\d+)"
-
-    test = (
-        ("https://www.imagefap.com/gallery/7102714", {
-            "pattern": r"https://cdnh?\.imagefap\.com"
-                       r"/images/full/\d+/\d+/\d+\.jpg",
-            "keyword": "2ba96e84c2952c4750e9fa94a3f2b1f965cec2f3",
-            "content": "694a0a57385980a6f90fbc296cadcd6c11ba2dab",
-        }),
-        ("https://www.imagefap.com/gallery/7876223", {
-            "pattern": r"https://cdnh?\.imagefap\.com"
-                       r"/images/full/\d+/\d+/\d+\.jpg",
-            "keyword": {
-                "count": 44,
-                "gallery_id": 7876223,
-                "image_id": int,
-                "num": int,
-                "tags": ["big ass", "panties", "horny",
-                         "pussy", "exposed", "outdoor"],
-                "title": "Kelsi Monroe in lingerie",
-                "uploader": "BdRachel",
-            },
-            "count": 44,
-        }),
-        ("https://www.imagefap.com/pictures/7102714"),
-        ("https://www.imagefap.com/gallery.php?gid=7102714"),
-        ("https://beta.imagefap.com/gallery.php?gid=7102714"),
-    )
+    example = "https://www.imagefap.com/gallery/12345"
 
     def __init__(self, match):
         ImagefapExtractor.__init__(self, match)
@@ -92,9 +62,14 @@ class ImagefapGalleryExtractor(ImagefapExtractor):
 
         data = {
             "gallery_id": text.parse_int(self.gid),
-            "tags": extr('name="keywords" content="', '"').split(", "),
             "uploader": extr("porn picture gallery by ", " to see hottest"),
             "title": text.unescape(extr("<title>", "<")),
+            "description": text.unescape(extr(
+                'id="gdesc_text"', '<').partition(">")[2]),
+            "categories": text.split_html(extr(
+                'id="cnt_cats"', '</div>'))[1::2],
+            "tags": text.split_html(extr(
+                'id="cnt_tags"', '</div>'))[1::2],
             "count": text.parse_int(extr(' 1 of ', ' pics"')),
         }
 
@@ -136,22 +111,7 @@ class ImagefapImageExtractor(ImagefapExtractor):
     """Extractor for single images from imagefap.com"""
     subcategory = "image"
     pattern = BASE_PATTERN + r"/photo/(\d+)"
-    test = (
-        ("https://www.imagefap.com/photo/1962981893", {
-            "pattern": r"https://cdnh?\.imagefap\.com"
-                       r"/images/full/65/196/1962981893\.jpg",
-            "keyword": {
-                "date": "21/08/2014",
-                "gallery_id": 7876223,
-                "height": 1600,
-                "image_id": 1962981893,
-                "title": "Kelsi Monroe in lingerie",
-                "uploader": "BdRachel",
-                "width": 1066,
-            },
-        }),
-        ("https://beta.imagefap.com/photo/1962981893"),
-    )
+    example = "https://www.imagefap.com/photo/12345"
 
     def __init__(self, match):
         ImagefapExtractor.__init__(self, match)
@@ -166,14 +126,15 @@ class ImagefapImageExtractor(ImagefapExtractor):
         url = "{}/photo/{}/".format(self.root, self.image_id)
         page = self.request(url).text
 
+        url, pos = text.extract(
+            page, 'original="', '"')
         info, pos = text.extract(
-            page, '<script type="application/ld+json">', '</script>')
+            page, '<script type="application/ld+json">', '</script>', pos)
         image_id, pos = text.extract(
             page, 'id="imageid_input" value="', '"', pos)
         gallery_id, pos = text.extract(
             page, 'id="galleryid_input" value="', '"', pos)
         info = util.json_loads(info)
-        url = info["contentUrl"]
 
         return url, text.nameext_from_url(url, {
             "title": text.unescape(info["name"]),
@@ -192,35 +153,7 @@ class ImagefapFolderExtractor(ImagefapExtractor):
     pattern = (BASE_PATTERN + r"/(?:organizer/|"
                r"(?:usergallery\.php\?user(id)?=([^&#]+)&"
                r"|profile/([^/?#]+)/galleries\?)folderid=)(\d+|-1)")
-    test = (
-        ("https://www.imagefap.com/organizer/409758", {
-            "pattern": r"https://www\.imagefap\.com/gallery/7876223",
-            "url": "37822523e6e4a56feb9dea35653760c86b44ff89",
-            "count": 1,
-        }),
-        (("https://www.imagefap.com/usergallery.php"
-          "?userid=1981976&folderid=409758"), {
-            "url": "37822523e6e4a56feb9dea35653760c86b44ff89",
-        }),
-        (("https://www.imagefap.com/usergallery.php"
-          "?user=BdRachel&folderid=409758"), {
-            "url": "37822523e6e4a56feb9dea35653760c86b44ff89",
-        }),
-        ("https://www.imagefap.com/profile/BdRachel/galleries?folderid=-1", {
-            "pattern": ImagefapGalleryExtractor.pattern,
-            "range": "1-40",
-        }),
-        (("https://www.imagefap.com/usergallery.php"
-          "?userid=1981976&folderid=-1"), {
-            "pattern": ImagefapGalleryExtractor.pattern,
-            "range": "1-40",
-        }),
-        (("https://www.imagefap.com/usergallery.php"
-          "?user=BdRachel&folderid=-1"), {
-            "pattern": ImagefapGalleryExtractor.pattern,
-            "range": "1-40",
-        }),
-    )
+    example = "https://www.imagefap.com/organizer/12345"
 
     def __init__(self, match):
         ImagefapExtractor.__init__(self, match)
@@ -261,7 +194,7 @@ class ImagefapFolderExtractor(ImagefapExtractor):
                 yield gid, extr("<b>", "<")
                 cnt += 1
 
-            if cnt < 25:
+            if cnt < 20:
                 break
             params["page"] += 1
 
@@ -272,20 +205,7 @@ class ImagefapUserExtractor(ImagefapExtractor):
     pattern = (BASE_PATTERN +
                r"/(?:profile(?:\.php\?user=|/)([^/?#]+)(?:/galleries)?"
                r"|usergallery\.php\?userid=(\d+))(?:$|#)")
-    test = (
-        ("https://www.imagefap.com/profile/BdRachel", {
-            "pattern": ImagefapFolderExtractor.pattern,
-            "count": ">= 18",
-        }),
-        ("https://www.imagefap.com/usergallery.php?userid=1862791", {
-            "pattern": r"https://www\.imagefap\.com"
-                       r"/profile/LucyRae/galleries\?folderid=-1",
-            "count": 1,
-        }),
-        ("https://www.imagefap.com/profile/BdRachel/galleries"),
-        ("https://www.imagefap.com/profile.php?user=BdRachel"),
-        ("https://beta.imagefap.com/profile.php?user=BdRachel"),
-    )
+    example = "https://www.imagefap.com/profile/USER"
 
     def __init__(self, match):
         ImagefapExtractor.__init__(self, match)

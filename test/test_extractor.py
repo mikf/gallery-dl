@@ -93,20 +93,24 @@ class TestExtractorModule(unittest.TestCase):
                 FakeExtractor.from_url(invalid)
 
     def test_unique_pattern_matches(self):
-        test_urls = []
+        try:
+            import test.results
+        except ImportError:
+            raise unittest.SkipTest("no test data")
 
         # collect testcase URLs
+        test_urls = []
         append = test_urls.append
-        for extr in extractor.extractors():
-            for testcase in extr._get_tests():
-                append((testcase[0], extr))
+
+        for result in test.results.all():
+            append((result["#url"], result["#class"]))
 
         # iterate over all testcase URLs
         for url, extr1 in test_urls:
             matches = []
 
             # ... and apply all regex patterns to each one
-            for extr2 in extractor._cache:
+            for extr2 in _list_classes():
 
                 # skip DirectlinkExtractor pattern if it isn't tested
                 if extr1 != DirectlinkExtractor and \
@@ -132,8 +136,31 @@ class TestExtractorModule(unittest.TestCase):
             else:
                 self.assertIs(extr1, matches[0][1], url)
 
+    def test_init(self):
+        """Test for exceptions in Extractor.initialize() and .finalize()"""
+        for cls in extractor.extractors():
+            if cls.category == "ytdl":
+                continue
+            extr = cls.from_url(cls.example)
+            if not extr and cls.basecategory and not cls.instances:
+                continue
+            extr.initialize()
+            extr.finalize()
+
+    @unittest.skipIf(sys.hexversion < 0x3060000, "test fails in CI")
+    def test_init_ytdl(self):
+        try:
+            extr = extractor.find("ytdl:")
+            extr.initialize()
+            extr.finalize()
+        except ImportError as exc:
+            if exc.name in ("youtube_dl", "yt_dlp"):
+                raise unittest.SkipTest("cannot import module '{}'".format(
+                    exc.name))
+            raise
+
     def test_docstrings(self):
-        """ensure docstring uniqueness"""
+        """Ensure docstring uniqueness"""
         for extr1 in extractor.extractors():
             for extr2 in extractor.extractors():
                 if extr1 != extr2 and extr1.__doc__ and extr2.__doc__:
@@ -213,7 +240,7 @@ class TestExtractorWait(unittest.TestCase):
             until = datetime.fromtimestamp(until)
         o = self._isotime_to_seconds(output)
         u = self._isotime_to_seconds(until.time().isoformat()[:8])
-        self.assertLess(o-u, 1.0)
+        self.assertLessEqual(o-u, 1.0)
 
     @staticmethod
     def _isotime_to_seconds(isotime):

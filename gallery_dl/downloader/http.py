@@ -44,6 +44,12 @@ class HttpDownloader(DownloaderBase):
         self.mtime = self.config("mtime", True)
         self.rate = self.config("rate")
 
+        if not self.config("consume-content", False):
+            # this resets the underlying TCP connection, and therefore
+            # if the program makes another request to the same domain,
+            # a new connection (either TLS or plain TCP) must be made
+            self.release_conn = lambda resp: resp.close()
+
         if self.retries < 0:
             self.retries = float("inf")
         if self.minsize:
@@ -106,7 +112,7 @@ class HttpDownloader(DownloaderBase):
         while True:
             if tries:
                 if response:
-                    response.close()
+                    self.release_conn(response)
                     response = None
                 self.log.warning("%s (%s/%s)", msg, tries, self.retries+1)
                 if tries > self.retries:
@@ -165,18 +171,24 @@ class HttpDownloader(DownloaderBase):
                 retry = kwdict.get("_http_retry")
                 if retry and retry(response):
                     continue
+                self.release_conn(response)
                 self.log.warning(msg)
                 return False
 
             # check for invalid responses
             validate = kwdict.get("_http_validate")
             if validate and self.validate:
-                result = validate(response)
+                try:
+                    result = validate(response)
+                except Exception:
+                    self.release_conn(response)
+                    raise
                 if isinstance(result, str):
                     url = result
                     tries -= 1
                     continue
                 if not result:
+                    self.release_conn(response)
                     self.log.warning("Invalid response")
                     return False
 
@@ -184,15 +196,19 @@ class HttpDownloader(DownloaderBase):
             size = text.parse_int(size, None)
             if size is not None:
                 if self.minsize and size < self.minsize:
+                    self.release_conn(response)
                     self.log.warning(
                         "File size smaller than allowed minimum (%s < %s)",
                         size, self.minsize)
-                    return False
+                    pathfmt.temppath = ""
+                    return True
                 if self.maxsize and size > self.maxsize:
+                    self.release_conn(response)
                     self.log.warning(
                         "File size larger than allowed maximum (%s > %s)",
                         size, self.maxsize)
-                    return False
+                    pathfmt.temppath = ""
+                    return True
 
             build_path = False
 
@@ -211,6 +227,14 @@ class HttpDownloader(DownloaderBase):
                 pathfmt.build_path()
                 if pathfmt.exists():
                     pathfmt.temppath = ""
+                    # release the connection back to pool by explicitly
+                    # calling .close()
+                    # see https://requests.readthedocs.io/en/latest/user
+                    # /advanced/#body-content-workflow
+                    # when the image size is on the order of megabytes,
+                    # re-establishing a TLS connection will typically be faster
+                    # than consuming the whole response
+                    response.close()
                     return True
                 if self.part and metadata:
                     pathfmt.part_enable(self.partdir)
@@ -232,6 +256,7 @@ class HttpDownloader(DownloaderBase):
                 if self._adjust_extension(pathfmt, file_header) and \
                         pathfmt.exists():
                     pathfmt.temppath = ""
+                    response.close()
                     return True
 
             # set open mode
@@ -279,6 +304,18 @@ class HttpDownloader(DownloaderBase):
             kwdict["_mtime"] = None
 
         return True
+
+    def release_conn(self, response):
+        """Release connection back to pool by consuming response body"""
+        try:
+            for _ in response.iter_content(self.chunk_size):
+                pass
+        except (RequestException, SSLError, OpenSSLError) as exc:
+            print()
+            self.log.debug(
+                "Unable to consume response body (%s: %s); "
+                "closing the connection anyway", exc.__class__.__name__, exc)
+            response.close()
 
     @staticmethod
     def receive(fp, content, bytes_total, bytes_start):
@@ -353,6 +390,8 @@ MIME_TYPES = {
     "image/x-ms-bmp": "bmp",
     "image/webp"    : "webp",
     "image/avif"    : "avif",
+    "image/heic"    : "heic",
+    "image/heif"    : "heif",
     "image/svg+xml" : "svg",
     "image/ico"     : "ico",
     "image/icon"    : "ico",
@@ -399,6 +438,8 @@ SIGNATURE_CHECKS = {
     "webp": lambda s: (s[0:4] == b"RIFF" and
                        s[8:12] == b"WEBP"),
     "avif": lambda s: s[4:11] == b"ftypavi" and s[11] in b"fs",
+    "heic": lambda s: (s[4:10] == b"ftyphe" and s[10:12] in (
+                       b"ic", b"im", b"is", b"ix", b"vc", b"vm", b"vs")),
     "svg" : lambda s: s[0:5] == b"<?xml",
     "ico" : lambda s: s[0:4] == b"\x00\x00\x01\x00",
     "cur" : lambda s: s[0:4] == b"\x00\x00\x02\x00",

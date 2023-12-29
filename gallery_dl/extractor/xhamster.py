@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2020 Mike Fährmann
+# Copyright 2019-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -32,54 +32,7 @@ class XhamsterGalleryExtractor(XhamsterExtractor):
     filename_fmt = "{num:>03}_{id}.{extension}"
     archive_fmt = "{id}"
     pattern = BASE_PATTERN + r"(/photos/gallery/[^/?#]+)"
-    test = (
-        ("https://xhamster.com/photos/gallery/11748968", {
-            "pattern": r"https://thumb-p\d+.xhcdn.com/./[\w/-]+_1000.jpg$",
-            "count": ">= 144",
-            "keyword": {
-                "comments": int,
-                "count": int,
-                "favorite": bool,
-                "id": int,
-                "num": int,
-                "height": int,
-                "width": int,
-                "imageURL": str,
-                "pageURL": str,
-                "thumbURL": str,
-                "gallery": {
-                    "date": "dt:2019-04-16 00:07:31",
-                    "description": "",
-                    "dislikes": int,
-                    "id": 11748968,
-                    "likes": int,
-                    "tags": ["NON-Porn"],
-                    "thumbnail": str,
-                    "title": "Make the world better.",
-                    "views": int,
-                },
-                "user": {
-                    "id": 16874672,
-                    "name": "Anonymousrants",
-                    "retired": bool,
-                    "subscribers": int,
-                    "url": "https://xhamster.com/users/anonymousrants",
-                    "verified": bool,
-                },
-            },
-        }),
-        ("https://jp.xhamster2.com/photos/gallery/11748968", {
-            "pattern": r"https://thumb-p\d+.xhcdn.com/./[\w/-]+_1000.jpg$",
-            "count": ">= 144",
-        }),
-        ("https://xhamster.com/photos/gallery/make-the-world-better-11748968"),
-        ("https://xhamster.com/photos/gallery/11748968"),
-        ("https://xhamster.one/photos/gallery/11748968"),
-        ("https://xhamster.desi/photos/gallery/11748968"),
-        ("https://xhamster2.com/photos/gallery/11748968"),
-        ("https://en.xhamster.com/photos/gallery/11748968"),
-        ("https://xhamster.porncache.net/photos/gallery/11748968"),
-    )
+    example = "https://xhamster.com/photos/gallery/12345"
 
     def __init__(self, match):
         XhamsterExtractor.__init__(self, match)
@@ -150,14 +103,7 @@ class XhamsterUserExtractor(XhamsterExtractor):
     """Extractor for all galleries of an xhamster user"""
     subcategory = "user"
     pattern = BASE_PATTERN + r"/users/([^/?#]+)(?:/photos)?/?(?:$|[?#])"
-    test = (
-        ("https://xhamster.com/users/goldenpalomino/photos", {
-            "pattern": XhamsterGalleryExtractor.pattern,
-            "count": 50,
-            "range": "1-50",
-        }),
-        ("https://xhamster.com/users/nickname68"),
-    )
+    example = "https://xhamster.com/users/USER/photos"
 
     def __init__(self, match):
         XhamsterExtractor.__init__(self, match)

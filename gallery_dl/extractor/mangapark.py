@@ -8,155 +8,398 @@
 
 """Extractors for https://mangapark.net/"""
 
-from .common import ChapterExtractor, MangaExtractor
+from .common import ChapterExtractor, Extractor, Message
 from .. import text, util, exception
 import re
+
+BASE_PATTERN = r"(?:https?://)?(?:www\.)?mangapark\.(?:net|com|org|io|me)"
 
 
 class MangaparkBase():
     """Base class for mangapark extractors"""
     category = "mangapark"
-    root_fmt = "https://v2.mangapark.{}"
-    browser = "firefox"
+    _match_title = None
 
-    @staticmethod
-    def parse_chapter_path(path, data):
-        """Get volume/chapter information from url-path of a chapter"""
-        data["volume"], data["chapter_minor"] = 0, ""
-        for part in path.split("/")[1:]:
-            key, value = part[0], part[1:]
-            if key == "c":
-                chapter, dot, minor = value.partition(".")
-                data["chapter"] = text.parse_int(chapter)
-                data["chapter_minor"] = dot + minor
-            elif key == "i":
-                data["chapter_id"] = text.parse_int(value)
-            elif key == "v":
-                data["volume"] = text.parse_int(value)
-            elif key == "s":
-                data["stream"] = text.parse_int(value)
-            elif key == "e":
-                data["chapter_minor"] = "v" + value
-
-    @staticmethod
-    def parse_chapter_title(title, data):
-        match = re.search(r"(?i)(?:vol(?:ume)?[ .]*(\d+) )?"
-                          r"ch(?:apter)?[ .]*(\d+)(\.\w+)?", title)
-        if match:
-            vol, ch, data["chapter_minor"] = match.groups()
-            data["volume"] = text.parse_int(vol)
-            data["chapter"] = text.parse_int(ch)
+    def _parse_chapter_title(self, title):
+        if not self._match_title:
+            MangaparkBase._match_title = re.compile(
+                r"(?i)"
+                r"(?:vol(?:\.|ume)?\s*(\d+)\s*)?"
+                r"ch(?:\.|apter)?\s*(\d+)([^\s:]*)"
+                r"(?:\s*:\s*(.*))?"
+            ).match
+        match = self._match_title(title)
+        return match.groups() if match else (0, 0, "", "")
 
 
 class MangaparkChapterExtractor(MangaparkBase, ChapterExtractor):
     """Extractor for manga-chapters from mangapark.net"""
-    pattern = (r"(?:https?://)?(?:www\.|v2\.)?mangapark\.(me|net|com)"
-               r"/manga/([^?#]+/i\d+)")
-    test = (
-        ("https://mangapark.net/manga/gosu/i811653/c055/1", {
-            "count": 50,
-            "keyword": "db1ed9af4f972756a25dbfa5af69a8f155b043ff",
-        }),
-        (("https://mangapark.net/manga"
-          "/ad-astra-per-aspera-hata-kenjirou/i662051/c001.2/1"), {
-            "count": 40,
-            "keyword": "2bb3a8f426383ea13f17ff5582f3070d096d30ac",
-        }),
-        (("https://mangapark.net/manga"
-          "/gekkan-shoujo-nozaki-kun/i2067426/v7/c70/1"), {
-            "count": 15,
-            "keyword": "edc14993c4752cee3a76e09b2f024d40d854bfd1",
-        }),
-        ("https://mangapark.me/manga/gosu/i811615/c55/1"),
-        ("https://mangapark.com/manga/gosu/i811615/c55/1"),
-    )
+    pattern = BASE_PATTERN + r"/title/[^/?#]+/(\d+)"
+    example = "https://mangapark.net/title/MANGA/12345-en-ch.01"
 
     def __init__(self, match):
-        tld, self.path = match.groups()
-        self.root = self.root_fmt.format(tld)
-        url = "{}/manga/{}?zoom=2".format(self.root, self.path)
+        self.root = text.root_from_url(match.group(0))
+        url = "{}/title/_/{}".format(self.root, match.group(1))
         ChapterExtractor.__init__(self, match, url)
 
     def metadata(self, page):
-        data = text.extract_all(page, (
-            ("manga_id"  , "var _manga_id = '", "'"),
-            ("chapter_id", "var _book_id = '", "'"),
-            ("stream"    , "var _stream = '", "'"),
-            ("path"      , "var _book_link = '", "'"),
-            ("manga"     , "<h2>", "</h2>"),
-            ("title"     , "</a>", "<"),
-        ), values={"lang": "en", "language": "English"})[0]
+        data = util.json_loads(text.extr(
+            page, 'id="__NEXT_DATA__" type="application/json">', '<'))
+        chapter = (data["props"]["pageProps"]["dehydratedState"]
+                   ["queries"][0]["state"]["data"]["data"])
+        manga = chapter["comicNode"]["data"]
+        source = chapter["sourceNode"]["data"]
 
-        if not data["path"]:
-            raise exception.NotFoundError("chapter")
+        self._urls = chapter["imageSet"]["httpLis"]
+        self._params = chapter["imageSet"]["wordLis"]
+        vol, ch, minor, title = self._parse_chapter_title(chapter["dname"])
 
-        self.parse_chapter_path(data["path"], data)
-        if "chapter" not in data:
-            self.parse_chapter_title(data["title"], data)
-
-        data["manga"], _, data["type"] = data["manga"].rpartition(" ")
-        data["manga"] = text.unescape(data["manga"])
-        data["title"] = data["title"].partition(": ")[2]
-        for key in ("manga_id", "chapter_id", "stream"):
-            data[key] = text.parse_int(data[key])
-
-        return data
+        return {
+            "manga"     : manga["name"],
+            "manga_id"  : manga["id"],
+            "artist"    : source["artists"],
+            "author"    : source["authors"],
+            "genre"     : source["genres"],
+            "volume"    : text.parse_int(vol),
+            "chapter"   : text.parse_int(ch),
+            "chapter_minor": minor,
+            "chapter_id": chapter["id"],
+            "title"     : chapter["title"] or title or "",
+            "lang"      : chapter["lang"],
+            "language"  : util.code_to_language(chapter["lang"]),
+            "source"    : source["srcTitle"],
+            "source_id" : source["id"],
+            "date"      : text.parse_timestamp(chapter["dateCreate"] // 1000),
+        }
 
     def images(self, page):
-        data = util.json_loads(text.extr(page, "var _load_pages =", ";"))
         return [
-            (text.urljoin(self.root, item["u"]), {
-                "width": text.parse_int(item["w"]),
-                "height": text.parse_int(item["h"]),
-            })
-            for item in data
+            (url + "?" + params, None)
+            for url, params in zip(self._urls, self._params)
         ]
 
 
-class MangaparkMangaExtractor(MangaparkBase, MangaExtractor):
+class MangaparkMangaExtractor(MangaparkBase, Extractor):
     """Extractor for manga from mangapark.net"""
-    chapterclass = MangaparkChapterExtractor
-    pattern = (r"(?:https?://)?(?:www\.|v2\.)?mangapark\.(me|net|com)"
-               r"(/manga/[^/?#]+)/?$")
-    test = (
-        ("https://mangapark.net/manga/aria", {
-            "url": "51c6d82aed5c3c78e0d3f980b09a998e6a2a83ee",
-            "keyword": "cabc60cf2efa82749d27ac92c495945961e4b73c",
-        }),
-        ("https://mangapark.me/manga/aria"),
-        ("https://mangapark.com/manga/aria"),
-    )
+    subcategory = "manga"
+    pattern = BASE_PATTERN + r"/title/(\d+)(?:-[^/?#]*)?/?$"
+    example = "https://mangapark.net/title/12345-MANGA"
 
     def __init__(self, match):
-        self.root = self.root_fmt.format(match.group(1))
-        MangaExtractor.__init__(self, match, self.root + match.group(2))
+        self.root = text.root_from_url(match.group(0))
+        self.manga_id = int(match.group(1))
+        Extractor.__init__(self, match)
 
-    def chapters(self, page):
-        results = []
-        data = {"lang": "en", "language": "English"}
-        data["manga"] = text.unescape(
-            text.extr(page, '<title>', ' Manga - '))
+    def items(self):
+        for chapter in self.chapters():
+            chapter = chapter["data"]
+            url = self.root + chapter["urlPath"]
 
-        for stream in page.split('<div id="stream_')[1:]:
-            data["stream"] = text.parse_int(text.extr(stream, '', '"'))
+            vol, ch, minor, title = self._parse_chapter_title(chapter["dname"])
+            data = {
+                "manga_id"  : self.manga_id,
+                "volume"    : text.parse_int(vol),
+                "chapter"   : text.parse_int(ch),
+                "chapter_minor": minor,
+                "chapter_id": chapter["id"],
+                "title"     : chapter["title"] or title or "",
+                "lang"      : chapter["lang"],
+                "language"  : util.code_to_language(chapter["lang"]),
+                "source"    : chapter["srcTitle"],
+                "source_id" : chapter["sourceId"],
+                "date"      : text.parse_timestamp(
+                    chapter["dateCreate"] // 1000),
+                "_extractor": MangaparkChapterExtractor,
+            }
+            yield Message.Queue, url, data
 
-            for chapter in text.extract_iter(stream, '<li ', '</li>'):
-                path  , pos = text.extract(chapter, 'href="', '"')
-                title1, pos = text.extract(chapter, '>', '<', pos)
-                title2, pos = text.extract(chapter, '>: </span>', '<', pos)
-                count , pos = text.extract(chapter, '  of ', ' ', pos)
+    def chapters(self):
+        source = self.config("source")
+        if not source:
+            return self.chapters_all()
 
-                self.parse_chapter_path(path[8:], data)
-                if "chapter" not in data:
-                    self.parse_chapter_title(title1, data)
+        source_id = self._select_source(source)
+        self.log.debug("Requesting chapters for source_id %s", source_id)
+        return self.chapters_source(source_id)
 
-                if title2:
-                    data["title"] = title2.strip()
-                else:
-                    data["title"] = title1.partition(":")[2].strip()
+    def chapters_all(self):
+        pnum = 0
+        variables = {
+            "select": {
+                "comicId": self.manga_id,
+                "range"  : None,
+                "isAsc"  : not self.config("chapter-reverse"),
+            }
+        }
 
-                data["count"] = text.parse_int(count)
-                results.append((self.root + path, data.copy()))
-                data.pop("chapter", None)
+        while True:
+            data = self._request_graphql(
+                "get_content_comicChapterRangeList", variables)
 
-        return results
+            for item in data["items"]:
+                yield from item["chapterNodes"]
+
+            if not pnum:
+                pager = data["pager"]
+            pnum += 1
+
+            try:
+                variables["select"]["range"] = pager[pnum]
+            except IndexError:
+                return
+
+    def chapters_source(self, source_id):
+        variables = {
+            "sourceId": source_id,
+        }
+        chapters = self._request_graphql(
+            "get_content_source_chapterList", variables)
+
+        if self.config("chapter-reverse"):
+            chapters.reverse()
+        return chapters
+
+    def _select_source(self, source):
+        if isinstance(source, int):
+            return source
+
+        group, _, lang = source.partition(":")
+        group = group.lower()
+
+        variables = {
+            "comicId"    : self.manga_id,
+            "dbStatuss"  : ["normal"],
+            "haveChapter": True,
+        }
+        for item in self._request_graphql(
+                "get_content_comic_sources", variables):
+            data = item["data"]
+            if (not group or data["srcTitle"].lower() == group) and (
+                    not lang or data["lang"] == lang):
+                return data["id"]
+
+        raise exception.StopExtraction(
+            "'%s' does not match any available source", source)
+
+    def _request_graphql(self, opname, variables):
+        url = self.root + "/apo/"
+        data = {
+            "query"        : QUERIES[opname],
+            "variables"    : util.json_dumps(variables),
+            "operationName": opname,
+        }
+        return self.request(
+            url, method="POST", json=data).json()["data"][opname]
+
+
+QUERIES = {
+    "get_content_comicChapterRangeList": """
+  query get_content_comicChapterRangeList($select: Content_ComicChapterRangeList_Select) {
+    get_content_comicChapterRangeList(
+      select: $select
+    ) {
+      reqRange{x y}
+      missing
+      pager {x y}
+      items{
+        serial
+        chapterNodes {
+
+  id
+  data {
+
+
+  id
+  sourceId
+
+  dbStatus
+  isNormal
+  isHidden
+  isDeleted
+  isFinal
+
+  dateCreate
+  datePublic
+  dateModify
+  lang
+  volume
+  serial
+  dname
+  title
+  urlPath
+
+  srcTitle srcColor
+
+  count_images
+
+  stat_count_post_child
+  stat_count_post_reply
+  stat_count_views_login
+  stat_count_views_guest
+
+  userId
+  userNode {
+
+  id
+  data {
+
+id
+name
+uniq
+avatarUrl
+urlPath
+
+verified
+deleted
+banned
+
+dateCreate
+dateOnline
+
+stat_count_chapters_normal
+stat_count_chapters_others
+
+is_adm is_mod is_vip is_upr
+
+  }
+
+  }
+
+  disqusId
+
+
+  }
+
+          sser_read
+        }
+      }
+
+    }
+  }
+""",
+
+    "get_content_source_chapterList": """
+  query get_content_source_chapterList($sourceId: Int!) {
+    get_content_source_chapterList(
+      sourceId: $sourceId
+    ) {
+
+  id
+  data {
+
+
+  id
+  sourceId
+
+  dbStatus
+  isNormal
+  isHidden
+  isDeleted
+  isFinal
+
+  dateCreate
+  datePublic
+  dateModify
+  lang
+  volume
+  serial
+  dname
+  title
+  urlPath
+
+  srcTitle srcColor
+
+  count_images
+
+  stat_count_post_child
+  stat_count_post_reply
+  stat_count_views_login
+  stat_count_views_guest
+
+  userId
+  userNode {
+
+  id
+  data {
+
+id
+name
+uniq
+avatarUrl
+urlPath
+
+verified
+deleted
+banned
+
+dateCreate
+dateOnline
+
+stat_count_chapters_normal
+stat_count_chapters_others
+
+is_adm is_mod is_vip is_upr
+
+  }
+
+  }
+
+  disqusId
+
+
+  }
+
+    }
+  }
+""",
+
+    "get_content_comic_sources": """
+  query get_content_comic_sources($comicId: Int!, $dbStatuss: [String] = [], $userId: Int, $haveChapter: Boolean, $sortFor: String) {
+    get_content_comic_sources(
+      comicId: $comicId
+      dbStatuss: $dbStatuss
+      userId: $userId
+      haveChapter: $haveChapter
+      sortFor: $sortFor
+    ) {
+
+id
+data{
+
+  id
+
+  dbStatus
+  isNormal
+  isHidden
+  isDeleted
+
+  lang name altNames authors artists
+
+  release
+  genres summary{code} extraInfo{code}
+
+  urlCover600
+  urlCover300
+  urlCoverOri
+
+  srcTitle srcColor
+
+  chapterCount
+  chapterNode_last {
+    id
+    data {
+      dateCreate datePublic dateModify
+      volume serial
+      dname title
+      urlPath
+      userNode {
+        id data {uniq name}
+      }
+    }
+  }
+}
+
+    }
+  }
+""",
+}

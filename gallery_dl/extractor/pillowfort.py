@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2021-2022 Mike Fährmann
+# Copyright 2021-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -24,7 +24,7 @@ class PillowfortExtractor(Extractor):
     filename_fmt = ("{post_id} {title|original_post[title]:?/ /}"
                     "{num:>02}.{extension}")
     archive_fmt = "{id}"
-    cookiedomain = "www.pillowfort.social"
+    cookies_domain = "www.pillowfort.social"
 
     def __init__(self, match):
         Extractor.__init__(self, match)
@@ -56,7 +56,7 @@ class PillowfortExtractor(Extractor):
 
             post["num"] = 0
             for file in files:
-                url = file["url"]
+                url = file["url"] or file.get("b2_lg_url")
                 if not url:
                     continue
 
@@ -82,17 +82,16 @@ class PillowfortExtractor(Extractor):
                 yield msgtype, url, post
 
     def login(self):
-        cget = self.session.cookies.get
-        if cget("_Pf_new_session", domain=self.cookiedomain) \
-                or cget("remember_user_token", domain=self.cookiedomain):
+        if self.cookies.get("_Pf_new_session", domain=self.cookies_domain):
+            return
+        if self.cookies.get("remember_user_token", domain=self.cookies_domain):
             return
 
         username, password = self._get_auth_info()
         if username:
-            cookies = self._login_impl(username, password)
-            self._update_cookies(cookies)
+            self.cookies_update(self._login_impl(username, password))
 
-    @cache(maxage=14*24*3600, keyarg=1)
+    @cache(maxage=14*86400, keyarg=1)
     def _login_impl(self, username, password):
         self.log.info("Logging in as %s", username)
 
@@ -123,69 +122,7 @@ class PillowfortPostExtractor(PillowfortExtractor):
     """Extractor for a single pillowfort post"""
     subcategory = "post"
     pattern = BASE_PATTERN + r"/posts/(\d+)"
-    test = (
-        ("https://www.pillowfort.social/posts/27510", {
-            "pattern": r"https://img\d+\.pillowfort\.social"
-                       r"/posts/\w+_out\d+\.png",
-            "count": 4,
-            "keyword": {
-                "avatar_url": str,
-                "col": 0,
-                "commentable": True,
-                "comments_count": int,
-                "community_id": None,
-                "content": str,
-                "created_at": str,
-                "date": "type:datetime",
-                "deleted": None,
-                "deleted_at": None,
-                "deleted_by_mod": None,
-                "deleted_for_flag_id": None,
-                "embed_code": None,
-                "id": int,
-                "last_activity": str,
-                "last_activity_elapsed": str,
-                "last_edited_at": str,
-                "likes_count": int,
-                "media_type": "picture",
-                "nsfw": False,
-                "num": int,
-                "original_post_id": None,
-                "original_post_user_id": None,
-                "picture_content_type": None,
-                "picture_file_name": None,
-                "picture_file_size": None,
-                "picture_updated_at": None,
-                "post_id": 27510,
-                "post_type": "picture",
-                "privacy": "public",
-                "reblog_copy_info": list,
-                "rebloggable": True,
-                "reblogged_from_post_id": None,
-                "reblogged_from_user_id": None,
-                "reblogs_count": int,
-                "row": int,
-                "small_image_url": None,
-                "tags": list,
-                "time_elapsed": str,
-                "timestamp": str,
-                "title": "What is Pillowfort.social?",
-                "updated_at": str,
-                "url": r"re:https://img3.pillowfort.social/posts/.*\.png",
-                "user_id": 5,
-                "username": "Staff"
-            },
-        }),
-        ("https://www.pillowfort.social/posts/1557500", {
-            "options": (("external", True), ("inline", False)),
-            "pattern": r"https://twitter\.com/Aliciawitdaart/status"
-                       r"/1282862493841457152",
-        }),
-        ("https://www.pillowfort.social/posts/1672518", {
-            "options": (("inline", True),),
-            "count": 3,
-        }),
-    )
+    example = "https://www.pillowfort.social/posts/12345"
 
     def posts(self):
         url = "{}/posts/{}/json/".format(self.root, self.item)
@@ -195,12 +132,8 @@ class PillowfortPostExtractor(PillowfortExtractor):
 class PillowfortUserExtractor(PillowfortExtractor):
     """Extractor for all posts of a pillowfort user"""
     subcategory = "user"
-    pattern = BASE_PATTERN + r"/(?!posts/)([^/?#]+)"
-    test = ("https://www.pillowfort.social/Pome", {
-        "pattern": r"https://img\d+\.pillowfort\.social/posts/",
-        "range": "1-15",
-        "count": 15,
-    })
+    pattern = BASE_PATTERN + r"/(?!posts/)([^/?#]+(?:/tagged/[^/?#]+)?)"
+    example = "https://www.pillowfort.social/USER"
 
     def posts(self):
         url = "{}/{}/json/".format(self.root, self.item)

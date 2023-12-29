@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright 2017-2019 Mike Fährmann
+# Copyright 2017-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -9,12 +9,12 @@
 
 import sys
 
-if __package__ is None and not hasattr(sys, "frozen"):
+if not __package__ and not hasattr(sys, "frozen"):
     import os.path
-    path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    sys.path.insert(0, os.path.realpath(path))
+    path = os.path.realpath(os.path.abspath(__file__))
+    sys.path.insert(0, os.path.dirname(os.path.dirname(path)))
 
 import gallery_dl
 
 if __name__ == "__main__":
-    sys.exit(gallery_dl.main())
+    raise SystemExit(gallery_dl.main())

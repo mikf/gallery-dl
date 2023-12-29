@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2022 Mike Fährmann
+# Copyright 2018-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -19,7 +19,7 @@ class PiczelExtractor(Extractor):
     filename_fmt = "{category}_{id}_{title}_{num:>02}.{extension}"
     archive_fmt = "{id}_{num}"
     root = "https://piczel.tv"
-    api_root = "https://tombstone.piczel.tv"
+    api_root = root
 
     def items(self):
         for post in self.posts():
@@ -68,10 +68,7 @@ class PiczelUserExtractor(PiczelExtractor):
     """Extractor for all images from a user's gallery"""
     subcategory = "user"
     pattern = r"(?:https?://)?(?:www\.)?piczel\.tv/gallery/([^/?#]+)/?$"
-    test = ("https://piczel.tv/gallery/Bikupan", {
-        "range": "1-100",
-        "count": ">= 100",
-    })
+    example = "https://piczel.tv/gallery/USER"
 
     def __init__(self, match):
         PiczelExtractor.__init__(self, match)
@@ -89,9 +86,7 @@ class PiczelFolderExtractor(PiczelExtractor):
     archive_fmt = "f{folder[id]}_{id}_{num}"
     pattern = (r"(?:https?://)?(?:www\.)?piczel\.tv"
                r"/gallery/(?!image)([^/?#]+)/(\d+)")
-    test = ("https://piczel.tv/gallery/Lulena/1114", {
-        "count": ">= 4",
-    })
+    example = "https://piczel.tv/gallery/USER/12345"
 
     def __init__(self, match):
         PiczelExtractor.__init__(self, match)
@@ -106,30 +101,7 @@ class PiczelImageExtractor(PiczelExtractor):
     """Extractor for individual images"""
     subcategory = "image"
     pattern = r"(?:https?://)?(?:www\.)?piczel\.tv/gallery/image/(\d+)"
-    test = ("https://piczel.tv/gallery/image/7807", {
-        "pattern": r"https://(\w+\.)?piczel\.tv/static/uploads/gallery_image"
-                   r"/32920/image/7807/1532236438-Lulena\.png",
-        "content": "df9a053a24234474a19bce2b7e27e0dec23bff87",
-        "keyword": {
-            "created_at": "2018-07-22T05:13:58.000Z",
-            "date": "dt:2018-07-22 05:13:58",
-            "description": None,
-            "extension": "png",
-            "favorites_count": int,
-            "folder_id": 1113,
-            "id": 7807,
-            "is_flash": False,
-            "is_video": False,
-            "multi": False,
-            "nsfw": False,
-            "num": 0,
-            "password_protected": False,
-            "tags": ["fanart", "commission", "altair", "recreators"],
-            "title": "Altair",
-            "user": dict,
-            "views": int,
-        },
-    })
+    example = "https://piczel.tv/gallery/image/12345"
 
     def __init__(self, match):
         PiczelExtractor.__init__(self, match)

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2021 Mike Fährmann
+# Copyright 2019-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -11,7 +11,6 @@
 from .common import Extractor, Message
 from .. import text, exception
 
-
 BASE_PATTERN = r"(?:https?://)?(?:[\w-]+\.)?pornhub\.com"
 
 
@@ -19,6 +18,35 @@ class PornhubExtractor(Extractor):
     """Base class for pornhub extractors"""
     category = "pornhub"
     root = "https://www.pornhub.com"
+
+    def _init(self):
+        self.cookies.set(
+            "accessAgeDisclaimerPH", "1", domain=".pornhub.com")
+
+    def _pagination(self, user, path):
+        if "/" not in path:
+            path += "/public"
+
+        url = "{}/{}/{}/ajax".format(self.root, user, path)
+        params = {"page": 1}
+        headers = {
+            "Referer": url[:-5],
+            "X-Requested-With": "XMLHttpRequest",
+        }
+
+        while True:
+            response = self.request(
+                url, method="POST", headers=headers, params=params,
+                allow_redirects=False)
+
+            if 300 <= response.status_code < 400:
+                url = "{}{}/{}/ajax".format(
+                    self.root, response.headers["location"], path)
+                continue
+
+            yield response.text
+
+            params["page"] += 1
 
 
 class PornhubGalleryExtractor(PornhubExtractor):
@@ -28,30 +56,7 @@ class PornhubGalleryExtractor(PornhubExtractor):
     filename_fmt = "{num:>03}_{id}.{extension}"
     archive_fmt = "{id}"
     pattern = BASE_PATTERN + r"/album/(\d+)"
-    test = (
-        ("https://www.pornhub.com/album/19289801", {
-            "pattern": r"https://\w+.phncdn.com/pics/albums/\d+/\d+/\d+/\d+/",
-            "count": ">= 300",
-            "keyword": {
-                "id"     : int,
-                "num"    : int,
-                "score"  : int,
-                "views"  : int,
-                "caption": str,
-                "user"   : "Danika Mori",
-                "gallery": {
-                    "id"   : 19289801,
-                    "score": int,
-                    "views": int,
-                    "tags" : list,
-                    "title": "Danika Mori Best Moments",
-                },
-            },
-        }),
-        ("https://www.pornhub.com/album/69040172", {
-            "exception": exception.AuthorizationError,
-        }),
-    )
+    example = "https://www.pornhub.com/album/12345"
 
     def __init__(self, match):
         PornhubExtractor.__init__(self, match)
@@ -109,47 +114,100 @@ class PornhubGalleryExtractor(PornhubExtractor):
                 "views"  : text.parse_int(img["times_viewed"]),
                 "score"  : text.parse_int(img["vote_percent"]),
             }
-            key = img["next"]
+            key = str(img["next"])
             if key == end:
                 return
 
 
-class PornhubUserExtractor(PornhubExtractor):
-    """Extractor for all galleries of a pornhub user"""
-    subcategory = "user"
-    pattern = (BASE_PATTERN + r"/(users|model|pornstar)/([^/?#]+)"
-               "(?:/photos(?:/(public|private|favorites))?)?/?$")
-    test = (
-        ("https://www.pornhub.com/pornstar/danika-mori/photos", {
-            "pattern": PornhubGalleryExtractor.pattern,
-            "count": ">= 6",
-        }),
-        ("https://www.pornhub.com/users/flyings0l0/"),
-        ("https://www.pornhub.com/users/flyings0l0/photos/public"),
-        ("https://www.pornhub.com/users/flyings0l0/photos/private"),
-        ("https://www.pornhub.com/users/flyings0l0/photos/favorites"),
-        ("https://www.pornhub.com/model/bossgirl/photos"),
-    )
+class PornhubGifExtractor(PornhubExtractor):
+    """Extractor for pornhub.com gifs"""
+    subcategory = "gif"
+    directory_fmt = ("{category}", "{user}", "gifs")
+    filename_fmt = "{id} {title}.{extension}"
+    archive_fmt = "{id}"
+    pattern = BASE_PATTERN + r"/gif/(\d+)"
+    example = "https://www.pornhub.com/gif/12345"
 
     def __init__(self, match):
         PornhubExtractor.__init__(self, match)
-        self.type, self.user, self.cat = match.groups()
+        self.gallery_id = match.group(1)
 
     def items(self):
-        url = "{}/{}/{}/photos/{}/ajax".format(
-            self.root, self.type, self.user, self.cat or "public")
-        params = {"page": 1}
-        headers = {
-            "Referer": url[:-5],
-            "X-Requested-With": "XMLHttpRequest",
+        url = "{}/gif/{}".format(self.root, self.gallery_id)
+        extr = text.extract_from(self.request(url).text)
+
+        gif = {
+            "id"   : self.gallery_id,
+            "tags" : extr("data-context-tag='", "'").split(","),
+            "title": extr('"name": "', '"'),
+            "url"  : extr('"contentUrl": "', '"'),
+            "date" : text.parse_datetime(
+                extr('"uploadDate": "', '"'), "%Y-%m-%d"),
+            "user" : text.remove_html(extr("Created by:", "</div>")),
         }
 
+        yield Message.Directory, gif
+        yield Message.Url, gif["url"], text.nameext_from_url(gif["url"], gif)
+
+
+class PornhubUserExtractor(PornhubExtractor):
+    """Extractor for a pornhub user"""
+    subcategory = "user"
+    pattern = BASE_PATTERN + r"/((?:users|model|pornstar)/[^/?#]+)/?$"
+    example = "https://www.pornhub.com/model/USER"
+
+    def __init__(self, match):
+        PornhubExtractor.__init__(self, match)
+        self.user = match.group(1)
+
+    def initialize(self):
+        pass
+
+    def items(self):
+        base = "{}/{}/".format(self.root, self.user)
+        return self._dispatch_extractors((
+            (PornhubPhotosExtractor, base + "photos"),
+            (PornhubGifsExtractor  , base + "gifs"),
+        ), ("photos",))
+
+
+class PornhubPhotosExtractor(PornhubExtractor):
+    """Extractor for all galleries of a pornhub user"""
+    subcategory = "photos"
+    pattern = (BASE_PATTERN + r"/((?:users|model|pornstar)/[^/?#]+)"
+               "/(photos(?:/[^/?#]+)?)")
+    example = "https://www.pornhub.com/model/USER/photos"
+
+    def __init__(self, match):
+        PornhubExtractor.__init__(self, match)
+        self.user, self.path = match.groups()
+
+    def items(self):
         data = {"_extractor": PornhubGalleryExtractor}
-        while True:
-            page = self.request(
-                url, method="POST", headers=headers, params=params).text
-            if not page:
-                return
+        for page in self._pagination(self.user, self.path):
+            gid = None
             for gid in text.extract_iter(page, 'id="albumphoto', '"'):
                 yield Message.Queue, self.root + "/album/" + gid, data
-            params["page"] += 1
+            if gid is None:
+                return
+
+
+class PornhubGifsExtractor(PornhubExtractor):
+    """Extractor for a pornhub user's gifs"""
+    subcategory = "gifs"
+    pattern = (BASE_PATTERN + r"/((?:users|model|pornstar)/[^/?#]+)"
+               "/(gifs(?:/[^/?#]+)?)")
+    example = "https://www.pornhub.com/model/USER/gifs"
+
+    def __init__(self, match):
+        PornhubExtractor.__init__(self, match)
+        self.user, self.path = match.groups()
+
+    def items(self):
+        data = {"_extractor": PornhubGifExtractor}
+        for page in self._pagination(self.user, self.path):
+            gid = None
+            for gid in text.extract_iter(page, 'id="gif', '"'):
+                yield Message.Queue, self.root + "/gif/" + gid, data
+            if gid is None:
+                return

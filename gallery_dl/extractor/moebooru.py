@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2020-2022 Mike Fährmann
+# Copyright 2020-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -92,92 +92,12 @@ BASE_PATTERN = MoebooruExtractor.update({
 })
 
 
-class MoebooruPostExtractor(MoebooruExtractor):
-    subcategory = "post"
-    archive_fmt = "{id}"
-    pattern = BASE_PATTERN + r"/post/show/(\d+)"
-    test = (
-        ("https://yande.re/post/show/51824", {
-            "content": "59201811c728096b2d95ce6896fd0009235fe683",
-            "options": (("tags", True),),
-            "keyword": {
-                "tags_artist": "sasaki_tamaru",
-                "tags_circle": "softhouse_chara",
-                "tags_copyright": "ouzoku",
-                "tags_general": str,
-            },
-        }),
-        ("https://konachan.com/post/show/205189", {
-            "content": "674e75a753df82f5ad80803f575818b8e46e4b65",
-            "options": (("tags", True),),
-            "keyword": {
-                "tags_artist": "patata",
-                "tags_character": "clownpiece",
-                "tags_copyright": "touhou",
-                "tags_general": str,
-            },
-        }),
-        ("https://yande.re/post/show/993156", {
-            "content": "fed722bd90f48de41ec163692befc701056e2b1e",
-            "options": (("notes", True),),
-            "keyword": {
-                "notes": [
-                    {
-                        "id": 7096,
-                        "x" : 90,
-                        "y" : 626,
-                        "width" : 283,
-                        "height": 529,
-                        "body"  : "Please keep this as a secret for me!!",
-                    },
-                    {
-                        "id": 7095,
-                        "x" : 900,
-                        "y" : 438,
-                        "width" : 314,
-                        "height": 588,
-                        "body"  : "The facts that I love playing games",
-                    },
-                ],
-            },
-        }),
-        ("https://lolibooru.moe/post/show/281305/", {
-            "content": "a331430223ffc5b23c31649102e7d49f52489b57",
-            "options": (("notes", True),),
-            "keyword": {
-                "notes": list,
-            },
-        }),
-        ("https://konachan.net/post/show/205189"),
-        ("https://www.sakugabooru.com/post/show/125570"),
-        ("https://lolibooru.moe/post/show/287835"),
-    )
-
-    def __init__(self, match):
-        MoebooruExtractor.__init__(self, match)
-        self.post_id = match.group(match.lastindex)
-
-    def posts(self):
-        params = {"tags": "id:" + self.post_id}
-        return self.request(self.root + "/post.json", params=params).json()
-
-
 class MoebooruTagExtractor(MoebooruExtractor):
     subcategory = "tag"
     directory_fmt = ("{category}", "{search_tags}")
     archive_fmt = "t_{search_tags}_{id}"
-    pattern = BASE_PATTERN + r"/post\?(?:[^&#]*&)*tags=([^&#]+)"
-    test = (
-        ("https://yande.re/post?tags=ouzoku+armor", {
-            "content": "59201811c728096b2d95ce6896fd0009235fe683",
-        }),
-        ("https://konachan.com/post?tags=patata", {
-            "content": "838cfb815e31f48160855435655ddf7bfc4ecb8d",
-        }),
-        ("https://konachan.net/post?tags=patata"),
-        ("https://www.sakugabooru.com/post?tags=nichijou"),
-        ("https://lolibooru.moe/post?tags=ruu_%28tksymkw%29"),
-    )
+    pattern = BASE_PATTERN + r"/post\?(?:[^&#]*&)*tags=([^&#]*)"
+    example = "https://yande.re/post?tags=TAG"
 
     def __init__(self, match):
         MoebooruExtractor.__init__(self, match)
@@ -197,28 +117,38 @@ class MoebooruPoolExtractor(MoebooruExtractor):
     directory_fmt = ("{category}", "pool", "{pool}")
     archive_fmt = "p_{pool}_{id}"
     pattern = BASE_PATTERN + r"/pool/show/(\d+)"
-    test = (
-        ("https://yande.re/pool/show/318", {
-            "content": "2a35b9d6edecce11cc2918c6dce4de2198342b68",
-        }),
-        ("https://konachan.com/pool/show/95", {
-            "content": "cf0546e38a93c2c510a478f8744e60687b7a8426",
-        }),
-        ("https://konachan.net/pool/show/95"),
-        ("https://www.sakugabooru.com/pool/show/54"),
-        ("https://lolibooru.moe/pool/show/239"),
-    )
+    example = "https://yande.re/pool/show/12345"
 
     def __init__(self, match):
         MoebooruExtractor.__init__(self, match)
         self.pool_id = match.group(match.lastindex)
 
     def metadata(self):
+        if self.config("metadata"):
+            url = "{}/pool/show/{}.json".format(self.root, self.pool_id)
+            pool = self.request(url).json()
+            pool.pop("posts", None)
+            return {"pool": pool}
         return {"pool": text.parse_int(self.pool_id)}
 
     def posts(self):
         params = {"tags": "pool:" + self.pool_id}
         return self._pagination(self.root + "/post.json", params)
+
+
+class MoebooruPostExtractor(MoebooruExtractor):
+    subcategory = "post"
+    archive_fmt = "{id}"
+    pattern = BASE_PATTERN + r"/post/show/(\d+)"
+    example = "https://yande.re/post/show/12345"
+
+    def __init__(self, match):
+        MoebooruExtractor.__init__(self, match)
+        self.post_id = match.group(match.lastindex)
+
+    def posts(self):
+        params = {"tags": "id:" + self.post_id}
+        return self.request(self.root + "/post.json", params=params).json()
 
 
 class MoebooruPopularExtractor(MoebooruExtractor):
@@ -227,19 +157,7 @@ class MoebooruPopularExtractor(MoebooruExtractor):
     archive_fmt = "P_{scale[0]}_{date}_{id}"
     pattern = BASE_PATTERN + \
         r"/post/popular_(by_(?:day|week|month)|recent)(?:\?([^#]*))?"
-    test = (
-        ("https://yande.re/post/popular_by_month?month=6&year=2014", {
-            "count": 40,
-        }),
-        ("https://yande.re/post/popular_recent"),
-        ("https://konachan.com/post/popular_by_month?month=11&year=2010", {
-            "count": 20,
-        }),
-        ("https://konachan.com/post/popular_recent"),
-        ("https://konachan.net/post/popular_recent"),
-        ("https://www.sakugabooru.com/post/popular_recent"),
-        ("https://lolibooru.moe/post/popular_recent"),
-    )
+    example = "https://yande.re/post/popular_by_month?year=YYYY&month=MM"
 
     def __init__(self, match):
         MoebooruExtractor.__init__(self, match)

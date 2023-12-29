@@ -22,49 +22,7 @@ class _8musesAlbumExtractor(Extractor):
     root = "https://comics.8muses.com"
     pattern = (r"(?:https?://)?(?:comics\.|www\.)?8muses\.com"
                r"(/comics/album/[^?#]+)(\?[^#]+)?")
-    test = (
-        ("https://comics.8muses.com/comics/album/Fakku-Comics/mogg/Liar", {
-            "url": "6286ac33087c236c5a7e51f8a9d4e4d5548212d4",
-            "pattern": r"https://comics.8muses.com/image/fl/[\w-]+",
-            "keyword": {
-                "url"  : str,
-                "hash" : str,
-                "page" : int,
-                "count": 6,
-                "album": {
-                    "id"     : 10467,
-                    "title"  : "Liar",
-                    "path"   : "Fakku Comics/mogg/Liar",
-                    "private": False,
-                    "url"    : str,
-                    "parent" : 10464,
-                    "views"  : int,
-                    "likes"  : int,
-                    "date"   : "dt:2018-07-10 00:00:00",
-                },
-            },
-        }),
-        ("https://www.8muses.com/comics/album/Fakku-Comics/santa", {
-            "count": ">= 3",
-            "pattern": pattern,
-            "keyword": {
-                "url"    : str,
-                "name"   : str,
-                "private": False,
-            },
-        }),
-        # custom sorting
-        ("https://www.8muses.com/comics/album/Fakku-Comics/11?sort=az", {
-            "count": ">= 70",
-            "keyword": {"name": r"re:^[R-Zr-z]"},
-        }),
-        # non-ASCII characters
-        (("https://comics.8muses.com/comics/album/Various-Authors/Chessire88"
-          "/From-Trainers-to-Pokmons"), {
-            "count": 2,
-            "keyword": {"name": "re:From Trainers to Pokémons"},
-        }),
-    )
+    example = "https://comics.8muses.com/comics/album/PATH/TITLE"
 
     def __init__(self, match):
         Extractor.__init__(self, match)
@@ -118,9 +76,10 @@ class _8musesAlbumExtractor(Extractor):
         return {
             "id"     : album["id"],
             "path"   : album["path"],
+            "parts"  : album["path"].split("/"),
             "title"  : album["name"],
             "private": album["isPrivate"],
-            "url"    : self.root + album["permalink"],
+            "url"    : self.root + "/comics/album/" + album["permalink"],
             "parent" : text.parse_int(album["parentId"]),
             "views"  : text.parse_int(album["numberViews"]),
             "likes"  : text.parse_int(album["numberLikes"]),

@@ -4,9 +4,12 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
+"""Extractors for https://gofile.io/"""
+
 from .common import Extractor, Message
 from .. import text, exception
-from ..cache import memcache
+from ..cache import cache, memcache
+import hashlib
 
 
 class GofileFolderExtractor(Extractor):
@@ -16,49 +19,7 @@ class GofileFolderExtractor(Extractor):
     directory_fmt = ("{category}", "{name} ({code})")
     archive_fmt = "{id}"
     pattern = r"(?:https?://)?(?:www\.)?gofile\.io/d/([^/?#]+)"
-    test = (
-        ("https://gofile.io/d/k6BomI", {
-            "pattern": r"https://store\d+\.gofile\.io/download"
-                       r"/\w{8}-\w{4}-\w{4}-\w{4}-\w{12}"
-                       r"/test-%E3%83%86%E3%82%B9%E3%83%88-%2522%26!\.png",
-            "keyword": {
-                "createTime": int,
-                "directLink": "re:https://store5.gofile.io/download/direct/.+",
-                "downloadCount": int,
-                "extension": "png",
-                "filename": "test-テスト-%22&!",
-                "folder": {
-                    "childs": [
-                        "b0367d79-b8ba-407f-8342-aaf8eb815443",
-                        "7fd4a36a-c1dd-49ff-9223-d93f7d24093f"
-                    ],
-                    "code": "k6BomI",
-                    "createTime": 1654076165,
-                    "id": "fafb59f9-a7c7-4fea-a098-b29b8d97b03c",
-                    "name": "root",
-                    "public": True,
-                    "totalDownloadCount": int,
-                    "totalSize": 182,
-                    "type": "folder"
-                },
-                "id": r"re:\w{8}-\w{4}-\w{4}-\w{4}-\w{12}",
-                "link": r"re:https://store5.gofile.io/download/.+\.png",
-                "md5": "re:[0-9a-f]{32}",
-                "mimetype": "image/png",
-                "name": "test-テスト-%22&!.png",
-                "num": int,
-                "parentFolder": "fafb59f9-a7c7-4fea-a098-b29b8d97b03c",
-                "serverChoosen": "store5",
-                "size": 182,
-                "thumbnail": r"re:https://store5.gofile.io/download/.+\.png",
-                "type": "file"
-            },
-        }),
-        ("https://gofile.io/d/7fd4a36a-c1dd-49ff-9223-d93f7d24093f", {
-            "options": (("website-token", None),),
-            "content": "0c8768055e4e20e7c7259608b67799171b691140",
-        }),
-    )
+    example = "https://gofile.io/d/ID"
 
     def __init__(self, match):
         Extractor.__init__(self, match)
@@ -66,19 +27,18 @@ class GofileFolderExtractor(Extractor):
 
     def items(self):
         recursive = self.config("recursive")
+        password = self.config("password")
 
         token = self.config("api-token")
         if not token:
             token = self._create_account()
-        self.session.cookies.set("accountToken", token, domain=".gofile.io")
+        self.cookies.set("accountToken", token, domain=".gofile.io")
         self.api_token = token
 
-        token = self.config("website-token", "12345")
-        if not token:
-            token = self._get_website_token()
-        self.website_token = token
+        self.website_token = (self.config("website-token") or
+                              self._get_website_token())
 
-        folder = self._get_content(self.content_id)
+        folder = self._get_content(self.content_id, password)
         yield Message.Directory, folder
 
         num = 0
@@ -109,17 +69,20 @@ class GofileFolderExtractor(Extractor):
         self.log.debug("Creating temporary account")
         return self._api_request("createAccount")["token"]
 
-    @memcache()
+    @cache(maxage=86400)
     def _get_website_token(self):
         self.log.debug("Fetching website token")
-        page = self.request(self.root + "/contents/files.html").text
-        return text.extract(page, "websiteToken:", ",")[0].strip("\" ")
+        page = self.request(self.root + "/dist/js/alljs.js").text
+        return text.extr(page, 'fetchData.websiteToken = "', '"')
 
-    def _get_content(self, content_id):
+    def _get_content(self, content_id, password=None):
+        if password is not None:
+            password = hashlib.sha256(password.encode()).hexdigest()
         return self._api_request("getContent", {
             "contentId"   : content_id,
             "token"       : self.api_token,
             "websiteToken": self.website_token,
+            "password"    : password,
         })
 
     def _api_request(self, endpoint, params=None):

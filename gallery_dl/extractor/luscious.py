@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2022 Mike Fährmann
+# Copyright 2016-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -15,7 +15,7 @@ from .. import text, exception
 class LusciousExtractor(Extractor):
     """Base class for luscious extractors"""
     category = "luscious"
-    cookiedomain = ".luscious.net"
+    cookies_domain = ".luscious.net"
     root = "https://members.luscious.net"
 
     def _graphql(self, op, variables, query):
@@ -47,77 +47,13 @@ class LusciousAlbumExtractor(LusciousExtractor):
     archive_fmt = "{album[id]}_{id}"
     pattern = (r"(?:https?://)?(?:www\.|members\.)?luscious\.net"
                r"/(?:albums|pictures/c/[^/?#]+/album)/[^/?#]+_(\d+)")
-    test = (
-        ("https://luscious.net/albums/okinami-no-koigokoro_277031/", {
-            "pattern": r"https://storage\.bhs\.cloud\.ovh\.net/v1/AUTH_\w+"
-                       r"/images/NTRshouldbeillegal/277031"
-                       r"/luscious_net_\d+_\d+\.jpg$",
-            #  "content": "b3a747a6464509440bd0ff6d1267e6959f8d6ff3",
-            "keyword": {
-                "album": {
-                    "__typename"  : "Album",
-                    "audiences"   : list,
-                    "content"     : "Hentai",
-                    "cover"       : "re:https://\\w+.luscious.net/.+/277031/",
-                    "created"     : 1479625853,
-                    "created_by"  : "NTRshouldbeillegal",
-                    "date"        : "dt:2016-11-20 07:10:53",
-                    "description" : "Enjoy.",
-                    "download_url": "re:/download/(r/)?824778/277031/",
-                    "genres"      : list,
-                    "id"          : 277031,
-                    "is_manga"    : True,
-                    "labels"      : list,
-                    "language"    : "English",
-                    "like_status" : "none",
-                    "modified"    : int,
-                    "permissions" : list,
-                    "rating"      : float,
-                    "slug"        : "okinami-no-koigokoro",
-                    "status"      : None,
-                    "tags"        : list,
-                    "title"       : "Okinami no Koigokoro",
-                    "url"         : "/albums/okinami-no-koigokoro_277031/",
-                    "marked_for_deletion": False,
-                    "marked_for_processing": False,
-                    "number_of_animated_pictures": 0,
-                    "number_of_favorites": int,
-                    "number_of_pictures": 18,
-                },
-                "aspect_ratio": r"re:\d+:\d+",
-                "category"    : "luscious",
-                "created"     : int,
-                "date"        : "type:datetime",
-                "height"      : int,
-                "id"          : int,
-                "is_animated" : False,
-                "like_status" : "none",
-                "position"    : int,
-                "resolution"  : r"re:\d+x\d+",
-                "status"      : None,
-                "tags"        : list,
-                "thumbnail"   : str,
-                "title"       : str,
-                "width"       : int,
-                "number_of_comments": int,
-                "number_of_favorites": int,
-            },
-        }),
-        ("https://luscious.net/albums/not-found_277035/", {
-            "exception": exception.NotFoundError,
-        }),
-        ("https://members.luscious.net/albums/login-required_323871/", {
-            "count": 64,
-        }),
-        ("https://www.luscious.net/albums/okinami_277031/"),
-        ("https://members.luscious.net/albums/okinami_277031/"),
-        ("https://luscious.net/pictures/c/video_game_manga/album"
-         "/okinami-no-koigokoro_277031/sorted/position/id/16528978/@_1"),
-    )
+    example = "https://luscious.net/albums/TITLE_12345/"
 
     def __init__(self, match):
         LusciousExtractor.__init__(self, match)
         self.album_id = match.group(1)
+
+    def _init(self):
         self.gif = self.config("gif", False)
 
     def items(self):
@@ -336,15 +272,7 @@ class LusciousSearchExtractor(LusciousExtractor):
     subcategory = "search"
     pattern = (r"(?:https?://)?(?:www\.|members\.)?luscious\.net"
                r"/albums/list/?(?:\?([^#]+))?")
-    test = (
-        ("https://members.luscious.net/albums/list/"),
-        ("https://members.luscious.net/albums/list/"
-         "?display=date_newest&language_ids=%2B1&tagged=+full_color&page=1", {
-             "pattern": LusciousAlbumExtractor.pattern,
-             "range": "41-60",
-             "count": 20,
-         }),
-    )
+    example = "https://luscious.net/albums/list/?tagged=TAG"
 
     def __init__(self, match):
         LusciousExtractor.__init__(self, match)

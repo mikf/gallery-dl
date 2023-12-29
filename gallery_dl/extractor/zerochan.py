@@ -21,17 +21,19 @@ class ZerochanExtractor(BooruExtractor):
     root = "https://www.zerochan.net"
     filename_fmt = "{id}.{extension}"
     archive_fmt = "{id}"
-    cookiedomain = ".zerochan.net"
-    cookienames = ("z_id", "z_hash")
+    cookies_domain = ".zerochan.net"
+    cookies_names = ("z_id", "z_hash")
 
     def login(self):
         self._logged_in = True
-        if not self._check_cookies(self.cookienames):
-            username, password = self._get_auth_info()
-            if username:
-                self._update_cookies(self._login_impl(username, password))
-            else:
-                self._logged_in = False
+        if self.cookies_check(self.cookies_names):
+            return
+
+        username, password = self._get_auth_info()
+        if username:
+            return self.cookies_update(self._login_impl(username, password))
+
+        self._logged_in = False
 
     @cache(maxage=90*86400, keyarg=1)
     def _login_impl(self, username, password):
@@ -61,14 +63,14 @@ class ZerochanExtractor(BooruExtractor):
 
         data = {
             "id"      : text.parse_int(entry_id),
-            "author"  : extr('"author": "', '"'),
+            "author"  : text.parse_unicode_escapes(extr('    "name": "', '"')),
             "file_url": extr('"contentUrl": "', '"'),
             "date"    : text.parse_datetime(extr('"datePublished": "', '"')),
             "width"   : text.parse_int(extr('"width": "', ' ')),
             "height"  : text.parse_int(extr('"height": "', ' ')),
             "size"    : text.parse_bytes(extr('"contentSize": "', 'B')),
             "path"    : text.split_html(extr(
-                'class="breadcrumbs', '</p>'))[2:],
+                'class="breadcrumbs', '</nav>'))[2:],
             "uploader": extr('href="/user/', '"'),
             "tags"    : extr('<ul id="tags"', '</ul>'),
             "source"  : extr('<h2>Source</h2>', '</p><h2>').rpartition(
@@ -78,8 +80,9 @@ class ZerochanExtractor(BooruExtractor):
         html = data["tags"]
         tags = data["tags"] = []
         for tag in html.split("<li class=")[1:]:
-            category, _, name = text.extr(tag, 'alt="', '<').partition('">')
-            tags.append(category + ":" + name.strip())
+            category = text.extr(tag, 'data-type="', '"')
+            name = text.extr(tag, 'data-tag="', '"')
+            tags.append(category.capitalize() + ":" + name)
 
         return data
 
@@ -108,23 +111,7 @@ class ZerochanTagExtractor(ZerochanExtractor):
     subcategory = "tag"
     directory_fmt = ("{category}", "{search_tags}")
     pattern = BASE_PATTERN + r"/(?!\d+$)([^/?#]+)/?(?:\?([^#]+))?"
-    test = ("https://www.zerochan.net/Perth+%28Kantai+Collection%29", {
-        "pattern": r"https://static\.zerochan\.net/.+\.full\.\d+\.(jpg|png)",
-        "count": "> 24",
-        "keyword": {
-            "extension": r"re:jpg|png",
-            "file_url": r"re:https://static\.zerochan\.net"
-                        r"/.+\.full\.\d+\.(jpg|png)",
-            "filename": r"re:(Perth\.\(Kantai\.Collection\)"
-                        r"|Kantai\.Collection)\.full\.\d+",
-            "height": r"re:^\d+$",
-            "id": r"re:^\d+$",
-            "name": r"re:(Perth \(Kantai Collection\)|Kantai Collection)",
-            "search_tags": "Perth (Kantai Collection)",
-            "size": r"re:^\d+k$",
-            "width": r"re:^\d+$",
-        },
-    })
+    example = "https://www.zerochan.net/TAG"
 
     def __init__(self, match):
         ZerochanExtractor.__init__(self, match)
@@ -174,40 +161,7 @@ class ZerochanTagExtractor(ZerochanExtractor):
 class ZerochanImageExtractor(ZerochanExtractor):
     subcategory = "image"
     pattern = BASE_PATTERN + r"/(\d+)"
-    test = ("https://www.zerochan.net/2920445", {
-        "pattern": r"https://static\.zerochan\.net/"
-                   r"Perth\.%28Kantai\.Collection%29\.full.2920445\.jpg",
-        "keyword": {
-            "author": "YeFan 葉凡",
-            "date": "dt:2020-04-24 21:33:44",
-            "file_url": "https://static.zerochan.net"
-                        "/Perth.%28Kantai.Collection%29.full.2920445.jpg",
-            "filename": "Perth.(Kantai.Collection).full.2920445",
-            "height": 1366,
-            "id": 2920445,
-            "path": ["Kantai Collection", "Perth (Kantai Collection)"],
-            "size": 1975296,
-            "tags": [
-                "Mangaka:YeFan 葉凡",
-                "Game:Kantai Collection",
-                "Character:Perth (Kantai Collection)",
-                "Theme:Blonde Hair",
-                "Theme:Braids",
-                "Theme:Coat",
-                "Theme:Female",
-                "Theme:Firefighter Outfit",
-                "Theme:Group",
-                "Theme:Long Sleeves",
-                "Theme:Personification",
-                "Theme:Pins",
-                "Theme:Ribbon",
-                "Theme:Shirt",
-                "Theme:Short Hair",
-            ],
-            "uploader": "YukinoTokisaki",
-            "width": 1920,
-        },
-    })
+    example = "https://www.zerochan.net/12345"
 
     def __init__(self, match):
         ZerochanExtractor.__init__(self, match)

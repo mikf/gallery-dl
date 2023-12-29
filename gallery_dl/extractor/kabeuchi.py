@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2020 Mike Fährmann
+# Copyright 2020-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -21,16 +21,7 @@ class KabeuchiUserExtractor(Extractor):
     archive_fmt = "{id}_{num}"
     root = "https://kabe-uchiroom.com"
     pattern = r"(?:https?://)?kabe-uchiroom\.com/mypage/?\?id=(\d+)"
-    test = (
-        ("https://kabe-uchiroom.com/mypage/?id=919865303848255493", {
-            "pattern": (r"https://kabe-uchiroom\.com/accounts/upfile/3/"
-                        r"919865303848255493/\w+\.jpe?g"),
-            "count": ">= 24",
-        }),
-        ("https://kabe-uchiroom.com/mypage/?id=123456789", {
-            "exception": exception.NotFoundError,
-        }),
-    )
+    example = "https://kabe-uchiroom.com/mypage/?id=12345"
 
     def __init__(self, match):
         Extractor.__init__(self, match)

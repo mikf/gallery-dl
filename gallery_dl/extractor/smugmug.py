@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2022 Mike Fährmann
+# Copyright 2018-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -21,7 +21,7 @@ class SmugmugExtractor(Extractor):
     category = "smugmug"
     filename_fmt = ("{category}_{User[NickName]:?/_/}"
                     "{Image[UploadKey]}_{Image[ImageKey]}.{extension}")
-    cookiedomain = None
+    cookies_domain = None
     empty_user = {
         "Uri": "",
         "ResponseLevel": "Public",
@@ -34,8 +34,7 @@ class SmugmugExtractor(Extractor):
         "Uris": None,
     }
 
-    def __init__(self, match):
-        Extractor.__init__(self, match)
+    def _init(self):
         self.api = SmugmugAPI(self)
         self.videos = self.config("videos", True)
         self.session = self.api.session
@@ -69,19 +68,7 @@ class SmugmugAlbumExtractor(SmugmugExtractor):
     directory_fmt = ("{category}", "{User[NickName]}", "{Album[Name]}")
     archive_fmt = "a_{Album[AlbumKey]}_{Image[ImageKey]}"
     pattern = r"smugmug:album:([^:]+)$"
-    test = (
-        ("smugmug:album:cr4C7f", {
-            "url": "2c2e576e47d4e9ce60b44871f08a8c66b5ebaceb",
-        }),
-        # empty
-        ("smugmug:album:Fb7hMs", {
-            "count": 0,
-        }),
-        # no "User"
-        ("smugmug:album:6VRT8G", {
-            "url": "c4a0f4c4bfd514b93cbdeb02b3345bf7ef6604df",
-        }),
-    )
+    example = "smugmug:album:ID"
 
     def __init__(self, match):
         SmugmugExtractor.__init__(self, match)
@@ -108,18 +95,7 @@ class SmugmugImageExtractor(SmugmugExtractor):
     subcategory = "image"
     archive_fmt = "{Image[ImageKey]}"
     pattern = BASE_PATTERN + r"(?:/[^/?#]+)+/i-([^/?#-]+)"
-    test = (
-        ("https://tdm.smugmug.com/Nature/Dove/i-kCsLJT6", {
-            "url": "e6408fd2c64e721fd146130dceb56a971ceb4259",
-            "keyword": "b31a63d07c9c26eb0f79f52d60d171a98938f99b",
-            "content": "ecbd9d7b4f75a637abc8d35319be9ec065a44eb0",
-        }),
-        # video
-        ("https://tstravels.smugmug.com/Dailies/Daily-Dose-2015/i-39JFNzB", {
-            "url": "04d0ab1ff829ca7d78f5acb5548953df08e9a5ee",
-            "keyword": "2b545184592c282b365fcbb7df6ca7952b8a3173",
-        }),
-    )
+    example = "https://USER.smugmug.com/PATH/i-ID"
 
     def __init__(self, match):
         SmugmugExtractor.__init__(self, match)
@@ -140,35 +116,13 @@ class SmugmugPathExtractor(SmugmugExtractor):
     """Extractor for smugmug albums from URL paths and users"""
     subcategory = "path"
     pattern = BASE_PATTERN + r"((?:/[^/?#a-fh-mo-z][^/?#]*)*)/?$"
-    test = (
-        ("https://tdm.smugmug.com/Nature/Dove", {
-            "pattern": "smugmug:album:cr4C7f$",
-        }),
-        ("https://tdm.smugmug.com/", {
-            "pattern": SmugmugAlbumExtractor.pattern,
-            "url": "1640028712875b90974e5aecd91b60e6de6138c7",
-        }),
-        # gallery node without owner
-        ("https://www.smugmug.com/gallery/n-GLCjnD/", {
-            "pattern": "smugmug:album:6VRT8G$",
-        }),
-        # custom domain
-        ("smugmug:www.sitkapics.com/TREES-and-TRAILS/", {
-            "pattern": "smugmug:album:ct8Nds$",
-        }),
-        ("smugmug:www.sitkapics.com/", {
-            "pattern": r"smugmug:album:\w{6}$",
-            "count": ">= 14",
-        }),
-        ("smugmug:https://www.sitkapics.com/"),
-    )
+    example = "https://USER.smugmug.com/PATH"
 
     def __init__(self, match):
         SmugmugExtractor.__init__(self, match)
         self.domain, self.user, self.path = match.groups()
 
     def items(self):
-
         if not self.user:
             self.user = self.api.site_user(self.domain)["NickName"]
 

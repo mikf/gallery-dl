@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2021-2022 Mike Fährmann
+# Copyright 2021-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -30,25 +30,16 @@ BASE_PATTERN = LolisafeExtractor.update({
 class LolisafeAlbumExtractor(LolisafeExtractor):
     subcategory = "album"
     pattern = BASE_PATTERN + "/a/([^/?#]+)"
-    test = (
-        ("https://xbunkr.com/a/TA0bu3F4", {
-            "pattern": r"https://media\.xbunkr\.com/[^.]+\.\w+",
-            "count": 861,
-            "keyword": {
-                "album_id": "TA0bu3F4",
-                "album_name": "Hannahowo Onlyfans Photos",
-            }
-        }),
-        ("https://xbunkr.com/a/GNQc2I5d"),
-    )
+    example = "https://xbunkr.com/a/ID"
 
     def __init__(self, match):
         LolisafeExtractor.__init__(self, match)
         self.album_id = match.group(match.lastindex)
 
+    def _init(self):
         domain = self.config("domain")
         if domain == "auto":
-            self.root = text.root_from_url(match.group(0))
+            self.root = text.root_from_url(self.url)
         elif domain:
             self.root = text.ensure_http_scheme(domain)
 

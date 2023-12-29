@@ -102,10 +102,10 @@ class BasePostprocessorTest(unittest.TestCase):
         pp = postprocessor.find(self.__class__.__name__[:-4].lower())
         return pp(self.job, options)
 
-    def _trigger(self, events=None, *args):
+    def _trigger(self, events=None):
         for event in (events or ("prepare", "file")):
             for callback in self.job.hooks[event]:
-                callback(self.pathfmt, *args)
+                callback(self.pathfmt)
 
 
 class ClassifyTest(BasePostprocessorTest):
@@ -162,6 +162,80 @@ class ClassifyTest(BasePostprocessorTest):
         with patch("os.makedirs") as mkdirs:
             self._trigger()
             mkdirs.assert_called_once_with(path, exist_ok=True)
+
+
+class ExecTest(BasePostprocessorTest):
+
+    def test_command_string(self):
+        self._create({
+            "command": "echo {} {_path} {_directory} {_filename} && rm {};",
+        })
+
+        with patch("subprocess.Popen") as p:
+            i = Mock()
+            i.wait.return_value = 0
+            p.return_value = i
+            self._trigger(("after",))
+
+        p.assert_called_once_with(
+            "echo {0} {0} {1} {2} && rm {0};".format(
+                self.pathfmt.realpath,
+                self.pathfmt.realdirectory,
+                self.pathfmt.filename),
+            shell=True)
+        i.wait.assert_called_once_with()
+
+    def test_command_list(self):
+        self._create({
+            "command": ["~/script.sh", "{category}",
+                        "\fE _directory.upper()"],
+        })
+
+        with patch("subprocess.Popen") as p:
+            i = Mock()
+            i.wait.return_value = 0
+            p.return_value = i
+            self._trigger(("after",))
+
+        p.assert_called_once_with(
+            [
+                os.path.expanduser("~/script.sh"),
+                self.pathfmt.kwdict["category"],
+                self.pathfmt.realdirectory.upper(),
+            ],
+            shell=False,
+        )
+
+    def test_command_returncode(self):
+        self._create({
+            "command": "echo {}",
+        })
+
+        with patch("subprocess.Popen") as p:
+            i = Mock()
+            i.wait.return_value = 123
+            p.return_value = i
+
+            with self.assertLogs() as log:
+                self._trigger(("after",))
+
+        msg = ("WARNING:postprocessor.exec:'echo {}' returned with "
+               "non-zero exit status (123)".format(self.pathfmt.realpath))
+        self.assertEqual(log.output[0], msg)
+
+    def test_async(self):
+        self._create({
+            "async"  : True,
+            "command": "echo {}",
+        })
+
+        with patch("subprocess.Popen") as p:
+            i = Mock()
+            p.return_value = i
+            self._trigger(("after",))
+
+        self.assertTrue(p.called)
+        self.assertFalse(i.wait.called)
 
 
 class MetadataTest(BasePostprocessorTest):
@@ -291,8 +365,8 @@ class MetadataTest(BasePostprocessorTest):
         self._create(
             {"mode": "tags"},
             {"tags": [
-                {"g": "foobar1", "m": "foobar2"},
-                {"g": None, "m": "foobarbaz"}
+                {"g": "foobar1", "m": "foobar2", "u": True},
+                {"g": None, "m": "foobarbaz", "u": [3, 4]},
             ]},
         )
         with patch("builtins.open", mock_open()) as m:
@@ -388,50 +462,94 @@ class MetadataTest(BasePostprocessorTest):
 """)
 
     def test_metadata_modify(self):
-        kwdict = {"foo": 0, "bar": {"bax": 1, "bay": 2, "baz": 3}}
+        kwdict = {"foo": 0, "bar": {"bax": 1, "bay": 2, "baz": 3, "ba2": {}}}
         self._create({
             "mode": "modify",
             "fields": {
-                "foo"     : "{filename}-{foo!s}",
-                "foo2"    : "\fE bar['bax'] + 122",
-                "bar[baz]": "{_now}",
-                "bar[ba2]": "test",
+                "foo"          : "{filename}-{foo!s}",
+                "foo2"         : "\fE bar['bax'] + 122",
+                "bar[\"baz\"]" : "{_now}",
+                "bar['ba2'][a]": "test",
             },
         }, kwdict)
-        pdict = self.pathfmt.kwdict
 
+        pdict = self.pathfmt.kwdict
         self.assertIsNot(kwdict, pdict)
         self.assertEqual(pdict["foo"], kwdict["foo"])
         self.assertEqual(pdict["bar"], kwdict["bar"])
 
         self._trigger()
 
-        self.assertEqual(pdict["foo"]       , "file-0")
-        self.assertEqual(pdict["foo2"]      , 123)
-        self.assertEqual(pdict["bar"]["ba2"], "test")
+        self.assertEqual(pdict["foo"] , "file-0")
+        self.assertEqual(pdict["foo2"], 123)
+        self.assertEqual(pdict["bar"]["ba2"]["a"], "test")
         self.assertIsInstance(pdict["bar"]["baz"], datetime)
 
     def test_metadata_delete(self):
-        kwdict = {"foo": 0, "bar": {"bax": 1, "bay": 2, "baz": 3}}
-        self._create({"mode": "delete", "fields": ["foo", "bar[baz]"]}, kwdict)
-        pdict = self.pathfmt.kwdict
+        kwdict = {
+            "foo": 0,
+            "bar": {
+                "bax": 1,
+                "bay": 2,
+                "baz": {"a": 3, "b": 4},
+            },
+        }
+        self._create({
+            "mode": "delete",
+            "fields": ["foo", "bar['bax']", "bar[\"baz\"][a]"],
+        }, kwdict)
 
+        pdict = self.pathfmt.kwdict
         self.assertIsNot(kwdict, pdict)
+
         self.assertEqual(pdict["foo"], kwdict["foo"])
         self.assertEqual(pdict["bar"], kwdict["bar"])
 
-        del kwdict["foo"]
-        del kwdict["bar"]["baz"]
+        self._trigger()
 
+        self.assertNotIn("foo", pdict)
+        self.assertNotIn("bax", pdict["bar"])
+        self.assertNotIn("a", pdict["bar"]["baz"])
+
+        # no errors for deleted/undefined fields
         self._trigger()
         self.assertNotIn("foo", pdict)
-        self.assertNotIn("baz", pdict["bar"])
-        self.assertEqual(kwdict["bar"], pdict["bar"])
+        self.assertNotIn("bax", pdict["bar"])
+        self.assertNotIn("a", pdict["bar"]["baz"])
 
-        self._trigger()
-        self.assertNotIn("foo", pdict)
-        self.assertNotIn("baz", pdict["bar"])
-        self.assertEqual(kwdict["bar"], pdict["bar"])
+    def test_metadata_option_skip(self):
+        self._create({"skip": True})
+
+        with patch("builtins.open", mock_open()) as m, \
+                patch("os.path.exists") as e:
+            e.return_value = True
+            self._trigger()
+
+        self.assertTrue(e.called)
+        self.assertTrue(not m.called)
+        self.assertTrue(not len(self._output(m)))
+
+        with patch("builtins.open", mock_open()) as m, \
+                patch("os.path.exists") as e:
+            e.return_value = False
+            self._trigger()
+
+        self.assertTrue(e.called)
+        self.assertTrue(m.called)
+        self.assertGreater(len(self._output(m)), 0)
+
+        path = self.pathfmt.realdirectory + "file.ext.json"
+        m.assert_called_once_with(path, "w", encoding="utf-8")
+
+    def test_metadata_option_skip_false(self):
+        self._create({"skip": False})
+
+        with patch("builtins.open", mock_open()) as m, \
+                patch("os.path.exists") as e:
+            self._trigger()
+
+        self.assertTrue(not e.called)
+        self.assertTrue(m.called)
 
     @staticmethod
     def _output(mock):
@@ -463,6 +581,40 @@ class MtimeTest(BasePostprocessorTest):
         self._create({"value": "{foo}"}, {"foo": 315532800})
         self._trigger()
         self.assertEqual(self.pathfmt.kwdict["_mtime"], 315532800)
+
+
+class PythonTest(BasePostprocessorTest):
+
+    def test_module(self):
+        path = os.path.join(self.dir.name, "module.py")
+        self._write_module(path)
+
+        sys.path.insert(0, self.dir.name)
+        try:
+            self._create({"function": "module:calc"}, {"_value": 123})
+        finally:
+            del sys.path[0]
+
+        self.assertNotIn("_result", self.pathfmt.kwdict)
+        self._trigger()
+        self.assertEqual(self.pathfmt.kwdict["_result"], 246)
+
+    def test_path(self):
+        path = os.path.join(self.dir.name, "module.py")
+        self._write_module(path)
+
+        self._create({"function": path + ":calc"}, {"_value": 12})
+
+        self.assertNotIn("_result", self.pathfmt.kwdict)
+        self._trigger()
+        self.assertEqual(self.pathfmt.kwdict["_result"], 24)
+
+    def _write_module(self, path):
+        with open(path, "w") as fp:
+            fp.write("""
+def calc(kwdict):
+    kwdict["_result"] = kwdict["_value"] * 2
+""")
 
 
 class ZipTest(BasePostprocessorTest):
@@ -531,7 +683,7 @@ class ZipTest(BasePostprocessorTest):
             self.assertEqual(len(pp.zfile.NameToInfo), 4)
 
         # close file
-        self._trigger(("finalize",), 0)
+        self._trigger(("finalize",))
 
         # reopen to check persistence
         with zipfile.ZipFile(pp.zfile.filename) as file:
@@ -564,7 +716,7 @@ class ZipTest(BasePostprocessorTest):
         self._trigger()
 
         # close file
-        self._trigger(("finalize",), 0)
+        self._trigger(("finalize",))
 
         self.assertEqual(pp.zfile.write.call_count, 3)
         for call in pp.zfile.write.call_args_list:

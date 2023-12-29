@@ -36,64 +36,19 @@ class MangaseeBase():
 class MangaseeChapterExtractor(MangaseeBase, ChapterExtractor):
     pattern = (r"(?:https?://)?(mangasee123|manga4life)\.com"
                r"(/read-online/[^/?#]+\.html)")
-    test = (
-        (("https://mangasee123.com/read-online"
-          "/Tokyo-Innocent-chapter-4.5-page-1.html"), {
-            "pattern": r"https://[^/]+/manga/Tokyo-Innocent/0004\.5-00\d\.png",
-            "count": 8,
-            "keyword": {
-                "author": ["NARUMI Naru"],
-                "chapter": 4,
-                "chapter_minor": ".5",
-                "chapter_string": "100045",
-                "count": 8,
-                "date": "dt:2020-01-20 21:52:53",
-                "extension": "png",
-                "filename": r"re:0004\.5-00\d",
-                "genre": ["Comedy", "Fantasy", "Harem", "Romance", "Shounen",
-                          "Supernatural"],
-                "index": "1",
-                "lang": "en",
-                "language": "English",
-                "manga": "Tokyo Innocent",
-                "page": int,
-                "title": "",
-            },
-        }),
-        (("https://manga4life.com/read-online"
-          "/One-Piece-chapter-1063-page-1.html"), {
-            "pattern": r"https://[^/]+/manga/One-Piece/1063-0\d\d\.png",
-            "count": 13,
-            "keyword": {
-                "author": ["ODA Eiichiro"],
-                "chapter": 1063,
-                "chapter_minor": "",
-                "chapter_string": "110630",
-                "count": 13,
-                "date": "dt:2022-10-16 17:32:54",
-                "extension": "png",
-                "filename": r"re:1063-0\d\d",
-                "genre": ["Action", "Adventure", "Comedy", "Drama", "Fantasy",
-                          "Shounen"],
-                "index": "1",
-                "lang": "en",
-                "language": "English",
-                "manga": "One Piece",
-                "page": int,
-                "title": "",
-            },
-        }),
-    )
+    example = "https://mangasee123.com/read-online/MANGA-chapter-1-page-1.html"
 
     def __init__(self, match):
         if match.group(1) == "manga4life":
             self.category = "mangalife"
             self.root = "https://manga4life.com"
         ChapterExtractor.__init__(self, match, self.root + match.group(2))
+
+    def _init(self):
         self.session.headers["Referer"] = self.gallery_url
 
         domain = self.root.rpartition("/")[2]
-        cookies = self.session.cookies
+        cookies = self.cookies
         if not cookies.get("PHPSESSID", domain=domain):
             cookies.set("PHPSESSID", util.generate_token(13), domain=domain)
 
@@ -132,45 +87,7 @@ class MangaseeChapterExtractor(MangaseeBase, ChapterExtractor):
 class MangaseeMangaExtractor(MangaseeBase, MangaExtractor):
     chapterclass = MangaseeChapterExtractor
     pattern = r"(?:https?://)?(mangasee123|manga4life)\.com(/manga/[^/?#]+)"
-    test = (
-        (("https://mangasee123.com/manga"
-          "/Nakamura-Koedo-To-Daizu-Keisuke-Wa-Umaku-Ikanai"), {
-            "pattern": MangaseeChapterExtractor.pattern,
-            "count": ">= 17",
-            "keyword": {
-                "author": ["TAKASE Masaya"],
-                "chapter": int,
-                "chapter_minor": r"re:^|\.5$",
-                "chapter_string": r"re:100\d\d\d",
-                "date": "type:datetime",
-                "genre": ["Comedy", "Romance", "School Life", "Shounen",
-                          "Slice of Life"],
-                "index": "1",
-                "lang": "en",
-                "language": "English",
-                "manga": "Nakamura-Koedo-To-Daizu-Keisuke-Wa-Umaku-Ikanai",
-                "title": "",
-            },
-        }),
-        ("https://manga4life.com/manga/Ano-Musume-Ni-Kiss-To-Shirayuri-O", {
-            "pattern": MangaseeChapterExtractor.pattern,
-            "count": ">= 50",
-            "keyword": {
-                "author": ["Canno"],
-                "chapter": int,
-                "chapter_minor": r"re:^|\.5$",
-                "chapter_string": r"re:100\d\d\d",
-                "date": "type:datetime",
-                "genre": ["Comedy", "Romance", "School Life", "Seinen",
-                          "Shoujo Ai"],
-                "index": "1",
-                "lang": "en",
-                "language": "English",
-                "manga": "Ano-Musume-Ni-Kiss-To-Shirayuri-O",
-                "title": ""
-            },
-        }),
-    )
+    example = "https://mangasee123.com/manga/MANGA"
 
     def __init__(self, match):
         if match.group(1) == "manga4life":

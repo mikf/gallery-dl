@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2022 Mike Fährmann
+# Copyright 2019-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -35,6 +35,7 @@ class SexcomExtractor(Extractor):
     def _pagination(self, url):
         while True:
             extr = text.extract_from(self.request(url).text)
+            url = extr('<link rel="next" href="', '"')
 
             while True:
                 href = extr('<a class="image_wrapper" href="', '"')
@@ -42,11 +43,9 @@ class SexcomExtractor(Extractor):
                     break
                 yield self.root + href
 
-            pager = extr('id="pagenum"', '</div>')
-            url = text.extr(pager, ' href="', '"')
             if not url:
                 return
-            url = text.urljoin(self.root, url)
+            url = text.urljoin(self.root, text.unescape(url))
 
     def _parse_pin(self, url):
         response = self.request(url, fatal=False)
@@ -71,9 +70,12 @@ class SexcomExtractor(Extractor):
             info = extr("player.updateSrc(", ");")
 
             if info:
-                path = text.extr(info, "src: '", "'")
-                data["filename"] = path.rpartition("/")[2]
-                data["extension"] = "mp4"
+                try:
+                    path, _ = text.rextract(
+                        info, "src: '", "'", info.index("label: 'HD'"))
+                except ValueError:
+                    path = text.extr(info, "src: '", "'")
+                text.nameext_from_url(path, data)
                 data["url"] = path
             else:
                 iframe = extr('<iframe', '>')
@@ -104,42 +106,7 @@ class SexcomPinExtractor(SexcomExtractor):
     subcategory = "pin"
     directory_fmt = ("{category}",)
     pattern = r"(?:https?://)?(?:www\.)?sex\.com/pin/(\d+)(?!.*#related$)"
-    test = (
-        # picture
-        ("https://www.sex.com/pin/21241874-sexy-ecchi-girls-166/", {
-            "pattern": "https://cdn.sex.com/images/.+/2014/08/26/7637609.jpg",
-            "content": "ebe1814dadfebf15d11c6af4f6afb1a50d6c2a1c",
-            "keyword": {
-                "comments" : int,
-                "date"     : "dt:2014-10-19 15:45:44",
-                "extension": "jpg",
-                "filename" : "7637609",
-                "likes"    : int,
-                "pin_id"   : 21241874,
-                "repins"   : int,
-                "tags"     : list,
-                "thumbnail": str,
-                "title"    : "Sexy Ecchi Girls 166",
-                "type"     : "picture",
-                "uploader" : "mangazeta",
-                "url"      : str,
-            },
-        }),
-        # gif
-        ("https://www.sex.com/pin/55435122-ecchi/", {
-            "pattern": "https://cdn.sex.com/images/.+/2017/12/07/18760842.gif",
-            "content": "176cc63fa05182cb0438c648230c0f324a5965fe",
-        }),
-        # video
-        ("https://www.sex.com/pin/55748341/", {
-            "pattern": "https://www.sex.com/video/stream/776229/hd",
-            "content": "e1a5834869163e2c4d1ca2677f5b7b367cf8cfff",
-        }),
-        # pornhub embed
-        ("https://www.sex.com/pin/55847384-very-nicely-animated/", {
-            "pattern": "ytdl:https://www.pornhub.com/embed/ph56ef24b6750f2",
-        }),
-    )
+    example = "https://www.sex.com/pin/12345-TITLE/"
 
     def __init__(self, match):
         SexcomExtractor.__init__(self, match)
@@ -154,9 +121,7 @@ class SexcomRelatedPinExtractor(SexcomPinExtractor):
     subcategory = "related-pin"
     directory_fmt = ("{category}", "related {original_pin[pin_id]}")
     pattern = r"(?:https?://)?(?:www\.)?sex\.com/pin/(\d+).*#related$"
-    test = ("https://www.sex.com/pin/21241874/#related", {
-        "count": ">= 20",
-    })
+    example = "https://www.sex.com/pin/12345#related"
 
     def metadata(self):
         pin = self._parse_pin(SexcomPinExtractor.pins(self)[0])
@@ -173,9 +138,7 @@ class SexcomPinsExtractor(SexcomExtractor):
     subcategory = "pins"
     directory_fmt = ("{category}", "{user}")
     pattern = r"(?:https?://)?(?:www\.)?sex\.com/user/([^/?#]+)/pins/"
-    test = ("https://www.sex.com/user/sirjuan79/pins/", {
-        "count": ">= 15",
-    })
+    example = "https://www.sex.com/user/USER/pins/"
 
     def __init__(self, match):
         SexcomExtractor.__init__(self, match)
@@ -195,9 +158,7 @@ class SexcomBoardExtractor(SexcomExtractor):
     directory_fmt = ("{category}", "{user}", "{board}")
     pattern = (r"(?:https?://)?(?:www\.)?sex\.com/user"
                r"/([^/?#]+)/(?!(?:following|pins|repins|likes)/)([^/?#]+)")
-    test = ("https://www.sex.com/user/ronin17/exciting-hentai/", {
-        "count": ">= 15",
-    })
+    example = "https://www.sex.com/user/USER/BOARD/"
 
     def __init__(self, match):
         SexcomExtractor.__init__(self, match)
@@ -221,17 +182,7 @@ class SexcomSearchExtractor(SexcomExtractor):
     pattern = (r"(?:https?://)?(?:www\.)?sex\.com/((?:"
                r"(pic|gif|video)s/([^/?#]*)|search/(pic|gif|video)s"
                r")/?(?:\?([^#]+))?)")
-    test = (
-        ("https://www.sex.com/search/pics?query=ecchi", {
-            "range": "1-10",
-            "count": 10,
-        }),
-        ("https://www.sex.com/videos/hentai/", {
-            "range": "1-10",
-            "count": 10,
-        }),
-        ("https://www.sex.com/pics/?sort=popular&sub=all&page=1"),
-    )
+    example = "https://www.sex.com/search/pics?query=QUERY"
 
     def __init__(self, match):
         SexcomExtractor.__init__(self, match)

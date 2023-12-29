@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright 2021-2022 Mike Fährmann
+# Copyright 2021-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -23,10 +23,12 @@ class TestFormatter(unittest.TestCase):
     kwdict = {
         "a": "hElLo wOrLd",
         "b": "äöü",
+        "j": "げんそうきょう",
         "d": {"a": "foo", "b": 0, "c": None},
         "l": ["a", "b", "c"],
         "n": None,
         "s": " \n\r\tSPACE    ",
+        "h": "<p>foo </p> &amp; bar <p> </p>",
         "u": "&#x27;&lt; / &gt;&#x27;",
         "t": 1262304000,
         "dt": datetime.datetime(2010, 1, 1),
@@ -46,6 +48,10 @@ class TestFormatter(unittest.TestCase):
         self._run_test("{s!t}", "SPACE")
         self._run_test("{a!U}", self.kwdict["a"])
         self._run_test("{u!U}", "'< / >'")
+        self._run_test("{a!H}", self.kwdict["a"])
+        self._run_test("{h!H}", "foo & bar")
+        self._run_test("{u!H}", "'< / >'")
+        self._run_test("{n!H}", "")
         self._run_test("{a!s}", self.kwdict["a"])
         self._run_test("{a!r}", "'" + self.kwdict["a"] + "'")
         self._run_test("{a!a}", "'" + self.kwdict["a"] + "'")
@@ -128,7 +134,12 @@ class TestFormatter(unittest.TestCase):
         self._run_test("{l[0]}" , "a")
         self._run_test("{a[6]}" , "w")
 
-    def test_slicing(self):
+    def test_dict_access(self):
+        self._run_test("{d[a]}"  , "foo")
+        self._run_test("{d['a']}", "foo")
+        self._run_test('{d["a"]}', "foo")
+
+    def test_slice_str(self):
         v = self.kwdict["a"]
         self._run_test("{a[1:10]}"  , v[1:10])
         self._run_test("{a[-10:-1]}", v[-10:-1])
@@ -159,6 +170,26 @@ class TestFormatter(unittest.TestCase):
         self._run_test("{a:[:5:2]}" , v[:5:2])
         self._run_test("{a:[:50:2]}", v[:50:2])
         self._run_test("{a:[::]}"   , v)
+
+    def test_slice_bytes(self):
+        v = self.kwdict["j"]
+        self._run_test("{j[b1:10]}"  , v[1:3])
+        self._run_test("{j[b-10:-1]}", v[-3:-1])
+        self._run_test("{j[b5:]}"    , v[2:])
+        self._run_test("{j[b50:]}"   , v[50:])
+        self._run_test("{j[b:5]}"    , v[:1])
+        self._run_test("{j[b:50]}"   , v[:50])
+        self._run_test("{j[b:]}"     , v)
+        self._run_test("{j[b::]}"    , v)
+
+        self._run_test("{j:[b1:10]}"  , v[1:3])
+        self._run_test("{j:[b-10:-1]}", v[-3:-1])
+        self._run_test("{j:[b5:]}"    , v[2:])
+        self._run_test("{j:[b50:]}"   , v[50:])
+        self._run_test("{j:[b:5]}"    , v[:1])
+        self._run_test("{j:[b:50]}"   , v[:50])
+        self._run_test("{j:[b:]}"     , v)
+        self._run_test("{j:[b::]}"    , v)
 
     def test_maxlen(self):
         v = self.kwdict["a"]
@@ -309,6 +340,8 @@ class TestFormatter(unittest.TestCase):
         self._run_test("{'foobar'[:3]}", value)
         self._run_test("{z|'foo'}"     , value)
         self._run_test("{z|''|'foo'}"  , value)
+        self._run_test("{z|''}"        , "")
+        self._run_test("{''|''}"       , "")
 
         self._run_test("{_lit[foo]}"       , value)
         self._run_test("{_lit[foo]!u}"     , value.upper())
@@ -348,6 +381,27 @@ class TestFormatter(unittest.TestCase):
         self._run_test("\fF foo-'\"{a.upper()}\"'-bar",
                        """foo-'"{}"'-bar""".format(self.kwdict["a"].upper()))
 
+    @unittest.skipIf(sys.hexversion < 0x3060000, "no fstring support")
+    def test_template_fstring(self):
+        with tempfile.TemporaryDirectory() as tmpdirname:
+            path1 = os.path.join(tmpdirname, "tpl1")
+            path2 = os.path.join(tmpdirname, "tpl2")
+
+            with open(path1, "w") as fp:
+                fp.write("{a}")
+            fmt1 = formatter.parse("\fTF " + path1)
+
+            with open(path2, "w") as fp:
+                fp.write("foo-'\"{a.upper()}\"'-bar")
+            fmt2 = formatter.parse("\fTF " + path2)
+
+        self.assertEqual(fmt1.format_map(self.kwdict), self.kwdict["a"])
+        self.assertEqual(fmt2.format_map(self.kwdict),
+                         """foo-'"{}"'-bar""".format(self.kwdict["a"].upper()))
+
+        with self.assertRaises(OSError):
+            formatter.parse("\fTF /")
+
     def test_module(self):
         with tempfile.TemporaryDirectory() as tmpdirname:
             path = os.path.join(tmpdirname, "testmod.py")
@@ -374,7 +428,7 @@ def noarg():
             try:
                 fmt1 = formatter.parse("\fM testmod:gentext")
                 fmt2 = formatter.parse("\fM testmod:lengths")
-                fmt3 = formatter.parse("\fM testmod:noarg")
+                fmt0 = formatter.parse("\fM testmod:noarg")
 
                 with self.assertRaises(AttributeError):
                     formatter.parse("\fM testmod:missing")
@@ -383,11 +437,17 @@ def noarg():
             finally:
                 sys.path.pop(0)
 
+            fmt3 = formatter.parse("\fM " + path + ":gentext")
+            fmt4 = formatter.parse("\fM " + path + ":lengths")
+
         self.assertEqual(fmt1.format_map(self.kwdict), "'Title' by Name")
-        self.assertEqual(fmt2.format_map(self.kwdict), "89")
+        self.assertEqual(fmt2.format_map(self.kwdict), "126")
+
+        self.assertEqual(fmt3.format_map(self.kwdict), "'Title' by Name")
+        self.assertEqual(fmt4.format_map(self.kwdict), "126")
 
         with self.assertRaises(TypeError):
-            self.assertEqual(fmt3.format_map(self.kwdict), "")
+            self.assertEqual(fmt0.format_map(self.kwdict), "")
 
     def _run_test(self, format_string, result, default=None, fmt=format):
         fmt = formatter.parse(format_string, default, fmt)

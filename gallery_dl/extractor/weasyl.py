@@ -30,8 +30,7 @@ class WeasylExtractor(Extractor):
             return True
         return False
 
-    def __init__(self, match):
-        Extractor.__init__(self, match)
+    def _init(self):
         self.session.headers['X-Weasyl-API-Key'] = self.config("api-key")
 
     def request_submission(self, submitid):
@@ -73,32 +72,7 @@ class WeasylExtractor(Extractor):
 class WeasylSubmissionExtractor(WeasylExtractor):
     subcategory = "submission"
     pattern = BASE_PATTERN + r"(?:~[\w~-]+/submissions|submission)/(\d+)"
-    test = (
-        ("https://www.weasyl.com/~fiz/submissions/2031/a-wesley", {
-            "pattern": "https://cdn.weasyl.com/~fiz/submissions/2031/41ebc1c29"
-                       "40be928532785dfbf35c37622664d2fbb8114c3b063df969562fc5"
-                       "1/fiz-a-wesley.png",
-            "keyword": {
-                "comments"    : int,
-                "date"        : "dt:2012-04-20 00:38:04",
-                "description" : "<p>(flex)</p>\n",
-                "favorites"   : int,
-                "folder_name" : "Wesley Stuff",
-                "folderid"    : 2081,
-                "friends_only": False,
-                "owner"       : "Fiz",
-                "owner_login" : "fiz",
-                "rating"      : "general",
-                "submitid"    : 2031,
-                "subtype"     : "visual",
-                "tags"        : list,
-                "title"       : "A Wesley!",
-                "type"        : "submission",
-                "views"       : int,
-            },
-        }),
-        ("https://www.weasyl.com/submission/2031/a-wesley"),
-    )
+    example = "https://www.weasyl.com/~USER/submissions/12345/TITLE"
 
     def __init__(self, match):
         WeasylExtractor.__init__(self, match)
@@ -114,13 +88,7 @@ class WeasylSubmissionExtractor(WeasylExtractor):
 class WeasylSubmissionsExtractor(WeasylExtractor):
     subcategory = "submissions"
     pattern = BASE_PATTERN + r"(?:~|submissions/)([\w~-]+)/?$"
-    test = (
-        ("https://www.weasyl.com/~tanidareal", {
-            "count": ">= 200"
-        }),
-        ("https://www.weasyl.com/submissions/tanidareal"),
-        ("https://www.weasyl.com/~aro~so")
-    )
+    example = "https://www.weasyl.com/submissions/USER"
 
     def __init__(self, match):
         WeasylExtractor.__init__(self, match)
@@ -135,9 +103,7 @@ class WeasylFolderExtractor(WeasylExtractor):
     subcategory = "folder"
     directory_fmt = ("{category}", "{owner_login}", "{folder_name}")
     pattern = BASE_PATTERN + r"submissions/([\w~-]+)\?folderid=(\d+)"
-    test = ("https://www.weasyl.com/submissions/tanidareal?folderid=7403", {
-        "count": ">= 12"
-    })
+    example = "https://www.weasyl.com/submissions/USER?folderid=12345"
 
     def __init__(self, match):
         WeasylExtractor.__init__(self, match)
@@ -158,14 +124,7 @@ class WeasylJournalExtractor(WeasylExtractor):
     filename_fmt = "{journalid} {title}.{extension}"
     archive_fmt = "{journalid}"
     pattern = BASE_PATTERN + r"journal/(\d+)"
-    test = ("https://www.weasyl.com/journal/17647/bbcode", {
-        "keyword": {
-            "title"  : "BBCode",
-            "date"   : "dt:2013-09-19 23:11:23",
-            "content": "<p><a>javascript:alert(42);</a></p>\n\n"
-                       "<p>No more of that!</p>\n",
-        },
-    })
+    example = "https://www.weasyl.com/journal/12345"
 
     def __init__(self, match):
         WeasylExtractor.__init__(self, match)
@@ -182,9 +141,7 @@ class WeasylJournalsExtractor(WeasylExtractor):
     filename_fmt = "{journalid} {title}.{extension}"
     archive_fmt = "{journalid}"
     pattern = BASE_PATTERN + r"journals/([\w~-]+)"
-    test = ("https://www.weasyl.com/journals/charmander", {
-        "count": ">= 2",
-    })
+    example = "https://www.weasyl.com/journals/USER"
 
     def __init__(self, match):
         WeasylExtractor.__init__(self, match)
@@ -204,9 +161,7 @@ class WeasylFavoriteExtractor(WeasylExtractor):
     subcategory = "favorite"
     directory_fmt = ("{category}", "{owner_login}", "Favorites")
     pattern = BASE_PATTERN + r"favorites\?userid=(\d+)"
-    test = ("https://www.weasyl.com/favorites?userid=184616&feature=submit", {
-        "count": ">= 5",
-    })
+    example = "https://www.weasyl.com/favorites?userid=12345"
 
     def __init__(self, match):
         WeasylExtractor.__init__(self, match)

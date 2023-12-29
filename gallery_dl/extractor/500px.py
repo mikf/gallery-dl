@@ -21,11 +21,7 @@ class _500pxExtractor(Extractor):
     filename_fmt = "{id}_{name}.{extension}"
     archive_fmt = "{id}"
     root = "https://500px.com"
-    cookiedomain = ".500px.com"
-
-    def __init__(self, match):
-        Extractor.__init__(self, match)
-        self.session.headers["Referer"] = self.root + "/"
+    cookies_domain = ".500px.com"
 
     def items(self):
         data = self.metadata()
@@ -73,7 +69,7 @@ class _500pxExtractor(Extractor):
     def _request_api(self, url, params):
         headers = {
             "Origin": self.root,
-            "x-csrf-token": self.session.cookies.get(
+            "x-csrf-token": self.cookies.get(
                 "x-csrf-token", domain=".500px.com"),
         }
         return self.request(url, headers=headers, params=params).json()
@@ -81,7 +77,7 @@ class _500pxExtractor(Extractor):
     def _request_graphql(self, opname, variables):
         url = "https://api.500px.com/graphql"
         headers = {
-            "x-csrf-token": self.session.cookies.get(
+            "x-csrf-token": self.cookies.get(
                 "x-csrf-token", domain=".500px.com"),
         }
         data = {
@@ -97,15 +93,7 @@ class _500pxUserExtractor(_500pxExtractor):
     """Extractor for photos from a user's photostream on 500px.com"""
     subcategory = "user"
     pattern = BASE_PATTERN + r"/(?!photo/|liked)(?:p/)?([^/?#]+)/?(?:$|[?#])"
-    test = (
-        ("https://500px.com/p/light_expression_photography", {
-            "pattern": r"https?://drscdn.500px.org/photo/\d+/m%3D4096/v2",
-            "range": "1-99",
-            "count": 99,
-        }),
-        ("https://500px.com/light_expression_photography"),
-        ("https://web.500px.com/light_expression_photography"),
-    )
+    example = "https://500px.com/USER"
 
     def __init__(self, match):
         _500pxExtractor.__init__(self, match)
@@ -135,17 +123,7 @@ class _500pxGalleryExtractor(_500pxExtractor):
     directory_fmt = ("{category}", "{user[username]}", "{gallery[name]}")
     pattern = (BASE_PATTERN + r"/(?!photo/)(?:p/)?"
                r"([^/?#]+)/galleries/([^/?#]+)")
-    test = (
-        ("https://500px.com/p/fashvamp/galleries/lera", {
-            "url": "002dc81dee5b4a655f0e31ad8349e8903b296df6",
-            "count": 3,
-            "keyword": {
-                "gallery": dict,
-                "user": dict,
-            },
-        }),
-        ("https://500px.com/fashvamp/galleries/lera"),
-    )
+    example = "https://500px.com/USER/galleries/GALLERY"
 
     def __init__(self, match):
         _500pxExtractor.__init__(self, match)
@@ -201,7 +179,7 @@ class _500pxFavoriteExtractor(_500pxExtractor):
     """Extractor for favorite 500px photos"""
     subcategory = "favorite"
     pattern = BASE_PATTERN + r"/liked/?$"
-    test = ("https://500px.com/liked",)
+    example = "https://500px.com/liked"
 
     def photos(self):
         variables = {"pageSize": 20}
@@ -225,50 +203,7 @@ class _500pxImageExtractor(_500pxExtractor):
     """Extractor for individual images from 500px.com"""
     subcategory = "image"
     pattern = BASE_PATTERN + r"/photo/(\d+)"
-    test = ("https://500px.com/photo/222049255/queen-of-coasts", {
-        "url": "fbdf7df39325cae02f5688e9f92935b0e7113315",
-        "count": 1,
-        "keyword": {
-            "camera": "Canon EOS 600D",
-            "camera_info": dict,
-            "comments": list,
-            "comments_count": int,
-            "created_at": "2017-08-01T08:40:05+00:00",
-            "description": str,
-            "editored_by": None,
-            "editors_choice": False,
-            "extension": "jpg",
-            "feature": "popular",
-            "feature_date": "2017-08-01T09:58:28+00:00",
-            "focal_length": "208",
-            "height": 3111,
-            "id": 222049255,
-            "image_format": "jpg",
-            "image_url": list,
-            "images": list,
-            "iso": "100",
-            "lens": "EF-S55-250mm f/4-5.6 IS II",
-            "lens_info": dict,
-            "liked": None,
-            "location": None,
-            "location_details": dict,
-            "name": "Queen Of Coasts",
-            "nsfw": False,
-            "privacy": False,
-            "profile": True,
-            "rating": float,
-            "status": 1,
-            "tags": list,
-            "taken_at": "2017-05-04T17:36:51+00:00",
-            "times_viewed": int,
-            "url": "/photo/222049255/Queen-Of-Coasts-by-Alice-Nabieva",
-            "user": dict,
-            "user_id": 12847235,
-            "votes_count": int,
-            "watermark": True,
-            "width": 4637,
-        },
-    })
+    example = "https://500px.com/photo/12345/TITLE"
 
     def __init__(self, match):
         _500pxExtractor.__init__(self, match)

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2021 Mike Fährmann
+# Copyright 2018-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -19,20 +19,7 @@ class SimplyhentaiGalleryExtractor(GalleryExtractor):
     pattern = (r"(?:https?://)?(?!videos\.)([\w-]+\.)?simply-hentai\.com"
                r"(?!/(?:album|gifs?|images?|series)(?:/|$))"
                r"((?:/(?!(?:page|all-pages)(?:/|\.|$))[^/?#]+)+)")
-    test = (
-        (("https://original-work.simply-hentai.com"
-          "/amazon-no-hiyaku-amazon-elixir"), {
-            "url": "21613585ae5ec2f69ea579e9713f536fceab5bd5",
-            "keyword": "9e87a0973553b2922ddee37958b8f5d87910af72",
-        }),
-        ("https://www.simply-hentai.com/notfound", {
-            "exception": exception.GalleryDLException,
-        }),
-        # custom subdomain
-        ("https://pokemon.simply-hentai.com/mao-friends-9bc39"),
-        # www subdomain, two path segments
-        ("https://www.simply-hentai.com/vocaloid/black-magnet"),
-    )
+    example = "https://www.simply-hentai.com/TITLE"
 
     def __init__(self, match):
         subdomain, path = match.groups()
@@ -40,7 +27,9 @@ class SimplyhentaiGalleryExtractor(GalleryExtractor):
             path = "/" + subdomain.rstrip(".") + path
         url = "https://old.simply-hentai.com" + path
         GalleryExtractor.__init__(self, match, url)
-        self.session.headers["Referer"] = url
+
+    def _init(self):
+        self.session.headers["Referer"] = self.gallery_url
 
     def metadata(self, page):
         extr = text.extract_from(page)
@@ -87,17 +76,7 @@ class SimplyhentaiImageExtractor(Extractor):
     archive_fmt = "{token}"
     pattern = (r"(?:https?://)?(?:www\.)?(simply-hentai\.com"
                r"/(image|gif)/[^/?#]+)")
-    test = (
-        (("https://www.simply-hentai.com/image"
-          "/pheromomania-vol-1-kanzenban-isao-3949d8b3-400c-4b6"), {
-            "url": "3d8eb55240a960134891bd77fe1df7988fcdc455",
-            "keyword": "e10e5588481cab68329ef6ec1e5325206b2079a2",
-        }),
-        ("https://www.simply-hentai.com/gif/8915dfcf-0b6a-47c", {
-            "url": "f73916527211b4a40f26568ee26cd8999f5f4f30",
-            "keyword": "f94d775177fed918759c8a78a50976f867425b48",
-        }),
-    )
+    example = "https://www.simply-hentai.com/image/NAME"
 
     def __init__(self, match):
         Extractor.__init__(self, match)
@@ -140,20 +119,7 @@ class SimplyhentaiVideoExtractor(Extractor):
     filename_fmt = "{title}{episode:?_//>02}.{extension}"
     archive_fmt = "{title}_{episode}"
     pattern = r"(?:https?://)?(videos\.simply-hentai\.com/[^/?#]+)"
-    test = (
-        ("https://videos.simply-hentai.com/creamy-pie-episode-02", {
-            "pattern": r"https://www\.googleapis\.com/drive/v3/files"
-                       r"/0B1ecQ8ZVLm3JcHZzQzBnVy1ZUmc\?alt=media&key=[\w-]+",
-            "keyword": "706790708b14773efc1e075ddd3b738a375348a5",
-            "options": (("verify", False),),
-            "count": 1,
-        }),
-        (("https://videos.simply-hentai.com"
-          "/1715-tifa-in-hentai-gang-bang-3d-movie"), {
-            "url": "ad9a36ae06c601b6490e3c401834b4949d947eb0",
-            "keyword": "f9dad94fbde9c95859e631ff4f07297a9567b874",
-        }),
-    )
+    example = "https://videos.simply-hentai.com/TITLE"
 
     def __init__(self, match):
         Extractor.__init__(self, match)

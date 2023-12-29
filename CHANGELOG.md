@@ -1,10 +1,534 @@
 # Changelog
 
+## 1.26.5 - 2023-12-23
+### Extractors
+#### Additions
+- [deviantart] add `intermediary` option ([#4955](https://github.com/mikf/gallery-dl/issues/4955))
+- [inkbunny] add `unread` extractor ([#4934](https://github.com/mikf/gallery-dl/issues/4934))
+- [mastodon] support non-numeric status IDs ([#4936](https://github.com/mikf/gallery-dl/issues/4936))
+- [myhentaigallery] recognize `/g/` URLs ([#4920](https://github.com/mikf/gallery-dl/issues/4920))
+- [postmill] add support ([#4917](https://github.com/mikf/gallery-dl/issues/4917), [#4919](https://github.com/mikf/gallery-dl/issues/4919))
+- {shimmie2[ support `rule34hentai.net` ([#861](https://github.com/mikf/gallery-dl/issues/861), [#4789](https://github.com/mikf/gallery-dl/issues/4789), [#4945](https://github.com/mikf/gallery-dl/issues/4945))
+#### Fixes
+- [deviantart] add workaround for integer `client-id` values ([#4924](https://github.com/mikf/gallery-dl/issues/4924))
+- [exhentai] fix error for infinite `fallback-retries` ([#4911](https://github.com/mikf/gallery-dl/issues/4911))
+- [inkbunny] stop pagination on empty results
+- [patreon] fix bootstrap data extraction again ([#4904](https://github.com/mikf/gallery-dl/issues/4904))
+- [tumblr] fix exception after waiting for rate limit ([#4916](https://github.com/mikf/gallery-dl/issues/4916))
+#### Improvements
+- [exhentai] output continuation URL when interrupted ([#4782](https://github.com/mikf/gallery-dl/issues/4782))
+- [inkbunny] improve `/submissionsviewall.php` patterns ([#4934](https://github.com/mikf/gallery-dl/issues/4934))
+- [tumblr] support infinite `fallback-retries`
+- [twitter] default to `tweets` timeline when `replies` are enabled ([#4953](https://github.com/mikf/gallery-dl/issues/4953))
+#### Metadata
+- [danbooru] provide `tags` as list ([#4942](https://github.com/mikf/gallery-dl/issues/4942))
+- [deviantart] set `is_original` for intermediary URLs to `false`
+- [twitter] remove `date_liked` ([#3850](https://github.com/mikf/gallery-dl/issues/3850), [#4108](https://github.com/mikf/gallery-dl/issues/4108), [#4657](https://github.com/mikf/gallery-dl/issues/4657))
+### Docker
+- add Docker instructions to README ([#4850](https://github.com/mikf/gallery-dl/issues/4850))
+- fix auto-generation of `latest` tags
+
+## 1.26.4 - 2023-12-10
+### Extractors
+#### Additions
+- [exhentai] add `fallback-retries` option ([#4792](https://github.com/mikf/gallery-dl/issues/4792))
+- [urlgalleries] add `gallery` extractor ([#919](https://github.com/mikf/gallery-dl/issues/919), [#1184](https://github.com/mikf/gallery-dl/issues/1184), [#2905](https://github.com/mikf/gallery-dl/issues/2905), [#4886](https://github.com/mikf/gallery-dl/issues/4886))
+#### Fixes
+- [nijie] fix image URLs of multi-image posts ([#4876](https://github.com/mikf/gallery-dl/issues/4876))
+- [patreon] fix bootstrap data extraction ([#4904](https://github.com/mikf/gallery-dl/issues/4904), [#4906](https://github.com/mikf/gallery-dl/issues/4906))
+- [twitter] fix `/media` timelines ([#4898](https://github.com/mikf/gallery-dl/issues/4898), [#4899](https://github.com/mikf/gallery-dl/issues/4899))
+- [twitter] retry API requests when response contains incomplete results ([#4811](https://github.com/mikf/gallery-dl/issues/4811))
+#### Improvements
+- [exhentai] store more cookies when logging in with username & password ([#4881](https://github.com/mikf/gallery-dl/issues/4881))
+- [twitter] generalize "Login Required" errors ([#4734](https://github.com/mikf/gallery-dl/issues/4734), [#4324](https://github.com/mikf/gallery-dl/issues/4324))
+### Options
+- add `-e/--error-file` command-line and `output.errorfile` config option ([#4732](https://github.com/mikf/gallery-dl/issues/4732))
+### Miscellaneous
+- automatically build and push Docker images
+- prompt for passwords on login when necessary
+- fix `util.dump_response()` to work with `bytes` header values
+
+## 1.26.3 - 2023-11-27
+### Extractors
+#### Additions
+- [behance] support `text` modules ([#4799](https://github.com/mikf/gallery-dl/issues/4799))
+- [behance] add `modules` option ([#4799](https://github.com/mikf/gallery-dl/issues/4799))
+- [blogger] support `www.micmicidol.club` ([#4759](https://github.com/mikf/gallery-dl/issues/4759))
+- [erome] add `count` metadata ([#4812](https://github.com/mikf/gallery-dl/issues/4812))
+- [exhentai] add `gp` option ([#4576](https://github.com/mikf/gallery-dl/issues/4576))
+- [fapello] support `.su` TLD ([#4840](https://github.com/mikf/gallery-dl/issues/4840), [#4841](https://github.com/mikf/gallery-dl/issues/4841))
+- [pixeldrain] add `file` and `album` extractors ([#4839](https://github.com/mikf/gallery-dl/issues/4839))
+- [pixeldrain] add `api-key` option ([#4839](https://github.com/mikf/gallery-dl/issues/4839))
+- [tmohentai] add `gallery` extractor ([#4808](https://github.com/mikf/gallery-dl/issues/4808), [#4832](https://github.com/mikf/gallery-dl/issues/4832))
+#### Fixes
+- [cyberdrop] update to site layout changes
+- [exhentai] handle `Downloading … requires GP` errors ([#4576](https://github.com/mikf/gallery-dl/issues/4576), [#4763](https://github.com/mikf/gallery-dl/issues/4763))
+- [exhentai] fix empty API URL with `"source": "hitomi"` ([#4829](https://github.com/mikf/gallery-dl/issues/4829))
+- [hentaifoundry] check for and update expired sessions ([#4694](https://github.com/mikf/gallery-dl/issues/4694))
+- [hiperdex] fix `manga` metadata
+- [idolcomplex] update to site layout changes
+- [imagefap] fix resolution of single images
+- [instagram] fix exception on empty `video_versions` ([#4795](https://github.com/mikf/gallery-dl/issues/4795))
+- [mangaread] fix extraction
+- [mastodon] fix reblogs ([#4580](https://github.com/mikf/gallery-dl/issues/4580))
+- [nitter] fix video extraction ([#4853](https://github.com/mikf/gallery-dl/issues/4853), [#4855](https://github.com/mikf/gallery-dl/issues/4855))
+- [pornhub] fix `user` metadata for gifs
+- [tumblr] fix `day` extractor
+- [wallpapercave] fix extraction
+- [warosu] fix file URLs
+- [webtoons] fix pagination when receiving an HTTP redirect
+- [xvideos] fix metadata extraction
+- [zerochan] fix metadata extraction
+#### Improvements
+- [hentaicosplays] force `https://` for download URLs
+- [oauth] warn when cache is enabled but not writeable ([#4771](https://github.com/mikf/gallery-dl/issues/4771))
+- [sankaku] update URL patterns
+- [twitter] ignore promoted Tweets ([#3894](https://github.com/mikf/gallery-dl/issues/3894), [#4790](https://github.com/mikf/gallery-dl/issues/4790))
+- [weibo] detect redirects to login page ([#4773](https://github.com/mikf/gallery-dl/issues/4773))
+#### Removals
+- [foolslide] remove `powermanga.org`
+### Downloaders
+#### Changes
+- [http] treat files not passing `filesize-min`/`-max` as skipped ([#4821](https://github.com/mikf/gallery-dl/issues/4821))
+### Options
+#### Additions
+- add `metadata-extractor` option ([#4549](https://github.com/mikf/gallery-dl/issues/4549))
+- support `metadata-*` names for `*-metadata` options
+  (for example `url-metadata` is now also recognized as `metadata-url`)
+### CLI
+#### Additions
+- implement `-I/--input-file-comment` and `-x/--input-file-delete` options ([#4732](https://github.com/mikf/gallery-dl/issues/4732))
+- add `--ugoira` as a general version of `--ugoira-conv` and co.
+- add `--mtime` as a general version of `--mtime-from-date`
+- add `--cbz`
+#### Fixes
+- allow `--mtime-from-date` to work with Weibo`s metadata structure
+### Miscellaneous
+#### Additions
+- add a simple Dockerfile ([#4831](https://github.com/mikf/gallery-dl/issues/4831))
+
+## 1.26.2 - 2023-11-04
+### Extractors
+#### Additions
+- [4archive] add `thread` and `board` extractors ([#1262](https://github.com/mikf/gallery-dl/issues/1262), [#2418](https://github.com/mikf/gallery-dl/issues/2418), [#4400](https://github.com/mikf/gallery-dl/issues/4400), [#4710](https://github.com/mikf/gallery-dl/issues/4710), [#4714](https://github.com/mikf/gallery-dl/issues/4714))
+- [hitomi] recognize `imageset` gallery URLs ([#4756](https://github.com/mikf/gallery-dl/issues/4756))
+- [kemonoparty] add `revision_index` metadata field ([#4727](https://github.com/mikf/gallery-dl/issues/4727))
+- [misskey] support `misskey.design` ([#4713](https://github.com/mikf/gallery-dl/issues/4713))
+- [reddit] support Reddit Mobile share links ([#4693](https://github.com/mikf/gallery-dl/issues/4693))
+- [sankaku] support `/posts/` tag search URLs ([#4740](https://github.com/mikf/gallery-dl/issues/4740))
+- [twitter] recognize `fixupx.com` URLs ([#4755](https://github.com/mikf/gallery-dl/issues/4755))
+#### Fixes
+- [exhentai] update to site layout changes ([#4730](https://github.com/mikf/gallery-dl/issues/4730), [#4754](https://github.com/mikf/gallery-dl/issues/4754))
+- [exhentai] provide fallback URLs ([#1021](https://github.com/mikf/gallery-dl/issues/1021), [#4745](https://github.com/mikf/gallery-dl/issues/4745))
+- [exhentai] disable `DH` ciphers to avoid `DH_KEY_TOO_SMALL` errors ([#1021](https://github.com/mikf/gallery-dl/issues/1021), [#4593](https://github.com/mikf/gallery-dl/issues/4593))
+- [idolcomplex] disable sending Referer headers ([#4726](https://github.com/mikf/gallery-dl/issues/4726))
+- [instagram] update API headers
+- [kemonoparty] fix parsing of non-standard `date` values ([#4676](https://github.com/mikf/gallery-dl/issues/4676))
+- [patreon] fix `campaign_id` extraction ([#4699](https://github.com/mikf/gallery-dl/issues/4699), [#4715](https://github.com/mikf/gallery-dl/issues/4715), [#4736](https://github.com/mikf/gallery-dl/issues/4736), [#4738](https://github.com/mikf/gallery-dl/issues/4738))
+- [pixiv] load cookies for non-OAuth URLs ([#4760](https://github.com/mikf/gallery-dl/issues/4760))
+- [twitter] fix avatars without `date` information ([#4696](https://github.com/mikf/gallery-dl/issues/4696))
+- [twitter] restore truncated retweet texts ([#3430](https://github.com/mikf/gallery-dl/issues/3430), [#4690](https://github.com/mikf/gallery-dl/issues/4690))
+- [weibo] fix Sina Visitor requests
+#### Improvements
+- [behance] unescape embed URLs ([#4742](https://github.com/mikf/gallery-dl/issues/4742))
+- [fantia] simplify `tags` to a list of strings ([#4752](https://github.com/mikf/gallery-dl/issues/4752))
+- [kemonoparty] limit `title` length ([#4741](https://github.com/mikf/gallery-dl/issues/4741))
+- [nijie] set 1-2s delay between requests to avoid 429 errors
+- [patreon] provide ways to manually specify a user's campaign_id
+  - `https://www.patreon.com/id:12345`
+  - `https://www.patreon.com/USER?c=12345`
+  - `https://www.patreon.com/USER?campaign_id=12345`
+- [twitter] cache `user_by_…` results ([#4719](https://github.com/mikf/gallery-dl/issues/4719))
+### Post Processors
+#### Fixes
+- [metadata] ignore non-string tag values ([#4764](https://github.com/mikf/gallery-dl/issues/4764))
+### Miscellaneous
+#### Fixes
+- prevent crash when `stdout.line_buffering` is not defined ([#642](https://github.com/mikf/gallery-dl/issues/642))
+
+## 1.26.1 - 2023-10-21
+### Extractors
+#### Additions
+- [bunkr] add extractor for media URLs ([#4684](https://github.com/mikf/gallery-dl/issues/4684))
+- [chevereto] add generic extractors for `chevereto` sites ([#4664](https://github.com/mikf/gallery-dl/issues/4664))
+  - `deltaporno.com` ([#1381](https://github.com/mikf/gallery-dl/issues/1381))
+  - `img.kiwi`
+  - `jpgfish`
+  - `pixl.li` ([#3179](https://github.com/mikf/gallery-dl/issues/3179), [#4357](https://github.com/mikf/gallery-dl/issues/4357))
+- [deviantart] implement `"group": "skip"` ([#4630](https://github.com/mikf/gallery-dl/issues/4630))
+- [fantia] add `content_count` and `content_num` metadata fields ([#4627](https://github.com/mikf/gallery-dl/issues/4627))
+- [imgbb] add `displayname` and `user_id` metadata ([#4626](https://github.com/mikf/gallery-dl/issues/4626))
+- [kemonoparty] support post revisions; add `revisions` option ([#4498](https://github.com/mikf/gallery-dl/issues/4498), [#4597](https://github.com/mikf/gallery-dl/issues/4597))
+- [kemonoparty] support searches ([#3385](https://github.com/mikf/gallery-dl/issues/3385), [#4057](https://github.com/mikf/gallery-dl/issues/4057))
+- [kemonoparty] support discord URLs with channel IDs ([#4662](https://github.com/mikf/gallery-dl/issues/4662))
+- [moebooru] add `metadata` option ([#4646](https://github.com/mikf/gallery-dl/issues/4646))
+- [newgrounds] support multi-image posts ([#4642](https://github.com/mikf/gallery-dl/issues/4642))
+- [sankaku] support `/posts/` URLs ([#4688](https://github.com/mikf/gallery-dl/issues/4688))
+- [twitter] add `sensitive` metadata field ([#4619](https://github.com/mikf/gallery-dl/issues/4619))
+#### Fixes
+- [4chanarchives] disable Referer headers by default ([#4686](https://github.com/mikf/gallery-dl/issues/4686))
+- [bunkr] fix `/d/` file URLs ([#4685](https://github.com/mikf/gallery-dl/issues/4685))
+- [deviantart] expand nested comment replies ([#4653](https://github.com/mikf/gallery-dl/issues/4653))
+- [deviantart] disable `jwt` ([#4652](https://github.com/mikf/gallery-dl/issues/4652))
+- [hentaifoundry] fix `.swf` file downloads ([#4641](https://github.com/mikf/gallery-dl/issues/4641))
+- [imgbb] fix `user` metadata extraction ([#4626](https://github.com/mikf/gallery-dl/issues/4626))
+- [imgbb] update pagination end condition ([#4626](https://github.com/mikf/gallery-dl/issues/4626))
+- [kemonoparty] update API endpoints ([#4676](https://github.com/mikf/gallery-dl/issues/4676), [#4677](https://github.com/mikf/gallery-dl/issues/4677))
+- [patreon] update `campaign_id` path ([#4639](https://github.com/mikf/gallery-dl/issues/4639))
+- [reddit] fix wrong previews ([#4649](https://github.com/mikf/gallery-dl/issues/4649))
+- [redgifs] fix `niches` extraction ([#4666](https://github.com/mikf/gallery-dl/issues/4666), [#4667](https://github.com/mikf/gallery-dl/issues/4667))
+- [twitter] fix crash due to missing `source` ([#4620](https://github.com/mikf/gallery-dl/issues/4620))
+- [warosu] fix extraction ([#4634](https://github.com/mikf/gallery-dl/issues/4634))
+### Post Processors
+#### Additions
+- support `{_filename}`, `{_directory}`, and `{_path}` replacement fields for `--exec` ([#4633](https://github.com/mikf/gallery-dl/issues/4633))
+### Miscellaneous
+#### Improvements
+- avoid temporary copies with `--cookies-from-browser` by opening cookie databases in read-only mode
+
+## 1.26.0 - 2023-10-03
+- ### Extractors
+    #### Additions
+    - [behance] add `date` metadata field ([#4417](https://github.com/mikf/gallery-dl/issues/4417))
+    - [danbooru] support `booru.borvar.art` ([#4096](https://github.com/mikf/gallery-dl/issues/4096))
+    - [danbooru] support `donmai.moe`
+    - [deviantart] add `is_original` metadata field ([#4559](https://github.com/mikf/gallery-dl/issues/4559))
+    - [e621] support `e6ai.net` ([#4320](https://github.com/mikf/gallery-dl/issues/4320))
+    - [exhentai] add `fav` option ([#4409](https://github.com/mikf/gallery-dl/issues/4409))
+    - [gelbooru_v02] support `xbooru.com` ([#4493](https://github.com/mikf/gallery-dl/issues/4493))
+    - [instagram] add `following` extractor ([#1848](https://github.com/mikf/gallery-dl/issues/1848))
+    - [pillowfort] support `/tagged/` URLs ([#4570](https://github.com/mikf/gallery-dl/issues/4570))
+    - [pornhub] add `gif` support ([#4463](https://github.com/mikf/gallery-dl/issues/4463))
+    - [reddit] add `previews` option ([#4322](https://github.com/mikf/gallery-dl/issues/4322))
+    - [redgifs] add `niches` extractor ([#4311](https://github.com/mikf/gallery-dl/issues/4311), [#4312](https://github.com/mikf/gallery-dl/issues/4312))
+    - [redgifs] support `order` parameter for user URLs ([#4583](https://github.com/mikf/gallery-dl/issues/4583))
+    - [twitter] add `user` extractor and `include` option ([#4275](https://github.com/mikf/gallery-dl/issues/4275))
+    - [twitter] add `tweet-endpoint` option ([#4307](https://github.com/mikf/gallery-dl/issues/4307))
+    - [twitter] add `date_original` metadata for retweets ([#4337](https://github.com/mikf/gallery-dl/issues/4337), [#4443](https://github.com/mikf/gallery-dl/issues/4443))
+    - [twitter] extract `source` metadata ([#4459](https://github.com/mikf/gallery-dl/issues/4459))
+    - [twitter] support `x.com` URLs ([#4452](https://github.com/mikf/gallery-dl/issues/4452))
+    #### Improvements
+    - include `Referer` header in all HTTP requests ([#4490](https://github.com/mikf/gallery-dl/issues/4490), [#4518](https://github.com/mikf/gallery-dl/issues/4518))
+      (can be disabled with `referer` option)
+    - [behance] show errors for mature content ([#4417](https://github.com/mikf/gallery-dl/issues/4417))
+    - [deviantart] re-add `quality` option and `/intermediary/` transform
+    - [fantia] improve metadata extraction ([#4126](https://github.com/mikf/gallery-dl/issues/4126))
+    - [instagram] better error messages for invalid users ([#4606](https://github.com/mikf/gallery-dl/issues/4606))
+    - [mangadex] support multiple values for `lang` ([#4093](https://github.com/mikf/gallery-dl/issues/4093))
+    - [mastodon] support `/@USER/following` URLs ([#4608](https://github.com/mikf/gallery-dl/issues/4608))
+    - [moebooru] match search URLs with empty `tags` ([#4354](https://github.com/mikf/gallery-dl/issues/4354))
+    - [pillowfort] extract `b2_lg_url` media ([#4570](https://github.com/mikf/gallery-dl/issues/4570))
+    - [reddit] improve comment metadata ([#4482](https://github.com/mikf/gallery-dl/issues/4482))
+    - [reddit] ignore `/message/compose` URLs ([#4482](https://github.com/mikf/gallery-dl/issues/4482), [#4581](https://github.com/mikf/gallery-dl/issues/4581))
+    - [redgifs] provide `collection` metadata as separate field ([#4508](https://github.com/mikf/gallery-dl/issues/4508))
+    - [redgifs] match `gfycat` image URLs ([#4558](https://github.com/mikf/gallery-dl/issues/4558))
+    - [twitter] improve error messages for single Tweets ([#4369](https://github.com/mikf/gallery-dl/issues/4369))
+    #### Fixes
+    - [acidimg] fix extraction
+    - [architizer] fix extraction ([#4537](https://github.com/mikf/gallery-dl/issues/4537))
+    - [behance] fix and update `user` extractor ([#4417](https://github.com/mikf/gallery-dl/issues/4417))
+    - [behance] fix cookie usage ([#4417](https://github.com/mikf/gallery-dl/issues/4417))
+    - [behance] handle videos without `renditions` ([#4523](https://github.com/mikf/gallery-dl/issues/4523))
+    - [bunkr] fix media domain for `cdn9` ([#4386](https://github.com/mikf/gallery-dl/issues/4386), [#4412](https://github.com/mikf/gallery-dl/issues/4412))
+    - [bunkr] fix extracting `.wmv` files ([#4419](https://github.com/mikf/gallery-dl/issues/4419))
+    - [bunkr] fix media domain for `cdn-pizza.bunkr.ru` ([#4489](https://github.com/mikf/gallery-dl/issues/4489))
+    - [bunkr] fix extraction ([#4514](https://github.com/mikf/gallery-dl/issues/4514), [#4532](https://github.com/mikf/gallery-dl/issues/4532), [#4529](https://github.com/mikf/gallery-dl/issues/4529), [#4540](https://github.com/mikf/gallery-dl/issues/4540))
+    - [deviantart] fix full resolution URLs for non-downloadable images ([#293](https://github.com/mikf/gallery-dl/issues/293), [#4548](https://github.com/mikf/gallery-dl/issues/4548), [#4563](https://github.com/mikf/gallery-dl/issues/4563))
+    - [deviantart] fix shortened URLs ([#4316](https://github.com/mikf/gallery-dl/issues/4316))
+    - [deviantart] fix search ([#4384](https://github.com/mikf/gallery-dl/issues/4384))
+    - [deviantart] update Eclipse API endpoints ([#4553](https://github.com/mikf/gallery-dl/issues/4553), [#4615](https://github.com/mikf/gallery-dl/issues/4615))
+    - [deviantart] use private tokens for `is_mature` posts ([#4563](https://github.com/mikf/gallery-dl/issues/4563))
+    - [flickr] update default API credentials ([#4332](https://github.com/mikf/gallery-dl/issues/4332))
+    - [giantessbooru] fix extraction ([#4373](https://github.com/mikf/gallery-dl/issues/4373))
+    - [hiperdex] fix crash for titles containing Unicode characters ([#4325](https://github.com/mikf/gallery-dl/issues/4325))
+    - [hiperdex] fix `manga` metadata
+    - [imagefap] fix pagination ([#3013](https://github.com/mikf/gallery-dl/issues/3013))
+    - [imagevenue] fix extraction ([#4473](https://github.com/mikf/gallery-dl/issues/4473))
+    - [instagram] fix private posts with long shortcodes ([#4362](https://github.com/mikf/gallery-dl/issues/4362))
+    - [instagram] fix video preview archive IDs ([#2135](https://github.com/mikf/gallery-dl/issues/2135), [#4455](https://github.com/mikf/gallery-dl/issues/4455))
+    - [instagram] handle exceptions due to missing media ([#4555](https://github.com/mikf/gallery-dl/issues/4555))
+    - [issuu] fix extraction ([#4420](https://github.com/mikf/gallery-dl/issues/4420))
+    - [jpgfish] update domain to `jpg1.su` ([#4494](https://github.com/mikf/gallery-dl/issues/4494))
+    - [kemonoparty] update `favorite` API endpoint ([#4522](https://github.com/mikf/gallery-dl/issues/4522))
+    - [lensdump] fix extraction ([#4352](https://github.com/mikf/gallery-dl/issues/4352))
+    - [mangakakalot] update domain
+    - [reddit] fix `preview.redd.it` URLs ([#4470](https://github.com/mikf/gallery-dl/issues/4470))
+    - [patreon] fix extraction ([#4547](https://github.com/mikf/gallery-dl/issues/4547))
+    - [pixiv] handle errors for private novels ([#4481](https://github.com/mikf/gallery-dl/issues/4481))
+    - [pornhub] fix extraction ([#4301](https://github.com/mikf/gallery-dl/issues/4301))
+    - [pururin] fix extraction ([#4375](https://github.com/mikf/gallery-dl/issues/4375))
+    - [subscribestar] fix preview detection ([#4468](https://github.com/mikf/gallery-dl/issues/4468))
+    - [twitter] fix crash on private user ([#4349](https://github.com/mikf/gallery-dl/issues/4349))
+    - [twitter] fix `TweetWithVisibilityResults` ([#4369](https://github.com/mikf/gallery-dl/issues/4369))
+    - [twitter] fix crash when `sortIndex` is undefined ([#4499](https://github.com/mikf/gallery-dl/issues/4499))
+    - [zerochan] fix `tags` extraction ([#4315](https://github.com/mikf/gallery-dl/issues/4315), [#4319](https://github.com/mikf/gallery-dl/issues/4319))
+    #### Removals
+    - [gfycat] remove module
+    - [shimmie2] remove `meme.museum`
+- ### Post Processors
+    #### Changes
+    - update `finalize` events
+        - add `finalize-error` and `finalize-success` events that trigger
+          depending on whether error(s) did or did not happen
+        - change `finalize` to always trigger regardless of error status
+    #### Additions
+    - add `python` post processor
+    - add `prepare-after` event ([#4083](https://github.com/mikf/gallery-dl/issues/4083))
+    - [ugoira] add `"framerate": "uniform"` ([#4421](https://github.com/mikf/gallery-dl/issues/4421))
+    #### Improvements
+    - [ugoira] extend `ffmpeg-output` ([#4421](https://github.com/mikf/gallery-dl/issues/4421))
+    #### Fixes
+    - [ugoira] restore `libx264-prevent-odd` ([#4407](https://github.com/mikf/gallery-dl/issues/4407))
+    - [ugoira] fix high frame rates ([#4421](https://github.com/mikf/gallery-dl/issues/4421))
+- ### Downloaders
+    #### Fixes
+    - [http] close connection when file already exists ([#4403](https://github.com/mikf/gallery-dl/issues/4403))
+- ### Options
+    #### Additions
+    - support `parent>child` categories for child extractor options,
+      for example an `imgur` album from a `reddit` thread with `reddit>imgur`
+    - implement `subconfigs` option ([#4440](https://github.com/mikf/gallery-dl/issues/4440))
+    - add `"ascii+"` as a special `path-restrict` value ([#4371](https://github.com/mikf/gallery-dl/issues/4371))
+    #### Removals
+    - remove `pyopenssl` option
+- ### Tests
+    #### Improvements
+    - move extractor results into their own, separate files ([#4504](https://github.com/mikf/gallery-dl/issues/4504))
+    - include fallback URLs in content tests ([#3163](https://github.com/mikf/gallery-dl/issues/3163))
+    - various test method improvements
+- ### Miscellaneous
+    #### Fixes
+    - [formatter] use value of last alternative ([#4492](https://github.com/mikf/gallery-dl/issues/4492))
+    - fix imports when running `__main__.py` ([#4581](https://github.com/mikf/gallery-dl/issues/4581))
+    - fix symlink resolution in `__main__.py`
+    - fix default Firefox user agent string
+
+## 1.25.8 - 2023-07-15
+### Changes
+- update default User-Agent header to Firefox 115 ESR
+### Additions
+- [gfycat] support `@me` user ([#3770](https://github.com/mikf/gallery-dl/issues/3770), [#4271](https://github.com/mikf/gallery-dl/issues/4271))
+- [gfycat] implement login support ([#3770](https://github.com/mikf/gallery-dl/issues/3770), [#4271](https://github.com/mikf/gallery-dl/issues/4271))
+- [reddit] notify users about registering an OAuth application ([#4292](https://github.com/mikf/gallery-dl/issues/4292))
+- [twitter] add `ratelimit` option ([#4251](https://github.com/mikf/gallery-dl/issues/4251))
+- [twitter] use `TweetResultByRestId` endpoint that allows accessing single Tweets without login ([#4250](https://github.com/mikf/gallery-dl/issues/4250))
+### Fixes
+- [bunkr] use `.la` TLD for `media-files12` servers ([#4147](https://github.com/mikf/gallery-dl/issues/4147), [#4276](https://github.com/mikf/gallery-dl/issues/4276))
+- [erome] ignore duplicate album IDs
+- [fantia] send `X-Requested-With` header ([#4273](https://github.com/mikf/gallery-dl/issues/4273))
+- [gelbooru_v01] fix `source` metadata ([#4302](https://github.com/mikf/gallery-dl/issues/4302), [#4303](https://github.com/mikf/gallery-dl/issues/4303))
+- [gelbooru_v01] update `vidyart` domain
+- [jpgfish] update domain to `jpeg.pet`
+- [mangaread] fix `tags` metadata extraction
+- [naverwebtoon] fix `comic` metadata extraction
+- [newgrounds] extract & pass auth token during login ([#4268](https://github.com/mikf/gallery-dl/issues/4268))
+- [paheal] fix extraction ([#4262](https://github.com/mikf/gallery-dl/issues/4262), [#4293](https://github.com/mikf/gallery-dl/issues/4293))
+- [paheal] unescape `source`
+- [philomena] fix `--range` ([#4288](https://github.com/mikf/gallery-dl/issues/4288))
+- [philomena] handle `429 Too Many Requests` errors ([#4288](https://github.com/mikf/gallery-dl/issues/4288))
+- [pornhub] set `accessAgeDisclaimerPH` cookie ([#4301](https://github.com/mikf/gallery-dl/issues/4301))
+- [reddit] use 0.6s delay between API requests ([#4292](https://github.com/mikf/gallery-dl/issues/4292))
+- [seiga] set `skip_fetish_warning` cookie ([#4242](https://github.com/mikf/gallery-dl/issues/4242))
+- [slideshare] fix extraction
+- [twitter] fix `following` extractor not getting all users ([#4287](https://github.com/mikf/gallery-dl/issues/4287))
+- [twitter] use GraphQL search endpoint by default ([#4264](https://github.com/mikf/gallery-dl/issues/4264))
+- [twitter] do not treat missing `TimelineAddEntries` instruction as fatal ([#4278](https://github.com/mikf/gallery-dl/issues/4278))
+- [weibo] fix cursor based pagination
+- [wikifeet] fix `tag` extraction ([#4289](https://github.com/mikf/gallery-dl/issues/4289), [#4291](https://github.com/mikf/gallery-dl/issues/4291))
+### Removals
+- [bcy] remove module
+- [lineblog] remove module
+
+## 1.25.7 - 2023-07-02
+### Additions
+- [flickr] add 'exif' option
+- [flickr] add 'metadata' option ([#4227](https://github.com/mikf/gallery-dl/issues/4227))
+- [mangapark] add 'source' option ([#3969](https://github.com/mikf/gallery-dl/issues/3969))
+- [twitter] extend 'conversations' option ([#4211](https://github.com/mikf/gallery-dl/issues/4211))
+### Fixes
+- [furaffinity] improve 'description' HTML ([#4224](https://github.com/mikf/gallery-dl/issues/4224))
+- [gelbooru_v01] fix '--range' ([#4167](https://github.com/mikf/gallery-dl/issues/4167))
+- [hentaifox] fix titles containing '@' ([#4201](https://github.com/mikf/gallery-dl/issues/4201))
+- [mangapark] update to v5 ([#3969](https://github.com/mikf/gallery-dl/issues/3969))
+- [piczel] update API server address ([#4244](https://github.com/mikf/gallery-dl/issues/4244))
+- [poipiku] improve error detection ([#4206](https://github.com/mikf/gallery-dl/issues/4206))
+- [sankaku] improve warnings for unavailable posts
+- [senmanga] ensure download URLs have a scheme ([#4235](https://github.com/mikf/gallery-dl/issues/4235))
+
+## 1.25.6 - 2023-06-17
+### Additions
+- [blogger] download files from `lh*.googleusercontent.com` ([#4070](https://github.com/mikf/gallery-dl/issues/4070))
+- [fantia] extract `plan` metadata ([#2477](https://github.com/mikf/gallery-dl/issues/2477))
+- [fantia] emit warning for non-visible content sections ([#4128](https://github.com/mikf/gallery-dl/issues/4128))
+- [furaffinity] extract `favorite_id` metadata ([#4133](https://github.com/mikf/gallery-dl/issues/4133))
+- [jschan] add generic extractors for jschan image boards ([#3447](https://github.com/mikf/gallery-dl/issues/3447))
+- [kemonoparty] support `.su` TLDs ([#4139](https://github.com/mikf/gallery-dl/issues/4139))
+- [pixiv:novel] add `novel-bookmark` extractor ([#4111](https://github.com/mikf/gallery-dl/issues/4111))
+- [pixiv:novel] add `full-series` option ([#4111](https://github.com/mikf/gallery-dl/issues/4111))
+- [postimage] add gallery support, update image extractor ([#3115](https://github.com/mikf/gallery-dl/issues/3115), [#4134](https://github.com/mikf/gallery-dl/issues/4134))
+- [redgifs] support galleries ([#4021](https://github.com/mikf/gallery-dl/issues/4021))
+- [twitter] extract `conversation_id` metadata ([#3839](https://github.com/mikf/gallery-dl/issues/3839))
+- [vipergirls] add login support ([#4166](https://github.com/mikf/gallery-dl/issues/4166))
+- [vipergirls] use API endpoints ([#4166](https://github.com/mikf/gallery-dl/issues/4166))
+- [formatter] implement `H` conversion ([#4164](https://github.com/mikf/gallery-dl/issues/4164))
+### Fixes
+- [acidimg] fix extraction ([#4136](https://github.com/mikf/gallery-dl/issues/4136))
+- [bunkr] update domain to bunkrr.su ([#4159](https://github.com/mikf/gallery-dl/issues/4159), [#4189](https://github.com/mikf/gallery-dl/issues/4189))
+- [bunkr] fix video downloads
+- [fanbox] prevent exception due to missing embeds ([#4088](https://github.com/mikf/gallery-dl/issues/4088))
+- [instagram] fix retrieving `/tagged` posts ([#4122](https://github.com/mikf/gallery-dl/issues/4122))
+- [jpgfish] update domain to `jpg.pet` ([#4138](https://github.com/mikf/gallery-dl/issues/4138))
+- [pixiv:novel] fix error with embeds extraction ([#4175](https://github.com/mikf/gallery-dl/issues/4175))
+- [pornhub] improve redirect handling ([#4188](https://github.com/mikf/gallery-dl/issues/4188))
+- [reddit] fix crash due to empty `crosspost_parent_lists` ([#4120](https://github.com/mikf/gallery-dl/issues/4120), [#4172](https://github.com/mikf/gallery-dl/issues/4172))
+- [redgifs] update `search` URL pattern ([#4115](https://github.com/mikf/gallery-dl/issues/4115), [#4185](https://github.com/mikf/gallery-dl/issues/4185))
+- [senmanga] fix and update ([#4160](https://github.com/mikf/gallery-dl/issues/4160))
+- [twitter] use GraphQL API search endpoint ([#3942](https://github.com/mikf/gallery-dl/issues/3942))
+- [wallhaven] improve HTTP error handling ([#4192](https://github.com/mikf/gallery-dl/issues/4192))
+- [weibo] prevent fatal exception due to missing video data ([#4150](https://github.com/mikf/gallery-dl/issues/4150))
+- [weibo] fix `.json` extension for some videos
+
+## 1.25.5 - 2023-05-27
+### Additions
+- [8muses] add `parts` metadata field ([#3329](https://github.com/mikf/gallery-dl/issues/3329))
+- [danbooru] add `date` metadata field ([#4047](https://github.com/mikf/gallery-dl/issues/4047))
+- [e621] add `date` metadata field ([#4047](https://github.com/mikf/gallery-dl/issues/4047))
+- [gofile] add basic password support ([#4056](https://github.com/mikf/gallery-dl/issues/4056))
+- [imagechest] implement API support ([#4065](https://github.com/mikf/gallery-dl/issues/4065))
+- [instagram] add `order-files` option ([#3993](https://github.com/mikf/gallery-dl/issues/3993), [#4017](https://github.com/mikf/gallery-dl/issues/4017))
+- [instagram] add `order-posts` option ([#3993](https://github.com/mikf/gallery-dl/issues/3993), [#4017](https://github.com/mikf/gallery-dl/issues/4017))
+- [instagram] add `metadata` option ([#3107](https://github.com/mikf/gallery-dl/issues/3107))
+- [jpgfish] add `jpg.fishing` extractors ([#2657](https://github.com/mikf/gallery-dl/issues/2657), [#2719](https://github.com/mikf/gallery-dl/issues/2719))
+- [lensdump] add `lensdump.com` extractors ([#2078](https://github.com/mikf/gallery-dl/issues/2078), [#4104](https://github.com/mikf/gallery-dl/issues/4104))
+- [mangaread] add `mangaread.org` extractors ([#2425](https://github.com/mikf/gallery-dl/issues/2425), [#2781](https://github.com/mikf/gallery-dl/issues/2781))
+- [misskey] add `favorite` extractor ([#3950](https://github.com/mikf/gallery-dl/issues/3950))
+- [pixiv] add `novel` support ([#1241](https://github.com/mikf/gallery-dl/issues/1241), [#4044](https://github.com/mikf/gallery-dl/issues/4044))
+- [reddit] support cross-posted media ([#887](https://github.com/mikf/gallery-dl/issues/887), [#3586](https://github.com/mikf/gallery-dl/issues/3586), [#3976](https://github.com/mikf/gallery-dl/issues/3976))
+- [postprocessor:exec] support tilde expansion for `command`
+- [formatter] support slicing strings as bytes ([#4087](https://github.com/mikf/gallery-dl/issues/4087))
+### Fixes
+- [8muses] fix value of `album[url]` ([#3329](https://github.com/mikf/gallery-dl/issues/3329))
+- [danbooru] refactor pagination logic ([#4002](https://github.com/mikf/gallery-dl/issues/4002))
+- [fanbox] skip invalid posts ([#4088](https://github.com/mikf/gallery-dl/issues/4088))
+- [gofile] automatically fetch `website-token`
+- [kemonoparty] fix kemono and coomer logins sharing the same cache ([#4098](https://github.com/mikf/gallery-dl/issues/4098))
+- [newgrounds] add default delay between requests ([#4046](https://github.com/mikf/gallery-dl/issues/4046))
+- [nsfwalbum] detect placeholder images
+- [poipiku] extract full `descriptions` ([#4066](https://github.com/mikf/gallery-dl/issues/4066))
+- [tcbscans] update domain to `tcbscans.com` ([#4080](https://github.com/mikf/gallery-dl/issues/4080))
+- [twitter] extract TwitPic URLs in text ([#3792](https://github.com/mikf/gallery-dl/issues/3792), [#3796](https://github.com/mikf/gallery-dl/issues/3796))
+- [weibo] require numeric IDs to have length >= 10 ([#4059](https://github.com/mikf/gallery-dl/issues/4059))
+- [ytdl] fix crash due to removed `no_color` attribute
+- [cookies] improve logging behavior ([#4050](https://github.com/mikf/gallery-dl/issues/4050))
+
+## 1.25.4 - 2023-05-07
+### Additions
+- [4chanarchives] add `thread` and `board` extractors ([#4012](https://github.com/mikf/gallery-dl/issues/4012))
+- [foolfuuka] add `archive.palanq.win`
+- [imgur] add `favorite-folder` extractor ([#4016](https://github.com/mikf/gallery-dl/issues/4016))
+- [mangadex] add `status` and `tags` metadata ([#4031](https://github.com/mikf/gallery-dl/issues/4031))
+- allow selecting a domain with `--cookies-from-browser`
+- add `--cookies-export` command-line option
+- add `-C` as short option for `--cookies`
+- include exception type in config error messages
+### Fixes
+- [exhentai] update sadpanda check
+- [imagechest] load all images when a "Load More" button is present ([#4028](https://github.com/mikf/gallery-dl/issues/4028))
+- [imgur] fix bug causing some images/albums from user profiles and favorites to be ignored
+- [pinterest] update endpoint for related board pins
+- [pinterest] fix `pin.it` extractor
+- [ytdl] fix yt-dlp `--xff/--geo-bypass` tests ([#3989](https://github.com/mikf/gallery-dl/issues/3989))
+### Removals
+- [420chan] remove module
+- [foolfuuka] remove `archive.alice.al` and `tokyochronos.net`
+- [foolslide] remove `sensescans.com`
+- [nana] remove module
+
+## 1.25.3 - 2023-04-30
+### Additions
+- [imagefap] extract `description` and `categories` metadata ([#3905](https://github.com/mikf/gallery-dl/issues/3905))
+- [imxto] add `gallery` extractor ([#1289](https://github.com/mikf/gallery-dl/issues/1289))
+- [itchio] add `game` extractor ([#3923](https://github.com/mikf/gallery-dl/issues/3923))
+- [nitter] extract user IDs from encoded banner URLs
+- [pixiv] allow sorting search results by popularity ([#3970](https://github.com/mikf/gallery-dl/issues/3970))
+- [reddit] match `preview.redd.it` URLs ([#3935](https://github.com/mikf/gallery-dl/issues/3935))
+- [sankaku] support post URLs with MD5 hashes ([#3952](https://github.com/mikf/gallery-dl/issues/3952))
+- [shimmie2] add generic extractors for Shimmie2 sites ([#3734](https://github.com/mikf/gallery-dl/issues/3734), [#943](https://github.com/mikf/gallery-dl/issues/943))
+- [tumblr] add `day` extractor ([#3951](https://github.com/mikf/gallery-dl/issues/3951))
+- [twitter] support `profile-conversation` entries ([#3938](https://github.com/mikf/gallery-dl/issues/3938))
+- [vipergirls] add `thread` and `post` extractors ([#3812](https://github.com/mikf/gallery-dl/issues/3812), [#2720](https://github.com/mikf/gallery-dl/issues/2720), [#731](https://github.com/mikf/gallery-dl/issues/731))
+- [downloader:http] add `consume-content` option ([#3748](https://github.com/mikf/gallery-dl/issues/3748))
+### Fixes
+- [2chen] update domain to sturdychan.help
+- [behance] fix extraction ([#3980](https://github.com/mikf/gallery-dl/issues/3980))
+- [deviantart] retry downloads with private token ([#3941](https://github.com/mikf/gallery-dl/issues/3941))
+- [imagefap] fix empty `tags` metadata
+- [manganelo] support arbitrary minor version separators ([#3972](https://github.com/mikf/gallery-dl/issues/3972))
+- [nozomi] fix file URLs ([#3925](https://github.com/mikf/gallery-dl/issues/3925))
+- [oauth] catch exceptions from `webbrowser.get()` ([#3947](https://github.com/mikf/gallery-dl/issues/3947))
+- [pixiv] fix `pixivision` extraction
+- [reddit] ignore `id-max` value `"zik0zj"`/`2147483647` ([#3939](https://github.com/mikf/gallery-dl/issues/3939), [#3862](https://github.com/mikf/gallery-dl/issues/3862), [#3697](https://github.com/mikf/gallery-dl/issues/3697), [#3606](https://github.com/mikf/gallery-dl/issues/3606), [#3546](https://github.com/mikf/gallery-dl/issues/3546), [#3521](https://github.com/mikf/gallery-dl/issues/3521), [#3412](https://github.com/mikf/gallery-dl/issues/3412))
+- [sankaku] sanitize `date:` tags ([#1790](https://github.com/mikf/gallery-dl/issues/1790))
+- [tumblr] fix and update pagination logic ([#2191](https://github.com/mikf/gallery-dl/issues/2191))
+- [twitter] fix `user` metadata when downloading quoted Tweets ([#3922](https://github.com/mikf/gallery-dl/issues/3922))
+- [ytdl] fix crash due to `--geo-bypass` deprecation ([#3975](https://github.com/mikf/gallery-dl/issues/3975))
+- [postprocessor:metadata] support putting keys in quotes
+- include more optional dependencies in executables ([#3907](https://github.com/mikf/gallery-dl/issues/3907))
+
+## 1.25.2 - 2023-04-15
+### Additions
+- [deviantart] add `public` option
+- [nitter] extract videos from `source` elements ([#3912](https://github.com/mikf/gallery-dl/issues/3912))
+- [twitter] add `date_liked` and `date_bookmarked` metadata for liked and bookmarked Tweets ([#3816](https://github.com/mikf/gallery-dl/issues/3816))
+- [urlshortener] add support for bit.ly & t.co ([#3841](https://github.com/mikf/gallery-dl/issues/3841))
+- [downloader:http] add MIME type and signature for `.heic` files ([#3915](https://github.com/mikf/gallery-dl/issues/3915))
+### Fixes
+- [blogger] update regex to get the highest resolution URLs ([#3863](https://github.com/mikf/gallery-dl/issues/3863), [#3870](https://github.com/mikf/gallery-dl/issues/3870))
+- [bunkr] update domain to `bunkr.la` ([#3813](https://github.com/mikf/gallery-dl/issues/3813), [#3877](https://github.com/mikf/gallery-dl/issues/3877))
+- [deviantart] keep using private access tokens when requesting download URLs ([#3845](https://github.com/mikf/gallery-dl/issues/3845), [#3857](https://github.com/mikf/gallery-dl/issues/3857), [#3896](https://github.com/mikf/gallery-dl/issues/3896))
+- [hentaifoundry] fix content filters ([#3887](https://github.com/mikf/gallery-dl/issues/3887))
+- [hotleak] fix downloading of creators whose name starts with a category name ([#3871](https://github.com/mikf/gallery-dl/issues/3871))
+- [imagechest] fix extraction ([#3914](https://github.com/mikf/gallery-dl/issues/3914))
+- [realbooru] fix extraction ([#2530](https://github.com/mikf/gallery-dl/issues/2530))
+- [sexcom] fix pagination ([#3906](https://github.com/mikf/gallery-dl/issues/3906))
+- [sexcom] fix HD video extraction
+- [shopify] fix `collection` extractor ([#3866](https://github.com/mikf/gallery-dl/issues/3866), [#3868](https://github.com/mikf/gallery-dl/issues/3868))
+- [twitter] update to bookmark timeline v2 ([#3859](https://github.com/mikf/gallery-dl/issues/3859), [#3854](https://github.com/mikf/gallery-dl/issues/3854))
+- [twitter] warn about "withheld" Tweets and users ([#3864](https://github.com/mikf/gallery-dl/issues/3864))
+### Improvements
+- [danbooru] reduce number of API requests when fetching extended `metadata`
+- [deviantart:search] detect login redirects ([#3860](https://github.com/mikf/gallery-dl/issues/3860))
+- [generic] write regular expressions without `x` flags
+- [mastodon] try to get account IDs without access token
+- [twitter] calculate `date` from Tweet IDs
+
+## 1.25.1 - 2023-03-25
+### Additions
+- [nitter] support nitter.it ([#3819](https://github.com/mikf/gallery-dl/issues/3819))
+- [twitter] add `hashtag` extractor ([#3783](https://github.com/mikf/gallery-dl/issues/3783))
+- [twitter] support Tweet content with >280 characters
+- [formatter] support loading f-strings from template files ([#3800](https://github.com/mikf/gallery-dl/issues/3800))
+- [formatter] support filesystem paths for `\fM` modules ([#3399](https://github.com/mikf/gallery-dl/issues/3399))
+- [formatter] support putting keys in quotes (e.g. `user['name']`) ([#2559](https://github.com/mikf/gallery-dl/issues/2559))
+- [postprocessor:metadata] add `skip` option ([#3786](https://github.com/mikf/gallery-dl/issues/3786))
+### Fixes
+- [output] set `errors=replace` for output streams ([#3765](https://github.com/mikf/gallery-dl/issues/3765))
+- [gelbooru] extract favorites without needing cookies ([#3704](https://github.com/mikf/gallery-dl/issues/3704))
+- [gelbooru] fix and improve `--range` for pools
+- [hiperdex] fix extraction ([#3768](https://github.com/mikf/gallery-dl/issues/3768))
+- [naverwebtoon] fix extraction ([#3729](https://github.com/mikf/gallery-dl/issues/3729))
+- [nitter] fix extraction for instances without user banners
+- [twitter] update API query hashes and parameters
+- [weibo] support `mix_media_info` entries ([#3793](https://github.com/mikf/gallery-dl/issues/3793))
+- fix circular reference detection for `-K`
+### Changes
+- update `globals` instead of overwriting the default ([#3773](https://github.com/mikf/gallery-dl/issues/3773))
+
 ## 1.25.0 - 2023-03-11
 ### Changes
 - [e621] split `e621` extractors from `danbooru` module ([#3425](https://github.com/mikf/gallery-dl/issues/3425))
 - [deviantart] remove mature scraps warning ([#3691](https://github.com/mikf/gallery-dl/issues/3691))
-- [deviantart] use `/collections/all` endpoint for favorites ([#3666](https://github.com/mikf/gallery-dl/issues/3666) ,#3668)
+- [deviantart] use `/collections/all` endpoint for favorites ([#3666](https://github.com/mikf/gallery-dl/issues/3666), [#3668](https://github.com/mikf/gallery-dl/issues/3668))
 - [newgrounds] update default image and audio archive IDs to prevent ID overlap ([#3681](https://github.com/mikf/gallery-dl/issues/3681))
 - rename `--ignore-config` to `--config-ignore`
 ### Extractors

@@ -11,7 +11,7 @@
 from .common import Extractor, Message
 from .. import text, oauth, util, config, exception
 from ..output import stdout_write
-from ..cache import cache
+from ..cache import cache, memcache
 import urllib.parse
 import binascii
 import hashlib
@@ -28,7 +28,12 @@ class OAuthBase(Extractor):
     def __init__(self, match):
         Extractor.__init__(self, match)
         self.client = None
+
+    def _init(self):
         self.cache = config.get(("extractor", self.category), "cache", True)
+        if self.cache and cache is memcache:
+            self.log.warning("cache file is not writeable")
+            self.cache = False
 
     def oauth_config(self, key, default=None):
         value = config.interpolate(("extractor", self.subcategory), key)
@@ -71,8 +76,11 @@ class OAuthBase(Extractor):
 
         browser = self.config("browser", True)
         if browser:
-            import webbrowser
-            browser = webbrowser.get()
+            try:
+                import webbrowser
+                browser = webbrowser.get()
+            except Exception:
+                browser = None
 
         if browser and browser.open(url):
             name = getattr(browser, "name", "Browser")
@@ -131,7 +139,7 @@ class OAuthBase(Extractor):
 
     def _oauth2_authorization_code_grant(
             self, client_id, client_secret, default_id, default_secret,
-            auth_url, token_url, *, scope="read", duration="permanent",
+            auth_url, token_url, scope="read", duration="permanent",
             key="refresh_token", auth=True, cache=None, instance=None):
         """Perform an OAuth2 authorization code grant"""
 
@@ -175,7 +183,7 @@ class OAuthBase(Extractor):
         }
 
         if auth:
-            auth = (client_id, client_secret)
+            auth = util.HTTPBasicAuth(client_id, client_secret)
         else:
             auth = None
             data["client_id"] = client_id
@@ -238,6 +246,7 @@ class OAuthBase(Extractor):
 class OAuthFlickr(OAuthBase):
     subcategory = "flickr"
     pattern = "oauth:flickr$"
+    example = "oauth:flickr"
     redirect_uri = REDIRECT_URI_HTTPS
 
     def items(self):
@@ -256,6 +265,7 @@ class OAuthFlickr(OAuthBase):
 class OAuthSmugmug(OAuthBase):
     subcategory = "smugmug"
     pattern = "oauth:smugmug$"
+    example = "oauth:smugmug"
 
     def items(self):
         yield Message.Version, 1
@@ -273,6 +283,7 @@ class OAuthSmugmug(OAuthBase):
 class OAuthTumblr(OAuthBase):
     subcategory = "tumblr"
     pattern = "oauth:tumblr$"
+    example = "oauth:tumblr"
 
     def items(self):
         yield Message.Version, 1
@@ -293,6 +304,7 @@ class OAuthTumblr(OAuthBase):
 class OAuthDeviantart(OAuthBase):
     subcategory = "deviantart"
     pattern = "oauth:deviantart$"
+    example = "oauth:deviantart"
     redirect_uri = REDIRECT_URI_HTTPS
 
     def items(self):
@@ -314,6 +326,7 @@ class OAuthDeviantart(OAuthBase):
 class OAuthReddit(OAuthBase):
     subcategory = "reddit"
     pattern = "oauth:reddit$"
+    example = "oauth:reddit"
 
     def items(self):
         yield Message.Version, 1
@@ -335,6 +348,7 @@ class OAuthReddit(OAuthBase):
 class OAuthMastodon(OAuthBase):
     subcategory = "mastodon"
     pattern = "oauth:mastodon:(?:https?://)?([^/?#]+)"
+    example = "oauth:mastodon:mastodon.social"
 
     def __init__(self, match):
         OAuthBase.__init__(self, match)
@@ -362,7 +376,7 @@ class OAuthMastodon(OAuthBase):
             cache=mastodon._access_token_cache,
         )
 
-    @cache(maxage=10*365*24*3600, keyarg=1)
+    @cache(maxage=36500*86400, keyarg=1)
     def _register(self, instance):
         self.log.info("Registering application for '%s'", instance)
 
@@ -392,6 +406,7 @@ class OAuthMastodon(OAuthBase):
 class OAuthPixiv(OAuthBase):
     subcategory = "pixiv"
     pattern = "oauth:pixiv$"
+    example = "oauth:pixiv"
 
     def items(self):
         yield Message.Version, 1

@@ -26,35 +26,11 @@ class IssuuPublicationExtractor(IssuuBase, GalleryExtractor):
     filename_fmt = "{num:>03}.{extension}"
     archive_fmt = "{document[publicationId]}_{num}"
     pattern = r"(?:https?://)?issuu\.com(/[^/?#]+/docs/[^/?#]+)"
-    test = ("https://issuu.com/issuu/docs/motions-1-2019/", {
-        "pattern": r"https://image.isu.pub/190916155301-\w+/jpg/page_\d+.jpg",
-        "count"  : 36,
-        "keyword": {
-            "document": {
-                "access"        : "PUBLIC",
-                "contentRating" : {
-                    "isAdsafe"  : True,
-                    "isExplicit": False,
-                    "isReviewed": True,
-                },
-                "date"          : "dt:2019-09-16 00:00:00",
-                "description"   : "re:Motions, the brand new publication by I",
-                "documentName"  : "motions-1-2019",
-                "downloadable"  : False,
-                "pageCount"     : 36,
-                "publicationId" : "d99ec95935f15091b040cb8060f05510",
-                "title"         : "Motions by Issuu - Issue 1",
-                "username"      : "issuu",
-            },
-            "extension": "jpg",
-            "filename" : r"re:page_\d+",
-            "num"      : int,
-        },
-    })
+    example = "https://issuu.com/issuu/docs/TITLE/"
 
     def metadata(self, page):
-        data = util.json_loads(text.extr(
-            page, '<script data-json="', '"').replace("&quot;", '"'))
+        data = util.json_loads(text.rextract(
+            page, '<script data-json="', '"')[0].replace("&quot;", '"'))
 
         doc = data["initialDocumentData"]["document"]
         doc["date"] = text.parse_datetime(
@@ -78,10 +54,7 @@ class IssuuUserExtractor(IssuuBase, Extractor):
     """Extractor for all publications of a user/publisher"""
     subcategory = "user"
     pattern = r"(?:https?://)?issuu\.com/([^/?#]+)/?$"
-    test = ("https://issuu.com/issuu", {
-        "pattern": IssuuPublicationExtractor.pattern,
-        "count"  : "> 25",
-    })
+    example = "https://issuu.com/USER"
 
     def __init__(self, match):
         Extractor.__init__(self, match)

@@ -59,7 +59,7 @@ build-linux() {
     rm -rf "${VENV_PATH}"
     python -m virtualenv "${VENV_PATH}"
 
-    $VENV_PYTHON -m pip install requests requests[socks] yt-dlp pyinstaller
+    $VENV_PYTHON -m pip install requests requests[socks] yt-dlp pyyaml secretstorage pyinstaller
     $VENV_PYTHON ./scripts/pyinstaller.py
 }
 
@@ -161,6 +161,6 @@ build-python
 build-linux
 build-windows
 sign
-upload-git
 upload-pypi
+upload-git
 update-dev

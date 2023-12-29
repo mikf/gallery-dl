@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright 2017-2022 Mike Fährmann
+# Copyright 2017-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -46,8 +46,7 @@ class TestCookiejar(unittest.TestCase):
 
     def test_cookiefile(self):
         config.set((), "cookies", self.cookiefile)
-
-        cookies = extractor.find("test:").session.cookies
+        cookies = _get_extractor("test").cookies
         self.assertEqual(len(cookies), 1)
 
         cookie = next(iter(cookies))
@@ -65,12 +64,14 @@ class TestCookiejar(unittest.TestCase):
     def _test_warning(self, filename, exc):
         config.set((), "cookies", filename)
         log = logging.getLogger("test")
+
         with mock.patch.object(log, "warning") as mock_warning:
-            cookies = extractor.find("test:").session.cookies
-            self.assertEqual(len(cookies), 0)
-            self.assertEqual(mock_warning.call_count, 1)
-            self.assertEqual(mock_warning.call_args[0][0], "cookies: %s")
-            self.assertIsInstance(mock_warning.call_args[0][1], exc)
+            cookies = _get_extractor("test").cookies
+
+        self.assertEqual(len(cookies), 0)
+        self.assertEqual(mock_warning.call_count, 1)
+        self.assertEqual(mock_warning.call_args[0][0], "cookies: %s")
+        self.assertIsInstance(mock_warning.call_args[0][1], exc)
 
 
 class TestCookiedict(unittest.TestCase):
@@ -83,7 +84,8 @@ class TestCookiedict(unittest.TestCase):
         config.clear()
 
     def test_dict(self):
-        cookies = extractor.find("test:").session.cookies
+        cookies = _get_extractor("test").cookies
+
         self.assertEqual(len(cookies), len(self.cdict))
         self.assertEqual(sorted(cookies.keys()), sorted(self.cdict.keys()))
         self.assertEqual(sorted(cookies.values()), sorted(self.cdict.values()))
@@ -91,11 +93,11 @@ class TestCookiedict(unittest.TestCase):
     def test_domain(self):
         for category in ["exhentai", "idolcomplex", "nijie", "horne"]:
             extr = _get_extractor(category)
-            cookies = extr.session.cookies
+            cookies = extr.cookies
             for key in self.cdict:
                 self.assertTrue(key in cookies)
             for c in cookies:
-                self.assertEqual(c.domain, extr.cookiedomain)
+                self.assertEqual(c.domain, extr.cookies_domain)
 
 
 class TestCookieLogin(unittest.TestCase):
@@ -122,91 +124,96 @@ class TestCookieLogin(unittest.TestCase):
 class TestCookieUtils(unittest.TestCase):
 
     def test_check_cookies(self):
-        extr = extractor.find("test:")
-        self.assertFalse(extr._cookiejar, "empty")
-        self.assertFalse(extr.cookiedomain, "empty")
+        extr = _get_extractor("test")
+        self.assertFalse(extr.cookies, "empty")
+        self.assertFalse(extr.cookies_domain, "empty")
 
         # always returns False when checking for empty cookie list
-        self.assertFalse(extr._check_cookies(()))
+        self.assertFalse(extr.cookies_check(()))
 
-        self.assertFalse(extr._check_cookies(("a",)))
-        self.assertFalse(extr._check_cookies(("a", "b")))
-        self.assertFalse(extr._check_cookies(("a", "b", "c")))
+        self.assertFalse(extr.cookies_check(("a",)))
+        self.assertFalse(extr.cookies_check(("a", "b")))
+        self.assertFalse(extr.cookies_check(("a", "b", "c")))
 
-        extr._cookiejar.set("a", "1")
-        self.assertTrue(extr._check_cookies(("a",)))
-        self.assertFalse(extr._check_cookies(("a", "b")))
-        self.assertFalse(extr._check_cookies(("a", "b", "c")))
+        extr.cookies.set("a", "1")
+        self.assertTrue(extr.cookies_check(("a",)))
+        self.assertFalse(extr.cookies_check(("a", "b")))
+        self.assertFalse(extr.cookies_check(("a", "b", "c")))
 
-        extr._cookiejar.set("b", "2")
-        self.assertTrue(extr._check_cookies(("a",)))
-        self.assertTrue(extr._check_cookies(("a", "b")))
-        self.assertFalse(extr._check_cookies(("a", "b", "c")))
+        extr.cookies.set("b", "2")
+        self.assertTrue(extr.cookies_check(("a",)))
+        self.assertTrue(extr.cookies_check(("a", "b")))
+        self.assertFalse(extr.cookies_check(("a", "b", "c")))
 
     def test_check_cookies_domain(self):
-        extr = extractor.find("test:")
-        self.assertFalse(extr._cookiejar, "empty")
-        extr.cookiedomain = ".example.org"
+        extr = _get_extractor("test")
+        self.assertFalse(extr.cookies, "empty")
+        extr.cookies_domain = ".example.org"
 
-        self.assertFalse(extr._check_cookies(("a",)))
-        self.assertFalse(extr._check_cookies(("a", "b")))
+        self.assertFalse(extr.cookies_check(("a",)))
+        self.assertFalse(extr.cookies_check(("a", "b")))
 
-        extr._cookiejar.set("a", "1")
-        self.assertFalse(extr._check_cookies(("a",)))
+        extr.cookies.set("a", "1")
+        self.assertFalse(extr.cookies_check(("a",)))
 
-        extr._cookiejar.set("a", "1", domain=extr.cookiedomain)
-        self.assertTrue(extr._check_cookies(("a",)))
+        extr.cookies.set("a", "1", domain=extr.cookies_domain)
+        self.assertTrue(extr.cookies_check(("a",)))
 
-        extr._cookiejar.set("a", "1", domain="www" + extr.cookiedomain)
-        self.assertEqual(len(extr._cookiejar), 3)
-        self.assertTrue(extr._check_cookies(("a",)))
+        extr.cookies.set("a", "1", domain="www" + extr.cookies_domain)
+        self.assertEqual(len(extr.cookies), 3)
+        self.assertTrue(extr.cookies_check(("a",)))
 
-        extr._cookiejar.set("b", "2", domain=extr.cookiedomain)
-        extr._cookiejar.set("c", "3", domain=extr.cookiedomain)
-        self.assertTrue(extr._check_cookies(("a", "b", "c")))
+        extr.cookies.set("b", "2", domain=extr.cookies_domain)
+        extr.cookies.set("c", "3", domain=extr.cookies_domain)
+        self.assertTrue(extr.cookies_check(("a", "b", "c")))
 
     def test_check_cookies_expires(self):
-        extr = extractor.find("test:")
-        self.assertFalse(extr._cookiejar, "empty")
-        self.assertFalse(extr.cookiedomain, "empty")
+        extr = _get_extractor("test")
+        self.assertFalse(extr.cookies, "empty")
+        self.assertFalse(extr.cookies_domain, "empty")
 
         now = int(time.time())
         log = logging.getLogger("test")
 
-        extr._cookiejar.set("a", "1", expires=now-100)
+        extr.cookies.set("a", "1", expires=now-100)
         with mock.patch.object(log, "warning") as mw:
-            self.assertFalse(extr._check_cookies(("a",)))
+            self.assertFalse(extr.cookies_check(("a",)))
             self.assertEqual(mw.call_count, 1)
             self.assertEqual(mw.call_args[0], ("Cookie '%s' has expired", "a"))
 
-        extr._cookiejar.set("a", "1", expires=now+100)
+        extr.cookies.set("a", "1", expires=now+100)
         with mock.patch.object(log, "warning") as mw:
-            self.assertTrue(extr._check_cookies(("a",)))
+            self.assertTrue(extr.cookies_check(("a",)))
             self.assertEqual(mw.call_count, 1)
             self.assertEqual(mw.call_args[0], (
                 "Cookie '%s' will expire in less than %s hour%s", "a", 1, ""))
 
-        extr._cookiejar.set("a", "1", expires=now+100+7200)
+        extr.cookies.set("a", "1", expires=now+100+7200)
         with mock.patch.object(log, "warning") as mw:
-            self.assertTrue(extr._check_cookies(("a",)))
+            self.assertTrue(extr.cookies_check(("a",)))
             self.assertEqual(mw.call_count, 1)
             self.assertEqual(mw.call_args[0], (
                 "Cookie '%s' will expire in less than %s hour%s", "a", 3, "s"))
 
-        extr._cookiejar.set("a", "1", expires=now+100+24*3600)
+        extr.cookies.set("a", "1", expires=now+100+24*3600)
         with mock.patch.object(log, "warning") as mw:
-            self.assertTrue(extr._check_cookies(("a",)))
+            self.assertTrue(extr.cookies_check(("a",)))
             self.assertEqual(mw.call_count, 0)
 
 
 def _get_extractor(category):
-    URLS = {
-        "exhentai"   : "https://exhentai.org/g/1200119/d55c44d3d0/",
-        "idolcomplex": "https://idol.sankakucomplex.com/post/show/1",
-        "nijie"      : "https://nijie.info/view.php?id=1",
-        "horne"      : "https://horne.red/view.php?id=1",
-    }
-    return extractor.find(URLS[category])
+    extr = extractor.find(URLS[category])
+    extr.initialize()
+    return extr
+
+
+URLS = {
+    "exhentai"   : "https://exhentai.org/g/1200119/d55c44d3d0/",
+    "idolcomplex": "https://idol.sankakucomplex.com/post/show/1",
+    "nijie"      : "https://nijie.info/view.php?id=1",
+    "horne"      : "https://horne.red/view.php?id=1",
+    "test"       : "test:",
+}
 
 
 if __name__ == "__main__":

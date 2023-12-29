@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2020-2021 Mike Fährmann
+# Copyright 2020-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -10,7 +10,6 @@
 
 from .common import PostProcessor
 from .. import text, util, exception
-import sys
 import os
 
 
@@ -31,7 +30,7 @@ class ComparePP(PostProcessor):
             elif equal == "terminate":
                 self._equal_exc = exception.TerminateExtraction
             elif equal == "exit":
-                self._equal_exc = sys.exit
+                self._equal_exc = SystemExit
 
         job.register_hooks({"file": (
             self.enumerate

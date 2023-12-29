@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2022 Mike Fährmann
+# Copyright 2016-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -16,30 +16,13 @@ class KhinsiderSoundtrackExtractor(AsynchronousMixin, Extractor):
     """Extractor for soundtracks from khinsider.com"""
     category = "khinsider"
     subcategory = "soundtrack"
+    root = "https://downloads.khinsider.com"
     directory_fmt = ("{category}", "{album[name]}")
     archive_fmt = "{filename}.{extension}"
     pattern = (r"(?:https?://)?downloads\.khinsider\.com"
                r"/game-soundtracks/album/([^/?#]+)")
-    root = "https://downloads.khinsider.com"
-    test = (("https://downloads.khinsider.com"
-             "/game-soundtracks/album/horizon-riders-wii"), {
-        "pattern": r"https?://vgm(site|downloads)\.com"
-                   r"/soundtracks/horizon-riders-wii/[^/]+"
-                   r"/Horizon%20Riders%20Wii%20-%20Full%20Soundtrack\.mp3",
-        "keyword": {
-            "album": {
-                "count": 1,
-                "date": "Sep 18th, 2016",
-                "name": "Horizon Riders",
-                "platform": "Wii",
-                "size": 26214400,
-                "type": "Gamerip",
-            },
-            "extension": "mp3",
-            "filename": "Horizon Riders Wii - Full Soundtrack",
-        },
-        "count": 1,
-    })
+    example = ("https://downloads.khinsider.com"
+               "/game-soundtracks/album/TITLE")
 
     def __init__(self, match):
         Extractor.__init__(self, match)

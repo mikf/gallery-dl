@@ -34,6 +34,7 @@ class FakeJob():
 
     def __init__(self):
         self.extractor = extractor.find("test:")
+        self.extractor.initialize()
         self.pathfmt = path.PathFormat(self.extractor)
         self.out = output.NullOutput()
         self.get_logger = logging.getLogger
@@ -213,7 +214,8 @@ class TestHTTPDownloader(TestDownloaderBase):
         self.downloader.minsize = 100
         with self.assertLogs(self.downloader.log, "WARNING"):
             success = self.downloader.download(url, pathfmt)
-        self.assertFalse(success)
+        self.assertTrue(success)
+        self.assertEqual(pathfmt.temppath, "")
 
     def test_http_filesize_max(self):
         url = self.address + "/jpg"
@@ -221,7 +223,8 @@ class TestHTTPDownloader(TestDownloaderBase):
         self.downloader.maxsize = 100
         with self.assertLogs(self.downloader.log, "WARNING"):
             success = self.downloader.download(url, pathfmt)
-        self.assertFalse(success)
+        self.assertTrue(success)
+        self.assertEqual(pathfmt.temppath, "")
 
 
 class TestTextDownloader(TestDownloaderBase):
@@ -289,6 +292,10 @@ SAMPLES = {
     ("webp", b"RIFF????WEBP"),
     ("avif", b"????ftypavif"),
     ("avif", b"????ftypavis"),
+    ("heic", b"????ftypheic"),
+    ("heic", b"????ftypheim"),
+    ("heic", b"????ftypheis"),
+    ("heic", b"????ftypheix"),
     ("svg" , b"<?xml"),
     ("ico" , b"\x00\x00\x01\x00"),
     ("cur" , b"\x00\x00\x02\x00"),

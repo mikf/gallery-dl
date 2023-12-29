@@ -4,35 +4,27 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extractors for https://2chen.moe/"""
+"""Extractors for https://sturdychan.help/"""
 
 from .common import Extractor, Message
 from .. import text
+
+BASE_PATTERN = r"(?:https?://)?(?:sturdychan.help|2chen\.(?:moe|club))"
 
 
 class _2chenThreadExtractor(Extractor):
     """Extractor for 2chen threads"""
     category = "2chen"
     subcategory = "thread"
+    root = "https://sturdychan.help"
     directory_fmt = ("{category}", "{board}", "{thread} {title}")
     filename_fmt = "{time} {filename}.{extension}"
     archive_fmt = "{board}_{thread}_{hash}_{time}"
-    pattern = r"(?:https?://)?2chen\.(?:moe|club)/([^/?#]+)/(\d+)"
-    test = (
-        ("https://2chen.moe/tv/496715", {
-            "pattern": r"https://2chen\.su/assets/images/src/\w{40}\.\w+$",
-            "count": ">= 179",
-        }),
-        ("https://2chen.club/tv/1", {
-            "count": 5,
-        }),
-        # 404
-        ("https://2chen.moe/jp/303786"),
-    )
+    pattern = BASE_PATTERN + r"/([^/?#]+)/(\d+)"
+    example = "https://sturdychan.help/a/12345/"
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.root = text.root_from_url(match.group(0))
         self.board, self.thread = match.groups()
 
     def items(self):
@@ -88,19 +80,12 @@ class _2chenBoardExtractor(Extractor):
     """Extractor for 2chen boards"""
     category = "2chen"
     subcategory = "board"
-    pattern = r"(?:https?://)?2chen\.(?:moe|club)/([^/?#]+)(?:/catalog|/?$)"
-    test = (
-        ("https://2chen.moe/co/", {
-            "pattern": _2chenThreadExtractor.pattern
-        }),
-        ("https://2chen.moe/co"),
-        ("https://2chen.club/tv"),
-        ("https://2chen.moe/co/catalog"),
-    )
+    root = "https://sturdychan.help"
+    pattern = BASE_PATTERN + r"/([^/?#]+)(?:/catalog|/?$)"
+    example = "https://sturdychan.help/a/"
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.root = text.root_from_url(match.group(0))
         self.board = match.group(1)
 
     def items(self):

@@ -18,7 +18,7 @@ from .output import stdout_write
 
 
 class Job():
-    """Base class for Job-types"""
+    """Base class for Job types"""
     ulog = None
 
     def __init__(self, extr, parent=None):
@@ -31,6 +31,35 @@ class Job():
         self.pathfmt = None
         self.kwdict = {}
         self.status = 0
+
+        cfgpath = []
+        if parent:
+            if extr.category == parent.extractor.category or \
+                    extr.category in parent.parents:
+                parents = parent.parents
+            else:
+                parents = parent.parents + (parent.extractor.category,)
+
+            if parents:
+                for category in parents:
+                    cat = "{}>{}".format(category, extr.category)
+                    cfgpath.append((cat, extr.subcategory))
+                cfgpath.append((extr.category, extr.subcategory))
+                self.parents = parents
+            else:
+                self.parents = ()
+        else:
+            self.parents = ()
+
+        if extr.basecategory:
+            if not cfgpath:
+                cfgpath.append((extr.category, extr.subcategory))
+            cfgpath.append((extr.basecategory, extr.subcategory))
+
+        if cfgpath:
+            extr._cfgpath = cfgpath
+            extr.config = extr._config_shared
+            extr.config_accumulate = extr._config_shared_accumulate
 
         actions = extr.config("actions")
         if actions:
@@ -58,28 +87,27 @@ class Job():
                 extr.category = pextr.category
                 extr.subcategory = pextr.subcategory
 
-        self.metadata_url = extr.config("url-metadata")
-        self.metadata_http = extr.config("http-metadata")
+        self.metadata_url = extr.config2("metadata-url", "url-metadata")
+        self.metadata_http = extr.config2("metadata-http", "http-metadata")
+        metadata_path = extr.config2("metadata-path", "path-metadata")
+        metadata_version = extr.config2("metadata-version", "version-metadata")
+        metadata_extractor = extr.config2(
+            "metadata-extractor", "extractor-metadata")
 
-        version_info = extr.config("version-metadata")
-        metadata_path = extr.config("path-metadata")
-
-        # user-supplied metadata
-        kwdict = extr.config("keywords")
-        if kwdict:
-            self.kwdict.update(kwdict)
         if metadata_path:
             self.kwdict[metadata_path] = path_proxy
-        if version_info:
-            self.kwdict[version_info] = {
+        if metadata_extractor:
+            self.kwdict[metadata_extractor] = extr
+        if metadata_version:
+            self.kwdict[metadata_version] = {
                 "version"         : version.__version__,
                 "is_executable"   : util.EXECUTABLE,
                 "current_git_head": util.git_head()
             }
-
-        # predicates
-        self.pred_url = self._prepare_predicates("image", True)
-        self.pred_queue = self._prepare_predicates("chapter", False)
+        # user-supplied metadata
+        kwdict = extr.config("keywords")
+        if kwdict:
+            self.kwdict.update(kwdict)
 
     def run(self):
         """Execute or run the job"""
@@ -87,6 +115,9 @@ class Job():
         log = extractor.log
         msg = None
 
+        self._init()
+
+        # sleep before extractor start
         sleep = util.build_duration_func(
             extractor.config("sleep-extractor"))
         if sleep:
@@ -125,8 +156,7 @@ class Job():
                 log.info("No results for %s", extractor.url)
         finally:
             self.handle_finalize()
-            if extractor.finalize:
-                extractor.finalize()
+            extractor.finalize()
 
         return self.status
 
@@ -172,6 +202,11 @@ class Job():
             kwdict.pop(self.metadata_http, None)
         if self.kwdict:
             kwdict.update(self.kwdict)
+
+    def _init(self):
+        self.extractor.initialize()
+        self.pred_url = self._prepare_predicates("image", True)
+        self.pred_queue = self._prepare_predicates("chapter", False)
 
     def _prepare_predicates(self, target, skip=True):
         predicates = []
@@ -259,6 +294,10 @@ class DownloadJob(Job):
                 self.handle_skip()
                 return
 
+        if "prepare-after" in hooks:
+            for callback in hooks["prepare-after"]:
+                callback(pathfmt)
+
         if self.sleep:
             self.extractor.sleep(self.sleep(), "download")
 
@@ -339,7 +378,7 @@ class DownloadJob(Job):
             else:
                 extr._parentdir = pextr._parentdir
 
-            pmeta = pextr.config("parent-metadata")
+            pmeta = pextr.config2("parent-metadata", "metadata-parent")
             if pmeta:
                 if isinstance(pmeta, str):
                     data = self.kwdict.copy()
@@ -356,10 +395,25 @@ class DownloadJob(Job):
                 try:
                     if pextr.config("parent-skip"):
                         job._skipcnt = self._skipcnt
-                        self.status |= job.run()
+                        status = job.run()
                         self._skipcnt = job._skipcnt
                     else:
-                        self.status |= job.run()
+                        status = job.run()
+
+                    if status:
+                        self.status |= status
+                        if "_fallback" in kwdict and self.fallback:
+                            fallback = kwdict["_fallback"] = \
+                                iter(kwdict["_fallback"])
+                            try:
+                                url = next(fallback)
+                            except StopIteration:
+                                pass
+                            else:
+                                text.nameext_from_url(url, kwdict)
+                                if url.startswith("ytdl:"):
+                                    kwdict["extension"] = ""
+                                self.handle_url(url, kwdict)
                     break
                 except exception.RestartExtraction:
                     pass
@@ -378,11 +432,19 @@ class DownloadJob(Job):
                 for callback in hooks["post-after"]:
                     callback(pathfmt)
 
-            self.extractor._store_cookies()
+            self.extractor.cookies_store()
+
             if "finalize" in hooks:
-                status = self.status
                 for callback in hooks["finalize"]:
-                    callback(pathfmt, status)
+                    callback(pathfmt)
+            if self.status:
+                if "finalize-error" in hooks:
+                    for callback in hooks["finalize-error"]:
+                        callback(pathfmt)
+            else:
+                if "finalize-success" in hooks:
+                    for callback in hooks["finalize-success"]:
+                        callback(pathfmt)
 
     def handle_skip(self):
         pathfmt = self.pathfmt
@@ -458,7 +520,7 @@ class DownloadJob(Job):
                     archive, archive_format, archive_pragma)
             except Exception as exc:
                 extr.log.warning(
-                    "Failed to open download archive at '%s' ('%s: %s')",
+                    "Failed to open download archive at '%s' (%s: %s)",
                     archive, exc.__class__.__name__, exc)
             else:
                 extr.log.debug("Using download archive '%s'", archive)
@@ -475,7 +537,7 @@ class DownloadJob(Job):
                 elif skip == "terminate":
                     self._skipexc = exception.TerminateExtraction
                 elif skip == "exit":
-                    self._skipexc = sys.exit
+                    self._skipexc = SystemExit
                 self._skipmax = text.parse_int(smax)
         else:
             # monkey-patch methods to always return False
@@ -633,13 +695,13 @@ class KeywordJob(Job):
     def print_kwdict(self, kwdict, prefix="", markers=None):
         """Print key-value pairs in 'kwdict' with formatting"""
         write = sys.stdout.write
-        suffix = "]" if prefix else ""
+        suffix = "']" if prefix else ""
 
         markerid = id(kwdict)
         if markers is None:
             markers = {markerid}
         elif markerid in markers:
-            write("{}\n  <circular reference>\n".format(prefix[:-1]))
+            write("{}\n  <circular reference>\n".format(prefix[:-2]))
             return  # ignore circular reference
         else:
             markers.add(markerid)
@@ -650,13 +712,13 @@ class KeywordJob(Job):
             key = prefix + key + suffix
 
             if isinstance(value, dict):
-                self.print_kwdict(value, key + "[", markers)
+                self.print_kwdict(value, key + "['", markers)
 
             elif isinstance(value, list):
                 if not value:
                     pass
                 elif isinstance(value[0], dict):
-                    self.print_kwdict(value[0], key + "[N][", markers)
+                    self.print_kwdict(value[0], key + "[N]['", markers)
                 else:
                     fmt = ("  {:>%s} {}\n" % len(str(len(value)))).format
                     write(key + "[N]\n")
@@ -666,6 +728,8 @@ class KeywordJob(Job):
             else:
                 # string or number
                 write("{}\n  {}\n".format(key, value))
+
+        markers.remove(markerid)
 
 
 class UrlJob(Job):
@@ -753,6 +817,8 @@ class DataJob(Job):
         self.filter = dict.copy if private else util.filter_dict
 
     def run(self):
+        self._init()
+
         extractor = self.extractor
         sleep = util.build_duration_func(
             extractor.config("sleep-extractor"))

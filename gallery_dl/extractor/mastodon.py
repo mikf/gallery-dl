@@ -19,12 +19,14 @@ class MastodonExtractor(BaseExtractor):
     directory_fmt = ("mastodon", "{instance}", "{account[username]}")
     filename_fmt = "{category}_{id}_{media[id]}.{extension}"
     archive_fmt = "{media[id]}"
-    cookiedomain = None
+    cookies_domain = None
 
     def __init__(self, match):
         BaseExtractor.__init__(self, match)
-        self.instance = self.root.partition("://")[2]
         self.item = match.group(match.lastindex)
+
+    def _init(self):
+        self.instance = self.root.partition("://")[2]
         self.reblogs = self.config("reblogs", False)
         self.replies = self.config("replies", True)
 
@@ -42,6 +44,9 @@ class MastodonExtractor(BaseExtractor):
 
             attachments = status["media_attachments"]
             del status["media_attachments"]
+
+            if status["reblog"]:
+                attachments.extend(status["reblog"]["media_attachments"])
 
             status["instance"] = self.instance
             acct = status["account"]["acct"]
@@ -104,36 +109,17 @@ class MastodonUserExtractor(MastodonExtractor):
     """Extractor for all images of an account/user"""
     subcategory = "user"
     pattern = BASE_PATTERN + r"/(?:@|users/)([^/?#]+)(?:/media)?/?$"
-    test = (
-        ("https://mastodon.social/@jk", {
-            "pattern": r"https://files.mastodon.social/media_attachments"
-                       r"/files/(\d+/){3,}original/\w+",
-            "range": "1-60",
-            "count": 60,
-        }),
-        ("https://pawoo.net/@yoru_nine/", {
-            "range": "1-60",
-            "count": 60,
-        }),
-        ("https://baraag.net/@pumpkinnsfw"),
-        ("https://mastodon.social/@yoru_nine@pawoo.net", {
-            "pattern": r"https://mastodon\.social/media_proxy/\d+/original",
-            "range": "1-10",
-            "count": 10,
-        }),
-        ("https://mastodon.social/@id:10843"),
-        ("https://mastodon.social/users/id:10843"),
-        ("https://mastodon.social/users/jk"),
-        ("https://mastodon.social/users/yoru_nine@pawoo.net"),
-        ("https://mastodon.social/web/@jk"),
-    )
+    example = "https://mastodon.social/@USER"
 
     def statuses(self):
         api = MastodonAPI(self)
 
         return api.account_statuses(
             api.account_id_by_username(self.item),
-            only_media=not self.config("text-posts", False),
+            only_media=(
+                not self.reblogs and
+                not self.config("text-posts", False)
+            ),
             exclude_replies=not self.replies,
         )
 
@@ -142,11 +128,7 @@ class MastodonBookmarkExtractor(MastodonExtractor):
     """Extractor for mastodon bookmarks"""
     subcategory = "bookmark"
     pattern = BASE_PATTERN + r"/bookmarks"
-    test = (
-        ("https://mastodon.social/bookmarks"),
-        ("https://pawoo.net/bookmarks"),
-        ("https://baraag.net/bookmarks"),
-    )
+    example = "https://mastodon.social/bookmarks"
 
     def statuses(self):
         return MastodonAPI(self).account_bookmarks()
@@ -155,16 +137,8 @@ class MastodonBookmarkExtractor(MastodonExtractor):
 class MastodonFollowingExtractor(MastodonExtractor):
     """Extractor for followed mastodon users"""
     subcategory = "following"
-    pattern = BASE_PATTERN + r"/users/([^/?#]+)/following"
-    test = (
-        ("https://mastodon.social/users/0x4f/following", {
-            "extractor": False,
-            "count": ">= 20",
-        }),
-        ("https://mastodon.social/users/id:10843/following"),
-        ("https://pawoo.net/users/yoru_nine/following"),
-        ("https://baraag.net/users/pumpkinnsfw/following"),
-    )
+    pattern = BASE_PATTERN + r"/(?:@|users/)([^/?#]+)/following"
+    example = "https://mastodon.social/@USER/following"
 
     def items(self):
         api = MastodonAPI(self)
@@ -178,22 +152,8 @@ class MastodonFollowingExtractor(MastodonExtractor):
 class MastodonStatusExtractor(MastodonExtractor):
     """Extractor for images from a status"""
     subcategory = "status"
-    pattern = BASE_PATTERN + r"/@[^/?#]+/(\d+)"
-    test = (
-        ("https://mastodon.social/@jk/103794036899778366", {
-            "count": 4,
-            "keyword": {
-                "count": 4,
-                "num": int,
-            },
-        }),
-        ("https://pawoo.net/@yoru_nine/105038878897832922", {
-            "content": "b52e807f8ab548d6f896b09218ece01eba83987a",
-        }),
-        ("https://baraag.net/@pumpkinnsfw/104364170556898443", {
-            "content": "67748c1b828c58ad60d0fe5729b59fb29c872244",
-        }),
-    )
+    pattern = BASE_PATTERN + r"/@[^/?#]+/(?!following)([^/?#]+)"
+    example = "https://mastodon.social/@USER/12345"
 
     def statuses(self):
         return (MastodonAPI(self).status(self.item),)
@@ -227,6 +187,12 @@ class MastodonAPI():
         if username.startswith("id:"):
             return username[3:]
 
+        try:
+            return self.account_lookup(username)["id"]
+        except Exception:
+            # fall back to account search
+            pass
+
         if "@" in username:
             handle = "@" + username
         else:
@@ -245,6 +211,11 @@ class MastodonAPI():
     def account_following(self, account_id):
         endpoint = "/v1/accounts/{}/following".format(account_id)
         return self._pagination(endpoint, None)
+
+    def account_lookup(self, username):
+        endpoint = "/v1/accounts/lookup"
+        params = {"acct": username}
+        return self._call(endpoint, params).json()
 
     def account_search(self, query, limit=40):
         """Search for accounts"""
@@ -306,6 +277,6 @@ class MastodonAPI():
             params = None
 
 
-@cache(maxage=100*365*24*3600, keyarg=0)
+@cache(maxage=36500*86400, keyarg=0)
 def _access_token_cache(instance):
     return None

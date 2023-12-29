@@ -6,8 +6,6 @@
 ## General Options:
     -h, --help                  Print this help message and exit
     --version                   Print program version and exit
-    -i, --input-file FILE       Download URLs found in FILE ('-' for stdin).
-                                More than one --input-file can be specified
     -f, --filename FORMAT       Filename format string for downloaded files
                                 ('/O' for "original" filenames)
     -d, --destination PATH      Target location for file downloads
@@ -18,12 +16,16 @@
     --user-agent UA             User-Agent request header
     --clear-cache MODULE        Delete cached login sessions, cookies, etc. for
                                 MODULE (ALL to delete everything)
-    --cookies FILE              File to load additional cookies from
-    --cookies-from-browser BROWSER[+KEYRING][:PROFILE][::CONTAINER]
-                                Name of the browser to load cookies from, with
-                                optional keyring name prefixed with '+', profile
-                                prefixed with ':', and container prefixed with
-                                '::' ('none' for no container)
+
+## Input Options:
+    -i, --input-file FILE       Download URLs found in FILE ('-' for stdin).
+                                More than one --input-file can be specified
+    -I, --input-file-comment FILE
+                                Download URLs found in FILE. Comment them out
+                                after they were downloaded successfully.
+    -x, --input-file-delete FILE
+                                Download URLs found in FILE. Delete them after
+                                they were downloaded successfully.
 
 ## Output Options:
     -q, --quiet                 Activate quiet mode
@@ -37,6 +39,7 @@
     -E, --extractor-info        Print extractor defaults and settings
     -K, --list-keywords         Print a list of available keywords and example
                                 values for the given URLs
+    -e, --error-file FILE       Add input URLs which returned an error to FILE
     --list-modules              Print a list of available extractor modules
     --list-extractors           Print a list of extractor classes with
                                 description, (sub)category and example URL
@@ -49,7 +52,8 @@
 ## Downloader Options:
     -r, --limit-rate RATE       Maximum download rate (e.g. 500k or 2.5M)
     -R, --retries N             Maximum number of retries for failed HTTP
-                                requests or -1 for infinite retries (default: 4)
+                                requests or -1 for infinite retries (default:
+                                4)
     --http-timeout SECONDS      Timeout for HTTP connections (default: 30.0)
     --sleep SECONDS             Number of seconds to wait before each download.
                                 This can be either a constant value or a range
@@ -84,6 +88,16 @@
     -p, --password PASS         Password belonging to the given username
     --netrc                     Enable .netrc authentication data
 
+## Cookie Options:
+    -C, --cookies FILE          File to load additional cookies from
+    --cookies-export FILE       Export session cookies to FILE
+    --cookies-from-browser BROWSER[/DOMAIN][+KEYRING][:PROFILE][::CONTAINER]
+                                Name of the browser to load cookies from, with
+                                optional domain prefixed with '/', keyring name
+                                prefixed with '+', profile prefixed with ':',
+                                and container prefixed with '::' ('none' for no
+                                container)
+
 ## Selection Options:
     --download-archive FILE     Record all downloaded or skipped files in FILE
                                 and skip downloading any file already in it
@@ -106,23 +120,24 @@
                                 and other delegated URLs
 
 ## Post-processing Options:
-    --zip                       Store downloaded files in a ZIP archive
-    --ugoira-conv               Convert Pixiv Ugoira to WebM (requires FFmpeg)
-    --ugoira-conv-lossless      Convert Pixiv Ugoira to WebM in VP9 lossless
-                                mode
-    --ugoira-conv-copy          Convert Pixiv Ugoira to MKV without re-encoding
-                                any frames
+    -P, --postprocessor NAME    Activate the specified post processor
+    -O, --postprocessor-option KEY=VALUE
+                                Additional post processor options
     --write-metadata            Write metadata to separate JSON files
     --write-info-json           Write gallery metadata to a info.json file
     --write-tags                Write image tags to separate text files
-    --mtime-from-date           Set file modification times according to 'date'
-                                metadata
-    --exec CMD                  Execute CMD for each downloaded file. Example:
-                                --exec "convert {} {}.png && rm {}"
-    --exec-after CMD            Execute CMD after all files were downloaded
-                                successfully. Example: --exec-after "cd {} &&
+    --zip                       Store downloaded files in a ZIP archive
+    --cbz                       Store downloaded files in a CBZ archive
+    --mtime NAME                Set file modification times according to
+                                metadata selected by NAME. Examples: 'date' or
+                                'status[date]'
+    --ugoira FORMAT             Convert Pixiv Ugoira to FORMAT using FFmpeg.
+                                Supported formats are 'webm', 'mp4', 'gif',
+                                'vp8', 'vp9', 'vp9-lossless', 'copy'.
+    --exec CMD                  Execute CMD for each downloaded file. Supported
+                                replacement fields are {} or {_path},
+                                {_directory}, {_filename}. Example: --exec
+                                "convert {} {}.png && rm {}"
+    --exec-after CMD            Execute CMD after all files were downloaded.
+                                Example: --exec-after "cd {_directory} &&
                                 convert * ../doc.pdf"
-    -P, --postprocessor NAME    Activate the specified post processor
-    -O, --postprocessor-option OPT
-                                Additional '<key>=<value>' post processor
-                                options

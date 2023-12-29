@@ -23,7 +23,6 @@ class PornpicsExtractor(Extractor):
     def __init__(self, match):
         super().__init__(match)
         self.item = match.group(1)
-        self.session.headers["Referer"] = self.root
 
     def items(self):
         for gallery in self.galleries():
@@ -62,33 +61,7 @@ class PornpicsExtractor(Extractor):
 class PornpicsGalleryExtractor(PornpicsExtractor, GalleryExtractor):
     """Extractor for pornpics galleries"""
     pattern = BASE_PATTERN + r"(/galleries/(?:[^/?#]+-)?(\d+))"
-    test = (
-        (("https://www.pornpics.com/galleries/british-beauty-danielle-flashes-"
-          "hot-breasts-ass-and-snatch-in-the-forest-62610699/"), {
-            "pattern": r"https://cdni\.pornpics\.com/1280/7/160/62610699"
-                       r"/62610699_\d+_[0-9a-f]{4}\.jpg",
-            "keyword": {
-                "categories": ["MILF", "Amateur", "Sexy", "Outdoor"],
-                "channel": "FTV MILFs",
-                "count": 17,
-                "gallery_id": 62610699,
-                "models": ["Danielle"],
-                "num": int,
-                "slug": "british-beauty-danielle-flashes-"
-                        "hot-breasts-ass-and-snatch-in-the-forest",
-                "tags": ["Amateur MILF", "Sexy MILF"],
-                "title": "British beauty Danielle flashes "
-                         "hot breasts, ass and snatch in the forest",
-                "views": int,
-            },
-        }),
-        ("https://pornpics.com/es/galleries/62610699", {
-            "keyword": {
-                "slug": "british-beauty-danielle-flashes-"
-                        "hot-breasts-ass-and-snatch-in-the-forest",
-            },
-        }),
-    )
+    example = "https://www.pornpics.com/galleries/TITLE-12345/"
 
     def __init__(self, match):
         PornpicsExtractor.__init__(self, match)
@@ -124,14 +97,7 @@ class PornpicsTagExtractor(PornpicsExtractor):
     """Extractor for galleries from pornpics tag searches"""
     subcategory = "tag"
     pattern = BASE_PATTERN + r"/tags/([^/?#]+)"
-    test = (
-        ("https://www.pornpics.com/tags/summer-dress/", {
-            "pattern": PornpicsGalleryExtractor.pattern,
-            "range": "1-50",
-            "count": 50,
-        }),
-        ("https://pornpics.com/fr/tags/summer-dress"),
-    )
+    example = "https://www.pornpics.com/tags/TAGS/"
 
     def galleries(self):
         url = "{}/tags/{}/".format(self.root, self.item)
@@ -142,26 +108,7 @@ class PornpicsSearchExtractor(PornpicsExtractor):
     """Extractor for galleries from pornpics search results"""
     subcategory = "search"
     pattern = BASE_PATTERN + r"/(?:\?q=|pornstars/|channels/)([^/&#]+)"
-    test = (
-        ("https://www.pornpics.com/?q=nature", {
-            "pattern": PornpicsGalleryExtractor.pattern,
-            "range": "1-50",
-            "count": 50,
-        }),
-        ("https://www.pornpics.com/channels/femjoy/", {
-            "pattern": PornpicsGalleryExtractor.pattern,
-            "range": "1-50",
-            "count": 50,
-        }),
-        ("https://www.pornpics.com/pornstars/emma-brown/", {
-            "pattern": PornpicsGalleryExtractor.pattern,
-            "range": "1-50",
-            "count": 50,
-        }),
-        ("https://pornpics.com/jp/?q=nature"),
-        ("https://pornpics.com/it/channels/femjoy"),
-        ("https://pornpics.com/pt/pornstars/emma-brown"),
-    )
+    example = "https://www.pornpics.com/?q=QUERY"
 
     def galleries(self):
         url = self.root + "/search/srch.php"

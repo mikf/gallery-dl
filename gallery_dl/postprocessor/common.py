@@ -41,9 +41,11 @@ class PostProcessor():
                     "_archive_" + self.name)
             except Exception as exc:
                 self.log.warning(
-                    "Failed to open %s archive at '%s' ('%s: %s')",
+                    "Failed to open %s archive at '%s' (%s: %s)",
                     self.name, archive, exc.__class__.__name__, exc)
             else:
                 self.log.debug("Using %s archive '%s'", self.name, archive)
+                return True
         else:
             self.archive = None
+        return False
