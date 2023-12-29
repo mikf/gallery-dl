@@ -26,17 +26,25 @@ class Rule34usExtractor(BooruExtractor):
     def _parse_post(self, post_id):
         url = "{}/index.php?r=posts/view&id={}".format(self.root, post_id)
         page = self.request(url).text
-        extr = text.extract_from(page)
+
+        data = text.extract_all(page, (
+            ("tags"    , 'name="keywords" content="', '"'),
+            (None      , '<div ', '>Tools</div>'),
+            ("file_url", '<a href="', '"><li class="character-tag"'),
+            ("uploader", 'Added by: ', '</li>'),
+            ("score"   , 'Score: ', '> - <'),
+            ("width"   , 'Size: ', 'w'),
+            ("height"  , ' x ', 'h'),
+        ))[0]
 
         post = {
             "id"      : post_id,
-            "tags"    : text.unescape(extr(
-                'name="keywords" content="', '"').rstrip(", ")),
-            "uploader": text.extract(extr('Added by: ', '</li>'), ">", "<")[0],
-            "score"   : text.extract(extr('Score: ', '> - <'), ">", "<")[0],
-            "width"   : extr('Size: ', 'w'),
-            "height"  : extr(' x ', 'h'),
-            "file_url": extr(' src="', '"'),
+            "tags"    : text.unescape(data["tags"].rstrip(", ")),
+            "file_url": text.unescape(data["file_url"]),
+            "uploader": text.extract(data["uploader"], ">", "<")[0],
+            "score"   : text.extract(data["score"], ">", "<")[0],
+            "width"   : data["width"],
+            "height"  : data["height"],
         }
         post["md5"] = post["file_url"].rpartition("/")[2].partition(".")[0]
 

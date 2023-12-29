@@ -28,9 +28,9 @@ __tests__ = (
     "#url"     : "https://rule34.us/index.php?r=posts/view&id=4576310",
     "#category": ("booru", "rule34us", "post"),
     "#class"   : rule34us.Rule34usPostExtractor,
-    "#pattern" : r"https://video\.rule34\.us/images/a2/94/a294ff8e1f8e0efa041e5dc9d1480011\.mp4",
+    "#pattern" : r"https://video\.rule34\.us/images/a2/94/a294ff8e1f8e0efa041e5dc9d1480011\.webm",
 
-    "extension"    : "mp4",
+    "extension"    : "webm",
     "file_url"     : str,
     "filename"     : "a294ff8e1f8e0efa041e5dc9d1480011",
     "height"       : "3982",
@@ -42,6 +42,14 @@ __tests__ = (
     "tags_metadata": "tagme",
     "uploader"     : "Anonymous",
     "width"        : "3184",
+},
+
+{
+    "#url"     : "https://rule34.us/index.php?r=posts/view&id=8113105",
+    "#comment" : "Video with non-existent MP4",
+    "#category": ("booru", "rule34us", "post"),
+    "#class"   : rule34us.Rule34usPostExtractor,
+    "#pattern" : r"https://video\.rule34\.us/images/c3/97/c39740dc21f3de5a8a0ea955955b2090\.webm",
 },
 
 )
