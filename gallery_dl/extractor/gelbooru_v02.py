@@ -168,7 +168,7 @@ INSTANCES = {
     },
     "rule34": {
         "root": "https://rule34.xxx",
-        "pattern": r"rule34\.xxx",
+        "pattern": r"(?:www\.)?rule34\.xxx",
         "api_root": "https://api.rule34.xxx",
     },
     "safebooru": {
