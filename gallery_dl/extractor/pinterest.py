@@ -47,6 +47,7 @@ class PinterestExtractor(Extractor):
 
             carousel_data = pin.get("carousel_data")
             if carousel_data:
+                pin["count"] = len(carousel_data["carousel_slots"])
                 for num, slot in enumerate(carousel_data["carousel_slots"], 1):
                     slot["media_id"] = slot.pop("id")
                     pin.update(slot)
@@ -65,7 +66,7 @@ class PinterestExtractor(Extractor):
 
                 if videos or media.get("duration") is None:
                     pin.update(media)
-                    pin["num"] = 0
+                    pin["num"] = pin["count"] = 1
                     pin["media_id"] = ""
 
                     url = media["url"]
