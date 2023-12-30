@@ -122,6 +122,7 @@ modules = [
     "pixnet",
     "plurk",
     "poipiku",
+    "poringa",
     "pornhub",
     "pornpics",
     "postmill",
