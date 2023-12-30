@@ -35,6 +35,13 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.rule34.xxx/index.php?page=post&s=view&id=863",
+    "#comment" : "www subdomain",
+    "#category": ("gelbooru_v02", "rule34", "post"),
+    "#class"   : gelbooru_v02.GelbooruV02PostExtractor,
+},
+
+{
     "#url"     : "https://rule34.xxx/index.php?page=post&s=view&id=863",
     "#category": ("gelbooru_v02", "rule34", "post"),
     "#class"   : gelbooru_v02.GelbooruV02PostExtractor,
