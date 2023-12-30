@@ -83,6 +83,7 @@ __tests__ = (
 
     "artist_id"  : 58000,
     "artist_name": "のえるわ",
+    "count"      : 1,
     "date"       : "dt:2018-01-29 14:25:39",
     "description": "前回とシチュがまるかぶり　\r\n竿野郎は塗るのだるかった",
     "extension"  : "png",
@@ -113,9 +114,11 @@ __tests__ = (
 
     "artist_id"  : 58000,
     "artist_name": "のえるわ",
+    "count"      : 4,
     "date"       : "dt:2018-02-04 14:47:24",
     "description": "ノエル「そんなことしなくても、言ってくれたら咥えるのに・・・♡」",
     "image_id"   : 8716,
+    "num"        : range(0, 3),
     "tags"       : [
         "男の娘",
         "フェラ",

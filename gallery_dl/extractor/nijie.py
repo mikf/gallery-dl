@@ -55,9 +55,12 @@ class NijieExtractor(AsynchronousMixin, BaseExtractor):
             else:
                 data["user_id"] = data["artist_id"]
                 data["user_name"] = data["artist_name"]
-            yield Message.Directory, data
 
-            for num, url in enumerate(self._extract_images(image_id, page)):
+            urls = list(self._extract_images(image_id, page))
+            data["count"] = len(urls)
+
+            yield Message.Directory, data
+            for num, url in enumerate(urls):
                 image = text.nameext_from_url(url, {
                     "num": num,
                     "url": "https:" + url,
