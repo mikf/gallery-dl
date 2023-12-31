@@ -1066,6 +1066,25 @@ Description
     after a colon ``:``, for example ``{date:%Y%m%d}``.
 
 
+extractor.*.write-pages
+-----------------------
+Type
+    * ``bool``
+    * ``string``
+Default
+    ``false``
+Description
+    During data extraction,
+    write received HTTP request data
+    to enumerated files in the current working directory.
+
+    Special values:
+
+    * ``"all"``: Include HTTP request and response headers. Hide ``Authorization``, ``Cookie``, and ``Set-Cookie`` values.
+    * ``"ALL"``: Include all HTTP request and response headers.
+
+
+
 Extractor-specific Options
 ==========================
 
