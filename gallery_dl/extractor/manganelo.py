@@ -10,7 +10,11 @@ from .common import ChapterExtractor, MangaExtractor
 from .. import text
 import re
 
-BASE_PATTERN = r"(?:https?://)?((?:chap|read|www\.|m\.)?mangan(?:at|el)o\.com)"
+BASE_PATTERN = (
+    r"(?:https?://)?"
+    r"((?:chap|read|www\.|m\.)?mangan(?:at|el)o"
+    r"\.(?:to|com))"
+)
 
 
 class ManganeloBase():
@@ -67,10 +71,11 @@ class ManganeloChapterExtractor(ManganeloBase, ChapterExtractor):
 
     def images(self, page):
         page = text.extr(
-            page, 'class="container-chapter-reader', '\n<div')
+            page, 'class="container-chapter-reader', 'class="container')
         return [
             (url, None)
             for url in text.extract_iter(page, '<img src="', '"')
+            if not url.endswith("/gohome.png")
         ] or [
             (url, None)
             for url in text.extract_iter(
