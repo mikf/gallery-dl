@@ -627,6 +627,20 @@ Description
     `ssl.SSLContext.set_ciphers() <https://docs.python.org/3/library/ssl.html#ssl.SSLContext.set_ciphers>`__
 
 
+extractor.*.tls12
+-----------------
+Type
+    ``bool``
+Default
+    * ``true``
+    * ``false`` for ``patreon``, ``pixiv:series``
+Description
+    Allow selecting TLS 1.2 cipher suites.
+
+    Can be disabled to alter TLS fingerprints
+    and potentially bypass Cloudflare blocks.
+
+
 extractor.*.keywords
 --------------------
 Type
