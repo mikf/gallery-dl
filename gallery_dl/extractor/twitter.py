@@ -552,9 +552,11 @@ class TwitterTimelineExtractor(TwitterExtractor):
                 return self.api.user_media
         if strategy == "tweets":
             return self.api.user_tweets
+        if strategy == "media":
+            return self.api.user_media
         if strategy == "with_replies":
             return self.api.user_tweets_and_replies
-        return self.api.user_media
+        raise exception.StopExtraction("Invalid strategy '%s'", strategy)
 
 
 class TwitterTweetsExtractor(TwitterExtractor):
