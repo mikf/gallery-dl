@@ -21,7 +21,7 @@ __tests__ = (
     "album_id"   : "i5PggF",
     "album_name" : "British Scrap Book",
     "extension"  : "jpg",
-    "id"         : "re:^\w{7}$",
+    "id"         : r"re:^\w{7}$",
     "title"      : str,
     "url"        : r"re:https://i\.ibb\.co/\w{7}/[\w-]+\.jpg",
     "user"       : "folkie",

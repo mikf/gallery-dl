@@ -21,7 +21,7 @@ __tests__ = (
     "#category": ("postmill", "raddle.me", "forum"),
     "#class"   : postmill.PostmillForumExtractor,
     "#count"   : 1,
-    "#pattern" : "^https://raddle\.me/f/traa/156646/click-here-to-go-to-f-traaaaaaannnnnnnnnns$",
+    "#pattern" : r"^https://raddle\.me/f/traa/156646/click-here-to-go-to-f-traaaaaaannnnnnnnnns$",
 },
 
 {
@@ -97,7 +97,7 @@ __tests__ = (
     "#comment" : "Link + text post (with text disabled)",
     "#category": ("postmill", "raddle.me", "post"),
     "#class"   : postmill.PostmillPostExtractor,
-    "#pattern" : "^https://fantasyanime\.com/anime/neo-tokyo-dub$",
+    "#pattern" : r"^https://fantasyanime\.com/anime/neo-tokyo-dub$",
     "#count"   : 1,
 },
 

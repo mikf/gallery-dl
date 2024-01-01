@@ -12,7 +12,7 @@ __tests__ = (
     "#url"     : "https://rule34.paheal.net/post/list/Ayane_Suzuki/1",
     "#category": ("shimmie2", "paheal", "tag"),
     "#class"   : paheal.PahealTagExtractor,
-    "#pattern" : "https://[^.]+\.paheal\.net/_images/\w+/\d+%20-%20|https://r34i\.paheal-cdn\.net/[0-9a-f]{2}/[0-9a-f]{2}/[0-9a-f]{32}$",
+    "#pattern" : r"https://[^.]+\.paheal\.net/_images/\w+/\d+%20-%20|https://r34i\.paheal-cdn\.net/[0-9a-f]{2}/[0-9a-f]{2}/[0-9a-f]{32}$",
     "#count"   : range(70, 200),
 
     "date"     : "type:datetime",
