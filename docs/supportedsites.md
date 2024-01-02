@@ -148,7 +148,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>DeviantArt</td>
     <td>https://www.deviantart.com/</td>
-    <td>Collections, Deviations, Favorites, Folders, Followed Users, Galleries, Gallery Searches, Journals, Popular Images, Scraps, Search Results, Sta.sh, Status Updates, Tag Searches, User Profiles, Watches</td>
+    <td>Avatars, Backgrounds, Collections, Deviations, Favorites, Folders, Followed Users, Galleries, Gallery Searches, Journals, Popular Images, Scraps, Search Results, Sta.sh, Status Updates, Tag Searches, User Profiles, Watches</td>
     <td><a href="https://github.com/mikf/gallery-dl#oauth">OAuth</a></td>
 </tr>
 <tr>

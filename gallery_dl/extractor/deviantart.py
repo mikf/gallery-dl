@@ -38,7 +38,7 @@ class DeviantartExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.user = match.group(1) or match.group(2)
+        self.user = (match.group(1) or match.group(2)).lower()
         self.offset = 0
 
     def _init(self):
@@ -104,7 +104,6 @@ class DeviantartExtractor(Extractor):
                     raise exception.StopExtraction()
                 else:
                     self.subcategory = "group-" + self.subcategory
-                    self.user = self.user.lower()
                     self.group = True
 
         for deviation in self.deviations():
@@ -513,11 +512,13 @@ class DeviantartUserExtractor(DeviantartExtractor):
     def items(self):
         base = "{}/{}/".format(self.root, self.user)
         return self._dispatch_extractors((
-            (DeviantartGalleryExtractor , base + "gallery"),
-            (DeviantartScrapsExtractor  , base + "gallery/scraps"),
-            (DeviantartJournalExtractor , base + "posts"),
-            (DeviantartStatusExtractor  , base + "posts/statuses"),
-            (DeviantartFavoriteExtractor, base + "favourites"),
+            (DeviantartAvatarExtractor    , base + "avatar"),
+            (DeviantartBackgroundExtractor, base + "banner"),
+            (DeviantartGalleryExtractor   , base + "gallery"),
+            (DeviantartScrapsExtractor    , base + "gallery/scraps"),
+            (DeviantartJournalExtractor   , base + "posts"),
+            (DeviantartStatusExtractor    , base + "posts/statuses"),
+            (DeviantartFavoriteExtractor  , base + "favourites"),
         ), ("gallery",))
 
 
@@ -536,6 +537,47 @@ class DeviantartGalleryExtractor(DeviantartExtractor):
             return self.api.gallery_all(self.user, self.offset)
         folders = self.api.gallery_folders(self.user)
         return self._folder_urls(folders, "gallery", DeviantartFolderExtractor)
+
+
+class DeviantartAvatarExtractor(DeviantartExtractor):
+    """Extractor for an artist's avatar"""
+    subcategory = "avatar"
+    archive_fmt = "a_{_username}_{index}"
+    pattern = BASE_PATTERN + r"/avatar"
+    example = "https://www.deviantart.com/USER/avatar/"
+
+    def deviations(self):
+        profile = self.api.user_profile(self.user.lower())
+        if profile:
+            url = profile["user"]["usericon"]
+            return ({
+                "author"         : profile["user"],
+                "category"       : "avatar",
+                "index"          : text.parse_int(url.rpartition("?")[2]),
+                "is_deleted"     : False,
+                "is_downloadable": False,
+                "published_time" : 0,
+                "title"          : "avatar",
+                "content"        : {
+                    "src": url.replace("/avatars/", "/avatars-big/", 1),
+                },
+            },)
+        return ()
+
+
+class DeviantartBackgroundExtractor(DeviantartExtractor):
+    """Extractor for an artist's banner"""
+    subcategory = "background"
+    archive_fmt = "b_{index}"
+    pattern = BASE_PATTERN + r"/ba(?:nner|ckground)"
+    example = "https://www.deviantart.com/USER/banner/"
+
+    def deviations(self):
+        try:
+            return (self.api.user_profile(self.user.lower())
+                    ["cover_deviation"]["cover_deviation"],)
+        except Exception:
+            return ()
 
 
 class DeviantartFolderExtractor(DeviantartExtractor):
