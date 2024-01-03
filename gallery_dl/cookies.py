@@ -215,9 +215,11 @@ def _firefox_cookies_database(profile=None, container=None):
 
 def _firefox_browser_directory():
     if sys.platform in ("win32", "cygwin"):
-        return os.path.expandvars(r"%APPDATA%\Mozilla\Firefox\Profiles")
+        return os.path.expandvars(
+            r"%APPDATA%\Mozilla\Firefox\Profiles")
     if sys.platform == "darwin":
-        return os.path.expanduser("~/Library/Application Support/Firefox")
+        return os.path.expanduser(
+            "~/Library/Application Support/Firefox/Profiles")
     return os.path.expanduser("~/.mozilla/firefox")
 
 
