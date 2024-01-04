@@ -178,6 +178,7 @@ modules = [
     "xhamster",
     "xvideos",
     "zerochan",
+    "zzup",
     "booru",
     "moebooru",
     "foolfuuka",
