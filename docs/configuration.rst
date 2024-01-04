@@ -1569,7 +1569,7 @@ Default
     ``false``
 Example
     * ``notes,pools``
-    * ``["notes", "pools"``
+    * ``["notes", "pools"]``
 Description
     Extract additional metadata (notes, pool metadata) if available.
 
@@ -1709,6 +1709,21 @@ Description
     * ``"ytdl"``: Like ``true``, but let `youtube-dl`_ handle video
       extraction and download for YouTube, Vimeo and SoundCloud embeds.
     * ``false``: Ignore embeds.
+
+
+extractor.fanbox.metadata
+-------------------------
+Type
+    * ``bool``
+    * ``string``
+    * ``list`` of ``strings``
+Default
+    ``false``
+Example
+    * ``user,plan``
+    * ``["user", "plan"]``
+Description
+    Extract ``plan`` and extended ``user`` metadata.
 
 
 extractor.flickr.access-token & .access-token-secret

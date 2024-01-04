@@ -87,6 +87,43 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://official-en.fanbox.cc/posts/7022572",
+    "#comment" : "'plan' and 'user' metadata (#4921)",
+    "#category": ("", "fanbox", "post"),
+    "#class"   : fanbox.FanboxPostExtractor,
+    "#options" : {"metadata": True},
+
+    "plan": {
+        "coverImageUrl"  : "",
+        "creatorId"      : "official-en",
+        "description"    : "",
+        "fee"            : 0,
+        "hasAdultContent": None,
+        "id"             : "",
+        "paymentMethod"  : None,
+        "title"          : "",
+    },
+    "user": {
+        "coverImageUrl"     : "https://pixiv.pximg.net/c/1620x580_90_a2_g5/fanbox/public/images/creator/74349833/cover/n9mX8q4tUXHXXj7sK1RPWyUu.jpeg",
+        "creatorId"         : "official-en",
+        "description"       : "This is the official English pixivFANBOX account! \n(official Japanese account: https://official.fanbox.cc/ )\n\npixivFANBOX is a subscription service for building a reliable fan community where creators can nurture creative lifestyles together with their fans.\nFollowers can be notified of the updates from their favorite creators they are following. Supporters can enjoy closer communication with creators through exclusive content and their latest information.\n",
+        "hasAdultContent"   : False,
+        "hasBoothShop"      : False,
+        "iconUrl"           : "https://pixiv.pximg.net/c/160x160_90_a2_g5/fanbox/public/images/user/74349833/icon/oJH0OoGoSixLrJXlnneNvC95.jpeg",
+        "isAcceptingRequest": False,
+        "isFollowed"        : False,
+        "isStopped"         : False,
+        "isSupported"       : False,
+        "name"              : "pixivFANBOX English",
+        "profileItems"      : [],
+        "profileLinks"      : [
+            "https://twitter.com/pixivfanbox",
+        ],
+        "userId"            : "74349833",
+    },
+},
+
+{
     "#url"     : "https://mochirong.fanbox.cc/posts/3746116",
     "#comment" : "imageMap file order (#2718)",
     "#category": ("", "fanbox", "post"),

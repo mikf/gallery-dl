@@ -8,6 +8,7 @@
 
 from .common import Extractor, Message
 from .. import text
+from ..cache import memcache
 import re
 
 BASE_PATTERN = (
@@ -27,7 +28,19 @@ class FanboxExtractor(Extractor):
     _warning = True
 
     def _init(self):
+        self.headers = {"Origin": self.root}
         self.embeds = self.config("embeds", True)
+
+        includes = self.config("metadata")
+        if includes:
+            if isinstance(includes, str):
+                includes = includes.split(",")
+            elif not isinstance(includes, (list, tuple)):
+                includes = ("user", "plan")
+            self._meta_user = ("user" in includes)
+            self._meta_plan = ("plan" in includes)
+        else:
+            self._meta_user = self._meta_plan = False
 
         if self._warning:
             if not self.cookies_check(("FANBOXSESSID",)):
@@ -43,11 +56,9 @@ class FanboxExtractor(Extractor):
         """Return all relevant post objects"""
 
     def _pagination(self, url):
-        headers = {"Origin": self.root}
-
         while url:
             url = text.ensure_http_scheme(url)
-            body = self.request(url, headers=headers).json()["body"]
+            body = self.request(url, headers=self.headers).json()["body"]
             for item in body["items"]:
                 try:
                     yield self._get_post_data(item["id"])
@@ -58,9 +69,8 @@ class FanboxExtractor(Extractor):
 
     def _get_post_data(self, post_id):
         """Fetch and process post data"""
-        headers = {"Origin": self.root}
         url = "https://api.fanbox.cc/post.info?postId="+post_id
-        post = self.request(url, headers=headers).json()["body"]
+        post = self.request(url, headers=self.headers).json()["body"]
 
         content_body = post.pop("body", None)
         if content_body:
@@ -98,7 +108,46 @@ class FanboxExtractor(Extractor):
         post["text"] = content_body.get("text") if content_body else None
         post["isCoverImage"] = False
 
+        if self._meta_user:
+            post["user"] = self._get_user_data(post["creatorId"])
+        if self._meta_plan:
+            plans = self._get_plan_data(post["creatorId"])
+            post["plan"] = plans[post["feeRequired"]]
+
         return content_body, post
+
+    @memcache(keyarg=1)
+    def _get_user_data(self, creator_id):
+        url = "https://api.fanbox.cc/creator.get"
+        params = {"creatorId": creator_id}
+        data = self.request(url, params=params, headers=self.headers).json()
+
+        user = data["body"]
+        user.update(user.pop("user"))
+
+        return user
+
+    @memcache(keyarg=1)
+    def _get_plan_data(self, creator_id):
+        url = "https://api.fanbox.cc/plan.listCreator"
+        params = {"creatorId": creator_id}
+        data = self.request(url, params=params, headers=self.headers).json()
+
+        plans = {0: {
+            "id"             : "",
+            "title"          : "",
+            "fee"            : 0,
+            "description"    : "",
+            "coverImageUrl"  : "",
+            "creatorId"      : creator_id,
+            "hasAdultContent": None,
+            "paymentMethod"  : None,
+        }}
+        for plan in data["body"]:
+            del plan["user"]
+            plans[plan["fee"]] = plan
+
+        return plans
 
     def _get_urls_from_post(self, content_body, post):
         num = 0
