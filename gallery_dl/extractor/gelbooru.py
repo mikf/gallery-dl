@@ -165,15 +165,16 @@ class GelbooruFavoriteExtractor(GelbooruBase,
             "id"   : self.favorite_id,
             "limit": "1",
         }
-        count = self._api_request(params, "@attributes")[0]["count"]
 
+        count = self._api_request(params, "@attributes")[0]["count"]
         if count <= self.offset:
             return
-        pnum, last = divmod(count + 1, self.per_page)
 
-        if self.offset >= last:
+        pnum, last = divmod(count-1, self.per_page)
+        if self.offset > last:
+            # page number change
             self.offset -= last
-            diff, self.offset = divmod(self.offset, self.per_page)
+            diff, self.offset = divmod(self.offset-1, self.per_page)
             pnum -= diff + 1
         skip = self.offset
 
@@ -183,8 +184,8 @@ class GelbooruFavoriteExtractor(GelbooruBase,
 
         while True:
             favs = self._api_request(params, "favorite")
-
             favs.reverse()
+
             if skip:
                 favs = favs[skip:]
                 skip = 0
