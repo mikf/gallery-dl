@@ -107,7 +107,6 @@ modules = [
     "nitter",
     "nozomi",
     "nsfwalbum",
-    "nudecollect",
     "paheal",
     "patreon",
     "philomena",

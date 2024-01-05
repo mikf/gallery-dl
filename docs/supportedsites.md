@@ -590,12 +590,6 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
-    <td>Nudecollect</td>
-    <td>https://nudecollect.com/</td>
-    <td>Albums, individual Images</td>
-    <td></td>
-</tr>
-<tr>
     <td>Patreon</td>
     <td>https://www.patreon.com/</td>
     <td>Creators, Posts, User Profiles</td>
@@ -1002,6 +996,12 @@ Consider all listed sites to potentially be NSFW.
     <td>https://www.zerochan.net/</td>
     <td>individual Images, Tag Searches</td>
     <td>Supported</td>
+</tr>
+<tr>
+    <td>Zzup</td>
+    <td>https://zzup.com/</td>
+    <td>Galleries</td>
+    <td></td>
 </tr>
 <tr>
     <td>かべうち</td>
