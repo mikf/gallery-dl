@@ -81,7 +81,7 @@ __tests__ = (
         "full"    : "https://images.unsplash.com/photo-1601823984263-b87b59798b70?crop=entropy&cs=srgb&fm=jpg&ixid=M3wxMjA3fDB8MXxhbGx8fHx8fHx8fHwxNzAwODY2NDE4fA&ixlib=rb-4.0.3&q=85",
         "raw"     : "https://images.unsplash.com/photo-1601823984263-b87b59798b70?ixid=M3wxMjA3fDB8MXxhbGx8fHx8fHx8fHwxNzAwODY2NDE4fA&ixlib=rb-4.0.3",
         "regular" : "https://images.unsplash.com/photo-1601823984263-b87b59798b70?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMjA3fDB8MXxhbGx8fHx8fHx8fHwxNzAwODY2NDE4fA&ixlib=rb-4.0.3&q=80&w=1080",
-        "small"   :  "https://images.unsplash.com/photo-1601823984263-b87b59798b70?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMjA3fDB8MXxhbGx8fHx8fHx8fHwxNzAwODY2NDE4fA&ixlib=rb-4.0.3&q=80&w=400",
+        "small"   : "https://images.unsplash.com/photo-1601823984263-b87b59798b70?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMjA3fDB8MXxhbGx8fHx8fHx8fHwxNzAwODY2NDE4fA&ixlib=rb-4.0.3&q=80&w=400",
         "small_s3": "https://s3.us-west-2.amazonaws.com/images.unsplash.com/small/photo-1601823984263-b87b59798b70",
         "thumb"   : "https://images.unsplash.com/photo-1601823984263-b87b59798b70?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxMjA3fDB8MXxhbGx8fHx8fHx8fHwxNzAwODY2NDE4fA&ixlib=rb-4.0.3&q=80&w=200",
     },
