@@ -1037,7 +1037,7 @@ Consider all listed sites to potentially be NSFW.
 </tr>
 <tr>
     <td>JPG Fish</td>
-    <td>https://jpg2.su/</td>
+    <td>https://jpg4.su/</td>
     <td>Albums, individual Images, User Profiles</td>
     <td></td>
 </tr>
@@ -1406,6 +1406,12 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Bcbnsfw</td>
     <td>https://booru.bcbnsfw.space/</td>
+    <td>Posts, Tag Searches</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Snootbooru</td>
+    <td>https://snootbooru.com/</td>
     <td>Posts, Tag Searches</td>
     <td></td>
 </tr>
