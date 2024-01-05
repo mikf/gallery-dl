@@ -5,7 +5,6 @@
 # published by the Free Software Foundation.
 
 import os
-import sys
 import functools
 
 __directory__ = os.path.dirname(__file__)
