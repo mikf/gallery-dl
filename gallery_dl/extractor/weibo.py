@@ -225,9 +225,6 @@ class WeiboUserExtractor(WeiboExtractor):
     pattern = USER_PATTERN + r"(?:$|#)"
     example = "https://weibo.com/USER"
 
-    def initialize(self):
-        pass
-
     def items(self):
         base = "{}/u/{}?tabtype=".format(self.root, self._user_id())
         return self._dispatch_extractors((
