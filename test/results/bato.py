@@ -60,6 +60,6 @@ __tests__ = (
     "#url"     : "https://bato.to/title/134270-removed",
     "#category": ("", "bato", "manga"),
     "#class"   : bato.BatoMangaExtractor,
-    "#exception": exception.NotFoundError
+    "#exception": exception.StopExtraction,
 }
 )

@@ -99,7 +99,7 @@ Consider all listed sites to potentially be NSFW.
 </tr>
 <tr>
     <td>Bato</td>
-    <td>https://bato.to</td>
+    <td>https://bato.to/</td>
     <td>Chapters, Manga</td>
     <td></td>
 </tr>
