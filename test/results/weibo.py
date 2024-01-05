@@ -13,7 +13,35 @@ __tests__ = (
     "#url"     : "https://weibo.com/1758989602",
     "#category": ("", "weibo", "user"),
     "#class"   : weibo.WeiboUserExtractor,
-    "#pattern" : r"^https://weibo\.com/u/1758989602\?tabtype=feed$",
+    "#urls"    : "https://weibo.com/u/1758989602?tabtype=feed",
+},
+
+{
+    "#url"     : "https://weibo.com/1758989602",
+    "#category": ("", "weibo", "user"),
+    "#class"   : weibo.WeiboUserExtractor,
+    "#options" : {"include": "all"},
+    "#urls"    : (
+        "https://weibo.com/u/1758989602?tabtype=home",
+        "https://weibo.com/u/1758989602?tabtype=feed",
+        "https://weibo.com/u/1758989602?tabtype=video",
+        "https://weibo.com/u/1758989602?tabtype=newVideo",
+        "https://weibo.com/u/1758989602?tabtype=album",
+    ),
+},
+
+{
+    "#url"     : "https://weibo.com/zhouyuxi77",
+    "#category": ("", "weibo", "user"),
+    "#class"   : weibo.WeiboUserExtractor,
+    "#urls"    : "https://weibo.com/u/7488709788?tabtype=feed",
+},
+
+{
+    "#url"     : "https://www.weibo.com/n/周于希Sally",
+    "#category": ("", "weibo", "user"),
+    "#class"   : weibo.WeiboUserExtractor,
+    "#urls"    : "https://weibo.com/u/7488709788?tabtype=feed",
 },
 
 {
@@ -69,9 +97,11 @@ __tests__ = (
     "#class"   : weibo.WeiboFeedExtractor,
     "#range"   : "1",
 
-    "status": {"user": {
-    "id"       : 7488709788,
-}},
+    "status": {
+        "user": {
+            "id": 7488709788,
+        },
+    },
 },
 
 {
@@ -80,9 +110,12 @@ __tests__ = (
     "#class"   : weibo.WeiboFeedExtractor,
     "#range"   : "1",
 
-    "status": {"user": {
-    "id"       : 7488709788,
-}},
+
+    "status": {
+        "user": {
+            "id": 7488709788,
+        },
+    },
 },
 
 {
