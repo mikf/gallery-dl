@@ -9,7 +9,7 @@ from gallery_dl.extractor import chevereto
 
 __tests__ = (
 {
-    "#url"     : "https://jpg2.su/img/funnymeme.LecXGS",
+    "#url"     : "https://jpg4.su/img/funnymeme.LecXGS",
     "#category": ("chevereto", "jpgfish", "image"),
     "#class"   : chevereto.CheveretoImageExtractor,
     "#urls"        : "https://simp3.jpg.church/images/funnymeme.jpg",
