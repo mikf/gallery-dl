@@ -4,61 +4,63 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extractors for https://bato.to and aliases (v3x only)"""
+"""Extractors for https://bato.to/"""
 
-from .common import ChapterExtractor, MangaExtractor
+from .common import Extractor, ChapterExtractor, MangaExtractor
 from .. import text, exception
 import re
 
-BASE_PATTERN = r"(?:https?://)?" \
-    r"(?:bato\.to|dto\.to|batotoo\.com|wto\.to|mangatoto\.com)"
-MANGA_PATTERN = r"/title/\d+(?:-[0-9a-z]+)*/?"
-CHAPTER_PATTERN = r"/\d+(?:-vol_\d+)?-ch_\d+\.?\d*/?"
+BASE_PATTERN = (r"(?:https?://)?"
+                r"(?:(?:ba|d|w)to\.to|\.to|(?:batotoo|mangatoto)\.com)")
 
 
 class BatoBase():
-    """Base class for bato v3x extractors"""
+    """Base class for bato extractors"""
     category = "bato"
     root = "https://bato.to"
 
+    def request(self, url, **kwargs):
+        kwargs["encoding"] = "utf-8"
+        return Extractor.request(self, url, **kwargs)
+
 
 class BatoChapterExtractor(BatoBase, ChapterExtractor):
-    """Extractor for manga chapters from bato.to"""
-    pattern = BASE_PATTERN + "(" + MANGA_PATTERN + CHAPTER_PATTERN + ")"
-    # There are three possible patterns for a chapter
-    example = "https://bato.to/title/12345-manga-name-with-spaces/54212-ch_1.5"
-    example2 = \
-        "https://bato.to/title/12345-manga-name-with-spaces/54212-vol1-ch_1.5"
-    example3 = "https://bato.to/title/12345/54212"
-    # v2x, not supported
-    example4 = "https://bato.to/chapter/54212"
+    """Extractor for bato.to manga chapters"""
+    pattern = BASE_PATTERN + r"/(?:title/[^/?#]+|chapter)/(\d+)"
+    example = "https://bato.to/title/12345-MANGA/54321"
 
     def __init__(self, match):
-        self.path = match.group(1)
-        ChapterExtractor.__init__(self, match, self.root + self.path)
+        self.root = text.root_from_url(match.group(0))
+        self.chapter_id = match.group(1)
+        url = "{}/title/0/{}".format(self.root, self.chapter_id)
+        ChapterExtractor.__init__(self, match, url)
 
     def metadata(self, page):
-        info = text.extr(
-            page, "<title>", r" - Read Free Manga Online at Bato.To</title>"
-        )
-        info = info.encode('latin-1').decode('utf-8').replace("\n", "")
+        extr = text.extract_from(page)
+        manga, info, _ = extr("<title>", "<").rsplit(" - ", 3)
+        manga_id = extr("/title/", "/")
 
         match = re.match(
-            r"(.+) - "
-            r"(?:Volume *(\d+) )?"
-            r"Chapter *([\d\.]+)", info)
-        manga, volume, chapter = match.groups() if match else ("", "", info)
-        chapter, sep, minor = chapter.partition(".")
-        title_section = text.extr(page, '<a href="' + self.path + '"', "</a>")
-        title = text.extr(title_section, "<!-- -->", "</span>")
+            r"(?:Volume\s+(\d+) )?"
+            r"\w+\s+(\d+)(.*)", info)
+        if match:
+            volume, chapter, minor = match.groups()
+            title = text.remove_html(extr(
+                "selected>", "</option")).partition(" : ")[2]
+        else:
+            volume = chapter = 0
+            minor = ""
+            title = info
 
         return {
             "manga"        : text.unescape(manga),
+            "manga_id"     : text.parse_int(manga_id),
             "title"        : text.unescape(title),
-            "author"       : "",
             "volume"       : text.parse_int(volume),
             "chapter"      : text.parse_int(chapter),
-            "chapter_minor": sep + minor,
+            "chapter_minor": minor,
+            "chapter_id"   : text.parse_int(self.chapter_id),
+            "date"         : text.parse_timestamp(extr(' time="', '"')[:-3]),
         }
 
     def images(self, page):
@@ -71,61 +73,46 @@ class BatoChapterExtractor(BatoBase, ChapterExtractor):
 
 
 class BatoMangaExtractor(BatoBase, MangaExtractor):
-    """Extractor for manga from bato.to"""
+    """Extractor for bato.to manga"""
     reverse = False
     chapterclass = BatoChapterExtractor
-    pattern = BASE_PATTERN + "(" + MANGA_PATTERN + "$" + ")"
-    # There are two possible patterns for a manga
-    example = "https://bato.to/title/12345-manga-name-with-spaces/"
-    example2 = "https://bato.to/title/12345/"
-    # v2x, not supported
-    example3 = "https://bato.to/series/12345/manga-name-with-space"
+    pattern = BASE_PATTERN + r"/(?:title|series)/(\d+)[^/?#]*/?$"
+    example = "https://bato.to/title/12345-MANGA/"
+
+    def __init__(self, match):
+        self.root = text.root_from_url(match.group(0))
+        self.manga_id = match.group(1)
+        url = "{}/title/{}".format(self.root, self.manga_id)
+        MangaExtractor.__init__(self, match, url)
 
     def chapters(self, page):
-        data = {}
-        num_chapters = text.extr(page, ">Chapters<", "</div>")
-        num_chapters = text.extr(num_chapters, r"<!-- -->", r"<!-- -->")
-        num_chapters = text.parse_int(num_chapters)
-        if num_chapters == 0:
-            raise exception.NotFoundError("chapter")
+        extr = text.extract_from(page)
 
-        manga = text.extr(
-            page, "<title>", r" - Read Free Manga Online at Bato.To</title>"
-        )
-        manga = manga.encode('latin-1').decode('utf-8').replace("\n", "")
-        data["manga"] = manga
+        warning = extr(' class="alert alert-warning">', "</div><")
+        if warning:
+            raise exception.StopExtraction("'%s'", text.remove_html(warning))
 
+        data = {
+            "manga_id": text.parse_int(self.manga_id),
+            "manga"   : text.unescape(extr(
+                "<title>", "<").rpartition(" - ")[0]),
+        }
+
+        extr('<div data-hk="0-0-0-0"', "")
         results = []
-        for chapter_num in range(num_chapters):
-            chapter_info = text.extr(
-                page,
-                '<div data-hk="0-0-{}-0"'.format(chapter_num),
-                r"</time><!--/-->"
-            )
-            chapter_info += r"</time><!--/-->"  # so we can match the date
-            url, pos = text.extract(chapter_info, '<a href="', '"')
+        while True:
+            href = extr('<a href="/title/', '"')
+            if not href:
+                break
 
-            chapter = re.search(r"-ch_([\d\.]+)", url)
-            if chapter:
-                chapt_major, sep, chapt_minor = chapter.group(1).partition(".")
-            title = text.extr(
-                chapter_info,
-                '<span data-hk="0-0-{}-1"'.format(chapter_num),
-                "</span>"
-            )
-            title = text.extr(title, r"<!--#-->", r"<!--/-->")
-            if title is None or title == "" or title == "<!--/-->":
-                title, _ = text.extract(chapter_info, ">", "</a>", pos)
+            chapter = href.rpartition("-ch_")[2]
+            chapter, sep, minor = chapter.partition(".")
 
-            date = text.extr(chapter_info, "<time", "</time>")
-            date = text.extr(date, 'time="', '"')
+            data["chapter"] = text.parse_int(chapter)
+            data["chapter_minor"] = sep + minor
+            data["date"] = text.parse_datetime(
+                extr('time="', '"'), "%Y-%m-%dT%H:%M:%S.%fZ")
 
-            data["date"] = date
-            data["title"] = title
-            data["chapter"] = text.parse_int(chapt_major)
-            data["chapter_minor"] = sep + chapt_minor
-
-            if url.startswith("/"):
-                url = self.root + url
+            url = "{}/title/{}".format(self.root, href)
             results.append((url, data.copy()))
         return results
