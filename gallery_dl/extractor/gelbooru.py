@@ -32,10 +32,13 @@ class GelbooruBase():
         url = self.root + "/index.php?page=dapi&q=index&json=1"
         data = self.request(url, params=params).json()
 
-        if key not in data:
-            return ()
+        try:
+            posts = data[key]
+        except KeyError:
+            self.log.error("Incomplete API response (missing '%s')", key)
+            self.log.debug("%s", data)
+            return []
 
-        posts = data[key]
         if not isinstance(posts, list):
             return (posts,)
         return posts
