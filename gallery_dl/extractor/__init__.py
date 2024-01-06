@@ -24,7 +24,7 @@ modules = [
     "architizer",
     "artstation",
     "aryion",
-    "bato",
+    "batoto",
     "bbc",
     "behance",
     "blogger",

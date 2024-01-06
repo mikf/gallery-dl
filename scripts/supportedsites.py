@@ -32,7 +32,7 @@ CATEGORY_MAP = {
     "atfbooru"       : "ATFBooru",
     "b4k"            : "arch.b4k.co",
     "baraag"         : "baraag",
-    "bato"           : "Bato",
+    "batoto"         : "BATO.TO",
     "bbc"            : "BBC",
     "comicvine"      : "Comic Vine",
     "coomerparty"    : "Coomer",
