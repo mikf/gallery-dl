@@ -57,8 +57,22 @@ __tests__ = (
     "#url"     : "https://komikcast.site/komik/090-eko-to-issho/",
     "#category": ("", "komikcast", "manga"),
     "#class"   : komikcast.KomikcastMangaExtractor,
-    "#sha1_url"     : "19d3d50d532e84be6280a3d61ff0fd0ca04dd6b4",
-    "#sha1_metadata": "837a7e96867344ff59d840771c04c20dc46c0ab1",
+    "#pattern" : komikcast.KomikcastChapterExtractor.pattern,
+    "#count"   : 12,
+
+    "author" : "Asakura Maru",
+    "chapter": range(1, 12),
+    "chapter_minor": "",
+    "genres" : [
+        "Comedy",
+        "Drama",
+        "Romance",
+        "School Life",
+        "Sci-Fi",
+        "Shounen"
+    ],
+    "manga"  : "090 Eko to Issho",
+    "type"   : "Manga",
 },
 
 {
