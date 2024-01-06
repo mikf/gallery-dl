@@ -98,6 +98,12 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
+    <td>BATO.TO</td>
+    <td>https://bato.to/</td>
+    <td>Chapters, Manga</td>
+    <td></td>
+</tr>
+<tr>
     <td>BBC</td>
     <td>https://bbc.co.uk/</td>
     <td>Galleries, Programmes</td>
