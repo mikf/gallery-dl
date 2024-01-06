@@ -98,7 +98,7 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
-    <td>Bato</td>
+    <td>BATO.TO</td>
     <td>https://bato.to/</td>
     <td>Chapters, Manga</td>
     <td></td>

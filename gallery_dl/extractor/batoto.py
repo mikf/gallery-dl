@@ -14,9 +14,9 @@ BASE_PATTERN = (r"(?:https?://)?"
                 r"(?:(?:ba|d|w)to\.to|\.to|(?:batotoo|mangatoto)\.com)")
 
 
-class BatoBase():
-    """Base class for bato extractors"""
-    category = "bato"
+class BatotoBase():
+    """Base class for batoto extractors"""
+    category = "batoto"
     root = "https://bato.to"
 
     def request(self, url, **kwargs):
@@ -24,7 +24,7 @@ class BatoBase():
         return Extractor.request(self, url, **kwargs)
 
 
-class BatoChapterExtractor(BatoBase, ChapterExtractor):
+class BatotoChapterExtractor(BatotoBase, ChapterExtractor):
     """Extractor for bato.to manga chapters"""
     pattern = BASE_PATTERN + r"/(?:title/[^/?#]+|chapter)/(\d+)"
     example = "https://bato.to/title/12345-MANGA/54321"
@@ -72,10 +72,10 @@ class BatoChapterExtractor(BatoBase, ChapterExtractor):
         ]
 
 
-class BatoMangaExtractor(BatoBase, MangaExtractor):
+class BatotoMangaExtractor(BatotoBase, MangaExtractor):
     """Extractor for bato.to manga"""
     reverse = False
-    chapterclass = BatoChapterExtractor
+    chapterclass = BatotoChapterExtractor
     pattern = BASE_PATTERN + r"/(?:title|series)/(\d+)[^/?#]*/?$"
     example = "https://bato.to/title/12345-MANGA/"
 
