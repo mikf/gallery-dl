@@ -10,6 +10,7 @@
 
 from .common import Extractor, Message
 from .. import text, exception
+import re
 
 BASE_PATTERN = r"(?:https://)?(?:www\.|m\.)?vk\.com"
 
@@ -24,6 +25,7 @@ class VkExtractor(Extractor):
     request_interval = (0.5, 1.5)
 
     def items(self):
+        sub = re.compile(r"/imp[fg]/").sub
         sizes = "wzyxrqpo"
 
         data = self.metadata()
@@ -40,10 +42,14 @@ class VkExtractor(Extractor):
                 continue
 
             try:
-                photo["url"] = photo[size + "src"]
+                url = photo[size + "src"]
             except KeyError:
                 self.log.warning("no photo URL found (%s)", photo.get("id"))
                 continue
+
+            photo["url"] = sub("/", url.partition("?")[0])
+            #  photo["url"] = url
+            photo["_fallback"] = (url,)
 
             try:
                 _, photo["width"], photo["height"] = photo[size]
