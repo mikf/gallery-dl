@@ -76,8 +76,10 @@ class KomikcastMangaExtractor(KomikcastBase, MangaExtractor):
 
         for item in text.extract_iter(
                 page, '<a class="chapter-link-item" href="', '</a'):
-            url, _, chapter_string = item.rpartition('">Chapter ')
-            self.parse_chapter_string(chapter_string, data)
+            url, _, chapter = item.rpartition('">Chapter')
+            chapter, sep, minor = chapter.strip().partition(".")
+            data["chapter"] = text.parse_int(chapter)
+            data["chapter_minor"] = sep + minor
             results.append((url, data.copy()))
         return results
 
