@@ -113,4 +113,31 @@ __tests__ = (
     "#class"   : mangadex.MangadexFeedExtractor,
 },
 
+{
+    "#url"     : "https://mangadex.org/list/3a0982c5-65aa-4de2-8a4a-2175be7383ab/test",
+    "#category": ("", "mangadex", "list"),
+    "#class"   : mangadex.MangadexListExtractor,
+    "#urls"    : (
+        "https://mangadex.org/title/cba4e5d6-67a0-47a0-b37a-c06e9bf25d93",
+        "https://mangadex.org/title/cad76ec6-ca22-42f6-96f8-eca164da6545",
+    ),
+},
+
+{
+    "#url"     : "https://mangadex.org/list/3a0982c5-65aa-4de2-8a4a-2175be7383ab/test?tab=titles",
+    "#category": ("", "mangadex", "list"),
+    "#class"   : mangadex.MangadexListExtractor,
+},
+
+{
+    "#url"     : "https://mangadex.org/list/3a0982c5-65aa-4de2-8a4a-2175be7383ab/test?tab=feed",
+    "#category": ("", "mangadex", "list-feed"),
+    "#class"   : mangadex.MangadexListExtractor,
+    "#urls"    : (
+        "https://mangadex.org/chapter/c765d6d5-5712-4360-be0b-0c8e0914fc94",
+        "https://mangadex.org/chapter/fa8a695d-260f-4dcc-95a3-1f30e66d6571",
+        "https://mangadex.org/chapter/788766b9-41c6-422e-97ba-552f03ba9655",
+    ),
+},
+
 )

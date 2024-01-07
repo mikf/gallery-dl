@@ -502,7 +502,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>MangaDex</td>
     <td>https://mangadex.org/</td>
-    <td>Chapters, Followed Feed, Manga</td>
+    <td>Chapters, Followed Feed, Lists, Manga</td>
     <td>Supported</td>
 </tr>
 <tr>
