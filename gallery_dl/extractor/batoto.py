@@ -11,7 +11,7 @@ from .. import text, exception
 import re
 
 BASE_PATTERN = (r"(?:https?://)?"
-                r"(?:(?:ba|d|w)to\.to|\.to|(?:batotoo|mangatoto)\.com)")
+                r"(?:(?:ba|d|w)to\.to|(?:batotoo|mangatoto)\.com)")
 
 
 class BatotoBase():
@@ -76,12 +76,13 @@ class BatotoMangaExtractor(BatotoBase, MangaExtractor):
     """Extractor for bato.to manga"""
     reverse = False
     chapterclass = BatotoChapterExtractor
-    pattern = BASE_PATTERN + r"/(?:title|series)/(\d+)[^/?#]*/?$"
+    pattern = (BASE_PATTERN +
+               r"/(?:title/(\d+)[^/?#]*|series/(\d+)(?:/[^/?#]*)?)/?$")
     example = "https://bato.to/title/12345-MANGA/"
 
     def __init__(self, match):
         self.root = text.root_from_url(match.group(0))
-        self.manga_id = match.group(1)
+        self.manga_id = match.group(1) or match.group(2)
         url = "{}/title/{}".format(self.root, self.manga_id)
         MangaExtractor.__init__(self, match, url)
 
