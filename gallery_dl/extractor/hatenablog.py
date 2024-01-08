@@ -101,8 +101,8 @@ class HatenaBlogEntriesExtractor(HatenaBlogExtractor):
             if not section:
                 break
 
-            url = "hatenablog:" + text.unescape(text.extr(section,
-                '<a class="entry-title-link" href="', '"'))
+            url = "hatenablog:" + text.unescape(text.extr(
+                section, '<a class="entry-title-link" href="', '"'))
             data = {"_extractor": HatenaBlogEntryExtractor}
             yield Message.Queue, url, data
 
