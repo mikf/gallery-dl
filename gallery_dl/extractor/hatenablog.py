@@ -19,7 +19,7 @@ BASE_PATTERN = (
 QUERY_RE = r"(?:\?([^#]*))?(?:#.*)?$"
 
 
-class HatenaBlogExtractor(Extractor):
+class HatenablogExtractor(Extractor):
     """Base class for HatenaBlog extractors"""
     category = "hatenablog"
     directory_fmt = ("{category}", "{domain}")
@@ -65,12 +65,12 @@ class HatenaBlogExtractor(Extractor):
             yield Message.Url, url, text.nameext_from_url(url, data)
 
 
-class HatenaBlogEntriesExtractor(HatenaBlogExtractor):
+class HatenablogEntriesExtractor(HatenablogExtractor):
     """Base class for a list of entries"""
     allowed_parameters = ()
 
     def __init__(self, match):
-        HatenaBlogExtractor.__init__(self, match)
+        HatenablogExtractor.__init__(self, match)
         self.path = match.group(3)
         self.query = {key: value for key, value in text.parse_query(
             match.group(4)).items() if self._acceptable_query(key)}
@@ -103,7 +103,7 @@ class HatenaBlogEntriesExtractor(HatenaBlogExtractor):
 
             url = "hatenablog:" + text.unescape(text.extr(
                 section, '<a class="entry-title-link" href="', '"'))
-            data = {"_extractor": HatenaBlogEntryExtractor}
+            data = {"_extractor": HatenablogEntryExtractor}
             yield Message.Queue, url, data
 
     def _handle_full_articles(self, extr):
@@ -121,14 +121,14 @@ class HatenaBlogEntriesExtractor(HatenaBlogExtractor):
         return key == "page" or key in self.allowed_parameters
 
 
-class HatenaBlogEntryExtractor(HatenaBlogExtractor):
+class HatenablogEntryExtractor(HatenablogExtractor):
     """Extractor for a single entry URL"""
     subcategory = "entry"
     pattern = BASE_PATTERN + r"/entry/([^?#]+)" + QUERY_RE
     example = "https://BLOG.hatenablog.com/entry/PATH"
 
     def __init__(self, match):
-        HatenaBlogExtractor.__init__(self, match)
+        HatenablogExtractor.__init__(self, match)
         self.path = match.group(3)
 
     def items(self):
@@ -144,14 +144,14 @@ class HatenaBlogEntryExtractor(HatenaBlogExtractor):
             return self._handle_article(article)
 
 
-class HatenaBlogHomeExtractor(HatenaBlogEntriesExtractor):
+class HatenablogHomeExtractor(HatenablogEntriesExtractor):
     """Extractor for a blog's home page"""
     subcategory = "home"
     pattern = BASE_PATTERN + r"(/?)" + QUERY_RE
     example = "https://BLOG.hatenablog.com"
 
 
-class HatenaBlogArchiveExtractor(HatenaBlogEntriesExtractor):
+class HatenablogArchiveExtractor(HatenablogEntriesExtractor):
     """Extractor for a blog's archive page"""
     subcategory = "archive"
     pattern = BASE_PATTERN + r"(/archive(?:/\d+(?:/\d+(?:/\d+)?)?" + \
@@ -159,7 +159,7 @@ class HatenaBlogArchiveExtractor(HatenaBlogEntriesExtractor):
     example = "https://BLOG.hatenablog.com/archive/2024"
 
 
-class HatenaBlogSearchExtractor(HatenaBlogEntriesExtractor):
+class HatenablogSearchExtractor(HatenablogEntriesExtractor):
     """Extractor for a blog's search results"""
     subcategory = "search"
     pattern = BASE_PATTERN + r"(/search)" + QUERY_RE
