@@ -22,7 +22,7 @@ class FuskatorGalleryExtractor(GalleryExtractor):
 
     def __init__(self, match):
         self.gallery_hash = match.group(1)
-        url = "{}/thumbs/{}/".format(self.root, self.gallery_hash)
+        url = "{}/thumbs/{}/index.html".format(self.root, self.gallery_hash)
         GalleryExtractor.__init__(self, match, url)
 
     def metadata(self, page):
@@ -50,15 +50,16 @@ class FuskatorGalleryExtractor(GalleryExtractor):
             "gallery_id"  : text.parse_int(gallery_id),
             "gallery_hash": self.gallery_hash,
             "title"       : text.unescape(title[:-15]),
-            "views"       : data["hits"],
-            "score"       : data["rating"],
-            "tags"        : data["tags"].split(","),
-            "count"       : len(data["images"]),
+            "views"       : data.get("hits"),
+            "score"       : data.get("rating"),
+            "tags"        : (data.get("tags") or "").split(","),
         }
 
     def images(self, page):
-        for image in self.data["images"]:
-            yield "https:" + image["imageUrl"], image
+        return [
+            ("https:" + image["imageUrl"], image)
+            for image in self.data["images"]
+        ]
 
 
 class FuskatorSearchExtractor(Extractor):
