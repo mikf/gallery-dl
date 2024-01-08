@@ -50,6 +50,7 @@ CATEGORY_MAP = {
     "fanbox"         : "pixivFANBOX",
     "fashionnova"    : "Fashion Nova",
     "furaffinity"    : "Fur Affinity",
+    "hatenablog"     : "HatenaBlog",
     "hbrowse"        : "HBrowse",
     "hentai2read"    : "Hentai2Read",
     "hentaicosplays" : "Hentai Cosplay",
@@ -102,7 +103,6 @@ CATEGORY_MAP = {
     "pornimagesxxx"  : "Porn Image",
     "pornpics"       : "PornPics.com",
     "pornreactor"    : "PornReactor",
-    "postmill"       : "Postmill",
     "readcomiconline": "Read Comic Online",
     "rbt"            : "RebeccaBlackTech",
     "redgifs"        : "RedGIFs",
@@ -188,6 +188,11 @@ SUBCATEGORY_MAP = {
     },
     "fapello": {
         "path": "Videos, Trending Posts, Popular Videos, Top Models",
+    },
+    "hatenablog": {
+        "archive": "Archive",
+        "entry"  : "Individual Posts",
+        "home"   : "Home Feed",
     },
     "hentaifoundry": {
         "story": "",

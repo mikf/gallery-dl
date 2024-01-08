@@ -53,6 +53,7 @@ modules = [
     "gelbooru_v01",
     "gelbooru_v02",
     "gofile",
+    "hatenablog",
     "hbrowse",
     "hentai2read",
     "hentaicosplays",
