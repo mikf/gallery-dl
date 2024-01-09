@@ -558,6 +558,7 @@ class DeviantartAvatarExtractor(DeviantartExtractor):
                 "is_downloadable": False,
                 "published_time" : 0,
                 "title"          : "avatar",
+                "stats"          : {"comments": 0},
                 "content"        : {
                     "src": url.replace("/avatars/", "/avatars-big/", 1),
                 },
