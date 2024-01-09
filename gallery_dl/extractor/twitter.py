@@ -546,7 +546,7 @@ class TwitterTimelineExtractor(TwitterExtractor):
     def _select_tweet_source(self):
         strategy = self.config("strategy")
         if strategy is None or strategy == "auto":
-            if self.retweets or self.replies or self.textonly:
+            if self.retweets or self.textonly:
                 return self.api.user_tweets
             else:
                 return self.api.user_media
