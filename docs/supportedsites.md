@@ -812,6 +812,12 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
+    <td>SteamGridDB</td>
+    <td>https://www.steamgriddb.com</td>
+    <td>Individual Assets, Grids, Heroes, Icons, Logos</td>
+    <td></td>
+</tr>
+<tr>
     <td>SubscribeStar</td>
     <td>https://www.subscribestar.com/</td>
     <td>Posts, User Profiles</td>
