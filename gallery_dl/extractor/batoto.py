@@ -38,7 +38,8 @@ class BatotoChapterExtractor(BatotoBase, ChapterExtractor):
     def metadata(self, page):
         extr = text.extract_from(page)
         manga, info, _ = extr("<title>", "<").rsplit(" - ", 3)
-        manga_id = extr("/title/", "/")
+        manga_id = text.extr(
+            extr('rel="canonical" href="', '"'), "/title/", "/")
 
         match = re.match(
             r"(?:Volume\s+(\d+) )?"
