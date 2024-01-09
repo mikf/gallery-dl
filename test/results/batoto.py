@@ -43,6 +43,19 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://bato.to/title/86408/1681030",
+    "#category": ("", "batoto", "chapter"),
+    "#class"   : batoto.BatotoChapterExtractor,
+},
+
+{
+    "#url"     : "https://bato.to/chapter/1681030",
+    "#comment" : "v2 URL",
+    "#category": ("", "batoto", "chapter"),
+    "#class"   : batoto.BatotoChapterExtractor,
+},
+
+{
     "#url"     : "https://bato.to/title/113742-futsutsuka-na-akujo-de-wa-gozaimasu-ga-suuguu-chouso-torikae-den-official",
     "#category": ("", "batoto", "manga"),
     "#class"   : batoto.BatotoMangaExtractor,
@@ -84,15 +97,16 @@ __tests__ = (
 },
 
 {
-    "#url"     : "https://bato.to/title/86408/1681030",
-    "#category": ("", "batoto", "chapter"),
-    "#class"   : batoto.BatotoChapterExtractor,
+    "#url"     : "https://bato.to/title/86408-i-shall-master-this-family-official",
+    "#category": ("", "batoto", "manga"),
+    "#class"   : batoto.BatotoMangaExtractor,
 },
 
 {
-    "#url"     : "https://bato.to/chapter/1681030",
-    "#category": ("", "batoto", "chapter"),
-    "#class"   : batoto.BatotoChapterExtractor,
+    "#url"     : "https://bato.to/series/86408/i-shall-master-this-family-official",
+    "#comment" : "v2 URL",
+    "#category": ("", "batoto", "manga"),
+    "#class"   : batoto.BatotoMangaExtractor,
 },
 
 {
@@ -100,15 +114,18 @@ __tests__ = (
     "#category": ("", "batoto", "chapter"),
     "#class"   : batoto.BatotoChapterExtractor,
 },
-
 {
-    "#url"     : "https://wto.to/title/86408/1681030",
+    "#url"     : "https://hto.to/title/86408/1681030",
     "#category": ("", "batoto", "chapter"),
     "#class"   : batoto.BatotoChapterExtractor,
 },
-
 {
-    "#url"     : "https://batotoo.com/title/86408/1681030",
+    "#url"     : "https://mto.to/title/86408/1681030",
+    "#category": ("", "batoto", "chapter"),
+    "#class"   : batoto.BatotoChapterExtractor,
+},
+{
+    "#url"     : "https://wto.to/title/86408/1681030",
     "#category": ("", "batoto", "chapter"),
     "#class"   : batoto.BatotoChapterExtractor,
 },
@@ -118,17 +135,106 @@ __tests__ = (
     "#category": ("", "batoto", "chapter"),
     "#class"   : batoto.BatotoChapterExtractor,
 },
-
 {
-    "#url"     : "https://bato.to/title/86408-i-shall-master-this-family-official",
-    "#category": ("", "batoto", "manga"),
-    "#class"   : batoto.BatotoMangaExtractor,
+    "#url"     : "https://mangatoto.net/title/86408/1681030",
+    "#category": ("", "batoto", "chapter"),
+    "#class"   : batoto.BatotoChapterExtractor,
+},
+{
+    "#url"     : "https://mangatoto.org/title/86408/1681030",
+    "#category": ("", "batoto", "chapter"),
+    "#class"   : batoto.BatotoChapterExtractor,
 },
 
 {
-    "#url"     : "https://bato.to/series/86408/i-shall-master-this-family-official",
-    "#category": ("", "batoto", "manga"),
-    "#class"   : batoto.BatotoMangaExtractor,
+    "#url"     : "https://batocomic.com/title/86408/1681030",
+    "#category": ("", "batoto", "chapter"),
+    "#class"   : batoto.BatotoChapterExtractor,
+},
+{
+    "#url"     : "https://batocomic.net/title/86408/1681030",
+    "#category": ("", "batoto", "chapter"),
+    "#class"   : batoto.BatotoChapterExtractor,
+},
+{
+    "#url"     : "https://batocomic.org/title/86408/1681030",
+    "#category": ("", "batoto", "chapter"),
+    "#class"   : batoto.BatotoChapterExtractor,
+},
+
+{
+    "#url"     : "https://readtoto.com/title/86408/1681030",
+    "#category": ("", "batoto", "chapter"),
+    "#class"   : batoto.BatotoChapterExtractor,
+},
+{
+    "#url"     : "https://readtoto.net/title/86408/1681030",
+    "#category": ("", "batoto", "chapter"),
+    "#class"   : batoto.BatotoChapterExtractor,
+},
+{
+    "#url"     : "https://readtoto.org/title/86408/1681030",
+    "#category": ("", "batoto", "chapter"),
+    "#class"   : batoto.BatotoChapterExtractor,
+},
+
+{
+    "#url"     : "https://xbato.com/title/86408/1681030",
+    "#category": ("", "batoto", "chapter"),
+    "#class"   : batoto.BatotoChapterExtractor,
+},
+{
+    "#url"     : "https://xbato.net/title/86408/1681030",
+    "#category": ("", "batoto", "chapter"),
+    "#class"   : batoto.BatotoChapterExtractor,
+},
+{
+    "#url"     : "https://xbato.org/title/86408/1681030",
+    "#category": ("", "batoto", "chapter"),
+    "#class"   : batoto.BatotoChapterExtractor,
+},
+
+{
+    "#url"     : "https://zbato.com/title/86408/1681030",
+    "#category": ("", "batoto", "chapter"),
+    "#class"   : batoto.BatotoChapterExtractor,
+},
+{
+    "#url"     : "https://zbato.net/title/86408/1681030",
+    "#category": ("", "batoto", "chapter"),
+    "#class"   : batoto.BatotoChapterExtractor,
+},
+{
+    "#url"     : "https://zbato.org/title/86408/1681030",
+    "#category": ("", "batoto", "chapter"),
+    "#class"   : batoto.BatotoChapterExtractor,
+},
+
+{
+    "#url"     : "https://comiko.net/title/86408/1681030",
+    "#category": ("", "batoto", "chapter"),
+    "#class"   : batoto.BatotoChapterExtractor,
+},
+{
+    "#url"     : "https://comiko.org/title/86408/1681030",
+    "#category": ("", "batoto", "chapter"),
+    "#class"   : batoto.BatotoChapterExtractor,
+},
+
+{
+    "#url"     : "https://batotoo.com/title/86408/1681030",
+    "#category": ("", "batoto", "chapter"),
+    "#class"   : batoto.BatotoChapterExtractor,
+},
+{
+    "#url"     : "https://batotwo.com/title/86408/1681030",
+    "#category": ("", "batoto", "chapter"),
+    "#class"   : batoto.BatotoChapterExtractor,
+},
+{
+    "#url"     : "https://battwo.com/title/86408/1681030",
+    "#category": ("", "batoto", "chapter"),
+    "#class"   : batoto.BatotoChapterExtractor,
 },
 
 )
