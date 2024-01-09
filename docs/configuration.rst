@@ -3496,7 +3496,7 @@ Description
     * ``"tweets"``: `/tweets <https://twitter.com/USER/tweets>`__ timeline + search
     * ``"media"``: `/media <https://twitter.com/USER/media>`__ timeline + search
     * ``"with_replies"``: `/with_replies <https://twitter.com/USER/with_replies>`__ timeline + search
-    * ``"auto"``: ``"tweets"`` or ``"media"``, depending on `retweets <extractor.twitter.retweets_>`__, `replies <extractor.twitter.replies_>`__, and `text-tweets <extractor.twitter.text-tweets_>`__ settings
+    * ``"auto"``: ``"tweets"`` or ``"media"``, depending on `retweets <extractor.twitter.retweets_>`__ and `text-tweets <extractor.twitter.text-tweets_>`__ settings
 
 
 extractor.twitter.text-tweets
