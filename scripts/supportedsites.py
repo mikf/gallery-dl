@@ -121,6 +121,7 @@ CATEGORY_MAP = {
     "slideshare"     : "SlideShare",
     "smugmug"        : "SmugMug",
     "speakerdeck"    : "Speaker Deck",
+    "steamgriddb"    : "SteamGridDB",
     "subscribestar"  : "SubscribeStar",
     "tbib"           : "The Big ImageBoard",
     "tcbscans"       : "TCB Scans",
@@ -261,6 +262,9 @@ SUBCATEGORY_MAP = {
     },
     "smugmug": {
         "path": "Images from Users and Folders",
+    },
+    "steamgriddb": {
+        "asset": "Individual Assets",
     },
     "tumblr": {
         "day": "Days",
