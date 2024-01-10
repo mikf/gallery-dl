@@ -116,7 +116,8 @@ class NijieExtractor(AsynchronousMixin, BaseExtractor):
             yield from text.extract_iter(
                 page, 'href="javascript:void(0);"><img src="', '"')
         else:
-            yield text.extr(page, 'itemprop="image" src="', '"')
+            pos = page.find('id="view-center"') + 1
+            yield text.extract(page, 'itemprop="image" src="', '"', pos)[0]
 
     @staticmethod
     def _extract_user_name(page):

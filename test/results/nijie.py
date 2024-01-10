@@ -158,6 +158,14 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://nijie.info/view.php?id=37078",
+    "#comment" : "'view_side_dojin' thumbnails (#5049)",
+    "#category": ("Nijie", "nijie", "image"),
+    "#class"   : nijie.NijieImageExtractor,
+    "#urls"    : "https://pic.nijie.net/03/nijie/13/98/498/illust/0_0_703023d18ca8d058_bca943.jpg",
+},
+
+{
     "#url"     : "https://nijie.info/view.php?id=70724",
     "#category": ("Nijie", "nijie", "image"),
     "#class"   : nijie.NijieImageExtractor,
