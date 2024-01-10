@@ -23,7 +23,7 @@ class GelbooruBase():
     root = "https://gelbooru.com"
     offset = 0
 
-    def _api_request(self, params, key="post"):
+    def _api_request(self, params, key="post", log=False):
         if "s" not in params:
             params["s"] = "post"
         params["api_key"] = self.api_key
@@ -35,8 +35,9 @@ class GelbooruBase():
         try:
             posts = data[key]
         except KeyError:
-            self.log.error("Incomplete API response (missing '%s')", key)
-            self.log.debug("%s", data)
+            if log:
+                self.log.error("Incomplete API response (missing '%s')", key)
+                self.log.debug("%s", data)
             return []
 
         if not isinstance(posts, list):
@@ -169,7 +170,7 @@ class GelbooruFavoriteExtractor(GelbooruBase,
             "limit": "1",
         }
 
-        count = self._api_request(params, "@attributes")[0]["count"]
+        count = self._api_request(params, "@attributes", True)[0]["count"]
         if count <= self.offset:
             return
 
@@ -186,7 +187,7 @@ class GelbooruFavoriteExtractor(GelbooruBase,
         params["limit"] = self.per_page
 
         while True:
-            favs = self._api_request(params, "favorite")
+            favs = self._api_request(params, "favorite", True)
             favs.reverse()
 
             if skip:
