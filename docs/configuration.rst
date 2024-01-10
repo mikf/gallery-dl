@@ -1559,6 +1559,19 @@ Description
     Minimum wait time in seconds before API requests.
 
 
+extractor.deviantart.avatar.formats
+-----------------------------------
+Type
+    ``list`` of ``strings``
+Example
+    ``["original.jpg", "big.jpg", "big.gif", ".png"]``
+Description
+    Avatar URL formats to return.
+
+    | Each format is parsed as ``SIZE.EXT``.
+    | Leave ``SIZE`` empty to download the regular, small avatar format.
+
+
 extractor.[E621].metadata
 -------------------------
 Type
