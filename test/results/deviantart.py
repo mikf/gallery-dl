@@ -210,7 +210,7 @@ __tests__ = (
     "#sha1_content": "abf2cc79b842315f2e54bfdd93bf794a0f612b6f",
 
     "author"         : {
-        "type"    : "premium",
+        "type"    : "regular",
         "usericon": "https://a.deviantart.net/avatars/s/h/shimoda7.jpg?4",
         "userid"  : "9AE51FC7-0278-806C-3FFF-F4961ABF9E2B",
         "username": "shimoda7",
@@ -235,6 +235,21 @@ __tests__ = (
     },
     "title"          : "avatar",
     "username"       : "shimoda7",
+},
+
+{
+    "#url"     : "https://deviantart.com/shimoda7/avatar",
+    "#comment" : "'formats' option",
+    "#category": ("", "deviantart", "avatar"),
+    "#class"   : deviantart.DeviantartAvatarExtractor,
+    "#archive" : False,
+    "#options" : {"formats": ["original.jpg", "big.jpg", "big.png", "big.gif"]},
+    "#urls"    : (
+        "https://a.deviantart.net/avatars-original/s/h/shimoda7.jpg?4",
+        "https://a.deviantart.net/avatars-big/s/h/shimoda7.jpg?4",
+        "https://a.deviantart.net/avatars-big/s/h/shimoda7.png?4",
+        "https://a.deviantart.net/avatars-big/s/h/shimoda7.gif?4",
+    ),
 },
 
 {

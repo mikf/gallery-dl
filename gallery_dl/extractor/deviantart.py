@@ -547,23 +547,45 @@ class DeviantartAvatarExtractor(DeviantartExtractor):
     example = "https://www.deviantart.com/USER/avatar/"
 
     def deviations(self):
-        profile = self.api.user_profile(self.user.lower())
-        if profile:
-            url = profile["user"]["usericon"]
-            return ({
-                "author"         : profile["user"],
-                "category"       : "avatar",
-                "index"          : text.parse_int(url.rpartition("?")[2]),
-                "is_deleted"     : False,
-                "is_downloadable": False,
-                "published_time" : 0,
-                "title"          : "avatar",
-                "stats"          : {"comments": 0},
-                "content"        : {
-                    "src": url.replace("/avatars/", "/avatars-big/", 1),
-                },
-            },)
-        return ()
+        name = self.user.lower()
+        profile = self.api.user_profile(name)
+        if not profile:
+            return ()
+
+        user = profile["user"]
+        icon = user["usericon"]
+        index = icon.rpartition("?")[2]
+
+        formats = self.config("formats")
+        if not formats:
+            url = icon.replace("/avatars/", "/avatars-big/", 1)
+            return (self._make_deviation(url, user, index, ""),)
+
+        if isinstance(formats, str):
+            formats = formats.replace(" ", "").split(",")
+
+        results = []
+        for fmt in formats:
+            fmt, _, ext = fmt.rpartition(".")
+            if fmt:
+                fmt = "-" + fmt
+            url = "https://a.deviantart.net/avatars{}/{}/{}/{}.{}?{}".format(
+                fmt, name[0], name[1], name, ext, index)
+            results.append(self._make_deviation(url, user, index, fmt))
+        return results
+
+    def _make_deviation(self, url, user, index, fmt):
+        return {
+            "author"         : user,
+            "category"       : "avatar",
+            "index"          : text.parse_int(index),
+            "is_deleted"     : False,
+            "is_downloadable": False,
+            "published_time" : 0,
+            "title"          : "avatar" + fmt,
+            "stats"          : {"comments": 0},
+            "content"        : {"src": url},
+        }
 
 
 class DeviantartBackgroundExtractor(DeviantartExtractor):
