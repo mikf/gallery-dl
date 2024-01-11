@@ -56,15 +56,16 @@ class PatreonExtractor(Extractor):
                 else:
                     self.log.debug("skipping %s (%s %s)", url, fhash, kind)
 
-    @staticmethod
-    def _postfile(post):
+    def _postfile(self, post):
         postfile = post.get("post_file")
         if postfile:
-            return (("postfile", postfile["url"], postfile["name"]),)
+            url = postfile["url"]
+            name = postfile.get("name") or self._filename(url) or url
+            return (("postfile", url, name),)
         return ()
 
     def _images(self, post):
-        for image in post["images"]:
+        for image in post.get("images") or ():
             url = image.get("download_url")
             if url:
                 name = image.get("file_name") or self._filename(url) or url
@@ -80,7 +81,7 @@ class PatreonExtractor(Extractor):
         return ()
 
     def _attachments(self, post):
-        for attachment in post["attachments"]:
+        for attachment in post.get("attachments") or ():
             url = self.request(
                 attachment["url"], method="HEAD",
                 allow_redirects=False, fatal=False,
