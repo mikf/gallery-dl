@@ -3089,6 +3089,176 @@ Description
     Download video files.
 
 
+extractor.steamgriddb.animated
+------------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Include animated assets when downloading from a list of assets.
+
+
+extractor.steamgriddb.epilepsy
+------------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Include assets tagged with epilepsy when downloading from a list of assets.
+
+
+extractor.steamgriddb.dimensions
+--------------------------------
+Type
+    * ``string``
+    * ``list`` of ``strings``
+Default
+    ``"all"``
+Examples
+    * ``"1024x512,512x512"``
+    * ``["460x215", "920x430"]``
+Description
+    Only include assets that are in the specified dimensions. ``all`` can be
+    used to specify all dimensions. Valid values are:
+
+    * Grids: ``460x215``, ``920x430``, ``600x900``, ``342x482``, ``660x930``,
+      ``512x512``, ``1024x1024``
+    * Heroes: ``1920x620``, ``3840x1240``, ``1600x650``
+    * Logos: N/A (will be ignored)
+    * Icons: ``8x8``, ``10x10``, ``14x14``, ``16x16``, ``20x20``, ``24x24``,
+      ``28x28``, ``32x32``, ``35x35``, ``40x40``, ``48x48``, ``54x54``,
+      ``56x56``, ``57x57``, ``60x60``, ``64x64``, ``72x72``, ``76x76``,
+      ``80x80``, ``90x90``, ``96x96``, ``100x100``, ``114x114``, ``120x120``,
+      ``128x128``, ``144x144``, ``150x150``, ``152x152``, ``160x160``,
+      ``180x180``, ``192x192``, ``194x194``, ``256x256``, ``310x310``,
+      ``512x512``, ``768x768``, ``1024x1024``
+
+
+extractor.steamgriddb.file-types
+--------------------------------
+Type
+    * ``string``
+    * ``list`` of ``strings``
+Default
+    ``"all"``
+Examples
+    * ``"png,jpeg"``
+    * ``["jpeg", "webp"]``
+Description
+    Only include assets that are in the specified file types. ``all`` can be
+    used to specifiy all file types. Valid values are:
+
+    * Grids: ``png``, ``jpeg``, ``jpg``, ``webp``
+    * Heroes: ``png``, ``jpeg``, ``jpg``, ``webp``
+    * Logos: ``png``, ``webp``
+    * Icons: ``png``, ``ico``
+
+
+extractor.steamgriddb.download-fake-png
+---------------------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Download fake PNGs alongside the real file.
+
+
+extractor.steamgriddb.humor
+---------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Include assets tagged with humor when downloading from a list of assets.
+
+
+extractor.steamgriddb.languages
+-------------------------------
+Type
+    * ``string``
+    * ``list`` of ``strings``
+Default
+    ``"all"``
+Examples
+    * ``"en,km"``
+    * ``["fr", "it"]``
+Description
+    Only include assets that are in the specified languages. ``all`` can be
+    used to specifiy all languages. Valid values are `ISO 639-1 <https://en.wikipedia.org/wiki/ISO_639-1>`__
+    language codes.
+
+
+extractor.steamgriddb.nsfw
+--------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Include assets tagged with adult content when downloading from a list of assets.
+
+
+extractor.steamgriddb.sort
+--------------------------
+Type
+    ``string``
+Default
+    ``score_desc``
+Description
+    Set the chosen sorting method when downloading from a list of assets. Can be one of:
+
+    * ``score_desc`` (Highest Score (Beta))
+    * ``score_asc`` (Lowest Score (Beta))
+    * ``score_old_desc`` (Highest Score (Old))
+    * ``score_old_asc`` (Lowest Score (Old))
+    * ``age_desc`` (Newest First)
+    * ``age_asc`` (Oldest First)
+
+
+extractor.steamgriddb.static
+----------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Include static assets when downloading from a list of assets.
+
+
+extractor.steamgriddb.styles
+----------------------------
+Type
+    * ``string``
+    * ``list`` of ``strings``
+Default
+    ``all``
+Examples
+    * ``white,black``
+    * ``["no_logo", "white_logo"]``
+Description
+    Only include assets that are in the specified styles. ``all`` can be used
+    to specify all styles. Valid values are:
+
+    * Grids: ``alternate``, ``blurred``, ``no_logo``, ``material``, ``white_logo``
+    * Heroes: ``alternate``, ``blurred``, ``material``
+    * Logos: ``official``, ``white``, ``black``, ``custom``
+    * Icons: ``official``, ``custom``
+
+
+extractor.steamgriddb.untagged
+------------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Include untagged assets when downloading from a list of assets.
+
+
 extractor.[szurubooru].username & .token
 ----------------------------------------
 Type
