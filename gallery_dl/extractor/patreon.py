@@ -52,7 +52,11 @@ class PatreonExtractor(Extractor):
                     post["hash"] = fhash
                     post["type"] = kind
                     post["num"] += 1
-                    yield Message.Url, url, text.nameext_from_url(name, post)
+                    text.nameext_from_url(name, post)
+                    if text.ext_from_url(url) == "m3u8":
+                        url = "ytdl:" + url
+                        post["extension"] = "mp4"
+                    yield Message.Url, url, post
                 else:
                     self.log.debug("skipping %s (%s %s)", url, fhash, kind)
 
