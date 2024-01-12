@@ -13,7 +13,7 @@ from .. import text
 
 BASE_PATTERN = (
     r"(?:hatenablog:https?://([^/]+)|(?:https?://)?"
-    r"([\w-]+\.(?:hatenablog\.com|hatenablog\.jp"
+    r"([\w-]+\.(?:hatenablog\.(?:com|jp)"
     r"|hatenadiary\.com|hateblo\.jp)))"
 )
 QUERY_RE = r"(?:\?([^#]*))?(?:#.*)?$"
@@ -28,29 +28,26 @@ class HatenablogExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-
         self.domain = match.group(1) or match.group(2)
-        self._find_img = re.compile(r'<img +(.+?) */?>').finditer
-        self._is_image = re.compile(
-            r'(?: |^)class="hatena-fotolife"(?: |$)').search
-        self._find_img_src = re.compile(r'(?: |^)src="(.+?)"(?: |$)').search
+
+    def _init(self):
+        self._find_img = re.compile(r'<img +([^>]+)').finditer
 
     def _handle_article(self, article: str):
         extr = text.extract_from(article)
         date = text.parse_datetime(extr('<time datetime="', '"'))
-        entry_link = text.unescape(extr(
-            '<a href="', '" class="entry-title-link bookmark">'))
+        entry_link = text.unescape(extr('<a href="', '"'))
         entry = entry_link.partition("/entry/")[2]
-        title = extr('', '</a>')
+        title = text.unescape(extr('>', '<'))
         content = extr(
             '<div class="entry-content hatenablog-entry">', '</div>')
 
         images = []
         for i in self._find_img(content):
             attributes = i.group(1)
-            if not self._is_image(attributes):
+            if 'class="hatena-fotolife"' not in attributes:
                 continue
-            image = text.unescape(self._find_img_src(attributes).group(1))
+            image = text.unescape(text.extr(attributes, 'src="', '"'))
             images.append(image)
 
         data = {
@@ -74,8 +71,11 @@ class HatenablogEntriesExtractor(HatenablogExtractor):
         self.path = match.group(3)
         self.query = {key: value for key, value in text.parse_query(
             match.group(4)).items() if self._acceptable_query(key)}
+
+    def _init(self):
+        HatenablogExtractor._init(self)
         self._find_pager_url = re.compile(
-            r'<span class="pager-next">\s*<a href="(.+?)"').search
+            r' class="pager-next">\s*<a href="([^"]+)').search
 
     def items(self):
         url = "https://" + self.domain + self.path
@@ -117,7 +117,7 @@ class HatenablogEntriesExtractor(HatenablogExtractor):
             article = extr('', '</article>')
             yield from self._handle_article(article)
 
-    def _acceptable_query(self, key: str) -> bool:
+    def _acceptable_query(self, key):
         return key == "page" or key in self.allowed_parameters
 
 
@@ -154,8 +154,8 @@ class HatenablogHomeExtractor(HatenablogEntriesExtractor):
 class HatenablogArchiveExtractor(HatenablogEntriesExtractor):
     """Extractor for a blog's archive page"""
     subcategory = "archive"
-    pattern = BASE_PATTERN + r"(/archive(?:/\d+(?:/\d+(?:/\d+)?)?" + \
-        r"|/category/[^?#]+)?)" + QUERY_RE
+    pattern = (BASE_PATTERN + r"(/archive(?:/\d+(?:/\d+(?:/\d+)?)?"
+               r"|/category/[^?#]+)?)" + QUERY_RE)
     example = "https://BLOG.hatenablog.com/archive/2024"
 
 
