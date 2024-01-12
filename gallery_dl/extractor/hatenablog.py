@@ -12,7 +12,7 @@ from .. import text
 
 
 BASE_PATTERN = (
-    r"(?:hatenablog:https?://([^/]+)|(?:https?://)?"
+    r"(?:hatenablog:https?://([^/?#]+)|(?:https?://)?"
     r"([\w-]+\.(?:hatenablog\.(?:com|jp)"
     r"|hatenadiary\.com|hateblo\.jp)))"
 )
