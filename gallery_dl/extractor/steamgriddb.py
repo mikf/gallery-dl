@@ -56,16 +56,16 @@ class SteamgriddbExtractor(Extractor):
         download_fake_png = self.config("download-fake-png", True)
 
         for asset in self.assets():
-            urls = [asset["url"]]
+            urls = (asset["url"],)
             if download_fake_png and asset.get("fake_png"):
-                urls.append(asset["fake_png"])
+                urls = (asset["url"], asset["fake_png"])
 
             asset["count"] = len(urls)
             yield Message.Directory, asset
             for asset["num"], url in enumerate(urls, 1):
                 yield Message.Url, url, text.nameext_from_url(url, asset)
 
-    def _call(self, endpoint: str, **kwargs):
+    def _call(self, endpoint, **kwargs):
         data = self.request(self.root + endpoint, **kwargs).json()
         if not data["success"]:
             raise exception.StopExtraction(data["error"])
@@ -129,17 +129,16 @@ class SteamgriddbAssetsExtractor(SteamgriddbExtractor):
                     asset["game"] = data["game"]
                 yield asset
 
-            if data["total"] > limit * page:
-                page += 1
-            else:
+            if data["total"] <= limit * page:
                 break
+            page += 1
 
     def config_list(self, key, type_name, valid_values):
-        value = self.config(key, ["all"])
+        value = self.config(key)
         if isinstance(value, str):
             value = value.split(",")
 
-        if "all" in value:
+        if value is None or "all" in value:
             return ["all"]
 
         for i in value:
