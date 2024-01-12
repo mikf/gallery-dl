@@ -45,7 +45,7 @@ def main():
             elif filename.startswith("\\f"):
                 filename = "\f" + filename[2:]
             config.set((), "filename", filename)
-        if args.directory:
+        if args.directory is not None:
             config.set((), "base-directory", args.directory)
             config.set((), "directory", ())
         if args.postprocessors:
