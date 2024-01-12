@@ -3131,7 +3131,7 @@ Type
 Default
     ``"all"``
 Examples
-    * ``"png,jpg"``
+    * ``"png,jpeg"``
     * ``["jpeg", "webp"]``
 Description
     Only include assets that are in the specified file types. ``all`` can be
