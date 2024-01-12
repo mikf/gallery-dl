@@ -104,6 +104,14 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.patreon.com/posts/meu8-94714289",
+    "#category": ("", "patreon", "post"),
+    "#class"   : patreon.PatreonPostExtractor,
+    "#range"   : "2",
+    "#pattern" : r"ytdl:https://stream\.mux\.com/NLrxTLdxyGStpOgapJAtB8uPGAaokEcj8YovML00y2DY\.m3u8\?token=ey.+",
+},
+
+{
     "#url"     : "https://www.patreon.com/posts/not-found-123",
     "#category": ("", "patreon", "post"),
     "#class"   : patreon.PatreonPostExtractor,
