@@ -193,6 +193,7 @@ modules = [
     "recursive",
     "oauth",
     "test",
+    "youpic",
     "ytdl",
     "generic",
 ]
