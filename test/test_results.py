@@ -38,6 +38,15 @@ CONFIG = {
     },
 }
 
+AUTH = {
+    "pixiv",
+    "nijie",
+    "horne",
+    "seiga",
+    "instagram",
+    "twitter",
+}
+
 
 class TestExtractorResults(unittest.TestCase):
 
@@ -76,6 +85,18 @@ class TestExtractorResults(unittest.TestCase):
                 for key, value in result["#options"].items():
                     key = key.split(".")
                     config.set(key[:-1], key[-1], value)
+
+            requires_auth = result.get("#auth")
+            if requires_auth is None:
+                requires_auth = (result["#category"][1] in AUTH)
+            if requires_auth:
+                extr = result["#class"].from_url(result["#url"])
+                if not any(extr.config(key) for key in (
+                        "username", "cookies", "api-key", "client-id")):
+                    msg = "no auth"
+                    self._skipped.append((result["#url"], msg))
+                    self.skipTest(msg)
+
             if "#range" in result:
                 config.set((), "image-range"  , result["#range"])
                 config.set((), "chapter-range", result["#range"])
@@ -371,7 +392,7 @@ def load_test_config():
     except FileNotFoundError:
         pass
     except Exception as exc:
-        print("Error when loading {}: {}: {}".format(
+        sys.exit("Error when loading {}: {}: {}".format(
             path, exc.__class__.__name__, exc))
 
 
@@ -422,7 +443,7 @@ def generate_tests():
         setattr(TestExtractorResults, method.__name__, method)
 
 
-load_test_config()
 generate_tests()
 if __name__ == "__main__":
+    load_test_config()
     unittest.main(warnings="ignore")
