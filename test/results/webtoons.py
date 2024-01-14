@@ -38,6 +38,18 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.webtoons.com/en/canvas/i-want-to-be-a-cute-anime-girl/209-the-storys-story/viewer?title_no=349416&episode_no=214",
+    "#category": ("", "webtoons", "episode"),
+    "#class"   : webtoons.WebtoonsEpisodeExtractor,
+    "#count"   : 4,
+
+    "comic_name"  : "I want to be a cute anime girl",
+    "episode_name": "209 - The story's story",
+    "username"    : "m9huj",
+    "author_name" : "Azul Crescent",
+},
+
+{
     "#url"     : "https://www.webtoons.com/en/comedy/live-with-yourself/list?title_no=919",
     "#comment" : "english",
     "#category": ("", "webtoons", "comic"),
