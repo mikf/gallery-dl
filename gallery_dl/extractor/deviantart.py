@@ -38,7 +38,7 @@ class DeviantartExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.user = (match.group(1) or match.group(2)).lower()
+        self.user = (match.group(1) or match.group(2) or "").lower()
         self.offset = 0
 
     def _init(self):
