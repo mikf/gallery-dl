@@ -20,6 +20,22 @@ __tests__ = (
         "42055e44659f6ffc410b3fb6557346dfbb993df3",
         "49e1f2def04c6f7a6a3dacf245a1cd9abe77a6a9",
     ],
+
+    "author_name" : "Chris McCoy",
+    "comic"       : "safely-endangered",
+    "comic_name"  : "Safely Endangered",
+    "count"       : 5,
+    "description" : "Silly comics for silly people.",
+    "episode"     : "572",
+    "episode_name": "Ep. 572 - Earth",
+    "episode_no"  : "572",
+    "genre"       : "comedy",
+    "lang"        : "en",
+    "language"    : "English",
+    "num"         : range(1, 5),
+    "title"       : "Safely Endangered - Ep. 572 - Earth",
+    "title_no"    : "352",
+    "username"    : "safelyendangered",
 },
 
 {

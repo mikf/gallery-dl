@@ -92,10 +92,11 @@ class WebtoonsEpisodeExtractor(WebtoonsBase, GalleryExtractor):
         title = extr('<meta property="og:title" content="', '"')
         descr = extr('<meta property="og:description" content="', '"')
 
-        author_area = extr('<div class="author_area">', '</div>')
-        aa_extr = text.extract_from(author_area)
-        username = aa_extr('/creator/', '"')
-        author_name = aa_extr('<span>', '</span>')
+        if extr('<div class="author_area"', '\n'):
+            username = extr('/creator/', '"')
+            author_name = extr('<span>', '</span>')
+        else:
+            username = author_name = ""
 
         return {
             "genre"       : self.genre,
