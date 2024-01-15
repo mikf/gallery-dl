@@ -10,6 +10,7 @@ import sys
 import re
 
 modules = [
+    "2ch",
     "2chan",
     "2chen",
     "35photo",

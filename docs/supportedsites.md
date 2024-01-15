@@ -14,6 +14,12 @@ Consider all listed sites to potentially be NSFW.
 </thead>
 <tbody valign="top">
 <tr>
+    <td>2ch</td>
+    <td>https://2ch.hk/</td>
+    <td>Boards, Threads</td>
+    <td></td>
+</tr>
+<tr>
     <td>2chen</td>
     <td>https://sturdychan.help/</td>
     <td>Boards, Threads</td>
