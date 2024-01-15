@@ -41,6 +41,10 @@ case "${2,,}" in
     call git push "$USER" HEAD:"$BRANCH"
     ;;
 
+"pf"|"push-force")
+    call git push --force "$USER" HEAD:"$BRANCH"
+    ;;
+
 "d"|"delete")
     call git switch master
     call git branch -D "$USER-$BRANCH"
