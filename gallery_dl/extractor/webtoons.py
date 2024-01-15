@@ -87,23 +87,31 @@ class WebtoonsEpisodeExtractor(WebtoonsBase, GalleryExtractor):
         self.episode_no = params.get("episode_no")
 
     def metadata(self, page):
-        keywords, pos = text.extract(
-            page, '<meta name="keywords" content="', '"')
-        title, pos = text.extract(
-            page, '<meta property="og:title" content="', '"', pos)
-        descr, pos = text.extract(
-            page, '<meta property="og:description" content="', '"', pos)
+        extr = text.extract_from(page)
+        keywords = extr('<meta name="keywords" content="', '"').split(", ")
+        title = extr('<meta property="og:title" content="', '"')
+        descr = extr('<meta property="og:description" content="', '"')
+
+        if extr('<div class="author_area"', '\n'):
+            username = extr('/creator/', '"')
+            author_name = extr('<span>', '</span>')
+        else:
+            username = author_name = ""
 
         return {
-            "genre"      : self.genre,
-            "comic"      : self.comic,
-            "title_no"   : self.title_no,
-            "episode_no" : self.episode_no,
-            "title"      : text.unescape(title),
-            "episode"    : keywords.split(", ")[1],
-            "description": text.unescape(descr),
-            "lang"       : self.lang,
-            "language"   : util.code_to_language(self.lang),
+            "genre"       : self.genre,
+            "comic"       : self.comic,
+            "title_no"    : self.title_no,
+            "episode_no"  : self.episode_no,
+            "title"       : text.unescape(title),
+            "episode"     : keywords[1],
+            "comic_name"  : text.unescape(keywords[0]),
+            "episode_name": text.unescape(keywords[2]),
+            "username"    : username,
+            "author_name" : text.unescape(author_name),
+            "description" : text.unescape(descr),
+            "lang"        : self.lang,
+            "language"    : util.code_to_language(self.lang),
         }
 
     @staticmethod
