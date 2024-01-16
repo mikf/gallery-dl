@@ -139,6 +139,7 @@ CATEGORY_MAP = {
     "webmshare"      : "webmshare",
     "webtoons"       : "Webtoon",
     "wikiart"        : "WikiArt.org",
+    "wikimediacommons": "Wikimedia Commons",
     "xbunkr"         : "xBunkr",
     "xhamster"       : "xHamster",
     "xvideos"        : "XVideos",

@@ -178,6 +178,7 @@ modules = [
     "weibo",
     "wikiart",
     "wikifeet",
+    "wikimedia",
     "xhamster",
     "xvideos",
     "zerochan",
