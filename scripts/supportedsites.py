@@ -32,6 +32,7 @@ CATEGORY_MAP = {
     "atfbooru"       : "ATFBooru",
     "b4k"            : "arch.b4k.co",
     "baraag"         : "baraag",
+    "batoto"         : "BATO.TO",
     "bbc"            : "BBC",
     "comicvine"      : "Comic Vine",
     "coomerparty"    : "Coomer",
@@ -49,6 +50,7 @@ CATEGORY_MAP = {
     "fanbox"         : "pixivFANBOX",
     "fashionnova"    : "Fashion Nova",
     "furaffinity"    : "Fur Affinity",
+    "hatenablog"     : "HatenaBlog",
     "hbrowse"        : "HBrowse",
     "hentai2read"    : "Hentai2Read",
     "hentaicosplays" : "Hentai Cosplay",
@@ -101,7 +103,6 @@ CATEGORY_MAP = {
     "pornimagesxxx"  : "Porn Image",
     "pornpics"       : "PornPics.com",
     "pornreactor"    : "PornReactor",
-    "postmill"       : "Postmill",
     "readcomiconline": "Read Comic Online",
     "rbt"            : "RebeccaBlackTech",
     "redgifs"        : "RedGIFs",
@@ -120,6 +121,7 @@ CATEGORY_MAP = {
     "slideshare"     : "SlideShare",
     "smugmug"        : "SmugMug",
     "speakerdeck"    : "Speaker Deck",
+    "steamgriddb"    : "SteamGridDB",
     "subscribestar"  : "SubscribeStar",
     "tbib"           : "The Big ImageBoard",
     "tcbscans"       : "TCB Scans",
@@ -137,6 +139,7 @@ CATEGORY_MAP = {
     "webmshare"      : "webmshare",
     "webtoons"       : "Webtoon",
     "wikiart"        : "WikiArt.org",
+    "wikimediacommons": "Wikimedia Commons",
     "xbunkr"         : "xBunkr",
     "xhamster"       : "xHamster",
     "xvideos"        : "XVideos",
@@ -188,6 +191,11 @@ SUBCATEGORY_MAP = {
     "fapello": {
         "path": "Videos, Trending Posts, Popular Videos, Top Models",
     },
+    "hatenablog": {
+        "archive": "Archive",
+        "entry"  : "Individual Posts",
+        "home"   : "Home Feed",
+    },
     "hentaifoundry": {
         "story": "",
     },
@@ -234,6 +242,9 @@ SUBCATEGORY_MAP = {
         "sketch": "Sketch",
         "work": "individual Images",
     },
+    "poringa": {
+        "post": "Posts Images",
+    },
     "pornhub": {
         "gifs": "",
     },
@@ -257,6 +268,9 @@ SUBCATEGORY_MAP = {
     },
     "smugmug": {
         "path": "Images from Users and Folders",
+    },
+    "steamgriddb": {
+        "asset": "Individual Assets",
     },
     "tumblr": {
         "day": "Days",

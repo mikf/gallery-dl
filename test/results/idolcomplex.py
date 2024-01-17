@@ -9,12 +9,30 @@ from gallery_dl.extractor import idolcomplex
 
 __tests__ = (
 {
-    "#url"     : "https://idol.sankakucomplex.com/?tags=lyumos",
+    "#url"     : "https://idol.sankakucomplex.com/en/posts?tags=lyumos",
     "#category": ("booru", "idolcomplex", "tag"),
     "#class"   : idolcomplex.IdolcomplexTagExtractor,
     "#pattern" : r"https://i[sv]\.sankakucomplex\.com/data/[^/]{2}/[^/]{2}/[^/]{32}\.\w+\?e=\d+&m=[^&#]+",
     "#range"   : "18-22",
     "#count"   : 5,
+},
+
+{
+    "#url"     : "https://idol.sankakucomplex.com/posts/?tags=lyumos",
+    "#category": ("booru", "idolcomplex", "tag"),
+    "#class"   : idolcomplex.IdolcomplexTagExtractor,
+},
+
+{
+    "#url"     : "https://idol.sankakucomplex.com/en/?tags=lyumos",
+    "#category": ("booru", "idolcomplex", "tag"),
+    "#class"   : idolcomplex.IdolcomplexTagExtractor,
+},
+
+{
+    "#url"     : "https://idol.sankakucomplex.com/?tags=lyumos",
+    "#category": ("booru", "idolcomplex", "tag"),
+    "#class"   : idolcomplex.IdolcomplexTagExtractor,
 },
 
 {
@@ -31,13 +49,19 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://idol.sankakucomplex.com/en/pools/show/145",
+    "#category": ("booru", "idolcomplex", "pool"),
+    "#class"   : idolcomplex.IdolcomplexPoolExtractor,
+},
+
+{
     "#url"     : "https://idol.sankakucomplex.com/pool/show/145",
     "#category": ("booru", "idolcomplex", "pool"),
     "#class"   : idolcomplex.IdolcomplexPoolExtractor,
 },
 
 {
-    "#url"     : "https://idol.sankakucomplex.com/en/posts/show/509eccbba54a43cea6b275a65b93c51d",
+    "#url"     : "https://idol.sankakucomplex.com/en/posts/509eccbba54a43cea6b275a65b93c51d",
     "#category": ("booru", "idolcomplex", "post"),
     "#class"   : idolcomplex.IdolcomplexPostExtractor,
     "#sha1_content": "694ec2491240787d75bf5d0c75d0082b53a85afd",
@@ -45,7 +69,7 @@ __tests__ = (
     "created_at"    : "2017-11-24 17:01:27.696",
     "date"          : "dt:2017-11-24 17:01:27",
     "extension"     : "jpg",
-    "file_url"      : r"re:https://is\.sankakucomplex\.com/data/50/9e/509eccbba54a43cea6b275a65b93c51d\.jpg\?",
+    "file_url"      : r"re:https://i[sv]\.sankakucomplex\.com/data/50/9e/509eccbba54a43cea6b275a65b93c51d\.jpg\?",
     "filename"      : "509eccbba54a43cea6b275a65b93c51d",
     "height"        : 683,
     "id"            : 694215,
@@ -60,6 +84,12 @@ __tests__ = (
     "vote_average"  : range(4, 5),
     "vote_count"    : range(25, 40),
     "width"         : 1024,
+},
+
+{
+    "#url"     : "https://idol.sankakucomplex.com/en/posts/show/509eccbba54a43cea6b275a65b93c51d",
+    "#category": ("booru", "idolcomplex", "post"),
+    "#class"   : idolcomplex.IdolcomplexPostExtractor,
 },
 
 {

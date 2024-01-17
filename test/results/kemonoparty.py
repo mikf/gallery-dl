@@ -177,6 +177,7 @@ __tests__ = (
 
     "revision_id": 142470,
     "revision_index": 2,
+    "revision_hash": "e0e93281495e151b11636c156e52bfe9234c2a40",
 },
 
 {
@@ -190,6 +191,7 @@ __tests__ = (
 
     "revision_id": range(134996, 3052965),
     "revision_index": range(1, 9),
+    "revision_hash": r"re:^[0-9a-f]{40}$",
 },
 
 
@@ -297,6 +299,7 @@ __tests__ = (
     "#category": ("", "kemonoparty", "favorite"),
     "#class"   : kemonoparty.KemonopartyFavoriteExtractor,
     "#pattern" : kemonoparty.KemonopartyUserExtractor.pattern,
+    "#auth"    : True,
     "#count"   : 3,
     "#sha1_url": "f4b5b796979bcba824af84206578c79101c7f0e1",
 },
@@ -306,6 +309,7 @@ __tests__ = (
     "#category": ("", "kemonoparty", "favorite"),
     "#class"   : kemonoparty.KemonopartyFavoriteExtractor,
     "#pattern" : kemonoparty.KemonopartyPostExtractor.pattern,
+    "#auth"    : True,
     "#count"   : 3,
     "#sha1_url": "ecfccf5f0d50b8d14caa7bbdcf071de5c1e5b90f",
 },
@@ -315,6 +319,7 @@ __tests__ = (
     "#category": ("", "kemonoparty", "favorite"),
     "#class"   : kemonoparty.KemonopartyFavoriteExtractor,
     "#pattern" : kemonoparty.KemonopartyPostExtractor.pattern,
+    "#auth"    : True,
     "#count"   : 3,
     "#sha1_url": "4be8e84cb384a907a8e7997baaf6287b451783b5",
 },

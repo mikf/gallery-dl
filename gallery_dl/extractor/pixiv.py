@@ -826,9 +826,9 @@ class PixivAppAPI():
 
         extractor.session.headers.update({
             "App-OS"        : "ios",
-            "App-OS-Version": "13.1.2",
-            "App-Version"   : "7.7.6",
-            "User-Agent"    : "PixivIOSApp/7.7.6 (iOS 13.1.2; iPhone11,8)",
+            "App-OS-Version": "16.7.2",
+            "App-Version"   : "7.19.1",
+            "User-Agent"    : "PixivIOSApp/7.19.1 (iOS 16.7.2; iPhone12,8)",
             "Referer"       : "https://app-api.pixiv.net/",
         })
 

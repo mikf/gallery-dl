@@ -41,10 +41,8 @@ __tests__ = (
     "#category": ("nitter", "nitter.1d4.us", "tweet"),
     "#class"   : nitter.NitterTweetExtractor,
 
-    "content": r"""re:Gear up for #PokemonSwordShieldEX with special Mystery Gifts! 
-
-You’ll be able to receive four Galarian form Pokémon with Hidden Abilities, plus some very useful items. It’s our \(Mystery\) Gift to you, Trainers! 
-
+    "content": r"""re:Gear up for #PokemonSwordShieldEX with special Mystery Gifts! \n
+You’ll be able to receive four Galarian form Pokémon with Hidden Abilities, plus some very useful items. It’s our \(Mystery\) Gift to you, Trainers! \n
 ❓🎁➡️ """,
 },
 

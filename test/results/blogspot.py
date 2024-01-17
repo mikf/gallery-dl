@@ -43,7 +43,6 @@ __tests__ = (
     "extension": "jpg",
     "filename" : "Icy-Moonrise---For-Web",
     "num"      : 1,
-    "num"      : int,
     "url"      : "https://3.bp.blogspot.com/-zlJddJtJOUo/Tt4WooTPNtI/AAAAAAAABG8/dGT2cGp2E7Y/s0/Icy-Moonrise---For-Web.jpg",
 },
 

@@ -12,7 +12,7 @@ __tests__ = (
     "#url"     : "https://www.wikiart.org/en/thomas-cole",
     "#category": ("", "wikiart", "artist"),
     "#class"   : wikiart.WikiartArtistExtractor,
-    "#pattern" : "https://uploads\d+\.wikiart\.org/(\d+/)?images/thomas-cole/[\w()-]+\.(jpg|png)",
+    "#pattern" : r"https://uploads\d+\.wikiart\.org/(\d+/)?images/thomas-cole/[\w()-]+\.(jpg|png)",
     "#count"   : "> 100",
 
     "albums"     : None,

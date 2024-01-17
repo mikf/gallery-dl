@@ -627,6 +627,20 @@ Description
     `ssl.SSLContext.set_ciphers() <https://docs.python.org/3/library/ssl.html#ssl.SSLContext.set_ciphers>`__
 
 
+extractor.*.tls12
+-----------------
+Type
+    ``bool``
+Default
+    * ``true``
+    * ``false`` for ``patreon``, ``pixiv:series``
+Description
+    Allow selecting TLS 1.2 cipher suites.
+
+    Can be disabled to alter TLS fingerprints
+    and potentially bypass Cloudflare blocks.
+
+
 extractor.*.keywords
 --------------------
 Type
@@ -1066,6 +1080,25 @@ Description
     after a colon ``:``, for example ``{date:%Y%m%d}``.
 
 
+extractor.*.write-pages
+-----------------------
+Type
+    * ``bool``
+    * ``string``
+Default
+    ``false``
+Description
+    During data extraction,
+    write received HTTP request data
+    to enumerated files in the current working directory.
+
+    Special values:
+
+    * ``"all"``: Include HTTP request and response headers. Hide ``Authorization``, ``Cookie``, and ``Set-Cookie`` values.
+    * ``"ALL"``: Include all HTTP request and response headers.
+
+
+
 Extractor-specific Options
 ==========================
 
@@ -1368,7 +1401,13 @@ Description
     when processing a user profile.
 
     Possible values are
-    ``"gallery"``, ``"scraps"``, ``"journal"``, ``"favorite"``, ``"status"``.
+    ``"avatar"``,
+    ``"background"``,
+    ``"gallery"``,
+    ``"scraps"``,
+    ``"journal"``,
+    ``"favorite"``,
+    ``"status"``.
 
     It is possible to use ``"all"`` instead of listing all values separately.
 
@@ -1520,6 +1559,19 @@ Description
     Minimum wait time in seconds before API requests.
 
 
+extractor.deviantart.avatar.formats
+-----------------------------------
+Type
+    ``list`` of ``strings``
+Example
+    ``["original.jpg", "big.jpg", "big.gif", ".png"]``
+Description
+    Avatar URL formats to return.
+
+    | Each format is parsed as ``SIZE.EXT``.
+    | Leave ``SIZE`` empty to download the regular, small avatar format.
+
+
 extractor.[E621].metadata
 -------------------------
 Type
@@ -1530,7 +1582,7 @@ Default
     ``false``
 Example
     * ``notes,pools``
-    * ``["notes", "pools"``
+    * ``["notes", "pools"]``
 Description
     Extract additional metadata (notes, pool metadata) if available.
 
@@ -1670,6 +1722,21 @@ Description
     * ``"ytdl"``: Like ``true``, but let `youtube-dl`_ handle video
       extraction and download for YouTube, Vimeo and SoundCloud embeds.
     * ``false``: Ignore embeds.
+
+
+extractor.fanbox.metadata
+-------------------------
+Type
+    * ``bool``
+    * ``string``
+    * ``list`` of ``strings``
+Default
+    ``false``
+Example
+    * ``user,plan``
+    * ``["user", "plan"]``
+Description
+    Extract ``plan`` and extended ``user`` metadata.
 
 
 extractor.flickr.access-token & .access-token-secret
@@ -3022,6 +3089,176 @@ Description
     Download video files.
 
 
+extractor.steamgriddb.animated
+------------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Include animated assets when downloading from a list of assets.
+
+
+extractor.steamgriddb.epilepsy
+------------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Include assets tagged with epilepsy when downloading from a list of assets.
+
+
+extractor.steamgriddb.dimensions
+--------------------------------
+Type
+    * ``string``
+    * ``list`` of ``strings``
+Default
+    ``"all"``
+Examples
+    * ``"1024x512,512x512"``
+    * ``["460x215", "920x430"]``
+Description
+    Only include assets that are in the specified dimensions. ``all`` can be
+    used to specify all dimensions. Valid values are:
+
+    * Grids: ``460x215``, ``920x430``, ``600x900``, ``342x482``, ``660x930``,
+      ``512x512``, ``1024x1024``
+    * Heroes: ``1920x620``, ``3840x1240``, ``1600x650``
+    * Logos: N/A (will be ignored)
+    * Icons: ``8x8``, ``10x10``, ``14x14``, ``16x16``, ``20x20``, ``24x24``,
+      ``28x28``, ``32x32``, ``35x35``, ``40x40``, ``48x48``, ``54x54``,
+      ``56x56``, ``57x57``, ``60x60``, ``64x64``, ``72x72``, ``76x76``,
+      ``80x80``, ``90x90``, ``96x96``, ``100x100``, ``114x114``, ``120x120``,
+      ``128x128``, ``144x144``, ``150x150``, ``152x152``, ``160x160``,
+      ``180x180``, ``192x192``, ``194x194``, ``256x256``, ``310x310``,
+      ``512x512``, ``768x768``, ``1024x1024``
+
+
+extractor.steamgriddb.file-types
+--------------------------------
+Type
+    * ``string``
+    * ``list`` of ``strings``
+Default
+    ``"all"``
+Examples
+    * ``"png,jpeg"``
+    * ``["jpeg", "webp"]``
+Description
+    Only include assets that are in the specified file types. ``all`` can be
+    used to specifiy all file types. Valid values are:
+
+    * Grids: ``png``, ``jpeg``, ``jpg``, ``webp``
+    * Heroes: ``png``, ``jpeg``, ``jpg``, ``webp``
+    * Logos: ``png``, ``webp``
+    * Icons: ``png``, ``ico``
+
+
+extractor.steamgriddb.download-fake-png
+---------------------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Download fake PNGs alongside the real file.
+
+
+extractor.steamgriddb.humor
+---------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Include assets tagged with humor when downloading from a list of assets.
+
+
+extractor.steamgriddb.languages
+-------------------------------
+Type
+    * ``string``
+    * ``list`` of ``strings``
+Default
+    ``"all"``
+Examples
+    * ``"en,km"``
+    * ``["fr", "it"]``
+Description
+    Only include assets that are in the specified languages. ``all`` can be
+    used to specifiy all languages. Valid values are `ISO 639-1 <https://en.wikipedia.org/wiki/ISO_639-1>`__
+    language codes.
+
+
+extractor.steamgriddb.nsfw
+--------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Include assets tagged with adult content when downloading from a list of assets.
+
+
+extractor.steamgriddb.sort
+--------------------------
+Type
+    ``string``
+Default
+    ``score_desc``
+Description
+    Set the chosen sorting method when downloading from a list of assets. Can be one of:
+
+    * ``score_desc`` (Highest Score (Beta))
+    * ``score_asc`` (Lowest Score (Beta))
+    * ``score_old_desc`` (Highest Score (Old))
+    * ``score_old_asc`` (Lowest Score (Old))
+    * ``age_desc`` (Newest First)
+    * ``age_asc`` (Oldest First)
+
+
+extractor.steamgriddb.static
+----------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Include static assets when downloading from a list of assets.
+
+
+extractor.steamgriddb.styles
+----------------------------
+Type
+    * ``string``
+    * ``list`` of ``strings``
+Default
+    ``all``
+Examples
+    * ``white,black``
+    * ``["no_logo", "white_logo"]``
+Description
+    Only include assets that are in the specified styles. ``all`` can be used
+    to specify all styles. Valid values are:
+
+    * Grids: ``alternate``, ``blurred``, ``no_logo``, ``material``, ``white_logo``
+    * Heroes: ``alternate``, ``blurred``, ``material``
+    * Logos: ``official``, ``white``, ``black``, ``custom``
+    * Icons: ``official``, ``custom``
+
+
+extractor.steamgriddb.untagged
+------------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Include untagged assets when downloading from a list of assets.
+
+
 extractor.[szurubooru].username & .token
 ----------------------------------------
 Type
@@ -3442,7 +3679,7 @@ Description
     * ``"tweets"``: `/tweets <https://twitter.com/USER/tweets>`__ timeline + search
     * ``"media"``: `/media <https://twitter.com/USER/media>`__ timeline + search
     * ``"with_replies"``: `/with_replies <https://twitter.com/USER/with_replies>`__ timeline + search
-    * ``"auto"``: ``"tweets"`` or ``"media"``, depending on `retweets <extractor.twitter.retweets_>`__, `replies <extractor.twitter.replies_>`__, and `text-tweets <extractor.twitter.text-tweets_>`__ settings
+    * ``"auto"``: ``"tweets"`` or ``"media"``, depending on `retweets <extractor.twitter.retweets_>`__ and `text-tweets <extractor.twitter.text-tweets_>`__ settings
 
 
 extractor.twitter.text-tweets

@@ -34,8 +34,11 @@ class IdolcomplexExtractor(SankakuExtractor):
         self.start_post = 0
 
     def _init(self):
+        self.find_pids = re.compile(
+            r" href=[\"#]/\w\w/posts/([0-9a-f]+)"
+        ).findall
         self.find_tags = re.compile(
-            r'tag-type-([^"]+)">\s*<div [^>]+>\s*<a href="/\?tags=([^"]+)'
+            r'tag-type-([^"]+)">\s*<a [^>]*?href="/[^?]*\?tags=([^"]+)'
         ).findall
 
     def items(self):
@@ -149,8 +152,8 @@ class IdolcomplexTagExtractor(IdolcomplexExtractor):
     subcategory = "tag"
     directory_fmt = ("{category}", "{search_tags}")
     archive_fmt = "t_{search_tags}_{id}"
-    pattern = r"(?:https?://)?idol\.sankakucomplex\.com/\?([^#]*)"
-    example = "https://idol.sankakucomplex.com/?tags=TAGS"
+    pattern = BASE_PATTERN + r"/(?:posts/?)?\?([^#]*)"
+    example = "https://idol.sankakucomplex.com/en/posts?tags=TAGS"
     per_page = 20
 
     def __init__(self, match):
@@ -196,7 +199,8 @@ class IdolcomplexTagExtractor(IdolcomplexExtractor):
             page = self.request(self.root, params=params, retries=10).text
             pos = ((page.find('id="more-popular-posts-link"') + 1) or
                    (page.find('<span class="thumb') + 1))
-            yield from text.extract_iter(page, ' href="/posts/', '"', pos)
+
+            yield from self.find_pids(page, pos)
 
             next_url = text.extract(page, 'next-page-url="', '"', pos)[0]
             if not next_url:
@@ -218,7 +222,7 @@ class IdolcomplexPoolExtractor(IdolcomplexExtractor):
     subcategory = "pool"
     directory_fmt = ("{category}", "pool", "{pool}")
     archive_fmt = "p_{pool}_{id}"
-    pattern = r"(?:https?://)?idol\.sankakucomplex\.com/pools?/show/(\d+)"
+    pattern = BASE_PATTERN + r"/pools?/show/(\d+)"
     example = "https://idol.sankakucomplex.com/pools/show/12345"
     per_page = 24
 
@@ -242,8 +246,7 @@ class IdolcomplexPoolExtractor(IdolcomplexExtractor):
         while True:
             page = self.request(url, params=params, retries=10).text
             pos = page.find('id="pool-show"') + 1
-            post_ids = list(text.extract_iter(
-                page, ' href="/posts/', '"', pos))
+            post_ids = self.find_pids(page, pos)
 
             yield from post_ids
             if len(post_ids) < self.per_page:

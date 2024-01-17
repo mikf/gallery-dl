@@ -28,6 +28,25 @@ BROKEN = {
     "photobucket",
 }
 
+CONFIG = {
+    "cache": {
+        "file": None,
+    },
+    "downloader": {
+        "adjust-extensions": False,
+        "part": False,
+    },
+}
+
+AUTH = {
+    "pixiv",
+    "nijie",
+    "horne",
+    "seiga",
+    "instagram",
+    "twitter",
+}
+
 
 class TestExtractorResults(unittest.TestCase):
 
@@ -66,6 +85,18 @@ class TestExtractorResults(unittest.TestCase):
                 for key, value in result["#options"].items():
                     key = key.split(".")
                     config.set(key[:-1], key[-1], value)
+
+            requires_auth = result.get("#auth")
+            if requires_auth is None:
+                requires_auth = (result["#category"][1] in AUTH)
+            if requires_auth:
+                extr = result["#class"].from_url(result["#url"])
+                if not any(extr.config(key) for key in (
+                        "username", "cookies", "api-key", "client-id")):
+                    msg = "no auth"
+                    self._skipped.append((result["#url"], msg))
+                    self.skipTest(msg)
+
             if "#range" in result:
                 config.set((), "image-range"  , result["#range"])
                 config.set((), "chapter-range", result["#range"])
@@ -348,56 +379,21 @@ class TestFormatter(formatter.StringFormatter):
 
 
 def setup_test_config():
-    name = "gallerydl"
-    email = "gallerydl@openaliasbox.org"
-    email2 = "gallerydl@protonmail.com"
+    config._config.update(CONFIG)
 
-    config.clear()
-    config.set(("cache",), "file", None)
-    config.set(("downloader",), "part", False)
-    config.set(("downloader",), "adjust-extensions", False)
-    config.set(("extractor" ,), "timeout" , 60)
-    config.set(("extractor" ,), "username", name)
-    config.set(("extractor" ,), "password", name)
 
-    config.set(("extractor", "nijie")     , "username", email)
-    config.set(("extractor", "seiga")     , "username", email)
-    config.set(("extractor", "horne")     , "username", email2)
-    config.set(("extractor", "pinterest") , "username", email2)
-    config.set(("extractor", "pinterest") , "username", None)  # login broken
-
-    config.set(("extractor", "newgrounds"), "username", "d1618111")
-    config.set(("extractor", "newgrounds"), "password", "d1618111")
-
-    config.set(("extractor", "mangoxo")   , "username", "LiQiang3")
-    config.set(("extractor", "mangoxo")   , "password", "5zbQF10_5u25259Ma")
-
-    for category in ("danbooru", "atfbooru", "aibooru", "booruvar",
-                     "e621", "e926", "e6ai",
-                     "instagram", "twitter", "subscribestar", "deviantart",
-                     "inkbunny", "tapas", "pillowfort", "mangadex",
-                     "vipergirls"):
-        config.set(("extractor", category), "username", None)
-
-    config.set(("extractor", "mastodon.social"), "access-token",
-               "Blf9gVqG7GytDTfVMiyYQjwVMQaNACgf3Ds3IxxVDUQ")
-
-    config.set(("extractor", "nana"), "favkey",
-               "9237ddb82019558ea7d179e805100805"
-               "ea6aa1c53ca6885cd4c179f9fb22ead2")
-
-    config.set(("extractor", "deviantart"), "client-id", "7777")
-    config.set(("extractor", "deviantart"), "client-secret",
-               "ff14994c744d9208e5caeec7aab4a026")
-
-    config.set(("extractor", "tumblr"), "api-key",
-               "0cXoHfIqVzMQcc3HESZSNsVlulGxEXGDTTZCDrRrjaa0jmuTc6")
-    config.set(("extractor", "tumblr"), "api-secret",
-               "6wxAK2HwrXdedn7VIoZWxGqVhZ8JdYKDLjiQjL46MLqGuEtyVj")
-    config.set(("extractor", "tumblr"), "access-token",
-               "N613fPV6tOZQnyn0ERTuoEZn0mEqG8m2K8M3ClSJdEHZJuqFdG")
-    config.set(("extractor", "tumblr"), "access-token-secret",
-               "sgOA7ZTT4FBXdOGGVV331sSp0jHYp4yMDRslbhaQf7CaS71i4O")
+def load_test_config():
+    try:
+        path = os.path.join(
+            os.path.dirname(os.path.dirname(__file__)),
+            "archive", "config.json")
+        with open(path) as fp:
+            CONFIG.update(json.loads(fp.read()))
+    except FileNotFoundError:
+        pass
+    except Exception as exc:
+        sys.exit("Error when loading {}: {}: {}".format(
+            path, exc.__class__.__name__, exc))
 
 
 def generate_tests():
@@ -442,10 +438,12 @@ def generate_tests():
         enum[name] += 1
 
         method = _generate_method(result)
+        method.__doc__ = result["#url"]
         method.__name__ = "test_{}_{}".format(name, enum[name])
         setattr(TestExtractorResults, method.__name__, method)
 
 
 generate_tests()
 if __name__ == "__main__":
+    load_test_config()
     unittest.main(warnings="ignore")

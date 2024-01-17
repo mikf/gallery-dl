@@ -6,19 +6,19 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extractors for https://komikcast.site/"""
+"""Extractors for https://komikcast.lol/"""
 
 from .common import ChapterExtractor, MangaExtractor
 from .. import text
 import re
 
-BASE_PATTERN = r"(?:https?://)?(?:www\.)?komikcast\.(?:site|me|com)"
+BASE_PATTERN = r"(?:https?://)?(?:www\.)?komikcast\.(?:lol|site|me|com)"
 
 
 class KomikcastBase():
     """Base class for komikcast extractors"""
     category = "komikcast"
-    root = "https://komikcast.site"
+    root = "https://komikcast.lol"
 
     @staticmethod
     def parse_chapter_string(chapter_string, data=None):
@@ -46,9 +46,9 @@ class KomikcastBase():
 
 
 class KomikcastChapterExtractor(KomikcastBase, ChapterExtractor):
-    """Extractor for manga-chapters from komikcast.site"""
+    """Extractor for manga-chapters from komikcast.lol"""
     pattern = BASE_PATTERN + r"(/chapter/[^/?#]+/)"
-    example = "https://komikcast.site/chapter/TITLE/"
+    example = "https://komikcast.lol/chapter/TITLE/"
 
     def metadata(self, page):
         info = text.extr(page, "<title>", " - Komikcast<")
@@ -65,10 +65,10 @@ class KomikcastChapterExtractor(KomikcastBase, ChapterExtractor):
 
 
 class KomikcastMangaExtractor(KomikcastBase, MangaExtractor):
-    """Extractor for manga from komikcast.site"""
+    """Extractor for manga from komikcast.lol"""
     chapterclass = KomikcastChapterExtractor
     pattern = BASE_PATTERN + r"(/(?:komik/)?[^/?#]+)/?$"
-    example = "https://komikcast.site/komik/TITLE"
+    example = "https://komikcast.lol/komik/TITLE"
 
     def chapters(self, page):
         results = []
@@ -76,8 +76,10 @@ class KomikcastMangaExtractor(KomikcastBase, MangaExtractor):
 
         for item in text.extract_iter(
                 page, '<a class="chapter-link-item" href="', '</a'):
-            url, _, chapter_string = item.rpartition('">Chapter ')
-            self.parse_chapter_string(chapter_string, data)
+            url, _, chapter = item.rpartition('">Chapter')
+            chapter, sep, minor = chapter.strip().partition(".")
+            data["chapter"] = text.parse_int(chapter)
+            data["chapter_minor"] = sep + minor
             results.append((url, data.copy()))
         return results
 

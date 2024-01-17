@@ -14,6 +14,12 @@ Consider all listed sites to potentially be NSFW.
 </thead>
 <tbody valign="top">
 <tr>
+    <td>2ch</td>
+    <td>https://2ch.hk/</td>
+    <td>Boards, Threads</td>
+    <td></td>
+</tr>
+<tr>
     <td>2chen</td>
     <td>https://sturdychan.help/</td>
     <td>Boards, Threads</td>
@@ -98,6 +104,12 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
+    <td>BATO.TO</td>
+    <td>https://bato.to/</td>
+    <td>Chapters, Manga</td>
+    <td></td>
+</tr>
+<tr>
     <td>BBC</td>
     <td>https://bbc.co.uk/</td>
     <td>Galleries, Programmes</td>
@@ -148,7 +160,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>DeviantArt</td>
     <td>https://www.deviantart.com/</td>
-    <td>Collections, Deviations, Favorites, Folders, Followed Users, Galleries, Gallery Searches, Journals, Popular Images, Scraps, Search Results, Sta.sh, Status Updates, Tag Searches, User Profiles, Watches</td>
+    <td>Avatars, Backgrounds, Collections, Deviations, Favorites, Folders, Followed Users, Galleries, Gallery Searches, Journals, Popular Images, Scraps, Search Results, Sta.sh, Status Updates, Tag Searches, User Profiles, Watches</td>
     <td><a href="https://github.com/mikf/gallery-dl#oauth">OAuth</a></td>
 </tr>
 <tr>
@@ -251,6 +263,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Gofile</td>
     <td>https://gofile.io/</td>
     <td>Folders</td>
+    <td></td>
+</tr>
+<tr>
+    <td>HatenaBlog</td>
+    <td>https://hatenablog.com</td>
+    <td>Archive, Individual Posts, Home Feed, Search Results</td>
     <td></td>
 </tr>
 <tr>
@@ -447,7 +465,7 @@ Consider all listed sites to potentially be NSFW.
 </tr>
 <tr>
     <td>Komikcast</td>
-    <td>https://komikcast.site/</td>
+    <td>https://komikcast.lol/</td>
     <td>Chapters, Manga</td>
     <td></td>
 </tr>
@@ -496,7 +514,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>MangaDex</td>
     <td>https://mangadex.org/</td>
-    <td>Chapters, Followed Feed, Manga</td>
+    <td>Chapters, Followed Feed, Lists, Manga</td>
     <td>Supported</td>
 </tr>
 <tr>
@@ -590,12 +608,6 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
-    <td>Nudecollect</td>
-    <td>https://nudecollect.com/</td>
-    <td>Albums, individual Images</td>
-    <td></td>
-</tr>
-<tr>
     <td>Patreon</td>
     <td>https://www.patreon.com/</td>
     <td>Creators, Posts, User Profiles</td>
@@ -677,6 +689,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Poipiku</td>
     <td>https://poipiku.com/</td>
     <td>Posts, User Profiles</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Poringa</td>
+    <td>http://www.poringa.net/</td>
+    <td>Posts Images, Search Results, User Profiles</td>
     <td></td>
 </tr>
 <tr>
@@ -803,6 +821,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Speaker Deck</td>
     <td>https://speakerdeck.com/</td>
     <td>Presentations</td>
+    <td></td>
+</tr>
+<tr>
+    <td>SteamGridDB</td>
+    <td>https://www.steamgriddb.com</td>
+    <td>Individual Assets, Grids, Heroes, Icons, Logos</td>
     <td></td>
 </tr>
 <tr>
@@ -998,6 +1022,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Supported</td>
 </tr>
 <tr>
+    <td>Zzup</td>
+    <td>https://zzup.com/</td>
+    <td>Galleries</td>
+    <td></td>
+</tr>
+<tr>
     <td>かべうち</td>
     <td>https://kabe-uchiroom.com/</td>
     <td>User Profiles</td>
@@ -1031,7 +1061,7 @@ Consider all listed sites to potentially be NSFW.
 </tr>
 <tr>
     <td>JPG Fish</td>
-    <td>https://jpg2.su/</td>
+    <td>https://jpg4.su/</td>
     <td>Albums, individual Images, User Profiles</td>
     <td></td>
 </tr>
@@ -1403,6 +1433,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Posts, Tag Searches</td>
     <td></td>
 </tr>
+<tr>
+    <td>Snootbooru</td>
+    <td>https://snootbooru.com/</td>
+    <td>Posts, Tag Searches</td>
+    <td></td>
+</tr>
 
 <tr>
     <td colspan="4"><strong>URL Shorteners</strong></td>
@@ -1439,6 +1475,64 @@ Consider all listed sites to potentially be NSFW.
     <td>Smugloli</td>
     <td>https://smuglo.li/</td>
     <td>Boards, Threads</td>
+    <td></td>
+</tr>
+
+<tr>
+    <td colspan="4"><strong>Wikimedia Instances</strong></td>
+</tr>
+<tr>
+    <td>Wikipedia</td>
+    <td>https://www.wikipedia.org/</td>
+    <td>Articles, Categories</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Wiktionary</td>
+    <td>https://www.wiktionary.org/</td>
+    <td>Articles, Categories</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Wikiquote</td>
+    <td>https://www.wikiquote.org/</td>
+    <td>Articles, Categories</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Wikibooks</td>
+    <td>https://www.wikibooks.org/</td>
+    <td>Articles, Categories</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Wikisource</td>
+    <td>https://www.wikisource.org/</td>
+    <td>Articles, Categories</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Wikinews</td>
+    <td>https://www.wikinews.org/</td>
+    <td>Articles, Categories</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Wikiversity</td>
+    <td>https://www.wikiversity.org/</td>
+    <td>Articles, Categories</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Wikispecies</td>
+    <td>https://species.wikimedia.org/</td>
+    <td>Articles, Categories</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Wikimedia Commons</td>
+    <td>https://commons.wikimedia.org/</td>
+    <td>Articles, Categories</td>
     <td></td>
 </tr>
 

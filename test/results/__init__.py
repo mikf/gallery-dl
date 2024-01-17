@@ -5,7 +5,6 @@
 # published by the Free Software Foundation.
 
 import os
-import sys
 import functools
 
 __directory__ = os.path.dirname(__file__)
@@ -13,12 +12,8 @@ __directory__ = os.path.dirname(__file__)
 
 @functools.lru_cache(maxsize=None)
 def tests(name):
-    try:
-        module = __import__(name, globals(), None, (), 1)
-        return module.__tests__
-    except Exception as exc:
-        print(exc)
-        return ()
+    module = __import__(name, globals(), None, (), 1)
+    return module.__tests__
 
 
 def all():
