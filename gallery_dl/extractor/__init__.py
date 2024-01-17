@@ -35,6 +35,7 @@ modules = [
     "catbox",
     "chevereto",
     "cien",
+    "comicfury",
     "comicvine",
     "cyberdrop",
     "danbooru",
