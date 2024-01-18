@@ -102,6 +102,9 @@ class Extractor():
     def config_accumulate(self, key):
         return config.accumulate(self._cfgpath, key)
 
+    def config_instance(self, key, default=None):
+        return default
+
     def _config_shared(self, key, default=None):
         return config.interpolate_common(
             ("extractor",), self._cfgpath, key, default)
@@ -735,9 +738,10 @@ class BaseExtractor(Extractor):
         for index, group in enumerate(match.groups()):
             if group is not None:
                 if index:
-                    self.category, self.root = self.instances[index-1]
+                    self.category, self.root, info = self.instances[index-1]
                     if not self.root:
                         self.root = text.root_from_url(match.group(0))
+                    self.config_instance = info.get
                 else:
                     self.root = group
                     self.category = group.partition("://")[2]
@@ -757,7 +761,7 @@ class BaseExtractor(Extractor):
             root = info["root"]
             if root:
                 root = root.rstrip("/")
-            instance_list.append((category, root))
+            instance_list.append((category, root, info))
 
             pattern = info.get("pattern")
             if not pattern:

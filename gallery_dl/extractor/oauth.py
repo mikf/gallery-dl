@@ -358,8 +358,8 @@ class OAuthMastodon(OAuthBase):
         yield Message.Version, 1
         from . import mastodon
 
-        for application in mastodon.INSTANCES.values():
-            if self.instance == application["root"].partition("://")[2]:
+        for _, root, application in mastodon.MastodonExtractor.instances:
+            if self.instance == root.partition("://")[2]:
                 break
         else:
             application = self._register(self.instance)

@@ -75,7 +75,7 @@ class MastodonExtractor(BaseExtractor):
                              account["acct"], account["moved"]["acct"])
 
 
-INSTANCES = {
+BASE_PATTERN = MastodonExtractor.update({
     "mastodon.social": {
         "root"         : "https://mastodon.social",
         "pattern"      : r"mastodon\.social",
@@ -100,9 +100,7 @@ INSTANCES = {
         "client-id"    : "czxx2qilLElYHQ_sm-lO8yXuGwOHxLX9RYYaD0-nq1o",
         "client-secret": "haMaFdMBgK_-BIxufakmI2gFgkYjqmgXGEO2tB-R2xY",
     }
-}
-
-BASE_PATTERN = MastodonExtractor.update(INSTANCES) + "(?:/web)?"
+}) + "(?:/web)?"
 
 
 class MastodonUserExtractor(MastodonExtractor):
@@ -174,10 +172,8 @@ class MastodonAPI():
         if access_token is None or access_token == "cache":
             access_token = _access_token_cache(extractor.instance)
         if not access_token:
-            try:
-                access_token = INSTANCES[extractor.category]["access-token"]
-            except (KeyError, TypeError):
-                pass
+            access_token = extractor.config_instance("access-token")
+
         if access_token:
             self.headers = {"Authorization": "Bearer " + access_token}
         else:

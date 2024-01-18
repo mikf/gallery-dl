@@ -22,11 +22,7 @@ class GelbooruV02Extractor(booru.BooruExtractor):
     def _init(self):
         self.api_key = self.config("api-key")
         self.user_id = self.config("user-id")
-
-        try:
-            self.api_root = INSTANCES[self.category]["api_root"]
-        except KeyError:
-            self.api_root = self.root
+        self.api_root = self.config_instance("api_root") or self.root
 
         if self.category == "realbooru":
             self.items = self._items_realbooru
@@ -161,7 +157,7 @@ class GelbooruV02Extractor(booru.BooruExtractor):
             post["tags_" + key] = " ".join(value)
 
 
-INSTANCES = {
+BASE_PATTERN = GelbooruV02Extractor.update({
     "realbooru": {
         "root": "https://realbooru.com",
         "pattern": r"realbooru\.com",
@@ -187,9 +183,7 @@ INSTANCES = {
         "root": "https://xbooru.com",
         "pattern": r"xbooru\.com",
     },
-}
-
-BASE_PATTERN = GelbooruV02Extractor.update(INSTANCES)
+})
 
 
 class GelbooruV02TagExtractor(GelbooruV02Extractor):
