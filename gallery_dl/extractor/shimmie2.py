@@ -19,17 +19,12 @@ class Shimmie2Extractor(BaseExtractor):
     archive_fmt = "{id}"
 
     def _init(self):
-        try:
-            instance = INSTANCES[self.category]
-        except KeyError:
-            return
-
-        cookies = instance.get("cookies")
+        cookies = self.config_instance("cookies")
         if cookies:
             domain = self.root.rpartition("/")[2]
             self.cookies_update_dict(cookies, domain=domain)
 
-        file_url = instance.get("file_url")
+        file_url = self.config_instance("file_url")
         if file_url:
             self.file_url_fmt = file_url
 
@@ -73,7 +68,7 @@ class Shimmie2Extractor(BaseExtractor):
             return "'"
 
 
-INSTANCES = {
+BASE_PATTERN = Shimmie2Extractor.update({
     "loudbooru": {
         "root": "https://loudbooru.com",
         "pattern": r"loudbooru\.com",
@@ -97,9 +92,7 @@ INSTANCES = {
         "root": "https://rule34hentai.net",
         "pattern": r"rule34hentai\.net",
     },
-}
-
-BASE_PATTERN = Shimmie2Extractor.update(INSTANCES) + r"/(?:index\.php\?q=/?)?"
+}) + r"/(?:index\.php\?q=/?)?"
 
 
 class Shimmie2TagExtractor(Shimmie2Extractor):

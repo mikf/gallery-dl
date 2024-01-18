@@ -457,7 +457,7 @@ def build_extractor_list():
                 domains[category] = domain(extr)
         else:
             base = categories[extr.basecategory]
-            for category, root in extr.instances:
+            for category, root, info in extr.instances:
                 base[category].append(extr.subcategory)
                 if category not in domains:
                     if not root:
