@@ -17,6 +17,20 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://safebooru.org/index.php?page=post&s=list&tags=all",
+    "#category": ("gelbooru_v02", "safebooru", "tag"),
+    "#class"   : gelbooru_v02.GelbooruV02TagExtractor,
+    "#range"   : "1-3",
+    "#count"   : 3,
+},
+
+{
+    "#url"     : "https://safebooru.org/index.php?page=post&s=list&tags=",
+    "#category": ("gelbooru_v02", "safebooru", "tag"),
+    "#class"   : gelbooru_v02.GelbooruV02TagExtractor,
+},
+
+{
     "#url"     : "https://safebooru.org/index.php?page=pool&s=show&id=11",
     "#category": ("gelbooru_v02", "safebooru", "pool"),
     "#class"   : gelbooru_v02.GelbooruV02PoolExtractor,

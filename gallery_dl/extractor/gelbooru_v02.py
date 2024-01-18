@@ -190,7 +190,7 @@ class GelbooruV02TagExtractor(GelbooruV02Extractor):
     subcategory = "tag"
     directory_fmt = ("{category}", "{search_tags}")
     archive_fmt = "t_{search_tags}_{id}"
-    pattern = BASE_PATTERN + r"/index\.php\?page=post&s=list&tags=([^&#]+)"
+    pattern = BASE_PATTERN + r"/index\.php\?page=post&s=list&tags=([^&#]*)"
     example = "https://safebooru.org/index.php?page=post&s=list&tags=TAG"
 
     def __init__(self, match):
@@ -202,6 +202,8 @@ class GelbooruV02TagExtractor(GelbooruV02Extractor):
         return {"search_tags": self.tags}
 
     def posts(self):
+        if self.tags == "all":
+            self.tags = ""
         return self._pagination({"tags": self.tags})
 
 

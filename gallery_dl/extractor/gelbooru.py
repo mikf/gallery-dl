@@ -118,7 +118,7 @@ class GelbooruBase():
 class GelbooruTagExtractor(GelbooruBase,
                            gelbooru_v02.GelbooruV02TagExtractor):
     """Extractor for images from gelbooru.com based on search-tags"""
-    pattern = BASE_PATTERN + r"page=post&s=list&tags=([^&#]+)"
+    pattern = BASE_PATTERN + r"page=post&s=list&tags=([^&#]*)"
     example = "https://gelbooru.com/index.php?page=post&s=list&tags=TAG"
 
 
