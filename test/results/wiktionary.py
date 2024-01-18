@@ -17,7 +17,7 @@ __tests__ = (
 {
     "#url"     : "https://en.wiktionary.org/wiki/Category:Words",
     "#category": ("wikimedia", "wiktionary", "category"),
-    "#class"   : wikimedia.WikimediaCategoryExtractor,
+    "#class"   : wikimedia.WikimediaArticleExtractor,
 },
 
 )

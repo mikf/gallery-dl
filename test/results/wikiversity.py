@@ -17,7 +17,7 @@ __tests__ = (
 {
     "#url"     : "https://en.wikiversity.org/wiki/Category:Title",
     "#category": ("wikimedia", "wikiversity", "category"),
-    "#class"   : wikimedia.WikimediaCategoryExtractor,
+    "#class"   : wikimedia.WikimediaArticleExtractor,
 },
 
 )

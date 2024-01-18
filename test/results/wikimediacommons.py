@@ -17,7 +17,7 @@ __tests__ = (
 {
     "#url"     : "https://commons.wikimedia.org/wiki/Category:Network_maps_of_the_Paris_Metro",
     "#category": ("wikimedia", "wikimediacommons", "category"),
-    "#class"   : wikimedia.WikimediaCategoryExtractor,
+    "#class"   : wikimedia.WikimediaArticleExtractor,
 },
 
 )

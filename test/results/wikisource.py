@@ -17,7 +17,7 @@ __tests__ = (
 {
     "#url"     : "https://en.wikisource.org/wiki/Category:Title",
     "#category": ("wikimedia", "wikisource", "category"),
-    "#class"   : wikimedia.WikimediaCategoryExtractor,
+    "#class"   : wikimedia.WikimediaArticleExtractor,
 },
 
 )
