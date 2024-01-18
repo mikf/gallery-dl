@@ -1484,55 +1484,67 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Wikipedia</td>
     <td>https://www.wikipedia.org/</td>
-    <td>Articles, Categories</td>
+    <td>Articles</td>
     <td></td>
 </tr>
 <tr>
     <td>Wiktionary</td>
     <td>https://www.wiktionary.org/</td>
-    <td>Articles, Categories</td>
+    <td>Articles</td>
     <td></td>
 </tr>
 <tr>
     <td>Wikiquote</td>
     <td>https://www.wikiquote.org/</td>
-    <td>Articles, Categories</td>
+    <td>Articles</td>
     <td></td>
 </tr>
 <tr>
     <td>Wikibooks</td>
     <td>https://www.wikibooks.org/</td>
-    <td>Articles, Categories</td>
+    <td>Articles</td>
     <td></td>
 </tr>
 <tr>
     <td>Wikisource</td>
     <td>https://www.wikisource.org/</td>
-    <td>Articles, Categories</td>
+    <td>Articles</td>
     <td></td>
 </tr>
 <tr>
     <td>Wikinews</td>
     <td>https://www.wikinews.org/</td>
-    <td>Articles, Categories</td>
+    <td>Articles</td>
     <td></td>
 </tr>
 <tr>
     <td>Wikiversity</td>
     <td>https://www.wikiversity.org/</td>
-    <td>Articles, Categories</td>
+    <td>Articles</td>
     <td></td>
 </tr>
 <tr>
     <td>Wikispecies</td>
     <td>https://species.wikimedia.org/</td>
-    <td>Articles, Categories</td>
+    <td>Articles</td>
     <td></td>
 </tr>
 <tr>
     <td>Wikimedia Commons</td>
     <td>https://commons.wikimedia.org/</td>
-    <td>Articles, Categories</td>
+    <td>Articles</td>
+    <td></td>
+</tr>
+<tr>
+    <td>MediaWiki</td>
+    <td>https://www.mediawiki.org/</td>
+    <td>Articles</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Super Mario Wiki</td>
+    <td>https://www.mariowiki.com/</td>
+    <td>Articles</td>
     <td></td>
 </tr>
 

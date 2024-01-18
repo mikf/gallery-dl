@@ -7,7 +7,7 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extractors for Wikimedia and Wikipedia"""
+"""Extractors for Wikimedia sites"""
 
 from .common import BaseExtractor, Message
 from .. import text
@@ -22,7 +22,41 @@ class WikimediaExtractor(BaseExtractor):
 
     def __init__(self, match):
         BaseExtractor.__init__(self, match)
-        self.title = match.group(match.lastindex)
+        path = match.group(match.lastindex)
+
+        if path.startswith("wiki/"):
+            path = path[5:]
+            self.api_path = "/w/api.php"
+        else:
+            self.api_path = "/api.php"
+
+        pre, sep, _ = path.partition(":")
+        prefix = pre.lower() if sep else None
+
+        self.title = path = text.unquote(path)
+        self.subcategory = prefix
+
+        if prefix == "category":
+            self.params = {
+                "generator": "categorymembers",
+                "gcmtitle" : path,
+                "gcmtype"  : "file",
+            }
+        else:
+            self.params = {
+                "generator": "images",
+                "titles"   : path,
+            }
+
+    def _init(self):
+        api_path = self.config_instance("api-path")
+        if api_path:
+            if api_path[0] == "/":
+                self.api_url = self.root + api_path
+            else:
+                self.api_url = api_path
+        else:
+            self.api_url = self.root + self.api_path
 
     def items(self):
         for info in self._pagination(self.params):
@@ -51,9 +85,14 @@ class WikimediaExtractor(BaseExtractor):
         https://opendata.stackexchange.com/questions/13381
         """
 
-        url = self.root + "/w/api.php"
+        url = self.api_url
         params["action"] = "query"
         params["format"] = "json"
+        params["prop"] = "imageinfo"
+        params["iiprop"] = (
+            "timestamp|user|userid|comment|canonicaltitle|url|size|"
+            "sha1|mime|metadata|commonmetadata|extmetadata|bitdepth"
+        )
 
         while True:
             data = self.request(url, params=params).json()
@@ -109,36 +148,19 @@ BASE_PATTERN = WikimediaExtractor.update({
         "root": "https://commons.wikimedia.org",
         "pattern": r"commons\.wikimedia\.org",
     },
+    "mediawiki": {
+        "root": "https://www.mediawiki.org",
+        "pattern": r"(?:www\.)?mediawiki\.org",
+    },
+    "mariowiki": {
+        "root": "https://www.mariowiki.com",
+        "pattern": r"(?:www\.)?mariowiki\.com",
+    },
 })
 
 
 class WikimediaArticleExtractor(WikimediaExtractor):
     """Extractor for wikimedia articles"""
     subcategory = "article"
-    pattern = BASE_PATTERN + r"/wiki/(?!Category:)([^/?#]+)"
+    pattern = BASE_PATTERN + r"/(?!static/)([^?#]+)"
     example = "https://en.wikipedia.org/wiki/TITLE"
-
-    def _init(self):
-        self.params = {
-            "generator": "images",
-            "titles"   : self.title,
-            "prop"     : "imageinfo",
-            "iiprop": "timestamp|user|userid|comment|canonicaltitle|url|size|"
-                      "sha1|mime|metadata|commonmetadata|extmetadata|bitdepth",
-        }
-
-
-class WikimediaCategoryExtractor(WikimediaExtractor):
-    subcategory = "category"
-    pattern = BASE_PATTERN + r"/wiki/(Category:[^/?#]+)"
-    example = "https://commons.wikimedia.org/wiki/Category:NAME"
-
-    def _init(self):
-        self.params = {
-            "generator": "categorymembers",
-            "gcmtitle" : self.title,
-            "gcmtype"  : "file",
-            "prop"     : "imageinfo",
-            "iiprop": "timestamp|user|userid|comment|canonicaltitle|url|size|"
-                      "sha1|mime|metadata|commonmetadata|extmetadata|bitdepth",
-        }

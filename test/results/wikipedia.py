@@ -47,7 +47,7 @@ __tests__ = (
 {
     "#url"     : "https://en.wikipedia.org/wiki/Category:Physics",
     "#category": ("wikimedia", "wikipedia", "category"),
-    "#class"   : wikimedia.WikimediaCategoryExtractor,
+    "#class"   : wikimedia.WikimediaArticleExtractor,
 },
 
 )

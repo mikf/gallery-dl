@@ -17,7 +17,7 @@ __tests__ = (
 {
     "#url"     : "https://en.wikinews.org/wiki/Category:Title",
     "#category": ("wikimedia", "wikinews", "category"),
-    "#class"   : wikimedia.WikimediaCategoryExtractor,
+    "#class"   : wikimedia.WikimediaArticleExtractor,
 },
 
 )

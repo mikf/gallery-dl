@@ -19,7 +19,7 @@ __tests__ = (
 {
     "#url"     : "https://species.wikimedia.org/wiki/Category:Names",
     "#category": ("wikimedia", "wikispecies", "category"),
-    "#class"   : wikimedia.WikimediaCategoryExtractor,
+    "#class"   : wikimedia.WikimediaArticleExtractor,
 },
 
 )
