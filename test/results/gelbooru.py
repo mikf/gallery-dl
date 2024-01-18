@@ -16,6 +16,20 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://gelbooru.com/index.php?page=post&s=list&tags=all",
+    "#category": ("booru", "gelbooru", "tag"),
+    "#class"   : gelbooru.GelbooruTagExtractor,
+    "#range"   : "1-3",
+    "#count"   : 3,
+},
+
+{
+    "#url"     : "https://gelbooru.com/index.php?page=post&s=list&tags=",
+    "#category": ("booru", "gelbooru", "tag"),
+    "#class"   : gelbooru.GelbooruTagExtractor,
+},
+
+{
     "#url"     : "https://gelbooru.com/index.php?page=post&s=list&tags=meiya_neon",
     "#category": ("booru", "gelbooru", "tag"),
     "#class"   : gelbooru.GelbooruTagExtractor,
