@@ -118,18 +118,38 @@ __tests__ = (
 },
 
 {
-    "#url"     : "https://sankaku.app/post/show/360451",
+    "#url"     : "https://sankaku.app/posts/y0abGlDOr2o",
     "#category": ("booru", "sankaku", "post"),
     "#class"   : sankaku.SankakuPostExtractor,
     "#options"     : {"tags": True},
     "#sha1_content": "5e255713cbf0a8e0801dc423563c34d896bb9229",
 
-    "tags_artist"   : ["bonocho"],
-    "tags_studio"   : ["dc_comics"],
-    "tags_medium"   : list,
-    "tags_copyright": list,
-    "tags_character": list,
-    "tags_general"  : list,
+    "tags_artist": [
+        "bonocho",
+    ],
+    "tags_character": [
+        "batman",
+        "letty_whiterock",
+        "bruce_wayne",
+        "the_joker",
+        "heath_ledger",
+    ],
+    "tags_copyright": [
+        "batman_(series)",
+        "the_dark_knight",
+    ],
+    "tags_studio": [
+        "dc_comics",
+    ],
+    "tags_general": list,
+},
+
+{
+    "#url"     : "https://sankaku.app/post/show/360451",
+    "#comment" : "legacy post URL",
+    "#category": ("booru", "sankaku", "post"),
+    "#class"   : sankaku.SankakuPostExtractor,
+    "#pattern" : r"https://s\.sankakucomplex\.com/data/ac/8e/ac8e3b92ea328ce9cf7211e69c905bf9\.jpg\?e=.+",
 },
 
 {
@@ -137,6 +157,7 @@ __tests__ = (
     "#comment" : "'contentious_content'",
     "#category": ("booru", "sankaku", "post"),
     "#class"   : sankaku.SankakuPostExtractor,
+    "#auth"    : True,
     "#pattern" : r"https://s\.sankakucomplex\.com/data/13/3c/133cda3bfde249c504284493903fb985\.jpg",
 },
 

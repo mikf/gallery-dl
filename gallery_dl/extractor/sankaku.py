@@ -143,7 +143,7 @@ class SankakuPostExtractor(SankakuExtractor):
     """Extractor for single posts from sankaku.app"""
     subcategory = "post"
     archive_fmt = "{id}"
-    pattern = BASE_PATTERN + r"/posts?(?:/show)?/([0-9a-f]+)"
+    pattern = BASE_PATTERN + r"/posts?(?:/show)?/(\w+)"
     example = "https://sankaku.app/post/show/12345"
 
     def __init__(self, match):
