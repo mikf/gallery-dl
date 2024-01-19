@@ -114,6 +114,7 @@ modules = [
     "patreon",
     "philomena",
     "photobucket",
+    "photos18",
     "photovogue",
     "picarto",
     "piczel",
