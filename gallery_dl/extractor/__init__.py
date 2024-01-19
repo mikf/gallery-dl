@@ -154,6 +154,7 @@ modules = [
     "tcbscans",
     "telegraph",
     "tmohentai",
+    "toondex",
     "toyhouse",
     "tsumino",
     "tumblr",
