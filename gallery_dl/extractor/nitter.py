@@ -235,10 +235,6 @@ BASE_PATTERN = NitterExtractor.update({
         "root": "https://nitter.net",
         "pattern": r"nitter\.net",
     },
-    "nitter.lacontrevoie.fr": {
-        "root": "https://nitter.lacontrevoie.fr",
-        "pattern": r"nitter\.lacontrevoie\.fr",
-    },
     "nitter.1d4.us": {
         "root": "https://nitter.1d4.us",
         "pattern": r"nitter\.1d4\.us",
