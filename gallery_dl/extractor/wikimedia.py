@@ -34,13 +34,18 @@ class WikimediaExtractor(BaseExtractor):
         prefix = pre.lower() if sep else None
 
         self.title = path = text.unquote(path)
-        self.subcategory = prefix
+        if prefix:
+            self.subcategory = prefix
 
         if prefix == "category":
             self.params = {
                 "generator": "categorymembers",
                 "gcmtitle" : path,
                 "gcmtype"  : "file",
+            }
+        elif prefix == "file":
+            self.params = {
+                "titles"   : path,
             }
         else:
             self.params = {
