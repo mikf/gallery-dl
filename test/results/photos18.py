@@ -31,4 +31,12 @@ __tests__ = (
     "category_name": "歐美寫真",
 },
 
+{
+    "#url"     : "https://www.photos18.com",
+    "#category": ("", "photos18", "list"),
+    "#class"   : photos18.Photos18ListExtractor,
+    "#range"   : "1-200",
+    "#count"   : 200,
+},
+
 )

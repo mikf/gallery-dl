@@ -22,41 +22,6 @@ class Photos18Extractor(Extractor):
     archive_fmt = "{filename}"
     root = "https://www.photos18.com"
 
-    def items(self):
-        for post_id in self.posts():
-            url = self.root + "/v/" + post_id
-            page = self.request(url).text
-            extr = text.extract_from(page)
-
-            category_id = int(extr(
-                '<li class="breadcrumb-item"><a href="/cat/', '"'))
-            category_name = text.unescape(extr('>', '<'))
-            date = text.parse_datetime(extr('"datePublished":"', '"'))
-            title = text.unescape(extr(
-                '<h1 class="title py-1">', '</h1>')).strip()
-
-            urls = []
-            while True:
-                url = text.unescape(extr(
-                    '<div class="my-2 imgHolder"><a href="', '"'))
-                if not url:
-                    break
-
-                urls.append(url)
-
-            data = {
-                "post_id": post_id,
-                "title": title,
-                "category_id": category_id,
-                "category_name": category_name,
-                "date": date,
-                "count": len(urls),
-                "_http_headers": {"Referer": self.root},
-            }
-            yield Message.Directory, data
-            for data["num"], url in enumerate(urls, 1):
-                yield Message.Url, url, text.nameext_from_url(url, data)
-
 
 class Photos18AlbumExtractor(Photos18Extractor):
     """Extractor for a single album URL"""
@@ -68,8 +33,39 @@ class Photos18AlbumExtractor(Photos18Extractor):
         Photos18Extractor.__init__(self, match)
         self.post_id = match.group(1)
 
-    def posts(self):
-        return (self.post_id,)
+    def items(self):
+        url = self.root + "/v/" + self.post_id
+        page = self.request(url).text
+        extr = text.extract_from(page)
+
+        category_id = int(extr(
+            '<li class="breadcrumb-item"><a href="/cat/', '"'))
+        category_name = text.unescape(extr('>', '<'))
+        date = text.parse_datetime(extr('"datePublished":"', '"'))
+        title = text.unescape(extr(
+            '<h1 class="title py-1">', '</h1>')).strip()
+
+        urls = []
+        while True:
+            url = text.unescape(extr(
+                '<div class="my-2 imgHolder"><a href="', '"'))
+            if not url:
+                break
+
+            urls.append(url)
+
+        data = {
+            "post_id": self.post_id,
+            "title": title,
+            "category_id": category_id,
+            "category_name": category_name,
+            "date": date,
+            "count": len(urls),
+            "_http_headers": {"Referer": self.root},
+        }
+        yield Message.Directory, data
+        for data["num"], url in enumerate(urls, 1):
+            yield Message.Url, url, text.nameext_from_url(url, data)
 
 
 class Photos18ListExtractor(Photos18Extractor):
@@ -86,9 +82,9 @@ class Photos18ListExtractor(Photos18Extractor):
         self.q = text.unquote(match.group(4) or "") or query.get("q")
         self.category_id = match.group(1) or query.get("category_id")
         self.sort = match.group(2) or match.group(3) or query.get("sort")
-        self.page = query.get("page")
+        self.page = int(query.get("page") or 1)
 
-    def posts(self):
+    def items(self):
         query = {}
         if self.q:
             query["q"] = self.q
@@ -99,5 +95,17 @@ class Photos18ListExtractor(Photos18Extractor):
         if self.page:
             query["page"] = self.page
 
-        page = self.request(self.root, params=query).text
-        return text.extract_iter(page, '<a class="visited" href="/v/', '"')
+        while True:
+            has_post = False
+            page = self.request(self.root, params=query).text
+
+            for i in text.extract_iter(
+                    page, '<a class="visited" href="/v/', '"'):
+                has_post = True
+                url = self.root + "/v/" + i
+                data = {"_extractor": Photos18AlbumExtractor}
+                yield Message.Queue, url, data
+
+            if not has_post or '<li class="page-item next">' not in page:
+                break
+            query["page"] += 1
