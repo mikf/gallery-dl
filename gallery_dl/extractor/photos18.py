@@ -28,12 +28,12 @@ class Photos18Extractor(Extractor):
             page = self.request(url).text
             extr = text.extract_from(page)
 
-            title = text.unescape(extr(
-                '<meta property="og:title" content="', '"'))
             category_id = int(extr(
                 '<li class="breadcrumb-item"><a href="/cat/', '"'))
             category_name = text.unescape(extr('>', '<'))
             date = text.parse_datetime(extr('"datePublished":"', '"'))
+            title = text.unescape(extr(
+                '<h1 class="title py-1">', '</h1>')).strip()
 
             urls = []
             while True:
