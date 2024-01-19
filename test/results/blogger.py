@@ -24,7 +24,7 @@ __tests__ = (
 
 {
     "#url"     : "blogger:http://www.julianbunker.com/search?q=400mm",
-    "#category": ("blogger", "1www.julianbunker.com", "search"),
+    "#category": ("blogger", "www.julianbunker.com", "search"),
     "#class"   : blogger.BloggerSearchExtractor,
 },
 

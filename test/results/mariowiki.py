@@ -10,7 +10,7 @@ from gallery_dl.extractor import wikimedia
 __tests__ = (
 {
     "#url"     : "https://www.mariowiki.com/Rabbit",
-    "#category": ("wikimedia", "wikibooks", "article"),
+    "#category": ("wikimedia", "mariowiki", "article"),
     "#class"   : wikimedia.WikimediaArticleExtractor,
     "#pattern" : r"https://mario\.wiki\.gallery/images/.+",
     "#count"   : range(20, 50),
