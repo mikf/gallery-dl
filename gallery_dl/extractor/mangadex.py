@@ -158,8 +158,9 @@ class MangadexListExtractor(MangadexExtractor):
 
     def __init__(self, match):
         MangadexExtractor.__init__(self, match)
-        if match.group(2) != "feed":
+        if match.group(2) == "feed":
             self.subcategory = "list-feed"
+        else:
             self.items = self._items_titles
 
     def chapters(self):

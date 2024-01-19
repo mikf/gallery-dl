@@ -24,6 +24,11 @@ from gallery_dl.extractor.directlink import DirectlinkExtractor  # noqa E402
 
 _list_classes = extractor._list_classes
 
+try:
+    from test import results
+except ImportError:
+    results = None
+
 
 class FakeExtractor(Extractor):
     category = "fake"
@@ -92,17 +97,23 @@ class TestExtractorModule(unittest.TestCase):
             with self.assertRaises(TypeError):
                 FakeExtractor.from_url(invalid)
 
-    def test_unique_pattern_matches(self):
-        try:
-            import test.results
-        except ImportError:
-            raise unittest.SkipTest("no test data")
+    @unittest.skipIf(not results, "no test data")
+    def test_categories(self):
+        for result in results.all():
+            url = result["#url"]
+            extr = result["#class"].from_url(url)
+            base, cat, sub = result["#category"]
+            self.assertEqual(extr.category, cat, url)
+            self.assertEqual(extr.subcategory, sub, url)
+            self.assertEqual(extr.basecategory, base, url)
 
+    @unittest.skipIf(not results, "no test data")
+    def test_unique_pattern_matches(self):
         # collect testcase URLs
         test_urls = []
         append = test_urls.append
 
-        for result in test.results.all():
+        for result in results.all():
             append((result["#url"], result["#class"]))
 
         # iterate over all testcase URLs
