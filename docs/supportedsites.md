@@ -1294,12 +1294,6 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
-    <td>Nitter.lacontrevoie.fr</td>
-    <td>https://nitter.lacontrevoie.fr/</td>
-    <td>Media Files, Replies, Search Results, Tweets</td>
-    <td></td>
-</tr>
-<tr>
     <td>Nitter.1d4.us</td>
     <td>https://nitter.1d4.us/</td>
     <td>Media Files, Replies, Search Results, Tweets</td>
