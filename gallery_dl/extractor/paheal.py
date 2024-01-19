@@ -56,7 +56,7 @@ class PahealExtractor(Extractor):
             "date"    : text.parse_datetime(
                 extr("datetime='", "'"), "%Y-%m-%dT%H:%M:%S%z"),
             "source"  : text.unescape(text.extr(
-                extr(">Source&nbsp;Link<", "</td>"), "href='", "'")),
+                extr(">Source Link<", "</td>"), "href='", "'")),
         }
 
         dimensions, size, ext = extr("Info</th><td>", "<").split(" // ")
