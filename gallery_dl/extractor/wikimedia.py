@@ -16,6 +16,7 @@ from .. import text
 class WikimediaExtractor(BaseExtractor):
     """Base class for wikimedia extractors"""
     basecategory = "wikimedia"
+    filename_fmt = "{filename} ({sha1[:8]}).{extension}"
     directory_fmt = ("{category}", "{page}")
     archive_fmt = "{sha1}"
     request_interval = (1.0, 2.0)
