@@ -1395,7 +1395,7 @@ Consider all listed sites to potentially be NSFW.
 </tr>
 <tr>
     <td>Giantessbooru</td>
-    <td>https://giantessbooru.com/</td>
+    <td>https://sizechangebooru.com/</td>
     <td>Posts, Tag Searches</td>
     <td></td>
 </tr>
