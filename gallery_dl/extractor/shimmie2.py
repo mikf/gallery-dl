@@ -75,8 +75,8 @@ BASE_PATTERN = Shimmie2Extractor.update({
         "cookies": {"ui-tnc-agreed": "true"},
     },
     "giantessbooru": {
-        "root": "https://giantessbooru.com",
-        "pattern": r"giantessbooru\.com",
+        "root": "https://sizechangebooru.com",
+        "pattern": r"(?:sizechange|giantess)booru\.com",
         "cookies": {"agreed": "true"},
     },
     "tentaclerape": {
@@ -176,25 +176,25 @@ class Shimmie2TagExtractor(Shimmie2Extractor):
             extr = text.extract_from(self.request(url).text)
 
             while True:
-                pid = extr('href="./index.php?q=/post/view/', '&')
+                pid = extr("href='./index.php?q=/post/view/", "&")
                 if not pid:
                     break
 
-                tags, dimensions, size = extr('title="', '"').split(" // ")
+                tags, dimensions, size = extr("title='", "'").split(" // ")
                 width, _, height = dimensions.partition("x")
 
                 yield {
                     "file_url": file_url_fmt(pid),
-                    "id": pid,
-                    "md5": "",
-                    "tags": tags,
-                    "width": width,
-                    "height": height,
-                    "size": text.parse_bytes(size[:-1]),
+                    "id"      : pid,
+                    "md5"     : "",
+                    "tags"    : tags,
+                    "width"   : width,
+                    "height"  : height,
+                    "size"    : text.parse_bytes(size[:-1]),
                 }
 
             pnum += 1
-            if not extr('/{}">{}<'.format(pnum, pnum), ">"):
+            if not extr("/{0}'>{0}<".format(pnum), ">"):
                 return
 
 
@@ -241,7 +241,7 @@ class Shimmie2PostExtractor(Shimmie2Extractor):
             "id"      : self.post_id,
             "tags"    : extr(": ", "<").partition(" - ")[0].rstrip(")"),
             "md5"     : "",
-            "file_url": self.root + extr('id="main_image" src=".', '"'),
+            "file_url": self.root + extr("id='main_image' src='.", "'"),
             "width"   : extr("orig_width =", ";"),
             "height"  : 0,
             "size"    : 0,
