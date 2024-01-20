@@ -38,10 +38,6 @@ BASE_PATTERN = CheveretoExtractor.update({
         "root": "https://jpg4.su",
         "pattern": r"jpe?g\d?\.(?:su|pet|fish(?:ing)?|church)",
     },
-    "pixl": {
-        "root": "https://pixl.li",
-        "pattern": r"pixl\.(?:li|is)",
-    },
     "imgkiwi": {
         "root": "https://img.kiwi",
         "pattern": r"img\.kiwi",
