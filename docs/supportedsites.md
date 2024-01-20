@@ -272,12 +272,6 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
-    <td>HBrowse</td>
-    <td>https://www.hbrowse.com/</td>
-    <td>Chapters, Manga</td>
-    <td></td>
-</tr>
-<tr>
     <td>Hentai Cosplay</td>
     <td>https://hentai-cosplays.com/</td>
     <td>Galleries</td>
