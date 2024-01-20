@@ -31,6 +31,7 @@ __tests__ = (
     "#category": ("booru", "zerochan", "image"),
     "#class"   : zerochan.ZerochanImageExtractor,
     "#pattern" : r"https://static\.zerochan\.net/Perth\.%28Kantai\.Collection%29\.full.2920445\.jpg",
+    "#auth"    : True,
 
     "author"  : "YeFan 葉凡",
     "date"    : "dt:2020-04-24 21:33:44",

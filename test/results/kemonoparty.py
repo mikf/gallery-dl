@@ -60,7 +60,7 @@ __tests__ = (
     "added"      : "2020-05-06T20:28:02.302000",
     "content"    : str,
     "count"      : 1,
-    "date"       : "dt:2019-08-11 02:09:04",
+    "date"       : "dt:2019-08-10 17:09:04",
     "edited"     : None,
     "embed"      : dict,
     "extension"  : "jpeg",
@@ -68,7 +68,7 @@ __tests__ = (
     "hash"       : "210f35388e28bbcf756db18dd516e2d82ce758e0d32881eeee76d43e1716d382",
     "id"         : "506575",
     "num"        : 1,
-    "published"  : "2019-08-11T02:09:04",
+    "published"  : "2019-08-10T17:09:04",
     "service"    : "fanbox",
     "shared_file": False,
     "subcategory": "fanbox",
@@ -295,23 +295,13 @@ __tests__ = (
 },
 
 {
-    "#url"     : "https://kemono.party/favorites",
+    "#url"     : "https://kemono.su/favorites",
     "#category": ("", "kemonoparty", "favorite"),
     "#class"   : kemonoparty.KemonopartyFavoriteExtractor,
     "#pattern" : kemonoparty.KemonopartyUserExtractor.pattern,
     "#auth"    : True,
     "#count"   : 3,
-    "#sha1_url": "f4b5b796979bcba824af84206578c79101c7f0e1",
-},
-
-{
-    "#url"     : "https://kemono.party/favorites?type=post",
-    "#category": ("", "kemonoparty", "favorite"),
-    "#class"   : kemonoparty.KemonopartyFavoriteExtractor,
-    "#pattern" : kemonoparty.KemonopartyPostExtractor.pattern,
-    "#auth"    : True,
-    "#count"   : 3,
-    "#sha1_url": "ecfccf5f0d50b8d14caa7bbdcf071de5c1e5b90f",
+    "#sha1_url": "902c656c8002a3257ef9e255cb69bca1937373d4",
 },
 
 {

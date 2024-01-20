@@ -27,6 +27,7 @@ __tests__ = (
     "num"       : int,
     "slug"      : "british-beauty-danielle-flashes-hot-breasts-ass-and-snatch-in-the-forest",
     "tags"      : [
+        "MILF Outdoor",
         "Amateur MILF",
         "Nature",
         "Amateur Outdoor",

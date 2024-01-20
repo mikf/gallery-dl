@@ -187,7 +187,7 @@ __tests__ = (
     "#url"     : "https://twitter.com/i/lists/784214683683127296/members",
     "#category": ("", "twitter", "list-members"),
     "#class"   : twitter.TwitterListMembersExtractor,
-    "#pattern" : twitter.TwitterTimelineExtractor.pattern,
+    "#pattern" : twitter.TwitterUserExtractor.pattern,
     "#range"   : "1-40",
     "#count"   : 40,
 },
@@ -463,7 +463,7 @@ You’ll be able to receive four Galarian form Pokémon with Hidden Abilities, p
     "#category": ("", "twitter", "tweet"),
     "#class"   : twitter.TwitterTweetExtractor,
     "#options" : {"retweets": True},
-    "#count"   : 0,
+    "#count"   : 4,
 },
 
 {
@@ -509,8 +509,8 @@ You’ll be able to receive four Galarian form Pokémon with Hidden Abilities, p
     "#category": ("", "twitter", "tweet"),
     "#class"   : twitter.TwitterTweetExtractor,
     "#options" : {"cards": True},
-    "#pattern" : r"https://pbs.twimg.com/card_img/157\d+/[\w-]+\?format=(jpg|png)&name=orig$",
-    "#range"   : "1-2",
+    "#pattern" : r"https://pbs.twimg.com/card_img/174\d+/[\w-]+\?format=(jpg|png)&name=orig$",
+    "#range"   : "1,3",
 },
 
 {

@@ -29,11 +29,11 @@ __tests__ = (
 },
 
 {
-    "#url"     : "https://www.fashionnova.com/products/essential-slide-red",
+    "#url"     : "https://www.fashionnova.com/products/all-my-life-legging-black",
     "#category": ("shopify", "fashionnova", "product"),
     "#class"   : shopify.ShopifyProductExtractor,
-    "#pattern" : r"https?://cdn\d*\.shopify.com/",
-    "#count"   : 3,
+    "#pattern" : r"https?://cdn\d*\.shopify\.com/s/files/",
+    "#count"   : 8,
 },
 
 {

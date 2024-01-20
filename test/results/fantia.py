@@ -17,7 +17,7 @@ __tests__ = (
 
     "fanclub_user_id": 52152,
     "tags"           : list,
-    "title"          : str,
+    "post_title"     : str,
 },
 
 {
@@ -26,7 +26,7 @@ __tests__ = (
     "#class"   : fantia.FantiaPostExtractor,
     "#pattern" : r"https://(c\.fantia\.jp/uploads/post/file/1166373/|cc\.fantia\.jp/uploads/post_content_photo/file/732549[01]|fantia\.jp/posts/1166373/album_image\?)",
 
-    "blogpost_text"   : r"re:^$|This is a test.\n\nThis is a test.\n\n|Link to video:\nhttps://www.youtube.com/watch\?v=5SSdvNcAagI\n\nhtml img from another site:\n\n\n\n\n\n",
+    "blogpost_text"   : r"re:^$|This is a test.\n\n(This is a test.)?\n\n|Link to video:\nhttps://www.youtube.com/watch\?v=5SSdvNcAagI\n\nhtml img from another site:\n\n\n\n\n\n",
     "comment"         : "\n\n",
     "content_category": r"re:thumb|blog|photo_gallery",
     "content_comment" : str,
@@ -56,7 +56,7 @@ __tests__ = (
     "#url"     : "https://fantia.jp/posts/508363",
     "#category": ("", "fantia", "post"),
     "#class"   : fantia.FantiaPostExtractor,
-    "#count"   : 0,
+    "#count"   : 6,
 
     "post_title": "zunda逆バニーでおしりｺｯｼｮﾘ",
     "tags"      : list,

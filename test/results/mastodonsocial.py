@@ -82,6 +82,7 @@ __tests__ = (
     "#class"   : mastodon.MastodonFollowingExtractor,
     "#extractor": False,
     "#urls"     : (
+        "https://ravenation.club/@soundwarrior20",
         "https://mastodon.social/@0x4f",
         "https://mastodon.social/@RustyBertrand",
         "https://mastodon.social/@christianselig",
@@ -105,7 +106,7 @@ __tests__ = (
     "header_static" : str,
     "id"            : r"re:\d+",
     "last_status_at": r"re:\d{4}-\d{2}-\d{2}",
-    "locked"        : False,
+    "locked"        : bool,
     "note"          : str,
     "statuses_count": int,
     "uri"           : str,

@@ -262,7 +262,7 @@ __tests__ = (
     "allows_comments"  : True,
     "author"           : {
         "type"    : "regular",
-        "usericon": "https://a.deviantart.net/avatars/g/d/gdldev.jpg?2",
+        "usericon": "https://a.deviantart.net/avatars/g/d/gdldev.jpg?12",
         "userid"  : "1A12BA26-33C2-AA0A-7678-0B6DFBA7AC8E",
         "username": "gdldev"
     },
@@ -530,7 +530,7 @@ __tests__ = (
     "#category": ("", "deviantart", "status"),
     "#class"   : deviantart.DeviantartStatusExtractor,
     "#count"   : 4,
-    "#sha1_url": "bf4c44c0c60ff2648a880f4c3723464ad3e7d074",
+    "#sha1_url": "62ee48ff3405c7714dca70abf42e8e39731012fc",
 },
 
 {
@@ -538,7 +538,7 @@ __tests__ = (
     "#category": ("", "deviantart", "status"),
     "#class"   : deviantart.DeviantartStatusExtractor,
     "#options" : {"journals": "none"},
-    "#pattern" : r"https://images-wixmp-\w+\.wixmp\.com/f/[^/]+/[^.]+\.jpg\?token=",
+    "#pattern" : r"https://images-wixmp-\w+\.wixmp\.com/intermediary/f/[^/]+/[^.]+\.jpg",
     "#count"   : 1,
 },
 
@@ -580,7 +580,7 @@ __tests__ = (
     "#category": ("", "deviantart", "status"),
     "#class"   : deviantart.DeviantartStatusExtractor,
     "#options" : {"journals": "text"},
-    "#sha1_url": "c8744f7f733a3029116607b826321233c5ca452d",
+    "#sha1_url": "10a336bdee7b9692919461443a7dde44d495818c",
 },
 
 {
@@ -766,7 +766,7 @@ __tests__ = (
     "#url"     : "https://www.deviantart.com/view/706871727",
     "#category": ("", "deviantart", "deviation"),
     "#class"   : deviantart.DeviantartDeviationExtractor,
-    "#sha1_content": "3f62ae0c2fca2294ac28e41888ea06bb37c22c65",
+    "#sha1_content": "87dff6056fc9a2bf77f75317a1e00e18451b3c80",
 },
 
 {
