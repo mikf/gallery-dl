@@ -88,9 +88,19 @@ class WebtoonsEpisodeExtractor(WebtoonsBase, GalleryExtractor):
 
     def metadata(self, page):
         extr = text.extract_from(page)
-        keywords = extr('<meta name="keywords" content="', '"').split(", ")
         title = extr('<meta property="og:title" content="', '"')
         descr = extr('<meta property="og:description" content="', '"')
+
+        if extr('<div class="subj_info"', '\n'):
+            comic_name = extr('>', '<')
+            episode_name = extr('<h1 class="subj_episode" title="', '"')
+        else:
+            comic_name = episode_name = ""
+
+        if extr('<span class="tx _btnOpenEpisodeList ', '"'):
+            episode = extr('>#', '<')
+        else:
+            episode = ""
 
         if extr('<div class="author_area"', '\n'):
             username = extr('/creator/', '"')
@@ -104,9 +114,9 @@ class WebtoonsEpisodeExtractor(WebtoonsBase, GalleryExtractor):
             "title_no"    : self.title_no,
             "episode_no"  : self.episode_no,
             "title"       : text.unescape(title),
-            "episode"     : keywords[1],
-            "comic_name"  : text.unescape(keywords[0]),
-            "episode_name": text.unescape(keywords[2]),
+            "episode"     : episode,
+            "comic_name"  : text.unescape(comic_name),
+            "episode_name": text.unescape(episode_name),
             "username"    : username,
             "author_name" : text.unescape(author_name),
             "description" : text.unescape(descr),
