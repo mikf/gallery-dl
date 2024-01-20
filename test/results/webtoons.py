@@ -61,8 +61,35 @@ __tests__ = (
 
     "comic_name"  : "I want to be a cute anime girl",
     "episode_name": "209 - The story's story",
+    "episode"     : "214",
     "username"    : "m9huj",
     "author_name" : "Azul Crescent",
+},
+
+{
+    "#url"     : "https://www.webtoons.com/en/canvas/i-want-to-be-a-cute-anime-girl/174-not-194-it-was-a-typo-later/viewer?title_no=349416&episode_no=179",
+    "#category": ("", "webtoons", "episode"),
+    "#class"   : webtoons.WebtoonsEpisodeExtractor,
+    "#count"   : 4,
+
+    "comic_name"  : "I want to be a cute anime girl",
+    "episode_name": "174 (not 194, it was a typo) - Later",
+    "episode"     : "179",
+    "username"    : "m9huj",
+    "author_name" : "Azul Crescent",
+},
+
+{
+    "#url"     : "https://www.webtoons.com/en/canvas/us-over-here/1-the-wheel/viewer?title_no=919536&episode_no=1",
+    "#category": ("", "webtoons", "episode"),
+    "#class"   : webtoons.WebtoonsEpisodeExtractor,
+    "#count"   : 59,
+
+    "comic_name"  : "Us, over here",
+    "episode_name": "1. The Wheel",
+    "episode"     : "1",
+    "username"    : "i94q8",
+    "author_name" : "spin.ani",
 },
 
 {
