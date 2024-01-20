@@ -9,11 +9,11 @@ from gallery_dl.extractor import xhamster
 
 __tests__ = (
 {
-    "#url"     : "https://xhamster.com/photos/gallery/11748968",
+    "#url"     : "https://xhamster.com/photos/gallery/take-me-to-the-carwash-at-digitaldesire-15860946",
     "#category": ("", "xhamster", "gallery"),
     "#class"   : xhamster.XhamsterGalleryExtractor,
-    "#pattern" : r"https://thumb-p\d+.xhcdn.com/./[\w/-]+_1000.jpg$",
-    "#count"   : ">= 144",
+    "#pattern" : r"https://ic-ph-ah\.xhcdn\.com/a/\w+/webp/000/\d+/\d+/\d+_1000\.jpg$",
+    "#count"   : 19,
 
     "comments": int,
     "count"   : int,
@@ -26,32 +26,40 @@ __tests__ = (
     "pageURL" : str,
     "thumbURL": str,
     "gallery" : {
-        "date"       : "dt:2019-04-16 00:07:31",
-        "description": "",
+        "date"       : "dt:2022-02-02 06:30:09",
+        "description": "Alina Henessy loves to wash her car, and we love seeing every inch of her gorgeous body. More at DigitalDesire.com",
         "dislikes"   : int,
-        "id"         : 11748968,
+        "id"         : 15860946,
         "likes"      : int,
-        "tags"       : ["NON-Porn"],
+        "tags"       : [
+            "Babe",
+            "Public Nudity",
+            "Take",
+            "Taking",
+            "Masturbation",
+            "Take Me",
+        ],
         "thumbnail"  : str,
-        "title"      : "Make the world better.",
-        "views"      : int,
+        "title"      : "Take me to the carwash at DigitalDesire",
+        "views"      : range(100000, 200000),
+
     },
     "user"    : {
-        "id"         : 16874672,
-        "name"       : "Anonymousrants",
-        "retired"    : bool,
-        "subscribers": int,
-        "url"        : "https://xhamster.com/users/anonymousrants",
-        "verified"   : bool,
+        "id"         : 4741860,
+        "name"       : "DaringSex",
+        "retired"    : False,
+        "subscribers": range(25000, 50000),
+        "url"        : "https://xhamster.com/users/daringsex",
+        "verified"   : False,
     },
 },
 
 {
-    "#url"     : "https://jp.xhamster2.com/photos/gallery/11748968",
+    "#url"     : "https://jp.xhamster2.com/photos/gallery/take-me-to-the-carwash-at-digitaldesire-15860946",
     "#category": ("", "xhamster", "gallery"),
     "#class"   : xhamster.XhamsterGalleryExtractor,
-    "#pattern" : r"https://thumb-p\d+.xhcdn.com/./[\w/-]+_1000.jpg$",
-    "#count"   : ">= 144",
+    "#pattern" : r"https://ic-ph-ah\.xhcdn\.com/a/\w+/webp/000/\d+/\d+/\d+_1000\.jpg$",
+    "#count"   : 19,
 },
 
 {
@@ -97,7 +105,7 @@ __tests__ = (
 },
 
 {
-    "#url"     : "https://xhamster.com/users/goldenpalomino/photos",
+    "#url"     : "https://xhamster.com/users/daringsex/photos",
     "#category": ("", "xhamster", "user"),
     "#class"   : xhamster.XhamsterUserExtractor,
     "#pattern" : xhamster.XhamsterGalleryExtractor.pattern,

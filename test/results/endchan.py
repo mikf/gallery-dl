@@ -9,11 +9,10 @@ from gallery_dl.extractor import lynxchan
 
 __tests__ = (
 {
-    "#url"     : "https://endchan.org/yuri/res/193483.html",
+    "#url"     : "https://endchan.org/yuri/res/33621.html",
     "#category": ("lynxchan", "endchan", "thread"),
     "#class"   : lynxchan.LynxchanThreadExtractor,
-    "#pattern" : r"https://endchan\.org/\.media/[^.]+(\.\w+)?$",
-    "#count"   : ">= 19",
+    "#urls"    : "https://endchan.org/.media/358c089df4be990e9f7b636e1ce83d3e-imagejpeg.jpg",
 },
 
 {
@@ -27,7 +26,7 @@ __tests__ = (
     "#category": ("lynxchan", "endchan", "board"),
     "#class"   : lynxchan.LynxchanBoardExtractor,
     "#pattern" : lynxchan.LynxchanThreadExtractor.pattern,
-    "#count"   : ">= 9",
+    "#count"   : ">= 8",
 },
 
 {

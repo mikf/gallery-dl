@@ -57,6 +57,7 @@ __tests__ = (
     "#comment" : "secret board (#1055)",
     "#category": ("", "pinterest", "board"),
     "#class"   : pinterest.PinterestBoardExtractor,
+    "#auth"    : True,
     "#count"   : 2,
 },
 

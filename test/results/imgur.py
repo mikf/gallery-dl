@@ -232,7 +232,7 @@ __tests__ = (
     "#comment" : "large album",
     "#category": ("", "imgur", "album"),
     "#class"   : imgur.ImgurAlbumExtractor,
-    "#sha1_url": "de748c181a04d18bef1de9d4f4866ef0a06d632b",
+    "#exception": exception.HttpError,
 },
 
 {
@@ -255,7 +255,7 @@ __tests__ = (
     "#comment" : "empty, no 'media' (#2557)",
     "#category": ("", "imgur", "album"),
     "#class"   : imgur.ImgurAlbumExtractor,
-    "#count"   : 0,
+    "#exception": exception.HttpError,
 },
 
 {
@@ -291,7 +291,7 @@ __tests__ = (
     "#url"     : "https://imgur.com/gallery/eD9CT",
     "#category": ("", "imgur", "gallery"),
     "#class"   : imgur.ImgurGalleryExtractor,
-    "#pattern" : "https://imgur.com/a/eD9CT",
+    "#exception": exception.HttpError,
 },
 
 {

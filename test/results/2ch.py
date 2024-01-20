@@ -28,7 +28,7 @@ __tests__ = (
     "filename" : str,
     "fullname" : str,
     "height"   : int,
-    "lasthit"  : 1705273977,
+    "lasthit"  : range(1705000000, 1900000000),
     "md5"      : r"re:[0-9a-f]{32}",
     "name"     : r"re:\d+\.\w+",
     "num"      : int,

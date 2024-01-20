@@ -42,7 +42,9 @@ AUTH = {
     "pixiv",
     "nijie",
     "horne",
+    "reddit",
     "seiga",
+    "fantia",
     "instagram",
     "twitter",
 }
@@ -92,7 +94,8 @@ class TestExtractorResults(unittest.TestCase):
             if requires_auth:
                 extr = result["#class"].from_url(result["#url"])
                 if not any(extr.config(key) for key in (
-                        "username", "cookies", "api-key", "client-id")):
+                        "username", "cookies", "api-key", "client-id",
+                        "refresh-token")):
                     msg = "no auth"
                     self._skipped.append((result["#url"], msg))
                     self.skipTest(msg)
@@ -410,7 +413,7 @@ def generate_tests():
                 if v in ("f", "fail"):
                     self.fail("manual test failure")
                 else:
-                    self._skipped.append((result["#url"], exc))
+                    self._skipped.append((result["#url"], "manual skip"))
                     self.skipTest(exc)
         return test
 

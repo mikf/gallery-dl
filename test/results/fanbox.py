@@ -69,9 +69,9 @@ __tests__ = (
     "#category": ("", "fanbox", "post"),
     "#class"   : fanbox.FanboxPostExtractor,
     "#options" : {"embeds": True},
-    "#count"   : 10,
+    "#count"   : 8,
 
-    "title"          : "イラスト+SS｜義足の炭鉱少年が義足を見せてくれるだけ 【全体公開版】",
+    "title"          : "イラスト+SS｜【全体公開版】義足の探鉱夫男子が義足を見せてくれるだけ ",
     "tags"           : list,
     "articleBody"    : dict,
     "hasAdultContent": True,

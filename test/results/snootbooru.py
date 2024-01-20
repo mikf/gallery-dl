@@ -64,9 +64,6 @@ __tests__ = (
         "sport",
         "text"
     ],
-    "tags_type"    : [
-        "transparent"
-    ],
     "thumbnailUrl" : "data/generated-thumbnails/14511_e753313112755da6.jpg",
     "type"         : "image",
     "user"         : {

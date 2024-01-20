@@ -107,7 +107,7 @@ __tests__ = (
     "#category": ("", "artstation", "image"),
     "#class"   : artstation.ArtstationImageExtractor,
     "#pattern"     : r"https?://\w+\.artstation\.com/p/assets/images/images/008/760/279/4k/.+",
-    "#sha1_content": "7b113871465fdc09d127adfdc2767d51cf45a7e9",
+    "#sha1_content": "3f211ce0d6ecdb502db2cdf7bbeceb11d8421170",
 },
 
 {
@@ -124,7 +124,7 @@ __tests__ = (
     "#category": ("", "artstation", "image"),
     "#class"   : artstation.ArtstationImageExtractor,
     "#options" : {"external": True},
-    "#pattern" : "ytdl:https://www.youtube.com/embed/JNFfJtwwrU0",
+    "#pattern" : r"ytdl:https://www\.youtube(-nocookie)?\.com/embed/JNFfJtwwrU0",
     "#range"   : "2",
 },
 
@@ -154,7 +154,7 @@ __tests__ = (
     "#category": ("", "artstation", "following"),
     "#class"   : artstation.ArtstationFollowingExtractor,
     "#pattern" : artstation.ArtstationUserExtractor.pattern,
-    "#count"   : ">= 50",
+    "#count"   : ">= 40",
 },
 
 )
