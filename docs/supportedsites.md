@@ -1524,6 +1524,12 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
+    <td>Fandom</td>
+    <td>https://www.fandom.com/</td>
+    <td>Articles</td>
+    <td></td>
+</tr>
+<tr>
     <td>Super Mario Wiki</td>
     <td>https://www.mariowiki.com/</td>
     <td>Articles</td>
