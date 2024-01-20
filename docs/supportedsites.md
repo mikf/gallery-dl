@@ -1066,12 +1066,6 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
-    <td>Pixl</td>
-    <td>https://pixl.li/</td>
-    <td>Albums, individual Images, User Profiles</td>
-    <td></td>
-</tr>
-<tr>
     <td>IMG.Kiwi</td>
     <td>https://img.kiwi/</td>
     <td>Albums, individual Images, User Profiles</td>
