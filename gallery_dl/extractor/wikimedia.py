@@ -25,6 +25,10 @@ class WikimediaExtractor(BaseExtractor):
         BaseExtractor.__init__(self, match)
         path = match.group(match.lastindex)
 
+        if self.category == "fandom":
+            self.category = \
+                "fandom-" + self.root.partition(".")[0].rpartition("/")[2]
+
         if path.startswith("wiki/"):
             path = path[5:]
             self.api_path = "/w/api.php"
@@ -157,6 +161,11 @@ BASE_PATTERN = WikimediaExtractor.update({
     "mediawiki": {
         "root": "https://www.mediawiki.org",
         "pattern": r"(?:www\.)?mediawiki\.org",
+    },
+    "fandom": {
+        "root": None,
+        "pattern": r"[\w-]+\.fandom\.com",
+        "api-path": "/api.php",
     },
     "mariowiki": {
         "root": "https://www.mariowiki.com",
