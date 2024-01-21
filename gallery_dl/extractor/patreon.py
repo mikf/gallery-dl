@@ -64,7 +64,12 @@ class PatreonExtractor(Extractor):
         postfile = post.get("post_file")
         if postfile:
             url = postfile["url"]
-            name = postfile.get("name") or self._filename(url) or url
+            name = postfile.get("name")
+            if not name:
+                if url.startswith("https://stream.mux.com/"):
+                    name = url
+                else:
+                    name = self._filename(url) or url
             return (("postfile", url, name),)
         return ()
 
