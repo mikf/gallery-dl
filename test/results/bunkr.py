@@ -9,7 +9,7 @@ from gallery_dl.extractor import bunkr
 
 __tests__ = (
 {
-    "#url"     : "https://bunkrr.su/a/Lktg9Keq",
+    "#url"     : "https://bunkrr.ru/a/Lktg9Keq",
     "#category": ("lolisafe", "bunkr", "album"),
     "#class"   : bunkr.BunkrAlbumExtractor,
     "#urls"        : "https://i-burger.bunkr.ru/test-テスト-\"&>-QjgneIQv.png",
