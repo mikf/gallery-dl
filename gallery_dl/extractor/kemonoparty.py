@@ -240,7 +240,9 @@ class KemonopartyExtractor(Extractor):
         rev.pop("added", None)
         rev.pop("next", None)
         rev.pop("prev", None)
+        rev["file"] = rev["file"].copy()
         rev["file"].pop("name", None)
+        rev["attachments"] = [a.copy() for a in rev["attachments"]]
         for a in rev["attachments"]:
             a.pop("name", None)
         return util.sha1(self._json_dumps(rev))
