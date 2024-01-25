@@ -123,7 +123,7 @@ Consider all listed sites to potentially be NSFW.
 </tr>
 <tr>
     <td>Bunkr</td>
-    <td>https://bunkrr.ru/</td>
+    <td>https://bunkr.sk/</td>
     <td>Albums, Media Files</td>
     <td></td>
 </tr>

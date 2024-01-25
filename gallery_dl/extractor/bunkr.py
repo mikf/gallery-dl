@@ -6,13 +6,13 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extractors for https://bunkrr.ru/"""
+"""Extractors for https://bunkr.sk/"""
 
 from .lolisafe import LolisafeAlbumExtractor
 from .. import text
 from urllib.parse import urlsplit, urlunsplit
 
-BASE_PATTERN = r"(?:https?://)?(?:app\.)?bunkr+\.(?:[rs]u|la|is|to)"
+BASE_PATTERN = r"(?:https?://)?(?:app\.)?bunkr+\.(?:sk|[rs]u|la|is|to)"
 
 MEDIA_DOMAIN_OVERRIDES = {
     "cdn9.bunkr.ru" : "c9.bunkr.ru",
@@ -27,11 +27,11 @@ CDN_HOSTED_EXTENSIONS = (
 
 
 class BunkrAlbumExtractor(LolisafeAlbumExtractor):
-    """Extractor for bunkrr.ru albums"""
+    """Extractor for bunkr.sk albums"""
     category = "bunkr"
-    root = "https://bunkrr.ru"
+    root = "https://bunkr.sk"
     pattern = BASE_PATTERN + r"/a/([^/?#]+)"
-    example = "https://bunkrr.ru/a/ID"
+    example = "https://bunkr.sk/a/ID"
 
     def fetch_album(self, album_id):
         # album metadata
@@ -84,11 +84,11 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
 
 
 class BunkrMediaExtractor(BunkrAlbumExtractor):
-    """Extractor for bunkrr.ru media links"""
+    """Extractor for bunkr.sk media links"""
     subcategory = "media"
     directory_fmt = ("{category}",)
     pattern = BASE_PATTERN + r"/[vid]/([^/?#]+)"
-    example = "https://bunkrr.ru/v/FILENAME"
+    example = "https://bunkr.sk/v/FILENAME"
 
     def fetch_album(self, album_id):
         try:
