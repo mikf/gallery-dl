@@ -198,6 +198,21 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://kemono.su/patreon/user/3161935/post/68231671",
+    "#comment" : "unique revisions (#5013)",
+    "#category": ("", "kemonoparty", "patreon"),
+    "#class"   : kemonoparty.KemonopartyPostExtractor,
+    "#options" : {"revisions": "unique"},
+    "#urls"    : "https://kemono.su/data/88/52/88521f71822dfa2f42df3beba319ea4fceda2a2d6dc59da0276a75238f743f86.jpg",
+
+    "filename"      : "wip update",
+    "hash"          : "88521f71822dfa2f42df3beba319ea4fceda2a2d6dc59da0276a75238f743f86",
+    "revision_id"   : 0,
+    "revision_index": 1,
+    "revision_hash" : "e0e93281495e151b11636c156e52bfe9234c2a40",
+},
+
+{
     "#url"     : "https://kemono.party/patreon/user/3161935/post/68231671/revisions",
     "#comment" : "revisions (#4498)",
     "#category": ("", "kemonoparty", "patreon"),

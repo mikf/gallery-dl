@@ -2212,11 +2212,14 @@ Description
 extractor.kemonoparty.revisions
 -------------------------------
 Type
-    ``bool``
+    * ``bool``
+    * ``string``
 Default
     ``false``
 Description
     Extract post revisions.
+
+    Set this to ``"unique"`` to filter out duplicate revisions.
 
     Note: This requires 1 additional HTTP request per post.
 
