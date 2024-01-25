@@ -9,7 +9,7 @@ from gallery_dl.extractor import bunkr
 
 __tests__ = (
 {
-    "#url"     : "https://bunkrr.ru/a/Lktg9Keq",
+    "#url"     : "https://bunkr.sk/a/Lktg9Keq",
     "#category": ("lolisafe", "bunkr", "album"),
     "#class"   : bunkr.BunkrAlbumExtractor,
     "#urls"        : "https://i-burger.bunkr.ru/test-テスト-\"&>-QjgneIQv.png",
@@ -62,6 +62,12 @@ __tests__ = (
     "#class"   : bunkr.BunkrAlbumExtractor,
     "#pattern" : r"https://(i-)?meatballs.bunkr.ru/\w+",
     "#count"   : 9,
+},
+
+{
+    "#url"     : "https://bunkrr.ru/a/Lktg9Keq",
+    "#category": ("lolisafe", "bunkr", "album"),
+    "#class"   : bunkr.BunkrAlbumExtractor,
 },
 
 {
