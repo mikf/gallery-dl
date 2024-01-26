@@ -24,6 +24,8 @@ class FoolfuukaExtractor(BaseExtractor):
         BaseExtractor.__init__(self, match)
         if self.category == "b4k":
             self.remote = self._remote_direct
+        elif self.category == "archivedmoe":
+            self.referer = False
 
     def items(self):
         yield Message.Directory, self.metadata()
@@ -53,9 +55,12 @@ class FoolfuukaExtractor(BaseExtractor):
 
     def remote(self, media):
         """Resolve a remote media link"""
-        needle = '<meta http-equiv="Refresh" content="0; url='
         page = self.request(media["remote_media_link"]).text
-        return text.extr(page, needle, '"')
+        url = text.extr(page, 'http-equiv="Refresh" content="0; url=', '"')
+        if url.endswith(".webm") and \
+                url.startswith("https://thebarchive.com/"):
+            return url[:-1]
+        return url
 
     @staticmethod
     def _remote_direct(media):
