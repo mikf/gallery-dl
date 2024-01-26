@@ -179,12 +179,16 @@ class SankakuAPI():
     def __init__(self, extractor):
         self.extractor = extractor
         self.headers = {
-            "Accept"  : "application/vnd.sankaku.api+json;v=2",
-            "Platform": "web-app",
-            "Origin"  : extractor.root,
+            "Accept"     : "application/vnd.sankaku.api+json;v=2",
+            "Platform"   : "web-app",
+            "Api-Version": None,
+            "Origin"     : extractor.root,
         }
 
-        self.username, self.password = self.extractor._get_auth_info()
+        if extractor.config("id-format") in ("alnum", "alphanumeric"):
+            self.headers["Api-Version"] = "2"
+
+        self.username, self.password = extractor._get_auth_info()
         if not self.username:
             self.authenticate = util.noop
 
