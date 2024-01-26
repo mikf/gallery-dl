@@ -119,11 +119,16 @@ __tests__ = (
 
 {
     "#url"     : "https://sankaku.app/posts/y0abGlDOr2o",
+    "#comment" : "extended tag categories; alphanumeric ID (#5073)",
     "#category": ("booru", "sankaku", "post"),
     "#class"   : sankaku.SankakuPostExtractor,
-    "#options"     : {"tags": True},
+    "#options"     : {
+        "tags"     : True,
+        "id-format": "alphanumeric",
+    },
     "#sha1_content": "5e255713cbf0a8e0801dc423563c34d896bb9229",
 
+    "id": "y0abGlDOr2o",
     "tags_artist": [
         "bonocho",
     ],
@@ -150,6 +155,8 @@ __tests__ = (
     "#category": ("booru", "sankaku", "post"),
     "#class"   : sankaku.SankakuPostExtractor,
     "#pattern" : r"https://s\.sankakucomplex\.com/data/ac/8e/ac8e3b92ea328ce9cf7211e69c905bf9\.jpg\?e=.+",
+
+    "id": 360451,
 },
 
 {
@@ -169,6 +176,7 @@ __tests__ = (
     "#options" : {"tags": True},
     "#count"   : 1,
 
+    "id"          : 20758561,
     "tags"        : list,
     "tags_general": [
         "key(mangaka)",

@@ -3009,6 +3009,19 @@ Description
     restrict it to only one possible format.
 
 
+extractor.sankaku.id-format
+---------------------------
+Type
+    ``string``
+Default
+    ``"numeric"``
+Description
+    Format of ``id`` metadata fields.
+
+    * ``"alphanumeric"`` or ``"alnum"``: 11-character alphanumeric IDs (``y0abGlDOr2o``)
+    * ``"numeric"`` or ``"legacy"``: numeric IDs (``360451``)
+
+
 extractor.sankaku.refresh
 -------------------------
 Type
