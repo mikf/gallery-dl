@@ -73,7 +73,7 @@ class GofileFolderExtractor(Extractor):
     def _get_website_token(self):
         self.log.debug("Fetching website token")
         page = self.request(self.root + "/dist/js/alljs.js").text
-        return text.extr(page, 'fetchData.websiteToken = "', '"')
+        return text.extr(page, 'fetchData.wt = "', '"')
 
     def _get_content(self, content_id, password=None):
         if password is not None:
@@ -81,7 +81,7 @@ class GofileFolderExtractor(Extractor):
         return self._api_request("getContent", {
             "contentId"   : content_id,
             "token"       : self.api_token,
-            "websiteToken": self.website_token,
+            "wt"          : self.website_token,
             "password"    : password,
         })
 
