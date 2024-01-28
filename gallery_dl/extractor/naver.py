@@ -10,6 +10,7 @@
 
 from .common import GalleryExtractor, Extractor, Message
 from .. import text
+from urllib.parse import unquote
 
 
 class NaverBase():
@@ -63,7 +64,13 @@ class NaverPostExtractor(NaverBase, GalleryExtractor):
 
     def images(self, page):
         return [
-            (url.replace("://post", "://blog", 1).partition("?")[0], None)
+            (unquote(url, encoding="EUC-KR")
+             .replace("://post", "://blog", 1)
+             .partition("?")[0], None)
+            if "\ufffd" in unquote(url)
+            else
+            (url.replace("://post", "://blog", 1)
+             .partition("?")[0], None)
             for url in text.extract_iter(page, 'data-lazy-src="', '"')
         ]
 
