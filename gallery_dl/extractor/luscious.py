@@ -63,7 +63,6 @@ class LusciousAlbumExtractor(LusciousExtractor):
             image["num"] = num
             image["album"] = album
 
-            image["thumbnail"] = image.pop("thumbnails")[0]["url"]
             image["tags"] = [item["text"] for item in image["tags"]]
             image["date"] = text.parse_timestamp(image["created"])
             image["id"] = text.parse_int(image["id"])
