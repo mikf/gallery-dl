@@ -154,6 +154,7 @@ modules = [
     "telegraph",
     "tmohentai",
     "toyhouse",
+    "toonily",
     "tsumino",
     "tumblr",
     "tumblrgallery",
