@@ -14,8 +14,8 @@ __tests__ = (
     "#url"     : "https://www.patreon.com/koveliana",
     "#category": ("", "patreon", "creator"),
     "#class"   : patreon.PatreonCreatorExtractor,
-    "#range"   : "1-25",
-    "#count"   : ">= 25",
+    "#range"   : "1-15",
+    "#count"   : 15,
 
     "attachments"  : list,
     "comment_count": int,
@@ -59,6 +59,18 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.patreon.com/user?c=369707",
+    "#category": ("", "patreon", "creator"),
+    "#class"   : patreon.PatreonCreatorExtractor,
+},
+
+{
+    "#url"     : "https://www.patreon.com/id:369707",
+    "#category": ("", "patreon", "creator"),
+    "#class"   : patreon.PatreonCreatorExtractor,
+},
+
+{
     "#url"     : "https://www.patreon.com/home",
     "#category": ("", "patreon", "user"),
     "#class"   : patreon.PatreonUserExtractor,
@@ -89,6 +101,14 @@ __tests__ = (
     "#class"   : patreon.PatreonPostExtractor,
 
     "tags": ["AWMedia"],
+},
+
+{
+    "#url"     : "https://www.patreon.com/posts/meu8-94714289",
+    "#category": ("", "patreon", "post"),
+    "#class"   : patreon.PatreonPostExtractor,
+    "#range"   : "2",
+    "#pattern" : r"ytdl:https://stream\.mux\.com/NLrxTLdxyGStpOgapJAtB8uPGAaokEcj8YovML00y2DY\.m3u8\?token=ey.+",
 },
 
 {

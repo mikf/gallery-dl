@@ -38,10 +38,6 @@ class FoolslideExtractor(BaseExtractor):
 
 
 BASE_PATTERN = FoolslideExtractor.update({
-    "powermanga": {
-        "root": "https://read.powermanga.org",
-        "pattern": r"read(?:er)?\.powermanga\.org",
-    },
 })
 
 

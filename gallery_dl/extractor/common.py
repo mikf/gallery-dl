@@ -32,13 +32,15 @@ class Extractor():
     directory_fmt = ("{category}",)
     filename_fmt = "{filename}.{extension}"
     archive_fmt = ""
-    cookies_domain = ""
-    browser = None
     root = ""
+    cookies_domain = ""
+    referer = True
+    ciphers = None
+    tls12 = True
+    browser = None
     request_interval = 0.0
     request_interval_min = 0.0
     request_timestamp = 0.0
-    tls12 = True
 
     def __init__(self, match):
         self.log = logging.getLogger(self.category)
@@ -76,6 +78,12 @@ class Extractor():
     def config(self, key, default=None):
         return config.interpolate(self._cfgpath, key, default)
 
+    def config2(self, key, key2, default=None, sentinel=util.SENTINEL):
+        value = self.config(key, sentinel)
+        if value is not sentinel:
+            return value
+        return self.config(key2, default)
+
     def config_deprecated(self, key, deprecated, default=None,
                           sentinel=util.SENTINEL, history=set()):
         value = self.config(deprecated, sentinel)
@@ -93,6 +101,9 @@ class Extractor():
 
     def config_accumulate(self, key):
         return config.accumulate(self._cfgpath, key)
+
+    def config_instance(self, key, default=None):
+        return default
 
     def _config_shared(self, key, default=None):
         return config.interpolate_common(
@@ -128,6 +139,18 @@ class Extractor():
             kwargs["timeout"] = self._timeout
         if "verify" not in kwargs:
             kwargs["verify"] = self._verify
+
+        if "json" in kwargs:
+            json = kwargs["json"]
+            if json is not None:
+                kwargs["data"] = util.json_dumps(json).encode()
+                del kwargs["json"]
+                headers = kwargs.get("headers")
+                if headers:
+                    headers["Content-Type"] = "application/json"
+                else:
+                    kwargs["headers"] = {"Content-Type": "application/json"}
+
         response = None
         tries = 1
 
@@ -225,7 +248,7 @@ class Extractor():
         password = None
 
         if username:
-            password = self.config("password")
+            password = self.config("password") or util.LazyPrompt()
         elif self.config("netrc", False):
             try:
                 info = netrc.netrc().authenticators(self.category)
@@ -304,16 +327,17 @@ class Extractor():
             headers["User-Agent"] = useragent
             headers["Accept"] = "*/*"
             headers["Accept-Language"] = "en-US,en;q=0.5"
+            ssl_ciphers = self.ciphers
 
         if BROTLI:
             headers["Accept-Encoding"] = "gzip, deflate, br"
         else:
             headers["Accept-Encoding"] = "gzip, deflate"
 
-        custom_referer = self.config("referer", True)
-        if custom_referer:
-            if isinstance(custom_referer, str):
-                headers["Referer"] = custom_referer
+        referer = self.config("referer", self.referer)
+        if referer:
+            if isinstance(referer, str):
+                headers["Referer"] = referer
             elif self.root:
                 headers["Referer"] = self.root + "/"
 
@@ -505,12 +529,15 @@ class Extractor():
         if include == "all":
             include = extractors
         elif isinstance(include, str):
-            include = include.split(",")
+            include = include.replace(" ", "").split(",")
 
         result = [(Message.Version, 1)]
         for category in include:
-            if category in extractors:
+            try:
                 extr, url = extractors[category]
+            except KeyError:
+                self.log.warning("Invalid include '%s'", category)
+            else:
                 result.append((Message.Queue, url, {"_extractor": extr}))
         return iter(result)
 
@@ -711,9 +738,10 @@ class BaseExtractor(Extractor):
         for index, group in enumerate(match.groups()):
             if group is not None:
                 if index:
-                    self.category, self.root = self.instances[index-1]
+                    self.category, self.root, info = self.instances[index-1]
                     if not self.root:
                         self.root = text.root_from_url(match.group(0))
+                    self.config_instance = info.get
                 else:
                     self.root = group
                     self.category = group.partition("://")[2]
@@ -733,7 +761,7 @@ class BaseExtractor(Extractor):
             root = info["root"]
             if root:
                 root = root.rstrip("/")
-            instance_list.append((category, root))
+            instance_list.append((category, root, info))
 
             pattern = info.get("pattern")
             if not pattern:

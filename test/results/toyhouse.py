@@ -60,7 +60,7 @@ __tests__ = (
         "http://aminoapps.com/p/92sf3z",
         "kroksoc (Color)",
     ],
-    "characters": ["❀Reiichi❀"],
+    "characters": ["Reiichi❀"],
     "date"      : "dt:2021-07-03 20:02:02",
     "hash"      : "bqhGcwcnU",
     "id"        : "36817425",

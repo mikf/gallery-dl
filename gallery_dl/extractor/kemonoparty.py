@@ -9,9 +9,10 @@
 """Extractors for https://kemono.party/"""
 
 from .common import Extractor, Message
-from .. import text, exception
-from ..cache import cache
+from .. import text, util, exception
+from ..cache import cache, memcache
 import itertools
+import json
 import re
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.|beta\.)?(kemono|coomer)\.(party|su)"
@@ -24,7 +25,7 @@ class KemonopartyExtractor(Extractor):
     category = "kemonoparty"
     root = "https://kemono.party"
     directory_fmt = ("{category}", "{service}", "{user}")
-    filename_fmt = "{id}_{title}_{num:>02}_{filename[:180]}.{extension}"
+    filename_fmt = "{id}_{title[:180]}_{num:>02}_{filename[:180]}.{extension}"
     archive_fmt = "{service}_{user}_{id}_{num}"
     cookies_domain = ".kemono.party"
 
@@ -37,10 +38,16 @@ class KemonopartyExtractor(Extractor):
         Extractor.__init__(self, match)
 
     def _init(self):
+        self.revisions = self.config("revisions")
+        if self.revisions:
+            self.revisions_unique = (self.revisions == "unique")
         self._prepare_ddosguard_cookies()
         self._find_inline = re.compile(
             r'src="(?:https?://(?:kemono|coomer)\.(?:party|su))?(/inline/[^"]+'
             r'|/[0-9a-f]{2}/[0-9a-f]{2}/[0-9a-f]{64}\.[^"]+)').findall
+        self._json_dumps = json.JSONEncoder(
+            ensure_ascii=False, check_circular=False,
+            sort_keys=True, separators=(",", ":")).encode
 
     def items(self):
         find_hash = re.compile(HASH_PATTERN).match
@@ -69,9 +76,9 @@ class KemonopartyExtractor(Extractor):
             headers["Referer"] = "{}/{}/user/{}/post/{}".format(
                 self.root, post["service"], post["user"], post["id"])
             post["_http_headers"] = headers
-            post["date"] = text.parse_datetime(
-                post["published"] or post["added"],
-                "%a, %d %b %Y %H:%M:%S %Z")
+            post["date"] = self._parse_datetime(
+                post["published"] or post["added"])
+
             if username:
                 post["username"] = username
             if comments:
@@ -129,7 +136,7 @@ class KemonopartyExtractor(Extractor):
             self.cookies_update(self._login_impl(
                 (username, self.cookies_domain), password))
 
-    @cache(maxage=28*24*3600, keyarg=1)
+    @cache(maxage=28*86400, keyarg=1)
     def _login_impl(self, username, password):
         username = username[0]
         self.log.info("Logging in as %s", username)
@@ -197,13 +204,79 @@ class KemonopartyExtractor(Extractor):
 
         dms = []
         for dm in text.extract_iter(page, "<article", "</article>"):
+            footer = text.extr(dm, "<footer", "</footer>")
             dms.append({
-                "body": text.unescape(text.extract(
+                "body": text.unescape(text.extr(
                     dm, "<pre>", "</pre></",
-                )[0].strip()),
-                "date": text.extr(dm, 'datetime="', '"'),
+                ).strip()),
+                "date": text.extr(footer, 'Published: ', '\n'),
             })
         return dms
+
+    def _parse_datetime(self, date_string):
+        if len(date_string) > 19:
+            date_string = date_string[:19]
+        return text.parse_datetime(date_string, "%Y-%m-%dT%H:%M:%S")
+
+    @memcache(keyarg=1)
+    def _discord_channels(self, server):
+        url = "{}/api/v1/discord/channel/lookup/{}".format(
+            self.root, server)
+        return self.request(url).json()
+
+    def _revisions_post(self, post, url):
+        post["revision_id"] = 0
+
+        try:
+            revs = self.request(url + "/revisions").json()
+        except exception.HttpError:
+            post["revision_hash"] = self._revision_hash(post)
+            post["revision_index"] = 1
+            return (post,)
+        revs.insert(0, post)
+
+        for rev in revs:
+            rev["revision_hash"] = self._revision_hash(rev)
+
+        if self.revisions_unique:
+            uniq = []
+            last = None
+            for rev in revs:
+                if last != rev["revision_hash"]:
+                    last = rev["revision_hash"]
+                    uniq.append(rev)
+            revs = uniq
+
+        idx = len(revs)
+        for rev in revs:
+            rev["revision_index"] = idx
+            idx -= 1
+
+        return revs
+
+    def _revisions_all(self, url):
+        revs = self.request(url + "/revisions").json()
+
+        idx = len(revs)
+        for rev in revs:
+            rev["revision_hash"] = self._revision_hash(rev)
+            rev["revision_index"] = idx
+            idx -= 1
+
+        return revs
+
+    def _revision_hash(self, revision):
+        rev = revision.copy()
+        rev.pop("revision_id", None)
+        rev.pop("added", None)
+        rev.pop("next", None)
+        rev.pop("prev", None)
+        rev["file"] = rev["file"].copy()
+        rev["file"].pop("name", None)
+        rev["attachments"] = [a.copy() for a in rev["attachments"]]
+        for a in rev["attachments"]:
+            a.pop("name", None)
+        return util.sha1(self._json_dumps(rev))
 
 
 def _validate(response):
@@ -214,48 +287,68 @@ def _validate(response):
 class KemonopartyUserExtractor(KemonopartyExtractor):
     """Extractor for all posts from a kemono.party user listing"""
     subcategory = "user"
-    pattern = USER_PATTERN + r"/?(?:\?o=(\d+))?(?:$|[?#])"
+    pattern = USER_PATTERN + r"/?(?:\?([^#]+))?(?:$|[?#])"
     example = "https://kemono.party/SERVICE/user/12345"
 
     def __init__(self, match):
-        _, _, service, user_id, offset = match.groups()
+        _, _, service, user_id, self.query = match.groups()
         self.subcategory = service
         KemonopartyExtractor.__init__(self, match)
-        self.api_url = "{}/api/{}/user/{}".format(self.root, service, user_id)
+        self.api_url = "{}/api/v1/{}/user/{}".format(
+            self.root, service, user_id)
         self.user_url = "{}/{}/user/{}".format(self.root, service, user_id)
-        self.offset = text.parse_int(offset)
 
     def posts(self):
         url = self.api_url
-        params = {"o": self.offset}
+        params = text.parse_query(self.query)
+        params["o"] = text.parse_int(params.get("o"))
 
         while True:
             posts = self.request(url, params=params).json()
-            yield from posts
 
-            cnt = len(posts)
-            if cnt < 25:
-                return
-            params["o"] += cnt
+            if self.revisions:
+                for post in posts:
+                    post_url = "{}/post/{}".format(self.api_url, post["id"])
+                    yield from self._revisions_post(post, post_url)
+            else:
+                yield from posts
+
+            if len(posts) < 50:
+                break
+            params["o"] += 50
 
 
 class KemonopartyPostExtractor(KemonopartyExtractor):
     """Extractor for a single kemono.party post"""
     subcategory = "post"
-    pattern = USER_PATTERN + r"/post/([^/?#]+)"
+    pattern = USER_PATTERN + r"/post/([^/?#]+)(/revisions?(?:/(\d*))?)?"
     example = "https://kemono.party/SERVICE/user/12345/post/12345"
 
     def __init__(self, match):
-        _, _, service, user_id, post_id = match.groups()
+        _, _, service, user_id, post_id, self.revision, self.revision_id = \
+            match.groups()
         self.subcategory = service
         KemonopartyExtractor.__init__(self, match)
-        self.api_url = "{}/api/{}/user/{}/post/{}".format(
+        self.api_url = "{}/api/v1/{}/user/{}/post/{}".format(
             self.root, service, user_id, post_id)
         self.user_url = "{}/{}/user/{}".format(self.root, service, user_id)
 
     def posts(self):
-        posts = self.request(self.api_url).json()
-        return (posts[0],) if len(posts) > 1 else posts
+        if not self.revision:
+            post = self.request(self.api_url).json()
+            if self.revisions:
+                return self._revisions_post(post, self.api_url)
+            return (post,)
+
+        revs = self._revisions_all(self.api_url)
+        if not self.revision_id:
+            return revs
+
+        for rev in revs:
+            if str(rev["revision_id"]) == self.revision_id:
+                return (rev,)
+
+        raise exception.NotFoundError("revision")
 
 
 class KemonopartyDiscordExtractor(KemonopartyExtractor):
@@ -270,10 +363,28 @@ class KemonopartyDiscordExtractor(KemonopartyExtractor):
 
     def __init__(self, match):
         KemonopartyExtractor.__init__(self, match)
-        _, _, self.server, self.channel, self.channel_name = match.groups()
+        _, _, self.server, self.channel_id, self.channel = match.groups()
+        self.channel_name = ""
 
     def items(self):
         self._prepare_ddosguard_cookies()
+
+        if self.channel_id:
+            self.channel_name = self.channel
+        else:
+            if self.channel.isdecimal() and len(self.channel) >= 16:
+                key = "id"
+            else:
+                key = "name"
+
+            for channel in self._discord_channels(self.server):
+                if channel[key] == self.channel:
+                    break
+            else:
+                raise exception.NotFoundError("channel")
+
+            self.channel_id = channel["id"]
+            self.channel_name = channel["name"]
 
         find_inline = re.compile(
             r"https?://(?:cdn\.discordapp.com|media\.discordapp\.net)"
@@ -298,8 +409,7 @@ class KemonopartyDiscordExtractor(KemonopartyExtractor):
                         "name": path, "type": "inline", "hash": ""})
 
             post["channel_name"] = self.channel_name
-            post["date"] = text.parse_datetime(
-                post["published"], "%a, %d %b %Y %H:%M:%S %Z")
+            post["date"] = self._parse_datetime(post["published"])
             post["count"] = len(files)
             yield Message.Directory, post
 
@@ -319,27 +429,17 @@ class KemonopartyDiscordExtractor(KemonopartyExtractor):
                 yield Message.Url, url, post
 
     def posts(self):
-        if self.channel is None:
-            url = "{}/api/discord/channels/lookup?q={}".format(
-                self.root, self.server)
-            for channel in self.request(url).json():
-                if channel["name"] == self.channel_name:
-                    self.channel = channel["id"]
-                    break
-            else:
-                raise exception.NotFoundError("channel")
-
-        url = "{}/api/discord/channel/{}".format(self.root, self.channel)
-        params = {"skip": 0}
+        url = "{}/api/v1/discord/channel/{}".format(
+            self.root, self.channel_id)
+        params = {"o": 0}
 
         while True:
             posts = self.request(url, params=params).json()
             yield from posts
 
-            cnt = len(posts)
-            if cnt < 25:
+            if len(posts) < 150:
                 break
-            params["skip"] += cnt
+            params["o"] += 150
 
 
 class KemonopartyDiscordServerExtractor(KemonopartyExtractor):
@@ -352,11 +452,7 @@ class KemonopartyDiscordServerExtractor(KemonopartyExtractor):
         self.server = match.group(3)
 
     def items(self):
-        url = "{}/api/discord/channels/lookup?q={}".format(
-            self.root, self.server)
-        channels = self.request(url).json()
-
-        for channel in channels:
+        for channel in self._discord_channels(self.server):
             url = "{}/discord/server/{}/channel/{}#{}".format(
                 self.root, self.server, channel["id"], channel["name"])
             channel["_extractor"] = KemonopartyDiscordExtractor

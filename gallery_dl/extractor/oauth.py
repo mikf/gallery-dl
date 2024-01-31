@@ -11,7 +11,7 @@
 from .common import Extractor, Message
 from .. import text, oauth, util, config, exception
 from ..output import stdout_write
-from ..cache import cache
+from ..cache import cache, memcache
 import urllib.parse
 import binascii
 import hashlib
@@ -31,6 +31,9 @@ class OAuthBase(Extractor):
 
     def _init(self):
         self.cache = config.get(("extractor", self.category), "cache", True)
+        if self.cache and cache is memcache:
+            self.log.warning("cache file is not writeable")
+            self.cache = False
 
     def oauth_config(self, key, default=None):
         value = config.interpolate(("extractor", self.subcategory), key)
@@ -180,7 +183,7 @@ class OAuthBase(Extractor):
         }
 
         if auth:
-            auth = (client_id, client_secret)
+            auth = util.HTTPBasicAuth(client_id, client_secret)
         else:
             auth = None
             data["client_id"] = client_id
@@ -355,8 +358,8 @@ class OAuthMastodon(OAuthBase):
         yield Message.Version, 1
         from . import mastodon
 
-        for application in mastodon.INSTANCES.values():
-            if self.instance == application["root"].partition("://")[2]:
+        for _, root, application in mastodon.MastodonExtractor.instances:
+            if self.instance == root.partition("://")[2]:
                 break
         else:
             application = self._register(self.instance)
@@ -373,7 +376,7 @@ class OAuthMastodon(OAuthBase):
             cache=mastodon._access_token_cache,
         )
 
-    @cache(maxage=10*365*24*3600, keyarg=1)
+    @cache(maxage=36500*86400, keyarg=1)
     def _register(self, instance):
         self.log.info("Registering application for '%s'", instance)
 

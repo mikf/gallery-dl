@@ -12,7 +12,7 @@ __tests__ = (
     "#url"     : "https://misskey.io/@lithla",
     "#category": ("misskey", "misskey.io", "user"),
     "#class"   : misskey.MisskeyUserExtractor,
-    "#pattern" : r"https://s\d+\.arkjp\.net/misskey/[\w-]+\.\w+",
+    "#pattern" : r"https://(media.misskeyusercontent.com/io|s\d+\.arkjp\.net/misskey)/[\w-]+\.\w+",
     "#range"   : "1-50",
     "#count"   : 50,
 },

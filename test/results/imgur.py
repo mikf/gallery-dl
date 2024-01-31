@@ -16,6 +16,7 @@ __tests__ = (
     "#class"   : imgur.ImgurImageExtractor,
     "#sha1_url"    : "6f2dcfb86815bdd72808c313e5f715610bc7b9b2",
     "#sha1_content": "0c8768055e4e20e7c7259608b67799171b691140",
+    "#urls"        : "https://i.imgur.com/21yMxCS.png",
 
     "account_id"    : 0,
     "comment_count" : int,
@@ -159,6 +160,27 @@ __tests__ = (
     "#category": ("", "imgur", "album"),
     "#class"   : imgur.ImgurAlbumExtractor,
     "#sha1_url": "ce3552f550a5b5316bd9c7ae02e21e39f30c0563",
+    "#urls"    : (
+        "https://i.imgur.com/693j2Kr.jpg",
+        "https://i.imgur.com/ZNalkAC.jpg",
+        "https://i.imgur.com/lMox9Ek.jpg",
+        "https://i.imgur.com/6PryGOv.jpg",
+        "https://i.imgur.com/ecasnH2.jpg",
+        "https://i.imgur.com/NlJDmFG.jpg",
+        "https://i.imgur.com/aCwKs8S.jpg",
+        "https://i.imgur.com/Oz4rpxo.jpg",
+        "https://i.imgur.com/hE93Xsn.jpg",
+        "https://i.imgur.com/A5uBLSx.jpg",
+        "https://i.imgur.com/zZghWiD.jpg",
+        "https://i.imgur.com/ALV4fYV.jpg",
+        "https://i.imgur.com/FDd90t9.jpg",
+        "https://i.imgur.com/Txw37NO.jpg",
+        "https://i.imgur.com/DcLw7Cl.jpg",
+        "https://i.imgur.com/a4VChy8.jpg",
+        "https://i.imgur.com/auCwCig.jpg",
+        "https://i.imgur.com/Z8VihIb.jpg",
+        "https://i.imgur.com/6WDRFne.jpg",
+    ),
 
     "album"      : {
         "account_id"    : 0,
@@ -210,7 +232,7 @@ __tests__ = (
     "#comment" : "large album",
     "#category": ("", "imgur", "album"),
     "#class"   : imgur.ImgurAlbumExtractor,
-    "#sha1_url": "de748c181a04d18bef1de9d4f4866ef0a06d632b",
+    "#exception": exception.HttpError,
 },
 
 {
@@ -233,7 +255,7 @@ __tests__ = (
     "#comment" : "empty, no 'media' (#2557)",
     "#category": ("", "imgur", "album"),
     "#class"   : imgur.ImgurAlbumExtractor,
-    "#count"   : 0,
+    "#exception": exception.HttpError,
 },
 
 {
@@ -269,7 +291,7 @@ __tests__ = (
     "#url"     : "https://imgur.com/gallery/eD9CT",
     "#category": ("", "imgur", "gallery"),
     "#class"   : imgur.ImgurGalleryExtractor,
-    "#pattern" : "https://imgur.com/a/eD9CT",
+    "#exception": exception.HttpError,
 },
 
 {

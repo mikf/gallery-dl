@@ -87,24 +87,27 @@ class Job():
                 extr.category = pextr.category
                 extr.subcategory = pextr.subcategory
 
-        self.metadata_url = extr.config("url-metadata")
-        self.metadata_http = extr.config("http-metadata")
+        self.metadata_url = extr.config2("metadata-url", "url-metadata")
+        self.metadata_http = extr.config2("metadata-http", "http-metadata")
+        metadata_path = extr.config2("metadata-path", "path-metadata")
+        metadata_version = extr.config2("metadata-version", "version-metadata")
+        metadata_extractor = extr.config2(
+            "metadata-extractor", "extractor-metadata")
 
-        version_info = extr.config("version-metadata")
-        metadata_path = extr.config("path-metadata")
-
-        # user-supplied metadata
-        kwdict = extr.config("keywords")
-        if kwdict:
-            self.kwdict.update(kwdict)
         if metadata_path:
             self.kwdict[metadata_path] = path_proxy
-        if version_info:
-            self.kwdict[version_info] = {
+        if metadata_extractor:
+            self.kwdict[metadata_extractor] = extr
+        if metadata_version:
+            self.kwdict[metadata_version] = {
                 "version"         : version.__version__,
                 "is_executable"   : util.EXECUTABLE,
                 "current_git_head": util.git_head()
             }
+        # user-supplied metadata
+        kwdict = extr.config("keywords")
+        if kwdict:
+            self.kwdict.update(kwdict)
 
     def run(self):
         """Execute or run the job"""
@@ -375,7 +378,7 @@ class DownloadJob(Job):
             else:
                 extr._parentdir = pextr._parentdir
 
-            pmeta = pextr.config("parent-metadata")
+            pmeta = pextr.config2("parent-metadata", "metadata-parent")
             if pmeta:
                 if isinstance(pmeta, str):
                     data = self.kwdict.copy()
@@ -517,7 +520,7 @@ class DownloadJob(Job):
                     archive, archive_format, archive_pragma)
             except Exception as exc:
                 extr.log.warning(
-                    "Failed to open download archive at '%s' ('%s: %s')",
+                    "Failed to open download archive at '%s' (%s: %s)",
                     archive, exc.__class__.__name__, exc)
             else:
                 extr.log.debug("Using download archive '%s'", archive)

@@ -13,8 +13,10 @@ __tests__ = (
     "#url"     : "https://www.behance.net/gallery/17386197/A-Short-Story",
     "#category": ("", "behance", "gallery"),
     "#class"   : behance.BehanceGalleryExtractor,
-    "#count"   : 2,
-    "#sha1_url": "ab79bd3bef8d3ae48e6ac74fd995c1dfaec1b7d2",
+    "#urls"    : (
+        "ytdl:https://player.vimeo.com/video/97189640?title=0&byline=0&portrait=0&color=ffffff",
+        "https://mir-s3-cdn-cf.behance.net/project_modules/source/a5a12417386197.562bc055a107d.jpg",
+    ),
 
     "id"    : 17386197,
     "name"  : r"re:\"Hi\". A short story about the important things ",
@@ -59,6 +61,15 @@ __tests__ = (
     "#class"   : behance.BehanceGalleryExtractor,
     "#pattern" : r"https://cdn-prod-ccv\.adobe\.com/\w+/rend/\w+_720\.mp4\?",
     "#count"   : 3,
+},
+
+{
+    "#url"     : "https://www.behance.net/gallery/89270715/Moevir",
+    "#comment" : "'text' modules (#4799)",
+    "#category": ("", "behance", "gallery"),
+    "#class"   : behance.BehanceGalleryExtractor,
+    "#options" : {"modules": "text"},
+    "#urls"    : """text:<div>Make Shift<br><a href="https://www.moevir.com/News/make-shif?fbclid=IwAR2MXL7mVDskdXHitLs4tv_RQFqB1tpAYix2EMIzea4lOSIPdPOR45wEJMA" target="_blank" rel="nofollow">https://www.moevir.com/News/make-shif</a><br>Moevir Magazine November Issue 2019<br>Photography by Caesar Lima @caephoto <br>Model: Bee @phamhuongbee <br>Makeup by Monica Alvarez @monicaalvarezmakeup <br>Styling by Jessica Boal @jessicaboal <br>Hair by James Gilbert @brandnewjames<br>Shot at Vila Sophia<br></div>""",
 },
 
 {

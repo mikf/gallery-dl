@@ -87,23 +87,41 @@ class WebtoonsEpisodeExtractor(WebtoonsBase, GalleryExtractor):
         self.episode_no = params.get("episode_no")
 
     def metadata(self, page):
-        keywords, pos = text.extract(
-            page, '<meta name="keywords" content="', '"')
-        title, pos = text.extract(
-            page, '<meta property="og:title" content="', '"', pos)
-        descr, pos = text.extract(
-            page, '<meta property="og:description" content="', '"', pos)
+        extr = text.extract_from(page)
+        title = extr('<meta property="og:title" content="', '"')
+        descr = extr('<meta property="og:description" content="', '"')
+
+        if extr('<div class="subj_info"', '\n'):
+            comic_name = extr('>', '<')
+            episode_name = extr('<h1 class="subj_episode" title="', '"')
+        else:
+            comic_name = episode_name = ""
+
+        if extr('<span class="tx _btnOpenEpisodeList ', '"'):
+            episode = extr('>#', '<')
+        else:
+            episode = ""
+
+        if extr('<div class="author_area"', '\n'):
+            username = extr('/creator/', '"')
+            author_name = extr('<span>', '</span>')
+        else:
+            username = author_name = ""
 
         return {
-            "genre"      : self.genre,
-            "comic"      : self.comic,
-            "title_no"   : self.title_no,
-            "episode_no" : self.episode_no,
-            "title"      : text.unescape(title),
-            "episode"    : keywords.split(", ")[1],
-            "description": text.unescape(descr),
-            "lang"       : self.lang,
-            "language"   : util.code_to_language(self.lang),
+            "genre"       : self.genre,
+            "comic"       : self.comic,
+            "title_no"    : self.title_no,
+            "episode_no"  : self.episode_no,
+            "title"       : text.unescape(title),
+            "episode"     : episode,
+            "comic_name"  : text.unescape(comic_name),
+            "episode_name": text.unescape(episode_name),
+            "username"    : username,
+            "author_name" : text.unescape(author_name),
+            "description" : text.unescape(descr),
+            "lang"        : self.lang,
+            "language"    : util.code_to_language(self.lang),
         }
 
     @staticmethod
@@ -146,7 +164,12 @@ class WebtoonsComicExtractor(WebtoonsBase, Extractor):
             if page and path not in page:
                 return
 
-            page = self.request(self.root + path).text
+            response = self.request(self.root + path)
+            if response.history:
+                parts = response.url.split("/")
+                self.path = "/".join(parts[3:-1])
+
+            page = response.text
             data["page"] = self.page_no
 
             for url in self.get_episode_urls(page):

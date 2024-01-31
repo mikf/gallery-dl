@@ -517,6 +517,7 @@ class PixivPixivisionExtractor(PixivExtractor):
     directory_fmt = ("{category}", "pixivision",
                      "{pixivision_id} {pixivision_title}")
     archive_fmt = "V{pixivision_id}_{id}{suffix}.{extension}"
+    cookies_domain = ".pixiv.net"
     pattern = r"(?:https?://)?(?:www\.)?pixivision\.net/(?:en/)?a/(\d+)"
     example = "https://www.pixivision.net/en/a/12345"
 
@@ -549,6 +550,9 @@ class PixivSeriesExtractor(PixivExtractor):
     directory_fmt = ("{category}", "{user[id]} {user[account]}",
                      "{series[id]} {series[title]}")
     filename_fmt = "{num_series:>03}_{id}_p{num}.{extension}"
+    cookies_domain = ".pixiv.net"
+    browser = "firefox"
+    tls12 = False
     pattern = BASE_PATTERN + r"/user/(\d+)/series/(\d+)"
     example = "https://www.pixiv.net/user/12345/series/12345"
 
@@ -590,7 +594,7 @@ class PixivSeriesExtractor(PixivExtractor):
 class PixivNovelExtractor(PixivExtractor):
     """Extractor for pixiv novels"""
     subcategory = "novel"
-    request_interval = 1.0
+    request_interval = (0.5, 1.5)
     pattern = BASE_PATTERN + r"/n(?:ovel/show\.php\?id=|/)(\d+)"
     example = "https://www.pixiv.net/novel/show.php?id=12345"
 
@@ -822,9 +826,9 @@ class PixivAppAPI():
 
         extractor.session.headers.update({
             "App-OS"        : "ios",
-            "App-OS-Version": "13.1.2",
-            "App-Version"   : "7.7.6",
-            "User-Agent"    : "PixivIOSApp/7.7.6 (iOS 13.1.2; iPhone11,8)",
+            "App-OS-Version": "16.7.2",
+            "App-Version"   : "7.19.1",
+            "User-Agent"    : "PixivIOSApp/7.19.1 (iOS 16.7.2; iPhone12,8)",
             "Referer"       : "https://app-api.pixiv.net/",
         })
 
@@ -992,6 +996,6 @@ class PixivAppAPI():
             params = text.parse_query(query)
 
 
-@cache(maxage=10*365*24*3600, keyarg=0)
+@cache(maxage=36500*86400, keyarg=0)
 def _refresh_token_cache(username):
     return None

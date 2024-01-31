@@ -166,6 +166,8 @@ Description
 
 extractor.*.parent-metadata
 ---------------------------
+extractor.*.metadata-parent
+---------------------------
 Type
     * ``bool``
     * ``string``
@@ -377,7 +379,7 @@ Description
     The username and password to use when attempting to log in to
     another site.
 
-    Specifying a username and password is required for
+    Specifying username and password is required for
 
     * ``nijie``
 
@@ -412,6 +414,10 @@ Description
 
     (*) The password value for these sites should be
     the API key found in your user profile, not the actual account password.
+
+    Note: Leave the ``password`` value empty or undefined
+    to get prompted for a passeword when performing a login
+    (see `getpass() <https://docs.python.org/3/library/getpass.html#getpass.getpass>`__).
 
 
 extractor.*.netrc
@@ -621,6 +627,20 @@ Description
     `ssl.SSLContext.set_ciphers() <https://docs.python.org/3/library/ssl.html#ssl.SSLContext.set_ciphers>`__
 
 
+extractor.*.tls12
+-----------------
+Type
+    ``bool``
+Default
+    * ``true``
+    * ``false`` for ``patreon``, ``pixiv:series``
+Description
+    Allow selecting TLS 1.2 cipher suites.
+
+    Can be disabled to alter TLS fingerprints
+    and potentially bypass Cloudflare blocks.
+
+
 extractor.*.keywords
 --------------------
 Type
@@ -642,12 +662,12 @@ Description
     `format strings`_.
 
 
+extractor.*.metadata-url
+------------------------
 extractor.*.url-metadata
 ------------------------
 Type
     ``string``
-Default
-    ``null``
 Description
     Insert a file's download URL into its metadata dictionary as the given name.
 
@@ -658,12 +678,12 @@ Description
     with a ``metadata`` post processor, etc.
 
 
+extractor.*.metadata-path
+-------------------------
 extractor.*.path-metadata
 -------------------------
 Type
     ``string``
-Default
-    ``null``
 Description
     Insert a reference to the current
     `PathFormat <https://github.com/mikf/gallery-dl/blob/v1.24.2/gallery_dl/path.py#L27>`__
@@ -673,12 +693,24 @@ Description
     to access the current file's filename as ``"{gdl_path.filename}"``.
 
 
+extractor.*.metadata-extractor
+------------------------------
+extractor.*.extractor-metadata
+------------------------------
+Type
+    ``string``
+Description
+    Insert a reference to the current
+    `Extractor <https://github.com/mikf/gallery-dl/blob/v1.26.2/gallery_dl/extractor/common.py#L26>`__
+    object into metadata dictionaries as the given name.
+
+
+extractor.*.metadata-http
+-------------------------
 extractor.*.http-metadata
 -------------------------
 Type
     ``string``
-Default
-    ``null``
 Description
     Insert an ``object`` containing a file's HTTP headers and
     ``filename``, ``extension``, and ``date`` parsed from them
@@ -689,12 +721,12 @@ Description
     and its parsed form as ``"{gdl_http[date]}"``.
 
 
+extractor.*.metadata-version
+----------------------------
 extractor.*.version-metadata
 ----------------------------
 Type
     ``string``
-Default
-    ``null``
 Description
     Insert an ``object`` containing gallery-dl's version info into
     metadata dictionaries as the given name.
@@ -1048,6 +1080,25 @@ Description
     after a colon ``:``, for example ``{date:%Y%m%d}``.
 
 
+extractor.*.write-pages
+-----------------------
+Type
+    * ``bool``
+    * ``string``
+Default
+    ``false``
+Description
+    During data extraction,
+    write received HTTP request data
+    to enumerated files in the current working directory.
+
+    Special values:
+
+    * ``"all"``: Include HTTP request and response headers. Hide ``Authorization``, ``Cookie``, and ``Set-Cookie`` values.
+    * ``"ALL"``: Include all HTTP request and response headers.
+
+
+
 Extractor-specific Options
 ==========================
 
@@ -1108,6 +1159,19 @@ Description
 
     This value must be divisble by 16 and gets rounded down otherwise.
     The maximum possible value appears to be ``1920``.
+
+
+extractor.behance.modules
+-------------------------
+Type
+    ``list`` of ``strings``
+Default
+    ``["image", "video", "mediacollection", "embed"]``
+Description
+    Selects which gallery modules to download from.
+
+    Supported module types are
+    ``image``, ``video``, ``mediacollection``, ``embed``, ``text``.
 
 
 extractor.blogger.videos
@@ -1306,12 +1370,20 @@ Description
 extractor.deviantart.group
 --------------------------
 Type
-    ``bool``
+    * ``bool``
+    * ``string``
 Default
     ``true``
 Description
     Check whether the profile name in a given URL
     belongs to a group or a regular user.
+
+    When disabled, assume every given profile name
+    belongs to a regular user.
+
+    Special values:
+
+    * ``"skip"``: Skip groups
 
 
 extractor.deviantart.include
@@ -1329,9 +1401,26 @@ Description
     when processing a user profile.
 
     Possible values are
-    ``"gallery"``, ``"scraps"``, ``"journal"``, ``"favorite"``, ``"status"``.
+    ``"avatar"``,
+    ``"background"``,
+    ``"gallery"``,
+    ``"scraps"``,
+    ``"journal"``,
+    ``"favorite"``,
+    ``"status"``.
 
     It is possible to use ``"all"`` instead of listing all values separately.
+
+
+extractor.deviantart.intermediary
+---------------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    For older non-downloadable images,
+    download a higher-quality ``/intermediary/`` version.
 
 
 extractor.deviantart.journals
@@ -1360,7 +1449,7 @@ Description
     of otherwise non-downloadable, low-resolution images
     to be able to download them in full resolution.
 
-    Note: This got patched by DeviantArt on 2023-09-19 and no longer works.
+    Note: No longer functional as of 2023-10-11
 
 
 extractor.deviantart.mature
@@ -1429,6 +1518,19 @@ Description
     when a `refresh token <extractor.deviantart.refresh-token_>`__ is provided.
 
 
+extractor.deviantart.quality
+----------------------------
+Type
+    ``integer``
+Default
+    ``100``
+Description
+    JPEG quality level of newer images for which
+    an original file download is not available.
+
+    Note: Only has an effect when `deviantart.jwt <extractor.deviantart.jwt_>`__ is disabled.
+
+
 extractor.deviantart.refresh-token
 ----------------------------------
 Type
@@ -1457,6 +1559,19 @@ Description
     Minimum wait time in seconds before API requests.
 
 
+extractor.deviantart.avatar.formats
+-----------------------------------
+Type
+    ``list`` of ``strings``
+Example
+    ``["original.jpg", "big.jpg", "big.gif", ".png"]``
+Description
+    Avatar URL formats to return.
+
+    | Each format is parsed as ``SIZE.EXT``.
+    | Leave ``SIZE`` empty to download the regular, small avatar format.
+
+
 extractor.[E621].metadata
 -------------------------
 Type
@@ -1467,7 +1582,7 @@ Default
     ``false``
 Example
     * ``notes,pools``
-    * ``["notes", "pools"``
+    * ``["notes", "pools"]``
 Description
     Extract additional metadata (notes, pool metadata) if available.
 
@@ -1504,6 +1619,17 @@ Description
     * ``"exhentai.org"``: Use ``exhentai.org`` for all URLs
 
 
+extractor.exhentai.fallback-retries
+-----------------------------------
+Type
+    ``integer``
+Default
+    ``2``
+Description
+    Number of times a failed image gets retried
+    or ``-1`` for infinite retries.
+
+
 extractor.exhentai.fav
 ----------------------
 Type
@@ -1518,6 +1644,20 @@ Description
 
     Note: This will remove any Favorite Notes when applied
     to already favorited galleries.
+
+
+extractor.exhentai.gp
+---------------------
+Type
+    ``string``
+Default
+    ``"resized"``
+Description
+    Selects how to handle "you do not have enough GP" errors.
+
+    * `"resized"`: Continue downloading `non-original <extractor.exhentai.original_>`__ images.
+    * `"stop"`: Stop the current extractor run.
+    * `"wait"`: Wait for user input before retrying the current image.
 
 
 extractor.exhentai.limits
@@ -1582,6 +1722,21 @@ Description
     * ``"ytdl"``: Like ``true``, but let `youtube-dl`_ handle video
       extraction and download for YouTube, Vimeo and SoundCloud embeds.
     * ``false``: Ignore embeds.
+
+
+extractor.fanbox.metadata
+-------------------------
+Type
+    * ``bool``
+    * ``string``
+    * ``list`` of ``strings``
+Default
+    ``false``
+Example
+    * ``user,plan``
+    * ``["user", "plan"]``
+Description
+    Extract ``plan`` and extended ``user`` metadata.
 
 
 extractor.flickr.access-token & .access-token-secret
@@ -2051,7 +2206,22 @@ Type
 Default
     ``false``
 Description
-    Extract ``username`` metadata
+    Extract ``username`` metadata.
+
+
+extractor.kemonoparty.revisions
+-------------------------------
+Type
+    * ``bool``
+    * ``string``
+Default
+    ``false``
+Description
+    Extract post revisions.
+
+    Set this to ``"unique"`` to filter out duplicate revisions.
+
+    Note: This requires 1 additional HTTP request per post.
 
 
 extractor.khinsider.format
@@ -2234,6 +2404,18 @@ Default
     ``true``
 Description
     Fetch media from replies to other notes.
+
+
+extractor.[moebooru].pool.metadata
+----------------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Extract extended ``pool`` metadata.
+
+    Note: Not supported by all ``moebooru`` instances.
 
 
 extractor.newgrounds.flash
@@ -2481,6 +2663,14 @@ Description
     Download from video pins.
 
 
+extractor.pixeldrain.api-key
+----------------------------
+Type
+    ``string``
+Description
+    Your account's `API key <https://pixeldrain.com/user/api_keys>`__
+
+
 extractor.pixiv.include
 -----------------------
 Type
@@ -2623,6 +2813,16 @@ Default
     ``false``
 Description
     Also search Plurk comments for URLs.
+
+
+extractor.[postmill].save-link-post-body
+----------------------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Whether or not to save the body for link/image posts.
 
 
 extractor.reactor.gif
@@ -2809,6 +3009,19 @@ Description
     restrict it to only one possible format.
 
 
+extractor.sankaku.id-format
+---------------------------
+Type
+    ``string``
+Default
+    ``"numeric"``
+Description
+    Format of ``id`` metadata fields.
+
+    * ``"alphanumeric"`` or ``"alnum"``: 11-character alphanumeric IDs (``y0abGlDOr2o``)
+    * ``"numeric"`` or ``"legacy"``: numeric IDs (``360451``)
+
+
 extractor.sankaku.refresh
 -------------------------
 Type
@@ -2890,6 +3103,176 @@ Default
     ``true``
 Description
     Download video files.
+
+
+extractor.steamgriddb.animated
+------------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Include animated assets when downloading from a list of assets.
+
+
+extractor.steamgriddb.epilepsy
+------------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Include assets tagged with epilepsy when downloading from a list of assets.
+
+
+extractor.steamgriddb.dimensions
+--------------------------------
+Type
+    * ``string``
+    * ``list`` of ``strings``
+Default
+    ``"all"``
+Examples
+    * ``"1024x512,512x512"``
+    * ``["460x215", "920x430"]``
+Description
+    Only include assets that are in the specified dimensions. ``all`` can be
+    used to specify all dimensions. Valid values are:
+
+    * Grids: ``460x215``, ``920x430``, ``600x900``, ``342x482``, ``660x930``,
+      ``512x512``, ``1024x1024``
+    * Heroes: ``1920x620``, ``3840x1240``, ``1600x650``
+    * Logos: N/A (will be ignored)
+    * Icons: ``8x8``, ``10x10``, ``14x14``, ``16x16``, ``20x20``, ``24x24``,
+      ``28x28``, ``32x32``, ``35x35``, ``40x40``, ``48x48``, ``54x54``,
+      ``56x56``, ``57x57``, ``60x60``, ``64x64``, ``72x72``, ``76x76``,
+      ``80x80``, ``90x90``, ``96x96``, ``100x100``, ``114x114``, ``120x120``,
+      ``128x128``, ``144x144``, ``150x150``, ``152x152``, ``160x160``,
+      ``180x180``, ``192x192``, ``194x194``, ``256x256``, ``310x310``,
+      ``512x512``, ``768x768``, ``1024x1024``
+
+
+extractor.steamgriddb.file-types
+--------------------------------
+Type
+    * ``string``
+    * ``list`` of ``strings``
+Default
+    ``"all"``
+Examples
+    * ``"png,jpeg"``
+    * ``["jpeg", "webp"]``
+Description
+    Only include assets that are in the specified file types. ``all`` can be
+    used to specifiy all file types. Valid values are:
+
+    * Grids: ``png``, ``jpeg``, ``jpg``, ``webp``
+    * Heroes: ``png``, ``jpeg``, ``jpg``, ``webp``
+    * Logos: ``png``, ``webp``
+    * Icons: ``png``, ``ico``
+
+
+extractor.steamgriddb.download-fake-png
+---------------------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Download fake PNGs alongside the real file.
+
+
+extractor.steamgriddb.humor
+---------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Include assets tagged with humor when downloading from a list of assets.
+
+
+extractor.steamgriddb.languages
+-------------------------------
+Type
+    * ``string``
+    * ``list`` of ``strings``
+Default
+    ``"all"``
+Examples
+    * ``"en,km"``
+    * ``["fr", "it"]``
+Description
+    Only include assets that are in the specified languages. ``all`` can be
+    used to specifiy all languages. Valid values are `ISO 639-1 <https://en.wikipedia.org/wiki/ISO_639-1>`__
+    language codes.
+
+
+extractor.steamgriddb.nsfw
+--------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Include assets tagged with adult content when downloading from a list of assets.
+
+
+extractor.steamgriddb.sort
+--------------------------
+Type
+    ``string``
+Default
+    ``score_desc``
+Description
+    Set the chosen sorting method when downloading from a list of assets. Can be one of:
+
+    * ``score_desc`` (Highest Score (Beta))
+    * ``score_asc`` (Lowest Score (Beta))
+    * ``score_old_desc`` (Highest Score (Old))
+    * ``score_old_asc`` (Lowest Score (Old))
+    * ``age_desc`` (Newest First)
+    * ``age_asc`` (Oldest First)
+
+
+extractor.steamgriddb.static
+----------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Include static assets when downloading from a list of assets.
+
+
+extractor.steamgriddb.styles
+----------------------------
+Type
+    * ``string``
+    * ``list`` of ``strings``
+Default
+    ``all``
+Examples
+    * ``white,black``
+    * ``["no_logo", "white_logo"]``
+Description
+    Only include assets that are in the specified styles. ``all`` can be used
+    to specify all styles. Valid values are:
+
+    * Grids: ``alternate``, ``blurred``, ``no_logo``, ``material``, ``white_logo``
+    * Heroes: ``alternate``, ``blurred``, ``material``
+    * Logos: ``official``, ``white``, ``black``, ``custom``
+    * Icons: ``official``, ``custom``
+
+
+extractor.steamgriddb.untagged
+------------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Include untagged assets when downloading from a list of assets.
 
 
 extractor.[szurubooru].username & .token
@@ -3035,7 +3418,8 @@ Type
 Default
     ``2``
 Description
-    Number of retries for fetching full-resolution images.
+    Number of retries for fetching full-resolution images
+    or ``-1`` for infinite retries.
 
 
 extractor.twibooru.api-key
@@ -3062,6 +3446,16 @@ Description
     to access 18+ content without `API Key <extractor.twibooru.api-key_>`__.
 
     See `Filters <https://twibooru.org/filters>`__ for details.
+
+
+extractor.twitter.ads
+---------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Fetch media from promoted Tweets.
 
 
 extractor.twitter.cards
@@ -3142,8 +3536,6 @@ Description
     for each Tweet in said timeline.
 
     Note: This requires at least 1 additional API call per initial Tweet.
-    Age-restricted replies cannot be expanded when using the
-    `syndication <extractor.twitter.syndication_>`__ API.
 
 
 extractor.twitter.include
@@ -3209,30 +3601,6 @@ Description
 
     Known available sizes are
     ``4096x4096``, ``orig``, ``large``, ``medium``, and ``small``.
-
-
-extractor.twitter.syndication
------------------------------
-Type
-    * ``bool``
-    * ``string``
-Default
-    ``false``
-Description
-    Controls how to retrieve age-restricted content when not logged in.
-
-    * ``false``: Skip age-restricted Tweets.
-    * ``true``: Download using Twitter's syndication API.
-    * ``"extended"``: Try to fetch Tweet metadata using the normal API
-      in addition to the syndication API. This requires additional HTTP
-      requests in some cases (e.g. when `retweets <extractor.twitter.retweets_>`_
-      are enabled).
-
-    Note: This does not apply to search results (including
-    `timeline strategies <extractor.twitter.timeline.strategy_>`__).
-    To retrieve such content from search results, you must log in and
-    disable "Hide sensitive content" in your `search settings
-    <https://twitter.com/settings/search>`__.
 
 
 extractor.twitter.logout
@@ -4300,6 +4668,24 @@ Description
     The default format string here is ``"{message}"``.
 
 
+output.errorfile
+----------------
+Type
+    * |Path|_
+    * |Logging Configuration|_
+Description
+    File to write input URLs which returned an error to.
+
+    The default format string here is also ``"{message}"``.
+
+    When combined with
+    ``-I``/``--input-file-comment`` or
+    ``-x``/``--input-file-delete``,
+    this option will cause *all* input URLs from these files
+    to be commented/deleted after processing them
+    and not just successful ones.
+
+
 output.num-to-str
 -----------------
 Type
@@ -5234,9 +5620,14 @@ How To
     * login and visit the `apps <https://www.reddit.com/prefs/apps/>`__
       section of your account's preferences
     * click the "are you a developer? create an app..." button
-    * fill out the form, choose "installed app", preferably set
-      "http://localhost:6414/" as "redirect uri" and finally click
-      "create app"
+    * fill out the form:
+
+      * choose a name
+      * select "installed app"
+      * set ``http://localhost:6414/`` as "redirect uri"
+      * solve the "I'm not a rebot" reCATCHA if needed
+      * click "create app"
+
     * copy the client id (third line, under your application's name and
       "installed app") and put it in your configuration file
       as ``"client-id"``

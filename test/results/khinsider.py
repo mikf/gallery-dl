@@ -12,7 +12,7 @@ __tests__ = (
     "#url"     : "https://downloads.khinsider.com/game-soundtracks/album/horizon-riders-wii",
     "#category": ("", "khinsider", "soundtrack"),
     "#class"   : khinsider.KhinsiderSoundtrackExtractor,
-    "#pattern" : r"https?://vgm(site|downloads)\.com/soundtracks/horizon-riders-wii/[^/]+/Horizon%20Riders%20Wii%20-%20Full%20Soundtrack\.mp3",
+    "#pattern" : r"https?://(dl\.)?vgm(site|downloads)\.com/soundtracks/horizon-riders-wii/[^/]+/Horizon%20Riders%20Wii%20-%20Full%20Soundtrack\.mp3",
     "#count"   : 1,
 
     "album"    : {

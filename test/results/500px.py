@@ -10,22 +10,22 @@ _500px = getattr(gallery_dl.extractor, "500px")
 
 __tests__ = (
 {
-    "#url"     : "https://500px.com/p/light_expression_photography",
+    "#url"     : "https://500px.com/p/fashvamp",
     "#category": ("", "500px", "user"),
     "#class"   : _500px._500pxUserExtractor,
-    "#pattern" : r"https?://drscdn.500px.org/photo/\d+/m%3D4096/v2",
+    "#pattern" : r"https?://drscdn.500px.org/photo/\d+/m%3D4096(_k%3D1)?/v2\?sig=",
     "#range"   : "1-99",
     "#count"   : 99,
 },
 
 {
-    "#url"     : "https://500px.com/light_expression_photography",
+    "#url"     : "https://500px.com/fashvamp",
     "#category": ("", "500px", "user"),
     "#class"   : _500px._500pxUserExtractor,
 },
 
 {
-    "#url"     : "https://web.500px.com/light_expression_photography",
+    "#url"     : "https://web.500px.com/fashvamp",
     "#category": ("", "500px", "user"),
     "#class"   : _500px._500pxUserExtractor,
 },
@@ -34,8 +34,8 @@ __tests__ = (
     "#url"     : "https://500px.com/p/fashvamp/galleries/lera",
     "#category": ("", "500px", "gallery"),
     "#class"   : _500px._500pxGalleryExtractor,
+    "#pattern" : r"https?://drscdn.500px.org/photo/\d+/m%3D4096_k%3D1/v2\?sig=",
     "#count"   : 3,
-    "#sha1_url": "002dc81dee5b4a655f0e31ad8349e8903b296df6",
 
     "gallery": dict,
     "user"   : dict,
@@ -57,8 +57,8 @@ __tests__ = (
     "#url"     : "https://500px.com/photo/222049255/queen-of-coasts",
     "#category": ("", "500px", "image"),
     "#class"   : _500px._500pxImageExtractor,
+    "#pattern" : r"https://drscdn\.500px\.org/photo/222049255/m%3D4096_k%3D1/v2\?sig=\w+",
     "#count"   : 1,
-    "#sha1_url": "fbdf7df39325cae02f5688e9f92935b0e7113315",
 
     "camera"          : "Canon EOS 600D",
     "camera_info"     : dict,

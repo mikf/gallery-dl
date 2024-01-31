@@ -12,7 +12,7 @@ __tests__ = (
     "#url"     : "https://itaku.ee/profile/piku/gallery",
     "#category": ("", "itaku", "gallery"),
     "#class"   : itaku.ItakuGalleryExtractor,
-    "#pattern" : r"https://d1wmr8tlk3viaj\.cloudfront\.net/gallery_imgs/[^/?#]+\.(jpg|png|gif)",
+    "#pattern" : r"https://itaku\.ee/api/media/gallery_imgs/[^/?#]+\.(jpg|png|gif)",
     "#range"   : "1-10",
     "#count"   : 10,
 },
@@ -21,8 +21,7 @@ __tests__ = (
     "#url"     : "https://itaku.ee/images/100471",
     "#category": ("", "itaku", "image"),
     "#class"   : itaku.ItakuImageExtractor,
-    "#pattern" : r"https://d1wmr8tlk3viaj\.cloudfront\.net/gallery_imgs/220504_oUNIAFT\.png",
-    "#count"   : 1,
+    "#urls"    : "https://itaku.ee/api/media/gallery_imgs/220504_oUNIAFT.png",
 
     "already_pinned"  : None,
     "blacklisted"     : {
@@ -38,8 +37,8 @@ __tests__ = (
     "filename"        : "220504_oUNIAFT",
     "hotness_score"   : float,
     "id"              : 100471,
-    "image"           : "https://d1wmr8tlk3viaj.cloudfront.net/gallery_imgs/220504_oUNIAFT.png",
-    "image_xl"        : "https://d1wmr8tlk3viaj.cloudfront.net/gallery_imgs/220504_oUNIAFT/lg.jpg",
+    "image"           : "https://itaku.ee/api/media/gallery_imgs/220504_oUNIAFT.png",
+    "image_xl"        : "https://itaku.ee/api/media/gallery_imgs/220504_oUNIAFT/lg.jpg",
     "liked_by_you"    : False,
     "maturity_rating" : "SFW",
     "num_comments"    : int,
@@ -47,7 +46,7 @@ __tests__ = (
     "num_reshares"    : int,
     "obj_tags"        : 136446,
     "owner"           : 16775,
-    "owner_avatar"    : "https://d1wmr8tlk3viaj.cloudfront.net/profile_pics/av2022r_vKYVywc/md.jpg",
+    "owner_avatar"    : "https://itaku.ee/api/media/profile_pics/av2022r_vKYVywc/md.jpg",
     "owner_displayname": "Piku",
     "owner_username"  : "piku",
     "reshared_by_you" : False,
@@ -55,7 +54,7 @@ __tests__ = (
     "tags"            : list,
     "tags_character"  : ["hatsune_miku"],
     "tags_copyright"  : ["vocaloid"],
-    "tags_general"    : [
+    "tags_general": [
         "twintails",
         "green_hair",
         "flag",
@@ -76,7 +75,7 @@ __tests__ = (
     "#comment" : "video",
     "#category": ("", "itaku", "image"),
     "#class"   : itaku.ItakuImageExtractor,
-    "#pattern" : r"https://d1wmr8tlk3viaj\.cloudfront\.net/gallery_vids/sleepy_af_OY5GHWw\.mp4",
+    "#urls"    : "https://itaku.ee/api/media/gallery_vids/sleepy_af_OY5GHWw.mp4",
 },
 
 )

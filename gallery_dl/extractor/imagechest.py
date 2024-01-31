@@ -44,7 +44,7 @@ class ImagechestGalleryExtractor(GalleryExtractor):
         }
 
     def images(self, page):
-        if " More Files</button>" in page:
+        if ' load-all">' in page:
             url = "{}/p/{}/loadAll".format(self.root, self.gallery_id)
             headers = {
                 "X-Requested-With": "XMLHttpRequest",

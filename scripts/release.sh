@@ -161,6 +161,6 @@ build-python
 build-linux
 build-windows
 sign
-upload-git
 upload-pypi
+upload-git
 update-dev

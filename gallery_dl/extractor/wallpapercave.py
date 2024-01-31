@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # Copyright 2021 David Hoppenbrouwers
+# Copyright 2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -22,7 +23,20 @@ class WallpapercaveImageExtractor(Extractor):
 
     def items(self):
         page = self.request(text.ensure_http_scheme(self.url)).text
+
+        path = None
         for path in text.extract_iter(page, 'class="download" href="', '"'):
             image = text.nameext_from_url(path)
             yield Message.Directory, image
             yield Message.Url, self.root + path, image
+
+        if path is None:
+            try:
+                path = text.rextract(
+                    page, 'href="', '"', page.index('id="tdownload"'))[0]
+            except Exception:
+                pass
+            else:
+                image = text.nameext_from_url(path)
+                yield Message.Directory, image
+                yield Message.Url, self.root + path, image

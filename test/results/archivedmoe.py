@@ -24,6 +24,18 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://archived.moe/b/thread/912594917/",
+    "#comment" : "broken thebarchive .webm URLs (#5116)",
+    "#category": ("foolfuuka", "archivedmoe", "thread"),
+    "#class"   : foolfuuka.FoolfuukaThreadExtractor,
+    "#urls"    : (
+        "https://thebarchive.com/b/full_image/1705625299234839.gif",
+        "https://thebarchive.com/b/full_image/1705625431133806.web",
+        "https://thebarchive.com/b/full_image/1705626190307840.web",
+    ),
+},
+
+{
     "#url"     : "https://archived.moe/gd/",
     "#category": ("foolfuuka", "archivedmoe", "board"),
     "#class"   : foolfuuka.FoolfuukaBoardExtractor,

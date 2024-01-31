@@ -18,7 +18,7 @@ class PhilomenaExtractor(BooruExtractor):
     basecategory = "philomena"
     filename_fmt = "{filename}.{extension}"
     archive_fmt = "{id}"
-    request_interval = 1.0
+    request_interval = (0.5, 1.5)
     page_start = 1
     per_page = 50
 
@@ -32,7 +32,7 @@ class PhilomenaExtractor(BooruExtractor):
         post["date"] = text.parse_datetime(post["created_at"])
 
 
-INSTANCES = {
+BASE_PATTERN = PhilomenaExtractor.update({
     "derpibooru": {
         "root": "https://derpibooru.org",
         "pattern": r"(?:www\.)?derpibooru\.org",
@@ -48,9 +48,7 @@ INSTANCES = {
         "pattern": r"furbooru\.org",
         "filter_id": "2",
     },
-}
-
-BASE_PATTERN = PhilomenaExtractor.update(INSTANCES)
+})
 
 
 class PhilomenaPostExtractor(PhilomenaExtractor):
@@ -176,10 +174,7 @@ class PhilomenaAPI():
         if filter_id:
             params["filter_id"] = filter_id
         elif not api_key:
-            try:
-                params["filter_id"] = INSTANCES[extr.category]["filter_id"]
-            except (KeyError, TypeError):
-                params["filter_id"] = "2"
+            params["filter_id"] = extr.config_instance("filter_id") or "2"
 
         params["page"] = extr.page_start
         params["per_page"] = extr.per_page

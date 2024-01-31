@@ -19,6 +19,7 @@ class NijieExtractor(AsynchronousMixin, BaseExtractor):
     directory_fmt = ("{category}", "{user_id}")
     filename_fmt = "{image_id}_p{num}.{extension}"
     archive_fmt = "{image_id}_{num}"
+    request_interval = (1.0, 2.0)
 
     def __init__(self, match):
         BaseExtractor.__init__(self, match)
@@ -54,9 +55,16 @@ class NijieExtractor(AsynchronousMixin, BaseExtractor):
             else:
                 data["user_id"] = data["artist_id"]
                 data["user_name"] = data["artist_name"]
-            yield Message.Directory, data
 
-            for image in self._extract_images(page):
+            urls = list(self._extract_images(image_id, page))
+            data["count"] = len(urls)
+
+            yield Message.Directory, data
+            for num, url in enumerate(urls):
+                image = text.nameext_from_url(url, {
+                    "num": num,
+                    "url": "https:" + url,
+                })
                 image.update(data)
                 if not image["extension"]:
                     image["extension"] = "jpg"
@@ -71,7 +79,7 @@ class NijieExtractor(AsynchronousMixin, BaseExtractor):
         extr = text.extract_from(page)
         keywords = text.unescape(extr(
             'name="keywords" content="', '" />')).split(",")
-        data = {
+        return {
             "title"      : keywords[0].strip(),
             "description": text.unescape(extr(
                 '"description": "', '"').replace("&amp;", "&")),
@@ -81,7 +89,6 @@ class NijieExtractor(AsynchronousMixin, BaseExtractor):
             "artist_name": keywords[1],
             "tags"       : keywords[2:-1],
         }
-        return data
 
     @staticmethod
     def _extract_data_horne(page):
@@ -89,7 +96,7 @@ class NijieExtractor(AsynchronousMixin, BaseExtractor):
         extr = text.extract_from(page)
         keywords = text.unescape(extr(
             'name="keywords" content="', '" />')).split(",")
-        data = {
+        return {
             "title"      : keywords[0].strip(),
             "description": text.unescape(extr(
                 'property="og:description" content="', '"')),
@@ -100,21 +107,17 @@ class NijieExtractor(AsynchronousMixin, BaseExtractor):
                 "itemprop='datePublished' content=", "<").rpartition(">")[2],
                 "%Y-%m-%d %H:%M:%S", 9),
         }
-        return data
 
-    @staticmethod
-    def _extract_images(page):
-        """Extract image URLs from 'page'"""
-        images = text.extract_iter(page, "/view_popup.php", "</a>")
-        for num, image in enumerate(images):
-            src = text.extr(image, 'src="', '"')
-            if not src:
-                continue
-            url = ("https:" + src).replace("/__rs_l120x120/", "/")
-            yield text.nameext_from_url(url, {
-                "num": num,
-                "url": url,
-            })
+    def _extract_images(self, image_id, page):
+        if '&#diff_1" ' in page:
+            # multiple images
+            url = "{}/view_popup.php?id={}".format(self.root, image_id)
+            page = self.request(url).text
+            yield from text.extract_iter(
+                page, 'href="javascript:void(0);"><img src="', '"')
+        else:
+            pos = page.find('id="view-center"') + 1
+            yield text.extract(page, 'itemprop="image" src="', '"', pos)[0]
 
     @staticmethod
     def _extract_user_name(page):
@@ -125,15 +128,15 @@ class NijieExtractor(AsynchronousMixin, BaseExtractor):
             return
 
         username, password = self._get_auth_info()
-        self.cookies_update(self._login_impl(username, password))
+        if username:
+            return self.cookies_update(self._login_impl(username, password))
 
-    @cache(maxage=90*24*3600, keyarg=1)
+        raise exception.AuthenticationError("Username and password required")
+
+    @cache(maxage=90*86400, keyarg=1)
     def _login_impl(self, username, password):
-        if not username or not password:
-            raise exception.AuthenticationError(
-                "Username and password required")
-
         self.log.info("Logging in as %s", username)
+
         url = "{}/login_int.php".format(self.root)
         data = {"email": username, "password": password, "save": "on"}
 

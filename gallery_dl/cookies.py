@@ -47,7 +47,7 @@ def load_cookies(cookiejar, browser_specification):
 
 def load_cookies_firefox(cookiejar, profile=None, container=None, domain=None):
     path, container_id = _firefox_cookies_database(profile, container)
-    with DatabaseCopy(path) as db:
+    with DatabaseConnection(path) as db:
 
         sql = ("SELECT name, value, host, path, isSecure, expiry "
                "FROM moz_cookies")
@@ -100,7 +100,7 @@ def load_cookies_chrome(cookiejar, browser_name, profile=None,
     path = _chrome_cookies_database(profile, config)
     _log_debug("Extracting cookies from %s", path)
 
-    with DatabaseCopy(path) as db:
+    with DatabaseConnection(path) as db:
         db.text_factory = bytes
         decryptor = get_cookie_decryptor(
             config["directory"], config["keyring"], keyring)
@@ -215,9 +215,11 @@ def _firefox_cookies_database(profile=None, container=None):
 
 def _firefox_browser_directory():
     if sys.platform in ("win32", "cygwin"):
-        return os.path.expandvars(r"%APPDATA%\Mozilla\Firefox\Profiles")
+        return os.path.expandvars(
+            r"%APPDATA%\Mozilla\Firefox\Profiles")
     if sys.platform == "darwin":
-        return os.path.expanduser("~/Library/Application Support/Firefox")
+        return os.path.expanduser(
+            "~/Library/Application Support/Firefox/Profiles")
     return os.path.expanduser("~/.mozilla/firefox")
 
 
@@ -814,7 +816,7 @@ class DataParser:
         self.skip_to(len(self._data), description)
 
 
-class DatabaseCopy():
+class DatabaseConnection():
 
     def __init__(self, path):
         self.path = path
@@ -823,12 +825,26 @@ class DatabaseCopy():
 
     def __enter__(self):
         try:
+            # https://www.sqlite.org/uri.html#the_uri_path
+            path = self.path.replace("?", "%3f").replace("#", "%23")
+            if util.WINDOWS:
+                path = "/" + os.path.abspath(path)
+
+            uri = "file:{}?mode=ro&immutable=1".format(path)
+            self.database = sqlite3.connect(
+                uri, uri=True, isolation_level=None, check_same_thread=False)
+            return self.database
+        except Exception as exc:
+            _log_debug("Falling back to temporary database copy (%s: %s)",
+                       exc.__class__.__name__, exc)
+
+        try:
             self.directory = tempfile.TemporaryDirectory(prefix="gallery-dl-")
             path_copy = os.path.join(self.directory.name, "copy.sqlite")
             shutil.copyfile(self.path, path_copy)
-            self.database = db = sqlite3.connect(
+            self.database = sqlite3.connect(
                 path_copy, isolation_level=None, check_same_thread=False)
-            return db
+            return self.database
         except BaseException:
             if self.directory:
                 self.directory.cleanup()
@@ -836,7 +852,8 @@ class DatabaseCopy():
 
     def __exit__(self, exc, value, tb):
         self.database.close()
-        self.directory.cleanup()
+        if self.directory:
+            self.directory.cleanup()
 
 
 def Popen_communicate(*args):

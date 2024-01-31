@@ -89,14 +89,20 @@ class RedgifsUserExtractor(RedgifsExtractor):
     """Extractor for redgifs user profiles"""
     subcategory = "user"
     directory_fmt = ("{category}", "{userName}")
-    pattern = r"(?:https?://)?(?:\w+\.)?redgifs\.com/users/([^/?#]+)/?$"
+    pattern = (r"(?:https?://)?(?:\w+\.)?redgifs\.com/users/([^/?#]+)/?"
+               r"(?:\?([^#]+))?$")
     example = "https://www.redgifs.com/users/USER"
+
+    def __init__(self, match):
+        RedgifsExtractor.__init__(self, match)
+        self.query = match.group(2)
 
     def metadata(self):
         return {"userName": self.key}
 
     def gifs(self):
-        return self.api.user(self.key)
+        order = text.parse_query(self.query).get("order")
+        return self.api.user(self.key, order or "new")
 
 
 class RedgifsCollectionExtractor(RedgifsExtractor):
@@ -140,11 +146,17 @@ class RedgifsCollectionsExtractor(RedgifsExtractor):
 class RedgifsNichesExtractor(RedgifsExtractor):
     """Extractor for redgifs niches"""
     subcategory = "niches"
-    pattern = r"(?:https?://)?(?:www\.)?redgifs\.com/niches/([^/?#]+)"
+    pattern = (r"(?:https?://)?(?:www\.)?redgifs\.com/niches/([^/?#]+)/?"
+               r"(?:\?([^#]+))?$")
     example = "https://www.redgifs.com/niches/NAME"
 
+    def __init__(self, match):
+        RedgifsExtractor.__init__(self, match)
+        self.query = match.group(2)
+
     def gifs(self):
-        return self.api.niches(self.key)
+        order = text.parse_query(self.query).get("order")
+        return self.api.niches(self.key, order or "new")
 
 
 class RedgifsSearchExtractor(RedgifsExtractor):
@@ -208,7 +220,7 @@ class RedgifsAPI():
         endpoint = "/v2/gallery/" + gallery_id
         return self._call(endpoint)
 
-    def user(self, user, order="best"):
+    def user(self, user, order="new"):
         endpoint = "/v2/users/{}/search".format(user.lower())
         params = {"order": order}
         return self._pagination(endpoint, params)
@@ -226,9 +238,10 @@ class RedgifsAPI():
         endpoint = "/v2/users/{}/collections".format(user)
         return self._pagination(endpoint, key="collections")
 
-    def niches(self, niche):
+    def niches(self, niche, order):
         endpoint = "/v2/niches/{}/gifs".format(niche)
-        return self._pagination(endpoint)
+        params = {"count": 30, "order": order}
+        return self._pagination(endpoint, params)
 
     def search(self, params):
         endpoint = "/v2/gifs/search"

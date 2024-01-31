@@ -19,17 +19,12 @@ class Shimmie2Extractor(BaseExtractor):
     archive_fmt = "{id}"
 
     def _init(self):
-        try:
-            instance = INSTANCES[self.category]
-        except KeyError:
-            return
-
-        cookies = instance.get("cookies")
+        cookies = self.config_instance("cookies")
         if cookies:
             domain = self.root.rpartition("/")[2]
             self.cookies_update_dict(cookies, domain=domain)
 
-        file_url = instance.get("file_url")
+        file_url = self.config_instance("file_url")
         if file_url:
             self.file_url_fmt = file_url
 
@@ -41,8 +36,9 @@ class Shimmie2Extractor(BaseExtractor):
 
         for post in self.posts():
 
-            for key in ("id", "width", "height"):
-                post[key] = text.parse_int(post[key])
+            post["id"] = text.parse_int(post["id"])
+            post["width"] = text.parse_int(post["width"])
+            post["height"] = text.parse_int(post["height"])
             post["tags"] = text.unquote(post["tags"])
             post.update(data)
 
@@ -64,20 +60,23 @@ class Shimmie2Extractor(BaseExtractor):
         """Return an iterable containing data of all relevant posts"""
         return ()
 
+    def _quote_type(self, page):
+        """Return quoting character used in 'page' (' or ")"""
+        try:
+            return page[page.index("<link rel=")+10]
+        except Exception:
+            return "'"
 
-INSTANCES = {
-    "mememuseum": {
-        "root": "https://meme.museum",
-        "pattern": r"meme\.museum",
-    },
+
+BASE_PATTERN = Shimmie2Extractor.update({
     "loudbooru": {
         "root": "https://loudbooru.com",
         "pattern": r"loudbooru\.com",
         "cookies": {"ui-tnc-agreed": "true"},
     },
     "giantessbooru": {
-        "root": "https://giantessbooru.com",
-        "pattern": r"giantessbooru\.com",
+        "root": "https://sizechangebooru.com",
+        "pattern": r"(?:sizechange|giantess)booru\.com",
         "cookies": {"agreed": "true"},
     },
     "tentaclerape": {
@@ -89,9 +88,11 @@ INSTANCES = {
         "pattern": r"booru\.cavemanon\.xyz",
         "file_url": "{0}/index.php?q=image/{2}.{4}",
     },
-}
-
-BASE_PATTERN = Shimmie2Extractor.update(INSTANCES) + r"/(?:index\.php\?q=/?)?"
+    "rule34hentai": {
+        "root": "https://rule34hentai.net",
+        "pattern": r"rule34hentai\.net",
+    },
+}) + r"/(?:index\.php\?q=/?)?"
 
 
 class Shimmie2TagExtractor(Shimmie2Extractor):
@@ -125,21 +126,26 @@ class Shimmie2TagExtractor(Shimmie2Extractor):
 
             if init:
                 init = False
-                has_mime = ("data-mime='" in page)
-                has_pid = ("data-post-id='" in page)
+                quote = self._quote_type(page)
+                has_mime = (" data-mime=" in page)
+                has_pid = (" data-post-id=" in page)
 
             while True:
                 if has_mime:
-                    mime = extr("data-mime='", "'")
+                    mime = extr(" data-mime="+quote, quote)
                 if has_pid:
-                    pid = extr("data-post-id='", "'")
+                    pid = extr(" data-post-id="+quote, quote)
                 else:
-                    pid = extr("href='/post/view/", "?")
+                    pid = extr(" href='/post/view/", quote)
 
                 if not pid:
                     break
 
-                tags, dimensions, size = extr("title='", "'").split(" // ")
+                data = extr("title="+quote, quote).split(" // ")
+                tags = data[0]
+                dimensions = data[1]
+                size = data[2]
+
                 width, _, height = dimensions.partition("x")
                 md5 = extr("/_thumbs/", "/")
 
@@ -170,25 +176,25 @@ class Shimmie2TagExtractor(Shimmie2Extractor):
             extr = text.extract_from(self.request(url).text)
 
             while True:
-                pid = extr('href="./index.php?q=/post/view/', '&')
+                pid = extr("href='./index.php?q=/post/view/", "&")
                 if not pid:
                     break
 
-                tags, dimensions, size = extr('title="', '"').split(" // ")
+                tags, dimensions, size = extr("title='", "'").split(" // ")
                 width, _, height = dimensions.partition("x")
 
                 yield {
                     "file_url": file_url_fmt(pid),
-                    "id": pid,
-                    "md5": "",
-                    "tags": tags,
-                    "width": width,
-                    "height": height,
-                    "size": text.parse_bytes(size[:-1]),
+                    "id"      : pid,
+                    "md5"     : "",
+                    "tags"    : tags,
+                    "width"   : width,
+                    "height"  : height,
+                    "size"    : text.parse_bytes(size[:-1]),
                 }
 
             pnum += 1
-            if not extr('/{}">{}<'.format(pnum, pnum), ">"):
+            if not extr("/{0}'>{0}<".format(pnum), ">"):
                 return
 
 
@@ -204,15 +210,17 @@ class Shimmie2PostExtractor(Shimmie2Extractor):
 
     def posts(self):
         url = "{}/post/view/{}".format(self.root, self.post_id)
-        extr = text.extract_from(self.request(url).text)
+        page = self.request(url).text
+        extr = text.extract_from(page)
+        quote = self._quote_type(page)
 
         post = {
             "id"      : self.post_id,
             "tags"    : extr(": ", "<").partition(" - ")[0].rstrip(")"),
             "md5"     : extr("/_thumbs/", "/"),
             "file_url": self.root + (
-                extr("id='main_image' src='", "'") or
-                extr("<source src='", "'")).lstrip("."),
+                extr("id={0}main_image{0} src={0}".format(quote), quote) or
+                extr("<source src="+quote, quote)).lstrip("."),
             "width"   : extr("data-width=", " ").strip("\"'"),
             "height"  : extr("data-height=", ">").partition(
                 " ")[0].strip("\"'"),
@@ -233,7 +241,7 @@ class Shimmie2PostExtractor(Shimmie2Extractor):
             "id"      : self.post_id,
             "tags"    : extr(": ", "<").partition(" - ")[0].rstrip(")"),
             "md5"     : "",
-            "file_url": self.root + extr('id="main_image" src=".', '"'),
+            "file_url": self.root + extr("id='main_image' src='.", "'"),
             "width"   : extr("orig_width =", ";"),
             "height"  : 0,
             "size"    : 0,

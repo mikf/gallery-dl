@@ -58,7 +58,7 @@ __tests__ = (
     "#url"     : "https://skeb.jp/@kanade_cocotte",
     "#category": ("", "skeb", "user"),
     "#class"   : skeb.SkebUserExtractor,
-    "#pattern" : r"https://skeb\.imgix\.net/uploads/origins/[\w-]+\?bg=%23fff&auto=format&txtfont=bold&txtshad=70&txtclr=BFFFFFFF&txtalign=middle%2Ccenter&txtsize=150&txt=SAMPLE&fm=webp&w=800&s=\w+",
+    "#pattern" : r"https://si\.imgix\.net/\w+/uploads/origins/[\w-]+",
     "#range"   : "1-5",
 },
 

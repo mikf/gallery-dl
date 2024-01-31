@@ -5,7 +5,7 @@
 # published by the Free Software Foundation.
 
 from gallery_dl.extractor import twitter
-from gallery_dl import exception
+from gallery_dl import util, exception
 
 
 __tests__ = (
@@ -50,6 +50,12 @@ __tests__ = (
 
 {
     "#url"     : "https://vxtwitter.com/supernaturepics",
+    "#category": ("", "twitter", "user"),
+    "#class"   : twitter.TwitterUserExtractor,
+},
+
+{
+    "#url"     : "https://fixupx.com/supernaturepics",
     "#category": ("", "twitter", "user"),
     "#class"   : twitter.TwitterUserExtractor,
 },
@@ -181,7 +187,7 @@ __tests__ = (
     "#url"     : "https://twitter.com/i/lists/784214683683127296/members",
     "#category": ("", "twitter", "list-members"),
     "#class"   : twitter.TwitterListMembersExtractor,
-    "#pattern" : twitter.TwitterTimelineExtractor.pattern,
+    "#pattern" : twitter.TwitterUserExtractor.pattern,
     "#range"   : "1-40",
     "#count"   : 40,
 },
@@ -254,10 +260,9 @@ __tests__ = (
     "#category": ("", "twitter", "tweet"),
     "#class"   : twitter.TwitterTweetExtractor,
 
-    "content": r"""re:Gear up for #PokemonSwordShieldEX with special Mystery Gifts! 
-
-You’ll be able to receive four Galarian form Pokémon with Hidden Abilities, plus some very useful items. It’s our \(Mystery\) Gift to you, Trainers! 
-
+    "source" : "Sprinklr",
+    "content": r"""re:Gear up for #PokemonSwordShieldEX with special Mystery Gifts! \n
+You’ll be able to receive four Galarian form Pokémon with Hidden Abilities, plus some very useful items. It’s our \(Mystery\) Gift to you, Trainers! \n
 ❓🎁➡️ """,
 },
 
@@ -458,7 +463,7 @@ You’ll be able to receive four Galarian form Pokémon with Hidden Abilities, p
     "#category": ("", "twitter", "tweet"),
     "#class"   : twitter.TwitterTweetExtractor,
     "#options" : {"retweets": True},
-    "#count"   : 0,
+    "#count"   : 4,
 },
 
 {
@@ -482,8 +487,9 @@ You’ll be able to receive four Galarian form Pokémon with Hidden Abilities, p
     "#comment" : "age-restricted (#2354)",
     "#category": ("", "twitter", "tweet"),
     "#class"   : twitter.TwitterTweetExtractor,
-    "#options" : {"syndication": True},
-    "#count"   : 1,
+    "#exception": exception.AuthorizationError,
+    "#options"  : {"syndication": True},
+    "#count"    : 1,
 
     "date": "dt:2022-02-13 20:10:09",
 },
@@ -503,8 +509,8 @@ You’ll be able to receive four Galarian form Pokémon with Hidden Abilities, p
     "#category": ("", "twitter", "tweet"),
     "#class"   : twitter.TwitterTweetExtractor,
     "#options" : {"cards": True},
-    "#pattern" : r"https://pbs.twimg.com/card_img/157\d+/[\w-]+\?format=(jpg|png)&name=orig$",
-    "#range"   : "1-2",
+    "#pattern" : r"https://pbs.twimg.com/card_img/174\d+/[\w-]+\?format=(jpg|png)&name=orig$",
+    "#range"   : "1,3",
 },
 
 {
@@ -513,10 +519,8 @@ You’ll be able to receive four Galarian form Pokémon with Hidden Abilities, p
     "#category": ("", "twitter", "tweet"),
     "#class"   : twitter.TwitterTweetExtractor,
 
-    "content": """BREAKING - DEADLY LIES: Independent researchers at Texas A&M University have just contradicted federal government regulators, saying that toxic air pollutants in East Palestine, Ohio, could pose long-term risks. 
-
-The Washington Post writes, "Three weeks after the toxic train derailment in Ohio, an analysis of Environmental Protection Agency data has found nine air pollutants at levels that could raise long-term health concerns in and around East Palestine, according to an independent analysis. 
-
+    "content": """BREAKING - DEADLY LIES: Independent researchers at Texas A&M University have just contradicted federal government regulators, saying that toxic air pollutants in East Palestine, Ohio, could pose long-term risks. \n
+The Washington Post writes, "Three weeks after the toxic train derailment in Ohio, an analysis of Environmental Protection Agency data has found nine air pollutants at levels that could raise long-term health concerns in and around East Palestine, according to an independent analysis. \n
 "The analysis by Texas A&M University seems to contradict statements by state and federal regulators that air near the crash site is completely safe, despite residents complaining about rashes, breathing problems and other health effects." Your reaction.""",
 },
 
@@ -524,7 +528,7 @@ The Washington Post writes, "Three weeks after the toxic train derailment in Ohi
     "#url"     : "https://twitter.com/supernaturepics/photo",
     "#category": ("", "twitter", "avatar"),
     "#class"   : twitter.TwitterAvatarExtractor,
-    "#pattern" : r"https://pbs\.twimg\.com/profile_images/554585280938659841/FLVAlX18\.jpeg",
+    "#urls"    : "https://pbs.twimg.com/profile_images/554585280938659841/FLVAlX18.jpeg",
 
     "date"     : "dt:2015-01-12 10:26:49",
     "extension": "jpeg",
@@ -537,6 +541,17 @@ The Washington Post writes, "Three weeks after the toxic train derailment in Ohi
     "#category": ("", "twitter", "avatar"),
     "#class"   : twitter.TwitterAvatarExtractor,
     "#count"   : 0,
+},
+
+{
+    "#url"     : "https://twitter.com/i_n_u/photo",
+    "#comment" : "old avatar with small ID and no valid 'date' (#4696)",
+    "#category": ("", "twitter", "avatar"),
+    "#class"   : twitter.TwitterAvatarExtractor,
+    "#urls"    : "https://pbs.twimg.com/profile_images/2946444489/32028c6affdab425e037ff5a6bf77c1d.jpeg",
+
+    "date"     : util.NONE,
+    "tweet_id" : 2946444489,
 },
 
 {

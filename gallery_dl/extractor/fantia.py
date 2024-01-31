@@ -42,7 +42,11 @@ class FantiaExtractor(Extractor):
             post = self._get_post_data(post_id)
             post["num"] = 0
 
-            for content in self._get_post_contents(post):
+            contents = self._get_post_contents(post)
+            post["content_count"] = len(contents)
+            post["content_num"] = 0
+
+            for content in contents:
                 files = self._process_content(post, content)
                 yield Message.Directory, post
 
@@ -58,6 +62,8 @@ class FantiaExtractor(Extractor):
                     text.nameext_from_url(
                         post["content_filename"] or file["file_url"], post)
                     yield Message.Url, file["file_url"], post
+
+            post["content_num"] += 1
 
     def posts(self):
         """Return post IDs"""
@@ -102,7 +108,7 @@ class FantiaExtractor(Extractor):
             "fanclub_user_name": resp["fanclub"]["user"]["name"],
             "fanclub_name": resp["fanclub"]["name"],
             "fanclub_url": self.root+"/fanclubs/"+str(resp["fanclub"]["id"]),
-            "tags": resp["tags"],
+            "tags": [t["name"] for t in resp["tags"]],
             "_data": resp,
         }
 
@@ -131,6 +137,7 @@ class FantiaExtractor(Extractor):
         post["content_filename"] = content.get("filename") or ""
         post["content_id"] = content["id"]
         post["content_comment"] = content.get("comment") or ""
+        post["content_num"] += 1
         post["plan"] = content["plan"] or self._empty_plan
 
         files = []

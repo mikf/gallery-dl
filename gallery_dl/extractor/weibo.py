@@ -41,9 +41,14 @@ class WeiboExtractor(Extractor):
     def request(self, url, **kwargs):
         response = Extractor.request(self, url, **kwargs)
 
-        if response.history and "passport.weibo.com" in response.url:
-            self._sina_visitor_system(response)
-            response = Extractor.request(self, url, **kwargs)
+        if response.history:
+            if "login.sina.com" in response.url:
+                raise exception.StopExtraction(
+                    "HTTP redirect to login page (%s)",
+                    response.url.partition("?")[0])
+            if "passport.weibo.com" in response.url:
+                self._sina_visitor_system(response)
+                response = Extractor.request(self, url, **kwargs)
 
         return response
 
@@ -191,7 +196,7 @@ class WeiboExtractor(Extractor):
         headers = {"Referer": response.url}
         data = {
             "cb": "gen_callback",
-            "fp": '{"os":"1","browser":"Gecko91,0,0,0","fonts":"undefined",'
+            "fp": '{"os":"1","browser":"Gecko109,0,0,0","fonts":"undefined",'
                   '"screenInfo":"1920*1080*24","plugins":""}',
         }
 
@@ -203,8 +208,8 @@ class WeiboExtractor(Extractor):
         params = {
             "a"    : "incarnate",
             "t"    : data["tid"],
-            "w"    : "2",
-            "c"    : "{:>03}".format(data["confidence"]),
+            "w"    : "3" if data.get("new_tid") else "2",
+            "c"    : "{:>03}".format(data.get("confidence") or 100),
             "gc"   : "",
             "cb"   : "cross_domain",
             "from" : "weibo",
@@ -219,9 +224,6 @@ class WeiboUserExtractor(WeiboExtractor):
     subcategory = "user"
     pattern = USER_PATTERN + r"(?:$|#)"
     example = "https://weibo.com/USER"
-
-    def initialize(self):
-        pass
 
     def items(self):
         base = "{}/u/{}?tabtype=".format(self.root, self._user_id())

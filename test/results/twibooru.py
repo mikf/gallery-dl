@@ -44,7 +44,7 @@ __tests__ = (
     "tag_ids"         : list,
     "tags"            : list,
     "thumbnails_generated": True,
-    "updated_at"      : "2022-11-27T00:34:50.483Z",
+    "updated_at"      : "2023-12-25T06:58:33.986Z",
     "upvotes"         : int,
     "view_url"        : "https://cdn.twibooru.org/img/2020/7/8/1/full.png",
     "width"           : 576,

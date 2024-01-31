@@ -23,7 +23,7 @@ class NewgroundsExtractor(Extractor):
     root = "https://www.newgrounds.com"
     cookies_domain = ".newgrounds.com"
     cookies_names = ("NG_GG_username", "vmk1du5I8m")
-    request_interval = 1.0
+    request_interval = (0.5, 1.5)
 
     def __init__(self, match):
         Extractor.__init__(self, match)
@@ -54,14 +54,31 @@ class NewgroundsExtractor(Extractor):
                 if metadata:
                     post.update(metadata)
                 yield Message.Directory, post
+                post["num"] = 0
                 yield Message.Url, url, text.nameext_from_url(url, post)
 
-                for num, url in enumerate(text.extract_iter(
-                        post["_comment"], 'data-smartload-src="', '"'), 1):
-                    post["num"] = num
-                    post["_index"] = "{}_{:>02}".format(post["index"], num)
+                if "_multi" in post:
+                    for data in post["_multi"]:
+                        post["num"] += 1
+                        post["_index"] = "{}_{:>02}".format(
+                            post["index"], post["num"])
+                        post.update(data)
+                        url = data["image"]
+
+                        text.nameext_from_url(url, post)
+                        yield Message.Url, url, post
+
+                        if "_fallback" in post:
+                            del post["_fallback"]
+
+                for url in text.extract_iter(
+                        post["_comment"], 'data-smartload-src="', '"'):
+                    post["num"] += 1
+                    post["_index"] = "{}_{:>02}".format(
+                        post["index"], post["num"])
                     url = text.ensure_http_scheme(url)
-                    yield Message.Url, url, text.nameext_from_url(url, post)
+                    text.nameext_from_url(url, post)
+                    yield Message.Url, url, post
             else:
                 self.log.warning(
                     "Unable to get download URL for '%s'", post_url)
@@ -81,7 +98,7 @@ class NewgroundsExtractor(Extractor):
         if username:
             self.cookies_update(self._login_impl(username, password))
 
-    @cache(maxage=360*24*3600, keyarg=1)
+    @cache(maxage=365*86400, keyarg=1)
     def _login_impl(self, username, password):
         self.log.info("Logging in as %s", username)
 
@@ -153,8 +170,7 @@ class NewgroundsExtractor(Extractor):
         data["post_url"] = post_url
         return data
 
-    @staticmethod
-    def _extract_image_data(extr, url):
+    def _extract_image_data(self, extr, url):
         full = text.extract_from(util.json_loads(extr(
             '"full_image_text":', '});')))
         data = {
@@ -172,7 +188,33 @@ class NewgroundsExtractor(Extractor):
         index = data["url"].rpartition("/")[2].partition("_")[0]
         data["index"] = text.parse_int(index)
         data["_index"] = index
+
+        image_data = extr("let imageData =", "\n];")
+        if image_data:
+            data["_multi"] = self._extract_images_multi(image_data)
+        else:
+            art_images = extr('<div class="art-images', '\n</div>')
+            if art_images:
+                data["_multi"] = self._extract_images_art(art_images, data)
+
         return data
+
+    def _extract_images_multi(self, html):
+        data = util.json_loads(html + "]")
+        yield from data[1:]
+
+    def _extract_images_art(self, html, data):
+        ext = text.ext_from_url(data["url"])
+        for url in text.extract_iter(html, 'data-smartload-src="', '"'):
+            url = text.ensure_http_scheme(url)
+            url = url.replace("/medium_views/", "/images/", 1)
+            if text.ext_from_url(url) == "webp":
+                yield {
+                    "image"    : url.replace(".webp", "." + ext),
+                    "_fallback": (url,),
+                }
+            else:
+                yield {"image": url}
 
     @staticmethod
     def _extract_audio_data(extr, url):

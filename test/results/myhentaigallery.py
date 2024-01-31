@@ -9,10 +9,10 @@ from gallery_dl.extractor import myhentaigallery
 
 __tests__ = (
 {
-    "#url"     : "https://myhentaigallery.com/gallery/thumbnails/16247",
+    "#url"     : "https://myhentaigallery.com/g/16247",
     "#category": ("", "myhentaigallery", "gallery"),
     "#class"   : myhentaigallery.MyhentaigalleryGalleryExtractor,
-    "#pattern" : r"https://images.myhentaicomics\.com/imagesgallery/images/[^/]+/original/\d+\.jpg",
+    "#pattern" : r"https://images\.myhentaicomics\.com/m\w\w/images/[^/]+/original/\d+\.jpg",
 
     "artist"    : list,
     "count"     : 11,
@@ -21,6 +21,12 @@ __tests__ = (
     "parodies"  : list,
     "tags"      : ["Giantess"],
     "title"     : "Attack Of The 50ft Woman 1",
+},
+
+{
+    "#url"     : "https://myhentaigallery.com/gallery/thumbnails/16247",
+    "#category": ("", "myhentaigallery", "gallery"),
+    "#class"   : myhentaigallery.MyhentaigalleryGalleryExtractor,
 },
 
 {

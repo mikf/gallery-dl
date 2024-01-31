@@ -23,7 +23,7 @@ class GelbooruBase():
     root = "https://gelbooru.com"
     offset = 0
 
-    def _api_request(self, params, key="post"):
+    def _api_request(self, params, key="post", log=False):
         if "s" not in params:
             params["s"] = "post"
         params["api_key"] = self.api_key
@@ -32,10 +32,14 @@ class GelbooruBase():
         url = self.root + "/index.php?page=dapi&q=index&json=1"
         data = self.request(url, params=params).json()
 
-        if key not in data:
-            return ()
+        try:
+            posts = data[key]
+        except KeyError:
+            if log:
+                self.log.error("Incomplete API response (missing '%s')", key)
+                self.log.debug("%s", data)
+            return []
 
-        posts = data[key]
         if not isinstance(posts, list):
             return (posts,)
         return posts
@@ -114,7 +118,7 @@ class GelbooruBase():
 class GelbooruTagExtractor(GelbooruBase,
                            gelbooru_v02.GelbooruV02TagExtractor):
     """Extractor for images from gelbooru.com based on search-tags"""
-    pattern = BASE_PATTERN + r"page=post&s=list&tags=([^&#]+)"
+    pattern = BASE_PATTERN + r"page=post&s=list&tags=([^&#]*)"
     example = "https://gelbooru.com/index.php?page=post&s=list&tags=TAG"
 
 
@@ -165,15 +169,16 @@ class GelbooruFavoriteExtractor(GelbooruBase,
             "id"   : self.favorite_id,
             "limit": "1",
         }
-        count = self._api_request(params, "@attributes")[0]["count"]
 
+        count = self._api_request(params, "@attributes", True)[0]["count"]
         if count <= self.offset:
             return
-        pnum, last = divmod(count + 1, self.per_page)
 
-        if self.offset >= last:
+        pnum, last = divmod(count-1, self.per_page)
+        if self.offset > last:
+            # page number change
             self.offset -= last
-            diff, self.offset = divmod(self.offset, self.per_page)
+            diff, self.offset = divmod(self.offset-1, self.per_page)
             pnum -= diff + 1
         skip = self.offset
 
@@ -182,9 +187,9 @@ class GelbooruFavoriteExtractor(GelbooruBase,
         params["limit"] = self.per_page
 
         while True:
-            favs = self._api_request(params, "favorite")
-
+            favs = self._api_request(params, "favorite", True)
             favs.reverse()
+
             if skip:
                 favs = favs[skip:]
                 skip = 0

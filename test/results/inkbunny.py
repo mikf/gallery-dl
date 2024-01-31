@@ -79,6 +79,12 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://inkbunny.net/submissionsviewall.php?mode=pool&pool_id=28985",
+    "#category": ("", "inkbunny", "pool"),
+    "#class"   : inkbunny.InkbunnyPoolExtractor,
+},
+
+{
     "#url"     : "https://inkbunny.net/userfavorites_process.php?favs_user_id=20969",
     "#category": ("", "inkbunny", "favorite"),
     "#class"   : inkbunny.InkbunnyFavoriteExtractor,
@@ -92,6 +98,24 @@ __tests__ = (
     "#url"     : "https://inkbunny.net/submissionsviewall.php?rid=ffffffffff&mode=userfavs&random=no&orderby=fav_datetime&page=1&user_id=20969",
     "#category": ("", "inkbunny", "favorite"),
     "#class"   : inkbunny.InkbunnyFavoriteExtractor,
+},
+
+{
+    "#url"     : "https://inkbunny.net/submissionsviewall.php?mode=userfavs&user_id=20969",
+    "#category": ("", "inkbunny", "favorite"),
+    "#class"   : inkbunny.InkbunnyFavoriteExtractor,
+},
+
+{
+    "#url"     : "https://inkbunny.net/submissionsviewall.php?rid=ffffffffff&mode=unreadsubs&page=1&orderby=unread_datetime",
+    "#category": ("", "inkbunny", "unread"),
+    "#class"   : inkbunny.InkbunnyUnreadExtractor,
+},
+
+{
+    "#url"     : "https://inkbunny.net/submissionsviewall.php?mode=unreadsubs",
+    "#category": ("", "inkbunny", "unread"),
+    "#class"   : inkbunny.InkbunnyUnreadExtractor,
 },
 
 {
@@ -115,6 +139,12 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://inkbunny.net/submissionsviewall.php?mode=search",
+    "#category": ("", "inkbunny", "search"),
+    "#class"   : inkbunny.InkbunnySearchExtractor,
+},
+
+{
     "#url"     : "https://inkbunny.net/watchlist_process.php?mode=watching&user_id=20969",
     "#category": ("", "inkbunny", "following"),
     "#class"   : inkbunny.InkbunnyFollowingExtractor,
@@ -124,6 +154,12 @@ __tests__ = (
 
 {
     "#url"     : "https://inkbunny.net/usersviewall.php?rid=ffffffffff&mode=watching&page=1&user_id=20969&orderby=added&namesonly=",
+    "#category": ("", "inkbunny", "following"),
+    "#class"   : inkbunny.InkbunnyFollowingExtractor,
+},
+
+{
+    "#url"     : "https://inkbunny.net/usersviewall.php?mode=watching&user_id=20969",
     "#category": ("", "inkbunny", "following"),
     "#class"   : inkbunny.InkbunnyFollowingExtractor,
 },

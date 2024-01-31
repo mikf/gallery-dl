@@ -96,6 +96,8 @@ class NitterExtractor(BaseExtractor):
 
                         for url in text.extract_iter(
                                 attachments, '<source src="', '"'):
+                            if url[0] == "/":
+                                url = self.root + url
                             append(text.nameext_from_url(url, {"url": url}))
 
             else:
@@ -232,10 +234,6 @@ BASE_PATTERN = NitterExtractor.update({
     "nitter.net": {
         "root": "https://nitter.net",
         "pattern": r"nitter\.net",
-    },
-    "nitter.lacontrevoie.fr": {
-        "root": "https://nitter.lacontrevoie.fr",
-        "pattern": r"nitter\.lacontrevoie\.fr",
     },
     "nitter.1d4.us": {
         "root": "https://nitter.1d4.us",

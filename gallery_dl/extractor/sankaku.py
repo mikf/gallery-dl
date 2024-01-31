@@ -87,7 +87,7 @@ class SankakuTagExtractor(SankakuExtractor):
     subcategory = "tag"
     directory_fmt = ("{category}", "{search_tags}")
     archive_fmt = "t_{search_tags}_{id}"
-    pattern = BASE_PATTERN + r"/?\?([^#]*)"
+    pattern = BASE_PATTERN + r"(?:/posts)?/?\?([^#]*)"
     example = "https://sankaku.app/?tags=TAG"
 
     def __init__(self, match):
@@ -117,7 +117,7 @@ class SankakuPoolExtractor(SankakuExtractor):
     subcategory = "pool"
     directory_fmt = ("{category}", "pool", "{pool[id]} {pool[name_en]}")
     archive_fmt = "p_{pool}_{id}"
-    pattern = BASE_PATTERN + r"/(?:books|pool/show)/(\d+)"
+    pattern = BASE_PATTERN + r"/(?:books|pools?/show)/(\d+)"
     example = "https://sankaku.app/books/12345"
 
     def __init__(self, match):
@@ -143,7 +143,7 @@ class SankakuPostExtractor(SankakuExtractor):
     """Extractor for single posts from sankaku.app"""
     subcategory = "post"
     archive_fmt = "{id}"
-    pattern = BASE_PATTERN + r"/post/show/([0-9a-f]+)"
+    pattern = BASE_PATTERN + r"/posts?(?:/show)?/(\w+)"
     example = "https://sankaku.app/post/show/12345"
 
     def __init__(self, match):
@@ -179,12 +179,16 @@ class SankakuAPI():
     def __init__(self, extractor):
         self.extractor = extractor
         self.headers = {
-            "Accept"  : "application/vnd.sankaku.api+json;v=2",
-            "Platform": "web-app",
-            "Origin"  : extractor.root,
+            "Accept"     : "application/vnd.sankaku.api+json;v=2",
+            "Platform"   : "web-app",
+            "Api-Version": None,
+            "Origin"     : extractor.root,
         }
 
-        self.username, self.password = self.extractor._get_auth_info()
+        if extractor.config("id-format") in ("alnum", "alphanumeric"):
+            self.headers["Api-Version"] = "2"
+
+        self.username, self.password = extractor._get_auth_info()
         if not self.username:
             self.authenticate = util.noop
 
@@ -285,7 +289,7 @@ class SankakuAPI():
                 return
 
 
-@cache(maxage=365*24*3600, keyarg=1)
+@cache(maxage=365*86400, keyarg=1)
 def _authenticate_impl(extr, username, password):
     extr.log.info("Logging in as %s", username)
 

@@ -25,7 +25,6 @@ __tests__ = (
         "date"         : "dt:2019-09-16 00:00:00",
         "description"  : r"re:Motions, the brand new publication by I",
         "documentName" : "motions-1-2019",
-        "downloadable" : False,
         "pageCount"    : 36,
         "publicationId": "d99ec95935f15091b040cb8060f05510",
         "title"        : "Motions by Issuu - Issue 1",

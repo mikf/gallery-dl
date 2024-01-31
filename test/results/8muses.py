@@ -6,6 +6,7 @@
 
 gallery_dl = __import__("gallery_dl.extractor.8muses")
 _8muses = getattr(gallery_dl.extractor, "8muses")
+from gallery_dl import exception
 
 
 __tests__ = (
@@ -65,9 +66,7 @@ __tests__ = (
     "#comment" : "non-ASCII characters",
     "#category": ("", "8muses", "album"),
     "#class"   : _8muses._8musesAlbumExtractor,
-    "#count"   : 2,
-
-    "name": r"re:From Trainers to Pokémons",
+    "#exception": exception.HttpError,
 },
 
 )

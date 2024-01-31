@@ -12,7 +12,8 @@ __tests__ = (
     "#url"     : "https://archive.4plebs.org/tg/thread/54059290",
     "#category": ("foolfuuka", "4plebs", "thread"),
     "#class"   : foolfuuka.FoolfuukaThreadExtractor,
-    "#sha1_url": "fd823f17b5001442b941fddcd9ec91bafedfbc79",
+    "#pattern" : r"https://i\.4pcdn\.org/tg/1[34]\d{11}\.(jpg|png|gif)",
+    "#count"   : 30,
 },
 
 {

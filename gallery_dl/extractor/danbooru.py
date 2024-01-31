@@ -20,7 +20,7 @@ class DanbooruExtractor(BaseExtractor):
     page_limit = 1000
     page_start = None
     per_page = 200
-    request_interval = 1.0
+    request_interval = (0.5, 1.5)
 
     def _init(self):
         self.ugoira = self.config("ugoira", False)
@@ -36,7 +36,7 @@ class DanbooruExtractor(BaseExtractor):
         username, api_key = self._get_auth_info()
         if username:
             self.log.debug("Using HTTP Basic Auth for user '%s'", username)
-            self.session.auth = (username, api_key)
+            self.session.auth = util.HTTPBasicAuth(username, api_key)
 
     def skip(self, num):
         pages = num // self.per_page
@@ -71,6 +71,25 @@ class DanbooruExtractor(BaseExtractor):
             text.nameext_from_url(url, post)
             post["date"] = text.parse_datetime(
                 post["created_at"], "%Y-%m-%dT%H:%M:%S.%f%z")
+
+            post["tags"] = (
+                post["tag_string"].split(" ")
+                if post["tag_string"] else ())
+            post["tags_artist"] = (
+                post["tag_string_artist"].split(" ")
+                if post["tag_string_artist"] else ())
+            post["tags_character"] = (
+                post["tag_string_character"].split(" ")
+                if post["tag_string_character"] else ())
+            post["tags_copyright"] = (
+                post["tag_string_copyright"].split(" ")
+                if post["tag_string_copyright"] else ())
+            post["tags_general"] = (
+                post["tag_string_general"].split(" ")
+                if post["tag_string_general"] else ())
+            post["tags_meta"] = (
+                post["tag_string_meta"].split(" ")
+                if post["tag_string_meta"] else ())
 
             if post["extension"] == "zip":
                 if self.ugoira:
@@ -150,7 +169,8 @@ class DanbooruExtractor(BaseExtractor):
 BASE_PATTERN = DanbooruExtractor.update({
     "danbooru": {
         "root": None,
-        "pattern": r"(?:danbooru|hijiribe|sonohara|safebooru)\.donmai\.us",
+        "pattern": r"(?:(?:danbooru|hijiribe|sonohara|safebooru)\.donmai\.us"
+                   r"|donmai\.moe)",
     },
     "atfbooru": {
         "root": "https://booru.allthefallen.moe",
@@ -158,7 +178,7 @@ BASE_PATTERN = DanbooruExtractor.update({
     },
     "aibooru": {
         "root": None,
-        "pattern": r"(?:safe.)?aibooru\.online",
+        "pattern": r"(?:safe\.)?aibooru\.online",
     },
     "booruvar": {
         "root": "https://booru.borvar.art",

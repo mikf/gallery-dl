@@ -17,7 +17,7 @@ __tests__ = (
 
     "fanclub_user_id": 52152,
     "tags"           : list,
-    "title"          : str,
+    "post_title"     : str,
 },
 
 {
@@ -26,13 +26,13 @@ __tests__ = (
     "#class"   : fantia.FantiaPostExtractor,
     "#pattern" : r"https://(c\.fantia\.jp/uploads/post/file/1166373/|cc\.fantia\.jp/uploads/post_content_photo/file/732549[01]|fantia\.jp/posts/1166373/album_image\?)",
 
-    "blogpost_text"   : r"re:^$|This is a test.\n\nThis is a test.\n\n|Link to video:\nhttps://www.youtube.com/watch\?v=5SSdvNcAagI\n\nhtml img from another site:\n\n\n\n\n\n",
-    "comment"         : """
-
-""",
+    "blogpost_text"   : r"re:^$|This is a test.\n\n(This is a test.)?\n\n|Link to video:\nhttps://www.youtube.com/watch\?v=5SSdvNcAagI\n\nhtml img from another site:\n\n\n\n\n\n",
+    "comment"         : "\n\n",
     "content_category": r"re:thumb|blog|photo_gallery",
     "content_comment" : str,
+    "content_count"   : 5,
     "content_filename": r"re:|",
+    "content_num"     : range(1, 5),
     "content_title"   : r"re:Test (Blog Content \d+|Image Gallery)|thumb",
     "date"            : "dt:2022-03-09 16:46:12",
     "fanclub_id"      : 356320,

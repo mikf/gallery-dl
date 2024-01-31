@@ -14,7 +14,7 @@ __tests__ = (
     "#url"     : "https://www.deviantart.com/shimoda7",
     "#category": ("", "deviantart", "user"),
     "#class"   : deviantart.DeviantartUserExtractor,
-    "#pattern" : "/shimoda7/gallery$",
+    "#urls"    : "https://www.deviantart.com/shimoda7/gallery",
 },
 
 {
@@ -22,8 +22,15 @@ __tests__ = (
     "#category": ("", "deviantart", "user"),
     "#class"   : deviantart.DeviantartUserExtractor,
     "#options" : {"include": "all"},
-    "#pattern" : "/shimoda7/(gallery(/scraps)?|posts(/statuses)?|favourites)$",
-    "#count"   : 5,
+    "#urls"    : (
+        "https://www.deviantart.com/shimoda7/avatar",
+        "https://www.deviantart.com/shimoda7/banner",
+        "https://www.deviantart.com/shimoda7/gallery",
+        "https://www.deviantart.com/shimoda7/gallery/scraps",
+        "https://www.deviantart.com/shimoda7/posts",
+        "https://www.deviantart.com/shimoda7/posts/statuses",
+        "https://www.deviantart.com/shimoda7/favourites",
+    ),
 },
 
 {
@@ -94,12 +101,43 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.deviantart.com/AlloyRabbit/gallery",
+    "#comment" : "deactivated account",
+    "#category": ("", "deviantart", "gallery"),
+    "#class"   : deviantart.DeviantartGalleryExtractor,
+},
+
+{
+    "#url"     : "https://www.deviantart.com/Shydude/gallery",
+    "#comment" : "deactivated account",
+    "#category": ("", "deviantart", "gallery"),
+    "#class"   : deviantart.DeviantartGalleryExtractor,
+},
+
+{
+    "#url"     : "https://www.deviantart.com/zapor666/gallery",
+    "#comment" : "deactivated account",
+    "#category": ("", "deviantart", "gallery"),
+    "#class"   : deviantart.DeviantartGalleryExtractor,
+},
+
+{
     "#url"     : "https://www.deviantart.com/yakuzafc/gallery",
     "#comment" : "group",
     "#category": ("", "deviantart", "gallery"),
     "#class"   : deviantart.DeviantartGalleryExtractor,
     "#pattern" : r"https://www.deviantart.com/yakuzafc/gallery/\w{8}-\w{4}-\w{4}-\w{4}-\w{12}/",
     "#count"   : ">= 15",
+},
+
+{
+    "#url"      : "https://www.deviantart.com/yakuzafc/gallery",
+    "#comment"  : "'group': 'skip' (#4630)",
+    "#category" : ("", "deviantart", "gallery"),
+    "#class"    : deviantart.DeviantartGalleryExtractor,
+    "#options"  : {"group": "skip"},
+    "#exception": exception.StopExtraction,
+    "#count"    : 0,
 },
 
 {
@@ -162,6 +200,108 @@ __tests__ = (
     "#url"     : "https://shimoda7.deviantart.com/gallery/?catpath=/",
     "#category": ("", "deviantart", "gallery"),
     "#class"   : deviantart.DeviantartGalleryExtractor,
+},
+
+{
+    "#url"     : "https://deviantart.com/shimoda7/avatar",
+    "#category": ("", "deviantart", "avatar"),
+    "#class"   : deviantart.DeviantartAvatarExtractor,
+    "#urls"        : "https://a.deviantart.net/avatars-big/s/h/shimoda7.jpg?4",
+    "#sha1_content": "abf2cc79b842315f2e54bfdd93bf794a0f612b6f",
+
+    "author"         : {
+        "type"    : "regular",
+        "usericon": "https://a.deviantart.net/avatars/s/h/shimoda7.jpg?4",
+        "userid"  : "9AE51FC7-0278-806C-3FFF-F4961ABF9E2B",
+        "username": "shimoda7",
+    },
+    "content"        : {
+        "src": "https://a.deviantart.net/avatars-big/s/h/shimoda7.jpg?4"
+    },
+    "da_category"    : "avatar",
+    "date"           : "dt:1970-01-01 00:00:00",
+    "extension"      : "jpg",
+    "filename"       : "avatar_by_shimoda7-d4",
+    "index"          : 4,
+    "index_base36"   : "4",
+    "is_deleted"     : False,
+    "is_downloadable": False,
+    "is_original"    : True,
+    "published_time" : 0,
+    "target"         : {
+        "extension": "jpg",
+        "filename" : "avatar_by_shimoda7-d4",
+        "src"      : "https://a.deviantart.net/avatars-big/s/h/shimoda7.jpg?4"
+    },
+    "title"          : "avatar",
+    "username"       : "shimoda7",
+},
+
+{
+    "#url"     : "https://deviantart.com/shimoda7/avatar",
+    "#comment" : "'formats' option",
+    "#category": ("", "deviantart", "avatar"),
+    "#class"   : deviantart.DeviantartAvatarExtractor,
+    "#archive" : False,
+    "#options" : {"formats": ["original.jpg", "big.jpg", "big.png", "big.gif"]},
+    "#urls"    : (
+        "https://a.deviantart.net/avatars-original/s/h/shimoda7.jpg?4",
+        "https://a.deviantart.net/avatars-big/s/h/shimoda7.jpg?4",
+        "https://a.deviantart.net/avatars-big/s/h/shimoda7.png?4",
+        "https://a.deviantart.net/avatars-big/s/h/shimoda7.gif?4",
+    ),
+},
+
+{
+    "#url"     : "https://deviantart.com/gdldev/banner",
+    "#category": ("", "deviantart", "background"),
+    "#class"   : deviantart.DeviantartBackgroundExtractor,
+    "#pattern"     : r"https://wixmp-\w+\.wixmp\.com/f/b042e0ae-a7ff-420b-a41a-b35503427360/dgntyqc-3deebb65-04b4-4085-992a-aa0c0e7e225d\.png\?token=ey[\w.-]+$",
+    "#sha1_content": "980eaa76ce515f1b6bef60dfadf26a5bbe9c583f",
+
+    "allows_comments"  : True,
+    "author"           : {
+        "type"    : "regular",
+        "usericon": "https://a.deviantart.net/avatars/g/d/gdldev.jpg?12",
+        "userid"  : "1A12BA26-33C2-AA0A-7678-0B6DFBA7AC8E",
+        "username": "gdldev"
+    },
+    "category_path"    : "",
+    "content"          : {
+        "filename"    : "banner_by_gdldev_dgntyqc.png",
+        "filesize"    : 84510,
+        "height"      : 4000,
+        "src"         : r"re:https://wixmp-\w+\.wixmp\.com/f/b042e0ae-a7ff-420b-a41a-b35503427360/dgntyqc-3deebb65-04b4-4085-992a-aa0c0e7e225d\.png\?token=ey[\w.-]+$",
+        "transparency": False,
+        "width"       : 6400
+    },
+    "da_category"      : "Uncategorized",
+    "date"             : "dt:2024-01-02 21:16:06",
+    "deviationid"      : "8C8D6B28-766A-DE21-7F7D-CE055C3BD50A",
+    "download_filesize": 84510,
+    "extension"        : "png",
+    "filename"         : "banner_by_gdldev-dgntyqc",
+    "index"            : 1007488020,
+    "index_base36"     : "gntyqc",
+    "is_blocked"       : False,
+    "is_deleted"       : False,
+    "is_downloadable"  : True,
+    "is_favourited"    : False,
+    "is_mature"        : False,
+    "is_original"      : True,
+    "is_published"     : False,
+    "preview"          : dict,
+    "printid"          : None,
+    "published_time"   : 1704230166,
+    "stats"            : {
+        "comments"  : 0,
+        "favourites": 0,
+    },
+    "target"           : dict,
+    "thumbs"           : list,
+    "title"            : "Banner",
+    "url"              : "https://sta.sh/0198jippkeys",
+    "username"         : "gdldev",
 },
 
 {
@@ -390,7 +530,7 @@ __tests__ = (
     "#category": ("", "deviantart", "status"),
     "#class"   : deviantart.DeviantartStatusExtractor,
     "#count"   : 4,
-    "#sha1_url": "bf4c44c0c60ff2648a880f4c3723464ad3e7d074",
+    "#sha1_url": "62ee48ff3405c7714dca70abf42e8e39731012fc",
 },
 
 {
@@ -398,7 +538,7 @@ __tests__ = (
     "#category": ("", "deviantart", "status"),
     "#class"   : deviantart.DeviantartStatusExtractor,
     "#options" : {"journals": "none"},
-    "#pattern" : r"https://images-wixmp-\w+\.wixmp\.com/f/[^/]+/[^.]+\.jpg\?token=",
+    "#pattern" : r"https://images-wixmp-\w+\.wixmp\.com/intermediary/f/[^/]+/[^.]+\.jpg",
     "#count"   : 1,
 },
 
@@ -440,7 +580,7 @@ __tests__ = (
     "#category": ("", "deviantart", "status"),
     "#class"   : deviantart.DeviantartStatusExtractor,
     "#options" : {"journals": "text"},
-    "#sha1_url": "c8744f7f733a3029116607b826321233c5ca452d",
+    "#sha1_url": "10a336bdee7b9692919461443a7dde44d495818c",
 },
 
 {
@@ -516,15 +656,31 @@ __tests__ = (
     "#options" : {"comments": True},
     "#pattern" : r"https://wixmp-[^.]+\.wixmp\.com/f/.+/.+\.jpg\?token=.+",
 
-    "comments": list,
+    "comments": "len:44",
+},
+
+{
+    "#url"     : "https://www.deviantart.com/justatest235723/art/Blue-811519058",
+    "#comment" : "nested comments (#4653)",
+    "#category": ("", "deviantart", "deviation"),
+    "#class"   : deviantart.DeviantartDeviationExtractor,
+    "#options" : {
+        "original": False,
+        "comments": True,
+    },
+
+    "comments": "len:20",
 },
 
 {
     "#url"     : "https://www.deviantart.com/citizenfresh/art/Hverarond-789295466",
-    "#comment" : "wixmp URL rewrite",
+    "#comment" : "wixmp URL rewrite /intermediary/",
     "#category": ("", "deviantart", "deviation"),
     "#class"   : deviantart.DeviantartDeviationExtractor,
-    "#pattern" : r"https://images-wixmp-\w+\.wixmp\.com/f/[^/]+/[^.]+\.jpg\?token=",
+    "#urls"    : "https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/intermediary/f/4deb0f1a-cdef-444e-b194-c8d6b3f7e933/dd1xca2-7f835e62-6fd3-4b99-92c7-2bfd4e1b296f.jpg",
+
+    "is_downloadable": False,
+    "is_original"    : False,
 },
 
 {
@@ -610,7 +766,7 @@ __tests__ = (
     "#url"     : "https://www.deviantart.com/view/706871727",
     "#category": ("", "deviantart", "deviation"),
     "#class"   : deviantart.DeviantartDeviationExtractor,
-    "#sha1_content": "3f62ae0c2fca2294ac28e41888ea06bb37c22c65",
+    "#sha1_content": "87dff6056fc9a2bf77f75317a1e00e18451b3c80",
 },
 
 {
@@ -691,6 +847,13 @@ __tests__ = (
     "#category": ("", "deviantart", "scraps"),
     "#class"   : deviantart.DeviantartScrapsExtractor,
     "#count"   : 12,
+},
+
+{
+    "#url"     : "https://www.deviantart.com/chain-man/gallery/scraps",
+    "#comment" : "deactivated account",
+    "#category": ("", "deviantart", "scraps"),
+    "#class"   : deviantart.DeviantartScrapsExtractor,
 },
 
 {

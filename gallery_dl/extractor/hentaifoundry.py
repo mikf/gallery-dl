@@ -72,13 +72,11 @@ class HentaifoundryExtractor(Extractor):
         extr = text.extract_from(page, page.index('id="picBox"'))
 
         data = {
+            "index"      : text.parse_int(path.rsplit("/", 2)[1]),
             "title"      : text.unescape(extr('class="imageTitle">', '<')),
             "artist"     : text.unescape(extr('/profile">', '<')),
-            "width"      : text.parse_int(extr('width="', '"')),
-            "height"     : text.parse_int(extr('height="', '"')),
-            "index"      : text.parse_int(path.rsplit("/", 2)[1]),
-            "src"        : text.urljoin(self.root, text.unescape(extr(
-                'src="', '"'))),
+            "_body"      : extr(
+                '<div class="boxbody"', '<div class="boxfooter"'),
             "description": text.unescape(text.remove_html(extr(
                 '>Description</div>', '</section>')
                 .replace("\r\n", "\n"), "", "")),
@@ -91,6 +89,20 @@ class HentaifoundryExtractor(Extractor):
             "tags"       : text.split_html(extr(
                 ">Tags </span>", "</div>")),
         }
+
+        body = data["_body"]
+        if "<object " in body:
+            data["src"] = text.urljoin(self.root, text.unescape(text.extr(
+                body, 'name="movie" value="', '"')))
+            data["width"] = text.parse_int(text.extr(
+                body, "name='width' value='", "'"))
+            data["height"] = text.parse_int(text.extr(
+                body, "name='height' value='", "'"))
+        else:
+            data["src"] = text.urljoin(self.root, text.unescape(text.extr(
+                body, 'src="', '"')))
+            data["width"] = text.parse_int(text.extr(body, 'width="', '"'))
+            data["height"] = text.parse_int(text.extr(body, 'height="', '"'))
 
         return text.nameext_from_url(data["src"], data)
 
@@ -121,9 +133,25 @@ class HentaifoundryExtractor(Extractor):
 
         return text.nameext_from_url(data["src"], data)
 
-    def _init_site_filters(self):
+    def _request_check(self, url, **kwargs):
+        self.request = self._request_original
+
+        # check for Enter button / front page
+        # and update PHPSESSID and content filters if necessary
+        response = self.request(url, **kwargs)
+        content = response.content
+        if len(content) < 5000 and \
+                b'<div id="entryButtonContainer"' in content:
+            self._init_site_filters(False)
+            response = self.request(url, **kwargs)
+        return response
+
+    def _init_site_filters(self, check_cookies=True):
         """Set site-internal filters to show all images"""
-        if self.cookies.get("PHPSESSID", domain=self.cookies_domain):
+        if check_cookies and self.cookies.get(
+                "PHPSESSID", domain=self.cookies_domain):
+            self._request_original = self.request
+            self.request = self._request_check
             return
 
         url = self.root + "/?enterAgree=1"

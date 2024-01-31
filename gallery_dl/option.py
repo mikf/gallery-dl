@@ -44,19 +44,92 @@ class DeprecatedConfigConstAction(argparse.Action):
         namespace.options.append(((), self.dest, self.const))
 
 
-class ParseAction(argparse.Action):
-    """Parse <key>=<value> options and set them as config values"""
+class ConfigParseAction(argparse.Action):
+    """Parse KEY=VALUE config options"""
     def __call__(self, parser, namespace, values, option_string=None):
         key, value = _parse_option(values)
         key = key.split(".")  # splitting an empty string becomes [""]
         namespace.options.append((key[:-1], key[-1], value))
 
 
-class OptionAction(argparse.Action):
-    """Parse <key>=<value> options for """
+class PPParseAction(argparse.Action):
+    """Parse KEY=VALUE post processor options"""
     def __call__(self, parser, namespace, values, option_string=None):
         key, value = _parse_option(values)
         namespace.options_pp[key] = value
+
+
+class InputfileAction(argparse.Action):
+    """Collect input files"""
+    def __call__(self, parser, namespace, value, option_string=None):
+        namespace.input_files.append((value, self.const))
+
+
+class MtimeAction(argparse.Action):
+    """Configure mtime post processors"""
+    def __call__(self, parser, namespace, value, option_string=None):
+        namespace.postprocessors.append({
+            "name": "mtime",
+            "value": "{" + (self.const or value) + "}",
+        })
+
+
+class UgoiraAction(argparse.Action):
+    """Configure ugoira post processors"""
+    def __call__(self, parser, namespace, value, option_string=None):
+        if self.const:
+            value = self.const
+        else:
+            value = value.strip().lower()
+
+        if value in ("webm", "vp9"):
+            pp = {
+                "extension"        : "webm",
+                "ffmpeg-args"      : ("-c:v", "libvpx-vp9",
+                                      "-crf", "12",
+                                      "-b:v", "0", "-an"),
+            }
+        elif value == "vp9-lossless":
+            pp = {
+                "extension"        : "webm",
+                "ffmpeg-args"      : ("-c:v", "libvpx-vp9",
+                                      "-lossless", "1",
+                                      "-pix_fmt", "yuv420p", "-an"),
+            }
+        elif value == "vp8":
+            pp = {
+                "extension"        : "webm",
+                "ffmpeg-args"      : ("-c:v", "libvpx",
+                                      "-crf", "4",
+                                      "-b:v", "5000k", "-an"),
+            }
+        elif value == "mp4":
+            pp = {
+                "extension"        : "mp4",
+                "ffmpeg-args"      : ("-c:v", "libx264", "-an", "-b:v", "5M"),
+                "libx264-prevent-odd": True,
+            }
+        elif value == "gif":
+            pp = {
+                "extension"        : "gif",
+                "ffmpeg-args"      : ("-filter_complex", "[0:v] split [a][b];"
+                                      "[a] palettegen [p];[b][p] paletteuse"),
+                "repeat-last-frame": False,
+            }
+        elif value in ("mkv", "copy"):
+            pp = {
+                "extension"        : "mkv",
+                "ffmpeg-args"      : ("-c:v", "copy"),
+                "repeat-last-frame": False,
+            }
+        else:
+            parser.error("Unsupported Ugoira format '{}'".format(value))
+
+        pp["name"] = "ugoira"
+        pp["whitelist"] = ("pixiv", "danbooru")
+
+        namespace.options.append(((), "ugoira", True))
+        namespace.postprocessors.append(pp)
 
 
 class Formatter(argparse.HelpFormatter):
@@ -101,12 +174,6 @@ def build_parser():
         help="Print program version and exit",
     )
     general.add_argument(
-        "-i", "--input-file",
-        dest="inputfiles", metavar="FILE", action="append",
-        help=("Download URLs found in FILE ('-' for stdin). "
-              "More than one --input-file can be specified"),
-    )
-    general.add_argument(
         "-f", "--filename",
         dest="filename", metavar="FORMAT",
         help=("Filename format string for downloaded files "
@@ -147,6 +214,32 @@ def build_parser():
         dest="clear_cache", metavar="MODULE",
         help="Delete cached login sessions, cookies, etc. for MODULE "
              "(ALL to delete everything)",
+    )
+
+    input = parser.add_argument_group("Input Options")
+    input.add_argument(
+        "urls",
+        metavar="URL", nargs="*",
+        help=argparse.SUPPRESS,
+    )
+    input.add_argument(
+        "-i", "--input-file",
+        dest="input_files", metavar="FILE", action=InputfileAction, const=None,
+        default=[],
+        help=("Download URLs found in FILE ('-' for stdin). "
+              "More than one --input-file can be specified"),
+    )
+    input.add_argument(
+        "-I", "--input-file-comment",
+        dest="input_files", metavar="FILE", action=InputfileAction, const="c",
+        help=("Download URLs found in FILE. "
+              "Comment them out after they were downloaded successfully."),
+    )
+    input.add_argument(
+        "-x", "--input-file-delete",
+        dest="input_files", metavar="FILE", action=InputfileAction, const="d",
+        help=("Download URLs found in FILE. "
+              "Delete them after they were downloaded successfully."),
     )
 
     output = parser.add_argument_group("Output Options")
@@ -192,6 +285,11 @@ def build_parser():
         dest="jobtype", action="store_const", const=job.KeywordJob,
         help=("Print a list of available keywords and example values "
               "for the given URLs"),
+    )
+    output.add_argument(
+        "-e", "--error-file",
+        dest="errorfile", metavar="FILE", action=ConfigAction,
+        help="Add input URLs which returned an error to FILE",
     )
     output.add_argument(
         "--list-modules",
@@ -308,7 +406,8 @@ def build_parser():
     configuration = parser.add_argument_group("Configuration Options")
     configuration.add_argument(
         "-o", "--option",
-        dest="options", metavar="KEY=VALUE", action=ParseAction, default=[],
+        dest="options", metavar="KEY=VALUE",
+        action=ConfigParseAction, default=[],
         help=("Additional options. "
               "Example: -o browser=firefox")   ,
     )
@@ -437,43 +536,15 @@ def build_parser():
     }
     postprocessor = parser.add_argument_group("Post-processing Options")
     postprocessor.add_argument(
-        "--zip",
-        dest="postprocessors",
-        action="append_const", const="zip",
-        help="Store downloaded files in a ZIP archive",
+        "-P", "--postprocessor",
+        dest="postprocessors", metavar="NAME", action="append", default=[],
+        help="Activate the specified post processor",
     )
     postprocessor.add_argument(
-        "--ugoira-conv",
-        dest="postprocessors", action="append_const", const={
-            "name"          : "ugoira",
-            "ffmpeg-args"   : ("-c:v", "libvpx", "-crf", "4", "-b:v", "5000k"),
-            "ffmpeg-twopass": True,
-            "whitelist"     : ("pixiv", "danbooru"),
-        },
-        help="Convert Pixiv Ugoira to WebM (requires FFmpeg)",
-    )
-    postprocessor.add_argument(
-        "--ugoira-conv-lossless",
-        dest="postprocessors", action="append_const", const={
-            "name"          : "ugoira",
-            "ffmpeg-args"   : ("-c:v", "libvpx-vp9", "-lossless", "1",
-                               "-pix_fmt", "yuv420p"),
-            "ffmpeg-twopass": False,
-            "whitelist"     : ("pixiv", "danbooru"),
-        },
-        help="Convert Pixiv Ugoira to WebM in VP9 lossless mode",
-    )
-    postprocessor.add_argument(
-        "--ugoira-conv-copy",
-        dest="postprocessors", action="append_const", const={
-            "name"             : "ugoira",
-            "extension"        : "mkv",
-            "ffmpeg-args"      : ("-c:v", "copy"),
-            "ffmpeg-twopass"   : False,
-            "repeat-last-frame": False,
-            "whitelist"        : ("pixiv", "danbooru"),
-        },
-        help="Convert Pixiv Ugoira to MKV without re-encoding any frames",
+        "-O", "--postprocessor-option",
+        dest="options_pp", metavar="KEY=VALUE",
+        action=PPParseAction, default={},
+        help="Additional post processor options",
     )
     postprocessor.add_argument(
         "--write-metadata",
@@ -500,16 +571,62 @@ def build_parser():
         help="Write image tags to separate text files",
     )
     postprocessor.add_argument(
-        "--mtime-from-date",
+        "--zip",
         dest="postprocessors",
-        action="append_const", const="mtime",
-        help="Set file modification times according to 'date' metadata",
+        action="append_const", const="zip",
+        help="Store downloaded files in a ZIP archive",
+    )
+    postprocessor.add_argument(
+        "--cbz",
+        dest="postprocessors",
+        action="append_const", const={
+            "name"     : "zip",
+            "extension": "cbz",
+        },
+        help="Store downloaded files in a CBZ archive",
+    )
+    postprocessor.add_argument(
+        "--mtime",
+        dest="postprocessors", metavar="NAME", action=MtimeAction,
+        help=("Set file modification times according to metadata "
+              "selected by NAME. Examples: 'date' or 'status[date]'"),
+    )
+    postprocessor.add_argument(
+        "--mtime-from-date",
+        dest="postprocessors", nargs=0, action=MtimeAction,
+        const="date|status[date]",
+        help=argparse.SUPPRESS,
+    )
+    postprocessor.add_argument(
+        "--ugoira",
+        dest="postprocessors", metavar="FORMAT", action=UgoiraAction,
+        help=("Convert Pixiv Ugoira to FORMAT using FFmpeg. "
+              "Supported formats are 'webm', 'mp4', 'gif', "
+              "'vp8', 'vp9', 'vp9-lossless', 'copy'."),
+    )
+    postprocessor.add_argument(
+        "--ugoira-conv",
+        dest="postprocessors", nargs=0, action=UgoiraAction, const="vp8",
+        help=argparse.SUPPRESS,
+    )
+    postprocessor.add_argument(
+        "--ugoira-conv-lossless",
+        dest="postprocessors", nargs=0, action=UgoiraAction,
+        const="vp9-lossless",
+        help=argparse.SUPPRESS,
+    )
+    postprocessor.add_argument(
+        "--ugoira-conv-copy",
+        dest="postprocessors", nargs=0, action=UgoiraAction, const="copy",
+        help=argparse.SUPPRESS,
     )
     postprocessor.add_argument(
         "--exec",
         dest="postprocessors", metavar="CMD",
         action=AppendCommandAction, const={"name": "exec"},
         help=("Execute CMD for each downloaded file. "
+              "Supported replacement fields are "
+              "{} or {_path}, {_directory}, {_filename}. "
               "Example: --exec \"convert {} {}.png && rm {}\""),
     )
     postprocessor.add_argument(
@@ -517,24 +634,9 @@ def build_parser():
         dest="postprocessors", metavar="CMD",
         action=AppendCommandAction, const={
             "name": "exec", "event": "finalize"},
-        help=("Execute CMD after all files were downloaded successfully. "
-              "Example: --exec-after \"cd {} && convert * ../doc.pdf\""),
-    )
-    postprocessor.add_argument(
-        "-P", "--postprocessor",
-        dest="postprocessors", metavar="NAME", action="append",
-        help="Activate the specified post processor",
-    )
-    postprocessor.add_argument(
-        "-O", "--postprocessor-option",
-        dest="options_pp", metavar="OPT", action=OptionAction, default={},
-        help="Additional '<key>=<value>' post processor options",
-    )
-
-    parser.add_argument(
-        "urls",
-        metavar="URL", nargs="*",
-        help=argparse.SUPPRESS,
+        help=("Execute CMD after all files were downloaded. "
+              "Example: --exec-after \"cd {_directory} "
+              "&& convert * ../doc.pdf\""),
     )
 
     return parser

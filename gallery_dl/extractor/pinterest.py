@@ -10,7 +10,6 @@
 
 from .common import Extractor, Message
 from .. import text, util, exception
-from ..cache import cache
 import itertools
 
 BASE_PATTERN = r"(?:https?://)?(?:\w+\.)?pinterest\.[\w.]+"
@@ -33,7 +32,6 @@ class PinterestExtractor(Extractor):
         self.api = PinterestAPI(self)
 
     def items(self):
-        self.api.login()
         data = self.metadata()
         videos = self.config("videos", True)
 
@@ -49,6 +47,7 @@ class PinterestExtractor(Extractor):
 
             carousel_data = pin.get("carousel_data")
             if carousel_data:
+                pin["count"] = len(carousel_data["carousel_slots"])
                 for num, slot in enumerate(carousel_data["carousel_slots"], 1):
                     slot["media_id"] = slot.pop("id")
                     pin.update(slot)
@@ -67,7 +66,7 @@ class PinterestExtractor(Extractor):
 
                 if videos or media.get("duration") is None:
                     pin.update(media)
-                    pin["num"] = 0
+                    pin["num"] = pin["count"] = 1
                     pin["media_id"] = ""
 
                     url = media["url"]
@@ -415,41 +414,6 @@ class PinterestAPI():
         """Yield pins from searches"""
         options = {"query": query, "scope": "pins", "rs": "typed"}
         return self._pagination("BaseSearch", options)
-
-    def login(self):
-        """Login and obtain session cookies"""
-        username, password = self.extractor._get_auth_info()
-        if username:
-            self.cookies.update(self._login_impl(username, password))
-
-    @cache(maxage=180*24*3600, keyarg=1)
-    def _login_impl(self, username, password):
-        self.extractor.log.info("Logging in as %s", username)
-
-        url = self.root + "/resource/UserSessionResource/create/"
-        options = {
-            "username_or_email": username,
-            "password"         : password,
-        }
-        data = {
-            "data"      : util.json_dumps({"options": options}),
-            "source_url": "",
-        }
-
-        try:
-            response = self.extractor.request(
-                url, method="POST", headers=self.headers,
-                cookies=self.cookies, data=data)
-            resource = response.json()["resource_response"]
-        except (exception.HttpError, ValueError, KeyError):
-            raise exception.AuthenticationError()
-
-        if resource["status"] != "success":
-            raise exception.AuthenticationError()
-        return {
-            cookie.name: cookie.value
-            for cookie in response.cookies
-        }
 
     def _call(self, resource, options):
         url = "{}/resource/{}Resource/get/".format(self.root, resource)

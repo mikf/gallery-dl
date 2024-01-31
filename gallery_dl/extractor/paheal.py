@@ -32,7 +32,7 @@ class PahealExtractor(Extractor):
             post["tags"] = text.unquote(post["tags"])
             post.update(data)
             yield Message.Directory, post
-            yield Message.Url, url, text.nameext_from_url(url, post)
+            yield Message.Url, url, post
 
     def get_metadata(self):
         """Return general metadata"""
@@ -56,14 +56,16 @@ class PahealExtractor(Extractor):
             "date"    : text.parse_datetime(
                 extr("datetime='", "'"), "%Y-%m-%dT%H:%M:%S%z"),
             "source"  : text.unescape(text.extr(
-                extr(">Source&nbsp;Link<", "</td>"), "href='", "'")),
+                extr(">Source Link<", "</td>"), "href='", "'")),
         }
 
-        dimensions, size, ext = extr("Info</th><td>", ">").split(" // ")
-        post["width"], _, height = dimensions.partition("x")
+        dimensions, size, ext = extr("Info</th><td>", "<").split(" // ")
         post["size"] = text.parse_bytes(size[:-1])
+        post["width"], _, height = dimensions.partition("x")
         post["height"], _, duration = height.partition(", ")
         post["duration"] = text.parse_float(duration[:-1])
+        post["filename"] = "{} - {}".format(post_id, post["tags"])
+        post["extension"] = ext
 
         return post
 
@@ -112,6 +114,7 @@ class PahealTagExtractor(PahealExtractor):
 
         tags, data, date = data.split("\n")
         dimensions, size, ext = data.split(" // ")
+        tags = text.unescape(tags)
         width, _, height = dimensions.partition("x")
         height, _, duration = height.partition(", ")
 
@@ -119,9 +122,11 @@ class PahealTagExtractor(PahealExtractor):
             "id": pid, "md5": md5, "file_url": url,
             "width": width, "height": height,
             "duration": text.parse_float(duration[:-1]),
-            "tags": text.unescape(tags),
+            "tags": tags,
             "size": text.parse_bytes(size[:-1]),
             "date": text.parse_datetime(date, "%B %d, %Y; %H:%M"),
+            "filename" : "{} - {}".format(pid, tags),
+            "extension": ext,
         }
 
     def _extract_data_ex(self, post):

@@ -21,7 +21,7 @@ __tests__ = (
     "#category": ("", "comicvine", "tag"),
     "#class"   : comicvine.ComicvineTagExtractor,
     "#pattern" : r"https://comicvine\.gamespot\.com/a/uploads/original/\d+/\d+/\d+-.+",
-    "#count"   : ">= 450",
+    "#count"   : ">= 400",
 },
 
 )

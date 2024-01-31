@@ -18,7 +18,7 @@ class ReactorExtractor(BaseExtractor):
     basecategory = "reactor"
     filename_fmt = "{post_id}_{num:>02}{title[:100]:?_//}.{extension}"
     archive_fmt = "{post_id}_{num}"
-    request_interval = 5.0
+    request_interval = (3.0, 6.0)
 
     def __init__(self, match):
         BaseExtractor.__init__(self, match)

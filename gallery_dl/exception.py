@@ -21,6 +21,7 @@ Exception
       |    +-- FilenameFormatError
       |    +-- DirectoryFormatError
       +-- FilterError
+      +-- InputFileError
       +-- NoExtractorError
       +-- StopExtraction
       +-- TerminateExtraction
@@ -97,6 +98,15 @@ class FilterError(GalleryDLException):
     """Error while evaluating a filter expression"""
     msgfmt = "Evaluating filter expression failed ({})"
     code = 32
+
+
+class InputFileError(GalleryDLException):
+    """Error when parsing input file"""
+    code = 32
+
+    def __init__(self, message, *args):
+        GalleryDLException.__init__(
+            self, message % args if args else message)
 
 
 class NoExtractorError(GalleryDLException):

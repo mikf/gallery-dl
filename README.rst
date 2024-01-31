@@ -72,9 +72,9 @@ Standalone Executable
 Prebuilt executable files with a Python interpreter and
 required Python packages included are available for
 
-- `Windows <https://github.com/mikf/gallery-dl/releases/download/v1.25.8/gallery-dl.exe>`__
+- `Windows <https://github.com/mikf/gallery-dl/releases/download/v1.26.7/gallery-dl.exe>`__
   (Requires `Microsoft Visual C++ Redistributable Package (x86) <https://aka.ms/vs/17/release/vc_redist.x86.exe>`__)
-- `Linux   <https://github.com/mikf/gallery-dl/releases/download/v1.25.8/gallery-dl.bin>`__
+- `Linux   <https://github.com/mikf/gallery-dl/releases/download/v1.26.7/gallery-dl.bin>`__
 
 
 Nightly Builds
@@ -132,6 +132,43 @@ For macOS users with MacPorts:
 
     sudo port install gallery-dl
 
+Docker
+--------
+Using the Dockerfile in the repository:
+
+.. code:: bash
+
+    git clone https://github.com/mikf/gallery-dl.git
+    cd gallery-dl/
+    docker build -t gallery-dl:latest .
+
+Pulling image from `Docker Hub <https://hub.docker.com/r/mikf123/gallery-dl>`__:
+
+.. code:: bash
+
+    docker pull mikf123/gallery-dl
+    docker tag mikf123/gallery-dl gallery-dl
+
+Pulling image from `GitHub Container Registry <https://github.com/mikf/gallery-dl/pkgs/container/gallery-dl>`__:
+
+.. code:: bash
+
+    docker pull ghcr.io/mikf/gallery-dl
+    docker tag ghcr.io/mikf/gallery-dl gallery-dl
+
+To run the container you will probably want to attach some directories on the host so that the config file and downloads can persist across runs.
+
+Make sure to either download the example config file reference in the repo and place it in the mounted volume location or touch an empty file there.
+
+If you gave the container a different tag or are using podman then make sure you adjust.  Run ``docker image ls`` to check the name if you are not sure.
+
+This will remove the container after every use so you will always have a fresh environment for it to run. If you setup a ci-cd pipeline to autobuild the container you can also add a ``--pull=newer`` flag so that when you run it docker will check to see if there is a newer container and download it before running.
+
+.. code:: bash
+
+    docker run --rm  -v $HOME/Downloads/:/gallery-dl/ -v $HOME/.config/gallery-dl/gallery-dl.conf:/etc/gallery-dl.conf -it gallery-dl:latest
+
+You can also add an alias to your shell for "gallery-dl" or create a simple bash script and drop it somewhere in your $PATH to act as a shim for this command.
 
 Usage
 =====

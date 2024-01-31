@@ -148,6 +148,32 @@ class MangadexFeedExtractor(MangadexExtractor):
         return self.api.user_follows_manga_feed()
 
 
+class MangadexListExtractor(MangadexExtractor):
+    """Extractor for mangadex lists"""
+    subcategory = "list"
+    pattern = (BASE_PATTERN +
+               r"/list/([0-9a-f-]+)(?:/[^/?#]*)?(?:\?tab=(\w+))?")
+    example = ("https://mangadex.org/list"
+               "/01234567-89ab-cdef-0123-456789abcdef/NAME")
+
+    def __init__(self, match):
+        MangadexExtractor.__init__(self, match)
+        if match.group(2) == "feed":
+            self.subcategory = "list-feed"
+        else:
+            self.items = self._items_titles
+
+    def chapters(self):
+        return self.api.list_feed(self.uuid)
+
+    def _items_titles(self):
+        data = {"_extractor": MangadexMangaExtractor}
+        for item in self.api.list(self.uuid)["relationships"]:
+            if item["type"] == "manga":
+                url = "{}/title/{}".format(self.root, item["id"])
+                yield Message.Queue, url, data
+
+
 class MangadexAPI():
     """Interface for the MangaDex API v5
 
@@ -172,6 +198,12 @@ class MangadexAPI():
     def chapter(self, uuid):
         params = {"includes[]": ("scanlation_group",)}
         return self._call("/chapter/" + uuid, params)["data"]
+
+    def list(self, uuid):
+        return self._call("/list/" + uuid)["data"]
+
+    def list_feed(self, uuid):
+        return self._pagination("/list/" + uuid + "/feed")
 
     @memcache(keyarg=1)
     def manga(self, uuid):
@@ -266,6 +298,6 @@ class MangadexAPI():
                 return
 
 
-@cache(maxage=28*24*3600, keyarg=0)
+@cache(maxage=28*86400, keyarg=0)
 def _refresh_token_cache(username):
     return None

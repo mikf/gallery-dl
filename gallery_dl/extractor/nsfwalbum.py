@@ -20,6 +20,7 @@ class NsfwalbumAlbumExtractor(GalleryExtractor):
     filename_fmt = "{album_id}_{num:>03}_{id}.{extension}"
     directory_fmt = ("{category}", "{album_id} {title}")
     archive_fmt = "{id}"
+    referer = False
     pattern = r"(?:https?://)?(?:www\.)?nsfwalbum\.com(/album/(\d+))"
     example = "https://nsfwalbum.com/album/12345"
 
@@ -71,8 +72,8 @@ class NsfwalbumAlbumExtractor(GalleryExtractor):
 
     @staticmethod
     def _validate_response(response):
-        return not response.request.url.endswith(
-            ("/no_image.jpg", "/placeholder.png"))
+        return not response.url.endswith(
+            ("/no_image.jpg", "/placeholder.png", "/error.jpg"))
 
     @staticmethod
     def _annihilate(value, base=6):

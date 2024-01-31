@@ -15,7 +15,7 @@ class UrlshortenerExtractor(BaseExtractor):
     basecategory = "urlshortener"
 
 
-INSTANCES = {
+BASE_PATTERN = UrlshortenerExtractor.update({
     "bitly": {
         "root": "https://bit.ly",
         "pattern": r"bit\.ly",
@@ -26,9 +26,7 @@ INSTANCES = {
         "root": "https://t.co",
         "pattern": r"t\.co",
     },
-}
-
-BASE_PATTERN = UrlshortenerExtractor.update(INSTANCES)
+})
 
 
 class UrlshortenerLinkExtractor(UrlshortenerExtractor):
@@ -42,10 +40,7 @@ class UrlshortenerLinkExtractor(UrlshortenerExtractor):
         self.id = match.group(match.lastindex)
 
     def _init(self):
-        try:
-            self.headers = INSTANCES[self.category]["headers"]
-        except Exception:
-            self.headers = None
+        self.headers = self.config_instance("headers")
 
     def items(self):
         response = self.request(

@@ -63,6 +63,27 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://yande.re/pool/show/318",
+    "#comment" : "'metadata' option (#4646)",
+    "#category": ("moebooru", "yandere", "pool"),
+    "#class"   : moebooru.MoebooruPoolExtractor,
+    "#options" : {"metadata": True},
+    "#count"   : 3,
+
+    "pool": {
+        "created_at" : "2008-12-13T15:56:10.728Z",
+        "description": "Dengeki Hime's posts are in pool #97.",
+        "id"         : 318,
+        "is_public"  : True,
+        "name"       : "Galgame_Mag_08",
+        "post_count" : 3,
+        "updated_at" : "2012-03-11T14:31:00.935Z",
+        "user_id"    : 1305,
+    },
+
+},
+
+{
     "#url"     : "https://yande.re/post/popular_by_month?month=6&year=2014",
     "#category": ("moebooru", "yandere", "popular"),
     "#class"   : moebooru.MoebooruPopularExtractor,

@@ -46,7 +46,7 @@ class NaverwebtoonEpisodeExtractor(NaverwebtoonBase, GalleryExtractor):
             "episode" : self.episode,
             "comic"   : extr('titleName: "', '"'),
             "tags"    : [t.strip() for t in text.extract_iter(
-                extr("tagList: [", "}],"), '"tagName":"', '"')],
+                extr("tagList: [", "],"), '"tagName":"', '"')],
             "title"   : extr('"subtitle":"', '"'),
             "author"  : [a.strip() for a in text.extract_iter(
                 extr('"writers":[', ']'), '"name":"', '"')],

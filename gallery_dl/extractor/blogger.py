@@ -8,30 +8,22 @@
 
 """Extractors for Blogger blogs"""
 
-from .common import Extractor, Message
+from .common import BaseExtractor, Message
 from .. import text, util
 import re
 
-BASE_PATTERN = (
-    r"(?:blogger:(?:https?://)?([^/]+)|"
-    r"(?:https?://)?([\w-]+\.blogspot\.com))")
 
-
-class BloggerExtractor(Extractor):
+class BloggerExtractor(BaseExtractor):
     """Base class for blogger extractors"""
-    category = "blogger"
-    directory_fmt = ("{category}", "{blog[name]}",
+    basecategory = "blogger"
+    directory_fmt = ("blogger", "{blog[name]}",
                      "{post[date]:%Y-%m-%d} {post[title]}")
     filename_fmt = "{num:>03}.{extension}"
     archive_fmt = "{post[id]}_{num}"
-    root = "https://www.blogger.com"
-
-    def __init__(self, match):
-        Extractor.__init__(self, match)
-        self.blog = match.group(1) or match.group(2)
 
     def _init(self):
         self.api = BloggerAPI(self)
+        self.blog = self.root.rpartition("/")[2]
         self.videos = self.config("videos", True)
 
     def items(self):
@@ -45,7 +37,7 @@ class BloggerExtractor(Extractor):
         findall_image = re.compile(
             r'src="(https?://(?:'
             r'blogger\.googleusercontent\.com/img|'
-            r'lh\d+\.googleusercontent\.com/|'
+            r'lh\d+(?:-\w+)?\.googleusercontent\.com|'
             r'\d+\.bp\.blogspot\.com)/[^"]+)').findall
         findall_video = re.compile(
             r'src="(https?://www\.blogger\.com/video\.g\?token=[^"]+)').findall
@@ -92,6 +84,18 @@ class BloggerExtractor(Extractor):
         """Return additional metadata"""
 
 
+BASE_PATTERN = BloggerExtractor.update({
+    "blogspot": {
+        "root": None,
+        "pattern": r"[\w-]+\.blogspot\.com",
+    },
+    "micmicidol": {
+        "root": "https://www.micmicidol.club",
+        "pattern": r"(?:www\.)?micmicidol\.club",
+    },
+})
+
+
 class BloggerPostExtractor(BloggerExtractor):
     """Extractor for a single blog post"""
     subcategory = "post"
@@ -100,7 +104,7 @@ class BloggerPostExtractor(BloggerExtractor):
 
     def __init__(self, match):
         BloggerExtractor.__init__(self, match)
-        self.path = match.group(3)
+        self.path = match.group(match.lastindex)
 
     def posts(self, blog):
         return (self.api.post_by_path(blog["id"], self.path),)
@@ -124,7 +128,7 @@ class BloggerSearchExtractor(BloggerExtractor):
 
     def __init__(self, match):
         BloggerExtractor.__init__(self, match)
-        self.query = text.unquote(match.group(3))
+        self.query = text.unquote(match.group(match.lastindex))
 
     def posts(self, blog):
         return self.api.blog_search(blog["id"], self.query)
@@ -141,7 +145,7 @@ class BloggerLabelExtractor(BloggerExtractor):
 
     def __init__(self, match):
         BloggerExtractor.__init__(self, match)
-        self.label = text.unquote(match.group(3))
+        self.label = text.unquote(match.group(match.lastindex))
 
     def posts(self, blog):
         return self.api.blog_posts(blog["id"], self.label)

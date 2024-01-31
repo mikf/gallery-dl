@@ -56,7 +56,7 @@ class PillowfortExtractor(Extractor):
 
             post["num"] = 0
             for file in files:
-                url = file["url"]
+                url = file["url"] or file.get("b2_lg_url")
                 if not url:
                     continue
 
@@ -91,7 +91,7 @@ class PillowfortExtractor(Extractor):
         if username:
             self.cookies_update(self._login_impl(username, password))
 
-    @cache(maxage=14*24*3600, keyarg=1)
+    @cache(maxage=14*86400, keyarg=1)
     def _login_impl(self, username, password):
         self.log.info("Logging in as %s", username)
 
@@ -132,7 +132,7 @@ class PillowfortPostExtractor(PillowfortExtractor):
 class PillowfortUserExtractor(PillowfortExtractor):
     """Extractor for all posts of a pillowfort user"""
     subcategory = "user"
-    pattern = BASE_PATTERN + r"/(?!posts/)([^/?#]+)"
+    pattern = BASE_PATTERN + r"/(?!posts/)([^/?#]+(?:/tagged/[^/?#]+)?)"
     example = "https://www.pillowfort.social/USER"
 
     def posts(self):

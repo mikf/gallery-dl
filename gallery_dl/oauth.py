@@ -138,6 +138,6 @@ class OAuth1API():
         return self.extractor.request(url, **kwargs)
 
 
-@cache(maxage=100*365*24*3600, keyarg=0)
+@cache(maxage=36500*86400, keyarg=0)
 def _token_cache(key):
     return None, None

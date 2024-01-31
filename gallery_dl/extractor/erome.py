@@ -44,20 +44,26 @@ class EromeExtractor(Extractor):
             pos = page.index('<div class="user-profile', pos)
             user, pos = text.extract(
                 page, 'href="https://www.erome.com/', '"', pos)
+
+            urls = []
+            groups = page.split('<div class="media-group"')
+            for group in util.advance(groups, 1):
+                url = (text.extr(group, '<source src="', '"') or
+                       text.extr(group, 'data-src="', '"'))
+                if url:
+                    urls.append(url)
+
             data = {
                 "album_id"     : album_id,
                 "title"        : text.unescape(title),
                 "user"         : text.unquote(user),
+                "count"        : len(urls),
                 "_http_headers": {"Referer": url},
             }
 
             yield Message.Directory, data
-            groups = page.split('<div class="media-group"')
-            for data["num"], group in enumerate(util.advance(groups, 1), 1):
-                url = (text.extr(group, '<source src="', '"') or
-                       text.extr(group, 'data-src="', '"'))
-                if url:
-                    yield Message.Url, url, text.nameext_from_url(url, data)
+            for data["num"], url in enumerate(urls, 1):
+                yield Message.Url, url, text.nameext_from_url(url, data)
 
     def albums(self):
         return ()

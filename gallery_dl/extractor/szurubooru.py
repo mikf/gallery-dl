@@ -87,6 +87,10 @@ BASE_PATTERN = SzurubooruExtractor.update({
         "root": "https://booru.bcbnsfw.space",
         "pattern": r"booru\.bcbnsfw\.space",
     },
+    "snootbooru": {
+        "root": "https://snootbooru.com",
+        "pattern": r"snootbooru\.com",
+    },
 })
 
 

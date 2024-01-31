@@ -103,7 +103,8 @@ class InkbunnyPoolExtractor(InkbunnyExtractor):
     subcategory = "pool"
     pattern = (BASE_PATTERN + r"/(?:"
                r"poolview_process\.php\?pool_id=(\d+)|"
-               r"submissionsviewall\.php\?([^#]+&mode=pool&[^#]+))")
+               r"submissionsviewall\.php"
+               r"\?((?:[^#]+&)?mode=pool(?:&[^#]+)?))")
     example = "https://inkbunny.net/poolview_process.php?pool_id=12345"
 
     def __init__(self, match):
@@ -133,7 +134,8 @@ class InkbunnyFavoriteExtractor(InkbunnyExtractor):
     subcategory = "favorite"
     pattern = (BASE_PATTERN + r"/(?:"
                r"userfavorites_process\.php\?favs_user_id=(\d+)|"
-               r"submissionsviewall\.php\?([^#]+&mode=userfavs&[^#]+))")
+               r"submissionsviewall\.php"
+               r"\?((?:[^#]+&)?mode=userfavs(?:&[^#]+)?))")
     example = ("https://inkbunny.net/userfavorites_process.php"
                "?favs_user_id=12345")
 
@@ -161,11 +163,31 @@ class InkbunnyFavoriteExtractor(InkbunnyExtractor):
         return self.api.search(params)
 
 
+class InkbunnyUnreadExtractor(InkbunnyExtractor):
+    """Extractor for unread inkbunny submissions"""
+    subcategory = "unread"
+    pattern = (BASE_PATTERN + r"/submissionsviewall\.php"
+               r"\?((?:[^#]+&)?mode=unreadsubs(?:&[^#]+)?)")
+    example = ("https://inkbunny.net/submissionsviewall.php"
+               "?text=&mode=unreadsubs&type=")
+
+    def __init__(self, match):
+        InkbunnyExtractor.__init__(self, match)
+        self.params = text.parse_query(match.group(1))
+
+    def posts(self):
+        params = self.params.copy()
+        params.pop("rid", None)
+        params.pop("mode", None)
+        params["unread_submissions"] = "yes"
+        return self.api.search(params)
+
+
 class InkbunnySearchExtractor(InkbunnyExtractor):
     """Extractor for inkbunny search results"""
     subcategory = "search"
-    pattern = (BASE_PATTERN +
-               r"/submissionsviewall\.php\?([^#]+&mode=search&[^#]+)")
+    pattern = (BASE_PATTERN + r"/submissionsviewall\.php"
+               r"\?((?:[^#]+&)?mode=search(?:&[^#]+)?)")
     example = ("https://inkbunny.net/submissionsviewall.php"
                "?text=TAG&mode=search&type=")
 
@@ -201,7 +223,8 @@ class InkbunnyFollowingExtractor(InkbunnyExtractor):
     subcategory = "following"
     pattern = (BASE_PATTERN + r"/(?:"
                r"watchlist_process\.php\?mode=watching&user_id=(\d+)|"
-               r"usersviewall\.php\?([^#]+&mode=watching&[^#]+))")
+               r"usersviewall\.php"
+               r"\?((?:[^#]+&)?mode=watching(?:&[^#]+)?))")
     example = ("https://inkbunny.net/watchlist_process.php"
                "?mode=watching&user_id=12345")
 
@@ -324,6 +347,9 @@ class InkbunnyAPI():
 
         while True:
             data = self._call("search", params)
+            if not data["submissions"]:
+                return
+
             yield from self.detail(data["submissions"])
 
             if data["page"] >= data["pages_count"]:
@@ -334,7 +360,7 @@ class InkbunnyAPI():
             params["page"] += 1
 
 
-@cache(maxage=360*24*3600, keyarg=1)
+@cache(maxage=365*86400, keyarg=1)
 def _authenticate_impl(api, username, password):
     api.extractor.log.info("Logging in as %s", username)
 

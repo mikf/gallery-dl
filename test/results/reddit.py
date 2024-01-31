@@ -189,7 +189,7 @@ __tests__ = (
     "#comment" : "preview.redd.it (#4470)",
     "#category": ("", "reddit", "submission"),
     "#class"   : reddit.RedditSubmissionExtractor,
-    "#pattern" : "https://preview.redd.it/u9ud4k6xaf271.jpg?auto=webp&s=19b1334cb4409111cda136c01f7b44c2c42bf9fb",
+    "#urls"    : "https://preview.redd.it/u9ud4k6xaf271.jpg?auto=webp&s=19b1334cb4409111cda136c01f7b44c2c42bf9fb",
 },
 
 {
@@ -238,6 +238,14 @@ __tests__ = (
     "#category": ("", "reddit", "image"),
     "#class"   : reddit.RedditImageExtractor,
     "#pattern" : r"^https://i\.redd\.it/00af44lpn0u51\.jpg$",
+},
+
+{
+    "#url"     : "https://www.reddit.com/r/analog/s/hKrTTvFVwZ",
+    "#comment" : "Mobile share URL",
+    "#category": ("", "reddit", "redirect"),
+    "#class"   : reddit.RedditRedirectExtractor,
+    "#pattern" : r"^https://www\.reddit\.com/r/analog/comments/179exao/photographing_the_recent_annular_eclipse_with_a",
 },
 
 )

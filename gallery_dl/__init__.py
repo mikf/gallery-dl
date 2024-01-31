@@ -18,19 +18,6 @@ __email__ = "mike_faehrmann@web.de"
 __version__ = version.__version__
 
 
-def progress(urls, pformat):
-    """Wrapper around urls to output a simple progress indicator"""
-    if pformat is True:
-        pformat = "[{current}/{total}] {url}\n"
-    else:
-        pformat += "\n"
-
-    pinfo = {"total": len(urls)}
-    for pinfo["current"], pinfo["url"] in enumerate(urls, 1):
-        output.stderr_write(pformat.format_map(pinfo))
-        yield pinfo["url"]
-
-
 def main():
     try:
         parser = option.build_parser()
@@ -58,7 +45,7 @@ def main():
             elif filename.startswith("\\f"):
                 filename = "\f" + filename[2:]
             config.set((), "filename", filename)
-        if args.directory:
+        if args.directory is not None:
             config.set((), "base-directory", args.directory)
             config.set((), "directory", ())
         if args.postprocessors:
@@ -128,6 +115,7 @@ def main():
         output.configure_logging(args.loglevel)
         if args.loglevel >= logging.ERROR:
             config.set(("output",), "mode", "null")
+            config.set(("downloader",), "progress", None)
         elif args.loglevel <= logging.DEBUG:
             import platform
             import requests
@@ -224,7 +212,7 @@ def main():
             return config.initialize()
 
         else:
-            if not args.urls and not args.inputfiles:
+            if not args.urls and not args.input_files:
                 parser.error(
                     "The following arguments are required: URL\n"
                     "Use 'gallery-dl --help' to get a list of all options.")
@@ -238,50 +226,62 @@ def main():
             else:
                 jobtype = args.jobtype or job.DownloadJob
 
-            urls = args.urls
-            if args.inputfiles:
-                for inputfile in args.inputfiles:
-                    try:
-                        if inputfile == "-":
-                            if sys.stdin:
-                                urls += util.parse_inputfile(sys.stdin, log)
-                            else:
-                                log.warning(
-                                    "input file: stdin is not readable")
-                        else:
-                            with open(inputfile, encoding="utf-8") as file:
-                                urls += util.parse_inputfile(file, log)
-                    except OSError as exc:
-                        log.warning("input file: %s", exc)
+            input_manager = InputManager()
+            input_manager.log = input_log = logging.getLogger("inputfile")
 
             # unsupported file logging handler
             handler = output.setup_logging_handler(
                 "unsupportedfile", fmt="{message}")
             if handler:
-                ulog = logging.getLogger("unsupported")
+                ulog = job.Job.ulog = logging.getLogger("unsupported")
                 ulog.addHandler(handler)
                 ulog.propagate = False
-                job.Job.ulog = ulog
+
+            # error file logging handler
+            handler = output.setup_logging_handler(
+                "errorfile", fmt="{message}", mode="a")
+            if handler:
+                elog = input_manager.err = logging.getLogger("errorfile")
+                elog.addHandler(handler)
+                elog.propagate = False
+
+            # collect input URLs
+            input_manager.add_list(args.urls)
+
+            if args.input_files:
+                for input_file, action in args.input_files:
+                    try:
+                        path = util.expand_path(input_file)
+                        input_manager.add_file(path, action)
+                    except Exception as exc:
+                        input_log.error(exc)
+                        return getattr(exc, "code", 128)
 
             pformat = config.get(("output",), "progress", True)
-            if pformat and len(urls) > 1 and args.loglevel < logging.ERROR:
-                urls = progress(urls, pformat)
-            else:
-                urls = iter(urls)
+            if pformat and len(input_manager.urls) > 1 and \
+                    args.loglevel < logging.ERROR:
+                input_manager.progress(pformat)
 
+            # process input URLs
             retval = 0
-            url = next(urls, None)
-
-            while url is not None:
+            for url in input_manager:
                 try:
                     log.debug("Starting %s for '%s'", jobtype.__name__, url)
-                    if isinstance(url, util.ExtendedUrl):
+
+                    if isinstance(url, ExtendedUrl):
                         for opts in url.gconfig:
                             config.set(*opts)
                         with config.apply(url.lconfig):
-                            retval |= jobtype(url.value).run()
+                            status = jobtype(url.value).run()
                     else:
-                        retval |= jobtype(url).run()
+                        status = jobtype(url).run()
+
+                    if status:
+                        retval |= status
+                        input_manager.error()
+                    else:
+                        input_manager.success()
+
                 except exception.TerminateExtraction:
                     pass
                 except exception.RestartExtraction:
@@ -290,9 +290,9 @@ def main():
                 except exception.NoExtractorError:
                     log.error("Unsupported URL '%s'", url)
                     retval |= 64
+                    input_manager.error()
 
-                url = next(urls, None)
-
+                input_manager.next()
             return retval
 
     except KeyboardInterrupt:
@@ -304,3 +304,226 @@ def main():
         if exc.errno != errno.EPIPE:
             raise
     return 1
+
+
+class InputManager():
+
+    def __init__(self):
+        self.urls = []
+        self.files = ()
+        self.log = self.err = None
+
+        self._url = ""
+        self._item = None
+        self._index = 0
+        self._pformat = None
+
+    def add_url(self, url):
+        self.urls.append(url)
+
+    def add_list(self, urls):
+        self.urls += urls
+
+    def add_file(self, path, action=None):
+        """Process an input file.
+
+        Lines starting with '#' and empty lines will be ignored.
+        Lines starting with '-' will be interpreted as a key-value pair
+          separated by an '='. where
+          'key' is a dot-separated option name and
+          'value' is a JSON-parsable string.
+          These configuration options will be applied
+          while processing the next URL only.
+        Lines starting with '-G' are the same as above, except these options
+          will be applied for *all* following URLs, i.e. they are Global.
+        Everything else will be used as a potential URL.
+
+        Example input file:
+
+        # settings global options
+        -G base-directory = "/tmp/"
+        -G skip = false
+
+        # setting local options for the next URL
+        -filename="spaces_are_optional.jpg"
+        -skip    = true
+
+        https://example.org/
+
+        # next URL uses default filename and 'skip' is false.
+        https://example.com/index.htm # comment1
+        https://example.com/404.htm   # comment2
+        """
+        if path == "-" and not action:
+            try:
+                lines = sys.stdin.readlines()
+            except Exception:
+                raise exception.InputFileError("stdin is not readable")
+            path = None
+        else:
+            try:
+                with open(path, encoding="utf-8") as fp:
+                    lines = fp.readlines()
+            except Exception as exc:
+                raise exception.InputFileError(str(exc))
+
+            if self.files:
+                self.files[path] = lines
+            else:
+                self.files = {path: lines}
+
+            if action == "c":
+                action = self._action_comment
+            elif action == "d":
+                action = self._action_delete
+            else:
+                action = None
+
+        gconf = []
+        lconf = []
+        indicies = []
+        strip_comment = None
+        append = self.urls.append
+
+        for n, line in enumerate(lines):
+            line = line.strip()
+
+            if not line or line[0] == "#":
+                # empty line or comment
+                continue
+
+            elif line[0] == "-":
+                # config spec
+                if len(line) >= 2 and line[1] == "G":
+                    conf = gconf
+                    line = line[2:]
+                else:
+                    conf = lconf
+                    line = line[1:]
+                    if action:
+                        indicies.append(n)
+
+                key, sep, value = line.partition("=")
+                if not sep:
+                    raise exception.InputFileError(
+                        "Invalid KEY=VALUE pair '%s' on line %s in %s",
+                        line, n+1, path)
+
+                try:
+                    value = util.json_loads(value.strip())
+                except ValueError as exc:
+                    self.log.debug("%s: %s", exc.__class__.__name__, exc)
+                    raise exception.InputFileError(
+                        "Unable to parse '%s' on line %s in %s",
+                        value, n+1, path)
+
+                key = key.strip().split(".")
+                conf.append((key[:-1], key[-1], value))
+
+            else:
+                # url
+                if " #" in line or "\t#" in line:
+                    if strip_comment is None:
+                        import re
+                        strip_comment = re.compile(r"\s+#.*").sub
+                    line = strip_comment("", line)
+                if gconf or lconf:
+                    url = ExtendedUrl(line, gconf, lconf)
+                    gconf = []
+                    lconf = []
+                else:
+                    url = line
+
+                if action:
+                    indicies.append(n)
+                    append((url, path, action, indicies))
+                    indicies = []
+                else:
+                    append(url)
+
+    def progress(self, pformat=True):
+        if pformat is True:
+            pformat = "[{current}/{total}] {url}\n"
+        else:
+            pformat += "\n"
+        self._pformat = pformat.format_map
+
+    def next(self):
+        self._index += 1
+
+    def success(self):
+        if self._item:
+            self._rewrite()
+
+    def error(self):
+        if self.err:
+            if self._item:
+                url, path, action, indicies = self._item
+                lines = self.files[path]
+                out = "".join(lines[i] for i in indicies)
+                if out and out[-1] == "\n":
+                    out = out[:-1]
+                self._rewrite()
+            else:
+                out = str(self._url)
+            self.err.info(out)
+
+    def _rewrite(self):
+        url, path, action, indicies = self._item
+        lines = self.files[path]
+        action(lines, indicies)
+        try:
+            with open(path, "w", encoding="utf-8") as fp:
+                fp.writelines(lines)
+        except Exception as exc:
+            self.log.warning(
+                "Unable to update '%s' (%s: %s)",
+                path, exc.__class__.__name__, exc)
+
+    @staticmethod
+    def _action_comment(lines, indicies):
+        for i in indicies:
+            lines[i] = "# " + lines[i]
+
+    @staticmethod
+    def _action_delete(lines, indicies):
+        for i in indicies:
+            lines[i] = ""
+
+    def __iter__(self):
+        self._index = 0
+        return self
+
+    def __next__(self):
+        try:
+            url = self.urls[self._index]
+        except IndexError:
+            raise StopIteration
+
+        if isinstance(url, tuple):
+            self._item = url
+            url = url[0]
+        else:
+            self._item = None
+        self._url = url
+
+        if self._pformat:
+            output.stderr_write(self._pformat({
+                "total"  : len(self.urls),
+                "current": self._index + 1,
+                "url"    : url,
+            }))
+        return url
+
+
+class ExtendedUrl():
+    """URL with attached config key-value pairs"""
+    __slots__ = ("value", "gconfig", "lconfig")
+
+    def __init__(self, url, gconf, lconf):
+        self.value = url
+        self.gconfig = gconf
+        self.lconfig = lconf
+
+    def __str__(self):
+        return self.value

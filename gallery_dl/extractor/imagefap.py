@@ -126,14 +126,15 @@ class ImagefapImageExtractor(ImagefapExtractor):
         url = "{}/photo/{}/".format(self.root, self.image_id)
         page = self.request(url).text
 
+        url, pos = text.extract(
+            page, 'original="', '"')
         info, pos = text.extract(
-            page, '<script type="application/ld+json">', '</script>')
+            page, '<script type="application/ld+json">', '</script>', pos)
         image_id, pos = text.extract(
             page, 'id="imageid_input" value="', '"', pos)
         gallery_id, pos = text.extract(
             page, 'id="galleryid_input" value="', '"', pos)
         info = util.json_loads(info)
-        url = info["contentUrl"]
 
         return url, text.nameext_from_url(url, {
             "title": text.unescape(info["name"]),

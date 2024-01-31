@@ -217,9 +217,10 @@ class InstagramExtractor(Extractor):
                                  data["post_shortcode"])
                 continue
 
-            if "video_versions" in item:
+            video_versions = item.get("video_versions")
+            if video_versions:
                 video = max(
-                    item["video_versions"],
+                    video_versions,
                     key=lambda x: (x["width"], x["height"], x["type"]),
                 )
                 media = video
@@ -710,7 +711,8 @@ class InstagramRestAPI():
     def user_by_name(self, screen_name):
         endpoint = "/v1/users/web_profile_info/"
         params = {"username": screen_name}
-        return self._call(endpoint, params=params)["data"]["user"]
+        return self._call(
+            endpoint, params=params, notfound="user")["data"]["user"]
 
     @memcache(keyarg=1)
     def user_by_id(self, user_id):
@@ -777,13 +779,15 @@ class InstagramRestAPI():
         kwargs["headers"] = {
             "Accept"          : "*/*",
             "X-CSRFToken"     : extr.csrf_token,
-            "X-Instagram-AJAX": "1006242110",
             "X-IG-App-ID"     : "936619743392459",
-            "X-ASBD-ID"       : "198387",
+            "X-ASBD-ID"       : "129477",
             "X-IG-WWW-Claim"  : extr.www_claim,
             "X-Requested-With": "XMLHttpRequest",
-            "Alt-Used"        : "www.instagram.com",
+            "Connection"      : "keep-alive",
             "Referer"         : extr.root + "/",
+            "Sec-Fetch-Dest"  : "empty",
+            "Sec-Fetch-Mode"  : "cors",
+            "Sec-Fetch-Site"  : "same-origin",
         }
         return extr.request(url, **kwargs).json()
 
@@ -973,7 +977,7 @@ class InstagramGraphqlAPI():
             variables["after"] = extr._update_cursor(info["end_cursor"])
 
 
-@cache(maxage=90*24*3600, keyarg=1)
+@cache(maxage=90*86400, keyarg=1)
 def _login_impl(extr, username, password):
     extr.log.error("Login with username & password is no longer supported. "
                    "Use browser cookies instead.")

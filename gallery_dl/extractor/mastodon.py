@@ -45,6 +45,9 @@ class MastodonExtractor(BaseExtractor):
             attachments = status["media_attachments"]
             del status["media_attachments"]
 
+            if status["reblog"]:
+                attachments.extend(status["reblog"]["media_attachments"])
+
             status["instance"] = self.instance
             acct = status["account"]["acct"]
             status["instance_remote"] = \
@@ -72,7 +75,7 @@ class MastodonExtractor(BaseExtractor):
                              account["acct"], account["moved"]["acct"])
 
 
-INSTANCES = {
+BASE_PATTERN = MastodonExtractor.update({
     "mastodon.social": {
         "root"         : "https://mastodon.social",
         "pattern"      : r"mastodon\.social",
@@ -97,9 +100,7 @@ INSTANCES = {
         "client-id"    : "czxx2qilLElYHQ_sm-lO8yXuGwOHxLX9RYYaD0-nq1o",
         "client-secret": "haMaFdMBgK_-BIxufakmI2gFgkYjqmgXGEO2tB-R2xY",
     }
-}
-
-BASE_PATTERN = MastodonExtractor.update(INSTANCES) + "(?:/web)?"
+}) + "(?:/web)?"
 
 
 class MastodonUserExtractor(MastodonExtractor):
@@ -113,7 +114,10 @@ class MastodonUserExtractor(MastodonExtractor):
 
         return api.account_statuses(
             api.account_id_by_username(self.item),
-            only_media=not self.config("text-posts", False),
+            only_media=(
+                not self.reblogs and
+                not self.config("text-posts", False)
+            ),
             exclude_replies=not self.replies,
         )
 
@@ -146,7 +150,7 @@ class MastodonFollowingExtractor(MastodonExtractor):
 class MastodonStatusExtractor(MastodonExtractor):
     """Extractor for images from a status"""
     subcategory = "status"
-    pattern = BASE_PATTERN + r"/@[^/?#]+/(\d+)"
+    pattern = BASE_PATTERN + r"/@[^/?#]+/(?!following)([^/?#]+)"
     example = "https://mastodon.social/@USER/12345"
 
     def statuses(self):
@@ -168,10 +172,8 @@ class MastodonAPI():
         if access_token is None or access_token == "cache":
             access_token = _access_token_cache(extractor.instance)
         if not access_token:
-            try:
-                access_token = INSTANCES[extractor.category]["access-token"]
-            except (KeyError, TypeError):
-                pass
+            access_token = extractor.config_instance("access-token")
+
         if access_token:
             self.headers = {"Authorization": "Bearer " + access_token}
         else:
@@ -271,6 +273,6 @@ class MastodonAPI():
             params = None
 
 
-@cache(maxage=100*365*24*3600, keyarg=0)
+@cache(maxage=36500*86400, keyarg=0)
 def _access_token_cache(instance):
     return None

@@ -12,8 +12,8 @@ __tests__ = (
     "#url"     : "https://aibooru.online/posts?tags=center_frills&z=1",
     "#category": ("Danbooru", "aibooru", "tag"),
     "#class"   : danbooru.DanbooruTagExtractor,
-    "#pattern" : r"https://cdn\.aibooru\.online/original/[0-9a-f]{2}/[0-9a-f]{2}/[0-9a-f]{32}\.\w+",
-    "#count"   : ">= 3",
+    "#pattern" : r"https://cdn\.aibooru\.download/original/[0-9a-f]{2}/[0-9a-f]{2}/[0-9a-f]{32}\.\w+",
+    "#count"   : ">= 50",
 },
 
 {

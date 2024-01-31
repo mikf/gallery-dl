@@ -39,7 +39,7 @@ __tests__ = (
 },
 
 {
-    "#url"     : "https://www.bbc.co.uk/programmes/b006q2x0/galleries?page=40",
+    "#url"     : "https://www.bbc.co.uk/programmes/b006q2x0/galleries?page=25",
     "#category": ("", "bbc", "programme"),
     "#class"   : bbc.BbcProgrammeExtractor,
     "#pattern" : bbc.BbcGalleryExtractor.pattern,

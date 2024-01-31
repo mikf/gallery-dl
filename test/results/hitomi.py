@@ -93,6 +93,13 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://hitomi.la/imageset/867789.html",
+    "#comment" : "/imageset/ gallery (#4756)",
+    "#category": ("", "hitomi", "gallery"),
+    "#class"   : hitomi.HitomiGalleryExtractor,
+},
+
+{
     "#url"     : "https://hitomi.la/reader/867789.html",
     "#category": ("", "hitomi", "gallery"),
     "#class"   : hitomi.HitomiGalleryExtractor,

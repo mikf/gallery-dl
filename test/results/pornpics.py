@@ -15,10 +15,10 @@ __tests__ = (
     "#pattern" : r"https://cdni\.pornpics\.com/1280/7/160/62610699/62610699_\d+_[0-9a-f]{4}\.jpg",
 
     "categories": [
+        "Outdoor",
         "MILF",
         "Amateur",
         "Sexy",
-        "Outdoor",
     ],
     "channel"   : "FTV MILFs",
     "count"     : 17,
@@ -27,7 +27,11 @@ __tests__ = (
     "num"       : int,
     "slug"      : "british-beauty-danielle-flashes-hot-breasts-ass-and-snatch-in-the-forest",
     "tags"      : [
+        "MILF Outdoor",
         "Amateur MILF",
+        "Nature",
+        "Amateur Outdoor",
+        "First Time",
         "Sexy MILF",
     ],
     "title"     : "British beauty Danielle flashes hot breasts, ass and snatch in the forest",

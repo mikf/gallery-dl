@@ -28,6 +28,27 @@ BROKEN = {
     "photobucket",
 }
 
+CONFIG = {
+    "cache": {
+        "file": None,
+    },
+    "downloader": {
+        "adjust-extensions": False,
+        "part": False,
+    },
+}
+
+AUTH = {
+    "pixiv",
+    "nijie",
+    "horne",
+    "reddit",
+    "seiga",
+    "fantia",
+    "instagram",
+    "twitter",
+}
+
 
 class TestExtractorResults(unittest.TestCase):
 
@@ -48,6 +69,13 @@ class TestExtractorResults(unittest.TestCase):
             for url, exc in cls._skipped:
                 print('- {} ("{}")'.format(url, exc))
 
+    def assertRange(self, value, range, msg=None):
+        if range.step > 1:
+            self.assertIn(value, range, msg=msg)
+        else:
+            self.assertLessEqual(value, range.stop, msg=msg)
+            self.assertGreaterEqual(value, range.start, msg=msg)
+
     def _run_test(self, result):
         result.pop("#comment", None)
         only_matching = (len(result) <= 3)
@@ -59,19 +87,32 @@ class TestExtractorResults(unittest.TestCase):
                 for key, value in result["#options"].items():
                     key = key.split(".")
                     config.set(key[:-1], key[-1], value)
+
+            requires_auth = result.get("#auth")
+            if requires_auth is None:
+                requires_auth = (result["#category"][1] in AUTH)
+            if requires_auth:
+                extr = result["#class"].from_url(result["#url"])
+                if not any(extr.config(key) for key in (
+                        "username", "cookies", "api-key", "client-id",
+                        "refresh-token")):
+                    msg = "no auth"
+                    self._skipped.append((result["#url"], msg))
+                    self.skipTest(msg)
+
             if "#range" in result:
                 config.set((), "image-range"  , result["#range"])
                 config.set((), "chapter-range", result["#range"])
             content = ("#sha1_content" in result)
 
         tjob = ResultJob(result["#url"], content=content)
-        self.assertEqual(result["#class"], tjob.extractor.__class__)
+        self.assertEqual(result["#class"], tjob.extractor.__class__, "#class")
 
         if only_matching:
             return
 
         if "#exception" in result:
-            with self.assertRaises(result["#exception"]):
+            with self.assertRaises(result["#exception"], msg="#exception"):
                 tjob.run()
             return
 
@@ -91,8 +132,7 @@ class TestExtractorResults(unittest.TestCase):
             self.assertEqual(
                 len(set(tjob.archive_list)),
                 len(tjob.archive_list),
-                "archive-id uniqueness",
-            )
+                msg="archive-id uniqueness")
 
         if tjob.queue:
             # test '_extractor' entries
@@ -106,40 +146,58 @@ class TestExtractorResults(unittest.TestCase):
         else:
             # test 'extension' entries
             for kwdict in tjob.kwdict_list:
-                self.assertIn("extension", kwdict)
+                self.assertIn("extension", kwdict, msg="#extension")
 
         # test extraction results
         if "#sha1_url" in result:
             self.assertEqual(
-                result["#sha1_url"], tjob.url_hash.hexdigest())
+                result["#sha1_url"],
+                tjob.url_hash.hexdigest(),
+                msg="#sha1_url")
 
         if "#sha1_content" in result:
             expected = result["#sha1_content"]
             digest = tjob.content_hash.hexdigest()
             if isinstance(expected, str):
-                self.assertEqual(
-                    expected, digest, "content")
+                self.assertEqual(expected, digest, msg="#sha1_content")
             else:  # iterable
-                self.assertIn(
-                    digest, expected, "content")
+                self.assertIn(digest, expected, msg="#sha1_content")
 
         if "#sha1_metadata" in result:
             self.assertEqual(
-                result["#sha1_metadata"], tjob.kwdict_hash.hexdigest())
+                result["#sha1_metadata"],
+                tjob.kwdict_hash.hexdigest(),
+                "#sha1_metadata")
 
         if "#count" in result:
             count = result["#count"]
+            len_urls = len(tjob.url_list)
             if isinstance(count, str):
-                self.assertRegex(count, r"^ *(==|!=|<|<=|>|>=) *\d+ *$")
-                expr = "{} {}".format(len(tjob.url_list), count)
+                self.assertRegex(
+                    count, r"^ *(==|!=|<|<=|>|>=) *\d+ *$", msg="#count")
+                expr = "{} {}".format(len_urls, count)
                 self.assertTrue(eval(expr), msg=expr)
+            elif isinstance(count, range):
+                self.assertRange(len_urls, count, msg="#count")
             else:  # assume integer
-                self.assertEqual(len(tjob.url_list), count)
+                self.assertEqual(len_urls, count, msg="#count")
 
         if "#pattern" in result:
-            self.assertGreater(len(tjob.url_list), 0)
-            for url in tjob.url_list:
-                self.assertRegex(url, result["#pattern"])
+            self.assertGreater(len(tjob.url_list), 0, msg="#pattern")
+            pattern = result["#pattern"]
+            if isinstance(pattern, str):
+                for url in tjob.url_list:
+                    self.assertRegex(url, pattern, msg="#pattern")
+            else:
+                for url, pat in zip(tjob.url_list, pattern):
+                    self.assertRegex(url, pat, msg="#pattern")
+
+        if "#urls" in result:
+            expected = result["#urls"]
+            if isinstance(expected, str):
+                self.assertEqual(tjob.url_list[0], expected, msg="#urls")
+            else:
+                self.assertSequenceEqual(tjob.url_list, expected, msg="#urls")
 
         metadata = {k: v for k, v in result.items() if k[0] != "#"}
         if metadata:
@@ -152,13 +210,15 @@ class TestExtractorResults(unittest.TestCase):
                 key = key[1:]
                 if key not in kwdict:
                     continue
-            self.assertIn(key, kwdict)
+            self.assertIn(key, kwdict, msg=key)
             value = kwdict[key]
 
             if isinstance(test, dict):
                 self._test_kwdict(value, test)
             elif isinstance(test, type):
                 self.assertIsInstance(value, test, msg=key)
+            elif isinstance(test, range):
+                self.assertRange(value, test, msg=key)
             elif isinstance(test, list):
                 subtest = False
                 for idx, item in enumerate(test):
@@ -166,19 +226,22 @@ class TestExtractorResults(unittest.TestCase):
                         subtest = True
                         self._test_kwdict(value[idx], item)
                 if not subtest:
-                    self.assertEqual(value, test, msg=key)
+                    self.assertEqual(test, value, msg=key)
             elif isinstance(test, str):
                 if test.startswith("re:"):
                     self.assertRegex(value, test[3:], msg=key)
                 elif test.startswith("dt:"):
                     self.assertIsInstance(value, datetime.datetime, msg=key)
-                    self.assertEqual(str(value), test[3:], msg=key)
+                    self.assertEqual(test[3:], str(value), msg=key)
                 elif test.startswith("type:"):
-                    self.assertEqual(type(value).__name__, test[5:], msg=key)
+                    self.assertEqual(test[5:], type(value).__name__, msg=key)
+                elif test.startswith("len:"):
+                    self.assertIsInstance(value, (list, tuple), msg=key)
+                    self.assertEqual(int(test[4:]), len(value), msg=key)
                 else:
-                    self.assertEqual(value, test, msg=key)
+                    self.assertEqual(test, value, msg=key)
             else:
-                self.assertEqual(value, test, msg=key)
+                self.assertEqual(test, value, msg=key)
 
 
 class ResultJob(job.DownloadJob):
@@ -199,6 +262,8 @@ class ResultJob(job.DownloadJob):
 
         if content:
             self.fileobj = TestPathfmt(self.content_hash)
+        else:
+            self._update_content = lambda url, kwdict: None
 
         self.format_directory = TestFormatter(
             "".join(self.extractor.directory_fmt)).format_map
@@ -246,10 +311,17 @@ class ResultJob(job.DownloadJob):
         self.archive_hash.update(archive_id.encode())
 
     def _update_content(self, url, kwdict):
-        if self.content:
-            scheme = url.partition(":")[0]
-            self.fileobj.kwdict = kwdict
-            self.get_downloader(scheme).download(url, self.fileobj)
+        self.fileobj.kwdict = kwdict
+
+        downloader = self.get_downloader(url.partition(":")[0])
+        if downloader.download(url, self.fileobj):
+            return
+
+        for num, url in enumerate(kwdict.get("_fallback") or (), 1):
+            self.log.warning("Trying fallback URL #%d", num)
+            downloader = self.get_downloader(url.partition(":")[0])
+            if downloader.download(url, self.fileobj):
+                return
 
 
 class TestPathfmt():
@@ -310,56 +382,21 @@ class TestFormatter(formatter.StringFormatter):
 
 
 def setup_test_config():
-    name = "gallerydl"
-    email = "gallerydl@openaliasbox.org"
-    email2 = "gallerydl@protonmail.com"
+    config._config.update(CONFIG)
 
-    config.clear()
-    config.set(("cache",), "file", None)
-    config.set(("downloader",), "part", False)
-    config.set(("downloader",), "adjust-extensions", False)
-    config.set(("extractor" ,), "timeout" , 60)
-    config.set(("extractor" ,), "username", name)
-    config.set(("extractor" ,), "password", name)
 
-    config.set(("extractor", "nijie")     , "username", email)
-    config.set(("extractor", "seiga")     , "username", email)
-    config.set(("extractor", "horne")     , "username", email2)
-    config.set(("extractor", "pinterest") , "username", email2)
-    config.set(("extractor", "pinterest") , "username", None)  # login broken
-
-    config.set(("extractor", "newgrounds"), "username", "d1618111")
-    config.set(("extractor", "newgrounds"), "password", "d1618111")
-
-    config.set(("extractor", "mangoxo")   , "username", "LiQiang3")
-    config.set(("extractor", "mangoxo")   , "password", "5zbQF10_5u25259Ma")
-
-    for category in ("danbooru", "atfbooru", "aibooru", "booruvar",
-                     "e621", "e926", "e6ai",
-                     "instagram", "twitter", "subscribestar", "deviantart",
-                     "inkbunny", "tapas", "pillowfort", "mangadex",
-                     "vipergirls"):
-        config.set(("extractor", category), "username", None)
-
-    config.set(("extractor", "mastodon.social"), "access-token",
-               "Blf9gVqG7GytDTfVMiyYQjwVMQaNACgf3Ds3IxxVDUQ")
-
-    config.set(("extractor", "nana"), "favkey",
-               "9237ddb82019558ea7d179e805100805"
-               "ea6aa1c53ca6885cd4c179f9fb22ead2")
-
-    config.set(("extractor", "deviantart"), "client-id", "7777")
-    config.set(("extractor", "deviantart"), "client-secret",
-               "ff14994c744d9208e5caeec7aab4a026")
-
-    config.set(("extractor", "tumblr"), "api-key",
-               "0cXoHfIqVzMQcc3HESZSNsVlulGxEXGDTTZCDrRrjaa0jmuTc6")
-    config.set(("extractor", "tumblr"), "api-secret",
-               "6wxAK2HwrXdedn7VIoZWxGqVhZ8JdYKDLjiQjL46MLqGuEtyVj")
-    config.set(("extractor", "tumblr"), "access-token",
-               "N613fPV6tOZQnyn0ERTuoEZn0mEqG8m2K8M3ClSJdEHZJuqFdG")
-    config.set(("extractor", "tumblr"), "access-token-secret",
-               "sgOA7ZTT4FBXdOGGVV331sSp0jHYp4yMDRslbhaQf7CaS71i4O")
+def load_test_config():
+    try:
+        path = os.path.join(
+            os.path.dirname(os.path.dirname(__file__)),
+            "archive", "config.json")
+        with open(path) as fp:
+            CONFIG.update(json.loads(fp.read()))
+    except FileNotFoundError:
+        pass
+    except Exception as exc:
+        sys.exit("Error when loading {}: {}: {}".format(
+            path, exc.__class__.__name__, exc))
 
 
 def generate_tests():
@@ -367,7 +404,17 @@ def generate_tests():
     def _generate_method(result):
         def test(self):
             print("\n" + result["#url"])
-            self._run_test(result)
+            try:
+                self._run_test(result)
+            except KeyboardInterrupt as exc:
+                v = input("\n[e]xit | [f]ail | [S]kip ? ").strip().lower()
+                if v in ("e", "exit"):
+                    raise
+                if v in ("f", "fail"):
+                    self.fail("manual test failure")
+                else:
+                    self._skipped.append((result["#url"], "manual skip"))
+                    self.skipTest(exc)
         return test
 
     # enable selective testing for direct calls
@@ -375,7 +422,13 @@ def generate_tests():
         category, _, subcategory = sys.argv[1].partition(":")
         del sys.argv[1:]
 
-        tests = results.category(category)
+        if category.startswith("+"):
+            basecategory = category[1:].lower()
+            tests = [t for t in results.all()
+                     if t["#category"][0].lower() == basecategory]
+        else:
+            tests = results.category(category)
+
         if subcategory:
             tests = [t for t in tests if t["#category"][-1] == subcategory]
     else:
@@ -388,10 +441,12 @@ def generate_tests():
         enum[name] += 1
 
         method = _generate_method(result)
+        method.__doc__ = result["#url"]
         method.__name__ = "test_{}_{}".format(name, enum[name])
         setattr(TestExtractorResults, method.__name__, method)
 
 
 generate_tests()
 if __name__ == "__main__":
+    load_test_config()
     unittest.main(warnings="ignore")

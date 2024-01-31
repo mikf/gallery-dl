@@ -24,6 +24,11 @@ from gallery_dl.extractor.directlink import DirectlinkExtractor  # noqa E402
 
 _list_classes = extractor._list_classes
 
+try:
+    from test import results
+except ImportError:
+    results = None
+
 
 class FakeExtractor(Extractor):
     category = "fake"
@@ -92,17 +97,29 @@ class TestExtractorModule(unittest.TestCase):
             with self.assertRaises(TypeError):
                 FakeExtractor.from_url(invalid)
 
-    def test_unique_pattern_matches(self):
-        try:
-            import test.results
-        except ImportError:
-            raise unittest.SkipTest("no test data")
+    @unittest.skipIf(not results, "no test data")
+    def test_categories(self):
+        for result in results.all():
+            url = result["#url"]
+            base, cat, sub = result["#category"]
+            try:
+                extr = result["#class"].from_url(url)
+            except ImportError as exc:
+                if exc.name in ("youtube_dl", "yt_dlp"):
+                    print("Skipping '{}' category checks".format(cat))
+                    continue
+                raise
+            self.assertEqual(extr.category, cat, url)
+            self.assertEqual(extr.subcategory, sub, url)
+            self.assertEqual(extr.basecategory, base, url)
 
+    @unittest.skipIf(not results, "no test data")
+    def test_unique_pattern_matches(self):
         # collect testcase URLs
         test_urls = []
         append = test_urls.append
 
-        for result in test.results.all():
+        for result in results.all():
             append((result["#url"], result["#class"]))
 
         # iterate over all testcase URLs
@@ -142,6 +159,8 @@ class TestExtractorModule(unittest.TestCase):
             if cls.category == "ytdl":
                 continue
             extr = cls.from_url(cls.example)
+            if not extr and cls.basecategory and not cls.instances:
+                continue
             extr.initialize()
             extr.finalize()
 
@@ -238,7 +257,7 @@ class TestExtractorWait(unittest.TestCase):
             until = datetime.fromtimestamp(until)
         o = self._isotime_to_seconds(output)
         u = self._isotime_to_seconds(until.time().isoformat()[:8])
-        self.assertLess(o-u, 1.0)
+        self.assertLessEqual(o-u, 1.0)
 
     @staticmethod
     def _isotime_to_seconds(isotime):

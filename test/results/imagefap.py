@@ -5,6 +5,7 @@
 # published by the Free Software Foundation.
 
 from gallery_dl.extractor import imagefap
+from gallery_dl import exception
 
 
 __tests__ = (
@@ -12,16 +13,14 @@ __tests__ = (
     "#url"     : "https://www.imagefap.com/gallery/7102714",
     "#category": ("", "imagefap", "gallery"),
     "#class"   : imagefap.ImagefapGalleryExtractor,
-    "#pattern"      : r"https://cdnh?\.imagefap\.com/images/full/\d+/\d+/\d+\.jpg",
-    "#sha1_metadata": "bdcb75b1e4b9dddc718f3d66e1a58afa9d81a38b",
-    "#sha1_content" : "694a0a57385980a6f90fbc296cadcd6c11ba2dab",
+    "#exception": exception.HttpError,
 },
 
 {
     "#url"     : "https://www.imagefap.com/gallery/7876223",
     "#category": ("", "imagefap", "gallery"),
     "#class"   : imagefap.ImagefapGalleryExtractor,
-    "#pattern" : r"https://cdnh?\.imagefap\.com/images/full/\d+/\d+/\d+\.jpg",
+    "#pattern" : r"https://cdn[ch]?\.imagefap\.com/images/full/\d+/\d+/\d+\.jpg",
     "#count"   : 44,
 
     "categories" : [
@@ -47,25 +46,30 @@ __tests__ = (
 },
 
 {
-    "#url"     : "https://www.imagefap.com/gallery/6180555",
+    "#url"     : "https://www.imagefap.com/gallery/6706356",
     "#comment" : "description (#3905)",
     "#category": ("", "imagefap", "gallery"),
     "#class"   : imagefap.ImagefapGalleryExtractor,
     "#range"   : "1",
 
     "categories" : [
-        "Amateur",
-        "Softcore",
-        "Homemade",
+        "Lesbian",
+        "Fetish",
+        "Animated GIFS",
     ],
-    "count"      : 36,
-    "description": "Nude and dressed sluts showing off the goods",
-    "gallery_id" : 6180555,
-    "image_id"   : int,
-    "num"        : int,
-    "tags"       : [],
-    "title"      : "Dressed or Undressed MG*",
-    "uploader"   : "splitopen",
+    "count"      : 75,
+    "description": "A mixed collection of pics and gifs depicting lesbian femdom.\n\nAll images originally found on various Tumblr blogs and through the internet.\n\nObviously I don't own any of the images so if you do and you would like them removed please just let me know and I shall remove them straight away.",
+    "gallery_id" : 6706356,
+    "tags"       : [
+        "lesbian",
+        "femdom",
+        "lesbian femdom",
+        "lezdom",
+        "dominant women",
+        "submissive women",
+    ],
+    "title"      : "Lezdom, Lesbian Femdom, Lesbian Domination - 3",
+    "uploader"   : "pussysimon",
 },
 
 {
@@ -90,7 +94,7 @@ __tests__ = (
     "#url"     : "https://www.imagefap.com/photo/1962981893",
     "#category": ("", "imagefap", "image"),
     "#class"   : imagefap.ImagefapImageExtractor,
-    "#pattern" : r"https://cdnh?\.imagefap\.com/images/full/65/196/1962981893\.jpg",
+    "#pattern" : r"https://cdn[ch]?\.imagefap\.com/images/full/65/196/1962981893\.jpg",
 
     "date"      : "21/08/2014",
     "gallery_id": 7876223,

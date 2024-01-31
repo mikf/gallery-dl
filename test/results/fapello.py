@@ -26,6 +26,7 @@ __tests__ = (
     "#category": ("", "fapello", "post"),
     "#class"   : fapello.FapelloPostExtractor,
     "#pattern" : r"https://cdn\.fapello\.com/content/v/l/vladislava-661/1000/vladislava-661_0693\.mp4",
+    "#exception": exception.NotFoundError,
 
     "model"    : "vladislava-661",
     "id"       : 693,
@@ -38,6 +39,16 @@ __tests__ = (
     "#category": ("", "fapello", "post"),
     "#class"   : fapello.FapelloPostExtractor,
     "#exception": exception.NotFoundError,
+},
+
+{
+    "#url"     : "https://fapello.su/grace-charis-gracecharisxo/2038266/",
+    "#category": ("", "fapello", "post"),
+    "#class"   : fapello.FapelloPostExtractor,
+
+    "model"    : "grace-charis-gracecharisxo",
+    "id"       : 2038266,
+    "type"     : "photo",
 },
 
 {
@@ -56,7 +67,25 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://fapello.su/grace-charis-gracecharisxo/",
+    "#category": ("", "fapello", "model"),
+    "#class"   : fapello.FapelloModelExtractor,
+    "#pattern" : fapello.FapelloPostExtractor.pattern,
+    "#range"   : "1-50",
+    "#count"   : 50,
+},
+
+{
     "#url"     : "https://fapello.com/top-likes/",
+    "#category": ("", "fapello", "path"),
+    "#class"   : fapello.FapelloPathExtractor,
+    "#pattern" : fapello.FapelloModelExtractor.pattern,
+    "#range"   : "1-10",
+    "#count"   : 10,
+},
+
+{
+    "#url"     : "https://fapello.su/top-likes/",
     "#category": ("", "fapello", "path"),
     "#class"   : fapello.FapelloPathExtractor,
     "#pattern" : fapello.FapelloModelExtractor.pattern,
@@ -80,7 +109,19 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://fapello.su/top-followers/",
+    "#category": ("", "fapello", "path"),
+    "#class"   : fapello.FapelloPathExtractor,
+},
+
+{
     "#url"     : "https://fapello.com/trending/",
+    "#category": ("", "fapello", "path"),
+    "#class"   : fapello.FapelloPathExtractor,
+},
+
+{
+    "#url"     : "https://fapello.su/trending/",
     "#category": ("", "fapello", "path"),
     "#class"   : fapello.FapelloPathExtractor,
 },

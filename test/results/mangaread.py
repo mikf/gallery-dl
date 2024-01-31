@@ -69,7 +69,7 @@ __tests__ = (
     "#url"     : "https://www.mangaread.org/manga/kanan-sama-wa-akumade-choroi",
     "#category": ("", "mangaread", "manga"),
     "#class"   : mangaread.MangareadMangaExtractor,
-    "#pattern" : r"https://www\.mangaread\.org/manga/kanan-sama-wa-akumade-choroi/chapter-\d+(-.+)?/",
+    "#pattern" : r"https://www\.mangaread\.org/manga/kanan-sama-wa-akumade-choroi/chapter-\d+([_-].+)?/",
     "#count"   : ">= 13",
 
     "manga"      : "Kanan-sama wa Akumade Choroi",
