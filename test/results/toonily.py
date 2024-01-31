@@ -55,7 +55,7 @@ __tests__ = (
 },
 
 {
-    "#url"     : "https://toonily.com/manga/doesnotexist",
+    "#url"     : "https://toonily.com/webtoon/doesnotexist",
     "#category": ("", "toonily", "manga"),
     "#class"   : toonily.ToonilyMangaExtractor,
     "#exception": exception.HttpError,
