@@ -13,7 +13,10 @@ from .. import text
 from urllib.parse import urlsplit, urlunsplit
 import re
 
-BASE_PATTERN = r"(?:https?://)?(?:app\.)?bunkr+\.(?:sk|[rs]u|la|is|to|si|ac|black|cat|media|red|site|ws)"
+BASE_PATTERN = (
+    r"(?:https?://)?(?:app\.)?bunkr+\."
+    r"(?:sk|[rs]u|la|is|to|si|ac|black|cat|media|red|site|ws)"
+)
 
 MEDIA_DOMAIN_OVERRIDES = {
     "cdn9.bunkr.ru" : "c9.bunkr.ru",
@@ -75,7 +78,8 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
                         try:
                             url = self._extract_file(text.unescape(path))
                         except Exception as exc:
-                            self.log.error("%s: %s", exc.__class__.__name__, exc)
+                            self.log.error("%s: %s",
+                                           exc.__class__.__name__, exc)
                             continue
 
             yield {"file": text.unescape(url)}
