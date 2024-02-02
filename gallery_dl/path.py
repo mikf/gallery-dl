@@ -12,6 +12,7 @@ import os
 import re
 import shutil
 import functools
+import glob
 from . import util, formatter, exception
 
 WINDOWS = util.WINDOWS
@@ -159,9 +160,9 @@ class PathFormat():
 
     def exists(self):
         """Return True if the file exists on disk"""
-        
         # Search only by file name not including file extension
-        # This means checking if 'image_1.jpg' is on disk will be True if 'image_1.png' is found
+        # This means checking if 'image_1.jpg' is on disk will
+        # be True if 'image_1.png' is found
         if self.skip_ext:
             split_real_path = self.realpath.split(".")
             any_ext_path = ".".join(split_real_path[:-1]) + ".*"
