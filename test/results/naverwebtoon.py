@@ -96,6 +96,15 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://comic.naver.com/webtoon/list?titleId=765124",
+    "#comment" : "/webtoon/ path for 'challenge' comic (#5123)",
+    "#category": ("", "naverwebtoon", "comic"),
+    "#class"   : naverwebtoon.NaverwebtoonComicExtractor,
+    "#range"   : "1",
+    "#urls"    : "https://comic.naver.com/challenge/detail?titleId=765124&no=1",
+},
+
+{
     "#url"     : "https://comic.naver.com/challenge/list?titleId=765124",
     "#category": ("", "naverwebtoon", "comic"),
     "#class"   : naverwebtoon.NaverwebtoonComicExtractor,

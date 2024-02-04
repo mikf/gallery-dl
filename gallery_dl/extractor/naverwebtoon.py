@@ -79,9 +79,6 @@ class NaverwebtoonComicExtractor(NaverwebtoonBase, Extractor):
         self.sort = query.get("sort", "ASC")
 
     def items(self):
-        base = "{}/{}/detail?titleId={}&no=".format(
-            self.root, self.path, self.title_id)
-
         url = self.root + "/api/article/list"
         headers = {
             "Accept": "application/json, text/plain, */*",
@@ -94,6 +91,10 @@ class NaverwebtoonComicExtractor(NaverwebtoonBase, Extractor):
 
         while True:
             data = self.request(url, headers=headers, params=params).json()
+
+            path = data["webtoonLevelCode"].lower().replace("_c", "C", 1)
+            base = "{}/{}/detail?titleId={}&no=".format(
+                self.root, path, data["titleId"])
 
             for article in data["articleList"]:
                 article["_extractor"] = NaverwebtoonEpisodeExtractor
