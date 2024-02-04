@@ -13,12 +13,7 @@ import mimetypes
 from requests.exceptions import RequestException, ConnectionError, Timeout
 from .common import DownloaderBase
 from .. import text, util
-
 from ssl import SSLError
-try:
-    from OpenSSL.SSL import Error as OpenSSLError
-except ImportError:
-    OpenSSLError = SSLError
 
 
 class HttpDownloader(DownloaderBase):
@@ -249,7 +244,7 @@ class HttpDownloader(DownloaderBase):
                     file_header = next(
                         content if response.raw.chunked
                         else response.iter_content(16), b"")
-                except (RequestException, SSLError, OpenSSLError) as exc:
+                except (RequestException, SSLError) as exc:
                     msg = str(exc)
                     print()
                     continue
@@ -283,7 +278,7 @@ class HttpDownloader(DownloaderBase):
                 self.out.start(pathfmt.path)
                 try:
                     self.receive(fp, content, size, offset)
-                except (RequestException, SSLError, OpenSSLError) as exc:
+                except (RequestException, SSLError) as exc:
                     msg = str(exc)
                     print()
                     continue
@@ -310,7 +305,7 @@ class HttpDownloader(DownloaderBase):
         try:
             for _ in response.iter_content(self.chunk_size):
                 pass
-        except (RequestException, SSLError, OpenSSLError) as exc:
+        except (RequestException, SSLError) as exc:
             print()
             self.log.debug(
                 "Unable to consume response body (%s: %s); "
