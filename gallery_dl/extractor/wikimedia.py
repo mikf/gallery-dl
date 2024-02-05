@@ -31,9 +31,6 @@ class WikimediaExtractor(BaseExtractor):
 
         if path.startswith("wiki/"):
             path = path[5:]
-            self.api_path = "/w/api.php"
-        else:
-            self.api_path = "/api.php"
 
         pre, sep, _ = path.partition(":")
         prefix = pre.lower() if sep else None
@@ -66,7 +63,7 @@ class WikimediaExtractor(BaseExtractor):
             else:
                 self.api_url = api_path
         else:
-            self.api_url = self.root + self.api_path
+            self.api_url = self.root + "/api.php"
 
     def items(self):
         for info in self._pagination(self.params):
@@ -125,47 +122,56 @@ BASE_PATTERN = WikimediaExtractor.update({
     "wikipedia": {
         "root": None,
         "pattern": r"[a-z]{2,}\.wikipedia\.org",
+        "api-path": "/w/api.php",
     },
     "wiktionary": {
         "root": None,
         "pattern": r"[a-z]{2,}\.wiktionary\.org",
+        "api-path": "/w/api.php",
     },
     "wikiquote": {
         "root": None,
         "pattern": r"[a-z]{2,}\.wikiquote\.org",
+        "api-path": "/w/api.php",
     },
     "wikibooks": {
         "root": None,
         "pattern": r"[a-z]{2,}\.wikibooks\.org",
+        "api-path": "/w/api.php",
     },
     "wikisource": {
         "root": None,
         "pattern": r"[a-z]{2,}\.wikisource\.org",
+        "api-path": "/w/api.php",
     },
     "wikinews": {
         "root": None,
         "pattern": r"[a-z]{2,}\.wikinews\.org",
+        "api-path": "/w/api.php",
     },
     "wikiversity": {
         "root": None,
         "pattern": r"[a-z]{2,}\.wikiversity\.org",
+        "api-path": "/w/api.php",
     },
     "wikispecies": {
         "root": "https://species.wikimedia.org",
         "pattern": r"species\.wikimedia\.org",
+        "api-path": "/w/api.php",
     },
     "wikimediacommons": {
         "root": "https://commons.wikimedia.org",
         "pattern": r"commons\.wikimedia\.org",
+        "api-path": "/w/api.php",
     },
     "mediawiki": {
         "root": "https://www.mediawiki.org",
         "pattern": r"(?:www\.)?mediawiki\.org",
+        "api-path": "/w/api.php",
     },
     "fandom": {
         "root": None,
         "pattern": r"[\w-]+\.fandom\.com",
-        "api-path": "/api.php",
     },
     "mariowiki": {
         "root": "https://www.mariowiki.com",
