@@ -53,6 +53,15 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.pinterest.jp/gdldev/bname/",
+    "#comment" : "board & section with /?# in name (#5104)",
+    "#category": ("", "pinterest", "board"),
+    "#class"   : pinterest.PinterestBoardExtractor,
+    "#options" : {"sections": True},
+    "#urls"    : "https://www.pinterest.jp/gdldev/bname/id:5345901183739414095",
+},
+
+{
     "#url"     : "https://www.pinterest.de/g1952849/secret/",
     "#comment" : "secret board (#1055)",
     "#category": ("", "pinterest", "board"),

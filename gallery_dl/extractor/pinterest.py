@@ -149,8 +149,7 @@ class PinterestBoardExtractor(PinterestExtractor):
         pins = self.api.board_pins(board["id"])
 
         if board["section_count"] and self.config("sections", True):
-            base = "{}/{}/{}/id:".format(
-                self.root, board["owner"]["username"], board["name"])
+            base = "{}{}id:".format(self.root, board["url"])
             data = {"_extractor": PinterestSectionExtractor}
             sections = [(base + section["id"], data)
                         for section in self.api.board_sections(board["id"])]
@@ -220,7 +219,7 @@ class PinterestSectionExtractor(PinterestExtractor):
                      "{board[name]}", "{section[title]}")
     archive_fmt = "{board[id]}_{id}"
     pattern = BASE_PATTERN + r"/(?!pin/)([^/?#]+)/([^/?#]+)/([^/?#]+)"
-    example = "https://www.pinterest.com/USER/BOARD/SEcTION"
+    example = "https://www.pinterest.com/USER/BOARD/SECTION"
 
     def __init__(self, match):
         PinterestExtractor.__init__(self, match)
