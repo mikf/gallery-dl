@@ -386,7 +386,11 @@ class FlickrAPI(oauth.OAuth1API):
         params["nojsoncallback"] = "1"
         if self.api_key:
             params["api_key"] = self.api_key
-        data = self.request(self.API_URL, params=params).json()
+        response = self.request(self.API_URL, params=params)
+        try:
+            data = response.json()
+        except ValueError:
+            data = {"code": -1, "message": response.content}
         if "code" in data:
             msg = data.get("message")
             self.log.debug("Server response: %s", data)
