@@ -35,7 +35,7 @@ class IdolcomplexExtractor(SankakuExtractor):
 
     def _init(self):
         self.find_pids = re.compile(
-            r" href=[\"#]/\w\w/posts/([0-9a-f]+)"
+            r" href=[\"#]/\w\w/posts/(\w+)"
         ).findall
         self.find_tags = re.compile(
             r'tag-type-([^"]+)">\s*<a [^>]*?href="/[^?]*\?tags=([^"]+)'
@@ -258,7 +258,7 @@ class IdolcomplexPostExtractor(IdolcomplexExtractor):
     """Extractor for single images from idol.sankakucomplex.com"""
     subcategory = "post"
     archive_fmt = "{id}"
-    pattern = BASE_PATTERN + r"/posts?/(?:show/)?([0-9a-f]+)"
+    pattern = BASE_PATTERN + r"/posts?/(?:show/)?(\w+)"
     example = "https://idol.sankakucomplex.com/posts/0123456789abcdef"
 
     def __init__(self, match):
