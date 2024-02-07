@@ -61,7 +61,7 @@ __tests__ = (
 },
 
 {
-    "#url"     : "https://idol.sankakucomplex.com/en/posts/509eccbba54a43cea6b275a65b93c51d",
+    "#url"     : "https://idol.sankakucomplex.com/en/posts/vkr36qdOaZ4",
     "#category": ("booru", "idolcomplex", "post"),
     "#class"   : idolcomplex.IdolcomplexPostExtractor,
     "#sha1_content": "694ec2491240787d75bf5d0c75d0082b53a85afd",
@@ -84,6 +84,12 @@ __tests__ = (
     "vote_average"  : range(4, 5),
     "vote_count"    : range(25, 40),
     "width"         : 1024,
+},
+
+{
+    "#url"     : "https://idol.sankakucomplex.com/en/posts/509eccbba54a43cea6b275a65b93c51d",
+    "#category": ("booru", "idolcomplex", "post"),
+    "#class"   : idolcomplex.IdolcomplexPostExtractor,
 },
 
 {
