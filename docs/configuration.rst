@@ -388,6 +388,7 @@ Description
     * ``aibooru`` (*)
     * ``aryion``
     * ``atfbooru`` (*)
+    * ``bluesky``
     * ``danbooru`` (*)
     * ``e621`` (*)
     * ``e926`` (*)

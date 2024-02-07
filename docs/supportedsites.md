@@ -122,6 +122,12 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
+    <td>Bluesky</td>
+    <td>https://bsky.app/</td>
+    <td>Likes, Media Files, Posts, Replies, User Profiles</td>
+    <td>Supported</td>
+</tr>
+<tr>
     <td>Bunkr</td>
     <td>https://bunkr.sk/</td>
     <td>Albums, Media Files</td>
