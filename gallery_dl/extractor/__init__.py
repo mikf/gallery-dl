@@ -29,6 +29,7 @@ modules = [
     "bbc",
     "behance",
     "blogger",
+    "bluesky",
     "bunkr",
     "catbox",
     "chevereto",

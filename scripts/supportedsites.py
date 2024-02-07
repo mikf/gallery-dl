@@ -174,6 +174,9 @@ SUBCATEGORY_MAP = {
     "artstation": {
         "artwork": "Artwork Listings",
     },
+    "bluesky": {
+        "posts": "",
+    },
     "coomerparty": {
         "discord"       : "",
         "discord-server": "",
@@ -339,6 +342,7 @@ AUTH_MAP = {
     "aryion"         : "Supported",
     "atfbooru"       : "Supported",
     "baraag"         : _OAUTH,
+    "bluesky"        : "Supported",
     "coomerparty"    : "Supported",
     "danbooru"       : "Supported",
     "derpibooru"     : _APIKEY_DB,
