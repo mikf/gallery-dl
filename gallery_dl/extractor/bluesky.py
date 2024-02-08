@@ -289,8 +289,7 @@ class BlueskyAPI():
             raise exception.AuthenticationError('"{}: {}"'.format(
                 data.get("error"), data.get("message")))
 
-        if not refresh_token:
-            _refresh_token_cache.update(self.username, data["refreshJwt"])
+        _refresh_token_cache.update(self.username, data["refreshJwt"])
         return "Bearer " + data["accessJwt"]
 
     def _call(self, endpoint, params):
