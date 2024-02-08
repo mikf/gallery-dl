@@ -25,7 +25,7 @@ class BlueskyExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.handle = match.group(1)
+        self.user = match.group(1)
 
     def _init(self):
         self.api = BlueskyAPI(self)
@@ -77,17 +77,13 @@ class BlueskyUserExtractor(BlueskyExtractor):
         pass
 
     def items(self):
-        base = "{}/profile/{}/".format(self.root, self.handle)
+        base = "{}/profile/{}/".format(self.root, self.user)
         return self._dispatch_extractors((
             (BlueskyPostsExtractor  , base + "posts"),
             (BlueskyRepliesExtractor, base + "replies"),
             (BlueskyMediaExtractor  , base + "media"),
             (BlueskyLikesExtractor  , base + "likes"),
         ), ("media",))
-
-    def posts(self):
-        did = self.api.resolve_handle(self.handle)
-        return self.api.get_author_feed(did)
 
 
 class BlueskyPostsExtractor(BlueskyExtractor):
@@ -96,8 +92,7 @@ class BlueskyPostsExtractor(BlueskyExtractor):
     example = "https://bsky.app/profile/HANDLE/posts"
 
     def posts(self):
-        did = self.api.resolve_handle(self.handle)
-        return self.api.get_author_feed(did, "posts_and_author_threads")
+        return self.api.get_author_feed(self.user, "posts_and_author_threads")
 
 
 class BlueskyRepliesExtractor(BlueskyExtractor):
@@ -106,8 +101,7 @@ class BlueskyRepliesExtractor(BlueskyExtractor):
     example = "https://bsky.app/profile/HANDLE/replies"
 
     def posts(self):
-        did = self.api.resolve_handle(self.handle)
-        return self.api.get_author_feed(did, "posts_with_replies")
+        return self.api.get_author_feed(self.user, "posts_with_replies")
 
 
 class BlueskyMediaExtractor(BlueskyExtractor):
@@ -116,8 +110,7 @@ class BlueskyMediaExtractor(BlueskyExtractor):
     example = "https://bsky.app/profile/HANDLE/media"
 
     def posts(self):
-        did = self.api.resolve_handle(self.handle)
-        return self.api.get_author_feed(did, "posts_with_media")
+        return self.api.get_author_feed(self.user, "posts_with_media")
 
 
 class BlueskyLikesExtractor(BlueskyExtractor):
@@ -126,8 +119,7 @@ class BlueskyLikesExtractor(BlueskyExtractor):
     example = "https://bsky.app/profile/HANDLE/likes"
 
     def posts(self):
-        did = self.api.resolve_handle(self.handle)
-        return self.api.get_actor_likes(did)
+        return self.api.get_actor_likes(self.user)
 
 
 class BlueskyPostExtractor(BlueskyExtractor):
@@ -140,8 +132,7 @@ class BlueskyPostExtractor(BlueskyExtractor):
         self.post_id = match.group(2)
 
     def posts(self):
-        did = self.api.resolve_handle(self.handle)
-        return self.api.get_post_thread(did, self.post_id)
+        return self.api.get_post_thread(self.user, self.post_id)
 
 
 class BlueskyAPI():
@@ -165,7 +156,7 @@ class BlueskyAPI():
     def get_actor_likes(self, actor):
         endpoint = "app.bsky.feed.getActorLikes"
         params = {
-            "actor": actor,
+            "actor": self._did_from_actor(actor),
             "limit": "100",
         }
         return self._pagination(endpoint, params)
@@ -173,7 +164,7 @@ class BlueskyAPI():
     def get_author_feed(self, actor, filter="posts_and_author_threads"):
         endpoint = "app.bsky.feed.getAuthorFeed"
         params = {
-            "actor" : actor,
+            "actor" : self._did_from_actor(actor),
             "filter": filter,
             "limit" : "100",
         }
@@ -182,13 +173,14 @@ class BlueskyAPI():
     def get_post_thread(self, actor, post_id):
         endpoint = "app.bsky.feed.getPostThread"
         params = {
-            "uri": "at://{}/app.bsky.feed.post/{}".format(actor, post_id),
+            "uri": "at://{}/app.bsky.feed.post/{}".format(
+                self._did_from_actor(actor), post_id),
         }
         return (self._call(endpoint, params)["thread"],)
 
     def get_profile(self, actor):
         endpoint = "app.bsky.actor.getProfile"
-        params = {"actor": actor}
+        params = {"actor": self._did_from_actor(actor)}
         return self._call(endpoint, params)
 
     @memcache(keyarg=1)
@@ -196,6 +188,11 @@ class BlueskyAPI():
         endpoint = "com.atproto.identity.resolveHandle"
         params = {"handle": handle}
         return self._call(endpoint, params)["did"]
+
+    def _did_from_actor(self, actor):
+        if actor.startswith("did:"):
+            return actor
+        return self.resolve_handle(actor)
 
     def authenticate(self):
         self.headers["Authorization"] = self._authenticate_impl(self.username)
