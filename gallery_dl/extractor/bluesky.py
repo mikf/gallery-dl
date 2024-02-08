@@ -135,6 +135,19 @@ class BlueskyFeedExtractor(BlueskyExtractor):
         return self.api.get_feed(self.user, self.feed)
 
 
+class BlueskyListExtractor(BlueskyExtractor):
+    subcategory = "list"
+    pattern = BASE_PATTERN + r"/profile/([^/?#]+)/lists/([^/?#]+)"
+    example = "https://bsky.app/profile/HANDLE/lists/ID"
+
+    def __init__(self, match):
+        BlueskyExtractor.__init__(self, match)
+        self.list = match.group(2)
+
+    def posts(self):
+        return self.api.get_list_feed(self.user, self.list)
+
+
 class BlueskyPostExtractor(BlueskyExtractor):
     subcategory = "post"
     pattern = BASE_PATTERN + r"/profile/([^/?#]+)/post/([^/?#]+)"
@@ -188,6 +201,15 @@ class BlueskyAPI():
         params = {
             "feed" : "at://{}/app.bsky.feed.generator/{}".format(
                 self._did_from_actor(actor), feed),
+            "limit": "100",
+        }
+        return self._pagination(endpoint, params)
+
+    def get_list_feed(self, actor, list):
+        endpoint = "app.bsky.feed.getListFeed"
+        params = {
+            "list" : "at://{}/app.bsky.graph.list/{}".format(
+                self._did_from_actor(actor), list),
             "limit": "100",
         }
         return self._pagination(endpoint, params)
