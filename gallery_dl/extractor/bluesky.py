@@ -13,6 +13,7 @@ from .. import text, util, exception
 from ..cache import cache, memcache
 
 BASE_PATTERN = r"(?:https?://)?bsky\.app"
+USER_PATTERN = BASE_PATTERN + r"/profile/([^/?#]+)"
 
 
 class BlueskyExtractor(Extractor):
@@ -70,7 +71,7 @@ class BlueskyExtractor(Extractor):
 
 class BlueskyUserExtractor(BlueskyExtractor):
     subcategory = "user"
-    pattern = BASE_PATTERN + r"/profile/([^/?#]+)$"
+    pattern = USER_PATTERN + r"$"
     example = "https://bsky.app/profile/HANDLE"
 
     def initialize(self):
@@ -88,7 +89,7 @@ class BlueskyUserExtractor(BlueskyExtractor):
 
 class BlueskyPostsExtractor(BlueskyExtractor):
     subcategory = "posts"
-    pattern = BASE_PATTERN + r"/profile/([^/?#]+)/posts"
+    pattern = USER_PATTERN + r"/posts"
     example = "https://bsky.app/profile/HANDLE/posts"
 
     def posts(self):
@@ -97,7 +98,7 @@ class BlueskyPostsExtractor(BlueskyExtractor):
 
 class BlueskyRepliesExtractor(BlueskyExtractor):
     subcategory = "replies"
-    pattern = BASE_PATTERN + r"/profile/([^/?#]+)/replies"
+    pattern = USER_PATTERN + r"/replies"
     example = "https://bsky.app/profile/HANDLE/replies"
 
     def posts(self):
@@ -106,7 +107,7 @@ class BlueskyRepliesExtractor(BlueskyExtractor):
 
 class BlueskyMediaExtractor(BlueskyExtractor):
     subcategory = "media"
-    pattern = BASE_PATTERN + r"/profile/([^/?#]+)/media"
+    pattern = USER_PATTERN + r"/media"
     example = "https://bsky.app/profile/HANDLE/media"
 
     def posts(self):
@@ -115,7 +116,7 @@ class BlueskyMediaExtractor(BlueskyExtractor):
 
 class BlueskyLikesExtractor(BlueskyExtractor):
     subcategory = "likes"
-    pattern = BASE_PATTERN + r"/profile/([^/?#]+)/likes"
+    pattern = USER_PATTERN + r"/likes"
     example = "https://bsky.app/profile/HANDLE/likes"
 
     def posts(self):
@@ -124,7 +125,7 @@ class BlueskyLikesExtractor(BlueskyExtractor):
 
 class BlueskyFeedExtractor(BlueskyExtractor):
     subcategory = "feed"
-    pattern = BASE_PATTERN + r"/profile/([^/?#]+)/feed/([^/?#]+)"
+    pattern = USER_PATTERN + r"/feed/([^/?#]+)"
     example = "https://bsky.app/profile/HANDLE/feed/NAME"
 
     def __init__(self, match):
@@ -137,7 +138,7 @@ class BlueskyFeedExtractor(BlueskyExtractor):
 
 class BlueskyListExtractor(BlueskyExtractor):
     subcategory = "list"
-    pattern = BASE_PATTERN + r"/profile/([^/?#]+)/lists/([^/?#]+)"
+    pattern = USER_PATTERN + r"/lists/([^/?#]+)"
     example = "https://bsky.app/profile/HANDLE/lists/ID"
 
     def __init__(self, match):
@@ -150,7 +151,7 @@ class BlueskyListExtractor(BlueskyExtractor):
 
 class BlueskyPostExtractor(BlueskyExtractor):
     subcategory = "post"
-    pattern = BASE_PATTERN + r"/profile/([^/?#]+)/post/([^/?#]+)"
+    pattern = USER_PATTERN + r"/post/([^/?#]+)"
     example = "https://bsky.app/profile/HANDLE/post/ID"
 
     def __init__(self, match):
