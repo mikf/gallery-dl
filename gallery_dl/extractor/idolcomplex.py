@@ -101,7 +101,7 @@ class IdolcomplexExtractor(SankakuExtractor):
         page = self.request(url, retries=10).text
         extr = text.extract_from(page)
 
-        tags = extr("<title>", " | ")
+        pid_alnum = extr('/posts/', '"')
         vavg = extr('itemprop="ratingValue">', "<")
         vcnt = extr('itemprop="reviewCount">', "<")
         pid = extr(">Post ID:", "<")
@@ -121,8 +121,8 @@ class IdolcomplexExtractor(SankakuExtractor):
 
         data = {
             "id"          : text.parse_int(pid),
+            "id_alnum"    : pid_alnum,
             "md5"         : file_url.rpartition("/")[2].partition(".")[0],
-            "tags"        : text.unescape(tags),
             "vote_average": text.parse_float(vavg),
             "vote_count"  : text.parse_int(vcnt),
             "created_at"  : created,

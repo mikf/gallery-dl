@@ -73,6 +73,7 @@ __tests__ = (
     "filename"      : "509eccbba54a43cea6b275a65b93c51d",
     "height"        : 683,
     "id"            : 694215,
+    "id_alnum"      : "vkr36qdOaZ4",
     "md5"           : "509eccbba54a43cea6b275a65b93c51d",
     "rating"        : "g",
     "tags"          : "lyumos the_witcher shani_(the_witcher) 1girl green_eyes non-asian redhead waistcoat wreath cosplay 3:2_aspect_ratio",
@@ -110,6 +111,8 @@ __tests__ = (
     "#class"   : idolcomplex.IdolcomplexPostExtractor,
     "#sha1_content": "694ec2491240787d75bf5d0c75d0082b53a85afd",
 
+    "id"            : 694215,
+    "id_alnum"      : "vkr36qdOaZ4",
     "tags_character": "shani_(the_witcher)",
     "tags_copyright": "the_witcher",
     "tags_idol"     : str,
