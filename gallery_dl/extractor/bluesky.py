@@ -149,6 +149,17 @@ class BlueskyListExtractor(BlueskyExtractor):
         return self.api.get_list_feed(self.user, self.list)
 
 
+class BlueskyFollowingExtractor(BlueskyExtractor):
+    subcategory = "following"
+    pattern = USER_PATTERN + r"/follows"
+    example = "https://bsky.app/profile/HANDLE/follows"
+
+    def items(self):
+        for user in self.api.get_follows(self.user):
+            url = "https://bsky.app/profile/" + user["did"]
+            yield Message.Queue, url, user
+
+
 class BlueskyPostExtractor(BlueskyExtractor):
     subcategory = "post"
     pattern = USER_PATTERN + r"/post/([^/?#]+)"
@@ -205,6 +216,14 @@ class BlueskyAPI():
             "limit": "100",
         }
         return self._pagination(endpoint, params)
+
+    def get_follows(self, actor):
+        endpoint = "app.bsky.graph.getFollows"
+        params = {
+            "actor": self._did_from_actor(actor),
+            "limit": "100",
+        }
+        return self._pagination(endpoint, params, "follows")
 
     def get_list_feed(self, actor, list):
         endpoint = "app.bsky.feed.getListFeed"
@@ -293,10 +312,10 @@ class BlueskyAPI():
                 "API request failed (%s %s)",
                 response.status_code, response.reason)
 
-    def _pagination(self, endpoint, params):
+    def _pagination(self, endpoint, params, key="feed"):
         while True:
             data = self._call(endpoint, params)
-            yield from data["feed"]
+            yield from data[key]
 
             cursor = data.get("cursor")
             if not cursor:
