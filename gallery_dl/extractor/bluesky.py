@@ -20,7 +20,7 @@ class BlueskyExtractor(Extractor):
     """Base class for bluesky extractors"""
     category = "bluesky"
     directory_fmt = ("{category}", "{author[handle]}")
-    filename_fmt = "{indexedAt[:19]}_{post_id}_{num}.{extension}"
+    filename_fmt = "{createdAt[:19]}_{post_id}_{num}.{extension}"
     archive_fmt = "{filename}"
     root = "https://bsky.app"
 
@@ -34,20 +34,31 @@ class BlueskyExtractor(Extractor):
     def items(self):
         for post in self.posts():
             post = post["post"]
+            post.update(post["record"])
+            del post["record"]
 
-            try:
-                images = post["embed"]["images"]
-            except KeyError:
-                images = ()
+            images = ()
+            if "embed" in post:
+                media = post["embed"]
+                if "media" in media:
+                    media = media["media"]
+                if "images" in media:
+                    images = media["images"]
 
             post["post_id"] = post["uri"].rpartition("/")[2]
             post["count"] = len(images)
             post["date"] = text.parse_datetime(
-                post["indexedAt"][:19], "%Y-%m-%dT%H:%M:%S")
+                post["createdAt"][:19], "%Y-%m-%dT%H:%M:%S")
 
             yield Message.Directory, post
 
+            if not images:
+                continue
+
+            base = ("https://bsky.social/xrpc/com.atproto.sync.getBlob"
+                    "?did={}&cid=".format(post["author"]["did"]))
             post["num"] = 0
+
             for file in images:
                 post["num"] += 1
                 post["description"] = file["alt"]
@@ -59,11 +70,11 @@ class BlueskyExtractor(Extractor):
                 except KeyError:
                     post["width"] = post["height"] = 0
 
-                url = file["fullsize"]
-                name = url.rpartition("/")[2]
-                post["filename"], _, post["extension"] = name.rpartition("@")
+                image = file["image"]
+                post["filename"] = link = image["ref"]["$link"]
+                post["extension"] = image["mimeType"].rpartition("/")[2]
 
-                yield Message.Url, url, post
+                yield Message.Url, base + link, post
 
     def posts(self):
         return ()

@@ -12,8 +12,8 @@ __tests__ = (
     "#url"     : "https://bsky.app/profile/bsky.app/post/3kh5rarr3gn2n",
     "#category": ("", "bluesky", "post"),
     "#class"   : bluesky.BlueskyPostExtractor,
-    "#urls"        : "https://cdn.bsky.app/img/feed_fullsize/plain/did:plc:z72i7hdynmk6r22z27h6tvur/bafkreidypzoaybmfj5h7pnpiyct6ng5yae6ydp4czrm72ocg7ev6vbirri@jpeg",
-    "#sha1_content": "c36a27d135277dc08b7bfd289e4078af7b32c720",
+    "#urls"        : "https://bsky.social/xrpc/com.atproto.sync.getBlob?did=did:plc:z72i7hdynmk6r22z27h6tvur&cid=bafkreidypzoaybmfj5h7pnpiyct6ng5yae6ydp4czrm72ocg7ev6vbirri",
+    "#sha1_content": "ffcf25e7c511173a12de5276b85903309fcd8d14",
 
     "author": {
         "avatar"     : "https://cdn.bsky.app/img/avatar/plain/did:plc:z72i7hdynmk6r22z27h6tvur/bafkreihagr2cmvl2jt4mgx3sppwe2it3fwolkrbtjrhcnwjk4jdijhsoze@jpeg",
@@ -24,6 +24,7 @@ __tests__ = (
     },
     "cid"        : "bafyreihh7m6bfrwlcjfklwturmja7qfse5gte7lskpmgw76flivimbnoqm",
     "count"      : 1,
+    "createdAt"  : "2023-12-22T18:58:32.715Z",
     "date"       : "dt:2023-12-22 18:58:32",
     "description": "The bluesky logo with the blue butterfly",
     "extension"  : "jpeg",
