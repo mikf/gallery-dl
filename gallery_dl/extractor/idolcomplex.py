@@ -206,8 +206,8 @@ class IdolcomplexTagExtractor(IdolcomplexExtractor):
             if not next_url:
                 return
 
-            next_params = text.parse_query(text.unescape(text.unescape(
-                next_url).lstrip("?/")))
+            next_params = text.parse_query(text.unquote(text.unescape(
+                text.unescape(next_url).lstrip("?/"))))
 
             if "next" in next_params:
                 # stop if the same "next" value occurs twice in a row (#265)
