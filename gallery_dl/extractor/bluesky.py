@@ -45,6 +45,21 @@ class BlueskyExtractor(Extractor):
                 if "images" in media:
                     images = media["images"]
 
+            if "facets" in post:
+                post["hashtags"] = tags = []
+                post["mentions"] = dids = []
+                post["uris"] = uris = []
+                for facet in post["facets"]:
+                    features = facet["features"][0]
+                    if "tag" in features:
+                        tags.append(features["tag"])
+                    elif "did" in features:
+                        dids.append(features["did"])
+                    elif "uri" in features:
+                        uris.append(features["uri"])
+            else:
+                post["hashtags"] = post["mentions"] = post["uris"] = ()
+
             post["post_id"] = post["uri"].rpartition("/")[2]
             post["count"] = len(images)
             post["date"] = text.parse_datetime(
