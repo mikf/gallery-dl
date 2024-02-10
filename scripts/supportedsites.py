@@ -325,7 +325,8 @@ BASE_MAP = {
 }
 
 URL_MAP = {
-    "blogspot": "https://www.blogger.com/",
+    "blogspot" : "https://www.blogger.com/",
+    "wikimedia": "https://www.wikimedia.org/",
 }
 
 _OAUTH = '<a href="https://github.com/mikf/gallery-dl#oauth">OAuth</a>'

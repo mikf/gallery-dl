@@ -124,7 +124,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Bluesky</td>
     <td>https://bsky.app/</td>
-    <td>Likes, Media Files, Posts, Replies, User Profiles</td>
+    <td>Feeds, Followed Users, Likes, Lists, Media Files, Posts, Replies, User Profiles</td>
     <td>Supported</td>
 </tr>
 <tr>
@@ -1470,44 +1470,8 @@ Consider all listed sites to potentially be NSFW.
     <td colspan="4"><strong>Wikimedia Instances</strong></td>
 </tr>
 <tr>
-    <td>Wikipedia</td>
-    <td>https://www.wikipedia.org/</td>
-    <td>Articles</td>
-    <td></td>
-</tr>
-<tr>
-    <td>Wiktionary</td>
-    <td>https://www.wiktionary.org/</td>
-    <td>Articles</td>
-    <td></td>
-</tr>
-<tr>
-    <td>Wikiquote</td>
-    <td>https://www.wikiquote.org/</td>
-    <td>Articles</td>
-    <td></td>
-</tr>
-<tr>
-    <td>Wikibooks</td>
-    <td>https://www.wikibooks.org/</td>
-    <td>Articles</td>
-    <td></td>
-</tr>
-<tr>
-    <td>Wikisource</td>
-    <td>https://www.wikisource.org/</td>
-    <td>Articles</td>
-    <td></td>
-</tr>
-<tr>
-    <td>Wikinews</td>
-    <td>https://www.wikinews.org/</td>
-    <td>Articles</td>
-    <td></td>
-</tr>
-<tr>
-    <td>Wikiversity</td>
-    <td>https://www.wikiversity.org/</td>
+    <td>Wikimedia</td>
+    <td>https://www.wikimedia.org/</td>
     <td>Articles</td>
     <td></td>
 </tr>
