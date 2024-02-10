@@ -25,7 +25,9 @@ class WikimediaExtractor(BaseExtractor):
         BaseExtractor.__init__(self, match)
         path = match.group(match.lastindex)
 
-        if self.category == "fandom":
+        if self.category == "wikimedia":
+            self.category = self.root.split(".")[-2]
+        elif self.category == "fandom":
             self.category = \
                 "fandom-" + self.root.partition(".")[0].rpartition("/")[2]
 
@@ -119,39 +121,12 @@ class WikimediaExtractor(BaseExtractor):
 
 
 BASE_PATTERN = WikimediaExtractor.update({
-    "wikipedia": {
+    "wikimedia": {
         "root": None,
-        "pattern": r"[a-z]{2,}\.wikipedia\.org",
-        "api-path": "/w/api.php",
-    },
-    "wiktionary": {
-        "root": None,
-        "pattern": r"[a-z]{2,}\.wiktionary\.org",
-        "api-path": "/w/api.php",
-    },
-    "wikiquote": {
-        "root": None,
-        "pattern": r"[a-z]{2,}\.wikiquote\.org",
-        "api-path": "/w/api.php",
-    },
-    "wikibooks": {
-        "root": None,
-        "pattern": r"[a-z]{2,}\.wikibooks\.org",
-        "api-path": "/w/api.php",
-    },
-    "wikisource": {
-        "root": None,
-        "pattern": r"[a-z]{2,}\.wikisource\.org",
-        "api-path": "/w/api.php",
-    },
-    "wikinews": {
-        "root": None,
-        "pattern": r"[a-z]{2,}\.wikinews\.org",
-        "api-path": "/w/api.php",
-    },
-    "wikiversity": {
-        "root": None,
-        "pattern": r"[a-z]{2,}\.wikiversity\.org",
+        "pattern": r"[a-z]{2,}\."
+                   r"wik(?:i(?:pedia|quote|books|source|news|versity|data"
+                   r"|voyage)|tionary)"
+                   r"\.org",
         "api-path": "/w/api.php",
     },
     "wikispecies": {
