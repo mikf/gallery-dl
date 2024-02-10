@@ -231,6 +231,8 @@ class PathFormat():
                     self.temppath = self.realpath = self.realpath[:-1]
             elif not self.temppath:
                 self.build_path()
+        except exception.GalleryDLException:
+            raise
         except Exception:
             self.path = self.directory + "?"
             self.realpath = self.temppath = self.realdirectory + "?"
