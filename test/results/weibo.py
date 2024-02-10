@@ -218,6 +218,15 @@ __tests__ = (
     "#comment" : "type == gif",
     "#category": ("", "weibo", "status"),
     "#class"   : weibo.WeiboStatusExtractor,
+    "#urls"    : "https://wx4.sinaimg.cn/large/68d80d22gy1h2ryfa8k0kg208w06o7wh.gif",
+},
+
+{
+    "#url"     : "https://weibo.com/1758989602/LvBhm5DiP",
+    "#comment" : "type == gif as video (#5183)",
+    "#category": ("", "weibo", "status"),
+    "#class"   : weibo.WeiboStatusExtractor,
+    "#options" : {"gifs": "video"},
     "#pattern" : r"https://g\.us\.sinaimg.cn/o0/qNZcaAAglx07Wuf921CM0104120005tc0E010\.mp4\?label=gif_mp4",
 },
 

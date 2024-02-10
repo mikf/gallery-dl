@@ -3868,6 +3868,19 @@ Description
     Note: This requires 1 additional HTTP request per submission.
 
 
+extractor.weibo.gifs
+--------------------
+Type
+    * ``bool``
+    * ``string``
+Default
+    ``true``
+Description
+    Download ``gif`` files.
+
+    Set this to ``"video"`` to download GIFs as video files.
+
+
 extractor.weibo.include
 -----------------------
 Type
