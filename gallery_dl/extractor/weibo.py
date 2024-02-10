@@ -33,6 +33,8 @@ class WeiboExtractor(Extractor):
         self.retweets = self.config("retweets", True)
         self.videos = self.config("videos", True)
         self.livephoto = self.config("livephoto", True)
+        self.gifs = self.config("gifs", True)
+        self.gifs_video = (self.gifs == "video")
 
         cookies = _cookie_cache()
         if cookies is not None:
@@ -106,8 +108,11 @@ class WeiboExtractor(Extractor):
                 pic = pics[pic_id]
                 pic_type = pic.get("type")
 
-                if pic_type == "gif" and self.videos:
-                    append({"url": pic["video"]})
+                if pic_type == "gif" and self.gifs:
+                    if self.gifs_video:
+                        append({"url": pic["video"]})
+                    else:
+                        append(pic["largest"].copy())
 
                 elif pic_type == "livephoto" and self.livephoto:
                     append(pic["largest"].copy())
