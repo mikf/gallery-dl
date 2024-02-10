@@ -34,12 +34,12 @@ class SkebExtractor(Extractor):
             if metadata:
                 post.update(metadata)
 
-            datas = self._get_urls_from_post(response)
-            post["count"] = len(datas)
+            files = self._get_files_from_post(response)
+            post["count"] = len(files)
             yield Message.Directory, post
-            for post["num"], data in enumerate(datas, 1):
-                post.update(data)
-                url = post["file_url"]
+            for post["num"], file in enumerate(files, 1):
+                post.update(file)
+                url = file["file_url"]
                 yield Message.Url, url, text.nameext_from_url(url, post)
 
     def posts(self):
@@ -109,47 +109,48 @@ class SkebExtractor(Extractor):
             }
         return resp, post
 
-    def _get_urls_from_post(self, resp):
-        datas = []
+    def _get_files_from_post(self, resp):
+        files = []
 
         if self.thumbnails and "og_image_url" in resp:
-            data = {}
-            data["content_category"] = "thumb"
-            data["file_id"] = "thumb"
-            data["_file_id"] = str(resp["id"]) + "t"
-            data["file_url"] = resp["og_image_url"]
-            datas.append(data)
+            files.append({
+                "content_category": "thumb",
+                "file_id" : "thumb",
+                "_file_id": str(resp["id"]) + "t",
+                "file_url": resp["og_image_url"],
+            })
 
         if self.article and "article_image_url" in resp:
             url = resp["article_image_url"]
             if url:
-                data = {}
-                data["content_category"] = "article"
-                data["file_id"] = "article"
-                data["_file_id"] = str(resp["id"]) + "a"
-                data["file_url"] = url
-                datas.append(data)
+                files.append({
+                    "content_category": "article",
+                    "file_id" : "article",
+                    "_file_id": str(resp["id"]) + "a",
+                    "file_url": url,
+                })
 
         for preview in resp["previews"]:
-            data = {}
-            data["content_category"] = "preview"
-            data["file_id"] = data["_file_id"] = preview["id"]
-            data["file_url"] = preview["url"]
             info = preview["information"]
-            data["original"] = {
-                "width"     : info["width"],
-                "height"    : info["height"],
-                "byte_size" : info["byte_size"],
-                "duration"  : info["duration"],
-                "frame_rate": info["frame_rate"],
-                "software"  : info["software"],
-                "extension" : info["extension"],
-                "is_movie"  : info["is_movie"],
-                "transcoder": info["transcoder"],
-            }
-            datas.append(data)
+            files.append({
+                "content_category": "preview",
+                "file_id" : preview["id"],
+                "_file_id": preview["id"],
+                "file_url": preview["url"],
+                "original": {
+                    "width"     : info["width"],
+                    "height"    : info["height"],
+                    "byte_size" : info["byte_size"],
+                    "duration"  : info["duration"],
+                    "frame_rate": info["frame_rate"],
+                    "software"  : info["software"],
+                    "extension" : info["extension"],
+                    "is_movie"  : info["is_movie"],
+                    "transcoder": info["transcoder"],
+                },
+            })
 
-        return datas
+        return files
 
 
 class SkebPostExtractor(SkebExtractor):
