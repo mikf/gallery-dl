@@ -41,4 +41,12 @@ __tests__ = (
     "#exception": exception.NotFoundError,
 },
 
+{
+    "#url"     : "https://imgchest.com/u/LunarLandr",
+    "#category": ("", "imagechest", "user"),
+    "#class"   : imagechest.ImagechestUserExtractor,
+    "#pattern" : imagechest.ImagechestGalleryExtractor.pattern,
+    "#count"   : 279,
+},
+
 )
