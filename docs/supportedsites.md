@@ -364,7 +364,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Imagetwist</td>
     <td>https://imagetwist.com/</td>
-    <td>individual Images</td>
+    <td>Galleries, individual Images</td>
     <td></td>
 </tr>
 <tr>

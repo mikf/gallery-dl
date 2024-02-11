@@ -183,6 +183,23 @@ class ImagetwistImageExtractor(ImagehostImageExtractor):
         return url, filename
 
 
+class ImagetwistGalleryExtractor(ImagehostImageExtractor):
+    """Extractor for galleries from imagetwist.com"""
+    category = "imagetwist"
+    subcategory = "gallery"
+    pattern = (r"(?:https?://)?((?:www\.|phun\.)?"
+               r"image(?:twist|haha)\.com/(p/[^/?#]+/\d+))")
+    example = "https://imagetwist.com/p/USER/12345/NAME"
+
+    def items(self):
+        data = {"_extractor": ImagetwistImageExtractor}
+        root = self.page_url[:self.page_url.find("/", 8)]
+        page = self.request(self.page_url).text
+        gallery = text.extr(page, 'class="gallerys', "</div")
+        for path in text.extract_iter(gallery, ' href="', '"'):
+            yield Message.Queue, root + path, data
+
+
 class ImgspiceImageExtractor(ImagehostImageExtractor):
     """Extractor for single images from imgspice.com"""
     category = "imgspice"
