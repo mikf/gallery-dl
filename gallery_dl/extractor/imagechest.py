@@ -9,15 +9,17 @@
 
 """Extractors for https://imgchest.com/"""
 
-from .common import GalleryExtractor
+from .common import GalleryExtractor, Extractor, Message
 from .. import text, exception
+
+BASE_PATTERN = r"(?:https?://)?(?:www\.)?imgchest\.com"
 
 
 class ImagechestGalleryExtractor(GalleryExtractor):
     """Extractor for image galleries from imgchest.com"""
     category = "imagechest"
     root = "https://imgchest.com"
-    pattern = r"(?:https?://)?(?:www\.)?imgchest\.com/p/([A-Za-z0-9]{11})"
+    pattern = BASE_PATTERN + r"/p/([A-Za-z0-9]{11})"
     example = "https://imgchest.com/p/abcdefghijk"
 
     def __init__(self, match):
@@ -81,6 +83,42 @@ class ImagechestGalleryExtractor(GalleryExtractor):
             (img["link"], img)
             for img in self._image_list
         ]
+
+
+class ImagechestUserExtractor(Extractor):
+    """Extractor for imgchest.com user profiles"""
+    category = "imagechest"
+    subcategory = "user"
+    root = "https://imgchest.com"
+    pattern = BASE_PATTERN + r"/u/([^/?#]+)"
+    example = "https://imgchest.com/u/USER"
+
+    def __init__(self, match):
+        Extractor.__init__(self, match)
+        self.user = match.group(1)
+
+    def items(self):
+        url = self.root + "/api/posts"
+        params = {
+            "page"    : 1,
+            "sort"    : "new",
+            "tag"     : "",
+            "q"       : "",
+            "username": text.unquote(self.user),
+            "nsfw"    : "true",
+        }
+
+        while True:
+            try:
+                data = self.request(url, params=params).json()["data"]
+            except (TypeError, KeyError):
+                return
+
+            for gallery in data:
+                gallery["_extractor"] = ImagechestGalleryExtractor
+                yield Message.Queue, gallery["link"], gallery
+
+            params["page"] += 1
 
 
 class ImagechestAPI():
