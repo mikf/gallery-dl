@@ -10,23 +10,21 @@
 
 from .lolisafe import LolisafeAlbumExtractor
 from .. import text
-from urllib.parse import urlsplit, urlunsplit
 
 BASE_PATTERN = (
-    r"(?:https?://)?(?:app\.)?bunkr+"
-    r"\.(?:sk|[rs]u|la|is|to|si|ac|black|cat|media|red|site|ws)"
+    r"(?:https?://)?(?:app\.)?(bunkr+"
+    r"\.(?:s[kiu]|ru|la|is|to|ac|black|cat|media|red|site|ws))"
 )
 
-MEDIA_DOMAIN_OVERRIDES = {
-    "cdn9.bunkr.ru" : "c9.bunkr.ru",
-    "cdn12.bunkr.ru": "media-files12.bunkr.la",
-    "cdn-pizza.bunkr.ru": "pizza.bunkr.ru",
+LEGACY_DOMAINS = {
+    "bunkr.ru",
+    "bunkrr.ru",
+    "bunkr.su",
+    "bunkrr.su",
+    "bunkr.la",
+    "bunkr.is",
+    "bunkr.to",
 }
-
-CDN_HOSTED_EXTENSIONS = (
-    ".mp4", ".m4v", ".mov", ".webm", ".mkv", ".ts", ".wmv",
-    ".zip", ".rar", ".7z",
-)
 
 
 class BunkrAlbumExtractor(LolisafeAlbumExtractor):
@@ -35,6 +33,12 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
     root = "https://bunkr.sk"
     pattern = BASE_PATTERN + r"/a/([^/?#]+)"
     example = "https://bunkr.sk/a/ID"
+
+    def __init__(self, match):
+        LolisafeAlbumExtractor.__init__(self, match)
+        domain = match.group(match.lastindex-1)
+        if domain not in LEGACY_DOMAINS:
+            self.root = "https://" + domain
 
     def fetch_album(self, album_id):
         # album metadata
@@ -56,46 +60,32 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
 
     def _extract_files(self, urls):
         for url in urls:
-            if url.startswith("/"):
-                try:
-                    url = self._extract_file(text.unescape(url))
-                except Exception as exc:
-                    self.log.error("%s: %s", exc.__class__.__name__, exc)
-                    continue
-
-            else:
-                if url.lower().endswith(CDN_HOSTED_EXTENSIONS):
-                    scheme, domain, path, query, fragment = urlsplit(url)
-                    if domain in MEDIA_DOMAIN_OVERRIDES:
-                        domain = MEDIA_DOMAIN_OVERRIDES[domain]
-                    else:
-                        domain = domain.replace("cdn", "media-files", 1)
-                    url = urlunsplit((scheme, domain, path, query, fragment))
-
+            try:
+                url = self._extract_file(text.unescape(url))
+            except Exception as exc:
+                self.log.error("%s: %s", exc.__class__.__name__, exc)
+                continue
             yield {"file": text.unescape(url)}
 
-    def _extract_file(self, path):
-        page = self.request(self.root + path).text
-        if path[1] == "v":
-            url = text.extr(page, '<source src="', '"')
-        else:
-            url = text.extr(page, '<img src="', '"')
-        if not url:
-            url = text.rextract(
-                page, ' href="', '"', page.rindex("Download"))[0]
-        return url
+    def _extract_file(self, url):
+        page = self.request(url).text
+        return (
+            text.extr(page, '<source src="', '"') or
+            text.extr(page, '<img src="', '"') or
+            text.rextract(page, ' href="', '"', page.rindex("Download"))[0]
+        )
 
 
 class BunkrMediaExtractor(BunkrAlbumExtractor):
     """Extractor for bunkr.sk media links"""
     subcategory = "media"
     directory_fmt = ("{category}",)
-    pattern = BASE_PATTERN + r"/[vid]/([^/?#]+)"
+    pattern = BASE_PATTERN + r"(/[vid]/[^/?#]+)"
     example = "https://bunkr.sk/v/FILENAME"
 
     def fetch_album(self, album_id):
         try:
-            url = self._extract_file(urlsplit(self.url).path)
+            url = self._extract_file(self.root + self.album_id)
         except Exception as exc:
             self.log.error("%s: %s", exc.__class__.__name__, exc)
             return (), {}
