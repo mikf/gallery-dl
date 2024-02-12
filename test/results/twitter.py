@@ -487,11 +487,8 @@ You’ll be able to receive four Galarian form Pokémon with Hidden Abilities, p
     "#comment" : "age-restricted (#2354)",
     "#category": ("", "twitter", "tweet"),
     "#class"   : twitter.TwitterTweetExtractor,
+    "#auth"     : False,
     "#exception": exception.AuthorizationError,
-    "#options"  : {"syndication": True},
-    "#count"    : 1,
-
-    "date": "dt:2022-02-13 20:10:09",
 },
 
 {
