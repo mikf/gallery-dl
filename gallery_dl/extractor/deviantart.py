@@ -63,6 +63,7 @@ class DeviantartExtractor(Extractor):
 
         if self.quality:
             self.quality = ",q_{}".format(self.quality)
+            self.quality_sub = re.compile(r",q_\d+").sub
 
         if self.original != "image":
             self._update_content = self._update_content_default
@@ -135,26 +136,7 @@ class DeviantartExtractor(Extractor):
             yield Message.Directory, deviation
 
             if "content" in deviation:
-                content = deviation["content"]
-
-                if self.original and deviation["is_downloadable"]:
-                    self._update_content(deviation, content)
-                elif self.jwt:
-                    self._update_token(deviation, content)
-                elif content["src"].startswith("https://images-wixmp-"):
-                    if self.intermediary and deviation["index"] <= 790677560:
-                        # https://github.com/r888888888/danbooru/issues/4069
-                        intermediary, count = re.subn(
-                            r"(/f/[^/]+/[^/]+)/v\d+/.*",
-                            r"/intermediary\1", content["src"], 1)
-                        if count:
-                            deviation["is_original"] = False
-                            deviation["_fallback"] = (content["src"],)
-                            content["src"] = intermediary
-                    if self.quality:
-                        content["src"] = re.sub(
-                            r",q_\d+", self.quality, content["src"], 1)
-
+                content = self._extract_content(deviation)
                 yield self.commit(deviation, content)
 
             elif deviation["is_downloadable"]:
@@ -338,6 +320,33 @@ class DeviantartExtractor(Extractor):
 
         deviation["extension"] = "txt"
         return Message.Url, txt, deviation
+
+    def _extract_content(self, deviation):
+        content = deviation["content"]
+
+        if self.original and deviation["is_downloadable"]:
+            self._update_content(deviation, content)
+            return content
+
+        if self.jwt:
+            self._update_token(deviation, content)
+            return content
+
+        if content["src"].startswith("https://images-wixmp-"):
+            if self.intermediary and deviation["index"] <= 790677560:
+                # https://github.com/r888888888/danbooru/issues/4069
+                intermediary, count = re.subn(
+                    r"(/f/[^/]+/[^/]+)/v\d+/.*",
+                    r"/intermediary\1", content["src"], 1)
+                if count:
+                    deviation["is_original"] = False
+                    deviation["_fallback"] = (content["src"],)
+                    content["src"] = intermediary
+            if self.quality:
+                content["src"] = self.quality_sub(
+                    self.quality, content["src"], 1)
+
+        return content
 
     @staticmethod
     def _find_folder(folders, name, uuid):
