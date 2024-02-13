@@ -230,6 +230,22 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://twitter.com/i/communities",
+    "#category": ("", "twitter", "communities"),
+    "#class"   : twitter.TwitterCommunitiesExtractor,
+    "#range"   : "1-20",
+    "#count"   : 20,
+},
+
+{
+    "#url"     : "https://twitter.com/i/communities/1651515740753735697",
+    "#category": ("", "twitter", "community"),
+    "#class"   : twitter.TwitterCommunityExtractor,
+    "#range"   : "1-20",
+    "#count"   : 20,
+},
+
+{
     "#url"     : "https://twitter.com/supernaturepics/status/604341487988576256",
     "#comment" : "all Tweets from a 'conversation' (#1319)",
     "#category": ("", "twitter", "tweet"),
