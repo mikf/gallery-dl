@@ -20,7 +20,7 @@ __tests__ = (
         "Amateur",
         "Sexy",
     ],
-    "channel"   : "FTV MILFs",
+    "channel"   : ["FTV MILFs"],
     "count"     : 17,
     "gallery_id": 62610699,
     "models"    : ["Danielle"],
@@ -44,6 +44,41 @@ __tests__ = (
     "#class"   : pornpics.PornpicsGalleryExtractor,
 
     "slug": "british-beauty-danielle-flashes-hot-breasts-ass-and-snatch-in-the-forest",
+},
+
+{
+    "#url"     : "https://www.pornpics.com/galleries/four-american-hotties-in-swimsuit-showing-off-their-sexy-booty-and-bare-legs-59500405/",
+    "#comment" : "more than one 'channel' (#5195)",
+    "#category": ("", "pornpics", "gallery"),
+    "#class"   : pornpics.PornpicsGalleryExtractor,
+
+    "count"     : 16,
+    "num"       : range(1, 16),
+    "gallery_id": 59500405,
+    "slug"      : "four-american-hotties-in-swimsuit-showing-off-their-sexy-booty-and-bare-legs",
+    "title"     : "Four American hotties in swimsuit showing off their sexy booty and bare legs",
+    "views"     : range(50000, 100000),
+    "models"    : [
+        "Kayla West",
+        "Layla Price",
+        "Marley Blaze",
+        "Mena Mason",
+    ],
+    "categories": [
+        "Outdoor",
+        "Asian",
+        "Pornstar",
+        "Brunette",
+        "Blonde",
+    ],
+    "channel"   : [
+        "Adult Time",
+        "Fame Digital",
+    ],
+    "tags"      : [
+        "Nature",
+        "Asian Outdoor",
+    ],
 },
 
 {
