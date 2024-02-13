@@ -119,6 +119,12 @@ class DeviantartExtractor(Extractor):
                     "Skipping %s (deleted)", deviation["deviationid"])
                 continue
 
+            tier_access = deviation.get("tier_access")
+            if tier_access == "locked":
+                self.log.debug(
+                    "Skipping %s (access locked)", deviation["deviationid"])
+                continue
+
             if "premium_folder_data" in deviation:
                 data = self._fetch_premium(deviation)
                 if not data:
