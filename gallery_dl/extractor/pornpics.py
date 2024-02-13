@@ -76,7 +76,7 @@ class PornpicsGalleryExtractor(PornpicsExtractor, GalleryExtractor):
             "gallery_id": text.parse_int(self.gallery_id),
             "slug"      : extr("/galleries/", "/").rpartition("-")[0],
             "title"     : text.unescape(extr("<h1>", "<")),
-            "channel"   : extr('>Channel:', '</a>').rpartition(">")[2],
+            "channel"   : text.split_html(extr(">Channel:&nbsp;", '</div>')),
             "models"    : text.split_html(extr(
                 ">Models:", '<span class="suggest')),
             "categories": text.split_html(extr(
