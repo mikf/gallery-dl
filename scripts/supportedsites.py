@@ -284,6 +284,7 @@ SUBCATEGORY_MAP = {
         "media": "Media Timelines",
         "tweets": "",
         "replies": "",
+        "community": "",
         "list-members": "List Members",
     },
     "vk": {

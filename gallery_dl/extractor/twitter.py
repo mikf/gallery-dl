@@ -693,6 +693,28 @@ class TwitterHashtagExtractor(TwitterExtractor):
         yield Message.Queue, url, data
 
 
+class TwitterCommunityExtractor(TwitterExtractor):
+    """Extractor for a Twitter community"""
+    subcategory = "community"
+    pattern = BASE_PATTERN + r"/i/communities/(\d+)"
+    example = "https://twitter.com/i/communities/12345"
+
+    def tweets(self):
+        if self.textonly:
+            return self.api.community_tweets_timeline(self.user)
+        return self.api.community_media_timeline(self.user)
+
+
+class TwitterCommunitiesExtractor(TwitterExtractor):
+    """Extractor for followed Twitter communities"""
+    subcategory = "communities"
+    pattern = BASE_PATTERN + r"/([^/?#]+)/communities/?$"
+    example = "https://twitter.com/i/communities"
+
+    def tweets(self):
+        return self.api.communities_main_page_timeline(self.user)
+
+
 class TwitterEventExtractor(TwitterExtractor):
     """Extractor for Tweets from a Twitter Event"""
     subcategory = "event"
@@ -1100,6 +1122,43 @@ class TwitterAPI():
             endpoint, variables,
             ("search_by_raw_query", "search_timeline", "timeline"))
 
+    def community_tweets_timeline(self, community_id):
+        endpoint = "/graphql/7B2AdxSuC-Er8qUr3Plm_w/CommunityTweetsTimeline"
+        variables = {
+            "communityId": community_id,
+            "count": 100,
+            "displayLocation": "Community",
+            "rankingMode": "Recency",
+            "withCommunity": True,
+        }
+        return self._pagination_tweets(
+            endpoint, variables,
+            ("communityResults", "result", "ranked_community_timeline",
+             "timeline"))
+
+    def community_media_timeline(self, community_id):
+        endpoint = "/graphql/qAGUldfcIoMv5KyAyVLYog/CommunityMediaTimeline"
+        variables = {
+            "communityId": community_id,
+            "count": 100,
+            "withCommunity": True,
+        }
+        return self._pagination_tweets(
+            endpoint, variables,
+            ("communityResults", "result", "community_media_timeline",
+             "timeline"))
+
+    def communities_main_page_timeline(self, screen_name):
+        endpoint = ("/graphql/GtOhw2mstITBepTRppL6Uw"
+                    "/CommunitiesMainPageTimeline")
+        variables = {
+            "count": 100,
+            "withCommunity": True,
+        }
+        return self._pagination_tweets(
+            endpoint, variables,
+            ("viewer", "communities_timeline", "timeline"))
+
     def live_event_timeline(self, event_id):
         endpoint = "/2/live_event/timeline/{}.json".format(event_id)
         params = self.params.copy()
@@ -1433,7 +1492,8 @@ class TwitterAPI():
 
                 if esw("tweet-"):
                     tweets.append(entry)
-                elif esw("profile-grid-"):
+                elif esw(("profile-grid-",
+                          "communities-grid-")):
                     if "content" in entry:
                         tweets.extend(entry["content"]["items"])
                     else:
