@@ -327,6 +327,13 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://kemono.su/posts?q=foobar",
+    "#category": ("", "kemonoparty", "posts"),
+    "#class"   : kemonoparty.KemonopartyPostsExtractor,
+    "#count"   : range(60, 100),
+},
+
+{
     "#url"     : "https://kemono.su/favorites",
     "#category": ("", "kemonoparty", "favorite"),
     "#class"   : kemonoparty.KemonopartyFavoriteExtractor,

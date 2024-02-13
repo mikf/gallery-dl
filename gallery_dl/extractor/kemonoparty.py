@@ -6,7 +6,7 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extractors for https://kemono.party/"""
+"""Extractors for https://kemono.su/"""
 
 from .common import Extractor, Message
 from .. import text, util, exception
@@ -23,11 +23,11 @@ HASH_PATTERN = r"/[0-9a-f]{2}/[0-9a-f]{2}/([0-9a-f]{64})"
 class KemonopartyExtractor(Extractor):
     """Base class for kemonoparty extractors"""
     category = "kemonoparty"
-    root = "https://kemono.party"
+    root = "https://kemono.su"
     directory_fmt = ("{category}", "{service}", "{user}")
     filename_fmt = "{id}_{title[:180]}_{num:>02}_{filename[:180]}.{extension}"
     archive_fmt = "{service}_{user}_{id}_{num}"
-    cookies_domain = ".kemono.party"
+    cookies_domain = ".kemono.su"
 
     def __init__(self, match):
         domain = match.group(1)
@@ -164,7 +164,7 @@ class KemonopartyExtractor(Extractor):
         return post["attachments"]
 
     def _inline(self, post):
-        for path in self._find_inline(post["content"] or ""):
+        for path in self._find_inline(post.get("content") or ""):
             yield {"path": path, "name": path, "type": "inline"}
 
     def _build_file_generators(self, filetypes):
@@ -285,10 +285,10 @@ def _validate(response):
 
 
 class KemonopartyUserExtractor(KemonopartyExtractor):
-    """Extractor for all posts from a kemono.party user listing"""
+    """Extractor for all posts from a kemono.su user listing"""
     subcategory = "user"
     pattern = USER_PATTERN + r"/?(?:\?([^#]+))?(?:$|[?#])"
-    example = "https://kemono.party/SERVICE/user/12345"
+    example = "https://kemono.su/SERVICE/user/12345"
 
     def __init__(self, match):
         _, _, service, user_id, self.query = match.groups()
@@ -308,7 +308,8 @@ class KemonopartyUserExtractor(KemonopartyExtractor):
 
             if self.revisions:
                 for post in posts:
-                    post_url = "{}/post/{}".format(self.api_url, post["id"])
+                    post_url = "{}/api/v1/{}/user/{}/post/{}".format(
+                        self.root, post["service"], post["user"], post["id"])
                     yield from self._revisions_post(post, post_url)
             else:
                 yield from posts
@@ -318,11 +319,25 @@ class KemonopartyUserExtractor(KemonopartyExtractor):
             params["o"] += 50
 
 
+class KemonopartyPostsExtractor(KemonopartyExtractor):
+    """Extractor for kemono.su post listings"""
+    subcategory = "posts"
+    pattern = BASE_PATTERN + r"/posts(?:/?\?([^#]+))?"
+    example = "https://kemono.su/posts"
+
+    def __init__(self, match):
+        KemonopartyExtractor.__init__(self, match)
+        self.query = match.group(3)
+        self.api_url = self.root + "/api/v1/posts"
+
+    posts = KemonopartyUserExtractor.posts
+
+
 class KemonopartyPostExtractor(KemonopartyExtractor):
-    """Extractor for a single kemono.party post"""
+    """Extractor for a single kemono.su post"""
     subcategory = "post"
     pattern = USER_PATTERN + r"/post/([^/?#]+)(/revisions?(?:/(\d*))?)?"
-    example = "https://kemono.party/SERVICE/user/12345/post/12345"
+    example = "https://kemono.su/SERVICE/user/12345/post/12345"
 
     def __init__(self, match):
         _, _, service, user_id, post_id, self.revision, self.revision_id = \
@@ -352,14 +367,14 @@ class KemonopartyPostExtractor(KemonopartyExtractor):
 
 
 class KemonopartyDiscordExtractor(KemonopartyExtractor):
-    """Extractor for kemono.party discord servers"""
+    """Extractor for kemono.su discord servers"""
     subcategory = "discord"
     directory_fmt = ("{category}", "discord", "{server}",
                      "{channel_name|channel}")
     filename_fmt = "{id}_{num:>02}_{filename}.{extension}"
     archive_fmt = "discord_{server}_{id}_{num}"
     pattern = BASE_PATTERN + r"/discord/server/(\d+)(?:/channel/(\d+))?#(.*)"
-    example = "https://kemono.party/discord/server/12345#CHANNEL"
+    example = "https://kemono.su/discord/server/12345#CHANNEL"
 
     def __init__(self, match):
         KemonopartyExtractor.__init__(self, match)
@@ -445,7 +460,7 @@ class KemonopartyDiscordExtractor(KemonopartyExtractor):
 class KemonopartyDiscordServerExtractor(KemonopartyExtractor):
     subcategory = "discord-server"
     pattern = BASE_PATTERN + r"/discord/server/(\d+)$"
-    example = "https://kemono.party/discord/server/12345"
+    example = "https://kemono.su/discord/server/12345"
 
     def __init__(self, match):
         KemonopartyExtractor.__init__(self, match)
@@ -460,10 +475,10 @@ class KemonopartyDiscordServerExtractor(KemonopartyExtractor):
 
 
 class KemonopartyFavoriteExtractor(KemonopartyExtractor):
-    """Extractor for kemono.party favorites"""
+    """Extractor for kemono.su favorites"""
     subcategory = "favorite"
     pattern = BASE_PATTERN + r"/favorites(?:/?\?([^#]+))?"
-    example = "https://kemono.party/favorites"
+    example = "https://kemono.su/favorites"
 
     def __init__(self, match):
         KemonopartyExtractor.__init__(self, match)

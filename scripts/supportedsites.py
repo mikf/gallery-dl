@@ -180,6 +180,7 @@ SUBCATEGORY_MAP = {
     "coomerparty": {
         "discord"       : "",
         "discord-server": "",
+        "posts"         : "",
     },
     "desktopography": {
         "site": "",
@@ -216,8 +217,9 @@ SUBCATEGORY_MAP = {
         "tagged": "Tagged Posts",
     },
     "kemonoparty": {
-        "discord": "Discord Servers",
+        "discord"       : "Discord Servers",
         "discord-server": "",
+        "posts"         : "",
     },
     "lensdump": {
         "albums": "",
