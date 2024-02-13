@@ -742,9 +742,16 @@ __tests__ = (
     "#comment" : "journal-like post with isJournal == False (#419)",
     "#category": ("", "deviantart", "deviation"),
     "#class"   : deviantart.DeviantartDeviationExtractor,
-    "#pattern" : """text:<!DOCTYPE html>
-""",
+    "#pattern" : """text:<!DOCTYPE html>\n""",
     "#sha1_url": "e2e0044bd255304412179b6118536dbd9bb3bb0e",
+},
+
+{
+    "#url"     : "https://www.deviantart.com/neotypical/art/985226590",
+    "#comment" : "subscription locked (#4567)",
+    "#category": ("", "deviantart", "deviation"),
+    "#class"   : deviantart.DeviantartDeviationExtractor,
+    "#count"   : 0,
 },
 
 {
