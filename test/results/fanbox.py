@@ -132,6 +132,23 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://fanbox.cc/",
+    "#category": ("", "fanbox", "home"),
+    "#class"   : fanbox.FanboxHomeExtractor,
+    "#auth"    : True,
+    "#range"   : "1-10",
+    "#count"   : 10,
+},
+
+{
+    "#url"     : "https://fanbox.cc/home/supporting",
+    "#category": ("", "fanbox", "supporting"),
+    "#class"   : fanbox.FanboxSupportingExtractor,
+    "#auth"    : True,
+    "#count"   : 0,
+},
+
+{
     "#url"     : "https://www.pixiv.net/fanbox/creator/52336352",
     "#category": ("", "fanbox", "redirect"),
     "#class"   : fanbox.FanboxRedirectExtractor,
