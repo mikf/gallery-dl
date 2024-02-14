@@ -670,7 +670,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>pixivFANBOX</td>
     <td>https://www.fanbox.cc/</td>
-    <td>Creators, Posts</td>
+    <td>Creators, Home Feed, Posts, Pixiv Redirects, Supported User Feed</td>
     <td><a href="https://github.com/mikf/gallery-dl#cookies">Cookies</a></td>
 </tr>
 <tr>

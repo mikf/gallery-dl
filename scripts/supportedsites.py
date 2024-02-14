@@ -153,6 +153,7 @@ SUBCATEGORY_MAP = {
     "art"    : "Art",
     "audio"  : "Audio",
     "doujin" : "Doujin",
+    "home"   : "Home Feed",
     "image"  : "individual Images",
     "index"  : "Site Index",
     "issue"  : "Comic Issues",
@@ -192,7 +193,8 @@ SUBCATEGORY_MAP = {
         "watch-posts": "",
     },
     "fanbox": {
-        "redirect": "",
+        "supporting": "Supported User Feed",
+        "redirect"  : "Pixiv Redirects",
     },
     "fapello": {
         "path": "Videos, Trending Posts, Popular Videos, Top Models",
@@ -200,7 +202,6 @@ SUBCATEGORY_MAP = {
     "hatenablog": {
         "archive": "Archive",
         "entry"  : "Individual Posts",
-        "home"   : "Home Feed",
     },
     "hentaifoundry": {
         "story": "",
@@ -256,13 +257,9 @@ SUBCATEGORY_MAP = {
         "gifs": "",
     },
     "raddle": {
-        "home"           : "Home Feed",
         "usersubmissions": "User Profiles",
         "post"           : "Individual Posts",
         "shorturl"       : "",
-    },
-    "reddit": {
-        "home": "Home Feed",
     },
     "redgifs": {
         "collections": "",
