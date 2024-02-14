@@ -1506,6 +1506,17 @@ Description
     * ``"manual"``: Disregard ``has_more`` and only stop when a batch of results is empty.
 
 
+extractor.deviantart.png
+------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Download the PNG version of images
+    for which an original file download is not available.
+
+
 extractor.deviantart.public
 ---------------------------
 Type

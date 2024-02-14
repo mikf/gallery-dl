@@ -43,6 +43,7 @@ class DeviantartExtractor(Extractor):
 
     def _init(self):
         self.jwt = self.config("jwt", False)
+        self.png = self.config("png", False)
         self.flat = self.config("flat", True)
         self.extra = self.config("extra", False)
         self.quality = self.config("quality", "100")
@@ -64,6 +65,10 @@ class DeviantartExtractor(Extractor):
         if self.quality:
             self.quality = ",q_{}".format(self.quality)
             self.quality_sub = re.compile(r",q_\d+").sub
+
+        if self.png:
+            self.png = "-fullview.png?"
+            self.png_sub = re.compile(r"-fullview\.[a-z0-9]+\?").sub
 
         if self.original != "image":
             self._update_content = self._update_content_default
@@ -345,6 +350,9 @@ class DeviantartExtractor(Extractor):
             if self.quality:
                 content["src"] = self.quality_sub(
                     self.quality, content["src"], 1)
+            if self.png:
+                content["src"] = self.png_sub(
+                    self.png, content["src"], 1)
 
         return content
 
