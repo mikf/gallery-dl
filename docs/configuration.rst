@@ -1506,17 +1506,6 @@ Description
     * ``"manual"``: Disregard ``has_more`` and only stop when a batch of results is empty.
 
 
-extractor.deviantart.png
-------------------------
-Type
-    ``bool``
-Default
-    ``false``
-Description
-    Download the PNG version of images
-    for which an original file download is not available.
-
-
 extractor.deviantart.public
 ---------------------------
 Type
@@ -1533,14 +1522,15 @@ Description
 extractor.deviantart.quality
 ----------------------------
 Type
-    ``integer``
+    * ``integer``
+    * ``string``
 Default
     ``100``
 Description
-    JPEG quality level of newer images for which
+    JPEG quality level of images for which
     an original file download is not available.
 
-    Note: Only has an effect when `deviantart.jwt <extractor.deviantart.jwt_>`__ is disabled.
+    Set this to ``"png"`` to download a PNG version of these images instead.
 
 
 extractor.deviantart.refresh-token
