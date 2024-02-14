@@ -758,11 +758,11 @@ __tests__ = (
     "#comment" : "'png' option (#4846)",
     "#category": ("", "deviantart", "deviation"),
     "#class"   : deviantart.DeviantartDeviationExtractor,
-    "#options"     : {"png": True, "intermediary": False},
+    "#options"     : {"quality": "png", "intermediary": False},
     "#sha1_content": "75fb92a820b154c061f7e1f9935260577b2365ec",
     "#pattern"     : r"https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com"
                      r"/f/d86d1faa-37a8-4bcb-b421-53331885d763/dafo6q1-5c4c999a-019e-4845-8c29-6fab2d05c8e8\.jpg"
-                     r"/v1/fill/w_1024,h_1297,q_100,strp"
+                     r"/v1/fill/w_1024,h_1297,q_75,strp"
                      r"/crimson_pandaren_phoenix_world_of_warcraft_by_colibriworkshop_dafo6q1-fullview\.png"
                      r"\?token=ey.+",
 
