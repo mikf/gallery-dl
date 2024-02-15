@@ -1185,6 +1185,26 @@ Description
     Download embedded videos hosted on https://www.blogger.com/
 
 
+extractor.bluesky.metadata
+--------------------------
+Type
+    * ``bool``
+    * ``string``
+    * ``list`` of ``strings``
+Default
+    ``false``
+Example
+    * ``"facets,user"``
+    * ``["facets", "user"]``
+Description
+    Extract additional metadata.
+
+    * ``facets``: ``hashtags``, ``mentions``, and ``uris``
+    * ``user``: detailed ``user`` metadata for the user referenced in the input URL
+      (See `app.bsky.actor.getProfile <https://www.docs.bsky.app/docs/api/app-bsky-actor-get-profile>`__).
+
+
+
 extractor.bluesky.post.depth
 ----------------------------
 Type
@@ -1595,7 +1615,7 @@ Type
 Default
     ``false``
 Example
-    * ``notes,pools``
+    * ``"notes,pools"``
     * ``["notes", "pools"]``
 Description
     Extract additional metadata (notes, pool metadata) if available.
