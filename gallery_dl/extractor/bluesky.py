@@ -206,9 +206,9 @@ class BlueskyAPI():
     """
 
     def __init__(self, extractor):
-        self.headers = {}
         self.extractor = extractor
         self.log = extractor.log
+        self.headers = {"Accept": "application/json"}
 
         self.username, self.password = extractor._get_auth_info()
         if self.username:
@@ -265,8 +265,22 @@ class BlueskyAPI():
         params = {
             "uri": "at://{}/app.bsky.feed.post/{}".format(
                 self._did_from_actor(actor), post_id),
+            "depth"       : self.extractor.config("depth", "0"),
+            "parentHeight": "0",
         }
-        return (self._call(endpoint, params)["thread"],)
+
+        thread = self._call(endpoint, params)["thread"]
+        if "replies" not in thread:
+            return (thread,)
+
+        index = 0
+        posts = [thread]
+        while index < len(posts):
+            post = posts[index]
+            if "replies" in post:
+                posts.extend(post["replies"])
+            index += 1
+        return posts
 
     def get_profile(self, actor):
         endpoint = "app.bsky.actor.getProfile"
