@@ -1185,6 +1185,18 @@ Description
     Download embedded videos hosted on https://www.blogger.com/
 
 
+extractor.bluesky.post.depth
+----------------------------
+Type
+    ``integer``
+Default
+    ``0``
+Description
+    Sets the maximum depth of returned reply posts.
+
+    (See `depth` parameter of `app.bsky.feed.getPostThread <https://www.docs.bsky.app/docs/api/app-bsky-feed-get-post-thread>`__)
+
+
 extractor.cyberdrop.domain
 --------------------------
 Type
