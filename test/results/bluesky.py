@@ -12,6 +12,7 @@ __tests__ = (
     "#url"     : "https://bsky.app/profile/bsky.app/post/3kh5rarr3gn2n",
     "#category": ("", "bluesky", "post"),
     "#class"   : bluesky.BlueskyPostExtractor,
+    "#options"     : {"metadata": True},
     "#urls"        : "https://bsky.social/xrpc/com.atproto.sync.getBlob?did=did:plc:z72i7hdynmk6r22z27h6tvur&cid=bafkreidypzoaybmfj5h7pnpiyct6ng5yae6ydp4czrm72ocg7ev6vbirri",
     "#sha1_content": "ffcf25e7c511173a12de5276b85903309fcd8d14",
 
@@ -42,12 +43,26 @@ __tests__ = (
     "hashtags"   : [],
     "mentions"   : [],
     "uris"       : ["https://blueskyweb.xyz/blog/12-21-2023-butterfly"],
+    "user"       : {
+        "avatar"        : str,
+        "banner"        : str,
+        "description"   : "Official Bluesky account (check domain👆)\n\nFollow for updates and announcements",
+        "did"           : "did:plc:z72i7hdynmk6r22z27h6tvur",
+        "displayName"   : "Bluesky",
+        "followersCount": int,
+        "followsCount"  : int,
+        "handle"        : "bsky.app",
+        "indexedAt"     : "2023-12-22T18:54:12.339Z",
+        "labels"        : [],
+        "postsCount"    : int,
+    },
 },
 
 {
     "#url"     : "https://bsky.app/profile/mikf.bsky.social/post/3kkzc3xaf5m2w",
     "#category": ("", "bluesky", "post"),
     "#class"   : bluesky.BlueskyPostExtractor,
+    "#options"     : {"metadata": "facets"},
     "#urls"        : "https://bsky.social/xrpc/com.atproto.sync.getBlob?did=did:plc:cslxjqkeexku6elp5xowxkq7&cid=bafkreib7ydpe3xxo4cq7nn32w7eqhcanfaanz6caepd2z4kzplxtx2ctgi",
     "#sha1_content": "9cf5748f6d00aae83fbb3cc2c6eb3caa832b90f4",
 
