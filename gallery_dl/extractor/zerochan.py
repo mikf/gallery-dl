@@ -146,9 +146,9 @@ class ZerochanTagExtractor(ZerochanExtractor):
                     yield {
                         "id"    : extr('href="/', '"'),
                         "name"  : extr('alt="', '"'),
-                        "width" : extr('title="', 'x'),
+                        "width" : extr('title="', '&#10005;'),
                         "height": extr('', ' '),
-                        "size"  : extr('', 'B'),
+                        "size"  : extr('', 'b'),
                         "file_url": "https://static." + extr(
                             '<a href="https://static.', '"'),
                     }
