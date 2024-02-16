@@ -124,7 +124,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Bluesky</td>
     <td>https://bsky.app/</td>
-    <td>Feeds, Followed Users, Likes, Lists, Media Files, Posts, Replies, User Profiles</td>
+    <td>Avatars, Backgrounds, Feeds, Followed Users, Likes, Lists, Media Files, Posts, Replies, Search Results, User Profiles</td>
     <td>Supported</td>
 </tr>
 <tr>

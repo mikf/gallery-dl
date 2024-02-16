@@ -43,7 +43,8 @@ class BlueskyExtractor(Extractor):
 
     def items(self):
         for post in self.posts():
-            post = post["post"]
+            if "post" in post:
+                post = post["post"]
             post.update(post["record"])
             del post["record"]
 
@@ -265,6 +266,15 @@ class BlueskyBackgroundExtractor(BlueskyExtractor):
         return self._make_post(self.user, "banner")
 
 
+class BlueskySearchExtractor(BlueskyExtractor):
+    subcategory = "search"
+    pattern = BASE_PATTERN + r"/search(?:/|\?q=)(.+)"
+    example = "https://bsky.app/search?q=QUERY"
+
+    def posts(self):
+        return self.api.search_posts(self.user)
+
+
 class BlueskyAPI():
     """Interface for the Bluesky API
 
@@ -359,6 +369,14 @@ class BlueskyAPI():
         endpoint = "com.atproto.identity.resolveHandle"
         params = {"handle": handle}
         return self._call(endpoint, params)["did"]
+
+    def search_posts(self, query):
+        endpoint = "app.bsky.feed.searchPosts"
+        params = {
+            "q"    : query,
+            "limit": "100",
+        }
+        return self._pagination(endpoint, params, "posts")
 
     def _did_from_actor(self, actor):
         if actor.startswith("did:"):
