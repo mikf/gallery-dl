@@ -58,8 +58,9 @@ class FapachiUserExtractor(Extractor):
             page = self.request("{}/{}/page/{}".format(
                 self.root, self.user, self.num)).text
             for post in text.extract_iter(page, 'model-media-prew">', ">"):
-                url = self.root + text.extr(post, '<a href="', '"')
-                yield Message.Queue, url, data
+                path = text.extr(post, '<a href="', '"')
+                if path:
+                    yield Message.Queue, self.root + path, data
 
             if '">Next page</a>' not in page:
                 return
