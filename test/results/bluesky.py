@@ -9,6 +9,107 @@ from gallery_dl.extractor import bluesky
 
 __tests__ = (
 {
+    "#url"     : "https://bsky.app/profile/bsky.app",
+    "#category": ("", "bluesky", "user"),
+    "#class"   : bluesky.BlueskyUserExtractor,
+    "#urls"    : (
+        "https://bsky.app/profile/bsky.app/media",
+    ),
+},
+
+{
+    "#url"     : "https://bsky.app/profile/did:plc:z72i7hdynmk6r22z27h6tvur",
+    "#category": ("", "bluesky", "user"),
+    "#class"   : bluesky.BlueskyUserExtractor,
+    "#options" : {"include": "all"},
+    "#urls"    : (
+        "https://bsky.app/profile/did:plc:z72i7hdynmk6r22z27h6tvur/avatar",
+        "https://bsky.app/profile/did:plc:z72i7hdynmk6r22z27h6tvur/banner",
+        "https://bsky.app/profile/did:plc:z72i7hdynmk6r22z27h6tvur/posts",
+        "https://bsky.app/profile/did:plc:z72i7hdynmk6r22z27h6tvur/replies",
+        "https://bsky.app/profile/did:plc:z72i7hdynmk6r22z27h6tvur/media",
+        "https://bsky.app/profile/did:plc:z72i7hdynmk6r22z27h6tvur/likes",
+    ),
+},
+
+{
+    "#url"     : "https://bsky.app/profile/bsky.app/avatar",
+    "#category": ("", "bluesky", "avatar"),
+    "#class"   : bluesky.BlueskyAvatarExtractor,
+    "#urls"    : "https://bsky.social/xrpc/com.atproto.sync.getBlob?did=did:plc:z72i7hdynmk6r22z27h6tvur&cid=bafkreihagr2cmvl2jt4mgx3sppwe2it3fwolkrbtjrhcnwjk4jdijhsoze",
+},
+
+{
+    "#url"     : "https://bsky.app/profile/did:plc:z72i7hdynmk6r22z27h6tvur/banner",
+    "#category": ("", "bluesky", "background"),
+    "#class"   : bluesky.BlueskyBackgroundExtractor,
+    "#urls"    : "https://bsky.social/xrpc/com.atproto.sync.getBlob?did=did:plc:z72i7hdynmk6r22z27h6tvur&cid=bafkreichzyovokfzmymz36p5jibbjrhsur6n7hjnzxrpbt5jaydp2szvna",
+},
+
+{
+    "#url"     : "https://bsky.app/profile/bsky.app/posts",
+    "#category": ("", "bluesky", "posts"),
+    "#class"   : bluesky.BlueskyPostsExtractor,
+    "#range"   : "1-40",
+    "#count"   : 40,
+},
+
+{
+    "#url"     : "https://bsky.app/profile/bsky.app/replies",
+    "#category": ("", "bluesky", "replies"),
+    "#class"   : bluesky.BlueskyRepliesExtractor,
+    "#range"   : "1-40",
+    "#count"   : 40,
+},
+
+{
+    "#url"     : "https://bsky.app/profile/bsky.app/media",
+    "#category": ("", "bluesky", "media"),
+    "#class"   : bluesky.BlueskyMediaExtractor,
+    "#range"   : "1-40",
+    "#count"   : 40,
+},
+
+{
+    "#url"     : "https://bsky.app/profile/did:plc:jfhpnnst6flqway4eaeqzj2a/feed/for-science",
+    "#category": ("", "bluesky", "feed"),
+    "#class"   : bluesky.BlueskyFeedExtractor,
+    "#range"   : "1-40",
+    "#count"   : 40,
+},
+
+{
+    "#url"     : "https://bsky.app/profile/bsky.app/follows",
+    "#category": ("", "bluesky", "following"),
+    "#class"   : bluesky.BlueskyFollowingExtractor,
+    "#urls"    : (
+        "https://bsky.app/profile/did:plc:eon2iu7v3x2ukgxkqaf7e5np",
+        "https://bsky.app/profile/did:plc:ewvi7nxzyoun6zhxrhs64oiz",
+    ),
+},
+
+{
+    "#url"     : "https://bsky.app/profile/bsky.app/likes",
+    "#category": ("", "bluesky", "likes"),
+    "#class"   : bluesky.BlueskyLikesExtractor,
+},
+
+{
+    "#url"     : "https://bsky.app/profile/bsky.app/lists/abcdefghijklm",
+    "#category": ("", "bluesky", "list"),
+    "#class"   : bluesky.BlueskyListExtractor,
+},
+
+{
+    "#url"     : "https://bsky.app/search?q=nature",
+    "#category": ("", "bluesky", "search"),
+    "#class"   : bluesky.BlueskySearchExtractor,
+    "#range"   : "1-40",
+    "#count"   : 40,
+    "#archive" : False,
+},
+
+{
     "#url"     : "https://bsky.app/profile/bsky.app/post/3kh5rarr3gn2n",
     "#category": ("", "bluesky", "post"),
     "#class"   : bluesky.BlueskyPostExtractor,
