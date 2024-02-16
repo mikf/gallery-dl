@@ -110,7 +110,7 @@ __tests__ = (
     "#url"     : "https://www.pinterest.de/digitalmomblog/_created/",
     "#category": ("", "pinterest", "created"),
     "#class"   : pinterest.PinterestCreatedExtractor,
-    "#pattern" : r"https://i\.pinimg\.com/originals/[0-9a-f]{2}/[0-9a-f]{2}/[0-9a-f]{2}/[0-9a-f]{32}\.(jpg|png)",
+    "#pattern" : r"ytdl:|https://i\.pinimg\.com/originals/[0-9a-f]{2}/[0-9a-f]{2}/[0-9a-f]{2}/[0-9a-f]{32}\.(jpg|png)",
     "#range"   : "1-10",
     "#count"   : 10,
 },

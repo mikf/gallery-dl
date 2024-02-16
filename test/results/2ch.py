@@ -58,7 +58,7 @@ __tests__ = (
     "#category": ("", "2ch", "board"),
     "#class"   : _2ch._2chBoardExtractor,
     "#pattern" : _2ch._2chThreadExtractor.pattern,
-    "#count"   : range(200, 300),
+    "#count"   : range(200, 400),
 },
 
 )

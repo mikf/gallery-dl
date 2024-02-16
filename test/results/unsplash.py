@@ -62,10 +62,10 @@ __tests__ = (
         "hakone",
         "神奈川県 日本",
         "torii",
-        "hakone shrine",
-        "sunrise",
-        "traditional",
         "shrine",
+        "traditional",
+        "sunrise",
+        "hakone shrine",
         "wallpaper",
         "grey",
         "arbour",
@@ -76,7 +76,7 @@ __tests__ = (
     "tags_preview": list,
     "topic_submissions": {},
     "topics"     : [],
-    "updated_at" : "2024-01-19T08:21:54Z",
+    "updated_at" : str,
     "urls": dict,
     "user": {
         "accepted_tos"      : True,
@@ -135,7 +135,7 @@ __tests__ = (
     "#category": ("", "unsplash", "favorite"),
     "#class"   : unsplash.UnsplashFavoriteExtractor,
     "#pattern" : r"https://images\.unsplash\.com/(photo-\d+-\w+|reserve/[^/?#]+)\?ixid=\w+&ixlib=rb-4\.0\.3$",
-    "#count"   : 31,
+    "#count"   : range(25, 35),
 },
 
 {

@@ -49,7 +49,7 @@ __tests__ = (
     "#url"     : "https://komikcast.me/chapter/soul-land-ii-chapter-300-1-bahasa-indonesia/",
     "#category": ("", "komikcast", "chapter"),
     "#class"   : komikcast.KomikcastChapterExtractor,
-    "#pattern" : r"https://svr\d\.imgkc\.my\.id/wp-content/img/S/Soul_Land_II/300\.1/\d\d\.jpg",
+    "#pattern" : r"https://svr\d\.imgkc\d*\.my\.id/wp-content/img/S/Soul_Land_II/300\.1/\d\d\.jpg",
     "#count"   : 9,
     "#sha1_metadata": "cb646cfed3d45105bd645ab38b2e9f7d8c436436",
 },

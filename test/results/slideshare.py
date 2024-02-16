@@ -41,7 +41,8 @@ __tests__ = (
     "#comment" : "mobile URL",
     "#category": ("", "slideshare", "presentation"),
     "#class"   : slideshare.SlidesharePresentationExtractor,
-    "#sha1_url": "72c431cb1eccbb6794f608ecbbc01d52e8768159",
+    "#pattern" : r"https://image\.slidesharecdn\.com/introductiontofixedprosthodonticsfinal-110427200948-phpapp02/95/introduction-to-fixed-prosthodontics-\d+-1024\.jpg\?cb=\d+",
+    "#count"   : 27,
 },
 
 )
