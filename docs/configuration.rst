@@ -1185,6 +1185,31 @@ Description
     Download embedded videos hosted on https://www.blogger.com/
 
 
+extractor.bluesky.include
+-------------------------
+Type
+    * ``string``
+    * ``list`` of ``strings``
+Default
+    ``"media"``
+Example
+    * ``"avatar,background,posts"``
+    * ``["avatar", "background", "posts"]``
+Description
+    A (comma-separated) list of subcategories to include
+    when processing a user profile.
+
+    Possible values are
+    ``"avatar"``,
+    ``"background"``,
+    ``"posts"``,
+    ``"replies"``,
+    ``"media"``,
+    ``"likes"``,
+
+    It is possible to use ``"all"`` instead of listing all values separately.
+
+
 extractor.bluesky.metadata
 --------------------------
 Type
