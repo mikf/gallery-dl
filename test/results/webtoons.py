@@ -83,7 +83,7 @@ __tests__ = (
     "#url"     : "https://www.webtoons.com/en/canvas/us-over-here/1-the-wheel/viewer?title_no=919536&episode_no=1",
     "#category": ("", "webtoons", "episode"),
     "#class"   : webtoons.WebtoonsEpisodeExtractor,
-    "#count"   : 59,
+    "#count"   : 60,
 
     "comic_name"  : "Us, over here",
     "episode_name": "1. The Wheel",

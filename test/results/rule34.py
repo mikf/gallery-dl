@@ -57,7 +57,7 @@ __tests__ = (
 
     "tags_artist"   : "reverse_noise yamu_(reverse_noise)",
     "tags_character": "hong_meiling",
-    "tags_copyright": "touhou",
+    "tags_copyright": "team_shanghai_alice touhou",
     "tags_general"  : str,
     "tags_metadata" : "censored translated",
     "notes"         : [

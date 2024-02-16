@@ -19,8 +19,13 @@ __tests__ = (
     "#url"     : "https://xbooru.com/index.php?page=pool&s=show&id=757",
     "#category": ("gelbooru_v02", "xbooru", "pool"),
     "#class"   : gelbooru_v02.GelbooruV02PoolExtractor,
-    "#count"   : 5,
-    "#sha1_url": "ceeac56c179ec72301bd0b6add6355a138fdea01",
+    "#urls": (
+        "https://img.xbooru.com/images/154/aeca160f8c7131f6a93033adac5416d7.jpeg",
+        "https://img.xbooru.com/images/278/6185a8a71547568020e45e8319c02978.jpeg",
+        "https://img.xbooru.com/images/524/0fc2b1e2e3cc8be259e9712ca3f48b0b.jpeg",
+        "https://img.xbooru.com/images/253/74412b59a60fac5040c6cfe8efe7a625.jpeg",
+        "https://img.xbooru.com/images/590/2eacd900958a467fb053b8a92145b55b.jpeg",
+    ),
 },
 
 {
