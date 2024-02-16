@@ -108,6 +108,36 @@ class BlueskyExtractor(Extractor):
     def posts(self):
         return ()
 
+    def _make_post(self, actor, kind):
+        did = self.api._did_from_actor(actor)
+        profile = self.api.get_profile(did)
+
+        if kind not in profile:
+            return ()
+        cid = profile[kind].rpartition("/")[2].partition("@")[0]
+
+        return ({
+            "post": {
+                "embed": {"images": [{
+                    "alt": kind,
+                    "image": {
+                        "$type"   : "blob",
+                        "ref"     : {"$link": cid},
+                        "mimeType": "image/jpeg",
+                        "size"    : 0,
+                    },
+                    "aspectRatio": {
+                        "width" : 1000,
+                        "height": 1000,
+                    },
+                }]},
+                "author"   : profile,
+                "record"   : (),
+                "createdAt": "",
+                "uri"      : cid,
+            },
+        },)
+
 
 class BlueskyUserExtractor(BlueskyExtractor):
     subcategory = "user"
@@ -120,10 +150,12 @@ class BlueskyUserExtractor(BlueskyExtractor):
     def items(self):
         base = "{}/profile/{}/".format(self.root, self.user)
         return self._dispatch_extractors((
-            (BlueskyPostsExtractor  , base + "posts"),
-            (BlueskyRepliesExtractor, base + "replies"),
-            (BlueskyMediaExtractor  , base + "media"),
-            (BlueskyLikesExtractor  , base + "likes"),
+            (BlueskyAvatarExtractor    , base + "avatar"),
+            (BlueskyBackgroundExtractor, base + "banner"),
+            (BlueskyPostsExtractor     , base + "posts"),
+            (BlueskyRepliesExtractor   , base + "replies"),
+            (BlueskyMediaExtractor     , base + "media"),
+            (BlueskyLikesExtractor     , base + "likes"),
         ), ("media",))
 
 
@@ -211,6 +243,26 @@ class BlueskyPostExtractor(BlueskyExtractor):
 
     def posts(self):
         return self.api.get_post_thread(self.user, self.post_id)
+
+
+class BlueskyAvatarExtractor(BlueskyExtractor):
+    subcategory = "avatar"
+    filename_fmt = "avatar_{post_id}.{extension}"
+    pattern = USER_PATTERN + r"/avatar"
+    example = "https://bsky.app/profile/HANDLE/avatar"
+
+    def posts(self):
+        return self._make_post(self.user, "avatar")
+
+
+class BlueskyBackgroundExtractor(BlueskyExtractor):
+    subcategory = "background"
+    filename_fmt = "background_{post_id}.{extension}"
+    pattern = USER_PATTERN + r"/ba(?:nner|ckground)"
+    example = "https://bsky.app/profile/HANDLE/banner"
+
+    def posts(self):
+        return self._make_post(self.user, "banner")
 
 
 class BlueskyAPI():
