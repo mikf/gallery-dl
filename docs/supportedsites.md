@@ -1505,6 +1505,18 @@ Consider all listed sites to potentially be NSFW.
     <td>Articles</td>
     <td></td>
 </tr>
+<tr>
+    <td>Bulbapedia</td>
+    <td>https://bulbapedia.bulbagarden.net/</td>
+    <td>Articles</td>
+    <td></td>
+</tr>
+<tr>
+    <td>PidgiWiki</td>
+    <td>https://www.pidgi.net/</td>
+    <td>Articles</td>
+    <td></td>
+</tr>
 
 <tr>
     <td colspan="4"><strong>Moebooru and MyImouto</strong></td>

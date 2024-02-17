@@ -101,6 +101,7 @@ CATEGORY_MAP = {
     "nsfwalbum"      : "NSFWalbum.com",
     "paheal"         : "rule #34",
     "photovogue"     : "PhotoVogue",
+    "pidgiwiki"      : "PidgiWiki",
     "pixeldrain"     : "pixeldrain",
     "pornimagesxxx"  : "Porn Image",
     "pornpics"       : "PornPics.com",
