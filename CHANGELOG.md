@@ -1,5 +1,49 @@
 # Changelog
 
+## 1.26.8 - 2024-02-17
+### Extractors
+#### Additions
+- [bluesky] add support ([#4438](https://github.com/mikf/gallery-dl/issues/4438), [#4708](https://github.com/mikf/gallery-dl/issues/4708), [#4722](https://github.com/mikf/gallery-dl/issues/4722), [#5047](https://github.com/mikf/gallery-dl/issues/5047))
+- [bunkr] support new domains ([#5114](https://github.com/mikf/gallery-dl/issues/5114), [#5130](https://github.com/mikf/gallery-dl/issues/5130), [#5134](https://github.com/mikf/gallery-dl/issues/5134))
+- [fanbox] add `home` and `supporting` extractors ([#5138](https://github.com/mikf/gallery-dl/issues/5138))
+- [imagechest] add `user` extractor ([#5143](https://github.com/mikf/gallery-dl/issues/5143))
+- [imagetwist] add `gallery` extractor ([#5190](https://github.com/mikf/gallery-dl/issues/5190))
+- [kemonoparty] add `posts` extractor ([#5194](https://github.com/mikf/gallery-dl/issues/5194), [#5198](https://github.com/mikf/gallery-dl/issues/5198))
+- [twitter] support communities ([#4913](https://github.com/mikf/gallery-dl/issues/4913))
+- [vsco] support spaces ([#5202](https://github.com/mikf/gallery-dl/issues/5202))
+- [weibo] add `gifs` option ([#5183](https://github.com/mikf/gallery-dl/issues/5183))
+- [wikimedia] support `www.pidgi.net` ([#5205](https://github.com/mikf/gallery-dl/issues/5205))
+- [wikimedia] support `bulbapedia.bulbagarden.net` ([#5206](https://github.com/mikf/gallery-dl/issues/5206))
+#### Fixes
+- [archivedmoe] fix `thebarchive` WebM URLs ([#5116](https://github.com/mikf/gallery-dl/issues/5116))
+- [batoto] fix crash when manga name or chapter contains a `-` ([#5200](https://github.com/mikf/gallery-dl/issues/5200))
+- [bunkr] fix extraction ([#5088](https://github.com/mikf/gallery-dl/issues/5088), [#5151](https://github.com/mikf/gallery-dl/issues/5151), [#5153](https://github.com/mikf/gallery-dl/issues/5153))
+- [gofile] update `website_token` extraction
+- [idolcomplex] fix pagination for tags containing `:` ([#5184](https://github.com/mikf/gallery-dl/issues/5184))
+- [kemonoparty] fix deleting file names when computing `revision_hash` ([#5103](https://github.com/mikf/gallery-dl/issues/5103))
+- [luscious] fix IndexError for files without thumbnail ([#5122](https://github.com/mikf/gallery-dl/issues/5122), [#5124](https://github.com/mikf/gallery-dl/issues/5124), [#5182](https://github.com/mikf/gallery-dl/issues/5182))
+- [naverwebtoon] fix `title` for comics with empty tags ([#5120](https://github.com/mikf/gallery-dl/issues/5120))
+- [pinterest] fix section URLs for boards with `/`, `?`, or `#` in their name ([#5104](https://github.com/mikf/gallery-dl/issues/5104))
+- [twitter] update query hashes
+- [zerochan] fix skipping every other post
+#### Improvements
+- [deviantart] skip locked/blurred posts ([#4567](https://github.com/mikf/gallery-dl/issues/4567), [#5193](https://github.com/mikf/gallery-dl/issues/5193))
+- [deviantart] implement downloading PNG versions of non-original images with `"quality": "png"` ([#4846](https://github.com/mikf/gallery-dl/issues/4846))
+- [flickr] handle non-JSON errors ([#5131](https://github.com/mikf/gallery-dl/issues/5131))
+- [idolcomplex] support alphanumeric post IDs ([#5171](https://github.com/mikf/gallery-dl/issues/5171))
+- [kemonoparty] implement filtering duplicate revisions with `"revisions": "unique"`([#5013](https://github.com/mikf/gallery-dl/issues/5013))
+- [naverwebtoon] support `/webtoon/` paths for all comics ([#5123](https://github.com/mikf/gallery-dl/issues/5123))
+#### Metadata
+- [idolcomplex] extract `id_alnum` metadata ([#5171](https://github.com/mikf/gallery-dl/issues/5171))
+- [pornpics] support multiple values for `channel` ([#5195](https://github.com/mikf/gallery-dl/issues/5195))
+- [sankaku] add `id-format` option ([#5073](https://github.com/mikf/gallery-dl/issues/5073))
+- [skeb] add `num` and `count` metadata fields ([#5187](https://github.com/mikf/gallery-dl/issues/5187))
+### Downloaders
+#### Fixes
+- [http] remove `pyopenssl` import ([#5156](https://github.com/mikf/gallery-dl/issues/5156))
+### Miscellaneous
+- fix filename formatting silently failing under certain circumstances ([#5185](https://github.com/mikf/gallery-dl/issues/5185), [#5186](https://github.com/mikf/gallery-dl/issues/5186))
+
 ## 1.26.7 - 2024-01-21
 ### Extractors
 #### Additions
