@@ -39,6 +39,14 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://vsco.co/spaces/6320a3e1e0338d1350b33fea",
+    "#category": ("", "vsco", "space"),
+    "#class"   : vsco.VscoSpaceExtractor,
+    "#pattern" : r"https://image(-aws.+)?\.vsco\.co/[0-9a-f/]+/[\w\s-]+\.\w+",
+    "#count"   : range(100, 150),
+},
+
+{
     "#url"     : "https://vsco.co/erenyildiz/media/5d34b93ef632433030707ce2",
     "#category": ("", "vsco", "image"),
     "#class"   : vsco.VscoImageExtractor,
