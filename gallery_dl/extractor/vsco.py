@@ -139,8 +139,8 @@ class VscoCollectionExtractor(VscoExtractor):
     subcategory = "collection"
     directory_fmt = ("{category}", "{user}", "collection")
     archive_fmt = "c_{user}_{id}"
-    pattern = USER_PATTERN + r"/collection/"
-    example = "https://vsco.co/USER/collection/12345"
+    pattern = USER_PATTERN + r"/collection"
+    example = "https://vsco.co/USER/collection/1"
 
     def images(self):
         url = "{}/{}/collection/1".format(self.root, self.user)
@@ -206,6 +206,36 @@ class VscoSpaceExtractor(VscoExtractor):
             params["cursor"] = cursor["postcursorcontext"]["postId"]
 
             data = self.request(url, params=params, headers=headers).json()
+
+
+class VscoSpacesExtractor(VscoExtractor):
+    """Extractor for a vsco.co user's spaces"""
+    subcategory = "spaces"
+    pattern = USER_PATTERN + r"/spaces"
+    example = "https://vsco.co/USER/spaces"
+
+    def items(self):
+        url = "{}/{}/spaces".format(self.root, self.user)
+        data = self._extract_preload_state(url)
+
+        tkn = data["users"]["currentUser"]["tkn"]
+        uid = data["sites"]["siteByUsername"][self.user]["site"]["userId"]
+
+        headers = {
+            "Accept"       : "application/json",
+            "Referer"      : url,
+            "Content-Type" : "application/json",
+            "Authorization": "Bearer " + tkn,
+        }
+        # this would theoretically need to be paginated
+        url = "{}/grpc/spaces/user/{}".format(self.root, uid)
+        data = self.request(url, headers=headers).json()
+
+        for space in data["spacesWithRoleList"]:
+            space = space["space"]
+            url = "{}/spaces/{}".format(self.root, space["id"])
+            space["_extractor"] = VscoSpaceExtractor
+            yield Message.Queue, url, space
 
 
 class VscoImageExtractor(VscoExtractor):

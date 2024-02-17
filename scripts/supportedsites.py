@@ -290,6 +290,9 @@ SUBCATEGORY_MAP = {
     "vk": {
         "tagged": "Tagged Photos",
     },
+    "vsco": {
+        "spaces": "",
+    },
     "wallhaven": {
         "collections": "",
         "uploads"    : "",
