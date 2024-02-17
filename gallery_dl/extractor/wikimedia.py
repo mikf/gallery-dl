@@ -152,6 +152,16 @@ BASE_PATTERN = WikimediaExtractor.update({
         "root": "https://www.mariowiki.com",
         "pattern": r"(?:www\.)?mariowiki\.com",
     },
+    "bulbapedia": {
+        "root": "https://bulbapedia.bulbagarden.net",
+        "pattern": r"(?:bulbapedia|archives)\.bulbagarden\.net",
+        "api-path": "/w/api.php",
+    },
+    "pidgiwiki": {
+        "root": "https://www.pidgi.net",
+        "pattern": r"(?:www\.)?pidgi\.net",
+        "api-path": "/wiki/api.php",
+    },
 })
 
 
