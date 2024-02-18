@@ -1079,6 +1079,7 @@ class DeviantartOAuthAPI():
         self.headers = {"dA-minor-version": "20200519"}
         self._warn_429 = True
 
+        self.limit = None
         self.delay = extractor.config("wait-min", 0)
         self.delay_min = max(2, self.delay)
 
@@ -1086,9 +1087,8 @@ class DeviantartOAuthAPI():
         if not isinstance(self.mature, str):
             self.mature = "true" if self.mature else "false"
 
-        self.folders = extractor.config("folders", False)
-        self.metadata = extractor.extra or extractor.config("metadata", False)
         self.strategy = extractor.config("pagination")
+        self.folders = extractor.config("folders", False)
         self.public = extractor.config("public", True)
 
         client_id = extractor.config("client-id")
@@ -1106,6 +1106,41 @@ class DeviantartOAuthAPI():
                 token = None
         self.refresh_token_key = token
 
+        metadata = extractor.config("metadata", False)
+        if not metadata:
+            metadata = bool(extractor.extra)
+        if metadata:
+            self.metadata = True
+
+            if isinstance(metadata, str):
+                if metadata == "all":
+                    metadata = ("submission", "camera", "stats",
+                                "collection", "gallery")
+                else:
+                    metadata = metadata.replace(" ", "").split(",")
+            elif not isinstance(metadata, (list, tuple)):
+                metadata = ()
+
+            self._metadata_params = {"mature_content": self.mature}
+            self._metadata_public = None
+            if metadata:
+                # extended metadata
+                self.limit = 10
+                for param in metadata:
+                    self._metadata_params["ext_" + param] = "1"
+                if "ext_collection" in self._metadata_params or \
+                        "ext_gallery" in self._metadata_params:
+                    if token:
+                        self._metadata_public = False
+                    else:
+                        self.log.error("'collection' and 'gallery' metadata "
+                                       "require a refresh token")
+            else:
+                # base metadata
+                self.limit = 50
+        else:
+            self.metadata = False
+
         self.log.debug(
             "Using %s API credentials (client-id %s)",
             "default" if self.client_id == self.CLIENT_ID else "custom",
@@ -1115,14 +1150,14 @@ class DeviantartOAuthAPI():
     def browse_deviantsyouwatch(self, offset=0):
         """Yield deviations from users you watch"""
         endpoint = "/browse/deviantsyouwatch"
-        params = {"limit": "50", "offset": offset,
+        params = {"limit": 50, "offset": offset,
                   "mature_content": self.mature}
         return self._pagination(endpoint, params, public=False)
 
     def browse_posts_deviantsyouwatch(self, offset=0):
         """Yield posts from users you watch"""
         endpoint = "/browse/posts/deviantsyouwatch"
-        params = {"limit": "50", "offset": offset,
+        params = {"limit": 50, "offset": offset,
                   "mature_content": self.mature}
         return self._pagination(endpoint, params, public=False, unpack=True)
 
@@ -1131,7 +1166,7 @@ class DeviantartOAuthAPI():
         endpoint = "/browse/newest"
         params = {
             "q"             : query,
-            "limit"         : 50 if self.metadata else 120,
+            "limit"         : 120,
             "offset"        : offset,
             "mature_content": self.mature,
         }
@@ -1142,7 +1177,7 @@ class DeviantartOAuthAPI():
         endpoint = "/browse/popular"
         params = {
             "q"             : query,
-            "limit"         : 50 if self.metadata else 120,
+            "limit"         : 120,
             "timerange"     : timerange,
             "offset"        : offset,
             "mature_content": self.mature,
@@ -1249,8 +1284,11 @@ class DeviantartOAuthAPI():
             "deviationids[{}]={}".format(num, deviation["deviationid"])
             for num, deviation in enumerate(deviations)
         )
-        params = {"mature_content": self.mature}
-        return self._call(endpoint, params=params)["metadata"]
+        return self._call(
+            endpoint,
+            params=self._metadata_params.copy(),
+            public=self._metadata_public,
+        )["metadata"]
 
     def gallery(self, username, folder_id, offset=0, extend=True, public=None):
         """Yield all Deviation-objects contained in a gallery folder"""
@@ -1411,6 +1449,8 @@ class DeviantartOAuthAPI():
         warn = True
         if public is None:
             public = self.public
+        if self.limit and params["limit"] > self.limit:
+            params["limit"] = self.limit
 
         while True:
             data = self._call(endpoint, params=params, public=public)
