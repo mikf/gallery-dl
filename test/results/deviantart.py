@@ -643,6 +643,37 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.deviantart.com/shimoda7/art/For-the-sake-10073852",
+    "#category": ("", "deviantart", "deviation"),
+    "#class"   : deviantart.DeviantartDeviationExtractor,
+    "#options" : {"metadata": "submission,camera,stats"},
+
+    "can_post_comment": False,
+    "description"     : str,
+    "is_watching"     : False,
+    "license"         : "No License",
+    "stats": {
+        "comments"       : int,
+        "downloads"      : int,
+        "downloads_today": int,
+        "favourites"     : int,
+        "views"          : int,
+        "views_today"    : int,
+    },
+    "submission": {
+        "category"      : "traditional/drawings/other",
+        "creation_time" : "2004-08-25T02:44:08-0700",
+        "file_size"     : "133 KB",
+        "resolution"    : "710x510",
+        "submitted_with": {
+            "app": "Unknown App",
+            "url": ""
+        },
+    },
+    "tags": [],
+},
+
+{
     "#url"     : "https://www.deviantart.com/zzz/art/zzz-1234567890",
     "#category": ("", "deviantart", "deviation"),
     "#class"   : deviantart.DeviantartDeviationExtractor,

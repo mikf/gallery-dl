@@ -1527,12 +1527,33 @@ Description
 extractor.deviantart.metadata
 -----------------------------
 Type
-    ``bool``
+    * ``bool``
+    * ``string``
+    * ``list`` of ``strings``
 Default
     ``false``
+Example
+    * ``"stats,submission"``
+    * ``["camera", "stats", "submission"]``
 Description
-    Request extended metadata for deviation objects to additionally provide
-    ``description``, ``tags``, ``license`` and ``is_watching`` fields.
+    Extract additional metadata for deviation objects.
+
+    Provides
+    ``description``, ``tags``, ``license``, and ``is_watching``
+    fields when enabled.
+
+    It is possible to request extended metadata by specifying a list of
+
+    * ``camera``     : EXIF information (if available)
+    * ``stats``      : deviation statistics
+    * ``submission`` : submission information
+    * ``collection`` : favourited folder information (requires a `refresh token <extractor.deviantart.refresh-token_>`__)
+    * ``gallery``    : gallery folder information (requires a `refresh token <extractor.deviantart.refresh-token_>`__)
+
+    Set this option to ``"all"`` to request all extended metadata categories.
+
+    See `/deviation/metadata <https://www.deviantart.com/developers/http/v1/20210526/deviation_metadata/7824fc14d6fba6acbacca1cf38c24158>`__
+    for official documentation.
 
 
 extractor.deviantart.original
