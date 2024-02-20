@@ -19,7 +19,7 @@ class NijieExtractor(AsynchronousMixin, BaseExtractor):
     directory_fmt = ("{category}", "{user_id}")
     filename_fmt = "{image_id}_p{num}.{extension}"
     archive_fmt = "{image_id}_{num}"
-    request_interval = (1.0, 2.0)
+    request_interval = (2.0, 4.0)
 
     def __init__(self, match):
         BaseExtractor.__init__(self, match)
