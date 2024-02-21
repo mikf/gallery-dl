@@ -175,7 +175,7 @@ class ArtstationUserExtractor(ArtstationExtractor):
     subcategory = "user"
     pattern = (r"(?:https?://)?(?:(?:www\.)?artstation\.com"
                r"/(?!artwork|projects|search)([^/?#]+)(?:/albums/all)?"
-               r"|((?!www)\w+)\.artstation\.com(?:/projects)?)/?$")
+               r"|((?!www)[\w-]+)\.artstation\.com(?:/projects)?)/?$")
     example = "https://www.artstation.com/USER"
 
     def projects(self):
@@ -192,7 +192,7 @@ class ArtstationAlbumExtractor(ArtstationExtractor):
     archive_fmt = "a_{album[id]}_{asset[id]}"
     pattern = (r"(?:https?://)?(?:(?:www\.)?artstation\.com"
                r"/(?!artwork|projects|search)([^/?#]+)"
-               r"|((?!www)\w+)\.artstation\.com)/albums/(\d+)")
+               r"|((?!www)[\w-]+)\.artstation\.com)/albums/(\d+)")
     example = "https://www.artstation.com/USER/albums/12345"
 
     def __init__(self, match):
@@ -355,7 +355,7 @@ class ArtstationImageExtractor(ArtstationExtractor):
     """Extractor for images from a single artstation project"""
     subcategory = "image"
     pattern = (r"(?:https?://)?(?:"
-               r"(?:\w+\.)?artstation\.com/(?:artwork|projects|search)"
+               r"(?:[\w-]+\.)?artstation\.com/(?:artwork|projects|search)"
                r"|artstn\.co/p)/(\w+)")
     example = "https://www.artstation.com/artwork/abcde"
 
