@@ -157,4 +157,25 @@ __tests__ = (
     "#count"   : ">= 40",
 },
 
+{
+    "#url"     : "https://fede-x-rojas.artstation.com/projects/WBdaZy",
+    "#comment" : "dash in username",
+    "#category": ("", "artstation", "image"),
+    "#class"   : artstation.ArtstationImageExtractor,
+},
+
+{
+    "#url"     : "https://fede-x-rojas.artstation.com/albums/8533110",
+    "#comment" : "dash in username",
+    "#category": ("", "artstation", "album"),
+    "#class"   : artstation.ArtstationAlbumExtractor,
+},
+
+{
+    "#url"     : "https://fede-x-rojas.artstation.com/",
+    "#comment" : "dash in username",
+    "#category": ("", "artstation", "user"),
+    "#class"   : artstation.ArtstationUserExtractor,
+},
+
 )
