@@ -7,7 +7,7 @@
 """Extractors for https://skeb.jp/"""
 
 from .common import Extractor, Message
-from .. import text
+from .. import text, exception
 import itertools
 
 
@@ -26,6 +26,19 @@ class SkebExtractor(Extractor):
     def _init(self):
         self.thumbnails = self.config("thumbnails", False)
         self.article = self.config("article", False)
+        self.headers = {
+            "Accept"       : "application/json, text/plain, */*",
+            "Authorization": "Bearer null",
+        }
+
+    def request(self, url, **kwargs):
+        while True:
+            try:
+                return Extractor.request(self, url, **kwargs)
+            except exception.HttpError as exc:
+                if exc.status == 429 and "request_key" in exc.response.cookies:
+                    continue
+                raise
 
     def items(self):
         metadata = self.metadata()
@@ -49,11 +62,11 @@ class SkebExtractor(Extractor):
         """Return additional metadata"""
 
     def _pagination(self, url, params):
-        headers = {"Authorization": "Bearer null"}
         params["offset"] = 0
 
         while True:
-            posts = self.request(url, params=params, headers=headers).json()
+            posts = self.request(
+                url, params=params, headers=self.headers).json()
 
             for post in posts:
                 parts = post["path"].split("/")
@@ -73,8 +86,7 @@ class SkebExtractor(Extractor):
     def _get_post_data(self, user_name, post_num):
         url = "{}/api/users/{}/works/{}".format(
             self.root, user_name, post_num)
-        headers = {"Authorization": "Bearer null"}
-        resp = self.request(url, headers=headers).json()
+        resp = self.request(url, headers=self.headers).json()
         creator = resp["creator"]
         post = {
             "post_id"          : resp["id"],
@@ -254,10 +266,10 @@ class SkebFollowingExtractor(SkebExtractor):
         url = "{}/api/users/{}/following_creators".format(
             self.root, self.user_name)
         params = {"sort": "date", "offset": 0, "limit": 90}
-        headers = {"Authorization": "Bearer null"}
 
         while True:
-            data = self.request(url, params=params, headers=headers).json()
+            data = self.request(
+                url, params=params, headers=self.headers).json()
             yield from data
 
             if len(data) < params["limit"]:
