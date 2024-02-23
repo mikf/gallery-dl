@@ -57,7 +57,7 @@ class HttpError(ExtractionError):
     def __init__(self, message, response=None):
         ExtractionError.__init__(self, message)
         self.response = response
-        self.status = response.status_code if response else 0
+        self.status = 0 if response is None else response.status_code
 
 
 class NotFoundError(ExtractionError):
