@@ -10,7 +10,7 @@
 
 from .booru import BooruExtractor
 from ..cache import cache
-from .. import text, exception
+from .. import text, util, exception
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?zerochan\.net"
 
@@ -21,8 +21,11 @@ class ZerochanExtractor(BooruExtractor):
     root = "https://www.zerochan.net"
     filename_fmt = "{id}.{extension}"
     archive_fmt = "{id}"
+    page_start = 1
+    per_page = 250
     cookies_domain = ".zerochan.net"
     cookies_names = ("z_id", "z_hash")
+    request_interval = (0.5, 1.5)
 
     def login(self):
         self._logged_in = True
@@ -86,7 +89,7 @@ class ZerochanExtractor(BooruExtractor):
 
         return data
 
-    def _parse_entry_json(self, entry_id):
+    def _parse_entry_api(self, entry_id):
         url = "{}/{}?json".format(self.root, entry_id)
         item = self.request(url).json()
 
@@ -117,14 +120,22 @@ class ZerochanTagExtractor(ZerochanExtractor):
         ZerochanExtractor.__init__(self, match)
         self.search_tag, self.query = match.groups()
 
+    def _init(self):
+        if self.config("pagination") == "html":
+            self.posts = self.posts_html
+            self.per_page = 24
+        else:
+            self.posts = self.posts_api
+            self.session.headers["User-Agent"] = util.USERAGENT
+
     def metadata(self):
         return {"search_tags": text.unquote(
             self.search_tag.replace("+", " "))}
 
-    def posts(self):
+    def posts_html(self):
         url = self.root + "/" + self.search_tag
         params = text.parse_query(self.query)
-        params["p"] = text.parse_int(params.get("p"), 1)
+        params["p"] = text.parse_int(params.get("p"), self.page_start)
         metadata = self.config("metadata")
 
         while True:
@@ -140,7 +151,7 @@ class ZerochanTagExtractor(ZerochanExtractor):
                 if metadata:
                     entry_id = extr('href="/', '"')
                     post = self._parse_entry_html(entry_id)
-                    post.update(self._parse_entry_json(entry_id))
+                    post.update(self._parse_entry_api(entry_id))
                     yield post
                 else:
                     yield {
@@ -157,6 +168,41 @@ class ZerochanTagExtractor(ZerochanExtractor):
                 break
             params["p"] += 1
 
+    def posts_api(self):
+        url = self.root + "/" + self.search_tag
+        metadata = self.config("metadata")
+        params = {
+            "json": "1",
+            "l"   : self.per_page,
+            "p"   : self.page_start,
+        }
+
+        static = "https://static.zerochan.net/.full."
+
+        while True:
+            data = self.request(url, params=params).json()
+            try:
+                posts = data["items"]
+            except ValueError:
+                return
+
+            if metadata:
+                for post in posts:
+                    post_id = post["id"]
+                    post.update(self._parse_entry_html(post_id))
+                    post.update(self._parse_entry_api(post_id))
+            else:
+                for post in posts:
+                    base = static + str(post["id"])
+                    post["file_url"] = base + ".jpg"
+                    post["_fallback"] = (base + ".png",)
+
+            yield from posts
+
+            if not data.get("next"):
+                return
+            params["p"] += 1
+
 
 class ZerochanImageExtractor(ZerochanExtractor):
     subcategory = "image"
@@ -170,5 +216,5 @@ class ZerochanImageExtractor(ZerochanExtractor):
     def posts(self):
         post = self._parse_entry_html(self.image_id)
         if self.config("metadata"):
-            post.update(self._parse_entry_json(self.image_id))
+            post.update(self._parse_entry_api(self.image_id))
         return (post,)
