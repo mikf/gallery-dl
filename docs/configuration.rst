@@ -4131,6 +4131,21 @@ Description
     Note: This requires 1-2 additional HTTP requests per post.
 
 
+extractor.zerochan.pagination
+-----------------------------
+Type
+    ``string``
+Default
+    ``"api"``
+Description
+    Controls how to paginate over tag search results.
+
+    * ``"api"``: Use the `JSON API <https://www.zerochan.net/api>`__
+      (no ``extension`` metadata)
+    * ``"html"``: Parse HTML pages
+      (limited to 100 pages * 24 posts)
+
+
 extractor.[booru].tags
 ----------------------
 Type
