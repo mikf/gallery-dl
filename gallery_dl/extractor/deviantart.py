@@ -1079,7 +1079,6 @@ class DeviantartOAuthAPI():
         self.headers = {"dA-minor-version": "20200519"}
         self._warn_429 = True
 
-        self.limit = None
         self.delay = extractor.config("wait-min", 0)
         self.delay_min = max(2, self.delay)
 
@@ -1140,6 +1139,7 @@ class DeviantartOAuthAPI():
                 self.limit = 50
         else:
             self.metadata = False
+            self.limit = None
 
         self.log.debug(
             "Using %s API credentials (client-id %s)",
@@ -1286,7 +1286,7 @@ class DeviantartOAuthAPI():
         )
         return self._call(
             endpoint,
-            params=self._metadata_params.copy(),
+            params=self._metadata_params,
             public=self._metadata_public,
         )["metadata"]
 
@@ -1449,8 +1449,9 @@ class DeviantartOAuthAPI():
         warn = True
         if public is None:
             public = self.public
+
         if self.limit and params["limit"] > self.limit:
-            params["limit"] = self.limit
+            params["limit"] = (params["limit"] // self.limit) * self.limit
 
         while True:
             data = self._call(endpoint, params=params, public=public)
@@ -1523,6 +1524,15 @@ class DeviantartOAuthAPI():
 
     def _metadata(self, deviations):
         """Add extended metadata to each deviation object"""
+        if len(deviations) <= self.limit:
+            self._metadata_batch(deviations)
+        else:
+            n = self.limit
+            for index in range(0, len(deviations), n):
+                self._metadata_batch(deviations[index:index+n])
+
+    def _metadata_batch(self, deviations):
+        """Fetch extended metadata for a single batch of deviations"""
         for deviation, metadata in zip(
                 deviations, self.deviation_metadata(deviations)):
             deviation.update(metadata)
