@@ -42,6 +42,13 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.xvideos.com/channels/pervertedcouple/photos/12",
+    "#comment" : "/channels/ URL (#5244)",
+    "#category": ("", "xvideos", "gallery"),
+    "#class"   : xvideos.XvideosGalleryExtractor,
+},
+
+{
     "#url"     : "https://www.xvideos.com/profiles/pervertedcouple",
     "#category": ("", "xvideos", "user"),
     "#class"   : xvideos.XvideosUserExtractor,
@@ -51,6 +58,24 @@ __tests__ = (
 
 {
     "#url"     : "https://www.xvideos.com/profiles/pervertedcouple#_tabPhotos",
+    "#category": ("", "xvideos", "user"),
+    "#class"   : xvideos.XvideosUserExtractor,
+},
+
+{
+    "#url"     : "https://www.xvideos.com/channels/pervertedcouple",
+    "#category": ("", "xvideos", "user"),
+    "#class"   : xvideos.XvideosUserExtractor,
+},
+
+{
+    "#url"     : "https://www.xvideos.com/amateur-channels/pervertedcouple",
+    "#category": ("", "xvideos", "user"),
+    "#class"   : xvideos.XvideosUserExtractor,
+},
+
+{
+    "#url"     : "https://www.xvideos.com/model-channels/pervertedcouple",
     "#category": ("", "xvideos", "user"),
     "#class"   : xvideos.XvideosUserExtractor,
 },
