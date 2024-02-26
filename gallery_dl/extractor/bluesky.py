@@ -230,6 +230,7 @@ class BlueskyFollowingExtractor(BlueskyExtractor):
     def items(self):
         for user in self.api.get_follows(self.user):
             url = "https://bsky.app/profile/" + user["did"]
+            user["_extractor"] = BlueskyUserExtractor
             yield Message.Queue, url, user
 
 
