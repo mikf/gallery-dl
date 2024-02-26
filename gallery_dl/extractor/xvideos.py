@@ -59,14 +59,28 @@ class XvideosGalleryExtractor(XvideosBase, GalleryExtractor):
             },
         }
 
-    @staticmethod
-    def images(page):
-        """Return a list of all image urls for this gallery"""
-        return [
+    def images(self, page):
+        results = [
             (url, None)
             for url in text.extract_iter(
                 page, '<a class="embed-responsive-item" href="', '"')
         ]
+
+        if not results:
+            return
+
+        while len(results) % 500 == 0:
+            path = text.rextract(page, ' href="', '"', page.find(">Next</"))[0]
+            if not path:
+                break
+            page = self.request(self.root + path).text
+            results.extend(
+                (url, None)
+                for url in text.extract_iter(
+                    page, '<a class="embed-responsive-item" href="', '"')
+            )
+
+        return results
 
 
 class XvideosUserExtractor(XvideosBase, Extractor):
