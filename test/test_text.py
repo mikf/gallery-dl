@@ -457,5 +457,5 @@ class TestText(unittest.TestCase):
         self.assertEqual(f("1970.01.01"), "1970.01.01")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

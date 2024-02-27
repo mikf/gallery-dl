@@ -455,5 +455,5 @@ def noarg():
         self.assertEqual(output, result, format_string)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
