@@ -54,7 +54,7 @@ jobs:
       run: |
         case "${{ matrix.python-version }}" in
             3.4|3.5|3.6|3.7)
-                flake8 --extend-exclude scripts/export_tests.py .
+                flake8 --extend-exclude scripts/export_tests.py,scripts/pyprint.py .
                 ;;
             *)
                 flake8 .
