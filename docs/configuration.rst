@@ -1242,6 +1242,16 @@ Description
     (See `depth` parameter of `app.bsky.feed.getPostThread <https://www.docs.bsky.app/docs/api/app-bsky-feed-get-post-thread>`__)
 
 
+extractor.bluesky.reposts
+-------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Process reposts.
+
+
 extractor.cyberdrop.domain
 --------------------------
 Type
