@@ -63,7 +63,7 @@ class TestCookiejar(unittest.TestCase):
 
     def _test_warning(self, filename, exc):
         config.set((), "cookies", filename)
-        log = logging.getLogger("test")
+        log = logging.getLogger("generic")
 
         with mock.patch.object(log, "warning") as mock_warning:
             cookies = _get_extractor("test").cookies
@@ -173,7 +173,7 @@ class TestCookieUtils(unittest.TestCase):
         self.assertFalse(extr.cookies_domain, "empty")
 
         now = int(time.time())
-        log = logging.getLogger("test")
+        log = logging.getLogger("generic")
 
         extr.cookies.set("a", "1", expires=now-100)
         with mock.patch.object(log, "warning") as mw:
@@ -212,7 +212,7 @@ URLS = {
     "idolcomplex": "https://idol.sankakucomplex.com/post/show/1",
     "nijie"      : "https://nijie.info/view.php?id=1",
     "horne"      : "https://horne.red/view.php?id=1",
-    "test"       : "test:",
+    "test"       : "generic:https://example.org/",
 }
 
 

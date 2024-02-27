@@ -194,7 +194,6 @@ modules = [
     "directlink",
     "recursive",
     "oauth",
-    "test",
     "ytdl",
     "generic",
 ]
