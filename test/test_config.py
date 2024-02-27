@@ -214,5 +214,5 @@ class TestConfigFiles(unittest.TestCase):
             raise unittest.SkipTest(path + " not available")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

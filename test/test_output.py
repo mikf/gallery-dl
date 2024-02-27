@@ -152,5 +152,5 @@ class TestShortenEAW(unittest.TestCase):
         self.assertEqual(f(s, 19, "")   , "幻-想-郷###幻-想-郷")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
