@@ -563,7 +563,7 @@ WINDOWS = (os.name == "nt")
 SENTINEL = object()
 USERAGENT = "gallery-dl/" + version.__version__
 EXECUTABLE = getattr(sys, "frozen", False)
-SPECIAL_EXTRACTORS = {"oauth", "recursive", "test"}
+SPECIAL_EXTRACTORS = {"oauth", "recursive", "generic"}
 GLOBALS = {
     "contains" : contains,
     "parse_int": text.parse_int,

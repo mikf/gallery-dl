@@ -45,7 +45,7 @@ class TestExtractorModule(unittest.TestCase):
         "https://example.org/file.jpg",
         "tumblr:foobar",
         "oauth:flickr",
-        "test:pixiv:",
+        "generic:https://example.org/",
         "recursive:https://example.org/document.html",
     )
 
@@ -208,7 +208,7 @@ class TestExtractorModule(unittest.TestCase):
 class TestExtractorWait(unittest.TestCase):
 
     def test_wait_seconds(self):
-        extr = extractor.find("test:")
+        extr = extractor.find("generic:https://example.org/")
         seconds = 5
         until = time.time() + seconds
 
@@ -222,7 +222,7 @@ class TestExtractorWait(unittest.TestCase):
             self._assert_isotime(calls[0][1][1], until)
 
     def test_wait_until(self):
-        extr = extractor.find("test:")
+        extr = extractor.find("generic:https://example.org/")
         until = time.time() + 5
 
         with patch("time.sleep") as sleep, patch.object(extr, "log") as log:
@@ -237,7 +237,7 @@ class TestExtractorWait(unittest.TestCase):
             self._assert_isotime(calls[0][1][1], until)
 
     def test_wait_until_datetime(self):
-        extr = extractor.find("test:")
+        extr = extractor.find("generic:https://example.org/")
         until = datetime.utcnow() + timedelta(seconds=5)
         until_local = datetime.now() + timedelta(seconds=5)
 

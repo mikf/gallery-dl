@@ -30,7 +30,8 @@ class MockPostprocessorModule(Mock):
 
 class FakeJob():
 
-    def __init__(self, extr=extractor.find("test:")):
+    def __init__(self, extr=extractor.find("generic:https://example.org/")):
+        extr.directory_fmt = ("{category}",)
         self.extractor = extr
         self.pathfmt = path.PathFormat(extr)
         self.out = output.NullOutput()

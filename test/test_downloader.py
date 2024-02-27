@@ -33,7 +33,7 @@ class MockDownloaderModule(Mock):
 class FakeJob():
 
     def __init__(self):
-        self.extractor = extractor.find("test:")
+        self.extractor = extractor.find("generic:https://example.org/")
         self.extractor.initialize()
         self.pathfmt = path.PathFormat(self.extractor)
         self.out = output.NullOutput()
