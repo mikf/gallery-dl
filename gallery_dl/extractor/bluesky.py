@@ -444,7 +444,8 @@ class BlueskyAPI():
             if response.status_code < 400:
                 return response.json()
             if response.status_code == 429:
-                self.extractor.wait(seconds=60)
+                until = response.headers.get("RateLimit-Reset")
+                self.extractor.wait(until=until)
                 continue
 
             try:
