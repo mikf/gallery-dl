@@ -447,10 +447,16 @@ class BlueskyAPI():
                 self.extractor.wait(seconds=60)
                 continue
 
+            try:
+                data = response.json()
+                msg = "API request failed ('{}: {}')".format(
+                    data["error"], data["message"])
+            except Exception:
+                msg = "API request failed ({} {})".format(
+                    response.status_code, response.reason)
+
             self.extractor.log.debug("Server response: %s", response.text)
-            raise exception.StopExtraction(
-                "API request failed (%s %s)",
-                response.status_code, response.reason)
+            raise exception.StopExtraction(msg)
 
     def _pagination(self, endpoint, params, key="feed"):
         while True:
