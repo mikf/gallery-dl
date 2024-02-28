@@ -224,6 +224,9 @@ def setup_logging_handler(key, fmt=LOG_FORMAT, lvl=LOG_LEVEL, mode="w"):
     try:
         path = util.expand_path(path)
         handler = logging.FileHandler(path, mode, encoding)
+    except FileNotFoundError:
+        os.makedirs(os.path.dirname(path))
+        handler = logging.FileHandler(path, mode, encoding)
     except (OSError, ValueError) as exc:
         logging.getLogger("gallery-dl").warning(
             "%s: %s", key, exc)
