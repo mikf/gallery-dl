@@ -1517,6 +1517,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Articles</td>
     <td></td>
 </tr>
+<tr>
+    <td>Azur Lane Wiki</td>
+    <td>https://azurlane.koumakan.jp/</td>
+    <td>Articles</td>
+    <td></td>
+</tr>
 
 <tr>
     <td colspan="4"><strong>Moebooru and MyImouto</strong></td>

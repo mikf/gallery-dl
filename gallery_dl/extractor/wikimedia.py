@@ -162,6 +162,11 @@ BASE_PATTERN = WikimediaExtractor.update({
         "pattern": r"(?:www\.)?pidgi\.net",
         "api-path": "/wiki/api.php",
     },
+    "azurlanewiki": {
+        "root": "https://azurlane.koumakan.jp",
+        "pattern": r"azurlane\.koumakan\.jp",
+        "api-path": "/w/api.php",
+    },
 })
 
 
