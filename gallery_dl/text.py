@@ -59,8 +59,14 @@ def ensure_http_scheme(url, scheme="https://"):
 def root_from_url(url, scheme="https://"):
     """Extract scheme and domain from a URL"""
     if not url.startswith(("https://", "http://")):
-        return scheme + url[:url.index("/")]
-    return url[:url.index("/", 8)]
+        try:
+            return scheme + url[:url.index("/")]
+        except ValueError:
+            return scheme + url
+    try:
+        return url[:url.index("/", 8)]
+    except ValueError:
+        return url
 
 
 def filename_from_url(url):
