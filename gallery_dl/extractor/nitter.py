@@ -219,7 +219,10 @@ class NitterExtractor(BaseExtractor):
                 self.user_obj = self._user_from_html(tweets_html[0])
 
             for html, quote in map(self._extract_quote, tweets_html[1:]):
-                yield self._tweet_from_html(html)
+                tweet = self._tweet_from_html(html)
+                if not tweet["date"]:
+                    continue
+                yield tweet
                 if quoted and quote:
                     yield self._tweet_from_quote(quote)
 
