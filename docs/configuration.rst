@@ -4957,11 +4957,12 @@ Description
 exec.event
 ----------
 Type
-    ``string``
+    * ``string``
+    * ``list`` of ``strings``
 Default
     ``"after"``
 Description
-    The event for which `exec.command`_ is run.
+    The event(s) for which `exec.command`_ is run.
 
     See `metadata.event`_ for a list of available events.
 
@@ -5044,13 +5045,17 @@ Description
 metadata.event
 --------------
 Type
-    ``string``
+    * ``string``
+    * ``list`` of ``strings``
 Default
     ``"file"``
+Example
+    * ``"prepare,file,after"``
+    * ``["prepare-after", "skip"]``
 Description
-    The event for which metadata gets written to a file.
+    The event(s) for which metadata gets written to a file.
 
-    The available events are:
+    Available events are:
 
     ``init``
         After post processor initialization
@@ -5266,11 +5271,14 @@ Description
 mtime.event
 -----------
 Type
-    ``string``
+    * ``string``
+    * ``list`` of ``strings``
 Default
     ``"file"``
 Description
-    See `metadata.event`_
+    The event(s) for which `mtime.key`_ or `mtime.value`_ get evaluated.
+
+    See `metadata.event`_ for a list of available events.
 
 
 mtime.key
@@ -5322,11 +5330,12 @@ Description
 python.event
 ------------
 Type
-    ``string``
+    * ``string``
+    * ``list`` of ``strings``
 Default
     ``"file"``
 Description
-    The event for which `python.function`_ gets called.
+    The event(s) for which `python.function`_ gets called.
 
     See `metadata.event`_ for a list of available events.
 
@@ -5341,7 +5350,7 @@ Example
 Description
     The Python function to call.
 
-    This function gets specified as ``<module>:<function name>``
+    This function is specified as ``<module>:<function name>``
     and gets called with the current metadata dict as argument.
 
     ``module`` is either an importable Python module name
