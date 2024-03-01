@@ -52,22 +52,21 @@ class RedgifsExtractor(Extractor):
 
             gif.update(metadata)
             gif["count"] = cnt
+            gif["date"] = text.parse_timestamp(gif.get("createDate"))
             yield Message.Directory, gif
 
             for num, gif in enumerate(gifs, enum):
-                url = self._process(gif)
+                gif["_fallback"] = formats = self._formats(gif)
+                url = next(formats, None)
+
                 if not url:
                     self.log.warning(
                         "Skipping '%s' (format not available)", gif["id"])
                     continue
+
                 gif["num"] = num
                 gif["count"] = cnt
                 yield Message.Url, url, gif
-
-    def _process(self, gif):
-        gif["_fallback"] = formats = self._formats(gif)
-        gif["date"] = text.parse_timestamp(gif.get("createDate"))
-        return next(formats, None)
 
     def _formats(self, gif):
         urls = gif["urls"]
