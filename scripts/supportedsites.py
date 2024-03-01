@@ -176,6 +176,7 @@ SUBCATEGORY_MAP = {
 
     "artstation": {
         "artwork": "Artwork Listings",
+        "collections": "",
     },
     "bluesky": {
         "posts": "",

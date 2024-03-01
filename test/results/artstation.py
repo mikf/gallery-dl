@@ -65,6 +65,44 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.artstation.com/mikf/collections/2647023",
+    "#category": ("", "artstation", "collection"),
+    "#class"   : artstation.ArtstationCollectionExtractor,
+    "#count"   : 10,
+
+    "collection": {
+        "active_projects_count": 3,
+        "id"            : 2647023,
+        "is_private"    : False,
+        "micro_square_image_url": "https://cdna.artstation.com/p/assets/images/images/005/131/434/micro_square/gaeri-kim-cat-front.jpg?1488720625",
+        "name"          : "テスト",
+        "projects_count": 3,
+        "small_square_image_url": "https://cdna.artstation.com/p/assets/images/images/005/131/434/small_square/gaeri-kim-cat-front.jpg?1488720625",
+        "user_id"       : 697975,
+    },
+    "user": "mikf",
+},
+
+{
+    "#url"     : "https://www.artstation.com/mikf/collections",
+    "#category": ("", "artstation", "collections"),
+    "#class"   : artstation.ArtstationCollectionsExtractor,
+    "#urls"    : (
+        "https://www.artstation.com/mikf/collections/2647023",
+        "https://www.artstation.com/mikf/collections/2647719",
+    ),
+
+    "active_projects_count": int,
+    "id"            : range(2647023, 2647719),
+    "is_private"    : False,
+    "micro_square_image_url": str,
+    "name"          : r"re:テスト|empty",
+    "projects_count": int,
+    "small_square_image_url": str,
+    "user_id"       : 697975,
+},
+
+{
     "#url"     : "https://www.artstation.com/sungchoi/likes",
     "#comment" : "no likes",
     "#category": ("", "artstation", "likes"),

@@ -100,7 +100,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>ArtStation</td>
     <td>https://www.artstation.com/</td>
-    <td>Albums, Artwork Listings, Challenges, Followed Users, individual Images, Likes, Search Results, User Profiles</td>
+    <td>Albums, Artwork Listings, Challenges, Collections, Followed Users, individual Images, Likes, Search Results, User Profiles</td>
     <td></td>
 </tr>
 <tr>

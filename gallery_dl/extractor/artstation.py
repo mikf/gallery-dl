@@ -226,12 +226,60 @@ class ArtstationLikesExtractor(ArtstationExtractor):
     directory_fmt = ("{category}", "{userinfo[username]}", "Likes")
     archive_fmt = "f_{userinfo[id]}_{asset[id]}"
     pattern = (r"(?:https?://)?(?:www\.)?artstation\.com"
-               r"/(?!artwork|projects|search)([^/?#]+)/likes/?")
+               r"/(?!artwork|projects|search)([^/?#]+)/likes")
     example = "https://www.artstation.com/USER/likes"
 
     def projects(self):
         url = "{}/users/{}/likes.json".format(self.root, self.user)
         return self._pagination(url)
+
+
+class ArtstationCollectionExtractor(ArtstationExtractor):
+    """Extractor for an artstation collection"""
+    subcategory = "collection"
+    directory_fmt = ("{category}", "{user}",
+                     "{collection[id]} {collection[name]}")
+    archive_fmt = "c_{collection[id]}_{asset[id]}"
+    pattern = (r"(?:https?://)?(?:www\.)?artstation\.com"
+               r"/(?!artwork|projects|search)([^/?#]+)/collections/(\d+)")
+    example = "https://www.artstation.com/USER/collections/12345"
+
+    def __init__(self, match):
+        ArtstationExtractor.__init__(self, match)
+        self.collection_id = match.group(2)
+
+    def metadata(self):
+        url = "{}/collections/{}.json".format(
+            self.root, self.collection_id)
+        params = {"username": self.user}
+        collection = self.request(
+            url, params=params, notfound="collection").json()
+        return {"collection": collection, "user": self.user}
+
+    def projects(self):
+        url = "{}/collections/{}/projects.json".format(
+            self.root, self.collection_id)
+        params = {"collection_id": self.collection_id}
+        return self._pagination(url, params)
+
+
+class ArtstationCollectionsExtractor(ArtstationExtractor):
+    """Extractor for an artstation user's collections"""
+    subcategory = "collections"
+    pattern = (r"(?:https?://)?(?:www\.)?artstation\.com"
+               r"/(?!artwork|projects|search)([^/?#]+)/collections/?$")
+    example = "https://www.artstation.com/USER/collections"
+
+    def items(self):
+        url = self.root + "/collections.json"
+        params = {"username": self.user}
+
+        for collection in self.request(
+                url, params=params, notfound="collections").json():
+            url = "{}/{}/collections/{}".format(
+                self.root, self.user, collection["id"])
+            collection["_extractor"] = ArtstationCollectionExtractor
+            yield Message.Queue, url, collection
 
 
 class ArtstationChallengeExtractor(ArtstationExtractor):
