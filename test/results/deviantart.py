@@ -704,6 +704,20 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.deviantart.com/justatest235723/art/Blue-811519058",
+    "#comment" : "comment avatars (#4995)",
+    "#category": ("", "deviantart", "deviation"),
+    "#class"   : deviantart.DeviantartDeviationExtractor,
+    "#options" : {
+        "original"        : False,
+        "comments-avatars": True,
+    },
+    "#range"   : "5-",
+    "#pattern" : r"^https://www\.deviantart\.com/justatest235723/avatar/$",
+    "#count"   : 16,
+},
+
+{
     "#url"     : "https://www.deviantart.com/citizenfresh/art/Hverarond-789295466",
     "#comment" : "wixmp URL rewrite /intermediary/",
     "#category": ("", "deviantart", "deviation"),

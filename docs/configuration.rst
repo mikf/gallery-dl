@@ -1388,6 +1388,18 @@ Description
     Extract ``comments`` metadata.
 
 
+extractor.deviantart.comments-avatars
+-------------------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Download the avatar of each commenting user.
+
+    Note: Enabling this option also enables deviantart.comments_.
+
+
 extractor.deviantart.extra
 --------------------------
 Type
@@ -6009,6 +6021,7 @@ Description
 .. _base-directory: `extractor.*.base-directory`_
 .. _date-format: `extractor.*.date-format`_
 .. _deviantart.metadata: `extractor.deviantart.metadata`_
+.. _deviantart.comments: `extractor.deviantart.comments`_
 .. _postprocessors: `extractor.*.postprocessors`_
 .. _download archive: `extractor.*.archive`_
 
