@@ -161,17 +161,19 @@ class ImagefapFolderExtractor(ImagefapExtractor):
         self.user = user or profile
 
     def items(self):
-        for gallery_id, name in self.galleries(self.folder_id):
+        for gallery_id, name, folder in self.galleries(self.folder_id):
             url = "{}/gallery/{}".format(self.root, gallery_id)
             data = {
                 "gallery_id": gallery_id,
                 "title"     : text.unescape(name),
+                "folder"    : text.unescape(folder),
                 "_extractor": ImagefapGalleryExtractor,
             }
             yield Message.Queue, url, data
 
     def galleries(self, folder_id):
         """Yield gallery IDs and titles of a folder"""
+        folder="Uncategorized"
         if folder_id == "-1":
             if self._id:
                 url = "{}/usergallery.php?userid={}&folderid=-1".format(
@@ -187,11 +189,14 @@ class ImagefapFolderExtractor(ImagefapExtractor):
             extr = text.extract_from(self.request(url, params=params).text)
             cnt = 0
 
+            if folder_id != -1 and params["page"] == 0:
+                folder = extr('class\'blk_galleries\'><b>','</b>')
+
             while True:
                 gid = extr('<a  href="/gallery/', '"')
                 if not gid:
                     break
-                yield gid, extr("<b>", "<")
+                yield gid, extr("<b>", "<"), folder
                 cnt += 1
 
             if cnt < 20:
