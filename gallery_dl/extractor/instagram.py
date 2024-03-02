@@ -689,7 +689,10 @@ class InstagramRestAPI():
     def reels_media(self, reel_ids):
         endpoint = "/v1/feed/reels_media/"
         params = {"reel_ids": reel_ids}
-        return self._call(endpoint, params=params)["reels_media"]
+        try:
+            return self._call(endpoint, params=params)["reels_media"]
+        except KeyError:
+            raise exception.AuthorizationError("Login required")
 
     def tags_media(self, tag):
         for section in self.tags_sections(tag):
