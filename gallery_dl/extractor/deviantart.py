@@ -101,9 +101,9 @@ class DeviantartExtractor(Extractor):
         if self.user:
             group = self.config("group", True)
             if group:
-                profile = self.api.user_profile(self.user)
-                if profile:
-                    self.user = profile["user"]["username"]
+                user = _user_details(self, self.user)
+                if user:
+                    self.user = user["username"]
                     self.group = False
                 elif group == "skip":
                     self.log.info("Skipping group '%s'", self.user)
@@ -175,8 +175,11 @@ class DeviantartExtractor(Extractor):
 
             if self.comments_avatars:
                 for comment in deviation["comments"]:
-                    url = "{}/{}/avatar/".format(
-                        self.root, comment["user"]["username"])
+                    user = comment["user"]
+                    name = user["username"].lower()
+                    _user_details.update(name, user)
+
+                    url = "{}/{}/avatar/".format(self.root, name)
                     comment["_extractor"] = DeviantartAvatarExtractor
                     yield Message.Queue, url, comment
 
@@ -577,11 +580,10 @@ class DeviantartAvatarExtractor(DeviantartExtractor):
 
     def deviations(self):
         name = self.user.lower()
-        profile = self.api.user_profile(name)
-        if not profile:
+        user = _user_details(self, name)
+        if not user:
             return ()
 
-        user = profile["user"]
         icon = user["usericon"]
         index = icon.rpartition("?")[2]
 
@@ -1723,6 +1725,14 @@ class DeviantartEclipseAPI():
         self.csrf_token = token = text.extr(
             page, "window.__CSRF_TOKEN__ = '", "'")
         return token
+
+
+@memcache(keyarg=1)
+def _user_details(extr, name):
+    try:
+        return extr.api.user_profile(name)["user"]
+    except Exception:
+        return None
 
 
 @cache(maxage=36500*86400, keyarg=0)
