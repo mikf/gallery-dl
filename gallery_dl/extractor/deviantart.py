@@ -47,8 +47,9 @@ class DeviantartExtractor(Extractor):
         self.extra = self.config("extra", False)
         self.quality = self.config("quality", "100")
         self.original = self.config("original", True)
-        self.comments = self.config("comments", False)
         self.intermediary = self.config("intermediary", True)
+        self.comments_avatars = self.config("comments-avatars", False)
+        self.comments = self.comments_avatars or self.config("comments", False)
 
         self.api = DeviantartOAuthAPI(self)
         self.group = False
@@ -171,6 +172,13 @@ class DeviantartExtractor(Extractor):
                         deviation["_journal"] = journal["html"]
                     deviation["is_original"] = True
                     yield self.commit_journal(deviation, journal)
+
+            if self.comments_avatars:
+                for comment in deviation["comments"]:
+                    url = "{}/{}/avatar/".format(
+                        self.root, comment["user"]["username"])
+                    comment["_extractor"] = DeviantartAvatarExtractor
+                    yield Message.Queue, url, comment
 
             if not self.extra:
                 continue
