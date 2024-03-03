@@ -107,10 +107,14 @@ class BlueskyExtractor(Extractor):
                     post["width"] = post["height"] = 0
 
                 image = file["image"]
-                post["filename"] = link = image["ref"]["$link"]
+                try:
+                    cid = image["ref"]["$link"]
+                except KeyError:
+                    cid = image["cid"]
+                post["filename"] = cid
                 post["extension"] = image["mimeType"].rpartition("/")[2]
 
-                yield Message.Url, base + link, post
+                yield Message.Url, base + cid, post
 
     def posts(self):
         return ()

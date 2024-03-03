@@ -202,4 +202,12 @@ __tests__ = (
     "uri"        : "at://did:plc:cslxjqkeexku6elp5xowxkq7/app.bsky.feed.post/3kkzc3xaf5m2w",
 },
 
+{
+    "#url"     : "https://bsky.app/profile/go-guiltism.bsky.social/post/3klgth6lilt2l",
+    "#comment" : "different embed CID path",
+    "#category": ("", "bluesky", "post"),
+    "#class"   : bluesky.BlueskyPostExtractor,
+    "#urls"    : "https://bsky.social/xrpc/com.atproto.sync.getBlob?did=did:plc:owc2r2dsewj3hk73rtd746zh&cid=bafkreieuhplc7fpbvi3suvacaf2dqxzvuu4hgl5o6eifqb76tf3uopldmi",
+},
+
 )
