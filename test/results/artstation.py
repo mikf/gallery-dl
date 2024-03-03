@@ -71,14 +71,14 @@ __tests__ = (
     "#count"   : 10,
 
     "collection": {
-        "active_projects_count": 3,
         "id"            : 2647023,
         "is_private"    : False,
-        "micro_square_image_url": "https://cdna.artstation.com/p/assets/images/images/005/131/434/micro_square/gaeri-kim-cat-front.jpg?1488720625",
         "name"          : "テスト",
         "projects_count": 3,
-        "small_square_image_url": "https://cdna.artstation.com/p/assets/images/images/005/131/434/small_square/gaeri-kim-cat-front.jpg?1488720625",
         "user_id"       : 697975,
+        "active_projects_count" : 3,
+        "micro_square_image_url": "https://cdna.artstation.com/p/assets/images/images/005/131/434/micro_square/gaeri-kim-cat-front.jpg?1488720625",
+        "small_square_image_url": "https://cdna.artstation.com/p/assets/images/images/005/131/434/small_square/gaeri-kim-cat-front.jpg?1488720625",
     },
     "user": "mikf",
 },
@@ -92,14 +92,14 @@ __tests__ = (
         "https://www.artstation.com/mikf/collections/2647719",
     ),
 
-    "active_projects_count": int,
     "id"            : range(2647023, 2647719),
     "is_private"    : False,
-    "micro_square_image_url": str,
     "name"          : r"re:テスト|empty",
     "projects_count": int,
-    "small_square_image_url": str,
     "user_id"       : 697975,
+    "active_projects_count" : int,
+    "micro_square_image_url": str,
+    "small_square_image_url": str,
 },
 
 {
@@ -154,6 +154,19 @@ __tests__ = (
     "#category": ("", "artstation", "image"),
     "#class"   : artstation.ArtstationImageExtractor,
     "#count"   : 4,
+},
+
+{
+    "#url"     : "https://www.artstation.com/artwork/lR8b5k",
+    "#comment" : "artstation video clips (#2566)",
+    "#category": ("", "artstation", "image"),
+    "#class"   : artstation.ArtstationImageExtractor,
+    "#options" : {"videos": True},
+    "#range"   : "2-3",
+    "#urls"    : (
+        "https://cdn.artstation.com/p/video_sources/000/819/843/infection-4.mp4",
+        "https://cdn.artstation.com/p/video_sources/000/819/725/infection-veinonly-2.mp4",
+    ),
 },
 
 {
