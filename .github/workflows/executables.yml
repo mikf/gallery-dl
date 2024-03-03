@@ -1,6 +1,10 @@
 name: executables
 
-on: [push]
+on:
+  workflow_dispatch:
+  push:
+    branches:
+    - master
 
 jobs:
   build:
