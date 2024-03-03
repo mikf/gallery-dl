@@ -29,11 +29,13 @@ class ArtstationExtractor(Extractor):
         self.user = match.group(1) or match.group(2)
 
     def items(self):
-        data = self.metadata()
-
-        projects = self.projects()
+        videos = self.config("videos", True)
+        previews = self.config("previews", False)
         external = self.config("external", False)
         max_posts = self.config("max-posts")
+
+        data = self.metadata()
+        projects = self.projects()
         if max_posts:
             projects = itertools.islice(projects, max_posts)
 
@@ -45,13 +47,29 @@ class ArtstationExtractor(Extractor):
                 asset["num"] = num
                 yield Message.Directory, asset
 
-                if adict["has_embedded_player"] and external:
+                if adict["has_embedded_player"]:
                     player = adict["player_embedded"]
                     url = (text.extr(player, 'src="', '"') or
                            text.extr(player, "src='", "'"))
-                    if url and not url.startswith(self.root):
-                        asset["extension"] = None
-                        yield Message.Url, "ytdl:" + url, asset
+                    if url.startswith(self.root):
+                        # video clip hosted on artstation
+                        if videos:
+                            page = self.request(url).text
+                            url = text.extr(page, ' src="', '"')
+                            text.nameext_from_url(url, asset)
+                            yield Message.Url, url, asset
+                    elif url:
+                        # external URL
+                        if external:
+                            asset["extension"] = "mp4"
+                            yield Message.Url, "ytdl:" + url, asset
+                    else:
+                        self.log.debug(player)
+                        self.log.warning(
+                            "Failed to extract embedded player URL (%s)",
+                            adict.get("id"))
+
+                    if not previews:
                         continue
 
                 if adict["has_image"]:
@@ -59,10 +77,11 @@ class ArtstationExtractor(Extractor):
                     text.nameext_from_url(url, asset)
 
                     url = self._no_cache(url)
-                    lhs, _, rhs = url.partition("/large/")
-                    if rhs:
-                        url = lhs + "/4k/" + rhs
-                        asset["_fallback"] = self._image_fallback(lhs, rhs)
+                    if "/video_clips/" not in url:
+                        lhs, _, rhs = url.partition("/large/")
+                        if rhs:
+                            url = lhs + "/4k/" + rhs
+                            asset["_fallback"] = self._image_fallback(lhs, rhs)
 
                     yield Message.Url, url, asset
 

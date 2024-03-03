@@ -1124,6 +1124,26 @@ Description
     Limit the number of posts/projects to download.
 
 
+extractor.artstation.previews
+-----------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Download video previews.
+
+
+extractor.artstation.videos
+---------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Download video clips.
+
+
 extractor.artstation.search.pro-first
 -------------------------------------
 Type
