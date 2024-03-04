@@ -253,6 +253,14 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://deviantart.com/h3813067/avatar",
+    "#comment" : "default avatar (#5276)",
+    "#category": ("", "deviantart", "avatar"),
+    "#class"   : deviantart.DeviantartAvatarExtractor,
+    "#count"   : 0,
+},
+
+{
     "#url"     : "https://deviantart.com/gdldev/banner",
     "#category": ("", "deviantart", "background"),
     "#class"   : deviantart.DeviantartBackgroundExtractor,
