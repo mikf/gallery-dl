@@ -133,6 +133,7 @@ class PatreonExtractor(Extractor):
         """Process and extend a 'post' object"""
         attr = post["attributes"]
         attr["id"] = text.parse_int(post["id"])
+        self._process_post_comments(attr)
 
         if attr.get("current_user_can_view", True):
 
@@ -155,6 +156,34 @@ class PatreonExtractor(Extractor):
                 included["user"][user["data"]["id"]])
 
         return attr
+
+    def _process_post_comments(self, post):
+        headers = {
+            "Content-Type": "application/vnd.api+json",
+        }
+
+        post["comments"] = []
+
+        comments_url = text.ensure_http_scheme(PatreonExtractor._build_comments_url(post["id"]))
+        while comments_url:
+            comments = self.request(comments_url, headers=headers).json()
+            post["comments"].extend(comments["data"])
+            comments_url = comments["links"].get("next")
+
+        for comment in post['comments']:
+            self._process_comment_replies(comment)
+
+    def _process_comment_replies(self, comment):
+        headers = {
+            "Content-Type": "application/vnd.api+json",
+        }
+
+        replies_url = text.ensure_http_scheme(PatreonExtractor._build_comment_replies_url(comment["id"]))
+        comments = self.request(replies_url, headers=headers).json()
+        comment["replies"] = comments["data"]
+
+        for reply in comment['replies']:
+            self._process_comment_replies(reply)
 
     @staticmethod
     def _transform(included):
@@ -242,6 +271,14 @@ class PatreonExtractor(Extractor):
 
             "&json-api-version=1.0"
         )
+
+    @staticmethod
+    def _build_comments_url(post_id):
+        return "https://www.patreon.com/api/posts/" + str(post_id) + "/comments"
+
+    @staticmethod
+    def _build_comment_replies_url(comment_id):
+        return "https://www.patreon.com/api/comments/" + str(comment_id) + "/replies"
 
     def _build_file_generators(self, filetypes):
         if filetypes is None:
