@@ -585,7 +585,9 @@ class DeviantartAvatarExtractor(DeviantartExtractor):
             return ()
 
         icon = user["usericon"]
-        index = icon.rpartition("?")[2]
+        _, sep, index = icon.rpartition("?")
+        if not sep:
+            index = "0"
 
         formats = self.config("formats")
         if not formats:
