@@ -26,7 +26,8 @@ class NaverPostExtractor(NaverBase, GalleryExtractor):
                      "{post[date]:%Y-%m-%d} {post[title]}")
     archive_fmt = "{blog[id]}_{post[num]}_{num}"
     pattern = (r"(?:https?://)?blog\.naver\.com/"
-               r"(?:PostView\.nhn\?blogId=(\w+)&logNo=(\d+)|(\w+)/(\d+)/?$)")
+               r"(?:PostView\.n(?:aver|hn)\?blogId=(\w+)&logNo=(\d+)|"
+               r"(\w+)/(\d+)/?$)")
     example = "https://blog.naver.com/BLOGID/12345"
 
     def __init__(self, match):
@@ -73,7 +74,8 @@ class NaverBlogExtractor(NaverBase, Extractor):
     subcategory = "blog"
     categorytransfer = True
     pattern = (r"(?:https?://)?blog\.naver\.com/"
-               r"(?:PostList.nhn\?(?:[^&#]+&)*blogId=([^&#]+)|(\w+)/?$)")
+               r"(?:PostList\.n(?:aver|hn)\?(?:[^&#]+&)*blogId=([^&#]+)|"
+               r"(\w+)/?$)")
     example = "https://blog.naver.com/BLOGID"
 
     def __init__(self, match):
@@ -81,12 +83,11 @@ class NaverBlogExtractor(NaverBase, Extractor):
         self.blog_id = match.group(1) or match.group(2)
 
     def items(self):
-
         # fetch first post number
         url = "{}/PostList.nhn?blogId={}".format(self.root, self.blog_id)
-        post_num = text.extract(
+        post_num = text.extr(
             self.request(url).text, 'gnFirstLogNo = "', '"',
-        )[0]
+        )
 
         # setup params for API calls
         url = "{}/PostViewBottomTitleListAsync.nhn".format(self.root)
