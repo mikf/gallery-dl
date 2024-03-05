@@ -134,7 +134,6 @@ class PatreonExtractor(Extractor):
         attr = post["attributes"]
         attr["id"] = text.parse_int(post["id"])
 
-
         if attr.get("current_user_can_view", True):
 
             self._process_post_comments(attr)
