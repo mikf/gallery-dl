@@ -47,8 +47,10 @@ class NaverPostExtractor(NaverBase, GalleryExtractor):
         extr = text.extract_from(page)
         data = {
             "post": {
-                "title"      : extr('"og:title" content="', '"'),
-                "description": extr('"og:description" content="', '"'),
+                "title"      : text.unescape(extr(
+                    '"og:title" content="', '"')),
+                "description": text.unescape(extr(
+                    '"og:description" content="', '"')).replace("&nbsp;", " "),
                 "num"        : text.parse_int(self.post_id),
             },
             "blog": {
