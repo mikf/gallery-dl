@@ -133,9 +133,11 @@ class PatreonExtractor(Extractor):
         """Process and extend a 'post' object"""
         attr = post["attributes"]
         attr["id"] = text.parse_int(post["id"])
-        self._process_post_comments(attr)
+
 
         if attr.get("current_user_can_view", True):
+
+            self._process_post_comments(attr)
 
             relationships = post["relationships"]
             attr["images"] = self._files(post, included, "images")
