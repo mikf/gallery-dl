@@ -41,9 +41,9 @@ __tests__ = (
     },
     "post": {
         "date"       : "dt:2013-03-05 17:48:00",
-        "description": "&amp;nbsp;◈ &amp;nbsp; &amp;nbsp; PROMOTER&amp;nbsp;：핑수 ˚ 아담 EDITOR：핑수 &amp;nbsp; 넵：이크：핑수...",
+        "description": " ◈     PROMOTER ：핑수 ˚ 아담 EDITOR：핑수   넵：이크：핑수...",
         "num"        : 70161391809,
-        "title"      : "[공유] {&#8201;합작}&#8201; OH, MY GOD! ~ 아 또 무슨 종말을 한다 그래~"
+        "title"      : "[공유] { 합작}  OH, MY GOD! ~ 아 또 무슨 종말을 한다 그래~",
     },
     "count"    : 2,
     "num"      : range(1, 2),
