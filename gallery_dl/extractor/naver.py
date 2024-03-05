@@ -63,10 +63,13 @@ class NaverPostExtractor(NaverBase, GalleryExtractor):
         return data
 
     def images(self, page):
-        return [
-            (url.replace("://post", "://blog", 1).partition("?")[0], None)
-            for url in text.extract_iter(page, 'data-lazy-src="', '"')
-        ]
+        results = []
+        for url in text.extract_iter(page, 'data-lazy-src="', '"'):
+            url = url.replace("://post", "://blog", 1).partition("?")[0]
+            if "\ufffd" in text.unquote(url):
+                url = text.unquote(url, encoding="EUC-KR")
+            results.append((url, None))
+        return results
 
 
 class NaverBlogExtractor(NaverBase, Extractor):
