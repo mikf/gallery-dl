@@ -25,6 +25,12 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://blog.naver.com/PostView.naver?blogId=rlfqjxm0&logNo=221430673006",
+    "#category": ("", "naver", "post"),
+    "#class"   : naver.NaverPostExtractor,
+},
+
+{
     "#url"     : "https://blog.naver.com/gukjung",
     "#category": ("", "naver", "blog"),
     "#class"   : naver.NaverBlogExtractor,
@@ -40,6 +46,12 @@ __tests__ = (
     "#pattern" : naver.NaverPostExtractor.pattern,
     "#range"   : "1-12",
     "#count"   : 12,
+},
+
+{
+    "#url"     : "https://blog.naver.com/PostList.naver?blogId=gukjung",
+    "#category": ("", "naver", "blog"),
+    "#class"   : naver.NaverBlogExtractor,
 },
 
 )
