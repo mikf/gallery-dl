@@ -399,6 +399,7 @@ MIME_TYPES = {
     "video/webm": "webm",
     "video/ogg" : "ogg",
     "video/mp4" : "mp4",
+    "video/quicktime": "mov",
 
     "audio/wav"  : "wav",
     "audio/x-wav": "wav",
@@ -441,6 +442,7 @@ SIGNATURE_CHECKS = {
     "psd" : lambda s: s[0:4] == b"8BPS",
     "mp4" : lambda s: (s[4:8] == b"ftyp" and s[8:11] in (
                        b"mp4", b"avc", b"iso", b"M4V")),
+    "mov" : lambda s: s[4:12] == b"ftypqt  ",
     "webm": lambda s: s[0:4] == b"\x1A\x45\xDF\xA3",
     "ogg" : lambda s: s[0:4] == b"OggS",
     "wav" : lambda s: (s[0:4] == b"RIFF" and
