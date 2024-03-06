@@ -5784,7 +5784,7 @@ How To
       * choose a name
       * select "installed app"
       * set ``http://localhost:6414/`` as "redirect uri"
-      * solve the "I'm not a rebot" reCATCHA if needed
+      * solve the "I'm not a robot" reCATCHA if needed
       * click "create app"
 
     * copy the client id (third line, under your application's name and
