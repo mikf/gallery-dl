@@ -55,6 +55,18 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://warosu.org/jp/thread/45886210",
+    "#comment" : "deleted post (#5289)",
+    "#category": ("", "warosu", "thread"),
+    "#class"   : warosu.WarosuThreadExtractor,
+    "#count"   : "> 150",
+
+    "board"     : "jp",
+    "board_name": "Otaku Culture",
+    "title"     : "/07/th Expansion Thread",
+},
+
+{
     "#url"     : "https://warosu.org/ic/thread/4604652",
     "#category": ("", "warosu", "thread"),
     "#class"   : warosu.WarosuThreadExtractor,

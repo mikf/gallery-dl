@@ -64,8 +64,7 @@ class WarosuThreadExtractor(Extractor):
     def parse(self, post):
         """Build post object by extracting data from an HTML post"""
         data = self._extract_post(post)
-        if "<span> File:" in post:
-            self._extract_image(post, data)
+        if "<span> File:" in post and self._extract_image(post, data):
             part = data["image"].rpartition("/")[2]
             data["tim"], _, data["extension"] = part.partition(".")
             data["ext"] = "." + data["extension"]
@@ -91,6 +90,11 @@ class WarosuThreadExtractor(Extractor):
             "", "<").rstrip().rpartition(".")[0])
         extr("<br>", "")
 
-        data["image"] = url = extr("<a href=", ">")
-        if url[0] == "/":
-            data["image"] = self.root + url
+        url = extr("<a href=", ">")
+        if url:
+            if url[0] == "/":
+                data["image"] = self.root + url
+            else:
+                data["image"] = url
+            return True
+        return False
