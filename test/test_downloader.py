@@ -304,6 +304,7 @@ SAMPLES = {
     ("mp4" , b"????ftypavc1"),
     ("mp4" , b"????ftypiso3"),
     ("mp4" , b"????ftypM4V"),
+    ("mov" , b"????ftypqt  "),
     ("webm", b"\x1A\x45\xDF\xA3"),
     ("ogg" , b"OggS"),
     ("wav" , b"RIFF????WAVE"),
