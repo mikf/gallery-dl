@@ -118,7 +118,7 @@ class WeiboExtractor(Extractor):
                     append(pic["largest"].copy())
 
                     file = {"url": pic["video"]}
-                    file["filehame"], _, file["extension"] = \
+                    file["filename"], _, file["extension"] = \
                         pic["video"].rpartition("%2F")[2].rpartition(".")
                     append(file)
 

@@ -209,8 +209,10 @@ __tests__ = (
     "#comment" : "type == livephoto (#2146)",
     "#category": ("", "weibo", "status"),
     "#class"   : weibo.WeiboStatusExtractor,
-    "#pattern" : r"https://video\.weibo\.com/media/play\?livephoto=https%3A%2F%2Fus.sinaimg.cn%2F\w+\.mov",
+    "#pattern" : r"https://video\.weibo\.com/media/play\?livephoto=https%3A%2F%2Fus\.sinaimg\.cn%2F\w+\.mov",
     "#range"   : "2,4,6",
+
+    "extension": "mov",
 },
 
 {
@@ -219,6 +221,8 @@ __tests__ = (
     "#category": ("", "weibo", "status"),
     "#class"   : weibo.WeiboStatusExtractor,
     "#urls"    : "https://wx4.sinaimg.cn/large/68d80d22gy1h2ryfa8k0kg208w06o7wh.gif",
+
+    "extension": "gif",
 },
 
 {
