@@ -26,10 +26,10 @@ class SkebExtractor(Extractor):
     def _init(self):
         self.thumbnails = self.config("thumbnails", False)
         self.article = self.config("article", False)
-        self.headers = {
-            "Accept"       : "application/json, text/plain, */*",
-            "Authorization": "Bearer null",
-        }
+        self.headers = {"Accept": "application/json, text/plain, */*"}
+
+        if "Authorization" not in self.session.headers:
+            self.headers["Authorization"] = "Bearer null"
 
     def request(self, url, **kwargs):
         while True:
@@ -54,6 +54,12 @@ class SkebExtractor(Extractor):
                 post.update(file)
                 url = file["file_url"]
                 yield Message.Url, url, text.nameext_from_url(url, post)
+
+    def _items_users(self):
+        base = self.root + "/@"
+        for user in self.users():
+            user["_extractor"] = SkebUserExtractor
+            yield Message.Queue, base + user["screen_name"], user
 
     def posts(self):
         """Return post number"""
@@ -82,6 +88,20 @@ class SkebExtractor(Extractor):
             if len(posts) < 30:
                 return
             params["offset"] += 30
+
+    def _pagination_users(self, endpoint, params):
+        url = "{}/api{}".format(self.root, endpoint)
+        params["offset"] = 0
+        params["limit"] = 90
+
+        while True:
+            data = self.request(
+                url, params=params, headers=self.headers).json()
+            yield from data
+
+            if len(data) < params["limit"]:
+                return
+            params["offset"] += params["limit"]
 
     def _get_post_data(self, user_name, post_num):
         url = "{}/api/users/{}/works/{}".format(
@@ -256,22 +276,23 @@ class SkebFollowingExtractor(SkebExtractor):
     pattern = r"(?:https?://)?skeb\.jp/@([^/?#]+)/following_creators"
     example = "https://skeb.jp/@USER/following_creators"
 
-    def items(self):
-        for user in self.users():
-            url = "{}/@{}".format(self.root, user["screen_name"])
-            user["_extractor"] = SkebUserExtractor
-            yield Message.Queue, url, user
+    items = SkebExtractor._items_users
 
     def users(self):
-        url = "{}/api/users/{}/following_creators".format(
-            self.root, self.user_name)
-        params = {"sort": "date", "offset": 0, "limit": 90}
+        endpoint = "/users/{}/following_creators".format(self.user_name)
+        params = {"sort": "date"}
+        return self._pagination_users(endpoint, params)
 
-        while True:
-            data = self.request(
-                url, params=params, headers=self.headers).json()
-            yield from data
 
-            if len(data) < params["limit"]:
-                return
-            params["offset"] += params["limit"]
+class SkebFollowingUsersExtractor(SkebExtractor):
+    """Extractor for your followed users"""
+    subcategory = "following-users"
+    pattern = r"(?:https?://)?skeb\.jp/following_users()"
+    example = "https://skeb.jp/following_users"
+
+    items = SkebExtractor._items_users
+
+    def users(self):
+        endpoint = "/following_users"
+        params = {}
+        return self._pagination_users(endpoint, params)

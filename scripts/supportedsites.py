@@ -273,6 +273,10 @@ SUBCATEGORY_MAP = {
     "sexcom": {
         "pins": "User Pins",
     },
+    "skeb": {
+        "following"      : "Followed Creators",
+        "following-users": "Followed Users",
+    },
     "smugmug": {
         "path": "Images from Users and Folders",
     },
