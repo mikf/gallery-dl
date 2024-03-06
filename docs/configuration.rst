@@ -4039,7 +4039,7 @@ extractor.weibo.retweets
 Type
     ``bool``
 Default
-    ``true``
+    ``false``
 Description
     Fetch media from retweeted posts.
 
