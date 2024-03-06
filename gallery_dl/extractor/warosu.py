@@ -50,7 +50,7 @@ class WarosuThreadExtractor(Extractor):
         title = text.unescape(text.extr(page, "class=filetitle>", "<"))
         return {
             "board"     : self.board,
-            "board_name": boardname.rpartition(" - ")[2],
+            "board_name": boardname.split(" - ")[1],
             "thread"    : self.thread,
             "title"     : title,
         }
