@@ -82,4 +82,12 @@ __tests__ = (
     "#class"   : skeb.SkebFollowingExtractor,
 },
 
+{
+    "#url"     : "https://skeb.jp/following_users",
+    "#category": ("", "skeb", "following-users"),
+    "#class"   : skeb.SkebFollowingUsersExtractor,
+    "#pattern" : skeb.SkebUserExtractor.pattern,
+    "#auth"    : True,
+},
+
 )
