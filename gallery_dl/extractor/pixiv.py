@@ -650,7 +650,7 @@ class PixivNovelExtractor(PixivExtractor):
             yield Message.Directory, novel
 
             try:
-                content = self.api.novel_text(novel["id"])["novel_text"]
+                content = self.api.novel_webview(novel["id"])["text"]
             except Exception:
                 self.log.warning("Unable to download novel %s", novel["id"])
                 continue
@@ -663,7 +663,7 @@ class PixivNovelExtractor(PixivExtractor):
                 illusts = {}
 
                 for marker in text.extract_iter(content, "[", "]"):
-                    if marker.startswith("[jumpuri:If you would like to "):
+                    if marker.startswith("uploadedimage:"):
                         desktop = True
                     elif marker.startswith("pixivimage:"):
                         illusts[marker[11:].partition("-")[0]] = None
@@ -918,6 +918,15 @@ class PixivAppAPI():
         params = {"novel_id": novel_id}
         return self._call("/v1/novel/text", params)
 
+    def novel_webview(self, novel_id):
+        params = {"id": novel_id, "viewer_version": "20221031_ai"}
+        return self._call(
+            "/webview/v2/novel", params, self._novel_webview_parse)
+
+    def _novel_webview_parse(self, response):
+        return util.json_loads(text.extr(
+            response.text, "novel: ", ",\n"))
+
     def search_illust(self, word, sort=None, target=None, duration=None,
                       date_start=None, date_end=None):
         params = {"word": word, "search_target": target,
@@ -962,13 +971,17 @@ class PixivAppAPI():
         params = {"illust_id": illust_id}
         return self._call("/v1/ugoira/metadata", params)["ugoira_metadata"]
 
-    def _call(self, endpoint, params=None):
+    def _call(self, endpoint, params=None, parse=None):
         url = "https://app-api.pixiv.net" + endpoint
 
         while True:
             self.login()
             response = self.extractor.request(url, params=params, fatal=False)
-            data = response.json()
+
+            if parse:
+                data = parse(response)
+            else:
+                data = response.json()
 
             if "error" not in data:
                 return data
