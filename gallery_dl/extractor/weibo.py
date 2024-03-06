@@ -30,9 +30,9 @@ class WeiboExtractor(Extractor):
         self._prefix, self.user = match.groups()
 
     def _init(self):
-        self.retweets = self.config("retweets", True)
-        self.videos = self.config("videos", True)
         self.livephoto = self.config("livephoto", True)
+        self.retweets = self.config("retweets", False)
+        self.videos = self.config("videos", True)
         self.gifs = self.config("gifs", True)
         self.gifs_video = (self.gifs == "video")
 
@@ -59,15 +59,25 @@ class WeiboExtractor(Extractor):
 
         for status in self.statuses():
 
-            files = []
-            if self.retweets and "retweeted_status" in status:
+            if "ori_mid" in status and not self.retweets:
+                self.log.debug("Skipping %s (快转 retweet)", status["id"])
+                continue
+
+            if "retweeted_status" in status:
+                if not self.retweets:
+                    self.log.debug("Skipping %s (retweet)", status["id"])
+                    continue
+
+                # videos of the original post are in status
+                # images of the original post are in status["retweeted_status"]
+                files = []
+                self._extract_status(status, files)
+                self._extract_status(status["retweeted_status"], files)
+
                 if original_retweets:
                     status = status["retweeted_status"]
-                    self._extract_status(status, files)
-                else:
-                    self._extract_status(status, files)
-                    self._extract_status(status["retweeted_status"], files)
             else:
+                files = []
                 self._extract_status(status, files)
 
             status["date"] = text.parse_datetime(

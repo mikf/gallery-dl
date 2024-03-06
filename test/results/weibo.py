@@ -80,11 +80,11 @@ __tests__ = (
     "#category": ("", "weibo", "home"),
     "#class"   : weibo.WeiboHomeExtractor,
     "#range"   : "1-30",
-    "#count"   : 30,
+    "#count"   : 0,
 },
 
 {
-    "#url"     : "https://weibo.com/1758989602?tabtype=feed",
+    "#url"     : "https://weibo.com/2553930725?tabtype=feed",
     "#category": ("", "weibo", "feed"),
     "#class"   : weibo.WeiboFeedExtractor,
     "#range"   : "1-30",
@@ -192,6 +192,28 @@ __tests__ = (
     "#comment" : "non-numeric status ID (#664)",
     "#category": ("", "weibo", "status"),
     "#class"   : weibo.WeiboStatusExtractor,
+},
+
+{
+    "#url"     : "https://weibo.cn/detail/4600272267522211",
+    "#comment" : "retweet",
+    "#category": ("", "weibo", "status"),
+    "#class"   : weibo.WeiboStatusExtractor,
+    "#count"   : 0,
+},
+
+{
+    "#url"     : "https://weibo.cn/detail/4600272267522211",
+    "#comment" : "retweet",
+    "#category": ("", "weibo", "status"),
+    "#class"   : weibo.WeiboStatusExtractor,
+    "#options" : {"retweets": True},
+    "#count"   : 2,
+
+    "status": {
+        "id"                     : 4600272267522211,
+        "retweeted_status": {"id": 4600167083287033},
+    },
 },
 
 {
