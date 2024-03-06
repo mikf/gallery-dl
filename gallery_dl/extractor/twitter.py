@@ -731,9 +731,9 @@ class TwitterEventExtractor(TwitterExtractor):
 
 
 class TwitterTweetExtractor(TwitterExtractor):
-    """Extractor for images from individual tweets"""
+    """Extractor for individual tweets"""
     subcategory = "tweet"
-    pattern = BASE_PATTERN + r"/([^/?#]+|i/web)/status/(\d+)"
+    pattern = BASE_PATTERN + r"/([^/?#]+|i/web)/status/(\d+)/?$"
     example = "https://twitter.com/USER/status/12345"
 
     def __init__(self, match):
@@ -808,6 +808,18 @@ class TwitterTweetExtractor(TwitterExtractor):
             return buffer
 
         return itertools.chain(buffer, tweets)
+
+
+class TwitterQuotesExtractor(TwitterExtractor):
+    """Extractor for quotes of a Tweet"""
+    subcategory = "quotes"
+    pattern = BASE_PATTERN + r"/(?:[^/?#]+|i/web)/status/(\d+)/quotes"
+    example = "https://twitter.com/USER/status/12345/quotes"
+
+    def items(self):
+        url = "{}/search?q=quoted_tweet_id:{}".format(self.root, self.user)
+        data = {"_extractor": TwitterSearchExtractor}
+        yield Message.Queue, url, data
 
 
 class TwitterAvatarExtractor(TwitterExtractor):

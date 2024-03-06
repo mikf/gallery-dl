@@ -218,7 +218,7 @@ __tests__ = (
     "#category": ("", "twitter", "hashtag"),
     "#class"   : twitter.TwitterHashtagExtractor,
     "#pattern" : twitter.TwitterSearchExtractor.pattern,
-    "#sha1_url": "3571c3a53b7647ea35517041fdc17f77ec5b2cb9",
+    "#urls"    : "https://twitter.com/search?q=%23nature",
 },
 
 {
@@ -535,6 +535,14 @@ You’ll be able to receive four Galarian form Pokémon with Hidden Abilities, p
     "content": """BREAKING - DEADLY LIES: Independent researchers at Texas A&M University have just contradicted federal government regulators, saying that toxic air pollutants in East Palestine, Ohio, could pose long-term risks. \n
 The Washington Post writes, "Three weeks after the toxic train derailment in Ohio, an analysis of Environmental Protection Agency data has found nine air pollutants at levels that could raise long-term health concerns in and around East Palestine, according to an independent analysis. \n
 "The analysis by Texas A&M University seems to contradict statements by state and federal regulators that air near the crash site is completely safe, despite residents complaining about rashes, breathing problems and other health effects." Your reaction.""",
+},
+
+{
+    "#url"     : "https://twitter.com/playpokemon/status/1263832915173048321/quotes",
+    "#category": ("", "twitter", "quotes"),
+    "#class"   : twitter.TwitterQuotesExtractor,
+    "#pattern" : twitter.TwitterSearchExtractor.pattern,
+    "#urls"    : "https://twitter.com/search?q=quoted_tweet_id:1263832915173048321",
 },
 
 {
