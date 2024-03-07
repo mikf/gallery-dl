@@ -191,6 +191,8 @@ class RedditExtractor(Extractor):
         try:
             if "reddit_video_preview" in post["preview"]:
                 video = post["preview"]["reddit_video_preview"]
+                if "fallback_url" in video:
+                    yield video["fallback_url"]
                 if "dash_url" in video:
                     yield "ytdl:" + video["dash_url"]
                 if "hls_url" in video:
