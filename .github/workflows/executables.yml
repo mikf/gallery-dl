@@ -49,7 +49,7 @@ jobs:
       shell: python
       run: |
         import re
-        path = "./application/version.py"
+        path = "./gallery_dl/version.py"
         with open(path) as fp:
             content = fp.read()
         content = re.sub(
