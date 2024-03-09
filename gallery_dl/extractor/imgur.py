@@ -39,9 +39,14 @@ class ImgurExtractor(Extractor):
         image["url"] = url = "https://i.imgur.com/{}.{}".format(
             image["id"], image["ext"])
         image["date"] = text.parse_datetime(image["created_at"])
+        image["_http_validate"] = self._validate
         text.nameext_from_url(url, image)
 
         return url
+
+    def _validate(self, response):
+        return (not response.history or
+                not response.url.endswith("/removed.png"))
 
     def _items_queue(self, items):
         album_ex = ImgurAlbumExtractor
