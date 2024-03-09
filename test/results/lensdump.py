@@ -61,4 +61,16 @@ __tests__ = (
     "width"    : 620,
 },
 
+{
+    "#url"     : "https://i.lensdump.com/i/tyoAyM",
+    "#category": ("", "lensdump", "image"),
+    "#class"   : lensdump.LensdumpImageExtractor,
+},
+
+{
+    "#url"     : "https://i3.lensdump.com/i/tyoAyM",
+    "#category": ("", "lensdump", "image"),
+    "#class"   : lensdump.LensdumpImageExtractor,
+},
+
 )
