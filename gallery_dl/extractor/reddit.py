@@ -202,6 +202,12 @@ class RedditExtractor(Extractor):
 
         try:
             for image in post["preview"]["images"]:
+                variants = image.get("variants")
+                if variants:
+                    if "gif" in variants:
+                        yield variants["gif"]["source"]["url"]
+                    if "mp4" in variants:
+                        yield variants["mp4"]["source"]["url"]
                 yield image["source"]["url"]
         except Exception as exc:
             self.log.debug("%s: %s", exc.__class__.__name__, exc)
