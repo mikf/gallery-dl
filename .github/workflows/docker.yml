@@ -37,7 +37,7 @@ jobs:
           type=ref,event=tag
           type=raw,value=dev
           type=sha,format=long,prefix=
-          type=raw,priority=500,value={{date 'YYYYMMDD'}}
+          type=raw,priority=500,value={{date 'YYYY.MM.DD'}}
 
     - uses: docker/setup-qemu-action@v3
 
