@@ -14,6 +14,8 @@ RUN : \
         https://github.com/mikf/gallery-dl/archive/refs/heads/master.tar.gz \
         yt-dlp \
     && rm -rf /root/.cache/pip \
+    && find /usr/local/lib/python3.*/site-packages/setuptools -name __pycache__ -exec rm -rf {} + \
+    && find /usr/local/lib/python3.*/site-packages/wheel      -name __pycache__ -exec rm -rf {} + \
     && :
 
 ENTRYPOINT [ "gallery-dl" ]
