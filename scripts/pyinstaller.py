@@ -13,6 +13,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-o", "--os")
     parser.add_argument("-a", "--arch")
+    parser.add_argument("-e", "--extension")
     args = parser.parse_args()
 
     name = "gallery-dl"
@@ -20,6 +21,8 @@ def main():
         name = "{}_{}".format(name, args.os.partition("-")[0].lower())
     if args.arch == "x86":
         name += "_x86"
+    if args.extension:
+        name = "{}.{}".format(name, args.extension.lower())
 
     PyInstaller.__main__.run([
         "--onefile",
