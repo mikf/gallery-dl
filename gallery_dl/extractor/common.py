@@ -203,9 +203,15 @@ class Extractor():
             self.log.debug("%s (%s/%s)", msg, tries, retries+1)
             if tries > retries:
                 break
-            self.sleep(
-                max(tries, self._interval()) if self._interval else tries,
-                "retry")
+
+            if self._interval:
+                seconds = self._interval()
+                if seconds < tries:
+                    seconds = tries
+            else:
+                seconds = tries
+
+            self.sleep(seconds, "retry")
             tries += 1
 
         raise exception.HttpError(msg, response)
