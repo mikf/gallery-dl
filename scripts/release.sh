@@ -53,31 +53,43 @@ build-linux() {
     cd "${ROOTDIR}"
     echo Building Linux executable
 
-    VENV_PATH="/tmp/venv"
-    VENV_PYTHON="${VENV_PATH}/bin/python"
-
-    rm -rf "${VENV_PATH}"
-    python -m virtualenv "${VENV_PATH}"
-
-    $VENV_PYTHON -m pip install requests requests[socks] yt-dlp pyyaml secretstorage pyinstaller
-    $VENV_PYTHON ./scripts/pyinstaller.py
+    build-vm 'ubuntu22.04' 'gallery-dl.bin'
 }
 
 build-windows() {
-    cd "${ROOTDIR}/dist"
+    cd "${ROOTDIR}"
     echo Building Windows executable
 
-    # remove old executable
-    rm -f "gallery-dl.exe"
+    build-vm 'windows7_x86_sp1' 'gallery-dl.exe'
+}
 
-    # build windows exe in vm
-    ln -fs "${ROOTDIR}" /tmp/
-    vmstart "windows7_x86_sp1" &
+build-vm() {
+    VMNAME="$1"
+    BINNAME="$2"
+    TMPPATH="/tmp/gallery-dl/dist/$BINNAME"
+
+    # launch VM
+    vmstart "$VMNAME" &
     disown
-    while [ ! -e "gallery-dl.exe" ] ; do
+
+    # copy source files
+    mkdir -p /tmp/gallery-dl
+    cp -a -t /tmp/gallery-dl -- \
+        ./gallery_dl ./scripts ./data ./setup.py ./README.rst
+
+    # remove old executable
+    rm -f "./dist/$BINNAME"
+
+    # wait for new executable
+    while [ ! -e "$TMPPATH" ] ; do
         sleep 5
     done
     sleep 2
+
+    # move
+    mv "$TMPPATH" "./dist/$BINNAME"
+
+    rm -r /tmp/gallery-dl
 }
 
 sign() {
