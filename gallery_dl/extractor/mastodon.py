@@ -70,7 +70,11 @@ class MastodonExtractor(BaseExtractor):
 
     def _check_moved(self, account):
         self._check_moved = None
-        if "moved" in account:
+        # Certain fediverse software (such as Iceshrimp and Sharkey) have a
+        # null account "moved" field instead of not having it outright.
+        # To handle this, check if the "moved" value is truthy instead
+        # if only it exists.
+        if account.get("moved"):
             self.log.warning("Account '%s' moved to '%s'",
                              account["acct"], account["moved"]["acct"])
 
