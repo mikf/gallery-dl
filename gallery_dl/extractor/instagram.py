@@ -573,7 +573,7 @@ class InstagramFollowingExtractor(InstagramExtractor):
     example = "https://www.instagram.com/USER/following/"
 
     def items(self):
-        uid = self.api.user_id(self.item)
+        uid = self.api.user_id(self.item, check_private=False)
         for user in self.api.user_following(uid):
             user["_extractor"] = InstagramUserExtractor
             url = "{}/{}".format(self.root, user["username"])
