@@ -18,4 +18,15 @@ __tests__ = (
     "instance_remote": None,
 },
 
+{
+    "#url"     : "mastodon:https://wanderingwires.net/@quarc/9qppkxzyd1ee3i9p",
+    "#comment" : "null moved account",
+    "#category": ("mastodon", "wanderingwires.net", "status"),
+    "#class"   : mastodon.MastodonStatusExtractor,
+    "#urls"    : "https://s3.wanderingwires.net/null/4377e826-72ab-4659-885c-fa12945eb207.png",
+
+    "instance": "wanderingwires.net",
+    "instance_remote": None,
+},
+
 )
