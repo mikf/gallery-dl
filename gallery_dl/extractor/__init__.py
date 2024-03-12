@@ -44,6 +44,7 @@ modules = [
     "exhentai",
     "fallenangels",
     "fanbox",
+    "fancaps",
     "fanleaks",
     "fantia",
     "fapello",
