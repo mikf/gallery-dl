@@ -22,6 +22,7 @@ import datetime
 import functools
 import itertools
 import subprocess
+import unicodedata
 import urllib.parse
 from http.cookiejar import Cookie
 from email.utils import mktime_tz, parsedate_tz
@@ -216,6 +217,12 @@ def to_string(value):
         except Exception:
             return ", ".join(map(str, value))
     return str(value)
+
+
+def remove_invisible_chars_strip(text):
+    """Remove all invisible characters from 'text' then strip"""
+    return "".join(c for c in text if unicodedata.category(c)[0] != "C")\
+        .strip()
 
 
 def datetime_to_timestamp(dt):
