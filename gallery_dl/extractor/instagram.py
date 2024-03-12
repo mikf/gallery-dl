@@ -736,7 +736,7 @@ class InstagramRestAPI():
                 not user["followed_by_viewer"]:
             name = user["username"]
             s = "" if name.endswith("s") else "s"
-            raise exception.StopExtraction("%s'%s posts are private", name, s)
+            self.extractor.log.warning("%s'%s posts are private", name, s)
         self.extractor._assign_user(user)
         return user["id"]
 
