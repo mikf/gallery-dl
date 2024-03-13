@@ -186,23 +186,34 @@ class WeiboExtractor(Extractor):
 
             data = data["data"]
             statuses = data["list"]
-            if not statuses:
-                return
             yield from statuses
 
-            if "next_cursor" in data:  # videos, newvideo
-                if data["next_cursor"] == -1:
+            # videos, newvideo
+            cursor = data.get("next_cursor")
+            if cursor:
+                if cursor == -1:
                     return
-                params["cursor"] = data["next_cursor"]
-            elif "page" in params:     # home, article
-                params["page"] += 1
-            elif data["since_id"]:     # album
+                params["cursor"] = cursor
+                continue
+
+            # album
+            since_id = data.get("since_id")
+            if since_id:
                 params["sinceid"] = data["since_id"]
-            else:                      # feed, last album page
-                try:
-                    params["since_id"] = statuses[-1]["id"] - 1
-                except KeyError:
+                continue
+
+            # home, article
+            if "page" in params:
+                if not statuses:
                     return
+                params["page"] += 1
+                continue
+
+            # feed, last album page
+            try:
+                params["since_id"] = statuses[-1]["id"] - 1
+            except LookupError:
+                return
 
     def _sina_visitor_system(self, response):
         self.log.info("Sina Visitor System")
