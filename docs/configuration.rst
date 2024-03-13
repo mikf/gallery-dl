@@ -3771,6 +3771,19 @@ Description
     * ``"wait"``: Wait until rate limit reset
 
 
+extractor.twitter.locked
+------------------------
+Type
+    ``string``
+Default
+    ``"abort"``
+Description
+    Selects how to handle "account is temporarily locked" errors.
+
+    * ``"abort"``: Raise an error and stop extraction
+    * ``"wait"``: Wait until the account is unlocked and retry
+
+
 extractor.twitter.replies
 -------------------------
 Type
