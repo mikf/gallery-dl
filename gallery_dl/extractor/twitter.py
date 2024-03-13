@@ -380,6 +380,7 @@ class TwitterExtractor(Extractor):
             "date"            : text.parse_datetime(
                 uget("created_at"), "%a %b %d %H:%M:%S %z %Y"),
             "verified"        : uget("verified", False),
+            "protected"       : uget("protected", False),
             "profile_banner"  : uget("profile_banner_url", ""),
             "profile_image"   : uget(
                 "profile_image_url_https", "").replace("_normal.", "."),
