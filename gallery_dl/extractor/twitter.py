@@ -895,6 +895,7 @@ class TwitterAPI():
 
     def __init__(self, extractor):
         self.extractor = extractor
+        self.log = extractor.log
 
         self.root = "https://twitter.com/i/api"
         self._nsfw_warning = True
@@ -1257,7 +1258,7 @@ class TwitterAPI():
     @cache(maxage=3600)
     def _guest_token(self):
         endpoint = "/1.1/guest/activate.json"
-        self.extractor.log.info("Requesting guest token")
+        self.log.info("Requesting guest token")
         return str(self._call(
             endpoint, None, "POST", False, "https://api.twitter.com",
         )["guest_token"])
@@ -1287,17 +1288,35 @@ class TwitterAPI():
 
             if response.status_code < 400:
                 data = response.json()
-                if not data.get("errors") or not any(
-                        (e.get("message") or "").lower().startswith("timeout")
-                        for e in data["errors"]):
-                    return data  # success or non-timeout errors
 
-                msg = data["errors"][0].get("message") or "Unspecified"
-                self.extractor.log.debug("Internal Twitter error: '%s'", msg)
+                errors = data.get("errors")
+                if not errors:
+                    return data
 
-                if self.headers["x-twitter-auth-type"]:
-                    self.extractor.log.debug("Retrying API request")
-                    continue  # retry
+                retry = False
+                for error in errors:
+                    msg = error.get("message") or "Unspecified"
+                    self.log.debug("API error: '%s'", msg)
+
+                    if "this account is temporarily locked" in msg:
+                        msg = "Account temporarily locked"
+                        if self.extractor.config("locked") != "wait":
+                            raise exception.AuthorizationError(msg)
+                        self.log.warning("%s. Press ENTER to retry.", msg)
+                        try:
+                            input()
+                        except (EOFError, OSError):
+                            pass
+                        retry = True
+
+                    elif msg.lower().startswith("timeout"):
+                        retry = True
+
+                if not retry:
+                    return data
+                elif self.headers["x-twitter-auth-type"]:
+                    self.log.debug("Retrying API request")
+                    continue
 
                 # fall through to "Login Required"
                 response.status_code = 404
@@ -1387,7 +1406,7 @@ class TwitterAPI():
                 try:
                     tweet = tweets[tweet_id]
                 except KeyError:
-                    self.extractor.log.debug("Skipping %s (deleted)", tweet_id)
+                    self.log.debug("Skipping %s (deleted)", tweet_id)
                     continue
 
                 if "retweeted_status_id_str" in tweet:
@@ -1619,8 +1638,10 @@ class TwitterAPI():
             variables["cursor"] = cursor
 
     def _pagination_users(self, endpoint, variables, path=None):
-        params = {"variables": None,
-                  "features" : self._json_dumps(self.features_pagination)}
+        params = {
+            "variables": None,
+            "features" : self._json_dumps(self.features_pagination),
+        }
 
         while True:
             cursor = entry = None
@@ -1664,9 +1685,9 @@ class TwitterAPI():
         if text.startswith("Age-restricted"):
             if self._nsfw_warning:
                 self._nsfw_warning = False
-                self.extractor.log.warning('"%s"', text)
+                self.log.warning('"%s"', text)
 
-        self.extractor.log.debug("Skipping %s (\"%s\")", tweet_id, text)
+        self.log.debug("Skipping %s ('%s')", tweet_id, text)
 
 
 @cache(maxage=365*86400, keyarg=1)
