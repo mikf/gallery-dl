@@ -3286,7 +3286,7 @@ Examples
     * ``["jpeg", "webp"]``
 Description
     Only include assets that are in the specified file types. ``all`` can be
-    used to specifiy all file types. Valid values are:
+    used to specify all file types. Valid values are:
 
     * Grids: ``png``, ``jpeg``, ``jpg``, ``webp``
     * Heroes: ``png``, ``jpeg``, ``jpg``, ``webp``
@@ -3326,7 +3326,7 @@ Examples
     * ``["fr", "it"]``
 Description
     Only include assets that are in the specified languages. ``all`` can be
-    used to specifiy all languages. Valid values are `ISO 639-1 <https://en.wikipedia.org/wiki/ISO_639-1>`__
+    used to specify all languages. Valid values are `ISO 639-1 <https://en.wikipedia.org/wiki/ISO_639-1>`__
     language codes.
 
 
