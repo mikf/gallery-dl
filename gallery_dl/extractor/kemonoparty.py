@@ -232,6 +232,7 @@ class KemonopartyExtractor(Extractor):
         except exception.HttpError:
             post["revision_hash"] = self._revision_hash(post)
             post["revision_index"] = 1
+            post["revision_count"] = 1
             return (post,)
         revs.insert(0, post)
 
@@ -247,9 +248,10 @@ class KemonopartyExtractor(Extractor):
                     uniq.append(rev)
             revs = uniq
 
-        idx = len(revs)
+        cnt = idx = len(revs)
         for rev in revs:
             rev["revision_index"] = idx
+            rev["revision_count"] = cnt
             idx -= 1
 
         return revs
@@ -257,10 +259,11 @@ class KemonopartyExtractor(Extractor):
     def _revisions_all(self, url):
         revs = self.request(url + "/revisions").json()
 
-        idx = len(revs)
+        cnt = idx = len(revs)
         for rev in revs:
             rev["revision_hash"] = self._revision_hash(rev)
             rev["revision_index"] = idx
+            rev["revision_count"] = cnt
             idx -= 1
 
         return revs

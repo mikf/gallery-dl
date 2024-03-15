@@ -195,6 +195,7 @@ __tests__ = (
     "hash"          : "88521f71822dfa2f42df3beba319ea4fceda2a2d6dc59da0276a75238f743f86",
     "revision_id"   : 142470,
     "revision_index": 2,
+    "revision_count": 9,
     "revision_hash" : "e0e93281495e151b11636c156e52bfe9234c2a40",
 },
 
@@ -210,6 +211,7 @@ __tests__ = (
     "hash"          : "88521f71822dfa2f42df3beba319ea4fceda2a2d6dc59da0276a75238f743f86",
     "revision_id"   : 0,
     "revision_index": 1,
+    "revision_count": 1,
     "revision_hash" : "e0e93281495e151b11636c156e52bfe9234c2a40",
 },
 
@@ -224,6 +226,7 @@ __tests__ = (
 
     "revision_id": range(134996, 3052965),
     "revision_index": range(1, 9),
+    "revision_count": 9,
     "revision_hash": "e0e93281495e151b11636c156e52bfe9234c2a40",
 },
 
