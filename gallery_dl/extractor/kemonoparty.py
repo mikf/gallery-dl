@@ -40,6 +40,8 @@ class KemonopartyExtractor(Extractor):
     def _init(self):
         self.revisions = self.config("revisions")
         if self.revisions:
+            order = self.config("order-revisions")
+            self.revisions_reverse = order[0] in ("r", "a") if order else False
             self.revisions_unique = (self.revisions == "unique")
         self._prepare_ddosguard_cookies()
         self._find_inline = re.compile(
@@ -254,6 +256,9 @@ class KemonopartyExtractor(Extractor):
             rev["revision_count"] = cnt
             idx -= 1
 
+        if self.revisions_reverse:
+            revs.reverse()
+
         return revs
 
     def _revisions_all(self, url):
@@ -265,6 +270,9 @@ class KemonopartyExtractor(Extractor):
             rev["revision_index"] = idx
             rev["revision_count"] = cnt
             idx -= 1
+
+        if self.revisions_reverse:
+            revs.reverse()
 
         return revs
 
