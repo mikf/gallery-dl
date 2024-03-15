@@ -678,7 +678,8 @@ class DeviantartStashExtractor(DeviantartExtractor):
     """Extractor for sta.sh-ed deviations"""
     subcategory = "stash"
     archive_fmt = "{index}.{extension}"
-    pattern = r"(?:https?://)?sta\.sh/([a-z0-9]+)"
+    pattern = (r"(?:https?://)?(?:(?:www\.)?deviantart\.com/stash|sta\.sh)"
+               r"/([a-z0-9]+)")
     example = "https://sta.sh/abcde"
 
     skip = Extractor.skip
