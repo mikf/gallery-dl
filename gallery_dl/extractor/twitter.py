@@ -43,14 +43,13 @@ def bar(tweet, entities, files, directory) -> None:
             # This tweet has already been recorded
             return
     print("Started writing JSON data.")
-    # Append tweet to the list
-    data.append(tweet)
     # Write JSON data
-    with open(file_path, "w") as f:
-        for i in data:
-            f.write(f"{json.dumps(i)}\n")
+    previous_size = file_path.stat().st_size
+    with open(file_path, "a") as f:
+        f.write(f"{json.dumps(tweet)}\n")
+    new_size = file_path.stat().st_size
     print(
-        f"Writing JSON data complete. Wrote {file_path.stat().st_size} bytes."
+        f"Writing JSON data complete. Wrote {new_size - previous_size} bytes."
     )
     return
 
