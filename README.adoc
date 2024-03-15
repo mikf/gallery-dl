@@ -1,11 +1,16 @@
 = gallery-dl-forked
 
+To download images given a particular Twitter username:
+
 [source,shell]
 ----
 run.sh USERNAME
 ----
 
+To generate a timeline (in an HTML file) for offline viewing:
+
 [source,shell]
 ----
 finalize.sh USERNAME
 ----
+
