@@ -73,7 +73,7 @@ def foo(tweet, entities, files) -> None:
     dir_name = "gallery-dl/twitter/tweet_json_data"
     if not os.path.exists(dir_name):
         os.makedirs(dir_name)
-    recreate_asciidoc = bar(
+    bar(
         tweet,
         entities,
         files,
