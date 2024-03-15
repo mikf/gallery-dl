@@ -1,5 +1,9 @@
 = gallery-dl-forked
 
+:toc:
+
+== Usage
+
 Please run commands from the directory corresponding to this repo.
 
 Images will be downloaded to `+gallery-dl/twitter/USERNAME+`.
@@ -18,3 +22,8 @@ To generate a timeline (in an HTML file) for offline viewing:
 finalize.sh USERNAME
 ----
 
+== Requirements
+
+----
+include::requirments.txt[]
+----
