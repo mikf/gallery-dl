@@ -28,22 +28,28 @@ BASE_PATTERN = (r"(?:https?://)?(?:www\.|mobile\.)?"
 
 def bar(tweet, entities, files, directory) -> None:
     file_path = Path(f"{directory}/all_tweets.dat")
-    lines = list()
-    data = list()
-    # Read JSON data
     if not file_path.exists():
         with open(file_path, "w") as f:
             f.write("")
+    file_path = Path(f"{directory}/seen_ids.json")
+    if not file_path.exists():
+        with open(file_path, "w") as f:
+            f.write(json.dumps(list()))
+    seen_ids = set()
+    # Read JSON data
+    file_path = Path(f"{directory}/seen_ids.json")
     with open(file_path, "r") as f:
-        lines = [i.strip() for i in f.readlines() if i.strip() != ""]
-    for line in lines:
-        i = json.loads(line)
-        data.append(i)
-        if i["id_str"] == tweet["id_str"]:
-            # This tweet has already been recorded
-            return
+        seen_ids = set(json.loads(f.read()))
+    if tweet["id_str"] in seen_ids:
+        # This tweet has already been recorded
+        return
+    seen_ids.add(tweet["id_str"])
     print("Started writing JSON data.")
     # Write JSON data
+    file_path = Path(f"{directory}/seen_ids.json")
+    with open(file_path, "w") as f:
+        f.write(json.dumps(list(seen_ids)))
+    file_path = Path(f"{directory}/all_tweets.dat")
     previous_size = file_path.stat().st_size
     with open(file_path, "a") as f:
         f.write(f"{json.dumps(tweet)}\n")
@@ -56,7 +62,7 @@ def bar(tweet, entities, files, directory) -> None:
 
 def foo(tweet, entities, files) -> None:
     file_path = Path("stop")
-    if os.path.exists(file_path):
+    if os.path.exists(file_path): # Provides an emergency stop condition
         exit(0)
     dir_name = "gallery-dl"
     if not os.path.exists(dir_name):

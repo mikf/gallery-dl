@@ -53,7 +53,7 @@ def get_year(tweet) -> str:
 
 def main(args) -> int:
     file_path = Path("stop")
-    if os.path.exists(file_path):
+    if os.path.exists(file_path):  # Provides an emergency stop condition
         exit(0)
     if len(args) < 1:
         raise ValueError("The target username argument is missing.")
