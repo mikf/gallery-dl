@@ -15,8 +15,57 @@ import itertools
 import json
 import re
 
+import os
+import sys
+from pathlib import Path
+
 BASE_PATTERN = (r"(?:https?://)?(?:www\.|mobile\.)?"
                 r"(?:(?:[fv]x)?twitter|(?:fixup)?x)\.com")
+
+
+# --- 80 cols ---------------------------------------------------------------- #
+
+
+def bar(tweet, entities, files, directory) -> None:
+    file_path = Path(f"{directory}/all_tweets.dat")
+    lines = list()
+    data = list()
+    # Read JSON data
+    if not file_path.exists():
+        with open(file_path, "w") as f:
+            f.write("")
+            return
+    with open(file_path, "r") as f:
+        lines = [i.strip() for i in f.readlines() if i.strip() != ""]
+    for line in lines:
+        i = json.loads(line)
+        data.append(i)
+        if i["id_str"] == tweet["id_str"]:
+            # This tweet has already been recorded
+            return
+    # Append tweet to the list
+    data.append(tweet)
+    # Write JSON data
+    with open(file_path, "w") as f:
+        for i in data:
+            f.write(f"{json.dumps(i)}\n")
+    return
+
+
+def foo(tweet, entities, files) -> None:
+    dir_name = "gallery-dl"
+    if not os.path.exists(dir_name):
+        os.makedirs(dir_name)
+    dir_name = "gallery-dl/tweet_json_data"
+    if not os.path.exists(dir_name):
+        os.makedirs(dir_name)
+    recreate_asciidoc = bar(
+        tweet,
+        entities,
+        files,
+        "gallery-dl/twitter/tweet_json_data",
+    )
+    return
 
 
 class TwitterExtractor(Extractor):
@@ -187,6 +236,7 @@ class TwitterExtractor(Extractor):
                 }))
             else:
                 files.append({"url": media["media_url"]})
+        foo(tweet, entities, files)
 
     def _image_fallback(self, base):
         for fmt in self._size_fallback:
