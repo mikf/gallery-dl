@@ -1,0 +1,5 @@
+img, video {
+  max-width: 100%;
+  max-height: 650px;
+  height: auto; /* This ensures the aspect ratio is maintained */
+}

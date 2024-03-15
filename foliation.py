@@ -15,6 +15,7 @@ import time
 import textwrap
 import re
 import copy
+import mimetypes
 
 from pathlib import Path
 from datetime import datetime
@@ -41,7 +42,15 @@ def process(tweet, all_images, target_username, previous_year) -> str:
     return_value = f"{return_value}....\n{modified_text}\n...."
     return_value = f"{return_value}\n\n"
     for i in images:
-        return_value += f"image::{file_path}/{i}[]\n\n"
+        mime_type, _ = mimetypes.guess_type(f"{file_path}/{i}")
+        if mime_type.startswith("image/"):
+            return_value += f"image::{file_path}/{i}[]\n\n"
+        elif mime_type.startswith("video/"):
+            return_value += f".A video file.\nvideo::{file_path}/{i}[]\n\n"
+        elif mime_type.startswith("audio/"):
+            return_value += f".An audio file.\naudio::{file_path}/{i}[]\n\n"
+        else:
+            return_value += f"image::{file_path}/{i}[]\n\n"
     return return_value
 
 
@@ -58,6 +67,7 @@ def main(args) -> int:
     if len(args) < 1:
         raise ValueError("The target username argument is missing.")
     target_username = args[0].strip()
+    print(f"Started building document for {target_username}.")
     directory = "gallery-dl"
     file_path = Path(f"{directory}/twitter/tweet_json_data/all_tweets.dat")
     all_tweets_data = list()
@@ -85,7 +95,6 @@ def main(args) -> int:
             )
             previous_year = get_year(tweet)
     with open(f"{target_username}.adoc", "w") as f:
-        print(text)
         f.write(text)
     return 0
 
