@@ -194,7 +194,7 @@ class ImagefapFolderExtractor(ImagefapExtractor):
             cnt = 0
 
             while True:
-                gid = extr('<a  href="/gallery/', '"')
+                gid = extr(' id="gid-', '"')
                 if not gid:
                     break
                 yield gid, extr("<b>", "<"), folder_name
