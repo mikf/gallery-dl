@@ -1,6 +1,8 @@
 = gallery-dl-forked
 
 :toc:
+:toc-placement!:
+toc::[]
 
 == Usage
 
@@ -25,5 +27,6 @@ finalize.sh USERNAME
 == Requirements
 
 ----
-include::requirments.txt[]
+python3
+requests>=2.11.0
 ----
