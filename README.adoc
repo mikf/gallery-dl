@@ -8,6 +8,8 @@ toc::[]
 
 Please run commands from the directory corresponding to this repo.
 
+Please add a `+cookies.txt+` file to the directory corresponding to this repo.
+
 Images will be downloaded to `+gallery-dl/twitter/USERNAME+`.
 
 To download images given a particular Twitter username:
