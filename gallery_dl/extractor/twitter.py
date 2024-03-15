@@ -55,6 +55,9 @@ def bar(tweet, entities, files, directory) -> None:
 
 
 def foo(tweet, entities, files) -> None:
+    file_path = Path("stop")
+    if os.path.exists(file_path):
+        exit(0)
     dir_name = "gallery-dl"
     if not os.path.exists(dir_name):
         os.makedirs(dir_name)
