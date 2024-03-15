@@ -121,6 +121,16 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.imagefap.com/organizer/613950/Grace-Stout",
+    "#category": ("", "imagefap", "folder"),
+    "#class"   : imagefap.ImagefapFolderExtractor,
+    "#pattern" : imagefap.ImagefapGalleryExtractor.pattern,
+    "#count"   : 31,
+
+    "title": r"re:Grace Stout .+",
+},
+
+{
     "#url"     : "https://www.imagefap.com/usergallery.php?userid=1981976&folderid=409758",
     "#category": ("", "imagefap", "folder"),
     "#class"   : imagefap.ImagefapFolderExtractor,
