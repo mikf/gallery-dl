@@ -699,7 +699,7 @@ class DeviantartStashExtractor(DeviantartExtractor):
             if uuid:
                 deviation = self.api.deviation(uuid)
                 deviation["index"] = text.parse_int(text.extr(
-                    page, 'gmi-deviationid="', '"'))
+                    page, '\\"deviationId\\":', ','))
                 yield deviation
                 return
 
