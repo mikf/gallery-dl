@@ -1,0 +1,11 @@
+= gallery-dl-forked
+
+[source,shell]
+----
+run.sh USERNAME
+----
+
+[source,shell]
+----
+finalize.sh USERNAME
+----
