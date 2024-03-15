@@ -2346,6 +2346,22 @@ Description
     Note: This requires 1 additional HTTP request per post.
 
 
+extractor.kemonoparty.order-revisions
+-------------------------------------
+Type
+    ``string``
+Default
+    ``"desc"``
+Description
+    Controls the order in which
+    `revisions <extractor.kemonoparty.revisions_>`__
+    are returned.
+
+    * ``"asc"``: Ascending order (oldest first)
+    * ``"desc"``: Descending order (newest first)
+    * ``"reverse"``: Same as ``"asc"``
+
+
 extractor.khinsider.format
 --------------------------
 Type
