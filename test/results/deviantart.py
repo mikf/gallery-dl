@@ -361,7 +361,7 @@ __tests__ = (
 },
 
 {
-    "#url"     : "https://sta.sh/022c83odnaxc",
+    "#url"     : "https://www.deviantart.com/stash/022c83odnaxc",
     "#category": ("", "deviantart", "stash"),
     "#class"   : deviantart.DeviantartStashExtractor,
     "#pattern"     : r"https://wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/940f2d05-c5eb-4917-8192-7eb6a2d508c6/dcvdmbc-e506cdcf-3208-4c20-85ab-0bfa8a7bcb16.png\?token=ey.+",
@@ -386,6 +386,12 @@ __tests__ = (
     "published_time": 1545835767,
     "title"         : "01",
     "url"           : "https://www.deviantart.com/stash/022c83odnaxc",
+},
+
+{
+    "#url"     : "https://sta.sh/022c83odnaxc",
+    "#category": ("", "deviantart", "stash"),
+    "#class"   : deviantart.DeviantartStashExtractor,
 },
 
 {
