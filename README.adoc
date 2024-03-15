@@ -1,5 +1,9 @@
 = gallery-dl-forked
 
+Please run commands from the directory corresponding to this repo.
+
+Images will be downloaded to `+gallery-dl/twitter/USERNAME+`.
+
 To download images given a particular Twitter username:
 
 [source,shell]
