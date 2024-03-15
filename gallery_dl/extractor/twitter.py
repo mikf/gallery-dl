@@ -56,7 +56,10 @@ def foo(tweet, entities, files) -> None:
     dir_name = "gallery-dl"
     if not os.path.exists(dir_name):
         os.makedirs(dir_name)
-    dir_name = "gallery-dl/tweet_json_data"
+    dir_name = "gallery-dl/twitter"
+    if not os.path.exists(dir_name):
+        os.makedirs(dir_name)
+    dir_name = "gallery-dl/twitter/tweet_json_data"
     if not os.path.exists(dir_name):
         os.makedirs(dir_name)
     recreate_asciidoc = bar(
