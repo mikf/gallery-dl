@@ -34,7 +34,6 @@ def bar(tweet, entities, files, directory) -> None:
     if not file_path.exists():
         with open(file_path, "w") as f:
             f.write("")
-            return
     with open(file_path, "r") as f:
         lines = [i.strip() for i in f.readlines() if i.strip() != ""]
     for line in lines:
@@ -43,12 +42,16 @@ def bar(tweet, entities, files, directory) -> None:
         if i["id_str"] == tweet["id_str"]:
             # This tweet has already been recorded
             return
+    print("Started writing JSON data.")
     # Append tweet to the list
     data.append(tweet)
     # Write JSON data
     with open(file_path, "w") as f:
         for i in data:
             f.write(f"{json.dumps(i)}\n")
+    print(
+        f"Writing JSON data complete. Wrote {file_path.stat().st_size} bytes."
+    )
     return
 
 
