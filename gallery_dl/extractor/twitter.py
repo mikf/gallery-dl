@@ -340,6 +340,8 @@ class TwitterExtractor(Extractor):
         txt, _, tco = content.rpartition(" ")
         tdata["content"] = txt if tco.startswith("https://t.co/") else content
 
+        if "birdwatch_pivot" in tweet:
+            tdata["birdwatch"] = tweet["birdwatch_pivot"]["subtitle"]["text"]
         if "in_reply_to_screen_name" in legacy:
             tdata["reply_to"] = legacy["in_reply_to_screen_name"]
         if "quoted_by" in legacy:
