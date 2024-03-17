@@ -9,7 +9,7 @@ from gallery_dl.extractor import hiperdex
 
 __tests__ = (
 {
-    "#url"     : "https://hiperdex.com/manga/domestic-na-kanojo/154-5/",
+    "#url"     : "https://hiperdex.com/mangas/domestic-na-kanojo/154-5/",
     "#category": ("", "hiperdex", "chapter"),
     "#class"   : hiperdex.HiperdexChapterExtractor,
     "#pattern" : r"https://(1st)?hiperdex\d?.(com|net|info)/wp-content/uploads/WP-manga/data/manga_\w+/[0-9a-f]{32}/\d+\.webp",
@@ -25,6 +25,12 @@ __tests__ = (
     "release"      : 2014,
     "score"        : float,
     "type"         : "Manga",
+},
+
+{
+    "#url"     : "https://hiperdex.com/manga/domestic-na-kanojo/154-5/",
+    "#category": ("", "hiperdex", "chapter"),
+    "#class"   : hiperdex.HiperdexChapterExtractor,
 },
 
 {
