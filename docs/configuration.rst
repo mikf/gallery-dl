@@ -1872,6 +1872,20 @@ Description
     from `linking your Flickr account to gallery-dl <OAuth_>`__.
 
 
+extractor.flickr.contexts
+-------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    For each photo, return the albums and pools it belongs to
+    as ``set`` and ``pool`` metadata.
+
+    Note: This requires 1 additional API call per photo.
+    See `flickr.photos.getAllContexts <https://www.flickr.com/services/api/flickr.photos.getAllContexts.html>`__ for details.
+
+
 extractor.flickr.exif
 ---------------------
 Type
@@ -1879,9 +1893,11 @@ Type
 Default
     ``false``
 Description
-    Fetch `exif` and `camera` metadata for each photo.
+    For each photo, return its EXIF/TIFF/GPS tags
+    as ``exif`` and ``camera`` metadata.
 
     Note: This requires 1 additional API call per photo.
+    See `flickr.photos.getExif <https://www.flickr.com/services/api/flickr.photos.getExif.html>`__ for details.
 
 
 extractor.flickr.metadata
@@ -1901,7 +1917,7 @@ Description
 
     It is possible to specify a custom list of metadata includes.
     See `the extras parameter <https://www.flickr.com/services/api/flickr.people.getPhotos.html>`__
-    in `Flickr API docs <https://www.flickr.com/services/api/>`__
+    in `Flickr's API docs <https://www.flickr.com/services/api/>`__
     for possible field names.
 
 
