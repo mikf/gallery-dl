@@ -40,6 +40,7 @@ class BlueskyExtractor(Extractor):
 
         self.api = BlueskyAPI(self)
         self._user = self._user_did = None
+        self.instance = self.root.partition("://")[2]
 
     def items(self):
         for post in self.posts():
@@ -81,6 +82,7 @@ class BlueskyExtractor(Extractor):
             if self._metadata_user:
                 post["user"] = self._user or post["author"]
 
+            post["instance"] = self.instance
             post["post_id"] = pid
             post["count"] = len(images)
             post["date"] = text.parse_datetime(
