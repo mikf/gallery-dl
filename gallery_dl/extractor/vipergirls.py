@@ -26,6 +26,11 @@ class VipergirlsExtractor(Extractor):
     cookies_domain = ".vipergirls.to"
     cookies_names = ("vg_userid", "vg_password")
 
+    def _init(self):
+        domain = self.config("domain")
+        if domain:
+            self.root = text.ensure_http_scheme(domain)
+
     def items(self):
         self.login()
         posts = self.posts()
