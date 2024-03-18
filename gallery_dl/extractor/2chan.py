@@ -26,17 +26,19 @@ class _2chanThreadExtractor(Extractor):
     def __init__(self, match):
         Extractor.__init__(self, match)
         self.server, self.board, self.thread = match.groups()
+        self.text_posts = self.config("text-posts", False)
 
     def items(self):
         url = "https://{}.2chan.net/{}/res/{}.htm".format(
             self.server, self.board, self.thread)
         page = self.request(url).text
         data = self.metadata(page)
-        yield Message.Directory, data
         for post in self.posts(page):
+            post.update(data)
+            if "filename" in post or self.text_posts:
+                yield Message.Directory, post
             if "filename" not in post:
                 continue
-            post.update(data)
             url = self.url_fmt.format_map(post)
             yield Message.Url, url, post
 

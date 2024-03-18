@@ -26,6 +26,7 @@ class _4chanThreadExtractor(Extractor):
     def __init__(self, match):
         Extractor.__init__(self, match)
         self.board, self.thread = match.groups()
+        self.text_posts = self.config("text-posts", False)
 
     def items(self):
         url = "https://a.4cdn.org/{}/thread/{}.json".format(
@@ -39,10 +40,11 @@ class _4chanThreadExtractor(Extractor):
             "title" : text.unescape(title)[:50],
         }
 
-        yield Message.Directory, data
         for post in posts:
+            post.update(data)
+            if "filename" in post or self.text_posts:
+                yield Message.Directory, post
             if "filename" in post:
-                post.update(data)
                 post["extension"] = post["ext"][1:]
                 post["filename"] = text.unescape(post["filename"])
                 url = "https://i.4cdn.org/{}/{}{}".format(
