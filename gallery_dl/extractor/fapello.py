@@ -42,7 +42,7 @@ class FapelloPostExtractor(Extractor):
             "type" : "video" if 'type="video' in page else "photo",
             "thumbnail": text.extr(page, 'poster="', '"'),
         }
-        url = text.extr(page, 'src="', '"')
+        url = text.extr(page, 'src="', '"').replace(".md", "")
         yield Message.Directory, data
         yield Message.Url, url, text.nameext_from_url(url, data)
 
