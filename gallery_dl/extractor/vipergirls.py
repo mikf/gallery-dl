@@ -28,14 +28,31 @@ class VipergirlsExtractor(Extractor):
 
     def items(self):
         self.login()
+        posts = self.posts()
 
-        for post in self.posts():
+        like = self.config("like")
+        if like:
+            user_hash = posts[0].get("hash")
+            if len(user_hash) < 16:
+                self.log.warning("Login required to like posts")
+                like = False
+
+        posts = posts.iter("post")
+        if self.page:
+            util.advance(posts, (text.parse_int(self.page[5:]) - 1) * 15)
+
+        for post in posts:
             data = post.attrib
             data["thread_id"] = self.thread_id
 
             yield Message.Directory, data
+
+            image = None
             for image in post:
                 yield Message.Queue, image.attrib["main_url"], data
+
+            if image is not None and like:
+                self.like(post, user_hash)
 
     def login(self):
         if self.cookies_check(self.cookies_names):
@@ -64,6 +81,17 @@ class VipergirlsExtractor(Extractor):
         return {cookie.name: cookie.value
                 for cookie in response.cookies}
 
+    def like(self, post, user_hash):
+        url = self.root + "/post_thanks.php"
+        params = {
+            "do"           : "post_thanks_add",
+            "p"            : post.get("id"),
+            "securitytoken": user_hash,
+        }
+
+        with self.request(url, params=params, allow_redirects=False):
+            pass
+
 
 class VipergirlsThreadExtractor(VipergirlsExtractor):
     """Extractor for vipergirls threads"""
@@ -77,12 +105,7 @@ class VipergirlsThreadExtractor(VipergirlsExtractor):
 
     def posts(self):
         url = "{}/vr.php?t={}".format(self.root, self.thread_id)
-        root = ElementTree.fromstring(self.request(url).text)
-        posts = root.iter("post")
-
-        if self.page:
-            util.advance(posts, (text.parse_int(self.page[5:]) - 1) * 15)
-        return posts
+        return ElementTree.fromstring(self.request(url).text)
 
 
 class VipergirlsPostExtractor(VipergirlsExtractor):
@@ -95,8 +118,8 @@ class VipergirlsPostExtractor(VipergirlsExtractor):
     def __init__(self, match):
         VipergirlsExtractor.__init__(self, match)
         self.thread_id, self.post_id = match.groups()
+        self.page = 0
 
     def posts(self):
         url = "{}/vr.php?p={}".format(self.root, self.post_id)
-        root = ElementTree.fromstring(self.request(url).text)
-        return root.iter("post")
+        return ElementTree.fromstring(self.request(url).text)
