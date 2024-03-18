@@ -3954,6 +3954,18 @@ Description
     ``"raw"``, ``"full"``, ``"regular"``, ``"small"``, and ``"thumb"``.
 
 
+extractor.vipergirls.domain
+---------------------------
+Type
+    ``string``
+Default
+    ``"vipergirls.to"``
+Description
+    Specifies the domain used by ``vipergirls`` extractors.
+
+    For example ``"viper.click"`` if the main domain is blocked or to bypass Cloudflare,
+
+
 extractor.vipergirls.like
 -------------------------
 Type
