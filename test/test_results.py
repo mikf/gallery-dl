@@ -214,44 +214,46 @@ class TestExtractorResults(unittest.TestCase):
             for kwdict in tjob.kwdict_list:
                 self._test_kwdict(kwdict, metadata)
 
-    def _test_kwdict(self, kwdict, tests):
+    def _test_kwdict(self, kwdict, tests, parent=None):
         for key, test in tests.items():
             if key.startswith("?"):
                 key = key[1:]
                 if key not in kwdict:
                     continue
-            self.assertIn(key, kwdict, msg=key)
+            path = "{}.{}".format(parent, key) if parent else key
+            self.assertIn(key, kwdict, msg=path)
             value = kwdict[key]
 
             if isinstance(test, dict):
-                self._test_kwdict(value, test)
+                self._test_kwdict(value, test, path)
             elif isinstance(test, type):
-                self.assertIsInstance(value, test, msg=key)
+                self.assertIsInstance(value, test, msg=path)
             elif isinstance(test, range):
-                self.assertRange(value, test, msg=key)
+                self.assertRange(value, test, msg=path)
             elif isinstance(test, list):
                 subtest = False
                 for idx, item in enumerate(test):
                     if isinstance(item, dict):
                         subtest = True
-                        self._test_kwdict(value[idx], item)
+                        subpath = "{}[{}]".format(path, idx)
+                        self._test_kwdict(value[idx], item, subpath)
                 if not subtest:
-                    self.assertEqual(test, value, msg=key)
+                    self.assertEqual(test, value, msg=path)
             elif isinstance(test, str):
                 if test.startswith("re:"):
-                    self.assertRegex(value, test[3:], msg=key)
+                    self.assertRegex(value, test[3:], msg=path)
                 elif test.startswith("dt:"):
-                    self.assertIsInstance(value, datetime.datetime, msg=key)
-                    self.assertEqual(test[3:], str(value), msg=key)
+                    self.assertIsInstance(value, datetime.datetime, msg=path)
+                    self.assertEqual(test[3:], str(value), msg=path)
                 elif test.startswith("type:"):
-                    self.assertEqual(test[5:], type(value).__name__, msg=key)
+                    self.assertEqual(test[5:], type(value).__name__, msg=path)
                 elif test.startswith("len:"):
-                    self.assertIsInstance(value, (list, tuple), msg=key)
-                    self.assertEqual(int(test[4:]), len(value), msg=key)
+                    self.assertIsInstance(value, (list, tuple), msg=path)
+                    self.assertEqual(int(test[4:]), len(value), msg=path)
                 else:
-                    self.assertEqual(test, value, msg=key)
+                    self.assertEqual(test, value, msg=path)
             else:
-                self.assertEqual(test, value, msg=key)
+                self.assertEqual(test, value, msg=path)
 
 
 class ResultJob(job.DownloadJob):
