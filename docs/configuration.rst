@@ -3954,6 +3954,19 @@ Description
     ``"raw"``, ``"full"``, ``"regular"``, ``"small"``, and ``"thumb"``.
 
 
+extractor.vipergirls.like
+-------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Automatically `like` posts after downloading their images.
+
+    Note: Requires `login <extractor.*.username & .password_>`__
+    or `cookies <extractor.*.cookies_>`__
+
+
 extractor.vsco.videos
 ---------------------
 Type
