@@ -31,8 +31,9 @@ class TestFormatter(unittest.TestCase):
         "h": "<p>foo </p> &amp; bar <p> </p>",
         "u": "&#x27;&lt; / &gt;&#x27;",
         "t": 1262304000,
-        "dt": datetime.datetime(2010, 1, 1),
         "ds": "2010-01-01T01:00:00+0100",
+        "dt": datetime.datetime(2010, 1, 1),
+        "dt_dst": datetime.datetime(2010, 6, 1),
         "name": "Name",
         "title1": "Title",
         "title2": "",
@@ -236,19 +237,18 @@ class TestFormatter(unittest.TestCase):
         self._run_test("{ds:D%Y-%m-%dT%H:%M:%S%z/O1}", "2010-01-01 01:00:00")
         self._run_test("{t!d:O2}", "2010-01-01 02:00:00")
 
-        orig_daylight = time.daylight
-        orig_timezone = time.timezone
-        orig_altzone = time.altzone
-        try:
-            time.daylight = False
-            time.timezone = -3600
-            self._run_test("{dt:O}", "2010-01-01 01:00:00")
-            time.timezone = 7200
-            self._run_test("{dt:Olocal}", "2009-12-31 22:00:00")
-        finally:
-            time.daylight = orig_daylight
-            time.timezone = orig_timezone
-            time.altzone = orig_altzone
+    def test_offset_local(self):
+        ts = self.kwdict["dt"].replace(tzinfo=datetime.UTC).timestamp()
+        offset = time.localtime(ts).tm_gmtoff
+        dt = self.kwdict["dt"] + datetime.timedelta(seconds=offset)
+        self._run_test("{dt:O}", str(dt))
+        self._run_test("{dt:Olocal}", str(dt))
+
+        ts = self.kwdict["dt_dst"].replace(tzinfo=datetime.UTC).timestamp()
+        offset = time.localtime(ts).tm_gmtoff
+        dt = self.kwdict["dt_dst"] + datetime.timedelta(seconds=offset)
+        self._run_test("{dt_dst:O}", str(dt))
+        self._run_test("{dt_dst:Olocal}", str(dt))
 
     def test_sort(self):
         self._run_test("{l:S}" , "['a', 'b', 'c']")
