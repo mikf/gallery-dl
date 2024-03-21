@@ -17,6 +17,10 @@ import re
 
 import os
 import sys
+import time
+import math
+import random
+import datetime
 from pathlib import Path
 
 BASE_PATTERN = (r"(?:https?://)?(?:www\.|mobile\.)?"
@@ -24,6 +28,41 @@ BASE_PATTERN = (r"(?:https?://)?(?:www\.|mobile\.)?"
 
 
 # --- 80 cols ---------------------------------------------------------------- #
+
+
+def sleeping_time() -> bool:
+    # Get the current local time
+    current_time = datetime.datetime.now().time()
+    # Define the start and end times
+    start_time = datetime.datetime.strptime("23:00", "%H:%M").time()
+    end_time = datetime.datetime.strptime("08:00", "%H:%M").time()
+    # Check if the current time is between 11:00 PM and 8:00 AM
+    is_between = start_time <= current_time or current_time <= end_time
+    return is_between
+
+
+def go_to_bed() -> None:
+    if sleeping_time():
+        print("Program is going to bed for today.")
+    while sleeping_time():
+        time.sleep(60)
+    return
+
+
+def wait_inbetween_calls() -> None:
+    wait_time = max(0, random.gauss(mu = 120, sigma = 30))
+    print(f"Waiting for extra time inbetween retriving tweets. ({wait_time:.3f}s)")
+    time.sleep(wait_time)
+    go_to_bed()
+    return
+
+
+def wait_inbetween_downloads():
+    wait_time = max(0, random.gauss(mu = 120, sigma = 30))
+    print(f"Waiting for extra time inbetween downloading media. ({wait_time:.3f}s)")
+    time.sleep(wait_time)
+    go_to_bed()
+    return
 
 
 def bar(tweet, entities, files, directory) -> None:
@@ -44,6 +83,7 @@ def bar(tweet, entities, files, directory) -> None:
         # This tweet has already been recorded
         return
     seen_ids.add(tweet["id_str"])
+    wait_inbetween_downloads()
     print("Started writing JSON data.")
     # Write JSON data
     file_path = Path(f"{directory}/seen_ids.json")
@@ -1335,6 +1375,7 @@ class TwitterAPI():
                 "gt", guest_token, domain=self.extractor.cookies_domain)
 
     def _call(self, endpoint, params, method="GET", auth=True, root=None):
+        wait_inbetween_calls()
         url = (root or self.root) + endpoint
 
         while True:

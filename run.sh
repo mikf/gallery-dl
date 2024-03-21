@@ -3,11 +3,8 @@
 
 # --- 80 cols ---------------------------------------------------------------- #
 
-SLEEP_VALUE="60s"
-
 python3 begin.py \
     "https://twitter.com/${1}" \
-    --exec "sleep ${SLEEP_VALUE}" \
     --cookies "cookies.txt" \
     ;
 
