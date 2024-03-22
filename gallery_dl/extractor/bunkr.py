@@ -54,7 +54,6 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
             "album_id"   : self.album_id,
             "album_name" : text.unescape(info[0]),
             "album_size" : size[1:-1],
-            "description": text.unescape(info[2]) if len(info) > 2 else "",
             "count"      : len(urls),
         }
 
