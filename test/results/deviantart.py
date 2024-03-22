@@ -308,7 +308,7 @@ __tests__ = (
     "target"           : dict,
     "thumbs"           : list,
     "title"            : "Banner",
-    "url"              : "https://sta.sh/0198jippkeys",
+    "url"              : "https://www.deviantart.com/stash/0198jippkeys",
     "username"         : "gdldev",
 },
 
@@ -589,7 +589,7 @@ __tests__ = (
 
     "index"       : int,
     "index_base36": r"re:^[0-9a-z]+$",
-    "url"         : r"re:^https://sta.sh",
+    "url"         : r"re:^https://www.deviantart.com/stash/\w+",
 },
 
 {

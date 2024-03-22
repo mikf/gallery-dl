@@ -29,10 +29,11 @@ __tests__ = (
 },
 
 {
-    "#url"     : "https://www.hentai-foundry.com/pictures/user/Evulchibi/scraps",
+    "#url"     : "https://www.hentai-foundry.com/pictures/user/Ethevian/scraps",
     "#category": ("", "hentaifoundry", "scraps"),
     "#class"   : hentaifoundry.HentaifoundryScrapsExtractor,
-    "#sha1_url": "7cd9c6ec6258c4ab8c44991f7731be82337492a7",
+    "#pattern" : r"https://pictures\.hentai-foundry\.com/e/Ethevian/.+",
+    "#count"   : ">= 10",
 },
 
 {

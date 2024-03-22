@@ -89,11 +89,10 @@ __tests__ = (
 },
 
 {
-    "#url"     : "https://kemono.party/gumroad/user/trylsc/post/IURjT",
-    "#comment" : "kemono.party -> data.kemono.party",
+    "#url"     : "https://kemono.su/gumroad/user/3101696181060/post/tOWyf",
     "#category": ("", "kemonoparty", "gumroad"),
     "#class"   : kemonoparty.KemonopartyPostExtractor,
-    "#pattern" : r"https://kemono\.party/data/(a4/7b/a47bfe938d8c1682eef06e885927484cd8df1b.+\.jpg|c6/04/c6048f5067fd9dbfa7a8be565ac194efdfb6e4.+\.zip)",
+    "#urls"    : "https://kemono.su/data/6f/13/6f1394b19516396ea520254350662c254bbea30c1e111fd4b0f042c61c426d07.zip",
 },
 
 {

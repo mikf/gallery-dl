@@ -47,13 +47,11 @@ __tests__ = (
 },
 
 {
-    "#url"     : "https://vsco.co/vscotest39/spaces",
+    "#url"     : "https://vsco.co/missuri/spaces",
     "#category": ("", "vsco", "spaces"),
     "#class"   : vsco.VscoSpacesExtractor,
     "#urls"    : (
-        "https://vsco.co/spaces/62991a535a9ee215340fa2b0",
-        "https://vsco.co/spaces/62b35bfb54f97cbfbd5c1e62",
-        "https://vsco.co/spaces/629674a6875ebddb8f1320c1",
+        "https://vsco.co/spaces/62e4934e6920440801d19f05",
     ),
 },
 

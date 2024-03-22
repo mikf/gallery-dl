@@ -15,11 +15,11 @@ __tests__ = (
 },
 
 {
-    "#url"     : "https://www.omgmiamiswimwear.com/products/la-medusa-maxi-dress",
+    "#url"     : "https://www.omgmiamiswimwear.com/products/snatch-me-waist-belt",
     "#category": ("shopify", "omgmiamiswimwear", "product"),
     "#class"   : shopify.ShopifyProductExtractor,
     "#pattern" : r"https://cdn\.shopify\.com/s/files/1/1819/6171/",
-    "#count"   : 5,
+    "#count"   : 3,
 },
 
 )

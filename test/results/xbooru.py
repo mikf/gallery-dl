@@ -12,7 +12,7 @@ __tests__ = (
     "#url"     : "https://xbooru.com/index.php?page=post&s=list&tags=konoyan",
     "#category": ("gelbooru_v02", "xbooru", "tag"),
     "#class"   : gelbooru_v02.GelbooruV02TagExtractor,
-    "#count"   : 24,
+    "#count"   : 25,
 },
 
 {
