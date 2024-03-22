@@ -42,7 +42,7 @@ __tests__ = (
 },
 
 {
-    "#url"     : "https://idol.sankakucomplex.com/pools/show/145",
+    "#url"     : "https://idol.sankakucomplex.com/en/pools/e9PMwnwRBK3",
     "#category": ("booru", "idolcomplex", "pool"),
     "#class"   : idolcomplex.IdolcomplexPoolExtractor,
     "#count"   : 3,
@@ -72,16 +72,16 @@ __tests__ = (
     "file_url"      : r"re:https://i[sv]\.sankakucomplex\.com/data/50/9e/509eccbba54a43cea6b275a65b93c51d\.jpg\?",
     "filename"      : "509eccbba54a43cea6b275a65b93c51d",
     "height"        : 683,
-    "id"            : 694215,
-    "id_alnum"      : "vkr36qdOaZ4",
+    "id"            : "vkr36qdOaZ4",  # legacy ID: 694215
     "md5"           : "509eccbba54a43cea6b275a65b93c51d",
     "rating"        : "g",
     "tags"          : "lyumos the_witcher shani_(the_witcher) 1girl green_eyes non-asian redhead waistcoat wreath cosplay 3:2_aspect_ratio",
     "tags_character": "shani_(the_witcher)",
     "tags_copyright": "the_witcher",
     "tags_general"  : "1girl green_eyes non-asian redhead waistcoat wreath",
+    "tags_genre"    : "cosplay",
     "tags_idol"     : "lyumos",
-    "tags_medium"   : "cosplay 3:2_aspect_ratio",
+    "tags_medium"   : "3:2_aspect_ratio",
     "vote_average"  : range(4, 5),
     "vote_count"    : range(25, 40),
     "width"         : 1024,
@@ -111,8 +111,7 @@ __tests__ = (
     "#class"   : idolcomplex.IdolcomplexPostExtractor,
     "#sha1_content": "694ec2491240787d75bf5d0c75d0082b53a85afd",
 
-    "id"            : 694215,
-    "id_alnum"      : "vkr36qdOaZ4",
+    "id"            : "vkr36qdOaZ4",  # legacy ID: 694215
     "tags_character": "shani_(the_witcher)",
     "tags_copyright": "the_witcher",
     "tags_idol"     : str,
