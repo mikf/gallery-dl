@@ -12,7 +12,7 @@ __tests__ = (
     "#url"     : "https://myhentaigallery.com/g/16247",
     "#category": ("", "myhentaigallery", "gallery"),
     "#class"   : myhentaigallery.MyhentaigalleryGalleryExtractor,
-    "#pattern" : r"https://images\.myhentaicomics\.com/m\w\w/images/[^/]+/original/\d+\.jpg",
+    "#pattern" : r"https://(cdn|images)\.myhentaicomics\.com/m\w\w/images/[^/]+/original/\d+\.jpg",
 
     "artist"    : list,
     "count"     : 11,

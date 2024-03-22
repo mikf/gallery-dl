@@ -5,22 +5,16 @@
 # published by the Free Software Foundation.
 
 from gallery_dl.extractor import steamgriddb
+from gallery_dl import exception
 
 
 __tests__ = (
 {
     "#url"     : "https://www.steamgriddb.com/grid/368023",
+    "#comment" : "deleted",
     "#category": ("", "steamgriddb", "asset"),
     "#class"   : steamgriddb.SteamgriddbAssetExtractor,
-    "#urls"    : ("https://cdn2.steamgriddb.com/grid/"
-                  "82fee171d62c044898d99ba0fddeb203.png"),
-    "#count"   : 1,
-    "#sha1_content": "0bffaccae6f35f9fab529684a5b158d1cec4186b",
-
-    "game": {
-        "id"  : 5259324,
-        "name": "Helltaker",
-    },
+    "#exception": exception.NotFoundError,
 },
 
 {

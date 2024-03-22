@@ -82,9 +82,9 @@ __tests__ = (
     "#class"   : mastodon.MastodonFollowingExtractor,
     "#extractor": False,
     "#urls"     : (
+        "https://mastodon.ie/@RustyBertrand",
         "https://ravenation.club/@soundwarrior20",
         "https://mastodon.social/@0x4f",
-        "https://mastodon.social/@RustyBertrand",
         "https://mastodon.social/@christianselig",
         "https://saturation.social/@clive",
         "https://mastodon.social/@sjvn",

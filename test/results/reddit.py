@@ -46,6 +46,7 @@ __tests__ = (
     "#class"   : reddit.RedditHomeExtractor,
     "#range"   : "1-20",
     "#count"   : ">= 20",
+    "#archive" : False,
 },
 
 {

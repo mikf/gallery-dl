@@ -17,6 +17,7 @@ __tests__ = (
     "categories": [
         "Outdoor",
         "MILF",
+        "Boots",
         "Amateur",
         "Sexy",
     ],

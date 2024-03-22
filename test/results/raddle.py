@@ -68,9 +68,8 @@ __tests__ = (
     "#comment" : "Image post",
     "#category": ("postmill", "raddle", "post"),
     "#class"   : postmill.PostmillPostExtractor,
-    "#sha1_url"    : "48663f767ea258fcd545ab5aa0e734f98f434388",
     "#sha1_content": "431e938082c2b59c44888a83cfc711cd1f0e910a",
-    "#count"   : 1,
+    "#urls"        : "https://uploads-cdn.raddle.me/submission_images/30f4cf7d235d40c1daebf6dc2e58bef2a80bec2b5b2dab10f2021ea8e3f29e11.png",
 },
 
 {
@@ -79,7 +78,7 @@ __tests__ = (
     "#category": ("postmill", "raddle", "post"),
     "#class"   : postmill.PostmillPostExtractor,
     "#options" : {"save-link-post-body": True},
-    "#pattern" : r"^(text:[\s\S]+|https://raddle\.me/submission_images/[0-9a-f]+\.png)$",
+    "#pattern" : r"^(text:[\s\S]+|https://(uploads-cdn\.)?raddle\.me/submission_images/[0-9a-f]+\.png)$",
     "#count"   : 2,
 },
 
