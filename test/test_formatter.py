@@ -238,13 +238,15 @@ class TestFormatter(unittest.TestCase):
         self._run_test("{t!d:O2}", "2010-01-01 02:00:00")
 
     def test_offset_local(self):
-        ts = self.kwdict["dt"].replace(tzinfo=datetime.UTC).timestamp()
+        ts = self.kwdict["dt"].replace(
+            tzinfo=datetime.timezone.utc).timestamp()
         offset = time.localtime(ts).tm_gmtoff
         dt = self.kwdict["dt"] + datetime.timedelta(seconds=offset)
         self._run_test("{dt:O}", str(dt))
         self._run_test("{dt:Olocal}", str(dt))
 
-        ts = self.kwdict["dt_dst"].replace(tzinfo=datetime.UTC).timestamp()
+        ts = self.kwdict["dt_dst"].replace(
+            tzinfo=datetime.timezone.utc).timestamp()
         offset = time.localtime(ts).tm_gmtoff
         dt = self.kwdict["dt_dst"] + datetime.timedelta(seconds=offset)
         self._run_test("{dt_dst:O}", str(dt))
