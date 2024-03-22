@@ -40,9 +40,10 @@ class KemonopartyExtractor(Extractor):
     def _init(self):
         self.revisions = self.config("revisions")
         if self.revisions:
-            order = self.config("order-revisions")
-            self.revisions_reverse = order[0] in ("r", "a") if order else False
             self.revisions_unique = (self.revisions == "unique")
+        order = self.config("order-revisions")
+        self.revisions_reverse = order[0] in ("r", "a") if order else False
+
         self._prepare_ddosguard_cookies()
         self._find_inline = re.compile(
             r'src="(?:https?://(?:kemono|coomer)\.(?:su|party))?(/inline/[^"]+'
