@@ -213,7 +213,9 @@ class DeviantartExtractor(Extractor):
         """Adjust the contents of a Deviation-object"""
         if "index" not in deviation:
             try:
-                if deviation["url"].startswith("https://sta.sh"):
+                if deviation["url"].startswith((
+                    "https://www.deviantart.com/stash/", "https://sta.sh",
+                )):
                     filename = deviation["content"]["src"].split("/")[5]
                     deviation["index_base36"] = filename.partition("-")[0][1:]
                     deviation["index"] = id_from_base36(
