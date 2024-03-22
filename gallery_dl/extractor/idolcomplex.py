@@ -222,8 +222,8 @@ class IdolcomplexPoolExtractor(IdolcomplexExtractor):
     subcategory = "pool"
     directory_fmt = ("{category}", "pool", "{pool}")
     archive_fmt = "p_{pool}_{id}"
-    pattern = BASE_PATTERN + r"/pools?/show/(\d+)"
-    example = "https://idol.sankakucomplex.com/pools/show/12345"
+    pattern = BASE_PATTERN + r"/pools?/(?:show/)?(\w+)"
+    example = "https://idol.sankakucomplex.com/pools/0123456789abcdef"
     per_page = 24
 
     def __init__(self, match):
