@@ -163,6 +163,9 @@ class SteamgriddbAssetExtractor(SteamgriddbExtractor):
     def assets(self):
         endpoint = "/api/public/asset/" + self.asset_type + "/" + self.asset_id
         asset = self._call(endpoint)["asset"]
+        if asset is None:
+            raise exception.NotFoundError("asset ({}:{})".format(
+                self.asset_type, self.asset_id))
         return (asset,)
 
 
