@@ -143,6 +143,9 @@ class PornhubGifExtractor(PornhubExtractor):
             "url"  : extr('"contentUrl": "', '"'),
             "date" : text.parse_datetime(
                 extr('"uploadDate": "', '"'), "%Y-%m-%d"),
+            "viewkey"  : extr('From this video: '
+                              '<a href="/view_video.php?viewkey=', '"'),
+            "timestamp": extr('lass="directLink tstamp" rel="nofollow">', '<'),
             "user" : text.remove_html(extr("Created by:", "</div>")),
         }
 
