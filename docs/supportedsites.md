@@ -620,6 +620,12 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
+    <td>Photos18</td>
+    <td>https://photos18.com</td>
+    <td>Albums, Lists</td>
+    <td></td>
+</tr>
+<tr>
     <td>PhotoVogue</td>
     <td>https://www.vogue.com/photovogue/</td>
     <td>User Profiles</td>
