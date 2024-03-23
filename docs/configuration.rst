@@ -2017,6 +2017,20 @@ Description
     page.
 
 
+extractor.gelbooru.favorite.order-posts
+---------------------------------------
+Type
+    ``string``
+Default
+    ``"desc"``
+Description
+    Controls the order in which favorited posts are returned.
+
+    * ``"asc"``: Ascending favorite date order (oldest first)
+    * ``"desc"``: Descending favorite date order (newest first)
+    * ``"reverse"``: Same as ``"asc"``
+
+
 extractor.generic.enabled
 -------------------------
 Type
