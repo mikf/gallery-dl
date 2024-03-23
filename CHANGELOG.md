@@ -1,5 +1,89 @@
 # Changelog
 
+## 1.26.9 - 2024-03-23
+### Extractors
+#### Additions
+- [artstation] support video clips ([#2566](https://github.com/mikf/gallery-dl/issues/2566), [#3309](https://github.com/mikf/gallery-dl/issues/3309), [#3911](https://github.com/mikf/gallery-dl/issues/3911))
+- [artstation] support collections ([#146](https://github.com/mikf/gallery-dl/issues/146))
+- [deviantart] recognize `deviantart.com/stash/…` URLs
+- [idolcomplex] support new pool URLs
+- [lensdump] recognize direct image links ([#5293](https://github.com/mikf/gallery-dl/issues/5293))
+- [skeb] add extractor for followed users ([#5290](https://github.com/mikf/gallery-dl/issues/5290))
+- [twitter] add `quotes` extractor ([#5262](https://github.com/mikf/gallery-dl/issues/5262))
+- [wikimedia] support `azurlane.koumakan.jp` ([#5256](https://github.com/mikf/gallery-dl/issues/5256))
+- [xvideos] support `/channels/` URLs ([#5244](https://github.com/mikf/gallery-dl/issues/5244))
+#### Fixes
+- [artstation] fix handling usernames with dashes in domain names ([#5224](https://github.com/mikf/gallery-dl/issues/5224))
+- [bluesky] fix not spawning child extractors for followed users ([#5246](https://github.com/mikf/gallery-dl/issues/5246))
+- [deviantart] handle CloudFront blocks ([#5363](https://github.com/mikf/gallery-dl/issues/5363))
+- [deviantart:avatar] fix `index` for URLs without `?` ([#5276](https://github.com/mikf/gallery-dl/issues/5276))
+- [deviantart:stash] fix `index` values ([#5335](https://github.com/mikf/gallery-dl/issues/5335))
+- [gofile] fix extraction
+- [hiperdex] update URL patterns & fix `manga` metadata ([#5340](https://github.com/mikf/gallery-dl/issues/5340))
+- [idolcomplex] fix metadata extraction
+- [imagefap] fix folder extraction ([#5333](https://github.com/mikf/gallery-dl/issues/5333))
+- [instagram] make accessing `like_count` non-fatal ([#5218](https://github.com/mikf/gallery-dl/issues/5218))
+- [mastodon] fix handling null `moved` account field ([#5321](https://github.com/mikf/gallery-dl/issues/5321))
+- [naver] fix EUC-KR encoding issue in old image URLs ([#5126](https://github.com/mikf/gallery-dl/issues/5126))
+- [nijie] increase default delay between requests ([#5221](https://github.com/mikf/gallery-dl/issues/5221))
+- [nitter] ignore invalid Tweets ([#5253](https://github.com/mikf/gallery-dl/issues/5253))
+- [pixiv:novel] fix text extraction ([#5285](https://github.com/mikf/gallery-dl/issues/5285), [#5309](https://github.com/mikf/gallery-dl/issues/5309))
+- [skeb] retry 429 responses containing a `request_key` cookie ([#5210](https://github.com/mikf/gallery-dl/issues/5210))
+- [warosu] fix crash for threads with deleted posts ([#5289](https://github.com/mikf/gallery-dl/issues/5289))
+- [weibo] fix retweets ([#2825](https://github.com/mikf/gallery-dl/issues/2825), [#3874](https://github.com/mikf/gallery-dl/issues/3874), [#5263](https://github.com/mikf/gallery-dl/issues/5263))
+- [weibo] fix `livephoto` filename extensions ([#5287](https://github.com/mikf/gallery-dl/issues/5287))
+- [xvideos] fix galleries with more than 500 images ([#5244](https://github.com/mikf/gallery-dl/issues/5244))
+#### Improvements
+- [bluesky] improve API error messages
+- [bluesky] handle posts with different `embed` structure
+- [deviantart:avatar] ignore default avatars ([#5276](https://github.com/mikf/gallery-dl/issues/5276))
+- [fapello] download full-sized images ([#5349](https://github.com/mikf/gallery-dl/issues/5349))
+- [gelbooru:favorite] automatically detect returned post order ([#5220](https://github.com/mikf/gallery-dl/issues/5220))
+- [imgur] fail downloads when redirected to `removed.png` ([#5308](https://github.com/mikf/gallery-dl/issues/5308))
+- [instagram] raise proper error for missing `reels_media` ([#5257](https://github.com/mikf/gallery-dl/issues/5257))
+- [instagram] change `posts are private` exception to a warning ([#5322](https://github.com/mikf/gallery-dl/issues/5322))
+- [reddit] improve preview fallback formats ([#5296](https://github.com/mikf/gallery-dl/issues/5296), [#5315](https://github.com/mikf/gallery-dl/issues/5315))
+- [steamgriddb] raise exception for deleted assets
+- [twitter] handle "account is temporarily locked" errors ([#5300](https://github.com/mikf/gallery-dl/issues/5300))
+- [weibo] rework pagination logic ([#4168](https://github.com/mikf/gallery-dl/issues/4168))
+- [zerochan] fetch more posts by using the API ([#3669](https://github.com/mikf/gallery-dl/issues/3669))
+#### Metadata
+- [bluesky] add `instance` metadata field ([#4438](https://github.com/mikf/gallery-dl/issues/4438))
+- [gelbooru:favorite] add `date_favorited` metadata field
+- [imagefap] extract `folder` metadata ([#5270](https://github.com/mikf/gallery-dl/issues/5270))
+- [instagram] default `likes` to `0` ([#5323](https://github.com/mikf/gallery-dl/issues/5323))
+- [kemonoparty] add `revision_count` metadata field ([#5334](https://github.com/mikf/gallery-dl/issues/5334))
+- [naver] unescape post `title` and `description`
+- [pornhub:gif] extract `viewkey` and `timestamp` metadata ([#4463](https://github.com/mikf/gallery-dl/issues/4463))
+- [redgifs] make `date` available for directories ([#5262](https://github.com/mikf/gallery-dl/issues/5262))
+- [subscribestar] fix `date` metadata
+- [twitter] add `birdwatch` metadata field ([#5317](https://github.com/mikf/gallery-dl/issues/5317))
+- [twitter] add `protected` metadata field ([#5327](https://github.com/mikf/gallery-dl/issues/5327))
+- [warosu] fix `board_name` metadata
+#### Options
+- [bluesky] add `reposts` option ([#4438](https://github.com/mikf/gallery-dl/issues/4438), [#5248](https://github.com/mikf/gallery-dl/issues/5248))
+- [deviantart] add `comments-avatars` option ([#4995](https://github.com/mikf/gallery-dl/issues/4995))
+- [deviantart] extend `metadata` option ([#5175](https://github.com/mikf/gallery-dl/issues/5175))
+- [flickr] add `contexts` option ([#5324](https://github.com/mikf/gallery-dl/issues/5324))
+- [gelbooru:favorite] add `order-posts` option ([#5220](https://github.com/mikf/gallery-dl/issues/5220))
+- [kemonoparty] add `order-revisions` option ([#5334](https://github.com/mikf/gallery-dl/issues/5334))
+- [vipergirls] add `like` option ([#4166](https://github.com/mikf/gallery-dl/issues/4166))
+- [vipergirls] add `domain` option ([#4166](https://github.com/mikf/gallery-dl/issues/4166))
+### Downloaders
+- [http] add MIME type and signature for `.mov` files ([#5287](https://github.com/mikf/gallery-dl/issues/5287))
+### Docker
+- build images from source instead of PyPI package
+- build `linux/arm64` images ([#5227](https://github.com/mikf/gallery-dl/issues/5227))
+- build images on every push to master
+  - tag images as `YYYY.MM.DD`
+  - tag the most recent build from master as `dev`
+  - tag the most recent release build as `latest`
+- reduce image size ([#5097](https://github.com/mikf/gallery-dl/issues/5097))
+### Miscellaneous
+- [formatter] fix local DST datetime offsets for `:O`
+- build Linux executable on Ubuntu 22.04 LTS ([#4184](https://github.com/mikf/gallery-dl/issues/4184))
+- automatically create directories for logging files ([#5249](https://github.com/mikf/gallery-dl/issues/5249))
+
 ## 1.26.8 - 2024-02-17
 ### Extractors
 #### Additions
