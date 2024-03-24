@@ -249,6 +249,16 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://kemono.su/gumroad/user/3267960360326/post/jwwag",
+    "#comment" : "empty 'file' with no 'path' (#5368)",
+    "#category": ("", "kemonoparty", "gumroad"),
+    "#class"   : kemonoparty.KemonopartyPostExtractor,
+    "#count"   : 8,
+
+    "type"     : "attachment",
+},
+
+{
     "#url"     : "https://kemono.su/discord/server/488668827274444803#608504710906904576",
     "#category": ("", "kemonoparty", "discord"),
     "#class"   : kemonoparty.KemonopartyDiscordExtractor,

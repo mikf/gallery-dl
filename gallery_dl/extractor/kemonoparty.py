@@ -156,7 +156,7 @@ class KemonopartyExtractor(Extractor):
 
     def _file(self, post):
         file = post["file"]
-        if not file:
+        if not file or "path" not in file:
             return ()
         file["type"] = "file"
         return (file,)
