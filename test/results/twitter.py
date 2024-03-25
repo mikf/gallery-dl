@@ -316,7 +316,7 @@ __tests__ = (
 },
 
 {
-    "#url"     : "https://twitter.com/perrypumas/status/1065692031626829824",
+    "#url"     : "https://twitter.com/perrypumas/status/1065692031626829824?s=20",
     "#comment" : "video",
     "#category": ("", "twitter", "tweet"),
     "#class"   : twitter.TwitterTweetExtractor,
@@ -324,7 +324,7 @@ __tests__ = (
 },
 
 {
-    "#url"     : "https://twitter.com/playpokemon/status/1263832915173048321",
+    "#url"     : "https://twitter.com/playpokemon/status/1263832915173048321/",
     "#comment" : "content with emoji, newlines, hashtags (#338)",
     "#category": ("", "twitter", "tweet"),
     "#class"   : twitter.TwitterTweetExtractor,
