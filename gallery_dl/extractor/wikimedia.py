@@ -69,7 +69,11 @@ class WikimediaExtractor(BaseExtractor):
 
     def items(self):
         for info in self._pagination(self.params):
-            image = info["imageinfo"][0]
+            try:
+                image = info["imageinfo"][0]
+            except LookupError:
+                self.log.debug("Missing 'imageinfo' for %s", info)
+                continue
 
             image["metadata"] = {
                 m["name"]: m["value"]
