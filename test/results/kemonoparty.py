@@ -136,6 +136,19 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://kemono.su/patreon/user/3161935/post/68231671",
+    "#comment" : "announcements",
+    "#category": ("", "kemonoparty", "patreon"),
+    "#class"   : kemonoparty.KemonopartyPostExtractor,
+    "#options" : {"announcements": True},
+
+    "announcements": [{
+        "body": "<div><strong>Thank you so much for the support!</strong><strong><br></strong>This Patreon is more of a tip jar for supporting what I make. I have to clarify that there are <strong>no exclusive Patreon animations</strong> because all are released for the public. You will get earlier access to WIPs. Direct downloads to my works are also available for $5 and $10 Tiers.</div>",
+        "date": "2023-02",
+    }],
+},
+
+{
     "#url"     : "https://kemono.su/patreon/user/19623797/post/29035449",
     "#comment" : "invalid file (#3510)",
     "#category": ("", "kemonoparty", "patreon"),
