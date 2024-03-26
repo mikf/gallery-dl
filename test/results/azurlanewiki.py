@@ -14,4 +14,12 @@ __tests__ = (
     "#class"   : wikimedia.WikimediaArticleExtractor,
 },
 
+{
+    "#url"     : "https://azurlane.koumakan.jp/wiki/Louisville/Gallery",
+    "#comment" : "entries with missing 'imageinfo' (#5384)",
+    "#category": ("wikimedia", "azurlanewiki", "article"),
+    "#class"   : wikimedia.WikimediaArticleExtractor,
+    "#count"   : "> 10",
+},
+
 )
