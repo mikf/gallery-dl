@@ -352,8 +352,24 @@ __tests__ = (
     "#class"   : kemonoparty.KemonopartyFavoriteExtractor,
     "#pattern" : kemonoparty.KemonopartyUserExtractor.pattern,
     "#auth"    : True,
-    "#count"   : 3,
-    "#sha1_url": "902c656c8002a3257ef9e255cb69bca1937373d4",
+    "#urls"    : (
+        "https://kemono.su/patreon/user/881792",
+        "https://kemono.su/fanbox/user/6993449",
+        "https://kemono.su/subscribestar/user/alcorart",
+    ),
+},
+
+{
+    "#url"     : "https://kemono.su/favorites?type=artist&sort=faved_seq&order=asc",
+    "#category": ("", "kemonoparty", "favorite"),
+    "#class"   : kemonoparty.KemonopartyFavoriteExtractor,
+    "#pattern" : kemonoparty.KemonopartyUserExtractor.pattern,
+    "#auth"    : True,
+    "#urls"    : (
+        "https://kemono.su/fanbox/user/6993449",
+        "https://kemono.su/patreon/user/881792",
+        "https://kemono.su/subscribestar/user/alcorart",
+    ),
 },
 
 {
@@ -362,8 +378,24 @@ __tests__ = (
     "#class"   : kemonoparty.KemonopartyFavoriteExtractor,
     "#pattern" : kemonoparty.KemonopartyPostExtractor.pattern,
     "#auth"    : True,
-    "#count"   : 3,
-    "#sha1_url": "4be8e84cb384a907a8e7997baaf6287b451783b5",
+    "#urls"    : (
+        "https://kemono.su/subscribestar/user/alcorart/post/184329",
+        "https://kemono.su/fanbox/user/6993449/post/23913",
+        "https://kemono.su/patreon/user/881792/post/4769638",
+    ),
+},
+
+{
+    "#url"     : "https://kemono.su/favorites?type=post&sort=published&order=asc",
+    "#category": ("", "kemonoparty", "favorite"),
+    "#class"   : kemonoparty.KemonopartyFavoriteExtractor,
+    "#pattern" : kemonoparty.KemonopartyPostExtractor.pattern,
+    "#auth"    : True,
+    "#urls"    : (
+        "https://kemono.su/patreon/user/881792/post/4769638",
+        "https://kemono.su/fanbox/user/6993449/post/23913",
+        "https://kemono.su/subscribestar/user/alcorart/post/184329",
+    ),
 },
 
 )
