@@ -142,6 +142,7 @@ CATEGORY_MAP = {
     "wallpapercave"  : "Wallpaper Cave",
     "webmshare"      : "webmshare",
     "webtoons"       : "Webtoon",
+    "webtoonxyz"     : "Webtoon.xyz",
     "wikiart"        : "WikiArt.org",
     "wikimediacommons": "Wikimedia Commons",
     "xbunkr"         : "xBunkr",
