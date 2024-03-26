@@ -2317,6 +2317,16 @@ Description
     Extract a user's direct messages as ``dms`` metadata.
 
 
+extractor.kemonoparty.announcements
+-----------------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Extract a user's announcements as ``announcements`` metadata.
+
+
 extractor.kemonoparty.favorites
 -------------------------------
 Type

@@ -57,7 +57,7 @@ class KemonopartyExtractor(Extractor):
         generators = self._build_file_generators(self.config("files"))
         duplicates = self.config("duplicates")
         comments = self.config("comments")
-        username = dms = None
+        username = dms = announcements = None
 
         # prevent files from being sent with gzip compression
         headers = {"Accept-Encoding": "identity"}
@@ -68,6 +68,8 @@ class KemonopartyExtractor(Extractor):
                 '<meta name="artist_name" content="', '"')[0])
         if self.config("dms"):
             dms = True
+        if self.config("announcements"):
+            announcements = True
 
         posts = self.posts()
         max_posts = self.config("max-posts")
@@ -88,8 +90,12 @@ class KemonopartyExtractor(Extractor):
                 post["comments"] = self._extract_comments(post)
             if dms is not None:
                 if dms is True:
-                    dms = self._extract_dms(post)
+                    dms = self._extract_cards(post, "dms")
                 post["dms"] = dms
+            if announcements is not None:
+                if announcements is True:
+                    announcements = self._extract_cards(post, "announcements")
+                post["announcements"] = announcements
 
             files = []
             hashes = set()
@@ -200,21 +206,21 @@ class KemonopartyExtractor(Extractor):
             })
         return comments
 
-    def _extract_dms(self, post):
-        url = "{}/{}/user/{}/dms".format(
-            self.root, post["service"], post["user"])
+    def _extract_cards(self, post, type):
+        url = "{}/{}/user/{}/{}".format(
+            self.root, post["service"], post["user"], type)
         page = self.request(url).text
 
-        dms = []
-        for dm in text.extract_iter(page, "<article", "</article>"):
-            footer = text.extr(dm, "<footer", "</footer>")
-            dms.append({
+        cards = []
+        for card in text.extract_iter(page, "<article", "</article>"):
+            footer = text.extr(card, "<footer", "</footer>")
+            cards.append({
                 "body": text.unescape(text.extr(
-                    dm, "<pre>", "</pre></",
+                    card, "<pre>", "</pre></",
                 ).strip()),
-                "date": text.extr(footer, 'Published: ', '\n'),
+                "date": text.extr(footer, ': ', '\n'),
             })
-        return dms
+        return cards
 
     def _parse_datetime(self, date_string):
         if len(date_string) > 19:
