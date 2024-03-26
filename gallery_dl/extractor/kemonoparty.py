@@ -494,7 +494,8 @@ class KemonopartyFavoriteExtractor(KemonopartyExtractor):
 
     def __init__(self, match):
         KemonopartyExtractor.__init__(self, match)
-        self.favorites = (text.parse_query(match.group(3)).get("type") or
+        self.params = text.parse_query(match.group(3))
+        self.favorites = (self.params.get("type") or
                           self.config("favorites") or
                           "artist")
 
@@ -502,9 +503,17 @@ class KemonopartyFavoriteExtractor(KemonopartyExtractor):
         self._prepare_ddosguard_cookies()
         self.login()
 
+        sort = self.params.get("sort")
+        order = self.params.get("order") or "desc"
+
         if self.favorites == "artist":
             users = self.request(
                 self.root + "/api/v1/account/favorites?type=artist").json()
+
+            if not sort:
+                sort = "updated"
+            users.sort(key=lambda x: x[sort], reverse=(order == "desc"))
+
             for user in users:
                 user["_extractor"] = KemonopartyUserExtractor
                 url = "{}/{}/user/{}".format(
@@ -514,6 +523,11 @@ class KemonopartyFavoriteExtractor(KemonopartyExtractor):
         elif self.favorites == "post":
             posts = self.request(
                 self.root + "/api/v1/account/favorites?type=post").json()
+
+            if not sort:
+                sort = "faved_seq"
+            posts.sort(key=lambda x: x[sort], reverse=(order == "desc"))
+
             for post in posts:
                 post["_extractor"] = KemonopartyPostExtractor
                 url = "{}/{}/user/{}/post/{}".format(
