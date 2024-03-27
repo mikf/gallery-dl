@@ -4,16 +4,16 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extractors for https://mangaread.org/"""
+"""Extractors for WordPressMadara based websites."""
 
-from .common import ChapterExtractor, MangaExtractor
+from .common import BaseExtractor, ChapterExtractor, MangaExtractor
 from .. import text, exception
 import re
 
 
-class MangareadBase():
-    """Base class for Mangaread extractors"""
-    category = "mangaread"
+class WPMadaraBase(BaseExtractor):
+    """Base class for WordPressMadara based extractors"""
+    basecategory = "wpmadara"
     root = "https://www.mangaread.org"
 
     @staticmethod
@@ -31,11 +31,36 @@ class MangareadBase():
         data["language"] = "English"
 
 
-class MangareadChapterExtractor(MangareadBase, ChapterExtractor):
-    """Extractor for manga-chapters from mangaread.org"""
-    pattern = (r"(?:https?://)?(?:www\.)?mangaread\.org"
-               r"(/manga/[^/?#]+/[^/?#]+)")
+BASE_PATTERN = WPMadaraBase.update({
+    "mangaread": {
+        "root": "https://www.mangaread.org",
+        "pattern": r"(?:https?://)?(?:www\.)?mangaread\.org",
+    },
+    "toonily": {
+        "root": "https://www.toonily.com",
+        "pattern": r"(?:https?://)?(?:www\.)?toonily\.com",
+    },
+    "webtoonxyz": {
+        "root": "https://www.webtoon.xyz",
+        "pattern": r"(?:https?://)?(?:www\.)?webtoon\.xyz",
+    },
+})
+
+
+class WPMadaraChapterExtractor(WPMadaraBase, ChapterExtractor):
+    """Extractor for manga-chapters from WordPressMadara based websites."""
+    subcategory = "chapter"
+    pattern = BASE_PATTERN + r"(/(manga|webtoon|read)/[^/?#]+/[^/?#]+)"
     example = "https://www.mangaread.org/manga/MANGA/chapter-01/"
+
+    def __init__(self, match, url=None):
+        WPMadaraBase.__init__(self, match)
+        self.chapter = match.group(match.lastindex)
+        self.log.debug("chapter: %s", self.chapter)
+        self.gallery_url = self.root + match.group(match.lastindex)
+
+        if self.config("chapter-reverse", False):
+            self.reverse = not self.reverse
 
     def metadata(self, page):
         tags = text.extr(page, 'class="wp-manga-tags-list">', '</div>')
@@ -44,22 +69,30 @@ class MangareadChapterExtractor(MangareadBase, ChapterExtractor):
         if not info:
             raise exception.NotFoundError("chapter")
         self.parse_chapter_string(info, data)
+        self.log.debug("data: %s", data)
         return data
 
     def images(self, page):
         page = text.extr(
             page, '<div class="reading-content">', '<div class="entry-header')
+        self.log.debug("page: %s", page)
         return [
             (text.extr(img, 'src="', '"').strip(), None)
             for img in text.extract_iter(page, '<img id="image-', '>')
         ]
 
 
-class MangareadMangaExtractor(MangareadBase, MangaExtractor):
-    """Extractor for manga from mangaread.org"""
-    chapterclass = MangareadChapterExtractor
-    pattern = r"(?:https?://)?(?:www\.)?mangaread\.org(/manga/[^/?#]+)/?$"
+class WPMadaraMangaExtractor(WPMadaraBase, MangaExtractor):
+    """Extractor for manga from WordPressMadara based websites."""
+    chapterclass = WPMadaraChapterExtractor
+    subcategory = "manga"
+    pattern = BASE_PATTERN + r"(/(manga|webtoon|read)/[^/?#]+)/?$"
     example = "https://www.mangaread.org/manga/MANGA"
+
+    def __init__(self, match, url=None):
+        WPMadaraBase.__init__(self, match)
+        self.manga = match.group(match.lastindex)
+        self.manga_url = url or self.root + match.group(match.lastindex)
 
     def chapters(self, page):
         if 'class="error404' in page:
@@ -77,12 +110,24 @@ class MangareadMangaExtractor(MangareadBase, MangaExtractor):
     def metadata(self, page):
         extr = text.extract_from(text.extr(
             page, 'class="summary_content">', 'class="manga-action"'))
+        # rating = 0.0
+        if len(text.extr(page, 'total_votes">', "</span>").strip()) > 0:
+            rating = text.parse_float(text.extr(
+                page, 'total_votes">', "</span>").strip())
+        elif len(text.extr(page, 'property="ratingValue" id="averagerate">',
+                           "</span>").strip()) > 0:
+            rating = text.parse_float(
+                text.extr(page,
+                          'property="ratingValue" id="averagerate">',
+                          "</span>").strip())
+        else:
+            rating = 0.0
+
         return {
             "manga"      : text.extr(page, "<h1>", "</h1>").strip(),
             "description": text.unescape(text.remove_html(text.extract(
                 page, ">", "</div>", page.index("summary__content"))[0])),
-            "rating"     : text.parse_float(
-                extr('total_votes">', "</span>").strip()),
+            "rating"     : rating,
             "manga_alt"  : text.remove_html(
                 extr("Alternative </h5>\n</div>", "</div>")).split("; "),
             "author"     : list(text.extract_iter(
