@@ -13,6 +13,13 @@ from .. import text, util, oauth, exception
 from datetime import datetime, date, timedelta
 import re
 
+import os
+import sys
+import time
+import math
+import random
+import datetime
+from pathlib import Path
 
 BASE_PATTERN = (
     r"(?:tumblr:(?:https?://)?([^/]+)|"
@@ -23,6 +30,50 @@ BASE_PATTERN = (
 
 POST_TYPES = frozenset((
     "text", "quote", "link", "answer", "video", "audio", "photo", "chat"))
+
+
+# --- 80 cols ---------------------------------------------------------------- #
+
+
+def sleeping_time() -> bool:
+    current_time = datetime.datetime.now().time()
+    start_time = datetime.datetime.strptime("23:00", "%H:%M").time()
+    end_time = datetime.datetime.strptime("08:00", "%H:%M").time()
+    # Check if the current time is between 11:00 PM and 8:00 AM
+    is_between = start_time <= current_time or current_time <= end_time
+    return is_between
+
+
+def go_to_bed() -> None:
+    if sleeping_time():
+        print(
+            "Program is going to bed for today."
+        )
+        while sleeping_time():
+            time.sleep(60)
+    return
+
+
+def wait_inbetween_calls() -> None:
+    wait_time = max(0, random.gauss(mu = 120, sigma = 30))
+    print(
+        "Waiting for extra time inbetween retriving tweets."
+        + f" ({wait_time:.3f}s)"
+    )
+    time.sleep(wait_time)
+    go_to_bed()
+    return
+
+
+def wait_inbetween_downloads():
+    wait_time = max(0, random.gauss(mu = 120, sigma = 30))
+    print(
+        "Waiting for extra time inbetween downloading media."
+        + f" ({wait_time:.3f}s)"
+    )
+    time.sleep(wait_time)
+    go_to_bed()
+    return
 
 
 class TumblrExtractor(Extractor):
@@ -402,6 +453,7 @@ class TumblrAPI(oauth.OAuth1API):
         return self._pagination(blog, "/likes", params, key="liked_posts")
 
     def _call(self, endpoint, params, **kwargs):
+        wait_inbetween_calls()
         url = self.ROOT + endpoint
         kwargs["params"] = params
 
