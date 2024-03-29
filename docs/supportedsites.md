@@ -1103,7 +1103,7 @@ Consider all listed sites to potentially be NSFW.
     <td>Booruvar</td>
     <td>https://booru.borvar.art/</td>
     <td>Pools, Popular Images, Posts, Tag Searches</td>
-    <td></td>
+    <td>Supported</td>
 </tr>
 
 <tr>
@@ -1125,7 +1125,7 @@ Consider all listed sites to potentially be NSFW.
     <td>e6AI</td>
     <td>https://e6ai.net/</td>
     <td>Favorites, Pools, Popular Images, Posts, Tag Searches</td>
-    <td></td>
+    <td>Supported</td>
 </tr>
 
 <tr>
@@ -1331,7 +1331,7 @@ Consider all listed sites to potentially be NSFW.
     <td>Furbooru</td>
     <td>https://furbooru.org/</td>
     <td>Galleries, Posts, Search Results</td>
-    <td></td>
+    <td>API Key</td>
 </tr>
 
 <tr>
