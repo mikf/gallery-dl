@@ -363,7 +363,23 @@ extractor.*.sleep-request
 Type
     |Duration|_
 Default
-    ``0``
+    * ``"0.5-1.5"``
+        ``[Danbooru]``, ``[E621]``, ``[foolfuuka]``, ``itaku``,
+        ``newgrounds``, ``[philomena]``, ``pixiv:novel``, ``plurk``,
+        ``poipiku`` , ``pornpics``, ``soundgasm``, ``urlgalleries``,
+        ``vk``, ``zerochan``
+    * ``"1.0-2.0"``
+        ``flickr``, ``weibo``, ``[wikimedia]``
+    * ``"2.0-4.0"``
+        ``behance``, ``imagefap``, ``[Nijie]``
+    * ``"3.0-6.0"``
+        ``exhentai``, ``idolcomplex``, ``[reactor]``, ``readcomiconline``
+    * ``"6.0-6.1"``
+        ``twibooru``
+    * ``"6.0-12.0"``
+        ``instagram``
+    * ``0``
+        otherwise
 Description
     Minimal time interval in seconds between each HTTP request
     during data extraction.
@@ -382,6 +398,7 @@ Description
     Specifying username and password is required for
 
     * ``nijie``
+    * ``horne``
 
     and optional for
 
@@ -389,8 +406,12 @@ Description
     * ``aryion``
     * ``atfbooru`` (*)
     * ``bluesky``
+    * ``booruvar`` (*)
+    * ``coomerparty``
     * ``danbooru`` (*)
+    * ``deviantart``
     * ``e621`` (*)
+    * ``e6ai`` (*)
     * ``e926`` (*)
     * ``exhentai``
     * ``idolcomplex``
@@ -401,7 +422,6 @@ Description
     * ``mangoxo``
     * ``pillowfort``
     * ``sankaku``
-    * ``seisoparty``
     * ``subscribestar``
     * ``tapas``
     * ``tsumino``
@@ -417,7 +437,7 @@ Description
     the API key found in your user profile, not the actual account password.
 
     Note: Leave the ``password`` value empty or undefined
-    to get prompted for a passeword when performing a login
+    to be prompted for a passeword when performing a login
     (see `getpass() <https://docs.python.org/3/library/getpass.html#getpass.getpass>`__).
 
 
@@ -557,8 +577,8 @@ extractor.*.browser
 Type
     ``string``
 Default
-    * ``"firefox"`` for ``patreon``, ``mangapark``, and ``mangasee``
-    * ``null`` everywhere else
+    * ``"firefox"``: ``artstation``, ``mangasee``, ``patreon``, ``pixiv:series``, ``twitter``
+    * ``null``: otherwise
 Example
     * ``"chrome:macos"``
 Description
@@ -633,8 +653,8 @@ extractor.*.tls12
 Type
     ``bool``
 Default
-    * ``true``
-    * ``false`` for ``patreon``, ``pixiv:series``
+    * ``false``: ``patreon``, ``pixiv:series``
+    * ``true``: otherwise
 Description
     Allow selecting TLS 1.2 cipher suites.
 
