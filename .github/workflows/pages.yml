@@ -33,50 +33,24 @@ jobs:
         https://api.github.com/repos/gdl-org/docs/actions/workflows/pages.yml/dispatches
         -d '{"ref":"master"}'
 
-  build:
-
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v4
-
-    - uses: actions/configure-pages@v4
-
-    - uses: actions/setup-python@v5
-      with:
-        python-version: "3.12"
-
-    - name: Install Docutils
-      run: pip install docutils pygments
-
-    - name: Update Links
-      working-directory: ./docs/
-      run: sed --in-place 's/\.\(rst\|md\)\b/.html/g' -- *.md  *.rst
-
-    - name: reStructuredText to HTML
-      working-directory: ./docs/
-      run: |
-        while read -r RST
-        do
-          python -m docutils --writer=html --output="${RST%.rst}.html" -- "$RST"
-        done < <(find . -type f -name "*.rst")
-
-    - uses: actions/jekyll-build-pages@v1
-      with:
-        source: ./docs/
-        destination: ./_site/
-
-    - uses: actions/upload-pages-artifact@v3
-
   deploy:
 
     runs-on: ubuntu-latest
 
-    needs: build
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
+    - uses: actions/checkout@v4
+    - uses: actions/configure-pages@v4
+
+    - name: Copy static files
+      run: |
+        mkdir --parents -- ./_site
+        cp --archive --target-directory=./_site -- \
+          ./docs/oauth-redirect.html
+
+    - uses: actions/upload-pages-artifact@v3
     - uses: actions/deploy-pages@v4
       id: deployment
