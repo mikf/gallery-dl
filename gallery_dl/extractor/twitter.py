@@ -341,7 +341,12 @@ class TwitterExtractor(Extractor):
         tdata["content"] = txt if tco.startswith("https://t.co/") else content
 
         if "birdwatch_pivot" in tweet:
-            tdata["birdwatch"] = tweet["birdwatch_pivot"]["subtitle"]["text"]
+            try:
+                tdata["birdwatch"] = \
+                    tweet["birdwatch_pivot"]["subtitle"]["text"]
+            except KeyError:
+                self.log.debug("Unable to extract 'birdwatch' note from %s",
+                               tweet["birdwatch_pivot"])
         if "in_reply_to_screen_name" in legacy:
             tdata["reply_to"] = legacy["in_reply_to_screen_name"]
         if "quoted_by" in legacy:
