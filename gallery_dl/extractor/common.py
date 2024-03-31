@@ -45,6 +45,8 @@ class Extractor():
     def __init__(self, match):
         self.log = logging.getLogger(self.category)
         self.url = match.string
+        self.match = match
+        self.groups = match.groups()
         self._cfgpath = ("extractor", self.category, self.subcategory)
         self._parentdir = ""
 
@@ -599,7 +601,7 @@ class GalleryExtractor(Extractor):
 
     def __init__(self, match, url=None):
         Extractor.__init__(self, match)
-        self.gallery_url = self.root + match.group(1) if url is None else url
+        self.gallery_url = self.root + self.groups[0] if url is None else url
 
     def items(self):
         self.login()
@@ -674,7 +676,7 @@ class MangaExtractor(Extractor):
 
     def __init__(self, match, url=None):
         Extractor.__init__(self, match)
-        self.manga_url = url or self.root + match.group(1)
+        self.manga_url = self.root + self.groups[0] if url is None else url
 
         if self.config("chapter-reverse", False):
             self.reverse = not self.reverse
@@ -736,17 +738,17 @@ class BaseExtractor(Extractor):
     instances = ()
 
     def __init__(self, match):
-        if not self.category:
-            self._init_category(match)
         Extractor.__init__(self, match)
+        if not self.category:
+            self._init_category()
 
-    def _init_category(self, match):
-        for index, group in enumerate(match.groups()):
+    def _init_category(self):
+        for index, group in enumerate(self.groups):
             if group is not None:
                 if index:
                     self.category, self.root, info = self.instances[index-1]
                     if not self.root:
-                        self.root = text.root_from_url(match.group(0))
+                        self.root = text.root_from_url(self.match.group(0))
                     self.config_instance = info.get
                 else:
                     self.root = group
