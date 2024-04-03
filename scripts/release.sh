@@ -44,9 +44,9 @@ update-dev() {
 
 build-python() {
     cd "${ROOTDIR}"
-    echo Building bdist_wheel and sdist
+    echo Building sdist and wheel
 
-    python setup.py bdist_wheel sdist
+    python -m build
 }
 
 build-linux() {
