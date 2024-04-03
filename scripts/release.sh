@@ -112,6 +112,14 @@ changelog() {
         -e "s*\([( ]\)#\([0-9]\+\)*\1[#\2](https://github.com/mikf/gallery-dl/issues/\2)*g" \
         -e "s*^## \w\+\$*## ${NEWVERSION} - $(date +%Y-%m-%d)*" \
         "${CHANGELOG}"
+
+    mv "${CHANGELOG}" "${CHANGELOG}.orig"
+
+    # - remove all but the latest entries
+    sed -n \
+        -e '/^## /,/^$/ { /^$/q; p }' \
+        "${CHANGELOG}.orig" \
+    > "${CHANGELOG}"
 }
 
 supportedsites() {
@@ -129,6 +137,7 @@ upload-git() {
     cd "${ROOTDIR}"
     echo Pushing changes to github
 
+    mv "${CHANGELOG}.orig" "${CHANGELOG}" || true
     git add "gallery_dl/version.py" "${README}" "${CHANGELOG}"
     git commit -S -m "release version ${NEWVERSION}"
     git tag -s -m "version ${NEWVERSION}" "v${NEWVERSION}"
