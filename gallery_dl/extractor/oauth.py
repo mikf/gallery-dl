@@ -441,7 +441,8 @@ class OAuthPixiv(OAuthBase):
             "redirect_uri"  : "https://app-api.pixiv.net"
                               "/web/v1/users/auth/pixiv/callback",
         }
-        data = self.session.post(url, headers=headers, data=data).json()
+        proxies = util.build_proxy_map(self.config("proxy"), self.log)
+        data = self.session.post(url, headers=headers, data=data, proxies=proxies).json()
 
         if "error" in data:
             stdout_write("\n{}\n".format(data))
