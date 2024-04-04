@@ -110,7 +110,7 @@ class OAuthBase(Extractor):
 
         # get a request token
         params = {"oauth_callback": self.redirect_uri}
-        data = self.session.get(request_token_url, params=params).text
+        data = self.request(request_token_url, params=params).text
 
         data = text.parse_query(data)
         self.session.auth.token_secret = data["oauth_token_secret"]
@@ -120,7 +120,7 @@ class OAuthBase(Extractor):
         data = self.open(authorize_url, params)
 
         # exchange the request token for an access token
-        data = self.session.get(access_token_url, params=data).text
+        data = self.request(access_token_url, params=data).text
         data = text.parse_query(data)
         token = data["oauth_token"]
         token_secret = data["oauth_token_secret"]
@@ -189,7 +189,8 @@ class OAuthBase(Extractor):
             data["client_id"] = client_id
             data["client_secret"] = client_secret
 
-        data = self.session.post(token_url, data=data, auth=auth).json()
+        data = self.request(
+            token_url, method="POST", data=data, auth=auth).json()
 
         # check token response
         if "error" in data:
@@ -386,7 +387,7 @@ class OAuthMastodon(OAuthBase):
             "redirect_uris": self.redirect_uri,
             "scopes": "read",
         }
-        data = self.session.post(url, data=data).json()
+        data = self.request(url, method="POST", data=data).json()
 
         if "client_id" not in data or "client_secret" not in data:
             raise exception.StopExtraction(
@@ -441,7 +442,8 @@ class OAuthPixiv(OAuthBase):
             "redirect_uri"  : "https://app-api.pixiv.net"
                               "/web/v1/users/auth/pixiv/callback",
         }
-        data = self.session.post(url, headers=headers, data=data).json()
+        data = self.request(
+            url, method="POST", headers=headers, data=data).json()
 
         if "error" in data:
             stdout_write("\n{}\n".format(data))
