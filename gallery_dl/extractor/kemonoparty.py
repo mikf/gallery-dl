@@ -82,7 +82,7 @@ class KemonopartyExtractor(Extractor):
                 self.root, post["service"], post["user"], post["id"])
             post["_http_headers"] = headers
             post["date"] = self._parse_datetime(
-                post["published"] or post["added"])
+                post.get("published") or post.get("added") or "")
 
             if username:
                 post["username"] = username
