@@ -10,7 +10,6 @@
 
 from .common import PostProcessor
 from .. import util, formatter
-import subprocess
 import os
 import re
 
@@ -80,14 +79,14 @@ class ExecPP(PostProcessor):
 
     def _exec(self, args, shell):
         self.log.debug("Running '%s'", args)
-        retcode = subprocess.Popen(args, shell=shell).wait()
+        retcode = util.Popen(args, shell=shell).wait()
         if retcode:
             self.log.warning("'%s' returned with non-zero exit status (%d)",
                              args, retcode)
 
     def _exec_async(self, args, shell):
         self.log.debug("Running '%s'", args)
-        subprocess.Popen(args, shell=shell)
+        util.Popen(args, shell=shell)
 
     def _replace(self, match):
         name = match.group(1)

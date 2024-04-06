@@ -857,7 +857,7 @@ class DatabaseConnection():
 
 
 def Popen_communicate(*args):
-    proc = subprocess.Popen(
+    proc = util.Popen(
         args, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
     try:
         stdout, stderr = proc.communicate()
