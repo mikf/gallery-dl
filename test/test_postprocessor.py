@@ -172,7 +172,7 @@ class ExecTest(BasePostprocessorTest):
             "command": "echo {} {_path} {_directory} {_filename} && rm {};",
         })
 
-        with patch("subprocess.Popen") as p:
+        with patch("gallery_dl.util.Popen") as p:
             i = Mock()
             i.wait.return_value = 0
             p.return_value = i
@@ -192,7 +192,7 @@ class ExecTest(BasePostprocessorTest):
                         "\fE _directory.upper()"],
         })
 
-        with patch("subprocess.Popen") as p:
+        with patch("gallery_dl.util.Popen") as p:
             i = Mock()
             i.wait.return_value = 0
             p.return_value = i
@@ -212,7 +212,7 @@ class ExecTest(BasePostprocessorTest):
             "command": "echo {}",
         })
 
-        with patch("subprocess.Popen") as p:
+        with patch("gallery_dl.util.Popen") as p:
             i = Mock()
             i.wait.return_value = 123
             p.return_value = i
@@ -230,7 +230,7 @@ class ExecTest(BasePostprocessorTest):
             "command": "echo {}",
         })
 
-        with patch("subprocess.Popen") as p:
+        with patch("gallery_dl.util.Popen") as p:
             i = Mock()
             p.return_value = i
             self._trigger(("after",))

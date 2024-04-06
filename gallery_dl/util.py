@@ -339,7 +339,7 @@ def extract_headers(response):
 @functools.lru_cache(maxsize=None)
 def git_head():
     try:
-        out, err = subprocess.Popen(
+        out, err = Popen(
             ("git", "rev-parse", "--short", "HEAD"),
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
@@ -577,6 +577,33 @@ GLOBALS = {
     "hash_md5" : md5,
     "re"       : re,
 }
+
+
+if EXECUTABLE and hasattr(sys, "_MEIPASS"):
+    # https://github.com/pyinstaller/pyinstaller/blob/develop/doc
+    # /runtime-information.rst#ld_library_path--libpath-considerations
+    _popen_env = os.environ.copy()
+
+    orig = _popen_env.get("LD_LIBRARY_PATH_ORIG")
+    if orig is None:
+        _popen_env.pop("LD_LIBRARY_PATH", None)
+    else:
+        _popen_env["LD_LIBRARY_PATH"] = orig
+
+    orig = _popen_env.get("DYLD_LIBRARY_PATH_ORIG")
+    if orig is None:
+        _popen_env.pop("DYLD_LIBRARY_PATH", None)
+    else:
+        _popen_env["DYLD_LIBRARY_PATH"] = orig
+
+    del orig
+
+    class Popen(subprocess.Popen):
+        def __init__(self, args, **kwargs):
+            kwargs["env"] = _popen_env
+            subprocess.Popen.__init__(self, args, **kwargs)
+else:
+    Popen = subprocess.Popen
 
 
 def compile_expression(expr, name="<expr>", globals=None):

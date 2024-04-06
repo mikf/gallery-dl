@@ -171,7 +171,7 @@ class UgoiraPP(PostProcessor):
     def _exec(self, args):
         self.log.debug(args)
         out = None if self.output else subprocess.DEVNULL
-        retcode = subprocess.Popen(args, stdout=out, stderr=out).wait()
+        retcode = util.Popen(args, stdout=out, stderr=out).wait()
         if retcode:
             print()
             self.log.error("Non-zero exit status when running %s (%s)",
