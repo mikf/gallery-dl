@@ -741,7 +741,8 @@ class TwitterEventExtractor(TwitterExtractor):
 class TwitterTweetExtractor(TwitterExtractor):
     """Extractor for individual tweets"""
     subcategory = "tweet"
-    pattern = BASE_PATTERN + r"/([^/?#]+|i/web)/status/(\d+)/?(?:$|[?#])"
+    pattern = (BASE_PATTERN + r"/([^/?#]+|i/web)/status/(\d+)"
+               r"/?(?:$|\?|#|photo/)")
     example = "https://twitter.com/USER/status/12345"
 
     def __init__(self, match):
