@@ -10,7 +10,6 @@
 # https://github.com/yt-dlp/yt-dlp/blob/master/yt_dlp/cookies.py
 
 import binascii
-import contextlib
 import ctypes
 import logging
 import os
@@ -682,7 +681,8 @@ def _get_gnome_keyring_password(browser_keyring_name):
     # lists all keys and presumably searches for its key in the list.
     # It appears that we must do the same.
     # https://github.com/jaraco/keyring/issues/556
-    with contextlib.closing(secretstorage.dbus_init()) as con:
+    con = secretstorage.dbus_init()
+    try:
         col = secretstorage.get_default_collection(con)
         label = browser_keyring_name + " Safe Storage"
         for item in col.get_all_items():
@@ -691,6 +691,8 @@ def _get_gnome_keyring_password(browser_keyring_name):
         else:
             _log_error("Failed to read from GNOME keyring")
             return b""
+    finally:
+        con.close()
 
 
 def _get_linux_keyring_password(browser_keyring_name, keyring):

@@ -13,7 +13,6 @@ import unittest
 from unittest.mock import patch
 
 import io
-import contextlib
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from gallery_dl import job, config, text  # noqa E402
@@ -32,8 +31,13 @@ class TestJob(unittest.TestCase):
             jobinstance = extr_or_job
 
         with io.StringIO() as buffer:
-            with contextlib.redirect_stdout(buffer):
+            stdout = sys.stdout
+            sys.stdout = buffer
+            try:
                 jobinstance.run()
+            finally:
+                sys.stdout = stdout
+
             return buffer.getvalue()
 
 
