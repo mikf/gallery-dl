@@ -573,6 +573,16 @@ class MtimeTest(BasePostprocessorTest):
         self._trigger()
         self.assertEqual(self.pathfmt.kwdict["_mtime"], 315532800)
 
+    def test_mtime_none(self):
+        self._create(None, {"date": None})
+        self._trigger()
+        self.assertNotIn("_mtime", self.pathfmt.kwdict)
+
+    def test_mtime_undefined(self):
+        self._create(None, {})
+        self._trigger()
+        self.assertNotIn("_mtime", self.pathfmt.kwdict)
+
     def test_mtime_key(self):
         self._create({"key": "foo"}, {"foo": 315532800})
         self._trigger()
