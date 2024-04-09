@@ -84,6 +84,15 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://hearthstone.fandom.com/wiki/Flame_Juggler",
+    "#comment" : "empty 'metadata'",
+    "#category": ("wikimedia", "fandom-hearthstone", "article"),
+    "#class"   : wikimedia.WikimediaArticleExtractor,
+
+    "metadata" : {},
+},
+
+{
     "#url"     : "https://projectsekai.fandom.com/wiki/Project_SEKAI_Wiki",
     "#category": ("wikimedia", "fandom-projectsekai", "article"),
     "#class"   : wikimedia.WikimediaArticleExtractor,

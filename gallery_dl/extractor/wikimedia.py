@@ -77,10 +77,10 @@ class WikimediaExtractor(BaseExtractor):
 
             image["metadata"] = {
                 m["name"]: m["value"]
-                for m in image["metadata"]}
+                for m in image["metadata"] or ()}
             image["commonmetadata"] = {
                 m["name"]: m["value"]
-                for m in image["commonmetadata"]}
+                for m in image["commonmetadata"] or ()}
 
             filename = image["canonicaltitle"]
             image["filename"], _, image["extension"] = \
