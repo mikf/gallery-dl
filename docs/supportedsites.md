@@ -1500,6 +1500,12 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
+    <td>wiki.gg</td>
+    <td>https://www.wiki.gg/</td>
+    <td>Articles</td>
+    <td></td>
+</tr>
+<tr>
     <td>Super Mario Wiki</td>
     <td>https://www.mariowiki.com/</td>
     <td>Articles</td>
