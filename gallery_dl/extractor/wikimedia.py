@@ -27,9 +27,9 @@ class WikimediaExtractor(BaseExtractor):
 
         if self.category == "wikimedia":
             self.category = self.root.split(".")[-2]
-        elif self.category == "fandom":
-            self.category = \
-                "fandom-" + self.root.partition(".")[0].rpartition("/")[2]
+        elif self.category in ("fandom", "wikigg"):
+            self.category = "{}-{}".format(
+                self.category, self.root.partition(".")[0].rpartition("/")[2])
 
         if path.startswith("wiki/"):
             path = path[5:]
@@ -151,6 +151,10 @@ BASE_PATTERN = WikimediaExtractor.update({
     "fandom": {
         "root": None,
         "pattern": r"[\w-]+\.fandom\.com",
+    },
+    "wikigg": {
+        "root": None,
+        "pattern": r"\w+\.wiki\.gg",
     },
     "mariowiki": {
         "root": "https://www.mariowiki.com",
