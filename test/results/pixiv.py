@@ -459,11 +459,14 @@ __tests__ = (
 
 {
     "#url"     : "https://www.pixiv.net/novel/show.php?id=16422450",
-    "#comment" : "embeds",
+    "#comment" : "embeds // covers (#5373)",
     "#category": ("", "pixiv", "novel"),
     "#class"   : pixiv.PixivNovelExtractor,
-    "#options" : {"embeds": True},
-    "#count"   : 3,
+    "#options" : {
+        "embeds": True,
+        "covers": True,
+    },
+    "#count"   : 4,
 },
 
 {
