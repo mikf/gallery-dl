@@ -2964,14 +2964,24 @@ Description
     `gppt <https://github.com/eggplants/get-pixivpy-token>`__.
 
 
-extractor.pixiv.embeds
-----------------------
+extractor.pixiv.novel.covers
+----------------------------
 Type
     ``bool``
 Default
     ``false``
 Description
-    Download images embedded in novels.
+    Download cover images.
+
+
+extractor.pixiv.novel.embeds
+----------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Download embedded images.
 
 
 extractor.pixiv.novel.full-series

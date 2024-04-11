@@ -619,6 +619,7 @@ class PixivNovelExtractor(PixivExtractor):
         meta_user = self.config("metadata")
         meta_bookmark = self.config("metadata-bookmark")
         embeds = self.config("embeds")
+        covers = self.config("covers")
 
         if embeds:
             headers = {
@@ -657,6 +658,19 @@ class PixivNovelExtractor(PixivExtractor):
 
             novel["extension"] = "txt"
             yield Message.Url, "text:" + content, novel
+
+            if covers:
+                path = novel["image_urls"]["large"].partition("/img/")[2]
+                url = ("https://i.pximg.net/novel-cover-original/img/" +
+                       path.rpartition(".")[0].replace("_master1200", ""))
+                novel["date_url"] = self._date_from_url(url)
+                novel["num"] += 1
+                novel["suffix"] = "_p{:02}".format(novel["num"])
+                novel["_fallback"] = (url + ".png",)
+                url_jpg = url + ".jpg"
+                text.nameext_from_url(url_jpg, novel)
+                yield Message.Url, url_jpg, novel
+                del novel["_fallback"]
 
             if embeds:
                 desktop = False
