@@ -151,3 +151,18 @@ class TapasEpisodeExtractor(TapasExtractor):
 
     def episode_ids(self):
         return (self.episode_id,)
+
+
+class TapasCreatorExtractor(TapasExtractor):
+    subcategory = "creator"
+    pattern = BASE_PATTERN + r"/(?!series|episode)([^/?#]+)"
+    example = "https://tapas.io/CREATOR"
+
+    def items(self):
+        url = "{}/{}/series".format(self.root, self.groups[0])
+        page = self.request(url).text
+        page = text.extr(page, '<ul class="content-list-wrap', "</ul>")
+
+        data = {"_extractor": TapasSeriesExtractor}
+        for path in text.extract_iter(page, ' href="', '"'):
+            yield Message.Queue, self.root + path, data

@@ -73,4 +73,17 @@ __tests__ = (
     },
 },
 
+{
+    "#url"     : "https://tapas.io/SANG123/series",
+    "#comment" : "#5306",
+    "#category": ("", "tapas", "creator"),
+    "#class"   : tapas.TapasCreatorExtractor,
+    "#urls"    : (
+        "https://tapas.io/series/the-return-of-the-disaster-class-hero-novel",
+        "https://tapas.io/series/the-return-of-the-disaster-class-hero",
+        "https://tapas.io/series/tomb-raider-king",
+        "https://tapas.io/series/tomb-raider-king-novel",
+    ),
+},
+
 )
