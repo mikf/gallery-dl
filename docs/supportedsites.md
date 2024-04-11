@@ -838,7 +838,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Tapas</td>
     <td>https://tapas.io/</td>
-    <td>Episodes, Series</td>
+    <td>Creators, Episodes, Series</td>
     <td>Supported</td>
 </tr>
 <tr>
