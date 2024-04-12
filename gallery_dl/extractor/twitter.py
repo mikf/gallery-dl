@@ -1294,42 +1294,62 @@ class TwitterAPI():
             if csrf_token:
                 self.headers["x-csrf-token"] = csrf_token
 
-            if response.status_code < 400:
+            try:
                 data = response.json()
+            except ValueError:
+                data = {"errors": ({"message": response.text},)}
 
-                errors = data.get("errors")
-                if not errors:
-                    return data
+            errors = data.get("errors")
+            if not errors:
+                return data
 
-                retry = False
-                for error in errors:
-                    msg = error.get("message") or "Unspecified"
-                    self.log.debug("API error: '%s'", msg)
+            retry = False
+            for error in errors:
+                msg = error.get("message") or "Unspecified"
+                self.log.debug("API error: '%s'", msg)
 
-                    if "this account is temporarily locked" in msg:
-                        msg = "Account temporarily locked"
-                        if self.extractor.config("locked") != "wait":
-                            raise exception.AuthorizationError(msg)
-                        self.log.warning("%s. Press ENTER to retry.", msg)
-                        try:
-                            input()
-                        except (EOFError, OSError):
-                            pass
-                        retry = True
+                if "this account is temporarily locked" in msg:
+                    msg = "Account temporarily locked"
+                    if self.extractor.config("locked") != "wait":
+                        raise exception.AuthorizationError(msg)
+                    self.log.warning("%s. Press ENTER to retry.", msg)
+                    try:
+                        input()
+                    except (EOFError, OSError):
+                        pass
+                    retry = True
 
-                    elif msg.lower().startswith("timeout"):
-                        retry = True
+                elif "Could not authenticate you" in msg:
+                    if not self.extractor.config("relogin", True):
+                        continue
 
-                if not retry:
-                    return data
-                elif self.headers["x-twitter-auth-type"]:
+                    username, password = self.extractor._get_auth_info()
+                    if not username:
+                        continue
+
+                    _login_impl.invalidate(username)
+                    self.extractor.cookies_update(
+                        _login_impl(self.extractor, username, password))
+                    self.__init__(self.extractor)
+                    retry = True
+
+                elif msg.lower().startswith("timeout"):
+                    retry = True
+
+            if retry:
+                if self.headers["x-twitter-auth-type"]:
                     self.log.debug("Retrying API request")
                     continue
+                else:
+                    # fall through to "Login Required"
+                    response.status_code = 404
 
-                # fall through to "Login Required"
-                response.status_code = 404
-
-            if response.status_code == 429:
+            if response.status_code < 400:
+                return data
+            elif response.status_code in (403, 404) and \
+                    not self.headers["x-twitter-auth-type"]:
+                raise exception.AuthorizationError("Login required")
+            elif response.status_code == 429:
                 # rate limit exceeded
                 if self.extractor.config("ratelimit") == "abort":
                     raise exception.StopExtraction("Rate limit exceeded")
@@ -1339,18 +1359,11 @@ class TwitterAPI():
                 self.extractor.wait(until=until, seconds=seconds)
                 continue
 
-            if response.status_code in (403, 404) and \
-                    not self.headers["x-twitter-auth-type"]:
-                raise exception.AuthorizationError("Login required")
-
             # error
             try:
-                data = response.json()
-                errors = ", ".join(e["message"] for e in data["errors"])
-            except ValueError:
-                errors = response.text
+                errors = ", ".join(e["message"] for e in errors)
             except Exception:
-                errors = data.get("errors", "")
+                pass
 
             raise exception.StopExtraction(
                 "%s %s (%s)", response.status_code, response.reason, errors)
