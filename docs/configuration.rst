@@ -3916,6 +3916,19 @@ Description
     * ``"wait"``: Wait until rate limit reset
 
 
+extractor.twitter.relogin
+-------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    | When receiving a "Could not authenticate you" error while logged in with
+      `username & passeword <extractor.*.username & .password_>`__,
+    | refresh the current login session and
+      try to continue from where it left off.
+
+
 extractor.twitter.locked
 ------------------------
 Type
