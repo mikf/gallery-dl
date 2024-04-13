@@ -487,14 +487,14 @@ class RedditAPI():
 
             remaining = response.headers.get("x-ratelimit-remaining")
             if remaining and float(remaining) < 2:
-                if self._warn_429:
-                    self._warn_429 = False
+                self.log.warning("API rate limit exceeded")
+                if self._warn_429 and self.client_id == self.CLIENT_ID:
                     self.log.info(
                         "Register your own OAuth application and use its "
                         "credentials to prevent this error: "
-                        "https://github.com/mikf/gallery-dl/blob/master"
-                        "/docs/configuration.rst"
-                        "#extractorredditclient-id--user-agent")
+                        "https://gdl-org.github.io/docs/configuration.html"
+                        "#extractor-reddit-client-id-user-agent")
+                self._warn_429 = False
                 self.extractor.wait(
                     seconds=response.headers["x-ratelimit-reset"])
                 continue

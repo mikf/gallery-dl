@@ -447,9 +447,9 @@ class TumblrAPI(oauth.OAuth1API):
                     if api_key == self.API_KEY:
                         self.log.info(
                             "Register your own OAuth application and use its "
-                            "credentials to prevent this error: https://githu"
-                            "b.com/mikf/gallery-dl/blob/master/docs/configurat"
-                            "ion.rst#extractortumblrapi-key--api-secret")
+                            "credentials to prevent this error: "
+                            "https://gdl-org.github.io/docs/configuration.html"
+                            "#extractor-tumblr-api-key-api-secret")
 
                     if self.extractor.config("ratelimit") == "wait":
                         self.extractor.wait(seconds=reset)

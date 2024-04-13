@@ -947,7 +947,7 @@ Consider all listed sites to potentially be NSFW.
     <td>Wallhaven</td>
     <td>https://wallhaven.cc/</td>
     <td>Collections, individual Images, Search Results, User Profiles</td>
-    <td><a href="configuration.rst#extractorwallhavenapi-key">API Key</a></td>
+    <td><a href="https://gdl-org.github.io/docs/configuration.html#extractor-wallhaven-api-key">API Key</a></td>
 </tr>
 <tr>
     <td>Wallpaper Cave</td>
@@ -965,7 +965,7 @@ Consider all listed sites to potentially be NSFW.
     <td>Weasyl</td>
     <td>https://www.weasyl.com/</td>
     <td>Favorites, Folders, Journals, Submissions</td>
-    <td><a href="configuration.rst#extractorweasylapi-key">API Key</a></td>
+    <td><a href="https://gdl-org.github.io/docs/configuration.html#extractor-weasyl-api-key">API Key</a></td>
 </tr>
 <tr>
     <td>webmshare</td>
@@ -1319,7 +1319,7 @@ Consider all listed sites to potentially be NSFW.
     <td>Derpibooru</td>
     <td>https://derpibooru.org/</td>
     <td>Galleries, Posts, Search Results</td>
-    <td><a href="configuration.rst#extractorderpibooruapi-key">API Key</a></td>
+    <td><a href="https://gdl-org.github.io/docs/configuration.html#extractor-derpibooru-api-key">API Key</a></td>
 </tr>
 <tr>
     <td>Ponybooru</td>

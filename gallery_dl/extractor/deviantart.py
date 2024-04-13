@@ -1457,9 +1457,8 @@ class DeviantartOAuthAPI():
                         self.log.info(
                             "Register your own OAuth application and use its "
                             "credentials to prevent this error: "
-                            "https://github.com/mikf/gallery-dl/blob/master/do"
-                            "cs/configuration.rst#extractordeviantartclient-id"
-                            "--client-secret")
+                            "https://gdl-org.github.io/docs/configuration.html"
+                            "#extractor-deviantart-client-id-client-secret")
             else:
                 if log:
                     self.log.error(msg)
