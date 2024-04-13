@@ -441,9 +441,11 @@ class Extractor():
             if not path:
                 return
 
+        path_tmp = path + ".tmp"
         try:
-            with open(path, "w") as fp:
+            with open(path_tmp, "w") as fp:
                 util.cookiestxt_store(fp, self.cookies)
+            os.replace(path_tmp, path)
         except OSError as exc:
             self.log.warning("cookies: %s", exc)
 
