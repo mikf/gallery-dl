@@ -250,6 +250,12 @@ def build_parser():
         help="Activate quiet mode",
     )
     output.add_argument(
+        "-w", "--warning",
+        dest="loglevel",
+        action="store_const", const=logging.WARNING,
+        help="Print only warnings and errors",
+    )
+    output.add_argument(
         "-v", "--verbose",
         dest="loglevel",
         action="store_const", const=logging.DEBUG,
