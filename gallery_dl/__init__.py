@@ -113,7 +113,7 @@ def main():
 
         # loglevels
         output.configure_logging(args.loglevel)
-        if args.loglevel >= logging.ERROR:
+        if args.loglevel >= logging.WARNING:
             config.set(("output",), "mode", "null")
             config.set(("downloader",), "progress", None)
         elif args.loglevel <= logging.DEBUG:
