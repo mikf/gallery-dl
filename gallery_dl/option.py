@@ -256,6 +256,12 @@ def build_parser():
         help="Print various debugging information",
     )
     output.add_argument(
+        "-w", "--warning",
+        dest="loglevel",
+        action="store_const", const=logging.WARNING,
+        help="Print warnings",
+    )
+    output.add_argument(
         "-g", "--get-urls",
         dest="list_urls", action="count",
         help="Print URLs instead of downloading",
