@@ -40,6 +40,22 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://gelbooru.com/index.php?page=post&s=list&tags=id:>=67800+id:<=68000",
+    "#comment" : "meta tags (#5478)",
+    "#category": ("booru", "gelbooru", "tag"),
+    "#class"   : gelbooru.GelbooruTagExtractor,
+    "#count"   : 187,
+},
+
+{
+    "#url"     : "https://gelbooru.com/index.php?page=post&s=list&tags=id:>=67800+id:<=68000+sort:id:asc",
+    "#comment" : "meta + sort tags (#5478)",
+    "#category": ("booru", "gelbooru", "tag"),
+    "#class"   : gelbooru.GelbooruTagExtractor,
+    "#count"   : 187,
+},
+
+{
     "#url"     : "https://gelbooru.com/index.php?page=pool&s=show&id=761",
     "#category": ("booru", "gelbooru", "pool"),
     "#class"   : gelbooru.GelbooruPoolExtractor,
