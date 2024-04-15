@@ -35,10 +35,7 @@ class ReadcomiconlineBase():
                 self.log.warning(
                     "Redirect to \n%s\nVisit this URL in your browser, solve "
                     "the CAPTCHA, and press ENTER to continue", response.url)
-                try:
-                    input()
-                except (EOFError, OSError):
-                    pass
+                self.input()
             else:
                 raise exception.StopExtraction(
                     "Redirect to \n%s\nVisit this URL in your browser and "
