@@ -51,19 +51,44 @@ class GelbooruBase():
         params["pid"] = self.page_start
         params["limit"] = self.per_page
         limit = self.per_page // 2
+        pid = False
+
+        if "tags" in params:
+            tags = params["tags"].split()
+            op = "<"
+            id = False
+
+            for tag in tags:
+                if tag.startswith("sort:"):
+                    if tag == "sort:id:asc":
+                        op = ">"
+                    elif tag == "sort:id" or tag.startswith("sort:id:"):
+                        op = "<"
+                    else:
+                        pid = True
+                elif tag.startswith("id:"):
+                    id = True
+
+            if not pid:
+                if id:
+                    tag = "id:" + op
+                    tags = [t for t in tags if not t.startswith(tag)]
+                tags = "{} id:{}".format(" ".join(tags), op)
 
         while True:
             posts = self._api_request(params)
 
-            for post in posts:
-                yield post
+            yield from posts
 
             if len(posts) < limit:
                 return
 
-            if "pid" in params:
-                del params["pid"]
-            params["tags"] = "{} id:<{}".format(self.tags, post["id"])
+            if pid:
+                params["pid"] += 1
+            else:
+                if "pid" in params:
+                    del params["pid"]
+                params["tags"] = tags + str(posts[-1]["id"])
 
     def _pagination_html(self, params):
         url = self.root + "/index.php"
