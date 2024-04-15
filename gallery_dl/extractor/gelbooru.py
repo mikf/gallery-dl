@@ -63,7 +63,7 @@ class GelbooruBase():
 
             if "pid" in params:
                 del params["pid"]
-            params["tags"] = "{} id:<{}".format(self.tags, post["id"])
+            params["tags"] = "{} id:{}{}".format(self.tags, '>' if 'sort:id:asc' in self.tags else '<', post["id"])
 
     def _pagination_html(self, params):
         url = self.root + "/index.php"
