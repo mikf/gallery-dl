@@ -14,6 +14,7 @@ import ssl
 import time
 import netrc
 import queue
+import getpass
 import logging
 import datetime
 import requests
@@ -249,6 +250,15 @@ class Extractor():
         self.log.debug("Sleeping %.2f seconds (%s)",
                        seconds, reason)
         time.sleep(seconds)
+
+    def input(self, prompt, echo=True):
+        if echo:
+            try:
+                return input(prompt)
+            except (EOFError, OSError):
+                return None
+        else:
+            return getpass.getpass(prompt)
 
     def _get_auth_info(self):
         """Return authentication information as (username, password) tuple"""

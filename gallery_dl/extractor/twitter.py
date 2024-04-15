@@ -1312,11 +1312,8 @@ class TwitterAPI():
                     msg = "Account temporarily locked"
                     if self.extractor.config("locked") != "wait":
                         raise exception.AuthorizationError(msg)
-                    self.log.warning("%s. Press ENTER to retry.", msg)
-                    try:
-                        input()
-                    except (EOFError, OSError):
-                        pass
+                    self.log.warning(msg)
+                    self.extractor.input("Press ENTER to retry.")
                     retry = True
 
                 elif "Could not authenticate you" in msg:
