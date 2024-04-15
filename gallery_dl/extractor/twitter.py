@@ -1710,23 +1710,24 @@ class TwitterAPI():
 
 @cache(maxage=365*86400, keyarg=1)
 def _login_impl(extr, username, password):
-
-    import re
     import random
 
-    if re.fullmatch(r"[\w.%+-]+@[\w.-]+\.\w{2,}", username):
-        extr.log.warning(
-            "Login with email is no longer possible. "
-            "You need to provide your username or phone number instead.")
+    def process(data, params=None):
+        response = extr.request(
+            url, params=params, headers=headers, json=data,
+            method="POST", fatal=None)
 
-    def process(response):
         try:
             data = response.json()
         except ValueError:
             data = {"errors": ({"message": "Invalid response"},)}
         else:
             if response.status_code < 400:
-                return data["flow_token"]
+                try:
+                    return (data["flow_token"],
+                            data["subtasks"][0]["subtask_id"])
+                except LookupError:
+                    pass
 
         errors = []
         for error in data.get("errors") or ():
@@ -1735,9 +1736,13 @@ def _login_impl(extr, username, password):
         extr.log.debug(response.text)
         raise exception.AuthenticationError(", ".join(errors))
 
-    extr.cookies.clear()
+    cookies = extr.cookies
+    cookies.clear()
     api = TwitterAPI(extr)
     api._authenticate_guest()
+
+    url = "https://api.twitter.com/1.1/onboarding/task.json"
+    params = {"flow_name": "login"}
     headers = api.headers
 
     extr.log.info("Logging in as %s", username)
@@ -1794,31 +1799,18 @@ def _login_impl(extr, username, password):
             "web_modal": 1,
         },
     }
-    url = "https://api.twitter.com/1.1/onboarding/task.json?flow_name=login"
-    response = extr.request(url, method="POST", headers=headers, json=data)
 
-    data = {
-        "flow_token": process(response),
-        "subtask_inputs": [
-            {
-                "subtask_id": "LoginJsInstrumentationSubtask",
+    flow_token, subtask = process(data, params)
+    while not cookies.get("auth_token"):
+        if subtask == "LoginJsInstrumentationSubtask":
+            data = {
                 "js_instrumentation": {
                     "response": "{}",
                     "link": "next_link",
                 },
-            },
-        ],
-    }
-    url = "https://api.twitter.com/1.1/onboarding/task.json"
-    response = extr.request(
-        url, method="POST", headers=headers, json=data, fatal=None)
-
-    # username
-    data = {
-        "flow_token": process(response),
-        "subtask_inputs": [
-            {
-                "subtask_id": "LoginEnterUserIdentifierSSO",
+            }
+        elif subtask == "LoginEnterUserIdentifierSSO":
+            data = {
                 "settings_list": {
                     "setting_responses": [
                         {
@@ -1830,48 +1822,61 @@ def _login_impl(extr, username, password):
                     ],
                     "link": "next_link",
                 },
-            },
-        ],
-    }
-    #  url = "https://api.twitter.com/1.1/onboarding/task.json"
-    extr.sleep(random.uniform(2.0, 4.0), "login (username)")
-    response = extr.request(
-        url, method="POST", headers=headers, json=data, fatal=None)
-
-    # password
-    data = {
-        "flow_token": process(response),
-        "subtask_inputs": [
-            {
-                "subtask_id": "LoginEnterPassword",
+            }
+        elif subtask == "LoginEnterPassword":
+            data = {
                 "enter_password": {
                     "password": password,
                     "link": "next_link",
                 },
-            },
-        ],
-    }
-    #  url = "https://api.twitter.com/1.1/onboarding/task.json"
-    extr.sleep(random.uniform(2.0, 4.0), "login (password)")
-    response = extr.request(
-        url, method="POST", headers=headers, json=data, fatal=None)
-
-    # account duplication check ?
-    data = {
-        "flow_token": process(response),
-        "subtask_inputs": [
-            {
-                "subtask_id": "AccountDuplicationCheck",
+            }
+        elif subtask == "LoginEnterAlternateIdentifierSubtask":
+            alt = extr.input(
+                "Alternate Identifier (username, email, phone number): ")
+            data = {
+                "enter_text": {
+                    "text": alt,
+                    "link": "next_link",
+                },
+            }
+        elif subtask == "LoginTwoFactorAuthChallenge":
+            data = {
+                "enter_text": {
+                    "text": extr.input("2FA Token: "),
+                    "link": "next_link",
+                },
+            }
+        elif subtask == "LoginAcid":
+            data = {
+                "enter_text": {
+                    "text": extr.input("Email Verification Code: "),
+                    "link": "next_link",
+                },
+            }
+        elif subtask == "AccountDuplicationCheck":
+            data = {
                 "check_logged_in_account": {
                     "link": "AccountDuplicationCheck_false",
                 },
-            },
-        ],
-    }
-    #  url = "https://api.twitter.com/1.1/onboarding/task.json"
-    response = extr.request(
-        url, method="POST", headers=headers, json=data, fatal=None)
-    process(response)
+            }
+        elif subtask == "ArkoseLogin":
+            raise exception.AuthenticationError("Login requires CAPTCHA")
+        elif subtask == "DenyLoginSubtask":
+            raise exception.AuthenticationError("Login rejected as suspicious")
+        elif subtask == "ArkoseLogin":
+            raise exception.AuthenticationError("No auth token cookie")
+        else:
+            raise exception.StopExtraction("Unrecognized subtask %s", subtask)
+
+        inputs = {"subtask_id": subtask}
+        inputs.update(data)
+        data = {
+            "flow_token": flow_token,
+            "subtask_inputs": [inputs],
+        }
+
+        extr.sleep(random.uniform(1.0, 3.0), "login ({})".format(subtask))
+        flow_token, subtask = process(data)
 
     return {
         cookie.name: cookie.value
