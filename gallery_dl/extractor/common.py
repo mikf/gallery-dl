@@ -220,7 +220,7 @@ class Extractor():
         raise exception.HttpError(msg, response)
 
     def wait(self, seconds=None, until=None, adjust=1.0,
-             reason="rate limit reset"):
+             reason="rate limit"):
         now = time.time()
 
         if seconds:
@@ -243,7 +243,7 @@ class Extractor():
         if reason:
             t = datetime.datetime.fromtimestamp(until).time()
             isotime = "{:02}:{:02}:{:02}".format(t.hour, t.minute, t.second)
-            self.log.info("Waiting until %s for %s.", isotime, reason)
+            self.log.info("Waiting until %s (%s)", isotime, reason)
         time.sleep(seconds)
 
     def sleep(self, seconds, reason):
