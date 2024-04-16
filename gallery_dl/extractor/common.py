@@ -198,7 +198,10 @@ class Extractor():
                     if b'name="captcha-bypass"' in content:
                         self.log.warning("Cloudflare CAPTCHA")
                         break
-                if code not in retry_codes and code < 500:
+
+                if code == 429 and self._interval_429:
+                    pass
+                elif code not in retry_codes and code < 500:
                     break
 
             finally:
@@ -208,14 +211,18 @@ class Extractor():
             if tries > retries:
                 break
 
+            seconds = tries
             if self._interval:
-                seconds = self._interval()
-                if seconds < tries:
-                    seconds = tries
+                s = self._interval()
+                if seconds < s:
+                    seconds = s
+            if code == 429 and self._interval_429:
+                s = self._interval_429()
+                if seconds < s:
+                    seconds = s
+                self.wait(seconds=seconds, reason="429 Too Many Requests")
             else:
-                seconds = tries
-
-            self.sleep(seconds, "retry")
+                self.sleep(seconds, "retry")
             tries += 1
 
         raise exception.HttpError(msg, response)
@@ -292,6 +299,9 @@ class Extractor():
         self._interval = util.build_duration_func(
             self.config("sleep-request", self.request_interval),
             self.request_interval_min,
+        )
+        self._interval_429 = util.build_duration_func(
+            self.config("sleep-429", 60),
         )
 
         if self._retries < 0:

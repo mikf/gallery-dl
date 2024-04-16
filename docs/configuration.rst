@@ -358,13 +358,24 @@ Description
     i.e. before starting a new extractor.
 
 
+extractor.*.sleep-429
+---------------------
+Type
+    |Duration|_
+Default
+    ``60``
+Description
+    Number of seconds to sleep when receiving a `429 Too Many Requests`
+    response before `retrying <extractor.*.retries_>`__ the request.
+
+
 extractor.*.sleep-request
 -------------------------
 Type
     |Duration|_
 Default
     * ``"0.5-1.5"``
-        ``[Danbooru]``, ``[E621]``, ``[foolfuuka]``, ``itaku``,
+        ``[Danbooru]``, ``[E621]``, ``[foolfuuka]:search``, ``itaku``,
         ``newgrounds``, ``[philomena]``, ``pixiv:novel``, ``plurk``,
         ``poipiku`` , ``pornpics``, ``soundgasm``, ``urlgalleries``,
         ``vk``, ``zerochan``
