@@ -177,9 +177,10 @@ class Extractor():
                 code = response.status_code
                 if self._write_pages:
                     self._dump_response(response)
-                if 200 <= code < 400 or fatal is None and \
-                        (400 <= code < 500) or not fatal and \
-                        (400 <= code < 429 or 431 <= code < 500):
+                if (
+                    code < 400 or
+                    code < 500 and (not fatal and code != 429 or fatal is None)
+                ):
                     if encoding:
                         response.encoding = encoding
                     return response
