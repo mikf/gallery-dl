@@ -171,6 +171,7 @@ class Extractor():
                     requests.exceptions.ChunkedEncodingError,
                     requests.exceptions.ContentDecodingError) as exc:
                 msg = exc
+                code = 0
             except (requests.exceptions.RequestException) as exc:
                 raise exception.HttpError(exc)
             else:
