@@ -243,8 +243,8 @@ class TwitterExtractor(Extractor):
 
         # collect URLs from entities
         for url in tweet["entities"].get("urls") or ():
-            url = url["expanded_url"]
-            if "//twitpic.com/" not in url or "/photos/" in url:
+            url = url.get("expanded_url") or url.get("url") or ""
+            if not url or "//twitpic.com/" not in url or "/photos/" in url:
                 continue
             if url.startswith("http:"):
                 url = "https" + url[4:]
@@ -336,7 +336,10 @@ class TwitterExtractor(Extractor):
         urls = entities.get("urls")
         if urls:
             for url in urls:
-                content = content.replace(url["url"], url["expanded_url"])
+                try:
+                    content = content.replace(url["url"], url["expanded_url"])
+                except KeyError:
+                    pass
         txt, _, tco = content.rpartition(" ")
         tdata["content"] = txt if tco.startswith("https://t.co/") else content
 
@@ -403,7 +406,10 @@ class TwitterExtractor(Extractor):
         urls = entities["description"].get("urls")
         if urls:
             for url in urls:
-                descr = descr.replace(url["url"], url["expanded_url"])
+                try:
+                    descr = descr.replace(url["url"], url["expanded_url"])
+                except KeyError:
+                    pass
         udata["description"] = descr
 
         if "url" in entities:
