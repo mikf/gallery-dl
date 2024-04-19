@@ -95,7 +95,11 @@ class ExhentaiExtractor(Extractor):
         self.cookies.clear()
 
         response = self.request(url, method="POST", headers=headers, data=data)
-        if b"You are now logged in as:" not in response.content:
+        content = response.content
+        if b"You are now logged in as:" not in content:
+            if b"The captcha was not entered correctly" in content:
+                raise exception.AuthenticationError(
+                    "CAPTCHA required. Use cookies instead.")
             raise exception.AuthenticationError()
 
         # collect more cookies
