@@ -442,7 +442,15 @@ def generate_tests():
             tests = results.category(category)
 
         if subcategory:
-            tests = [t for t in tests if t["#category"][-1] == subcategory]
+            if subcategory.startswith("+"):
+                url = subcategory[1:]
+                tests = [t for t in tests if url in t["#url"]]
+            elif subcategory.startswith("~"):
+                com = subcategory[1:]
+                tests = [t for t in tests
+                         if "#comment" in t and com in t["#comment"].lower()]
+            else:
+                tests = [t for t in tests if t["#category"][-1] == subcategory]
     else:
         tests = results.all()
 
