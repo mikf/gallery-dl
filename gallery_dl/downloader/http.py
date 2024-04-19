@@ -98,6 +98,8 @@ class HttpDownloader(DownloaderBase):
 
         metadata = self.metadata
         kwdict = pathfmt.kwdict
+        expected_status = kwdict.get(
+            "_http_expected_status", ())
         adjust_extension = kwdict.get(
             "_http_adjust_extension", self.adjust_extension)
 
@@ -151,7 +153,7 @@ class HttpDownloader(DownloaderBase):
 
             # check response
             code = response.status_code
-            if code == 200:  # OK
+            if code == 200 or code in expected_status:  # OK
                 offset = 0
                 size = response.headers.get("Content-Length")
             elif code == 206:  # Partial Content
