@@ -104,8 +104,9 @@ class PixivExtractor(Extractor):
             elif work["page_count"] == 1:
                 url = meta_single_page["original_image_url"]
                 if url == url_sanity:
-                    self.log.debug("Skipping 'sanity_level' warning (%s)",
-                                   work["id"])
+                    self.log.warning(
+                        "Unable to download work %s ('sanity_level' warning)",
+                        work["id"])
                     continue
                 work["date_url"] = self._date_from_url(url)
                 yield Message.Url, url, text.nameext_from_url(url, work)
