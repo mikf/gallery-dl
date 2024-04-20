@@ -14,6 +14,15 @@ import functools
 import unicodedata
 from . import config, util, formatter
 
+COLORS_DEFAULT = {
+    "success": "1;32",
+    "skip"   : "2",
+    "debug"  : "0;37",
+    "info"   : "1;37",
+    "warning": "1;33",
+    "error"  : "1;31",
+}
+
 
 # --------------------------------------------------------------------
 # Logging
@@ -189,7 +198,9 @@ def configure_logging(loglevel):
     handler = root.handlers[0]
     opts = config.interpolate(("output",), "log")
 
-    colors = config.interpolate(("output",), "colors") or {}
+    colors = config.interpolate(("output",), "colors")
+    if colors is None:
+        colors = COLORS_DEFAULT
     if colors and not opts:
         opts = LOG_FORMAT
 
@@ -326,9 +337,12 @@ def select():
     mode = config.get(("output",), "mode")
 
     if mode is None or mode == "auto":
-        if hasattr(sys.stdout, "isatty") and sys.stdout.isatty():
-            output = ColorOutput() if ANSI else TerminalOutput()
-        else:
+        try:
+            if sys.stdout.isatty():
+                output = ColorOutput() if ANSI else TerminalOutput()
+            else:
+                output = PipeOutput()
+        except Exception:
             output = PipeOutput()
     elif isinstance(mode, dict):
         output = CustomOutput(mode)
@@ -407,7 +421,10 @@ class ColorOutput(TerminalOutput):
     def __init__(self):
         TerminalOutput.__init__(self)
 
-        colors = config.get(("output",), "colors") or {}
+        colors = config.interpolate(("output",), "colors")
+        if colors is None:
+            colors = COLORS_DEFAULT
+
         self.color_skip = "\033[{}m".format(
             colors.get("skip", "2"))
         self.color_success = "\r\033[{}m".format(
