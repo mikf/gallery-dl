@@ -21,6 +21,7 @@ from . import config, util, formatter
 LOG_FORMAT = "[{name}][{levelname}] {message}"
 LOG_FORMAT_DATE = "%Y-%m-%d %H:%M:%S"
 LOG_LEVEL = logging.INFO
+LOG_LEVELS = ("debug", "info", "warning", "error")
 
 
 class Logger(logging.Logger):
@@ -129,7 +130,7 @@ class Formatter(logging.Formatter):
 
     def __init__(self, fmt, datefmt):
         if isinstance(fmt, dict):
-            for key in ("debug", "info", "warning", "error"):
+            for key in LOG_LEVELS:
                 value = fmt[key] if key in fmt else LOG_FORMAT
                 fmt[key] = (formatter.parse(value).format_map,
                             "{asctime" in value)
@@ -187,16 +188,34 @@ def configure_logging(loglevel):
     # stream logging handler
     handler = root.handlers[0]
     opts = config.interpolate(("output",), "log")
+
+    colors = config.interpolate(("output",), "colors") or {}
+    if colors and not opts:
+        opts = LOG_FORMAT
+
     if opts:
         if isinstance(opts, str):
-            opts = {"format": opts}
-        if handler.level == LOG_LEVEL and "level" in opts:
+            logfmt = opts
+            opts = {}
+        elif "format" in opts:
+            logfmt = opts["format"]
+        else:
+            logfmt = LOG_FORMAT
+
+        if not isinstance(logfmt, dict) and colors:
+            ansifmt = "\033[{}m{}\033[0m".format
+            lf = {}
+            for level in LOG_LEVELS:
+                c = colors.get(level)
+                lf[level] = ansifmt(c, logfmt) if c else logfmt
+            logfmt = lf
+
+        handler.setFormatter(Formatter(
+            logfmt, opts.get("format-date", LOG_FORMAT_DATE)))
+
+        if "level" in opts and handler.level == LOG_LEVEL:
             handler.setLevel(opts["level"])
-        if "format" in opts or "format-date" in opts:
-            handler.setFormatter(Formatter(
-                opts.get("format", LOG_FORMAT),
-                opts.get("format-date", LOG_FORMAT_DATE),
-            ))
+
         if minlevel > handler.level:
             minlevel = handler.level
 
