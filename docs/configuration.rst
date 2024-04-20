@@ -4923,8 +4923,21 @@ Type
 Default
     ``{"success": "1;32", "skip": "2"}``
 Description
-    Controls the `ANSI colors <https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797#colors--graphics-mode>`__
-    used with |mode: color|__ for successfully downloaded or skipped files.
+    Controls the
+    `ANSI colors <https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797#colors--graphics-mode>`__
+    used for various outputs.
+
+    Output for |mode: color|__
+
+    * ``success``: successfully downloaded files
+    * ``skip``: skipped files
+
+    Logging Messages:
+
+    * ``debug``: debug logging messages
+    * ``info``: info logging messages
+    * ``warning``: warning logging messages
+    * ``error``: error logging messages
 
 .. __: `output.mode`_
 
