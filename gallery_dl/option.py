@@ -325,6 +325,11 @@ def build_parser():
         help=("Write downloaded intermediary pages to files "
               "in the current directory to debug problems"),
     )
+    output.add_argument(
+        "--no-colors",
+        dest="colors", action="store_false",
+        help=("Do not emit ANSI color codes in output"),
+    )
 
     downloader = parser.add_argument_group("Downloader Options")
     downloader.add_argument(

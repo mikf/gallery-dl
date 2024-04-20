@@ -29,6 +29,7 @@
 
 ## Output Options:
     -q, --quiet                 Activate quiet mode
+    -w, --warning               Print only warnings and errors
     -v, --verbose               Print various debugging information
     -g, --get-urls              Print URLs instead of downloading
     -G, --resolve-urls          Print URLs instead of downloading; resolve
@@ -48,12 +49,12 @@
                                 extractors but cannot be handled, to FILE
     --write-pages               Write downloaded intermediary pages to files in
                                 the current directory to debug problems
+    --no-colors                 Do not emit ANSI color codes in output
 
 ## Downloader Options:
     -r, --limit-rate RATE       Maximum download rate (e.g. 500k or 2.5M)
     -R, --retries N             Maximum number of retries for failed HTTP
-                                requests or -1 for infinite retries (default:
-                                4)
+                                requests or -1 for infinite retries (default: 4)
     --http-timeout SECONDS      Timeout for HTTP connections (default: 30.0)
     --sleep SECONDS             Number of seconds to wait before each download.
                                 This can be either a constant value or a range
