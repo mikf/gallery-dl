@@ -11,7 +11,7 @@
 from .common import Extractor, Message
 from .. import text, util
 
-BASE_PATTERN = r"(?:https?://)?(?:www\.|sfw\.)?furaffinity\.net"
+BASE_PATTERN = r"(?:https?://)?(?:www\.|sfw\.)?f(?:u|x|xfu)raffinity\.net"
 
 
 class FuraffinityExtractor(Extractor):
