@@ -16,7 +16,7 @@ import json
 import re
 
 BASE_PATTERN = (r"(?:https?://)?(?:www\.|mobile\.)?"
-                r"(?:(?:[fv]x)?twitter|(?:fixup)?x)\.com")
+                r"(?:(?:[fv]x)?twitter|(?:fix(?:up|v))?x)\.com")
 
 
 class TwitterExtractor(Extractor):
