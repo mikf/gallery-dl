@@ -122,6 +122,18 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://fxfuraffinity.net/view/21835115/",
+    "#category": ("", "furaffinity", "post"),
+    "#class"   : furaffinity.FuraffinityPostExtractor,
+},
+
+{
+    "#url"     : "https://fxraffinity.net/view/21835115/",
+    "#category": ("", "furaffinity", "post"),
+    "#class"   : furaffinity.FuraffinityPostExtractor,
+},
+
+{
     "#url"     : "https://sfw.furaffinity.net/view/21835115/",
     "#category": ("", "furaffinity", "post"),
     "#class"   : furaffinity.FuraffinityPostExtractor,
