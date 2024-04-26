@@ -227,8 +227,8 @@ class MastodonAPI():
                          exclude_replies=False):
         """Fetch an account's statuses"""
         endpoint = "/v1/accounts/{}/statuses".format(account_id)
-        params = {"only_media"     : "1" if only_media else "0",
-                  "exclude_replies": "1" if exclude_replies else "0"}
+        params = {"only_media"     : "true" if only_media else "false",
+                  "exclude_replies": "true" if exclude_replies else "false"}
         return self._pagination(endpoint, params)
 
     def status(self, status_id):
