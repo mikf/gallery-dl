@@ -2616,6 +2616,16 @@ Description
     user IDs.
 
 
+extractor.[mastodon].cards
+--------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Fetch media from cards.
+
+
 extractor.[mastodon].reblogs
 ----------------------------
 Type

@@ -29,6 +29,7 @@ class MastodonExtractor(BaseExtractor):
         self.instance = self.root.partition("://")[2]
         self.reblogs = self.config("reblogs", False)
         self.replies = self.config("replies", True)
+        self.cards = self.config("cards", False)
 
     def items(self):
         for status in self.statuses():
@@ -47,6 +48,17 @@ class MastodonExtractor(BaseExtractor):
 
             if status["reblog"]:
                 attachments.extend(status["reblog"]["media_attachments"])
+
+            if self.cards:
+                card = status.get("card")
+                if card:
+                    url = card.get("image")
+                    if url:
+                        card["weburl"] = card.get("url")
+                        card["url"] = url
+                        card["id"] = "card" + "".join(
+                            url.split("/")[6:-2]).lstrip("0")
+                        attachments.append(card)
 
             status["instance"] = self.instance
             acct = status["account"]["acct"]
@@ -120,6 +132,7 @@ class MastodonUserExtractor(MastodonExtractor):
             api.account_id_by_username(self.item),
             only_media=(
                 not self.reblogs and
+                not self.cards and
                 not self.config("text-posts", False)
             ),
             exclude_replies=not self.replies,

@@ -164,4 +164,36 @@ __tests__ = (
     "num"  : int,
 },
 
+{
+    "#url"     : "https://mastodon.social/@technewsbot@assortedflotsam.com/112360601113258881",
+    "#comment" : "card image",
+    "#category": ("mastodon", "mastodon.social", "status"),
+    "#class"   : mastodon.MastodonStatusExtractor,
+    "#options" : {"cards": True},
+    "#urls"    : "https://files.mastodon.social/cache/preview_cards/images/095/900/335/original/83f0b4a793c84123.jpg",
+
+    "media": {
+        "author_name" : "Tom Warren",
+        "author_url"  : "https://www.theverge.com/authors/tom-warren",
+        "blurhash"    : "UHBDWMCjVGM0k,XjnPM#0h+vkpb^RkjYSh$*",
+        "description" : "Microsoft’s big Xbox games showcase will take place on June 9th. It will include more games than last year and a special Call of Duty Direct will follow.",
+        "embed_url"   : "",
+        "height"      : 628,
+        "html"        : "",
+        "id"          : "card95900335",
+        "image"       : "https://files.mastodon.social/cache/preview_cards/images/095/900/335/original/83f0b4a793c84123.jpg",
+        "image_description": "The Xbox showcase illustration",
+        "language"    : "en",
+        "provider_name": "The Verge",
+        "provider_url": "",
+        "published_at": "2024-04-30T14:15:30.341Z",
+        "title"       : "The Xbox games showcase airs June 9th, followed by a Call of Duty Direct",
+        "type"        : "link",
+        "url"         : "https://files.mastodon.social/cache/preview_cards/images/095/900/335/original/83f0b4a793c84123.jpg",
+        "weburl"      : "https://www.theverge.com/2024/4/30/24145262/xbox-games-showcase-summer-2024-call-of-duty-direct",
+        "width"       : 1200,
+    },
+
+},
+
 )
