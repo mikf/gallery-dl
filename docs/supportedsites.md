@@ -1622,19 +1622,19 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>mastodon.social</td>
     <td>https://mastodon.social/</td>
-    <td>Bookmarks, Followed Users, Images from Statuses, User Profiles</td>
+    <td>Bookmarks, Favorites, Followed Users, Hashtags, Lists, Images from Statuses, User Profiles</td>
     <td><a href="https://github.com/mikf/gallery-dl#oauth">OAuth</a></td>
 </tr>
 <tr>
     <td>Pawoo</td>
     <td>https://pawoo.net/</td>
-    <td>Bookmarks, Followed Users, Images from Statuses, User Profiles</td>
+    <td>Bookmarks, Favorites, Followed Users, Hashtags, Lists, Images from Statuses, User Profiles</td>
     <td><a href="https://github.com/mikf/gallery-dl#oauth">OAuth</a></td>
 </tr>
 <tr>
     <td>baraag</td>
     <td>https://baraag.net/</td>
-    <td>Bookmarks, Followed Users, Images from Statuses, User Profiles</td>
+    <td>Bookmarks, Favorites, Followed Users, Hashtags, Lists, Images from Statuses, User Profiles</td>
     <td><a href="https://github.com/mikf/gallery-dl#oauth">OAuth</a></td>
 </tr>
 

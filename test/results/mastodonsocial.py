@@ -74,6 +74,33 @@ __tests__ = (
     "#url"     : "https://mastodon.social/bookmarks",
     "#category": ("mastodon", "mastodon.social", "bookmark"),
     "#class"   : mastodon.MastodonBookmarkExtractor,
+    "#auth"    : True,
+    "#urls"    : "https://files.mastodon.social/media_attachments/files/111/331/603/082/304/823/original/e12cde371c88c1b0.png",
+},
+
+{
+    "#url"     : "https://mastodon.social/favourites",
+    "#category": ("mastodon", "mastodon.social", "favorite"),
+    "#class"   : mastodon.MastodonFavoriteExtractor,
+    "#auth"    : True,
+    "#urls"    : "https://files.mastodon.social/media_attachments/files/111/331/603/082/304/823/original/e12cde371c88c1b0.png",
+},
+
+{
+    "#url"     : "https://mastodon.social/lists/92653",
+    "#category": ("mastodon", "mastodon.social", "list"),
+    "#class"   : mastodon.MastodonListExtractor,
+    "#auth"    : True,
+    "#pattern" : r"https://files\.mastodon\.social/media_attachments/files/(\d+/){3,}original/\w+",
+    "#range"   : "1-10",
+},
+
+{
+    "#url"     : "https://mastodon.social/tags/mastodon",
+    "#category": ("mastodon", "mastodon.social", "hashtag"),
+    "#class"   : mastodon.MastodonHashtagExtractor,
+    "#pattern" : r"https://files\.mastodon\.social/media_attachments/files/(\d+/){3,}original/\w+",
+    "#range"   : "1-10",
 },
 
 {
