@@ -330,15 +330,18 @@ class InkbunnyAPI():
     def _call(self, endpoint, params):
         url = "https://inkbunny.net/api_" + endpoint + ".php"
         params["sid"] = self.session_id
-        data = self.extractor.request(url, params=params).json()
 
-        if "error_code" in data:
+        while True:
+            data = self.extractor.request(url, params=params).json()
+
+            if "error_code" not in data:
+                return data
+
             if str(data["error_code"]) == "2":
                 self.authenticate(invalidate=True)
-                return self._call(endpoint, params)
-            raise exception.StopExtraction(data.get("error_message"))
+                continue
 
-        return data
+            raise exception.StopExtraction(data.get("error_message"))
 
     def _pagination_search(self, params):
         params["page"] = 1
