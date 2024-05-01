@@ -766,6 +766,7 @@ class BaseExtractor(Extractor):
         Extractor.__init__(self, match)
         if not self.category:
             self._init_category()
+            self._cfgpath = ("extractor", self.category, self.subcategory)
 
     def _init_category(self):
         for index, group in enumerate(self.groups):
