@@ -54,6 +54,7 @@ AUTH_CONFIG = (
     "cookies",
     "api-key",
     "client-id",
+    "access-token",
     "refresh-token",
 )
 
@@ -88,6 +89,19 @@ class TestExtractorResults(unittest.TestCase):
         result.pop("#comment", None)
         only_matching = (len(result) <= 3)
 
+        auth = result.get("#auth")
+        if auth is None:
+            auth = (result["#category"][1] in AUTH)
+        elif not auth:
+            for key in AUTH_CONFIG:
+                config.set((), key, None)
+
+        if auth:
+            extr = result["#class"].from_url(result["#url"])
+            if not any(extr.config(key) for key in AUTH_CONFIG):
+                self._skipped.append((result["#url"], "no auth"))
+                only_matching = True
+
         if only_matching:
             content = False
         else:
@@ -95,21 +109,6 @@ class TestExtractorResults(unittest.TestCase):
                 for key, value in result["#options"].items():
                     key = key.split(".")
                     config.set(key[:-1], key[-1], value)
-
-            auth = result.get("#auth")
-            if auth is None:
-                auth = (result["#category"][1] in AUTH)
-            elif not auth:
-                for key in AUTH_CONFIG:
-                    config.set((), key, None)
-
-            if auth:
-                extr = result["#class"].from_url(result["#url"])
-                if not any(extr.config(key) for key in AUTH_CONFIG):
-                    msg = "no auth"
-                    self._skipped.append((result["#url"], msg))
-                    self.skipTest(msg)
-
             if "#range" in result:
                 config.set((), "image-range"  , result["#range"])
                 config.set((), "chapter-range", result["#range"])
