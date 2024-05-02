@@ -174,9 +174,17 @@ class TestHTTPDownloader(TestDownloaderBase):
         TestDownloaderBase.setUpClass()
         cls.downloader = downloader.find("http")(cls.job)
 
-        port = 8088
-        cls.address = "http://127.0.0.1:{}".format(port)
-        server = http.server.HTTPServer(("", port), HttpRequestHandler)
+        host = "127.0.0.1"
+        port = 0  # select random not-in-use port
+
+        try:
+            server = http.server.HTTPServer((host, port), HttpRequestHandler)
+        except OSError as exc:
+            raise unittest.SkipTest(
+                "cannot spawn local HTTP server ({})".format(exc))
+
+        host, port = server.server_address
+        cls.address = "http://{}:{}".format(host, port)
         threading.Thread(target=server.serve_forever, daemon=True).start()
 
     def _run_test(self, ext, input, output,
