@@ -243,12 +243,11 @@ class TemplateFStringFormatter(FStringFormatter):
 
 
 def parse_field_name(field_name):
+    if field_name[0] == "'":
+        return "_lit", (operator.itemgetter(field_name[1:-1]),)
+
     first, rest = _string.formatter_field_name_split(field_name)
     funcs = []
-
-    if first[0] == "'":
-        funcs.append(operator.itemgetter(first[1:-1]))
-        first = "_lit"
 
     for is_attr, key in rest:
         if is_attr:
