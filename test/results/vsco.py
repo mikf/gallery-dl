@@ -56,6 +56,16 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://vsco.co/vsco/avatar",
+    "#category": ("", "vsco", "avatar"),
+    "#class"   : vsco.VscoAvatarExtractor,
+    "#urls"         : "https://image-aws-us-west-2.vsco.co/3c69ae/304128/652d9f3b39a6007526dda683/vscoprofile-avatar.jpg",
+    "#sha1_content" : "57cd648759e34a6daefc5c79542ddb4595b9b677",
+
+    "id": "652d9f3b39a6007526dda683",
+},
+
+{
     "#url"     : "https://vsco.co/erenyildiz/media/5d34b93ef632433030707ce2",
     "#category": ("", "vsco", "image"),
     "#class"   : vsco.VscoImageExtractor,
