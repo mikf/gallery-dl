@@ -1001,6 +1001,12 @@ def _decrypt_windows_dpapi(ciphertext):
 
 
 def _find_most_recently_used_file(root, filename):
+    # if the provided root points to an exact profile path
+    # check if it contains the wanted filename
+    first_choice = os.path.join(root, filename)
+    if os.path.exists(first_choice):
+        return first_choice
+
     # if there are multiple browser profiles, take the most recently used one
     paths = []
     for curr_root, dirs, files in os.walk(root):
