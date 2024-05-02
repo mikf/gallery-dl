@@ -336,20 +336,31 @@ class TestFormatter(unittest.TestCase):
     def test_literals(self):
         value = "foo"
 
-        self._run_test("{'foo'}"       , value)
-        self._run_test("{'foo'!u}"     , value.upper())
-        self._run_test("{'f00':R0/o/}" , value)
-        self._run_test("{'foobar'[:3]}", value)
-        self._run_test("{z|'foo'}"     , value)
-        self._run_test("{z|''|'foo'}"  , value)
-        self._run_test("{z|''}"        , "")
-        self._run_test("{''|''}"       , "")
+        self._run_test("{'foo'}"      , value)
+        self._run_test("{'foo'!u}"    , value.upper())
+        self._run_test("{'f00':R0/o/}", value)
+
+        self._run_test("{z|'foo'}"      , value)
+        self._run_test("{z|''|'foo'}"   , value)
+        self._run_test("{z|'foo'!u}"    , value.upper())
+        self._run_test("{z|'f00':R0/o/}", value)
 
         self._run_test("{_lit[foo]}"       , value)
         self._run_test("{_lit[foo]!u}"     , value.upper())
         self._run_test("{_lit[f00]:R0/o/}" , value)
         self._run_test("{_lit[foobar][:3]}", value)
         self._run_test("{z|_lit[foo]}"     , value)
+
+        # empty (#4492)
+        self._run_test("{z|''}" , "")
+        self._run_test("{''|''}", "")
+
+        # special characters (dots, brackets, singlee quotes) (#5539)
+        self._run_test("{'f.o.o'}"    , "f.o.o")
+        self._run_test("{_lit[f.o.o]}", "f.o.o")
+        self._run_test("{_lit[f'o'o]}", "f'o'o")
+        self._run_test("{'f.[].[]'}"  , "f.[].[]")
+        self._run_test("{z|'f.[].[]'}", "f.[].[]")
 
     def test_template(self):
         with tempfile.TemporaryDirectory() as tmpdirname:
