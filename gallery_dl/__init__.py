@@ -91,7 +91,7 @@ def main():
                     signal.signal(signal_num, signal.SIG_IGN)
 
         # enable ANSI escape sequences on Windows
-        if util.WINDOWS and config.get(("output",), "ansi", True):
+        if util.WINDOWS and config.get(("output",), "ansi", output.COLORS):
             from ctypes import windll, wintypes, byref
             kernel32 = windll.kernel32
             mode = wintypes.DWORD()
