@@ -128,7 +128,7 @@ class HotleakstvCreatorExtractor(HotleakstvExtractor):
 
                 if post["type"] == 0:
                     data["type"] = "photo"
-                    data["url"] = self.root + "/storage/" + post["image"]
+                    data["url"] = post["player"]
                     text.nameext_from_url(data["url"], data)
 
                 elif post["type"] == 1:
