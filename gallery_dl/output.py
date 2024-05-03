@@ -14,6 +14,11 @@ import functools
 import unicodedata
 from . import config, util, formatter
 
+
+# --------------------------------------------------------------------
+# Globals
+
+COLORS = not os.environ.get("NO_COLOR")
 COLORS_DEFAULT = {
     "success": "1;32",
     "skip"   : "2",
@@ -21,7 +26,20 @@ COLORS_DEFAULT = {
     "info"   : "1;37",
     "warning": "1;33",
     "error"  : "1;31",
-}
+} if COLORS else {}
+
+if util.WINDOWS:
+    ANSI = COLORS and os.environ.get("TERM") == "ANSI"
+    OFFSET = 1
+    CHAR_SKIP = "# "
+    CHAR_SUCCESS = "* "
+    CHAR_ELLIPSIES = "..."
+else:
+    ANSI = COLORS
+    OFFSET = 0
+    CHAR_SKIP = "# "
+    CHAR_SUCCESS = "✔ "
+    CHAR_ELLIPSIES = "…"
 
 
 # --------------------------------------------------------------------
@@ -550,17 +568,3 @@ def shorten_string_eaw(txt, limit, sep="…", cache=EAWCache()):
         right -= 1
 
     return txt[:left] + sep + txt[right+1:]
-
-
-if util.WINDOWS:
-    ANSI = os.environ.get("TERM") == "ANSI"
-    OFFSET = 1
-    CHAR_SKIP = "# "
-    CHAR_SUCCESS = "* "
-    CHAR_ELLIPSIES = "..."
-else:
-    ANSI = True
-    OFFSET = 0
-    CHAR_SKIP = "# "
-    CHAR_SUCCESS = "✔ "
-    CHAR_ELLIPSIES = "…"
