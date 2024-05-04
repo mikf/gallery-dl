@@ -337,6 +337,23 @@ Description
       filename extension (``file.1.ext``, ``file.2.ext``, etc.)
 
 
+extractor.*.skip-extension
+-----------------
+Type
+    * ``bool``
+Default
+    ``false``
+Description
+    If enabled, the file extension is ignored when checking to see if a file
+    already exists locally during the pre-download stage.
+    i.e. if downloading `./test/image_5.jpg` but `./test/image_5.png` or
+    `./test/image_5.avif` exists, it will behave as if `./test/image_5.jpg` exists
+    on disk
+
+    * ``false``: Respects the file extension when checking if the file exists
+    * ``true``: Ignores the file extension when checking if the file exists and 
+    any file with the same path & name will return True
+
 extractor.*.sleep
 -----------------
 Type

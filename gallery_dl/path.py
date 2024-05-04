@@ -12,6 +12,7 @@ import os
 import re
 import shutil
 import functools
+import glob
 from . import util, formatter, exception
 
 WINDOWS = util.WINDOWS
@@ -51,6 +52,7 @@ class PathFormat():
             raise exception.FilenameFormatError(exc)
 
         directory_fmt = config("directory")
+        self.skip_ext = config("skip-extension") or False
         try:
             if directory_fmt is None:
                 directory_fmt = extractor.directory_fmt
@@ -158,8 +160,17 @@ class PathFormat():
 
     def exists(self):
         """Return True if the file exists on disk"""
-        if self.extension and os.path.exists(self.realpath):
-            return self.check_file()
+        # Search only by file name not including file extension
+        # This means checking if 'image_1.jpg' is on disk will
+        # be True if 'image_1.png' is found
+        if self.skip_ext:
+            split_real_path = self.realpath.split(".")
+            any_ext_path = ".".join(split_real_path[:-1]) + ".*"
+            if self.extension and glob.glob(any_ext_path):
+                return self.check_file()
+        else:
+            if self.extension and os.path.exists(self.realpath):
+                return self.check_file()
         return False
 
     @staticmethod
