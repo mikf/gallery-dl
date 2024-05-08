@@ -128,6 +128,12 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://xfuraffinity.net/view/21835115/",
+    "#category": ("", "furaffinity", "post"),
+    "#class"   : furaffinity.FuraffinityPostExtractor,
+},
+
+{
     "#url"     : "https://fxraffinity.net/view/21835115/",
     "#category": ("", "furaffinity", "post"),
     "#class"   : furaffinity.FuraffinityPostExtractor,
