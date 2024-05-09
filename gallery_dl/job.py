@@ -11,10 +11,23 @@ import errno
 import logging
 import functools
 import collections
-from . import extractor, downloader, postprocessor
-from . import config, text, util, path, formatter, output, exception, version
+
+from . import (
+    extractor,
+    downloader,
+    postprocessor,
+    archive,
+    config,
+    exception,
+    formatter,
+    output,
+    path,
+    text,
+    util,
+    version,
+)
 from .extractor.message import Message
-from .output import stdout_write
+stdout_write = output.stdout_write
 
 
 class Job():
@@ -507,23 +520,24 @@ class DownloadJob(Job):
             # monkey-patch method to do nothing and always return True
             self.download = pathfmt.fix_extension
 
-        archive = cfg("archive")
-        if archive:
-            archive = util.expand_path(archive)
+        archive_path = cfg("archive")
+        if archive_path:
+            archive_path = util.expand_path(archive_path)
             archive_format = (cfg("archive-prefix", extr.category) +
                               cfg("archive-format", extr.archive_fmt))
             archive_pragma = (cfg("archive-pragma"))
             try:
-                if "{" in archive:
-                    archive = formatter.parse(archive).format_map(kwdict)
-                self.archive = util.DownloadArchive(
-                    archive, archive_format, archive_pragma)
+                if "{" in archive_path:
+                    archive_path = formatter.parse(
+                        archive_path).format_map(kwdict)
+                self.archive = archive.DownloadArchive(
+                    archive_path, archive_format, archive_pragma)
             except Exception as exc:
                 extr.log.warning(
                     "Failed to open download archive at '%s' (%s: %s)",
-                    archive, exc.__class__.__name__, exc)
+                    archive_path, exc.__class__.__name__, exc)
             else:
-                extr.log.debug("Using download archive '%s'", archive)
+                extr.log.debug("Using download archive '%s'", archive_path)
 
         skip = cfg("skip", True)
         if skip:
