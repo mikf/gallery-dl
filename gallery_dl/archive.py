@@ -54,3 +54,45 @@ class DownloadArchive():
         self.cursor.execute(
             "SELECT 1 FROM archive WHERE entry=? LIMIT 1", (key,))
         return self.cursor.fetchone()
+
+    def finalize(self):
+        pass
+
+
+class DownloadArchiveMemory(DownloadArchive):
+
+    def __init__(self, path, format_string, pragma=None,
+                 cache_key="_archive_key"):
+        DownloadArchive.__init__(self, path, format_string, pragma, cache_key)
+        self.keys = set()
+
+    def add(self, kwdict):
+        self.keys.add(
+            kwdict.get(self._cache_key) or
+            self.keygen(kwdict))
+
+    def check(self, kwdict):
+        key = kwdict[self._cache_key] = self.keygen(kwdict)
+        if key in self.keys:
+            return True
+        self.cursor.execute(
+            "SELECT 1 FROM archive WHERE entry=? LIMIT 1", (key,))
+        return self.cursor.fetchone()
+
+    def finalize(self):
+        if not self.keys:
+            return
+
+        cursor = self.cursor
+        with self.connection:
+            try:
+                cursor.execute("BEGIN")
+            except sqlite3.OperationalError:
+                pass
+
+            stmt = "INSERT OR IGNORE INTO archive (entry) VALUES (?)"
+            if len(self.keys) < 100:
+                for key in self.keys:
+                    cursor.execute(stmt, (key,))
+            else:
+                cursor.executemany(stmt, ((key,) for key in self.keys))
