@@ -23,6 +23,10 @@ class PoipikuExtractor(Extractor):
     archive_fmt = "{post_id}_{num}"
     request_interval = (0.5, 1.5)
 
+    def _init(self):
+        self.cookies.set(
+            "POIPIKU_CONTENTS_VIEW_MODE", "1", domain="poipiku.com")
+
     def items(self):
         password = self.config("password", "")
 
