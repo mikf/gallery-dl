@@ -22,6 +22,7 @@ import threading
 from requests.adapters import HTTPAdapter
 from .message import Message
 from .. import config, text, util, cache, exception
+urllib3 = requests.packages.urllib3
 
 
 class Extractor():
@@ -834,12 +835,8 @@ def _build_requests_adapter(ssl_options, ssl_ciphers, source_address):
         pass
 
     if ssl_options or ssl_ciphers:
-        ssl_context = ssl.create_default_context()
-        if ssl_options:
-            ssl_context.options |= ssl_options
-        if ssl_ciphers:
-            ssl_context.set_ecdh_curve("prime256v1")
-            ssl_context.set_ciphers(ssl_ciphers)
+        ssl_context = urllib3.connection.create_urllib3_context(
+            options=ssl_options or None, ciphers=ssl_ciphers)
         ssl_context.check_hostname = False
     else:
         ssl_context = None
@@ -959,8 +956,6 @@ SSL_CIPHERS = {
     ),
 }
 
-
-urllib3 = requests.packages.urllib3
 
 # detect brotli support
 try:
