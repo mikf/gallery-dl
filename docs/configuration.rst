@@ -337,6 +337,15 @@ Description
       filename extension (``file.1.ext``, ``file.2.ext``, etc.)
 
 
+extractor.*.skip-filter
+-----------------------
+Type
+    ``string``
+Description
+    Python expression controlling which skipped files to count towards
+    ``"abort"`` / ``"terminate"`` / ``"exit"``.
+
+
 extractor.*.sleep
 -----------------
 Type

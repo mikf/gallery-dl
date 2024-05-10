@@ -468,9 +468,12 @@ class DownloadJob(Job):
             for callback in self.hooks["skip"]:
                 callback(pathfmt)
         if self._skipexc:
-            self._skipcnt += 1
-            if self._skipcnt >= self._skipmax:
-                raise self._skipexc()
+            if not self._skipftr or self._skipftr(pathfmt.kwdict):
+                self._skipcnt += 1
+                if self._skipcnt >= self._skipmax:
+                    raise self._skipexc()
+            else:
+                self._skipcnt = 0
 
     def download(self, url):
         """Download 'url'"""
@@ -559,6 +562,12 @@ class DownloadJob(Job):
                 elif skip == "exit":
                     self._skipexc = SystemExit
                 self._skipmax = text.parse_int(smax)
+
+                skip_filter = cfg("skip-filter")
+                if skip_filter:
+                    self._skipftr = util.compile_expression(skip_filter)
+                else:
+                    self._skipftr = None
         else:
             # monkey-patch methods to always return False
             pathfmt.exists = lambda x=None: False
