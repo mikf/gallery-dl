@@ -840,6 +840,7 @@ def _build_requests_adapter(ssl_options, ssl_ciphers, source_address):
         if ssl_ciphers:
             ssl_context.set_ecdh_curve("prime256v1")
             ssl_context.set_ciphers(ssl_ciphers)
+        ssl_context.check_hostname = False
     else:
         ssl_context = None
 
