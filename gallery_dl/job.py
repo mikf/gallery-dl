@@ -436,6 +436,8 @@ class DownloadJob(Job):
 
     def handle_finalize(self):
         if self.archive:
+            if not self.status:
+                self.archive.finalize()
             self.archive.close()
 
         pathfmt = self.pathfmt
@@ -530,7 +532,11 @@ class DownloadJob(Job):
                 if "{" in archive_path:
                     archive_path = formatter.parse(
                         archive_path).format_map(kwdict)
-                self.archive = archive.DownloadArchive(
+                if cfg("archive-mode") == "memory":
+                    archive_cls = archive.DownloadArchiveMemory
+                else:
+                    archive_cls = archive.DownloadArchive
+                self.archive = archive_cls(
                     archive_path, archive_format, archive_pragma)
             except Exception as exc:
                 extr.log.warning(

@@ -844,6 +844,22 @@ Description
     An alternative `format string`_ to build archive IDs with.
 
 
+extractor.*.archive-mode
+------------------------
+Type
+    ``string``
+Default
+    ``"file"``
+Description
+    Controls when to write `archive IDs <extractor.*.archive-format_>`__
+    to the archive database.
+
+    * ``"file"``: Write IDs immediately
+      after completing or skipping a file download.
+    * ``"memory"``: Keep IDs in memory
+      and only write them after successful job completion.
+
+
 extractor.*.archive-prefix
 --------------------------
 Type
@@ -6172,7 +6188,7 @@ Description
 
     * format
         * General format string for logging messages
-          or a dictionary with format strings for each loglevel.
+          or an ``object`` with format strings for each loglevel.
 
           In addition to the default
           `LogRecord attributes <https://docs.python.org/3/library/logging.html#logrecord-attributes>`__,
