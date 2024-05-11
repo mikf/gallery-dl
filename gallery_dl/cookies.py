@@ -146,7 +146,8 @@ def load_cookies_chrome(cookiejar, browser_name, profile=None,
             set_cookie(Cookie(
                 0, name, value, None, False,
                 domain, bool(domain), domain.startswith("."),
-                path, bool(path), secure, expires, False, None, None, {},
+                path, bool(path), secure, expires or None, False,
+                None, None, {},
             ))
 
     if failed_cookies > 0:
