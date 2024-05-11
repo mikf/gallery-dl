@@ -12,6 +12,7 @@ from .common import Extractor, Message
 from .. import text, util, exception
 from ..cache import cache, memcache
 import itertools
+import random
 import json
 import re
 
@@ -1300,6 +1301,11 @@ class TwitterAPI():
             if csrf_token:
                 self.headers["x-csrf-token"] = csrf_token
 
+            remaining = int(response.headers.get("x-rate-limit-remaining", 6))
+            if remaining < 6 and remaining <= random.randrange(1, 6):
+                self._handle_ratelimit(response)
+                continue
+
             try:
                 data = response.json()
             except ValueError:
@@ -1353,13 +1359,7 @@ class TwitterAPI():
                     not self.headers["x-twitter-auth-type"]:
                 raise exception.AuthorizationError("Login required")
             elif response.status_code == 429:
-                # rate limit exceeded
-                if self.extractor.config("ratelimit") == "abort":
-                    raise exception.StopExtraction("Rate limit exceeded")
-
-                until = response.headers.get("x-rate-limit-reset")
-                seconds = None if until else 60
-                self.extractor.wait(until=until, seconds=seconds)
+                self._handle_ratelimit(response)
                 continue
 
             # error
@@ -1702,6 +1702,13 @@ class TwitterAPI():
                 return
             variables["cursor"] = cursor
 
+    def _handle_ratelimit(self, response):
+        if self.extractor.config("ratelimit") == "abort":
+            raise exception.StopExtraction("Rate limit exceeded")
+
+        until = response.headers.get("x-rate-limit-reset")
+        self.extractor.wait(until=until, seconds=None if until else 60)
+
     def _process_tombstone(self, entry, tombstone):
         text = (tombstone.get("richText") or tombstone["text"])["text"]
         tweet_id = entry["entryId"].rpartition("-")[2]
@@ -1716,7 +1723,6 @@ class TwitterAPI():
 
 @cache(maxage=365*86400, keyarg=1)
 def _login_impl(extr, username, password):
-    import random
 
     def process(data, params=None):
         response = extr.request(
