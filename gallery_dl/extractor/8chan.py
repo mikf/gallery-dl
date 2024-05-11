@@ -26,6 +26,9 @@ class _8chanExtractor(Extractor):
         self.root = "https://8chan." + match.group(1)
         Extractor.__init__(self, match)
 
+    def _init(self):
+        self.cookies.set("TOS", "1", domain=self.root.rpartition("/")[2])
+
     @memcache()
     def cookies_prepare(self):
         # fetch captcha cookies
