@@ -50,7 +50,7 @@ class ExhentaiExtractor(Extractor):
 
     def request(self, url, **kwargs):
         response = Extractor.request(self, url, **kwargs)
-        if response.history and response.headers.get("Content-Length") == "0":
+        if "Cache-Control" not in response.headers and not response.content:
             self.log.info("blank page")
             raise exception.AuthorizationError()
         return response
