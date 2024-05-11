@@ -441,7 +441,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
             raise exception.AuthorizationError()
         if page.startswith(("Key missing", "Gallery not found")):
             raise exception.NotFoundError("gallery")
-        if "hentai.org/mpv/" in page:
+        if page.count("hentai.org/mpv/") > 1:
             self.log.warning("Enabled Multi-Page Viewer is not supported")
         return page
 
