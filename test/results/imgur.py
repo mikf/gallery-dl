@@ -87,6 +87,13 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://imgur.com/test-21yMxCS",
+    "#comment" : "slug",
+    "#category": ("", "imgur", "image"),
+    "#class"   : imgur.ImgurImageExtractor,
+},
+
+{
     "#url"     : "https://m.imgur.com/r/Celebs/iHJ7tsM",
     "#category": ("", "imgur", "image"),
     "#class"   : imgur.ImgurImageExtractor,
@@ -259,6 +266,13 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://imgur.com/a/138-TcBmP",
+    "#comment" : "slug",
+    "#category": ("", "imgur", "album"),
+    "#class"   : imgur.ImgurAlbumExtractor,
+},
+
+{
     "#url"     : "https://www.imgur.com/a/TcBmP",
     "#comment" : "www",
     "#category": ("", "imgur", "album"),
@@ -292,6 +306,13 @@ __tests__ = (
     "#category": ("", "imgur", "gallery"),
     "#class"   : imgur.ImgurGalleryExtractor,
     "#exception": exception.HttpError,
+},
+
+{
+    "#url"     : "https://imgur.com/gallery/guy-gets-out-of-car-during-long-traffic-jam-to-pet-dog-zf2fIms",
+    "#comment" : "slug",
+    "#category": ("", "imgur", "gallery"),
+    "#class"   : imgur.ImgurGalleryExtractor,
 },
 
 {
