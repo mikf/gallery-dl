@@ -6,7 +6,7 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extractors for https://twitter.com/"""
+"""Extractors for https://x.com/"""
 
 from .common import Extractor, Message
 from .. import text, util, exception
@@ -26,9 +26,9 @@ class TwitterExtractor(Extractor):
     directory_fmt = ("{category}", "{user[name]}")
     filename_fmt = "{tweet_id}_{num}.{extension}"
     archive_fmt = "{tweet_id}_{retweet_id}_{num}"
-    cookies_domain = ".twitter.com"
+    cookies_domain = ".x.com"
     cookies_names = ("auth_token",)
-    root = "https://twitter.com"
+    root = "https://x.com"
     browser = "firefox"
 
     def __init__(self, match):
@@ -503,7 +503,7 @@ class TwitterUserExtractor(TwitterExtractor):
     subcategory = "user"
     pattern = (BASE_PATTERN + r"/(?!search)(?:([^/?#]+)/?(?:$|[?#])"
                r"|i(?:/user/|ntent/user\?user_id=)(\d+))")
-    example = "https://twitter.com/USER"
+    example = "https://x.com/USER"
 
     def __init__(self, match):
         TwitterExtractor.__init__(self, match)
@@ -531,7 +531,7 @@ class TwitterTimelineExtractor(TwitterExtractor):
     """Extractor for a Twitter user timeline"""
     subcategory = "timeline"
     pattern = BASE_PATTERN + r"/(?!search)([^/?#]+)/timeline(?!\w)"
-    example = "https://twitter.com/USER/timeline"
+    example = "https://x.com/USER/timeline"
 
     def tweets(self):
         # yield initial batch of (media) tweets
@@ -578,7 +578,7 @@ class TwitterTweetsExtractor(TwitterExtractor):
     """Extractor for Tweets from a user's Tweets timeline"""
     subcategory = "tweets"
     pattern = BASE_PATTERN + r"/(?!search)([^/?#]+)/tweets(?!\w)"
-    example = "https://twitter.com/USER/tweets"
+    example = "https://x.com/USER/tweets"
 
     def tweets(self):
         return self.api.user_tweets(self.user)
@@ -588,7 +588,7 @@ class TwitterRepliesExtractor(TwitterExtractor):
     """Extractor for Tweets from a user's timeline including replies"""
     subcategory = "replies"
     pattern = BASE_PATTERN + r"/(?!search)([^/?#]+)/with_replies(?!\w)"
-    example = "https://twitter.com/USER/with_replies"
+    example = "https://x.com/USER/with_replies"
 
     def tweets(self):
         return self.api.user_tweets_and_replies(self.user)
@@ -598,7 +598,7 @@ class TwitterMediaExtractor(TwitterExtractor):
     """Extractor for Tweets from a user's Media timeline"""
     subcategory = "media"
     pattern = BASE_PATTERN + r"/(?!search)([^/?#]+)/media(?!\w)"
-    example = "https://twitter.com/USER/media"
+    example = "https://x.com/USER/media"
 
     def tweets(self):
         return self.api.user_media(self.user)
@@ -608,7 +608,7 @@ class TwitterLikesExtractor(TwitterExtractor):
     """Extractor for liked tweets"""
     subcategory = "likes"
     pattern = BASE_PATTERN + r"/(?!search)([^/?#]+)/likes(?!\w)"
-    example = "https://twitter.com/USER/likes"
+    example = "https://x.com/USER/likes"
 
     def metadata(self):
         return {"user_likes": self.user}
@@ -621,7 +621,7 @@ class TwitterBookmarkExtractor(TwitterExtractor):
     """Extractor for bookmarked tweets"""
     subcategory = "bookmark"
     pattern = BASE_PATTERN + r"/i/bookmarks()"
-    example = "https://twitter.com/i/bookmarks"
+    example = "https://x.com/i/bookmarks"
 
     def tweets(self):
         return self.api.user_bookmarks()
@@ -637,7 +637,7 @@ class TwitterListExtractor(TwitterExtractor):
     """Extractor for Twitter lists"""
     subcategory = "list"
     pattern = BASE_PATTERN + r"/i/lists/(\d+)/?$"
-    example = "https://twitter.com/i/lists/12345"
+    example = "https://x.com/i/lists/12345"
 
     def tweets(self):
         return self.api.list_latest_tweets_timeline(self.user)
@@ -647,7 +647,7 @@ class TwitterListMembersExtractor(TwitterExtractor):
     """Extractor for members of a Twitter list"""
     subcategory = "list-members"
     pattern = BASE_PATTERN + r"/i/lists/(\d+)/members"
-    example = "https://twitter.com/i/lists/12345/members"
+    example = "https://x.com/i/lists/12345/members"
 
     def items(self):
         self.login()
@@ -658,7 +658,7 @@ class TwitterFollowingExtractor(TwitterExtractor):
     """Extractor for followed users"""
     subcategory = "following"
     pattern = BASE_PATTERN + r"/(?!search)([^/?#]+)/following(?!\w)"
-    example = "https://twitter.com/USER/following"
+    example = "https://x.com/USER/following"
 
     def items(self):
         self.login()
@@ -669,7 +669,7 @@ class TwitterSearchExtractor(TwitterExtractor):
     """Extractor for Twitter search results"""
     subcategory = "search"
     pattern = BASE_PATTERN + r"/search/?\?(?:[^&#]+&)*q=([^&#]+)"
-    example = "https://twitter.com/search?q=QUERY"
+    example = "https://x.com/search?q=QUERY"
 
     def metadata(self):
         return {"search": text.unquote(self.user)}
@@ -700,7 +700,7 @@ class TwitterHashtagExtractor(TwitterExtractor):
     """Extractor for Twitter hashtags"""
     subcategory = "hashtag"
     pattern = BASE_PATTERN + r"/hashtag/([^/?#]+)"
-    example = "https://twitter.com/hashtag/NAME"
+    example = "https://x.com/hashtag/NAME"
 
     def items(self):
         url = "{}/search?q=%23{}".format(self.root, self.user)
@@ -712,7 +712,7 @@ class TwitterCommunityExtractor(TwitterExtractor):
     """Extractor for a Twitter community"""
     subcategory = "community"
     pattern = BASE_PATTERN + r"/i/communities/(\d+)"
-    example = "https://twitter.com/i/communities/12345"
+    example = "https://x.com/i/communities/12345"
 
     def tweets(self):
         if self.textonly:
@@ -724,7 +724,7 @@ class TwitterCommunitiesExtractor(TwitterExtractor):
     """Extractor for followed Twitter communities"""
     subcategory = "communities"
     pattern = BASE_PATTERN + r"/([^/?#]+)/communities/?$"
-    example = "https://twitter.com/i/communities"
+    example = "https://x.com/i/communities"
 
     def tweets(self):
         return self.api.communities_main_page_timeline(self.user)
@@ -736,7 +736,7 @@ class TwitterEventExtractor(TwitterExtractor):
     directory_fmt = ("{category}", "Events",
                      "{event[id]} {event[short_title]}")
     pattern = BASE_PATTERN + r"/i/events/(\d+)"
-    example = "https://twitter.com/i/events/12345"
+    example = "https://x.com/i/events/12345"
 
     def metadata(self):
         return {"event": self.api.live_event(self.user)}
@@ -750,7 +750,7 @@ class TwitterTweetExtractor(TwitterExtractor):
     subcategory = "tweet"
     pattern = (BASE_PATTERN + r"/([^/?#]+|i/web)/status/(\d+)"
                r"/?(?:$|\?|#|photo/|video/)")
-    example = "https://twitter.com/USER/status/12345"
+    example = "https://x.com/USER/status/12345"
 
     def __init__(self, match):
         TwitterExtractor.__init__(self, match)
@@ -830,7 +830,7 @@ class TwitterQuotesExtractor(TwitterExtractor):
     """Extractor for quotes of a Tweet"""
     subcategory = "quotes"
     pattern = BASE_PATTERN + r"/(?:[^/?#]+|i/web)/status/(\d+)/quotes"
-    example = "https://twitter.com/USER/status/12345/quotes"
+    example = "https://x.com/USER/status/12345/quotes"
 
     def items(self):
         url = "{}/search?q=quoted_tweet_id:{}".format(self.root, self.user)
@@ -843,7 +843,7 @@ class TwitterAvatarExtractor(TwitterExtractor):
     filename_fmt = "avatar {date}.{extension}"
     archive_fmt = "AV_{user[id]}_{date}"
     pattern = BASE_PATTERN + r"/(?!search)([^/?#]+)/photo"
-    example = "https://twitter.com/USER/photo"
+    example = "https://x.com/USER/photo"
 
     def tweets(self):
         self.api._user_id_by_screen_name(self.user)
@@ -865,7 +865,7 @@ class TwitterBackgroundExtractor(TwitterExtractor):
     filename_fmt = "background {date}.{extension}"
     archive_fmt = "BG_{user[id]}_{date}"
     pattern = BASE_PATTERN + r"/(?!search)([^/?#]+)/header_photo"
-    example = "https://twitter.com/USER/header_photo"
+    example = "https://x.com/USER/header_photo"
 
     def tweets(self):
         self.api._user_id_by_screen_name(self.user)
@@ -912,7 +912,7 @@ class TwitterAPI():
         self.extractor = extractor
         self.log = extractor.log
 
-        self.root = "https://twitter.com/i/api"
+        self.root = "https://x.com/i/api"
         self._nsfw_warning = True
         self._json_dumps = json.JSONEncoder(separators=(",", ":")).encode
 
@@ -932,7 +932,7 @@ class TwitterAPI():
 
         self.headers = {
             "Accept": "*/*",
-            "Referer": "https://twitter.com/",
+            "Referer": extractor.root + "/",
             "content-type": "application/json",
             "x-guest-token": None,
             "x-twitter-auth-type": "OAuth2Session" if auth_token else None,
@@ -1275,7 +1275,7 @@ class TwitterAPI():
         endpoint = "/1.1/guest/activate.json"
         self.log.info("Requesting guest token")
         return str(self._call(
-            endpoint, None, "POST", False, "https://api.twitter.com",
+            endpoint, None, "POST", False, "https://api.x.com",
         )["guest_token"])
 
     def _authenticate_guest(self):
@@ -1753,7 +1753,7 @@ def _login_impl(extr, username, password):
     api = TwitterAPI(extr)
     api._authenticate_guest()
 
-    url = "https://api.twitter.com/1.1/onboarding/task.json"
+    url = "https://api.x.com/1.1/onboarding/task.json"
     params = {"flow_name": "login"}
     headers = api.headers
 
