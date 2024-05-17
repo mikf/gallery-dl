@@ -164,6 +164,14 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.pixiv.net/artworks/966412",
+    "#comment" : "limit_sanity_level_360.png (#4327, #5180)",
+    "#category": ("", "pixiv", "work"),
+    "#class"   : pixiv.PixivWorkExtractor,
+    "#count"   : 0,
+},
+
+{
     "#url"     : "https://www.pixiv.net/en/artworks/966412",
     "#category": ("", "pixiv", "work"),
     "#class"   : pixiv.PixivWorkExtractor,
@@ -459,11 +467,14 @@ __tests__ = (
 
 {
     "#url"     : "https://www.pixiv.net/novel/show.php?id=16422450",
-    "#comment" : "embeds",
+    "#comment" : "embeds // covers (#5373)",
     "#category": ("", "pixiv", "novel"),
     "#class"   : pixiv.PixivNovelExtractor,
-    "#options" : {"embeds": True},
-    "#count"   : 3,
+    "#options" : {
+        "embeds": True,
+        "covers": True,
+    },
+    "#count"   : 4,
 },
 
 {

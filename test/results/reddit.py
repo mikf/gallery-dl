@@ -46,6 +46,7 @@ __tests__ = (
     "#class"   : reddit.RedditHomeExtractor,
     "#range"   : "1-20",
     "#count"   : ">= 20",
+    "#archive" : False,
 },
 
 {
@@ -165,6 +166,18 @@ __tests__ = (
     "#category": ("", "reddit", "submission"),
     "#class"   : reddit.RedditSubmissionExtractor,
     "#count"   : 0,
+},
+
+{
+    "#url"     : "https://www.reddit.com/r/RobloxArt/comments/15ko0qu/",
+    "#comment" : "comment embeds (#5366)",
+    "#category": ("", "reddit", "submission"),
+    "#class"   : reddit.RedditSubmissionExtractor,
+    "#options" : {"comments": 10},
+    "#urls"    : (
+        "https://i.redd.it/ppt5yciyipgb1.jpg",
+        "https://i.redd.it/u0ojzd69kpgb1.png",
+    ),
 },
 
 {

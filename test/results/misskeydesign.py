@@ -21,7 +21,7 @@ __tests__ = (
     "#url"     : "https://misskey.design/@blooddj@pawoo.net",
     "#category": ("misskey", "misskey.design", "user"),
     "#class"   : misskey.MisskeyUserExtractor,
-    "#count"   : 7,
+    "#count"   : "> 30",
 },
 
 {

@@ -40,6 +40,7 @@ class BlueskyExtractor(Extractor):
 
         self.api = BlueskyAPI(self)
         self._user = self._user_did = None
+        self.instance = self.root.partition("://")[2]
 
     def items(self):
         for post in self.posts():
@@ -81,6 +82,7 @@ class BlueskyExtractor(Extractor):
             if self._metadata_user:
                 post["user"] = self._user or post["author"]
 
+            post["instance"] = self.instance
             post["post_id"] = pid
             post["count"] = len(images)
             post["date"] = text.parse_datetime(
@@ -315,7 +317,7 @@ class BlueskyAPI():
     def get_author_feed(self, actor, filter="posts_and_author_threads"):
         endpoint = "app.bsky.feed.getAuthorFeed"
         params = {
-            "actor" : self._did_from_actor(actor),
+            "actor" : self._did_from_actor(actor, True),
             "filter": filter,
             "limit" : "100",
         }
@@ -325,7 +327,7 @@ class BlueskyAPI():
         endpoint = "app.bsky.feed.getFeed"
         params = {
             "feed" : "at://{}/app.bsky.feed.generator/{}".format(
-                self._did_from_actor(actor, False), feed),
+                self._did_from_actor(actor), feed),
             "limit": "100",
         }
         return self._pagination(endpoint, params)
@@ -342,7 +344,7 @@ class BlueskyAPI():
         endpoint = "app.bsky.feed.getListFeed"
         params = {
             "list" : "at://{}/app.bsky.graph.list/{}".format(
-                self._did_from_actor(actor, False), list),
+                self._did_from_actor(actor), list),
             "limit": "100",
         }
         return self._pagination(endpoint, params)
@@ -389,7 +391,7 @@ class BlueskyAPI():
         }
         return self._pagination(endpoint, params, "posts")
 
-    def _did_from_actor(self, actor, user_did=True):
+    def _did_from_actor(self, actor, user_did=False):
         if actor.startswith("did:"):
             did = actor
         else:

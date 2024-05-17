@@ -98,6 +98,8 @@ class HttpDownloader(DownloaderBase):
 
         metadata = self.metadata
         kwdict = pathfmt.kwdict
+        expected_status = kwdict.get(
+            "_http_expected_status", ())
         adjust_extension = kwdict.get(
             "_http_adjust_extension", self.adjust_extension)
 
@@ -151,7 +153,7 @@ class HttpDownloader(DownloaderBase):
 
             # check response
             code = response.status_code
-            if code == 200:  # OK
+            if code == 200 or code in expected_status:  # OK
                 offset = 0
                 size = response.headers.get("Content-Length")
             elif code == 206:  # Partial Content
@@ -399,6 +401,9 @@ MIME_TYPES = {
     "video/webm": "webm",
     "video/ogg" : "ogg",
     "video/mp4" : "mp4",
+    "video/m4v" : "m4v",
+    "video/x-m4v": "m4v",
+    "video/quicktime": "mov",
 
     "audio/wav"  : "wav",
     "audio/x-wav": "wav",
@@ -440,7 +445,9 @@ SIGNATURE_CHECKS = {
     "cur" : lambda s: s[0:4] == b"\x00\x00\x02\x00",
     "psd" : lambda s: s[0:4] == b"8BPS",
     "mp4" : lambda s: (s[4:8] == b"ftyp" and s[8:11] in (
-                       b"mp4", b"avc", b"iso", b"M4V")),
+                       b"mp4", b"avc", b"iso")),
+    "m4v" : lambda s: s[4:11] == b"ftypM4V",
+    "mov" : lambda s: s[4:12] == b"ftypqt  ",
     "webm": lambda s: s[0:4] == b"\x1A\x45\xDF\xA3",
     "ogg" : lambda s: s[0:4] == b"OggS",
     "wav" : lambda s: (s[0:4] == b"RIFF" and

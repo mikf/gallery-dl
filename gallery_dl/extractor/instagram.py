@@ -165,7 +165,7 @@ class InstagramExtractor(Extractor):
             data = {
                 "post_id" : post["pk"],
                 "post_shortcode": post["code"],
-                "likes": post.get("like_count"),
+                "likes": post.get("like_count", 0),
                 "pinned": post.get("timeline_pinned_user_ids", ()),
                 "date": text.parse_timestamp(post.get("taken_at")),
             }
@@ -736,7 +736,7 @@ class InstagramRestAPI():
                 not user["followed_by_viewer"]:
             name = user["username"]
             s = "" if name.endswith("s") else "s"
-            raise exception.StopExtraction("%s'%s posts are private", name, s)
+            self.extractor.log.warning("%s'%s posts are private", name, s)
         self.extractor._assign_user(user)
         return user["id"]
 

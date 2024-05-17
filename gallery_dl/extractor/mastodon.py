@@ -29,6 +29,7 @@ class MastodonExtractor(BaseExtractor):
         self.instance = self.root.partition("://")[2]
         self.reblogs = self.config("reblogs", False)
         self.replies = self.config("replies", True)
+        self.cards = self.config("cards", False)
 
     def items(self):
         for status in self.statuses():
@@ -47,6 +48,17 @@ class MastodonExtractor(BaseExtractor):
 
             if status["reblog"]:
                 attachments.extend(status["reblog"]["media_attachments"])
+
+            if self.cards:
+                card = status.get("card")
+                if card:
+                    url = card.get("image")
+                    if url:
+                        card["weburl"] = card.get("url")
+                        card["url"] = url
+                        card["id"] = "card" + "".join(
+                            url.split("/")[6:-2]).lstrip("0")
+                        attachments.append(card)
 
             status["instance"] = self.instance
             acct = status["account"]["acct"]
@@ -70,7 +82,11 @@ class MastodonExtractor(BaseExtractor):
 
     def _check_moved(self, account):
         self._check_moved = None
-        if "moved" in account:
+        # Certain fediverse software (such as Iceshrimp and Sharkey) have a
+        # null account "moved" field instead of not having it outright.
+        # To handle this, check if the "moved" value is truthy instead
+        # if only it exists.
+        if account.get("moved"):
             self.log.warning("Account '%s' moved to '%s'",
                              account["acct"], account["moved"]["acct"])
 
@@ -116,6 +132,7 @@ class MastodonUserExtractor(MastodonExtractor):
             api.account_id_by_username(self.item),
             only_media=(
                 not self.reblogs and
+                not self.cards and
                 not self.config("text-posts", False)
             ),
             exclude_replies=not self.replies,
@@ -130,6 +147,36 @@ class MastodonBookmarkExtractor(MastodonExtractor):
 
     def statuses(self):
         return MastodonAPI(self).account_bookmarks()
+
+
+class MastodonFavoriteExtractor(MastodonExtractor):
+    """Extractor for mastodon favorites"""
+    subcategory = "favorite"
+    pattern = BASE_PATTERN + r"/favourites"
+    example = "https://mastodon.social/favourites"
+
+    def statuses(self):
+        return MastodonAPI(self).account_favorites()
+
+
+class MastodonListExtractor(MastodonExtractor):
+    """Extractor for mastodon lists"""
+    subcategory = "list"
+    pattern = BASE_PATTERN + r"/lists/(\w+)"
+    example = "https://mastodon.social/lists/12345"
+
+    def statuses(self):
+        return MastodonAPI(self).timelines_list(self.item)
+
+
+class MastodonHashtagExtractor(MastodonExtractor):
+    """Extractor for mastodon hashtags"""
+    subcategory = "hashtag"
+    pattern = BASE_PATTERN + r"/tags/(\w+)"
+    example = "https://mastodon.social/tags/NAME"
+
+    def statuses(self):
+        return MastodonAPI(self).timelines_tag(self.item)
 
 
 class MastodonFollowingExtractor(MastodonExtractor):
@@ -201,36 +248,54 @@ class MastodonAPI():
         raise exception.NotFoundError("account")
 
     def account_bookmarks(self):
+        """Statuses the user has bookmarked"""
         endpoint = "/v1/bookmarks"
         return self._pagination(endpoint, None)
 
+    def account_favorites(self):
+        """Statuses the user has favourited"""
+        endpoint = "/v1/favourites"
+        return self._pagination(endpoint, None)
+
     def account_following(self, account_id):
+        """Accounts which the given account is following"""
         endpoint = "/v1/accounts/{}/following".format(account_id)
         return self._pagination(endpoint, None)
 
     def account_lookup(self, username):
+        """Quickly lookup a username to see if it is available"""
         endpoint = "/v1/accounts/lookup"
         params = {"acct": username}
         return self._call(endpoint, params).json()
 
     def account_search(self, query, limit=40):
-        """Search for accounts"""
+        """Search for matching accounts by username or display name"""
         endpoint = "/v1/accounts/search"
         params = {"q": query, "limit": limit}
         return self._call(endpoint, params).json()
 
     def account_statuses(self, account_id, only_media=True,
                          exclude_replies=False):
-        """Fetch an account's statuses"""
+        """Statuses posted to the given account"""
         endpoint = "/v1/accounts/{}/statuses".format(account_id)
-        params = {"only_media"     : "1" if only_media else "0",
-                  "exclude_replies": "1" if exclude_replies else "0"}
+        params = {"only_media"     : "true" if only_media else "false",
+                  "exclude_replies": "true" if exclude_replies else "false"}
         return self._pagination(endpoint, params)
 
     def status(self, status_id):
-        """Fetch a status"""
+        """Obtain information about a status"""
         endpoint = "/v1/statuses/" + status_id
         return self._call(endpoint).json()
+
+    def timelines_list(self, list_id):
+        """View statuses in the given list timeline"""
+        endpoint = "/v1/timelines/list/" + list_id
+        return self._pagination(endpoint, None)
+
+    def timelines_tag(self, hashtag):
+        """View public statuses containing the given hashtag"""
+        endpoint = "/v1/timelines/tag/" + hashtag
+        return self._pagination(endpoint, None)
 
     def _call(self, endpoint, params=None):
         if endpoint.startswith("http"):

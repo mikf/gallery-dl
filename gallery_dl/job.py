@@ -11,10 +11,23 @@ import errno
 import logging
 import functools
 import collections
-from . import extractor, downloader, postprocessor
-from . import config, text, util, path, formatter, output, exception, version
+
+from . import (
+    extractor,
+    downloader,
+    postprocessor,
+    archive,
+    config,
+    exception,
+    formatter,
+    output,
+    path,
+    text,
+    util,
+    version,
+)
 from .extractor.message import Message
-from .output import stdout_write
+stdout_write = output.stdout_write
 
 
 class Job():
@@ -423,6 +436,8 @@ class DownloadJob(Job):
 
     def handle_finalize(self):
         if self.archive:
+            if not self.status:
+                self.archive.finalize()
             self.archive.close()
 
         pathfmt = self.pathfmt
@@ -453,9 +468,12 @@ class DownloadJob(Job):
             for callback in self.hooks["skip"]:
                 callback(pathfmt)
         if self._skipexc:
-            self._skipcnt += 1
-            if self._skipcnt >= self._skipmax:
-                raise self._skipexc()
+            if not self._skipftr or self._skipftr(pathfmt.kwdict):
+                self._skipcnt += 1
+                if self._skipcnt >= self._skipmax:
+                    raise self._skipexc()
+            else:
+                self._skipcnt = 0
 
     def download(self, url):
         """Download 'url'"""
@@ -507,23 +525,28 @@ class DownloadJob(Job):
             # monkey-patch method to do nothing and always return True
             self.download = pathfmt.fix_extension
 
-        archive = cfg("archive")
-        if archive:
-            archive = util.expand_path(archive)
+        archive_path = cfg("archive")
+        if archive_path:
+            archive_path = util.expand_path(archive_path)
             archive_format = (cfg("archive-prefix", extr.category) +
                               cfg("archive-format", extr.archive_fmt))
             archive_pragma = (cfg("archive-pragma"))
             try:
-                if "{" in archive:
-                    archive = formatter.parse(archive).format_map(kwdict)
-                self.archive = util.DownloadArchive(
-                    archive, archive_format, archive_pragma)
+                if "{" in archive_path:
+                    archive_path = formatter.parse(
+                        archive_path).format_map(kwdict)
+                if cfg("archive-mode") == "memory":
+                    archive_cls = archive.DownloadArchiveMemory
+                else:
+                    archive_cls = archive.DownloadArchive
+                self.archive = archive_cls(
+                    archive_path, archive_format, archive_pragma)
             except Exception as exc:
                 extr.log.warning(
                     "Failed to open download archive at '%s' (%s: %s)",
-                    archive, exc.__class__.__name__, exc)
+                    archive_path, exc.__class__.__name__, exc)
             else:
-                extr.log.debug("Using download archive '%s'", archive)
+                extr.log.debug("Using download archive '%s'", archive_path)
 
         skip = cfg("skip", True)
         if skip:
@@ -539,6 +562,12 @@ class DownloadJob(Job):
                 elif skip == "exit":
                     self._skipexc = SystemExit
                 self._skipmax = text.parse_int(smax)
+
+                skip_filter = cfg("skip-filter")
+                if skip_filter:
+                    self._skipftr = util.compile_expression(skip_filter)
+                else:
+                    self._skipftr = None
         else:
             # monkey-patch methods to always return False
             pathfmt.exists = lambda x=None: False

@@ -44,40 +44,52 @@ update-dev() {
 
 build-python() {
     cd "${ROOTDIR}"
-    echo Building bdist_wheel and sdist
+    echo Building sdist and wheel
 
-    python setup.py bdist_wheel sdist
+    python -m build
 }
 
 build-linux() {
     cd "${ROOTDIR}"
     echo Building Linux executable
 
-    VENV_PATH="/tmp/venv"
-    VENV_PYTHON="${VENV_PATH}/bin/python"
-
-    rm -rf "${VENV_PATH}"
-    python -m virtualenv "${VENV_PATH}"
-
-    $VENV_PYTHON -m pip install requests requests[socks] yt-dlp pyyaml secretstorage pyinstaller
-    $VENV_PYTHON ./scripts/pyinstaller.py
+    build-vm 'ubuntu22.04' 'gallery-dl.bin'
 }
 
 build-windows() {
-    cd "${ROOTDIR}/dist"
+    cd "${ROOTDIR}"
     echo Building Windows executable
 
-    # remove old executable
-    rm -f "gallery-dl.exe"
+    build-vm 'windows7_x86_sp1' 'gallery-dl.exe'
+}
 
-    # build windows exe in vm
-    ln -fs "${ROOTDIR}" /tmp/
-    vmstart "windows7_x86_sp1" &
+build-vm() {
+    VMNAME="$1"
+    BINNAME="$2"
+    TMPPATH="/tmp/gallery-dl/dist/$BINNAME"
+
+    # launch VM
+    vmstart "$VMNAME" &
     disown
-    while [ ! -e "gallery-dl.exe" ] ; do
+
+    # copy source files
+    mkdir -p /tmp/gallery-dl
+    cp -a -t /tmp/gallery-dl -- \
+        ./gallery_dl ./scripts ./data ./setup.py ./README.rst
+
+    # remove old executable
+    rm -f "./dist/$BINNAME"
+
+    # wait for new executable
+    while [ ! -e "$TMPPATH" ] ; do
         sleep 5
     done
     sleep 2
+
+    # move
+    mv "$TMPPATH" "./dist/$BINNAME"
+
+    rm -r /tmp/gallery-dl
 }
 
 sign() {
@@ -100,6 +112,14 @@ changelog() {
         -e "s*\([( ]\)#\([0-9]\+\)*\1[#\2](https://github.com/mikf/gallery-dl/issues/\2)*g" \
         -e "s*^## \w\+\$*## ${NEWVERSION} - $(date +%Y-%m-%d)*" \
         "${CHANGELOG}"
+
+    mv "${CHANGELOG}" "${CHANGELOG}.orig"
+
+    # - remove all but the latest entries
+    sed -n \
+        -e '/^## /,/^$/ { /^$/q; p }' \
+        "${CHANGELOG}.orig" \
+    > "${CHANGELOG}"
 }
 
 supportedsites() {
@@ -117,6 +137,7 @@ upload-git() {
     cd "${ROOTDIR}"
     echo Pushing changes to github
 
+    mv "${CHANGELOG}.orig" "${CHANGELOG}" || true
     git add "gallery_dl/version.py" "${README}" "${CHANGELOG}"
     git commit -S -m "release version ${NEWVERSION}"
     git tag -s -m "version ${NEWVERSION}" "v${NEWVERSION}"

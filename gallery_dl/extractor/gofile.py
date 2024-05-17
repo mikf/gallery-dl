@@ -41,9 +41,13 @@ class GofileFolderExtractor(Extractor):
         folder = self._get_content(self.content_id, password)
         yield Message.Directory, folder
 
+        try:
+            contents = folder.pop("children")
+        except KeyError:
+            raise exception.AuthorizationError("Password required")
+
         num = 0
-        contents = folder.pop("contents")
-        for content_id in folder["childs"]:
+        for content_id in folder["childrenIds"]:
             content = contents[content_id]
             content["folder"] = folder
 
@@ -67,31 +71,32 @@ class GofileFolderExtractor(Extractor):
     @memcache()
     def _create_account(self):
         self.log.debug("Creating temporary account")
-        return self._api_request("createAccount")["token"]
+        return self._api_request("accounts", method="POST")["token"]
 
     @cache(maxage=86400)
     def _get_website_token(self):
         self.log.debug("Fetching website token")
         page = self.request(self.root + "/dist/js/alljs.js").text
-        return text.extr(page, 'fetchData.wt = "', '"')
+        return text.extr(page, 'wt: "', '"')
 
     def _get_content(self, content_id, password=None):
+        headers = {"Authorization": "Bearer " + self.api_token}
+        params = {"wt": self.website_token}
         if password is not None:
-            password = hashlib.sha256(password.encode()).hexdigest()
-        return self._api_request("getContent", {
-            "contentId"   : content_id,
-            "token"       : self.api_token,
-            "wt"          : self.website_token,
-            "password"    : password,
-        })
+            params["password"] = hashlib.sha256(password.encode()).hexdigest()
+        return self._api_request("contents/" + content_id, params, headers)
 
-    def _api_request(self, endpoint, params=None):
+    def _api_request(self, endpoint, params=None, headers=None, method="GET"):
         response = self.request(
-            "https://api.gofile.io/" + endpoint, params=params).json()
+            "https://api.gofile.io/" + endpoint,
+            method=method, params=params, headers=headers,
+        ).json()
 
         if response["status"] != "ok":
             if response["status"] == "error-notFound":
                 raise exception.NotFoundError("content")
+            if response["status"] == "error-passwordRequired":
+                raise exception.AuthorizationError("Password required")
             raise exception.StopExtraction(
                 "%s failed (Status: %s)", endpoint, response["status"])
 

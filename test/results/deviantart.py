@@ -253,6 +253,14 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://deviantart.com/h3813067/avatar",
+    "#comment" : "default avatar (#5276)",
+    "#category": ("", "deviantart", "avatar"),
+    "#class"   : deviantart.DeviantartAvatarExtractor,
+    "#count"   : 0,
+},
+
+{
     "#url"     : "https://deviantart.com/gdldev/banner",
     "#category": ("", "deviantart", "background"),
     "#class"   : deviantart.DeviantartBackgroundExtractor,
@@ -300,7 +308,7 @@ __tests__ = (
     "target"           : dict,
     "thumbs"           : list,
     "title"            : "Banner",
-    "url"              : "https://sta.sh/0198jippkeys",
+    "url"              : "https://www.deviantart.com/stash/0198jippkeys",
     "username"         : "gdldev",
 },
 
@@ -353,12 +361,37 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.deviantart.com/stash/022c83odnaxc",
+    "#category": ("", "deviantart", "stash"),
+    "#class"   : deviantart.DeviantartStashExtractor,
+    "#pattern"     : r"https://wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/940f2d05-c5eb-4917-8192-7eb6a2d508c6/dcvdmbc-e506cdcf-3208-4c20-85ab-0bfa8a7bcb16.png\?token=ey.+",
+    "#count"       : 1,
+    "#sha1_content": "057eb2f2861f6c8a96876b13cca1a4b7a408c11f",
+
+    "content": {
+        "filename": "01_by_justatest235723_dcvdmbc.png",
+        "filesize": 380,
+        "width"   : 128,
+        "height"  : 128,
+        "src"     : r"re:https://wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/940f2d05-c5eb-4917-8192-7eb6a2d508c6/dcvdmbc-e506cdcf-3208-4c20-85ab-0bfa8a7bcb16.png\?token=ey.+",
+    },
+    "da_category"   : "Uncategorized",
+    "date"          : "dt:2018-12-26 14:49:27",
+    "deviationid"   : "A4A6AD52-8857-46EE-ABFE-86D49D4FF9D0",
+    "download_filesize": 380,
+    "extension"     : "png",
+    "filename"      : "01_by_justatest235723-dcvdmbc",
+    "index"         : 778297656,
+    "index_base36"  : "cvdmbc",
+    "published_time": 1545835767,
+    "title"         : "01",
+    "url"           : "https://www.deviantart.com/stash/022c83odnaxc",
+},
+
+{
     "#url"     : "https://sta.sh/022c83odnaxc",
     "#category": ("", "deviantart", "stash"),
     "#class"   : deviantart.DeviantartStashExtractor,
-    "#pattern"     : r"https://wixmp-[^.]+\.wixmp\.com/f/.+/.+\.png\?token=.+",
-    "#count"       : 1,
-    "#sha1_content": "057eb2f2861f6c8a96876b13cca1a4b7a408c11f",
 },
 
 {
@@ -556,7 +589,7 @@ __tests__ = (
 
     "index"       : int,
     "index_base36": r"re:^[0-9a-z]+$",
-    "url"         : r"re:^https://sta.sh",
+    "url"         : r"re:^https://www.deviantart.com/stash/\w+",
 },
 
 {

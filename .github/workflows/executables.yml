@@ -1,10 +1,15 @@
-name: executables
+name: Executables
 
 on:
   workflow_dispatch:
   push:
     branches:
     - master
+    tags-ignore:
+    - "*"
+
+env:
+  DATE_FORMAT: "%Y.%m.%d"
 
 jobs:
   build:
@@ -31,19 +36,58 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: Set up Python ${{ matrix.python-version }} ${{ matrix.architecture }}
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
         architecture: ${{ matrix.architecture }}
 
+    - name: Date
+      run: echo "DATE=$(date '+${{ env.DATE_FORMAT }}')" >> "$GITHUB_ENV"
+
+    - name: Update Version
+      # use Python since its behavior is consistent across operating systems
+      shell: python
+      run: |
+        import re
+        path = "./gallery_dl/version.py"
+        with open(path) as fp:
+            content = fp.read()
+        content = re.sub(
+            r'\b(__version__ = "[^"]+)',
+            r"\1:${{ env.DATE }}",
+            content)
+        with open(path, "w") as fp:
+            fp.write(content)
+
     - name: Build executable
       run: |
         pip install requests requests[socks] yt-dlp pyyaml ${{ matrix.python-packages }} pyinstaller
-        python scripts/pyinstaller.py
+        python ./scripts/pyinstaller.py --os '${{ matrix.os }}' --arch '${{ matrix.architecture }}'
 
-    - name: Upload executable
-      uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       with:
-        name: gallery-dl-${{ matrix.os }}-${{ matrix.architecture }}-${{ matrix.python-version }}
-        path: |
-          dist
+        name: executable-${{ matrix.os }}-${{ matrix.architecture }}-${{ matrix.python-version }}
+        path: dist/*
+        retention-days: 1
+        compression-level: 0
+
+  release:
+
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/download-artifact@v4
+
+    - name: Date
+      run: echo "DATE=$(date '+${{ env.DATE_FORMAT }}')" >> "$GITHUB_ENV"
+
+    - uses: ncipollo/release-action@v1
+      with:
+        owner: gdl-org
+        repo: builds
+        tag: ${{ env.DATE }}
+        artifacts: "executable-*/*"
+        allowUpdates: true
+        makeLatest: true
+        token: ${{ secrets.REPO_TOKEN }}

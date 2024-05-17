@@ -104,8 +104,9 @@ class PixivExtractor(Extractor):
             elif work["page_count"] == 1:
                 url = meta_single_page["original_image_url"]
                 if url == url_sanity:
-                    self.log.debug("Skipping 'sanity_level' warning (%s)",
-                                   work["id"])
+                    self.log.warning(
+                        "Unable to download work %s ('sanity_level' warning)",
+                        work["id"])
                     continue
                 work["date_url"] = self._date_from_url(url)
                 yield Message.Url, url, text.nameext_from_url(url, work)
@@ -619,6 +620,7 @@ class PixivNovelExtractor(PixivExtractor):
         meta_user = self.config("metadata")
         meta_bookmark = self.config("metadata-bookmark")
         embeds = self.config("embeds")
+        covers = self.config("covers")
 
         if embeds:
             headers = {
@@ -650,7 +652,7 @@ class PixivNovelExtractor(PixivExtractor):
             yield Message.Directory, novel
 
             try:
-                content = self.api.novel_text(novel["id"])["novel_text"]
+                content = self.api.novel_webview(novel["id"])["text"]
             except Exception:
                 self.log.warning("Unable to download novel %s", novel["id"])
                 continue
@@ -658,12 +660,25 @@ class PixivNovelExtractor(PixivExtractor):
             novel["extension"] = "txt"
             yield Message.Url, "text:" + content, novel
 
+            if covers:
+                path = novel["image_urls"]["large"].partition("/img/")[2]
+                url = ("https://i.pximg.net/novel-cover-original/img/" +
+                       path.rpartition(".")[0].replace("_master1200", ""))
+                novel["date_url"] = self._date_from_url(url)
+                novel["num"] += 1
+                novel["suffix"] = "_p{:02}".format(novel["num"])
+                novel["_fallback"] = (url + ".png",)
+                url_jpg = url + ".jpg"
+                text.nameext_from_url(url_jpg, novel)
+                yield Message.Url, url_jpg, novel
+                del novel["_fallback"]
+
             if embeds:
                 desktop = False
                 illusts = {}
 
                 for marker in text.extract_iter(content, "[", "]"):
-                    if marker.startswith("[jumpuri:If you would like to "):
+                    if marker.startswith("uploadedimage:"):
                         desktop = True
                     elif marker.startswith("pixivimage:"):
                         illusts[marker[11:].partition("-")[0]] = None
@@ -918,6 +933,15 @@ class PixivAppAPI():
         params = {"novel_id": novel_id}
         return self._call("/v1/novel/text", params)
 
+    def novel_webview(self, novel_id):
+        params = {"id": novel_id, "viewer_version": "20221031_ai"}
+        return self._call(
+            "/webview/v2/novel", params, self._novel_webview_parse)
+
+    def _novel_webview_parse(self, response):
+        return util.json_loads(text.extr(
+            response.text, "novel: ", ",\n"))
+
     def search_illust(self, word, sort=None, target=None, duration=None,
                       date_start=None, date_end=None):
         params = {"word": word, "search_target": target,
@@ -962,13 +986,17 @@ class PixivAppAPI():
         params = {"illust_id": illust_id}
         return self._call("/v1/ugoira/metadata", params)["ugoira_metadata"]
 
-    def _call(self, endpoint, params=None):
+    def _call(self, endpoint, params=None, parse=None):
         url = "https://app-api.pixiv.net" + endpoint
 
         while True:
             self.login()
             response = self.extractor.request(url, params=params, fatal=False)
-            data = response.json()
+
+            if parse:
+                data = parse(response)
+            else:
+                data = response.json()
 
             if "error" not in data:
                 return data

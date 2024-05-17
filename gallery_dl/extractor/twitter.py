@@ -12,11 +12,12 @@ from .common import Extractor, Message
 from .. import text, util, exception
 from ..cache import cache, memcache
 import itertools
+import random
 import json
 import re
 
 BASE_PATTERN = (r"(?:https?://)?(?:www\.|mobile\.)?"
-                r"(?:(?:[fv]x)?twitter|(?:fixup)?x)\.com")
+                r"(?:(?:[fv]x)?twitter|(?:fix(?:up|v))?x)\.com")
 
 
 class TwitterExtractor(Extractor):
@@ -243,8 +244,8 @@ class TwitterExtractor(Extractor):
 
         # collect URLs from entities
         for url in tweet["entities"].get("urls") or ():
-            url = url["expanded_url"]
-            if "//twitpic.com/" not in url or "/photos/" in url:
+            url = url.get("expanded_url") or url.get("url") or ""
+            if not url or "//twitpic.com/" not in url or "/photos/" in url:
                 continue
             if url.startswith("http:"):
                 url = "https" + url[4:]
@@ -336,10 +337,20 @@ class TwitterExtractor(Extractor):
         urls = entities.get("urls")
         if urls:
             for url in urls:
-                content = content.replace(url["url"], url["expanded_url"])
+                try:
+                    content = content.replace(url["url"], url["expanded_url"])
+                except KeyError:
+                    pass
         txt, _, tco = content.rpartition(" ")
         tdata["content"] = txt if tco.startswith("https://t.co/") else content
 
+        if "birdwatch_pivot" in tweet:
+            try:
+                tdata["birdwatch"] = \
+                    tweet["birdwatch_pivot"]["subtitle"]["text"]
+            except KeyError:
+                self.log.debug("Unable to extract 'birdwatch' note from %s",
+                               tweet["birdwatch_pivot"])
         if "in_reply_to_screen_name" in legacy:
             tdata["reply_to"] = legacy["in_reply_to_screen_name"]
         if "quoted_by" in legacy:
@@ -380,6 +391,7 @@ class TwitterExtractor(Extractor):
             "date"            : text.parse_datetime(
                 uget("created_at"), "%a %b %d %H:%M:%S %z %Y"),
             "verified"        : uget("verified", False),
+            "protected"       : uget("protected", False),
             "profile_banner"  : uget("profile_banner_url", ""),
             "profile_image"   : uget(
                 "profile_image_url_https", "").replace("_normal.", "."),
@@ -395,7 +407,10 @@ class TwitterExtractor(Extractor):
         urls = entities["description"].get("urls")
         if urls:
             for url in urls:
-                descr = descr.replace(url["url"], url["expanded_url"])
+                try:
+                    descr = descr.replace(url["url"], url["expanded_url"])
+                except KeyError:
+                    pass
         udata["description"] = descr
 
         if "url" in entities:
@@ -731,9 +746,10 @@ class TwitterEventExtractor(TwitterExtractor):
 
 
 class TwitterTweetExtractor(TwitterExtractor):
-    """Extractor for images from individual tweets"""
+    """Extractor for individual tweets"""
     subcategory = "tweet"
-    pattern = BASE_PATTERN + r"/([^/?#]+|i/web)/status/(\d+)"
+    pattern = (BASE_PATTERN + r"/([^/?#]+|i/web)/status/(\d+)"
+               r"/?(?:$|\?|#|photo/)")
     example = "https://twitter.com/USER/status/12345"
 
     def __init__(self, match):
@@ -810,6 +826,18 @@ class TwitterTweetExtractor(TwitterExtractor):
         return itertools.chain(buffer, tweets)
 
 
+class TwitterQuotesExtractor(TwitterExtractor):
+    """Extractor for quotes of a Tweet"""
+    subcategory = "quotes"
+    pattern = BASE_PATTERN + r"/(?:[^/?#]+|i/web)/status/(\d+)/quotes"
+    example = "https://twitter.com/USER/status/12345/quotes"
+
+    def items(self):
+        url = "{}/search?q=quoted_tweet_id:{}".format(self.root, self.user)
+        data = {"_extractor": TwitterSearchExtractor}
+        yield Message.Queue, url, data
+
+
 class TwitterAvatarExtractor(TwitterExtractor):
     subcategory = "avatar"
     filename_fmt = "avatar {date}.{extension}"
@@ -882,6 +910,7 @@ class TwitterAPI():
 
     def __init__(self, extractor):
         self.extractor = extractor
+        self.log = extractor.log
 
         self.root = "https://twitter.com/i/api"
         self._nsfw_warning = True
@@ -1244,7 +1273,7 @@ class TwitterAPI():
     @cache(maxage=3600)
     def _guest_token(self):
         endpoint = "/1.1/guest/activate.json"
-        self.extractor.log.info("Requesting guest token")
+        self.log.info("Requesting guest token")
         return str(self._call(
             endpoint, None, "POST", False, "https://api.twitter.com",
         )["guest_token"])
@@ -1272,45 +1301,72 @@ class TwitterAPI():
             if csrf_token:
                 self.headers["x-csrf-token"] = csrf_token
 
-            if response.status_code < 400:
-                data = response.json()
-                if not data.get("errors") or not any(
-                        (e.get("message") or "").lower().startswith("timeout")
-                        for e in data["errors"]):
-                    return data  # success or non-timeout errors
-
-                msg = data["errors"][0].get("message") or "Unspecified"
-                self.extractor.log.debug("Internal Twitter error: '%s'", msg)
-
-                if self.headers["x-twitter-auth-type"]:
-                    self.extractor.log.debug("Retrying API request")
-                    continue  # retry
-
-                # fall through to "Login Required"
-                response.status_code = 404
-
-            if response.status_code == 429:
-                # rate limit exceeded
-                if self.extractor.config("ratelimit") == "abort":
-                    raise exception.StopExtraction("Rate limit exceeded")
-
-                until = response.headers.get("x-rate-limit-reset")
-                seconds = None if until else 60
-                self.extractor.wait(until=until, seconds=seconds)
+            remaining = int(response.headers.get("x-rate-limit-remaining", 6))
+            if remaining < 6 and remaining <= random.randrange(1, 6):
+                self._handle_ratelimit(response)
                 continue
 
-            if response.status_code in (403, 404) and \
+            try:
+                data = response.json()
+            except ValueError:
+                data = {"errors": ({"message": response.text},)}
+
+            errors = data.get("errors")
+            if not errors:
+                return data
+
+            retry = False
+            for error in errors:
+                msg = error.get("message") or "Unspecified"
+                self.log.debug("API error: '%s'", msg)
+
+                if "this account is temporarily locked" in msg:
+                    msg = "Account temporarily locked"
+                    if self.extractor.config("locked") != "wait":
+                        raise exception.AuthorizationError(msg)
+                    self.log.warning(msg)
+                    self.extractor.input("Press ENTER to retry.")
+                    retry = True
+
+                elif "Could not authenticate you" in msg:
+                    if not self.extractor.config("relogin", True):
+                        continue
+
+                    username, password = self.extractor._get_auth_info()
+                    if not username:
+                        continue
+
+                    _login_impl.invalidate(username)
+                    self.extractor.cookies_update(
+                        _login_impl(self.extractor, username, password))
+                    self.__init__(self.extractor)
+                    retry = True
+
+                elif msg.lower().startswith("timeout"):
+                    retry = True
+
+            if retry:
+                if self.headers["x-twitter-auth-type"]:
+                    self.log.debug("Retrying API request")
+                    continue
+                else:
+                    # fall through to "Login Required"
+                    response.status_code = 404
+
+            if response.status_code < 400:
+                return data
+            elif response.status_code in (403, 404) and \
                     not self.headers["x-twitter-auth-type"]:
                 raise exception.AuthorizationError("Login required")
+            elif response.status_code == 429:
+                self._handle_ratelimit(response)
+                continue
 
             # error
             try:
-                data = response.json()
-                errors = ", ".join(e["message"] for e in data["errors"])
-            except ValueError:
-                errors = response.text
+                errors = ", ".join(e["message"] for e in errors)
             except Exception:
-                errors = data.get("errors", "")
+                pass
 
             raise exception.StopExtraction(
                 "%s %s (%s)", response.status_code, response.reason, errors)
@@ -1374,7 +1430,7 @@ class TwitterAPI():
                 try:
                     tweet = tweets[tweet_id]
                 except KeyError:
-                    self.extractor.log.debug("Skipping %s (deleted)", tweet_id)
+                    self.log.debug("Skipping %s (deleted)", tweet_id)
                     continue
 
                 if "retweeted_status_id_str" in tweet:
@@ -1606,8 +1662,10 @@ class TwitterAPI():
             variables["cursor"] = cursor
 
     def _pagination_users(self, endpoint, variables, path=None):
-        params = {"variables": None,
-                  "features" : self._json_dumps(self.features_pagination)}
+        params = {
+            "variables": None,
+            "features" : self._json_dumps(self.features_pagination),
+        }
 
         while True:
             cursor = entry = None
@@ -1644,6 +1702,13 @@ class TwitterAPI():
                 return
             variables["cursor"] = cursor
 
+    def _handle_ratelimit(self, response):
+        if self.extractor.config("ratelimit") == "abort":
+            raise exception.StopExtraction("Rate limit exceeded")
+
+        until = response.headers.get("x-rate-limit-reset")
+        self.extractor.wait(until=until, seconds=None if until else 60)
+
     def _process_tombstone(self, entry, tombstone):
         text = (tombstone.get("richText") or tombstone["text"])["text"]
         tweet_id = entry["entryId"].rpartition("-")[2]
@@ -1651,30 +1716,30 @@ class TwitterAPI():
         if text.startswith("Age-restricted"):
             if self._nsfw_warning:
                 self._nsfw_warning = False
-                self.extractor.log.warning('"%s"', text)
+                self.log.warning('"%s"', text)
 
-        self.extractor.log.debug("Skipping %s (\"%s\")", tweet_id, text)
+        self.log.debug("Skipping %s ('%s')", tweet_id, text)
 
 
 @cache(maxage=365*86400, keyarg=1)
 def _login_impl(extr, username, password):
 
-    import re
-    import random
+    def process(data, params=None):
+        response = extr.request(
+            url, params=params, headers=headers, json=data,
+            method="POST", fatal=None)
 
-    if re.fullmatch(r"[\w.%+-]+@[\w.-]+\.\w{2,}", username):
-        extr.log.warning(
-            "Login with email is no longer possible. "
-            "You need to provide your username or phone number instead.")
-
-    def process(response):
         try:
             data = response.json()
         except ValueError:
             data = {"errors": ({"message": "Invalid response"},)}
         else:
             if response.status_code < 400:
-                return data["flow_token"]
+                try:
+                    return (data["flow_token"],
+                            data["subtasks"][0]["subtask_id"])
+                except LookupError:
+                    pass
 
         errors = []
         for error in data.get("errors") or ():
@@ -1683,9 +1748,13 @@ def _login_impl(extr, username, password):
         extr.log.debug(response.text)
         raise exception.AuthenticationError(", ".join(errors))
 
-    extr.cookies.clear()
+    cookies = extr.cookies
+    cookies.clear()
     api = TwitterAPI(extr)
     api._authenticate_guest()
+
+    url = "https://api.twitter.com/1.1/onboarding/task.json"
+    params = {"flow_name": "login"}
     headers = api.headers
 
     extr.log.info("Logging in as %s", username)
@@ -1742,31 +1811,18 @@ def _login_impl(extr, username, password):
             "web_modal": 1,
         },
     }
-    url = "https://api.twitter.com/1.1/onboarding/task.json?flow_name=login"
-    response = extr.request(url, method="POST", headers=headers, json=data)
 
-    data = {
-        "flow_token": process(response),
-        "subtask_inputs": [
-            {
-                "subtask_id": "LoginJsInstrumentationSubtask",
+    flow_token, subtask = process(data, params)
+    while not cookies.get("auth_token"):
+        if subtask == "LoginJsInstrumentationSubtask":
+            data = {
                 "js_instrumentation": {
                     "response": "{}",
                     "link": "next_link",
                 },
-            },
-        ],
-    }
-    url = "https://api.twitter.com/1.1/onboarding/task.json"
-    response = extr.request(
-        url, method="POST", headers=headers, json=data, fatal=None)
-
-    # username
-    data = {
-        "flow_token": process(response),
-        "subtask_inputs": [
-            {
-                "subtask_id": "LoginEnterUserIdentifierSSO",
+            }
+        elif subtask == "LoginEnterUserIdentifierSSO":
+            data = {
                 "settings_list": {
                     "setting_responses": [
                         {
@@ -1778,48 +1834,61 @@ def _login_impl(extr, username, password):
                     ],
                     "link": "next_link",
                 },
-            },
-        ],
-    }
-    #  url = "https://api.twitter.com/1.1/onboarding/task.json"
-    extr.sleep(random.uniform(2.0, 4.0), "login (username)")
-    response = extr.request(
-        url, method="POST", headers=headers, json=data, fatal=None)
-
-    # password
-    data = {
-        "flow_token": process(response),
-        "subtask_inputs": [
-            {
-                "subtask_id": "LoginEnterPassword",
+            }
+        elif subtask == "LoginEnterPassword":
+            data = {
                 "enter_password": {
                     "password": password,
                     "link": "next_link",
                 },
-            },
-        ],
-    }
-    #  url = "https://api.twitter.com/1.1/onboarding/task.json"
-    extr.sleep(random.uniform(2.0, 4.0), "login (password)")
-    response = extr.request(
-        url, method="POST", headers=headers, json=data, fatal=None)
-
-    # account duplication check ?
-    data = {
-        "flow_token": process(response),
-        "subtask_inputs": [
-            {
-                "subtask_id": "AccountDuplicationCheck",
+            }
+        elif subtask == "LoginEnterAlternateIdentifierSubtask":
+            alt = extr.input(
+                "Alternate Identifier (username, email, phone number): ")
+            data = {
+                "enter_text": {
+                    "text": alt,
+                    "link": "next_link",
+                },
+            }
+        elif subtask == "LoginTwoFactorAuthChallenge":
+            data = {
+                "enter_text": {
+                    "text": extr.input("2FA Token: "),
+                    "link": "next_link",
+                },
+            }
+        elif subtask == "LoginAcid":
+            data = {
+                "enter_text": {
+                    "text": extr.input("Email Verification Code: "),
+                    "link": "next_link",
+                },
+            }
+        elif subtask == "AccountDuplicationCheck":
+            data = {
                 "check_logged_in_account": {
                     "link": "AccountDuplicationCheck_false",
                 },
-            },
-        ],
-    }
-    #  url = "https://api.twitter.com/1.1/onboarding/task.json"
-    response = extr.request(
-        url, method="POST", headers=headers, json=data, fatal=None)
-    process(response)
+            }
+        elif subtask == "ArkoseLogin":
+            raise exception.AuthenticationError("Login requires CAPTCHA")
+        elif subtask == "DenyLoginSubtask":
+            raise exception.AuthenticationError("Login rejected as suspicious")
+        elif subtask == "ArkoseLogin":
+            raise exception.AuthenticationError("No auth token cookie")
+        else:
+            raise exception.StopExtraction("Unrecognized subtask %s", subtask)
+
+        inputs = {"subtask_id": subtask}
+        inputs.update(data)
+        data = {
+            "flow_token": flow_token,
+            "subtask_inputs": [inputs],
+        }
+
+        extr.sleep(random.uniform(1.0, 3.0), "login ({})".format(subtask))
+        flow_token, subtask = process(data)
 
     return {
         cookie.name: cookie.value

@@ -790,7 +790,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Skeb</td>
     <td>https://skeb.jp/</td>
-    <td>Followed Users, Posts, Search Results, User Profiles</td>
+    <td>Followed Creators, Followed Users, Posts, Search Results, User Profiles</td>
     <td></td>
 </tr>
 <tr>
@@ -838,7 +838,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Tapas</td>
     <td>https://tapas.io/</td>
-    <td>Episodes, Series</td>
+    <td>Creators, Episodes, Series</td>
     <td>Supported</td>
 </tr>
 <tr>
@@ -898,7 +898,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Twitter</td>
     <td>https://twitter.com/</td>
-    <td>Avatars, Backgrounds, Bookmarks, Communities, Events, Followed Users, Hashtags, individual Images, Likes, Lists, List Members, Media Timelines, Search Results, Timelines, Tweets, User Profiles</td>
+    <td>Avatars, Backgrounds, Bookmarks, Communities, Events, Followed Users, Hashtags, individual Images, Likes, Lists, List Members, Media Timelines, Quotes, Search Results, Timelines, Tweets, User Profiles</td>
     <td>Supported</td>
 </tr>
 <tr>
@@ -940,14 +940,14 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>VSCO</td>
     <td>https://vsco.co/</td>
-    <td>Collections, individual Images, Spaces, User Profiles</td>
+    <td>Avatars, Collections, individual Images, Spaces, User Profiles</td>
     <td></td>
 </tr>
 <tr>
     <td>Wallhaven</td>
     <td>https://wallhaven.cc/</td>
     <td>Collections, individual Images, Search Results, User Profiles</td>
-    <td><a href="configuration.rst#extractorwallhavenapi-key">API Key</a></td>
+    <td><a href="https://gdl-org.github.io/docs/configuration.html#extractor-wallhaven-api-key">API Key</a></td>
 </tr>
 <tr>
     <td>Wallpaper Cave</td>
@@ -965,7 +965,7 @@ Consider all listed sites to potentially be NSFW.
     <td>Weasyl</td>
     <td>https://www.weasyl.com/</td>
     <td>Favorites, Folders, Journals, Submissions</td>
-    <td><a href="configuration.rst#extractorweasylapi-key">API Key</a></td>
+    <td><a href="https://gdl-org.github.io/docs/configuration.html#extractor-weasyl-api-key">API Key</a></td>
 </tr>
 <tr>
     <td>webmshare</td>
@@ -1103,7 +1103,7 @@ Consider all listed sites to potentially be NSFW.
     <td>Booruvar</td>
     <td>https://booru.borvar.art/</td>
     <td>Pools, Popular Images, Posts, Tag Searches</td>
-    <td></td>
+    <td>Supported</td>
 </tr>
 
 <tr>
@@ -1125,7 +1125,7 @@ Consider all listed sites to potentially be NSFW.
     <td>e6AI</td>
     <td>https://e6ai.net/</td>
     <td>Favorites, Pools, Popular Images, Posts, Tag Searches</td>
-    <td></td>
+    <td>Supported</td>
 </tr>
 
 <tr>
@@ -1319,7 +1319,7 @@ Consider all listed sites to potentially be NSFW.
     <td>Derpibooru</td>
     <td>https://derpibooru.org/</td>
     <td>Galleries, Posts, Search Results</td>
-    <td><a href="configuration.rst#extractorderpibooruapi-key">API Key</a></td>
+    <td><a href="https://gdl-org.github.io/docs/configuration.html#extractor-derpibooru-api-key">API Key</a></td>
 </tr>
 <tr>
     <td>Ponybooru</td>
@@ -1331,7 +1331,7 @@ Consider all listed sites to potentially be NSFW.
     <td>Furbooru</td>
     <td>https://furbooru.org/</td>
     <td>Galleries, Posts, Search Results</td>
-    <td></td>
+    <td>API Key</td>
 </tr>
 
 <tr>
@@ -1500,6 +1500,12 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
+    <td>wiki.gg</td>
+    <td>https://www.wiki.gg/</td>
+    <td>Articles</td>
+    <td></td>
+</tr>
+<tr>
     <td>Super Mario Wiki</td>
     <td>https://www.mariowiki.com/</td>
     <td>Articles</td>
@@ -1616,19 +1622,19 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>mastodon.social</td>
     <td>https://mastodon.social/</td>
-    <td>Bookmarks, Followed Users, Images from Statuses, User Profiles</td>
+    <td>Bookmarks, Favorites, Followed Users, Hashtags, Lists, Images from Statuses, User Profiles</td>
     <td><a href="https://github.com/mikf/gallery-dl#oauth">OAuth</a></td>
 </tr>
 <tr>
     <td>Pawoo</td>
     <td>https://pawoo.net/</td>
-    <td>Bookmarks, Followed Users, Images from Statuses, User Profiles</td>
+    <td>Bookmarks, Favorites, Followed Users, Hashtags, Lists, Images from Statuses, User Profiles</td>
     <td><a href="https://github.com/mikf/gallery-dl#oauth">OAuth</a></td>
 </tr>
 <tr>
     <td>baraag</td>
     <td>https://baraag.net/</td>
-    <td>Bookmarks, Followed Users, Images from Statuses, User Profiles</td>
+    <td>Bookmarks, Favorites, Followed Users, Hashtags, Lists, Images from Statuses, User Profiles</td>
     <td><a href="https://github.com/mikf/gallery-dl#oauth">OAuth</a></td>
 </tr>
 

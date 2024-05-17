@@ -9,17 +9,16 @@ from gallery_dl.extractor import wikimedia
 
 __tests__ = (
 {
-    "#url"     : "https://azurlane.koumakan.jp/wiki/Azur_Lane_Wiki",
-    "#category": ("wikimedia", "azurlanewiki", "article"),
+    "#url"     : "https://www.wiki.gg/wiki/Title",
+    "#comment" : "for scripts/supportedsites.py",
+    "#category": ("wikimedia", "wikigg-www", "article"),
     "#class"   : wikimedia.WikimediaArticleExtractor,
 },
 
 {
-    "#url"     : "https://azurlane.koumakan.jp/wiki/Louisville/Gallery",
-    "#comment" : "entries with missing 'imageinfo' (#5384)",
-    "#category": ("wikimedia", "azurlanewiki", "article"),
+    "#url"     : "https://hearthstone.wiki.gg/wiki/Flame_Juggler",
+    "#category": ("wikimedia", "wikigg-hearthstone", "article"),
     "#class"   : wikimedia.WikimediaArticleExtractor,
-    "#count"   : "> 10",
 },
 
 )

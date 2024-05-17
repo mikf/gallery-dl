@@ -243,12 +243,11 @@ class TemplateFStringFormatter(FStringFormatter):
 
 
 def parse_field_name(field_name):
+    if field_name[0] == "'":
+        return "_lit", (operator.itemgetter(field_name[1:-1]),)
+
     first, rest = _string.formatter_field_name_split(field_name)
     funcs = []
-
-    if first[0] == "'":
-        funcs.append(operator.itemgetter(first[1:-1]))
-        first = "_lit"
 
     for is_attr, key in rest:
         if is_attr:
@@ -375,18 +374,18 @@ def _parse_offset(format_spec, default):
     fmt = _build_format_func(format_spec, default)
 
     if not offset or offset == "local":
-        is_dst = time.daylight and time.localtime().tm_isdst > 0
-        offset = -(time.altzone if is_dst else time.timezone)
+        def off(dt):
+            local = time.localtime(util.datetime_to_timestamp(dt))
+            return fmt(dt + datetime.timedelta(0, local.tm_gmtoff))
     else:
         hours, _, minutes = offset.partition(":")
         offset = 3600 * int(hours)
         if minutes:
             offset += 60 * (int(minutes) if offset > 0 else -int(minutes))
+        offset = datetime.timedelta(0, offset)
 
-    offset = datetime.timedelta(seconds=offset)
-
-    def off(obj):
-        return fmt(obj + offset)
+        def off(obj):
+            return fmt(obj + offset)
     return off
 
 

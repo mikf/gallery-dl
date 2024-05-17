@@ -74,8 +74,8 @@ class RedditExtractor(Extractor):
                         yield Message.Url, url, submission
 
                     elif "gallery_data" in media:
-                        for submission["num"], url in enumerate(
-                                self._extract_gallery(media), 1):
+                        for url in self._extract_gallery(media):
+                            submission["num"] += 1
                             text.nameext_from_url(url, submission)
                             yield Message.Url, url, submission
 
@@ -99,7 +99,10 @@ class RedditExtractor(Extractor):
                             urls.append((url, submission))
                     for comment in comments:
                         html = comment["body_html"] or ""
-                        if ' href="' in html:
+                        href = (' href="' in html)
+                        media = ("media_metadata" in comment)
+
+                        if media or href:
                             comment["date"] = text.parse_timestamp(
                                 comment["created_utc"])
                             if submission:
@@ -107,6 +110,14 @@ class RedditExtractor(Extractor):
                                 data["comment"] = comment
                             else:
                                 data = comment
+
+                        if media:
+                            for embed in self._extract_embed(comment):
+                                submission["num"] += 1
+                                text.nameext_from_url(embed, submission)
+                                yield Message.Url, embed, submission
+
+                        if href:
                             for url in text.extract_iter(html, ' href="', '"'):
                                 urls.append((url, data))
 
@@ -118,6 +129,7 @@ class RedditExtractor(Extractor):
                     if url.startswith((
                         "https://www.reddit.com/message/compose",
                         "https://reddit.com/message/compose",
+                        "https://preview.redd.it/",
                     )):
                         continue
 
@@ -172,6 +184,27 @@ class RedditExtractor(Extractor):
                     submission["id"], item["media_id"])
                 self.log.debug(src)
 
+    def _extract_embed(self, submission):
+        meta = submission["media_metadata"]
+        if not meta:
+            return
+
+        for mid, data in meta.items():
+            if data["status"] != "valid" or "s" not in data:
+                self.log.warning(
+                    "embed %s: skipping item %s (status: %s)",
+                    submission["id"], mid, data.get("status"))
+                continue
+            src = data["s"]
+            url = src.get("u") or src.get("gif") or src.get("mp4")
+            if url:
+                yield url.partition("?")[0].replace("/preview.", "/i.", 1)
+            else:
+                self.log.error(
+                    "embed %s: unable to fetch download URL for item %s",
+                    submission["id"], mid)
+                self.log.debug(src)
+
     def _extract_video_ytdl(self, submission):
         return "https://www.reddit.com" + submission["permalink"]
 
@@ -191,6 +224,8 @@ class RedditExtractor(Extractor):
         try:
             if "reddit_video_preview" in post["preview"]:
                 video = post["preview"]["reddit_video_preview"]
+                if "fallback_url" in video:
+                    yield video["fallback_url"]
                 if "dash_url" in video:
                     yield "ytdl:" + video["dash_url"]
                 if "hls_url" in video:
@@ -200,6 +235,12 @@ class RedditExtractor(Extractor):
 
         try:
             for image in post["preview"]["images"]:
+                variants = image.get("variants")
+                if variants:
+                    if "gif" in variants:
+                        yield variants["gif"]["source"]["url"]
+                    if "mp4" in variants:
+                        yield variants["mp4"]["source"]["url"]
                 yield image["source"]["url"]
         except Exception as exc:
             self.log.debug("%s: %s", exc.__class__.__name__, exc)
@@ -446,14 +487,14 @@ class RedditAPI():
 
             remaining = response.headers.get("x-ratelimit-remaining")
             if remaining and float(remaining) < 2:
-                if self._warn_429:
-                    self._warn_429 = False
+                self.log.warning("API rate limit exceeded")
+                if self._warn_429 and self.client_id == self.CLIENT_ID:
                     self.log.info(
                         "Register your own OAuth application and use its "
                         "credentials to prevent this error: "
-                        "https://github.com/mikf/gallery-dl/blob/master"
-                        "/docs/configuration.rst"
-                        "#extractorredditclient-id--user-agent")
+                        "https://gdl-org.github.io/docs/configuration.html"
+                        "#extractor-reddit-client-id-user-agent")
+                self._warn_429 = False
                 self.extractor.wait(
                     seconds=response.headers["x-ratelimit-reset"])
                 continue

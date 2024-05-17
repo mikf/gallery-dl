@@ -23,6 +23,7 @@ class HotleakExtractor(Extractor):
 
     def items(self):
         for post in self.posts():
+            post["_http_expected_status"] = (404,)
             yield Message.Directory, post
             yield Message.Url, post["url"], post
 

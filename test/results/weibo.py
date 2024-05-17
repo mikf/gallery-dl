@@ -80,11 +80,11 @@ __tests__ = (
     "#category": ("", "weibo", "home"),
     "#class"   : weibo.WeiboHomeExtractor,
     "#range"   : "1-30",
-    "#count"   : 30,
+    "#count"   : 0,
 },
 
 {
-    "#url"     : "https://weibo.com/1758989602?tabtype=feed",
+    "#url"     : "https://weibo.com/2553930725?tabtype=feed",
     "#category": ("", "weibo", "feed"),
     "#class"   : weibo.WeiboFeedExtractor,
     "#range"   : "1-30",
@@ -195,6 +195,28 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://weibo.cn/detail/4600272267522211",
+    "#comment" : "retweet",
+    "#category": ("", "weibo", "status"),
+    "#class"   : weibo.WeiboStatusExtractor,
+    "#count"   : 0,
+},
+
+{
+    "#url"     : "https://weibo.cn/detail/4600272267522211",
+    "#comment" : "retweet",
+    "#category": ("", "weibo", "status"),
+    "#class"   : weibo.WeiboStatusExtractor,
+    "#options" : {"retweets": True},
+    "#count"   : 2,
+
+    "status": {
+        "id"                     : 4600272267522211,
+        "retweeted_status": {"id": 4600167083287033},
+    },
+},
+
+{
     "#url"     : "https://m.weibo.cn/detail/4600272267522211",
     "#comment" : "original retweets (#1542)",
     "#category": ("", "weibo", "status"),
@@ -209,8 +231,10 @@ __tests__ = (
     "#comment" : "type == livephoto (#2146)",
     "#category": ("", "weibo", "status"),
     "#class"   : weibo.WeiboStatusExtractor,
-    "#pattern" : r"https://video\.weibo\.com/media/play\?livephoto=https%3A%2F%2Fus.sinaimg.cn%2F\w+\.mov",
+    "#pattern" : r"https://video\.weibo\.com/media/play\?livephoto=https%3A%2F%2Fus\.sinaimg\.cn%2F\w+\.mov",
     "#range"   : "2,4,6",
+
+    "extension": "mov",
 },
 
 {
@@ -219,6 +243,8 @@ __tests__ = (
     "#category": ("", "weibo", "status"),
     "#class"   : weibo.WeiboStatusExtractor,
     "#urls"    : "https://wx4.sinaimg.cn/large/68d80d22gy1h2ryfa8k0kg208w06o7wh.gif",
+
+    "extension": "gif",
 },
 
 {

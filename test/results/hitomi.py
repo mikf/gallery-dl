@@ -5,6 +5,7 @@
 # published by the Free Software Foundation.
 
 from gallery_dl.extractor import hitomi
+from gallery_dl import exception
 
 
 __tests__ = (
@@ -47,9 +48,7 @@ __tests__ = (
     "#comment" : "gallery with 'broken' redirect",
     "#category": ("", "hitomi", "gallery"),
     "#class"   : hitomi.HitomiGalleryExtractor,
-    "#options" : {"format": "original"},
-    "#pattern" : r"https://[a-c]b\.hitomi\.la/images/\d+/\d+/[0-9a-f]{64}\.jpg",
-    "#count"   : 10,
+    "#exception": exception.NotFoundError,
 },
 
 {

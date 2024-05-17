@@ -30,9 +30,9 @@ class WeiboExtractor(Extractor):
         self._prefix, self.user = match.groups()
 
     def _init(self):
-        self.retweets = self.config("retweets", True)
-        self.videos = self.config("videos", True)
         self.livephoto = self.config("livephoto", True)
+        self.retweets = self.config("retweets", False)
+        self.videos = self.config("videos", True)
         self.gifs = self.config("gifs", True)
         self.gifs_video = (self.gifs == "video")
 
@@ -59,15 +59,25 @@ class WeiboExtractor(Extractor):
 
         for status in self.statuses():
 
-            files = []
-            if self.retweets and "retweeted_status" in status:
+            if "ori_mid" in status and not self.retweets:
+                self.log.debug("Skipping %s (快转 retweet)", status["id"])
+                continue
+
+            if "retweeted_status" in status:
+                if not self.retweets:
+                    self.log.debug("Skipping %s (retweet)", status["id"])
+                    continue
+
+                # videos of the original post are in status
+                # images of the original post are in status["retweeted_status"]
+                files = []
+                self._extract_status(status, files)
+                self._extract_status(status["retweeted_status"], files)
+
                 if original_retweets:
                     status = status["retweeted_status"]
-                    self._extract_status(status, files)
-                else:
-                    self._extract_status(status, files)
-                    self._extract_status(status["retweeted_status"], files)
             else:
+                files = []
                 self._extract_status(status, files)
 
             status["date"] = text.parse_datetime(
@@ -118,7 +128,7 @@ class WeiboExtractor(Extractor):
                     append(pic["largest"].copy())
 
                     file = {"url": pic["video"]}
-                    file["filehame"], _, file["extension"] = \
+                    file["filename"], _, file["extension"] = \
                         pic["video"].rpartition("%2F")[2].rpartition(".")
                     append(file)
 
@@ -176,23 +186,34 @@ class WeiboExtractor(Extractor):
 
             data = data["data"]
             statuses = data["list"]
-            if not statuses:
-                return
             yield from statuses
 
-            if "next_cursor" in data:  # videos, newvideo
-                if data["next_cursor"] == -1:
+            # videos, newvideo
+            cursor = data.get("next_cursor")
+            if cursor:
+                if cursor == -1:
                     return
-                params["cursor"] = data["next_cursor"]
-            elif "page" in params:     # home, article
-                params["page"] += 1
-            elif data["since_id"]:     # album
+                params["cursor"] = cursor
+                continue
+
+            # album
+            since_id = data.get("since_id")
+            if since_id:
                 params["sinceid"] = data["since_id"]
-            else:                      # feed, last album page
-                try:
-                    params["since_id"] = statuses[-1]["id"] - 1
-                except KeyError:
+                continue
+
+            # home, article
+            if "page" in params:
+                if not statuses:
                     return
+                params["page"] += 1
+                continue
+
+            # feed, last album page
+            try:
+                params["since_id"] = statuses[-1]["id"] - 1
+            except LookupError:
+                return
 
     def _sina_visitor_system(self, response):
         self.log.info("Sina Visitor System")

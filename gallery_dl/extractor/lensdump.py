@@ -104,7 +104,7 @@ class LensdumpImageExtractor(LensdumpBase, Extractor):
     filename_fmt = "{category}_{id}{title:?_//}.{extension}"
     directory_fmt = ("{category}",)
     archive_fmt = "{id}"
-    pattern = BASE_PATTERN + r"/i/(\w+)"
+    pattern = r"(?:https?://)?(?:(?:i\d?\.)?lensdump\.com|\w\.l3n\.co)/i/(\w+)"
     example = "https://lensdump.com/i/ID"
 
     def __init__(self, match):

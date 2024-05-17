@@ -1,0 +1,56 @@
+name: GitHub Pages
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+    - master
+    paths:
+    - docs/**
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  dispatch:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Dispatch to gdl-org/docs
+      run: >
+        curl -L
+        -X POST
+        -H "Accept: application/vnd.github+json"
+        -H "Authorization: Bearer ${{ secrets.REPO_TOKEN }}"
+        -H "X-GitHub-Api-Version: 2022-11-28"
+        https://api.github.com/repos/gdl-org/docs/actions/workflows/pages.yml/dispatches
+        -d '{"ref":"master"}'
+
+  deploy:
+
+    runs-on: ubuntu-latest
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/configure-pages@v4
+
+    - name: Copy static files
+      run: |
+        mkdir --parents -- ./_site
+        cp --archive --target-directory=./_site -- \
+          ./docs/oauth-redirect.html
+
+    - uses: actions/upload-pages-artifact@v3
+    - uses: actions/deploy-pages@v4
+      id: deployment

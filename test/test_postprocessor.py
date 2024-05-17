@@ -172,7 +172,7 @@ class ExecTest(BasePostprocessorTest):
             "command": "echo {} {_path} {_directory} {_filename} && rm {};",
         })
 
-        with patch("subprocess.Popen") as p:
+        with patch("gallery_dl.util.Popen") as p:
             i = Mock()
             i.wait.return_value = 0
             p.return_value = i
@@ -192,7 +192,7 @@ class ExecTest(BasePostprocessorTest):
                         "\fE _directory.upper()"],
         })
 
-        with patch("subprocess.Popen") as p:
+        with patch("gallery_dl.util.Popen") as p:
             i = Mock()
             i.wait.return_value = 0
             p.return_value = i
@@ -212,7 +212,7 @@ class ExecTest(BasePostprocessorTest):
             "command": "echo {}",
         })
 
-        with patch("subprocess.Popen") as p:
+        with patch("gallery_dl.util.Popen") as p:
             i = Mock()
             i.wait.return_value = 123
             p.return_value = i
@@ -230,7 +230,7 @@ class ExecTest(BasePostprocessorTest):
             "command": "echo {}",
         })
 
-        with patch("subprocess.Popen") as p:
+        with patch("gallery_dl.util.Popen") as p:
             i = Mock()
             p.return_value = i
             self._trigger(("after",))
@@ -572,6 +572,16 @@ class MtimeTest(BasePostprocessorTest):
         self._create(None, {"date": 315532800})
         self._trigger()
         self.assertEqual(self.pathfmt.kwdict["_mtime"], 315532800)
+
+    def test_mtime_none(self):
+        self._create(None, {"date": None})
+        self._trigger()
+        self.assertNotIn("_mtime", self.pathfmt.kwdict)
+
+    def test_mtime_undefined(self):
+        self._create(None, {})
+        self._trigger()
+        self.assertNotIn("_mtime", self.pathfmt.kwdict)
 
     def test_mtime_key(self):
         self._create({"key": "foo"}, {"foo": 315532800})

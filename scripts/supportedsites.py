@@ -143,6 +143,7 @@ CATEGORY_MAP = {
     "webmshare"      : "webmshare",
     "webtoons"       : "Webtoon",
     "wikiart"        : "WikiArt.org",
+    "wikigg"         : "wiki.gg",
     "wikimediacommons": "Wikimedia Commons",
     "xbunkr"         : "xBunkr",
     "xhamster"       : "xHamster",
@@ -273,6 +274,10 @@ SUBCATEGORY_MAP = {
     "sexcom": {
         "pins": "User Pins",
     },
+    "skeb": {
+        "following"      : "Followed Creators",
+        "following-users": "Followed Users",
+    },
     "smugmug": {
         "path": "Images from Users and Folders",
     },
@@ -337,12 +342,12 @@ URL_MAP = {
 
 _OAUTH = '<a href="https://github.com/mikf/gallery-dl#oauth">OAuth</a>'
 _COOKIES = '<a href="https://github.com/mikf/gallery-dl#cookies">Cookies</a>'
-_APIKEY_DB = \
-    '<a href="configuration.rst#extractorderpibooruapi-key">API Key</a>'
-_APIKEY_WH = \
-    '<a href="configuration.rst#extractorwallhavenapi-key">API Key</a>'
-_APIKEY_WY = \
-    '<a href="configuration.rst#extractorweasylapi-key">API Key</a>'
+_APIKEY_DB = ('<a href="https://gdl-org.github.io/docs/configuration.html'
+              '#extractor-derpibooru-api-key">API Key</a>')
+_APIKEY_WH = ('<a href="https://gdl-org.github.io/docs/configuration.html'
+              '#extractor-wallhaven-api-key">API Key</a>')
+_APIKEY_WY = ('<a href="https://gdl-org.github.io/docs/configuration.html'
+              '#extractor-weasyl-api-key">API Key</a>')
 
 AUTH_MAP = {
     "aibooru"        : "Supported",
@@ -350,11 +355,13 @@ AUTH_MAP = {
     "atfbooru"       : "Supported",
     "baraag"         : _OAUTH,
     "bluesky"        : "Supported",
+    "booruvar"       : "Supported",
     "coomerparty"    : "Supported",
     "danbooru"       : "Supported",
     "derpibooru"     : _APIKEY_DB,
     "deviantart"     : _OAUTH,
     "e621"           : "Supported",
+    "e6ai"           : "Supported",
     "e926"           : "Supported",
     "e-hentai"       : "Supported",
     "exhentai"       : "Supported",
@@ -362,6 +369,7 @@ AUTH_MAP = {
     "fantia"         : _COOKIES,
     "flickr"         : _OAUTH,
     "furaffinity"    : _COOKIES,
+    "furbooru"       : "API Key",
     "horne"          : "Required",
     "idolcomplex"    : "Supported",
     "imgbb"          : "Supported",
@@ -382,7 +390,6 @@ AUTH_MAP = {
     "reddit"         : _OAUTH,
     "sankaku"        : "Supported",
     "seiga"          : _COOKIES,
-    "seisoparty"     : "Supported",
     "smugmug"        : _OAUTH,
     "subscribestar"  : "Supported",
     "tapas"          : "Supported",

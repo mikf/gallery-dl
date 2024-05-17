@@ -32,7 +32,7 @@ __tests__ = (
     "#url"     : "https://lensdump.com/i/tyoAyM",
     "#category": ("", "lensdump", "image"),
     "#class"   : lensdump.LensdumpImageExtractor,
-    "#pattern"     : r"https://c\.l3n\.co/i/tyoAyM\.webp",
+    "#urls"        : "https://c.l3n.co/i/tyoAyM.webp",
     "#sha1_content": "1aa749ed2c0cf679ec8e1df60068edaf3875de46",
 
     "date"     : "dt:2022-08-01 08:24:28",
@@ -43,6 +43,34 @@ __tests__ = (
     "title"    : "MYOBI clovis bookcaseset",
     "url"      : "https://c.l3n.co/i/tyoAyM.webp",
     "width"    : 620,
+},
+
+{
+    "#url"     : "https://c.l3n.co/i/tyoAyM.webp",
+    "#category": ("", "lensdump", "image"),
+    "#class"   : lensdump.LensdumpImageExtractor,
+    "#urls"    : "https://c.l3n.co/i/tyoAyM.webp",
+
+    "date"     : "dt:2022-08-01 08:24:28",
+    "extension": "webp",
+    "filename" : "tyoAyM",
+    "height"   : 400,
+    "id"       : "tyoAyM",
+    "title"    : "MYOBI clovis bookcaseset",
+    "url"      : "https://c.l3n.co/i/tyoAyM.webp",
+    "width"    : 620,
+},
+
+{
+    "#url"     : "https://i.lensdump.com/i/tyoAyM",
+    "#category": ("", "lensdump", "image"),
+    "#class"   : lensdump.LensdumpImageExtractor,
+},
+
+{
+    "#url"     : "https://i3.lensdump.com/i/tyoAyM",
+    "#category": ("", "lensdump", "image"),
+    "#class"   : lensdump.LensdumpImageExtractor,
 },
 
 )

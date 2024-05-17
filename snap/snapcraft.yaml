@@ -37,7 +37,7 @@ plugs:
   # Network access
   network:
 
-  # For network service for recieving OAuth callback tokens
+  # For network service for receiving OAuth callback tokens
   network-bind:
 
   # Configuration access

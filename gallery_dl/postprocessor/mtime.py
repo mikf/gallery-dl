@@ -33,6 +33,9 @@ class MtimePP(PostProcessor):
 
     def run(self, pathfmt):
         mtime = self._get(pathfmt.kwdict)
+        if mtime is None:
+            return
+
         pathfmt.kwdict["_mtime"] = (
             util.datetime_to_timestamp(mtime)
             if isinstance(mtime, datetime) else

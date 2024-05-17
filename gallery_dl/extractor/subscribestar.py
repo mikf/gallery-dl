@@ -175,7 +175,7 @@ class SubscribestarPostExtractor(SubscribestarExtractor):
             "author_id"  : text.parse_int(extr('data-user-id="', '"')),
             "author_nick": text.unescape(extr('alt="', '"')),
             "date"       : self._parse_datetime(extr(
-                'class="section-subtitle">', '<')),
+                '<span class="star_link-types">', '<')),
             "content"    : (extr(
                 '<div class="post-content', '<div class="post-uploads')
                 .partition(">")[2]),

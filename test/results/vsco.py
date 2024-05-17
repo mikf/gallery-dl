@@ -47,14 +47,22 @@ __tests__ = (
 },
 
 {
-    "#url"     : "https://vsco.co/vscotest39/spaces",
+    "#url"     : "https://vsco.co/missuri/spaces",
     "#category": ("", "vsco", "spaces"),
     "#class"   : vsco.VscoSpacesExtractor,
     "#urls"    : (
-        "https://vsco.co/spaces/62991a535a9ee215340fa2b0",
-        "https://vsco.co/spaces/62b35bfb54f97cbfbd5c1e62",
-        "https://vsco.co/spaces/629674a6875ebddb8f1320c1",
+        "https://vsco.co/spaces/62e4934e6920440801d19f05",
     ),
+},
+
+{
+    "#url"     : "https://vsco.co/vsco/avatar",
+    "#category": ("", "vsco", "avatar"),
+    "#class"   : vsco.VscoAvatarExtractor,
+    "#urls"         : "https://image-aws-us-west-2.vsco.co/3c69ae/304128/652d9f3b39a6007526dda683/vscoprofile-avatar.jpg",
+    "#sha1_content" : "57cd648759e34a6daefc5c79542ddb4595b9b677",
+
+    "id": "652d9f3b39a6007526dda683",
 },
 
 {

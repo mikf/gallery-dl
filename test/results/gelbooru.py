@@ -40,6 +40,22 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://gelbooru.com/index.php?page=post&s=list&tags=id:>=67800+id:<=68000",
+    "#comment" : "meta tags (#5478)",
+    "#category": ("booru", "gelbooru", "tag"),
+    "#class"   : gelbooru.GelbooruTagExtractor,
+    "#count"   : 187,
+},
+
+{
+    "#url"     : "https://gelbooru.com/index.php?page=post&s=list&tags=id:>=67800+id:<=68000+sort:id:asc",
+    "#comment" : "meta + sort tags (#5478)",
+    "#category": ("booru", "gelbooru", "tag"),
+    "#class"   : gelbooru.GelbooruTagExtractor,
+    "#count"   : 187,
+},
+
+{
     "#url"     : "https://gelbooru.com/index.php?page=pool&s=show&id=761",
     "#category": ("booru", "gelbooru", "pool"),
     "#class"   : gelbooru.GelbooruPoolExtractor,
@@ -47,10 +63,30 @@ __tests__ = (
 },
 
 {
-    "#url"     : "https://gelbooru.com/index.php?page=favorites&s=view&id=279415",
+    "#url"     : "https://gelbooru.com/index.php?page=favorites&s=view&id=1435674",
     "#category": ("booru", "gelbooru", "favorite"),
     "#class"   : gelbooru.GelbooruFavoriteExtractor,
-    "#count"   : 3,
+    "#urls"    : (
+        "https://img3.gelbooru.com/images/5d/30/5d30fc056ed8668616b3c440df9bac89.jpg",
+        "https://img3.gelbooru.com/images/4c/2d/4c2da867ed643acdadd8105177dcdaf0.png",
+        "https://img3.gelbooru.com/images/c8/26/c826f3cb90d9aaca8d0632a96bf4abe8.jpg",
+        "https://img3.gelbooru.com/images/c1/fe/c1fe59c0bc8ce955dd353544b1015d0c.jpg",
+        "https://img3.gelbooru.com/images/e6/6d/e66d8883c184f5d3b2591dfcdf0d007c.jpg",
+    ),
+},
+
+{
+    "#url"     : "https://gelbooru.com/index.php?page=favorites&s=view&id=1435674",
+    "#category": ("booru", "gelbooru", "favorite"),
+    "#class"   : gelbooru.GelbooruFavoriteExtractor,
+    "#options" : {"order-posts": "reverse"},
+    "#urls"    : (
+        "https://img3.gelbooru.com/images/e6/6d/e66d8883c184f5d3b2591dfcdf0d007c.jpg",
+        "https://img3.gelbooru.com/images/c1/fe/c1fe59c0bc8ce955dd353544b1015d0c.jpg",
+        "https://img3.gelbooru.com/images/c8/26/c826f3cb90d9aaca8d0632a96bf4abe8.jpg",
+        "https://img3.gelbooru.com/images/4c/2d/4c2da867ed643acdadd8105177dcdaf0.png",
+        "https://img3.gelbooru.com/images/5d/30/5d30fc056ed8668616b3c440df9bac89.jpg",
+    ),
 },
 
 {

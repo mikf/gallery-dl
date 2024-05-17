@@ -250,6 +250,12 @@ def build_parser():
         help="Activate quiet mode",
     )
     output.add_argument(
+        "-w", "--warning",
+        dest="loglevel",
+        action="store_const", const=logging.WARNING,
+        help="Print only warnings and errors",
+    )
+    output.add_argument(
         "-v", "--verbose",
         dest="loglevel",
         action="store_const", const=logging.DEBUG,
@@ -318,6 +324,11 @@ def build_parser():
         dest="write-pages", nargs=0, action=ConfigConstAction, const=True,
         help=("Write downloaded intermediary pages to files "
               "in the current directory to debug problems"),
+    )
+    output.add_argument(
+        "--no-colors",
+        dest="colors", action="store_false",
+        help=("Do not emit ANSI color codes in output"),
     )
 
     downloader = parser.add_argument_group("Downloader Options")

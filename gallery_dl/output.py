@@ -16,11 +16,39 @@ from . import config, util, formatter
 
 
 # --------------------------------------------------------------------
+# Globals
+
+COLORS = not os.environ.get("NO_COLOR")
+COLORS_DEFAULT = {
+    "success": "1;32",
+    "skip"   : "2",
+    "debug"  : "0;37",
+    "info"   : "1;37",
+    "warning": "1;33",
+    "error"  : "1;31",
+} if COLORS else {}
+
+if util.WINDOWS:
+    ANSI = COLORS and os.environ.get("TERM") == "ANSI"
+    OFFSET = 1
+    CHAR_SKIP = "# "
+    CHAR_SUCCESS = "* "
+    CHAR_ELLIPSIES = "..."
+else:
+    ANSI = COLORS
+    OFFSET = 0
+    CHAR_SKIP = "# "
+    CHAR_SUCCESS = "✔ "
+    CHAR_ELLIPSIES = "…"
+
+
+# --------------------------------------------------------------------
 # Logging
 
 LOG_FORMAT = "[{name}][{levelname}] {message}"
 LOG_FORMAT_DATE = "%Y-%m-%d %H:%M:%S"
 LOG_LEVEL = logging.INFO
+LOG_LEVELS = ("debug", "info", "warning", "error")
 
 
 class Logger(logging.Logger):
@@ -129,7 +157,7 @@ class Formatter(logging.Formatter):
 
     def __init__(self, fmt, datefmt):
         if isinstance(fmt, dict):
-            for key in ("debug", "info", "warning", "error"):
+            for key in LOG_LEVELS:
                 value = fmt[key] if key in fmt else LOG_FORMAT
                 fmt[key] = (formatter.parse(value).format_map,
                             "{asctime" in value)
@@ -187,16 +215,36 @@ def configure_logging(loglevel):
     # stream logging handler
     handler = root.handlers[0]
     opts = config.interpolate(("output",), "log")
+
+    colors = config.interpolate(("output",), "colors")
+    if colors is None:
+        colors = COLORS_DEFAULT
+    if colors and not opts:
+        opts = LOG_FORMAT
+
     if opts:
         if isinstance(opts, str):
-            opts = {"format": opts}
-        if handler.level == LOG_LEVEL and "level" in opts:
+            logfmt = opts
+            opts = {}
+        elif "format" in opts:
+            logfmt = opts["format"]
+        else:
+            logfmt = LOG_FORMAT
+
+        if not isinstance(logfmt, dict) and colors:
+            ansifmt = "\033[{}m{}\033[0m".format
+            lf = {}
+            for level in LOG_LEVELS:
+                c = colors.get(level)
+                lf[level] = ansifmt(c, logfmt) if c else logfmt
+            logfmt = lf
+
+        handler.setFormatter(Formatter(
+            logfmt, opts.get("format-date", LOG_FORMAT_DATE)))
+
+        if "level" in opts and handler.level == LOG_LEVEL:
             handler.setLevel(opts["level"])
-        if "format" in opts or "format-date" in opts:
-            handler.setFormatter(Formatter(
-                opts.get("format", LOG_FORMAT),
-                opts.get("format-date", LOG_FORMAT_DATE),
-            ))
+
         if minlevel > handler.level:
             minlevel = handler.level
 
@@ -307,9 +355,12 @@ def select():
     mode = config.get(("output",), "mode")
 
     if mode is None or mode == "auto":
-        if hasattr(sys.stdout, "isatty") and sys.stdout.isatty():
-            output = ColorOutput() if ANSI else TerminalOutput()
-        else:
+        try:
+            if sys.stdout.isatty():
+                output = ColorOutput() if ANSI else TerminalOutput()
+            else:
+                output = PipeOutput()
+        except Exception:
             output = PipeOutput()
     elif isinstance(mode, dict):
         output = CustomOutput(mode)
@@ -388,7 +439,10 @@ class ColorOutput(TerminalOutput):
     def __init__(self):
         TerminalOutput.__init__(self)
 
-        colors = config.get(("output",), "colors") or {}
+        colors = config.interpolate(("output",), "colors")
+        if colors is None:
+            colors = COLORS_DEFAULT
+
         self.color_skip = "\033[{}m".format(
             colors.get("skip", "2"))
         self.color_success = "\r\033[{}m".format(
@@ -514,17 +568,3 @@ def shorten_string_eaw(txt, limit, sep="…", cache=EAWCache()):
         right -= 1
 
     return txt[:left] + sep + txt[right+1:]
-
-
-if util.WINDOWS:
-    ANSI = os.environ.get("TERM") == "ANSI"
-    OFFSET = 1
-    CHAR_SKIP = "# "
-    CHAR_SUCCESS = "* "
-    CHAR_ELLIPSIES = "..."
-else:
-    ANSI = True
-    OFFSET = 0
-    CHAR_SKIP = "# "
-    CHAR_SUCCESS = "✔ "
-    CHAR_ELLIPSIES = "…"

@@ -38,6 +38,11 @@ def main():
             except ImportError:
                 import toml
             config.load(args.configs_toml, strict=True, loads=toml.loads)
+        if not args.colors:
+            output.ANSI = False
+            config.set((), "colors", False)
+            if util.WINDOWS:
+                config.set(("output",), "ansi", False)
         if args.filename:
             filename = args.filename
             if filename == "/O":
@@ -86,7 +91,7 @@ def main():
                     signal.signal(signal_num, signal.SIG_IGN)
 
         # enable ANSI escape sequences on Windows
-        if util.WINDOWS and config.get(("output",), "ansi"):
+        if util.WINDOWS and config.get(("output",), "ansi", output.COLORS):
             from ctypes import windll, wintypes, byref
             kernel32 = windll.kernel32
             mode = wintypes.DWORD()
@@ -113,7 +118,7 @@ def main():
 
         # loglevels
         output.configure_logging(args.loglevel)
-        if args.loglevel >= logging.ERROR:
+        if args.loglevel >= logging.WARNING:
             config.set(("output",), "mode", "null")
             config.set(("downloader",), "progress", None)
         elif args.loglevel <= logging.DEBUG:

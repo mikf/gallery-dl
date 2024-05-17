@@ -46,6 +46,8 @@ class VscoExtractor(Extractor):
                     url = "https://image-{}.vsco.co/{}".format(cdn, path)
                 elif cdn.isdecimal():
                     url = "https://image.vsco.co/" + base
+                elif img["responsive_url"].startswith("http"):
+                    url = img["responsive_url"]
                 else:
                     url = "https://" + img["responsive_url"]
 
@@ -236,6 +238,34 @@ class VscoSpacesExtractor(VscoExtractor):
             url = "{}/spaces/{}".format(self.root, space["id"])
             space["_extractor"] = VscoSpaceExtractor
             yield Message.Queue, url, space
+
+
+class VscoAvatarExtractor(VscoExtractor):
+    """Extractor for vsco.co user avatars"""
+    subcategory = "avatar"
+    pattern = USER_PATTERN + r"/avatar"
+    example = "https://vsco.co/USER/avatar"
+
+    def images(self):
+        url = "{}/{}/gallery".format(self.root, self.user)
+        page = self.request(url).text
+        piid = text.extr(page, '"profileImageId":"', '"')
+
+        url = "https://im.vsco.co/" + piid
+        # needs GET request, since HEAD does not redirect to full URL
+        response = self.request(url, allow_redirects=False)
+
+        return ({
+            "_id"           : piid,
+            "is_video"      : False,
+            "grid_name"     : "",
+            "upload_date"   : 0,
+            "responsive_url": response.headers["Location"],
+            "video_url"     : "",
+            "image_meta"    : None,
+            "width"         : 0,
+            "height"        : 0,
+        },)
 
 
 class VscoImageExtractor(VscoExtractor):

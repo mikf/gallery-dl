@@ -50,7 +50,7 @@ class ExhentaiExtractor(Extractor):
 
     def request(self, url, **kwargs):
         response = Extractor.request(self, url, **kwargs)
-        if response.history and response.headers.get("Content-Length") == "0":
+        if "Cache-Control" not in response.headers and not response.content:
             self.log.info("blank page")
             raise exception.AuthorizationError()
         return response
@@ -95,7 +95,11 @@ class ExhentaiExtractor(Extractor):
         self.cookies.clear()
 
         response = self.request(url, method="POST", headers=headers, data=data)
-        if b"You are now logged in as:" not in response.content:
+        content = response.content
+        if b"You are now logged in as:" not in content:
+            if b"The captcha was not entered correctly" in content:
+                raise exception.AuthenticationError(
+                    "CAPTCHA required. Use cookies instead.")
             raise exception.AuthenticationError()
 
         # collect more cookies
@@ -437,7 +441,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
             raise exception.AuthorizationError()
         if page.startswith(("Key missing", "Gallery not found")):
             raise exception.NotFoundError("gallery")
-        if "hentai.org/mpv/" in page:
+        if page.count("hentai.org/mpv/") > 1:
             self.log.warning("Enabled Multi-Page Viewer is not supported")
         return page
 

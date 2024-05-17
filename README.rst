@@ -7,8 +7,8 @@ to download image galleries and collections
 from several image hosting sites
 (see `Supported Sites <docs/supportedsites.md>`__).
 It is a cross-platform tool
-with many `configuration options <docs/configuration.rst>`__
-and powerful `filenaming capabilities <docs/formatting.md>`__.
+with many `configuration options <https://gdl-org.github.io/docs/configuration.html>`__
+and powerful `filenaming capabilities <https://gdl-org.github.io/docs/formatting.html>`__.
 
 
 |pypi| |build|
@@ -72,9 +72,9 @@ Standalone Executable
 Prebuilt executable files with a Python interpreter and
 required Python packages included are available for
 
-- `Windows <https://github.com/mikf/gallery-dl/releases/download/v1.26.8/gallery-dl.exe>`__
+- `Windows <https://github.com/mikf/gallery-dl/releases/download/v1.26.9/gallery-dl.exe>`__
   (Requires `Microsoft Visual C++ Redistributable Package (x86) <https://aka.ms/vs/17/release/vc_redist.x86.exe>`__)
-- `Linux   <https://github.com/mikf/gallery-dl/releases/download/v1.26.8/gallery-dl.bin>`__
+- `Linux   <https://github.com/mikf/gallery-dl/releases/download/v1.26.9/gallery-dl.bin>`__
 
 
 Nightly Builds
@@ -234,7 +234,7 @@ Documentation
 -------------
 
 A list of all available configuration options and their descriptions
-can be found in `<docs/configuration.rst>`__.
+can be found at `<https://gdl-org.github.io/docs/configuration.html>`__.
 
 | For a default configuration file with available options set to their
   default values, see `<docs/gallery-dl.conf>`__.
@@ -330,7 +330,7 @@ CAPTCHA or similar, or has not been implemented yet, you can use the
 cookies from a browser login session and input them into *gallery-dl*.
 
 This can be done via the
-`cookies <docs/configuration.rst#extractorcookies>`__
+`cookies <https://gdl-org.github.io/docs/configuration.html#extractor-cookies>`__
 option in your configuration file by specifying
 
 - | the path to a Mozilla/Netscape format cookies.txt file exported by a browser addon
