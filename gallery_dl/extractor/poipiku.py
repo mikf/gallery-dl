@@ -63,7 +63,7 @@ class PoipikuExtractor(Extractor):
                     "//img.", "//img-org.", 1)
                 yield Message.Url, url, text.nameext_from_url(url, post)
 
-            if not extr(' show all(+', '<'):
+            if not extr('ShowAppendFile', '<'):
                 continue
 
             url = self.root + "/f/ShowAppendFileF.jsp"
