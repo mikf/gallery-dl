@@ -749,7 +749,7 @@ class TwitterTweetExtractor(TwitterExtractor):
     """Extractor for individual tweets"""
     subcategory = "tweet"
     pattern = (BASE_PATTERN + r"/([^/?#]+|i/web)/status/(\d+)"
-               r"/?(?:$|\?|#|photo/)")
+               r"/?(?:$|\?|#|photo/|video/)")
     example = "https://twitter.com/USER/status/12345"
 
     def __init__(self, match):

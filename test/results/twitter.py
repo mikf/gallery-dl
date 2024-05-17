@@ -540,6 +540,13 @@ You’ll be able to receive four Galarian form Pokémon with Hidden Abilities, p
 },
 
 {
+    "#url"     : "https://twitter.com/perrypumas/status/1065692031626829824/video/1",
+    "#comment" : "/video/ URL",
+    "#category": ("", "twitter", "tweet"),
+    "#class"   : twitter.TwitterTweetExtractor,
+},
+
+{
     "#url"     : "https://twitter.com/morino_ya/status/1392763691599237121",
     "#comment" : "retweet with missing media entities (#1555)",
     "#category": ("", "twitter", "tweet"),
