@@ -168,6 +168,7 @@ class InstagramExtractor(Extractor):
                 "likes": post.get("like_count", 0),
                 "pinned": post.get("timeline_pinned_user_ids", ()),
                 "date": text.parse_timestamp(post.get("taken_at")),
+                "user_has_liked": post.get('has_liked', False),
             }
 
             caption = post["caption"]
