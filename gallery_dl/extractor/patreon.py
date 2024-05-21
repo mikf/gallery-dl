@@ -263,8 +263,9 @@ class PatreonExtractor(Extractor):
             page, 'id="__NEXT_DATA__" type="application/json">', '</script')
         if data:
             try:
-                return (util.json_loads(data)["props"]["pageProps"]
-                        ["bootstrapEnvelope"]["bootstrap"])
+                data = util.json_loads(data)
+                env = data["props"]["pageProps"]["bootstrapEnvelope"]
+                return env.get("pageBootstrap") or env["bootstrap"]
             except Exception as exc:
                 self.log.debug("%s: %s", exc.__class__.__name__, exc)
 
