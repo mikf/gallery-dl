@@ -495,7 +495,13 @@ class TwitterExtractor(Extractor):
 
         username, password = self._get_auth_info()
         if username:
-            self.cookies_update(_login_impl(self, username, password))
+            return self.cookies_update(_login_impl(self, username, password))
+
+        for cookie in self.cookies:
+            if cookie.domain == ".twitter.com":
+                self.cookies.set(
+                    cookie.name, cookie.value, domain=self.cookies_domain,
+                    expires=cookie.expires, secure=cookie.secure)
 
 
 class TwitterUserExtractor(TwitterExtractor):
