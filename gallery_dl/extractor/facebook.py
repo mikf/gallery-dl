@@ -12,7 +12,7 @@ from .. import text, exception
 BASE_PATTERN = r"(?:https?://)www\.facebook\.com"
 
 
-class FacebookBase(Extractor):
+class FacebookExtractor(Extractor):
     """Base class for Facebook extractors"""
     category = "facebook"
     root = "https://www.facebook.com"
@@ -135,9 +135,9 @@ class FacebookBase(Extractor):
                 all_ids.append(cur_id)
 
 
-class FacebookSetExtractor(FacebookBase):
-    """Base class for Facebook Set extractors"""
-    subcategory = "folder"
+class FacebookAlbumExtractor(FacebookExtractor):
+    """Base class for Facebook Album extractors"""
+    subcategory = "album"
     pattern = BASE_PATTERN + r"/media/set/.*set=([^/?&]+)"
     directory_fmt = ("{category}", "{title} ({set_id})")
     example = "https://www.facebook.com/media/set/?set=SET_ID"
@@ -149,9 +149,9 @@ class FacebookSetExtractor(FacebookBase):
             yield message
 
 
-class FacebookPhotosExtractor(FacebookBase):
-    """Base class for Facebook Photos extractors"""
-    subcategory = "folder"
+class FacebookProfileExtractor(FacebookExtractor):
+    """Base class for Facebook Profile extractors"""
+    subcategory = "profile"
     pattern = BASE_PATTERN + r"/([^/|?]+)"
     directory_fmt = ("{category}", "{title} ({set_id})")
     example = "https://www.facebook.com/ID"
