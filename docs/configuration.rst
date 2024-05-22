@@ -692,6 +692,17 @@ Description
     Additional name-value pairs to be added to each metadata dictionary.
 
 
+extractor.*.keywords-eval
+-------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Evaluate each `keywords <extractor.*.keywords_>`__ ``string`` value
+    as a `format string`_.
+
+
 extractor.*.keywords-default
 ----------------------------
 Type
