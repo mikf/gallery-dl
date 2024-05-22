@@ -42,8 +42,9 @@ class Job():
 
         self.extractor = extr
         self.pathfmt = None
-        self.kwdict = {}
         self.status = 0
+        self.kwdict = {}
+        self.kwdict_eval = False
 
         cfgpath = []
         if parent:
@@ -120,7 +121,16 @@ class Job():
         # user-supplied metadata
         kwdict = extr.config("keywords")
         if kwdict:
-            self.kwdict.update(kwdict)
+            if extr.config("keywords-eval"):
+                self.kwdict_eval = []
+                for key, value in kwdict.items():
+                    if isinstance(value, str):
+                        fmt = formatter.parse(value, None, util.identity)
+                        self.kwdict_eval.append((key, fmt.format_map))
+                    else:
+                        self.kwdict[key] = value
+            else:
+                self.kwdict.update(kwdict)
 
     def run(self):
         """Execute or run the job"""
@@ -215,6 +225,9 @@ class Job():
             kwdict.pop(self.metadata_http, None)
         if self.kwdict:
             kwdict.update(self.kwdict)
+        if self.kwdict_eval:
+            for key, valuegen in self.kwdict_eval:
+                kwdict[key] = valuegen(kwdict)
 
     def _init(self):
         self.extractor.initialize()
