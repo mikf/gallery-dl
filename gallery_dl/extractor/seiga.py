@@ -10,6 +10,7 @@
 
 from .common import Extractor, Message
 from .. import text, util, exception
+from ..cache import cache
 
 
 class SeigaExtractor(Extractor):
@@ -17,6 +18,7 @@ class SeigaExtractor(Extractor):
     category = "seiga"
     archive_fmt = "{image_id}"
     cookies_domain = ".nicovideo.jp"
+    cookies_names = ("user_session",)
     root = "https://seiga.nicovideo.jp"
 
     def __init__(self, match):
@@ -24,8 +26,7 @@ class SeigaExtractor(Extractor):
         self.start_image = 0
 
     def items(self):
-        if not self.cookies_check(("user_session",)):
-            raise exception.StopExtraction("'user_session' cookie required")
+        self.login()
 
         images = iter(self.get_images())
         data = next(images)
@@ -49,6 +50,59 @@ class SeigaExtractor(Extractor):
             raise exception.StopExtraction(
                 "HTTP redirect to login page (%s)", location.partition("?")[0])
         return location.replace("/o/", "/priv/", 1)
+
+    def login(self):
+        if self.cookies_check(self.cookies_names):
+            return
+
+        username, password = self._get_auth_info()
+        if username:
+            return self.cookies_update(self._login_impl(username, password))
+
+        raise exception.AuthorizationError(
+            "username & password or 'user_session' cookie required")
+
+    @cache(maxage=365*86400, keyarg=1)
+    def _login_impl(self, username, password):
+        self.log.info("Logging in as %s", username)
+
+        root = "https://account.nicovideo.jp"
+        response = self.request(root + "/login?site=seiga")
+        page = response.text
+
+        data = {
+            "mail_tel": username,
+            "password": password,
+        }
+        url = root + text.unescape(text.extr(page, '<form action="', '"'))
+        response = self.request(url, method="POST", data=data)
+
+        if "message=cant_login" in response.url:
+            raise exception.AuthenticationError()
+
+        if "/mfa" in response.url:
+            page = response.text
+            email = text.extr(page, 'class="userAccount">', "<")
+            code = self.input("Email Confirmation Code ({}): ".format(email))
+
+            data = {
+                "otp": code,
+                "loginBtn": "Login",
+                "device_name": "gdl",
+            }
+            url = root + text.unescape(text.extr(page, '<form action="', '"'))
+            response = self.request(url, method="POST", data=data)
+
+            if not response.history and \
+                    b"Confirmation code is incorrect" in response.content:
+                raise exception.AuthenticationError(
+                    "Incorrect Confirmation Code")
+
+        return {
+            cookie.name: cookie.value
+            for cookie in self.cookies
+            if cookie.expires and cookie.domain == self.cookies_domain
+        }
 
 
 class SeigaUserExtractor(SeigaExtractor):
