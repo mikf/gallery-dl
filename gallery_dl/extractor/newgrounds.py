@@ -102,30 +102,55 @@ class NewgroundsExtractor(Extractor):
     def _login_impl(self, username, password):
         self.log.info("Logging in as %s", username)
 
-        url = self.root + "/passport/"
+        url = self.root + "/passport"
         response = self.request(url)
         if response.history and response.url.endswith("/social"):
             return self.cookies
 
         page = response.text
-        headers = {"Origin": self.root, "Referer": url}
+        headers = {
+            "Accept": "application/json, text/javascript, */*; q=0.01",
+            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+            "X-Requested-With": "XMLHttpRequest",
+            "Origin": self.root,
+            "Referer": url,
+        }
         url = text.urljoin(self.root, text.extr(page, 'action="', '"'))
         data = {
-            "username": username,
-            "password": password,
-            "remember": "1",
-            "login"   : "1",
             "auth"    : text.extr(page, 'name="auth" value="', '"'),
+            "remember": "1",
+            "username": username,
+            "password": str(password),
+            "code"    : "",
+            "codehint": "------",
+            "mfaCheck": "1",
         }
 
-        response = self.request(url, method="POST", headers=headers, data=data)
-        if not response.history:
-            raise exception.AuthenticationError()
+        while True:
+            response = self.request(
+                url, method="POST", headers=headers, data=data)
+            result = response.json()
+
+            if result.get("success"):
+                break
+            if "errors" in result:
+                raise exception.AuthenticationError(
+                    '"' + '", "'.join(result["errors"]) + '"')
+
+            if result.get("requiresMfa"):
+                data["code"] = self.input("Verification Code: ")
+                data["codehint"] = "      "
+            elif result.get("requiresEmailMfa"):
+                email = result.get("obfuscatedEmail")
+                prompt = "Email Verification Code ({}): ".format(email)
+                data["code"] = self.input(prompt)
+                data["codehint"] = "      "
+
+            data.pop("mfaCheck", None)
 
         return {
             cookie.name: cookie.value
-            for cookie in response.history[0].cookies
-            if cookie.expires and cookie.domain == self.cookies_domain
+            for cookie in response.cookies
         }
 
     def extract_post(self, post_url):
