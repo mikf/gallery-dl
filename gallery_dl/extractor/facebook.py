@@ -9,7 +9,7 @@
 from .common import Extractor, Message
 from .. import text, exception
 
-BASE_PATTERN = r"(?:https?://)www\.facebook\.com"
+BASE_PATTERN = r"(?:https?://)?(?:www\.)?facebook\.com"
 
 
 class FacebookExtractor(Extractor):
@@ -26,8 +26,20 @@ class FacebookExtractor(Extractor):
         self.session.headers["Accept"] = "text/html"
         self.session.headers["Sec-Fetch-Mode"] = "navigate"
 
-    def item_filename_handle(self, item):
-        if "filename" in item or item["filename"] is not None:
+    @staticmethod
+    def raise_request_exceptions(res):
+        if res.url.startswith(FacebookExtractor.root + "/login"):
+            raise exception.AuthenticationError()
+        if '{"__dr":"CometErrorRoot.react"}' in res.text:
+            raise exception.StopExtraction(
+                "You've been temporarily blocked from viewing images. "
+                "Please try again later."
+            )
+        return res
+
+    @staticmethod
+    def item_filename_handle(item):
+        if "filename" in item and item["filename"] is not None:
             if "." in item["filename"]:
                 item["name"], _, item["extension"] = (
                     item["filename"].rpartition(".")
@@ -35,28 +47,63 @@ class FacebookExtractor(Extractor):
             else:
                 item["name"] = item["filename"]
                 item["extension"] = ""
+        else:
+            item["filename"] = item["name"] = item["extension"] = ""
 
-    def set_photos_iter(self, set_id):
-        PHOTO_PAGE_URL_FORMAT = self.root + "/photo/?fbid={id}&set={set_id}"
+    @staticmethod
+    def get_first_photo_id(album_page):
+        return text.extr(
+            album_page,
+            '{"__typename":"Photo","id":"',
+            '"',
+            text.extr(
+                album_page,
+                '{"__typename":"Photo","__isMedia":"Photo","',
+                '","'
+            ).rsplit('"', 1)[-1]
+        )
 
-        set_page_url = self.root + "/media/set/?set=" + set_id
-        set_page = self.request(set_page_url).text
+    @staticmethod
+    def get_next_photo_id(photo_page):
+        return text.extr(
+            photo_page,
+            '"nextMediaAfterNodeId":{"__typename":"Photo","id":"',
+            '"',
+            text.extr(
+                photo_page,
+                '"nextMedia":{"edges":[{"node":{"__typename":"Photo","id":"',
+                '"'
+            )
+        )
+
+    @staticmethod
+    def get_photo_download_url(photo_page):
+        return text.extr(
+            photo_page,
+            '"},"extensions":{"prefetch_uris_v2":[{"uri":"',
+            '"'
+        ).replace("\\/", "/")
+
+    def album_photos_iter(self, set_id):
+        PHOTO_URL = self.root + "/photo/?fbid={photo_id}&set={set_id}"
+
+        album_url = self.root + "/media/set/?set=" + set_id
+        album_page = self.request(album_url).text
 
         directory = {
             "set_id": set_id,
             "title": text.parse_unicode_escapes(text.extr(
-                set_page,
+                album_page,
                 '"title":{"text":"',
                 '"'
             )),
             "username": text.parse_unicode_escapes(text.extr(
-                set_page,
-                '{"__typename":"User","name":"',
-                '","',
-                text.extr(set_page, '"userVanity":"', '","')
+                album_page,
+                '"User","name":"',
+                '","'
             )),
             "user_id": text.extr(
-                set_page,
+                album_page,
                 '"owner":{"__typename":"User","id":"',
                 '"'
             )
@@ -66,43 +113,25 @@ class FacebookExtractor(Extractor):
 
         yield Message.Directory, directory
 
-        cur_id = text.extr(
-            set_page,
-            '{"__typename":"Photo","id":"',
-            '"',
-            text.extr(
-                set_page,
-                '{"__typename":"Photo","__isMedia":"Photo","',
-                '","'
-            ).rsplit('"', 1)[1]
-        )
+        cur_photo_id = self.get_first_photo_id(album_page)
 
-        # print("\n", cur_id, "\n")
+        # print("\n", cur_photo_id, "\n")
 
-        all_ids = [cur_id]
+        all_photo_ids = [cur_photo_id]
 
         num = 0
 
         while True:
             num += 1
 
-            media_page_req = self.request(
-                PHOTO_PAGE_URL_FORMAT.format(id=cur_id, set_id=set_id)
-            )
-
-            if media_page_req.url.startswith(self.root + "/login"):
-                raise exception.AuthenticationError()
-
-            media_page = media_page_req.text
+            media_page = self.raise_request_exceptions(self.request(
+                PHOTO_URL.format(photo_id=cur_photo_id, set_id=set_id)
+            )).text
 
             photo = {
-                "id": cur_id,
+                "id": cur_photo_id,
                 "set_id": set_id,
-                "url": text.extr(
-                    media_page,
-                    '"},"extensions":{"prefetch_uris_v2":[{"uri":"',
-                    '"'
-                ).replace("\\/", "/"),
+                "url": self.get_photo_download_url(media_page),
                 "num": num
             }
 
@@ -114,25 +143,15 @@ class FacebookExtractor(Extractor):
 
             yield Message.Url, photo["url"], photo
 
-            next_id = text.extr(
-                media_page,
-                '"nextMediaAfterNodeId":{"__typename":"Photo","id":"',
-                '"',
-                text.extr(
-                    media_page,
-                    ('"nextMedia":{"edges":[{"node":'
-                     '{"__typename":"Photo","id":"'),
-                    '"'
-                )
-            )
+            next_photo_id = self.get_next_photo_id(media_page)
 
-            # print("\n", next_id, "\n")
+            # print("\n", next_photo_id, "\n")
 
-            if next_id == "" or next_id in all_ids:
+            if next_photo_id == "" or next_photo_id in all_photo_ids:
                 break
             else:
-                cur_id = next_id
-                all_ids.append(cur_id)
+                cur_photo_id = next_photo_id
+                all_photo_ids.append(cur_photo_id)
 
 
 class FacebookAlbumExtractor(FacebookExtractor):
@@ -143,7 +162,7 @@ class FacebookAlbumExtractor(FacebookExtractor):
     example = "https://www.facebook.com/media/set/?set=SET_ID"
 
     def items(self):
-        metadata_iter = self.set_photos_iter(self.match.group(1))
+        metadata_iter = self.album_photos_iter(self.match.group(1))
 
         for message in metadata_iter:
             yield message
@@ -156,16 +175,21 @@ class FacebookProfileExtractor(FacebookExtractor):
     directory_fmt = ("{category}", "{title} ({set_id})")
     example = "https://www.facebook.com/ID"
 
-    def items(self):
-        photos_page_url = self.root + "/" + self.match.group(1) + "/photos"
-        photos_page = text.extract_from(self.request(photos_page_url).text)
+    @staticmethod
+    def get_profile_photos_album_id(profile_photos_page):
+        profile_photos_page_extr = text.extract_from(profile_photos_page)
+        profile_photos_page_extr('"pageItems"', '"actions_renderer"')
+        set_id = profile_photos_page_extr('set=', '"').rsplit("&", 1)[0]
+        return set_id
 
-        photos_page('{"__typename":"Photo","id":"', '"')
-        set_id = photos_page('set=', '"')
-        set_id = set_id.rsplit("&", 1)[0]
+    def items(self):
+        profile_photos_url = f"{self.root}/{self.match.group(1)}/photos_by"
+        profile_photos_page = self.request(profile_photos_url).text
+
+        set_id = self.get_profile_photos_album_id(profile_photos_page)
         # print("\n", set_id, "\n")
 
-        metadata_iter = self.set_photos_iter(set_id)
+        metadata_iter = self.album_photos_iter(set_id)
 
         for message in metadata_iter:
             yield message
