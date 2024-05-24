@@ -321,7 +321,7 @@ Consider all listed sites to potentially be NSFW.
 </tr>
 <tr>
     <td>Hiperdex</td>
-    <td>https://hiperdex.com/</td>
+    <td>https://hiperdex.top/</td>
     <td>Artists, Chapters, Manga</td>
     <td></td>
 </tr>
