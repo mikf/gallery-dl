@@ -82,11 +82,15 @@ jobs:
     - name: Date
       run: echo "DATE=$(date '+${{ env.DATE_FORMAT }}')" >> "$GITHUB_ENV"
 
+    - name: Body
+      run: printf 'https://github.com/%s/commit/%s' '${{ github.repository }}' '${{ github.sha }}' > body.md
+
     - uses: ncipollo/release-action@v1
       with:
         owner: gdl-org
         repo: builds
         tag: ${{ env.DATE }}
+        bodyFile: body.md
         artifacts: "executable-*/*"
         allowUpdates: true
         makeLatest: true
