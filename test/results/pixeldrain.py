@@ -89,4 +89,12 @@ __tests__ = (
     "mime_type"  : str,
 },
 
+{
+    "#url"     : "https://pixeldrain.com/l/zQ7XpWfM#item=0",
+    "#category": ("", "pixeldrain", "album"),
+    "#class"   : pixeldrain.PixeldrainAlbumExtractor,
+    "#urls"        : "https://pixeldrain.com/api/file/jW9E6s4h?download",
+    "#sha1_content": "0c8768055e4e20e7c7259608b67799171b691140",
+},
+
 )

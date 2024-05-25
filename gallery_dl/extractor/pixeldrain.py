@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2023 Mike Fährmann
+# Copyright 2023-2024 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -59,12 +59,13 @@ class PixeldrainAlbumExtractor(PixeldrainExtractor):
     directory_fmt = ("{category}",
                      "{album[date]:%Y-%m-%d} {album[title]} ({album[id]})")
     filename_fmt = "{num:>03} {filename[:230]} ({id}).{extension}"
-    pattern = BASE_PATTERN + r"/(?:l|api/list)/(\w+)"
+    pattern = BASE_PATTERN + r"/(?:l|api/list)/(\w+)(?:#item=(\d+))?"
     example = "https://pixeldrain.com/l/abcdefgh"
 
     def __init__(self, match):
         Extractor.__init__(self, match)
         self.album_id = match.group(1)
+        self.file_index = match.group(2)
 
     def items(self):
         url = "{}/api/list/{}".format(self.root, self.album_id)
@@ -74,11 +75,20 @@ class PixeldrainAlbumExtractor(PixeldrainExtractor):
         album["count"] = album["file_count"]
         album["date"] = self.parse_datetime(album["date_created"])
 
+        if self.file_index:
+            idx = text.parse_int(self.file_index)
+            try:
+                files = (files[idx],)
+            except LookupError:
+                files = ()
+        else:
+            idx = 0
+
         del album["files"]
         del album["file_count"]
 
         yield Message.Directory, {"album": album}
-        for num, file in enumerate(files, 1):
+        for num, file in enumerate(files, idx+1):
             file["album"] = album
             file["num"] = num
             file["url"] = url = "{}/api/file/{}?download".format(
