@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2023 Mike Fährmann
+# Copyright 2023-2024 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -53,13 +53,40 @@ class PixeldrainFileExtractor(PixeldrainExtractor):
         yield Message.Url, file["url"], file
 
 
+class PixeldrainSinglefilefromalbumsExtractor(PixeldrainExtractor):
+    """Extractor for pixeldrain file from albums"""
+    subcategory = "singlefilefromalbums"
+    filename_fmt = "{filename[:230]} ({id}).{extension}"
+    pattern = BASE_PATTERN + r"/(?:l)/(\w+)#item=(\d+)"
+    example = "https://pixeldrain.com/l/abcdefgh#item=0"
+
+    def __init__(self, match):
+        Extractor.__init__(self, match)
+        self.album_id = match.group(1)
+        self.file_number = int(match.group(2))
+
+    def items(self):
+        url = "{}/api/list/{}".format(self.root, self.album_id)
+        album = self.request(url).json()
+
+        file = album["files"][self.file_number]
+        file["url"] = "{}/api/file/{}?download".format(self.root, file["id"])
+        file["date"] = self.parse_datetime(file["date_upload"])
+
+        del album
+
+        text.nameext_from_url(file["name"], file)
+        yield Message.Directory, file
+        yield Message.Url, file["url"], file
+
+
 class PixeldrainAlbumExtractor(PixeldrainExtractor):
     """Extractor for pixeldrain albums"""
     subcategory = "album"
     directory_fmt = ("{category}",
                      "{album[date]:%Y-%m-%d} {album[title]} ({album[id]})")
     filename_fmt = "{num:>03} {filename[:230]} ({id}).{extension}"
-    pattern = BASE_PATTERN + r"/(?:l|api/list)/(\w+)"
+    pattern = BASE_PATTERN + r"/(?:l|api/list)/(\w+)$"
     example = "https://pixeldrain.com/l/abcdefgh"
 
     def __init__(self, match):
