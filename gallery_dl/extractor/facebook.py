@@ -25,15 +25,23 @@ class FacebookExtractor(Extractor):
     def _init(self):
         self.session.headers["Accept"] = "text/html"
         self.session.headers["Sec-Fetch-Mode"] = "navigate"
+        self.fallback_retries = self.config("fallback-retries", 2)
+        self.sleep_429 = self.config("sleep-429", 5)
+        self.log.warning(
+            "Using the Facebook extractor for too long may result in "
+            "temporary UI bans of increasing length. Use at your own risk."
+        )
 
     @staticmethod
-    def raise_request_exceptions(res):
+    def raise_request(res):
         if res.url.startswith(FacebookExtractor.root + "/login"):
-            raise exception.AuthenticationError()
+            raise exception.AuthenticationError(
+                "You need to be logged in to view this content."
+            )
         if '{"__dr":"CometErrorRoot.react"}' in res.text:
             raise exception.StopExtraction(
-                "You've been temporarily blocked from viewing images. "
-                "Please try again later."
+                "You've been temporarily blocked from viewing this image. "
+                "Please try again later or use a different account."
             )
         return res
 
@@ -77,12 +85,20 @@ class FacebookExtractor(Extractor):
         )
 
     @staticmethod
-    def get_photo_download_url(photo_page):
-        return text.extr(
+    def get_photo_page_metadata(photo_page):
+        # TODO: add date, author, id, set id ecc.
+        photo = {}
+
+        photo["url"] = text.extr(
             photo_page,
             '"},"extensions":{"prefetch_uris_v2":[{"uri":"',
             '"'
         ).replace("\\/", "/")
+
+        photo["filename"] = text.rextract(photo["url"], "/", "?")[0]
+        FacebookExtractor.item_filename_handle(photo)
+
+        return photo
 
     def album_photos_iter(self, set_id):
         PHOTO_URL = self.root + "/photo/?fbid={photo_id}&set={set_id}"
@@ -117,41 +133,63 @@ class FacebookExtractor(Extractor):
 
         # print("\n", cur_photo_id, "\n")
 
-        all_photo_ids = [cur_photo_id]
+        all_photo_ids = set([cur_photo_id])
 
         num = 0
+        retries = 0
 
         while True:
             num += 1
 
-            media_page = self.raise_request_exceptions(self.request(
-                PHOTO_URL.format(photo_id=cur_photo_id, set_id=set_id)
-            )).text
+            photo_url = PHOTO_URL.format(photo_id=cur_photo_id, set_id=set_id)
+            media_page = self.raise_request(self.request(photo_url)).text
 
-            photo = {
-                "id": cur_photo_id,
-                "set_id": set_id,
-                "url": self.get_photo_download_url(media_page),
-                "num": num
-            }
-
-            photo["filename"] = text.rextract(photo["url"], "/", "?")[0]
+            photo = self.get_photo_page_metadata(media_page)
+            photo["id"] = cur_photo_id
+            photo["set_id"] = set_id
+            photo["num"] = num
 
             # print("\n", photo, "\n")
 
-            self.item_filename_handle(photo)
-
-            yield Message.Url, photo["url"], photo
+            if photo["url"] == "":
+                if retries < self.fallback_retries:
+                    # TODO: change to log.debug
+                    self.log.warning(
+                        f"Failed to find photo download URL for {photo_url}. "
+                        f"Retrying in {self.sleep_429} seconds."
+                    )
+                    self.sleep(self.sleep_429, "retry")
+                    retries += 1
+                    num -= 1
+                    continue
+                else:
+                    self.log.warning(
+                        f"Failed to find photo download URL for {photo_url}. "
+                        "Skipping."
+                    )
+                    retries = 0
+            else:
+                yield Message.Url, photo["url"], photo
 
             next_photo_id = self.get_next_photo_id(media_page)
 
             # print("\n", next_photo_id, "\n")
 
-            if next_photo_id == "" or next_photo_id in all_photo_ids:
+            if next_photo_id == "":
+                # TODO: change to log.debug
+                self.log.warning(
+                    "Can't find next image in the set. Quitting."
+                )
+                break
+            elif next_photo_id in all_photo_ids:
+                # TODO: change to log.debug
+                self.log.warning(
+                    "Detected a loop in the set, it's likely over. Quitting."
+                )
                 break
             else:
                 cur_photo_id = next_photo_id
-                all_photo_ids.append(cur_photo_id)
+                all_photo_ids.add(cur_photo_id)
 
 
 class FacebookAlbumExtractor(FacebookExtractor):
@@ -168,8 +206,29 @@ class FacebookAlbumExtractor(FacebookExtractor):
             yield message
 
 
+class FacebookPhotoExtractor(FacebookExtractor):
+    """Base class for Facebook Photo extractors"""
+    subcategory = "photo"
+    pattern = BASE_PATTERN + r"/photo.*fbid=([^/?&]+)"
+    directory_fmt = ("{category}", "{subcategory}")
+    example = "https://www.facebook.com/photo/?fbid=PHOTO_ID"
+
+    def items(self):
+        photo_url = f"{self.root}/photo/?fbid={self.match.group(1)}"
+        photo_page = self.request(photo_url).text
+
+        photo = self.get_photo_page_metadata(photo_page)
+        photo["id"] = self.match.group(1)
+        photo["num"] = 1
+
+        # print("\n", photo, "\n")
+
+        yield Message.Directory, {}
+        yield Message.Url, photo["url"], photo
+
+
 class FacebookProfileExtractor(FacebookExtractor):
-    """Base class for Facebook Profile extractors"""
+    """Base class for Facebook Profile Photos Album extractors"""
     subcategory = "profile"
     pattern = BASE_PATTERN + r"/([^/|?]+)"
     directory_fmt = ("{category}", "{title} ({set_id})")
@@ -185,6 +244,9 @@ class FacebookProfileExtractor(FacebookExtractor):
     def items(self):
         profile_photos_url = f"{self.root}/{self.match.group(1)}/photos_by"
         profile_photos_page = self.request(profile_photos_url).text
+
+        if '"comet.profile.collection.photos_by"' not in profile_photos_page:
+            return
 
         set_id = self.get_profile_photos_album_id(profile_photos_page)
         # print("\n", set_id, "\n")
