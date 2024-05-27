@@ -3,7 +3,6 @@
 
 """Build a standalone executable using PyInstaller"""
 
-import PyInstaller.__main__
 import argparse
 import util
 import sys
@@ -13,18 +12,34 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-o", "--os")
     parser.add_argument("-a", "--arch")
+    parser.add_argument("-l", "--label")
     parser.add_argument("-e", "--extension")
+    parser.add_argument("-p", "--print", action="store_true")
     args = parser.parse_args()
 
+    if args.label:
+        label = args.label
+    else:
+        label = ""
+        if args.os:
+            os = args.os.partition("-")[0].lower()
+            if os == "ubuntu":
+                os = "linux"
+            label += os
+        if args.arch == "x86":
+            label += "_x86"
+
+    if args.print:
+        return print(label)
+
     name = "gallery-dl"
-    if args.os:
-        name = "{}_{}".format(name, args.os.partition("-")[0].lower())
-    if args.arch == "x86":
-        name += "_x86"
+    if label:
+        name = "{}_{}".format(name, label)
     if args.extension:
         name = "{}.{}".format(name, args.extension.lower())
 
-    PyInstaller.__main__.run([
+    import PyInstaller.__main__
+    return PyInstaller.__main__.run([
         "--onefile",
         "--console",
         "--name", name,
