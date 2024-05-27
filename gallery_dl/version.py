@@ -7,3 +7,4 @@
 # published by the Free Software Foundation.
 
 __version__ = "1.27.0-dev"
+__variant__ = None
