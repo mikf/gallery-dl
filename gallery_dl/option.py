@@ -173,6 +173,18 @@ def build_parser():
         action="version", version=version.__version__,
         help="Print program version and exit",
     )
+    if util.EXECUTABLE:
+        general.add_argument(
+            "-U", "--update",
+            dest="update", action="store_const", const="latest",
+            help="Update to the latest version",
+        )
+    else:
+        general.add_argument(
+            "-U", "--update",
+            dest="update", action="store_const", const="check",
+            help="Check if a newer version is available",
+        )
     general.add_argument(
         "-f", "--filename",
         dest="filename", metavar="FORMAT",
