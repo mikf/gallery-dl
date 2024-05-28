@@ -7,29 +7,38 @@
 # published by the Free Software Foundation.
 
 import os
+import re
 import sys
 
 from .extractor.common import Extractor, Message
 from .job import DownloadJob
-from . import util, version
+from . import util, version, exception
 
 REPOS = {
-    "stable": "mikf/gallery-dl",
-    "dev"   : "gdl-org/builds",
+    "stable" : "mikf/gallery-dl",
+    "dev"    : "gdl-org/builds",
+    "nightly": "gdl-org/builds",
+    "master" : "gdl-org/builds",
 }
 
+BINARIES_STABLE = {
+    "windows"    : "gallery-dl.exe",
+    "windows_x86": "gallery-dl.exe",
+    "windows_x64": "gallery-dl.exe",
+    "linux"      : "gallery-dl.bin",
+}
+BINARIES_DEV = {
+    "windows"    : "gallery-dl_windows.exe",
+    "windows_x86": "gallery-dl_windows_x86.exe",
+    "windows_x64": "gallery-dl_windows.exe",
+    "linux"      : "gallery-dl_ubuntu",
+    "macos"      : "gallery-dl_macos",
+}
 BINARIES = {
-    "stable": {
-        "windows"    : "gallery-dl.exe",
-        "windows_x86": "gallery-dl.exe",
-        "linux"      : "gallery-dl.bin",
-    },
-    "dev": {
-        "windows"    : "gallery-dl_windows.exe",
-        "windows_x86": "gallery-dl_windows_x86.exe",
-        "linux"      : "gallery-dl_ubuntu",
-        "macos"      : "gallery-dl_macos",
-    },
+    "stable" : BINARIES_STABLE,
+    "dev"    : BINARIES_DEV,
+    "nightly": BINARIES_DEV,
+    "master" : BINARIES_DEV,
 }
 
 
@@ -40,7 +49,7 @@ class UpdateJob(DownloadJob):
             if kwdict["_check"]:
                 self.status |= 1
             return self.extractor.log.info(
-                "Current version is up to date (%s)", version.__version__)
+                "gallery-dl is up to date (%s)", version.__version__)
 
         if kwdict["_check"]:
             return self.extractor.log.info(
@@ -109,6 +118,9 @@ class UpdateJob(DownloadJob):
         self.out.success(pathfmt.path)
 
     def _check_update(self, kwdict):
+        if kwdict["_exact"]:
+            return True
+
         tag = kwdict["tag_name"]
 
         if tag[0] == "v":
@@ -149,22 +161,51 @@ class UpdateExtractor(Extractor):
     pattern = r"update(?::(.+))?"
 
     def items(self):
+        tag = "latest"
+        check = exact = False
+
         variant = version.__variant__ or "stable/windows"
         repo, _, binary = variant.partition("/")
-        tag = "latest"
 
+        target = self.groups[0]
+        if target == "latest":
+            pass
+        elif target == "check":
+            check = True
+        else:
+            channel, sep, target = target.partition("@")
+            if sep:
+                repo = channel
+                tag = target
+                exact = True
+            elif channel in REPOS:
+                repo = channel
+            else:
+                tag = channel
+                exact = True
+
+            if re.match(r"\d\.\d+\.\d+", tag):
+                tag = "v" + tag
+
+        try:
+            path_repo = REPOS[repo or "stable"]
+        except KeyError:
+            raise exception.StopExtraction("Invalid channel '%s'", repo)
+
+        path_tag = tag if tag == "latest" else "tags/" + tag
         url = "{}/repos/{}/releases/{}".format(
-            self.root_api, REPOS[repo], tag)
+            self.root_api, path_repo, path_tag)
         headers = {
             "Accept": "application/vnd.github+json",
             "User-Agent": util.USERAGENT,
             "X-GitHub-Api-Version": "2022-11-28",
         }
-        data = self.request(url, headers=headers).json()
-        data["_check"] = (self.groups[0] == "check")
+        data = self.request(url, headers=headers, notfound="tag").json()
+        data["_check"] = check
+        data["_exact"] = exact
 
         url = "{}/{}/releases/download/{}/{}".format(
-            self.root, REPOS[repo], data["tag_name"], BINARIES[repo][binary])
+            self.root, path_repo, data["tag_name"], BINARIES[repo][binary])
 
         yield Message.Directory, data
         yield Message.Url, url, data
