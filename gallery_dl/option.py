@@ -180,6 +180,11 @@ def build_parser():
             help="Update to the latest version",
         )
         general.add_argument(
+            "--update-to",
+            dest="update", metavar="[CHANNEL@]TAG",
+            help="Upgrade/downgrade to a specific version",
+        )
+        general.add_argument(
             "--update-check",
             dest="update", action="store_const", const="check",
             help="Check if a newer version is available",
