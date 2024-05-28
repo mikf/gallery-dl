@@ -36,9 +36,16 @@ BINARIES = {
 class UpdateJob(DownloadJob):
 
     def handle_url(self, url, kwdict):
-        if not url:
-            self.extractor.log.info("Up to date (%s)", version.__version__)
-            return
+        if not self._check_update(kwdict):
+            if kwdict["_check"]:
+                self.status |= 1
+            return self.extractor.log.info(
+                "Current version is up to date (%s)", version.__version__)
+
+        if kwdict["_check"]:
+            return self.extractor.log.info(
+                "A new release is available: %s -> %s",
+                version.__version__, kwdict["tag_name"])
 
         self.extractor.log.info(
             "Updating from %s to %s",
@@ -58,7 +65,7 @@ class UpdateJob(DownloadJob):
         self._newline = True
         if not self.download(url):
             self.status |= 4
-            return self._error("Failed to download %s", filename or url)
+            return self._error("Failed to download %s", url.rpartition("/")[2])
 
         if not util.WINDOWS:
             try:
@@ -101,6 +108,26 @@ class UpdateJob(DownloadJob):
 
         self.out.success(pathfmt.path)
 
+    def _check_update(self, kwdict):
+        tag = kwdict["tag_name"]
+
+        if tag[0] == "v":
+            kwdict["tag_name"] = tag = tag[1:]
+            ver, _, dev = version.__version__.partition("-")
+
+            version_local = [int(v) for v in ver.split(".")]
+            version_remote = [int(v) for v in tag.split(".")]
+
+            if dev:
+                version_local[-1] -= 0.5
+            if version_local >= version_remote:
+                return False
+
+        elif version.__version__.endswith(":" + tag):
+            return False
+
+        return True
+
     def _warning(self, msg, *args):
         if self._newline:
             self._newline = False
@@ -119,10 +146,11 @@ class UpdateExtractor(Extractor):
     category = "update"
     root = "https://github.com"
     root_api = "https://api.github.com"
-    pattern = r"update(?:(.+))?"
+    pattern = r"update(?::(.+))?"
 
     def items(self):
-        repo, _, binary = version.__variant__.partition("/")
+        variant = version.__variant__ or "stable/windows"
+        repo, _, binary = variant.partition("/")
         tag = "latest"
 
         url = "{}/repos/{}/releases/{}".format(
@@ -133,19 +161,10 @@ class UpdateExtractor(Extractor):
             "X-GitHub-Api-Version": "2022-11-28",
         }
         data = self.request(url, headers=headers).json()
+        data["_check"] = (self.groups[0] == "check")
+
+        url = "{}/{}/releases/download/{}/{}".format(
+            self.root, REPOS[repo], data["tag_name"], BINARIES[repo][binary])
 
         yield Message.Directory, data
-
-        tag = data["tag_name"]
-        url = "{}/{}/releases/download/{}/{}".format(
-            self.root, REPOS[repo], tag, BINARIES[repo][binary])
-
-        if tag[0] == "v":
-            data["tag_name"] = tag = tag[1:]
-            if tag == version.__version__:
-                url = ""
-        else:
-            if version.__version__.endswith(":" + tag):
-                url = ""
-
         yield Message.Url, url, data

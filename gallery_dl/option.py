@@ -179,9 +179,14 @@ def build_parser():
             dest="update", action="store_const", const="latest",
             help="Update to the latest version",
         )
+        general.add_argument(
+            "--update-check",
+            dest="update", action="store_const", const="check",
+            help="Check if a newer version is available",
+        )
     else:
         general.add_argument(
-            "-U", "--update",
+            "-U", "--update-check",
             dest="update", action="store_const", const="check",
             help="Check if a newer version is available",
         )
