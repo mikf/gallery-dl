@@ -22,15 +22,12 @@ def main():
     else:
         label = ""
         if args.os:
-            os = args.os.partition("-")[0].lower()
-            if os == "ubuntu":
-                os = "linux"
-            label += os
+            label += args.os.partition("-")[0].lower()
         if args.arch == "x86":
             label += "_x86"
 
     if args.print:
-        return print(label)
+        return print(label.replace("ubuntu", "linux"))
 
     name = "gallery-dl"
     if label:
