@@ -31,7 +31,7 @@ BINARIES_DEV = {
     "windows"    : "gallery-dl_windows.exe",
     "windows_x86": "gallery-dl_windows_x86.exe",
     "windows_x64": "gallery-dl_windows.exe",
-    "linux"      : "gallery-dl_ubuntu",
+    "linux"      : "gallery-dl_linux",
     "macos"      : "gallery-dl_macos",
 }
 BINARIES = {
@@ -204,8 +204,15 @@ class UpdateExtractor(Extractor):
         data["_check"] = check
         data["_exact"] = exact
 
+        if binary == "linux" and \
+                repo != "stable" and \
+                data["tag_name"] <= "2024.05.28":
+            binary_name = "gallery-dl_ubuntu"
+        else:
+            binary_name = BINARIES[repo][binary]
+
         url = "{}/{}/releases/download/{}/{}".format(
-            self.root, path_repo, data["tag_name"], BINARIES[repo][binary])
+            self.root, path_repo, data["tag_name"], binary_name)
 
         yield Message.Directory, data
         yield Message.Url, url, data
