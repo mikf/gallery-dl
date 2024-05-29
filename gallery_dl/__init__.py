@@ -213,6 +213,7 @@ def main():
 
             if cnt is None:
                 log.error("Database file not available")
+                return 1
             else:
                 log.info(
                     "Deleted %d %s from '%s'",
@@ -305,6 +306,7 @@ def main():
 
                 input_manager.next()
             return retval
+        return 0
 
     except KeyboardInterrupt:
         raise SystemExit("\nKeyboardInterrupt")
