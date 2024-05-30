@@ -663,7 +663,7 @@ Example
 
 Description
     List of TLS/SSL cipher suites in
-    `OpenSSL cipher list format <https://www.openssl.org/docs/manmaster/man1/openssl-ciphers.html>`__
+    `OpenSSL cipher list format <https://www.openssl.org/docs/manmaster/man1/openssl-ciphers.html#CIPHER-LIST-FORMAT>`__
     to be passed to
     `ssl.SSLContext.set_ciphers() <https://docs.python.org/3/library/ssl.html#ssl.SSLContext.set_ciphers>`__
 
@@ -673,7 +673,7 @@ extractor.*.tls12
 Type
     ``bool``
 Default
-    * ``false``: ``patreon``, ``pixiv:series``
+    * ``false``: ``artstation``, ``patreon``, ``pixiv:series``
     * ``true``: otherwise
 Description
     Allow selecting TLS 1.2 cipher suites.
