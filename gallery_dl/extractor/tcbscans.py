@@ -30,7 +30,7 @@ class TcbscansChapterExtractor(ChapterExtractor):
             page, 'font-bold mt-8">', "</h1>").rpartition(" - Chapter ")
         chapter, sep, minor = chapter.partition(".")
         return {
-            "manga": text.unescape(manga),
+            "manga": text.unescape(manga).strip(),
             "chapter": text.parse_int(chapter),
             "chapter_minor": sep + minor,
             "lang": "en", "language": "English",
