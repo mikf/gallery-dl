@@ -47,13 +47,13 @@ class SlidesharePresentationExtractor(GalleryExtractor):
         }
 
     def images(self, page):
-        parts = self.slideshow["slideImages"][0]["baseUrl"].split("/")
-
-        begin = "{}/95/{}-".format(
-            "/".join(parts[:4]),
-            self.slideshow["strippedTitle"],
+        slides = self.slideshow["slides"]
+        begin = "{}/{}/95/{}-".format(
+            slides["host"],
+            slides["imageLocation"],
+            slides["title"],
         )
-        end = "-1024.jpg?" + parts[-1].rpartition("?")[2]
+        end = "-1024.jpg"
 
         return [
             (begin + str(n) + end, None)
