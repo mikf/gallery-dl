@@ -1944,6 +1944,16 @@ Description
     * ``"hitomi"``:  Download the corresponding gallery from ``hitomi.la``
 
 
+extractor.facebook.author-followups
+-------------------------
+Type
+    ``bool``
+Default
+    ``false``
+description
+    Extract comments that include photo attachments made by the author of the post.
+
+
 extractor.fanbox.embeds
 -----------------------
 Type
