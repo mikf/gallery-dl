@@ -68,16 +68,16 @@ class FacebookExtractor(Extractor):
             item["filename"] = item["name"] = item["extension"] = ""
 
     @staticmethod
-    def get_first_photo_id(album_page):
+    def get_first_photo_id(set_page):
         photo_id = text.extr(
-            album_page,
+            set_page,
             '{"__typename":"Photo","__isMedia":"Photo","',
             '","creation_story"'
         ).rsplit('"id":"', 1)[-1]
 
         if photo_id == "":
             photo_id = text.extr(
-                album_page,
+                set_page,
                 '{"__typename":"Photo","id":"',
                 '"'
             )
@@ -179,17 +179,17 @@ class FacebookExtractor(Extractor):
 
         return directory
 
-    def album_photos_iter(self, set_id):
+    def set_photos_iter(self, set_id):
         PHOTO_URL = self.root + "/photo/?fbid={photo_id}&set={set_id}"
 
-        album_url = self.root + "/media/set/?set=" + set_id
-        album_page = self.request(album_url).text
+        set_url = self.root + "/media/set/?set=" + set_id
+        set_page = self.request(set_url).text
 
-        directory = self.get_set_page_metadata(album_page)
+        directory = self.get_set_page_metadata(set_page)
 
         yield Message.Directory, directory
 
-        all_photo_ids = [self.get_first_photo_id(album_page)]
+        all_photo_ids = [self.get_first_photo_id(set_page)]
 
         retries = 0
         i = 0
@@ -250,14 +250,14 @@ class FacebookExtractor(Extractor):
             i += 1
 
 
-class FacebookAlbumExtractor(FacebookExtractor):
-    """Base class for Facebook Album extractors"""
-    subcategory = "album"
+class FacebookSetExtractor(FacebookExtractor):
+    """Base class for Facebook Set extractors"""
+    subcategory = "set"
     pattern = BASE_PATTERN + r"/media/set/.*set=([^/?&]+)"
     example = "https://www.facebook.com/media/set/?set=SET_ID"
 
     def items(self):
-        metadata_iter = self.album_photos_iter(self.match.group(1))
+        metadata_iter = self.set_photos_iter(self.match.group(1))
 
         for message in metadata_iter:
             yield message
@@ -287,13 +287,13 @@ class FacebookPhotoExtractor(FacebookExtractor):
 
 
 class FacebookProfileExtractor(FacebookExtractor):
-    """Base class for Facebook Profile Photos Album extractors"""
+    """Base class for Facebook Profile Photos Set extractors"""
     subcategory = "profile"
     pattern = BASE_PATTERN + r"/([^/|?]+)"
     example = "https://www.facebook.com/USERNAME"
 
     @staticmethod
-    def get_profile_photos_album_id(profile_photos_page):
+    def get_profile_photos_set_id(profile_photos_page):
         profile_photos_page_extr = text.extract_from(profile_photos_page)
         profile_photos_page_extr('"pageItems"', '"actions_renderer"')
         set_id = profile_photos_page_extr('set=', '"').rsplit("&", 1)[0]
@@ -306,9 +306,9 @@ class FacebookProfileExtractor(FacebookExtractor):
         if '"comet.profile.collection.photos_by"' not in profile_photos_page:
             return
 
-        set_id = self.get_profile_photos_album_id(profile_photos_page)
+        set_id = self.get_profile_photos_set_id(profile_photos_page)
 
-        metadata_iter = self.album_photos_iter(set_id)
+        metadata_iter = self.set_photos_iter(set_id)
 
         for message in metadata_iter:
             yield message
