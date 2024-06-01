@@ -614,12 +614,6 @@ Consider all listed sites to potentially be NSFW.
     <td><a href="https://github.com/mikf/gallery-dl#cookies">Cookies</a></td>
 </tr>
 <tr>
-    <td>Photobucket</td>
-    <td>https://photobucket.com/</td>
-    <td>Albums, individual Images</td>
-    <td></td>
-</tr>
-<tr>
     <td>PhotoVogue</td>
     <td>https://www.vogue.com/photovogue/</td>
     <td>User Profiles</td>
