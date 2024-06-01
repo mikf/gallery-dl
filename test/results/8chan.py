@@ -46,8 +46,8 @@ __tests__ = (
     "uniquePosters"   : 9,
     "usesCustomCss"   : True,
     "usesCustomJs"    : False,
-    "?wsPort"         : 8880,
-    "?wssPort"        : 2087,
+    "?wsPort"         : int,
+    "?wssPort"        : int,
 },
 
 {
