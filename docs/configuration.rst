@@ -2904,16 +2904,6 @@ Description
     ``postfile``, ``images``, ``image_large``, ``attachments``, and ``content``.
 
 
-extractor.photobucket.subalbums
--------------------------------
-Type
-    ``bool``
-Default
-    ``true``
-Description
-    Download subalbums.
-
-
 extractor.pillowfort.external
 -----------------------------
 Type

@@ -113,7 +113,6 @@ modules = [
     "paheal",
     "patreon",
     "philomena",
-    "photobucket",
     "photovogue",
     "picarto",
     "piczel",

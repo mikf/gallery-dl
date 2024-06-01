@@ -25,7 +25,6 @@ from test import results  # noqa E402
 
 # temporary issues, etc.
 BROKEN = {
-    "photobucket",
 }
 
 CONFIG = {
