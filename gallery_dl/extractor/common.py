@@ -837,6 +837,9 @@ def _build_requests_adapter(ssl_options, ssl_ciphers, source_address):
     if ssl_options or ssl_ciphers:
         ssl_context = urllib3.connection.create_urllib3_context(
             options=ssl_options or None, ciphers=ssl_ciphers)
+        if requests.__version__ > "2.31":
+            # https://github.com/psf/requests/pull/6731
+            ssl_context.load_default_certs()
         ssl_context.check_hostname = False
     else:
         ssl_context = None
