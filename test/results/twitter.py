@@ -14,7 +14,7 @@ __tests__ = (
     "#category": ("", "twitter", "user"),
     "#class"   : twitter.TwitterUserExtractor,
     "#options" : {"include": "all"},
-    "#pattern" : r"https://twitter\.com/supernaturepics/(photo|header_photo|timeline|tweets|media|with_replies|likes)$",
+    "#pattern" : r"https://x\.com/supernaturepics/(photo|header_photo|timeline|tweets|media|with_replies|likes)$",
     "#count"   : 7,
 },
 
@@ -277,7 +277,7 @@ __tests__ = (
     "#category": ("", "twitter", "hashtag"),
     "#class"   : twitter.TwitterHashtagExtractor,
     "#pattern" : twitter.TwitterSearchExtractor.pattern,
-    "#urls"    : "https://twitter.com/search?q=%23nature",
+    "#urls"    : "https://x.com/search?q=%23nature",
 },
 
 {
@@ -626,7 +626,7 @@ The Washington Post writes, "Three weeks after the toxic train derailment in Ohi
     "#category": ("", "twitter", "quotes"),
     "#class"   : twitter.TwitterQuotesExtractor,
     "#pattern" : twitter.TwitterSearchExtractor.pattern,
-    "#urls"    : "https://twitter.com/search?q=quoted_tweet_id:1263832915173048321",
+    "#urls"    : "https://x.com/search?q=quoted_tweet_id:1263832915173048321",
 },
 
 {

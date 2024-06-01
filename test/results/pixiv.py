@@ -164,7 +164,7 @@ __tests__ = (
 },
 
 {
-    "#url"     : "https://www.pixiv.net/artworks/966412",
+    "#url"     : "https://www.pixiv.net/artworks/85960783",
     "#comment" : "limit_sanity_level_360.png (#4327, #5180)",
     "#category": ("", "pixiv", "work"),
     "#class"   : pixiv.PixivWorkExtractor,

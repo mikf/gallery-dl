@@ -18,7 +18,7 @@ __tests__ = (
     "programme": "p084qtzs",
     "path"     : [
         "BBC One",
-        "Doctor Who",
+        "Doctor Who (2005–2022)",
         "The Timeless Children",
     ],
 },

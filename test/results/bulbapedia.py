@@ -12,7 +12,7 @@ __tests__ = (
     "#url"     : "https://bulbapedia.bulbagarden.net/wiki/Jet",
     "#category": ("wikimedia", "bulbapedia", "article"),
     "#class"   : wikimedia.WikimediaArticleExtractor,
-    "#pattern" : r"http://archives\.bulbagarden\.net/media/upload/\w+/\w+/[^/?#]+",
+    "#pattern" : r"https://archives\.bulbagarden\.net/media/upload/\w+/\w+/[^/?#]+",
     "#count"   : range(10, 30),
 },
 
@@ -20,7 +20,7 @@ __tests__ = (
     "#url"     : "https://archives.bulbagarden.net/wiki/File:0460Abomasnow-Mega.png",
     "#category": ("wikimedia", "bulbapedia", "file"),
     "#class"   : wikimedia.WikimediaArticleExtractor,
-    "#pattern" : r"http://archives\.bulbagarden\.net/media/upload/\w+/\w+/[^/?#]+",
+    "#pattern" : r"https://archives\.bulbagarden\.net/media/upload/\w+/\w+/[^/?#]+",
     "#count"   : range(8, 12),
     "#archive" : False,
 },
