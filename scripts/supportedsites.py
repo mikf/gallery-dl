@@ -465,7 +465,7 @@ def build_extractor_list():
     """Generate a sorted list of lists of extractor classes"""
     categories = collections.defaultdict(lambda: collections.defaultdict(list))
     default = categories[""]
-    domains = {}
+    domains = {"": ""}
 
     for extr in extractor._list_classes():
         category = extr.category
@@ -477,6 +477,9 @@ def build_extractor_list():
                 domains[category] = domain(extr)
         else:
             base = categories[extr.basecategory]
+            if not extr.instances:
+                base[""].append(extr.subcategory)
+                continue
             for category, root, info in extr.instances:
                 base[category].append(extr.subcategory)
                 if category not in domains:

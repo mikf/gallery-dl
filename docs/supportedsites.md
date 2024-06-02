@@ -1273,6 +1273,16 @@ Consider all listed sites to potentially be NSFW.
 </tr>
 
 <tr>
+    <td colspan="4"><strong>Nitter Instances</strong></td>
+</tr>
+<tr>
+    <td></td>
+    <td></td>
+    <td>Media Files, Replies, Search Results, Tweets</td>
+    <td></td>
+</tr>
+
+<tr>
     <td colspan="4"><strong>Philomena Instances</strong></td>
 </tr>
 <tr>
@@ -1567,6 +1577,16 @@ Consider all listed sites to potentially be NSFW.
     <td>The /b/ Archive</td>
     <td>https://thebarchive.com/</td>
     <td>Boards, Galleries, Search Results, Threads</td>
+    <td></td>
+</tr>
+
+<tr>
+    <td colspan="4"><strong>FoOlSlide Instances</strong></td>
+</tr>
+<tr>
+    <td></td>
+    <td></td>
+    <td>Chapters, Manga</td>
     <td></td>
 </tr>
 
