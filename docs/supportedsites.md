@@ -1414,12 +1414,6 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
-    <td>Wikieat</td>
-    <td>https://wikieat.club/</td>
-    <td>Boards, Threads</td>
-    <td></td>
-</tr>
-<tr>
     <td>Smugloli</td>
     <td>https://smuglo.li/</td>
     <td>Boards, Threads</td>
