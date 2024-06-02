@@ -89,6 +89,11 @@ class YoutubeDLDownloader(DownloaderBase):
         formats = info_dict.get("requested_formats")
         if formats and not compatible_formats(formats):
             info_dict["ext"] = "mkv"
+        elif "ext" not in info_dict:
+            try:
+                info_dict["ext"] = info_dict["formats"][0]["ext"]
+            except LookupError:
+                info_dict["ext"] = "mp4"
 
         if self.outtmpl:
             self._set_outtmpl(ytdl_instance, self.outtmpl)
