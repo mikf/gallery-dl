@@ -22,10 +22,6 @@ BASE_PATTERN = VichanExtractor.update({
         "root": "https://8kun.top",
         "pattern": r"8kun\.top",
     },
-    "wikieat": {
-        "root": "https://wikieat.club",
-        "pattern": r"wikieat\.club",
-    },
     "smugloli": {
         "root": None,
         "pattern": r"smuglo(?:\.li|li\.net)",
