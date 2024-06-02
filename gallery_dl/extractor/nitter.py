@@ -234,26 +234,6 @@ class NitterExtractor(BaseExtractor):
 
 
 BASE_PATTERN = NitterExtractor.update({
-    "nitter.net": {
-        "root": "https://nitter.net",
-        "pattern": r"nitter\.net",
-    },
-    "nitter.1d4.us": {
-        "root": "https://nitter.1d4.us",
-        "pattern": r"nitter\.1d4\.us",
-    },
-    "nitter.kavin.rocks": {
-        "root": "https://nitter.kavin.rocks",
-        "pattern": r"nitter\.kavin\.rocks",
-    },
-    "nitter.unixfox.eu": {
-        "root": "https://nitter.unixfox.eu",
-        "pattern": r"nitter\.unixfox\.eu",
-    },
-    "nitter.it": {
-        "root": "https://nitter.it",
-        "pattern": r"nitter\.it",
-    },
 })
 
 USER_PATTERN = BASE_PATTERN + r"/(i(?:/user/|d:)(\d+)|[^/?#]+)"

@@ -1273,40 +1273,6 @@ Consider all listed sites to potentially be NSFW.
 </tr>
 
 <tr>
-    <td colspan="4"><strong>Nitter Instances</strong></td>
-</tr>
-<tr>
-    <td>Nitter.net</td>
-    <td>https://nitter.net/</td>
-    <td>Media Files, Replies, Search Results, Tweets</td>
-    <td></td>
-</tr>
-<tr>
-    <td>Nitter.1d4.us</td>
-    <td>https://nitter.1d4.us/</td>
-    <td>Media Files, Replies, Search Results, Tweets</td>
-    <td></td>
-</tr>
-<tr>
-    <td>Nitter.kavin.rocks</td>
-    <td>https://nitter.kavin.rocks/</td>
-    <td>Media Files, Replies, Search Results, Tweets</td>
-    <td></td>
-</tr>
-<tr>
-    <td>Nitter.unixfox.eu</td>
-    <td>https://nitter.unixfox.eu/</td>
-    <td>Media Files, Replies, Search Results, Tweets</td>
-    <td></td>
-</tr>
-<tr>
-    <td>Nitter.it</td>
-    <td>https://nitter.it/</td>
-    <td>Media Files, Replies, Search Results, Tweets</td>
-    <td></td>
-</tr>
-
-<tr>
     <td colspan="4"><strong>Philomena Instances</strong></td>
 </tr>
 <tr>
