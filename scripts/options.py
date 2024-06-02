@@ -14,7 +14,10 @@ import re
 import sys
 
 import util
-from gallery_dl import option
+
+import gallery_dl.util
+gallery_dl.util.EXECUTABLE = True
+from gallery_dl import option  # noqa E402
 
 
 TEMPLATE = """# Command-Line Options
