@@ -320,6 +320,12 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
+    <td>HentaiNexus</td>
+    <td>https://hentainexus.com/</td>
+    <td>Galleries, Search Results</td>
+    <td></td>
+</tr>
+<tr>
     <td>Hiperdex</td>
     <td>https://hiperdex.top/</td>
     <td>Artists, Chapters, Manga</td>
