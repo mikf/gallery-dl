@@ -1502,6 +1502,19 @@ Description
     See `Filters <https://derpibooru.org/filters>`_ for details.
 
 
+extractor.derpibooru.svg
+------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Download SVG versions of images when available.
+
+    Try to download the ``view_url`` version of these posts
+    when this option is disabled.
+
+
 extractor.deviantart.auto-watch
 -------------------------------
 Type
@@ -3760,6 +3773,19 @@ Description
     to access 18+ content without `API Key <extractor.twibooru.api-key_>`__.
 
     See `Filters <https://twibooru.org/filters>`__ for details.
+
+
+extractor.twibooru.svg
+----------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Download SVG versions of images when available.
+
+    Try to download the ``view_url`` version of these posts
+    when this option is disabled.
 
 
 extractor.twitter.ads

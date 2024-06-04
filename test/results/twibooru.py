@@ -52,6 +52,31 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://twibooru.org/523964",
+    "#comment" : "svg (#5643)",
+    "#category": ("philomena", "twibooru", "post"),
+    "#class"   : twibooru.TwibooruPostExtractor,
+    "#urls"        : "https://cdn.twibooru.org/img/2020/7/13/523964/full.svg",
+    "#sha1_content": "15590fe151ff65ef767b409e46dfdf708b339f4d",
+
+    "extension": "svg",
+    "format"   : "svg",
+},
+
+{
+    "#url"     : "https://twibooru.org/523964",
+    "#comment" : "svg (#5643)",
+    "#category": ("philomena", "twibooru", "post"),
+    "#class"   : twibooru.TwibooruPostExtractor,
+    "#options" : {"svg": False},
+    "#urls"        : "https://cdn.twibooru.org/img/2020/7/13/523964/full.png",
+    "#sha1_content": "f8ff78e6a929a024f8529199f9a600617898d03c",
+
+    "extension": "png",
+    "format"   : "svg",
+},
+
+{
     "#url"     : "https://twibooru.org/search?q=cute",
     "#category": ("philomena", "twibooru", "search"),
     "#class"   : twibooru.TwibooruSearchExtractor,
