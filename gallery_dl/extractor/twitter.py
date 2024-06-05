@@ -1709,11 +1709,16 @@ class TwitterAPI():
             variables["cursor"] = cursor
 
     def _handle_ratelimit(self, response):
-        if self.extractor.config("ratelimit") == "abort":
+        rl = self.extractor.config("ratelimit")
+        if rl == "abort":
             raise exception.StopExtraction("Rate limit exceeded")
-
-        until = response.headers.get("x-rate-limit-reset")
-        self.extractor.wait(until=until, seconds=None if until else 60)
+        elif rl and isinstance(rl, str) and rl.startswith("wait:"):
+            until = None
+            seconds = text.parse_float(rl.partition(":")[2]) or 60.0
+        else:
+            until = response.headers.get("x-rate-limit-reset")
+            seconds = None if until else 60.0
+        self.extractor.wait(until=until, seconds=seconds)
 
     def _process_tombstone(self, entry, tombstone):
         text = (tombstone.get("richText") or tombstone["text"])["text"]
