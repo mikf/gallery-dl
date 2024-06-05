@@ -518,7 +518,8 @@ class KemonopartyFavoriteExtractor(KemonopartyExtractor):
 
             if not sort:
                 sort = "updated"
-            users.sort(key=lambda x: x[sort], reverse=(order == "desc"))
+            users.sort(key=lambda x: x[sort] or util.NONE,
+                       reverse=(order == "desc"))
 
             for user in users:
                 user["_extractor"] = KemonopartyUserExtractor
@@ -532,7 +533,8 @@ class KemonopartyFavoriteExtractor(KemonopartyExtractor):
 
             if not sort:
                 sort = "faved_seq"
-            posts.sort(key=lambda x: x[sort], reverse=(order == "desc"))
+            posts.sort(key=lambda x: x[sort] or util.NONE,
+                       reverse=(order == "desc"))
 
             for post in posts:
                 post["_extractor"] = KemonopartyPostExtractor
