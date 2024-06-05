@@ -193,6 +193,12 @@ Format specifiers can be used for advanced formatting by using the options provi
     <td><code>F()()&nbsp;Bar</code></td>
 </tr>
 <tr>
+    <td><code>C&lt;conversion(s)&gt;/</code></td>
+    <td>Apply <a href="#conversions">Conversions</a> to the current value</td>
+    <td><code>{tags:CSgc/}</code></td>
+    <td><code>"Sun-tree-water"</code></td>
+</tr>
+<tr>
     <td><code>S&lt;order&gt;/</code></td>
     <td>Sort a list. <code>&lt;order&gt;</code> can be either <strong>a</strong>scending or <strong>d</strong>escending/<strong>r</strong>everse. (default: <strong>a</strong>)</td>
     <td><code>{tags:Sd}</code></td>

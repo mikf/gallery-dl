@@ -325,6 +325,26 @@ def _parse_slice(format_spec, default):
     return apply_slice
 
 
+def _parse_conversion(format_spec, default):
+    conversions, _, format_spec = format_spec.partition(_SEPARATOR)
+    convs = [_CONVERSIONS[c] for c in conversions[1:]]
+    fmt = _build_format_func(format_spec, default)
+
+    if len(conversions) <= 2:
+
+        def convert_one(obj):
+            return fmt(conv(obj))
+        conv = _CONVERSIONS[conversions[1]]
+        return convert_one
+
+    def convert_many(obj):
+        for conv in convs:
+            obj = conv(obj)
+        return fmt(obj)
+    convs = [_CONVERSIONS[c] for c in conversions[1:]]
+    return convert_many
+
+
 def _parse_maxlen(format_spec, default):
     maxlen, replacement, format_spec = format_spec.split(_SEPARATOR, 2)
     maxlen = text.parse_int(maxlen[1:])
@@ -447,6 +467,7 @@ _CONVERSIONS = {
 _FORMAT_SPECIFIERS = {
     "?": _parse_optional,
     "[": _parse_slice,
+    "C": _parse_conversion,
     "D": _parse_datetime,
     "L": _parse_maxlen,
     "J": _parse_join,

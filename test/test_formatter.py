@@ -267,6 +267,11 @@ class TestFormatter(unittest.TestCase):
             "{a:Sort-reverse}",  # starts with 'S', contains 'r'
             "['w', 'r', 'o', 'l', 'h', 'd', 'O', 'L', 'L', 'E', ' ']")
 
+    def test_specifier_conversions(self):
+        self._run_test("{a:Cl}"   , "hello world")
+        self._run_test("{h:CHC}"  , "Foo & Bar")
+        self._run_test("{l:CSulc}", "A, b, c")
+
     def test_chain_special(self):
         # multiple replacements
         self._run_test("{a:Rh/C/RE/e/RL/l/}", "Cello wOrld")
