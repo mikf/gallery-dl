@@ -106,12 +106,12 @@ def identity(x):
     return x
 
 
-def true(_):
+def true(_, __=None):
     """Always returns True"""
     return True
 
 
-def false(_):
+def false(_, __=None):
     """Always returns False"""
     return False
 
@@ -540,8 +540,19 @@ class CustomNone():
     def __bool__():
         return False
 
+    __lt__ = true
+    __le__ = true
+    __eq__ = false
+    __ne__ = true
+    __gt__ = false
+    __ge__ = false
+
     @staticmethod
     def __len__():
+        return 0
+
+    @staticmethod
+    def __hash__():
         return 0
 
     @staticmethod
