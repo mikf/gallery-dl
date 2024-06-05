@@ -3987,6 +3987,7 @@ Description
 
     * ``"abort"``: Raise an error and stop extraction
     * ``"wait"``: Wait until rate limit reset
+    * ``"wait:N"``: Wait for ``N`` seconds
 
 
 extractor.twitter.relogin
@@ -3996,10 +3997,10 @@ Type
 Default
     ``true``
 Description
-    | When receiving a "Could not authenticate you" error while logged in with
-      `username & passeword <extractor.*.username & .password_>`__,
-    | refresh the current login session and
-      try to continue from where it left off.
+    When receiving a "Could not authenticate you" error while logged in with
+    `username & passeword <extractor.*.username & .password_>`__,
+    refresh the current login session and
+    try to continue from where it left off.
 
 
 extractor.twitter.locked
