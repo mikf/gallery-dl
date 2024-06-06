@@ -92,6 +92,10 @@ BASE_PATTERN = Shimmie2Extractor.update({
         "root": "https://rule34hentai.net",
         "pattern": r"rule34hentai\.net",
     },
+    "vidyapics": {
+        "root": "https://vidya.pics",
+        "pattern": r"vidya\.pics",
+    },
 }) + r"/(?:index\.php\?q=/?)?"
 
 

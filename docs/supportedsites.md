@@ -1381,6 +1381,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Posts, Tag Searches</td>
     <td></td>
 </tr>
+<tr>
+    <td>Vidya Booru</td>
+    <td>https://vidya.pics/</td>
+    <td>Posts, Tag Searches</td>
+    <td></td>
+</tr>
 
 <tr>
     <td colspan="4"><strong>szurubooru Instances</strong></td>

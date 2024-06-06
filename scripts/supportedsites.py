@@ -138,6 +138,7 @@ CATEGORY_MAP = {
     "tumblrgallery"  : "TumblrGallery",
     "vanillarock"    : "もえぴりあ",
     "vidyart2"       : "/v/idyart2",
+    "vidyapics"      : "Vidya Booru",
     "vk"             : "VK",
     "vsco"           : "VSCO",
     "wallpapercave"  : "Wallpaper Cave",
