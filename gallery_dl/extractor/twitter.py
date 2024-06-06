@@ -1886,8 +1886,9 @@ def _login_impl(extr, username, password):
             raise exception.AuthenticationError("Login requires CAPTCHA")
         elif subtask == "DenyLoginSubtask":
             raise exception.AuthenticationError("Login rejected as suspicious")
-        elif subtask == "ArkoseLogin":
-            raise exception.AuthenticationError("No auth token cookie")
+        elif subtask == "LoginSuccessSubtask":
+            raise exception.AuthenticationError(
+                "No 'auth_token' cookie received")
         else:
             raise exception.StopExtraction("Unrecognized subtask %s", subtask)
 
