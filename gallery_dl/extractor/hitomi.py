@@ -58,6 +58,7 @@ class HitomiGalleryExtractor(GalleryExtractor):
         return {
             "gallery_id": text.parse_int(info["id"]),
             "title"     : info["title"],
+            "title_jpn" : info.get("japanese_title") or "",
             "type"      : info["type"].capitalize(),
             "language"  : language,
             "lang"      : util.language_to_code(language),
