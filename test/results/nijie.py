@@ -166,6 +166,18 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://nijie.info/view.php?id=385585",
+    "#comment" : "video (#5707)",
+    "#category": ("Nijie", "nijie", "image"),
+    "#class"   : nijie.NijieImageExtractor,
+    "#urls"    : (
+        "https://pic.nijie.net/01/nijie/20/82/59182/illust/0_0_162270ef49e2ee28_fab5ae.mp4",
+        "https://pic.nijie.net/04/nijie/20/82/59182/illust/385585_0_ff2d5d19129530d5_b2821e.jpg",
+        "https://pic.nijie.net/01/nijie/20/82/59182/illust/385585_1_7ee1a2a67bed2f84_212d67.jpg",
+    ),
+},
+
+{
     "#url"     : "https://nijie.info/view.php?id=70724",
     "#category": ("Nijie", "nijie", "image"),
     "#class"   : nijie.NijieImageExtractor,
