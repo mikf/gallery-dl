@@ -17,6 +17,7 @@ class HentainexusGalleryExtractor(GalleryExtractor):
     """Extractor for hentainexus galleries"""
     category = "hentainexus"
     root = "https://hentainexus.com"
+    hostname = "hentainexus.com"
     pattern = (r"(?i)(?:https?://)?(?:www\.)?hentainexus\.com"
                r"/(?:view|read)/(\d+)")
     example = "https://hentainexus.com/view/12345"
@@ -79,7 +80,10 @@ class HentainexusGalleryExtractor(GalleryExtractor):
     def _decode(data):
         # https://hentainexus.com/static/js/reader.min.js?r=13
         primes = (2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53)
-        blob = binascii.a2b_base64(data)
+        blob = list(binascii.a2b_base64(data))
+        for i in range(0, len(hostname)):
+            blob[i] = blob[i] ^ ord(hostname[i])
+
         key = blob[0:64]
 
         C = 0
