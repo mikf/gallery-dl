@@ -18,6 +18,18 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://booru.foalcon.com/posts/query=",
+    "#category": ("szurubooru", "foalcon", "tag"),
+    "#class"   : szurubooru.SzurubooruTagExtractor,
+},
+
+{
+    "#url"     : "https://booru.foalcon.com/posts",
+    "#category": ("szurubooru", "foalcon", "tag"),
+    "#class"   : szurubooru.SzurubooruTagExtractor,
+},
+
+{
     "#url"     : "https://booru.foalcon.com/post/30092",
     "#category": ("szurubooru", "foalcon", "post"),
     "#class"   : szurubooru.SzurubooruPostExtractor,

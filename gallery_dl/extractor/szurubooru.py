@@ -98,13 +98,13 @@ class SzurubooruTagExtractor(SzurubooruExtractor):
     subcategory = "tag"
     directory_fmt = ("{category}", "{search_tags}")
     archive_fmt = "t_{search_tags}_{id}_{version}"
-    pattern = BASE_PATTERN + r"/posts/query=([^/?#]+)"
+    pattern = BASE_PATTERN + r"/posts(?:/query=([^/?#]*))?"
     example = "https://booru.foalcon.com/posts/query=TAG"
 
     def __init__(self, match):
         SzurubooruExtractor.__init__(self, match)
-        query = match.group(match.lastindex)
-        self.query = text.unquote(query.replace("+", " "))
+        query = self.groups[-1]
+        self.query = text.unquote(query.replace("+", " ")) if query else ""
 
     def metadata(self):
         return {"search_tags": self.query}
@@ -119,9 +119,5 @@ class SzurubooruPostExtractor(SzurubooruExtractor):
     pattern = BASE_PATTERN + r"/post/(\d+)"
     example = "https://booru.foalcon.com/post/12345"
 
-    def __init__(self, match):
-        SzurubooruExtractor.__init__(self, match)
-        self.post_id = match.group(match.lastindex)
-
     def posts(self):
-        return (self._api_request("/post/" + self.post_id),)
+        return (self._api_request("/post/" + self.groups[-1]),)
