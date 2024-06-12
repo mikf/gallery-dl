@@ -1854,7 +1854,7 @@ def _login_impl(extr, username, password):
                 },
             }
         elif subtask == "LoginEnterAlternateIdentifierSubtask":
-            alt = extr.input(
+            alt = extr.config("username_alt") or extr.input(
                 "Alternate Identifier (username, email, phone number): ")
             data = {
                 "enter_text": {

@@ -4105,6 +4105,18 @@ Description
     Ignore previously seen Tweets.
 
 
+extractor.twitter.username-alt
+------------------------------
+Type
+    ``string``
+Description
+    Alternate Identifier (username, email, phone number)
+    when `logging in <extractor.*.username & .password_>`__.
+
+    When not specified and asked for by Twitter,
+    this identifier will need to entered in an interactive prompt.
+
+
 extractor.twitter.users
 -----------------------
 Type
