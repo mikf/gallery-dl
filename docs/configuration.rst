@@ -2758,16 +2758,22 @@ Description
 extractor.newgrounds.format
 ---------------------------
 Type
-    ``string``
+    * ``string``
+    * ``list`` of ``string``
 Default
     ``"original"``
 Example
-    ``"720p"``
+    * ``"720p"``
+    * ``["mp4", "mov", "1080p", "720p"]``
 Description
     Selects the preferred format for video downloads.
 
     If the selected format is not available,
     the next smaller one gets chosen.
+
+    If this is a ``list``, try each given
+    filename extension in original resolution or recoded format
+    until an available format is found.
 
 
 extractor.newgrounds.include
