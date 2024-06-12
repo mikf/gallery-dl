@@ -12,6 +12,7 @@ from .common import Extractor, Message
 from .. import text, util, exception
 from ..cache import cache
 import itertools
+import re
 
 
 class NewgroundsExtractor(Extractor):
@@ -33,10 +34,16 @@ class NewgroundsExtractor(Extractor):
     def _init(self):
         self.flash = self.config("flash", True)
 
-        fmt = self.config("format", "original")
-        self.format = (True if not fmt or fmt == "original" else
-                       fmt if isinstance(fmt, int) else
-                       text.parse_int(fmt.rstrip("p")))
+        fmt = self.config("format")
+        if not fmt or fmt == "original":
+            self.format = ("mp4", "webm", "m4v", "mov", "mkv",
+                           1080, 720, 360)
+        elif isinstance(fmt, (list, tuple)):
+            self.format = fmt
+        else:
+            self._video_formats = self._video_formats_limit
+            self.format = (fmt if isinstance(fmt, int) else
+                           text.parse_int(fmt.rstrip("p")))
 
     def items(self):
         self.login()
@@ -266,7 +273,7 @@ class NewgroundsExtractor(Extractor):
 
         if src:
             src = src.replace("\\/", "/")
-            fallback = ()
+            formats = ()
             date = text.parse_datetime(extr(
                 'itemprop="datePublished" content="', '"'))
         else:
@@ -276,23 +283,8 @@ class NewgroundsExtractor(Extractor):
                 "X-Requested-With": "XMLHttpRequest",
             }
             sources = self.request(url, headers=headers).json()["sources"]
-
-            if self.format is True:
-                src = sources["360p"][0]["src"].replace(".360p.", ".")
-                formats = sources
-            else:
-                formats = []
-                for fmt, src in sources.items():
-                    width = text.parse_int(fmt.rstrip("p"))
-                    if width <= self.format:
-                        formats.append((width, src))
-                if formats:
-                    formats.sort(reverse=True)
-                    src, formats = formats[0][1][0]["src"], formats[1:]
-                else:
-                    src = ""
-
-            fallback = self._video_fallback(formats)
+            formats = self._video_formats(sources)
+            src = next(formats, "")
             date = text.parse_timestamp(src.rpartition("?")[2])
 
         return {
@@ -306,15 +298,33 @@ class NewgroundsExtractor(Extractor):
             "rating"     : extr('class="rated-', '"'),
             "index"      : text.parse_int(index),
             "_index"     : index,
-            "_fallback"  : fallback,
+            "_fallback"  : formats,
         }
 
-    @staticmethod
-    def _video_fallback(formats):
-        if isinstance(formats, dict):
-            formats = list(formats.items())
-            formats.sort(key=lambda fmt: text.parse_int(fmt[0].rstrip("p")),
-                         reverse=True)
+    def _video_formats(self, sources):
+        src = sources["360p"][0]["src"]
+        sub = re.compile(r"\.360p\.\w+").sub
+
+        for fmt in self.format:
+            try:
+                if isinstance(fmt, int):
+                    yield sources[str(fmt) + "p"][0]["src"]
+                elif fmt in sources:
+                    yield sources[fmt][0]["src"]
+                else:
+                    yield sub("." + fmt, src, 1)
+            except Exception as exc:
+                self.log.debug("Video format '%s' not available (%s: %s)",
+                               fmt, exc.__class__.__name__, exc)
+
+    def _video_formats_limit(self, sources):
+        formats = []
+        for fmt, src in sources.items():
+            width = text.parse_int(fmt.rstrip("p"))
+            if width <= self.format:
+                formats.append((width, src))
+
+        formats.sort(reverse=True)
         for fmt in formats:
             yield fmt[1][0]["src"]
 
