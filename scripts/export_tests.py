@@ -239,8 +239,8 @@ def main():
     os.makedirs(args.target, exist_ok=True)
     for name, tests in collect_tests(args.category).items():
         name = name.replace(".", "")
-        with util.lazy(f"{args.target}/{name}.py") as file:
-            file.write(export_tests(tests))
+        with util.lazy(f"{args.target}/{name}.py") as fp:
+            fp.write(export_tests(tests))
 
 
 if __name__ == "__main__":

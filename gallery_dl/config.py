@@ -167,8 +167,8 @@ def load(files=None, strict=False, loads=util.json_loads):
     for pathfmt in files or _default_configs:
         path = util.expand_path(pathfmt)
         try:
-            with open(path, encoding="utf-8") as file:
-                conf = loads(file.read())
+            with open(path, encoding="utf-8") as fp:
+                conf = loads(fp.read())
         except OSError as exc:
             if strict:
                 log.error(exc)
