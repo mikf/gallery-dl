@@ -188,8 +188,8 @@ def _firefox_cookies_database(profile=None, container=None):
             os.path.dirname(path), "containers.json")
 
         try:
-            with open(containers_path) as file:
-                identities = util.json_loads(file.read())["identities"]
+            with open(containers_path) as fp:
+                identities = util.json_loads(fp.read())["identities"]
         except OSError:
             _log_error("Unable to read Firefox container database at '%s'",
                        containers_path)
@@ -745,8 +745,8 @@ def _get_windows_v10_key(browser_root):
         _log_error("Unable to find Local State file")
         return None
     _log_debug("Found Local State file at '%s'", path)
-    with open(path, encoding="utf-8") as file:
-        data = util.json_loads(file.read())
+    with open(path, encoding="utf-8") as fp:
+        data = util.json_loads(fp.read())
     try:
         base64_key = data["os_crypt"]["encrypted_key"]
     except KeyError:

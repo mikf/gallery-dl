@@ -165,12 +165,12 @@ class TestConfig(unittest.TestCase):
     def test_load(self):
         with tempfile.TemporaryDirectory() as base:
             path1 = os.path.join(base, "cfg1")
-            with open(path1, "w") as file:
-                file.write('{"a": 1, "b": {"a": 2, "c": "text"}}')
+            with open(path1, "w") as fp:
+                fp.write('{"a": 1, "b": {"a": 2, "c": "text"}}')
 
             path2 = os.path.join(base, "cfg2")
-            with open(path2, "w") as file:
-                file.write('{"a": 7, "b": {"a": 8, "e": "foo"}}')
+            with open(path2, "w") as fp:
+                fp.write('{"a": 7, "b": {"a": 8, "e": "foo"}}')
 
             config.clear()
             config.load((path1,))
@@ -208,8 +208,8 @@ class TestConfigFiles(unittest.TestCase):
     def _load(name):
         path = os.path.join(ROOTDIR, "docs", name)
         try:
-            with open(path) as file:
-                return util.json_loads(file.read())
+            with open(path) as fp:
+                return util.json_loads(fp.read())
         except FileNotFoundError:
             raise unittest.SkipTest(path + " not available")
 

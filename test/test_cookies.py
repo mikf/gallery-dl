@@ -28,14 +28,14 @@ class TestCookiejar(unittest.TestCase):
         cls.path = tempfile.TemporaryDirectory()
 
         cls.cookiefile = join(cls.path.name, "cookies.txt")
-        with open(cls.cookiefile, "w") as file:
-            file.write("""# HTTP Cookie File
+        with open(cls.cookiefile, "w") as fp:
+            fp.write("""# HTTP Cookie File
 .example.org\tTRUE\t/\tFALSE\t253402210800\tNAME\tVALUE
 """)
 
         cls.invalid_cookiefile = join(cls.path.name, "invalid.txt")
-        with open(cls.invalid_cookiefile, "w") as file:
-            file.write("""# asd
+        with open(cls.invalid_cookiefile, "w") as fp:
+            fp.write("""# asd
 .example.org\tTRUE/FALSE\t253402210800\tNAME\tVALUE
 """)
 

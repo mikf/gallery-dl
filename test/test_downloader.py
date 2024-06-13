@@ -136,8 +136,8 @@ class TestDownloaderBase(unittest.TestCase):
 
         if content:
             mode = "w" + ("b" if isinstance(content, bytes) else "")
-            with pathfmt.open(mode) as file:
-                file.write(content)
+            with pathfmt.open(mode) as fp:
+                fp.write(content)
 
         return pathfmt
 
@@ -151,8 +151,8 @@ class TestDownloaderBase(unittest.TestCase):
 
         # test content
         mode = "r" + ("b" if isinstance(output, bytes) else "")
-        with pathfmt.open(mode) as file:
-            content = file.read()
+        with pathfmt.open(mode) as fp:
+            content = fp.read()
         self.assertEqual(content, output)
 
         # test filename extension

@@ -593,5 +593,5 @@ Consider all listed sites to potentially be NSFW.
 categories, domains = build_extractor_list()
 PATH = (sys.argv[1] if len(sys.argv) > 1 else
         util.path("docs", "supportedsites.md"))
-with util.lazy(PATH) as file:
-    file.write(generate_output(COLUMNS, categories, domains))
+with util.lazy(PATH) as fp:
+    fp.write(generate_output(COLUMNS, categories, domains))
