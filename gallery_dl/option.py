@@ -461,8 +461,18 @@ def build_parser():
     )
     configuration.add_argument(
         "--config-create",
-        dest="config_init", action="store_true",
+        dest="config", action="store_const", const="init",
         help="Create a basic configuration file",
+    )
+    configuration.add_argument(
+        "--config-status",
+        dest="config", action="store_const", const="status",
+        help="Show configuration file status",
+    )
+    configuration.add_argument(
+        "--config-open",
+        dest="config", action="store_const", const="open",
+        help="Open configuration file in external application",
     )
     configuration.add_argument(
         "--config-ignore",
