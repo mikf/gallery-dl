@@ -10,6 +10,7 @@
 
 from .common import Extractor, Message
 from .. import text
+import re
 
 
 class SpeakerdeckPresentationExtractor(Extractor):
@@ -60,4 +61,5 @@ class SpeakerdeckPresentationExtractor(Extractor):
         """Extract and return a list of all image-urls"""
         page = self.request("https://speakerdeck.com/player/" +
                             self.presentation_id).text
+        page = re.sub(r"\s+", " ", page)
         return list(text.extract_iter(page, 'js-sd-slide" data-url="', '"'))
