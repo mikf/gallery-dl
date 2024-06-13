@@ -220,8 +220,13 @@ def main():
                     cnt, "entry" if cnt == 1 else "entries", cache._path(),
                 )
 
-        elif args.config_init:
-            return config.initialize()
+        elif args.config:
+            if args.config == "init":
+                return config.initialize()
+            elif args.config == "status":
+                return config.status()
+            else:
+                return config.open_extern()
 
         else:
             if not args.urls and not args.input_files:
