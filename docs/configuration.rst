@@ -738,7 +738,7 @@ Type
     ``string``
 Description
     Insert a reference to the current
-    `PathFormat <https://github.com/mikf/gallery-dl/blob/v1.24.2/gallery_dl/path.py#L27>`__
+    `PathFormat <https://github.com/mikf/gallery-dl/blob/v1.27.0/gallery_dl/path.py#L27>`__
     data structure into metadata dictionaries as the given name.
 
     For example, setting this option to ``"gdl_path"`` would make it possible
@@ -753,7 +753,7 @@ Type
     ``string``
 Description
     Insert a reference to the current
-    `Extractor <https://github.com/mikf/gallery-dl/blob/v1.26.2/gallery_dl/extractor/common.py#L26>`__
+    `Extractor <https://github.com/mikf/gallery-dl/blob/v1.27.0/gallery_dl/extractor/common.py#L28>`__
     object into metadata dictionaries as the given name.
 
 
@@ -899,7 +899,7 @@ Example
 Description
     A list of SQLite ``PRAGMA`` statements to run during archive initialization.
 
-    See `<https://www.sqlite.org/pragma.html>`__
+    See `<https://www.sqlite.org/pragma.html#toc>`__
     for available ``PRAGMA`` statements and further details.
 
 
@@ -5925,7 +5925,7 @@ Type
     ``list`` of ``strings``
 Default
     The ``modules`` list in
-    `extractor/__init__.py <../gallery_dl/extractor/__init__.py#L12>`__
+    `extractor/__init__.py <https://github.com/mikf/gallery-dl/blob/master/gallery_dl/extractor/__init__.py#L12>`__
 Example
     ``["reddit", "danbooru", "mangadex"]``
 Description
@@ -5948,7 +5948,7 @@ Description
     i.e. classes with a ``pattern`` attribute.
 
     Note: ``null`` references internal extractors defined in
-    `extractor/__init__.py <../gallery_dl/extractor/__init__.py#L12>`__
+    `extractor/__init__.py <https://github.com/mikf/gallery-dl/blob/master/gallery_dl/extractor/__init__.py#L12>`__
     or by `extractor.modules`_.
 
 
@@ -5965,7 +5965,8 @@ Description
       `importable <https://docs.python.org/3/reference/import.html>`__
       Python module,
     | whose namespace,
-      in addition to the ``GLOBALS`` dict in `util.py <../gallery_dl/util.py>`__,
+      in addition to the ``GLOBALS`` dict in
+      `util.py <https://github.com/mikf/gallery-dl/blob/v1.27.0/gallery_dl/util.py#L566-L578>`__,
       gets used as |globals parameter|__ for compiled Python expressions.
 
 .. |globals parameter| replace:: ``globals`` parameter
@@ -6248,9 +6249,9 @@ Description
           In addition to the default
           `LogRecord attributes <https://docs.python.org/3/library/logging.html#logrecord-attributes>`__,
           it is also possible to access the current
-          `extractor <https://github.com/mikf/gallery-dl/blob/v1.24.2/gallery_dl/extractor/common.py#L26>`__,
-          `job <https://github.com/mikf/gallery-dl/blob/v1.24.2/gallery_dl/job.py#L21>`__,
-          `path <https://github.com/mikf/gallery-dl/blob/v1.24.2/gallery_dl/path.py#L27>`__,
+          `extractor <https://github.com/mikf/gallery-dl/blob/v1.27.0/gallery_dl/extractor/common.py#L28>`__,
+          `job <https://github.com/mikf/gallery-dl/blob/v1.27.0/gallery_dl/job.py#L33>`__,
+          `path <https://github.com/mikf/gallery-dl/blob/v1.27.0/gallery_dl/path.py#L27>`__,
           and `keywords` objects and their attributes, for example
           ``"{extractor.url}"``, ``"{path.filename}"``, ``"{keywords.title}"``
         * Default: ``"[{name}][{levelname}] {message}"``
