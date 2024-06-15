@@ -1980,8 +1980,8 @@ Description
 
     * ``true``: Extract embed URLs and download them if supported
       (videos are not downloaded).
-    * ``"ytdl"``: Like ``true``, but let `youtube-dl`_ handle video
-      extraction and download for YouTube, Vimeo and SoundCloud embeds.
+    * ``"ytdl"``: Like ``true``, but let |ytdl| handle video
+      extraction and download for YouTube, Vimeo, and SoundCloud embeds.
     * ``false``: Ignore embeds.
 
 
@@ -2844,7 +2844,7 @@ Description
     Control video download behavior.
 
     * ``true``: Download videos
-    * ``"ytdl"``: Download videos using `youtube-dl`_
+    * ``"ytdl"``: Download videos using |ytdl|
     * ``false``: Skip video Tweets
 
 
@@ -3304,11 +3304,11 @@ Default
 Description
     Control video download behavior.
 
-    * ``true``: Download videos and use `youtube-dl`_ to handle
+    * ``true``: Download videos and use |ytdl| to handle
       HLS and DASH manifests
-    * ``"ytdl"``: Download videos and let `youtube-dl`_ handle all of
+    * ``"ytdl"``: Download videos and let |ytdl| handle all of
       video extraction and download
-    * ``"dash"``: Extract DASH manifest URLs and use `youtube-dl`_
+    * ``"dash"``: Extract DASH manifest URLs and use |ytdl|
       to download and merge them. (*)
     * ``false``: Ignore videos
 
@@ -3816,7 +3816,8 @@ Description
 
     * ``false``: Ignore cards
     * ``true``: Download image content from supported cards
-    * ``"ytdl"``: Additionally download video content from unsupported cards using `youtube-dl`_
+    * ``"ytdl"``: Additionally download video content from unsupported cards
+      using |ytdl|
 
 
 extractor.twitter.cards-blacklist
@@ -4155,7 +4156,7 @@ Description
     Control video download behavior.
 
     * ``true``: Download videos
-    * ``"ytdl"``: Download videos using `youtube-dl`_
+    * ``"ytdl"``: Download videos using |ytdl|
     * ``false``: Skip video Tweets
 
 
@@ -4345,6 +4346,33 @@ Description
     Download video files.
 
 
+extractor.ytdl.cmdline-args
+---------------------------
+Type
+    * ``string``
+    * ``list`` of ``strings``
+Example
+    * ``"--quiet --write-sub --merge-output-format mkv"``
+    * ``["--quiet", "--write-sub", "--merge-output-format", "mkv"]``
+Description
+    Additional ``ytdl`` options specified as command-line arguments.
+
+    See
+    `yt-dlp options <https://github.com/yt-dlp/yt-dlp#usage-and-options>`__
+    /
+    `youtube-dl options <https://github.com/ytdl-org/youtube-dl#options>`__
+
+
+extractor.ytdl.config-file
+--------------------------
+Type
+    |Path|_
+Example
+    ``"~/.config/yt-dlp/config"``
+Description
+    Location of a |ytdl| configuration file to load options from.
+
+
 extractor.ytdl.enabled
 ----------------------
 Type
@@ -4352,7 +4380,7 @@ Type
 Default
     ``false``
 Description
-    Match **all** URLs, even ones without a ``ytdl:`` prefix.
+    Process URLs otherwise unsupported by gallery-dl with |ytdl|.
 
 
 extractor.ytdl.format
@@ -4360,23 +4388,29 @@ extractor.ytdl.format
 Type
     ``string``
 Default
-    youtube-dl's default, currently ``"bestvideo+bestaudio/best"``
+    | Default of the ``ytdl`` `module <extractor.ytdl.module_>`__ used.
+    | (``"bestvideo*+bestaudio/best"`` for ``yt_dlp``,
+       ``"bestvideo+bestaudio/best"`` for ``youtube_dl``)
 Description
-    Video `format selection
-    <https://github.com/ytdl-org/youtube-dl#format-selection>`__
-    directly passed to youtube-dl.
+    ``ytdl`` format selection string.
+
+    See
+    `yt-dlp format selection <https://github.com/yt-dlp/yt-dlp#format-selection>`__
+    /
+    `youtube-dl format selection <https://github.com/ytdl-org/youtube-dl#format-selection>`__
 
 
 extractor.ytdl.generic
 ----------------------
 Type
-    ``bool``
+    * ``bool``
+    * ``string``
 Default
     ``true``
 Description
-    Controls the use of youtube-dl's generic extractor.
+    Enables the use of |ytdl's| ``generic`` extractor.
 
-    Set this option to ``"force"`` for the same effect as youtube-dl's
+    Set this option to ``"force"`` for the same effect as
     ``--force-generic-extractor``.
 
 
@@ -4387,8 +4421,8 @@ Type
 Default
     ``true``
 Description
-    Route youtube-dl's output through gallery-dl's logging system.
-    Otherwise youtube-dl will write its output directly to stdout/stderr.
+    Route |ytdl's| output through gallery-dl's logging system.
+    Otherwise it will be written directly to stdout/stderr.
 
     Note: Set ``quiet`` and ``no_warnings`` in
     `extractor.ytdl.raw-options`_ to ``true`` to suppress all output.
@@ -4401,7 +4435,7 @@ Type
 Default
     ``null``
 Description
-    Name of the youtube-dl Python module to import.
+    Name of the ``ytdl`` Python module to import.
 
     Setting this to ``null`` will try to import ``"yt_dlp"``
     followed by ``"youtube_dl"`` as fallback.
@@ -4423,30 +4457,10 @@ Example
 Description
     Additional options passed directly to the ``YoutubeDL`` constructor.
 
-    All available options can be found in `youtube-dl's docstrings
-    <https://github.com/ytdl-org/youtube-dl/blob/master/youtube_dl/YoutubeDL.py#L138-L318>`__.
-
-
-extractor.ytdl.cmdline-args
----------------------------
-Type
-    * ``string``
-    * ``list`` of ``strings``
-Example
-    * ``"--quiet --write-sub --merge-output-format mkv"``
-    * ``["--quiet", "--write-sub", "--merge-output-format", "mkv"]``
-Description
-    Additional options specified as youtube-dl command-line arguments.
-
-
-extractor.ytdl.config-file
---------------------------
-Type
-    |Path|_
-Example
-    ``"~/.config/youtube-dl/config"``
-Description
-    Location of a youtube-dl configuration file to load options from.
+    Available options can be found in
+    `yt-dlp's docstrings <https://github.com/yt-dlp/yt-dlp/blob/2024.05.27/yt_dlp/YoutubeDL.py#L200>`__
+    /
+    `youtube-dl's docstrings <https://github.com/ytdl-org/youtube-dl/blob/0153b387e57e0bb8e580f1869f85596d2767fb0d/youtube_dl/YoutubeDL.py#L157>`__
 
 
 extractor.zerochan.metadata
@@ -4775,16 +4789,48 @@ Description
     instead of downloading a potentially broken file.
 
 
+downloader.ytdl.cmdline-args
+----------------------------
+Type
+    * ``string``
+    * ``list`` of ``strings``
+Example
+    * ``"--quiet --write-sub --merge-output-format mkv"``
+    * ``["--quiet", "--write-sub", "--merge-output-format", "mkv"]``
+Description
+    Additional ``ytdl`` options specified as command-line arguments.
+
+    See
+    `yt-dlp options <https://github.com/yt-dlp/yt-dlp#usage-and-options>`__
+    /
+    `youtube-dl options <https://github.com/ytdl-org/youtube-dl#options>`__
+
+
+downloader.ytdl.config-file
+---------------------------
+Type
+    |Path|_
+Example
+    ``"~/.config/yt-dlp/config"``
+Description
+    Location of a |ytdl| configuration file to load options from.
+
+
 downloader.ytdl.format
 ----------------------
 Type
     ``string``
 Default
-    youtube-dl's default, currently ``"bestvideo+bestaudio/best"``
+    | Default of the ``ytdl`` `module <downloader.ytdl.module_>`__ used.
+    | (``"bestvideo*+bestaudio/best"`` for ``yt_dlp``,
+       ``"bestvideo+bestaudio/best"`` for ``youtube_dl``)
 Description
-    Video `format selection
-    <https://github.com/ytdl-org/youtube-dl#format-selection>`__
-    directly passed to youtube-dl.
+    ``ytdl`` format selection string.
+
+    See
+    `yt-dlp format selection <https://github.com/yt-dlp/yt-dlp#format-selection>`__
+    /
+    `youtube-dl format selection <https://github.com/ytdl-org/youtube-dl#format-selection>`__
 
 
 downloader.ytdl.forward-cookies
@@ -4794,7 +4840,7 @@ Type
 Default
     ``false``
 Description
-    Forward cookies to youtube-dl.
+    Forward gallery-dl's cookies to |ytdl|.
 
 
 downloader.ytdl.logging
@@ -4804,8 +4850,8 @@ Type
 Default
     ``true``
 Description
-    Route youtube-dl's output through gallery-dl's logging system.
-    Otherwise youtube-dl will write its output directly to stdout/stderr.
+    Route |ytdl's| output through gallery-dl's logging system.
+    Otherwise it will be written directly to stdout/stderr.
 
     Note: Set ``quiet`` and ``no_warnings`` in
     `downloader.ytdl.raw-options`_ to ``true`` to suppress all output.
@@ -4818,10 +4864,10 @@ Type
 Default
     ``null``
 Description
-    Name of the youtube-dl Python module to import.
+    Name of the ``ytdl`` Python module to import.
 
-    Setting this to ``null`` will first try to import ``"yt_dlp"``
-    and use ``"youtube_dl"`` as fallback.
+    Setting this to ``null`` will try to import ``"yt_dlp"``
+    followed by ``"youtube_dl"`` as fallback.
 
 
 downloader.ytdl.outtmpl
@@ -4831,16 +4877,23 @@ Type
 Default
     ``null``
 Description
-    The `Output Template <https://github.com/ytdl-org/youtube-dl#output-template>`__
-    used to generate filenames for files downloaded with youtube-dl.
+    The `Output Template`
+    used to generate filenames for files downloaded with ``ytdl``.
+
+    See
+    `yt-dlp output template <https://github.com/yt-dlp/yt-dlp#output-template>`__
+    /
+    `youtube-dl output template <https://github.com/ytdl-org/youtube-dl#output-template>`__.
 
     Special values:
 
     * ``null``: generate filenames with `extractor.*.filename`_
-    * ``"default"``: use youtube-dl's default, currently ``"%(title)s-%(id)s.%(ext)s"``
+    * ``"default"``: use |ytdl's| default, currently
+      ``"%(title)s [%(id)s].%(ext)s"`` for yt-dlp_ /
+      ``"%(title)s-%(id)s.%(ext)s"`` for youtube-dl_
 
     Note: An output template other than ``null`` might
-    cause unexpected results in combination with other options
+    cause unexpected results in combination with certain options
     (e.g. ``"skip": "enumerate"``)
 
 
@@ -4860,30 +4913,10 @@ Example
 Description
     Additional options passed directly to the ``YoutubeDL`` constructor.
 
-    All available options can be found in `youtube-dl's docstrings
-    <https://github.com/ytdl-org/youtube-dl/blob/master/youtube_dl/YoutubeDL.py#L138-L318>`__.
-
-
-downloader.ytdl.cmdline-args
-----------------------------
-Type
-    * ``string``
-    * ``list`` of ``strings``
-Example
-    * ``"--quiet --write-sub --merge-output-format mkv"``
-    * ``["--quiet", "--write-sub", "--merge-output-format", "mkv"]``
-Description
-    Additional options specified as youtube-dl command-line arguments.
-
-
-downloader.ytdl.config-file
----------------------------
-Type
-    |Path|_
-Example
-    ``"~/.config/youtube-dl/config"``
-Description
-    Location of a youtube-dl configuration file to load options from.
+    Available options can be found in
+    `yt-dlp's docstrings <https://github.com/yt-dlp/yt-dlp/blob/2024.05.27/yt_dlp/YoutubeDL.py#L200>`__
+    /
+    `youtube-dl's docstrings <https://github.com/ytdl-org/youtube-dl/blob/0153b387e57e0bb8e580f1869f85596d2767fb0d/youtube_dl/YoutubeDL.py#L157>`__
 
 
 
@@ -5719,7 +5752,7 @@ Default
 Example
     ``["-c:v", "libvpx-vp9", "-an", "-b:v", "2M"]``
 Description
-    Additional FFmpeg command-line arguments.
+    Additional |ffmpeg| command-line arguments.
 
 
 ugoira.ffmpeg-demuxer
@@ -5729,7 +5762,9 @@ Type
 Default
     ``auto``
 Description
-    FFmpeg demuxer to read and process input files with. Possible values are
+    |ffmpeg| demuxer to read and process input files with.
+
+    Possible values are
 
     * "`concat <https://ffmpeg.org/ffmpeg-formats.html#concat-1>`_" (inaccurate frame timecodes for non-uniform frame delays)
     * "`image2 <https://ffmpeg.org/ffmpeg-formats.html#image2-1>`_" (accurate timecodes, requires nanosecond file timestamps, i.e. no Windows or macOS)
@@ -5767,12 +5802,12 @@ Type
 Default
     ``"error"``
 Description
-    Controls FFmpeg output.
+    Controls |ffmpeg| output.
 
-    * ``true``: Enable FFmpeg output
-    * ``false``: Disable all FFmpeg output
+    * ``true``: Enable |ffmpeg| output
+    * ``false``: Disable all |ffmpeg| output
     * any ``string``: Pass ``-hide_banner`` and ``-loglevel``
-      with this value as argument to FFmpeg
+      with this value as argument to |ffmpeg|
 
 
 ugoira.ffmpeg-twopass
@@ -5792,7 +5827,7 @@ Type
 Default
     ``"auto"``
 Description
-    Controls the frame rate argument (``-r``) for FFmpeg
+    Controls the frame rate argument (``-r``) for |ffmpeg|
 
     * ``"auto"``: Automatically assign a fitting frame rate
       based on delays between frames.
@@ -5827,7 +5862,7 @@ Description
 
     This option, when ``libx264/5`` is used, automatically
     adds ``["-vf", "crop=iw-mod(iw\\,2):ih-mod(ih\\,2)"]``
-    to the list of FFmpeg command-line arguments
+    to the list of |ffmpeg| command-line arguments
     to reduce an odd width/height by 1 pixel and make them even.
 
 
@@ -6324,11 +6359,16 @@ Description
     ``python``
         Call Python functions
     ``ugoira``
-        Convert Pixiv Ugoira to WebM using `FFmpeg <https://www.ffmpeg.org/>`__
+        Convert Pixiv Ugoira to WebM using |ffmpeg|
     ``zip``
         Store files in a ZIP archive
+        |ytdl|
 
 
+
+.. |ytdl| replace:: `yt-dlp`_/`youtube-dl`_
+.. |ytdl's| replace:: yt-dlp's/youtube-dl's
+.. |ffmpeg| replace:: FFmpeg_
 
 .. |.netrc| replace:: ``.netrc``
 .. |requests.request()| replace:: ``requests.request()``
@@ -6371,6 +6411,8 @@ Description
 .. _format string:      formatting.md
 .. _format strings:     formatting.md
 .. _youtube-dl:         https://github.com/ytdl-org/youtube-dl
+.. _yt-dlp:             https://github.com/yt-dlp/yt-dlp
+.. _FFmpeg:             https://www.ffmpeg.org/
 .. _requests.request(): https://requests.readthedocs.io/en/master/api/#requests.request
 .. _timeout:            https://requests.readthedocs.io/en/master/user/advanced/#timeouts
 .. _verify:             https://requests.readthedocs.io/en/master/user/advanced/#ssl-cert-verification
