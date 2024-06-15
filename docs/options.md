@@ -6,19 +6,20 @@
 ## General Options:
     -h, --help                  Print this help message and exit
     --version                   Print program version and exit
-    -U, --update                Update to the latest version
-    --update-to [CHANNEL@]TAG   Upgrade/downgrade to a specific version
-    --update-check              Check if a newer version is available
     -f, --filename FORMAT       Filename format string for downloaded files
                                 ('/O' for "original" filenames)
     -d, --destination PATH      Target location for file downloads
     -D, --directory PATH        Exact location for file downloads
     -X, --extractors PATH       Load external extractors from PATH
-    --proxy URL                 Use the specified proxy
-    --source-address IP         Client-side IP address to bind to
     --user-agent UA             User-Agent request header
     --clear-cache MODULE        Delete cached login sessions, cookies, etc. for
                                 MODULE (ALL to delete everything)
+
+## Update Options:
+    -U, --update                Update to the latest version
+    --update-to CHANNEL[@TAG]   Switch to a dfferent release channel (stable or
+                                dev) or upgrade/downgrade to a specific version
+    --update-check              Check if a newer version is available
 
 ## Input Options:
     -i, --input-file FILE       Download URLs found in FILE ('-' for stdin).
@@ -54,11 +55,17 @@
                                 the current directory to debug problems
     --no-colors                 Do not emit ANSI color codes in output
 
-## Downloader Options:
-    -r, --limit-rate RATE       Maximum download rate (e.g. 500k or 2.5M)
+## Networking Options:
     -R, --retries N             Maximum number of retries for failed HTTP
                                 requests or -1 for infinite retries (default: 4)
     --http-timeout SECONDS      Timeout for HTTP connections (default: 30.0)
+    --proxy URL                 Use the specified proxy
+    --source-address IP         Client-side IP address to bind to
+    --no-check-certificate      Disable HTTPS certificate validation
+
+## Downloader Options:
+    -r, --limit-rate RATE       Maximum download rate (e.g. 500k or 2.5M)
+    --chunk-size SIZE           Size of in-memory data chunks (default: 32k)
     --sleep SECONDS             Number of seconds to wait before each download.
                                 This can be either a constant value or a range
                                 (e.g. 2.7 or 2.0-3.5)
@@ -66,18 +73,11 @@
                                 during data extraction
     --sleep-extractor SECONDS   Number of seconds to wait before starting data
                                 extraction for an input URL
-    --filesize-min SIZE         Do not download files smaller than SIZE (e.g.
-                                500k or 2.5M)
-    --filesize-max SIZE         Do not download files larger than SIZE (e.g.
-                                500k or 2.5M)
-    --chunk-size SIZE           Size of in-memory data chunks (default: 32k)
     --no-part                   Do not use .part files
     --no-skip                   Do not skip downloads; overwrite existing files
     --no-mtime                  Do not set file modification times according to
                                 Last-Modified HTTP response headers
     --no-download               Do not download any files
-    --no-postprocessors         Do not run any post processors
-    --no-check-certificate      Disable HTTPS certificate validation
 
 ## Configuration Options:
     -o, --option KEY=VALUE      Additional options. Example: -o browser=firefox
@@ -105,12 +105,16 @@
                                 container)
 
 ## Selection Options:
-    --download-archive FILE     Record all downloaded or skipped files in FILE
-                                and skip downloading any file already in it
     -A, --abort N               Stop current extractor run after N consecutive
                                 file downloads were skipped
     -T, --terminate N           Stop current and parent extractor runs after N
                                 consecutive file downloads were skipped
+    --filesize-min SIZE         Do not download files smaller than SIZE (e.g.
+                                500k or 2.5M)
+    --filesize-max SIZE         Do not download files larger than SIZE (e.g.
+                                500k or 2.5M)
+    --download-archive FILE     Record all downloaded or skipped files in FILE
+                                and skip downloading any file already in it
     --range RANGE               Index range(s) specifying which files to
                                 download. These can be either a constant value,
                                 range, or slice (e.g. '5', '8-20', or '1:24:3')
@@ -127,6 +131,7 @@
 
 ## Post-processing Options:
     -P, --postprocessor NAME    Activate the specified post processor
+    --no-postprocessors         Do not run any post processors
     -O, --postprocessor-option KEY=VALUE
                                 Additional post processor options
     --write-metadata            Write metadata to separate JSON files
