@@ -240,23 +240,23 @@ class FacebookExtractor(Extractor):
                 ):
                     if comment_photo_id not in all_photo_ids:
                         self.log.debug(
-                            f"Found a followup in comments: {comment_photo_id}"
+                            "Found a followup in comments:" + comment_photo_id
                         )
                         all_photo_ids.append(comment_photo_id)
 
             if photo["url"] == "":
                 if retries < self.fallback_retries:
                     self.log.debug(
-                        f"Failed to find photo download URL for {photo_url}. "
-                        f"Retrying in {self.sleep_429} seconds."
+                        "Failed to find photo download URL for " + photo_url +
+                        ". Retrying in " + self.sleep_429 + " seconds."
                     )
                     self.sleep(self.sleep_429, "retry")
                     retries += 1
                     continue
                 else:
                     self.log.warning(
-                        f"Failed to find photo download URL for {photo_url}. "
-                        "Skipping."
+                        "Failed to find photo download URL for " + photo_url +
+                        ". Skipping."
                     )
                     retries = 0
             else:
@@ -348,7 +348,9 @@ class FacebookProfileExtractor(FacebookExtractor):
         return set_id
 
     def items(self):
-        profile_photos_url = f"{self.root}/{self.match.group(1)}/photos_by"
+        profile_photos_url = (
+            self.root + "/" + self.match.group(1) + "/photos_by"
+        )
         profile_photos_page = self.request(profile_photos_url).text
 
         if '"comet.profile.collection.photos_by"' not in profile_photos_page:
