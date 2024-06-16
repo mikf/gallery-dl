@@ -158,6 +158,7 @@ class UgoiraPP(PostProcessor):
             except Exception as exc:
                 print()
                 self.log.error("%s: %s", exc.__class__.__name__, exc)
+                self.log.debug("", exc_info=True)
                 pathfmt.realpath = pathfmt.temppath
             else:
                 if self.mtime:
