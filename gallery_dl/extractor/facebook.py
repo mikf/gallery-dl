@@ -19,6 +19,9 @@ class FacebookExtractor(Extractor):
     filename_fmt = "{id}.{extension}"
     directory_fmt = ("{category}", "{username}", "{title} ({set_id})")
 
+    set_url_fmt = root + "/media/set/?set={set_id}"
+    photo_url_fmt = root + "/photo/?fbid={photo_id}&set={set_id}"
+
     def __init__(self, match):
         Extractor.__init__(self, match)
         self.match = match
@@ -27,6 +30,10 @@ class FacebookExtractor(Extractor):
         self.session.headers["Accept"] = "text/html"
         self.session.headers["Sec-Fetch-Mode"] = "navigate"
 
+        self.fb_cookies = self.session.cookies.get_dict(domain=".facebook.com")
+        if self.fb_cookies:
+            self.session.cookies.clear(domain=".facebook.com")
+
         self.fallback_retries = self.config("fallback-retries", 2)
         self.sleep_429 = self.config("sleep-429", 5)
 
@@ -34,25 +41,15 @@ class FacebookExtractor(Extractor):
 
         self.log.warning(
             "Using the Facebook extractor for too long may result in "
-            "temporary UI bans of increasing length. Use at your own risk."
+            "temporary UI bans of increasing length. "
+            "Cookies will only be used when necessary, "
+            "and you will be informed if they are. "
+            "\nUse at your own risk."
         )
 
     @staticmethod
     def text_unescape(txt):
         return text.unescape(txt.encode("utf-8").decode("unicode_escape"))
-
-    @staticmethod
-    def raise_request(res):
-        if res.url.startswith(FacebookExtractor.root + "/login"):
-            raise exception.AuthenticationError(
-                "You need to be logged in to view this content."
-            )
-        if '{"__dr":"CometErrorRoot.react"}' in res.text:
-            raise exception.StopExtraction(
-                "You've been temporarily blocked from viewing this image. "
-                "Please use a different account or try again later."
-            )
-        return res
 
     @staticmethod
     def item_filename_handle(item):
@@ -179,10 +176,43 @@ class FacebookExtractor(Extractor):
 
         return directory
 
-    def set_photos_iter(self, set_id):
-        PHOTO_URL = self.root + "/photo/?fbid={photo_id}&set={set_id}"
+    def photo_page_request_wrapper(self, url, *args, **kwargs):
+        res = self.request(url, *args, **kwargs)
 
-        set_url = self.root + "/media/set/?set=" + set_id
+        if res.url.startswith(self.root + "/login"):
+            ERROR_TXT = "You must be logged in to continue viewing images."
+            used_cookies = self.session.cookies.get_dict(
+                domain=".facebook.com"
+            )
+
+            if "datr" in self.fb_cookies and "datr" not in used_cookies:
+                self.session.cookies.set(
+                    "datr", self.fb_cookies["datr"], domain=".facebook.com"
+                )
+                res = self.photo_page_request_wrapper(url, *args, **kwargs)
+                self.log.debug(ERROR_TXT + " Using session from now on.")
+            elif "c_user" in self.fb_cookies and "c_user" not in used_cookies:
+                self.session.cookies.set(
+                    "c_user", self.fb_cookies["c_user"], domain=".facebook.com"
+                )
+                self.session.cookies.set(
+                    "xs", self.fb_cookies["xs"], domain=".facebook.com"
+                )
+                res = self.photo_page_request_wrapper(url, *args, **kwargs)
+                self.log.info(ERROR_TXT + " Using cookies from now on.")
+            else:
+                raise exception.AuthenticationError(ERROR_TXT)
+
+        if '{"__dr":"CometErrorRoot.react"}' in res.text:
+            raise exception.StopExtraction(
+                "You've been temporarily blocked from viewing images. "
+                "Please use a different account or try again later."
+            )
+
+        return res
+
+    def set_photos_iter(self, set_id):
+        set_url = self.set_url_fmt.format(set_id=set_id)
         set_page = self.request(set_url).text
 
         directory = self.get_set_page_metadata(set_page)
@@ -196,8 +226,10 @@ class FacebookExtractor(Extractor):
 
         while i < len(all_photo_ids):
             photo_id = all_photo_ids[i]
-            photo_url = PHOTO_URL.format(photo_id=photo_id, set_id=set_id)
-            media_page = self.raise_request(self.request(photo_url)).text
+            photo_url = self.photo_url_fmt.format(
+                photo_id=photo_id, set_id=set_id
+            )
+            media_page = self.photo_page_request_wrapper(photo_url).text
 
             photo = self.get_photo_page_metadata(media_page)
             photo["num"] = i + 1
@@ -270,20 +302,36 @@ class FacebookPhotoExtractor(FacebookExtractor):
     example = "https://www.facebook.com/photo/?fbid=PHOTO_ID"
 
     def items(self):
-        photo_url = f"{self.root}/photo/?fbid={self.match.group(1)}"
-        photo_page = self.raise_request(self.request(photo_url)).text
+        photo_url = self.photo_url_fmt.format(
+            photo_id=self.match.group(1), set_id=""
+        )
+        photo_page = self.photo_page_request_wrapper(photo_url).text
 
+        i = 1
         photo = self.get_photo_page_metadata(photo_page)
-        photo["num"] = 1
+        photo["num"] = i
 
-        set_page = self.request(
-            self.root + "/media/set/?set=" + photo["set_id"]
-        ).text
+        set_page = self.request(self.set_url_fmt.format(
+            set_id=photo["set_id"]
+        )).text
 
         directory = self.get_set_page_metadata(set_page)
 
         yield Message.Directory, directory
         yield Message.Url, photo["url"], photo
+
+        if self.author_followups:
+            for comment_photo_id in (
+                self.get_photo_page_author_comments_photo_ids(photo_page)
+            ):
+                comment_photo = self.get_photo_page_metadata(
+                    self.request(self.photo_url_fmt.format(
+                        photo_id=comment_photo_id, set_id=""
+                    )).text
+                )
+                i += 1
+                comment_photo["num"] = i
+                yield Message.Url, comment_photo["url"], comment_photo
 
 
 class FacebookProfileExtractor(FacebookExtractor):
