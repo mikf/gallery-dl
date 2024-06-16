@@ -11,6 +11,7 @@
 import os
 import re
 import ssl
+import sys
 import time
 import netrc
 import queue
@@ -263,6 +264,10 @@ class Extractor():
         time.sleep(seconds)
 
     def input(self, prompt, echo=True):
+        if not self._input:
+            raise exception.StopExtraction(
+                "User input required (%s)", prompt.strip(" :"))
+
         if echo:
             try:
                 return input(prompt)
@@ -277,7 +282,13 @@ class Extractor():
         password = None
 
         if username:
-            password = self.config("password") or util.LazyPrompt()
+            password = self.config("password")
+            if not password:
+                if not self._input:
+                    raise exception.StopExtraction(
+                        "User input required (password)")
+                password = util.LazyPrompt()
+
         elif self.config("netrc", False):
             try:
                 info = netrc.netrc().authenticators(self.category)
@@ -298,6 +309,7 @@ class Extractor():
         self._retries = self.config("retries", 4)
         self._timeout = self.config("timeout", 30)
         self._verify = self.config("verify", True)
+        self._input = self.config("input")
         self._proxies = util.build_proxy_map(self.config("proxy"), self.log)
         self._interval = util.build_duration_func(
             self.config("sleep-request", self.request_interval),
@@ -307,6 +319,11 @@ class Extractor():
             self.config("sleep-429", 60),
         )
 
+        if self._input is None:
+            try:
+                self._input = sys.stdin.isatty()
+            except Exception:
+                self._input = False
         if self._retries < 0:
             self._retries = float("inf")
         if not self._retry_codes:

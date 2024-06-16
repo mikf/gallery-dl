@@ -256,6 +256,11 @@ def build_parser():
         help=("Download URLs found in FILE. "
               "Delete them after they were downloaded successfully."),
     )
+    input.add_argument(
+        "--no-input",
+        dest="input", nargs=0, action=ConfigConstAction, const=False,
+        help=("Do not prompt for passwords/tokens"),
+    )
 
     output = parser.add_argument_group("Output Options")
     output.add_argument(

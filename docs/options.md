@@ -30,6 +30,7 @@
     -x, --input-file-delete FILE
                                 Download URLs found in FILE. Delete them after
                                 they were downloaded successfully.
+    --no-input                  Do not prompt for passwords/tokens
 
 ## Output Options:
     -q, --quiet                 Activate quiet mode

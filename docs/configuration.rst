@@ -461,6 +461,17 @@ Description
     (see `getpass() <https://docs.python.org/3/library/getpass.html#getpass.getpass>`__).
 
 
+extractor.*.input
+-----------------
+Type
+    ``bool``
+Default
+    ``true`` if `stdin` is attached to a terminal ,
+    ``false`` otherwise
+Description
+    Allow prompting the user for interactive input.
+
+
 extractor.*.netrc
 -----------------
 Type
