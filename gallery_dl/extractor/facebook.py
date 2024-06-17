@@ -269,11 +269,15 @@ class FacebookExtractor(Extractor):
 class FacebookSetExtractor(FacebookExtractor):
     """Base class for Facebook Set extractors"""
     subcategory = "set"
-    pattern = BASE_PATTERN + r"/media/set/.*set=([^/?&]+)"
+    pattern = (
+        BASE_PATTERN + r"(?:/media/set/.*set=([^/?&]+)"
+        r"|/photo.*fbid=([^/?&]+).*set=([^/?&]+).*(?:setextract))"
+    )
     example = "https://www.facebook.com/media/set/?set=SET_ID"
 
     def items(self):
-        set_url = self.set_url_fmt.format(set_id=self.match.group(1))
+        set_id = self.match.group(3) or self.match.group(1)
+        set_url = self.set_url_fmt.format(set_id=set_id)
         set_page = self.request(set_url).text
 
         directory = self.get_set_page_metadata(set_page)
@@ -281,7 +285,8 @@ class FacebookSetExtractor(FacebookExtractor):
         yield Message.Directory, directory
 
         for photo in self.set_photos_iter(
-            directory["first_photo_id"], directory["set_id"]
+            self.match.group(2) or directory["first_photo_id"],
+            directory["set_id"]
         ):
             yield Message.Url, photo["url"], photo
 
@@ -289,7 +294,7 @@ class FacebookSetExtractor(FacebookExtractor):
 class FacebookPhotoExtractor(FacebookExtractor):
     """Base class for Facebook Photo extractors"""
     subcategory = "photo"
-    pattern = BASE_PATTERN + r"/photo.*fbid=([^/?&]+)(?:.*(setextract))?"
+    pattern = BASE_PATTERN + r"/photo.*fbid=([^/?&]+)"
     example = "https://www.facebook.com/photo/?fbid=PHOTO_ID"
 
     def items(self):
@@ -309,28 +314,20 @@ class FacebookPhotoExtractor(FacebookExtractor):
         directory = self.get_set_page_metadata(set_page)
 
         yield Message.Directory, directory
+        yield Message.Url, photo["url"], photo
 
-        if self.match.group(2) == "setextract":
-            for set_photo in self.set_photos_iter(
-                photo["id"], directory["set_id"]
-            ):
-                set_photo["num"] += i
-                yield Message.Url, set_photo["url"], set_photo
-        else:
-            yield Message.Url, photo["url"], photo
-
-            if self.author_followups:
-                for comment_photo_id in photo["followups_ids"]:
-                    comment_photo = self.get_photo_page_metadata(
-                        self.photo_page_request_wrapper(
-                            self.photo_url_fmt.format(
-                                photo_id=comment_photo_id, set_id=""
-                            )
-                        ).text
-                    )
-                    i += 1
-                    comment_photo["num"] = i
-                    yield Message.Url, comment_photo["url"], comment_photo
+        if self.author_followups:
+            for comment_photo_id in photo["followups_ids"]:
+                comment_photo = self.get_photo_page_metadata(
+                    self.photo_page_request_wrapper(
+                        self.photo_url_fmt.format(
+                            photo_id=comment_photo_id, set_id=""
+                        )
+                    ).text
+                )
+                i += 1
+                comment_photo["num"] = i
+                yield Message.Url, comment_photo["url"], comment_photo
 
 
 class FacebookProfileExtractor(FacebookExtractor):
