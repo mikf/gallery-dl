@@ -105,6 +105,7 @@ class LoggerAdapterActions():
         self.error = functools.partial(self.log, logging.ERROR)
 
     def log(self, level, msg, *args, **kwargs):
+        msg = str(msg)
         if args:
             msg = msg % args
 
