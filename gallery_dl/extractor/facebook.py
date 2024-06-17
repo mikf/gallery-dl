@@ -43,7 +43,7 @@ class FacebookExtractor(Extractor):
             "Using the Facebook extractor for too long may result in "
             "temporary UI bans of increasing length. "
             "Cookies will only be used when necessary, "
-            "and you will be informed if they are. "
+            "and you will be informed if they are being used. "
             "\nUse at your own risk."
         )
 
@@ -65,43 +65,15 @@ class FacebookExtractor(Extractor):
             item["filename"] = item["name"] = item["extension"] = ""
 
     @staticmethod
-    def get_first_photo_id(set_page):
-        photo_id = text.extr(
-            set_page,
-            '{"__typename":"Photo","__isMedia":"Photo","',
-            '","creation_story"'
-        ).rsplit('"id":"', 1)[-1]
-
-        if photo_id == "":
-            photo_id = text.extr(
-                set_page,
-                '{"__typename":"Photo","id":"',
-                '"'
-            )
-
-        return photo_id
-
-    @staticmethod
-    def get_next_photo_id(photo_page):
-        return text.extr(
-            photo_page,
-            '"nextMediaAfterNodeId":{"__typename":"Photo","id":"',
-            '"',
-            text.extr(
-                photo_page,
-                '"nextMedia":{"edges":[{"node":{"__typename":"Photo","id":"',
-                '"'
-            )
-        )
-
-    @staticmethod
     def get_photo_page_metadata(photo_page):
         photo = {
             "id": text.extr(
                 photo_page, '"__isNode":"Photo","id":"', '"'
             ),
             "set_id": text.extr(
-                photo_page, 'www.facebook.com\\/photo\\/?fbid=', '"'
+                photo_page,
+                '"url":"https:\\/\\/www.facebook.com\\/photo\\/?fbid=',
+                '"'
             ).rsplit("&set=", 1)[-1],
             "username": text.extr(
                 photo_page, '"owner":{"__typename":"User","name":"', '"'
@@ -128,30 +100,34 @@ class FacebookExtractor(Extractor):
                 '"},"extensions":{"prefetch_uris_v2":[{"uri":"',
                 '"'
             ).replace("\\/", "/"),
+            "next_photo_id": text.extr(
+                photo_page,
+                '"nextMediaAfterNodeId":{"__typename":"Photo","id":"',
+                '"',
+                text.extr(
+                    photo_page,  # "n
+                    'extMedia":{"edges":[{"node":{"__typename":"Photo","id":"',
+                    '"'
+                )
+            )
         }
 
         photo["filename"] = text.rextract(photo["url"], "/", "?")[0]
         FacebookExtractor.item_filename_handle(photo)
 
-        return photo
-
-    @staticmethod
-    def get_photo_page_author_comments_photo_ids(photo_page):
-        comments_raw_iter = text.extract_iter(
+        photo["followups_ids"] = []
+        for comment_raw in text.extract_iter(
             photo_page, '{"node":{"id"', '"cursor":null}'
-        )
-
-        photo_ids = []
-        for comment_raw in comments_raw_iter:
+        ):
             if ('"is_author_original_poster":true' in comment_raw and
                     '{"__typename":"Photo","id":"' in comment_raw):
-                photo_ids.append(text.extr(
+                photo["followups_ids"].append(text.extr(
                     comment_raw,
                     '{"__typename":"Photo","id":"',
                     '"'
                 ))
 
-        return photo_ids
+        return photo
 
     @staticmethod
     def get_set_page_metadata(set_page):
@@ -172,15 +148,31 @@ class FacebookExtractor(Extractor):
             "description": FacebookExtractor.text_unescape(text.extr(
                 set_page, '"message":{"delight_ranges"', '"},'
             ).rsplit('],"text":"', 1)[-1]),
+            "first_photo_id": text.extr(
+                set_page,
+                '{"__typename":"Photo","__isMedia":"Photo","',
+                '","creation_story"'
+            ).rsplit('"id":"', 1)[-1]
         }
+
+        if directory["first_photo_id"] == "":
+            directory["first_photo_id"] = text.extr(
+                set_page, '{"__typename":"Photo","id":"', '"'
+            )
 
         return directory
 
     def photo_page_request_wrapper(self, url, *args, **kwargs):
+        LOGIN_TXT = "You must be logged in to continue viewing images."
+        LEFT_OFF_TXT = "" if url.endswith("&set=") else (
+            "\nYou can use this URL to continue from "
+            "where you left off (added \"&setextract\"): "
+            "\n" + url + "&setextract"
+        )
+
         res = self.request(url, *args, **kwargs)
 
         if res.url.startswith(self.root + "/login"):
-            ERROR_TXT = "You must be logged in to continue viewing images."
             used_cookies = self.session.cookies.get_dict(
                 domain=".facebook.com"
             )
@@ -190,7 +182,7 @@ class FacebookExtractor(Extractor):
                     "datr", self.fb_cookies["datr"], domain=".facebook.com"
                 )
                 res = self.photo_page_request_wrapper(url, *args, **kwargs)
-                self.log.debug(ERROR_TXT + " Using session from now on.")
+                self.log.debug(LOGIN_TXT + " Using session from now on.")
             elif "c_user" in self.fb_cookies and "c_user" not in used_cookies:
                 self.session.cookies.set(
                     "c_user", self.fb_cookies["c_user"], domain=".facebook.com"
@@ -199,27 +191,23 @@ class FacebookExtractor(Extractor):
                     "xs", self.fb_cookies["xs"], domain=".facebook.com"
                 )
                 res = self.photo_page_request_wrapper(url, *args, **kwargs)
-                self.log.info(ERROR_TXT + " Using cookies from now on.")
+                self.log.info(LOGIN_TXT + " Using cookies from now on.")
             else:
-                raise exception.AuthenticationError(ERROR_TXT)
+                raise exception.AuthenticationError(
+                    LOGIN_TXT + LEFT_OFF_TXT
+                )
 
         if '{"__dr":"CometErrorRoot.react"}' in res.text:
             raise exception.StopExtraction(
                 "You've been temporarily blocked from viewing images. "
-                "Please use a different account or try again later."
+                "\nPlease use a different account or "
+                "try again later." + LEFT_OFF_TXT
             )
 
         return res
 
-    def set_photos_iter(self, set_id):
-        set_url = self.set_url_fmt.format(set_id=set_id)
-        set_page = self.request(set_url).text
-
-        directory = self.get_set_page_metadata(set_page)
-
-        yield Message.Directory, directory
-
-        all_photo_ids = [self.get_first_photo_id(set_page)]
+    def set_photos_iter(self, first_photo_id, set_id):
+        all_photo_ids = [first_photo_id]
 
         retries = 0
         i = 0
@@ -229,20 +217,18 @@ class FacebookExtractor(Extractor):
             photo_url = self.photo_url_fmt.format(
                 photo_id=photo_id, set_id=set_id
             )
-            media_page = self.photo_page_request_wrapper(photo_url).text
+            photo_page = self.photo_page_request_wrapper(photo_url).text
 
-            photo = self.get_photo_page_metadata(media_page)
+            photo = self.get_photo_page_metadata(photo_page)
             photo["num"] = i + 1
 
             if self.author_followups:
-                for comment_photo_id in (
-                    self.get_photo_page_author_comments_photo_ids(media_page)
-                ):
-                    if comment_photo_id not in all_photo_ids:
+                for followup_id in photo["followups_ids"]:
+                    if followup_id not in all_photo_ids:
                         self.log.debug(
-                            "Found a followup in comments:" + comment_photo_id
+                            "Found a followup in comments:" + followup_id
                         )
-                        all_photo_ids.append(comment_photo_id)
+                        all_photo_ids.append(followup_id)
 
             if photo["url"] == "":
                 if retries < self.fallback_retries:
@@ -261,23 +247,21 @@ class FacebookExtractor(Extractor):
                     retries = 0
             else:
                 retries = 0
-                yield Message.Url, photo["url"], photo
+                yield photo
 
-            next_photo_id = self.get_next_photo_id(media_page)
-
-            if next_photo_id == "":
+            if photo["next_photo_id"] == "":
                 self.log.debug(
                     "Can't find next image in the set. "
                     "Extraction is over."
                 )
-            elif next_photo_id in all_photo_ids:
-                if next_photo_id != photo_id:
+            elif photo["next_photo_id"] in all_photo_ids:
+                if photo["next_photo_id"] != photo["id"]:
                     self.log.debug(
                         "Detected a loop in the set, it's likely finished. "
                         "Extraction is over."
                     )
             else:
-                all_photo_ids.append(next_photo_id)
+                all_photo_ids.append(photo["next_photo_id"])
 
             i += 1
 
@@ -289,16 +273,23 @@ class FacebookSetExtractor(FacebookExtractor):
     example = "https://www.facebook.com/media/set/?set=SET_ID"
 
     def items(self):
-        metadata_iter = self.set_photos_iter(self.match.group(1))
+        set_url = self.set_url_fmt.format(set_id=self.match.group(1))
+        set_page = self.request(set_url).text
 
-        for message in metadata_iter:
-            yield message
+        directory = self.get_set_page_metadata(set_page)
+
+        yield Message.Directory, directory
+
+        for photo in self.set_photos_iter(
+            directory["first_photo_id"], directory["set_id"]
+        ):
+            yield Message.Url, photo["url"], photo
 
 
 class FacebookPhotoExtractor(FacebookExtractor):
     """Base class for Facebook Photo extractors"""
     subcategory = "photo"
-    pattern = BASE_PATTERN + r"/photo.*fbid=([^/?&]+)"
+    pattern = BASE_PATTERN + r"/photo.*fbid=([^/?&]+)(?:.*(setextract))?"
     example = "https://www.facebook.com/photo/?fbid=PHOTO_ID"
 
     def items(self):
@@ -311,27 +302,35 @@ class FacebookPhotoExtractor(FacebookExtractor):
         photo = self.get_photo_page_metadata(photo_page)
         photo["num"] = i
 
-        set_page = self.request(self.set_url_fmt.format(
-            set_id=photo["set_id"]
-        )).text
+        set_page = self.request(
+            self.set_url_fmt.format(set_id=photo["set_id"])
+        ).text
 
         directory = self.get_set_page_metadata(set_page)
 
         yield Message.Directory, directory
-        yield Message.Url, photo["url"], photo
 
-        if self.author_followups:
-            for comment_photo_id in (
-                self.get_photo_page_author_comments_photo_ids(photo_page)
+        if self.match.group(2) == "setextract":
+            for set_photo in self.set_photos_iter(
+                photo["id"], directory["set_id"]
             ):
-                comment_photo = self.get_photo_page_metadata(
-                    self.request(self.photo_url_fmt.format(
-                        photo_id=comment_photo_id, set_id=""
-                    )).text
-                )
-                i += 1
-                comment_photo["num"] = i
-                yield Message.Url, comment_photo["url"], comment_photo
+                set_photo["num"] += i
+                yield Message.Url, set_photo["url"], set_photo
+        else:
+            yield Message.Url, photo["url"], photo
+
+            if self.author_followups:
+                for comment_photo_id in photo["followups_ids"]:
+                    comment_photo = self.get_photo_page_metadata(
+                        self.photo_page_request_wrapper(
+                            self.photo_url_fmt.format(
+                                photo_id=comment_photo_id, set_id=""
+                            )
+                        ).text
+                    )
+                    i += 1
+                    comment_photo["num"] = i
+                    yield Message.Url, comment_photo["url"], comment_photo
 
 
 class FacebookProfileExtractor(FacebookExtractor):
@@ -357,8 +356,14 @@ class FacebookProfileExtractor(FacebookExtractor):
             return
 
         set_id = self.get_profile_photos_set_id(profile_photos_page)
+        set_url = self.set_url_fmt.format(set_id=set_id)
+        set_page = self.request(set_url).text
 
-        metadata_iter = self.set_photos_iter(set_id)
+        directory = self.get_set_page_metadata(set_page)
 
-        for message in metadata_iter:
-            yield message
+        yield Message.Directory, directory
+
+        for photo in self.set_photos_iter(
+            directory["first_photo_id"], directory["set_id"]
+        ):
+            yield Message.Url, photo["url"], photo
