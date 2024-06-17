@@ -202,7 +202,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Facebook</td>
     <td>https://www.facebook.com/</td>
-    <td>Profile Photos, Albums, Single Photos</td>
+    <td>Profile Photos, Albums/Sets, Individual Photos, Individual Videos</td>
     <td></td>
 </tr>
 <tr>
