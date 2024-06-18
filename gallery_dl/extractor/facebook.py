@@ -36,6 +36,7 @@ class FacebookExtractor(Extractor):
 
         self.fallback_retries = self.config("fallback-retries", 2)
         self.sleep_429 = self.config("sleep-429", 5)
+        self.videos = self.config("videos", True)
 
         self.author_followups = self.config("author-followups", False)
 
@@ -152,7 +153,24 @@ class FacebookExtractor(Extractor):
             ),
             "views": text.extr(
                 video_page, '"video_view_count":', ','
-            )
+            ),
+            "type": "video"
+        }
+
+        audio = {
+            **video,
+            "url": text.unescape(
+                text.extr(
+                    text.extr(
+                        video_page,
+                        "AudioChannelConfiguration",
+                        "BaseURL>\\u003C"
+                    ),
+                    "BaseURL>",
+                    "\\u003C\\/"
+                )
+            ).replace("\\/", "/"),
+            "type": "audio"
         }
 
         video["urls"] = {}
@@ -164,13 +182,17 @@ class FacebookExtractor(Extractor):
                 raw_url.split('BaseURL>', 1)[1]
             ).replace("\\/", "/")
             video["urls"][resolution] = dl_url
-
         video["url"] = dl_url
 
         video["filename"] = text.rextract(video["url"], "/", "?")[0]
         FacebookExtractor.item_filename_handle(video)
 
-        return video
+        audio["filename"] = text.rextract(
+            audio["url"], "/", "?"
+        )[0].replace(".mp4", ".m4a")
+        FacebookExtractor.item_filename_handle(audio)
+
+        return video, audio
 
     @staticmethod
     def get_set_page_metadata(set_page):
@@ -314,7 +336,7 @@ class FacebookSetExtractor(FacebookExtractor):
     subcategory = "set"
     pattern = (
         BASE_PATTERN + r"(?:/media/set/.*set=([^/?&]+)"
-        r"|/photo.*fbid=([^/?&]+).*set=([^/?&]+).*(?:setextract))"
+        r"|/photo.*fbid=([^/?&]+).*set=([^/?&]+).*setextract)"
     )
     example = "https://www.facebook.com/media/set/?set=SET_ID"
 
@@ -379,17 +401,21 @@ class FacebookVideoExtractor(FacebookExtractor):
     pattern = BASE_PATTERN + r"/(?:.+/videos/|watch/.*\?v=)([^/]+)"
     example = "https://www.facebook.com/watch/?v=VIDEO_ID"
     directory_fmt = ("{category}", "{username}", "{subcategory}")
-    filename_fmt = "{id}.{extension}"
 
     def items(self):
         video_id = self.match.group(1)
         video_url = self.root + "/watch/?v=" + video_id
         video_page = self.request(video_url).text
 
-        video = self.get_video_page_metadata(video_page)
+        video, audio = self.get_video_page_metadata(video_page)
 
         yield Message.Directory, video
-        yield Message.Url, video["url"], video
+
+        if self.videos == "ytdl":
+            yield Message.Url, "ytdl:" + video_url, video
+        else:
+            yield Message.Url, video["url"], video
+            yield Message.Url, audio["url"], audio
 
 
 class FacebookProfileExtractor(FacebookExtractor):

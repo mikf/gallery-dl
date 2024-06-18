@@ -1954,6 +1954,20 @@ description
     Extract comments that include photo attachments made by the author of the post.
 
 
+extractor.facebook.videos
+-----------------------
+Type
+    * ``bool``
+    * ``string``
+Default
+    ``true``
+Description
+    Control video download behavior.
+
+    * ``true``: Extract and download video & audio separately.
+    * ``"ytdl"``: Let `youtube-dl`_ handle video extraction and download, and merge video & audio streams.
+
+
 extractor.fanbox.embeds
 -----------------------
 Type
