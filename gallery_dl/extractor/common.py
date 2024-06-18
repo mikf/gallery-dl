@@ -264,9 +264,7 @@ class Extractor():
         time.sleep(seconds)
 
     def input(self, prompt, echo=True):
-        if not self._input:
-            raise exception.StopExtraction(
-                "User input required (%s)", prompt.strip(" :"))
+        self._check_input_allowed(prompt)
 
         if echo:
             try:
@@ -276,6 +274,19 @@ class Extractor():
         else:
             return getpass.getpass(prompt)
 
+    def _check_input_allowed(self, prompt=""):
+        input = self.config("input")
+
+        if input is None:
+            try:
+                input = sys.stdin.isatty()
+            except Exception:
+                input = False
+
+        if not input:
+            raise exception.StopExtraction(
+                "User input required (%s)", prompt.strip(" :"))
+
     def _get_auth_info(self):
         """Return authentication information as (username, password) tuple"""
         username = self.config("username")
@@ -284,9 +295,7 @@ class Extractor():
         if username:
             password = self.config("password")
             if not password:
-                if not self._input:
-                    raise exception.StopExtraction(
-                        "User input required (password)")
+                self._check_input_allowed("password")
                 password = util.LazyPrompt()
 
         elif self.config("netrc", False):
@@ -309,7 +318,6 @@ class Extractor():
         self._retries = self.config("retries", 4)
         self._timeout = self.config("timeout", 30)
         self._verify = self.config("verify", True)
-        self._input = self.config("input")
         self._proxies = util.build_proxy_map(self.config("proxy"), self.log)
         self._interval = util.build_duration_func(
             self.config("sleep-request", self.request_interval),
@@ -319,11 +327,6 @@ class Extractor():
             self.config("sleep-429", 60),
         )
 
-        if self._input is None:
-            try:
-                self._input = sys.stdin.isatty()
-            except Exception:
-                self._input = False
         if self._retries < 0:
             self._retries = float("inf")
         if not self._retry_codes:
