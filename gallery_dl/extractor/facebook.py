@@ -336,7 +336,7 @@ class FacebookSetExtractor(FacebookExtractor):
     subcategory = "set"
     pattern = (
         BASE_PATTERN + r"(?:/media/set/.*set=([^/?&]+)"
-        r"|/photo.*fbid=([^/?&]+).*set=([^/?&]+).*setextract)"
+        r"|/photo.*fbid=([^/?&]+).*?(?:set=([^/?&]+))?&setextract)"
     )
     example = "https://www.facebook.com/media/set/?set=SET_ID"
 
