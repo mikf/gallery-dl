@@ -36,7 +36,9 @@ class TwitterExtractor(Extractor):
         self.user = match.group(1)
 
     def _init(self):
-        self.textonly = self.config("text-tweets", False)
+        self.textonly = self.config("text-posts", False) or self.config(
+            "text-tweets", False
+        )
         self.retweets = self.config("retweets", False)
         self.replies = self.config("replies", True)
         self.twitpic = self.config("twitpic", False)

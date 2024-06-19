@@ -43,6 +43,7 @@ class VichanThreadExtractor(VichanExtractor):
         index = match.lastindex
         self.board = match.group(index-1)
         self.thread = match.group(index)
+        self.text_posts = self.config("text-posts", False)
 
     def items(self):
         url = "{}/{}/res/{}.json".format(self.root, self.board, self.thread)
@@ -57,8 +58,10 @@ class VichanThreadExtractor(VichanExtractor):
             "num"   : 0,
         }
 
-        yield Message.Directory, data
         for post in posts:
+            post.update(data)
+            if "filename" in post or self.text_posts:
+                yield Message.Directory, post
             if "filename" in post:
                 yield process(post, data)
                 if "extra_files" in post:
@@ -67,7 +70,6 @@ class VichanThreadExtractor(VichanExtractor):
                         yield process(post, filedata)
 
     def _process(self, post, data):
-        post.update(data)
         post["extension"] = post["ext"][1:]
         post["url"] = "{}/{}/src/{}{}".format(
             self.root, post["board"], post["tim"], post["ext"])
@@ -75,7 +77,6 @@ class VichanThreadExtractor(VichanExtractor):
 
     @staticmethod
     def _process_8kun(post, data):
-        post.update(data)
         post["extension"] = post["ext"][1:]
 
         tim = post["tim"]

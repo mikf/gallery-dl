@@ -47,6 +47,7 @@ class LynxchanThreadExtractor(LynxchanExtractor):
         index = match.lastindex
         self.board = match.group(index-1)
         self.thread = match.group(index)
+        self.text_posts = self.config("text-posts", False)
 
     def items(self):
         url = "{}/{}/res/{}.json".format(self.root, self.board, self.thread)
@@ -54,17 +55,17 @@ class LynxchanThreadExtractor(LynxchanExtractor):
         thread["postId"] = thread["threadId"]
         posts = thread.pop("posts", ())
 
-        yield Message.Directory, thread
         for post in itertools.chain((thread,), posts):
             files = post.pop("files", ())
-            if files:
-                thread.update(post)
-                for num, file in enumerate(files):
-                    file.update(thread)
-                    file["num"] = num
-                    url = self.root + file["path"]
-                    text.nameext_from_url(file["originalName"], file)
-                    yield Message.Url, url, file
+            thread.update(post)
+            if files or self.text_posts:
+                yield Message.Directory, thread
+            for num, file in enumerate(files):
+                file.update(thread)
+                file["num"] = num
+                url = self.root + file["path"]
+                text.nameext_from_url(file["originalName"], file)
+                yield Message.Url, url, file
 
 
 class LynxchanBoardExtractor(LynxchanExtractor):

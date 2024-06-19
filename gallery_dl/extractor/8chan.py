@@ -65,6 +65,7 @@ class _8chanThreadExtractor(_8chanExtractor):
     def __init__(self, match):
         _8chanExtractor.__init__(self, match)
         _, self.board, self.thread = match.groups()
+        self.text_posts = self.config("text-posts", False)
 
     def items(self):
         # fetch thread data
@@ -82,12 +83,11 @@ class _8chanThreadExtractor(_8chanExtractor):
 
         # download files
         posts = thread.pop("posts", ())
-        yield Message.Directory, thread
         for post in itertools.chain((thread,), posts):
             files = post.pop("files", ())
-            if not files:
-                continue
             thread.update(post)
+            if files or self.text_posts:
+                yield Message.Directory, post
             for num, file in enumerate(files):
                 file.update(thread)
                 file["num"] = num
