@@ -36,6 +36,7 @@ class TwitterExtractor(Extractor):
         self.user = match.group(1)
 
     def _init(self):
+        self.unavailable = self.config("unavailable", False)
         self.textonly = self.config("text-tweets", False)
         self.retweets = self.config("retweets", False)
         self.replies = self.config("replies", True)
@@ -143,6 +144,15 @@ class TwitterExtractor(Extractor):
 
     def _extract_media(self, tweet, entities, files):
         for media in entities:
+
+            if "ext_media_availability" in media:
+                ext = media["ext_media_availability"]
+                if ext.get("status") == "Unavailable":
+                    self.log.warning("Media unavailable (%s - '%s')",
+                                     tweet["id_str"], ext.get("reason"))
+                    if not self.unavailable:
+                        continue
+
             descr = media.get("ext_alt_text")
             width = media["original_info"].get("width", 0)
             height = media["original_info"].get("height", 0)
