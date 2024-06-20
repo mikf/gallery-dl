@@ -3896,6 +3896,17 @@ Description
     Note: This requires at least 1 additional API call per initial Tweet.
 
 
+extractor.twitter.unavailable
+-----------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Try to download media marked as ``Unavailable``,
+    e.g. ``Geoblocked`` videos.
+
+
 extractor.twitter.include
 -------------------------
 Type
