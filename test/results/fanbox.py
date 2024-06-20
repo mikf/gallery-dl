@@ -124,6 +124,22 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://saki9184.fanbox.cc/posts/7754760",
+    "#comment" : "missing plan for exact 'feeRequired' value (#5759)",
+    "#category": ("", "fanbox", "post"),
+    "#class"   : fanbox.FanboxPostExtractor,
+    "#options" : {"metadata": "plan"},
+
+    "feeRequired": 300,
+    "plan"       : {
+        "creatorId": "saki9184",
+        "fee"      : 350,
+        "id"       : "414274",
+        "title"    : "涼宮ハルヒの憂鬱",
+    },
+},
+
+{
     "#url"     : "https://mochirong.fanbox.cc/posts/3746116",
     "#comment" : "imageMap file order (#2718)",
     "#category": ("", "fanbox", "post"),

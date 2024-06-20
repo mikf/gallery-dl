@@ -113,7 +113,12 @@ class FanboxExtractor(Extractor):
             post["user"] = self._get_user_data(post["creatorId"])
         if self._meta_plan:
             plans = self._get_plan_data(post["creatorId"])
-            post["plan"] = plans[post["feeRequired"]]
+            fee = post["feeRequired"]
+            try:
+                post["plan"] = plans[fee]
+            except KeyError:
+                post["plan"] = plans[fee] = min(
+                    p for p in plans.values() if p["fee"] >= fee)
 
         return content_body, post
 
