@@ -43,6 +43,7 @@ class Extractor():
     browser = None
     request_interval = 0.0
     request_interval_min = 0.0
+    request_interval_429 = 60.0
     request_timestamp = 0.0
 
     def __init__(self, match):
@@ -203,7 +204,9 @@ class Extractor():
                         self.log.warning("Cloudflare CAPTCHA")
                         break
 
-                if code == 429 and self._interval_429:
+                if code == 429 and self._handle_429(response):
+                    continue
+                elif code == 429 and self._interval_429:
                     pass
                 elif code not in retry_codes and code < 500:
                     break
@@ -230,6 +233,8 @@ class Extractor():
             tries += 1
 
         raise exception.HttpError(msg, response)
+
+    _handle_429 = util.false
 
     def wait(self, seconds=None, until=None, adjust=1.0,
              reason="rate limit"):
@@ -324,7 +329,7 @@ class Extractor():
             self.request_interval_min,
         )
         self._interval_429 = util.build_duration_func(
-            self.config("sleep-429", 60),
+            self.config("sleep-429", self.request_interval_429),
         )
 
         if self._retries < 0:
