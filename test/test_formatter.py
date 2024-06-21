@@ -272,6 +272,13 @@ class TestFormatter(unittest.TestCase):
         self._run_test("{h:CHC}"  , "Foo & Bar")
         self._run_test("{l:CSulc}", "A, b, c")
 
+    def test_specifier_limit(self):
+        self._run_test("{a:X20/ */}", "hElLo wOrLd")
+        self._run_test("{a:X10/ */}", "hElLo wO *")
+
+        with self.assertRaises(ValueError):
+            self._run_test("{a:Xfoo/ */}", "hello wo *")
+
     def test_chain_special(self):
         # multiple replacements
         self._run_test("{a:Rh/C/RE/e/RL/l/}", "Cello wOrld")

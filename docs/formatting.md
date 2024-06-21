@@ -181,6 +181,16 @@ Format specifiers can be used for advanced formatting by using the options provi
     <td><code>long</code></td>
 </tr>
 <tr>
+    <td rowspan="2"><code>X&lt;maxlen&gt;/&lt;ext&gt;/</code></td>
+    <td rowspan="2">Limit output to <code>&lt;maxlen&gt;</code> characters. Cut output and add <code>&lt;ext&gt;</code> to its end if its length exceeds <code>&lt;maxlen&gt;</code></td>
+    <td><code>{foo:X15/&nbsp;.../}</code></td>
+    <td><code>Foo&nbsp;Bar</code></td>
+</tr>
+<tr>
+    <td><code>{foo:L6/&nbsp;.../}</code></td>
+    <td><code>Fo&nbsp;...</code></td>
+</tr>
+<tr>
     <td><code>J&lt;separator&gt;/</code></td>
     <td>Concatenates elements of a list with <code>&lt;separator&gt;</code> using <a href="https://docs.python.org/3/library/stdtypes.html#str.join" rel="nofollow"><code>str.join()</code></a></td>
     <td><code>{tags:J - /}</code></td>
