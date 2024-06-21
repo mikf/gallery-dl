@@ -843,7 +843,7 @@ Consider all listed sites to potentially be NSFW.
 </tr>
 <tr>
     <td>TCB Scans</td>
-    <td>https://tcbscans.com/</td>
+    <td>https://tcbscans.me/</td>
     <td>Chapters, Manga</td>
     <td></td>
 </tr>
