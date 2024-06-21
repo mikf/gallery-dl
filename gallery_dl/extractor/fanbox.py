@@ -124,8 +124,6 @@ class FanboxExtractor(Extractor):
                     plan = plans[0].copy()
                     plan["fee"] = fee
                 post["plan"] = plans[fee] = plan
-            print(post["plan"])
-            exit()
 
         return content_body, post
 
