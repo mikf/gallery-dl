@@ -117,8 +117,15 @@ class FanboxExtractor(Extractor):
             try:
                 post["plan"] = plans[fee]
             except KeyError:
-                post["plan"] = plans[fee] = min(
-                    p for p in plans.values() if p["fee"] >= fee)
+                fees = [f for f in plans if f >= fee]
+                if fees:
+                    plan = plans[min(fees)]
+                else:
+                    plan = plans[0].copy()
+                    plan["fee"] = fee
+                post["plan"] = plans[fee] = plan
+            print(post["plan"])
+            exit()
 
         return content_body, post
 
