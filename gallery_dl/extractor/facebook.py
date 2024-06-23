@@ -37,16 +37,18 @@ class FacebookExtractor(Extractor):
         self.fallback_retries = self.config("fallback-retries", 2)
         self.sleep_429 = self.config("sleep-429", 5)
         self.videos = self.config("videos", True)
+        self.no_warning = self.config("no-warning", False)
 
         self.author_followups = self.config("author-followups", False)
 
-        self.log.warning(
-            "Using the Facebook extractor for too long may result in "
-            "temporary UI bans of increasing length. "
-            "Cookies will only be used when necessary, "
-            "and you will be informed if they are being used. "
-            "\nUse at your own risk."
-        )
+        if not self.no_warning:
+            self.log.warning(
+                "Using the Facebook extractor for too long may result in "
+                "temporary UI bans of increasing length. "
+                "Cookies will only be used when necessary, "
+                "and you will be informed if they are being used. "
+                "\nUse at your own risk."
+            )
 
     @staticmethod
     def text_unescape(txt):
@@ -64,6 +66,39 @@ class FacebookExtractor(Extractor):
                 item["extension"] = ""
         else:
             item["filename"] = item["name"] = item["extension"] = ""
+
+    @staticmethod
+    def get_set_page_metadata(set_page):
+        directory = {
+            "username": FacebookExtractor.text_unescape(text.extr(
+                set_page, '"User","name":"', '","'
+            )),
+            "user_id": text.extr(
+                set_page, '"owner":{"__typename":"User","id":"', '"'
+            ),
+            "set_id": text.extr(
+                set_page, '"mediaSetToken":"', '"',
+                text.extr(set_page, '"mediasetToken":"', '"')
+            ),
+            "title": FacebookExtractor.text_unescape(text.extr(
+                set_page, '"title":{"text":"', '"'
+            )),
+            "description": FacebookExtractor.text_unescape(text.extr(
+                set_page, '"message":{"delight_ranges"', '"},'
+            ).rsplit('],"text":"', 1)[-1]),
+            "first_photo_id": text.extr(
+                set_page,
+                '{"__typename":"Photo","__isMedia":"Photo","',
+                '","creation_story"'
+            ).rsplit('"id":"', 1)[-1]
+        }
+
+        if directory["first_photo_id"] == "":
+            directory["first_photo_id"] = text.extr(
+                set_page, '{"__typename":"Photo","id":"', '"'
+            )
+
+        return directory
 
     @staticmethod
     def get_photo_page_metadata(photo_page):
@@ -129,103 +164,6 @@ class FacebookExtractor(Extractor):
                 ))
 
         return photo
-
-    @staticmethod
-    def get_video_page_metadata(video_page):
-        video = {
-            "id": text.extr(
-                video_page, '\\"video_id\\":\\"', '\\"'
-            ),
-            "username": text.extr(
-                video_page, '"actors":[{"__typename":"User","name":"', '"'
-            ),
-            "date": text.parse_timestamp(text.extr(
-                video_page, '"publish_time":', ','
-            )),
-            "caption": FacebookExtractor.text_unescape(text.extr(
-                video_page, '"meta":{"title":"', ' | '
-            )),
-            "reactions": text.extr(
-                video_page, '}},"i18n_reaction_count":"', '"'
-            ),
-            "comments": text.extr(
-                video_page, '{"comments":{"total_count":', '}'
-            ),
-            "views": text.extr(
-                video_page, '"video_view_count":', ','
-            ),
-            "type": "video"
-        }
-
-        audio = {
-            **video,
-            "url": text.unescape(
-                text.extr(
-                    text.extr(
-                        video_page,
-                        "AudioChannelConfiguration",
-                        "BaseURL>\\u003C"
-                    ),
-                    "BaseURL>",
-                    "\\u003C\\/"
-                )
-            ).replace("\\/", "/"),
-            "type": "audio"
-        }
-
-        video["urls"] = {}
-        for raw_url in text.extract_iter(
-            video_page, 'FBQualityLabel=\\"', '\\u003C\\/BaseURL>'
-        ):
-            resolution = raw_url.split('\\"', 1)[0]
-            dl_url = text.unescape(
-                raw_url.split('BaseURL>', 1)[1]
-            ).replace("\\/", "/")
-            video["urls"][resolution] = dl_url
-        video["url"] = dl_url
-
-        video["filename"] = text.rextract(video["url"], "/", "?")[0]
-        FacebookExtractor.item_filename_handle(video)
-
-        audio["filename"] = text.rextract(
-            audio["url"], "/", "?"
-        )[0].replace(".mp4", ".m4a")
-        FacebookExtractor.item_filename_handle(audio)
-
-        return video, audio
-
-    @staticmethod
-    def get_set_page_metadata(set_page):
-        directory = {
-            "username": FacebookExtractor.text_unescape(text.extr(
-                set_page, '"User","name":"', '","'
-            )),
-            "user_id": text.extr(
-                set_page, '"owner":{"__typename":"User","id":"', '"'
-            ),
-            "set_id": text.extr(
-                set_page, '"mediaSetToken":"', '"',
-                text.extr(set_page, '"mediasetToken":"', '"')
-            ),
-            "title": FacebookExtractor.text_unescape(text.extr(
-                set_page, '"title":{"text":"', '"'
-            )),
-            "description": FacebookExtractor.text_unescape(text.extr(
-                set_page, '"message":{"delight_ranges"', '"},'
-            ).rsplit('],"text":"', 1)[-1]),
-            "first_photo_id": text.extr(
-                set_page,
-                '{"__typename":"Photo","__isMedia":"Photo","',
-                '","creation_story"'
-            ).rsplit('"id":"', 1)[-1]
-        }
-
-        if directory["first_photo_id"] == "":
-            directory["first_photo_id"] = text.extr(
-                set_page, '{"__typename":"Photo","id":"', '"'
-            )
-
-        return directory
 
     def photo_page_request_wrapper(self, url, *args, **kwargs):
         LOGIN_TXT = "You must be logged in to continue viewing images."
@@ -401,6 +339,70 @@ class FacebookVideoExtractor(FacebookExtractor):
     pattern = BASE_PATTERN + r"/(?:.+/videos/|watch/.*\?v=)([^/]+)"
     example = "https://www.facebook.com/watch/?v=VIDEO_ID"
     directory_fmt = ("{category}", "{username}", "{subcategory}")
+
+    @staticmethod
+    def get_video_page_metadata(video_page):
+        video = {
+            "id": text.extr(
+                video_page, '\\"video_id\\":\\"', '\\"'
+            ),
+            "username": text.extr(
+                video_page, '"actors":[{"__typename":"User","name":"', '"'
+            ),
+            "date": text.parse_timestamp(text.extr(
+                video_page, '"publish_time":', ','
+            )),
+            "caption": FacebookExtractor.text_unescape(text.extr(
+                video_page, '"meta":{"title":"', ' | '
+            )),
+            "reactions": text.extr(
+                video_page, '}},"i18n_reaction_count":"', '"'
+            ),
+            "comments": text.extr(
+                video_page, '{"comments":{"total_count":', '}'
+            ),
+            "views": text.extr(
+                video_page, '"video_view_count":', ','
+            ),
+            "type": "video"
+        }
+
+        audio = {
+            **video,
+            "url": text.unescape(
+                text.extr(
+                    text.extr(
+                        video_page,
+                        "AudioChannelConfiguration",
+                        "BaseURL>\\u003C"
+                    ),
+                    "BaseURL>",
+                    "\\u003C\\/"
+                )
+            ).replace("\\/", "/"),
+            "type": "audio"
+        }
+
+        video["urls"] = {}
+        for raw_url in text.extract_iter(
+            video_page, 'FBQualityLabel=\\"', '\\u003C\\/BaseURL>'
+        ):
+            resolution = raw_url.split('\\"', 1)[0]
+            dl_url = text.unescape(
+                raw_url.split('BaseURL>', 1)[1]
+            ).replace("\\/", "/")
+            video["urls"][resolution] = dl_url
+        video["url"] = dl_url
+
+        video["filename"] = text.rextract(video["url"], "/", "?")[0]
+        FacebookExtractor.item_filename_handle(video)
+
+        audio["filename"] = text.rextract(
+            audio["url"], "/", "?"
+        )[0].replace(".mp4", ".m4a")
+        FacebookExtractor.item_filename_handle(audio)
+
+        return video, audio
 
     def items(self):
         video_id = self.match.group(1)

@@ -1968,6 +1968,16 @@ Description
     * ``"ytdl"``: Let `youtube-dl`_ handle video extraction and download, and merge video & audio streams.
 
 
+extractor.facebook.no-warning
+-------------------------
+Type
+    ``bool``
+Default
+    ``false``
+description
+    Disable the start warning message.
+
+
 extractor.fanbox.embeds
 -----------------------
 Type
