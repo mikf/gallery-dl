@@ -33,6 +33,7 @@ modules = [
     "bunkr",
     "catbox",
     "chevereto",
+    "comicfury",
     "comicvine",
     "cyberdrop",
     "danbooru",
