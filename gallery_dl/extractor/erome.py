@@ -46,18 +46,24 @@ class EromeExtractor(Extractor):
                 page, 'href="https://www.erome.com/', '"', pos)
 
             urls = []
+            date = None
             groups = page.split('<div class="media-group"')
             for group in util.advance(groups, 1):
                 url = (text.extr(group, '<source src="', '"') or
                        text.extr(group, 'data-src="', '"'))
                 if url:
                     urls.append(url)
+                if not date:
+                    ts = text.extr(group, '?v=', '"')
+                    if len(ts) > 1:
+                        date = text.parse_timestamp(ts)
 
             data = {
                 "album_id"     : album_id,
                 "title"        : text.unescape(title),
                 "user"         : text.unquote(user),
                 "count"        : len(urls),
+                "date"         : date,
                 "_http_headers": {"Referer": url},
             }
 
