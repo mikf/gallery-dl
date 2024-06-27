@@ -865,6 +865,25 @@ Description
     may pose a security risk.
 
 
+extractor.*.archive-event
+-------------------------
+Type
+     + ``string``
+     + ``list`` of ``strings``
+Default
+    ``"file"``
+Example
+    * ``"file,skip"``
+    * ``["file", "skip"]``
+Description
+    `Event(s) <metadata.event_>`__
+    for which IDs get written to an
+    `archive <extractor.*.archive_>`__.
+
+    Available events are:
+    ``file``, ``skip``
+
+
 extractor.*.archive-format
 --------------------------
 Type
