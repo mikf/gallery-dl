@@ -335,13 +335,10 @@ class PathFormat():
 
         if self.temppath != self.realpath:
             # Move temp file to its actual location
+            os.makedirs(self.realdirectory, exist_ok=True)
             while True:
                 try:
                     os.replace(self.temppath, self.realpath)
-                except FileNotFoundError:
-                    # delayed directory creation
-                    os.makedirs(self.realdirectory)
-                    continue
                 except OSError:
                     # move across different filesystems
                     shutil.copyfile(self.temppath, self.realpath)
