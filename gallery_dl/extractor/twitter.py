@@ -854,6 +854,24 @@ class TwitterQuotesExtractor(TwitterExtractor):
         yield Message.Queue, url, data
 
 
+class TwitterProfileExtractor(TwitterExtractor):
+    """Extractor a user's profile data"""
+    subcategory = "profile"
+    pattern = BASE_PATTERN + r"/(?!search)([^/?#]+)/profile"
+    example = "https://x.com/USER/profile"
+
+    def items(self):
+        api = TwitterAPI(self)
+
+        screen_name = self.user
+        if screen_name.startswith("id:"):
+            user = api.user_by_rest_id(screen_name[3:])
+        else:
+            user = api.user_by_screen_name(screen_name)
+
+        return iter(((Message.Directory, self._transform_user(user)),))
+
+
 class TwitterAvatarExtractor(TwitterExtractor):
     subcategory = "avatar"
     filename_fmt = "avatar {date}.{extension}"
