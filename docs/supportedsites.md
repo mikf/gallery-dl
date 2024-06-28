@@ -898,7 +898,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Twitter</td>
     <td>https://x.com/</td>
-    <td>Avatars, Backgrounds, Bookmarks, Communities, Events, Followed Users, Hashtags, individual Images, Likes, Lists, List Members, Media Timelines, Quotes, Search Results, Timelines, Tweets, User Profiles</td>
+    <td>Avatars, Backgrounds, Bookmarks, Communities, Events, Followed Users, Hashtags, individual Images, Likes, Lists, List Members, Media Timelines, User Profile Data, Quotes, Search Results, Timelines, Tweets, User Profiles</td>
     <td>Supported</td>
 </tr>
 <tr>
