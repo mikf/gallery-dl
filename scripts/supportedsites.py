@@ -166,6 +166,7 @@ SUBCATEGORY_MAP = {
     "media"  : "Media Files",
     "note"   : "Images from Notes",
     "popular": "Popular Images",
+    "profile": "User Profile Data",
     "recent" : "Recent Images",
     "search" : "Search Results",
     "status" : "Images from Statuses",

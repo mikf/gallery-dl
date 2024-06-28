@@ -596,6 +596,22 @@ class InstagramTagExtractor(InstagramExtractor):
         return self.api.tags_media(self.item)
 
 
+class InstagramProfileExtractor(InstagramExtractor):
+    """Extractor for an Instagram user's profile data"""
+    subcategory = "profile"
+    pattern = USER_PATTERN + r"/profile"
+    example = "https://www.instagram.com/USER/profile/"
+
+    def items(self):
+        screen_name = self.item
+        if screen_name.startswith("id:"):
+            user = self.api.user_by_id(screen_name[3:])
+        else:
+            user = self.api.user_by_name(screen_name)
+
+        return iter(((Message.Directory, user),))
+
+
 class InstagramAvatarExtractor(InstagramExtractor):
     """Extractor for an Instagram user's avatar"""
     subcategory = "avatar"
