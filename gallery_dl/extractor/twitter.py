@@ -321,7 +321,16 @@ class TwitterExtractor(Extractor):
             "quote_count"   : tget("quote_count"),
             "reply_count"   : tget("reply_count"),
             "retweet_count" : tget("retweet_count"),
+            "bookmark_count": tget("bookmark_count"),
         }
+
+        if "views" in tweet:
+            try:
+                tdata["view_count"] = int(tweet["views"]["count"])
+            except Exception:
+                tdata["view_count"] = 0
+        else:
+            tdata["view_count"] = 0
 
         if "note_tweet" in tweet:
             note = tweet["note_tweet"]["note_tweet_results"]["result"]
