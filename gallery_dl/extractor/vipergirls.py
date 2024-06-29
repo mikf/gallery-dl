@@ -101,7 +101,8 @@ class VipergirlsExtractor(Extractor):
 class VipergirlsThreadExtractor(VipergirlsExtractor):
     """Extractor for vipergirls threads"""
     subcategory = "thread"
-    pattern = BASE_PATTERN + r"/threads/(\d+)(?:-[^/?#]+)?(/page\d+)?$"
+    pattern = (BASE_PATTERN +
+               r"/threads/(\d+)(?:-[^/?#]+)?(/page\d+)?(?:$|#|\?(?!p=))")
     example = "https://vipergirls.to/threads/12345-TITLE"
 
     def __init__(self, match):
