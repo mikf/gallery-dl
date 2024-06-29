@@ -27,7 +27,8 @@ def parse(actionspec):
     for event, spec in actionspec:
         level, _, pattern = event.partition(":")
         type, _, args = spec.partition(" ")
-        action = (re.compile(pattern).search, ACTIONS[type](args))
+        search = re.compile(pattern).search if pattern else util.true
+        action = (search, ACTIONS[type](args))
 
         level = level.strip()
         if not level or level == "*":
@@ -36,7 +37,6 @@ def parse(actionspec):
             actions_w.append(action)
             actions_e.append(action)
         else:
-
             actions[_level_to_int(level)].append(action)
 
     return actions
