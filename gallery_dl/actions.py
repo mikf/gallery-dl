@@ -80,6 +80,12 @@ def action_level(opts):
     return _level
 
 
+def action_exec(opts):
+    def _exec(_):
+        util.Popen(opts, shell=True).wait()
+    return _exec
+
+
 def action_wait(opts):
     def _wait(args):
         input("Press Enter to continue")
@@ -110,12 +116,13 @@ def action_exit(opts):
 
 
 ACTIONS = {
-    "print"    : action_print,
-    "status"   : action_status,
-    "level"    : action_level,
     "abort"    : action_abort,
-    "terminate": action_terminate,
-    "restart"  : action_restart,
-    "wait"     : action_wait,
+    "exec"     : action_exec,
     "exit"     : action_exit,
+    "level"    : action_level,
+    "print"    : action_print,
+    "restart"  : action_restart,
+    "status"   : action_status,
+    "terminate": action_terminate,
+    "wait"     : action_wait,
 }
