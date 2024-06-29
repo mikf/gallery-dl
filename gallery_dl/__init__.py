@@ -299,6 +299,8 @@ def main():
                     else:
                         input_manager.success()
 
+                except exception.StopExtraction:
+                    pass
                 except exception.TerminateExtraction:
                     pass
                 except exception.RestartExtraction:

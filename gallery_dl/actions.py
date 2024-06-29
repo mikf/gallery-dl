@@ -86,6 +86,14 @@ def action_wait(opts):
     return _wait
 
 
+def action_abort(opts):
+    return util.raises(exception.StopExtraction)
+
+
+def action_terminate(opts):
+    return util.raises(exception.TerminateExtraction)
+
+
 def action_restart(opts):
     return util.raises(exception.RestartExtraction)
 
@@ -102,10 +110,12 @@ def action_exit(opts):
 
 
 ACTIONS = {
-    "print"  : action_print,
-    "status" : action_status,
-    "level"  : action_level,
-    "restart": action_restart,
-    "wait"   : action_wait,
-    "exit"   : action_exit,
+    "print"    : action_print,
+    "status"   : action_status,
+    "level"    : action_level,
+    "abort"    : action_abort,
+    "terminate": action_terminate,
+    "restart"  : action_restart,
+    "wait"     : action_wait,
+    "exit"     : action_exit,
 }
