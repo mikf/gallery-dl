@@ -338,6 +338,10 @@ class PathFormat():
             while True:
                 try:
                     os.replace(self.temppath, self.realpath)
+                except FileNotFoundError:
+                    # delayed directory creation
+                    os.makedirs(self.realdirectory)
+                    continue
                 except OSError:
                     # move across different filesystems
                     try:
