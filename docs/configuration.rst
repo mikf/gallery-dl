@@ -984,6 +984,8 @@ Description
         | Can be one of ``debug``, ``info``, ``warning``, ``error`` or an integer value.
     ``print``
         Write argument to stdout.
+    ``exec``
+        Run a shell command.
     ``abort``:
         Stop the current extractor run.
     ``terminate``:
