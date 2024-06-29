@@ -9,6 +9,7 @@
 """ """
 
 import re
+import time
 import logging
 import operator
 from . import util, exception
@@ -87,8 +88,15 @@ def action_exec(opts):
 
 
 def action_wait(opts):
-    def _wait(args):
-        input("Press Enter to continue")
+    if opts:
+        seconds = util.build_duration_func(opts)
+
+        def _wait(args):
+            time.sleep(seconds())
+    else:
+        def _wait(args):
+            input("Press Enter to continue")
+
     return _wait
 
 
