@@ -27,9 +27,17 @@ def parse(actionspec):
 
     for event, spec in actionspec:
         level, _, pattern = event.partition(":")
-        type, _, args = spec.partition(" ")
         search = re.compile(pattern).search if pattern else util.true
-        action = (search, ACTIONS[type](args))
+
+        if isinstance(spec, str):
+            type, _, args = spec.partition(" ")
+            action = (search, ACTIONS[type](args))
+        else:
+            action_list = []
+            for s in spec:
+                type, _, args = s.partition(" ")
+                action_list.append(ACTIONS[type](args))
+            action = (search, _chain_actions(action_list))
 
         level = level.strip()
         if not level or level == "*":
@@ -48,6 +56,13 @@ def _level_to_int(level):
         return logging._nameToLevel[level]
     except KeyError:
         return int(level)
+
+
+def _chain_actions(actions):
+    def _chain(args):
+        for action in actions:
+            action(args)
+    return _chain
 
 
 def action_print(opts):
