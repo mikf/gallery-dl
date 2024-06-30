@@ -12,6 +12,7 @@ import re
 import time
 import logging
 import operator
+import functools
 from . import util, exception
 
 
@@ -49,6 +50,39 @@ def parse(actionspec):
             actions[_level_to_int(level)].append(action)
 
     return actions
+
+
+class LoggerAdapter():
+
+    def __init__(self, logger, job):
+        self.logger = logger
+        self.extra = job._logger_extra
+        self.actions = job._logger_actions
+
+        self.debug = functools.partial(self.log, logging.DEBUG)
+        self.info = functools.partial(self.log, logging.INFO)
+        self.warning = functools.partial(self.log, logging.WARNING)
+        self.error = functools.partial(self.log, logging.ERROR)
+
+    def log(self, level, msg, *args, **kwargs):
+        msg = str(msg)
+        if args:
+            msg = msg % args
+
+        actions = self.actions[level]
+        if actions:
+            args = self.extra.copy()
+            args["level"] = level
+
+            for cond, action in actions:
+                if cond(msg):
+                    action(args)
+
+            level = args["level"]
+
+        if self.logger.isEnabledFor(level):
+            kwargs["extra"] = self.extra
+            self.logger._log(level, msg, (), **kwargs)
 
 
 def _level_to_int(level):

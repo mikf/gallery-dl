@@ -33,6 +33,7 @@ stdout_write = output.stdout_write
 class Job():
     """Base class for Job types"""
     ulog = None
+    _logger_adapter = output.LoggerAdapter
 
     def __init__(self, extr, parent=None):
         if isinstance(extr, str):
@@ -77,9 +78,9 @@ class Job():
 
         actions = extr.config("actions")
         if actions:
-            from .actions import parse
+            from .actions import LoggerAdapter, parse
+            self._logger_adapter = LoggerAdapter
             self._logger_actions = parse(actions)
-            self._wrap_logger = self._wrap_logger_actions
 
         path_proxy = output.PathfmtProxy(self)
         self._logger_extra = {
@@ -267,10 +268,7 @@ class Job():
         return self._wrap_logger(logging.getLogger(name))
 
     def _wrap_logger(self, logger):
-        return output.LoggerAdapter(logger, self)
-
-    def _wrap_logger_actions(self, logger):
-        return output.LoggerAdapterActions(logger, self)
+        return self._logger_adapter(logger, self)
 
     def _write_unsupported(self, url):
         if self.ulog:
