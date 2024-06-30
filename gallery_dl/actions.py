@@ -21,10 +21,14 @@ def parse(actionspec):
         actionspec = actionspec.items()
 
     actions = {}
-    actions[logging.DEBUG] = actions_d = []
-    actions[logging.INFO] = actions_i = []
-    actions[logging.WARNING] = actions_w = []
-    actions[logging.ERROR] = actions_e = []
+    actions[-logging.DEBUG] = actions_bd = []
+    actions[-logging.INFO] = actions_bi = []
+    actions[-logging.WARNING] = actions_bw = []
+    actions[-logging.ERROR] = actions_be = []
+    actions[logging.DEBUG] = actions_ad = []
+    actions[logging.INFO] = actions_ai = []
+    actions[logging.WARNING] = actions_aw = []
+    actions[logging.ERROR] = actions_ae = []
 
     for event, spec in actionspec:
         level, _, pattern = event.partition(":")
@@ -32,22 +36,40 @@ def parse(actionspec):
 
         if isinstance(spec, str):
             type, _, args = spec.partition(" ")
-            action = (search, ACTIONS[type](args))
+            before, after = ACTIONS[type](args)
         else:
-            action_list = []
+            actions_before = []
+            actions_after = []
             for s in spec:
                 type, _, args = s.partition(" ")
-                action_list.append(ACTIONS[type](args))
-            action = (search, _chain_actions(action_list))
+                before, after = ACTIONS[type](args)
+                if before:
+                    actions_before.append(before)
+                if after:
+                    actions_after.append(after)
+            before = _chain_actions(actions_before)
+            after = _chain_actions(actions_after)
 
         level = level.strip()
         if not level or level == "*":
-            actions_d.append(action)
-            actions_i.append(action)
-            actions_w.append(action)
-            actions_e.append(action)
+            if before:
+                action = (search, before)
+                actions_bd.append(action)
+                actions_bi.append(action)
+                actions_bw.append(action)
+                actions_be.append(action)
+            if after:
+                action = (search, after)
+                actions_ad.append(action)
+                actions_ai.append(action)
+                actions_aw.append(action)
+                actions_ae.append(action)
         else:
-            actions[_level_to_int(level)].append(action)
+            level = _level_to_int(level)
+            if before:
+                actions[-level].append((search, before))
+            if after:
+                actions[level].append((search, after))
 
     return actions
 
@@ -69,12 +91,14 @@ class LoggerAdapter():
         if args:
             msg = msg % args
 
-        actions = self.actions[level]
-        if actions:
+        before = self.actions[-level]
+        after = self.actions[level]
+
+        if before:
             args = self.extra.copy()
             args["level"] = level
 
-            for cond, action in actions:
+            for cond, action in before:
                 if cond(msg):
                     action(args)
 
@@ -83,6 +107,12 @@ class LoggerAdapter():
         if self.logger.isEnabledFor(level):
             kwargs["extra"] = self.extra
             self.logger._log(level, msg, (), **kwargs)
+
+        if after:
+            args = self.extra.copy()
+            for cond, action in after:
+                if cond(msg):
+                    action(args)
 
 
 def _level_to_int(level):
@@ -99,10 +129,12 @@ def _chain_actions(actions):
     return _chain
 
 
+# --------------------------------------------------------------------
+
 def action_print(opts):
     def _print(_):
         print(opts)
-    return _print
+    return None, _print
 
 
 def action_status(opts):
@@ -119,7 +151,7 @@ def action_status(opts):
 
     def _status(args):
         args["job"].status = op(args["job"].status, value)
-    return _status
+    return _status, None
 
 
 def action_level(opts):
@@ -127,13 +159,13 @@ def action_level(opts):
 
     def _level(args):
         args["level"] = level
-    return _level
+    return _level, None
 
 
 def action_exec(opts):
     def _exec(_):
         util.Popen(opts, shell=True).wait()
-    return _exec
+    return None, _exec
 
 
 def action_wait(opts):
@@ -146,19 +178,19 @@ def action_wait(opts):
         def _wait(args):
             input("Press Enter to continue")
 
-    return _wait
+    return None, _wait
 
 
 def action_abort(opts):
-    return util.raises(exception.StopExtraction)
+    return None, util.raises(exception.StopExtraction)
 
 
 def action_terminate(opts):
-    return util.raises(exception.TerminateExtraction)
+    return None, util.raises(exception.TerminateExtraction)
 
 
 def action_restart(opts):
-    return util.raises(exception.RestartExtraction)
+    return None, util.raises(exception.RestartExtraction)
 
 
 def action_exit(opts):
@@ -169,7 +201,7 @@ def action_exit(opts):
 
     def _exit(args):
         raise SystemExit(opts)
-    return _exit
+    return None, _exit
 
 
 ACTIONS = {
