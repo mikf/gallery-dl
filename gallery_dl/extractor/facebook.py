@@ -30,10 +30,6 @@ class FacebookExtractor(Extractor):
         self.session.headers["Accept"] = "text/html"
         self.session.headers["Sec-Fetch-Mode"] = "navigate"
 
-        self.fb_cookies = self.session.cookies.get_dict(domain=".facebook.com")
-        if self.fb_cookies:
-            self.session.cookies.clear(domain=".facebook.com")
-
         self.fallback_retries = self.config("fallback-retries", 2)
         self.sleep_429 = self.config("sleep-429", 5)
         self.videos = self.config("videos", True)
@@ -45,8 +41,6 @@ class FacebookExtractor(Extractor):
             self.log.warning(
                 "Using the Facebook extractor for too long may result in "
                 "temporary UI bans of increasing length. "
-                "Cookies will only be used when necessary, "
-                "and you will be informed if they are being used. "
                 "\nUse at your own risk."
             )
 
@@ -166,7 +160,6 @@ class FacebookExtractor(Extractor):
         return photo
 
     def photo_page_request_wrapper(self, url, *args, **kwargs):
-        LOGIN_TXT = "You must be logged in to continue viewing images."
         LEFT_OFF_TXT = "" if url.endswith("&set=") else (
             "\nYou can use this URL to continue from "
             "where you left off (added \"&setextract\"): "
@@ -176,27 +169,10 @@ class FacebookExtractor(Extractor):
         res = self.request(url, *args, **kwargs)
 
         if res.url.startswith(self.root + "/login"):
-            used_cookies = self.session.cookies.get_dict(
-                domain=".facebook.com"
+            raise exception.AuthenticationError(
+                "You must be logged in to continue viewing images." +
+                LEFT_OFF_TXT
             )
-
-            if "datr" in self.fb_cookies and "datr" not in used_cookies:
-                self.session.cookies.set(
-                    "datr", self.fb_cookies["datr"], domain=".facebook.com"
-                )
-                res = self.photo_page_request_wrapper(url, *args, **kwargs)
-                self.log.debug(LOGIN_TXT + " Using session from now on.")
-            elif "c_user" in self.fb_cookies and "c_user" not in used_cookies:
-                self.session.cookies.set(
-                    "c_user", self.fb_cookies["c_user"], domain=".facebook.com"
-                )
-                self.session.cookies.set(
-                    "xs", self.fb_cookies["xs"], domain=".facebook.com"
-                )
-                res = self.photo_page_request_wrapper(url, *args, **kwargs)
-                self.log.info(LOGIN_TXT + " Using cookies from now on.")
-            else:
-                raise exception.AuthenticationError(LOGIN_TXT + LEFT_OFF_TXT)
 
         if '{"__dr":"CometErrorRoot.react"}' in res.text:
             raise exception.StopExtraction(
@@ -419,15 +395,16 @@ class FacebookVideoExtractor(FacebookExtractor):
 class FacebookProfileExtractor(FacebookExtractor):
     """Base class for Facebook Profile Photos Set extractors"""
     subcategory = "profile"
-    pattern = BASE_PATTERN + r"/([^/|?]+)"
+    pattern = BASE_PATTERN + r"/(?:profile.php\?id=)?([^/|?|&]+)"
     example = "https://www.facebook.com/USERNAME"
 
     @staticmethod
     def get_profile_photos_set_id(profile_photos_page):
-        profile_photos_page_extr = text.extract_from(profile_photos_page)
-        profile_photos_page_extr('"pageItems"', '"actions_renderer"')
-        set_id = profile_photos_page_extr('set=', '"').rsplit("&", 1)[0]
-        return set_id
+        return text.extr(
+            text.extr(
+                profile_photos_page, '"pageItems"', '"actions_renderer"'
+            ), 'set=', '"'
+        ).rsplit("&", 1)[0]
 
     def items(self):
         profile_photos_url = (
