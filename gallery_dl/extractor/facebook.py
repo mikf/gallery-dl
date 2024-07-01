@@ -84,8 +84,8 @@ class FacebookExtractor(Extractor):
                 set_page, '"title":{"text":"', '"'
             )),
             "description": FacebookExtractor.text_unescape(text.extr(
-                set_page, '"message":{"delight_ranges"', '"},'
-            ).rsplit('],"text":"', 1)[-1]),
+                set_page, '"message":{"delight_ranges"', '"},"group_album'
+            ).rsplit('],"text":"', 1)[-1]).replace("\\/", "/"),
             "first_photo_id": text.extr(
                 set_page,
                 '{"__typename":"Photo","__isMedia":"Photo","',
@@ -196,9 +196,7 @@ class FacebookExtractor(Extractor):
                 res = self.photo_page_request_wrapper(url, *args, **kwargs)
                 self.log.info(LOGIN_TXT + " Using cookies from now on.")
             else:
-                raise exception.AuthenticationError(
-                    LOGIN_TXT + LEFT_OFF_TXT
-                )
+                raise exception.AuthenticationError(LOGIN_TXT + LEFT_OFF_TXT)
 
         if '{"__dr":"CometErrorRoot.react"}' in res.text:
             raise exception.StopExtraction(
@@ -352,7 +350,7 @@ class FacebookVideoExtractor(FacebookExtractor):
             "date": text.parse_timestamp(text.extr(
                 video_page, '"publish_time":', ','
             )),
-            "caption": FacebookExtractor.text_unescape(text.extr(
+            "title": FacebookExtractor.text_unescape(text.extr(
                 video_page, '"meta":{"title":"', ' | '
             )),
             "reactions": text.extr(
@@ -397,9 +395,7 @@ class FacebookVideoExtractor(FacebookExtractor):
         video["filename"] = text.rextract(video["url"], "/", "?")[0]
         FacebookExtractor.item_filename_handle(video)
 
-        audio["filename"] = text.rextract(
-            audio["url"], "/", "?"
-        )[0].replace(".mp4", ".m4a")
+        audio["filename"] = video["name"] + ".m4a"
         FacebookExtractor.item_filename_handle(audio)
 
         return video, audio
