@@ -272,6 +272,12 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
+    <td>Googledrive</td>
+    <td>https://www.google.com/drive/</td>
+    <td>Folders, Files</td>
+    <td></td>
+</tr>
+<tr>
     <td>HatenaBlog</td>
     <td>https://hatenablog.com</td>
     <td>Archive, Individual Posts, Home Feed, Search Results</td>
