@@ -77,22 +77,26 @@ class ToyhouseExtractor(Extractor):
                 cnt += 1
                 yield self._parse_post(post)
 
-            if cnt == 0 and params["page"] == 1:
-                token, pos = text.extract(
-                    page, '<input name="_token" type="hidden" value="', '"')
-                if not token:
-                    return
-                data = {
-                    "_token": token,
-                    "user"  : text.extract(page, 'value="', '"', pos)[0],
-                }
-                self.request(self.root + "/~account/warnings/accept",
-                             method="POST", data=data, allow_redirects=False)
-                continue
+            if not cnt and params["page"] == 1:
+                if self._accept_content_warning(page):
+                    continue
+                return
 
             if cnt < 18:
                 return
             params["page"] += 1
+
+    def _accept_content_warning(self, page):
+        pos = page.find(' name="_token"') + 1
+        token, pos = text.extract(page, ' value="', '"', pos)
+        user , pos = text.extract(page, ' value="', '"', pos)
+        if not token or not user:
+            return False
+
+        data = {"_token": token, "user": user}
+        self.request(self.root + "/~account/warnings/accept",
+                     method="POST", data=data, allow_redirects=False)
+        return True
 
 
 class ToyhouseArtExtractor(ToyhouseExtractor):
