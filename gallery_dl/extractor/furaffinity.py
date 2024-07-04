@@ -144,7 +144,7 @@ class FuraffinityExtractor(Extractor):
         data["thumbnail"] = (
             'https://t.furaffinity.net/' +
             str(data['id']) + '@600-' +
-            data['url'].split('/')[-2].split('.')[0] + '.jpg')
+            data['url'].split('/')[-2] + '.jpg')
 
         return data
 
