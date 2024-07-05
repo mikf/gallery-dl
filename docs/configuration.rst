@@ -5442,11 +5442,13 @@ Description
 metadata.directory
 ------------------
 Type
-    ``string``
+    * ``string``
+    * ``list`` of ``strings``
 Default
     ``"."``
 Example
-    ``"metadata"``
+    * ``"metadata"``
+    * ``["..", "metadata", "\fF {id // 500 * 500}"]``
 Description
     Directory where metadata files are stored in relative to the
     current target location for file downloads.
