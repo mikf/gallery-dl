@@ -145,6 +145,10 @@ def main():
 
             log.debug("Configuration Files %s", config._files)
 
+        if args.print_traffic:
+            import requests
+            requests.packages.urllib3.connection.HTTPConnection.debuglevel = 1
+
         # extractor modules
         modules = config.get(("extractor",), "modules")
         if modules is not None:

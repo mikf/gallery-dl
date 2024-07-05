@@ -346,6 +346,11 @@ def build_parser():
               "in the current directory to debug problems"),
     )
     output.add_argument(
+        "--print-traffic",
+        dest="print_traffic", action="store_true",
+        help=("Display sent and read HTTP traffic"),
+    )
+    output.add_argument(
         "--no-colors",
         dest="colors", action="store_false",
         help=("Do not emit ANSI color codes in output"),
