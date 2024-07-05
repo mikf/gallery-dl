@@ -183,7 +183,8 @@ class ZerochanTagExtractor(ZerochanExtractor):
             data = self.request(url, params=params).json()
             try:
                 posts = data["items"]
-            except ValueError:
+            except Exception:
+                self.log.debug("Server response: %s", data)
                 return
 
             if metadata:
