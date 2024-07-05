@@ -70,10 +70,13 @@ class HentainexusGalleryExtractor(GalleryExtractor):
             for img in imgs:
                 img["_http_headers"] = headers
 
-        return [
-            (img["image"], img)
-            for img in imgs
-        ]
+        results = []
+        for img in imgs:
+            try:
+                results.append((img["image"], img))
+            except KeyError:
+                pass
+        return results
 
     @staticmethod
     def _decode(data):

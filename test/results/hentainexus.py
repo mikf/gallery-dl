@@ -40,6 +40,7 @@ __tests__ = (
         "kimono",
         "pubic hair",
         "uncensored",
+        "unlimited",
         "vanilla",
     ],
     "title"      : "Graduation!",
@@ -52,6 +53,14 @@ __tests__ = (
     "#url"     : "https://hentainexus.com/read/5688",
     "#category": ("", "hentainexus", "gallery"),
     "#class"   : hentainexus.HentainexusGalleryExtractor,
+},
+
+{
+    "#url"     : "https://hentainexus.com/view/715",
+    "#comment" : "combined left-right pages (#5827)",
+    "#category": ("", "hentainexus", "gallery"),
+    "#class"   : hentainexus.HentainexusGalleryExtractor,
+    "#count"   : 2,
 },
 
 {
