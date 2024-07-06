@@ -442,7 +442,7 @@ class MetadataTest(BasePostprocessorTest):
 
     def test_metadata_directory_format(self):
         self._create(
-            {"directory": ["..", "json", "\fF {id // 500 * 500 + 500}"]},
+            {"directory": ["..", "json", "\fE str(id // 500 * 500 + 500)"]},
             {"id": 12345},
         )
 
