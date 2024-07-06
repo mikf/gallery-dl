@@ -51,6 +51,7 @@ class PathFormat():
             raise exception.FilenameFormatError(exc)
 
         directory_fmt = config("directory")
+        self.directory_conditions = ()
         try:
             if directory_fmt is None:
                 directory_fmt = extractor.directory_fmt
