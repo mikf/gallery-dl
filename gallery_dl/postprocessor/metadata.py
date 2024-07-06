@@ -155,12 +155,15 @@ class MetadataPP(PostProcessor):
 
     def _directory_format(self, pathfmt):
         formatters = pathfmt.directory_formatters
+        conditions = pathfmt.directory_conditions
         try:
             pathfmt.directory_formatters = self._directory_formatters
+            pathfmt.directory_conditions = ()
             segments = pathfmt.build_directory(pathfmt.kwdict)
             directory = pathfmt.clean_path(os.sep.join(segments) + os.sep)
             return os.path.join(pathfmt.realdirectory, directory)
         finally:
+            pathfmt.directory_conditions = conditions
             pathfmt.directory_formatters = formatters
 
     def _filename(self, pathfmt):
