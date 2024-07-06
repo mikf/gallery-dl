@@ -632,7 +632,6 @@ class TwitterTimelineExtractor(TwitterExtractor):
                 tweet = None
                 for tweet in self.api.search_timeline(query + " filter:links"):
                     yield tweet
-                    break
                 if tweet is not None:
                     return self._update_cursor(None)
 
