@@ -609,16 +609,14 @@ class TwitterTimelineExtractor(TwitterExtractor):
                 yield tweet
             if tweet is None and not cursor:
                 return
-
-            user = self._user["name"]
             tweet_id = tweet["rest_id"]
 
             state = reset = 2
         else:
-            user = self.user
+            self.api._user_id_by_screen_name(self.user)
 
         # build search query
-        query = "from:{} max_id:{}".format(user, tweet_id)
+        query = "from:{} max_id:{}".format(self._user["name"], tweet_id)
         if self.retweets:
             query += " include:retweets include:nativeretweets"
 
