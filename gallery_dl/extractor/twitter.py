@@ -1477,7 +1477,9 @@ class TwitterAPI():
 
     def _pagination_legacy(self, endpoint, params):
         extr = self.extractor
-        params["cursor"] = extr._init_cursor()
+        cursor = extr._init_cursor()
+        if cursor:
+            params["cursor"] = cursor
         original_retweets = (extr.retweets == "original")
         bottom = ("cursor-bottom-", "sq-cursor-bottom")
 
@@ -1577,7 +1579,9 @@ class TwitterAPI():
         pinned_tweet = extr.pinned
 
         params = {"variables": None}
-        variables["cursor"] = extr._init_cursor()
+        cursor = extr._init_cursor()
+        if cursor:
+            variables["cursor"] = cursor
         if features is None:
             features = self.features_pagination
         if features:
@@ -1770,7 +1774,9 @@ class TwitterAPI():
 
     def _pagination_users(self, endpoint, variables, path=None):
         extr = self.extractor
-        variables["cursor"] = extr._init_cursor()
+        cursor = extr._init_cursor()
+        if cursor:
+            variables["cursor"] = cursor
         params = {
             "variables": None,
             "features" : self._json_dumps(self.features_pagination),
