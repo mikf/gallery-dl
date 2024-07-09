@@ -390,6 +390,8 @@ class Extractor():
             headers["Accept-Encoding"] = "gzip, deflate, br"
         else:
             headers["Accept-Encoding"] = "gzip, deflate"
+        if ZSTD:
+            headers["Accept-Encoding"] += ", zstd"
 
         referer = self.config("referer", self.referer)
         if referer:
@@ -989,6 +991,12 @@ try:
     BROTLI = urllib3.response.brotli is not None
 except AttributeError:
     BROTLI = False
+
+# detect zstandard support
+try:
+    ZSTD = urllib3.response.HAS_ZSTD
+except AttributeError:
+    ZSTD = False
 
 # set (urllib3) warnings filter
 action = config.get((), "warnings", "default")
