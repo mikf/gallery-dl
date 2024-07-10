@@ -133,9 +133,10 @@ __tests__ = (
 },
 
 {
-    "#url"     : "https://www.instagram.com/instagram/profile",
-    "#category": ("", "instagram", "profile"),
-    "#class"   : instagram.InstagramProfileExtractor,
+    "#url"     : "https://www.instagram.com/instagram/info",
+    "#category": ("", "instagram", "info"),
+    "#class"   : instagram.InstagramInfoExtractor,
+    "#auth"    : False,
 },
 
 {

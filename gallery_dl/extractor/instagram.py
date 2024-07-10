@@ -596,11 +596,11 @@ class InstagramTagExtractor(InstagramExtractor):
         return self.api.tags_media(self.item)
 
 
-class InstagramProfileExtractor(InstagramExtractor):
+class InstagramInfoExtractor(InstagramExtractor):
     """Extractor for an Instagram user's profile data"""
-    subcategory = "profile"
-    pattern = USER_PATTERN + r"/profile"
-    example = "https://www.instagram.com/USER/profile/"
+    subcategory = "info"
+    pattern = USER_PATTERN + r"/info"
+    example = "https://www.instagram.com/USER/info/"
 
     def items(self):
         screen_name = self.item
