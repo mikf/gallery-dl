@@ -6085,6 +6085,18 @@ Description
     this cache.
 
 
+filters-environment
+-------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Evaluate filter expressions raising an exception as ``false``
+    instead of aborting the current extractor run
+    by wrapping them in a `try`/`except` block.
+
+
 format-separator
 ----------------
 Type
