@@ -616,9 +616,26 @@ else:
     Popen = subprocess.Popen
 
 
-def compile_expression(expr, name="<expr>", globals=None):
+def compile_expression_raw(expr, name="<expr>", globals=None):
     code_object = compile(expr, name, "eval")
     return functools.partial(eval, code_object, globals or GLOBALS)
+
+
+def compile_expression_tryexcept(expr, name="<expr>", globals=None):
+    code_object = compile(expr, name, "eval")
+
+    def _eval(locals=None, globals=(globals or GLOBALS), co=code_object):
+        try:
+            return eval(co, globals, locals)
+        except exception.GalleryDLException:
+            raise
+        except Exception:
+            return False
+
+    return _eval
+
+
+compile_expression = compile_expression_tryexcept
 
 
 def import_file(path):

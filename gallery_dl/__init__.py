@@ -105,6 +105,11 @@ def main():
 
             output.ANSI = True
 
+        # filter environment
+        filterenv = config.get((), "filters-environment", True)
+        if not filterenv:
+            util.compile_expression = util.compile_expression_raw
+
         # format string separator
         separator = config.get((), "format-separator")
         if separator:
