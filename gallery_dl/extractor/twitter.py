@@ -924,11 +924,11 @@ class TwitterQuotesExtractor(TwitterExtractor):
         yield Message.Queue, url, data
 
 
-class TwitterProfileExtractor(TwitterExtractor):
-    """Extractor a user's profile data"""
-    subcategory = "profile"
-    pattern = BASE_PATTERN + r"/(?!search)([^/?#]+)/profile"
-    example = "https://x.com/USER/profile"
+class TwitterInfoExtractor(TwitterExtractor):
+    """Extractor for a user's profile data"""
+    subcategory = "info"
+    pattern = BASE_PATTERN + r"/(?!search)([^/?#]+)/info"
+    example = "https://x.com/USER/info"
 
     def items(self):
         api = TwitterAPI(self)
