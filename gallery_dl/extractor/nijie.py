@@ -120,7 +120,8 @@ class NijieExtractor(AsynchronousMixin, BaseExtractor):
             ]
         else:
             pos = page.find('id="view-center"') + 1
-            return (text.extr(page, 'itemprop="image" src="', '"', pos),)
+            # do NOT use text.extr() here, as it doesn't support a pos argument
+            return (text.extract(page, 'itemprop="image" src="', '"', pos)[0],)
 
     @staticmethod
     def _extract_user_name(page):
