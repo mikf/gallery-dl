@@ -86,9 +86,9 @@ class TestExtractorResults(unittest.TestCase):
 
     def _run_test(self, result):
         result.pop("#comment", None)
+        auth = result.pop("#auth", None)
         only_matching = (len(result) <= 3)
 
-        auth = result.get("#auth")
         if auth is None:
             auth = (result["#category"][1] in AUTH)
         elif not auth:
