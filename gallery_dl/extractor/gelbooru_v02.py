@@ -36,7 +36,9 @@ class GelbooruV02Extractor(booru.BooruExtractor):
         params["pid"] = self.page_start
         params["limit"] = self.per_page
 
-        post = None
+        post = total = None
+        count = 0
+
         while True:
             try:
                 root = self._api_request(params)
@@ -50,12 +52,29 @@ class GelbooruV02Extractor(booru.BooruExtractor):
                 params["pid"] = 0
                 continue
 
+            if total is None:
+                try:
+                    total = int(root.attrib["count"])
+                    self.log.debug("%s posts in total", total)
+                except Exception as exc:
+                    total = 0
+                    self.log.debug(
+                        "Failed to get total number of posts (%s: %s)",
+                        exc.__class__.__name__, exc)
+
             post = None
             for post in root:
                 yield post.attrib
 
-            if len(root) < self.per_page:
-                return
+            num = len(root)
+            count += num
+            if num < self.per_page:
+                if not total or count >= total:
+                    return
+                if not num:
+                    self.log.debug("Empty response - Retrying")
+                    continue
+
             params["pid"] += 1
 
     def _pagination_html(self, params):
