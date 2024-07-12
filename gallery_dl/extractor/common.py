@@ -791,10 +791,11 @@ class BaseExtractor(Extractor):
     instances = ()
 
     def __init__(self, match):
-        Extractor.__init__(self, match)
         if not self.category:
+            self.groups = match.groups()
+            self.match = match
             self._init_category()
-            self._cfgpath = ("extractor", self.category, self.subcategory)
+        Extractor.__init__(self, match)
 
     def _init_category(self):
         for index, group in enumerate(self.groups):
