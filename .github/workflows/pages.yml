@@ -36,6 +36,7 @@ jobs:
 
   deploy:
 
+    if: github.repository == 'mikf/gallery-dl'
     runs-on: ubuntu-latest
 
     environment:
