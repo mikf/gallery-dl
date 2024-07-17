@@ -4577,13 +4577,17 @@ Description
 extractor.[booru].url
 ---------------------
 Type
-    ``string``
+    * ``string``
+    * ``list`` of ``strings``
 Default
     ``"file_url"``
 Example
-    ``"preview_url"``
+    * ``"preview_url"``
+    * ``["sample_url", "preview_url", "file_url"}``
 Description
     Alternate field name to retrieve download URLs from.
+
+    When multiple names are given, download the first available one.
 
 
 extractor.[manga-extractor].chapter-reverse
