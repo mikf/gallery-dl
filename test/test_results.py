@@ -87,37 +87,32 @@ class TestExtractorResults(unittest.TestCase):
     def _run_test(self, result):
         result.pop("#comment", None)
         auth = result.pop("#auth", None)
-        only_matching = (len(result) <= 3)
+
+        extr = result["#class"].from_url(result["#url"])
+        if not extr:
+            raise exception.NoExtractorError()
+        if len(result) <= 3:
+            return  # only matching
 
         if auth is None:
             auth = (result["#category"][1] in AUTH)
         elif not auth:
+            # auth explicitly disabled
             for key in AUTH_CONFIG:
                 config.set((), key, None)
 
-        if auth:
-            extr = result["#class"].from_url(result["#url"])
-            if not any(extr.config(key) for key in AUTH_CONFIG):
-                self._skipped.append((result["#url"], "no auth"))
-                only_matching = True
+        if auth and not any(extr.config(key) for key in AUTH_CONFIG):
+            return self._skipped.append((result["#url"], "no auth"))
 
-        if only_matching:
-            content = False
-        else:
-            if "#options" in result:
-                for key, value in result["#options"].items():
-                    key = key.split(".")
-                    config.set(key[:-1], key[-1], value)
-            if "#range" in result:
-                config.set((), "image-range"  , result["#range"])
-                config.set((), "chapter-range", result["#range"])
-            content = ("#sha1_content" in result)
+        if "#options" in result:
+            for key, value in result["#options"].items():
+                key = key.split(".")
+                config.set(key[:-1], key[-1], value)
+        if "#range" in result:
+            config.set((), "image-range"  , result["#range"])
+            config.set((), "chapter-range", result["#range"])
 
-        tjob = ResultJob(result["#url"], content=content)
-        self.assertEqual(result["#class"], tjob.extractor.__class__, "#class")
-
-        if only_matching:
-            return
+        tjob = ResultJob(extr, content=("#sha1_content" in result))
 
         if "#exception" in result:
             with self.assertRaises(result["#exception"], msg="#exception"):
