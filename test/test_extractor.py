@@ -109,6 +109,7 @@ class TestExtractorModule(unittest.TestCase):
                     print("Skipping '{}' category checks".format(cat))
                     continue
                 raise
+            self.assertTrue(extr, url)
             self.assertEqual(extr.category, cat, url)
             self.assertEqual(extr.subcategory, sub, url)
             self.assertEqual(extr.basecategory, base, url)
@@ -120,7 +121,8 @@ class TestExtractorModule(unittest.TestCase):
         append = test_urls.append
 
         for result in results.all():
-            append((result["#url"], result["#class"]))
+            if result["#class"].__module__.startswith("gallery_dl."):
+                append((result["#url"], result["#class"]))
 
         # iterate over all testcase URLs
         for url, extr1 in test_urls:
