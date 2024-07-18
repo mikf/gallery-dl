@@ -45,6 +45,9 @@ class SankakuExtractor(BooruExtractor):
     def skip(self, num):
         return 0
 
+    def _init(self):
+        self.api = SankakuAPI(self)
+
     def _file_url(self, post):
         url = post["file_url"]
         if not url:
@@ -81,6 +84,15 @@ class SankakuExtractor(BooruExtractor):
             post["tags_" + key] = value
             post["tag_string_" + key] = " ".join(value)
 
+    def _notes(self, post, page):
+        if post.get("has_notes"):
+            post["notes"] = self.api.notes(post["id"])
+            for note in post["notes"]:
+                note["created_at"] = note["created_at"]["s"]
+                note["updated_at"] = note["updated_at"]["s"]
+        else:
+            post["notes"] = ()
+
 
 class SankakuTagExtractor(SankakuExtractor):
     """Extractor for images from sankaku.app by search-tags"""
@@ -109,7 +121,7 @@ class SankakuTagExtractor(SankakuExtractor):
 
     def posts(self):
         params = {"tags": self.tags}
-        return SankakuAPI(self).posts_keyset(params)
+        return self.api.posts_keyset(params)
 
 
 class SankakuPoolExtractor(SankakuExtractor):
@@ -125,7 +137,7 @@ class SankakuPoolExtractor(SankakuExtractor):
         self.pool_id = match.group(1)
 
     def metadata(self):
-        pool = SankakuAPI(self).pools(self.pool_id)
+        pool = self.api.pools(self.pool_id)
         pool["tags"] = [tag["name"] for tag in pool["tags"]]
         pool["artist_tags"] = [tag["name"] for tag in pool["artist_tags"]]
 
@@ -151,7 +163,7 @@ class SankakuPostExtractor(SankakuExtractor):
         self.post_id = match.group(1)
 
     def posts(self):
-        return SankakuAPI(self).posts(self.post_id)
+        return self.api.posts(self.post_id)
 
 
 class SankakuBooksExtractor(SankakuExtractor):
@@ -167,7 +179,7 @@ class SankakuBooksExtractor(SankakuExtractor):
 
     def items(self):
         params = {"tags": self.tags, "pool_type": "0"}
-        for pool in SankakuAPI(self).pools_keyset(params):
+        for pool in self.api.pools_keyset(params):
             pool["_extractor"] = SankakuPoolExtractor
             url = "https://sankaku.app/books/{}".format(pool["id"])
             yield Message.Queue, url, pool
@@ -191,6 +203,10 @@ class SankakuAPI():
         self.username, self.password = extractor._get_auth_info()
         if not self.username:
             self.authenticate = util.noop
+
+    def notes(self, post_id):
+        params = {"lang": "en"}
+        return self._call("/posts/{}/notes".format(post_id), params)
 
     def pools(self, pool_id):
         params = {"lang": "en"}
