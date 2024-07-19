@@ -857,14 +857,19 @@ class InfoJob(Job):
 class DataJob(Job):
     """Collect extractor results and dump them"""
 
-    def __init__(self, url, parent=None, file=sys.stdout, ensure_ascii=True):
+    def __init__(self, url, parent=None, file=sys.stdout, ensure_ascii=True,
+                 resolve=False):
         Job.__init__(self, url, parent)
         self.file = file
         self.data = []
         self.ascii = config.get(("output",), "ascii", ensure_ascii)
+        self.resolve = 128 if resolve is True else resolve
 
         private = config.get(("output",), "private")
         self.filter = dict.copy if private else util.filter_dict
+
+        if resolve:
+            self.handle_queue = self.handle_queue_resolve
 
     def run(self):
         self._init()
@@ -891,12 +896,13 @@ class DataJob(Job):
             for msg in self.data:
                 util.transform_dict(msg[-1], util.number_to_string)
 
-        # dump to 'file'
-        try:
-            util.dump_json(self.data, self.file, self.ascii, 2)
-            self.file.flush()
-        except Exception:
-            pass
+        if self.file:
+            # dump to 'file'
+            try:
+                util.dump_json(self.data, self.file, self.ascii, 2)
+                self.file.flush()
+            except Exception:
+                pass
 
         return 0
 
@@ -908,3 +914,17 @@ class DataJob(Job):
 
     def handle_queue(self, url, kwdict):
         self.data.append((Message.Queue, url, self.filter(kwdict)))
+
+    def handle_queue_resolve(self, url, kwdict):
+        cls = kwdict.get("_extractor")
+        if cls:
+            extr = cls.from_url(url)
+        else:
+            extr = extractor.find(url)
+
+        if not extr:
+            return self.data.append((Message.Queue, url, self.filter(kwdict)))
+
+        job = self.__class__(extr, self, None, self.ascii, self.resolve-1)
+        job.data = self.data
+        job.run()
