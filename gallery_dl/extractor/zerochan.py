@@ -192,13 +192,13 @@ class ZerochanTagExtractor(ZerochanExtractor):
                     post_id = post["id"]
                     post.update(self._parse_entry_html(post_id))
                     post.update(self._parse_entry_api(post_id))
+                    yield post
             else:
                 for post in posts:
                     base = static + str(post["id"])
                     post["file_url"] = base + ".jpg"
                     post["_fallback"] = (base + ".png",)
-
-            yield from posts
+                    yield post
 
             if not data.get("next"):
                 return
