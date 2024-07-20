@@ -79,18 +79,22 @@ class AryionExtractor(Extractor):
     def metadata(self):
         """Return general metadata"""
 
-    def _pagination_params(self, url, params=None):
+    def _pagination_params(self, url, params=None, favorite_items=False):
         if params is None:
             params = {"p": 1}
         else:
             params["p"] = text.parse_int(params.get("p"), 1)
 
+        if favorite_items == True:
+            begin = "class='gallery-item favorite' id='"
+        else:
+            begin = "class='gallery-item' id='"
+
         while True:
             page = self.request(url, params=params).text
 
             cnt = 0
-            for post_id in text.extract_iter(
-                    page, "class='gallery-item' id='", "'"):
+            for post_id in text.extract_iter(page, begin, "'"):
                 cnt += 1
                 yield post_id
 
@@ -199,6 +203,19 @@ class AryionGalleryExtractor(AryionExtractor):
             url = "{}/g4/latest.php?name={}".format(self.root, self.user)
             return util.advance(self._pagination_next(url), self.offset)
 
+class AryionFavoriteExtractor(AryionExtractor):
+    """Extractor for a user's favorites gallery"""
+    subcategory = "favorite"
+    categorytransfer = True
+    pattern = BASE_PATTERN + r"/favorites/([^/?#]+)"
+    example = "https://aryion.com/g4/favorites/USER"
+
+    def __init__(self, match):
+        AryionExtractor.__init__(self, match)
+
+    def posts(self):
+        url = "{}/g4/favorites/{}".format(self.root, self.user)
+        return self._pagination_params(url, favorite_items=True)
 
 class AryionTagExtractor(AryionExtractor):
     """Extractor for tag searches on eka's portal"""
