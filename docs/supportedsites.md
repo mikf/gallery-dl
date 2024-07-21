@@ -184,7 +184,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Eka's Portal</td>
     <td>https://aryion.com/</td>
-    <td>Galleries, Posts, Tag Searches</td>
+    <td>Favorites, Galleries, Posts, Tag Searches</td>
     <td>Supported</td>
 </tr>
 <tr>
