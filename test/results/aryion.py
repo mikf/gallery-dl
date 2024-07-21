@@ -31,7 +31,18 @@ __tests__ = (
 },
 
 {
-    "#url"     : "https://aryion.com/g4/tags.php?tag=star+wars&p=19",
+    "#url"     : "https://aryion.com/g4/favorites/jameshoward",
+    "#category": ("", "aryion", "favorite"),
+    "#class"   : aryion.AryionFavoriteExtractor,
+    "#range"   : "1-10",
+    "#count"   : 10,
+
+    "user"     : "jameshoward",
+    "artist"   : "re:^((?!jameshoward).)*$",
+},
+
+{
+    "#url"     : "https://aryion.com/g4/tags.php?tag=star+wars&p=28",
     "#category": ("", "aryion", "tag"),
     "#class"   : aryion.AryionTagExtractor,
     "#count"   : ">= 5",
