@@ -246,14 +246,12 @@ class InkbunnyFollowingExtractor(InkbunnyExtractor):
         data = {"_extractor": InkbunnyUserExtractor}
 
         while True:
-            cnt = 0
             for user in text.extract_iter(
                     page, '<a class="widget_userNameSmall" href="', '"',
                     page.index('id="changethumboriginal_form"')):
-                cnt += 1
                 yield Message.Queue, self.root + user, data
 
-            if cnt < 20:
+            if "<a title='next page' " not in page:
                 return
             params["page"] += 1
             page = self.request(url, params=params).text
