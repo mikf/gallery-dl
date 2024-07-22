@@ -20,7 +20,13 @@ import collections
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from gallery_dl import \
     extractor, util, job, config, exception, formatter  # noqa E402
-from test import results  # noqa E402
+
+
+RESULTS = os.environ.get("GDL_TEST_RESULTS")
+if RESULTS:
+    results = util.import_file(RESULTS)
+else:
+    from test import results
 
 
 # temporary issues, etc.
