@@ -125,8 +125,7 @@ class TestExtractorModule(unittest.TestCase):
         append = test_urls.append
 
         for result in results.all():
-            if result["#class"].__module__.startswith("gallery_dl."):
-                append((result["#url"], result["#class"]))
+            append((result["#url"], result["#class"]))
 
         # iterate over all testcase URLs
         for url, extr1 in test_urls:
