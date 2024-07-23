@@ -3735,6 +3735,23 @@ Description
     use an extra HTTP request to find the URL to its full-resolution version.
 
 
+extractor.tumblr.pagination
+---------------------------
+Type
+    ``string``
+Default
+    ``"offset"``
+Description
+    Controls how to paginate over blog posts.
+
+    * ``"api"``: ``next`` parameter provided by the API
+      (potentially misses posts due to a
+      `bug <https://github.com/tumblr/docs/issues/76>`__
+      in Tumblr's API)
+    * ``"before"``: timestamp of last post
+    * ``"offset"``: post offset number
+
+
 extractor.tumblr.ratelimit
 --------------------------
 Type

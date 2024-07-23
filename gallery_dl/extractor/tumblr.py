@@ -386,7 +386,7 @@ class TumblrAPI(oauth.OAuth1API):
     def posts(self, blog, params):
         """Retrieve published posts"""
         params["offset"] = self.extractor.config("offset")
-        params["limit"] = "50"
+        params["limit"] = 50
         params["reblog_info"] = "true"
         params["type"] = self.posts_type
         params["before"] = self.before
@@ -398,8 +398,14 @@ class TumblrAPI(oauth.OAuth1API):
 
     def likes(self, blog):
         """Retrieve liked posts"""
+        endpoint = "/v2/blog/{}/likes".format(blog)
         params = {"limit": "50", "before": self.before}
-        return self._pagination(blog, "/likes", params, key="liked_posts")
+        while True:
+            posts = self._call(endpoint, params)["liked_posts"]
+            if not posts:
+                return
+            yield from posts
+            params["before"] = posts[-1]["liked_timestamp"]
 
     def _call(self, endpoint, params, **kwargs):
         url = self.ROOT + endpoint
@@ -474,6 +480,7 @@ class TumblrAPI(oauth.OAuth1API):
         if self.api_key:
             params["api_key"] = self.api_key
 
+        strategy = self.extractor.config("pagination")
         while True:
             data = self._call(endpoint, params)
 
@@ -481,13 +488,31 @@ class TumblrAPI(oauth.OAuth1API):
                 self.BLOG_CACHE[blog] = data["blog"]
                 cache = False
 
-            yield from data[key]
+            posts = data[key]
+            yield from posts
 
-            try:
-                endpoint = data["_links"]["next"]["href"]
-            except KeyError:
-                return
+            if strategy == "api":
+                try:
+                    endpoint = data["_links"]["next"]["href"]
+                except KeyError:
+                    return
 
-            params = None
-            if self.api_key:
-                endpoint += "&api_key=" + self.api_key
+                params = None
+                if self.api_key:
+                    endpoint += "&api_key=" + self.api_key
+
+            elif strategy == "before":
+                if not posts:
+                    return
+                timestamp = posts[-1]["timestamp"] + 1
+                if params["before"] and timestamp >= params["before"]:
+                    return
+                params["before"] = timestamp
+                params["offset"] = None
+
+            else:  # offset
+                params["offset"] = \
+                    text.parse_int(params["offset"]) + params["limit"]
+                params["before"] = None
+                if params["offset"] >= data["total_posts"]:
+                    return
