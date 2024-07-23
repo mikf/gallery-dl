@@ -76,8 +76,8 @@ class ZerochanExtractor(BooruExtractor):
                 'class="breadcrumbs', '</nav>'))[2:],
             "uploader": extr('href="/user/', '"'),
             "tags"    : extr('<ul id="tags"', '</ul>'),
-            "source"  : extr('<h2>Source</h2>', '</p><h2>').rpartition(
-                ">")[2] or None,
+            "source"  : text.unescape(text.extr(
+                extr('id="source-url"', '</a>'), 'href="', '"')),
         }
 
         html = data["tags"]
