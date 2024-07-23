@@ -11,6 +11,7 @@
 from .booru import BooruExtractor
 from ..cache import cache
 from .. import text, util, exception
+import collections
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?zerochan\.net"
 
@@ -108,6 +109,14 @@ class ZerochanExtractor(BooruExtractor):
             data["tags"] = item["tags"]
 
         return data
+
+    def _tags(self, post, page):
+        tags = collections.defaultdict(list)
+        for tag in post["tags"]:
+            category, _, name = tag.partition(":")
+            tags[category].append(name)
+        for key, value in tags.items():
+            post["tags_" + key.lower()] = value
 
 
 class ZerochanTagExtractor(ZerochanExtractor):
