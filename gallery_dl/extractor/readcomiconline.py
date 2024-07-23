@@ -78,12 +78,16 @@ class ReadcomiconlineIssueExtractor(ReadcomiconlineBase, ChapterExtractor):
         }
 
     def images(self, page):
-        return [
-            (beau(url), None)
-            for url in text.extract_iter(
-                page, "lstImages.push('", "'",
-            )
-        ]
+        results = []
+
+        for block in page.split("    pth = '")[1:]:
+            pth = text.extr(block, "", "'")
+            for needle, repl in re.findall(
+                    r"pth = pth\.replace\(/([^/]+)/g, [\"']([^\"']*)", block):
+                pth = pth.replace(needle, repl)
+            results.append((beau(pth), None))
+
+        return results
 
 
 class ReadcomiconlineComicExtractor(ReadcomiconlineBase, MangaExtractor):
@@ -116,9 +120,9 @@ class ReadcomiconlineComicExtractor(ReadcomiconlineBase, MangaExtractor):
 
 
 def beau(url):
-    """https://readcomiconline.li/Scripts/rguard.min.js"""
-    url = url.replace("_x236", "d")
-    url = url.replace("_x945", "g")
+    """https://readcomiconline.li/Scripts/rguard.min.js?v=1.5.1"""
+    url = url.replace("pw_.g28x", "b")
+    url = url.replace("d2pr.x_27", "h")
 
     if url.startswith("https"):
         return url
@@ -126,8 +130,8 @@ def beau(url):
     url, sep, rest = url.partition("?")
     containsS0 = "=s0" in url
     url = url[:-3 if containsS0 else -6]
-    url = url[4:22] + url[25:]
-    url = url[0:-6] + url[-2:]
+    url = url[15:33] + url[50:]
+    url = url[0:-11] + url[-2:]
     url = binascii.a2b_base64(url).decode()
     url = url[0:13] + url[17:]
     url = url[0:-2] + ("=s0" if containsS0 else "=s1600")
