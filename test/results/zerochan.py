@@ -120,6 +120,7 @@ __tests__ = (
     "#category": ("booru", "zerochan", "image"),
     "#class"   : zerochan.ZerochanImageExtractor,
     "#urls"    : "https://static.zerochan.net/DRAGON.BALL.full.4233756.jpg",
+    "#options" : {"tags": True},
 
     "author"   : "Raydash",
     "date"     : "dt:2024-07-23 00:10:51",
@@ -149,9 +150,31 @@ __tests__ = (
         "Source:Fanart from X (Twitter)",
         "Source:X (Twitter)",
     ],
+    "tags_character": [
+        "Piccolo",
+        "Son Gohan",
+    ],
+    "tags_mangaka"  : [
+        "Raydash",
+    ],
+    "tags_series"   : [
+        "DRAGON BALL",
+        "DRAGON BALL Z",
+    ],
+    "tags_source"   : [
+        "Fanart",
+        "Fanart from X (Twitter)",
+        "X (Twitter)",
+    ],
+    "tags_theme"    : [
+        "Duo",
+        "Green Skin",
+        "Male",
+        "Male Focus",
+        "Two Males",
+    ],
     "uploader" : "menotbug",
     "width"    : 750,
-
 },
 
 )
