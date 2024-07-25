@@ -249,6 +249,22 @@ def parse_command_line(module, argv):
         None if opts.match_filter is None
         else module.match_filter_func(opts.match_filter))
 
+    cookiesfrombrowser = getattr(opts, "cookiesfrombrowser", None)
+    if cookiesfrombrowser:
+        match = re.fullmatch(r"""(?x)
+            (?P<name>[^+:]+)
+            (?:\s*\+\s*(?P<keyring>[^:]+))?
+            (?:\s*:\s*(?!:)(?P<profile>.+?))?
+            (?:\s*::\s*(?P<container>.+))?
+        """, cookiesfrombrowser)
+        if match:
+            browser, keyring, profile, container = match.groups()
+            if keyring is not None:
+                keyring = keyring.upper()
+            cookiesfrombrowser = (browser.lower(), profile, keyring, container)
+        else:
+            cookiesfrombrowser = None
+
     return {
         "usenetrc": opts.usenetrc,
         "netrc_location": getattr(opts, "netrc_location", None),
@@ -364,7 +380,7 @@ def parse_command_line(module, argv):
         "skip_playlist_after_errors": getattr(
             opts, "skip_playlist_after_errors", None),
         "cookiefile": opts.cookiefile,
-        "cookiesfrombrowser": getattr(opts, "cookiesfrombrowser", None),
+        "cookiesfrombrowser": cookiesfrombrowser,
         "nocheckcertificate": opts.no_check_certificate,
         "prefer_insecure": opts.prefer_insecure,
         "proxy": opts.proxy,
