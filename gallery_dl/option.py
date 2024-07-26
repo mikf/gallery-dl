@@ -293,8 +293,13 @@ def build_parser():
     )
     output.add_argument(
         "-j", "--dump-json",
-        dest="jobtype", action="store_const", const=job.DataJob,
+        dest="dump_json", action="count",
         help="Print JSON information",
+    )
+    output.add_argument(
+        "-J", "--resolve-json",
+        dest="dump_json", action="store_const", const=128,
+        help="Print JSON information; resolve intermediary URLs",
     )
     output.add_argument(
         "-s", "--simulate",

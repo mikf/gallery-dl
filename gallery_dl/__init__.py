@@ -249,6 +249,9 @@ def main():
                 if config.get(("output",), "fallback", True):
                     jobtype.handle_url = \
                         staticmethod(jobtype.handle_url_fallback)
+            elif args.dump_json:
+                jobtype = job.DataJob
+                jobtype.resolve = args.dump_json - 1
             else:
                 jobtype = args.jobtype or job.DownloadJob
 
