@@ -189,7 +189,12 @@ class ZerochanTagExtractor(ZerochanExtractor):
         static = "https://static.zerochan.net/.full."
 
         while True:
-            data = self.request(url, params=params).json()
+            response = self.request(url, params=params, allow_redirects=False)
+            if response.status_code >= 300:
+                url = text.urljoin(self.root, response.headers["location"])
+                response = self.request(url, params=params)
+            data = response.json()
+
             try:
                 posts = data["items"]
             except Exception:
