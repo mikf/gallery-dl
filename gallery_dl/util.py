@@ -540,10 +540,14 @@ class CustomNone():
     def __bool__():
         return False
 
+    def __eq__(self, other):
+        return self is other
+
+    def __ne__(self, other):
+        return self is not other
+
     __lt__ = true
     __le__ = true
-    __eq__ = false
-    __ne__ = true
     __gt__ = false
     __ge__ = false
 
