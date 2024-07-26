@@ -9,19 +9,19 @@ from gallery_dl.extractor import sankakucomplex
 
 __tests__ = (
 {
-    "#url"     : "https://www.sankakucomplex.com/2019/05/11/twitter-cosplayers",
+    "#url"     : "https://news.sankakucomplex.com/2019/05/11/twitter-cosplayers",
     "#category": ("", "sankakucomplex", "article"),
     "#class"   : sankakucomplex.SankakucomplexArticleExtractor,
-    "#sha1_url"     : "4a9ecc5ae917fbce469280da5b6a482510cae84d",
-    "#sha1_metadata": "bfe08310e7d9a572f568f6900e0ed0eb295aa2b3",
+    "#pattern"      : r"https://news\.sankakucomplex\.com/wp-content/uploads/2019/05/maid-day-cosplay-\d+\.jpg",
+    "#sha1_metadata": "21bf106150913a1398860031f06d6e1e6423e518",
 },
 
 {
     "#url"     : "https://www.sankakucomplex.com/2009/12/01/sexy-goddesses-of-2ch",
     "#category": ("", "sankakucomplex", "article"),
     "#class"   : sankakucomplex.SankakucomplexArticleExtractor,
-    "#sha1_url"     : "a1e249173fd6c899a8134fcfbd9c925588a63f7c",
-    "#sha1_metadata": "e78fcc23c2711befc0969a45ea5082a29efccf68",
+    "#pattern"      : r"https://news\.sankakucomplex\.com/wp-content/uploads/2009/12/Goddesses-of-2ch-amateur-internet-idol-\d+\.jpe?g",
+    "#sha1_metadata": "651e4ee79ecab1771b43df467b5ab32249d69b2a",
 },
 
 {

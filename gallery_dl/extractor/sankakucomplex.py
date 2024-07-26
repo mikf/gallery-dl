@@ -6,7 +6,7 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extractors for https://www.sankakucomplex.com/"""
+"""Extractors for https://news.sankakucomplex.com/"""
 
 from .common import Extractor, Message
 from .. import text, util
@@ -16,7 +16,7 @@ import re
 class SankakucomplexExtractor(Extractor):
     """Base class for sankakucomplex extractors"""
     category = "sankakucomplex"
-    root = "https://www.sankakucomplex.com"
+    root = "https://news.sankakucomplex.com"
 
     def __init__(self, match):
         Extractor.__init__(self, match)
@@ -24,14 +24,14 @@ class SankakucomplexExtractor(Extractor):
 
 
 class SankakucomplexArticleExtractor(SankakucomplexExtractor):
-    """Extractor for articles on www.sankakucomplex.com"""
+    """Extractor for articles on news.sankakucomplex.com"""
     subcategory = "article"
     directory_fmt = ("{category}", "{date:%Y-%m-%d} {title}")
     filename_fmt = "{filename}.{extension}"
     archive_fmt = "{date:%Y%m%d}_{filename}"
-    pattern = (r"(?:https?://)?www\.sankakucomplex\.com"
+    pattern = (r"(?:https?://)?(?:news|www)\.sankakucomplex\.com"
                r"/(\d\d\d\d/\d\d/\d\d/[^/?#]+)")
-    example = "https://www.sankakucomplex.com/1970/01/01/TITLE"
+    example = "https://news.sankakucomplex.com/1970/01/01/TITLE"
 
     def items(self):
         url = "{}/{}/?pg=X".format(self.root, self.path)
@@ -87,9 +87,9 @@ class SankakucomplexArticleExtractor(SankakucomplexExtractor):
 class SankakucomplexTagExtractor(SankakucomplexExtractor):
     """Extractor for sankakucomplex blog articles by tag or author"""
     subcategory = "tag"
-    pattern = (r"(?:https?://)?www\.sankakucomplex\.com"
+    pattern = (r"(?:https?://)?(?:news|www)\.sankakucomplex\.com"
                r"/((?:tag|category|author)/[^/?#]+)")
-    example = "https://www.sankakucomplex.com/tag/TAG/"
+    example = "https://news.sankakucomplex.com/tag/TAG/"
 
     def items(self):
         pnum = 1
