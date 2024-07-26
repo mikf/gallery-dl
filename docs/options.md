@@ -40,6 +40,8 @@
     -G, --resolve-urls          Print URLs instead of downloading; resolve
                                 intermediary URLs
     -j, --dump-json             Print JSON information
+    -J, --resolve-json          Print JSON information; resolve intermediary
+                                URLs
     -s, --simulate              Simulate data extraction; do not download
                                 anything
     -E, --extractor-info        Print extractor defaults and settings
@@ -54,6 +56,7 @@
                                 extractors but cannot be handled, to FILE
     --write-pages               Write downloaded intermediary pages to files in
                                 the current directory to debug problems
+    --print-traffic             Display sent and read HTTP traffic
     --no-colors                 Do not emit ANSI color codes in output
 
 ## Networking Options:
