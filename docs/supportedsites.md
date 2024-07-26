@@ -765,7 +765,7 @@ Consider all listed sites to potentially be NSFW.
 </tr>
 <tr>
     <td>Sankaku Complex</td>
-    <td>https://www.sankakucomplex.com/</td>
+    <td>https://news.sankakucomplex.com/</td>
     <td>Articles, Tag Searches</td>
     <td></td>
 </tr>
