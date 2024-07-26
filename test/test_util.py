@@ -755,8 +755,9 @@ def hash(value):
 
         self.assertLess(obj, "foo")
         self.assertLessEqual(obj, None)
-        self.assertFalse(obj == obj)
-        self.assertTrue(obj != obj)
+        self.assertTrue(obj == obj)
+        self.assertFalse(obj == 0)
+        self.assertFalse(obj != obj)
         self.assertGreater(123, obj)
         self.assertGreaterEqual(1.23, obj)
 
