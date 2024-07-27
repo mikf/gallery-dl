@@ -92,6 +92,12 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
+    <td>Agnph</td>
+    <td>https://agn.ph/</td>
+    <td>Posts, Tag Searches</td>
+    <td></td>
+</tr>
+<tr>
     <td>Architizer</td>
     <td>https://architizer.com/</td>
     <td>Firms, Projects</td>

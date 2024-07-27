@@ -22,6 +22,7 @@ modules = [
     "8chan",
     "8muses",
     "adultempire",
+    "agnph",
     "architizer",
     "artstation",
     "aryion",
