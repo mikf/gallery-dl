@@ -190,7 +190,7 @@ class RedgifsImageExtractor(RedgifsExtractor):
                r"(?:\w+\.)?redgifs\.com/(?:watch|ifr)|"
                r"(?:\w+\.)?gfycat\.com(?:/gifs/detail|/\w+)?|"
                r"(?:www\.)?gifdeliverynetwork\.com|"
-               r"i\.redgifs\.com/i)/([A-Za-z]+)")
+               r"i\.redgifs\.com/i)/([A-Za-z0-9]+)")
     example = "https://redgifs.com/watch/ID"
 
     def gifs(self):
