@@ -92,7 +92,7 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
-    <td>Agnph</td>
+    <td>AGNPH</td>
     <td>https://agn.ph/</td>
     <td>Posts, Tag Searches</td>
     <td></td>
@@ -143,6 +143,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Catbox</td>
     <td>https://catbox.moe/</td>
     <td>Albums, Files</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Ci-en</td>
+    <td>https://ci-en.net/</td>
+    <td>Articles, Creators, Followed Users, Recent Images</td>
     <td></td>
 </tr>
 <tr>
