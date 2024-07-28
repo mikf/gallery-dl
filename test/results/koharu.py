@@ -1,0 +1,60 @@
+# -*- coding: utf-8 -*-
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 2 as
+# published by the Free Software Foundation.
+
+from gallery_dl.extractor import koharu
+
+
+__tests__ = (
+{
+    "#url"     : "https://koharu.to/g/14216/6c67076fdd45",
+    "#category": ("", "koharu", "gallery"),
+    "#class"   : koharu.KoharuGalleryExtractor,
+    "#pattern" : r"https://kisakisexo.xyz/download/59896/a4fbd1828229/f47639c6abaf1903dd69c36a3d961da84741a1831aa07a2906ce9c74156a5d75\?v=1721626410802&w=0",
+    "#count"   : 1,
+
+    "count"     : 1,
+    "created_at": 1721626410802,
+    "extension" : "cbz",
+    "filename"  : "f47639c6abaf1903dd69c36a3d961da84741a1831aa07a2906ce9c74156a5d75",
+    "id"        : 14216,
+    "num"       : 1,
+    "public_key": "6c67076fdd45",
+    "tags"      : list,
+    "title"     : "[Ouchi Kaeru] Summer Business (Comic Kairakuten 2024-08)",
+    "updated_at": 1721626410802,
+},
+
+{
+    "#url"     : "https://koharu.to/g/14216/6c67076fdd45",
+    "#category": ("", "koharu", "gallery"),
+    "#class"   : koharu.KoharuGalleryExtractor,
+    "#options" : {"cbz": False, "format": "780"},
+    "#pattern" : r"https://koharusexo.xyz/data/59905/2df9110af7f1/a7cbeca3fb9c83aa87582a8a74cc8f8ce1b9e9b434dc1af293628871642f42df/[0-9a-f]+/.+",
+    "#count"   : 22,
+
+},
+
+{
+    "#url"     : "https://anchira.to/g/14216/6c67076fdd45",
+    "#category": ("", "koharu", "gallery"),
+    "#class"   : koharu.KoharuGalleryExtractor,
+},
+
+{
+    "#url"     : "https://koharu.to/reader/14216/6c67076fdd45",
+    "#category": ("", "koharu", "gallery"),
+    "#class"   : koharu.KoharuGalleryExtractor,
+},
+
+{
+    "#url"     : "https://koharu.to/?s=tag:^beach$",
+    "#category": ("", "koharu", "search"),
+    "#class"   : koharu.KoharuSearchExtractor,
+    "#pattern" : koharu.KoharuGalleryExtractor.pattern,
+    "#count"   : ">= 50",
+},
+
+)

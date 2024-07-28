@@ -2605,6 +2605,32 @@ Description
     the first in the list gets chosen (usually `mp3`).
 
 
+extractor.koharu.cbz
+--------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Download each gallery as a single ``.cbz`` file.
+
+    Disabling this option causes a gallery
+    to be downloaded as individual image files.
+
+
+extractor.koharu.format
+-----------------------
+Type
+    ``string``
+Default
+    ``"original"``
+Description
+    Name of the image format to download.
+
+    | Available formats are
+    | ``"780"``, ``"980"``, ``"1280"``, ``"1600"``, ``"0"``/``"original"``
+
+
 extractor.lolisafe.domain
 -------------------------
 Type

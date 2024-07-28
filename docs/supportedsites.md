@@ -476,6 +476,12 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
+    <td>Koharu</td>
+    <td>https://koharu.to/</td>
+    <td>Galleries, Search Results</td>
+    <td></td>
+</tr>
+<tr>
     <td>Komikcast</td>
     <td>https://komikcast.lol/</td>
     <td>Chapters, Manga</td>

@@ -85,6 +85,7 @@ modules = [
     "keenspot",
     "kemonoparty",
     "khinsider",
+    "koharu",
     "komikcast",
     "lensdump",
     "lexica",
