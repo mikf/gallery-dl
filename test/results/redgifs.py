@@ -166,6 +166,14 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://v3.redgifs.com/watch/605025947780972895",
+    "#category": ("", "redgifs", "image"),
+    "#class"   : redgifs.RedgifsImageExtractor,
+
+    "id": "humblegrippingmole",
+},
+
+{
     "#url"     : "https://www.gfycat.com/foolishforkedabyssiniancat",
     "#category": ("", "redgifs", "image"),
     "#class"   : redgifs.RedgifsImageExtractor,
