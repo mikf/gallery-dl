@@ -340,18 +340,19 @@ class RedditRedirectExtractor(Extractor):
     category = "reddit"
     subcategory = "redirect"
     pattern = (r"(?:https?://)?(?:"
-               r"(?:\w+\.)?reddit\.com/(?:(?:r)/([^/?#]+)))"
+               r"(?:\w+\.)?reddit\.com/(?:(r|u|user)/([^/?#]+)))"
                r"/s/([a-zA-Z0-9]{10})")
     example = "https://www.reddit.com/r/SUBREDDIT/s/abc456GHIJ"
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.subreddit = match.group(1)
-        self.share_url = match.group(2)
+        self.sub_type = "user" if match.group(1) == "u" else match.group(1)
+        self.subreddit = match.group(2)
+        self.share_url = match.group(3)
 
     def items(self):
-        url = "https://www.reddit.com/r/" + self.subreddit + "/s/" + \
-              self.share_url
+        url = "https://www.reddit.com/" + self.sub_type + "/" + \
+              self.subreddit + "/s/" + self.share_url
         data = {"_extractor": RedditSubmissionExtractor}
         response = self.request(url, method="HEAD", allow_redirects=False,
                                 notfound="submission")
