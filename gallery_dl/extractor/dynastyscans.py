@@ -66,6 +66,8 @@ class DynastyscansChapterExtractor(DynastyscansBase, ChapterExtractor):
                          text.extr(group, ' alt="', '"')),
             "date"    : text.parse_datetime(extr(
                 '"icon-calendar"></i> ', '<'), "%b %d, %Y"),
+            "tags"    : text.split_html(extr(
+                "class='tags'>", "<div id='chapter-actions'")),
             "lang"    : "en",
             "language": "English",
         }
