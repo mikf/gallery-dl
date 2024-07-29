@@ -12,6 +12,7 @@ from .booru import BooruExtractor
 from ..cache import cache
 from .. import text, util, exception
 import collections
+import re
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?zerochan\.net"
 
@@ -92,7 +93,14 @@ class ZerochanExtractor(BooruExtractor):
 
     def _parse_entry_api(self, entry_id):
         url = "{}/{}?json".format(self.root, entry_id)
-        item = self.request(url).json()
+        text = self.request(url).text
+        try:
+            item = util.json_loads(text)
+        except ValueError as exc:
+            if " control character " not in str(exc):
+                raise
+            text = re.sub(r"[\x00-\x1f\x7f]", "", text)
+            item = util.json_loads(text)
 
         data = {
             "id"      : item["id"],

@@ -177,4 +177,15 @@ __tests__ = (
     "width"    : 750,
 },
 
+{
+    "#url"     : "https://www.zerochan.net/1395035",
+    "#comment" : "Invalid control character '\r' in 'source' field (#5892)",
+    "#category": ("booru", "zerochan", "image"),
+    "#class"   : zerochan.ZerochanImageExtractor,
+    "#auth"    : True,
+    "#options" : {"metadata": True},
+
+    "source": "http://www.youtube.com/watch?v=0vodqkGPxt8",
+},
+
 )
