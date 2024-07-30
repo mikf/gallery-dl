@@ -25,6 +25,22 @@ class KoharuGalleryExtractor(GalleryExtractor):
     pattern = BASE_PATTERN + r"/(?:g|reader)/(\d+)/(\w+)"
     example = "https://koharu.to/g/12345/67890abcde/"
 
+    TAG_TYPES = {
+        0 : "general",
+        1 : "artist",
+        2 : "circle",
+        3 : "parody",
+        4 : "magazine",
+        5 : "character",
+        6 : "",
+        7 : "uploader",
+        8 : "male",
+        9 : "female",
+        10: "mixed",
+        11: "language",
+        12: "other",
+    }
+
     def __init__(self, match):
         GalleryExtractor.__init__(self, match)
         self.gallery_url = None
@@ -49,6 +65,15 @@ class KoharuGalleryExtractor(GalleryExtractor):
         self.data = data = self.request(url, headers=self.headers).json()
         data.pop("rels", None)
         data.pop("thumbnails", None)
+
+        tags = []
+        for tag in data["tags"]:
+            name = tag["name"]
+            namespace = tag.get("namespace", 0)
+            tags.append(self.TAG_TYPES[namespace] + ":" + name)
+        data["tags"] = tags
+        data["date"] = text.parse_timestamp(data["created_at"] // 1000)
+
         return data
 
     def images(self, _):
