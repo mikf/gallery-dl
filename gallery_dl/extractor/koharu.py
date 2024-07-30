@@ -107,7 +107,11 @@ class KoharuGalleryExtractor(GalleryExtractor):
         results = []
         for entry in data["entries"]:
             dimensions = entry["dimensions"]
-            info = {"w": dimensions[0], "h": dimensions[1]}
+            info = {
+                "w": dimensions[0],
+                "h": dimensions[1],
+                "_http_headers": self.headers,
+            }
             results.append((base + entry["path"], info))
         return results
 

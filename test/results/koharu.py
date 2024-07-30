@@ -54,7 +54,15 @@ __tests__ = (
     "#options" : {"cbz": False, "format": "780"},
     "#pattern" : r"https://koharusexo.xyz/data/59905/2df9110af7f1/a7cbeca3fb9c83aa87582a8a74cc8f8ce1b9e9b434dc1af293628871642f42df/[0-9a-f]+/.+",
     "#count"   : 22,
+},
 
+{
+    "#url"     : "https://koharu.to/g/14216/6c67076fdd45",
+    "#category": ("", "koharu", "gallery"),
+    "#class"   : koharu.KoharuGalleryExtractor,
+    "#options" : {"cbz": False, "format": "780"},
+    "#range"   : "1",
+    "#sha1_content": "08954e0ae18a900ee7ca144d1661c664468c2525",
 },
 
 {
