@@ -212,12 +212,6 @@ Consider all listed sites to potentially be NSFW.
     <td>Supported</td>
 </tr>
 <tr>
-    <td>Fallen Angels Scans</td>
-    <td>https://www.fascans.com/</td>
-    <td>Chapters, Manga</td>
-    <td></td>
-</tr>
-<tr>
     <td>Fanleaks</td>
     <td>https://fanleaks.club/</td>
     <td>Models, Posts</td>
