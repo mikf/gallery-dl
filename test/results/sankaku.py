@@ -18,6 +18,12 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.sankakucomplex.com/?tags=bonocho",
+    "#category": ("booru", "sankaku", "tag"),
+    "#class"   : sankaku.SankakuTagExtractor,
+},
+
+{
     "#url"     : "https://beta.sankakucomplex.com/?tags=bonocho",
     "#category": ("booru", "sankaku", "tag"),
     "#class"   : sankaku.SankakuTagExtractor,
@@ -97,6 +103,12 @@ __tests__ = (
     "#category": ("booru", "sankaku", "pool"),
     "#class"   : sankaku.SankakuPoolExtractor,
     "#count"   : 5,
+},
+
+{
+    "#url"     : "https://www.sankakucomplex.com/books/90",
+    "#category": ("booru", "sankaku", "pool"),
+    "#class"   : sankaku.SankakuPoolExtractor,
 },
 
 {
