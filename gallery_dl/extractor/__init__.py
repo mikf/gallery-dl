@@ -44,7 +44,6 @@ modules = [
     "e621",
     "erome",
     "exhentai",
-    "fallenangels",
     "fanbox",
     "fanleaks",
     "fantia",
