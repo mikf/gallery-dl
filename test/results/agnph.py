@@ -20,6 +20,7 @@ __tests__ = (
     "#url"     : "https://agn.ph/gallery/post/show/501604/",
     "#category": ("booru", "agnph", "post"),
     "#class"   : agnph.AgnphPostExtractor,
+    "#options" : {"tags": True},
     "#urls"        : "http://agn.ph/gallery/data/7d/a5/7da50021f3e86f6cf1c215652060d772.png",
     "#sha1_content": "93c8b2d3f53e891ad8fa68d5f60f8c7a70acd836",
 
@@ -41,6 +42,10 @@ __tests__ = (
     "source"      : "https://inkbunny.net/s/2886519",
     "status"      : "approved",
     "tags"        : "anthro female hisuian_sneasel regional_form reyn_goldfur shelly_the_sneasel sneasel solo",
+    "tags_artist" : "reyn_goldfur",
+    "tags_character": "shelly_the_sneasel",
+    "tags_general": "anthro female solo",
+    "tags_species": "hisuian_sneasel regional_form sneasel",
     "thumbnail_url": "http://agn.ph/gallery/data/thumb/7d/a5/7da50021f3e86f6cf1c215652060d772.png",
     "width"       : "953",
 

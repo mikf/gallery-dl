@@ -12,6 +12,8 @@ from . import booru
 from .. import text
 
 from xml.etree import ElementTree
+import collections
+import re
 
 BASE_PATTERN = r"(?:https?://)?agn\.ph"
 
@@ -21,6 +23,17 @@ class AgnphExtractor(booru.BooruExtractor):
     root = "https://agn.ph"
     page_start = 1
     per_page = 45
+
+    TAG_TYPES = {
+        "a": "artist",
+        "b": "copyright",
+        "c": "character",
+        "d": "species",
+        "m": "general",
+    }
+
+    def _init(self):
+        self.cookies.set("confirmed_age", "true", domain="agn.ph")
 
     def _prepare(self, post):
         post["date"] = text.parse_timestamp(post["created_at"])
@@ -49,6 +62,23 @@ class AgnphExtractor(booru.BooruExtractor):
                 return
 
             params["page"] += 1
+
+    def _html(self, post):
+        url = "{}/gallery/post/show/{}/".format(self.root, post["id"])
+        return self.request(url).text
+
+    def _tags(self, post, page):
+        tag_container = text.extr(
+            page, '<ul class="taglist">', '<h3>Statistics</h3>')
+        if not tag_container:
+            return
+
+        tags = collections.defaultdict(list)
+        pattern = re.compile(r'class="(.)typetag">([^<]+)')
+        for tag_type, tag_name in pattern.findall(tag_container):
+            tags[tag_type].append(text.unquote(tag_name).replace(" ", "_"))
+        for key, value in tags.items():
+            post["tags_" + self.TAG_TYPES[key]] = " ".join(value)
 
 
 class AgnphTagExtractor(AgnphExtractor):
