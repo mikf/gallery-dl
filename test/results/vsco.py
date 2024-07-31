@@ -9,9 +9,29 @@ from gallery_dl.extractor import vsco
 
 __tests__ = (
 {
-    "#url"     : "https://vsco.co/missuri/gallery",
+    "#url"     : "https://vsco.co/missuri",
     "#category": ("", "vsco", "user"),
     "#class"   : vsco.VscoUserExtractor,
+    "#urls"    : "https://vsco.co/missuri/gallery",
+},
+
+{
+    "#url"     : "https://vsco.co/missuri",
+    "#category": ("", "vsco", "user"),
+    "#class"   : vsco.VscoUserExtractor,
+    "#options" : {"include": "all"},
+    "#urls"    : [
+        "https://vsco.co/missuri/avatar",
+        "https://vsco.co/missuri/gallery",
+        "https://vsco.co/missuri/spaces",
+        "https://vsco.co/missuri/collection",
+    ],
+},
+
+{
+    "#url"     : "https://vsco.co/missuri/gallery",
+    "#category": ("", "vsco", "gallery"),
+    "#class"   : vsco.VscoGalleryExtractor,
     "#pattern" : r"https://image(-aws.+)?\.vsco\.co/[0-9a-f/]+/[\w-]+\.\w+",
     "#range"   : "1-80",
     "#count"   : 80,
@@ -19,14 +39,8 @@ __tests__ = (
 
 {
     "#url"     : "https://vsco.co/missuri/images/1",
-    "#category": ("", "vsco", "user"),
-    "#class"   : vsco.VscoUserExtractor,
-},
-
-{
-    "#url"     : "https://vsco.co/missuri",
-    "#category": ("", "vsco", "user"),
-    "#class"   : vsco.VscoUserExtractor,
+    "#category": ("", "vsco", "gallery"),
+    "#class"   : vsco.VscoGalleryExtractor,
 },
 
 {

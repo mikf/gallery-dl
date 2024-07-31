@@ -115,9 +115,28 @@ class VscoExtractor(Extractor):
 
 
 class VscoUserExtractor(VscoExtractor):
-    """Extractor for images from a user on vsco.co"""
+    """Extractor for a vsco user profile"""
     subcategory = "user"
-    pattern = USER_PATTERN + r"(?:/gallery|/images(?:/\d+)?)?/?(?:$|[?#])"
+    pattern = USER_PATTERN + r"/?$"
+    example = "https://vsco.co/USER"
+
+    def initialize(self):
+        pass
+
+    def items(self):
+        base = "{}/{}/".format(self.root, self.user)
+        return self._dispatch_extractors((
+            (VscoAvatarExtractor    , base + "avatar"),
+            (VscoGalleryExtractor   , base + "gallery"),
+            (VscoSpacesExtractor    , base + "spaces"),
+            (VscoCollectionExtractor, base + "collection"),
+        ), ("gallery",))
+
+
+class VscoGalleryExtractor(VscoExtractor):
+    """Extractor for a vsco user's gallery"""
+    subcategory = "gallery"
+    pattern = USER_PATTERN + r"/(?:gallery|images)"
     example = "https://vsco.co/USER/gallery"
 
     def images(self):
