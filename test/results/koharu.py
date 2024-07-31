@@ -85,4 +85,26 @@ __tests__ = (
     "#count"   : ">= 50",
 },
 
+{
+    "#url"     : "https://koharu.to/favorites",
+    "#category": ("", "koharu", "favorite"),
+    "#class"   : koharu.KoharuFavoriteExtractor,
+    "#pattern" : koharu.KoharuGalleryExtractor.pattern,
+    "#auth"    : True,
+    "#urls"    : [
+        "https://koharu.to/g/14216/6c67076fdd45",
+    ],
+},
+
+{
+    "#url"     : "https://koharu.to/favorites?cat=6&sort=4",
+    "#category": ("", "koharu", "favorite"),
+    "#class"   : koharu.KoharuFavoriteExtractor,
+    "#pattern" : koharu.KoharuGalleryExtractor.pattern,
+    "#auth"    : True,
+    "#urls"    : [
+        "https://koharu.to/g/14216/6c67076fdd45",
+    ],
+},
+
 )

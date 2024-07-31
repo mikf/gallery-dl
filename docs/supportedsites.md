@@ -478,7 +478,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Koharu</td>
     <td>https://koharu.to/</td>
-    <td>Galleries, Search Results</td>
+    <td>Favorites, Galleries, Search Results</td>
     <td></td>
 </tr>
 <tr>

@@ -10,15 +10,53 @@
 
 from .common import GalleryExtractor, Extractor, Message
 from .. import text, exception
+from ..cache import cache
 
 BASE_PATTERN = r"(?i)(?:https?://)?(?:koharu|anchira)\.to"
 
 
-class KoharuGalleryExtractor(GalleryExtractor):
-    """Extractor for koharu galleries"""
+class KoharuExtractor(Extractor):
+    """Base class for koharu extractors"""
     category = "koharu"
     root = "https://koharu.to"
     root_api = "https://api.koharu.to"
+    request_interval = (0.5, 1.5)
+
+    def _init(self):
+        self.headers = {
+            "Accept" : "*/*",
+            "Referer": self.root + "/",
+            "Origin" : self.root,
+        }
+
+    def _pagination(self, endpoint, params):
+        url_api = self.root_api + endpoint
+
+        while True:
+            data = self.request(
+                url_api, params=params, headers=self.headers).json()
+
+            try:
+                entries = data["entries"]
+            except KeyError:
+                return
+
+            for entry in entries:
+                url = "{}/g/{}/{}".format(
+                    self.root, entry["id"], entry["public_key"])
+                entry["_extractor"] = KoharuGalleryExtractor
+                yield Message.Queue, url, entry
+
+            try:
+                if data["limit"] * data["page"] >= data["total"]:
+                    return
+            except Exception:
+                pass
+            params["page"] += 1
+
+
+class KoharuGalleryExtractor(KoharuExtractor, GalleryExtractor):
+    """Extractor for koharu galleries"""
     filename_fmt = "{num:>03}.{extension}"
     directory_fmt = ("{category}", "{id} {title}")
     archive_fmt = "{id}_{num}"
@@ -130,46 +168,47 @@ class KoharuGalleryExtractor(GalleryExtractor):
         return fmt
 
 
-class KoharuSearchExtractor(Extractor):
+class KoharuSearchExtractor(KoharuExtractor):
     """Extractor for koharu search results"""
-    category = "koharu"
     subcategory = "search"
-    root = "https://koharu.to"
-    root_api = "https://api.koharu.to"
-    request_interval = (1.0, 2.0)
     pattern = BASE_PATTERN + r"/\?([^#]*)"
     example = "https://koharu.to/?s=QUERY"
 
-    def _init(self):
-        self.headers = {
-            "Accept" : "*/*",
-            "Referer": self.root + "/",
-            "Origin" : self.root,
-        }
-
     def items(self):
-        url_api = self.root_api + "/books"
         params = text.parse_query(self.groups[0])
         params["page"] = text.parse_int(params.get("page"), 1)
+        return self._pagination("/books", params)
 
-        while True:
-            data = self.request(
-                url_api, params=params, headers=self.headers).json()
 
-            try:
-                entries = data["entries"]
-            except KeyError:
-                return
+class KoharuFavoriteExtractor(KoharuExtractor):
+    """Extractor for koharu favorites"""
+    subcategory = "favorite"
+    pattern = BASE_PATTERN + r"/favorites(?:\?([^#]*))?"
+    example = "https://koharu.to/favorites"
 
-            for entry in entries:
-                url = "{}/g/{}/{}/".format(
-                    self.root, entry["id"], entry["public_key"])
-                entry["_extractor"] = KoharuGalleryExtractor
-                yield Message.Queue, url, entry
+    def items(self):
+        self.login()
 
-            try:
-                if data["limit"] * data["page"] >= data["total"]:
-                    return
-            except Exception:
-                pass
-            params["page"] += 1
+        params = text.parse_query(self.groups[0])
+        params["page"] = text.parse_int(params.get("page"), 1)
+        return self._pagination("/favorites", params)
+
+    def login(self):
+        username, password = self._get_auth_info()
+        if username:
+            self.headers["Authorization"] = \
+                "Bearer " + self._login_impl(username, password)
+            return
+
+        raise exception.AuthenticationError("Username and password required")
+
+    @cache(maxage=28*86400, keyarg=1)
+    def _login_impl(self, username, password):
+        self.log.info("Logging in as %s", username)
+
+        url = "https://auth.koharu.to/login"
+        data = {"uname": username, "passwd": password}
+        response = self.request(
+            url, method="POST", headers=self.headers, data=data)
+
+        return response.json()["session"]
