@@ -1077,14 +1077,14 @@ class DeviantartGallerySearchExtractor(DeviantartExtractor):
 class DeviantartFollowingExtractor(DeviantartExtractor):
     """Extractor for user's watched users"""
     subcategory = "following"
-    pattern = BASE_PATTERN + "/about#watching$"
+    pattern = BASE_PATTERN + "/(?:about#)?watching"
     example = "https://www.deviantart.com/USER/about#watching"
 
     def items(self):
-        eclipse_api = DeviantartEclipseAPI(self)
+        api = DeviantartOAuthAPI(self)
 
-        for user in eclipse_api.user_watching(self.user, self.offset):
-            url = "{}/{}".format(self.root, user["username"])
+        for user in api.user_friends(self.user):
+            url = "{}/{}".format(self.root, user["user"]["username"])
             user["_extractor"] = DeviantartUserExtractor
             yield Message.Queue, url, user
 
@@ -1349,6 +1349,12 @@ class DeviantartOAuthAPI():
         """Yield status updates of a specific user"""
         endpoint = "/user/statuses/"
         params = {"username": username, "offset": offset, "limit": 50}
+        return self._pagination(endpoint, params)
+
+    def user_friends(self, username, offset=0):
+        """Get the users list of friends"""
+        endpoint = "/user/friends/" + username
+        params = {"limit": 50, "offset": offset, "mature_content": self.mature}
         return self._pagination(endpoint, params)
 
     def user_friends_watch(self, username):
