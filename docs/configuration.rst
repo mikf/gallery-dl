@@ -385,6 +385,7 @@ Type
 Default
     * ``"0.5-1.5"``
         ``[Danbooru]``, ``[E621]``, ``[foolfuuka]:search``, ``itaku``,
+        ``koharu``,
         ``newgrounds``, ``[philomena]``, ``pixiv:novel``, ``plurk``,
         ``poipiku`` , ``pornpics``, ``soundgasm``, ``urlgalleries``,
         ``vk``, ``zerochan``
@@ -438,6 +439,7 @@ Description
     * ``imgbb``
     * ``inkbunny``
     * ``kemonoparty``
+    * ``koharu``
     * ``mangadex``
     * ``mangoxo``
     * ``pillowfort``
