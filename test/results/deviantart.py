@@ -1003,4 +1003,10 @@ __tests__ = (
     "#count"   : 50,
 },
 
+{
+    "#url"     : "https://www.deviantart.com/shimoda7/watching",
+    "#category": ("", "deviantart", "following"),
+    "#class"   : deviantart.DeviantartFollowingExtractor,
+},
+
 )
