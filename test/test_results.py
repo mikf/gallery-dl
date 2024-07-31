@@ -94,6 +94,7 @@ class TestExtractorResults(unittest.TestCase):
         result.pop("#comment", None)
         auth = result.pop("#auth", None)
 
+        extractor.find(result["#url"])
         extr = result["#class"].from_url(result["#url"])
         if not extr:
             raise exception.NoExtractorError()
