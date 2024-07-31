@@ -4300,6 +4300,29 @@ Description
     or `cookies <extractor.*.cookies_>`__
 
 
+extractor.vsco.include
+----------------------
+Type
+    * ``string``
+    * ``list`` of ``strings``
+Default
+    ``"gallery"``
+Example
+    * ``"avatar,collection"``
+    * ``["avatar", "collection"]``
+Description
+    A (comma-separated) list of subcategories to include
+    when processing a user profile.
+
+    Possible values are
+    ``"avatar"``,
+    ``"gallery"``,
+    ``"spaces"``,
+    ``"collection"``,
+
+    It is possible to use ``"all"`` instead of listing all values separately.
+
+
 extractor.vsco.videos
 ---------------------
 Type
