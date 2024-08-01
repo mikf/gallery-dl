@@ -17,10 +17,14 @@ BASE_PATTERN = r"(?:https?://)?ci-en\.(?:net|dlsite\.com)"
 class CienExtractor(Extractor):
     category = "cien"
     root = "https://ci-en.net"
+    request_interval = (1.0, 2.0)
 
     def __init__(self, match):
         self.root = text.root_from_url(match.group(0))
         Extractor.__init__(self, match)
+
+    def _init(self):
+        self.cookies.set("accepted_rating", "r18g", domain="ci-en.dlsite.com")
 
     def _pagination_articles(self, url, params):
         data = {"_extractor": CienArticleExtractor}
@@ -57,6 +61,7 @@ class CienArticleExtractor(CienExtractor):
 
         files = self._extract_files(post.get("articleBody") or page)
 
+        post["post_url"] = url
         post["post_id"] = text.parse_int(self.groups[1])
         post["count"] = len(files)
         post["date"] = text.parse_datetime(post["datePublished"])
@@ -77,6 +82,14 @@ class CienArticleExtractor(CienExtractor):
     def _extract_files(self, page):
         files = []
 
+        self._extract_files_image(page, files)
+        self._extract_files_video(page, files)
+        self._extract_files_attachment(page, files)
+        self._extract_files_gallery(page, files)
+
+        return files
+
+    def _extract_files_image(self, page, files):
         for image in text.extract_iter(
                 page, 'class="file-player-image"', "</figure>"):
             size = text.extr(image, ' data-size="', '"')
@@ -89,6 +102,7 @@ class CienArticleExtractor(CienExtractor):
                 "type"  : "image",
             })
 
+    def _extract_files_video(self, page, files):
         for video in text.extract_iter(
                 page, "<vue-file-player", "</vue-file-player>"):
             path = text.extr(video, ' base-path="', '"')
@@ -100,6 +114,7 @@ class CienArticleExtractor(CienExtractor):
             file["type"] = "video"
             files.append(file)
 
+    def _extract_files_attachment(self, page, files):
         for download in text.extract_iter(
                 page, 'class="downloadBlock', "</div>"):
             name = text.extr(download, "<p>", "<")
@@ -109,24 +124,26 @@ class CienArticleExtractor(CienExtractor):
             file["type"] = "attachment"
             files.append(file)
 
-        return files
-
-    def _extract_galleries(self, page):
-        # TODO
-        files = []
-
+    def _extract_files_gallery(self, page, files):
         for gallery in text.extract_iter(
                 page, "<vue-image-gallery", "</vue-image-gallery>"):
 
-            url = "https://ci-en.dlsite.com/api/creator/gallery/images"
+            url = self.root + "/api/creator/gallery/images"
             params = {
                 "hash"      : text.extr(gallery, ' hash="', '"'),
                 "gallery_id": text.extr(gallery, ' gallery-id="', '"'),
                 "time"      : text.extr(gallery, ' time="', '"'),
             }
-            self.request(url, params=params)
+            data = self.request(url, params=params).json()
+            url = self.root + "/api/creator/gallery/imagePath"
 
-        return files
+            for params["page"], params["file_id"] in enumerate(
+                    data["imgList"]):
+                path = self.request(url, params=params).json()["path"]
+
+                file = params.copy()
+                file["url"] = path
+                files.append(file)
 
 
 class CienCreatorExtractor(CienExtractor):
