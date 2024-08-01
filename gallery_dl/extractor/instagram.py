@@ -991,9 +991,9 @@ class InstagramGraphqlAPI():
             if not info["has_next_page"]:
                 return extr._update_cursor(None)
             elif not data["edges"]:
-                s = "" if self.item.endswith("s") else "s"
+                s = "" if self.extractor.item.endswith("s") else "s"
                 raise exception.StopExtraction(
-                    "%s'%s posts are private", self.item, s)
+                    "%s'%s posts are private", self.extractor.item, s)
 
             variables["after"] = extr._update_cursor(info["end_cursor"])
 
