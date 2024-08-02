@@ -14,6 +14,7 @@ __tests__ = (
     "#class"   : directlink.DirectlinkExtractor,
     "#sha1_url"     : "18c5d00077332e98e53be9fed2ee4be66154b88d",
     "#sha1_metadata": "105770a3f4393618ab7b811b731b22663b5d3794",
+    "#sha1_content" : "e6f58aaec8f31eb222f9e10fa9e9f64b79ae888c",
 },
 
 {
@@ -57,6 +58,117 @@ __tests__ = (
     "#class"   : directlink.DirectlinkExtractor,
     "#sha1_url"     : "a65667f670b194afbd1e3ea5e7a78938d36747da",
     "#sha1_metadata": "fd5037fe86eebd4764e176cbaf318caec0f700be",
+},
+
+{
+    "#url"     : "https://example.org/file.gif",
+    "#category": ("", "directlink", ""),
+    "#class"   : directlink.DirectlinkExtractor,
+},
+{
+    "#url"     : "https://example.org/file.bmp",
+    "#category": ("", "directlink", ""),
+    "#class"   : directlink.DirectlinkExtractor,
+},
+{
+    "#url"     : "https://example.org/file.svg",
+    "#category": ("", "directlink", ""),
+    "#class"   : directlink.DirectlinkExtractor,
+},
+{
+    "#url"     : "https://example.org/file.webp",
+    "#category": ("", "directlink", ""),
+    "#class"   : directlink.DirectlinkExtractor,
+},
+{
+    "#url"     : "https://example.org/file.avif",
+    "#category": ("", "directlink", ""),
+    "#class"   : directlink.DirectlinkExtractor,
+},
+{
+    "#url"     : "https://example.org/file.heic",
+    "#category": ("", "directlink", ""),
+    "#class"   : directlink.DirectlinkExtractor,
+},
+{
+    "#url"     : "https://example.org/file.psd",
+    "#category": ("", "directlink", ""),
+    "#class"   : directlink.DirectlinkExtractor,
+},
+{
+    "#url"     : "https://example.org/file.mp4",
+    "#category": ("", "directlink", ""),
+    "#class"   : directlink.DirectlinkExtractor,
+},
+{
+    "#url"     : "https://example.org/file.m4v",
+    "#category": ("", "directlink", ""),
+    "#class"   : directlink.DirectlinkExtractor,
+},
+{
+    "#url"     : "https://example.org/file.mov",
+    "#category": ("", "directlink", ""),
+    "#class"   : directlink.DirectlinkExtractor,
+},
+{
+    "#url"     : "https://example.org/file.mkv",
+    "#category": ("", "directlink", ""),
+    "#class"   : directlink.DirectlinkExtractor,
+},
+{
+    "#url"     : "https://example.org/file.ogg",
+    "#category": ("", "directlink", ""),
+    "#class"   : directlink.DirectlinkExtractor,
+},
+{
+    "#url"     : "https://example.org/file.ogm",
+    "#category": ("", "directlink", ""),
+    "#class"   : directlink.DirectlinkExtractor,
+},
+{
+    "#url"     : "https://example.org/file.ogv",
+    "#category": ("", "directlink", ""),
+    "#class"   : directlink.DirectlinkExtractor,
+},
+{
+    "#url"     : "https://example.org/file.wav",
+    "#category": ("", "directlink", ""),
+    "#class"   : directlink.DirectlinkExtractor,
+},
+{
+    "#url"     : "https://example.org/file.mp3",
+    "#category": ("", "directlink", ""),
+    "#class"   : directlink.DirectlinkExtractor,
+},
+{
+    "#url"     : "https://example.org/file.opus",
+    "#category": ("", "directlink", ""),
+    "#class"   : directlink.DirectlinkExtractor,
+},
+{
+    "#url"     : "https://example.org/file.zip",
+    "#category": ("", "directlink", ""),
+    "#class"   : directlink.DirectlinkExtractor,
+},
+{
+    "#url"     : "https://example.org/file.rar",
+    "#category": ("", "directlink", ""),
+    "#class"   : directlink.DirectlinkExtractor,
+},
+{
+    "#url"     : "https://example.org/file.7z",
+    "#category": ("", "directlink", ""),
+    "#class"   : directlink.DirectlinkExtractor,
+},
+{
+    "#url"     : "https://example.org/file.pdf",
+    "#category": ("", "directlink", ""),
+    "#class"   : directlink.DirectlinkExtractor,
+},
+{
+    "#url"     : "https://example.org/file.swf",
+    "#category": ("", "directlink", ""),
+    "#class"   : directlink.DirectlinkExtractor,
 },
 
 )
