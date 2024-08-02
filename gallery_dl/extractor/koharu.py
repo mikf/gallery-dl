@@ -209,7 +209,7 @@ class KoharuFavoriteExtractor(KoharuExtractor):
 
         raise exception.AuthenticationError("Username and password required")
 
-    @cache(maxage=28*86400, keyarg=1)
+    @cache(maxage=86400, keyarg=1)
     def _login_impl(self, username, password):
         self.log.info("Logging in as %s", username)
 
