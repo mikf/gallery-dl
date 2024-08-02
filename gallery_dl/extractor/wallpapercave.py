@@ -18,7 +18,7 @@ class WallpapercaveImageExtractor(Extractor):
     category = "wallpapercave"
     subcategory = "image"
     root = "https://wallpapercave.com"
-    pattern = r"(?:https?://)?(?:www\.)?wallpapercave\.com"
+    pattern = r"(?:https?://)?(?:www\.)?wallpapercave\.com/"
     example = "https://wallpapercave.com/w/wp12345"
 
     def items(self):
@@ -40,3 +40,12 @@ class WallpapercaveImageExtractor(Extractor):
                 image = text.nameext_from_url(path)
                 yield Message.Directory, image
                 yield Message.Url, self.root + path, image
+
+        if path is None:
+            for wp in text.extract_iter(
+                    page, 'class="wallpaper" id="wp', '</picture>'):
+                path = text.rextract(wp, ' src="', '"')[0]
+                if path:
+                    image = text.nameext_from_url(path)
+                    yield Message.Directory, image
+                    yield Message.Url, self.root + path, image
