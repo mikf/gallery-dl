@@ -92,6 +92,12 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
+    <td>AGNPH</td>
+    <td>https://agn.ph/</td>
+    <td>Posts, Tag Searches</td>
+    <td></td>
+</tr>
+<tr>
     <td>Architizer</td>
     <td>https://architizer.com/</td>
     <td>Firms, Projects</td>
@@ -140,6 +146,12 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
+    <td>Ci-en</td>
+    <td>https://ci-en.net/</td>
+    <td>Articles, Creators, Followed Users, Recent Images</td>
+    <td></td>
+</tr>
+<tr>
     <td>Comic Vine</td>
     <td>https://comicvine.gamespot.com/</td>
     <td>Tag Searches</td>
@@ -184,7 +196,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Eka's Portal</td>
     <td>https://aryion.com/</td>
-    <td>Galleries, Posts, Tag Searches</td>
+    <td>Favorites, Galleries, Posts, Tag Searches</td>
     <td>Supported</td>
 </tr>
 <tr>
@@ -203,12 +215,6 @@ Consider all listed sites to potentially be NSFW.
     <td>Facebook</td>
     <td>https://www.facebook.com/</td>
     <td>Profile Photos, Albums/Sets, Individual Photos, Individual Videos</td>
-    <td></td>
-</tr>
-<tr>
-    <td>Fallen Angels Scans</td>
-    <td>https://www.fascans.com/</td>
-    <td>Chapters, Manga</td>
     <td></td>
 </tr>
 <tr>
@@ -326,8 +332,14 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
+    <td>HentaiNexus</td>
+    <td>https://hentainexus.com/</td>
+    <td>Galleries, Search Results</td>
+    <td></td>
+</tr>
+<tr>
     <td>Hiperdex</td>
-    <td>https://hiperdex.com/</td>
+    <td>https://hiperdex.top/</td>
     <td>Artists, Chapters, Manga</td>
     <td></td>
 </tr>
@@ -430,7 +442,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Instagram</td>
     <td>https://www.instagram.com/</td>
-    <td>Avatars, Collections, Followed Users, Guides, Highlights, Posts, Reels, Saved Posts, Stories, Tag Searches, Tagged Posts, User Profiles</td>
+    <td>Avatars, Collections, Followed Users, Guides, Highlights, User Profile Information, Posts, Reels, Saved Posts, Stories, Tag Searches, Tagged Posts, User Profiles</td>
     <td><a href="https://github.com/mikf/gallery-dl#cookies">Cookies</a></td>
 </tr>
 <tr>
@@ -467,6 +479,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Khinsider</td>
     <td>https://downloads.khinsider.com/</td>
     <td>Soundtracks</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Koharu</td>
+    <td>https://koharu.to/</td>
+    <td>Favorites, Galleries, Search Results</td>
     <td></td>
 </tr>
 <tr>
@@ -620,12 +638,6 @@ Consider all listed sites to potentially be NSFW.
     <td><a href="https://github.com/mikf/gallery-dl#cookies">Cookies</a></td>
 </tr>
 <tr>
-    <td>Photobucket</td>
-    <td>https://photobucket.com/</td>
-    <td>Albums, individual Images</td>
-    <td></td>
-</tr>
-<tr>
     <td>PhotoVogue</td>
     <td>https://www.vogue.com/photovogue/</td>
     <td>User Profiles</td>
@@ -771,7 +783,7 @@ Consider all listed sites to potentially be NSFW.
 </tr>
 <tr>
     <td>Sankaku Complex</td>
-    <td>https://www.sankakucomplex.com/</td>
+    <td>https://news.sankakucomplex.com/</td>
     <td>Articles, Tag Searches</td>
     <td></td>
 </tr>
@@ -849,7 +861,7 @@ Consider all listed sites to potentially be NSFW.
 </tr>
 <tr>
     <td>TCB Scans</td>
-    <td>https://tcbscans.com/</td>
+    <td>https://tcbscans.me/</td>
     <td>Chapters, Manga</td>
     <td></td>
 </tr>
@@ -904,7 +916,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Twitter</td>
     <td>https://x.com/</td>
-    <td>Avatars, Backgrounds, Bookmarks, Communities, Events, Followed Users, Hashtags, individual Images, Likes, Lists, List Members, Media Timelines, Quotes, Search Results, Timelines, Tweets, User Profiles</td>
+    <td>Avatars, Backgrounds, Bookmarks, Communities, Events, Followed Users, Hashtags, individual Images, User Profile Information, Likes, Lists, List Members, Media Timelines, Quotes, Search Results, Timelines, Tweets, User Profiles</td>
     <td>Supported</td>
 </tr>
 <tr>
@@ -946,7 +958,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>VSCO</td>
     <td>https://vsco.co/</td>
-    <td>Avatars, Collections, individual Images, Spaces, User Profiles</td>
+    <td>Avatars, Collections, Galleries, individual Images, Spaces, User Profiles</td>
     <td></td>
 </tr>
 <tr>
@@ -1288,32 +1300,8 @@ Consider all listed sites to potentially be NSFW.
     <td colspan="4"><strong>Nitter Instances</strong></td>
 </tr>
 <tr>
-    <td>Nitter.net</td>
-    <td>https://nitter.net/</td>
-    <td>Media Files, Replies, Search Results, Tweets</td>
     <td></td>
-</tr>
-<tr>
-    <td>Nitter.1d4.us</td>
-    <td>https://nitter.1d4.us/</td>
-    <td>Media Files, Replies, Search Results, Tweets</td>
     <td></td>
-</tr>
-<tr>
-    <td>Nitter.kavin.rocks</td>
-    <td>https://nitter.kavin.rocks/</td>
-    <td>Media Files, Replies, Search Results, Tweets</td>
-    <td></td>
-</tr>
-<tr>
-    <td>Nitter.unixfox.eu</td>
-    <td>https://nitter.unixfox.eu/</td>
-    <td>Media Files, Replies, Search Results, Tweets</td>
-    <td></td>
-</tr>
-<tr>
-    <td>Nitter.it</td>
-    <td>https://nitter.it/</td>
     <td>Media Files, Replies, Search Results, Tweets</td>
     <td></td>
 </tr>
@@ -1411,6 +1399,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Posts, Tag Searches</td>
     <td></td>
 </tr>
+<tr>
+    <td>Vidya Booru</td>
+    <td>https://vidya.pics/</td>
+    <td>Posts, Tag Searches</td>
+    <td></td>
+</tr>
 
 <tr>
     <td colspan="4"><strong>szurubooru Instances</strong></td>
@@ -1456,12 +1450,6 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>8kun</td>
     <td>https://8kun.top/</td>
-    <td>Boards, Threads</td>
-    <td></td>
-</tr>
-<tr>
-    <td>Wikieat</td>
-    <td>https://wikieat.club/</td>
     <td>Boards, Threads</td>
     <td></td>
 </tr>
@@ -1619,6 +1607,16 @@ Consider all listed sites to potentially be NSFW.
     <td>The /b/ Archive</td>
     <td>https://thebarchive.com/</td>
     <td>Boards, Galleries, Search Results, Threads</td>
+    <td></td>
+</tr>
+
+<tr>
+    <td colspan="4"><strong>FoOlSlide Instances</strong></td>
+</tr>
+<tr>
+    <td></td>
+    <td></td>
+    <td>Chapters, Manga</td>
     <td></td>
 </tr>
 

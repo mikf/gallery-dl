@@ -168,6 +168,7 @@ class InstagramExtractor(Extractor):
                 "likes": post.get("like_count", 0),
                 "pinned": post.get("timeline_pinned_user_ids", ()),
                 "date": text.parse_timestamp(post.get("taken_at")),
+                "liked": post.get("has_liked", False),
             }
 
             caption = post["caption"]
@@ -270,6 +271,7 @@ class InstagramExtractor(Extractor):
             "typename"   : typename,
             "date"       : text.parse_timestamp(post["taken_at_timestamp"]),
             "likes"      : post["edge_media_preview_like"]["count"],
+            "liked"      : post.get("viewer_has_liked", False),
             "pinned"     : pinned,
             "owner_id"   : owner["id"],
             "username"   : owner.get("username"),
@@ -592,6 +594,22 @@ class InstagramTagExtractor(InstagramExtractor):
 
     def posts(self):
         return self.api.tags_media(self.item)
+
+
+class InstagramInfoExtractor(InstagramExtractor):
+    """Extractor for an Instagram user's profile data"""
+    subcategory = "info"
+    pattern = USER_PATTERN + r"/info"
+    example = "https://www.instagram.com/USER/info/"
+
+    def items(self):
+        screen_name = self.item
+        if screen_name.startswith("id:"):
+            user = self.api.user_by_id(screen_name[3:])
+        else:
+            user = self.api.user_by_name(screen_name)
+
+        return iter(((Message.Directory, user),))
 
 
 class InstagramAvatarExtractor(InstagramExtractor):
@@ -973,9 +991,9 @@ class InstagramGraphqlAPI():
             if not info["has_next_page"]:
                 return extr._update_cursor(None)
             elif not data["edges"]:
-                s = "" if self.item.endswith("s") else "s"
+                s = "" if self.extractor.item.endswith("s") else "s"
                 raise exception.StopExtraction(
-                    "%s'%s posts are private", self.item, s)
+                    "%s'%s posts are private", self.extractor.item, s)
 
             variables["after"] = extr._update_cursor(info["end_cursor"])
 

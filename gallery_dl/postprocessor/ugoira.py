@@ -158,6 +158,7 @@ class UgoiraPP(PostProcessor):
             except Exception as exc:
                 print()
                 self.log.error("%s: %s", exc.__class__.__name__, exc)
+                self.log.debug("", exc_info=True)
                 pathfmt.realpath = pathfmt.temppath
             else:
                 if self.mtime:
@@ -266,8 +267,8 @@ class UgoiraPP(PostProcessor):
         append("")
 
         ffconcat = tempdir + "/ffconcat.txt"
-        with open(ffconcat, "w") as file:
-            file.write("\n".join(content))
+        with open(ffconcat, "w") as fp:
+            fp.write("\n".join(content))
         return ffconcat
 
     def _write_mkvmerge_timecodes(self, tempdir):
@@ -282,8 +283,8 @@ class UgoiraPP(PostProcessor):
         append("")
 
         timecodes = tempdir + "/timecodes.tc"
-        with open(timecodes, "w") as file:
-            file.write("\n".join(content))
+        with open(timecodes, "w") as fp:
+            fp.write("\n".join(content))
         return timecodes
 
     def calculate_framerate(self, frames):

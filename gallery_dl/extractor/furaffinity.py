@@ -113,6 +113,12 @@ class FuraffinityExtractor(Extractor):
             data["gender"] = rh(extr('>Gender</strong>', '</div>'))
             data["width"] = pi(extr("<span>", "x"))
             data["height"] = pi(extr("", "p"))
+            data["folders"] = folders = []
+            for folder in extr(
+                    "<h3>Listed in Folders</h3>", "</section>").split("</a>"):
+                folder = rh(folder)
+                if folder:
+                    folders.append(folder)
         else:
             # old site layout
             data["title"] = text.unescape(extr("<h2>", "</h2>"))
@@ -132,11 +138,14 @@ class FuraffinityExtractor(Extractor):
             data["_description"] = extr(
                 '<td valign="top" align="left" width="70%" class="alt1" '
                 'style="padding:8px">', '                               </td>')
+            data["folders"] = ()  # folders not present in old layout
 
         data["artist_url"] = data["artist"].replace("_", "").lower()
         data["user"] = self.user or data["artist_url"]
         data["date"] = text.parse_timestamp(data["filename"].partition(".")[0])
         data["description"] = self._process_description(data["_description"])
+        data["thumbnail"] = "https://t.furaffinity.net/{}@600-{}.jpg".format(
+            post_id, path.rsplit("/", 2)[1])
 
         return data
 

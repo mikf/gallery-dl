@@ -152,8 +152,16 @@ class BehanceGalleryExtractor(BehanceExtractor):
                 continue
 
             if mtype == "image":
-                url = module["imageSizes"]["size_original"]["url"]
-                append((url, module))
+                sizes = {
+                    size["url"].rsplit("/", 2)[1]: size
+                    for size in module["imageSizes"]["allAvailable"]
+                }
+                size = (sizes.get("source") or
+                        sizes.get("max_3840") or
+                        sizes.get("fs") or
+                        sizes.get("hd") or
+                        sizes.get("disp"))
+                append((size["url"], module))
 
             elif mtype == "video":
                 try:

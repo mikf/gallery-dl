@@ -14,7 +14,11 @@ env:
 jobs:
   build:
 
+    if: github.repository == 'mikf/gallery-dl'
     runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
     strategy:
       fail-fast: false
       matrix:
@@ -41,8 +45,10 @@ jobs:
         python-version: ${{ matrix.python-version }}
         architecture: ${{ matrix.architecture }}
 
-    - name: Date
-      run: echo "DATE=$(date '+${{ env.DATE_FORMAT }}')" >> "$GITHUB_ENV"
+    - name: Environment Variables
+      run: |
+        echo "DATE=$(date '+${{ env.DATE_FORMAT }}')" >> "$GITHUB_ENV"
+        echo "LABEL=$(python ./scripts/pyinstaller.py --print --os '${{ matrix.os }}' --arch '${{ matrix.architecture }}')" >> "$GITHUB_ENV"
 
     - name: Update Version
       # use Python since its behavior is consistent across operating systems
@@ -56,13 +62,17 @@ jobs:
             r'\b(__version__ = "[^"]+)',
             r"\1:${{ env.DATE }}",
             content)
+        content = re.sub(
+            r'\b(__variant__ =).+',
+            r'\1 "dev/${{ env.LABEL }}"',
+            content)
         with open(path, "w") as fp:
             fp.write(content)
 
     - name: Build executable
       run: |
-        pip install requests requests[socks] yt-dlp pyyaml ${{ matrix.python-packages }} pyinstaller
-        python ./scripts/pyinstaller.py --os '${{ matrix.os }}' --arch '${{ matrix.architecture }}'
+        pip install 'setuptools<71' 'requests<2.32' requests[socks] yt-dlp pyyaml ${{ matrix.python-packages }} pyinstaller
+        python ./scripts/pyinstaller.py --label '${{ env.LABEL }}'
 
     - uses: actions/upload-artifact@v4
       with:
@@ -79,14 +89,18 @@ jobs:
     steps:
     - uses: actions/download-artifact@v4
 
-    - name: Date
+    - name: Environment Variables
       run: echo "DATE=$(date '+${{ env.DATE_FORMAT }}')" >> "$GITHUB_ENV"
+
+    - name: Body
+      run: printf 'https://github.com/%s/commit/%s' '${{ github.repository }}' '${{ github.sha }}' > body.md
 
     - uses: ncipollo/release-action@v1
       with:
         owner: gdl-org
         repo: builds
         tag: ${{ env.DATE }}
+        bodyFile: body.md
         artifacts: "executable-*/*"
         allowUpdates: true
         makeLatest: true

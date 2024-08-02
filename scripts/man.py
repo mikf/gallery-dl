@@ -100,8 +100,8 @@ and https://github.com/mikf/gallery-dl/graphs/contributors
 
     if not path:
         path = util.path("data/man/gallery-dl.1")
-    with util.lazy(path) as file:
-        file.write(TEMPLATE.lstrip() % {
+    with util.lazy(path) as fp:
+        fp.write(TEMPLATE.lstrip() % {
             "options": "\n".join(options),
             "version": gallery_dl.version.__version__,
             "date"   : datetime.datetime.now().strftime("%Y-%m-%d"),
@@ -218,8 +218,8 @@ and https://github.com/mikf/gallery-dl/graphs/contributors
 
     if not path:
         path = util.path("data/man/gallery-dl.conf.5")
-    with util.lazy(path) as file:
-        file.write(TEMPLATE.lstrip() % {
+    with util.lazy(path) as fp:
+        fp.write(TEMPLATE.lstrip() % {
             "options": "\n".join(content),
             "version": gallery_dl.version.__version__,
             "date"   : datetime.datetime.now().strftime("%Y-%m-%d"),
@@ -229,8 +229,8 @@ and https://github.com/mikf/gallery-dl/graphs/contributors
 def parse_docs_configuration():
 
     doc_path = util.path("docs", "configuration.rst")
-    with open(doc_path, encoding="utf-8") as file:
-        doc_lines = file.readlines()
+    with open(doc_path, encoding="utf-8") as fp:
+        doc_lines = fp.readlines()
 
     sections = {}
     sec_name = None

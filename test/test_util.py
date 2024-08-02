@@ -134,19 +134,18 @@ class TestPredicate(unittest.TestCase):
         with self.assertRaises(SyntaxError):
             util.FilterPredicate("(")
 
-        with self.assertRaises(exception.FilterError):
-            util.FilterPredicate("a > 1")(url, {"a": None})
-
-        with self.assertRaises(exception.FilterError):
-            util.FilterPredicate("b > 1")(url, {"a": 2})
+        self.assertFalse(
+            util.FilterPredicate("a > 1")(url, {"a": None}))
+        self.assertFalse(
+            util.FilterPredicate("b > 1")(url, {"a": 2}))
 
         pred = util.FilterPredicate(["a < 3", "b < 4", "c < 5"])
         self.assertTrue(pred(url, {"a": 2, "b": 3, "c": 4}))
         self.assertFalse(pred(url, {"a": 3, "b": 3, "c": 4}))
         self.assertFalse(pred(url, {"a": 2, "b": 4, "c": 4}))
         self.assertFalse(pred(url, {"a": 2, "b": 3, "c": 5}))
-        with self.assertRaises(exception.FilterError):
-            pred(url, {"a": 2})
+
+        self.assertFalse(pred(url, {"a": 2}))
 
     def test_build_predicate(self):
         pred = util.build_predicate([])
@@ -445,6 +444,7 @@ class TestOther(unittest.TestCase):
         self.assertEqual(expr({"a": 1, "b": 2, "c": 3}), 7)
         self.assertEqual(expr({"a": 9, "b": 9, "c": 9}), 90)
 
+        expr = util.compile_expression_raw("a + b * c")
         with self.assertRaises(NameError):
             expr()
         with self.assertRaises(NameError):
@@ -745,12 +745,25 @@ def hash(value):
         self.assertEqual(repr(obj), repr(None))
         self.assertEqual(format(obj), str(None))
         self.assertEqual(format(obj, "%F"), str(None))
+
         self.assertIs(obj.attr, obj)
         self.assertIs(obj["key"], obj)
         self.assertIs(obj(), obj)
         self.assertIs(obj(1, "a"), obj)
         self.assertIs(obj(foo="bar"), obj)
         self.assertEqual(util.json_dumps(obj), "null")
+
+        self.assertLess(obj, "foo")
+        self.assertLessEqual(obj, None)
+        self.assertTrue(obj == obj)
+        self.assertFalse(obj == 0)
+        self.assertFalse(obj != obj)
+        self.assertGreater(123, obj)
+        self.assertGreaterEqual(1.23, obj)
+
+        mapping = {}
+        mapping[obj] = 123
+        self.assertIn(obj, mapping)
 
         i = 0
         for _ in obj:

@@ -107,7 +107,7 @@ __tests__ = (
     "#url"     : "https://www.newgrounds.com/portal/view/595355",
     "#category": ("", "newgrounds", "media"),
     "#class"   : newgrounds.NewgroundsMediaExtractor,
-    "#pattern" : r"https://uploads\.ungrounded\.net/alternate/564000/564957_alternate_31\.mp4\?1359712249",
+    "#urls"    : "https://uploads.ungrounded.net/alternate/564000/564957_alternate_31.mp4?1359712249",
 
     "artist"     : [
         "kickinthehead",
@@ -129,6 +129,22 @@ __tests__ = (
     "title"      : "Alien Hominid Fan Trailer",
     "type"       : "movie",
     "user"       : "kickinthehead",
+},
+
+{
+    "#url"     : "https://www.newgrounds.com/portal/view/595355",
+    "#category": ("", "newgrounds", "media"),
+    "#class"   : newgrounds.NewgroundsMediaExtractor,
+    "#options" : {"format": ["mkv", "mov", 1080]},
+    "#urls"    : "https://uploads.ungrounded.net/alternate/564000/564957_alternate_31.mkv?1359712249",
+},
+
+{
+    "#url"     : "https://www.newgrounds.com/portal/view/595355",
+    "#category": ("", "newgrounds", "media"),
+    "#class"   : newgrounds.NewgroundsMediaExtractor,
+    "#options" : {"format": "720p"},
+    "#urls"    : "https://uploads.ungrounded.net/alternate/564000/564957_alternate_31.720p.mp4?1359712249",
 },
 
 {

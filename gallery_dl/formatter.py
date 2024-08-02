@@ -325,6 +325,26 @@ def _parse_slice(format_spec, default):
     return apply_slice
 
 
+def _parse_conversion(format_spec, default):
+    conversions, _, format_spec = format_spec.partition(_SEPARATOR)
+    convs = [_CONVERSIONS[c] for c in conversions[1:]]
+    fmt = _build_format_func(format_spec, default)
+
+    if len(conversions) <= 2:
+
+        def convert_one(obj):
+            return fmt(conv(obj))
+        conv = _CONVERSIONS[conversions[1]]
+        return convert_one
+
+    def convert_many(obj):
+        for conv in convs:
+            obj = conv(obj)
+        return fmt(obj)
+    convs = [_CONVERSIONS[c] for c in conversions[1:]]
+    return convert_many
+
+
 def _parse_maxlen(format_spec, default):
     maxlen, replacement, format_spec = format_spec.split(_SEPARATOR, 2)
     maxlen = text.parse_int(maxlen[1:])
@@ -403,6 +423,19 @@ def _parse_sort(format_spec, default):
         return sort_asc
 
 
+def _parse_limit(format_spec, default):
+    limit, hint, format_spec = format_spec.split(_SEPARATOR, 2)
+    limit = int(limit[1:])
+    limit_hint = limit - len(hint)
+    fmt = _build_format_func(format_spec, default)
+
+    def apply_limit(obj):
+        if len(obj) > limit:
+            obj = obj[:limit_hint] + hint
+        return fmt(obj)
+    return apply_limit
+
+
 def _default_format(format_spec, default):
     def wrap(obj):
         return format(obj, format_spec)
@@ -447,10 +480,12 @@ _CONVERSIONS = {
 _FORMAT_SPECIFIERS = {
     "?": _parse_optional,
     "[": _parse_slice,
+    "C": _parse_conversion,
     "D": _parse_datetime,
-    "L": _parse_maxlen,
     "J": _parse_join,
+    "L": _parse_maxlen,
     "O": _parse_offset,
     "R": _parse_replace,
     "S": _parse_sort,
+    "X": _parse_limit,
 }

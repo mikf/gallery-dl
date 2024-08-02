@@ -17,7 +17,7 @@ import string
 from datetime import datetime, timedelta
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from gallery_dl import extractor  # noqa E402
+from gallery_dl import extractor, util  # noqa E402
 from gallery_dl.extractor import mastodon  # noqa E402
 from gallery_dl.extractor.common import Extractor, Message  # noqa E402
 from gallery_dl.extractor.directlink import DirectlinkExtractor  # noqa E402
@@ -25,7 +25,11 @@ from gallery_dl.extractor.directlink import DirectlinkExtractor  # noqa E402
 _list_classes = extractor._list_classes
 
 try:
-    from test import results
+    RESULTS = os.environ.get("GDL_TEST_RESULTS")
+    if RESULTS:
+        results = util.import_file(RESULTS)
+    else:
+        from test import results
 except ImportError:
     results = None
 
@@ -109,6 +113,7 @@ class TestExtractorModule(unittest.TestCase):
                     print("Skipping '{}' category checks".format(cat))
                     continue
                 raise
+            self.assertTrue(extr, url)
             self.assertEqual(extr.category, cat, url)
             self.assertEqual(extr.subcategory, sub, url)
             self.assertEqual(extr.basecategory, base, url)

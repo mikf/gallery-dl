@@ -22,7 +22,11 @@ jobs:
     runs-on: ubuntu-latest
 
     # on release commits, run only for tag event
-    if: ${{ ! startsWith( github.event.head_commit.message , 'release version ' ) || startsWith( github.ref , 'refs/tags/v' ) }}
+    if: ${{
+        github.repository == 'mikf/gallery-dl' &&
+        ( ! startsWith( github.event.head_commit.message , 'release version ' ) ||
+            startsWith( github.ref , 'refs/tags/v' ) )
+      }}
 
     steps:
     - uses: actions/checkout@v4

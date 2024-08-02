@@ -133,6 +133,13 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.instagram.com/instagram/info",
+    "#category": ("", "instagram", "info"),
+    "#class"   : instagram.InstagramInfoExtractor,
+    "#auth"    : False,
+},
+
+{
     "#url"     : "https://www.instagram.com/instagram/avatar",
     "#category": ("", "instagram", "avatar"),
     "#class"   : instagram.InstagramAvatarExtractor,

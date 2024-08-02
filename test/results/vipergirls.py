@@ -24,6 +24,18 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://vipergirls.to/threads/4328304-2011-05-28-Danica-Simply-Beautiful-x112-4500x3000?highlight=foobar",
+    "#category": ("", "vipergirls", "thread"),
+    "#class"   : vipergirls.VipergirlsThreadExtractor,
+},
+
+{
+    "#url"     : "https://vipergirls.to/threads/4328304?foo=bar",
+    "#category": ("", "vipergirls", "thread"),
+    "#class"   : vipergirls.VipergirlsThreadExtractor,
+},
+
+{
     "#url"     : "https://vipergirls.to/threads/4328304",
     "#category": ("", "vipergirls", "thread"),
     "#class"   : vipergirls.VipergirlsThreadExtractor,

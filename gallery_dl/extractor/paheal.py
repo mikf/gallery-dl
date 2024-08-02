@@ -77,6 +77,7 @@ class PahealTagExtractor(PahealExtractor):
     pattern = (r"(?:https?://)?(?:rule34|rule63|cosplay)\.paheal\.net"
                r"/post/list/([^/?#]+)")
     example = "https://rule34.paheal.net/post/list/TAG/1"
+    page_start = 1
     per_page = 70
 
     def __init__(self, match):
@@ -87,11 +88,16 @@ class PahealTagExtractor(PahealExtractor):
         if self.config("metadata"):
             self._extract_data = self._extract_data_ex
 
+    def skip(self, num):
+        pages = num // self.per_page
+        self.page_start += pages
+        return pages * self.per_page
+
     def get_metadata(self):
         return {"search_tags": self.tags}
 
     def get_posts(self):
-        pnum = 1
+        pnum = self.page_start
         while True:
             url = "{}/post/list/{}/{}".format(self.root, self.tags, pnum)
             page = self.request(url).text

@@ -106,12 +106,12 @@ def identity(x):
     return x
 
 
-def true(_):
+def true(_, __=None):
     """Always returns True"""
     return True
 
 
-def false(_):
+def false(_, __=None):
     """Always returns False"""
     return False
 
@@ -540,8 +540,23 @@ class CustomNone():
     def __bool__():
         return False
 
+    def __eq__(self, other):
+        return self is other
+
+    def __ne__(self, other):
+        return self is not other
+
+    __lt__ = true
+    __le__ = true
+    __gt__ = false
+    __ge__ = false
+
     @staticmethod
     def __len__():
+        return 0
+
+    @staticmethod
+    def __hash__():
         return 0
 
     @staticmethod
@@ -605,9 +620,26 @@ else:
     Popen = subprocess.Popen
 
 
-def compile_expression(expr, name="<expr>", globals=None):
+def compile_expression_raw(expr, name="<expr>", globals=None):
     code_object = compile(expr, name, "eval")
     return functools.partial(eval, code_object, globals or GLOBALS)
+
+
+def compile_expression_tryexcept(expr, name="<expr>", globals=None):
+    code_object = compile(expr, name, "eval")
+
+    def _eval(locals=None, globals=(globals or GLOBALS), co=code_object):
+        try:
+            return eval(co, globals, locals)
+        except exception.GalleryDLException:
+            raise
+        except Exception:
+            return False
+
+    return _eval
+
+
+compile_expression = compile_expression_tryexcept
 
 
 def import_file(path):

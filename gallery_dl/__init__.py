@@ -105,6 +105,11 @@ def main():
 
             output.ANSI = True
 
+        # filter environment
+        filterenv = config.get((), "filters-environment", True)
+        if not filterenv:
+            util.compile_expression = util.compile_expression_raw
+
         # format string separator
         separator = config.get((), "format-separator")
         if separator:
@@ -127,7 +132,7 @@ def main():
 
             extra = ""
             if util.EXECUTABLE:
-                extra = " - Executable"
+                extra = " - Executable ({})".format(version.__variant__)
             else:
                 git_head = util.git_head()
                 if git_head:
@@ -144,6 +149,10 @@ def main():
                 pass
 
             log.debug("Configuration Files %s", config._files)
+
+        if args.print_traffic:
+            import requests
+            requests.packages.urllib3.connection.HTTPConnection.debuglevel = 1
 
         # extractor modules
         modules = config.get(("extractor",), "modules")
@@ -183,7 +192,13 @@ def main():
             else:
                 extractor._module_iter = iter(modules[0])
 
-        if args.list_modules:
+        if args.update:
+            from . import update
+            extr = update.UpdateExtractor.from_url("update:" + args.update)
+            ujob = update.UpdateJob(extr)
+            return ujob.run()
+
+        elif args.list_modules:
             extractor.modules.append("")
             sys.stdout.write("\n".join(extractor.modules))
 
@@ -207,14 +222,20 @@ def main():
 
             if cnt is None:
                 log.error("Database file not available")
+                return 1
             else:
                 log.info(
                     "Deleted %d %s from '%s'",
                     cnt, "entry" if cnt == 1 else "entries", cache._path(),
                 )
 
-        elif args.config_init:
-            return config.initialize()
+        elif args.config:
+            if args.config == "init":
+                return config.initialize()
+            elif args.config == "status":
+                return config.status()
+            else:
+                return config.open_extern()
 
         else:
             if not args.urls and not args.input_files:
@@ -228,6 +249,9 @@ def main():
                 if config.get(("output",), "fallback", True):
                     jobtype.handle_url = \
                         staticmethod(jobtype.handle_url_fallback)
+            elif args.dump_json:
+                jobtype = job.DataJob
+                jobtype.resolve = args.dump_json - 1
             else:
                 jobtype = args.jobtype or job.DownloadJob
 
@@ -287,6 +311,8 @@ def main():
                     else:
                         input_manager.success()
 
+                except exception.StopExtraction:
+                    pass
                 except exception.TerminateExtraction:
                     pass
                 except exception.RestartExtraction:
@@ -299,6 +325,7 @@ def main():
 
                 input_manager.next()
             return retval
+        return 0
 
     except KeyboardInterrupt:
         raise SystemExit("\nKeyboardInterrupt")

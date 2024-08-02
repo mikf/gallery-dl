@@ -33,6 +33,7 @@ stdout_write = output.stdout_write
 class Job():
     """Base class for Job types"""
     ulog = None
+    _logger_adapter = output.LoggerAdapter
 
     def __init__(self, extr, parent=None):
         if isinstance(extr, str):
@@ -42,8 +43,9 @@ class Job():
 
         self.extractor = extr
         self.pathfmt = None
-        self.kwdict = {}
         self.status = 0
+        self.kwdict = {}
+        self.kwdict_eval = False
 
         cfgpath = []
         if parent:
@@ -76,9 +78,9 @@ class Job():
 
         actions = extr.config("actions")
         if actions:
-            from .actions import parse
+            from .actions import LoggerAdapter, parse
+            self._logger_adapter = LoggerAdapter
             self._logger_actions = parse(actions)
-            self._wrap_logger = self._wrap_logger_actions
 
         path_proxy = output.PathfmtProxy(self)
         self._logger_extra = {
@@ -120,7 +122,16 @@ class Job():
         # user-supplied metadata
         kwdict = extr.config("keywords")
         if kwdict:
-            self.kwdict.update(kwdict)
+            if extr.config("keywords-eval"):
+                self.kwdict_eval = []
+                for key, value in kwdict.items():
+                    if isinstance(value, str):
+                        fmt = formatter.parse(value, None, util.identity)
+                        self.kwdict_eval.append((key, fmt.format_map))
+                    else:
+                        self.kwdict[key] = value
+            else:
+                self.kwdict.update(kwdict)
 
     def run(self):
         """Execute or run the job"""
@@ -215,6 +226,9 @@ class Job():
             kwdict.pop(self.metadata_http, None)
         if self.kwdict:
             kwdict.update(self.kwdict)
+        if self.kwdict_eval:
+            for key, valuegen in self.kwdict_eval:
+                kwdict[key] = valuegen(kwdict)
 
     def _init(self):
         self.extractor.initialize()
@@ -254,10 +268,7 @@ class Job():
         return self._wrap_logger(logging.getLogger(name))
 
     def _wrap_logger(self, logger):
-        return output.LoggerAdapter(logger, self)
-
-    def _wrap_logger_actions(self, logger):
-        return output.LoggerAdapterActions(logger, self)
+        return self._logger_adapter(logger, self)
 
     def _write_unsupported(self, url):
         if self.ulog:
@@ -302,7 +313,7 @@ class DownloadJob(Job):
             pathfmt.build_path()
 
             if pathfmt.exists():
-                if archive:
+                if archive and self._archive_write_skip:
                     archive.add(kwdict)
                 self.handle_skip()
                 return
@@ -332,7 +343,7 @@ class DownloadJob(Job):
                 return
 
         if not pathfmt.temppath:
-            if archive:
+            if archive and self._archive_write_skip:
                 archive.add(kwdict)
             self.handle_skip()
             return
@@ -346,7 +357,7 @@ class DownloadJob(Job):
         pathfmt.finalize()
         self.out.success(pathfmt.path)
         self._skipcnt = 0
-        if archive:
+        if archive and self._archive_write_file:
             archive.add(kwdict)
         if "after" in hooks:
             for callback in hooks["after"]:
@@ -548,6 +559,16 @@ class DownloadJob(Job):
             else:
                 extr.log.debug("Using download archive '%s'", archive_path)
 
+                events = cfg("archive-event")
+                if events is None:
+                    self._archive_write_file = True
+                    self._archive_write_skip = False
+                else:
+                    if isinstance(events, str):
+                        events = events.split(",")
+                    self._archive_write_file = ("file" in events)
+                    self._archive_write_skip = ("skip" in events)
+
         skip = cfg("skip", True)
         if skip:
             self._skipexc = None
@@ -663,7 +684,7 @@ class SimulationJob(DownloadJob):
             kwdict["extension"] = "jpg"
         if self.sleep:
             self.extractor.sleep(self.sleep(), "download")
-        if self.archive:
+        if self.archive and self._archive_write_skip:
             self.archive.add(kwdict)
         self.out.skip(self.pathfmt.build_filename(kwdict))
 
@@ -835,15 +856,21 @@ class InfoJob(Job):
 
 class DataJob(Job):
     """Collect extractor results and dump them"""
+    resolve = False
 
-    def __init__(self, url, parent=None, file=sys.stdout, ensure_ascii=True):
+    def __init__(self, url, parent=None, file=sys.stdout, ensure_ascii=True,
+                 resolve=False):
         Job.__init__(self, url, parent)
         self.file = file
         self.data = []
         self.ascii = config.get(("output",), "ascii", ensure_ascii)
+        self.resolve = 128 if resolve is True else (resolve or self.resolve)
 
         private = config.get(("output",), "private")
         self.filter = dict.copy if private else util.filter_dict
+
+        if self.resolve > 0:
+            self.handle_queue = self.handle_queue_resolve
 
     def run(self):
         self._init()
@@ -870,12 +897,13 @@ class DataJob(Job):
             for msg in self.data:
                 util.transform_dict(msg[-1], util.number_to_string)
 
-        # dump to 'file'
-        try:
-            util.dump_json(self.data, self.file, self.ascii, 2)
-            self.file.flush()
-        except Exception:
-            pass
+        if self.file:
+            # dump to 'file'
+            try:
+                util.dump_json(self.data, self.file, self.ascii, 2)
+                self.file.flush()
+            except Exception:
+                pass
 
         return 0
 
@@ -887,3 +915,17 @@ class DataJob(Job):
 
     def handle_queue(self, url, kwdict):
         self.data.append((Message.Queue, url, self.filter(kwdict)))
+
+    def handle_queue_resolve(self, url, kwdict):
+        cls = kwdict.get("_extractor")
+        if cls:
+            extr = cls.from_url(url)
+        else:
+            extr = extractor.find(url)
+
+        if not extr:
+            return self.data.append((Message.Queue, url, self.filter(kwdict)))
+
+        job = self.__class__(extr, self, None, self.ascii, self.resolve-1)
+        job.data = self.data
+        job.run()

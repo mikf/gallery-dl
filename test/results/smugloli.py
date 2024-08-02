@@ -9,15 +9,15 @@ from gallery_dl.extractor import vichan
 
 __tests__ = (
 {
-    "#url"     : "https://smuglo.li/a/res/1187531.html",
+    "#url"     : "https://smuglo.li/a/res/1143245.html",
     "#category": ("vichan", "smugloli", "thread"),
     "#class"   : vichan.VichanThreadExtractor,
     "#pattern" : r"https://smug.+/a/src/\d+(-\d)?\.\w+",
     "#count"   : ">= 50",
 
     "board" : "a",
-    "thread": "1187531",
-    "title" : "Buta no Liver wa Kanetsu Shiro",
+    "thread": "1143245",
+    "title": "Rabbit Rabbit Thread #4",
 },
 
 {

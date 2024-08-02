@@ -11,6 +11,8 @@
 from .booru import BooruExtractor
 from ..cache import cache
 from .. import text, util, exception
+import collections
+import re
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?zerochan\.net"
 
@@ -76,22 +78,29 @@ class ZerochanExtractor(BooruExtractor):
                 'class="breadcrumbs', '</nav>'))[2:],
             "uploader": extr('href="/user/', '"'),
             "tags"    : extr('<ul id="tags"', '</ul>'),
-            "source"  : extr('<h2>Source</h2>', '</p><h2>').rpartition(
-                ">")[2] or None,
+            "source"  : text.unescape(text.extr(
+                extr('id="source-url"', '</a>'), 'href="', '"')),
         }
 
         html = data["tags"]
         tags = data["tags"] = []
         for tag in html.split("<li class=")[1:]:
-            category = text.extr(tag, 'data-type="', '"')
+            category = text.extr(tag, '"', '"')
             name = text.extr(tag, 'data-tag="', '"')
-            tags.append(category.capitalize() + ":" + name)
+            tags.append(category.partition(" ")[0].capitalize() + ":" + name)
 
         return data
 
     def _parse_entry_api(self, entry_id):
         url = "{}/{}?json".format(self.root, entry_id)
-        item = self.request(url).json()
+        text = self.request(url).text
+        try:
+            item = util.json_loads(text)
+        except ValueError as exc:
+            if " control character " not in str(exc):
+                raise
+            text = re.sub(r"[\x00-\x1f\x7f]", "", text)
+            item = util.json_loads(text)
 
         data = {
             "id"      : item["id"],
@@ -108,6 +117,14 @@ class ZerochanExtractor(BooruExtractor):
             data["tags"] = item["tags"]
 
         return data
+
+    def _tags(self, post, page):
+        tags = collections.defaultdict(list)
+        for tag in post["tags"]:
+            category, _, name = tag.partition(":")
+            tags[category].append(name)
+        for key, value in tags.items():
+            post["tags_" + key.lower()] = value
 
 
 class ZerochanTagExtractor(ZerochanExtractor):
@@ -180,10 +197,16 @@ class ZerochanTagExtractor(ZerochanExtractor):
         static = "https://static.zerochan.net/.full."
 
         while True:
-            data = self.request(url, params=params).json()
+            response = self.request(url, params=params, allow_redirects=False)
+            if response.status_code >= 300:
+                url = text.urljoin(self.root, response.headers["location"])
+                response = self.request(url, params=params)
+            data = response.json()
+
             try:
                 posts = data["items"]
-            except ValueError:
+            except Exception:
+                self.log.debug("Server response: %s", data)
                 return
 
             if metadata:
@@ -191,13 +214,13 @@ class ZerochanTagExtractor(ZerochanExtractor):
                     post_id = post["id"]
                     post.update(self._parse_entry_html(post_id))
                     post.update(self._parse_entry_api(post_id))
+                    yield post
             else:
                 for post in posts:
                     base = static + str(post["id"])
                     post["file_url"] = base + ".jpg"
                     post["_fallback"] = (base + ".png",)
-
-            yield from posts
+                    yield post
 
             if not data.get("next"):
                 return

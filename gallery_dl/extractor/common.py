@@ -11,6 +11,7 @@
 import os
 import re
 import ssl
+import sys
 import time
 import netrc
 import queue
@@ -42,6 +43,7 @@ class Extractor():
     browser = None
     request_interval = 0.0
     request_interval_min = 0.0
+    request_interval_429 = 60.0
     request_timestamp = 0.0
 
     def __init__(self, match):
@@ -202,7 +204,9 @@ class Extractor():
                         self.log.warning("Cloudflare CAPTCHA")
                         break
 
-                if code == 429 and self._interval_429:
+                if code == 429 and self._handle_429(response):
+                    continue
+                elif code == 429 and self._interval_429:
                     pass
                 elif code not in retry_codes and code < 500:
                     break
@@ -229,6 +233,8 @@ class Extractor():
             tries += 1
 
         raise exception.HttpError(msg, response)
+
+    _handle_429 = util.false
 
     def wait(self, seconds=None, until=None, adjust=1.0,
              reason="rate limit"):
@@ -263,6 +269,8 @@ class Extractor():
         time.sleep(seconds)
 
     def input(self, prompt, echo=True):
+        self._check_input_allowed(prompt)
+
         if echo:
             try:
                 return input(prompt)
@@ -271,13 +279,30 @@ class Extractor():
         else:
             return getpass.getpass(prompt)
 
+    def _check_input_allowed(self, prompt=""):
+        input = self.config("input")
+
+        if input is None:
+            try:
+                input = sys.stdin.isatty()
+            except Exception:
+                input = False
+
+        if not input:
+            raise exception.StopExtraction(
+                "User input required (%s)", prompt.strip(" :"))
+
     def _get_auth_info(self):
         """Return authentication information as (username, password) tuple"""
         username = self.config("username")
         password = None
 
         if username:
-            password = self.config("password") or util.LazyPrompt()
+            password = self.config("password")
+            if not password:
+                self._check_input_allowed("password")
+                password = util.LazyPrompt()
+
         elif self.config("netrc", False):
             try:
                 info = netrc.netrc().authenticators(self.category)
@@ -304,7 +329,7 @@ class Extractor():
             self.request_interval_min,
         )
         self._interval_429 = util.build_duration_func(
-            self.config("sleep-429", 60),
+            self.config("sleep-429", self.request_interval_429),
         )
 
         if self._retries < 0:
@@ -353,7 +378,7 @@ class Extractor():
             useragent = self.config("user-agent")
             if useragent is None:
                 useragent = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64; "
-                             "rv:109.0) Gecko/20100101 Firefox/115.0")
+                             "rv:128.0) Gecko/20100101 Firefox/128.0")
             elif useragent == "browser":
                 useragent = _browser_useragent()
             headers["User-Agent"] = useragent
@@ -365,6 +390,8 @@ class Extractor():
             headers["Accept-Encoding"] = "gzip, deflate, br"
         else:
             headers["Accept-Encoding"] = "gzip, deflate"
+        if ZSTD:
+            headers["Accept-Encoding"] += ", zstd"
 
         referer = self.config("referer", self.referer)
         if referer:
@@ -764,10 +791,11 @@ class BaseExtractor(Extractor):
     instances = ()
 
     def __init__(self, match):
-        Extractor.__init__(self, match)
         if not self.category:
+            self.groups = match.groups()
+            self.match = match
             self._init_category()
-            self._cfgpath = ("extractor", self.category, self.subcategory)
+        Extractor.__init__(self, match)
 
     def _init_category(self):
         for index, group in enumerate(self.groups):
@@ -837,6 +865,9 @@ def _build_requests_adapter(ssl_options, ssl_ciphers, source_address):
     if ssl_options or ssl_ciphers:
         ssl_context = urllib3.connection.create_urllib3_context(
             options=ssl_options or None, ciphers=ssl_ciphers)
+        if not requests.__version__ < "2.32":
+            # https://github.com/psf/requests/pull/6731
+            ssl_context.load_default_certs()
         ssl_context.check_hostname = False
     else:
         ssl_context = None
@@ -883,13 +914,12 @@ _browser_cookies = {}
 HTTP_HEADERS = {
     "firefox": (
         ("User-Agent", "Mozilla/5.0 ({}; "
-                       "rv:109.0) Gecko/20100101 Firefox/115.0"),
+                       "rv:128.0) Gecko/20100101 Firefox/128.0"),
         ("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,"
-                   "image/avif,image/webp,*/*;q=0.8"),
+                   "image/avif,image/webp,image/png,image/svg+xml,*/*;q=0.8"),
         ("Accept-Language", "en-US,en;q=0.5"),
         ("Accept-Encoding", None),
         ("Referer", None),
-        ("DNT", "1"),
         ("Connection", "keep-alive"),
         ("Upgrade-Insecure-Requests", "1"),
         ("Cookie", None),
@@ -962,6 +992,12 @@ try:
     BROTLI = urllib3.response.brotli is not None
 except AttributeError:
     BROTLI = False
+
+# detect zstandard support
+try:
+    ZSTD = urllib3.response.HAS_ZSTD
+except AttributeError:
+    ZSTD = False
 
 # set (urllib3) warnings filter
 action = config.get((), "warnings", "default")

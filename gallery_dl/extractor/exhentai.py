@@ -394,6 +394,9 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
                 self.original = False
                 return self.data["_url_1280"]
 
+            if " temporarily banned " in page:
+                raise exception.AuthorizationError("Temporarily Banned")
+
             self._report_limits()
         return True
 

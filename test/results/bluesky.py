@@ -76,6 +76,7 @@ __tests__ = (
     "#class"   : bluesky.BlueskyFeedExtractor,
     "#range"   : "1-40",
     "#count"   : 40,
+    "#archive" : False,
 },
 
 {

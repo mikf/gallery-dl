@@ -424,7 +424,7 @@ class OAuthPixiv(OAuthBase):
             "code_challenge_method": "S256",
             "client": "pixiv-android",
         }
-        code = self.open(url, params, self._input)
+        code = self.open(url, params, self._input_code)
 
         url = "https://oauth.secure.pixiv.net/auth/token"
         headers = {
@@ -459,7 +459,7 @@ class OAuthPixiv(OAuthBase):
 
         stdout_write(self._generate_message(("refresh-token",), (token,)))
 
-    def _input(self):
+    def _input_code(self):
         stdout_write("""\
 1) Open your browser's Developer Tools (F12) and switch to the Network tab
 2) Login
@@ -471,5 +471,5 @@ class OAuthPixiv(OAuthBase):
   like the entire URL or several query parameters.
 
 """)
-        code = input("code: ")
+        code = self.input("code: ")
         return code.rpartition("=")[2].strip()

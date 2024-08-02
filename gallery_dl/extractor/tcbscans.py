@@ -4,19 +4,23 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extractors for https://tcbscans.com/"""
+"""Extractors for https://tcbscans.me/"""
 
 from .common import ChapterExtractor, MangaExtractor
 from .. import text
 
-BASE_PATTERN = r"(?:https?://)?(?:tcbscans|onepiecechapters)\.com"
+BASE_PATTERN = (r"(?:https?://)?(?:tcb(?:-backup\.bihar-mirchi|scans)"
+                r"|onepiecechapters)\.(?:com|me)")
 
 
 class TcbscansChapterExtractor(ChapterExtractor):
     category = "tcbscans"
-    root = "https://tcbscans.com"
     pattern = BASE_PATTERN + r"(/chapters/\d+/[^/?#]+)"
-    example = "https://tcbscans.com/chapters/12345/MANGA-chapter-123"
+    example = "https://tcbscans.me/chapters/12345/MANGA-chapter-123"
+
+    def __init__(self, match):
+        self.root = text.root_from_url(match.group(0))
+        ChapterExtractor.__init__(self, match)
 
     def images(self, page):
         return [
@@ -30,7 +34,7 @@ class TcbscansChapterExtractor(ChapterExtractor):
             page, 'font-bold mt-8">', "</h1>").rpartition(" - Chapter ")
         chapter, sep, minor = chapter.partition(".")
         return {
-            "manga": text.unescape(manga),
+            "manga": text.unescape(manga).strip(),
             "chapter": text.parse_int(chapter),
             "chapter_minor": sep + minor,
             "lang": "en", "language": "English",
@@ -39,10 +43,13 @@ class TcbscansChapterExtractor(ChapterExtractor):
 
 class TcbscansMangaExtractor(MangaExtractor):
     category = "tcbscans"
-    root = "https://tcbscans.com"
     chapterclass = TcbscansChapterExtractor
     pattern = BASE_PATTERN + r"(/mangas/\d+/[^/?#]+)"
-    example = "https://tcbscans.com/mangas/123/MANGA"
+    example = "https://tcbscans.me/mangas/123/MANGA"
+
+    def __init__(self, match):
+        self.root = text.root_from_url(match.group(0))
+        MangaExtractor.__init__(self, match)
 
     def chapters(self, page):
         data = {

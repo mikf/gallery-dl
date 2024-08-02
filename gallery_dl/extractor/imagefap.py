@@ -19,7 +19,7 @@ class ImagefapExtractor(Extractor):
     category = "imagefap"
     root = "https://www.imagefap.com"
     directory_fmt = ("{category}", "{gallery_id} {title}")
-    filename_fmt = "{category}_{gallery_id}_{filename}.{extension}"
+    filename_fmt = "{category}_{gallery_id}_{num:04}_{filename}.{extension}"
     archive_fmt = "{gallery_id}_{image_id}"
     request_interval = (2.0, 4.0)
 

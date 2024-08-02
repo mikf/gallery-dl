@@ -7,7 +7,7 @@
 """Extractors for https://skeb.jp/"""
 
 from .common import Extractor, Message
-from .. import text, exception
+from .. import text
 import itertools
 
 
@@ -31,14 +31,15 @@ class SkebExtractor(Extractor):
         if "Authorization" not in self.session.headers:
             self.headers["Authorization"] = "Bearer null"
 
-    def request(self, url, **kwargs):
-        while True:
-            try:
-                return Extractor.request(self, url, **kwargs)
-            except exception.HttpError as exc:
-                if exc.status == 429 and "request_key" in exc.response.cookies:
-                    continue
-                raise
+    def _handle_429(self, response):
+        if "request_key" in response.cookies:
+            return True
+
+        request_key = text.extr(
+            response.text, "request_key=", ";")
+        if request_key:
+            self.cookies.set("request_key", request_key, domain="skeb.jp")
+            return True
 
     def items(self):
         metadata = self.metadata()

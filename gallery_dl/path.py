@@ -51,6 +51,7 @@ class PathFormat():
             raise exception.FilenameFormatError(exc)
 
         directory_fmt = config("directory")
+        self.directory_conditions = ()
         try:
             if directory_fmt is None:
                 directory_fmt = extractor.directory_fmt
@@ -266,7 +267,7 @@ class PathFormat():
         try:
             for fmt in self.directory_formatters:
                 segment = fmt(kwdict).strip()
-                if strip:
+                if strip and segment != "..":
                     # remove trailing dots and spaces (#647)
                     segment = segment.rstrip(strip)
                 if segment:
@@ -288,7 +289,7 @@ class PathFormat():
                 formatters = self.directory_formatters
             for fmt in formatters:
                 segment = fmt(kwdict).strip()
-                if strip:
+                if strip and segment != "..":
                     segment = segment.rstrip(strip)
                 if segment:
                     append(self.clean_segment(segment))
@@ -344,7 +345,11 @@ class PathFormat():
                     continue
                 except OSError:
                     # move across different filesystems
-                    shutil.copyfile(self.temppath, self.realpath)
+                    try:
+                        shutil.copyfile(self.temppath, self.realpath)
+                    except FileNotFoundError:
+                        os.makedirs(self.realdirectory)
+                        shutil.copyfile(self.temppath, self.realpath)
                     os.unlink(self.temppath)
                 break
 

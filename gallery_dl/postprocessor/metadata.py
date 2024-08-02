@@ -56,7 +56,13 @@ class MetadataPP(PostProcessor):
             ext = "json"
 
         directory = options.get("directory")
-        if directory:
+        if isinstance(directory, list):
+            self._directory = self._directory_format
+            self._directory_formatters = [
+                formatter.parse(dirfmt, util.NONE).format_map
+                for dirfmt in directory
+            ]
+        elif directory:
             self._directory = self._directory_custom
             sep = os.sep + (os.altsep or "")
             self._metadir = util.expand_path(directory).rstrip(sep) + os.sep
@@ -146,6 +152,19 @@ class MetadataPP(PostProcessor):
 
     def _directory_custom(self, pathfmt):
         return os.path.join(pathfmt.realdirectory, self._metadir)
+
+    def _directory_format(self, pathfmt):
+        formatters = pathfmt.directory_formatters
+        conditions = pathfmt.directory_conditions
+        try:
+            pathfmt.directory_formatters = self._directory_formatters
+            pathfmt.directory_conditions = ()
+            segments = pathfmt.build_directory(pathfmt.kwdict)
+            directory = pathfmt.clean_path(os.sep.join(segments) + os.sep)
+            return os.path.join(pathfmt.realdirectory, directory)
+        finally:
+            pathfmt.directory_conditions = conditions
+            pathfmt.directory_formatters = formatters
 
     def _filename(self, pathfmt):
         return (pathfmt.filename or "metadata") + "." + self.extension

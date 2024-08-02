@@ -81,7 +81,7 @@ __tests__ = (
     "chapter"      : int,
     "chapter_minor": str,
     "date"         : "type:datetime",
-    "manga"        : "Futsutsuka na Akujo de wa Gozaimasu ga - Suuguu Chouso Torikae Den (Official)",
+    "manga"        : "Futsutsuka na Akujo de wa Gozaimasu ga - Suuguu Chouso Torikae Den",
     "manga_id"     : 113742,
 },
 
@@ -102,7 +102,7 @@ __tests__ = (
     "#class"   : batoto.BatotoMangaExtractor,
     "#count"   : ">= 29",
 
-    "manga": "The Grand Duke’s Fox Princess〖MGCHAN〗",
+    "manga": "Grand Duke Dan Putri Rubah [cont by LUNABY]",
 },
 
 {

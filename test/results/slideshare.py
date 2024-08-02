@@ -12,7 +12,7 @@ __tests__ = (
     "#url"     : "https://www.slideshare.net/Slideshare/get-started-with-slide-share",
     "#category": ("", "slideshare", "presentation"),
     "#class"   : slideshare.SlidesharePresentationExtractor,
-    "#pattern"     : r"https://image\.slidesharecdn\.com/getstartedwithslideshare-150520173821-lva1-app6892/95/get-started-with-slide-share-\d+-1024\.jpg\?cb=\d+",
+    "#pattern"     : r"https://image\.slidesharecdn\.com/getstartedwithslideshare-150520173821-lva1-app6892/95/Getting-Started-With-SlideShare-\d+-1024\.jpg",
     "#count"       : 19,
     "#sha1_content": "2b6a191eab60b3978fdacfecf2da302dd45bc108",
 
@@ -30,7 +30,7 @@ __tests__ = (
     "#comment" : "long title and description",
     "#category": ("", "slideshare", "presentation"),
     "#class"   : slideshare.SlidesharePresentationExtractor,
-    "#sha1_url": "d8952260f8bec337dd809a958ec8091350393f6b",
+    "#sha1_url": "c2d0079cc3b05de0fd93b0d0b1f47ff2a32119b7",
 
     "title"      : "Warum Sie nicht Ihren Mitarbeitenden ändern sollten, sondern Ihr Managementsystem",
     "description": "Mitarbeitende verhalten sich mehrheitlich so, wie das System es ihnen vorgibt. Welche Voraussetzungen es braucht, damit Ihre Mitarbeitenden ihr ganzes Herzblut einsetzen, bespricht Fredi Schmidli in diesem Referat.",
@@ -41,7 +41,7 @@ __tests__ = (
     "#comment" : "mobile URL",
     "#category": ("", "slideshare", "presentation"),
     "#class"   : slideshare.SlidesharePresentationExtractor,
-    "#pattern" : r"https://image\.slidesharecdn\.com/introductiontofixedprosthodonticsfinal-110427200948-phpapp02/95/introduction-to-fixed-prosthodontics-\d+-1024\.jpg\?cb=\d+",
+    "#pattern" : r"https://image\.slidesharecdn\.com/introductiontofixedprosthodonticsfinal-110427200948-phpapp02/95/Introduction-to-fixed-prosthodontics-\d+-1024\.jpg",
     "#count"   : 27,
 },
 

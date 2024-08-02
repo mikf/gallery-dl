@@ -90,13 +90,85 @@ def initialize():
     return 0
 
 
+def open_extern():
+    for path in _default_configs:
+        path = util.expand_path(path)
+        if os.access(path, os.R_OK | os.W_OK):
+            break
+    else:
+        log.warning("Unable to find any writable configuration file")
+        return 1
+
+    if util.WINDOWS:
+        openers = ("explorer", "notepad")
+    else:
+        openers = ("xdg-open", "open")
+        editor = os.environ.get("EDITOR")
+        if editor:
+            openers = (editor,) + openers
+
+    import shutil
+    for opener in openers:
+        opener = shutil.which(opener)
+        if opener:
+            break
+    else:
+        log.warning("Unable to find a program to open '%s' with", path)
+        return 1
+
+    log.info("Running '%s %s'", opener, path)
+    retcode = util.Popen((opener, path)).wait()
+
+    if not retcode:
+        try:
+            with open(path, encoding="utf-8") as fp:
+                util.json_loads(fp.read())
+        except Exception as exc:
+            log.warning("%s when parsing '%s': %s",
+                        exc.__class__.__name__, path, exc)
+            return 2
+
+    return retcode
+
+
+def status():
+    from .output import stdout_write
+
+    paths = []
+    for path in _default_configs:
+        path = util.expand_path(path)
+
+        try:
+            with open(path, encoding="utf-8") as fp:
+                util.json_loads(fp.read())
+        except FileNotFoundError:
+            status = "Not Present"
+        except OSError:
+            status = "Inaccessible"
+        except ValueError:
+            status = "Invalid JSON"
+        except Exception as exc:
+            log.debug(exc)
+            status = "Unknown"
+        else:
+            status = "OK"
+
+        paths.append((path, status))
+
+    fmt = "{{:<{}}} : {{}}\n".format(
+        max(len(p[0]) for p in paths)).format
+
+    for path, status in paths:
+        stdout_write(fmt(path, status))
+
+
 def load(files=None, strict=False, loads=util.json_loads):
     """Load JSON configuration files"""
     for pathfmt in files or _default_configs:
         path = util.expand_path(pathfmt)
         try:
-            with open(path, encoding="utf-8") as file:
-                conf = loads(file.read())
+            with open(path, encoding="utf-8") as fp:
+                conf = loads(fp.read())
         except OSError as exc:
             if strict:
                 log.error(exc)

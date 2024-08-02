@@ -1077,14 +1077,14 @@ class DeviantartGallerySearchExtractor(DeviantartExtractor):
 class DeviantartFollowingExtractor(DeviantartExtractor):
     """Extractor for user's watched users"""
     subcategory = "following"
-    pattern = BASE_PATTERN + "/about#watching$"
+    pattern = BASE_PATTERN + "/(?:about#)?watching"
     example = "https://www.deviantart.com/USER/about#watching"
 
     def items(self):
-        eclipse_api = DeviantartEclipseAPI(self)
+        api = DeviantartOAuthAPI(self)
 
-        for user in eclipse_api.user_watching(self.user, self.offset):
-            url = "{}/{}".format(self.root, user["username"])
+        for user in api.user_friends(self.user):
+            url = "{}/{}".format(self.root, user["user"]["username"])
             user["_extractor"] = DeviantartUserExtractor
             yield Message.Queue, url, user
 
@@ -1349,6 +1349,12 @@ class DeviantartOAuthAPI():
         """Yield status updates of a specific user"""
         endpoint = "/user/statuses/"
         params = {"username": username, "offset": offset, "limit": 50}
+        return self._pagination(endpoint, params)
+
+    def user_friends(self, username, offset=0):
+        """Get the users list of friends"""
+        endpoint = "/user/friends/" + username
+        params = {"limit": 50, "offset": offset, "mature_content": self.mature}
         return self._pagination(endpoint, params)
 
     def user_friends_watch(self, username):
@@ -1730,15 +1736,16 @@ class DeviantartEclipseAPI():
         url = "{}/{}/about".format(self.extractor.root, user)
         page = self.request(url).text
 
-        gruserid, pos = text.extract(page, ' data-userid="', '"')
+        gruser_id = text.extr(page, ' data-userid="', '"')
 
-        pos = page.find('\\"type\\":\\"watching\\"', pos)
+        pos = page.find('\\"name\\":\\"watching\\"')
         if pos < 0:
-            raise exception.NotFoundError("module")
-        moduleid = text.rextract(page, '\\"id\\":', ',', pos)[0].strip('" ')
+            raise exception.NotFoundError("'watching' module ID")
+        module_id = text.rextract(
+            page, '\\"id\\":', ',', pos)[0].strip('" ')
 
         self._fetch_csrf_token(page)
-        return gruserid, moduleid
+        return gruser_id, module_id
 
     def _fetch_csrf_token(self, page=None):
         if page is None:

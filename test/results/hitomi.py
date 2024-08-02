@@ -5,7 +5,6 @@
 # published by the Free Software Foundation.
 
 from gallery_dl.extractor import hitomi
-from gallery_dl import exception
 
 
 __tests__ = (
@@ -15,7 +14,33 @@ __tests__ = (
     "#class"   : hitomi.HitomiGalleryExtractor,
     "#pattern"      : r"https://[a-c]a\.hitomi\.la/webp/\d+/\d+/[0-9a-f]{64}\.webp",
     "#count"        : 16,
-    "#sha1_metadata": "86af5371f38117a07407f11af689bdd460b09710",
+
+    "artist"    : ["morris"],
+    "characters": [],
+    "count"     : 16,
+    "date"      : "dt:2015-10-27 19:20:00",
+    "extension" : "webp",
+    "filename"  : str,
+    "gallery_id": 867789,
+    "group"     : [],
+    "lang"      : "en",
+    "language"  : "English",
+    "num"       : range(1, 16),
+    "parody"    : [],
+    "tags"      : [
+        "Cheating ♀",
+        "Drugs ♀",
+        "Drugs ♂",
+        "Incest",
+        "Milf ♀",
+        "Mother ♀",
+        "Sole Female ♀",
+        "Sole Male ♂",
+        "Uncensored"
+    ],
+    "title"     : "Amazon no Hiyaku | Amazon Elixir (decensored)",
+    "title_jpn" : "",
+    "type"      : "Manga",
 },
 
 {
@@ -48,7 +73,6 @@ __tests__ = (
     "#comment" : "gallery with 'broken' redirect",
     "#category": ("", "hitomi", "gallery"),
     "#class"   : hitomi.HitomiGalleryExtractor,
-    "#exception": exception.NotFoundError,
 },
 
 {
@@ -59,6 +83,33 @@ __tests__ = (
     "#options" : {"format": "avif"},
     "#pattern" : r"https://[a-c]a\.hitomi\.la/avif/\d+/\d+/[0-9a-f]{64}\.avif",
     "#count"   : 22,
+
+    "artist"    : ["sorairo len"],
+    "characters": [],
+    "count"     : 22,
+    "date"      : "dt:2020-04-19 06:33:00",
+    "extension" : "avif",
+    "filename"  : str,
+    "gallery_id": 1615823,
+    "group"     : [],
+    "lang"      : "ja",
+    "language"  : "Japanese",
+    "num"       : range(1, 22),
+    "parody"    : [],
+    "tags"      : [
+        "Blowjob ♀",
+        "Focus Blowjob ♀",
+        "Fox Girl ♀",
+        "Kemonomimi ♀",
+        "Loli ♀",
+        "Miko ♀",
+        "No Penetration",
+        "Unusual Pupils ♀",
+        "Variant Set"
+    ],
+    "title"     : "Kouko-sama ga Okuchi de Reiryoku Hokyuu",
+    "title_jpn" : "コウコ様がお口で霊力補給♡",
+    "type"      : "Artistcg",
 },
 
 {
