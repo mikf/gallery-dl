@@ -15,7 +15,7 @@ __tests__ = (
     "#pattern" : r"https://kisakisexo.xyz/download/59896/a4fbd1828229/f47639c6abaf1903dd69c36a3d961da84741a1831aa07a2906ce9c74156a5d75\?v=1721626410802&w=0",
     "#count"   : 1,
 
-    "count"     : 1,
+    "count"     : 22,
     "created_at": 1721626410802,
     "date"      : "dt:2024-07-22 05:33:30",
     "extension" : "cbz",

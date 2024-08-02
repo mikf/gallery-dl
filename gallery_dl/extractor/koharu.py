@@ -60,6 +60,7 @@ class KoharuGalleryExtractor(KoharuExtractor, GalleryExtractor):
     filename_fmt = "{num:>03}.{extension}"
     directory_fmt = ("{category}", "{id} {title}")
     archive_fmt = "{id}_{num}"
+    request_interval = 0.0
     pattern = BASE_PATTERN + r"/(?:g|reader)/(\d+)/(\w+)"
     example = "https://koharu.to/g/12345/67890abcde/"
 
@@ -101,8 +102,6 @@ class KoharuGalleryExtractor(KoharuExtractor, GalleryExtractor):
         url = "{}/books/detail/{}/{}".format(
             self.root_api, self.groups[0], self.groups[1])
         self.data = data = self.request(url, headers=self.headers).json()
-        data.pop("rels", None)
-        data.pop("thumbnails", None)
 
         tags = []
         for tag in data["tags"]:
@@ -111,6 +110,14 @@ class KoharuGalleryExtractor(KoharuExtractor, GalleryExtractor):
             tags.append(self.TAG_TYPES[namespace] + ":" + name)
         data["tags"] = tags
         data["date"] = text.parse_timestamp(data["created_at"] // 1000)
+
+        try:
+            if self.cbz:
+                data["count"] = len(data["thumbnails"]["entries"])
+            del data["thumbnails"]
+            del data["rels"]
+        except Exception:
+            pass
 
         return data
 
