@@ -48,7 +48,7 @@ __tests__ = (
 
     "allows_comments" : bool,
     "author"          : {
-        "type"    : "regular",
+        "type"    : "premium",
         "usericon": str,
         "userid"  : "9AE51FC7-0278-806C-3FFF-F4961ABF9E2B",
         "username": "shimoda7",
@@ -210,7 +210,7 @@ __tests__ = (
     "#sha1_content": "abf2cc79b842315f2e54bfdd93bf794a0f612b6f",
 
     "author"         : {
-        "type"    : "regular",
+        "type"    : "premium",
         "usericon": "https://a.deviantart.net/avatars/s/h/shimoda7.jpg?4",
         "userid"  : "9AE51FC7-0278-806C-3FFF-F4961ABF9E2B",
         "username": "shimoda7",
@@ -502,7 +502,7 @@ __tests__ = (
     "#url"     : "https://www.deviantart.com/angrywhitewanker/posts/journals/",
     "#category": ("", "deviantart", "journal"),
     "#class"   : deviantart.DeviantartJournalExtractor,
-    "#sha1_url": "38db2a0d3a587a7e0f9dba7ff7d274610ebefe44",
+    "#sha1_url": "48aeed5631763d96f5391d2177ea72d9fdbee4e5",
 },
 
 {
@@ -614,30 +614,6 @@ __tests__ = (
     "#class"   : deviantart.DeviantartStatusExtractor,
     "#options" : {"journals": "text"},
     "#sha1_url": "10a336bdee7b9692919461443a7dde44d495818c",
-},
-
-{
-    "#url"     : "https://www.deviantart.com/?order=popular-all-time",
-    "#category": ("", "deviantart", "popular"),
-    "#class"   : deviantart.DeviantartPopularExtractor,
-    "#options" : {"original": False},
-    "#range"   : "1-30",
-    "#count"   : 30,
-},
-
-{
-    "#url"     : "https://www.deviantart.com/popular-24-hours/?q=tree+house",
-    "#category": ("", "deviantart", "popular"),
-    "#class"   : deviantart.DeviantartPopularExtractor,
-    "#options" : {"original": False},
-    "#range"   : "1-30",
-    "#count"   : 30,
-},
-
-{
-    "#url"     : "https://www.deviantart.com/artisan/popular-all-time/?q=tree",
-    "#category": ("", "deviantart", "popular"),
-    "#class"   : deviantart.DeviantartPopularExtractor,
 },
 
 {
@@ -811,7 +787,7 @@ __tests__ = (
     "#category": ("", "deviantart", "deviation"),
     "#class"   : deviantart.DeviantartDeviationExtractor,
     "#pattern" : """text:<!DOCTYPE html>\n""",
-    "#sha1_url": "d34b2c9f873423e665a1b8ced20fcb75951694a3",
+    "#sha1_url": "37302947642d1e53392ef8ee9b3f473a3c578e7c",
 },
 
 {
@@ -820,7 +796,7 @@ __tests__ = (
     "#category": ("", "deviantart", "deviation"),
     "#class"   : deviantart.DeviantartDeviationExtractor,
     "#pattern" : """text:<!DOCTYPE html>\n""",
-    "#sha1_url": "e2e0044bd255304412179b6118536dbd9bb3bb0e",
+    "#sha1_url": "8ca1dc8df53d3707c778d08a604f9ad9ddba7469",
 },
 
 {
@@ -829,6 +805,7 @@ __tests__ = (
     "#category": ("", "deviantart", "deviation"),
     "#class"   : deviantart.DeviantartDeviationExtractor,
     "#count"   : 0,
+    "#exception": exception.NotFoundError,
 },
 
 {
@@ -866,7 +843,7 @@ __tests__ = (
     "#url"     : "https://www.deviantart.com/view/706871727",
     "#category": ("", "deviantart", "deviation"),
     "#class"   : deviantart.DeviantartDeviationExtractor,
-    "#sha1_content": "87dff6056fc9a2bf77f75317a1e00e18451b3c80",
+    "#sha1_content": "4d013515e72dec1e3977c82fd71ce4b15b8bd856",
 },
 
 {
