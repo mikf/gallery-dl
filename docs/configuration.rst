@@ -1448,6 +1448,22 @@ Description
     Process reposts.
 
 
+extractor.cien.files
+--------------------
+Type
+    ``list`` of ``strings``
+Default
+    ``["image", "video", "download", "gallery"]``
+Description
+    Determines the type and order of files to be downloaded.
+
+    Available types are
+    ``image``,
+    ``video``,
+    ``download``,
+    ``gallery``.
+
+
 extractor.cyberdrop.domain
 --------------------------
 Type

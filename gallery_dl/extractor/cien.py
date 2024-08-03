@@ -82,10 +82,24 @@ class CienArticleExtractor(CienExtractor):
     def _extract_files(self, page):
         files = []
 
-        self._extract_files_image(page, files)
-        self._extract_files_video(page, files)
-        self._extract_files_attachment(page, files)
-        self._extract_files_gallery(page, files)
+        filetypes = self.config("files")
+        if filetypes is None:
+            self._extract_files_image(page, files)
+            self._extract_files_video(page, files)
+            self._extract_files_download(page, files)
+            self._extract_files_gallery(page, files)
+        else:
+            generators = {
+                "image"   : self._extract_files_image,
+                "video"   : self._extract_files_video,
+                "download": self._extract_files_download,
+                "gallery" : self._extract_files_gallery,
+                "gallerie": self._extract_files_gallery,
+            }
+            if isinstance(filetypes, str):
+                filetypes = filetypes.split(",")
+            for ft in filetypes:
+                generators[ft.rstrip("s")](page, files)
 
         return files
 
@@ -114,14 +128,14 @@ class CienArticleExtractor(CienExtractor):
             file["type"] = "video"
             files.append(file)
 
-    def _extract_files_attachment(self, page, files):
+    def _extract_files_download(self, page, files):
         for download in text.extract_iter(
                 page, 'class="downloadBlock', "</div>"):
             name = text.extr(download, "<p>", "<")
 
             file = text.nameext_from_url(name.rpartition(" ")[0])
             file["url"] = text.extr(download, ' href="', '"')
-            file["type"] = "attachment"
+            file["type"] = "download"
             files.append(file)
 
     def _extract_files_gallery(self, page, files):

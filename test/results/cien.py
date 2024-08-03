@@ -50,12 +50,12 @@ __tests__ = (
     "#url"     : "https://ci-en.dlsite.com/creator/25509/article/1172460",
     "#category": ("", "cien", "article"),
     "#class"   : cien.CienArticleExtractor,
-    "#range"   : "3",
+    "#options" : {"files": "download"},
     "#pattern" : r"https://media\.ci-en\.jp/private/attachment/creator/00025509/7fd3c039d2277ba9541e82592aca6f6751f6c268404038ccbf1112bcf2f93357/upload/.+\.zip\?px-time=.+",
 
     "filename" : "VP 1.05.4 Tim-v9 ENG rec v3",
     "extension": "zip",
-    "type"     : "attachment",
+    "type"     : "download",
 },
 
 {
