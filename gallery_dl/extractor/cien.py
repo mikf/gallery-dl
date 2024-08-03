@@ -59,7 +59,7 @@ class CienArticleExtractor(CienExtractor):
         post = util.json_loads(text.extr(
             page, '<script type="application/ld+json">', '</script>'))[0]
 
-        files = self._extract_files(post.get("articleBody") or page)
+        files = self._extract_files(page)
 
         post["post_url"] = url
         post["post_id"] = text.parse_int(self.groups[1])
