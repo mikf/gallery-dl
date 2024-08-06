@@ -60,7 +60,7 @@ class FanboxExtractor(Extractor):
         while url:
             url = text.ensure_http_scheme(url)
             body = self.request(url, headers=self.headers).json()["body"]
-            for item in body["items"]:
+            for item in body:
                 try:
                     yield self._get_post_data(item["id"])
                 except Exception as exc:
