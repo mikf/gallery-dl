@@ -45,6 +45,7 @@ modules = [
     "erome",
     "exhentai",
     "fanbox",
+    "fancaps",
     "fanleaks",
     "fantia",
     "fapello",
