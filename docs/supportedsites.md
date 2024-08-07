@@ -250,7 +250,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Fur Affinity</td>
     <td>https://www.furaffinity.net/</td>
-    <td>Favorites, Followed Users, Galleries, Posts, Scraps, Search Results, User Profiles</td>
+    <td>Favorites, Followed Users, Galleries, Posts, Scraps, Search Results, New Submissions, User Profiles</td>
     <td><a href="https://github.com/mikf/gallery-dl#cookies">Cookies</a></td>
 </tr>
 <tr>

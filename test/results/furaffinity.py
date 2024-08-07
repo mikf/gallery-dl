@@ -220,4 +220,21 @@ __tests__ = (
     "#count"   : 50,
 },
 
+{
+    "#url"     : "https://www.furaffinity.net/msg/submissions",
+    "#category": ("", "furaffinity", "submissions"),
+    "#class"   : furaffinity.FuraffinitySubmissionsExtractor,
+    "#auth"    : True,
+    "#pattern" : r"https://d\d?\.f(uraffinity|acdn)\.net/art/mirlinthloth/\d+/\d+.\w+\.\w+",
+    "#range"   : "45-50",
+    "#count"   : 6,
+},
+
+{
+    "#url"     : "https://www.furaffinity.net/msg/submissions/new~56789000@48/",
+    "#category": ("", "furaffinity", "submissions"),
+    "#class"   : furaffinity.FuraffinitySubmissionsExtractor,
+    "#auth"    : True,
+},
+
 )

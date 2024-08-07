@@ -208,6 +208,9 @@ SUBCATEGORY_MAP = {
     "fapello": {
         "path": "Videos, Trending Posts, Popular Videos, Top Models",
     },
+    "furaffinity": {
+        "submissions": "New Submissions",
+    },
     "hatenablog": {
         "archive": "Archive",
         "entry"  : "Individual Posts",

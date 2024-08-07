@@ -335,3 +335,29 @@ class FuraffinityFollowingExtractor(FuraffinityExtractor):
             if url.endswith(path):
                 return
             url = self.root + path
+
+
+class FuraffinitySubmissionsExtractor(FuraffinityExtractor):
+    """Extractor for new furaffinity submissions"""
+    subcategory = "submissions"
+    pattern = BASE_PATTERN + r"(/msg/submissions(?:/[^/?#]+)?)"
+    example = "https://www.furaffinity.net/msg/submissions"
+
+    def posts(self):
+        self.user = None
+        url = self.root + self.groups[0]
+        return self._pagination_submissions(url)
+
+    def _pagination_submissions(self, url):
+        while True:
+            page = self.request(url).text
+
+            for post_id in text.extract_iter(page, 'id="sid-', '"'):
+                yield post_id
+
+            path = (text.extr(page, '<a class="button standard more" href="', '"') or  # noqa 501
+                    text.extr(page, '<a class="more-half" href="', '"') or
+                    text.extr(page, '<a class="more" href="', '"'))
+            if not path:
+                return
+            url = self.root + text.unescape(path)
