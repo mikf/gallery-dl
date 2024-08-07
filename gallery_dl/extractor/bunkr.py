@@ -55,6 +55,7 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
             "album_name" : text.unescape(info[0]),
             "album_size" : size[1:-1],
             "count"      : len(urls),
+            "_http_validate": self._validate,
         }
 
     def _extract_files(self, urls):
@@ -73,6 +74,12 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
             text.extr(page, '<img src="', '"') or
             text.rextract(page, ' href="', '"', page.rindex("Download"))[0]
         )
+
+    def _validate(self, response):
+        if response.history and response.url.endswith("/maintenance-vid.mp4"):
+            self.log.warning("File server in maintenance mode")
+            return False
+        return True
 
 
 class BunkrMediaExtractor(BunkrAlbumExtractor):
@@ -95,4 +102,5 @@ class BunkrMediaExtractor(BunkrAlbumExtractor):
             "album_size" : -1,
             "description": "",
             "count"      : 1,
+            "_http_validate": self._validate,
         }
