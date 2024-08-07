@@ -936,23 +936,23 @@ class InstagramGraphqlAPI():
 
     def tags_media(self, tag):
         query_hash = "9b498c08113f1e09617a1703c22b2f32"
-        variables = {"tag_name": text.unescape(tag), "first": 50}
+        variables = {"tag_name": text.unescape(tag), "first": 24}
         return self._pagination(query_hash, variables,
                                 "hashtag", "edge_hashtag_to_media")
 
     def user_clips(self, user_id):
         query_hash = "bc78b344a68ed16dd5d7f264681c4c76"
-        variables = {"id": user_id, "first": 50}
+        variables = {"id": user_id, "first": 24}
         return self._pagination(query_hash, variables)
 
     def user_feed(self, user_id):
         query_hash = "69cba40317214236af40e7efa697781d"
-        variables = {"id": user_id, "first": 50}
+        variables = {"id": user_id, "first": 24}
         return self._pagination(query_hash, variables)
 
     def user_tagged(self, user_id):
         query_hash = "be13233562af2d229b008d2976b998b5"
-        variables = {"id": user_id, "first": 50}
+        variables = {"id": user_id, "first": 24}
         return self._pagination(query_hash, variables)
 
     def _call(self, query_hash, variables):
