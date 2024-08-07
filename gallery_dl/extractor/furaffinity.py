@@ -78,14 +78,12 @@ class FuraffinityExtractor(Extractor):
 
         path = extr('href="//d', '"')
         if not path:
-            self.log.warning(
-                "Unable to download post %s (\"%s\")",
-                post_id, text.remove_html(
-                    extr('System Message', '</section>') or
-                    extr('System Message', '</table>')
-                )
-            )
-            return None
+            msg = text.remove_html(
+                extr('System Message', '</section>') or
+                extr('System Message', '</table>')
+            ).partition(" . Continue ")[0]
+            return self.log.warning(
+                "Unable to download post %s (\"%s\")", post_id, msg)
 
         pi = text.parse_int
         rh = text.remove_html
