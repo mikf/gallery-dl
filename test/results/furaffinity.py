@@ -160,6 +160,14 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.furaffinity.net/view/57587562",
+    "#comment" : "login required",
+    "#category": ("", "furaffinity", "post"),
+    "#class"   : furaffinity.FuraffinityPostExtractor,
+    "#count"   : 0,
+},
+
+{
     "#url"     : "https://furaffinity.net/view/21835115/",
     "#category": ("", "furaffinity", "post"),
     "#class"   : furaffinity.FuraffinityPostExtractor,
