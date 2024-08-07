@@ -55,6 +55,20 @@ class MetadataPP(PostProcessor):
             self._json_encode = self._make_encoder(options, 4).encode
             ext = "json"
 
+        base_directory = options.get("base-directory")
+        if base_directory:
+            if base_directory is True:
+                self._base = lambda p: p.basedirectory
+            else:
+                sep = os.sep
+                altsep = os.altsep
+                base_directory = util.expand_path(base_directory)
+                if altsep and altsep in base_directory:
+                    base_directory = base_directory.replace(altsep, sep)
+                if base_directory[-1] != sep:
+                    base_directory += sep
+                self._base = lambda p: base_directory
+
         directory = options.get("directory")
         if isinstance(directory, list):
             self._directory = self._directory_format
@@ -147,11 +161,14 @@ class MetadataPP(PostProcessor):
             except Exception:
                 pass
 
-    def _directory(self, pathfmt):
+    def _base(self, pathfmt):
         return pathfmt.realdirectory
 
+    def _directory(self, pathfmt):
+        return self._base(pathfmt)
+
     def _directory_custom(self, pathfmt):
-        return os.path.join(pathfmt.realdirectory, self._metadir)
+        return os.path.join(self._base(pathfmt), self._metadir)
 
     def _directory_format(self, pathfmt):
         formatters = pathfmt.directory_formatters
@@ -161,7 +178,7 @@ class MetadataPP(PostProcessor):
             pathfmt.directory_conditions = ()
             segments = pathfmt.build_directory(pathfmt.kwdict)
             directory = pathfmt.clean_path(os.sep.join(segments) + os.sep)
-            return os.path.join(pathfmt.realdirectory, directory)
+            return os.path.join(self._base(pathfmt), directory)
         finally:
             pathfmt.directory_conditions = conditions
             pathfmt.directory_formatters = formatters
