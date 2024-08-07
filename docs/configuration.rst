@@ -160,8 +160,7 @@ Default
     ``false``
 Description
     Use an extractor's current target directory as
-    `base-directory <extractor.*.base-directory_>`__
-    for any spawned child extractors.
+    base-directory_ for any spawned child extractors.
 
 
 extractor.*.parent-metadata
@@ -5548,8 +5547,23 @@ Example
     * ``"metadata"``
     * ``["..", "metadata", "\fF {id // 500 * 500}"]``
 Description
-    Directory where metadata files are stored in relative to the
-    current target location for file downloads.
+    Directory where metadata files are stored in
+    relative to `metadata.base-directory`_.
+
+
+metadata.base-directory
+-----------------------
+Type
+    * ``bool``
+    * |Path|_
+Default
+    ``false``
+Description
+    Selects the relative location for metadata files.
+
+    * ``false``: current target location for file downloads (base-directory_ + directory_)
+    * ``true``: current base-directory_ location
+    * any |Path|_: custom location
 
 
 metadata.extension
@@ -6561,6 +6575,7 @@ Description
 .. |open()| replace:: the built-in ``open()`` function
 .. |json.dump()| replace:: ``json.dump()``
 
+.. _directory: `extractor.*.directory`_
 .. _base-directory: `extractor.*.base-directory`_
 .. _date-format: `extractor.*.date-format`_
 .. _deviantart.metadata: `extractor.deviantart.metadata`_
