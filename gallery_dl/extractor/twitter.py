@@ -1849,6 +1849,11 @@ def _login_impl(extr, username, password):
             url, params=params, headers=headers, json=data,
             method="POST", fatal=None)
 
+        # update 'x-csrf-token' header (#5945)
+        csrf_token = response.cookies.get("ct0")
+        if csrf_token:
+            headers["x-csrf-token"] = csrf_token
+
         try:
             data = response.json()
         except ValueError:
