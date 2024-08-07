@@ -106,6 +106,7 @@ modules = [
     "myhentaigallery",
     "myportfolio",
     "naver",
+    "naverpost",
     "naverwebtoon",
     "newgrounds",
     "nhentai",
