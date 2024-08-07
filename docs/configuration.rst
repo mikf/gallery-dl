@@ -1371,8 +1371,18 @@ Description
     ``image``, ``video``, ``mediacollection``, ``embed``, ``text``.
 
 
-extractor.blogger.videos
-------------------------
+extractor.[blogger].api-key
+---------------------------
+Type
+    ``string``
+Description
+    Custom Blogger API key.
+
+    https://developers.google.com/blogger/docs/3.0/using#APIKey
+
+
+extractor.[blogger].videos
+--------------------------
 Type
     ``bool``
 Default
