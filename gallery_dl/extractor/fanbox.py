@@ -309,7 +309,7 @@ class FanboxCreatorExtractor(FanboxExtractor):
         self.creator_id = match.group(1) or match.group(2)
 
     def posts(self):
-        url = "https://api.fanbox.cc/post.paginateCreator?creatorId={}&limit=10"
+        url = "https://api.fanbox.cc/post.paginateCreator?creatorId={}"
         return self._pagination(url.format(self.creator_id))
 
 
