@@ -13,20 +13,20 @@ __tests__ = (
     "#url"     : "https://hotleak.vip/kaiyakawaii/photo/1617145",
     "#category": ("", "hotleak", "post"),
     "#class"   : hotleak.HotleakPostExtractor,
-    "#pattern" : r"https://hotleak\.vip/storage/images/3625/1617145/fefdd5988dfcf6b98cc9e11616018868\.jpg",
+    "#urls"    : "https://image-cdn.hotleak.vip/storage/images/e98/18ad68/18ad68.webp",
 
     "id"       : 1617145,
     "creator"  : "kaiyakawaii",
     "type"     : "photo",
-    "filename" : "fefdd5988dfcf6b98cc9e11616018868",
-    "extension": "jpg",
+    "filename" : "18ad68",
+    "extension": "webp",
 },
 
 {
     "#url"     : "https://hotleak.vip/lilmochidoll/video/1625538",
     "#category": ("", "hotleak", "post"),
     "#class"   : hotleak.HotleakPostExtractor,
-    "#pattern" : r"ytdl:https://cdn8-leak\.camhdxx\.com/1661/1625538/index\.m3u8",
+    "#pattern" : r"ytdl:https://cdn\d+-leak\.camhdxx\.com/.+,\d+/1661/1625538/index\.m3u8",
 
     "id"       : 1625538,
     "creator"  : "lilmochidoll",
