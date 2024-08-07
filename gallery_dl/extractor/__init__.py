@@ -131,6 +131,7 @@ modules = [
     "pornpics",
     "postmill",
     "pururin",
+    "rawkuma",
     "reactor",
     "readcomiconline",
     "reddit",
