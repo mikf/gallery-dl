@@ -12,7 +12,6 @@ from .common import Extractor, Message
 from .. import text, util, exception
 from ..cache import cache, memcache
 import collections
-import itertools
 import mimetypes
 import binascii
 import time
@@ -246,7 +245,6 @@ class DeviantartExtractor(Extractor):
             deviation["username"] = deviation["author"]["username"]
             deviation["_username"] = deviation["username"].lower()
 
-        deviation["da_category"] = deviation["category"]
         deviation["published_time"] = text.parse_int(
             deviation["published_time"])
         deviation["date"] = text.parse_timestamp(
@@ -301,15 +299,6 @@ class DeviantartExtractor(Extractor):
             )
         else:
             needle = '<div usr class="gr">'
-            catlist = deviation["category_path"].split("/")
-            categories = " / ".join(
-                ('<span class="crumb"><a href="{}/{}/"><span>{}</span></a>'
-                 '</span>').format(self.root, cpath, cat.capitalize())
-                for cat, cpath in zip(
-                    catlist,
-                    itertools.accumulate(catlist, lambda t, c: t + "/" + c)
-                )
-            )
             username = deviation["author"]["username"]
             urlname = deviation.get("username") or username.lower()
             header = HEADER_TEMPLATE.format(
@@ -318,7 +307,6 @@ class DeviantartExtractor(Extractor):
                 userurl="{}/{}/".format(self.root, urlname),
                 username=username,
                 date=deviation["date"],
-                categories=categories,
             )
 
         if needle in html:
@@ -624,7 +612,7 @@ class DeviantartAvatarExtractor(DeviantartExtractor):
     def _make_deviation(self, url, user, index, fmt):
         return {
             "author"         : user,
-            "category"       : "avatar",
+            "da_category"    : "avatar",
             "index"          : text.parse_int(index),
             "is_deleted"     : False,
             "is_downloadable": False,
@@ -1772,9 +1760,6 @@ HEADER_TEMPLATE = """<div usr class="gr">
             <a class="u regular username" href="{userurl}">{username}</a>\
 <span class="user-symbol regular"></span></span></span>,
             <span>{date}</span>
-        </li>
-        <li class="category">
-            {categories}
         </li>
     </ul>
 </div>
