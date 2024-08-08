@@ -212,6 +212,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Supported</td>
 </tr>
 <tr>
+    <td>Facebook</td>
+    <td>https://www.facebook.com/</td>
+    <td>Profile Photos, Albums/Sets, Individual Photos, Individual Videos</td>
+    <td></td>
+</tr>
+<tr>
     <td>Fanleaks</td>
     <td>https://fanleaks.club/</td>
     <td>Models, Posts</td>
