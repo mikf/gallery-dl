@@ -49,7 +49,7 @@ class BehanceExtractor(Extractor):
 
     def _update(self, data):
         # compress data to simple lists
-        if data["fields"] and isinstance(data["fields"][0], dict):
+        if data.get("fields") and isinstance(data["fields"][0], dict):
             data["fields"] = [
                 field.get("name") or field.get("label")
                 for field in data["fields"]
