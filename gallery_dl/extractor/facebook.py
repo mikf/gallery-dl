@@ -41,7 +41,7 @@ class FacebookExtractor(Extractor):
             self.log.warning(
                 "Using the Facebook extractor for too long may result in "
                 "temporary UI bans of increasing length. "
-                "\nUse at your own risk."
+                "Use at your own risk."
             )
 
     @staticmethod
@@ -177,8 +177,8 @@ class FacebookExtractor(Extractor):
         if '{"__dr":"CometErrorRoot.react"}' in res.text:
             raise exception.StopExtraction(
                 "You've been temporarily blocked from viewing images. "
-                "\nPlease use a different account or "
-                "try again later." + LEFT_OFF_TXT
+                "\nPlease use a different account or try again later." +
+                LEFT_OFF_TXT
             )
 
         return res
@@ -395,16 +395,21 @@ class FacebookVideoExtractor(FacebookExtractor):
 class FacebookProfileExtractor(FacebookExtractor):
     """Base class for Facebook Profile Photos Set extractors"""
     subcategory = "profile"
-    pattern = BASE_PATTERN + r"/(?:profile.php\?id=)?([^/|?|&]+)"
+    pattern = (
+        BASE_PATTERN + r"/(?:profile.php\?id=|people/[^/|?|&]+/)?([^/|?|&]+)"
+    )
     example = "https://www.facebook.com/USERNAME"
 
     @staticmethod
     def get_profile_photos_set_id(profile_photos_page):
-        return text.extr(
-            text.extr(
-                profile_photos_page, '"pageItems"', '"actions_renderer"'
-            ), 'set=', '"'
-        ).rsplit("&", 1)[0]
+        set_ids_raw = text.extr(
+            profile_photos_page, '"pageItems"', '"page_info"'
+        )
+        set_id = text.extr(set_ids_raw, 'set=', '"').rsplit("&", 1)[0]
+        if not set_id:
+            set_id = text.extr(set_ids_raw, '\\/photos\\/', '\\/')
+
+        return set_id
 
     def items(self):
         profile_photos_url = (
