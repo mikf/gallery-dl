@@ -285,7 +285,7 @@ Consider all listed sites to potentially be NSFW.
 </tr>
 <tr>
     <td>Hentai Cosplay</td>
-    <td>https://hentai-cosplays.com/</td>
+    <td>https://hentai-cosplay-xxx.com/</td>
     <td>Galleries</td>
     <td></td>
 </tr>
