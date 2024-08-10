@@ -4642,6 +4642,16 @@ Description
       (limited to 100 pages * 24 posts)
 
 
+extractor.zerochan.redirects
+----------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Automatically follow tag redirects.
+
+
 extractor.[booru].tags
 ----------------------
 Type
