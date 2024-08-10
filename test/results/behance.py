@@ -24,7 +24,7 @@ __tests__ = (
         "Place Studio",
         "Julio César Velazquez",
     ],
-    "fields": [
+    "?fields": [
         "Animation",
         "Character Design",
         "Directing",
@@ -59,7 +59,7 @@ __tests__ = (
     "#comment" : "'video' modules (#1282)",
     "#category": ("", "behance", "gallery"),
     "#class"   : behance.BehanceGalleryExtractor,
-    "#pattern" : r"https://cdn-prod-ccv\.adobe\.com/\w+/rend/\w+_720\.mp4\?",
+    "#pattern" : r"ytdl:https://cdn-prod-ccv\.adobe\.com/\w+/rend/master\.m3u8\?",
     "#count"   : 3,
 },
 

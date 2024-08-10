@@ -165,6 +165,19 @@ class BehanceGalleryExtractor(BehanceExtractor):
 
             elif mtype == "video":
                 try:
+                    url = text.extr(module["embed"], 'src="', '"')
+                    page = self.request(text.unescape(url)).text
+
+                    url = text.extr(page, '<source src="', '"')
+                    if text.ext_from_url(url) == "m3u8":
+                        url = "ytdl:" + url
+                        module["extension"] = "mp4"
+                    append((url, module))
+                    continue
+                except Exception as exc:
+                    self.log.debug("%s: %s", exc.__class__.__name__, exc)
+
+                try:
                     renditions = module["videoData"]["renditions"]
                 except Exception:
                     self.log.warning("No download URLs for video %s",
