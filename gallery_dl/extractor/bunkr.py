@@ -13,7 +13,7 @@ from .. import text
 
 BASE_PATTERN = (
     r"(?:https?://)?(?:app\.)?(bunkr+"
-    r"\.(?:s[kiu]|fi|ru|la|is|to|ac|black|cat|media|red|site|ws))"
+    r"\.(?:s[kiu]|[cf]i|ru|la|is|to|ac|black|cat|media|red|site|ws|org))"
 )
 
 LEGACY_DOMAINS = {
