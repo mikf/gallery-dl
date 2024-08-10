@@ -562,34 +562,39 @@ class PixivSeriesExtractor(PixivExtractor):
         self.user_id, self.series_id = match.groups()
 
     def works(self):
-        url = self.root + "/ajax/series/" + self.series_id
-        params = {"p": 1}
-        headers = {
-            "Accept": "application/json",
-            "Referer": "{}/user/{}/series/{}".format(
-                self.root, self.user_id, self.series_id),
-            "Alt-Used": "www.pixiv.net",
-        }
+        offset = 0
 
+        series = None
+        works = []
         while True:
-            data = self.request(url, params=params, headers=headers).json()
-            body = data["body"]
-            page = body["page"]
+            data = (self.api.illust_series(self.series_id, offset))
 
-            series = body["extraData"]["meta"]
-            series["id"] = self.series_id
-            series["total"] = page["total"]
-            series["title"] = text.extr(series["title"], '"', '"')
+            if series is None:
+                detail = data['illust_series_detail']
+                series = {
+                    'id': self.series_id,
+                    'total': detail['series_work_count'],
+                    'title': detail["title"],
+                    'description': detail['caption'],
+                }
 
-            for info in page["series"]:
-                work = self.api.illust_detail(info["workId"])
-                work["num_series"] = info["order"]
-                work["series"] = series
-                yield work
+            works = works + data['illusts']
 
-            if len(page["series"]) < 10:
-                return
-            params["p"] += 1
+            if data['next_url'] is None:
+                break
+
+            offset = len(works)
+
+        works.reverse()
+
+        chapterNo = 0
+        for work in works:
+            chapterNo += 1
+
+            work["num_series"] = chapterNo
+            work["series"] = series
+
+            yield work
 
 
 class PixivNovelExtractor(PixivExtractor):
@@ -915,6 +920,10 @@ class PixivAppAPI():
     def illust_related(self, illust_id):
         params = {"illust_id": illust_id}
         return self._pagination("/v2/illust/related", params)
+
+    def illust_series(self, series_id, offset=0):
+        params = {"illust_series_id": series_id, "offset": offset}
+        return self._call("/v1/illust/series", params)
 
     def novel_bookmark_detail(self, novel_id):
         params = {"novel_id": novel_id}
