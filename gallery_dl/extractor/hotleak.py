@@ -23,6 +23,12 @@ class HotleakExtractor(Extractor):
 
     def items(self):
         for post in self.posts():
+            if not post["url"].startswith("ytdl:"):
+                post["url"] = (
+                    post["url"]
+                    .replace("/storage/storage/", "/storage/")
+                    .replace("_thumb.", ".")
+                )
             post["_http_expected_status"] = (404,)
             yield Message.Directory, post
             yield Message.Url, post["url"], post

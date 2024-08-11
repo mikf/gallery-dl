@@ -160,8 +160,7 @@ Default
     ``false``
 Description
     Use an extractor's current target directory as
-    `base-directory <extractor.*.base-directory_>`__
-    for any spawned child extractors.
+    base-directory_ for any spawned child extractors.
 
 
 extractor.*.parent-metadata
@@ -385,6 +384,7 @@ Type
 Default
     * ``"0.5-1.5"``
         ``[Danbooru]``, ``[E621]``, ``[foolfuuka]:search``, ``itaku``,
+        ``koharu``,
         ``newgrounds``, ``[philomena]``, ``pixiv:novel``, ``plurk``,
         ``poipiku`` , ``pornpics``, ``soundgasm``, ``urlgalleries``,
         ``vk``, ``zerochan``
@@ -438,6 +438,7 @@ Description
     * ``imgbb``
     * ``inkbunny``
     * ``kemonoparty``
+    * ``koharu``
     * ``mangadex``
     * ``mangoxo``
     * ``pillowfort``
@@ -1369,8 +1370,18 @@ Description
     ``image``, ``video``, ``mediacollection``, ``embed``, ``text``.
 
 
-extractor.blogger.videos
-------------------------
+extractor.[blogger].api-key
+---------------------------
+Type
+    ``string``
+Description
+    Custom Blogger API key.
+
+    https://developers.google.com/blogger/docs/3.0/using#APIKey
+
+
+extractor.[blogger].videos
+--------------------------
 Type
     ``bool``
 Default
@@ -1444,6 +1455,22 @@ Default
     ``false``
 Description
     Process reposts.
+
+
+extractor.cien.files
+--------------------
+Type
+    ``list`` of ``strings``
+Default
+    ``["image", "video", "download", "gallery"]``
+Description
+    Determines the type and order of files to be downloaded.
+
+    Available types are
+    ``image``,
+    ``video``,
+    ``download``,
+    ``gallery``.
 
 
 extractor.cyberdrop.domain
@@ -2605,6 +2632,32 @@ Description
     the first in the list gets chosen (usually `mp3`).
 
 
+extractor.koharu.cbz
+--------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Download each gallery as a single ``.cbz`` file.
+
+    Disabling this option causes a gallery
+    to be downloaded as individual image files.
+
+
+extractor.koharu.format
+-----------------------
+Type
+    ``string``
+Default
+    ``"original"``
+Description
+    Name of the image format to download.
+
+    | Available formats are
+    | ``"780"``, ``"980"``, ``"1280"``, ``"1600"``, ``"0"``/``"original"``
+
+
 extractor.lolisafe.domain
 -------------------------
 Type
@@ -3735,6 +3788,23 @@ Description
     use an extra HTTP request to find the URL to its full-resolution version.
 
 
+extractor.tumblr.pagination
+---------------------------
+Type
+    ``string``
+Default
+    ``"offset"``
+Description
+    Controls how to paginate over blog posts.
+
+    * ``"api"``: ``next`` parameter provided by the API
+      (potentially misses posts due to a
+      `bug <https://github.com/tumblr/docs/issues/76>`__
+      in Tumblr's API)
+    * ``"before"``: timestamp of last post
+    * ``"offset"``: post offset number
+
+
 extractor.tumblr.ratelimit
 --------------------------
 Type
@@ -4257,6 +4327,29 @@ Description
     or `cookies <extractor.*.cookies_>`__
 
 
+extractor.vsco.include
+----------------------
+Type
+    * ``string``
+    * ``list`` of ``strings``
+Default
+    ``"gallery"``
+Example
+    * ``"avatar,collection"``
+    * ``["avatar", "collection"]``
+Description
+    A (comma-separated) list of subcategories to include
+    when processing a user profile.
+
+    Possible values are
+    ``"avatar"``,
+    ``"gallery"``,
+    ``"spaces"``,
+    ``"collection"``,
+
+    It is possible to use ``"all"`` instead of listing all values separately.
+
+
 extractor.vsco.videos
 ---------------------
 Type
@@ -4547,6 +4640,16 @@ Description
       (no ``extension`` metadata)
     * ``"html"``: Parse HTML pages
       (limited to 100 pages * 24 posts)
+
+
+extractor.zerochan.redirects
+----------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Automatically follow tag redirects.
 
 
 extractor.[booru].tags
@@ -5454,8 +5557,23 @@ Example
     * ``"metadata"``
     * ``["..", "metadata", "\fF {id // 500 * 500}"]``
 Description
-    Directory where metadata files are stored in relative to the
-    current target location for file downloads.
+    Directory where metadata files are stored in
+    relative to `metadata.base-directory`_.
+
+
+metadata.base-directory
+-----------------------
+Type
+    * ``bool``
+    * |Path|_
+Default
+    ``false``
+Description
+    Selects the relative location for metadata files.
+
+    * ``false``: current target location for file downloads (base-directory_ + directory_)
+    * ``true``: current base-directory_ location
+    * any |Path|_: custom location
 
 
 metadata.extension
@@ -6467,6 +6585,7 @@ Description
 .. |open()| replace:: the built-in ``open()`` function
 .. |json.dump()| replace:: ``json.dump()``
 
+.. _directory: `extractor.*.directory`_
 .. _base-directory: `extractor.*.base-directory`_
 .. _date-format: `extractor.*.date-format`_
 .. _deviantart.metadata: `extractor.deviantart.metadata`_

@@ -16,7 +16,7 @@ import collections
 import re
 
 BASE_PATTERN = r"(?:https?://)?" \
-    r"(?:(?:chan|beta|black|white)\.sankakucomplex\.com|sankaku\.app)" \
+    r"(?:(?:chan|www|beta|black|white)\.sankakucomplex\.com|sankaku\.app)" \
     r"(?:/[a-z]{2})?"
 
 

@@ -24,6 +24,7 @@ CATEGORY_MAP = {
     "2chan"          : "Futaba Channel",
     "35photo"        : "35PHOTO",
     "adultempire"    : "Adult Empire",
+    "agnph"          : "AGNPH",
     "allgirlbooru"   : "All girl",
     "archivedmoe"    : "Archived.Moe",
     "archiveofsins"  : "Archive of Sins",
@@ -35,6 +36,7 @@ CATEGORY_MAP = {
     "baraag"         : "baraag",
     "batoto"         : "BATO.TO",
     "bbc"            : "BBC",
+    "cien"           : "Ci-en",
     "comicvine"      : "Comic Vine",
     "coomerparty"    : "Coomer",
     "deltaporno"     : "DeltaPorno",
@@ -206,6 +208,9 @@ SUBCATEGORY_MAP = {
     },
     "fapello": {
         "path": "Videos, Trending Posts, Popular Videos, Top Models",
+    },
+    "furaffinity": {
+        "submissions": "New Submissions",
     },
     "hatenablog": {
         "archive": "Archive",

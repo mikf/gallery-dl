@@ -856,6 +856,7 @@ class InfoJob(Job):
 
 class DataJob(Job):
     """Collect extractor results and dump them"""
+    resolve = False
 
     def __init__(self, url, parent=None, file=sys.stdout, ensure_ascii=True,
                  resolve=False):
@@ -863,12 +864,12 @@ class DataJob(Job):
         self.file = file
         self.data = []
         self.ascii = config.get(("output",), "ascii", ensure_ascii)
-        self.resolve = 128 if resolve is True else resolve
+        self.resolve = 128 if resolve is True else (resolve or self.resolve)
 
         private = config.get(("output",), "private")
         self.filter = dict.copy if private else util.filter_dict
 
-        if resolve:
+        if self.resolve > 0:
             self.handle_queue = self.handle_queue_resolve
 
     def run(self):

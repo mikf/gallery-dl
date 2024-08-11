@@ -63,6 +63,7 @@ __tests__ = (
         "Perth (Kantai Collection)",
     ],
     "size"    : 1975296,
+    "source"  : "",
     "tags"    : [
         "Mangaka:YeFan 葉凡",
         "Game:Kantai Collection",
@@ -102,6 +103,7 @@ __tests__ = (
         "Perth (Kantai Collection)",
     ],
     "size"    : 1975296,
+    "source"  : "",
     "tags"    : [
         "Mangaka:YeFan 葉凡",
         "Game:Kantai Collection",
@@ -111,6 +113,79 @@ __tests__ = (
     ],
     "uploader": "YukinoTokisaki",
     "width"   : 1920,
+},
+
+{
+    "#url"     : "https://www.zerochan.net/4233756",
+    "#category": ("booru", "zerochan", "image"),
+    "#class"   : zerochan.ZerochanImageExtractor,
+    "#urls"    : "https://static.zerochan.net/DRAGON.BALL.full.4233756.jpg",
+    "#options" : {"tags": True},
+
+    "author"   : "Raydash",
+    "date"     : "dt:2024-07-23 00:10:51",
+    "extension": "jpg",
+    "file_url" : "https://static.zerochan.net/DRAGON.BALL.full.4233756.jpg",
+    "filename" : "DRAGON.BALL.full.4233756",
+    "height"   : 1125,
+    "id"       : 4233756,
+    "path"     : [
+        "Toriyama Akira",
+        "DRAGON BALL",
+    ],
+    "size"     : 136192,
+    "source": "https://x.com/Raydash30/status/1766012730769862774",
+    "tags"     : [
+        "Mangaka:Raydash",
+        "Series:DRAGON BALL",
+        "Series:DRAGON BALL Z",
+        "Character:Piccolo",
+        "Character:Son Gohan",
+        "Theme:Duo",
+        "Theme:Green Skin",
+        "Theme:Male",
+        "Theme:Male Focus",
+        "Theme:Two Males",
+        "Source:Fanart",
+        "Source:Fanart from X (Twitter)",
+        "Source:X (Twitter)",
+    ],
+    "tags_character": [
+        "Piccolo",
+        "Son Gohan",
+    ],
+    "tags_mangaka"  : [
+        "Raydash",
+    ],
+    "tags_series"   : [
+        "DRAGON BALL",
+        "DRAGON BALL Z",
+    ],
+    "tags_source"   : [
+        "Fanart",
+        "Fanart from X (Twitter)",
+        "X (Twitter)",
+    ],
+    "tags_theme"    : [
+        "Duo",
+        "Green Skin",
+        "Male",
+        "Male Focus",
+        "Two Males",
+    ],
+    "uploader" : "menotbug",
+    "width"    : 750,
+},
+
+{
+    "#url"     : "https://www.zerochan.net/1395035",
+    "#comment" : "Invalid control character '\r' in 'source' field (#5892)",
+    "#category": ("booru", "zerochan", "image"),
+    "#class"   : zerochan.ZerochanImageExtractor,
+    "#auth"    : True,
+    "#options" : {"metadata": True},
+
+    "source": "http://www.youtube.com/watch?v=0vodqkGPxt8",
 },
 
 )

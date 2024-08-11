@@ -294,6 +294,20 @@ class Test_CommandlineArguments_YtDlp(Test_CommandlineArguments):
         self._(["--geo-bypass-ip-block", "198.51.100.14/24"],
                "geo_bypass", "198.51.100.14/24")
 
+    def test_cookiesfrombrowser(self):
+        self._(["--cookies-from-browser", "firefox"],
+               "cookiesfrombrowser", ("firefox", None, None, None))
+        self._(["--cookies-from-browser", "firefox:profile"],
+               "cookiesfrombrowser", ("firefox", "profile", None, None))
+        self._(["--cookies-from-browser", "firefox+keyring"],
+               "cookiesfrombrowser", ("firefox", None, "KEYRING", None))
+        self._(["--cookies-from-browser", "firefox::container"],
+               "cookiesfrombrowser", ("firefox", None, None, "container"))
+        self._(["--cookies-from-browser",
+                "firefox+keyring:profile::container"],
+               "cookiesfrombrowser",
+               ("firefox", "profile", "KEYRING", "container"))
+
 
 if __name__ == "__main__":
     unittest.main(warnings="ignore")

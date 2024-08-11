@@ -92,6 +92,12 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
+    <td>AGNPH</td>
+    <td>https://agn.ph/</td>
+    <td>Posts, Tag Searches</td>
+    <td></td>
+</tr>
+<tr>
     <td>Architizer</td>
     <td>https://architizer.com/</td>
     <td>Firms, Projects</td>
@@ -140,6 +146,12 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
+    <td>Ci-en</td>
+    <td>https://ci-en.net/</td>
+    <td>Articles, Creators, Followed Users, Recent Images</td>
+    <td></td>
+</tr>
+<tr>
     <td>Comic Vine</td>
     <td>https://comicvine.gamespot.com/</td>
     <td>Tag Searches</td>
@@ -166,7 +178,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>DeviantArt</td>
     <td>https://www.deviantart.com/</td>
-    <td>Avatars, Backgrounds, Collections, Deviations, Favorites, Folders, Followed Users, Galleries, Gallery Searches, Journals, Popular Images, Scraps, Search Results, Sta.sh, Status Updates, Tag Searches, User Profiles, Watches</td>
+    <td>Avatars, Backgrounds, Collections, Deviations, Favorites, Folders, Followed Users, Galleries, Gallery Searches, Journals, Scraps, Search Results, Sta.sh, Status Updates, Tag Searches, User Profiles, Watches</td>
     <td><a href="https://github.com/mikf/gallery-dl#oauth">OAuth</a></td>
 </tr>
 <tr>
@@ -198,12 +210,6 @@ Consider all listed sites to potentially be NSFW.
     <td>https://exhentai.org/</td>
     <td>Favorites, Galleries, Search Results</td>
     <td>Supported</td>
-</tr>
-<tr>
-    <td>Fallen Angels Scans</td>
-    <td>https://www.fascans.com/</td>
-    <td>Chapters, Manga</td>
-    <td></td>
 </tr>
 <tr>
     <td>Fanleaks</td>
@@ -244,7 +250,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Fur Affinity</td>
     <td>https://www.furaffinity.net/</td>
-    <td>Favorites, Followed Users, Galleries, Posts, Scraps, Search Results, User Profiles</td>
+    <td>Favorites, Followed Users, Galleries, Posts, Scraps, Search Results, New Submissions, User Profiles</td>
     <td><a href="https://github.com/mikf/gallery-dl#cookies">Cookies</a></td>
 </tr>
 <tr>
@@ -279,7 +285,7 @@ Consider all listed sites to potentially be NSFW.
 </tr>
 <tr>
     <td>Hentai Cosplay</td>
-    <td>https://hentai-cosplays.com/</td>
+    <td>https://hentai-cosplay-xxx.com/</td>
     <td>Galleries</td>
     <td></td>
 </tr>
@@ -467,6 +473,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Khinsider</td>
     <td>https://downloads.khinsider.com/</td>
     <td>Soundtracks</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Koharu</td>
+    <td>https://koharu.to/</td>
+    <td>Favorites, Galleries, Search Results</td>
     <td></td>
 </tr>
 <tr>
@@ -765,7 +777,7 @@ Consider all listed sites to potentially be NSFW.
 </tr>
 <tr>
     <td>Sankaku Complex</td>
-    <td>https://www.sankakucomplex.com/</td>
+    <td>https://news.sankakucomplex.com/</td>
     <td>Articles, Tag Searches</td>
     <td></td>
 </tr>
@@ -940,7 +952,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>VSCO</td>
     <td>https://vsco.co/</td>
-    <td>Avatars, Collections, individual Images, Spaces, User Profiles</td>
+    <td>Avatars, Collections, Galleries, individual Images, Spaces, User Profiles</td>
     <td></td>
 </tr>
 <tr>

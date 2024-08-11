@@ -12,7 +12,6 @@ from .common import Extractor, Message
 from .. import text, util, exception
 from ..cache import cache, memcache
 import collections
-import itertools
 import mimetypes
 import binascii
 import time
@@ -246,7 +245,6 @@ class DeviantartExtractor(Extractor):
             deviation["username"] = deviation["author"]["username"]
             deviation["_username"] = deviation["username"].lower()
 
-        deviation["da_category"] = deviation["category"]
         deviation["published_time"] = text.parse_int(
             deviation["published_time"])
         deviation["date"] = text.parse_timestamp(
@@ -301,15 +299,6 @@ class DeviantartExtractor(Extractor):
             )
         else:
             needle = '<div usr class="gr">'
-            catlist = deviation["category_path"].split("/")
-            categories = " / ".join(
-                ('<span class="crumb"><a href="{}/{}/"><span>{}</span></a>'
-                 '</span>').format(self.root, cpath, cat.capitalize())
-                for cat, cpath in zip(
-                    catlist,
-                    itertools.accumulate(catlist, lambda t, c: t + "/" + c)
-                )
-            )
             username = deviation["author"]["username"]
             urlname = deviation.get("username") or username.lower()
             header = HEADER_TEMPLATE.format(
@@ -318,7 +307,6 @@ class DeviantartExtractor(Extractor):
                 userurl="{}/{}/".format(self.root, urlname),
                 username=username,
                 date=deviation["date"],
-                categories=categories,
             )
 
         if needle in html:
@@ -624,7 +612,7 @@ class DeviantartAvatarExtractor(DeviantartExtractor):
     def _make_deviation(self, url, user, index, fmt):
         return {
             "author"         : user,
-            "category"       : "avatar",
+            "da_category"    : "avatar",
             "index"          : text.parse_int(index),
             "is_deleted"     : False,
             "is_downloadable": False,
@@ -846,55 +834,6 @@ class DeviantartStatusExtractor(DeviantartExtractor):
             )
 
 
-class DeviantartPopularExtractor(DeviantartExtractor):
-    """Extractor for popular deviations"""
-    subcategory = "popular"
-    directory_fmt = ("{category}", "Popular",
-                     "{popular[range]}", "{popular[search]}")
-    archive_fmt = "P_{popular[range]}_{popular[search]}_{index}.{extension}"
-    pattern = (r"(?:https?://)?www\.deviantart\.com/(?:"
-               r"(?:deviations/?)?\?order=(popular-[^/?#]+)"
-               r"|((?:[\w-]+/)*)(popular-[^/?#]+)"
-               r")/?(?:\?([^#]*))?")
-    example = "https://www.deviantart.com/popular-24-hours/"
-
-    def __init__(self, match):
-        DeviantartExtractor.__init__(self, match)
-        self.user = ""
-
-        trange1, path, trange2, query = match.groups()
-        query = text.parse_query(query)
-        self.search_term = query.get("q")
-
-        trange = trange1 or trange2 or query.get("order", "")
-        if trange.startswith("popular-"):
-            trange = trange[8:]
-        self.time_range = {
-            "newest"      : "now",
-            "most-recent" : "now",
-            "this-week"   : "1week",
-            "this-month"  : "1month",
-            "this-century": "alltime",
-            "all-time"    : "alltime",
-        }.get(trange, "alltime")
-
-        self.popular = {
-            "search": self.search_term or "",
-            "range" : trange or "all-time",
-            "path"  : path.strip("/") if path else "",
-        }
-
-    def deviations(self):
-        if self.time_range == "now":
-            return self.api.browse_newest(self.search_term, self.offset)
-        return self.api.browse_popular(
-            self.search_term, self.time_range, self.offset)
-
-    def prepare(self, deviation):
-        DeviantartExtractor.prepare(self, deviation)
-        deviation["popular"] = self.popular
-
-
 class DeviantartTagExtractor(DeviantartExtractor):
     """Extractor for deviations from tag searches"""
     subcategory = "tag"
@@ -1077,14 +1016,14 @@ class DeviantartGallerySearchExtractor(DeviantartExtractor):
 class DeviantartFollowingExtractor(DeviantartExtractor):
     """Extractor for user's watched users"""
     subcategory = "following"
-    pattern = BASE_PATTERN + "/about#watching$"
+    pattern = BASE_PATTERN + "/(?:about#)?watching"
     example = "https://www.deviantart.com/USER/about#watching"
 
     def items(self):
-        eclipse_api = DeviantartEclipseAPI(self)
+        api = DeviantartOAuthAPI(self)
 
-        for user in eclipse_api.user_watching(self.user, self.offset):
-            url = "{}/{}".format(self.root, user["username"])
+        for user in api.user_friends(self.user):
+            url = "{}/{}".format(self.root, user["user"]["username"])
             user["_extractor"] = DeviantartUserExtractor
             yield Message.Queue, url, user
 
@@ -1095,7 +1034,7 @@ class DeviantartFollowingExtractor(DeviantartExtractor):
 class DeviantartOAuthAPI():
     """Interface for the DeviantArt OAuth API
 
-    Ref: https://www.deviantart.com/developers/http/v1/20160316
+    https://www.deviantart.com/developers/http/v1/20160316
     """
     CLIENT_ID = "5388"
     CLIENT_SECRET = "76b08c69cfb27f26d6161f9ab6d061a1"
@@ -1188,29 +1127,6 @@ class DeviantartOAuthAPI():
                   "mature_content": self.mature}
         return self._pagination(endpoint, params, public=False, unpack=True)
 
-    def browse_newest(self, query=None, offset=0):
-        """Browse newest deviations"""
-        endpoint = "/browse/newest"
-        params = {
-            "q"             : query,
-            "limit"         : 120,
-            "offset"        : offset,
-            "mature_content": self.mature,
-        }
-        return self._pagination(endpoint, params)
-
-    def browse_popular(self, query=None, timerange=None, offset=0):
-        """Yield popular deviations"""
-        endpoint = "/browse/popular"
-        params = {
-            "q"             : query,
-            "limit"         : 120,
-            "timerange"     : timerange,
-            "offset"        : offset,
-            "mature_content": self.mature,
-        }
-        return self._pagination(endpoint, params)
-
     def browse_tags(self, tag, offset=0):
         """ Browse a tag """
         endpoint = "/browse/tags"
@@ -1223,11 +1139,12 @@ class DeviantartOAuthAPI():
         return self._pagination(endpoint, params)
 
     def browse_user_journals(self, username, offset=0):
-        """Yield all journal entries of a specific user"""
-        endpoint = "/browse/user/journals"
-        params = {"username": username, "offset": offset, "limit": 50,
-                  "mature_content": self.mature, "featured": "false"}
-        return self._pagination(endpoint, params)
+        journals = filter(
+            lambda post: "/journal/" in post["url"],
+            self.user_profile_posts(username))
+        if offset:
+            journals = util.advance(journals, offset)
+        return journals
 
     def collections(self, username, folder_id, offset=0):
         """Yield all Deviation-objects contained in a collection folder"""
@@ -1339,16 +1256,10 @@ class DeviantartOAuthAPI():
                   "mature_content": self.mature}
         return self._pagination_list(endpoint, params)
 
-    @memcache(keyarg=1)
-    def user_profile(self, username):
-        """Get user profile information"""
-        endpoint = "/user/profile/" + username
-        return self._call(endpoint, fatal=False)
-
-    def user_statuses(self, username, offset=0):
-        """Yield status updates of a specific user"""
-        endpoint = "/user/statuses/"
-        params = {"username": username, "offset": offset, "limit": 50}
+    def user_friends(self, username, offset=0):
+        """Get the users list of friends"""
+        endpoint = "/user/friends/" + username
+        params = {"limit": 50, "offset": offset, "mature_content": self.mature}
         return self._pagination(endpoint, params)
 
     def user_friends_watch(self, username):
@@ -1375,6 +1286,27 @@ class DeviantartOAuthAPI():
         return self._call(
             endpoint, method="POST", public=False, fatal=False,
         ).get("success")
+
+    @memcache(keyarg=1)
+    def user_profile(self, username):
+        """Get user profile information"""
+        endpoint = "/user/profile/" + username
+        return self._call(endpoint, fatal=False)
+
+    def user_profile_posts(self, username):
+        endpoint = "/user/profile/posts"
+        params = {"username": username, "limit": 50,
+                  "mature_content": self.mature}
+        return self._pagination(endpoint, params)
+
+    def user_statuses(self, username, offset=0):
+        """Yield status updates of a specific user"""
+        statuses = filter(
+            lambda post: "/status-update/" in post["url"],
+            self.user_profile_posts(username))
+        if offset:
+            statuses = util.advance(statuses, offset)
+        return statuses
 
     def authenticate(self, refresh_token_key):
         """Authenticate the application by requesting an access token"""
@@ -1464,7 +1396,7 @@ class DeviantartOAuthAPI():
                     self.log.error(msg)
                 return data
 
-    def _switch_tokens(self, results, params):
+    def _should_switch_tokens(self, results, params):
         if len(results) < params["limit"]:
             return True
 
@@ -1496,7 +1428,7 @@ class DeviantartOAuthAPI():
                 results = [item["journal"] for item in results
                            if "journal" in item]
             if extend:
-                if public and self._switch_tokens(results, params):
+                if public and self._should_switch_tokens(results, params):
                     if self.refresh_token_key:
                         self.log.debug("Switching to private access token")
                         public = False
@@ -1540,6 +1472,11 @@ class DeviantartOAuthAPI():
                     return
                 params["offset"] = int(params["offset"]) + len(results)
 
+    def _pagination_list(self, endpoint, params, key="results"):
+        result = []
+        result.extend(self._pagination(endpoint, params, False, key=key))
+        return result
+
     @staticmethod
     def _shared_content(results):
         """Return an iterable of shared deviations in 'results'"""
@@ -1547,11 +1484,6 @@ class DeviantartOAuthAPI():
             for item in result.get("items") or ():
                 if "deviation" in item:
                     yield item["deviation"]
-
-    def _pagination_list(self, endpoint, params, key="results"):
-        result = []
-        result.extend(self._pagination(endpoint, params, False, key=key))
-        return result
 
     def _metadata(self, deviations):
         """Add extended metadata to each deviation object"""
@@ -1828,9 +1760,6 @@ HEADER_TEMPLATE = """<div usr class="gr">
             <a class="u regular username" href="{userurl}">{username}</a>\
 <span class="user-symbol regular"></span></span></span>,
             <span>{date}</span>
-        </li>
-        <li class="category">
-            {categories}
         </li>
     </ul>
 </div>

@@ -20,7 +20,13 @@ import collections
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from gallery_dl import \
     extractor, util, job, config, exception, formatter  # noqa E402
-from test import results  # noqa E402
+
+
+RESULTS = os.environ.get("GDL_TEST_RESULTS")
+if RESULTS:
+    results = util.import_file(RESULTS)
+else:
+    from test import results
 
 
 # temporary issues, etc.
@@ -88,6 +94,7 @@ class TestExtractorResults(unittest.TestCase):
         result.pop("#comment", None)
         auth = result.pop("#auth", None)
 
+        extractor.find(result["#url"])
         extr = result["#class"].from_url(result["#url"])
         if not extr:
             raise exception.NoExtractorError()

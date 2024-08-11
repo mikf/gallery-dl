@@ -49,7 +49,7 @@ class BehanceExtractor(Extractor):
 
     def _update(self, data):
         # compress data to simple lists
-        if data["fields"] and isinstance(data["fields"][0], dict):
+        if data.get("fields") and isinstance(data["fields"][0], dict):
             data["fields"] = [
                 field.get("name") or field.get("label")
                 for field in data["fields"]
@@ -164,6 +164,19 @@ class BehanceGalleryExtractor(BehanceExtractor):
                 append((size["url"], module))
 
             elif mtype == "video":
+                try:
+                    url = text.extr(module["embed"], 'src="', '"')
+                    page = self.request(text.unescape(url)).text
+
+                    url = text.extr(page, '<source src="', '"')
+                    if text.ext_from_url(url) == "m3u8":
+                        url = "ytdl:" + url
+                        module["extension"] = "mp4"
+                    append((url, module))
+                    continue
+                except Exception as exc:
+                    self.log.debug("%s: %s", exc.__class__.__name__, exc)
+
                 try:
                     renditions = module["videoData"]["renditions"]
                 except Exception:

@@ -17,7 +17,7 @@ import string
 from datetime import datetime, timedelta
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from gallery_dl import extractor  # noqa E402
+from gallery_dl import extractor, util  # noqa E402
 from gallery_dl.extractor import mastodon  # noqa E402
 from gallery_dl.extractor.common import Extractor, Message  # noqa E402
 from gallery_dl.extractor.directlink import DirectlinkExtractor  # noqa E402
@@ -25,7 +25,11 @@ from gallery_dl.extractor.directlink import DirectlinkExtractor  # noqa E402
 _list_classes = extractor._list_classes
 
 try:
-    from test import results
+    RESULTS = os.environ.get("GDL_TEST_RESULTS")
+    if RESULTS:
+        results = util.import_file(RESULTS)
+    else:
+        from test import results
 except ImportError:
     results = None
 
@@ -121,8 +125,7 @@ class TestExtractorModule(unittest.TestCase):
         append = test_urls.append
 
         for result in results.all():
-            if result["#class"].__module__.startswith("gallery_dl."):
-                append((result["#url"], result["#class"]))
+            append((result["#url"], result["#class"]))
 
         # iterate over all testcase URLs
         for url, extr1 in test_urls:
