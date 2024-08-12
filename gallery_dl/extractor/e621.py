@@ -8,6 +8,7 @@
 
 """Extractors for https://e621.net/ and other e621 instances"""
 
+from ..cache import memcache
 from .common import Message
 from . import danbooru
 from .. import text, util
@@ -20,6 +21,18 @@ class E621Extractor(danbooru.DanbooruExtractor):
     page_start = None
     per_page = 320
     request_interval_min = 1.0
+
+    def _get_notes(self, id):
+        return self.request(
+            "{}/notes.json?search[post_id]={}".format(self.root, id)).json()
+
+    @memcache(keyarg=1)
+    def _get_pools(self, ids):
+        pools = self.request(
+            "{}/pools.json?search[id]={}".format(self.root, ids)).json()
+        for pool in pools:
+            pool["name"] = pool["name"].replace("_", " ")
+        return pools
 
     def items(self):
         self.session.headers["User-Agent"] = util.USERAGENT + " (by mikf)"
@@ -44,16 +57,11 @@ class E621Extractor(danbooru.DanbooruExtractor):
                     self.root[8:], md5[0:2], md5[2:4], md5, file["ext"])
 
             if notes and post.get("has_notes"):
-                url = "{}/notes.json?search[post_id]={}".format(
-                    self.root, post["id"])
-                post["notes"] = self.request(url).json()
+                post["notes"] = self._get_notes(post["id"])
 
             if pools and post["pools"]:
-                url = "{}/pools.json?search[id]={}".format(
-                    self.root, ",".join(map(str, post["pools"])))
-                post["pools"] = _pools = self.request(url).json()
-                for pool in _pools:
-                    pool["name"] = pool["name"].replace("_", " ")
+                post["pools"] = self._get_pools(
+                    ",".join(map(str, post["pools"])))
 
             post["filename"] = file["md5"]
             post["extension"] = file["ext"]
