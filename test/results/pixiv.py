@@ -405,12 +405,14 @@ __tests__ = (
 
     "num_series": int,
     "series"    : {
-        "canonical"  : "https://www.pixiv.net/user/10509347/series/21859",
-        "description": str,
-        "ogp"        : dict,
-        "title"      : "先輩がうざい後輩の話",
-        "total"      : int,
-        "twitter"    : dict,
+        "create_date": "2017-10-22T14:07:42+09:00",
+        "width" : 4250,
+        "height": 3009,
+        "id"    : 21859,
+        "title" : "先輩がうざい後輩の話",
+        "total" : range(100, 500),
+        "user"  : dict,
+        "watchlist_added": False,
     },
 },
 
