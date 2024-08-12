@@ -335,6 +335,14 @@ __tests__ = (
 },
 
 {
+    "#url"     : "http://mikf123.tumblr.com/likes",
+    "#category": ("", "tumblr", "likes"),
+    "#class"   : tumblr.TumblrLikesExtractor,
+    "#options" : {"api-secret": None},
+    "#count"   : 1,
+},
+
+{
     "#url"     : "https://www.tumblr.com/blog/view/mikf123/likes",
     "#category": ("", "tumblr", "likes"),
     "#class"   : tumblr.TumblrLikesExtractor,

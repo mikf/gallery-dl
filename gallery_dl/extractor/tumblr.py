@@ -400,6 +400,9 @@ class TumblrAPI(oauth.OAuth1API):
         """Retrieve liked posts"""
         endpoint = "/v2/blog/{}/likes".format(blog)
         params = {"limit": "50", "before": self.before}
+        if self.api_key:
+            params["api_key"] = self.api_key
+
         while True:
             posts = self._call(endpoint, params)["liked_posts"]
             if not posts:
