@@ -60,6 +60,18 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://bato.to/title/90710-new-suitor-for-the-abandoned-wife/2089747-ch_76",
+    "#comment" : "duplicate info in chapter_minor / title (#5988)",
+    "#category": ("", "batoto", "chapter"),
+    "#class"   : batoto.BatotoChapterExtractor,
+
+    "chapter"      : 76,
+    "chapter_id"   : 2089747,
+    "chapter_minor": "",
+    "title"        : "Side Story 4 [END]",
+},
+
+{
     "#url"     : "https://bato.to/title/86408/1681030",
     "#category": ("", "batoto", "chapter"),
     "#class"   : batoto.BatotoChapterExtractor,
