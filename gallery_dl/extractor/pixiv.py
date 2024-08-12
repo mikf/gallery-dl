@@ -551,9 +551,6 @@ class PixivSeriesExtractor(PixivExtractor):
     directory_fmt = ("{category}", "{user[id]} {user[account]}",
                      "{series[id]} {series[title]}")
     filename_fmt = "{num_series:>03}_{id}_p{num}.{extension}"
-    cookies_domain = ".pixiv.net"
-    browser = "firefox"
-    tls12 = False
     pattern = BASE_PATTERN + r"/user/(\d+)/series/(\d+)"
     example = "https://www.pixiv.net/user/12345/series/12345"
 
@@ -562,34 +559,18 @@ class PixivSeriesExtractor(PixivExtractor):
         self.user_id, self.series_id = match.groups()
 
     def works(self):
-        url = self.root + "/ajax/series/" + self.series_id
-        params = {"p": 1}
-        headers = {
-            "Accept": "application/json",
-            "Referer": "{}/user/{}/series/{}".format(
-                self.root, self.user_id, self.series_id),
-            "Alt-Used": "www.pixiv.net",
-        }
+        series = None
 
-        while True:
-            data = self.request(url, params=params, headers=headers).json()
-            body = data["body"]
-            page = body["page"]
+        for work in self.api.illust_series(self.series_id):
+            if series is None:
+                series = self.api.data
+                series["total"] = num_series = series.pop("series_work_count")
+            else:
+                num_series -= 1
 
-            series = body["extraData"]["meta"]
-            series["id"] = self.series_id
-            series["total"] = page["total"]
-            series["title"] = text.extr(series["title"], '"', '"')
-
-            for info in page["series"]:
-                work = self.api.illust_detail(info["workId"])
-                work["num_series"] = info["order"]
-                work["series"] = series
-                yield work
-
-            if len(page["series"]) < 10:
-                return
-            params["p"] += 1
+            work["num_series"] = num_series
+            work["series"] = series
+            yield work
 
 
 class PixivNovelExtractor(PixivExtractor):
@@ -916,6 +897,11 @@ class PixivAppAPI():
         params = {"illust_id": illust_id}
         return self._pagination("/v2/illust/related", params)
 
+    def illust_series(self, series_id, offset=0):
+        params = {"illust_series_id": series_id, "offset": offset}
+        return self._pagination("/v1/illust/series", params,
+                                key_data="illust_series_detail")
+
     def novel_bookmark_detail(self, novel_id):
         params = {"novel_id": novel_id}
         return self._call(
@@ -1013,10 +999,15 @@ class PixivAppAPI():
 
             raise exception.StopExtraction("API request failed: %s", error)
 
-    def _pagination(self, endpoint, params, key="illusts"):
+    def _pagination(self, endpoint, params,
+                    key_items="illusts", key_data=None):
         while True:
             data = self._call(endpoint, params)
-            yield from data[key]
+
+            if key_data:
+                self.data = data.get(key_data)
+                key_data = None
+            yield from data[key_items]
 
             if not data["next_url"]:
                 return
