@@ -207,7 +207,7 @@ def build_parser():
     )
 
     update = parser.add_argument_group("Update Options")
-    if util.EXECUTABLE or 1:
+    if util.EXECUTABLE:
         update.add_argument(
             "-U", "--update",
             dest="update", action="store_const", const="latest",
