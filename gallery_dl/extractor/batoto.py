@@ -51,14 +51,15 @@ class BatotoChapterExtractor(BatotoBase, ChapterExtractor):
         if not manga:
             manga = extr('link-hover">', "<")
             info = text.remove_html(extr('link-hover">', "</"))
+        info = text.unescape(info)
 
         match = re.match(
             r"(?:Volume\s+(\d+) )?"
             r"[Cc]hapter\s*(\d+)([\w.]*)", info)
         if match:
             volume, chapter, minor = match.groups()
-            title = text.remove_html(extr(
-                "selected>", "</option")).partition(" : ")[2]
+            title = text.unescape(text.remove_html(extr(
+                "selected>", "</option")).partition(" : ")[2])
         else:
             volume = chapter = 0
             minor = ""
@@ -67,11 +68,11 @@ class BatotoChapterExtractor(BatotoBase, ChapterExtractor):
         return {
             "manga"         : text.unescape(manga),
             "manga_id"      : text.parse_int(manga_id),
-            "title"         : text.unescape(title),
+            "title"         : title,
             "volume"        : text.parse_int(volume),
             "chapter"       : text.parse_int(chapter),
             "chapter_minor" : minor,
-            "chapter_string": text.unquote(info),
+            "chapter_string": info,
             "chapter_id"    : text.parse_int(self.chapter_id),
             "date"          : text.parse_timestamp(extr(' time="', '"')[:-3]),
         }
