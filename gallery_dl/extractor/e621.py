@@ -8,9 +8,9 @@
 
 """Extractors for https://e621.net/ and other e621 instances"""
 
-from ..cache import memcache
 from .common import Message
 from . import danbooru
+from ..cache import memcache
 from .. import text, util
 
 
@@ -21,18 +21,6 @@ class E621Extractor(danbooru.DanbooruExtractor):
     page_start = None
     per_page = 320
     request_interval_min = 1.0
-
-    def _get_notes(self, id):
-        return self.request(
-            "{}/notes.json?search[post_id]={}".format(self.root, id)).json()
-
-    @memcache(keyarg=1)
-    def _get_pools(self, ids):
-        pools = self.request(
-            "{}/pools.json?search[id]={}".format(self.root, ids)).json()
-        for pool in pools:
-            pool["name"] = pool["name"].replace("_", " ")
-        return pools
 
     def items(self):
         self.session.headers["User-Agent"] = util.USERAGENT + " (by mikf)"
@@ -71,6 +59,18 @@ class E621Extractor(danbooru.DanbooruExtractor):
             post.update(data)
             yield Message.Directory, post
             yield Message.Url, file["url"], post
+
+    def _get_notes(self, id):
+        return self.request(
+            "{}/notes.json?search[post_id]={}".format(self.root, id)).json()
+
+    @memcache(keyarg=1)
+    def _get_pools(self, ids):
+        pools = self.request(
+            "{}/pools.json?search[id]={}".format(self.root, ids)).json()
+        for pool in pools:
+            pool["name"] = pool["name"].replace("_", " ")
+        return pools
 
 
 BASE_PATTERN = E621Extractor.update({
