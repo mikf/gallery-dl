@@ -54,7 +54,7 @@ class BatotoChapterExtractor(BatotoBase, ChapterExtractor):
 
         match = re.match(
             r"(?:Volume\s+(\d+) )?"
-            r"[Cc]hapter\s*(\d+)(\.\d+)?", info)
+            r"[Cc]hapter\s*(\d+)([\w.]*)", info)
         if match:
             volume, chapter, minor = match.groups()
             title = text.remove_html(extr(
@@ -65,14 +65,15 @@ class BatotoChapterExtractor(BatotoBase, ChapterExtractor):
             title = info
 
         return {
-            "manga"        : text.unescape(manga),
-            "manga_id"     : text.parse_int(manga_id),
-            "title"        : text.unescape(title),
-            "volume"       : text.parse_int(volume),
-            "chapter"      : text.parse_int(chapter),
-            "chapter_minor": minor or "",
-            "chapter_id"   : text.parse_int(self.chapter_id),
-            "date"         : text.parse_timestamp(extr(' time="', '"')[:-3]),
+            "manga"         : text.unescape(manga),
+            "manga_id"      : text.parse_int(manga_id),
+            "title"         : text.unescape(title),
+            "volume"        : text.parse_int(volume),
+            "chapter"       : text.parse_int(chapter),
+            "chapter_minor" : minor,
+            "chapter_string": text.unquote(info),
+            "chapter_id"    : text.parse_int(self.chapter_id),
+            "date"          : text.parse_timestamp(extr(' time="', '"')[:-3]),
         }
 
     def images(self, page):
