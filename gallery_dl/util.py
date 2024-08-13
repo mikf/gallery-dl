@@ -101,7 +101,7 @@ def raises(cls):
     return wrap
 
 
-def identity(x):
+def identity(x, _=None):
     """Returns its argument"""
     return x
 
@@ -550,6 +550,39 @@ class CustomNone():
     __le__ = true
     __gt__ = false
     __ge__ = false
+
+    __add__ = identity
+    __sub__ = identity
+    __mul__ = identity
+    __matmul__ = identity
+    __truediv__ = identity
+    __floordiv__ = identity
+    __mod__ = identity
+
+    __radd__ = identity
+    __rsub__ = identity
+    __rmul__ = identity
+    __rmatmul__ = identity
+    __rtruediv__ = identity
+    __rfloordiv__ = identity
+    __rmod__ = identity
+
+    __lshift__ = identity
+    __rshift__ = identity
+    __and__ = identity
+    __xor__ = identity
+    __or__ = identity
+
+    __rlshift__ = identity
+    __rrshift__ = identity
+    __rand__ = identity
+    __rxor__ = identity
+    __ror__ = identity
+
+    __neg__ = identity
+    __pos__ = identity
+    __abs__ = identity
+    __invert__ = identity
 
     @staticmethod
     def __len__():
