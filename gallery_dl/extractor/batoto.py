@@ -54,8 +54,8 @@ class BatotoChapterExtractor(BatotoBase, ChapterExtractor):
         info = text.unescape(info)
 
         match = re.match(
-            r"(?:Volume\s+(\d+) )?"
-            r"[Cc]hapter\s*(\d+)([\w.]*)", info)
+            r"(?i)(?:(?:Volume|S(?:eason)?)\s*(\d+)\s+)?"
+            r"(?:Chapter|Episode)\s*(\d+)([\w.]*)", info)
         if match:
             volume, chapter, minor = match.groups()
             title = text.unescape(text.remove_html(extr(
