@@ -761,6 +761,39 @@ def hash(value):
         self.assertGreater(123, obj)
         self.assertGreaterEqual(1.23, obj)
 
+        self.assertEqual(obj + 123, obj)
+        self.assertEqual(obj - 123, obj)
+        self.assertEqual(obj * 123, obj)
+        self.assertEqual(obj @ 123, obj)
+        self.assertEqual(obj / 123, obj)
+        self.assertEqual(obj // 123, obj)
+        self.assertEqual(obj % 123, obj)
+
+        self.assertEqual(123 + obj, obj)
+        self.assertEqual(123 - obj, obj)
+        self.assertEqual(123 * obj, obj)
+        self.assertEqual(123 @ obj, obj)
+        self.assertEqual(123 / obj, obj)
+        self.assertEqual(123 // obj, obj)
+        self.assertEqual(123 % obj, obj)
+
+        self.assertEqual(obj << 123, obj)
+        self.assertEqual(obj >> 123, obj)
+        self.assertEqual(obj & 123, obj)
+        self.assertEqual(obj ^ 123, obj)
+        self.assertEqual(obj | 123, obj)
+
+        self.assertEqual(123 << obj, obj)
+        self.assertEqual(123 >> obj, obj)
+        self.assertEqual(123 & obj, obj)
+        self.assertEqual(123 ^ obj, obj)
+        self.assertEqual(123 | obj, obj)
+
+        self.assertEqual(-obj, obj)
+        self.assertEqual(+obj, obj)
+        self.assertEqual(~obj, obj)
+        self.assertEqual(abs(obj), obj)
+
         mapping = {}
         mapping[obj] = 123
         self.assertIn(obj, mapping)
