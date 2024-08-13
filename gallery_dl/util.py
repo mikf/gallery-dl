@@ -520,14 +520,9 @@ class CustomNone():
     """None-style type that supports more operations than regular None"""
     __slots__ = ()
 
-    def __getattribute__(self, _):
-        return self
-
-    def __getitem__(self, _):
-        return self
-
-    def __iter__(self):
-        return self
+    __getattribute__ = identity
+    __getitem__ = identity
+    __iter__ = identity
 
     def __call__(self, *args, **kwargs):
         return self
@@ -535,10 +530,6 @@ class CustomNone():
     @staticmethod
     def __next__():
         raise StopIteration
-
-    @staticmethod
-    def __bool__():
-        return False
 
     def __eq__(self, other):
         return self is other
@@ -550,6 +541,7 @@ class CustomNone():
     __le__ = true
     __gt__ = false
     __ge__ = false
+    __bool__ = false
 
     __add__ = identity
     __sub__ = identity
@@ -588,9 +580,8 @@ class CustomNone():
     def __len__():
         return 0
 
-    @staticmethod
-    def __hash__():
-        return 0
+    __hash__ = __len__
+    __index__ = __len__
 
     @staticmethod
     def __format__(_):
