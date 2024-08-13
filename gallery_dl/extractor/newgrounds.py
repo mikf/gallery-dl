@@ -171,15 +171,17 @@ class NewgroundsExtractor(Extractor):
             if self.flash:
                 url += "/format/flash"
 
-        with self.request(url, fatal=False) as response:
-            if response.status_code >= 400:
-                return {}
-            page = response.text
+        response = self.request(url, fatal=False)
+        page = response.text
 
         pos = page.find('id="adults_only"')
         if pos >= 0:
             msg = text.extract(page, 'class="highlight">', '<', pos)[0]
             self.log.warning('"%s"', msg)
+            return {}
+
+        if response.status_code >= 400:
+            return {}
 
         extr = text.extract_from(page)
         data = extract_data(extr, post_url)
