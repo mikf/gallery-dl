@@ -75,11 +75,8 @@ class FlickrImageExtractor(FlickrExtractor):
 
     def items(self):
         photo = self.api.photos_getInfo(self.item_id)
-        if self.api.exif:
-            photo.update(self.api.photos_getExif(self.item_id))
-        if self.api.contexts:
-            photo.update(self.api.photos_getAllContexts(self.item_id))
 
+        self.api._extract_metadata(photo)
         if photo["media"] == "video" and self.api.videos:
             self.api._extract_video(photo)
         else:
@@ -407,6 +404,8 @@ class FlickrAPI(oauth.OAuth1API):
             self.log.debug("Server response: %s", data)
             if data["code"] == 1:
                 raise exception.NotFoundError(self.extractor.subcategory)
+            elif data["code"] == 2:
+                raise exception.AuthorizationError(msg)
             elif data["code"] == 98:
                 raise exception.AuthenticationError(msg)
             elif data["code"] == 99:
@@ -453,10 +452,7 @@ class FlickrAPI(oauth.OAuth1API):
         photo["date"] = text.parse_timestamp(photo["dateupload"])
         photo["tags"] = photo["tags"].split()
 
-        if self.exif:
-            photo.update(self.photos_getExif(photo["id"]))
-        if self.contexts:
-            photo.update(self.photos_getAllContexts(photo["id"]))
+        self._extract_metadata(photo)
         photo["id"] = text.parse_int(photo["id"])
 
         if "owner" in photo:
@@ -511,6 +507,23 @@ class FlickrAPI(oauth.OAuth1API):
         photo["label"] = stream["type"]
         photo["width"] = photo["height"] = 0
         return photo
+
+    def _extract_metadata(self, photo):
+        if self.exif:
+            try:
+                photo.update(self.photos_getExif(photo["id"]))
+            except Exception as exc:
+                self.log.warning(
+                    "Unable to retrieve 'exif' data for %s (%s: %s)",
+                    photo["id"], exc.__class__.__name__, exc)
+
+        if self.contexts:
+            try:
+                photo.update(self.api.photos_getAllContexts(photo["id"]))
+            except Exception as exc:
+                self.log.warning(
+                    "Unable to retrieve 'contexts' data for %s (%s: %s)",
+                    photo["id"], exc.__class__.__name__, exc)
 
     @staticmethod
     def _clean_info(info):
