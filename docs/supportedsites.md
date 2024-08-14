@@ -135,7 +135,7 @@ Consider all listed sites to potentially be NSFW.
 </tr>
 <tr>
     <td>Bunkr</td>
-    <td>https://bunkr.sk/</td>
+    <td>https://bunkr.si/</td>
     <td>Albums, Media Files</td>
     <td></td>
 </tr>

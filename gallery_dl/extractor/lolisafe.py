@@ -34,7 +34,7 @@ class LolisafeAlbumExtractor(LolisafeExtractor):
 
     def __init__(self, match):
         LolisafeExtractor.__init__(self, match)
-        self.album_id = match.group(match.lastindex)
+        self.album_id = self.groups[-1]
 
     def _init(self):
         domain = self.config("domain")
