@@ -6,14 +6,15 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extractors for https://bunkr.sk/"""
+"""Extractors for https://bunkr.si/"""
 
 from .lolisafe import LolisafeAlbumExtractor
 from .. import text
 
 BASE_PATTERN = (
+    r"(?:bunkr:(?:https?://)?([^/?#]+)|"
     r"(?:https?://)?(?:app\.)?(bunkr+"
-    r"\.(?:s[kiu]|[cf]i|ru|la|is|to|ac|black|cat|media|red|site|ws|org))"
+    r"\.(?:s[kiu]|[cf]i|ru|la|is|to|a[cx]|black|cat|media|red|site|ws|org)))"
 )
 
 LEGACY_DOMAINS = {
@@ -28,15 +29,15 @@ LEGACY_DOMAINS = {
 
 
 class BunkrAlbumExtractor(LolisafeAlbumExtractor):
-    """Extractor for bunkr.sk albums"""
+    """Extractor for bunkr.si albums"""
     category = "bunkr"
-    root = "https://bunkr.sk"
+    root = "https://bunkr.si"
     pattern = BASE_PATTERN + r"/a/([^/?#]+)"
-    example = "https://bunkr.sk/a/ID"
+    example = "https://bunkr.si/a/ID"
 
     def __init__(self, match):
         LolisafeAlbumExtractor.__init__(self, match)
-        domain = match.group(match.lastindex-1)
+        domain = self.groups[0] or self.groups[1]
         if domain not in LEGACY_DOMAINS:
             self.root = "https://" + domain
 
@@ -83,11 +84,11 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
 
 
 class BunkrMediaExtractor(BunkrAlbumExtractor):
-    """Extractor for bunkr.sk media links"""
+    """Extractor for bunkr.si media links"""
     subcategory = "media"
     directory_fmt = ("{category}",)
     pattern = BASE_PATTERN + r"(/[vid]/[^/?#]+)"
-    example = "https://bunkr.sk/v/FILENAME"
+    example = "https://bunkr.si/v/FILENAME"
 
     def fetch_album(self, album_id):
         try:
