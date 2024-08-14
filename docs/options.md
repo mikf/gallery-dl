@@ -106,7 +106,7 @@
                                 optional domain prefixed with '/', keyring name
                                 prefixed with '+', profile prefixed with ':',
                                 and container prefixed with '::' ('none' for no
-                                container)
+                                container (default), 'all' for all containers)
 
 ## Selection Options:
     -A, --abort N               Stop current extractor run after N consecutive

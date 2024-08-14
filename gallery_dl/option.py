@@ -526,7 +526,8 @@ def build_parser():
               "domain prefixed with '/', "
               "keyring name prefixed with '+', "
               "profile prefixed with ':', and "
-              "container prefixed with '::' ('none' for no container)"),
+              "container prefixed with '::' "
+              "('none' for no container (default), 'all' for all containers)"),
     )
 
     selection = parser.add_argument_group("Selection Options")
