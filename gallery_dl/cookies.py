@@ -179,11 +179,14 @@ def _firefox_cookies_database(profile=None, container=None):
                                 "{}".format(search_root))
     _log_debug("Extracting cookies from %s", path)
 
-    if container == "none":
+    if not container or container == "none":
         container_id = False
         _log_debug("Only loading cookies not belonging to any container")
 
-    elif container:
+    elif container == "all":
+        container_id = None
+
+    else:
         containers_path = os.path.join(
             os.path.dirname(path), "containers.json")
 
@@ -207,8 +210,6 @@ def _firefox_cookies_database(profile=None, container=None):
                 container))
         _log_debug("Only loading cookies from container '%s' (ID %s)",
                    container, container_id)
-    else:
-        container_id = None
 
     return path, container_id
 
