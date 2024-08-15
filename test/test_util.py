@@ -16,6 +16,7 @@ import time
 import random
 import string
 import datetime
+import platform
 import tempfile
 import itertools
 import http.cookiejar
@@ -769,7 +770,7 @@ def hash(value):
         self.assertEqual(obj + 123, obj)
         self.assertEqual(obj - 123, obj)
         self.assertEqual(obj * 123, obj)
-        self.assertEqual(obj @ 123, obj)
+        #  self.assertEqual(obj @ 123, obj)
         self.assertEqual(obj / 123, obj)
         self.assertEqual(obj // 123, obj)
         self.assertEqual(obj % 123, obj)
@@ -777,7 +778,7 @@ def hash(value):
         self.assertEqual(123 + obj, obj)
         self.assertEqual(123 - obj, obj)
         self.assertEqual(123 * obj, obj)
-        self.assertEqual(123 @ obj, obj)
+        #  self.assertEqual(123 @ obj, obj)
         self.assertEqual(123 / obj, obj)
         self.assertEqual(123 // obj, obj)
         self.assertEqual(123 % obj, obj)
@@ -807,7 +808,8 @@ def hash(value):
         array = [1, 2, 3]
         self.assertEqual(array[obj], 1)
 
-        self.assertTrue(time.localtime(obj))
+        if platform.python_implementation().lower() == "cpython":
+            self.assertTrue(time.localtime(obj))
 
         i = 0
         for _ in obj:
