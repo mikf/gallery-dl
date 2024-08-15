@@ -580,6 +580,7 @@ class CustomNone():
     def __len__():
         return 0
 
+    __int__ = __len__
     __hash__ = __len__
     __index__ = __len__
 
