@@ -25,6 +25,7 @@ class TestFormatter(unittest.TestCase):
         "b": "äöü",
         "j": "げんそうきょう",
         "d": {"a": "foo", "b": 0, "c": None},
+        "i": 2,
         "l": ["a", "b", "c"],
         "n": None,
         "s": " \n\r\tSPACE    ",
@@ -266,6 +267,11 @@ class TestFormatter(unittest.TestCase):
         self._run_test(
             "{a:Sort-reverse}",  # starts with 'S', contains 'r'
             "['w', 'r', 'o', 'l', 'h', 'd', 'O', 'L', 'L', 'E', ' ']")
+
+    def test_specifier_arithmetic(self):
+        self._run_test("{i:A+1}", "3")
+        self._run_test("{i:A-1}", "1")
+        self._run_test("{i:A*3}", "6")
 
     def test_specifier_conversions(self):
         self._run_test("{a:Cl}"   , "hello world")
