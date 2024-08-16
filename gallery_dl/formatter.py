@@ -325,6 +325,23 @@ def _parse_slice(format_spec, default):
     return apply_slice
 
 
+def _parse_arithmetic(format_spec, default):
+    op, _, format_spec = format_spec.partition(_SEPARATOR)
+    fmt = _build_format_func(format_spec, default)
+
+    value = int(op[2:])
+    op = op[1]
+
+    if op == "+":
+        return lambda obj: fmt(obj + value)
+    if op == "-":
+        return lambda obj: fmt(obj - value)
+    if op == "*":
+        return lambda obj: fmt(obj * value)
+
+    return fmt
+
+
 def _parse_conversion(format_spec, default):
     conversions, _, format_spec = format_spec.partition(_SEPARATOR)
     convs = [_CONVERSIONS[c] for c in conversions[1:]]
@@ -480,6 +497,7 @@ _CONVERSIONS = {
 _FORMAT_SPECIFIERS = {
     "?": _parse_optional,
     "[": _parse_slice,
+    "A": _parse_arithmetic,
     "C": _parse_conversion,
     "D": _parse_datetime,
     "J": _parse_join,

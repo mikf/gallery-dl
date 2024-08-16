@@ -203,6 +203,12 @@ Format specifiers can be used for advanced formatting by using the options provi
     <td><code>F()()&nbsp;Bar</code></td>
 </tr>
 <tr>
+    <td><code>A&lt;op&gt;&lt;value&gt;/</code></td>
+    <td>Apply arithmetic operation <code>&lt;op&gt;</code> (<code>+</code>, <code>-</code>, <code>*</code>) to the current value</td>
+    <td><code>{num:A+1/}</code></td>
+    <td><code>"2"</code></td>
+</tr>
+<tr>
     <td><code>C&lt;conversion(s)&gt;/</code></td>
     <td>Apply <a href="#conversions">Conversions</a> to the current value</td>
     <td><code>{tags:CSgc/}</code></td>
