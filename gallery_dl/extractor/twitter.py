@@ -504,7 +504,11 @@ class TwitterExtractor(Extractor):
         }
 
     def _init_cursor(self):
-        return self.config("cursor") or None
+        cursor = self.config("cursor", True)
+        if not cursor:
+            self._update_cursor = util.identity
+        elif isinstance(cursor, str):
+            return cursor
 
     def _update_cursor(self, cursor):
         self.log.debug("Cursor: %s", cursor)
@@ -590,8 +594,15 @@ class TwitterTimelineExtractor(TwitterExtractor):
         return cursor
 
     def tweets(self):
-        self._cursor = cursor = self.config("cursor") or None
         reset = False
+
+        cursor = self.config("cursor", True)
+        if not cursor:
+            self._update_cursor = util.identity
+        elif isinstance(cursor, str):
+            self._cursor = cursor
+        else:
+            cursor = None
 
         if cursor:
             state = cursor.partition("/")[0]

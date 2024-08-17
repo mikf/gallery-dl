@@ -3985,6 +3985,26 @@ Description
     * ``"cookies"``: Use token given by the ``ct0`` cookie if present.
 
 
+extractor.twitter.cursor
+------------------------
+Type
+    * ``bool``
+    * ``string``
+Default
+    ``true``
+Example
+    ``"1/DAABCgABGVKi5lE___oKAAIYbfYNcxrQLggAAwAAAAIAAA"``
+Description
+    Controls from which position to start the extraction process from.
+
+    * ``true``: Start from the beginning.
+      Log the most recent ``cursor`` value when interrupted before reaching the end.
+    * ``false``: Start from the beginning.
+    * any ``string``: Start from the position defined by this value.
+
+    Note: A ``cursor`` value from one timeline cannot be used with another.
+
+
 extractor.twitter.expand
 ------------------------
 Type
