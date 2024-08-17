@@ -2392,6 +2392,24 @@ Description
     * ``"graphql"``: GraphQL API - lower-resolution media
 
 
+extractor.instagram.cursor
+--------------------------
+Type
+    * ``bool``
+    * ``string``
+Default
+    ``true``
+Example
+    ``"3414259811154179155_25025320"``
+Description
+    Controls from which position to start the extraction process from.
+
+    * ``true``: Start from the beginning.
+      Log the most recent ``cursor`` value when interrupted before reaching the end.
+    * ``false``: Start from the beginning.
+    * any ``string``: Start from the position defined by this value.
+
+
 extractor.instagram.include
 ---------------------------
 Type
