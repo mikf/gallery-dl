@@ -70,11 +70,16 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
 
     def _extract_file(self, url):
         page = self.request(url).text
-        return (
-            text.extr(page, '<source src="', '"') or
-            text.extr(page, '<img src="', '"') or
-            text.rextract(page, ' href="', '"', page.rindex("Download"))[0]
-        )
+        url = (text.extr(page, '<source src="', '"') or
+               text.extr(page, '<img src="', '"'))
+
+        if not url:
+            url_download = text.rextract(
+                page, ' href="', '"', page.rindex("Download"))[0]
+            page = self.request(text.unescape(url_download)).text
+            url = text.unescape(text.rextract(page, ' href="', '"')[0])
+
+        return url
 
     def _validate(self, response):
         if response.history and response.url.endswith("/maintenance-vid.mp4"):
