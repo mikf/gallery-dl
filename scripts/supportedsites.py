@@ -323,6 +323,13 @@ SUBCATEGORY_MAP = {
         "home": "",
         "newvideo": "",
     },
+    "weverse": {
+        "feed": "Feed Tab, Artist Tab",
+        "media-category": "Media Categories",
+        "media-tab": "Media Tabs",
+        "member": "Member Profiles",
+        "moments": "",
+    },
     "wikiart": {
         "artists": "Artist Listings",
     },
@@ -407,6 +414,7 @@ AUTH_MAP = {
     "vipergirls"     : "Supported",
     "wallhaven"      : _APIKEY_WH,
     "weasyl"         : _APIKEY_WY,
+    "weverse"        : _COOKIES,
     "zerochan"       : "Supported",
 }
 

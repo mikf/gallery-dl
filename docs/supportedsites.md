@@ -998,6 +998,12 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
+    <td>Weverse</td>
+    <td>https://weverse.io/</td>
+    <td>Feed Tab, Artist Tab, Media Files, Media Categories, Media Tabs, Member Profiles, Moments, Posts</td>
+    <td><a href="https://github.com/mikf/gallery-dl#cookies">Cookies</a></td>
+</tr>
+<tr>
     <td>WikiArt.org</td>
     <td>https://www.wikiart.org/</td>
     <td>Artists, Artist Listings, Artworks, individual Images</td>
