@@ -29,7 +29,7 @@ class WikimediaExtractor(BaseExtractor):
             self.category = "{}-{}".format(
                 self.category, self.root.partition(".")[0].rpartition("/")[2])
 
-        self.per_page = self.config("limit", 10)
+        self.per_page = self.config("limit", 50)
 
     def _init(self):
         api_path = self.config_instance("api-path")
