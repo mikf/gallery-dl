@@ -50,4 +50,12 @@ __tests__ = (
     "#class"   : wikimedia.WikimediaArticleExtractor,
 },
 
+{
+    "#url"     : "https://en.wikipedia.org",
+    "#category": ("wikimedia", "wikipedia", "wiki"),
+    "#class"   : wikimedia.WikimediaWikiExtractor,
+    "#range"   : "1-10",
+    "#count"   : 10,
+},
+
 )
