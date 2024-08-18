@@ -4536,6 +4536,29 @@ Description
     Download video files.
 
 
+extractor.weverse.embeds
+------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Download YouTube embeds found in ``Media`` posts.
+
+    Note: Setting `extractor.weverse.videos`_ to ``false`` will
+    override this setting.
+
+
+extractor.weverse.videos
+------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Download video files.
+
+
 extractor.ytdl.cmdline-args
 ---------------------------
 Type

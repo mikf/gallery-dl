@@ -178,6 +178,7 @@ modules = [
     "webmshare",
     "webtoons",
     "weibo",
+    "weverse",
     "wikiart",
     "wikifeet",
     "wikimedia",
