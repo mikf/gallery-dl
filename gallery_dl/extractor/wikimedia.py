@@ -87,6 +87,17 @@ class WikimediaExtractor(BaseExtractor):
         while True:
             data = self.request(url, params=params).json()
 
+            # ref: https://www.mediawiki.org/wiki/API:Errors_and_warnings
+            error = data.get("error")
+            if error:
+                self.log.error("%s: %s", error["code"], error["info"])
+                return
+            # MediaWiki will emit warnings for non-fatal mistakes such as
+            # invalid parameter instead of raising an error
+            warnings = data.get("warnings")
+            if warnings:
+                self.log.debug("MediaWiki returned warnings: %s", warnings)
+
             try:
                 pages = data["query"]["pages"]
             except KeyError:
