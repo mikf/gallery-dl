@@ -29,6 +29,8 @@ class WikimediaExtractor(BaseExtractor):
             self.category = "{}-{}".format(
                 self.category, self.root.partition(".")[0].rpartition("/")[2])
 
+        self.per_page = self.config("limit", 10)
+
     def _init(self):
         api_path = self.config_instance("api-path")
         if api_path:
@@ -179,6 +181,7 @@ class WikimediaArticleExtractor(WikimediaExtractor):
                 "generator": "categorymembers",
                 "gcmtitle" : path,
                 "gcmtype"  : "file",
+                "gcmlimit" : self.per_page,
             }
         elif prefix == "file":
             self.params = {
@@ -187,6 +190,7 @@ class WikimediaArticleExtractor(WikimediaExtractor):
         else:
             self.params = {
                 "generator": "images",
+                "gimlimit" : self.per_page,
                 "titles"   : path,
             }
 
@@ -208,4 +212,5 @@ class WikimediaWikiExtractor(WikimediaExtractor):
         self.params = {
             "generator"   : "allpages",
             "gapnamespace": 6,  # "File" namespace
+            "gaplimit"    : self.per_page,
         }

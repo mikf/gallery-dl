@@ -4536,6 +4536,18 @@ Description
     Download video files.
 
 
+extractor.wikimedia.limit
+-------------------------
+Type
+    ``integer``
+Default
+    ``10``
+Description
+    Number of results to return in a single API query.
+
+    The value must be between 10 and 500.
+
+
 extractor.ytdl.cmdline-args
 ---------------------------
 Type
