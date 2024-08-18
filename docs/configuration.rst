@@ -4541,7 +4541,7 @@ extractor.wikimedia.limit
 Type
     ``integer``
 Default
-    ``10``
+    ``50``
 Description
     Number of results to return in a single API query.
 
