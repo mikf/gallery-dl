@@ -193,3 +193,19 @@ class WikimediaArticleExtractor(WikimediaExtractor):
     def prepare(self, image):
         WikimediaExtractor.prepare(image)
         image["page"] = self.title
+
+
+class WikimediaWikiExtractor(WikimediaExtractor):
+    """Extractor for all files on a MediaWiki instance"""
+    subcategory = "wiki"
+    pattern = BASE_PATTERN + r"/?$"
+    example = "https://en.wikipedia.org/"
+
+    def __init__(self, match):
+        WikimediaExtractor.__init__(self, match)
+
+        # ref: https://www.mediawiki.org/wiki/API:Allpages
+        self.params = {
+            "generator"   : "allpages",
+            "gapnamespace": 6,  # "File" namespace
+        }
