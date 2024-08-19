@@ -5692,6 +5692,30 @@ Description
         After downloading all files of a `post`
 
 
+metadata.include
+----------------
+Type
+    ``list`` of ``strings``
+Example
+    ``["id", "width", "height", "description"]``
+Description
+    Include only the given top-level keys when writing JSON data.
+
+    Note: Missing or undefined fields will be silently ignored.
+
+
+metadata.exclude
+----------------
+Type
+    ``list`` of ``strings``
+Example
+    ``["blocked", "watching", "status"]``
+Description
+    Exclude all given keys from written JSON data.
+
+    Note: Cannot be used with `metadata.include`_.
+
+
 metadata.fields
 ---------------
 Type

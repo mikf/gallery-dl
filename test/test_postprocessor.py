@@ -585,6 +585,36 @@ class MetadataTest(BasePostprocessorTest):
         self.assertTrue(not e.called)
         self.assertTrue(m.called)
 
+    def test_metadata_option_include(self):
+        self._create(
+            {"include": ["_private", "filename", "foo"], "sort": True},
+            {"public": "hello ワールド", "_private": "foo バー"},
+        )
+
+        with patch("builtins.open", mock_open()) as m:
+            self._trigger()
+
+        self.assertEqual(self._output(m), """{
+    "_private": "foo バー",
+    "filename": "file"
+}
+""")
+
+    def test_metadata_option_exclude(self):
+        self._create(
+            {"exclude": ["category", "filename", "foo"], "sort": True},
+            {"public": "hello ワールド", "_private": "foo バー"},
+        )
+
+        with patch("builtins.open", mock_open()) as m:
+            self._trigger()
+
+        self.assertEqual(self._output(m), """{
+    "extension": "ext",
+    "public": "hello ワールド"
+}
+""")
+
     @staticmethod
     def _output(mock):
         return "".join(
