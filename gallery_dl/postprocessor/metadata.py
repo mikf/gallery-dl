@@ -103,10 +103,10 @@ class MetadataPP(PostProcessor):
         job.register_hooks({event: self.run for event in events}, options)
 
         self._init_archive(job, options, "_MD_")
+        self.filter = self._make_filter(options)
         self.mtime = options.get("mtime")
         self.omode = options.get("open", omode)
         self.encoding = options.get("encoding", "utf-8")
-        self.private = options.get("private", False)
         self.skip = options.get("skip", False)
 
     def run(self, pathfmt):
@@ -231,9 +231,32 @@ class MetadataPP(PostProcessor):
         fp.write("\n".join(tags) + "\n")
 
     def _write_json(self, fp, kwdict):
-        if not self.private:
-            kwdict = util.filter_dict(kwdict)
+        if self.filter:
+            kwdict = self.filter(kwdict)
         fp.write(self._json_encode(kwdict) + "\n")
+
+    def _make_filter(self, options):
+        include = options.get("include")
+        if include:
+            if isinstance(include, str):
+                include = include.split(",")
+            return lambda d: {k: d[k] for k in include if k in d}
+
+        exclude = options.get("exclude")
+        private = options.get("private")
+        if exclude:
+            if isinstance(exclude, str):
+                exclude = exclude.split(",")
+            exclude = set(exclude)
+
+            if private:
+                return lambda d: {k: v for k, v in d.items()
+                                  if k not in exclude}
+            return lambda d: {k: v for k, v in util.filter_dict(d).items()
+                              if k not in exclude}
+
+        if not private:
+            return util.filter_dict
 
     @staticmethod
     def _make_encoder(options, indent=None):
