@@ -2435,6 +2435,16 @@ Description
     It is possible to use ``"all"`` instead of listing all values separately.
 
 
+extractor.instagram.max-posts
+-----------------------------
+Type
+    ``integer``
+Default
+    ``null``
+Description
+    Limit the number of posts to download.
+
+
 extractor.instagram.metadata
 ----------------------------
 Type

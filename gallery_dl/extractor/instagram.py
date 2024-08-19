@@ -12,6 +12,7 @@
 from .common import Extractor, Message
 from .. import text, util, exception
 from ..cache import cache, memcache
+import itertools
 import binascii
 import json
 import re
@@ -57,12 +58,17 @@ class InstagramExtractor(Extractor):
         data = self.metadata()
         videos = self.config("videos", True)
         previews = self.config("previews", False)
+        max_posts = self.config("max-posts")
         video_headers = {"User-Agent": "Mozilla/5.0"}
 
         order = self.config("order-files")
         reverse = order[0] in ("r", "d") if order else False
 
-        for post in self.posts():
+        posts = self.posts()
+        if max_posts:
+            posts = itertools.islice(posts, max_posts)
+
+        for post in posts:
 
             if "__typename" in post:
                 post = self._parse_post_graphql(post)
