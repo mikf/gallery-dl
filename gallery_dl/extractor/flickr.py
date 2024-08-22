@@ -519,7 +519,7 @@ class FlickrAPI(oauth.OAuth1API):
 
         if self.contexts:
             try:
-                photo.update(self.api.photos_getAllContexts(photo["id"]))
+                photo.update(self.photos_getAllContexts(photo["id"]))
             except Exception as exc:
                 self.log.warning(
                     "Unable to retrieve 'contexts' data for %s (%s: %s)",
