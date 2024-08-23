@@ -1462,6 +1462,8 @@ class DeviantartOAuthAPI():
                 return
 
             if "next_cursor" in data:
+                if not data["next_cursor"]:
+                    return
                 params["offset"] = None
                 params["cursor"] = data["next_cursor"]
             elif data["next_offset"] is not None:
