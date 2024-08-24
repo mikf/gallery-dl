@@ -9,13 +9,21 @@
 """Extractors for https://bunkr.si/"""
 
 from .lolisafe import LolisafeAlbumExtractor
-from .. import text
+from .. import text, config
 
-BASE_PATTERN = (
-    r"(?:bunkr:(?:https?://)?([^/?#]+)|"
-    r"(?:https?://)?(?:app\.)?(bunkr+"
-    r"\.(?:s[kiu]|[cf]i|ru|la|is|to|a[cx]|black|cat|media|red|site|ws|org)))"
-)
+
+if config.get(("extractor", "bunkr"), "tlds"):
+    BASE_PATTERN = (
+        r"(?:bunkr:(?:https?://)?([^/?#]+)|"
+        r"(?:https?://)?(?:app\.)?(bunkr+\.\w+))"
+    )
+else:
+    BASE_PATTERN = (
+        r"(?:bunkr:(?:https?://)?([^/?#]+)|"
+        r"(?:https?://)?(?:app\.)?(bunkr+"
+        r"\.(?:s[kiu]|[cf]i|ru|la|is|to|a[cx]"
+        r"|black|cat|media|red|site|ws|org)))"
+    )
 
 LEGACY_DOMAINS = {
     "bunkr.ru",
