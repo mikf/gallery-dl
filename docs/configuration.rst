@@ -1457,6 +1457,19 @@ Description
     Process reposts.
 
 
+extractor.bunkr.tlds
+--------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Controls which ``bunkr`` TLDs to accept.
+
+    * ``true``: Match URLs with *all* possible TLDs (e.g. ``bunkr.xyz`` or ``bunkrrr.duck``)
+    * ``false``: Match only URLs with known TLDs
+
+
 extractor.cien.files
 --------------------
 Type
