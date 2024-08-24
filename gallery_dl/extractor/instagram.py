@@ -171,9 +171,10 @@ class InstagramExtractor(Extractor):
             data = {
                 "post_id" : post["pk"],
                 "post_shortcode": post["code"],
+                "post_url": "{}/p/{}/".format(self.root, post["code"]),
+                "post_date": text.parse_timestamp(post.get("taken_at")),
                 "likes": post.get("like_count", 0),
                 "pinned": post.get("timeline_pinned_user_ids", ()),
-                "date": text.parse_timestamp(post.get("taken_at")),
                 "liked": post.get("has_liked", False),
             }
 
@@ -212,7 +213,7 @@ class InstagramExtractor(Extractor):
         data["owner_id"] = owner["pk"]
         data["username"] = owner.get("username")
         data["fullname"] = owner.get("full_name")
-        data["post_url"] = "{}/p/{}/".format(self.root, data["post_shortcode"])
+        data["date"] = data["post_date"]
 
         data["_files"] = files = []
         for num, item in enumerate(items, 1):
@@ -275,7 +276,6 @@ class InstagramExtractor(Extractor):
         owner = post["owner"]
         data = {
             "typename"   : typename,
-            "date"       : text.parse_timestamp(post["taken_at_timestamp"]),
             "likes"      : post["edge_media_preview_like"]["count"],
             "liked"      : post.get("viewer_has_liked", False),
             "pinned"     : pinned,
@@ -285,11 +285,13 @@ class InstagramExtractor(Extractor):
             "post_id"    : post["id"],
             "post_shortcode": post["shortcode"],
             "post_url"   : "{}/p/{}/".format(self.root, post["shortcode"]),
+            "post_date"  : text.parse_timestamp(post["taken_at_timestamp"]),
             "description": text.parse_unicode_escapes("\n".join(
                 edge["node"]["text"]
                 for edge in post["edge_media_to_caption"]["edges"]
             )),
         }
+        data["date"] = data["post_date"]
 
         tags = self._find_tags(data["description"])
         if tags:
@@ -319,6 +321,7 @@ class InstagramExtractor(Extractor):
                 media = {
                     "num": num,
                     "media_id"   : node["id"],
+                    "date"       : data["date"],
                     "shortcode"  : (node.get("shortcode") or
                                     shortcode_from_id(node["id"])),
                     "display_url": node["display_url"],
@@ -334,6 +337,7 @@ class InstagramExtractor(Extractor):
             dimensions = post["dimensions"]
             media = {
                 "media_id"   : post["id"],
+                "date"       : data["date"],
                 "shortcode"  : post["shortcode"],
                 "display_url": post["display_url"],
                 "video_url"  : post.get("video_url"),
