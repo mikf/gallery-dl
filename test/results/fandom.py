@@ -98,4 +98,12 @@ __tests__ = (
     "#class"   : wikimedia.WikimediaArticleExtractor,
 },
 
+{
+    "#url"     : "https://youtube.fandom.com",
+    "#category": ("wikimedia", "fandom-youtube", "wiki"),
+    "#class"   : wikimedia.WikimediaWikiExtractor,
+    "#range"   : "1-20",
+    "#count"   : 20,
+},
+
 )
