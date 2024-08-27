@@ -238,6 +238,13 @@ def main():
                 return config.open_extern()
 
         else:
+            input_files = config.get((), "input-files")
+            if input_files:
+                for input_file in input_files:
+                    if isinstance(input_file, str):
+                        input_file = (input_file, None)
+                    args.input_files.append(input_file)
+
             if not args.urls and not args.input_files:
                 parser.error(
                     "The following arguments are required: URL\n"
