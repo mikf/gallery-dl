@@ -184,28 +184,30 @@ class PathFormat():
     def set_directory(self, kwdict):
         """Build directory path and create it if necessary"""
         self.kwdict = kwdict
-        sep = os.sep
 
         segments = self.build_directory(kwdict)
         if segments:
             self.directory = directory = self.basedirectory + self.clean_path(
-                sep.join(segments) + sep)
+                os.sep.join(segments) + os.sep)
         else:
             self.directory = directory = self.basedirectory
 
         if WINDOWS and self.extended:
-            # Enable longer-than-260-character paths
-            directory = os.path.abspath(directory)
-            if directory.startswith("\\\\"):
-                directory = "\\\\?\\UNC\\" + directory[2:]
-            else:
-                directory = "\\\\?\\" + directory
-
-            # abspath() in Python 3.7+ removes trailing path separators (#402)
-            if directory[-1] != sep:
-                directory += sep
-
+            directory = self._extended_path(directory)
         self.realdirectory = directory
+
+    def _extended_path(self, path):
+        # Enable longer-than-260-character paths
+        path = os.path.abspath(path)
+        if not path.startswith("\\\\"):
+            path = "\\\\?\\" + path
+        elif not path.startswith("\\\\?\\"):
+            path = "\\\\?\\UNC\\" + path[2:]
+
+        # abspath() in Python 3.7+ removes trailing path separators (#402)
+        if path[-1] != os.sep:
+            return path + os.sep
+        return path
 
     def set_filename(self, kwdict):
         """Set general filename data"""
