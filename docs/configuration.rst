@@ -6330,6 +6330,16 @@ Description
     operation to be ``Rold#new#`` instead of the default ``Rold/new/``
 
 
+input-files
+-----------
+Type
+    ``list`` of |Path|_
+Example
+    ``["~/urls.txt", "$HOME/input"]``
+Description
+    Additional# input files.
+
+
 signals-ignore
 --------------
 Type
