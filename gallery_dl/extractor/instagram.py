@@ -165,14 +165,17 @@ class InstagramExtractor(Extractor):
             if "title" in post:
                 data["highlight_title"] = post["title"]
             if "created_at" in post:
-                data["date"] = text.parse_timestamp(post.get("created_at"))
+                data["post_date"] = data["date"] = text.parse_timestamp(
+                    post.get("created_at"))
 
         else:  # regular image/video post
+            date = text.parse_timestamp(post.get("taken_at"))
             data = {
                 "post_id" : post["pk"],
                 "post_shortcode": post["code"],
                 "post_url": "{}/p/{}/".format(self.root, post["code"]),
-                "post_date": text.parse_timestamp(post.get("taken_at")),
+                "post_date": date,
+                "date": date,
                 "likes": post.get("like_count", 0),
                 "pinned": post.get("timeline_pinned_user_ids", ()),
                 "liked": post.get("has_liked", False),
@@ -213,7 +216,6 @@ class InstagramExtractor(Extractor):
         data["owner_id"] = owner["pk"]
         data["username"] = owner.get("username")
         data["fullname"] = owner.get("full_name")
-        data["date"] = data["post_date"]
 
         data["_files"] = files = []
         for num, item in enumerate(items, 1):
