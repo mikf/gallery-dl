@@ -114,7 +114,10 @@ class MetadataPP(PostProcessor):
         if archive and archive.check(pathfmt.kwdict):
             return
 
-        directory = self._directory(pathfmt)
+        if util.WINDOWS and pathfmt.extended:
+            directory = pathfmt._extended_path(self._directory(pathfmt))
+        else:
+            directory = self._directory(pathfmt)
         path = directory + self._filename(pathfmt)
 
         if self.skip and os.path.exists(path):
