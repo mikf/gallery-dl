@@ -15,7 +15,7 @@ import re
 class GenericExtractor(Extractor):
     """Extractor for images in a generic web page."""
     category = "generic"
-    directory_fmt = ("{category}", "{pageurl}")
+    directory_fmt = ("{category}", "{subcategory}", "{path}")
     archive_fmt = "{imageurl}"
 
     # By default, the generic extractor is disabled
@@ -52,7 +52,10 @@ class GenericExtractor(Extractor):
             self.scheme = match.group('scheme')
         else:
             self.scheme = 'https://'
-            self.url = self.scheme + self.url
+            self.url = text.ensure_http_scheme(self.url, self.scheme)
+
+        self.subcategory = match.group('domain')
+        self.path = match.group('path')
 
         # Used to resolve relative image urls
         self.root = self.scheme + match.group('domain')
@@ -87,6 +90,7 @@ class GenericExtractor(Extractor):
     def metadata(self, page):
         """Extract generic webpage metadata, return them in a dict."""
         data = {}
+        data['path'] = self.path.replace("/", "")
         data['pageurl'] = self.url
         data['title'] = text.extr(page, '<title>', "</title>")
         data['description'] = text.extr(
