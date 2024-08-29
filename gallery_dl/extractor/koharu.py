@@ -161,16 +161,29 @@ class KoharuGalleryExtractor(KoharuExtractor, GalleryExtractor):
         return results
 
     def _select_format(self, formats):
-        if not self.fmt or self.fmt == "original":
-            fmtid = "0"
-        else:
-            fmtid = str(self.fmt)
+        fmt = self.fmt
 
-        try:
-            fmt = formats[fmtid]
-        except KeyError:
+        if not fmt or fmt == "best":
+            fmtids = ("0", "1600", "1280", "980", "780")
+        elif isinstance(fmt, str):
+            fmtids = fmt.split(",")
+        elif isinstance(fmt, list):
+            fmtids = fmt
+        else:
+            fmtids = (str(self.fmt),)
+
+        for fmtid in fmtids:
+            try:
+                fmt = formats[fmtid]
+                if fmt["id"]:
+                    break
+            except KeyError:
+                self.log.debug("%s: Format %s is not available",
+                               self.groups[0], fmtid)
+        else:
             raise exception.NotFoundError("format")
 
+        self.log.debug("%s: Selected format %s", self.groups[0], fmtid)
         fmt["w"] = fmtid
         return fmt
 
