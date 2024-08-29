@@ -1623,6 +1623,9 @@ class TwitterAPI():
                             entries = instr["entries"]
                     elif instr_type == "TimelineAddToModule":
                         entries = instr["moduleItems"]
+                    elif instr_type == "TimelinePinEntry":
+                        if pinned_tweet:
+                            pinned_tweet = instr["entry"]
                     elif instr_type == "TimelineReplaceEntry":
                         entry = instr["entry"]
                         if entry["entryId"].startswith("cursor-bottom-"):
@@ -1661,9 +1664,11 @@ class TwitterAPI():
             tweet = None
 
             if pinned_tweet:
-                pinned_tweet = False
-                if instructions[-1]["type"] == "TimelinePinEntry":
+                if isinstance(pinned_tweet, dict):
+                    tweets.append(pinned_tweet)
+                elif instructions[-1]["type"] == "TimelinePinEntry":
                     tweets.append(instructions[-1]["entry"])
+                pinned_tweet = False
 
             for entry in entries:
                 esw = entry["entryId"].startswith
