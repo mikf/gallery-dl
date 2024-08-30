@@ -214,8 +214,8 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Facebook</td>
     <td>https://www.facebook.com/</td>
-    <td>Profile Photos, Albums/Sets, Individual Photos, Individual Videos</td>
-    <td></td>
+    <td>Photos, Profiles, Sets, Videos</td>
+    <td><a href="https://github.com/mikf/gallery-dl#cookies">Cookies</a></td>
 </tr>
 <tr>
     <td>Fanleaks</td>

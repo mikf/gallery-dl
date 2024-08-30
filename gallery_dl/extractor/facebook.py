@@ -16,8 +16,9 @@ class FacebookExtractor(Extractor):
     """Base class for Facebook extractors"""
     category = "facebook"
     root = "https://www.facebook.com"
-    filename_fmt = "{id}.{extension}"
     directory_fmt = ("{category}", "{username}", "{title} ({set_id})")
+    filename_fmt = "{id}.{extension}"
+    archive_fmt = "{id}.{extension}"
 
     set_url_fmt = root + "/media/set/?set={set_id}"
     photo_url_fmt = root + "/photo/?fbid={photo_id}&set={set_id}"
@@ -33,16 +34,8 @@ class FacebookExtractor(Extractor):
         self.fallback_retries = self.config("fallback-retries", 2)
         self.sleep_429 = self.config("sleep-429", 5)
         self.videos = self.config("videos", True)
-        self.no_warning = self.config("no-warning", False)
 
         self.author_followups = self.config("author-followups", False)
-
-        if not self.no_warning:
-            self.log.warning(
-                "Using the Facebook extractor for too long may result in "
-                "temporary UI bans of increasing length. "
-                "Use at your own risk."
-            )
 
     @staticmethod
     def decode_all(txt):
@@ -121,15 +114,15 @@ class FacebookExtractor(Extractor):
                 '"message":{"delight_ranges"',
                 '"},"message_preferred_body"'
             ).rsplit('],"text":"', 1)[-1]),
-            "reactions": text.extr(
+            "reactions": int(text.extr(
                 photo_page, '"reaction_count":{"count":', ","
-            ),
-            "comments": text.extr(
+            )),
+            "comments": int(text.extr(
                 photo_page, '{"comments":{"total_count":', "}"
-            ),
-            "shares": text.extr(
+            )),
+            "shares": int(text.extr(
                 photo_page, '"share_count":{"count":', ","
-            ),
+            )),
             "url": FacebookExtractor.decode_all(text.extr(
                 photo_page,
                 '"},"extensions":{"prefetch_uris_v2":[{"uri":"',
@@ -179,23 +172,30 @@ class FacebookExtractor(Extractor):
             "title": FacebookExtractor.decode_all(text.extr(
                 video_page, '"},"message":{"text":"', '","delight_ranges"'
             )),
-            "reactions": text.extr(
+            "reactions": int(text.extr(
                 video_page, '}},"i18n_reaction_count":"', '"'
-            ),
-            "comments": text.extr(
+            )),
+            "comments": int(text.extr(
                 video_page, '{"comments":{"total_count":', '}'
-            ),
-            "views": text.extr(
+            )),
+            "views": int(text.extr(
                 video_page, '"video_view_count":', ','
-            ),
+            )),
             "type": "video"
         }
+
+        first_video_del = '{"__dr":"VideoPlayerScrubberDefaultPreview.react"}'
+        first_video_raw = text.extr(
+            video_page, first_video_del, first_video_del
+        )
 
         audio = {
             **video,
             "url": FacebookExtractor.decode_all(text.extr(
                 text.extr(
-                    video_page, "AudioChannelConfiguration", "BaseURL>\\u003C"
+                    first_video_raw,
+                    "AudioChannelConfiguration",
+                    "BaseURL>\\u003C"
                 ),
                 "BaseURL>", "\\u003C\\/"
             )),
@@ -204,7 +204,7 @@ class FacebookExtractor(Extractor):
 
         video["urls"] = {}
         for raw_url in text.extract_iter(
-            video_page, 'FBQualityLabel=\\"', '\\u003C\\/BaseURL>'
+            first_video_raw, 'FBQualityLabel=\\"', '\\u003C\\/BaseURL>'
         ):
             resolution = raw_url.split('\\"', 1)[0]
             dl_url = FacebookExtractor.decode_all(
@@ -389,7 +389,8 @@ class FacebookVideoExtractor(FacebookExtractor):
             yield Message.Url, "ytdl:" + video_url, video
         else:
             yield Message.Url, video["url"], video
-            yield Message.Url, audio["url"], audio
+            if audio["url"]:
+                yield Message.Url, audio["url"], audio
 
 
 class FacebookProfileExtractor(FacebookExtractor):

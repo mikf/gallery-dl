@@ -2039,17 +2039,7 @@ Description
     Control video download behavior.
 
     * ``true``: Extract and download video & audio separately.
-    * ``"ytdl"``: Let `youtube-dl`_ handle video extraction and download, and merge video & audio streams.
-
-
-extractor.facebook.no-warning
--------------------------
-Type
-    ``bool``
-Default
-    ``false``
-description
-    Disable the start warning message.
+    * ``"ytdl"``: Let |ytdl| handle video extraction and download, and merge video & audio streams.
 
 
 extractor.fanbox.embeds
