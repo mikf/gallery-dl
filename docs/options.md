@@ -146,7 +146,12 @@
     --mtime NAME                Set file modification times according to
                                 metadata selected by NAME. Examples: 'date' or
                                 'status[date]'
-    --ugoira FORMAT             Convert Pixiv Ugoira to FORMAT using FFmpeg.
+    --rename FORMAT             Rename previously downloaded files from FORMAT
+                                to the current filename format
+    --rename-to FORMAT          Rename previously downloaded files from the
+                                current filename format to FORMAT (disables
+                                downloads)
+    --ugoira FMT                Convert Pixiv Ugoira to FMT using FFmpeg.
                                 Supported formats are 'webm', 'mp4', 'gif',
                                 'vp8', 'vp9', 'vp9-lossless', 'copy'.
     --exec CMD                  Execute CMD for each downloaded file. Supported

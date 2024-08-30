@@ -74,6 +74,22 @@ class MtimeAction(argparse.Action):
         })
 
 
+class RenameAction(argparse.Action):
+    """Configure rename post processors"""
+    def __call__(self, parser, namespace, value, option_string=None):
+        if self.const:
+            namespace.options.append(((), "download", False))
+            namespace.postprocessors.append({
+                "name": "rename",
+                "to"  : value,
+            })
+        else:
+            namespace.postprocessors.append({
+                "name": "rename",
+                "from": value,
+            })
+
+
 class UgoiraAction(argparse.Action):
     """Configure ugoira post processors"""
     def __call__(self, parser, namespace, value, option_string=None):
@@ -662,9 +678,21 @@ def build_parser():
         help=argparse.SUPPRESS,
     )
     postprocessor.add_argument(
+        "--rename",
+        dest="postprocessors", metavar="FORMAT", action=RenameAction, const=0,
+        help=("Rename previously downloaded files from FORMAT "
+              "to the current filename format"),
+    )
+    postprocessor.add_argument(
+        "--rename-to",
+        dest="postprocessors", metavar="FORMAT", action=RenameAction, const=1,
+        help=("Rename previously downloaded files from the current filename "
+              "format to FORMAT (disables downloads)"),
+    )
+    postprocessor.add_argument(
         "--ugoira",
-        dest="postprocessors", metavar="FORMAT", action=UgoiraAction,
-        help=("Convert Pixiv Ugoira to FORMAT using FFmpeg. "
+        dest="postprocessors", metavar="FMT", action=UgoiraAction,
+        help=("Convert Pixiv Ugoira to FMT using FFmpeg. "
               "Supported formats are 'webm', 'mp4', 'gif', "
               "'vp8', 'vp9', 'vp9-lossless', 'copy'."),
     )
