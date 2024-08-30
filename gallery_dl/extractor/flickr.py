@@ -132,8 +132,13 @@ class FlickrAlbumExtractor(FlickrExtractor):
 
     def metadata(self):
         data = FlickrExtractor.metadata(self)
-        data["album"] = self.api.photosets_getInfo(
-            self.album_id, self.user["nsid"])
+        try:
+            data["album"] = self.api.photosets_getInfo(
+                self.album_id, self.user["nsid"])
+        except Exception:
+            data["album"] = {}
+            self.log.warning("%s: Unable to retrieve album metadata",
+                             self.album_id)
         return data
 
     def photos(self):
