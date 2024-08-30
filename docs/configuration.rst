@@ -6016,6 +6016,42 @@ Description
     or the |Path|_ to a `.py` file,
 
 
+rename.from
+-----------
+Type
+    ``string``
+Description
+    The `format string`_ for filenames to rename.
+
+    When no value is given, `extractor.*.filename`_ is used.
+
+
+rename.to
+---------
+Type
+    ``string``
+Description
+    The `format string`_ for target filenames.
+
+    When no value is given, `extractor.*.filename`_ is used.
+
+    Note:
+    With default settings, the potential download to `extractor.*.filename`_
+    still happens, even when using this post processor.
+    Disabling `file downloads <extractor.*.download_>`__
+    when using this option is recommended.
+
+
+rename.skip
+-----------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Do not rename a file when another file with the target name already exists.
+
+
 ugoira.extension
 ----------------
 Type
@@ -6340,7 +6376,7 @@ Type
 Example
     ``["~/urls.txt", "$HOME/input"]``
 Description
-    Additional# input files.
+    Additional input files.
 
 
 signals-ignore
@@ -6663,11 +6699,12 @@ Description
         Set file modification time according to its metadata
     ``python``
         Call Python functions
+    ``rename``
+        Rename previously downloaded files
     ``ugoira``
         Convert Pixiv Ugoira to WebM using |ffmpeg|
     ``zip``
         Store files in a ZIP archive
-        |ytdl|
 
 
 

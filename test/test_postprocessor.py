@@ -12,6 +12,7 @@ import sys
 import unittest
 from unittest.mock import Mock, mock_open, patch
 
+import shutil
 import logging
 import zipfile
 import tempfile
@@ -689,6 +690,60 @@ class PythonTest(BasePostprocessorTest):
 def calc(kwdict):
     kwdict["_result"] = kwdict["_value"] * 2
 """)
+
+
+class RenameTest(BasePostprocessorTest):
+
+    def _prepare(self, filename):
+        path = self.pathfmt.realdirectory
+        shutil.rmtree(path, ignore_errors=True)
+        os.makedirs(path, exist_ok=True)
+
+        with open(path + filename, "w"):
+            pass
+
+        return path
+
+    def test_rename_from(self):
+        self._create({"from": "{id}.{extension}"}, {"id": 12345})
+        path = self._prepare("12345.ext")
+
+        self._trigger()
+
+        self.assertEqual(os.listdir(path), ["file.ext"])
+
+    def test_rename_to(self):
+        self._create({"to": "{id}.{extension}"}, {"id": 12345})
+        path = self._prepare("file.ext")
+
+        self._trigger()
+
+        self.assertEqual(os.listdir(path), ["12345.ext"])
+
+    def test_rename_from_to(self):
+        self._create({"from": "name", "to": "{id}"}, {"id": 12345})
+        path = self._prepare("name")
+
+        self._trigger()
+
+        self.assertEqual(os.listdir(path), ["12345"])
+
+    def test_rename_noopt(self):
+        with self.assertRaises(ValueError):
+            self._create({})
+
+    def test_rename_skip(self):
+        self._create({"from": "{id}.{extension}"}, {"id": 12345})
+        path = self._prepare("12345.ext")
+        with open(path + "file.ext", "w"):
+            pass
+
+        with self.assertLogs("postprocessor.rename", level="WARNING") as cm:
+            self._trigger()
+        self.assertTrue(cm.output[0].startswith(
+            "WARNING:postprocessor.rename:Not renaming "
+            "'12345.ext' to 'file.ext'"))
+        self.assertEqual(sorted(os.listdir(path)), ["12345.ext", "file.ext"])
 
 
 class ZipTest(BasePostprocessorTest):
