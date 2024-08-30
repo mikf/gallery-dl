@@ -15,6 +15,7 @@ modules = [
     "metadata",
     "mtime",
     "python",
+    "rename",
     "ugoira",
     "zip",
 ]
