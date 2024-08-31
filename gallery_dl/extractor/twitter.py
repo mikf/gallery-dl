@@ -568,6 +568,7 @@ class TwitterUserExtractor(TwitterExtractor):
     def items(self):
         base = "{}/{}/".format(self.root, self.user)
         return self._dispatch_extractors((
+            (TwitterInfoExtractor      , base + "info"),
             (TwitterAvatarExtractor    , base + "photo"),
             (TwitterBackgroundExtractor, base + "header_photo"),
             (TwitterTimelineExtractor  , base + "timeline"),

@@ -4093,6 +4093,7 @@ Description
     when processing a user profile.
 
     Possible values are
+    ``"info"``,
     ``"avatar"``,
     ``"background"``,
     ``"timeline"``,

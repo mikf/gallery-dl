@@ -14,8 +14,16 @@ __tests__ = (
     "#category": ("", "twitter", "user"),
     "#class"   : twitter.TwitterUserExtractor,
     "#options" : {"include": "all"},
-    "#pattern" : r"https://x\.com/supernaturepics/(photo|header_photo|timeline|tweets|media|with_replies|likes)$",
-    "#count"   : 7,
+    "#urls"    : [
+        "https://x.com/supernaturepics/info",
+        "https://x.com/supernaturepics/photo",
+        "https://x.com/supernaturepics/header_photo",
+        "https://x.com/supernaturepics/timeline",
+        "https://x.com/supernaturepics/tweets",
+        "https://x.com/supernaturepics/media",
+        "https://x.com/supernaturepics/with_replies",
+        "https://x.com/supernaturepics/likes",
+    ],
 },
 
 {
