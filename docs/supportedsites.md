@@ -1460,61 +1460,61 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Wikimedia</td>
     <td>https://www.wikimedia.org/</td>
-    <td>Articles</td>
+    <td>Articles, Categories, Files, Wikis</td>
     <td></td>
 </tr>
 <tr>
     <td>Wikispecies</td>
     <td>https://species.wikimedia.org/</td>
-    <td>Articles</td>
+    <td>Articles, Categories, Files, Wikis</td>
     <td></td>
 </tr>
 <tr>
     <td>Wikimedia Commons</td>
     <td>https://commons.wikimedia.org/</td>
-    <td>Articles</td>
+    <td>Articles, Categories, Files, Wikis</td>
     <td></td>
 </tr>
 <tr>
     <td>MediaWiki</td>
     <td>https://www.mediawiki.org/</td>
-    <td>Articles</td>
+    <td>Articles, Categories, Files, Wikis</td>
     <td></td>
 </tr>
 <tr>
     <td>Fandom</td>
     <td>https://www.fandom.com/</td>
-    <td>Articles</td>
+    <td>Articles, Categories, Files, Wikis</td>
     <td></td>
 </tr>
 <tr>
     <td>wiki.gg</td>
     <td>https://www.wiki.gg/</td>
-    <td>Articles</td>
+    <td>Articles, Categories, Files, Wikis</td>
     <td></td>
 </tr>
 <tr>
     <td>Super Mario Wiki</td>
     <td>https://www.mariowiki.com/</td>
-    <td>Articles</td>
+    <td>Articles, Categories, Files, Wikis</td>
     <td></td>
 </tr>
 <tr>
     <td>Bulbapedia</td>
     <td>https://bulbapedia.bulbagarden.net/</td>
-    <td>Articles</td>
+    <td>Articles, Categories, Files, Wikis</td>
     <td></td>
 </tr>
 <tr>
     <td>PidgiWiki</td>
     <td>https://www.pidgi.net/</td>
-    <td>Articles</td>
+    <td>Articles, Categories, Files, Wikis</td>
     <td></td>
 </tr>
 <tr>
     <td>Azur Lane Wiki</td>
     <td>https://azurlane.koumakan.jp/</td>
-    <td>Articles</td>
+    <td>Articles, Categories, Files, Wikis</td>
     <td></td>
 </tr>
 
