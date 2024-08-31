@@ -160,14 +160,20 @@ class WeasylJournalsExtractor(WeasylExtractor):
 class WeasylFavoriteExtractor(WeasylExtractor):
     subcategory = "favorite"
     directory_fmt = ("{category}", "{owner_login}", "Favorites")
-    pattern = BASE_PATTERN + r"favorites\?userid=(\d+)"
+    pattern = BASE_PATTERN + r"favorites(?:\?userid=(\d+)|\/([\w~-]+))"
     example = "https://www.weasyl.com/favorites?userid=12345"
 
     def __init__(self, match):
         WeasylExtractor.__init__(self, match)
         self.userid = match.group(1)
+        self.username = match.group(2)
 
     def items(self):
+        if self.userid is None and self.username is not None:
+            new_url = self.root + f"/favorites/{self.username}"
+            page = self.request(new_url).text
+            self.userid = text.extr(page, '<a class="more" href="/favorites?userid=', '&amp')
+
         owner_login = lastid = None
         url = self.root + "/favorites"
         params = {
