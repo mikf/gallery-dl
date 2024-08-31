@@ -206,7 +206,7 @@ SUBCATEGORY_MAP = {
         "redirect"  : "Pixiv Redirects",
     },
     "fapello": {
-        "path": "Videos, Trending Posts, Popular Videos, Top Models",
+        "path": ["Videos", "Trending Posts", "Popular Videos", "Top Models"],
     },
     "furaffinity": {
         "submissions": "New Submissions",
@@ -239,9 +239,6 @@ SUBCATEGORY_MAP = {
     },
     "mangadex": {
         "feed" : "Followed Feed",
-    },
-    "nana": {
-        "search": "Favorites, Search Results",
     },
     "nijie": {
         "followed": "Followed Users",
@@ -313,7 +310,7 @@ SUBCATEGORY_MAP = {
         "uploads"    : "",
     },
     "wallpapercave": {
-        "image": "individual Images, Search Results",
+        "image": ["individual Images", "Search Results"],
     },
     "weasyl": {
         "journals"   : "",
@@ -325,6 +322,9 @@ SUBCATEGORY_MAP = {
     },
     "wikiart": {
         "artists": "Artist Listings",
+    },
+    "wikimedia": {
+        "article": ["Articles", "Categories", "Files"],
     },
 }
 
@@ -441,12 +441,23 @@ def category_text(c):
     return CATEGORY_MAP.get(c) or c.capitalize()
 
 
-def subcategory_text(c, sc):
+def subcategory_text(bc, c, sc):
     """Return a human-readable representation of a subcategory"""
     if c in SUBCATEGORY_MAP:
         scm = SUBCATEGORY_MAP[c]
         if sc in scm:
-            return scm[sc]
+            txt = scm[sc]
+            if not isinstance(txt, str):
+                txt = ", ".join(txt)
+            return txt
+
+    if bc and bc in SUBCATEGORY_MAP:
+        scm = SUBCATEGORY_MAP[bc]
+        if sc in scm:
+            txt = scm[sc]
+            if not isinstance(txt, str):
+                txt = ", ".join(txt)
+            return txt
 
     if sc in SUBCATEGORY_MAP:
         return SUBCATEGORY_MAP[sc]
@@ -534,14 +545,14 @@ def build_extractor_list():
 # define table columns
 COLUMNS = (
     ("Site", 20,
-     lambda c, scs, d: category_text(c)),
+     lambda bc, c, scs, d: category_text(c)),
     ("URL" , 35,
-     lambda c, scs, d: d),
+     lambda bc, c, scs, d: d),
     ("Capabilities", 50,
-     lambda c, scs, d: ", ".join(subcategory_text(c, sc) for sc in scs
-                                 if subcategory_text(c, sc))),
+     lambda bc, c, scs, d: ", ".join(subcategory_text(bc, c, sc) for sc in scs
+                                     if subcategory_text(bc, c, sc))),
     ("Authentication", 16,
-     lambda c, scs, d: AUTH_MAP.get(c, "")),
+     lambda bc, c, scs, d: AUTH_MAP.get(c, "")),
 )
 
 
@@ -557,10 +568,10 @@ def generate_output(columns, categories, domains):
     tbody = []
     append = tbody.append
 
-    for name, base in categories.items():
+    for bcat, base in categories.items():
 
-        if name and base:
-            name = BASE_MAP.get(name) or (name.capitalize() + " Instances")
+        if bcat and base:
+            name = BASE_MAP.get(bcat) or (bcat.capitalize() + " Instances")
             append('\n<tr>\n    <td colspan="4"><strong>' +
                    name + '</strong></td>\n</tr>')
             clist = base.items()
@@ -571,7 +582,7 @@ def generate_output(columns, categories, domains):
             append("<tr>")
             for column in columns:
                 domain = domains[category]
-                content = column[2](category, subcategories, domain)
+                content = column[2](bcat, category, subcategories, domain)
                 append("    <td>" + content + "</td>")
             append("</tr>")
 
