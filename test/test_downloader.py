@@ -45,11 +45,15 @@ class TestDownloaderModule(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         # allow import of ytdl downloader module without youtube_dl installed
+        cls._orig_ytdl = sys.modules.get("youtube_dl")
         sys.modules["youtube_dl"] = MagicMock()
 
     @classmethod
     def tearDownClass(cls):
-        del sys.modules["youtube_dl"]
+        if cls._orig_ytdl:
+            sys.modules["youtube_dl"] = cls._orig_ytdl
+        else:
+            del sys.modules["youtube_dl"]
 
     def tearDown(self):
         downloader._cache.clear()
