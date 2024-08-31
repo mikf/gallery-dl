@@ -155,6 +155,7 @@ class TwitterExtractor(Extractor):
                     if not self.unavailable:
                         continue
 
+            mtype = media.get("type")
             descr = media.get("ext_alt_text")
             width = media["original_info"].get("width", 0)
             height = media["original_info"].get("height", 0)
@@ -164,6 +165,7 @@ class TwitterExtractor(Extractor):
                     files.append({
                         "url": "ytdl:{}/i/web/status/{}".format(
                             self.root, tweet["id_str"]),
+                        "type"       : mtype,
                         "width"      : width,
                         "height"     : height,
                         "extension"  : None,
@@ -177,6 +179,7 @@ class TwitterExtractor(Extractor):
                     )
                     files.append({
                         "url"        : variant["url"],
+                        "type"       : mtype,
                         "width"      : width,
                         "height"     : height,
                         "bitrate"    : variant.get("bitrate", 0),
@@ -193,6 +196,7 @@ class TwitterExtractor(Extractor):
                     base = url.rpartition("=")[0] + "="
                 files.append(text.nameext_from_url(url, {
                     "url"        : base + self._size_image,
+                    "type"       : mtype,
                     "width"      : width,
                     "height"     : height,
                     "_fallback"  : self._image_fallback(base),
