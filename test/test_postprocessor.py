@@ -240,6 +240,57 @@ class ExecTest(BasePostprocessorTest):
         self.assertFalse(i.wait.called)
 
 
+class HashTest(BasePostprocessorTest):
+
+    def test_default(self):
+        self._create({})
+
+        with self.pathfmt.open() as fp:
+            fp.write(b"Foo Bar\n")
+
+        self._trigger()
+
+        kwdict = self.pathfmt.kwdict
+        self.assertEqual(
+            "35c9c9c7c90ad764bae9e2623f522c24", kwdict["md5"], "md5")
+        self.assertEqual(
+            "14d3d804494ef4e57d72de63e4cfee761240471a", kwdict["sha1"], "sha1")
+
+    def test_custom_hashes(self):
+        self._create({"hashes": "sha256:a,sha512:b"})
+
+        with self.pathfmt.open() as fp:
+            fp.write(b"Foo Bar\n")
+
+        self._trigger()
+
+        kwdict = self.pathfmt.kwdict
+        self.assertEqual(
+            "4775b55be17206445d7015a5fc7656f38a74b880670523c3b175455f885f2395",
+            kwdict["a"], "sha256")
+        self.assertEqual(
+            "6028f9e6957f4ca929941318c4bba6258713fd5162f9e33bd10e1c456d252700"
+            "3e1095b50736c4fd1e2deea152e3c8ecd5993462a747208e4d842659935a1c62",
+            kwdict["b"], "sha512")
+
+    def test_custom_hashes_dict(self):
+        self._create({"hashes": {"a": "sha256", "b": "sha512"}})
+
+        with self.pathfmt.open() as fp:
+            fp.write(b"Foo Bar\n")
+
+        self._trigger()
+
+        kwdict = self.pathfmt.kwdict
+        self.assertEqual(
+            "4775b55be17206445d7015a5fc7656f38a74b880670523c3b175455f885f2395",
+            kwdict["a"], "sha256")
+        self.assertEqual(
+            "6028f9e6957f4ca929941318c4bba6258713fd5162f9e33bd10e1c456d252700"
+            "3e1095b50736c4fd1e2deea152e3c8ecd5993462a747208e4d842659935a1c62",
+            kwdict["b"], "sha512")
+
+
 class MetadataTest(BasePostprocessorTest):
 
     def test_metadata_default(self):
