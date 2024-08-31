@@ -159,7 +159,7 @@ class WeasylJournalsExtractor(WeasylExtractor):
 
 class WeasylFavoriteExtractor(WeasylExtractor):
     subcategory = "favorite"
-    directory_fmt = ("{category}", "{owner_login}", "Favorites")
+    directory_fmt = ("{category}", "{user}", "Favorites")
     pattern = BASE_PATTERN + r"favorites(?:\?userid=(\d+)|\/([\w~-]+))"
     example = "https://www.weasyl.com/favorites?userid=12345"
 
