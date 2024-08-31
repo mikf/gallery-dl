@@ -172,7 +172,11 @@ class WeasylFavoriteExtractor(WeasylExtractor):
         if self.userid is None and self.username is not None:
             new_url = self.root + f"/favorites/{self.username}"
             page = self.request(new_url).text
-            self.userid = text.extr(page, '<a class="more" href="/favorites?userid=', '&amp')
+            self.userid = text.extr(
+                page,
+                '<a class="more" href="/favorites?userid=',
+                '&amp'
+            )
 
         owner_login = lastid = None
         url = self.root + "/favorites"
