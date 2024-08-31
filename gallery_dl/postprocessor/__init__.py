@@ -12,6 +12,7 @@ modules = [
     "classify",
     "compare",
     "exec",
+    "hash",
     "metadata",
     "mtime",
     "python",
