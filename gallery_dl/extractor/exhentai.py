@@ -430,7 +430,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
         }
 
         page = self.request(url, cookies=cookies).text
-        current = text.extr(page, "<strong>", "</strong>")
+        current = text.extr(page, "<strong>", "</strong>").replace(",", "")
         self.log.debug("Image Limits: %s/%s", current, self.limits)
         self._remaining = self.limits - text.parse_int(current)
 
