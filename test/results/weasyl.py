@@ -92,4 +92,11 @@ __tests__ = (
     "#count"   : ">= 5",
 },
 
+{
+    "#url"     : "https://www.weasyl.com/favorites/furoferre",
+    "#category": ("", "weasyl", "favorite"),
+    "#class"   : weasyl.WeasylFavoriteExtractor,
+    "#count"   : ">= 5",
+}
+
 )
