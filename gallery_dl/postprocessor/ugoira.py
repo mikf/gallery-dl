@@ -36,7 +36,7 @@ class UgoiraPP(PostProcessor):
         self.delete = not options.get("keep-files", False)
         self.repeat = options.get("repeat-last-frame", True)
         self.mtime = options.get("mtime", True)
-        self.uniform = False
+        self.uniform = self._convert_zip = self._convert_files = False
 
         ffmpeg = options.get("ffmpeg-location")
         self.ffmpeg = util.expand_path(ffmpeg) if ffmpeg else "ffmpeg"
@@ -90,33 +90,39 @@ class UgoiraPP(PostProcessor):
         if self.prevent_odd:
             args += ("-vf", "crop=iw-mod(iw\\,2):ih-mod(ih\\,2)")
 
-        job.register_hooks(
-            {"prepare": self.prepare, "file": self.convert}, options)
+        job.register_hooks({
+            "prepare": self.prepare,
+            "file"   : self.convert_zip,
+            "after"  : self.convert_files,
+        }, options)
 
     def prepare(self, pathfmt):
-        self._frames = None
-
-        if pathfmt.extension != "zip":
+        if "frames" not in pathfmt.kwdict:
+            self._frames = None
             return
 
-        kwdict = pathfmt.kwdict
-        if "frames" in kwdict:
-            self._frames = kwdict["frames"]
-        elif "pixiv_ugoira_frame_data" in kwdict:
-            self._frames = kwdict["pixiv_ugoira_frame_data"]["data"]
+        self._frames = pathfmt.kwdict["frames"]
+        if pathfmt.extension == "zip":
+            self._convert_zip = True
+            if self.delete:
+                pathfmt.set_extension(self.extension)
+                pathfmt.build_path()
         else:
-            return
-
-        if self.delete:
-            pathfmt.set_extension(self.extension)
             pathfmt.build_path()
+            num = pathfmt.kwdict["num"]
+            if not num:
+                self._files = [pathfmt.realpath]
+            else:
+                self._files.append(pathfmt.realpath)
+                if num+1 >= len(self._frames):
+                    self._convert_files = True
 
-    def convert(self, pathfmt):
-        if not self._frames:
+    def convert_zip(self, pathfmt):
+        if not self._convert_zip:
             return
+        self._convert_zip = False
 
         with tempfile.TemporaryDirectory() as tempdir:
-            # extract frames
             try:
                 with zipfile.ZipFile(pathfmt.temppath) as zfile:
                     zfile.extractall(tempdir)
@@ -124,52 +130,86 @@ class UgoiraPP(PostProcessor):
                 pathfmt.realpath = pathfmt.temppath
                 return
 
-            # process frames and collect command-line arguments
-            pathfmt.set_extension(self.extension)
-            pathfmt.build_path()
-
-            args = self._process(pathfmt, tempdir)
-            if self.args_pp:
-                args += self.args_pp
-            if self.args:
-                args += self.args
-
-            # ensure target directory exists
-            os.makedirs(pathfmt.realdirectory, exist_ok=True)
-
-            # invoke ffmpeg
-            try:
-                if self.twopass:
-                    if "-f" not in self.args:
-                        args += ("-f", self.extension)
-                    args += ("-passlogfile", tempdir + "/ffmpeg2pass", "-pass")
-                    self._exec(args + ["1", "-y", os.devnull])
-                    self._exec(args + ["2", pathfmt.realpath])
-                else:
-                    args.append(pathfmt.realpath)
-                    self._exec(args)
-                if self._finalize:
-                    self._finalize(pathfmt, tempdir)
-            except OSError as exc:
-                print()
-                self.log.error("Unable to invoke FFmpeg (%s: %s)",
-                               exc.__class__.__name__, exc)
-                pathfmt.realpath = pathfmt.temppath
-            except Exception as exc:
-                print()
-                self.log.error("%s: %s", exc.__class__.__name__, exc)
-                self.log.debug("", exc_info=True)
-                pathfmt.realpath = pathfmt.temppath
-            else:
-                if self.mtime:
-                    mtime = pathfmt.kwdict.get("_mtime")
-                    if mtime:
-                        util.set_mtime(pathfmt.realpath, mtime)
+            if self.convert(pathfmt, tempdir):
                 if self.delete:
                     pathfmt.delete = True
                 else:
+                    self.log.info(pathfmt.filename)
                     pathfmt.set_extension("zip")
                     pathfmt.build_path()
+
+    def convert_files(self, pathfmt):
+        if not self._convert_files:
+            return
+        self._convert_files = False
+
+        with tempfile.TemporaryDirectory() as tempdir:
+            for frame, path in zip(self._frames, self._files):
+
+                # update frame filename extension
+                frame["file"] = name = "{}.{}".format(
+                    frame["file"].partition(".")[0],
+                    path.rpartition(".")[2])
+
+                # move frame into tempdir
+                try:
+                    self._copy_file(path, tempdir + "/" + name)
+                except OSError as exc:
+                    self.log.debug("Unable to copy frame %s (%s: %s)",
+                                   name, exc.__class__.__name__, exc)
+                    return
+
+            pathfmt.kwdict["num"] = 0
+            if self.convert(pathfmt, tempdir):
+                self.log.info(pathfmt.filename)
+                if self.delete:
+                    self.log.debug("Deleting frames")
+                    for path in self._files:
+                        util.remove_file(path)
+
+    def convert(self, pathfmt, tempdir):
+        pathfmt.set_extension(self.extension)
+        pathfmt.build_path()
+
+        # process frames and collect command-line arguments
+        args = self._process(pathfmt, tempdir)
+        if self.args_pp:
+            args += self.args_pp
+        if self.args:
+            args += self.args
+
+        # ensure target directory exists
+        os.makedirs(pathfmt.realdirectory, exist_ok=True)
+
+        # invoke ffmpeg
+        try:
+            if self.twopass:
+                if "-f" not in self.args:
+                    args += ("-f", self.extension)
+                args += ("-passlogfile", tempdir + "/ffmpeg2pass", "-pass")
+                self._exec(args + ["1", "-y", os.devnull])
+                self._exec(args + ["2", pathfmt.realpath])
+            else:
+                args.append(pathfmt.realpath)
+                self._exec(args)
+            if self._finalize:
+                self._finalize(pathfmt, tempdir)
+        except OSError as exc:
+            print()
+            self.log.error("Unable to invoke FFmpeg (%s: %s)",
+                           exc.__class__.__name__, exc)
+            pathfmt.realpath = pathfmt.temppath
+        except Exception as exc:
+            print()
+            self.log.error("%s: %s", exc.__class__.__name__, exc)
+            self.log.debug("", exc_info=True)
+            pathfmt.realpath = pathfmt.temppath
+        else:
+            if self.mtime:
+                mtime = pathfmt.kwdict.get("_mtime")
+                if mtime:
+                    util.set_mtime(pathfmt.realpath, mtime)
+            return True
 
     def _exec(self, args):
         self.log.debug(args)
@@ -181,6 +221,9 @@ class UgoiraPP(PostProcessor):
                            args, retcode)
             raise ValueError()
         return retcode
+
+    def _copy_file(self, src, dst):
+        shutil.copyfile(src, dst)
 
     def _process_concat(self, pathfmt, tempdir):
         rate_in, rate_out = self.calculate_framerate(self._frames)
