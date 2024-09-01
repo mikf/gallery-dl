@@ -94,12 +94,39 @@ class PixivExtractor(Extractor):
                         work.get("id"), exc.message)
                     continue
 
-                url = ugoira["zip_urls"]["medium"].replace(
-                    "_ugoira600x600", "_ugoira1920x1080")
-                work["frames"] = ugoira["frames"]
+                url = ugoira["zip_urls"]["medium"]
+                work["frames"] = frames = ugoira["frames"]
                 work["date_url"] = self._date_from_url(url)
                 work["_http_adjust_extension"] = False
-                yield Message.Url, url, text.nameext_from_url(url, work)
+
+                if self.load_ugoira == "original":
+                    base, sep, _ = url.rpartition("_ugoira")
+                    base = base.replace(
+                        "/img-zip-ugoira/", "/img-original/", 1) + sep
+
+                    for ext in ("jpg", "png", "gif"):
+                        try:
+                            url = ("{}0.{}".format(base, ext))
+                            self.request(url, method="HEAD")
+                            break
+                        except exception.HttpError:
+                            pass
+                    else:
+                        self.log.warning(
+                            "Unable to find Ugoira frame URLs (%s)",
+                            work.get("id"))
+                        continue
+
+                    for num, frame in enumerate(frames):
+                        url = ("{}{}.{}".format(base, num, ext))
+                        work["num"] = num
+                        work["suffix"] = "_p{:02}".format(num)
+                        text.nameext_from_url(url, work)
+                        yield Message.Url, url, work
+
+                else:
+                    url = url.replace("_ugoira600x600", "_ugoira1920x1080")
+                    yield Message.Url, url, text.nameext_from_url(url, work)
 
             elif work["page_count"] == 1:
                 url = meta_single_page["original_image_url"]
