@@ -146,11 +146,29 @@ __tests__ = (
     "#comment" : "ugoira",
     "#category": ("", "pixiv", "work"),
     "#class"   : pixiv.PixivWorkExtractor,
-    "#sha1_url": "7267695a985c4db8759bebcf8d21dbdd2d2317ef",
+    "#urls"    : "https://i.pximg.net/img-zip-ugoira/img/2018/01/15/13/24/48/66806629_ugoira1920x1080.zip",
 
     "frames"  : list,
     "date"    : "dt:2018-01-14 15:06:08",
     "date_url": "dt:2018-01-15 04:24:48",
+},
+
+{
+    "#url"     : "https://www.pixiv.net/artworks/101003492",
+    "#comment" : "original ugoira frames (#6056)",
+    "#category": ("", "pixiv", "work"),
+    "#class"   : pixiv.PixivWorkExtractor,
+    "#options" : {"ugoira": "original"},
+    "#urls"    : [
+        "https://i.pximg.net/img-original/img/2022/09/04/23/54/19/101003492_ugoira0.png",
+        "https://i.pximg.net/img-original/img/2022/09/04/23/54/19/101003492_ugoira1.png",
+        "https://i.pximg.net/img-original/img/2022/09/04/23/54/19/101003492_ugoira2.png",
+        "https://i.pximg.net/img-original/img/2022/09/04/23/54/19/101003492_ugoira3.png",
+        "https://i.pximg.net/img-original/img/2022/09/04/23/54/19/101003492_ugoira4.png",
+        "https://i.pximg.net/img-original/img/2022/09/04/23/54/19/101003492_ugoira5.png",
+    ],
+
+    "frames": list,
 },
 
 {
