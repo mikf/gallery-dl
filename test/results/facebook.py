@@ -25,19 +25,35 @@ __tests__ = (
 },
 
 {
-    "#url"     : "https://www.facebook.com/photo/?fbid=10152716011096729",
+    "#url"     : "https://www.facebook.com/photo/?fbid=10160743390456729",
     "#category": ("", "facebook", "photo"),
     "#class"   : facebook.FacebookPhotoExtractor,
     "#count"   : 1,
 
-    "caption"  : str,
-    "comments" : int,
-    "date"     : datetime.datetime(2014, 5, 3, 0, 44, 47),
-    "filename" : "10268581_10152716011096729_8785818270101685508_n.png",
-    "id"       : "10152716011096729",
-    "reactions": int,
-    "set_id"   : "a.10152716010956729",
-    "shares"   : int,
+    "caption"  : "They were on a break... #FriendsReunion #MoreTogether",
+    "date"     : datetime.datetime(2021, 5, 27, 21, 55, 19),
+    "filename" : "191053255_10160743390471729_9001965649022744000_n.jpg",
+    "id"       : "10160743390456729",
+    "set_id"   : "a.494827881728",
+    "url"      : str,
+    "user_id"  : "100064860875397",
+    "username" : "Facebook",
+},
+
+{
+    "#url"     : "https://www.facebook.com/photo/?fbid=10159575010981729",
+    "#category": ("", "facebook", "photo"),
+    "#class"   : facebook.FacebookPhotoExtractor,
+    "#count"   : 1,
+
+    "caption"  : "",
+    "date"     : datetime.datetime(2020, 5, 1, 16, 40, 41),
+    "filename" : "95789923_10159575010986729_679923434972512256_n.png",
+    "id"       : "10159575010981729",
+    "set_id"   : "a.494827881728",
+    "url"      : str,
+    "user_id"  : "100064860875397",
+    "username" : "Facebook",
 },
 
 {
@@ -46,28 +62,26 @@ __tests__ = (
     "#class"   : facebook.FacebookVideoExtractor,
     "#count"   : 1,
 
-    "comments" : int,
     "date"     : datetime.datetime(2024, 4, 19, 17, 25, 48),
-    "name"     : "451872212_1144847833414253_8993539189674481418_n",
+    "name"     : "451734618_986951969754568_3078978443536682653_n",
     "id"       : "1165557851291824",
-    "reactions": int,
+    "url"      : str,
+    "user_id"  : "100064860875397",
     "username" : "Facebook",
-    "views"    : int,
 },
 
 {
-    "#url"     : "https://www.facebook.com/watch/?v=738162178127348",
+    "#url"     : "https://www.facebook.com/100064860875397/videos/644342003942740",
     "#category": ("", "facebook", "video"),
     "#class"   : facebook.FacebookVideoExtractor,
     "#count"   : 2,
 
-    "comments" : int,
-    "date"     : datetime.datetime(2023, 12, 2, 20, 16, 2),
-    "name"     : "D2412EBD0F6CE0B7F8D314E41517F8BA_video_dashinit",
-    "id"       : "738162178127348",
-    "reactions": int,
+    "date"     : datetime.datetime(2022, 10, 14, 16, 45, 27),
+    "name"     : "1514198129001376",
+    "id"       : "644342003942740",
+    "url"      : str,
+    "user_id"  : "100064860875397",
     "username" : "Facebook",
-    "views"    : int,
 },
 
 )

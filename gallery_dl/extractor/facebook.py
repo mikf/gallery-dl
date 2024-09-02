@@ -45,50 +45,42 @@ class FacebookExtractor(Extractor):
 
     @staticmethod
     def item_filename_handle(item):
-        if "filename" in item and item["filename"] is not None:
-            if "." in item["filename"]:
-                item["name"], item["extension"] = (
-                    item["filename"].rsplit(".", 1)
-                )
-            else:
-                item["name"] = item["filename"]
-                item["extension"] = ""
+        if "." in item["filename"]:
+            item["name"], item["extension"] = item["filename"].rsplit(".", 1)
         else:
-            item["filename"] = item["name"] = item["extension"] = ""
+            item["name"] = item["filename"]
+            item["extension"] = ""
 
     @staticmethod
     def get_set_page_metadata(set_page):
         directory = {
-            "username": FacebookExtractor.decode_all(text.extr(
-                set_page, '"user":{"__isProfile":"User","name":"', '","',
+            "set_id": text.extr(
+                set_page, '"mediaSetToken":"', '"'
+            ) or text.extr(
+                set_page, '"mediasetToken":"', '"'
+            ),
+            "username": FacebookExtractor.decode_all(
                 text.extr(
+                    set_page, '"user":{"__isProfile":"User","name":"', '","'
+                ) or text.extr(
                     set_page, '"actors":[{"__typename":"User","name":"', '","'
                 )
-            )),
+            ),
             "user_id": text.extr(
                 set_page, '"owner":{"__typename":"User","id":"', '"'
-            ),
-            "set_id": text.extr(
-                set_page, '"mediaSetToken":"', '"',
-                text.extr(set_page, '"mediasetToken":"', '"')
             ),
             "title": FacebookExtractor.decode_all(text.extr(
                 set_page, '"title":{"text":"', '"'
             )),
-            "description": FacebookExtractor.decode_all(text.extr(
-                set_page, '"message":{"delight_ranges"', '"},"group_album'
-            ).rsplit('],"text":"', 1)[-1]),
             "first_photo_id": text.extr(
                 set_page,
                 '{"__typename":"Photo","__isMedia":"Photo","',
                 '","creation_story"'
-            ).rsplit('"id":"', 1)[-1]
-        }
-
-        if directory["first_photo_id"] == "":
-            directory["first_photo_id"] = text.extr(
+            ).rsplit('"id":"', 1)[-1] or
+            text.extr(
                 set_page, '{"__typename":"Photo","id":"', '"'
             )
+        }
 
         return directory
 
@@ -106,37 +98,28 @@ class FacebookExtractor(Extractor):
             "username": FacebookExtractor.decode_all(text.extr(
                 photo_page, '"owner":{"__typename":"User","name":"', '"'
             )),
-            "date": text.parse_timestamp(text.extr(
-                photo_page, '\\"publish_time\\":', ','
-            )),
+            "user_id": text.extr(
+                photo_page, '"owner":{"__typename":"User","id":"', '"'
+            ),
             "caption": FacebookExtractor.decode_all(text.extr(
                 photo_page,
                 '"message":{"delight_ranges"',
                 '"},"message_preferred_body"'
             ).rsplit('],"text":"', 1)[-1]),
-            "reactions": int(text.extr(
-                photo_page, '"reaction_count":{"count":', ","
-            )),
-            "comments": int(text.extr(
-                photo_page, '{"comments":{"total_count":', "}"
-            )),
-            "shares": int(text.extr(
-                photo_page, '"share_count":{"count":', ","
+            "date": text.parse_timestamp(text.extr(
+                photo_page, '\\"publish_time\\":', ','
             )),
             "url": FacebookExtractor.decode_all(text.extr(
-                photo_page,
-                '"},"extensions":{"prefetch_uris_v2":[{"uri":"',
-                '"'
+                photo_page, ',"image":{"uri":"', '","'
             )),
             "next_photo_id": text.extr(
                 photo_page,
                 '"nextMediaAfterNodeId":{"__typename":"Photo","id":"',
-                '"',
-                text.extr(
-                    photo_page,  # "n
-                    'extMedia":{"edges":[{"node":{"__typename":"Photo","id":"',
-                    '"'
-                )
+                '"'
+            ) or text.extr(
+                photo_page,
+                '"nextMedia":{"edges":[{"node":{"__typename":"Photo","id":"',
+                '"'
             )
         }
 
@@ -164,29 +147,26 @@ class FacebookExtractor(Extractor):
                 video_page, '\\"video_id\\":\\"', '\\"'
             ),
             "username": FacebookExtractor.decode_all(text.extr(
-                video_page, '"actors":[{"__typename":"User","name":"', '"'
+                video_page, '"actors":[{"__typename":"User","name":"', '","'
             )),
+            "user_id": text.extr(
+                video_page, '"owner":{"__typename":"User","id":"', '"'
+            ),
             "date": text.parse_timestamp(text.extr(
                 video_page, '\\"publish_time\\":', ','
-            )),
-            "title": FacebookExtractor.decode_all(text.extr(
-                video_page, '"},"message":{"text":"', '","delight_ranges"'
-            )),
-            "reactions": int(text.extr(
-                video_page, '}},"i18n_reaction_count":"', '"'
-            )),
-            "comments": int(text.extr(
-                video_page, '{"comments":{"total_count":', '}'
-            )),
-            "views": int(text.extr(
-                video_page, '"video_view_count":', ','
             )),
             "type": "video"
         }
 
-        first_video_del = '{"__dr":"VideoPlayerScrubberDefaultPreview.react"}'
+        if not video["username"]:
+            video["username"] = FacebookExtractor.decode_all(text.extr(
+                video_page,
+                '"__typename":"User","id":"' + video["user_id"] + '","name":"',
+                '","'
+            ))
+
         first_video_raw = text.extr(
-            video_page, first_video_del, first_video_del
+            video_page, '"playlist":"\\u003C?xml', '\\/Period>\\u003C\\/MPD>'
         )
 
         audio = {
@@ -203,15 +183,22 @@ class FacebookExtractor(Extractor):
         }
 
         video["urls"] = {}
+
         for raw_url in text.extract_iter(
             first_video_raw, 'FBQualityLabel=\\"', '\\u003C\\/BaseURL>'
         ):
             resolution = raw_url.split('\\"', 1)[0]
-            dl_url = FacebookExtractor.decode_all(
+            video["urls"][resolution] = FacebookExtractor.decode_all(
                 raw_url.split('BaseURL>', 1)[1]
             )
-            video["urls"][resolution] = dl_url
-        video["url"] = dl_url
+
+        if not video["urls"]:
+            return video, audio
+
+        video["url"] = sorted(
+            video["urls"].items(),
+            key=lambda x: int(x[0][:-1])
+        )[-1][1]
 
         video["filename"] = text.rextract(video["url"], "/", "?")[0]
         FacebookExtractor.item_filename_handle(video)
@@ -383,6 +370,9 @@ class FacebookVideoExtractor(FacebookExtractor):
 
         video, audio = self.get_video_page_metadata(video_page)
 
+        if "url" not in video:
+            return
+
         yield Message.Directory, video
 
         if self.videos == "ytdl":
@@ -407,9 +397,12 @@ class FacebookProfileExtractor(FacebookExtractor):
         set_ids_raw = text.extr(
             profile_photos_page, '"pageItems"', '"page_info"'
         )
-        set_id = text.extr(set_ids_raw, 'set=', '"').rsplit("&", 1)[0]
-        if not set_id:
-            set_id = text.extr(set_ids_raw, '\\/photos\\/', '\\/')
+
+        set_id = text.extr(
+            set_ids_raw, 'set=', '"'
+        ).rsplit("&", 1)[0] or text.extr(
+            set_ids_raw, '\\/photos\\/', '\\/'
+        )
 
         return set_id
 
