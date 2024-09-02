@@ -387,7 +387,7 @@ class FacebookProfileExtractor(FacebookExtractor):
     """Base class for Facebook Profile Photos Set extractors"""
     subcategory = "profile"
     pattern = (
-        BASE_PATTERN + r"/(?!(?:media|photo|watch)/)"
+        BASE_PATTERN + r"/(?!(?:media|photo|watch|.*?/videos)/)"
         r"(?:profile.php\?id=|people/[^/|?|&]+/)?([^/|?|&]+)"
     )
     example = "https://www.facebook.com/USERNAME"
