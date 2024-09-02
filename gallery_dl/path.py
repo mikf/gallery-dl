@@ -214,7 +214,7 @@ class PathFormat():
         self.kwdict = kwdict
         self.filename = self.temppath = self.prefix = ""
 
-        ext = kwdict["extension"]
+        ext = kwdict.get("extension", "")
         kwdict["extension"] = self.extension = self.extension_map(ext, ext)
 
     def set_extension(self, extension, real=True):
