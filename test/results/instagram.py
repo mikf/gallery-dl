@@ -12,6 +12,17 @@ __tests__ = (
     "#url"     : "https://www.instagram.com/instagram/",
     "#category": ("", "instagram", "user"),
     "#class"   : instagram.InstagramUserExtractor,
+    "#auth"    : False,
+    "#options" : {"include": "all"},
+    "#urls": [
+        "https://www.instagram.com/instagram/info/",
+        "https://www.instagram.com/instagram/avatar/",
+        "https://www.instagram.com/stories/instagram/",
+        "https://www.instagram.com/instagram/highlights/",
+        "https://www.instagram.com/instagram/posts/",
+        "https://www.instagram.com/instagram/reels/",
+        "https://www.instagram.com/instagram/tagged/",
+    ],
 },
 
 {

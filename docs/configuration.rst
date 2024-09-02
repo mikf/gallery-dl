@@ -2443,6 +2443,7 @@ Description
     ``"tagged"``,
     ``"stories"``,
     ``"highlights"``,
+    ``"info"``,
     ``"avatar"``.
 
     It is possible to use ``"all"`` instead of listing all values separately.
