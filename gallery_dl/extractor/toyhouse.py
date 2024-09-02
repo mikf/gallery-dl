@@ -123,4 +123,5 @@ class ToyhouseImageExtractor(ToyhouseExtractor):
 
     def posts(self):
         url = "{}/~images/{}".format(self.root, self.user)
-        return (self._parse_post(self.request(url).text, '<img src="'),)
+        return (self._parse_post(
+            self.request(url).text, '<img class="mw-100" src="'),)
