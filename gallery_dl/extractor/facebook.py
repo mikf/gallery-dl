@@ -45,6 +45,7 @@ class FacebookExtractor(Extractor):
 
     @staticmethod
     def item_filename_handle(item):
+        item["filename"] = item.get("filename") or ""
         if "." in item["filename"]:
             item["name"], item["extension"] = item["filename"].rsplit(".", 1)
         else:
