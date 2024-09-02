@@ -69,11 +69,12 @@ class DeviantartExtractor(Extractor):
                 self.quality = ",q_{}".format(self.quality)
                 self.quality_sub = re.compile(r",q_\d+").sub
 
-        if self.original != "image":
-            self._update_content = self._update_content_default
-        else:
-            self._update_content = self._update_content_image
+        if isinstance(self.original, str) and \
+                self.original.lower().startswith("image"):
             self.original = True
+            self._update_content = self._update_content_image
+        else:
+            self._update_content = self._update_content_default
 
         journals = self.config("journals", "html")
         if journals == "html":
