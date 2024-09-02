@@ -434,6 +434,7 @@ class InstagramUserExtractor(InstagramExtractor):
         base = "{}/{}/".format(self.root, self.item)
         stories = "{}/stories/{}/".format(self.root, self.item)
         return self._dispatch_extractors((
+            (InstagramInfoExtractor      , base + "info/"),
             (InstagramAvatarExtractor    , base + "avatar/"),
             (InstagramStoriesExtractor   , stories),
             (InstagramHighlightsExtractor, base + "highlights/"),
