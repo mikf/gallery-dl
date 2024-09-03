@@ -78,7 +78,6 @@ class RenameAction(argparse.Action):
     """Configure rename post processors"""
     def __call__(self, parser, namespace, value, option_string=None):
         if self.const:
-            namespace.options.append(((), "download", False))
             namespace.postprocessors.append({
                 "name": "rename",
                 "to"  : value,
@@ -687,7 +686,7 @@ def build_parser():
         "--rename-to",
         dest="postprocessors", metavar="FORMAT", action=RenameAction, const=1,
         help=("Rename previously downloaded files from the current filename "
-              "format to FORMAT (disables downloads)"),
+              "format to FORMAT"),
     )
     postprocessor.add_argument(
         "--ugoira",

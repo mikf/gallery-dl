@@ -26,29 +26,53 @@ class RenamePP(PostProcessor):
             self._old = self._apply_format(old)
             self._new = (self._apply_format(new) if new else
                          self._apply_pathfmt)
+            job.register_hooks({
+                "prepare": self.rename_from,
+            }, options)
+
         elif new:
             self._old = self._apply_pathfmt
             self._new = self._apply_format(new)
+            job.register_hooks({
+                "skip"         : self.rename_to_skip,
+                "prepare-after": self.rename_to_pafter,
+            }, options)
+
         else:
             raise ValueError("Option 'from' or 'to' is required")
 
-        job.register_hooks({"prepare": self.run}, options)
-
-    def run(self, pathfmt):
-        old = self._old(pathfmt)
-        path_old = pathfmt.realdirectory + old
+    def rename_from(self, pathfmt):
+        name_old = self._old(pathfmt)
+        path_old = pathfmt.realdirectory + name_old
 
         if os.path.exists(path_old):
-            new = self._new(pathfmt)
-            path_new = pathfmt.realdirectory + new
+            name_new = self._new(pathfmt)
+            path_new = pathfmt.realdirectory + name_new
+            self._rename(path_old, name_old, path_new, name_new)
 
-            if self.skip and os.path.exists(path_new):
-                return self.log.warning(
-                    "Not renaming '%s' to '%s' since another file with the "
-                    "same name exists", old, new)
+    def rename_to_skip(self, pathfmt):
+        name_old = self._old(pathfmt)
+        path_old = pathfmt.realdirectory + name_old
 
-            self.log.info("'%s' -> '%s'", old, new)
-            os.replace(path_old, path_new)
+        if os.path.exists(path_old):
+            pathfmt.filename = name_new = self._new(pathfmt)
+            pathfmt.path = pathfmt.directory + name_new
+            pathfmt.realpath = path_new = pathfmt.realdirectory + name_new
+            self._rename(path_old, name_old, path_new, name_new)
+
+    def rename_to_pafter(self, pathfmt):
+        pathfmt.filename = name_new = self._new(pathfmt)
+        pathfmt.path = pathfmt.directory + name_new
+        pathfmt.realpath = pathfmt.realdirectory + name_new
+
+    def _rename(self, path_old, name_old, path_new, name_new):
+        if self.skip and os.path.exists(path_new):
+            return self.log.warning(
+                "Not renaming '%s' to '%s' since another file with the "
+                "same name exists", name_old, name_new)
+
+        self.log.info("'%s' -> '%s'", name_old, name_new)
+        os.replace(path_old, path_new)
 
     def _apply_pathfmt(self, pathfmt):
         return pathfmt.build_filename(pathfmt.kwdict)

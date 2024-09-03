@@ -322,6 +322,12 @@ class DownloadJob(Job):
             for callback in hooks["prepare-after"]:
                 callback(pathfmt)
 
+            if pathfmt.exists():
+                if archive and self._archive_write_skip:
+                    archive.add(kwdict)
+                self.handle_skip()
+                return
+
         if self.sleep:
             self.extractor.sleep(self.sleep(), "download")
 
@@ -474,10 +480,11 @@ class DownloadJob(Job):
 
     def handle_skip(self):
         pathfmt = self.pathfmt
-        self.out.skip(pathfmt.path)
         if "skip" in self.hooks:
             for callback in self.hooks["skip"]:
                 callback(pathfmt)
+        self.out.skip(pathfmt.path)
+
         if self._skipexc:
             if not self._skipftr or self._skipftr(pathfmt.kwdict):
                 self._skipcnt += 1
