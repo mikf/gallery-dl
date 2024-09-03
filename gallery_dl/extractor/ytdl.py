@@ -131,6 +131,9 @@ class YoutubeDLExtractor(Extractor):
                         ytdl_module, ytdl_instance, info_dict["entries"])
                 else:
                     yield info_dict
+            elif "entries" in entry:
+                yield from self._process_entries(
+                    ytdl_module, ytdl_instance, entry["entries"])
             else:
                 yield entry
 
