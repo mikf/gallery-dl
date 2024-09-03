@@ -149,8 +149,7 @@
     --rename FORMAT             Rename previously downloaded files from FORMAT
                                 to the current filename format
     --rename-to FORMAT          Rename previously downloaded files from the
-                                current filename format to FORMAT (disables
-                                downloads)
+                                current filename format to FORMAT
     --ugoira FMT                Convert Pixiv Ugoira to FMT using FFmpeg.
                                 Supported formats are 'webm', 'mp4', 'gif',
                                 'vp8', 'vp9', 'vp9-lossless', 'copy'.

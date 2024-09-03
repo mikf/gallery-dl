@@ -767,7 +767,7 @@ class RenameTest(BasePostprocessorTest):
         self._create({"to": "{id}.{extension}"}, {"id": 12345})
         path = self._prepare("file.ext")
 
-        self._trigger()
+        self._trigger(("skip",))
 
         self.assertEqual(os.listdir(path), ["12345.ext"])
 
