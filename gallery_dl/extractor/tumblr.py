@@ -11,6 +11,7 @@
 from .common import Extractor, Message
 from .. import text, util, oauth, exception
 from datetime import datetime, date, timedelta
+from urllib.parse import urlparse
 import re
 
 
@@ -22,7 +23,7 @@ BASE_PATTERN = (
 )
 
 POST_TYPES = frozenset((
-    "text", "quote", "link", "answer", "video", "audio", "photo", "chat"))
+    "text", "quote", "link", "answer", "video", "audio", "photo", "chat", "search"))
 
 
 class TumblrExtractor(Extractor):
@@ -37,10 +38,13 @@ class TumblrExtractor(Extractor):
         Extractor.__init__(self, match)
 
         name = match.group(2)
+
         if name:
             self.blog = name + ".tumblr.com"
         else:
             self.blog = match.group(1) or match.group(3)
+
+        self.is_timeline = False
 
     def _init(self):
         self.api = TumblrAPI(self)
@@ -83,12 +87,23 @@ class TumblrExtractor(Extractor):
                 return
             if post["type"] not in self.types:
                 continue
+
             if not blog:
-                blog = self.api.info(self.blog)
-                blog["uuid"] = self.blog
+                if self.is_timeline:
+                    blog = post.get("blog")
+                    self.blog = blog.get("name") + ".tumblr.com"
+
+                    for image in blog.get("avatar", []):
+                        if int(image.get("width")) == 512:
+                            avatar_url = image.get("url")
+                            break
+
+                else:
+                    blog = self.api.info(self.blog)
+                    blog["uuid"] = self.blog
 
                 if self.avatar:
-                    url = self.api.avatar(self.blog)
+                    url = avatar_url or self.api.avatar(self.blog)
                     yield Message.Directory, {"blog": blog}
                     yield self._prepare_avatar(url, post.copy(), blog)
 
@@ -349,6 +364,38 @@ class TumblrLikesExtractor(TumblrExtractor):
         return self.api.likes(self.blog)
 
 
+class TumblrSearchExtractor(TumblrExtractor):
+    """Extractor for a Tumblr search"""
+    subcategory = "search"
+    """ https://www.tumblr.com/search/nathan%20fielder?src=suggested_tag """
+    pattern = BASE_PATTERN + r'/search/(.*?)(\?.*)?$'
+    example = "https://www.tumblr.com/search/QUERY"
+
+    def __init__(self, match):
+        TumblrExtractor.__init__(self, match)
+
+        self.is_timeline = True
+        self.query = text.unquote(match.group(4))
+
+        parsed_url = urlparse(self.url)
+        self.params = text.parse_query(parsed_url.query)
+
+    def search(self, query, params):
+        """Retrieve published posts"""
+
+        params["limit"] = 50
+        params["days"] = self.params.get("t") or 0
+        params["query"] = query
+        params["mode"] = "top"
+        params["reblog_info"] = "true" if self.reblogs else "false"
+
+        endpoint = "/v2/timeline/search"
+        return self.api._pagination(endpoint, params, cache=True)
+
+    def posts(self):
+        return self.search(self.query, {})
+
+
 class TumblrAPI(oauth.OAuth1API):
     """Interface for the Tumblr API v2
 
@@ -394,7 +441,8 @@ class TumblrAPI(oauth.OAuth1API):
         if self.before and params["offset"]:
             self.log.warning("'offset' and 'date-max' cannot be used together")
 
-        return self._pagination(blog, "/posts", params, cache=True)
+        endpoint = "/v2/blog/{}/posts".format(blog)
+        return self._pagination(endpoint, params, cache=True)
 
     def likes(self, blog):
         """Retrieve liked posts"""
@@ -478,20 +526,32 @@ class TumblrAPI(oauth.OAuth1API):
 
             raise exception.StopExtraction(data)
 
-    def _pagination(self, blog, endpoint, params, key="posts", cache=False):
-        endpoint = "/v2/blog/{}{}".format(blog, endpoint)
+    def _pagination(self, full_endpoint, params, key="posts", cache=False):
+        if not full_endpoint.endswith("?"):
+            full_endpoint = full_endpoint + "?"
+
+        endpoint = full_endpoint
+
         if self.api_key:
             params["api_key"] = self.api_key
 
         strategy = self.extractor.config("pagination")
+
         while True:
             data = self._call(endpoint, params)
 
+            if "/timeline/" in endpoint:
+                key = "elements"
+                posts = data.get("timeline", {}).get(key, [])
+            else:
+                posts = data[key]
+
             if cache:
-                self.BLOG_CACHE[blog] = data["blog"]
+                for post in posts:
+                    p_blog = post.get("blog", {})
+                    self.BLOG_CACHE[p_blog.get("name", "")] = p_blog
                 cache = False
 
-            posts = data[key]
             yield from posts
 
             if strategy == "api":

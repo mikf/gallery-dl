@@ -360,4 +360,15 @@ __tests__ = (
     "#class"   : tumblr.TumblrLikesExtractor,
 },
 
+{
+    "#url"     : "https://www.tumblr.com/search/nathan fielder?src=typed_query",
+    "#category": ("", "tumblr", "search"),
+    "#class"   : tumblr.TumblrSearchExtractor,
+},
+
+{
+    "#url"     : "https://www.tumblr.com/search/nathan%20fielder?t=90",
+    "#category": ("", "tumblr", "search"),
+    "#class"   : tumblr.TumblrSearchExtractor,
+},
 )
