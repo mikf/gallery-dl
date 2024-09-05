@@ -322,7 +322,7 @@ class DownloadJob(Job):
             for callback in hooks["prepare-after"]:
                 callback(pathfmt)
 
-            if pathfmt.exists():
+            if kwdict.pop("_file_recheck", False) and pathfmt.exists():
                 if archive and self._archive_write_skip:
                     archive.add(kwdict)
                 self.handle_skip()

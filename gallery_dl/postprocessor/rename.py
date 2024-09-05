@@ -64,6 +64,7 @@ class RenamePP(PostProcessor):
         pathfmt.filename = name_new = self._new(pathfmt)
         pathfmt.path = pathfmt.directory + name_new
         pathfmt.realpath = pathfmt.realdirectory + name_new
+        pathfmt.kwdict["_file_recheck"] = True
 
     def _rename(self, path_old, name_old, path_new, name_new):
         if self.skip and os.path.exists(path_new):
