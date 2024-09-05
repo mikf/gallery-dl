@@ -143,7 +143,7 @@ class UgoiraAction(argparse.Action):
         pp["name"] = "ugoira"
         pp["whitelist"] = ("pixiv", "danbooru")
 
-        namespace.options.append(((), "ugoira", True))
+        namespace.options.append((("extractor",), "ugoira", True))
         namespace.postprocessors.append(pp)
 
 
