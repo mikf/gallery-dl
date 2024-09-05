@@ -65,8 +65,7 @@ class BatotoChapterExtractor(BatotoBase, ChapterExtractor):
         return {
             "manga"         : text.unescape(manga),
             "manga_id"      : text.parse_int(manga_id),
-            "chapter_url"   : text.parse_int(extr(
-                self.chapter_id + "-ch_", '"')),
+            "chapter_url"   : extr(self.chapter_id + "-ch_", '"'),
             "title"         : text.unescape(text.remove_html(extr(
                 "selected>", "</option")).partition(" : ")[2]),
             "volume"        : text.parse_int(volume),
