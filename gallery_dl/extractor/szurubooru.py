@@ -86,6 +86,7 @@ BASE_PATTERN = SzurubooruExtractor.update({
     "bcbnsfw": {
         "root": "https://booru.bcbnsfw.space",
         "pattern": r"booru\.bcbnsfw\.space",
+        "query-all": "*",
     },
     "snootbooru": {
         "root": "https://snootbooru.com",
@@ -110,7 +111,12 @@ class SzurubooruTagExtractor(SzurubooruExtractor):
         return {"search_tags": self.query}
 
     def posts(self):
-        return self._pagination("/posts/", {"query": self.query})
+        if self.query.strip():
+            query = self.query
+        else:
+            query = self.config_instance("query-all")
+
+        return self._pagination("/posts/", {"query": query})
 
 
 class SzurubooruPostExtractor(SzurubooruExtractor):
