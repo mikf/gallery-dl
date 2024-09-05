@@ -5643,6 +5643,28 @@ Example
 Description
     Hash digests to compute.
 
+    For a list of available hash algorithms, run
+
+    .. code::
+
+        python -c "import hashlib; print('\n'.join(hashlib.algorithms_available))"
+
+    or see `python/hashlib <https://docs.python.org/3/library/hashlib.html>`__.
+
+    * If this is a ``string``,
+      it is parsed as a a comma-separated list of algorthm-fieldname pairs:
+
+      .. code::
+
+          [<hash algorithm> ":"] <field name> ["," ...]
+
+      When ``<hash algorithm>`` is omitted,
+      ``<field name>`` is used as algorithm name.
+
+    * If this is an ``object``,
+      it is a ``<field name>`` to ``<algorithm name>`` mapping
+      for hash digests to compute.
+
 
 metadata.mode
 -------------
@@ -6259,6 +6281,16 @@ Description
     to prevent it from only being displayed for a very short amount of time.
 
 
+ugoira.skip
+-----------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Do not convert frames if target file already exists.
+
+
 zip.compression
 ---------------
 Type
@@ -6269,6 +6301,7 @@ Description
     Compression method to use when writing the archive.
 
     Possible values are ``"store"``, ``"zip"``, ``"bzip2"``, ``"lzma"``.
+
 
 zip.extension
 -------------
