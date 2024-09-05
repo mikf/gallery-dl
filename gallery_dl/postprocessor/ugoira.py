@@ -36,6 +36,7 @@ class UgoiraPP(PostProcessor):
         self.delete = not options.get("keep-files", False)
         self.repeat = options.get("repeat-last-frame", True)
         self.mtime = options.get("mtime", True)
+        self.skip = options.get("skip", True)
         self.uniform = self._convert_zip = self._convert_files = False
 
         ffmpeg = options.get("ffmpeg-location")
@@ -109,12 +110,17 @@ class UgoiraPP(PostProcessor):
                 pathfmt.build_path()
         else:
             pathfmt.build_path()
-            num = pathfmt.kwdict["num"]
-            if not num:
-                self._files = [pathfmt.realpath]
+            index = pathfmt.kwdict["_ugoira_frame_index"]
+            frame = self._frames[index].copy()
+            frame["index"] = index
+            frame["path"] = pathfmt.realpath
+            frame["ext"] = pathfmt.kwdict["extension"]
+
+            if not index:
+                self._files = [frame]
             else:
-                self._files.append(pathfmt.realpath)
-                if num+1 >= len(self._frames):
+                self._files.append(frame)
+                if len(self._files) >= len(self._frames):
                     self._convert_files = True
 
     def convert_zip(self, pathfmt):
@@ -144,32 +150,34 @@ class UgoiraPP(PostProcessor):
         self._convert_files = False
 
         with tempfile.TemporaryDirectory() as tempdir:
-            for frame, path in zip(self._frames, self._files):
+            for frame in self._files:
 
                 # update frame filename extension
                 frame["file"] = name = "{}.{}".format(
-                    frame["file"].partition(".")[0],
-                    path.rpartition(".")[2])
+                    frame["file"].partition(".")[0], frame["ext"])
 
                 # move frame into tempdir
                 try:
-                    self._copy_file(path, tempdir + "/" + name)
+                    self._copy_file(frame["path"], tempdir + "/" + name)
                 except OSError as exc:
                     self.log.debug("Unable to copy frame %s (%s: %s)",
                                    name, exc.__class__.__name__, exc)
                     return
 
             pathfmt.kwdict["num"] = 0
+            self._frames = self._files
             if self.convert(pathfmt, tempdir):
                 self.log.info(pathfmt.filename)
                 if self.delete:
                     self.log.debug("Deleting frames")
-                    for path in self._files:
-                        util.remove_file(path)
+                    for frame in self._files:
+                        util.remove_file(frame["path"])
 
     def convert(self, pathfmt, tempdir):
         pathfmt.set_extension(self.extension)
         pathfmt.build_path()
+        if self.skip and pathfmt.exists():
+            return True
 
         # process frames and collect command-line arguments
         args = self._process(pathfmt, tempdir)

@@ -119,7 +119,7 @@ class PixivExtractor(Extractor):
 
                     for num, frame in enumerate(frames):
                         url = ("{}{}.{}".format(base, num, ext))
-                        work["num"] = num
+                        work["num"] = work["_ugoira_frame_index"] = num
                         work["suffix"] = "_p{:02}".format(num)
                         text.nameext_from_url(url, work)
                         yield Message.Url, url, work
