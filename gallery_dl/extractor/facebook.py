@@ -227,7 +227,8 @@ class FacebookExtractor(Extractor):
         if '{"__dr":"CometErrorRoot.react"}' in res.text:
             raise exception.StopExtraction(
                 "You've been temporarily blocked from viewing images. "
-                "\nPlease use a different account or try again later." +
+                "\nPlease try using a different account, "
+                "using a VPN or waiting before you retry." +
                 LEFT_OFF_TXT
             )
 
@@ -259,15 +260,15 @@ class FacebookExtractor(Extractor):
 
             if photo["url"] == "":
                 if retries < self.fallback_retries:
-                    self.log.debug(
+                    self.log.warning(
                         "Failed to find photo download URL for " + photo_url +
-                        ". Retrying in " + self.sleep_429 + " seconds."
+                        ". Retrying in " + str(self.sleep_429) + " seconds."
                     )
                     self.sleep(self.sleep_429, "retry")
                     retries += 1
                     continue
                 else:
-                    self.log.warning(
+                    self.log.error(
                         "Failed to find photo download URL for " + photo_url +
                         ". Skipping."
                     )
