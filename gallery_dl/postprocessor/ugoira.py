@@ -109,8 +109,11 @@ class UgoiraPP(PostProcessor):
                 pathfmt.set_extension(self.extension)
                 pathfmt.build_path()
         else:
+            index = pathfmt.kwdict.get("_ugoira_frame_index")
+            if index is None:
+                return
+
             pathfmt.build_path()
-            index = pathfmt.kwdict["_ugoira_frame_index"]
             frame = self._frames[index].copy()
             frame["index"] = index
             frame["path"] = pathfmt.realpath
