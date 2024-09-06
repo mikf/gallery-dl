@@ -790,7 +790,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Sex.com</td>
     <td>https://www.sex.com/</td>
-    <td>Boards, Pins, User Pins, related Pins, Search Results</td>
+    <td>Boards, Likes, Pins, User Pins, related Pins, Search Results</td>
     <td></td>
 </tr>
 <tr>

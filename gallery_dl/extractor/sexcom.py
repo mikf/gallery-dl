@@ -152,6 +152,25 @@ class SexcomPinsExtractor(SexcomExtractor):
         return self._pagination(url)
 
 
+class SexcomLikesExtractor(SexcomExtractor):
+    """Extractor for a user's liked pins on www.sex.com"""
+    subcategory = "likes"
+    directory_fmt = ("{category}", "{user}", "Likes")
+    pattern = r"(?:https?://)?(?:www\.)?sex\.com/user/([^/?#]+)/likes/"
+    example = "https://www.sex.com/user/USER/likes/"
+
+    def __init__(self, match):
+        SexcomExtractor.__init__(self, match)
+        self.user = match.group(1)
+
+    def metadata(self):
+        return {"user": text.unquote(self.user)}
+
+    def pins(self):
+        url = "{}/user/{}/likes/".format(self.root, self.user)
+        return self._pagination(url)
+
+
 class SexcomBoardExtractor(SexcomExtractor):
     """Extractor for pins from a board on www.sex.com"""
     subcategory = "board"
