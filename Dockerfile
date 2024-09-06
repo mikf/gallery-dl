@@ -14,9 +14,9 @@ RUN : \
         https://github.com/mikf/gallery-dl/archive/refs/heads/master.tar.gz \
         yt-dlp \
         'requests<2.32' \
-    && rm -rf /root/.cache/pip \
-    && find /usr/local/lib/python3.*/site-packages/setuptools -name __pycache__ -exec rm -rf {} + \
-    && find /usr/local/lib/python3.*/site-packages/wheel      -name __pycache__ -exec rm -rf {} + \
+    && ( rm -rf /root/.cache/pip || true ) \
+    && ( find /usr/local/lib/python3.*/site-packages/setuptools -name __pycache__ -exec rm -rf {} + || true ) \
+    && ( find /usr/local/lib/python3.*/site-packages/wheel      -name __pycache__ -exec rm -rf {} + || true ) \
     && :
 
 ENTRYPOINT [ "gallery-dl" ]
