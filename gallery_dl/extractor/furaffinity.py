@@ -179,6 +179,11 @@ class FuraffinityExtractor(Extractor):
                     break
                 self._favorite_id = text.parse_int(extr('data-fav-id="', '"'))
                 yield post_id
+
+            pos = page.find('type="submit">Next</button>')
+            if pos >= 0:
+                path = text.rextract(page, '<form action="', '"', pos)[0]
+                continue
             path = text.extr(page, 'right" href="', '"')
 
     def _pagination_search(self, query):
