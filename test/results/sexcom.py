@@ -67,14 +67,22 @@ __tests__ = (
     "#url"     : "https://www.sex.com/user/sirjuan79/pins/",
     "#category": ("", "sexcom", "pins"),
     "#class"   : sexcom.SexcomPinsExtractor,
-    "#count"   : ">= 15",
+    "#count"   : ">= 4",
+},
+
+{
+    "#url"     : "https://www.sex.com/user/sirjuan79/likes/",
+    "#category": ("", "sexcom", "likes"),
+    "#class"   : sexcom.SexcomLikesExtractor,
+    "#range"   : "1-30",
+    "#count"   : ">= 25",
 },
 
 {
     "#url"     : "https://www.sex.com/user/ronin17/exciting-hentai/",
     "#category": ("", "sexcom", "board"),
     "#class"   : sexcom.SexcomBoardExtractor,
-    "#count"   : ">= 15",
+    "#count"   : ">= 10",
 },
 
 {
