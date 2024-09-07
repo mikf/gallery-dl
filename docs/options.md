@@ -49,7 +49,8 @@
                                 values for the given URLs
     -e, --error-file FILE       Add input URLs which returned an error to FILE
     --list-modules              Print a list of available extractor modules
-    --list-extractors           Print a list of extractor classes with
+    --list-extractors CATEGORIES
+                                Print a list of extractor classes with
                                 description, (sub)category and example URL
     --write-log FILE            Write logging output to FILE
     --write-unsupported FILE    Write URLs, which get emitted by other

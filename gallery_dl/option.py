@@ -344,7 +344,7 @@ def build_parser():
     )
     output.add_argument(
         "--list-extractors",
-        dest="list_extractors", action="store_true",
+        dest="list_extractors", metavar="CATEGORIES", nargs="*",
         help=("Print a list of extractor classes "
               "with description, (sub)category and example URL"),
     )
