@@ -196,6 +196,10 @@ class Extractor():
                 server = response.headers.get("Server")
                 if server and server.startswith("cloudflare") and \
                         code in (403, 503):
+                    mitigated = response.headers.get("cf-mitigated")
+                    if mitigated and mitigated.lower() == "challenge":
+                        self.log.warning("Cloudflare challenge")
+                        break
                     content = response.content
                     if b"_cf_chl_opt" in content or b"jschl-answer" in content:
                         self.log.warning("Cloudflare challenge")
