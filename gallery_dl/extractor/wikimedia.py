@@ -10,7 +10,8 @@
 """Extractors for Wikimedia sites"""
 
 from .common import BaseExtractor, Message
-from .. import text
+from .. import text, exception
+from ..cache import cache
 
 
 class WikimediaExtractor(BaseExtractor):
@@ -39,7 +40,17 @@ class WikimediaExtractor(BaseExtractor):
             else:
                 self.api_url = api_path
         else:
-            self.api_url = self.root + "/api.php"
+            self.api_url = None
+
+    @cache(maxage=36500*86400, keyarg=1)
+    def _search_api_path(self, root):
+        self.log.debug("Probing possible API endpoints")
+        for path in ("/api.php", "/w/api.php", "/wiki/api.php"):
+            url = root + path
+            response = self.request(url, method="HEAD", fatal=None)
+            if response.status_code < 400:
+                return url
+        raise exception.StopExtraction("Unable to find API endpoint")
 
     @staticmethod
     def prepare(image):
@@ -76,6 +87,9 @@ class WikimediaExtractor(BaseExtractor):
         """
 
         url = self.api_url
+        if not url:
+            url = self._search_api_path(self.root)
+
         params["action"] = "query"
         params["format"] = "json"
         params["prop"] = "imageinfo"
@@ -139,14 +153,17 @@ BASE_PATTERN = WikimediaExtractor.update({
     "fandom": {
         "root": None,
         "pattern": r"[\w-]+\.fandom\.com",
+        "api-path": "/api.php",
     },
     "wikigg": {
         "root": None,
         "pattern": r"\w+\.wiki\.gg",
+        "api-path": "/api.php",
     },
     "mariowiki": {
         "root": "https://www.mariowiki.com",
         "pattern": r"(?:www\.)?mariowiki\.com",
+        "api-path": "/api.php",
     },
     "bulbapedia": {
         "root": "https://bulbapedia.bulbagarden.net",
