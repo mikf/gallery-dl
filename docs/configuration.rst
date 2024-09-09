@@ -3258,17 +3258,21 @@ Description
 extractor.pixiv.ugoira
 ----------------------
 Type
-    ``bool``
+    * ``bool``
+    * ``string``
 Default
     ``true``
 Description
-    Download Pixiv's Ugoira animations or ignore them.
+    Download Pixiv's Ugoira animations.
 
-    These animations come as a ``.zip`` file containing all
-    animation frames in JPEG format.
+    These animations come as a ``.zip`` archive containing all
+    animation frames in JPEG format by default.
+
+    Set this option to ``"original"``
+    to download them as individual, higher-quality frames.
 
     Use an `ugoira` post processor to convert them
-    to watchable videos. (Example__)
+    to watchable animations. (Example__)
 
 .. __: https://github.com/mikf/gallery-dl/blob/v1.12.3/docs/gallery-dl-example.conf#L9-L14
 
@@ -6149,6 +6153,8 @@ Description
     Additional |ffmpeg| command-line arguments.
 
 
+ugoira.mode
+-----------
 ugoira.ffmpeg-demuxer
 ---------------------
 Type
@@ -6163,6 +6169,7 @@ Description
     * "`concat <https://ffmpeg.org/ffmpeg-formats.html#concat-1>`_" (inaccurate frame timecodes for non-uniform frame delays)
     * "`image2 <https://ffmpeg.org/ffmpeg-formats.html#image2-1>`_" (accurate timecodes, requires nanosecond file timestamps, i.e. no Windows or macOS)
     * "mkvmerge" (accurate timecodes, only WebM or MKV, requires `mkvmerge <ugoira.mkvmerge-location_>`__)
+    * "archive" (store "original" frames in a ``.zip`` archive)
 
     `"auto"` will select `mkvmerge` if available and fall back to `concat` otherwise.
 
@@ -6258,6 +6265,21 @@ Description
     adds ``["-vf", "crop=iw-mod(iw\\,2):ih-mod(ih\\,2)"]``
     to the list of |ffmpeg| command-line arguments
     to reduce an odd width/height by 1 pixel and make them even.
+
+
+ugoira.metadata
+---------------
+Type
+    * ``bool``
+    * ``string``
+Default
+    ``true``
+Description
+    When using ``"mode": "archive"``, save Ugoira frame delay data as
+    ``animation.json`` within the archive file.
+
+    If this is a ``string``,
+    use it as alternate filename for frame delay files.
 
 
 ugoira.mtime

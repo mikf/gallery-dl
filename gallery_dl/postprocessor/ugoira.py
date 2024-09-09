@@ -29,12 +29,12 @@ class UgoiraPP(PostProcessor):
 
     def __init__(self, job, options):
         PostProcessor.__init__(self, job)
-        self.extension = options.get("extension") or "webm"
         self.args = options.get("ffmpeg-args") or ()
         self.twopass = options.get("ffmpeg-twopass", False)
         self.output = options.get("ffmpeg-output", "error")
         self.delete = not options.get("keep-files", False)
         self.repeat = options.get("repeat-last-frame", True)
+        self.metadata = options.get("metadata", True)
         self.mtime = options.get("mtime", True)
         self.skip = options.get("skip", True)
         self.uniform = self._convert_zip = self._convert_files = False
@@ -45,24 +45,31 @@ class UgoiraPP(PostProcessor):
         mkvmerge = options.get("mkvmerge-location")
         self.mkvmerge = util.expand_path(mkvmerge) if mkvmerge else "mkvmerge"
 
-        demuxer = options.get("ffmpeg-demuxer")
-        if demuxer is None or demuxer == "auto":
-            if self.extension in ("webm", "mkv") and (
+        ext = options.get("extension")
+        mode = options.get("mode") or options.get("ffmpeg-demuxer")
+        if mode is None or mode == "auto":
+            if ext in (None, "webm", "mkv") and (
                     mkvmerge or shutil.which("mkvmerge")):
-                demuxer = "mkvmerge"
+                mode = "mkvmerge"
             else:
-                demuxer = "concat"
+                mode = "concat"
 
-        if demuxer == "mkvmerge":
+        if mode == "mkvmerge":
             self._process = self._process_mkvmerge
             self._finalize = self._finalize_mkvmerge
-        elif demuxer == "image2":
+        elif mode == "image2":
             self._process = self._process_image2
             self._finalize = None
+        elif mode == "archive":
+            if ext is None:
+                ext = "zip"
+            self._convert_impl = self.convert_to_archive
+            self._tempdir = util.NullContext
         else:
             self._process = self._process_concat
             self._finalize = None
-        self.log.debug("using %s demuxer", demuxer)
+        self.extension = "webm" if ext is None else ext
+        self.log.debug("using %s demuxer", mode)
 
         rate = options.get("framerate", "auto")
         if rate == "uniform":
@@ -93,8 +100,8 @@ class UgoiraPP(PostProcessor):
 
         job.register_hooks({
             "prepare": self.prepare,
-            "file"   : self.convert_zip,
-            "after"  : self.convert_files,
+            "file"   : self.convert_from_zip,
+            "after"  : self.convert_from_files,
         }, options)
 
     def prepare(self, pathfmt):
@@ -117,7 +124,7 @@ class UgoiraPP(PostProcessor):
             frame = self._frames[index].copy()
             frame["index"] = index
             frame["path"] = pathfmt.realpath
-            frame["ext"] = pathfmt.kwdict["extension"]
+            frame["ext"] = pathfmt.extension
 
             if not index:
                 self._files = [frame]
@@ -126,31 +133,34 @@ class UgoiraPP(PostProcessor):
                 if len(self._files) >= len(self._frames):
                     self._convert_files = True
 
-    def convert_zip(self, pathfmt):
+    def convert_from_zip(self, pathfmt):
         if not self._convert_zip:
             return
         self._convert_zip = False
+        self._zip_source = True
 
-        with tempfile.TemporaryDirectory() as tempdir:
-            try:
-                with zipfile.ZipFile(pathfmt.temppath) as zfile:
-                    zfile.extractall(tempdir)
-            except FileNotFoundError:
-                pathfmt.realpath = pathfmt.temppath
-                return
+        with self._tempdir() as tempdir:
+            if tempdir:
+                try:
+                    with zipfile.ZipFile(pathfmt.temppath) as zfile:
+                        zfile.extractall(tempdir)
+                except FileNotFoundError:
+                    pathfmt.realpath = pathfmt.temppath
+                    return
 
             if self.convert(pathfmt, tempdir):
                 if self.delete:
                     pathfmt.delete = True
-                else:
+                elif pathfmt.extension != "zip":
                     self.log.info(pathfmt.filename)
                     pathfmt.set_extension("zip")
                     pathfmt.build_path()
 
-    def convert_files(self, pathfmt):
+    def convert_from_files(self, pathfmt):
         if not self._convert_files:
             return
         self._convert_files = False
+        self._zip_source = False
 
         with tempfile.TemporaryDirectory() as tempdir:
             for frame in self._files:
@@ -159,13 +169,14 @@ class UgoiraPP(PostProcessor):
                 frame["file"] = name = "{}.{}".format(
                     frame["file"].partition(".")[0], frame["ext"])
 
-                # move frame into tempdir
-                try:
-                    self._copy_file(frame["path"], tempdir + "/" + name)
-                except OSError as exc:
-                    self.log.debug("Unable to copy frame %s (%s: %s)",
-                                   name, exc.__class__.__name__, exc)
-                    return
+                if tempdir:
+                    # move frame into tempdir
+                    try:
+                        self._copy_file(frame["path"], tempdir + "/" + name)
+                    except OSError as exc:
+                        self.log.debug("Unable to copy frame %s (%s: %s)",
+                                       name, exc.__class__.__name__, exc)
+                        return
 
             pathfmt.kwdict["num"] = 0
             self._frames = self._files
@@ -182,6 +193,9 @@ class UgoiraPP(PostProcessor):
         if self.skip and pathfmt.exists():
             return True
 
+        return self._convert_impl(pathfmt, tempdir)
+
+    def convert_to_animation(self, pathfmt, tempdir):
         # process frames and collect command-line arguments
         args = self._process(pathfmt, tempdir)
         if self.args_pp:
@@ -221,6 +235,42 @@ class UgoiraPP(PostProcessor):
                 if mtime:
                     util.set_mtime(pathfmt.realpath, mtime)
             return True
+
+    def convert_to_archive(self, pathfmt, tempdir):
+        frames = self._frames
+
+        if self.metadata:
+            if isinstance(self.metadata, str):
+                metaname = self.metadata
+            else:
+                metaname = "animation.json"
+            framedata = util.json_dumps([
+                {"file": frame["file"], "delay": frame["delay"]}
+                for frame in frames
+            ]).encode()
+
+        if self._zip_source:
+            self.delete = False
+            if self.metadata:
+                with zipfile.ZipFile(pathfmt.temppath, "a") as zfile:
+                    with zfile.open(metaname, "w") as fp:
+                        fp.write(framedata)
+        else:
+            with zipfile.ZipFile(pathfmt.realpath, "w") as zfile:
+                for frame in frames:
+                    zinfo = zipfile.ZipInfo.from_file(
+                        frame["path"], frame["file"])
+                    with open(frame["path"], "rb") as src, \
+                            zfile.open(zinfo, "w") as dst:
+                        shutil.copyfileobj(src, dst, 1024*8)
+                if self.metadata:
+                    with zfile.open(metaname, "w") as fp:
+                        fp.write(framedata)
+
+        return True
+
+    _convert_impl = convert_to_animation
+    _tempdir = tempfile.TemporaryDirectory
 
     def _exec(self, args):
         self.log.debug(args)
