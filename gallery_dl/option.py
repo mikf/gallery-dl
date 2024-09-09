@@ -131,12 +131,17 @@ class UgoiraAction(argparse.Action):
                                       "[a] palettegen [p];[b][p] paletteuse"),
                 "repeat-last-frame": False,
             }
-        elif value in ("mkv", "copy"):
+        elif value == "mkv" or value == "copy":
             pp = {
                 "extension"        : "mkv",
                 "ffmpeg-args"      : ("-c:v", "copy"),
                 "repeat-last-frame": False,
             }
+        elif value == "zip" or value == "archive":
+            pp = {
+                "mode"             : "archive",
+            }
+            namespace.options.append(((), "ugoira", "original"))
         else:
             parser.error("Unsupported Ugoira format '{}'".format(value))
 
@@ -693,7 +698,7 @@ def build_parser():
         dest="postprocessors", metavar="FMT", action=UgoiraAction,
         help=("Convert Pixiv Ugoira to FMT using FFmpeg. "
               "Supported formats are 'webm', 'mp4', 'gif', "
-              "'vp8', 'vp9', 'vp9-lossless', 'copy'."),
+              "'vp8', 'vp9', 'vp9-lossless', 'copy', 'zip'."),
     )
     postprocessor.add_argument(
         "--ugoira-conv",
