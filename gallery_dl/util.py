@@ -516,6 +516,15 @@ class LazyPrompt():
         return getpass.getpass()
 
 
+class NullContext():
+
+    def __enter__(self):
+        return None
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        pass
+
+
 class CustomNone():
     """None-style type that supports more operations than regular None"""
     __slots__ = ()
