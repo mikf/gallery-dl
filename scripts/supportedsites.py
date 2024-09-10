@@ -37,6 +37,7 @@ CATEGORY_MAP = {
     "batoto"         : "BATO.TO",
     "bbc"            : "BBC",
     "cien"           : "Ci-en",
+    "cohost"         : "cohost!",
     "comicvine"      : "Comic Vine",
     "coomerparty"    : "Coomer",
     "deltaporno"     : "DeltaPorno",
