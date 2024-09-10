@@ -1486,6 +1486,46 @@ Description
     ``gallery``.
 
 
+extractor.cohost.asks
+---------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Extract ``ask`` posts.
+
+
+extractor.cohost.pinned
+-----------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Extract pinned posts.
+
+
+extractor.cohost.replies
+------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Extract reply posts.
+
+
+extractor.cohost.shares
+-----------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Extract shared posts.
+
+
 extractor.cyberdrop.domain
 --------------------------
 Type
