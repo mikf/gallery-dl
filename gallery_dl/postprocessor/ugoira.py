@@ -253,18 +253,30 @@ class UgoiraPP(PostProcessor):
             self.delete = False
             if self.metadata:
                 with zipfile.ZipFile(pathfmt.temppath, "a") as zfile:
-                    with zfile.open(metaname, "w") as fp:
+                    zinfo = zipfile.ZipInfo(metaname)
+                    if self.mtime:
+                        zinfo.date_time = zfile.infolist()[0].date_time
+                    with zfile.open(zinfo, "w") as fp:
                         fp.write(framedata)
         else:
+            if self.mtime:
+                dt = pathfmt.kwdict["date_url"] or pathfmt.kwdict["date"]
+                mtime = (dt.year, dt.month, dt.day,
+                         dt.hour, dt.minute, dt.second)
             with zipfile.ZipFile(pathfmt.realpath, "w") as zfile:
                 for frame in frames:
                     zinfo = zipfile.ZipInfo.from_file(
                         frame["path"], frame["file"])
+                    if self.mtime:
+                        zinfo.date_time = mtime
                     with open(frame["path"], "rb") as src, \
                             zfile.open(zinfo, "w") as dst:
                         shutil.copyfileobj(src, dst, 1024*8)
                 if self.metadata:
-                    with zfile.open(metaname, "w") as fp:
+                    zinfo = zipfile.ZipInfo(metaname)
+                    if self.mtime:
+                        zinfo.date_time = mtime
+                    with zfile.open(zinfo, "w") as fp:
                         fp.write(framedata)
 
         return True
