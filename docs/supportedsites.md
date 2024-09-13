@@ -154,7 +154,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>cohost!</td>
     <td>https://cohost.org/</td>
-    <td>Posts, User Profiles</td>
+    <td>Posts, Tag Searches, User Profiles</td>
     <td></td>
 </tr>
 <tr>
