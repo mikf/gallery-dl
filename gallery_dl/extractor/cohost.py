@@ -82,6 +82,11 @@ class CohostExtractor(Extractor):
                     file = block["attachment"].copy()
                     file["shared"] = shared
                     files.append(file)
+                elif type == "attachment-row":
+                    for att in block["attachments"]:
+                        file = att["attachment"].copy()
+                        file["shared"] = shared
+                        files.append(file)
                 elif type == "markdown":
                     content.append(block["markdown"]["content"])
                 elif type == "ask":
