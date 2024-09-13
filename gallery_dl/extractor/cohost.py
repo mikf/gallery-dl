@@ -31,6 +31,13 @@ class CohostExtractor(Extractor):
 
     def items(self):
         for post in self.posts():
+            reason = post.get("limitedVisibilityReason")
+            if reason and reason != "none":
+                if reason == "log-in-first":
+                    reason = ("This page's posts are visible only to users "
+                              "who are logged in.")
+                self.log.warning('%s: "%s"', post["postId"], reason)
+
             files = self._extract_files(post)
             post["count"] = len(files)
             post["date"] = text.parse_datetime(
