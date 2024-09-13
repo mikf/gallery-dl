@@ -158,3 +158,36 @@ class CohostPostExtractor(CohostExtractor):
             post["comments"] = ()
 
         return (post,)
+
+
+class CohostTagExtractor(CohostExtractor):
+    """Extractor for tagged posts"""
+    subcategory = "tag"
+    pattern = BASE_PATTERN + r"/([^/?#]+)/tagged/([^/?#]+)(?:\?([^#]+))?"
+    example = "https://cohost.org/USER/tagged/TAG"
+
+    def posts(self):
+        user, tag, query = self.groups
+        url = "{}/{}/tagged/{}".format(self.root, user, tag)
+        params = text.parse_query(query)
+        post_feed_key = ("tagged-post-feed" if user == "rc" else
+                         "project-tagged-post-feed")
+
+        while True:
+            page = self.request(url, params=params).text
+            data = util.json_loads(text.extr(
+                page, 'id="__COHOST_LOADER_STATE__">', '</script>'))
+
+            try:
+                feed = data[post_feed_key]
+            except KeyError:
+                feed = data.popitem()[1]
+
+            yield from feed["posts"]
+
+            pagination = feed["paginationMode"]
+            if not pagination.get("morePagesForward"):
+                return
+            params["refTimestamp"] = pagination["refTimestamp"]
+            params["skipPosts"] = \
+                pagination["currentSkip"] + pagination["idealPageStride"]
