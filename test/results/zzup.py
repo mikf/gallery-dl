@@ -27,4 +27,10 @@ __tests__ = (
     "#pattern" : r"https://zzup.com/MjAxNjc3OTIyMjE5Nzk=/showimage/zzup-8769086487/image000\d\d-5896498214-40-9689595623/Courtesan/9879560327/zzup.com.jpg",
 },
 
+{
+    "#url"     : "https://up.zzup.com/viewalbum/TE9MQUxVWlogLSBMYWxsaSAtIFdhcm0gYW5kIENvenk=/NTM0MTk=/OTgz/index.html",
+    "#category": ("", "zzup", "gallery"),
+    "#class"   : zzup.ZzupGalleryExtractor,
+},
+
 )
