@@ -1457,6 +1457,16 @@ Description
     Process reposts.
 
 
+extractor.bluesky.videos
+------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Download videos.
+
+
 extractor.bunkr.tlds
 --------------------
 Type
