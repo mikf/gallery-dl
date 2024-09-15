@@ -104,6 +104,12 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
+    <td>Archive of Our Own</td>
+    <td>https://archiveofourown.org/</td>
+    <td>Search Results, Series, Tag Searches, User Profiles, Bookmarks, Works</td>
+    <td></td>
+</tr>
+<tr>
     <td>ArtStation</td>
     <td>https://www.artstation.com/</td>
     <td>Albums, Artwork Listings, Challenges, Collections, Followed Users, individual Images, Likes, Search Results, User Profiles</td>
