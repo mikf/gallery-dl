@@ -26,6 +26,7 @@ CATEGORY_MAP = {
     "adultempire"    : "Adult Empire",
     "agnph"          : "AGNPH",
     "allgirlbooru"   : "All girl",
+    "ao3"            : "Archive of Our Own",
     "archivedmoe"    : "Archived.Moe",
     "archiveofsins"  : "Archive of Sins",
     "artstation"     : "ArtStation",
@@ -181,6 +182,11 @@ SUBCATEGORY_MAP = {
     "related-pin"  : "related Pins",
     "related-board": "",
 
+    "ao3": {
+        "user-works"   : "",
+        "user-series"  : "",
+        "user-bookmark": "Bookmarks",
+    },
     "artstation": {
         "artwork": "Artwork Listings",
         "collections": "",

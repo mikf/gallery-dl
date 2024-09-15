@@ -23,6 +23,7 @@ modules = [
     "8muses",
     "adultempire",
     "agnph",
+    "ao3",
     "architizer",
     "artstation",
     "aryion",
