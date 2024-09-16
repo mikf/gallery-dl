@@ -284,6 +284,9 @@ class DeviantartExtractor(Extractor):
         html = journal["html"]
         shadow = SHADOW_TEMPLATE.format_map(thumbs[0]) if thumbs else ""
 
+        if not html:
+            self.log.warning("%s: Empty journal content", deviation["index"])
+
         if "css" in journal:
             css, cls = journal["css"], "withskin"
         elif html.startswith("<style"):
