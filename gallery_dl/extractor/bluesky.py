@@ -87,9 +87,11 @@ class BlueskyExtractor(Extractor):
             if not files:
                 continue
 
+            base = ("https://bsky.social/xrpc/com.atproto.sync.getBlob"
+                    "?did={}&cid=".format(post["author"]["did"]))
             for post["num"], file in enumerate(files, 1):
                 post.update(file)
-                yield Message.Url, file["url"], post
+                yield Message.Url, base + file["filename"], post
 
     def posts(self):
         return ()
@@ -99,64 +101,39 @@ class BlueskyExtractor(Extractor):
             return ()
 
         files = []
-
         media = post["embed"]
         if "media" in media:
             media = media["media"]
 
         if "images" in media:
-            base = ("https://bsky.social/xrpc/com.atproto.sync.getBlob"
-                    "?did={}&cid=".format(post["author"]["did"]))
-
             for image in media["images"]:
-                try:
-                    aspect = image["aspectRatio"]
-                    width = aspect["width"]
-                    height = aspect["height"]
-                except KeyError:
-                    width = height = 0
-
-                data = image["image"]
-                try:
-                    cid = data["ref"]["$link"]
-                except KeyError:
-                    cid = data["cid"]
-
-                files.append({
-                    "description": image.get("alt"),
-                    "width"      : width,
-                    "height"     : height,
-                    "filename"   : cid,
-                    "extension"  : data["mimeType"].rpartition("/")[2],
-                    "url"        : base + cid,
-                })
-
+                files.append(self._extract_media(image, "image"))
         if "video" in media and self.videos:
-            base = ("https://bsky.social/xrpc/com.atproto.sync.getBlob"
-                    "?did={}&cid=".format(post["author"]["did"]))
-            try:
-                aspect = media["aspectRatio"]
-                width = aspect["width"]
-                height = aspect["height"]
-            except KeyError:
-                width = height = 0
-
-            video = media["video"]
-            try:
-                cid = video["ref"]["$link"]
-            except KeyError:
-                cid = video["cid"]
-
-            files.append({
-                "description": media.get("alt") or "",
-                "width"      : width,
-                "height"     : height,
-                "filename"   : cid,
-                "extension"  : video["mimeType"].rpartition("/")[2],
-                "url"        : base + cid,
-            })
+            files.append(self._extract_media(media, "video"))
 
         return files
+
+    def _extract_media(self, media, key):
+        try:
+            aspect = media["aspectRatio"]
+            width = aspect["width"]
+            height = aspect["height"]
+        except KeyError:
+            width = height = 0
+
+        data = media[key]
+        try:
+            cid = data["ref"]["$link"]
+        except KeyError:
+            cid = data["cid"]
+
+        return {
+            "description": media.get("alt") or "",
+            "width"      : width,
+            "height"     : height,
+            "filename"   : cid,
+            "extension"  : data["mimeType"].rpartition("/")[2],
+        }
 
     def _make_post(self, actor, kind):
         did = self.api._did_from_actor(actor)
