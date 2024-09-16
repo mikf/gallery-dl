@@ -513,8 +513,8 @@ Description
       * The first entry is the browser name
       * The optional second entry is a profile name or an absolute path to a profile directory
       * The optional third entry is the keyring to retrieve passwords for decrypting cookies from
-      * The optional fourth entry is a (Firefox) container name (``"none"`` for only cookies with no container)
-      * The optional fifth entry is the domain to extract cookies for. Prefix it with a dot ``.`` to include cookies for subdomains. Has no effect when also specifying a container.
+      * The optional fourth entry is a (Firefox) container name (``"none"`` for only cookies with no container (default))
+      * The optional fifth entry is the domain to extract cookies for. Prefix it with a dot ``.`` to include cookies for subdomains.
 
       .. code:: json
 

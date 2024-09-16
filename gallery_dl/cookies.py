@@ -50,21 +50,27 @@ def load_cookies_firefox(cookiejar, profile=None, container=None, domain=None):
 
         sql = ("SELECT name, value, host, path, isSecure, expiry "
                "FROM moz_cookies")
-        parameters = ()
+        conditions = []
+        parameters = []
 
         if container_id is False:
-            sql += " WHERE NOT INSTR(originAttributes,'userContextId=')"
+            conditions.append("NOT INSTR(originAttributes,'userContextId=')")
         elif container_id:
-            sql += " WHERE originAttributes LIKE ? OR originAttributes LIKE ?"
+            conditions.append(
+                "originAttributes LIKE ? OR originAttributes LIKE ?")
             uid = "%userContextId={}".format(container_id)
-            parameters = (uid, uid + "&%")
-        elif domain:
+            parameters += (uid, uid + "&%")
+
+        if domain:
             if domain[0] == ".":
-                sql += " WHERE host == ? OR host LIKE ?"
-                parameters = (domain[1:], "%" + domain)
+                conditions.append("host == ? OR host LIKE ?")
+                parameters += (domain[1:], "%" + domain)
             else:
-                sql += " WHERE host == ? OR host == ?"
-                parameters = (domain, "." + domain)
+                conditions.append("host == ? OR host == ?")
+                parameters += (domain, "." + domain)
+
+        if conditions:
+            sql = "{} WHERE ( {} )".format(sql, " ) AND ( ".join(conditions))
 
         set_cookie = cookiejar.set_cookie
         for name, value, domain, path, secure, expires in db.execute(
