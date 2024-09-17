@@ -602,6 +602,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Supported</td>
 </tr>
 <tr>
+    <td>Motherless</td>
+    <td>https://www.motherless.com/</td>
+    <td>Individual Images, Individual Videos, Galleries</td>
+    <td></td>
+</tr>
+<tr>
     <td>My Hentai Gallery</td>
     <td>https://myhentaigallery.com/</td>
     <td>Galleries</td>
