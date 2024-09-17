@@ -11,7 +11,8 @@
 from .common import Extractor, Message
 from .. import text, util
 
-BASE_PATTERN = r"(?:https?://)?(?:www\.)?archiveofourown.org"
+BASE_PATTERN = (r"(?:https?://)?(?:www\.)?"
+                r"a(?:rchiveofourown|o3)\.(?:org|com|net)")
 
 
 class Ao3Extractor(Extractor):
@@ -188,7 +189,6 @@ class Ao3UserSeriesExtractor(Ao3Extractor):
             yield Message.Queue, base + series_id, data
 
     def series(self):
-        path, user, pseud, query = self.groups
         return self._pagination(self.groups[0], '<li id="series_')
 
 
