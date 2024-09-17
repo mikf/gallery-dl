@@ -139,6 +139,21 @@ __tests__ = (
         "https://archiveofourown.org/users/Fyrelass/series",
     ),
 },
+{
+    "#url"     : "https://archiveofourown.com/users/Fyrelass",
+    "#category": ("", "ao3", "user"),
+    "#class"   : ao3.Ao3UserExtractor,
+},
+{
+    "#url"     : "https://archiveofourown.net/users/Fyrelass",
+    "#category": ("", "ao3", "user"),
+    "#class"   : ao3.Ao3UserExtractor,
+},
+{
+    "#url"     : "https://ao3.org/users/Fyrelass",
+    "#category": ("", "ao3", "user"),
+    "#class"   : ao3.Ao3UserExtractor,
+},
 
 {
     "#url"     : "https://archiveofourown.org/users/Fyrelass/profile",
