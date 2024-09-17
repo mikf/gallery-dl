@@ -19,6 +19,8 @@ __tests__ = (
     "chapters" : 27,
     "comments" : range(800, 2000),
     "date"     : "dt:2023-06-11 00:00:00",
+    "date_completed": "dt:2024-05-10 00:00:00",
+    "date_updated"  : "dt:2024-07-08 00:27:04",
     "extension": "pdf",
     "filename" : "The_Wildcard",
     "id"       : 47802076,
