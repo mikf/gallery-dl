@@ -25,6 +25,13 @@ __tests__ = (
     "lang"     : "en",
     "language" : "English",
     "likes"    : range(1000, 2000),
+    "series"   : {
+        "id"   : "4237024",
+        "prev" : "",
+        "next" : "57205801",
+        "index": "1",
+        "name" : "The Wildcard Universe",
+    },
     "title"    : "The Wildcard",
     "views"    : range(34000, 50000),
     "words"    : 217549,
@@ -172,6 +179,7 @@ __tests__ = (
     "#category": ("", "ao3", "user-works"),
     "#class"   : ao3.Ao3UserWorksExtractor,
     "#urls"    : (
+        "https://archiveofourown.org/works/58979287",
         "https://archiveofourown.org/works/55035061",
         "https://archiveofourown.org/works/52704457",
         "https://archiveofourown.org/works/52502743",
