@@ -70,6 +70,7 @@ class Ao3WorkExtractor(Ao3Extractor):
         extr = text.extract_from(self.request(url).text)
 
         fmts = {}
+        path = ""
         download = extr(' class="download"', "</ul>")
         for dl in text.extract_iter(download, ' href="', "</"):
             path, _, type = dl.rpartition('">')
@@ -95,6 +96,10 @@ class Ao3WorkExtractor(Ao3Extractor):
             "series"       : extr('<dd class="series">', "</dd>"),
             "date"         : text.parse_datetime(
                 extr('<dd class="published">', "<"), "%Y-%m-%d"),
+            "date_completed": text.parse_datetime(
+                extr('>Completed:</dt><dd class="status">', "<"), "%Y-%m-%d"),
+            "date_updated" : text.parse_timestamp(
+                path.rpartition("updated_at=")[2]),
             "words"        : text.parse_int(
                 extr('<dd class="words">', "<").replace(",", "")),
             "chapters"     : text.parse_int(
