@@ -116,6 +116,19 @@ class Ao3WorkExtractor(Ao3Extractor):
         }
         data["language"] = util.code_to_language(data["lang"])
 
+        series = data["series"]
+        if series:
+            extr = text.extract_from(series)
+            data["series"] = {
+                "prev" : extr(' class="previous" href="/works/', '"'),
+                "index": extr(' class="position">Part ', " "),
+                "id"   : extr(' href="/series/', '"'),
+                "name" : text.unescape(extr(">", "<")),
+                "next" : extr(' class="next" href="/works/', '"'),
+            }
+        else:
+            data["series"] = None
+
         yield Message.Directory, data
         for fmt in self.formats:
             try:
