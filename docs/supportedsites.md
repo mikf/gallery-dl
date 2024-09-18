@@ -286,7 +286,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Girlsreleased</td>
     <td>https://www.girlsreleased.com/</td>
-    <td>Galleries, Sites, Models</td>
+    <td>Sets, Models, Sites</td>
     <td></td>
 </tr>
 <tr>

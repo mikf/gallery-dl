@@ -48,9 +48,9 @@ class GirlsreleasedExtractor(Extractor):
                 yield from self._images(self.request(url).json()["set"])
 
 
-class GirlsreleasedGalleryExtractor(GirlsreleasedExtractor):
+class GirlsreleasedSetExtractor(GirlsreleasedExtractor):
     """Extractor for girlsreleased galleries"""
-    subcategory = "gallery"
+    subcategory = "set"
     pattern = BASE_PATTERN + r"/set/(\d+)"
     example = "https://girlsreleased.com/set/12345"
 
