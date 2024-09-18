@@ -9,8 +9,7 @@
 """Extractors for https://girlsreleased.com/"""
 
 from .common import Extractor, Message
-from .. import text, util, exception
-from ..cache import cache
+from .. import text
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?girlsreleased\.com"
 
