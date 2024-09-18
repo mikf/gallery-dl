@@ -69,6 +69,12 @@ class Ao3WorkExtractor(Ao3Extractor):
         url = "{}/works/{}".format(self.root, work_id)
         extr = text.extract_from(self.request(url).text)
 
+        chapters = {}
+        cindex = extr(' id="chapter_index"', "</ul>")
+        for ch in text.extract_iter(cindex, ' value="', "</option>"):
+            cid, _, cname = ch.partition('">')
+            chapters[cid] = text.unescape(cname)
+
         fmts = {}
         path = ""
         download = extr(' class="download"', "</ul>")
@@ -102,8 +108,7 @@ class Ao3WorkExtractor(Ao3Extractor):
                 path.rpartition("updated_at=")[2]),
             "words"        : text.parse_int(
                 extr('<dd class="words">', "<").replace(",", "")),
-            "chapters"     : text.parse_int(
-                extr('<dd class="chapters">', "/")),
+            "chapters"     : chapters,
             "comments"     : text.parse_int(
                 extr('<dd class="comments">', "<").replace(",", "")),
             "likes"        : text.parse_int(
