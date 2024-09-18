@@ -284,6 +284,12 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
+    <td>Girlsreleased</td>
+    <td>https://www.girlsreleased.com/</td>
+    <td>Galleries, Sites, Models</td>
+    <td></td>
+</tr>
+<tr>
     <td>Gofile</td>
     <td>https://gofile.io/</td>
     <td>Folders</td>
