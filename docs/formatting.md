@@ -77,6 +77,12 @@ Conversion specifiers allow to *convert* the value to a different form or type. 
     <td><code>["sun", "tree", "water"]</code></td>
 </tr>
 <tr>
+    <td align="center"><code>L</code></td>
+    <td>Return the <a href="https://docs.python.org/3/library/functions.html#len" rel="nofollow">length</a> of a value</td>
+    <td><code>{foo!L}</code></td>
+    <td><code>7</code></td>
+</tr>
+<tr>
     <td align="center"><code>t</code></td>
     <td>Trim a string, i.e. remove leading and trailing whitespace characters</td>
     <td><code>{bar!t}</code></td>
@@ -84,13 +90,13 @@ Conversion specifiers allow to *convert* the value to a different form or type. 
 </tr>
 <tr>
     <td align="center"><code>T</code></td>
-    <td>Convert a <code>datetime</code> object to a unix timestamp</td>
+    <td>Convert a <code>datetime</code> object to a Unix timestamp</td>
     <td><code>{date!T}</code></td>
     <td><code>1262304000</code></td>
 </tr>
 <tr>
     <td align="center"><code>d</code></td>
-    <td>Convert a unix timestamp to a <code>datetime</code> object</td>
+    <td>Convert a Unix timestamp to a <code>datetime</code> object</td>
     <td><code>{created!d}</code></td>
     <td><code>2010-01-01 00:00:00</code></td>
 </tr>

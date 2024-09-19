@@ -67,6 +67,9 @@ class TestFormatter(unittest.TestCase):
         self._run_test("{l!j}", '["a", "b", "c"]')
         self._run_test("{dt!j}", '"2010-01-01 00:00:00"')
         self._run_test("{a!g}", "hello-world")
+        self._run_test("{a!L}", 11)
+        self._run_test("{l!L}", 3)
+        self._run_test("{d!L}", 3)
 
         with self.assertRaises(KeyError):
             self._run_test("{a!q}", "hello world")
