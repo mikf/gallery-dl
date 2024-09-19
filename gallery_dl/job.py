@@ -158,6 +158,7 @@ class Job():
             raise
         except exception.GalleryDLException as exc:
             log.error("%s: %s", exc.__class__.__name__, exc)
+            log.debug("", exc_info=True)
             self.status |= exc.code
         except OSError as exc:
             log.error("Unable to download data:  %s: %s",
