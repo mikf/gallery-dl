@@ -10,6 +10,7 @@ from .common import Extractor, Message
 from .. import text
 import re
 from datetime import datetime, timedelta, timezone
+from html import unescape
 
 ROOT_URL_PATTERN = r"(?:https?://)?motherless\.com"
 
@@ -25,7 +26,7 @@ class MotherlessExtractor(Extractor):
 class MotherlessMediaExtractor(MotherlessExtractor):
     """Extractor for a single image/video from motherless.com"""
 
-    pattern = ROOT_URL_PATTERN + "/([A-Z0-9]+)$"
+    pattern = ROOT_URL_PATTERN + "/((?!GV|GI|G)[A-Z0-9]+)$"
     example = "https://motherless.com/ABC123"
     directory_fmt = ("{category}",)
 
@@ -44,7 +45,7 @@ class MotherlessMediaExtractor(MotherlessExtractor):
             image_url_search = re.search(f'<link rel="image_src" type="image/([a-z]+)" href="(.+)">', self.page_data)
             extension = image_url_search.group(1)
             media_url = image_url_search.group(2)
-            id = self.get_image_id(media_url)
+            id = get_image_id(media_url)
 
         except AttributeError:
             # No image, find video url.
@@ -53,63 +54,20 @@ class MotherlessMediaExtractor(MotherlessExtractor):
             video_url_search = re.search("__fileurl = '(.+)'", self.page_data)
             extension = "mp4"
             media_url = video_url_search.group(1)
-            id = self.get_video_id(media_url)
+            id = get_video_id(media_url)
 
         data = {
             "url": self.url,
-            "title": self.get_title(self.page_data),
+            "title": get_media_title(self.page_data),
             "id": id,
             "filename": id,
             "extension": extension,
-            "date": self.get_date(self.page_data),
-            "uploader": self.get_uploader(self.page_data),
-            "tags": self.get_tags(self.page_data)}
+            "date": get_media_date(self.page_data),
+            "uploader": get_media_uploader(self.page_data),
+            "tags": get_media_tags(self.page_data)}
 
         return media_url, data
 
-    def get_tags(self, page_html):
-        try:
-            tags_html = re.search('<div class="media-meta-tags">([\S\s]+?)</div>', page_html).group(1)
-        except AttributeError:
-            # No tags found.
-            return []
-
-        tags = text.split_html(tags_html)
-        for i, tag in enumerate(tags):
-            tags[i] = tag.replace('#', '')
-
-        return tags
-
-    def get_title(self, page_html):
-        title = re.search('<div class="media-meta-title">([\S\s]+?)</div>', page_html).group(1)
-        return text.remove_html(title)
-
-    def get_date(self, page_html):
-        # Find date uploaded and convert to ISO 8601.
-
-        try:
-            # Find 'DD Mon YYYY' format.
-            date = re.search('<span class="count">(\d{1,2}\s+\w+\s+\d{4})<\/span>', page_html).group(1)
-            return text.parse_datetime(date, "%d  %b  %Y").isoformat()
-
-        except AttributeError:
-            # Find 'nd ago' format.
-            days_ago = int(re.search('<span class="count">(\d+)\s*d\s*ago<\/span>', page_html).group(1))
-            return (datetime.now(timezone.utc) - timedelta(days=days_ago)).replace(hour=0, minute=0, second=0, microsecond=0)
-    
-    def get_uploader(self, page_html):
-        username_html = re.search('class="username">\s+(.+[^\s])\s+<\/span>', page_html).group(1)
-        return text.remove_html(username_html)
-    
-    def get_image_id(self, image_url):
-        return text.extract(image_url, 'images/', '.')[0]
-    
-    def get_video_id(self, video_url):
-        video_id = text.extract(video_url, 'videos/', '.')[0]
-
-        if '-' in video_id:
-            return text.extract(video_id, '', '-')[0]
-        return video_id
 
 class MotherlessMediaInGalleryExtractor(MotherlessMediaExtractor):
     """Extractor for a single image/video from a gallery from motherless.com"""
@@ -121,15 +79,65 @@ class MotherlessMediaInGalleryExtractor(MotherlessMediaExtractor):
     def get_image(self):
         media_url, data =  super().get_image()
         data['gallery_id'] = re.match(self.pattern, self.url).group(1)
-        data['gallery_title'] = self.get_gallery_name(self.page_data, data['gallery_id'])
+        data['gallery_title'] = self.get_gallery_name(data['gallery_id'])
+        data['title'] = get_media_title(self.page_data)
         return media_url, data
-    
-    def get_gallery_name(self, page_data, gallery_id):
+
+    def get_gallery_name(self, gallery_id):
         try:
             # 'From the gallery: ...' does not always appear in the page.
-            return re.search('From the gallery: (.+?)</a>', page_data).group(1).strip()
-
+            return unescape(
+                re.search('From the gallery: (.+?)</a>', self.page_data).group(1).strip())
         except AttributeError:
             # Get gallery name from gallery home page.
-            gallery_page_data = self.request(self.root + '/G' + gallery_id).text
-            return re.search('id="view-upload-title">([\s\S]+?)<', gallery_page_data).group(1).strip()
+            gallery_page_data = self.request(f"{self.root}/G{gallery_id}").text
+            return get_gallery_name_from_homepage(gallery_page_data)
+
+
+# Metadata extractors.
+
+def get_media_tags(page_data):
+    try:
+        tags_html = re.search('<div class="media-meta-tags">([\S\s]+?)</div>', page_data).group(1)
+    except AttributeError:
+        # No tags found.
+        return []
+
+    tags = text.split_html(tags_html)
+    for i, tag in enumerate(tags):
+        tags[i] = tag.replace('#', '')
+
+    return tags
+
+def get_media_title(page_data):
+    title = re.search('<div class="media-meta-title">([\S\s]+?)</div>', page_data).group(1)
+    return unescape(text.remove_html(title))
+
+def get_media_date(page_data):
+    # Find date uploaded and convert to ISO 8601.
+    try:
+        # Find 'DD Mon YYYY' format.
+        date = re.search('<span class="count">(\d{1,2}\s+\w+\s+\d{4})</span>', page_data).group(1)
+        return text.parse_datetime(date, "%d  %b  %Y").isoformat()
+
+    except AttributeError:
+        # Find 'nd ago' format.
+        days_ago = int(re.search('<span class="count">(\d+)\s*d\s*ago</span>', page_data).group(1))
+        return (datetime.now(timezone.utc) - timedelta(days=days_ago)).replace(hour=0, minute=0, second=0, microsecond=0)
+
+def get_media_uploader(page_data):
+    username_html = re.search('class="username">\s+(.+[^\s])\s+<\/span>', page_data).group(1)
+    return text.remove_html(username_html)
+
+def get_image_id(image_url):
+    return text.extract(image_url, 'images/', '.')[0]
+
+def get_video_id(video_url):
+    video_id = text.extract(video_url, 'videos/', '.')[0]
+
+    if '-' in video_id:
+        return text.extract(video_id, '', '-')[0]
+    return video_id
+
+def get_gallery_name_from_homepage(page_data):
+    return unescape(re.search('<title>(.+) \|', page_data).group(1))
