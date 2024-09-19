@@ -448,7 +448,8 @@ class PixivRankingExtractor(PixivExtractor):
                 self.log.warning("invalid date '%s'", date)
                 date = None
         if not date:
-            date = (datetime.utcnow() - timedelta(days=1)).strftime("%Y-%m-%d")
+            now = util.datetime_utcnow()
+            date = (now - timedelta(days=1)).strftime("%Y-%m-%d")
         self.date = date
 
         return {"ranking": {
@@ -887,7 +888,7 @@ class PixivAppAPI():
             "get_secure_url": "1",
         }
 
-        time = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S+00:00")
+        time = util.datetime_utcnow().strftime("%Y-%m-%dT%H:%M:%S+00:00")
         headers = {
             "X-Client-Time": time,
             "X-Client-Hash": hashlib.md5(
