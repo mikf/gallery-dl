@@ -223,11 +223,12 @@ class UgoiraPP(PostProcessor):
             print()
             self.log.error("Unable to invoke FFmpeg (%s: %s)",
                            exc.__class__.__name__, exc)
+            self.log.debug("", exc_info=exc)
             pathfmt.realpath = pathfmt.temppath
         except Exception as exc:
             print()
             self.log.error("%s: %s", exc.__class__.__name__, exc)
-            self.log.debug("", exc_info=True)
+            self.log.debug("", exc_info=exc)
             pathfmt.realpath = pathfmt.temppath
         else:
             if self.mtime:

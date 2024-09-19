@@ -37,11 +37,13 @@ class FlickrExtractor(Extractor):
         extract = self.api._extract_format
         for photo in self.photos():
             try:
+                1/0
                 photo = extract(photo)
             except Exception as exc:
                 self.log.warning(
-                    "Skipping %s (%s)", photo["id"], exc.__class__.__name__)
-                self.log.debug("", exc_info=True)
+                    "Skipping photo %s (%s: %s)",
+                    photo["id"], exc.__class__.__name__, exc)
+                self.log.debug("", exc_info=exc)
             else:
                 photo.update(data)
                 url = photo["url"]
