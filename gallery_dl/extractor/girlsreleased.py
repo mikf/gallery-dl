@@ -42,7 +42,8 @@ class GirlsreleasedExtractor(Extractor):
             json = self.request(url.format(self.root, self.id, page)).json()
             if not json["sets"]:
                 return sets
-            sets += json["sets"][1:]
+            offset = 0 if page == 0 else 1
+            sets += json["sets"][offset:]
             page += 1
 
     def items(self):
