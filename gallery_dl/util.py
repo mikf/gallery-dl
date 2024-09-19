@@ -218,16 +218,32 @@ def to_string(value):
 
 
 def datetime_to_timestamp(dt):
-    """Convert naive UTC datetime to timestamp"""
+    """Convert naive UTC datetime to Unix timestamp"""
     return (dt - EPOCH) / SECOND
 
 
 def datetime_to_timestamp_string(dt):
-    """Convert naive UTC datetime to timestamp string"""
+    """Convert naive UTC datetime to Unix timestamp string"""
     try:
         return str((dt - EPOCH) // SECOND)
     except Exception:
         return ""
+
+
+if sys.hexversion < 0x30c0000:
+    # Python <= 3.11
+    datetime_utcfromtimestamp = datetime.datetime.utcfromtimestamp
+    datetime_utcnow = datetime.datetime.utcnow
+    datetime_from_timestamp = datetime_utcfromtimestamp
+else:
+    # Python >= 3.12
+    def datetime_from_timestamp(ts=None):
+        """Convert Unix timestamp to naive UTC datetime"""
+        Y, m, d, H, M, S, _, _, _ = time.gmtime(ts)
+        return datetime.datetime(Y, m, d, H, M, S)
+
+    datetime_utcfromtimestamp = datetime_from_timestamp
+    datetime_utcnow = datetime_from_timestamp
 
 
 def json_default(obj):

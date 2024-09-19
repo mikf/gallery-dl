@@ -243,8 +243,11 @@ class TestExtractorWait(unittest.TestCase):
 
     def test_wait_until_datetime(self):
         extr = extractor.find("generic:https://example.org/")
-        until = datetime.utcnow() + timedelta(seconds=5)
+        until = util.datetime_utcnow() + timedelta(seconds=5)
         until_local = datetime.now() + timedelta(seconds=5)
+
+        if not until.microsecond:
+            until = until.replace(microsecond=until_local.microsecond)
 
         with patch("time.sleep") as sleep, patch.object(extr, "log") as log:
             extr.wait(until=until)

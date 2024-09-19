@@ -9,7 +9,9 @@
 """Collection of functions that work on strings/text"""
 
 import re
+import sys
 import html
+import time
 import datetime
 import urllib.parse
 
@@ -247,12 +249,23 @@ def parse_query(qs):
     return result
 
 
-def parse_timestamp(ts, default=None):
-    """Create a datetime object from a unix timestamp"""
-    try:
-        return datetime.datetime.utcfromtimestamp(int(ts))
-    except Exception:
-        return default
+if sys.hexversion < 0x30c0000:
+    # Python <= 3.11
+    def parse_timestamp(ts, default=None):
+        """Create a datetime object from a Unix timestamp"""
+        try:
+            return datetime.datetime.utcfromtimestamp(int(ts))
+        except Exception:
+            return default
+else:
+    # Python >= 3.12
+    def parse_timestamp(ts, default=None):
+        """Create a datetime object from a Unix timestamp"""
+        try:
+            Y, m, d, H, M, S, _, _, _ = time.gmtime(int(ts))
+            return datetime.datetime(Y, m, d, H, M, S)
+        except Exception:
+            return default
 
 
 def parse_datetime(date_string, format="%Y-%m-%dT%H:%M:%S%z", utcoffset=0):

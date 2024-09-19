@@ -738,6 +738,22 @@ def hash(value):
         self.assertEqual(f(datetime.datetime(2010, 1, 1)), "1262304000")
         self.assertEqual(f(None), "")
 
+    def test_datetime_from_timestamp(
+            self, f=util.datetime_from_timestamp):
+        self.assertEqual(f(0.0), util.EPOCH)
+        self.assertEqual(f(1262304000.0), datetime.datetime(2010, 1, 1))
+        self.assertEqual(f(1262304000.128000).replace(microsecond=0),
+                         datetime.datetime(2010, 1, 1, 0, 0, 0))
+
+    def test_datetime_utcfromtimestamp(
+            self, f=util.datetime_utcfromtimestamp):
+        self.assertEqual(f(0.0), util.EPOCH)
+        self.assertEqual(f(1262304000.0), datetime.datetime(2010, 1, 1))
+
+    def test_datetime_utcnow(
+            self, f=util.datetime_utcnow):
+        self.assertIsInstance(f(), datetime.datetime)
+
     def test_universal_none(self):
         obj = util.NONE
 
