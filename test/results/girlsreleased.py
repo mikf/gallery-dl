@@ -40,13 +40,13 @@ __tests__ = (
 
 {
     "#url"     : "https://girlsreleased.com/site/amourangels.com",
-    "#category": ("", "girlsreleased", "model"),
+    "#category": ("", "girlsreleased", "site"),
     "#class"   : girlsreleased.GirlsreleasedSiteExtractor,
 },
 
 {
     "#url"     : "https://girlsreleased.com/site/femjoy.com/model/854/Gabi",
-    "#category": ("", "girlsreleased", "model"),
+    "#category": ("", "girlsreleased", "site"),
     "#class"   : girlsreleased.GirlsreleasedSiteExtractor,
 },
 )
