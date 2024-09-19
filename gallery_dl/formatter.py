@@ -485,6 +485,7 @@ _CONVERSIONS = {
     "C": string.capwords,
     "j": util.json_dumps,
     "t": str.strip,
+    "L": len,
     "T": util.datetime_to_timestamp_string,
     "d": text.parse_timestamp,
     "U": text.unescape,
