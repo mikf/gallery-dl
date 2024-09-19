@@ -79,7 +79,7 @@ class _8chanThreadExtractor(_8chanExtractor):
             self.cookies = self.cookies_prepare()
         except Exception as exc:
             self.log.debug("Failed to fetch captcha cookies:  %s: %s",
-                           exc.__class__.__name__, exc, exc_info=True)
+                           exc.__class__.__name__, exc, exc_info=exc)
 
         # download files
         posts = thread.pop("posts", ())

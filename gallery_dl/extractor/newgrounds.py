@@ -53,8 +53,8 @@ class NewgroundsExtractor(Extractor):
             try:
                 post = self.extract_post(post_url)
                 url = post.get("url")
-            except Exception:
-                self.log.debug("", exc_info=True)
+            except Exception as exc:
+                self.log.debug("", exc_info=exc)
                 url = None
 
             if url:

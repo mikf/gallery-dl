@@ -158,12 +158,12 @@ class Job():
             raise
         except exception.GalleryDLException as exc:
             log.error("%s: %s", exc.__class__.__name__, exc)
-            log.debug("", exc_info=True)
+            log.debug("", exc_info=exc)
             self.status |= exc.code
         except OSError as exc:
             log.error("Unable to download data:  %s: %s",
                       exc.__class__.__name__, exc)
-            log.debug("", exc_info=True)
+            log.debug("", exc_info=exc)
             self.status |= 128
         except Exception as exc:
             log.error(("An unexpected error occurred: %s - %s. "
@@ -171,7 +171,7 @@ class Job():
                        "copy its output and report this issue on "
                        "https://github.com/mikf/gallery-dl/issues ."),
                       exc.__class__.__name__, exc)
-            log.debug("", exc_info=True)
+            log.debug("", exc_info=exc)
             self.status |= 1
         except BaseException:
             self.status |= 1
@@ -642,7 +642,7 @@ class DownloadJob(Job):
                 except Exception as exc:
                     pp_log.error("'%s' initialization failed:  %s: %s",
                                  name, exc.__class__.__name__, exc)
-                    pp_log.debug("", exc_info=True)
+                    pp_log.debug("", exc_info=exc)
                 else:
                     pp_list.append(pp_obj)
 
