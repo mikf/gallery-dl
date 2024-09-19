@@ -476,6 +476,7 @@ _GLOBALS = {
     "_env": lambda: os.environ,
     "_lit": lambda: _literal,
     "_now": datetime.datetime.now,
+    "_nul": lambda: util.NONE,
 }
 _CONVERSIONS = {
     "l": str.lower,

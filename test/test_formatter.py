@@ -351,6 +351,14 @@ class TestFormatter(unittest.TestCase):
         self.assertRegex(out1, r"^\d{4}-\d\d-\d\d \d\d:\d\d:\d\d(\.\d+)?$")
         self.assertNotEqual(out1, out2)
 
+    def test_globals_nul(self):
+        value = "None"
+
+        self._run_test("{_nul}"         , value)
+        self._run_test("{_nul[key]}"    , value)
+        self._run_test("{z|_nul}"       , value)
+        self._run_test("{z|_nul:%Y%m%s}", value)
+
     def test_literals(self):
         value = "foo"
 

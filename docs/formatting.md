@@ -273,6 +273,12 @@ Replacement field names that are available in all format strings.
     <td><code>2022-08</code></td>
 </tr>
 <tr>
+    <td><code>_nul</code></td>
+    <td>Universal <code>null</code> value</td>
+    <td><code>{date|_nul:%Y-%m}</code></td>
+    <td><code>None</code></td>
+</tr>
+<tr>
     <td rowspan="2"><code>_lit</code></td>
     <td rowspan="2">String literals</td>
     <td><code>{_lit[foo]}</code></td>
