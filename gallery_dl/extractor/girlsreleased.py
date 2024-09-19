@@ -9,7 +9,6 @@
 """Extractors for https://girlsreleased.com/"""
 
 from .common import Extractor, Message
-from .. import text
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?girlsreleased\.com"
 
@@ -21,10 +20,9 @@ class GirlsreleasedExtractor(Extractor):
     request_interval = 0.5
     request_interval_min = 0.2
 
-    def _init(self):
-        domain = self.config("domain")
-        if domain:
-            self.root = text.ensure_http_scheme(domain)
+    def __init__(self, match):
+        Extractor.__init__(self, match)
+        self.id = match.group(1)
 
     def _images(self, json):
         data = {
@@ -37,14 +35,25 @@ class GirlsreleasedExtractor(Extractor):
         for image in json["images"]:
             yield Message.Queue, image[3], data
 
-    def items(self):
-        posts = self.posts()
+    def _pagination(self, url):
+        sets = []
+        page = 0
+        while True:
+            print(page)
+            json = self.request(url.format(self.root, self.id, page)).json()
+            if not json["sets"]:
+                return sets
+            sets += json["sets"][1:]
+            page += 1
 
-        if "images" in posts:
-            yield from self._images(posts)
+    def items(self):
+        sets = self.sets()
+
+        if "images" in sets:
+            yield from self._images(sets)
         else:
-            for gallery in posts:
-                url = "{}/set/{}".format(self.root, gallery[0])
+            for set in sets:
+                url = "{}/set/{}".format(self.root, set[0])
                 yield from self._images(self.request(url).json()["set"])
 
 
@@ -54,11 +63,7 @@ class GirlsreleasedSetExtractor(GirlsreleasedExtractor):
     pattern = BASE_PATTERN + r"/set/(\d+)"
     example = "https://girlsreleased.com/set/12345"
 
-    def __init__(self, match):
-        GirlsreleasedExtractor.__init__(self, match)
-        self.id = match.group(1)
-
-    def posts(self):
+    def sets(self):
         url = "{}/set/{}".format(self.root, self.id)
         return self.request(url).json()["set"]
 
@@ -69,13 +74,8 @@ class GirlsreleasedModelExtractor(GirlsreleasedExtractor):
     pattern = BASE_PATTERN + r"/model/(\d+(?:/?.+)?)"
     example = "https://girlsreleased.com/model/12345/MODEL"
 
-    def __init__(self, match):
-        GirlsreleasedExtractor.__init__(self, match)
-        self.id = match.group(1)
-
-    def posts(self):
-        url = "{}/sets/model/{}".format(self.root, self.id)
-        return self.request(url).json()["sets"]
+    def sets(self):
+        return self._pagination("{}/sets/model/{}/page/{}")
 
 
 class GirlsreleasedSiteExtractor(GirlsreleasedExtractor):
@@ -84,10 +84,5 @@ class GirlsreleasedSiteExtractor(GirlsreleasedExtractor):
     pattern = BASE_PATTERN + r"/site/(.+(?:/model/\d+(?:/?.+)?)?)"
     example = "https://girlsreleased.com/site/SITE"
 
-    def __init__(self, match):
-        GirlsreleasedExtractor.__init__(self, match)
-        self.id = match.group(1)
-
-    def posts(self):
-        url = "{}/sets/site/{}".format(self.root, self.id)
-        return self.request(url).json()["sets"]
+    def sets(self):
+        return self._pagination("{}/sets/site/{}/page/{}")
