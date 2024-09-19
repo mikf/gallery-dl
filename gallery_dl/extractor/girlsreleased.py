@@ -36,14 +36,13 @@ class GirlsreleasedExtractor(Extractor):
             yield Message.Queue, image[3], data
 
     def _pagination(self, url):
-        sets = []
         page = 0
         while True:
             json = self.request(url.format(self.root, self.id, page)).json()
             if not json["sets"]:
-                return sets
+                return
             offset = 0 if page == 0 else 1
-            sets += json["sets"][offset:]
+            yield from json["sets"][offset:]
             page += 1
 
     def items(self):
@@ -75,7 +74,7 @@ class GirlsreleasedModelExtractor(GirlsreleasedExtractor):
     example = "https://girlsreleased.com/model/12345/MODEL"
 
     def sets(self):
-        return self._pagination("{}/sets/model/{}/page/{}")
+        return list(self._pagination("{}/sets/model/{}/page/{}"))
 
 
 class GirlsreleasedSiteExtractor(GirlsreleasedExtractor):
@@ -85,4 +84,4 @@ class GirlsreleasedSiteExtractor(GirlsreleasedExtractor):
     example = "https://girlsreleased.com/site/SITE"
 
     def sets(self):
-        return self._pagination("{}/sets/site/{}/page/{}")
+        return list(self._pagination("{}/sets/site/{}/page/{}"))
