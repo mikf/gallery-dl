@@ -39,7 +39,6 @@ class GirlsreleasedExtractor(Extractor):
         sets = []
         page = 0
         while True:
-            print(page)
             json = self.request(url.format(self.root, self.id, page)).json()
             if not json["sets"]:
                 return sets
