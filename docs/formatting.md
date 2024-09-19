@@ -11,16 +11,56 @@ Field names select the metadata value to use in a replacement field.
 
 While simple names are usually enough, more complex forms like accessing values by attribute, element index, or slicing are also supported.
 
-|                      | Example             | Result                 |
-| -------------------- | ------------------- | ---------------------- |
-| Name                 | `{title}`           | `Hello World`          |
-| Element Index        | `{title[6]}`        | `W`                    |
-| Slicing              | `{title[3:8]}`      | `lo Wo`                |
-| Slicing (Bytes)      | `{title_ja[b3:18]}` | `ロー・ワー`           |
-| Alternatives         | `{empty\|title}`    | `Hello World`          |
-| Attribute Access     | `{extractor.url}`   | `https://example.org/` |
-| Element Access       | `{user[name]}`      | `John Doe`             |
-|                      | `{user['name']}`    | `John Doe`             |
+<table>
+<thead>
+<tr>
+    <th></th>
+    <th>Example</th>
+    <th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+    <td>Name</td>
+    <td><code>{title}</code></td>
+    <td><code>Hello World</code></td>
+</tr>
+<tr>
+    <td>Element Index</td>
+    <td><code>{title[6]}</code></td>
+    <td><code>W</code></td>
+</tr>
+<tr>
+    <td>Slicing</td>
+    <td><code>{title[3:8]}</code></td>
+    <td><code>lo Wo</code></td>
+</tr>
+<tr>
+    <td>Slicing (Bytes)</td>
+    <td><code>{title_ja[b3:18]}</code></td>
+    <td><code>ロー・ワー</code></td>
+</tr>
+<tr>
+    <td>Alternatives</td>
+    <td><code>{empty|title}</code></td>
+    <td><code>Hello World</code></td>
+</tr>
+<tr>
+    <td>Attribute Access</td>
+    <td><code>{extractor.url}</code></td>
+    <td><code>https://example.org/</code></td>
+</tr>
+<tr>
+    <td rowspan="2">Element Access</td>
+    <td><code>{user[name]}</code></td>
+    <td><code>John Doe</code></td>
+</tr>
+<tr>
+    <td><code>{user['name']}</code></td>
+    <td><code>John Doe</code></td>
+</tr>
+</tbody>
+</table>
 
 All of these methods can be combined as needed.
 For example `{title[24]|empty|extractor.url[15:-1]}` would result in `.org`.
