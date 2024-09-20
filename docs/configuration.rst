@@ -1501,12 +1501,40 @@ Type
 Default
     ``["image", "video", "download", "gallery"]``
 Description
-    Determines the type and order of files to be downloaded.
+    Determines the type and order of files to download.
 
     Available types are
     ``image``,
     ``video``,
     ``download``,
+    ``gallery``.
+
+
+extractor.civitai.api-key
+-------------------------
+Type
+    ``string``
+Description
+    The API Key value generated in your
+    `User Account Settings <https://civitai.com/user/account>`__
+    to make authorized API requests.
+
+    See `API/Authorization <https://developer.civitai.com/docs/api/public-rest#authorization>`__
+    for details.
+
+
+extractor.civitai.files
+-----------------------
+Type
+    ``list`` of ``strings``
+Default
+    ``["image"]``
+Description
+    Determines the type and order of files to download.
+
+    Available types are
+    ``model``,
+    ``image``,
     ``gallery``.
 
 

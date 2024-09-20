@@ -158,9 +158,15 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
+    <td>Civitai</td>
+    <td>https://www.civitai.com/</td>
+    <td>Models, Search Results, Tag Searches, User Profiles</td>
+    <td></td>
+</tr>
+<tr>
     <td>cohost!</td>
     <td>https://cohost.org/</td>
-    <td>Posts, Tag Searches, User Profiles</td>
+    <td>Likes, Posts, Tag Searches, User Profiles</td>
     <td></td>
 </tr>
 <tr>
