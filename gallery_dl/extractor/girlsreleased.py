@@ -9,6 +9,7 @@
 """Extractors for https://girlsreleased.com/"""
 
 from .common import Extractor, Message
+from .. import text
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?girlsreleased\.com"
 
@@ -33,6 +34,7 @@ class GirlsreleasedExtractor(Extractor):
         }
         yield Message.Directory, data
         for image in json["images"]:
+            text.nameext_from_url(image[5], data)
             yield Message.Queue, image[3], data
 
     def _pagination(self, url):
