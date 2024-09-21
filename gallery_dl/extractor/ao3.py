@@ -116,7 +116,17 @@ class Ao3WorkExtractor(Ao3Extractor):
 
         work_id = self.groups[0]
         url = "{}/works/{}".format(self.root, work_id)
-        extr = text.extract_from(self.request(url).text)
+        response = self.request(url, notfound="work")
+
+        if response.url.endswith("/users/login?restricted=true"):
+            raise exception.AuthorizationError(
+                "Login required to access member-only works")
+        page = response.text
+        if len(page) < 20000 and \
+                '<h2 class="landmark heading">Adult Content Warning</' in page:
+            raise exception.StopExtraction("Adult Content")
+
+        extr = text.extract_from(page)
 
         chapters = {}
         cindex = extr(' id="chapter_index"', "</ul>")
