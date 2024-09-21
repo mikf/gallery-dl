@@ -282,3 +282,21 @@ class Ao3UserBookmarkExtractor(Ao3Extractor):
     pattern = (BASE_PATTERN + r"(/users/([^/?#]+)/(?:pseuds/([^/?#]+)/)?"
                r"bookmarks(?:/?\?.+)?)")
     example = "https://archiveofourown.org/users/USER/bookmarks"
+
+    def items(self):
+        self.login()
+
+        base = self.root + "/"
+        data_work = {"_extractor": Ao3WorkExtractor}
+        data_series = {"_extractor": Ao3SeriesExtractor}
+
+        for item in self._pagination(
+                self.groups[0], '<span class="count"><a href="/'):
+            path = item.rpartition("/")[0]
+            url = base + path
+            if item.startswith("works/"):
+                yield Message.Queue, url, data_work
+            elif item.startswith("series/"):
+                yield Message.Queue, url, data_series
+            else:
+                self.log.warning("Unsupported bookmark type '%s'", path)
