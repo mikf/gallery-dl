@@ -105,15 +105,23 @@ class TestExtractorModule(unittest.TestCase):
     def test_categories(self):
         for result in results.all():
             url = result["#url"]
-            base, cat, sub = result["#category"]
+            cls = result["#class"]
             try:
-                extr = result["#class"].from_url(url)
+                extr = cls.from_url(url)
             except ImportError as exc:
                 if exc.name in ("youtube_dl", "yt_dlp"):
-                    print("Skipping '{}' category checks".format(cat))
+                    print("Skipping '{}' category checks".format(cls.category))
                     continue
                 raise
             self.assertTrue(extr, url)
+
+            categories = result.get("#category")
+            if categories:
+                base, cat, sub = categories
+            else:
+                cat = cls.category
+                sub = cls.subcategory
+                base = cls.basecategory
             self.assertEqual(extr.category, cat, url)
             self.assertEqual(extr.subcategory, sub, url)
             self.assertEqual(extr.basecategory, base, url)
