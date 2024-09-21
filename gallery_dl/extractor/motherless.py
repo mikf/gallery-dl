@@ -294,7 +294,15 @@ def get_gallery_uploader(page_data):
         return re.search('gallery-member-username">[\s\S]+?<a href="/m/(.+?)"', page_data).group(1)
 
 def get_gallery_image_count(page_data):
-    return int(re.search('Images \(([0-9]+)\)', page_data).group(1))
+    try:
+        return int(re.search('Images \(([0-9,]+)\)', page_data).group(1).replace(',', ''))
+    except AttributeError:
+        # No images found.
+        return 0
 
 def get_gallery_video_count(page_data):
-    return int(re.search('Videos \(([0-9]+)\)', page_data).group(1))
+    try:
+        return int(re.search('Videos \(([0-9,]+)\)', page_data).group(1).replace(',', ''))
+    except AttributeError:
+        # No images found.
+        return 0
