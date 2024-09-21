@@ -236,7 +236,7 @@ __tests__ = (
     "#url"     : "https://archiveofourown.org/users/Fyrelass/bookmarks",
     "#category": ("", "ao3", "user-bookmark"),
     "#class"   : ao3.Ao3UserBookmarkExtractor,
-    "#pattern" : ao3.Ao3WorkExtractor.pattern,
+    "#pattern" : r"https://archiveofourown\.org/(work|serie)s/\d+",
     "#range"   : "1-50",
     "#count"   : 50,
 },
