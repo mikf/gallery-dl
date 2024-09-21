@@ -415,14 +415,10 @@ Description
     The username and password to use when attempting to log in to
     another site.
 
-    Specifying username and password is required for
-
-    * ``nijie``
-    * ``horne``
-
-    and optional for
+    This is supported for
 
     * ``aibooru`` (*)
+    * ``ao3``
     * ``aryion``
     * ``atfbooru`` (*)
     * ``bluesky``
@@ -434,6 +430,7 @@ Description
     * ``e6ai`` (*)
     * ``e926`` (*)
     * ``exhentai``
+    * ``horne`` (R)
     * ``idolcomplex``
     * ``imgbb``
     * ``inkbunny``
@@ -441,8 +438,11 @@ Description
     * ``koharu``
     * ``mangadex``
     * ``mangoxo``
+    * ``newgrounds``
+    * ``nijie`` (R)
     * ``pillowfort``
     * ``sankaku``
+    * ``seiga``
     * ``subscribestar``
     * ``tapas``
     * ``tsumino``
@@ -457,6 +457,9 @@ Description
     (*) The password value for these sites should be
     the API key found in your user profile, not the actual account password.
 
+    (R) Login with username & password or supplying logged-in
+    `cookies <extractor.*.cookies_>`__ is required
+
     Note: Leave the ``password`` value empty or undefined
     to be prompted for a passeword when performing a login
     (see `getpass() <https://docs.python.org/3/library/getpass.html#getpass.getpass>`__).
@@ -467,7 +470,7 @@ extractor.*.input
 Type
     ``bool``
 Default
-    ``true`` if `stdin` is attached to a terminal ,
+    ``true`` if `stdin` is attached to a terminal,
     ``false`` otherwise
 Description
     Allow prompting the user for interactive input.
