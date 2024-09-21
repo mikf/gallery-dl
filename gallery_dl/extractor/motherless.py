@@ -94,6 +94,154 @@ class MotherlessMediaInGalleryExtractor(MotherlessMediaExtractor):
             return get_gallery_name_from_homepage(gallery_page_data)
 
 
+class MotherlessGalleryImagesExtractor(MotherlessExtractor):
+    """Extractor for all images in a gallery from motherless.com"""
+
+    subcategory = "image gallery"
+    directory_fmt = ("{category}", "{gallery_id} {gallery_title}")
+    pattern = ROOT_URL_PATTERN + "/GI([A-Z0-9]+)$"
+    example = "https://motherless.com/GIABC123"
+
+    def items(self):
+        self.gallery_id = re.match(self.pattern, self.url).group(1)
+
+        page = self.request(f"{self.root}/G{self.gallery_id}").text
+        data = {
+            "gallery_id" : self.gallery_id, 
+            "gallery_title": get_gallery_name_from_homepage(page), 
+            "uploader": get_gallery_uploader(page),
+            "count": get_gallery_image_count(page)}
+
+        yield Message.Directory, data
+
+        for id, url, extension, title, num in get_images(self):
+            data |= {
+                "id": id,
+                "filename": id,
+                "extension": extension,
+                "title": title,
+                "num": num}
+
+            yield Message.Url, url, data
+
+
+class MotherlessGalleryVideosExtractor(MotherlessExtractor):
+    """Extractor for all videos in a gallery from motherless.com"""
+
+    subcategory = "video gallery"
+    directory_fmt = ("{category}", "{gallery_id} {gallery_title}")
+    pattern = ROOT_URL_PATTERN + "/GV([A-Z0-9]+)$"
+    example = "https://motherless.com/GVABC123"
+
+    def items(self):
+        self.gallery_id = re.match(self.pattern, self.url).group(1)
+        page = self.request(f"{self.root}/G{self.gallery_id}").text
+        data = {
+            "gallery_id" : self.gallery_id, 
+            "gallery_title": get_gallery_name_from_homepage(page),
+            "uploader": get_gallery_uploader(page),
+            "count": get_gallery_video_count(page)}
+
+        yield Message.Directory, data
+
+        for id, url, title, num in get_videos(self):
+            data |= {
+                "id": id,
+                "filename": id,
+                "extension": "mp4",
+                "title": title,
+                "num": num}
+
+            yield Message.Url, url, data
+
+
+class MotherlessGalleryExtractor(MotherlessExtractor):
+    """Extractor for all images and videos in a gallery from motherless.com"""
+
+    subcategory = "gallery"
+    directory_fmt = ("{category}", "{gallery_id} {gallery_title}")
+    pattern = ROOT_URL_PATTERN + "/G([A-Z0-9]+)$"
+    example = "https://motherless.com/GABC123"
+
+    def items(self):
+        self.gallery_id = re.match(self.pattern, self.url).group(1)
+        page = self.request(f"{self.root}/G{self.gallery_id}").text
+        data = {
+            "gallery_id" : self.gallery_id, 
+            "gallery_title": get_gallery_name_from_homepage(page), 
+            "uploader": get_gallery_uploader(page),
+            "count": get_gallery_image_count(page) + get_gallery_video_count(page)}
+        
+        yield Message.Directory, data
+
+        for id, url, extension, title, num in get_images(self):
+            data |= {
+                "id": id,
+                "filename": id,
+                "extension": extension,
+                "title": title,
+                "num": num}
+
+            yield Message.Url, url, data
+
+        for id, url, title, num in get_videos(self):
+            data |= {
+                "id": id,
+                "filename": id,
+                "extension": "mp4",
+                "title": title,
+                "num": num}
+
+            yield Message.Url, url, data
+
+
+# Url extractors.
+
+def get_images(extractor):
+    n = 1
+    total_count = 0
+
+    while True:
+        page = extractor.request(f"{extractor.root}/GI{extractor.gallery_id}?page={n}").text
+        page_count = 0
+
+        for result in re.finditer(f' src="https:\/\/cdn5-thumbs\.motherlessmedia\.com\/thumbs\/([A-Z0-9]+?)\.(jpg|gif)"[\s\S]+?alt="(.+)"', page):
+            id = result.group(1)
+            url = f"https://cdn5-images.motherlessmedia.com/images/{id}.jpg"
+            extension = result.group(2)
+            title = result.group(3)
+            page_count += 1
+
+            yield id, url, extension, title, total_count + page_count
+
+        if page_count == 0:
+            return
+
+        total_count += page_count
+        n += 1
+
+def get_videos(extractor):
+    n = 1
+    total_count = 0
+
+    while True:
+        page = extractor.request(f"{extractor.root}/GV{extractor.gallery_id}?page={n}").text
+        page_count = 0
+
+        for result in re.finditer(f'thumbs\/([A-Z0-9]+?)-strip\.jpg" alt="(.+)"', page):
+            id = result.group(1)
+            url = f"https://cdn5-videos.motherlessmedia.com/videos/{id}.mp4"
+            title = result.group(2)
+            page_count += 1
+
+            yield id, url, title, total_count + page_count
+
+        if page_count == 0:
+            return
+
+        total_count += page_count
+        n += 1
+
 # Metadata extractors.
 
 def get_media_tags(page_data):
@@ -141,3 +289,12 @@ def get_video_id(video_url):
 
 def get_gallery_name_from_homepage(page_data):
     return unescape(re.search('<title>(.+) \|', page_data).group(1))
+
+def get_gallery_uploader(page_data):
+        return re.search('gallery-member-username">[\s\S]+?<a href="/m/(.+?)"', page_data).group(1)
+
+def get_gallery_image_count(page_data):
+    return int(re.search('Images \(([0-9]+)\)', page_data).group(1))
+
+def get_gallery_video_count(page_data):
+    return int(re.search('Videos \(([0-9]+)\)', page_data).group(1))
