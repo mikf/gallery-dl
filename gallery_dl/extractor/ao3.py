@@ -9,7 +9,8 @@
 """Extractors for https://archiveofourown.org/"""
 
 from .common import Extractor, Message
-from .. import text, util
+from .. import text, util, exception
+from ..cache import cache
 
 BASE_PATTERN = (r"(?:https?://)?(?:www\.)?"
                 r"a(?:rchiveofourown|o3)\.(?:org|com|net)")
@@ -20,9 +21,13 @@ class Ao3Extractor(Extractor):
     category = "ao3"
     root = "https://archiveofourown.org"
     categorytransfer = True
+    cookies_domain = ".archiveofourown.org"
+    cookies_names = ("remember_user_token",)
     request_interval = (0.5, 1.5)
 
     def items(self):
+        self.login()
+
         base = self.root + "/works/"
         data = {"_extractor": Ao3WorkExtractor}
 
@@ -31,6 +36,48 @@ class Ao3Extractor(Extractor):
 
     def works(self):
         return self._pagination(self.groups[0])
+
+    def login(self):
+        if self.cookies_check(self.cookies_names):
+            return
+
+        username, password = self._get_auth_info()
+        if username:
+            return self.cookies_update(self._login_impl(username, password))
+
+    @cache(maxage=90*86400, keyarg=1)
+    def _login_impl(self, username, password):
+        self.log.info("Logging in as %s", username)
+
+        url = self.root + "/users/login"
+        page = self.request(url).text
+
+        pos = page.find('id="loginform"')
+        token = text.extract(
+            page, ' name="authenticity_token" value="', '"', pos)[0]
+        if not token:
+            self.log.error("Unable to extract 'authenticity_token'")
+
+        data = {
+            "authenticity_token": text.unescape(token),
+            "user[login]"       : username,
+            "user[password]"    : password,
+            "user[remember_me]" : "1",
+            "commit"            : "Log In",
+        }
+
+        response = self.request(url, method="POST", data=data)
+        if not response.history:
+            raise exception.AuthenticationError()
+
+        remember = response.history[0].cookies.get("remember_user_token")
+        if not remember:
+            raise exception.AuthenticationError()
+
+        return {
+            "remember_user_token": remember,
+            "user_credentials"   : "1",
+        }
 
     def _pagination(self, path, needle='<li id="work_'):
         while True:
@@ -65,6 +112,8 @@ class Ao3WorkExtractor(Ao3Extractor):
         self.cookies.set("view_adult", "true", domain="archiveofourown.org")
 
     def items(self):
+        self.login()
+
         work_id = self.groups[0]
         url = "{}/works/{}".format(self.root, work_id)
         extr = text.extract_from(self.request(url).text)
@@ -205,6 +254,8 @@ class Ao3UserSeriesExtractor(Ao3Extractor):
     example = "https://archiveofourown.org/users/USER/series"
 
     def items(self):
+        self.login()
+
         base = self.root + "/series/"
         data = {"_extractor": Ao3SeriesExtractor}
 

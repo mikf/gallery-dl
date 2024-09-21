@@ -366,6 +366,7 @@ _APIKEY_WY = ('<a href="https://gdl-org.github.io/docs/configuration.html'
 
 AUTH_MAP = {
     "aibooru"        : "Supported",
+    "ao3"            : "Supported",
     "aryion"         : "Supported",
     "atfbooru"       : "Supported",
     "baraag"         : _OAUTH,
@@ -404,7 +405,7 @@ AUTH_MAP = {
     "ponybooru"      : "API Key",
     "reddit"         : _OAUTH,
     "sankaku"        : "Supported",
-    "seiga"          : _COOKIES,
+    "seiga"          : "Supported",
     "smugmug"        : _OAUTH,
     "subscribestar"  : "Supported",
     "tapas"          : "Supported",
