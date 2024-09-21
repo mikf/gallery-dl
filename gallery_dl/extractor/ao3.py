@@ -176,8 +176,8 @@ class Ao3WorkExtractor(Ao3Extractor):
                 extr('<dd class="bookmarks">', "</dd>")).replace(",", "")),
             "views"        : text.parse_int(
                 extr('<dd class="hits">', "<").replace(",", "")),
-            "title"        : text.unescape(
-                extr(' class="title heading">', "<").strip()),
+            "title"        : text.unescape(text.remove_html(
+                extr(' class="title heading">', "</h2>")).strip()),
             "author"       : text.unescape(text.remove_html(
                 extr(' class="byline heading">', "</h3>"))),
             "summary"      : text.split_html(
