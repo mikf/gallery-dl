@@ -43,7 +43,8 @@ CONFIG = {
     },
 }
 
-AUTH = {
+
+AUTH_REQUIRED = {
     "pixiv",
     "nijie",
     "horne",
@@ -54,7 +55,7 @@ AUTH = {
     "twitter",
 }
 
-AUTH_CONFIG = (
+AUTH_KEYS = (
     "username",
     "cookies",
     "api-key",
@@ -91,24 +92,26 @@ class TestExtractorResults(unittest.TestCase):
             self.assertGreaterEqual(value, range.start, msg=msg)
 
     def _run_test(self, result):
+        base, cat, sub = result_categories(result)
         result.pop("#comment", None)
+        result.pop("#category", None)
         auth = result.pop("#auth", None)
 
         extractor.find(result["#url"])
         extr = result["#class"].from_url(result["#url"])
         if not extr:
             raise exception.NoExtractorError()
-        if len(result) <= 3:
+        if len(result) <= 2:
             return  # only matching
 
         if auth is None:
-            auth = (result["#category"][1] in AUTH)
+            auth = (cat in AUTH_REQUIRED)
         elif not auth:
             # auth explicitly disabled
-            for key in AUTH_CONFIG:
+            for key in AUTH_KEYS:
                 config.set((), key, None)
 
-        if auth and not any(extr.config(key) for key in AUTH_CONFIG):
+        if auth and not any(extr.config(key) for key in AUTH_KEYS):
             return self._skipped.append((result["#url"], "no auth"))
 
         if "#options" in result:
@@ -411,6 +414,15 @@ def load_test_config():
             path, exc.__class__.__name__, exc))
 
 
+def result_categories(result):
+    categories = result.get("#category")
+    if categories:
+        return categories
+
+    cls = result["#class"]
+    return cls.basecategory, cls.category, cls.subcategory
+
+
 def generate_tests():
     """Dynamically generate extractor unittests"""
     def _generate_method(result):
@@ -437,7 +449,7 @@ def generate_tests():
         if category.startswith("+"):
             basecategory = category[1:].lower()
             tests = [t for t in results.all()
-                     if t["#category"][0].lower() == basecategory]
+                     if result_categories(t)[0].lower() == basecategory]
         else:
             tests = results.category(category)
 
@@ -450,14 +462,16 @@ def generate_tests():
                 tests = [t for t in tests
                          if "#comment" in t and com in t["#comment"].lower()]
             else:
-                tests = [t for t in tests if t["#category"][-1] == subcategory]
+                tests = [t for t in tests
+                         if result_categories(t)[-1] == subcategory]
     else:
         tests = results.all()
 
     # add 'test_...' methods
     enum = collections.defaultdict(int)
     for result in tests:
-        name = "{1}_{2}".format(*result["#category"])
+        base, cat, sub = result_categories(result)
+        name = "{}_{}".format(cat, sub)
         enum[name] += 1
 
         method = _generate_method(result)
