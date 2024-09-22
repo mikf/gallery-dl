@@ -192,9 +192,11 @@ class WeasylFavoriteExtractor(WeasylExtractor):
             if not owner_login:
                 owner_login = text.extr(page, '<a href="/~', '"')
 
+            new_posts = False
             for submitid in text.extract_iter(page, "/submissions/", "/", pos):
                 if submitid == lastid:
                     continue
+                new_posts = True
                 lastid = submitid
                 submission = self.request_submission(submitid)
                 if self.populate_submission(submission):
@@ -202,6 +204,6 @@ class WeasylFavoriteExtractor(WeasylExtractor):
                     yield Message.Directory, submission
                     yield Message.Url, submission["url"], submission
 
-            if "&amp;nextid=" not in page:
+            if not new_posts:
                 return
             params["nextid"] = submitid
