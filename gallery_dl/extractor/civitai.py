@@ -10,26 +10,56 @@
 
 from .common import Extractor, Message
 from .. import text
+import functools
 import itertools
 import re
 
 BASE_PATTERN = r"(?:https?://)?civitai\.com"
+USER_PATTERN = BASE_PATTERN + r"/user/([^/?#]+)"
 
 
 class CivitaiExtractor(Extractor):
     """Base class for civitai extractors"""
     category = "civitai"
     root = "https://civitai.com"
+    directory_fmt = ("{category}", "{username}", "images")
+    filename_fmt = "{id}.{extension}"
+    archive_fmt = "{hash}"
     request_interval = (0.5, 1.5)
 
     def _init(self):
         self.api = CivitaiAPI(self)
 
     def items(self):
-        data = {"_extractor": CivitaiModelExtractor}
-        for model in self.models():
-            url = "{}/models/{}".format(self.root, model["id"])
-            yield Message.Queue, url, data
+        models = self.models()
+        if models:
+            data = {"_extractor": CivitaiModelExtractor}
+            for model in models:
+                url = "{}/models/{}".format(self.root, model["id"])
+                yield Message.Queue, url, data
+            return
+
+        images = self.images()
+        if images:
+            for image in images:
+                url = self._orig(image["url"])
+                image["date"] = text.parse_datetime(
+                    image["createdAt"], "%Y-%m-%dT%H:%M:%S.%fZ")
+                text.nameext_from_url(url, image)
+                yield Message.Directory, image
+                yield Message.Url, url, image
+            return
+
+    def models(self):
+        return ()
+
+    def images(self):
+        return ()
+
+    def _orig(self, url):
+        sub_width = functools.partial(re.compile(r"/width=\d*/").sub, "/w/")
+        CivitaiExtractor._orig = sub_width
+        return sub_width(url)
 
 
 class CivitaiModelExtractor(CivitaiExtractor):
@@ -43,7 +73,6 @@ class CivitaiModelExtractor(CivitaiExtractor):
 
     def items(self):
         model_id, version_id = self.groups
-        self._sub = re.compile(r"/width=\d*/").sub
 
         model = self.api.model(model_id)
         creator = model["creator"]
@@ -114,7 +143,7 @@ class CivitaiModelExtractor(CivitaiExtractor):
             text.nameext_from_url(file["url"], {
                 "num" : num,
                 "file": file,
-                "url" : self._sub("/w/", file["url"]),
+                "url" : self._orig(file["url"]),
             })
             for num, file in enumerate(version["images"], 1)
         ]
@@ -129,7 +158,7 @@ class CivitaiModelExtractor(CivitaiExtractor):
             yield text.nameext_from_url(file["url"], {
                 "num" : num,
                 "file": file,
-                "url" : self._sub("/w/", file["url"]),
+                "url" : self._orig(file["url"]),
             })
 
     def _validate_file_model(self, response):
@@ -146,14 +175,33 @@ class CivitaiModelExtractor(CivitaiExtractor):
         return True
 
 
-class CivitaiTagExtractor(CivitaiExtractor):
-    subcategory = "tag"
-    pattern = BASE_PATTERN + r"/tag/([^?/#]+)"
+class CivitaiImageExtractor(CivitaiExtractor):
+    subcategory = "image"
+    pattern = BASE_PATTERN + r"/images/(\d+)"
+    example = "https://civitai.com/images/12345"
+
+    def images(self):
+        return self.api.images({"imageId": self.groups[0]})
+
+
+class CivitaiTagModelsExtractor(CivitaiExtractor):
+    subcategory = "tag-models"
+    pattern = BASE_PATTERN + r"/(?:tag/|models\?tag=)([^/?&#]+)"
     example = "https://civitai.com/tag/TAG"
 
     def models(self):
         tag = text.unquote(self.groups[0])
         return self.api.models({"tag": tag})
+
+
+class CivitaiTagImagesExtractor(CivitaiExtractor):
+    subcategory = "tag-images"
+    pattern = BASE_PATTERN + r"/images\?tags=([^&#]+)"
+    example = "https://civitai.com/images?tags=12345"
+
+    def images(self):
+        tag = text.unquote(self.groups[0])
+        return self.api.images({"tag": tag})
 
 
 class CivitaiSearchExtractor(CivitaiExtractor):
@@ -168,12 +216,40 @@ class CivitaiSearchExtractor(CivitaiExtractor):
 
 class CivitaiUserExtractor(CivitaiExtractor):
     subcategory = "user"
-    pattern = BASE_PATTERN + r"/user/([^/?#]+)(?:/models)?/?(?:$|\?|#)"
+    pattern = USER_PATTERN + r"/?(?:$|\?|#)"
+    example = "https://civitai.com/user/USER"
+
+    def initialize(self):
+        pass
+
+    def items(self):
+        base = "{}/user/{}/".format(self.root, self.groups[0])
+        return self._dispatch_extractors((
+            (CivitaiUserModelsExtractor, base + "models"),
+            (CivitaiUserImagesExtractor, base + "images"),
+        ), ("user-models", "user-images"))
+
+
+class CivitaiUserModelsExtractor(CivitaiExtractor):
+    subcategory = "user-models"
+    pattern = USER_PATTERN + r"/models/?(?:\?([^#]+))?"
     example = "https://civitai.com/user/USER/models"
 
     def models(self):
-        params = {"username": text.unquote(self.groups[0])}
+        params = text.parse_query(self.groups[1])
+        params["username"] = text.unquote(self.groups[0])
         return self.api.models(params)
+
+
+class CivitaiUserImagesExtractor(CivitaiExtractor):
+    subcategory = "user-images"
+    pattern = USER_PATTERN + r"/images/?(?:\?([^#]+))?"
+    example = "https://civitai.com/user/USER/images"
+
+    def images(self):
+        params = text.parse_query(self.groups[1])
+        params["username"] = text.unquote(self.groups[0])
+        return self.api.images(params)
 
 
 class CivitaiAPI():

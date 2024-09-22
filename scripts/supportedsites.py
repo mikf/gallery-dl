@@ -194,6 +194,12 @@ SUBCATEGORY_MAP = {
     "bluesky": {
         "posts": "",
     },
+    "civitai": {
+        "tag-models": "Tag Searches (Models)",
+        "tag-images": "Tag Searches (Images)",
+        "user-models": "User Models",
+        "user-images": "User Images",
+    },
     "coomerparty": {
         "discord"       : "",
         "discord-server": "",
