@@ -97,10 +97,12 @@ class TestExtractorResults(unittest.TestCase):
         result.pop("#category", None)
         auth = result.pop("#auth", None)
 
-        extractor.find(result["#url"])
-        extr = result["#class"].from_url(result["#url"])
-        if not extr:
-            raise exception.NoExtractorError()
+        extr_url = extractor.find(result["#url"])
+        self.assertTrue(extr_url, "extractor by URL/find")
+        extr_cls = extr = result["#class"].from_url(result["#url"])
+        self.assertTrue(extr_url, "extractor by cls.from_url()")
+        self.assertIs(extr_url.__class__, extr_cls.__class__)
+
         if len(result) <= 2:
             return  # only matching
 
