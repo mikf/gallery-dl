@@ -10,22 +10,28 @@
 
 from .common import Extractor, Message
 from .. import text
+import itertools
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?girlsreleased\.com"
 
 
-class GirlsreleasedExtractor(Extractor):
-    """Base class for girlsreleased extractors"""
+class GirlsreleasedSetExtractor(Extractor):
+    """Extractor for girlsreleased galleries"""
     category = "girlsreleased"
+    subcategory = "set"
+    pattern = BASE_PATTERN + r"/set/(\d+)"
+    example = "https://girlsreleased.com/set/12345"
     root = "https://www.girlsreleased.com/api/0.1"
     request_interval = 0.5
     request_interval_min = 0.2
 
     def __init__(self, match):
-        Extractor.__init__(self, match)
+        super().__init__(match)
         self.id = match.group(1)
 
-    def _images(self, json):
+    def images(self, id):
+        url = "{}/set/{}".format(self.root, id)
+        json = self.request(url).json()["set"]
         data = {
             "title": json["name"] or json["id"],
             "id": json["id"],
@@ -37,53 +43,34 @@ class GirlsreleasedExtractor(Extractor):
             text.nameext_from_url(image[5], data)
             yield Message.Queue, image[3], data
 
-    def _pagination(self, url):
-        page = 0
-        while True:
-            json = self.request(url.format(self.root, self.id, page)).json()
-            if not json["sets"]:
-                return
-            offset = 0 if page == 0 else 1
-            yield from json["sets"][offset:]
-            page += 1
-
     def items(self):
-        sets = self.sets()
-
-        if "images" in sets:
-            yield from self._images(sets)
-        else:
-            for set in sets:
-                url = "{}/set/{}".format(self.root, set[0])
-                yield from self._images(self.request(url).json()["set"])
+        yield from self.images(self.id)
 
 
-class GirlsreleasedSetExtractor(GirlsreleasedExtractor):
-    """Extractor for girlsreleased galleries"""
-    subcategory = "set"
-    pattern = BASE_PATTERN + r"/set/(\d+)"
-    example = "https://girlsreleased.com/set/12345"
-
-    def sets(self):
-        url = "{}/set/{}".format(self.root, self.id)
-        return self.request(url).json()["set"]
-
-
-class GirlsreleasedModelExtractor(GirlsreleasedExtractor):
+class GirlsreleasedModelExtractor(GirlsreleasedSetExtractor):
     """Extractor for girlsreleased models"""
     subcategory = "model"
     pattern = BASE_PATTERN + r"/model/(\d+(?:/?.+)?)"
     example = "https://girlsreleased.com/model/12345/MODEL"
 
-    def sets(self):
-        return list(self._pagination("{}/sets/model/{}/page/{}"))
+    def _pagination(self):
+        for page in itertools.count():
+            url = "{}/sets/{}/{}/page/{}".format(
+                self.root, self.subcategory, self.id, page
+            )
+            json = self.request(url).json()["sets"]
+            if not json:
+                return
+            offset = 0 if page == 0 else 1
+            yield from json[offset:]
+
+    def items(self):
+        for set in self._pagination():
+            yield from self.images(set[0])
 
 
-class GirlsreleasedSiteExtractor(GirlsreleasedExtractor):
+class GirlsreleasedSiteExtractor(GirlsreleasedModelExtractor):
     """Extractor for girlsreleased sites"""
     subcategory = "site"
     pattern = BASE_PATTERN + r"/site/(.+(?:/model/\d+(?:/?.+)?)?)"
     example = "https://girlsreleased.com/site/SITE"
-
-    def sets(self):
-        return list(self._pagination("{}/sets/site/{}/page/{}"))
