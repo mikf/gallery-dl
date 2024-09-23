@@ -121,6 +121,7 @@ class ReadcomiconlineComicExtractor(ReadcomiconlineBase, MangaExtractor):
 
 def beau(url):
     """https://readcomiconline.li/Scripts/rguard.min.js?v=1.5.1"""
+    url = url.replace("swREY__Vd9__", "g")
     url = url.replace("pw_.g28x", "b")
     url = url.replace("d2pr.x_27", "h")
 
