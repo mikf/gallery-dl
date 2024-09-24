@@ -16,7 +16,7 @@ __tests__ = (
 
     "id"        : "32332",
     "title"     : "Monadiko",
-    "model"     : "Mia Sollis",
+    "model"     : ["Mia Sollis"],
     "site"      : "sexart.com"
 },
 
@@ -28,7 +28,7 @@ __tests__ = (
 
     "id"        : "124943",
     "title"     : "124943",
-    "model"     : "Iveta",
+    "model"     : ["Iveta"],
     "site"      : "errotica-archives.com"
 },
 

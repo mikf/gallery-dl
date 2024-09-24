@@ -36,7 +36,7 @@ class GirlsreleasedSetExtractor(Extractor):
             "title": json["name"] or json["id"],
             "id": json["id"],
             "site": json["site"],
-            "model": ", ".join(model for _, model in json["models"])
+            "model": [model for _, model in json["models"]]
         }
         yield Message.Directory, data
         for image in json["images"]:
