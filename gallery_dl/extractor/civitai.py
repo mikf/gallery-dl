@@ -10,9 +10,7 @@
 
 from .common import Extractor, Message
 from .. import text
-import functools
 import itertools
-import re
 
 BASE_PATTERN = r"(?:https?://)?civitai\.com"
 USER_PATTERN = BASE_PATTERN + r"/user/([^/?#]+)"
@@ -29,6 +27,14 @@ class CivitaiExtractor(Extractor):
 
     def _init(self):
         self.api = CivitaiAPI(self)
+
+        quality = self.config("quality")
+        if quality:
+            if not isinstance(quality, str):
+                quality = ",".join(quality)
+            self._image_quality = quality
+        else:
+            self._image_quality = "original=true"
 
     def items(self):
         models = self.models()
@@ -57,9 +63,9 @@ class CivitaiExtractor(Extractor):
         return ()
 
     def _orig(self, url):
-        sub_width = functools.partial(re.compile(r"/width=\d*/").sub, "/w/")
-        CivitaiExtractor._orig = sub_width
-        return sub_width(url)
+        parts = url.rsplit("/", 2)
+        parts[1] = self._image_quality
+        return "/".join(parts)
 
 
 class CivitaiModelExtractor(CivitaiExtractor):
@@ -67,6 +73,7 @@ class CivitaiModelExtractor(CivitaiExtractor):
     directory_fmt = ("{category}", "{user[username]}",
                      "{model[id]}{model[name]:? //}",
                      "{version[id]}{version[name]:? //}")
+    filename_fmt = "{filename}.{extension}"
     archive_fmt = "{file[hash]}"
     pattern = BASE_PATTERN + r"/models/(\d+)(?:/?\?modelVersionId=(\d+))?"
     example = "https://civitai.com/models/12345/TITLE"
