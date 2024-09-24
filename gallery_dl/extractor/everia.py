@@ -19,7 +19,7 @@ import re
 class EveriaExtractor(Extractor):
     category = "everia"
     subcategory = "post"
-    root = "https://everia.club"
+    root = "https://everia.club/wp-json/wp/v2"
     pattern = r"(?:https?://)?everia\.club/(\d{4}/\d{2}/\d{2}/[^/]+)/?"
     example = "https://everia.club/YYYY/MM/DD/TITLE"
     directory_fmt = ("{category}", "{title}")
@@ -61,7 +61,7 @@ class EveriaTagExtractor(EveriaExtractor):
 
     def _pagination(self, pages=None):
         for self.params["page"] in itertools.count(1):
-            url = "{}/wp-json/wp/v2/posts".format(self.root)
+            url = "{}/posts".format(self.root)
             try:
                 json = self.request(url, params=self.params).json()
             except exception.HttpError:
@@ -72,9 +72,9 @@ class EveriaTagExtractor(EveriaExtractor):
                 return
 
     def items(self):
-        url = "{}/tag/{}".format(self.root, self.tag)
-        page = self.request(url).text
-        self.params["tags"] = text.extr(page, "wp/v2/tags/", '"')
+        url = "{}/tags".format(self.root)
+        page = self.request(url, params={"search": self.tag}).json()
+        self.params["tags"] = page[0]["id"]
         pages = text.rextract(page, "/page/", "/")[0] or 1
         yield from self._pagination(pages)
 
