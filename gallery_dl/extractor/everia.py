@@ -106,7 +106,7 @@ class EveriaSearchExtractor(EveriaTagExtractor):
         yield from self._pagination()
 
 
-class EveriaCatagoryExtractor(EveriaTagExtractor):
+class EveriaCategoryExtractor(EveriaTagExtractor):
     subcategory = "category"
     pattern = r"(?:https?://)?everia\.club/category/([^/]+)/?"
     example = "https://everia.club/category/CATEGORY"
