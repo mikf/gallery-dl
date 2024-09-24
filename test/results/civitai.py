@@ -9,15 +9,15 @@ from gallery_dl.extractor import civitai
 
 __tests__ = (
 {
-    "#url"     : "https://civitai.com/models/703211/maid-classic",
-    "#class"   : civitai.CivitaiModelExtractor,
-    "#urls"    : [
-        "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/5c4efa68-bb58-47c5-a716-98cd0f51f047/w/26962950.jpeg",
-        "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/69bf3279-df2c-4ec8-b795-479e9cd3db1b/w/26962948.jpeg",
-        "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/2dd1dc69-45a6-4beb-b36b-2e2bc65e3cda/w/26962957.jpeg",
-        "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/52b6efa7-801c-4901-90b4-fa3964d23480/w/26887862.jpeg",
-        "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/c4d3bcd5-0e23-4f4e-9f34-d13b2f2bf14c/w/26887856.jpeg",
-        "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/68568d22-c4f3-45cb-ac32-82f1cedf968f/w/26887852.jpeg",
+    "#url"  : "https://civitai.com/models/703211/maid-classic",
+    "#class": civitai.CivitaiModelExtractor,
+    "#urls" : [
+        "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/5c4efa68-bb58-47c5-a716-98cd0f51f047/original=true/26962950.jpeg",
+        "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/69bf3279-df2c-4ec8-b795-479e9cd3db1b/original=true/26962948.jpeg",
+        "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/2dd1dc69-45a6-4beb-b36b-2e2bc65e3cda/original=true/26962957.jpeg",
+        "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/52b6efa7-801c-4901-90b4-fa3964d23480/original=true/26887862.jpeg",
+        "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/c4d3bcd5-0e23-4f4e-9f34-d13b2f2bf14c/original=true/26887856.jpeg",
+        "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/68568d22-c4f3-45cb-ac32-82f1cedf968f/original=true/26887852.jpeg",
     ],
 
     "model"  : {
@@ -47,12 +47,12 @@ __tests__ = (
 },
 
 {
-    "#url"     : "https://civitai.com/models/703211?modelVersionId=786644",
-    "#class"   : civitai.CivitaiModelExtractor,
-    "#urls"    : [
-        "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/52b6efa7-801c-4901-90b4-fa3964d23480/w/26887862.jpeg",
-        "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/c4d3bcd5-0e23-4f4e-9f34-d13b2f2bf14c/w/26887856.jpeg",
-        "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/68568d22-c4f3-45cb-ac32-82f1cedf968f/w/26887852.jpeg",
+    "#url"  : "https://civitai.com/models/703211?modelVersionId=786644",
+    "#class": civitai.CivitaiModelExtractor,
+    "#urls" : [
+        "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/52b6efa7-801c-4901-90b4-fa3964d23480/original=true/26887862.jpeg",
+        "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/c4d3bcd5-0e23-4f4e-9f34-d13b2f2bf14c/original=true/26887856.jpeg",
+        "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/68568d22-c4f3-45cb-ac32-82f1cedf968f/original=true/26887852.jpeg",
     ],
 
     "version": {
@@ -87,8 +87,9 @@ __tests__ = (
 },
 
 {
-    "#url"     : "https://civitai.com/images/26962948",
-    "#class"   : civitai.CivitaiImageExtractor,
+    "#url"  : "https://civitai.com/images/26962948",
+    "#class": civitai.CivitaiImageExtractor,
+    "#options"     : {"image-flags": "w"},
     "#urls"        : "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/69bf3279-df2c-4ec8-b795-479e9cd3db1b/w/69bf3279-df2c-4ec8-b795-479e9cd3db1b.jpeg",
     "#sha1_content": "a9a9d08f5fcdbc1e1eec7f203717f9df97b7a671",
 

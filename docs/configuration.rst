@@ -383,6 +383,7 @@ Type
     |Duration|_
 Default
     * ``"0.5-1.5"``
+        ``ao3``, ``civitai``,
         ``[Danbooru]``, ``[E621]``, ``[foolfuuka]:search``, ``itaku``,
         ``koharu``,
         ``newgrounds``, ``[philomena]``, ``pixiv:novel``, ``plurk``,
@@ -1533,12 +1534,32 @@ Type
 Default
     ``["image"]``
 Description
-    Determines the type and order of files to download.
+    Determines the type and order of files to download when processing models.
 
     Available types are
     ``model``,
     ``image``,
     ``gallery``.
+
+
+extractor.civitai.quality
+-------------------------
+Type
+    * ``string``
+    * ``list`` of ``strings``
+Default
+    ``"original=true"``
+Example
+    * ``"width=1280,quality=90"``
+    * ``["width=1280", "quality=90"]``
+Description
+    A (comma-separated) list of image quality options
+    to pass with every image URL.
+
+    Known available options include ``original``, ``quality``, ``width``
+
+    Note: Set this option to an arbitrary letter, e.g., ``"w"``,
+    to download images in JPEG format at their original resolution.
 
 
 extractor.cohost.asks
