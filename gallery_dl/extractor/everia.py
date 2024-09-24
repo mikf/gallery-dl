@@ -12,7 +12,6 @@ from .common import Extractor, Message, exception
 from .. import text
 import functools
 import itertools
-import urllib
 import html
 import re
 
@@ -36,7 +35,7 @@ class EveriaExtractor(Extractor):
             params = {"include": tag}
         elif isinstance(tag, list):
             params = {"include": ",".join(map(str, tag))}
-        
+
         url = "{}/{}".format(self.root, type)
         page = self.request(url, params=params).json()
         if isinstance(tag, str):
@@ -104,4 +103,14 @@ class EveriaSearchExtractor(EveriaTagExtractor):
         self.params["search"] = match.group(1)
 
     def items(self):
+        yield from self._pagination()
+
+
+class EveriaCatagoryExtractor(EveriaTagExtractor):
+    subcategory = "category"
+    pattern = r"(?:https?://)?everia\.club/category/([^/]+)/?"
+    example = "https://everia.club/category/CATEGORY"
+
+    def items(self):
+        self.params["categories"] = self.get_categories(self.tag)
         yield from self._pagination()
