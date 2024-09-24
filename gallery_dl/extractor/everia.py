@@ -21,7 +21,7 @@ class EveriaPostExtractor(Extractor):
     subcategory = "post"
     root = "https://everia.club/wp-json/wp/v2"
     pattern = r"(?:https?://)?everia\.club/(\d{4}/\d{2}/\d{2}/[^/]+)/?"
-    example = "https://everia.club/YYYY/MM/DD/TITLE"
+    example = "https://everia.club/0000/00/00/TITLE"
     directory_fmt = ("{category}", "{title}")
 
     def __init__(self, match):
