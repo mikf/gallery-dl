@@ -11,6 +11,8 @@
 from .common import Extractor, Message, exception
 from .. import text
 import itertools
+import urllib
+import html
 import re
 
 
@@ -28,16 +30,17 @@ class EveriaExtractor(Extractor):
 
     def extract(self, json):
         data = {
-            "title": json["title"]["rendered"],
+            "title": html.unescape(json["title"]["rendered"]),
             "id": json["id"],
             "date": json["date"],
-            "url": json["link"]
+            "url": text.unquote(json["link"])
         }
 
         yield Message.Directory, data
         urls = re.findall(r'img.*?src=\"(.+?)\"', json["content"]["rendered"])
         for url in urls:
-            yield Message.Url, url, text.nameext_from_url(url, data)
+            text.nameext_from_url(text.unquote(url), data)
+            yield Message.Url, url, data
 
     def items(self):
         page = self.request(self.url).text
@@ -60,10 +63,10 @@ class EveriaTagExtractor(EveriaExtractor):
         for self.params["page"] in itertools.count(1):
             url = "{}/wp-json/wp/v2/posts".format(self.root)
             try:
-                response = self.request(url, params=self.params)
+                json = self.request(url, params=self.params).json()
             except exception.HttpError:
                 return
-            for item in response.json():
+            for item in json:
                 yield from self.extract(item)
             if self.params["page"] == pages:
                 return
