@@ -11,7 +11,7 @@ __tests__ = (
 {
     "#url"      : "https://everia.club/2024/09/23/mikacho-조미카-joapictures-someday/",
     "#category" : ("", "everia", "post"),
-    "#class"    : everia.EveriaExtractor,
+    "#class"    : everia.EveriaPostExtractor,
     "#archive"  : False,
     "#count"    : 32,
 

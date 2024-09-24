@@ -16,7 +16,7 @@ import html
 import re
 
 
-class EveriaExtractor(Extractor):
+class EveriaPostExtractor(Extractor):
     category = "everia"
     subcategory = "post"
     root = "https://everia.club/wp-json/wp/v2"
@@ -68,7 +68,7 @@ class EveriaExtractor(Extractor):
         yield from self.extract(json)
 
 
-class EveriaTagExtractor(EveriaExtractor):
+class EveriaTagExtractor(EveriaPostExtractor):
     subcategory = "tag"
     pattern = r"(?:https?://)?everia\.club/tag/([^/]+)/?"
     example = "https://everia.club/tag/TAG"
