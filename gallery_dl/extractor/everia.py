@@ -10,6 +10,7 @@
 
 from .common import Extractor, Message, exception
 from .. import text
+import functools
 import itertools
 import urllib
 import html
@@ -19,7 +20,7 @@ import re
 class EveriaExtractor(Extractor):
     category = "everia"
     subcategory = "post"
-    root = "https://everia.club"
+    root = "https://everia.club/wp-json/wp/v2"
     pattern = r"(?:https?://)?everia\.club/(\d{4}/\d{2}/\d{2}/[^/]+)/?"
     example = "https://everia.club/YYYY/MM/DD/TITLE"
     directory_fmt = ("{category}", "{title}")
@@ -28,12 +29,31 @@ class EveriaExtractor(Extractor):
         super().__init__(match)
         self.url = match.group(0)
 
+    def get_tags(self, tag, type="tags"):
+        if isinstance(tag, str):
+            params = {"search": tag}
+        elif isinstance(tag, int):
+            params = {"include": tag}
+        elif isinstance(tag, list):
+            params = {"include": ",".join(map(str, tag))}
+        
+        url = "{}/{}".format(self.root, type)
+        page = self.request(url, params=params).json()
+        if isinstance(tag, str):
+            return page[0]["id"]
+        else:
+            return [item["name"] for item in page]
+
+    get_categories = functools.partialmethod(get_tags, type="categories")
+
     def extract(self, json):
         data = {
             "title": html.unescape(json["title"]["rendered"]),
             "id": json["id"],
             "date": json["date"],
-            "url": text.unquote(json["link"])
+            "url": text.unquote(json["link"]),
+            "tags": self.get_tags(json["tags"]),
+            "categories": self.get_categories(json["categories"]),
         }
 
         yield Message.Directory, data
@@ -61,22 +81,17 @@ class EveriaTagExtractor(EveriaExtractor):
 
     def _pagination(self, pages=None):
         for self.params["page"] in itertools.count(1):
-            url = "{}/wp-json/wp/v2/posts".format(self.root)
+            url = "{}/posts".format(self.root)
             try:
                 json = self.request(url, params=self.params).json()
             except exception.HttpError:
                 return
             for item in json:
                 yield from self.extract(item)
-            if self.params["page"] == pages:
-                return
 
     def items(self):
-        url = "{}/tag/{}".format(self.root, self.tag)
-        page = self.request(url).text
-        self.params["tags"] = text.extr(page, "wp/v2/tags/", '"')
-        pages = text.rextract(page, "/page/", "/")[0] or 1
-        yield from self._pagination(pages)
+        self.params["tags"] = self.get_tags(self.tag)
+        yield from self._pagination()
 
 
 class EveriaSearchExtractor(EveriaTagExtractor):
