@@ -80,7 +80,7 @@ class EveriaTagExtractor(EveriaPostExtractor):
         super().__init__(match)
         self.tag = match.group(1)
 
-    def _pagination(self, pages=None):
+    def _pagination(self):
         for self.params["page"] in itertools.count(1):
             url = "{}/posts".format(self.root)
             try:
