@@ -153,8 +153,8 @@ class InkbunnyFavoriteExtractor(InkbunnyExtractor):
 
     def metadata(self):
         # Lookup fav user ID as username
-        path = "/userfavorites_process.php?favs_user_id=" + self.user_id
-        url = self.root + path
+        url = "{}/userfavorites_process.php?favs_user_id={}".format(
+            self.root, self.user_id)
         page = self.request(url).text
         user_link = text.extr(page, '<a rel="author"', '</a>')
         favs_username = text.extr(user_link, 'href="/', '"')
