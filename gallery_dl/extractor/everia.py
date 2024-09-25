@@ -10,17 +10,21 @@
 
 from .common import Extractor, Message, exception
 from .. import text
+from datetime import datetime, timedelta
 import functools
 import itertools
+import calendar
 import html
 import re
+
+BASE_PATTERN = r"(?:https?://)?everia\.club"
 
 
 class EveriaPostExtractor(Extractor):
     category = "everia"
     subcategory = "post"
     root = "https://everia.club/wp-json/wp/v2"
-    pattern = r"(?:https?://)?everia\.club/(\d{4}/\d{2}/\d{2}/[^/]+)/?"
+    pattern = BASE_PATTERN + r"/(\d{4}/\d{2}/\d{2}/[^/]+)/?"
     example = "https://everia.club/0000/00/00/TITLE"
     directory_fmt = ("{category}", "{title}")
 
@@ -68,7 +72,7 @@ class EveriaPostExtractor(Extractor):
 
 class EveriaTagExtractor(EveriaPostExtractor):
     subcategory = "tag"
-    pattern = r"(?:https?://)?everia\.club/tag/([^/]+)/?"
+    pattern = BASE_PATTERN + r"/tag/([^/]+)/?"
     example = "https://everia.club/tag/TAG"
     params = {"per_page": 34}
 
@@ -93,7 +97,7 @@ class EveriaTagExtractor(EveriaPostExtractor):
 
 class EveriaSearchExtractor(EveriaTagExtractor):
     subcategory = "search"
-    pattern = r"(?:https?://)?everia\.club/\?s=(.+)"
+    pattern = BASE_PATTERN + r"/\?s=(.+)"
     example = "https://everia.club/?s=SEARCH"
 
     def __init__(self, match):
@@ -106,9 +110,35 @@ class EveriaSearchExtractor(EveriaTagExtractor):
 
 class EveriaCategoryExtractor(EveriaTagExtractor):
     subcategory = "category"
-    pattern = r"(?:https?://)?everia\.club/category/([^/]+)/?"
+    pattern = BASE_PATTERN + r"/category/([^/]+)/?"
     example = "https://everia.club/category/CATEGORY"
 
     def items(self):
         self.params["categories"] = self.get_categories(self.tag)
+        yield from self._pagination()
+
+
+class EveriaDateExtractor(EveriaTagExtractor):
+    subcategory = "date"
+    pattern = BASE_PATTERN + r"/(\d{4})(?:/?(\d{2}))?(?:/?(\d{2}))?/?$"
+    example = "https://everia.club/0000/00/00"
+
+    def __init__(self, match):
+        super().__init__(match)
+        self.year, self.month, self.day = map(int, match.groups(0))
+
+    def items(self):
+        if self.day:
+            after = datetime(self.year, self.month, self.day)
+            before = after + timedelta(1)
+        elif self.month:
+            after = datetime(self.year, self.month, 1)
+            days_in_month = calendar.monthrange(self.year, self.month)[1]
+            before = after + timedelta(days_in_month)
+        else:
+            after = datetime(self.year, 1, 1)
+            before = after + timedelta(365 + int(calendar.isleap(self.year)))
+
+        self.params["before"] = before.strftime("%Y-%m-%dT%H:%M:%S")
+        self.params["after"] = after.strftime("%Y-%m-%dT%H:%M:%S")
         yield from self._pagination()
