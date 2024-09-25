@@ -87,6 +87,8 @@ class EveriaTagExtractor(EveriaPostExtractor):
                 json = self.request(url, params=self.params).json()
             except exception.HttpError:
                 return
+            if not json:
+                return
             for item in json:
                 yield from self.extract(item)
 
@@ -128,16 +130,21 @@ class EveriaDateExtractor(EveriaTagExtractor):
         self.year, self.month, self.day = map(int, match.groups(0))
 
     def items(self):
-        if self.day:
-            after = datetime(self.year, self.month, self.day)
-            before = after + timedelta(1)
-        elif self.month:
-            after = datetime(self.year, self.month, 1)
-            days_in_month = calendar.monthrange(self.year, self.month)[1]
-            before = after + timedelta(days_in_month)
-        else:
-            after = datetime(self.year, 1, 1)
-            before = after + timedelta(365 + int(calendar.isleap(self.year)))
+        try:
+            if self.day:
+                after = datetime(self.year, self.month, self.day)
+                before = after + timedelta(1)
+            elif self.month:
+                after = datetime(self.year, self.month, 1)
+                days_in_month = calendar.monthrange(self.year, self.month)[1]
+                before = after + timedelta(days_in_month)
+            else:
+                after = datetime(self.year, 1, 1)
+                days_in_year = 365 + int(calendar.isleap(self.year))
+                before = after + timedelta(days_in_year)
+        except ValueError as e:
+            self.log.error(str(e).capitalize())
+            return
 
         self.params["before"] = before.strftime("%Y-%m-%dT%H:%M:%S")
         self.params["after"] = after.strftime("%Y-%m-%dT%H:%M:%S")
