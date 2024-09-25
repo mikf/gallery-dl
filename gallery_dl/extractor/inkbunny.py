@@ -132,6 +132,7 @@ class InkbunnyPoolExtractor(InkbunnyExtractor):
 class InkbunnyFavoriteExtractor(InkbunnyExtractor):
     """Extractor for inkbunny user favorites"""
     subcategory = "favorite"
+    directory_fmt = ("{category}", "{favs_username!l}", "Favorites")
     pattern = (BASE_PATTERN + r"/(?:"
                r"userfavorites_process\.php\?favs_user_id=(\d+)|"
                r"submissionsviewall\.php"
@@ -151,7 +152,17 @@ class InkbunnyFavoriteExtractor(InkbunnyExtractor):
             self.orderby = params.get("orderby", "fav_datetime")
 
     def metadata(self):
-        return {"favs_user_id": self.user_id}
+        # Lookup fav user ID as username
+        url = "{}/userfavorites_process.php?favs_user_id={}".format(
+            self.root, self.user_id)
+        page = self.request(url).text
+        user_link = text.extr(page, '<a rel="author"', '</a>')
+        favs_username = text.extr(user_link, 'href="/', '"')
+
+        return {
+            "favs_user_id": self.user_id,
+            "favs_username": favs_username,
+        }
 
     def posts(self):
         params = {
