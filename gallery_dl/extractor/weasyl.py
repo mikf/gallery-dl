@@ -159,24 +159,26 @@ class WeasylJournalsExtractor(WeasylExtractor):
 
 class WeasylFavoriteExtractor(WeasylExtractor):
     subcategory = "favorite"
-    directory_fmt = ("{category}", "{owner_login}", "Favorites")
-    pattern = BASE_PATTERN + r"favorites\?userid=(\d+)"
+    directory_fmt = ("{category}", "{user}", "Favorites")
+    pattern = BASE_PATTERN + r"favorites(?:\?userid=(\d+)|/([^/?#]+))"
     example = "https://www.weasyl.com/favorites?userid=12345"
 
-    def __init__(self, match):
-        WeasylExtractor.__init__(self, match)
-        self.userid = match.group(1)
-
     def items(self):
+        userid, username = self.groups
         owner_login = lastid = None
-        url = self.root + "/favorites"
+
+        if username:
+            owner_login = username
+            path = "/favorites/" + username
+        else:
+            path = "/favorites"
         params = {
-            "userid" : self.userid,
+            "userid" : userid,
             "feature": "submit",
         }
 
         while True:
-            page = self.request(url, params=params).text
+            page = self.request(self.root + path, params=params).text
             pos = page.index('id="favorites-content"')
 
             if not owner_login:
@@ -186,12 +188,16 @@ class WeasylFavoriteExtractor(WeasylExtractor):
                 if submitid == lastid:
                     continue
                 lastid = submitid
+
                 submission = self.request_submission(submitid)
                 if self.populate_submission(submission):
                     submission["user"] = owner_login
                     yield Message.Directory, submission
                     yield Message.Url, submission["url"], submission
 
-            if "&amp;nextid=" not in page:
+            try:
+                pos = page.index('">Next (', pos)
+            except ValueError:
                 return
-            params["nextid"] = submitid
+            path = text.unescape(text.rextract(page, 'href="', '"', pos)[0])
+            params = None
