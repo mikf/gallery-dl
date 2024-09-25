@@ -33,8 +33,10 @@ class CivitaiExtractor(Extractor):
             if not isinstance(quality, str):
                 quality = ",".join(quality)
             self._image_quality = quality
+            self._image_ext = ("png" if quality == "original=true" else "jpg")
         else:
             self._image_quality = "original=true"
+            self._image_ext = "png"
 
     def items(self):
         models = self.models()
@@ -48,10 +50,11 @@ class CivitaiExtractor(Extractor):
         images = self.images()
         if images:
             for image in images:
-                url = self._orig(image["url"])
+                url = self._url(image)
                 image["date"] = text.parse_datetime(
                     image["createdAt"], "%Y-%m-%dT%H:%M:%S.%fZ")
                 text.nameext_from_url(url, image)
+                image["extension"] = self._image_ext
                 yield Message.Directory, image
                 yield Message.Url, url, image
             return
@@ -62,10 +65,21 @@ class CivitaiExtractor(Extractor):
     def images(self):
         return ()
 
-    def _orig(self, url):
-        parts = url.rsplit("/", 2)
-        parts[1] = self._image_quality
-        return "/".join(parts)
+    def _url(self, image):
+        url = image["url"]
+        if "/" in url:
+            parts = url.rsplit("/", 2)
+            parts[1] = self._image_quality
+            return "/".join(parts)
+
+        name = image.get("name")
+        if not name:
+            mime = image.get("mimeType") or self._image_ext
+            name = "{}.{}".format(image.get("id"), mime.rpartition("/")[2])
+        return (
+            "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/{}/{}/{}".format(
+                url, self._image_quality, name)
+        )
 
 
 class CivitaiModelExtractor(CivitaiExtractor):
@@ -150,7 +164,7 @@ class CivitaiModelExtractor(CivitaiExtractor):
             text.nameext_from_url(file["url"], {
                 "num" : num,
                 "file": file,
-                "url" : self._orig(file["url"]),
+                "url" : self._url(file),
             })
             for num, file in enumerate(version["images"], 1)
         ]
@@ -165,7 +179,7 @@ class CivitaiModelExtractor(CivitaiExtractor):
             yield text.nameext_from_url(file["url"], {
                 "num" : num,
                 "file": file,
-                "url" : self._orig(file["url"]),
+                "url" : self._url(file),
             })
 
     def _validate_file_model(self, response):
