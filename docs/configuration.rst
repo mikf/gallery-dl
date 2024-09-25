@@ -1514,6 +1514,19 @@ Description
     ``gallery``.
 
 
+extractor.civitai.api
+---------------------
+Type
+    ``string``
+Default
+    ``"rest"``
+Description
+    Selects which API endpoints to use.
+
+    * ``"rest"``: `Public REST API <https://developer.civitai.com/docs/api/public-rest>`__
+    * ``"trpc"``: Internal TRPC API
+
+
 extractor.civitai.api-key
 -------------------------
 Type
