@@ -91,7 +91,8 @@ __tests__ = (
     "#pattern" : r"https://[\w.]+\.metapix\.net/files/full/\d+/\d+_\w+_.+",
     "#range"   : "20-50",
 
-    "favs_user_id": "20969",
+    "favs_user_id" : "20969",
+    "favs_username": "soina",
 },
 
 {
