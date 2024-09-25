@@ -28,17 +28,15 @@ class EveriaPostExtractor(Extractor):
         super().__init__(match)
         self.url = match.group(0)
 
-    def get_tags(self, tag, type="tags"):
-        if isinstance(tag, str):
-            params = {"search": tag}
-        elif isinstance(tag, int):
-            params = {"include": tag}
-        elif isinstance(tag, list):
-            params = {"include": ",".join(map(str, tag))}
+    def get_tags(self, query, type="tags"):
+        if isinstance(query, str):
+            params = {"search": query}
+        else:
+            params = {"post": query}
 
         url = "{}/{}".format(self.root, type)
         page = self.request(url, params=params).json()
-        if isinstance(tag, str):
+        if isinstance(query, str):
             return page[0]["id"]
         else:
             return [item["name"] for item in page]
@@ -51,8 +49,8 @@ class EveriaPostExtractor(Extractor):
             "id": json["id"],
             "date": json["date"],
             "url": text.unquote(json["link"]),
-            "tags": self.get_tags(json["tags"]),
-            "categories": self.get_categories(json["categories"]),
+            "tags": self.get_tags(json["id"]),
+            "categories": self.get_categories(json["id"]),
         }
 
         yield Message.Directory, data
