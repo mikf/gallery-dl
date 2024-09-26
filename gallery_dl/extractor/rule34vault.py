@@ -73,7 +73,6 @@ class Rule34vaultPlaylistExtractor(Rule34vaultExtractor):
     def posts(self):
         url = "{}/api/v2/post/search/playlist/{}".format(self.root,
                                                          self.playlist_id)
-        print(url)
         current_page = self.page_start
 
         while True:
