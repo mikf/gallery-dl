@@ -46,6 +46,7 @@ class DeviantartExtractor(Extractor):
         self.extra = self.config("extra", False)
         self.quality = self.config("quality", "100")
         self.original = self.config("original", True)
+        self.previews = self.config("previews", False)
         self.intermediary = self.config("intermediary", True)
         self.comments_avatars = self.config("comments-avatars", False)
         self.comments = self.comments_avatars or self.config("comments", False)
@@ -76,6 +77,11 @@ class DeviantartExtractor(Extractor):
             self._update_content = self._update_content_image
         else:
             self._update_content = self._update_content_default
+
+        if self.previews == "all":
+            self.previews_images = self.previews = True
+        else:
+            self.previews_images = False
 
         journals = self.config("journals", "html")
         if journals == "html":
@@ -208,6 +214,18 @@ class DeviantartExtractor(Extractor):
                     url = "{}/{}/avatar/".format(self.root, name)
                     comment["_extractor"] = DeviantartAvatarExtractor
                     yield Message.Queue, url, comment
+
+            if self.previews and "preview" in deviation:
+                preview = deviation["preview"]
+                deviation["is_preview"] = True
+                if self.previews_images:
+                    yield self.commit(deviation, preview)
+                else:
+                    mtype = mimetypes.guess_type(
+                        "a." + deviation["extension"], False)[0]
+                    if mtype and not mtype.startswith("image/"):
+                        yield self.commit(deviation, preview)
+                del deviation["is_preview"]
 
             if not self.extra:
                 continue

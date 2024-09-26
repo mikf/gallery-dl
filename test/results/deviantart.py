@@ -690,6 +690,17 @@ __tests__ = (
 },
 
 {
+    "#url"    : "https://www.deviantart.com/justatest235723/art/archive-1103129101",
+    "#comment": "ZIP archive + preview image (#3782)",
+    "#class"  : deviantart.DeviantartDeviationExtractor,
+    "#options": {"previews": True},
+    "#pattern": [
+        r"/f/940f2d05-c5eb-4917-8192-7eb6a2d508c6/di8rvv1-afe65948-16e1-4eca-b08d-9e6aaa9ed344\.zip",
+        r"/i/940f2d05-c5eb-4917-8192-7eb6a2d508c6/di8rvv1-bb9d891f-4374-4203-acd3-aea34b29a6a1\.png",
+    ],
+},
+
+{
     "#url"     : "https://www.deviantart.com/myria-moon/art/Aime-Moi-261986576",
     "#category": ("", "deviantart", "deviation"),
     "#class"   : deviantart.DeviantartDeviationExtractor,
