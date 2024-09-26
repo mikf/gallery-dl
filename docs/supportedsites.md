@@ -758,6 +758,12 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
+    <td>R34 Vault</td>
+    <td>https://rule34vault.com/</td>
+    <td>Playlists, Posts, Tag Searches</td>
+    <td></td>
+</tr>
+<tr>
     <td>Read Comic Online</td>
     <td>https://readcomiconline.li/</td>
     <td>Comic Issues, Comics</td>
@@ -785,12 +791,6 @@ Consider all listed sites to potentially be NSFW.
     <td>Rule 34</td>
     <td>https://rule34.us/</td>
     <td>Posts, Tag Searches</td>
-    <td></td>
-</tr>
-<tr>
-    <td>R34 Vault</td>
-    <td>https://rule34vault.com/</td>
-    <td>Posts, Playlists, Tag Searches</td>
     <td></td>
 </tr>
 <tr>
