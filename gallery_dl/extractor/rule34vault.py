@@ -43,6 +43,19 @@ class Rule34vaultExtractor(BooruExtractor):
 
         return post
 
+class Rule34vaultPostExtractor(Rule34vaultExtractor):
+    subcategory = "post"
+    archive_fmt = "{id}"
+    pattern = r"(?:https?://)?rule34vault\.com/post/(\d+)"
+    example = "https://rule34vault.com/post/399437"
+
+    def __init__(self, match):
+        Rule34vaultExtractor.__init__(self, match)
+        self.post_id = int(match.group(1))
+
+    def posts(self):
+        return (self._parse_post(self.post_id),)
+
 class Rule34vaultPlaylistExtractor(Rule34vaultExtractor):
     subcategory = "playlist"
     directory_fmt = ("{category}", "{playlist_id}")
