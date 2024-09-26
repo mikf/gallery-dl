@@ -35,7 +35,7 @@ class CheveretoExtractor(BaseExtractor):
 
 BASE_PATTERN = CheveretoExtractor.update({
     "jpgfish": {
-        "root": "https://jpg4.su",
+        "root": "https://jpg5.su",
         "pattern": r"jpe?g\d?\.(?:su|pet|fish(?:ing)?|church)",
     },
     "imgkiwi": {
