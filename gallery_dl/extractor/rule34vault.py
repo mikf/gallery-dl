@@ -43,6 +43,41 @@ class Rule34vaultExtractor(BooruExtractor):
 
         return post
 
+class Rule34vaultPlaylistExtractor(Rule34vaultExtractor):
+    subcategory = "playlist"
+    directory_fmt = ("{category}", "{playlist_id}")
+    archive_fmt = "t_{playlist_id}_{id}"
+    pattern = r"(?:https?://)?rule34vault\.com/playlists/view/(\d+)"
+    example = "https://rule34vault.com/playlists/view/2"
+
+    def __init__(self, match):
+        Rule34vaultExtractor.__init__(self, match)
+        self.playlist_id = match.group(1)
+
+    def metadata(self):
+        return {"playlist_id": self.playlist_id}
+
+    def posts(self):
+        url = "{}/api/v2/post/search/playlist/{}".format(self.root,
+                                                         self.playlist_id)
+        print(url)
+        current_page = self.page_start
+
+        while True:
+            payload = {
+                "CountTotal": True,
+                "Skip": current_page * self.per_page,
+                "take": self.per_page,
+            }
+            data = self.request(url, method="POST", json=payload).json()
+
+            for post in data["items"]:
+                yield self._parse_post(post["id"])
+
+            if current_page * self.per_page > data["totalCount"]:
+                return
+            current_page += 1
+
 class Rule34vaultTagExtractor(Rule34vaultExtractor):
     subcategory = "tag"
     directory_fmt = ("{category}", "{search_tags}")
@@ -54,7 +89,6 @@ class Rule34vaultTagExtractor(Rule34vaultExtractor):
         Rule34vaultExtractor.__init__(self, match)
         self.tags_ = text.unquote(match.group(1)).split("%7C")
         self.tags = [t.replace("_", " ") for t in self.tags_]
-        print(self.filename_fmt)
 
     def metadata(self):
         return {"search_tags": " ".join(self.tags_)}
