@@ -95,7 +95,7 @@ class Rule34vaultTagExtractor(Rule34vaultExtractor):
     subcategory = "tag"
     directory_fmt = ("{category}", "{search_tags}")
     archive_fmt = "t_{search_tags}_{id}"
-    pattern = r"(?:https?://)?rule34vault\.com/([^/?#]+)"
+    pattern = r"(?:https?://)?rule34vault\.com/([^/?#]+)$"
     example = "https://rule34vault.com/not_porn"
 
     def __init__(self, match):
