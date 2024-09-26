@@ -26,7 +26,11 @@ class SkebExtractor(Extractor):
     def _init(self):
         self.thumbnails = self.config("thumbnails", False)
         self.article = self.config("article", False)
-        self.headers = {"Accept": "application/json, text/plain, */*"}
+        self.headers = {
+            "Accept": "application/json, text/plain, */*",
+            "sec-fetch-mode": "cors",
+            "sec-fetch-site": "same-origin",
+        }
 
         if "Authorization" not in self.session.headers:
             self.headers["Authorization"] = "Bearer null"
