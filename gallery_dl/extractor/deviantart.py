@@ -51,6 +51,7 @@ class DeviantartExtractor(Extractor):
         self.comments = self.comments_avatars or self.config("comments", False)
 
         self.api = DeviantartOAuthAPI(self)
+        self.eclipse_api = None
         self.group = False
         self._premium_cache = {}
 
@@ -171,8 +172,19 @@ class DeviantartExtractor(Extractor):
 
             if self.commit_journal:
                 if "excerpt" in deviation:
-                    journal = self.api.deviation_content(
-                        deviation["deviationid"])
+                    #  journal = self.api.deviation_content(
+                    #      deviation["deviationid"])
+                    if not self.eclipse_api:
+                        self.eclipse_api = DeviantartEclipseAPI(self)
+                    content = self.eclipse_api.deviation_extended_fetch(
+                        deviation["index"],
+                        deviation["author"]["username"],
+                        "journal",
+                    )["deviation"]["textContent"]
+                    html = content["html"]["markup"]
+                    if html.startswith("{"):
+                        html = content["excerpt"].replace("\n", "<br />")
+                    journal = {"html": html}
                 elif "body" in deviation:
                     journal = {"html": deviation.pop("body")}
                 else:
@@ -324,10 +336,11 @@ class DeviantartExtractor(Extractor):
         deviation["extension"] = "htm"
         return Message.Url, html, deviation
 
-    @staticmethod
-    def _commit_journal_text(deviation, journal):
+    def _commit_journal_text(self, deviation, journal):
         html = journal["html"]
-        if html.startswith("<style"):
+        if not html:
+            self.log.warning("%s: Empty journal content", deviation["index"])
+        elif html.startswith("<style"):
             html = html.partition("</style>")[2]
         head, _, tail = html.rpartition("<script")
         content = "\n".join(
