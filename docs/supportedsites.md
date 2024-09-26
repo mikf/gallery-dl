@@ -790,7 +790,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>R34 Vault</td>
     <td>https://rule34vault.com/</td>
-    <td>Tag Searches</td>
+    <td>Playlists, Tag Searches</td>
     <td></td>
 </tr>
 <tr>
