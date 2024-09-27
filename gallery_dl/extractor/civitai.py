@@ -28,7 +28,7 @@ class CivitaiExtractor(Extractor):
 
     def _init(self):
         if self.config("api") == "trpc":
-            self.log.debug("Using TRPC API")
+            self.log.debug("Using tRPC API")
             self.api = CivitaiTrpcAPI(self)
         else:
             self.log.debug("Using REST API")
@@ -193,12 +193,8 @@ class CivitaiModelExtractor(CivitaiExtractor):
         ]
 
     def _extract_files_gallery(self, model, version, user):
-        params = {
-            "modelId"       : model["id"],
-            "modelVersionId": version["id"],
-        }
-
-        for num, file in enumerate(self.api.images(params), 1):
+        images = self.api.images_gallery(model, version, user)
+        for num, file in enumerate(images, 1):
             yield text.nameext_from_url(file["url"], {
                 "num" : num,
                 "file": file,
@@ -321,6 +317,15 @@ class CivitaiRestAPI():
         endpoint = "/v1/images"
         return self._pagination(endpoint, params)
 
+    def images_gallery(self, model, version, user):
+        endpoint = "/v1/images"
+        params = {
+            "modelId"       : model["id"],
+            "modelVersionId": version["id"],
+            "nsfw"          : "X",
+        }
+        return self._pagination(endpoint, params)
+
     def model(self, model_id):
         endpoint = "/v1/models/{}".format(model_id)
         return self._call(endpoint)
@@ -397,6 +402,21 @@ class CivitaiTrpcAPI():
             params_ = params
 
         return self._pagination(endpoint, params_)
+
+    def images_gallery(self, model, version, user):
+        endpoint = "image.getImagesAsPostsInfinite"
+        params = {
+            "period"        : "AllTime",
+            "sort"          : "Newest",
+            "modelVersionId": version["id"],
+            "modelId"       : model["id"],
+            "hidden"        : False,
+            "limit"         : 50,
+            "browsingLevel" : 31,
+        }
+
+        for post in self._pagination(endpoint, params):
+            yield from post["images"]
 
     def model(self, model_id):
         endpoint = "model.getById"
