@@ -29,9 +29,10 @@ class Rule34vaultExtractor(BooruExtractor):
         url = "{}/api/v2/post/{}".format(self.root, post_id)
         data = self.request(url).json()
 
+        tags = " ".join(t["value"].replace(" ", "_") for t in data["tags"])
         post = {
             "id": post_id,
-            "tags": " ".join(t["value"].replace(" ", "_") for t in data["tags"]),
+            "tags": tags,
             "uploader": data["uploader"]["userName"],
             "score": data.get("likes") or 0,
             "width": data["width"],
@@ -42,6 +43,7 @@ class Rule34vaultExtractor(BooruExtractor):
                                               else "video")
 
         return post
+
 
 class Rule34vaultPostExtractor(Rule34vaultExtractor):
     subcategory = "post"
@@ -55,6 +57,7 @@ class Rule34vaultPostExtractor(Rule34vaultExtractor):
 
     def posts(self):
         return (self._parse_post(self.post_id),)
+
 
 class Rule34vaultPlaylistExtractor(Rule34vaultExtractor):
     subcategory = "playlist"
@@ -89,6 +92,7 @@ class Rule34vaultPlaylistExtractor(Rule34vaultExtractor):
             if current_page * self.per_page > data["totalCount"]:
                 return
             current_page += 1
+
 
 class Rule34vaultTagExtractor(Rule34vaultExtractor):
     subcategory = "tag"
