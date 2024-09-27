@@ -38,7 +38,8 @@ class GirlsreleasedSetExtractor(Extractor):
             "site": json["site"],
             "model": [model for _, model in json["models"]],
             "date": text.parse_timestamp(json["date"]),
-            "count": len(json["images"])
+            "count": len(json["images"]),
+            "url": "https://girlsreleased.com/set/" + json["id"],
         }
         yield Message.Directory, data
         for data["num"], image in enumerate(json["images"], 1):
