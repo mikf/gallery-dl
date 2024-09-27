@@ -5,6 +5,7 @@
 # published by the Free Software Foundation.
 
 from gallery_dl.extractor import girlsreleased
+import datetime
 
 
 __tests__ = (
@@ -17,7 +18,8 @@ __tests__ = (
     "id"        : "32332",
     "title"     : "Monadiko",
     "model"     : ["Mia Sollis"],
-    "site"      : "sexart.com"
+    "site"      : "sexart.com",
+    "date"      : datetime.datetime,
 },
 
 {
@@ -29,7 +31,8 @@ __tests__ = (
     "id"        : "124943",
     "title"     : "124943",
     "model"     : ["Iveta"],
-    "site"      : "errotica-archives.com"
+    "site"      : "errotica-archives.com",
+    "date"      : datetime.datetime,
 },
 
 {
