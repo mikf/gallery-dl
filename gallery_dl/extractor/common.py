@@ -15,6 +15,7 @@ import sys
 import time
 import netrc
 import queue
+import random
 import getpass
 import logging
 import datetime
@@ -37,6 +38,7 @@ class Extractor():
     archive_fmt = ""
     root = ""
     cookies_domain = ""
+    cookies_index = 0
     referer = True
     ciphers = None
     tls12 = True
@@ -443,45 +445,55 @@ class Extractor():
 
         cookies = self.config("cookies")
         if cookies:
-            if isinstance(cookies, dict):
-                self.cookies_update_dict(cookies, self.cookies_domain)
+            select = self.config("cookies-select")
+            if select:
+                if select == "rotate":
+                    cookies = cookies[self.cookies_index % len(cookies)]
+                    Extractor.cookies_index += 1
+                else:
+                    cookies = random.choice(cookies)
+            self.cookies_load(cookies)
 
-            elif isinstance(cookies, str):
-                path = util.expand_path(cookies)
+    def cookies_load(self, cookies):
+        if isinstance(cookies, dict):
+            self.cookies_update_dict(cookies, self.cookies_domain)
+
+        elif isinstance(cookies, str):
+            path = util.expand_path(cookies)
+            try:
+                with open(path) as fp:
+                    util.cookiestxt_load(fp, self.cookies)
+            except Exception as exc:
+                self.log.warning("cookies: %s", exc)
+            else:
+                self.log.debug("Loading cookies from '%s'", cookies)
+                self.cookies_file = path
+
+        elif isinstance(cookies, (list, tuple)):
+            key = tuple(cookies)
+            cookiejar = _browser_cookies.get(key)
+
+            if cookiejar is None:
+                from ..cookies import load_cookies
+                cookiejar = self.cookies.__class__()
                 try:
-                    with open(path) as fp:
-                        util.cookiestxt_load(fp, self.cookies)
+                    load_cookies(cookiejar, cookies)
                 except Exception as exc:
                     self.log.warning("cookies: %s", exc)
                 else:
-                    self.log.debug("Loading cookies from '%s'", cookies)
-                    self.cookies_file = path
-
-            elif isinstance(cookies, (list, tuple)):
-                key = tuple(cookies)
-                cookiejar = _browser_cookies.get(key)
-
-                if cookiejar is None:
-                    from ..cookies import load_cookies
-                    cookiejar = self.cookies.__class__()
-                    try:
-                        load_cookies(cookiejar, cookies)
-                    except Exception as exc:
-                        self.log.warning("cookies: %s", exc)
-                    else:
-                        _browser_cookies[key] = cookiejar
-                else:
-                    self.log.debug("Using cached cookies from %s", key)
-
-                set_cookie = self.cookies.set_cookie
-                for cookie in cookiejar:
-                    set_cookie(cookie)
-
+                    _browser_cookies[key] = cookiejar
             else:
-                self.log.warning(
-                    "Expected 'dict', 'list', or 'str' value for 'cookies' "
-                    "option, got '%s' (%s)",
-                    cookies.__class__.__name__, cookies)
+                self.log.debug("Using cached cookies from %s", key)
+
+            set_cookie = self.cookies.set_cookie
+            for cookie in cookiejar:
+                set_cookie(cookie)
+
+        else:
+            self.log.warning(
+                "Expected 'dict', 'list', or 'str' value for 'cookies' "
+                "option, got '%s' (%s)",
+                cookies.__class__.__name__, cookies)
 
     def cookies_store(self):
         """Store the session's cookies in a cookies.txt file"""
