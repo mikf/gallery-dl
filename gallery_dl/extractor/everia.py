@@ -47,7 +47,7 @@ class EveriaPostExtractor(Extractor):
 
     get_categories = functools.partialmethod(get_tags, type="categories")
 
-    def extract(self, json):
+    def images(self, json):
         urls = re.findall(r'img.*?src=\"(.+?)\"', json["content"]["rendered"])
 
         data = {
@@ -69,7 +69,7 @@ class EveriaPostExtractor(Extractor):
         page = self.request(self.url).text
         json_url = text.extr(page, 'application/json" href="', '"')
         json = self.request(json_url).json()
-        yield from self.extract(json)
+        yield from self.images(json)
 
 
 class EveriaTagExtractor(EveriaPostExtractor):
@@ -92,7 +92,7 @@ class EveriaTagExtractor(EveriaPostExtractor):
             if not json:
                 return
             for item in json:
-                yield from self.extract(item)
+                yield from self.images(item)
 
     def items(self):
         self.params["tags"] = self.get_tags(self.tag)
