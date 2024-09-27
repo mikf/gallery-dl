@@ -5,6 +5,7 @@
 # published by the Free Software Foundation.
 
 from gallery_dl.extractor import everia
+import datetime
 
 
 __tests__ = (
@@ -17,7 +18,9 @@ __tests__ = (
 
     "title"     : "Mikacho 조미카, JOApictures ‘Someday’",
     "id"        : 231320,
-    "date"      : "2024-09-23T06:00:04",
+    "date"      : datetime.datetime,
+    "categories": ["Korea"],
+    "tags"      : ["[JOApictures]", "Mikacho 조미카"]
 },
 {
     "#url"      : "https://everia.club/tag/yeon-woo-연우/",

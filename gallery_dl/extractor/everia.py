@@ -48,18 +48,20 @@ class EveriaPostExtractor(Extractor):
     get_categories = functools.partialmethod(get_tags, type="categories")
 
     def extract(self, json):
+        urls = re.findall(r'img.*?src=\"(.+?)\"', json["content"]["rendered"])
+
         data = {
             "title": html.unescape(json["title"]["rendered"]),
             "id": json["id"],
-            "date": json["date"],
+            "date": text.parse_datetime(json["date"], "%Y-%m-%dT%H:%M:%S"),
             "url": text.unquote(json["link"]),
             "tags": self.get_tags(json["id"]),
             "categories": self.get_categories(json["id"]),
+            "count": len(urls),
         }
 
         yield Message.Directory, data
-        urls = re.findall(r'img.*?src=\"(.+?)\"', json["content"]["rendered"])
-        for url in urls:
+        for data["num"], url in enumerate(urls, 1):
             text.nameext_from_url(text.unquote(url), data)
             yield Message.Url, url, data
 
