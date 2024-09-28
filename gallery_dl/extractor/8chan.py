@@ -27,8 +27,10 @@ class _8chanExtractor(Extractor):
         Extractor.__init__(self, match)
 
     def _init(self):
-        self.cookies.set(
-            "TOS20240918", "1", domain=self.root.rpartition("/")[2])
+        now = util.datetime_utcnow()
+        domain = self.root.rpartition("/")[2]
+        self.cookies.set("TOS20240928", "1", domain=domain)
+        self.cookies.set(now.strftime("TOS%Y%m%d"), "1", domain=domain)
 
     @memcache()
     def cookies_prepare(self):
