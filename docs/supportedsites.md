@@ -1091,7 +1091,7 @@ Consider all listed sites to potentially be NSFW.
 </tr>
 <tr>
     <td>JPG Fish</td>
-    <td>https://jpg4.su/</td>
+    <td>https://jpg5.su/</td>
     <td>Albums, individual Images, User Profiles</td>
     <td></td>
 </tr>
