@@ -5018,6 +5018,40 @@ Description
     These suffixes are case-insensitive.
 
 
+downloader.*.videolegth-min & .videolegth-max
+-----------------------------------------
+Type
+    ``string``
+Default
+    ``null``
+Example
+    ``"1min"``, ``"1m30s"``, ``"1h21min31s"``
+Description
+    Minimum/Maximum allowed video length. 
+    Any video shorter/longer than this limit will not be downloaded.
+
+    A file qualifies as a video if it contains more than 10 frames. If a file contains multiple video streams the shortest video will be used for comparison.
+
+    This option requires ``ffprobe`` to be available. Additionally ``download.*.ffprobe-location`` can be configured.
+
+    Possible values are valid integer numbers followed with one of the following suffixes:
+    * Hours: ```hours``, ``hour``, ``h``,
+    * Minutes: ``minutes``, ``minute``, ``min``, ``m``
+    * Seconds: ``seconds``, ``second``, ``sec``, ``s``
+
+    Multiple values can be combined. e.g. ``2hours30min2s``
+
+
+download.*.ffprobe-location
+------------------
+Type
+    ``string``
+Default
+    ``ffprobe``
+Description
+    Path/Location of ``ffprobe``. Used for the ``downloader.*.videolegth-min & .videolegth-max`` option.
+
+
 downloader.*.mtime
 ------------------
 Type

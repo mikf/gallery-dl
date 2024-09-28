@@ -10,6 +10,9 @@
 
 import time
 import mimetypes
+import subprocess
+import json
+from datetime import timedelta
 from requests.exceptions import RequestException, ConnectionError, Timeout
 from .common import DownloaderBase
 from .. import text, util
@@ -32,6 +35,10 @@ class HttpDownloader(DownloaderBase):
         self.headers = self.config("headers")
         self.minsize = self.config("filesize-min")
         self.maxsize = self.config("filesize-max")
+        self.minlength = self.config("videolength-min")
+        self.maxlength = self.config("videolength-max")
+        ffprobe = self.config("ffprobe-location")
+        self.ffprobe = util.expand_path(ffprobe) if ffprobe else "ffprobe"
         self.retries = self.config("retries", extractor._retries)
         self.retry_codes = self.config("retry-codes", extractor._retry_codes)
         self.timeout = self.config("timeout", extractor._timeout)
@@ -59,6 +66,18 @@ class HttpDownloader(DownloaderBase):
                 self.log.warning(
                     "Invalid maximum file size (%r)", self.maxsize)
             self.maxsize = maxsize
+        if self.minlength:
+            minlength = text.parse_duration(self.minlength)
+            if not minlength:
+                self.log.warning(
+                    "Invalid maximum videolength duration (%r)", self.minlength)
+            self.minlength = minlength
+        if self.maxlength:
+            maxlength = text.parse_duration(self.maxlength)
+            if not maxlength:
+                self.log.warning(
+                    "Invalid maximum videolength duration (%r)", self.maxlength)
+            self.maxlength = maxlength
         if isinstance(self.chunk_size, str):
             chunk_size = text.parse_bytes(self.chunk_size)
             if not chunk_size:
@@ -219,6 +238,26 @@ class HttpDownloader(DownloaderBase):
                 kwdict[metadata] = util.extract_headers(response)
                 build_path = True
 
+            # check video length using ffprobe request
+            if (self.minlength or self.maxlength):
+                length = self._fetch_videolength(url)
+
+                if length and self.minlength and length < self.minlength:
+                    self.release_conn(response)
+                    self.log.warning(
+                        "Video length is shorter than allowed minimum (%s < %s)",
+                        length, self.minlength)
+                    pathfmt.temppath = ""
+                    return True
+
+                if length and self.maxlength and length > self.maxlength:
+                    self.release_conn(response)
+                    self.log.warning(
+                        "Video length is longer than allowed maximum (%s > %s)",
+                        length, self.maxlength)
+                    pathfmt.temppath = ""
+                    return True
+
             # build and check file path
             if build_path:
                 pathfmt.build_path()
@@ -375,6 +414,63 @@ class HttpDownloader(DownloaderBase):
                     pathfmt.build_path()
                     return True
         return False
+
+    def _fetch_videolength(self, url):
+        minimum_frames = 10
+        args = [
+            self.ffprobe,
+            "-v",
+            "quiet",
+            "-print_format",
+            "json",
+            "-show_format",
+            "-show_streams",
+            url,
+        ]
+
+        try:
+            result = subprocess.run(
+                args,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                check=True,
+            )
+            data = json.loads(result.stdout)
+
+            video_streams = [
+                float(stream["duration"])
+                for stream in data["streams"]
+                if stream["codec_type"] == "video"
+                and "duration" in stream
+                and "avg_frame_rate" in stream
+                and self._frame_count(stream) >= minimum_frames
+            ]
+
+            if not video_streams:
+                self.log.info(
+                    "No video streams found or none with a valid duration and minimum frames."
+                )
+                return None
+
+            duration = timedelta(seconds=min(video_streams))
+            return duration
+
+        except subprocess.CalledProcessError as e:
+            self.log.error("ffprobe failed: %s", e.stderr)
+            return None
+        except json.JSONDecodeError:
+            self.log.error("Failed to decode ffprobe output as JSON")
+            return None
+
+    def _frame_count(self, stream):
+        """Calculates the number of frames in the video stream."""
+        try:
+            duration = float(stream["duration"])
+            avg_frame_rate = eval(stream["avg_frame_rate"])
+            return int(duration * avg_frame_rate)
+        except (ValueError, ZeroDivisionError):
+            return 0
 
 
 MIME_TYPES = {
