@@ -10,7 +10,6 @@ from gallery_dl.extractor import ao3
 __tests__ = (
 {
     "#url"     : "https://archiveofourown.org/works/47802076",
-    "#category": ("", "ao3", "work"),
     "#class"   : ao3.Ao3WorkExtractor,
     "#urls"    : "https://archiveofourown.org/downloads/47802076/The_Wildcard.pdf?updated_at=1720398424",
 
@@ -126,7 +125,6 @@ __tests__ = (
 
 {
     "#url"     : "https://archiveofourown.org/works/47802076",
-    "#category": ("", "ao3", "work"),
     "#class"   : ao3.Ao3WorkExtractor,
     "#options" : {"formats": ["epub", "mobi", "azw3", "pdf", "html"]},
     "#urls"    : (
@@ -139,8 +137,15 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://archiveofourown.org/works/12345",
+    "#comment" : "restricted work / login required",
+    "#class"   : ao3.Ao3WorkExtractor,
+    "#auth"    : True,
+    "#urls"    : "https://archiveofourown.org/downloads/12345/Unquenchable.pdf?updated_at=1716029699",
+},
+
+{
     "#url"     : "https://archiveofourown.org/series/1903930",
-    "#category": ("", "ao3", "series"),
     "#class"   : ao3.Ao3SeriesExtractor,
     "#urls"    : (
         "https://archiveofourown.org/works/26131546",
@@ -151,7 +156,6 @@ __tests__ = (
 
 {
     "#url"     : "https://archiveofourown.org/tags/Sunshine%20(Ghost%20Sweden%20Band)/works",
-    "#category": ("", "ao3", "tag"),
     "#class"   : ao3.Ao3TagExtractor,
     "#pattern" : ao3.Ao3WorkExtractor.pattern,
     "#range"   : "1-50",
@@ -160,7 +164,6 @@ __tests__ = (
 
 {
     "#url"     : "https://archiveofourown.org/works/search?work_search%5Bquery%5D=air+fire+ice+water",
-    "#category": ("", "ao3", "search"),
     "#class"   : ao3.Ao3SearchExtractor,
     "#pattern" : ao3.Ao3WorkExtractor.pattern,
     "#range"   : "1-50",
@@ -169,7 +172,6 @@ __tests__ = (
 
 {
     "#url"     : "https://archiveofourown.org/users/Fyrelass",
-    "#category": ("", "ao3", "user"),
     "#class"   : ao3.Ao3UserExtractor,
     "#urls"    : (
         "https://archiveofourown.org/users/Fyrelass/works",
@@ -178,39 +180,34 @@ __tests__ = (
 },
 {
     "#url"     : "https://archiveofourown.com/users/Fyrelass",
-    "#category": ("", "ao3", "user"),
     "#class"   : ao3.Ao3UserExtractor,
 },
 {
     "#url"     : "https://archiveofourown.net/users/Fyrelass",
-    "#category": ("", "ao3", "user"),
     "#class"   : ao3.Ao3UserExtractor,
 },
 {
     "#url"     : "https://ao3.org/users/Fyrelass",
-    "#category": ("", "ao3", "user"),
     "#class"   : ao3.Ao3UserExtractor,
 },
 
 {
     "#url"     : "https://archiveofourown.org/users/Fyrelass/profile",
-    "#category": ("", "ao3", "user"),
     "#class"   : ao3.Ao3UserExtractor,
 },
 
 {
     "#url"     : "https://archiveofourown.org/users/Fyrelass/pseuds/Aileen%20Autarkeia",
-    "#category": ("", "ao3", "user"),
     "#class"   : ao3.Ao3UserExtractor,
 },
 
 {
     "#url"     : "https://archiveofourown.org/users/Fyrelass/works",
-    "#category": ("", "ao3", "user-works"),
     "#class"   : ao3.Ao3UserWorksExtractor,
+    "#auth"    : False,
     "#urls"    : (
-        "https://archiveofourown.org/works/58979287",
         "https://archiveofourown.org/works/55035061",
+        "https://archiveofourown.org/works/58979287",
         "https://archiveofourown.org/works/52704457",
         "https://archiveofourown.org/works/52502743",
         "https://archiveofourown.org/works/52170409",
@@ -225,8 +222,8 @@ __tests__ = (
 
 {
     "#url"     : "https://archiveofourown.org/users/Fyrelass/series",
-    "#category": ("", "ao3", "user-series"),
     "#class"   : ao3.Ao3UserSeriesExtractor,
+    "#auth"    : False,
     "#urls"    : (
         "https://archiveofourown.org/series/3821575",
     ),
@@ -234,11 +231,18 @@ __tests__ = (
 
 {
     "#url"     : "https://archiveofourown.org/users/Fyrelass/bookmarks",
-    "#category": ("", "ao3", "user-bookmark"),
     "#class"   : ao3.Ao3UserBookmarkExtractor,
     "#pattern" : r"https://archiveofourown\.org/(work|serie)s/\d+",
     "#range"   : "1-50",
     "#count"   : 50,
+},
+
+{
+    "#url"     : "https://archiveofourown.org/users/mikf/subscriptions",
+    "#class"   : ao3.Ao3SubscriptionsExtractor,
+    "#auth"    : True,
+    "#pattern" : r"https://archiveofourown\.org/(work|serie|user)s/\w+",
+    "#count"   : range(20, 30),
 },
 
 )

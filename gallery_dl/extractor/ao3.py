@@ -29,10 +29,30 @@ class Ao3Extractor(Extractor):
         self.login()
 
         base = self.root + "/works/"
-        data = {"_extractor": Ao3WorkExtractor}
+        data = {"_extractor": Ao3WorkExtractor, "type": "work"}
 
         for work_id in self.works():
             yield Message.Queue, base + work_id, data
+
+    def items_list(self, type, needle, part=True):
+        self.login()
+
+        base = self.root + "/"
+        data_work = {"_extractor": Ao3WorkExtractor, "type": "work"}
+        data_series = {"_extractor": Ao3SeriesExtractor, "type": "series"}
+        data_user = {"_extractor": Ao3UserExtractor, "type": "user"}
+
+        for item in self._pagination(self.groups[0], needle):
+            path = item.rpartition("/")[0] if part else item
+            url = base + path
+            if item.startswith("works/"):
+                yield Message.Queue, url, data_work
+            elif item.startswith("series/"):
+                yield Message.Queue, url, data_series
+            elif item.startswith("users/"):
+                yield Message.Queue, url, data_user
+            else:
+                self.log.warning("Unsupported %s type '%s'", type, path)
 
     def works(self):
         return self._pagination(self.groups[0])
@@ -284,19 +304,14 @@ class Ao3UserBookmarkExtractor(Ao3Extractor):
     example = "https://archiveofourown.org/users/USER/bookmarks"
 
     def items(self):
-        self.login()
+        return self.items_list("bookmark", '<span class="count"><a href="/')
 
-        base = self.root + "/"
-        data_work = {"_extractor": Ao3WorkExtractor}
-        data_series = {"_extractor": Ao3SeriesExtractor}
 
-        for item in self._pagination(
-                self.groups[0], '<span class="count"><a href="/'):
-            path = item.rpartition("/")[0]
-            url = base + path
-            if item.startswith("works/"):
-                yield Message.Queue, url, data_work
-            elif item.startswith("series/"):
-                yield Message.Queue, url, data_series
-            else:
-                self.log.warning("Unsupported bookmark type '%s'", path)
+class Ao3SubscriptionsExtractor(Ao3Extractor):
+    """Extractor for your AO3 account's subscriptions"""
+    subcategory = "subscriptions"
+    pattern = BASE_PATTERN + r"(/users/([^/?#]+)/subscriptions(?:/?\?.+)?)"
+    example = "https://archiveofourown.org/users/USER/subscriptions"
+
+    def items(self):
+        return self.items_list("subscription", '<dt>\n<a href="/', False)
