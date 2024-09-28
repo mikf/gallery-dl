@@ -106,7 +106,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Archive of Our Own</td>
     <td>https://archiveofourown.org/</td>
-    <td>Search Results, Series, Tag Searches, User Profiles, Bookmarks, Works</td>
+    <td>Search Results, Series, Subscriptions, Tag Searches, User Profiles, Bookmarks, Works</td>
     <td>Supported</td>
 </tr>
 <tr>
