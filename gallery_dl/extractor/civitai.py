@@ -308,23 +308,29 @@ class CivitaiRestAPI():
             extractor.log.debug("Using api_key authentication")
             self.headers["Authorization"] = "Bearer " + api_key
 
+        nsfw = extractor.config("nsfw")
+        if nsfw is None or nsfw is True:
+            nsfw = "X"
+        elif not nsfw:
+            nsfw = "Safe"
+        self.nsfw = nsfw
+
     def image(self, image_id):
-        endpoint = "/v1/images"
-        params = {"imageId": image_id}
-        return self._pagination(endpoint, params)
+        return self.images({
+            "imageId": image_id,
+        })
 
     def images(self, params):
         endpoint = "/v1/images"
+        if "nsfw" not in params:
+            params["nsfw"] = self.nsfw
         return self._pagination(endpoint, params)
 
     def images_gallery(self, model, version, user):
-        endpoint = "/v1/images"
-        params = {
+        return self.images({
             "modelId"       : model["id"],
             "modelVersionId": version["id"],
-            "nsfw"          : "X",
-        }
-        return self._pagination(endpoint, params)
+        })
 
     def model(self, model_id):
         endpoint = "/v1/models/{}".format(model_id)
@@ -372,11 +378,17 @@ class CivitaiTrpcAPI():
             "x-client"        : "web",
             "x-fingerprint"   : "undefined",
         }
-
         api_key = extractor.config("api-key")
         if api_key:
             extractor.log.debug("Using api_key authentication")
             self.headers["Authorization"] = "Bearer " + api_key
+
+        nsfw = extractor.config("nsfw")
+        if nsfw is None or nsfw is True:
+            nsfw = 31
+        elif not nsfw:
+            nsfw = 1
+        self.nsfw = nsfw
 
     def image(self, image_id):
         endpoint = "image.get"
@@ -394,7 +406,7 @@ class CivitaiTrpcAPI():
                 "types"        : ["image"],
                 "withMeta"     : False,  # Metadata Only
                 "fromPlatform" : False,  # Made On-Site
-                "browsingLevel": 31,
+                "browsingLevel": self.nsfw,
                 "include"      : ["cosmetics"],
             }
             params_.update(params)
@@ -412,7 +424,7 @@ class CivitaiTrpcAPI():
             "modelId"       : model["id"],
             "hidden"        : False,
             "limit"         : 50,
-            "browsingLevel" : 31,
+            "browsingLevel" : self.nsfw,
         }
 
         for post in self._pagination(endpoint, params):
@@ -442,7 +454,7 @@ class CivitaiTrpcAPI():
                 "earlyAccess"  : False,
                 "fromPlatform" : False,
                 "supportsGeneration": False,
-                "browsingLevel": 31,
+                "browsingLevel": self.nsfw,
             }
             params_.update(params)
         else:
