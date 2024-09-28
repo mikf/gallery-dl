@@ -70,13 +70,15 @@ class HttpDownloader(DownloaderBase):
             minlength = text.parse_duration(self.minlength)
             if not minlength:
                 self.log.warning(
-                    "Invalid maximum videolength duration (%r)", self.minlength)
+                    "Invalid maximum videolength duration (%r)",
+                    self.minlength)
             self.minlength = minlength
         if self.maxlength:
             maxlength = text.parse_duration(self.maxlength)
             if not maxlength:
                 self.log.warning(
-                    "Invalid maximum videolength duration (%r)", self.maxlength)
+                    "Invalid maximum videolength duration (%r)",
+                    self.maxlength)
             self.maxlength = maxlength
         if isinstance(self.chunk_size, str):
             chunk_size = text.parse_bytes(self.chunk_size)
@@ -249,7 +251,8 @@ class HttpDownloader(DownloaderBase):
                 if length and self.minlength and length < self.minlength:
                     self.release_conn(response)
                     self.log.warning(
-                        "Video length is shorter than allowed minimum (%s < %s)",
+                        "Video length is shorter than allowed minimum "
+                        "(%s < %s)",
                         length, self.minlength)
                     pathfmt.temppath = ""
                     return True
@@ -257,7 +260,8 @@ class HttpDownloader(DownloaderBase):
                 if length and self.maxlength and length > self.maxlength:
                     self.release_conn(response)
                     self.log.warning(
-                        "Video length is longer than allowed maximum (%s > %s)",
+                        "Video length is longer than allowed maximum "
+                        "(%s > %s)",
                         length, self.maxlength)
                     pathfmt.temppath = ""
                     return True
@@ -445,10 +449,10 @@ class HttpDownloader(DownloaderBase):
             video_streams = [
                 float(stream["duration"])
                 for stream in data["streams"]
-                if stream["codec_type"] == "video"
-                and "duration" in stream
-                and "avg_frame_rate" in stream
-                and self._frame_count(stream) >= minimum_frames
+                if stream["codec_type"] == "video" and
+                "duration" in stream and
+                "avg_frame_rate" in stream and
+                self._frame_count(stream) >= minimum_frames
             ]
 
             if not video_streams:
