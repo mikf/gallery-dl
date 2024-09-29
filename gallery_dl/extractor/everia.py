@@ -14,7 +14,6 @@ from datetime import datetime, timedelta
 import functools
 import itertools
 import calendar
-import html
 import re
 
 BASE_PATTERN = r"(?:https?://)?everia\.club"
@@ -51,7 +50,7 @@ class EveriaPostExtractor(Extractor):
         urls = re.findall(r'img.*?src=\"(.+?)\"', json["content"]["rendered"])
 
         data = {
-            "title": html.unescape(json["title"]["rendered"]),
+            "title": text.unescape(json["title"]["rendered"]),
             "id": json["id"],
             "date": text.parse_datetime(json["date"], "%Y-%m-%dT%H:%M:%S"),
             "url": text.unquote(json["link"]),
