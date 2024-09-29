@@ -81,22 +81,26 @@ __tests__ = (
         "image"   : None,
         "username": "bolero537"
     },
-    "file"   : dict,
-    "model"  : dict,
+    "file"   : {
+        "id": {26887862, 26887856, 26887852},
+    },
+    "model"  : {
+        "id": 703211,
+    },
     "num"    : range(1, 3),
 },
 
 {
     "#url"  : "https://civitai.com/images/26962948",
     "#class": civitai.CivitaiImageExtractor,
-    "#options"     : {"image-flags": "w"},
+    "#options"     : {"quality": "w"},
     "#urls"        : "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/69bf3279-df2c-4ec8-b795-479e9cd3db1b/w/69bf3279-df2c-4ec8-b795-479e9cd3db1b.jpeg",
     "#sha1_content": "a9a9d08f5fcdbc1e1eec7f203717f9df97b7a671",
 
     "browsingLevel": 1,
     "createdAt": "2024-08-31T01:11:47.021Z",
     "date"     : "dt:2024-08-31 01:11:47",
-    "extension": "jpeg",
+    "extension": "jpg",
     "filename" : "69bf3279-df2c-4ec8-b795-479e9cd3db1b",
     "hash"     : "ULN0-w?b4nRjxGM{-;t7M_t7NGae~qRjMyt7",
     "height"   : 1536,

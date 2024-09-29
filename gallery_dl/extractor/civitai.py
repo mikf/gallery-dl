@@ -93,7 +93,7 @@ class CivitaiModelExtractor(CivitaiExtractor):
     directory_fmt = ("{category}", "{user[username]}",
                      "{model[id]}{model[name]:? //}",
                      "{version[id]}{version[name]:? //}")
-    filename_fmt = "{filename}.{extension}"
+    filename_fmt = "{file[id]}.{extension}"
     archive_fmt = "{file[hash]}"
     pattern = BASE_PATTERN + r"/models/(\d+)(?:/?\?modelVersionId=(\d+))?"
     example = "https://civitai.com/models/12345/TITLE"
@@ -183,23 +183,22 @@ class CivitaiModelExtractor(CivitaiExtractor):
             }
             images = self.api.images(params, defaults=False)
 
-        return [
-            text.nameext_from_url(file["url"], {
-                "num" : num,
-                "file": file,
-                "url" : self._url(file),
-            })
-            for num, file in enumerate(images, 1)
-        ]
+        return self._image_results(images)
 
     def _extract_files_gallery(self, model, version, user):
         images = self.api.images_gallery(model, version, user)
+        return self._image_results(images)
+
+    def _image_results(self, images):
         for num, file in enumerate(images, 1):
-            yield text.nameext_from_url(file["url"], {
+            data = text.nameext_from_url(file["url"], {
                 "num" : num,
                 "file": file,
                 "url" : self._url(file),
             })
+            if "id" not in file and data["filename"].isdecimal():
+                file["id"] = text.parse_int(data["filename"])
+            yield data
 
     def _validate_file_model(self, response):
         if response.headers.get("Content-Type", "").startswith("text/html"):
