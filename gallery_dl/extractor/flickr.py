@@ -37,7 +37,6 @@ class FlickrExtractor(Extractor):
         extract = self.api._extract_format
         for photo in self.photos():
             try:
-                1/0
                 photo = extract(photo)
             except Exception as exc:
                 self.log.warning(
