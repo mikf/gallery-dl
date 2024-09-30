@@ -21,7 +21,7 @@ class GirlsreleasedSetExtractor(Extractor):
     subcategory = "set"
     pattern = BASE_PATTERN + r"/set/(\d+)"
     example = "https://girlsreleased.com/set/12345"
-    root = "https://girlsreleased.com/api/0.1"
+    root = "https://girlsreleased.com"
     request_interval = 0.5
     request_interval_min = 0.2
 
@@ -29,8 +29,8 @@ class GirlsreleasedSetExtractor(Extractor):
         super().__init__(match)
         self.id = match.group(1)
 
-    def images(self, id):
-        url = "{}/set/{}".format(self.root, id)
+    def items(self):
+        url = "{}/api/0.1/set/{}".format(self.root, self.id)
         json = self.request(url).json()["set"]
         data = {
             "title": json["name"] or json["id"],
@@ -46,9 +46,6 @@ class GirlsreleasedSetExtractor(Extractor):
             text.nameext_from_url(image[5], data)
             yield Message.Queue, image[3], data
 
-    def items(self):
-        yield from self.images(self.id)
-
 
 class GirlsreleasedModelExtractor(GirlsreleasedSetExtractor):
     """Extractor for girlsreleased models"""
@@ -58,7 +55,7 @@ class GirlsreleasedModelExtractor(GirlsreleasedSetExtractor):
 
     def _pagination(self):
         for page in itertools.count():
-            url = "{}/sets/{}/{}/page/{}".format(
+            url = "{}/api/0.1/sets/{}/{}/page/{}".format(
                 self.root, self.subcategory, self.id, page
             )
             json = self.request(url).json()["sets"]
@@ -68,8 +65,9 @@ class GirlsreleasedModelExtractor(GirlsreleasedSetExtractor):
             yield from json[offset:]
 
     def items(self):
+        data = {"_extractor": GirlsreleasedSetExtractor}
         for set in self._pagination():
-            yield from self.images(set[0])
+            yield Message.Queue, "{}/set/{}".format(self.root, set[0]), data
 
 
 class GirlsreleasedSiteExtractor(GirlsreleasedModelExtractor):
