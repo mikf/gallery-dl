@@ -32,6 +32,8 @@ class NewgroundsExtractor(Extractor):
         self.user_root = "https://{}.newgrounds.com".format(self.user)
 
     def _init(self):
+        self._extract_comment_urls = re.compile(
+            r'(?:<img |data-smartload-)src="([^"]+)').findall
         self.flash = self.config("flash", True)
 
         fmt = self.config("format")
@@ -78,8 +80,7 @@ class NewgroundsExtractor(Extractor):
                         if "_fallback" in post:
                             del post["_fallback"]
 
-                for url in text.extract_iter(
-                        post["_comment"], 'data-smartload-src="', '"'):
+                for url in self._extract_comment_urls(post["_comment"]):
                     post["num"] += 1
                     post["_index"] = "{}_{:>02}".format(
                         post["index"], post["num"])
