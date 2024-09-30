@@ -95,6 +95,20 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.newgrounds.com/art/view/sockdotclip/trickin-treats",
+    "#comment" : "extra files in comment section as '<img src=' (#6253)",
+    "#class"   : newgrounds.NewgroundsImageExtractor,
+    "#urls"    : (
+        "https://art.ngfiles.com/images/2811000/2811344_sockdotclip_trickin-treats.png?f1667246310",
+        "https://art.ngfiles.com/comments/788000/iu_788899_10504416.webp",
+        "https://art.ngfiles.com/comments/788000/iu_788901_10504416.webp",
+        "https://art.ngfiles.com/comments/788000/iu_788900_10504416.webp",
+        "https://art.ngfiles.com/comments/788000/iu_788903_10504416.webp",
+        "https://art.ngfiles.com/comments/788000/iu_788902_10504416.webp",
+    ),
+},
+
+{
     "#url"     : "https://www.newgrounds.com/art/view/kekiiro/red",
     "#comment" : "'adult' rated (#2456)",
     "#category": ("", "newgrounds", "image"),
