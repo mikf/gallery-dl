@@ -50,7 +50,7 @@ class GirlsreleasedSetExtractor(Extractor):
 class GirlsreleasedModelExtractor(GirlsreleasedSetExtractor):
     """Extractor for girlsreleased models"""
     subcategory = "model"
-    pattern = BASE_PATTERN + r"/model/(\d+(?:/?.+)?)"
+    pattern = BASE_PATTERN + r"/model/(\d+/?.*)"
     example = "https://girlsreleased.com/model/12345/MODEL"
 
     def _pagination(self):
@@ -73,5 +73,5 @@ class GirlsreleasedModelExtractor(GirlsreleasedSetExtractor):
 class GirlsreleasedSiteExtractor(GirlsreleasedModelExtractor):
     """Extractor for girlsreleased sites"""
     subcategory = "site"
-    pattern = BASE_PATTERN + r"/site/(.+(?:/model/\d+(?:/?.+)?)?)"
+    pattern = BASE_PATTERN + r"/site/(.+(?:/model/\d+/?.*)?)"
     example = "https://girlsreleased.com/site/SITE"
