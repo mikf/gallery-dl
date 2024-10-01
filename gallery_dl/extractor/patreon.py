@@ -379,7 +379,15 @@ class PatreonPostExtractor(PatreonExtractor):
     def posts(self):
         url = "{}/posts/{}".format(self.root, self.groups[0])
         page = self.request(url, notfound="post").text
-        post = self._extract_bootstrap(page)["post"]
+        bootstrap = self._extract_bootstrap(page)
+
+        try:
+            post = bootstrap["post"]
+        except KeyError:
+            self.log.debug(bootstrap)
+            if bootstrap.get("campaignDisciplinaryStatus") == "suspended":
+                self.log.warning("Account suspended")
+            return ()
 
         included = self._transform(post["included"])
         return (self._process(post["data"], included),)
