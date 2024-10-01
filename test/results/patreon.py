@@ -76,6 +76,17 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.patreon.com/posts/free-mari-8s-113049301",
+    "#comment" : "postfile + attachments_media (#6241)",
+    "#class"   : patreon.PatreonPostExtractor,
+    "#pattern" : [
+        r"https://c10\.patreonusercontent\.com/4/patreon-media/p/post/113049301/7ae4fd78d3374d849a80863f3d8eee89/eyJhIjoxLCJwIjoxfQ%3D%3D/1\.jpg",
+        r"https://c10\.patreonusercontent\.com/4/patreon-media/p/post/113049301/b6ea96b18cbc47f78f9334d50d0877ea/eyJhIjoxLCJwIjoxfQ%3D%3D/1\.mp4",
+        r"https://c10\.patreonusercontent\.com/4/patreon-media/p/post/113049301/62dc1d4194db4245aca31c56f71234ed/eyJhIjoxLCJwIjoxfQ%3D%3D/1\.mp4",
+    ],
+},
+
+{
     "#url"     : "https://www.patreon.com/posts/56127163",
     "#comment" : "account suspended",
     "#class"   : patreon.PatreonPostExtractor,

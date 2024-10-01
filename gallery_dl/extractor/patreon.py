@@ -100,6 +100,11 @@ class PatreonExtractor(Extractor):
             if url:
                 yield "attachment", url, attachment["name"]
 
+        for attachment in post.get("attachments_media") or ():
+            url = attachment.get("download_url")
+            if url:
+                yield "attachment", url, attachment["file_name"]
+
     def _content(self, post):
         content = post.get("content")
         if content:
@@ -138,8 +143,12 @@ class PatreonExtractor(Extractor):
         if attr.get("current_user_can_view", True):
 
             relationships = post["relationships"]
-            attr["images"] = self._files(post, included, "images")
-            attr["attachments"] = self._files(post, included, "attachments")
+            attr["images"] = self._files(
+                post, included, "images")
+            attr["attachments"] = self._files(
+                post, included, "attachments")
+            attr["attachments_media"] = self._files(
+                post, included, "attachments_media")
             attr["date"] = text.parse_datetime(
                 attr["published_at"], "%Y-%m-%dT%H:%M:%S.%f%z")
 
