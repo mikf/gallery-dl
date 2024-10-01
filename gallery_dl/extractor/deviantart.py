@@ -369,15 +369,30 @@ class DeviantartExtractor(Extractor):
             else:
                 page = self._limited_request(deviation["url"]).text
 
+            # extract journal html from webpage
+            html = text.extr(
+                page,
+                "<h2>Literature Text</h2></span><div>",
+                "</div></section>")
+            if html:
+                return {"html": html}
+
+            self.log.warning("%s: Failed to extract journal HTML from "
+                             "webpage. Falling back to __INITIAL_STATE__ "
+                             "markup.", deviation["index"])
+
+            # parse __INITIAL_STATE__ as fallback
             state = util.json_loads(text.extr(
                 page, 'window.__INITIAL_STATE__ = JSON.parse("', '");')
                 .replace("\\\\", "\\").replace("\\'", "'").replace('\\"', '"'))
 
-            deviation = state["@@entities"]["deviation"].popitem()[1]
-            content = deviation["textContent"]
+            deviations = state["@@entities"]["deviation"]
+            content = deviations.popitem()[1]["textContent"]
 
             html = content["html"]["markup"]
             if html.startswith("{"):
+                self.log.warning("%s: Unsupported '%s' markup.",
+                                 deviation["index"], content["html"]["type"])
                 html = content["excerpt"].replace("\n", "<br />")
             return {"html": html}
 
