@@ -177,24 +177,7 @@ class DeviantartExtractor(Extractor):
                 yield self.commit(deviation, deviation["flash"])
 
             if self.commit_journal:
-                if "excerpt" in deviation:
-                    #  journal = self.api.deviation_content(
-                    #      deviation["deviationid"])
-                    if not self.eclipse_api:
-                        self.eclipse_api = DeviantartEclipseAPI(self)
-                    content = self.eclipse_api.deviation_extended_fetch(
-                        deviation["index"],
-                        deviation["author"]["username"],
-                        "journal",
-                    )["deviation"]["textContent"]
-                    html = content["html"]["markup"]
-                    if html.startswith("{"):
-                        html = content["excerpt"].replace("\n", "<br />")
-                    journal = {"html": html}
-                elif "body" in deviation:
-                    journal = {"html": deviation.pop("body")}
-                else:
-                    journal = None
+                journal = self._extract_journal(deviation)
                 if journal:
                     if self.extra:
                         deviation["_journal"] = journal["html"]
@@ -374,6 +357,33 @@ class DeviantartExtractor(Extractor):
 
         deviation["extension"] = "txt"
         return Message.Url, txt, deviation
+
+    def _extract_journal(self, deviation):
+        if "excerpt" in deviation:
+            # # empty 'html'
+            #  return self.api.deviation_content(deviation["deviationid"])
+
+            if "_page" in deviation:
+                page = deviation["_page"]
+                del deviation["_page"]
+            else:
+                page = self._limited_request(deviation["url"]).text
+
+            state = util.json_loads(text.extr(
+                page, 'window.__INITIAL_STATE__ = JSON.parse("', '");')
+                .replace("\\\\", "\\").replace("\\'", "'").replace('\\"', '"'))
+
+            deviation = state["@@entities"]["deviation"].popitem()[1]
+            content = deviation["textContent"]
+
+            html = content["html"]["markup"]
+            if html.startswith("{"):
+                html = content["excerpt"].replace("\n", "<br />")
+            return {"html": html}
+
+        if "body" in deviation:
+            return {"html": deviation.pop("body")}
+        return None
 
     def _extract_content(self, deviation):
         content = deviation["content"]
@@ -728,6 +738,7 @@ class DeviantartStashExtractor(DeviantartExtractor):
             uuid = text.extr(page, '//deviation/', '"')
             if uuid:
                 deviation = self.api.deviation(uuid)
+                deviation["_page"] = page
                 deviation["index"] = text.parse_int(text.extr(
                     page, '\\"deviationId\\":', ','))
                 yield deviation
@@ -939,11 +950,14 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
         else:
             url = "{}/view/{}/".format(self.root, self.deviation_id)
 
-        uuid = text.extr(self._limited_request(url).text,
-                         '"deviationUuid\\":\\"', '\\')
+        page = self._limited_request(url, notfound="deviation").text
+        uuid = text.extr(page, '"deviationUuid\\":\\"', '\\')
         if not uuid:
             raise exception.NotFoundError("deviation")
-        return (self.api.deviation(uuid),)
+
+        deviation = self.api.deviation(uuid)
+        deviation["_page"] = page
+        return (deviation,)
 
 
 class DeviantartScrapsExtractor(DeviantartExtractor):
