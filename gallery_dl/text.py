@@ -239,11 +239,17 @@ def parse_float(value, default=0.0):
 
 def parse_query(qs):
     """Parse a query string into key-value pairs"""
+    if not qs:
+        return {}
+
     result = {}
     try:
-        for key, value in urllib.parse.parse_qsl(qs):
-            if key not in result:
-                result[key] = value
+        for name_value in qs.split("&"):
+            name, eq, value = name_value.partition("=")
+            if eq:
+                name = unquote(name.replace("+", " "))
+                if name not in result:
+                    result[name] = unquote(value.replace("+", " "))
     except Exception:
         pass
     return result
