@@ -304,13 +304,11 @@ class PatreonCreatorExtractor(PatreonExtractor):
                r"([^/?#]+)(?:/posts)?/?(?:\?([^#]+))?")
     example = "https://www.patreon.com/USER"
 
-    def __init__(self, match):
-        PatreonExtractor.__init__(self, match)
-        self.creator, self.query = match.groups()
-
     def posts(self):
-        query = text.parse_query(self.query)
-        campaign_id = self._get_campaign_id(query)
+        creator, query = self.groups
+
+        query = text.parse_query(query)
+        campaign_id = self._get_campaign_id(creator, query)
         filters = self._get_filters(query)
 
         self.log.debug("campaign_id: %s", campaign_id)
@@ -323,9 +321,9 @@ class PatreonCreatorExtractor(PatreonExtractor):
         ))
         return self._pagination(url)
 
-    def _get_campaign_id(self, query):
-        if self.creator.startswith("id:"):
-            return self.creator[3:]
+    def _get_campaign_id(self, creator, query):
+        if creator.startswith("id:"):
+            return creator[3:]
 
         campaign_id = query.get("c") or query.get("campaign_id")
         if campaign_id:
@@ -335,7 +333,7 @@ class PatreonCreatorExtractor(PatreonExtractor):
         if user_id:
             url = "{}/user/posts?u={}".format(self.root, user_id)
         else:
-            url = "{}/{}/posts".format(self.root, self.creator)
+            url = "{}/{}/posts".format(self.root, creator)
         page = self.request(url, notfound="creator").text
 
         try:
@@ -378,12 +376,8 @@ class PatreonPostExtractor(PatreonExtractor):
     pattern = r"(?:https?://)?(?:www\.)?patreon\.com/posts/([^/?#]+)"
     example = "https://www.patreon.com/posts/TITLE-12345"
 
-    def __init__(self, match):
-        PatreonExtractor.__init__(self, match)
-        self.slug = match.group(1)
-
     def posts(self):
-        url = "{}/posts/{}".format(self.root, self.slug)
+        url = "{}/posts/{}".format(self.root, self.groups[0])
         page = self.request(url, notfound="post").text
         post = self._extract_bootstrap(page)["post"]
 
