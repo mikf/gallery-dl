@@ -14,7 +14,6 @@ from .. import text, util, exception
 from ..cache import cache, memcache
 import itertools
 import binascii
-import json
 import re
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?instagram\.com"
@@ -913,7 +912,7 @@ class InstagramGraphqlAPI():
         self.user_collection = self.user_saved = self.reels_media = \
             self.highlights_media = self.guide = self.guide_media = \
             self._unsupported
-        self._json_dumps = json.JSONEncoder(separators=(",", ":")).encode
+        self._json_dumps = util.json_dumps
 
         api = InstagramRestAPI(extractor)
         self.user_by_name = api.user_by_name
