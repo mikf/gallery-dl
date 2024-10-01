@@ -627,7 +627,7 @@ Description
     and use the User-Agent used by the system's default browser.
 
     Note: This option has no effect on
-    `pixiv`, `e621`, and `mangadex`
+    `pixiv`, `e621`, `mangadex`, and `patreon`
     extractors, as these need specific values to function correctly.
 
 
@@ -636,7 +636,7 @@ extractor.*.browser
 Type
     ``string``
 Default
-    * ``"firefox"``: ``artstation``, ``mangasee``, ``patreon``, ``pixiv:series``, ``twitter``
+    * ``"firefox"``: ``artstation``, ``mangasee``, ``twitter``
     * ``null``: otherwise
 Example
     * ``"chrome:macos"``
@@ -712,7 +712,7 @@ extractor.*.tls12
 Type
     ``bool``
 Default
-    * ``false``: ``artstation``, ``patreon``, ``pixiv:series``
+    * ``false``: ``artstation``
     * ``true``: otherwise
 Description
     Allow selecting TLS 1.2 cipher suites.
