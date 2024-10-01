@@ -64,7 +64,7 @@ class TestFormatter(unittest.TestCase):
         self._run_test("{t!d}", datetime.datetime(2010, 1, 1))
         self._run_test("{t!d:%Y-%m-%d}", "2010-01-01")
         self._run_test("{dt!T}", "1262304000")
-        self._run_test("{l!j}", '["a", "b", "c"]')
+        self._run_test("{l!j}", '["a","b","c"]')
         self._run_test("{dt!j}", '"2010-01-01 00:00:00"')
         self._run_test("{a!g}", "hello-world")
         self._run_test("{a!L}", 11)

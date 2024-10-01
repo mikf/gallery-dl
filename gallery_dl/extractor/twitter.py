@@ -13,7 +13,6 @@ from .. import text, util, exception
 from ..cache import cache, memcache
 import itertools
 import random
-import json
 import re
 
 BASE_PATTERN = (r"(?:https?://)?(?:www\.|mobile\.)?"
@@ -1034,7 +1033,7 @@ class TwitterAPI():
 
         self.root = "https://x.com/i/api"
         self._nsfw_warning = True
-        self._json_dumps = json.JSONEncoder(separators=(",", ":")).encode
+        self._json_dumps = util.json_dumps
 
         cookies = extractor.cookies
         cookies_domain = extractor.cookies_domain
