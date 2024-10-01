@@ -244,9 +244,12 @@ class NewgroundsExtractor(Extractor):
             url = text.ensure_http_scheme(url)
             url = url.replace("/medium_views/", "/images/", 1)
             if text.ext_from_url(url) == "webp":
+                fallback = [url.replace(".webp", "." + e)
+                            for e in ("jpg", "png", "gif") if e != ext]
+                fallback.append(url)
                 yield {
                     "image"    : url.replace(".webp", "." + ext),
-                    "_fallback": (url,),
+                    "_fallback": fallback,
                 }
             else:
                 yield {"image": url}
