@@ -32,6 +32,7 @@ modules = [
     "behance",
     "blogger",
     "bluesky",
+    "boosty",
     "bunkr",
     "catbox",
     "chevereto",

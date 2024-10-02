@@ -140,6 +140,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Supported</td>
 </tr>
 <tr>
+    <td>Boosty</td>
+    <td>https://www.boosty.to/</td>
+    <td>Media Files, Posts, User Profiles</td>
+    <td><a href="https://github.com/mikf/gallery-dl#cookies">Cookies</a></td>
+</tr>
+<tr>
     <td>Bunkr</td>
     <td>https://bunkr.si/</td>
     <td>Albums, Media Files</td>

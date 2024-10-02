@@ -378,6 +378,7 @@ AUTH_MAP = {
     "baraag"         : _OAUTH,
     "bluesky"        : "Supported",
     "booruvar"       : "Supported",
+    "boosty"         : _COOKIES,
     "coomerparty"    : "Supported",
     "danbooru"       : "Supported",
     "derpibooru"     : _APIKEY_DB,
