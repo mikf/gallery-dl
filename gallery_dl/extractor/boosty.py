@@ -81,6 +81,8 @@ class BoostyExtractor(Extractor):
                     content.append(c[0])
 
                 elif type == "image":
+                    if post["signedQuery"]:
+                        block["url"] += post["signedQuery"]
                     files.append(block)
 
                 elif type == "ok_video":
