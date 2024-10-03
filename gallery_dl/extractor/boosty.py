@@ -28,13 +28,15 @@ class BoostyExtractor(Extractor):
 
         self._user = None if self.config("metadata") else False
         self.only_allowed = self.config("allowed", True)
+        self.only_bought = self.config("bought")
 
         videos = self.config("videos")
-        if videos is None:
-            videos = ("quad_hd", "ultra_hd", "full_hd",
-                      "high", "medium", "low")
-        elif videos and isinstance(videos, str):
-            videos = videos.split(",")
+        if videos is None or videos:
+            if isinstance(videos, str):
+                videos = videos.split(",")
+            elif not isinstance(videos, (list, tuple)):
+                videos = ("quad_hd", "ultra_hd", "full_hd",
+                          "high", "medium", "low")
         self.videos = videos
 
     def items(self):
@@ -247,6 +249,10 @@ class BoostyAPI():
             "offset"        : None,
             "comments_limit": "2",
         })
+        if "only_allowed" not in params and self.extractor.only_allowed:
+            params["only_allowed"] = "true"
+        if "only_bought" not in params and self.extractor.only_bought:
+            params["only_bought"] = "true"
         return self._pagination(endpoint, params, key="posts")
 
     def user(self, username):
