@@ -220,8 +220,8 @@ class PatreonExtractor(Extractor):
         return (
             "https://www.patreon.com/api/" + endpoint +
 
-            "?include=campaign,access_rules,attachments,audio,images,media,"
-            "native_video_insights,poll.choices,"
+            "?include=campaign,access_rules,attachments,attachments_media,"
+            "audio,images,media,native_video_insights,poll.choices,"
             "poll.current_user_responses.user,"
             "poll.current_user_responses.choice,"
             "poll.current_user_responses.poll,"
