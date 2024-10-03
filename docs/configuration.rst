@@ -1508,6 +1508,54 @@ Description
     Download videos.
 
 
+extractor.boosty.allowed
+------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Request only available posts.
+
+
+extractor.boosty.bought
+-----------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Request only purchased posts for ``feed`` results.
+
+
+extractor.boosty.metadata
+-------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Provide detailed ``user`` metadata.
+
+
+extractor.boosty.videos
+-----------------------
+Type
+    * ``bool``
+    * ``list`` of ``strings``
+Default
+    ``true``
+Example
+    ``["full_hd", "high", "medium"]``
+Description
+    Download videos.
+
+    | If this is a ``list``, it selects which format to try to download.
+    | Possibly available formats are
+      ``"quad_hd"``, ``"ultra_hd"``, ``"full_hd"``,
+      ``"high"``, ``"medium"``, ``"low"``
+
+
 extractor.bunkr.tlds
 --------------------
 Type
