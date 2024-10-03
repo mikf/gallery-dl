@@ -108,7 +108,7 @@ class BoostyExtractor(Extractor):
 
                 elif type == "link":
                     url = block["url"]
-                    links.appens(url)
+                    links.append(url)
                     content.append(url)
 
                 else:
