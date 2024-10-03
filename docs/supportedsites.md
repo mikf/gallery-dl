@@ -142,7 +142,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Boosty</td>
     <td>https://www.boosty.to/</td>
-    <td>Media Files, Posts, User Profiles</td>
+    <td>Subscriptions Feed, Followed Users, Media Files, Posts, User Profiles</td>
     <td><a href="https://github.com/mikf/gallery-dl#cookies">Cookies</a></td>
 </tr>
 <tr>

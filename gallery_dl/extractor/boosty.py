@@ -150,6 +150,17 @@ class BoostyMediaExtractor(BoostyExtractor):
         return self.api.blog_media_album(user, media, params)
 
 
+class BoostyFeedExtractor(BoostyExtractor):
+    """Extractor for your boosty.to subscription feed"""
+    subcategory = "feed"
+    pattern = BASE_PATTERN + r"/(?:\?([^#]+))?(?:$|#)"
+    example = "https://boosty.to/"
+
+    def posts(self):
+        params = text.parse_query(self.groups[0])
+        return self.api.feed_posts(params)
+
+
 class BoostyPostExtractor(BoostyExtractor):
     """Extractor for boosty.to posts"""
     subcategory = "post"
@@ -161,6 +172,19 @@ class BoostyPostExtractor(BoostyExtractor):
         if self._user is None:
             self._user = self.api.user(user)
         return (self.api.post(user, post_id),)
+
+
+class BoostyFollowingExtractor(BoostyExtractor):
+    """Extractor for your boosty.to subscribed users"""
+    subcategory = "following"
+    pattern = BASE_PATTERN + r"/app/settings/subscriptions"
+    example = "https://boosty.to/app/settings/subscriptions"
+
+    def items(self):
+        for user in self.api.user_subscriptions():
+            url = "{}/{}".format(self.root, user["blog"]["blogUrl"])
+            user["_extractor"] = BoostyUserExtractor
+            yield Message.Queue, url, user
 
 
 class BoostyAPI():
@@ -184,7 +208,7 @@ class BoostyAPI():
 
     def blog_posts(self, username, params):
         endpoint = "/v1/blog/{}/post/".format(username)
-        params = self._combine_params(params, {
+        params = self._merge_params(params, {
             "limit"         : "5",
             "offset"        : None,
             "comments_limit": "2",
@@ -194,7 +218,7 @@ class BoostyAPI():
 
     def blog_media_album(self, username, type="all", params=()):
         endpoint = "/v1/blog/{}/media_album/".format(username)
-        params = self._combine_params(params, {
+        params = self._merge_params(params, {
             "type"    : type.rstrip("s"),
             "limit"   : "15",
             "limit_by": "media",
@@ -216,11 +240,42 @@ class BoostyAPI():
         endpoint = "/v1/blog/{}/post/{}".format(username, post_id)
         return self._call(endpoint)
 
+    def feed_posts(self, params=None):
+        endpoint = "/v1/feed/post/"
+        params = self._merge_params(params, {
+            "limit"         : "5",
+            "offset"        : None,
+            "comments_limit": "2",
+        })
+        return self._pagination(endpoint, params, key="posts")
+
     def user(self, username):
         endpoint = "/v1/blog/" + username
         user = self._call(endpoint)
         user["id"] = user["owner"]["id"]
         return user
+
+    def user_subscriptions(self, params=None):
+        endpoint = "/v1/user/subscriptions"
+        params = self._merge_params(params, {
+            "limit"      : "30",
+            "with_follow": "true",
+            "offset"     : None,
+        })
+        return self._pagination_users(endpoint, params)
+
+    def _merge_params(self, params_web, params_api):
+        if params_web:
+            web_to_api = {
+                "isOnlyAllowedPosts": "is_only_allowed",
+                "postsTagsIds"      : "tags_ids",
+                "postsFrom"         : "from_ts",
+                "postsTo"           : "to_ts",
+            }
+            for name, value in params_web.items():
+                name = web_to_api.get(name, name)
+                params_api[name] = value
+        return params_api
 
     def _call(self, endpoint, params=None):
         url = self.root + endpoint
@@ -243,7 +298,7 @@ class BoostyAPI():
                 self.extractor.log.debug(response.text)
                 raise exception.StopExtraction("API request failed")
 
-    def _pagination(self, endpoint, params, transform=None):
+    def _pagination(self, endpoint, params, transform=None, key=None):
         if "is_only_allowed" not in params and self.extractor.only_allowed:
             params["is_only_allowed"] = "true"
 
@@ -252,6 +307,8 @@ class BoostyAPI():
 
             if transform:
                 yield from transform(data["data"])
+            elif key:
+                yield from data["data"][key]
             else:
                 yield from data["data"]
 
@@ -263,18 +320,13 @@ class BoostyAPI():
                 return
             params["offset"] = offset
 
-    def _combine_params(self, params_web, params_api):
-        if params_web:
-            params_api.update(self._web_to_api(params_web))
-        return params_api
+    def _pagination_users(self, endpoint, params):
+        while True:
+            data = self._call(endpoint, params)
 
-    def _web_to_api(self, params):
-        return {
-            api: params[web]
-            for web, api in (
-                ("isOnlyAllowedPosts", "is_only_allowed"),
-                ("postsFrom", "from_ts"),
-                ("postsTo", "to_ts"),
-            )
-            if web in params
-        }
+            yield from data["data"]
+
+            offset = data["offset"] + data["limit"]
+            if offset > data["total"]:
+                return
+            params["offset"] = offset
