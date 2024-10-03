@@ -97,4 +97,20 @@ __tests__ = (
     },
 },
 
+{
+    "#url"     : "https://boosty.to/",
+    "#class"   : boosty.BoostyFeedExtractor,
+    "#auth"    : True,
+    "#range"   : "1-40",
+    "#count"   : 40,
+},
+
+{
+    "#url"     : "https://boosty.to/app/settings/subscriptions",
+    "#class"   : boosty.BoostyFollowingExtractor,
+    "#pattern" : boosty.BoostyUserExtractor,
+    "#auth"    : True,
+},
+
+
 )
