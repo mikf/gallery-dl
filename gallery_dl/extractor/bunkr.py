@@ -21,7 +21,7 @@ else:
     BASE_PATTERN = (
         r"(?:bunkr:(?:https?://)?([^/?#]+)|"
         r"(?:https?://)?(?:app\.)?(bunkr+"
-        r"\.(?:s[kiu]|[cf]i|ru|la|is|to|a[cx]"
+        r"\.(?:s[kiu]|[cf]i|pk|ru|la|is|to|a[cx]"
         r"|black|cat|media|red|site|ws|org)))"
     )
 
