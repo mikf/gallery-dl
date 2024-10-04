@@ -614,6 +614,12 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
+    <td>NaverPost</td>
+    <td>https://post.naver.com/</td>
+    <td>Posts, User Profiles</td>
+    <td></td>
+</tr>
+<tr>
     <td>NaverWebtoon</td>
     <td>https://comic.naver.com/</td>
     <td>Comics, Episodes</td>

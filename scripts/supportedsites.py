@@ -100,6 +100,7 @@ CATEGORY_MAP = {
     "micmicidol"     : "MIC MIC IDOL",
     "myhentaigallery": "My Hentai Gallery",
     "myportfolio"    : "Adobe Portfolio",
+    "naverpost"      : "NaverPost",
     "naverwebtoon"   : "NaverWebtoon",
     "nhentai"        : "nhentai",
     "nijie"          : "nijie",
