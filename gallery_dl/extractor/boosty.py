@@ -115,6 +115,11 @@ class BoostyExtractor(Extractor):
                     links.append(url)
                     content.append(url)
 
+                elif type == "audio_file":
+                    if post["signedQuery"]:
+                        block["url"] += post["signedQuery"]
+                    files.append(block)
+
                 else:
                     self.log.debug("%s: Unsupported data type '%s'",
                                    post["int_id"], type)
