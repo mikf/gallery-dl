@@ -27,13 +27,14 @@ class PixivExtractor(Extractor):
     filename_fmt = "{id}_p{num}.{extension}"
     archive_fmt = "{id}{suffix}.{extension}"
     cookies_domain = None
-    url_sanity = ("https://s.pximg.net/common/images"
+    sanity_url = ("https://s.pximg.net/common/images"
                   "/limit_sanity_level_360.png")
 
     def _init(self):
         self.api = PixivAppAPI(self)
         self.load_ugoira = self.config("ugoira", True)
         self.max_posts = self.config("max-posts", 0)
+        self.sanity_workaround = self.config("sanity", True)
 
     def items(self):
         tags = self.config("tags", "japanese")
@@ -102,10 +103,14 @@ class PixivExtractor(Extractor):
 
         elif work["page_count"] == 1:
             url = meta_single_page["original_image_url"]
-            if url == self.url_sanity:
-                self.log.warning(
-                    "Unable to download work %s ('sanity_level' warning)",
-                    work["id"])
+            if url == self.sanity_url:
+                if self.sanity_workaround:
+                    self.log.warning("%s: 'sanity_level' warning", work["id"])
+                    self._extract_ajax(work, files)
+                else:
+                    self.log.warning(
+                        "%s: Unable to download work ('sanity_level' warning)",
+                        work["id"])
             else:
                 files.append({"url": url})
 
@@ -147,12 +152,92 @@ class PixivExtractor(Extractor):
                     "num": num,
                     "suffix": "_p{:02}".format(num),
                     "_ugoira_frame_index": num,
-
                 }))
         else:
             files.append({
                 "url": url.replace("_ugoira600x600", "_ugoira1920x1080", 1),
             })
+
+    def _extract_ajax(self, work, files):
+        url = "{}/ajax/illust/{}".format(self.root, work["id"])
+        data = self.request(url, headers=self.headers_web).json()
+        body = data["body"]
+
+        for key_app, key_ajax in (
+            ("title"            , "illustTitle"),
+            ("image_urls"       , "urls"),
+            ("caption"          , "illustComment"),
+            ("create_date"      , "createDate"),
+            ("width"            , "width"),
+            ("height"           , "height"),
+            ("sanity_level"     , "sl"),
+            ("total_view"       , "viewCount"),
+            ("total_comments"   , "commentCount"),
+            ("total_bookmarks"  , "bookmarkCount"),
+            ("restrict"         , "restrict"),
+            ("x_restrict"       , "xRestrict"),
+            ("illust_ai_type"   , "aiType"),
+            ("illust_book_style", "bookStyle"),
+        ):
+            work[key_app] = body[key_ajax]
+
+        work["user"] = {
+            "account"    : body["userAccount"],
+            "id"         : int(body["userId"]),
+            "is_followed": False,
+            "name"       : body["userName"],
+            "profile_image_urls": {},
+        }
+
+        work["tags"] = tags = []
+        for tag in body["tags"]["tags"]:
+            name = tag["tag"]
+            try:
+                translated_name = tag["translation"]["en"]
+            except Exception:
+                translated_name = None
+            tags.append({"name": name, "translated_name": translated_name})
+
+        url = self._extract_ajax_url(body)
+        if not url:
+            return
+
+        work["page_count"] = count = body["pageCount"]
+        if count == 1:
+            files.append({"url": url})
+        else:
+            base, _, ext = url.rpartition("_p0.")
+            for num in range(count):
+                url = "{}_p{}.{}".format(base, num, ext)
+                files.append({
+                    "url"   : url,
+                    "suffix": "_p{:02}".format(num),
+                })
+
+    def _extract_ajax_url(self, body):
+        try:
+            original = body["urls"]["original"]
+            if original:
+                return original
+        except KeyError:
+            pass
+
+        try:
+            square1200 = body["userIllusts"][body["id"]]["url"]
+        except KeyError:
+            return
+        parts = square1200.rpartition("_p0")[0].split("/")
+        del parts[3:5]
+        parts[3] = "img-original"
+        base = "/".join(parts)
+
+        for ext in ("jpg", "png", "gif"):
+            try:
+                url = "{}_p0.{}".format(base, ext)
+                self.request(url, method="HEAD")
+                return url
+            except exception.HttpError:
+                pass
 
     @staticmethod
     def _date_from_url(url, offset=timedelta(hours=9)):
@@ -860,6 +945,7 @@ class PixivAppAPI():
         self.username = extractor._get_auth_info()[0]
         self.user = None
 
+        extractor.headers_web = extractor.session.headers.copy()
         extractor.session.headers.update({
             "App-OS"        : "ios",
             "App-OS-Version": "16.7.2",
