@@ -3525,6 +3525,16 @@ Description
     A value of ``0`` means no limit.
 
 
+extractor.pixiv.sanity
+----------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Try to fetch ``limit_sanity_level`` works via web API.
+
+
 extractor.plurk.comments
 ------------------------
 Type
