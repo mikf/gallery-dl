@@ -47,6 +47,7 @@ modules = [
     "dynastyscans",
     "e621",
     "erome",
+    "erooups",
     "exhentai",
     "fanbox",
     "fanleaks",
