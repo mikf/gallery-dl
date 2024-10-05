@@ -194,6 +194,9 @@ SUBCATEGORY_MAP = {
     "bluesky": {
         "posts": "",
     },
+    "boosty": {
+        "feed": "Subscriptions Feed",
+    },
     "civitai": {
         "tag-models": "Tag Searches (Models)",
         "tag-images": "Tag Searches (Images)",
@@ -270,6 +273,7 @@ SUBCATEGORY_MAP = {
         "novel-user": "",
         "pixivision": "pixivision",
         "sketch": "Sketch",
+        "unlisted": "Unlisted Works",
         "work": "individual Images",
     },
     "poringa": {

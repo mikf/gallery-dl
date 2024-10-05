@@ -309,6 +309,15 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.pixiv.net/en/artworks/unlisted/eE3fTYaROT9IsZmep386",
+    "#class"   : pixiv.PixivUnlistedExtractor,
+    "#urls"    : "https://i.pximg.net/img-original/img/2020/10/15/00/46/12/85017704-149014193e4d3e23a6b8bd5e38b51ed4_p0.png",
+
+    "id"         : 85017704,
+    "id_unlisted": "eE3fTYaROT9IsZmep386",
+},
+
+{
     "#url"     : "https://www.pixiv.net/en/users/173530/bookmarks/artworks",
     "#category": ("", "pixiv", "favorite"),
     "#class"   : pixiv.PixivFavoriteExtractor,
