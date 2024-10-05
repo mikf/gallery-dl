@@ -385,20 +385,96 @@ class DeviantartExtractor(Extractor):
             state = util.json_loads(text.extr(
                 page, 'window.__INITIAL_STATE__ = JSON.parse("', '");')
                 .replace("\\\\", "\\").replace("\\'", "'").replace('\\"', '"'))
-
             deviations = state["@@entities"]["deviation"]
             content = deviations.popitem()[1]["textContent"]
 
-            html = content["html"]["markup"]
-            if html.startswith("{"):
-                self.log.warning("%s: Unsupported '%s' markup.",
-                                 deviation["index"], content["html"]["type"])
-                html = content["excerpt"].replace("\n", "<br />")
-            return {"html": html}
+            html = self._textcontent_to_html(deviation, content)
+            if html:
+                return {"html": html}
+            return {"html": content["excerpt"].replace("\n", "<br />")}
 
         if "body" in deviation:
             return {"html": deviation.pop("body")}
         return None
+
+    def _textcontent_to_html(self, deviation, content):
+        html = content["html"]
+        markup = html["markup"]
+
+        if not markup.startswith("{"):
+            return markup
+
+        if html["type"] == "tiptap":
+            return self._tiptap_to_html(markup)
+
+        self.log.warning("%s: Unsupported '%s' markup.",
+                         deviation["index"], html["type"])
+
+    def _tiptap_to_html(self, markup):
+        html = []
+
+        html.append('<div data-editor-viewer="1" '
+                    'class="_83r8m _2CKTq _3NjDa mDnFl">')
+        data = util.json_loads(markup)
+        for block in data["document"]["content"]:
+            self._tiptap_process_content(html, block)
+        html.append("</div>")
+
+        return "".join(html)
+
+    def _tiptap_process_content(self, html, content):
+        type = content["type"]
+
+        if type == "paragraph":
+            html.append('<p style="')
+
+            attrs = content["attrs"]
+            if "textAlign" in attrs:
+                html.append("text-align:")
+                html.append(attrs["textAlign"])
+                html.append(";")
+            html.append('margin-inline-start:0px">')
+
+            for block in content["content"]:
+                self._tiptap_process_content(html, block)
+
+            html.append("</p>")
+
+        elif type == "text":
+            html.append(text.escape(content["text"]))
+
+        elif type == "hardBreak":
+            html.append("<br/><br/>")
+
+        elif type == "da-deviation":
+            dev = content["attrs"]["deviation"]
+            url, formats = self._eclipse_media(dev["media"])
+            full = formats["fullview"]
+
+            html.append('<div class="jjNX2">')
+
+            html.append('<figure class="Qf-HY" data-da-type="da-deviation" '
+                        'data-deviation="" '
+                        'data-width="" data-link="" data-alignment="center">')
+
+            html.append('<a href="')
+            html.append(text.escape(dev["url"]))
+            html.append('" class="_3ouD5" style="margin:0 auto;display:flex;'
+                        'align-items:center;justify-content:center;'
+                        'overflow:hidden;width:780px;height:')
+            html.append(str(780 * full["h"] / full["w"]))
+            html.append('px">')
+
+            html.append('<img src="')
+            html.append(text.escape(url))
+            html.append('" alt="')
+            html.append(text.escape(dev["title"]))
+            html.append('" style="width:100%;max-width:100%;display:block"/>')
+
+            html.append("</a></figure></div>")
+
+        else:
+            self.log.warning("Unsupported content type '%s'", type)
 
     def _extract_content(self, deviation):
         content = deviation["content"]
@@ -576,6 +652,23 @@ class DeviantartExtractor(Extractor):
         for username in self.unwatch:
             self.log.info("Unwatching %s", username)
             self.api.user_friends_unwatch(username)
+
+    def _eclipse_media(self, media, format="preview"):
+        url = [media["baseUri"], ]
+
+        formats = {
+            fmt["t"]: fmt
+            for fmt in media["types"]
+        }
+
+        tokens = media["token"]
+        if len(tokens) == 1:
+            fmt = formats[format]
+            url.append(fmt["c"].replace("<prettyName>", media["prettyName"]))
+        url.append("?token=")
+        url.append(tokens[-1])
+
+        return "".join(url), formats
 
     def _eclipse_to_oauth(self, eclipse_api, deviations):
         for obj in deviations:
