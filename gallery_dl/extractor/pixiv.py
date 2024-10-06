@@ -52,6 +52,7 @@ class PixivExtractor(Extractor):
         ratings = {0: "General", 1: "R-18", 2: "R-18G"}
         meta_user = self.config("metadata")
         meta_bookmark = self.config("metadata-bookmark")
+        meta_comments = self.config("comments")
         metadata = self.metadata()
 
         works = self.works()
@@ -65,10 +66,17 @@ class PixivExtractor(Extractor):
 
             if meta_user:
                 work.update(self.api.user_detail(work["user"]["id"]))
+            if meta_comments:
+                if work["total_comments"]:
+                    work["comments"] = list(
+                        self.api.illust_comments(work["id"]))
+                else:
+                    work["comments"] = ()
             if meta_bookmark and work["is_bookmarked"]:
                 detail = self.api.illust_bookmark_detail(work["id"])
                 work["tags_bookmark"] = [tag["name"] for tag in detail["tags"]
                                          if tag["is_registered"]]
+
             if transform_tags:
                 transform_tags(work)
             work["num"] = 0
@@ -744,6 +752,7 @@ class PixivNovelExtractor(PixivExtractor):
         ratings = {0: "General", 1: "R-18", 2: "R-18G"}
         meta_user = self.config("metadata")
         meta_bookmark = self.config("metadata-bookmark")
+        meta_comments = self.config("comments")
         embeds = self.config("embeds")
         covers = self.config("covers")
 
@@ -763,6 +772,12 @@ class PixivNovelExtractor(PixivExtractor):
         for novel in novels:
             if meta_user:
                 novel.update(self.api.user_detail(novel["user"]["id"]))
+            if meta_comments:
+                if novel["total_comments"]:
+                    novel["comments"] = list(
+                        self.api.novel_comments(novel["id"]))
+                else:
+                    novel["comments"] = ()
             if meta_bookmark and novel["is_bookmarked"]:
                 detail = self.api.novel_bookmark_detail(novel["id"])
                 novel["tags_bookmark"] = [tag["name"] for tag in detail["tags"]
@@ -1030,6 +1045,10 @@ class PixivAppAPI():
         return self._call(
             "/v2/illust/bookmark/detail", params)["bookmark_detail"]
 
+    def illust_comments(self, illust_id):
+        params = {"illust_id": illust_id}
+        return self._pagination("/v3/illust/comments", params, "comments")
+
     def illust_follow(self, restrict="all"):
         params = {"restrict": restrict}
         return self._pagination("/v2/illust/follow", params)
@@ -1051,6 +1070,10 @@ class PixivAppAPI():
         params = {"novel_id": novel_id}
         return self._call(
             "/v2/novel/bookmark/detail", params)["bookmark_detail"]
+
+    def novel_comments(self, novel_id):
+        params = {"novel_id": novel_id}
+        return self._pagination("/v1/novel/comments", params, "comments")
 
     def novel_detail(self, novel_id):
         params = {"novel_id": novel_id}
