@@ -202,6 +202,7 @@ SUBCATEGORY_MAP = {
         "tag-images": "Tag Searches (Images)",
         "user-models": "User Models",
         "user-images": "User Images",
+        "user-posts": "User Posts",
     },
     "coomerparty": {
         "discord"       : "",
