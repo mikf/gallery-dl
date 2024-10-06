@@ -22,7 +22,7 @@ class CivitaiExtractor(Extractor):
     category = "civitai"
     root = "https://civitai.com"
     directory_fmt = ("{category}", "{username|user[username]}", "images")
-    filename_fmt = "{id}.{extension}"
+    filename_fmt = "{file[id]|id|filename}.{extension}"
     archive_fmt = "{hash}"
     request_interval = (0.5, 1.5)
 
@@ -53,6 +53,30 @@ class CivitaiExtractor(Extractor):
                 yield Message.Queue, url, data
             return
 
+        posts = self.posts()
+        if posts:
+            for post in posts:
+
+                if "images" in post:
+                    images = post["images"]
+                else:
+                    images = self.api.images_post(post["id"])
+
+                post = self.api.post(post["id"])
+                post["date"] = text.parse_datetime(
+                    post["publishedAt"], "%Y-%m-%dT%H:%M:%S.%fZ")
+                data = {
+                    "post": post,
+                    "user": post["user"],
+                }
+                del post["user"]
+
+                yield Message.Directory, data
+                for file in self._image_results(images):
+                    file.update(data)
+                    yield Message.Url, file["url"], file
+            return
+
         images = self.images()
         if images:
             for image in images:
@@ -66,6 +90,9 @@ class CivitaiExtractor(Extractor):
             return
 
     def models(self):
+        return ()
+
+    def posts(self):
         return ()
 
     def images(self):
@@ -86,6 +113,19 @@ class CivitaiExtractor(Extractor):
             "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/{}/{}/{}".format(
                 url, self._image_quality, name)
         )
+
+    def _image_results(self, images):
+        for num, file in enumerate(images, 1):
+            data = text.nameext_from_url(file["url"], {
+                "num" : num,
+                "file": file,
+                "url" : self._url(file),
+            })
+            if not data["extension"]:
+                data["extension"] = self._image_ext
+            if "id" not in file and data["filename"].isdecimal():
+                file["id"] = text.parse_int(data["filename"])
+            yield data
 
 
 class CivitaiModelExtractor(CivitaiExtractor):
@@ -189,17 +229,6 @@ class CivitaiModelExtractor(CivitaiExtractor):
         images = self.api.images_gallery(model, version, user)
         return self._image_results(images)
 
-    def _image_results(self, images):
-        for num, file in enumerate(images, 1):
-            data = text.nameext_from_url(file["url"], {
-                "num" : num,
-                "file": file,
-                "url" : self._url(file),
-            })
-            if "id" not in file and data["filename"].isdecimal():
-                file["id"] = text.parse_int(data["filename"])
-            yield data
-
     def _validate_file_model(self, response):
         if response.headers.get("Content-Type", "").startswith("text/html"):
             alert = text.extr(
@@ -221,6 +250,17 @@ class CivitaiImageExtractor(CivitaiExtractor):
 
     def images(self):
         return self.api.image(self.groups[0])
+
+
+class CivitaiPostExtractor(CivitaiExtractor):
+    subcategory = "post"
+    directory_fmt = ("{category}", "{username|user[username]}", "posts",
+                     "{post[id]}{post[title]:? //}")
+    pattern = BASE_PATTERN + r"/posts/(\d+)"
+    example = "https://civitai.com/posts/12345"
+
+    def posts(self):
+        return ({"id": int(self.groups[0])},)
 
 
 class CivitaiTagModelsExtractor(CivitaiExtractor):
@@ -265,8 +305,9 @@ class CivitaiUserExtractor(CivitaiExtractor):
         base = "{}/user/{}/".format(self.root, self.groups[0])
         return self._dispatch_extractors((
             (CivitaiUserModelsExtractor, base + "models"),
+            (CivitaiUserPostsExtractor , base + "posts"),
             (CivitaiUserImagesExtractor, base + "images"),
-        ), ("user-models", "user-images"))
+        ), ("user-models", "user-posts"))
 
 
 class CivitaiUserModelsExtractor(CivitaiExtractor):
@@ -278,6 +319,19 @@ class CivitaiUserModelsExtractor(CivitaiExtractor):
         params = text.parse_query(self.groups[1])
         params["username"] = text.unquote(self.groups[0])
         return self.api.models(params)
+
+
+class CivitaiUserPostsExtractor(CivitaiExtractor):
+    subcategory = "user-posts"
+    directory_fmt = ("{category}", "{username|user[username]}", "posts",
+                     "{post[id]}{post[title]:? //}")
+    pattern = USER_PATTERN + r"/posts/?(?:\?([^#]+))?"
+    example = "https://civitai.com/user/USER/posts"
+
+    def posts(self):
+        params = text.parse_query(self.groups[1])
+        params["username"] = text.unquote(self.groups[0])
+        return self.api.posts(params)
 
 
 class CivitaiUserImagesExtractor(CivitaiExtractor):
@@ -372,7 +426,7 @@ class CivitaiTrpcAPI():
         self.root = extractor.root + "/api/trpc/"
         self.headers = {
             "content-type"    : "application/json",
-            "x-client-version": "5.0.94",
+            "x-client-version": "5.0.146",
             "x-client-date"   : "",
             "x-client"        : "web",
             "x-fingerprint"   : "undefined",
@@ -398,7 +452,7 @@ class CivitaiTrpcAPI():
         endpoint = "image.getInfinite"
 
         if defaults:
-            params_ = {
+            params = self._merge_params(params, {
                 "useIndex"     : True,
                 "period"       : "AllTime",
                 "sort"         : "Newest",
@@ -407,12 +461,9 @@ class CivitaiTrpcAPI():
                 "fromPlatform" : False,  # Made On-Site
                 "browsingLevel": self.nsfw,
                 "include"      : ["cosmetics"],
-            }
-            params_.update(params)
-        else:
-            params_ = params
+            })
 
-        return self._pagination(endpoint, params_)
+        return self._pagination(endpoint, params)
 
     def images_gallery(self, model, version, user):
         endpoint = "image.getImagesAsPostsInfinite"
@@ -429,6 +480,13 @@ class CivitaiTrpcAPI():
         for post in self._pagination(endpoint, params):
             yield from post["images"]
 
+    def images_post(self, post_id):
+        params = {
+            "postId" : int(post_id),
+            "pending": True,
+        }
+        return self.images(params)
+
     def model(self, model_id):
         endpoint = "model.getById"
         params = {"id": int(model_id)}
@@ -443,7 +501,7 @@ class CivitaiTrpcAPI():
         endpoint = "model.getAll"
 
         if defaults:
-            params_ = {
+            params = self._merge_params(params, {
                 "period"       : "AllTime",
                 "periodMode"   : "published",
                 "sort"         : "Newest",
@@ -454,36 +512,71 @@ class CivitaiTrpcAPI():
                 "fromPlatform" : False,
                 "supportsGeneration": False,
                 "browsingLevel": self.nsfw,
-            }
-            params_.update(params)
-        else:
-            params_ = params
+            })
 
-        return self._pagination(endpoint, params_)
+        return self._pagination(endpoint, params)
+
+    def post(self, post_id):
+        endpoint = "post.get"
+        params = {"id": int(post_id)}
+        return self._call(endpoint, params)
+
+    def posts(self, params, defaults=True):
+        endpoint = "post.getInfinite"
+        meta = {"cursor": ("Date",)}
+
+        if defaults:
+            params = self._merge_params(params, {
+                "browsingLevel": self.nsfw,
+                "period"       : "AllTime",
+                "periodMode"   : "published",
+                "sort"         : "Newest",
+                "followed"     : False,
+                "draftOnly"    : False,
+                "pending"      : True,
+                "include"      : ["cosmetics"],
+            })
+
+        return self._pagination(endpoint, params, meta)
 
     def user(self, username):
         endpoint = "user.getCreator"
         params = {"username": username}
         return (self._call(endpoint, params),)
 
-    def _call(self, endpoint, params):
+    def _call(self, endpoint, params, meta=None):
         url = self.root + endpoint
         headers = self.headers
-        params = {"input": util.json_dumps({"json": params})}
 
+        if meta:
+            input = {"json": params, "meta": {"values": meta}}
+        else:
+            input = {"json": params}
+
+        params = {"input": util.json_dumps(input)}
         headers["x-client-date"] = str(int(time.time() * 1000))
-        response = self.extractor.request(url, headers=headers, params=params)
+        response = self.extractor.request(url, params=params, headers=headers)
 
         return response.json()["result"]["data"]["json"]
 
-    def _pagination(self, endpoint, params):
+    def _pagination(self, endpoint, params, meta=None):
+        if "cursor" not in params:
+            params["cursor"] = None
+            meta_ = {"cursor": ("undefined",)}
+
         while True:
-            data = self._call(endpoint, params)
+            data = self._call(endpoint, params, meta_)
             yield from data["items"]
 
             try:
                 if not data["nextCursor"]:
                     return
-                params["cursor"] = data["nextCursor"]
             except KeyError:
                 return
+
+            params["cursor"] = data["nextCursor"]
+            meta_ = meta
+
+    def _merge_params(self, params_user, params_default):
+        params_default.update(params_user)
+        return params_default
