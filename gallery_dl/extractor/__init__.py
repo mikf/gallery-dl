@@ -71,6 +71,7 @@ modules = [
     "hiperdex",
     "hitomi",
     "hotleak",
+    "huaban",
     "idolcomplex",
     "imagebam",
     "imagechest",
