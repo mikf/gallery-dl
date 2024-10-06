@@ -1590,12 +1590,12 @@ extractor.civitai.api
 Type
     ``string``
 Default
-    ``"rest"``
+    ``"trpc"``
 Description
     Selects which API endpoints to use.
 
     * ``"rest"``: `Public REST API <https://developer.civitai.com/docs/api/public-rest>`__
-    * ``"trpc"``: Internal TRPC API
+    * ``"trpc"``: Internal tRPC API
 
 
 extractor.civitai.api-key
