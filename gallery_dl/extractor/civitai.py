@@ -27,12 +27,12 @@ class CivitaiExtractor(Extractor):
     request_interval = (0.5, 1.5)
 
     def _init(self):
-        if self.config("api") == "trpc":
-            self.log.debug("Using tRPC API")
-            self.api = CivitaiTrpcAPI(self)
-        else:
+        if self.config("api") == "rest":
             self.log.debug("Using REST API")
             self.api = CivitaiRestAPI(self)
+        else:
+            self.log.debug("Using tRPC API")
+            self.api = CivitaiTrpcAPI(self)
 
         quality = self.config("quality")
         if quality:
