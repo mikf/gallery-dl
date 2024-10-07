@@ -36,8 +36,10 @@ class Rule34usExtractor(BooruExtractor):
             "score"   : text.extract(extr('Score: ', '> - <'), ">", "<")[0],
             "width"   : extr('Size: ', 'w'),
             "height"  : extr(' x ', 'h'),
+            ""        : extr('</script>', '</div></center>'),
             "file_url": extr(' src="', '"'),
         }
+        del post[""]
 
         url = post["file_url"]
         if "//video-cdn1." in url:
