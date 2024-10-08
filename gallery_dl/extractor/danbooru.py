@@ -93,7 +93,8 @@ class DanbooruExtractor(BaseExtractor):
 
             if post["extension"] == "zip":
                 if self.ugoira:
-                    post["frames"] = self._ugoira_frames(post)
+                    post["_ugoira_frame_data"] = post["frames"] = \
+                        self._ugoira_frames(post)
                     post["_http_adjust_extension"] = False
                 else:
                     url = post["large_file_url"]
