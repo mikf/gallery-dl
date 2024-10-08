@@ -105,11 +105,11 @@ class UgoiraPP(PostProcessor):
         }, options)
 
     def prepare(self, pathfmt):
-        if "frames" not in pathfmt.kwdict:
+        if "_ugoira_frame_data" not in pathfmt.kwdict:
             self._frames = None
             return
 
-        self._frames = pathfmt.kwdict["frames"]
+        self._frames = pathfmt.kwdict["_ugoira_frame_data"]
         if pathfmt.extension == "zip":
             self._convert_zip = True
             if self.delete:

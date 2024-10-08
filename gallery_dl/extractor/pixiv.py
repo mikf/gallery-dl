@@ -136,7 +136,7 @@ class PixivExtractor(Extractor):
     def _extract_ugoira(self, work):
         ugoira = self.api.ugoira_metadata(work["id"])
         url = ugoira["zip_urls"]["medium"]
-        work["frames"] = frames = ugoira["frames"]
+        work["_ugoira_frame_data"] = work["frames"] = frames = ugoira["frames"]
         work["date_url"] = self._date_from_url(url)
         work["_http_adjust_extension"] = False
 
