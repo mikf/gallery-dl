@@ -60,6 +60,7 @@ class KoharuGalleryExtractor(KoharuExtractor, GalleryExtractor):
     filename_fmt = "{num:>03}.{extension}"
     directory_fmt = ("{category}", "{id} {title}")
     archive_fmt = "{id}_{num}"
+    request_interval = 0.0
     pattern = BASE_PATTERN + r"/(?:g|reader)/(\d+)/(\w+)"
     example = "https://koharu.to/g/12345/67890abcde/"
 
@@ -101,8 +102,6 @@ class KoharuGalleryExtractor(KoharuExtractor, GalleryExtractor):
         url = "{}/books/detail/{}/{}".format(
             self.root_api, self.groups[0], self.groups[1])
         self.data = data = self.request(url, headers=self.headers).json()
-        data.pop("rels", None)
-        data.pop("thumbnails", None)
 
         tags = []
         for tag in data["tags"]:
@@ -111,6 +110,14 @@ class KoharuGalleryExtractor(KoharuExtractor, GalleryExtractor):
             tags.append(self.TAG_TYPES[namespace] + ":" + name)
         data["tags"] = tags
         data["date"] = text.parse_timestamp(data["created_at"] // 1000)
+
+        try:
+            if self.cbz:
+                data["count"] = len(data["thumbnails"]["entries"])
+            del data["thumbnails"]
+            del data["rels"]
+        except Exception:
+            pass
 
         return data
 
@@ -154,16 +161,29 @@ class KoharuGalleryExtractor(KoharuExtractor, GalleryExtractor):
         return results
 
     def _select_format(self, formats):
-        if not self.fmt or self.fmt == "original":
-            fmtid = "0"
-        else:
-            fmtid = str(self.fmt)
+        fmt = self.fmt
 
-        try:
-            fmt = formats[fmtid]
-        except KeyError:
+        if not fmt or fmt == "best":
+            fmtids = ("0", "1600", "1280", "980", "780")
+        elif isinstance(fmt, str):
+            fmtids = fmt.split(",")
+        elif isinstance(fmt, list):
+            fmtids = fmt
+        else:
+            fmtids = (str(self.fmt),)
+
+        for fmtid in fmtids:
+            try:
+                fmt = formats[fmtid]
+                if fmt["id"]:
+                    break
+            except KeyError:
+                self.log.debug("%s: Format %s is not available",
+                               self.groups[0], fmtid)
+        else:
             raise exception.NotFoundError("format")
 
+        self.log.debug("%s: Selected format %s", self.groups[0], fmtid)
         fmt["w"] = fmtid
         return fmt
 
@@ -202,7 +222,7 @@ class KoharuFavoriteExtractor(KoharuExtractor):
 
         raise exception.AuthenticationError("Username and password required")
 
-    @cache(maxage=28*86400, keyarg=1)
+    @cache(maxage=86400, keyarg=1)
     def _login_impl(self, username, password):
         self.log.info("Logging in as %s", username)
 

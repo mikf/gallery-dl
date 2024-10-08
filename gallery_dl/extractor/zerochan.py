@@ -198,11 +198,15 @@ class ZerochanTagExtractor(ZerochanExtractor):
 
         while True:
             response = self.request(url, params=params, allow_redirects=False)
+
             if response.status_code >= 300:
                 url = text.urljoin(self.root, response.headers["location"])
-                response = self.request(url, params=params)
-            data = response.json()
+                self.log.warning("HTTP redirect to %s", url)
+                if self.config("redirects"):
+                    continue
+                raise exception.StopExtraction()
 
+            data = response.json()
             try:
                 posts = data["items"]
             except Exception:

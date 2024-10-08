@@ -20,6 +20,7 @@ __tests__ = (
     "count"     : 16,
     "date"      : "dt:2015-10-27 19:20:00",
     "extension" : "webp",
+    "extension_original" : "jpg",
     "filename"  : str,
     "gallery_id": 867789,
     "group"     : [],

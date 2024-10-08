@@ -158,11 +158,12 @@ class Job():
             raise
         except exception.GalleryDLException as exc:
             log.error("%s: %s", exc.__class__.__name__, exc)
+            log.debug("", exc_info=exc)
             self.status |= exc.code
         except OSError as exc:
             log.error("Unable to download data:  %s: %s",
                       exc.__class__.__name__, exc)
-            log.debug("", exc_info=True)
+            log.debug("", exc_info=exc)
             self.status |= 128
         except Exception as exc:
             log.error(("An unexpected error occurred: %s - %s. "
@@ -170,7 +171,7 @@ class Job():
                        "copy its output and report this issue on "
                        "https://github.com/mikf/gallery-dl/issues ."),
                       exc.__class__.__name__, exc)
-            log.debug("", exc_info=True)
+            log.debug("", exc_info=exc)
             self.status |= 1
         except BaseException:
             self.status |= 1
@@ -321,6 +322,12 @@ class DownloadJob(Job):
         if "prepare-after" in hooks:
             for callback in hooks["prepare-after"]:
                 callback(pathfmt)
+
+            if kwdict.pop("_file_recheck", False) and pathfmt.exists():
+                if archive and self._archive_write_skip:
+                    archive.add(kwdict)
+                self.handle_skip()
+                return
 
         if self.sleep:
             self.extractor.sleep(self.sleep(), "download")
@@ -474,10 +481,11 @@ class DownloadJob(Job):
 
     def handle_skip(self):
         pathfmt = self.pathfmt
-        self.out.skip(pathfmt.path)
         if "skip" in self.hooks:
             for callback in self.hooks["skip"]:
                 callback(pathfmt)
+        self.out.skip(pathfmt.path)
+
         if self._skipexc:
             if not self._skipftr or self._skipftr(pathfmt.kwdict):
                 self._skipcnt += 1
@@ -634,7 +642,7 @@ class DownloadJob(Job):
                 except Exception as exc:
                     pp_log.error("'%s' initialization failed:  %s: %s",
                                  name, exc.__class__.__name__, exc)
-                    pp_log.debug("", exc_info=True)
+                    pp_log.debug("", exc_info=exc)
                 else:
                     pp_list.append(pp_obj)
 

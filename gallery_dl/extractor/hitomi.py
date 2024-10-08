@@ -89,6 +89,7 @@ class HitomiGalleryExtractor(GalleryExtractor):
                     path = ext = "webp"
             ihash = image["hash"]
             idata = text.nameext_from_url(image["name"])
+            idata["extension_original"] = idata["extension"]
             if ext:
                 idata["extension"] = ext
 

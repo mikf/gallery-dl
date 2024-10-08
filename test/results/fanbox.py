@@ -135,16 +135,25 @@ __tests__ = (
         "creatorId": "saki9184",
         "fee"      : 350,
         "id"       : "414274",
-        "title"    : "涼宮ハルヒの憂鬱",
+        "title"    : "入り浸りJKハルヒ",
     },
 },
 
 {
     "#url"     : "https://mochirong.fanbox.cc/posts/3746116",
-    "#comment" : "imageMap file order (#2718)",
+    "#comment" : "imageMap file order (#2718); comments metadata (#6287)",
     "#category": ("", "fanbox", "post"),
     "#class"   : fanbox.FanboxPostExtractor,
+    "#options" : {"metadata": "comments"},
     "#sha1_url": "c92ddd06f2efc4a5fe30ec67e21544f79a5c4062",
+    "#urls"    : [
+        "https://pixiv.pximg.net/fanbox/public/images/post/3746116/cover/6h5w7F1MJWLeED6ODfHo6ZYQ.jpeg",
+        "https://downloads.fanbox.cc/images/post/3746116/ouTz7XZIeVD3FBOzoLhJ3ZTA.jpeg",
+        "https://downloads.fanbox.cc/images/post/3746116/hBs9bXEg6HvbqWT8QLD9g5ne.jpeg",
+        "https://downloads.fanbox.cc/images/post/3746116/C93E7db3C3sBqbDw6gQoZBMz.jpeg",
+    ],
+
+    "comments": "len:4",
 },
 
 {

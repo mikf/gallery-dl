@@ -41,6 +41,7 @@ class BlueskyExtractor(Extractor):
         self.api = BlueskyAPI(self)
         self._user = self._user_did = None
         self.instance = self.root.partition("://")[2]
+        self.videos = self.config("videos", True)
 
     def items(self):
         for post in self.posts():
@@ -54,14 +55,6 @@ class BlueskyExtractor(Extractor):
 
             post.update(post["record"])
             del post["record"]
-
-            images = ()
-            if "embed" in post:
-                media = post["embed"]
-                if "media" in media:
-                    media = media["media"]
-                if "images" in media:
-                    images = media["images"]
 
             if self._metadata_facets:
                 if "facets" in post:
@@ -82,44 +75,65 @@ class BlueskyExtractor(Extractor):
             if self._metadata_user:
                 post["user"] = self._user or post["author"]
 
+            files = self._extract_files(post)
             post["instance"] = self.instance
             post["post_id"] = pid
-            post["count"] = len(images)
+            post["count"] = len(files)
             post["date"] = text.parse_datetime(
                 post["createdAt"][:19], "%Y-%m-%dT%H:%M:%S")
 
             yield Message.Directory, post
 
-            if not images:
+            if not files:
                 continue
 
             base = ("https://bsky.social/xrpc/com.atproto.sync.getBlob"
                     "?did={}&cid=".format(post["author"]["did"]))
-            post["num"] = 0
-
-            for file in images:
-                post["num"] += 1
-                post["description"] = file["alt"]
-
-                try:
-                    aspect = file["aspectRatio"]
-                    post["width"] = aspect["width"]
-                    post["height"] = aspect["height"]
-                except KeyError:
-                    post["width"] = post["height"] = 0
-
-                image = file["image"]
-                try:
-                    cid = image["ref"]["$link"]
-                except KeyError:
-                    cid = image["cid"]
-                post["filename"] = cid
-                post["extension"] = image["mimeType"].rpartition("/")[2]
-
-                yield Message.Url, base + cid, post
+            for post["num"], file in enumerate(files, 1):
+                post.update(file)
+                yield Message.Url, base + file["filename"], post
 
     def posts(self):
         return ()
+
+    def _extract_files(self, post):
+        if "embed" not in post:
+            return ()
+
+        files = []
+        media = post["embed"]
+        if "media" in media:
+            media = media["media"]
+
+        if "images" in media:
+            for image in media["images"]:
+                files.append(self._extract_media(image, "image"))
+        if "video" in media and self.videos:
+            files.append(self._extract_media(media, "video"))
+
+        return files
+
+    def _extract_media(self, media, key):
+        try:
+            aspect = media["aspectRatio"]
+            width = aspect["width"]
+            height = aspect["height"]
+        except KeyError:
+            width = height = 0
+
+        data = media[key]
+        try:
+            cid = data["ref"]["$link"]
+        except KeyError:
+            cid = data["cid"]
+
+        return {
+            "description": media.get("alt") or "",
+            "width"      : width,
+            "height"     : height,
+            "filename"   : cid,
+            "extension"  : data["mimeType"].rpartition("/")[2],
+        }
 
     def _make_post(self, actor, kind):
         did = self.api._did_from_actor(actor)

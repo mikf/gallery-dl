@@ -49,7 +49,8 @@
                                 values for the given URLs
     -e, --error-file FILE       Add input URLs which returned an error to FILE
     --list-modules              Print a list of available extractor modules
-    --list-extractors           Print a list of extractor classes with
+    --list-extractors CATEGORIES
+                                Print a list of extractor classes with
                                 description, (sub)category and example URL
     --write-log FILE            Write logging output to FILE
     --write-unsupported FILE    Write URLs, which get emitted by other
@@ -106,7 +107,7 @@
                                 optional domain prefixed with '/', keyring name
                                 prefixed with '+', profile prefixed with ':',
                                 and container prefixed with '::' ('none' for no
-                                container)
+                                container (default), 'all' for all containers)
 
 ## Selection Options:
     -A, --abort N               Stop current extractor run after N consecutive
@@ -146,7 +147,11 @@
     --mtime NAME                Set file modification times according to
                                 metadata selected by NAME. Examples: 'date' or
                                 'status[date]'
-    --ugoira FORMAT             Convert Pixiv Ugoira to FORMAT using FFmpeg.
+    --rename FORMAT             Rename previously downloaded files from FORMAT
+                                to the current filename format
+    --rename-to FORMAT          Rename previously downloaded files from the
+                                current filename format to FORMAT
+    --ugoira FMT                Convert Pixiv Ugoira to FMT using FFmpeg.
                                 Supported formats are 'webm', 'mp4', 'gif',
                                 'vp8', 'vp9', 'vp9-lossless', 'copy'.
     --exec CMD                  Execute CMD for each downloaded file. Supported

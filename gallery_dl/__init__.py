@@ -202,12 +202,18 @@ def main():
             extractor.modules.append("")
             sys.stdout.write("\n".join(extractor.modules))
 
-        elif args.list_extractors:
+        elif args.list_extractors is not None:
             write = sys.stdout.write
             fmt = ("{}{}\nCategory: {} - Subcategory: {}"
                    "\nExample : {}\n\n").format
 
-            for extr in extractor.extractors():
+            extractors = extractor.extractors()
+            if args.list_extractors:
+                fltr = util.build_extractor_filter(
+                    args.list_extractors, negate=False)
+                extractors = filter(fltr, extractors)
+
+            for extr in extractors:
                 write(fmt(
                     extr.__name__,
                     "\n" + extr.__doc__ if extr.__doc__ else "",
@@ -238,6 +244,13 @@ def main():
                 return config.open_extern()
 
         else:
+            input_files = config.get((), "input-files")
+            if input_files:
+                for input_file in input_files:
+                    if isinstance(input_file, str):
+                        input_file = (input_file, None)
+                    args.input_files.append(input_file)
+
             if not args.urls and not args.input_files:
                 parser.error(
                     "The following arguments are required: URL\n"

@@ -149,13 +149,13 @@ __tests__ = (
     "user"       : {
         "avatar"        : str,
         "banner"        : str,
-        "description"   : "Official Bluesky account (check domain👆)\n\nFollow for updates and announcements",
+        "description"   : str,
         "did"           : "did:plc:z72i7hdynmk6r22z27h6tvur",
         "displayName"   : "Bluesky",
         "followersCount": int,
         "followsCount"  : int,
         "handle"        : "bsky.app",
-        "indexedAt"     : "2024-01-20T05:04:41.904Z",
+        "indexedAt"     : "2024-08-30T21:49:26.737Z",
         "labels"        : [],
         "postsCount"    : int,
     },
@@ -210,6 +210,21 @@ __tests__ = (
     "#category": ("", "bluesky", "post"),
     "#class"   : bluesky.BlueskyPostExtractor,
     "#urls"    : "https://bsky.social/xrpc/com.atproto.sync.getBlob?did=did:plc:owc2r2dsewj3hk73rtd746zh&cid=bafkreieuhplc7fpbvi3suvacaf2dqxzvuu4hgl5o6eifqb76tf3uopldmi",
+},
+
+{
+    "#url"     : "https://bsky.app/profile/mikf.bsky.social/post/3l46q5glfex27",
+    "#comment" : "video (#6183)",
+    "#category": ("", "bluesky", "post"),
+    "#class"   : bluesky.BlueskyPostExtractor,
+    "#urls"    : "https://bsky.social/xrpc/com.atproto.sync.getBlob?did=did:plc:cslxjqkeexku6elp5xowxkq7&cid=bafkreihq2nsfocrnlpx4nykb4szouqszxwmy3ucnk4k46nx5t6hjnxlti4",
+
+    "description": "kirby and reimu dance",
+    "text"       : "video",
+    "width"      : 1280,
+    "height"     : 720,
+    "filename"   : "bafkreihq2nsfocrnlpx4nykb4szouqszxwmy3ucnk4k46nx5t6hjnxlti4",
+    "extension"  : "mp4",
 },
 
 )

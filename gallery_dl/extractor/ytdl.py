@@ -116,21 +116,20 @@ class YoutubeDLExtractor(Extractor):
         for entry in entries:
             if not entry:
                 continue
-            elif entry.get("_type") in ("url", "url_transparent"):
+
+            if entry.get("_type") in ("url", "url_transparent"):
                 try:
-                    info_dict = ytdl_instance.extract_info(
+                    entry = ytdl_instance.extract_info(
                         entry["url"], False,
                         ie_key=entry.get("ie_key"))
                 except ytdl_module.utils.YoutubeDLError:
                     continue
-
-                if not info_dict:
+                if not entry:
                     continue
-                elif "entries" in info_dict:
-                    yield from self._process_entries(
-                        ytdl_module, ytdl_instance, info_dict["entries"])
-                else:
-                    yield info_dict
+
+            if "entries" in entry:
+                yield from self._process_entries(
+                    ytdl_module, ytdl_instance, entry["entries"])
             else:
                 yield entry
 

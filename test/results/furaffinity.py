@@ -160,6 +160,14 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.furaffinity.net/view/57587562",
+    "#comment" : "login required",
+    "#category": ("", "furaffinity", "post"),
+    "#class"   : furaffinity.FuraffinityPostExtractor,
+    "#count"   : 0,
+},
+
+{
     "#url"     : "https://furaffinity.net/view/21835115/",
     "#category": ("", "furaffinity", "post"),
     "#class"   : furaffinity.FuraffinityPostExtractor,
@@ -218,6 +226,23 @@ __tests__ = (
     "#pattern" : furaffinity.FuraffinityUserExtractor.pattern,
     "#range"   : "176-225",
     "#count"   : 50,
+},
+
+{
+    "#url"     : "https://www.furaffinity.net/msg/submissions",
+    "#category": ("", "furaffinity", "submissions"),
+    "#class"   : furaffinity.FuraffinitySubmissionsExtractor,
+    "#auth"    : True,
+    "#pattern" : r"https://d\d?\.f(uraffinity|acdn)\.net/art/mirlinthloth/\d+/\d+.\w+\.\w+",
+    "#range"   : "45-50",
+    "#count"   : 6,
+},
+
+{
+    "#url"     : "https://www.furaffinity.net/msg/submissions/new~56789000@48/",
+    "#category": ("", "furaffinity", "submissions"),
+    "#class"   : furaffinity.FuraffinitySubmissionsExtractor,
+    "#auth"    : True,
 },
 
 )

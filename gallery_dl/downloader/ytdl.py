@@ -42,9 +42,10 @@ class YoutubeDLDownloader(DownloaderBase):
             if not ytdl_instance:
                 try:
                     module = ytdl.import_module(self.config("module"))
-                except ImportError as exc:
-                    self.log.error("Cannot import module '%s'", exc.name)
-                    self.log.debug("", exc_info=True)
+                except (ImportError, SyntaxError) as exc:
+                    self.log.error("Cannot import module '%s'",
+                                   getattr(exc, "name", ""))
+                    self.log.debug("", exc_info=exc)
                     self.download = lambda u, p: False
                     return False
                 self.ytdl_instance = ytdl_instance = ytdl.construct_YoutubeDL(
@@ -63,8 +64,8 @@ class YoutubeDLDownloader(DownloaderBase):
         if not info_dict:
             try:
                 info_dict = ytdl_instance.extract_info(url[5:], download=False)
-            except Exception:
-                pass
+            except Exception as exc:
+                self.log.debug("", exc_info=exc)
             if not info_dict:
                 return False
 
@@ -119,8 +120,8 @@ class YoutubeDLDownloader(DownloaderBase):
         self.out.start(pathfmt.path)
         try:
             ytdl_instance.process_info(info_dict)
-        except Exception:
-            self.log.debug("Traceback", exc_info=True)
+        except Exception as exc:
+            self.log.debug("", exc_info=exc)
             return False
         return True
 

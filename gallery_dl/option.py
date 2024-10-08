@@ -74,6 +74,21 @@ class MtimeAction(argparse.Action):
         })
 
 
+class RenameAction(argparse.Action):
+    """Configure rename post processors"""
+    def __call__(self, parser, namespace, value, option_string=None):
+        if self.const:
+            namespace.postprocessors.append({
+                "name": "rename",
+                "to"  : value,
+            })
+        else:
+            namespace.postprocessors.append({
+                "name": "rename",
+                "from": value,
+            })
+
+
 class UgoiraAction(argparse.Action):
     """Configure ugoira post processors"""
     def __call__(self, parser, namespace, value, option_string=None):
@@ -116,19 +131,24 @@ class UgoiraAction(argparse.Action):
                                       "[a] palettegen [p];[b][p] paletteuse"),
                 "repeat-last-frame": False,
             }
-        elif value in ("mkv", "copy"):
+        elif value == "mkv" or value == "copy":
             pp = {
                 "extension"        : "mkv",
                 "ffmpeg-args"      : ("-c:v", "copy"),
                 "repeat-last-frame": False,
             }
+        elif value == "zip" or value == "archive":
+            pp = {
+                "mode"             : "archive",
+            }
+            namespace.options.append(((), "ugoira", "original"))
         else:
             parser.error("Unsupported Ugoira format '{}'".format(value))
 
         pp["name"] = "ugoira"
         pp["whitelist"] = ("pixiv", "danbooru")
 
-        namespace.options.append(((), "ugoira", True))
+        namespace.options.append((("extractor",), "ugoira", True))
         namespace.postprocessors.append(pp)
 
 
@@ -207,7 +227,7 @@ def build_parser():
     )
 
     update = parser.add_argument_group("Update Options")
-    if util.EXECUTABLE or 1:
+    if util.EXECUTABLE:
         update.add_argument(
             "-U", "--update",
             dest="update", action="store_const", const="latest",
@@ -329,7 +349,7 @@ def build_parser():
     )
     output.add_argument(
         "--list-extractors",
-        dest="list_extractors", action="store_true",
+        dest="list_extractors", metavar="CATEGORIES", nargs="*",
         help=("Print a list of extractor classes "
               "with description, (sub)category and example URL"),
     )
@@ -526,7 +546,8 @@ def build_parser():
               "domain prefixed with '/', "
               "keyring name prefixed with '+', "
               "profile prefixed with ':', and "
-              "container prefixed with '::' ('none' for no container)"),
+              "container prefixed with '::' "
+              "('none' for no container (default), 'all' for all containers)"),
     )
 
     selection = parser.add_argument_group("Selection Options")
@@ -661,11 +682,23 @@ def build_parser():
         help=argparse.SUPPRESS,
     )
     postprocessor.add_argument(
+        "--rename",
+        dest="postprocessors", metavar="FORMAT", action=RenameAction, const=0,
+        help=("Rename previously downloaded files from FORMAT "
+              "to the current filename format"),
+    )
+    postprocessor.add_argument(
+        "--rename-to",
+        dest="postprocessors", metavar="FORMAT", action=RenameAction, const=1,
+        help=("Rename previously downloaded files from the current filename "
+              "format to FORMAT"),
+    )
+    postprocessor.add_argument(
         "--ugoira",
-        dest="postprocessors", metavar="FORMAT", action=UgoiraAction,
-        help=("Convert Pixiv Ugoira to FORMAT using FFmpeg. "
+        dest="postprocessors", metavar="FMT", action=UgoiraAction,
+        help=("Convert Pixiv Ugoira to FMT using FFmpeg. "
               "Supported formats are 'webm', 'mp4', 'gif', "
-              "'vp8', 'vp9', 'vp9-lossless', 'copy'."),
+              "'vp8', 'vp9', 'vp9-lossless', 'copy', 'zip'."),
     )
     postprocessor.add_argument(
         "--ugoira-conv",

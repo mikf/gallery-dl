@@ -32,6 +32,8 @@ class NewgroundsExtractor(Extractor):
         self.user_root = "https://{}.newgrounds.com".format(self.user)
 
     def _init(self):
+        self._extract_comment_urls = re.compile(
+            r'(?:<img |data-smartload-)src="([^"]+)').findall
         self.flash = self.config("flash", True)
 
         fmt = self.config("format")
@@ -53,8 +55,8 @@ class NewgroundsExtractor(Extractor):
             try:
                 post = self.extract_post(post_url)
                 url = post.get("url")
-            except Exception:
-                self.log.debug("", exc_info=True)
+            except Exception as exc:
+                self.log.debug("", exc_info=exc)
                 url = None
 
             if url:
@@ -78,8 +80,7 @@ class NewgroundsExtractor(Extractor):
                         if "_fallback" in post:
                             del post["_fallback"]
 
-                for url in text.extract_iter(
-                        post["_comment"], 'data-smartload-src="', '"'):
+                for url in self._extract_comment_urls(post["_comment"]):
                     post["num"] += 1
                     post["_index"] = "{}_{:>02}".format(
                         post["index"], post["num"])
@@ -171,15 +172,17 @@ class NewgroundsExtractor(Extractor):
             if self.flash:
                 url += "/format/flash"
 
-        with self.request(url, fatal=False) as response:
-            if response.status_code >= 400:
-                return {}
-            page = response.text
+        response = self.request(url, fatal=False)
+        page = response.text
 
         pos = page.find('id="adults_only"')
         if pos >= 0:
             msg = text.extract(page, 'class="highlight">', '<', pos)[0]
             self.log.warning('"%s"', msg)
+            return {}
+
+        if response.status_code >= 400:
+            return {}
 
         extr = text.extract_from(page)
         data = extract_data(extr, post_url)
@@ -241,9 +244,12 @@ class NewgroundsExtractor(Extractor):
             url = text.ensure_http_scheme(url)
             url = url.replace("/medium_views/", "/images/", 1)
             if text.ext_from_url(url) == "webp":
+                fallback = [url.replace(".webp", "." + e)
+                            for e in ("jpg", "png", "gif") if e != ext]
+                fallback.append(url)
                 yield {
                     "image"    : url.replace(".webp", "." + ext),
-                    "_fallback": (url,),
+                    "_fallback": fallback,
                 }
             else:
                 yield {"image": url}

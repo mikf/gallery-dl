@@ -160,8 +160,7 @@ Default
     ``false``
 Description
     Use an extractor's current target directory as
-    `base-directory <extractor.*.base-directory_>`__
-    for any spawned child extractors.
+    base-directory_ for any spawned child extractors.
 
 
 extractor.*.parent-metadata
@@ -384,6 +383,7 @@ Type
     |Duration|_
 Default
     * ``"0.5-1.5"``
+        ``ao3``, ``civitai``,
         ``[Danbooru]``, ``[E621]``, ``[foolfuuka]:search``, ``itaku``,
         ``koharu``,
         ``newgrounds``, ``[philomena]``, ``pixiv:novel``, ``plurk``,
@@ -416,14 +416,10 @@ Description
     The username and password to use when attempting to log in to
     another site.
 
-    Specifying username and password is required for
-
-    * ``nijie``
-    * ``horne``
-
-    and optional for
+    This is supported for
 
     * ``aibooru`` (*)
+    * ``ao3``
     * ``aryion``
     * ``atfbooru`` (*)
     * ``bluesky``
@@ -435,6 +431,7 @@ Description
     * ``e6ai`` (*)
     * ``e926`` (*)
     * ``exhentai``
+    * ``horne`` (R)
     * ``idolcomplex``
     * ``imgbb``
     * ``inkbunny``
@@ -442,8 +439,11 @@ Description
     * ``koharu``
     * ``mangadex``
     * ``mangoxo``
+    * ``newgrounds``
+    * ``nijie`` (R)
     * ``pillowfort``
     * ``sankaku``
+    * ``seiga``
     * ``subscribestar``
     * ``tapas``
     * ``tsumino``
@@ -458,6 +458,9 @@ Description
     (*) The password value for these sites should be
     the API key found in your user profile, not the actual account password.
 
+    (R) Login with username & password or supplying logged-in
+    `cookies <extractor.*.cookies_>`__ is required
+
     Note: Leave the ``password`` value empty or undefined
     to be prompted for a passeword when performing a login
     (see `getpass() <https://docs.python.org/3/library/getpass.html#getpass.getpass>`__).
@@ -468,7 +471,7 @@ extractor.*.input
 Type
     ``bool``
 Default
-    ``true`` if `stdin` is attached to a terminal ,
+    ``true`` if `stdin` is attached to a terminal,
     ``false`` otherwise
 Description
     Allow prompting the user for interactive input.
@@ -514,14 +517,37 @@ Description
       * The first entry is the browser name
       * The optional second entry is a profile name or an absolute path to a profile directory
       * The optional third entry is the keyring to retrieve passwords for decrypting cookies from
-      * The optional fourth entry is a (Firefox) container name (``"none"`` for only cookies with no container)
-      * The optional fifth entry is the domain to extract cookies for. Prefix it with a dot ``.`` to include cookies for subdomains. Has no effect when also specifying a container.
+      * The optional fourth entry is a (Firefox) container name (``"none"`` for only cookies with no container (default))
+      * The optional fifth entry is the domain to extract cookies for. Prefix it with a dot ``.`` to include cookies for subdomains.
 
       .. code:: json
 
         ["firefox"]
         ["firefox", null, null, "Personal"]
         ["chromium", "Private", "kwallet", null, ".twitter.com"]
+
+
+extractor.*.cookies-select
+--------------------------
+Type
+    ``string``
+Default
+    ``"random"``
+Description
+    Interpret `extractor.cookies <extractor.*.cookies_>`__
+    as a list of cookie sources and select one of them for each extractor run.
+
+    * ``"random"``: Select cookies `randomly <https://docs.python.org/3.10/library/random.html#random.choice>`__
+    * ``"rotate"``: Select cookies in sequence. Start over from the beginning after reaching the end of the list.
+
+    .. code:: json
+
+      [
+          "~/.local/share/cookies-instagram-com-1.txt",
+          "~/.local/share/cookies-instagram-com-2.txt",
+          "~/.local/share/cookies-instagram-com-3.txt",
+          ["firefox", null, null, "c1", ".instagram-com"],
+      ]
 
 
 extractor.*.cookies-update
@@ -601,7 +627,7 @@ Description
     and use the User-Agent used by the system's default browser.
 
     Note: This option has no effect on
-    `pixiv`, `e621`, and `mangadex`
+    `pixiv`, `e621`, `mangadex`, and `patreon`
     extractors, as these need specific values to function correctly.
 
 
@@ -610,7 +636,7 @@ extractor.*.browser
 Type
     ``string``
 Default
-    * ``"firefox"``: ``artstation``, ``mangasee``, ``patreon``, ``pixiv:series``, ``twitter``
+    * ``"firefox"``: ``artstation``, ``mangasee``, ``twitter``
     * ``null``: otherwise
 Example
     * ``"chrome:macos"``
@@ -686,7 +712,7 @@ extractor.*.tls12
 Type
     ``bool``
 Default
-    * ``false``: ``artstation``, ``patreon``, ``pixiv:series``
+    * ``false``: ``artstation``
     * ``true``: otherwise
 Description
     Allow selecting TLS 1.2 cipher suites.
@@ -1280,6 +1306,20 @@ Extractor-specific Options
 ==========================
 
 
+extractor.ao3.formats
+---------------------
+Type
+    * ``string``
+    * ``list`` of ``strings``
+Default
+    ``"pdf"``
+Example
+    * ``"azw3,epub,mobi,pdf,html"``
+    * ``["azw3", "epub", "mobi", "pdf", "html"]``
+Description
+    Format(s) to download.
+
+
 extractor.artstation.external
 -----------------------------
 Type
@@ -1371,8 +1411,18 @@ Description
     ``image``, ``video``, ``mediacollection``, ``embed``, ``text``.
 
 
-extractor.blogger.videos
-------------------------
+extractor.[blogger].api-key
+---------------------------
+Type
+    ``string``
+Description
+    Custom Blogger API key.
+
+    https://developers.google.com/blogger/docs/3.0/using#APIKey
+
+
+extractor.[blogger].videos
+--------------------------
 Type
     ``bool``
 Default
@@ -1446,6 +1496,237 @@ Default
     ``false``
 Description
     Process reposts.
+
+
+extractor.bluesky.videos
+------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Download videos.
+
+
+extractor.boosty.allowed
+------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Request only available posts.
+
+
+extractor.boosty.bought
+-----------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Request only purchased posts for ``feed`` results.
+
+
+extractor.boosty.metadata
+-------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Provide detailed ``user`` metadata.
+
+
+extractor.boosty.videos
+-----------------------
+Type
+    * ``bool``
+    * ``list`` of ``strings``
+Default
+    ``true``
+Example
+    ``["full_hd", "high", "medium"]``
+Description
+    Download videos.
+
+    | If this is a ``list``, it selects which format to try to download.
+    | Possibly available formats are
+      ``"quad_hd"``, ``"ultra_hd"``, ``"full_hd"``,
+      ``"high"``, ``"medium"``, ``"low"``
+
+
+extractor.bunkr.tlds
+--------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Controls which ``bunkr`` TLDs to accept.
+
+    * ``true``: Match URLs with *all* possible TLDs (e.g. ``bunkr.xyz`` or ``bunkrrr.duck``)
+    * ``false``: Match only URLs with known TLDs
+
+
+extractor.cien.files
+--------------------
+Type
+    ``list`` of ``strings``
+Default
+    ``["image", "video", "download", "gallery"]``
+Description
+    Determines the type and order of files to download.
+
+    Available types are
+    ``image``,
+    ``video``,
+    ``download``,
+    ``gallery``.
+
+
+extractor.civitai.api
+---------------------
+Type
+    ``string``
+Default
+    ``"trpc"``
+Description
+    Selects which API endpoints to use.
+
+    * ``"rest"``: `Public REST API <https://developer.civitai.com/docs/api/public-rest>`__
+    * ``"trpc"``: Internal tRPC API
+
+
+extractor.civitai.api-key
+-------------------------
+Type
+    ``string``
+Description
+    The API Key value generated in your
+    `User Account Settings <https://civitai.com/user/account>`__
+    to make authorized API requests.
+
+    See `API/Authorization <https://developer.civitai.com/docs/api/public-rest#authorization>`__
+    for details.
+
+
+extractor.civitai.files
+-----------------------
+Type
+    ``list`` of ``strings``
+Default
+    ``["image"]``
+Description
+    Determines the type and order of files to download when processing models.
+
+    Available types are
+    ``model``,
+    ``image``,
+    ``gallery``.
+
+
+extractor.civitai.include
+-------------------------
+Type
+    * ``string``
+    * ``list`` of ``strings``
+Default
+    ``["user-models", "user-posts"]``
+Description
+    A (comma-separated) list of subcategories to include
+    when processing a user profile.
+
+    Possible values are
+    ``"user-models"``,
+    ``"user-posts"``,
+    ``"user-images"``.
+
+    It is possible to use ``"all"`` instead of listing all values separately.
+
+
+extractor.civitai.nsfw
+----------------------
+Type
+    * ``bool``
+    * ``string`` (``"api": "rest"``)
+    * ``integer`` (``"api": "trpc"``)
+Default
+    ``true``
+Description
+    Download images rated NSFW.
+
+    * For ``"api": "rest"``, this can be one of
+      ``"None"``, ``"Soft"``, ``"Mature"``, ``"X"``
+      to set the highest returned mature content flag.
+
+    * For ``"api": "trpc"``, this can be an ``integer``
+      whose bits select the returned mature content flags.
+
+      For example, ``12`` (``4|8``)  would return only
+      ``Mature`` and ``X`` rated images,
+      while ``3`` (``1|2``) would return only
+      ``None`` and ``Soft`` rated images,
+
+
+extractor.civitai.quality
+-------------------------
+Type
+    * ``string``
+    * ``list`` of ``strings``
+Default
+    ``"original=true"``
+Example
+    * ``"width=1280,quality=90"``
+    * ``["width=1280", "quality=90"]``
+Description
+    A (comma-separated) list of image quality options
+    to pass with every image URL.
+
+    Known available options include ``original``, ``quality``, ``width``
+
+    Note: Set this option to an arbitrary letter, e.g., ``"w"``,
+    to download images in JPEG format at their original resolution.
+
+
+extractor.cohost.asks
+---------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Extract ``ask`` posts.
+
+
+extractor.cohost.pinned
+-----------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Extract pinned posts.
+
+
+extractor.cohost.replies
+------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Extract reply posts.
+
+
+extractor.cohost.shares
+-----------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Extract shared posts.
 
 
 extractor.cyberdrop.domain
@@ -1799,7 +2080,7 @@ Description
 
     Setting this option to ``"images"`` only downloads original
     files if they are images and falls back to preview versions for
-    everything else (archives, etc.).
+    everything else (archives, videos, etc.).
 
 
 extractor.deviantart.pagination
@@ -1813,6 +2094,19 @@ Description
 
     * ``"api"``: Trust the API and stop when ``has_more`` is ``false``.
     * ``"manual"``: Disregard ``has_more`` and only stop when a batch of results is empty.
+
+
+extractor.deviantart.previews
+-----------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    For non-image files (archives, videos, etc.),
+    also download the file's preview image.
+
+    Set this option to ``"all"`` to download previews for all files.
 
 
 extractor.deviantart.public
@@ -2042,6 +2336,19 @@ Description
     * ``"ytdl"``: Let |ytdl| handle video extraction and download, and merge video & audio streams.
 
 
+extractor.fanbox.comments
+-------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Extract ``comments`` metadata.
+
+    Note: This requires 1 or more additional API requests per post,
+    depending on the number of comments.
+
+
 extractor.fanbox.embeds
 -----------------------
 Type
@@ -2068,10 +2375,19 @@ Type
 Default
     ``false``
 Example
-    * ``user,plan``
-    * ``["user", "plan"]``
+    * ``user,plan,comments``
+    * ``["user", "plan", "comments"]``
 Description
     Extract ``plan`` and extended ``user`` metadata.
+
+    Supported fields when selecting which data to extract are
+
+    * ``comments``
+    * ``plan``
+    * ``user``
+
+    Note: ``comments`` can also be enabled via
+    `fanbox.comments <extractor.fanbox.comments_>`__
 
 
 extractor.flickr.access-token & .access-token-secret
@@ -2391,6 +2707,24 @@ Description
     * ``"graphql"``: GraphQL API - lower-resolution media
 
 
+extractor.instagram.cursor
+--------------------------
+Type
+    * ``bool``
+    * ``string``
+Default
+    ``true``
+Example
+    ``"3414259811154179155_25025320"``
+Description
+    Controls from which position to start the extraction process from.
+
+    * ``true``: Start from the beginning.
+      Log the most recent ``cursor`` value when interrupted before reaching the end.
+    * ``false``: Start from the beginning.
+    * any ``string``: Start from the position defined by this value.
+
+
 extractor.instagram.include
 ---------------------------
 Type
@@ -2411,9 +2745,20 @@ Description
     ``"tagged"``,
     ``"stories"``,
     ``"highlights"``,
+    ``"info"``,
     ``"avatar"``.
 
     It is possible to use ``"all"`` instead of listing all values separately.
+
+
+extractor.instagram.max-posts
+-----------------------------
+Type
+    ``integer``
+Default
+    ``null``
+Description
+    Limit the number of posts to download.
 
 
 extractor.instagram.metadata
@@ -2647,14 +2992,17 @@ Description
 extractor.koharu.format
 -----------------------
 Type
-    ``string``
+    * ``string``
+    * ``list`` of ``strings``
 Default
-    ``"original"``
+    ``["0", "1600", "1280", "980", "780"]``
 Description
-    Name of the image format to download.
+    Name(s) of the image format to download.
 
-    | Available formats are
-    | ``"780"``, ``"980"``, ``"1280"``, ``"1600"``, ``"0"``/``"original"``
+    When more than one format is given, the first available one is selected.
+
+    | Possible formats are
+    | ``"780"``, ``"980"``, ``"1280"``, ``"1600"``, ``"0"`` (original)
 
 
 extractor.lolisafe.domain
@@ -3182,7 +3530,20 @@ Description
     `your own account <extractor.pixiv.refresh-token_>`__,
     fetch bookmark tags as ``tags_bookmark`` metadata.
 
-    Note: This requires 1 additional API call per bookmarked post.
+    Note: This requires 1 additional API request per bookmarked post.
+
+
+extractor.pixiv.comments
+------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Fetch ``comments`` metadata.
+
+    Note: This requires 1 or more additional API requests per post,
+    depending on the number of comments.
 
 
 extractor.pixiv.work.related
@@ -3212,17 +3573,21 @@ Description
 extractor.pixiv.ugoira
 ----------------------
 Type
-    ``bool``
+    * ``bool``
+    * ``string``
 Default
     ``true``
 Description
-    Download Pixiv's Ugoira animations or ignore them.
+    Download Pixiv's Ugoira animations.
 
-    These animations come as a ``.zip`` file containing all
-    animation frames in JPEG format.
+    These animations come as a ``.zip`` archive containing all
+    animation frames in JPEG format by default.
+
+    Set this option to ``"original"``
+    to download them as individual, higher-quality frames.
 
     Use an `ugoira` post processor to convert them
-    to watchable videos. (Example__)
+    to watchable animations. (Example__)
 
 .. __: https://github.com/mikf/gallery-dl/blob/v1.12.3/docs/gallery-dl-example.conf#L9-L14
 
@@ -3236,6 +3601,16 @@ Default
 Description
     When downloading galleries, this sets the maximum number of posts to get.
     A value of ``0`` means no limit.
+
+
+extractor.pixiv.sanity
+----------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Try to fetch ``limit_sanity_level`` works via web API.
 
 
 extractor.plurk.comments
@@ -3984,6 +4359,26 @@ Description
     * ``"cookies"``: Use token given by the ``ct0`` cookie if present.
 
 
+extractor.twitter.cursor
+------------------------
+Type
+    * ``bool``
+    * ``string``
+Default
+    ``true``
+Example
+    ``"1/DAABCgABGVKi5lE___oKAAIYbfYNcxrQLggAAwAAAAIAAA"``
+Description
+    Controls from which position to start the extraction process from.
+
+    * ``true``: Start from the beginning.
+      Log the most recent ``cursor`` value when interrupted before reaching the end.
+    * ``false``: Start from the beginning.
+    * any ``string``: Start from the position defined by this value.
+
+    Note: A ``cursor`` value from one timeline cannot be used with another.
+
+
 extractor.twitter.expand
 ------------------------
 Type
@@ -4028,6 +4423,7 @@ Description
     when processing a user profile.
 
     Possible values are
+    ``"info"``,
     ``"avatar"``,
     ``"background"``,
     ``"timeline"``,
@@ -4497,6 +4893,18 @@ Description
     Download video files.
 
 
+extractor.wikimedia.limit
+-------------------------
+Type
+    ``integer``
+Default
+    ``50``
+Description
+    Number of results to return in a single API query.
+
+    The value must be between 10 and 500.
+
+
 extractor.ytdl.cmdline-args
 ---------------------------
 Type
@@ -4639,6 +5047,16 @@ Description
       (no ``extension`` metadata)
     * ``"html"``: Parse HTML pages
       (limited to 100 pages * 24 posts)
+
+
+extractor.zerochan.redirects
+----------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Automatically follow tag redirects.
 
 
 extractor.[booru].tags
@@ -5498,6 +5916,85 @@ Description
     See `metadata.event`_ for a list of available events.
 
 
+hash.chunk-size
+---------------
+Type
+    ``integer``
+Default
+    ``32768``
+Description
+    Number of bytes read per chunk during file hash computation.
+
+
+hash.event
+----------
+Type
+    * ``string``
+    * ``list`` of ``strings``
+Default
+    ``"file"``
+Description
+    The event(s) for which `file hashes <hash.hashes_>`__ are computed.
+
+    See `metadata.event`_ for a list of available events.
+
+
+hash.filename
+-------------
+Type
+    * ``bool``
+Default
+    ``false``
+Description
+    Rebuild `filenames <extractor.*.filename_>`__ after computing
+    `hash digests <hash.hashes_>`__ and adding them to the metadata dict.
+
+
+hash.hashes
+-----------
+Type
+    * ``string``
+    * ``object`` (`field name` -> `hash algorithm`)
+Default
+    ``"md5,sha1"``
+Example
+    .. code:: json
+
+        "sha256:hash_sha,sha3_512:hash_sha3"
+
+    .. code:: json
+
+        {
+            "hash_sha" : "sha256",
+            "hash_sha3": "sha3_512"
+        }
+
+Description
+    Hash digests to compute.
+
+    For a list of available hash algorithms, run
+
+    .. code::
+
+        python -c "import hashlib; print('\n'.join(hashlib.algorithms_available))"
+
+    or see `python/hashlib <https://docs.python.org/3/library/hashlib.html>`__.
+
+    * If this is a ``string``,
+      it is parsed as a a comma-separated list of algorthm-fieldname pairs:
+
+      .. code::
+
+          [<hash algorithm> ":"] <field name> ["," ...]
+
+      When ``<hash algorithm>`` is omitted,
+      ``<field name>`` is used as algorithm name.
+
+    * If this is an ``object``,
+      it is a ``<field name>`` to ``<algorithm name>`` mapping
+      for hash digests to compute.
+
+
 metadata.mode
 -------------
 Type
@@ -5546,8 +6043,23 @@ Example
     * ``"metadata"``
     * ``["..", "metadata", "\fF {id // 500 * 500}"]``
 Description
-    Directory where metadata files are stored in relative to the
-    current target location for file downloads.
+    Directory where metadata files are stored in
+    relative to `metadata.base-directory`_.
+
+
+metadata.base-directory
+-----------------------
+Type
+    * ``bool``
+    * |Path|_
+Default
+    ``false``
+Description
+    Selects the relative location for metadata files.
+
+    * ``false``: current target location for file downloads (base-directory_ + directory_)
+    * ``true``: current base-directory_ location
+    * any |Path|_: custom location
 
 
 metadata.extension
@@ -5616,6 +6128,30 @@ Description
         e.g. a Tweet on Twitter or a post on Patreon.
     ``post-after``
         After downloading all files of a `post`
+
+
+metadata.include
+----------------
+Type
+    ``list`` of ``strings``
+Example
+    ``["id", "width", "height", "description"]``
+Description
+    Include only the given top-level keys when writing JSON data.
+
+    Note: Missing or undefined fields will be silently ignored.
+
+
+metadata.exclude
+----------------
+Type
+    ``list`` of ``strings``
+Example
+    ``["blocked", "watching", "status"]``
+Description
+    Exclude all given keys from written JSON data.
+
+    Note: Cannot be used with `metadata.include`_.
 
 
 metadata.fields
@@ -5890,6 +6426,36 @@ Description
     or the |Path|_ to a `.py` file,
 
 
+rename.from
+-----------
+Type
+    ``string``
+Description
+    The `format string`_ for filenames to rename.
+
+    When no value is given, `extractor.*.filename`_ is used.
+
+
+rename.to
+---------
+Type
+    ``string``
+Description
+    The `format string`_ for target filenames.
+
+    When no value is given, `extractor.*.filename`_ is used.
+
+
+rename.skip
+-----------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Do not rename a file when another file with the target name already exists.
+
+
 ugoira.extension
 ----------------
 Type
@@ -5912,6 +6478,8 @@ Description
     Additional |ffmpeg| command-line arguments.
 
 
+ugoira.mode
+-----------
 ugoira.ffmpeg-demuxer
 ---------------------
 Type
@@ -5926,6 +6494,7 @@ Description
     * "`concat <https://ffmpeg.org/ffmpeg-formats.html#concat-1>`_" (inaccurate frame timecodes for non-uniform frame delays)
     * "`image2 <https://ffmpeg.org/ffmpeg-formats.html#image2-1>`_" (accurate timecodes, requires nanosecond file timestamps, i.e. no Windows or macOS)
     * "mkvmerge" (accurate timecodes, only WebM or MKV, requires `mkvmerge <ugoira.mkvmerge-location_>`__)
+    * "archive" (store "original" frames in a ``.zip`` archive)
 
     `"auto"` will select `mkvmerge` if available and fall back to `concat` otherwise.
 
@@ -6023,6 +6592,21 @@ Description
     to reduce an odd width/height by 1 pixel and make them even.
 
 
+ugoira.metadata
+---------------
+Type
+    * ``bool``
+    * ``string``
+Default
+    ``true``
+Description
+    When using ``"mode": "archive"``, save Ugoira frame delay data as
+    ``animation.json`` within the archive file.
+
+    If this is a ``string``,
+    use it as alternate filename for frame delay files.
+
+
 ugoira.mtime
 ------------
 Type
@@ -6044,6 +6628,16 @@ Description
     to prevent it from only being displayed for a very short amount of time.
 
 
+ugoira.skip
+-----------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Do not convert frames if target file already exists.
+
+
 zip.compression
 ---------------
 Type
@@ -6054,6 +6648,7 @@ Description
     Compression method to use when writing the archive.
 
     Possible values are ``"store"``, ``"zip"``, ``"bzip2"``, ``"lzma"``.
+
 
 zip.extension
 -------------
@@ -6205,6 +6800,16 @@ Description
 
     For example, setting this option to ``"#"`` would allow a replacement
     operation to be ``Rold#new#`` instead of the default ``Rold/new/``
+
+
+input-files
+-----------
+Type
+    ``list`` of |Path|_
+Example
+    ``["~/urls.txt", "$HOME/input"]``
+Description
+    Additional input files.
 
 
 signals-ignore
@@ -6521,17 +7126,20 @@ Description
         | (requires `downloader.*.part`_ = ``true`` and `extractor.*.skip`_ = ``false``)
     ``exec``
         Execute external commands
+    ``hash``
+        Compute file hash digests
     ``metadata``
         Write metadata to separate files
     ``mtime``
         Set file modification time according to its metadata
     ``python``
         Call Python functions
+    ``rename``
+        Rename previously downloaded files
     ``ugoira``
         Convert Pixiv Ugoira to WebM using |ffmpeg|
     ``zip``
         Store files in a ZIP archive
-        |ytdl|
 
 
 
@@ -6559,6 +7167,7 @@ Description
 .. |open()| replace:: the built-in ``open()`` function
 .. |json.dump()| replace:: ``json.dump()``
 
+.. _directory: `extractor.*.directory`_
 .. _base-directory: `extractor.*.base-directory`_
 .. _date-format: `extractor.*.date-format`_
 .. _deviantart.metadata: `extractor.deviantart.metadata`_

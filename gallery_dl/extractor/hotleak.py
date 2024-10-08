@@ -23,7 +23,7 @@ class HotleakExtractor(Extractor):
 
     def items(self):
         for post in self.posts():
-            if self.type == "photo":
+            if not post["url"].startswith("ytdl:"):
                 post["url"] = (
                     post["url"]
                     .replace("/storage/storage/", "/storage/")

@@ -9,10 +9,22 @@ from gallery_dl.extractor import hentaicosplays
 
 __tests__ = (
 {
+    "#url"     : "https://hentai-cosplay-xxx.com/image/---devilism--tide-kurihara-/",
+    "#category": ("", "hentaicosplays", "gallery"),
+    "#class"   : hentaicosplays.HentaicosplaysGalleryExtractor,
+    "#pattern" : r"https://static\d?\.hentai-cosplay-xxx\.com/upload/\d+/\d+/\d+/\d+\.jpg$",
+
+    "count": 18,
+    "site" : "hentai-cosplay-xxx",
+    "slug" : "---devilism--tide-kurihara-",
+    "title": "艦 こ れ-devilism の tide Kurihara 憂",
+},
+
+{
     "#url"     : "https://hentai-cosplays.com/image/---devilism--tide-kurihara-/",
     "#category": ("", "hentaicosplays", "gallery"),
     "#class"   : hentaicosplays.HentaicosplaysGalleryExtractor,
-    "#pattern" : r"https://static\d?.hentai-cosplays.com/upload/\d+/\d+/\d+/\d+.jpg$",
+    "#pattern" : r"https://static\d?\.hentai-cosplay-xxx\.com/upload/\d+/\d+/\d+/\d+\.jpg$",
 
     "count": 18,
     "site" : "hentai-cosplays",

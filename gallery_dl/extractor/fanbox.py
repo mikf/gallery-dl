@@ -29,7 +29,10 @@ class FanboxExtractor(Extractor):
     _warning = True
 
     def _init(self):
-        self.headers = {"Origin": self.root}
+        self.headers = {
+            "Accept": "application/json, text/plain, */*",
+            "Origin": self.root,
+        }
         self.embeds = self.config("embeds", True)
 
         includes = self.config("metadata")
@@ -40,8 +43,12 @@ class FanboxExtractor(Extractor):
                 includes = ("user", "plan")
             self._meta_user = ("user" in includes)
             self._meta_plan = ("plan" in includes)
+            self._meta_comments = ("comments" in includes)
         else:
-            self._meta_user = self._meta_plan = False
+            self._meta_user = self._meta_plan = self._meta_comments = False
+
+        if self.config("comments"):
+            self._meta_comments = True
 
         if self._warning:
             if not self.cookies_check(("FANBOXSESSID",)):
@@ -124,6 +131,11 @@ class FanboxExtractor(Extractor):
                     plan = plans[0].copy()
                     plan["fee"] = fee
                 post["plan"] = plans[fee] = plan
+        if self._meta_comments:
+            if post["commentCount"]:
+                post["comments"] = list(self._get_comment_data(post_id))
+            else:
+                post["commentd"] = ()
 
         return content_body, post
 
@@ -159,6 +171,18 @@ class FanboxExtractor(Extractor):
             plans[plan["fee"]] = plan
 
         return plans
+
+    def _get_comment_data(self, post_id):
+        url = ("https://api.fanbox.cc/post.listComments"
+               "?limit=10&postId=" + post_id)
+
+        comments = []
+        while url:
+            url = text.ensure_http_scheme(url)
+            body = self.request(url, headers=self.headers).json()["body"]
+            comments.extend(body["items"])
+            url = body["nextUrl"]
+        return comments
 
     def _get_urls_from_post(self, content_body, post):
         num = 0
@@ -309,8 +333,20 @@ class FanboxCreatorExtractor(FanboxExtractor):
         self.creator_id = match.group(1) or match.group(2)
 
     def posts(self):
-        url = "https://api.fanbox.cc/post.listCreator?creatorId={}&limit=10"
-        return self._pagination(url.format(self.creator_id))
+        url = "https://api.fanbox.cc/post.paginateCreator?creatorId="
+        return self._pagination_creator(url + self.creator_id)
+
+    def _pagination_creator(self, url):
+        urls = self.request(url, headers=self.headers).json()["body"]
+        for url in urls:
+            url = text.ensure_http_scheme(url)
+            body = self.request(url, headers=self.headers).json()["body"]
+            for item in body:
+                try:
+                    yield self._get_post_data(item["id"])
+                except Exception as exc:
+                    self.log.warning("Skipping post %s (%s: %s)",
+                                     item["id"], exc.__class__.__name__, exc)
 
 
 class FanboxPostExtractor(FanboxExtractor):

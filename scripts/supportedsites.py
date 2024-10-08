@@ -26,6 +26,7 @@ CATEGORY_MAP = {
     "adultempire"    : "Adult Empire",
     "agnph"          : "AGNPH",
     "allgirlbooru"   : "All girl",
+    "ao3"            : "Archive of Our Own",
     "archivedmoe"    : "Archived.Moe",
     "archiveofsins"  : "Archive of Sins",
     "artstation"     : "ArtStation",
@@ -37,6 +38,7 @@ CATEGORY_MAP = {
     "batoto"         : "BATO.TO",
     "bbc"            : "BBC",
     "cien"           : "Ci-en",
+    "cohost"         : "cohost!",
     "comicvine"      : "Comic Vine",
     "coomerparty"    : "Coomer",
     "deltaporno"     : "DeltaPorno",
@@ -180,12 +182,27 @@ SUBCATEGORY_MAP = {
     "related-pin"  : "related Pins",
     "related-board": "",
 
+    "ao3": {
+        "user-works"   : "",
+        "user-series"  : "",
+        "user-bookmark": "Bookmarks",
+    },
     "artstation": {
         "artwork": "Artwork Listings",
         "collections": "",
     },
     "bluesky": {
         "posts": "",
+    },
+    "boosty": {
+        "feed": "Subscriptions Feed",
+    },
+    "civitai": {
+        "tag-models": "Tag Searches (Models)",
+        "tag-images": "Tag Searches (Images)",
+        "user-models": "User Models",
+        "user-images": "User Images",
+        "user-posts": "User Posts",
     },
     "coomerparty": {
         "discord"       : "",
@@ -206,7 +223,10 @@ SUBCATEGORY_MAP = {
         "redirect"  : "Pixiv Redirects",
     },
     "fapello": {
-        "path": "Videos, Trending Posts, Popular Videos, Top Models",
+        "path": ["Videos", "Trending Posts", "Popular Videos", "Top Models"],
+    },
+    "furaffinity": {
+        "submissions": "New Submissions",
     },
     "hatenablog": {
         "archive": "Archive",
@@ -237,9 +257,6 @@ SUBCATEGORY_MAP = {
     "mangadex": {
         "feed" : "Followed Feed",
     },
-    "nana": {
-        "search": "Favorites, Search Results",
-    },
     "nijie": {
         "followed": "Followed Users",
         "nuita" : "Nuita History",
@@ -257,6 +274,7 @@ SUBCATEGORY_MAP = {
         "novel-user": "",
         "pixivision": "pixivision",
         "sketch": "Sketch",
+        "unlisted": "Unlisted Works",
         "work": "individual Images",
     },
     "poringa": {
@@ -310,7 +328,7 @@ SUBCATEGORY_MAP = {
         "uploads"    : "",
     },
     "wallpapercave": {
-        "image": "individual Images, Search Results",
+        "image": ["individual Images", "Search Results"],
     },
     "weasyl": {
         "journals"   : "",
@@ -322,6 +340,9 @@ SUBCATEGORY_MAP = {
     },
     "wikiart": {
         "artists": "Artist Listings",
+    },
+    "wikimedia": {
+        "article": ["Articles", "Categories", "Files"],
     },
 }
 
@@ -356,11 +377,13 @@ _APIKEY_WY = ('<a href="https://gdl-org.github.io/docs/configuration.html'
 
 AUTH_MAP = {
     "aibooru"        : "Supported",
+    "ao3"            : "Supported",
     "aryion"         : "Supported",
     "atfbooru"       : "Supported",
     "baraag"         : _OAUTH,
     "bluesky"        : "Supported",
     "booruvar"       : "Supported",
+    "boosty"         : _COOKIES,
     "coomerparty"    : "Supported",
     "danbooru"       : "Supported",
     "derpibooru"     : _APIKEY_DB,
@@ -395,7 +418,7 @@ AUTH_MAP = {
     "ponybooru"      : "API Key",
     "reddit"         : _OAUTH,
     "sankaku"        : "Supported",
-    "seiga"          : _COOKIES,
+    "seiga"          : "Supported",
     "smugmug"        : _OAUTH,
     "subscribestar"  : "Supported",
     "tapas"          : "Supported",
@@ -439,12 +462,23 @@ def category_text(c):
     return CATEGORY_MAP.get(c) or c.capitalize()
 
 
-def subcategory_text(c, sc):
+def subcategory_text(bc, c, sc):
     """Return a human-readable representation of a subcategory"""
     if c in SUBCATEGORY_MAP:
         scm = SUBCATEGORY_MAP[c]
         if sc in scm:
-            return scm[sc]
+            txt = scm[sc]
+            if not isinstance(txt, str):
+                txt = ", ".join(txt)
+            return txt
+
+    if bc and bc in SUBCATEGORY_MAP:
+        scm = SUBCATEGORY_MAP[bc]
+        if sc in scm:
+            txt = scm[sc]
+            if not isinstance(txt, str):
+                txt = ", ".join(txt)
+            return txt
 
     if sc in SUBCATEGORY_MAP:
         return SUBCATEGORY_MAP[sc]
@@ -532,14 +566,14 @@ def build_extractor_list():
 # define table columns
 COLUMNS = (
     ("Site", 20,
-     lambda c, scs, d: category_text(c)),
+     lambda bc, c, scs, d: category_text(c)),
     ("URL" , 35,
-     lambda c, scs, d: d),
+     lambda bc, c, scs, d: d),
     ("Capabilities", 50,
-     lambda c, scs, d: ", ".join(subcategory_text(c, sc) for sc in scs
-                                 if subcategory_text(c, sc))),
+     lambda bc, c, scs, d: ", ".join(subcategory_text(bc, c, sc) for sc in scs
+                                     if subcategory_text(bc, c, sc))),
     ("Authentication", 16,
-     lambda c, scs, d: AUTH_MAP.get(c, "")),
+     lambda bc, c, scs, d: AUTH_MAP.get(c, "")),
 )
 
 
@@ -555,10 +589,10 @@ def generate_output(columns, categories, domains):
     tbody = []
     append = tbody.append
 
-    for name, base in categories.items():
+    for bcat, base in categories.items():
 
-        if name and base:
-            name = BASE_MAP.get(name) or (name.capitalize() + " Instances")
+        if bcat and base:
+            name = BASE_MAP.get(bcat) or (bcat.capitalize() + " Instances")
             append('\n<tr>\n    <td colspan="4"><strong>' +
                    name + '</strong></td>\n</tr>')
             clist = base.items()
@@ -569,7 +603,7 @@ def generate_output(columns, categories, domains):
             append("<tr>")
             for column in columns:
                 domain = domains[category]
-                content = column[2](category, subcategories, domain)
+                content = column[2](bcat, category, subcategories, domain)
                 append("    <td>" + content + "</td>")
             append("</tr>")
 

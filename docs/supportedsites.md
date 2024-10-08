@@ -104,6 +104,12 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
+    <td>Archive of Our Own</td>
+    <td>https://archiveofourown.org/</td>
+    <td>Search Results, Series, Subscriptions, Tag Searches, User Profiles, Bookmarks, Works</td>
+    <td>Supported</td>
+</tr>
+<tr>
     <td>ArtStation</td>
     <td>https://www.artstation.com/</td>
     <td>Albums, Artwork Listings, Challenges, Collections, Followed Users, individual Images, Likes, Search Results, User Profiles</td>
@@ -134,8 +140,14 @@ Consider all listed sites to potentially be NSFW.
     <td>Supported</td>
 </tr>
 <tr>
+    <td>Boosty</td>
+    <td>https://www.boosty.to/</td>
+    <td>Subscriptions Feed, Followed Users, Media Files, Posts, User Profiles</td>
+    <td><a href="https://github.com/mikf/gallery-dl#cookies">Cookies</a></td>
+</tr>
+<tr>
     <td>Bunkr</td>
-    <td>https://bunkr.sk/</td>
+    <td>https://bunkr.si/</td>
     <td>Albums, Media Files</td>
     <td></td>
 </tr>
@@ -149,6 +161,18 @@ Consider all listed sites to potentially be NSFW.
     <td>Ci-en</td>
     <td>https://ci-en.net/</td>
     <td>Articles, Creators, Followed Users, Recent Images</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Civitai</td>
+    <td>https://www.civitai.com/</td>
+    <td>individual Images, Models, Posts, Search Results, Tag Searches (Images), Tag Searches (Models), User Profiles, User Images, User Models, User Posts</td>
+    <td></td>
+</tr>
+<tr>
+    <td>cohost!</td>
+    <td>https://cohost.org/</td>
+    <td>Likes, Posts, Tag Searches, User Profiles</td>
     <td></td>
 </tr>
 <tr>
@@ -178,7 +202,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>DeviantArt</td>
     <td>https://www.deviantart.com/</td>
-    <td>Avatars, Backgrounds, Collections, Deviations, Favorites, Folders, Followed Users, Galleries, Gallery Searches, Journals, Popular Images, Scraps, Search Results, Sta.sh, Status Updates, Tag Searches, User Profiles, Watches</td>
+    <td>Avatars, Backgrounds, Collections, Deviations, Favorites, Folders, Followed Users, Galleries, Gallery Searches, Journals, Scraps, Search Results, Sta.sh, Status Updates, Tag Searches, User Profiles, Watches</td>
     <td><a href="https://github.com/mikf/gallery-dl#oauth">OAuth</a></td>
 </tr>
 <tr>
@@ -256,7 +280,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Fur Affinity</td>
     <td>https://www.furaffinity.net/</td>
-    <td>Favorites, Followed Users, Galleries, Posts, Scraps, Search Results, User Profiles</td>
+    <td>Favorites, Followed Users, Galleries, Posts, Scraps, Search Results, New Submissions, User Profiles</td>
     <td><a href="https://github.com/mikf/gallery-dl#cookies">Cookies</a></td>
 </tr>
 <tr>
@@ -291,7 +315,7 @@ Consider all listed sites to potentially be NSFW.
 </tr>
 <tr>
     <td>Hentai Cosplay</td>
-    <td>https://hentai-cosplays.com/</td>
+    <td>https://hentai-cosplay-xxx.com/</td>
     <td>Galleries</td>
     <td></td>
 </tr>
@@ -617,7 +641,7 @@ Consider all listed sites to potentially be NSFW.
     <td>Niconico Seiga</td>
     <td>https://seiga.nicovideo.jp/</td>
     <td>individual Images, User Profiles</td>
-    <td><a href="https://github.com/mikf/gallery-dl#cookies">Cookies</a></td>
+    <td>Supported</td>
 </tr>
 <tr>
     <td>Nozomi.la</td>
@@ -682,7 +706,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Pixiv</td>
     <td>https://www.pixiv.net/</td>
-    <td>Artworks, Avatars, Backgrounds, Favorites, Follows, pixiv.me Links, Novels, Novel Bookmarks, Novel Series, pixivision, Rankings, Search Results, Series, Sketch, User Profiles, individual Images</td>
+    <td>Artworks, Avatars, Backgrounds, Favorites, Follows, pixiv.me Links, Novels, Novel Bookmarks, Novel Series, pixivision, Rankings, Search Results, Series, Sketch, Unlisted Works, User Profiles, individual Images</td>
     <td><a href="https://github.com/mikf/gallery-dl#oauth">OAuth</a></td>
 </tr>
 <tr>
@@ -796,7 +820,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Sex.com</td>
     <td>https://www.sex.com/</td>
-    <td>Boards, Pins, User Pins, related Pins, Search Results</td>
+    <td>Boards, Likes, Pins, User Pins, related Pins, Search Results</td>
     <td></td>
 </tr>
 <tr>
@@ -1079,7 +1103,7 @@ Consider all listed sites to potentially be NSFW.
 </tr>
 <tr>
     <td>JPG Fish</td>
-    <td>https://jpg4.su/</td>
+    <td>https://jpg5.su/</td>
     <td>Albums, individual Images, User Profiles</td>
     <td></td>
 </tr>
@@ -1466,61 +1490,61 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Wikimedia</td>
     <td>https://www.wikimedia.org/</td>
-    <td>Articles</td>
+    <td>Articles, Categories, Files, Wikis</td>
     <td></td>
 </tr>
 <tr>
     <td>Wikispecies</td>
     <td>https://species.wikimedia.org/</td>
-    <td>Articles</td>
+    <td>Articles, Categories, Files, Wikis</td>
     <td></td>
 </tr>
 <tr>
     <td>Wikimedia Commons</td>
     <td>https://commons.wikimedia.org/</td>
-    <td>Articles</td>
+    <td>Articles, Categories, Files, Wikis</td>
     <td></td>
 </tr>
 <tr>
     <td>MediaWiki</td>
     <td>https://www.mediawiki.org/</td>
-    <td>Articles</td>
+    <td>Articles, Categories, Files, Wikis</td>
     <td></td>
 </tr>
 <tr>
     <td>Fandom</td>
     <td>https://www.fandom.com/</td>
-    <td>Articles</td>
+    <td>Articles, Categories, Files, Wikis</td>
     <td></td>
 </tr>
 <tr>
     <td>wiki.gg</td>
     <td>https://www.wiki.gg/</td>
-    <td>Articles</td>
+    <td>Articles, Categories, Files, Wikis</td>
     <td></td>
 </tr>
 <tr>
     <td>Super Mario Wiki</td>
     <td>https://www.mariowiki.com/</td>
-    <td>Articles</td>
+    <td>Articles, Categories, Files, Wikis</td>
     <td></td>
 </tr>
 <tr>
     <td>Bulbapedia</td>
     <td>https://bulbapedia.bulbagarden.net/</td>
-    <td>Articles</td>
+    <td>Articles, Categories, Files, Wikis</td>
     <td></td>
 </tr>
 <tr>
     <td>PidgiWiki</td>
     <td>https://www.pidgi.net/</td>
-    <td>Articles</td>
+    <td>Articles, Categories, Files, Wikis</td>
     <td></td>
 </tr>
 <tr>
     <td>Azur Lane Wiki</td>
     <td>https://azurlane.koumakan.jp/</td>
-    <td>Articles</td>
+    <td>Articles, Categories, Files, Wikis</td>
     <td></td>
 </tr>
 
