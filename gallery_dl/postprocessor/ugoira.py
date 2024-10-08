@@ -147,6 +147,13 @@ class UgoiraPP(PostProcessor):
                 except FileNotFoundError:
                     pathfmt.realpath = pathfmt.temppath
                     return
+                except Exception as exc:
+                    pathfmt.realpath = pathfmt.temppath
+                    self.log.error(
+                        "%s: Unable to extract frames from %s (%s: %s)",
+                        pathfmt.kwdict.get("id"), pathfmt.filename,
+                        exc.__class__.__name__, exc)
+                    return self.log.debug("", exc_info=exc)
 
             if self.convert(pathfmt, tempdir):
                 if self.delete:
