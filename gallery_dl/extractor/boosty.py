@@ -81,9 +81,7 @@ class BoostyExtractor(Extractor):
                     content.append(c[0])
 
                 elif type == "image":
-                    if post["signedQuery"]:
-                        block["url"] += post["signedQuery"]
-                    files.append(block)
+                    files.append(self._update_url(post, block))
 
                 elif type == "ok_video":
                     if not self.videos:
@@ -116,9 +114,7 @@ class BoostyExtractor(Extractor):
                     content.append(url)
 
                 elif type == "audio_file":
-                    if post["signedQuery"]:
-                        block["url"] += post["signedQuery"]
-                    files.append(block)
+                    files.append(self._update_url(post, block))
 
                 else:
                     self.log.debug("%s: Unsupported data type '%s'",
@@ -128,6 +124,22 @@ class BoostyExtractor(Extractor):
 
         del post["data"]
         return files
+
+    def _update_url(self, post, block):
+        url = block["url"]
+        sep = "&" if "?" in url else "?"
+
+        signed_query = post.get("signedQuery")
+        if signed_query:
+            url += sep + signed_query[1:]
+            sep = "&"
+
+        migrated = post.get("isMigrated")
+        if migrated is not None:
+            url += sep + "is_migrated=" + str(migrated).lower()
+
+        block["url"] = url
+        return block
 
 
 class BoostyUserExtractor(BoostyExtractor):
