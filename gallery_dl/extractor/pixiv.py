@@ -76,6 +76,9 @@ class PixivExtractor(Extractor):
                 detail = self.api.illust_bookmark_detail(work["id"])
                 work["tags_bookmark"] = [tag["name"] for tag in detail["tags"]
                                          if tag["is_registered"]]
+            if self.sanity_workaround and not work.get("caption"):
+                body = self._request_ajax("/illust/" + str(work["id"]))
+                work["caption"] = text.unescape(body["illustComment"])
 
             if transform_tags:
                 transform_tags(work)
@@ -180,7 +183,6 @@ class PixivExtractor(Extractor):
         for key_app, key_ajax in (
             ("title"            , "illustTitle"),
             ("image_urls"       , "urls"),
-            ("caption"          , "illustComment"),
             ("create_date"      , "createDate"),
             ("width"            , "width"),
             ("height"           , "height"),
@@ -212,6 +214,7 @@ class PixivExtractor(Extractor):
                 translated_name = None
             tags.append({"name": name, "translated_name": translated_name})
 
+        work["caption"] = text.unescape(body["illustComment"])
         work["page_count"] = count = body["pageCount"]
         if count == 1:
             return ({"url": url},)
