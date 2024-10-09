@@ -140,6 +140,7 @@ modules = [
     "reddit",
     "redgifs",
     "rule34us",
+    "rule34vault",
     "sankaku",
     "sankakucomplex",
     "seiga",
