@@ -1085,12 +1085,6 @@ Consider all listed sites to potentially be NSFW.
     <td>Blogs, Labels, Posts, Search Results</td>
     <td></td>
 </tr>
-<tr>
-    <td>MIC MIC IDOL</td>
-    <td>https://www.micmicidol.club/</td>
-    <td>Blogs, Labels, Posts, Search Results</td>
-    <td></td>
-</tr>
 
 <tr>
     <td colspan="4"><strong>Chevereto Instances</strong></td>

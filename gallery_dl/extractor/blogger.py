@@ -89,10 +89,6 @@ BASE_PATTERN = BloggerExtractor.update({
         "root": None,
         "pattern": r"[\w-]+\.blogspot\.com",
     },
-    "micmicidol": {
-        "root": "https://www.micmicidol.club",
-        "pattern": r"(?:www\.)?micmicidol\.club",
-    },
 })
 
 
