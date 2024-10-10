@@ -329,14 +329,26 @@ __tests__ = (
     "#url"     : "https://www.pixiv.net/en/users/173530/bookmarks/artworks",
     "#category": ("", "pixiv", "favorite"),
     "#class"   : pixiv.PixivFavoriteExtractor,
-    "#sha1_url": "85a3104eaaaf003c7b3947117ca2f1f0b1cfc949",
+    "#urls"    : [
+        "https://i.pximg.net/img-original/img/2008/10/31/17/54/01/2005108_p0.jpg",
+        "https://i.pximg.net/img-original/img/2008/09/27/12/22/40/1719386_p0.jpg",
+        "https://i.pximg.net/img-original/img/2008/04/15/01/43/46/669358_p0.jpg",
+        "https://i.pximg.net/img-original/img/2008/06/19/21/52/15/1005851_p0.jpg",
+        "https://i.pximg.net/img-original/img/2008/06/17/22/16/54/994965_p0.jpg",
+    ],
 },
 
 {
     "#url"     : "https://www.pixiv.net/bookmark.php?id=173530",
     "#category": ("", "pixiv", "favorite"),
     "#class"   : pixiv.PixivFavoriteExtractor,
-    "#sha1_url": "85a3104eaaaf003c7b3947117ca2f1f0b1cfc949",
+    "#urls"    : [
+        "https://i.pximg.net/img-original/img/2008/10/31/17/54/01/2005108_p0.jpg",
+        "https://i.pximg.net/img-original/img/2008/09/27/12/22/40/1719386_p0.jpg",
+        "https://i.pximg.net/img-original/img/2008/04/15/01/43/46/669358_p0.jpg",
+        "https://i.pximg.net/img-original/img/2008/06/19/21/52/15/1005851_p0.jpg",
+        "https://i.pximg.net/img-original/img/2008/06/17/22/16/54/994965_p0.jpg",
+    ],
 },
 
 {

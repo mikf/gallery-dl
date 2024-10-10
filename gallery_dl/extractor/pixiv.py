@@ -27,8 +27,8 @@ class PixivExtractor(Extractor):
     filename_fmt = "{id}_p{num}.{extension}"
     archive_fmt = "{id}{suffix}.{extension}"
     cookies_domain = None
-    sanity_url = ("https://s.pximg.net/common/images"
-                  "/limit_sanity_level_360.png")
+    sanity_url = "https://s.pximg.net/common/images/limit_sanity_level_360.png"
+    mypixiv_url = "https://s.pximg.net/common/images/limit_mypixiv_360.png"
 
     def _init(self):
         self.api = PixivAppAPI(self)
@@ -76,7 +76,8 @@ class PixivExtractor(Extractor):
                 detail = self.api.illust_bookmark_detail(work["id"])
                 work["tags_bookmark"] = [tag["name"] for tag in detail["tags"]
                                          if tag["is_registered"]]
-            if self.sanity_workaround and not work.get("caption"):
+            if self.sanity_workaround and not work.get("caption") and \
+                    not work.get("_mypixiv"):
                 body = self._request_ajax("/illust/" + str(work["id"]))
                 work["caption"] = text.unescape(body["illustComment"])
 
@@ -122,6 +123,10 @@ class PixivExtractor(Extractor):
                     self.log.warning(
                         "%s: Unable to download work ('sanity_level' warning)",
                         work["id"])
+            elif url == self.mypixiv_url:
+                work["_mypixiv"] = True
+                self.log.warning("%s: 'My pixiv' locked", work["id"])
+                return ()
             else:
                 return ({"url": url},)
 
