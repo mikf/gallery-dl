@@ -105,6 +105,7 @@ class UgoiraPP(PostProcessor):
         }, options)
 
     def prepare(self, pathfmt):
+        self._convert_zip = self._convert_files = False
         if "_ugoira_frame_data" not in pathfmt.kwdict:
             self._frames = None
             return
@@ -136,7 +137,6 @@ class UgoiraPP(PostProcessor):
     def convert_from_zip(self, pathfmt):
         if not self._convert_zip:
             return
-        self._convert_zip = False
         self._zip_source = True
 
         with self._tempdir() as tempdir:
@@ -166,7 +166,6 @@ class UgoiraPP(PostProcessor):
     def convert_from_files(self, pathfmt):
         if not self._convert_files:
             return
-        self._convert_files = False
         self._zip_source = False
 
         with tempfile.TemporaryDirectory() as tempdir:
