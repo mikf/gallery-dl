@@ -42,10 +42,6 @@ BASE_PATTERN = CheveretoExtractor.update({
         "root": "https://img.kiwi",
         "pattern": r"img\.kiwi",
     },
-    "deltaporno": {
-        "root": "https://gallery.deltaporno.com",
-        "pattern": r"gallery\.deltaporno\.com",
-    },
 })
 
 
