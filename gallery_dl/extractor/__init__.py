@@ -134,7 +134,6 @@ modules = [
     "pornhub",
     "pornpics",
     "postmill",
-    "pururin",
     "reactor",
     "readcomiconline",
     "reddit",
