@@ -1370,12 +1370,6 @@ Consider all listed sites to potentially be NSFW.
     <td colspan="4"><strong>Shimmie2 Instances</strong></td>
 </tr>
 <tr>
-    <td>Loudbooru</td>
-    <td>https://loudbooru.com/</td>
-    <td>Posts, Tag Searches</td>
-    <td></td>
-</tr>
-<tr>
     <td>Giantessbooru</td>
     <td>https://sizechangebooru.com/</td>
     <td>Posts, Tag Searches</td>
