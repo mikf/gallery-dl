@@ -99,20 +99,15 @@ class Shimmie2TagExtractor(Shimmie2Extractor):
     subcategory = "tag"
     directory_fmt = ("{category}", "{search_tags}")
     file_url_fmt = "{}/_images/{}/{}%20-%20{}.{}"
-    pattern = BASE_PATTERN + r"post/list/([^/?#]+)(?:/(\d+))?()"
+    pattern = BASE_PATTERN + r"post/list/([^/?#]+)(?:/(\d+))?"
     example = "https://vidya.pics/post/list/TAG/1"
 
-    def __init__(self, match):
-        Shimmie2Extractor.__init__(self, match)
-        lastindex = match.lastindex
-        self.tags = text.unquote(match.group(lastindex-2))
-        self.page = match.group(lastindex-1)
-
     def metadata(self):
+        self.tags = text.unquote(self.groups[-2])
         return {"search_tags": self.tags}
 
     def posts(self):
-        pnum = text.parse_int(self.page, 1)
+        pnum = text.parse_int(self.groups[-1], 1)
         file_url_fmt = self.file_url_fmt.format
 
         init = True
@@ -166,7 +161,7 @@ class Shimmie2TagExtractor(Shimmie2Extractor):
                     return
 
     def _posts_giantessbooru(self):
-        pnum = text.parse_int(self.page, 1)
+        pnum = text.parse_int(self.groups[-1], 1)
         file_url_fmt = (self.root + "/index.php?q=/image/{}.jpg").format
 
         while True:
@@ -203,18 +198,15 @@ class Shimmie2PostExtractor(Shimmie2Extractor):
     pattern = BASE_PATTERN + r"post/view/(\d+)"
     example = "https://vidya.pics/post/view/12345"
 
-    def __init__(self, match):
-        Shimmie2Extractor.__init__(self, match)
-        self.post_id = match.group(match.lastindex)
-
     def posts(self):
-        url = "{}/post/view/{}".format(self.root, self.post_id)
+        post_id = self.groups[-1]
+        url = "{}/post/view/{}".format(self.root, post_id)
         page = self.request(url).text
         extr = text.extract_from(page)
         quote = self._quote_type(page)
 
         post = {
-            "id"      : self.post_id,
+            "id"      : post_id,
             "tags"    : extr(": ", "<").partition(" - ")[0].rstrip(")"),
             "md5"     : extr("/_thumbs/", "/"),
             "file_url": self.root + (
@@ -232,12 +224,12 @@ class Shimmie2PostExtractor(Shimmie2Extractor):
         return (post,)
 
     def _posts_giantessbooru(self):
-        url = "{}/index.php?q=/post/view/{}".format(
-            self.root, self.post_id)
+        post_id = self.groups[-1]
+        url = "{}/index.php?q=/post/view/{}".format(self.root, post_id)
         extr = text.extract_from(self.request(url).text)
 
         return ({
-            "id"      : self.post_id,
+            "id"      : post_id,
             "tags"    : extr(": ", "<").partition(" - ")[0].rstrip(")"),
             "md5"     : "",
             "file_url": self.root + extr("id='main_image' src='.", "'"),
