@@ -1716,8 +1716,8 @@ Consider all listed sites to potentially be NSFW.
     <td colspan="4"><strong>lolisafe and chibisafe</strong></td>
 </tr>
 <tr>
-    <td>xBunkr</td>
-    <td>https://xbunkr.com/</td>
+    <td></td>
+    <td></td>
     <td>Albums</td>
     <td></td>
 </tr>

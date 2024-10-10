@@ -20,10 +20,6 @@ class LolisafeExtractor(BaseExtractor):
 
 
 BASE_PATTERN = LolisafeExtractor.update({
-    "xbunkr": {
-        "root": "https://xbunkr.com",
-        "pattern": r"xbunkr\.com",
-    },
 })
 
 
