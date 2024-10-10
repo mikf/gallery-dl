@@ -19,7 +19,7 @@ class CohostExtractor(Extractor):
     category = "cohost"
     root = "https://cohost.org"
     directory_fmt = ("{category}", "{postingProject[handle]}")
-    filename_fmt = ("{postId}_{headline:?/_/}{num}.{extension}")
+    filename_fmt = ("{postId}_{headline:?/_/[b:200]}{num}.{extension}")
     archive_fmt = "{postId}_{num}"
 
     def _init(self):
