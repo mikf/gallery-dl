@@ -35,6 +35,9 @@ class PixivExtractor(Extractor):
         self.load_ugoira = self.config("ugoira", True)
         self.max_posts = self.config("max-posts", 0)
         self.sanity_workaround = self.config("sanity", True)
+        self.meta_user = self.config("metadata")
+        self.meta_bookmark = self.config("metadata-bookmark")
+        self.meta_comments = self.config("comments")
 
     def items(self):
         tags = self.config("tags", "japanese")
@@ -50,9 +53,6 @@ class PixivExtractor(Extractor):
                 work["tags"] = [tag["name"] for tag in work["tags"]]
 
         ratings = {0: "General", 1: "R-18", 2: "R-18G"}
-        meta_user = self.config("metadata")
-        meta_bookmark = self.config("metadata-bookmark")
-        meta_comments = self.config("comments")
         metadata = self.metadata()
 
         works = self.works()
@@ -64,15 +64,15 @@ class PixivExtractor(Extractor):
 
             files = self._extract_files(work)
 
-            if meta_user:
+            if self.meta_user:
                 work.update(self.api.user_detail(work["user"]["id"]))
-            if meta_comments:
+            if self.meta_comments:
                 if work["total_comments"]:
                     work["comments"] = list(
                         self.api.illust_comments(work["id"]))
                 else:
                     work["comments"] = ()
-            if meta_bookmark and work["is_bookmarked"]:
+            if self.meta_bookmark and work["is_bookmarked"]:
                 detail = self.api.illust_bookmark_detail(work["id"])
                 work["tags_bookmark"] = [tag["name"] for tag in detail["tags"]
                                          if tag["is_registered"]]
@@ -366,12 +366,12 @@ class PixivAvatarExtractor(PixivExtractor):
     pattern = USER_PATTERN + r"/avatar"
     example = "https://www.pixiv.net/en/users/12345/avatar"
 
-    def __init__(self, match):
-        PixivExtractor.__init__(self, match)
-        self.user_id = match.group(1)
+    def _init(self):
+        PixivExtractor._init(self)
+        self.sanity_workaround = self.meta_comments = False
 
     def works(self):
-        user = self.api.user_detail(self.user_id)["user"]
+        user = self.api.user_detail(self.groups[0])["user"]
         url = user["profile_image_urls"]["medium"].replace("_170.", ".")
         return (self._make_work("avatar", url, user),)
 
@@ -384,12 +384,12 @@ class PixivBackgroundExtractor(PixivExtractor):
     pattern = USER_PATTERN + "/background"
     example = "https://www.pixiv.net/en/users/12345/background"
 
-    def __init__(self, match):
-        PixivExtractor.__init__(self, match)
-        self.user_id = match.group(1)
+    def _init(self):
+        PixivExtractor._init(self)
+        self.sanity_workaround = self.meta_comments = False
 
     def works(self):
-        detail = self.api.user_detail(self.user_id)
+        detail = self.api.user_detail(self.groups[0])
         url = detail["profile"]["background_image_url"]
         if not url:
             return ()
@@ -753,9 +753,6 @@ class PixivNovelExtractor(PixivExtractor):
                 work["tags"] = [tag["name"] for tag in work["tags"]]
 
         ratings = {0: "General", 1: "R-18", 2: "R-18G"}
-        meta_user = self.config("metadata")
-        meta_bookmark = self.config("metadata-bookmark")
-        meta_comments = self.config("comments")
         embeds = self.config("embeds")
         covers = self.config("covers")
 
@@ -773,15 +770,15 @@ class PixivNovelExtractor(PixivExtractor):
         if self.max_posts:
             novels = itertools.islice(novels, self.max_posts)
         for novel in novels:
-            if meta_user:
+            if self.meta_user:
                 novel.update(self.api.user_detail(novel["user"]["id"]))
-            if meta_comments:
+            if self.meta_comments:
                 if novel["total_comments"]:
                     novel["comments"] = list(
                         self.api.novel_comments(novel["id"]))
                 else:
                     novel["comments"] = ()
-            if meta_bookmark and novel["is_bookmarked"]:
+            if self.meta_bookmark and novel["is_bookmarked"]:
                 detail = self.api.novel_bookmark_detail(novel["id"])
                 novel["tags_bookmark"] = [tag["name"] for tag in detail["tags"]
                                           if tag["is_registered"]]
