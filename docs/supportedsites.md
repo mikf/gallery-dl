@@ -1107,12 +1107,6 @@ Consider all listed sites to potentially be NSFW.
     <td>Albums, individual Images, User Profiles</td>
     <td></td>
 </tr>
-<tr>
-    <td>DeltaPorno</td>
-    <td>https://gallery.deltaporno.com/</td>
-    <td>Albums, individual Images, User Profiles</td>
-    <td></td>
-</tr>
 
 <tr>
     <td colspan="4"><strong>Danbooru Instances</strong></td>
