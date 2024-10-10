@@ -97,6 +97,7 @@ class GelbooruV02Extractor(booru.BooruExtractor):
 
     @staticmethod
     def _prepare(post):
+        post["tags"] = post["tags"].strip()
         post["date"] = text.parse_datetime(
             post["created_at"], "%a %b %d %H:%M:%S %z %Y")
 
@@ -114,7 +115,7 @@ class GelbooruV02Extractor(booru.BooruExtractor):
         pattern = re.compile(
             r"tag-type-([^\"' ]+).*?[?;]tags=([^\"'&]+)", re.S)
         for tag_type, tag_name in pattern.findall(tag_container):
-            tags[tag_type].append(text.unquote(tag_name))
+            tags[tag_type].append(text.unescape(text.unquote(tag_name)))
         for key, value in tags.items():
             post["tags_" + key] = " ".join(value)
 
@@ -178,7 +179,7 @@ class GelbooruV02Extractor(booru.BooruExtractor):
         pattern = re.compile(
             r'<a class="(?:tag-type-)?([^"]+).*?;tags=([^"&]+)')
         for tag_type, tag_name in pattern.findall(tag_container):
-            tags[tag_type].append(text.unquote(tag_name))
+            tags[tag_type].append(text.unescape(text.unquote(tag_name)))
         for key, value in tags.items():
             post["tags_" + key] = " ".join(value)
 

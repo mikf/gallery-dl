@@ -67,7 +67,7 @@ __tests__ = (
     "score"         : "",
     "source"        : "https://www.instagram.com/p/CwAO1UyJBnw",
     "status"        : "active",
-    "tags"          : " 1girl asian bikini black_hair breasts cleavage female female_only floral_print instagram japanese kurita_emi large_breasts looking_at_viewer navel sauna short_hair side-tie_bikini sitting solo ",
+    "tags"          : "1girl asian bikini black_hair breasts cleavage female female_only floral_print instagram japanese kurita_emi large_breasts looking_at_viewer navel sauna short_hair side-tie_bikini sitting solo",
     "tags_copyright": "instagram",
     "tags_general"  : "1girl asian bikini black_hair breasts cleavage female female_only floral_print japanese large_breasts looking_at_viewer navel sauna short_hair side-tie_bikini sitting solo",
     "tags_model"    : "kurita_emi",
