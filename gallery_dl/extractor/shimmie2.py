@@ -69,11 +69,6 @@ class Shimmie2Extractor(BaseExtractor):
 
 
 BASE_PATTERN = Shimmie2Extractor.update({
-    "loudbooru": {
-        "root": "https://loudbooru.com",
-        "pattern": r"loudbooru\.com",
-        "cookies": {"ui-tnc-agreed": "true"},
-    },
     "giantessbooru": {
         "root": "https://sizechangebooru.com",
         "pattern": r"(?:sizechange|giantess)booru\.com",
@@ -105,7 +100,7 @@ class Shimmie2TagExtractor(Shimmie2Extractor):
     directory_fmt = ("{category}", "{search_tags}")
     file_url_fmt = "{}/_images/{}/{}%20-%20{}.{}"
     pattern = BASE_PATTERN + r"post/list/([^/?#]+)(?:/(\d+))?()"
-    example = "https://loudbooru.com/post/list/TAG/1"
+    example = "https://vidya.pics/post/list/TAG/1"
 
     def __init__(self, match):
         Shimmie2Extractor.__init__(self, match)
@@ -206,7 +201,7 @@ class Shimmie2PostExtractor(Shimmie2Extractor):
     """Extractor for single shimmie2 posts"""
     subcategory = "post"
     pattern = BASE_PATTERN + r"post/view/(\d+)"
-    example = "https://loudbooru.com/post/view/12345"
+    example = "https://vidya.pics/post/view/12345"
 
     def __init__(self, match):
         Shimmie2Extractor.__init__(self, match)
