@@ -100,7 +100,7 @@ class EveriaTagExtractor(EveriaPostExtractor):
 
 class EveriaSearchExtractor(EveriaTagExtractor):
     subcategory = "search"
-    pattern = BASE_PATTERN + r"/\?s=(.+)"
+    pattern = BASE_PATTERN + r"/(?:page/\d+/)?\?s=(.+)"
     example = "https://everia.club/?s=SEARCH"
 
     def __init__(self, match):
@@ -123,7 +123,8 @@ class EveriaCategoryExtractor(EveriaTagExtractor):
 
 class EveriaDateExtractor(EveriaTagExtractor):
     subcategory = "date"
-    pattern = BASE_PATTERN + r"/(\d{4})(?:/?(\d{2}))?(?:/?(\d{2}))?/?$"
+    pattern = BASE_PATTERN + \
+        r"/(\d{4})(?:/?(\d{2}))?(?:/?(\d{2}))?(?:/page/\d+)?/?$"
     example = "https://everia.club/0000/00/00"
 
     def __init__(self, match):
