@@ -23,7 +23,7 @@ class CivitaiExtractor(Extractor):
     root = "https://civitai.com"
     directory_fmt = ("{category}", "{username|user[username]}", "images")
     filename_fmt = "{file[id]|id|filename}.{extension}"
-    archive_fmt = "{hash}"
+    archive_fmt = "{file[hash]|hash}"
     request_interval = (0.5, 1.5)
 
     def _init(self):
