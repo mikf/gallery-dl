@@ -6,19 +6,19 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extractors for https://komikcast.lol/"""
+"""Extractors for https://komikcast.cz/"""
 
 from .common import ChapterExtractor, MangaExtractor
 from .. import text
 import re
 
-BASE_PATTERN = r"(?:https?://)?(?:www\.)?komikcast\.(?:lol|site|me|com)"
+BASE_PATTERN = r"(?:https?://)?(?:www\.)?komikcast\.(?:cz|lol|site|mo?e|com)"
 
 
 class KomikcastBase():
     """Base class for komikcast extractors"""
     category = "komikcast"
-    root = "https://komikcast.lol"
+    root = "https://komikcast.cz"
 
     @staticmethod
     def parse_chapter_string(chapter_string, data=None):
@@ -46,9 +46,9 @@ class KomikcastBase():
 
 
 class KomikcastChapterExtractor(KomikcastBase, ChapterExtractor):
-    """Extractor for manga-chapters from komikcast.lol"""
+    """Extractor for komikcast manga chapters"""
     pattern = BASE_PATTERN + r"(/chapter/[^/?#]+/)"
-    example = "https://komikcast.lol/chapter/TITLE/"
+    example = "https://komikcast.cz/chapter/TITLE/"
 
     def metadata(self, page):
         info = text.extr(page, "<title>", " - Komikcast<")
@@ -65,10 +65,10 @@ class KomikcastChapterExtractor(KomikcastBase, ChapterExtractor):
 
 
 class KomikcastMangaExtractor(KomikcastBase, MangaExtractor):
-    """Extractor for manga from komikcast.lol"""
+    """Extractor for komikcast manga"""
     chapterclass = KomikcastChapterExtractor
     pattern = BASE_PATTERN + r"(/(?:komik/)?[^/?#]+)/?$"
-    example = "https://komikcast.lol/komik/TITLE"
+    example = "https://komikcast.cz/komik/TITLE"
 
     def chapters(self, page):
         results = []
