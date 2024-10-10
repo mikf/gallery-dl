@@ -30,7 +30,7 @@ __tests__ = (
     "markdown"        : str,
     "maxFileCount"    : 5,
     "maxFileSize"     : "32.00 MB",
-    "maxMessageLength": 8001,
+    "maxMessageLength": 12000,
     "message"         : str,
     "mime"            : str,
     "name"            : "Anonymous",
@@ -73,7 +73,7 @@ __tests__ = (
     "#category": ("", "8chan", "board"),
     "#class"   : _8chan._8chanBoardExtractor,
     "#pattern" : _8chan._8chanThreadExtractor.pattern,
-    "#count"   : range(24, 28),
+    "#count"   : range(24, 32),
 },
 
 {
