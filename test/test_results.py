@@ -210,6 +210,7 @@ class TestExtractorResults(unittest.TestCase):
         if "#urls" in result:
             expected = result["#urls"]
             if isinstance(expected, str):
+                self.assertTrue(tjob.url_list, msg="#urls")
                 self.assertEqual(tjob.url_list[0], expected, msg="#urls")
             else:
                 self.assertSequenceEqual(tjob.url_list, expected, msg="#urls")
@@ -288,6 +289,8 @@ class ResultJob(job.DownloadJob):
             "".join(self.extractor.directory_fmt)).format_map
         self.format_filename = TestFormatter(
             self.extractor.filename_fmt).format_map
+        self.format_archive = TestFormatter(
+            self.extractor.archive_fmt).format_map
 
     def run(self):
         self._init()
@@ -325,7 +328,7 @@ class ResultJob(job.DownloadJob):
             json.dumps(kwdict, sort_keys=True, default=str).encode())
 
     def _update_archive(self, kwdict):
-        archive_id = self.extractor.archive_fmt.format_map(kwdict)
+        archive_id = self.format_archive(kwdict)
         self.archive_list.append(archive_id)
         self.archive_hash.update(archive_id.encode())
 
