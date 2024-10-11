@@ -315,7 +315,7 @@ class apply():
             self.original.append((path, key, get(path, key, util.SENTINEL)))
             set(path, key, value)
 
-    def __exit__(self, etype, value, traceback):
+    def __exit__(self, exc_type, exc_value, traceback):
         for path, key, value in self.original:
             if value is util.SENTINEL:
                 unset(path, key)

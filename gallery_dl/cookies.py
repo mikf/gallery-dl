@@ -864,7 +864,7 @@ class DatabaseConnection():
                 self.directory.cleanup()
             raise
 
-    def __exit__(self, exc, value, tb):
+    def __exit__(self, exc_type, exc_value, traceback):
         self.database.close()
         if self.directory:
             self.directory.cleanup()
