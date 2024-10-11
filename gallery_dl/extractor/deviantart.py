@@ -907,19 +907,18 @@ class DeviantartStashExtractor(DeviantartExtractor):
     archive_fmt = "{index}.{extension}"
     pattern = (r"(?:https?://)?(?:(?:www\.)?deviantart\.com/stash|sta\.sh)"
                r"/([a-z0-9]+)")
-    example = "https://sta.sh/abcde"
+    example = "https://www.deviantart.com/stash/abcde"
 
     skip = Extractor.skip
 
     def __init__(self, match):
         DeviantartExtractor.__init__(self, match)
         self.user = None
-        self.stash_id = match.group(1)
 
     def deviations(self, stash_id=None):
         if stash_id is None:
-            stash_id = self.stash_id
-        url = "https://sta.sh/" + stash_id
+            stash_id = self.groups[0]
+        url = "https://www.deviantart.com/stash/" + stash_id
         page = self._limited_request(url).text
 
         if stash_id[0] == "0":
@@ -932,19 +931,11 @@ class DeviantartStashExtractor(DeviantartExtractor):
                 yield deviation
                 return
 
-        for item in text.extract_iter(
-                page, 'class="stash-thumb-container', '</div>'):
-            url = text.extr(item, '<a href="', '"')
-
-            if url:
-                stash_id = url.rpartition("/")[2]
-            else:
-                stash_id = text.extr(item, 'gmi-stashid="', '"')
-                stash_id = "2" + util.bencode(text.parse_int(
-                    stash_id), "0123456789abcdefghijklmnopqrstuvwxyz")
-
-            if len(stash_id) > 2:
-                yield from self.deviations(stash_id)
+        for sid in text.extract_iter(
+                page, 'href="https://www.deviantart.com/stash/', '"'):
+            if sid == stash_id or sid.endswith("#comments"):
+                continue
+            yield from self.deviations(sid)
 
 
 class DeviantartFavoriteExtractor(DeviantartExtractor):
