@@ -185,7 +185,9 @@ class Extractor():
                     self._dump_response(response)
                 if (
                     code < 400 or
-                    code < 500 and (not fatal and code != 429 or fatal is None)
+                    code < 500 and (
+                        not fatal and code != 429 or fatal is None) or
+                    fatal is ...
                 ):
                     if encoding:
                         response.encoding = encoding
