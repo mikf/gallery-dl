@@ -79,7 +79,8 @@ class PixivExtractor(Extractor):
             if self.sanity_workaround and not work.get("caption") and \
                     not work.get("_mypixiv"):
                 body = self._request_ajax("/illust/" + str(work["id"]))
-                work["caption"] = text.unescape(body["illustComment"])
+                if body:
+                    work["caption"] = text.unescape(body["illustComment"])
 
             if transform_tags:
                 transform_tags(work)
@@ -177,8 +178,10 @@ class PixivExtractor(Extractor):
 
     def _request_ajax(self, endpoint):
         url = "{}/ajax{}".format(self.root, endpoint)
-        data = self.request(url, headers=self.headers_web).json()
-        return data["body"]
+        try:
+            return self.request(url, headers=self.headers_web).json()["body"]
+        except Exception:
+            return None
 
     def _extract_ajax(self, work, body):
         url = self._extract_ajax_url(body)
