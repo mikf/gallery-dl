@@ -296,6 +296,12 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
+    <td>Girlgirlgo</td>
+    <td>https://girlgirlgo.org</td>
+    <td>Albums, Models, Regions, Search Results, Studios, Tag Searches</td>
+    <td></td>
+</tr>
+<tr>
     <td>Gofile</td>
     <td>https://gofile.io/</td>
     <td>Folders</td>
