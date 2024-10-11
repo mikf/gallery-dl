@@ -150,6 +150,7 @@ class PixivExtractor(Extractor):
         work["_http_adjust_extension"] = False
 
         if self.load_ugoira == "original":
+            work["_ugoira_original"] = True
             base, sep, _ = url.rpartition("_ugoira")
             base = base.replace("/img-zip-ugoira/", "/img-original/", 1) + sep
 
@@ -173,6 +174,7 @@ class PixivExtractor(Extractor):
                 for num in range(len(frames))
             ]
         else:
+            work["_ugoira_original"] = False
             url = url.replace("_ugoira600x600", "_ugoira1920x1080", 1)
             return ({"url": url},)
 
