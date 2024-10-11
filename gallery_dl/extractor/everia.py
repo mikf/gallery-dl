@@ -33,7 +33,7 @@ class EveriaPostExtractor(Extractor):
 
     def get_tags(self, query, type="tags"):
         if isinstance(query, str):
-            params = {"search": query}
+            params = {"slug": query}
         else:
             params = {"post": query}
 
