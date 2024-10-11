@@ -54,10 +54,16 @@ class HttpError(ExtractionError):
     default = "HTTP request failed"
     code = 4
 
-    def __init__(self, message, response=None):
-        ExtractionError.__init__(self, message)
+    def __init__(self, message="", response=None):
         self.response = response
-        self.status = 0 if response is None else response.status_code
+        if response is None:
+            self.status = 0
+        else:
+            self.status = response.status_code
+            if not message:
+                message = "'{} {}' for '{}'".format(
+                    response.status_code, response.reason, response.url)
+        ExtractionError.__init__(self, message)
 
 
 class NotFoundError(ExtractionError):
