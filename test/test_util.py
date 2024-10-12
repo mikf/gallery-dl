@@ -205,9 +205,8 @@ class TestCookiesTxt(unittest.TestCase):
     def test_cookiestxt_load(self):
 
         def _assert(content, expected):
-            jar = http.cookiejar.CookieJar()
-            util.cookiestxt_load(io.StringIO(content, None), jar)
-            for c, e in zip(jar, expected):
+            cookies = util.cookiestxt_load(io.StringIO(content, None))
+            for c, e in zip(cookies, expected):
                 self.assertEqual(c.__dict__, e.__dict__)
 
         _assert("", [])
@@ -253,8 +252,7 @@ class TestCookiesTxt(unittest.TestCase):
         )
 
         with self.assertRaises(ValueError):
-            util.cookiestxt_load("example.org\tTRUE\t/\tTRUE\t0\tname",
-                                 http.cookiejar.CookieJar())
+            util.cookiestxt_load("example.org\tTRUE\t/\tTRUE\t0\tname")
 
     def test_cookiestxt_store(self):
 

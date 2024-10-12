@@ -403,9 +403,9 @@ def set_mtime(path, mtime):
         pass
 
 
-def cookiestxt_load(fp, cookiejar):
-    """Parse a Netscape cookies.txt file and add its Cookies to 'cookiejar'"""
-    set_cookie = cookiejar.set_cookie
+def cookiestxt_load(fp):
+    """Parse a Netscape cookies.txt file and add return its Cookies"""
+    cookies = []
 
     for line in fp:
 
@@ -427,7 +427,7 @@ def cookiestxt_load(fp, cookiejar):
             name = value
             value = None
 
-        set_cookie(Cookie(
+        cookies.append(Cookie(
             0, name, value,
             None, False,
             domain,
@@ -438,6 +438,8 @@ def cookiestxt_load(fp, cookiejar):
             None if expires == "0" or not expires else expires,
             False, None, None, {},
         ))
+
+    return cookies
 
 
 def cookiestxt_store(fp, cookies):
