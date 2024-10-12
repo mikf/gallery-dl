@@ -456,46 +456,49 @@ class Extractor():
                     cookies = random.choice(cookies)
             self.cookies_load(cookies)
 
-    def cookies_load(self, cookies):
-        if isinstance(cookies, dict):
-            self.cookies_update_dict(cookies, self.cookies_domain)
+    def cookies_load(self, cookies_source):
+        if isinstance(cookies_source, dict):
+            self.cookies_update_dict(cookies_source, self.cookies_domain)
 
-        elif isinstance(cookies, str):
-            path = util.expand_path(cookies)
+        elif isinstance(cookies_source, str):
+            path = util.expand_path(cookies_source)
             try:
                 with open(path) as fp:
-                    util.cookiestxt_load(fp, self.cookies)
+                    cookies = util.cookiestxt_load(fp)
             except Exception as exc:
                 self.log.warning("cookies: %s", exc)
             else:
-                self.log.debug("Loading cookies from '%s'", cookies)
+                self.log.debug("Loading cookies from '%s'", cookies_source)
+                set_cookie = self.cookies.set_cookie
+                for cookie in cookies:
+                    set_cookie(cookie)
                 self.cookies_file = path
 
-        elif isinstance(cookies, (list, tuple)):
-            key = tuple(cookies)
-            cookiejar = _browser_cookies.get(key)
+        elif isinstance(cookies_source, (list, tuple)):
+            key = tuple(cookies_source)
+            cookies = _browser_cookies.get(key)
 
-            if cookiejar is None:
+            if cookies is None:
                 from ..cookies import load_cookies
-                cookiejar = self.cookies.__class__()
                 try:
-                    load_cookies(cookiejar, cookies)
+                    cookies = load_cookies(cookies_source)
                 except Exception as exc:
                     self.log.warning("cookies: %s", exc)
+                    cookies = ()
                 else:
-                    _browser_cookies[key] = cookiejar
+                    _browser_cookies[key] = cookies
             else:
                 self.log.debug("Using cached cookies from %s", key)
 
             set_cookie = self.cookies.set_cookie
-            for cookie in cookiejar:
+            for cookie in cookies:
                 set_cookie(cookie)
 
         else:
             self.log.warning(
                 "Expected 'dict', 'list', or 'str' value for 'cookies' "
                 "option, got '%s' (%s)",
-                cookies.__class__.__name__, cookies)
+                cookies_source.__class__.__name__, cookies_source)
 
     def cookies_store(self):
         """Store the session's cookies in a cookies.txt file"""
