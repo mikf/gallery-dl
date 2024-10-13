@@ -143,8 +143,15 @@ class FacebookExtractor(Extractor):
 
     @staticmethod
     def parse_post_page(post_page):
+        first_photo_url = text.extr(
+            text.extr(
+                post_page, '"__isMedia":"Photo"', '"target_group"'
+            ), '"url":"', ','
+        )
+
         post = {
-            "id": text.extr(post_page, '{"__typename":"Photo","id":"', '"')
+            "set_id": text.extr(post_page, '{"mediaset_token":"', '"') or
+            text.extr(first_photo_url, 'set=', '"').rsplit("&", 1)[0]
         }
 
         return post
@@ -256,6 +263,7 @@ class FacebookExtractor(Extractor):
             photo_page = self.photo_page_request_wrapper(photo_url).text
 
             photo = self.parse_photo_page(photo_page)
+            photo["set_id"] = set_id
             photo["num"] = i + 1
 
             if self.author_followups:
@@ -307,12 +315,20 @@ class FacebookSetExtractor(FacebookExtractor):
     subcategory = "set"
     pattern = (
         BASE_PATTERN + r"(?:/media/set/.*set=([^/?&]+)"
-        r"|/photo.*fbid=([^/?&]+).*?(?:set=([^/?&]+))?&setextract)"
+        r"|/photo.*fbid=([^/?&]+).*?(?:set=([^/?&]+))?&setextract"
+        r"|(.*/posts/[^/?&]+))"
     )
     example = "https://www.facebook.com/media/set/?set=SET_ID"
 
     def items(self):
-        set_id = self.match.group(1) or self.match.group(3)
+        if self.match.group(4):
+            post_url = self.root + self.match.group(4)
+            post_page = self.request(post_url).text
+
+            set_id = self.parse_post_page(post_page)["set_id"]
+        else:
+            set_id = self.match.group(1) or self.match.group(3)
+
         set_url = self.set_url_fmt.format(set_id=set_id)
         set_page = self.request(set_url).text
 
@@ -329,18 +345,11 @@ class FacebookSetExtractor(FacebookExtractor):
 class FacebookPhotoExtractor(FacebookExtractor):
     """Base class for Facebook Photo extractors"""
     subcategory = "photo"
-    pattern = BASE_PATTERN + r"/(.*/photos.*/|photo.*fbid=|.*/posts/)([^/?&]+)"
+    pattern = BASE_PATTERN + r"/(?:.*/photos.*/|photo.*fbid=)([^/?&]+)"
     example = "https://www.facebook.com/photo/?fbid=PHOTO_ID"
 
     def items(self):
-        if self.match.group(1).endswith("/posts/"):
-            photo_url = self.root + "/" + ''.join(self.match.groups())
-            photo_page = self.request(photo_url).text
-
-            photo_id = self.parse_post_page(photo_page)["id"]
-        else:
-            photo_id = self.match.group(2)
-
+        photo_id = self.match.group(1)
         photo_url = self.photo_url_fmt.format(photo_id=photo_id, set_id="")
         photo_page = self.photo_page_request_wrapper(photo_url).text
 

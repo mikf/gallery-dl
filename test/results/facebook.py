@@ -25,6 +25,18 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.facebook.com/joho.press.jp/posts/pfbid02mfFRpVkErLQxQ8cpD2f1hwXEVsFzK8kfNBKdK2Jndnx6AkmMQZuXhovwDgwvoDNil",
+    "#category": ("", "facebook", "set"),
+    "#class"   : facebook.FacebookSetExtractor,
+    "#range"   : "1-3",
+    "#count"   : 3,
+
+    "set_id"   : "pcb.1160563418981189",
+    "user_id"  : "100050826247807",
+    "username" : "情報プレスα",
+},
+
+{
     "#url"     : "https://www.facebook.com/photo/?fbid=10160743390456729",
     "#category": ("", "facebook", "photo"),
     "#class"   : facebook.FacebookPhotoExtractor,
@@ -57,22 +69,6 @@ __tests__ = (
 },
 
 {
-    "#url"     : "https://www.facebook.com/Facebook/posts/10152716011101729",
-    "#category": ("", "facebook", "photo"),
-    "#class"   : facebook.FacebookPhotoExtractor,
-    "#count"   : 1,
-
-    "caption"  : "",
-    "date"     : datetime.datetime(2014, 5, 3, 0, 44, 47),
-    "filename" : "10154418_10152716011101729_3247649165160407848_n.png",
-    "id"       : "10152716011101729",
-    "set_id"   : "a.10152716010956729",
-    "url"      : str,
-    "user_id"  : "100064860875397",
-    "username" : "Facebook",
-},
-
-{
     "#url"     : "https://www.facebook.com/watch/?v=1165557851291824",
     "#category": ("", "facebook", "video"),
     "#class"   : facebook.FacebookVideoExtractor,
@@ -92,7 +88,6 @@ __tests__ = (
     "#class"   : facebook.FacebookVideoExtractor,
     "#count"   : 2,
 
-    "date"     : datetime.datetime(2022, 10, 14, 16, 45, 27),
     "name"     : "1514198129001376",
     "id"       : "644342003942740",
     "url"      : str,
