@@ -108,10 +108,10 @@ class PixivExtractor(Extractor):
             if self.load_ugoira:
                 try:
                     return self._extract_ugoira(work)
-                except exception.StopExtraction as exc:
+                except Exception as exc:
                     self.log.warning(
-                        "Unable to retrieve Ugoira metatdata (%s - %s)",
-                        work["id"], exc.message)
+                        "%s: Unable to retrieve Ugoira metatdata (%s - %s)",
+                        work["id"], exc.__class__.__name__, exc)
 
         elif work["page_count"] == 1:
             url = meta_single_page["original_image_url"]
