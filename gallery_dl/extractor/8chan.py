@@ -64,16 +64,14 @@ class _8chanThreadExtractor(_8chanExtractor):
                      "{threadId} {subject[:50]}")
     filename_fmt = "{postId}{num:?-//} {filename[:200]}.{extension}"
     archive_fmt = "{boardUri}_{postId}_{num}"
-    pattern = BASE_PATTERN + r"/([^/?#]+)/res/(\d+)"
+    pattern = BASE_PATTERN + r"/([^/?#]+)/(?:res|last)/(\d+)"
     example = "https://8chan.moe/a/res/12345.html"
 
-    def __init__(self, match):
-        _8chanExtractor.__init__(self, match)
-        _, self.board, self.thread = match.groups()
-
     def items(self):
+        _, board, thread = self.groups
+
         # fetch thread data
-        url = "{}/{}/res/{}.".format(self.root, self.board, self.thread)
+        url = "{}/{}/res/{}.".format(self.root, board, thread)
         self.session.headers["Referer"] = url + "html"
         thread = self.request(url + "json").json()
         thread["postId"] = thread["threadId"]
@@ -106,25 +104,22 @@ class _8chanBoardExtractor(_8chanExtractor):
     pattern = BASE_PATTERN + r"/([^/?#]+)/(?:(\d+)\.html)?$"
     example = "https://8chan.moe/a/"
 
-    def __init__(self, match):
-        _8chanExtractor.__init__(self, match)
-        _, self.board, self.page = match.groups()
-
     def items(self):
-        page = text.parse_int(self.page, 1)
-        url = "{}/{}/{}.json".format(self.root, self.board, page)
-        board = self.request(url).json()
-        threads = board["threads"]
+        _, board, pnum = self.groups
+        pnum = text.parse_int(pnum, 1)
+        url = "{}/{}/{}.json".format(self.root, board, pnum)
+        data = self.request(url).json()
+        threads = data["threads"]
 
         while True:
             for thread in threads:
                 thread["_extractor"] = _8chanThreadExtractor
                 url = "{}/{}/res/{}.html".format(
-                    self.root, self.board, thread["threadId"])
+                    self.root, board, thread["threadId"])
                 yield Message.Queue, url, thread
 
-            page += 1
-            if page > board["pageCount"]:
+            pnum += 1
+            if pnum > data["pageCount"]:
                 return
-            url = "{}/{}/{}.json".format(self.root, self.board, page)
+            url = "{}/{}/{}.json".format(self.root, board, pnum)
             threads = self.request(url).json()["threads"]
