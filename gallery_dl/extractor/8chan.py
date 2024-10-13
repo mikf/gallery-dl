@@ -27,12 +27,22 @@ class _8chanExtractor(Extractor):
         Extractor.__init__(self, match)
 
     def _init(self):
-        now = util.datetime_utcnow()
-        domain = self.root.rpartition("/")[2]
-        self.cookies.set(
-            now.strftime("TOS%Y%m%d"), "1", domain=domain)
-        self.cookies.set(
-            (now - timedelta(1)).strftime("TOS%Y%m%d"), "1", domain=domain)
+        tos = self.cookies_tos_name()
+        self.cookies.set(tos, "1", domain=self.root[8:])
+
+    @memcache()
+    def cookies_tos_name(self):
+        url = self.root + "/.static/pages/confirmed.html"
+        headers = {"Referer": self.root + "/.static/pages/disclaimer.html"}
+        response = self.request(url, headers=headers, allow_redirects=False)
+
+        for cookie in response.cookies:
+            if cookie.name.lower().startswith("tos"):
+                self.log.debug("TOS cookie name: %s", cookie.name)
+                return cookie.name
+
+        self.log.error("Unable to determin TOS cookie name")
+        return "TOS20241009"
 
     @memcache()
     def cookies_prepare(self):
