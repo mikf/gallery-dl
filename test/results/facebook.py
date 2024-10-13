@@ -10,7 +10,7 @@ import datetime
 
 __tests__ = (
 {
-    "#url"     : "https://www.facebook.com/facebook",
+    "#url"     : "https://www.facebook.com/facebook/photos",
     "#category": ("", "facebook", "profile"),
     "#class"   : facebook.FacebookProfileExtractor,
     "#range"   : "1-3",
@@ -41,16 +41,32 @@ __tests__ = (
 },
 
 {
-    "#url"     : "https://www.facebook.com/photo/?fbid=10159575010981729",
+    "#url"     : "https://www.facebook.com/Facebook/photos/a.10152716010956729/10152716011076729",
     "#category": ("", "facebook", "photo"),
     "#class"   : facebook.FacebookPhotoExtractor,
     "#count"   : 1,
 
     "caption"  : "",
-    "date"     : datetime.datetime(2020, 5, 1, 16, 40, 41),
-    "filename" : "95789923_10159575010986729_679923434972512256_n.png",
-    "id"       : "10159575010981729",
-    "set_id"   : "a.494827881728",
+    "date"     : datetime.datetime(2014, 5, 3, 0, 44, 47),
+    "filename" : "10334445_10152716011076729_6502314875328401420_n.png",
+    "id"       : "10152716011076729",
+    "set_id"   : "a.10152716010956729",
+    "url"      : str,
+    "user_id"  : "100064860875397",
+    "username" : "Facebook",
+},
+
+{
+    "#url"     : "https://www.facebook.com/Facebook/posts/10152716011101729",
+    "#category": ("", "facebook", "photo"),
+    "#class"   : facebook.FacebookPhotoExtractor,
+    "#count"   : 1,
+
+    "caption"  : "",
+    "date"     : datetime.datetime(2014, 5, 3, 0, 44, 47),
+    "filename" : "10154418_10152716011101729_3247649165160407848_n.png",
+    "id"       : "10152716011101729",
+    "set_id"   : "a.10152716010956729",
     "url"      : str,
     "user_id"  : "100064860875397",
     "username" : "Facebook",

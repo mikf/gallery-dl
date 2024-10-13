@@ -53,7 +53,7 @@ class FacebookExtractor(Extractor):
             item["extension"] = ""
 
     @staticmethod
-    def get_set_page_metadata(set_page):
+    def parse_set_page(set_page):
         directory = {
             "set_id": text.extr(
                 set_page, '"mediaSetToken":"', '"'
@@ -86,7 +86,7 @@ class FacebookExtractor(Extractor):
         return directory
 
     @staticmethod
-    def get_photo_page_metadata(photo_page):
+    def parse_photo_page(photo_page):
         photo = {
             "id": text.extr(
                 photo_page, '"__isNode":"Photo","id":"', '"'
@@ -142,7 +142,15 @@ class FacebookExtractor(Extractor):
         return photo
 
     @staticmethod
-    def get_video_page_metadata(video_page):
+    def parse_post_page(post_page):
+        post = {
+            "id": text.extr(post_page, '{"__typename":"Photo","id":"', '"')
+        }
+
+        return post
+
+    @staticmethod
+    def parse_video_page(video_page):
         video = {
             "id": text.extr(
                 video_page, '\\"video_id\\":\\"', '\\"'
@@ -234,7 +242,7 @@ class FacebookExtractor(Extractor):
 
         return res
 
-    def set_photos_iter(self, first_photo_id, set_id):
+    def extract_set(self, first_photo_id, set_id):
         all_photo_ids = [first_photo_id]
 
         retries = 0
@@ -247,7 +255,7 @@ class FacebookExtractor(Extractor):
             )
             photo_page = self.photo_page_request_wrapper(photo_url).text
 
-            photo = self.get_photo_page_metadata(photo_page)
+            photo = self.parse_photo_page(photo_page)
             photo["num"] = i + 1
 
             if self.author_followups:
@@ -275,7 +283,7 @@ class FacebookExtractor(Extractor):
                     retries = 0
             else:
                 retries = 0
-                yield photo
+                yield Message.Url, photo["url"], photo
 
             if photo["next_photo_id"] == "":
                 self.log.debug(
@@ -308,45 +316,50 @@ class FacebookSetExtractor(FacebookExtractor):
         set_url = self.set_url_fmt.format(set_id=set_id)
         set_page = self.request(set_url).text
 
-        directory = self.get_set_page_metadata(set_page)
+        directory = self.parse_set_page(set_page)
 
         yield Message.Directory, directory
 
-        for photo in self.set_photos_iter(
+        yield from self.extract_set(
             (self.match.group(2) or directory["first_photo_id"]),
             directory["set_id"]
-        ):
-            yield Message.Url, photo["url"], photo
+        )
 
 
 class FacebookPhotoExtractor(FacebookExtractor):
     """Base class for Facebook Photo extractors"""
     subcategory = "photo"
-    pattern = BASE_PATTERN + r"/(?:.*/photos.*/|photo.*fbid=)([^/?&]+)"
+    pattern = BASE_PATTERN + r"/(.*/photos.*/|photo.*fbid=|.*/posts/)([^/?&]+)"
     example = "https://www.facebook.com/photo/?fbid=PHOTO_ID"
 
     def items(self):
-        photo_url = self.photo_url_fmt.format(
-            photo_id=self.match.group(1), set_id=""
-        )
+        if self.match.group(1).endswith("/posts/"):
+            photo_url = self.root + "/" + ''.join(self.match.groups())
+            photo_page = self.request(photo_url).text
+
+            photo_id = self.parse_post_page(photo_page)["id"]
+        else:
+            photo_id = self.match.group(2)
+
+        photo_url = self.photo_url_fmt.format(photo_id=photo_id, set_id="")
         photo_page = self.photo_page_request_wrapper(photo_url).text
 
         i = 1
-        photo = self.get_photo_page_metadata(photo_page)
+        photo = self.parse_photo_page(photo_page)
         photo["num"] = i
 
         set_page = self.request(
             self.set_url_fmt.format(set_id=photo["set_id"])
         ).text
 
-        directory = self.get_set_page_metadata(set_page)
+        directory = self.parse_set_page(set_page)
 
         yield Message.Directory, directory
         yield Message.Url, photo["url"], photo
 
         if self.author_followups:
             for comment_photo_id in photo["followups_ids"]:
-                comment_photo = self.get_photo_page_metadata(
+                comment_photo = self.parse_photo_page(
                     self.photo_page_request_wrapper(
                         self.photo_url_fmt.format(
                             photo_id=comment_photo_id, set_id=""
@@ -370,7 +383,7 @@ class FacebookVideoExtractor(FacebookExtractor):
         video_url = self.root + "/watch/?v=" + video_id
         video_page = self.request(video_url).text
 
-        video, audio = self.get_video_page_metadata(video_page)
+        video, audio = self.parse_video_page(video_page)
 
         if "url" not in video:
             return
@@ -389,8 +402,9 @@ class FacebookProfileExtractor(FacebookExtractor):
     """Base class for Facebook Profile Photos Set extractors"""
     subcategory = "profile"
     pattern = (
-        BASE_PATTERN + r"/(?!(?:media|photo|watch|.*?/videos)/)"
-        r"(?:profile.php\?id=|people/[^/|?|&]+/)?([^/|?|&]+)"
+        BASE_PATTERN +
+        r"/(?!(?:media|photo|watch|.*?/photos|.*?/posts|.*?/videos)/)"
+        r"(?:profile.php\?id=|people/[^/?&]+/)?([^/?&]+)"
     )
     example = "https://www.facebook.com/USERNAME"
 
@@ -420,13 +434,12 @@ class FacebookProfileExtractor(FacebookExtractor):
             set_url = self.set_url_fmt.format(set_id=set_id)
             set_page = self.request(set_url).text
 
-            directory = self.get_set_page_metadata(set_page)
+            directory = self.parse_set_page(set_page)
 
             yield Message.Directory, directory
 
-            for photo in self.set_photos_iter(
+            yield from self.extract_set(
                 directory["first_photo_id"], directory["set_id"]
-            ):
-                yield Message.Url, photo["url"], photo
+            )
         else:
             self.log.debug("Profile photos set ID not found.")
