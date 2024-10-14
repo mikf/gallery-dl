@@ -26,7 +26,7 @@ class KemonopartyExtractor(Extractor):
     root = "https://kemono.su"
     directory_fmt = ("{category}", "{service}", "{user}")
     filename_fmt = "{id}_{title[:180]}_{num:>02}_{filename[:180]}.{extension}"
-    archive_fmt = "{service}_{user}_{id}_{num}"
+    archive_fmt = "{service}_{user}_{id}_{num}_{hash}"
     cookies_domain = ".kemono.su"
 
     def __init__(self, match):
