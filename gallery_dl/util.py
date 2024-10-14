@@ -646,6 +646,7 @@ GLOBALS = {
     "hash_sha1": sha1,
     "hash_md5" : md5,
     "re"       : re,
+    "functools": functools,
 }
 
 
