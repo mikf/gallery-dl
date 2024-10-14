@@ -64,30 +64,32 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
             "album_name" : text.unescape(info[0]),
             "album_size" : size[1:-1],
             "count"      : len(urls),
-            "_http_validate": self._validate,
         }
 
     def _extract_files(self, urls):
         for url in urls:
             try:
-                url = self._extract_file(text.unescape(url))
+                yield self._extract_file(text.unescape(url))
             except Exception as exc:
                 self.log.error("%s: %s", exc.__class__.__name__, exc)
-                continue
-            yield {"file": text.unescape(url)}
 
-    def _extract_file(self, url):
-        page = self.request(url).text
-        url = (text.extr(page, '<source src="', '"') or
-               text.extr(page, '<img src="', '"'))
+    def _extract_file(self, webpage_url):
+        response = self.request(webpage_url)
+        page = response.text
+        file_url = (text.extr(page, '<source src="', '"') or
+                    text.extr(page, '<img src="', '"'))
 
-        if not url:
-            url_download = text.rextract(
-                page, ' href="', '"', page.rindex("Download"))[0]
-            page = self.request(text.unescape(url_download)).text
-            url = text.unescape(text.rextract(page, ' href="', '"')[0])
+        if not file_url:
+            webpage_url = text.unescape(text.rextract(
+                page, ' href="', '"', page.rindex("Download"))[0])
+            response = self.request(webpage_url)
+            file_url = text.rextract(response.text, ' href="', '"')[0]
 
-        return url
+        return {
+            "file"          : text.unescape(file_url),
+            "_http_headers" : {"Referer": response.url},
+            "_http_validate": self._validate,
+        }
 
     def _validate(self, response):
         if response.history and response.url.endswith("/maintenance-vid.mp4"):
@@ -105,16 +107,15 @@ class BunkrMediaExtractor(BunkrAlbumExtractor):
 
     def fetch_album(self, album_id):
         try:
-            url = self._extract_file(self.root + self.album_id)
+            file = self._extract_file(self.root + album_id)
         except Exception as exc:
             self.log.error("%s: %s", exc.__class__.__name__, exc)
             return (), {}
 
-        return ({"file": text.unescape(url)},), {
+        return (file,), {
             "album_id"   : "",
             "album_name" : "",
             "album_size" : -1,
             "description": "",
             "count"      : 1,
-            "_http_validate": self._validate,
         }
