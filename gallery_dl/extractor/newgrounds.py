@@ -14,6 +14,9 @@ from ..cache import cache
 import itertools
 import re
 
+BASE_PATTERN = r"(?:https?://)?(?:www\.)?newgrounds\.com"
+USER_PATTERN = r"(?:https?://)?([\w-]+)\.newgrounds\.com"
+
 
 class NewgroundsExtractor(Extractor):
     """Base class for newgrounds extractors"""
@@ -93,7 +96,7 @@ class NewgroundsExtractor(Extractor):
 
     def posts(self):
         """Return URLs of all relevant post pages"""
-        return self._pagination(self._path)
+        return self._pagination(self._path, self.groups[1])
 
     def metadata(self):
         """Return general metadata"""
@@ -334,10 +337,10 @@ class NewgroundsExtractor(Extractor):
         for fmt in formats:
             yield fmt[1][0]["src"]
 
-    def _pagination(self, kind):
+    def _pagination(self, kind, pnum=1):
         url = "{}/{}".format(self.user_root, kind)
         params = {
-            "page": 1,
+            "page": text.parse_int(pnum, 1),
             "isAjaxRequest": "1",
         }
         headers = {
@@ -400,8 +403,7 @@ class NewgroundsImageExtractor(NewgroundsExtractor):
 class NewgroundsMediaExtractor(NewgroundsExtractor):
     """Extractor for a media file from newgrounds.com"""
     subcategory = "media"
-    pattern = (r"(?:https?://)?(?:www\.)?newgrounds\.com"
-               r"(/(?:portal/view|audio/listen)/\d+)")
+    pattern = BASE_PATTERN + r"(/(?:portal/view|audio/listen)/\d+)"
     example = "https://www.newgrounds.com/portal/view/12345"
 
     def __init__(self, match):
@@ -416,35 +418,35 @@ class NewgroundsMediaExtractor(NewgroundsExtractor):
 class NewgroundsArtExtractor(NewgroundsExtractor):
     """Extractor for all images of a newgrounds user"""
     subcategory = _path = "art"
-    pattern = r"(?:https?://)?([\w-]+)\.newgrounds\.com/art/?$"
+    pattern = USER_PATTERN + r"/art(?:(?:/page/|/?\?page=)(\d+))?/?$"
     example = "https://USER.newgrounds.com/art"
 
 
 class NewgroundsAudioExtractor(NewgroundsExtractor):
     """Extractor for all audio submissions of a newgrounds user"""
     subcategory = _path = "audio"
-    pattern = r"(?:https?://)?([\w-]+)\.newgrounds\.com/audio/?$"
+    pattern = USER_PATTERN + r"/audio(?:(?:/page/|/?\?page=)(\d+))?/?$"
     example = "https://USER.newgrounds.com/audio"
 
 
 class NewgroundsMoviesExtractor(NewgroundsExtractor):
     """Extractor for all movies of a newgrounds user"""
     subcategory = _path = "movies"
-    pattern = r"(?:https?://)?([\w-]+)\.newgrounds\.com/movies/?$"
+    pattern = USER_PATTERN + r"/movies(?:(?:/page/|/?\?page=)(\d+))?/?$"
     example = "https://USER.newgrounds.com/movies"
 
 
 class NewgroundsGamesExtractor(NewgroundsExtractor):
     """Extractor for a newgrounds user's games"""
     subcategory = _path = "games"
-    pattern = r"(?:https?://)?([\w-]+)\.newgrounds\.com/games/?$"
+    pattern = USER_PATTERN + r"/games(?:(?:/page/|/?\?page=)(\d+))?/?$"
     example = "https://USER.newgrounds.com/games"
 
 
 class NewgroundsUserExtractor(NewgroundsExtractor):
     """Extractor for a newgrounds user profile"""
     subcategory = "user"
-    pattern = r"(?:https?://)?([\w-]+)\.newgrounds\.com/?$"
+    pattern = USER_PATTERN + r"/?$"
     example = "https://USER.newgrounds.com"
 
     def initialize(self):
@@ -464,25 +466,22 @@ class NewgroundsFavoriteExtractor(NewgroundsExtractor):
     """Extractor for posts favorited by a newgrounds user"""
     subcategory = "favorite"
     directory_fmt = ("{category}", "{user}", "Favorites")
-    pattern = (r"(?:https?://)?([\w-]+)\.newgrounds\.com"
-               r"/favorites(?!/following)(?:/(art|audio|movies))?/?")
+    pattern = (USER_PATTERN + r"/favorites(?!/following)(?:/(art|audio|movies)"
+               r"(?:(?:/page/|/?\?page=)(\d+))?)?")
     example = "https://USER.newgrounds.com/favorites"
 
-    def __init__(self, match):
-        NewgroundsExtractor.__init__(self, match)
-        self.kind = match.group(2)
-
     def posts(self):
-        if self.kind:
-            return self._pagination(self.kind)
+        _, kind, pnum = self.groups
+        if kind:
+            return self._pagination_favorites(kind, pnum)
         return itertools.chain.from_iterable(
-            self._pagination(k) for k in ("art", "audio", "movies")
+            self._pagination_favorites(k) for k in ("art", "audio", "movies")
         )
 
-    def _pagination(self, kind):
+    def _pagination_favorites(self, kind, pnum=1):
         url = "{}/favorites/{}".format(self.user_root, kind)
         params = {
-            "page": 1,
+            "page": text.parse_int(pnum, 1),
             "isAjaxRequest": "1",
         }
         headers = {
@@ -514,12 +513,13 @@ class NewgroundsFavoriteExtractor(NewgroundsExtractor):
 class NewgroundsFollowingExtractor(NewgroundsFavoriteExtractor):
     """Extractor for a newgrounds user's favorited users"""
     subcategory = "following"
-    pattern = r"(?:https?://)?([\w-]+)\.newgrounds\.com/favorites/(following)"
+    pattern = USER_PATTERN + r"/favorites/(following)"
     example = "https://USER.newgrounds.com/favorites/following"
 
     def items(self):
+        _, kind, pnum = self.groups
         data = {"_extractor": NewgroundsUserExtractor}
-        for url in self._pagination(self.kind):
+        for url in self._pagination_favorites(kind, pnum):
             yield Message.Queue, url, data
 
     @staticmethod
@@ -534,13 +534,12 @@ class NewgroundsSearchExtractor(NewgroundsExtractor):
     """Extractor for newgrounds.com search reesults"""
     subcategory = "search"
     directory_fmt = ("{category}", "search", "{search_tags}")
-    pattern = (r"(?:https?://)?(?:www\.)?newgrounds\.com"
-               r"/search/conduct/([^/?#]+)/?\?([^#]+)")
+    pattern = BASE_PATTERN + r"/search/conduct/([^/?#]+)/?\?([^#]+)"
     example = "https://www.newgrounds.com/search/conduct/art?terms=QUERY"
 
     def __init__(self, match):
         NewgroundsExtractor.__init__(self, match)
-        self._path, query = match.groups()
+        self._path, query = self.groups
         self.query = text.parse_query(query)
 
     def posts(self):
@@ -550,19 +549,20 @@ class NewgroundsSearchExtractor(NewgroundsExtractor):
                     for s in suitabilities.split(",")}
             self.request(self.root + "/suitabilities",
                          method="POST", data=data)
-        return self._pagination("/search/conduct/" + self._path, self.query)
+        return self._pagination_search(
+            "/search/conduct/" + self._path, self.query)
 
     def metadata(self):
         return {"search_tags": self.query.get("terms", "")}
 
-    def _pagination(self, path, params):
+    def _pagination_search(self, path, params):
         url = self.root + path
+        params["inner"] = "1"
+        params["page"] = text.parse_int(params.get("page"), 1)
         headers = {
             "Accept": "application/json, text/javascript, */*; q=0.01",
             "X-Requested-With": "XMLHttpRequest",
         }
-        params["inner"] = "1"
-        params["page"] = 1
 
         while True:
             data = self.request(url, params=params, headers=headers).json()
