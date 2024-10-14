@@ -109,7 +109,7 @@ class CohostUserExtractor(CohostExtractor):
             "projectHandle": self.groups[0],
             "page": 0,
             "options": {
-                "pinnedPostsAtTop"    : bool(self.pinned),
+                "pinnedPostsAtTop"    : True if self.pinned else False,
                 "hideReplies"         : not self.replies,
                 "hideShares"          : not self.shares,
                 "hideAsks"            : not self.asks,

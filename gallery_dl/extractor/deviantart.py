@@ -1301,7 +1301,7 @@ class DeviantartOAuthAPI():
 
         metadata = extractor.config("metadata", False)
         if not metadata:
-            metadata = bool(extractor.extra)
+            metadata = True if extractor.extra else False
         if metadata:
             self.metadata = True
 
