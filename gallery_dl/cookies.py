@@ -74,8 +74,9 @@ def load_cookies_firefox(profile=None, container=None, domain=None):
         cookies = [
             Cookie(
                 0, name, value, None, False,
-                domain, bool(domain), domain.startswith("."),
-                path, bool(path), secure, expires, False, None, None, {},
+                domain, True if domain else False, domain.startswith("."),
+                path, True if path else False, secure, expires,
+                False, None, None, {},
             )
             for name, value, domain, path, secure, expires in db.execute(
                 sql, parameters)
@@ -157,9 +158,9 @@ def load_cookies_chromium(browser_name, profile=None,
 
             cookies.append(Cookie(
                 0, name, value, None, False,
-                domain, bool(domain), domain.startswith("."),
-                path, bool(path), secure, expires or None, False,
-                None, None, {},
+                domain, True if domain else False, domain.startswith("."),
+                path, True if path else False, secure, expires or None,
+                False, None, None, {},
             ))
 
     if failed_cookies > 0:
@@ -284,7 +285,7 @@ def _safari_parse_cookies_record(data, cookies, host=None):
     record_size = p.read_uint()
     p.skip(4, "unknown record field 1")
     flags = p.read_uint()
-    is_secure = bool(flags & 0x0001)
+    is_secure = True if (flags & 0x0001) else False
     p.skip(4, "unknown record field 2")
     domain_offset = p.read_uint()
     name_offset = p.read_uint()
@@ -322,9 +323,9 @@ def _safari_parse_cookies_record(data, cookies, host=None):
 
     cookies.append(Cookie(
         0, name, value, None, False,
-        domain, bool(domain), domain.startswith("."),
-        path, bool(path), is_secure, expiration_date, False,
-        None, None, {},
+        domain, True if domain else False, domain.startswith("."),
+        path, True if path else False, is_secure, expiration_date,
+        False, None, None, {},
     ))
 
     return record_size

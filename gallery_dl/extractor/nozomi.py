@@ -63,7 +63,8 @@ class NozomiExtractor(Extractor):
             yield Message.Directory, post
             for post["num"], image in enumerate(images, 1):
                 post["filename"] = post["dataid"] = did = image["dataid"]
-                post["is_video"] = video = bool(image.get("is_video"))
+                post["is_video"] = video = \
+                    True if image.get("is_video") else False
 
                 ext = image["type"]
                 if video:
