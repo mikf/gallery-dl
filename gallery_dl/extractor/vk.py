@@ -75,7 +75,7 @@ class VkExtractor(Extractor):
             "al"       : "1",
             "direction": "1",
             "list"     : photos_id,
-            "offset"   : 0,
+            "offset"   : self.config("offset") or 0,
         }
 
         while True:
