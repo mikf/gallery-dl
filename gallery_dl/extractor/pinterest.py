@@ -74,6 +74,7 @@ class PinterestExtractor(Extractor):
 
                     if pin["extension"] == "m3u8":
                         url = "ytdl:" + url
+                        pin["_ytdl_manifest"] = "hls"
                         pin["extension"] = "mp4"
 
                     yield Message.Url, url, pin
