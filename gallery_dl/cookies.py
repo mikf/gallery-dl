@@ -153,6 +153,12 @@ def load_cookies_chromium(browser_name, profile=None,
                 value = value.decode()
                 unencrypted_cookies += 1
 
+            if expires:
+                # https://stackoverflow.com/a/43520042
+                expires = int(expires) // 1000000 - 11644473600
+            else:
+                expires = None
+
             domain = domain.decode()
             path = path.decode()
             name = name.decode()
@@ -161,7 +167,7 @@ def load_cookies_chromium(browser_name, profile=None,
                 0, name, value, None, False,
                 domain, True if domain else False,
                 domain[0] == "." if domain else False,
-                path, True if path else False, secure, expires or None,
+                path, True if path else False, secure, expires,
                 False, None, None, {},
             ))
 
