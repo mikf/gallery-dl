@@ -432,7 +432,7 @@ def cookiestxt_load(fp):
             None, False,
             domain,
             domain_specified == "TRUE",
-            domain.startswith("."),
+            domain[0] == "." if domain else False,
             path, False,
             secure == "TRUE",
             None if expires == "0" or not expires else expires,
@@ -458,9 +458,10 @@ def cookiestxt_store(fp, cookies):
             name = cookie.name
             value = cookie.value
 
+        domain = cookie.domain
         write("\t".join((
-            cookie.domain,
-            "TRUE" if cookie.domain.startswith(".") else "FALSE",
+            domain,
+            "TRUE" if domain and domain[0] == "." else "FALSE",
             cookie.path,
             "TRUE" if cookie.secure else "FALSE",
             "0" if cookie.expires is None else str(cookie.expires),

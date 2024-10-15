@@ -49,7 +49,7 @@ class TelegraphGalleryExtractor(GalleryExtractor):
             url, pos = text.extract(figure, 'src="', '"')
             if url.startswith("/embed/"):
                 continue
-            elif url.startswith("/"):
+            elif url[0] == "/":
                 url = self.root + url
             caption, pos = text.extract(figure, "<figcaption>", "<", pos)
             num += 1

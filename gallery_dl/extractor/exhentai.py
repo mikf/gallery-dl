@@ -260,9 +260,9 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
             "torrentcount" : extr('>Torrent Download (', ')'),
         }
 
-        if data["uploader"].startswith("<"):
-            data["uploader"] = text.unescape(text.extr(
-                data["uploader"], ">", "<"))
+        uploader = data["uploader"]
+        if uploader and uploader[0] == "<":
+            data["uploader"] = text.unescape(text.extr(uploader, ">", "<"))
 
         f = data["favorites"][0]
         if f == "N":

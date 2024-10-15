@@ -74,7 +74,8 @@ def load_cookies_firefox(profile=None, container=None, domain=None):
         cookies = [
             Cookie(
                 0, name, value, None, False,
-                domain, True if domain else False, domain.startswith("."),
+                domain, True if domain else False,
+                domain[0] == "." if domain else False,
                 path, True if path else False, secure, expires,
                 False, None, None, {},
             )
@@ -158,7 +159,8 @@ def load_cookies_chromium(browser_name, profile=None,
 
             cookies.append(Cookie(
                 0, name, value, None, False,
-                domain, True if domain else False, domain.startswith("."),
+                domain, True if domain else False,
+                domain[0] == "." if domain else False,
                 path, True if path else False, secure, expires or None,
                 False, None, None, {},
             ))
@@ -323,7 +325,8 @@ def _safari_parse_cookies_record(data, cookies, host=None):
 
     cookies.append(Cookie(
         0, name, value, None, False,
-        domain, True if domain else False, domain.startswith("."),
+        domain, True if domain else False,
+        domain[0] == "." if domain else False,
         path, True if path else False, is_secure, expiration_date,
         False, None, None, {},
     ))

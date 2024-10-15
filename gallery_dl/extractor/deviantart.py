@@ -401,7 +401,7 @@ class DeviantartExtractor(Extractor):
         html = content["html"]
         markup = html["markup"]
 
-        if not markup.startswith("{"):
+        if not markup or markup[0] != "{":
             return markup
 
         if html["type"] == "tiptap":

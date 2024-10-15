@@ -63,7 +63,7 @@ def main():
             browser, _, profile = args.cookies_from_browser.partition(":")
             browser, _, keyring = browser.partition("+")
             browser, _, domain = browser.partition("/")
-            if profile.startswith(":"):
+            if profile and profile[0] == ":":
                 container = profile[1:]
                 profile = None
             else:
