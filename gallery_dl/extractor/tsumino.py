@@ -148,8 +148,10 @@ class TsuminoSearchExtractor(TsuminoBase, Extractor):
             data["PageNumber"] += 1
 
     def _parse(self, query):
+        if not query:
+            return {}
         try:
-            if query.startswith("?"):
+            if query[0] == "?":
                 return self._parse_simple(query)
             return self._parse_jsurl(query)
         except Exception as exc:
@@ -187,8 +189,6 @@ class TsuminoSearchExtractor(TsuminoBase, Extractor):
         Example: ~(name~'John*20Doe~age~42~children~(~'Mary~'Bill))
         Ref: https://github.com/Sage/jsurl
         """
-        if not data:
-            return {}
         i = 0
         imax = len(data)
 

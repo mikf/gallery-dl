@@ -19,7 +19,7 @@ BASE_PATTERN = r"(?:https?://)?(?:ww[\dw]?\.)?mangakakalot\.tv"
 class MangakakalotBase():
     """Base class for mangakakalot extractors"""
     category = "mangakakalot"
-    root = "https://ww6.mangakakalot.tv"
+    root = "https://ww8.mangakakalot.tv"
 
 
 class MangakakalotChapterExtractor(MangakakalotBase, ChapterExtractor):
@@ -40,7 +40,7 @@ class MangakakalotChapterExtractor(MangakakalotBase, ChapterExtractor):
         match = re.match(
             r"(?:[Vv]ol\. *(\d+) )?"
             r"[Cc]hapter *([^:]*)"
-            r"(?:: *(.+))?", info)
+            r"(?:: *(.+))?", info or "")
         volume, chapter, title = match.groups() if match else ("", "", info)
         chapter, sep, minor = chapter.partition(".")
 
@@ -86,7 +86,7 @@ class MangakakalotMangaExtractor(MangakakalotBase, MangaExtractor):
             data["chapter"] = text.parse_int(chapter)
             data["chapter_minor"] = sep + minor
 
-            if url.startswith("/"):
+            if url[0] == "/":
                 url = self.root + url
             results.append((url, data.copy()))
         return results
