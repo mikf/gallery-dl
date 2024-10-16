@@ -798,6 +798,17 @@ class TwitterFollowingExtractor(TwitterExtractor):
         return self._users_result(TwitterAPI(self).user_following(self.user))
 
 
+class TwitterFollowersExtractor(TwitterExtractor):
+    """Extractor for a user's followers"""
+    subcategory = "followers"
+    pattern = BASE_PATTERN + r"/(?!search)([^/?#]+)/followers(?!\w)"
+    example = "https://x.com/USER/followers"
+
+    def items(self):
+        self.login()
+        return self._users_result(TwitterAPI(self).user_followers(self.user))
+
+
 class TwitterSearchExtractor(TwitterExtractor):
     """Extractor for Twitter search results"""
     subcategory = "search"
@@ -1404,6 +1415,15 @@ class TwitterAPI():
 
     def user_followers(self, screen_name):
         endpoint = "/graphql/jqZ0_HJBA6mnu18iTZYm9w/Followers"
+        variables = {
+            "userId": self._user_id_by_screen_name(screen_name),
+            "count": 100,
+            "includePromotedContent": False,
+        }
+        return self._pagination_users(endpoint, variables)
+
+    def user_followers_verified(self, screen_name):
+        endpoint = "/graphql/GHg0X_FjrJoISwwLPWi1LQ/BlueVerifiedFollowers"
         variables = {
             "userId": self._user_id_by_screen_name(screen_name),
             "count": 100,
