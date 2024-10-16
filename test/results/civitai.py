@@ -176,4 +176,15 @@ __tests__ = (
     "#count"  : 50,
 },
 
+{
+    "#url"  : "https://civitai.com/user/USER/images?section=reactions",
+    "#class": civitai.CivitaiUserImagesExtractor,
+    "#auth" : True,
+    "#urls" : (
+        "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/dd29c97a-1e95-4186-8df5-632736cbae79/original=true/00012-2489035818.png",
+        "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/5c4efa68-bb58-47c5-a716-98cd0f51f047/original=true/00013-4238863814.png",
+        "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/69bf3279-df2c-4ec8-b795-479e9cd3db1b/original=true/00014-3150861441.png",
+    ),
+},
+
 )
