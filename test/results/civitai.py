@@ -121,12 +121,22 @@ __tests__ = (
 
 {
     "#url"  : "https://civitai.com/tag/mecha",
-    "#class": civitai.CivitaiTagModelsExtractor,
+    "#class": civitai.CivitaiTagExtractor,
 },
 
 {
     "#url"  : "https://civitai.com/images?tags=482",
-    "#class": civitai.CivitaiTagImagesExtractor,
+    "#class": civitai.CivitaiImagesExtractor,
+},
+
+{
+    "#url"  : "https://civitai.com/images?modelVersionId=786644",
+    "#class": civitai.CivitaiImagesExtractor,
+},
+
+{
+    "#url"  : "https://civitai.com/models",
+    "#class": civitai.CivitaiModelsExtractor,
 },
 
 {
