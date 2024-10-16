@@ -198,11 +198,11 @@ SUBCATEGORY_MAP = {
         "feed": "Subscriptions Feed",
     },
     "civitai": {
-        "tag-models": "Tag Searches (Models)",
-        "tag-images": "Tag Searches (Images)",
+        "models": "Model Listings",
+        "images": "Image Listings",
         "user-models": "User Models",
         "user-images": "User Images",
-        "user-posts": "User Posts",
+        "user-posts" : "User Posts",
     },
     "coomerparty": {
         "discord"       : "",

@@ -269,24 +269,14 @@ class CivitaiPostExtractor(CivitaiExtractor):
         return ({"id": int(self.groups[0])},)
 
 
-class CivitaiTagModelsExtractor(CivitaiExtractor):
-    subcategory = "tag-models"
-    pattern = BASE_PATTERN + r"/(?:tag/|models\?tag=)([^/?&#]+)"
+class CivitaiTagExtractor(CivitaiExtractor):
+    subcategory = "tag"
+    pattern = BASE_PATTERN + r"/tag/([^/?&#]+)"
     example = "https://civitai.com/tag/TAG"
 
     def models(self):
         tag = text.unquote(self.groups[0])
-        return self.api.models({"tag": tag})
-
-
-class CivitaiTagImagesExtractor(CivitaiExtractor):
-    subcategory = "tag-images"
-    pattern = BASE_PATTERN + r"/images\?tags=([^&#]+)"
-    example = "https://civitai.com/images?tags=12345"
-
-    def images(self):
-        tag = text.unquote(self.groups[0])
-        return self.api.images({"tag": tag})
+        return self.api.models_tag(tag)
 
 
 class CivitaiSearchExtractor(CivitaiExtractor):
@@ -297,6 +287,26 @@ class CivitaiSearchExtractor(CivitaiExtractor):
     def models(self):
         params = text.parse_query(self.groups[0])
         return self.api.models(params)
+
+
+class CivitaiModelsExtractor(CivitaiExtractor):
+    subcategory = "models"
+    pattern = BASE_PATTERN + r"/models(?:/?\?([^#]+))?(?:$|#)"
+    example = "https://civitai.com/models"
+
+    def models(self):
+        params = text.parse_query(self.groups[0])
+        return self.api.models(params)
+
+
+class CivitaiImagesExtractor(CivitaiExtractor):
+    subcategory = "images"
+    pattern = BASE_PATTERN + r"/images(?:/?\?([^#]+))?(?:$|#)"
+    example = "https://civitai.com/images"
+
+    def images(self):
+        params = text.parse_query(self.groups[0])
+        return self.api.images(params)
 
 
 class CivitaiUserExtractor(CivitaiExtractor):
@@ -402,6 +412,9 @@ class CivitaiRestAPI():
     def models(self, params):
         return self._pagination("/v1/models", params)
 
+    def models_tag(self, tag):
+        return self.models({"tag": tag})
+
     def _call(self, endpoint, params=None):
         if endpoint[0] == "/":
             url = self.root + endpoint
@@ -469,6 +482,7 @@ class CivitaiTrpcAPI():
                 "include"      : ["cosmetics"],
             })
 
+        params = self._type_params(params)
         return self._pagination(endpoint, params)
 
     def images_gallery(self, model, version, user):
@@ -521,6 +535,9 @@ class CivitaiTrpcAPI():
             })
 
         return self._pagination(endpoint, params)
+
+    def models_tag(self, tag):
+        return self.models({"tagname": tag})
 
     def post(self, post_id):
         endpoint = "post.get"
@@ -586,3 +603,13 @@ class CivitaiTrpcAPI():
     def _merge_params(self, params_user, params_default):
         params_default.update(params_user)
         return params_default
+
+    def _type_params(self, params):
+        for key, type in (
+            ("tags"          , int),
+            ("modelId"       , int),
+            ("modelVersionId", int),
+        ):
+            if key in params:
+                params[key] = type(params[key])
+        return params
