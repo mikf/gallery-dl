@@ -356,8 +356,20 @@ class CivitaiUserImagesExtractor(CivitaiExtractor):
     example = "https://civitai.com/user/USER/images"
 
     def images(self):
-        params = text.parse_query(self.groups[1])
-        params["username"] = text.unquote(self.groups[0])
+        params = text.parse_query_list(self.groups[1])
+
+        if params.get("section") == "reactions":
+            params["authed"] = True
+            params["useIndex"] = False
+            if "reactions" in params:
+                if isinstance(params["reactions"], str):
+                    params["reactions"] = (params["reactions"],)
+            else:
+                params["reactions"] = (
+                    "Like", "Dislike", "Heart", "Laugh", "Cry")
+        else:
+            params["username"] = text.unquote(self.groups[0])
+
         return self.api.images(params)
 
 
