@@ -23,7 +23,7 @@ class CivitaiExtractor(Extractor):
     root = "https://civitai.com"
     directory_fmt = ("{category}", "{username|user[username]}", "images")
     filename_fmt = "{file[id]|id|filename}.{extension}"
-    archive_fmt = "{file[hash]|hash}"
+    archive_fmt = "{file[uuid]|uuid}"
     request_interval = (0.5, 1.5)
 
     def _init(self):
@@ -101,9 +101,11 @@ class CivitaiExtractor(Extractor):
     def _url(self, image):
         url = image["url"]
         if "/" in url:
-            parts = url.rsplit("/", 2)
-            parts[1] = self._image_quality
+            parts = url.rsplit("/", 3)
+            image["uuid"] = parts[1]
+            parts[2] = self._image_quality
             return "/".join(parts)
+        image["uuid"] = url
 
         name = image.get("name")
         if not name:
@@ -133,8 +135,6 @@ class CivitaiModelExtractor(CivitaiExtractor):
     directory_fmt = ("{category}", "{user[username]}",
                      "{model[id]}{model[name]:? //}",
                      "{version[id]}{version[name]:? //}")
-    filename_fmt = "{file[id]}.{extension}"
-    archive_fmt = "{file[hash]}"
     pattern = BASE_PATTERN + r"/models/(\d+)(?:/?\?modelVersionId=(\d+))?"
     example = "https://civitai.com/models/12345/TITLE"
 
@@ -195,8 +195,12 @@ class CivitaiModelExtractor(CivitaiExtractor):
         )
 
     def _extract_files_model(self, model, version, user):
-        return [
-            {
+        files = []
+
+        for num, file in enumerate(version["files"], 1):
+            file["uuid"] = "model-{}-{}-{}".format(
+                model["id"], version["id"], file["id"])
+            files.append({
                 "num"      : num,
                 "file"     : file,
                 "filename" : file["name"],
@@ -207,9 +211,9 @@ class CivitaiModelExtractor(CivitaiExtractor):
                 "_http_headers" : {
                     "Authorization": self.api.headers.get("Authorization")},
                 "_http_validate": self._validate_file_model,
-            }
-            for num, file in enumerate(version["files"], 1)
-        ]
+            })
+
+        return files
 
     def _extract_files_image(self, model, version, user):
         if "images" in version:
