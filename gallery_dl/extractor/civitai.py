@@ -201,7 +201,9 @@ class CivitaiModelExtractor(CivitaiExtractor):
                 "file"     : file,
                 "filename" : file["name"],
                 "extension": "bin",
-                "url"      : file["downloadUrl"],
+                "url"      : file.get("downloadUrl") or
+                             "{}/api/download/models/{}".format(
+                                 self.root, version["id"]),
                 "_http_headers" : {
                     "Authorization": self.api.headers.get("Authorization")},
                 "_http_validate": self._validate_file_model,
