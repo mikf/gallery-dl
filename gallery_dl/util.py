@@ -532,6 +532,24 @@ class HTTPBasicAuth():
         return request
 
 
+class ModuleProxy():
+    __slots__ = ()
+
+    def __getitem__(self, key, modules=sys.modules):
+        try:
+            return modules[key]
+        except KeyError:
+            pass
+        try:
+            __import__(key)
+        except ImportError:
+            modules[key] = NONE
+            return NONE
+        return modules[key]
+
+    __getattr__ = __getitem__
+
+
 class LazyPrompt():
     __slots__ = ()
 
@@ -540,6 +558,7 @@ class LazyPrompt():
 
 
 class NullContext():
+    __slots__ = ()
 
     def __enter__(self):
         return None
@@ -646,6 +665,7 @@ GLOBALS = {
     "restart"  : raises(exception.RestartExtraction),
     "hash_sha1": sha1,
     "hash_md5" : md5,
+    "std"      : ModuleProxy(),
     "re"       : re,
 }
 

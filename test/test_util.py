@@ -830,6 +830,34 @@ def hash(value):
             i += 1
         self.assertEqual(i, 0)
 
+    def test_module_proxy(self):
+        proxy = util.ModuleProxy()
+
+        self.assertIs(proxy.os, os)
+        self.assertIs(proxy.os.path, os.path)
+        self.assertIs(proxy["os"], os)
+        self.assertIs(proxy["os.path"], os.path)
+        self.assertIs(proxy["os"].path, os.path)
+
+        self.assertIs(proxy.abcdefghi, util.NONE)
+        self.assertIs(proxy["abcdefghi"], util.NONE)
+        self.assertIs(proxy["abc.def.ghi"], util.NONE)
+        self.assertIs(proxy["os.path2"], util.NONE)
+
+    def test_null_context(self):
+        with util.NullContext():
+            pass
+
+        with util.NullContext() as ctx:
+            self.assertIs(ctx, None)
+
+        try:
+            with util.NullContext() as ctx:
+                exc_orig = ValueError()
+                raise exc_orig
+        except ValueError as exc:
+            self.assertIs(exc, exc_orig)
+
 
 class TestExtractor():
     category = "test_category"
