@@ -24,6 +24,13 @@ class VkExtractor(Extractor):
     root = "https://vk.com"
     request_interval = (0.5, 1.5)
 
+    def _init(self):
+        self.offset = text.parse_int(self.config("offset"))
+
+    def skip(self, num):
+        self.offset += num
+        return num
+
     def items(self):
         sub = re.compile(r"/imp[fg]/").sub
         sizes = "wzyxrqpo"
@@ -75,7 +82,7 @@ class VkExtractor(Extractor):
             "al"       : "1",
             "direction": "1",
             "list"     : photos_id,
-            "offset"   : 0,
+            "offset"   : self.offset,
         }
 
         while True:
