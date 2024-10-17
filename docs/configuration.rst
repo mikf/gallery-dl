@@ -4698,6 +4698,16 @@ Description
     or `cookies <extractor.*.cookies_>`__
 
 
+extractor.vk.offset
+-------------------
+Type
+    ``integer``
+Default
+    ``0``
+Description
+    Custom ``offset`` starting value when paginating over image results.
+
+
 extractor.vsco.include
 ----------------------
 Type
