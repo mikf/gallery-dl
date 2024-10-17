@@ -433,7 +433,8 @@ class DownloadJob(Job):
 
                     if status:
                         self.status |= status
-                        if "_fallback" in kwdict and self.fallback:
+                        if (status & 95 and   # not FormatError or OSError
+                                "_fallback" in kwdict and self.fallback):
                             fallback = kwdict["_fallback"] = \
                                 iter(kwdict["_fallback"])
                             try:
