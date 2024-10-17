@@ -765,6 +765,16 @@ class TwitterFollowingExtractor(TwitterExtractor):
         self.login()
         return self._users_result(TwitterAPI(self).user_following(self.user))
 
+class TwitterFollowersExtractor(TwitterExtractor):
+    """Extractor for followed users"""
+    subcategory = "followers"
+    pattern = BASE_PATTERN + r"/(?!search)([^/?#]+)/followers(?!\w)"
+    example = "https://x.com/USER/followers"
+
+    def items(self):
+        self.login()
+        return self._users_result(TwitterAPI(self).user_followers(self.user))
+
 
 class TwitterSearchExtractor(TwitterExtractor):
     """Extractor for Twitter search results"""
@@ -1142,6 +1152,10 @@ class TwitterAPI():
             "longform_notetweets_inline_media_enabled": True,
             "responsive_web_media_download_video_enabled": True,
             "responsive_web_enhance_cards_enabled": False,
+            "communities_web_enable_tweet_community_results_fetch" : False,
+            "creator_subscriptions_quote_tweet_preview_enabled" : False,
+            "rweb_tipjar_consumption_enabled": False,
+            "articles_preview_enabled" : False,
         }
 
     def tweet_result_by_rest_id(self, tweet_id):
@@ -1335,6 +1349,15 @@ class TwitterAPI():
 
     def user_following(self, screen_name):
         endpoint = "/graphql/PAnE9toEjRfE-4tozRcsfw/Following"
+        variables = {
+            "userId": self._user_id_by_screen_name(screen_name),
+            "count": 100,
+            "includePromotedContent": False,
+        }
+        return self._pagination_users(endpoint, variables)
+
+    def user_followers(self, screen_name):
+        endpoint = "/graphql/gwv4MK0diCpAJ79u7op1Lg/Followers"
         variables = {
             "userId": self._user_id_by_screen_name(screen_name),
             "count": 100,
