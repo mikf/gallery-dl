@@ -374,6 +374,12 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
+    <td>Hreads</td>
+    <td>https://Hreads.net/</td>
+    <td>Chapters, Manga</td>
+    <td></td>
+</tr>
+<tr>
     <td>Idol Complex</td>
     <td>https://idol.sankakucomplex.com/</td>
     <td>Pools, Posts, Tag Searches</td>
