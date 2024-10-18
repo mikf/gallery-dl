@@ -30,12 +30,11 @@ class PinterestExtractor(Extractor):
             self.root = text.ensure_http_scheme(domain)
 
         self.api = PinterestAPI(self)
+        self.videos = self.config("videos", True)
 
     def items(self):
         data = self.metadata()
-        videos = self.config("videos", True)
 
-        yield Message.Directory, data
         for pin in self.pins():
 
             if isinstance(pin, tuple):
@@ -43,41 +42,33 @@ class PinterestExtractor(Extractor):
                 yield Message.Queue, url, data
                 continue
 
+            try:
+                files = self._extract_files(pin)
+            except Exception as exc:
+                self.log.debug("", exc_info=exc)
+                self.log.warning(
+                    "%s: Error when extracting download URLs (%s: %s)",
+                    pin.get("id"), exc.__class__.__name__, exc)
+                continue
+
             pin.update(data)
+            pin["count"] = len(files)
 
-            carousel_data = pin.get("carousel_data")
-            if carousel_data:
-                pin["count"] = len(carousel_data["carousel_slots"])
-                for num, slot in enumerate(carousel_data["carousel_slots"], 1):
-                    slot["media_id"] = slot.pop("id")
-                    pin.update(slot)
-                    pin["num"] = num
-                    size, image = next(iter(slot["images"].items()))
-                    url = image["url"].replace("/" + size + "/", "/originals/")
-                    yield Message.Url, url, text.nameext_from_url(url, pin)
+            yield Message.Directory, pin
+            for pin["num"], file in enumerate(files, 1):
+                url = file["url"]
+                text.nameext_from_url(url, pin)
+                pin.update(file)
 
-            else:
-                try:
-                    media = self._media_from_pin(pin)
-                except Exception:
-                    self.log.debug("Unable to fetch download URL for pin %s",
-                                   pin.get("id"))
-                    continue
-
-                if videos or media.get("duration") is None:
-                    pin.update(media)
-                    pin["num"] = pin["count"] = 1
+                if "media_id" not in file:
                     pin["media_id"] = ""
 
-                    url = media["url"]
-                    text.nameext_from_url(url, pin)
+                if pin["extension"] == "m3u8":
+                    url = "ytdl:" + url
+                    pin["_ytdl_manifest"] = "hls"
+                    pin["extension"] = "mp4"
 
-                    if pin["extension"] == "m3u8":
-                        url = "ytdl:" + url
-                        pin["_ytdl_manifest"] = "hls"
-                        pin["extension"] = "mp4"
-
-                    yield Message.Url, url, pin
+                yield Message.Url, url, pin
 
     def metadata(self):
         """Return general metadata"""
@@ -85,26 +76,38 @@ class PinterestExtractor(Extractor):
     def pins(self):
         """Return all relevant pin objects"""
 
-    @staticmethod
-    def _media_from_pin(pin):
+    def _extract_files(self, pin):
+        carousel_data = pin.get("carousel_data")
+        if carousel_data:
+            files = []
+            for slot in carousel_data["carousel_slots"]:
+                size, image = next(iter(slot["images"].items()))
+                slot["media_id"] = slot.pop("id")
+                slot["url"] = image["url"].replace(
+                    "/" + size + "/", "/originals/", 1)
+                files.append(slot)
+            return files
+
         videos = pin.get("videos")
         if videos:
-            video_formats = videos["video_list"]
+            if not self.videos:
+                return ()
+            pass
 
+            video_formats = videos["video_list"]
             for fmt in ("V_HLSV4", "V_HLSV3_WEB", "V_HLSV3_MOBILE"):
                 if fmt in video_formats:
-                    media = video_formats[fmt]
+                    file = video_formats[fmt]
                     break
             else:
-                media = max(video_formats.values(),
-                            key=lambda x: x.get("width", 0))
+                file = max(video_formats.values(),
+                           key=lambda x: x.get("width", 0))
 
             if "V_720P" in video_formats:
-                media["_fallback"] = (video_formats["V_720P"]["url"],)
+                file["_fallback"] = (video_formats["V_720P"]["url"],)
+            return (file,)
 
-            return media
-
-        return pin["images"]["orig"]
+        return (pin["images"]["orig"],)
 
 
 class PinterestPinExtractor(PinterestExtractor):
