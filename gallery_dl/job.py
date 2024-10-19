@@ -347,6 +347,9 @@ class DownloadJob(Job):
                 self.status |= 4
                 self.log.error("Failed to download %s",
                                pathfmt.filename or url)
+                if "error" in hooks:
+                    for callback in hooks["error"]:
+                        callback(pathfmt)
                 return
 
         if not pathfmt.temppath:
