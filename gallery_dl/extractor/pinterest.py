@@ -18,8 +18,8 @@ BASE_PATTERN = r"(?:https?://)?(?:\w+\.)?pinterest\.[\w.]+"
 class PinterestExtractor(Extractor):
     """Base class for pinterest extractors"""
     category = "pinterest"
-    filename_fmt = "{category}_{id}{media_id:?_//}.{extension}"
-    archive_fmt = "{id}{media_id}"
+    filename_fmt = "{category}_{id}{media_id|page_id:?_//}.{extension}"
+    archive_fmt = "{id}{media_id|page_id}"
     root = "https://www.pinterest.com"
 
     def _init(self):
@@ -30,6 +30,7 @@ class PinterestExtractor(Extractor):
             self.root = text.ensure_http_scheme(domain)
 
         self.api = PinterestAPI(self)
+        self.stories = self.config("stories", True)
         self.videos = self.config("videos", True)
 
     def items(self):
@@ -62,6 +63,8 @@ class PinterestExtractor(Extractor):
 
                 if "media_id" not in file:
                     pin["media_id"] = ""
+                if "page_id" not in file:
+                    pin["page_id"] = ""
 
                 if pin["extension"] == "m3u8":
                     url = "ytdl:" + url
@@ -77,37 +80,107 @@ class PinterestExtractor(Extractor):
         """Return all relevant pin objects"""
 
     def _extract_files(self, pin):
+        story_pin_data = pin.get("story_pin_data")
+        if story_pin_data and self.stories:
+            return self._extract_story(pin, story_pin_data)
+
         carousel_data = pin.get("carousel_data")
         if carousel_data:
-            files = []
-            for slot in carousel_data["carousel_slots"]:
-                size, image = next(iter(slot["images"].items()))
-                slot["media_id"] = slot.pop("id")
-                slot["url"] = image["url"].replace(
-                    "/" + size + "/", "/originals/", 1)
-                files.append(slot)
-            return files
+            return self._extract_carousel(pin, carousel_data)
 
         videos = pin.get("videos")
-        if videos:
-            if not self.videos:
-                return ()
-            pass
+        if videos and self.videos:
+            return (self._extract_video(videos),)
 
-            video_formats = videos["video_list"]
-            for fmt in ("V_HLSV4", "V_HLSV3_WEB", "V_HLSV3_MOBILE"):
-                if fmt in video_formats:
-                    file = video_formats[fmt]
-                    break
-            else:
-                file = max(video_formats.values(),
-                           key=lambda x: x.get("width", 0))
+        try:
+            return (pin["images"]["orig"],)
+        except Exception:
+            self.log.debug("%s: No files found", pin.get("id"))
+            return ()
 
-            if "V_720P" in video_formats:
-                file["_fallback"] = (video_formats["V_720P"]["url"],)
-            return (file,)
+    def _extract_story(self, pin, story):
+        files = []
+        story_id = story.get("id")
 
-        return (pin["images"]["orig"],)
+        for page in story["pages"]:
+            page_id = page.get("id")
+
+            for block in page["blocks"]:
+                type = block.get("type")
+
+                if type == "story_pin_image_block":
+                    if 1 == len(page["blocks"]) == len(story["pages"]):
+                        try:
+                            media = pin["images"]["orig"]
+                        except Exception:
+                            media = self._extract_image(page, block)
+                    else:
+                        media = self._extract_image(page, block)
+
+                elif type == "story_pin_video_block":
+                    video = block["video"]
+                    media = self._extract_video(video)
+                    media["media_id"] = video.get("id") or ""
+
+                elif type == "story_pin_paragraph_block":
+                    media = {"url": "text:" + block["text"],
+                             "extension": "txt",
+                             "media_id": block.get("id")}
+
+                else:
+                    self.log.warning("%s: Unsupported story block '%s'",
+                                     pin.get("id"), type)
+                    continue
+
+                media["story_id"] = story_id
+                media["page_id"] = page_id
+                files.append(media)
+
+        return files
+
+    def _extract_carousel(self, pin, carousel_data):
+        files = []
+        for slot in carousel_data["carousel_slots"]:
+            size, image = next(iter(slot["images"].items()))
+            slot["media_id"] = slot.pop("id")
+            slot["url"] = image["url"].replace(
+                "/" + size + "/", "/originals/", 1)
+            files.append(slot)
+        return files
+
+    def _extract_image(self, page, block):
+        sig = block.get("image_signature") or page["image_signature"]
+        url_base = "https://i.pinimg.com/originals/{}/{}/{}/{}.".format(
+            sig[0:2], sig[2:4], sig[4:6], sig)
+        url_jpg = url_base + "jpg"
+        url_png = url_base + "png"
+        url_webp = url_base + "webp"
+
+        try:
+            media = block["image"]["images"]["originals"]
+        except Exception:
+            media = {"url": url_jpg, "_fallback": (url_png, url_webp,)}
+
+        if media["url"] == url_jpg:
+            media["_fallback"] = (url_png, url_webp,)
+        else:
+            media["_fallback"] = (url_jpg, url_png, url_webp,)
+        media["media_id"] = sig
+
+        return media
+
+    def _extract_video(self, video):
+        video_formats = video["video_list"]
+        for fmt in ("V_HLSV4", "V_HLSV3_WEB", "V_HLSV3_MOBILE"):
+            if fmt in video_formats:
+                media = video_formats[fmt]
+                break
+        else:
+            media = max(video_formats.values(),
+                        key=lambda x: x.get("width", 0))
+        if "V_720P" in video_formats:
+            media["_fallback"] = (video_formats["V_720P"]["url"],)
+        return media
 
 
 class PinterestPinExtractor(PinterestExtractor):
