@@ -6126,6 +6126,8 @@ Description
         After a file got moved to its target location
     ``skip``
         When skipping a file download
+    ``error``
+        After a file download failed
     ``post``
         When starting to download all files of a `post`,
         e.g. a Tweet on Twitter or a post on Patreon.
