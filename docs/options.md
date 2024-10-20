@@ -48,6 +48,11 @@
     -K, --list-keywords         Print a list of available keywords and example
                                 values for the given URLs
     -e, --error-file FILE       Add input URLs which returned an error to FILE
+    -N, --print [EVENT:]FORMAT  Write FORMAT during EVENT (default 'prepare') to
+                                standard output. Examples: 'id' or
+                                'post:{md5[:8]}'
+    --print-to-file [EVENT:]FORMAT FILE
+                                Append FORMAT during EVENT to FILE
     --list-modules              Print a list of available extractor modules
     --list-extractors CATEGORIES
                                 Print a list of extractor classes with
@@ -153,7 +158,7 @@
                                 current filename format to FORMAT
     --ugoira FMT                Convert Pixiv Ugoira to FMT using FFmpeg.
                                 Supported formats are 'webm', 'mp4', 'gif',
-                                'vp8', 'vp9', 'vp9-lossless', 'copy'.
+                                'vp8', 'vp9', 'vp9-lossless', 'copy', 'zip'.
     --exec CMD                  Execute CMD for each downloaded file. Supported
                                 replacement fields are {} or {_path},
                                 {_directory}, {_filename}. Example: --exec
