@@ -10,6 +10,7 @@
 
 import argparse
 import logging
+import os.path
 import sys
 from . import job, util, version
 
@@ -150,6 +151,49 @@ class UgoiraAction(argparse.Action):
 
         namespace.options.append((("extractor",), "ugoira", True))
         namespace.postprocessors.append(pp)
+
+
+class PrintAction(argparse.Action):
+    def __call__(self, parser, namespace, value, option_string=None):
+        if self.const:
+            filename = self.const
+            base = None
+            mode = "w"
+        else:
+            value, path = value
+            base, filename = os.path.split(path)
+            mode = "a"
+
+        event, sep, format_string = value.partition(":")
+        if not sep:
+            format_string = event
+            event = ("prepare",)
+        else:
+            event = event.strip().lower()
+            if event not in {"init", "file", "after", "skip", "error",
+                             "prepare", "prepare-after", "post", "post-after",
+                             "finalize", "finalize-success", "finalize-error"}:
+                format_string = value
+                event = ("prepare",)
+
+        if not format_string:
+            return
+
+        if "{" not in format_string and \
+                " " not in format_string and \
+                format_string[0] != "\f":
+            format_string = "{" + format_string + "}"
+        if format_string[-1] != "\n":
+            format_string += "\n"
+
+        namespace.postprocessors.append({
+            "name"          : "metadata",
+            "event"         : event,
+            "filename"      : filename,
+            "base-directory": base or ".",
+            "content-format": format_string,
+            "open"          : mode,
+        })
 
 
 class Formatter(argparse.HelpFormatter):
@@ -341,6 +385,19 @@ def build_parser():
         "-e", "--error-file",
         dest="errorfile", metavar="FILE", action=ConfigAction,
         help="Add input URLs which returned an error to FILE",
+    )
+    output.add_argument(
+        "-N", "--print",
+        dest="postprocessors", metavar="[EVENT:]FORMAT",
+        action=PrintAction, const="-", default=[],
+        help=("Write FORMAT during EVENT (default 'prepare') to standard "
+              "output. Examples: 'id' or 'post:{md5[:8]}'"),
+    )
+    output.add_argument(
+        "--print-to-file",
+        dest="postprocessors", metavar="[EVENT:]FORMAT FILE",
+        action=PrintAction, nargs=2,
+        help="Append FORMAT during EVENT to FILE",
     )
     output.add_argument(
         "--list-modules",
@@ -616,7 +673,7 @@ def build_parser():
     postprocessor = parser.add_argument_group("Post-processing Options")
     postprocessor.add_argument(
         "-P", "--postprocessor",
-        dest="postprocessors", metavar="NAME", action="append", default=[],
+        dest="postprocessors", metavar="NAME", action="append",
         help="Activate the specified post processor",
     )
     postprocessor.add_argument(
