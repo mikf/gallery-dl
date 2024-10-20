@@ -9,7 +9,7 @@
 """Extractors for https://www.civitai.com/"""
 
 from .common import Extractor, Message
-from .. import text, util
+from .. import text, util, exception
 import itertools
 import time
 
@@ -355,21 +355,33 @@ class CivitaiUserImagesExtractor(CivitaiExtractor):
     pattern = USER_PATTERN + r"/images/?(?:\?([^#]+))?"
     example = "https://civitai.com/user/USER/images"
 
+    def __init__(self, match):
+        self.params = text.parse_query_list(match.group(2))
+        if self.params.get("section") == "reactions":
+            self.subcategory = "reactions"
+            self.images = self.images_reactions
+        CivitaiExtractor.__init__(self, match)
+
     def images(self):
-        params = text.parse_query_list(self.groups[1])
+        params = self.params
+        params["username"] = text.unquote(self.groups[0])
+        return self.api.images(params)
 
-        if params.get("section") == "reactions":
-            params["authed"] = True
-            params["useIndex"] = False
-            if "reactions" in params:
-                if isinstance(params["reactions"], str):
-                    params["reactions"] = (params["reactions"],)
-            else:
-                params["reactions"] = (
-                    "Like", "Dislike", "Heart", "Laugh", "Cry")
+    def images_reactions(self):
+        if "Authorization" not in self.api.headers and \
+                not self.cookies.get(
+                "__Secure-civitai-token", domain=".civitai.com"):
+            raise exception.AuthorizationError("api-key or cookies required")
+
+        params = self.params
+        params["authed"] = True
+        params["useIndex"] = False
+        if "reactions" in params:
+            if isinstance(params["reactions"], str):
+                params["reactions"] = (params["reactions"],)
         else:
-            params["username"] = text.unquote(self.groups[0])
-
+            params["reactions"] = (
+                "Like", "Dislike", "Heart", "Laugh", "Cry")
         return self.api.images(params)
 
 
@@ -450,14 +462,14 @@ class CivitaiRestAPI():
 
 
 class CivitaiTrpcAPI():
-    """Interface for the Civitai TRPC API"""
+    """Interface for the Civitai tRPC API"""
 
     def __init__(self, extractor):
         self.extractor = extractor
         self.root = extractor.root + "/api/trpc/"
         self.headers = {
             "content-type"    : "application/json",
-            "x-client-version": "5.0.146",
+            "x-client-version": "5.0.185",
             "x-client-date"   : "",
             "x-client"        : "web",
             "x-fingerprint"   : "undefined",
