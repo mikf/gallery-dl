@@ -311,7 +311,7 @@ class PatreonCreatorExtractor(PatreonExtractor):
     subcategory = "creator"
     pattern = (r"(?:https?://)?(?:www\.)?patreon\.com"
                r"/(?!(?:home|join|posts|login|signup)(?:$|[/?#]))"
-               r"([^/?#]+)(?:/posts)?/?(?:\?([^#]+))?")
+               r"(?:c/)?([^/?#]+)(?:/posts)?/?(?:\?([^#]+))?")
     example = "https://www.patreon.com/USER"
 
     def posts(self):
@@ -341,9 +341,9 @@ class PatreonCreatorExtractor(PatreonExtractor):
 
         user_id = query.get("u")
         if user_id:
-            url = "{}/user/posts?u={}".format(self.root, user_id)
+            url = "{}/user?u={}".format(self.root, user_id)
         else:
-            url = "{}/{}/posts".format(self.root, creator)
+            url = "{}/{}".format(self.root, creator)
         page = self.request(url, notfound="creator").text
 
         try:
