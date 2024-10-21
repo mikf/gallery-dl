@@ -800,6 +800,12 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
+    <td>Scrolller</td>
+    <td>https://scrolller.com/</td>
+    <td>Followed Subreddits, Posts, Subreddits</td>
+    <td>Supported</td>
+</tr>
+<tr>
     <td>Sen Manga</td>
     <td>https://raw.senmanga.com/</td>
     <td>Chapters</td>

@@ -443,6 +443,7 @@ Description
     * ``nijie`` (R)
     * ``pillowfort``
     * ``sankaku``
+    * ``scrolller``
     * ``seiga``
     * ``subscribestar``
     * ``tapas``
