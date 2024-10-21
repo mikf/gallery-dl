@@ -267,6 +267,13 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.pixiv.net/en/artworks/104582860",
+    "#comment" : "deleted limit_sanity_level_360.png work (#6339)",
+    "#class"   : pixiv.PixivWorkExtractor,
+    "#count"   : 0,
+},
+
+{
     "#url"     : "https://www.pixiv.net/en/artworks/103983466",
     "#comment" : "empty 'caption' in App API response (#4327, #5191)",
     "#class"   : pixiv.PixivWorkExtractor,
