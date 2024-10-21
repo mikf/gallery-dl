@@ -77,7 +77,7 @@ class PixivExtractor(Extractor):
                 work["tags_bookmark"] = [tag["name"] for tag in detail["tags"]
                                          if tag["is_registered"]]
             if self.sanity_workaround and not work.get("caption") and \
-                    not work.get("_mypixiv"):
+                    not work.get("_mypixiv") and not work.get("_ajax"):
                 body = self._request_ajax("/illust/" + str(work["id"]))
                 if body:
                     work["caption"] = text.unescape(body["illustComment"])
@@ -186,6 +186,7 @@ class PixivExtractor(Extractor):
             return None
 
     def _extract_ajax(self, work, body):
+        work["_ajax"] = True
         url = self._extract_ajax_url(body)
         if not url:
             return ()
@@ -243,12 +244,12 @@ class PixivExtractor(Extractor):
             original = body["urls"]["original"]
             if original:
                 return original
-        except KeyError:
+        except Exception:
             pass
 
         try:
             square1200 = body["userIllusts"][body["id"]]["url"]
-        except KeyError:
+        except Exception:
             return
         parts = square1200.rpartition("_p0")[0].split("/")
         del parts[3:5]
