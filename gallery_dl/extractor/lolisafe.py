@@ -47,7 +47,15 @@ class LolisafeAlbumExtractor(LolisafeExtractor):
             url = file["file"]
             file.update(data)
             text.nameext_from_url(url, file)
-            file["name"], sep, file["id"] = file["filename"].rpartition("-")
+
+            if "name" in file:
+                name = file["name"]
+                file["name"] = name.rpartition(".")[0] or name
+                file["id"] = file["filename"].rpartition("-")[2]
+            else:
+                file["name"], sep, file["id"] = \
+                    file["filename"].rpartition("-")
+
             yield Message.Url, url, file
 
     def fetch_album(self, album_id):

@@ -26,6 +26,7 @@ else:
     )
 
 LEGACY_DOMAINS = {
+    "bunkr.cat",
     "bunkr.ru",
     "bunkrr.ru",
     "bunkr.su",
@@ -52,24 +53,30 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
     def fetch_album(self, album_id):
         # album metadata
         page = self.request(self.root + "/a/" + self.album_id).text
-        info = text.split_html(text.extr(
-            page, "<h1", "</div>").partition(">")[2])
-        count, _, size = info[1].split(None, 2)
+        title, size = text.split_html(text.extr(
+            page, "<h1", "</span>").partition(">")[2])
 
-        pos = page.index('class="grid-images')
-        urls = list(text.extract_iter(page, '<a href="', '"', pos))
-
-        return self._extract_files(urls), {
+        items = list(text.extract_iter(page, "<!-- item -->", "<!--  -->"))
+        return self._extract_files(items), {
             "album_id"   : self.album_id,
-            "album_name" : text.unescape(info[0]),
-            "album_size" : size[1:-1],
-            "count"      : len(urls),
+            "album_name" : title,
+            "album_size" : text.extr(size, "(", ")"),
+            "count"      : len(items),
         }
 
-    def _extract_files(self, urls):
-        for url in urls:
+    def _extract_files(self, items):
+        for item in items:
             try:
-                yield self._extract_file(text.unescape(url))
+                url = text.extr(item, ' href="', '"')
+                file = self._extract_file(text.unescape(url))
+
+                info = text.split_html(item)
+                file["name"] = info[0]
+                file["size"] = info[2]
+                file["date"] = text.parse_datetime(
+                    info[-1], "%H:%M:%S %d/%m/%Y")
+
+                yield file
             except Exception as exc:
                 self.log.error("%s: %s", exc.__class__.__name__, exc)
 
