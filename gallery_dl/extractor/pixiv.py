@@ -333,21 +333,31 @@ class PixivUserExtractor(PixivExtractor):
 class PixivArtworksExtractor(PixivExtractor):
     """Extractor for artworks of a pixiv user"""
     subcategory = "artworks"
+    _warning = True
     pattern = (BASE_PATTERN + r"/(?:"
                r"(?:en/)?users/(\d+)/(?:artworks|illustrations|manga)"
                r"(?:/([^/?#]+))?/?(?:$|[?#])"
                r"|member_illust\.php\?id=(\d+)(?:&([^#]+))?)")
     example = "https://www.pixiv.net/en/users/12345/artworks"
 
-    def __init__(self, match):
-        PixivExtractor.__init__(self, match)
-        u1, t1, u2, t2 = match.groups()
+    def _init(self):
+        PixivExtractor._init(self)
+
+        u1, t1, u2, t2 = self.groups
         if t1:
             t1 = text.unquote(t1)
         elif t2:
             t2 = text.parse_query(t2).get("tag")
         self.user_id = u1 or u2
         self.tag = t1 or t2
+
+        if self.sanity_workaround:
+            self.cookies_domain = d = ".pixiv.net"
+            self._init_cookies()
+            if self._warning and not self.cookies.get("PHPSESSID", domain=d):
+                PixivArtworksExtractor._warning = False
+                self.log.warning("No 'PHPSESSID' cookie set. Can detect only "
+                                 "non R-18 'sanity_level' works.")
 
     def metadata(self):
         if self.config("metadata"):
@@ -357,6 +367,19 @@ class PixivArtworksExtractor(PixivExtractor):
     def works(self):
         works = self.api.user_illusts(self.user_id)
 
+        if self.sanity_workaround:
+            body = self._request_ajax(
+                "/user/{}/profile/all".format(self.user_id))
+            try:
+                ajax_ids = list(map(int, body["illusts"]))
+                ajax_ids.extend(map(int, body["manga"]))
+                ajax_ids.sort()
+            except Exception as exc:
+                self.log.warning("Unable to collect artwork IDs using AJAX "
+                                 "API (%s: %s)", exc.__class__.__name__, exc)
+            else:
+                works = self._extend_sanity(works, ajax_ids)
+
         if self.tag:
             tag = self.tag.lower()
             works = (
@@ -365,6 +388,35 @@ class PixivArtworksExtractor(PixivExtractor):
             )
 
         return works
+
+    def _extend_sanity(self, works, ajax_ids):
+        user = {"id": 1}
+        index = len(ajax_ids) - 1
+
+        for work in works:
+            while index >= 0:
+                work_id = work["id"]
+                ajax_id = ajax_ids[index]
+
+                if ajax_id == work_id:
+                    index -= 1
+                    break
+
+                elif ajax_id > work_id:
+                    index -= 1
+                    self.log.debug("Inserting work %s", ajax_id)
+                    yield self._make_work(ajax_id, self.sanity_url, user)
+
+                else:  # ajax_id < work_id
+                    break
+
+            yield work
+
+        while index >= 0:
+            ajax_id = ajax_ids[index]
+            self.log.debug("Inserting work %s", ajax_id)
+            yield self._make_work(ajax_id, self.sanity_url, user)
+            index -= 1
 
 
 class PixivAvatarExtractor(PixivExtractor):

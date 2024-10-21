@@ -71,6 +71,13 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.pixiv.net/en/users/56514424/artworks",
+    "#comment" : "limit_sanity_level_360.png in artworks results (#5435, #6339)",
+    "#class"   : pixiv.PixivArtworksExtractor,
+    "#count"   : ">= 39",
+},
+
+{
     "#url"     : "https://www.pixiv.net/en/users/173530/manga",
     "#category": ("", "pixiv", "artworks"),
     "#class"   : pixiv.PixivArtworksExtractor,
