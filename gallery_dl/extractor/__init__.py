@@ -141,6 +141,7 @@ modules = [
     "rule34us",
     "sankaku",
     "sankakucomplex",
+    "scrolller",
     "seiga",
     "senmanga",
     "sexcom",

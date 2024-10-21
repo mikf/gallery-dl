@@ -294,6 +294,9 @@ SUBCATEGORY_MAP = {
     "sankaku": {
         "books": "Book Searches",
     },
+    "scrolller": {
+        "following": "Followed Subreddits",
+    },
     "sexcom": {
         "pins": "User Pins",
     },
@@ -417,6 +420,7 @@ AUTH_MAP = {
     "ponybooru"      : "API Key",
     "reddit"         : _OAUTH,
     "sankaku"        : "Supported",
+    "scrolller"      : "Supported",
     "seiga"          : "Supported",
     "smugmug"        : _OAUTH,
     "subscribestar"  : "Supported",
