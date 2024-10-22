@@ -3702,6 +3702,16 @@ Description
     Note: This requires 1 additional API call for every 100 extra comments.
 
 
+extractor.reddit.embeds
+-----------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Download embedded comments media.
+
+
 extractor.reddit.date-min & .date-max
 -------------------------------------
 Type
