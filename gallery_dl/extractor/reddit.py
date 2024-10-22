@@ -31,6 +31,7 @@ class RedditExtractor(Extractor):
         parentdir = self.config("parent-directory")
         max_depth = self.config("recursion", 0)
         previews = self.config("previews", True)
+        embeds = self.config("embeds", True)
 
         videos = self.config("videos", True)
         if videos:
@@ -100,7 +101,7 @@ class RedditExtractor(Extractor):
                     for comment in comments:
                         html = comment["body_html"] or ""
                         href = (' href="' in html)
-                        media = ("media_metadata" in comment)
+                        media = (embeds and "media_metadata" in comment)
 
                         if media or href:
                             comment["date"] = text.parse_timestamp(
