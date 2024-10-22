@@ -24,7 +24,7 @@ import subprocess
 import urllib.parse
 from http.cookiejar import Cookie
 from email.utils import mktime_tz, parsedate_tz
-from . import text, version, exception
+from . import text, version, exception, ytdl, config
 
 
 def bencode(num, alphabet="0123456789"):
@@ -517,6 +517,15 @@ CODES = {
     "vi": "Vietnamese",
     "zh": "Chinese",
 }
+
+
+def check_if_supported_by_ytdlp(url):
+    ytdl_module = ytdl.import_module(
+        config.get(("extractor", "ytdl"), "module"))
+    for ie in ytdl_module.extractor.gen_extractor_classes():
+        if ie.suitable(url):
+            return True
+    return False
 
 
 class HTTPBasicAuth():
