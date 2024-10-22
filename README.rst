@@ -168,7 +168,7 @@ This will remove the container after every use so you will always have a fresh e
 
 .. code:: bash
 
-    docker run --rm  -v $HOME/Downloads/:/gallery-dl/ -v $HOME/.config/gallery-dl/gallery-dl.conf:/etc/gallery-dl.conf -it gallery-dl:latest
+    docker run --rm  -v $HOME/Downloads/:/gallery-dl/ -v $HOME/.config/gallery-dl/gallery-dl.conf:/etc/gallery-dl.conf -v $HOME/.cache/gallery-dl/:/root/.cache/gallery-dl/ -it gallery-dl:latest
 
 You can also add an alias to your shell for "gallery-dl" or create a simple bash script and drop it somewhere in your $PATH to act as a shim for this command.
 
