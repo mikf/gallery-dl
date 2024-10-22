@@ -38,6 +38,7 @@ class PixivExtractor(Extractor):
         self.meta_user = self.config("metadata")
         self.meta_bookmark = self.config("metadata-bookmark")
         self.meta_comments = self.config("comments")
+        self.meta_captions = self.config("captions")
 
     def items(self):
         tags = self.config("tags", "japanese")
@@ -76,7 +77,7 @@ class PixivExtractor(Extractor):
                 detail = self.api.illust_bookmark_detail(work["id"])
                 work["tags_bookmark"] = [tag["name"] for tag in detail["tags"]
                                          if tag["is_registered"]]
-            if self.sanity_workaround and not work.get("caption") and \
+            if self.meta_captions and not work.get("caption") and \
                     not work.get("_mypixiv") and not work.get("_ajax"):
                 body = self._request_ajax("/illust/" + str(work["id"]))
                 if body:
@@ -293,9 +294,6 @@ class PixivExtractor(Extractor):
             "width"           : 0,
             "x_restrict"      : 0,
         }
-
-    def _web_to_mobile(self, work):
-        return work
 
     def works(self):
         """Return an iterable containing all relevant 'work' objects"""

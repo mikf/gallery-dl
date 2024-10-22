@@ -277,6 +277,7 @@ __tests__ = (
     "#url"     : "https://www.pixiv.net/en/artworks/103983466",
     "#comment" : "empty 'caption' in App API response (#4327, #5191)",
     "#class"   : pixiv.PixivWorkExtractor,
+    "#options" : {"captions": True},
 
     "caption": r"re:Either she doesn't know how to pose or she can't move with that much clothing on her, in any case she's very well dressed for a holiday trip around town. Lots of stuff to see and a perfect day to grab some sweet pastries at the bakery.<br />...",
 },
