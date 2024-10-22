@@ -3520,6 +3520,17 @@ Description
     Note: This requires 1 additional API request per bookmarked post.
 
 
+extractor.pixiv.captions
+------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    For works with seemingly empty ``caption`` metadata,
+    try to grab the actual ``caption`` value using the AJAX API.
+
+
 extractor.pixiv.comments
 ------------------------
 Type
