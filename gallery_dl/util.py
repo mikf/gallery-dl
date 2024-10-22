@@ -667,6 +667,7 @@ GLOBALS = {
     "hash_md5" : md5,
     "std"      : ModuleProxy(),
     "re"       : re,
+    "functools": functools,
 }
 
 
