@@ -8,9 +8,10 @@
 
 """Extractors for https://bunkr.si/"""
 
+from .common import Extractor
 from .lolisafe import LolisafeAlbumExtractor
-from .. import text, config
-
+from .. import text, config, exception
+import random
 
 if config.get(("extractor", "bunkr"), "tlds"):
     BASE_PATTERN = (
@@ -21,11 +22,27 @@ else:
     BASE_PATTERN = (
         r"(?:bunkr:(?:https?://)?([^/?#]+)|"
         r"(?:https?://)?(?:app\.)?(bunkr+"
-        r"\.(?:s[kiu]|[cf]i|p[ks]|ru|la|is|to|a[cx]"
+        r"\.(?:s[kiu]|[cf]i|p[hks]|ru|la|is|to|a[cx]"
         r"|black|cat|media|red|site|ws|org)))"
     )
 
+DOMAINS = [
+    "bunkr.ac",
+    "bunkr.ci",
+    "bunkr.fi",
+    "bunkr.ph",
+    "bunkr.pk",
+    "bunkr.ps",
+    "bunkr.si",
+    "bunkr.sk",
+    "bunkr.ws",
+    "bunkr.black",
+    "bunkr.red",
+    "bunkr.media",
+    "bunkr.site",
+]
 LEGACY_DOMAINS = {
+    "bunkr.ax",
     "bunkr.cat",
     "bunkr.ru",
     "bunkrr.ru",
@@ -35,6 +52,7 @@ LEGACY_DOMAINS = {
     "bunkr.is",
     "bunkr.to",
 }
+CF_DOMAINS = set()
 
 
 class BunkrAlbumExtractor(LolisafeAlbumExtractor):
@@ -49,6 +67,46 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
         domain = self.groups[0] or self.groups[1]
         if domain not in LEGACY_DOMAINS:
             self.root = "https://" + domain
+
+    def request(self, url, **kwargs):
+        kwargs["allow_redirects"] = False
+
+        while True:
+            try:
+                response = Extractor.request(self, url, **kwargs)
+                if response.status_code < 300:
+                    return response
+
+                # redirect
+                url = response.headers["Location"]
+                root, path = self._split(url)
+                if root not in CF_DOMAINS:
+                    continue
+                self.log.debug("Redirect to known CF challenge domain '%s'",
+                               root)
+
+            except exception.HttpError as exc:
+                if exc.status != 403:
+                    raise
+
+                # CF challenge
+                root, path = self._split(url)
+                CF_DOMAINS.add(root)
+                self.log.debug("Added '%s' to CF challenge domains", root)
+
+                try:
+                    DOMAINS.remove(root.rpartition("/")[2])
+                except ValueError:
+                    pass
+                else:
+                    if not DOMAINS:
+                        raise exception.StopExtraction(
+                            "All Bunkr domains require solving a CF challenge")
+
+            # select alternative domain
+            root = "https://" + random.choice(DOMAINS)
+            self.log.debug("Trying '%s' as fallback", root)
+            url = root + path
 
     def fetch_album(self, album_id):
         # album metadata
@@ -77,8 +135,11 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
                     info[-1], "%H:%M:%S %d/%m/%Y")
 
                 yield file
+            except exception.StopExtraction:
+                raise
             except Exception as exc:
                 self.log.error("%s: %s", exc.__class__.__name__, exc)
+                self.log.debug("", exc_info=exc)
 
     def _extract_file(self, webpage_url):
         response = self.request(webpage_url)
@@ -103,6 +164,10 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
             self.log.warning("File server in maintenance mode")
             return False
         return True
+
+    def _split(self, url):
+        pos = url.index("/", 8)
+        return url[:pos], url[pos:]
 
 
 class BunkrMediaExtractor(BunkrAlbumExtractor):
