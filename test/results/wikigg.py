@@ -21,4 +21,13 @@ __tests__ = (
     "#class"   : wikimedia.WikimediaArticleExtractor,
 },
 
+{
+    "#url"     : "https://terraria.wiki.gg/de/wiki/Golem",
+    "#comment" : "non-English language prefix (#6370)",
+    "#category": ("wikimedia", "wikigg-terraria", "article"),
+    "#class"   : wikimedia.WikimediaArticleExtractor,
+    "#count"   : "> 45",
+    "#archive" : False,
+},
+
 )
