@@ -193,7 +193,10 @@ class WikimediaArticleExtractor(WikimediaExtractor):
     def __init__(self, match):
         WikimediaExtractor.__init__(self, match)
 
-        path = match.group(match.lastindex)
+        path = self.groups[-1]
+        if path[2] == "/":
+            self.root = self.root + "/" + path[:2]
+            path = path[3:]
         if path.startswith("wiki/"):
             path = path[5:]
 
