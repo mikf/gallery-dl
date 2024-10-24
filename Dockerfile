@@ -1,4 +1,4 @@
-FROM python:3.12-alpine
+FROM python:alpine
 ENV LANG=C.UTF-8
 
 RUN : \
