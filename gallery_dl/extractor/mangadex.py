@@ -174,6 +174,23 @@ class MangadexListExtractor(MangadexExtractor):
                 yield Message.Queue, url, data
 
 
+class MangadexAuthorExtractor(MangadexExtractor):
+    """Extractor for mangadex authors"""
+    subcategory = "author"
+    pattern = BASE_PATTERN + r"/author/([0-9a-f-]+)"
+    example = ("https://mangadex.org/author"
+               "/01234567-89ab-cdef-0123-456789abcdef/NAME")
+
+    def items(self):
+        author = self.api.author(self.uuid)
+        author["_extractor"] = MangadexMangaExtractor
+
+        for item in author["relationships"]:
+            if item["type"] == "manga":
+                url = "{}/title/{}".format(self.root, item["id"])
+                yield Message.Queue, url, author
+
+
 class MangadexAPI():
     """Interface for the MangaDex API v5
 
@@ -194,6 +211,10 @@ class MangadexAPI():
 
     def athome_server(self, uuid):
         return self._call("/at-home/server/" + uuid)
+
+    def author(self, uuid, manga=False):
+        params = {"includes[]": ("manga",)} if manga else None
+        return self._call("/author/" + uuid, params)["data"]
 
     def chapter(self, uuid):
         params = {"includes[]": ("scanlation_group",)}

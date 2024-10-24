@@ -140,4 +140,22 @@ __tests__ = (
     ),
 },
 
+{
+    "#url"     : "https://mangadex.org/author/7222d0d5-836c-4bf3-9174-72bceade8c87/kotoyama",
+    "#class"   : mangadex.MangadexAuthorExtractor,
+    "#urls"    : (
+        "https://mangadex.org/title/f48bbb5f-8a23-4dea-8177-eb2dbbcbf4fa",
+        "https://mangadex.org/title/00b68132-4e69-4ff9-ad4b-29138b377dc8",
+        "https://mangadex.org/title/41cd6fa7-3e53-4900-88e6-4a06cd7df9ad",
+        "https://mangadex.org/title/f1b70bba-3873-4c22-afa3-1d1c78299cd9",
+        "https://mangadex.org/title/259dfd8a-f06a-4825-8fa6-a2dcd7274230",
+        "https://mangadex.org/title/d0c88e3b-ea64-4e07-9841-c1d2ac982f4a",
+    ),
+
+    "id": "7222d0d5-836c-4bf3-9174-72bceade8c87",
+    "type": "author",
+    "attributes": dict,
+    "relationships": list,
+},
+
 )
