@@ -35,7 +35,7 @@ def get_video_length(obj, url):
 
     if obj.headers:
         for key, value in obj.headers.items():
-            command.extend(["-headers", f"{key}: {value}"])
+            command.extend(["-headers", key + ": " + value])
 
     command.append(url)
 
@@ -57,7 +57,7 @@ def get_video_length(obj, url):
             )
             data = json.loads(result.stdout)
         except subprocess.CalledProcessError as e:
-            msg = f"ffprobe failed: {e}"
+            msg = "ffprobe failed: " + e
             print(e)
             continue
         except json.JSONDecodeError:
