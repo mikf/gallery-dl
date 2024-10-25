@@ -1489,6 +1489,16 @@ Description
     (See `depth` parameter of `app.bsky.feed.getPostThread <https://www.docs.bsky.app/docs/api/app-bsky-feed-get-post-thread>`__)
 
 
+extractor.bluesky.quoted
+------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Fetch media from quoted posts.
+
+
 extractor.bluesky.reposts
 -------------------------
 Type
