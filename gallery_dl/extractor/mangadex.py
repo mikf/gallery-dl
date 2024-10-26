@@ -221,7 +221,7 @@ class MangadexAPI():
         return self._call("/list/" + uuid)["data"]
 
     def list_feed(self, uuid):
-        return self._pagination("/list/" + uuid + "/feed")
+        return self._pagination_chapters("/list/" + uuid + "/feed")
 
     @memcache(keyarg=1)
     def manga(self, uuid):
@@ -230,7 +230,7 @@ class MangadexAPI():
 
     def manga_author(self, uuid_author):
         params = {"authorOrArtist": uuid_author}
-        return self._pagination("/manga", params)
+        return self._pagination_manga("/manga", params)
 
     def manga_feed(self, uuid):
         order = "desc" if self.extractor.config("chapter-reverse") else "asc"
@@ -238,11 +238,11 @@ class MangadexAPI():
             "order[volume]" : order,
             "order[chapter]": order,
         }
-        return self._pagination("/manga/" + uuid + "/feed", params)
+        return self._pagination_chapters("/manga/" + uuid + "/feed", params)
 
     def user_follows_manga_feed(self):
         params = {"order[publishAt]": "desc"}
-        return self._pagination("/user/follows/manga/feed", params)
+        return self._pagination_chapters("/user/follows/manga/feed", params)
 
     def authenticate(self):
         self.headers["Authorization"] = \
@@ -289,22 +289,31 @@ class MangadexAPI():
             raise exception.StopExtraction(
                 "%s %s (%s)", response.status_code, response.reason, msg)
 
-    def _pagination(self, endpoint, params=None):
+    def _pagination_chapters(self, endpoint, params=None):
         if params is None:
             params = {}
 
+        lang = self.extractor.config("lang")
+        if isinstance(lang, str) and "," in lang:
+            lang = lang.split(",")
+        params["translatedLanguage[]"] = lang
+        params["includes[]"] = ("scanlation_group",)
+
+        return self._pagination(endpoint, params)
+
+    def _pagination_manga(self, endpoint, params=None):
+        if params is None:
+            params = {}
+
+        return self._pagination(endpoint, params)
+
+    def _pagination(self, endpoint, params):
         config = self.extractor.config
+
         ratings = config("ratings")
         if ratings is None:
             ratings = ("safe", "suggestive", "erotica", "pornographic")
-
-        lang = config("lang")
-        if isinstance(lang, str) and "," in lang:
-            lang = lang.split(",")
-
         params["contentRating[]"] = ratings
-        params["translatedLanguage[]"] = lang
-        params["includes[]"] = ("scanlation_group",)
         params["offset"] = 0
 
         api_params = config("api-parameters")

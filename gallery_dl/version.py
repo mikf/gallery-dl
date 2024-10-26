@@ -6,5 +6,5 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-__version__ = "1.27.7"
+__version__ = "1.28.0-dev"
 __variant__ = None
