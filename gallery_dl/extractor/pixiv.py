@@ -105,34 +105,7 @@ class PixivExtractor(Extractor):
         del work["image_urls"]
         del work["meta_pages"]
 
-        if work["type"] == "ugoira":
-            if self.load_ugoira:
-                try:
-                    return self._extract_ugoira(work)
-                except Exception as exc:
-                    self.log.warning(
-                        "%s: Unable to retrieve Ugoira metatdata (%s - %s)",
-                        work["id"], exc.__class__.__name__, exc)
-
-        elif work["page_count"] == 1:
-            url = meta_single_page["original_image_url"]
-            if url == self.sanity_url:
-                if self.sanity_workaround:
-                    self.log.warning("%s: 'sanity_level' warning", work["id"])
-                    body = self._request_ajax("/illust/" + str(work["id"]))
-                    return self._extract_ajax(work, body)
-                else:
-                    self.log.warning(
-                        "%s: Unable to download work ('sanity_level' warning)",
-                        work["id"])
-            elif url == self.mypixiv_url:
-                work["_mypixiv"] = True
-                self.log.warning("%s: 'My pixiv' locked", work["id"])
-                return ()
-            else:
-                return ({"url": url},)
-
-        else:
+        if meta_pages:
             return [
                 {
                     "url"   : img["image_urls"]["original"],
@@ -140,6 +113,29 @@ class PixivExtractor(Extractor):
                 }
                 for num, img in enumerate(meta_pages)
             ]
+
+        url = meta_single_page["original_image_url"]
+        if url == self.sanity_url:
+            work["_ajax"] = True
+            self.log.warning("%s: 'limit_sanity_level' warning", work["id"])
+            if self.sanity_workaround:
+                body = self._request_ajax("/illust/" + str(work["id"]))
+                return self._extract_ajax(work, body)
+
+        elif url == self.mypixiv_url:
+            work["_mypixiv"] = True
+            self.log.warning("%s: 'My pixiv' locked", work["id"])
+
+        elif work["type"] != "ugoira":
+            return ({"url": url},)
+
+        elif self.load_ugoira:
+            try:
+                return self._extract_ugoira(work)
+            except Exception as exc:
+                self.log.warning(
+                    "%s: Unable to retrieve Ugoira metatdata (%s - %s)",
+                    work["id"], exc.__class__.__name__, exc)
 
         return ()
 
