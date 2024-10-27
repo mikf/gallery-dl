@@ -44,6 +44,16 @@ class CivitaiExtractor(Extractor):
             self._image_quality = "original=true"
             self._image_ext = "png"
 
+        metadata = self.config("metadata")
+        if metadata:
+            if isinstance(metadata, str):
+                metadata = metadata.split(",")
+            elif not isinstance(metadata, (list, tuple)):
+                metadata = ("generation",)
+            self._meta_generation = ("generation" in metadata)
+        else:
+            self._meta_generation = False
+
     def items(self):
         models = self.models()
         if models:
@@ -81,6 +91,9 @@ class CivitaiExtractor(Extractor):
         if images:
             for image in images:
                 url = self._url(image)
+                if self._meta_generation:
+                    image["generation"] = self.api.image_generationdata(
+                        image["id"])
                 image["date"] = text.parse_datetime(
                     image["createdAt"], "%Y-%m-%dT%H:%M:%S.%fZ")
                 text.nameext_from_url(url, image)
@@ -127,6 +140,8 @@ class CivitaiExtractor(Extractor):
                 data["extension"] = self._image_ext
             if "id" not in file and data["filename"].isdecimal():
                 file["id"] = text.parse_int(data["filename"])
+            if self._meta_generation:
+                file["generation"] = self.api.image_generationdata(file["id"])
             yield data
 
 
@@ -469,7 +484,7 @@ class CivitaiTrpcAPI():
         self.root = extractor.root + "/api/trpc/"
         self.headers = {
             "content-type"    : "application/json",
-            "x-client-version": "5.0.185",
+            "x-client-version": "5.0.211",
             "x-client-date"   : "",
             "x-client"        : "web",
             "x-fingerprint"   : "undefined",
@@ -490,6 +505,11 @@ class CivitaiTrpcAPI():
         endpoint = "image.get"
         params = {"id": int(image_id)}
         return (self._call(endpoint, params),)
+
+    def image_generationdata(self, image_id):
+        endpoint = "image.getGenerationData"
+        params = {"id": int(image_id)}
+        return self._call(endpoint, params)
 
     def images(self, params, defaults=True):
         endpoint = "image.getInfinite"

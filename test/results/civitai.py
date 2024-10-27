@@ -77,7 +77,7 @@ __tests__ = (
 {
     "#url"  : "https://civitai.com/images/26962948",
     "#class": civitai.CivitaiImageExtractor,
-    "#options"     : {"quality": "w"},
+    "#options"     : {"quality": "w", "metadata": True},
     "#urls"        : "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/69bf3279-df2c-4ec8-b795-479e9cd3db1b/w/00014-3150861441.png",
     "#sha1_content": "a9a9d08f5fcdbc1e1eec7f203717f9df97b7a671",
 
@@ -92,17 +92,52 @@ __tests__ = (
     "postId"   : 6030721,
     "stats"    : dict,
     "url"      : "69bf3279-df2c-4ec8-b795-479e9cd3db1b",
+    "uuid"     : "69bf3279-df2c-4ec8-b795-479e9cd3db1b",
+    "width"    : 1152,
     "user"     : {
         "username": "bolero537",
     },
-    "uuid"     : "69bf3279-df2c-4ec8-b795-479e9cd3db1b",
-    "width"    : 1152,
+    "generation": {
+        "canRemix"  : True,
+        "external"  : None,
+        "generationProcess": "img2img",
+        "resources" : list,
+        "techniques": [],
+        "tools"     : [],
+        "meta"      : {
+            "Denoising strength": "0.4",
+            "Model"         : "boleromix_XL_V1.3",
+            "Model hash"    : "afaf521da2",
+            "Size"          : "1152x1536",
+            "Tiled Diffusion scale factor": "1.5",
+            "Tiled Diffusion upscaler": "R-ESRGAN 4x+ Anime6B",
+            "VAE"           : "sdxl_vae.safetensors",
+            "Version"       : "v1.7.0",
+            "cfgScale"      : 7,
+            "negativePrompt": "negativeXL_D,(worst quality,extra legs,extra arms,extra ears,bad fingers,extra fingers,bad anatomy, missing fingers, lowres,username, artist name, text,pubic hair,bar censor,censored,multipul angle,split view,realistic,3D:1)",
+            "prompt"        : "masterpiece,ultra-detailed,best quality,8K,illustration,cute face,clean skin ,shiny hair,girl,ultra-detailed-eyes,simple background, <lora:add-detail-xl:1> <lora:classic maid_XL_V1.0:1> maid, maid apron, maid headdress, long sleeves,tray,tea,cup,skirt lift",
+            "resources"     : list,
+            "sampler"       : "DPM++ 2M Karras",
+            "seed"          : 3150861441,
+            "steps"         : 20,
+            "hashes"        : {
+                "lora:add-detail-xl": "9c783c8ce46c",
+                "lora:classic maid_XL_V1.0": "e8f6e4297112",
+                "model": "afaf521da2",
+                "vae": "735e4c3a44",
+            },
+            "TI hashes"     : {
+                "negativeXL_D": "fff5d51ab655",
+            },
+        },
+    },
 },
 
 {
-    "#url"  : "https://civitai.com/posts/6877551",
-    "#class": civitai.CivitaiPostExtractor,
-    "#urls" : [
+    "#url"    : "https://civitai.com/posts/6877551",
+    "#class"  : civitai.CivitaiPostExtractor,
+    "#options": {"metadata": "generation"},
+    "#urls"   : [
         "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/6220fa0f-9037-4b1d-bfbd-a740a06eeb7c/original=true/30748752.png",
         "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/cd1edb7f-7b50-4da5-bf23-d38f24d8aef0/original=true/30748747.png",
         "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/cfd5b231-accd-49bd-8bde-370880f63aa6/original=true/30748733.png",
@@ -117,6 +152,15 @@ __tests__ = (
         "uuid": {"6220fa0f-9037-4b1d-bfbd-a740a06eeb7c",
                  "cd1edb7f-7b50-4da5-bf23-d38f24d8aef0",
                  "cfd5b231-accd-49bd-8bde-370880f63aa6"},
+        "generation": {
+            "resources" : list,
+            "techniques": [],
+            "tools"     : [],
+            "meta"      : {
+                "prompt"        : str,
+                "negativePrompt": str,
+            },
+        },
     },
 },
 

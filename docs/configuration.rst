@@ -387,8 +387,8 @@ Default
         ``[Danbooru]``, ``[E621]``, ``[foolfuuka]:search``, ``itaku``,
         ``koharu``,
         ``newgrounds``, ``[philomena]``, ``pixiv:novel``, ``plurk``,
-        ``poipiku`` , ``pornpics``, ``soundgasm``, ``urlgalleries``,
-        ``vk``, ``zerochan``
+        ``poipiku`` , ``pornpics``, ``scrolller``, ``soundgasm``,
+        ``urlgalleries``, ``vk``, ``zerochan``
     * ``"1.0-2.0"``
         ``flickr``, ``weibo``, ``[wikimedia]``
     * ``"2.0-4.0"``
@@ -1656,6 +1656,23 @@ Description
     It is possible to use ``"all"`` instead of listing all values separately.
 
 
+extractor.civitai.metadata
+--------------------------
+Type
+    * ``bool``
+    * ``string``
+    * ``list`` of ``strings``
+Default
+    ``false``
+Example
+    * ``"generation"``
+    * ``["generation"]``
+Description
+    Extract additional ``generation`` metadata.
+
+    Note: This requires 1 additional HTTP request per image.
+
+
 extractor.civitai.nsfw
 ----------------------
 Type
@@ -1788,7 +1805,7 @@ Type
 Default
     ``false``
 Example
-    * ``replacements,comments,ai_tags``
+    * ``"replacements,comments,ai_tags"``
     * ``["replacements", "comments", "ai_tags"]``
 Description
     Extract additional metadata
