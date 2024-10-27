@@ -139,6 +139,7 @@ modules = [
     "reddit",
     "redgifs",
     "rule34us",
+    "saint",
     "sankaku",
     "sankakucomplex",
     "scrolller",
