@@ -317,6 +317,15 @@ class BlueskySearchExtractor(BlueskyExtractor):
         return self.api.search_posts(self.user)
 
 
+class BlueskyHashtagExtractor(BlueskyExtractor):
+    subcategory = "hashtag"
+    pattern = BASE_PATTERN + r"/hashtag/([^/?#]+)(?:/(top|latest))?"
+    example = "https://bsky.app/hashtag/NAME"
+
+    def posts(self):
+        return self.api.search_posts("#"+self.user, self.groups[1])
+
+
 class BlueskyAPI():
     """Interface for the Bluesky API
 
@@ -412,11 +421,12 @@ class BlueskyAPI():
         params = {"handle": handle}
         return self._call(endpoint, params)["did"]
 
-    def search_posts(self, query):
+    def search_posts(self, query, sort=None):
         endpoint = "app.bsky.feed.searchPosts"
         params = {
             "q"    : query,
             "limit": "100",
+            "sort" : sort,
         }
         return self._pagination(endpoint, params, "posts")
 
