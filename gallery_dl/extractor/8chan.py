@@ -26,10 +26,6 @@ class _8chanExtractor(Extractor):
         self.root = "https://8chan." + match.group(1)
         Extractor.__init__(self, match)
 
-    def _init(self):
-        tos = self.cookies_tos_name()
-        self.cookies.set(tos, "1", domain=self.root[8:])
-
     @memcache()
     def cookies_tos_name(self):
         url = self.root + "/.static/pages/confirmed.html"
@@ -79,6 +75,7 @@ class _8chanThreadExtractor(_8chanExtractor):
 
     def items(self):
         _, board, thread = self.groups
+        self.cookies.set(self.cookies_tos_name(), "1", domain=self.root[8:])
 
         # fetch thread data
         url = "{}/{}/res/{}.".format(self.root, board, thread)
@@ -116,6 +113,8 @@ class _8chanBoardExtractor(_8chanExtractor):
 
     def items(self):
         _, board, pnum = self.groups
+        self.cookies.set(self.cookies_tos_name(), "1", domain=self.root[8:])
+
         pnum = text.parse_int(pnum, 1)
         url = "{}/{}/{}.json".format(self.root, board, pnum)
         data = self.request(url).json()
