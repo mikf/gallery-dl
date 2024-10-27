@@ -333,12 +333,12 @@ class PixivUserExtractor(PixivExtractor):
 class PixivArtworksExtractor(PixivExtractor):
     """Extractor for artworks of a pixiv user"""
     subcategory = "artworks"
-    _warning = True
     pattern = (BASE_PATTERN + r"/(?:"
                r"(?:en/)?users/(\d+)/(?:artworks|illustrations|manga)"
                r"(?:/([^/?#]+))?/?(?:$|[?#])"
                r"|member_illust\.php\?id=(\d+)(?:&([^#]+))?)")
     example = "https://www.pixiv.net/en/users/12345/artworks"
+    _warn_phpsessid = True
 
     def _init(self):
         PixivExtractor._init(self)
@@ -352,12 +352,13 @@ class PixivArtworksExtractor(PixivExtractor):
         self.tag = t1 or t2
 
         if self.sanity_workaround:
-            self.cookies_domain = d = ".pixiv.net"
+            self.cookies_domain = domain = ".pixiv.net"
             self._init_cookies()
-            if self._warning and not self.cookies.get("PHPSESSID", domain=d):
-                PixivArtworksExtractor._warning = False
-                self.log.warning("No 'PHPSESSID' cookie set. Can detect only "
-                                 "non R-18 'sanity_level' works.")
+            if self._warn_phpsessid:
+                PixivArtworksExtractor._warn_phpsessid = False
+                if not self.cookies.get("PHPSESSID", domain=domain):
+                    self.log.warning("No 'PHPSESSID' cookie set. Can detect on"
+                                     "ly non R-18 'limit_sanity_level' works.")
 
     def metadata(self):
         if self.config("metadata"):
