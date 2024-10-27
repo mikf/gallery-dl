@@ -171,13 +171,20 @@ __tests__ = (
 {
     "#url"     : "https://www.reddit.com/r/RobloxArt/comments/15ko0qu/",
     "#comment" : "comment embeds (#5366)",
-    "#category": ("", "reddit", "submission"),
     "#class"   : reddit.RedditSubmissionExtractor,
     "#options" : {"comments": 10},
     "#urls"    : (
         "https://i.redd.it/ppt5yciyipgb1.jpg",
         "https://i.redd.it/u0ojzd69kpgb1.png",
     ),
+},
+
+{
+    "#url"     : "https://www.reddit.com/r/RobloxArt/comments/15ko0qu/",
+    "#comment" : "disabled comment embeds (#6357)",
+    "#class"   : reddit.RedditSubmissionExtractor,
+    "#options" : {"comments": 10, "embeds": False},
+    "#urls"    : "https://i.redd.it/ppt5yciyipgb1.jpg",
 },
 
 {

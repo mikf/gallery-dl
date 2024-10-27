@@ -93,9 +93,25 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://discogs.fandom.com/zh/wiki/File:CH-0430D2.jpg",
+    "#comment" : "non-English language prefix (#6370)",
+    "#category": ("wikimedia", "fandom-discogs", "file"),
+    "#class"   : wikimedia.WikimediaArticleExtractor,
+    "#urls"    : "https://static.wikia.nocookie.net/discogs/images/a/ab/CH-0430D2.jpg/revision/latest?cb=20241007150151&path-prefix=zh",
+},
+
+{
     "#url"     : "https://projectsekai.fandom.com/wiki/Project_SEKAI_Wiki",
     "#category": ("wikimedia", "fandom-projectsekai", "article"),
     "#class"   : wikimedia.WikimediaArticleExtractor,
+},
+
+{
+    "#url"     : "https://youtube.fandom.com",
+    "#category": ("wikimedia", "fandom-youtube", "wiki"),
+    "#class"   : wikimedia.WikimediaWikiExtractor,
+    "#range"   : "1-20",
+    "#count"   : 20,
 },
 
 )

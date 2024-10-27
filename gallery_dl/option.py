@@ -10,6 +10,7 @@
 
 import argparse
 import logging
+import os.path
 import sys
 from . import job, util, version
 
@@ -74,6 +75,21 @@ class MtimeAction(argparse.Action):
         })
 
 
+class RenameAction(argparse.Action):
+    """Configure rename post processors"""
+    def __call__(self, parser, namespace, value, option_string=None):
+        if self.const:
+            namespace.postprocessors.append({
+                "name": "rename",
+                "to"  : value,
+            })
+        else:
+            namespace.postprocessors.append({
+                "name": "rename",
+                "from": value,
+            })
+
+
 class UgoiraAction(argparse.Action):
     """Configure ugoira post processors"""
     def __call__(self, parser, namespace, value, option_string=None):
@@ -116,20 +132,68 @@ class UgoiraAction(argparse.Action):
                                       "[a] palettegen [p];[b][p] paletteuse"),
                 "repeat-last-frame": False,
             }
-        elif value in ("mkv", "copy"):
+        elif value == "mkv" or value == "copy":
             pp = {
                 "extension"        : "mkv",
                 "ffmpeg-args"      : ("-c:v", "copy"),
                 "repeat-last-frame": False,
             }
+        elif value == "zip" or value == "archive":
+            pp = {
+                "mode"             : "archive",
+            }
+            namespace.options.append(((), "ugoira", "original"))
         else:
             parser.error("Unsupported Ugoira format '{}'".format(value))
 
         pp["name"] = "ugoira"
         pp["whitelist"] = ("pixiv", "danbooru")
 
-        namespace.options.append(((), "ugoira", True))
+        namespace.options.append((("extractor",), "ugoira", True))
         namespace.postprocessors.append(pp)
+
+
+class PrintAction(argparse.Action):
+    def __call__(self, parser, namespace, value, option_string=None):
+        if self.const:
+            filename = self.const
+            base = None
+            mode = "w"
+        else:
+            value, path = value
+            base, filename = os.path.split(path)
+            mode = "a"
+
+        event, sep, format_string = value.partition(":")
+        if not sep:
+            format_string = event
+            event = ("prepare",)
+        else:
+            event = event.strip().lower()
+            if event not in {"init", "file", "after", "skip", "error",
+                             "prepare", "prepare-after", "post", "post-after",
+                             "finalize", "finalize-success", "finalize-error"}:
+                format_string = value
+                event = ("prepare",)
+
+        if not format_string:
+            return
+
+        if "{" not in format_string and \
+                " " not in format_string and \
+                format_string[0] != "\f":
+            format_string = "{" + format_string + "}"
+        if format_string[-1] != "\n":
+            format_string += "\n"
+
+        namespace.postprocessors.append({
+            "name"          : "metadata",
+            "event"         : event,
+            "filename"      : filename,
+            "base-directory": base or ".",
+            "content-format": format_string,
+            "open"          : mode,
+        })
 
 
 class Formatter(argparse.HelpFormatter):
@@ -323,13 +387,26 @@ def build_parser():
         help="Add input URLs which returned an error to FILE",
     )
     output.add_argument(
+        "-N", "--print",
+        dest="postprocessors", metavar="[EVENT:]FORMAT",
+        action=PrintAction, const="-", default=[],
+        help=("Write FORMAT during EVENT (default 'prepare') to standard "
+              "output. Examples: 'id' or 'post:{md5[:8]}'"),
+    )
+    output.add_argument(
+        "--print-to-file",
+        dest="postprocessors", metavar="[EVENT:]FORMAT FILE",
+        action=PrintAction, nargs=2,
+        help="Append FORMAT during EVENT to FILE",
+    )
+    output.add_argument(
         "--list-modules",
         dest="list_modules", action="store_true",
         help="Print a list of available extractor modules",
     )
     output.add_argument(
         "--list-extractors",
-        dest="list_extractors", action="store_true",
+        dest="list_extractors", metavar="CATEGORIES", nargs="*",
         help=("Print a list of extractor classes "
               "with description, (sub)category and example URL"),
     )
@@ -526,7 +603,8 @@ def build_parser():
               "domain prefixed with '/', "
               "keyring name prefixed with '+', "
               "profile prefixed with ':', and "
-              "container prefixed with '::' ('none' for no container)"),
+              "container prefixed with '::' "
+              "('none' for no container (default), 'all' for all containers)"),
     )
 
     selection = parser.add_argument_group("Selection Options")
@@ -595,7 +673,7 @@ def build_parser():
     postprocessor = parser.add_argument_group("Post-processing Options")
     postprocessor.add_argument(
         "-P", "--postprocessor",
-        dest="postprocessors", metavar="NAME", action="append", default=[],
+        dest="postprocessors", metavar="NAME", action="append",
         help="Activate the specified post processor",
     )
     postprocessor.add_argument(
@@ -661,11 +739,23 @@ def build_parser():
         help=argparse.SUPPRESS,
     )
     postprocessor.add_argument(
+        "--rename",
+        dest="postprocessors", metavar="FORMAT", action=RenameAction, const=0,
+        help=("Rename previously downloaded files from FORMAT "
+              "to the current filename format"),
+    )
+    postprocessor.add_argument(
+        "--rename-to",
+        dest="postprocessors", metavar="FORMAT", action=RenameAction, const=1,
+        help=("Rename previously downloaded files from the current filename "
+              "format to FORMAT"),
+    )
+    postprocessor.add_argument(
         "--ugoira",
-        dest="postprocessors", metavar="FORMAT", action=UgoiraAction,
-        help=("Convert Pixiv Ugoira to FORMAT using FFmpeg. "
+        dest="postprocessors", metavar="FMT", action=UgoiraAction,
+        help=("Convert Pixiv Ugoira to FMT using FFmpeg. "
               "Supported formats are 'webm', 'mp4', 'gif', "
-              "'vp8', 'vp9', 'vp9-lossless', 'copy'."),
+              "'vp8', 'vp9', 'vp9-lossless', 'copy', 'zip'."),
     )
     postprocessor.add_argument(
         "--ugoira-conv",

@@ -260,9 +260,9 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
             "torrentcount" : extr('>Torrent Download (', ')'),
         }
 
-        if data["uploader"].startswith("<"):
-            data["uploader"] = text.unescape(text.extr(
-                data["uploader"], ">", "<"))
+        uploader = data["uploader"]
+        if uploader and uploader[0] == "<":
+            data["uploader"] = text.unescape(text.extr(uploader, ">", "<"))
 
         f = data["favorites"][0]
         if f == "N":
@@ -430,7 +430,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
         }
 
         page = self.request(url, cookies=cookies).text
-        current = text.extr(page, "<strong>", "</strong>")
+        current = text.extr(page, "<strong>", "</strong>").replace(",", "")
         self.log.debug("Image Limits: %s/%s", current, self.limits)
         self._remaining = self.limits - text.parse_int(current)
 

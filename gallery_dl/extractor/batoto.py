@@ -54,21 +54,20 @@ class BatotoChapterExtractor(BatotoBase, ChapterExtractor):
         info = text.unescape(info)
 
         match = re.match(
-            r"(?:Volume\s+(\d+) )?"
-            r"[Cc]hapter\s*(\d+)([\w.]*)", info)
+            r"(?i)(?:(?:Volume|S(?:eason)?)\s*(\d+)\s+)?"
+            r"(?:Chapter|Episode)\s*(\d+)([\w.]*)", info)
         if match:
             volume, chapter, minor = match.groups()
-            title = text.unescape(text.remove_html(extr(
-                "selected>", "</option")).partition(" : ")[2])
         else:
             volume = chapter = 0
             minor = ""
-            title = info
 
         return {
             "manga"         : text.unescape(manga),
             "manga_id"      : text.parse_int(manga_id),
-            "title"         : title,
+            "chapter_url"   : extr(self.chapter_id + "-ch_", '"'),
+            "title"         : text.unescape(text.remove_html(extr(
+                "selected>", "</option")).partition(" : ")[2]),
             "volume"        : text.parse_int(volume),
             "chapter"       : text.parse_int(chapter),
             "chapter_minor" : minor,

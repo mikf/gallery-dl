@@ -12,6 +12,7 @@ import sys
 import unittest
 from unittest.mock import Mock, mock_open, patch
 
+import shutil
 import logging
 import zipfile
 import tempfile
@@ -237,6 +238,57 @@ class ExecTest(BasePostprocessorTest):
 
         self.assertTrue(p.called)
         self.assertFalse(i.wait.called)
+
+
+class HashTest(BasePostprocessorTest):
+
+    def test_default(self):
+        self._create({})
+
+        with self.pathfmt.open() as fp:
+            fp.write(b"Foo Bar\n")
+
+        self._trigger()
+
+        kwdict = self.pathfmt.kwdict
+        self.assertEqual(
+            "35c9c9c7c90ad764bae9e2623f522c24", kwdict["md5"], "md5")
+        self.assertEqual(
+            "14d3d804494ef4e57d72de63e4cfee761240471a", kwdict["sha1"], "sha1")
+
+    def test_custom_hashes(self):
+        self._create({"hashes": "sha256:a,sha512:b"})
+
+        with self.pathfmt.open() as fp:
+            fp.write(b"Foo Bar\n")
+
+        self._trigger()
+
+        kwdict = self.pathfmt.kwdict
+        self.assertEqual(
+            "4775b55be17206445d7015a5fc7656f38a74b880670523c3b175455f885f2395",
+            kwdict["a"], "sha256")
+        self.assertEqual(
+            "6028f9e6957f4ca929941318c4bba6258713fd5162f9e33bd10e1c456d252700"
+            "3e1095b50736c4fd1e2deea152e3c8ecd5993462a747208e4d842659935a1c62",
+            kwdict["b"], "sha512")
+
+    def test_custom_hashes_dict(self):
+        self._create({"hashes": {"a": "sha256", "b": "sha512"}})
+
+        with self.pathfmt.open() as fp:
+            fp.write(b"Foo Bar\n")
+
+        self._trigger()
+
+        kwdict = self.pathfmt.kwdict
+        self.assertEqual(
+            "4775b55be17206445d7015a5fc7656f38a74b880670523c3b175455f885f2395",
+            kwdict["a"], "sha256")
+        self.assertEqual(
+            "6028f9e6957f4ca929941318c4bba6258713fd5162f9e33bd10e1c456d252700"
+            "3e1095b50736c4fd1e2deea152e3c8ecd5993462a747208e4d842659935a1c62",
+            kwdict["b"], "sha512")
 
 
 class MetadataTest(BasePostprocessorTest):
@@ -585,6 +637,36 @@ class MetadataTest(BasePostprocessorTest):
         self.assertTrue(not e.called)
         self.assertTrue(m.called)
 
+    def test_metadata_option_include(self):
+        self._create(
+            {"include": ["_private", "filename", "foo"], "sort": True},
+            {"public": "hello ワールド", "_private": "foo バー"},
+        )
+
+        with patch("builtins.open", mock_open()) as m:
+            self._trigger()
+
+        self.assertEqual(self._output(m), """{
+    "_private": "foo バー",
+    "filename": "file"
+}
+""")
+
+    def test_metadata_option_exclude(self):
+        self._create(
+            {"exclude": ["category", "filename", "foo"], "sort": True},
+            {"public": "hello ワールド", "_private": "foo バー"},
+        )
+
+        with patch("builtins.open", mock_open()) as m:
+            self._trigger()
+
+        self.assertEqual(self._output(m), """{
+    "extension": "ext",
+    "public": "hello ワールド"
+}
+""")
+
     @staticmethod
     def _output(mock):
         return "".join(
@@ -659,6 +741,60 @@ class PythonTest(BasePostprocessorTest):
 def calc(kwdict):
     kwdict["_result"] = kwdict["_value"] * 2
 """)
+
+
+class RenameTest(BasePostprocessorTest):
+
+    def _prepare(self, filename):
+        path = self.pathfmt.realdirectory
+        shutil.rmtree(path, ignore_errors=True)
+        os.makedirs(path, exist_ok=True)
+
+        with open(path + filename, "w"):
+            pass
+
+        return path
+
+    def test_rename_from(self):
+        self._create({"from": "{id}.{extension}"}, {"id": 12345})
+        path = self._prepare("12345.ext")
+
+        self._trigger()
+
+        self.assertEqual(os.listdir(path), ["file.ext"])
+
+    def test_rename_to(self):
+        self._create({"to": "{id}.{extension}"}, {"id": 12345})
+        path = self._prepare("file.ext")
+
+        self._trigger(("skip",))
+
+        self.assertEqual(os.listdir(path), ["12345.ext"])
+
+    def test_rename_from_to(self):
+        self._create({"from": "name", "to": "{id}"}, {"id": 12345})
+        path = self._prepare("name")
+
+        self._trigger()
+
+        self.assertEqual(os.listdir(path), ["12345"])
+
+    def test_rename_noopt(self):
+        with self.assertRaises(ValueError):
+            self._create({})
+
+    def test_rename_skip(self):
+        self._create({"from": "{id}.{extension}"}, {"id": 12345})
+        path = self._prepare("12345.ext")
+        with open(path + "file.ext", "w"):
+            pass
+
+        with self.assertLogs("postprocessor.rename", level="WARNING") as cm:
+            self._trigger()
+        self.assertTrue(cm.output[0].startswith(
+            "WARNING:postprocessor.rename:Not renaming "
+            "'12345.ext' to 'file.ext'"))
+        self.assertEqual(sorted(os.listdir(path)), ["12345.ext", "file.ext"])
 
 
 class ZipTest(BasePostprocessorTest):

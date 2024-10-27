@@ -15,7 +15,7 @@ import re
 class GenericExtractor(Extractor):
     """Extractor for images in a generic web page."""
     category = "generic"
-    directory_fmt = ("{category}", "{pageurl}")
+    directory_fmt = ("{category}", "{subcategory}", "{path}")
     archive_fmt = "{imageurl}"
 
     # By default, the generic extractor is disabled
@@ -52,7 +52,10 @@ class GenericExtractor(Extractor):
             self.scheme = match.group('scheme')
         else:
             self.scheme = 'https://'
-            self.url = self.scheme + self.url
+            self.url = text.ensure_http_scheme(self.url, self.scheme)
+
+        self.subcategory = match.group('domain')
+        self.path = match.group('path')
 
         # Used to resolve relative image urls
         self.root = self.scheme + match.group('domain')
@@ -86,29 +89,33 @@ class GenericExtractor(Extractor):
 
     def metadata(self, page):
         """Extract generic webpage metadata, return them in a dict."""
-        data = {}
-        data['pageurl'] = self.url
-        data['title'] = text.extr(page, '<title>', "</title>")
-        data['description'] = text.extr(
-            page, '<meta name="description" content="', '"')
-        data['keywords'] = text.extr(
-            page, '<meta name="keywords" content="', '"')
-        data['language'] = text.extr(
-            page, '<meta name="language" content="', '"')
-        data['name'] = text.extr(
-            page, '<meta itemprop="name" content="', '"')
-        data['copyright'] = text.extr(
-            page, '<meta name="copyright" content="', '"')
-        data['og_site'] = text.extr(
-            page, '<meta property="og:site" content="', '"')
-        data['og_site_name'] = text.extr(
-            page, '<meta property="og:site_name" content="', '"')
-        data['og_title'] = text.extr(
-            page, '<meta property="og:title" content="', '"')
-        data['og_description'] = text.extr(
-            page, '<meta property="og:description" content="', '"')
+        data = {
+            "title"         : text.extr(
+                page, "<title>", "</title>"),
+            "description"   : text.extr(
+                page, '<meta name="description" content="', '"'),
+            "keywords"      : text.extr(
+                page, '<meta name="keywords" content="', '"'),
+            "language"      : text.extr(
+                page, '<meta name="language" content="', '"'),
+            "name"          : text.extr(
+                page, '<meta itemprop="name" content="', '"'),
+            "copyright"     : text.extr(
+                page, '<meta name="copyright" content="', '"'),
+            "og_site"       : text.extr(
+                page, '<meta property="og:site" content="', '"'),
+            "og_site_name"  : text.extr(
+                page, '<meta property="og:site_name" content="', '"'),
+            "og_title"      : text.extr(
+                page, '<meta property="og:title" content="', '"'),
+            "og_description": text.extr(
+                page, '<meta property="og:description" content="', '"'),
 
-        data = {k: text.unescape(data[k]) for k in data if data[k] != ""}
+        }
+
+        data = {k: text.unescape(v) for k, v in data.items() if v}
+        data["path"] = self.path.replace("/", "")
+        data["pageurl"] = self.url
 
         return data
 

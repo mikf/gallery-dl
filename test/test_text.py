@@ -14,7 +14,7 @@ import unittest
 import datetime
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from gallery_dl import text  # noqa E402
+from gallery_dl import text, util  # noqa E402
 
 
 INVALID = ((), [], {}, None, 1, 2.3)
@@ -413,9 +413,31 @@ class TestText(unittest.TestCase):
         for value in INVALID:
             self.assertEqual(f(value), {})
 
+    def test_parse_query_list(self, f=text.parse_query_list):
+        # standard usage
+        self.assertEqual(f(""), {})
+        self.assertEqual(f("foo=1"), {"foo": "1"})
+        self.assertEqual(f("foo=1&bar=2"), {"foo": "1", "bar": "2"})
+
+        # missing value
+        self.assertEqual(f("bar"), {})
+        self.assertEqual(f("foo=1&bar"), {"foo": "1"})
+        self.assertEqual(f("foo=1&bar&baz=3"), {"foo": "1", "baz": "3"})
+
+        # keys with identical names
+        self.assertEqual(f("foo=1&foo=2"), {"foo": ["1", "2"]})
+        self.assertEqual(
+            f("foo=1&bar=2&foo=3&bar=4&foo=5"),
+            {"foo": ["1", "3", "5"], "bar": ["2", "4"]},
+        )
+
+        # invalid arguments
+        for value in INVALID:
+            self.assertEqual(f(value), {})
+
     def test_parse_timestamp(self, f=text.parse_timestamp):
-        null = datetime.datetime.utcfromtimestamp(0)
-        value = datetime.datetime.utcfromtimestamp(1555816235)
+        null = util.datetime_utcfromtimestamp(0)
+        value = util.datetime_utcfromtimestamp(1555816235)
 
         self.assertEqual(f(0)           , null)
         self.assertEqual(f("0")         , null)
@@ -427,7 +449,7 @@ class TestText(unittest.TestCase):
             self.assertEqual(f(value, "foo"), "foo")
 
     def test_parse_datetime(self, f=text.parse_datetime):
-        null = datetime.datetime.utcfromtimestamp(0)
+        null = util.datetime_utcfromtimestamp(0)
 
         self.assertEqual(f("1970-01-01T00:00:00+00:00"), null)
         self.assertEqual(f("1970-01-01T00:00:00+0000") , null)

@@ -22,7 +22,7 @@ class FlickrExtractor(Extractor):
     archive_fmt = "{id}"
     cookies_domain = None
     request_interval = (1.0, 2.0)
-    request_interval_min = 0.2
+    request_interval_min = 0.5
 
     def __init__(self, match):
         Extractor.__init__(self, match)
@@ -40,8 +40,9 @@ class FlickrExtractor(Extractor):
                 photo = extract(photo)
             except Exception as exc:
                 self.log.warning(
-                    "Skipping %s (%s)", photo["id"], exc.__class__.__name__)
-                self.log.debug("", exc_info=True)
+                    "Skipping photo %s (%s: %s)",
+                    photo["id"], exc.__class__.__name__, exc)
+                self.log.debug("", exc_info=exc)
             else:
                 photo.update(data)
                 url = photo["url"]
@@ -75,11 +76,8 @@ class FlickrImageExtractor(FlickrExtractor):
 
     def items(self):
         photo = self.api.photos_getInfo(self.item_id)
-        if self.api.exif:
-            photo.update(self.api.photos_getExif(self.item_id))
-        if self.api.contexts:
-            photo.update(self.api.photos_getAllContexts(self.item_id))
 
+        self.api._extract_metadata(photo)
         if photo["media"] == "video" and self.api.videos:
             self.api._extract_video(photo)
         else:
@@ -135,8 +133,13 @@ class FlickrAlbumExtractor(FlickrExtractor):
 
     def metadata(self):
         data = FlickrExtractor.metadata(self)
-        data["album"] = self.api.photosets_getInfo(
-            self.album_id, self.user["nsid"])
+        try:
+            data["album"] = self.api.photosets_getInfo(
+                self.album_id, self.user["nsid"])
+        except Exception:
+            data["album"] = {}
+            self.log.warning("%s: Unable to retrieve album metadata",
+                             self.album_id)
         return data
 
     def photos(self):
@@ -232,8 +235,8 @@ class FlickrAPI(oauth.OAuth1API):
     """
 
     API_URL = "https://api.flickr.com/services/rest/"
-    API_KEY = "f8f78d1a40debf471f0b22fa2d00525f"
-    API_SECRET = "4f9dae1113e45556"
+    API_KEY = "90c368449018a0cb880ea4889cbb8681"
+    API_SECRET = "e4b83e319c11e9e1"
     FORMATS = [
         ("o" , "Original"    , None),
         ("6k", "X-Large 6K"  , 6144),
@@ -407,6 +410,8 @@ class FlickrAPI(oauth.OAuth1API):
             self.log.debug("Server response: %s", data)
             if data["code"] == 1:
                 raise exception.NotFoundError(self.extractor.subcategory)
+            elif data["code"] == 2:
+                raise exception.AuthorizationError(msg)
             elif data["code"] == 98:
                 raise exception.AuthenticationError(msg)
             elif data["code"] == 99:
@@ -453,10 +458,7 @@ class FlickrAPI(oauth.OAuth1API):
         photo["date"] = text.parse_timestamp(photo["dateupload"])
         photo["tags"] = photo["tags"].split()
 
-        if self.exif:
-            photo.update(self.photos_getExif(photo["id"]))
-        if self.contexts:
-            photo.update(self.photos_getAllContexts(photo["id"]))
+        self._extract_metadata(photo)
         photo["id"] = text.parse_int(photo["id"])
 
         if "owner" in photo:
@@ -511,6 +513,23 @@ class FlickrAPI(oauth.OAuth1API):
         photo["label"] = stream["type"]
         photo["width"] = photo["height"] = 0
         return photo
+
+    def _extract_metadata(self, photo):
+        if self.exif:
+            try:
+                photo.update(self.photos_getExif(photo["id"]))
+            except Exception as exc:
+                self.log.warning(
+                    "Unable to retrieve 'exif' data for %s (%s: %s)",
+                    photo["id"], exc.__class__.__name__, exc)
+
+        if self.contexts:
+            try:
+                photo.update(self.photos_getAllContexts(photo["id"]))
+            except Exception as exc:
+                self.log.warning(
+                    "Unable to retrieve 'contexts' data for %s (%s: %s)",
+                    photo["id"], exc.__class__.__name__, exc)
 
     @staticmethod
     def _clean_info(info):

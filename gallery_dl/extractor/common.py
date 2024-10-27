@@ -15,6 +15,7 @@ import sys
 import time
 import netrc
 import queue
+import random
 import getpass
 import logging
 import datetime
@@ -37,6 +38,7 @@ class Extractor():
     archive_fmt = ""
     root = ""
     cookies_domain = ""
+    cookies_index = 0
     referer = True
     ciphers = None
     tls12 = True
@@ -183,7 +185,9 @@ class Extractor():
                     self._dump_response(response)
                 if (
                     code < 400 or
-                    code < 500 and (not fatal and code != 429 or fatal is None)
+                    code < 500 and (
+                        not fatal and code != 429 or fatal is None) or
+                    fatal is ...
                 ):
                     if encoding:
                         response.encoding = encoding
@@ -196,6 +200,10 @@ class Extractor():
                 server = response.headers.get("Server")
                 if server and server.startswith("cloudflare") and \
                         code in (403, 503):
+                    mitigated = response.headers.get("cf-mitigated")
+                    if mitigated and mitigated.lower() == "challenge":
+                        self.log.warning("Cloudflare challenge")
+                        break
                     content = response.content
                     if b"_cf_chl_opt" in content or b"jschl-answer" in content:
                         self.log.warning("Cloudflare challenge")
@@ -439,45 +447,58 @@ class Extractor():
 
         cookies = self.config("cookies")
         if cookies:
-            if isinstance(cookies, dict):
-                self.cookies_update_dict(cookies, self.cookies_domain)
+            select = self.config("cookies-select")
+            if select:
+                if select == "rotate":
+                    cookies = cookies[self.cookies_index % len(cookies)]
+                    Extractor.cookies_index += 1
+                else:
+                    cookies = random.choice(cookies)
+            self.cookies_load(cookies)
 
-            elif isinstance(cookies, str):
-                path = util.expand_path(cookies)
+    def cookies_load(self, cookies_source):
+        if isinstance(cookies_source, dict):
+            self.cookies_update_dict(cookies_source, self.cookies_domain)
+
+        elif isinstance(cookies_source, str):
+            path = util.expand_path(cookies_source)
+            try:
+                with open(path) as fp:
+                    cookies = util.cookiestxt_load(fp)
+            except Exception as exc:
+                self.log.warning("cookies: %s", exc)
+            else:
+                self.log.debug("Loading cookies from '%s'", cookies_source)
+                set_cookie = self.cookies.set_cookie
+                for cookie in cookies:
+                    set_cookie(cookie)
+                self.cookies_file = path
+
+        elif isinstance(cookies_source, (list, tuple)):
+            key = tuple(cookies_source)
+            cookies = _browser_cookies.get(key)
+
+            if cookies is None:
+                from ..cookies import load_cookies
                 try:
-                    with open(path) as fp:
-                        util.cookiestxt_load(fp, self.cookies)
+                    cookies = load_cookies(cookies_source)
                 except Exception as exc:
                     self.log.warning("cookies: %s", exc)
+                    cookies = ()
                 else:
-                    self.log.debug("Loading cookies from '%s'", cookies)
-                    self.cookies_file = path
-
-            elif isinstance(cookies, (list, tuple)):
-                key = tuple(cookies)
-                cookiejar = _browser_cookies.get(key)
-
-                if cookiejar is None:
-                    from ..cookies import load_cookies
-                    cookiejar = self.cookies.__class__()
-                    try:
-                        load_cookies(cookiejar, cookies)
-                    except Exception as exc:
-                        self.log.warning("cookies: %s", exc)
-                    else:
-                        _browser_cookies[key] = cookiejar
-                else:
-                    self.log.debug("Using cached cookies from %s", key)
-
-                set_cookie = self.cookies.set_cookie
-                for cookie in cookiejar:
-                    set_cookie(cookie)
-
+                    _browser_cookies[key] = cookies
             else:
-                self.log.warning(
-                    "Expected 'dict', 'list', or 'str' value for 'cookies' "
-                    "option, got '%s' (%s)",
-                    cookies.__class__.__name__, cookies)
+                self.log.debug("Using cached cookies from %s", key)
+
+            set_cookie = self.cookies.set_cookie
+            for cookie in cookies:
+                set_cookie(cookie)
+
+        else:
+            self.log.warning(
+                "Expected 'dict', 'list', or 'str' value for 'cookies' "
+                "option, got '%s' (%s)",
+                cookies_source.__class__.__name__, cookies_source)
 
     def cookies_store(self):
         """Store the session's cookies in a cookies.txt file"""

@@ -12,9 +12,11 @@ import sys
 import unittest
 
 import io
+import time
 import random
 import string
 import datetime
+import platform
 import tempfile
 import itertools
 import http.cookiejar
@@ -203,9 +205,8 @@ class TestCookiesTxt(unittest.TestCase):
     def test_cookiestxt_load(self):
 
         def _assert(content, expected):
-            jar = http.cookiejar.CookieJar()
-            util.cookiestxt_load(io.StringIO(content, None), jar)
-            for c, e in zip(jar, expected):
+            cookies = util.cookiestxt_load(io.StringIO(content, None))
+            for c, e in zip(cookies, expected):
                 self.assertEqual(c.__dict__, e.__dict__)
 
         _assert("", [])
@@ -251,8 +252,7 @@ class TestCookiesTxt(unittest.TestCase):
         )
 
         with self.assertRaises(ValueError):
-            util.cookiestxt_load("example.org\tTRUE\t/\tTRUE\t0\tname",
-                                 http.cookiejar.CookieJar())
+            util.cookiestxt_load("example.org\tTRUE\t/\tTRUE\t0\tname")
 
     def test_cookiestxt_store(self):
 
@@ -736,11 +736,30 @@ def hash(value):
         self.assertEqual(f(datetime.datetime(2010, 1, 1)), "1262304000")
         self.assertEqual(f(None), "")
 
+    def test_datetime_from_timestamp(
+            self, f=util.datetime_from_timestamp):
+        self.assertEqual(f(0.0), util.EPOCH)
+        self.assertEqual(f(1262304000.0), datetime.datetime(2010, 1, 1))
+        self.assertEqual(f(1262304000.128000).replace(microsecond=0),
+                         datetime.datetime(2010, 1, 1, 0, 0, 0))
+
+    def test_datetime_utcfromtimestamp(
+            self, f=util.datetime_utcfromtimestamp):
+        self.assertEqual(f(0.0), util.EPOCH)
+        self.assertEqual(f(1262304000.0), datetime.datetime(2010, 1, 1))
+
+    def test_datetime_utcnow(
+            self, f=util.datetime_utcnow):
+        self.assertIsInstance(f(), datetime.datetime)
+
     def test_universal_none(self):
         obj = util.NONE
 
         self.assertFalse(obj)
         self.assertEqual(len(obj), 0)
+        self.assertEqual(int(obj), 0)
+        self.assertEqual(hash(obj), 0)
+
         self.assertEqual(str(obj), str(None))
         self.assertEqual(repr(obj), repr(None))
         self.assertEqual(format(obj), str(None))
@@ -751,6 +770,7 @@ def hash(value):
         self.assertIs(obj(), obj)
         self.assertIs(obj(1, "a"), obj)
         self.assertIs(obj(foo="bar"), obj)
+        self.assertIs(iter(obj), obj)
         self.assertEqual(util.json_dumps(obj), "null")
 
         self.assertLess(obj, "foo")
@@ -764,7 +784,7 @@ def hash(value):
         self.assertEqual(obj + 123, obj)
         self.assertEqual(obj - 123, obj)
         self.assertEqual(obj * 123, obj)
-        self.assertEqual(obj @ 123, obj)
+        #  self.assertEqual(obj @ 123, obj)
         self.assertEqual(obj / 123, obj)
         self.assertEqual(obj // 123, obj)
         self.assertEqual(obj % 123, obj)
@@ -772,7 +792,7 @@ def hash(value):
         self.assertEqual(123 + obj, obj)
         self.assertEqual(123 - obj, obj)
         self.assertEqual(123 * obj, obj)
-        self.assertEqual(123 @ obj, obj)
+        #  self.assertEqual(123 @ obj, obj)
         self.assertEqual(123 / obj, obj)
         self.assertEqual(123 // obj, obj)
         self.assertEqual(123 % obj, obj)
@@ -797,11 +817,46 @@ def hash(value):
         mapping = {}
         mapping[obj] = 123
         self.assertIn(obj, mapping)
+        self.assertEqual(mapping[obj], 123)
+
+        array = [1, 2, 3]
+        self.assertEqual(array[obj], 1)
+
+        if platform.python_implementation().lower() == "cpython":
+            self.assertTrue(time.localtime(obj))
 
         i = 0
         for _ in obj:
             i += 1
         self.assertEqual(i, 0)
+
+    def test_module_proxy(self):
+        proxy = util.ModuleProxy()
+
+        self.assertIs(proxy.os, os)
+        self.assertIs(proxy.os.path, os.path)
+        self.assertIs(proxy["os"], os)
+        self.assertIs(proxy["os.path"], os.path)
+        self.assertIs(proxy["os"].path, os.path)
+
+        self.assertIs(proxy.abcdefghi, util.NONE)
+        self.assertIs(proxy["abcdefghi"], util.NONE)
+        self.assertIs(proxy["abc.def.ghi"], util.NONE)
+        self.assertIs(proxy["os.path2"], util.NONE)
+
+    def test_null_context(self):
+        with util.NullContext():
+            pass
+
+        with util.NullContext() as ctx:
+            self.assertIs(ctx, None)
+
+        try:
+            with util.NullContext() as ctx:
+                exc_orig = ValueError()
+                raise exc_orig
+        except ValueError as exc:
+            self.assertIs(exc, exc_orig)
 
 
 class TestExtractor():

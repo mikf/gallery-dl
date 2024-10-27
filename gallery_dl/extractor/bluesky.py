@@ -41,85 +41,114 @@ class BlueskyExtractor(Extractor):
         self.api = BlueskyAPI(self)
         self._user = self._user_did = None
         self.instance = self.root.partition("://")[2]
+        self.videos = self.config("videos", True)
+        self.quoted = self.config("quoted", False)
 
     def items(self):
         for post in self.posts():
             if "post" in post:
                 post = post["post"]
-
-            pid = post["uri"].rpartition("/")[2]
             if self._user_did and post["author"]["did"] != self._user_did:
-                self.log.debug("Skipping %s (repost)", pid)
+                self.log.debug("Skipping %s (repost)", self._pid(post))
                 continue
+            embed = post.get("embed")
+            post.update(post.pop("record"))
 
-            post.update(post["record"])
-            del post["record"]
+            while True:
+                self._prepare(post)
+                files = self._extract_files(post)
 
-            images = ()
-            if "embed" in post:
-                media = post["embed"]
-                if "media" in media:
-                    media = media["media"]
-                if "images" in media:
-                    images = media["images"]
+                yield Message.Directory, post
+                if files:
+                    base = ("https://bsky.social/xrpc/com.atproto.sync.getBlob"
+                            "?did={}&cid=".format(post["author"]["did"]))
+                    for post["num"], file in enumerate(files, 1):
+                        post.update(file)
+                        yield Message.Url, base + file["filename"], post
 
-            if self._metadata_facets:
-                if "facets" in post:
-                    post["hashtags"] = tags = []
-                    post["mentions"] = dids = []
-                    post["uris"] = uris = []
-                    for facet in post["facets"]:
-                        features = facet["features"][0]
-                        if "tag" in features:
-                            tags.append(features["tag"])
-                        elif "did" in features:
-                            dids.append(features["did"])
-                        elif "uri" in features:
-                            uris.append(features["uri"])
-                else:
-                    post["hashtags"] = post["mentions"] = post["uris"] = ()
+                if not self.quoted or not embed or "record" not in embed:
+                    break
 
-            if self._metadata_user:
-                post["user"] = self._user or post["author"]
-
-            post["instance"] = self.instance
-            post["post_id"] = pid
-            post["count"] = len(images)
-            post["date"] = text.parse_datetime(
-                post["createdAt"][:19], "%Y-%m-%dT%H:%M:%S")
-
-            yield Message.Directory, post
-
-            if not images:
-                continue
-
-            base = ("https://bsky.social/xrpc/com.atproto.sync.getBlob"
-                    "?did={}&cid=".format(post["author"]["did"]))
-            post["num"] = 0
-
-            for file in images:
-                post["num"] += 1
-                post["description"] = file["alt"]
-
-                try:
-                    aspect = file["aspectRatio"]
-                    post["width"] = aspect["width"]
-                    post["height"] = aspect["height"]
-                except KeyError:
-                    post["width"] = post["height"] = 0
-
-                image = file["image"]
-                try:
-                    cid = image["ref"]["$link"]
-                except KeyError:
-                    cid = image["cid"]
-                post["filename"] = cid
-                post["extension"] = image["mimeType"].rpartition("/")[2]
-
-                yield Message.Url, base + cid, post
+                quote = embed["record"]
+                if "record" in quote:
+                    quote = quote["record"]
+                quote["quote_id"] = self._pid(post)
+                quote["quote_by"] = post["author"]
+                embed = quote.get("embed")
+                quote.update(quote.pop("value"))
+                post = quote
 
     def posts(self):
         return ()
+
+    def _pid(self, post):
+        return post["uri"].rpartition("/")[2]
+
+    def _prepare(self, post):
+        if self._metadata_facets:
+            if "facets" in post:
+                post["hashtags"] = tags = []
+                post["mentions"] = dids = []
+                post["uris"] = uris = []
+                for facet in post["facets"]:
+                    features = facet["features"][0]
+                    if "tag" in features:
+                        tags.append(features["tag"])
+                    elif "did" in features:
+                        dids.append(features["did"])
+                    elif "uri" in features:
+                        uris.append(features["uri"])
+            else:
+                post["hashtags"] = post["mentions"] = post["uris"] = ()
+
+        if self._metadata_user:
+            post["user"] = self._user or post["author"]
+
+        post["instance"] = self.instance
+        post["post_id"] = self._pid(post)
+        post["date"] = text.parse_datetime(
+            post["createdAt"][:19], "%Y-%m-%dT%H:%M:%S")
+
+    def _extract_files(self, post):
+        if "embed" not in post:
+            post["count"] = 0
+            return ()
+
+        files = []
+        media = post["embed"]
+        if "media" in media:
+            media = media["media"]
+
+        if "images" in media:
+            for image in media["images"]:
+                files.append(self._extract_media(image, "image"))
+        if "video" in media and self.videos:
+            files.append(self._extract_media(media, "video"))
+
+        post["count"] = len(files)
+        return files
+
+    def _extract_media(self, media, key):
+        try:
+            aspect = media["aspectRatio"]
+            width = aspect["width"]
+            height = aspect["height"]
+        except KeyError:
+            width = height = 0
+
+        data = media[key]
+        try:
+            cid = data["ref"]["$link"]
+        except KeyError:
+            cid = data["cid"]
+
+        return {
+            "description": media.get("alt") or "",
+            "width"      : width,
+            "height"     : height,
+            "filename"   : cid,
+            "extension"  : data["mimeType"].rpartition("/")[2],
+        }
 
     def _make_post(self, actor, kind):
         did = self.api._did_from_actor(actor)
@@ -288,6 +317,15 @@ class BlueskySearchExtractor(BlueskyExtractor):
         return self.api.search_posts(self.user)
 
 
+class BlueskyHashtagExtractor(BlueskyExtractor):
+    subcategory = "hashtag"
+    pattern = BASE_PATTERN + r"/hashtag/([^/?#]+)(?:/(top|latest))?"
+    example = "https://bsky.app/hashtag/NAME"
+
+    def posts(self):
+        return self.api.search_posts("#"+self.user, self.groups[1])
+
+
 class BlueskyAPI():
     """Interface for the Bluesky API
 
@@ -383,11 +421,12 @@ class BlueskyAPI():
         params = {"handle": handle}
         return self._call(endpoint, params)["did"]
 
-    def search_posts(self, query):
+    def search_posts(self, query, sort=None):
         endpoint = "app.bsky.feed.searchPosts"
         params = {
             "q"    : query,
             "limit": "100",
+            "sort" : sort,
         }
         return self._pagination(endpoint, params, "posts")
 
