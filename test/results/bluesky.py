@@ -111,6 +111,22 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://bsky.app/hashtag/nature",
+    "#class"   : bluesky.BlueskyHashtagExtractor,
+    "#range"   : "1-40",
+    "#count"   : 40,
+    "#archive" : False,
+},
+{
+    "#url"     : "https://bsky.app/hashtag/top",
+    "#class"   : bluesky.BlueskyHashtagExtractor,
+},
+{
+    "#url"     : "https://bsky.app/hashtag/nature/latest",
+    "#class"   : bluesky.BlueskyHashtagExtractor,
+},
+
+{
     "#url"     : "https://bsky.app/profile/bsky.app/post/3kh5rarr3gn2n",
     "#category": ("", "bluesky", "post"),
     "#class"   : bluesky.BlueskyPostExtractor,
