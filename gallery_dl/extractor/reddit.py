@@ -344,15 +344,12 @@ class RedditRedirectExtractor(Extractor):
                r"/s/([a-zA-Z0-9]{10})")
     example = "https://www.reddit.com/r/SUBREDDIT/s/abc456GHIJ"
 
-    def __init__(self, match):
-        Extractor.__init__(self, match)
-        self.sub_type = "user" if match.group(1) == "u" else match.group(1)
-        self.subreddit = match.group(2)
-        self.share_url = match.group(3)
-
     def items(self):
-        url = "https://www.reddit.com/" + self.sub_type + "/" + \
-              self.subreddit + "/s/" + self.share_url
+        sub_type, subreddit, share_url = self.groups
+        if sub_type == "u":
+            sub_type = "user"
+        url = "https://www.reddit.com/{}/{}/s/{}".format(
+            sub_type, subreddit, share_url)
         data = {"_extractor": RedditSubmissionExtractor}
         response = self.request(url, method="HEAD", allow_redirects=False,
                                 notfound="submission")
