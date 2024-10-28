@@ -441,6 +441,7 @@ IGNORE_LIST = (
     "test",
     "ytdl",
     "generic",
+    "noop",
 )
 
 
