@@ -331,6 +331,8 @@ def select():
             output = PipeOutput()
     elif isinstance(mode, dict):
         output = CustomOutput(mode)
+    elif not mode:
+        output = NullOutput()
     else:
         output = {
             "default" : PipeOutput,
