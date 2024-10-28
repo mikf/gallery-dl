@@ -11,7 +11,6 @@
 import os
 import re
 import ssl
-import sys
 import time
 import netrc
 import queue
@@ -23,7 +22,7 @@ import requests
 import threading
 from requests.adapters import HTTPAdapter
 from .message import Message
-from .. import config, text, util, cache, exception
+from .. import config, output, text, util, cache, exception
 urllib3 = requests.packages.urllib3
 
 
@@ -289,13 +288,8 @@ class Extractor():
 
     def _check_input_allowed(self, prompt=""):
         input = self.config("input")
-
         if input is None:
-            try:
-                input = sys.stdin.isatty()
-            except Exception:
-                input = False
-
+            input = output.TTY_STDIN
         if not input:
             raise exception.StopExtraction(
                 "User input required (%s)", prompt.strip(" :"))
