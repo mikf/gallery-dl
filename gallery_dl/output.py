@@ -33,15 +33,18 @@ except Exception:
     TTY_STDIN = False
 
 
+COLORS_DEFAULT = {}
 COLORS = not os.environ.get("NO_COLOR")
-COLORS_DEFAULT = {
-    "success": "1;32",
-    "skip"   : "2",
-    "debug"  : "0;37",
-    "info"   : "1;37",
-    "warning": "1;33",
-    "error"  : "1;31",
-} if COLORS else {}
+if COLORS:
+    if TTY_STDOUT:
+        COLORS_DEFAULT["success"] = "1;32"
+        COLORS_DEFAULT["skip"] = "2"
+    if TTY_STDERR:
+        COLORS_DEFAULT["debug"] = "0;37"
+        COLORS_DEFAULT["info"] = "1;37"
+        COLORS_DEFAULT["warning"] = "1;33"
+        COLORS_DEFAULT["error"] = "1;31"
+
 
 if util.WINDOWS:
     ANSI = COLORS and os.environ.get("TERM") == "ANSI"
