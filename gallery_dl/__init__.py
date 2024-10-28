@@ -252,9 +252,13 @@ def main():
                     args.input_files.append(input_file)
 
             if not args.urls and not args.input_files:
-                parser.error(
-                    "The following arguments are required: URL\n"
-                    "Use 'gallery-dl --help' to get a list of all options.")
+                if args.cookies_from_browser or config.interpolate(
+                        ("extractor",), "cookies"):
+                    args.urls.append("noop")
+                else:
+                    parser.error(
+                        "The following arguments are required: URL\nUse "
+                        "'gallery-dl --help' to get a list of all options.")
 
             if args.list_urls:
                 jobtype = job.UrlJob
