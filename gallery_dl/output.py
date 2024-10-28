@@ -17,6 +17,22 @@ from . import config, util, formatter
 # --------------------------------------------------------------------
 # Globals
 
+try:
+    TTY_STDOUT = sys.stdout.isatty()
+except Exception:
+    TTY_STDOUT = False
+
+try:
+    TTY_STDERR = sys.stderr.isatty()
+except Exception:
+    TTY_STDERR = False
+
+try:
+    TTY_STDIN = sys.stdin.isatty()
+except Exception:
+    TTY_STDIN = False
+
+
 COLORS = not os.environ.get("NO_COLOR")
 COLORS_DEFAULT = {
     "success": "1;32",
@@ -323,7 +339,7 @@ def select():
 
     if mode is None or mode == "auto":
         try:
-            if sys.stdout.isatty():
+            if TTY_STDOUT:
                 output = ColorOutput() if ANSI else TerminalOutput()
             else:
                 output = PipeOutput()
