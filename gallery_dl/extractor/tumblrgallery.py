@@ -18,6 +18,7 @@ class TumblrgalleryExtractor(GalleryExtractor):
     filename_fmt = "{category}_{gallery_id}_{num:>03}_{id}.{extension}"
     directory_fmt = ("{category}", "{gallery_id} {title}")
     root = "https://tumblrgallery.xyz"
+    referer = False
 
     @staticmethod
     def _urls_from_page(page):
