@@ -22,8 +22,8 @@ BASE_PATTERN = (
     r"([\w-]+\.tumblr\.com)))"
 )
 
-POST_TYPES = frozenset((
-    "text", "quote", "link", "answer", "video", "audio", "photo", "chat", "search"))
+POST_TYPES = frozenset(("text", "quote", "link", "answer", "video",
+                        "audio", "photo", "chat", "search"))
 
 
 class TumblrExtractor(Extractor):
@@ -38,7 +38,6 @@ class TumblrExtractor(Extractor):
         Extractor.__init__(self, match)
 
         name = match.group(2)
-
         if name:
             self.blog = name + ".tumblr.com"
         else:
@@ -367,7 +366,6 @@ class TumblrLikesExtractor(TumblrExtractor):
 class TumblrSearchExtractor(TumblrExtractor):
     """Extractor for a Tumblr search"""
     subcategory = "search"
-    """ https://www.tumblr.com/search/nathan%20fielder?src=suggested_tag """
     pattern = BASE_PATTERN + r'/search/(.*?)(\?.*)?$'
     example = "https://www.tumblr.com/search/QUERY"
 
@@ -381,7 +379,7 @@ class TumblrSearchExtractor(TumblrExtractor):
         self.params = text.parse_query(parsed_url.query)
 
     def search(self, query, params):
-        """Retrieve published posts"""
+        """Retrieve search results"""
 
         params["limit"] = 50
         params["days"] = self.params.get("t") or 0
@@ -526,11 +524,9 @@ class TumblrAPI(oauth.OAuth1API):
 
             raise exception.StopExtraction(data)
 
-    def _pagination(self, full_endpoint, params, key="posts", cache=False):
-        if not full_endpoint.endswith("?"):
-            full_endpoint = full_endpoint + "?"
-
-        endpoint = full_endpoint
+    def _pagination(self, endpoint, params, key="posts", cache=False):
+        if endpoint[-1] != "?":
+            endpoint += "?"
 
         if self.api_key:
             params["api_key"] = self.api_key
