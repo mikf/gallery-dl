@@ -364,7 +364,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Hitomi.la</td>
     <td>https://hitomi.la/</td>
-    <td>Galleries, Tag Searches</td>
+    <td>Galleries, Site Index, Search Results, Tag Searches</td>
     <td></td>
 </tr>
 <tr>
