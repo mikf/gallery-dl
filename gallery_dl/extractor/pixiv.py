@@ -33,6 +33,7 @@ class PixivExtractor(Extractor):
     def _init(self):
         self.api = PixivAppAPI(self)
         self.load_ugoira = self.config("ugoira", True)
+        self.load_ugoira_original = (self.load_ugoira == "original")
         self.max_posts = self.config("max-posts", 0)
         self.sanity_workaround = self.config("sanity", True)
         self.meta_user = self.config("metadata")
@@ -131,7 +132,7 @@ class PixivExtractor(Extractor):
 
         elif self.load_ugoira:
             try:
-                return self._extract_ugoira(work)
+                return self._extract_ugoira(work, url)
             except Exception as exc:
                 self.log.warning(
                     "%s: Unable to retrieve Ugoira metatdata (%s - %s)",
@@ -139,28 +140,33 @@ class PixivExtractor(Extractor):
 
         return ()
 
-    def _extract_ugoira(self, work):
+    def _extract_ugoira(self, work, img_url):
         ugoira = self.api.ugoira_metadata(work["id"])
-        url = ugoira["zip_urls"]["medium"]
         work["_ugoira_frame_data"] = work["frames"] = frames = ugoira["frames"]
-        work["date_url"] = self._date_from_url(url)
+        work["_ugoira_original"] = self.load_ugoira_original
         work["_http_adjust_extension"] = False
 
-        if self.load_ugoira == "original":
-            work["_ugoira_original"] = True
-            base, sep, _ = url.rpartition("_ugoira")
-            base = base.replace("/img-zip-ugoira/", "/img-original/", 1) + sep
+        if self.load_ugoira_original:
+            work["date_url"] = self._date_from_url(img_url)
 
-            for ext in ("jpg", "png", "gif"):
-                try:
-                    url = "{}0.{}".format(base, ext)
-                    self.request(url, method="HEAD")
-                    break
-                except exception.HttpError:
-                    pass
+            base, sep, ext = img_url.rpartition("_ugoira0.")
+            if sep:
+                base += "_ugoira"
             else:
-                self.log.warning(
-                    "Unable to find Ugoira frame URLs (%s)", work["id"])
+                base, sep, _ = img_url.rpartition("_ugoira")
+                base = base.replace(
+                    "/img-zip-ugoira/", "/img-original/", 1) + sep
+
+                for ext in ("jpg", "png", "gif"):
+                    try:
+                        url = "{}0.{}".format(base, ext)
+                        self.request(url, method="HEAD")
+                        break
+                    except exception.HttpError:
+                        pass
+                else:
+                    self.log.warning(
+                        "Unable to find Ugoira frame URLs (%s)", work["id"])
 
             return [
                 {
@@ -170,9 +176,11 @@ class PixivExtractor(Extractor):
                 }
                 for num in range(len(frames))
             ]
+
         else:
-            work["_ugoira_original"] = False
-            url = url.replace("_ugoira600x600", "_ugoira1920x1080", 1)
+            zip_url = ugoira["zip_urls"]["medium"]
+            work["date_url"] = self._date_from_url(zip_url)
+            url = zip_url.replace("_ugoira600x600", "_ugoira1920x1080", 1)
             return ({"url": url},)
 
     def _request_ajax(self, endpoint):
