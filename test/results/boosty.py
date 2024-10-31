@@ -105,6 +105,18 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://boosty.to/geekmedia/posts/31bb8fb6-83f1-404f-a597-f84bbe611d1d",
+    "#comment" : "video",
+    "#class"   : boosty.BoostyPostExtractor,
+},
+
+{
+    "#url"     : "https://boosty.to/xcang/posts/5d4d6f90-5d48-4442-a7e5-2164a858681d",
+    "#comment" : "audio",
+    "#class"   : boosty.BoostyPostExtractor,
+},
+
+{
     "#url"     : "https://boosty.to/",
     "#class"   : boosty.BoostyFeedExtractor,
     "#auth"    : True,
