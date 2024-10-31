@@ -5463,7 +5463,7 @@ downloader.ytdl.forward-cookies
 Type
     ``bool``
 Default
-    ``false``
+    ``true``
 Description
     Forward gallery-dl's cookies to |ytdl|.
 

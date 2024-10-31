@@ -29,7 +29,7 @@ class YoutubeDLDownloader(DownloaderBase):
         }
 
         self.ytdl_instance = None
-        self.forward_cookies = self.config("forward-cookies", False)
+        self.forward_cookies = self.config("forward-cookies", True)
         self.progress = self.config("progress", 3.0)
         self.outtmpl = self.config("outtmpl")
 
@@ -53,6 +53,8 @@ class YoutubeDLDownloader(DownloaderBase):
                 if self.outtmpl == "default":
                     self.outtmpl = module.DEFAULT_OUTTMPL
             if self.forward_cookies:
+                self.log.debug("Forwarding cookies to %s",
+                               ytdl_instance.__module__)
                 set_cookie = ytdl_instance.cookiejar.set_cookie
                 for cookie in self.session.cookies:
                     set_cookie(cookie)
