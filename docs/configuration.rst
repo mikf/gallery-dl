@@ -1563,8 +1563,15 @@ Description
 
     | If this is a ``list``, it selects which format to try to download.
     | Possibly available formats are
-      ``"quad_hd"``, ``"ultra_hd"``, ``"full_hd"``,
-      ``"high"``, ``"medium"``, ``"low"``
+
+    * ``ultra_hd`` (2160p)
+    * ``quad_hd`` (1440p)
+    * ``full_hd`` (1080p)
+    * ``high`` (720p)
+    * ``medium`` (480p)
+    * ``low`` (360p)
+    * ``lowest`` (240p)
+    * ``tiny`` (144p)
 
 
 extractor.bunkr.tlds
