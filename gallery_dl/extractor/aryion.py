@@ -236,6 +236,37 @@ class AryionTagExtractor(AryionExtractor):
         url = self.root + "/g4/tags.php"
         return self._pagination_params(url, self.params)
 
+class AryionSearchExtractor(AryionExtractor):
+    """Extractor for full searches on eka's portal"""
+    subcategory = "search"
+    directory_fmt = (
+        "{category}", 
+        "searches", 
+        "{'Query - ' if q else ''}{q}", 
+        "{'Tags - ' if tags or untagged else ''}{tags or ('untagged' if notags else '')}", 
+        "{'Type - ' if q else ''}{type_search}", 
+        "{'User - ' if q else ''}{user}", 
+        "{'Time - ' if q else ''}{from}-{to}"
+    )
+    archive_fmt = "t_{search}_{id}"
+    pattern = BASE_PATTERN + r"/search\.php\?([^/?#]+)"
+    example = "https://aryion.com/g4/search.php?q=TEXT&tags=TAGS&type_search=TYPE&user=USER&from_date=FROM&to_date=TO"
+
+    def _init(self):
+        self.params = text.parse_query(self.user)
+        self.user = None
+
+    def metadata(self):
+        working = {"q": "", "tags": "", "type_search": "", "notags": "", "user": "", "from": "", "to": ""}.update(self.params)
+        if working["tags"]:
+            working["tags"] = working["tags"].strip(", ")
+        if working["p"]:
+            del working["p"]
+        return working
+
+    def posts(self):
+        url = self.root + "/g4/search.php"
+        return self._pagination_params(url, self.params)
 
 class AryionPostExtractor(AryionExtractor):
     """Extractor for individual posts on eka's portal"""
