@@ -285,4 +285,28 @@ __tests__ = (
     "text"     : {"quote with media", ""},
 },
 
+{
+    "#url"     : "https://cbsky.app/profile/bsky.app/post/3kh5rarr3gn2n",
+    "#category": ("", "bluesky", "post"),
+    "#class"   : bluesky.BlueskyPostExtractor,
+},
+
+{
+    "#url"     : "https://bskye.app/profile/bsky.app/post/3kh5rarr3gn2n",
+    "#category": ("", "bluesky", "post"),
+    "#class"   : bluesky.BlueskyPostExtractor,
+},
+
+{
+    "#url"     : "https://bskyx.app/profile/bsky.app/post/3kh5rarr3gn2n",
+    "#category": ("", "bluesky", "post"),
+    "#class"   : bluesky.BlueskyPostExtractor,
+},
+
+{
+    "#url"     : "https://bsyy.app/profile/bsky.app/post/3kh5rarr3gn2n",
+    "#category": ("", "bluesky", "post"),
+    "#class"   : bluesky.BlueskyPostExtractor,
+},
+
 )

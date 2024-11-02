@@ -12,7 +12,7 @@ from .common import Extractor, Message
 from .. import text, util, exception
 from ..cache import cache, memcache
 
-BASE_PATTERN = r"(?:https?://)?bsky\.app"
+BASE_PATTERN = r"(?:https?://)?c?bs[ky]y[ex]?\.app"
 USER_PATTERN = BASE_PATTERN + r"/profile/([^/?#]+)"
 
 
