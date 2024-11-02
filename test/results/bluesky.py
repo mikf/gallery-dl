@@ -149,6 +149,7 @@ __tests__ = (
         "did"        : "did:plc:z72i7hdynmk6r22z27h6tvur",
         "displayName": "Bluesky",
         "handle"     : "bsky.app",
+        "instance"   : "bsky.app",
         "labels"     : [],
     },
     "cid"        : "bafyreihh7m6bfrwlcjfklwturmja7qfse5gte7lskpmgw76flivimbnoqm",
@@ -181,6 +182,7 @@ __tests__ = (
         "followersCount": int,
         "followsCount"  : int,
         "handle"        : "bsky.app",
+        "instance"      : "bsky.app",
         "indexedAt"     : "2024-08-30T21:49:26.737Z",
         "labels"        : [],
         "postsCount"    : int,
@@ -199,6 +201,7 @@ __tests__ = (
         "did"        : "did:plc:cslxjqkeexku6elp5xowxkq7",
         "displayName": "mikf",
         "handle"     : "mikf.bsky.social",
+        "instance"   : "bsky.social",
         "labels"     : [],
     },
     "cid"        : "bafyreihtck7clocti2qshaiounadof74pxqhz7gnvbstxujqzhlodigqru",
@@ -293,6 +296,50 @@ __tests__ = (
     ),
 
     "text"     : {"quote with media", ""},
+},
+
+{
+    "#url"     : "https://bsky.app/profile/nytimes.com/post/3l7xvcjgdxg2g",
+    "#comment" : "instance metadata",
+    "#class"   : bluesky.BlueskyPostExtractor,
+    "#options" : {"metadata": "user"},
+
+    "instance": "bsky.app",
+    "author": {
+        "createdAt"  : "2023-06-05T18:50:31.498Z",
+        "did"        : "did:plc:eclio37ymobqex2ncko63h4r",
+        "displayName": "The New York Times",
+        "handle"     : "nytimes.com",
+        "instance"   : "nytimes.com",
+    },
+    "user": {
+        "avatar"        : "https://cdn.bsky.app/img/avatar/plain/did:plc:eclio37ymobqex2ncko63h4r/bafkreidvvqj5jymmpaeklwkpq6gi532el447mjy2yultuukypzqm5ohfju@jpeg",
+        "banner"        : "https://cdn.bsky.app/img/banner/plain/did:plc:eclio37ymobqex2ncko63h4r/bafkreiaiorkgl6t2j5w3sf6nj37drvwuvriq3e3vqwf4yn3pchpwfbekta@jpeg",
+        "createdAt"     : "2023-06-05T18:50:31.498Z",
+        "description"   : "In-depth, independent reporting to better understand the world, now on Bluesky. News tips? Share them here: http://nyti.ms/2FVHq9v",
+        "did"           : "did:plc:eclio37ymobqex2ncko63h4r",
+        "displayName"   : "The New York Times",
+        "followersCount": int,
+        "followsCount"  : int,
+        "handle"        : "nytimes.com",
+        "instance"      : "nytimes.com",
+        "indexedAt"     : "2024-01-20T05:04:46.757Z",
+        "labels"        : [],
+        "postsCount"    : int,
+    },
+},
+
+{
+    "#url"     : "https://bsky.app/profile/stupidsaru.woke.cat/post/3l66wwwqw6u2w",
+    "#comment" : "instance metadata",
+    "#class"   : bluesky.BlueskyPostExtractor,
+
+    "author": {
+        "createdAt": "2023-08-31T23:28:42.305Z",
+        "did"      : "did:plc:b7s3pdcjk6qvxmu3n674hlgj",
+        "handle"   : "stupidsaru.woke.cat",
+        "instance" : "woke.cat",
+    },
 },
 
 )
