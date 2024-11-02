@@ -381,4 +381,16 @@ __tests__ = (
     "#class"   : bluesky.BlueskyPostExtractor,
 },
 
+{
+    "#url"     : "https://fxbsky.app/profile/bsky.app/post/3kh5rarr3gn2n",
+    "#category": ("", "bluesky", "post"),
+    "#class"   : bluesky.BlueskyPostExtractor,
+},
+
+{
+    "#url"     : "https://vxbsky.app/profile/bsky.app/post/3kh5rarr3gn2n",
+    "#category": ("", "bluesky", "post"),
+    "#class"   : bluesky.BlueskyPostExtractor,
+},
+
 )
