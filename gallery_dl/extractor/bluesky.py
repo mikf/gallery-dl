@@ -84,7 +84,14 @@ class BlueskyExtractor(Extractor):
     def _pid(self, post):
         return post["uri"].rpartition("/")[2]
 
+    @memcache(keyarg=1)
+    def _instance(self, handle):
+        return ".".join(handle.rsplit(".", 2)[-2:])
+
     def _prepare(self, post):
+        author = post["author"]
+        author["instance"] = self._instance(author["handle"])
+
         if self._metadata_facets:
             if "facets" in post:
                 post["hashtags"] = tags = []
@@ -102,7 +109,7 @@ class BlueskyExtractor(Extractor):
                 post["hashtags"] = post["mentions"] = post["uris"] = ()
 
         if self._metadata_user:
-            post["user"] = self._user or post["author"]
+            post["user"] = self._user or author
 
         post["instance"] = self.instance
         post["post_id"] = self._pid(post)
@@ -440,7 +447,8 @@ class BlueskyAPI():
         if user_did and not extr.config("reposts", False):
             extr._user_did = did
         if extr._metadata_user:
-            extr._user = self.get_profile(did)
+            extr._user = user = self.get_profile(did)
+            user["instance"] = extr._instance(user["handle"])
 
         return did
 
