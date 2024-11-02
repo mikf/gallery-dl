@@ -18,6 +18,16 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.bsky.app/profile/bsky.app",
+    "#class"   : bluesky.BlueskyUserExtractor,
+},
+
+{
+    "#url"     : "https://main.bsky.dev/profile/bsky.app",
+    "#class"   : bluesky.BlueskyUserExtractor,
+},
+
+{
     "#url"     : "https://bsky.app/profile/did:plc:z72i7hdynmk6r22z27h6tvur",
     "#category": ("", "bluesky", "user"),
     "#class"   : bluesky.BlueskyUserExtractor,
