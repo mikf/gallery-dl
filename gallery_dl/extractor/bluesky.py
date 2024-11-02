@@ -60,8 +60,10 @@ class BlueskyExtractor(Extractor):
 
                 yield Message.Directory, post
                 if files:
-                    base = ("https://bsky.social/xrpc/com.atproto.sync.getBlob"
-                            "?did={}&cid=".format(post["author"]["did"]))
+                    did = post["author"]["did"]
+                    base = (
+                        "{}/xrpc/com.atproto.sync.getBlob?did={}&cid=".format(
+                            self.api.get_service_endpoint(did), did))
                     for post["num"], file in enumerate(files, 1):
                         post.update(file)
                         yield Message.Url, base + file["filename"], post
@@ -427,6 +429,23 @@ class BlueskyAPI():
         endpoint = "com.atproto.identity.resolveHandle"
         params = {"handle": handle}
         return self._call(endpoint, params)["did"]
+
+    @memcache(keyarg=1)
+    def get_service_endpoint(self, did):
+        if did.startswith('did:web:'):
+            url = "https://{}/.well-known/did.json".format(
+                did.rpartition(":")[2])
+        else:
+            url = "https://plc.directory/" + did
+
+        try:
+            data = self.extractor.request(url).json()
+            for service in data["service"]:
+                if service["type"] == "AtprotoPersonalDataServer":
+                    return service["serviceEndpoint"]
+        except Exception:
+            pass
+        return "https://bsky.social"
 
     def search_posts(self, query, sort=None):
         endpoint = "app.bsky.feed.searchPosts"
