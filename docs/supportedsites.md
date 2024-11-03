@@ -230,7 +230,7 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
-    <td>Everia</td>
+    <td>EVERIA.CLUB</td>
     <td>https://everia.club</td>
     <td>Categories, Dates, Posts, Search Results, Tag Searches</td>
     <td></td>

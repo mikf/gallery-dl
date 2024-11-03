@@ -9,29 +9,43 @@ from gallery_dl.extractor import everia
 
 __tests__ = (
 {
-    "#url"      : "https://everia.club/2024/09/23/mikacho-조미카-joapictures-someday/",
-    "#category" : ("", "everia", "post"),
-    "#class"    : everia.EveriaPostExtractor,
-    "#archive"  : False,
-    "#count"    : 32,
+    "#url"  : "https://everia.club/2024/09/23/mikacho-조미카-joapictures-someday/",
+    "#class": everia.EveriaPostExtractor,
+    "#count": 32,
 
-    "title"     : "Mikacho 조미카, JOApictures ‘Someday’",
+    "title"        : "Mikacho 조미카, JOApictures ‘Someday’",
     "post_category": "Korea",
-    "tags"      : ["[JOApictures]", "Mikacho 조미카"]
+    "tags"         : ["[JOApictures]", "Mikacho 조미카"]
 },
+
 {
-    "#url"      : "https://everia.club/tag/yeon-woo-연우/",
-    "#category" : ("", "everia", "tag"),
-    "#class"    : everia.EveriaTagExtractor,
+    "#url"    : "https://everia.club/tag/miku-tanaka-%e7%94%b0%e4%b8%ad%e7%be%8e%e4%b9%85/",
+    "#class"  : everia.EveriaTagExtractor,
+    "#pattern": everia.EveriaPostExtractor.pattern,
+    "#count"  : "> 50",
 },
+
 {
-    "#url"      : "https://everia.club/category/japan/",
-    "#category" : ("", "everia", "category"),
-    "#class"    : everia.EveriaCategoryExtractor,
+    "#url"    : "https://everia.club/category/japan/",
+    "#class"  : everia.EveriaCategoryExtractor,
+    "#pattern": everia.EveriaPostExtractor.pattern,
+    "#range"  : "1-50",
+    "#count"  : 50,
 },
+
 {
-    "#url"      : "https://everia.club/?s=saika",
-    "#category" : ("", "everia", "search"),
-    "#class"    : everia.EveriaSearchExtractor,
-}
+    "#url"    : "https://everia.club/2023/10/05/",
+    "#class"  : everia.EveriaDateExtractor,
+    "#pattern": everia.EveriaPostExtractor.pattern,
+    "#count"  : 34,
+},
+
+{
+    "#url"    : "https://everia.club/?s=saika",
+    "#class"  : everia.EveriaSearchExtractor,
+    "#pattern": everia.EveriaPostExtractor.pattern,
+    "#range"  : "1-15",
+    "#count"  : 15,
+},
+
 )

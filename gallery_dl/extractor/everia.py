@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2023 Mike Fährmann
-#
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
@@ -15,92 +13,87 @@ import re
 BASE_PATTERN = r"(?:https?://)?everia\.club"
 
 
-class EveriaPostExtractor(Extractor):
+class EveriaExtractor(Extractor):
     category = "everia"
-    subcategory = "post"
     root = "https://everia.club"
-    pattern = BASE_PATTERN + r"/(\d{4}/\d{2}/\d{2}/[^/]+)/?"
-    example = "https://everia.club/0000/00/00/TITLE"
-    directory_fmt = ("{category}", "{title}")
-
-    def __init__(self, match):
-        super().__init__(match)
-        self.url = match.group(0)
 
     def items(self):
-        page = self.request(self.url).text
+        data = {"_extractor": EveriaPostExtractor}
+        for url in self.posts():
+            yield Message.Queue, url, data
+
+    def posts(self):
+        return self._pagination(self.groups[0])
+
+    def _pagination(self, path, params=None, pnum=1):
+        find_posts = re.compile(r'thumbnail">\s*<a href="([^"]+)').findall
+
+        while True:
+            if pnum == 1:
+                url = "{}{}/".format(self.root, path)
+            else:
+                url = "{}{}/page/{}/".format(self.root, path, pnum)
+            response = self.request(url, params=params, allow_redirects=False)
+
+            if response.status_code >= 300:
+                return
+
+            yield from find_posts(response.text)
+            pnum += 1
+
+
+class EveriaPostExtractor(EveriaExtractor):
+    subcategory = "post"
+    directory_fmt = ("{category}", "{title}")
+    archive_fmt = "{post_url}_{num}"
+    pattern = BASE_PATTERN + r"(/\d{4}/\d{2}/\d{2}/[^/?#]+)"
+    example = "https://everia.club/0000/00/00/TITLE"
+
+    def items(self):
+        url = self.root + self.groups[0]
+        page = self.request(url).text
         content = text.extr(page, 'itemprop="text">', "</div>")
-        urls = re.findall(r'img.*?src=\"(.+?)\"', content)
+        urls = re.findall(r'img.*?src="([^"]+)', content)
 
         data = {
             "title": text.unescape(
-                text.extr(page, 'itemprop="headline">', "</h1>")
-            ),
-            "url": self.url,
+                text.extr(page, 'itemprop="headline">', "</h1>")),
             "tags": list(text.extract_iter(page, 'rel="tag">', "</a>")),
+            "post_url": url,
             "post_category": text.extr(
-                page, "post-in-category-", " "
-            ).capitalize(),
+                page, "post-in-category-", " ").capitalize(),
             "count": len(urls),
         }
 
         yield Message.Directory, data
         for data["num"], url in enumerate(urls, 1):
-            text.nameext_from_url(text.unquote(url), data)
-            yield Message.Url, url, data
+            yield Message.Url, url, text.nameext_from_url(url, data)
 
 
-class EveriaTagExtractor(EveriaPostExtractor):
+class EveriaTagExtractor(EveriaExtractor):
     subcategory = "tag"
-    pattern = BASE_PATTERN + r"/(tag/[^/]+)/?"
+    pattern = BASE_PATTERN + r"(/tag/[^/?#]+)"
     example = "https://everia.club/tag/TAG"
 
-    def __init__(self, match):
-        super().__init__(match)
-        self.id = match.group(1)
 
-    def _posts(self, page):
-        posts = re.findall(r'thumbnail\">\s*<a href=\"(.+?)\"', page)
-        for post in posts:
-            yield Message.Queue, post, {"_extractor": EveriaPostExtractor}
-
-    def items(self):
-        url = "{}/{}/".format(self.root, self.id)
-        page = self.request(url).text
-        yield from self._posts(page)
-        pages = list(text.extract_iter(page, "/page/", "/"))
-        if pages:
-            for i in range(2, int(pages[-2]) + 1):
-                url = "{}/{}/page/{}/".format(self.root, self.id, i + 1)
-                page = self.request(url).text
-                yield from self._posts(page)
-
-
-class EveriaSearchExtractor(EveriaTagExtractor):
-    subcategory = "search"
-    pattern = BASE_PATTERN + r"/(?:page/\d+/)?\?s=(.+)"
-    example = "https://everia.club/?s=SEARCH"
-
-    def items(self):
-        params = {"s": self.id}
-        page = self.request(self.root, params=params).text
-        yield from self._posts(page)
-        pages = list(text.extract_iter(page, "/page/", "/"))
-        if pages:
-            for i in range(2, int(pages[-2]) + 1):
-                url = "{}/page/{}/".format(self.root, i)
-                page = self.request(url, params=params).text
-                yield from self._posts(page)
-
-
-class EveriaCategoryExtractor(EveriaTagExtractor):
+class EveriaCategoryExtractor(EveriaExtractor):
     subcategory = "category"
-    pattern = BASE_PATTERN + r"/(category/[^/]+)/?"
+    pattern = BASE_PATTERN + r"(/category/[^/?#]+)"
     example = "https://everia.club/category/CATEGORY"
 
 
-class EveriaDateExtractor(EveriaTagExtractor):
+class EveriaDateExtractor(EveriaExtractor):
     subcategory = "date"
-    pattern = BASE_PATTERN + \
-        r"/(\d{4}(?:/\d{2})?(?:/\d{2})?)(?:/page/\d+)?/?$"
+    pattern = (BASE_PATTERN +
+               r"(/\d{4}(?:/\d{2})?(?:/\d{2})?)(?:/page/\d+)?/?$")
     example = "https://everia.club/0000/00/00"
+
+
+class EveriaSearchExtractor(EveriaExtractor):
+    subcategory = "search"
+    pattern = BASE_PATTERN + r"/(?:page/\d+/)?\?s=([^&#]+)"
+    example = "https://everia.club/?s=SEARCH"
+
+    def posts(self):
+        params = {"s": self.groups[0]}
+        return self._pagination("", params)
