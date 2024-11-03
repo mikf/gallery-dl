@@ -794,6 +794,12 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
+    <td>Rule 34 XYZ</td>
+    <td>https://rule34.xyz/</td>
+    <td>Playlists, Posts, Tag Searches</td>
+    <td></td>
+</tr>
+<tr>
     <td>Saint</td>
     <td>https://saint2.su/</td>
     <td>Albums, Media Files</td>
