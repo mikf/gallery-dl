@@ -654,6 +654,8 @@ class Extractor():
                     headers=(self._write_pages in ("all", "ALL")),
                     hide_auth=(self._write_pages != "ALL")
                 )
+            self.log.info("Writing '%s' response to '%s'",
+                          response.url, path + ".txt")
         except Exception as e:
             self.log.warning("Failed to dump HTTP request (%s: %s)",
                              e.__class__.__name__, e)
