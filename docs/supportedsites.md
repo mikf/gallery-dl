@@ -230,6 +230,12 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
+    <td>EVERIA.CLUB</td>
+    <td>https://everia.club</td>
+    <td>Categories, Dates, Posts, Search Results, Tag Searches</td>
+    <td></td>
+</tr>
+<tr>
     <td>ExHentai</td>
     <td>https://exhentai.org/</td>
     <td>Favorites, Galleries, Search Results</td>
