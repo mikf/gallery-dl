@@ -120,6 +120,7 @@ CATEGORY_MAP = {
     "rule34hentai"   : "Rule34Hentai",
     "rule34us"       : "Rule 34",
     "rule34vault"    : "R34 Vault",
+    "rule34xyz"      : "Rule 34 XYZ",
     "sankaku"        : "Sankaku Channel",
     "sankakucomplex" : "Sankaku Complex",
     "seiga"          : "Niconico Seiga",
