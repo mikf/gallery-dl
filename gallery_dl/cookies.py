@@ -126,20 +126,29 @@ def load_cookies_chromium(browser_name, profile=None,
 
     with DatabaseConnection(path) as db:
         db.text_factory = bytes
+        cursor = db.cursor()
 
         try:
-            rows = db.execute(
+            meta_version = int(cursor.execute(
+                "SELECT value FROM meta WHERE key = 'version'").fetchone()[0])
+        except Exception as exc:
+            _log_warning("Failed to get cookie database meta version (%s: %s)",
+                         exc.__class__.__name__, exc)
+            meta_version = 0
+
+        try:
+            rows = cursor.execute(
                 "SELECT host_key, name, value, encrypted_value, path, "
                 "expires_utc, is_secure FROM cookies" + condition, parameters)
         except sqlite3.OperationalError:
-            rows = db.execute(
+            rows = cursor.execute(
                 "SELECT host_key, name, value, encrypted_value, path, "
                 "expires_utc, secure FROM cookies" + condition, parameters)
 
         failed_cookies = 0
         unencrypted_cookies = 0
         decryptor = _chromium_cookie_decryptor(
-            config["directory"], config["keyring"], keyring)
+            config["directory"], config["keyring"], keyring, meta_version)
 
         cookies = []
         for domain, name, value, enc_value, path, expires, secure in rows:
@@ -432,13 +441,16 @@ def _chromium_browser_settings(browser_name):
 
 
 def _chromium_cookie_decryptor(
-        browser_root, browser_keyring_name, keyring=None):
+        browser_root, browser_keyring_name, keyring=None, meta_version=0):
     if sys.platform in ("win32", "cygwin"):
-        return WindowsChromiumCookieDecryptor(browser_root)
+        return WindowsChromiumCookieDecryptor(
+            browser_root, meta_version)
     elif sys.platform == "darwin":
-        return MacChromiumCookieDecryptor(browser_keyring_name)
+        return MacChromiumCookieDecryptor(
+            browser_keyring_name, meta_version)
     else:
-        return LinuxChromiumCookieDecryptor(browser_keyring_name, keyring)
+        return LinuxChromiumCookieDecryptor(
+            browser_keyring_name, keyring, meta_version)
 
 
 class ChromiumCookieDecryptor:
@@ -480,11 +492,12 @@ class ChromiumCookieDecryptor:
 
 
 class LinuxChromiumCookieDecryptor(ChromiumCookieDecryptor):
-    def __init__(self, browser_keyring_name, keyring=None):
+    def __init__(self, browser_keyring_name, keyring=None, meta_version=0):
         self._v10_key = self.derive_key(b"peanuts")
         password = _get_linux_keyring_password(browser_keyring_name, keyring)
         self._v11_key = None if password is None else self.derive_key(password)
         self._cookie_counts = {"v10": 0, "v11": 0, "other": 0}
+        self._offset = (32 if meta_version >= 24 else 0)
 
     @staticmethod
     def derive_key(password):
@@ -504,14 +517,14 @@ class LinuxChromiumCookieDecryptor(ChromiumCookieDecryptor):
 
         if version == b"v10":
             self._cookie_counts["v10"] += 1
-            return _decrypt_aes_cbc(ciphertext, self._v10_key)
+            return _decrypt_aes_cbc(ciphertext, self._v10_key, self._offset)
 
         elif version == b"v11":
             self._cookie_counts["v11"] += 1
             if self._v11_key is None:
                 _log_warning("Unable to decrypt v11 cookies: no key found")
                 return None
-            return _decrypt_aes_cbc(ciphertext, self._v11_key)
+            return _decrypt_aes_cbc(ciphertext, self._v11_key, self._offset)
 
         else:
             self._cookie_counts["other"] += 1
@@ -519,10 +532,11 @@ class LinuxChromiumCookieDecryptor(ChromiumCookieDecryptor):
 
 
 class MacChromiumCookieDecryptor(ChromiumCookieDecryptor):
-    def __init__(self, browser_keyring_name):
+    def __init__(self, browser_keyring_name, meta_version=0):
         password = _get_mac_keyring_password(browser_keyring_name)
         self._v10_key = None if password is None else self.derive_key(password)
         self._cookie_counts = {"v10": 0, "other": 0}
+        self._offset = (32 if meta_version >= 24 else 0)
 
     @staticmethod
     def derive_key(password):
@@ -546,7 +560,7 @@ class MacChromiumCookieDecryptor(ChromiumCookieDecryptor):
                 _log_warning("Unable to decrypt v10 cookies: no key found")
                 return None
 
-            return _decrypt_aes_cbc(ciphertext, self._v10_key)
+            return _decrypt_aes_cbc(ciphertext, self._v10_key, self._offset)
 
         else:
             self._cookie_counts["other"] += 1
@@ -558,9 +572,10 @@ class MacChromiumCookieDecryptor(ChromiumCookieDecryptor):
 
 
 class WindowsChromiumCookieDecryptor(ChromiumCookieDecryptor):
-    def __init__(self, browser_root):
+    def __init__(self, browser_root, meta_version=0):
         self._v10_key = _get_windows_v10_key(browser_root)
         self._cookie_counts = {"v10": 0, "other": 0}
+        self._offset = (32 if meta_version >= 24 else 0)
 
     @property
     def cookie_counts(self):
@@ -591,7 +606,8 @@ class WindowsChromiumCookieDecryptor(ChromiumCookieDecryptor):
             authentication_tag = raw_ciphertext[-authentication_tag_length:]
 
             return _decrypt_aes_gcm(
-                ciphertext, self._v10_key, nonce, authentication_tag)
+                ciphertext, self._v10_key, nonce, authentication_tag,
+                self._offset)
 
         else:
             self._cookie_counts["other"] += 1
@@ -975,10 +991,14 @@ def pbkdf2_sha1(password, salt, iterations, key_length):
     return pbkdf2_hmac("sha1", password, salt, iterations, key_length)
 
 
-def _decrypt_aes_cbc(ciphertext, key, initialization_vector=b" " * 16):
+def _decrypt_aes_cbc(ciphertext, key, offset=0,
+                     initialization_vector=b" " * 16):
     try:
-        return aes.unpad_pkcs7(aes.aes_cbc_decrypt_bytes(
-            ciphertext, key, initialization_vector)).decode()
+        plaintext = aes.unpad_pkcs7(aes.aes_cbc_decrypt_bytes(
+            ciphertext, key, initialization_vector))
+        if offset:
+            plaintext = plaintext[offset:]
+        return plaintext.decode()
     except UnicodeDecodeError:
         _log_warning("Failed to decrypt cookie (AES-CBC Unicode)")
     except ValueError:
@@ -986,10 +1006,13 @@ def _decrypt_aes_cbc(ciphertext, key, initialization_vector=b" " * 16):
     return None
 
 
-def _decrypt_aes_gcm(ciphertext, key, nonce, authentication_tag):
+def _decrypt_aes_gcm(ciphertext, key, nonce, authentication_tag, offset=0):
     try:
-        return aes.aes_gcm_decrypt_and_verify_bytes(
-            ciphertext, key, authentication_tag, nonce).decode()
+        plaintext = aes.aes_gcm_decrypt_and_verify_bytes(
+            ciphertext, key, authentication_tag, nonce)
+        if offset:
+            plaintext = plaintext[offset:]
+        return plaintext.decode()
     except UnicodeDecodeError:
         _log_warning("Failed to decrypt cookie (AES-GCM Unicode)")
     except ValueError:
