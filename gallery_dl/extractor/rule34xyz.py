@@ -31,11 +31,15 @@ class Rule34xyzExtractor(BooruExtractor):
 
     def _file_url(self, post):
         post["files"] = files = {
-            link["type"]: link["url"]
+            str(link["type"]): link["url"]
             for link in post.pop("imageLinks")
         }
         post["file_url"] = url = (
-            files.get(10) or files.get(40) or files.get(41) or files[2])
+            files.get("10") or  # mov
+            files.get("40") or  # mov720
+            files.get("41") or  # mov480
+            files["2"]          # pic
+        )
         return url
 
     def _prepare(self, post):
