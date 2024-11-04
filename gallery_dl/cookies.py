@@ -493,8 +493,9 @@ class ChromiumCookieDecryptor:
 
 class LinuxChromiumCookieDecryptor(ChromiumCookieDecryptor):
     def __init__(self, browser_keyring_name, keyring=None, meta_version=0):
-        self._v10_key = self.derive_key(b"peanuts")
         password = _get_linux_keyring_password(browser_keyring_name, keyring)
+        self._empty_key = self.derive_key(b"")
+        self._v10_key = self.derive_key(b"peanuts")
         self._v11_key = None if password is None else self.derive_key(password)
         self._cookie_counts = {"v10": 0, "v11": 0, "other": 0}
         self._offset = (32 if meta_version >= 24 else 0)
@@ -517,18 +518,24 @@ class LinuxChromiumCookieDecryptor(ChromiumCookieDecryptor):
 
         if version == b"v10":
             self._cookie_counts["v10"] += 1
-            return _decrypt_aes_cbc(ciphertext, self._v10_key, self._offset)
+            value = _decrypt_aes_cbc(ciphertext, self._v10_key, self._offset)
 
         elif version == b"v11":
             self._cookie_counts["v11"] += 1
             if self._v11_key is None:
                 _log_warning("Unable to decrypt v11 cookies: no key found")
                 return None
-            return _decrypt_aes_cbc(ciphertext, self._v11_key, self._offset)
+            value = _decrypt_aes_cbc(ciphertext, self._v11_key, self._offset)
 
         else:
             self._cookie_counts["other"] += 1
             return None
+
+        if value is None:
+            value = _decrypt_aes_cbc(ciphertext, self._empty_key, self._offset)
+            if value is None:
+                _log_warning("Failed to decrypt cookie (AES-CBC)")
+        return value
 
 
 class MacChromiumCookieDecryptor(ChromiumCookieDecryptor):
@@ -559,7 +566,6 @@ class MacChromiumCookieDecryptor(ChromiumCookieDecryptor):
             if self._v10_key is None:
                 _log_warning("Unable to decrypt v10 cookies: no key found")
                 return None
-
             return _decrypt_aes_cbc(ciphertext, self._v10_key, self._offset)
 
         else:
@@ -993,17 +999,14 @@ def pbkdf2_sha1(password, salt, iterations, key_length):
 
 def _decrypt_aes_cbc(ciphertext, key, offset=0,
                      initialization_vector=b" " * 16):
+    plaintext = aes.unpad_pkcs7(aes.aes_cbc_decrypt_bytes(
+        ciphertext, key, initialization_vector))
+    if offset:
+        plaintext = plaintext[offset:]
     try:
-        plaintext = aes.unpad_pkcs7(aes.aes_cbc_decrypt_bytes(
-            ciphertext, key, initialization_vector))
-        if offset:
-            plaintext = plaintext[offset:]
         return plaintext.decode()
     except UnicodeDecodeError:
-        _log_warning("Failed to decrypt cookie (AES-CBC Unicode)")
-    except ValueError:
-        _log_warning("Failed to decrypt cookie (AES-CBC)")
-    return None
+        return None
 
 
 def _decrypt_aes_gcm(ciphertext, key, nonce, authentication_tag, offset=0):
