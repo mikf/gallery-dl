@@ -122,6 +122,11 @@ class PinterestExtractor(Extractor):
                     media = self._extract_video(video)
                     media["media_id"] = video.get("id") or ""
 
+                elif type == "story_pin_music_block":
+                    media = block["audio"]
+                    media["url"] = media["audio_url"]
+                    media["media_id"] = media.get("id") or ""
+
                 elif type == "story_pin_paragraph_block":
                     media = {"url": "text:" + block["text"],
                              "extension": "txt",
