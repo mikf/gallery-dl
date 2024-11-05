@@ -29,17 +29,31 @@ class Rule34xyzExtractor(BooruExtractor):
         3: "artist",
     }
 
+    def _init(self):
+        formats = self.config("format")
+        if formats:
+            if isinstance(formats, str):
+                formats = formats.split(",")
+            self.formats = formats
+        else:
+            self.formats = ("10", "40", "41", "2")
+
     def _file_url(self, post):
         post["files"] = files = {
             str(link["type"]): link["url"]
             for link in post.pop("imageLinks")
         }
-        post["file_url"] = url = (
-            files.get("10") or  # mov
-            files.get("40") or  # mov720
-            files.get("41") or  # mov480
-            files["2"]          # pic
-        )
+
+        for fmt in self.formats:
+            if fmt in files:
+                break
+        else:
+            fmt = "2"
+            self.log.warning("%s: Requested format not available", post["id"])
+
+        post["file_url"] = url = files[fmt]
+        post["format_id"] = fmt
+        post["format"] = url.rsplit(".", 2)[1]
         return url
 
     def _prepare(self, post):

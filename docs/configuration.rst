@@ -3859,6 +3859,21 @@ Description
     restrict it to only one possible format.
 
 
+extractor.rule34xyz.format
+---------------------------
+Type
+    * ``string``
+    * ``list`` of ``strings``
+Default
+    ``["10", "40", "41", "2"]``
+Example
+    ``"33,34,4"``
+Description
+    Selects the file format to extract.
+
+    When more than one format is given, the first available one is selected.
+
+
 extractor.sankaku.id-format
 ---------------------------
 Type
