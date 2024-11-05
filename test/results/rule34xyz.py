@@ -44,6 +44,8 @@ __tests__ = (
     "extension" : "jpg",
     "file_url"  : "https://rule34xyz.b-cdn.net/posts/3613/3613851/3613851.pic.jpg",
     "filename"  : "3613851.pic",
+    "format"    : "pic",
+    "format_id" : "2",
     "id"        : 3613851,
     "likes"     : range(3, 100),
     "posted"    : "2023-03-29T06:01:07.900161",
@@ -121,6 +123,20 @@ __tests__ = (
     "#class"  : rule34xyz.Rule34xyzPostExtractor,
     "#urls"        : "https://rule34xyz.b-cdn.net/posts/3571/3571567/3571567.mov720.mp4",
     "#sha1_content": "c0a5e7e887774f91527f00e6142c435a3c482c1f",
+
+    "format"    : "mov720",
+    "format_id" : "40",
+},
+
+{
+    "#url"    : "https://rule34.xyz/post/3571567",
+    "#comment": "'format' option",
+    "#class"  : rule34xyz.Rule34xyzPostExtractor,
+    "#options": {"format": "10,33"},
+    "#urls"   : "https://rule34xyz.b-cdn.net/posts/3571/3571567/3571567.pic256avif.avif",
+
+    "format"    : "pic256avif",
+    "format_id" : "33",
 },
 
 )
