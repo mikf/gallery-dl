@@ -9,17 +9,17 @@ from gallery_dl.extractor import hiperdex
 
 __tests__ = (
 {
-    "#url"     : "https://hiperdex.com/manga/domestic-na-kanojo/154-5/",
+    "#url"     : "https://hipertoon.com/manga/domestic-na-kanojo/154-5/",
     "#category": ("", "hiperdex", "chapter"),
     "#class"   : hiperdex.HiperdexChapterExtractor,
-    "#pattern" : r"https://(1st)?hiperdex\d?.(com|net|info|top)/wp-content/uploads/WP-manga/data/manga_\w+/[0-9a-f]{32}/\d+\.webp",
+    "#pattern" : r"https://(1st)?hiper(dex|toon)\d?.(com|net|info|top)/wp-content/uploads/WP-manga/data/manga_\w+/[0-9a-f]{32}/\d+\.webp",
     "#count"   : 9,
 
     "artist"       : "Sasuga Kei",
     "author"       : "Sasuga Kei",
     "chapter"      : 154,
     "chapter_minor": ".5",
-    "description"  : r"re:Natsuo Fujii is in love with his teacher, ",
+    "description"  : "Natsuo Fujii is in love with his teacher, Hina. Attempting to forget his feelings towards her, Natsuo goes to a mixer with his classmates where he meets an odd girl named Rui Tachibana. In a strange turn of events, Rui asks Natsuo to sneak out with her and do her a favor. To his surprise, their destination is Rui’s house—and her request is for him to have sex with her. There’s no love behind the act; she just wants to learn from the experience. Thinking that it might help him forget about Hina, Natsuo hesitantly agrees. After this unusual encounter Natsuo now faces a new problem. With his father remarrying, he ends up with a new pair of stepsisters; unfortunately, he knows these two girls all too well. He soon finds out his new siblings are none other than Hina and Rui! Now living with both the teacher he loves and the girl with whom he had his “first time,” Natsuo finds himself in an unexpected love triangle as he climbs ever closer towards adulthood.",
     "genre"        : list,
     "manga"        : "Domestic na Kanojo",
     "release"      : 2014,
