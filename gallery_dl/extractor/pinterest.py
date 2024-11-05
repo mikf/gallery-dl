@@ -117,12 +117,12 @@ class PinterestExtractor(Extractor):
                     else:
                         media = self._extract_image(page, block)
 
-                elif type == "story_pin_video_block":
+                elif type == "story_pin_video_block" or "video" in block:
                     video = block["video"]
                     media = self._extract_video(video)
                     media["media_id"] = video.get("id") or ""
 
-                elif type == "story_pin_music_block":
+                elif type == "story_pin_music_block" or "audio" in block:
                     media = block["audio"]
                     media["url"] = media["audio_url"]
                     media["media_id"] = media.get("id") or ""
@@ -135,7 +135,10 @@ class PinterestExtractor(Extractor):
                 else:
                     self.log.warning("%s: Unsupported story block '%s'",
                                      pin.get("id"), type)
-                    continue
+                    try:
+                        media = self._extract_image(page, block)
+                    except Exception:
+                        continue
 
                 media["story_id"] = story_id
                 media["page_id"] = page_id
