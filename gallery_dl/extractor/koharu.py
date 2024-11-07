@@ -12,14 +12,14 @@ from .common import GalleryExtractor, Extractor, Message
 from .. import text, exception
 from ..cache import cache
 
-BASE_PATTERN = r"(?i)(?:https?://)?(?:koharu|anchira)\.to"
+BASE_PATTERN = r"(?i)(?:https?://)?((?:anchira|seia)\.to|(?:niyaniya|shupogaki)\.moe|hoshino\.one)"
 
 
 class KoharuExtractor(Extractor):
     """Base class for koharu extractors"""
     category = "koharu"
-    root = "https://koharu.to"
-    root_api = "https://api.koharu.to"
+    root = "https://niyaniya.moe"
+    root_api = "https://api.schale.network"
     request_interval = (0.5, 1.5)
 
     def _init(self):
@@ -62,7 +62,7 @@ class KoharuGalleryExtractor(KoharuExtractor, GalleryExtractor):
     archive_fmt = "{id}_{num}"
     request_interval = 0.0
     pattern = BASE_PATTERN + r"/(?:g|reader)/(\d+)/(\w+)"
-    example = "https://koharu.to/g/12345/67890abcde/"
+    example = "https://niyaniya.moe/g/12345/67890abcde/"
 
     TAG_TYPES = {
         0 : "general",
@@ -100,7 +100,7 @@ class KoharuGalleryExtractor(KoharuExtractor, GalleryExtractor):
 
     def metadata(self, _):
         url = "{}/books/detail/{}/{}".format(
-            self.root_api, self.groups[0], self.groups[1])
+            self.root_api, self.groups[1], self.groups[2])
         self.data = data = self.request(url, headers=self.headers).json()
 
         tags = []
@@ -192,7 +192,7 @@ class KoharuSearchExtractor(KoharuExtractor):
     """Extractor for koharu search results"""
     subcategory = "search"
     pattern = BASE_PATTERN + r"/\?([^#]*)"
-    example = "https://koharu.to/?s=QUERY"
+    example = "https://niyaniya.moe/?s=QUERY"
 
     def items(self):
         params = text.parse_query(self.groups[0])
@@ -204,7 +204,7 @@ class KoharuFavoriteExtractor(KoharuExtractor):
     """Extractor for koharu favorites"""
     subcategory = "favorite"
     pattern = BASE_PATTERN + r"/favorites(?:\?([^#]*))?"
-    example = "https://koharu.to/favorites"
+    example = "https://niyaniya.moe/favorites"
 
     def items(self):
         self.login()
@@ -226,7 +226,7 @@ class KoharuFavoriteExtractor(KoharuExtractor):
     def _login_impl(self, username, password):
         self.log.info("Logging in as %s", username)
 
-        url = "https://auth.koharu.to/login"
+        url = "https://auth.schale.network/login"
         data = {"uname": username, "passwd": password}
         response = self.request(
             url, method="POST", headers=self.headers, data=data)
