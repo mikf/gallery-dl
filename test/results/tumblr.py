@@ -361,7 +361,13 @@ __tests__ = (
 },
 
 {
-    "#url"     : "https://www.tumblr.com/search/nathan fielder?src=typed_query",
+    "#url"     : "https://www.tumblr.com/search/nathan fielder",
+    "#category": ("", "tumblr", "search"),
+    "#class"   : tumblr.TumblrSearchExtractor,
+},
+
+{
+    "#url"     : "https://www.tumblr.com/search/nathan fielder/recent/quote?src=typed_query",
     "#category": ("", "tumblr", "search"),
     "#class"   : tumblr.TumblrSearchExtractor,
 },

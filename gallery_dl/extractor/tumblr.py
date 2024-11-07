@@ -11,7 +11,6 @@
 from .common import Extractor, Message
 from .. import text, util, oauth, exception
 from datetime import datetime, date, timedelta
-from urllib.parse import urlparse
 import re
 
 
@@ -42,8 +41,6 @@ class TumblrExtractor(Extractor):
             self.blog = name + ".tumblr.com"
         else:
             self.blog = match.group(1) or match.group(3)
-
-        self.is_timeline = False
 
     def _init(self):
         self.api = TumblrAPI(self)
@@ -87,24 +84,20 @@ class TumblrExtractor(Extractor):
             if post["type"] not in self.types:
                 continue
 
-            if not blog:
-                if self.is_timeline:
-                    blog = post.get("blog")
-                    self.blog = blog.get("name") + ".tumblr.com"
-
-                    for image in blog.get("avatar", []):
-                        if int(image.get("width")) == 512:
-                            avatar_url = image.get("url")
-                            break
-
-                else:
+            if "blog" in post:
+                blog = post["blog"]
+                self.blog = blog["name"] + ".tumblr.com"
+            else:
+                if not blog:
                     blog = self.api.info(self.blog)
                     blog["uuid"] = self.blog
 
-                if self.avatar:
-                    url = avatar_url or self.api.avatar(self.blog)
-                    yield Message.Directory, {"blog": blog}
-                    yield self._prepare_avatar(url, post.copy(), blog)
+                    if self.avatar:
+                        url = self.api.avatar(self.blog)
+                        yield Message.Directory, {"blog": blog}
+                        yield self._prepare_avatar(url, post.copy(), blog)
+
+                post["blog"] = blog
 
             reblog = "reblogged_from_id" in post
             if reblog and self._skip_reblog(post):
@@ -113,7 +106,6 @@ class TumblrExtractor(Extractor):
 
             if "trail" in post:
                 del post["trail"]
-            post["blog"] = blog
             post["date"] = text.parse_timestamp(post["timestamp"])
             posts = []
 
@@ -366,32 +358,14 @@ class TumblrLikesExtractor(TumblrExtractor):
 class TumblrSearchExtractor(TumblrExtractor):
     """Extractor for a Tumblr search"""
     subcategory = "search"
-    pattern = BASE_PATTERN + r'/search/(.*?)(\?.*)?$'
+    pattern = (BASE_PATTERN + r"/search/([^/?#]+)"
+               r"(?:/([^/?#]+)(?:/([^/?#]+))?)?(?:/?\?([^#]+))?")
     example = "https://www.tumblr.com/search/QUERY"
 
-    def __init__(self, match):
-        TumblrExtractor.__init__(self, match)
-
-        self.is_timeline = True
-        self.query = text.unquote(match.group(4))
-
-        parsed_url = urlparse(self.url)
-        self.params = text.parse_query(parsed_url.query)
-
-    def search(self, query, params):
-        """Retrieve search results"""
-
-        params["limit"] = 50
-        params["days"] = self.params.get("t") or 0
-        params["query"] = query
-        params["mode"] = "top"
-        params["reblog_info"] = "true" if self.reblogs else "false"
-
-        endpoint = "/v2/timeline/search"
-        return self.api._pagination(endpoint, params, cache=True)
-
     def posts(self):
-        return self.search(self.query, {})
+        _, _, _, search, mode, post_type, query = self.groups
+        params = text.parse_query(query)
+        return self.api.search(text.unquote(search), params, mode, post_type)
 
 
 class TumblrAPI(oauth.OAuth1API):
@@ -440,7 +414,7 @@ class TumblrAPI(oauth.OAuth1API):
             self.log.warning("'offset' and 'date-max' cannot be used together")
 
         endpoint = "/v2/blog/{}/posts".format(blog)
-        return self._pagination(endpoint, params, cache=True)
+        return self._pagination(endpoint, params, blog=blog, cache=True)
 
     def likes(self, blog):
         """Retrieve liked posts"""
@@ -455,6 +429,20 @@ class TumblrAPI(oauth.OAuth1API):
                 return
             yield from posts
             params["before"] = posts[-1]["liked_timestamp"]
+
+    def search(self, query, params, mode="top", post_type=None):
+        """Retrieve search results"""
+        endpoint = "/v2/timeline/search"
+
+        params["limit"] = "50"
+        params["days"] = params.pop("t", None)
+        params["query"] = query
+        params["mode"] = mode
+        params["reblog_info"] = "true" if self.extractor.reblogs else "false"
+        if post_type:
+            params["post_type_filter"] = post_type
+
+        return self._pagination(endpoint, params)
 
     def _call(self, endpoint, params, **kwargs):
         url = self.ROOT + endpoint
@@ -524,29 +512,27 @@ class TumblrAPI(oauth.OAuth1API):
 
             raise exception.StopExtraction(data)
 
-    def _pagination(self, endpoint, params, key="posts", cache=False):
-        if endpoint[-1] != "?":
-            endpoint += "?"
-
+    def _pagination(self, endpoint, params,
+                    blog=None, key="posts", cache=False):
         if self.api_key:
             params["api_key"] = self.api_key
 
         strategy = self.extractor.config("pagination")
+        if not strategy and "offset" not in params:
+            strategy = "api"
 
         while True:
             data = self._call(endpoint, params)
 
-            if "/timeline/" in endpoint:
-                key = "elements"
-                posts = data.get("timeline", {}).get(key, [])
-            else:
-                posts = data[key]
+            if "timeline" in data:
+                data = data["timeline"]
+                posts = data["elements"]
 
-            if cache:
-                for post in posts:
-                    p_blog = post.get("blog", {})
-                    self.BLOG_CACHE[p_blog.get("name", "")] = p_blog
-                cache = False
+            else:
+                if cache:
+                    self.BLOG_CACHE[blog] = data["blog"]
+                    cache = False
+                posts = data[key]
 
             yield from posts
 
