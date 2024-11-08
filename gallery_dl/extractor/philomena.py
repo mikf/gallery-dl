@@ -46,7 +46,7 @@ BASE_PATTERN = PhilomenaExtractor.update({
     "ponybooru": {
         "root": "https://ponybooru.org",
         "pattern": r"(?:www\.)?ponybooru\.org",
-        "filter_id": "2",
+        "filter_id": "3",
     },
     "furbooru": {
         "root": "https://furbooru.org",
