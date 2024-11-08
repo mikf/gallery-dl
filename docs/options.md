@@ -71,6 +71,8 @@
     --http-timeout SECONDS      Timeout for HTTP connections (default: 30.0)
     --proxy URL                 Use the specified proxy
     --source-address IP         Client-side IP address to bind to
+    -4, --force-ipv4            Make all connections via IPv4
+    -6, --force-ipv6            Make all connections via IPv6
     --no-check-certificate      Disable HTTPS certificate validation
 
 ## Downloader Options:
