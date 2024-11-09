@@ -20,7 +20,6 @@ class FlickrExtractor(Extractor):
     filename_fmt = "{category}_{id}.{extension}"
     directory_fmt = ("{category}", "{user[username]}")
     archive_fmt = "{id}"
-    cookies_domain = None
     request_interval = (1.0, 2.0)
     request_interval_min = 0.5
 

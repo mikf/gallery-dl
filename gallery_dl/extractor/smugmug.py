@@ -21,7 +21,6 @@ class SmugmugExtractor(Extractor):
     category = "smugmug"
     filename_fmt = ("{category}_{User[NickName]:?/_/}"
                     "{Image[UploadKey]}_{Image[ImageKey]}.{extension}")
-    cookies_domain = None
     empty_user = {
         "Uri": "",
         "ResponseLevel": "Public",

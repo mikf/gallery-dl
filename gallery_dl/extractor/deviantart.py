@@ -31,7 +31,7 @@ class DeviantartExtractor(Extractor):
     root = "https://www.deviantart.com"
     directory_fmt = ("{category}", "{username}")
     filename_fmt = "{category}_{index}_{title}.{extension}"
-    cookies_domain = None
+    cookies_domain = ".deviantart.com"
     cookies_names = ("auth", "auth_secure", "userinfo")
     _last_request = 0
 
@@ -399,7 +399,7 @@ class DeviantartExtractor(Extractor):
 
     def _textcontent_to_html(self, deviation, content):
         html = content["html"]
-        markup = html["markup"]
+        markup = html.get("markup")
 
         if not markup or markup[0] != "{":
             return markup
@@ -1144,7 +1144,6 @@ class DeviantartScrapsExtractor(DeviantartExtractor):
     subcategory = "scraps"
     directory_fmt = ("{category}", "{username}", "Scraps")
     archive_fmt = "s_{_username}_{index}.{extension}"
-    cookies_domain = ".deviantart.com"
     pattern = BASE_PATTERN + r"/gallery/(?:\?catpath=)?scraps\b"
     example = "https://www.deviantart.com/USER/gallery/scraps"
 
@@ -1161,7 +1160,6 @@ class DeviantartSearchExtractor(DeviantartExtractor):
     subcategory = "search"
     directory_fmt = ("{category}", "Search", "{search_tags}")
     archive_fmt = "Q_{search_tags}_{index}.{extension}"
-    cookies_domain = ".deviantart.com"
     pattern = (r"(?:https?://)?www\.deviantart\.com"
                r"/search(?:/deviations)?/?\?([^#]+)")
     example = "https://www.deviantart.com/search?q=QUERY"
@@ -1213,7 +1211,6 @@ class DeviantartGallerySearchExtractor(DeviantartExtractor):
     """Extractor for deviantart gallery searches"""
     subcategory = "gallery-search"
     archive_fmt = "g_{_username}_{index}.{extension}"
-    cookies_domain = ".deviantart.com"
     pattern = BASE_PATTERN + r"/gallery/?\?(q=[^#]+)"
     example = "https://www.deviantart.com/USER/gallery?q=QUERY"
 
