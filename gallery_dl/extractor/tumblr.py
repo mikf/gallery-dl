@@ -31,7 +31,6 @@ class TumblrExtractor(Extractor):
     directory_fmt = ("{category}", "{blog_name}")
     filename_fmt = "{category}_{blog_name}_{id}_{num:>02}.{extension}"
     archive_fmt = "{id}_{num}"
-    cookies_domain = None
 
     def __init__(self, match):
         Extractor.__init__(self, match)

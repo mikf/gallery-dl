@@ -26,7 +26,7 @@ class PixivExtractor(Extractor):
     directory_fmt = ("{category}", "{user[id]} {user[account]}")
     filename_fmt = "{id}_p{num}.{extension}"
     archive_fmt = "{id}{suffix}.{extension}"
-    cookies_domain = None
+    cookies_domain = ".pixiv.net"
     sanity_url = "https://s.pximg.net/common/images/limit_sanity_level_360.png"
     mypixiv_url = "https://s.pximg.net/common/images/limit_mypixiv_360.png"
 
@@ -739,7 +739,6 @@ class PixivPixivisionExtractor(PixivExtractor):
     directory_fmt = ("{category}", "pixivision",
                      "{pixivision_id} {pixivision_title}")
     archive_fmt = "V{pixivision_id}_{id}{suffix}.{extension}"
-    cookies_domain = ".pixiv.net"
     pattern = r"(?:https?://)?(?:www\.)?pixivision\.net/(?:en/)?a/(\d+)"
     example = "https://www.pixivision.net/en/a/12345"
 
