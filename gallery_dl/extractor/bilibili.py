@@ -9,7 +9,7 @@
 """Extractors for https://www.bilibili.com/"""
 
 from .common import Extractor, Message
-from .. import text, exception
+from .. import text, util, exception
 
 
 class BilibiliExtractor(Extractor):
@@ -50,16 +50,21 @@ class BilibiliArticleExtractor(BilibiliExtractor):
 
     def items(self):
         article = self.api.article(self.item)
-        article["username"] = article["modules"]["module_author"]["name"]
-        article["id"] = article["id_str"]
 
-        dynamic_major = article["modules"]["module_dynamic"]["major"]
-        if dynamic_major["type"] == "MAJOR_TYPE_OPUS":
-            urls = [pic["url"] for pic in dynamic_major["opus"]["pics"]]
-        else:
-            urls = []
-            self.log.warning("%s: Unsupported article type '%s'",
-                             article["id"], dynamic_major["type"])
+        # Flatten modules list
+        modules = {}
+        for module in article["detail"]["modules"]:
+            del module['module_type']
+            modules.update(module)
+        article["detail"]["modules"] = modules
+
+        article["username"] = modules["module_author"]["name"]
+
+        urls = []
+        for paragraph in modules['module_content']['paragraphs']:
+            pics = paragraph.get('pic', {}).get('pics', [])
+            for pic in pics:
+                urls.append(pic['url'])
 
         yield Message.Directory, article
         for article["num"], url in enumerate(urls, 1):
@@ -94,9 +99,7 @@ class BilibiliAPI():
                 break
 
     def article(self, article_id):
-        endpoint = "/detail"
-        params = {
-            "id": article_id,
-            "features": "itemOpusStyle",
-        }
-        return self._call(endpoint, params)["data"]["item"]
+        url = "https://www.bilibili.com/opus/{}".format(article_id)
+        response = self.extractor.request(url)
+        return util.json_loads(text.extr(
+            response.text, "window.__INITIAL_STATE__=", ";"))
