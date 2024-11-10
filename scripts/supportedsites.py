@@ -195,6 +195,9 @@ SUBCATEGORY_MAP = {
         "artwork": "Artwork Listings",
         "collections": "",
     },
+    "bilibili": {
+        "user-articles": "User Articles",
+    },
     "bluesky": {
         "posts": "",
     },
