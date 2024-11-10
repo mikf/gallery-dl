@@ -41,7 +41,7 @@ class PoipikuExtractor(Extractor):
 
             post = {
                 "post_category": extr("<title>[", "]"),
-                "count"      : extr("(", " "),
+                "count"      : text.parse_int(extr("(", " ")),
                 "post_id"    : parts[-1].partition(".")[0],
                 "user_id"    : parts[-2],
                 "user_name"  : text.unescape(extr(
