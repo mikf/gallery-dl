@@ -22,13 +22,14 @@ else:
     BASE_PATTERN = (
         r"(?:bunkr:(?:https?://)?([^/?#]+)|"
         r"(?:https?://)?(?:app\.)?(bunkr+"
-        r"\.(?:s[kiu]|[cf]i|p[hks]|ru|la|is|to|a[cx]"
+        r"\.(?:s[kiu]|c[ir]|fi|p[hks]|ru|la|is|to|a[cx]"
         r"|black|cat|media|red|site|ws|org)))"
     )
 
 DOMAINS = [
     "bunkr.ac",
     "bunkr.ci",
+    "bunkr.cr",
     "bunkr.fi",
     "bunkr.ph",
     "bunkr.pk",
