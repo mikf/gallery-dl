@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2024 Mike Fährmann
-#
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
@@ -17,29 +15,25 @@ class BilibiliExtractor(Extractor):
     category = "bilibili"
     root = "https://www.bilibili.com"
 
-    def __init__(self, match):
-        Extractor.__init__(self, match)
-        self.item = match.group(match.lastindex)
-
     def _init(self):
         self.api = BilibiliAPI(self)
 
 
 class BilibiliUserArticlesExtractor(BilibiliExtractor):
-    """Extractor for all articles of an user"""
-    subcategory = "user"
+    """Extractor for a bilibili user's articles"""
+    subcategory = "user-articles"
     pattern = r"(?:https?://)?space\.bilibili\.com/(\d+)/article"
     example = "https://space.bilibili.com/12345/article"
 
     def items(self):
-        for article in self.api.user_articles(self.item):
+        for article in self.api.user_articles(self.groups[0]):
             article["_extractor"] = BilibiliArticleExtractor
             url = "{}/opus/{}".format(self.root, article["opus_id"])
             yield Message.Queue, url, article
 
 
 class BilibiliArticleExtractor(BilibiliExtractor):
-    """Extractor for images from an article"""
+    """Extractor for a bilibili article"""
     subcategory = "article"
     pattern = (r"(?:https?://)?"
                r"(?:t\.bilibili\.com|(?:www\.)?bilibili.com/opus)/(\d+)")
@@ -49,7 +43,7 @@ class BilibiliArticleExtractor(BilibiliExtractor):
     archive_fmt = "{id}_{num}"
 
     def items(self):
-        article = self.api.article(self.item)
+        article = self.api.article(self.groups[0])
 
         # Flatten modules list
         modules = {}
@@ -60,29 +54,37 @@ class BilibiliArticleExtractor(BilibiliExtractor):
 
         article["username"] = modules["module_author"]["name"]
 
-        urls = []
+        pics = []
         for paragraph in modules['module_content']['paragraphs']:
-            pics = paragraph.get('pic', {}).get('pics', [])
-            for pic in pics:
-                urls.append(pic['url'])
+            if "pic" not in paragraph:
+                continue
 
+            try:
+                pics.extend(paragraph["pic"]["pics"])
+            except Exception:
+                pass
+
+        article["count"] = len(pics)
         yield Message.Directory, article
-        for article["num"], url in enumerate(urls, 1):
+        for article["num"], pic in enumerate(pics, 1):
+            url = pic["url"]
+            article.update(pic)
             yield Message.Url, url, text.nameext_from_url(url, article)
 
 
 class BilibiliAPI():
-    def __init__(self, extractor: BilibiliExtractor):
+    def __init__(self, extractor):
         self.extractor = extractor
 
     def _call(self, endpoint, params):
         url = "https://api.bilibili.com/x/polymer/web-dynamic/v1" + endpoint
-        response = self.extractor.request(url, params=params).json()
+        data = self.extractor.request(url, params=params).json()
 
-        if response["code"] != 0:
+        if data["code"] != 0:
+            self.extractor.log.debug("Server response: %s", data)
             raise exception.StopExtraction("API request failed")
 
-        return response
+        return data
 
     def user_articles(self, user_id):
         endpoint = "/opus/feed/space"
@@ -99,7 +101,7 @@ class BilibiliAPI():
                 break
 
     def article(self, article_id):
-        url = "https://www.bilibili.com/opus/{}".format(article_id)
+        url = "https://www.bilibili.com/opus/" + article_id
         response = self.extractor.request(url)
         return util.json_loads(text.extr(
-            response.text, "window.__INITIAL_STATE__=", ";"))
+            response.text, "window.__INITIAL_STATE__=", "};") + "}")
