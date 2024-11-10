@@ -134,6 +134,12 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
+    <td>Bilibili</td>
+    <td>https://www.bilibili.com/</td>
+    <td>Articles, User Articles</td>
+    <td></td>
+</tr>
+<tr>
     <td>Bluesky</td>
     <td>https://bsky.app/</td>
     <td>Avatars, Backgrounds, Feeds, Followed Users, Hashtags, Likes, Lists, Media Files, Posts, Replies, Search Results, User Profiles</td>
