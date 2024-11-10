@@ -13,8 +13,8 @@ from .. import text, exception
 class UrlgalleriesGalleryExtractor(GalleryExtractor):
     """Base class for Urlgalleries extractors"""
     category = "urlgalleries"
-    root = "urlgalleries.net"
-    request_interval = (0.5, 1.0)
+    root = "https://urlgalleries.net"
+    request_interval = (0.5, 1.5)
     pattern = r"(?:https?://)(?:(\w+)\.)?urlgalleries\.net/(?:[\w-]+-)?(\d+)"
     example = "https://BLOG.urlgalleries.net/gallery-12345/TITLE"
 
