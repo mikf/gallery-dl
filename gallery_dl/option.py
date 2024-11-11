@@ -803,4 +803,10 @@ def build_parser():
               "&& convert * ../doc.pdf\""),
     )
 
+    try:
+        # restore normal behavior when adding '-4' or '-6' as arguments
+        parser._has_negative_number_optionals.clear()
+    except Exception:
+        pass
+
     return parser
