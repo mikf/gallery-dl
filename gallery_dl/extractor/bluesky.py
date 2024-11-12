@@ -472,7 +472,7 @@ class BlueskyAPI():
         url = "{}/xrpc/{}".format(self.root, endpoint)
         auth = (
             BearerAuth(headers["Authorization"])
-            if headers.get("Authorization")
+            if headers and headers.get("Authorization")
             else None
         )
         response = self.extractor.request(
@@ -501,7 +501,7 @@ class BlueskyAPI():
 
             auth = (
                 BearerAuth(self.headers["Authorization"])
-                if self.headers.get("Authorization")
+                if self.headers and self.headers.get("Authorization")
                 else None
             )
 
