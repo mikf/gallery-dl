@@ -17,6 +17,7 @@ from ssl import SSLError
 
 from requests.auth import AuthBase
 
+
 class BearerAuth(AuthBase):
     """Attaches HTTP Pizza Authentication to the given Request object."""
 
@@ -28,6 +29,7 @@ class BearerAuth(AuthBase):
         # modify and return the request
         r.headers["Authorization"] = self.auth_header
         return r
+
 
 class HttpDownloader(DownloaderBase):
     scheme = "http"
@@ -146,7 +148,11 @@ class HttpDownloader(DownloaderBase):
             if file_size:
                 headers["Range"] = "bytes={}-".format(file_size)
 
-            auth = (BearerAuth(headers["Authorization"]) if headers.get("Authorization") else None)
+            auth = (
+                BearerAuth(headers["Authorization"])
+                if headers.get("Authorization")
+                else None
+            )
             # connect to (remote) source
             try:
                 response = self.session.request(

@@ -11,11 +11,11 @@
 from .common import Extractor, Message
 from .. import text, util, exception
 from ..cache import cache, memcache
+from ..downloader.http import BearerAuth
 
 BASE_PATTERN = r"(?:https?://)?bsky\.app"
 USER_PATTERN = BASE_PATTERN + r"/profile/([^/?#]+)"
 
-from ..downloader.http import BearerAuth
 
 class BlueskyExtractor(Extractor):
     """Base class for bluesky extractors"""
@@ -60,6 +60,7 @@ class BlueskyExtractor(Extractor):
                 files = self._extract_files(post)
 
                 yield Message.Directory, post
+
                 if files:
                     base = ("https://bsky.social/xrpc/com.atproto.sync.getBlob"
                             "?did={}&cid=".format(post["author"]["did"]))
@@ -469,9 +470,19 @@ class BlueskyAPI():
             }
 
         url = "{}/xrpc/{}".format(self.root, endpoint)
-        auth = (BearerAuth(headers["Authorization"]) if headers.get("Authorization") else None)
+        auth = (
+            BearerAuth(headers["Authorization"])
+            if headers.get("Authorization")
+            else None
+        )
         response = self.extractor.request(
-            url, method="POST", headers=headers, json=data, auth=auth, fatal=None)
+            url,
+            method="POST",
+            headers=headers,
+            json=data,
+            auth=auth,
+            fatal=None
+        )
         data = response.json()
 
         if response.status_code != 200:
@@ -487,10 +498,20 @@ class BlueskyAPI():
 
         while True:
             self.authenticate()
-            auth = (BearerAuth(self.headers["Authorization"]) if self.headers.get("Authorization") else None)
+
+            auth = (
+                BearerAuth(self.headers["Authorization"])
+                if self.headers.get("Authorization")
+                else None
+            )
 
             response = self.extractor.request(
-                url, params=params, headers=self.headers, auth=auth, fatal=None)
+                url,
+                params=params,
+                headers=self.headers,
+                auth=auth,
+                fatal=None
+            )
 
             if response.status_code < 400:
                 return response.json()
