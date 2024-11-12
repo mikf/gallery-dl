@@ -15,6 +15,7 @@ from ..cache import cache, memcache
 BASE_PATTERN = r"(?:https?://)?bsky\.app"
 USER_PATTERN = BASE_PATTERN + r"/profile/([^/?#]+)"
 
+from ..downloader.http import BearerAuth
 
 class BlueskyExtractor(Extractor):
     """Base class for bluesky extractors"""
@@ -108,6 +109,8 @@ class BlueskyExtractor(Extractor):
         post["post_id"] = self._pid(post)
         post["date"] = text.parse_datetime(
             post["createdAt"][:19], "%Y-%m-%dT%H:%M:%S")
+
+        post["_http_headers"] = self.api.headers
 
     def _extract_files(self, post):
         if "embed" not in post:
@@ -466,8 +469,9 @@ class BlueskyAPI():
             }
 
         url = "{}/xrpc/{}".format(self.root, endpoint)
+        auth = (BearerAuth(headers["Authorization"]) if headers.get("Authorization") else None)
         response = self.extractor.request(
-            url, method="POST", headers=headers, json=data, fatal=None)
+            url, method="POST", headers=headers, json=data, auth=auth, fatal=None)
         data = response.json()
 
         if response.status_code != 200:
@@ -483,8 +487,10 @@ class BlueskyAPI():
 
         while True:
             self.authenticate()
+            auth = (BearerAuth(self.headers["Authorization"]) if self.headers.get("Authorization") else None)
+
             response = self.extractor.request(
-                url, params=params, headers=self.headers, fatal=None)
+                url, params=params, headers=self.headers, auth=auth, fatal=None)
 
             if response.status_code < 400:
                 return response.json()

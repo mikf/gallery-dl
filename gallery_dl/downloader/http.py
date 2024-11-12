@@ -15,6 +15,19 @@ from .common import DownloaderBase
 from .. import text, util
 from ssl import SSLError
 
+from requests.auth import AuthBase
+
+class BearerAuth(AuthBase):
+    """Attaches HTTP Pizza Authentication to the given Request object."""
+
+    def __init__(self, auth_header):
+        # setup any auth-related data here
+        self.auth_header = auth_header
+
+    def __call__(self, r):
+        # modify and return the request
+        r.headers["Authorization"] = self.auth_header
+        return r
 
 class HttpDownloader(DownloaderBase):
     scheme = "http"
@@ -133,12 +146,14 @@ class HttpDownloader(DownloaderBase):
             if file_size:
                 headers["Range"] = "bytes={}-".format(file_size)
 
+            auth = (BearerAuth(headers["Authorization"]) if headers.get("Authorization") else None)
             # connect to (remote) source
             try:
                 response = self.session.request(
                     kwdict.get("_http_method", "GET"), url,
                     stream=True,
                     headers=headers,
+                    auth=auth,
                     data=kwdict.get("_http_data"),
                     timeout=self.timeout,
                     proxies=self.proxies,

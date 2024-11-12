@@ -134,7 +134,7 @@ class Extractor():
 
     def request(self, url, method="GET", session=None,
                 retries=None, retry_codes=None, encoding=None,
-                fatal=True, notfound=None, **kwargs):
+                fatal=True, notfound=None, auth=None, **kwargs):
         if session is None:
             session = self.session
         if retries is None:
@@ -170,7 +170,7 @@ class Extractor():
 
         while True:
             try:
-                response = session.request(method, url, **kwargs)
+                response = session.request(method, url, auth=auth, **kwargs)
             except (requests.exceptions.ConnectionError,
                     requests.exceptions.Timeout,
                     requests.exceptions.ChunkedEncodingError,
