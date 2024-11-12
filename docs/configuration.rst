@@ -6855,13 +6855,22 @@ Description
 filters-environment
 -------------------
 Type
-    ``bool``
+    * ``bool``
+    * ``string``
 Default
     ``true``
 Description
-    Evaluate filter expressions raising an exception as ``false``
-    instead of aborting the current extractor run
-    by wrapping them in a `try`/`except` block.
+    Evaluate filter expressions in a special environment
+    preventing them from raising fatal exceptions.
+
+    ``true`` or ``"tryexcept"``:
+        Wrap expressions in a `try`/`except` block;
+        Evaluate expressions raising an exception as ``false``
+    ``false`` or ``"raw"``:
+        Do not wrap expressions in a special environment
+    ``"defaultdict"``:
+        Prevent exceptions when accessing undefined variables
+        by using a `defaultdict <https://docs.python.org/3/library/collections.html#collections.defaultdict>`__
 
 
 format-separator

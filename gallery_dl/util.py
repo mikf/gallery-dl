@@ -21,6 +21,7 @@ import datetime
 import functools
 import itertools
 import subprocess
+import collections
 import urllib.parse
 from http.cookiejar import Cookie
 from email.utils import mktime_tz, parsedate_tz
@@ -702,6 +703,20 @@ def compile_expression_raw(expr, name="<expr>", globals=None):
     return functools.partial(eval, code_object, globals or GLOBALS)
 
 
+def compile_expression_defaultdict(expr, name="<expr>", globals=None):
+    global GLOBALS_DEFAULT
+    GLOBALS_DEFAULT = collections.defaultdict(lambda: NONE, GLOBALS)
+
+    global compile_expression_defaultdict
+    compile_expression_defaultdict = compile_expression_defaultdict_impl
+    return compile_expression_defaultdict_impl(expr, name, globals)
+
+
+def compile_expression_defaultdict_impl(expr, name="<expr>", globals=None):
+    code_object = compile(expr, name, "eval")
+    return functools.partial(eval, code_object, globals or GLOBALS_DEFAULT)
+
+
 def compile_expression_tryexcept(expr, name="<expr>", globals=None):
     code_object = compile(expr, name, "eval")
 
@@ -711,7 +726,7 @@ def compile_expression_tryexcept(expr, name="<expr>", globals=None):
         except exception.GalleryDLException:
             raise
         except Exception:
-            return False
+            return NONE
 
     return _eval
 
