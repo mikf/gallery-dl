@@ -107,8 +107,15 @@ def main():
 
         # filter environment
         filterenv = config.get((), "filters-environment", True)
-        if not filterenv:
+        if filterenv is True:
+            pass
+        elif not filterenv:
             util.compile_expression = util.compile_expression_raw
+        elif isinstance(filterenv, str):
+            if filterenv == "raw":
+                util.compile_expression = util.compile_expression_raw
+            elif filterenv.startswith("default"):
+                util.compile_expression = util.compile_expression_defaultdict
 
         # format string separator
         separator = config.get((), "format-separator")
