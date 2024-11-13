@@ -57,10 +57,12 @@ class FlickrExtractor(Extractor):
         """Return an iterable with all relevant photo objects"""
 
     def _file_url(self, photo):
-        if "video" in photo:
-            return photo["url"]
+        url = photo["url"]
 
-        path, _, ext = photo["url"].rpartition(".")
+        if "/video/" in url:
+            return url
+
+        path, _, ext = url.rpartition(".")
         return path + "_d." + ext
 
 
