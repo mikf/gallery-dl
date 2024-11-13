@@ -328,7 +328,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Hentai Foundry</td>
     <td>https://www.hentai-foundry.com/</td>
-    <td>Favorites, individual Images, Pictures, Popular Images, Recent Images, Scraps, Stories, User Profiles</td>
+    <td>Favorites, individual Images, Pictures, Popular Images, Recent Images, Scraps, Stories, Tag Searches, User Profiles</td>
     <td></td>
 </tr>
 <tr>
