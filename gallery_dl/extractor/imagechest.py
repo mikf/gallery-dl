@@ -73,10 +73,12 @@ class ImagechestGalleryExtractor(GalleryExtractor):
         return metadata
 
     def images(self, page):
+        page_data = self._retrieve_page_data(page)
+
         try:
             return [
                 (file["link"], None)
-                for file in self._retrieve_page_data(page)["props"]["post"]["files"]
+                for file in page_data["props"]["post"]["files"]
             ]
         except Exception:
             return []
