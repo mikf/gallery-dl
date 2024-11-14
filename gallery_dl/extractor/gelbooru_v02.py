@@ -22,14 +22,14 @@ class GelbooruV02Extractor(booru.BooruExtractor):
     def _init(self):
         self.api_key = self.config("api-key")
         self.user_id = self.config("user-id")
-        self.api_root = self.config_instance("api_root") or self.root
+        self.root_api = self.config_instance("root-api") or self.root
 
         if self.category == "realbooru":
             self.items = self._items_realbooru
             self._tags = self._tags_realbooru
 
     def _api_request(self, params):
-        url = self.api_root + "/index.php?page=dapi&s=post&q=index"
+        url = self.root_api + "/index.php?page=dapi&s=post&q=index"
         return ElementTree.fromstring(self.request(url, params=params).text)
 
     def _pagination(self, params):
@@ -191,8 +191,8 @@ BASE_PATTERN = GelbooruV02Extractor.update({
     },
     "rule34": {
         "root": "https://rule34.xxx",
+        "root-api": "https://api.rule34.xxx",
         "pattern": r"(?:www\.)?rule34\.xxx",
-        "api_root": "https://api.rule34.xxx",
     },
     "safebooru": {
         "root": "https://safebooru.org",
