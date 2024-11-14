@@ -11,6 +11,7 @@
 
 from .common import GalleryExtractor, Extractor, Message
 from .. import text, exception
+import json
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?imgchest\.com"
 
@@ -36,32 +37,60 @@ class ImagechestGalleryExtractor(GalleryExtractor):
             self.images = self._images_api
 
     def metadata(self, page):
-        if "Sorry, but the page you requested could not be found." in page:
+        if "Not Found" in page:
             raise exception.NotFoundError("gallery")
 
-        return {
-            "gallery_id": self.gallery_id,
-            "title": text.unescape(text.extr(
-                page, 'property="og:title" content="', '"').strip())
+        page_data = self._retrieve_page_data(page)
+
+        metadata = {
+            "gallery_id": self.gallery_id
         }
 
-    def images(self, page):
-        if ' load-all">' in page:
-            url = "{}/p/{}/loadAll".format(self.root, self.gallery_id)
-            headers = {
-                "X-Requested-With": "XMLHttpRequest",
-                "Origin"          : self.root,
-                "Referer"         : self.gallery_url,
-            }
-            csrf_token = text.extr(page, 'name="csrf-token" content="', '"')
-            data = {"_token": csrf_token}
-            page += self.request(
-                url, method="POST", headers=headers, data=data).text
+        for attribute in [
+            "id",
+            "slug",
+            "status",
+            "title",
+            "nsfw",
+            "score",
+            "comments",
+            "upvotes",
+            "downvotes",
+            "favorites",
+            "views",
+            "created"
+        ]:
+            try:
+                metadata[attribute] = page_data["props"]["post"][attribute]
+            except Exception:
+                pass
 
-        return [
-            (url, None)
-            for url in text.extract_iter(page, 'data-url="', '"')
-        ]
+        try:
+            metadata["tags"] = ",".join(page_data["props"]["post"]["tags"])
+        except Exception:
+            pass
+
+        return metadata
+
+    def images(self, page):
+        try:
+            return [
+                (file["link"], None)
+                for file in self._retrieve_page_data(page)["props"]["post"]["files"]
+            ]
+        except Exception:
+            return []
+
+    def _retrieve_page_data(self, page):
+        return json.loads(
+            text.unescape(
+                text.extr(
+                    page,
+                    begin='data-page="',
+                    end='"',
+                    default='{}')
+            )
+        )
 
     def _metadata_api(self, page):
         post = self.api.post(self.gallery_id)
