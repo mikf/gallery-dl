@@ -305,6 +305,7 @@ class TwitterExtractor(Extractor):
                     legacy["created_at"], "%a %b %d %H:%M:%S %z %Y")
             except Exception:
                 date = util.NONE
+        source = tweet.get("source")
 
         tdata = {
             "tweet_id"      : tweet_id,
@@ -320,7 +321,7 @@ class TwitterExtractor(Extractor):
             "author"        : author,
             "user"          : self._user or author,
             "lang"          : legacy["lang"],
-            "source"        : text.extr(tweet["source"], ">", "<"),
+            "source"        : text.extr(source, ">", "<") if source else "",
             "sensitive"     : tget("possibly_sensitive"),
             "favorite_count": tget("favorite_count"),
             "quote_count"   : tget("quote_count"),
