@@ -349,6 +349,15 @@ class TestCompileExpression(unittest.TestCase):
         with self.assertRaises(AttributeError):
             expr({"a": 2})
 
+    def test_compile_filter(self):
+        expr = util.compile_filter("a + b * c")
+        self.assertEqual(expr({"a": 1, "b": 2, "c": 3}), 7)
+        self.assertEqual(expr({"a": 9, "b": 9, "c": 9}), 90)
+
+        expr = util.compile_filter(["a % 2 == 0", "b % 3 == 0", "c % 5 == 0"])
+        self.assertTrue(expr({"a": 4, "b": 6, "c": 10}))
+        self.assertFalse(expr({"a": 1, "b": 2, "c": 3}))
+
     def test_custom_globals(self):
         value = {"v": "foobar"}
         result = "8843d7f92416211de9ebb963ff4ce28125932878"
