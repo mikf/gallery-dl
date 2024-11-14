@@ -14,6 +14,7 @@ class BilibiliExtractor(Extractor):
     """Base class for bilibili extractors"""
     category = "bilibili"
     root = "https://www.bilibili.com"
+    request_interval = (3.0, 6.0)
 
     def _init(self):
         self.api = BilibiliAPI(self)
@@ -102,6 +103,14 @@ class BilibiliAPI():
 
     def article(self, article_id):
         url = "https://www.bilibili.com/opus/" + article_id
-        response = self.extractor.request(url)
-        return util.json_loads(text.extr(
-            response.text, "window.__INITIAL_STATE__=", "};") + "}")
+
+        while True:
+            page = self.extractor.request(url).text
+            try:
+                return util.json_loads(text.extr(
+                    page, "window.__INITIAL_STATE__=", "};") + "}")
+            except Exception:
+                if "window._riskdata_" not in page:
+                    raise exception.StopExtraction(
+                        "%s: Unable to extract INITIAL_STATE data", article_id)
+            self.extractor.wait(seconds=300)
