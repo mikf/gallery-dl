@@ -394,7 +394,11 @@ Default
     * ``"2.0-4.0"``
         ``behance``, ``imagefap``, ``[Nijie]``
     * ``"3.0-6.0"``
-        ``exhentai``, ``idolcomplex``, ``[reactor]``, ``readcomiconline``
+        ``bilibili``,
+        ``exhentai``,
+        ``idolcomplex``,
+        ``[reactor]``,
+        ``readcomiconline``
     * ``"6.0-6.1"``
         ``twibooru``
     * ``"6.0-12.0"``
