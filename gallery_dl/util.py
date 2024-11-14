@@ -734,6 +734,12 @@ def compile_expression_tryexcept(expr, name="<expr>", globals=None):
 compile_expression = compile_expression_tryexcept
 
 
+def compile_filter(expr, name="<filter>", globals=None):
+    if not isinstance(expr, str):
+        expr = "(" + ") and (".join(expr) + ")"
+    return compile_expression(expr, name, globals)
+
+
 def import_file(path):
     """Import a Python module from a filesystem path"""
     path, name = os.path.split(path)
@@ -964,10 +970,8 @@ class FilterPredicate():
     """Predicate; True if evaluating the given expression returns True"""
 
     def __init__(self, expr, target="image"):
-        if not isinstance(expr, str):
-            expr = "(" + ") and (".join(expr) + ")"
         name = "<{} filter>".format(target)
-        self.expr = compile_expression(expr, name)
+        self.expr = compile_filter(expr, name)
 
     def __call__(self, _, kwdict):
         try:

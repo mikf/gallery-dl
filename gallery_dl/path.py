@@ -38,7 +38,7 @@ class PathFormat():
                 filename_fmt = extractor.filename_fmt
             elif isinstance(filename_fmt, dict):
                 self.filename_conditions = [
-                    (util.compile_expression(expr),
+                    (util.compile_filter(expr),
                      formatter.parse(fmt, kwdefault).format_map)
                     for expr, fmt in filename_fmt.items() if expr
                 ]
@@ -57,7 +57,7 @@ class PathFormat():
                 directory_fmt = extractor.directory_fmt
             elif isinstance(directory_fmt, dict):
                 self.directory_conditions = [
-                    (util.compile_expression(expr), [
+                    (util.compile_filter(expr), [
                         formatter.parse(fmt, kwdefault).format_map
                         for fmt in fmts
                     ])
