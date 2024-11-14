@@ -127,10 +127,14 @@ class WeiboExtractor(Extractor):
                 elif pic_type == "livephoto" and self.livephoto:
                     append(pic["largest"].copy())
 
-                    file = {"url": pic["video"]}
-                    file["filename"], _, file["extension"] = \
-                        pic["video"].rpartition("%2F")[2].rpartition(".")
-                    append(file)
+                    url = pic["video"]
+                    fname, _, ext = (
+                        url.rpartition("%2F")[2]
+                        if "%2F" in url else
+                        text.filename_from_url(url)
+                    ).rpartition(".")
+
+                    append({"url": url, "filename": fname, "extension": ext})
 
                 else:
                     append(pic["largest"].copy())
@@ -251,8 +255,10 @@ class WeiboUserExtractor(WeiboExtractor):
     pattern = USER_PATTERN + r"(?:$|#)"
     example = "https://weibo.com/USER"
 
-    def initialize(self):
-        pass
+    # do NOT override 'initialize()'
+    # it is needed for 'self._user_id()'
+    # def initialize(self):
+    #     pass
 
     def items(self):
         base = "{}/u/{}?tabtype=".format(self.root, self._user_id())
