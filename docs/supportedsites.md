@@ -512,12 +512,6 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
-    <td>Koharu</td>
-    <td>https://koharu.to/</td>
-    <td>Favorites, Galleries, Search Results</td>
-    <td></td>
-</tr>
-<tr>
     <td>Komikcast</td>
     <td>https://komikcast.cz/</td>
     <td>Chapters, Manga</td>
@@ -827,6 +821,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Sankaku Complex</td>
     <td>https://news.sankakucomplex.com/</td>
     <td>Articles, Tag Searches</td>
+    <td></td>
+</tr>
+<tr>
+    <td>SchaleNetwork</td>
+    <td>https://niyaniya.moe/</td>
+    <td>Favorites, Galleries, Search Results</td>
     <td></td>
 </tr>
 <tr>

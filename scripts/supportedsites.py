@@ -84,6 +84,7 @@ CATEGORY_MAP = {
     "jpgfish"        : "JPG Fish",
     "kabeuchi"       : "かべうち",
     "kemonoparty"    : "Kemono",
+    "koharu"         : "SchaleNetwork",
     "livedoor"       : "livedoor Blog",
     "ohpolly"        : "Oh Polly",
     "omgmiamiswimwear": "Omg Miami Swimwear",

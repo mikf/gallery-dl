@@ -6,13 +6,19 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extractors for https://koharu.to/"""
+"""Extractors for https://niyaniya.moe/"""
 
 from .common import GalleryExtractor, Extractor, Message
 from .. import text, exception
 from ..cache import cache
 
-BASE_PATTERN = r"(?i)(?:https?://)?((?:anchira|seia)\.to|(?:niyaniya|shupogaki)\.moe|hoshino\.one)"
+BASE_PATTERN = (
+    r"(?i)(?:https?://)?("
+    r"(?:niyaniya|shupogaki)\.moe|"
+    r"(?:koharu|anchira|seia)\.to|"
+    r"(?:hoshino)\.one"
+    r")"
+)
 
 
 class KoharuExtractor(Extractor):
@@ -179,11 +185,11 @@ class KoharuGalleryExtractor(KoharuExtractor, GalleryExtractor):
                     break
             except KeyError:
                 self.log.debug("%s: Format %s is not available",
-                               self.groups[0], fmtid)
+                               self.groups[1], fmtid)
         else:
             raise exception.NotFoundError("format")
 
-        self.log.debug("%s: Selected format %s", self.groups[0], fmtid)
+        self.log.debug("%s: Selected format %s", self.groups[1], fmtid)
         fmt["w"] = fmtid
         return fmt
 
@@ -195,7 +201,7 @@ class KoharuSearchExtractor(KoharuExtractor):
     example = "https://niyaniya.moe/?s=QUERY"
 
     def items(self):
-        params = text.parse_query(self.groups[0])
+        params = text.parse_query(self.groups[1])
         params["page"] = text.parse_int(params.get("page"), 1)
         return self._pagination("/books", params)
 
@@ -209,7 +215,7 @@ class KoharuFavoriteExtractor(KoharuExtractor):
     def items(self):
         self.login()
 
-        params = text.parse_query(self.groups[0])
+        params = text.parse_query(self.groups[1])
         params["page"] = text.parse_int(params.get("page"), 1)
         return self._pagination("/favorites", params)
 

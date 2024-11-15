@@ -66,9 +66,24 @@ __tests__ = (
 },
 
 {
-    "#url"     : "https://anchira.to/g/14216/6c67076fdd45",
-    "#category": ("", "koharu", "gallery"),
-    "#class"   : koharu.KoharuGalleryExtractor,
+    "#url"  : "https://koharu.to/g/14216/6c67076fdd45",
+    "#class": koharu.KoharuGalleryExtractor,
+},
+{
+    "#url"  : "https://anchira.to/g/14216/6c67076fdd45",
+    "#class": koharu.KoharuGalleryExtractor,
+},
+{
+    "#url"  : "https://seia.to/g/14216/6c67076fdd45",
+    "#class": koharu.KoharuGalleryExtractor,
+},
+{
+    "#url"  : "https://shupogaki.moe/g/14216/6c67076fdd45",
+    "#class": koharu.KoharuGalleryExtractor,
+},
+{
+    "#url"  : "https://hoshino.one/g/14216/6c67076fdd45",
+    "#class": koharu.KoharuGalleryExtractor,
 },
 
 {
