@@ -345,6 +345,9 @@ class Extractor():
         headers.clear()
         ssl_options = ssl_ciphers = 0
 
+        # .netrc Authorization headers are alwsays disabled
+        session.trust_env = True if self.config("proxy-env", False) else False
+
         browser = self.config("browser")
         if browser is None:
             browser = self.browser
