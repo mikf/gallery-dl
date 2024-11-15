@@ -11,6 +11,7 @@
 from .common import GalleryExtractor, Extractor, Message
 from .. import text, exception
 from ..cache import cache
+import collections
 
 BASE_PATTERN = (
     r"(?i)(?:https?://)?("
@@ -108,14 +109,24 @@ class KoharuGalleryExtractor(KoharuExtractor, GalleryExtractor):
         url = "{}/books/detail/{}/{}".format(
             self.root_api, self.groups[1], self.groups[2])
         self.data = data = self.request(url, headers=self.headers).json()
+        data["date"] = text.parse_timestamp(data["created_at"] // 1000)
 
         tags = []
-        for tag in data["tags"]:
+        types = self.TAG_TYPES
+        tags_data = data["tags"]
+
+        for tag in tags_data:
             name = tag["name"]
             namespace = tag.get("namespace", 0)
-            tags.append(self.TAG_TYPES[namespace] + ":" + name)
+            tags.append(types[namespace] + ":" + name)
         data["tags"] = tags
-        data["date"] = text.parse_timestamp(data["created_at"] // 1000)
+
+        if self.config("tags", False):
+            tags = collections.defaultdict(list)
+            for tag in tags_data    :
+                tags[tag.get("namespace", 0)].append(tag["name"])
+            for type, values in tags.items():
+                data["tags_" + types[type]] = values
 
         try:
             if self.cbz:

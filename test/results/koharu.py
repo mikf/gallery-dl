@@ -12,6 +12,7 @@ __tests__ = (
     "#url"     : "https://niyaniya.moe/g/14216/6c67076fdd45",
     "#category": ("", "koharu", "gallery"),
     "#class"   : koharu.KoharuGalleryExtractor,
+    "#options" : {"tags": True},
     "#pattern" : r"https://kisakisexo.xyz/download/59896/a4fbd1828229/f47639c6abaf1903dd69c36a3d961da84741a1831aa07a2906ce9c74156a5d75\?v=1721626410802&w=0",
     "#count"   : 1,
 
@@ -42,6 +43,36 @@ __tests__ = (
         "language:translated",
         "other:uncensored",
         "other:vanilla",
+    ],
+    "tags_artist": [
+        "ouchi kaeru",
+    ],
+    "tags_female": [
+        "busty",
+    ],
+    "tags_general": [
+        "beach",
+        "booty",
+        "dark skin",
+        "fingering",
+        "handjob",
+        "light hair",
+        "nakadashi",
+        "outdoors",
+        "ponytail",
+        "swimsuit",
+        "x-ray",
+    ],
+    "tags_language": [
+        "english",
+        "translated",
+    ],
+    "tags_magazine": [
+        "comic kairakuten 2024-08",
+    ],
+    "tags_other": [
+        "uncensored",
+        "vanilla",
     ],
     "title"     : "[Ouchi Kaeru] Summer Business (Comic Kairakuten 2024-08)",
     "updated_at": 1721626410802,
