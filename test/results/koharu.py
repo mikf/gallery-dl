@@ -9,7 +9,7 @@ from gallery_dl.extractor import koharu
 
 __tests__ = (
 {
-    "#url"     : "https://koharu.to/g/14216/6c67076fdd45",
+    "#url"     : "https://niyaniya.moe/g/14216/6c67076fdd45",
     "#category": ("", "koharu", "gallery"),
     "#class"   : koharu.KoharuGalleryExtractor,
     "#pattern" : r"https://kisakisexo.xyz/download/59896/a4fbd1828229/f47639c6abaf1903dd69c36a3d961da84741a1831aa07a2906ce9c74156a5d75\?v=1721626410802&w=0",
@@ -48,7 +48,7 @@ __tests__ = (
 },
 
 {
-    "#url"     : "https://koharu.to/g/14216/6c67076fdd45",
+    "#url"     : "https://niyaniya.moe/g/14216/6c67076fdd45",
     "#category": ("", "koharu", "gallery"),
     "#class"   : koharu.KoharuGalleryExtractor,
     "#options" : {"cbz": False, "format": "780"},
@@ -57,7 +57,7 @@ __tests__ = (
 },
 
 {
-    "#url"     : "https://koharu.to/g/14216/6c67076fdd45",
+    "#url"     : "https://niyaniya.moe/g/14216/6c67076fdd45",
     "#category": ("", "koharu", "gallery"),
     "#class"   : koharu.KoharuGalleryExtractor,
     "#options" : {"cbz": False, "format": "780"},
@@ -66,19 +66,34 @@ __tests__ = (
 },
 
 {
-    "#url"     : "https://anchira.to/g/14216/6c67076fdd45",
+    "#url"  : "https://koharu.to/g/14216/6c67076fdd45",
+    "#class": koharu.KoharuGalleryExtractor,
+},
+{
+    "#url"  : "https://anchira.to/g/14216/6c67076fdd45",
+    "#class": koharu.KoharuGalleryExtractor,
+},
+{
+    "#url"  : "https://seia.to/g/14216/6c67076fdd45",
+    "#class": koharu.KoharuGalleryExtractor,
+},
+{
+    "#url"  : "https://shupogaki.moe/g/14216/6c67076fdd45",
+    "#class": koharu.KoharuGalleryExtractor,
+},
+{
+    "#url"  : "https://hoshino.one/g/14216/6c67076fdd45",
+    "#class": koharu.KoharuGalleryExtractor,
+},
+
+{
+    "#url"     : "https://niyaniya.moe/reader/14216/6c67076fdd45",
     "#category": ("", "koharu", "gallery"),
     "#class"   : koharu.KoharuGalleryExtractor,
 },
 
 {
-    "#url"     : "https://koharu.to/reader/14216/6c67076fdd45",
-    "#category": ("", "koharu", "gallery"),
-    "#class"   : koharu.KoharuGalleryExtractor,
-},
-
-{
-    "#url"     : "https://koharu.to/?s=tag:^beach$",
+    "#url"     : "https://niyaniya.moe/?s=tag:^beach$",
     "#category": ("", "koharu", "search"),
     "#class"   : koharu.KoharuSearchExtractor,
     "#pattern" : koharu.KoharuGalleryExtractor.pattern,
@@ -86,24 +101,24 @@ __tests__ = (
 },
 
 {
-    "#url"     : "https://koharu.to/favorites",
+    "#url"     : "https://niyaniya.moe/favorites",
     "#category": ("", "koharu", "favorite"),
     "#class"   : koharu.KoharuFavoriteExtractor,
     "#pattern" : koharu.KoharuGalleryExtractor.pattern,
     "#auth"    : True,
     "#urls"    : [
-        "https://koharu.to/g/14216/6c67076fdd45",
+        "https://niyaniya.moe/g/14216/6c67076fdd45",
     ],
 },
 
 {
-    "#url"     : "https://koharu.to/favorites?cat=6&sort=4",
+    "#url"     : "https://niyaniya.moe/favorites?cat=6&sort=4",
     "#category": ("", "koharu", "favorite"),
     "#class"   : koharu.KoharuFavoriteExtractor,
     "#pattern" : koharu.KoharuGalleryExtractor.pattern,
     "#auth"    : True,
     "#urls"    : [
-        "https://koharu.to/g/14216/6c67076fdd45",
+        "https://niyaniya.moe/g/14216/6c67076fdd45",
     ],
 },
 
