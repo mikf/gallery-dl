@@ -619,6 +619,8 @@ class DownloadJob(Job):
             pp_opts = cfg("postprocessor-options")
             pp_list = []
 
+            if isinstance(postprocessors, (dict, str)):
+                postprocessors = (postprocessors,)
             for pp_dict in postprocessors:
                 if isinstance(pp_dict, str):
                     pp_dict = pp_conf.get(pp_dict) or {"name": pp_dict}
