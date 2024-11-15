@@ -1004,6 +1004,12 @@ SSL_CIPHERS = {
 }
 
 
+# disable Basic Authorization header injection from .netrc data
+try:
+    requests.sessions.get_netrc_auth = lambda _: None
+except Exception:
+    pass
+
 # detect brotli support
 try:
     BROTLI = urllib3.response.brotli is not None
