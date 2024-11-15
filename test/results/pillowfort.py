@@ -22,6 +22,7 @@ __tests__ = (
     "comments_count"  : int,
     "community_id"    : None,
     "content"         : str,
+    "count"           : 4,
     "created_at"      : str,
     "date"            : datetime.datetime,
     "deleted"         : None,
@@ -36,7 +37,7 @@ __tests__ = (
     "likes_count"     : int,
     "media_type"      : "picture",
     "nsfw"            : False,
-    "num"             : int,
+    "num"             : range(1, 4),
     "original_post_id": None,
     "original_post_user_id": None,
     "picture_content_type": None,
@@ -84,6 +85,7 @@ __tests__ = (
     "community_id"  : None,
     "concealed_comment_warning": None,
     "content"       : "<p>Sea Bed</p>",
+    "count"         : 1,
     "created_at"    : r"re:2020-02-.+",
     "currentuser_default_avatar_url": None,
     "currentuser_multi_avi": None,
@@ -177,7 +179,7 @@ __tests__ = (
     "#category": ("", "pillowfort", "user"),
     "#class"   : pillowfort.PillowfortUserExtractor,
     "#pattern" : r"https://img\d+\.pillowfort\.social/posts/",
-    "#count"   : range(10, 20),
+    "#count"   : range(30, 50),
 },
 
 )
