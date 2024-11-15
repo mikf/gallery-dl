@@ -600,8 +600,20 @@ Description
       ``scheme://host`` as key.
       See `Requests' proxy documentation`_ for more details.
 
-    Note: If a proxy URLs does not include a scheme,
+    Note: If a proxy URL does not include a scheme,
     ``http://`` is assumed.
+
+
+extractor.*.proxy-env
+---------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Collect proxy configuration information from environment variables
+    (``HTTP_PROXY``, ``HTTPS_PROXY``, ``NO_PROXY``)
+    and Windows Registry settings.
 
 
 extractor.*.source-address
