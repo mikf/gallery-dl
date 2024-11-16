@@ -328,7 +328,7 @@ class TestCompileExpression(unittest.TestCase):
         with self.assertRaises(NameError):
             expr({"a": 2})
 
-        expr = util.compile_expression_defaultdict("int.param")
+        expr = util.compile_expression_raw("int.param")
         with self.assertRaises(AttributeError):
             expr({"a": 2})
 

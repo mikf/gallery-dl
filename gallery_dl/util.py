@@ -705,7 +705,15 @@ def compile_expression_raw(expr, name="<expr>", globals=None):
 
 def compile_expression_defaultdict(expr, name="<expr>", globals=None):
     global GLOBALS_DEFAULT
-    GLOBALS_DEFAULT = collections.defaultdict(lambda: NONE, GLOBALS)
+
+    if isinstance(__builtins__, dict):
+        # cpython
+        GLOBALS_DEFAULT = collections.defaultdict(lambda n=NONE: n, GLOBALS)
+    else:
+        # pypy3 - insert __builtins__ symbols into globals dict
+        GLOBALS_DEFAULT = collections.defaultdict(
+            lambda n=NONE: n, __builtins__.__dict__)
+        GLOBALS_DEFAULT.update(GLOBALS)
 
     global compile_expression_defaultdict
     compile_expression_defaultdict = compile_expression_defaultdict_impl
