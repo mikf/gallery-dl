@@ -28,7 +28,6 @@
     "C4",   # flake8-comprehensions
     "COM",  # flake8-commas
     "E",    # pycodestyle (errors)
-    "EXE",  # flake8-executable
     "F",    # Pyflakes
     "FA",   # flake8-future-annotations
     "FLY",  # flynt
@@ -57,6 +56,7 @@
     # "DTZ", # flake8-datetimez
     # "EM",  # flake8-errmsg
     # "ERA", # eradicate
+    # "EXE", # flake8-executable
     # "FBT", # flake8-boolean-trap
     # "INP", # flake8-no-pep420
     # "N",   # pep8-naming
