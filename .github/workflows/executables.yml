@@ -71,7 +71,7 @@ jobs:
 
     - name: Build executable
       run: |
-        pip install requests requests[socks] yt-dlp pyyaml ${{ matrix.python-packages }} pyinstaller
+        pip install requests requests[socks] yt-dlp[default] pyyaml ${{ matrix.python-packages }} pyinstaller
         python ./scripts/pyinstaller.py --label '${{ env.LABEL }}'
 
     - uses: actions/upload-artifact@v4

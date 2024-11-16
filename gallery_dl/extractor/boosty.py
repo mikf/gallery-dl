@@ -35,8 +35,16 @@ class BoostyExtractor(Extractor):
             if isinstance(videos, str):
                 videos = videos.split(",")
             elif not isinstance(videos, (list, tuple)):
-                videos = ("quad_hd", "ultra_hd", "full_hd",
-                          "high", "medium", "low")
+                # ultra_hd: 2160p
+                #  quad_hd: 1440p
+                #  full_hd: 1080p
+                #     high:  720p
+                #   medium:  480p
+                #      low:  360p
+                #   lowest:  240p
+                #     tiny:  144p
+                videos = ("ultra_hd", "quad_hd", "full_hd",
+                          "high", "medium", "low", "lowest", "tiny")
         self.videos = videos
 
     def items(self):
@@ -81,9 +89,7 @@ class BoostyExtractor(Extractor):
                     content.append(c[0])
 
                 elif type == "image":
-                    if post["signedQuery"]:
-                        block["url"] += post["signedQuery"]
-                    files.append(block)
+                    files.append(self._update_url(post, block))
 
                 elif type == "ok_video":
                     if not self.videos:
@@ -116,9 +122,7 @@ class BoostyExtractor(Extractor):
                     content.append(url)
 
                 elif type == "audio_file":
-                    if post["signedQuery"]:
-                        block["url"] += post["signedQuery"]
-                    files.append(block)
+                    files.append(self._update_url(post, block))
 
                 else:
                     self.log.debug("%s: Unsupported data type '%s'",
@@ -128,6 +132,22 @@ class BoostyExtractor(Extractor):
 
         del post["data"]
         return files
+
+    def _update_url(self, post, block):
+        url = block["url"]
+        sep = "&" if "?" in url else "?"
+
+        signed_query = post.get("signedQuery")
+        if signed_query:
+            url += sep + signed_query[1:]
+            sep = "&"
+
+        migrated = post.get("isMigrated")
+        if migrated is not None:
+            url += sep + "is_migrated=" + str(migrated).lower()
+
+        block["url"] = url
+        return block
 
 
 class BoostyUserExtractor(BoostyExtractor):
@@ -313,6 +333,7 @@ class BoostyAPI():
 
     def _pagination(self, endpoint, params, transform=None, key=None):
         if "is_only_allowed" not in params and self.extractor.only_allowed:
+            params["only_allowed"] = "true"
             params["is_only_allowed"] = "true"
 
         while True:

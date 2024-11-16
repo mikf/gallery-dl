@@ -44,6 +44,11 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.patreon.com/c/koveliana",
+    "#class"   : patreon.PatreonCreatorExtractor,
+},
+
+{
     "#url"     : "https://www.patreon.com/user?u=2931440",
     "#class"   : patreon.PatreonCreatorExtractor,
 },

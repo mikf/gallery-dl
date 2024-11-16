@@ -390,10 +390,11 @@ class InstagramExtractor(Extractor):
 
     def _init_cursor(self):
         cursor = self.config("cursor", True)
-        if not cursor:
+        if cursor is True:
+            return None
+        elif not cursor:
             self._update_cursor = util.identity
-        elif isinstance(cursor, str):
-            return cursor
+        return cursor
 
     def _update_cursor(self, cursor):
         self.log.debug("Cursor: %s", cursor)

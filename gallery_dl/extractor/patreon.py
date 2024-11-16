@@ -26,12 +26,15 @@ class PatreonExtractor(Extractor):
     _warning = True
 
     def _init(self):
-        self.session.headers["User-Agent"] = \
-            "Patreon/72.2.28 (Android; Android 14; Scale/2.10)"
-        if self._warning:
-            if not self.cookies_check(("session_id",)):
+        if self.cookies_check(("session_id",)):
+            self.session.headers["User-Agent"] = \
+                "Patreon/72.2.28 (Android; Android 14; Scale/2.10)"
+        else:
+            if self._warning:
+                PatreonExtractor._warning = False
                 self.log.warning("no 'session_id' cookie set")
-            PatreonExtractor._warning = False
+            self.session.headers["User-Agent"] = \
+                "Patreon/7.6.28 (Android; Android 11; Scale/2.10)"
 
     def items(self):
         generators = self._build_file_generators(self.config("files"))
@@ -56,6 +59,7 @@ class PatreonExtractor(Extractor):
                     text.nameext_from_url(name, post)
                     if text.ext_from_url(url) == "m3u8":
                         url = "ytdl:" + url
+                        post["_ytdl_manifest"] = "hls"
                         post["extension"] = "mp4"
                     yield Message.Url, url, post
                 else:
@@ -310,7 +314,7 @@ class PatreonCreatorExtractor(PatreonExtractor):
     subcategory = "creator"
     pattern = (r"(?:https?://)?(?:www\.)?patreon\.com"
                r"/(?!(?:home|join|posts|login|signup)(?:$|[/?#]))"
-               r"([^/?#]+)(?:/posts)?/?(?:\?([^#]+))?")
+               r"(?:c/)?([^/?#]+)(?:/posts)?/?(?:\?([^#]+))?")
     example = "https://www.patreon.com/USER"
 
     def posts(self):
@@ -340,9 +344,9 @@ class PatreonCreatorExtractor(PatreonExtractor):
 
         user_id = query.get("u")
         if user_id:
-            url = "{}/user/posts?u={}".format(self.root, user_id)
+            url = "{}/user?u={}".format(self.root, user_id)
         else:
-            url = "{}/{}/posts".format(self.root, creator)
+            url = "{}/{}".format(self.root, creator)
         page = self.request(url, notfound="creator").text
 
         try:

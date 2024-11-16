@@ -10,7 +10,6 @@ from gallery_dl.extractor import lensdump
 __tests__ = (
 {
     "#url"     : "https://lensdump.com/a/1IhJr",
-    "#category": ("", "lensdump", "album"),
     "#class"   : lensdump.LensdumpAlbumExtractor,
     "#pattern" : r"https://[abcd]\.l3n\.co/i/tq\w{4}\.png",
 
@@ -23,14 +22,43 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://lensdump.com/a/tA4lA",
+    "#comment" : "2 pages",
+    "#class"   : lensdump.LensdumpAlbumExtractor,
+    "#pattern" : r"https://[abcd]\.l3n\.co/i/\w{6}\.(jpe?g|png)",
+    "#count"   : 64,
+},
+
+{
+    "#url"     : "https://lensdump.com/vstar925",
+    "#class"   : lensdump.LensdumpAlbumsExtractor,
+    "#urls"    : (
+        "https://lensdump.com/a/tX1uA",
+        "https://lensdump.com/a/R0gfK",
+        "https://lensdump.com/a/RSOMv",
+        "https://lensdump.com/a/9TbdT",
+    ),
+},
+
+{
+    "#url"     : "https://lensdump.com/vstar925/?sort=likes_desc&page=1",
+    "#comment" : "custom sort order",
+    "#class"   : lensdump.LensdumpAlbumsExtractor,
+    "#urls"    : (
+        "https://lensdump.com/a/9TbdT",
+        "https://lensdump.com/a/RSOMv",
+        "https://lensdump.com/a/R0gfK",
+        "https://lensdump.com/a/tX1uA",
+    ),
+},
+
+{
     "#url"     : "https://lensdump.com/vstar925/albums",
-    "#category": ("", "lensdump", "albums"),
     "#class"   : lensdump.LensdumpAlbumsExtractor,
 },
 
 {
     "#url"     : "https://lensdump.com/i/tyoAyM",
-    "#category": ("", "lensdump", "image"),
     "#class"   : lensdump.LensdumpImageExtractor,
     "#urls"        : "https://c.l3n.co/i/tyoAyM.webp",
     "#sha1_content": "1aa749ed2c0cf679ec8e1df60068edaf3875de46",
@@ -47,7 +75,6 @@ __tests__ = (
 
 {
     "#url"     : "https://c.l3n.co/i/tyoAyM.webp",
-    "#category": ("", "lensdump", "image"),
     "#class"   : lensdump.LensdumpImageExtractor,
     "#urls"    : "https://c.l3n.co/i/tyoAyM.webp",
 
@@ -63,13 +90,11 @@ __tests__ = (
 
 {
     "#url"     : "https://i.lensdump.com/i/tyoAyM",
-    "#category": ("", "lensdump", "image"),
     "#class"   : lensdump.LensdumpImageExtractor,
 },
 
 {
     "#url"     : "https://i3.lensdump.com/i/tyoAyM",
-    "#category": ("", "lensdump", "image"),
     "#class"   : lensdump.LensdumpImageExtractor,
 },
 

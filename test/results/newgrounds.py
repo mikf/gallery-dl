@@ -267,23 +267,35 @@ From The ZJ "Late """,
 
 {
     "#url"     : "https://tomfulp.newgrounds.com/art",
-    "#category": ("", "newgrounds", "art"),
     "#class"   : newgrounds.NewgroundsArtExtractor,
     "#pattern" : newgrounds.NewgroundsImageExtractor.pattern,
     "#count"   : ">= 3",
 },
 
 {
+    "#url"     : "https://tomfulp.newgrounds.com/art/page/3",
+    "#class"   : newgrounds.NewgroundsArtExtractor,
+},
+
+{
+    "#url"     : "https://tomfulp.newgrounds.com/art?page=3",
+    "#class"   : newgrounds.NewgroundsArtExtractor,
+},
+
+{
     "#url"     : "https://tomfulp.newgrounds.com/audio",
-    "#category": ("", "newgrounds", "audio"),
     "#class"   : newgrounds.NewgroundsAudioExtractor,
     "#pattern" : r"https://(audio\.ngfiles\.com/\d+/\d+_.+\.mp3|uploads\.ungrounded\.net/.+\.png)",
     "#count"   : ">= 10",
 },
 
 {
+    "#url"     : "https://tomfulp.newgrounds.com/audio?page=3",
+    "#class"   : newgrounds.NewgroundsAudioExtractor,
+},
+
+{
     "#url"     : "https://tomfulp.newgrounds.com/movies",
-    "#category": ("", "newgrounds", "movies"),
     "#class"   : newgrounds.NewgroundsMoviesExtractor,
     "#pattern" : r"https://uploads.ungrounded.net(/alternate)?/\d+/\d+_.+",
     "#range"   : "1-10",
@@ -291,8 +303,12 @@ From The ZJ "Late """,
 },
 
 {
+    "#url"     : "https://tomfulp.newgrounds.com/movies/?page=3",
+    "#class"   : newgrounds.NewgroundsMoviesExtractor,
+},
+
+{
     "#url"     : "https://tomfulp.newgrounds.com/games",
-    "#category": ("", "newgrounds", "games"),
     "#class"   : newgrounds.NewgroundsGamesExtractor,
     "#pattern" : r"https://uploads.ungrounded.net(/alternate)?/(\d+/\d+_.+|tmp/.+)",
     "#range"   : "1-10",
@@ -300,15 +316,18 @@ From The ZJ "Late """,
 },
 
 {
+    "#url"     : "https://tomfulp.newgrounds.com/games?page=3",
+    "#class"   : newgrounds.NewgroundsGamesExtractor,
+},
+
+{
     "#url"     : "https://tomfulp.newgrounds.com",
-    "#category": ("", "newgrounds", "user"),
     "#class"   : newgrounds.NewgroundsUserExtractor,
     "#urls"    : "https://tomfulp.newgrounds.com/art",
 },
 
 {
     "#url"     : "https://tomfulp.newgrounds.com",
-    "#category": ("", "newgrounds", "user"),
     "#class"   : newgrounds.NewgroundsUserExtractor,
     "#options" : {"include": "all"},
     "#urls"    : (
@@ -321,33 +340,33 @@ From The ZJ "Late """,
 
 {
     "#url"     : "https://tomfulp.newgrounds.com/favorites/art",
-    "#category": ("", "newgrounds", "favorite"),
     "#class"   : newgrounds.NewgroundsFavoriteExtractor,
     "#range"   : "1-10",
     "#count"   : ">= 10",
 },
 
 {
+    "#url"     : "https://tomfulp.newgrounds.com/favorites/art?page=3",
+    "#class"   : newgrounds.NewgroundsFavoriteExtractor,
+},
+
+{
     "#url"     : "https://tomfulp.newgrounds.com/favorites/audio",
-    "#category": ("", "newgrounds", "favorite"),
     "#class"   : newgrounds.NewgroundsFavoriteExtractor,
 },
 
 {
     "#url"     : "https://tomfulp.newgrounds.com/favorites/movies",
-    "#category": ("", "newgrounds", "favorite"),
     "#class"   : newgrounds.NewgroundsFavoriteExtractor,
 },
 
 {
     "#url"     : "https://tomfulp.newgrounds.com/favorites/",
-    "#category": ("", "newgrounds", "favorite"),
     "#class"   : newgrounds.NewgroundsFavoriteExtractor,
 },
 
 {
     "#url"     : "https://tomfulp.newgrounds.com/favorites/following",
-    "#category": ("", "newgrounds", "following"),
     "#class"   : newgrounds.NewgroundsFollowingExtractor,
     "#pattern" : newgrounds.NewgroundsUserExtractor.pattern,
     "#range"   : "76-125",
@@ -355,8 +374,13 @@ From The ZJ "Late """,
 },
 
 {
+    "#url"     : "https://tomfulp.newgrounds.com/favorites/following?page=3",
+    "#class"   : newgrounds.NewgroundsFollowingExtractor,
+},
+
+
+{
     "#url"     : "https://www.newgrounds.com/search/conduct/art?terms=tree",
-    "#category": ("", "newgrounds", "search"),
     "#class"   : newgrounds.NewgroundsSearchExtractor,
     "#pattern" : newgrounds.NewgroundsImageExtractor.pattern,
     "#range"   : "1-10",
@@ -367,7 +391,6 @@ From The ZJ "Late """,
 
 {
     "#url"     : "https://www.newgrounds.com/search/conduct/movies?terms=tree",
-    "#category": ("", "newgrounds", "search"),
     "#class"   : newgrounds.NewgroundsSearchExtractor,
     "#pattern" : r"https://uploads.ungrounded.net(/alternate)?/\d+/\d+",
     "#range"   : "1-10",
@@ -376,7 +399,6 @@ From The ZJ "Late """,
 
 {
     "#url"     : "https://www.newgrounds.com/search/conduct/audio?advanced=1&terms=tree+green+nature&match=tdtu&genre=5&suitabilities=e%2Cm",
-    "#category": ("", "newgrounds", "search"),
     "#class"   : newgrounds.NewgroundsSearchExtractor,
 },
 

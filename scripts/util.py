@@ -27,7 +27,7 @@ class lazy():
     def __enter__(self):
         return self.buffer
 
-    def __exit__(self, exc, value, tb):
+    def __exit__(self, exc_type, exc_value, traceback):
         # get content of old file
         try:
             with open(self.path, encoding="utf-8") as fp:

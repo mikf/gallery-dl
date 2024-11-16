@@ -31,6 +31,7 @@ class RedditExtractor(Extractor):
         parentdir = self.config("parent-directory")
         max_depth = self.config("recursion", 0)
         previews = self.config("previews", True)
+        embeds = self.config("embeds", True)
 
         videos = self.config("videos", True)
         if videos:
@@ -100,7 +101,7 @@ class RedditExtractor(Extractor):
                     for comment in comments:
                         html = comment["body_html"] or ""
                         href = (' href="' in html)
-                        media = ("media_metadata" in comment)
+                        media = (embeds and "media_metadata" in comment)
 
                         if media or href:
                             comment["date"] = text.parse_timestamp(
@@ -211,8 +212,9 @@ class RedditExtractor(Extractor):
     def _extract_video_dash(self, submission):
         submission["_ytdl_extra"] = {"title": submission["title"]}
         try:
-            return (submission["secure_media"]["reddit_video"]["dash_url"] +
-                    "#__youtubedl_smuggle=%7B%22to_generic%22%3A+1%7D")
+            url = submission["secure_media"]["reddit_video"]["dash_url"]
+            submission["_ytdl_manifest"] = "dash"
+            return url
         except Exception:
             return submission["url"]
 
@@ -338,18 +340,16 @@ class RedditRedirectExtractor(Extractor):
     category = "reddit"
     subcategory = "redirect"
     pattern = (r"(?:https?://)?(?:"
-               r"(?:\w+\.)?reddit\.com/(?:(?:r)/([^/?#]+)))"
+               r"(?:\w+\.)?reddit\.com/(?:(r|u|user)/([^/?#]+)))"
                r"/s/([a-zA-Z0-9]{10})")
     example = "https://www.reddit.com/r/SUBREDDIT/s/abc456GHIJ"
 
-    def __init__(self, match):
-        Extractor.__init__(self, match)
-        self.subreddit = match.group(1)
-        self.share_url = match.group(2)
-
     def items(self):
-        url = "https://www.reddit.com/r/" + self.subreddit + "/s/" + \
-              self.share_url
+        sub_type, subreddit, share_url = self.groups
+        if sub_type == "u":
+            sub_type = "user"
+        url = "https://www.reddit.com/{}/{}/s/{}".format(
+            sub_type, subreddit, share_url)
         data = {"_extractor": RedditSubmissionExtractor}
         response = self.request(url, method="HEAD", allow_redirects=False,
                                 notfound="submission")

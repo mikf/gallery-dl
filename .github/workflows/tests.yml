@@ -1,4 +1,4 @@
-name: tests
+name: Tests
 
 on:
   workflow_dispatch:
@@ -10,13 +10,23 @@ on:
     - master
 
 jobs:
-  build:
+  test:
 
     runs-on: ubuntu-20.04
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.5", "3.6", "3.7", "3.8", "3.9", "3.10", "3.11", "3.12", "pypy3.9"]
+        python-version:
+        - "3.5"
+        - "3.6"
+        - "3.7"
+        - "3.8"
+        - "3.9"
+        - "3.10"
+        - "3.11"
+        - "3.12"
+        - "3.13"
+        - "pypy3.9"
 
     steps:
     - uses: actions/checkout@v4

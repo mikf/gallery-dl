@@ -305,6 +305,7 @@ class TwitterExtractor(Extractor):
                     legacy["created_at"], "%a %b %d %H:%M:%S %z %Y")
             except Exception:
                 date = util.NONE
+        source = tweet.get("source")
 
         tdata = {
             "tweet_id"      : tweet_id,
@@ -320,7 +321,7 @@ class TwitterExtractor(Extractor):
             "author"        : author,
             "user"          : self._user or author,
             "lang"          : legacy["lang"],
-            "source"        : text.extr(tweet["source"], ">", "<"),
+            "source"        : text.extr(source, ">", "<") if source else "",
             "sensitive"     : tget("possibly_sensitive"),
             "favorite_count": tget("favorite_count"),
             "quote_count"   : tget("quote_count"),
@@ -537,12 +538,6 @@ class TwitterExtractor(Extractor):
         username, password = self._get_auth_info()
         if username:
             return self.cookies_update(_login_impl(self, username, password))
-
-        for cookie in self.cookies:
-            if cookie.domain == ".twitter.com":
-                self.cookies.set(
-                    cookie.name, cookie.value, domain=self.cookies_domain,
-                    expires=cookie.expires, secure=cookie.secure)
 
 
 class TwitterUserExtractor(TwitterExtractor):
