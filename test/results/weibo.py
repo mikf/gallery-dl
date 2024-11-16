@@ -231,7 +231,7 @@ __tests__ = (
     "#comment" : "type == livephoto (#2146, #6471)",
     "#category": ("", "weibo", "status"),
     "#class"   : weibo.WeiboStatusExtractor,
-    "#pattern" : r"https://livephoto\.us\.sinaimg\.cn/\w+\.mov\?Expires=\d+&ssig=\w+&KID=unistore,video",
+    "#pattern" : r"https://livephoto\.us\.sinaimg\.cn/\w+\.mov\?Expires=\d+&ssig=[^&#]+&KID=unistore,video",
     "#range"   : "2,4",
 
     "filename" : {"000yfKhRjx08hBAXxdZ60f0f0100tBPr0k01", "000GEYrCjx08hBAXUFo40f0f0100vS5G0k01"},

@@ -126,15 +126,7 @@ class WeiboExtractor(Extractor):
 
                 elif pic_type == "livephoto" and self.livephoto:
                     append(pic["largest"].copy())
-
-                    url = pic["video"]
-                    fname, _, ext = (
-                        url.rpartition("%2F")[2]
-                        if "%2F" in url else
-                        text.filename_from_url(url)
-                    ).rpartition(".")
-
-                    append({"url": url, "filename": fname, "extension": ext})
+                    append({"url": pic["video"]})
 
                 else:
                     append(pic["largest"].copy())
