@@ -10,8 +10,7 @@
 """Extractors for https://imgchest.com/"""
 
 from .common import GalleryExtractor, Extractor, Message
-from .. import text, exception
-import json
+from .. import text, util, exception
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?imgchest\.com"
 
@@ -34,65 +33,23 @@ class ImagechestGalleryExtractor(GalleryExtractor):
             self.api = ImagechestAPI(self, access_token)
             self.gallery_url = None
             self.metadata = self._metadata_api
-            self.images = self._images_api
 
     def metadata(self, page):
-        if "Not Found" in page:
-            raise exception.NotFoundError("gallery")
-
-        page_data = self._retrieve_page_data(page)
-
-        metadata = {
-            "gallery_id": self.gallery_id
-        }
-
-        for attribute in [
-            "id",
-            "slug",
-            "status",
-            "title",
-            "nsfw",
-            "score",
-            "comments",
-            "upvotes",
-            "downvotes",
-            "favorites",
-            "views",
-            "created"
-        ]:
-            try:
-                metadata[attribute] = page_data["props"]["post"][attribute]
-            except Exception:
-                pass
-
         try:
-            metadata["tags"] = ",".join(page_data["props"]["post"]["tags"])
+            data = util.json_loads(text.unescape(text.extr(
+                page, 'data-page="', '"')))
+            post = data["props"]["post"]
         except Exception:
-            pass
+            if "<title>Not Found</title>" in page:
+                raise exception.NotFoundError("gallery")
+            self.files = ()
+            return {}
 
-        return metadata
+        self.files = post.pop("files", ())
+        post["gallery_id"] = self.gallery_id
+        post["tags"] = [tag["name"] for tag in post["tags"]]
 
-    def images(self, page):
-        page_data = self._retrieve_page_data(page)
-
-        try:
-            return [
-                (file["link"], None)
-                for file in page_data["props"]["post"]["files"]
-            ]
-        except Exception:
-            return []
-
-    def _retrieve_page_data(self, page):
-        return json.loads(
-            text.unescape(
-                text.extr(
-                    page,
-                    begin='data-page="',
-                    end='"',
-                    default='{}')
-            )
-        )
+        return post
 
     def _metadata_api(self, page):
         post = self.api.post(self.gallery_id)
@@ -105,15 +62,18 @@ class ImagechestGalleryExtractor(GalleryExtractor):
 
         post["gallery_id"] = self.gallery_id
         post.pop("image_count", None)
-        self._image_list = post.pop("images")
+        self.files = post.pop("images")
 
         return post
 
-    def _images_api(self, page):
-        return [
-            (img["link"], img)
-            for img in self._image_list
-        ]
+    def images(self, page):
+        try:
+            return [
+                (file["link"], file)
+                for file in self.files
+            ]
+        except Exception:
+            return ()
 
 
 class ImagechestUserExtractor(Extractor):
@@ -124,10 +84,6 @@ class ImagechestUserExtractor(Extractor):
     pattern = BASE_PATTERN + r"/u/([^/?#]+)"
     example = "https://imgchest.com/u/USER"
 
-    def __init__(self, match):
-        Extractor.__init__(self, match)
-        self.user = match.group(1)
-
     def items(self):
         url = self.root + "/api/posts"
         params = {
@@ -135,7 +91,7 @@ class ImagechestUserExtractor(Extractor):
             "sort"    : "new",
             "tag"     : "",
             "q"       : "",
-            "username": text.unquote(self.user),
+            "username": text.unquote(self.groups[0]),
             "nsfw"    : "true",
         }
 
@@ -143,6 +99,9 @@ class ImagechestUserExtractor(Extractor):
             try:
                 data = self.request(url, params=params).json()["data"]
             except (TypeError, KeyError):
+                return
+
+            if not data:
                 return
 
             for gallery in data:
