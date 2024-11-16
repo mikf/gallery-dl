@@ -24,7 +24,6 @@ from typing import TYPE_CHECKING
 from typing import Any
 from typing import AnyStr
 from typing import Literal
-from typing import Self
 
 import requests
 from requests.adapters import HTTPAdapter
@@ -72,7 +71,7 @@ class Extractor:
         self._parentdir = ""
 
     @classmethod
-    def from_url(cls, url) -> Self | None:
+    def from_url(cls, url):
         if isinstance(cls.pattern, str):
             cls.pattern = re.compile(cls.pattern)
         match = cls.pattern.match(url)
