@@ -261,13 +261,19 @@ def accumulate(path, key, conf=_config):
         if key in conf:
             value = conf[key]
             if value:
-                result.extend(value)
+                if isinstance(value, list):
+                    result.extend(value)
+                else:
+                    result.append(value)
         for p in path:
             conf = conf[p]
             if key in conf:
                 value = conf[key]
                 if value:
-                    result[:0] = value
+                    if isinstance(value, list):
+                        result[:0] = value
+                    else:
+                        result.insert(0, value)
     except Exception:
         pass
     return result

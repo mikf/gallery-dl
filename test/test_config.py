@@ -117,6 +117,24 @@ class TestConfig(unittest.TestCase):
         self.assertEqual(
             config.accumulate(("c", "c"), "l"), [5, 6])
 
+        config.set(()        , "l", 4)
+        config.set(("c",)    , "l", [2, 3])
+        config.set(("c", "c"), "l", 1)
+        self.assertEqual(
+            config.accumulate((), "l")        , [4])
+        self.assertEqual(
+            config.accumulate(("c",), "l")    , [2, 3, 4])
+        self.assertEqual(
+            config.accumulate(("c", "c"), "l"), [1, 2, 3, 4])
+
+        config.set(("c",), "l", None)
+        self.assertEqual(
+            config.accumulate((), "l")        , [4])
+        self.assertEqual(
+            config.accumulate(("c",), "l")    , [4])
+        self.assertEqual(
+            config.accumulate(("c", "c"), "l"), [1, 4])
+
     def test_set(self):
         config.set(()        , "c", [1, 2, 3])
         config.set(("b",)    , "c", [1, 2, 3])
