@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2021-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,11 +6,13 @@
 
 """Extractors for https://mangasee123.com/"""
 
-from .common import ChapterExtractor, MangaExtractor
-from .. import text, util
+from .. import text
+from .. import util
+from .common import ChapterExtractor
+from .common import MangaExtractor
 
 
-class MangaseeBase():
+class MangaseeBase:
     category = "mangasee"
     browser = "firefox"
     root = "https://mangasee123.com"
@@ -21,21 +21,19 @@ class MangaseeBase():
     def _transform_chapter(data):
         chapter = data["Chapter"]
         return {
-            "title"   : data["ChapterName"] or "",
-            "index"   : chapter[0],
-            "chapter" : int(chapter[1:-1]),
+            "title": data["ChapterName"] or "",
+            "index": chapter[0],
+            "chapter": int(chapter[1:-1]),
             "chapter_minor": "" if chapter[-1] == "0" else "." + chapter[-1],
             "chapter_string": chapter,
-            "lang"    : "en",
+            "lang": "en",
             "language": "English",
-            "date"    : text.parse_datetime(
-                data["Date"], "%Y-%m-%d %H:%M:%S"),
+            "date": text.parse_datetime(data["Date"], "%Y-%m-%d %H:%M:%S"),
         }
 
 
 class MangaseeChapterExtractor(MangaseeBase, ChapterExtractor):
-    pattern = (r"(?:https?://)?(mangasee123|manga4life)\.com"
-               r"(/read-online/[^/?#]+\.html)")
+    pattern = r"(?:https?://)?(mangasee123|manga4life)\.com" r"(/read-online/[^/?#]+\.html)"
     example = "https://mangasee123.com/read-online/MANGA-chapter-1-page-1.html"
 
     def __init__(self, match):
@@ -54,8 +52,8 @@ class MangaseeChapterExtractor(MangaseeBase, ChapterExtractor):
 
     def metadata(self, page):
         extr = text.extract_from(page)
-        author = util.json_loads(extr('"author":', '],') + "]")
-        genre = util.json_loads(extr('"genre":', '],') + "]")
+        author = util.json_loads(extr('"author":', "],") + "]")
+        genre = util.json_loads(extr('"genre":', "],") + "]")
         self.chapter = data = util.json_loads(extr("vm.CurChapter =", ";\r\n"))
         self.domain = extr('vm.CurPathName = "', '"')
         self.slug = extr('vm.IndexName = "', '"')
@@ -68,20 +66,14 @@ class MangaseeChapterExtractor(MangaseeBase, ChapterExtractor):
 
     def images(self, page):
         chapter = self.chapter["Chapter"][1:]
-        if chapter[-1] == "0":
-            chapter = chapter[:-1]
-        else:
-            chapter = chapter[:-1] + "." + chapter[-1]
+        chapter = chapter[:-1] if chapter[-1] == "0" else chapter[:-1] + "." + chapter[-1]
 
-        base = "https://{}/manga/{}/".format(self.domain, self.slug)
+        base = f"https://{self.domain}/manga/{self.slug}/"
         if self.chapter["Directory"]:
             base += self.chapter["Directory"] + "/"
         base += chapter + "-"
 
-        return [
-            ("{}{:>03}.png".format(base, i), None)
-            for i in range(1, int(self.chapter["Page"]) + 1)
-        ]
+        return [(f"{base}{i:>03}.png", None) for i in range(1, int(self.chapter["Page"]) + 1)]
 
 
 class MangaseeMangaExtractor(MangaseeBase, MangaExtractor):
@@ -97,15 +89,16 @@ class MangaseeMangaExtractor(MangaseeBase, MangaExtractor):
 
     def chapters(self, page):
         extr = text.extract_from(page)
-        author = util.json_loads(extr('"author":', '],') + "]")
-        genre = util.json_loads(extr('"genre":', '],') + "]")
+        author = util.json_loads(extr('"author":', "],") + "]")
+        genre = util.json_loads(extr('"genre":', "],") + "]")
         slug = extr('vm.IndexName = "', '"')
         chapters = util.json_loads(extr("vm.Chapters = ", ";\r\n"))
 
         result = []
         for data in map(self._transform_chapter, chapters):
             url = "{}/read-online/{}-chapter-{}{}".format(
-                self.root, slug, data["chapter"], data["chapter_minor"])
+                self.root, slug, data["chapter"], data["chapter_minor"]
+            )
             if data["index"] != "1":
                 url += "-index-" + data["index"]
             url += "-page-1.html"

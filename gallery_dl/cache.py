@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2016-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,16 +6,20 @@
 
 """Decorators to keep function results in an in-memory and database cache"""
 
-import sqlite3
-import pickle
-import time
-import os
 import functools
-from . import config, util
+import os
+import pickle
+import sqlite3
+import time
+from contextlib import suppress
+
+from . import config
+from . import util
 
 
-class CacheDecorator():
+class CacheDecorator:
     """Simplified in-memory cache"""
+
     def __init__(self, func, keyarg):
         self.func = func
         self.cache = {}
@@ -38,14 +40,13 @@ class CacheDecorator():
         self.cache[key] = value
 
     def invalidate(self, key=""):
-        try:
+        with suppress(KeyError):
             del self.cache[key]
-        except KeyError:
-            pass
 
 
 class MemoryCacheDecorator(CacheDecorator):
     """In-memory cache"""
+
     def __init__(self, func, keyarg, maxage):
         CacheDecorator.__init__(self, func, keyarg)
         self.maxage = maxage
@@ -67,13 +68,14 @@ class MemoryCacheDecorator(CacheDecorator):
         self.cache[key] = value, int(time.time()) + self.maxage
 
 
-class DatabaseCacheDecorator():
+class DatabaseCacheDecorator:
     """Database cache"""
+
     db = None
     _init = True
 
     def __init__(self, func, keyarg, maxage):
-        self.key = "%s.%s" % (func.__module__, func.__name__)
+        self.key = f"{func.__module__}.{func.__name__}"
         self.func = func
         self.cache = {}
         self.keyarg = keyarg
@@ -87,21 +89,19 @@ class DatabaseCacheDecorator():
         timestamp = int(time.time())
 
         # in-memory cache lookup
-        try:
+        with suppress(KeyError):
             value, expires = self.cache[key]
+
             if expires > timestamp:
                 return value
-        except KeyError:
-            pass
 
         # database lookup
-        fullkey = "%s-%s" % (self.key, key)
+        fullkey = f"{self.key}-{key}"
         with self.database() as db:
             cursor = db.cursor()
-            try:
+            # Silently swallow exception - workaround for Python 3.6
+            with suppress(sqlite3.OperationalError):
                 cursor.execute("BEGIN EXCLUSIVE")
-            except sqlite3.OperationalError:
-                pass  # Silently swallow exception - workaround for Python 3.6
             cursor.execute(
                 "SELECT value, expires FROM data WHERE key=? LIMIT 1",
                 (fullkey,),
@@ -128,18 +128,16 @@ class DatabaseCacheDecorator():
         with self.database() as db:
             db.execute(
                 "INSERT OR REPLACE INTO data VALUES (?,?,?)",
-                ("%s-%s" % (self.key, key), pickle.dumps(value), expires),
+                (f"{self.key}-{key}", pickle.dumps(value), expires),
             )
 
     def invalidate(self, key):
-        try:
+        with suppress(KeyError):
             del self.cache[key]
-        except KeyError:
-            pass
         with self.database() as db:
             db.execute(
                 "DELETE FROM data WHERE key=?",
-                ("%s-%s" % (self.key, key),),
+                (f"{self.key}-{key}",),
             )
 
     def database(self):
@@ -154,17 +152,21 @@ class DatabaseCacheDecorator():
 
 def memcache(maxage=None, keyarg=None):
     if maxage:
+
         def wrap(func):
             return MemoryCacheDecorator(func, keyarg, maxage)
     else:
+
         def wrap(func):
             return CacheDecorator(func, keyarg)
+
     return wrap
 
 
 def cache(maxage=3600, keyarg=None):
     def wrap(func):
         return DatabaseCacheDecorator(func, keyarg, maxage)
+
     return wrap
 
 
@@ -182,9 +184,8 @@ def clear(module):
             cursor.execute("DELETE FROM data")
         else:
             cursor.execute(
-                "DELETE FROM data "
-                "WHERE key LIKE 'gallery_dl.extractor.' || ? || '.%'",
-                (module.lower(),)
+                "DELETE FROM data " "WHERE key LIKE 'gallery_dl.extractor.' || ? || '.%'",
+                (module.lower(),),
             )
     except sqlite3.OperationalError:
         pass  # database not initialized, cannot be modified, etc.
@@ -218,8 +219,7 @@ def _init():
         # restrict access permissions for new db files
         os.close(os.open(dbfile, os.O_CREAT | os.O_RDONLY, 0o600))
 
-        DatabaseCacheDecorator.db = sqlite3.connect(
-            dbfile, timeout=60, check_same_thread=False)
+        DatabaseCacheDecorator.db = sqlite3.connect(dbfile, timeout=60, check_same_thread=False)
     except (OSError, TypeError, sqlite3.OperationalError):
         global cache
         cache = memcache

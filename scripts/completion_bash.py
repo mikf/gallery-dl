@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 
 # Copyright 2019 Mike Fährmann
 #
@@ -10,8 +9,8 @@
 """Generate bash completion script from gallery-dl's argument parser"""
 
 import util
-from gallery_dl import option
 
+from gallery_dl import option
 
 TEMPLATE = """_gallery_dl()
 {
@@ -36,7 +35,6 @@ opts = []
 diropts = []
 fileopts = []
 for action in option.build_parser()._actions:
-
     if action.metavar in ("DEST",):
         diropts.extend(action.option_strings)
 
@@ -49,8 +47,11 @@ for action in option.build_parser()._actions:
 
 PATH = util.path("data/completion/gallery-dl")
 with util.lazy(PATH) as fp:
-    fp.write(TEMPLATE % {
-        "opts"    : " ".join(opts),
-        "diropts" : "|".join(diropts),
-        "fileopts": "|".join(fileopts),
-    })
+    fp.write(
+        TEMPLATE
+        % {
+            "opts": " ".join(opts),
+            "diropts": "|".join(diropts),
+            "fileopts": "|".join(fileopts),
+        }
+    )

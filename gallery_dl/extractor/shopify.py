@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2019-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,12 +6,14 @@
 
 """Extractors for Shopify instances"""
 
-from .common import BaseExtractor, Message
 from .. import text
+from .common import BaseExtractor
+from .common import Message
 
 
 class ShopifyExtractor(BaseExtractor):
     """Base class for Shopify extractors"""
+
     basecategory = "shopify"
     filename_fmt = "{product[title]}_{num:>02}_{id}.{extension}"
     archive_fmt = "{id}"
@@ -42,56 +42,59 @@ class ShopifyExtractor(BaseExtractor):
         """Return an iterable with all relevant product URLs"""
 
 
-BASE_PATTERN = ShopifyExtractor.update({
-    "chelseacrew": {
-        "root": "https://chelseacrew.com",
-        "pattern": r"(?:www\.)?chelseacrew\.com",
-    },
-    "fashionnova": {
-        "root": "https://www.fashionnova.com",
-        "pattern": r"(?:www\.)?fashionnova\.com",
-    },
-    "loungeunderwear": {
-        "root": "https://loungeunderwear.com",
-        "pattern": r"(?:[a-z]+\.)?loungeunderwear\.com",
-    },
-    "michaelscameras": {
-        "root": "https://michaels.com.au",
-        "pattern": r"michaels\.com\.au",
-    },
-    "modcloth": {
-        "root": "https://modcloth.com",
-        "pattern": r"modcloth\.com",
-    },
-    "ohpolly": {
-        "root": "https://www.ohpolly.com",
-        "pattern": r"(?:www\.)?ohpolly\.com",
-    },
-    "omgmiamiswimwear": {
-        "root": "https://www.omgmiamiswimwear.com",
-        "pattern": r"(?:www\.)?omgmiamiswimwear\.com",
-    },
-    "pinupgirlclothing": {
-        "root": "https://pinupgirlclothing.com",
-        "pattern": r"pinupgirlclothing\.com",
-    },
-    "raidlondon": {
-        "root": "https://www.raidlondon.com",
-        "pattern": r"(?:www\.)?raidlondon\.com",
-    },
-    "unique-vintage": {
-        "root": "https://www.unique-vintage.com",
-        "pattern": r"(?:www\.)?unique\-vintage\.com",
-    },
-    "windsorstore": {
-        "root": "https://www.windsorstore.com",
-        "pattern": r"(?:www\.)?windsorstore\.com",
-    },
-})
+BASE_PATTERN = ShopifyExtractor.update(
+    {
+        "chelseacrew": {
+            "root": "https://chelseacrew.com",
+            "pattern": r"(?:www\.)?chelseacrew\.com",
+        },
+        "fashionnova": {
+            "root": "https://www.fashionnova.com",
+            "pattern": r"(?:www\.)?fashionnova\.com",
+        },
+        "loungeunderwear": {
+            "root": "https://loungeunderwear.com",
+            "pattern": r"(?:[a-z]+\.)?loungeunderwear\.com",
+        },
+        "michaelscameras": {
+            "root": "https://michaels.com.au",
+            "pattern": r"michaels\.com\.au",
+        },
+        "modcloth": {
+            "root": "https://modcloth.com",
+            "pattern": r"modcloth\.com",
+        },
+        "ohpolly": {
+            "root": "https://www.ohpolly.com",
+            "pattern": r"(?:www\.)?ohpolly\.com",
+        },
+        "omgmiamiswimwear": {
+            "root": "https://www.omgmiamiswimwear.com",
+            "pattern": r"(?:www\.)?omgmiamiswimwear\.com",
+        },
+        "pinupgirlclothing": {
+            "root": "https://pinupgirlclothing.com",
+            "pattern": r"pinupgirlclothing\.com",
+        },
+        "raidlondon": {
+            "root": "https://www.raidlondon.com",
+            "pattern": r"(?:www\.)?raidlondon\.com",
+        },
+        "unique-vintage": {
+            "root": "https://www.unique-vintage.com",
+            "pattern": r"(?:www\.)?unique\-vintage\.com",
+        },
+        "windsorstore": {
+            "root": "https://www.windsorstore.com",
+            "pattern": r"(?:www\.)?windsorstore\.com",
+        },
+    }
+)
 
 
 class ShopifyCollectionExtractor(ShopifyExtractor):
     """Base class for collection extractors for Shopify based sites"""
+
     subcategory = "collection"
     directory_fmt = ("{category}", "{collection[title]}")
     pattern = BASE_PATTERN + r"(/collections/[\w-]+)/?(?:$|[?#])"
@@ -114,6 +117,7 @@ class ShopifyCollectionExtractor(ShopifyExtractor):
 
 class ShopifyProductExtractor(ShopifyExtractor):
     """Base class for product extractors for Shopify based sites"""
+
     subcategory = "product"
     directory_fmt = ("{category}", "Products")
     pattern = BASE_PATTERN + r"((?:/collections/[\w-]+)?/products/[\w-]+)"

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2014-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,13 +6,18 @@
 
 """Extractors for https://imgbox.com/"""
 
-from .common import Extractor, Message, AsynchronousMixin
-from .. import text, exception
 import re
+
+from .. import exception
+from .. import text
+from .common import AsynchronousMixin
+from .common import Extractor
+from .common import Message
 
 
 class ImgboxExtractor(Extractor):
     """Base class for imgbox extractors"""
+
     category = "imgbox"
     root = "https://imgbox.com"
 
@@ -44,11 +47,14 @@ class ImgboxExtractor(Extractor):
     @staticmethod
     def get_image_metadata(page):
         """Collect metadata for a downloadable file"""
-        return text.extract_all(page, (
-            ("num"      , '</a> &nbsp; ', ' of '),
-            (None       , 'class="image-container"', ''),
-            ("filename" , ' title="', '"'),
-        ))[0]
+        return text.extract_all(
+            page,
+            (
+                ("num", "</a> &nbsp; ", " of "),
+                (None, 'class="image-container"', ""),
+                ("filename", ' title="', '"'),
+            ),
+        )[0]
 
     @staticmethod
     def get_image_url(page):
@@ -58,6 +64,7 @@ class ImgboxExtractor(Extractor):
 
 class ImgboxGalleryExtractor(AsynchronousMixin, ImgboxExtractor):
     """Extractor for image galleries from imgbox.com"""
+
     subcategory = "gallery"
     directory_fmt = ("{category}", "{title} - {gallery_key}")
     filename_fmt = "{num:>03}-{filename}.{extension}"
@@ -90,6 +97,7 @@ class ImgboxGalleryExtractor(AsynchronousMixin, ImgboxExtractor):
 
 class ImgboxImageExtractor(ImgboxExtractor):
     """Extractor for single images from imgbox.com"""
+
     subcategory = "image"
     archive_fmt = "{image_key}"
     pattern = r"(?:https?://)?(?:www\.)?imgbox\.com/([A-Za-z0-9]{8})"

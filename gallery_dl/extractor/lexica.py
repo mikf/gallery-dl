@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,12 +6,14 @@
 
 """Extractors for https://lexica.art/"""
 
-from .common import Extractor, Message
 from .. import text
+from .common import Extractor
+from .common import Message
 
 
 class LexicaSearchExtractor(Extractor):
     """Extractor for lexica.art search results"""
+
     category = "lexica"
     subcategory = "search"
     root = "https://lexica.art"
@@ -28,8 +28,7 @@ class LexicaSearchExtractor(Extractor):
         self.text = text.unquote(self.query).replace("+", " ")
 
     def items(self):
-        base = ("https://lexica-serve-encoded-images2.sharif.workers.dev"
-                "/full_jpg/")
+        base = "https://lexica-serve-encoded-images2.sharif.workers.dev" "/full_jpg/"
         tags = self.text
 
         for image in self.posts():
@@ -42,25 +41,21 @@ class LexicaSearchExtractor(Extractor):
     def posts(self):
         url = self.root + "/api/infinite-prompts"
         headers = {
-            "Accept" : "application/json, text/plain, */*",
-            "Referer": "{}/?q={}".format(self.root, self.query),
+            "Accept": "application/json, text/plain, */*",
+            "Referer": f"{self.root}/?q={self.query}",
         }
         json = {
-            "text"      : self.text,
+            "text": self.text,
             "searchMode": "images",
-            "source"    : "search",
-            "cursor"    : 0,
-            "model"     : "lexica-aperture-v2",
+            "source": "search",
+            "cursor": 0,
+            "model": "lexica-aperture-v2",
         }
 
         while True:
-            data = self.request(
-                url, method="POST", headers=headers, json=json).json()
+            data = self.request(url, method="POST", headers=headers, json=json).json()
 
-            prompts = {
-                prompt["id"]: prompt
-                for prompt in data["prompts"]
-            }
+            prompts = {prompt["id"]: prompt for prompt in data["prompts"]}
 
             for image in data["images"]:
                 image["prompt"] = prompts[image["promptid"]]

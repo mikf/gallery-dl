@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2021-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,15 +6,19 @@
 
 """Extractors for https://vk.com/"""
 
-from .common import Extractor, Message
-from .. import text, exception
 import re
+
+from .. import exception
+from .. import text
+from .common import Extractor
+from .common import Message
 
 BASE_PATTERN = r"(?:https://)?(?:www\.|m\.)?vk\.com"
 
 
 class VkExtractor(Extractor):
     """Base class for vk extractors"""
+
     category = "vk"
     directory_fmt = ("{category}", "{user[name]|user[id]}")
     filename_fmt = "{id}.{extension}"
@@ -39,7 +41,6 @@ class VkExtractor(Extractor):
         yield Message.Directory, data
 
         for photo in self.photos():
-
             for size in sizes:
                 size += "_"
                 if size in photo:
@@ -74,26 +75,30 @@ class VkExtractor(Extractor):
         url = self.root + "/al_photos.php"
         headers = {
             "X-Requested-With": "XMLHttpRequest",
-            "Origin"          : self.root,
-            "Referer"         : self.root + "/" + photos_id,
+            "Origin": self.root,
+            "Referer": self.root + "/" + photos_id,
         }
         data = {
-            "act"      : "show",
-            "al"       : "1",
+            "act": "show",
+            "al": "1",
             "direction": "1",
-            "list"     : photos_id,
-            "offset"   : self.offset,
+            "list": photos_id,
+            "offset": self.offset,
         }
 
         while True:
             payload = self.request(
-                url, method="POST", headers=headers, data=data,
+                url,
+                method="POST",
+                headers=headers,
+                data=data,
             ).json()["payload"][1]
 
             if len(payload) < 4:
                 self.log.debug(payload)
                 raise exception.AuthorizationError(
-                    text.unescape(payload[0]) if payload[0] else None)
+                    text.unescape(payload[0]) if payload[0] else None
+                )
 
             total = payload[1]
             photos = payload[3]
@@ -114,10 +119,11 @@ class VkExtractor(Extractor):
 
 class VkPhotosExtractor(VkExtractor):
     """Extractor for photos from a vk user"""
+
     subcategory = "photos"
-    pattern = (BASE_PATTERN + r"/(?:"
-               r"(?:albums|photos|id)(-?\d+)"
-               r"|(?!(?:album|tag)-?\d+_?)([^/?#]+))")
+    pattern = (
+        BASE_PATTERN + r"/(?:" r"(?:albums|photos|id)(-?\d+)" r"|(?!(?:album|tag)-?\d+_?)([^/?#]+))"
+    )
     example = "https://vk.com/id12345"
 
     def __init__(self, match):
@@ -134,27 +140,28 @@ class VkPhotosExtractor(VkExtractor):
             url = "{}/{}{}".format(self.root, prefix, user_id.lstrip("-"))
             data = self._extract_profile(url)
         else:
-            url = "{}/{}".format(self.root, self.user_name)
+            url = f"{self.root}/{self.user_name}"
             data = self._extract_profile(url)
             self.user_id = data["user"]["id"]
         return data
 
     def _extract_profile(self, url):
         extr = text.extract_from(self.request(url).text)
-        return {"user": {
-            "name": text.unescape(extr(
-                'rel="canonical" href="https://vk.com/', '"')),
-            "nick": text.unescape(extr(
-                '<h1 class="page_name">', "<")).replace("  ", " "),
-            "info": text.unescape(text.remove_html(extr(
-                '<span class="current_text">', '</span'))),
-            "id"  : (extr('<a href="/albums', '"') or
-                     extr('data-from-id="', '"')),
-        }}
+        return {
+            "user": {
+                "name": text.unescape(extr('rel="canonical" href="https://vk.com/', '"')),
+                "nick": text.unescape(extr('<h1 class="page_name">', "<")).replace("  ", " "),
+                "info": text.unescape(
+                    text.remove_html(extr('<span class="current_text">', "</span"))
+                ),
+                "id": (extr('<a href="/albums', '"') or extr('data-from-id="', '"')),
+            }
+        }
 
 
 class VkAlbumExtractor(VkExtractor):
     """Extractor for a vk album"""
+
     subcategory = "album"
     directory_fmt = ("{category}", "{user[id]}", "{album[id]}")
     pattern = BASE_PATTERN + r"/album(-?\d+)_(\d+)$"
@@ -165,8 +172,7 @@ class VkAlbumExtractor(VkExtractor):
         self.user_id, self.album_id = match.groups()
 
     def photos(self):
-        return self._pagination("album{}_{}".format(
-            self.user_id, self.album_id))
+        return self._pagination(f"album{self.user_id}_{self.album_id}")
 
     def metadata(self):
         return {
@@ -177,6 +183,7 @@ class VkAlbumExtractor(VkExtractor):
 
 class VkTaggedExtractor(VkExtractor):
     """Extractor for a vk tagged photos"""
+
     subcategory = "tagged"
     directory_fmt = ("{category}", "{user[id]}", "tags")
     pattern = BASE_PATTERN + r"/tag(-?\d+)$"
@@ -187,7 +194,7 @@ class VkTaggedExtractor(VkExtractor):
         self.user_id = match.group(1)
 
     def photos(self):
-        return self._pagination("tag{}".format(self.user_id))
+        return self._pagination(f"tag{self.user_id}")
 
     def metadata(self):
         return {"user": {"id": self.user_id}}

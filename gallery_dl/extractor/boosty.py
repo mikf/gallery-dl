@@ -1,23 +1,28 @@
-# -*- coding: utf-8 -*-
-
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
 """Extractors for https://www.boosty.to/"""
 
-from .common import Extractor, Message
-from .. import text, util, exception
+from .. import exception
+from .. import text
+from .. import util
+from .common import Extractor
+from .common import Message
 
 BASE_PATTERN = r"(?:https?://)?boosty\.to"
 
 
 class BoostyExtractor(Extractor):
     """Base class for boosty extractors"""
+
     category = "boosty"
     root = "https://www.boosty.to"
-    directory_fmt = ("{category}", "{user[blogUrl]} ({user[id]})",
-                     "{post[date]:%Y-%m-%d} {post[int_id]}")
+    directory_fmt = (
+        "{category}",
+        "{user[blogUrl]} ({user[id]})",
+        "{post[date]:%Y-%m-%d} {post[int_id]}",
+    )
     filename_fmt = "{num:>02} {file[id]}.{extension}"
     archive_fmt = "{file[id]}"
     cookies_domain = ".boosty.to"
@@ -43,8 +48,16 @@ class BoostyExtractor(Extractor):
                 #      low:  360p
                 #   lowest:  240p
                 #     tiny:  144p
-                videos = ("ultra_hd", "quad_hd", "full_hd",
-                          "high", "medium", "low", "lowest", "tiny")
+                videos = (
+                    "ultra_hd",
+                    "quad_hd",
+                    "full_hd",
+                    "high",
+                    "medium",
+                    "low",
+                    "lowest",
+                    "tiny",
+                )
         self.videos = videos
 
     def items(self):
@@ -55,8 +68,8 @@ class BoostyExtractor(Extractor):
 
             files = self._process_post(post)
             data = {
-                "post" : post,
-                "user" : post.pop("user", None),
+                "post": post,
+                "user": post.pop("user", None),
                 "count": len(files),
             }
 
@@ -93,19 +106,10 @@ class BoostyExtractor(Extractor):
 
                 elif type == "ok_video":
                     if not self.videos:
-                        self.log.debug("%s: Skipping video %s",
-                                       post["int_id"], block["id"])
+                        self.log.debug("%s: Skipping video %s", post["int_id"], block["id"])
                         continue
-                    fmts = {
-                        fmt["type"]: fmt["url"]
-                        for fmt in block["playerUrls"]
-                        if fmt["url"]
-                    }
-                    formats = [
-                        fmts[fmt]
-                        for fmt in self.videos
-                        if fmt in fmts
-                    ]
+                    fmts = {fmt["type"]: fmt["url"] for fmt in block["playerUrls"] if fmt["url"]}
+                    formats = [fmts[fmt] for fmt in self.videos if fmt in fmts]
                     if formats:
                         formats = iter(formats)
                         block["url"] = next(formats)
@@ -113,8 +117,8 @@ class BoostyExtractor(Extractor):
                         files.append(block)
                     else:
                         self.log.warning(
-                            "%s: Found no suitable video format for %s",
-                            post["int_id"], block["id"])
+                            "%s: Found no suitable video format for %s", post["int_id"], block["id"]
+                        )
 
                 elif type == "link":
                     url = block["url"]
@@ -125,8 +129,7 @@ class BoostyExtractor(Extractor):
                     files.append(self._update_url(post, block))
 
                 else:
-                    self.log.debug("%s: Unsupported data type '%s'",
-                                   post["int_id"], type)
+                    self.log.debug("%s: Unsupported data type '%s'", post["int_id"], type)
             except Exception as exc:
                 self.log.debug("%s: %s", exc.__class__.__name__, exc)
 
@@ -152,6 +155,7 @@ class BoostyExtractor(Extractor):
 
 class BoostyUserExtractor(BoostyExtractor):
     """Extractor for boosty.to user profiles"""
+
     subcategory = "user"
     pattern = BASE_PATTERN + r"/([^/?#]+)(?:\?([^#]+))?$"
     example = "https://boosty.to/USER"
@@ -166,6 +170,7 @@ class BoostyUserExtractor(BoostyExtractor):
 
 class BoostyMediaExtractor(BoostyExtractor):
     """Extractor for boosty.to user media"""
+
     subcategory = "media"
     directory_fmt = "{category}", "{user[blogUrl]} ({user[id]})", "media"
     filename_fmt = "{post[id]}_{num}.{extension}"
@@ -181,6 +186,7 @@ class BoostyMediaExtractor(BoostyExtractor):
 
 class BoostyFeedExtractor(BoostyExtractor):
     """Extractor for your boosty.to subscription feed"""
+
     subcategory = "feed"
     pattern = BASE_PATTERN + r"/(?:\?([^#]+))?(?:$|#)"
     example = "https://boosty.to/"
@@ -192,6 +198,7 @@ class BoostyFeedExtractor(BoostyExtractor):
 
 class BoostyPostExtractor(BoostyExtractor):
     """Extractor for boosty.to posts"""
+
     subcategory = "post"
     pattern = BASE_PATTERN + r"/([^/?#]+)/posts/([0-9a-f-]+)"
     example = "https://boosty.to/USER/posts/01234567-89ab-cdef-0123-456789abcd"
@@ -205,6 +212,7 @@ class BoostyPostExtractor(BoostyExtractor):
 
 class BoostyFollowingExtractor(BoostyExtractor):
     """Extractor for your boosty.to subscribed users"""
+
     subcategory = "following"
     pattern = BASE_PATTERN + r"/app/settings/subscriptions"
     example = "https://boosty.to/app/settings/subscriptions"
@@ -216,8 +224,9 @@ class BoostyFollowingExtractor(BoostyExtractor):
             yield Message.Queue, url, user
 
 
-class BoostyAPI():
+class BoostyAPI:
     """Interface for the Boosty API"""
+
     root = "https://api.boosty.to"
 
     def __init__(self, extractor, access_token=None):
@@ -230,29 +239,34 @@ class BoostyAPI():
         if not access_token:
             auth = self.extractor.cookies.get("auth", domain=".boosty.to")
             if auth:
-                access_token = text.extr(
-                    auth, "%22accessToken%22%3A%22", "%22")
+                access_token = text.extr(auth, "%22accessToken%22%3A%22", "%22")
         if access_token:
             self.headers["Authorization"] = "Bearer " + access_token
 
     def blog_posts(self, username, params):
-        endpoint = "/v1/blog/{}/post/".format(username)
-        params = self._merge_params(params, {
-            "limit"         : "5",
-            "offset"        : None,
-            "comments_limit": "2",
-            "reply_limit"   : "1",
-        })
+        endpoint = f"/v1/blog/{username}/post/"
+        params = self._merge_params(
+            params,
+            {
+                "limit": "5",
+                "offset": None,
+                "comments_limit": "2",
+                "reply_limit": "1",
+            },
+        )
         return self._pagination(endpoint, params)
 
     def blog_media_album(self, username, type="all", params=()):
-        endpoint = "/v1/blog/{}/media_album/".format(username)
-        params = self._merge_params(params, {
-            "type"    : type.rstrip("s"),
-            "limit"   : "15",
-            "limit_by": "media",
-            "offset"  : None,
-        })
+        endpoint = f"/v1/blog/{username}/media_album/"
+        params = self._merge_params(
+            params,
+            {
+                "type": type.rstrip("s"),
+                "limit": "15",
+                "limit_by": "media",
+                "offset": None,
+            },
+        )
         return self._pagination(endpoint, params, self._transform_media_posts)
 
     def _transform_media_posts(self, data):
@@ -266,16 +280,19 @@ class BoostyAPI():
         return posts
 
     def post(self, username, post_id):
-        endpoint = "/v1/blog/{}/post/{}".format(username, post_id)
+        endpoint = f"/v1/blog/{username}/post/{post_id}"
         return self._call(endpoint)
 
     def feed_posts(self, params=None):
         endpoint = "/v1/feed/post/"
-        params = self._merge_params(params, {
-            "limit"         : "5",
-            "offset"        : None,
-            "comments_limit": "2",
-        })
+        params = self._merge_params(
+            params,
+            {
+                "limit": "5",
+                "offset": None,
+                "comments_limit": "2",
+            },
+        )
         if "only_allowed" not in params and self.extractor.only_allowed:
             params["only_allowed"] = "true"
         if "only_bought" not in params and self.extractor.only_bought:
@@ -290,20 +307,23 @@ class BoostyAPI():
 
     def user_subscriptions(self, params=None):
         endpoint = "/v1/user/subscriptions"
-        params = self._merge_params(params, {
-            "limit"      : "30",
-            "with_follow": "true",
-            "offset"     : None,
-        })
+        params = self._merge_params(
+            params,
+            {
+                "limit": "30",
+                "with_follow": "true",
+                "offset": None,
+            },
+        )
         return self._pagination_users(endpoint, params)
 
     def _merge_params(self, params_web, params_api):
         if params_web:
             web_to_api = {
                 "isOnlyAllowedPosts": "is_only_allowed",
-                "postsTagsIds"      : "tags_ids",
-                "postsFrom"         : "from_ts",
-                "postsTo"           : "to_ts",
+                "postsTagsIds": "tags_ids",
+                "postsFrom": "from_ts",
+                "postsTo": "to_ts",
             }
             for name, value in params_web.items():
                 name = web_to_api.get(name, name)
@@ -315,16 +335,16 @@ class BoostyAPI():
 
         while True:
             response = self.extractor.request(
-                url, params=params, headers=self.headers,
-                fatal=None, allow_redirects=False)
+                url, params=params, headers=self.headers, fatal=None, allow_redirects=False
+            )
 
             if response.status_code < 300:
                 return response.json()
 
-            elif response.status_code < 400:
+            if response.status_code < 400:
                 raise exception.AuthenticationError("Invalid API access token")
 
-            elif response.status_code == 429:
+            if response.status_code == 429:
                 self.extractor.wait(seconds=600)
 
             else:

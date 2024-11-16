@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2018-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,13 +6,15 @@
 
 """Execute processes"""
 
-from .common import PostProcessor
-from .. import util, formatter
 import os
 import re
 
+from .. import formatter
+from .. import util
+from .common import PostProcessor
 
 if util.WINDOWS:
+
     def quote(s):
         return '"' + s.replace('"', '\\"') + '"'
 else:
@@ -22,7 +22,6 @@ else:
 
 
 class ExecPP(PostProcessor):
-
     def __init__(self, job, options):
         PostProcessor.__init__(self, job)
 
@@ -81,8 +80,7 @@ class ExecPP(PostProcessor):
         self.log.debug("Running '%s'", args)
         retcode = util.Popen(args, shell=shell).wait()
         if retcode:
-            self.log.warning("'%s' returned with non-zero exit status (%d)",
-                             args, retcode)
+            self.log.warning("'%s' returned with non-zero exit status (%d)", args, retcode)
 
     def _exec_async(self, args, shell):
         self.log.debug("Running '%s'", args)

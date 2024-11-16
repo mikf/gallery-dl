@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2016-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,15 +6,20 @@
 
 """Extractors for https://www.pinterest.com/"""
 
-from .common import Extractor, Message
-from .. import text, util, exception
 import itertools
+
+from .. import exception
+from .. import text
+from .. import util
+from .common import Extractor
+from .common import Message
 
 BASE_PATTERN = r"(?:https?://)?(?:\w+\.)?pinterest\.[\w.]+"
 
 
 class PinterestExtractor(Extractor):
     """Base class for pinterest extractors"""
+
     category = "pinterest"
     filename_fmt = "{category}_{id}{media_id|page_id:?_//}.{extension}"
     archive_fmt = "{id}{media_id|page_id}"
@@ -24,7 +27,7 @@ class PinterestExtractor(Extractor):
 
     def _init(self):
         domain = self.config("domain")
-        if not domain or domain == "auto" :
+        if not domain or domain == "auto":
             self.root = text.root_from_url(self.url)
         else:
             self.root = text.ensure_http_scheme(domain)
@@ -37,7 +40,6 @@ class PinterestExtractor(Extractor):
         data = self.metadata()
 
         for pin in self.pins():
-
             if isinstance(pin, tuple):
                 url, data = pin
                 yield Message.Queue, url, data
@@ -49,7 +51,10 @@ class PinterestExtractor(Extractor):
                 self.log.debug("", exc_info=exc)
                 self.log.warning(
                     "%s: Error when extracting download URLs (%s: %s)",
-                    pin.get("id"), exc.__class__.__name__, exc)
+                    pin.get("id"),
+                    exc.__class__.__name__,
+                    exc,
+                )
                 continue
 
             pin.update(data)
@@ -128,13 +133,14 @@ class PinterestExtractor(Extractor):
                     media["media_id"] = media.get("id") or ""
 
                 elif type == "story_pin_paragraph_block":
-                    media = {"url": "text:" + block["text"],
-                             "extension": "txt",
-                             "media_id": block.get("id")}
+                    media = {
+                        "url": "text:" + block["text"],
+                        "extension": "txt",
+                        "media_id": block.get("id"),
+                    }
 
                 else:
-                    self.log.warning("%s: Unsupported story block '%s'",
-                                     pin.get("id"), type)
+                    self.log.warning("%s: Unsupported story block '%s'", pin.get("id"), type)
                     try:
                         media = self._extract_image(page, block)
                     except Exception:
@@ -151,15 +157,13 @@ class PinterestExtractor(Extractor):
         for slot in carousel_data["carousel_slots"]:
             size, image = next(iter(slot["images"].items()))
             slot["media_id"] = slot.pop("id")
-            slot["url"] = image["url"].replace(
-                "/" + size + "/", "/originals/", 1)
+            slot["url"] = image["url"].replace("/" + size + "/", "/originals/", 1)
             files.append(slot)
         return files
 
     def _extract_image(self, page, block):
         sig = block.get("image_signature") or page["image_signature"]
-        url_base = "https://i.pinimg.com/originals/{}/{}/{}/{}.".format(
-            sig[0:2], sig[2:4], sig[4:6], sig)
+        url_base = f"https://i.pinimg.com/originals/{sig[0:2]}/{sig[2:4]}/{sig[4:6]}/{sig}."
         url_jpg = url_base + "jpg"
         url_png = url_base + "png"
         url_webp = url_base + "webp"
@@ -167,12 +171,25 @@ class PinterestExtractor(Extractor):
         try:
             media = block["image"]["images"]["originals"]
         except Exception:
-            media = {"url": url_jpg, "_fallback": (url_png, url_webp,)}
+            media = {
+                "url": url_jpg,
+                "_fallback": (
+                    url_png,
+                    url_webp,
+                ),
+            }
 
         if media["url"] == url_jpg:
-            media["_fallback"] = (url_png, url_webp,)
+            media["_fallback"] = (
+                url_png,
+                url_webp,
+            )
         else:
-            media["_fallback"] = (url_jpg, url_png, url_webp,)
+            media["_fallback"] = (
+                url_jpg,
+                url_png,
+                url_webp,
+            )
         media["media_id"] = sig
 
         return media
@@ -184,8 +201,7 @@ class PinterestExtractor(Extractor):
                 media = video_formats[fmt]
                 break
         else:
-            media = max(video_formats.values(),
-                        key=lambda x: x.get("width", 0))
+            media = max(video_formats.values(), key=lambda x: x.get("width", 0))
         if "V_720P" in video_formats:
             media["_fallback"] = (video_formats["V_720P"]["url"],)
         return media
@@ -193,6 +209,7 @@ class PinterestExtractor(Extractor):
 
 class PinterestPinExtractor(PinterestExtractor):
     """Extractor for images from a single pin from pinterest.com"""
+
     subcategory = "pin"
     pattern = BASE_PATTERN + r"/pin/([^/?#]+)(?!.*#related$)"
     example = "https://www.pinterest.com/pin/12345/"
@@ -212,11 +229,11 @@ class PinterestPinExtractor(PinterestExtractor):
 
 class PinterestBoardExtractor(PinterestExtractor):
     """Extractor for images from a board from pinterest.com"""
+
     subcategory = "board"
     directory_fmt = ("{category}", "{board[owner][username]}", "{board[name]}")
     archive_fmt = "{board[id]}_{id}"
-    pattern = (BASE_PATTERN + r"/(?!pin/)([^/?#]+)"
-               "/(?!_saved|_created|pins/)([^/?#]+)/?$")
+    pattern = BASE_PATTERN + r"/(?!pin/)([^/?#]+)" "/(?!_saved|_created|pins/)([^/?#]+)/?$"
     example = "https://www.pinterest.com/USER/BOARD/"
 
     def __init__(self, match):
@@ -236,8 +253,9 @@ class PinterestBoardExtractor(PinterestExtractor):
         if board["section_count"] and self.config("sections", True):
             base = "{}{}id:".format(self.root, board["url"])
             data = {"_extractor": PinterestSectionExtractor}
-            sections = [(base + section["id"], data)
-                        for section in self.api.board_sections(board["id"])]
+            sections = [
+                (base + section["id"], data) for section in self.api.board_sections(board["id"])
+            ]
             pins = itertools.chain(pins, sections)
 
         return pins
@@ -245,6 +263,7 @@ class PinterestBoardExtractor(PinterestExtractor):
 
 class PinterestUserExtractor(PinterestExtractor):
     """Extractor for a user's boards"""
+
     subcategory = "user"
     pattern = BASE_PATTERN + r"/(?!pin/)([^/?#]+)(?:/_saved)?/?$"
     example = "https://www.pinterest.com/USER/"
@@ -263,6 +282,7 @@ class PinterestUserExtractor(PinterestExtractor):
 
 class PinterestAllpinsExtractor(PinterestExtractor):
     """Extractor for a user's 'All Pins' feed"""
+
     subcategory = "allpins"
     directory_fmt = ("{category}", "{user}")
     pattern = BASE_PATTERN + r"/(?!pin/)([^/?#]+)/pins/?$"
@@ -281,6 +301,7 @@ class PinterestAllpinsExtractor(PinterestExtractor):
 
 class PinterestCreatedExtractor(PinterestExtractor):
     """Extractor for a user's created pins"""
+
     subcategory = "created"
     directory_fmt = ("{category}", "{user}")
     pattern = BASE_PATTERN + r"/(?!pin/)([^/?#]+)/_created/?$"
@@ -299,9 +320,9 @@ class PinterestCreatedExtractor(PinterestExtractor):
 
 class PinterestSectionExtractor(PinterestExtractor):
     """Extractor for board sections on pinterest.com"""
+
     subcategory = "section"
-    directory_fmt = ("{category}", "{board[owner][username]}",
-                     "{board[name]}", "{section[title]}")
+    directory_fmt = ("{category}", "{board[owner][username]}", "{board[name]}", "{section[title]}")
     archive_fmt = "{board[id]}_{id}"
     pattern = BASE_PATTERN + r"/(?!pin/)([^/?#]+)/([^/?#]+)/([^/?#]+)"
     example = "https://www.pinterest.com/USER/BOARD/SECTION"
@@ -315,11 +336,11 @@ class PinterestSectionExtractor(PinterestExtractor):
 
     def metadata(self):
         if self.section_slug.startswith("id:"):
-            section = self.section = self.api.board_section(
-                self.section_slug[3:])
+            section = self.section = self.api.board_section(self.section_slug[3:])
         else:
             section = self.section = self.api.board_section_by_name(
-                self.user, self.board_slug, self.section_slug)
+                self.user, self.board_slug, self.section_slug
+            )
         section.pop("preview_pins", None)
         return {"board": section.pop("board"), "section": section}
 
@@ -329,6 +350,7 @@ class PinterestSectionExtractor(PinterestExtractor):
 
 class PinterestSearchExtractor(PinterestExtractor):
     """Extractor for Pinterest search results"""
+
     subcategory = "search"
     directory_fmt = ("{category}", "Search", "{search}")
     pattern = BASE_PATTERN + r"/search/pins/?\?q=([^&#]+)"
@@ -347,6 +369,7 @@ class PinterestSearchExtractor(PinterestExtractor):
 
 class PinterestRelatedPinExtractor(PinterestPinExtractor):
     """Extractor for related pins of another pin from pinterest.com"""
+
     subcategory = "related-pin"
     directory_fmt = ("{category}", "related {original_pin[id]}")
     pattern = BASE_PATTERN + r"/pin/([^/?#]+).*#related$"
@@ -361,9 +384,9 @@ class PinterestRelatedPinExtractor(PinterestPinExtractor):
 
 class PinterestRelatedBoardExtractor(PinterestBoardExtractor):
     """Extractor for related pins of a board from pinterest.com"""
+
     subcategory = "related-board"
-    directory_fmt = ("{category}", "{board[owner][username]}",
-                     "{board[name]}", "related")
+    directory_fmt = ("{category}", "{board[owner][username]}", "{board[name]}", "related")
     pattern = BASE_PATTERN + r"/(?!pin/)([^/?#]+)/([^/?#]+)/?#related$"
     example = "https://www.pinterest.com/USER/BOARD/#related"
 
@@ -373,6 +396,7 @@ class PinterestRelatedBoardExtractor(PinterestBoardExtractor):
 
 class PinterestPinitExtractor(PinterestExtractor):
     """Extractor for images from a pin.it URL"""
+
     subcategory = "pinit"
     pattern = r"(?:https?://)?pin\.it/([^/?#]+)"
     example = "https://pin.it/abcde"
@@ -382,8 +406,7 @@ class PinterestPinitExtractor(PinterestExtractor):
         self.shortened_id = match.group(1)
 
     def items(self):
-        url = "https://api.pinterest.com/url_shortener/{}/redirect/".format(
-            self.shortened_id)
+        url = f"https://api.pinterest.com/url_shortener/{self.shortened_id}/redirect/"
         response = self.request(url, method="HEAD", allow_redirects=False)
         location = response.headers.get("Location")
         if not location or not PinterestPinExtractor.pattern.match(location):
@@ -391,7 +414,7 @@ class PinterestPinitExtractor(PinterestExtractor):
         yield Message.Queue, location, {"_extractor": PinterestPinExtractor}
 
 
-class PinterestAPI():
+class PinterestAPI:
     """Minimal interface for the Pinterest Web API
 
     For a better and more complete implementation in PHP, see
@@ -405,14 +428,13 @@ class PinterestAPI():
         self.root = extractor.root
         self.cookies = {"csrftoken": csrf_token}
         self.headers = {
-            "Accept"              : "application/json, text/javascript, "
-                                    "*/*, q=0.01",
-            "Accept-Language"     : "en-US,en;q=0.5",
-            "X-Requested-With"    : "XMLHttpRequest",
-            "X-APP-VERSION"       : "0c4af40",
-            "X-CSRFToken"         : csrf_token,
+            "Accept": "application/json, text/javascript, " "*/*, q=0.01",
+            "Accept-Language": "en-US,en;q=0.5",
+            "X-Requested-With": "XMLHttpRequest",
+            "X-APP-VERSION": "0c4af40",
+            "X-CSRFToken": csrf_token,
             "X-Pinterest-AppState": "active",
-            "Origin"              : self.root,
+            "Origin": self.root,
         }
 
     def pin(self, pin_id):
@@ -427,18 +449,17 @@ class PinterestAPI():
 
     def board(self, user, board_name):
         """Query information about a board"""
-        options = {"slug": board_name, "username": user,
-                   "field_set_key": "detailed"}
+        options = {"slug": board_name, "username": user, "field_set_key": "detailed"}
         return self._call("Board", options)["resource_response"]["data"]
 
     def boards(self, user):
         """Yield all boards from 'user'"""
         options = {
-            "sort"            : "last_pinned_to",
-            "field_set_key"   : "profile_grid_item",
-            "filter_stories"  : False,
-            "username"        : user,
-            "page_size"       : 25,
+            "sort": "last_pinned_to",
+            "field_set_key": "profile_grid_item",
+            "filter_stories": False,
+            "username": user,
+            "page_size": 25,
             "include_archived": True,
         }
         return self._pagination("Boards", options)
@@ -455,8 +476,7 @@ class PinterestAPI():
 
     def board_section_by_name(self, user, board_slug, section_slug):
         """Yield a board section by name"""
-        options = {"board_slug": board_slug, "section_slug": section_slug,
-                   "username": user}
+        options = {"board_slug": board_slug, "section_slug": section_slug, "username": user}
         return self._call("BoardSection", options)["resource_response"]["data"]
 
     def board_sections(self, board_id):
@@ -478,9 +498,9 @@ class PinterestAPI():
         """Yield all pins from 'user'"""
         options = {
             "is_own_profile_pins": False,
-            "username"           : user,
-            "field_set_key"      : "grid_item",
-            "pin_filter"         : None,
+            "username": user,
+            "field_set_key": "grid_item",
+            "pin_filter": None,
         }
         return self._pagination("UserPins", options)
 
@@ -488,9 +508,9 @@ class PinterestAPI():
         """Yield pins created by 'user'"""
         options = {
             "exclude_add_pin_rep": True,
-            "field_set_key"      : "grid_item",
+            "field_set_key": "grid_item",
             "is_own_profile_pins": False,
-            "username"           : user,
+            "username": user,
         }
         return self._pagination("UserActivityPins", options)
 
@@ -500,15 +520,15 @@ class PinterestAPI():
         return self._pagination("BaseSearch", options)
 
     def _call(self, resource, options):
-        url = "{}/resource/{}Resource/get/".format(self.root, resource)
+        url = f"{self.root}/resource/{resource}Resource/get/"
         params = {
-            "data"      : util.json_dumps({"options": options}),
+            "data": util.json_dumps({"options": options}),
             "source_url": "",
         }
 
         response = self.extractor.request(
-            url, params=params, headers=self.headers,
-            cookies=self.cookies, fatal=False)
+            url, params=params, headers=self.headers, cookies=self.cookies, fatal=False
+        )
 
         try:
             data = response.json()
@@ -535,8 +555,7 @@ class PinterestAPI():
 
             try:
                 bookmarks = data["resource"]["options"]["bookmarks"]
-                if (not bookmarks or bookmarks[0] == "-end-" or
-                        bookmarks[0].startswith("Y2JOb25lO")):
+                if not bookmarks or bookmarks[0] == "-end-" or bookmarks[0].startswith("Y2JOb25lO"):
                     return
                 options["bookmarks"] = bookmarks
             except KeyError:

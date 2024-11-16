@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2021 Seonghyeon Cho
 # Copyright 2022-2033 Mike Fährmann
 #
@@ -9,15 +7,17 @@
 
 """Extractors for https://comic.naver.com/"""
 
-from .common import GalleryExtractor, Extractor, Message
 from .. import text
+from .common import Extractor
+from .common import GalleryExtractor
+from .common import Message
 
-BASE_PATTERN = (r"(?:https?://)?comic\.naver\.com"
-                r"/(webtoon|challenge|bestChallenge)")
+BASE_PATTERN = r"(?:https?://)?comic\.naver\.com" r"/(webtoon|challenge|bestChallenge)"
 
 
-class NaverwebtoonBase():
+class NaverwebtoonBase:
     """Base class for naver webtoon extractors"""
+
     category = "naverwebtoon"
     root = "https://comic.naver.com"
 
@@ -32,7 +32,7 @@ class NaverwebtoonEpisodeExtractor(NaverwebtoonBase, GalleryExtractor):
 
     def __init__(self, match):
         path, query = match.groups()
-        url = "{}/{}/detail?{}".format(self.root, path, query)
+        url = f"{self.root}/{path}/detail?{query}"
         GalleryExtractor.__init__(self, match, url)
 
         query = text.parse_query(query)
@@ -43,20 +43,23 @@ class NaverwebtoonEpisodeExtractor(NaverwebtoonBase, GalleryExtractor):
         extr = text.extract_from(page)
         return {
             "title_id": self.title_id,
-            "episode" : self.episode,
-            "comic"   : extr('titleName: "', '"'),
-            "tags"    : [t.strip() for t in text.extract_iter(
-                extr("tagList: [", "],"), '"tagName":"', '"')],
-            "title"   : extr('"subtitle":"', '"'),
-            "author"  : [a.strip() for a in text.extract_iter(
-                extr('"writers":[', ']'), '"name":"', '"')],
-            "artist"  : [a.strip() for a in text.extract_iter(
-                extr('"painters":[', ']'), '"name":"', '"')]
+            "episode": self.episode,
+            "comic": extr('titleName: "', '"'),
+            "tags": [
+                t.strip() for t in text.extract_iter(extr("tagList: [", "],"), '"tagName":"', '"')
+            ],
+            "title": extr('"subtitle":"', '"'),
+            "author": [
+                a.strip() for a in text.extract_iter(extr('"writers":[', "]"), '"name":"', '"')
+            ],
+            "artist": [
+                a.strip() for a in text.extract_iter(extr('"painters":[', "]"), '"name":"', '"')
+            ],
         }
 
     @staticmethod
     def images(page):
-        view_area = text.extr(page, 'id="comic_view_area"', '</div>')
+        view_area = text.extr(page, 'id="comic_view_area"', "</div>")
         return [
             (url, None)
             for url in text.extract_iter(view_area, '<img src="', '"')
@@ -85,16 +88,15 @@ class NaverwebtoonComicExtractor(NaverwebtoonBase, Extractor):
         }
         params = {
             "titleId": self.title_id,
-            "page"   : self.page_no,
-            "sort"   : self.sort,
+            "page": self.page_no,
+            "sort": self.sort,
         }
 
         while True:
             data = self.request(url, headers=headers, params=params).json()
 
             path = data["webtoonLevelCode"].lower().replace("_c", "C", 1)
-            base = "{}/{}/detail?titleId={}&no=".format(
-                self.root, path, data["titleId"])
+            base = "{}/{}/detail?titleId={}&no=".format(self.root, path, data["titleId"])
 
             for article in data["articleList"]:
                 article["_extractor"] = NaverwebtoonEpisodeExtractor

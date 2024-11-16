@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2022-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,16 +6,16 @@
 
 """Extractors for https://bunkr.si/"""
 
-from .common import Extractor
-from .lolisafe import LolisafeAlbumExtractor
-from .. import text, config, exception
 import random
 
+from .. import config
+from .. import exception
+from .. import text
+from .common import Extractor
+from .lolisafe import LolisafeAlbumExtractor
+
 if config.get(("extractor", "bunkr"), "tlds"):
-    BASE_PATTERN = (
-        r"(?:bunkr:(?:https?://)?([^/?#]+)|"
-        r"(?:https?://)?(?:app\.)?(bunkr+\.\w+))"
-    )
+    BASE_PATTERN = r"(?:bunkr:(?:https?://)?([^/?#]+)|" r"(?:https?://)?(?:app\.)?(bunkr+\.\w+))"
 else:
     BASE_PATTERN = (
         r"(?:bunkr:(?:https?://)?([^/?#]+)|"
@@ -58,6 +56,7 @@ CF_DOMAINS = set()
 
 class BunkrAlbumExtractor(LolisafeAlbumExtractor):
     """Extractor for bunkr.si albums"""
+
     category = "bunkr"
     root = "https://bunkr.si"
     pattern = BASE_PATTERN + r"/a/([^/?#]+)"
@@ -83,8 +82,7 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
                 root, path = self._split(url)
                 if root not in CF_DOMAINS:
                     continue
-                self.log.debug("Redirect to known CF challenge domain '%s'",
-                               root)
+                self.log.debug("Redirect to known CF challenge domain '%s'", root)
 
             except exception.HttpError as exc:
                 if exc.status != 403:
@@ -102,7 +100,8 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
                 else:
                     if not DOMAINS:
                         raise exception.StopExtraction(
-                            "All Bunkr domains require solving a CF challenge")
+                            "All Bunkr domains require solving a CF challenge"
+                        )
 
             # select alternative domain
             root = "https://" + random.choice(DOMAINS)
@@ -112,19 +111,17 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
     def fetch_album(self, album_id):
         # album metadata
         page = self.request(self.root + "/a/" + album_id).text
-        title, size = text.split_html(text.extr(
-            page, "<h1", "</span>").partition(">")[2])
+        title, size = text.split_html(text.extr(page, "<h1", "</span>").partition(">")[2])
         if "&" in title:
-            title = title.replace(
-                "&lt;", "<").replace("&gt;", ">").replace("&amp;", "&")
+            title = title.replace("&lt;", "<").replace("&gt;", ">").replace("&amp;", "&")
 
         # files
         items = list(text.extract_iter(page, "<!-- item -->", "<!--  -->"))
         return self._extract_files(items), {
-            "album_id"   : album_id,
-            "album_name" : title,
-            "album_size" : text.extr(size, "(", ")"),
-            "count"      : len(items),
+            "album_id": album_id,
+            "album_name": title,
+            "album_size": text.extr(size, "(", ")"),
+            "count": len(items),
         }
 
     def _extract_files(self, items):
@@ -136,8 +133,7 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
                 info = text.split_html(item)
                 file["name"] = info[0]
                 file["size"] = info[2]
-                file["date"] = text.parse_datetime(
-                    info[-1], "%H:%M:%S %d/%m/%Y")
+                file["date"] = text.parse_datetime(info[-1], "%H:%M:%S %d/%m/%Y")
 
                 yield file
             except exception.StopExtraction:
@@ -149,18 +145,18 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
     def _extract_file(self, webpage_url):
         response = self.request(webpage_url)
         page = response.text
-        file_url = (text.extr(page, '<source src="', '"') or
-                    text.extr(page, '<img src="', '"'))
+        file_url = text.extr(page, '<source src="', '"') or text.extr(page, '<img src="', '"')
 
         if not file_url:
-            webpage_url = text.unescape(text.rextract(
-                page, ' href="', '"', page.rindex("Download"))[0])
+            webpage_url = text.unescape(
+                text.rextract(page, ' href="', '"', page.rindex("Download"))[0]
+            )
             response = self.request(webpage_url)
             file_url = text.rextract(response.text, ' href="', '"')[0]
 
         return {
-            "file"          : text.unescape(file_url),
-            "_http_headers" : {"Referer": response.url},
+            "file": text.unescape(file_url),
+            "_http_headers": {"Referer": response.url},
             "_http_validate": self._validate,
         }
 
@@ -177,6 +173,7 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
 
 class BunkrMediaExtractor(BunkrAlbumExtractor):
     """Extractor for bunkr.si media links"""
+
     subcategory = "media"
     directory_fmt = ("{category}",)
     pattern = BASE_PATTERN + r"(/[vid]/[^/?#]+)"
@@ -190,9 +187,9 @@ class BunkrMediaExtractor(BunkrAlbumExtractor):
             return (), {}
 
         return (file,), {
-            "album_id"   : "",
-            "album_name" : "",
-            "album_size" : -1,
+            "album_id": "",
+            "album_name": "",
+            "album_size": -1,
             "description": "",
-            "count"      : 1,
+            "count": 1,
         }

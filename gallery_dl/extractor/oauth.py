@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2017-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,13 +6,20 @@
 
 """Utility classes to setup OAuth and link accounts to gallery-dl"""
 
-from .common import Extractor, Message
-from .. import text, oauth, util, config, exception
-from ..output import stdout_write
-from ..cache import cache, memcache
-import urllib.parse
 import binascii
 import hashlib
+import urllib.parse
+
+from .. import config
+from .. import exception
+from .. import oauth
+from .. import text
+from .. import util
+from ..cache import cache
+from ..cache import memcache
+from ..output import stdout_write
+from .common import Extractor
+from .common import Message
 
 REDIRECT_URI_LOCALHOST = "http://localhost:6414/"
 REDIRECT_URI_HTTPS = "https://mikf.github.io/gallery-dl/oauth-redirect.html"
@@ -22,6 +27,7 @@ REDIRECT_URI_HTTPS = "https://mikf.github.io/gallery-dl/oauth-redirect.html"
 
 class OAuthBase(Extractor):
     """Base class for OAuth Helpers"""
+
     category = "oauth"
     redirect_uri = REDIRECT_URI_LOCALHOST
 
@@ -42,11 +48,11 @@ class OAuthBase(Extractor):
     def recv(self):
         """Open local HTTP server and recv callback parameters"""
         import socket
+
         stdout_write("Waiting for response. (Cancel with Ctrl+c)\n")
         server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        server.bind((self.config("host", "localhost"),
-                     self.config("port", 6414)))
+        server.bind((self.config("host", "localhost"), self.config("port", 6414)))
         server.listen(1)
 
         # workaround for ctrl+c not working during server.accept on Windows
@@ -78,6 +84,7 @@ class OAuthBase(Extractor):
         if browser:
             try:
                 import webbrowser
+
                 browser = webbrowser.get()
             except Exception:
                 browser = None
@@ -88,25 +95,27 @@ class OAuthBase(Extractor):
         else:
             self.log.info("Please open this URL in your browser:")
 
-        stdout_write("\n{}\n\n".format(url))
+        stdout_write(f"\n{url}\n\n")
         return (recv or self.recv)()
 
     def error(self, msg):
-        return self.send(
-            "Remote server reported an error:\n\n{}\n".format(msg))
+        return self.send(f"Remote server reported an error:\n\n{msg}\n")
 
     def _oauth1_authorization_flow(
-            self, default_key, default_secret,
-            request_token_url, authorize_url, access_token_url):
+        self, default_key, default_secret, request_token_url, authorize_url, access_token_url
+    ):
         """Perform the OAuth 1.0a authorization flow"""
 
         api_key = self.oauth_config("api-key") or default_key
         api_secret = self.oauth_config("api-secret") or default_secret
         self.session = oauth.OAuth1Session(api_key, api_secret)
 
-        self.log.info("Using %s %s API key (%s)",
-                      "default" if api_key == default_key else "custom",
-                      self.subcategory, api_key)
+        self.log.info(
+            "Using %s %s API key (%s)",
+            "default" if api_key == default_key else "custom",
+            self.subcategory,
+            api_key,
+        )
 
         # get a request token
         params = {"oauth_callback": self.redirect_uri}
@@ -132,36 +141,49 @@ class OAuthBase(Extractor):
             self.log.info("Writing tokens to cache")
 
         # display tokens
-        self.send(self._generate_message(
-            ("access-token", "access-token-secret"),
-            (token, token_secret),
-        ))
+        self.send(
+            self._generate_message(
+                ("access-token", "access-token-secret"),
+                (token, token_secret),
+            )
+        )
 
     def _oauth2_authorization_code_grant(
-            self, client_id, client_secret, default_id, default_secret,
-            auth_url, token_url, scope="read", duration="permanent",
-            key="refresh_token", auth=True, cache=None, instance=None):
+        self,
+        client_id,
+        client_secret,
+        default_id,
+        default_secret,
+        auth_url,
+        token_url,
+        scope="read",
+        duration="permanent",
+        key="refresh_token",
+        auth=True,
+        cache=None,
+        instance=None,
+    ):
         """Perform an OAuth2 authorization code grant"""
 
         client_id = str(client_id) if client_id else default_id
         client_secret = client_secret or default_secret
 
-        self.log.info("Using %s %s client ID (%s)",
-                      "default" if client_id == default_id else "custom",
-                      instance or self.subcategory, client_id)
-
-        state = "gallery-dl_{}_{}".format(
-            self.subcategory,
-            oauth.nonce(8),
+        self.log.info(
+            "Using %s %s client ID (%s)",
+            "default" if client_id == default_id else "custom",
+            instance or self.subcategory,
+            client_id,
         )
 
+        state = f"gallery-dl_{self.subcategory}_{oauth.nonce(8)}"
+
         auth_params = {
-            "client_id"    : client_id,
+            "client_id": client_id,
             "response_type": "code",
-            "state"        : state,
-            "redirect_uri" : self.redirect_uri,
-            "duration"     : duration,
-            "scope"        : scope,
+            "state": state,
+            "redirect_uri": self.redirect_uri,
+            "duration": duration,
+            "scope": scope,
         }
 
         # receive an authorization code
@@ -169,16 +191,15 @@ class OAuthBase(Extractor):
 
         # check authorization response
         if state != params.get("state"):
-            self.send("'state' mismatch: expected {}, got {}.\n".format(
-                state, params.get("state")))
-            return
+            self.send("'state' mismatch: expected {}, got {}.\n".format(state, params.get("state")))
+            return None
         if "error" in params:
             return self.error(params)
 
         # exchange authorization code for a token
         data = {
-            "grant_type"  : "authorization_code",
-            "code"        : params["code"],
+            "grant_type": "authorization_code",
+            "code": params["code"],
             "redirect_uri": self.redirect_uri,
         }
 
@@ -189,8 +210,7 @@ class OAuthBase(Extractor):
             data["client_id"] = client_id
             data["client_secret"] = client_secret
 
-        data = self.request(
-            token_url, method="POST", data=data, auth=auth).json()
+        data = self.request(token_url, method="POST", data=data, auth=auth).json()
 
         # check token response
         if "error" in data:
@@ -205,15 +225,18 @@ class OAuthBase(Extractor):
             self.log.info("Writing '%s' to cache", token_name)
 
         # display token
-        self.send(self._generate_message(
-            (token_name,), (token,),
-        ))
+        self.send(
+            self._generate_message(
+                (token_name,),
+                (token,),
+            )
+        )
 
     def _generate_message(self, names, values):
         _vh, _va, _is, _it = (
             ("This value has", "this value", "is", "it")
-            if len(names) == 1 else
-            ("These values have", "these values", "are", "them")
+            if len(names) == 1
+            else ("These values have", "these values", "are", "them")
         )
 
         msg = "\nYour {} {}\n\n{}\n\n".format(
@@ -227,22 +250,17 @@ class OAuthBase(Extractor):
             msg += _vh + " been cached and will automatically be used.\n"
         else:
             msg += "Put " + _va + " into your configuration file as \n"
-            msg += " and\n".join(
-                "'extractor." + self.subcategory + "." + n + "'"
-                for n in names
-            )
+            msg += " and\n".join("'extractor." + self.subcategory + "." + n + "'" for n in names)
             if self.cache:
-                msg += (
-                    "\nor set\n'extractor.{}.{}' to \"cache\""
-                    .format(self.subcategory, names[0])
-                )
-            msg += "\nto use {}.\n".format(_it)
+                msg += f"\nor set\n'extractor.{self.subcategory}.{names[0]}' to \"cache\""
+            msg += f"\nto use {_it}.\n"
 
         return msg
 
 
 # --------------------------------------------------------------------
 # OAuth 1.0a
+
 
 class OAuthFlickr(OAuthBase):
     subcategory = "flickr"
@@ -301,6 +319,7 @@ class OAuthTumblr(OAuthBase):
 
 # --------------------------------------------------------------------
 # OAuth 2.0
+
 
 class OAuthDeviantart(OAuthBase):
     subcategory = "deviantart"
@@ -370,18 +389,18 @@ class OAuthMastodon(OAuthBase):
             application["client-secret"],
             application["client-id"],
             application["client-secret"],
-            "https://{}/oauth/authorize".format(self.instance),
-            "https://{}/oauth/token".format(self.instance),
+            f"https://{self.instance}/oauth/authorize",
+            f"https://{self.instance}/oauth/token",
             instance=self.instance,
             key="access_token",
             cache=mastodon._access_token_cache,
         )
 
-    @cache(maxage=36500*86400, keyarg=1)
+    @cache(maxage=36500 * 86400, keyarg=1)
     def _register(self, instance):
         self.log.info("Registering application for '%s'", instance)
 
-        url = "https://{}/api/v1/apps".format(instance)
+        url = f"https://{instance}/api/v1/apps"
         data = {
             "client_name": "gdl:" + oauth.nonce(8),
             "redirect_uris": self.redirect_uri,
@@ -390,8 +409,7 @@ class OAuthMastodon(OAuthBase):
         data = self.request(url, method="POST", data=data).json()
 
         if "client_id" not in data or "client_secret" not in data:
-            raise exception.StopExtraction(
-                "Failed to register new application: '%s'", data)
+            raise exception.StopExtraction("Failed to register new application: '%s'", data)
 
         data["client-id"] = data.pop("client_id")
         data["client-secret"] = data.pop("client_secret")
@@ -404,6 +422,7 @@ class OAuthMastodon(OAuthBase):
 
 # --------------------------------------------------------------------
 
+
 class OAuthPixiv(OAuthBase):
     subcategory = "pixiv"
     pattern = "oauth:pixiv$"
@@ -415,8 +434,9 @@ class OAuthPixiv(OAuthBase):
 
         code_verifier = util.generate_token(32)
         digest = hashlib.sha256(code_verifier.encode()).digest()
-        code_challenge = binascii.b2a_base64(
-            digest)[:-2].decode().replace("+", "-").replace("/", "_")
+        code_challenge = (
+            binascii.b2a_base64(digest)[:-2].decode().replace("+", "-").replace("/", "_")
+        )
 
         url = "https://app-api.pixiv.net/web/v1/login"
         params = {
@@ -431,22 +451,18 @@ class OAuthPixiv(OAuthBase):
             "User-Agent": "PixivAndroidApp/5.0.234 (Android 11; Pixel 5)",
         }
         data = {
-            "client_id"     : self.oauth_config(
-                "client-id"    , pixiv.PixivAppAPI.CLIENT_ID),
-            "client_secret" : self.oauth_config(
-                "client-secret", pixiv.PixivAppAPI.CLIENT_SECRET),
-            "code"          : code,
-            "code_verifier" : code_verifier,
-            "grant_type"    : "authorization_code",
+            "client_id": self.oauth_config("client-id", pixiv.PixivAppAPI.CLIENT_ID),
+            "client_secret": self.oauth_config("client-secret", pixiv.PixivAppAPI.CLIENT_SECRET),
+            "code": code,
+            "code_verifier": code_verifier,
+            "grant_type": "authorization_code",
             "include_policy": "true",
-            "redirect_uri"  : "https://app-api.pixiv.net"
-                              "/web/v1/users/auth/pixiv/callback",
+            "redirect_uri": "https://app-api.pixiv.net" "/web/v1/users/auth/pixiv/callback",
         }
-        data = self.request(
-            url, method="POST", headers=headers, data=data).json()
+        data = self.request(url, method="POST", headers=headers, data=data).json()
 
         if "error" in data:
-            stdout_write("\n{}\n".format(data))
+            stdout_write(f"\n{data}\n")
             if data["error"] in ("invalid_request", "invalid_grant"):
                 stdout_write("'code' expired, try again\n\n")
             return

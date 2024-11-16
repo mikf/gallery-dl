@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 
 # Copyright 2015-2023 Mike Fährmann
 #
@@ -7,19 +6,17 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
+import collections
+import datetime
+import hashlib
+import json
 import os
+import re
 import sys
 import unittest
 
-import re
-import json
-import hashlib
-import datetime
-import collections
-
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from gallery_dl import \
-    extractor, util, job, config, exception, formatter  # noqa E402
+from gallery_dl import extractor, util, job, config, exception, formatter  # noqa E402
 
 
 RESULTS = os.environ.get("GDL_TEST_RESULTS")
@@ -30,8 +27,7 @@ else:
 
 
 # temporary issues, etc.
-BROKEN = {
-}
+BROKEN = {}
 
 CONFIG = {
     "cache": {
@@ -66,7 +62,6 @@ AUTH_KEYS = (
 
 
 class TestExtractorResults(unittest.TestCase):
-
     def setUp(self):
         setup_test_config()
 
@@ -82,7 +77,7 @@ class TestExtractorResults(unittest.TestCase):
         if cls._skipped:
             print("\n\nSkipped tests:")
             for url, exc in cls._skipped:
-                print('- {} ("{}")'.format(url, exc))
+                print(f'- {url} ("{exc}")')
 
     def assertRange(self, value, range, msg=None):
         if range.step > 1:
@@ -104,10 +99,10 @@ class TestExtractorResults(unittest.TestCase):
         self.assertIs(extr_url.__class__, extr_cls.__class__)
 
         if len(result) <= 2:
-            return  # only matching
+            return None  # only matching
 
         if auth is None:
-            auth = (cat in AUTH_REQUIRED)
+            auth = cat in AUTH_REQUIRED
         elif not auth:
             # auth explicitly disabled
             for key in AUTH_KEYS:
@@ -121,7 +116,7 @@ class TestExtractorResults(unittest.TestCase):
                 key = key.split(".")
                 config.set(key[:-1], key[-1], value)
         if "#range" in result:
-            config.set((), "image-range"  , result["#range"])
+            config.set((), "image-range", result["#range"])
             config.set((), "chapter-range", result["#range"])
 
         tjob = ResultJob(extr, content=("#sha1_content" in result))
@@ -129,7 +124,7 @@ class TestExtractorResults(unittest.TestCase):
         if "#exception" in result:
             with self.assertRaises(result["#exception"], msg="#exception"):
                 tjob.run()
-            return
+            return None
 
         try:
             tjob.run()
@@ -137,17 +132,15 @@ class TestExtractorResults(unittest.TestCase):
             pass
         except exception.HttpError as exc:
             exc = str(exc)
-            if re.match(r"'5\d\d ", exc) or \
-                    re.search(r"\bRead timed out\b", exc):
+            if re.match(r"'5\d\d ", exc) or re.search(r"\bRead timed out\b", exc):
                 self._skipped.append((result["#url"], exc))
                 self.skipTest(exc)
             raise
 
         if result.get("#archive", True):
             self.assertEqual(
-                len(set(tjob.archive_list)),
-                len(tjob.archive_list),
-                msg="archive-id uniqueness")
+                len(set(tjob.archive_list)), len(tjob.archive_list), msg="archive-id uniqueness"
+            )
 
         if tjob.queue:
             # test '_extractor' entries
@@ -165,10 +158,7 @@ class TestExtractorResults(unittest.TestCase):
 
         # test extraction results
         if "#sha1_url" in result:
-            self.assertEqual(
-                result["#sha1_url"],
-                tjob.url_hash.hexdigest(),
-                msg="#sha1_url")
+            self.assertEqual(result["#sha1_url"], tjob.url_hash.hexdigest(), msg="#sha1_url")
 
         if "#sha1_content" in result:
             expected = result["#sha1_content"]
@@ -180,17 +170,15 @@ class TestExtractorResults(unittest.TestCase):
 
         if "#sha1_metadata" in result:
             self.assertEqual(
-                result["#sha1_metadata"],
-                tjob.kwdict_hash.hexdigest(),
-                "#sha1_metadata")
+                result["#sha1_metadata"], tjob.kwdict_hash.hexdigest(), "#sha1_metadata"
+            )
 
         if "#count" in result:
             count = result["#count"]
             len_urls = len(tjob.url_list)
             if isinstance(count, str):
-                self.assertRegex(
-                    count, r"^ *(==|!=|<|<=|>|>=) *\d+ *$", msg="#count")
-                expr = "{} {}".format(len_urls, count)
+                self.assertRegex(count, r"^ *(==|!=|<|<=|>|>=) *\d+ *$", msg="#count")
+                expr = f"{len_urls} {count}"
                 self.assertTrue(eval(expr), msg=expr)
             elif isinstance(count, range):
                 self.assertRange(len_urls, count, msg="#count")
@@ -226,7 +214,7 @@ class TestExtractorResults(unittest.TestCase):
                 key = key[1:]
                 if key not in kwdict:
                     continue
-            path = "{}.{}".format(parent, key) if parent else key
+            path = f"{parent}.{key}" if parent else key
             self.assertIn(key, kwdict, msg=path)
             value = kwdict[key]
 
@@ -243,7 +231,7 @@ class TestExtractorResults(unittest.TestCase):
                 for idx, item in enumerate(test):
                     if isinstance(item, dict):
                         subtest = True
-                        subpath = "{}[{}]".format(path, idx)
+                        subpath = f"{path}[{idx}]"
                         self._test_kwdict(value[idx], item, subpath)
                 if not subtest:
                     self.assertEqual(test, value, msg=path)
@@ -285,12 +273,9 @@ class ResultJob(job.DownloadJob):
         else:
             self._update_content = lambda url, kwdict: None
 
-        self.format_directory = TestFormatter(
-            "".join(self.extractor.directory_fmt)).format_map
-        self.format_filename = TestFormatter(
-            self.extractor.filename_fmt).format_map
-        self.format_archive = TestFormatter(
-            self.extractor.archive_fmt).format_map
+        self.format_directory = TestFormatter("".join(self.extractor.directory_fmt)).format_map
+        self.format_filename = TestFormatter(self.extractor.filename_fmt).format_map
+        self.format_archive = TestFormatter(self.extractor.archive_fmt).format_map
 
     def run(self):
         self._init()
@@ -324,8 +309,7 @@ class ResultJob(job.DownloadJob):
         if to_list:
             self.kwdict_list.append(kwdict.copy())
         kwdict = util.filter_dict(kwdict)
-        self.kwdict_hash.update(
-            json.dumps(kwdict, sort_keys=True, default=str).encode())
+        self.kwdict_hash.update(json.dumps(kwdict, sort_keys=True, default=str).encode())
 
     def _update_archive(self, kwdict):
         archive_id = self.format_archive(kwdict)
@@ -346,8 +330,7 @@ class ResultJob(job.DownloadJob):
                 return
 
 
-class TestPathfmt():
-
+class TestPathfmt:
     def __init__(self, hashobj):
         self.hashobj = hashobj
         self.path = ""
@@ -378,7 +361,6 @@ class TestPathfmt():
 
 
 class TestFormatter(formatter.StringFormatter):
-
     @staticmethod
     def _noop(_):
         return ""
@@ -389,6 +371,7 @@ class TestFormatter(formatter.StringFormatter):
 
         def wrap(obj):
             return fmt(obj[key])
+
         return wrap
 
     def _apply(self, key, funcs, fmt):
@@ -400,6 +383,7 @@ class TestFormatter(formatter.StringFormatter):
             for func in funcs:
                 obj = func(obj)
             return fmt(obj)
+
         return wrap
 
 
@@ -409,16 +393,13 @@ def setup_test_config():
 
 def load_test_config():
     try:
-        path = os.path.join(
-            os.path.dirname(os.path.dirname(__file__)),
-            "archive", "config.json")
+        path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "archive", "config.json")
         with open(path) as fp:
             CONFIG.update(json.loads(fp.read()))
     except FileNotFoundError:
         pass
     except Exception as exc:
-        sys.exit("Error when loading {}: {}: {}".format(
-            path, exc.__class__.__name__, exc))
+        sys.exit(f"Error when loading {path}: {exc.__class__.__name__}: {exc}")
 
 
 def result_categories(result):
@@ -432,6 +413,7 @@ def result_categories(result):
 
 def generate_tests():
     """Dynamically generate extractor unittests"""
+
     def _generate_method(result):
         def test(self):
             print("\n" + result["#url"])
@@ -446,6 +428,7 @@ def generate_tests():
                 else:
                     self._skipped.append((result["#url"], "manual skip"))
                     self.skipTest(exc)
+
         return test
 
     # enable selective testing for direct calls
@@ -455,8 +438,7 @@ def generate_tests():
 
         if category.startswith("+"):
             basecategory = category[1:].lower()
-            tests = [t for t in results.all()
-                     if result_categories(t)[0].lower() == basecategory]
+            tests = [t for t in results.all() if result_categories(t)[0].lower() == basecategory]
         else:
             tests = results.category(category)
 
@@ -466,11 +448,9 @@ def generate_tests():
                 tests = [t for t in tests if url in t["#url"]]
             elif subcategory.startswith("~"):
                 com = subcategory[1:]
-                tests = [t for t in tests
-                         if "#comment" in t and com in t["#comment"].lower()]
+                tests = [t for t in tests if "#comment" in t and com in t["#comment"].lower()]
             else:
-                tests = [t for t in tests
-                         if result_categories(t)[-1] == subcategory]
+                tests = [t for t in tests if result_categories(t)[-1] == subcategory]
     else:
         tests = results.all()
 
@@ -478,12 +458,12 @@ def generate_tests():
     enum = collections.defaultdict(int)
     for result in tests:
         base, cat, sub = result_categories(result)
-        name = "{}_{}".format(cat, sub)
+        name = f"{cat}_{sub}"
         enum[name] += 1
 
         method = _generate_method(result)
         method.__doc__ = result["#url"]
-        method.__name__ = "test_{}_{}".format(name, enum[name])
+        method.__name__ = f"test_{name}_{enum[name]}"
         setattr(TestExtractorResults, method.__name__, method)
 
 

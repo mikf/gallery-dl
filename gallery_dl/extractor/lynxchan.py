@@ -1,42 +1,45 @@
-# -*- coding: utf-8 -*-
-
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
 """Extractors for LynxChan Imageboards"""
 
-from .common import BaseExtractor, Message
-from .. import text
 import itertools
+
+from .. import text
+from .common import BaseExtractor
+from .common import Message
 
 
 class LynxchanExtractor(BaseExtractor):
     """Base class for LynxChan extractors"""
+
     basecategory = "lynxchan"
 
 
-BASE_PATTERN = LynxchanExtractor.update({
-    "bbw-chan": {
-        "root": "https://bbw-chan.link",
-        "pattern": r"bbw-chan\.(?:link|nl)",
-    },
-    "kohlchan": {
-        "root": "https://kohlchan.net",
-        "pattern": r"kohlchan\.net",
-    },
-    "endchan": {
-        "root": None,
-        "pattern": r"endchan\.(?:org|net|gg)",
-    },
-})
+BASE_PATTERN = LynxchanExtractor.update(
+    {
+        "bbw-chan": {
+            "root": "https://bbw-chan.link",
+            "pattern": r"bbw-chan\.(?:link|nl)",
+        },
+        "kohlchan": {
+            "root": "https://kohlchan.net",
+            "pattern": r"kohlchan\.net",
+        },
+        "endchan": {
+            "root": None,
+            "pattern": r"endchan\.(?:org|net|gg)",
+        },
+    }
+)
 
 
 class LynxchanThreadExtractor(LynxchanExtractor):
     """Extractor for LynxChan threads"""
+
     subcategory = "thread"
-    directory_fmt = ("{category}", "{boardUri}",
-                     "{threadId} {subject|message[:50]}")
+    directory_fmt = ("{category}", "{boardUri}", "{threadId} {subject|message[:50]}")
     filename_fmt = "{postId}{num:?-//} {filename}.{extension}"
     archive_fmt = "{boardUri}_{postId}_{num}"
     pattern = BASE_PATTERN + r"/([^/?#]+)/res/(\d+)"
@@ -45,11 +48,11 @@ class LynxchanThreadExtractor(LynxchanExtractor):
     def __init__(self, match):
         LynxchanExtractor.__init__(self, match)
         index = match.lastindex
-        self.board = match.group(index-1)
+        self.board = match.group(index - 1)
         self.thread = match.group(index)
 
     def items(self):
-        url = "{}/{}/res/{}.json".format(self.root, self.board, self.thread)
+        url = f"{self.root}/{self.board}/res/{self.thread}.json"
         thread = self.request(url).json()
         thread["postId"] = thread["threadId"]
         posts = thread.pop("posts", ())
@@ -69,6 +72,7 @@ class LynxchanThreadExtractor(LynxchanExtractor):
 
 class LynxchanBoardExtractor(LynxchanExtractor):
     """Extractor for LynxChan boards"""
+
     subcategory = "board"
     pattern = BASE_PATTERN + r"/([^/?#]+)(?:/index|/catalog|/\d+|/?$)"
     example = "https://endchan.org/a/"
@@ -78,9 +82,8 @@ class LynxchanBoardExtractor(LynxchanExtractor):
         self.board = match.group(match.lastindex)
 
     def items(self):
-        url = "{}/{}/catalog.json".format(self.root, self.board)
+        url = f"{self.root}/{self.board}/catalog.json"
         for thread in self.request(url).json():
-            url = "{}/{}/res/{}.html".format(
-                self.root, self.board, thread["threadId"])
+            url = "{}/{}/res/{}.html".format(self.root, self.board, thread["threadId"])
             thread["_extractor"] = LynxchanThreadExtractor
             yield Message.Queue, url, thread

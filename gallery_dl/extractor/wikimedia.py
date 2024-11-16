@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2022 Ailothaen
 # Copyright 2024 Mike Fährmann
 #
@@ -9,13 +7,16 @@
 
 """Extractors for Wikimedia sites"""
 
-from .common import BaseExtractor, Message
-from .. import text, exception
+from .. import exception
+from .. import text
 from ..cache import cache
+from .common import BaseExtractor
+from .common import Message
 
 
 class WikimediaExtractor(BaseExtractor):
     """Base class for wikimedia extractors"""
+
     basecategory = "wikimedia"
     filename_fmt = "{filename} ({sha1[:8]}).{extension}"
     archive_fmt = "{sha1}"
@@ -28,7 +29,8 @@ class WikimediaExtractor(BaseExtractor):
             self.category = self.root.split(".")[-2]
         elif self.category in ("fandom", "wikigg"):
             self.category = "{}-{}".format(
-                self.category, self.root.partition(".")[0].rpartition("/")[2])
+                self.category, self.root.partition(".")[0].rpartition("/")[2]
+            )
 
         self.per_page = self.config("limit", 50)
 
@@ -42,7 +44,7 @@ class WikimediaExtractor(BaseExtractor):
         else:
             self.api_url = None
 
-    @cache(maxage=36500*86400, keyarg=1)
+    @cache(maxage=36500 * 86400, keyarg=1)
     def _search_api_path(self, root):
         self.log.debug("Probing possible API endpoints")
         for path in ("/api.php", "/w/api.php", "/wiki/api.php"):
@@ -55,18 +57,12 @@ class WikimediaExtractor(BaseExtractor):
     @staticmethod
     def prepare(image):
         """Adjust the content of a image object"""
-        image["metadata"] = {
-            m["name"]: m["value"]
-            for m in image["metadata"] or ()}
-        image["commonmetadata"] = {
-            m["name"]: m["value"]
-            for m in image["commonmetadata"] or ()}
+        image["metadata"] = {m["name"]: m["value"] for m in image["metadata"] or ()}
+        image["commonmetadata"] = {m["name"]: m["value"] for m in image["commonmetadata"] or ()}
 
         filename = image["canonicaltitle"]
-        image["filename"], _, image["extension"] = \
-            filename.partition(":")[2].rpartition(".")
-        image["date"] = text.parse_datetime(
-            image["timestamp"], "%Y-%m-%dT%H:%M:%SZ")
+        image["filename"], _, image["extension"] = filename.partition(":")[2].rpartition(".")
+        image["date"] = text.parse_datetime(image["timestamp"], "%Y-%m-%dT%H:%M:%SZ")
 
     def items(self):
         for info in self._pagination(self.params):
@@ -126,65 +122,68 @@ class WikimediaExtractor(BaseExtractor):
             params.update(continuation)
 
 
-BASE_PATTERN = WikimediaExtractor.update({
-    "wikimedia": {
-        "root": None,
-        "pattern": r"[a-z]{2,}\."
-                   r"wik(?:i(?:pedia|quote|books|source|news|versity|data"
-                   r"|voyage)|tionary)"
-                   r"\.org",
-        "api-path": "/w/api.php",
-    },
-    "wikispecies": {
-        "root": "https://species.wikimedia.org",
-        "pattern": r"species\.wikimedia\.org",
-        "api-path": "/w/api.php",
-    },
-    "wikimediacommons": {
-        "root": "https://commons.wikimedia.org",
-        "pattern": r"commons\.wikimedia\.org",
-        "api-path": "/w/api.php",
-    },
-    "mediawiki": {
-        "root": "https://www.mediawiki.org",
-        "pattern": r"(?:www\.)?mediawiki\.org",
-        "api-path": "/w/api.php",
-    },
-    "fandom": {
-        "root": None,
-        "pattern": r"[\w-]+\.fandom\.com",
-        "api-path": "/api.php",
-    },
-    "wikigg": {
-        "root": None,
-        "pattern": r"\w+\.wiki\.gg",
-        "api-path": "/api.php",
-    },
-    "mariowiki": {
-        "root": "https://www.mariowiki.com",
-        "pattern": r"(?:www\.)?mariowiki\.com",
-        "api-path": "/api.php",
-    },
-    "bulbapedia": {
-        "root": "https://bulbapedia.bulbagarden.net",
-        "pattern": r"(?:bulbapedia|archives)\.bulbagarden\.net",
-        "api-path": "/w/api.php",
-    },
-    "pidgiwiki": {
-        "root": "https://www.pidgi.net",
-        "pattern": r"(?:www\.)?pidgi\.net",
-        "api-path": "/wiki/api.php",
-    },
-    "azurlanewiki": {
-        "root": "https://azurlane.koumakan.jp",
-        "pattern": r"azurlane\.koumakan\.jp",
-        "api-path": "/w/api.php",
-    },
-})
+BASE_PATTERN = WikimediaExtractor.update(
+    {
+        "wikimedia": {
+            "root": None,
+            "pattern": r"[a-z]{2,}\."
+            r"wik(?:i(?:pedia|quote|books|source|news|versity|data"
+            r"|voyage)|tionary)"
+            r"\.org",
+            "api-path": "/w/api.php",
+        },
+        "wikispecies": {
+            "root": "https://species.wikimedia.org",
+            "pattern": r"species\.wikimedia\.org",
+            "api-path": "/w/api.php",
+        },
+        "wikimediacommons": {
+            "root": "https://commons.wikimedia.org",
+            "pattern": r"commons\.wikimedia\.org",
+            "api-path": "/w/api.php",
+        },
+        "mediawiki": {
+            "root": "https://www.mediawiki.org",
+            "pattern": r"(?:www\.)?mediawiki\.org",
+            "api-path": "/w/api.php",
+        },
+        "fandom": {
+            "root": None,
+            "pattern": r"[\w-]+\.fandom\.com",
+            "api-path": "/api.php",
+        },
+        "wikigg": {
+            "root": None,
+            "pattern": r"\w+\.wiki\.gg",
+            "api-path": "/api.php",
+        },
+        "mariowiki": {
+            "root": "https://www.mariowiki.com",
+            "pattern": r"(?:www\.)?mariowiki\.com",
+            "api-path": "/api.php",
+        },
+        "bulbapedia": {
+            "root": "https://bulbapedia.bulbagarden.net",
+            "pattern": r"(?:bulbapedia|archives)\.bulbagarden\.net",
+            "api-path": "/w/api.php",
+        },
+        "pidgiwiki": {
+            "root": "https://www.pidgi.net",
+            "pattern": r"(?:www\.)?pidgi\.net",
+            "api-path": "/wiki/api.php",
+        },
+        "azurlanewiki": {
+            "root": "https://azurlane.koumakan.jp",
+            "pattern": r"azurlane\.koumakan\.jp",
+            "api-path": "/w/api.php",
+        },
+    }
+)
 
 
 class WikimediaArticleExtractor(WikimediaExtractor):
     """Extractor for wikimedia articles"""
+
     subcategory = "article"
     directory_fmt = ("{category}", "{page}")
     pattern = BASE_PATTERN + r"/(?!static/)([^?#]+)"
@@ -210,19 +209,19 @@ class WikimediaArticleExtractor(WikimediaExtractor):
         if prefix == "category":
             self.params = {
                 "generator": "categorymembers",
-                "gcmtitle" : path,
-                "gcmtype"  : "file",
-                "gcmlimit" : self.per_page,
+                "gcmtitle": path,
+                "gcmtype": "file",
+                "gcmlimit": self.per_page,
             }
         elif prefix == "file":
             self.params = {
-                "titles"   : path,
+                "titles": path,
             }
         else:
             self.params = {
                 "generator": "images",
-                "gimlimit" : self.per_page,
-                "titles"   : path,
+                "gimlimit": self.per_page,
+                "titles": path,
             }
 
     def prepare(self, image):
@@ -232,6 +231,7 @@ class WikimediaArticleExtractor(WikimediaExtractor):
 
 class WikimediaWikiExtractor(WikimediaExtractor):
     """Extractor for all files on a MediaWiki instance"""
+
     subcategory = "wiki"
     pattern = BASE_PATTERN + r"/?$"
     example = "https://en.wikipedia.org/"
@@ -241,7 +241,7 @@ class WikimediaWikiExtractor(WikimediaExtractor):
 
         # ref: https://www.mediawiki.org/wiki/API:Allpages
         self.params = {
-            "generator"   : "allpages",
+            "generator": "allpages",
             "gapnamespace": 6,  # "File" namespace
-            "gaplimit"    : self.per_page,
+            "gaplimit": self.per_page,
         }

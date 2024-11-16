@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2018-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,9 +6,11 @@
 
 """Downloader module for URLs requiring youtube-dl support"""
 
-from .common import DownloaderBase
-from .. import ytdl, text
 import os
+
+from .. import text
+from .. import ytdl
+from .common import DownloaderBase
 
 
 class YoutubeDLDownloader(DownloaderBase):
@@ -22,7 +22,7 @@ class YoutubeDLDownloader(DownloaderBase):
         extractor = job.extractor
         retries = self.config("retries", extractor._retries)
         self.ytdl_opts = {
-            "retries": retries+1 if retries >= 0 else float("inf"),
+            "retries": retries + 1 if retries >= 0 else float("inf"),
             "socket_timeout": self.config("timeout", extractor._timeout),
             "nocheckcertificate": not self.config("verify", extractor._verify),
             "proxy": self.proxies.get("http") if self.proxies else None,
@@ -43,18 +43,17 @@ class YoutubeDLDownloader(DownloaderBase):
                 try:
                     module = ytdl.import_module(self.config("module"))
                 except (ImportError, SyntaxError) as exc:
-                    self.log.error("Cannot import module '%s'",
-                                   getattr(exc, "name", ""))
+                    self.log.error("Cannot import module '%s'", getattr(exc, "name", ""))
                     self.log.debug("", exc_info=exc)
                     self.download = lambda u, p: False
                     return False
                 self.ytdl_instance = ytdl_instance = ytdl.construct_YoutubeDL(
-                    module, self, self.ytdl_opts)
+                    module, self, self.ytdl_opts
+                )
                 if self.outtmpl == "default":
                     self.outtmpl = module.DEFAULT_OUTTMPL
             if self.forward_cookies:
-                self.log.debug("Forwarding cookies to %s",
-                               ytdl_instance.__module__)
+                self.log.debug("Forwarding cookies to %s", ytdl_instance.__module__)
                 set_cookie = ytdl_instance.cookiejar.set_cookie
                 for cookie in self.session.cookies:
                     set_cookie(cookie)
@@ -68,8 +67,7 @@ class YoutubeDLDownloader(DownloaderBase):
             try:
                 manifest = kwdict.pop("_ytdl_manifest", None)
                 if manifest:
-                    info_dict = self._extract_manifest(
-                        ytdl_instance, url, manifest)
+                    info_dict = self._extract_manifest(ytdl_instance, url, manifest)
                 else:
                     info_dict = self._extract_info(ytdl_instance, url)
             except Exception as exc:
@@ -82,10 +80,8 @@ class YoutubeDLDownloader(DownloaderBase):
         if "entries" in info_dict:
             index = kwdict.get("_ytdl_index")
             if index is None:
-                return self._download_playlist(
-                    ytdl_instance, pathfmt, info_dict)
-            else:
-                info_dict = info_dict["entries"][index]
+                return self._download_playlist(ytdl_instance, pathfmt, info_dict)
+            info_dict = info_dict["entries"][index]
 
         extra = kwdict.get("_ytdl_extra")
         if extra:
@@ -108,12 +104,10 @@ class YoutubeDLDownloader(DownloaderBase):
 
         if self.outtmpl:
             self._set_outtmpl(ytdl_instance, self.outtmpl)
-            pathfmt.filename = filename = \
-                ytdl_instance.prepare_filename(info_dict)
+            pathfmt.filename = filename = ytdl_instance.prepare_filename(info_dict)
             pathfmt.extension = info_dict["ext"]
             pathfmt.path = pathfmt.directory + filename
-            pathfmt.realpath = pathfmt.temppath = (
-                pathfmt.realdirectory + filename)
+            pathfmt.realpath = pathfmt.temppath = pathfmt.realdirectory + filename
         else:
             pathfmt.set_extension(info_dict["ext"])
             pathfmt.build_path()
@@ -122,8 +116,7 @@ class YoutubeDLDownloader(DownloaderBase):
             pathfmt.temppath = ""
             return True
         if self.part and self.partdir:
-            pathfmt.temppath = os.path.join(
-                self.partdir, pathfmt.filename)
+            pathfmt.temppath = os.path.join(self.partdir, pathfmt.filename)
 
         self._set_outtmpl(ytdl_instance, pathfmt.temppath.replace("%", "%%"))
 
@@ -153,16 +146,14 @@ class YoutubeDLDownloader(DownloaderBase):
 
         if manifest == "hls":
             try:
-                formats, subtitles = extr._extract_m3u8_formats_and_subtitles(
-                    url, video_id, "mp4")
+                formats, subtitles = extr._extract_m3u8_formats_and_subtitles(url, video_id, "mp4")
             except AttributeError:
                 formats = extr._extract_m3u8_formats(url, video_id, "mp4")
                 subtitles = None
 
         elif manifest == "dash":
             try:
-                formats, subtitles = extr._extract_mpd_formats_and_subtitles(
-                    url, video_id)
+                formats, subtitles = extr._extract_mpd_formats_and_subtitles(url, video_id)
             except AttributeError:
                 formats = extr._extract_mpd_formats(url, video_id)
                 subtitles = None
@@ -172,17 +163,16 @@ class YoutubeDLDownloader(DownloaderBase):
             return None
 
         info_dict = {
-            "id"       : video_id,
-            "title"    : video_id,
-            "formats"  : formats,
+            "id": video_id,
+            "title": video_id,
+            "formats": formats,
             "subtitles": subtitles,
         }
         #  extr._extra_manifest_info(info_dict, url)
         return ytdl.process_ie_result(info_dict, download=False)
 
     def _progress_hook(self, info):
-        if info["status"] == "downloading" and \
-                info["elapsed"] >= self.progress:
+        if info["status"] == "downloading" and info["elapsed"] >= self.progress:
             total = info.get("total_bytes") or info.get("total_bytes_estimate")
             speed = info.get("speed")
             self.out.progress(

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2019-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,15 +6,19 @@
 
 """Extractors for https://xhamster.com/"""
 
-from .common import Extractor, Message
-from .. import text, util
+from .. import text
+from .. import util
+from .common import Extractor
+from .common import Message
 
-BASE_PATTERN = (r"(?:https?://)?((?:[\w-]+\.)?xhamster"
-                r"(?:\d?\.(?:com|one|desi)|\.porncache\.net))")
+BASE_PATTERN = (
+    r"(?:https?://)?((?:[\w-]+\.)?xhamster" r"(?:\d?\.(?:com|one|desi)|\.porncache\.net))"
+)
 
 
 class XhamsterExtractor(Extractor):
     """Base class for xhamster extractors"""
+
     category = "xhamster"
 
     def __init__(self, match):
@@ -26,9 +28,9 @@ class XhamsterExtractor(Extractor):
 
 class XhamsterGalleryExtractor(XhamsterExtractor):
     """Extractor for image galleries on xhamster.com"""
+
     subcategory = "gallery"
-    directory_fmt = ("{category}", "{user[name]}",
-                     "{gallery[id]} {gallery[title]}")
+    directory_fmt = ("{category}", "{user[name]}", "{gallery[id]} {gallery[title]}")
     filename_fmt = "{num:>03}_{id}.{extension}"
     archive_fmt = "{id}"
     pattern = BASE_PATTERN + r"(/photos/gallery/[^/?#]+)"
@@ -54,26 +56,24 @@ class XhamsterGalleryExtractor(XhamsterExtractor):
         imgs = self.data["photosGalleryModel"]
 
         return {
-            "user":
-            {
-                "id"         : text.parse_int(user["id"]),
-                "url"        : user["pageURL"],
-                "name"       : user["name"],
-                "retired"    : user["retired"],
-                "verified"   : user["verified"],
+            "user": {
+                "id": text.parse_int(user["id"]),
+                "url": user["pageURL"],
+                "name": user["name"],
+                "retired": user["retired"],
+                "verified": user["verified"],
                 "subscribers": user["subscribers"],
             },
-            "gallery":
-            {
-                "id"         : text.parse_int(imgs["id"]),
-                "tags"       : [c["name"] for c in imgs["categories"]],
-                "date"       : text.parse_timestamp(imgs["created"]),
-                "views"      : text.parse_int(imgs["views"]),
-                "likes"      : text.parse_int(imgs["rating"]["likes"]),
-                "dislikes"   : text.parse_int(imgs["rating"]["dislikes"]),
-                "title"      : text.unescape(imgs["title"]),
+            "gallery": {
+                "id": text.parse_int(imgs["id"]),
+                "tags": [c["name"] for c in imgs["categories"]],
+                "date": text.parse_timestamp(imgs["created"]),
+                "views": text.parse_int(imgs["views"]),
+                "likes": text.parse_int(imgs["rating"]["likes"]),
+                "dislikes": text.parse_int(imgs["rating"]["dislikes"]),
+                "title": text.unescape(imgs["title"]),
                 "description": text.unescape(imgs["description"]),
-                "thumbnail"  : imgs["thumbURL"],
+                "thumbnail": imgs["thumbURL"],
             },
             "count": text.parse_int(imgs["quantity"]),
         }
@@ -95,12 +95,12 @@ class XhamsterGalleryExtractor(XhamsterExtractor):
 
     def _data(self, url):
         page = self.request(url).text
-        return util.json_loads(text.extr(
-            page, "window.initials=", "</script>").rstrip("\n\r;"))
+        return util.json_loads(text.extr(page, "window.initials=", "</script>").rstrip("\n\r;"))
 
 
 class XhamsterUserExtractor(XhamsterExtractor):
     """Extractor for all galleries of an xhamster user"""
+
     subcategory = "user"
     pattern = BASE_PATTERN + r"/users/([^/?#]+)(?:/photos)?/?(?:$|[?#])"
     example = "https://xhamster.com/users/USER/photos"
@@ -110,7 +110,7 @@ class XhamsterUserExtractor(XhamsterExtractor):
         self.user = match.group(2)
 
     def items(self):
-        url = "{}/users/{}/photos".format(self.root, self.user)
+        url = f"{self.root}/users/{self.user}/photos"
         data = {"_extractor": XhamsterGalleryExtractor}
 
         while url:

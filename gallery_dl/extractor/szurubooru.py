@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,11 +6,11 @@
 
 """Extractors for szurubooru instances"""
 
-from . import booru
-from .. import text
-
-import collections
 import binascii
+import collections
+
+from .. import text
+from . import booru
 
 
 class SzurubooruExtractor(booru.BooruExtractor):
@@ -31,8 +29,9 @@ class SzurubooruExtractor(booru.BooruExtractor):
             token = self.config("token")
             if token:
                 value = username + ":" + token
-                self.headers["Authorization"] = "Token " + \
-                    binascii.b2a_base64(value.encode())[:-1].decode()
+                self.headers["Authorization"] = (
+                    "Token " + binascii.b2a_base64(value.encode())[:-1].decode()
+                )
 
     def _api_request(self, endpoint, params=None):
         url = self.root + "/api" + endpoint
@@ -60,8 +59,7 @@ class SzurubooruExtractor(booru.BooruExtractor):
 
     @staticmethod
     def _prepare(post):
-        post["date"] = text.parse_datetime(
-            post["creationTime"], "%Y-%m-%dT%H:%M:%S.%fZ")
+        post["date"] = text.parse_datetime(post["creationTime"], "%Y-%m-%dT%H:%M:%S.%fZ")
 
         tags = []
         append = tags.append
@@ -78,21 +76,23 @@ class SzurubooruExtractor(booru.BooruExtractor):
             post["tags_" + category] = tags
 
 
-BASE_PATTERN = SzurubooruExtractor.update({
-    "foalcon": {
-        "root": "https://booru.foalcon.com",
-        "pattern": r"booru\.foalcon\.com",
-    },
-    "bcbnsfw": {
-        "root": "https://booru.bcbnsfw.space",
-        "pattern": r"booru\.bcbnsfw\.space",
-        "query-all": "*",
-    },
-    "snootbooru": {
-        "root": "https://snootbooru.com",
-        "pattern": r"snootbooru\.com",
-    },
-})
+BASE_PATTERN = SzurubooruExtractor.update(
+    {
+        "foalcon": {
+            "root": "https://booru.foalcon.com",
+            "pattern": r"booru\.foalcon\.com",
+        },
+        "bcbnsfw": {
+            "root": "https://booru.bcbnsfw.space",
+            "pattern": r"booru\.bcbnsfw\.space",
+            "query-all": "*",
+        },
+        "snootbooru": {
+            "root": "https://snootbooru.com",
+            "pattern": r"snootbooru\.com",
+        },
+    }
+)
 
 
 class SzurubooruTagExtractor(SzurubooruExtractor):
@@ -111,10 +111,7 @@ class SzurubooruTagExtractor(SzurubooruExtractor):
         return {"search_tags": self.query}
 
     def posts(self):
-        if self.query.strip():
-            query = self.query
-        else:
-            query = self.config_instance("query-all")
+        query = self.query if self.query.strip() else self.config_instance("query-all")
 
         return self._pagination("/posts/", {"query": query})
 

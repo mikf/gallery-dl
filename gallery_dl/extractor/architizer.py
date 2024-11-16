@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2021-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,12 +6,15 @@
 
 """Extractors for https://architizer.com/"""
 
-from .common import GalleryExtractor, Extractor, Message
 from .. import text
+from .common import Extractor
+from .common import GalleryExtractor
+from .common import Message
 
 
 class ArchitizerProjectExtractor(GalleryExtractor):
     """Extractor for project pages on architizer.com"""
+
     category = "architizer"
     subcategory = "project"
     root = "https://architizer.com"
@@ -24,7 +25,7 @@ class ArchitizerProjectExtractor(GalleryExtractor):
     example = "https://architizer.com/projects/NAME/"
 
     def __init__(self, match):
-        url = "{}/projects/{}/".format(self.root, match.group(1))
+        url = f"{self.root}/projects/{match.group(1)}/"
         GalleryExtractor.__init__(self, match, url)
 
     def metadata(self, page):
@@ -32,34 +33,30 @@ class ArchitizerProjectExtractor(GalleryExtractor):
         extr('id="Pages"', "")
 
         return {
-            "title"      : extr('data-name="', '"'),
-            "slug"       : extr('data-slug="', '"'),
-            "gid"        : extr('data-gid="', '"').rpartition(".")[2],
-            "firm"       : extr('data-firm-leaders-str="', '"'),
-            "location"   : extr("<h2>", "<").strip(),
-            "type"       : text.unescape(text.remove_html(extr(
-                '<div class="title">Type</div>', '<br'))),
-            "status"     : text.remove_html(extr(
-                '<div class="title">STATUS</div>', '</')),
-            "year"       : text.remove_html(extr(
-                '<div class="title">YEAR</div>', '</')),
-            "size"       : text.remove_html(extr(
-                '<div class="title">SIZE</div>', '</')),
-            "description": text.unescape(extr(
-                '<span class="copy js-copy">', '</span></div>')
-                .replace("<br />", "\n")),
+            "title": extr('data-name="', '"'),
+            "slug": extr('data-slug="', '"'),
+            "gid": extr('data-gid="', '"').rpartition(".")[2],
+            "firm": extr('data-firm-leaders-str="', '"'),
+            "location": extr("<h2>", "<").strip(),
+            "type": text.unescape(text.remove_html(extr('<div class="title">Type</div>', "<br"))),
+            "status": text.remove_html(extr('<div class="title">STATUS</div>', "</")),
+            "year": text.remove_html(extr('<div class="title">YEAR</div>', "</")),
+            "size": text.remove_html(extr('<div class="title">SIZE</div>', "</")),
+            "description": text.unescape(
+                extr('<span class="copy js-copy">', "</span></div>").replace("<br />", "\n")
+            ),
         }
 
     def images(self, page):
         return [
             (url, None)
-            for url in text.extract_iter(
-                page, 'property="og:image:secure_url" content="', "?")
+            for url in text.extract_iter(page, 'property="og:image:secure_url" content="', "?")
         ]
 
 
 class ArchitizerFirmExtractor(Extractor):
     """Extractor for all projects of a firm"""
+
     category = "architizer"
     subcategory = "firm"
     root = "https://architizer.com"
@@ -71,12 +68,11 @@ class ArchitizerFirmExtractor(Extractor):
         self.firm = match.group(1)
 
     def items(self):
-        url = url = "{}/firms/{}/?requesting_merlin=pages".format(
-            self.root, self.firm)
+        url = url = f"{self.root}/firms/{self.firm}/?requesting_merlin=pages"
         page = self.request(url).text
         data = {"_extractor": ArchitizerProjectExtractor}
 
         for project in text.extract_iter(page, '<a href="/projects/', '"'):
             if not project.startswith("q/"):
-                url = "{}/projects/{}".format(self.root, project)
+                url = f"{self.root}/projects/{project}"
                 yield Message.Queue, url, data

@@ -1,14 +1,14 @@
-# -*- coding: utf-8 -*-
-
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
 """Extractors for https://everia.club"""
 
-from .common import Extractor, Message
-from .. import text
 import re
+
+from .. import text
+from .common import Extractor
+from .common import Message
 
 BASE_PATTERN = r"(?:https?://)?everia\.club"
 
@@ -29,10 +29,7 @@ class EveriaExtractor(Extractor):
         find_posts = re.compile(r'thumbnail">\s*<a href="([^"]+)').findall
 
         while True:
-            if pnum == 1:
-                url = "{}{}/".format(self.root, path)
-            else:
-                url = "{}{}/page/{}/".format(self.root, path, pnum)
+            url = f"{self.root}{path}/" if pnum == 1 else f"{self.root}{path}/page/{pnum}/"
             response = self.request(url, params=params, allow_redirects=False)
 
             if response.status_code >= 300:
@@ -56,12 +53,10 @@ class EveriaPostExtractor(EveriaExtractor):
         urls = re.findall(r'img.*?src="([^"]+)', content)
 
         data = {
-            "title": text.unescape(
-                text.extr(page, 'itemprop="headline">', "</h1>")),
+            "title": text.unescape(text.extr(page, 'itemprop="headline">', "</h1>")),
             "tags": list(text.extract_iter(page, 'rel="tag">', "</a>")),
             "post_url": url,
-            "post_category": text.extr(
-                page, "post-in-category-", " ").capitalize(),
+            "post_category": text.extr(page, "post-in-category-", " ").capitalize(),
             "count": len(urls),
         }
 
@@ -84,8 +79,7 @@ class EveriaCategoryExtractor(EveriaExtractor):
 
 class EveriaDateExtractor(EveriaExtractor):
     subcategory = "date"
-    pattern = (BASE_PATTERN +
-               r"(/\d{4}(?:/\d{2})?(?:/\d{2})?)(?:/page/\d+)?/?$")
+    pattern = BASE_PATTERN + r"(/\d{4}(?:/\d{2})?(?:/\d{2})?)(?:/page/\d+)?/?$"
     example = "https://everia.club/0000/00/00"
 
 

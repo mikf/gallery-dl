@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,12 +6,14 @@
 
 """Extractors for https://itch.io/"""
 
-from .common import Extractor, Message
 from .. import text
+from .common import Extractor
+from .common import Message
 
 
 class ItchioGameExtractor(Extractor):
     """Extractor for itch.io games"""
+
     category = "itchio"
     subcategory = "game"
     root = "https://itch.io"
@@ -28,7 +28,7 @@ class ItchioGameExtractor(Extractor):
         Extractor.__init__(self, match)
 
     def items(self):
-        game_url = "https://{}.itch.io/{}".format(self.user, self.slug)
+        game_url = f"https://{self.user}.itch.io/{self.slug}"
         page = self.request(game_url).text
 
         params = {
@@ -39,16 +39,17 @@ class ItchioGameExtractor(Extractor):
         headers = {
             "Referer": game_url,
             "X-Requested-With": "XMLHttpRequest",
-            "Origin": "https://{}.itch.io".format(self.user),
+            "Origin": f"https://{self.user}.itch.io",
         }
         data = {
             "csrf_token": text.unquote(self.cookies["itchio_token"]),
         }
 
         for upload_id in text.extract_iter(page, 'data-upload_id="', '"'):
-            file_url = "{}/file/{}".format(game_url, upload_id)
-            info = self.request(file_url, method="POST", params=params,
-                                headers=headers, data=data).json()
+            file_url = f"{game_url}/file/{upload_id}"
+            info = self.request(
+                file_url, method="POST", params=params, headers=headers, data=data
+            ).json()
 
             game = info["lightbox"]["game"]
             user = info["lightbox"]["user"]

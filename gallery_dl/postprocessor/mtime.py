@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2019-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,13 +6,15 @@
 
 """Use metadata as file modification time"""
 
-from .common import PostProcessor
-from .. import text, util, formatter
 from datetime import datetime
+
+from .. import formatter
+from .. import text
+from .. import util
+from .common import PostProcessor
 
 
 class MtimePP(PostProcessor):
-
     def __init__(self, job, options):
         PostProcessor.__init__(self, job)
         value = options.get("value")
@@ -38,8 +38,8 @@ class MtimePP(PostProcessor):
 
         pathfmt.kwdict["_mtime"] = (
             util.datetime_to_timestamp(mtime)
-            if isinstance(mtime, datetime) else
-            text.parse_int(mtime)
+            if isinstance(mtime, datetime)
+            else text.parse_int(mtime)
         )
 
 

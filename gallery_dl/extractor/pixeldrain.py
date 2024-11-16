@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2023-2024 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,14 +6,17 @@
 
 """Extractors for https://pixeldrain.com/"""
 
-from .common import Extractor, Message
-from .. import text, util
+from .. import text
+from .. import util
+from .common import Extractor
+from .common import Message
 
 BASE_PATTERN = r"(?:https?://)?pixeldrain\.com"
 
 
 class PixeldrainExtractor(Extractor):
     """Base class for pixeldrain extractors"""
+
     category = "pixeldrain"
     root = "https://pixeldrain.com"
     archive_fmt = "{id}"
@@ -26,12 +27,12 @@ class PixeldrainExtractor(Extractor):
             self.session.auth = util.HTTPBasicAuth("", api_key)
 
     def parse_datetime(self, date_string):
-        return text.parse_datetime(
-            date_string, "%Y-%m-%dT%H:%M:%S.%fZ")
+        return text.parse_datetime(date_string, "%Y-%m-%dT%H:%M:%S.%fZ")
 
 
 class PixeldrainFileExtractor(PixeldrainExtractor):
     """Extractor for pixeldrain files"""
+
     subcategory = "file"
     filename_fmt = "{filename[:230]} ({id}).{extension}"
     pattern = BASE_PATTERN + r"/(?:u|api/file)/(\w+)"
@@ -42,7 +43,7 @@ class PixeldrainFileExtractor(PixeldrainExtractor):
         self.file_id = match.group(1)
 
     def items(self):
-        url = "{}/api/file/{}".format(self.root, self.file_id)
+        url = f"{self.root}/api/file/{self.file_id}"
         file = self.request(url + "/info").json()
 
         file["url"] = url + "?download"
@@ -55,9 +56,9 @@ class PixeldrainFileExtractor(PixeldrainExtractor):
 
 class PixeldrainAlbumExtractor(PixeldrainExtractor):
     """Extractor for pixeldrain albums"""
+
     subcategory = "album"
-    directory_fmt = ("{category}",
-                     "{album[date]:%Y-%m-%d} {album[title]} ({album[id]})")
+    directory_fmt = ("{category}", "{album[date]:%Y-%m-%d} {album[title]} ({album[id]})")
     filename_fmt = "{num:>03} {filename[:230]} ({id}).{extension}"
     pattern = BASE_PATTERN + r"/(?:l|api/list)/(\w+)(?:#item=(\d+))?"
     example = "https://pixeldrain.com/l/abcdefgh"
@@ -68,7 +69,7 @@ class PixeldrainAlbumExtractor(PixeldrainExtractor):
         self.file_index = match.group(2)
 
     def items(self):
-        url = "{}/api/list/{}".format(self.root, self.album_id)
+        url = f"{self.root}/api/list/{self.album_id}"
         album = self.request(url).json()
 
         files = album["files"]
@@ -88,11 +89,10 @@ class PixeldrainAlbumExtractor(PixeldrainExtractor):
         del album["file_count"]
 
         yield Message.Directory, {"album": album}
-        for num, file in enumerate(files, idx+1):
+        for num, file in enumerate(files, idx + 1):
             file["album"] = album
             file["num"] = num
-            file["url"] = url = "{}/api/file/{}?download".format(
-                self.root, file["id"])
+            file["url"] = url = "{}/api/file/{}?download".format(self.root, file["id"])
             file["date"] = self.parse_datetime(file["date_upload"])
             text.nameext_from_url(file["name"], file)
             yield Message.Url, url, file

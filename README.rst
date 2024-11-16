@@ -19,7 +19,7 @@ and powerful `filenaming capabilities <https://gdl-org.github.io/docs/formatting
 Dependencies
 ============
 
-- Python_ 3.4+
+- Python_ 3.9+
 - Requests_
 
 Optional

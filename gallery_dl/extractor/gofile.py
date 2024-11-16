@@ -1,15 +1,17 @@
-# -*- coding: utf-8 -*-
-
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
 """Extractors for https://gofile.io/"""
 
-from .common import Extractor, Message
-from .. import text, exception
-from ..cache import cache, memcache
 import hashlib
+
+from .. import exception
+from .. import text
+from ..cache import cache
+from ..cache import memcache
+from .common import Extractor
+from .common import Message
 
 
 class GofileFolderExtractor(Extractor):
@@ -35,8 +37,7 @@ class GofileFolderExtractor(Extractor):
         self.cookies.set("accountToken", token, domain=".gofile.io")
         self.api_token = token
 
-        self.website_token = (self.config("website-token") or
-                              self._get_website_token())
+        self.website_token = self.config("website-token") or self._get_website_token()
 
         folder = self._get_content(self.content_id, password)
         yield Message.Directory, folder
@@ -53,8 +54,7 @@ class GofileFolderExtractor(Extractor):
             if content["type"] == "file":
                 num += 1
                 content["num"] = num
-                content["filename"], _, content["extension"] = \
-                    content["name"].rpartition(".")
+                content["filename"], _, content["extension"] = content["name"].rpartition(".")
                 yield Message.Url, content["link"], content
 
             elif content["type"] == "folder":
@@ -64,8 +64,7 @@ class GofileFolderExtractor(Extractor):
                     yield Message.Queue, url, content
 
             else:
-                self.log.debug("'%s' is of unknown type (%s)",
-                               content.get("name"), content["type"])
+                self.log.debug("'%s' is of unknown type (%s)", content.get("name"), content["type"])
 
     @memcache()
     def _create_account(self):
@@ -88,7 +87,9 @@ class GofileFolderExtractor(Extractor):
     def _api_request(self, endpoint, params=None, headers=None, method="GET"):
         response = self.request(
             "https://api.gofile.io/" + endpoint,
-            method=method, params=params, headers=headers,
+            method=method,
+            params=params,
+            headers=headers,
         ).json()
 
         if response["status"] != "ok":
@@ -96,7 +97,6 @@ class GofileFolderExtractor(Extractor):
                 raise exception.NotFoundError("content")
             if response["status"] == "error-passwordRequired":
                 raise exception.AuthorizationError("Password required")
-            raise exception.StopExtraction(
-                "%s failed (Status: %s)", endpoint, response["status"])
+            raise exception.StopExtraction("%s failed (Status: %s)", endpoint, response["status"])
 
         return response["data"]

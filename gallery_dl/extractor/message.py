@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2015-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -7,7 +5,7 @@
 # published by the Free Software Foundation.
 
 
-class Message():
+class Message:
     """Enum for message identifiers
 
     Extractors yield their results as message-tuples, where the first element

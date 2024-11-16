@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2014-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,20 +6,26 @@
 
 """Extractors for https://sankaku.app/"""
 
-from .booru import BooruExtractor
-from .common import Message
-from .. import text, util, exception
-from ..cache import cache
 import collections
 import re
 
-BASE_PATTERN = r"(?:https?://)?" \
-    r"(?:(?:chan|www|beta|black|white)\.sankakucomplex\.com|sankaku\.app)" \
+from .. import exception
+from .. import text
+from .. import util
+from ..cache import cache
+from .booru import BooruExtractor
+from .common import Message
+
+BASE_PATTERN = (
+    r"(?:https?://)?"
+    r"(?:(?:chan|www|beta|black|white)\.sankakucomplex\.com|sankaku\.app)"
     r"(?:/[a-z]{2})?"
+)
 
 
 class SankakuExtractor(BooruExtractor):
     """Base class for sankaku channel extractors"""
+
     basecategory = "booru"
     category = "sankaku"
     root = "https://sankaku.app"
@@ -52,27 +56,25 @@ class SankakuExtractor(BooruExtractor):
         url = post["file_url"]
         if not url:
             if post["status"] != "active":
-                self.log.warning(
-                    "Unable to download post %s (%s)",
-                    post["id"], post["status"])
+                self.log.warning("Unable to download post %s (%s)", post["id"], post["status"])
             elif self._warning:
-                self.log.warning(
-                    "Login required to download 'contentious_content' posts")
+                self.log.warning("Login required to download 'contentious_content' posts")
                 SankakuExtractor._warning = False
         elif url[8] == "v":
-            url = "https://s.sankakucomplex.com" + url[url.index("/", 8):]
+            url = "https://s.sankakucomplex.com" + url[url.index("/", 8) :]
         return url
 
     def _prepare(self, post):
         post["created_at"] = post["created_at"]["s"]
         post["date"] = text.parse_timestamp(post["created_at"])
-        post["tags"] = [tag["name"].lower().replace(" ", "_")
-                        for tag in post["tags"] if tag["name"]]
+        post["tags"] = [
+            tag["name"].lower().replace(" ", "_") for tag in post["tags"] if tag["name"]
+        ]
         post["tag_string"] = " ".join(post["tags"])
         post["_http_validate"] = self._check_expired
 
     def _check_expired(self, response):
-        return not response.history or '.com/expired.png' not in response.url
+        return not response.history or ".com/expired.png" not in response.url
 
     def _tags(self, post, page):
         tags = collections.defaultdict(list)
@@ -98,6 +100,7 @@ class SankakuExtractor(BooruExtractor):
 
 class SankakuTagExtractor(SankakuExtractor):
     """Extractor for images from sankaku.app by search-tags"""
+
     subcategory = "tag"
     directory_fmt = ("{category}", "{search_tags}")
     archive_fmt = "t_{search_tags}_{id}"
@@ -111,12 +114,8 @@ class SankakuTagExtractor(SankakuExtractor):
 
         if "date:" in self.tags:
             # rewrite 'date:' tags (#1790)
-            self.tags = re.sub(
-                r"date:(\d\d)[.-](\d\d)[.-](\d\d\d\d)",
-                r"date:\3.\2.\1", self.tags)
-            self.tags = re.sub(
-                r"date:(\d\d\d\d)[.-](\d\d)[.-](\d\d)",
-                r"date:\1.\2.\3", self.tags)
+            self.tags = re.sub(r"date:(\d\d)[.-](\d\d)[.-](\d\d\d\d)", r"date:\3.\2.\1", self.tags)
+            self.tags = re.sub(r"date:(\d\d\d\d)[.-](\d\d)[.-](\d\d)", r"date:\1.\2.\3", self.tags)
 
     def metadata(self):
         return {"search_tags": self.tags}
@@ -128,6 +127,7 @@ class SankakuTagExtractor(SankakuExtractor):
 
 class SankakuPoolExtractor(SankakuExtractor):
     """Extractor for image pools or books from sankaku.app"""
+
     subcategory = "pool"
     directory_fmt = ("{category}", "pool", "{pool[id]} {pool[name_en]}")
     archive_fmt = "p_{pool}_{id}"
@@ -155,6 +155,7 @@ class SankakuPoolExtractor(SankakuExtractor):
 
 class SankakuPostExtractor(SankakuExtractor):
     """Extractor for single posts from sankaku.app"""
+
     subcategory = "post"
     archive_fmt = "{id}"
     pattern = BASE_PATTERN + r"/posts?(?:/show)?/(\w+)"
@@ -170,6 +171,7 @@ class SankakuPostExtractor(SankakuExtractor):
 
 class SankakuBooksExtractor(SankakuExtractor):
     """Extractor for books by tag search on sankaku.app"""
+
     subcategory = "books"
     pattern = BASE_PATTERN + r"/books/?\?([^#]*)"
     example = "https://sankaku.app/books?tags=TAG"
@@ -187,16 +189,16 @@ class SankakuBooksExtractor(SankakuExtractor):
             yield Message.Queue, url, pool
 
 
-class SankakuAPI():
+class SankakuAPI:
     """Interface for the sankaku.app API"""
 
     def __init__(self, extractor):
         self.extractor = extractor
         self.headers = {
-            "Accept"     : "application/vnd.sankaku.api+json;v=2",
-            "Platform"   : "web-app",
+            "Accept": "application/vnd.sankaku.api+json;v=2",
+            "Platform": "web-app",
             "Api-Version": None,
-            "Origin"     : extractor.root,
+            "Origin": extractor.root,
         }
 
         if extractor.config("id-format") in ("alnum", "alphanumeric"):
@@ -208,7 +210,7 @@ class SankakuAPI():
 
     def notes(self, post_id):
         params = {"lang": "en"}
-        return self._call("/posts/{}/notes".format(post_id), params)
+        return self._call(f"/posts/{post_id}/notes", params)
 
     def pools(self, pool_id):
         params = {"lang": "en"}
@@ -219,10 +221,10 @@ class SankakuAPI():
 
     def posts(self, post_id):
         params = {
-            "lang" : "en",
-            "page" : "1",
+            "lang": "en",
+            "page": "1",
             "limit": "1",
-            "tags" : ("md5:" if len(post_id) == 32 else "id_range:") + post_id,
+            "tags": ("md5:" if len(post_id) == 32 else "id_range:") + post_id,
         }
         return self._call("/posts", params)
 
@@ -230,15 +232,15 @@ class SankakuAPI():
         return self._pagination("/posts/keyset", params)
 
     def authenticate(self):
-        self.headers["Authorization"] = \
-            _authenticate_impl(self.extractor, self.username, self.password)
+        self.headers["Authorization"] = _authenticate_impl(
+            self.extractor, self.username, self.password
+        )
 
     def _call(self, endpoint, params=None):
         url = "https://capi-v2.sankakucomplex.com" + endpoint
         for _ in range(5):
             self.authenticate()
-            response = self.extractor.request(
-                url, params=params, headers=self.headers, fatal=None)
+            response = self.extractor.request(url, params=params, headers=self.headers, fatal=None)
 
             if response.status_code == 429:
                 until = response.headers.get("X-RateLimit-Reset")
@@ -255,8 +257,7 @@ class SankakuAPI():
                 success = True
             if not success:
                 code = data.get("code")
-                if code and code.endswith(
-                        ("unauthorized", "invalid-token", "invalid_token")):
+                if code and code.endswith(("unauthorized", "invalid-token", "invalid_token")):
                     _authenticate_impl.invalidate(self.username)
                     continue
                 raise exception.StopExtraction(code)
@@ -283,8 +284,7 @@ class SankakuAPI():
                     if not expires:
                         url = post["file_url"]
                         if url:
-                            expires = text.parse_int(
-                                text.extr(url, "e=", "&")) - 60
+                            expires = text.parse_int(text.extr(url, "e=", "&")) - 60
 
                     if 0 < expires <= time():
                         self.extractor.log.debug("Refreshing download URLs")
@@ -307,7 +307,7 @@ class SankakuAPI():
                 return
 
 
-@cache(maxage=365*86400, keyarg=1)
+@cache(maxage=365 * 86400, keyarg=1)
 def _authenticate_impl(extr, username, password):
     extr.log.info("Logging in as %s", username)
 
@@ -315,8 +315,7 @@ def _authenticate_impl(extr, username, password):
     headers = {"Accept": "application/vnd.sankaku.api+json;v=2"}
     data = {"login": username, "password": password}
 
-    response = extr.request(
-        url, method="POST", headers=headers, json=data, fatal=False)
+    response = extr.request(url, method="POST", headers=headers, json=data, fatal=False)
     data = response.json()
 
     if response.status_code >= 400 or not data.get("success"):

@@ -1,19 +1,18 @@
-# -*- coding: utf-8 -*-
-
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
 """Extractors for https://tumblrgallery.xyz/"""
 
-from .common import GalleryExtractor
 from .. import text
+from .common import GalleryExtractor
 
 BASE_PATTERN = r"(?:https?://)?tumblrgallery\.xyz"
 
 
 class TumblrgalleryExtractor(GalleryExtractor):
     """Base class for tumblrgallery extractors"""
+
     category = "tumblrgallery"
     filename_fmt = "{category}_{gallery_id}_{num:>03}_{id}.{extension}"
     directory_fmt = ("{category}", "{gallery_id} {title}")
@@ -22,8 +21,7 @@ class TumblrgalleryExtractor(GalleryExtractor):
 
     @staticmethod
     def _urls_from_page(page):
-        return text.extract_iter(
-            page, '<div class="report"> <a class="xx-co-me" href="', '"')
+        return text.extract_iter(page, '<div class="report"> <a class="xx-co-me" href="', '"')
 
     @staticmethod
     def _data_from_url(url):
@@ -37,6 +35,7 @@ class TumblrgalleryExtractor(GalleryExtractor):
 
 class TumblrgalleryTumblrblogExtractor(TumblrgalleryExtractor):
     """Extractor for Tumblrblog on tumblrgallery.xyz"""
+
     subcategory = "tumblrblog"
     pattern = BASE_PATTERN + r"(/tumblrblog/gallery/(\d+)\.html)"
     example = "https://tumblrgallery.xyz/tumblrblog/gallery/12345.html"
@@ -47,15 +46,14 @@ class TumblrgalleryTumblrblogExtractor(TumblrgalleryExtractor):
 
     def metadata(self, page):
         return {
-            "title" : text.unescape(text.extr(page, "<h1>", "</h1>")),
+            "title": text.unescape(text.extr(page, "<h1>", "</h1>")),
             "gallery_id": self.gallery_id,
         }
 
     def images(self, _):
         page_num = 1
         while True:
-            url = "{}/tumblrblog/gallery/{}/{}.html".format(
-                self.root, self.gallery_id, page_num)
+            url = f"{self.root}/tumblrblog/gallery/{self.gallery_id}/{page_num}.html"
             response = self.request(url, allow_redirects=False, fatal=False)
 
             if response.status_code >= 300:
@@ -68,6 +66,7 @@ class TumblrgalleryTumblrblogExtractor(TumblrgalleryExtractor):
 
 class TumblrgalleryPostExtractor(TumblrgalleryExtractor):
     """Extractor for Posts on tumblrgallery.xyz"""
+
     subcategory = "post"
     pattern = BASE_PATTERN + r"(/post/(\d+)\.html)"
     example = "https://tumblrgallery.xyz/post/12345.html"
@@ -78,7 +77,7 @@ class TumblrgalleryPostExtractor(TumblrgalleryExtractor):
 
     def metadata(self, page):
         return {
-            "title" : text.remove_html(
+            "title": text.remove_html(
                 text.unescape(text.extr(page, "<title>", "</title>"))
             ).replace("_", "-"),
             "gallery_id": self.gallery_id,
@@ -91,6 +90,7 @@ class TumblrgalleryPostExtractor(TumblrgalleryExtractor):
 
 class TumblrgallerySearchExtractor(TumblrgalleryExtractor):
     """Extractor for Search result on tumblrgallery.xyz"""
+
     subcategory = "search"
     filename_fmt = "{category}_{num:>03}_{gallery_id}_{id}_{title}.{extension}"
     directory_fmt = ("{category}", "{search_term}")
@@ -111,22 +111,19 @@ class TumblrgallerySearchExtractor(TumblrgalleryExtractor):
         while True:
             page = self.request(self.root + "/" + page_url).text
 
-            for gallery_id in text.extract_iter(
-                    page, '<div class="title"><a href="post/', '.html'):
-
-                url = "{}/post/{}.html".format(self.root, gallery_id)
+            for gallery_id in text.extract_iter(page, '<div class="title"><a href="post/', ".html"):
+                url = f"{self.root}/post/{gallery_id}.html"
                 post_page = self.request(url).text
 
                 for url in self._urls_from_page(post_page):
                     data = self._data_from_url(url)
                     data["gallery_id"] = gallery_id
-                    data["title"] = text.remove_html(text.unescape(
-                        text.extr(post_page, "<title>", "</title>")
-                    )).replace("_", "-")
+                    data["title"] = text.remove_html(
+                        text.unescape(text.extr(post_page, "<title>", "</title>"))
+                    ).replace("_", "-")
                     yield url, data
 
-            next_url = text.extr(
-                page, '</span> <a class="btn btn-primary" href="', '"')
+            next_url = text.extr(page, '</span> <a class="btn btn-primary" href="', '"')
             if not next_url or page_url == next_url:
                 return
             page_url = next_url

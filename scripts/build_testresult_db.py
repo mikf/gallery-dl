@@ -1,26 +1,25 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 
 """Collect results of extractor unit tests"""
 
-import sys
-import os.path
 import datetime
+import os.path
+import sys
 
 import util
-from gallery_dl import extractor, job, config
-from test.test_results import setup_test_config
 
+from gallery_dl import config
+from gallery_dl import extractor
+from gallery_dl import job
+from test.test_results import setup_test_config
 
 # filter test cases
 
 tests = [
     (idx, extr, url, result)
-
     for extr in extractor.extractors()
     if hasattr(extr, "test") and extr.test
     if len(sys.argv) <= 1 or extr.category in sys.argv
-
     for idx, (url, result) in enumerate(extr._get_tests())
     if result
 ]
@@ -33,9 +32,8 @@ os.makedirs(path, exist_ok=True)
 
 
 for idx, extr, url, result in tests:
-
     # filename
-    name = "{}-{}-{}.json".format(extr.category, extr.subcategory, idx)
+    name = f"{extr.category}-{extr.subcategory}-{idx}.json"
     print(name)
 
     # config values
@@ -46,7 +44,7 @@ for idx, extr, url, result in tests:
             key = key.split(".")
             config.set(key[:-1], key[-1], value)
     if "range" in result:
-        config.set((), "image-range"  , result["range"])
+        config.set((), "image-range", result["range"])
         config.set((), "chapter-range", result["range"])
 
     # write test data

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2015-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify

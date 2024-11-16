@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 
 # Copyright 2020 Mike Fährmann
 #
@@ -9,8 +8,10 @@
 
 """Generate zsh completion script from gallery-dl's argument parser"""
 
-import util
 import argparse
+
+import util
+
 from gallery_dl import option
 
 TEMPLATE = """#compdef gallery-dl
@@ -25,16 +26,17 @@ _arguments -s -S \\
 return rc
 """
 
-TR = str.maketrans({
-    "'": "'\\''",
-    "[": "\\[",
-    "]": "\\]",
-})
+TR = str.maketrans(
+    {
+        "'": "'\\''",
+        "[": "\\[",
+        "]": "\\]",
+    }
+)
 
 
 opts = []
 for action in option.build_parser()._actions:
-
     if not action.option_strings or action.help == argparse.SUPPRESS:
         continue
     elif len(action.option_strings) == 1:

@@ -1,5 +1,4 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+# !/usr/bin/env python3
 
 # Copyright 2021 Mike Fährmann
 #
@@ -11,8 +10,7 @@ import os
 import sys
 import unittest
 
-TEST_DIRECTORY = os.path.join(
-    os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "test")
+TEST_DIRECTORY = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "test")
 
 sys.path.insert(0, TEST_DIRECTORY)
 
@@ -23,10 +21,7 @@ if len(sys.argv) <= 1:
         if file.startswith("test_") and file != "test_results.py"
     ]
 else:
-    TESTS = [
-        name if name.startswith("test_") else "test_" + name
-        for name in sys.argv[1:]
-    ]
+    TESTS = [name if name.startswith("test_") else "test_" + name for name in sys.argv[1:]]
 
 
 suite = unittest.TestSuite()

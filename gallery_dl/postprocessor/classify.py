@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2018-2021 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,31 +6,25 @@
 
 """Categorize files by file extension"""
 
-from .common import PostProcessor
 import os
+
+from .common import PostProcessor
 
 
 class ClassifyPP(PostProcessor):
-
     DEFAULT_MAPPING = {
-        "Music" : ("mp3", "aac", "flac", "ogg", "wma", "m4a", "wav"),
-        "Video" : ("flv", "ogv", "avi", "mp4", "mpg", "mpeg", "3gp", "mkv",
-                   "webm", "vob", "wmv"),
-        "Pictures" : ("jpg", "jpeg", "png", "gif", "bmp", "svg", "webp"),
-        "Archives" : ("zip", "rar", "7z", "tar", "gz", "bz2"),
+        "Music": ("mp3", "aac", "flac", "ogg", "wma", "m4a", "wav"),
+        "Video": ("flv", "ogv", "avi", "mp4", "mpg", "mpeg", "3gp", "mkv", "webm", "vob", "wmv"),
+        "Pictures": ("jpg", "jpeg", "png", "gif", "bmp", "svg", "webp"),
+        "Archives": ("zip", "rar", "7z", "tar", "gz", "bz2"),
     }
 
     def __init__(self, job, options):
         PostProcessor.__init__(self, job)
         mapping = options.get("mapping", self.DEFAULT_MAPPING)
 
-        self.mapping = {
-            ext: directory
-            for directory, exts in mapping.items()
-            for ext in exts
-        }
-        job.register_hooks(
-            {"prepare": self.prepare, "file": self.move}, options)
+        self.mapping = {ext: directory for directory, exts in mapping.items() for ext in exts}
+        job.register_hooks({"prepare": self.prepare, "file": self.move}, options)
 
     def prepare(self, pathfmt):
         ext = pathfmt.extension

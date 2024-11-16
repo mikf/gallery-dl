@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2015-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,15 +6,21 @@
 
 """Extractors for https://mangapark.net/"""
 
-from .common import ChapterExtractor, Extractor, Message
-from .. import text, util, exception
 import re
+
+from .. import exception
+from .. import text
+from .. import util
+from .common import ChapterExtractor
+from .common import Extractor
+from .common import Message
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?mangapark\.(?:net|com|org|io|me)"
 
 
-class MangaparkBase():
+class MangaparkBase:
     """Base class for mangapark extractors"""
+
     category = "mangapark"
     _match_title = None
 
@@ -34,19 +38,20 @@ class MangaparkBase():
 
 class MangaparkChapterExtractor(MangaparkBase, ChapterExtractor):
     """Extractor for manga-chapters from mangapark.net"""
+
     pattern = BASE_PATTERN + r"/title/[^/?#]+/(\d+)"
     example = "https://mangapark.net/title/MANGA/12345-en-ch.01"
 
     def __init__(self, match):
         self.root = text.root_from_url(match.group(0))
-        url = "{}/title/_/{}".format(self.root, match.group(1))
+        url = f"{self.root}/title/_/{match.group(1)}"
         ChapterExtractor.__init__(self, match, url)
 
     def metadata(self, page):
-        data = util.json_loads(text.extr(
-            page, 'id="__NEXT_DATA__" type="application/json">', '<'))
-        chapter = (data["props"]["pageProps"]["dehydratedState"]
-                   ["queries"][0]["state"]["data"]["data"])
+        data = util.json_loads(text.extr(page, 'id="__NEXT_DATA__" type="application/json">', "<"))
+        chapter = data["props"]["pageProps"]["dehydratedState"]["queries"][0]["state"]["data"][
+            "data"
+        ]
         manga = chapter["comicNode"]["data"]
         source = chapter["sourceNode"]["data"]
 
@@ -55,32 +60,30 @@ class MangaparkChapterExtractor(MangaparkBase, ChapterExtractor):
         vol, ch, minor, title = self._parse_chapter_title(chapter["dname"])
 
         return {
-            "manga"     : manga["name"],
-            "manga_id"  : manga["id"],
-            "artist"    : source["artists"],
-            "author"    : source["authors"],
-            "genre"     : source["genres"],
-            "volume"    : text.parse_int(vol),
-            "chapter"   : text.parse_int(ch),
+            "manga": manga["name"],
+            "manga_id": manga["id"],
+            "artist": source["artists"],
+            "author": source["authors"],
+            "genre": source["genres"],
+            "volume": text.parse_int(vol),
+            "chapter": text.parse_int(ch),
             "chapter_minor": minor,
             "chapter_id": chapter["id"],
-            "title"     : chapter["title"] or title or "",
-            "lang"      : chapter["lang"],
-            "language"  : util.code_to_language(chapter["lang"]),
-            "source"    : source["srcTitle"],
-            "source_id" : source["id"],
-            "date"      : text.parse_timestamp(chapter["dateCreate"] // 1000),
+            "title": chapter["title"] or title or "",
+            "lang": chapter["lang"],
+            "language": util.code_to_language(chapter["lang"]),
+            "source": source["srcTitle"],
+            "source_id": source["id"],
+            "date": text.parse_timestamp(chapter["dateCreate"] // 1000),
         }
 
     def images(self, page):
-        return [
-            (url + "?" + params, None)
-            for url, params in zip(self._urls, self._params)
-        ]
+        return [(url + "?" + params, None) for url, params in zip(self._urls, self._params)]
 
 
 class MangaparkMangaExtractor(MangaparkBase, Extractor):
     """Extractor for manga from mangapark.net"""
+
     subcategory = "manga"
     pattern = BASE_PATTERN + r"/title/(\d+)(?:-[^/?#]*)?/?$"
     example = "https://mangapark.net/title/12345-MANGA"
@@ -97,18 +100,17 @@ class MangaparkMangaExtractor(MangaparkBase, Extractor):
 
             vol, ch, minor, title = self._parse_chapter_title(chapter["dname"])
             data = {
-                "manga_id"  : self.manga_id,
-                "volume"    : text.parse_int(vol),
-                "chapter"   : text.parse_int(ch),
+                "manga_id": self.manga_id,
+                "volume": text.parse_int(vol),
+                "chapter": text.parse_int(ch),
                 "chapter_minor": minor,
                 "chapter_id": chapter["id"],
-                "title"     : chapter["title"] or title or "",
-                "lang"      : chapter["lang"],
-                "language"  : util.code_to_language(chapter["lang"]),
-                "source"    : chapter["srcTitle"],
-                "source_id" : chapter["sourceId"],
-                "date"      : text.parse_timestamp(
-                    chapter["dateCreate"] // 1000),
+                "title": chapter["title"] or title or "",
+                "lang": chapter["lang"],
+                "language": util.code_to_language(chapter["lang"]),
+                "source": chapter["srcTitle"],
+                "source_id": chapter["sourceId"],
+                "date": text.parse_timestamp(chapter["dateCreate"] // 1000),
                 "_extractor": MangaparkChapterExtractor,
             }
             yield Message.Queue, url, data
@@ -127,14 +129,13 @@ class MangaparkMangaExtractor(MangaparkBase, Extractor):
         variables = {
             "select": {
                 "comicId": self.manga_id,
-                "range"  : None,
-                "isAsc"  : not self.config("chapter-reverse"),
+                "range": None,
+                "isAsc": not self.config("chapter-reverse"),
             }
         }
 
         while True:
-            data = self._request_graphql(
-                "get_content_comicChapterRangeList", variables)
+            data = self._request_graphql("get_content_comicChapterRangeList", variables)
 
             for item in data["items"]:
                 yield from item["chapterNodes"]
@@ -152,8 +153,7 @@ class MangaparkMangaExtractor(MangaparkBase, Extractor):
         variables = {
             "sourceId": source_id,
         }
-        chapters = self._request_graphql(
-            "get_content_source_chapterList", variables)
+        chapters = self._request_graphql("get_content_source_chapterList", variables)
 
         if self.config("chapter-reverse"):
             chapters.reverse()
@@ -167,29 +167,27 @@ class MangaparkMangaExtractor(MangaparkBase, Extractor):
         group = group.lower()
 
         variables = {
-            "comicId"    : self.manga_id,
-            "dbStatuss"  : ["normal"],
+            "comicId": self.manga_id,
+            "dbStatuss": ["normal"],
             "haveChapter": True,
         }
-        for item in self._request_graphql(
-                "get_content_comic_sources", variables):
+        for item in self._request_graphql("get_content_comic_sources", variables):
             data = item["data"]
             if (not group or data["srcTitle"].lower() == group) and (
-                    not lang or data["lang"] == lang):
+                not lang or data["lang"] == lang
+            ):
                 return data["id"]
 
-        raise exception.StopExtraction(
-            "'%s' does not match any available source", source)
+        raise exception.StopExtraction("'%s' does not match any available source", source)
 
     def _request_graphql(self, opname, variables):
         url = self.root + "/apo/"
         data = {
-            "query"        : QUERIES[opname],
-            "variables"    : util.json_dumps(variables),
+            "query": QUERIES[opname],
+            "variables": util.json_dumps(variables),
             "operationName": opname,
         }
-        return self.request(
-            url, method="POST", json=data).json()["data"][opname]
+        return self.request(url, method="POST", json=data).json()["data"][opname]
 
 
 QUERIES = {
@@ -277,7 +275,6 @@ is_adm is_mod is_vip is_upr
     }
   }
 """,
-
     "get_content_source_chapterList": """
   query get_content_source_chapterList($sourceId: Int!) {
     get_content_source_chapterList(
@@ -352,7 +349,6 @@ is_adm is_mod is_vip is_upr
     }
   }
 """,
-
     "get_content_comic_sources": """
   query get_content_comic_sources($comicId: Int!, $dbStatuss: [String] = [], $userId: Int, $haveChapter: Boolean, $sortFor: String) {
     get_content_comic_sources(

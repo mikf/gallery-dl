@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2020-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,15 +6,19 @@
 
 """Extractors for https://www.subscribestar.com/"""
 
-from .common import Extractor, Message
-from .. import text, util, exception
+from .. import exception
+from .. import text
+from .. import util
 from ..cache import cache
+from .common import Extractor
+from .common import Message
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?subscribestar\.(com|adult)"
 
 
 class SubscribestarExtractor(Extractor):
     """Base class for subscribestar extractors"""
+
     category = "subscribestar"
     root = "https://www.subscribestar.com"
     directory_fmt = ("{category}", "{author_name}")
@@ -58,24 +60,23 @@ class SubscribestarExtractor(Extractor):
         if username:
             self.cookies_update(self._login_impl(username, password))
 
-    @cache(maxage=28*86400, keyarg=1)
+    @cache(maxage=28 * 86400, keyarg=1)
     def _login_impl(self, username, password):
         self.log.info("Logging in as %s", username)
 
         url = "https://www.subscribestar.com/session.json"
         headers = {
-            "Origin"          : "https://www.subscribestar.com",
-            "Referer"         : "https://www.subscribestar.com/login",
+            "Origin": "https://www.subscribestar.com",
+            "Referer": "https://www.subscribestar.com/login",
             "X-Requested-With": "XMLHttpRequest",
         }
         data = {
-            "utf8"    : "✓",
-            "email"   : username,
+            "utf8": "✓",
+            "email": username,
             "password": password,
         }
 
-        response = self.request(
-            url, method="POST", headers=headers, data=data, fatal=False)
+        response = self.request(url, method="POST", headers=headers, data=data, fatal=False)
         if response.json().get("errors"):
             self.log.debug(response.json()["errors"])
             raise exception.AuthenticationError()
@@ -97,33 +98,31 @@ class SubscribestarExtractor(Extractor):
                 else:
                     media.append(item)
 
-        attachments = text.extr(
-            html, 'class="uploads-docs"', 'data-role="post-edit_form"')
+        attachments = text.extr(html, 'class="uploads-docs"', 'data-role="post-edit_form"')
         if attachments:
             for att in attachments.split('class="doc_preview"')[1:]:
-                media.append({
-                    "id"  : text.parse_int(text.extr(
-                        att, 'data-upload-id="', '"')),
-                    "name": text.unescape(text.extr(
-                        att, 'doc_preview-title">', '<')),
-                    "url" : text.unescape(text.extr(att, 'href="', '"')),
-                    "type": "attachment",
-                })
+                media.append(
+                    {
+                        "id": text.parse_int(text.extr(att, 'data-upload-id="', '"')),
+                        "name": text.unescape(text.extr(att, 'doc_preview-title">', "<")),
+                        "url": text.unescape(text.extr(att, 'href="', '"')),
+                        "type": "attachment",
+                    }
+                )
 
         return media
 
     def _data_from_post(self, html):
         extr = text.extract_from(html)
         return {
-            "post_id"    : text.parse_int(extr('data-id="', '"')),
-            "author_id"  : text.parse_int(extr('data-user-id="', '"')),
+            "post_id": text.parse_int(extr('data-id="', '"')),
+            "author_id": text.parse_int(extr('data-user-id="', '"')),
             "author_name": text.unescape(extr('href="/', '"')),
-            "author_nick": text.unescape(extr('>', '<')),
-            "date"       : self._parse_datetime(extr(
-                'class="post-date">', '</').rpartition(">")[2]),
-            "content"    : (extr(
-                '<div class="post-content', '<div class="post-uploads')
-                .partition(">")[2]),
+            "author_nick": text.unescape(extr(">", "<")),
+            "date": self._parse_datetime(extr('class="post-date">', "</").rpartition(">")[2]),
+            "content": (
+                extr('<div class="post-content', '<div class="post-uploads').partition(">")[2]
+            ),
         }
 
     def _parse_datetime(self, dt):
@@ -141,13 +140,14 @@ class SubscribestarExtractor(Extractor):
 
 class SubscribestarUserExtractor(SubscribestarExtractor):
     """Extractor for media from a subscribestar user"""
+
     subcategory = "user"
     pattern = BASE_PATTERN + r"/(?!posts/)([^/?#]+)"
     example = "https://www.subscribestar.com/USER"
 
     def posts(self):
         needle_next_page = 'data-role="infinite_scroll-next_page" href="'
-        page = self.request("{}/{}".format(self.root, self.item)).text
+        page = self.request(f"{self.root}/{self.item}").text
 
         while True:
             posts = page.split('<div class="post ')[1:]
@@ -163,24 +163,24 @@ class SubscribestarUserExtractor(SubscribestarExtractor):
 
 class SubscribestarPostExtractor(SubscribestarExtractor):
     """Extractor for media from a single subscribestar post"""
+
     subcategory = "post"
     pattern = BASE_PATTERN + r"/posts/(\d+)"
     example = "https://www.subscribestar.com/posts/12345"
 
     def posts(self):
-        url = "{}/posts/{}".format(self.root, self.item)
+        url = f"{self.root}/posts/{self.item}"
         return (self.request(url).text,)
 
     def _data_from_post(self, html):
         extr = text.extract_from(html)
         return {
-            "post_id"    : text.parse_int(extr('data-id="', '"')),
+            "post_id": text.parse_int(extr('data-id="', '"')),
             "author_name": text.unescape(extr('href="/', '"')),
-            "author_id"  : text.parse_int(extr('data-user-id="', '"')),
+            "author_id": text.parse_int(extr('data-user-id="', '"')),
             "author_nick": text.unescape(extr('alt="', '"')),
-            "date"       : self._parse_datetime(extr(
-                '<span class="star_link-types">', '<')),
-            "content"    : (extr(
-                '<div class="post-content', '<div class="post-uploads')
-                .partition(">")[2]),
+            "date": self._parse_datetime(extr('<span class="star_link-types">', "<")),
+            "content": (
+                extr('<div class="post-content', '<div class="post-uploads').partition(">")[2]
+            ),
         }

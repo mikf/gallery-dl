@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2022-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,17 +6,21 @@
 
 """Extractors for https://8chan.moe/"""
 
-from .common import Extractor, Message
-from .. import text, util
-from ..cache import memcache
-from datetime import timedelta
 import itertools
+from datetime import timedelta
+
+from .. import text
+from .. import util
+from ..cache import memcache
+from .common import Extractor
+from .common import Message
 
 BASE_PATTERN = r"(?:https?://)?8chan\.(moe|se|cc)"
 
 
 class _8chanExtractor(Extractor):
     """Base class for 8chan extractors"""
+
     category = "8chan"
     root = "https://8chan.moe"
 
@@ -57,17 +59,16 @@ class _8chanExtractor(Extractor):
             if cookie.domain.endswith(domain):
                 cookie.expires = None
                 if cookie.name == "captchaexpiration":
-                    cookie.value = (now + timedelta(30, 300)).strftime(
-                        "%a, %d %b %Y %H:%M:%S GMT")
+                    cookie.value = (now + timedelta(30, 300)).strftime("%a, %d %b %Y %H:%M:%S GMT")
 
         return self.cookies
 
 
 class _8chanThreadExtractor(_8chanExtractor):
     """Extractor for 8chan threads"""
+
     subcategory = "thread"
-    directory_fmt = ("{category}", "{boardUri}",
-                     "{threadId} {subject[:50]}")
+    directory_fmt = ("{category}", "{boardUri}", "{threadId} {subject[:50]}")
     filename_fmt = "{postId}{num:?-//} {filename[:200]}.{extension}"
     archive_fmt = "{boardUri}_{postId}_{num}"
     pattern = BASE_PATTERN + r"/([^/?#]+)/(?:res|last)/(\d+)"
@@ -78,7 +79,7 @@ class _8chanThreadExtractor(_8chanExtractor):
         self.cookies.set(self.cookies_tos_name(), "1", domain=self.root[8:])
 
         # fetch thread data
-        url = "{}/{}/res/{}.".format(self.root, board, thread)
+        url = f"{self.root}/{board}/res/{thread}."
         self.session.headers["Referer"] = url + "html"
         thread = self.request(url + "json").json()
         thread["postId"] = thread["threadId"]
@@ -87,8 +88,12 @@ class _8chanThreadExtractor(_8chanExtractor):
         try:
             self.cookies = self.cookies_prepare()
         except Exception as exc:
-            self.log.debug("Failed to fetch captcha cookies:  %s: %s",
-                           exc.__class__.__name__, exc, exc_info=exc)
+            self.log.debug(
+                "Failed to fetch captcha cookies:  %s: %s",
+                exc.__class__.__name__,
+                exc,
+                exc_info=exc,
+            )
 
         # download files
         posts = thread.pop("posts", ())
@@ -107,6 +112,7 @@ class _8chanThreadExtractor(_8chanExtractor):
 
 class _8chanBoardExtractor(_8chanExtractor):
     """Extractor for 8chan boards"""
+
     subcategory = "board"
     pattern = BASE_PATTERN + r"/([^/?#]+)/(?:(\d+)\.html)?$"
     example = "https://8chan.moe/a/"
@@ -116,19 +122,18 @@ class _8chanBoardExtractor(_8chanExtractor):
         self.cookies.set(self.cookies_tos_name(), "1", domain=self.root[8:])
 
         pnum = text.parse_int(pnum, 1)
-        url = "{}/{}/{}.json".format(self.root, board, pnum)
+        url = f"{self.root}/{board}/{pnum}.json"
         data = self.request(url).json()
         threads = data["threads"]
 
         while True:
             for thread in threads:
                 thread["_extractor"] = _8chanThreadExtractor
-                url = "{}/{}/res/{}.html".format(
-                    self.root, board, thread["threadId"])
+                url = "{}/{}/res/{}.html".format(self.root, board, thread["threadId"])
                 yield Message.Queue, url, thread
 
             pnum += 1
             if pnum > data["pageCount"]:
                 return
-            url = "{}/{}/{}.json".format(self.root, board, pnum)
+            url = f"{self.root}/{board}/{pnum}.json"
             threads = self.request(url).json()["threads"]

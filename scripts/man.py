@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 
 # Copyright 2019-2020 Mike Fährmann
 #
@@ -9,16 +8,16 @@
 
 """Generate man pages"""
 
-import re
 import datetime
+import re
 
 import util
+
 import gallery_dl.option
 import gallery_dl.version
 
 
 def build_gallery_dl_1(path=None):
-
     OPTS_FMT = """.TP\n.B "{}" {}\n{}"""
 
     TEMPLATE = r"""
@@ -92,24 +91,28 @@ and https://github.com/mikf/gallery-dl/graphs/contributors
     for action in gallery_dl.option.build_parser()._actions:
         if action.help.startswith("=="):
             continue
-        options.append(OPTS_FMT.format(
-            ", ".join(action.option_strings).replace("-", r"\-"),
-            r"\f[I]{}\f[]".format(action.metavar) if action.metavar else "",
-            action.help,
-        ))
+        options.append(
+            OPTS_FMT.format(
+                ", ".join(action.option_strings).replace("-", r"\-"),
+                rf"\f[I]{action.metavar}\f[]" if action.metavar else "",
+                action.help,
+            )
+        )
 
     if not path:
         path = util.path("data/man/gallery-dl.1")
     with util.lazy(path) as fp:
-        fp.write(TEMPLATE.lstrip() % {
-            "options": "\n".join(options),
-            "version": gallery_dl.version.__version__,
-            "date"   : datetime.datetime.now().strftime("%Y-%m-%d"),
-        })
+        fp.write(
+            TEMPLATE.lstrip()
+            % {
+                "options": "\n".join(options),
+                "version": gallery_dl.version.__version__,
+                "date": datetime.datetime.now().strftime("%Y-%m-%d"),
+            }
+        )
 
 
 def build_gallery_dl_conf_5(path=None):
-
     TEMPLATE = r"""
 .TH "GALLERY-DL.CONF" "5" "%(date)s" "%(version)s" "gallery-dl Manual"
 .\" disable hyphenation
@@ -210,24 +213,26 @@ and https://github.com/mikf/gallery-dl/graphs/contributors
 
             for field, text in option.items():
                 if field in ("Type", "Default"):
-                    content.append('.IP "{}:" {}'.format(field, len(field)+2))
+                    content.append(f'.IP "{field}:" {len(field) + 2}')
                     content.append(strip_rst(text))
                 else:
-                    content.append('.IP "{}:" 4'.format(field))
+                    content.append(f'.IP "{field}:" 4')
                     content.append(strip_rst(text, field != "Example"))
 
     if not path:
         path = util.path("data/man/gallery-dl.conf.5")
     with util.lazy(path) as fp:
-        fp.write(TEMPLATE.lstrip() % {
-            "options": "\n".join(content),
-            "version": gallery_dl.version.__version__,
-            "date"   : datetime.datetime.now().strftime("%Y-%m-%d"),
-        })
+        fp.write(
+            TEMPLATE.lstrip()
+            % {
+                "options": "\n".join(content),
+                "version": gallery_dl.version.__version__,
+                "date": datetime.datetime.now().strftime("%Y-%m-%d"),
+            }
+        )
 
 
 def parse_docs_configuration():
-
     doc_path = util.path("docs", "configuration.rst")
     with open(doc_path, encoding="utf-8") as fp:
         doc_lines = fp.readlines()
@@ -240,12 +245,11 @@ def parse_docs_configuration():
     name = None
     last = None
     for line in doc_lines:
-
         if line[0] == ".":
             continue
 
         # start of new section
-        elif re.match(r"^=+$", line):
+        if re.match(r"^=+$", line):
             if sec_name and options:
                 sections[sec_name] = options
             sec_name = last.strip()
@@ -284,7 +288,6 @@ def parse_docs_configuration():
 
 
 def strip_rst(text, extended=True, *, ITALIC=r"\\f[I]\1\\f[]", REGULAR=r"\1"):
-
     text = text.replace("\\", "\\\\")
 
     # ``foo``

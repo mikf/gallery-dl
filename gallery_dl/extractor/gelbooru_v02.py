@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2021-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,12 +6,14 @@
 
 """Extractors for Gelbooru Beta 0.2 sites"""
 
-from . import booru
-from .. import text, util, exception
-
-from xml.etree import ElementTree
 import collections
 import re
+from xml.etree import ElementTree as ET
+
+from .. import exception
+from .. import text
+from .. import util
+from . import booru
 
 
 class GelbooruV02Extractor(booru.BooruExtractor):
@@ -30,7 +30,7 @@ class GelbooruV02Extractor(booru.BooruExtractor):
 
     def _api_request(self, params):
         url = self.root_api + "/index.php?page=dapi&s=post&q=index"
-        return ElementTree.fromstring(self.request(url, params=params).text)
+        return ET.fromstring(self.request(url, params=params).text)
 
     def _pagination(self, params):
         params["pid"] = self.page_start
@@ -42,11 +42,10 @@ class GelbooruV02Extractor(booru.BooruExtractor):
         while True:
             try:
                 root = self._api_request(params)
-            except ElementTree.ParseError:
+            except ET.ParseError:
                 if "tags" not in params or post is None:
                     raise
-                taglist = [tag for tag in params["tags"].split()
-                           if not tag.startswith("id:<")]
+                taglist = [tag for tag in params["tags"].split() if not tag.startswith("id:<")]
                 taglist.append("id:<" + str(post.attrib["id"]))
                 params["tags"] = " ".join(taglist)
                 params["pid"] = 0
@@ -59,8 +58,8 @@ class GelbooruV02Extractor(booru.BooruExtractor):
                 except Exception as exc:
                     total = 0
                     self.log.debug(
-                        "Failed to get total number of posts (%s: %s)",
-                        exc.__class__.__name__, exc)
+                        "Failed to get total number of posts (%s: %s)", exc.__class__.__name__, exc
+                    )
 
             post = None
             for post in root:
@@ -98,22 +97,22 @@ class GelbooruV02Extractor(booru.BooruExtractor):
     @staticmethod
     def _prepare(post):
         post["tags"] = post["tags"].strip()
-        post["date"] = text.parse_datetime(
-            post["created_at"], "%a %b %d %H:%M:%S %z %Y")
+        post["date"] = text.parse_datetime(post["created_at"], "%a %b %d %H:%M:%S %z %Y")
 
     def _html(self, post):
-        return self.request("{}/index.php?page=post&s=view&id={}".format(
-            self.root, post["id"])).text
+        return self.request(
+            "{}/index.php?page=post&s=view&id={}".format(self.root, post["id"])
+        ).text
 
     def _tags(self, post, page):
-        tag_container = (text.extr(page, '<ul id="tag-', '</ul>') or
-                         text.extr(page, '<ul class="tag-', '</ul>'))
+        tag_container = text.extr(page, '<ul id="tag-', "</ul>") or text.extr(
+            page, '<ul class="tag-', "</ul>"
+        )
         if not tag_container:
             return
 
         tags = collections.defaultdict(list)
-        pattern = re.compile(
-            r"tag-type-([^\"' ]+).*?[?;]tags=([^\"'&]+)", re.S)
+        pattern = re.compile(r"tag-type-([^\"' ]+).*?[?;]tags=([^\"'&]+)", re.DOTALL)
         for tag_type, tag_name in pattern.findall(tag_container):
             tags[tag_type].append(text.unescape(text.unquote(tag_name)))
         for key, value in tags.items():
@@ -127,25 +126,29 @@ class GelbooruV02Extractor(booru.BooruExtractor):
         post["notes"] = notes = []
         for note in note_container.split('class="note-box"')[1:]:
             extr = text.extract_from(note)
-            notes.append({
-                "width" : int(extr("width:", "p")),
-                "height": int(extr("height:", "p")),
-                "y"     : int(extr("top:", "p")),
-                "x"     : int(extr("left:", "p")),
-                "id"    : int(extr('id="note-body-', '"')),
-                "body"  : text.unescape(text.remove_html(extr(">", "</div>"))),
-            })
+            notes.append(
+                {
+                    "width": int(extr("width:", "p")),
+                    "height": int(extr("height:", "p")),
+                    "y": int(extr("top:", "p")),
+                    "x": int(extr("left:", "p")),
+                    "id": int(extr('id="note-body-', '"')),
+                    "body": text.unescape(text.remove_html(extr(">", "</div>"))),
+                }
+            )
 
     def _file_url_realbooru(self, post):
         url = post["file_url"]
         md5 = post["md5"]
         if md5 not in post["preview_url"] or url.count("/") == 5:
             url = "{}/images/{}/{}/{}.{}".format(
-                self.root, md5[0:2], md5[2:4], md5, url.rpartition(".")[2])
+                self.root, md5[0:2], md5[2:4], md5, url.rpartition(".")[2]
+            )
         return url
 
     def _items_realbooru(self):
         from .common import Message
+
         data = self.metadata()
 
         for post in self.posts():
@@ -153,10 +156,14 @@ class GelbooruV02Extractor(booru.BooruExtractor):
                 html = self._html(post)
                 fallback = post["file_url"]
                 url = post["file_url"] = text.rextract(
-                    html, 'href="', '"', html.index(">Original<"))[0]
+                    html, 'href="', '"', html.index(">Original<")
+                )[0]
             except Exception:
-                self.log.debug("Unable to fetch download URL for post %s "
-                               "(md5: %s)", post.get("id"), post.get("md5"))
+                self.log.debug(
+                    "Unable to fetch download URL for post %s " "(md5: %s)",
+                    post.get("id"),
+                    post.get("md5"),
+                )
                 continue
 
             text.nameext_from_url(url, post)
@@ -174,43 +181,44 @@ class GelbooruV02Extractor(booru.BooruExtractor):
             yield Message.Url, url, post
 
     def _tags_realbooru(self, post, page):
-        tag_container = text.extr(page, 'id="tagLink"', '</div>')
+        tag_container = text.extr(page, 'id="tagLink"', "</div>")
         tags = collections.defaultdict(list)
-        pattern = re.compile(
-            r'<a class="(?:tag-type-)?([^"]+).*?;tags=([^"&]+)')
+        pattern = re.compile(r'<a class="(?:tag-type-)?([^"]+).*?;tags=([^"&]+)')
         for tag_type, tag_name in pattern.findall(tag_container):
             tags[tag_type].append(text.unescape(text.unquote(tag_name)))
         for key, value in tags.items():
             post["tags_" + key] = " ".join(value)
 
 
-BASE_PATTERN = GelbooruV02Extractor.update({
-    "realbooru": {
-        "root": "https://realbooru.com",
-        "pattern": r"realbooru\.com",
-    },
-    "rule34": {
-        "root": "https://rule34.xxx",
-        "root-api": "https://api.rule34.xxx",
-        "pattern": r"(?:www\.)?rule34\.xxx",
-    },
-    "safebooru": {
-        "root": "https://safebooru.org",
-        "pattern": r"safebooru\.org",
-    },
-    "tbib": {
-        "root": "https://tbib.org",
-        "pattern": r"tbib\.org",
-    },
-    "hypnohub": {
-        "root": "https://hypnohub.net",
-        "pattern": r"hypnohub\.net",
-    },
-    "xbooru": {
-        "root": "https://xbooru.com",
-        "pattern": r"xbooru\.com",
-    },
-})
+BASE_PATTERN = GelbooruV02Extractor.update(
+    {
+        "realbooru": {
+            "root": "https://realbooru.com",
+            "pattern": r"realbooru\.com",
+        },
+        "rule34": {
+            "root": "https://rule34.xxx",
+            "root-api": "https://api.rule34.xxx",
+            "pattern": r"(?:www\.)?rule34\.xxx",
+        },
+        "safebooru": {
+            "root": "https://safebooru.org",
+            "pattern": r"safebooru\.org",
+        },
+        "tbib": {
+            "root": "https://tbib.org",
+            "pattern": r"tbib\.org",
+        },
+        "hypnohub": {
+            "root": "https://hypnohub.net",
+            "pattern": r"hypnohub\.net",
+        },
+        "xbooru": {
+            "root": "https://xbooru.com",
+            "pattern": r"xbooru\.com",
+        },
+    }
+)
 
 
 class GelbooruV02TagExtractor(GelbooruV02Extractor):
@@ -256,15 +264,13 @@ class GelbooruV02PoolExtractor(GelbooruV02Extractor):
         return num
 
     def metadata(self):
-        url = "{}/index.php?page=pool&s=show&id={}".format(
-            self.root, self.pool_id)
+        url = f"{self.root}/index.php?page=pool&s=show&id={self.pool_id}"
         page = self.request(url).text
 
         name, pos = text.extract(page, "<h4>Pool: ", "</h4>")
         if not name:
             raise exception.NotFoundError("pool")
-        self.post_ids = text.extract_iter(
-            page, 'class="thumb" id="p', '"', pos)
+        self.post_ids = text.extract_iter(page, 'class="thumb" id="p', '"', pos)
 
         return {
             "pool": text.parse_int(self.pool_id),
@@ -278,11 +284,13 @@ class GelbooruV02PoolExtractor(GelbooruV02Extractor):
                 yield post.attrib
 
     def _posts_pages(self):
-        return self._pagination_html({
-            "page": "pool",
-            "s"   : "show",
-            "id"  : self.pool_id,
-        })
+        return self._pagination_html(
+            {
+                "page": "pool",
+                "s": "show",
+                "id": self.pool_id,
+            }
+        )
 
 
 class GelbooruV02FavoriteExtractor(GelbooruV02Extractor):
@@ -301,11 +309,13 @@ class GelbooruV02FavoriteExtractor(GelbooruV02Extractor):
         return {"favorite_id": text.parse_int(self.favorite_id)}
 
     def posts(self):
-        return self._pagination_html({
-            "page": "favorites",
-            "s"   : "view",
-            "id"  : self.favorite_id,
-        })
+        return self._pagination_html(
+            {
+                "page": "favorites",
+                "s": "view",
+                "id": self.favorite_id,
+            }
+        )
 
 
 class GelbooruV02PostExtractor(GelbooruV02Extractor):

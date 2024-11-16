@@ -1,16 +1,14 @@
-# -*- coding: utf-8 -*-
-
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-import os
 import functools
+import os
 
 __directory__ = os.path.dirname(__file__)
 
 
-@functools.lru_cache(maxsize=None)
+@functools.cache
 def tests(name):
     module = __import__(name, globals(), None, (), 1)
     return module.__tests__

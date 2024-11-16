@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2021-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,24 +6,26 @@
 
 """Filesystem path handling"""
 
+import functools
 import os
 import re
 import shutil
-import functools
-from . import util, formatter, exception
+
+from . import exception
+from . import formatter
+from . import util
 
 WINDOWS = util.WINDOWS
 EXTENSION_MAP = {
     "jpeg": "jpg",
-    "jpe" : "jpg",
+    "jpe": "jpg",
     "jfif": "jpg",
-    "jif" : "jpg",
-    "jfi" : "jpg",
+    "jif": "jpg",
+    "jfi": "jpg",
 }
 
 
-class PathFormat():
-
+class PathFormat:
     def __init__(self, extractor):
         config = extractor.config
         kwdefault = config("keywords-default")
@@ -38,15 +38,14 @@ class PathFormat():
                 filename_fmt = extractor.filename_fmt
             elif isinstance(filename_fmt, dict):
                 self.filename_conditions = [
-                    (util.compile_filter(expr),
-                     formatter.parse(fmt, kwdefault).format_map)
-                    for expr, fmt in filename_fmt.items() if expr
+                    (util.compile_filter(expr), formatter.parse(fmt, kwdefault).format_map)
+                    for expr, fmt in filename_fmt.items()
+                    if expr
                 ]
                 self.build_filename = self.build_filename_conditional
                 filename_fmt = filename_fmt.get("", extractor.filename_fmt)
 
-            self.filename_formatter = formatter.parse(
-                filename_fmt, kwdefault).format_map
+            self.filename_formatter = formatter.parse(filename_fmt, kwdefault).format_map
         except Exception as exc:
             raise exception.FilenameFormatError(exc)
 
@@ -57,18 +56,18 @@ class PathFormat():
                 directory_fmt = extractor.directory_fmt
             elif isinstance(directory_fmt, dict):
                 self.directory_conditions = [
-                    (util.compile_filter(expr), [
-                        formatter.parse(fmt, kwdefault).format_map
-                        for fmt in fmts
-                    ])
-                    for expr, fmts in directory_fmt.items() if expr
+                    (
+                        util.compile_filter(expr),
+                        [formatter.parse(fmt, kwdefault).format_map for fmt in fmts],
+                    )
+                    for expr, fmts in directory_fmt.items()
+                    if expr
                 ]
                 self.build_directory = self.build_directory_conditional
                 directory_fmt = directory_fmt.get("", extractor.directory_fmt)
 
             self.directory_formatters = [
-                formatter.parse(dirfmt, kwdefault).format_map
-                for dirfmt in directory_fmt
+                formatter.parse(dirfmt, kwdefault).format_map for dirfmt in directory_fmt
             ]
         except Exception as exc:
             raise exception.DirectoryFormatError(exc)
@@ -92,11 +91,11 @@ class PathFormat():
         restrict = config("path-restrict", "auto")
         replace = config("path-replace", "_")
         if restrict == "auto":
-            restrict = "\\\\|/<>:\"?*" if WINDOWS else "/"
+            restrict = '\\\\|/<>:"?*' if WINDOWS else "/"
         elif restrict == "unix":
             restrict = "/"
         elif restrict == "windows":
-            restrict = "\\\\|/<>:\"?*"
+            restrict = '\\\\|/<>:"?*'
         elif restrict == "ascii":
             restrict = "^0-9A-Za-z_."
         elif restrict == "ascii+":
@@ -138,15 +137,16 @@ class PathFormat():
     def _build_cleanfunc(chars, repl):
         if not chars:
             return util.identity
-        elif isinstance(chars, dict):
+        if isinstance(chars, dict):
+
             def func(x, table=str.maketrans(chars)):
                 return x.translate(table)
         elif len(chars) == 1:
+
             def func(x, c=chars, r=repl):
                 return x.replace(c, r)
         else:
-            return functools.partial(
-                re.compile("[" + chars + "]").sub, repl)
+            return functools.partial(re.compile("[" + chars + "]").sub, repl)
         return func
 
     def open(self, mode="wb"):
@@ -188,7 +188,8 @@ class PathFormat():
         segments = self.build_directory(kwdict)
         if segments:
             self.directory = directory = self.basedirectory + self.clean_path(
-                os.sep.join(segments) + os.sep)
+                os.sep.join(segments) + os.sep
+            )
         else:
             self.directory = directory = self.basedirectory
 
@@ -226,8 +227,7 @@ class PathFormat():
         """Fix filenames without a given filename extension"""
         try:
             if not self.extension:
-                self.kwdict["extension"] = \
-                    self.prefix + self.extension_map("", "")
+                self.kwdict["extension"] = self.prefix + self.extension_map("", "")
                 self.build_path()
                 if self.path[-1] == ".":
                     self.path = self.path[:-1]
@@ -244,8 +244,7 @@ class PathFormat():
     def build_filename(self, kwdict):
         """Apply 'kwdict' to filename format string"""
         try:
-            return self.clean_path(self.clean_segment(
-                self.filename_formatter(kwdict)))
+            return self.clean_path(self.clean_segment(self.filename_formatter(kwdict)))
         except Exception as exc:
             raise exception.FilenameFormatError(exc)
 
@@ -312,8 +311,7 @@ class PathFormat():
         if self.extension:
             self.temppath += ".part"
         else:
-            self.kwdict["extension"] = self.prefix + self.extension_map(
-                "part", "part")
+            self.kwdict["extension"] = self.prefix + self.extension_map("part", "part")
             self.build_path()
         if part_directory:
             self.temppath = os.path.join(

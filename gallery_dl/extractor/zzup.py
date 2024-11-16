@@ -1,13 +1,11 @@
-# -*- coding: utf-8 -*-
-
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
 """Extractors for https://zzup.com/"""
 
-from .common import GalleryExtractor
 from .. import text
+from .common import GalleryExtractor
 
 
 class ZzupGalleryExtractor(GalleryExtractor):
@@ -16,8 +14,10 @@ class ZzupGalleryExtractor(GalleryExtractor):
     filename_fmt = "{num:>03}.{extension}"
     archive_fmt = "{slug}_{num}"
     root = "https://zzup.com"
-    pattern = (r"(?:https?://)?(up\.|www\.)?zzup\.com(/(?:viewalbum|content)"
-               r"/[\w=]+/([^/?#]+)/[\w=]+)/(?:index|page-\d+)\.html")
+    pattern = (
+        r"(?:https?://)?(up\.|www\.)?zzup\.com(/(?:viewalbum|content)"
+        r"/[\w=]+/([^/?#]+)/[\w=]+)/(?:index|page-\d+)\.html"
+    )
     example = "https://zzup.com/content/xyz=/12345_TITLE/123=/index.html"
 
     def __init__(self, match):
@@ -25,14 +25,13 @@ class ZzupGalleryExtractor(GalleryExtractor):
         if subdomain == "up.":
             self.root = "https://up.zzup.com"
             self.images = self.images_v2
-        url = "{}{}/index.html".format(self.root, path)
+        url = f"{self.root}{path}/index.html"
         GalleryExtractor.__init__(self, match, url)
 
     def metadata(self, page):
         return {
-            "slug" : self.slug,
-            "title": text.unescape(text.extr(
-                page, "<title>", "</title>"))[:-11],
+            "slug": self.slug,
+            "title": text.unescape(text.extr(page, "<title>", "</title>"))[:-11],
         }
 
     def images(self, page):
@@ -48,10 +47,15 @@ class ZzupGalleryExtractor(GalleryExtractor):
         results = []
 
         while True:
-            for path in text.extract_iter(
-                    page, ' class="picbox"><a target="_blank" href="', '"'):
-                results.append(("{}/showimage/{}/zzup.com.jpg".format(
-                    self.root, "/".join(path.split("/")[2:-2])), None))
+            for path in text.extract_iter(page, ' class="picbox"><a target="_blank" href="', '"'):
+                results.append(
+                    (
+                        "{}/showimage/{}/zzup.com.jpg".format(
+                            self.root, "/".join(path.split("/")[2:-2])
+                        ),
+                        None,
+                    )
+                )
 
             pos = page.find("glyphicon-arrow-right")
             if pos < 0:

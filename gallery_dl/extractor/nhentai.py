@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2015-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,13 +6,18 @@
 
 """Extractors for https://nhentai.net/"""
 
-from .common import GalleryExtractor, Extractor, Message
-from .. import text, util
 import collections
+
+from .. import text
+from .. import util
+from .common import Extractor
+from .common import GalleryExtractor
+from .common import Message
 
 
 class NhentaiGalleryExtractor(GalleryExtractor):
     """Extractor for image galleries from nhentai.net"""
+
     category = "nhentai"
     root = "https://nhentai.net"
     pattern = r"(?:https?://)?nhentai\.net/g/(\d+)"
@@ -41,38 +44,42 @@ class NhentaiGalleryExtractor(GalleryExtractor):
                 break
 
         return {
-            "title"     : title_en or title_ja,
-            "title_en"  : title_en,
-            "title_ja"  : title_ja,
+            "title": title_en or title_ja,
+            "title_en": title_en,
+            "title_ja": title_ja,
             "gallery_id": data["id"],
-            "media_id"  : text.parse_int(data["media_id"]),
-            "date"      : data["upload_date"],
-            "scanlator" : data["scanlator"],
-            "artist"    : info["artist"],
-            "group"     : info["group"],
-            "parody"    : info["parody"],
+            "media_id": text.parse_int(data["media_id"]),
+            "date": data["upload_date"],
+            "scanlator": data["scanlator"],
+            "artist": info["artist"],
+            "group": info["group"],
+            "parody": info["parody"],
             "characters": info["character"],
-            "tags"      : info["tag"],
-            "type"      : info["category"][0] if info["category"] else "",
-            "lang"      : util.language_to_code(language),
-            "language"  : language,
+            "tags": info["tag"],
+            "type": info["category"][0] if info["category"] else "",
+            "lang": util.language_to_code(language),
+            "language": language,
         }
 
     def images(self, _):
-        ufmt = ("https://i.nhentai.net/galleries/" +
-                self.data["media_id"] + "/{}.{}")
+        ufmt = "https://i.nhentai.net/galleries/" + self.data["media_id"] + "/{}.{}"
         extdict = {"j": "jpg", "p": "png", "g": "gif", "w": "webp"}
 
         return [
-            (ufmt.format(num, extdict.get(img["t"], "jpg")), {
-                "width": img["w"], "height": img["h"],
-            })
+            (
+                ufmt.format(num, extdict.get(img["t"], "jpg")),
+                {
+                    "width": img["w"],
+                    "height": img["h"],
+                },
+            )
             for num, img in enumerate(self.data["images"]["pages"], 1)
         ]
 
 
 class NhentaiExtractor(Extractor):
     """Base class for nhentai extractors"""
+
     category = "nhentai"
     root = "https://nhentai.net"
 
@@ -83,7 +90,7 @@ class NhentaiExtractor(Extractor):
     def items(self):
         data = {"_extractor": NhentaiGalleryExtractor}
         for gallery_id in self._pagination():
-            url = "{}/g/{}/".format(self.root, gallery_id)
+            url = f"{self.root}/g/{gallery_id}/"
             yield Message.Queue, url, data
 
     def _pagination(self):
@@ -93,7 +100,7 @@ class NhentaiExtractor(Extractor):
 
         while True:
             page = self.request(url, params=params).text
-            yield from text.extract_iter(page, 'href="/g/', '/')
+            yield from text.extract_iter(page, 'href="/g/', "/")
             if 'class="next"' not in page:
                 return
             params["page"] += 1
@@ -101,15 +108,19 @@ class NhentaiExtractor(Extractor):
 
 class NhentaiTagExtractor(NhentaiExtractor):
     """Extractor for nhentai tag searches"""
+
     subcategory = "tag"
-    pattern = (r"(?:https?://)?nhentai\.net("
-               r"/(?:artist|category|character|group|language|parody|tag)"
-               r"/[^/?#]+(?:/popular[^/?#]*)?/?)(?:\?([^#]+))?")
+    pattern = (
+        r"(?:https?://)?nhentai\.net("
+        r"/(?:artist|category|character|group|language|parody|tag)"
+        r"/[^/?#]+(?:/popular[^/?#]*)?/?)(?:\?([^#]+))?"
+    )
     example = "https://nhentai.net/tag/TAG/"
 
 
 class NhentaiSearchExtractor(NhentaiExtractor):
     """Extractor for nhentai search results"""
+
     subcategory = "search"
     pattern = r"(?:https?://)?nhentai\.net(/search/?)\?([^#]+)"
     example = "https://nhentai.net/search/?q=QUERY"
@@ -117,6 +128,7 @@ class NhentaiSearchExtractor(NhentaiExtractor):
 
 class NhentaiFavoriteExtractor(NhentaiExtractor):
     """Extractor for nhentai favorites"""
+
     subcategory = "favorite"
     pattern = r"(?:https?://)?nhentai\.net(/favorites/?)(?:\?([^#]+))?"
     example = "https://nhentai.net/favorites/"

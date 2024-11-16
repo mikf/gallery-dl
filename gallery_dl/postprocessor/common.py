@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2018-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,10 +6,12 @@
 
 """Common classes and constants used by postprocessor modules."""
 
-from .. import util, formatter, archive
+from .. import archive
+from .. import formatter
+from .. import util
 
 
-class PostProcessor():
+class PostProcessor:
     """Base class for postprocessors"""
 
     def __init__(self, job):
@@ -28,24 +28,28 @@ class PostProcessor():
             archive_path = util.expand_path(archive_path)
             if not prefix:
                 prefix = "_" + self.name.upper() + "_"
-            archive_format = (
-                options.get("archive-prefix", extr.category) +
-                options.get("archive-format", prefix + extr.archive_fmt))
+            archive_format = options.get("archive-prefix", extr.category) + options.get(
+                "archive-format", prefix + extr.archive_fmt
+            )
             try:
                 if "{" in archive_path:
-                    archive_path = formatter.parse(archive_path).format_map(
-                        job.pathfmt.kwdict)
+                    archive_path = formatter.parse(archive_path).format_map(job.pathfmt.kwdict)
                 self.archive = archive.DownloadArchive(
-                    archive_path, archive_format,
+                    archive_path,
+                    archive_format,
                     options.get("archive-pragma"),
-                    "_archive_" + self.name)
+                    "_archive_" + self.name,
+                )
             except Exception as exc:
                 self.log.warning(
                     "Failed to open %s archive at '%s' (%s: %s)",
-                    self.name, archive_path, exc.__class__.__name__, exc)
+                    self.name,
+                    archive_path,
+                    exc.__class__.__name__,
+                    exc,
+                )
             else:
-                self.log.debug(
-                    "Using %s archive '%s'", self.name, archive_path)
+                self.log.debug("Using %s archive '%s'", self.name, archive_path)
                 return True
 
         self.archive = None

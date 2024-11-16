@@ -9,7 +9,7 @@ trim_trailing_whitespace = true
 [**.py]
 indent_size = 4
 indent_style = space
-max_line_length = 79
+max_line_length = 100
 
 [Makefile]
 indent_style = tab

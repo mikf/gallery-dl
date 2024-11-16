@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2019-2024 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,22 +6,27 @@
 
 """Extractors for https://hentainexus.com/"""
 
-from .common import GalleryExtractor, Extractor, Message
-from .. import text, util
 import binascii
+from contextlib import suppress
+
+from .. import text
+from .. import util
+from .common import Extractor
+from .common import GalleryExtractor
+from .common import Message
 
 
 class HentainexusGalleryExtractor(GalleryExtractor):
     """Extractor for hentainexus galleries"""
+
     category = "hentainexus"
     root = "https://hentainexus.com"
-    pattern = (r"(?i)(?:https?://)?(?:www\.)?hentainexus\.com"
-               r"/(?:view|read)/(\d+)")
+    pattern = r"(?i)(?:https?://)?(?:www\.)?hentainexus\.com" r"/(?:view|read)/(\d+)"
     example = "https://hentainexus.com/view/12345"
 
     def __init__(self, match):
         self.gallery_id = match.group(1)
-        url = "{}/view/{}".format(self.root, self.gallery_id)
+        url = f"{self.root}/view/{self.gallery_id}"
         GalleryExtractor.__init__(self, match, url)
 
     def metadata(self, page):
@@ -31,13 +34,22 @@ class HentainexusGalleryExtractor(GalleryExtractor):
         extr = text.extract_from(page)
         data = {
             "gallery_id": text.parse_int(self.gallery_id),
-            "cover"     : extr('"og:image" content="', '"'),
-            "title"     : extr('<h1 class="title">', '</h1>'),
+            "cover": extr('"og:image" content="', '"'),
+            "title": extr('<h1 class="title">', "</h1>"),
         }
 
-        for key in ("Artist", "Book", "Circle", "Event", "Language",
-                    "Magazine", "Parody", "Publisher", "Description"):
-            value = rmve(extr('viewcolumn">' + key + '</td>', '</td>'))
+        for key in (
+            "Artist",
+            "Book",
+            "Circle",
+            "Event",
+            "Language",
+            "Magazine",
+            "Parody",
+            "Publisher",
+            "Description",
+        ):
+            value = rmve(extr('viewcolumn">' + key + "</td>", "</td>"))
             value, sep, rest = value.rpartition(" (")
             data[key.lower()] = value if sep else rest
 
@@ -59,10 +71,9 @@ class HentainexusGalleryExtractor(GalleryExtractor):
         return data
 
     def images(self, _):
-        url = "{}/read/{}".format(self.root, self.gallery_id)
+        url = f"{self.root}/read/{self.gallery_id}"
         page = self.request(url).text
-        imgs = util.json_loads(self._decode(text.extr(
-            page, 'initReader("', '"')))
+        imgs = util.json_loads(self._decode(text.extr(page, 'initReader("', '"')))
 
         headers = None
         if not self.config("original", True):
@@ -72,10 +83,8 @@ class HentainexusGalleryExtractor(GalleryExtractor):
 
         results = []
         for img in imgs:
-            try:
+            with suppress(KeyError):
                 results.append((img["image"], img))
-            except KeyError:
-                pass
         return results
 
     @staticmethod
@@ -84,7 +93,7 @@ class HentainexusGalleryExtractor(GalleryExtractor):
         hostname = "hentainexus.com"
         primes = (2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53)
         blob = list(binascii.a2b_base64(data))
-        for i in range(0, len(hostname)):
+        for i in range(len(hostname)):
             blob[i] = blob[i] ^ ord(hostname[i])
 
         key = blob[0:64]
@@ -93,10 +102,7 @@ class HentainexusGalleryExtractor(GalleryExtractor):
         for k in key:
             C = C ^ k
             for _ in range(8):
-                if C & 1:
-                    C = C >> 1 ^ 0xc
-                else:
-                    C = C >> 1
+                C = C >> 1 ^ 12 if C & 1 else C >> 1
         k = primes[C & 0x7]
 
         x = 0
@@ -120,45 +126,45 @@ class HentainexusGalleryExtractor(GalleryExtractor):
 
     @staticmethod
     def _join_title(data):
-        event = data['event']
-        artist = data['artist']
-        circle = data['circle']
-        title = data['title']
-        parody = data['parody']
-        book = data['book']
-        magazine = data['magazine']
+        event = data["event"]
+        artist = data["artist"]
+        circle = data["circle"]
+        title = data["title"]
+        parody = data["parody"]
+        book = data["book"]
+        magazine = data["magazine"]
 
         # a few galleries have a large number of artists or parodies,
         # which get replaced with "Various" in the title string
-        if artist.count(',') >= 3:
-            artist = 'Various'
-        if parody.count(',') >= 3:
-            parody = 'Various'
+        if artist.count(",") >= 3:
+            artist = "Various"
+        if parody.count(",") >= 3:
+            parody = "Various"
 
-        jt = ''
+        jt = ""
         if event:
-            jt += '({}) '.format(event)
+            jt += f"({event}) "
         if circle:
-            jt += '[{} ({})] '.format(circle, artist)
+            jt += f"[{circle} ({artist})] "
         else:
-            jt += '[{}] '.format(artist)
+            jt += f"[{artist}] "
         jt += title
-        if parody.lower() != 'original work':
-            jt += ' ({})'.format(parody)
+        if parody.lower() != "original work":
+            jt += f" ({parody})"
         if book:
-            jt += ' ({})'.format(book)
+            jt += f" ({book})"
         if magazine:
-            jt += ' ({})'.format(magazine)
+            jt += f" ({magazine})"
         return jt
 
 
 class HentainexusSearchExtractor(Extractor):
     """Extractor for hentainexus search results"""
+
     category = "hentainexus"
     subcategory = "search"
     root = "https://hentainexus.com"
-    pattern = (r"(?i)(?:https?://)?(?:www\.)?hentainexus\.com"
-               r"(?:/page/\d+)?/?(?:\?(q=[^/?#]+))?$")
+    pattern = r"(?i)(?:https?://)?(?:www\.)?hentainexus\.com" r"(?:/page/\d+)?/?(?:\?(q=[^/?#]+))?$"
     example = "https://hentainexus.com/?q=QUERY"
 
     def items(self):

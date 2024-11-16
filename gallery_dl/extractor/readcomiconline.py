@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2016-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,16 +6,21 @@
 
 """Extractors for https://readcomiconline.li/"""
 
-from .common import Extractor, ChapterExtractor, MangaExtractor
-from .. import text, exception
 import binascii
 import re
+
+from .. import exception
+from .. import text
+from .common import ChapterExtractor
+from .common import Extractor
+from .common import MangaExtractor
 
 BASE_PATTERN = r"(?i)(?:https?://)?(?:www\.)?readcomiconline\.(?:li|to)"
 
 
-class ReadcomiconlineBase():
+class ReadcomiconlineBase:
     """Base class for readcomiconline extractors"""
+
     category = "readcomiconline"
     directory_fmt = ("{category}", "{comic}", "{issue:>03}")
     filename_fmt = "{comic}_{issue:>03}_{page:>03}.{extension}"
@@ -34,16 +37,21 @@ class ReadcomiconlineBase():
             if self.config("captcha", "stop") == "wait":
                 self.log.warning(
                     "Redirect to \n%s\nVisit this URL in your browser, solve "
-                    "the CAPTCHA, and press ENTER to continue", response.url)
+                    "the CAPTCHA, and press ENTER to continue",
+                    response.url,
+                )
                 self.input()
             else:
                 raise exception.StopExtraction(
                     "Redirect to \n%s\nVisit this URL in your browser and "
-                    "solve the CAPTCHA to continue", response.url)
+                    "solve the CAPTCHA to continue",
+                    response.url,
+                )
 
 
 class ReadcomiconlineIssueExtractor(ReadcomiconlineBase, ChapterExtractor):
     """Extractor for comic-issues from readcomiconline.li"""
+
     subcategory = "issue"
     pattern = BASE_PATTERN + r"(/Comic/[^/?#]+/[^/?#]+\?)([^#]+)"
     example = "https://readcomiconline.li/Comic/TITLE/Issue-123?id=12345"
@@ -83,7 +91,8 @@ class ReadcomiconlineIssueExtractor(ReadcomiconlineBase, ChapterExtractor):
         for block in page.split("    pth = '")[1:]:
             pth = text.extr(block, "", "'")
             for needle, repl in re.findall(
-                    r"pth = pth\.replace\(/([^/]+)/g, [\"']([^\"']*)", block):
+                r"pth = pth\.replace\(/([^/]+)/g, [\"']([^\"']*)", block
+            ):
                 pth = pth.replace(needle, repl)
             results.append((beau(pth), None))
 
@@ -92,6 +101,7 @@ class ReadcomiconlineIssueExtractor(ReadcomiconlineBase, ChapterExtractor):
 
 class ReadcomiconlineComicExtractor(ReadcomiconlineBase, MangaExtractor):
     """Extractor for comics from readcomiconline.li"""
+
     chapterclass = ReadcomiconlineIssueExtractor
     subcategory = "comic"
     pattern = BASE_PATTERN + r"(/Comic/[^/?#]+/?)$"
@@ -99,23 +109,30 @@ class ReadcomiconlineComicExtractor(ReadcomiconlineBase, MangaExtractor):
 
     def chapters(self, page):
         results = []
-        comic, pos = text.extract(page, ' class="barTitle">', '<')
-        page , pos = text.extract(page, ' class="listing">', '</table>', pos)
+        comic, pos = text.extract(page, ' class="barTitle">', "<")
+        page, pos = text.extract(page, ' class="listing">', "</table>", pos)
 
         comic = comic.rpartition("information")[0].strip()
-        needle = ' title="Read {} '.format(comic)
+        needle = f' title="Read {comic} '
         comic = text.unescape(comic)
 
-        for item in text.extract_iter(page, ' href="', ' comic online '):
+        for item in text.extract_iter(page, ' href="', " comic online "):
             url, _, issue = item.partition(needle)
             url = url.rpartition('"')[0]
-            if issue.startswith('Issue #'):
+            if issue.startswith("Issue #"):
                 issue = issue[7:]
-            results.append((self.root + url, {
-                "comic": comic, "issue": issue,
-                "issue_id": text.parse_int(url.rpartition("=")[2]),
-                "lang": "en", "language": "English",
-            }))
+            results.append(
+                (
+                    self.root + url,
+                    {
+                        "comic": comic,
+                        "issue": issue,
+                        "issue_id": text.parse_int(url.rpartition("=")[2]),
+                        "lang": "en",
+                        "language": "English",
+                    },
+                )
+            )
         return results
 
 
@@ -129,7 +146,7 @@ def beau(url):
 
     url, sep, rest = url.partition("?")
     containsS0 = "=s0" in url
-    url = url[:-3 if containsS0 else -6]
+    url = url[: -3 if containsS0 else -6]
     url = url[15:33] + url[50:]
     url = url[0:-11] + url[-2:]
     url = binascii.a2b_base64(url).decode()

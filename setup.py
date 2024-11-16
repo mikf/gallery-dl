@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 
+import os.path
 import re
 import sys
-import os.path
 import warnings
 
 
@@ -18,8 +17,8 @@ def check_file(fname):
     if os.path.exists(path):
         return True
     warnings.warn(
-        "Not including file '{}' since it is not present. "
-        "Run 'make' to build all automatically generated files.".format(fname)
+        f"Not including file '{fname}' since it is not present. "
+        "Run 'make' to build all automatically generated files."
     )
     return False
 
@@ -34,10 +33,10 @@ FILES = [
     (path, [f for f in files if check_file(f)])
     for (path, files) in [
         ("share/bash-completion/completions", ["data/completion/gallery-dl"]),
-        ("share/zsh/site-functions"         , ["data/completion/_gallery-dl"]),
-        ("share/fish/vendor_completions.d"  , ["data/completion/gallery-dl.fish"]),
-        ("share/man/man1"                   , ["data/man/gallery-dl.1"]),
-        ("share/man/man5"                   , ["data/man/gallery-dl.conf.5"]),
+        ("share/zsh/site-functions", ["data/completion/_gallery-dl"]),
+        ("share/fish/vendor_completions.d", ["data/completion/gallery-dl.fish"]),
+        ("share/man/man1", ["data/man/gallery-dl.1"]),
+        ("share/man/man5", ["data/man/gallery-dl.conf.5"]),
     ]
 ]
 
@@ -48,10 +47,13 @@ PACKAGES = [
     "gallery_dl.postprocessor",
 ]
 
-DESCRIPTION = ("Command-line program to download image galleries and "
-               "collections from several image hosting sites")
+DESCRIPTION = (
+    "Command-line program to download image galleries and "
+    "collections from several image hosting sites"
+)
 LONG_DESCRIPTION = read("README.rst").replace(
-    "<docs/", "<https://github.com/mikf/gallery-dl/blob/master/docs/")
+    "<docs/", "<https://github.com/mikf/gallery-dl/blob/master/docs/"
+)
 
 
 def build_py2exe():
@@ -61,25 +63,27 @@ def build_py2exe():
     VERSION_ = VERSION.partition("-")[0]
 
     freeze(
-        console=[{
-            "script"         : "./gallery_dl/__main__.py",
-            "dest_base"      : "gallery-dl",
-        }],
+        console=[
+            {
+                "script": "./gallery_dl/__main__.py",
+                "dest_base": "gallery-dl",
+            }
+        ],
         version_info={
-            "version"        : VERSION_,
-            "description"    : DESCRIPTION,
-            "comments"       : LONG_DESCRIPTION,
-            "product_name"   : "gallery-dl",
+            "version": VERSION_,
+            "description": DESCRIPTION,
+            "comments": LONG_DESCRIPTION,
+            "product_name": "gallery-dl",
             "product_version": VERSION_,
         },
         options={
-            "bundle_files"   : 0,
-            "compressed"     : 1,
-            "optimize"       : 1,
-            "dist_dir"       : "./dist",
-            "packages"       : PACKAGES,
-            "includes"       : ["youtube_dl"],
-            "dll_excludes"   : ["w9xpopen.exe"],
+            "bundle_files": 0,
+            "compressed": 1,
+            "optimize": 1,
+            "dist_dir": "./dist",
+            "packages": PACKAGES,
+            "includes": ["youtube_dl"],
+            "dll_excludes": ["w9xpopen.exe"],
         },
         zipfile=None,
     )

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2024 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,12 +6,12 @@
 
 """Compute file hash digests"""
 
-from .common import PostProcessor
 import hashlib
+
+from .common import PostProcessor
 
 
 class HashPP(PostProcessor):
-
     def __init__(self, job, options):
         PostProcessor.__init__(self, job)
 
@@ -41,10 +39,7 @@ class HashPP(PostProcessor):
         job.register_hooks({event: self.run for event in events}, options)
 
     def run(self, pathfmt):
-        hashes = [
-            (key, hashlib.new(name))
-            for key, name in self.hashes
-        ]
+        hashes = [(key, hashlib.new(name)) for key, name in self.hashes]
 
         size = self.chunk_size
         with self._open(pathfmt) as fp:

@@ -1,18 +1,18 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2015-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-import os
-import sys
-import shutil
 import logging
+import os
+import shutil
+import sys
 import unicodedata
-from . import config, util, formatter
 
+from . import config
+from . import formatter
+from . import util
 
 # --------------------------------------------------------------------
 # Globals
@@ -72,17 +72,29 @@ LOG_LEVELS = ("debug", "info", "warning", "error")
 class Logger(logging.Logger):
     """Custom Logger that includes extra info in log records"""
 
-    def makeRecord(self, name, level, fn, lno, msg, args, exc_info,
-                   func=None, extra=None, sinfo=None,
-                   factory=logging._logRecordFactory):
+    def makeRecord(
+        self,
+        name,
+        level,
+        fn,
+        lno,
+        msg,
+        args,
+        exc_info,
+        func=None,
+        extra=None,
+        sinfo=None,
+        factory=logging._logRecordFactory,
+    ):
         rv = factory(name, level, fn, lno, msg, args, exc_info, func, sinfo)
         if extra:
             rv.__dict__.update(extra)
         return rv
 
 
-class LoggerAdapter():
+class LoggerAdapter:
     """Trimmed-down version of logging.LoggingAdapter"""
+
     __slots__ = ("logger", "extra")
 
     def __init__(self, logger, job):
@@ -110,7 +122,7 @@ class LoggerAdapter():
             self.logger._log(logging.ERROR, msg, args, **kwargs)
 
 
-class PathfmtProxy():
+class PathfmtProxy:
     __slots__ = ("job",)
 
     def __init__(self, job):
@@ -127,7 +139,7 @@ class PathfmtProxy():
         return ""
 
 
-class KwdictProxy():
+class KwdictProxy:
     __slots__ = ("job",)
 
     def __init__(self, job):
@@ -144,9 +156,8 @@ class Formatter(logging.Formatter):
     def __init__(self, fmt, datefmt):
         if isinstance(fmt, dict):
             for key in LOG_LEVELS:
-                value = fmt[key] if key in fmt else LOG_FORMAT
-                fmt[key] = (formatter.parse(value).format_map,
-                            "{asctime" in value)
+                value = fmt.get(key, LOG_FORMAT)
+                fmt[key] = (formatter.parse(value).format_map, "{asctime" in value)
         else:
             if fmt == LOG_FORMAT:
                 fmt = (fmt.format_map, False)
@@ -225,21 +236,18 @@ def configure_logging(loglevel):
                 lf[level] = ansifmt(c, logfmt) if c else logfmt
             logfmt = lf
 
-        handler.setFormatter(Formatter(
-            logfmt, opts.get("format-date", LOG_FORMAT_DATE)))
+        handler.setFormatter(Formatter(logfmt, opts.get("format-date", LOG_FORMAT_DATE)))
 
         if "level" in opts and handler.level == LOG_LEVEL:
             handler.setLevel(opts["level"])
 
-        if minlevel > handler.level:
-            minlevel = handler.level
+        minlevel = min(minlevel, handler.level)
 
     # file logging handler
     handler = setup_logging_handler("logfile", lvl=loglevel)
     if handler:
         root.addHandler(handler)
-        if minlevel > handler.level:
-            minlevel = handler.level
+        minlevel = min(minlevel, handler.level)
 
     root.setLevel(minlevel)
 
@@ -262,24 +270,25 @@ def setup_logging_handler(key, fmt=LOG_FORMAT, lvl=LOG_LEVEL, mode="w"):
         os.makedirs(os.path.dirname(path))
         handler = logging.FileHandler(path, mode, encoding)
     except (OSError, ValueError) as exc:
-        logging.getLogger("gallery-dl").warning(
-            "%s: %s", key, exc)
+        logging.getLogger("gallery-dl").warning("%s: %s", key, exc)
         return None
     except TypeError as exc:
-        logging.getLogger("gallery-dl").warning(
-            "%s: missing or invalid path (%s)", key, exc)
+        logging.getLogger("gallery-dl").warning("%s: missing or invalid path (%s)", key, exc)
         return None
 
     handler.setLevel(opts.get("level", lvl))
-    handler.setFormatter(Formatter(
-        opts.get("format", fmt),
-        opts.get("format-date", LOG_FORMAT_DATE),
-    ))
+    handler.setFormatter(
+        Formatter(
+            opts.get("format", fmt),
+            opts.get("format-date", LOG_FORMAT_DATE),
+        )
+    )
     return handler
 
 
 # --------------------------------------------------------------------
 # Utility functions
+
 
 def stdout_write_flush(s):
     sys.stdout.write(s)
@@ -292,6 +301,7 @@ def stderr_write_flush(s):
 
 
 if getattr(sys.stdout, "line_buffering", None):
+
     def stdout_write(s):
         sys.stdout.write(s)
 else:
@@ -299,6 +309,7 @@ else:
 
 
 if getattr(sys.stderr, "line_buffering", None):
+
     def stderr_write(s):
         sys.stderr.write(s)
 else:
@@ -324,17 +335,22 @@ def configure_standard_streams():
         except AttributeError:
             # no 'reconfigure' support
             oget = options.get
-            setattr(sys, name, stream.__class__(
-                stream.buffer,
-                encoding=oget("encoding", stream.encoding),
-                errors=oget("errors", "replace"),
-                newline=oget("newline", stream.newlines),
-                line_buffering=oget("line_buffering", stream.line_buffering),
-            ))
+            setattr(
+                sys,
+                name,
+                stream.__class__(
+                    stream.buffer,
+                    encoding=oget("encoding", stream.encoding),
+                    errors=oget("errors", "replace"),
+                    newline=oget("newline", stream.newlines),
+                    line_buffering=oget("line_buffering", stream.line_buffering),
+                ),
+            )
 
 
 # --------------------------------------------------------------------
 # Downloader output
+
 
 def select():
     """Select a suitable output class"""
@@ -342,10 +358,7 @@ def select():
 
     if mode is None or mode == "auto":
         try:
-            if TTY_STDOUT:
-                output = ColorOutput() if ANSI else TerminalOutput()
-            else:
-                output = PipeOutput()
+            output = (ColorOutput() if ANSI else TerminalOutput()) if TTY_STDOUT else PipeOutput()
         except Exception:
             output = PipeOutput()
     elif isinstance(mode, dict):
@@ -354,12 +367,12 @@ def select():
         output = NullOutput()
     else:
         output = {
-            "default" : PipeOutput,
-            "pipe"    : PipeOutput,
-            "term"    : TerminalOutput,
+            "default": PipeOutput,
+            "pipe": PipeOutput,
+            "term": TerminalOutput,
             "terminal": TerminalOutput,
-            "color"   : ColorOutput,
-            "null"    : NullOutput,
+            "color": ColorOutput,
+            "null": NullOutput,
         }[mode.lower()]()
 
     if not config.get(("output",), "skip", True):
@@ -367,8 +380,7 @@ def select():
     return output
 
 
-class NullOutput():
-
+class NullOutput:
     def start(self, path):
         """Print a message indicating the start of a download"""
 
@@ -383,7 +395,6 @@ class NullOutput():
 
 
 class PipeOutput(NullOutput):
-
     def skip(self, path):
         stdout_write(CHAR_SKIP + path + "\n")
 
@@ -391,8 +402,7 @@ class PipeOutput(NullOutput):
         stdout_write(path + "\n")
 
 
-class TerminalOutput():
-
+class TerminalOutput:
     def __init__(self):
         shorten = config.get(("output",), "shorten", True)
         if shorten:
@@ -416,14 +426,12 @@ class TerminalOutput():
         bdl = util.format_value(bytes_downloaded)
         bps = util.format_value(bytes_per_second)
         if bytes_total is None:
-            stderr_write("\r{:>7}B {:>7}B/s ".format(bdl, bps))
+            stderr_write(f"\r{bdl:>7}B {bps:>7}B/s ")
         else:
-            stderr_write("\r{:>3}% {:>7}B {:>7}B/s ".format(
-                bytes_downloaded * 100 // bytes_total, bdl, bps))
+            stderr_write(f"\r{bytes_downloaded * 100 // bytes_total:>3}% {bdl:>7}B {bps:>7}B/s ")
 
 
 class ColorOutput(TerminalOutput):
-
     def __init__(self):
         TerminalOutput.__init__(self)
 
@@ -431,10 +439,8 @@ class ColorOutput(TerminalOutput):
         if colors is None:
             colors = COLORS_DEFAULT
 
-        self.color_skip = "\033[{}m".format(
-            colors.get("skip", "2"))
-        self.color_success = "\r\033[{}m".format(
-            colors.get("success", "1;32"))
+        self.color_skip = "\033[{}m".format(colors.get("skip", "2"))
+        self.color_success = "\r\033[{}m".format(colors.get("success", "1;32"))
 
     def start(self, path):
         stdout_write_flush(self.shorten(path))
@@ -446,10 +452,8 @@ class ColorOutput(TerminalOutput):
         stdout_write(self.color_success + self.shorten(path) + "\033[0m\n")
 
 
-class CustomOutput():
-
+class CustomOutput:
     def __init__(self, options):
-
         fmt_skip = options.get("skip")
         fmt_start = options.get("start")
         fmt_success = options.get("success")
@@ -467,21 +471,18 @@ class CustomOutput():
             func = shorten_string_eaw if shorten == "eaw" else shorten_string
             width = shutil.get_terminal_size().columns
 
-            self._fmt_skip = self._make_func(
-                func, fmt_skip, width - off_skip)
-            self._fmt_start = self._make_func(
-                func, fmt_start, width - off_start)
-            self._fmt_success = self._make_func(
-                func, fmt_success, width - off_success)
+            self._fmt_skip = self._make_func(func, fmt_skip, width - off_skip)
+            self._fmt_start = self._make_func(func, fmt_start, width - off_start)
+            self._fmt_success = self._make_func(func, fmt_success, width - off_success)
         else:
             self._fmt_skip = fmt_skip.format
             self._fmt_start = fmt_start.format
             self._fmt_success = fmt_success.format
 
-        self._fmt_progress = (options.get("progress") or
-                              "\r{0:>7}B {1:>7}B/s ").format
-        self._fmt_progress_total = (options.get("progress-total") or
-                                    "\r{3:>3}% {0:>7}B {1:>7}B/s ").format
+        self._fmt_progress = (options.get("progress") or "\r{0:>7}B {1:>7}B/s ").format
+        self._fmt_progress_total = (
+            options.get("progress-total") or "\r{3:>3}% {0:>7}B {1:>7}B/s "
+        ).format
 
     @staticmethod
     def _make_func(shorten, format_string, limit):
@@ -503,16 +504,16 @@ class CustomOutput():
         if bytes_total is None:
             stderr_write(self._fmt_progress(bdl, bps))
         else:
-            stderr_write(self._fmt_progress_total(
-                bdl, bps, util.format_value(bytes_total),
-                bytes_downloaded * 100 // bytes_total))
+            stderr_write(
+                self._fmt_progress_total(
+                    bdl, bps, util.format_value(bytes_total), bytes_downloaded * 100 // bytes_total
+                )
+            )
 
 
 class EAWCache(dict):
-
     def __missing__(self, key):
-        width = self[key] = \
-            2 if unicodedata.east_asian_width(key) in "WF" else 1
+        width = self[key] = 2 if unicodedata.east_asian_width(key) in "WF" else 1
         return width
 
 
@@ -521,7 +522,7 @@ def shorten_string(txt, limit, sep="…"):
     if len(txt) <= limit:
         return txt
     limit -= len(sep)
-    return txt[:limit // 2] + sep + txt[-((limit+1) // 2):]
+    return txt[: limit // 2] + sep + txt[-((limit + 1) // 2) :]
 
 
 def shorten_string_eaw(txt, limit, sep="…", cache=EAWCache()):
@@ -536,7 +537,7 @@ def shorten_string_eaw(txt, limit, sep="…", cache=EAWCache()):
     limit -= len(sep)
     if text_width == len(txt):
         # all characters have a width of 1
-        return txt[:limit // 2] + sep + txt[-((limit+1) // 2):]
+        return txt[: limit // 2] + sep + txt[-((limit + 1) // 2) :]
 
     # wide characters
     left = 0
@@ -548,11 +549,11 @@ def shorten_string_eaw(txt, limit, sep="…", cache=EAWCache()):
         left += 1
 
     right = -1
-    rwidth = (limit+1) // 2 + (lwidth + char_widths[left])
+    rwidth = (limit + 1) // 2 + (lwidth + char_widths[left])
     while True:
         rwidth -= char_widths[right]
         if rwidth < 0:
             break
         right -= 1
 
-    return txt[:left] + sep + txt[right+1:]
+    return txt[:left] + sep + txt[right + 1 :]

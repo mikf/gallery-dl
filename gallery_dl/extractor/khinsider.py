@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2016-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,21 +6,23 @@
 
 """Extractors for https://downloads.khinsider.com/"""
 
-from .common import Extractor, Message, AsynchronousMixin
-from .. import text, exception
+from .. import exception
+from .. import text
+from .common import AsynchronousMixin
+from .common import Extractor
+from .common import Message
 
 
 class KhinsiderSoundtrackExtractor(AsynchronousMixin, Extractor):
     """Extractor for soundtracks from khinsider.com"""
+
     category = "khinsider"
     subcategory = "soundtrack"
     root = "https://downloads.khinsider.com"
     directory_fmt = ("{category}", "{album[name]}")
     archive_fmt = "{filename}.{extension}"
-    pattern = (r"(?:https?://)?downloads\.khinsider\.com"
-               r"/game-soundtracks/album/([^/?#]+)")
-    example = ("https://downloads.khinsider.com"
-               "/game-soundtracks/album/TITLE")
+    pattern = r"(?:https?://)?downloads\.khinsider\.com" r"/game-soundtracks/album/([^/?#]+)"
+    example = "https://downloads.khinsider.com" "/game-soundtracks/album/TITLE"
 
     def __init__(self, match):
         Extractor.__init__(self, match)
@@ -42,26 +42,26 @@ class KhinsiderSoundtrackExtractor(AsynchronousMixin, Extractor):
 
     def metadata(self, page):
         extr = text.extract_from(page)
-        return {"album": {
-            "name" : text.unescape(extr("<h2>", "<")),
-            "platform": extr("Platforms: <a", "<").rpartition(">")[2],
-            "count": text.parse_int(extr("Number of Files: <b>", "<")),
-            "size" : text.parse_bytes(extr("Total Filesize: <b>", "<")[:-1]),
-            "date" : extr("Date Added: <b>", "<"),
-            "type" : text.remove_html(extr("Album type: <b>", "</b>")),
-        }}
+        return {
+            "album": {
+                "name": text.unescape(extr("<h2>", "<")),
+                "platform": extr("Platforms: <a", "<").rpartition(">")[2],
+                "count": text.parse_int(extr("Number of Files: <b>", "<")),
+                "size": text.parse_bytes(extr("Total Filesize: <b>", "<")[:-1]),
+                "date": extr("Date Added: <b>", "<"),
+                "type": text.remove_html(extr("Album type: <b>", "</b>")),
+            }
+        }
 
     def tracks(self, page):
         fmt = self.config("format", ("mp3",))
         if fmt and isinstance(fmt, str):
-            if fmt == "all":
-                fmt = None
-            else:
-                fmt = fmt.lower().split(",")
+            fmt = None if fmt == "all" else fmt.lower().split(",")
 
-        page = text.extr(page, '<table id="songlist">', '</table>')
-        for num, url in enumerate(text.extract_iter(
-                page, '<td class="clickable-row"><a href="', '"'), 1):
+        page = text.extr(page, '<table id="songlist">', "</table>")
+        for num, url in enumerate(
+            text.extract_iter(page, '<td class="clickable-row"><a href="', '"'), 1
+        ):
             url = text.urljoin(self.root, url)
             page = self.request(url, encoding="utf-8").text
             track = first = None

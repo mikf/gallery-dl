@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2024 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,9 +6,10 @@
 
 """Extractors for https://rule34.xyz/"""
 
-from .booru import BooruExtractor
-from .. import text
 import collections
+
+from .. import text
+from .booru import BooruExtractor
 
 BASE_PATTERN = r"(?:https?://)?rule34\.xyz"
 
@@ -39,10 +38,7 @@ class Rule34xyzExtractor(BooruExtractor):
             self.formats = ("10", "40", "41", "2")
 
     def _file_url(self, post):
-        post["files"] = files = {
-            str(link["type"]): link["url"]
-            for link in post.pop("imageLinks")
-        }
+        post["files"] = files = {str(link["type"]): link["url"] for link in post.pop("imageLinks")}
 
         for fmt in self.formats:
             if fmt in files:
@@ -59,8 +55,7 @@ class Rule34xyzExtractor(BooruExtractor):
     def _prepare(self, post):
         post.pop("filesPreview", None)
         post.pop("tagsWithType", None)
-        post["date"] = text.parse_datetime(
-            post["created"], "%Y-%m-%dT%H:%M:%S.%f")
+        post["date"] = text.parse_datetime(post["created"], "%Y-%m-%dT%H:%M:%S.%f")
 
     def _tags(self, post, _):
         if post.get("tagsWithType") is None:
@@ -74,11 +69,11 @@ class Rule34xyzExtractor(BooruExtractor):
             post["tags_" + types[type]] = values
 
     def _fetch_post(self, post_id):
-        url = "{}/api/post/{}".format(self.root, post_id)
+        url = f"{self.root}/api/post/{post_id}"
         return self.request(url).json()
 
     def _pagination(self, endpoint, params=None):
-        url = "{}/api{}".format(self.root, endpoint)
+        url = f"{self.root}/api{endpoint}"
 
         if params is None:
             params = {}

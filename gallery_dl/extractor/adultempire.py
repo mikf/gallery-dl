@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2019-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,16 +6,16 @@
 
 """Extractors for https://www.adultempire.com/"""
 
-from .common import GalleryExtractor
 from .. import text
+from .common import GalleryExtractor
 
 
 class AdultempireGalleryExtractor(GalleryExtractor):
     """Extractor for image galleries from www.adultempire.com"""
+
     category = "adultempire"
     root = "https://www.adultempire.com"
-    pattern = (r"(?:https?://)?(?:www\.)?adult(?:dvd)?empire\.com"
-               r"(/(\d+)/gallery\.html)")
+    pattern = r"(?:https?://)?(?:www\.)?adult(?:dvd)?empire\.com" r"(/(\d+)/gallery\.html)"
     example = "https://www.adultempire.com/12345/gallery.html"
 
     def __init__(self, match):
@@ -28,12 +26,12 @@ class AdultempireGalleryExtractor(GalleryExtractor):
         extr = text.extract_from(page, page.index('<div id="content">'))
         return {
             "gallery_id": text.parse_int(self.gallery_id),
-            "title"     : text.unescape(extr('title="', '"')),
-            "studio"    : extr(">studio</small>", "<").strip(),
-            "date"      : text.parse_datetime(extr(
-                ">released</small>", "<").strip(), "%m/%d/%Y"),
-            "actors"    : sorted(text.split_html(extr(
-                '<ul class="item-details item-cast-list ', '</ul>'))[1:]),
+            "title": text.unescape(extr('title="', '"')),
+            "studio": extr(">studio</small>", "<").strip(),
+            "date": text.parse_datetime(extr(">released</small>", "<").strip(), "%m/%d/%Y"),
+            "actors": sorted(
+                text.split_html(extr('<ul class="item-details item-cast-list ', "</ul>"))[1:]
+            ),
         }
 
     def images(self, page):

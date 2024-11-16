@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,12 +6,11 @@
 
 """Run Python functions"""
 
-from .common import PostProcessor
 from .. import util
+from .common import PostProcessor
 
 
 class PythonPP(PostProcessor):
-
     def __init__(self, job, options):
         PostProcessor.__init__(self, job)
 

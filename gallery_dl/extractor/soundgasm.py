@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2022-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,14 +6,16 @@
 
 """Extractors for https://soundgasm.net/"""
 
-from .common import Extractor, Message
 from .. import text
+from .common import Extractor
+from .common import Message
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?soundgasm\.net/u(?:ser)?"
 
 
 class SoundgasmExtractor(Extractor):
     """Base class for soundgasm extractors"""
+
     category = "soundgasm"
     root = "https://soundgasm.net"
     request_interval = (0.5, 1.5)
@@ -34,14 +34,15 @@ class SoundgasmExtractor(Extractor):
 
         _, user, slug = url.rstrip("/").rsplit("/", 2)
         data = {
-            "user" : user,
-            "slug" : slug,
+            "user": user,
+            "slug": slug,
             "title": text.unescape(extr('aria-label="title">', "<")),
-            "description": text.unescape(text.remove_html(extr(
-                'class="jp-description">', '</div>'))),
+            "description": text.unescape(
+                text.remove_html(extr('class="jp-description">', "</div>"))
+            ),
         }
 
-        formats = extr('"setMedia", {', '}')
+        formats = extr('"setMedia", {', "}")
         data["url"] = text.extr(formats, ': "', '"')
 
         return data
@@ -49,6 +50,7 @@ class SoundgasmExtractor(Extractor):
 
 class SoundgasmAudioExtractor(SoundgasmExtractor):
     """Extractor for audio clips from soundgasm.net"""
+
     subcategory = "audio"
     pattern = BASE_PATTERN + r"/([^/?#]+)/([^/?#]+)"
     example = "https://soundgasm.net/u/USER/TITLE"
@@ -58,11 +60,12 @@ class SoundgasmAudioExtractor(SoundgasmExtractor):
         self.user, self.slug = match.groups()
 
     def sounds(self):
-        return ("{}/u/{}/{}".format(self.root, self.user, self.slug),)
+        return (f"{self.root}/u/{self.user}/{self.slug}",)
 
 
 class SoundgasmUserExtractor(SoundgasmExtractor):
     """Extractor for all sounds from a soundgasm user"""
+
     subcategory = "user"
     pattern = BASE_PATTERN + r"/([^/?#]+)/?$"
     example = "https://soundgasm.net/u/USER"
@@ -75,6 +78,5 @@ class SoundgasmUserExtractor(SoundgasmExtractor):
         page = self.request(self.root + "/user/" + self.user).text
         return [
             text.extr(sound, '<a href="', '"')
-            for sound in text.extract_iter(
-                page, 'class="sound-details">', "</a>")
+            for sound in text.extract_iter(page, 'class="sound-details">', "</a>")
         ]

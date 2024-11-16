@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2018-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,12 +6,15 @@
 
 """Extractors for https://wallhaven.cc/"""
 
-from .common import Extractor, Message
-from .. import text, exception
+from .. import exception
+from .. import text
+from .common import Extractor
+from .common import Message
 
 
 class WallhavenExtractor(Extractor):
     """Base class for wallhaven extractors"""
+
     category = "wallhaven"
     root = "https://wallhaven.cc"
     filename_fmt = "{category}_{id}_{resolution}.{extension}"
@@ -44,8 +45,7 @@ class WallhavenExtractor(Extractor):
         wp["url"] = wp.pop("path")
         if "tags" in wp:
             wp["tags"] = [t["name"] for t in wp["tags"]]
-        wp["date"] = text.parse_datetime(
-            wp.pop("created_at"), "%Y-%m-%d %H:%M:%S")
+        wp["date"] = text.parse_datetime(wp.pop("created_at"), "%Y-%m-%d %H:%M:%S")
         wp["width"] = wp.pop("dimension_x")
         wp["height"] = wp.pop("dimension_y")
         wp["wh_category"] = wp["category"]
@@ -53,6 +53,7 @@ class WallhavenExtractor(Extractor):
 
 class WallhavenSearchExtractor(WallhavenExtractor):
     """Extractor for search results on wallhaven.cc"""
+
     subcategory = "search"
     directory_fmt = ("{category}", "{search[q]}")
     archive_fmt = "s_{search[q]}_{id}"
@@ -72,6 +73,7 @@ class WallhavenSearchExtractor(WallhavenExtractor):
 
 class WallhavenCollectionExtractor(WallhavenExtractor):
     """Extractor for a collection on wallhaven.cc"""
+
     subcategory = "collection"
     directory_fmt = ("{category}", "{username}", "{collection_id}")
     pattern = r"(?:https?://)?wallhaven\.cc/user/([^/?#]+)/favorites/(\d+)"
@@ -90,6 +92,7 @@ class WallhavenCollectionExtractor(WallhavenExtractor):
 
 class WallhavenUserExtractor(WallhavenExtractor):
     """Extractor for a wallhaven user"""
+
     subcategory = "user"
     pattern = r"(?:https?://)?wallhaven\.cc/user/([^/?#]+)/?$"
     example = "https://wallhaven.cc/user/USER"
@@ -102,15 +105,19 @@ class WallhavenUserExtractor(WallhavenExtractor):
         pass
 
     def items(self):
-        base = "{}/user/{}/".format(self.root, self.username)
-        return self._dispatch_extractors((
-            (WallhavenUploadsExtractor    , base + "uploads"),
-            (WallhavenCollectionsExtractor, base + "favorites"),
-        ), ("uploads",))
+        base = f"{self.root}/user/{self.username}/"
+        return self._dispatch_extractors(
+            (
+                (WallhavenUploadsExtractor, base + "uploads"),
+                (WallhavenCollectionsExtractor, base + "favorites"),
+            ),
+            ("uploads",),
+        )
 
 
 class WallhavenCollectionsExtractor(WallhavenExtractor):
     """Extractor for all collections of a wallhaven user"""
+
     subcategory = "collections"
     pattern = r"(?:https?://)?wallhaven\.cc/user/([^/?#]+)/favorites/?$"
     example = "https://wallhaven.cc/user/USER/favorites"
@@ -123,12 +130,14 @@ class WallhavenCollectionsExtractor(WallhavenExtractor):
         for collection in self.api.collections(self.username):
             collection["_extractor"] = WallhavenCollectionExtractor
             url = "https://wallhaven.cc/user/{}/favorites/{}".format(
-                self.username, collection["id"])
+                self.username, collection["id"]
+            )
             yield Message.Queue, url, collection
 
 
 class WallhavenUploadsExtractor(WallhavenExtractor):
     """Extractor for all uploads of a wallhaven user"""
+
     subcategory = "uploads"
     directory_fmt = ("{category}", "{username}")
     archive_fmt = "u_{username}_{id}"
@@ -149,9 +158,12 @@ class WallhavenUploadsExtractor(WallhavenExtractor):
 
 class WallhavenImageExtractor(WallhavenExtractor):
     """Extractor for individual wallpaper on wallhaven.cc"""
+
     subcategory = "image"
-    pattern = (r"(?:https?://)?(?:wallhaven\.cc/w/|whvn\.cc/"
-               r"|w\.wallhaven\.cc/[a-z]+/\w\w/wallhaven-)(\w+)")
+    pattern = (
+        r"(?:https?://)?(?:wallhaven\.cc/w/|whvn\.cc/"
+        r"|w\.wallhaven\.cc/[a-z]+/\w\w/wallhaven-)(\w+)"
+    )
     example = "https://wallhaven.cc/w/ID"
 
     def __init__(self, match):
@@ -162,7 +174,7 @@ class WallhavenImageExtractor(WallhavenExtractor):
         return (self.api.info(self.wallpaper_id),)
 
 
-class WallhavenAPI():
+class WallhavenAPI:
     """Interface for wallhaven's API
 
     Ref: https://wallhaven.cc/help/api
@@ -184,7 +196,7 @@ class WallhavenAPI():
         return self._call(endpoint)["data"]
 
     def collection(self, username, collection_id):
-        endpoint = "/v1/collections/{}/{}".format(username, collection_id)
+        endpoint = f"/v1/collections/{username}/{collection_id}"
         return self._pagination(endpoint)
 
     def collections(self, username):
@@ -199,8 +211,7 @@ class WallhavenAPI():
         url = "https://wallhaven.cc/api" + endpoint
 
         while True:
-            response = self.extractor.request(
-                url, params=params, headers=self.headers, fatal=None)
+            response = self.extractor.request(url, params=params, headers=self.headers, fatal=None)
 
             if response.status_code < 400:
                 return response.json()
@@ -210,8 +221,8 @@ class WallhavenAPI():
 
             self.extractor.log.debug("Server response: %s", response.text)
             raise exception.StopExtraction(
-                "API request failed (%s %s)",
-                response.status_code, response.reason)
+                "API request failed (%s %s)", response.status_code, response.reason
+            )
 
     def _pagination(self, endpoint, params=None, metadata=None):
         if params is None:

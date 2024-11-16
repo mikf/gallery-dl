@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2018-2020 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,12 +6,12 @@
 
 """OAuth helper functions and classes"""
 
+import binascii
+import hashlib
 import hmac
-import time
 import random
 import string
-import hashlib
-import binascii
+import time
 import urllib.parse
 
 import requests
@@ -41,13 +39,13 @@ def concat(*args):
 class OAuth1Session(requests.Session):
     """Extension to requests.Session to support OAuth 1.0"""
 
-    def __init__(self, consumer_key, consumer_secret,
-                 token=None, token_secret=None):
-
+    def __init__(self, consumer_key, consumer_secret, token=None, token_secret=None):
         requests.Session.__init__(self)
         self.auth = OAuth1Client(
-            consumer_key, consumer_secret,
-            token, token_secret,
+            consumer_key,
+            consumer_secret,
+            token,
+            token_secret,
         )
 
     def rebuild_auth(self, prepared_request, response):
@@ -59,9 +57,7 @@ class OAuth1Session(requests.Session):
 class OAuth1Client(requests.auth.AuthBase):
     """OAuth1.0a authentication"""
 
-    def __init__(self, consumer_key, consumer_secret,
-                 token=None, token_secret=None):
-
+    def __init__(self, consumer_key, consumer_secret, token=None, token_secret=None):
         self.consumer_key = consumer_key
         self.consumer_secret = consumer_secret
         self.token = token
@@ -82,7 +78,8 @@ class OAuth1Client(requests.auth.AuthBase):
         oauth_params.append(("oauth_signature", signature))
 
         request.headers["Authorization"] = "OAuth " + ",".join(
-            key + '="' + value + '"' for key, value in oauth_params)
+            key + '="' + value + '"' for key, value in oauth_params
+        )
 
         return request
 
@@ -103,8 +100,9 @@ class OAuth1Client(requests.auth.AuthBase):
         return quote(binascii.b2a_base64(signature)[:-1].decode())
 
 
-class OAuth1API():
+class OAuth1API:
     """Base class for OAuth1.0 based API interfaces"""
+
     API_KEY = None
     API_SECRET = None
 
@@ -124,8 +122,7 @@ class OAuth1API():
 
         if api_key and api_secret and token and token_secret:
             self.log.debug("Using %s OAuth1.0 authentication", key_type)
-            self.session = OAuth1Session(
-                api_key, api_secret, token, token_secret)
+            self.session = OAuth1Session(api_key, api_secret, token, token_secret)
             self.api_key = None
         else:
             self.log.debug("Using %s api_key authentication", key_type)
@@ -138,6 +135,6 @@ class OAuth1API():
         return self.extractor.request(url, **kwargs)
 
 
-@cache(maxage=36500*86400, keyarg=0)
+@cache(maxage=36500 * 86400, keyarg=0)
 def _token_cache(key):
     return None, None

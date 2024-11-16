@@ -1,17 +1,18 @@
-# -*- coding: utf-8 -*-
-
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
 """Extractors for https://lightroom.adobe.com/"""
 
-from .common import Extractor, Message
-from .. import text, util
+from .. import text
+from .. import util
+from .common import Extractor
+from .common import Message
 
 
 class LightroomGalleryExtractor(Extractor):
     """Extractor for an image gallery on lightroom.adobe.com"""
+
     category = "lightroom"
     subcategory = "gallery"
     directory_fmt = ("{category}", "{user}", "{title}")
@@ -28,9 +29,7 @@ class LightroomGalleryExtractor(Extractor):
         # Get config
         url = "https://lightroom.adobe.com/shares/" + self.href
         response = self.request(url)
-        album = util.json_loads(
-            text.extr(response.text, "albumAttributes: ", "\n")
-        )
+        album = util.json_loads(text.extr(response.text, "albumAttributes: ", "\n"))
 
         images = self.images(album)
         for img in images:
@@ -57,7 +56,7 @@ class LightroomGalleryExtractor(Extractor):
             url = base_url + next_url
             page = self.request(url).text
             # skip 1st line as it's a JS loop
-            data = util.json_loads(page[page.index("\n") + 1:])
+            data = util.json_loads(page[page.index("\n") + 1 :])
 
             base_url = data["base"]
             for res in data["resources"]:

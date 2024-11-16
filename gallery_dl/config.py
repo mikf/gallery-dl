@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2015-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,9 +6,10 @@
 
 """Global configuration module"""
 
-import sys
-import os.path
 import logging
+import os.path
+import sys
+
 from . import util
 
 log = logging.getLogger("config")
@@ -32,18 +31,20 @@ else:
     _default_configs = [
         "/etc/gallery-dl.conf",
         "${XDG_CONFIG_HOME}/gallery-dl/config.json"
-        if os.environ.get("XDG_CONFIG_HOME") else
-        "${HOME}/.config/gallery-dl/config.json",
+        if os.environ.get("XDG_CONFIG_HOME")
+        else "${HOME}/.config/gallery-dl/config.json",
         "${HOME}/.gallery-dl.conf",
     ]
 
 
 if util.EXECUTABLE:
     # look for config file in PyInstaller executable directory (#682)
-    _default_configs.append(os.path.join(
-        os.path.dirname(sys.executable),
-        "gallery-dl.conf",
-    ))
+    _default_configs.append(
+        os.path.join(
+            os.path.dirname(sys.executable),
+            "gallery-dl.conf",
+        )
+    )
 
 
 # --------------------------------------------------------------------
@@ -82,8 +83,7 @@ def initialize():
         except OSError as exc:
             log.debug("%s: %s", exc.__class__.__name__, exc)
     else:
-        log.error("Unable to create a new configuration file "
-                  "at any of the default paths")
+        log.error("Unable to create a new configuration file " "at any of the default paths")
         return 1
 
     log.info("Created a basic configuration file at '%s'", path)
@@ -108,6 +108,7 @@ def open_extern():
             openers = (editor,) + openers
 
     import shutil
+
     for opener in openers:
         opener = shutil.which(opener)
         if opener:
@@ -124,8 +125,7 @@ def open_extern():
             with open(path, encoding="utf-8") as fp:
                 util.json_loads(fp.read())
         except Exception as exc:
-            log.warning("%s when parsing '%s': %s",
-                        exc.__class__.__name__, path, exc)
+            log.warning("%s when parsing '%s': %s", exc.__class__.__name__, path, exc)
             return 2
 
     return retcode
@@ -155,8 +155,7 @@ def status():
 
         paths.append((path, status))
 
-    fmt = "{{:<{}}} : {{}}\n".format(
-        max(len(p[0]) for p in paths)).format
+    fmt = f"{{:<{max(len(p[0]) for p in paths)}}} : {{}}\n".format
 
     for path, status in paths:
         stdout_write(fmt(path, status))
@@ -174,8 +173,7 @@ def load(files=None, strict=False, loads=util.json_loads):
                 log.error(exc)
                 raise SystemExit(1)
         except Exception as exc:
-            log.error("%s when loading '%s': %s",
-                      exc.__class__.__name__, path, exc)
+            log.error("%s when loading '%s': %s", exc.__class__.__name__, path, exc)
             if strict:
                 raise SystemExit(2)
         else:
@@ -303,7 +301,7 @@ def unset(path, key, conf=_config):
         pass
 
 
-class apply():
+class apply:
     """Context Manager: apply a collection of key-value pairs"""
 
     def __init__(self, kvlist):

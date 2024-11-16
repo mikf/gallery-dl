@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2015-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,12 +6,13 @@
 
 """Extractors for https://imgth.com/"""
 
-from .common import GalleryExtractor
 from .. import text
+from .common import GalleryExtractor
 
 
 class ImgthGalleryExtractor(GalleryExtractor):
     """Extractor for image galleries from imgth.com"""
+
     category = "imgth"
     root = "https://imgth.com"
     pattern = r"(?:https?://)?(?:www\.)?imgth\.com/gallery/(\d+)"
@@ -21,7 +20,7 @@ class ImgthGalleryExtractor(GalleryExtractor):
 
     def __init__(self, match):
         self.gallery_id = gid = match.group(1)
-        url = "{}/gallery/{}/g/".format(self.root, gid)
+        url = f"{self.root}/gallery/{gid}/g/"
         GalleryExtractor.__init__(self, match, url)
 
     def metadata(self, page):
@@ -29,28 +28,29 @@ class ImgthGalleryExtractor(GalleryExtractor):
         return {
             "gallery_id": text.parse_int(self.gallery_id),
             "title": text.unescape(extr("<h1>", "</h1>")),
-            "count": text.parse_int(extr(
-                "total of images in this gallery: ", " ")),
-            "date" : text.parse_datetime(
+            "count": text.parse_int(extr("total of images in this gallery: ", " ")),
+            "date": text.parse_datetime(
                 extr("created on ", " by <")
-                .replace("th, ", " ", 1).replace("nd, ", " ", 1)
-                .replace("st, ", " ", 1), "%B %d %Y at %H:%M"),
-            "user" : text.unescape(extr(">", "<")),
+                .replace("th, ", " ", 1)
+                .replace("nd, ", " ", 1)
+                .replace("st, ", " ", 1),
+                "%B %d %Y at %H:%M",
+            ),
+            "user": text.unescape(extr(">", "<")),
         }
 
     def images(self, page):
         pnum = 0
 
         while True:
-            thumbs = text.extr(page, '<ul class="thumbnails">', '</ul>')
+            thumbs = text.extr(page, '<ul class="thumbnails">', "</ul>")
             for url in text.extract_iter(thumbs, '<img src="', '"'):
                 path = url.partition("/thumbs/")[2]
-                yield ("{}/images/{}".format(self.root, path), None)
+                yield (f"{self.root}/images/{path}", None)
 
             if '<li class="next">' not in page:
                 return
 
             pnum += 1
-            url = "{}/gallery/{}/g/page/{}".format(
-                self.root, self.gallery_id, pnum)
+            url = f"{self.root}/gallery/{self.gallery_id}/g/page/{pnum}"
             page = self.request(url).text

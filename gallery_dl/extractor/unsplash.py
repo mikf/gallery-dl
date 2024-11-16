@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2021-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,14 +6,17 @@
 
 """Extractors for https://unsplash.com/"""
 
-from .common import Extractor, Message
-from .. import text, util
+from .. import text
+from .. import util
+from .common import Extractor
+from .common import Message
 
 BASE_PATTERN = r"(?:https?://)?unsplash\.com"
 
 
 class UnsplashExtractor(Extractor):
     """Base class for unsplash extractors"""
+
     category = "unsplash"
     directory_fmt = ("{category}", "{user[username]}")
     filename_fmt = "{id}.{extension}"
@@ -33,8 +34,7 @@ class UnsplashExtractor(Extractor):
         metadata = self.metadata()
 
         for photo in self.photos():
-            util.delete_items(
-                photo, ("current_user_collections", "related_collections"))
+            util.delete_items(photo, ("current_user_collections", "related_collections"))
             url = photo["urls"][fmt]
             text.nameext_from_url(url, photo)
 
@@ -74,41 +74,45 @@ class UnsplashExtractor(Extractor):
 
 class UnsplashImageExtractor(UnsplashExtractor):
     """Extractor for a single unsplash photo"""
+
     subcategory = "image"
     pattern = BASE_PATTERN + r"/photos/([^/?#]+)"
     example = "https://unsplash.com/photos/ID"
 
     def photos(self):
-        url = "{}/napi/photos/{}".format(self.root, self.item)
+        url = f"{self.root}/napi/photos/{self.item}"
         return (self.request(url).json(),)
 
 
 class UnsplashUserExtractor(UnsplashExtractor):
     """Extractor for all photos of an unsplash user"""
+
     subcategory = "user"
     pattern = BASE_PATTERN + r"/@(\w+)/?$"
     example = "https://unsplash.com/@USER"
 
     def photos(self):
-        url = "{}/napi/users/{}/photos".format(self.root, self.item)
+        url = f"{self.root}/napi/users/{self.item}/photos"
         params = {"order_by": "latest"}
         return self._pagination(url, params)
 
 
 class UnsplashFavoriteExtractor(UnsplashExtractor):
     """Extractor for all likes of an unsplash user"""
+
     subcategory = "favorite"
     pattern = BASE_PATTERN + r"/@(\w+)/likes"
     example = "https://unsplash.com/@USER/likes"
 
     def photos(self):
-        url = "{}/napi/users/{}/likes".format(self.root, self.item)
+        url = f"{self.root}/napi/users/{self.item}/likes"
         params = {"order_by": "latest"}
         return self._pagination(url, params)
 
 
 class UnsplashCollectionExtractor(UnsplashExtractor):
     """Extractor for an unsplash collection"""
+
     subcategory = "collection"
     pattern = BASE_PATTERN + r"/collections/([^/?#]+)(?:/([^/?#]+))?"
     example = "https://unsplash.com/collections/12345/TITLE"
@@ -121,13 +125,14 @@ class UnsplashCollectionExtractor(UnsplashExtractor):
         return {"collection_id": self.item, "collection_title": self.title}
 
     def photos(self):
-        url = "{}/napi/collections/{}/photos".format(self.root, self.item)
+        url = f"{self.root}/napi/collections/{self.item}/photos"
         params = {"order_by": "latest"}
         return self._pagination(url, params)
 
 
 class UnsplashSearchExtractor(UnsplashExtractor):
     """Extractor for unsplash search results"""
+
     subcategory = "search"
     pattern = BASE_PATTERN + r"/s/photos/([^/?#]+)(?:\?([^#]+))?"
     example = "https://unsplash.com/s/photos/QUERY"
@@ -138,7 +143,7 @@ class UnsplashSearchExtractor(UnsplashExtractor):
 
     def photos(self):
         url = self.root + "/napi/search/photos"
-        params = {"query": text.unquote(self.item.replace('-', ' '))}
+        params = {"query": text.unquote(self.item.replace("-", " "))}
         if self.query:
             params.update(text.parse_query(self.query))
         return self._pagination(url, params, True)

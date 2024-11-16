@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 
 # Copyright 2022-2023 Mike Fährmann
 #
@@ -23,37 +22,35 @@ class Test_CommandlineArguments(unittest.TestCase):
         try:
             cls.module = __import__(cls.module_name)
         except (ImportError, SyntaxError):
-            raise unittest.SkipTest("cannot import module '{}'".format(
-                cls.module_name))
+            raise unittest.SkipTest(f"cannot import module '{cls.module_name}'")
         cls.default = ytdl.parse_command_line(cls.module, [])
 
     def test_ignore_errors(self):
-        self._("--ignore-errors" , "ignoreerrors", True)
+        self._("--ignore-errors", "ignoreerrors", True)
         self._("--abort-on-error", "ignoreerrors", False)
 
     def test_default_search(self):
-        self._(["--default-search", "foo"] , "default_search", "foo")
+        self._(["--default-search", "foo"], "default_search", "foo")
 
     def test_mark_watched(self):
-        self._("--mark-watched"   , "mark_watched", True)
+        self._("--mark-watched", "mark_watched", True)
         self._("--no-mark-watched", "mark_watched", False)
 
     def test_proxy(self):
-        self._(["--proxy", "socks5://127.0.0.1:1080/"],
-               "proxy", "socks5://127.0.0.1:1080/")
-        self._(["--cn-verification-proxy", "https://127.0.0.1"],
-               "cn_verification_proxy", "https://127.0.0.1")
-        self._(["--geo-verification-proxy", "127.0.0.1"],
-               "geo_verification_proxy", "127.0.0.1")
+        self._(["--proxy", "socks5://127.0.0.1:1080/"], "proxy", "socks5://127.0.0.1:1080/")
+        self._(
+            ["--cn-verification-proxy", "https://127.0.0.1"],
+            "cn_verification_proxy",
+            "https://127.0.0.1",
+        )
+        self._(["--geo-verification-proxy", "127.0.0.1"], "geo_verification_proxy", "127.0.0.1")
 
     def test_network_options(self):
-        self._(["--socket-timeout", "3.5"],
-               "socket_timeout", 3.5)
-        self._(["--source-address", "127.0.0.1"],
-               "source_address", "127.0.0.1")
-        self._("-4"          , "source_address", "0.0.0.0")
+        self._(["--socket-timeout", "3.5"], "socket_timeout", 3.5)
+        self._(["--source-address", "127.0.0.1"], "source_address", "127.0.0.1")
+        self._("-4", "source_address", "0.0.0.0")
         self._("--force-ipv4", "source_address", "0.0.0.0")
-        self._("-6"          , "source_address", "::")
+        self._("-6", "source_address", "::")
         self._("--force-ipv6", "source_address", "::")
 
     def test_thumbnail_options(self):
@@ -61,26 +58,26 @@ class Test_CommandlineArguments(unittest.TestCase):
         self._("--write-all-thumbnails", "write_all_thumbnails", True)
 
     def test_authentication_options(self):
-        self._(["-u"        , "foo"], "username", "foo")
+        self._(["-u", "foo"], "username", "foo")
         self._(["--username", "foo"], "username", "foo")
 
-        self._(["-p"        , "bar"], "password", "bar")
+        self._(["-p", "bar"], "password", "bar")
         self._(["--password", "bar"], "password", "bar")
 
-        self._(["--ap-mso"     , "mso"], "ap_mso", "mso")
+        self._(["--ap-mso", "mso"], "ap_mso", "mso")
         self._(["--ap-username", "foo"], "ap_username", "foo")
         self._(["--ap-password", "bar"], "ap_password", "bar")
 
-        self._(["-2"         , "pass"], "twofactor", "pass")
+        self._(["-2", "pass"], "twofactor", "pass")
         self._(["--twofactor", "pass"], "twofactor", "pass")
 
         self._(["--video-password", "pass"], "videopassword", "pass")
 
-        self._("-n"     , "usenetrc", True)
+        self._("-n", "usenetrc", True)
         self._("--netrc", "usenetrc", True)
 
     def test_subtitle_options(self):
-        self._("--write-sub"     , "writesubtitles"   , True)
+        self._("--write-sub", "writesubtitles", True)
         self._("--write-auto-sub", "writeautomaticsub", True)
 
         self._(["--sub-format", "best"], "subtitlesformat", "best")
@@ -100,8 +97,9 @@ class Test_CommandlineArguments(unittest.TestCase):
         self._("--geo-bypass", "geo_bypass", True)
         self._("--no-geo-bypass", "geo_bypass", False)
         self._(["--geo-bypass-country", "EN"], "geo_bypass_country", "EN")
-        self._(["--geo-bypass-ip-block", "198.51.100.14/24"],
-               "geo_bypass_ip_block", "198.51.100.14/24")
+        self._(
+            ["--geo-bypass-ip-block", "198.51.100.14/24"], "geo_bypass_ip_block", "198.51.100.14/24"
+        )
 
     def test_headers(self):
         headers = self.module.std_headers
@@ -116,41 +114,58 @@ class Test_CommandlineArguments(unittest.TestCase):
 
         self.assertNotEqual(headers["Accept"], "*/*")
         self.assertNotIn("DNT", headers)
-        self._([
-            "--add-header", "accept:*/*",
-            "--add-header", "dnt:1",
-        ])
+        self._(
+            [
+                "--add-header",
+                "accept:*/*",
+                "--add-header",
+                "dnt:1",
+            ]
+        )
         self.assertEqual(headers["accept"], "*/*")
         self.assertEqual(headers["dnt"], "1")
 
     def test_extract_audio(self):
         opts = self._(["--extract-audio"])
-        self.assertEqual(opts["postprocessors"][0], {
-            "key": "FFmpegExtractAudio",
-            "preferredcodec": "best",
-            "preferredquality": "5",
-            "nopostoverwrites": False,
-        })
+        self.assertEqual(
+            opts["postprocessors"][0],
+            {
+                "key": "FFmpegExtractAudio",
+                "preferredcodec": "best",
+                "preferredquality": "5",
+                "nopostoverwrites": False,
+            },
+        )
 
-        opts = self._([
-            "--extract-audio",
-            "--audio-format", "opus",
-            "--audio-quality", "9",
-            "--no-post-overwrites",
-        ])
-        self.assertEqual(opts["postprocessors"][0], {
-            "key": "FFmpegExtractAudio",
-            "preferredcodec": "opus",
-            "preferredquality": "9",
-            "nopostoverwrites": True,
-        })
+        opts = self._(
+            [
+                "--extract-audio",
+                "--audio-format",
+                "opus",
+                "--audio-quality",
+                "9",
+                "--no-post-overwrites",
+            ]
+        )
+        self.assertEqual(
+            opts["postprocessors"][0],
+            {
+                "key": "FFmpegExtractAudio",
+                "preferredcodec": "opus",
+                "preferredquality": "9",
+                "nopostoverwrites": True,
+            },
+        )
 
     def test_recode_video(self):
         opts = self._(["--recode-video", " mkv "])
-        self.assertEqual(opts["postprocessors"][0], {
-            "key": "FFmpegVideoConvertor",
-            "preferedformat": "mkv",
-        })
+        self.assertEqual(
+            opts["postprocessors"][0],
+            {
+                "key": "FFmpegVideoConvertor",
+                "preferedformat": "mkv",
+            },
+        )
 
     def test_subs(self):
         opts = self._(["--convert-subs", "srt"])
@@ -173,12 +188,14 @@ class Test_CommandlineArguments(unittest.TestCase):
             subs["already_have_subtitle"] = True
             thumb["already_have_thumbnail"] = "all"
 
-        opts = self._([
-            "--embed-thumbnail",
-            "--embed-subs",
-            "--write-sub",
-            "--write-all-thumbnails",
-        ])
+        opts = self._(
+            [
+                "--embed-thumbnail",
+                "--embed-subs",
+                "--write-sub",
+                "--write-all-thumbnails",
+            ]
+        )
         self.assertEqual(opts["postprocessors"][:2], [subs, thumb])
 
     def test_metadata(self):
@@ -187,10 +204,13 @@ class Test_CommandlineArguments(unittest.TestCase):
 
     def test_metadata_from_title(self):
         opts = self._(["--metadata-from-title", "%(artist)s - %(title)s"])
-        self.assertEqual(opts["postprocessors"][0], {
-            "key": "MetadataFromTitle",
-            "titleformat": "%(artist)s - %(title)s",
-        })
+        self.assertEqual(
+            opts["postprocessors"][0],
+            {
+                "key": "MetadataFromTitle",
+                "titleformat": "%(artist)s - %(title)s",
+            },
+        )
 
     def test_xattr(self):
         self._("--xattr-set-filesize", "xattr_set_filesize", True)
@@ -213,11 +233,14 @@ class Test_CommandlineArguments(unittest.TestCase):
         ]
 
         if self.module_name != "yt_dlp":
-            cmdline.extend((
-                "--dump-json",
-                "--dump-single-json",
-                "--config-location", "~",
-            ))
+            cmdline.extend(
+                (
+                    "--dump-json",
+                    "--dump-single-json",
+                    "--config-location",
+                    "~",
+                )
+            )
 
         result = self._(cmdline)
         result["daterange"] = self.default["daterange"]
@@ -244,30 +267,38 @@ class Test_CommandlineArguments_YtDlp(Test_CommandlineArguments):
 
     def test_remuxs_video(self):
         opts = self._(["--remux-video", " mkv "])
-        self.assertEqual(opts["postprocessors"][0], {
-            "key": "FFmpegVideoRemuxer",
-            "preferedformat": "mkv",
-        })
+        self.assertEqual(
+            opts["postprocessors"][0],
+            {
+                "key": "FFmpegVideoRemuxer",
+                "preferedformat": "mkv",
+            },
+        )
 
     def test_metadata(self):
-        opts = self._(["--embed-metadata",
-                       "--no-embed-chapters",
-                       "--embed-info-json"])
-        self.assertEqual(opts["postprocessors"][0], {
-            "key": "FFmpegMetadata",
-            "add_chapters": False,
-            "add_metadata": True,
-            "add_infojson": True,
-        })
+        opts = self._(["--embed-metadata", "--no-embed-chapters", "--embed-info-json"])
+        self.assertEqual(
+            opts["postprocessors"][0],
+            {
+                "key": "FFmpegMetadata",
+                "add_chapters": False,
+                "add_metadata": True,
+                "add_infojson": True,
+            },
+        )
 
     def test_metadata_from_title(self):
         opts = self._(["--metadata-from-title", "%(artist)s - %(title)s"])
-        self.assertEqual(opts["postprocessors"][0], {
-            "key"    : "MetadataParser",
-            "when"   : "pre_process",
-            "actions": [self.module.MetadataFromFieldPP.to_action(
-                "title:%(artist)s - %(title)s")],
-        })
+        self.assertEqual(
+            opts["postprocessors"][0],
+            {
+                "key": "MetadataParser",
+                "when": "pre_process",
+                "actions": [
+                    self.module.MetadataFromFieldPP.to_action("title:%(artist)s - %(title)s")
+                ],
+            },
+        )
 
     def test_geo_bypass(self):
         try:
@@ -276,37 +307,42 @@ class Test_CommandlineArguments_YtDlp(Test_CommandlineArguments):
             # before --xff (c16644642)
             return Test_CommandlineArguments.test_geo_bypass(self)
 
-        self._(["--xff", "default"],
-               "geo_bypass", "default")
-        self._(["--xff", "never"],
-               "geo_bypass", "never")
-        self._(["--xff", "EN"],
-               "geo_bypass", "EN")
-        self._(["--xff", "198.51.100.14/24"],
-               "geo_bypass", "198.51.100.14/24")
+        self._(["--xff", "default"], "geo_bypass", "default")
+        self._(["--xff", "never"], "geo_bypass", "never")
+        self._(["--xff", "EN"], "geo_bypass", "EN")
+        self._(["--xff", "198.51.100.14/24"], "geo_bypass", "198.51.100.14/24")
 
-        self._("--geo-bypass",
-               "geo_bypass", "default")
-        self._("--no-geo-bypass",
-               "geo_bypass", "never")
-        self._(["--geo-bypass-country", "EN"],
-               "geo_bypass", "EN")
-        self._(["--geo-bypass-ip-block", "198.51.100.14/24"],
-               "geo_bypass", "198.51.100.14/24")
+        self._("--geo-bypass", "geo_bypass", "default")
+        self._("--no-geo-bypass", "geo_bypass", "never")
+        self._(["--geo-bypass-country", "EN"], "geo_bypass", "EN")
+        self._(["--geo-bypass-ip-block", "198.51.100.14/24"], "geo_bypass", "198.51.100.14/24")
 
     def test_cookiesfrombrowser(self):
-        self._(["--cookies-from-browser", "firefox"],
-               "cookiesfrombrowser", ("firefox", None, None, None))
-        self._(["--cookies-from-browser", "firefox:profile"],
-               "cookiesfrombrowser", ("firefox", "profile", None, None))
-        self._(["--cookies-from-browser", "firefox+keyring"],
-               "cookiesfrombrowser", ("firefox", None, "KEYRING", None))
-        self._(["--cookies-from-browser", "firefox::container"],
-               "cookiesfrombrowser", ("firefox", None, None, "container"))
-        self._(["--cookies-from-browser",
-                "firefox+keyring:profile::container"],
-               "cookiesfrombrowser",
-               ("firefox", "profile", "KEYRING", "container"))
+        self._(
+            ["--cookies-from-browser", "firefox"],
+            "cookiesfrombrowser",
+            ("firefox", None, None, None),
+        )
+        self._(
+            ["--cookies-from-browser", "firefox:profile"],
+            "cookiesfrombrowser",
+            ("firefox", "profile", None, None),
+        )
+        self._(
+            ["--cookies-from-browser", "firefox+keyring"],
+            "cookiesfrombrowser",
+            ("firefox", None, "KEYRING", None),
+        )
+        self._(
+            ["--cookies-from-browser", "firefox::container"],
+            "cookiesfrombrowser",
+            ("firefox", None, None, "container"),
+        )
+        self._(
+            ["--cookies-from-browser", "firefox+keyring:profile::container"],
+            "cookiesfrombrowser",
+            ("firefox", "profile", "KEYRING", "container"),
+        )
 
 
 if __name__ == "__main__":

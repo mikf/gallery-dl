@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 
 # Copyright 2023 Mike Fährmann
 #
@@ -16,9 +15,9 @@ import sys
 import util
 
 import gallery_dl.util
-gallery_dl.util.EXECUTABLE = True
-from gallery_dl import option  # noqa E402
 
+gallery_dl.util.EXECUTABLE = True
+from gallery_dl import option  # noqa: E402
 
 TEMPLATE = """# Command-Line Options
 
@@ -36,10 +35,11 @@ opts = re.sub(r"(?m)^(\w+.*)", "## \\1", opts)  # group names to headings
 opts = opts.replace("\n  ", "\n    ")  # indent by 4
 
 
-PATH = (sys.argv[1] if len(sys.argv) > 1 else
-        util.path("docs", "options.md"))
+PATH = sys.argv[1] if len(sys.argv) > 1 else util.path("docs", "options.md")
 with util.lazy(PATH) as fp:
-    fp.write(TEMPLATE.format(
-        "/".join(os.path.normpath(__file__).split(os.sep)[-2:]),
-        opts,
-    ))
+    fp.write(
+        TEMPLATE.format(
+            "/".join(os.path.normpath(__file__).split(os.sep)[-2:]),
+            opts,
+        )
+    )

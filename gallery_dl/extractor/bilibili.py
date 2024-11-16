@@ -1,17 +1,21 @@
-# -*- coding: utf-8 -*-
-
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
 """Extractors for https://www.bilibili.com/"""
 
-from .common import Extractor, Message
-from .. import text, util, exception
+from contextlib import suppress
+
+from .. import exception
+from .. import text
+from .. import util
+from .common import Extractor
+from .common import Message
 
 
 class BilibiliExtractor(Extractor):
     """Base class for bilibili extractors"""
+
     category = "bilibili"
     root = "https://www.bilibili.com"
     request_interval = (3.0, 6.0)
@@ -22,6 +26,7 @@ class BilibiliExtractor(Extractor):
 
 class BilibiliUserArticlesExtractor(BilibiliExtractor):
     """Extractor for a bilibili user's articles"""
+
     subcategory = "user-articles"
     pattern = r"(?:https?://)?space\.bilibili\.com/(\d+)/article"
     example = "https://space.bilibili.com/12345/article"
@@ -35,9 +40,9 @@ class BilibiliUserArticlesExtractor(BilibiliExtractor):
 
 class BilibiliArticleExtractor(BilibiliExtractor):
     """Extractor for a bilibili article"""
+
     subcategory = "article"
-    pattern = (r"(?:https?://)?"
-               r"(?:t\.bilibili\.com|(?:www\.)?bilibili.com/opus)/(\d+)")
+    pattern = r"(?:https?://)?" r"(?:t\.bilibili\.com|(?:www\.)?bilibili.com/opus)/(\d+)"
     example = "https://www.bilibili.com/opus/12345"
     directory_fmt = ("{category}", "{username}")
     filename_fmt = "{id}_{num}.{extension}"
@@ -49,21 +54,19 @@ class BilibiliArticleExtractor(BilibiliExtractor):
         # Flatten modules list
         modules = {}
         for module in article["detail"]["modules"]:
-            del module['module_type']
+            del module["module_type"]
             modules.update(module)
         article["detail"]["modules"] = modules
 
         article["username"] = modules["module_author"]["name"]
 
         pics = []
-        for paragraph in modules['module_content']['paragraphs']:
+        for paragraph in modules["module_content"]["paragraphs"]:
             if "pic" not in paragraph:
                 continue
 
-            try:
+            with suppress(Exception):
                 pics.extend(paragraph["pic"]["pics"])
-            except Exception:
-                pass
 
         article["count"] = len(pics)
         yield Message.Directory, article
@@ -73,7 +76,7 @@ class BilibiliArticleExtractor(BilibiliExtractor):
             yield Message.Url, url, text.nameext_from_url(url, article)
 
 
-class BilibiliAPI():
+class BilibiliAPI:
     def __init__(self, extractor):
         self.extractor = extractor
 
@@ -107,10 +110,10 @@ class BilibiliAPI():
         while True:
             page = self.extractor.request(url).text
             try:
-                return util.json_loads(text.extr(
-                    page, "window.__INITIAL_STATE__=", "};") + "}")
+                return util.json_loads(text.extr(page, "window.__INITIAL_STATE__=", "};") + "}")
             except Exception:
                 if "window._riskdata_" not in page:
                     raise exception.StopExtraction(
-                        "%s: Unable to extract INITIAL_STATE data", article_id)
+                        "%s: Unable to extract INITIAL_STATE data", article_id
+                    )
             self.extractor.wait(seconds=300)

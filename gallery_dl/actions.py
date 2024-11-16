@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,12 +6,15 @@
 
 """ """
 
-import re
-import time
+import functools
 import logging
 import operator
-import functools
-from . import util, exception
+import re
+import time
+from contextlib import suppress
+
+from . import exception
+from . import util
 
 
 def parse(actionspec):
@@ -74,8 +75,7 @@ def parse(actionspec):
     return actions
 
 
-class LoggerAdapter():
-
+class LoggerAdapter:
     def __init__(self, logger, job):
         self.logger = logger
         self.extra = job._logger_extra
@@ -126,14 +126,17 @@ def _chain_actions(actions):
     def _chain(args):
         for action in actions:
             action(args)
+
     return _chain
 
 
 # --------------------------------------------------------------------
 
+
 def action_print(opts):
     def _print(_):
         print(opts)
+
     return None, _print
 
 
@@ -151,6 +154,7 @@ def action_status(opts):
 
     def _status(args):
         args["job"].status = op(args["job"].status, value)
+
     return _status, None
 
 
@@ -159,12 +163,14 @@ def action_level(opts):
 
     def _level(args):
         args["level"] = level
+
     return _level, None
 
 
 def action_exec(opts):
     def _exec(_):
         util.Popen(opts, shell=True).wait()
+
     return None, _exec
 
 
@@ -175,6 +181,7 @@ def action_wait(opts):
         def _wait(args):
             time.sleep(seconds())
     else:
+
         def _wait(args):
             input("Press Enter to continue")
 
@@ -194,24 +201,23 @@ def action_restart(opts):
 
 
 def action_exit(opts):
-    try:
+    with suppress(ValueError):
         opts = int(opts)
-    except ValueError:
-        pass
 
     def _exit(args):
         raise SystemExit(opts)
+
     return None, _exit
 
 
 ACTIONS = {
-    "abort"    : action_abort,
-    "exec"     : action_exec,
-    "exit"     : action_exit,
-    "level"    : action_level,
-    "print"    : action_print,
-    "restart"  : action_restart,
-    "status"   : action_status,
+    "abort": action_abort,
+    "exec": action_exec,
+    "exit": action_exit,
+    "level": action_level,
+    "print": action_print,
+    "restart": action_restart,
+    "status": action_status,
     "terminate": action_terminate,
-    "wait"     : action_wait,
+    "wait": action_wait,
 }

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2019-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,12 +6,13 @@
 
 """Extractors for https://nsfwalbum.com/"""
 
-from .common import GalleryExtractor
 from .. import text
+from .common import GalleryExtractor
 
 
 class NsfwalbumAlbumExtractor(GalleryExtractor):
     """Extractor for image albums on nsfwalbum.com"""
+
     category = "nsfwalbum"
     subcategory = "album"
     root = "https://nsfwalbum.com"
@@ -32,9 +31,9 @@ class NsfwalbumAlbumExtractor(GalleryExtractor):
         extr = text.extract_from(page)
         return {
             "album_id": text.parse_int(self.album_id),
-            "title"   : text.unescape(extr('<h6>', '</h6>')),
-            "models"  : text.split_html(extr('"models"> Models:', '</div>')),
-            "studio"  : text.remove_html(extr('"models"> Studio:', '</div>')),
+            "title": text.unescape(extr("<h6>", "</h6>")),
+            "models": text.split_html(extr('"models"> Models:', "</div>")),
+            "studio": text.remove_html(extr('"models"> Studio:', "</div>")),
         }
 
     def images(self, page):
@@ -49,9 +48,11 @@ class NsfwalbumAlbumExtractor(GalleryExtractor):
             while tries <= retries:
                 try:
                     if not spirit:
-                        spirit = self._annihilate(text.extract(
-                            self.request(iframe + image_id).text,
-                            'giraffe.annihilate("', '"')[0])
+                        spirit = self._annihilate(
+                            text.extract(
+                                self.request(iframe + image_id).text, 'giraffe.annihilate("', '"'
+                            )[0]
+                        )
                         params = {"spirit": spirit, "photo": image_id}
                     data = self.request(backend, params=params).json()
                     break
@@ -61,23 +62,23 @@ class NsfwalbumAlbumExtractor(GalleryExtractor):
                 self.log.warning("Unable to fetch image %s", image_id)
                 continue
 
-            yield data[0], {
-                "id"    : text.parse_int(image_id),
-                "width" : text.parse_int(data[1]),
-                "height": text.parse_int(data[2]),
-                "_http_validate": self._validate_response,
-                "_fallback": ("{}/imageProxy.php?photoId={}&spirit={}".format(
-                    self.root, image_id, spirit),),
-            }
+            yield (
+                data[0],
+                {
+                    "id": text.parse_int(image_id),
+                    "width": text.parse_int(data[1]),
+                    "height": text.parse_int(data[2]),
+                    "_http_validate": self._validate_response,
+                    "_fallback": (
+                        f"{self.root}/imageProxy.php?photoId={image_id}&spirit={spirit}",
+                    ),
+                },
+            )
 
     @staticmethod
     def _validate_response(response):
-        return not response.url.endswith(
-            ("/no_image.jpg", "/placeholder.png", "/error.jpg"))
+        return not response.url.endswith(("/no_image.jpg", "/placeholder.png", "/error.jpg"))
 
     @staticmethod
     def _annihilate(value, base=6):
-        return "".join(
-            chr(ord(char) ^ base)
-            for char in value
-        )
+        return "".join(chr(ord(char) ^ base) for char in value)

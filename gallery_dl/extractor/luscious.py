@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2016-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,45 +6,53 @@
 
 """Extractors for https://members.luscious.net/"""
 
-from .common import Extractor, Message
-from .. import text, exception
+from .. import exception
+from .. import text
+from .common import Extractor
+from .common import Message
 
 
 class LusciousExtractor(Extractor):
     """Base class for luscious extractors"""
+
     category = "luscious"
     cookies_domain = ".luscious.net"
     root = "https://members.luscious.net"
 
     def _graphql(self, op, variables, query):
         data = {
-            "id"           : 1,
+            "id": 1,
             "operationName": op,
-            "query"        : query,
-            "variables"    : variables,
+            "query": query,
+            "variables": variables,
         }
         response = self.request(
-            "{}/graphql/nobatch/?operationName={}".format(self.root, op),
-            method="POST", json=data, fatal=False,
+            f"{self.root}/graphql/nobatch/?operationName={op}",
+            method="POST",
+            json=data,
+            fatal=False,
         )
 
         if response.status_code >= 400:
             self.log.debug("Server response: %s", response.text)
             raise exception.StopExtraction(
-                "GraphQL query failed ('%s %s')",
-                response.status_code, response.reason)
+                "GraphQL query failed ('%s %s')", response.status_code, response.reason
+            )
 
         return response.json()["data"]
 
 
 class LusciousAlbumExtractor(LusciousExtractor):
     """Extractor for image albums from luscious.net"""
+
     subcategory = "album"
     filename_fmt = "{category}_{album[id]}_{num:>03}.{extension}"
     directory_fmt = ("{category}", "{album[id]} {album[title]}")
     archive_fmt = "{album[id]}_{id}"
-    pattern = (r"(?:https?://)?(?:www\.|members\.)?luscious\.net"
-               r"/(?:albums|pictures/c/[^/?#]+/album)/[^/?#]+_(\d+)")
+    pattern = (
+        r"(?:https?://)?(?:www\.|members\.)?luscious\.net"
+        r"/(?:albums|pictures/c/[^/?#]+/album)/[^/?#]+_(\d+)"
+    )
     example = "https://luscious.net/albums/TITLE_12345/"
 
     def __init__(self, match):
@@ -72,9 +78,11 @@ class LusciousAlbumExtractor(LusciousExtractor):
             image["date"] = text.parse_timestamp(image["created"])
             image["id"] = text.parse_int(image["id"])
 
-            url = (image["url_to_original"] or image["url_to_video"]
-                   if self.gif else
-                   image["url_to_video"] or image["url_to_original"])
+            url = (
+                image["url_to_original"] or image["url_to_video"]
+                if self.gif
+                else image["url_to_video"] or image["url_to_original"]
+            )
 
             yield Message.Url, url, text.nameext_from_url(url, image)
 
@@ -195,12 +203,14 @@ fragment AlbumStandard on Album {
     def images(self):
         variables = {
             "input": {
-                "filters": [{
-                    "name" : "album_id",
-                    "value": self.album_id,
-                }],
+                "filters": [
+                    {
+                        "name": "album_id",
+                        "value": self.album_id,
+                    }
+                ],
                 "display": "position",
-                "page"   : 1,
+                "page": 1,
             },
         }
 
@@ -273,9 +283,9 @@ fragment PictureStandardWithoutAlbum on Picture {
 
 class LusciousSearchExtractor(LusciousExtractor):
     """Extractor for album searches on luscious.net"""
+
     subcategory = "search"
-    pattern = (r"(?:https?://)?(?:www\.|members\.)?luscious\.net"
-               r"/albums/list/?(?:\?([^#]+))?")
+    pattern = r"(?:https?://)?(?:www\.|members\.)?luscious\.net" r"/albums/list/?(?:\?([^#]+))?"
     example = "https://luscious.net/albums/list/?tagged=TAG"
 
     def __init__(self, match):

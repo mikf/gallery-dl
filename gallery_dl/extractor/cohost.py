@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2024 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,18 +6,21 @@
 
 """Extractors for https://cohost.org/"""
 
-from .common import Extractor, Message
-from .. import text, util
+from .. import text
+from .. import util
+from .common import Extractor
+from .common import Message
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?cohost\.org"
 
 
 class CohostExtractor(Extractor):
     """Base class for cohost extractors"""
+
     category = "cohost"
     root = "https://cohost.org"
     directory_fmt = ("{category}", "{postingProject[handle]}")
-    filename_fmt = ("{postId}_{headline:?/_/[b:200]}{num}.{extension}")
+    filename_fmt = "{postId}_{headline:?/_/[b:200]}{num}.{extension}"
     archive_fmt = "{postId}_{num}"
 
     def _init(self):
@@ -33,14 +34,12 @@ class CohostExtractor(Extractor):
             reason = post.get("limitedVisibilityReason")
             if reason and reason != "none":
                 if reason == "log-in-first":
-                    reason = ("This page's posts are visible only to users "
-                              "who are logged in.")
+                    reason = "This page's posts are visible only to users " "who are logged in."
                 self.log.warning('%s: "%s"', post["postId"], reason)
 
             files = self._extract_files(post)
             post["count"] = len(files)
-            post["date"] = text.parse_datetime(
-                post["publishedAt"], "%Y-%m-%dT%H:%M:%S.%fZ")
+            post["date"] = text.parse_datetime(post["publishedAt"], "%Y-%m-%dT%H:%M:%S.%fZ")
 
             yield Message.Directory, post
             for post["num"], file in enumerate(files, 1):
@@ -53,7 +52,7 @@ class CohostExtractor(Extractor):
         return ()
 
     def _request_api(self, endpoint, input):
-        url = "{}/api/v1/trpc/{}".format(self.root, endpoint)
+        url = f"{self.root}/api/v1/trpc/{endpoint}"
         params = {"batch": "1", "input": util.json_dumps({"0": input})}
         headers = {"content-type": "application/json"}
 
@@ -91,14 +90,14 @@ class CohostExtractor(Extractor):
                 elif type == "ask":
                     post["ask"] = block["ask"]
                 else:
-                    self.log.debug("%s: Unsupported block type '%s'",
-                                   post["postId"], type)
+                    self.log.debug("%s: Unsupported block type '%s'", post["postId"], type)
             except Exception as exc:
                 self.log.debug("%s: %s", exc.__class__.__name__, exc)
 
 
 class CohostUserExtractor(CohostExtractor):
     """Extractor for media from a cohost user"""
+
     subcategory = "user"
     pattern = BASE_PATTERN + r"/([^/?#]+)/?(?:$|\?|#)"
     example = "https://cohost.org/USER"
@@ -109,10 +108,10 @@ class CohostUserExtractor(CohostExtractor):
             "projectHandle": self.groups[0],
             "page": 0,
             "options": {
-                "pinnedPostsAtTop"    : True if self.pinned else False,
-                "hideReplies"         : not self.replies,
-                "hideShares"          : not self.shares,
-                "hideAsks"            : not self.asks,
+                "pinnedPostsAtTop": bool(self.pinned),
+                "hideReplies": not self.replies,
+                "hideShares": not self.shares,
+                "hideAsks": not self.asks,
                 "viewingOnProjectPage": True,
             },
         }
@@ -137,6 +136,7 @@ class CohostUserExtractor(CohostExtractor):
 
 class CohostPostExtractor(CohostExtractor):
     """Extractor for media from a single cohost post"""
+
     subcategory = "post"
     pattern = BASE_PATTERN + r"/([^/?#]+)/post/(\d+)"
     example = "https://cohost.org/USER/post/12345"
@@ -161,21 +161,20 @@ class CohostPostExtractor(CohostExtractor):
 
 class CohostTagExtractor(CohostExtractor):
     """Extractor for tagged posts"""
+
     subcategory = "tag"
     pattern = BASE_PATTERN + r"/([^/?#]+)/tagged/([^/?#]+)(?:\?([^#]+))?"
     example = "https://cohost.org/USER/tagged/TAG"
 
     def posts(self):
         user, tag, query = self.groups
-        url = "{}/{}/tagged/{}".format(self.root, user, tag)
+        url = f"{self.root}/{user}/tagged/{tag}"
         params = text.parse_query(query)
-        post_feed_key = ("tagged-post-feed" if user == "rc" else
-                         "project-tagged-post-feed")
+        post_feed_key = "tagged-post-feed" if user == "rc" else "project-tagged-post-feed"
 
         while True:
             page = self.request(url, params=params).text
-            data = util.json_loads(text.extr(
-                page, 'id="__COHOST_LOADER_STATE__">', '</script>'))
+            data = util.json_loads(text.extr(page, 'id="__COHOST_LOADER_STATE__">', "</script>"))
 
             try:
                 feed = data[post_feed_key]
@@ -188,24 +187,23 @@ class CohostTagExtractor(CohostExtractor):
             if not pagination.get("morePagesForward"):
                 return
             params["refTimestamp"] = pagination["refTimestamp"]
-            params["skipPosts"] = \
-                pagination["currentSkip"] + pagination["idealPageStride"]
+            params["skipPosts"] = pagination["currentSkip"] + pagination["idealPageStride"]
 
 
 class CohostLikesExtractor(CohostExtractor):
     """Extractor for liked posts"""
+
     subcategory = "likes"
     pattern = BASE_PATTERN + r"/rc/liked-posts"
     example = "https://cohost.org/rc/liked-posts"
 
     def posts(self):
-        url = "{}/rc/liked-posts".format(self.root)
+        url = f"{self.root}/rc/liked-posts"
         params = {}
 
         while True:
             page = self.request(url, params=params).text
-            data = util.json_loads(text.extr(
-                page, 'id="__COHOST_LOADER_STATE__">', '</script>'))
+            data = util.json_loads(text.extr(page, 'id="__COHOST_LOADER_STATE__">', "</script>"))
 
             try:
                 feed = data["liked-posts-feed"]
@@ -218,5 +216,4 @@ class CohostLikesExtractor(CohostExtractor):
             if not pagination.get("morePagesForward"):
                 return
             params["refTimestamp"] = pagination["refTimestamp"]
-            params["skipPosts"] = \
-                pagination["currentSkip"] + pagination["idealPageStride"]
+            params["skipPosts"] = pagination["currentSkip"] + pagination["idealPageStride"]

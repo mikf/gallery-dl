@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2019-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,8 +6,9 @@
 
 """Extractors for https://35photo.pro/"""
 
-from .common import Extractor, Message
 from .. import text
+from .common import Extractor
+from .common import Message
 
 
 class _35photoExtractor(Extractor):
@@ -55,22 +54,21 @@ class _35photoExtractor(Extractor):
 
     def _photo_data(self, photo_id):
         params = {"method": "photo.getData", "photoId": photo_id}
-        data = self.request(
-            "https://api.35photo.pro/", params=params).json()["data"][photo_id]
+        data = self.request("https://api.35photo.pro/", params=params).json()["data"][photo_id]
         info = {
-            "url"        : data["src"],
-            "id"         : data["photo_id"],
-            "title"      : data["photo_name"],
+            "url": data["src"],
+            "id": data["photo_id"],
+            "title": data["photo_name"],
             "description": data["photo_desc"],
-            "tags"       : data["tags"] or [],
-            "views"      : data["photo_see"],
-            "favorites"  : data["photo_fav"],
-            "score"      : data["photo_rating"],
-            "type"       : data["photo_type"],
-            "date"       : data["timeAdd"],
-            "user"       : data["user_login"],
-            "user_id"    : data["user_id"],
-            "user_name"  : data["user_name"],
+            "tags": data["tags"] or [],
+            "views": data["photo_see"],
+            "favorites": data["photo_fav"],
+            "score": data["photo_rating"],
+            "type": data["photo_type"],
+            "date": data["timeAdd"],
+            "user": data["user_login"],
+            "user_id": data["user_id"],
+            "user_name": data["user_name"],
         }
 
         if "series" in data:
@@ -98,9 +96,11 @@ class _35photoExtractor(Extractor):
 
 class _35photoUserExtractor(_35photoExtractor):
     """Extractor for all images of a user on 35photo.pro"""
+
     subcategory = "user"
-    pattern = (r"(?:https?://)?(?:[a-z]+\.)?35photo\.pro"
-               r"/(?!photo_|genre_|tags/|rating/)([^/?#]+)")
+    pattern = (
+        r"(?:https?://)?(?:[a-z]+\.)?35photo\.pro" r"/(?!photo_|genre_|tags/|rating/)([^/?#]+)"
+    )
     example = "https://35photo.pro/USER"
 
     def __init__(self, match):
@@ -109,7 +109,7 @@ class _35photoUserExtractor(_35photoExtractor):
         self.user_id = 0
 
     def metadata(self):
-        url = "{}/{}/".format(self.root, self.user)
+        url = f"{self.root}/{self.user}/"
         page = self.request(url).text
         self.user_id = text.parse_int(text.extr(page, "/user_", ".xml"))
         return {
@@ -118,14 +118,17 @@ class _35photoUserExtractor(_35photoExtractor):
         }
 
     def photos(self):
-        return self._pagination({
-            "page": "photoUser",
-            "user_id": self.user_id,
-        })
+        return self._pagination(
+            {
+                "page": "photoUser",
+                "user_id": self.user_id,
+            }
+        )
 
 
 class _35photoTagExtractor(_35photoExtractor):
     """Extractor for all photos from a tag listing"""
+
     subcategory = "tag"
     directory_fmt = ("{category}", "Tags", "{search_tag}")
     archive_fmt = "t{search_tag}_{id}_{num}"
@@ -143,7 +146,7 @@ class _35photoTagExtractor(_35photoExtractor):
         num = 1
 
         while True:
-            url = "{}/tags/{}/list_{}/".format(self.root, self.tag, num)
+            url = f"{self.root}/tags/{self.tag}/list_{num}/"
             page = self.request(url).text
             prev = None
 
@@ -159,6 +162,7 @@ class _35photoTagExtractor(_35photoExtractor):
 
 class _35photoGenreExtractor(_35photoExtractor):
     """Extractor for images of a specific genre on 35photo.pro"""
+
     subcategory = "genre"
     directory_fmt = ("{category}", "Genre", "{genre}")
     archive_fmt = "g{genre_id}_{id}_{num}"
@@ -173,8 +177,7 @@ class _35photoGenreExtractor(_35photoExtractor):
     def metadata(self):
         url = "{}/genre_{}{}".format(self.root, self.genre_id, self.new or "/")
         page = self.request(url).text
-        self.photo_ids = self._photo_ids(text.extr(
-            page, ' class="photo', '\n'))
+        self.photo_ids = self._photo_ids(text.extr(page, ' class="photo', "\n"))
         return {
             "genre": text.extr(page, " genre - ", ". "),
             "genre_id": text.parse_int(self.genre_id),
@@ -183,16 +186,20 @@ class _35photoGenreExtractor(_35photoExtractor):
     def photos(self):
         if not self.photo_ids:
             return ()
-        return self._pagination({
-            "page": "genre",
-            "community_id": self.genre_id,
-            "photo_rating": "0" if self.new else "50",
-            "lastId": self.photo_ids[-1],
-        }, self.photo_ids)
+        return self._pagination(
+            {
+                "page": "genre",
+                "community_id": self.genre_id,
+                "photo_rating": "0" if self.new else "50",
+                "lastId": self.photo_ids[-1],
+            },
+            self.photo_ids,
+        )
 
 
 class _35photoImageExtractor(_35photoExtractor):
     """Extractor for individual images from 35photo.pro"""
+
     subcategory = "image"
     pattern = r"(?:https?://)?(?:[a-z]+\.)?35photo\.pro/photo_(\d+)"
     example = "https://35photo.pro/photo_12345/"

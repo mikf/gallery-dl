@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2014-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,13 +6,17 @@
 
 """Extractors for https://danbooru.donmai.us/ and other Danbooru instances"""
 
-from .common import BaseExtractor, Message
-from .. import text, util
 import datetime
+
+from .. import text
+from .. import util
+from .common import BaseExtractor
+from .common import Message
 
 
 class DanbooruExtractor(BaseExtractor):
     """Base class for danbooru extractors"""
+
     basecategory = "Danbooru"
     filename_fmt = "{category}_{id}_{filename}.{extension}"
     page_limit = 1000
@@ -29,7 +31,7 @@ class DanbooruExtractor(BaseExtractor):
 
         threshold = self.config("threshold")
         if isinstance(threshold, int):
-            self.threshold = 1 if threshold < 1 else threshold
+            self.threshold = max(threshold, 1)
         else:
             self.threshold = self.per_page
 
@@ -58,7 +60,6 @@ class DanbooruExtractor(BaseExtractor):
 
         data = self.metadata()
         for post in self.posts():
-
             try:
                 url = post["file_url"]
             except KeyError:
@@ -69,33 +70,29 @@ class DanbooruExtractor(BaseExtractor):
                 continue
 
             text.nameext_from_url(url, post)
-            post["date"] = text.parse_datetime(
-                post["created_at"], "%Y-%m-%dT%H:%M:%S.%f%z")
+            post["date"] = text.parse_datetime(post["created_at"], "%Y-%m-%dT%H:%M:%S.%f%z")
 
-            post["tags"] = (
-                post["tag_string"].split(" ")
-                if post["tag_string"] else ())
+            post["tags"] = post["tag_string"].split(" ") if post["tag_string"] else ()
             post["tags_artist"] = (
-                post["tag_string_artist"].split(" ")
-                if post["tag_string_artist"] else ())
+                post["tag_string_artist"].split(" ") if post["tag_string_artist"] else ()
+            )
             post["tags_character"] = (
-                post["tag_string_character"].split(" ")
-                if post["tag_string_character"] else ())
+                post["tag_string_character"].split(" ") if post["tag_string_character"] else ()
+            )
             post["tags_copyright"] = (
-                post["tag_string_copyright"].split(" ")
-                if post["tag_string_copyright"] else ())
+                post["tag_string_copyright"].split(" ") if post["tag_string_copyright"] else ()
+            )
             post["tags_general"] = (
-                post["tag_string_general"].split(" ")
-                if post["tag_string_general"] else ())
+                post["tag_string_general"].split(" ") if post["tag_string_general"] else ()
+            )
             post["tags_meta"] = (
-                post["tag_string_meta"].split(" ")
-                if post["tag_string_meta"] else ())
+                post["tag_string_meta"].split(" ") if post["tag_string_meta"] else ()
+            )
 
             if post["extension"] == "zip":
                 if self.ugoira:
                     post["_ugoira_original"] = False
-                    post["_ugoira_frame_data"] = post["frames"] = \
-                        self._ugoira_frames(post)
+                    post["_ugoira_frame_data"] = post["frames"] = self._ugoira_frames(post)
                     post["_http_adjust_extension"] = False
                 else:
                     url = post["large_file_url"]
@@ -128,14 +125,12 @@ class DanbooruExtractor(BaseExtractor):
             if posts:
                 if self.includes:
                     params_meta = {
-                        "only" : self.includes,
+                        "only": self.includes,
                         "limit": len(posts),
-                        "tags" : "id:" + ",".join(str(p["id"]) for p in posts),
+                        "tags": "id:" + ",".join(str(p["id"]) for p in posts),
                     }
                     data = {
-                        meta["id"]: meta
-                        for meta in self.request(
-                            url, params=params_meta).json()
+                        meta["id"]: meta for meta in self.request(url, params=params_meta).json()
                     }
                     for post in posts:
                         post.update(data[post["id"]])
@@ -157,40 +152,41 @@ class DanbooruExtractor(BaseExtractor):
             first = False
 
     def _ugoira_frames(self, post):
-        data = self.request("{}/posts/{}.json?only=media_metadata".format(
-            self.root, post["id"])
+        data = self.request(
+            "{}/posts/{}.json?only=media_metadata".format(self.root, post["id"])
         ).json()["media_metadata"]["metadata"]
 
         ext = data["ZIP:ZipFileName"].rpartition(".")[2]
         fmt = ("{:>06}." + ext).format
         delays = data["Ugoira:FrameDelays"]
-        return [{"file": fmt(index), "delay": delay}
-                for index, delay in enumerate(delays)]
+        return [{"file": fmt(index), "delay": delay} for index, delay in enumerate(delays)]
 
 
-BASE_PATTERN = DanbooruExtractor.update({
-    "danbooru": {
-        "root": None,
-        "pattern": r"(?:(?:danbooru|hijiribe|sonohara|safebooru)\.donmai\.us"
-                   r"|donmai\.moe)",
-    },
-    "atfbooru": {
-        "root": "https://booru.allthefallen.moe",
-        "pattern": r"booru\.allthefallen\.moe",
-    },
-    "aibooru": {
-        "root": None,
-        "pattern": r"(?:safe\.)?aibooru\.online",
-    },
-    "booruvar": {
-        "root": "https://booru.borvar.art",
-        "pattern": r"booru\.borvar\.art",
-    },
-})
+BASE_PATTERN = DanbooruExtractor.update(
+    {
+        "danbooru": {
+            "root": None,
+            "pattern": r"(?:(?:danbooru|hijiribe|sonohara|safebooru)\.donmai\.us" r"|donmai\.moe)",
+        },
+        "atfbooru": {
+            "root": "https://booru.allthefallen.moe",
+            "pattern": r"booru\.allthefallen\.moe",
+        },
+        "aibooru": {
+            "root": None,
+            "pattern": r"(?:safe\.)?aibooru\.online",
+        },
+        "booruvar": {
+            "root": "https://booru.borvar.art",
+            "pattern": r"booru\.borvar\.art",
+        },
+    }
+)
 
 
 class DanbooruTagExtractor(DanbooruExtractor):
     """Extractor for danbooru posts from tag searches"""
+
     subcategory = "tag"
     directory_fmt = ("{category}", "{search_tags}")
     archive_fmt = "t_{search_tags}_{id}"
@@ -215,8 +211,7 @@ class DanbooruTagExtractor(DanbooruExtractor):
                     prefix = "b"
                 else:
                     prefix = None
-            elif tag.startswith(
-                    ("id:", "md5", "ordfav:", "ordfavgroup:", "ordpool:")):
+            elif tag.startswith(("id:", "md5", "ordfav:", "ordfavgroup:", "ordpool:")):
                 prefix = None
                 break
 
@@ -225,6 +220,7 @@ class DanbooruTagExtractor(DanbooruExtractor):
 
 class DanbooruPoolExtractor(DanbooruExtractor):
     """Extractor for posts from danbooru pools"""
+
     subcategory = "pool"
     directory_fmt = ("{category}", "pool", "{pool[id]} {pool[name]}")
     archive_fmt = "p_{pool[id]}_{id}"
@@ -236,7 +232,7 @@ class DanbooruPoolExtractor(DanbooruExtractor):
         self.pool_id = match.group(match.lastindex)
 
     def metadata(self):
-        url = "{}/pools/{}.json".format(self.root, self.pool_id)
+        url = f"{self.root}/pools/{self.pool_id}.json"
         pool = self.request(url).json()
         pool["name"] = pool["name"].replace("_", " ")
         self.post_ids = pool.pop("post_ids", ())
@@ -249,6 +245,7 @@ class DanbooruPoolExtractor(DanbooruExtractor):
 
 class DanbooruPostExtractor(DanbooruExtractor):
     """Extractor for single danbooru posts"""
+
     subcategory = "post"
     archive_fmt = "{id}"
     pattern = BASE_PATTERN + r"/post(?:s|/show)/(\d+)"
@@ -259,7 +256,7 @@ class DanbooruPostExtractor(DanbooruExtractor):
         self.post_id = match.group(match.lastindex)
 
     def posts(self):
-        url = "{}/posts/{}.json".format(self.root, self.post_id)
+        url = f"{self.root}/posts/{self.post_id}.json"
         post = self.request(url).json()
         if self.includes:
             params = {"only": self.includes}
@@ -269,6 +266,7 @@ class DanbooruPostExtractor(DanbooruExtractor):
 
 class DanbooruPopularExtractor(DanbooruExtractor):
     """Extractor for popular images from danbooru"""
+
     subcategory = "popular"
     directory_fmt = ("{category}", "popular", "{scale}", "{date}")
     archive_fmt = "P_{scale[0]}_{date}_{id}"

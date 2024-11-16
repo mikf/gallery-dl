@@ -1,3 +1,128 @@
 [build-system]
-requires = ["setuptools"]
-build-backend = "setuptools.build_meta"
+  build-backend = "setuptools.build_meta"
+  requires      = ["setuptools"]
+
+
+# ============================================================================ #
+#                                     Ruff                                     #
+# ============================================================================ #
+#
+# Reference:
+#   - [Configuration](https://docs.astral.sh/ruff/configuration/)
+#
+#   - [Settings](https://docs.astral.sh/ruff/settings)
+#   - [Rules](https://docs.astral.sh/ruff/rules/)
+#
+[tool.ruff]
+
+  # Set the maximum line length to 100
+  # Reference: https://knox.codes/posts/line-length-limits
+  line-length = 100
+
+  # Target Python 3.9 (the latest supported version)
+  # Reference: https://devguide.python.org/versions/
+  target-version = "py39"
+
+[tool.ruff.lint]
+  select = [
+    "C4",   # flake8-comprehensions
+    "COM",  # flake8-commas
+    "E",    # pycodestyle (errors)
+    "EXE",  # flake8-executable
+    "F",    # Pyflakes
+    "FA",   # flake8-future-annotations
+    "FLY",  # flynt
+    "FURB", # refurb
+    "G",    # flake8-logging-format
+    "I",    # isort
+    "ICN",  # flake8-import-conventions
+    "ISC",  # flake8-implicit-str-concat
+    "PGH",  # pygrep-hooks
+    "PIE",  # flake8-pie
+    "PYI",  # flake8-pyi
+    "Q",    # flake8-quotes
+    "SIM",  # flake8-simplify
+    "T10",  # flake8-debugger
+    "TCH",  # flake8-type-checking
+    "UP",   # pyupgrade
+
+    # The following checks are recommended but would require a lot of changes:
+    # "A",   # flake8-builtins
+    # "ANN", # flake8-annotations
+    # "ARG", # flake8-unused-arguments
+    # "B",   # flake8-bugbear
+    # "BLE", # flake8-blind-except
+    # "C",   # mccabe (complexity)
+    # "D",   # pydocstyle
+    # "DTZ", # flake8-datetimez
+    # "EM",  # flake8-errmsg
+    # "ERA", # eradicate
+    # "FBT", # flake8-boolean-trap
+    # "INP", # flake8-no-pep420
+    # "N",   # pep8-naming
+    # "PL",  # Pylint
+    # "PTH", # flake8-use-pathlib
+    # "RET", # flake8-return
+    # "RUF", # Ruff-specific rules
+    # "S",   # flake8-bandit
+    # "SLF", # flake8-self
+    # "T20", # flake8-print
+    # "TD",  # flake8-todos
+    # "W",   # pycodestyle (warnings)
+  ]
+
+  # ignore:
+  ignore = [
+    "ANN101", # Missing type annotation for self in method (otherwise it's just t.Self)
+    "ANN102", # Missing type annotation for cls in classmethod
+    "COM812", # Trailing comma missing; ignored for compatibility with the Ruff formatter
+    "ISC001", # Implicitly concatenated string literals on one line; ignored for compatibility with the Ruff formatter
+    "SIM115", # Use a context manager for opening files; code is structured to return open file handle
+  ]
+
+[tool.ruff.lint.isort]
+
+  # Each import should be on a separate line to minimize merge conflicts (see
+  # [reorder_python_imports](https://github.com/asottile/reorder_python_imports#why-this-style)).
+  force-single-line = true
+  known-first-party = ["gallery_dl"]
+
+# Ignore `E402` (import violations) in all `__init__.py` files, and in select subdirectories.
+[tool.ruff.lint.per-file-ignores]
+  "gallery_dl/extractor/500px.py" = [
+    "E501", # Line too long; file uses large query strings
+  ]
+  "gallery_dl/extractor/mangapark.py" = [
+    "E501", # Line too long; file uses large query strings
+  ]
+  "test/**" = [
+    "C4",   # flake8-comprehensions
+    "COM",  # flake8-commas
+    "E",    # pycodestyle (errors)
+    "EXE",  # flake8-executable
+    "F",    # Pyflakes
+    "FA",   # flake8-future-annotations
+    "FLY",  # flynt
+    "FURB", # refurb
+    "G",    # flake8-logging-format
+    "I",    # isort
+    "ICN",  # flake8-import-conventions
+    "ISC",  # flake8-implicit-str-concat
+    "PGH",  # pygrep-hooks
+    "PIE",  # flake8-pie
+    "PYI",  # flake8-pyi
+    "Q",    # flake8-quotes
+    "SIM",  # flake8-simplify
+    "T10",  # flake8-debugger
+    "TCH",  # flake8-type-checking
+    "UP",   # pyupgrade
+  ]
+
+[tool.ruff.lint.pydocstyle]
+  # Use Google-style docstrings (https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html).
+  convention = "google"
+
+[tool.ruff.format]
+  # Enable auto-formatting of code examples in docstrings. Markdown,
+  # reStructuredText code/literal blocks and doctests are all supported.
+  docstring-code-format = true

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2017-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,12 +6,14 @@
 
 """Extractors for https://warosu.org/"""
 
-from .common import Extractor, Message
 from .. import text
+from .common import Extractor
+from .common import Message
 
 
 class WarosuThreadExtractor(Extractor):
     """Extractor for threads on warosu.org"""
+
     category = "warosu"
     subcategory = "thread"
     root = "https://warosu.org"
@@ -28,14 +28,13 @@ class WarosuThreadExtractor(Extractor):
         self.board, self.thread = match.groups()
 
     def items(self):
-        url = "{}/{}/thread/{}".format(self.root, self.board, self.thread)
+        url = f"{self.root}/{self.board}/thread/{self.thread}"
         page = self.request(url).text
         data = self.metadata(page)
         posts = self.posts(page)
 
         if not data["title"]:
-            data["title"] = text.unescape(text.remove_html(
-                posts[0]["com"]))[:50]
+            data["title"] = text.unescape(text.remove_html(posts[0]["com"]))[:50]
 
         yield Message.Directory, data
         for post in posts:
@@ -49,10 +48,10 @@ class WarosuThreadExtractor(Extractor):
         boardname = text.extr(page, "<title>", "</title>")
         title = text.unescape(text.extr(page, "class=filetitle>", "<"))
         return {
-            "board"     : self.board,
+            "board": self.board,
             "board_name": boardname.split(" - ")[1],
-            "thread"    : self.thread,
-            "title"     : title,
+            "thread": self.thread,
+            "title": title,
         }
 
     def posts(self, page):
@@ -73,12 +72,11 @@ class WarosuThreadExtractor(Extractor):
     def _extract_post(self, post):
         extr = text.extract_from(post)
         return {
-            "no"  : extr("id=p", ">"),
+            "no": extr("id=p", ">"),
             "name": extr("class=postername>", "<").strip(),
             "time": extr("class=posttime title=", "000>"),
-            "now" : extr("", "<").strip(),
-            "com" : text.unescape(text.remove_html(extr(
-                "<blockquote>", "</blockquote>").strip())),
+            "now": extr("", "<").strip(),
+            "com": text.unescape(text.remove_html(extr("<blockquote>", "</blockquote>").strip())),
         }
 
     def _extract_image(self, post, data):
@@ -86,8 +84,7 @@ class WarosuThreadExtractor(Extractor):
         data["fsize"] = extr("<span class=fileinfo> File: ", ", ")
         data["w"] = extr("", "x")
         data["h"] = extr("", ", ")
-        data["filename"] = text.unquote(extr(
-            "", "<").rstrip().rpartition(".")[0])
+        data["filename"] = text.unquote(extr("", "<").rstrip().rpartition(".")[0])
         extr("<br>", "")
 
         url = extr("<a href=", ">")

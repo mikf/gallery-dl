@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2024 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,7 +6,8 @@
 
 """noop extractor"""
 
-from .common import Extractor, Message
+from .common import Extractor
+from .common import Message
 
 
 class NoopExtractor(Extractor):

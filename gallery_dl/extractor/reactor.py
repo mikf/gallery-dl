@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2019-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,13 +6,17 @@
 
 """Generic extractors for *reactor sites"""
 
-from .common import BaseExtractor, Message
-from .. import text, util
 import urllib.parse
+
+from .. import text
+from .. import util
+from .common import BaseExtractor
+from .common import Message
 
 
 class ReactorExtractor(BaseExtractor):
     """Base class for *reactor.cc extractors"""
+
     basecategory = "reactor"
     filename_fmt = "{post_id}_{num:>02}{title[:100]:?_//}.{extension}"
     archive_fmt = "{post_id}_{num}"
@@ -67,8 +69,7 @@ class ReactorExtractor(BaseExtractor):
                     return
             page = response.text
 
-            yield from text.extract_iter(
-                page, '<div class="uhead">', '<div class="ufoot">')
+            yield from text.extract_iter(page, '<div class="uhead">', '<div class="ufoot">')
 
             try:
                 pos = page.index("class='next'")
@@ -81,8 +82,8 @@ class ReactorExtractor(BaseExtractor):
         post, _, script = post.partition('<script type="application/ld+json">')
         if not script:
             return
-        images = text.extract_iter(post, '<div class="image">', '</div>')
-        script = script[:script.index("</")].strip()
+        images = text.extract_iter(post, '<div class="image">', "</div>")
+        script = script[: script.index("</")].strip()
 
         try:
             data = util.json_loads(script)
@@ -101,8 +102,7 @@ class ReactorExtractor(BaseExtractor):
         user = data["author"]["name"]
         description = text.unescape(data["description"])
         title, _, tags = text.unescape(data["headline"]).partition(" / ")
-        post_id = text.parse_int(
-            data["mainEntityOfPage"]["@id"].rpartition("/")[2])
+        post_id = text.parse_int(data["mainEntityOfPage"]["@id"].rpartition("/")[2])
 
         if not tags:
             title, tags = tags, title
@@ -146,28 +146,31 @@ class ReactorExtractor(BaseExtractor):
             }
 
 
-BASE_PATTERN = ReactorExtractor.update({
-    "reactor"    : {
-        "root": "http://reactor.cc",
-        "pattern": r"(?:[^/.]+\.)?reactor\.cc",
-    },
-    "joyreactor" : {
-        "root": "http://joyreactor.cc",
-        "pattern": r"(?:www\.)?joyreactor\.c(?:c|om)",
-    },
-    "pornreactor": {
-        "root": "http://pornreactor.cc",
-        "pattern": r"(?:www\.)?(?:pornreactor\.cc|fapreactor.com)",
-    },
-    "thatpervert": {
-        "root": "http://thatpervert.com",
-        "pattern": r"thatpervert\.com",
-    },
-})
+BASE_PATTERN = ReactorExtractor.update(
+    {
+        "reactor": {
+            "root": "http://reactor.cc",
+            "pattern": r"(?:[^/.]+\.)?reactor\.cc",
+        },
+        "joyreactor": {
+            "root": "http://joyreactor.cc",
+            "pattern": r"(?:www\.)?joyreactor\.c(?:c|om)",
+        },
+        "pornreactor": {
+            "root": "http://pornreactor.cc",
+            "pattern": r"(?:www\.)?(?:pornreactor\.cc|fapreactor.com)",
+        },
+        "thatpervert": {
+            "root": "http://thatpervert.com",
+            "pattern": r"thatpervert\.com",
+        },
+    }
+)
 
 
 class ReactorTagExtractor(ReactorExtractor):
     """Extractor for tag searches on *reactor.cc sites"""
+
     subcategory = "tag"
     directory_fmt = ("{category}", "{search_tags}")
     archive_fmt = "{search_tags}_{post_id}_{num}"
@@ -184,6 +187,7 @@ class ReactorTagExtractor(ReactorExtractor):
 
 class ReactorSearchExtractor(ReactorExtractor):
     """Extractor for search results on *reactor.cc sites"""
+
     subcategory = "search"
     directory_fmt = ("{category}", "search", "{search_tags}")
     archive_fmt = "s_{search_tags}_{post_id}_{num}"
@@ -200,6 +204,7 @@ class ReactorSearchExtractor(ReactorExtractor):
 
 class ReactorUserExtractor(ReactorExtractor):
     """Extractor for all posts of a user on *reactor.cc sites"""
+
     subcategory = "user"
     directory_fmt = ("{category}", "user", "{user}")
     pattern = BASE_PATTERN + r"/user/([^/?#]+)"
@@ -215,6 +220,7 @@ class ReactorUserExtractor(ReactorExtractor):
 
 class ReactorPostExtractor(ReactorExtractor):
     """Extractor for single posts on *reactor.cc sites"""
+
     subcategory = "post"
     pattern = BASE_PATTERN + r"/post/(\d+)"
     example = "http://reactor.cc/post/12345"

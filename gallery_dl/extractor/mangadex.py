@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2018-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,22 +6,29 @@
 
 """Extractors for https://mangadex.org/"""
 
-from .common import Extractor, Message
-from .. import text, util, exception
-from ..cache import cache, memcache
 from collections import defaultdict
+
+from .. import exception
+from .. import text
+from .. import util
+from ..cache import cache
+from ..cache import memcache
+from .common import Extractor
+from .common import Message
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?mangadex\.(?:org|cc)"
 
 
 class MangadexExtractor(Extractor):
     """Base class for mangadex extractors"""
+
     category = "mangadex"
     directory_fmt = (
-        "{category}", "{manga}",
-        "{volume:?v/ />02}c{chapter:>03}{chapter_minor}{title:?: //}")
-    filename_fmt = (
-        "{manga}_c{chapter:>03}{chapter_minor}_{page:>03}.{extension}")
+        "{category}",
+        "{manga}",
+        "{volume:?v/ />02}c{chapter:>03}{chapter_minor}{title:?: //}",
+    )
+    filename_fmt = "{manga}_c{chapter:>03}{chapter_minor}_{page:>03}.{extension}"
     archive_fmt = "{chapter_id}_{page}"
     root = "https://mangadex.org"
     _cache = {}
@@ -65,41 +70,36 @@ class MangadexExtractor(Extractor):
             chnum, sep, minor = 0, "", ""
 
         data = {
-            "manga"   : (mattributes["title"].get("en") or
-                         next(iter(mattributes["title"].values()))),
+            "manga": (mattributes["title"].get("en") or next(iter(mattributes["title"].values()))),
             "manga_id": manga["id"],
-            "title"   : cattributes["title"],
-            "volume"  : text.parse_int(cattributes["volume"]),
-            "chapter" : text.parse_int(chnum),
+            "title": cattributes["title"],
+            "volume": text.parse_int(cattributes["volume"]),
+            "chapter": text.parse_int(chnum),
             "chapter_minor": sep + minor,
             "chapter_id": chapter["id"],
-            "date"    : text.parse_datetime(cattributes["publishAt"]),
-            "lang"    : lang,
+            "date": text.parse_datetime(cattributes["publishAt"]),
+            "lang": lang,
             "language": util.code_to_language(lang),
-            "count"   : cattributes["pages"],
+            "count": cattributes["pages"],
             "_external_url": cattributes.get("externalUrl"),
         }
 
-        data["artist"] = [artist["attributes"]["name"]
-                          for artist in relationships["artist"]]
-        data["author"] = [author["attributes"]["name"]
-                          for author in relationships["author"]]
-        data["group"] = [group["attributes"]["name"]
-                         for group in relationships["scanlation_group"]]
+        data["artist"] = [artist["attributes"]["name"] for artist in relationships["artist"]]
+        data["author"] = [author["attributes"]["name"] for author in relationships["author"]]
+        data["group"] = [group["attributes"]["name"] for group in relationships["scanlation_group"]]
 
         data["status"] = mattributes["status"]
-        data["tags"] = [tag["attributes"]["name"]["en"]
-                        for tag in mattributes["tags"]]
+        data["tags"] = [tag["attributes"]["name"]["en"] for tag in mattributes["tags"]]
 
         return data
 
 
 class MangadexChapterExtractor(MangadexExtractor):
     """Extractor for manga-chapters from mangadex.org"""
+
     subcategory = "chapter"
     pattern = BASE_PATTERN + r"/chapter/([0-9a-f-]+)"
-    example = ("https://mangadex.org/chapter"
-               "/01234567-89ab-cdef-0123-456789abcdef")
+    example = "https://mangadex.org/chapter" "/01234567-89ab-cdef-0123-456789abcdef"
 
     def items(self):
         try:
@@ -112,7 +112,10 @@ class MangadexChapterExtractor(MangadexExtractor):
             raise exception.StopExtraction(
                 "Chapter %s%s is not available on MangaDex and can instead be "
                 "read on the official publisher's website at %s.",
-                data["chapter"], data["chapter_minor"], data["_external_url"])
+                data["chapter"],
+                data["chapter_minor"],
+                data["_external_url"],
+            )
 
         yield Message.Directory, data
 
@@ -120,8 +123,7 @@ class MangadexChapterExtractor(MangadexExtractor):
         chapter = server["chapter"]
         base = "{}/data/{}/".format(server["baseUrl"], chapter["hash"])
 
-        enum = util.enumerate_reversed if self.config(
-            "page-reverse") else enumerate
+        enum = util.enumerate_reversed if self.config("page-reverse") else enumerate
         for data["page"], page in enum(chapter["data"], 1):
             text.nameext_from_url(page, data)
             yield Message.Url, base + page, data
@@ -129,10 +131,10 @@ class MangadexChapterExtractor(MangadexExtractor):
 
 class MangadexMangaExtractor(MangadexExtractor):
     """Extractor for manga from mangadex.org"""
+
     subcategory = "manga"
     pattern = BASE_PATTERN + r"/(?:title|manga)/(?!feed$)([0-9a-f-]+)"
-    example = ("https://mangadex.org/title"
-               "/01234567-89ab-cdef-0123-456789abcdef")
+    example = "https://mangadex.org/title" "/01234567-89ab-cdef-0123-456789abcdef"
 
     def chapters(self):
         return self.api.manga_feed(self.uuid)
@@ -140,6 +142,7 @@ class MangadexMangaExtractor(MangadexExtractor):
 
 class MangadexFeedExtractor(MangadexExtractor):
     """Extractor for chapters from your Followed Feed"""
+
     subcategory = "feed"
     pattern = BASE_PATTERN + r"/title/feed$()"
     example = "https://mangadex.org/title/feed"
@@ -150,11 +153,10 @@ class MangadexFeedExtractor(MangadexExtractor):
 
 class MangadexListExtractor(MangadexExtractor):
     """Extractor for mangadex lists"""
+
     subcategory = "list"
-    pattern = (BASE_PATTERN +
-               r"/list/([0-9a-f-]+)(?:/[^/?#]*)?(?:\?tab=(\w+))?")
-    example = ("https://mangadex.org/list"
-               "/01234567-89ab-cdef-0123-456789abcdef/NAME")
+    pattern = BASE_PATTERN + r"/list/([0-9a-f-]+)(?:/[^/?#]*)?(?:\?tab=(\w+))?"
+    example = "https://mangadex.org/list" "/01234567-89ab-cdef-0123-456789abcdef/NAME"
 
     def __init__(self, match):
         MangadexExtractor.__init__(self, match)
@@ -176,10 +178,10 @@ class MangadexListExtractor(MangadexExtractor):
 
 class MangadexAuthorExtractor(MangadexExtractor):
     """Extractor for mangadex authors"""
+
     subcategory = "author"
     pattern = BASE_PATTERN + r"/author/([0-9a-f-]+)"
-    example = ("https://mangadex.org/author"
-               "/01234567-89ab-cdef-0123-456789abcdef/NAME")
+    example = "https://mangadex.org/author" "/01234567-89ab-cdef-0123-456789abcdef/NAME"
 
     def items(self):
         for manga in self.api.manga_author(self.uuid):
@@ -188,7 +190,7 @@ class MangadexAuthorExtractor(MangadexExtractor):
             yield Message.Queue, url, manga
 
 
-class MangadexAPI():
+class MangadexAPI:
     """Interface for the MangaDex API v5
 
     https://api.mangadex.org/docs/
@@ -203,8 +205,11 @@ class MangadexAPI():
             self.authenticate = util.noop
 
         server = extr.config("api-server")
-        self.root = ("https://api.mangadex.org" if server is None
-                     else text.ensure_http_scheme(server).rstrip("/"))
+        self.root = (
+            "https://api.mangadex.org"
+            if server is None
+            else text.ensure_http_scheme(server).rstrip("/")
+        )
 
     def athome_server(self, uuid):
         return self._call("/at-home/server/" + uuid)
@@ -235,7 +240,7 @@ class MangadexAPI():
     def manga_feed(self, uuid):
         order = "desc" if self.extractor.config("chapter-reverse") else "asc"
         params = {
-            "order[volume]" : order,
+            "order[volume]": order,
             "order[chapter]": order,
         }
         return self._pagination_chapters("/manga/" + uuid + "/feed", params)
@@ -245,8 +250,7 @@ class MangadexAPI():
         return self._pagination_chapters("/user/follows/manga/feed", params)
 
     def authenticate(self):
-        self.headers["Authorization"] = \
-            self._authenticate_impl(self.username, self.password)
+        self.headers["Authorization"] = self._authenticate_impl(self.username, self.password)
 
     @cache(maxage=900, keyarg=1)
     def _authenticate_impl(self, username, password):
@@ -260,8 +264,7 @@ class MangadexAPI():
             url = self.root + "/auth/login"
             data = {"username": username, "password": password}
 
-        data = self.extractor.request(
-            url, method="POST", json=data, fatal=None).json()
+        data = self.extractor.request(url, method="POST", json=data, fatal=None).json()
         if data.get("result") != "ok":
             raise exception.AuthenticationError()
 
@@ -274,8 +277,7 @@ class MangadexAPI():
 
         while True:
             self.authenticate()
-            response = self.extractor.request(
-                url, params=params, headers=self.headers, fatal=None)
+            response = self.extractor.request(url, params=params, headers=self.headers, fatal=None)
 
             if response.status_code < 400:
                 return response.json()
@@ -284,10 +286,10 @@ class MangadexAPI():
                 self.extractor.wait(until=until)
                 continue
 
-            msg = ", ".join('{title}: {detail}'.format_map(error)
-                            for error in response.json()["errors"])
-            raise exception.StopExtraction(
-                "%s %s (%s)", response.status_code, response.reason, msg)
+            msg = ", ".join(
+                "{title}: {detail}".format_map(error) for error in response.json()["errors"]
+            )
+            raise exception.StopExtraction("%s %s (%s)", response.status_code, response.reason, msg)
 
     def _pagination_chapters(self, endpoint, params=None):
         if params is None:
@@ -329,6 +331,6 @@ class MangadexAPI():
                 return
 
 
-@cache(maxage=28*86400, keyarg=0)
+@cache(maxage=28 * 86400, keyarg=0)
 def _refresh_token_cache(username):
     return None

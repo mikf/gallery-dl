@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 
 """Build a standalone executable using PyInstaller"""
 
 import argparse
-import util
 import sys
+
+import util
 
 
 def main():
@@ -34,21 +34,29 @@ def main():
 
     name = "gallery-dl"
     if label:
-        name = "{}_{}".format(name, label)
+        name = f"{name}_{label}"
     if args.extension:
-        name = "{}.{}".format(name, args.extension.lower())
+        name = f"{name}.{args.extension.lower()}"
 
     import PyInstaller.__main__
-    return PyInstaller.__main__.run([
-        "--onefile",
-        "--console",
-        "--name", name,
-        "--additional-hooks-dir", util.path("scripts"),
-        "--distpath", util.path("dist"),
-        "--workpath", util.path("build"),
-        "--specpath", util.path("build"),
-        util.path("gallery_dl", "__main__.py"),
-    ])
+
+    return PyInstaller.__main__.run(
+        [
+            "--onefile",
+            "--console",
+            "--name",
+            name,
+            "--additional-hooks-dir",
+            util.path("scripts"),
+            "--distpath",
+            util.path("dist"),
+            "--workpath",
+            util.path("build"),
+            "--specpath",
+            util.path("build"),
+            util.path("gallery_dl", "__main__.py"),
+        ]
+    )
 
 
 if __name__ == "__main__":

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 
 # Copyright 2021-2023 Mike Fährmann
 #
@@ -7,19 +6,19 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
+import datetime
 import os
 import sys
+import tempfile
 import time
 import unittest
-import datetime
-import tempfile
+from time import sleep
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from gallery_dl import formatter, text, util  # noqa E402
 
 
 class TestFormatter(unittest.TestCase):
-
     kwdict = {
         "a": "hElLo wOrLd",
         "b": "äöü",
@@ -106,28 +105,27 @@ class TestFormatter(unittest.TestCase):
 
     def test_missing_custom_default(self):
         replacement = default = "foobar"
-        self._run_test("{missing}"     , replacement, default)
+        self._run_test("{missing}", replacement, default)
         self._run_test("{missing.attr}", replacement, default)
         self._run_test("{missing[key]}", replacement, default)
         self._run_test("{missing:?a//}", "a" + default, default)
 
     def test_fmt_func(self):
-        self._run_test("{t}" , self.kwdict["t"] , None, int)
-        self._run_test("{t}" , self.kwdict["t"] , None, util.identity)
+        self._run_test("{t}", self.kwdict["t"], None, int)
+        self._run_test("{t}", self.kwdict["t"], None, util.identity)
         self._run_test("{dt}", self.kwdict["dt"], None, util.identity)
         self._run_test("{ds}", self.kwdict["dt"], None, text.parse_datetime)
-        self._run_test("{ds:D%Y-%m-%dT%H:%M:%S%z}", self.kwdict["dt"],
-                       None, util.identity)
+        self._run_test("{ds:D%Y-%m-%dT%H:%M:%S%z}", self.kwdict["dt"], None, util.identity)
 
     def test_alternative(self):
-        self._run_test("{a|z}"    , "hElLo wOrLd")
-        self._run_test("{z|a}"    , "hElLo wOrLd")
-        self._run_test("{z|y|a}"  , "hElLo wOrLd")
+        self._run_test("{a|z}", "hElLo wOrLd")
+        self._run_test("{z|a}", "hElLo wOrLd")
+        self._run_test("{z|y|a}", "hElLo wOrLd")
         self._run_test("{z|y|x|a}", "hElLo wOrLd")
         self._run_test("{z|n|a|y}", "hElLo wOrLd")
 
-        self._run_test("{z|a!C}"      , "Hello World")
-        self._run_test("{z|a:Rh/C/}"  , "CElLo wOrLd")
+        self._run_test("{z|a!C}", "Hello World")
+        self._run_test("{z|a:Rh/C/}", "CElLo wOrLd")
         self._run_test("{z|a!C:RH/C/}", "Cello World")
         self._run_test("{z|y|x:?</>/}", "")
 
@@ -136,93 +134,93 @@ class TestFormatter(unittest.TestCase):
         self._run_test("{d[z]|d[y]|d[x]}", "None")
 
     def test_indexing(self):
-        self._run_test("{l[0]}" , "a")
-        self._run_test("{a[6]}" , "w")
+        self._run_test("{l[0]}", "a")
+        self._run_test("{a[6]}", "w")
 
     def test_dict_access(self):
-        self._run_test("{d[a]}"  , "foo")
+        self._run_test("{d[a]}", "foo")
         self._run_test("{d['a']}", "foo")
         self._run_test('{d["a"]}', "foo")
 
     def test_slice_str(self):
         v = self.kwdict["a"]
-        self._run_test("{a[1:10]}"  , v[1:10])
+        self._run_test("{a[1:10]}", v[1:10])
         self._run_test("{a[-10:-1]}", v[-10:-1])
-        self._run_test("{a[5:]}" , v[5:])
+        self._run_test("{a[5:]}", v[5:])
         self._run_test("{a[50:]}", v[50:])
-        self._run_test("{a[:5]}" , v[:5])
+        self._run_test("{a[:5]}", v[:5])
         self._run_test("{a[:50]}", v[:50])
-        self._run_test("{a[:]}"  , v)
-        self._run_test("{a[1:10:2]}"  , v[1:10:2])
+        self._run_test("{a[:]}", v)
+        self._run_test("{a[1:10:2]}", v[1:10:2])
         self._run_test("{a[-10:-1:2]}", v[-10:-1:2])
-        self._run_test("{a[5::2]}" , v[5::2])
+        self._run_test("{a[5::2]}", v[5::2])
         self._run_test("{a[50::2]}", v[50::2])
-        self._run_test("{a[:5:2]}" , v[:5:2])
+        self._run_test("{a[:5:2]}", v[:5:2])
         self._run_test("{a[:50:2]}", v[:50:2])
-        self._run_test("{a[::]}"   , v)
+        self._run_test("{a[::]}", v)
 
-        self._run_test("{a:[1:10]}"  , v[1:10])
+        self._run_test("{a:[1:10]}", v[1:10])
         self._run_test("{a:[-10:-1]}", v[-10:-1])
-        self._run_test("{a:[5:]}" , v[5:])
+        self._run_test("{a:[5:]}", v[5:])
         self._run_test("{a:[50:]}", v[50:])
-        self._run_test("{a:[:5]}" , v[:5])
+        self._run_test("{a:[:5]}", v[:5])
         self._run_test("{a:[:50]}", v[:50])
-        self._run_test("{a:[:]}"  , v)
-        self._run_test("{a:[1:10:2]}"  , v[1:10:2])
+        self._run_test("{a:[:]}", v)
+        self._run_test("{a:[1:10:2]}", v[1:10:2])
         self._run_test("{a:[-10:-1:2]}", v[-10:-1:2])
-        self._run_test("{a:[5::2]}" , v[5::2])
+        self._run_test("{a:[5::2]}", v[5::2])
         self._run_test("{a:[50::2]}", v[50::2])
-        self._run_test("{a:[:5:2]}" , v[:5:2])
+        self._run_test("{a:[:5:2]}", v[:5:2])
         self._run_test("{a:[:50:2]}", v[:50:2])
-        self._run_test("{a:[::]}"   , v)
+        self._run_test("{a:[::]}", v)
 
     def test_slice_bytes(self):
         v = self.kwdict["j"]
-        self._run_test("{j[b1:10]}"  , v[1:3])
+        self._run_test("{j[b1:10]}", v[1:3])
         self._run_test("{j[b-10:-1]}", v[-3:-1])
-        self._run_test("{j[b5:]}"    , v[2:])
-        self._run_test("{j[b50:]}"   , v[50:])
-        self._run_test("{j[b:5]}"    , v[:1])
-        self._run_test("{j[b:50]}"   , v[:50])
-        self._run_test("{j[b:]}"     , v)
-        self._run_test("{j[b::]}"    , v)
+        self._run_test("{j[b5:]}", v[2:])
+        self._run_test("{j[b50:]}", v[50:])
+        self._run_test("{j[b:5]}", v[:1])
+        self._run_test("{j[b:50]}", v[:50])
+        self._run_test("{j[b:]}", v)
+        self._run_test("{j[b::]}", v)
 
-        self._run_test("{j:[b1:10]}"  , v[1:3])
+        self._run_test("{j:[b1:10]}", v[1:3])
         self._run_test("{j:[b-10:-1]}", v[-3:-1])
-        self._run_test("{j:[b5:]}"    , v[2:])
-        self._run_test("{j:[b50:]}"   , v[50:])
-        self._run_test("{j:[b:5]}"    , v[:1])
-        self._run_test("{j:[b:50]}"   , v[:50])
-        self._run_test("{j:[b:]}"     , v)
-        self._run_test("{j:[b::]}"    , v)
+        self._run_test("{j:[b5:]}", v[2:])
+        self._run_test("{j:[b50:]}", v[50:])
+        self._run_test("{j:[b:5]}", v[:1])
+        self._run_test("{j:[b:50]}", v[:50])
+        self._run_test("{j:[b:]}", v)
+        self._run_test("{j:[b::]}", v)
 
     def test_maxlen(self):
         v = self.kwdict["a"]
-        self._run_test("{a:L5/foo/}" , "foo")
+        self._run_test("{a:L5/foo/}", "foo")
         self._run_test("{a:L50/foo/}", v)
         self._run_test("{a:L50/foo/>50}", " " * 39 + v)
         self._run_test("{a:L50/foo/>51}", "foo")
         self._run_test("{a:Lab/foo/}", "foo")
 
     def test_join(self):
-        self._run_test("{l:J}"       , "abc")
-        self._run_test("{l:J,}"      , "a,b,c")
-        self._run_test("{l:J,/}"     , "a,b,c")
-        self._run_test("{l:J,/>20}"  , "               a,b,c")
-        self._run_test("{l:J - }"    , "a - b - c")
-        self._run_test("{l:J - /}"   , "a - b - c")
+        self._run_test("{l:J}", "abc")
+        self._run_test("{l:J,}", "a,b,c")
+        self._run_test("{l:J,/}", "a,b,c")
+        self._run_test("{l:J,/>20}", "               a,b,c")
+        self._run_test("{l:J - }", "a - b - c")
+        self._run_test("{l:J - /}", "a - b - c")
         self._run_test("{l:J - />20}", "           a - b - c")
 
-        self._run_test("{a:J/}"      , self.kwdict["a"])
-        self._run_test("{a:J, /}"    , self.kwdict["a"])
+        self._run_test("{a:J/}", self.kwdict["a"])
+        self._run_test("{a:J, /}", self.kwdict["a"])
 
     def test_replace(self):
-        self._run_test("{a:Rh/C/}"  , "CElLo wOrLd")
+        self._run_test("{a:Rh/C/}", "CElLo wOrLd")
         self._run_test("{a!l:Rh/C/}", "Cello world")
         self._run_test("{a!u:Rh/C/}", "HELLO WORLD")
 
         self._run_test("{a!l:Rl/_/}", "he__o wor_d")
-        self._run_test("{a!l:Rl//}" , "heo word")
+        self._run_test("{a!l:Rl//}", "heo word")
         self._run_test("{name:Rame/othing/}", "Nothing")
 
     def test_datetime(self):
@@ -242,34 +240,33 @@ class TestFormatter(unittest.TestCase):
         self._run_test("{t!d:O2}", "2010-01-01 02:00:00")
 
     def test_offset_local(self):
-        ts = self.kwdict["dt"].replace(
-            tzinfo=datetime.timezone.utc).timestamp()
+        ts = self.kwdict["dt"].replace(tzinfo=datetime.timezone.utc).timestamp()
         offset = time.localtime(ts).tm_gmtoff
         dt = self.kwdict["dt"] + datetime.timedelta(seconds=offset)
         self._run_test("{dt:O}", str(dt))
         self._run_test("{dt:Olocal}", str(dt))
 
-        ts = self.kwdict["dt_dst"].replace(
-            tzinfo=datetime.timezone.utc).timestamp()
+        ts = self.kwdict["dt_dst"].replace(tzinfo=datetime.timezone.utc).timestamp()
         offset = time.localtime(ts).tm_gmtoff
         dt = self.kwdict["dt_dst"] + datetime.timedelta(seconds=offset)
         self._run_test("{dt_dst:O}", str(dt))
         self._run_test("{dt_dst:Olocal}", str(dt))
 
     def test_sort(self):
-        self._run_test("{l:S}" , "['a', 'b', 'c']")
+        self._run_test("{l:S}", "['a', 'b', 'c']")
         self._run_test("{l:Sa}", "['a', 'b', 'c']")
         self._run_test("{l:Sd}", "['c', 'b', 'a']")
         self._run_test("{l:Sr}", "['c', 'b', 'a']")
 
-        self._run_test(
-            "{a:S}", "[' ', 'E', 'L', 'L', 'O', 'd', 'h', 'l', 'o', 'r', 'w']")
+        self._run_test("{a:S}", "[' ', 'E', 'L', 'L', 'O', 'd', 'h', 'l', 'o', 'r', 'w']")
         self._run_test(
             "{a:S-asc}",  # starts with 'S', contains 'a'
-            "[' ', 'E', 'L', 'L', 'O', 'd', 'h', 'l', 'o', 'r', 'w']")
+            "[' ', 'E', 'L', 'L', 'O', 'd', 'h', 'l', 'o', 'r', 'w']",
+        )
         self._run_test(
             "{a:Sort-reverse}",  # starts with 'S', contains 'r'
-            "['w', 'r', 'o', 'l', 'h', 'd', 'O', 'L', 'L', 'E', ' ']")
+            "['w', 'r', 'o', 'l', 'h', 'd', 'O', 'L', 'L', 'E', ' ']",
+        )
 
     def test_specifier_arithmetic(self):
         self._run_test("{i:A+1}", "3")
@@ -277,8 +274,8 @@ class TestFormatter(unittest.TestCase):
         self._run_test("{i:A*3}", "6")
 
     def test_specifier_conversions(self):
-        self._run_test("{a:Cl}"   , "hello world")
-        self._run_test("{h:CHC}"  , "Foo & Bar")
+        self._run_test("{a:Cl}", "hello world")
+        self._run_test("{h:CHC}", "Foo & Bar")
         self._run_test("{l:CSulc}", "A, b, c")
 
     def test_specifier_limit(self):
@@ -332,7 +329,7 @@ class TestFormatter(unittest.TestCase):
     def test_globals_env(self):
         os.environ["FORMATTER_TEST"] = value = self.kwdict["a"]
 
-        self._run_test("{_env[FORMATTER_TEST]}"  , value)
+        self._run_test("{_env[FORMATTER_TEST]}", value)
         self._run_test("{_env[FORMATTER_TEST]!l}", value.lower())
         self._run_test("{z|_env[FORMATTER_TEST]}", value)
 
@@ -350,6 +347,10 @@ class TestFormatter(unittest.TestCase):
         self.assertRegex(out, r"^\d{4}$")
         self.assertEqual(out, format(now, "%Y"))
 
+        # Sleep briefly to ensure `now` is actually different
+        # Without this, the following assertion can fail if the instructions are executed quickly enough
+        sleep(0.01)
+
         out2 = fmt.format_map(self.kwdict)
         self.assertRegex(out1, r"^\d{4}-\d\d-\d\d \d\d:\d\d:\d\d(\.\d+)?$")
         self.assertNotEqual(out1, out2)
@@ -357,38 +358,38 @@ class TestFormatter(unittest.TestCase):
     def test_globals_nul(self):
         value = "None"
 
-        self._run_test("{_nul}"         , value)
-        self._run_test("{_nul[key]}"    , value)
-        self._run_test("{z|_nul}"       , value)
+        self._run_test("{_nul}", value)
+        self._run_test("{_nul[key]}", value)
+        self._run_test("{z|_nul}", value)
         self._run_test("{z|_nul:%Y%m%s}", value)
 
     def test_literals(self):
         value = "foo"
 
-        self._run_test("{'foo'}"      , value)
-        self._run_test("{'foo'!u}"    , value.upper())
+        self._run_test("{'foo'}", value)
+        self._run_test("{'foo'!u}", value.upper())
         self._run_test("{'f00':R0/o/}", value)
 
-        self._run_test("{z|'foo'}"      , value)
-        self._run_test("{z|''|'foo'}"   , value)
-        self._run_test("{z|'foo'!u}"    , value.upper())
+        self._run_test("{z|'foo'}", value)
+        self._run_test("{z|''|'foo'}", value)
+        self._run_test("{z|'foo'!u}", value.upper())
         self._run_test("{z|'f00':R0/o/}", value)
 
-        self._run_test("{_lit[foo]}"       , value)
-        self._run_test("{_lit[foo]!u}"     , value.upper())
-        self._run_test("{_lit[f00]:R0/o/}" , value)
+        self._run_test("{_lit[foo]}", value)
+        self._run_test("{_lit[foo]!u}", value.upper())
+        self._run_test("{_lit[f00]:R0/o/}", value)
         self._run_test("{_lit[foobar][:3]}", value)
-        self._run_test("{z|_lit[foo]}"     , value)
+        self._run_test("{z|_lit[foo]}", value)
 
         # empty (#4492)
-        self._run_test("{z|''}" , "")
+        self._run_test("{z|''}", "")
         self._run_test("{''|''}", "")
 
         # special characters (dots, brackets, singlee quotes) (#5539)
-        self._run_test("{'f.o.o'}"    , "f.o.o")
+        self._run_test("{'f.o.o'}", "f.o.o")
         self._run_test("{_lit[f.o.o]}", "f.o.o")
         self._run_test("{_lit[f'o'o]}", "f'o'o")
-        self._run_test("{'f.[].[]'}"  , "f.[].[]")
+        self._run_test("{'f.[].[]'}", "f.[].[]")
         self._run_test("{z|'f.[].[]'}", "f.[].[]")
 
     def test_template(self):
@@ -412,16 +413,21 @@ class TestFormatter(unittest.TestCase):
 
     def test_expression(self):
         self._run_test("\fE a", self.kwdict["a"])
-        self._run_test("\fE name * 2 + ' ' + a", "{}{} {}".format(
-            self.kwdict["name"], self.kwdict["name"], self.kwdict["a"]))
+        self._run_test(
+            "\fE name * 2 + ' ' + a",
+            "{}{} {}".format(self.kwdict["name"], self.kwdict["name"], self.kwdict["a"]),
+        )
 
     @unittest.skipIf(sys.hexversion < 0x3060000, "no fstring support")
     def test_fstring(self):
         self._run_test("\fF {a}", self.kwdict["a"])
-        self._run_test("\fF {name}{name} {a}", "{}{} {}".format(
-            self.kwdict["name"], self.kwdict["name"], self.kwdict["a"]))
-        self._run_test("\fF foo-'\"{a.upper()}\"'-bar",
-                       """foo-'"{}"'-bar""".format(self.kwdict["a"].upper()))
+        self._run_test(
+            "\fF {name}{name} {a}",
+            "{}{} {}".format(self.kwdict["name"], self.kwdict["name"], self.kwdict["a"]),
+        )
+        self._run_test(
+            "\fF foo-'\"{a.upper()}\"'-bar", """foo-'"{}"'-bar""".format(self.kwdict["a"].upper())
+        )
 
     @unittest.skipIf(sys.hexversion < 0x3060000, "no fstring support")
     def test_template_fstring(self):
@@ -438,8 +444,9 @@ class TestFormatter(unittest.TestCase):
             fmt2 = formatter.parse("\fTF " + path2)
 
         self.assertEqual(fmt1.format_map(self.kwdict), self.kwdict["a"])
-        self.assertEqual(fmt2.format_map(self.kwdict),
-                         """foo-'"{}"'-bar""".format(self.kwdict["a"].upper()))
+        self.assertEqual(
+            fmt2.format_map(self.kwdict), """foo-'"{}"'-bar""".format(self.kwdict["a"].upper())
+        )
 
         with self.assertRaises(OSError):
             formatter.parse("\fTF /")

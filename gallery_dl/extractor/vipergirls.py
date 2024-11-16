@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,17 +6,21 @@
 
 """Extractors for https://vipergirls.to/"""
 
-from .common import Extractor, Message
-from .. import text, util, exception
-from ..cache import cache
+from xml.etree import ElementTree as ET
 
-from xml.etree import ElementTree
+from .. import exception
+from .. import text
+from .. import util
+from ..cache import cache
+from .common import Extractor
+from .common import Message
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?vipergirls\.to"
 
 
 class VipergirlsExtractor(Extractor):
     """Base class for vipergirls extractors"""
+
     category = "vipergirls"
     root = "https://vipergirls.to"
     request_interval = 0.5
@@ -67,30 +69,29 @@ class VipergirlsExtractor(Extractor):
         if username:
             self.cookies_update(self._login_impl(username, password))
 
-    @cache(maxage=90*86400, keyarg=1)
+    @cache(maxage=90 * 86400, keyarg=1)
     def _login_impl(self, username, password):
         self.log.info("Logging in as %s", username)
 
-        url = "{}/login.php?do=login".format(self.root)
+        url = f"{self.root}/login.php?do=login"
         data = {
             "vb_login_username": username,
             "vb_login_password": password,
-            "do"               : "login",
-            "cookieuser"       : "1",
+            "do": "login",
+            "cookieuser": "1",
         }
 
         response = self.request(url, method="POST", data=data)
         if not response.cookies.get("vg_password"):
             raise exception.AuthenticationError()
 
-        return {cookie.name: cookie.value
-                for cookie in response.cookies}
+        return {cookie.name: cookie.value for cookie in response.cookies}
 
     def like(self, post, user_hash):
         url = self.root + "/post_thanks.php"
         params = {
-            "do"           : "post_thanks_add",
-            "p"            : post.get("id"),
+            "do": "post_thanks_add",
+            "p": post.get("id"),
             "securitytoken": user_hash,
         }
 
@@ -100,9 +101,9 @@ class VipergirlsExtractor(Extractor):
 
 class VipergirlsThreadExtractor(VipergirlsExtractor):
     """Extractor for vipergirls threads"""
+
     subcategory = "thread"
-    pattern = (BASE_PATTERN +
-               r"/threads/(\d+)(?:-[^/?#]+)?(/page\d+)?(?:$|#|\?(?!p=))")
+    pattern = BASE_PATTERN + r"/threads/(\d+)(?:-[^/?#]+)?(/page\d+)?(?:$|#|\?(?!p=))"
     example = "https://vipergirls.to/threads/12345-TITLE"
 
     def __init__(self, match):
@@ -110,15 +111,15 @@ class VipergirlsThreadExtractor(VipergirlsExtractor):
         self.thread_id, self.page = match.groups()
 
     def posts(self):
-        url = "{}/vr.php?t={}".format(self.root, self.thread_id)
-        return ElementTree.fromstring(self.request(url).text)
+        url = f"{self.root}/vr.php?t={self.thread_id}"
+        return ET.fromstring(self.request(url).text)
 
 
 class VipergirlsPostExtractor(VipergirlsExtractor):
     """Extractor for vipergirls posts"""
+
     subcategory = "post"
-    pattern = (BASE_PATTERN +
-               r"/threads/(\d+)(?:-[^/?#]+)?\?p=\d+[^#]*#post(\d+)")
+    pattern = BASE_PATTERN + r"/threads/(\d+)(?:-[^/?#]+)?\?p=\d+[^#]*#post(\d+)"
     example = "https://vipergirls.to/threads/12345-TITLE?p=23456#post23456"
 
     def __init__(self, match):
@@ -127,5 +128,5 @@ class VipergirlsPostExtractor(VipergirlsExtractor):
         self.page = 0
 
     def posts(self):
-        url = "{}/vr.php?p={}".format(self.root, self.post_id)
-        return ElementTree.fromstring(self.request(url).text)
+        url = f"{self.root}/vr.php?p={self.post_id}"
+        return ET.fromstring(self.request(url).text)

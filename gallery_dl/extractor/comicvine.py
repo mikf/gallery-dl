@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2021-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,13 +6,15 @@
 
 """Extractors for https://comicvine.gamespot.com/"""
 
-from .booru import BooruExtractor
-from .. import text
 import operator
+
+from .. import text
+from .booru import BooruExtractor
 
 
 class ComicvineTagExtractor(BooruExtractor):
     """Extractor for a gallery on comicvine.gamespot.com"""
+
     category = "comicvine"
     subcategory = "tag"
     basecategory = ""
@@ -23,8 +23,7 @@ class ComicvineTagExtractor(BooruExtractor):
     directory_fmt = ("{category}", "{tag}")
     filename_fmt = "{filename}.{extension}"
     archive_fmt = "{id}"
-    pattern = (r"(?:https?://)?comicvine\.gamespot\.com"
-               r"(/([^/?#]+)/(\d+-\d+)/images/.*)")
+    pattern = r"(?:https?://)?comicvine\.gamespot\.com" r"(/([^/?#]+)/(\d+-\d+)/images/.*)"
     example = "https://comicvine.gamespot.com/TAG/123-45/images/"
 
     def __init__(self, match):
@@ -38,10 +37,10 @@ class ComicvineTagExtractor(BooruExtractor):
         url = self.root + "/js/image-data.json"
         params = {
             "images": text.extract(
-                self.request(self.root + self.path).text,
-                'data-gallery-id="', '"')[0],
-            "start" : self.page_start,
-            "count" : self.per_page,
+                self.request(self.root + self.path).text, 'data-gallery-id="', '"'
+            )[0],
+            "start": self.page_start,
+            "count": self.per_page,
             "object": self.object_id,
         }
 
@@ -61,6 +60,5 @@ class ComicvineTagExtractor(BooruExtractor):
 
     @staticmethod
     def _prepare(post):
-        post["date"] = text.parse_datetime(
-            post["dateCreated"], "%a, %b %d %Y")
+        post["date"] = text.parse_datetime(post["dateCreated"], "%a, %b %d %Y")
         post["tags"] = [tag["name"] for tag in post["tags"] if tag["name"]]

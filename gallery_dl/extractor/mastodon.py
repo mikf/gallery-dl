@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2019-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,13 +6,16 @@
 
 """Extractors for Mastodon instances"""
 
-from .common import BaseExtractor, Message
-from .. import text, exception
+from .. import exception
+from .. import text
 from ..cache import cache
+from .common import BaseExtractor
+from .common import Message
 
 
 class MastodonExtractor(BaseExtractor):
     """Base class for mastodon extractors"""
+
     basecategory = "mastodon"
     directory_fmt = ("mastodon", "{instance}", "{account[username]}")
     filename_fmt = "{category}_{id}_{media[id]}.{extension}"
@@ -32,7 +33,6 @@ class MastodonExtractor(BaseExtractor):
 
     def items(self):
         for status in self.statuses():
-
             if self._check_moved:
                 self._check_moved(status["account"])
             if not self.reblogs and status["reblog"]:
@@ -55,19 +55,16 @@ class MastodonExtractor(BaseExtractor):
                     if url:
                         card["weburl"] = card.get("url")
                         card["url"] = url
-                        card["id"] = "card" + "".join(
-                            url.split("/")[6:-2]).lstrip("0")
+                        card["id"] = "card" + "".join(url.split("/")[6:-2]).lstrip("0")
                         attachments.append(card)
 
             status["instance"] = self.instance
             acct = status["account"]["acct"]
-            status["instance_remote"] = \
-                acct.rpartition("@")[2] if "@" in acct else None
+            status["instance_remote"] = acct.rpartition("@")[2] if "@" in acct else None
 
             status["count"] = len(attachments)
             status["tags"] = [tag["name"] for tag in status["tags"]]
-            status["date"] = text.parse_datetime(
-                status["created_at"][:19], "%Y-%m-%dT%H:%M:%S")
+            status["date"] = text.parse_datetime(status["created_at"][:19], "%Y-%m-%dT%H:%M:%S")
 
             yield Message.Directory, status
             for status["num"], media in enumerate(attachments, 1):
@@ -86,40 +83,46 @@ class MastodonExtractor(BaseExtractor):
         # To handle this, check if the "moved" value is truthy instead
         # if only it exists.
         if account.get("moved"):
-            self.log.warning("Account '%s' moved to '%s'",
-                             account["acct"], account["moved"]["acct"])
+            self.log.warning(
+                "Account '%s' moved to '%s'", account["acct"], account["moved"]["acct"]
+            )
 
 
-BASE_PATTERN = MastodonExtractor.update({
-    "mastodon.social": {
-        "root"         : "https://mastodon.social",
-        "pattern"      : r"mastodon\.social",
-        "access-token" : "Y06R36SMvuXXN5_wiPKFAEFiQaMSQg0o_hGgc86Jj48",
-        "client-id"    : "dBSHdpsnOUZgxOnjKSQrWEPakO3ctM7HmsyoOd4FcRo",
-        "client-secret": "DdrODTHs_XoeOsNVXnILTMabtdpWrWOAtrmw91wU1zI",
-    },
-    "pawoo": {
-        "root"         : "https://pawoo.net",
-        "pattern"      : r"pawoo\.net",
-        "access-token" : "c12c9d275050bce0dc92169a28db09d7"
-                         "0d62d0a75a8525953098c167eacd3668",
-        "client-id"    : "978a25f843ec01e53d09be2c290cd75c"
-                         "782bc3b7fdbd7ea4164b9f3c3780c8ff",
-        "client-secret": "9208e3d4a7997032cf4f1b0e12e5df38"
-                         "8428ef1fadb446dcfeb4f5ed6872d97b",
-    },
-    "baraag": {
-        "root"         : "https://baraag.net",
-        "pattern"      : r"baraag\.net",
-        "access-token" : "53P1Mdigf4EJMH-RmeFOOSM9gdSDztmrAYFgabOKKE0",
-        "client-id"    : "czxx2qilLElYHQ_sm-lO8yXuGwOHxLX9RYYaD0-nq1o",
-        "client-secret": "haMaFdMBgK_-BIxufakmI2gFgkYjqmgXGEO2tB-R2xY",
-    }
-}) + "(?:/web)?"
+BASE_PATTERN = (
+    MastodonExtractor.update(
+        {
+            "mastodon.social": {
+                "root": "https://mastodon.social",
+                "pattern": r"mastodon\.social",
+                "access-token": "Y06R36SMvuXXN5_wiPKFAEFiQaMSQg0o_hGgc86Jj48",
+                "client-id": "dBSHdpsnOUZgxOnjKSQrWEPakO3ctM7HmsyoOd4FcRo",
+                "client-secret": "DdrODTHs_XoeOsNVXnILTMabtdpWrWOAtrmw91wU1zI",
+            },
+            "pawoo": {
+                "root": "https://pawoo.net",
+                "pattern": r"pawoo\.net",
+                "access-token": "c12c9d275050bce0dc92169a28db09d7"
+                "0d62d0a75a8525953098c167eacd3668",
+                "client-id": "978a25f843ec01e53d09be2c290cd75c" "782bc3b7fdbd7ea4164b9f3c3780c8ff",
+                "client-secret": "9208e3d4a7997032cf4f1b0e12e5df38"
+                "8428ef1fadb446dcfeb4f5ed6872d97b",
+            },
+            "baraag": {
+                "root": "https://baraag.net",
+                "pattern": r"baraag\.net",
+                "access-token": "53P1Mdigf4EJMH-RmeFOOSM9gdSDztmrAYFgabOKKE0",
+                "client-id": "czxx2qilLElYHQ_sm-lO8yXuGwOHxLX9RYYaD0-nq1o",
+                "client-secret": "haMaFdMBgK_-BIxufakmI2gFgkYjqmgXGEO2tB-R2xY",
+            },
+        }
+    )
+    + "(?:/web)?"
+)
 
 
 class MastodonUserExtractor(MastodonExtractor):
     """Extractor for all images of an account/user"""
+
     subcategory = "user"
     pattern = BASE_PATTERN + r"/(?:@|users/)([^/?#]+)(?:/media)?/?$"
     example = "https://mastodon.social/@USER"
@@ -130,9 +133,7 @@ class MastodonUserExtractor(MastodonExtractor):
         return api.account_statuses(
             api.account_id_by_username(self.item),
             only_media=(
-                not self.reblogs and
-                not self.cards and
-                not self.config("text-posts", False)
+                not self.reblogs and not self.cards and not self.config("text-posts", False)
             ),
             exclude_replies=not self.replies,
         )
@@ -140,6 +141,7 @@ class MastodonUserExtractor(MastodonExtractor):
 
 class MastodonBookmarkExtractor(MastodonExtractor):
     """Extractor for mastodon bookmarks"""
+
     subcategory = "bookmark"
     pattern = BASE_PATTERN + r"/bookmarks"
     example = "https://mastodon.social/bookmarks"
@@ -150,6 +152,7 @@ class MastodonBookmarkExtractor(MastodonExtractor):
 
 class MastodonFavoriteExtractor(MastodonExtractor):
     """Extractor for mastodon favorites"""
+
     subcategory = "favorite"
     pattern = BASE_PATTERN + r"/favourites"
     example = "https://mastodon.social/favourites"
@@ -160,6 +163,7 @@ class MastodonFavoriteExtractor(MastodonExtractor):
 
 class MastodonListExtractor(MastodonExtractor):
     """Extractor for mastodon lists"""
+
     subcategory = "list"
     pattern = BASE_PATTERN + r"/lists/(\w+)"
     example = "https://mastodon.social/lists/12345"
@@ -170,6 +174,7 @@ class MastodonListExtractor(MastodonExtractor):
 
 class MastodonHashtagExtractor(MastodonExtractor):
     """Extractor for mastodon hashtags"""
+
     subcategory = "hashtag"
     pattern = BASE_PATTERN + r"/tags/(\w+)"
     example = "https://mastodon.social/tags/NAME"
@@ -180,6 +185,7 @@ class MastodonHashtagExtractor(MastodonExtractor):
 
 class MastodonFollowingExtractor(MastodonExtractor):
     """Extractor for followed mastodon users"""
+
     subcategory = "following"
     pattern = BASE_PATTERN + r"/(?:@|users/)([^/?#]+)/following"
     example = "https://mastodon.social/@USER/following"
@@ -195,6 +201,7 @@ class MastodonFollowingExtractor(MastodonExtractor):
 
 class MastodonStatusExtractor(MastodonExtractor):
     """Extractor for images from a status"""
+
     subcategory = "status"
     pattern = BASE_PATTERN + r"/@[^/?#]+/(?!following)([^/?#]+)"
     example = "https://mastodon.social/@USER/12345"
@@ -203,7 +210,7 @@ class MastodonStatusExtractor(MastodonExtractor):
         return (MastodonAPI(self).status(self.item),)
 
 
-class MastodonAPI():
+class MastodonAPI:
     """Minimal interface for the Mastodon API
 
     https://docs.joinmastodon.org/
@@ -235,10 +242,7 @@ class MastodonAPI():
             # fall back to account search
             pass
 
-        if "@" in username:
-            handle = "@" + username
-        else:
-            handle = "@{}@{}".format(username, self.extractor.instance)
+        handle = f"@{username}" if "@" in username else f"@{username}@{self.extractor.instance}"
 
         for account in self.account_search(handle, 1):
             if account["acct"] == username:
@@ -258,7 +262,7 @@ class MastodonAPI():
 
     def account_following(self, account_id):
         """Accounts which the given account is following"""
-        endpoint = "/v1/accounts/{}/following".format(account_id)
+        endpoint = f"/v1/accounts/{account_id}/following"
         return self._pagination(endpoint, None)
 
     def account_lookup(self, username):
@@ -273,12 +277,13 @@ class MastodonAPI():
         params = {"q": query, "limit": limit}
         return self._call(endpoint, params).json()
 
-    def account_statuses(self, account_id, only_media=True,
-                         exclude_replies=False):
+    def account_statuses(self, account_id, only_media=True, exclude_replies=False):
         """Statuses posted to the given account"""
-        endpoint = "/v1/accounts/{}/statuses".format(account_id)
-        params = {"only_media"     : "true" if only_media else "false",
-                  "exclude_replies": "true" if exclude_replies else "false"}
+        endpoint = f"/v1/accounts/{account_id}/statuses"
+        params = {
+            "only_media": "true" if only_media else "false",
+            "exclude_replies": "true" if exclude_replies else "false",
+        }
         return self._pagination(endpoint, params)
 
     def status(self, status_id):
@@ -297,14 +302,10 @@ class MastodonAPI():
         return self._pagination(endpoint, None)
 
     def _call(self, endpoint, params=None):
-        if endpoint.startswith("http"):
-            url = endpoint
-        else:
-            url = self.root + "/api" + endpoint
+        url = endpoint if endpoint.startswith("http") else f"{self.root}/api{endpoint}"
 
         while True:
-            response = self.extractor.request(
-                url, params=params, headers=self.headers, fatal=None)
+            response = self.extractor.request(url, params=params, headers=self.headers, fatal=None)
             code = response.status_code
 
             if code < 400:
@@ -313,14 +314,17 @@ class MastodonAPI():
                 raise exception.StopExtraction(
                     "Invalid or missing access token.\n"
                     "Run 'gallery-dl oauth:mastodon:%s' to obtain one.",
-                    self.extractor.instance)
+                    self.extractor.instance,
+                )
             if code == 404:
                 raise exception.NotFoundError()
             if code == 429:
-                self.extractor.wait(until=text.parse_datetime(
-                    response.headers["x-ratelimit-reset"],
-                    "%Y-%m-%dT%H:%M:%S.%fZ",
-                ))
+                self.extractor.wait(
+                    until=text.parse_datetime(
+                        response.headers["x-ratelimit-reset"],
+                        "%Y-%m-%dT%H:%M:%S.%fZ",
+                    )
+                )
                 continue
             raise exception.StopExtraction(response.json().get("error"))
 
@@ -337,6 +341,6 @@ class MastodonAPI():
             params = None
 
 
-@cache(maxage=36500*86400, keyarg=0)
+@cache(maxage=36500 * 86400, keyarg=0)
 def _access_token_cache(instance):
     return None

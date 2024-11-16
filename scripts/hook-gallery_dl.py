@@ -1,6 +1,6 @@
-# -*- coding: utf-8 -*-
-
-from gallery_dl import extractor, downloader, postprocessor
+from gallery_dl import downloader
+from gallery_dl import extractor
+from gallery_dl import postprocessor
 
 hiddenimports = [
     package.__name__ + "." + module

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2018-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,19 +6,24 @@
 
 """Extractors for https://www.smugmug.com/"""
 
-from .common import Extractor, Message
-from .. import text, oauth, exception
+from .. import exception
+from .. import oauth
+from .. import text
+from .common import Extractor
+from .common import Message
 
 BASE_PATTERN = (
-    r"(?:smugmug:(?!album:)(?:https?://)?([^/]+)|"
-    r"(?:https?://)?([\w-]+)\.smugmug\.com)")
+    r"(?:smugmug:(?!album:)(?:https?://)?([^/]+)|" r"(?:https?://)?([\w-]+)\.smugmug\.com)"
+)
 
 
 class SmugmugExtractor(Extractor):
     """Base class for smugmug extractors"""
+
     category = "smugmug"
-    filename_fmt = ("{category}_{User[NickName]:?/_/}"
-                    "{Image[UploadKey]}_{Image[ImageKey]}.{extension}")
+    filename_fmt = (
+        "{category}_{User[NickName]:?/_/}" "{Image[UploadKey]}_{Image[ImageKey]}.{extension}"
+    )
     empty_user = {
         "Uri": "",
         "ResponseLevel": "Public",
@@ -54,8 +57,7 @@ class SmugmugExtractor(Extractor):
             media = max(sizes, key=lambda s: s[1]["Width"])[1]
         del image["Uris"]
 
-        for key in ("Url", "Width", "Height", "MD5", "Size", "Watermarked",
-                    "Bitrate", "Duration"):
+        for key in ("Url", "Width", "Height", "MD5", "Size", "Watermarked", "Bitrate", "Duration"):
             if key in media:
                 image[key] = media[key]
         return image["Url"]
@@ -63,6 +65,7 @@ class SmugmugExtractor(Extractor):
 
 class SmugmugAlbumExtractor(SmugmugExtractor):
     """Extractor for smugmug albums"""
+
     subcategory = "album"
     directory_fmt = ("{category}", "{User[NickName]}", "{Album[Name]}")
     archive_fmt = "a_{Album[AlbumKey]}_{Image[ImageKey]}"
@@ -91,6 +94,7 @@ class SmugmugAlbumExtractor(SmugmugExtractor):
 
 class SmugmugImageExtractor(SmugmugExtractor):
     """Extractor for individual smugmug images"""
+
     subcategory = "image"
     archive_fmt = "{Image[ImageKey]}"
     pattern = BASE_PATTERN + r"(?:/[^/?#]+)+/i-([^/?#-]+)"
@@ -113,6 +117,7 @@ class SmugmugImageExtractor(SmugmugExtractor):
 
 class SmugmugPathExtractor(SmugmugExtractor):
     """Extractor for smugmug albums from URL paths and users"""
+
     subcategory = "path"
     pattern = BASE_PATTERN + r"((?:/[^/?#a-fh-mo-z][^/?#]*)*)/?$"
     example = "https://USER.smugmug.com/PATH"
@@ -161,10 +166,10 @@ class SmugmugPathExtractor(SmugmugExtractor):
 
 class SmugmugAPI(oauth.OAuth1API):
     """Minimal interface for the smugmug API v2"""
+
     API_DOMAIN = "api.smugmug.com"
     API_KEY = "RCVHDGjcbc4Fhzq4qzqLdZmvwmwB6LM2"
-    API_SECRET = ("jGrdndvJqhTx8XSNs7TFTSSthhZHq92d"
-                  "dMpbpDpkDVNM7TDgnvLFMtfB5Mg5kH73")
+    API_SECRET = "jGrdndvJqhTx8XSNs7TFTSSthhZHq92d" "dMpbpDpkDVNM7TDgnvLFMtfB5Mg5kH73"
     HEADERS = {"Accept": "application/json"}
 
     def album(self, album_id, expands=None):
@@ -197,7 +202,7 @@ class SmugmugAPI(oauth.OAuth1API):
         return self._expansion(endpoint, "Node", params)
 
     def _call(self, endpoint, params=None, domain=API_DOMAIN):
-        url = "https://{}/api/v2/{}".format(domain, endpoint)
+        url = f"https://{domain}/api/v2/{endpoint}"
         params = params or {}
         if self.api_key:
             params["APIKey"] = self.api_key
@@ -242,10 +247,9 @@ class SmugmugAPI(oauth.OAuth1API):
 
     @staticmethod
     def _apply_expansions(data, expands):
-
         def unwrap(response):
             locator = response["Locator"]
-            return response[locator] if locator in response else []
+            return response.get(locator, [])
 
         objs = unwrap(data["Response"])
         if not isinstance(objs, list):

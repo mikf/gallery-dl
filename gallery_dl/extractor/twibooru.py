@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2022-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,15 +6,18 @@
 
 """Extractors for https://twibooru.org/"""
 
-from .booru import BooruExtractor
-from .. import text, exception
 import operator
+
+from .. import exception
+from .. import text
+from .booru import BooruExtractor
 
 BASE_PATTERN = r"(?:https?://)?twibooru\.org"
 
 
 class TwibooruExtractor(BooruExtractor):
     """Base class for twibooru extractors"""
+
     category = "twibooru"
     basecategory = "philomena"
     root = "https://twibooru.org"
@@ -38,8 +39,7 @@ class TwibooruExtractor(BooruExtractor):
 
     @staticmethod
     def _prepare(post):
-        post["date"] = text.parse_datetime(
-            post["created_at"], "%Y-%m-%dT%H:%M:%S.%fZ")
+        post["date"] = text.parse_datetime(post["created_at"], "%Y-%m-%dT%H:%M:%S.%fZ")
 
         if "name" in post:
             name, sep, rest = post["name"].rpartition(".")
@@ -48,6 +48,7 @@ class TwibooruExtractor(BooruExtractor):
 
 class TwibooruPostExtractor(TwibooruExtractor):
     """Extractor for single twibooru posts"""
+
     subcategory = "post"
     request_interval = (0.5, 1.5)
     pattern = BASE_PATTERN + r"/(\d+)"
@@ -63,6 +64,7 @@ class TwibooruPostExtractor(TwibooruExtractor):
 
 class TwibooruSearchExtractor(TwibooruExtractor):
     """Extractor for twibooru search results"""
+
     subcategory = "search"
     directory_fmt = ("{category}", "{search_tags}")
     pattern = BASE_PATTERN + r"/(?:search/?\?([^#]+)|tags/([^/?#]+))"
@@ -74,10 +76,10 @@ class TwibooruSearchExtractor(TwibooruExtractor):
         if tag:
             q = tag.replace("+", " ")
             for old, new in (
-                ("-colon-"  , ":"),
-                ("-dash-"   , "-"),
-                ("-dot-"    , "."),
-                ("-plus-"   , "+"),
+                ("-colon-", ":"),
+                ("-dash-", "-"),
+                ("-dot-", "."),
+                ("-plus-", "+"),
                 ("-fwslash-", "/"),
                 ("-bwslash-", "\\"),
             ):
@@ -96,9 +98,9 @@ class TwibooruSearchExtractor(TwibooruExtractor):
 
 class TwibooruGalleryExtractor(TwibooruExtractor):
     """Extractor for twibooru galleries"""
+
     subcategory = "gallery"
-    directory_fmt = ("{category}", "galleries",
-                     "{gallery[id]} {gallery[title]}")
+    directory_fmt = ("{category}", "galleries", "{gallery[id]} {gallery[title]}")
     pattern = BASE_PATTERN + r"/galleries/(\d+)"
     example = "https://twibooru.org/galleries/12345"
 
@@ -111,11 +113,11 @@ class TwibooruGalleryExtractor(TwibooruExtractor):
 
     def posts(self):
         gallery_id = "gallery_id:" + self.gallery_id
-        params = {"sd": "desc", "sf": gallery_id, "q" : gallery_id}
+        params = {"sd": "desc", "sf": gallery_id, "q": gallery_id}
         return self.api.search(params)
 
 
-class TwibooruAPI():
+class TwibooruAPI:
     """Interface for the Twibooru API
 
     https://twibooru.org/pages/api
@@ -147,16 +149,14 @@ class TwibooruAPI():
                 return response.json()
 
             if response.status_code == 429:
-                until = text.parse_datetime(
-                    response.headers["X-RL-Reset"], "%Y-%m-%d %H:%M:%S %Z")
+                until = text.parse_datetime(response.headers["X-RL-Reset"], "%Y-%m-%d %H:%M:%S %Z")
                 # wait an extra minute, just to be safe
                 self.extractor.wait(until=until, adjust=60.0)
                 continue
 
             # error
             self.extractor.log.debug(response.content)
-            raise exception.StopExtraction(
-                "%s %s", response.status_code, response.reason)
+            raise exception.StopExtraction("%s %s", response.status_code, response.reason)
 
     def _pagination(self, endpoint, params):
         extr = self.extractor

@@ -1,17 +1,18 @@
-# -*- coding: utf-8 -*-
-
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
 """Extractors for https://fantia.jp/"""
 
-from .common import Extractor, Message
-from .. import text, util
+from .. import text
+from .. import util
+from .common import Extractor
+from .common import Message
 
 
 class FantiaExtractor(Extractor):
     """Base class for Fantia extractors"""
+
     category = "fantia"
     root = "https://fantia.jp"
     directory_fmt = ("{category}", "{fanclub_id}")
@@ -21,14 +22,14 @@ class FantiaExtractor(Extractor):
 
     def _init(self):
         self.headers = {
-            "Accept" : "application/json, text/plain, */*",
+            "Accept": "application/json, text/plain, */*",
             "X-Requested-With": "XMLHttpRequest",
         }
         self._empty_plan = {
-            "id"   : 0,
+            "id": 0,
             "price": 0,
             "limit": 0,
-            "name" : "",
+            "name": "",
             "description": "",
             "thumb": self.root + "/images/fallback/plan/thumb_default.png",
         }
@@ -52,15 +53,16 @@ class FantiaExtractor(Extractor):
 
                 if content["visible_status"] != "visible":
                     self.log.warning(
-                        "Unable to download '%s' files from "
-                        "%s#post-content-id-%s", content["visible_status"],
-                        post["post_url"], content["id"])
+                        "Unable to download '%s' files from " "%s#post-content-id-%s",
+                        content["visible_status"],
+                        post["post_url"],
+                        content["id"],
+                    )
 
                 for file in files:
                     post.update(file)
                     post["num"] += 1
-                    text.nameext_from_url(
-                        post["content_filename"] or file["file_url"], post)
+                    text.nameext_from_url(post["content_filename"] or file["file_url"], post)
                     yield Message.Url, file["file_url"], post
 
             post["content_num"] += 1
@@ -76,8 +78,7 @@ class FantiaExtractor(Extractor):
             self._csrf_token(page)
 
             post_id = None
-            for post_id in text.extract_iter(
-                    page, 'class="link-block" href="/posts/', '"'):
+            for post_id in text.extract_iter(page, 'class="link-block" href="/posts/', '"'):
                 yield post_id
 
             if not post_id:
@@ -87,12 +88,11 @@ class FantiaExtractor(Extractor):
     def _csrf_token(self, page=None):
         if not page:
             page = self.request(self.root + "/").text
-        self.headers["X-CSRF-Token"] = text.extr(
-            page, 'name="csrf-token" content="', '"')
+        self.headers["X-CSRF-Token"] = text.extr(page, 'name="csrf-token" content="', '"')
 
     def _get_post_data(self, post_id):
         """Fetch and process post data"""
-        url = self.root+"/api/v1/posts/"+post_id
+        url = self.root + "/api/v1/posts/" + post_id
         resp = self.request(url, headers=self.headers).json()["post"]
         return {
             "post_id": resp["id"],
@@ -101,13 +101,12 @@ class FantiaExtractor(Extractor):
             "comment": resp["comment"],
             "rating": resp["rating"],
             "posted_at": resp["posted_at"],
-            "date": text.parse_datetime(
-                resp["posted_at"], "%a, %d %b %Y %H:%M:%S %z"),
+            "date": text.parse_datetime(resp["posted_at"], "%a, %d %b %Y %H:%M:%S %z"),
             "fanclub_id": resp["fanclub"]["id"],
             "fanclub_user_id": resp["fanclub"]["user"]["id"],
             "fanclub_user_name": resp["fanclub"]["user"]["name"],
             "fanclub_name": resp["fanclub"]["name"],
-            "fanclub_url": self.root+"/fanclubs/"+str(resp["fanclub"]["id"]),
+            "fanclub_url": self.root + "/fanclubs/" + str(resp["fanclub"]["id"]),
             "tags": [t["name"] for t in resp["tags"]],
             "_data": resp,
         }
@@ -120,14 +119,17 @@ class FantiaExtractor(Extractor):
         except Exception:
             pass
         else:
-            contents.insert(0, {
-                "id": "thumb",
-                "title": "thumb",
-                "category": "thumb",
-                "download_uri": url,
-                "visible_status": "visible",
-                "plan": None,
-            })
+            contents.insert(
+                0,
+                {
+                    "id": "thumb",
+                    "title": "thumb",
+                    "category": "thumb",
+                    "download_uri": url,
+                    "visible_status": "visible",
+                    "plan": None,
+                },
+            )
 
         return contents
 
@@ -144,15 +146,13 @@ class FantiaExtractor(Extractor):
 
         if "post_content_photos" in content:
             for photo in content["post_content_photos"]:
-                files.append({"file_id" : photo["id"],
-                              "file_url": photo["url"]["original"]})
+                files.append({"file_id": photo["id"], "file_url": photo["url"]["original"]})
 
         if "download_uri" in content:
             url = content["download_uri"]
             if url[0] == "/":
                 url = self.root + url
-            files.append({"file_id" : content["id"],
-                          "file_url": url})
+            files.append({"file_id": content["id"], "file_url": url})
 
         if content["category"] == "blog" and "comment" in content:
             comment_json = util.json_loads(content["comment"])
@@ -164,8 +164,9 @@ class FantiaExtractor(Extractor):
                     blog_text += insert
                 elif isinstance(insert, dict) and "fantiaImage" in insert:
                     img = insert["fantiaImage"]
-                    files.append({"file_id" : img["id"],
-                                  "file_url": self.root + img["original_url"]})
+                    files.append(
+                        {"file_id": img["id"], "file_url": self.root + img["original_url"]}
+                    )
             post["blogpost_text"] = blog_text
         else:
             post["blogpost_text"] = ""
@@ -175,6 +176,7 @@ class FantiaExtractor(Extractor):
 
 class FantiaCreatorExtractor(FantiaExtractor):
     """Extractor for a Fantia creator's works"""
+
     subcategory = "creator"
     pattern = r"(?:https?://)?(?:www\.)?fantia\.jp/fanclubs/(\d+)"
     example = "https://fantia.jp/fanclubs/12345"
@@ -184,12 +186,13 @@ class FantiaCreatorExtractor(FantiaExtractor):
         self.creator_id = match.group(1)
 
     def posts(self):
-        url = "{}/fanclubs/{}/posts".format(self.root, self.creator_id)
+        url = f"{self.root}/fanclubs/{self.creator_id}/posts"
         return self._pagination(url)
 
 
 class FantiaPostExtractor(FantiaExtractor):
     """Extractor for media from a single Fantia post"""
+
     subcategory = "post"
     pattern = r"(?:https?://)?(?:www\.)?fantia\.jp/posts/(\d+)"
     example = "https://fantia.jp/posts/12345"

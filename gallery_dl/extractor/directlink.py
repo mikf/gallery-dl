@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2017-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,19 +6,23 @@
 
 """Direct link handling"""
 
-from .common import Extractor, Message
 from .. import text
+from .common import Extractor
+from .common import Message
 
 
 class DirectlinkExtractor(Extractor):
     """Extractor for direct links to images and other media files"""
+
     category = "directlink"
     filename_fmt = "{domain}/{path}/{filename}.{extension}"
     archive_fmt = filename_fmt
-    pattern = (r"(?i)https?://(?P<domain>[^/?#]+)/(?P<path>[^?#]+\."
-               r"(?:jpe?g|jpe|png|gif|bmp|svg|web[mp]|avif|heic|psd"
-               r"|mp4|m4v|mov|mkv|og[gmv]|wav|mp3|opus|zip|rar|7z|pdf|swf))"
-               r"(?:\?(?P<query>[^#]*))?(?:#(?P<fragment>.*))?$")
+    pattern = (
+        r"(?i)https?://(?P<domain>[^/?#]+)/(?P<path>[^?#]+\."
+        r"(?:jpe?g|jpe|png|gif|bmp|svg|web[mp]|avif|heic|psd"
+        r"|mp4|m4v|mov|mkv|og[gmv]|wav|mp3|opus|zip|rar|7z|pdf|swf))"
+        r"(?:\?(?P<query>[^#]*))?(?:#(?P<fragment>.*))?$"
+    )
     example = "https://en.wikipedia.org/static/images/project-logos/enwiki.png"
 
     def __init__(self, match):
@@ -36,8 +38,7 @@ class DirectlinkExtractor(Extractor):
         data["path"], _, name = data["path"].rpartition("/")
         data["filename"], _, ext = name.rpartition(".")
         data["extension"] = ext.lower()
-        data["_http_headers"] = {
-            "Referer": self.url.encode("latin-1", "ignore")}
+        data["_http_headers"] = {"Referer": self.url.encode("latin-1", "ignore")}
 
         yield Message.Directory, data
         yield Message.Url, self.url, data

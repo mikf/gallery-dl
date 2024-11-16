@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2024 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,15 +6,19 @@
 
 """Extractors for https://scrolller.com/"""
 
-from .common import Extractor, Message
-from .. import text, util, exception
+from .. import exception
+from .. import text
+from .. import util
 from ..cache import cache
+from .common import Extractor
+from .common import Message
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?scrolller\.com"
 
 
 class ScrolllerExtractor(Extractor):
     """Base class for scrolller extractors"""
+
     category = "scrolller"
     root = "https://scrolller.com"
     directory_fmt = ("{category}", "{subredditTitle}")
@@ -31,7 +33,6 @@ class ScrolllerExtractor(Extractor):
         self.login()
 
         for post in self.posts():
-
             src = max(post["mediaSources"], key=self._sort_key)
             post.update(src)
             url = src["url"]
@@ -48,7 +49,7 @@ class ScrolllerExtractor(Extractor):
         if username:
             self.auth_token = self._login_impl(username, password)
 
-    @cache(maxage=28*86400, keyarg=1)
+    @cache(maxage=28 * 86400, keyarg=1)
     def _login_impl(self, username, password):
         self.log.info("Logging in as %s", username)
 
@@ -69,19 +70,22 @@ class ScrolllerExtractor(Extractor):
     def _request_graphql(self, opname, variables):
         url = "https://api.scrolller.com/api/v2/graphql"
         headers = {
-            "Content-Type"  : "text/plain;charset=UTF-8",
-            "Origin"        : self.root,
+            "Content-Type": "text/plain;charset=UTF-8",
+            "Origin": self.root,
             "Sec-Fetch-Dest": "empty",
             "Sec-Fetch-Mode": "cors",
             "Sec-Fetch-Site": "same-site",
         }
         data = {
-            "query"        : QUERIES[opname],
-            "variables"    : variables,
+            "query": QUERIES[opname],
+            "variables": variables,
             "authorization": self.auth_token,
         }
         return self.request(
-            url, method="POST", headers=headers, data=util.json_dumps(data),
+            url,
+            method="POST",
+            headers=headers,
+            data=util.json_dumps(data),
         ).json()["data"]
 
     def _pagination(self, opname, variables):
@@ -102,6 +106,7 @@ class ScrolllerExtractor(Extractor):
 
 class ScrolllerSubredditExtractor(ScrolllerExtractor):
     """Extractor for media from a scrolller subreddit"""
+
     subcategory = "subreddit"
     pattern = BASE_PATTERN + r"(/r/[^/?#]+)(?:/?\?([^#]+))?"
     example = "https://scrolller.com/r/SUBREDDIT"
@@ -116,9 +121,9 @@ class ScrolllerSubredditExtractor(ScrolllerExtractor):
                 filter = params["filter"].upper().rstrip("S")
 
         variables = {
-            "url"      : url,
-            "iterator" : None,
-            "filter"   : filter,
+            "url": url,
+            "iterator": None,
+            "filter": filter,
             "hostsDown": None,
         }
         return self._pagination("SubredditQuery", variables)
@@ -126,6 +131,7 @@ class ScrolllerSubredditExtractor(ScrolllerExtractor):
 
 class ScrolllerFollowingExtractor(ScrolllerExtractor):
     """Extractor for followed scrolller subreddits"""
+
     subcategory = "following"
     pattern = BASE_PATTERN + r"/following"
     example = "https://scrolller.com/following"
@@ -137,7 +143,7 @@ class ScrolllerFollowingExtractor(ScrolllerExtractor):
             raise exception.AuthorizationError("Login required")
 
         variables = {
-            "iterator" : None,
+            "iterator": None,
             "hostsDown": None,
         }
 
@@ -149,21 +155,21 @@ class ScrolllerFollowingExtractor(ScrolllerExtractor):
 
 class ScrolllerPostExtractor(ScrolllerExtractor):
     """Extractor for media from a single scrolller post"""
+
     subcategory = "post"
     pattern = BASE_PATTERN + r"/(?!r/|following$)([^/?#]+)"
     example = "https://scrolller.com/title-slug-a1b2c3d4f5"
 
     def posts(self):
-        url = "{}/{}".format(self.root, self.groups[0])
+        url = f"{self.root}/{self.groups[0]}"
         page = self.request(url).text
-        data = util.json_loads(text.extr(
-            page, '<script>window.scrolllerConfig="', '"</script>')
-            .replace('\\"', '"'))
+        data = util.json_loads(
+            text.extr(page, '<script>window.scrolllerConfig="', '"</script>').replace('\\"', '"')
+        )
         return (data["item"],)
 
 
 QUERIES = {
-
     "SubredditQuery": """\
 query SubredditQuery(
     $url: String!
@@ -191,7 +197,6 @@ query SubredditQuery(
     }
 }
 """,
-
     "FollowingQuery": """\
 query FollowingQuery(
     $iterator: String
@@ -209,7 +214,6 @@ query FollowingQuery(
     }
 }
 """,
-
     "LoginQuery": """\
 query LoginQuery(
     $username: String!,
@@ -223,5 +227,4 @@ query LoginQuery(
     }
 }
 """,
-
 }

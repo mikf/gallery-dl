@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2014-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,26 +6,44 @@
 
 """Common classes and constants used by extractor modules."""
 
-import os
-import re
-import ssl
-import time
-import netrc
-import queue
-import random
+from __future__ import annotations
+
+import datetime
 import getpass
 import logging
-import datetime
-import requests
+import netrc
+import os
+import queue
+import random
+import re
+import ssl
 import threading
+import time
+from contextlib import suppress
+from typing import TYPE_CHECKING
+from typing import Any
+from typing import AnyStr
+from typing import Literal
+from typing import Self
+
+import requests
 from requests.adapters import HTTPAdapter
+
+from .. import cache
+from .. import config
+from .. import exception
+from .. import output
+from .. import text
+from .. import util
 from .message import Message
-from .. import config, output, text, util, cache, exception
+
+if TYPE_CHECKING:
+    from collections.abc import Generator
+
 urllib3 = requests.packages.urllib3
 
 
-class Extractor():
-
+class Extractor:
     category = ""
     subcategory = ""
     basecategory = ""
@@ -47,8 +63,8 @@ class Extractor():
     request_interval_429 = 60.0
     request_timestamp = 0.0
 
-    def __init__(self, match):
-        self.log = logging.getLogger(self.category)
+    def __init__(self, match: re.Match[AnyStr]) -> None:
+        self.log: logging.Logger = logging.getLogger(self.category)
         self.url = match.string
         self.match = match
         self.groups = match.groups()
@@ -56,7 +72,7 @@ class Extractor():
         self._parentdir = ""
 
     @classmethod
-    def from_url(cls, url):
+    def from_url(cls, url) -> Self | None:
         if isinstance(cls.pattern, str):
             cls.pattern = re.compile(cls.pattern)
         match = cls.pattern.match(url)
@@ -66,20 +82,20 @@ class Extractor():
         self.initialize()
         return self.items()
 
-    def initialize(self):
+    def initialize(self) -> None:
         self._init_options()
         self._init_session()
         self._init_cookies()
         self._init()
         self.initialize = util.noop
 
-    def finalize(self):
+    def finalize(self) -> None:
         pass
 
-    def items(self):
+    def items(self) -> Generator[tuple[int, Literal[1]], Any, None]:
         yield Message.Version, 1
 
-    def skip(self, num):
+    def skip(self, num) -> Literal[0]:
         return 0
 
     def config(self, key, default=None):
@@ -91,14 +107,14 @@ class Extractor():
             return value
         return self.config(key2, default)
 
-    def config_deprecated(self, key, deprecated, default=None,
-                          sentinel=util.SENTINEL, history=set()):
+    def config_deprecated(
+        self, key, deprecated, default=None, sentinel=util.SENTINEL, history=set()
+    ):
         value = self.config(deprecated, sentinel)
         if value is not sentinel:
             if deprecated not in history:
                 history.add(deprecated)
-                self.log.warning("'%s' is deprecated. Use '%s' instead.",
-                                 deprecated, key)
+                self.log.warning("'%s' is deprecated. Use '%s' instead.", deprecated, key)
             default = value
 
         value = self.config(key, sentinel)
@@ -113,8 +129,7 @@ class Extractor():
         return default
 
     def _config_shared(self, key, default=None):
-        return config.interpolate_common(
-            ("extractor",), self._cfgpath, key, default)
+        return config.interpolate_common(("extractor",), self._cfgpath, key, default)
 
     def _config_shared_accumulate(self, key):
         first = True
@@ -127,13 +142,21 @@ class Extractor():
             else:
                 conf = config.get(extr, path[0])
                 if conf:
-                    values[:0] = config.accumulate(
-                        (self.subcategory,), key, conf=conf)
+                    values[:0] = config.accumulate((self.subcategory,), key, conf=conf)
         return values
 
-    def request(self, url, method="GET", session=None,
-                retries=None, retry_codes=None, encoding=None,
-                fatal=True, notfound=None, **kwargs):
+    def request(
+        self,
+        url,
+        method="GET",
+        session=None,
+        retries=None,
+        retry_codes=None,
+        encoding=None,
+        fatal=True,
+        notfound=None,
+        **kwargs,
+    ):
         if session is None:
             session = self.session
         if retries is None:
@@ -162,31 +185,32 @@ class Extractor():
         tries = 1
 
         if self._interval:
-            seconds = (self._interval() -
-                       (time.time() - Extractor.request_timestamp))
+            seconds = self._interval() - (time.time() - Extractor.request_timestamp)
             if seconds > 0.0:
                 self.sleep(seconds, "request")
 
         while True:
             try:
                 response = session.request(method, url, **kwargs)
-            except (requests.exceptions.ConnectionError,
-                    requests.exceptions.Timeout,
-                    requests.exceptions.ChunkedEncodingError,
-                    requests.exceptions.ContentDecodingError) as exc:
+            except (
+                requests.exceptions.ConnectionError,
+                requests.exceptions.Timeout,
+                requests.exceptions.ChunkedEncodingError,
+                requests.exceptions.ContentDecodingError,
+            ) as exc:
                 msg = exc
                 code = 0
-            except (requests.exceptions.RequestException) as exc:
+            except requests.exceptions.RequestException as exc:
                 raise exception.HttpError(exc)
             else:
                 code = response.status_code
                 if self._write_pages:
                     self._dump_response(response)
                 if (
-                    code < 400 or
-                    code < 500 and (
-                        not fatal and code != 429 or fatal is None) or
-                    fatal is ...
+                    code < 400
+                    or code < 500
+                    and (not fatal and code != 429 or fatal is None)
+                    or fatal is ...
                 ):
                     if encoding:
                         response.encoding = encoding
@@ -194,11 +218,9 @@ class Extractor():
                 if notfound and code == 404:
                     raise exception.NotFoundError(notfound)
 
-                msg = "'{} {}' for '{}'".format(
-                    code, response.reason, response.url)
+                msg = f"'{code} {response.reason}' for '{response.url}'"
                 server = response.headers.get("Server")
-                if server and server.startswith("cloudflare") and \
-                        code in (403, 503):
+                if server and server.startswith("cloudflare") and code in (403, 503):
                     mitigated = response.headers.get("cf-mitigated")
                     if mitigated and mitigated.lower() == "challenge":
                         self.log.warning("Cloudflare challenge")
@@ -213,7 +235,7 @@ class Extractor():
 
                 if code == 429 and self._handle_429(response):
                     continue
-                elif code == 429 and self._interval_429:
+                if code == 429 and self._interval_429:
                     pass
                 elif code not in retry_codes and code < 500:
                     break
@@ -221,19 +243,17 @@ class Extractor():
             finally:
                 Extractor.request_timestamp = time.time()
 
-            self.log.debug("%s (%s/%s)", msg, tries, retries+1)
+            self.log.debug("%s (%s/%s)", msg, tries, retries + 1)
             if tries > retries:
                 break
 
             seconds = tries
             if self._interval:
                 s = self._interval()
-                if seconds < s:
-                    seconds = s
+                seconds = max(seconds, s)
             if code == 429 and self._interval_429:
                 s = self._interval_429()
-                if seconds < s:
-                    seconds = s
+                seconds = max(seconds, s)
                 self.wait(seconds=seconds, reason="429 Too Many Requests")
             else:
                 self.sleep(seconds, "retry")
@@ -243,8 +263,7 @@ class Extractor():
 
     _handle_429 = util.false
 
-    def wait(self, seconds=None, until=None, adjust=1.0,
-             reason="rate limit"):
+    def wait(self, seconds=None, until=None, adjust=1.0, reason="rate limit"):
         now = time.time()
 
         if seconds:
@@ -266,13 +285,12 @@ class Extractor():
 
         if reason:
             t = datetime.datetime.fromtimestamp(until).time()
-            isotime = "{:02}:{:02}:{:02}".format(t.hour, t.minute, t.second)
+            isotime = f"{t.hour:02}:{t.minute:02}:{t.second:02}"
             self.log.info("Waiting until %s (%s)", isotime, reason)
         time.sleep(seconds)
 
     def sleep(self, seconds, reason):
-        self.log.debug("Sleeping %.2f seconds (%s)",
-                       seconds, reason)
+        self.log.debug("Sleeping %.2f seconds (%s)", seconds, reason)
         time.sleep(seconds)
 
     def input(self, prompt, echo=True):
@@ -291,8 +309,7 @@ class Extractor():
         if input is None:
             input = output.TTY_STDIN
         if not input:
-            raise exception.StopExtraction(
-                "User input required (%s)", prompt.strip(" :"))
+            raise exception.StopExtraction("User input required (%s)", prompt.strip(" :"))
 
     def _get_auth_info(self):
         """Return authentication information as (username, password) tuple"""
@@ -346,7 +363,7 @@ class Extractor():
         ssl_options = ssl_ciphers = 0
 
         # .netrc Authorization headers are alwsays disabled
-        session.trust_env = True if self.config("proxy-env", False) else False
+        session.trust_env = bool(self.config("proxy-env", False))
 
         browser = self.config("browser")
         if browser is None:
@@ -355,8 +372,7 @@ class Extractor():
             browser, _, platform = browser.lower().partition(":")
 
             if not platform or platform == "auto":
-                platform = ("Windows NT 10.0; Win64; x64"
-                            if util.WINDOWS else "X11; Linux x86_64")
+                platform = "Windows NT 10.0; Win64; x64" if util.WINDOWS else "X11; Linux x86_64"
             elif platform == "windows":
                 platform = "Windows NT 10.0; Win64; x64"
             elif platform == "linux":
@@ -376,14 +392,15 @@ class Extractor():
                 else:
                     headers[key] = value
 
-            ssl_options |= (ssl.OP_NO_SSLv2 | ssl.OP_NO_SSLv3 |
-                            ssl.OP_NO_TLSv1 | ssl.OP_NO_TLSv1_1)
+            ssl_options |= ssl.OP_NO_SSLv2 | ssl.OP_NO_SSLv3 | ssl.OP_NO_TLSv1 | ssl.OP_NO_TLSv1_1
             ssl_ciphers = SSL_CIPHERS[browser]
         else:
             useragent = self.config("user-agent")
             if useragent is None:
-                useragent = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64; "
-                             "rv:128.0) Gecko/20100101 Firefox/128.0")
+                useragent = (
+                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64; "
+                    "rv:128.0) Gecko/20100101 Firefox/128.0"
+                )
             elif useragent == "browser":
                 useragent = _browser_useragent()
             headers["User-Agent"] = useragent
@@ -430,8 +447,7 @@ class Extractor():
             ssl_options |= ssl.OP_NO_TLSv1_2
             self.log.debug("TLS 1.2 disabled.")
 
-        adapter = _build_requests_adapter(
-            ssl_options, ssl_ciphers, source_address)
+        adapter = _build_requests_adapter(ssl_options, ssl_ciphers, source_address)
         session.mount("https://", adapter)
         session.mount("http://", adapter)
 
@@ -477,6 +493,7 @@ class Extractor():
 
             if cookies is None:
                 from ..cookies import load_cookies
+
                 try:
                     cookies = load_cookies(cookies_source)
                 except Exception as exc:
@@ -493,9 +510,10 @@ class Extractor():
 
         else:
             self.log.warning(
-                "Expected 'dict', 'list', or 'str' value for 'cookies' "
-                "option, got '%s' (%s)",
-                cookies_source.__class__.__name__, cookies_source)
+                "Expected 'dict', 'list', or 'str' value for 'cookies' " "option, got '%s' (%s)",
+                cookies_source.__class__.__name__,
+                cookies_source,
+            )
 
     def cookies_store(self):
         """Store the session's cookies in a cookies.txt file"""
@@ -549,22 +567,22 @@ class Extractor():
         now = time.time()
 
         for cookie in self.cookies:
-            if cookie.name in names and (
-                    not domain or cookie.domain == domain):
-
+            if cookie.name in names and (not domain or cookie.domain == domain):
                 if cookie.expires:
                     diff = int(cookie.expires - now)
 
                     if diff <= 0:
-                        self.log.warning(
-                            "Cookie '%s' has expired", cookie.name)
+                        self.log.warning("Cookie '%s' has expired", cookie.name)
                         continue
 
-                    elif diff <= 86400:
+                    if diff <= 86400:
                         hours = diff // 3600
                         self.log.warning(
                             "Cookie '%s' will expire in less than %s hour%s",
-                            cookie.name, hours + 1, "s" if hours else "")
+                            cookie.name,
+                            hours + 1,
+                            "s" if hours else "",
+                        )
 
                 names.discard(cookie.name)
                 if not names:
@@ -573,8 +591,7 @@ class Extractor():
 
     def _prepare_ddosguard_cookies(self):
         if not self.cookies.get("__ddg2", domain=self.cookies_domain):
-            self.cookies.set(
-                "__ddg2", util.generate_token(), domain=self.cookies_domain)
+            self.cookies.set("__ddg2", util.generate_token(), domain=self.cookies_domain)
 
     def _cache(self, func, maxage, keyarg=None):
         #  return cache.DatabaseCacheDecorator(func, maxage, keyarg)
@@ -585,6 +602,7 @@ class Extractor():
 
     def _get_date_min_max(self, dmin=None, dmax=None):
         """Retrieve and parse 'date-min' and 'date-max' config values"""
+
         def get(key, default):
             ts = self.config(key, default)
             if isinstance(ts, str):
@@ -594,15 +612,13 @@ class Extractor():
                     self.log.warning("Unable to parse '%s': %s", key, exc)
                     ts = default
             return ts
+
         fmt = self.config("date-format", "%Y-%m-%dT%H:%M:%S")
         return get("date-min", dmin), get("date-max", dmax)
 
     def _dispatch_extractors(self, extractor_data, default=()):
         """ """
-        extractors = {
-            data[0].subcategory: data
-            for data in extractor_data
-        }
+        extractors = {data[0].subcategory: data for data in extractor_data}
 
         include = self.config("include", default) or ()
         if include == "all":
@@ -642,30 +658,25 @@ class Extractor():
 
         fname = "{:>02}_{}".format(
             Extractor._dump_index,
-            Extractor._dump_sanitize('_', response.url),
+            Extractor._dump_sanitize("_", response.url),
         )
 
-        if util.WINDOWS:
-            path = os.path.abspath(fname)[:255]
-        else:
-            path = fname[:251]
+        path = os.path.abspath(fname)[:255] if util.WINDOWS else fname[:251]
 
         try:
-            with open(path + ".txt", 'wb') as fp:
+            with open(path + ".txt", "wb") as fp:
                 util.dump_response(
-                    response, fp,
+                    response,
+                    fp,
                     headers=(self._write_pages in ("all", "ALL")),
-                    hide_auth=(self._write_pages != "ALL")
+                    hide_auth=(self._write_pages != "ALL"),
                 )
-            self.log.info("Writing '%s' response to '%s'",
-                          response.url, path + ".txt")
+            self.log.info("Writing '%s' response to '%s'", response.url, path + ".txt")
         except Exception as e:
-            self.log.warning("Failed to dump HTTP request (%s: %s)",
-                             e.__class__.__name__, e)
+            self.log.warning("Failed to dump HTTP request (%s: %s)", e.__class__.__name__, e)
 
 
 class GalleryExtractor(Extractor):
-
     subcategory = "gallery"
     filename_fmt = "{category}_{gallery_id}_{num:>03}.{extension}"
     directory_fmt = ("{category}", "{gallery_id} {title}")
@@ -680,8 +691,7 @@ class GalleryExtractor(Extractor):
         self.login()
 
         if self.gallery_url:
-            page = self.request(
-                self.gallery_url, notfound=self.subcategory).text
+            page = self.request(self.gallery_url, notfound=self.subcategory).text
         else:
             page = None
 
@@ -693,7 +703,7 @@ class GalleryExtractor(Extractor):
                 images = util.enumerate_reversed(imgs, 1, data["count"])
             else:
                 images = zip(
-                    range(1, data["count"]+1),
+                    range(1, data["count"] + 1),
                     imgs,
                 )
         else:
@@ -728,20 +738,18 @@ class GalleryExtractor(Extractor):
 
 
 class ChapterExtractor(GalleryExtractor):
-
     subcategory = "chapter"
     directory_fmt = (
-        "{category}", "{manga}",
-        "{volume:?v/ />02}c{chapter:>03}{chapter_minor:?//}{title:?: //}")
-    filename_fmt = (
-        "{manga}_c{chapter:>03}{chapter_minor:?//}_{page:>03}.{extension}")
-    archive_fmt = (
-        "{manga}_{chapter}{chapter_minor}_{page}")
+        "{category}",
+        "{manga}",
+        "{volume:?v/ />02}c{chapter:>03}{chapter_minor:?//}{title:?: //}",
+    )
+    filename_fmt = "{manga}_c{chapter:>03}{chapter_minor:?//}_{page:>03}.{extension}"
+    archive_fmt = "{manga}_{chapter}{chapter_minor}_{page}"
     enum = "page"
 
 
 class MangaExtractor(Extractor):
-
     subcategory = "manga"
     categorytransfer = True
     chapterclass = None
@@ -773,7 +781,7 @@ class MangaExtractor(Extractor):
         """Return a list of all (chapter-url, metadata)-tuples"""
 
 
-class AsynchronousMixin():
+class AsynchronousMixin:
     """Run info extraction in a separate thread"""
 
     def __iter__(self):
@@ -821,7 +829,7 @@ class BaseExtractor(Extractor):
         for index, group in enumerate(self.groups):
             if group is not None:
                 if index:
-                    self.category, self.root, info = self.instances[index-1]
+                    self.category, self.root, info = self.instances[index - 1]
                     if not self.root:
                         self.root = text.root_from_url(self.match.group(0))
                     self.config_instance = info.get
@@ -848,7 +856,7 @@ class BaseExtractor(Extractor):
 
             pattern = info.get("pattern")
             if not pattern:
-                pattern = re.escape(root[root.index(":") + 3:])
+                pattern = re.escape(root[root.index(":") + 3 :])
             pattern_list.append(pattern + "()")
 
         return (
@@ -858,7 +866,6 @@ class BaseExtractor(Extractor):
 
 
 class RequestsAdapter(HTTPAdapter):
-
     def __init__(self, ssl_context=None, source_address=None):
         self.ssl_context = ssl_context
         self.source_address = source_address
@@ -884,7 +891,8 @@ def _build_requests_adapter(ssl_options, ssl_ciphers, source_address):
 
     if ssl_options or ssl_ciphers:
         ssl_context = urllib3.connection.create_urllib3_context(
-            options=ssl_options or None, ciphers=ssl_ciphers)
+            options=ssl_options or None, ciphers=ssl_ciphers
+        )
         if not requests.__version__ < "2.32":
             # https://github.com/psf/requests/pull/6731
             ssl_context.load_default_certs()
@@ -892,16 +900,15 @@ def _build_requests_adapter(ssl_options, ssl_ciphers, source_address):
     else:
         ssl_context = None
 
-    adapter = _adapter_cache[key] = RequestsAdapter(
-        ssl_context, source_address)
+    adapter = _adapter_cache[key] = RequestsAdapter(ssl_context, source_address)
     return adapter
 
 
 @cache.cache(maxage=86400)
 def _browser_useragent():
     """Get User-Agent header from default browser"""
-    import webbrowser
     import socket
+    import webbrowser
 
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -933,10 +940,12 @@ _browser_cookies = {}
 
 HTTP_HEADERS = {
     "firefox": (
-        ("User-Agent", "Mozilla/5.0 ({}; "
-                       "rv:128.0) Gecko/20100101 Firefox/128.0"),
-        ("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,"
-                   "image/avif,image/webp,image/png,image/svg+xml,*/*;q=0.8"),
+        ("User-Agent", "Mozilla/5.0 ({}; " "rv:128.0) Gecko/20100101 Firefox/128.0"),
+        (
+            "Accept",
+            "text/html,application/xhtml+xml,application/xml;q=0.9,"
+            "image/avif,image/webp,image/png,image/svg+xml,*/*;q=0.8",
+        ),
         ("Accept-Language", "en-US,en;q=0.5"),
         ("Accept-Encoding", None),
         ("Referer", None),
@@ -951,11 +960,17 @@ HTTP_HEADERS = {
     "chrome": (
         ("Connection", "keep-alive"),
         ("Upgrade-Insecure-Requests", "1"),
-        ("User-Agent", "Mozilla/5.0 ({}) AppleWebKit/537.36 (KHTML, "
-                       "like Gecko) Chrome/111.0.0.0 Safari/537.36"),
-        ("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,"
-                   "image/avif,image/webp,image/apng,*/*;q=0.8,"
-                   "application/signed-exchange;v=b3;q=0.7"),
+        (
+            "User-Agent",
+            "Mozilla/5.0 ({}) AppleWebKit/537.36 (KHTML, "
+            "like Gecko) Chrome/111.0.0.0 Safari/537.36",
+        ),
+        (
+            "Accept",
+            "text/html,application/xhtml+xml,application/xml;q=0.9,"
+            "image/avif,image/webp,image/apng,*/*;q=0.8,"
+            "application/signed-exchange;v=b3;q=0.7",
+        ),
         ("Referer", None),
         ("Sec-Fetch-Site", "same-origin"),
         ("Sec-Fetch-Mode", "no-cors"),
@@ -1008,10 +1023,8 @@ SSL_CIPHERS = {
 
 
 # disable Basic Authorization header injection from .netrc data
-try:
+with suppress(Exception):
     requests.sessions.get_netrc_auth = lambda _: None
-except Exception:
-    pass
 
 # detect brotli support
 try:
@@ -1030,6 +1043,7 @@ action = config.get((), "warnings", "default")
 if action:
     try:
         import warnings
+
         warnings.simplefilter(action, urllib3.exceptions.HTTPWarning)
     except Exception:
         pass

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2019-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,13 +6,16 @@
 
 """Extractors for FoolFuuka 4chan archives"""
 
-from .common import BaseExtractor, Message
-from .. import text
 import itertools
+
+from .. import text
+from .common import BaseExtractor
+from .common import Message
 
 
 class FoolfuukaExtractor(BaseExtractor):
     """Base extractor for FoolFuuka based boards/archives"""
+
     basecategory = "foolfuuka"
     filename_fmt = "{timestamp_ms} {filename_media}.{extension}"
     archive_fmt = "{board[shortname]}_{num}_{timestamp}"
@@ -40,11 +41,9 @@ class FoolfuukaExtractor(BaseExtractor):
             if url and url[0] == "/":
                 url = self.root + url
 
-            post["filename"], _, post["extension"] = \
-                media["media"].rpartition(".")
+            post["filename"], _, post["extension"] = media["media"].rpartition(".")
             post["filename_media"] = media["media_filename"].rpartition(".")[0]
-            post["timestamp_ms"] = text.parse_int(
-                media["media_orig"].rpartition(".")[0])
+            post["timestamp_ms"] = text.parse_int(media["media_orig"].rpartition(".")[0])
             yield Message.Url, url, post
 
     def metadata(self):
@@ -57,8 +56,7 @@ class FoolfuukaExtractor(BaseExtractor):
         """Resolve a remote media link"""
         page = self.request(media["remote_media_link"]).text
         url = text.extr(page, 'http-equiv="Refresh" content="0; url=', '"')
-        if url.endswith(".webm") and \
-                url.startswith("https://thebarchive.com/"):
+        if url.endswith(".webm") and url.startswith("https://thebarchive.com/"):
             return url[:-1]
         return url
 
@@ -67,51 +65,53 @@ class FoolfuukaExtractor(BaseExtractor):
         return media["remote_media_link"]
 
 
-BASE_PATTERN = FoolfuukaExtractor.update({
-    "4plebs": {
-        "root": "https://archive.4plebs.org",
-        "pattern": r"(?:archive\.)?4plebs\.org",
-    },
-    "archivedmoe": {
-        "root": "https://archived.moe",
-        "pattern": r"archived\.moe",
-    },
-    "archiveofsins": {
-        "root": "https://archiveofsins.com",
-        "pattern": r"(?:www\.)?archiveofsins\.com",
-    },
-    "b4k": {
-        "root": "https://arch.b4k.co",
-        "pattern": r"arch\.b4k\.co",
-    },
-    "desuarchive": {
-        "root": "https://desuarchive.org",
-        "pattern": r"desuarchive\.org",
-    },
-    "fireden": {
-        "root": "https://boards.fireden.net",
-        "pattern": r"boards\.fireden\.net",
-    },
-    "palanq": {
-        "root": "https://archive.palanq.win",
-        "pattern": r"archive\.palanq\.win",
-    },
-    "rbt": {
-        "root": "https://rbt.asia",
-        "pattern": r"(?:rbt\.asia|(?:archive\.)?rebeccablacktech\.com)",
-    },
-    "thebarchive": {
-        "root": "https://thebarchive.com",
-        "pattern": r"thebarchive\.com",
-    },
-})
+BASE_PATTERN = FoolfuukaExtractor.update(
+    {
+        "4plebs": {
+            "root": "https://archive.4plebs.org",
+            "pattern": r"(?:archive\.)?4plebs\.org",
+        },
+        "archivedmoe": {
+            "root": "https://archived.moe",
+            "pattern": r"archived\.moe",
+        },
+        "archiveofsins": {
+            "root": "https://archiveofsins.com",
+            "pattern": r"(?:www\.)?archiveofsins\.com",
+        },
+        "b4k": {
+            "root": "https://arch.b4k.co",
+            "pattern": r"arch\.b4k\.co",
+        },
+        "desuarchive": {
+            "root": "https://desuarchive.org",
+            "pattern": r"desuarchive\.org",
+        },
+        "fireden": {
+            "root": "https://boards.fireden.net",
+            "pattern": r"boards\.fireden\.net",
+        },
+        "palanq": {
+            "root": "https://archive.palanq.win",
+            "pattern": r"archive\.palanq\.win",
+        },
+        "rbt": {
+            "root": "https://rbt.asia",
+            "pattern": r"(?:rbt\.asia|(?:archive\.)?rebeccablacktech\.com)",
+        },
+        "thebarchive": {
+            "root": "https://thebarchive.com",
+            "pattern": r"thebarchive\.com",
+        },
+    }
+)
 
 
 class FoolfuukaThreadExtractor(FoolfuukaExtractor):
     """Base extractor for threads on FoolFuuka based boards/archives"""
+
     subcategory = "thread"
-    directory_fmt = ("{category}", "{board[shortname]}",
-                     "{thread_num} {title|comment[:50]}")
+    directory_fmt = ("{category}", "{board[shortname]}", "{thread_num} {title|comment[:50]}")
     pattern = BASE_PATTERN + r"/([^/?#]+)/thread/(\d+)"
     example = "https://archived.moe/a/thread/12345/"
 
@@ -139,6 +139,7 @@ class FoolfuukaThreadExtractor(FoolfuukaExtractor):
 
 class FoolfuukaBoardExtractor(FoolfuukaExtractor):
     """Base extractor for FoolFuuka based boards/archives"""
+
     subcategory = "board"
     pattern = BASE_PATTERN + r"/([^/?#]+)(?:/(?:page/)?(\d*))?$"
     example = "https://archived.moe/a/"
@@ -149,9 +150,8 @@ class FoolfuukaBoardExtractor(FoolfuukaExtractor):
         self.page = self.groups[-1]
 
     def items(self):
-        index_base = "{}/_/api/chan/index/?board={}&page=".format(
-            self.root, self.board)
-        thread_base = "{}/{}/thread/".format(self.root, self.board)
+        index_base = f"{self.root}/_/api/chan/index/?board={self.board}&page="
+        thread_base = f"{self.root}/{self.board}/thread/"
 
         page = self.page
         for pnum in itertools.count(text.parse_int(page, 1)):
@@ -175,6 +175,7 @@ class FoolfuukaBoardExtractor(FoolfuukaExtractor):
 
 class FoolfuukaSearchExtractor(FoolfuukaExtractor):
     """Base extractor for search results on FoolFuuka based boards/archives"""
+
     subcategory = "search"
     directory_fmt = ("{category}", "search", "{search}")
     pattern = BASE_PATTERN + r"/([^/?#]+)/search((?:/[^/?#]+/[^/?#]+)+)"
@@ -230,6 +231,7 @@ class FoolfuukaSearchExtractor(FoolfuukaExtractor):
 
 class FoolfuukaGalleryExtractor(FoolfuukaExtractor):
     """Base extractor for FoolFuuka galleries"""
+
     subcategory = "gallery"
     directory_fmt = ("{category}", "{board}", "gallery")
     pattern = BASE_PATTERN + r"/([^/?#]+)/gallery(?:/(\d+))?"
@@ -240,7 +242,7 @@ class FoolfuukaGalleryExtractor(FoolfuukaExtractor):
 
         board = match.group(match.lastindex)
         if board.isdecimal():
-            self.board = match.group(match.lastindex-1)
+            self.board = match.group(match.lastindex - 1)
             self.pages = (board,)
         else:
             self.board = board
@@ -250,8 +252,7 @@ class FoolfuukaGalleryExtractor(FoolfuukaExtractor):
         return {"board": self.board}
 
     def posts(self):
-        base = "{}/_/api/chan/gallery/?board={}&page=".format(
-            self.root, self.board)
+        base = f"{self.root}/_/api/chan/gallery/?board={self.board}&page="
 
         for page in self.pages:
             with self.request(base + page) as response:

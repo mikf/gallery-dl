@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2020 Leonardo Taccari
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,13 +6,15 @@
 
 """Extractors for https://speakerdeck.com/"""
 
-from .common import GalleryExtractor
-from .. import text
 import re
+
+from .. import text
+from .common import GalleryExtractor
 
 
 class SpeakerdeckPresentationExtractor(GalleryExtractor):
     """Extractor for images from a presentation on speakerdeck.com"""
+
     category = "speakerdeck"
     subcategory = "presentation"
     directory_fmt = ("{category}", "{user}")
@@ -31,12 +31,11 @@ class SpeakerdeckPresentationExtractor(GalleryExtractor):
     def metadata(self, _):
         url = self.root + "/oembed.json"
         params = {
-            "url": "{}/{}/{}".format(self.root, self.user, self.presentation),
+            "url": f"{self.root}/{self.user}/{self.presentation}",
         }
         data = self.request(url, params=params).json()
 
-        self.presentation_id = text.extr(
-            data["html"], 'src="//speakerdeck.com/player/', '"')
+        self.presentation_id = text.extr(data["html"], 'src="//speakerdeck.com/player/', '"')
 
         return {
             "user": self.user,
@@ -47,9 +46,6 @@ class SpeakerdeckPresentationExtractor(GalleryExtractor):
         }
 
     def images(self, _):
-        url = "{}/player/{}".format(self.root, self.presentation_id)
+        url = f"{self.root}/player/{self.presentation_id}"
         page = re.sub(r"\s+", " ", self.request(url).text)
-        return [
-            (url, None)
-            for url in text.extract_iter(page, 'js-sd-slide" data-url="', '"')
-        ]
+        return [(url, None) for url in text.extract_iter(page, 'js-sd-slide" data-url="', '"')]

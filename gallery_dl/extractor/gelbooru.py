@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2014-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,16 +6,20 @@
 
 """Extractors for https://gelbooru.com/"""
 
-from .common import Extractor, Message
-from . import gelbooru_v02
-from .. import text, exception
 import binascii
+
+from .. import exception
+from .. import text
+from . import gelbooru_v02
+from .common import Extractor
+from .common import Message
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?gelbooru\.com/(?:index\.php)?\?"
 
 
-class GelbooruBase():
+class GelbooruBase:
     """Base class for gelbooru extractors"""
+
     category = "gelbooru"
     basecategory = "booru"
     root = "https://gelbooru.com"
@@ -112,7 +114,7 @@ class GelbooruBase():
         url = post["file_url"]
         if url.endswith((".webm", ".mp4")):
             md5 = post["md5"]
-            path = "/images/{}/{}/{}.webm".format(md5[0:2], md5[2:4], md5)
+            path = f"/images/{md5[0:2]}/{md5[2:4]}/{md5}.webm"
             post["_fallback"] = GelbooruBase._video_fallback(path)
             url = "https://img3.gelbooru.com" + path
         return url
@@ -123,36 +125,38 @@ class GelbooruBase():
         yield "https://img1.gelbooru.com" + path
 
     def _notes(self, post, page):
-        notes_data = text.extr(page, '<section id="notes"', '</section>')
+        notes_data = text.extr(page, '<section id="notes"', "</section>")
         if not notes_data:
             return
 
         post["notes"] = notes = []
         extr = text.extract
-        for note in text.extract_iter(notes_data, '<article', '</article>'):
-            notes.append({
-                "width" : int(extr(note, 'data-width="', '"')[0]),
-                "height": int(extr(note, 'data-height="', '"')[0]),
-                "x"     : int(extr(note, 'data-x="', '"')[0]),
-                "y"     : int(extr(note, 'data-y="', '"')[0]),
-                "body"  : extr(note, 'data-body="', '"')[0],
-            })
+        for note in text.extract_iter(notes_data, "<article", "</article>"):
+            notes.append(
+                {
+                    "width": int(extr(note, 'data-width="', '"')[0]),
+                    "height": int(extr(note, 'data-height="', '"')[0]),
+                    "x": int(extr(note, 'data-x="', '"')[0]),
+                    "y": int(extr(note, 'data-y="', '"')[0]),
+                    "body": extr(note, 'data-body="', '"')[0],
+                }
+            )
 
     def _skip_offset(self, num):
         self.offset += num
         return num
 
 
-class GelbooruTagExtractor(GelbooruBase,
-                           gelbooru_v02.GelbooruV02TagExtractor):
+class GelbooruTagExtractor(GelbooruBase, gelbooru_v02.GelbooruV02TagExtractor):
     """Extractor for images from gelbooru.com based on search-tags"""
+
     pattern = BASE_PATTERN + r"page=post&s=list&tags=([^&#]*)"
     example = "https://gelbooru.com/index.php?page=post&s=list&tags=TAG"
 
 
-class GelbooruPoolExtractor(GelbooruBase,
-                            gelbooru_v02.GelbooruV02PoolExtractor):
+class GelbooruPoolExtractor(GelbooruBase, gelbooru_v02.GelbooruV02PoolExtractor):
     """Extractor for gelbooru pools"""
+
     per_page = 45
     pattern = BASE_PATTERN + r"page=pool&s=show&id=(\d+)"
     example = "https://gelbooru.com/index.php?page=pool&s=show&id=12345"
@@ -163,8 +167,8 @@ class GelbooruPoolExtractor(GelbooruBase,
         url = self.root + "/index.php"
         self._params = {
             "page": "pool",
-            "s"   : "show",
-            "id"  : self.pool_id,
+            "s": "show",
+            "id": self.pool_id,
         }
         page = self.request(url, params=self._params).text
 
@@ -181,9 +185,9 @@ class GelbooruPoolExtractor(GelbooruBase,
         return self._pagination_html(self._params)
 
 
-class GelbooruFavoriteExtractor(GelbooruBase,
-                                gelbooru_v02.GelbooruV02FavoriteExtractor):
+class GelbooruFavoriteExtractor(GelbooruBase, gelbooru_v02.GelbooruV02FavoriteExtractor):
     """Extractor for gelbooru favorites"""
+
     per_page = 100
     pattern = BASE_PATTERN + r"page=favorites&s=view&id=(\d+)"
     example = "https://gelbooru.com/index.php?page=favorites&s=view&id=12345"
@@ -193,8 +197,8 @@ class GelbooruFavoriteExtractor(GelbooruBase,
     def posts(self):
         # get number of favorites
         params = {
-            "s"    : "favorite",
-            "id"   : self.favorite_id,
+            "s": "favorite",
+            "id": self.favorite_id,
             "limit": "2",
         }
         data = self._api_request(params, None, True)
@@ -207,12 +211,11 @@ class GelbooruFavoriteExtractor(GelbooruBase,
             order = 1 if favs[0]["id"] < favs[1]["id"] else -1
         except LookupError as exc:
             self.log.debug(
-                "Error when determining API favorite order (%s: %s)",
-                exc.__class__.__name__, exc)
+                "Error when determining API favorite order (%s: %s)", exc.__class__.__name__, exc
+            )
             order = -1
         else:
-            self.log.debug("API yields favorites in %sscending order",
-                           "a" if order > 0 else "de")
+            self.log.debug("API yields favorites in %sscending order", "a" if order > 0 else "de")
 
         order_favs = self.config("order-posts")
         if order_favs and order_favs[0] in ("r", "a"):
@@ -250,11 +253,11 @@ class GelbooruFavoriteExtractor(GelbooruBase,
             params["pid"] += 1
 
     def _pagination_reverse(self, params, count):
-        pnum, last = divmod(count-1, self.per_page)
+        pnum, last = divmod(count - 1, self.per_page)
         if self.offset > last:
             # page number change
             self.offset -= last
-            diff, self.offset = divmod(self.offset-1, self.per_page)
+            diff, self.offset = divmod(self.offset - 1, self.per_page)
             pnum -= diff + 1
         skip = self.offset
 
@@ -279,20 +282,20 @@ class GelbooruFavoriteExtractor(GelbooruBase,
                 return
 
 
-class GelbooruPostExtractor(GelbooruBase,
-                            gelbooru_v02.GelbooruV02PostExtractor):
+class GelbooruPostExtractor(GelbooruBase, gelbooru_v02.GelbooruV02PostExtractor):
     """Extractor for single images from gelbooru.com"""
-    pattern = (BASE_PATTERN +
-               r"(?=(?:[^#]+&)?page=post(?:&|#|$))"
-               r"(?=(?:[^#]+&)?s=view(?:&|#|$))"
-               r"(?:[^#]+&)?id=(\d+)")
+
+    pattern = (
+        BASE_PATTERN + r"(?=(?:[^#]+&)?page=post(?:&|#|$))"
+        r"(?=(?:[^#]+&)?s=view(?:&|#|$))"
+        r"(?:[^#]+&)?id=(\d+)"
+    )
     example = "https://gelbooru.com/index.php?page=post&s=view&id=12345"
 
 
 class GelbooruRedirectExtractor(GelbooruBase, Extractor):
     subcategory = "redirect"
-    pattern = (r"(?:https?://)?(?:www\.)?gelbooru\.com"
-               r"/redirect\.php\?s=([^&#]+)")
+    pattern = r"(?:https?://)?(?:www\.)?gelbooru\.com" r"/redirect\.php\?s=([^&#]+)"
     example = "https://gelbooru.com/redirect.php?s=BASE64"
 
     def __init__(self, match):
@@ -300,7 +303,6 @@ class GelbooruRedirectExtractor(GelbooruBase, Extractor):
         self.url_base64 = match.group(1)
 
     def items(self):
-        url = text.ensure_http_scheme(binascii.a2b_base64(
-            self.url_base64).decode())
+        url = text.ensure_http_scheme(binascii.a2b_base64(self.url_base64).decode())
         data = {"_extractor": GelbooruPostExtractor}
         yield Message.Queue, url, data

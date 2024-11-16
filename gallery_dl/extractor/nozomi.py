@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2019-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,17 +6,19 @@
 
 """Extractors for https://nozomi.la/"""
 
-from .common import Extractor, Message
 from .. import text
+from .common import Extractor
+from .common import Message
 
 
 def decode_nozomi(n):
     for i in range(0, len(n), 4):
-        yield (n[i] << 24) + (n[i+1] << 16) + (n[i+2] << 8) + n[i+3]
+        yield (n[i] << 24) + (n[i + 1] << 16) + (n[i + 2] << 8) + n[i + 3]
 
 
 class NozomiExtractor(Extractor):
     """Base class for nozomi extractors"""
+
     category = "nozomi"
     root = "https://nozomi.la"
     filename_fmt = "{postid} {dataid}.{extension}"
@@ -31,14 +31,13 @@ class NozomiExtractor(Extractor):
         data = self.metadata()
 
         for post_id in map(str, self.posts()):
-            url = "https://j.nozomi.la/post/{}/{}/{}.json".format(
-                post_id[-1], post_id[-3:-1], post_id)
+            url = f"https://j.nozomi.la/post/{post_id[-1]}/{post_id[-3:-1]}/{post_id}.json"
             response = self.request(url, fatal=False)
 
             if response.status_code >= 400:
                 self.log.warning(
-                    "Skipping post %s ('%s %s')",
-                    post_id, response.status_code, response.reason)
+                    "Skipping post %s ('%s %s')", post_id, response.status_code, response.reason
+                )
                 continue
 
             post = response.json()
@@ -48,8 +47,7 @@ class NozomiExtractor(Extractor):
             post["character"] = self._list(post.get("character"))
 
             try:
-                post["date"] = text.parse_datetime(
-                    post["date"] + ":00", "%Y-%m-%d %H:%M:%S%z")
+                post["date"] = text.parse_datetime(post["date"] + ":00", "%Y-%m-%d %H:%M:%S%z")
             except Exception:
                 post["date"] = None
 
@@ -63,8 +61,7 @@ class NozomiExtractor(Extractor):
             yield Message.Directory, post
             for post["num"], image in enumerate(images, 1):
                 post["filename"] = post["dataid"] = did = image["dataid"]
-                post["is_video"] = video = \
-                    True if image.get("is_video") else False
+                post["is_video"] = video = bool(image.get("is_video"))
 
                 ext = image["type"]
                 if video:
@@ -76,8 +73,9 @@ class NozomiExtractor(Extractor):
                     ext = "webp"
 
                 post["extension"] = ext
-                post["url"] = url = "https://{}.nozomi.la/{}/{}/{}.{}".format(
-                    subdomain, did[-1], did[-3:-1], did, ext)
+                post["url"] = url = (
+                    f"https://{subdomain}.nozomi.la/{did[-1]}/{did[-3:-1]}/{did}.{ext}"
+                )
                 yield Message.Url, url, post
 
     def posts(self):
@@ -85,7 +83,7 @@ class NozomiExtractor(Extractor):
         offset = (text.parse_int(self.pnum, 1) - 1) * 256
 
         while True:
-            headers = {"Range": "bytes={}-{}".format(offset, offset+255)}
+            headers = {"Range": f"bytes={offset}-{offset + 255}"}
             response = self.request(url, headers=headers)
             yield from decode_nozomi(response.content)
 
@@ -104,6 +102,7 @@ class NozomiExtractor(Extractor):
 
 class NozomiPostExtractor(NozomiExtractor):
     """Extractor for individual posts on nozomi.la"""
+
     subcategory = "post"
     pattern = r"(?:https?://)?nozomi\.la/post/(\d+)"
     example = "https://nozomi.la/post/12345.html"
@@ -118,9 +117,9 @@ class NozomiPostExtractor(NozomiExtractor):
 
 class NozomiIndexExtractor(NozomiExtractor):
     """Extractor for the nozomi.la index"""
+
     subcategory = "index"
-    pattern = (r"(?:https?://)?nozomi\.la/"
-               r"(?:(index(?:-Popular)?)-(\d+)\.html)?(?:$|#|\?)")
+    pattern = r"(?:https?://)?nozomi\.la/" r"(?:(index(?:-Popular)?)-(\d+)\.html)?(?:$|#|\?)"
     example = "https://nozomi.la/index-1.html"
 
     def __init__(self, match):
@@ -131,6 +130,7 @@ class NozomiIndexExtractor(NozomiExtractor):
 
 class NozomiTagExtractor(NozomiExtractor):
     """Extractor for posts from tag searches on nozomi.la"""
+
     subcategory = "tag"
     directory_fmt = ("{category}", "{search_tags}")
     archive_fmt = "t_{search_tags}_{dataid}"
@@ -141,7 +141,7 @@ class NozomiTagExtractor(NozomiExtractor):
         NozomiExtractor.__init__(self, match)
         tags, self.pnum = match.groups()
         self.tags = text.unquote(tags)
-        self.nozomi = "/nozomi/{}.nozomi".format(self.tags)
+        self.nozomi = f"/nozomi/{self.tags}.nozomi"
 
     def metadata(self):
         return {"search_tags": self.tags}
@@ -149,6 +149,7 @@ class NozomiTagExtractor(NozomiExtractor):
 
 class NozomiSearchExtractor(NozomiExtractor):
     """Extractor for search results on nozomi.la"""
+
     subcategory = "search"
     directory_fmt = ("{category}", "{search_tags:J }")
     archive_fmt = "t_{search_tags}_{dataid}"
@@ -172,8 +173,7 @@ class NozomiSearchExtractor(NozomiExtractor):
             return decode_nozomi(self.request(url).content)
 
         for tag in self.tags:
-            (negative if tag[0] == "-" else positive).append(
-                tag.replace("/", ""))
+            (negative if tag[0] == "-" else positive).append(tag.replace("/", ""))
 
         for tag in positive:
             ids = nozomi("nozomi/" + tag)

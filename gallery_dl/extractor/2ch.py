@@ -1,17 +1,18 @@
-# -*- coding: utf-8 -*-
-
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
 """Extractors for https://2ch.hk/"""
 
-from .common import Extractor, Message
-from .. import text, util
+from .. import text
+from .. import util
+from .common import Extractor
+from .common import Message
 
 
 class _2chThreadExtractor(Extractor):
     """Extractor for 2ch threads"""
+
     category = "2ch"
     subcategory = "thread"
     root = "https://2ch.hk"
@@ -26,16 +27,16 @@ class _2chThreadExtractor(Extractor):
         self.board, self.thread = match.groups()
 
     def items(self):
-        url = "{}/{}/res/{}.json".format(self.root, self.board, self.thread)
+        url = f"{self.root}/{self.board}/res/{self.thread}.json"
         posts = self.request(url).json()["threads"][0]["posts"]
 
         op = posts[0]
         title = op.get("subject") or text.remove_html(op["comment"])
 
         thread = {
-            "board" : self.board,
+            "board": self.board,
             "thread": self.thread,
-            "title" : text.unescape(title)[:50],
+            "title": text.unescape(title)[:50],
         }
 
         yield Message.Directory, thread
@@ -52,14 +53,14 @@ class _2chThreadExtractor(Extractor):
                     file.update(post)
 
                     file["filename"] = file["fullname"].rpartition(".")[0]
-                    file["tim"], _, file["extension"] = \
-                        file["name"].rpartition(".")
+                    file["tim"], _, file["extension"] = file["name"].rpartition(".")
 
                     yield Message.Url, self.root + file["path"], file
 
 
 class _2chBoardExtractor(Extractor):
     """Extractor for 2ch boards"""
+
     category = "2ch"
     subcategory = "board"
     root = "https://2ch.hk"
@@ -72,20 +73,18 @@ class _2chBoardExtractor(Extractor):
 
     def items(self):
         # index page
-        url = "{}/{}/index.json".format(self.root, self.board)
+        url = f"{self.root}/{self.board}/index.json"
         index = self.request(url).json()
         index["_extractor"] = _2chThreadExtractor
         for thread in index["threads"]:
-            url = "{}/{}/res/{}.html".format(
-                self.root, self.board, thread["thread_num"])
+            url = "{}/{}/res/{}.html".format(self.root, self.board, thread["thread_num"])
             yield Message.Queue, url, index
 
         # pages 1..n
         for n in util.advance(index["pages"], 1):
-            url = "{}/{}/{}.json".format(self.root, self.board, n)
+            url = f"{self.root}/{self.board}/{n}.json"
             page = self.request(url).json()
             page["_extractor"] = _2chThreadExtractor
             for thread in page["threads"]:
-                url = "{}/{}/res/{}.html".format(
-                    self.root, self.board, thread["thread_num"])
+                url = "{}/{}/res/{}.html".format(self.root, self.board, thread["thread_num"])
                 yield Message.Queue, url, page

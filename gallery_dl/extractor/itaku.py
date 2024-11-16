@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2022-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,19 +6,21 @@
 
 """Extractors for https://itaku.ee/"""
 
-from .common import Extractor, Message
-from ..cache import memcache
 from .. import text
+from ..cache import memcache
+from .common import Extractor
+from .common import Message
 
 BASE_PATTERN = r"(?:https?://)?itaku\.ee"
 
 
 class ItakuExtractor(Extractor):
     """Base class for itaku extractors"""
+
     category = "itaku"
     root = "https://itaku.ee"
     directory_fmt = ("{category}", "{owner_username}")
-    filename_fmt = ("{id}{title:? //}.{extension}")
+    filename_fmt = "{id}{title:? //}.{extension}"
     archive_fmt = "{id}"
     request_interval = (0.5, 1.5)
 
@@ -34,9 +34,7 @@ class ItakuExtractor(Extractor):
 
     def items(self):
         for post in self.posts():
-
-            post["date"] = text.parse_datetime(
-                post["date_added"], "%Y-%m-%dT%H:%M:%S.%fZ")
+            post["date"] = text.parse_datetime(post["date_added"], "%Y-%m-%dT%H:%M:%S.%fZ")
             for category, tags in post.pop("categorized_tags").items():
                 post["tags_" + category.lower()] = [t["name"] for t in tags]
             post["tags"] = [t["name"] for t in post["tags"]]
@@ -50,10 +48,7 @@ class ItakuExtractor(Extractor):
                     sections.append(s["title"])
             post["sections"] = sections
 
-            if post["video"] and self.videos:
-                url = post["video"]["video"]
-            else:
-                url = post["image"]
+            url = post["video"]["video"] if post["video"] and self.videos else post["image"]
 
             yield Message.Directory, post
             yield Message.Url, url, text.nameext_from_url(url, post)
@@ -61,6 +56,7 @@ class ItakuExtractor(Extractor):
 
 class ItakuGalleryExtractor(ItakuExtractor):
     """Extractor for posts from an itaku user gallery"""
+
     subcategory = "gallery"
     pattern = BASE_PATTERN + r"/profile/([^/?#]+)/gallery"
     example = "https://itaku.ee/profile/USER/gallery"
@@ -78,8 +74,7 @@ class ItakuImageExtractor(ItakuExtractor):
         return (self.api.image(self.item),)
 
 
-class ItakuAPI():
-
+class ItakuAPI:
     def __init__(self, extractor):
         self.extractor = extractor
         self.root = extractor.root + "/api"
@@ -90,31 +85,30 @@ class ItakuAPI():
     def galleries_images(self, username, section=None):
         endpoint = "/galleries/images/"
         params = {
-            "cursor"    : None,
-            "owner"     : self.user(username)["owner"],
-            "section"   : section,
+            "cursor": None,
+            "owner": self.user(username)["owner"],
+            "section": section,
             "date_range": "",
             "maturity_rating": ("SFW", "Questionable", "NSFW"),
-            "ordering"  : "-date_added",
-            "page"      : "1",
-            "page_size" : "30",
+            "ordering": "-date_added",
+            "page": "1",
+            "page_size": "30",
             "visibility": ("PUBLIC", "PROFILE_ONLY"),
         }
         return self._pagination(endpoint, params, self.image)
 
     def image(self, image_id):
-        endpoint = "/galleries/images/{}/".format(image_id)
+        endpoint = f"/galleries/images/{image_id}/"
         return self._call(endpoint)
 
     @memcache(keyarg=1)
     def user(self, username):
-        return self._call("/user_profiles/{}/".format(username))
+        return self._call(f"/user_profiles/{username}/")
 
     def _call(self, endpoint, params=None):
         if not endpoint.startswith("http"):
             endpoint = self.root + endpoint
-        response = self.extractor.request(
-            endpoint, params=params, headers=self.headers)
+        response = self.extractor.request(endpoint, params=params, headers=self.headers)
         return response.json()
 
     def _pagination(self, endpoint, params, extend):

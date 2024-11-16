@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2020-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,12 +6,15 @@
 
 """Extractors for https://kabe-uchiroom.com/"""
 
-from .common import Extractor, Message
-from .. import text, exception
+from .. import exception
+from .. import text
+from .common import Extractor
+from .common import Message
 
 
 class KabeuchiUserExtractor(Extractor):
     """Extractor for all posts of a user on kabe-uchiroom.com"""
+
     category = "kabeuchi"
     subcategory = "user"
     directory_fmt = ("{category}", "{twitter_user_id} {twitter_id}")
@@ -28,16 +29,14 @@ class KabeuchiUserExtractor(Extractor):
         self.user_id = match.group(1)
 
     def items(self):
-        base = "{}/accounts/upfile/{}/{}/".format(
-            self.root, self.user_id[-1], self.user_id)
+        base = f"{self.root}/accounts/upfile/{self.user_id[-1]}/{self.user_id}/"
         keys = ("image1", "image2", "image3", "image4", "image5", "image6")
 
         for post in self.posts():
             if post.get("is_ad") or not post["image1"]:
                 continue
 
-            post["date"] = text.parse_datetime(
-                post["created_at"], "%Y-%m-%d %H:%M:%S")
+            post["date"] = text.parse_datetime(post["created_at"], "%Y-%m-%d %H:%M:%S")
             yield Message.Directory, post
 
             for key in keys:
@@ -49,7 +48,7 @@ class KabeuchiUserExtractor(Extractor):
                 yield Message.Url, url, text.nameext_from_url(name, post)
 
     def posts(self):
-        url = "{}/mypage/?id={}".format(self.root, self.user_id)
+        url = f"{self.root}/mypage/?id={self.user_id}"
         response = self.request(url)
         if response.history and response.url == self.root + "/":
             raise exception.NotFoundError("user")
@@ -57,15 +56,15 @@ class KabeuchiUserExtractor(Extractor):
         return self._pagination(target_id)
 
     def _pagination(self, target_id):
-        url = "{}/get_posts.php".format(self.root)
+        url = f"{self.root}/get_posts.php"
         data = {
-            "user_id"    : "0",
-            "target_id"  : target_id,
-            "type"       : "uploads",
-            "sort_type"  : "0",
+            "user_id": "0",
+            "target_id": target_id,
+            "type": "uploads",
+            "sort_type": "0",
             "category_id": "all",
             "latest_post": "",
-            "page_num"   : 0,
+            "page_num": 0,
         }
 
         while True:

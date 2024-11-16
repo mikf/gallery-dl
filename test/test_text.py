@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 
 # Copyright 2015-2022 Mike Fährmann
 #
@@ -7,22 +6,19 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
+import datetime
 import os
 import sys
 import unittest
 
-import datetime
-
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from gallery_dl import text, util  # noqa E402
-
 
 INVALID = ((), [], {}, None, 1, 2.3)
 INVALID_ALT = ((), [], {}, None, "")
 
 
 class TestText(unittest.TestCase):
-
     def test_remove_html(self, f=text.remove_html):
         result = "Hello World."
 
@@ -31,8 +27,7 @@ class TestText(unittest.TestCase):
         self.assertEqual(f("Hello World."), result)
         self.assertEqual(f(" Hello  World.  "), result)
         self.assertEqual(f("Hello<br/>World."), result)
-        self.assertEqual(
-            f("<div><b class='a'>Hello</b><i>World.</i></div>"), result)
+        self.assertEqual(f("<div><b class='a'>Hello</b><i>World.</i></div>"), result)
 
         # empty HTML
         self.assertEqual(f("<div></div>"), "")
@@ -56,12 +51,10 @@ class TestText(unittest.TestCase):
         self.assertEqual(f(" Hello  World.  "), ["Hello  World."])
         self.assertEqual(f("Hello<br/>World."), result)
         self.assertEqual(f(" Hello <br/> World.  "), result)
-        self.assertEqual(
-            f("<div><b class='a'>Hello</b><i>World.</i></div>"), result)
+        self.assertEqual(f("<div><b class='a'>Hello</b><i>World.</i></div>"), result)
 
         # escaped HTML entities
-        self.assertEqual(
-            f("<i>&lt;foo&gt;</i> <i>&lt;bar&gt; </i>"), ["<foo>", "<bar>"])
+        self.assertEqual(f("<i>&lt;foo&gt;</i> <i>&lt;bar&gt; </i>"), ["<foo>", "<bar>"])
 
         # empty HTML
         self.assertEqual(f("<div></div>"), empty)
@@ -121,17 +114,17 @@ class TestText(unittest.TestCase):
 
     def test_root_from_url(self, f=text.root_from_url):
         result = "https://example.org"
-        self.assertEqual(f("https://example.org")     , result)
-        self.assertEqual(f("https://example.org/")    , result)
+        self.assertEqual(f("https://example.org"), result)
+        self.assertEqual(f("https://example.org/"), result)
         self.assertEqual(f("https://example.org/path"), result)
-        self.assertEqual(f("example.org/")            , result)
-        self.assertEqual(f("example.org/path/")       , result)
+        self.assertEqual(f("example.org/"), result)
+        self.assertEqual(f("example.org/path/"), result)
 
         result = "http://example.org"
-        self.assertEqual(f("http://example.org")      , result)
-        self.assertEqual(f("http://example.org/")     , result)
+        self.assertEqual(f("http://example.org"), result)
+        self.assertEqual(f("http://example.org/"), result)
         self.assertEqual(f("http://example.org/path/"), result)
-        self.assertEqual(f("example.org/", "http://") , result)
+        self.assertEqual(f("example.org/", "http://"), result)
 
     def test_filename_from_url(self, f=text.filename_from_url):
         result = "filename.ext"
@@ -142,8 +135,7 @@ class TestText(unittest.TestCase):
         self.assertEqual(f("/filename.ext"), result)
         self.assertEqual(f("example.org/filename.ext"), result)
         self.assertEqual(f("http://example.org/v2/filename.ext"), result)
-        self.assertEqual(
-            f("http://example.org/v2/filename.ext?param=value#frag"), result)
+        self.assertEqual(f("http://example.org/v2/filename.ext?param=value#frag"), result)
 
         # invalid arguments
         for value in INVALID:
@@ -159,8 +151,7 @@ class TestText(unittest.TestCase):
         self.assertEqual(f("/filename.ExT"), result)
         self.assertEqual(f("example.org/filename.ext"), result)
         self.assertEqual(f("http://example.org/v2/filename.ext"), result)
-        self.assertEqual(
-            f("http://example.org/v2/filename.ext?param=value#frag"), result)
+        self.assertEqual(f("http://example.org/v2/filename.ext?param=value#frag"), result)
 
         # invalid arguments
         for value in INVALID:
@@ -176,8 +167,7 @@ class TestText(unittest.TestCase):
         self.assertEqual(f("/filename.ExT"), result)
         self.assertEqual(f("example.org/filename.ext"), result)
         self.assertEqual(f("http://example.org/v2/filename.ext"), result)
-        self.assertEqual(
-            f("http://example.org/v2/filename.ext?param=value#frag"), result)
+        self.assertEqual(f("http://example.org/v2/filename.ext?param=value#frag"), result)
 
         # long "extension"
         fn = "httpswww.example.orgpath-path-path-path-path-path-path-path"
@@ -189,7 +179,7 @@ class TestText(unittest.TestCase):
 
     def test_extract(self, f=text.extract):
         txt = "<a><b>"
-        self.assertEqual(f(txt, "<", ">"), ("a" , 3))
+        self.assertEqual(f(txt, "<", ">"), ("a", 3))
         self.assertEqual(f(txt, "X", ">"), (None, 0))
         self.assertEqual(f(txt, "<", "X"), (None, 0))
 
@@ -201,9 +191,9 @@ class TestText(unittest.TestCase):
 
         # invalid arguments
         for value in INVALID:
-            self.assertEqual(f(value, "<"  , ">")  , (None, 0))
-            self.assertEqual(f(txt  , value, ">")  , (None, 0))
-            self.assertEqual(f(txt  , "<"  , value), (None, 0))
+            self.assertEqual(f(value, "<", ">"), (None, 0))
+            self.assertEqual(f(txt, value, ">"), (None, 0))
+            self.assertEqual(f(txt, "<", value), (None, 0))
 
     def test_extr(self, f=text.extr):
         txt = "<a><b>"
@@ -219,13 +209,13 @@ class TestText(unittest.TestCase):
 
         # invalid arguments
         for value in INVALID:
-            self.assertEqual(f(value, "<"  , ">")  , "")
-            self.assertEqual(f(txt  , value, ">")  , "")
-            self.assertEqual(f(txt  , "<"  , value), "")
+            self.assertEqual(f(value, "<", ">"), "")
+            self.assertEqual(f(txt, value, ">"), "")
+            self.assertEqual(f(txt, "<", value), "")
 
     def test_rextract(self, f=text.rextract):
         txt = "<a><b>"
-        self.assertEqual(f(txt, "<", ">"), ("b" , 3))
+        self.assertEqual(f(txt, "<", ">"), ("b", 3))
         self.assertEqual(f(txt, "X", ">"), (None, -1))
         self.assertEqual(f(txt, "<", "X"), (None, -1))
 
@@ -237,15 +227,14 @@ class TestText(unittest.TestCase):
 
         # invalid arguments
         for value in INVALID:
-            self.assertEqual(f(value, "<"  , ">")  , (None, -1))
-            self.assertEqual(f(txt  , value, ">")  , (None, -1))
-            self.assertEqual(f(txt  , "<"  , value), (None, -1))
+            self.assertEqual(f(value, "<", ">"), (None, -1))
+            self.assertEqual(f(txt, value, ">"), (None, -1))
+            self.assertEqual(f(txt, "<", value), (None, -1))
 
     def test_extract_all(self, f=text.extract_all):
         txt = "[c][b][a]: xyz! [d][e"
 
-        self.assertEqual(
-            f(txt, ()), ({}, 0))
+        self.assertEqual(f(txt, ()), ({}, 0))
         self.assertEqual(
             f(txt, (("C", "[", "]"), ("B", "[", "]"), ("A", "[", "]"))),
             ({"A": "a", "B": "b", "C": "c"}, 9),
@@ -289,16 +278,11 @@ class TestText(unittest.TestCase):
         def g(*args):
             return list(f(*args))
 
-        self.assertEqual(
-            g("", "[", "]"), [])
-        self.assertEqual(
-            g("[a]", "[", "]"), ["a"])
-        self.assertEqual(
-            g(txt, "[", "]"), ["c", "b", "a", "d"])
-        self.assertEqual(
-            g(txt, "X", "X"), [])
-        self.assertEqual(
-            g(txt, "[", "]", 6), ["a", "d"])
+        self.assertEqual(g("", "[", "]"), [])
+        self.assertEqual(g("[a]", "[", "]"), ["a"])
+        self.assertEqual(g(txt, "[", "]"), ["c", "b", "a", "d"])
+        self.assertEqual(g(txt, "X", "X"), [])
+        self.assertEqual(g(txt, "[", "]", 6), ["a", "d"])
 
     def test_extract_from(self, f=text.extract_from):
         txt = "[c][b][a]: xyz! [d][e"
@@ -439,9 +423,9 @@ class TestText(unittest.TestCase):
         null = util.datetime_utcfromtimestamp(0)
         value = util.datetime_utcfromtimestamp(1555816235)
 
-        self.assertEqual(f(0)           , null)
-        self.assertEqual(f("0")         , null)
-        self.assertEqual(f(1555816235)  , value)
+        self.assertEqual(f(0), null)
+        self.assertEqual(f("0"), null)
+        self.assertEqual(f(1555816235), value)
         self.assertEqual(f("1555816235"), value)
 
         for value in INVALID_ALT:
@@ -452,8 +436,8 @@ class TestText(unittest.TestCase):
         null = util.datetime_utcfromtimestamp(0)
 
         self.assertEqual(f("1970-01-01T00:00:00+00:00"), null)
-        self.assertEqual(f("1970-01-01T00:00:00+0000") , null)
-        self.assertEqual(f("1970.01.01", "%Y.%m.%d")   , null)
+        self.assertEqual(f("1970-01-01T00:00:00+0000"), null)
+        self.assertEqual(f("1970.01.01", "%Y.%m.%d"), null)
 
         self.assertEqual(
             f("2019-05-07T21:25:02+09:00"),

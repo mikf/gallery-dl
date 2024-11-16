@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2020-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,17 +6,22 @@
 
 """Extractors for https://aryion.com/"""
 
-from .common import Extractor, Message
-from .. import text, util, exception
-from ..cache import cache
-from email.utils import parsedate_tz
 from datetime import datetime
+from email.utils import parsedate_tz
+
+from .. import exception
+from .. import text
+from .. import util
+from ..cache import cache
+from .common import Extractor
+from .common import Message
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?aryion\.com/g4"
 
 
 class AryionExtractor(Extractor):
     """Base class for aryion extractors"""
+
     category = "aryion"
     directory_fmt = ("{category}", "{user!l}", "{path:J - }")
     filename_fmt = "{id} {title}.{extension}"
@@ -40,7 +43,7 @@ class AryionExtractor(Extractor):
         if username:
             self.cookies_update(self._login_impl(username, password))
 
-    @cache(maxage=14*86400, keyarg=1)
+    @cache(maxage=14 * 86400, keyarg=1)
     def _login_impl(self, username, password):
         self.log.info("Logging in as %s", username)
 
@@ -111,13 +114,15 @@ class AryionExtractor(Extractor):
             url = self.root + text.rextract(page, "href='", "'", pos)[0]
 
     def _parse_post(self, post_id):
-        url = "{}/g4/data.php?id={}".format(self.root, post_id)
+        url = f"{self.root}/g4/data.php?id={post_id}"
         with self.request(url, method="HEAD", fatal=False) as response:
-
             if response.status_code >= 400:
                 self.log.warning(
                     "Unable to fetch post %s ('%s %s')",
-                    post_id, response.status_code, response.reason)
+                    post_id,
+                    response.status_code,
+                    response.reason,
+                )
                 return None
             headers = response.headers
 
@@ -141,40 +146,38 @@ class AryionExtractor(Extractor):
             # fix 'Last-Modified' header
             lmod = headers["last-modified"]
             if lmod[22] != ":":
-                lmod = "{}:{} GMT".format(lmod[:22], lmod[22:24])
+                lmod = f"{lmod[:22]}:{lmod[22:24]} GMT"
 
-        post_url = "{}/g4/view/{}".format(self.root, post_id)
+        post_url = f"{self.root}/g4/view/{post_id}"
         extr = text.extract_from(self.request(post_url).text)
 
-        title, _, artist = text.unescape(extr(
-            "<title>g4 :: ", "<")).rpartition(" by ")
+        title, _, artist = text.unescape(extr("<title>g4 :: ", "<")).rpartition(" by ")
 
         return {
-            "id"    : text.parse_int(post_id),
-            "url"   : url,
-            "user"  : self.user or artist,
-            "title" : title,
+            "id": text.parse_int(post_id),
+            "url": url,
+            "user": self.user or artist,
+            "title": title,
             "artist": artist,
-            "path"  : text.split_html(extr(
-                "cookiecrumb'>", '</span'))[4:-1:2],
-            "date"  : datetime(*parsedate_tz(lmod)[:6]),
-            "size"  : text.parse_int(clen),
-            "views" : text.parse_int(extr("Views</b>:", "<").replace(",", "")),
-            "width" : text.parse_int(extr("Resolution</b>:", "x")),
+            "path": text.split_html(extr("cookiecrumb'>", "</span"))[4:-1:2],
+            "date": datetime(*parsedate_tz(lmod)[:6]),
+            "size": text.parse_int(clen),
+            "views": text.parse_int(extr("Views</b>:", "<").replace(",", "")),
+            "width": text.parse_int(extr("Resolution</b>:", "x")),
             "height": text.parse_int(extr("", "<")),
-            "comments" : text.parse_int(extr("Comments</b>:", "<")),
+            "comments": text.parse_int(extr("Comments</b>:", "<")),
             "favorites": text.parse_int(extr("Favorites</b>:", "<")),
-            "tags"     : text.split_html(extr("class='taglist'>", "</span>")),
-            "description": text.unescape(text.remove_html(extr(
-                "<p>", "</p>"), "", "")),
-            "filename" : fname,
+            "tags": text.split_html(extr("class='taglist'>", "</span>")),
+            "description": text.unescape(text.remove_html(extr("<p>", "</p>"), "", "")),
+            "filename": fname,
             "extension": ext,
-            "_mtime"   : lmod,
+            "_mtime": lmod,
         }
 
 
 class AryionGalleryExtractor(AryionExtractor):
     """Extractor for a user's gallery on eka's portal"""
+
     subcategory = "gallery"
     categorytransfer = True
     pattern = BASE_PATTERN + r"/(?:gallery/|user/|latest.php\?name=)([^/?#]+)"
@@ -195,15 +198,15 @@ class AryionGalleryExtractor(AryionExtractor):
 
     def posts(self):
         if self.recursive:
-            url = "{}/g4/gallery/{}".format(self.root, self.user)
+            url = f"{self.root}/g4/gallery/{self.user}"
             return self._pagination_params(url)
-        else:
-            url = "{}/g4/latest.php?name={}".format(self.root, self.user)
-            return util.advance(self._pagination_next(url), self.offset)
+        url = f"{self.root}/g4/latest.php?name={self.user}"
+        return util.advance(self._pagination_next(url), self.offset)
 
 
 class AryionFavoriteExtractor(AryionExtractor):
     """Extractor for a user's favorites gallery"""
+
     subcategory = "favorite"
     directory_fmt = ("{category}", "{user!l}", "favorites")
     archive_fmt = "f_{user}_{id}"
@@ -212,13 +215,13 @@ class AryionFavoriteExtractor(AryionExtractor):
     example = "https://aryion.com/g4/favorites/USER"
 
     def posts(self):
-        url = "{}/g4/favorites/{}".format(self.root, self.user)
-        return self._pagination_params(
-            url, None, "class='gallery-item favorite' id='")
+        url = f"{self.root}/g4/favorites/{self.user}"
+        return self._pagination_params(url, None, "class='gallery-item favorite' id='")
 
 
 class AryionTagExtractor(AryionExtractor):
     """Extractor for tag searches on eka's portal"""
+
     subcategory = "tag"
     directory_fmt = ("{category}", "tags", "{search_tags}")
     archive_fmt = "t_{search_tags}_{id}"
@@ -239,6 +242,7 @@ class AryionTagExtractor(AryionExtractor):
 
 class AryionPostExtractor(AryionExtractor):
     """Extractor for individual posts on eka's portal"""
+
     subcategory = "post"
     pattern = BASE_PATTERN + r"/view/(\d+)"
     example = "https://aryion.com/g4/view/12345"

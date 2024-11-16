@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 
 # Copyright 2015-2019 Mike Fährmann
 #
@@ -11,10 +10,9 @@
 
 import argparse
 
-import util  # noqa
 from gallery_dl import extractor
-from test.test_results import ResultJob, setup_test_config
-
+from test.test_results import ResultJob
+from test.test_results import setup_test_config
 
 TESTDATA_FMT = """
     test = ("{}", {{
@@ -41,7 +39,8 @@ def main():
     if args.recreate:
         urls = [
             test[0]
-            for extr in extractor.extractors() if extr.category in args.urls
+            for extr in extractor.extractors()
+            if extr.category in args.urls
             for test in extr.test
         ]
     else:
@@ -58,12 +57,14 @@ def main():
             data = (exc.__class__.__name__,)
         else:
             fmt = TESTDATA_FMT
-            data = (tjob.url_hash.hexdigest(),
-                    tjob.kwdict_hash.hexdigest(),
-                    tjob.content_hash.hexdigest())
+            data = (
+                tjob.url_hash.hexdigest(),
+                tjob.kwdict_hash.hexdigest(),
+                tjob.content_hash.hexdigest(),
+            )
         print(tjob.extractor.__class__.__name__)
         print(fmt.format(url, *data))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2019-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,15 +6,16 @@
 
 """Write metadata to external files"""
 
-from .common import PostProcessor
-from .. import util, formatter
 import json
-import sys
 import os
+import sys
+
+from .. import formatter
+from .. import util
+from .common import PostProcessor
 
 
 class MetadataPP(PostProcessor):
-
     def __init__(self, job, options):
         PostProcessor.__init__(self, job)
 
@@ -73,8 +72,7 @@ class MetadataPP(PostProcessor):
         if isinstance(directory, list):
             self._directory = self._directory_format
             self._directory_formatters = [
-                formatter.parse(dirfmt, util.NONE).format_map
-                for dirfmt in directory
+                formatter.parse(dirfmt, util.NONE).format_map for dirfmt in directory
             ]
         elif directory:
             self._directory = self._directory_custom
@@ -190,8 +188,7 @@ class MetadataPP(PostProcessor):
         return (pathfmt.filename or "metadata") + "." + self.extension
 
     def _filename_custom(self, pathfmt):
-        return pathfmt.clean_path(pathfmt.clean_segment(
-            self._filename_fmt(pathfmt.kwdict)))
+        return pathfmt.clean_path(pathfmt.clean_segment(self._filename_fmt(pathfmt.kwdict)))
 
     def _filename_extfmt(self, pathfmt):
         kwdict = pathfmt.kwdict
@@ -253,10 +250,8 @@ class MetadataPP(PostProcessor):
             exclude = set(exclude)
 
             if private:
-                return lambda d: {k: v for k, v in d.items()
-                                  if k not in exclude}
-            return lambda d: {k: v for k, v in util.filter_dict(d).items()
-                              if k not in exclude}
+                return lambda d: {k: v for k, v in d.items() if k not in exclude}
+            return lambda d: {k: v for k, v in util.filter_dict(d).items() if k not in exclude}
 
         if not private:
             return util.filter_dict

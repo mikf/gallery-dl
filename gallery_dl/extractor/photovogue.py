@@ -1,13 +1,12 @@
-# -*- coding: utf-8 -*-
-
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
 """Extractors for https://www.vogue.com/photovogue/"""
 
-from .common import Extractor, Message
 from .. import text
+from .common import Extractor
+from .common import Message
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?vogue\.com/photovogue"
 
@@ -29,8 +28,7 @@ class PhotovogueUserExtractor(Extractor):
         for photo in self.photos():
             url = photo["gallery_image"]
             photo["title"] = photo["title"].strip()
-            photo["date"] = text.parse_datetime(
-                photo["date"], "%Y-%m-%dT%H:%M:%S.%f%z")
+            photo["date"] = text.parse_datetime(photo["date"], "%Y-%m-%dT%H:%M:%S.%f%z")
 
             yield Message.Directory, photo
             yield Message.Url, url, text.nameext_from_url(url, photo)

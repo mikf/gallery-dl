@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2018-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,12 +6,14 @@
 
 """Extractors for https://piczel.tv/"""
 
-from .common import Extractor, Message
 from .. import text
+from .common import Extractor
+from .common import Message
 
 
 class PiczelExtractor(Extractor):
     """Base class for piczel extractors"""
+
     category = "piczel"
     directory_fmt = ("{category}", "{user[username]}")
     filename_fmt = "{category}_{id}_{title}_{num:>02}.{extension}"
@@ -24,8 +24,7 @@ class PiczelExtractor(Extractor):
     def items(self):
         for post in self.posts():
             post["tags"] = [t["title"] for t in post["tags"] if t["title"]]
-            post["date"] = text.parse_datetime(
-                post["created_at"], "%Y-%m-%dT%H:%M:%S.%f%z")
+            post["date"] = text.parse_datetime(post["created_at"], "%Y-%m-%dT%H:%M:%S.%f%z")
 
             if post["multi"]:
                 images = post["images"]
@@ -49,7 +48,7 @@ class PiczelExtractor(Extractor):
 
     def _pagination(self, url, folder_id=None):
         params = {
-            "from_id"  : None,
+            "from_id": None,
             "folder_id": folder_id,
         }
 
@@ -66,6 +65,7 @@ class PiczelExtractor(Extractor):
 
 class PiczelUserExtractor(PiczelExtractor):
     """Extractor for all images from a user's gallery"""
+
     subcategory = "user"
     pattern = r"(?:https?://)?(?:www\.)?piczel\.tv/gallery/([^/?#]+)/?$"
     example = "https://piczel.tv/gallery/USER"
@@ -75,17 +75,17 @@ class PiczelUserExtractor(PiczelExtractor):
         self.user = match.group(1)
 
     def posts(self):
-        url = "{}/api/users/{}/gallery".format(self.root_api, self.user)
+        url = f"{self.root_api}/api/users/{self.user}/gallery"
         return self._pagination(url)
 
 
 class PiczelFolderExtractor(PiczelExtractor):
     """Extractor for images inside a user's folder"""
+
     subcategory = "folder"
     directory_fmt = ("{category}", "{user[username]}", "{folder[name]}")
     archive_fmt = "f{folder[id]}_{id}_{num}"
-    pattern = (r"(?:https?://)?(?:www\.)?piczel\.tv"
-               r"/gallery/(?!image)([^/?#]+)/(\d+)")
+    pattern = r"(?:https?://)?(?:www\.)?piczel\.tv" r"/gallery/(?!image)([^/?#]+)/(\d+)"
     example = "https://piczel.tv/gallery/USER/12345"
 
     def __init__(self, match):
@@ -93,12 +93,13 @@ class PiczelFolderExtractor(PiczelExtractor):
         self.user, self.folder_id = match.groups()
 
     def posts(self):
-        url = "{}/api/users/{}/gallery".format(self.root_api, self.user)
+        url = f"{self.root_api}/api/users/{self.user}/gallery"
         return self._pagination(url, int(self.folder_id))
 
 
 class PiczelImageExtractor(PiczelExtractor):
     """Extractor for individual images"""
+
     subcategory = "image"
     pattern = r"(?:https?://)?(?:www\.)?piczel\.tv/gallery/image/(\d+)"
     example = "https://piczel.tv/gallery/image/12345"
@@ -108,5 +109,5 @@ class PiczelImageExtractor(PiczelExtractor):
         self.image_id = match.group(1)
 
     def posts(self):
-        url = "{}/api/gallery/{}".format(self.root_api, self.image_id)
+        url = f"{self.root_api}/api/gallery/{self.image_id}"
         return (self.request(url).json(),)

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2014-2022 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -9,11 +7,14 @@
 """Common classes and constants used by downloader modules."""
 
 import os
-from .. import config, util
+
+from .. import config
+from .. import util
 
 
-class DownloaderBase():
+class DownloaderBase:
     """Base class for downloaders"""
+
     scheme = ""
 
     def __init__(self, job):

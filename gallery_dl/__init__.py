@@ -1,14 +1,21 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2014-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-import sys
 import logging
-from . import version, config, option, output, extractor, job, util, exception
+import sys
+from contextlib import suppress
+
+from . import config
+from . import exception
+from . import extractor
+from . import job
+from . import option
+from . import output
+from . import util
+from . import version
 
 __author__ = "Mike Fährmann"
 __copyright__ = "Copyright 2014-2023 Mike Fährmann"
@@ -31,6 +38,7 @@ def main():
             config.load(args.configs_json, strict=True)
         if args.configs_yaml:
             import yaml
+
             config.load(args.configs_yaml, strict=True, loads=yaml.safe_load)
         if args.configs_toml:
             try:
@@ -68,8 +76,7 @@ def main():
                 profile = None
             else:
                 profile, _, container = profile.partition("::")
-            config.set((), "cookies", (
-                browser, profile, keyring, container, domain))
+            config.set((), "cookies", (browser, profile, keyring, container, domain))
         if args.options_pp:
             config.set((), "postprocessor-options", args.options_pp)
         for opts in args.options:
@@ -81,6 +88,7 @@ def main():
         signals = config.get((), "signals-ignore")
         if signals:
             import signal
+
             if isinstance(signals, str):
                 signals = signals.split(",")
             for signal_name in signals:
@@ -92,7 +100,10 @@ def main():
 
         # enable ANSI escape sequences on Windows
         if util.WINDOWS and config.get(("output",), "ansi", output.COLORS):
-            from ctypes import windll, wintypes, byref
+            from ctypes import byref
+            from ctypes import windll
+            from ctypes import wintypes
+
             kernel32 = windll.kernel32
             mode = wintypes.DWORD()
 
@@ -121,6 +132,7 @@ def main():
         separator = config.get((), "format-separator")
         if separator:
             from . import formatter
+
             formatter._SEPARATOR = separator
 
         # eval globals
@@ -135,30 +147,31 @@ def main():
             config.set(("downloader",), "progress", None)
         elif args.loglevel <= logging.DEBUG:
             import platform
+
             import requests
 
             extra = ""
             if util.EXECUTABLE:
-                extra = " - Executable ({})".format(version.__variant__)
+                extra = f" - Executable ({version.__variant__})"
             else:
                 git_head = util.git_head()
                 if git_head:
                     extra = " - Git HEAD: " + git_head
 
             log.debug("Version %s%s", __version__, extra)
-            log.debug("Python %s - %s",
-                      platform.python_version(), platform.platform())
-            try:
-                log.debug("requests %s - urllib3 %s",
-                          requests.__version__,
-                          requests.packages.urllib3.__version__)
-            except AttributeError:
-                pass
+            log.debug("Python %s - %s", platform.python_version(), platform.platform())
+            with suppress(AttributeError):
+                log.debug(
+                    "requests %s - urllib3 %s",
+                    requests.__version__,
+                    requests.packages.urllib3.__version__,
+                )
 
             log.debug("Configuration Files %s", config._files)
 
         if args.print_traffic:
             import requests
+
             requests.packages.urllib3.connection.HTTPConnection.debuglevel = 1
 
         # extractor modules
@@ -177,6 +190,7 @@ def main():
 
         if sources:
             import os
+
             modules = []
 
             for source in sources:
@@ -186,13 +200,18 @@ def main():
                         files = os.listdir(path)
                         modules.append(extractor._modules_path(path, files))
                     except Exception as exc:
-                        log.warning("Unable to load modules from %s (%s: %s)",
-                                    path, exc.__class__.__name__, exc)
+                        log.warning(
+                            "Unable to load modules from %s (%s: %s)",
+                            path,
+                            exc.__class__.__name__,
+                            exc,
+                        )
                 else:
                     modules.append(extractor._modules_internal())
 
             if len(modules) > 1:
                 import itertools
+
                 extractor._module_iter = itertools.chain(*modules)
             elif not modules:
                 extractor._module_iter = ()
@@ -201,54 +220,57 @@ def main():
 
         if args.update:
             from . import update
+
             extr = update.UpdateExtractor.from_url("update:" + args.update)
             ujob = update.UpdateJob(extr)
             return ujob.run()
 
-        elif args.list_modules:
+        if args.list_modules:
             extractor.modules.append("")
             sys.stdout.write("\n".join(extractor.modules))
 
         elif args.list_extractors is not None:
             write = sys.stdout.write
-            fmt = ("{}{}\nCategory: {} - Subcategory: {}"
-                   "\nExample : {}\n\n").format
+            fmt = ("{}{}\nCategory: {} - Subcategory: {}" "\nExample : {}\n\n").format
 
             extractors = extractor.extractors()
             if args.list_extractors:
-                fltr = util.build_extractor_filter(
-                    args.list_extractors, negate=False)
+                fltr = util.build_extractor_filter(args.list_extractors, negate=False)
                 extractors = filter(fltr, extractors)
 
             for extr in extractors:
-                write(fmt(
-                    extr.__name__,
-                    "\n" + extr.__doc__ if extr.__doc__ else "",
-                    extr.category, extr.subcategory,
-                    extr.example,
-                ))
+                write(
+                    fmt(
+                        extr.__name__,
+                        "\n" + extr.__doc__ if extr.__doc__ else "",
+                        extr.category,
+                        extr.subcategory,
+                        extr.example,
+                    )
+                )
 
         elif args.clear_cache:
             from . import cache
+
             log = logging.getLogger("cache")
             cnt = cache.clear(args.clear_cache)
 
             if cnt is None:
                 log.error("Database file not available")
                 return 1
-            else:
-                log.info(
-                    "Deleted %d %s from '%s'",
-                    cnt, "entry" if cnt == 1 else "entries", cache._path(),
-                )
+            log.info(
+                "Deleted %d %s from '%s'",
+                cnt,
+                "entry" if cnt == 1 else "entries",
+                cache._path(),
+            )
 
         elif args.config:
             if args.config == "init":
                 return config.initialize()
-            elif args.config == "status":
+            if args.config == "status":
                 return config.status()
-            else:
-                return config.open_extern()
+            return config.open_extern()
 
         else:
             input_files = config.get((), "input-files")
@@ -259,20 +281,19 @@ def main():
                     args.input_files.append(input_file)
 
             if not args.urls and not args.input_files:
-                if args.cookies_from_browser or config.interpolate(
-                        ("extractor",), "cookies"):
+                if args.cookies_from_browser or config.interpolate(("extractor",), "cookies"):
                     args.urls.append("noop")
                 else:
                     parser.error(
                         "The following arguments are required: URL\nUse "
-                        "'gallery-dl --help' to get a list of all options.")
+                        "'gallery-dl --help' to get a list of all options."
+                    )
 
             if args.list_urls:
                 jobtype = job.UrlJob
                 jobtype.maxdepth = args.list_urls
                 if config.get(("output",), "fallback", True):
-                    jobtype.handle_url = \
-                        staticmethod(jobtype.handle_url_fallback)
+                    jobtype.handle_url = staticmethod(jobtype.handle_url_fallback)
             elif args.dump_json:
                 jobtype = job.DataJob
                 jobtype.resolve = args.dump_json - 1
@@ -283,16 +304,14 @@ def main():
             input_manager.log = input_log = logging.getLogger("inputfile")
 
             # unsupported file logging handler
-            handler = output.setup_logging_handler(
-                "unsupportedfile", fmt="{message}")
+            handler = output.setup_logging_handler("unsupportedfile", fmt="{message}")
             if handler:
                 ulog = job.Job.ulog = logging.getLogger("unsupported")
                 ulog.addHandler(handler)
                 ulog.propagate = False
 
             # error file logging handler
-            handler = output.setup_logging_handler(
-                "errorfile", fmt="{message}", mode="a")
+            handler = output.setup_logging_handler("errorfile", fmt="{message}", mode="a")
             if handler:
                 elog = input_manager.err = logging.getLogger("errorfile")
                 elog.addHandler(handler)
@@ -311,8 +330,7 @@ def main():
                         return getattr(exc, "code", 128)
 
             pformat = config.get(("output",), "progress", True)
-            if pformat and len(input_manager.urls) > 1 and \
-                    args.loglevel < logging.ERROR:
+            if pformat and len(input_manager.urls) > 1 and args.loglevel < logging.ERROR:
                 input_manager.progress(pformat)
 
             # process input URLs
@@ -357,13 +375,13 @@ def main():
         pass
     except OSError as exc:
         import errno
+
         if exc.errno != errno.EPIPE:
             raise
     return 1
 
 
-class InputManager():
-
+class InputManager:
     def __init__(self):
         self.urls = []
         self.files = ()
@@ -448,7 +466,7 @@ class InputManager():
                 # empty line or comment
                 continue
 
-            elif line[0] == "-":
+            if line[0] == "-":
                 # config spec
                 if len(line) >= 2 and line[1] == "G":
                     conf = gconf
@@ -463,15 +481,18 @@ class InputManager():
                 if not sep:
                     raise exception.InputFileError(
                         "Invalid KEY=VALUE pair '%s' on line %s in %s",
-                        line, n+1, path)
+                        line,
+                        n + 1,
+                        path,
+                    )
 
                 try:
                     value = util.json_loads(value.strip())
                 except ValueError as exc:
                     self.log.debug("%s: %s", exc.__class__.__name__, exc)
                     raise exception.InputFileError(
-                        "Unable to parse '%s' on line %s in %s",
-                        value, n+1, path)
+                        "Unable to parse '%s' on line %s in %s", value, n + 1, path
+                    )
 
                 key = key.strip().split(".")
                 conf.append((key[:-1], key[-1], value))
@@ -481,6 +502,7 @@ class InputManager():
                 if " #" in line or "\t#" in line:
                     if strip_comment is None:
                         import re
+
                         strip_comment = re.compile(r"\s+#.*").sub
                     line = strip_comment("", line)
                 if gconf or lconf:
@@ -532,9 +554,7 @@ class InputManager():
             with open(path, "w", encoding="utf-8") as fp:
                 fp.writelines(lines)
         except Exception as exc:
-            self.log.warning(
-                "Unable to update '%s' (%s: %s)",
-                path, exc.__class__.__name__, exc)
+            self.log.warning("Unable to update '%s' (%s: %s)", path, exc.__class__.__name__, exc)
 
     @staticmethod
     def _action_comment(lines, indicies):
@@ -564,16 +584,21 @@ class InputManager():
         self._url = url
 
         if self._pformat:
-            output.stderr_write(self._pformat({
-                "total"  : len(self.urls),
-                "current": self._index + 1,
-                "url"    : url,
-            }))
+            output.stderr_write(
+                self._pformat(
+                    {
+                        "total": len(self.urls),
+                        "current": self._index + 1,
+                        "url": url,
+                    }
+                )
+            )
         return url
 
 
-class ExtendedUrl():
+class ExtendedUrl:
     """URL with attached config key-value pairs"""
+
     __slots__ = ("value", "gconfig", "lconfig")
 
     def __init__(self, url, gconf, lconf):

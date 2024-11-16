@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2018-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,11 +6,15 @@
 
 """Extractors for https://www.newgrounds.com/"""
 
-from .common import Extractor, Message
-from .. import text, util, exception
-from ..cache import cache
 import itertools
 import re
+
+from .. import exception
+from .. import text
+from .. import util
+from ..cache import cache
+from .common import Extractor
+from .common import Message
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?newgrounds\.com"
 USER_PATTERN = r"(?:https?://)?([\w-]+)\.newgrounds\.com"
@@ -20,6 +22,7 @@ USER_PATTERN = r"(?:https?://)?([\w-]+)\.newgrounds\.com"
 
 class NewgroundsExtractor(Extractor):
     """Base class for newgrounds extractors"""
+
     category = "newgrounds"
     directory_fmt = ("{category}", "{artist[:10]:J, }")
     filename_fmt = "{category}_{_index}_{title}.{extension}"
@@ -32,23 +35,20 @@ class NewgroundsExtractor(Extractor):
     def __init__(self, match):
         Extractor.__init__(self, match)
         self.user = match.group(1)
-        self.user_root = "https://{}.newgrounds.com".format(self.user)
+        self.user_root = f"https://{self.user}.newgrounds.com"
 
     def _init(self):
-        self._extract_comment_urls = re.compile(
-            r'(?:<img |data-smartload-)src="([^"]+)').findall
+        self._extract_comment_urls = re.compile(r'(?:<img |data-smartload-)src="([^"]+)').findall
         self.flash = self.config("flash", True)
 
         fmt = self.config("format")
         if not fmt or fmt == "original":
-            self.format = ("mp4", "webm", "m4v", "mov", "mkv",
-                           1080, 720, 360)
+            self.format = ("mp4", "webm", "m4v", "mov", "mkv", 1080, 720, 360)
         elif isinstance(fmt, (list, tuple)):
             self.format = fmt
         else:
             self._video_formats = self._video_formats_limit
-            self.format = (fmt if isinstance(fmt, int) else
-                           text.parse_int(fmt.rstrip("p")))
+            self.format = fmt if isinstance(fmt, int) else text.parse_int(fmt.rstrip("p"))
 
     def items(self):
         self.login()
@@ -72,8 +72,7 @@ class NewgroundsExtractor(Extractor):
                 if "_multi" in post:
                     for data in post["_multi"]:
                         post["num"] += 1
-                        post["_index"] = "{}_{:>02}".format(
-                            post["index"], post["num"])
+                        post["_index"] = "{}_{:>02}".format(post["index"], post["num"])
                         post.update(data)
                         url = data["image"]
 
@@ -85,14 +84,12 @@ class NewgroundsExtractor(Extractor):
 
                 for url in self._extract_comment_urls(post["_comment"]):
                     post["num"] += 1
-                    post["_index"] = "{}_{:>02}".format(
-                        post["index"], post["num"])
+                    post["_index"] = "{}_{:>02}".format(post["index"], post["num"])
                     url = text.ensure_http_scheme(url)
                     text.nameext_from_url(url, post)
                     yield Message.Url, url, post
             else:
-                self.log.warning(
-                    "Unable to get download URL for '%s'", post_url)
+                self.log.warning("Unable to get download URL for '%s'", post_url)
 
     def posts(self):
         """Return URLs of all relevant post pages"""
@@ -109,7 +106,7 @@ class NewgroundsExtractor(Extractor):
         if username:
             self.cookies_update(self._login_impl(username, password))
 
-    @cache(maxage=365*86400, keyarg=1)
+    @cache(maxage=365 * 86400, keyarg=1)
     def _login_impl(self, username, password):
         self.log.info("Logging in as %s", username)
 
@@ -128,41 +125,36 @@ class NewgroundsExtractor(Extractor):
         }
         url = text.urljoin(self.root, text.extr(page, 'action="', '"'))
         data = {
-            "auth"    : text.extr(page, 'name="auth" value="', '"'),
+            "auth": text.extr(page, 'name="auth" value="', '"'),
             "remember": "1",
             "username": username,
             "password": str(password),
-            "code"    : "",
+            "code": "",
             "codehint": "------",
             "mfaCheck": "1",
         }
 
         while True:
-            response = self.request(
-                url, method="POST", headers=headers, data=data)
+            response = self.request(url, method="POST", headers=headers, data=data)
             result = response.json()
 
             if result.get("success"):
                 break
             if "errors" in result:
-                raise exception.AuthenticationError(
-                    '"' + '", "'.join(result["errors"]) + '"')
+                raise exception.AuthenticationError('"' + '", "'.join(result["errors"]) + '"')
 
             if result.get("requiresMfa"):
                 data["code"] = self.input("Verification Code: ")
                 data["codehint"] = "      "
             elif result.get("requiresEmailMfa"):
                 email = result.get("obfuscatedEmail")
-                prompt = "Email Verification Code ({}): ".format(email)
+                prompt = f"Email Verification Code ({email}): "
                 data["code"] = self.input(prompt)
                 data["codehint"] = "      "
 
             data.pop("mfaCheck", None)
 
-        return {
-            cookie.name: cookie.value
-            for cookie in response.cookies
-        }
+        return {cookie.name: cookie.value for cookie in response.cookies}
 
     def extract_post(self, post_url):
         url = post_url
@@ -180,7 +172,7 @@ class NewgroundsExtractor(Extractor):
 
         pos = page.find('id="adults_only"')
         if pos >= 0:
-            msg = text.extract(page, 'class="highlight">', '<', pos)[0]
+            msg = text.extract(page, 'class="highlight">', "<", pos)[0]
             self.log.warning('"%s"', msg)
             return {}
 
@@ -190,17 +182,14 @@ class NewgroundsExtractor(Extractor):
         extr = text.extract_from(page)
         data = extract_data(extr, post_url)
 
-        data["_comment"] = extr(
-            'id="author_comments"', '</div>').partition(">")[2]
-        data["comment"] = text.unescape(text.remove_html(
-            data["_comment"], "", ""))
-        data["favorites"] = text.parse_int(extr(
-            'id="faves_load">', '<').replace(",", ""))
-        data["score"] = text.parse_float(extr('id="score_number">', '<'))
-        data["tags"] = text.split_html(extr('<dd class="tags">', '</dd>'))
+        data["_comment"] = extr('id="author_comments"', "</div>").partition(">")[2]
+        data["comment"] = text.unescape(text.remove_html(data["_comment"], "", ""))
+        data["favorites"] = text.parse_int(extr('id="faves_load">', "<").replace(",", ""))
+        data["score"] = text.parse_float(extr('id="score_number">', "<"))
+        data["tags"] = text.split_html(extr('<dd class="tags">', "</dd>"))
         data["artist"] = [
-            text.extr(user, '//', '.')
-            for user in text.extract_iter(page, '<div class="item-user">', '>')
+            text.extr(user, "//", ".")
+            for user in text.extract_iter(page, '<div class="item-user">', ">")
         ]
 
         data["tags"].sort()
@@ -209,19 +198,17 @@ class NewgroundsExtractor(Extractor):
         return data
 
     def _extract_image_data(self, extr, url):
-        full = text.extract_from(util.json_loads(extr(
-            '"full_image_text":', '});')))
+        full = text.extract_from(util.json_loads(extr('"full_image_text":', "});")))
         data = {
-            "title"      : text.unescape(extr('"og:title" content="', '"')),
+            "title": text.unescape(extr('"og:title" content="', '"')),
             "description": text.unescape(extr(':description" content="', '"')),
-            "type"       : extr('og:type" content="', '"'),
-            "_type"      : "i",
-            "date"       : text.parse_datetime(extr(
-                'itemprop="datePublished" content="', '"')),
-            "rating"     : extr('class="rated-', '"'),
-            "url"        : full('src="', '"'),
-            "width"      : text.parse_int(full('width="', '"')),
-            "height"     : text.parse_int(full('height="', '"')),
+            "type": extr('og:type" content="', '"'),
+            "_type": "i",
+            "date": text.parse_datetime(extr('itemprop="datePublished" content="', '"')),
+            "rating": extr('class="rated-', '"'),
+            "url": full('src="', '"'),
+            "width": text.parse_int(full('width="', '"')),
+            "height": text.parse_int(full('height="', '"')),
         }
         index = data["url"].rpartition("/")[2].partition("_")[0]
         data["index"] = text.parse_int(index)
@@ -231,7 +218,7 @@ class NewgroundsExtractor(Extractor):
         if image_data:
             data["_multi"] = self._extract_images_multi(image_data)
         else:
-            art_images = extr('<div class="art-images', '\n</div>')
+            art_images = extr('<div class="art-images', "\n</div>")
             if art_images:
                 data["_multi"] = self._extract_images_art(art_images, data)
 
@@ -247,11 +234,12 @@ class NewgroundsExtractor(Extractor):
             url = text.ensure_http_scheme(url)
             url = url.replace("/medium_views/", "/images/", 1)
             if text.ext_from_url(url) == "webp":
-                fallback = [url.replace(".webp", "." + e)
-                            for e in ("jpg", "png", "gif") if e != ext]
+                fallback = [
+                    url.replace(".webp", "." + e) for e in ("jpg", "png", "gif") if e != ext
+                ]
                 fallback.append(url)
                 yield {
-                    "image"    : url.replace(".webp", "." + ext),
+                    "image": url.replace(".webp", "." + ext),
                     "_fallback": fallback,
                 }
             else:
@@ -261,16 +249,15 @@ class NewgroundsExtractor(Extractor):
     def _extract_audio_data(extr, url):
         index = url.split("/")[5]
         return {
-            "title"      : text.unescape(extr('"og:title" content="', '"')),
+            "title": text.unescape(extr('"og:title" content="', '"')),
             "description": text.unescape(extr(':description" content="', '"')),
-            "type"       : extr('og:type" content="', '"'),
-            "_type"      : "a",
-            "date"       : text.parse_datetime(extr(
-                'itemprop="datePublished" content="', '"')),
-            "url"        : extr('{"url":"', '"').replace("\\/", "/"),
-            "index"      : text.parse_int(index),
-            "_index"     : index,
-            "rating"     : "",
+            "type": extr('og:type" content="', '"'),
+            "_type": "a",
+            "date": text.parse_datetime(extr('itemprop="datePublished" content="', '"')),
+            "url": extr('{"url":"', '"').replace("\\/", "/"),
+            "index": text.parse_int(index),
+            "_index": index,
+            "rating": "",
         }
 
     def _extract_media_data(self, extr, url):
@@ -283,8 +270,7 @@ class NewgroundsExtractor(Extractor):
         if src:
             src = src.replace("\\/", "/")
             formats = ()
-            date = text.parse_datetime(extr(
-                'itemprop="datePublished" content="', '"'))
+            date = text.parse_datetime(extr('itemprop="datePublished" content="', '"'))
         else:
             url = self.root + "/portal/video/" + index
             headers = {
@@ -297,17 +283,16 @@ class NewgroundsExtractor(Extractor):
             date = text.parse_timestamp(src.rpartition("?")[2])
 
         return {
-            "title"      : text.unescape(title),
-            "url"        : src,
-            "date"       : date,
-            "type"       : type,
-            "_type"      : "",
-            "description": text.unescape(descr or extr(
-                'itemprop="description" content="', '"')),
-            "rating"     : extr('class="rated-', '"'),
-            "index"      : text.parse_int(index),
-            "_index"     : index,
-            "_fallback"  : formats,
+            "title": text.unescape(title),
+            "url": src,
+            "date": date,
+            "type": type,
+            "_type": "",
+            "description": text.unescape(descr or extr('itemprop="description" content="', '"')),
+            "rating": extr('class="rated-', '"'),
+            "index": text.parse_int(index),
+            "_index": index,
+            "_fallback": formats,
         }
 
     def _video_formats(self, sources):
@@ -323,8 +308,9 @@ class NewgroundsExtractor(Extractor):
                 else:
                     yield sub("." + fmt, src, 1)
             except Exception as exc:
-                self.log.debug("Video format '%s' not available (%s: %s)",
-                               fmt, exc.__class__.__name__, exc)
+                self.log.debug(
+                    "Video format '%s' not available (%s: %s)", fmt, exc.__class__.__name__, exc
+                )
 
     def _video_formats_limit(self, sources):
         formats = []
@@ -338,7 +324,7 @@ class NewgroundsExtractor(Extractor):
             yield fmt[1][0]["src"]
 
     def _pagination(self, kind, pnum=1):
-        url = "{}/{}".format(self.user_root, kind)
+        url = f"{self.user_root}/{kind}"
         params = {
             "page": text.parse_int(pnum, 1),
             "isAjaxRequest": "1",
@@ -349,9 +335,7 @@ class NewgroundsExtractor(Extractor):
         }
 
         while True:
-            with self.request(
-                    url, params=params, headers=headers,
-                    fatal=False) as response:
+            with self.request(url, params=params, headers=headers, fatal=False) as response:
                 try:
                     data = response.json()
                 except ValueError:
@@ -381,18 +365,20 @@ class NewgroundsExtractor(Extractor):
 
 class NewgroundsImageExtractor(NewgroundsExtractor):
     """Extractor for a single image from newgrounds.com"""
+
     subcategory = "image"
-    pattern = (r"(?:https?://)?(?:"
-               r"(?:www\.)?newgrounds\.com/art/view/([^/?#]+)/[^/?#]+"
-               r"|art\.ngfiles\.com/images/\d+/\d+_([^_]+)_([^.]+))")
+    pattern = (
+        r"(?:https?://)?(?:"
+        r"(?:www\.)?newgrounds\.com/art/view/([^/?#]+)/[^/?#]+"
+        r"|art\.ngfiles\.com/images/\d+/\d+_([^_]+)_([^.]+))"
+    )
     example = "https://www.newgrounds.com/art/view/USER/TITLE"
 
     def __init__(self, match):
         NewgroundsExtractor.__init__(self, match)
         if match.group(2):
             self.user = match.group(2)
-            self.post_url = "https://www.newgrounds.com/art/view/{}/{}".format(
-                self.user, match.group(3))
+            self.post_url = f"https://www.newgrounds.com/art/view/{self.user}/{match.group(3)}"
         else:
             self.post_url = text.ensure_http_scheme(match.group(0))
 
@@ -402,6 +388,7 @@ class NewgroundsImageExtractor(NewgroundsExtractor):
 
 class NewgroundsMediaExtractor(NewgroundsExtractor):
     """Extractor for a media file from newgrounds.com"""
+
     subcategory = "media"
     pattern = BASE_PATTERN + r"(/(?:portal/view|audio/listen)/\d+)"
     example = "https://www.newgrounds.com/portal/view/12345"
@@ -417,6 +404,7 @@ class NewgroundsMediaExtractor(NewgroundsExtractor):
 
 class NewgroundsArtExtractor(NewgroundsExtractor):
     """Extractor for all images of a newgrounds user"""
+
     subcategory = _path = "art"
     pattern = USER_PATTERN + r"/art(?:(?:/page/|/?\?page=)(\d+))?/?$"
     example = "https://USER.newgrounds.com/art"
@@ -424,6 +412,7 @@ class NewgroundsArtExtractor(NewgroundsExtractor):
 
 class NewgroundsAudioExtractor(NewgroundsExtractor):
     """Extractor for all audio submissions of a newgrounds user"""
+
     subcategory = _path = "audio"
     pattern = USER_PATTERN + r"/audio(?:(?:/page/|/?\?page=)(\d+))?/?$"
     example = "https://USER.newgrounds.com/audio"
@@ -431,6 +420,7 @@ class NewgroundsAudioExtractor(NewgroundsExtractor):
 
 class NewgroundsMoviesExtractor(NewgroundsExtractor):
     """Extractor for all movies of a newgrounds user"""
+
     subcategory = _path = "movies"
     pattern = USER_PATTERN + r"/movies(?:(?:/page/|/?\?page=)(\d+))?/?$"
     example = "https://USER.newgrounds.com/movies"
@@ -438,6 +428,7 @@ class NewgroundsMoviesExtractor(NewgroundsExtractor):
 
 class NewgroundsGamesExtractor(NewgroundsExtractor):
     """Extractor for a newgrounds user's games"""
+
     subcategory = _path = "games"
     pattern = USER_PATTERN + r"/games(?:(?:/page/|/?\?page=)(\d+))?/?$"
     example = "https://USER.newgrounds.com/games"
@@ -445,6 +436,7 @@ class NewgroundsGamesExtractor(NewgroundsExtractor):
 
 class NewgroundsUserExtractor(NewgroundsExtractor):
     """Extractor for a newgrounds user profile"""
+
     subcategory = "user"
     pattern = USER_PATTERN + r"/?$"
     example = "https://USER.newgrounds.com"
@@ -454,20 +446,26 @@ class NewgroundsUserExtractor(NewgroundsExtractor):
 
     def items(self):
         base = self.user_root + "/"
-        return self._dispatch_extractors((
-            (NewgroundsArtExtractor   , base + "art"),
-            (NewgroundsAudioExtractor , base + "audio"),
-            (NewgroundsGamesExtractor , base + "games"),
-            (NewgroundsMoviesExtractor, base + "movies"),
-        ), ("art",))
+        return self._dispatch_extractors(
+            (
+                (NewgroundsArtExtractor, base + "art"),
+                (NewgroundsAudioExtractor, base + "audio"),
+                (NewgroundsGamesExtractor, base + "games"),
+                (NewgroundsMoviesExtractor, base + "movies"),
+            ),
+            ("art",),
+        )
 
 
 class NewgroundsFavoriteExtractor(NewgroundsExtractor):
     """Extractor for posts favorited by a newgrounds user"""
+
     subcategory = "favorite"
     directory_fmt = ("{category}", "{user}", "Favorites")
-    pattern = (USER_PATTERN + r"/favorites(?!/following)(?:/(art|audio|movies)"
-               r"(?:(?:/page/|/?\?page=)(\d+))?)?")
+    pattern = (
+        USER_PATTERN + r"/favorites(?!/following)(?:/(art|audio|movies)"
+        r"(?:(?:/page/|/?\?page=)(\d+))?)?"
+    )
     example = "https://USER.newgrounds.com/favorites"
 
     def posts(self):
@@ -479,7 +477,7 @@ class NewgroundsFavoriteExtractor(NewgroundsExtractor):
         )
 
     def _pagination_favorites(self, kind, pnum=1):
-        url = "{}/favorites/{}".format(self.user_root, kind)
+        url = f"{self.user_root}/favorites/{kind}"
         params = {
             "page": text.parse_int(pnum, 1),
             "isAjaxRequest": "1",
@@ -505,13 +503,13 @@ class NewgroundsFavoriteExtractor(NewgroundsExtractor):
     def _extract_favorites(self, page):
         return [
             self.root + path
-            for path in text.extract_iter(
-                page, 'href="https://www.newgrounds.com', '"')
+            for path in text.extract_iter(page, 'href="https://www.newgrounds.com', '"')
         ]
 
 
 class NewgroundsFollowingExtractor(NewgroundsFavoriteExtractor):
     """Extractor for a newgrounds user's favorited users"""
+
     subcategory = "following"
     pattern = USER_PATTERN + r"/favorites/(following)"
     example = "https://USER.newgrounds.com/favorites/following"
@@ -532,6 +530,7 @@ class NewgroundsFollowingExtractor(NewgroundsFavoriteExtractor):
 
 class NewgroundsSearchExtractor(NewgroundsExtractor):
     """Extractor for newgrounds.com search reesults"""
+
     subcategory = "search"
     directory_fmt = ("{category}", "search", "{search_tags}")
     pattern = BASE_PATTERN + r"/search/conduct/([^/?#]+)/?\?([^#]+)"
@@ -545,12 +544,9 @@ class NewgroundsSearchExtractor(NewgroundsExtractor):
     def posts(self):
         suitabilities = self.query.get("suitabilities")
         if suitabilities:
-            data = {"view_suitability_" + s: "on"
-                    for s in suitabilities.split(",")}
-            self.request(self.root + "/suitabilities",
-                         method="POST", data=data)
-        return self._pagination_search(
-            "/search/conduct/" + self._path, self.query)
+            data = {"view_suitability_" + s: "on" for s in suitabilities.split(",")}
+            self.request(self.root + "/suitabilities", method="POST", data=data)
+        return self._pagination_search("/search/conduct/" + self._path, self.query)
 
     def metadata(self):
         return {"search_tags": self.query.get("terms", "")}

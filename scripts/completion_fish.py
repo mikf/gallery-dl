@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -8,8 +7,8 @@
 """Generate fish completion script from gallery-dl's argument parser"""
 
 import util
-from gallery_dl import option
 
+from gallery_dl import option
 
 TEMPLATE = """complete -c gallery-dl -x
 %(opts)s

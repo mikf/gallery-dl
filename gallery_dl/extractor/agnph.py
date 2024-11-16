@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2024 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,12 +6,12 @@
 
 """Extractors for https://agn.ph/"""
 
-from . import booru
-from .. import text
-
-from xml.etree import ElementTree
 import collections
 import re
+from xml.etree import ElementTree as ET
+
+from .. import text
+from . import booru
 
 BASE_PATTERN = r"(?:https?://)?agn\.ph"
 
@@ -38,7 +36,7 @@ class AgnphExtractor(booru.BooruExtractor):
     def _prepare(self, post):
         post["date"] = text.parse_timestamp(post["created_at"])
         post["status"] = post["status"].strip()
-        post["has_children"] = ("true" in post["has_children"])
+        post["has_children"] = "true" in post["has_children"]
 
     def _xml_to_dict(self, xml):
         return {element.tag: element.text for element in xml}
@@ -46,14 +44,13 @@ class AgnphExtractor(booru.BooruExtractor):
     def _pagination(self, url, params):
         params["api"] = "xml"
         if "page" in params:
-            params["page"] = \
-                self.page_start + text.parse_int(params["page"]) - 1
+            params["page"] = self.page_start + text.parse_int(params["page"]) - 1
         else:
             params["page"] = self.page_start
 
         while True:
             data = self.request(url, params=params).text
-            root = ElementTree.fromstring(data)
+            root = ET.fromstring(data)
 
             yield from map(self._xml_to_dict, root)
 
@@ -68,8 +65,7 @@ class AgnphExtractor(booru.BooruExtractor):
         return self.request(url).text
 
     def _tags(self, post, page):
-        tag_container = text.extr(
-            page, '<ul class="taglist">', '<h3>Statistics</h3>')
+        tag_container = text.extr(page, '<ul class="taglist">', "<h3>Statistics</h3>")
         if not tag_container:
             return
 
@@ -107,7 +103,6 @@ class AgnphPostExtractor(AgnphExtractor):
     example = "https://agn.ph/gallery/post/show/12345/"
 
     def posts(self):
-        url = "{}/gallery/post/show/{}/?api=xml".format(
-            self.root, self.groups[0])
-        post = ElementTree.fromstring(self.request(url).text)
+        url = f"{self.root}/gallery/post/show/{self.groups[0]}/?api=xml"
+        post = ET.fromstring(self.request(url).text)
         return (self._xml_to_dict(post),)

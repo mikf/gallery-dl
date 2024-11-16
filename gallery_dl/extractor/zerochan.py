@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2022-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,17 +6,21 @@
 
 """Extractors for https://www.zerochan.net/"""
 
-from .booru import BooruExtractor
-from ..cache import cache
-from .. import text, util, exception
 import collections
 import re
+
+from .. import exception
+from .. import text
+from .. import util
+from ..cache import cache
+from .booru import BooruExtractor
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?zerochan\.net"
 
 
 class ZerochanExtractor(BooruExtractor):
     """Base class for zerochan extractors"""
+
     category = "zerochan"
     root = "https://www.zerochan.net"
     filename_fmt = "{id}.{extension}"
@@ -32,7 +34,7 @@ class ZerochanExtractor(BooruExtractor):
     def login(self):
         self._logged_in = True
         if self.cookies_check(self.cookies_names):
-            return
+            return None
 
         username, password = self._get_auth_info()
         if username:
@@ -40,20 +42,20 @@ class ZerochanExtractor(BooruExtractor):
 
         self._logged_in = False
 
-    @cache(maxage=90*86400, keyarg=1)
+    @cache(maxage=90 * 86400, keyarg=1)
     def _login_impl(self, username, password):
         self.log.info("Logging in as %s", username)
 
         url = self.root + "/login"
         headers = {
-            "Origin"  : self.root,
-            "Referer" : url,
+            "Origin": self.root,
+            "Referer": url,
         }
         data = {
-            "ref"     : "/",
-            "name"    : username,
+            "ref": "/",
+            "name": username,
             "password": password,
-            "login"   : "Login",
+            "login": "Login",
         }
 
         response = self.request(url, method="POST", headers=headers, data=data)
@@ -63,23 +65,21 @@ class ZerochanExtractor(BooruExtractor):
         return response.cookies
 
     def _parse_entry_html(self, entry_id):
-        url = "{}/{}".format(self.root, entry_id)
+        url = f"{self.root}/{entry_id}"
         extr = text.extract_from(self.request(url).text)
 
         data = {
-            "id"      : text.parse_int(entry_id),
-            "author"  : text.parse_unicode_escapes(extr('    "name": "', '"')),
+            "id": text.parse_int(entry_id),
+            "author": text.parse_unicode_escapes(extr('    "name": "', '"')),
             "file_url": extr('"contentUrl": "', '"'),
-            "date"    : text.parse_datetime(extr('"datePublished": "', '"')),
-            "width"   : text.parse_int(extr('"width": "', ' ')),
-            "height"  : text.parse_int(extr('"height": "', ' ')),
-            "size"    : text.parse_bytes(extr('"contentSize": "', 'B')),
-            "path"    : text.split_html(extr(
-                'class="breadcrumbs', '</nav>'))[2:],
+            "date": text.parse_datetime(extr('"datePublished": "', '"')),
+            "width": text.parse_int(extr('"width": "', " ")),
+            "height": text.parse_int(extr('"height": "', " ")),
+            "size": text.parse_bytes(extr('"contentSize": "', "B")),
+            "path": text.split_html(extr('class="breadcrumbs', "</nav>"))[2:],
             "uploader": extr('href="/user/', '"'),
-            "tags"    : extr('<ul id="tags"', '</ul>'),
-            "source"  : text.unescape(text.extr(
-                extr('id="source-url"', '</a>'), 'href="', '"')),
+            "tags": extr('<ul id="tags"', "</ul>"),
+            "source": text.unescape(text.extr(extr('id="source-url"', "</a>"), 'href="', '"')),
         }
 
         html = data["tags"]
@@ -92,7 +92,7 @@ class ZerochanExtractor(BooruExtractor):
         return data
 
     def _parse_entry_api(self, entry_id):
-        url = "{}/{}?json".format(self.root, entry_id)
+        url = f"{self.root}/{entry_id}?json"
         text = self.request(url).text
         try:
             item = util.json_loads(text)
@@ -103,14 +103,14 @@ class ZerochanExtractor(BooruExtractor):
             item = util.json_loads(text)
 
         data = {
-            "id"      : item["id"],
+            "id": item["id"],
             "file_url": item["full"],
-            "width"   : item["width"],
-            "height"  : item["height"],
-            "size"    : item["size"],
-            "name"    : item["primary"],
-            "md5"     : item["hash"],
-            "source"  : item.get("source"),
+            "width": item["width"],
+            "height": item["height"],
+            "size": item["size"],
+            "name": item["primary"],
+            "md5": item["hash"],
+            "source": item.get("source"),
         }
 
         if not self._logged_in:
@@ -146,8 +146,7 @@ class ZerochanTagExtractor(ZerochanExtractor):
             self.session.headers["User-Agent"] = util.USERAGENT
 
     def metadata(self):
-        return {"search_tags": text.unquote(
-            self.search_tag.replace("+", " "))}
+        return {"search_tags": text.unquote(self.search_tag.replace("+", " "))}
 
     def posts_html(self):
         url = self.root + "/" + self.search_tag
@@ -157,11 +156,11 @@ class ZerochanTagExtractor(ZerochanExtractor):
 
         while True:
             page = self.request(url, params=params).text
-            thumbs = text.extr(page, '<ul id="thumbs', '</ul>')
+            thumbs = text.extr(page, '<ul id="thumbs', "</ul>")
             extr = text.extract_from(thumbs)
 
             while True:
-                post = extr('<li class="', '>')
+                post = extr('<li class="', ">")
                 if not post:
                     break
 
@@ -172,13 +171,12 @@ class ZerochanTagExtractor(ZerochanExtractor):
                     yield post
                 else:
                     yield {
-                        "id"    : extr('href="/', '"'),
-                        "name"  : extr('alt="', '"'),
-                        "width" : extr('title="', '&#10005;'),
-                        "height": extr('', ' '),
-                        "size"  : extr('', 'b'),
-                        "file_url": "https://static." + extr(
-                            '<a href="https://static.', '"'),
+                        "id": extr('href="/', '"'),
+                        "name": extr('alt="', '"'),
+                        "width": extr('title="', "&#10005;"),
+                        "height": extr("", " "),
+                        "size": extr("", "b"),
+                        "file_url": "https://static." + extr('<a href="https://static.', '"'),
                     }
 
             if 'rel="next"' not in page:
@@ -190,8 +188,8 @@ class ZerochanTagExtractor(ZerochanExtractor):
         metadata = self.config("metadata")
         params = {
             "json": "1",
-            "l"   : self.per_page,
-            "p"   : self.page_start,
+            "l": self.per_page,
+            "p": self.page_start,
         }
 
         static = "https://static.zerochan.net/.full."

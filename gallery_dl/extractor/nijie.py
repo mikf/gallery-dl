@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2015-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,13 +6,17 @@
 
 """Extractors for nijie instances"""
 
-from .common import BaseExtractor, Message, AsynchronousMixin
-from .. import text, exception
+from .. import exception
+from .. import text
 from ..cache import cache
+from .common import AsynchronousMixin
+from .common import BaseExtractor
+from .common import Message
 
 
 class NijieExtractor(AsynchronousMixin, BaseExtractor):
     """Base class for nijie extractors"""
+
     basecategory = "Nijie"
     directory_fmt = ("{category}", "{user_id}")
     filename_fmt = "{image_id}_p{num}.{extension}"
@@ -39,8 +41,7 @@ class NijieExtractor(AsynchronousMixin, BaseExtractor):
         self.login()
 
         for image_id in self.image_ids():
-
-            url = "{}/view.php?id={}".format(self.root, image_id)
+            url = f"{self.root}/view.php?id={image_id}"
             response = self.request(url, fatal=False)
             if response.status_code >= 400:
                 continue
@@ -61,10 +62,13 @@ class NijieExtractor(AsynchronousMixin, BaseExtractor):
 
             yield Message.Directory, data
             for num, url in enumerate(urls):
-                image = text.nameext_from_url(url, {
-                    "num": num,
-                    "url": "https:" + url,
-                })
+                image = text.nameext_from_url(
+                    url,
+                    {
+                        "num": num,
+                        "url": "https:" + url,
+                    },
+                )
                 image.update(data)
                 if not image["extension"]:
                     image["extension"] = "jpg"
@@ -77,51 +81,46 @@ class NijieExtractor(AsynchronousMixin, BaseExtractor):
     def _extract_data(page):
         """Extract image metadata from 'page'"""
         extr = text.extract_from(page)
-        keywords = text.unescape(extr(
-            'name="keywords" content="', '" />')).split(",")
+        keywords = text.unescape(extr('name="keywords" content="', '" />')).split(",")
         return {
-            "title"      : keywords[0].strip(),
-            "description": text.unescape(extr(
-                '"description": "', '"').replace("&amp;", "&")),
-            "date"       : text.parse_datetime(extr(
-                '"datePublished": "', '"'), "%a %b %d %H:%M:%S %Y", 9),
-            "artist_id"  : text.parse_int(extr('/members.php?id=', '"')),
+            "title": keywords[0].strip(),
+            "description": text.unescape(extr('"description": "', '"').replace("&amp;", "&")),
+            "date": text.parse_datetime(extr('"datePublished": "', '"'), "%a %b %d %H:%M:%S %Y", 9),
+            "artist_id": text.parse_int(extr("/members.php?id=", '"')),
             "artist_name": keywords[1],
-            "tags"       : keywords[2:-1],
+            "tags": keywords[2:-1],
         }
 
     @staticmethod
     def _extract_data_horne(page):
         """Extract image metadata from 'page'"""
         extr = text.extract_from(page)
-        keywords = text.unescape(extr(
-            'name="keywords" content="', '" />')).split(",")
+        keywords = text.unescape(extr('name="keywords" content="', '" />')).split(",")
         return {
-            "title"      : keywords[0].strip(),
-            "description": text.unescape(extr(
-                'property="og:description" content="', '"')),
-            "artist_id"  : text.parse_int(extr('members.php?id=', '"')),
+            "title": keywords[0].strip(),
+            "description": text.unescape(extr('property="og:description" content="', '"')),
+            "artist_id": text.parse_int(extr("members.php?id=", '"')),
             "artist_name": keywords[1],
-            "tags"       : keywords[2:-1],
-            "date"       : text.parse_datetime(extr(
-                "itemprop='datePublished' content=", "<").rpartition(">")[2],
-                "%Y-%m-%d %H:%M:%S", 9),
+            "tags": keywords[2:-1],
+            "date": text.parse_datetime(
+                extr("itemprop='datePublished' content=", "<").rpartition(">")[2],
+                "%Y-%m-%d %H:%M:%S",
+                9,
+            ),
         }
 
     def _extract_images(self, image_id, page):
         if '&#diff_1" ' in page:
             # multiple images
-            url = "{}/view_popup.php?id={}".format(self.root, image_id)
+            url = f"{self.root}/view_popup.php?id={image_id}"
             page = self.request(url).text
             return [
                 text.extr(media, ' src="', '"')
-                for media in text.extract_iter(
-                    page, 'href="javascript:void(0);"><', '>')
+                for media in text.extract_iter(page, 'href="javascript:void(0);"><', ">")
             ]
-        else:
-            pos = page.find('id="view-center"') + 1
-            # do NOT use text.extr() here, as it doesn't support a pos argument
-            return (text.extract(page, 'itemprop="image" src="', '"', pos)[0],)
+        pos = page.find('id="view-center"') + 1
+        # do NOT use text.extr() here, as it doesn't support a pos argument
+        return (text.extract(page, 'itemprop="image" src="', '"', pos)[0],)
 
     @staticmethod
     def _extract_user_name(page):
@@ -129,7 +128,7 @@ class NijieExtractor(AsynchronousMixin, BaseExtractor):
 
     def login(self):
         if self.cookies_check(self.cookies_names):
-            return
+            return None
 
         username, password = self._get_auth_info()
         if username:
@@ -137,11 +136,11 @@ class NijieExtractor(AsynchronousMixin, BaseExtractor):
 
         raise exception.AuthenticationError("Username and password required")
 
-    @cache(maxage=90*86400, keyarg=1)
+    @cache(maxage=90 * 86400, keyarg=1)
     def _login_impl(self, username, password):
         self.log.info("Logging in as %s", username)
 
-        url = "{}/login_int.php".format(self.root)
+        url = f"{self.root}/login_int.php"
         data = {"email": username, "password": password, "save": "on"}
 
         response = self.request(url, method="POST", data=data)
@@ -150,7 +149,7 @@ class NijieExtractor(AsynchronousMixin, BaseExtractor):
         return self.cookies
 
     def _pagination(self, path):
-        url = "{}/{}.php".format(self.root, path)
+        url = f"{self.root}/{path}.php"
         params = {"id": self.user_id, "p": 1}
 
         while True:
@@ -165,20 +164,23 @@ class NijieExtractor(AsynchronousMixin, BaseExtractor):
             params["p"] += 1
 
 
-BASE_PATTERN = NijieExtractor.update({
-    "nijie": {
-        "root": "https://nijie.info",
-        "pattern": r"(?:www\.)?nijie\.info",
-    },
-    "horne": {
-        "root": "https://horne.red",
-        "pattern": r"(?:www\.)?horne\.red",
-    },
-})
+BASE_PATTERN = NijieExtractor.update(
+    {
+        "nijie": {
+            "root": "https://nijie.info",
+            "pattern": r"(?:www\.)?nijie\.info",
+        },
+        "horne": {
+            "root": "https://horne.red",
+            "pattern": r"(?:www\.)?horne\.red",
+        },
+    }
+)
 
 
 class NijieUserExtractor(NijieExtractor):
     """Extractor for nijie user profiles"""
+
     subcategory = "user"
     cookies_domain = None
     pattern = BASE_PATTERN + r"/members\.php\?id=(\d+)"
@@ -188,17 +190,21 @@ class NijieUserExtractor(NijieExtractor):
         pass
 
     def items(self):
-        fmt = "{}/{{}}.php?id={}".format(self.root, self.user_id).format
-        return self._dispatch_extractors((
-            (NijieIllustrationExtractor, fmt("members_illust")),
-            (NijieDoujinExtractor      , fmt("members_dojin")),
-            (NijieFavoriteExtractor    , fmt("user_like_illust_view")),
-            (NijieNuitaExtractor       , fmt("history_nuita")),
-        ), ("illustration", "doujin"))
+        fmt = f"{self.root}/{{}}.php?id={self.user_id}".format
+        return self._dispatch_extractors(
+            (
+                (NijieIllustrationExtractor, fmt("members_illust")),
+                (NijieDoujinExtractor, fmt("members_dojin")),
+                (NijieFavoriteExtractor, fmt("user_like_illust_view")),
+                (NijieNuitaExtractor, fmt("history_nuita")),
+            ),
+            ("illustration", "doujin"),
+        )
 
 
 class NijieIllustrationExtractor(NijieExtractor):
     """Extractor for all illustrations of a nijie-user"""
+
     subcategory = "illustration"
     pattern = BASE_PATTERN + r"/members_illust\.php\?id=(\d+)"
     example = "https://nijie.info/members_illust.php?id=12345"
@@ -209,6 +215,7 @@ class NijieIllustrationExtractor(NijieExtractor):
 
 class NijieDoujinExtractor(NijieExtractor):
     """Extractor for doujin entries of a nijie user"""
+
     subcategory = "doujin"
     pattern = BASE_PATTERN + r"/members_dojin\.php\?id=(\d+)"
     example = "https://nijie.info/members_dojin.php?id=12345"
@@ -219,6 +226,7 @@ class NijieDoujinExtractor(NijieExtractor):
 
 class NijieFavoriteExtractor(NijieExtractor):
     """Extractor for all favorites/bookmarks of a nijie user"""
+
     subcategory = "favorite"
     directory_fmt = ("{category}", "bookmarks", "{user_id}")
     archive_fmt = "f_{user_id}_{image_id}_{num}"
@@ -237,6 +245,7 @@ class NijieFavoriteExtractor(NijieExtractor):
 
 class NijieNuitaExtractor(NijieExtractor):
     """Extractor for a nijie user's 抜いた list"""
+
     subcategory = "nuita"
     directory_fmt = ("{category}", "nuita", "{user_id}")
     archive_fmt = "n_{user_id}_{image_id}_{num}"
@@ -259,6 +268,7 @@ class NijieNuitaExtractor(NijieExtractor):
 
 class NijieFeedExtractor(NijieExtractor):
     """Extractor for nijie liked user feed"""
+
     subcategory = "feed"
     pattern = BASE_PATTERN + r"/like_user_view\.php"
     example = "https://nijie.info/like_user_view.php"
@@ -273,6 +283,7 @@ class NijieFeedExtractor(NijieExtractor):
 
 class NijieFollowedExtractor(NijieExtractor):
     """Extractor for followed nijie users"""
+
     subcategory = "followed"
     pattern = BASE_PATTERN + r"/like_my\.php"
     example = "https://nijie.info/like_my.php"
@@ -287,9 +298,8 @@ class NijieFollowedExtractor(NijieExtractor):
         while True:
             page = self.request(url, params=params).text
 
-            for user_id in text.extract_iter(
-                    page, '"><a href="/members.php?id=', '"'):
-                user_url = "{}/members.php?id={}".format(self.root, user_id)
+            for user_id in text.extract_iter(page, '"><a href="/members.php?id=', '"'):
+                user_url = f"{self.root}/members.php?id={user_id}"
                 yield Message.Queue, user_url, data
 
             if '<a rel="next"' not in page:
@@ -299,6 +309,7 @@ class NijieFollowedExtractor(NijieExtractor):
 
 class NijieImageExtractor(NijieExtractor):
     """Extractor for a nijie work/image"""
+
     subcategory = "image"
     pattern = BASE_PATTERN + r"/view(?:_popup)?\.php\?id=(\d+)"
     example = "https://nijie.info/view.php?id=12345"

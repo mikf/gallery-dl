@@ -1,17 +1,18 @@
-# -*- coding: utf-8 -*-
-
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
 """Extractors for Misskey instances"""
 
-from .common import BaseExtractor, Message
-from .. import text, exception
+from .. import exception
+from .. import text
+from .common import BaseExtractor
+from .common import Message
 
 
 class MisskeyExtractor(BaseExtractor):
     """Base class for Misskey extractors"""
+
     basecategory = "misskey"
     directory_fmt = ("misskey", "{instance}", "{user[username]}")
     filename_fmt = "{category}_{id}_{file[id]}.{extension}"
@@ -49,13 +50,11 @@ class MisskeyExtractor(BaseExtractor):
             note["instance"] = self.instance
             note["instance_remote"] = note["user"]["host"]
             note["count"] = len(files)
-            note["date"] = text.parse_datetime(
-                note["createdAt"], "%Y-%m-%dT%H:%M:%S.%f%z")
+            note["date"] = text.parse_datetime(note["createdAt"], "%Y-%m-%dT%H:%M:%S.%f%z")
 
             yield Message.Directory, note
             for note["num"], file in enumerate(files, 1):
-                file["date"] = text.parse_datetime(
-                    file["createdAt"], "%Y-%m-%dT%H:%M:%S.%f%z")
+                file["date"] = text.parse_datetime(file["createdAt"], "%Y-%m-%dT%H:%M:%S.%f%z")
                 note["file"] = file
                 url = file["url"]
                 yield Message.Url, url, text.nameext_from_url(url, note)
@@ -65,28 +64,31 @@ class MisskeyExtractor(BaseExtractor):
         return ()
 
 
-BASE_PATTERN = MisskeyExtractor.update({
-    "misskey.io": {
-        "root": "https://misskey.io",
-        "pattern": r"misskey\.io",
-    },
-    "misskey.design": {
-        "root": "https://misskey.design",
-        "pattern": r"misskey\.design",
-    },
-    "lesbian.energy": {
-        "root": "https://lesbian.energy",
-        "pattern": r"lesbian\.energy",
-    },
-    "sushi.ski": {
-        "root": "https://sushi.ski",
-        "pattern": r"sushi\.ski",
-    },
-})
+BASE_PATTERN = MisskeyExtractor.update(
+    {
+        "misskey.io": {
+            "root": "https://misskey.io",
+            "pattern": r"misskey\.io",
+        },
+        "misskey.design": {
+            "root": "https://misskey.design",
+            "pattern": r"misskey\.design",
+        },
+        "lesbian.energy": {
+            "root": "https://lesbian.energy",
+            "pattern": r"lesbian\.energy",
+        },
+        "sushi.ski": {
+            "root": "https://sushi.ski",
+            "pattern": r"sushi\.ski",
+        },
+    }
+)
 
 
 class MisskeyUserExtractor(MisskeyExtractor):
     """Extractor for all images of a Misskey user"""
+
     subcategory = "user"
     pattern = BASE_PATTERN + r"/@([^/?#]+)/?$"
     example = "https://misskey.io/@USER"
@@ -97,6 +99,7 @@ class MisskeyUserExtractor(MisskeyExtractor):
 
 class MisskeyFollowingExtractor(MisskeyExtractor):
     """Extractor for followed Misskey users"""
+
     subcategory = "following"
     pattern = BASE_PATTERN + r"/@([^/?#]+)/following"
     example = "https://misskey.io/@USER/following"
@@ -115,6 +118,7 @@ class MisskeyFollowingExtractor(MisskeyExtractor):
 
 class MisskeyNoteExtractor(MisskeyExtractor):
     """Extractor for images from a Note"""
+
     subcategory = "note"
     pattern = BASE_PATTERN + r"/notes/(\w+)"
     example = "https://misskey.io/notes/98765"
@@ -125,6 +129,7 @@ class MisskeyNoteExtractor(MisskeyExtractor):
 
 class MisskeyFavoriteExtractor(MisskeyExtractor):
     """Extractor for favorited notes"""
+
     subcategory = "favorite"
     pattern = BASE_PATTERN + r"/(?:my|api/i)/favorites"
     example = "https://misskey.io/my/favorites"
@@ -133,7 +138,7 @@ class MisskeyFavoriteExtractor(MisskeyExtractor):
         return self.api.i_favorites()
 
 
-class MisskeyAPI():
+class MisskeyAPI:
     """Interface for Misskey API
 
     https://github.com/misskey-dev/misskey
@@ -178,8 +183,7 @@ class MisskeyAPI():
 
     def _call(self, endpoint, data):
         url = self.root + "/api" + endpoint
-        return self.extractor.request(
-            url, method="POST", headers=self.headers, json=data).json()
+        return self.extractor.request(url, method="POST", headers=self.headers, json=data).json()
 
     def _pagination(self, endpoint, data):
         data["limit"] = 100

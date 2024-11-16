@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2019-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,14 +6,19 @@
 
 """Extractors for https://www.plurk.com/"""
 
-from .common import Extractor, Message
-from .. import text, util, exception
 import datetime
 import re
+
+from .. import exception
+from .. import text
+from .. import util
+from .common import Extractor
+from .common import Message
 
 
 class PlurkExtractor(Extractor):
     """Base class for plurk extractors"""
+
     category = "plurk"
     root = "https://www.plurk.com"
     request_interval = (0.5, 1.5)
@@ -51,8 +54,7 @@ class PlurkExtractor(Extractor):
         }
 
         while True:
-            info = self.request(
-                url, method="POST", headers=headers, data=data).json()
+            info = self.request(url, method="POST", headers=headers, data=data).json()
             yield from info["responses"]
             if not info["has_newer"]:
                 return
@@ -69,6 +71,7 @@ class PlurkExtractor(Extractor):
 
 class PlurkTimelineExtractor(PlurkExtractor):
     """Extractor for URLs from all posts in a Plurk timeline"""
+
     subcategory = "timeline"
     pattern = r"(?:https?://)?(?:www\.)?plurk\.com/(?!p/)(\w+)/?(?:$|[?#])"
     example = "https://www.plurk.com/USER"
@@ -78,9 +81,9 @@ class PlurkTimelineExtractor(PlurkExtractor):
         self.user = match.group(1)
 
     def plurks(self):
-        url = "{}/{}".format(self.root, self.user)
+        url = f"{self.root}/{self.user}"
         page = self.request(url).text
-        user_id, pos = text.extract(page, '"page_user": {"id":', ',')
+        user_id, pos = text.extract(page, '"page_user": {"id":', ",")
         plurks = self._load(text.extract(page, "_PLURKS = ", ";\n", pos)[0])
 
         headers = {"Referer": url, "X-Requested-With": "XMLHttpRequest"}
@@ -90,16 +93,15 @@ class PlurkTimelineExtractor(PlurkExtractor):
         while plurks:
             yield from plurks
 
-            offset = datetime.datetime.strptime(
-                plurks[-1]["posted"], "%a, %d %b %Y %H:%M:%S %Z")
+            offset = datetime.datetime.strptime(plurks[-1]["posted"], "%a, %d %b %Y %H:%M:%S %Z")
             data["offset"] = offset.strftime("%Y-%m-%dT%H:%M:%S.000Z")
-            response = self.request(
-                url, method="POST", headers=headers, data=data)
+            response = self.request(url, method="POST", headers=headers, data=data)
             plurks = response.json()["plurks"]
 
 
 class PlurkPostExtractor(PlurkExtractor):
     """Extractor for URLs from a Plurk post"""
+
     subcategory = "post"
     pattern = r"(?:https?://)?(?:www\.)?plurk\.com/p/(\w+)"
     example = "https://www.plurk.com/p/12345"
@@ -109,7 +111,7 @@ class PlurkPostExtractor(PlurkExtractor):
         self.plurk_id = match.group(1)
 
     def plurks(self):
-        url = "{}/p/{}".format(self.root, self.plurk_id)
+        url = f"{self.root}/p/{self.plurk_id}"
         page = self.request(url).text
         user, pos = text.extract(page, " GLOBAL = ", "\n")
         data, pos = text.extract(page, "plurk = ", ";\n", pos)

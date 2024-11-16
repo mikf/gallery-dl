@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2014-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,13 +6,16 @@
 
 """Extractors for https://www.imagebam.com/"""
 
-from .common import Extractor, Message
-from .. import text
 import re
+
+from .. import text
+from .common import Extractor
+from .common import Message
 
 
 class ImagebamExtractor(Extractor):
     """Base class for imagebam extractors"""
+
     category = "imagebam"
     root = "https://www.imagebam.com"
 
@@ -31,7 +32,7 @@ class ImagebamExtractor(Extractor):
         filename = text.unescape(text.extract(page, 'alt="', '"', pos)[0])
 
         data = {
-            "url"      : "https://images" + url,
+            "url": "https://images" + url,
             "image_key": path.rpartition("/")[2],
         }
         data["filename"], _, data["extension"] = filename.rpartition(".")
@@ -40,12 +41,12 @@ class ImagebamExtractor(Extractor):
 
 class ImagebamGalleryExtractor(ImagebamExtractor):
     """Extractor for imagebam galleries"""
+
     subcategory = "gallery"
     directory_fmt = ("{category}", "{title} {gallery_key}")
     filename_fmt = "{num:>03} {filename}.{extension}"
     archive_fmt = "{gallery_key}_{image_key}"
-    pattern = (r"(?:https?://)?(?:www\.)?imagebam\.com"
-               r"(/(?:gallery/|view/G)[a-zA-Z0-9]+)")
+    pattern = r"(?:https?://)?(?:www\.)?imagebam\.com" r"(/(?:gallery/|view/G)[a-zA-Z0-9]+)"
     example = "https://www.imagebam.com/view/GID"
 
     def items(self):
@@ -66,12 +67,12 @@ class ImagebamGalleryExtractor(ImagebamExtractor):
 
     @staticmethod
     def metadata(page):
-        return {"title": text.unescape(text.extr(
-            page, 'id="gallery-name">', '<').strip())}
+        return {"title": text.unescape(text.extr(page, 'id="gallery-name">', "<").strip())}
 
     def images(self, page):
-        findall = re.compile(r'<a href="https://www\.imagebam\.com'
-                             r'(/(?:image/|view/M)[a-zA-Z0-9]+)').findall
+        findall = re.compile(
+            r'<a href="https://www\.imagebam\.com' r"(/(?:image/|view/M)[a-zA-Z0-9]+)"
+        ).findall
 
         paths = []
         while True:
@@ -87,10 +88,13 @@ class ImagebamGalleryExtractor(ImagebamExtractor):
 
 class ImagebamImageExtractor(ImagebamExtractor):
     """Extractor for single imagebam images"""
+
     subcategory = "image"
     archive_fmt = "{image_key}"
-    pattern = (r"(?:https?://)?(?:\w+\.)?imagebam\.com"
-               r"(/(?:image/|view/M|(?:[0-9a-f]{2}/){3})[a-zA-Z0-9]+)")
+    pattern = (
+        r"(?:https?://)?(?:\w+\.)?imagebam\.com"
+        r"(/(?:image/|view/M|(?:[0-9a-f]{2}/){3})[a-zA-Z0-9]+)"
+    )
     example = "https://www.imagebam.com/view/MID"
 
     def items(self):

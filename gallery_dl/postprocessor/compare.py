@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2020-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,13 +6,15 @@
 
 """Compare versions of the same file and replace/enumerate them on mismatch"""
 
-from .common import PostProcessor
-from .. import text, util, exception
 import os
+
+from .. import exception
+from .. import text
+from .. import util
+from .common import PostProcessor
 
 
 class ComparePP(PostProcessor):
-
     def __init__(self, job, options):
         PostProcessor.__init__(self, job)
         if options.get("shallow"):
@@ -32,11 +32,10 @@ class ComparePP(PostProcessor):
             elif equal == "exit":
                 self._equal_exc = SystemExit
 
-        job.register_hooks({"file": (
-            self.enumerate
-            if options.get("action") == "enumerate" else
-            self.replace
-        )}, options)
+        job.register_hooks(
+            {"file": (self.enumerate if options.get("action") == "enumerate" else self.replace)},
+            options,
+        )
 
     def replace(self, pathfmt):
         try:

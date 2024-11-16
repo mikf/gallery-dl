@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2021-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,12 +6,14 @@
 
 """Extractors for https://picarto.tv/"""
 
-from .common import Extractor, Message
 from .. import text
+from .common import Extractor
+from .common import Message
 
 
 class PicartoGalleryExtractor(Extractor):
     """Extractor for picarto galleries"""
+
     category = "picarto"
     subcategory = "gallery"
     root = "https://picarto.tv"
@@ -29,8 +29,7 @@ class PicartoGalleryExtractor(Extractor):
 
     def items(self):
         for post in self.posts():
-            post["date"] = text.parse_datetime(
-                post["created_at"], "%Y-%m-%d %H:%M:%S")
+            post["date"] = text.parse_datetime(post["created_at"], "%Y-%m-%d %H:%M:%S")
             variations = post.pop("variations", ())
             yield Message.Directory, post
 

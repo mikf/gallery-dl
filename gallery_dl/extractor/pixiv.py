@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2014-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,12 +6,18 @@
 
 """Extractors for https://www.pixiv.net/"""
 
-from .common import Extractor, Message
-from .. import text, util, exception
-from ..cache import cache, memcache
-from datetime import datetime, timedelta
-import itertools
 import hashlib
+import itertools
+from datetime import datetime
+from datetime import timedelta
+
+from .. import exception
+from .. import text
+from .. import util
+from ..cache import cache
+from ..cache import memcache
+from .common import Extractor
+from .common import Message
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.|touch\.)?pixiv\.net"
 USER_PATTERN = BASE_PATTERN + r"/(?:en/)?users/(\d+)"
@@ -21,6 +25,7 @@ USER_PATTERN = BASE_PATTERN + r"/(?:en/)?users/(\d+)"
 
 class PixivExtractor(Extractor):
     """Base class for pixiv extractors"""
+
     category = "pixiv"
     root = "https://www.pixiv.net"
     directory_fmt = ("{category}", "{user[id]} {user[account]}")
@@ -33,7 +38,7 @@ class PixivExtractor(Extractor):
     def _init(self):
         self.api = PixivAppAPI(self)
         self.load_ugoira = self.config("ugoira", True)
-        self.load_ugoira_original = (self.load_ugoira == "original")
+        self.load_ugoira_original = self.load_ugoira == "original"
         self.max_posts = self.config("max-posts", 0)
         self.sanity_workaround = self.config("sanity", True)
         self.meta_user = self.config("metadata")
@@ -46,11 +51,13 @@ class PixivExtractor(Extractor):
         if tags == "original":
             transform_tags = None
         elif tags == "translated":
+
             def transform_tags(work):
-                work["tags"] = list(dict.fromkeys(
-                    tag["translated_name"] or tag["name"]
-                    for tag in work["tags"]))
+                work["tags"] = list(
+                    dict.fromkeys(tag["translated_name"] or tag["name"] for tag in work["tags"])
+                )
         else:
+
             def transform_tags(work):
                 work["tags"] = [tag["name"] for tag in work["tags"]]
 
@@ -70,16 +77,20 @@ class PixivExtractor(Extractor):
                 work.update(self.api.user_detail(work["user"]["id"]))
             if self.meta_comments:
                 if work["total_comments"]:
-                    work["comments"] = list(
-                        self.api.illust_comments(work["id"]))
+                    work["comments"] = list(self.api.illust_comments(work["id"]))
                 else:
                     work["comments"] = ()
             if self.meta_bookmark and work["is_bookmarked"]:
                 detail = self.api.illust_bookmark_detail(work["id"])
-                work["tags_bookmark"] = [tag["name"] for tag in detail["tags"]
-                                         if tag["is_registered"]]
-            if self.meta_captions and not work.get("caption") and \
-                    not work.get("_mypixiv") and not work.get("_ajax"):
+                work["tags_bookmark"] = [
+                    tag["name"] for tag in detail["tags"] if tag["is_registered"]
+                ]
+            if (
+                self.meta_captions
+                and not work.get("caption")
+                and not work.get("_mypixiv")
+                and not work.get("_ajax")
+            ):
                 body = self._request_ajax("/illust/" + str(work["id"]))
                 if body:
                     work["caption"] = text.unescape(body["illustComment"])
@@ -109,8 +120,8 @@ class PixivExtractor(Extractor):
         if meta_pages:
             return [
                 {
-                    "url"   : img["image_urls"]["original"],
-                    "suffix": "_p{:02}".format(num),
+                    "url": img["image_urls"]["original"],
+                    "suffix": f"_p{num:02}",
                 }
                 for num, img in enumerate(meta_pages)
             ]
@@ -136,7 +147,10 @@ class PixivExtractor(Extractor):
             except Exception as exc:
                 self.log.warning(
                     "%s: Unable to retrieve Ugoira metatdata (%s - %s)",
-                    work["id"], exc.__class__.__name__, exc)
+                    work["id"],
+                    exc.__class__.__name__,
+                    exc,
+                )
 
         return ()
 
@@ -154,24 +168,22 @@ class PixivExtractor(Extractor):
                 base += "_ugoira"
             else:
                 base, sep, _ = img_url.rpartition("_ugoira")
-                base = base.replace(
-                    "/img-zip-ugoira/", "/img-original/", 1) + sep
+                base = base.replace("/img-zip-ugoira/", "/img-original/", 1) + sep
 
                 for ext in ("jpg", "png", "gif"):
                     try:
-                        url = "{}0.{}".format(base, ext)
+                        url = f"{base}0.{ext}"
                         self.request(url, method="HEAD")
                         break
                     except exception.HttpError:
                         pass
                 else:
-                    self.log.warning(
-                        "Unable to find Ugoira frame URLs (%s)", work["id"])
+                    self.log.warning("Unable to find Ugoira frame URLs (%s)", work["id"])
 
             return [
                 {
-                    "url": "{}{}.{}".format(base, num, ext),
-                    "suffix": "_p{:02}".format(num),
+                    "url": f"{base}{num}.{ext}",
+                    "suffix": f"_p{num:02}",
                     "_ugoira_frame_index": num,
                 }
                 for num in range(len(frames))
@@ -184,7 +196,7 @@ class PixivExtractor(Extractor):
             return ({"url": url},)
 
     def _request_ajax(self, endpoint):
-        url = "{}/ajax{}".format(self.root, endpoint)
+        url = f"{self.root}/ajax{endpoint}"
         try:
             return self.request(url, headers=self.headers_web).json()["body"]
         except Exception:
@@ -197,27 +209,27 @@ class PixivExtractor(Extractor):
             return ()
 
         for key_app, key_ajax in (
-            ("title"            , "illustTitle"),
-            ("image_urls"       , "urls"),
-            ("create_date"      , "createDate"),
-            ("width"            , "width"),
-            ("height"           , "height"),
-            ("sanity_level"     , "sl"),
-            ("total_view"       , "viewCount"),
-            ("total_comments"   , "commentCount"),
-            ("total_bookmarks"  , "bookmarkCount"),
-            ("restrict"         , "restrict"),
-            ("x_restrict"       , "xRestrict"),
-            ("illust_ai_type"   , "aiType"),
+            ("title", "illustTitle"),
+            ("image_urls", "urls"),
+            ("create_date", "createDate"),
+            ("width", "width"),
+            ("height", "height"),
+            ("sanity_level", "sl"),
+            ("total_view", "viewCount"),
+            ("total_comments", "commentCount"),
+            ("total_bookmarks", "bookmarkCount"),
+            ("restrict", "restrict"),
+            ("x_restrict", "xRestrict"),
+            ("illust_ai_type", "aiType"),
             ("illust_book_style", "bookStyle"),
         ):
             work[key_app] = body[key_ajax]
 
         work["user"] = {
-            "account"    : body["userAccount"],
-            "id"         : int(body["userId"]),
+            "account": body["userAccount"],
+            "id": int(body["userId"]),
             "is_followed": False,
-            "name"       : body["userName"],
+            "name": body["userName"],
             "profile_image_urls": {},
         }
 
@@ -238,8 +250,8 @@ class PixivExtractor(Extractor):
         base, _, ext = url.rpartition("_p0.")
         return [
             {
-                "url"   : "{}_p{}.{}".format(base, num, ext),
-                "suffix": "_p{:02}".format(num),
+                "url": f"{base}_p{num}.{ext}",
+                "suffix": f"_p{num:02}",
             }
             for num in range(count)
         ]
@@ -255,7 +267,7 @@ class PixivExtractor(Extractor):
         try:
             square1200 = body["userIllusts"][body["id"]]["url"]
         except Exception:
-            return
+            return None
         parts = square1200.rpartition("_p0")[0].split("/")
         del parts[3:5]
         parts[3] = "img-original"
@@ -263,7 +275,7 @@ class PixivExtractor(Extractor):
 
         for ext in ("jpg", "png", "gif"):
             try:
-                url = "{}_p0.{}".format(base, ext)
+                url = f"{base}_p0.{ext}"
                 self.request(url, method="HEAD")
                 return url
             except exception.HttpError:
@@ -273,8 +285,7 @@ class PixivExtractor(Extractor):
     def _date_from_url(url, offset=timedelta(hours=9)):
         try:
             _, _, _, _, _, y, m, d, H, M, S, _ = url.split("/")
-            return datetime(
-                int(y), int(m), int(d), int(H), int(M), int(S)) - offset
+            return datetime(int(y), int(m), int(d), int(H), int(M), int(S)) - offset
         except Exception:
             return None
 
@@ -282,21 +293,22 @@ class PixivExtractor(Extractor):
     def _make_work(kind, url, user):
         p = url.split("/")
         return {
-            "create_date"     : "{}-{}-{}T{}:{}:{}+09:00".format(
-                p[5], p[6], p[7], p[8], p[9], p[10]) if len(p) > 9 else None,
-            "height"          : 0,
-            "id"              : kind,
-            "image_urls"      : None,
-            "meta_pages"      : (),
+            "create_date": f"{p[5]}-{p[6]}-{p[7]}T{p[8]}:{p[9]}:{p[10]}+09:00"
+            if len(p) > 9
+            else None,
+            "height": 0,
+            "id": kind,
+            "image_urls": None,
+            "meta_pages": (),
             "meta_single_page": {"original_image_url": url},
-            "page_count"      : 1,
-            "sanity_level"    : 0,
-            "tags"            : (),
-            "title"           : kind,
-            "type"            : kind,
-            "user"            : user,
-            "width"           : 0,
-            "x_restrict"      : 0,
+            "page_count": 1,
+            "sanity_level": 0,
+            "tags": (),
+            "title": kind,
+            "type": kind,
+            "user": user,
+            "width": 0,
+            "x_restrict": 0,
         }
 
     def works(self):
@@ -309,10 +321,13 @@ class PixivExtractor(Extractor):
 
 class PixivUserExtractor(PixivExtractor):
     """Extractor for a pixiv user profile"""
+
     subcategory = "user"
-    pattern = (BASE_PATTERN + r"/(?:"
-               r"(?:en/)?u(?:sers)?/|member\.php\?id=|(?:mypage\.php)?#id="
-               r")(\d+)(?:$|[?#])")
+    pattern = (
+        BASE_PATTERN + r"/(?:"
+        r"(?:en/)?u(?:sers)?/|member\.php\?id=|(?:mypage\.php)?#id="
+        r")(\d+)(?:$|[?#])"
+    )
     example = "https://www.pixiv.net/en/users/12345"
 
     def __init__(self, match):
@@ -323,24 +338,30 @@ class PixivUserExtractor(PixivExtractor):
         pass
 
     def items(self):
-        base = "{}/users/{}/".format(self.root, self.user_id)
-        return self._dispatch_extractors((
-            (PixivAvatarExtractor       , base + "avatar"),
-            (PixivBackgroundExtractor   , base + "background"),
-            (PixivArtworksExtractor     , base + "artworks"),
-            (PixivFavoriteExtractor     , base + "bookmarks/artworks"),
-            (PixivNovelBookmarkExtractor, base + "bookmarks/novels"),
-            (PixivNovelUserExtractor    , base + "novels"),
-        ), ("artworks",))
+        base = f"{self.root}/users/{self.user_id}/"
+        return self._dispatch_extractors(
+            (
+                (PixivAvatarExtractor, base + "avatar"),
+                (PixivBackgroundExtractor, base + "background"),
+                (PixivArtworksExtractor, base + "artworks"),
+                (PixivFavoriteExtractor, base + "bookmarks/artworks"),
+                (PixivNovelBookmarkExtractor, base + "bookmarks/novels"),
+                (PixivNovelUserExtractor, base + "novels"),
+            ),
+            ("artworks",),
+        )
 
 
 class PixivArtworksExtractor(PixivExtractor):
     """Extractor for artworks of a pixiv user"""
+
     subcategory = "artworks"
-    pattern = (BASE_PATTERN + r"/(?:"
-               r"(?:en/)?users/(\d+)/(?:artworks|illustrations|manga)"
-               r"(?:/([^/?#]+))?/?(?:$|[?#])"
-               r"|member_illust\.php\?id=(\d+)(?:&([^#]+))?)")
+    pattern = (
+        BASE_PATTERN + r"/(?:"
+        r"(?:en/)?users/(\d+)/(?:artworks|illustrations|manga)"
+        r"(?:/([^/?#]+))?/?(?:$|[?#])"
+        r"|member_illust\.php\?id=(\d+)(?:&([^#]+))?)"
+    )
     example = "https://www.pixiv.net/en/users/12345/artworks"
     _warn_phpsessid = True
 
@@ -361,8 +382,10 @@ class PixivArtworksExtractor(PixivExtractor):
             if self._warn_phpsessid:
                 PixivArtworksExtractor._warn_phpsessid = False
                 if not self.cookies.get("PHPSESSID", domain=domain):
-                    self.log.warning("No 'PHPSESSID' cookie set. Can detect on"
-                                     "ly non R-18 'limit_sanity_level' works.")
+                    self.log.warning(
+                        "No 'PHPSESSID' cookie set. Can detect on"
+                        "ly non R-18 'limit_sanity_level' works."
+                    )
 
     def metadata(self):
         if self.config("metadata"):
@@ -373,24 +396,23 @@ class PixivArtworksExtractor(PixivExtractor):
         works = self.api.user_illusts(self.user_id)
 
         if self.sanity_workaround:
-            body = self._request_ajax(
-                "/user/{}/profile/all".format(self.user_id))
+            body = self._request_ajax(f"/user/{self.user_id}/profile/all")
             try:
                 ajax_ids = list(map(int, body["illusts"]))
                 ajax_ids.extend(map(int, body["manga"]))
                 ajax_ids.sort()
             except Exception as exc:
-                self.log.warning("Unable to collect artwork IDs using AJAX "
-                                 "API (%s: %s)", exc.__class__.__name__, exc)
+                self.log.warning(
+                    "Unable to collect artwork IDs using AJAX " "API (%s: %s)",
+                    exc.__class__.__name__,
+                    exc,
+                )
             else:
                 works = self._extend_sanity(works, ajax_ids)
 
         if self.tag:
             tag = self.tag.lower()
-            works = (
-                work for work in works
-                if tag in [t["name"].lower() for t in work["tags"]]
-            )
+            works = (work for work in works if tag in [t["name"].lower() for t in work["tags"]])
 
         return works
 
@@ -426,6 +448,7 @@ class PixivArtworksExtractor(PixivExtractor):
 
 class PixivAvatarExtractor(PixivExtractor):
     """Extractor for pixiv avatars"""
+
     subcategory = "avatar"
     filename_fmt = "avatar{date:?_//%Y-%m-%d}.{extension}"
     archive_fmt = "avatar_{user[id]}_{date}"
@@ -444,6 +467,7 @@ class PixivAvatarExtractor(PixivExtractor):
 
 class PixivBackgroundExtractor(PixivExtractor):
     """Extractor for pixiv background banners"""
+
     subcategory = "background"
     filename_fmt = "background{date:?_//%Y-%m-%d}.{extension}"
     archive_fmt = "background_{user[id]}_{date}"
@@ -473,6 +497,7 @@ class PixivBackgroundExtractor(PixivExtractor):
 
 class PixivMeExtractor(PixivExtractor):
     """Extractor for pixiv.me URLs"""
+
     subcategory = "me"
     pattern = r"(?:https?://)?pixiv\.me/([^/?#]+)"
     example = "https://pixiv.me/USER"
@@ -484,20 +509,22 @@ class PixivMeExtractor(PixivExtractor):
     def items(self):
         url = "https://pixiv.me/" + self.account
         data = {"_extractor": PixivUserExtractor}
-        response = self.request(
-            url, method="HEAD", allow_redirects=False, notfound="user")
+        response = self.request(url, method="HEAD", allow_redirects=False, notfound="user")
         yield Message.Queue, response.headers["Location"], data
 
 
 class PixivWorkExtractor(PixivExtractor):
     """Extractor for a single pixiv work/illustration"""
+
     subcategory = "work"
-    pattern = (r"(?:https?://)?(?:(?:www\.|touch\.)?pixiv\.net"
-               r"/(?:(?:en/)?artworks/"
-               r"|member_illust\.php\?(?:[^&]+&)*illust_id=)(\d+)"
-               r"|(?:i(?:\d+\.pixiv|\.pximg)\.net"
-               r"/(?:(?:.*/)?img-[^/]+/img/\d{4}(?:/\d\d){5}|img\d+/img/[^/]+)"
-               r"|img\d*\.pixiv\.net/img/[^/]+|(?:www\.)?pixiv\.net/i)/(\d+))")
+    pattern = (
+        r"(?:https?://)?(?:(?:www\.|touch\.)?pixiv\.net"
+        r"/(?:(?:en/)?artworks/"
+        r"|member_illust\.php\?(?:[^&]+&)*illust_id=)(\d+)"
+        r"|(?:i(?:\d+\.pixiv|\.pximg)\.net"
+        r"/(?:(?:.*/)?img-[^/]+/img/\d{4}(?:/\d\d){5}|img\d+/img/[^/]+)"
+        r"|img\d*\.pixiv\.net/img/[^/]+|(?:www\.)?pixiv\.net/i)/(\d+))"
+    )
     example = "https://www.pixiv.net/artworks/12345"
 
     def __init__(self, match):
@@ -514,6 +541,7 @@ class PixivWorkExtractor(PixivExtractor):
 
 class PixivUnlistedExtractor(PixivExtractor):
     """Extractor for a unlisted pixiv illustrations"""
+
     subcategory = "unlisted"
     pattern = BASE_PATTERN + r"/(?:en/)?artworks/unlisted/(\w+)"
     example = "https://www.pixiv.net/en/artworks/unlisted/a1b2c3d4e5f6g7h8i9j0"
@@ -530,13 +558,15 @@ class PixivUnlistedExtractor(PixivExtractor):
 
 class PixivFavoriteExtractor(PixivExtractor):
     """Extractor for all favorites/bookmarks of a pixiv user"""
+
     subcategory = "favorite"
-    directory_fmt = ("{category}", "bookmarks",
-                     "{user_bookmark[id]} {user_bookmark[account]}")
+    directory_fmt = ("{category}", "bookmarks", "{user_bookmark[id]} {user_bookmark[account]}")
     archive_fmt = "f_{user_bookmark[id]}_{id}{num}.{extension}"
-    pattern = (BASE_PATTERN + r"/(?:(?:en/)?"
-               r"users/(\d+)/(bookmarks/artworks|following)(?:/([^/?#]+))?"
-               r"|bookmark\.php)(?:\?([^#]*))?")
+    pattern = (
+        BASE_PATTERN + r"/(?:(?:en/)?"
+        r"users/(\d+)/(bookmarks/artworks|following)(?:/([^/?#]+))?"
+        r"|bookmark\.php)(?:\?([^#]*))?"
+    )
     example = "https://www.pixiv.net/en/users/12345/bookmarks/artworks"
 
     def __init__(self, match):
@@ -593,10 +623,10 @@ class PixivFavoriteExtractor(PixivExtractor):
 
 class PixivRankingExtractor(PixivExtractor):
     """Extractor for pixiv ranking pages"""
+
     subcategory = "ranking"
     archive_fmt = "r_{ranking[mode]}_{ranking[date]}_{id}{num}.{extension}"
-    directory_fmt = ("{category}", "rankings",
-                     "{ranking[mode]}", "{ranking[date]}")
+    directory_fmt = ("{category}", "rankings", "{ranking[mode]}", "{ranking[date]}")
     pattern = BASE_PATTERN + r"/ranking\.php(?:\?([^#]*))?"
     example = "https://www.pixiv.net/ranking.php"
 
@@ -636,7 +666,7 @@ class PixivRankingExtractor(PixivExtractor):
         date = query.get("date")
         if date:
             if len(date) == 8 and date.isdecimal():
-                date = "{}-{}-{}".format(date[0:4], date[4:6], date[6:8])
+                date = f"{date[0:4]}-{date[4:6]}-{date[6:8]}"
             else:
                 self.log.warning("invalid date '%s'", date)
                 date = None
@@ -645,19 +675,23 @@ class PixivRankingExtractor(PixivExtractor):
             date = (now - timedelta(days=1)).strftime("%Y-%m-%d")
         self.date = date
 
-        return {"ranking": {
-            "mode": mode,
-            "date": self.date,
-        }}
+        return {
+            "ranking": {
+                "mode": mode,
+                "date": self.date,
+            }
+        }
 
 
 class PixivSearchExtractor(PixivExtractor):
     """Extractor for pixiv search results"""
+
     subcategory = "search"
     archive_fmt = "s_{search[word]}_{id}{num}.{extension}"
     directory_fmt = ("{category}", "search", "{search[word]}")
-    pattern = (BASE_PATTERN + r"/(?:(?:en/)?tags/([^/?#]+)(?:/[^/?#]+)?/?"
-               r"|search\.php)(?:\?([^#]+))?")
+    pattern = (
+        BASE_PATTERN + r"/(?:(?:en/)?tags/([^/?#]+)(?:/[^/?#]+)?/?" r"|search\.php)(?:\?([^#]+))?"
+    )
     example = "https://www.pixiv.net/en/tags/TAG"
 
     def __init__(self, match):
@@ -667,8 +701,8 @@ class PixivSearchExtractor(PixivExtractor):
 
     def works(self):
         return self.api.search_illust(
-            self.word, self.sort, self.target,
-            date_start=self.date_start, date_end=self.date_end)
+            self.word, self.sort, self.target, date_start=self.date_start, date_end=self.date_end
+        )
 
     def metadata(self):
         query = text.parse_query(self.query)
@@ -708,17 +742,20 @@ class PixivSearchExtractor(PixivExtractor):
         self.date_start = query.get("scd")
         self.date_end = query.get("ecd")
 
-        return {"search": {
-            "word": self.word,
-            "sort": self.sort,
-            "target": self.target,
-            "date_start": self.date_start,
-            "date_end": self.date_end,
-        }}
+        return {
+            "search": {
+                "word": self.word,
+                "sort": self.sort,
+                "target": self.target,
+                "date_start": self.date_start,
+                "date_end": self.date_end,
+            }
+        }
 
 
 class PixivFollowExtractor(PixivExtractor):
     """Extractor for new illustrations from your followed artists"""
+
     subcategory = "follow"
     archive_fmt = "F_{user_follow[id]}_{id}{num}.{extension}"
     directory_fmt = ("{category}", "following")
@@ -735,9 +772,9 @@ class PixivFollowExtractor(PixivExtractor):
 
 class PixivPixivisionExtractor(PixivExtractor):
     """Extractor for illustrations from a pixivision article"""
+
     subcategory = "pixivision"
-    directory_fmt = ("{category}", "pixivision",
-                     "{pixivision_id} {pixivision_title}")
+    directory_fmt = ("{category}", "pixivision", "{pixivision_id} {pixivision_title}")
     archive_fmt = "V{pixivision_id}_{id}{suffix}.{extension}"
     pattern = r"(?:https?://)?(?:www\.)?pixivision\.net/(?:en/)?a/(\d+)"
     example = "https://www.pixivision.net/en/a/12345"
@@ -749,8 +786,9 @@ class PixivPixivisionExtractor(PixivExtractor):
     def works(self):
         return (
             self.api.illust_detail(illust_id.partition("?")[0])
-            for illust_id in util.unique_sequence(text.extract_iter(
-                self.page, '<a href="https://www.pixiv.net/en/artworks/', '"'))
+            for illust_id in util.unique_sequence(
+                text.extract_iter(self.page, '<a href="https://www.pixiv.net/en/artworks/', '"')
+            )
         )
 
     def metadata(self):
@@ -758,18 +796,18 @@ class PixivPixivisionExtractor(PixivExtractor):
         headers = {"User-Agent": "Mozilla/5.0"}
         self.page = self.request(url, headers=headers).text
 
-        title = text.extr(self.page, '<title>', '<')
+        title = text.extr(self.page, "<title>", "<")
         return {
-            "pixivision_id"   : self.pixivision_id,
+            "pixivision_id": self.pixivision_id,
             "pixivision_title": text.unescape(title),
         }
 
 
 class PixivSeriesExtractor(PixivExtractor):
     """Extractor for illustrations from a Pixiv series"""
+
     subcategory = "series"
-    directory_fmt = ("{category}", "{user[id]} {user[account]}",
-                     "{series[id]} {series[title]}")
+    directory_fmt = ("{category}", "{user[id]} {user[account]}", "{series[id]} {series[title]}")
     filename_fmt = "{num_series:>03}_{id}_p{num}.{extension}"
     pattern = BASE_PATTERN + r"/user/(\d+)/series/(\d+)"
     example = "https://www.pixiv.net/user/12345/series/12345"
@@ -795,6 +833,7 @@ class PixivSeriesExtractor(PixivExtractor):
 
 class PixivNovelExtractor(PixivExtractor):
     """Extractor for pixiv novels"""
+
     subcategory = "novel"
     request_interval = (0.5, 1.5)
     pattern = BASE_PATTERN + r"/n(?:ovel/show\.php\?id=|/)(\d+)"
@@ -809,11 +848,13 @@ class PixivNovelExtractor(PixivExtractor):
         if tags == "original":
             transform_tags = None
         elif tags == "translated":
+
             def transform_tags(work):
-                work["tags"] = list(dict.fromkeys(
-                    tag["translated_name"] or tag["name"]
-                    for tag in work["tags"]))
+                work["tags"] = list(
+                    dict.fromkeys(tag["translated_name"] or tag["name"] for tag in work["tags"])
+                )
         else:
+
             def transform_tags(work):
                 work["tags"] = [tag["name"] for tag in work["tags"]]
 
@@ -823,12 +864,12 @@ class PixivNovelExtractor(PixivExtractor):
 
         if embeds:
             headers = {
-                "User-Agent"    : "Mozilla/5.0",
-                "App-OS"        : None,
+                "User-Agent": "Mozilla/5.0",
+                "App-OS": None,
                 "App-OS-Version": None,
-                "App-Version"   : None,
-                "Referer"       : self.root + "/",
-                "Authorization" : None,
+                "App-Version": None,
+                "Referer": self.root + "/",
+                "Authorization": None,
             }
 
         novels = self.novels()
@@ -839,14 +880,14 @@ class PixivNovelExtractor(PixivExtractor):
                 novel.update(self.api.user_detail(novel["user"]["id"]))
             if self.meta_comments:
                 if novel["total_comments"]:
-                    novel["comments"] = list(
-                        self.api.novel_comments(novel["id"]))
+                    novel["comments"] = list(self.api.novel_comments(novel["id"]))
                 else:
                     novel["comments"] = ()
             if self.meta_bookmark and novel["is_bookmarked"]:
                 detail = self.api.novel_bookmark_detail(novel["id"])
-                novel["tags_bookmark"] = [tag["name"] for tag in detail["tags"]
-                                          if tag["is_registered"]]
+                novel["tags_bookmark"] = [
+                    tag["name"] for tag in detail["tags"] if tag["is_registered"]
+                ]
             if transform_tags:
                 transform_tags(novel)
             novel["num"] = 0
@@ -867,8 +908,9 @@ class PixivNovelExtractor(PixivExtractor):
 
             if covers:
                 path = novel["image_urls"]["large"].partition("/img/")[2]
-                url = ("https://i.pximg.net/novel-cover-original/img/" +
-                       path.rpartition(".")[0].replace("_master1200", ""))
+                url = "https://i.pximg.net/novel-cover-original/img/" + path.rpartition(".")[
+                    0
+                ].replace("_master1200", "")
                 novel["date_url"] = self._date_from_url(url)
                 novel["num"] += 1
                 novel["suffix"] = "_p{:02}".format(novel["num"])
@@ -890,14 +932,16 @@ class PixivNovelExtractor(PixivExtractor):
 
                 if desktop:
                     novel_id = str(novel["id"])
-                    url = "{}/novel/show.php?id={}".format(
-                        self.root, novel_id)
-                    data = util.json_loads(text.extr(
-                        self.request(url, headers=headers).text,
-                        "id=\"meta-preload-data\" content='", "'"))
+                    url = f"{self.root}/novel/show.php?id={novel_id}"
+                    data = util.json_loads(
+                        text.extr(
+                            self.request(url, headers=headers).text,
+                            'id="meta-preload-data" content=\'',
+                            "'",
+                        )
+                    )
 
-                    for image in (data["novel"][novel_id]
-                                  ["textEmbeddedImages"]).values():
+                    for image in (data["novel"][novel_id]["textEmbeddedImages"]).values():
                         url = image.pop("urls")["original"]
                         novel.update(image)
                         novel["date_url"] = self._date_from_url(url)
@@ -912,7 +956,7 @@ class PixivNovelExtractor(PixivExtractor):
                     for illust_id in illusts:
                         novel["num"] += 1
                         novel["suffix"] = "_p{:02}".format(novel["num"])
-                        url = "{}/artworks/{}".format(self.root, illust_id)
+                        url = f"{self.root}/artworks/{illust_id}"
                         yield Message.Queue, url, novel
 
     def novels(self):
@@ -925,6 +969,7 @@ class PixivNovelExtractor(PixivExtractor):
 
 class PixivNovelUserExtractor(PixivNovelExtractor):
     """Extractor for pixiv users' novels"""
+
     subcategory = "novel-user"
     pattern = USER_PATTERN + r"/novels"
     example = "https://www.pixiv.net/en/users/12345/novels"
@@ -935,6 +980,7 @@ class PixivNovelUserExtractor(PixivNovelExtractor):
 
 class PixivNovelSeriesExtractor(PixivNovelExtractor):
     """Extractor for pixiv novel series"""
+
     subcategory = "novel-series"
     pattern = BASE_PATTERN + r"/novel/series/(\d+)"
     example = "https://www.pixiv.net/novel/series/12345"
@@ -945,9 +991,9 @@ class PixivNovelSeriesExtractor(PixivNovelExtractor):
 
 class PixivNovelBookmarkExtractor(PixivNovelExtractor):
     """Extractor for bookmarked pixiv novels"""
+
     subcategory = "novel-bookmark"
-    pattern = (USER_PATTERN + r"/bookmarks/novels"
-               r"(?:/([^/?#]+))?(?:/?\?([^#]+))?")
+    pattern = USER_PATTERN + r"/bookmarks/novels" r"(?:/([^/?#]+))?(?:/?\?([^#]+))?"
     example = "https://www.pixiv.net/en/users/12345/bookmarks/novels"
 
     def __init__(self, match):
@@ -955,21 +1001,15 @@ class PixivNovelBookmarkExtractor(PixivNovelExtractor):
         self.user_id, self.tag, self.query = match.groups()
 
     def novels(self):
-        if self.tag:
-            tag = text.unquote(self.tag)
-        else:
-            tag = None
-
-        if text.parse_query(self.query).get("rest") == "hide":
-            restrict = "private"
-        else:
-            restrict = "public"
+        tag = text.unquote(self.tag) if self.tag else None
+        restrict = "private" if text.parse_query(self.query).get("rest") == "hide" else "public"
 
         return self.api.user_bookmarks_novel(self.user_id, tag, restrict)
 
 
 class PixivSketchExtractor(Extractor):
     """Extractor for user pages on sketch.pixiv.net"""
+
     category = "pixiv"
     subcategory = "sketch"
     directory_fmt = ("{category}", "sketch", "{user[unique_name]}")
@@ -985,13 +1025,12 @@ class PixivSketchExtractor(Extractor):
         self.username = match.group(1)
 
     def items(self):
-        headers = {"Referer": "{}/@{}".format(self.root, self.username)}
+        headers = {"Referer": f"{self.root}/@{self.username}"}
 
         for post in self.posts():
             media = post["media"]
             post["post_id"] = post["id"]
-            post["date"] = text.parse_datetime(
-                post["created_at"], "%Y-%m-%dT%H:%M:%S.%f%z")
+            post["date"] = text.parse_datetime(post["created_at"], "%Y-%m-%dT%H:%M:%S.%f%z")
             util.delete_items(post, ("id", "media", "_links"))
 
             yield Message.Directory, post
@@ -1008,11 +1047,10 @@ class PixivSketchExtractor(Extractor):
                 yield Message.Url, url, post
 
     def posts(self):
-        url = "{}/api/walls/@{}/posts/public.json".format(
-            self.root, self.username)
+        url = f"{self.root}/api/walls/@{self.username}/posts/public.json"
         headers = {
             "Accept": "application/vnd.sketch-v4+json",
-            "X-Requested-With": "{}/@{}".format(self.root, self.username),
+            "X-Requested-With": f"{self.root}/@{self.username}",
             "Referer": self.root + "/",
         }
 
@@ -1026,17 +1064,17 @@ class PixivSketchExtractor(Extractor):
             url = self.root + next_url["href"]
 
 
-class PixivAppAPI():
+class PixivAppAPI:
     """Minimal interface for the Pixiv App API for mobile devices
 
     For a more complete implementation or documentation, see
     - https://github.com/upbit/pixivpy
     - https://gist.github.com/ZipFile/3ba99b47162c23f8aea5d5942bb557b1
     """
+
     CLIENT_ID = "MOBrBDS8blbauoSck0ZfDbtuzpyT"
     CLIENT_SECRET = "lsACyCD94FhDUtGTXi3QzcFE2uU1hqtDaKeqrdwj"
-    HASH_SECRET = ("28c1fdd170a5204386cb1313c7077b34"
-                   "f83e4aaf4aa829ce78c231e05b0bae2c")
+    HASH_SECRET = "28c1fdd170a5204386cb1313c7077b34" "f83e4aaf4aa829ce78c231e05b0bae2c"
 
     def __init__(self, extractor):
         self.extractor = extractor
@@ -1045,18 +1083,18 @@ class PixivAppAPI():
         self.user = None
 
         extractor.headers_web = extractor.session.headers.copy()
-        extractor.session.headers.update({
-            "App-OS"        : "ios",
-            "App-OS-Version": "16.7.2",
-            "App-Version"   : "7.19.1",
-            "User-Agent"    : "PixivIOSApp/7.19.1 (iOS 16.7.2; iPhone12,8)",
-            "Referer"       : "https://app-api.pixiv.net/",
-        })
+        extractor.session.headers.update(
+            {
+                "App-OS": "ios",
+                "App-OS-Version": "16.7.2",
+                "App-Version": "7.19.1",
+                "User-Agent": "PixivIOSApp/7.19.1 (iOS 16.7.2; iPhone12,8)",
+                "Referer": "https://app-api.pixiv.net/",
+            }
+        )
 
-        self.client_id = extractor.config(
-            "client-id", self.CLIENT_ID)
-        self.client_secret = extractor.config(
-            "client-secret", self.CLIENT_SECRET)
+        self.client_id = extractor.config("client-id", self.CLIENT_ID)
+        self.client_secret = extractor.config("client-secret", self.CLIENT_SECRET)
 
         token = extractor.config("refresh-token")
         if token is None or token == "cache":
@@ -1072,28 +1110,28 @@ class PixivAppAPI():
     def _login_impl(self, username):
         if not self.refresh_token:
             raise exception.AuthenticationError(
-                "'refresh-token' required.\n"
-                "Run `gallery-dl oauth:pixiv` to get one.")
+                "'refresh-token' required.\n" "Run `gallery-dl oauth:pixiv` to get one."
+            )
 
         self.log.info("Refreshing access token")
         url = "https://oauth.secure.pixiv.net/auth/token"
         data = {
-            "client_id"     : self.client_id,
-            "client_secret" : self.client_secret,
-            "grant_type"    : "refresh_token",
-            "refresh_token" : self.refresh_token,
+            "client_id": self.client_id,
+            "client_secret": self.client_secret,
+            "grant_type": "refresh_token",
+            "refresh_token": self.refresh_token,
             "get_secure_url": "1",
         }
 
         time = util.datetime_utcnow().strftime("%Y-%m-%dT%H:%M:%S+00:00")
         headers = {
             "X-Client-Time": time,
-            "X-Client-Hash": hashlib.md5(
-                (time + self.HASH_SECRET).encode()).hexdigest(),
+            "X-Client-Hash": hashlib.md5((time + self.HASH_SECRET).encode()).hexdigest(),
         }
 
         response = self.extractor.request(
-            url, method="POST", headers=headers, data=data, fatal=False)
+            url, method="POST", headers=headers, data=data, fatal=False
+        )
         if response.status_code >= 400:
             self.log.debug(response.text)
             raise exception.AuthenticationError("Invalid refresh token")
@@ -1107,8 +1145,7 @@ class PixivAppAPI():
 
     def illust_bookmark_detail(self, illust_id):
         params = {"illust_id": illust_id}
-        return self._call(
-            "/v2/illust/bookmark/detail", params)["bookmark_detail"]
+        return self._call("/v2/illust/bookmark/detail", params)["bookmark_detail"]
 
     def illust_comments(self, illust_id):
         params = {"illust_id": illust_id}
@@ -1128,13 +1165,11 @@ class PixivAppAPI():
 
     def illust_series(self, series_id, offset=0):
         params = {"illust_series_id": series_id, "offset": offset}
-        return self._pagination("/v1/illust/series", params,
-                                key_data="illust_series_detail")
+        return self._pagination("/v1/illust/series", params, key_data="illust_series_detail")
 
     def novel_bookmark_detail(self, novel_id):
         params = {"novel_id": novel_id}
-        return self._call(
-            "/v2/novel/bookmark/detail", params)["bookmark_detail"]
+        return self._call("/v2/novel/bookmark/detail", params)["bookmark_detail"]
 
     def novel_comments(self, novel_id):
         params = {"novel_id": novel_id}
@@ -1154,18 +1189,22 @@ class PixivAppAPI():
 
     def novel_webview(self, novel_id):
         params = {"id": novel_id, "viewer_version": "20221031_ai"}
-        return self._call(
-            "/webview/v2/novel", params, self._novel_webview_parse)
+        return self._call("/webview/v2/novel", params, self._novel_webview_parse)
 
     def _novel_webview_parse(self, response):
-        return util.json_loads(text.extr(
-            response.text, "novel: ", ",\n"))
+        return util.json_loads(text.extr(response.text, "novel: ", ",\n"))
 
-    def search_illust(self, word, sort=None, target=None, duration=None,
-                      date_start=None, date_end=None):
-        params = {"word": word, "search_target": target,
-                  "sort": sort, "duration": duration,
-                  "start_date": date_start, "end_date": date_end}
+    def search_illust(
+        self, word, sort=None, target=None, duration=None, date_start=None, date_end=None
+    ):
+        params = {
+            "word": word,
+            "search_target": target,
+            "sort": sort,
+            "duration": duration,
+            "start_date": date_start,
+            "end_date": date_end,
+        }
         return self._pagination("/v1/search/illust", params)
 
     def user_bookmarks_illust(self, user_id, tag=None, restrict="public"):
@@ -1181,8 +1220,7 @@ class PixivAppAPI():
     def user_bookmark_tags_illust(self, user_id, restrict="public"):
         """Return bookmark tags defined by a user"""
         params = {"user_id": user_id, "restrict": restrict}
-        return self._pagination(
-            "/v1/user/bookmark-tags/illust", params, "bookmark_tags")
+        return self._pagination("/v1/user/bookmark-tags/illust", params, "bookmark_tags")
 
     @memcache(keyarg=1)
     def user_detail(self, user_id):
@@ -1212,10 +1250,7 @@ class PixivAppAPI():
             self.login()
             response = self.extractor.request(url, params=params, fatal=False)
 
-            if parse:
-                data = parse(response)
-            else:
-                data = response.json()
+            data = parse(response) if parse else response.json()
 
             if "error" not in data:
                 return data
@@ -1232,8 +1267,7 @@ class PixivAppAPI():
 
             raise exception.StopExtraction("API request failed: %s", error)
 
-    def _pagination(self, endpoint, params,
-                    key_items="illusts", key_data=None):
+    def _pagination(self, endpoint, params, key_items="illusts", key_data=None):
         while True:
             data = self._call(endpoint, params)
 
@@ -1248,6 +1282,6 @@ class PixivAppAPI():
             params = text.parse_query(query)
 
 
-@cache(maxage=36500*86400, keyarg=0)
+@cache(maxage=36500 * 86400, keyarg=0)
 def _refresh_token_cache(username):
     return None

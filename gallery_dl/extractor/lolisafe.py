@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2021-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,19 +6,20 @@
 
 """Extractors for lolisafe/chibisafe instances"""
 
-from .common import BaseExtractor, Message
 from .. import text
+from .common import BaseExtractor
+from .common import Message
 
 
 class LolisafeExtractor(BaseExtractor):
     """Base class for lolisafe extractors"""
+
     basecategory = "lolisafe"
     directory_fmt = ("{category}", "{album_name} ({album_id})")
     archive_fmt = "{album_id}_{id}"
 
 
-BASE_PATTERN = LolisafeExtractor.update({
-})
+BASE_PATTERN = LolisafeExtractor.update({})
 
 
 class LolisafeAlbumExtractor(LolisafeExtractor):
@@ -58,17 +57,16 @@ class LolisafeAlbumExtractor(LolisafeExtractor):
                 file["name"] = file["filename"]
                 file["filename"] = "{}-{}".format(file["name"], file["id"])
             else:
-                file["name"], sep, file["id"] = \
-                    file["filename"].rpartition("-")
+                file["name"], sep, file["id"] = file["filename"].rpartition("-")
 
             yield Message.Url, url, file
 
     def fetch_album(self, album_id):
-        url = "{}/api/album/get/{}".format(self.root, album_id)
+        url = f"{self.root}/api/album/get/{album_id}"
         data = self.request(url).json()
 
         return data["files"], {
-            "album_id"  : self.album_id,
+            "album_id": self.album_id,
             "album_name": text.unescape(data["title"]),
-            "count"     : data["count"],
+            "count": data["count"],
         }

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2018-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,18 +6,22 @@
 
 """Extractors for https://idol.sankakucomplex.com/"""
 
-from .sankaku import SankakuExtractor
-from .common import Message
-from ..cache import cache
-from .. import text, util, exception
 import collections
 import re
+
+from .. import exception
+from .. import text
+from .. import util
+from ..cache import cache
+from .common import Message
+from .sankaku import SankakuExtractor
 
 BASE_PATTERN = r"(?:https?://)?idol\.sankakucomplex\.com(?:/[a-z]{2})?"
 
 
 class IdolcomplexExtractor(SankakuExtractor):
     """Base class for idolcomplex extractors"""
+
     category = "idolcomplex"
     root = "https://idol.sankakucomplex.com"
     cookies_domain = "idol.sankakucomplex.com"
@@ -34,9 +36,7 @@ class IdolcomplexExtractor(SankakuExtractor):
         self.start_post = 0
 
     def _init(self):
-        self.find_pids = re.compile(
-            r" href=[\"#]/\w\w/posts/(\w+)"
-        ).findall
+        self.find_pids = re.compile(r" href=[\"#]/\w\w/posts/(\w+)").findall
         self.find_tags = re.compile(
             r'tag-type-([^"]+)">\s*<a [^>]*?href="/[^?]*\?tags=([^"]+)'
         ).findall
@@ -62,7 +62,7 @@ class IdolcomplexExtractor(SankakuExtractor):
 
     def login(self):
         if self.cookies_check(self.cookies_names):
-            return
+            return None
 
         username, password = self._get_auth_info()
         if username:
@@ -70,7 +70,7 @@ class IdolcomplexExtractor(SankakuExtractor):
 
         self.logged_in = False
 
-    @cache(maxage=90*86400, keyarg=1)
+    @cache(maxage=90 * 86400, keyarg=1)
     def _login_impl(self, username, password):
         self.log.info("Logging in as %s", username)
 
@@ -80,15 +80,15 @@ class IdolcomplexExtractor(SankakuExtractor):
         headers = {
             "Referer": url,
         }
-        url = self.root + (text.extr(page, '<form action="', '"') or
-                           "/en/user/authenticate")
+        url = self.root + (text.extr(page, '<form action="', '"') or "/en/user/authenticate")
         data = {
-            "authenticity_token": text.unescape(text.extr(
-                page, 'name="authenticity_token" value="', '"')),
-            "url"           : "",
-            "user[name]"    : username,
+            "authenticity_token": text.unescape(
+                text.extr(page, 'name="authenticity_token" value="', '"')
+            ),
+            "url": "",
+            "user[name]": username,
             "user[password]": password,
-            "commit"        : "Login",
+            "commit": "Login",
         }
         response = self.request(url, method="POST", headers=headers, data=data)
 
@@ -102,40 +102,40 @@ class IdolcomplexExtractor(SankakuExtractor):
         extr = text.extract_from(page)
 
         vavg = extr('id="rating"', "</ul>")
-        vcnt = extr('>Votes</strong>:', "<")
+        vcnt = extr(">Votes</strong>:", "<")
         pid = extr(">Post ID:", "<")
         created = extr(' title="', '"')
 
-        file_url = extr('>Original:', 'id=')
+        file_url = extr(">Original:", "id=")
         if file_url:
             file_url = extr(' href="', '"')
             width = extr(">", "x")
             height = extr("", " ")
         else:
-            width = extr('<object width=', ' ')
-            height = extr('height=', '>')
+            width = extr("<object width=", " ")
+            height = extr("height=", ">")
             file_url = extr('<embed src="', '"')
 
         rating = extr(">Rating:", "<br")
 
         data = {
-            "id"          : pid.strip(),
-            "md5"         : file_url.rpartition("/")[2].partition(".")[0],
-            "vote_average": (1.0 * vavg.count('class="star-full"') +
-                             0.5 * vavg.count('class="star-half"')),
-            "vote_count"  : text.parse_int(vcnt),
-            "created_at"  : created,
-            "date"        : text.parse_datetime(
-                created, "%Y-%m-%d %H:%M:%S.%f"),
-            "rating"      : text.remove_html(rating).lower(),
-            "file_url"    : "https:" + text.unescape(file_url),
-            "width"       : text.parse_int(width),
-            "height"      : text.parse_int(height),
+            "id": pid.strip(),
+            "md5": file_url.rpartition("/")[2].partition(".")[0],
+            "vote_average": (
+                1.0 * vavg.count('class="star-full"') + 0.5 * vavg.count('class="star-half"')
+            ),
+            "vote_count": text.parse_int(vcnt),
+            "created_at": created,
+            "date": text.parse_datetime(created, "%Y-%m-%d %H:%M:%S.%f"),
+            "rating": text.remove_html(rating).lower(),
+            "file_url": "https:" + text.unescape(file_url),
+            "width": text.parse_int(width),
+            "height": text.parse_int(height),
         }
 
         tags = collections.defaultdict(list)
         tags_list = []
-        tags_html = text.extr(page, '<ul id="tag-sidebar"', '</ul>')
+        tags_html = text.extr(page, '<ul id="tag-sidebar"', "</ul>")
         for tag_type, tag_name in self.find_tags(tags_html or ""):
             tags[tag_type].append(text.unquote(tag_name))
         for key, value in tags.items():
@@ -148,6 +148,7 @@ class IdolcomplexExtractor(SankakuExtractor):
 
 class IdolcomplexTagExtractor(IdolcomplexExtractor):
     """Extractor for images from idol.sankakucomplex.com by search-tags"""
+
     subcategory = "tag"
     directory_fmt = ("{category}", "{search_tags}")
     archive_fmt = "t_{search_tags}_{id}"
@@ -175,15 +176,13 @@ class IdolcomplexTagExtractor(IdolcomplexExtractor):
         if not self.next:
             max_page = 50 if self.logged_in else 25
             if self.start_page > max_page:
-                self.log.info("Traversing from page %d to page %d",
-                              max_page, self.start_page)
+                self.log.info("Traversing from page %d to page %d", max_page, self.start_page)
                 self.start_post += self.per_page * (self.start_page - max_page)
                 self.start_page = max_page
 
         tags = self.tags.split()
         if not self.logged_in and len(tags) > 4:
-            raise exception.StopExtraction(
-                "Non-members can only search up to 4 tags at once")
+            raise exception.StopExtraction("Non-members can only search up to 4 tags at once")
         return {"search_tags": " ".join(tags)}
 
     def post_ids(self):
@@ -196,8 +195,9 @@ class IdolcomplexTagExtractor(IdolcomplexExtractor):
 
         while True:
             page = self.request(self.root, params=params, retries=10).text
-            pos = ((page.find('id="more-popular-posts-link"') + 1) or
-                   (page.find('<span class="thumb') + 1))
+            pos = (page.find('id="more-popular-posts-link"') + 1) or (
+                page.find('<span class="thumb') + 1
+            )
 
             yield from self.find_pids(page, pos)
 
@@ -205,8 +205,9 @@ class IdolcomplexTagExtractor(IdolcomplexExtractor):
             if not next_url:
                 return
 
-            next_params = text.parse_query(text.unquote(text.unescape(
-                text.unescape(next_url).lstrip("?/"))))
+            next_params = text.parse_query(
+                text.unquote(text.unescape(text.unescape(next_url).lstrip("?/")))
+            )
 
             if "next" in next_params:
                 # stop if the same "next" value occurs twice in a row (#265)
@@ -218,6 +219,7 @@ class IdolcomplexTagExtractor(IdolcomplexExtractor):
 
 class IdolcomplexPoolExtractor(IdolcomplexExtractor):
     """Extractor for image-pools from idol.sankakucomplex.com"""
+
     subcategory = "pool"
     directory_fmt = ("{category}", "pool", "{pool}")
     archive_fmt = "p_{pool}_{id}"
@@ -255,6 +257,7 @@ class IdolcomplexPoolExtractor(IdolcomplexExtractor):
 
 class IdolcomplexPostExtractor(IdolcomplexExtractor):
     """Extractor for single images from idol.sankakucomplex.com"""
+
     subcategory = "post"
     archive_fmt = "{id}"
     pattern = BASE_PATTERN + r"/posts?/(?:show/)?(\w+)"

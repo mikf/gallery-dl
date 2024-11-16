@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 
 # Copyright 2018-2022 Mike Fährmann
 #
@@ -7,31 +6,30 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-import os
-import sys
-import unittest
-from unittest.mock import Mock, MagicMock, patch
-
-import re
-import logging
-import os.path
 import binascii
+import http.server
+import logging
+import os
+import os.path
+import re
+import sys
 import tempfile
 import threading
-import http.server
-
+import unittest
+from unittest.mock import MagicMock
+from unittest.mock import Mock
+from unittest.mock import patch
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from gallery_dl import downloader, extractor, output, config, path  # noqa E402
-from gallery_dl.downloader.http import MIME_TYPES, SIGNATURE_CHECKS # noqa E402
+from gallery_dl.downloader.http import MIME_TYPES, SIGNATURE_CHECKS  # noqa E402
 
 
 class MockDownloaderModule(Mock):
     __downloader__ = "mock"
 
 
-class FakeJob():
-
+class FakeJob:
     def __init__(self):
         self.extractor = extractor.find("generic:https://example.org/")
         self.extractor.initialize()
@@ -41,7 +39,6 @@ class FakeJob():
 
 
 class TestDownloaderModule(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         # allow import of ytdl downloader module without youtube_dl installed
@@ -61,24 +58,24 @@ class TestDownloaderModule(unittest.TestCase):
     def test_find(self):
         cls = downloader.find("http")
         self.assertEqual(cls.__name__, "HttpDownloader")
-        self.assertEqual(cls.scheme  , "http")
+        self.assertEqual(cls.scheme, "http")
 
         cls = downloader.find("https")
         self.assertEqual(cls.__name__, "HttpDownloader")
-        self.assertEqual(cls.scheme  , "http")
+        self.assertEqual(cls.scheme, "http")
 
         cls = downloader.find("text")
         self.assertEqual(cls.__name__, "TextDownloader")
-        self.assertEqual(cls.scheme  , "text")
+        self.assertEqual(cls.scheme, "text")
 
         cls = downloader.find("ytdl")
         self.assertEqual(cls.__name__, "YoutubeDLDownloader")
-        self.assertEqual(cls.scheme  , "ytdl")
+        self.assertEqual(cls.scheme, "ytdl")
 
         self.assertEqual(downloader.find("ftp"), None)
         self.assertEqual(downloader.find("foo"), None)
-        self.assertEqual(downloader.find(1234) , None)
-        self.assertEqual(downloader.find(None) , None)
+        self.assertEqual(downloader.find(1234), None)
+        self.assertEqual(downloader.find(None), None)
 
     @patch("builtins.__import__")
     def test_cache(self, import_module):
@@ -108,7 +105,6 @@ class TestDownloaderModule(unittest.TestCase):
 
 
 class TestDownloaderBase(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         cls.dir = tempfile.TemporaryDirectory()
@@ -123,14 +119,14 @@ class TestDownloaderBase(unittest.TestCase):
 
     @classmethod
     def _prepare_destination(cls, content=None, part=True, extension=None):
-        name = "file-{}".format(cls.fnum)
+        name = f"file-{cls.fnum}"
         cls.fnum += 1
 
         kwdict = {
-            "category"   : "test",
+            "category": "test",
             "subcategory": "test",
-            "filename"   : name,
-            "extension"  : extension,
+            "filename": name,
+            "extension": extension,
         }
 
         pathfmt = cls.job.pathfmt
@@ -145,13 +141,12 @@ class TestDownloaderBase(unittest.TestCase):
 
         return pathfmt
 
-    def _run_test(self, url, input, output,
-                  extension, expected_extension=None):
+    def _run_test(self, url, input, output, extension, expected_extension=None):
         pathfmt = self._prepare_destination(input, extension=extension)
         success = self.downloader.download(url, pathfmt)
 
         # test successful download
-        self.assertTrue(success, "downloading '{}' failed".format(url))
+        self.assertTrue(success, f"downloading '{url}' failed")
 
         # test content
         mode = "r" + ("b" if isinstance(output, bytes) else "")
@@ -172,7 +167,6 @@ class TestDownloaderBase(unittest.TestCase):
 
 
 class TestHTTPDownloader(TestDownloaderBase):
-
     @classmethod
     def setUpClass(cls):
         TestDownloaderBase.setUpClass()
@@ -184,18 +178,16 @@ class TestHTTPDownloader(TestDownloaderBase):
         try:
             server = http.server.HTTPServer((host, port), HttpRequestHandler)
         except OSError as exc:
-            raise unittest.SkipTest(
-                "cannot spawn local HTTP server ({})".format(exc))
+            raise unittest.SkipTest(f"cannot spawn local HTTP server ({exc})")
 
         host, port = server.server_address
-        cls.address = "http://{}:{}".format(host, port)
+        cls.address = f"http://{host}:{port}"
         threading.Thread(target=server.serve_forever, daemon=True).start()
 
-    def _run_test(self, ext, input, output,
-                  extension, expected_extension=None):
+    def _run_test(self, ext, input, output, extension, expected_extension=None):
         TestDownloaderBase._run_test(
-            self, self.address + "/" + ext, input, output,
-            extension, expected_extension)
+            self, self.address + "/" + ext, input, output, extension, expected_extension
+        )
 
     def tearDown(self):
         self.downloader.minsize = self.downloader.maxsize = None
@@ -207,8 +199,8 @@ class TestHTTPDownloader(TestDownloaderBase):
 
     def test_http_offset(self):
         self._run_test("jpg", DATA["jpg"][:123], DATA["jpg"], "jpg", "jpg")
-        self._run_test("png", DATA["png"][:12] , DATA["png"], "png", "png")
-        self._run_test("gif", DATA["gif"][:1]  , DATA["gif"], "gif", "gif")
+        self._run_test("png", DATA["png"][:12], DATA["png"], "png", "png")
+        self._run_test("gif", DATA["gif"][:1], DATA["gif"], "gif", "gif")
 
     def test_http_extension(self):
         self._run_test("jpg", None, DATA["jpg"], None, "jpg")
@@ -240,7 +232,6 @@ class TestHTTPDownloader(TestDownloaderBase):
 
 
 class TestTextDownloader(TestDownloaderBase):
-
     @classmethod
     def setUpClass(cls):
         TestDownloaderBase.setUpClass()
@@ -257,7 +248,6 @@ class TestTextDownloader(TestDownloaderBase):
 
 
 class HttpRequestHandler(http.server.BaseHTTPRequestHandler):
-
     def do_GET(self):
         try:
             output = DATA[self.path[1:]]
@@ -274,8 +264,7 @@ class HttpRequestHandler(http.server.BaseHTTPRequestHandler):
             match = re.match(r"bytes=(\d+)-", self.headers["Range"])
             start = int(match.group(1))
 
-            headers["Content-Range"] = "bytes {}-{}/{}".format(
-                start, len(output)-1, len(output))
+            headers["Content-Range"] = f"bytes {start}-{len(output) - 1}/{len(output)}"
             output = output[start:]
         else:
             status = 200
@@ -288,19 +277,26 @@ class HttpRequestHandler(http.server.BaseHTTPRequestHandler):
 
 
 SAMPLES = {
-    ("jpg" , binascii.a2b_base64(
-        "/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEB"
-        "AQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQH/2wBDAQEB"
-        "AQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEB"
-        "AQEBAQEBAQEBAQEBAQH/wAARCAABAAEDAREAAhEBAxEB/8QAFAABAAAAAAAAAAAA"
-        "AAAAAAAACv/EABQQAQAAAAAAAAAAAAAAAAAAAAD/xAAUAQEAAAAAAAAAAAAAAAAA"
-        "AAAA/8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAwDAQACEQMRAD8AfwD/2Q==")),
-    ("png" , binascii.a2b_base64(
-        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAAAAAA6fptVAAAACklEQVQIHWP4DwAB"
-        "AQEANl9ngAAAAABJRU5ErkJggg==")),
-    ("gif" , binascii.a2b_base64(
-        "R0lGODdhAQABAIAAAP///////ywAAAAAAQABAAACAkQBADs=")),
-    ("bmp" , b"BM"),
+    (
+        "jpg",
+        binascii.a2b_base64(
+            "/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEB"
+            "AQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQH/2wBDAQEB"
+            "AQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEB"
+            "AQEBAQEBAQEBAQEBAQH/wAARCAABAAEDAREAAhEBAxEB/8QAFAABAAAAAAAAAAAA"
+            "AAAAAAAACv/EABQQAQAAAAAAAAAAAAAAAAAAAAD/xAAUAQEAAAAAAAAAAAAAAAAA"
+            "AAAA/8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAwDAQACEQMRAD8AfwD/2Q=="
+        ),
+    ),
+    (
+        "png",
+        binascii.a2b_base64(
+            "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAAAAAA6fptVAAAACklEQVQIHWP4DwAB"
+            "AQEANl9ngAAAAABJRU5ErkJggg=="
+        ),
+    ),
+    ("gif", binascii.a2b_base64("R0lGODdhAQABAIAAAP///////ywAAAAAAQABAAACAkQBADs=")),
+    ("bmp", b"BM"),
     ("webp", b"RIFF????WEBP"),
     ("avif", b"????ftypavif"),
     ("avif", b"????ftypavis"),
@@ -308,33 +304,33 @@ SAMPLES = {
     ("heic", b"????ftypheim"),
     ("heic", b"????ftypheis"),
     ("heic", b"????ftypheix"),
-    ("svg" , b"<?xml"),
-    ("ico" , b"\x00\x00\x01\x00"),
-    ("cur" , b"\x00\x00\x02\x00"),
-    ("psd" , b"8BPS"),
-    ("mp4" , b"????ftypmp4"),
-    ("mp4" , b"????ftypavc1"),
-    ("mp4" , b"????ftypiso3"),
-    ("m4v" , b"????ftypM4V"),
-    ("mov" , b"????ftypqt  "),
-    ("webm", b"\x1A\x45\xDF\xA3"),
-    ("ogg" , b"OggS"),
-    ("wav" , b"RIFF????WAVE"),
-    ("mp3" , b"ID3"),
-    ("mp3" , b"\xFF\xFB"),
-    ("mp3" , b"\xFF\xF3"),
-    ("mp3" , b"\xFF\xF2"),
-    ("zip" , b"PK\x03\x04"),
-    ("zip" , b"PK\x05\x06"),
-    ("zip" , b"PK\x07\x08"),
-    ("rar" , b"Rar!\x1A\x07"),
-    ("rar" , b"\x52\x61\x72\x21\x1A\x07"),
-    ("7z"  , b"\x37\x7A\xBC\xAF\x27\x1C"),
-    ("pdf" , b"%PDF-"),
-    ("swf" , b"FWS"),
-    ("swf" , b"CWS"),
+    ("svg", b"<?xml"),
+    ("ico", b"\x00\x00\x01\x00"),
+    ("cur", b"\x00\x00\x02\x00"),
+    ("psd", b"8BPS"),
+    ("mp4", b"????ftypmp4"),
+    ("mp4", b"????ftypavc1"),
+    ("mp4", b"????ftypiso3"),
+    ("m4v", b"????ftypM4V"),
+    ("mov", b"????ftypqt  "),
+    ("webm", b"\x1a\x45\xdf\xa3"),
+    ("ogg", b"OggS"),
+    ("wav", b"RIFF????WAVE"),
+    ("mp3", b"ID3"),
+    ("mp3", b"\xff\xfb"),
+    ("mp3", b"\xff\xf3"),
+    ("mp3", b"\xff\xf2"),
+    ("zip", b"PK\x03\x04"),
+    ("zip", b"PK\x05\x06"),
+    ("zip", b"PK\x07\x08"),
+    ("rar", b"Rar!\x1a\x07"),
+    ("rar", b"\x52\x61\x72\x21\x1a\x07"),
+    ("7z", b"\x37\x7a\xbc\xaf\x27\x1c"),
+    ("pdf", b"%PDF-"),
+    ("swf", b"FWS"),
+    ("swf", b"CWS"),
     ("blend", b"BLENDER-v303RENDH"),
-    ("obj" , b"# Blender v3.2.0 OBJ File: 'foo.blend'"),
+    ("obj", b"# Blender v3.2.0 OBJ File: 'foo.blend'"),
     ("clip", b"CSFCHUNK\x00\x00\x00\x00"),
 }
 
@@ -346,21 +342,19 @@ for ext, content in SAMPLES:
         DATA[ext] = content
 
 for idx, (_, content) in enumerate(SAMPLES):
-    DATA["S{:>02}".format(idx)] = content
+    DATA[f"S{idx:>02}"] = content
 
 
 # reverse mime types mapping
-MIME_TYPES = {
-    ext: mtype
-    for mtype, ext in MIME_TYPES.items()
-}
+MIME_TYPES = {ext: mtype for mtype, ext in MIME_TYPES.items()}
 
 
 def generate_tests():
     def generate_test(idx, ext, content):
         def test(self):
-            self._run_test("S{:>02}".format(idx), None, content, "bin", ext)
-        test.__name__ = "test_http_ext_{:>02}_{}".format(idx, ext)
+            self._run_test(f"S{idx:>02}", None, content, "bin", ext)
+
+        test.__name__ = f"test_http_ext_{idx:>02}_{ext}"
         return test
 
     for idx, (ext, content) in enumerate(SAMPLES):

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2021-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,10 +6,11 @@
 
 """Extractors for https://rule34.us/"""
 
-from .booru import BooruExtractor
-from .. import text
 import collections
 import re
+
+from .. import text
+from .booru import BooruExtractor
 
 
 class Rule34usExtractor(BooruExtractor):
@@ -21,21 +20,21 @@ class Rule34usExtractor(BooruExtractor):
 
     def _init(self):
         self._find_tags = re.compile(
-            r'<li class="([^-"]+)-tag"[^>]*><a href="[^;"]+;q=([^"]+)').findall
+            r'<li class="([^-"]+)-tag"[^>]*><a href="[^;"]+;q=([^"]+)'
+        ).findall
 
     def _parse_post(self, post_id):
-        url = "{}/index.php?r=posts/view&id={}".format(self.root, post_id)
+        url = f"{self.root}/index.php?r=posts/view&id={post_id}"
         page = self.request(url).text
         extr = text.extract_from(page)
 
         post = {
-            "id"      : post_id,
-            "tags"    : text.unescape(extr(
-                'name="keywords" content="', '"').rstrip(", ")),
-            "uploader": text.extract(extr('Added by: ', '</li>'), ">", "<")[0],
-            "score"   : text.extract(extr('Score: ', '> - <'), ">", "<")[0],
-            "width"   : extr('Size: ', 'w'),
-            "height"  : extr(' x ', 'h'),
+            "id": post_id,
+            "tags": text.unescape(extr('name="keywords" content="', '"').rstrip(", ")),
+            "uploader": text.extract(extr("Added by: ", "</li>"), ">", "<")[0],
+            "score": text.extract(extr("Score: ", "> - <"), ">", "<")[0],
+            "width": extr("Size: ", "w"),
+            "height": extr(" x ", "h"),
             "file_url": extr('<source src="', '"') or extr('<img src="', '"'),
         }
 
@@ -70,8 +69,8 @@ class Rule34usTagExtractor(Rule34usExtractor):
     def posts(self):
         url = self.root + "/index.php"
         params = {
-            "r"   : "posts/index",
-            "q"   : self.tags,
+            "r": "posts/index",
+            "q": self.tags,
             "page": self.page_start,
         }
 

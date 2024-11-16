@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2024 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -10,55 +8,54 @@ import os
 import re
 import sys
 
-from .extractor.common import Extractor, Message
+from . import exception
+from . import util
+from . import version
+from .extractor.common import Extractor
+from .extractor.common import Message
 from .job import DownloadJob
-from . import util, version, exception
 
 REPOS = {
-    "stable" : "mikf/gallery-dl",
-    "dev"    : "gdl-org/builds",
+    "stable": "mikf/gallery-dl",
+    "dev": "gdl-org/builds",
     "nightly": "gdl-org/builds",
-    "master" : "gdl-org/builds",
+    "master": "gdl-org/builds",
 }
 
 BINARIES_STABLE = {
-    "windows"    : "gallery-dl.exe",
+    "windows": "gallery-dl.exe",
     "windows_x86": "gallery-dl.exe",
     "windows_x64": "gallery-dl.exe",
-    "linux"      : "gallery-dl.bin",
+    "linux": "gallery-dl.bin",
 }
 BINARIES_DEV = {
-    "windows"    : "gallery-dl_windows.exe",
+    "windows": "gallery-dl_windows.exe",
     "windows_x86": "gallery-dl_windows_x86.exe",
     "windows_x64": "gallery-dl_windows.exe",
-    "linux"      : "gallery-dl_linux",
-    "macos"      : "gallery-dl_macos",
+    "linux": "gallery-dl_linux",
+    "macos": "gallery-dl_macos",
 }
 BINARIES = {
-    "stable" : BINARIES_STABLE,
-    "dev"    : BINARIES_DEV,
+    "stable": BINARIES_STABLE,
+    "dev": BINARIES_DEV,
     "nightly": BINARIES_DEV,
-    "master" : BINARIES_DEV,
+    "master": BINARIES_DEV,
 }
 
 
 class UpdateJob(DownloadJob):
-
     def handle_url(self, url, kwdict):
         if not self._check_update(kwdict):
             if kwdict["_check"]:
                 self.status |= 1
-            return self.extractor.log.info(
-                "gallery-dl is up to date (%s)", version.__version__)
+            return self.extractor.log.info("gallery-dl is up to date (%s)", version.__version__)
 
         if kwdict["_check"]:
             return self.extractor.log.info(
-                "A new release is available: %s -> %s",
-                version.__version__, kwdict["tag_name"])
+                "A new release is available: %s -> %s", version.__version__, kwdict["tag_name"]
+            )
 
-        self.extractor.log.info(
-            "Updating from %s to %s",
-            version.__version__, kwdict["tag_name"])
+        self.extractor.log.info("Updating from %s to %s", version.__version__, kwdict["tag_name"])
 
         path_old = sys.executable + ".old"
         path_new = sys.executable + ".new"
@@ -98,10 +95,13 @@ class UpdateJob(DownloadJob):
             import atexit
             import subprocess
 
-            cmd = 'ping 127.0.0.1 -n 5 -w 1000 & del /F "{}"'.format(path_old)
+            cmd = f'ping 127.0.0.1 -n 5 -w 1000 & del /F "{path_old}"'
             atexit.register(
-                util.Popen, cmd, shell=True,
-                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                util.Popen,
+                cmd,
+                shell=True,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
             )
 
         else:
@@ -193,8 +193,7 @@ class UpdateExtractor(Extractor):
             raise exception.StopExtraction("Invalid channel '%s'", repo)
 
         path_tag = tag if tag == "latest" else "tags/" + tag
-        url = "{}/repos/{}/releases/{}".format(
-            self.root_api, path_repo, path_tag)
+        url = f"{self.root_api}/repos/{path_repo}/releases/{path_tag}"
         headers = {
             "Accept": "application/vnd.github+json",
             "User-Agent": util.USERAGENT,
@@ -204,15 +203,14 @@ class UpdateExtractor(Extractor):
         data["_check"] = check
         data["_exact"] = exact
 
-        if binary == "linux" and \
-                repo != "stable" and \
-                data["tag_name"] <= "2024.05.28":
+        if binary == "linux" and repo != "stable" and data["tag_name"] <= "2024.05.28":
             binary_name = "gallery-dl_ubuntu"
         else:
             binary_name = BINARIES[repo][binary]
 
         url = "{}/{}/releases/download/{}/{}".format(
-            self.root, path_repo, data["tag_name"], binary_name)
+            self.root, path_repo, data["tag_name"], binary_name
+        )
 
         yield Message.Directory, data
         yield Message.Url, url, data

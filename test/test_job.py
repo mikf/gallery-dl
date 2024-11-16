@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 
 # Copyright 2021-2023 Mike Fährmann
 #
@@ -7,20 +6,18 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
+import io
 import os
 import sys
 import unittest
 from unittest.mock import patch
 
-import io
-
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from gallery_dl import job, config, text  # noqa E402
-from gallery_dl.extractor.common import Extractor, Message  # noqa E402
+from gallery_dl.extractor.common import Extractor, Message
 
 
 class TestJob(unittest.TestCase):
-
     def tearDown(self):
         config.clear()
 
@@ -49,21 +46,21 @@ class TestDownloadJob(TestJob):
         tjob = self.jobclass(extr)
 
         func = tjob._build_extractor_filter()
-        self.assertEqual(func(TestExtractor)      , False)
+        self.assertEqual(func(TestExtractor), False)
         self.assertEqual(func(TestExtractorParent), False)
-        self.assertEqual(func(TestExtractorAlt)   , True)
+        self.assertEqual(func(TestExtractorAlt), True)
 
         config.set((), "blacklist", ":test_subcategory")
         func = tjob._build_extractor_filter()
-        self.assertEqual(func(TestExtractor)      , False)
+        self.assertEqual(func(TestExtractor), False)
         self.assertEqual(func(TestExtractorParent), True)
-        self.assertEqual(func(TestExtractorAlt)   , False)
+        self.assertEqual(func(TestExtractorAlt), False)
 
         config.set((), "whitelist", "test_category:test_subcategory")
         func = tjob._build_extractor_filter()
-        self.assertEqual(func(TestExtractor)      , True)
+        self.assertEqual(func(TestExtractor), True)
         self.assertEqual(func(TestExtractorParent), False)
-        self.assertEqual(func(TestExtractorAlt)   , False)
+        self.assertEqual(func(TestExtractorAlt), False)
 
 
 class TestKeywordJob(TestJob):
@@ -72,7 +69,9 @@ class TestKeywordJob(TestJob):
     def test_default(self):
         self.maxDiff = None
         extr = TestExtractor.from_url("test:self")
-        self.assertEqual(self._capture_stdout(extr), """\
+        self.assertEqual(
+            self._capture_stdout(extr),
+            """\
 Keywords for directory names:
 -----------------------------
 author['id']
@@ -120,7 +119,8 @@ user['name']
   test
 user['self']
   <circular reference>
-""")
+""",
+        )
 
 
 class TestUrlJob(TestJob):
@@ -128,42 +128,55 @@ class TestUrlJob(TestJob):
 
     def test_default(self):
         extr = TestExtractor.from_url("test:")
-        self.assertEqual(self._capture_stdout(extr), """\
+        self.assertEqual(
+            self._capture_stdout(extr),
+            """\
 https://example.org/1.jpg
 https://example.org/2.jpg
 https://example.org/3.jpg
-""")
+""",
+        )
 
     def test_fallback(self):
         extr = TestExtractor.from_url("test:")
         tjob = self.jobclass(extr)
         tjob.handle_url = tjob.handle_url_fallback
 
-        self.assertEqual(self._capture_stdout(tjob), """\
+        self.assertEqual(
+            self._capture_stdout(tjob),
+            """\
 https://example.org/1.jpg
 | https://example.org/alt/1.jpg
 https://example.org/2.jpg
 | https://example.org/alt/2.jpg
 https://example.org/3.jpg
 | https://example.org/alt/3.jpg
-""")
+""",
+        )
 
     def test_parent(self):
         extr = TestExtractorParent.from_url("test:parent")
-        self.assertEqual(self._capture_stdout(extr), """\
+        self.assertEqual(
+            self._capture_stdout(extr),
+            """\
 test:child
 test:child
 test:child
-""")
+""",
+        )
 
     def test_child(self):
         extr = TestExtractorParent.from_url("test:parent")
         tjob = job.UrlJob(extr, depth=0)
-        self.assertEqual(self._capture_stdout(tjob), 3 * """\
+        self.assertEqual(
+            self._capture_stdout(tjob),
+            3
+            * """\
 https://example.org/1.jpg
 https://example.org/2.jpg
 https://example.org/3.jpg
-""")
+""",
+        )
 
 
 class TestInfoJob(TestJob):
@@ -171,7 +184,9 @@ class TestInfoJob(TestJob):
 
     def test_default(self):
         extr = TestExtractor.from_url("test:")
-        self.assertEqual(self._capture_stdout(extr), """\
+        self.assertEqual(
+            self._capture_stdout(extr),
+            """\
 Category / Subcategory
   "test_category" / "test_subcategory"
 
@@ -181,7 +196,8 @@ Filename format (default):
 Directory format (default):
   ["{category}"]
 
-""")
+""",
+        )
 
     def test_custom(self):
         config.set((), "filename", "custom")
@@ -190,7 +206,9 @@ Directory format (default):
         extr = TestExtractor.from_url("test:")
         extr.request_interval = 123.456
 
-        self.assertEqual(self._capture_stdout(extr), """\
+        self.assertEqual(
+            self._capture_stdout(extr),
+            """\
 Category / Subcategory
   "test_category" / "test_subcategory"
 
@@ -209,13 +227,16 @@ Request interval (custom):
 Request interval (default):
   123.456
 
-""")
+""",
+        )
 
     def test_base_category(self):
         extr = TestExtractor.from_url("test:")
         extr.basecategory = "test_basecategory"
 
-        self.assertEqual(self._capture_stdout(extr), """\
+        self.assertEqual(
+            self._capture_stdout(extr),
+            """\
 Category / Subcategory / Basecategory
   "test_category" / "test_subcategory" / "test_basecategory"
 
@@ -225,7 +246,8 @@ Filename format (default):
 Directory format (default):
   ["{category}"]
 
-""")
+""",
+        )
 
 
 class TestDataJob(TestJob):
@@ -238,51 +260,68 @@ class TestDataJob(TestJob):
 
         tjob.run()
 
-        self.assertEqual(tjob.data, [
-            (Message.Directory, {
-                "category"   : "test_category",
-                "subcategory": "test_subcategory",
-                "user"       : user,
-                "author"     : user,
-            }),
-            (Message.Url, "https://example.org/1.jpg", {
-                "category"   : "test_category",
-                "subcategory": "test_subcategory",
-                "filename"   : "1",
-                "extension"  : "jpg",
-                "num"        : 1,
-                "tags"       : ["foo", "bar", "テスト"],
-                "user"       : user,
-                "author"     : user,
-            }),
-            (Message.Url, "https://example.org/2.jpg", {
-                "category"   : "test_category",
-                "subcategory": "test_subcategory",
-                "filename"   : "2",
-                "extension"  : "jpg",
-                "num"        : 2,
-                "tags"       : ["foo", "bar", "テスト"],
-                "user"       : user,
-                "author"     : user,
-            }),
-            (Message.Url, "https://example.org/3.jpg", {
-                "category"   : "test_category",
-                "subcategory": "test_subcategory",
-                "filename"   : "3",
-                "extension"  : "jpg",
-                "num"        : 3,
-                "tags"       : ["foo", "bar", "テスト"],
-                "user"       : user,
-                "author"     : user,
-            }),
-        ])
+        self.assertEqual(
+            tjob.data,
+            [
+                (
+                    Message.Directory,
+                    {
+                        "category": "test_category",
+                        "subcategory": "test_subcategory",
+                        "user": user,
+                        "author": user,
+                    },
+                ),
+                (
+                    Message.Url,
+                    "https://example.org/1.jpg",
+                    {
+                        "category": "test_category",
+                        "subcategory": "test_subcategory",
+                        "filename": "1",
+                        "extension": "jpg",
+                        "num": 1,
+                        "tags": ["foo", "bar", "テスト"],
+                        "user": user,
+                        "author": user,
+                    },
+                ),
+                (
+                    Message.Url,
+                    "https://example.org/2.jpg",
+                    {
+                        "category": "test_category",
+                        "subcategory": "test_subcategory",
+                        "filename": "2",
+                        "extension": "jpg",
+                        "num": 2,
+                        "tags": ["foo", "bar", "テスト"],
+                        "user": user,
+                        "author": user,
+                    },
+                ),
+                (
+                    Message.Url,
+                    "https://example.org/3.jpg",
+                    {
+                        "category": "test_category",
+                        "subcategory": "test_subcategory",
+                        "filename": "3",
+                        "extension": "jpg",
+                        "num": 3,
+                        "tags": ["foo", "bar", "テスト"],
+                        "user": user,
+                        "author": user,
+                    },
+                ),
+            ],
+        )
 
     def test_exception(self):
         extr = TestExtractorException.from_url("test:exception")
         tjob = self.jobclass(extr, file=io.StringIO())
         tjob.run()
-        self.assertEqual(
-            tjob.data[-1], ("ZeroDivisionError", "division by zero"))
+        self.assertEqual(tjob.data[-1], ("ZeroDivisionError", "division by zero"))
 
     def test_private(self):
         config.set(("output",), "private", True)
@@ -294,7 +333,7 @@ class TestDataJob(TestJob):
         for i in range(1, 4):
             self.assertEqual(
                 tjob.data[i][2]["_fallback"],
-                ("https://example.org/alt/{}.jpg".format(i),),
+                (f"https://example.org/alt/{i}.jpg",),
             )
 
     def test_sleep(self):
@@ -317,24 +356,30 @@ class TestDataJob(TestJob):
 
         tjob.file = buffer = io.StringIO()
         tjob.run()
-        self.assertIn("""\
+        self.assertIn(
+            """\
       "tags": [
         "foo",
         "bar",
         "\\u30c6\\u30b9\\u30c8"
       ],
-""", buffer.getvalue())
+""",
+            buffer.getvalue(),
+        )
 
         tjob.file = buffer = io.StringIO()
         tjob.ascii = False
         tjob.run()
-        self.assertIn("""\
+        self.assertIn(
+            """\
       "tags": [
         "foo",
         "bar",
         "テスト"
       ],
-""", buffer.getvalue())
+""",
+            buffer.getvalue(),
+        )
 
     def test_num_string(self):
         extr = TestExtractor.from_url("test:")
@@ -371,20 +416,30 @@ class TestExtractor(Extractor):
         root = "https://example.org"
         user = self.user
 
-        yield Message.Directory, {
-            "user": user,
-            "author": user,
-        }
-
-        for i in range(1, 4):
-            url = "{}/{}.jpg".format(root, i)
-            yield Message.Url, url, text.nameext_from_url(url, {
-                "num" : i,
-                "tags": ["foo", "bar", "テスト"],
+        yield (
+            Message.Directory,
+            {
                 "user": user,
                 "author": user,
-                "_fallback": ("{}/alt/{}.jpg".format(root, i),),
-            })
+            },
+        )
+
+        for i in range(1, 4):
+            url = f"{root}/{i}.jpg"
+            yield (
+                Message.Url,
+                url,
+                text.nameext_from_url(
+                    url,
+                    {
+                        "num": i,
+                        "tags": ["foo", "bar", "テスト"],
+                        "user": user,
+                        "author": user,
+                        "_fallback": (f"{root}/alt/{i}.jpg",),
+                    },
+                ),
+            )
 
 
 class TestExtractorParent(Extractor):
@@ -396,11 +451,15 @@ class TestExtractorParent(Extractor):
         url = "test:child"
 
         for i in range(11, 14):
-            yield Message.Queue, url, {
-                "num" : i,
-                "tags": ["abc", "def"],
-                "_extractor": TestExtractor,
-            }
+            yield (
+                Message.Queue,
+                url,
+                {
+                    "num": i,
+                    "tags": ["abc", "def"],
+                    "_extractor": TestExtractor,
+                },
+            )
 
 
 class TestExtractorException(Extractor):
@@ -409,7 +468,7 @@ class TestExtractorException(Extractor):
     pattern = r"test:exception$"
 
     def items(self):
-        return 1/0
+        return 1 / 0
 
 
 class TestExtractorAlt(Extractor):

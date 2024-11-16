@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2016-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,12 +6,15 @@
 
 """Extractors for FoOlSlide based sites"""
 
-from .common import BaseExtractor, Message
-from .. import text, util
+from .. import text
+from .. import util
+from .common import BaseExtractor
+from .common import Message
 
 
 class FoolslideExtractor(BaseExtractor):
     """Base class for FoOlSlide extractors"""
+
     basecategory = "foolslide"
 
     def __init__(self, match):
@@ -22,7 +23,8 @@ class FoolslideExtractor(BaseExtractor):
 
     def request(self, url):
         return BaseExtractor.request(
-            self, url, encoding="utf-8", method="POST", data={"adult": "true"})
+            self, url, encoding="utf-8", method="POST", data={"adult": "true"}
+        )
 
     @staticmethod
     def parse_chapter_url(url, data):
@@ -37,16 +39,15 @@ class FoolslideExtractor(BaseExtractor):
         return data
 
 
-BASE_PATTERN = FoolslideExtractor.update({
-})
+BASE_PATTERN = FoolslideExtractor.update({})
 
 
 class FoolslideChapterExtractor(FoolslideExtractor):
     """Base class for chapter extractors for FoOlSlide based sites"""
+
     subcategory = "chapter"
     directory_fmt = ("{category}", "{manga}", "{chapter_string}")
-    filename_fmt = (
-        "{manga}_c{chapter:>03}{chapter_minor:?//}_{page:>03}.{extension}")
+    filename_fmt = "{manga}_c{chapter:>03}{chapter_minor:?//}_{page:>03}.{extension}"
     archive_fmt = "{id}"
     pattern = BASE_PATTERN + r"(/read/[^/?#]+/[a-z-]+/\d+/\d+(?:/\d+)?)"
     example = "https://read.powermanga.org/read/MANGA/en/0/123/"
@@ -60,8 +61,7 @@ class FoolslideChapterExtractor(FoolslideExtractor):
         data["chapter_id"] = text.parse_int(imgs[0]["chapter_id"])
 
         yield Message.Directory, data
-        enum = util.enumerate_reversed if self.config(
-            "page-reverse") else enumerate
+        enum = util.enumerate_reversed if self.config("page-reverse") else enumerate
         for data["page"], image in enum(imgs, 1):
             try:
                 url = image["url"]
@@ -78,11 +78,14 @@ class FoolslideChapterExtractor(FoolslideExtractor):
 
     def metadata(self, page):
         extr = text.extract_from(page)
-        extr('<h1 class="tbtitle dnone">', '')
-        return self.parse_chapter_url(self.gallery_url, {
-            "manga"         : text.unescape(extr('title="', '"')).strip(),
-            "chapter_string": text.unescape(extr('title="', '"')),
-        })
+        extr('<h1 class="tbtitle dnone">', "")
+        return self.parse_chapter_url(
+            self.gallery_url,
+            {
+                "manga": text.unescape(extr('title="', '"')).strip(),
+                "chapter_string": text.unescape(extr('title="', '"')),
+            },
+        )
 
     def images(self, page):
         return util.json_loads(text.extr(page, "var pages = ", ";"))
@@ -90,6 +93,7 @@ class FoolslideChapterExtractor(FoolslideExtractor):
 
 class FoolslideMangaExtractor(FoolslideExtractor):
     """Base class for manga extractors for FoOlSlide based sites"""
+
     subcategory = "manga"
     categorytransfer = True
     pattern = BASE_PATTERN + r"(/series/[^/?#]+)"
@@ -108,17 +112,27 @@ class FoolslideMangaExtractor(FoolslideExtractor):
 
     def chapters(self, page):
         extr = text.extract_from(page)
-        manga = text.unescape(extr('<h1 class="title">', '</h1>')).strip()
-        author = extr('<b>Author</b>: ', '<br')
-        artist = extr('<b>Artist</b>: ', '<br')
+        manga = text.unescape(extr('<h1 class="title">', "</h1>")).strip()
+        author = extr("<b>Author</b>: ", "<br")
+        artist = extr("<b>Artist</b>: ", "<br")
 
         results = []
         while True:
             url = extr('<div class="title"><a href="', '"')
             if not url:
                 return results
-            results.append((url, self.parse_chapter_url(url, {
-                "manga": manga, "author": author, "artist": artist,
-                "chapter_string": extr('title="', '"'),
-                "group"         : extr('title="', '"'),
-            })))
+            results.append(
+                (
+                    url,
+                    self.parse_chapter_url(
+                        url,
+                        {
+                            "manga": manga,
+                            "author": author,
+                            "artist": artist,
+                            "chapter_string": extr('title="', '"'),
+                            "group": extr('title="', '"'),
+                        },
+                    ),
+                )
+            )

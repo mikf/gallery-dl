@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2020-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,16 +6,17 @@
 
 """Extractors for Moebooru based sites"""
 
-from .booru import BooruExtractor
-from .. import text
-
 import collections
 import datetime
 import re
 
+from .. import text
+from .booru import BooruExtractor
+
 
 class MoebooruExtractor(BooruExtractor):
     """Base class for Moebooru extractors"""
+
     basecategory = "moebooru"
     filename_fmt = "{category}_{id}_{md5}.{extension}"
     page_start = 1
@@ -27,11 +26,10 @@ class MoebooruExtractor(BooruExtractor):
         post["date"] = text.parse_timestamp(post["created_at"])
 
     def _html(self, post):
-        return self.request("{}/post/show/{}".format(
-            self.root, post["id"])).text
+        return self.request("{}/post/show/{}".format(self.root, post["id"])).text
 
     def _tags(self, post, page):
-        tag_container = text.extr(page, '<ul id="tag-', '</ul>')
+        tag_container = text.extr(page, '<ul id="tag-', "</ul>")
         if not tag_container:
             return
 
@@ -50,14 +48,16 @@ class MoebooruExtractor(BooruExtractor):
         post["notes"] = notes = []
         for note in note_container.split('class="note-box"')[1:]:
             extr = text.extract_from(note)
-            notes.append({
-                "width" : int(extr("width:", "p")),
-                "height": int(extr("height:", "p")),
-                "y"     : int(extr("top:", "p")),
-                "x"     : int(extr("left:", "p")),
-                "id"    : int(extr('id="note-body-', '"')),
-                "body"  : text.unescape(text.remove_html(extr(">", "</div>"))),
-            })
+            notes.append(
+                {
+                    "width": int(extr("width:", "p")),
+                    "height": int(extr("height:", "p")),
+                    "y": int(extr("top:", "p")),
+                    "x": int(extr("left:", "p")),
+                    "id": int(extr('id="note-body-', '"')),
+                    "body": text.unescape(text.remove_html(extr(">", "</div>"))),
+                }
+            )
 
     def _pagination(self, url, params):
         params["page"] = self.page_start
@@ -72,24 +72,26 @@ class MoebooruExtractor(BooruExtractor):
             params["page"] += 1
 
 
-BASE_PATTERN = MoebooruExtractor.update({
-    "yandere": {
-        "root": "https://yande.re",
-        "pattern": r"yande\.re",
-    },
-    "konachan": {
-        "root": "https://konachan.com",
-        "pattern": r"konachan\.(?:com|net)",
-    },
-    "sakugabooru": {
-        "root": "https://www.sakugabooru.com",
-        "pattern": r"(?:www\.)?sakugabooru\.com",
-    },
-    "lolibooru": {
-        "root": "https://lolibooru.moe",
-        "pattern": r"lolibooru\.moe",
-    },
-})
+BASE_PATTERN = MoebooruExtractor.update(
+    {
+        "yandere": {
+            "root": "https://yande.re",
+            "pattern": r"yande\.re",
+        },
+        "konachan": {
+            "root": "https://konachan.com",
+            "pattern": r"konachan\.(?:com|net)",
+        },
+        "sakugabooru": {
+            "root": "https://www.sakugabooru.com",
+            "pattern": r"(?:www\.)?sakugabooru\.com",
+        },
+        "lolibooru": {
+            "root": "https://lolibooru.moe",
+            "pattern": r"lolibooru\.moe",
+        },
+    }
+)
 
 
 class MoebooruTagExtractor(MoebooruExtractor):
@@ -125,7 +127,7 @@ class MoebooruPoolExtractor(MoebooruExtractor):
 
     def metadata(self):
         if self.config("metadata"):
-            url = "{}/pool/show/{}.json".format(self.root, self.pool_id)
+            url = f"{self.root}/pool/show/{self.pool_id}.json"
             pool = self.request(url).json()
             pool.pop("posts", None)
             return {"pool": pool}
@@ -155,13 +157,12 @@ class MoebooruPopularExtractor(MoebooruExtractor):
     subcategory = "popular"
     directory_fmt = ("{category}", "popular", "{scale}", "{date}")
     archive_fmt = "P_{scale[0]}_{date}_{id}"
-    pattern = BASE_PATTERN + \
-        r"/post/popular_(by_(?:day|week|month)|recent)(?:\?([^#]*))?"
+    pattern = BASE_PATTERN + r"/post/popular_(by_(?:day|week|month)|recent)(?:\?([^#]*))?"
     example = "https://yande.re/post/popular_by_month?year=YYYY&month=MM"
 
     def __init__(self, match):
         MoebooruExtractor.__init__(self, match)
-        self.scale = match.group(match.lastindex-1)
+        self.scale = match.group(match.lastindex - 1)
         self.query = match.group(match.lastindex)
 
     def metadata(self):
@@ -188,5 +189,5 @@ class MoebooruPopularExtractor(MoebooruExtractor):
         return {"date": date, "scale": scale}
 
     def posts(self):
-        url = "{}/post/popular_{}.json".format(self.root, self.scale)
+        url = f"{self.root}/post/popular_{self.scale}.json"
         return self.request(url, params=self.params).json()

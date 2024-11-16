@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2015-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,12 +6,15 @@
 
 """Recursive extractor"""
 
-from .common import Extractor, Message
 import re
+
+from .common import Extractor
+from .common import Message
 
 
 class RecursiveExtractor(Extractor):
     """Extractor that fetches URLs from a remote or local source"""
+
     category = "recursive"
     pattern = r"r(?:ecursive)?:"
     example = "recursive:https://pastebin.com/raw/FLwrCYsT"

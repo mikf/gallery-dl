@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2024 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -10,13 +8,13 @@
 
 import os
 import sqlite3
+from contextlib import suppress
+
 from . import formatter
 
 
-class DownloadArchive():
-
-    def __init__(self, path, format_string, pragma=None,
-                 cache_key="_archive_key"):
+class DownloadArchive:
+    def __init__(self, path, format_string, pragma=None, cache_key="_archive_key"):
         try:
             con = sqlite3.connect(path, timeout=60, check_same_thread=False)
         except sqlite3.OperationalError:
@@ -35,24 +33,22 @@ class DownloadArchive():
                 cursor.execute("PRAGMA " + stmt)
 
         try:
-            cursor.execute("CREATE TABLE IF NOT EXISTS archive "
-                           "(entry TEXT PRIMARY KEY) WITHOUT ROWID")
+            cursor.execute(
+                "CREATE TABLE IF NOT EXISTS archive " "(entry TEXT PRIMARY KEY) WITHOUT ROWID"
+            )
         except sqlite3.OperationalError:
             # fallback for missing WITHOUT ROWID support (#553)
-            cursor.execute("CREATE TABLE IF NOT EXISTS archive "
-                           "(entry TEXT PRIMARY KEY)")
+            cursor.execute("CREATE TABLE IF NOT EXISTS archive " "(entry TEXT PRIMARY KEY)")
 
     def add(self, kwdict):
         """Add item described by 'kwdict' to archive"""
         key = kwdict.get(self._cache_key) or self.keygen(kwdict)
-        self.cursor.execute(
-            "INSERT OR IGNORE INTO archive (entry) VALUES (?)", (key,))
+        self.cursor.execute("INSERT OR IGNORE INTO archive (entry) VALUES (?)", (key,))
 
     def check(self, kwdict):
         """Return True if the item described by 'kwdict' exists in archive"""
         key = kwdict[self._cache_key] = self.keygen(kwdict)
-        self.cursor.execute(
-            "SELECT 1 FROM archive WHERE entry=? LIMIT 1", (key,))
+        self.cursor.execute("SELECT 1 FROM archive WHERE entry=? LIMIT 1", (key,))
         return self.cursor.fetchone()
 
     def finalize(self):
@@ -60,23 +56,18 @@ class DownloadArchive():
 
 
 class DownloadArchiveMemory(DownloadArchive):
-
-    def __init__(self, path, format_string, pragma=None,
-                 cache_key="_archive_key"):
+    def __init__(self, path, format_string, pragma=None, cache_key="_archive_key"):
         DownloadArchive.__init__(self, path, format_string, pragma, cache_key)
         self.keys = set()
 
     def add(self, kwdict):
-        self.keys.add(
-            kwdict.get(self._cache_key) or
-            self.keygen(kwdict))
+        self.keys.add(kwdict.get(self._cache_key) or self.keygen(kwdict))
 
     def check(self, kwdict):
         key = kwdict[self._cache_key] = self.keygen(kwdict)
         if key in self.keys:
             return True
-        self.cursor.execute(
-            "SELECT 1 FROM archive WHERE entry=? LIMIT 1", (key,))
+        self.cursor.execute("SELECT 1 FROM archive WHERE entry=? LIMIT 1", (key,))
         return self.cursor.fetchone()
 
     def finalize(self):
@@ -85,10 +76,8 @@ class DownloadArchiveMemory(DownloadArchive):
 
         cursor = self.cursor
         with self.connection:
-            try:
+            with suppress(sqlite3.OperationalError):
                 cursor.execute("BEGIN")
-            except sqlite3.OperationalError:
-                pass
 
             stmt = "INSERT OR IGNORE INTO archive (entry) VALUES (?)"
             if len(self.keys) < 100:

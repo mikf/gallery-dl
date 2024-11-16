@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 
 # Copyright 2018-2023 Mike Fährmann
 #
@@ -8,19 +7,19 @@
 # published by the Free Software Foundation.
 
 import os
-import sys
-import unittest
-from unittest.mock import patch
-
-import time
 import string
-from datetime import datetime, timedelta
+import sys
+import time
+import unittest
+from datetime import datetime
+from datetime import timedelta
+from unittest.mock import patch
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from gallery_dl import extractor, util  # noqa E402
 from gallery_dl.extractor import mastodon  # noqa E402
-from gallery_dl.extractor.common import Extractor, Message  # noqa E402
-from gallery_dl.extractor.directlink import DirectlinkExtractor  # noqa E402
+from gallery_dl.extractor.common import Extractor, Message
+from gallery_dl.extractor.directlink import DirectlinkExtractor
 
 _list_classes = extractor._list_classes
 
@@ -110,7 +109,7 @@ class TestExtractorModule(unittest.TestCase):
                 extr = cls.from_url(url)
             except ImportError as exc:
                 if exc.name in ("youtube_dl", "yt_dlp"):
-                    print("Skipping '{}' category checks".format(cls.category))
+                    print(f"Skipping '{cls.category}' category checks")
                     continue
                 raise
             self.assertTrue(extr, url)
@@ -141,10 +140,8 @@ class TestExtractorModule(unittest.TestCase):
 
             # ... and apply all regex patterns to each one
             for extr2 in _list_classes():
-
                 # skip DirectlinkExtractor pattern if it isn't tested
-                if extr1 != DirectlinkExtractor and \
-                        extr2 == DirectlinkExtractor:
+                if extr1 != DirectlinkExtractor and extr2 == DirectlinkExtractor:
                     continue
 
                 match = extr2.pattern.match(url)
@@ -153,14 +150,13 @@ class TestExtractorModule(unittest.TestCase):
 
             # fail if more or less than 1 match happened
             if len(matches) > 1:
-                msg = "'{}' gets matched by more than one pattern:".format(url)
+                msg = f"'{url}' gets matched by more than one pattern:"
                 for match, extr in matches:
-                    msg += "\n\n- {}:\n{}".format(
-                        extr.__name__, match.re.pattern)
+                    msg += f"\n\n- {extr.__name__}:\n{match.re.pattern}"
                 self.fail(msg)
 
             elif len(matches) < 1:
-                msg = "'{}' isn't matched by any pattern".format(url)
+                msg = f"'{url}' isn't matched by any pattern"
                 self.fail(msg)
 
             else:
@@ -168,6 +164,7 @@ class TestExtractorModule(unittest.TestCase):
 
     def test_init(self):
         """Test for exceptions in Extractor.initialize() and .finalize()"""
+
         def fail_request(*args, **kwargs):
             self.fail("called 'request() during initialization")
 
@@ -190,8 +187,7 @@ class TestExtractorModule(unittest.TestCase):
             extr.finalize()
         except ImportError as exc:
             if exc.name in ("youtube_dl", "yt_dlp"):
-                raise unittest.SkipTest("cannot import module '{}'".format(
-                    exc.name))
+                raise unittest.SkipTest(f"cannot import module '{exc.name}'")
             raise
 
     def test_docstrings(self):
@@ -202,11 +198,12 @@ class TestExtractorModule(unittest.TestCase):
                     self.assertNotEqual(
                         extr1.__doc__,
                         extr2.__doc__,
-                        "{} <-> {}".format(extr1, extr2),
+                        f"{extr1} <-> {extr2}",
                     )
 
     def test_names(self):
         """Ensure extractor classes are named CategorySubcategoryExtractor"""
+
         def capitalize(c):
             if "-" in c:
                 return string.capwords(c.replace("-", " ")).replace(" ", "")
@@ -214,17 +211,13 @@ class TestExtractorModule(unittest.TestCase):
 
         for extr in extractor.extractors():
             if extr.category not in ("", "oauth", "ytdl"):
-                expected = "{}{}Extractor".format(
-                    capitalize(extr.category),
-                    capitalize(extr.subcategory),
-                )
+                expected = f"{capitalize(extr.category)}{capitalize(extr.subcategory)}Extractor"
                 if expected[0].isdigit():
                     expected = "_" + expected
                 self.assertEqual(expected, extr.__name__)
 
 
 class TestExtractorWait(unittest.TestCase):
-
     def test_wait_seconds(self):
         extr = extractor.find("generic:https://example.org/")
         seconds = 5
@@ -278,7 +271,7 @@ class TestExtractorWait(unittest.TestCase):
             until = datetime.fromtimestamp(until)
         o = self._isotime_to_seconds(output)
         u = self._isotime_to_seconds(until.time().isoformat()[:8])
-        self.assertLessEqual(o-u, 1.0)
+        self.assertLessEqual(o - u, 1.0)
 
     @staticmethod
     def _isotime_to_seconds(isotime):
@@ -287,7 +280,6 @@ class TestExtractorWait(unittest.TestCase):
 
 
 class TextExtractorOAuth(unittest.TestCase):
-
     def test_oauth1(self):
         for category in ("flickr", "smugmug", "tumblr"):
             extr = extractor.find("oauth:" + category)
@@ -309,8 +301,10 @@ class TextExtractorOAuth(unittest.TestCase):
     def test_oauth2_mastodon(self):
         extr = extractor.find("oauth:mastodon:pawoo.net")
 
-        with patch.object(extr, "_oauth2_authorization_code_grant") as m, \
-                patch.object(extr, "_register") as r:
+        with (
+            patch.object(extr, "_oauth2_authorization_code_grant") as m,
+            patch.object(extr, "_register") as r,
+        ):
             for msg in extr:
                 pass
             self.assertEqual(len(r.mock_calls), 0)
@@ -319,10 +313,12 @@ class TextExtractorOAuth(unittest.TestCase):
     def test_oauth2_mastodon_unknown(self):
         extr = extractor.find("oauth:mastodon:example.com")
 
-        with patch.object(extr, "_oauth2_authorization_code_grant") as m, \
-                patch.object(extr, "_register") as r:
+        with (
+            patch.object(extr, "_oauth2_authorization_code_grant") as m,
+            patch.object(extr, "_register") as r,
+        ):
             r.return_value = {
-                "client-id"    : "foo",
+                "client-id": "foo",
                 "client-secret": "bar",
             }
 

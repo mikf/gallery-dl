@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 
 # Copyright 2020 Mike Fährmann
 #
@@ -9,17 +8,17 @@
 
 import os
 import sys
+import tempfile
 import unittest
 from unittest.mock import patch
-
-import tempfile
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from gallery_dl import config, util  # noqa E402
 
 dbpath = tempfile.mkstemp()[1]
 config.set(("cache",), "file", dbpath)
-from gallery_dl import cache  # noqa E402
+from gallery_dl import cache
+
 cache._init()
 
 
@@ -28,9 +27,7 @@ cache._init()
 
 
 class TestCache(unittest.TestCase):
-
     def test_decorator(self):
-
         @cache.memcache()
         def mc1():
             pass
@@ -50,7 +47,7 @@ class TestCache(unittest.TestCase):
     def test_keyarg_mem_simple(self):
         @cache.memcache(keyarg=2)
         def ka(a, b, c):
-            return a+b+c
+            return a + b + c
 
         self.assertEqual(ka(1, 1, 1), 3)
         self.assertEqual(ka(2, 2, 2), 6)
@@ -63,7 +60,7 @@ class TestCache(unittest.TestCase):
     def test_keyarg_mem(self):
         @cache.memcache(keyarg=2, maxage=10)
         def ka(a, b, c):
-            return a+b+c
+            return a + b + c
 
         self.assertEqual(ka(1, 1, 1), 3)
         self.assertEqual(ka(2, 2, 2), 6)
@@ -76,7 +73,7 @@ class TestCache(unittest.TestCase):
     def test_keyarg_db(self):
         @cache.cache(keyarg=2, maxage=10)
         def ka(a, b, c):
-            return a+b+c
+            return a + b + c
 
         self.assertEqual(ka(1, 1, 1), 3)
         self.assertEqual(ka(2, 2, 2), 6)
@@ -89,7 +86,7 @@ class TestCache(unittest.TestCase):
     def test_expires_mem(self):
         @cache.memcache(maxage=2)
         def ex(a, b, c):
-            return a+b+c
+            return a + b + c
 
         with patch("time.time") as tmock:
             tmock.return_value = 0.001
@@ -112,7 +109,7 @@ class TestCache(unittest.TestCase):
     def test_expires_db(self):
         @cache.cache(maxage=2)
         def ex(a, b, c):
-            return a+b+c
+            return a + b + c
 
         with patch("time.time") as tmock:
             tmock.return_value = 0.999
@@ -135,7 +132,7 @@ class TestCache(unittest.TestCase):
     def test_update_mem_simple(self):
         @cache.memcache(keyarg=0)
         def up(a, b, c):
-            return a+b+c
+            return a + b + c
 
         self.assertEqual(up(1, 1, 1), 3)
         up.update(1, 0)
@@ -146,7 +143,7 @@ class TestCache(unittest.TestCase):
     def test_update_mem(self):
         @cache.memcache(keyarg=0, maxage=10)
         def up(a, b, c):
-            return a+b+c
+            return a + b + c
 
         self.assertEqual(up(1, 1, 1), 3)
         up.update(1, 0)
@@ -157,7 +154,7 @@ class TestCache(unittest.TestCase):
     def test_update_db(self):
         @cache.cache(keyarg=0, maxage=10)
         def up(a, b, c):
-            return a+b+c
+            return a + b + c
 
         self.assertEqual(up(1, 1, 1), 3)
         up.update(1, 0)
@@ -168,7 +165,7 @@ class TestCache(unittest.TestCase):
     def test_invalidate_mem_simple(self):
         @cache.memcache(keyarg=0)
         def inv(a, b, c):
-            return a+b+c
+            return a + b + c
 
         self.assertEqual(inv(1, 1, 1), 3)
         inv.invalidate(1)
@@ -179,7 +176,7 @@ class TestCache(unittest.TestCase):
     def test_invalidate_mem(self):
         @cache.memcache(keyarg=0, maxage=10)
         def inv(a, b, c):
-            return a+b+c
+            return a + b + c
 
         self.assertEqual(inv(1, 1, 1), 3)
         inv.invalidate(1)
@@ -190,7 +187,7 @@ class TestCache(unittest.TestCase):
     def test_invalidate_db(self):
         @cache.cache(keyarg=0, maxage=10)
         def inv(a, b, c):
-            return a+b+c
+            return a + b + c
 
         self.assertEqual(inv(1, 1, 1), 3)
         inv.invalidate(1)
@@ -201,7 +198,7 @@ class TestCache(unittest.TestCase):
     def test_database_read(self):
         @cache.cache(keyarg=0, maxage=10)
         def db(a, b, c):
-            return a+b+c
+            return a + b + c
 
         # initialize cache
         self.assertEqual(db(1, 1, 1), 3)

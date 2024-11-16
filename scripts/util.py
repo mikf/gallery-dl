@@ -1,11 +1,9 @@
-# -*- coding: utf-8 -*-
-
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-import os
 import io
+import os
 import sys
 
 ROOTDIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -18,8 +16,7 @@ def path(*segments, join=os.path.join):
     return result
 
 
-class lazy():
-
+class lazy:
     def __init__(self, path):
         self.path = path
         self.buffer = io.StringIO()

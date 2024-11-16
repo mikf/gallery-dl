@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2021-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,10 +6,14 @@
 
 """Extractors for https://www.erome.com/"""
 
-from .common import Extractor, Message
-from .. import text, util, exception
-from ..cache import cache
 import itertools
+
+from .. import exception
+from .. import text
+from .. import util
+from ..cache import cache
+from .common import Extractor
+from .common import Message
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?erome\.com"
 
@@ -30,40 +32,36 @@ class EromeExtractor(Extractor):
 
     def items(self):
         for album_id in self.albums():
-            url = "{}/a/{}".format(self.root, album_id)
+            url = f"{self.root}/a/{album_id}"
 
             try:
                 page = self.request(url).text
             except exception.HttpError as exc:
-                self.log.warning(
-                    "Unable to fetch album '%s' (%s)", album_id, exc)
+                self.log.warning("Unable to fetch album '%s' (%s)", album_id, exc)
                 continue
 
-            title, pos = text.extract(
-                page, 'property="og:title" content="', '"')
+            title, pos = text.extract(page, 'property="og:title" content="', '"')
             pos = page.index('<div class="user-profile', pos)
-            user, pos = text.extract(
-                page, 'href="https://www.erome.com/', '"', pos)
+            user, pos = text.extract(page, 'href="https://www.erome.com/', '"', pos)
 
             urls = []
             date = None
             groups = page.split('<div class="media-group"')
             for group in util.advance(groups, 1):
-                url = (text.extr(group, '<source src="', '"') or
-                       text.extr(group, 'data-src="', '"'))
+                url = text.extr(group, '<source src="', '"') or text.extr(group, 'data-src="', '"')
                 if url:
                     urls.append(url)
                 if not date:
-                    ts = text.extr(group, '?v=', '"')
+                    ts = text.extr(group, "?v=", '"')
                     if len(ts) > 1:
                         date = text.parse_timestamp(ts)
 
             data = {
-                "album_id"     : album_id,
-                "title"        : text.unescape(title),
-                "user"         : text.unquote(user),
-                "count"        : len(urls),
-                "date"         : date,
+                "album_id": album_id,
+                "title": text.unescape(title),
+                "user": text.unquote(user),
+                "count": len(urls),
+                "date": date,
                 "_http_headers": {"Referer": url},
             }
 
@@ -83,8 +81,7 @@ class EromeExtractor(Extractor):
             response = Extractor.request(self, url, **kwargs)
             if response.cookies:
                 _cookie_cache.update("", response.cookies)
-            if response.content.find(
-                    b"<title>Please wait a few moments</title>", 0, 600) < 0:
+            if response.content.find(b"<title>Please wait a few moments</title>", 0, 600) < 0:
                 return response
             self.sleep(5.0, "check")
 
@@ -101,6 +98,7 @@ class EromeExtractor(Extractor):
 
 class EromeAlbumExtractor(EromeExtractor):
     """Extractor for albums on erome.com"""
+
     subcategory = "album"
     pattern = BASE_PATTERN + r"/a/(\w+)"
     example = "https://www.erome.com/a/ID"
@@ -115,7 +113,7 @@ class EromeUserExtractor(EromeExtractor):
     example = "https://www.erome.com/USER"
 
     def albums(self):
-        url = "{}/{}".format(self.root, self.item)
+        url = f"{self.root}/{self.item}"
         return self._pagination(url, {})
 
 

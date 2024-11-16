@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2015-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,13 +6,16 @@
 
 """Extractors for *booru sites"""
 
-from .common import BaseExtractor, Message
-from .. import text
 import operator
+
+from .. import text
+from .common import BaseExtractor
+from .common import Message
 
 
 class BooruExtractor(BaseExtractor):
     """Base class for *booru extractors"""
+
     basecategory = "booru"
     filename_fmt = "{category}_{id}_{md5}.{extension}"
     page_start = 0
@@ -42,8 +43,11 @@ class BooruExtractor(BaseExtractor):
                     url = self.root + url
             except Exception as exc:
                 self.log.debug("%s: %s", exc.__class__.__name__, exc)
-                self.log.warning("Unable to fetch download URL for post %s "
-                                 "(md5: %s)", post.get("id"), post.get("md5"))
+                self.log.warning(
+                    "Unable to fetch download URL for post %s " "(md5: %s)",
+                    post.get("id"),
+                    post.get("md5"),
+                )
                 continue
 
             if fetch_html:

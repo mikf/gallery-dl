@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # Copyright 2017-2023 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
@@ -8,24 +6,29 @@
 
 """Utility functions and classes"""
 
-import re
-import os
-import sys
-import json
-import time
-import random
-import getpass
-import hashlib
 import binascii
+import collections
 import datetime
 import functools
+import getpass
+import hashlib
 import itertools
+import json
+import os
+import random
+import re
 import subprocess
-import collections
+import sys
+import time
 import urllib.parse
+from contextlib import suppress
+from email.utils import mktime_tz
+from email.utils import parsedate_tz
 from http.cookiejar import Cookie
-from email.utils import mktime_tz, parsedate_tz
-from . import text, version, exception
+
+from . import exception
+from . import text
+from . import version
 
 
 def bencode(num, alphabet="0123456789"):
@@ -49,7 +52,7 @@ def bdecode(data, alphabet="0123456789"):
 
 
 def advance(iterable, num):
-    """"Advance 'iterable' by 'num' steps"""
+    """ "Advance 'iterable' by 'num' steps"""
     iterator = iter(iterable)
     next(itertools.islice(iterator, num, num), None)
     return iterator
@@ -89,16 +92,15 @@ def contains(values, elements, separator=" "):
     if not isinstance(elements, (tuple, list)):
         return elements in values
 
-    for e in elements:
-        if e in values:
-            return True
-    return False
+    return any(e in values for e in elements)
 
 
 def raises(cls):
     """Returns a function that raises 'cls' as exception"""
+
     def wrap(*args):
         raise cls(*args)
+
     return wrap
 
 
@@ -151,8 +153,7 @@ def format_value(value, suffixes="kMGTPEZY"):
     index = value_len - 4
     if index >= 0:
         offset = (value_len - 1) % 3 + 1
-        return (value[:offset] + "." + value[offset:offset+2] +
-                suffixes[index // 3])
+        return value[:offset] + "." + value[offset : offset + 2] + suffixes[index // 3]
     return value
 
 
@@ -193,9 +194,9 @@ def enumerate_reversed(iterable, start=0, length=None):
         length = len(iterable)
 
     try:
-        iterable = zip(range(start-1+length, start-1, -1), reversed(iterable))
+        iterable = zip(range(start - 1 + length, start - 1, -1), reversed(iterable))
     except TypeError:
-        iterable = list(zip(range(start, start+length), iterable))
+        iterable = list(zip(range(start, start + length), iterable))
         iterable.reverse()
 
     return iterable
@@ -231,7 +232,7 @@ def datetime_to_timestamp_string(dt):
         return ""
 
 
-if sys.hexversion < 0x30c0000:
+if sys.hexversion < 0x30C0000:
     # Python <= 3.11
     datetime_utcfromtimestamp = datetime.datetime.utcfromtimestamp
     datetime_utcnow = datetime.datetime.utcnow
@@ -264,7 +265,8 @@ json_dumps = json.JSONEncoder(
 def dump_json(obj, fp=sys.stdout, ensure_ascii=True, indent=4):
     """Serialize 'obj' as JSON and write it to 'fp'"""
     json.dump(
-        obj, fp,
+        obj,
+        fp,
         ensure_ascii=ensure_ascii,
         indent=indent,
         default=json_default,
@@ -308,30 +310,31 @@ Response Headers
             cookie = req_headers.get("Cookie")
             if cookie:
                 req_headers["Cookie"] = ";".join(
-                    c.partition("=")[0] + "=***"
-                    for c in cookie.split(";")
+                    c.partition("=")[0] + "=***" for c in cookie.split(";")
                 )
 
             set_cookie = res_headers.get("Set-Cookie")
             if set_cookie:
                 res_headers["Set-Cookie"] = re.sub(
-                    r"(^|, )([^ =]+)=[^,;]*", r"\1\2=***", set_cookie,
+                    r"(^|, )([^ =]+)=[^,;]*",
+                    r"\1\2=***",
+                    set_cookie,
                 )
 
         fmt_nv = "{}: {}".format
 
-        fp.write(outfmt.format(
-            request=request,
-            response=response,
-            request_headers="\n".join(
-                fmt_nv(name, value)
-                for name, value in req_headers.items()
-            ),
-            response_headers="\n".join(
-                fmt_nv(name, value)
-                for name, value in res_headers.items()
-            ),
-        ).encode())
+        fp.write(
+            outfmt.format(
+                request=request,
+                response=response,
+                request_headers="\n".join(
+                    fmt_nv(name, value) for name, value in req_headers.items()
+                ),
+                response_headers="\n".join(
+                    fmt_nv(name, value) for name, value in res_headers.items()
+                ),
+            ).encode()
+        )
 
     if content:
         if headers:
@@ -356,7 +359,7 @@ def extract_headers(response):
     return data
 
 
-@functools.lru_cache(maxsize=None)
+@functools.cache
 def git_head():
     try:
         out, err = Popen(
@@ -382,17 +385,13 @@ def expand_path(path):
 
 
 def remove_file(path):
-    try:
+    with suppress(OSError):
         os.unlink(path)
-    except OSError:
-        pass
 
 
 def remove_directory(path):
-    try:
+    with suppress(OSError):
         os.rmdir(path)
-    except OSError:
-        pass
 
 
 def set_mtime(path, mtime):
@@ -409,7 +408,6 @@ def cookiestxt_load(fp):
     cookies = []
 
     for line in fp:
-
         line = line.lstrip(" ")
         # strip '#HttpOnly_'
         if line.startswith("#HttpOnly_"):
@@ -421,24 +419,32 @@ def cookiestxt_load(fp):
         if line[-1] == "\n":
             line = line[:-1]
 
-        domain, domain_specified, path, secure, expires, name, value = \
-            line.split("\t")
+        domain, domain_specified, path, secure, expires, name, value = line.split("\t")
 
         if not name:
             name = value
             value = None
 
-        cookies.append(Cookie(
-            0, name, value,
-            None, False,
-            domain,
-            domain_specified == "TRUE",
-            domain[0] == "." if domain else False,
-            path, False,
-            secure == "TRUE",
-            None if expires == "0" or not expires else expires,
-            False, None, None, {},
-        ))
+        cookies.append(
+            Cookie(
+                0,
+                name,
+                value,
+                None,
+                False,
+                domain,
+                domain_specified == "TRUE",
+                domain[0] == "." if domain else False,
+                path,
+                False,
+                secure == "TRUE",
+                None if expires == "0" or not expires else expires,
+                False,
+                None,
+                None,
+                {},
+            )
+        )
 
     return cookies
 
@@ -460,15 +466,19 @@ def cookiestxt_store(fp, cookies):
             value = cookie.value
 
         domain = cookie.domain
-        write("\t".join((
-            domain,
-            "TRUE" if domain and domain[0] == "." else "FALSE",
-            cookie.path,
-            "TRUE" if cookie.secure else "FALSE",
-            "0" if cookie.expires is None else str(cookie.expires),
-            name,
-            value + "\n",
-        )))
+        write(
+            "\t".join(
+                (
+                    domain,
+                    "TRUE" if domain and domain[0] == "." else "FALSE",
+                    cookie.path,
+                    "TRUE" if cookie.secure else "FALSE",
+                    "0" if cookie.expires is None else str(cookie.expires),
+                    name,
+                    value + "\n",
+                )
+            )
+        )
 
 
 def code_to_language(code, default=None):
@@ -520,20 +530,23 @@ CODES = {
 }
 
 
-class HTTPBasicAuth():
+class HTTPBasicAuth:
     __slots__ = ("authorization",)
 
     def __init__(self, username, password):
-        self.authorization = b"Basic " + binascii.b2a_base64(
-            username.encode("latin1") + b":" + str(password).encode("latin1")
-        )[:-1]
+        self.authorization = (
+            b"Basic "
+            + binascii.b2a_base64(
+                username.encode("latin1") + b":" + str(password).encode("latin1")
+            )[:-1]
+        )
 
     def __call__(self, request):
         request.headers["Authorization"] = self.authorization
         return request
 
 
-class ModuleProxy():
+class ModuleProxy:
     __slots__ = ()
 
     def __getitem__(self, key, modules=sys.modules):
@@ -551,14 +564,14 @@ class ModuleProxy():
     __getattr__ = __getitem__
 
 
-class LazyPrompt():
+class LazyPrompt:
     __slots__ = ()
 
     def __str__(self):
         return getpass.getpass()
 
 
-class NullContext():
+class NullContext:
     __slots__ = ()
 
     def __enter__(self):
@@ -568,8 +581,9 @@ class NullContext():
         pass
 
 
-class CustomNone():
+class CustomNone:
     """None-style type that supports more operations than regular None"""
+
     __slots__ = ()
 
     __getattribute__ = identity
@@ -650,24 +664,24 @@ class CustomNone():
 NONE = CustomNone()
 EPOCH = datetime.datetime(1970, 1, 1)
 SECOND = datetime.timedelta(0, 1)
-WINDOWS = (os.name == "nt")
+WINDOWS = os.name == "nt"
 SENTINEL = object()
 USERAGENT = "gallery-dl/" + version.__version__
 EXECUTABLE = getattr(sys, "frozen", False)
 SPECIAL_EXTRACTORS = {"oauth", "recursive", "generic"}
 GLOBALS = {
-    "contains" : contains,
+    "contains": contains,
     "parse_int": text.parse_int,
-    "urlsplit" : urllib.parse.urlsplit,
-    "datetime" : datetime.datetime,
+    "urlsplit": urllib.parse.urlsplit,
+    "datetime": datetime.datetime,
     "timedelta": datetime.timedelta,
-    "abort"    : raises(exception.StopExtraction),
+    "abort": raises(exception.StopExtraction),
     "terminate": raises(exception.TerminateExtraction),
-    "restart"  : raises(exception.RestartExtraction),
+    "restart": raises(exception.RestartExtraction),
     "hash_sha1": sha1,
-    "hash_md5" : md5,
-    "std"      : ModuleProxy(),
-    "re"       : re,
+    "hash_md5": md5,
+    "std": ModuleProxy(),
+    "re": re,
 }
 
 
@@ -703,7 +717,7 @@ def compile_expression_raw(expr, name="<expr>", globals=None):
     return functools.partial(eval, code_object, globals or GLOBALS)
 
 
-def compile_expression_defaultdict(expr, name="<expr>", globals=None):
+def compile_expression_defaultdict(expr, name="<expr>", globals=None):  # noqa: F811
     global GLOBALS_DEFAULT
     GLOBALS_DEFAULT = collections.defaultdict(lambda: NONE, GLOBALS)
 
@@ -778,13 +792,11 @@ def build_duration_func(duration, min=0.0):
         upper = float(upper)
         return functools.partial(
             random.uniform,
-            lower if lower > min else min,
-            upper if upper > min else min,
+            max(min, lower),
+            max(min, upper),
         )
-    else:
-        if lower < min:
-            lower = min
-        return lambda: lower
+    lower = max(lower, min)
+    return lambda: lower
 
 
 def build_extractor_filter(categories, negate=True, special=None):
@@ -796,7 +808,7 @@ def build_extractor_filter(categories, negate=True, special=None):
 
     catset = set()  # set of categories / basecategories
     subset = set()  # set of subcategories
-    catsub = []     # list of category-subcategory pairs
+    catsub = []  # list of category-subcategory pairs
 
     for item in categories:
         category, _, subcategory = item.partition(":")
@@ -817,35 +829,34 @@ def build_extractor_filter(categories, negate=True, special=None):
 
     if negate:
         if catset:
-            tests.append(lambda extr:
-                         extr.category not in catset and
-                         extr.basecategory not in catset)
+            tests.append(
+                lambda extr: extr.category not in catset and extr.basecategory not in catset
+            )
         if subset:
             tests.append(lambda extr: extr.subcategory not in subset)
     else:
         if catset:
-            tests.append(lambda extr:
-                         extr.category in catset or
-                         extr.basecategory in catset)
+            tests.append(lambda extr: extr.category in catset or extr.basecategory in catset)
         if subset:
             tests.append(lambda extr: extr.subcategory in subset)
 
     if catsub:
+
         def test(extr):
             for category, subcategory in catsub:
                 if subcategory == extr.subcategory and (
-                        category == extr.category or
-                        category == extr.basecategory):
+                    category == extr.category or category == extr.basecategory
+                ):
                     return not negate
             return negate
+
         tests.append(test)
 
     if len(tests) == 1:
         return tests[0]
     if negate:
         return lambda extr: all(t(extr) for t in tests)
-    else:
-        return lambda extr: any(t(extr) for t in tests)
+    return lambda extr: any(t(extr) for t in tests)
 
 
 def build_proxy_map(proxies, log=None):
@@ -871,19 +882,16 @@ def build_proxy_map(proxies, log=None):
 def build_predicate(predicates):
     if not predicates:
         return lambda url, kwdict: True
-    elif len(predicates) == 1:
+    if len(predicates) == 1:
         return predicates[0]
     return functools.partial(chain_predicates, predicates)
 
 
 def chain_predicates(predicates, url, kwdict):
-    for pred in predicates:
-        if not pred(url, kwdict):
-            return False
-    return True
+    return all(pred(url, kwdict) for pred in predicates)
 
 
-class RangePredicate():
+class RangePredicate:
     """Predicate; True if the current index is in the given range(s)"""
 
     def __init__(self, rangespec):
@@ -905,10 +913,7 @@ class RangePredicate():
         if index > self.upper:
             raise exception.StopExtraction()
 
-        for range in self.ranges:
-            if index in range:
-                return True
-        return False
+        return any(index in range for range in self.ranges)
 
     @staticmethod
     def _parse(rangespec):
@@ -929,31 +934,36 @@ class RangePredicate():
             if not group:
                 continue
 
-            elif ":" in group:
+            if ":" in group:
                 start, _, stop = group.partition(":")
                 stop, _, step = stop.partition(":")
-                append(range(
-                    int(start) if start.strip() else 1,
-                    int(stop) if stop.strip() else sys.maxsize,
-                    int(step) if step.strip() else 1,
-                ))
+                append(
+                    range(
+                        int(start) if start.strip() else 1,
+                        int(stop) if stop.strip() else sys.maxsize,
+                        int(step) if step.strip() else 1,
+                    )
+                )
 
             elif "-" in group:
                 start, _, stop = group.partition("-")
-                append(range(
-                    int(start) if start.strip() else 1,
-                    int(stop) + 1 if stop.strip() else sys.maxsize,
-                ))
+                append(
+                    range(
+                        int(start) if start.strip() else 1,
+                        int(stop) + 1 if stop.strip() else sys.maxsize,
+                    )
+                )
 
             else:
                 start = int(group)
-                append(range(start, start+1))
+                append(range(start, start + 1))
 
         return ranges
 
 
-class UniquePredicate():
+class UniquePredicate:
     """Predicate; True if given URL has not been encountered before"""
+
     def __init__(self):
         self.urls = set()
 
@@ -966,11 +976,11 @@ class UniquePredicate():
         return False
 
 
-class FilterPredicate():
+class FilterPredicate:
     """Predicate; True if evaluating the given expression returns True"""
 
     def __init__(self, expr, target="image"):
-        name = "<{} filter>".format(target)
+        name = f"<{target} filter>"
         self.expr = compile_filter(expr, name)
 
     def __call__(self, _, kwdict):
