@@ -11,7 +11,8 @@ import sys
 import unittest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from gallery_dl import ytdl, util, config  # noqa E402
+from gallery_dl import util  # noqa: E402
+from gallery_dl import ytdl  # noqa: E402
 
 
 class Test_CommandlineArguments(unittest.TestCase):

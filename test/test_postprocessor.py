@@ -16,10 +16,16 @@ import unittest
 import zipfile
 from datetime import datetime
 from pathlib import Path
-from unittest.mock import Mock, mock_open, patch
+from unittest.mock import Mock
+from unittest.mock import mock_open
+from unittest.mock import patch
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from gallery_dl import config, extractor, output, path, postprocessor  # noqa E402
+from gallery_dl import config  # noqa: E402
+from gallery_dl import extractor  # noqa: E402
+from gallery_dl import output  # noqa: E402
+from gallery_dl import path  # noqa: E402
+from gallery_dl import postprocessor  # noqa: E402
 from gallery_dl.postprocessor.common import PostProcessor
 
 

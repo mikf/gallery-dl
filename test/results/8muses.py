@@ -1,10 +1,10 @@
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
+from gallery_dl import exception
 
 gallery_dl = __import__("gallery_dl.extractor.8muses")
 _8muses = getattr(gallery_dl.extractor, "8muses")
-from gallery_dl import exception
 
 __tests__ = (
     {

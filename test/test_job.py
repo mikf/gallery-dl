@@ -13,8 +13,11 @@ import unittest
 from unittest.mock import patch
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from gallery_dl import job, config, text  # noqa E402
-from gallery_dl.extractor.common import Extractor, Message
+from gallery_dl import config  # noqa: E402
+from gallery_dl import job  # noqa: E402
+from gallery_dl import text  # noqa: E402
+from gallery_dl.extractor.common import Extractor
+from gallery_dl.extractor.common import Message
 
 
 class TestJob(unittest.TestCase):

@@ -87,7 +87,6 @@
   force-single-line = true
   known-first-party = ["gallery_dl"]
 
-# Ignore `E402` (import violations) in all `__init__.py` files, and in select subdirectories.
 [tool.ruff.lint.per-file-ignores]
   "gallery_dl/extractor/500px.py" = [
     "E501", # Line too long; file uses large query strings
@@ -96,26 +95,7 @@
     "E501", # Line too long; file uses large query strings
   ]
   "test/**" = [
-    "C4",   # flake8-comprehensions
-    "COM",  # flake8-commas
-    "E",    # pycodestyle (errors)
-    "EXE",  # flake8-executable
-    "F",    # Pyflakes
-    "FA",   # flake8-future-annotations
-    "FLY",  # flynt
-    "FURB", # refurb
-    "G",    # flake8-logging-format
-    "I",    # isort
-    "ICN",  # flake8-import-conventions
-    "ISC",  # flake8-implicit-str-concat
-    "PGH",  # pygrep-hooks
-    "PIE",  # flake8-pie
-    "PYI",  # flake8-pyi
-    "Q",    # flake8-quotes
-    "SIM",  # flake8-simplify
-    "T10",  # flake8-debugger
-    "TCH",  # flake8-type-checking
-    "UP",   # pyupgrade
+    "E501", # Line too long
   ]
 
 [tool.ruff.lint.pydocstyle]

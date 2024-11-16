@@ -12,7 +12,8 @@ import unittest
 from unittest.mock import patch
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from gallery_dl import oauth, text  # noqa E402
+from gallery_dl import oauth  # noqa: E402
+from gallery_dl import text  # noqa: E402
 
 TESTSERVER = "http://term.ie/oauth/example"
 CONSUMER_KEY = "key"
@@ -38,7 +39,7 @@ class TestOAuthSession(unittest.TestCase):
         )
 
     def test_nonce(self, size=16):
-        nonce_values = set(oauth.nonce(size) for _ in range(size))
+        nonce_values = {oauth.nonce(size) for _ in range(size)}
 
         # uniqueness
         self.assertEqual(len(nonce_values), size)

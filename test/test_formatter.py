@@ -15,7 +15,9 @@ import unittest
 from time import sleep
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from gallery_dl import formatter, text, util  # noqa E402
+from gallery_dl import formatter  # noqa: E402
+from gallery_dl import text  # noqa: E402
+from gallery_dl import util  # noqa: E402
 
 
 class TestFormatter(unittest.TestCase):

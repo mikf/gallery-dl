@@ -13,7 +13,8 @@ import unittest
 
 ROOTDIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOTDIR)
-from gallery_dl import config, util  # noqa E402
+from gallery_dl import config  # noqa: E402
+from gallery_dl import util  # noqa: E402
 
 
 class TestConfig(unittest.TestCase):

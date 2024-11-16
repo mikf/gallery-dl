@@ -16,9 +16,10 @@ from datetime import timedelta
 from unittest.mock import patch
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from gallery_dl import extractor, util  # noqa E402
-from gallery_dl.extractor import mastodon  # noqa E402
-from gallery_dl.extractor.common import Extractor, Message
+from gallery_dl import extractor  # noqa: E402
+from gallery_dl import util  # noqa: E402
+from gallery_dl.extractor.common import Extractor
+from gallery_dl.extractor.common import Message
 from gallery_dl.extractor.directlink import DirectlinkExtractor
 
 _list_classes = extractor._list_classes

@@ -16,7 +16,8 @@ from os.path import join
 from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from gallery_dl import config, extractor  # noqa E402
+from gallery_dl import config  # noqa: E402
+from gallery_dl import extractor  # noqa: E402
 
 
 class TestCookiejar(unittest.TestCase):

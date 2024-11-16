@@ -20,7 +20,9 @@ import time
 import unittest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from gallery_dl import util, text, exception  # noqa E402
+from gallery_dl import exception  # noqa: E402
+from gallery_dl import text  # noqa: E402
+from gallery_dl import util  # noqa: E402
 
 
 class TestRange(unittest.TestCase):
@@ -656,8 +658,7 @@ value = 123
         result = [(3, 33), (2, 22), (1, 11)]
 
         def gen():
-            for i in seq:
-                yield i
+            yield from seq
 
         def gen_2():
             yield from seq

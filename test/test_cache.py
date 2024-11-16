@@ -13,11 +13,11 @@ import unittest
 from unittest.mock import patch
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from gallery_dl import config, util  # noqa E402
+from gallery_dl import config  # noqa: E402
 
 dbpath = tempfile.mkstemp()[1]
 config.set(("cache",), "file", dbpath)
-from gallery_dl import cache
+from gallery_dl import cache  # noqa: E402
 
 cache._init()
 

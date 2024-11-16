@@ -16,8 +16,12 @@ import sys
 import unittest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from gallery_dl import extractor, util, job, config, exception, formatter  # noqa E402
-
+from gallery_dl import config  # noqa: E402
+from gallery_dl import exception  # noqa: E402
+from gallery_dl import extractor  # noqa: E402
+from gallery_dl import formatter  # noqa: E402
+from gallery_dl import job  # noqa: E402
+from gallery_dl import util  # noqa: E402
 
 RESULTS = os.environ.get("GDL_TEST_RESULTS")
 if RESULTS:

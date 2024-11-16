@@ -12,7 +12,8 @@ import sys
 import unittest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from gallery_dl import text, util  # noqa E402
+from gallery_dl import text  # noqa: E402
+from gallery_dl import util  # noqa: E402
 
 INVALID = ((), [], {}, None, 1, 2.3)
 INVALID_ALT = ((), [], {}, None, "")
