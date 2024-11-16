@@ -48,8 +48,19 @@ jobs:
 
     - name: Install yt-dlp
       run: |
-        # install from master
-        pip install https://github.com/yt-dlp/yt-dlp/archive/refs/heads/master.tar.gz
+        case "${{ matrix.python-version }}" in
+            3.4|3.5)
+                # don't install yt-dlp
+                ;;
+            3.6|3.7|3.8)
+                # install from PyPI
+                pip install yt-dlp
+                ;;
+            *)
+                # install from master
+                pip install https://github.com/yt-dlp/yt-dlp/archive/refs/heads/master.tar.gz
+                ;;
+        esac
 
     - name: Lint with Ruff
       run: |
