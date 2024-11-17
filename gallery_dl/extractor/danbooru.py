@@ -23,9 +23,19 @@ class DanbooruExtractor(BaseExtractor):
     request_interval = (0.5, 1.5)
 
     def _init(self):
+        self.session.headers["User-Agent"] = util.USERAGENT
         self.ugoira = self.config("ugoira", False)
         self.external = self.config("external", False)
-        self.includes = False
+
+        includes = self.config("metadata")
+        if includes:
+            if isinstance(includes, (list, tuple)):
+                includes = ",".join(includes)
+            elif not isinstance(includes, str):
+                includes = "artist_commentary,children,notes,parent,uploader"
+            self.includes = includes + ",id"
+        else:
+            self.includes = False
 
         threshold = self.config("threshold")
         if isinstance(threshold, int):
@@ -46,16 +56,6 @@ class DanbooruExtractor(BaseExtractor):
         return pages * self.per_page
 
     def items(self):
-        self.session.headers["User-Agent"] = util.USERAGENT
-
-        includes = self.config("metadata")
-        if includes:
-            if isinstance(includes, (list, tuple)):
-                includes = ",".join(includes)
-            elif not isinstance(includes, str):
-                includes = "artist_commentary,children,notes,parent,uploader"
-            self.includes = includes + ",id"
-
         data = self.metadata()
         for post in self.posts():
 
