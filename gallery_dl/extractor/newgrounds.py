@@ -193,7 +193,8 @@ class NewgroundsExtractor(Extractor):
         data["_comment"] = extr(
             'id="author_comments"', '</div>').partition(">")[2]
         data["comment"] = text.unescape(text.remove_html(
-            data["_comment"], "", ""))
+            data["_comment"]
+            .replace("<p><br></p>", "\n\n").replace("<br>", "\n"), "", ""))
         data["favorites"] = text.parse_int(extr(
             'id="faves_load">', '<').replace(",", ""))
         data["score"] = text.parse_float(extr('id="score_number">', '<'))
@@ -214,7 +215,7 @@ class NewgroundsExtractor(Extractor):
         data = {
             "title"      : text.unescape(extr('"og:title" content="', '"')),
             "description": text.unescape(extr(':description" content="', '"')),
-            "type"       : extr('og:type" content="', '"'),
+            "type"       : "art",
             "_type"      : "i",
             "date"       : text.parse_datetime(extr(
                 'itemprop="datePublished" content="', '"')),
@@ -231,7 +232,7 @@ class NewgroundsExtractor(Extractor):
         if image_data:
             data["_multi"] = self._extract_images_multi(image_data)
         else:
-            art_images = extr('<div class="art-images', '\n</div>')
+            art_images = extr('<div class="art-images', '\n\t\t</div>')
             if art_images:
                 data["_multi"] = self._extract_images_art(art_images, data)
 
@@ -263,7 +264,7 @@ class NewgroundsExtractor(Extractor):
         return {
             "title"      : text.unescape(extr('"og:title" content="', '"')),
             "description": text.unescape(extr(':description" content="', '"')),
-            "type"       : extr('og:type" content="', '"'),
+            "type"       : "audio",
             "_type"      : "a",
             "date"       : text.parse_datetime(extr(
                 'itemprop="datePublished" content="', '"')),
@@ -283,8 +284,13 @@ class NewgroundsExtractor(Extractor):
         if src:
             src = src.replace("\\/", "/")
             formats = ()
+            type = extr(',"description":"', '"')
             date = text.parse_datetime(extr(
                 'itemprop="datePublished" content="', '"'))
+            if type:
+                type = type.rpartition(" ")[2].lower()
+            else:
+                type = "flash" if text.ext_from_url(url) == "swf" else "game"
         else:
             url = self.root + "/portal/video/" + index
             headers = {
@@ -295,6 +301,7 @@ class NewgroundsExtractor(Extractor):
             formats = self._video_formats(sources)
             src = next(formats, "")
             date = text.parse_timestamp(src.rpartition("?")[2])
+            type = "movie"
 
         return {
             "title"      : text.unescape(title),
@@ -513,7 +520,9 @@ class NewgroundsFavoriteExtractor(NewgroundsExtractor):
 class NewgroundsFollowingExtractor(NewgroundsFavoriteExtractor):
     """Extractor for a newgrounds user's favorited users"""
     subcategory = "following"
-    pattern = USER_PATTERN + r"/favorites/(following)"
+    pattern = (USER_PATTERN + r"/favorites/(following)"
+               r"(?:(?:/page/|/?\?page=)(\d+))?")
+
     example = "https://USER.newgrounds.com/favorites/following"
 
     def items(self):
