@@ -108,6 +108,13 @@ class DanbooruExtractor(BaseExtractor):
             yield Message.Directory, post
             yield Message.Url, url, post
 
+    def items_artists(self):
+        for artist in self.artists():
+            artist["_extractor"] = DanbooruTagExtractor
+            url = "{}/posts?tags={}".format(
+                self.root, text.quote(artist["name"]))
+            yield Message.Queue, url, artist
+
     def metadata(self):
         return ()
 
@@ -302,15 +309,31 @@ class DanbooruArtistExtractor(DanbooruExtractor):
     pattern = BASE_PATTERN + r"/artists/(\d+)"
     example = "https://danbooru.donmai.us/artists/12345"
 
-    def items(self):
-        url = "{}/artists/{}.json".format(self.root, self.groups[-1])
-        artist = self.request(url).json()
+    items = DanbooruExtractor.items_artists
 
-        url = "{}/posts?tags={}".format(
-            self.root, text.quote(artist["name"]))
-        data = {
-            "_extractor": DanbooruTagExtractor,
-            "artist"    : artist,
-        }
-        yield Message.Directory, data
-        yield Message.Queue, url, data
+    def artists(self):
+        url = "{}/artists/{}.json".format(self.root, self.groups[-1])
+        return (self.request(url).json(),)
+
+
+class DanbooruArtistSearchExtractor(DanbooruExtractor):
+    """Extractor for danbooru artist searches"""
+    subcategory = "artist-search"
+    pattern = BASE_PATTERN + r"/artists/?\?([^#]+)"
+    example = "https://danbooru.donmai.us/artists?QUERY"
+
+    items = DanbooruExtractor.items_artists
+
+    def artists(self):
+        url = self.root + "/artists.json"
+        params = text.parse_query(self.groups[-1])
+        params["page"] = text.parse_int(params.get("page"), 1)
+
+        while True:
+            artists = self.request(url, params=params).json()
+
+            yield from artists
+
+            if len(artists) < 20:
+                return
+            params["page"] += 1

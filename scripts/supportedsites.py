@@ -217,6 +217,9 @@ SUBCATEGORY_MAP = {
         "discord-server": "",
         "posts"         : "",
     },
+    "Danbooru": {
+        "artist-search": "Artist Searches",
+    },
     "desktopography": {
         "site": "",
     },
