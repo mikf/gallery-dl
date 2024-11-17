@@ -294,3 +294,23 @@ class DanbooruPopularExtractor(DanbooruExtractor):
 
     def posts(self):
         return self._pagination("/explore/posts/popular.json", self.params)
+
+
+class DanbooruArtistExtractor(DanbooruExtractor):
+    """Extractor for danbooru artists"""
+    subcategory = "artist"
+    pattern = BASE_PATTERN + r"/artists/(\d+)"
+    example = "https://danbooru.donmai.us/artists/12345"
+
+    def items(self):
+        url = "{}/artists/{}.json".format(self.root, self.groups[-1])
+        artist = self.request(url).json()
+
+        url = "{}/posts?tags={}".format(
+            self.root, text.quote(artist["name"]))
+        data = {
+            "_extractor": DanbooruTagExtractor,
+            "artist"    : artist,
+        }
+        yield Message.Directory, data
+        yield Message.Queue, url, data
