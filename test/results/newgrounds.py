@@ -16,9 +16,9 @@ __tests__ = (
     "#sha1_content": "8f395e08333eb2457ba8d8b715238f8910221365",
 
     "artist"     : ["tomfulp"],
-    "comment"    : "Consider this the bottom threshold for scouted artists.In fact consider it BELOW the bottom threshold.",
+    "comment"    : "Consider this the bottom threshold for scouted artists.\n\nIn fact consider it BELOW the bottom threshold.",
     "date"       : "dt:2009-06-04 14:44:05",
-    "description": "Consider this the bottom threshold for scouted artists.  In fact consider it BELOW the bottom threshold.   ",
+    "description": "",
     "favorites"  : int,
     "filename"   : "1993615_4474_tomfulp_ryu-is-hawt.44f81090378ae9c257a5e46a8e17cc4d",
     "height"     : 476,
@@ -30,7 +30,7 @@ __tests__ = (
         "streetfighter",
     ],
     "title"      : "Ryu is Hawt",
-    "type"       : "article",
+    "type"       : "art",
     "user"       : "tomfulp",
     "width"      : 447,
 },
@@ -58,12 +58,13 @@ __tests__ = (
     "#comment" : "extra files in 'art-image-row' elements - WebP to GIF (#4642)",
     "#category": ("", "newgrounds", "image"),
     "#class"   : newgrounds.NewgroundsImageExtractor,
+    "#auth"    : True,
     "#urls"    : (
         "https://art.ngfiles.com/images/5091000/5091275_45067_zedrinbot_untitled-5091275.0a9d27ed2bc265a7e89478ed6ad6f86f.gif?f1696187399",
-        "https://art.ngfiles.com/images/5091000/5091275_45071_zedrinbot_untitled-5091275.6fdc62eaef43528fb1c9bda624d30a3d.gif?f1696187437",
-        "https://art.ngfiles.com/images/5091000/5091275_45070_zedrinbot_untitled-5091275.0d7334746374465bd448908b88d1f810.gif?f1696187435",
-        "https://art.ngfiles.com/images/5091000/5091275_45072_zedrinbot_untitled-5091275.6fdc62eaef43528fb1c9bda624d30a3d.gif?f1696187438",
-        "https://art.ngfiles.com/images/5091000/5091275_45073_zedrinbot_untitled-5091275.20aa05c1cd22fd058e8c68ce58f5a302.gif?f1696187439",
+        "https://art.ngfiles.com/images/5091000/5091275_45071_zedrinbot_untitled-5091275.6fdc62eaef43528fb1c9bda624d30a3d.gif?f1696187436",
+        "https://art.ngfiles.com/images/5091000/5091275_45070_zedrinbot_untitled-5091275.0d7334746374465bd448908b88d1f810.gif?f1696187434",
+        "https://art.ngfiles.com/images/5091000/5091275_45072_zedrinbot_untitled-5091275.6fdc62eaef43528fb1c9bda624d30a3d.gif?f1696187437",
+        "https://art.ngfiles.com/images/5091000/5091275_45073_zedrinbot_untitled-5091275.20aa05c1cd22fd058e8c68ce58f5a302.gif?f1696187437",
     ),
 },
 
@@ -90,7 +91,7 @@ __tests__ = (
     "#class"   : newgrounds.NewgroundsImageExtractor,
     "#urls"    : (
         "https://art.ngfiles.com/images/5127000/5127150_93307_bacun_kill-la-kill-10th-anniversary.61adfe309bec342f9db55fd44397235b.png?f1697310027",
-        "https://art.ngfiles.com/images/5127000/5127150_94250_bacun_kill-la-kill-10th-anniversary.64fdf525fa38c1ab34defac4b354bc7a.png?f1697332109",
+        "https://art.ngfiles.com/images/5127000/5127150_94250_bacun_kill-la-kill-10th-anniversary.64fdf525fa38c1ab34defac4b354bc7a.webp?f1697332147",
     ),
 },
 
@@ -119,6 +120,7 @@ __tests__ = (
 
 {
     "#url"     : "https://www.newgrounds.com/portal/view/595355",
+    "#comment" : "video",
     "#category": ("", "newgrounds", "media"),
     "#class"   : newgrounds.NewgroundsMediaExtractor,
     "#urls"    : "https://uploads.ungrounded.net/alternate/564000/564957_alternate_31.mp4?1359712249",
@@ -163,6 +165,7 @@ __tests__ = (
 
 {
     "#url"     : "https://www.newgrounds.com/audio/listen/609768",
+    "#comment" : "audio",
     "#category": ("", "newgrounds", "media"),
     "#class"   : newgrounds.NewgroundsMediaExtractor,
     "#sha1_url": "f4c5490ae559a3b05e46821bb7ee834f93a43c95",
@@ -171,9 +174,27 @@ __tests__ = (
         "zj",
         "tomfulp",
     ],
-    "comment"    : r"""re:RECORDED 12-09-2014
+    "comment"    : """\
+RECORDED 12-09-2014
 
-From The ZJ "Late """,
+From The ZJ "Late Nite" Report at the University of Cincinnati!
+
+ZJ gets to interview Tom Fulp, the founder of Newgrounds.com and the programmer behind classic games like Alien Hominid and Castle Crashers. Lots of cool stuff is talked about on here like game design, finding a way to market yourself on the modern web, and what Tom would do in the zombie apocalypse. It's a barrel of fun, so shut up and listen to it!
+
+See more ZJ Report:
+
+Twitter: @ZJReport
+
+Facebook: Facebook.com/ZJReport
+
+NOTE:
+
+If this version of this interview offends your ears, there's a different one on Soundcloud. That original file was lost somehow, so I tried recreating it as best as I can, but I understand that there are still some differences...
+
+https://soundcloud.com/the-zj-late-nite-report/the-zj-late-nite-report-extra-tom-fulp-interview
+
+Also wanna give a big shout-out to by by Zachary (Zachary.newgrounds.com) for providing the intro and outro music on this thing.\
+""",
     "date"       : "dt:2015-02-23 19:31:59",
     "description": "From The ZJ Report Show!",
     "favorites"  : int,
@@ -187,7 +208,7 @@ From The ZJ "Late """,
         "zj",
     ],
     "title"      : "ZJ Interviews Tom Fulp!",
-    "type"       : "music.song",
+    "type"       : "audio",
     "user"       : "zj",
 },
 
@@ -203,7 +224,7 @@ From The ZJ "Late """,
 
 {
     "#url"     : "https://www.newgrounds.com/portal/view/758545",
-    "#comment" : "format selection (#1729)",
+    "#comment" : "video format selection (#1729)",
     "#category": ("", "newgrounds", "media"),
     "#class"   : newgrounds.NewgroundsMediaExtractor,
     "#options" : {"format": "720p"},
@@ -235,14 +256,6 @@ From The ZJ "Late """,
         "animalspeakandrews",
         "bill",
         "chipollo",
-        "dylz49",
-        "gappyshamp",
-        "pinktophat",
-        "rad",
-        "shapeshiftingblob",
-        "tomfulp",
-        "voicesbycorey",
-        "psychogoldfish",
     ],
     "comment"    : r"re:The children are expendable. Take out the ",
     "date"       : "dt:2022-01-10 23:00:57",
@@ -268,7 +281,7 @@ From The ZJ "Late """,
 {
     "#url"     : "https://tomfulp.newgrounds.com/art",
     "#class"   : newgrounds.NewgroundsArtExtractor,
-    "#pattern" : newgrounds.NewgroundsImageExtractor.pattern,
+    "#pattern" : r"https://(art.ngfiles.com/images/\d+|uploads.ungrounded.net/tmp/img/)",
     "#count"   : ">= 3",
 },
 
@@ -310,9 +323,11 @@ From The ZJ "Late """,
 {
     "#url"     : "https://tomfulp.newgrounds.com/games",
     "#class"   : newgrounds.NewgroundsGamesExtractor,
-    "#pattern" : r"https://uploads.ungrounded.net(/alternate)?/(\d+/\d+_.+|tmp/.+)",
+    "#pattern" : r"https://(uploads.ungrounded.net(/alternate)?/(\d+/\d+_.+|tmp/.+)|img.ngfiles.com/)",
     "#range"   : "1-10",
     "#count"   : 10,
+
+    "type": {"archive", "game"},
 },
 
 {
