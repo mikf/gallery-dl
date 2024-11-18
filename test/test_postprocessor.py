@@ -120,29 +120,36 @@ class ClassifyTest(BasePostprocessorTest):
             for directory, exts in pp.DEFAULT_MAPPING.items()
             for ext in exts
         })
-        self.pathfmt.set_extension("jpg")
-        self.pathfmt.build_path()
 
-        pp.prepare(self.pathfmt)
+        self.assertEqual(pp.directory, "")
+        self._trigger(("post",))
+        self.assertEqual(pp.directory, self.pathfmt.directory)
+
+        self.pathfmt.set_extension("jpg")
+        self._trigger(("prepare",))
+        self.pathfmt.build_path()
         path = os.path.join(self.dir.name, "test", "Pictures")
         self.assertEqual(self.pathfmt.path, path + "/file.jpg")
         self.assertEqual(self.pathfmt.realpath, path + "/file.jpg")
 
-        with patch("os.makedirs") as mkdirs:
-            self._trigger()
-            mkdirs.assert_called_once_with(path, exist_ok=True)
+        self.pathfmt.set_extension("mp4")
+        self._trigger(("prepare",))
+        self.pathfmt.build_path()
+        path = os.path.join(self.dir.name, "test", "Video")
+        self.assertEqual(self.pathfmt.path, path + "/file.mp4")
+        self.assertEqual(self.pathfmt.realpath, path + "/file.mp4")
 
     def test_classify_noop(self):
         pp = self._create()
         rp = self.pathfmt.realpath
 
-        pp.prepare(self.pathfmt)
+        self.assertEqual(pp.directory, "")
+        self._trigger(("post",))
+        self._trigger(("prepare",))
+
+        self.assertEqual(pp.directory, self.pathfmt.directory)
         self.assertEqual(self.pathfmt.path, rp)
         self.assertEqual(self.pathfmt.realpath, rp)
-
-        with patch("os.makedirs") as mkdirs:
-            self._trigger()
-            self.assertEqual(mkdirs.call_count, 0)
 
     def test_classify_custom(self):
         pp = self._create({"mapping": {
@@ -153,17 +160,17 @@ class ClassifyTest(BasePostprocessorTest):
             "foo": "foo/bar",
             "bar": "foo/bar",
         })
-        self.pathfmt.set_extension("foo")
-        self.pathfmt.build_path()
 
-        pp.prepare(self.pathfmt)
+        self.assertEqual(pp.directory, "")
+        self._trigger(("post",))
+        self.assertEqual(pp.directory, self.pathfmt.directory)
+
+        self.pathfmt.set_extension("foo")
+        self._trigger(("prepare",))
+        self.pathfmt.build_path()
         path = os.path.join(self.dir.name, "test", "foo", "bar")
         self.assertEqual(self.pathfmt.path, path + "/file.foo")
         self.assertEqual(self.pathfmt.realpath, path + "/file.foo")
-
-        with patch("os.makedirs") as mkdirs:
-            self._trigger()
-            mkdirs.assert_called_once_with(path, exist_ok=True)
 
 
 class ExecTest(BasePostprocessorTest):
