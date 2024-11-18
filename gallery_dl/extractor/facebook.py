@@ -182,7 +182,7 @@ class FacebookExtractor(Extractor):
             ))
 
         first_video_raw = text.extr(
-            video_page, '"playlist":"\\u003C?xml', '\\/Period>\\u003C\\/MPD>'
+            video_page, '"permalink_url"', '\\/Period>\\u003C\\/MPD>'
         )
 
         audio = {
@@ -412,7 +412,7 @@ class FacebookProfileExtractor(FacebookExtractor):
     subcategory = "profile"
     pattern = (
         BASE_PATTERN +
-        r"/(?!(?:media|photo|watch|.*?/photos|.*?/posts|.*?/videos)/)"
+        r"/(?!media/|photo/|watch/|.*?/photos/|.*?/posts/|.*?/videos/)"
         r"(?:profile.php\?id=|people/[^/?&]+/)?([^/?&]+)"
     )
     example = "https://www.facebook.com/USERNAME"
