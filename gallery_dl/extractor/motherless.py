@@ -26,7 +26,7 @@ class MotherlessExtractor(Extractor):
 class MotherlessMediaExtractor(MotherlessExtractor):
     """Extractor for a single image/video from motherless.com"""
 
-    pattern = ROOT_URL_PATTERN + "/((?!GV|GI|G)[A-Z0-9]+)$"
+    pattern = ROOT_URL_PATTERN + "/(?!G)([A-Z0-9]+)$"
     example = "https://motherless.com/ABC123"
     directory_fmt = ("{category}",)
 
@@ -42,7 +42,7 @@ class MotherlessMediaExtractor(MotherlessExtractor):
             # Find image source url.
             self.subcategory = "image"
 
-            image_url_search = re.search(f'<link rel="image_src" type="image/([a-z]+)" href="(.+)">', self.page_data)
+            image_url_search = re.search(f'<link rel="image_src" type="image/([a-z]+)" href="([^"]+)">', self.page_data)
             extension = image_url_search.group(1)
             media_url = image_url_search.group(2)
             id = get_image_id(media_url)
@@ -205,10 +205,10 @@ def get_images(extractor):
         page = extractor.request(f"{extractor.root}/GI{extractor.gallery_id}?page={n}").text
         page_count = 0
 
-        for result in re.finditer(f' src="https:\/\/cdn5-thumbs\.motherlessmedia\.com\/thumbs\/([A-Z0-9]+?)\.(jpg|gif)"[\s\S]+?alt="(.+)"', page):
+        for result in re.finditer(' src="https://cdn5-thumbs\.motherlessmedia\.com/thumbs/([A-Z0-9]+?)\.([a-zA-Z]+)"[\s\S]+?alt="([^"]+)"', page):
             id = result.group(1)
-            url = f"https://cdn5-images.motherlessmedia.com/images/{id}.jpg"
             extension = result.group(2)
+            url = f"https://cdn5-images.motherlessmedia.com/images/{id}.{extension}"
             title = result.group(3)
             page_count += 1
 
@@ -228,7 +228,7 @@ def get_videos(extractor):
         page = extractor.request(f"{extractor.root}/GV{extractor.gallery_id}?page={n}").text
         page_count = 0
 
-        for result in re.finditer(f'thumbs\/([A-Z0-9]+?)-strip\.jpg" alt="(.+)"', page):
+        for result in re.finditer('thumbs/([A-Z0-9]+?)-strip\.jpg" alt="([^"]+)"', page):
             id = result.group(1)
             url = f"https://cdn5-videos.motherlessmedia.com/videos/{id}.mp4"
             title = result.group(2)
@@ -266,7 +266,7 @@ def get_media_date(page_data):
     try:
         # Find 'DD Mon YYYY' format.
         date = re.search('<span class="count">(\d{1,2}\s+\w+\s+\d{4})</span>', page_data).group(1)
-        return text.parse_datetime(date, "%d  %b  %Y").isoformat()
+        return text.parse_datetime(date, "%d %b %Y").isoformat()
 
     except AttributeError:
         # Find 'nd ago' format.
@@ -274,7 +274,7 @@ def get_media_date(page_data):
         return (datetime.now(timezone.utc) - timedelta(days=days_ago)).replace(hour=0, minute=0, second=0, microsecond=0)
 
 def get_media_uploader(page_data):
-    username_html = re.search('class="username">\s+(.+[^\s])\s+<\/span>', page_data).group(1)
+    username_html = re.search('class="username">\s*([^\s]+)\s*</span>', page_data).group(1)
     return text.remove_html(username_html)
 
 def get_image_id(image_url):
