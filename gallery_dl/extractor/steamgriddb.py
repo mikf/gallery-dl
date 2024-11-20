@@ -56,14 +56,19 @@ class SteamgriddbExtractor(Extractor):
         download_fake_png = self.config("download-fake-png", True)
 
         for asset in self.assets():
-            if download_fake_png and asset.get("fake_png"):
-                urls = (asset["url"], asset["fake_png"])
-            else:
-                urls = (asset["url"],)
+            fake_png = download_fake_png and asset.get("fake_png")
 
-            asset["count"] = len(urls)
+            asset["count"] = 2 if fake_png else 1
             yield Message.Directory, asset
-            for asset["num"], url in enumerate(urls, 1):
+
+            asset["num"] = 1
+            url = asset["url"]
+            yield Message.Url, url, text.nameext_from_url(url, asset)
+
+            if fake_png:
+                asset["num"] = 2
+                asset["_http_adjust_extension"] = False
+                url = fake_png
                 yield Message.Url, url, text.nameext_from_url(url, asset)
 
     def _call(self, endpoint, **kwargs):
