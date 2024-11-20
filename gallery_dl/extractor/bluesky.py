@@ -64,7 +64,7 @@ class BlueskyExtractor(Extractor):
                     did = post["author"]["did"]
                     base = (
                         "{}/xrpc/com.atproto.sync.getBlob?did={}&cid=".format(
-                            self.api.get_service_endpoint(did), did))
+                            self.api.service_endpoint(did), did))
                     for post["num"], file in enumerate(files, 1):
                         post.update(file)
                         yield Message.Url, base + file["filename"], post
@@ -432,10 +432,9 @@ class BlueskyAPI():
         return self._call(endpoint, params)["did"]
 
     @memcache(keyarg=1)
-    def get_service_endpoint(self, did):
+    def service_endpoint(self, did):
         if did.startswith('did:web:'):
-            url = "https://{}/.well-known/did.json".format(
-                did.rpartition(":")[2])
+            url = "https://" + did[8:] + "/.well-known/did.json"
         else:
             url = "https://plc.directory/" + did
 
