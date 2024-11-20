@@ -159,7 +159,7 @@ class BloggerAPI():
 
     def __init__(self, extractor):
         self.extractor = extractor
-        self.api_key = extractor.config("api-key", self.API_KEY)
+        self.api_key = extractor.config("api-key") or self.API_KEY
 
     def blog_by_url(self, url):
         return self._call("blogs/byurl", {"url": url}, "blog")
