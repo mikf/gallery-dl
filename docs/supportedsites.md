@@ -1046,6 +1046,12 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
+    <td>Webtoon.xyz</td>
+    <td>https://www.webtoon.xyz/</td>
+    <td>Chapters, Comics</td>
+    <td></td>
+</tr>
+<tr>
     <td>Weibo</td>
     <td>https://www.weibo.com/</td>
     <td>Albums, Articles, Feeds, Images from Statuses, User Profiles, Videos</td>
