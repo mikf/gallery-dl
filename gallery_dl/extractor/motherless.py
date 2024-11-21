@@ -77,7 +77,7 @@ class MotherlessMediaInGalleryExtractor(MotherlessMediaExtractor):
     example = "https://motherless.com/GABC123/DEF456"
 
     def get_image(self):
-        media_url, data =  super().get_image()
+        media_url, data = super().get_image()
         data['gallery_id'] = re.match(self.pattern, self.url).group(1)
         data['gallery_title'] = self.get_gallery_name(data['gallery_id'])
         data['title'] = get_media_title(self.page_data)
@@ -107,22 +107,22 @@ class MotherlessGalleryImagesExtractor(MotherlessExtractor):
 
         page = self.request(f"{self.root}/G{self.gallery_id}").text
         data = {
-            "gallery_id" : self.gallery_id, 
-            "gallery_title": get_gallery_name_from_homepage(page), 
+            "gallery_id" : self.gallery_id,
+            "gallery_title": get_gallery_name_from_homepage(page),
             "uploader": get_gallery_uploader(page),
             "count": get_gallery_image_count(page)}
 
         yield Message.Directory, data
 
         for id, url, extension, title, num in get_images(self):
-            data |= {
+            image_data = data | {
                 "id": id,
                 "filename": id,
                 "extension": extension,
                 "title": title,
                 "num": num}
 
-            yield Message.Url, url, data
+            yield Message.Url, url, image_data
 
 
 class MotherlessGalleryVideosExtractor(MotherlessExtractor):
@@ -137,7 +137,7 @@ class MotherlessGalleryVideosExtractor(MotherlessExtractor):
         self.gallery_id = re.match(self.pattern, self.url).group(1)
         page = self.request(f"{self.root}/G{self.gallery_id}").text
         data = {
-            "gallery_id" : self.gallery_id, 
+            "gallery_id" : self.gallery_id,
             "gallery_title": get_gallery_name_from_homepage(page),
             "uploader": get_gallery_uploader(page),
             "count": get_gallery_video_count(page)}
@@ -145,14 +145,14 @@ class MotherlessGalleryVideosExtractor(MotherlessExtractor):
         yield Message.Directory, data
 
         for id, url, title, num in get_videos(self):
-            data |= {
+            video_data = data | {
                 "id": id,
                 "filename": id,
                 "extension": "mp4",
                 "title": title,
                 "num": num}
 
-            yield Message.Url, url, data
+            yield Message.Url, url, video_data
 
 
 class MotherlessGalleryExtractor(MotherlessExtractor):
@@ -167,80 +167,80 @@ class MotherlessGalleryExtractor(MotherlessExtractor):
         self.gallery_id = re.match(self.pattern, self.url).group(1)
         page = self.request(f"{self.root}/G{self.gallery_id}").text
         data = {
-            "gallery_id" : self.gallery_id, 
-            "gallery_title": get_gallery_name_from_homepage(page), 
+            "gallery_id" : self.gallery_id,
+            "gallery_title": get_gallery_name_from_homepage(page),
             "uploader": get_gallery_uploader(page),
             "count": get_gallery_image_count(page) + get_gallery_video_count(page)}
         
         yield Message.Directory, data
 
         for id, url, extension, title, num in get_images(self):
-            data |= {
+            image_data = data | {
                 "id": id,
                 "filename": id,
                 "extension": extension,
                 "title": title,
                 "num": num}
 
-            yield Message.Url, url, data
+            yield Message.Url, url, image_data
 
         for id, url, title, num in get_videos(self):
-            data |= {
+            video_data = data | {
                 "id": id,
                 "filename": id,
                 "extension": "mp4",
                 "title": title,
                 "num": num}
 
-            yield Message.Url, url, data
+            yield Message.Url, url, video_data
 
 
 # Url extractors.
 
 def get_images(extractor):
-    n = 1
-    total_count = 0
+    page_number = 1
+    total_image_count = 0
 
     while True:
-        page = extractor.request(f"{extractor.root}/GI{extractor.gallery_id}?page={n}").text
-        page_count = 0
+        page = extractor.request(f"{extractor.root}/GI{extractor.gallery_id}?page={page_number}").text
+        page_image_count = 0
 
         for result in re.finditer(' src="https://cdn5-thumbs\.motherlessmedia\.com/thumbs/([A-Z0-9]+?)\.([a-zA-Z]+)"[\s\S]+?alt="([^"]+)"', page):
             id = result.group(1)
             extension = result.group(2)
             url = f"https://cdn5-images.motherlessmedia.com/images/{id}.{extension}"
             title = result.group(3)
-            page_count += 1
+            page_image_count += 1
 
-            yield id, url, extension, title, total_count + page_count
+            yield id, url, extension, title, total_image_count + page_image_count
 
-        if page_count == 0:
+        if page_image_count == 0:
             return
 
-        total_count += page_count
-        n += 1
+        total_image_count += page_image_count
+        page_number += 1
 
 def get_videos(extractor):
-    n = 1
-    total_count = 0
+    page_number = 1
+    total_video_count = 0
 
     while True:
-        page = extractor.request(f"{extractor.root}/GV{extractor.gallery_id}?page={n}").text
-        page_count = 0
+        page = extractor.request(f"{extractor.root}/GV{extractor.gallery_id}?page={page_number}").text
+        page_video_count = 0
 
         for result in re.finditer('thumbs/([A-Z0-9]+?)-strip\.jpg" alt="([^"]+)"', page):
             id = result.group(1)
             url = f"https://cdn5-videos.motherlessmedia.com/videos/{id}.mp4"
             title = result.group(2)
-            page_count += 1
+            page_video_count += 1
 
-            yield id, url, title, total_count + page_count
+            yield id, url, title, total_video_count + page_video_count
 
-        if page_count == 0:
+        if page_video_count == 0:
             return
 
-        total_count += page_count
-        n += 1
+        total_video_count += page_video_count
+        page_number += 1
 
 # Metadata extractors.
 
