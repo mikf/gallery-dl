@@ -51,7 +51,7 @@ __tests__ = (
     "caption"  : "They were on a break... #FriendsReunion #MoreTogether",
     "date"     : datetime.datetime(2021, 5, 27, 21, 55, 19),
     "filename" : "191053255_10160743390471729_9001965649022744000_n",
-	"extension": "jpg",
+    "extension": "jpg",
     "id"       : "10160743390456729",
     "set_id"   : "a.494827881728",
     "url"      : str,
