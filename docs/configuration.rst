@@ -2377,7 +2377,7 @@ Description
 
 
 extractor.facebook.author-followups
--------------------------
+-----------------------------------
 Type
     ``bool``
 Default
@@ -2387,7 +2387,7 @@ description
 
 
 extractor.facebook.videos
------------------------
+-------------------------
 Type
     * ``bool``
     * ``string``
@@ -2398,6 +2398,7 @@ Description
 
     * ``true``: Extract and download video & audio separately.
     * ``"ytdl"``: Let |ytdl| handle video extraction and download, and merge video & audio streams.
+    * ``false``: Ignore videos.
 
 
 extractor.fanbox.comments

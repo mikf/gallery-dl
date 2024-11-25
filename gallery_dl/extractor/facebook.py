@@ -9,7 +9,7 @@
 from .common import Extractor, Message
 from .. import text, exception
 
-BASE_PATTERN = r"(?:https?://)?.*?facebook\.com"
+BASE_PATTERN = r"(?:https?://)?(?:\w+\.)?facebook\.com"
 
 
 class FacebookExtractor(Extractor):
@@ -23,16 +23,14 @@ class FacebookExtractor(Extractor):
     set_url_fmt = root + "/media/set/?set={set_id}"
     photo_url_fmt = root + "/photo/?fbid={photo_id}&set={set_id}"
 
-    def __init__(self, match):
-        Extractor.__init__(self, match)
-        self.match = match
-
     def _init(self):
-        self.session.headers["Accept"] = "text/html"
+        self.session.headers["Accept"] = (
+            "text/html,application/xhtml+xml,application/xml;q=0.9,"
+            "image/avif,image/webp,image/png,image/svg+xml,*/*;q=0.8"
+        )
         self.session.headers["Sec-Fetch-Mode"] = "navigate"
 
         self.fallback_retries = self.config("fallback-retries", 2)
-        self.sleep_429 = self.config("sleep-429", 5)
         self.videos = self.config("videos", True)
 
         self.author_followups = self.config("author-followups", False)
@@ -42,15 +40,6 @@ class FacebookExtractor(Extractor):
         return text.unescape(
             txt.encode("utf-8").decode("unicode_escape")
         ).replace("\\/", "/")
-
-    @staticmethod
-    def item_filename_handle(item):
-        item["filename"] = item.get("filename") or ""
-        if "." in item["filename"]:
-            item["name"], item["extension"] = item["filename"].rsplit(".", 1)
-        else:
-            item["name"] = item["filename"]
-            item["extension"] = ""
 
     @staticmethod
     def parse_set_page(set_page):
@@ -124,8 +113,7 @@ class FacebookExtractor(Extractor):
             )
         }
 
-        photo["filename"] = text.rextract(photo["url"], "/", "?")[0]
-        FacebookExtractor.item_filename_handle(photo)
+        text.nameext_from_url(text.rextract(photo["url"], "/", "?")[0], photo)
 
         photo["followups_ids"] = []
         for comment_raw in text.extract_iter(
@@ -216,22 +204,19 @@ class FacebookExtractor(Extractor):
             key=lambda x: int(x[0][:-1])
         )[-1][1]
 
-        video["filename"] = text.rextract(video["url"], "/", "?")[0]
-        FacebookExtractor.item_filename_handle(video)
-
-        audio["filename"] = video["name"] + ".m4a"
-        FacebookExtractor.item_filename_handle(audio)
+        text.nameext_from_url(text.rextract(video["url"], "/", "?")[0], video)
+        text.nameext_from_url(video["filename"] + ".m4a", audio)
 
         return video, audio
 
-    def photo_page_request_wrapper(self, url, *args, **kwargs):
+    def photo_page_request_wrapper(self, url, **kwargs):
         LEFT_OFF_TXT = "" if url.endswith("&set=") else (
             "\nYou can use this URL to continue from "
             "where you left off (added \"&setextract\"): "
             "\n" + url + "&setextract"
         )
 
-        res = self.request(url, *args, **kwargs)
+        res = self.request(url, **kwargs)
 
         if res.url.startswith(self.root + "/login"):
             raise exception.AuthenticationError(
@@ -239,7 +224,7 @@ class FacebookExtractor(Extractor):
                 LEFT_OFF_TXT
             )
 
-        if '{"__dr":"CometErrorRoot.react"}' in res.text:
+        if b'{"__dr":"CometErrorRoot.react"}' in res.content:
             raise exception.StopExtraction(
                 "You've been temporarily blocked from viewing images. "
                 "\nPlease try using a different account, "
@@ -277,10 +262,14 @@ class FacebookExtractor(Extractor):
             if photo["url"] == "":
                 if retries < self.fallback_retries:
                     self.log.warning(
-                        "Failed to find photo download URL for " + photo_url +
-                        ". Retrying in " + str(self.sleep_429) + " seconds."
+                        "Failed to find photo download URL for " +
+                        photo_url + ". Retrying in " +
+                        str(self._interval_429) + " seconds."
                     )
-                    self.sleep(self.sleep_429, "retry")
+                    self.wait(
+                        seconds=self._interval_429,
+                        reason="429 Too Many Requests"
+                    )
                     retries += 1
                     continue
                 else:
@@ -321,13 +310,13 @@ class FacebookSetExtractor(FacebookExtractor):
     example = "https://www.facebook.com/media/set/?set=SET_ID"
 
     def items(self):
-        if self.match.group(4):
-            post_url = self.root + self.match.group(4)
+        if self.groups[3]:
+            post_url = self.root + self.groups[3]
             post_page = self.request(post_url).text
 
             set_id = self.parse_post_page(post_page)["set_id"]
         else:
-            set_id = self.match.group(1) or self.match.group(3)
+            set_id = self.groups[0] or self.groups[2]
 
         set_url = self.set_url_fmt.format(set_id=set_id)
         set_page = self.request(set_url).text
@@ -337,7 +326,7 @@ class FacebookSetExtractor(FacebookExtractor):
         yield Message.Directory, directory
 
         yield from self.extract_set(
-            (self.match.group(2) or directory["first_photo_id"]),
+            (self.groups[1] or directory["first_photo_id"]),
             directory["set_id"]
         )
 
@@ -349,7 +338,7 @@ class FacebookPhotoExtractor(FacebookExtractor):
     example = "https://www.facebook.com/photo/?fbid=PHOTO_ID"
 
     def items(self):
-        photo_id = self.match.group(1)
+        photo_id = self.groups[0]
         photo_url = self.photo_url_fmt.format(photo_id=photo_id, set_id="")
         photo_page = self.photo_page_request_wrapper(photo_url).text
 
@@ -388,7 +377,7 @@ class FacebookVideoExtractor(FacebookExtractor):
     directory_fmt = ("{category}", "{username}", "{subcategory}")
 
     def items(self):
-        video_id = self.match.group(1)
+        video_id = self.groups[0]
         video_url = self.root + "/watch/?v=" + video_id
         video_page = self.request(video_url).text
 
@@ -401,7 +390,7 @@ class FacebookVideoExtractor(FacebookExtractor):
 
         if self.videos == "ytdl":
             yield Message.Url, "ytdl:" + video_url, video
-        else:
+        elif self.videos:
             yield Message.Url, video["url"], video
             if audio["url"]:
                 yield Message.Url, audio["url"], audio
@@ -433,7 +422,7 @@ class FacebookProfileExtractor(FacebookExtractor):
 
     def items(self):
         profile_photos_url = (
-            self.root + "/" + self.match.group(1) + "/photos_by"
+            self.root + "/" + self.groups[0] + "/photos_by"
         )
         profile_photos_page = self.request(profile_photos_url).text
 
