@@ -26,6 +26,7 @@ class MangadexExtractor(Extractor):
         "{manga}_c{chapter:>03}{chapter_minor}_{page:>03}.{extension}")
     archive_fmt = "{chapter_id}_{page}"
     root = "https://mangadex.org"
+    useragent = util.USERAGENT
     _cache = {}
 
     def __init__(self, match):
@@ -33,7 +34,6 @@ class MangadexExtractor(Extractor):
         self.uuid = match.group(1)
 
     def _init(self):
-        self.session.headers["User-Agent"] = util.USERAGENT
         self.api = MangadexAPI(self)
 
     def items(self):

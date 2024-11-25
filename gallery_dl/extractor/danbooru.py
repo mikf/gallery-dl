@@ -20,10 +20,10 @@ class DanbooruExtractor(BaseExtractor):
     page_limit = 1000
     page_start = None
     per_page = 200
+    useragent = util.USERAGENT
     request_interval = (0.5, 1.5)
 
     def _init(self):
-        self.session.headers["User-Agent"] = util.USERAGENT
         self.ugoira = self.config("ugoira", False)
         self.external = self.config("external", False)
 

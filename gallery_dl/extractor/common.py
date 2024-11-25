@@ -42,6 +42,8 @@ class Extractor():
     ciphers = None
     tls12 = True
     browser = None
+    useragent = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64; "
+                 "rv:128.0) Gecko/20100101 Firefox/128.0")
     request_interval = 0.0
     request_interval_min = 0.0
     request_interval_429 = 60.0
@@ -381,11 +383,13 @@ class Extractor():
             ssl_ciphers = SSL_CIPHERS[browser]
         else:
             useragent = self.config("user-agent")
-            if useragent is None:
-                useragent = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64; "
-                             "rv:128.0) Gecko/20100101 Firefox/128.0")
+            if useragent is None or useragent == "auto":
+                useragent = self.useragent
             elif useragent == "browser":
                 useragent = _browser_useragent()
+            elif useragent is config.get(("extractor",), "user-agent") and \
+                    useragent == Extractor.useragent:
+                useragent = self.useragent
             headers["User-Agent"] = useragent
             headers["Accept"] = "*/*"
             headers["Accept-Language"] = "en-US,en;q=0.5"

@@ -20,11 +20,10 @@ class E621Extractor(danbooru.DanbooruExtractor):
     page_limit = 750
     page_start = None
     per_page = 320
+    useragent = util.USERAGENT + " (by mikf)"
     request_interval_min = 1.0
 
     def items(self):
-        self.session.headers["User-Agent"] = util.USERAGENT + " (by mikf)"
-
         includes = self.config("metadata") or ()
         if includes:
             if isinstance(includes, str):
