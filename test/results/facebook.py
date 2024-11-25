@@ -18,6 +18,12 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.facebook.com/profile.php?id=100064860875397",
+    "#category": ("", "facebook", "profile"),
+    "#class"   : facebook.FacebookProfileExtractor,
+},
+
+{
     "#url"     : "https://www.facebook.com/media/set/?set=a.10152716010956729&type=3",
     "#category": ("", "facebook", "set"),
     "#class"   : facebook.FacebookSetExtractor,
