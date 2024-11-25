@@ -95,6 +95,7 @@ __tests__ = (
     "#category": ("", "facebook", "video"),
     "#class"   : facebook.FacebookVideoExtractor,
     "#count"   : 2,
+    "#archive": False,
 
     "filename" : "1514198129001376",
     "id"       : "644342003942740",
