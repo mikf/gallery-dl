@@ -113,7 +113,7 @@ class FacebookExtractor(Extractor):
             )
         }
 
-        text.nameext_from_url(text.rextract(photo["url"], "/", "?")[0], photo)
+        text.nameext_from_url(photo["url"], photo)
 
         photo["followups_ids"] = []
         for comment_raw in text.extract_iter(
@@ -204,7 +204,7 @@ class FacebookExtractor(Extractor):
             key=lambda x: int(x[0][:-1])
         )[-1][1]
 
-        text.nameext_from_url(text.rextract(video["url"], "/", "?")[0], video)
+        text.nameext_from_url(video["url"], video)
         text.nameext_from_url(video["filename"] + ".m4a", audio)
 
         return video, audio
