@@ -24,15 +24,17 @@ class FacebookExtractor(Extractor):
     photo_url_fmt = root + "/photo/?fbid={photo_id}&set={set_id}"
 
     def _init(self):
-        self.session.headers["Accept"] = (
+        headers = self.session.headers
+        headers["Accept"] = (
             "text/html,application/xhtml+xml,application/xml;q=0.9,"
             "image/avif,image/webp,image/png,image/svg+xml,*/*;q=0.8"
         )
-        self.session.headers["Sec-Fetch-Mode"] = "navigate"
+        headers["Sec-Fetch-Dest"] = "empty"
+        headers["Sec-Fetch-Mode"] = "navigate"
+        headers["Sec-Fetch-Site"] = "same-origin"
 
         self.fallback_retries = self.config("fallback-retries", 2)
         self.videos = self.config("videos", True)
-
         self.author_followups = self.config("author-followups", False)
 
     @staticmethod
@@ -199,13 +201,14 @@ class FacebookExtractor(Extractor):
         if not video["urls"]:
             return video, audio
 
-        video["url"] = sorted(
+        video["url"] = max(
             video["urls"].items(),
-            key=lambda x: int(x[0][:-1])
-        )[-1][1]
+            key=lambda x: text.parse_int(x[0][:-1])
+        )[1]
 
         text.nameext_from_url(video["url"], video)
-        text.nameext_from_url(video["filename"] + ".m4a", audio)
+        audio["filename"] = video["filename"]
+        audio["extension"] = "m4a"
 
         return video, audio
 
@@ -255,21 +258,18 @@ class FacebookExtractor(Extractor):
                 for followup_id in photo["followups_ids"]:
                     if followup_id not in all_photo_ids:
                         self.log.debug(
-                            "Found a followup in comments:" + followup_id
+                            "Found a followup in comments: %s", followup_id
                         )
                         all_photo_ids.append(followup_id)
 
-            if photo["url"] == "":
-                if retries < self.fallback_retries:
+            if not photo["url"]:
+                if retries < self.fallback_retries and self._interval_429:
+                    seconds = self._interval_429()
                     self.log.warning(
-                        "Failed to find photo download URL for " +
-                        photo_url + ". Retrying in " +
-                        str(self._interval_429) + " seconds."
+                        "Failed to find photo download URL for %s. "
+                        "Retrying in %s seconds.", photo_url, seconds,
                     )
-                    self.wait(
-                        seconds=self._interval_429,
-                        reason="429 Too Many Requests"
-                    )
+                    self.wait(seconds=seconds, reason="429 Too Many Requests")
                     retries += 1
                     continue
                 else:
