@@ -123,12 +123,23 @@ __tests__ = (
 },
 
 {
-    "#url"     : "https://kemono.su/patreon/user/34134344/post/38129255",
-    "#comment" : "DMs (#2008)",
+    "#url"     : "https://kemono.su/patreon/user/3161935/post/23445732",
+    "#comment" : "comments (#2008)",
     "#category": ("", "kemonoparty", "patreon"),
     "#class"   : kemonoparty.KemonopartyPostExtractor,
-    "#options" : {"dms": True},
+    "#options" : {"comments": True},
 
+    "comments": "len:12",
+},
+
+{
+    "#url"     : "https://kemono.su/patreon/user/34134344/post/38129255",
+    "#comment" : "DMs (#2008); no comments",
+    "#category": ("", "kemonoparty", "patreon"),
+    "#class"   : kemonoparty.KemonopartyPostExtractor,
+    "#options" : {"dms": True, "comments": True},
+
+    "comments": (),
     "dms": [
         {
             "added"    : "2021-07-31T02:47:51.327865",

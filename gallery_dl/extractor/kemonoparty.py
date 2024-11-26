@@ -90,12 +90,19 @@ class KemonopartyExtractor(Extractor):
                 post["username"] = username
                 post["user_profile"] = profile
             if comments:
-                post["comments"] = self.api.creator_post_comments(
-                    service, creator_id, post["id"])
+                try:
+                    post["comments"] = self.api.creator_post_comments(
+                        service, creator_id, post["id"])
+                except exception.HttpError:
+                    post["comments"] = ()
             if dms is not None:
                 if dms is True:
                     dms = self.api.creator_dms(
                         post["service"], post["user"])
+                    try:
+                        dms = dms["props"]["dms"]
+                    except Exception:
+                        dms = ()
                 post["dms"] = dms
             if announcements is not None:
                 if announcements is True:
