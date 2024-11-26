@@ -49,6 +49,19 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.facebook.com/photo/?fbid=10152716011076729&set=a.10152716010956729&setextract",
+    "#category": ("", "facebook", "set"),
+    "#class"   : facebook.FacebookSetExtractor,
+    "#count"   : 4,
+},
+
+{
+    "#url"     : "https://www.facebook.com/photo.php?fbid=10165113568399554&set=t.100064860875397&type=3",
+    "#category": ("", "facebook", "photo"),
+    "#class"   : facebook.FacebookPhotoExtractor,
+},
+
+{
     "#url"     : "https://www.facebook.com/photo/?fbid=10160743390456729",
     "#category": ("", "facebook", "photo"),
     "#class"   : facebook.FacebookPhotoExtractor,

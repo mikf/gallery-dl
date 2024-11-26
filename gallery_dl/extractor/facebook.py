@@ -305,12 +305,15 @@ class FacebookSetExtractor(FacebookExtractor):
     pattern = (
         BASE_PATTERN +
         r"/(?:(?:media/set|photo)/?\?(?:[^&#]+&)*set=([^&#]+)"
-        r"|([^/?#]+/posts/[^/?#]+))"
+        r"[^/?#]*(?<!&setextract)$"
+        r"|([^/?#]+/posts/[^/?#]+)"
+        r"|photo/\?(?:[^&#]+&)*fbid=([^/?&#]+)&set=([^/?&#]+)&setextract)"
     )
     example = "https://www.facebook.com/media/set/?set=SET_ID"
 
     def items(self):
-        set_id, path = self.groups
+        set_id = self.groups[0] or self.groups[3]
+        path = self.groups[1]
         if path:
             post_url = self.root + "/" + path
             post_page = self.request(post_url).text
@@ -324,7 +327,7 @@ class FacebookSetExtractor(FacebookExtractor):
         yield Message.Directory, directory
 
         yield from self.extract_set(
-            directory["first_photo_id"],
+            self.groups[2] or directory["first_photo_id"],
             directory["set_id"]
         )
 
@@ -333,8 +336,8 @@ class FacebookPhotoExtractor(FacebookExtractor):
     """Base class for Facebook Photo extractors"""
     subcategory = "photo"
     pattern = (BASE_PATTERN +
-               r"/(?:[^/?#]+/photos/[^/?#]+/|photo/?\?(?:[^&#]+&)*fbid=)"
-               r"([^/?&#]+)")
+               r"/(?:[^/?#]+/photos/[^/?#]+/|photo(?:.php)?/?\?"
+               r"(?:[^&#]+&)*fbid=)([^/?&#]+)[^/?#]*(?<!&setextract)$")
     example = "https://www.facebook.com/photo/?fbid=PHOTO_ID"
 
     def items(self):
@@ -401,7 +404,7 @@ class FacebookProfileExtractor(FacebookExtractor):
     subcategory = "profile"
     pattern = (
         BASE_PATTERN +
-        r"/(?!media/|photo/|watch/)"
+        r"/(?!media/|photo/|photo.php|watch/)"
         r"(?:profile\.php\?id=|people/[^/?#]+/)?"
         r"([^/?&#]+)(?:/photos|/videos|/posts)?/?(?:$|\?|#)"
     )
