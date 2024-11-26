@@ -9,7 +9,7 @@
 from .common import Extractor, Message
 from .. import text, exception
 
-BASE_PATTERN = r"(?:https?://)?(?:\w+\.)?facebook\.com"
+BASE_PATTERN = r"(?:https?://)?(?:[\w-]+\.)?facebook\.com"
 
 
 class FacebookExtractor(Extractor):
@@ -303,20 +303,18 @@ class FacebookSetExtractor(FacebookExtractor):
     """Base class for Facebook Set extractors"""
     subcategory = "set"
     pattern = (
-        BASE_PATTERN + r"(?:/media/set/.*set=([^/?&]+)"
-        r"|/photo.*fbid=([^/?&]+).*?(?:set=([^/?&]+))?&setextract"
-        r"|(.*/posts/[^/?&]+))"
+        BASE_PATTERN +
+        r"/(?:(?:media/set|photo)/?\?(?:[^&#]+&)*set=([^&#]+)"
+        r"|([^/?#]+/posts/[^/?#]+))"
     )
     example = "https://www.facebook.com/media/set/?set=SET_ID"
 
     def items(self):
-        if self.groups[3]:
-            post_url = self.root + self.groups[3]
+        set_id, path = self.groups
+        if path:
+            post_url = self.root + "/" + path
             post_page = self.request(post_url).text
-
             set_id = self.parse_post_page(post_page)["set_id"]
-        else:
-            set_id = self.groups[0] or self.groups[2]
 
         set_url = self.set_url_fmt.format(set_id=set_id)
         set_page = self.request(set_url).text
@@ -326,7 +324,7 @@ class FacebookSetExtractor(FacebookExtractor):
         yield Message.Directory, directory
 
         yield from self.extract_set(
-            (self.groups[1] or directory["first_photo_id"]),
+            directory["first_photo_id"],
             directory["set_id"]
         )
 
@@ -334,7 +332,9 @@ class FacebookSetExtractor(FacebookExtractor):
 class FacebookPhotoExtractor(FacebookExtractor):
     """Base class for Facebook Photo extractors"""
     subcategory = "photo"
-    pattern = BASE_PATTERN + r"/(?:.*/photos.*/|photo.*fbid=)([^/?&]+)"
+    pattern = (BASE_PATTERN +
+               r"/(?:[^/?#]+/photos/[^/?#]+/|photo/?\?(?:[^&#]+&)*fbid=)"
+               r"([^/?&#]+)")
     example = "https://www.facebook.com/photo/?fbid=PHOTO_ID"
 
     def items(self):
@@ -372,9 +372,9 @@ class FacebookPhotoExtractor(FacebookExtractor):
 class FacebookVideoExtractor(FacebookExtractor):
     """Base class for Facebook Video extractors"""
     subcategory = "video"
-    pattern = BASE_PATTERN + r"/(?:.+/videos/|watch/.*\?v=)([^/]+)"
-    example = "https://www.facebook.com/watch/?v=VIDEO_ID"
     directory_fmt = ("{category}", "{username}", "{subcategory}")
+    pattern = BASE_PATTERN + r"/(?:[^/?#]+/videos/|watch/?\?v=)([^/?&#]+)"
+    example = "https://www.facebook.com/watch/?v=VIDEO_ID"
 
     def items(self):
         video_id = self.groups[0]
@@ -401,8 +401,9 @@ class FacebookProfileExtractor(FacebookExtractor):
     subcategory = "profile"
     pattern = (
         BASE_PATTERN +
-        r"/(?!media/|photo/|watch/|.*?/photos/|.*?/posts/|.*?/videos/)"
-        r"(?:profile.php\?id=|people/[^/?&]+/)?([^/?&]+)"
+        r"/(?!media/|photo/|watch/)"
+        r"(?:profile\.php\?id=|people/[^/?#]+/)?"
+        r"([^/?&#]+)(?:/photos|/videos|/posts)?/?(?:$|\?|#)"
     )
     example = "https://www.facebook.com/USERNAME"
 

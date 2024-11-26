@@ -10,11 +10,17 @@ import datetime
 
 __tests__ = (
 {
-    "#url"     : "https://www.facebook.com/facebook/photos",
+    "#url"     : "https://www.facebook.com/facebook",
     "#category": ("", "facebook", "profile"),
     "#class"   : facebook.FacebookProfileExtractor,
     "#range"   : "1-3",
     "#count"   : 3,
+},
+
+{
+    "#url"     : "https://www.facebook.com/facebook/photos",
+    "#category": ("", "facebook", "profile"),
+    "#class"   : facebook.FacebookProfileExtractor,
 },
 
 {
@@ -57,6 +63,12 @@ __tests__ = (
     "url"      : str,
     "user_id"  : "100064860875397",
     "username" : "Facebook",
+},
+
+{
+    "#url"     : "https://www.facebook.com/photo/?fbs=home&fbid=10160743390456729",
+    "#category": ("", "facebook", "photo"),
+    "#class"   : facebook.FacebookPhotoExtractor,
 },
 
 {
