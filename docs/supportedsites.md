@@ -248,6 +248,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Supported</td>
 </tr>
 <tr>
+    <td>Facebook</td>
+    <td>https://www.facebook.com/</td>
+    <td>Photos, Profiles, Sets, Videos</td>
+    <td><a href="https://github.com/mikf/gallery-dl#cookies">Cookies</a></td>
+</tr>
+<tr>
     <td>Fanleaks</td>
     <td>https://fanleaks.club/</td>
     <td>Models, Posts</td>

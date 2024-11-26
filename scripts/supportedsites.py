@@ -407,6 +407,7 @@ AUTH_MAP = {
     "e926"           : "Supported",
     "e-hentai"       : "Supported",
     "exhentai"       : "Supported",
+    "facebook"       : _COOKIES,
     "fanbox"         : _COOKIES,
     "fantia"         : _COOKIES,
     "flickr"         : _OAUTH,

@@ -2376,6 +2376,31 @@ Description
     for example ``tags_artist`` or ``tags_character``.
 
 
+extractor.facebook.author-followups
+-----------------------------------
+Type
+    ``bool``
+Default
+    ``false``
+description
+    Extract comments that include photo attachments made by the author of the post.
+
+
+extractor.facebook.videos
+-------------------------
+Type
+    * ``bool``
+    * ``string``
+Default
+    ``true``
+Description
+    Control video download behavior.
+
+    * ``true``: Extract and download video & audio separately.
+    * ``"ytdl"``: Let |ytdl| handle video extraction and download, and merge video & audio streams.
+    * ``false``: Ignore videos.
+
+
 extractor.fanbox.comments
 -------------------------
 Type
