@@ -300,6 +300,16 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://kemono.su/discord/server/488668827274444803/608504710906904576",
+    "#category": ("", "kemonoparty", "discord"),
+    "#class"   : kemonoparty.KemonopartyDiscordExtractor,
+    "#count"   : 4,
+
+    "channel"     : "608504710906904576",
+    "channel_name": "",
+},
+
+{
     "#url"     : "https://kemono.su/discord/server/488668827274444803#608504710906904576",
     "#category": ("", "kemonoparty", "discord"),
     "#class"   : kemonoparty.KemonopartyDiscordExtractor,

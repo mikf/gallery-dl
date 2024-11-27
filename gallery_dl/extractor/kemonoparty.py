@@ -345,18 +345,15 @@ class KemonopartyDiscordExtractor(KemonopartyExtractor):
                      "{channel_name|channel}")
     filename_fmt = "{id}_{num:>02}_{filename}.{extension}"
     archive_fmt = "discord_{server}_{id}_{num}"
-    pattern = BASE_PATTERN + r"/discord/server/(\d+)(?:/channel/(\d+))?#(.*)"
-    example = "https://kemono.su/discord/server/12345#CHANNEL"
+    pattern = (BASE_PATTERN + r"/discord/server/(\d+)"
+               r"(?:/(?:channel/)?(\d+)(?:#(.+))?|#(.+))")
+    example = "https://kemono.su/discord/server/12345/12345"
 
     def items(self):
         self._prepare_ddosguard_cookies()
+        _, _, server_id, channel_id, channel_name, channel = self.groups
 
-        _, _, server_id, channel_id, channel = self.groups
-        channel_name = ""
-
-        if channel_id:
-            channel_name = channel
-        else:
+        if channel_id is None:
             if channel.isdecimal() and len(channel) >= 16:
                 key = "id"
             else:
@@ -370,6 +367,8 @@ class KemonopartyDiscordExtractor(KemonopartyExtractor):
 
             channel_id = ch["id"]
             channel_name = ch["name"]
+        elif channel_name is None:
+            channel_name = ""
 
         find_inline = re.compile(
             r"https?://(?:cdn\.discordapp.com|media\.discordapp\.net)"
@@ -422,7 +421,7 @@ class KemonopartyDiscordServerExtractor(KemonopartyExtractor):
     def items(self):
         server_id = self.groups[2]
         for channel in self.api.discord_server(server_id):
-            url = "{}/discord/server/{}/channel/{}#{}".format(
+            url = "{}/discord/server/{}/{}#{}".format(
                 self.root, server_id, channel["id"], channel["name"])
             channel["_extractor"] = KemonopartyDiscordExtractor
             yield Message.Queue, url, channel
