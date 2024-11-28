@@ -101,7 +101,10 @@ class InstagramExtractor(Extractor):
                         continue
 
                 url = file["display_url"]
-                yield Message.Url, url, text.nameext_from_url(url, file)
+                text.nameext_from_url(url, file)
+                if file["extension"] == "webp" and "stp=dst-jpg" in url:
+                    file["extension"] = "jpg"
+                yield Message.Url, url, file
 
     def metadata(self):
         return ()
