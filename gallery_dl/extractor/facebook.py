@@ -406,7 +406,7 @@ class FacebookProfileExtractor(FacebookExtractor):
         BASE_PATTERN +
         r"/(?!media/|photo/|photo.php|watch/)"
         r"(?:profile\.php\?id=|people/[^/?#]+/)?"
-        r"([^/?&#]+)(?:/photos|/videos|/posts)?/?(?:$|\?|#)"
+        r"([^/?&#]+)(?:/photos(?:_by)?|/videos|/posts)?/?(?:$|\?|#)"
     )
     example = "https://www.facebook.com/USERNAME"
 
