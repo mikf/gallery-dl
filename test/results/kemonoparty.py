@@ -399,6 +399,7 @@ __tests__ = (
         "https://kemono.su/patreon/user/881792",
         "https://kemono.su/fanbox/user/6993449",
         "https://kemono.su/subscribestar/user/alcorart",
+        "https://kemono.su/gumroad/user/shengtian",
     ),
 },
 
@@ -412,6 +413,7 @@ __tests__ = (
         "https://kemono.su/fanbox/user/6993449",
         "https://kemono.su/patreon/user/881792",
         "https://kemono.su/subscribestar/user/alcorart",
+        "https://kemono.su/gumroad/user/shengtian",
     ),
 },
 
