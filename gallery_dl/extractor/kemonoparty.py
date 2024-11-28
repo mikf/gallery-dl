@@ -158,20 +158,23 @@ class KemonopartyExtractor(Extractor):
             self.cookies_update(self._login_impl(
                 (username, self.cookies_domain), password))
 
-    @cache(maxage=28*86400, keyarg=1)
+    @cache(maxage=3650*86400, keyarg=1)
     def _login_impl(self, username, password):
         username = username[0]
         self.log.info("Logging in as %s", username)
 
-        url = self.root + "/account/login"
+        url = self.root + "/api/v1/authentication/login"
         data = {"username": username, "password": password}
 
-        response = self.request(url, method="POST", data=data)
-        if response.url.endswith("/account/login") and \
-                "Username or password is incorrect" in response.text:
-            raise exception.AuthenticationError()
+        response = self.request(url, method="POST", json=data, fatal=False)
+        if response.status_code >= 400:
+            try:
+                msg = '"' + response.json()["error"] + '"'
+            except Exception:
+                msg = '"0/1 Username or password is incorrect"'
+            raise exception.AuthenticationError(msg)
 
-        return {c.name: c.value for c in response.history[0].cookies}
+        return {c.name: c.value for c in response.cookies}
 
     def _file(self, post):
         file = post["file"]
@@ -430,26 +433,21 @@ class KemonopartyDiscordServerExtractor(KemonopartyExtractor):
 class KemonopartyFavoriteExtractor(KemonopartyExtractor):
     """Extractor for kemono.su favorites"""
     subcategory = "favorite"
-    pattern = BASE_PATTERN + r"/favorites(?:/?\?([^#]+))?"
+    pattern = BASE_PATTERN + r"/favorites()()(?:/?\?([^#]+))?"
     example = "https://kemono.su/favorites"
-
-    def __init__(self, match):
-        KemonopartyExtractor.__init__(self, match)
-        self.params = text.parse_query(match.group(3))
-        self.favorites = (self.params.get("type") or
-                          self.config("favorites") or
-                          "artist")
 
     def items(self):
         self._prepare_ddosguard_cookies()
         self.login()
 
-        sort = self.params.get("sort")
-        order = self.params.get("order") or "desc"
+        params = text.parse_query(self.groups[4])
+        type = params.get("type") or self.config("favorites") or "artist"
 
-        if self.favorites == "artist":
-            users = self.request(
-                self.root + "/api/v1/account/favorites?type=artist").json()
+        sort = params.get("sort")
+        order = params.get("order") or "desc"
+
+        if type == "artist":
+            users = self.api.account_favorites("artist")
 
             if not sort:
                 sort = "updated"
@@ -462,9 +460,8 @@ class KemonopartyFavoriteExtractor(KemonopartyExtractor):
                     self.root, user["service"], user["id"])
                 yield Message.Queue, url, user
 
-        elif self.favorites == "post":
-            posts = self.request(
-                self.root + "/api/v1/account/favorites?type=post").json()
+        elif type == "post":
+            posts = self.api.account_favorites("post")
 
             if not sort:
                 sort = "faved_seq"
@@ -547,11 +544,6 @@ class KemonoAPI():
     def account_favorites(self, type):
         endpoint = "/account/favorites"
         params = {"type": type}
-        return self._call(endpoint, params)
-
-    def authentication_login(self, username, password):
-        endpoint = "/authentication/login"
-        params = {"username": username, "password": password}
         return self._call(endpoint, params)
 
     def _call(self, endpoint, params=None):
