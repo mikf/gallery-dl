@@ -445,6 +445,13 @@ __tests__ = (
     "#url"     : "https://www.pixiv.net/ranking.php",
     "#category": ("", "pixiv", "ranking"),
     "#class"   : pixiv.PixivRankingExtractor,
+    "#options" : {"max-posts": 10},
+
+    "ranking": {
+        "date": r"re:\d\d\d\d-\d\d-\d\d",
+        "mode": "day",
+        "rank": range(1, 10),
+    },
 },
 
 {

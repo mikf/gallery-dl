@@ -606,7 +606,10 @@ class PixivRankingExtractor(PixivExtractor):
         self.mode = self.date = None
 
     def works(self):
-        return self.api.illust_ranking(self.mode, self.date)
+        ranking = self.ranking
+        for ranking["rank"], work in enumerate(
+                self.api.illust_ranking(self.mode, self.date), 1):
+            yield work
 
     def metadata(self):
         query = text.parse_query(self.query)
@@ -645,10 +648,12 @@ class PixivRankingExtractor(PixivExtractor):
             date = (now - timedelta(days=1)).strftime("%Y-%m-%d")
         self.date = date
 
-        return {"ranking": {
+        self.ranking = ranking = {
             "mode": mode,
             "date": self.date,
-        }}
+            "rank": 0,
+        }
+        return {"ranking": ranking}
 
 
 class PixivSearchExtractor(PixivExtractor):
