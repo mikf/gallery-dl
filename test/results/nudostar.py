@@ -12,7 +12,7 @@ __tests__ = (
     "#url": "https://nudostar.tv/models/eva-joys/",
     "#class"   : nudostar.NudostarGalleryExtractor,
     "#count"   : ">= 30",
-    "category" :("nudostar"),
+    "category" : ("nudostar"),
 },
 
 {
