@@ -24,7 +24,8 @@ class NudostarGalleryExtractor(GalleryExtractor):
         while True:  # Loop to handle all pages
             # Process current page's images
             for image_page_url in text.extract_iter(page,
-                                    '<div class="item">', 'title='):
+                                                    '<div class="item">',
+                                                    'title='):
                 page_url = text.extract(image_page_url, '="', '"')[0]
                 # Create a match object for the image extractor
                 image_match = re.match(NudostarExtractor.pattern, page_url)
@@ -42,7 +43,8 @@ class NudostarGalleryExtractor(GalleryExtractor):
 
             # Look for next page
             next_page = text.extract(page,
-                            '<li class="next"><a href="', '"')[0]
+                                     '<li class="next"><a href="',
+                                     '"')[0]
             if not next_page:
                 break  # No more pages
 
