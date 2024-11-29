@@ -158,11 +158,12 @@ class Job():
             raise
         except exception.GalleryDLException as exc:
             log.error("%s: %s", exc.__class__.__name__, exc)
+            log.debug("", exc_info=exc)
             self.status |= exc.code
         except OSError as exc:
             log.error("Unable to download data:  %s: %s",
                       exc.__class__.__name__, exc)
-            log.debug("", exc_info=True)
+            log.debug("", exc_info=exc)
             self.status |= 128
         except Exception as exc:
             log.error(("An unexpected error occurred: %s - %s. "
@@ -170,7 +171,7 @@ class Job():
                        "copy its output and report this issue on "
                        "https://github.com/mikf/gallery-dl/issues ."),
                       exc.__class__.__name__, exc)
-            log.debug("", exc_info=True)
+            log.debug("", exc_info=exc)
             self.status |= 1
         except BaseException:
             self.status |= 1
@@ -322,6 +323,12 @@ class DownloadJob(Job):
             for callback in hooks["prepare-after"]:
                 callback(pathfmt)
 
+            if kwdict.pop("_file_recheck", False) and pathfmt.exists():
+                if archive and self._archive_write_skip:
+                    archive.add(kwdict)
+                self.handle_skip()
+                return
+
         if self.sleep:
             self.extractor.sleep(self.sleep(), "download")
 
@@ -340,6 +347,9 @@ class DownloadJob(Job):
                 self.status |= 4
                 self.log.error("Failed to download %s",
                                pathfmt.filename or url)
+                if "error" in hooks:
+                    for callback in hooks["error"]:
+                        callback(pathfmt)
                 return
 
         if not pathfmt.temppath:
@@ -426,7 +436,8 @@ class DownloadJob(Job):
 
                     if status:
                         self.status |= status
-                        if "_fallback" in kwdict and self.fallback:
+                        if (status & 95 and   # not FormatError or OSError
+                                "_fallback" in kwdict and self.fallback):
                             fallback = kwdict["_fallback"] = \
                                 iter(kwdict["_fallback"])
                             try:
@@ -474,10 +485,11 @@ class DownloadJob(Job):
 
     def handle_skip(self):
         pathfmt = self.pathfmt
-        self.out.skip(pathfmt.path)
         if "skip" in self.hooks:
             for callback in self.hooks["skip"]:
                 callback(pathfmt)
+        self.out.skip(pathfmt.path)
+
         if self._skipexc:
             if not self._skipftr or self._skipftr(pathfmt.kwdict):
                 self._skipcnt += 1
@@ -586,7 +598,7 @@ class DownloadJob(Job):
 
                 skip_filter = cfg("skip-filter")
                 if skip_filter:
-                    self._skipftr = util.compile_expression(skip_filter)
+                    self._skipftr = util.compile_filter(skip_filter)
                 else:
                     self._skipftr = None
         else:
@@ -610,6 +622,14 @@ class DownloadJob(Job):
             for pp_dict in postprocessors:
                 if isinstance(pp_dict, str):
                     pp_dict = pp_conf.get(pp_dict) or {"name": pp_dict}
+                elif "type" in pp_dict:
+                    pp_type = pp_dict["type"]
+                    if pp_type in pp_conf:
+                        pp = pp_conf[pp_type].copy()
+                        pp.update(pp_dict)
+                        pp_dict = pp
+                    if "name" not in pp_dict:
+                        pp_dict["name"] = pp_type
                 if pp_opts:
                     pp_dict = pp_dict.copy()
                     pp_dict.update(pp_opts)
@@ -634,7 +654,7 @@ class DownloadJob(Job):
                 except Exception as exc:
                     pp_log.error("'%s' initialization failed:  %s: %s",
                                  name, exc.__class__.__name__, exc)
-                    pp_log.debug("", exc_info=True)
+                    pp_log.debug("", exc_info=exc)
                 else:
                     pp_list.append(pp_obj)
 
@@ -648,7 +668,7 @@ class DownloadJob(Job):
         expr = options.get("filter") if options else None
 
         if expr:
-            condition = util.compile_expression(expr)
+            condition = util.compile_filter(expr)
             for hook, callback in hooks.items():
                 self.hooks[hook].append(functools.partial(
                     self._call_hook, callback, condition))

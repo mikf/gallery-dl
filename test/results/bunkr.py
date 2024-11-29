@@ -12,15 +12,15 @@ __tests__ = (
     "#url"     : "https://bunkr.sk/a/Lktg9Keq",
     "#category": ("lolisafe", "bunkr", "album"),
     "#class"   : bunkr.BunkrAlbumExtractor,
-    "#urls"        : "https://i-burger.bunkr.ru/test-テスト-\"&>-QjgneIQv.png",
-    "#sha1_content": "961b25d85b5f5bd18cbe3e847ac55925f14d0286",
+    "#urls"        : "https://i-burger.bunkr.ru/test-%E3%83%86%E3%82%B9%E3%83%88-%22%26%3E-QjgneIQv.png?download=true",
+    "#sha1_content": "0c8768055e4e20e7c7259608b67799171b691140",
 
     "album_id"   : "Lktg9Keq",
     "album_name" : "test テスト \"&>",
     "album_size" : "182 B",
     "count"      : 1,
     "extension"  : "png",
-    "file"       : "https://i-burger.bunkr.ru/test-テスト-\"&>-QjgneIQv.png",
+    "file"       : "https://i-burger.bunkr.ru/test-%E3%83%86%E3%82%B9%E3%83%88-%22%26%3E-QjgneIQv.png?download=true",
     "filename"   : "test-テスト-\"&>-QjgneIQv",
     "id"         : "QjgneIQv",
     "name"       : "test-テスト-\"&>",
@@ -29,23 +29,21 @@ __tests__ = (
 
 {
     "#url"     : "https://bunkr.is/a/iXTTc1o2",
-    "#comment" : "cdn4",
     "#category": ("lolisafe", "bunkr", "album"),
     "#class"   : bunkr.BunkrAlbumExtractor,
     "#urls"        : (
-        "https://i-milkshake.bunkr.ru/image-sZrQUeOx.jpg",
-        "https://burger.bunkr.ru/video-gLn1hgpw.mp4",
+        "https://i-milkshake.bunkr.ru/image-sZrQUeOx.jpg?download=true",
     ),
-    "#sha1_content": "80914b8190ad001662f64e3b0b9c02ea3872c584",
+    "#sha1_content": "caf7c3d3439d94e83b3c24ddaf5a3a48aa057519",
 
     "album_id"   : "iXTTc1o2",
     "album_name" : "test2",
-    "album_size" : "561.6 KB",
-    "count"      : 2,
-    "filename"   : r"re:video-gLn1hgpw|image-sZrQUeOx",
-    "id"         : r"re:gLn1hgpw|sZrQUeOx",
-    "name"       : r"re:video|image",
-    "num"        : range(1, 2),
+    "album_size" : "534.6 KB",
+    "count"      : 1,
+    "filename"   : r"image-sZrQUeOx",
+    "id"         : r"sZrQUeOx",
+    "name"       : r"image",
+    "num"        : 1,
 },
 
 {
@@ -54,7 +52,28 @@ __tests__ = (
     "#category": ("lolisafe", "bunkr", "album"),
     "#class"   : bunkr.BunkrAlbumExtractor,
     "#pattern" : r"https://(i-)?meatballs.bunkr.ru/\w+",
-    "#count"   : 9,
+    "#count"   : 7,
+},
+
+{
+    "#url"     : "https://bunkr.ph/a/Lktg9Keq",
+    "#class"   : bunkr.BunkrAlbumExtractor,
+},
+
+{
+    "#url"     : "https://bunkr.ps/a/Lktg9Keq",
+    "#class"   : bunkr.BunkrAlbumExtractor,
+},
+
+{
+    "#url"     : "https://bunkr.pk/a/Lktg9Keq",
+    "#class"   : bunkr.BunkrAlbumExtractor,
+},
+
+{
+    "#url"     : "https://bunkr.ax/a/Lktg9Keq",
+    "#category": ("lolisafe", "bunkr", "album"),
+    "#class"   : bunkr.BunkrAlbumExtractor,
 },
 
 {
@@ -65,6 +84,12 @@ __tests__ = (
 
 {
     "#url"     : "https://bunkr.ci/a/Lktg9Keq",
+    "#category": ("lolisafe", "bunkr", "album"),
+    "#class"   : bunkr.BunkrAlbumExtractor,
+},
+
+{
+    "#url"     : "https://bunkr.cr/a/Lktg9Keq",
     "#category": ("lolisafe", "bunkr", "album"),
     "#class"   : bunkr.BunkrAlbumExtractor,
 },
@@ -148,33 +173,39 @@ __tests__ = (
 },
 
 {
+    "#url"     : "bunkr:http://example.org/a/Lktg9Keq",
+    "#category": ("lolisafe", "bunkr", "album"),
+    "#class"   : bunkr.BunkrAlbumExtractor,
+},
+
+{
     "#url"     : "https://bunkr.black/i/image-sZrQUeOx.jpg",
     "#category": ("lolisafe", "bunkr", "media"),
     "#class"   : bunkr.BunkrMediaExtractor,
-    "#urls"        : "https://i-milkshake.bunkr.ru/image-sZrQUeOx.jpg",
-    "#sha1_content": "55998743751dfe008d0e95605114fcbfa7dc4de8",
+    "#urls"        : "https://i-milkshake.bunkr.ru/image-sZrQUeOx.jpg?download=true",
+    "#sha1_content": "caf7c3d3439d94e83b3c24ddaf5a3a48aa057519",
 
     "count"    : 1,
     "extension": "jpg",
-    "file"     : "https://i-milkshake.bunkr.ru/image-sZrQUeOx.jpg",
+    "file"     : "https://i-milkshake.bunkr.ru/image-sZrQUeOx.jpg?download=true",
     "filename" : "image-sZrQUeOx",
     "id"       : "sZrQUeOx",
     "name"     : "image",
 },
 
 {
-    "#url"     : "https://bunkr.red/v/MY5aa4cLO7jN5",
+    "#url"     : "https://bunkrrr.org/d/dJuETSzKLrUps",
     "#category": ("lolisafe", "bunkr", "media"),
     "#class"   : bunkr.BunkrMediaExtractor,
-    "#urls"        : "https://burger.bunkr.ru/video-gLn1hgpw.mp4",
-    "#sha1_content": "f7a2ab24766a15ceffff1b07bada432b13ff8e5b",
+    "#urls"        : "https://burger.bunkr.ru/file-r5fmwjdd.zip",
+    "#sha1_content": "102ddd7894fe39b3843098fc51f972a0af938f45",
 
     "count"    : 1,
-    "extension": "mp4",
-    "file"     : "https://burger.bunkr.ru/video-gLn1hgpw.mp4",
-    "filename" : "video-gLn1hgpw",
-    "id"       : "gLn1hgpw",
-    "name"     : "video",
+    "extension": "zip",
+    "file"     : "https://burger.bunkr.ru/file-r5fmwjdd.zip",
+    "filename" : "file-r5fmwjdd",
+    "id"       : "r5fmwjdd",
+    "name"     : "file",
 },
 
 )

@@ -11,10 +11,10 @@
 import os
 import re
 import ssl
-import sys
 import time
 import netrc
 import queue
+import random
 import getpass
 import logging
 import datetime
@@ -22,7 +22,7 @@ import requests
 import threading
 from requests.adapters import HTTPAdapter
 from .message import Message
-from .. import config, text, util, cache, exception
+from .. import config, output, text, util, cache, exception
 urllib3 = requests.packages.urllib3
 
 
@@ -37,10 +37,13 @@ class Extractor():
     archive_fmt = ""
     root = ""
     cookies_domain = ""
+    cookies_index = 0
     referer = True
     ciphers = None
     tls12 = True
     browser = None
+    useragent = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64; "
+                 "rv:128.0) Gecko/20100101 Firefox/128.0")
     request_interval = 0.0
     request_interval_min = 0.0
     request_interval_429 = 60.0
@@ -183,7 +186,9 @@ class Extractor():
                     self._dump_response(response)
                 if (
                     code < 400 or
-                    code < 500 and (not fatal and code != 429 or fatal is None)
+                    code < 500 and (
+                        not fatal and code != 429 or fatal is None) or
+                    fatal is ...
                 ):
                     if encoding:
                         response.encoding = encoding
@@ -196,6 +201,10 @@ class Extractor():
                 server = response.headers.get("Server")
                 if server and server.startswith("cloudflare") and \
                         code in (403, 503):
+                    mitigated = response.headers.get("cf-mitigated")
+                    if mitigated and mitigated.lower() == "challenge":
+                        self.log.warning("Cloudflare challenge")
+                        break
                     content = response.content
                     if b"_cf_chl_opt" in content or b"jschl-answer" in content:
                         self.log.warning("Cloudflare challenge")
@@ -281,13 +290,8 @@ class Extractor():
 
     def _check_input_allowed(self, prompt=""):
         input = self.config("input")
-
         if input is None:
-            try:
-                input = sys.stdin.isatty()
-            except Exception:
-                input = False
-
+            input = output.TTY_STDIN
         if not input:
             raise exception.StopExtraction(
                 "User input required (%s)", prompt.strip(" :"))
@@ -343,6 +347,9 @@ class Extractor():
         headers.clear()
         ssl_options = ssl_ciphers = 0
 
+        # .netrc Authorization headers are alwsays disabled
+        session.trust_env = True if self.config("proxy-env", False) else False
+
         browser = self.config("browser")
         if browser is None:
             browser = self.browser
@@ -376,11 +383,13 @@ class Extractor():
             ssl_ciphers = SSL_CIPHERS[browser]
         else:
             useragent = self.config("user-agent")
-            if useragent is None:
-                useragent = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64; "
-                             "rv:128.0) Gecko/20100101 Firefox/128.0")
+            if useragent is None or useragent == "auto":
+                useragent = self.useragent
             elif useragent == "browser":
                 useragent = _browser_useragent()
+            elif useragent is config.get(("extractor",), "user-agent") and \
+                    useragent == Extractor.useragent:
+                useragent = self.useragent
             headers["User-Agent"] = useragent
             headers["Accept"] = "*/*"
             headers["Accept-Language"] = "en-US,en;q=0.5"
@@ -439,45 +448,58 @@ class Extractor():
 
         cookies = self.config("cookies")
         if cookies:
-            if isinstance(cookies, dict):
-                self.cookies_update_dict(cookies, self.cookies_domain)
+            select = self.config("cookies-select")
+            if select:
+                if select == "rotate":
+                    cookies = cookies[self.cookies_index % len(cookies)]
+                    Extractor.cookies_index += 1
+                else:
+                    cookies = random.choice(cookies)
+            self.cookies_load(cookies)
 
-            elif isinstance(cookies, str):
-                path = util.expand_path(cookies)
+    def cookies_load(self, cookies_source):
+        if isinstance(cookies_source, dict):
+            self.cookies_update_dict(cookies_source, self.cookies_domain)
+
+        elif isinstance(cookies_source, str):
+            path = util.expand_path(cookies_source)
+            try:
+                with open(path) as fp:
+                    cookies = util.cookiestxt_load(fp)
+            except Exception as exc:
+                self.log.warning("cookies: %s", exc)
+            else:
+                self.log.debug("Loading cookies from '%s'", cookies_source)
+                set_cookie = self.cookies.set_cookie
+                for cookie in cookies:
+                    set_cookie(cookie)
+                self.cookies_file = path
+
+        elif isinstance(cookies_source, (list, tuple)):
+            key = tuple(cookies_source)
+            cookies = _browser_cookies.get(key)
+
+            if cookies is None:
+                from ..cookies import load_cookies
                 try:
-                    with open(path) as fp:
-                        util.cookiestxt_load(fp, self.cookies)
+                    cookies = load_cookies(cookies_source)
                 except Exception as exc:
                     self.log.warning("cookies: %s", exc)
+                    cookies = ()
                 else:
-                    self.log.debug("Loading cookies from '%s'", cookies)
-                    self.cookies_file = path
-
-            elif isinstance(cookies, (list, tuple)):
-                key = tuple(cookies)
-                cookiejar = _browser_cookies.get(key)
-
-                if cookiejar is None:
-                    from ..cookies import load_cookies
-                    cookiejar = self.cookies.__class__()
-                    try:
-                        load_cookies(cookiejar, cookies)
-                    except Exception as exc:
-                        self.log.warning("cookies: %s", exc)
-                    else:
-                        _browser_cookies[key] = cookiejar
-                else:
-                    self.log.debug("Using cached cookies from %s", key)
-
-                set_cookie = self.cookies.set_cookie
-                for cookie in cookiejar:
-                    set_cookie(cookie)
-
+                    _browser_cookies[key] = cookies
             else:
-                self.log.warning(
-                    "Expected 'dict', 'list', or 'str' value for 'cookies' "
-                    "option, got '%s' (%s)",
-                    cookies.__class__.__name__, cookies)
+                self.log.debug("Using cached cookies from %s", key)
+
+            set_cookie = self.cookies.set_cookie
+            for cookie in cookies:
+                set_cookie(cookie)
+
+        else:
+            self.log.warning(
+                "Expected 'dict', 'list', or 'str' value for 'cookies' "
+                "option, got '%s' (%s)",
+                cookies_source.__class__.__name__, cookies_source)
 
     def cookies_store(self):
         """Store the session's cookies in a cookies.txt file"""
@@ -639,6 +661,8 @@ class Extractor():
                     headers=(self._write_pages in ("all", "ALL")),
                     hide_auth=(self._write_pages != "ALL")
                 )
+            self.log.info("Writing '%s' response to '%s'",
+                          response.url, path + ".txt")
         except Exception as e:
             self.log.warning("Failed to dump HTTP request (%s: %s)",
                              e.__class__.__name__, e)
@@ -986,6 +1010,12 @@ SSL_CIPHERS = {
     ),
 }
 
+
+# disable Basic Authorization header injection from .netrc data
+try:
+    requests.sessions.get_netrc_auth = lambda _: None
+except Exception:
+    pass
 
 # detect brotli support
 try:

@@ -261,13 +261,19 @@ def accumulate(path, key, conf=_config):
         if key in conf:
             value = conf[key]
             if value:
-                result.extend(value)
+                if isinstance(value, list):
+                    result.extend(value)
+                else:
+                    result.append(value)
         for p in path:
             conf = conf[p]
             if key in conf:
                 value = conf[key]
                 if value:
-                    result[:0] = value
+                    if isinstance(value, list):
+                        result[:0] = value
+                    else:
+                        result.insert(0, value)
     except Exception:
         pass
     return result
@@ -315,7 +321,7 @@ class apply():
             self.original.append((path, key, get(path, key, util.SENTINEL)))
             set(path, key, value)
 
-    def __exit__(self, etype, value, traceback):
+    def __exit__(self, exc_type, exc_value, traceback):
         for path, key, value in self.original:
             if value is util.SENTINEL:
                 unset(path, key)

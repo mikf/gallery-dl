@@ -335,6 +335,14 @@ __tests__ = (
 },
 
 {
+    "#url"     : "http://mikf123.tumblr.com/likes",
+    "#category": ("", "tumblr", "likes"),
+    "#class"   : tumblr.TumblrLikesExtractor,
+    "#options" : {"api-secret": None},
+    "#count"   : 1,
+},
+
+{
     "#url"     : "https://www.tumblr.com/blog/view/mikf123/likes",
     "#category": ("", "tumblr", "likes"),
     "#class"   : tumblr.TumblrLikesExtractor,
@@ -352,4 +360,21 @@ __tests__ = (
     "#class"   : tumblr.TumblrLikesExtractor,
 },
 
+{
+    "#url"     : "https://www.tumblr.com/search/nathan fielder",
+    "#category": ("", "tumblr", "search"),
+    "#class"   : tumblr.TumblrSearchExtractor,
+},
+
+{
+    "#url"     : "https://www.tumblr.com/search/nathan fielder/recent/quote?src=typed_query",
+    "#category": ("", "tumblr", "search"),
+    "#class"   : tumblr.TumblrSearchExtractor,
+},
+
+{
+    "#url"     : "https://www.tumblr.com/search/nathan%20fielder?t=90",
+    "#category": ("", "tumblr", "search"),
+    "#class"   : tumblr.TumblrSearchExtractor,
+},
 )

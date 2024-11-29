@@ -71,6 +71,13 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.pixiv.net/en/users/56514424/artworks",
+    "#comment" : "limit_sanity_level_360.png in artworks results (#5435, #6339)",
+    "#class"   : pixiv.PixivArtworksExtractor,
+    "#count"   : ">= 39",
+},
+
+{
     "#url"     : "https://www.pixiv.net/en/users/173530/manga",
     "#category": ("", "pixiv", "artworks"),
     "#class"   : pixiv.PixivArtworksExtractor,
@@ -146,11 +153,29 @@ __tests__ = (
     "#comment" : "ugoira",
     "#category": ("", "pixiv", "work"),
     "#class"   : pixiv.PixivWorkExtractor,
-    "#sha1_url": "7267695a985c4db8759bebcf8d21dbdd2d2317ef",
+    "#urls"    : "https://i.pximg.net/img-zip-ugoira/img/2018/01/15/13/24/48/66806629_ugoira1920x1080.zip",
 
     "frames"  : list,
     "date"    : "dt:2018-01-14 15:06:08",
     "date_url": "dt:2018-01-15 04:24:48",
+},
+
+{
+    "#url"     : "https://www.pixiv.net/artworks/101003492",
+    "#comment" : "original ugoira frames (#6056)",
+    "#category": ("", "pixiv", "work"),
+    "#class"   : pixiv.PixivWorkExtractor,
+    "#options" : {"ugoira": "original"},
+    "#urls"    : [
+        "https://i.pximg.net/img-original/img/2022/09/04/23/54/19/101003492_ugoira0.png",
+        "https://i.pximg.net/img-original/img/2022/09/04/23/54/19/101003492_ugoira1.png",
+        "https://i.pximg.net/img-original/img/2022/09/04/23/54/19/101003492_ugoira2.png",
+        "https://i.pximg.net/img-original/img/2022/09/04/23/54/19/101003492_ugoira3.png",
+        "https://i.pximg.net/img-original/img/2022/09/04/23/54/19/101003492_ugoira4.png",
+        "https://i.pximg.net/img-original/img/2022/09/04/23/54/19/101003492_ugoira5.png",
+    ],
+
+    "frames": list,
 },
 
 {
@@ -166,9 +191,102 @@ __tests__ = (
 {
     "#url"     : "https://www.pixiv.net/artworks/85960783",
     "#comment" : "limit_sanity_level_360.png (#4327, #5180)",
-    "#category": ("", "pixiv", "work"),
+    "#class"   : pixiv.PixivWorkExtractor,
+    "#options" : {"sanity": False},
+    "#count"   : 0,
+},
+
+{
+    "#url"     : "https://www.pixiv.net/en/artworks/102932581",
+    "#comment" : "limit_sanity_level_360.png (#4327, #5180)",
+    "#class"   : pixiv.PixivWorkExtractor,
+    "#options" : {"sanity": True},
+    "#urls"    : "https://i.pximg.net/img-original/img/2022/11/20/00/00/49/102932581_p0.jpg",
+
+    "caption"       : "Meet a deer .",
+    "comment_access_control": 0,
+    "create_date"   : "2022-11-19T15:00:00+00:00",
+    "date"          : "dt:2022-11-19 15:00:00",
+    "date_url"      : "dt:2022-11-19 15:00:49",
+    "extension"     : "jpg",
+    "filename"      : "102932581_p0",
+    "height"        : 3840,
+    "id"            : 102932581,
+    "illust_ai_type": 1,
+    "illust_book_style": 0,
+    "is_bookmarked" : False,
+    "is_muted"      : False,
+    "num"           : 0,
+    "page_count"    : 1,
+    "rating"        : "General",
+    "restrict"      : 0,
+    "sanity_level"  : 2,
+    "series"        : None,
+    "suffix"        : "",
+    "title"         : "《 Bridge and Deer 》",
+    "tools"         : [],
+    "total_bookmarks": range(1900, 3000),
+    "total_comments": range(3, 10),
+    "total_view"    : range(11000, 20000),
+    "type"          : "illust",
+    "url"           : "https://i.pximg.net/img-original/img/2022/11/20/00/00/49/102932581_p0.jpg",
+    "visible"       : False,
+    "width"         : 2160,
+    "x_restrict"    : 0,
+    "image_urls"    : {
+        "mini"    : "https://i.pximg.net/c/48x48/custom-thumb/img/2022/11/20/00/00/49/102932581_p0_custom1200.jpg",
+        "original": "https://i.pximg.net/img-original/img/2022/11/20/00/00/49/102932581_p0.jpg",
+        "regular" : "https://i.pximg.net/img-master/img/2022/11/20/00/00/49/102932581_p0_master1200.jpg",
+        "small"   : "https://i.pximg.net/c/540x540_70/img-master/img/2022/11/20/00/00/49/102932581_p0_master1200.jpg",
+        "thumb"   : "https://i.pximg.net/c/250x250_80_a2/custom-thumb/img/2022/11/20/00/00/49/102932581_p0_custom1200.jpg",
+    },
+    "tags"          : [
+        "オリジナル",
+        "風景",
+        "イラスト",
+        "illustration",
+        "美しい",
+        "女の子",
+        "少女",
+        "deer",
+        "flower",
+        "spring",
+    ],
+    "user"          : {
+        "account"    : "805482263",
+        "id"         : 7386235,
+        "is_followed": False,
+        "name"       : "岛的鲸",
+        "profile_image_urls": {},
+    },
+},
+
+{
+    "#url"     : "https://www.pixiv.net/en/artworks/109487939",
+    "#comment" : "R-18 limit_sanity_level_360.png (#4327, #5180)",
+    "#class"   : pixiv.PixivWorkExtractor,
+    "#urls"    : [
+        "https://i.pximg.net/img-original/img/2023/07/01/00/06/28/109487939_p0.png",
+        "https://i.pximg.net/img-original/img/2023/07/01/00/06/28/109487939_p1.png",
+        "https://i.pximg.net/img-original/img/2023/07/01/00/06/28/109487939_p2.png",
+        "https://i.pximg.net/img-original/img/2023/07/01/00/06/28/109487939_p3.png",
+    ],
+},
+
+{
+    "#url"     : "https://www.pixiv.net/en/artworks/104582860",
+    "#comment" : "deleted limit_sanity_level_360.png work (#6339)",
     "#class"   : pixiv.PixivWorkExtractor,
     "#count"   : 0,
+},
+
+{
+    "#url"     : "https://www.pixiv.net/en/artworks/103983466",
+    "#comment" : "empty 'caption' in App API response (#4327, #5191)",
+    "#class"   : pixiv.PixivWorkExtractor,
+    "#options" : {"captions": True},
+
+    "caption": r"re:Either she doesn't know how to pose or she can't move with that much clothing on her, in any case she's very well dressed for a holiday trip around town. Lots of stuff to see and a perfect day to grab some sweet pastries at the bakery.<br />...",
 },
 
 {
@@ -214,17 +332,38 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.pixiv.net/en/artworks/unlisted/eE3fTYaROT9IsZmep386",
+    "#class"   : pixiv.PixivUnlistedExtractor,
+    "#urls"    : "https://i.pximg.net/img-original/img/2020/10/15/00/46/12/85017704-149014193e4d3e23a6b8bd5e38b51ed4_p0.png",
+
+    "id"         : 85017704,
+    "id_unlisted": "eE3fTYaROT9IsZmep386",
+},
+
+{
     "#url"     : "https://www.pixiv.net/en/users/173530/bookmarks/artworks",
     "#category": ("", "pixiv", "favorite"),
     "#class"   : pixiv.PixivFavoriteExtractor,
-    "#sha1_url": "85a3104eaaaf003c7b3947117ca2f1f0b1cfc949",
+    "#urls"    : [
+        "https://i.pximg.net/img-original/img/2008/10/31/17/54/01/2005108_p0.jpg",
+        "https://i.pximg.net/img-original/img/2008/09/27/12/22/40/1719386_p0.jpg",
+        "https://i.pximg.net/img-original/img/2008/04/15/01/43/46/669358_p0.jpg",
+        "https://i.pximg.net/img-original/img/2008/06/19/21/52/15/1005851_p0.jpg",
+        "https://i.pximg.net/img-original/img/2008/06/17/22/16/54/994965_p0.jpg",
+    ],
 },
 
 {
     "#url"     : "https://www.pixiv.net/bookmark.php?id=173530",
     "#category": ("", "pixiv", "favorite"),
     "#class"   : pixiv.PixivFavoriteExtractor,
-    "#sha1_url": "85a3104eaaaf003c7b3947117ca2f1f0b1cfc949",
+    "#urls"    : [
+        "https://i.pximg.net/img-original/img/2008/10/31/17/54/01/2005108_p0.jpg",
+        "https://i.pximg.net/img-original/img/2008/09/27/12/22/40/1719386_p0.jpg",
+        "https://i.pximg.net/img-original/img/2008/04/15/01/43/46/669358_p0.jpg",
+        "https://i.pximg.net/img-original/img/2008/06/19/21/52/15/1005851_p0.jpg",
+        "https://i.pximg.net/img-original/img/2008/06/17/22/16/54/994965_p0.jpg",
+    ],
 },
 
 {
@@ -306,6 +445,13 @@ __tests__ = (
     "#url"     : "https://www.pixiv.net/ranking.php",
     "#category": ("", "pixiv", "ranking"),
     "#class"   : pixiv.PixivRankingExtractor,
+    "#options" : {"max-posts": 10},
+
+    "ranking": {
+        "date": r"re:\d\d\d\d-\d\d-\d\d",
+        "mode": "day",
+        "rank": range(1, 10),
+    },
 },
 
 {
@@ -405,12 +551,14 @@ __tests__ = (
 
     "num_series": int,
     "series"    : {
-        "canonical"  : "https://www.pixiv.net/user/10509347/series/21859",
-        "description": str,
-        "ogp"        : dict,
-        "title"      : "先輩がうざい後輩の話",
-        "total"      : int,
-        "twitter"    : dict,
+        "create_date": "2017-10-22T14:07:42+09:00",
+        "width" : 4250,
+        "height": 3009,
+        "id"    : 21859,
+        "title" : "先輩がうざい後輩の話",
+        "total" : range(100, 500),
+        "user"  : dict,
+        "watchlist_added": False,
     },
 },
 

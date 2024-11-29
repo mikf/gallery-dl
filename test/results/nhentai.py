@@ -35,6 +35,19 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://nhentai.net/g/538045/",
+    "#comment" : "webp (#6442)",
+    "#class"   : nhentai.NhentaiGalleryExtractor,
+    "#range"   : "4-7",
+    "#urls"    : (
+        "https://i.nhentai.net/galleries/3115523/4.jpg",
+        "https://i.nhentai.net/galleries/3115523/5.webp",
+        "https://i.nhentai.net/galleries/3115523/6.webp",
+        "https://i.nhentai.net/galleries/3115523/7.jpg",
+    ),
+},
+
+{
     "#url"     : "https://nhentai.net/tag/sole-female/",
     "#category": ("", "nhentai", "tag"),
     "#class"   : nhentai.NhentaiTagExtractor,

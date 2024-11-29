@@ -20,12 +20,22 @@ class DanbooruExtractor(BaseExtractor):
     page_limit = 1000
     page_start = None
     per_page = 200
+    useragent = util.USERAGENT
     request_interval = (0.5, 1.5)
 
     def _init(self):
         self.ugoira = self.config("ugoira", False)
         self.external = self.config("external", False)
-        self.includes = False
+
+        includes = self.config("metadata")
+        if includes:
+            if isinstance(includes, (list, tuple)):
+                includes = ",".join(includes)
+            elif not isinstance(includes, str):
+                includes = "artist_commentary,children,notes,parent,uploader"
+            self.includes = includes + ",id"
+        else:
+            self.includes = False
 
         threshold = self.config("threshold")
         if isinstance(threshold, int):
@@ -46,16 +56,6 @@ class DanbooruExtractor(BaseExtractor):
         return pages * self.per_page
 
     def items(self):
-        self.session.headers["User-Agent"] = util.USERAGENT
-
-        includes = self.config("metadata")
-        if includes:
-            if isinstance(includes, (list, tuple)):
-                includes = ",".join(includes)
-            elif not isinstance(includes, str):
-                includes = "artist_commentary,children,notes,parent,uploader"
-            self.includes = includes + ",id"
-
         data = self.metadata()
         for post in self.posts():
 
@@ -93,7 +93,9 @@ class DanbooruExtractor(BaseExtractor):
 
             if post["extension"] == "zip":
                 if self.ugoira:
-                    post["frames"] = self._ugoira_frames(post)
+                    post["_ugoira_original"] = False
+                    post["_ugoira_frame_data"] = post["frames"] = \
+                        self._ugoira_frames(post)
                     post["_http_adjust_extension"] = False
                 else:
                     url = post["large_file_url"]
@@ -105,6 +107,13 @@ class DanbooruExtractor(BaseExtractor):
             post.update(data)
             yield Message.Directory, post
             yield Message.Url, url, post
+
+    def items_artists(self):
+        for artist in self.artists():
+            artist["_extractor"] = DanbooruTagExtractor
+            url = "{}/posts?tags={}".format(
+                self.root, text.quote(artist["name"]))
+            yield Message.Queue, url, artist
 
     def metadata(self):
         return ()
@@ -292,3 +301,39 @@ class DanbooruPopularExtractor(DanbooruExtractor):
 
     def posts(self):
         return self._pagination("/explore/posts/popular.json", self.params)
+
+
+class DanbooruArtistExtractor(DanbooruExtractor):
+    """Extractor for danbooru artists"""
+    subcategory = "artist"
+    pattern = BASE_PATTERN + r"/artists/(\d+)"
+    example = "https://danbooru.donmai.us/artists/12345"
+
+    items = DanbooruExtractor.items_artists
+
+    def artists(self):
+        url = "{}/artists/{}.json".format(self.root, self.groups[-1])
+        return (self.request(url).json(),)
+
+
+class DanbooruArtistSearchExtractor(DanbooruExtractor):
+    """Extractor for danbooru artist searches"""
+    subcategory = "artist-search"
+    pattern = BASE_PATTERN + r"/artists/?\?([^#]+)"
+    example = "https://danbooru.donmai.us/artists?QUERY"
+
+    items = DanbooruExtractor.items_artists
+
+    def artists(self):
+        url = self.root + "/artists.json"
+        params = text.parse_query(self.groups[-1])
+        params["page"] = text.parse_int(params.get("page"), 1)
+
+        while True:
+            artists = self.request(url, params=params).json()
+
+            yield from artists
+
+            if len(artists) < 20:
+                return
+            params["page"] += 1

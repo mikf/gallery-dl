@@ -29,7 +29,7 @@ __tests__ = (
     "#class"   : poipiku.PoipikuPostExtractor,
     "#pattern" : r"https://img-org\.poipiku\.com/user_img\d+/000025049/005864576_EWN1Y65gQ\.png$",
 
-    "count"        : "1",
+    "count"        : 1,
     "description"  : "",
     "extension"    : "png",
     "filename"     : "005864576_EWN1Y65gQ",
@@ -47,7 +47,7 @@ __tests__ = (
     "#pattern" : r"https://img-org\.poipiku\.com/user_img\d+/002166245/006411749_\w+\.jpeg$",
     "#count"   : 4,
 
-    "count"        : "4",
+    "count"        : 4,
     "description"  : "絵茶の産物ネタバレあるやつ",
     "num"          : int,
     "post_category": "SPOILER",
@@ -64,7 +64,7 @@ __tests__ = (
     "#pattern" : r"https://img-org\.poipiku.com/user_img\d+/003572553/005776587_(\d+_)?\w+\.jpeg$",
     "#count"   : 3,
 
-    "count"        : "3",
+    "count"        : 3,
     "description"  : "ORANGE OASISボスネタバレ<br />曲も大好き<br />2枚目以降はほとんど見えなかった1枚目背景のヒエログリフ小ネタです𓀀",
     "num"          : int,
     "post_category": "SPOILER",

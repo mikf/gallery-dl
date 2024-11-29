@@ -17,6 +17,7 @@ __tests__ = (
     "chapter"      : 8,
     "chapter_id"   : 1681030,
     "chapter_minor": "",
+    "chapter_url"  : "8",
     "count"        : 66,
     "date"         : "dt:2021-05-15 18:51:37",
     "extension"    : "webp",
@@ -51,12 +52,44 @@ __tests__ = (
     "chapter"   : 9,
     "chapter_id": 2584460,
     "chapter_minor": "",
+    "chapter_url": "9",
     "count"     : 18,
     "date"      : "dt:2023-11-26 11:01:12",
     "manga"     : "Isekai Teni shitara Aiken ga Saikyou ni narimashita - Silver Fenrir to Ore ga Isekai Kurashi wo Hajimetara (Official)",
     "manga_id"  : 126793,
     "title"     : "",
     "volume"    : 0
+},
+
+{
+    "#url"     : "https://bato.to/title/90710-new-suitor-for-the-abandoned-wife/2089747-ch_76",
+    "#comment" : "duplicate info in chapter_minor / title (#5988)",
+    "#category": ("", "batoto", "chapter"),
+    "#class"   : batoto.BatotoChapterExtractor,
+
+    "chapter"      : 76,
+    "chapter_id"   : 2089747,
+    "chapter_minor": "",
+    "chapter_url"  : "76",
+    "title"        : "Side Story 4 [END]",
+},
+
+{
+    "#url"     : "https://bato.to/title/115494-today-with-you/2631897-ch_38",
+    "#category": ("", "batoto", "chapter"),
+    "#class"   : batoto.BatotoChapterExtractor,
+
+    "chapter"       : 37,
+    "chapter_id"    : 2631897,
+    "chapter_minor" : "",
+    "chapter_string": "S1 Episode 37 (End of season)",
+    "chapter_url"   : "38",
+    "count"         : 69,
+    "date"          : "dt:2023-12-20 17:31:18",
+    "manga"         : "Today With You",
+    "manga_id"      : 115494,
+    "title"         : "",
+    "volume"        : 1,
 },
 
 {

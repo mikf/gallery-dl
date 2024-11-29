@@ -231,4 +231,40 @@ __tests__ = (
     "#count"   : 120,
 },
 
+{
+    "#url"     : "https://danbooru.donmai.us/artists/288683",
+    "#category": ("Danbooru", "danbooru", "artist"),
+    "#class"   : danbooru.DanbooruArtistExtractor,
+    "#urls"    : "https://danbooru.donmai.us/posts?tags=kaori_%28vuoian_appxv%29",
+
+    "created_at" : "2022-05-12T16:00:40.852-04:00",
+    "updated_at" : "2022-05-12T22:10:51.917-04:00",
+    "group_name" : "",
+    "id"         : 288683,
+    "is_banned"  : False,
+    "is_deleted" : False,
+    "name"       : "kaori_(vuoian_appxv)",
+    "other_names": [
+        "香",
+        "vuoian_appxv",
+    ],
+},
+
+{
+    "#url"     : "https://danbooru.donmai.us/artists?commit=Search&search%5Bany_name_matches%5D=yu&search%5Border%5D=created_at",
+    "#category": ("Danbooru", "danbooru", "artist-search"),
+    "#class"   : danbooru.DanbooruArtistSearchExtractor,
+    "#pattern" : danbooru.DanbooruTagExtractor.pattern,
+    "#count"   : "> 50",
+
+    "created_at" : str,
+    "updated_at" : str,
+    "group_name" : str,
+    "id"         : int,
+    "is_banned"  : bool,
+    "is_deleted" : bool,
+    "name"       : str,
+    "other_names": list,
+},
+
 )

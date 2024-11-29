@@ -25,6 +25,7 @@ class TestFormatter(unittest.TestCase):
         "b": "äöü",
         "j": "げんそうきょう",
         "d": {"a": "foo", "b": 0, "c": None},
+        "i": 2,
         "l": ["a", "b", "c"],
         "n": None,
         "s": " \n\r\tSPACE    ",
@@ -63,9 +64,12 @@ class TestFormatter(unittest.TestCase):
         self._run_test("{t!d}", datetime.datetime(2010, 1, 1))
         self._run_test("{t!d:%Y-%m-%d}", "2010-01-01")
         self._run_test("{dt!T}", "1262304000")
-        self._run_test("{l!j}", '["a", "b", "c"]')
+        self._run_test("{l!j}", '["a","b","c"]')
         self._run_test("{dt!j}", '"2010-01-01 00:00:00"')
         self._run_test("{a!g}", "hello-world")
+        self._run_test("{a!L}", 11)
+        self._run_test("{l!L}", 3)
+        self._run_test("{d!L}", 3)
 
         with self.assertRaises(KeyError):
             self._run_test("{a!q}", "hello world")
@@ -267,6 +271,11 @@ class TestFormatter(unittest.TestCase):
             "{a:Sort-reverse}",  # starts with 'S', contains 'r'
             "['w', 'r', 'o', 'l', 'h', 'd', 'O', 'L', 'L', 'E', ' ']")
 
+    def test_specifier_arithmetic(self):
+        self._run_test("{i:A+1}", "3")
+        self._run_test("{i:A-1}", "1")
+        self._run_test("{i:A*3}", "6")
+
     def test_specifier_conversions(self):
         self._run_test("{a:Cl}"   , "hello world")
         self._run_test("{h:CHC}"  , "Foo & Bar")
@@ -344,6 +353,14 @@ class TestFormatter(unittest.TestCase):
         out2 = fmt.format_map(self.kwdict)
         self.assertRegex(out1, r"^\d{4}-\d\d-\d\d \d\d:\d\d:\d\d(\.\d+)?$")
         self.assertNotEqual(out1, out2)
+
+    def test_globals_nul(self):
+        value = "None"
+
+        self._run_test("{_nul}"         , value)
+        self._run_test("{_nul[key]}"    , value)
+        self._run_test("{z|_nul}"       , value)
+        self._run_test("{z|_nul:%Y%m%s}", value)
 
     def test_literals(self):
         value = "foo"

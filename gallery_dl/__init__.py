@@ -63,7 +63,7 @@ def main():
             browser, _, profile = args.cookies_from_browser.partition(":")
             browser, _, keyring = browser.partition("+")
             browser, _, domain = browser.partition("/")
-            if profile.startswith(":"):
+            if profile and profile[0] == ":":
                 container = profile[1:]
                 profile = None
             else:
@@ -107,8 +107,15 @@ def main():
 
         # filter environment
         filterenv = config.get((), "filters-environment", True)
-        if not filterenv:
+        if filterenv is True:
+            pass
+        elif not filterenv:
             util.compile_expression = util.compile_expression_raw
+        elif isinstance(filterenv, str):
+            if filterenv == "raw":
+                util.compile_expression = util.compile_expression_raw
+            elif filterenv.startswith("default"):
+                util.compile_expression = util.compile_expression_defaultdict
 
         # format string separator
         separator = config.get((), "format-separator")
@@ -202,12 +209,18 @@ def main():
             extractor.modules.append("")
             sys.stdout.write("\n".join(extractor.modules))
 
-        elif args.list_extractors:
+        elif args.list_extractors is not None:
             write = sys.stdout.write
             fmt = ("{}{}\nCategory: {} - Subcategory: {}"
                    "\nExample : {}\n\n").format
 
-            for extr in extractor.extractors():
+            extractors = extractor.extractors()
+            if args.list_extractors:
+                fltr = util.build_extractor_filter(
+                    args.list_extractors, negate=False)
+                extractors = filter(fltr, extractors)
+
+            for extr in extractors:
                 write(fmt(
                     extr.__name__,
                     "\n" + extr.__doc__ if extr.__doc__ else "",
@@ -238,10 +251,21 @@ def main():
                 return config.open_extern()
 
         else:
+            input_files = config.get((), "input-files")
+            if input_files:
+                for input_file in input_files:
+                    if isinstance(input_file, str):
+                        input_file = (input_file, None)
+                    args.input_files.append(input_file)
+
             if not args.urls and not args.input_files:
-                parser.error(
-                    "The following arguments are required: URL\n"
-                    "Use 'gallery-dl --help' to get a list of all options.")
+                if args.cookies_from_browser or config.interpolate(
+                        ("extractor",), "cookies"):
+                    args.urls.append("noop")
+                else:
+                    parser.error(
+                        "The following arguments are required: URL\nUse "
+                        "'gallery-dl --help' to get a list of all options.")
 
             if args.list_urls:
                 jobtype = job.UrlJob

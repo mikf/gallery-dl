@@ -47,8 +47,7 @@ class GofileFolderExtractor(Extractor):
             raise exception.AuthorizationError("Password required")
 
         num = 0
-        for content_id in folder["childrenIds"]:
-            content = contents[content_id]
+        for content in contents.values():
             content["folder"] = folder
 
             if content["type"] == "file":

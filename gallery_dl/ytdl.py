@@ -18,7 +18,7 @@ def import_module(module_name):
     if module_name is None:
         try:
             return __import__("yt_dlp")
-        except ImportError:
+        except (ImportError, SyntaxError):
             return __import__("youtube_dl")
     return __import__(module_name.replace("-", "_"))
 
@@ -134,6 +134,7 @@ def parse_command_line(module, argv):
     else:
         date = module.DateRange(opts.dateafter, opts.datebefore)
 
+    decodeOption = getattr(module, "decodeOption", util.identity)
     compat_opts = getattr(opts, "compat_opts", ())
 
     def _unused_compat_opt(name):
@@ -355,8 +356,8 @@ def parse_command_line(module, argv):
         "allsubtitles": opts.allsubtitles,
         "subtitlesformat": opts.subtitlesformat,
         "subtitleslangs": opts.subtitleslangs,
-        "matchtitle": module.decodeOption(opts.matchtitle),
-        "rejecttitle": module.decodeOption(opts.rejecttitle),
+        "matchtitle": decodeOption(opts.matchtitle),
+        "rejecttitle": decodeOption(opts.rejecttitle),
         "max_downloads": opts.max_downloads,
         "prefer_free_formats": opts.prefer_free_formats,
         "trim_file_name": getattr(opts, "trim_file_name", None),

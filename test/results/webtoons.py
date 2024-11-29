@@ -99,15 +99,23 @@ __tests__ = (
     "#class"   : webtoons.WebtoonsComicExtractor,
     "#pattern" : webtoons.WebtoonsEpisodeExtractor.pattern,
     "#range"   : "1-15",
-    "#count"   : ">= 15",
+    "#count"   : ">= 14",
+
+    "page"      : range(1, 2),
+    "title_no"  : 919,
+    "episode_no": range(1, 14),
 },
 
 {
-    "#url"     : "https://www.webtoons.com/fr/romance/subzero/list?title_no=1845&page=3",
+    "#url"     : "https://www.webtoons.com/fr/romance/subzero/list?title_no=1845&page=7",
     "#comment" : "french",
     "#category": ("", "webtoons", "comic"),
     "#class"   : webtoons.WebtoonsComicExtractor,
     "#count"   : ">= 15",
+
+    "page"      : range(7, 25),
+    "title_no"  : 1845,
+    "episode_no": int,
 },
 
 {
@@ -116,6 +124,10 @@ __tests__ = (
     "#category": ("", "webtoons", "comic"),
     "#class"   : webtoons.WebtoonsComicExtractor,
     "#count"   : ">= 18",
+
+    "page"      : int,
+    "title_no"  : 210827,
+    "episode_no": int,
 },
 
 {

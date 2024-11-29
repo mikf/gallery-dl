@@ -14,8 +14,16 @@ __tests__ = (
     "#category": ("", "twitter", "user"),
     "#class"   : twitter.TwitterUserExtractor,
     "#options" : {"include": "all"},
-    "#pattern" : r"https://x\.com/supernaturepics/(photo|header_photo|timeline|tweets|media|with_replies|likes)$",
-    "#count"   : 7,
+    "#urls"    : [
+        "https://x.com/supernaturepics/info",
+        "https://x.com/supernaturepics/photo",
+        "https://x.com/supernaturepics/header_photo",
+        "https://x.com/supernaturepics/timeline",
+        "https://x.com/supernaturepics/tweets",
+        "https://x.com/supernaturepics/media",
+        "https://x.com/supernaturepics/with_replies",
+        "https://x.com/supernaturepics/likes",
+    ],
 },
 
 {
@@ -319,6 +327,8 @@ __tests__ = (
     "#category": ("", "twitter", "tweet"),
     "#class"   : twitter.TwitterTweetExtractor,
     "#sha1_url": "3a2a43dc5fb79dd5432c701d8e55e87c4e551f47",
+
+    "type": "photo",
 },
 
 {
@@ -327,6 +337,8 @@ __tests__ = (
     "#category": ("", "twitter", "tweet"),
     "#class"   : twitter.TwitterTweetExtractor,
     "#pattern" : r"https://video.twimg.com/ext_tw_video/.+\.mp4\?tag=5",
+
+    "type": "video",
 },
 
 {
@@ -587,6 +599,7 @@ You’ll be able to receive four Galarian form Pokémon with Hidden Abilities, p
     "#class"   : twitter.TwitterTweetExtractor,
 
     "description": "oc",
+    "type"       : "photo",
 },
 
 {

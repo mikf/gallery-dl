@@ -14,6 +14,7 @@ from .. import text
 class CyberdropAlbumExtractor(lolisafe.LolisafeAlbumExtractor):
     category = "cyberdrop"
     root = "https://cyberdrop.me"
+    root_api = "https://api.cyberdrop.me"
     pattern = r"(?:https?://)?(?:www\.)?cyberdrop\.(?:me|to)/a/([^/?#]+)"
     example = "https://cyberdrop.me/a/ID"
 
@@ -55,5 +56,14 @@ class CyberdropAlbumExtractor(lolisafe.LolisafeAlbumExtractor):
 
     def _extract_files(self, file_ids):
         for file_id in file_ids:
-            url = "{}/api/f/{}".format(self.root, file_id)
-            yield self.request(url).json()
+            try:
+                url = "{}/api/file/info/{}".format(self.root_api, file_id)
+                file = self.request(url).json()
+                auth = self.request(file["auth_url"]).json()
+                file["url"] = auth["url"]
+            except Exception as exc:
+                self.log.warning("%s (%s: %s)",
+                                 file_id, exc.__class__.__name__, exc)
+                continue
+
+            yield file

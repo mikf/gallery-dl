@@ -51,28 +51,29 @@ class BatotoChapterExtractor(BatotoBase, ChapterExtractor):
         if not manga:
             manga = extr('link-hover">', "<")
             info = text.remove_html(extr('link-hover">', "</"))
+        info = text.unescape(info)
 
         match = re.match(
-            r"(?:Volume\s+(\d+) )?"
-            r"\w+\s+(\d+)(.*)", info)
+            r"(?i)(?:(?:Volume|S(?:eason)?)\s*(\d+)\s+)?"
+            r"(?:Chapter|Episode)\s*(\d+)([\w.]*)", info)
         if match:
             volume, chapter, minor = match.groups()
-            title = text.remove_html(extr(
-                "selected>", "</option")).partition(" : ")[2]
         else:
             volume = chapter = 0
             minor = ""
-            title = info
 
         return {
-            "manga"        : text.unescape(manga),
-            "manga_id"     : text.parse_int(manga_id),
-            "title"        : text.unescape(title),
-            "volume"       : text.parse_int(volume),
-            "chapter"      : text.parse_int(chapter),
-            "chapter_minor": minor,
-            "chapter_id"   : text.parse_int(self.chapter_id),
-            "date"         : text.parse_timestamp(extr(' time="', '"')[:-3]),
+            "manga"         : text.unescape(manga),
+            "manga_id"      : text.parse_int(manga_id),
+            "chapter_url"   : extr(self.chapter_id + "-ch_", '"'),
+            "title"         : text.unescape(text.remove_html(extr(
+                "selected>", "</option")).partition(" : ")[2]),
+            "volume"        : text.parse_int(volume),
+            "chapter"       : text.parse_int(chapter),
+            "chapter_minor" : minor,
+            "chapter_string": info,
+            "chapter_id"    : text.parse_int(self.chapter_id),
+            "date"          : text.parse_timestamp(extr(' time="', '"')[:-3]),
         }
 
     def images(self, page):

@@ -7,36 +7,40 @@
 """Extractors for https://urlgalleries.net/"""
 
 from .common import GalleryExtractor, Message
-from .. import text
+from .. import text, exception
 
 
 class UrlgalleriesGalleryExtractor(GalleryExtractor):
     """Base class for Urlgalleries extractors"""
     category = "urlgalleries"
-    root = "urlgalleries.net"
-    request_interval = (0.5, 1.0)
+    root = "https://urlgalleries.net"
+    request_interval = (0.5, 1.5)
     pattern = r"(?:https?://)(?:(\w+)\.)?urlgalleries\.net/(?:[\w-]+-)?(\d+)"
-    example = "https://blog.urlgalleries.net/gallery-12345/TITLE"
-
-    def __init__(self, match):
-        self.blog, self.gallery_id = match.groups()
-        url = "https://{}.urlgalleries.net/porn-gallery-{}/?a=10000".format(
-            self.blog, self.gallery_id)
-        GalleryExtractor.__init__(self, match, url)
+    example = "https://BLOG.urlgalleries.net/gallery-12345/TITLE"
 
     def items(self):
-        page = self.request(self.gallery_url).text
+        blog, self.gallery_id = self.groups
+        url = "https://{}.urlgalleries.net/porn-gallery-{}/?a=10000".format(
+            blog, self.gallery_id)
+
+        with self.request(url, allow_redirects=False, fatal=...) as response:
+            if 300 <= response.status_code < 500:
+                if response.headers.get("location", "").endswith(
+                        "/not_found_adult.php"):
+                    raise exception.NotFoundError("gallery")
+                raise exception.HttpError(None, response)
+            page = response.text
+
         imgs = self.images(page)
         data = self.metadata(page)
         data["count"] = len(imgs)
-        del page
 
-        root = "https://{}.urlgalleries.net".format(self.blog)
+        root = "https://{}.urlgalleries.net".format(blog)
         yield Message.Directory, data
         for data["num"], img in enumerate(imgs, 1):
-            response = self.request(
-                root + img, method="HEAD", allow_redirects=False)
-            yield Message.Queue, response.headers["Location"], data
+            page = self.request(root + img).text
+            url = text.extr(page, "window.location.href = '", "'")
+            yield Message.Queue, url, data
 
     def metadata(self, page):
         extr = text.extract_from(page)

@@ -20,10 +20,6 @@ class LolisafeExtractor(BaseExtractor):
 
 
 BASE_PATTERN = LolisafeExtractor.update({
-    "xbunkr": {
-        "root": "https://xbunkr.com",
-        "pattern": r"xbunkr\.com",
-    },
 })
 
 
@@ -34,7 +30,7 @@ class LolisafeAlbumExtractor(LolisafeExtractor):
 
     def __init__(self, match):
         LolisafeExtractor.__init__(self, match)
-        self.album_id = match.group(match.lastindex)
+        self.album_id = self.groups[-1]
 
     def _init(self):
         domain = self.config("domain")
@@ -50,8 +46,21 @@ class LolisafeAlbumExtractor(LolisafeExtractor):
         for data["num"], file in enumerate(files, 1):
             url = file["file"]
             file.update(data)
-            text.nameext_from_url(url, file)
-            file["name"], sep, file["id"] = file["filename"].rpartition("-")
+
+            if "extension" not in file:
+                text.nameext_from_url(url, file)
+
+            if "name" in file:
+                name = file["name"]
+                file["name"] = name.rpartition(".")[0] or name
+                file["id"] = file["filename"].rpartition("-")[2]
+            elif "id" in file:
+                file["name"] = file["filename"]
+                file["filename"] = "{}-{}".format(file["name"], file["id"])
+            else:
+                file["name"], sep, file["id"] = \
+                    file["filename"].rpartition("-")
+
             yield Message.Url, url, file
 
     def fetch_album(self, album_id):
