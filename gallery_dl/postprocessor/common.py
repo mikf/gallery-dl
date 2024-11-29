@@ -26,19 +26,27 @@ class PostProcessor():
         if archive_path:
             extr = job.extractor
             archive_path = util.expand_path(archive_path)
-            if not prefix:
-                prefix = "_" + self.name.upper() + "_"
-            archive_format = (
-                options.get("archive-prefix", extr.category) +
-                options.get("archive-format", prefix + extr.archive_fmt))
+
+            archive_prefix = options.get("archive-prefix")
+            if archive_prefix is None:
+                archive_prefix = extr.category
+
+            archive_format = options.get("archive-format")
+            if archive_format is None:
+                if prefix is None:
+                    prefix = "_" + self.name.upper() + "_"
+                archive_format = prefix + extr.archive_fmt
+
             try:
                 if "{" in archive_path:
                     archive_path = formatter.parse(archive_path).format_map(
                         job.pathfmt.kwdict)
                 self.archive = archive.DownloadArchive(
-                    archive_path, archive_format,
+                    archive_path,
+                    archive_prefix + archive_format,
                     options.get("archive-pragma"),
-                    "_archive_" + self.name)
+                    "_archive_" + self.name,
+                )
             except Exception as exc:
                 self.log.warning(
                     "Failed to open %s archive at '%s' (%s: %s)",

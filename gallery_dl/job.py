@@ -551,9 +551,15 @@ class DownloadJob(Job):
         archive_path = cfg("archive")
         if archive_path:
             archive_path = util.expand_path(archive_path)
-            archive_format = (cfg("archive-prefix", extr.category) +
-                              cfg("archive-format", extr.archive_fmt))
-            archive_pragma = (cfg("archive-pragma"))
+
+            archive_prefix = cfg("archive-prefix")
+            if archive_prefix is None:
+                archive_prefix = extr.category
+
+            archive_format = cfg("archive-format")
+            if archive_format is None:
+                archive_format = extr.archive_fmt
+
             try:
                 if "{" in archive_path:
                     archive_path = formatter.parse(
@@ -563,7 +569,10 @@ class DownloadJob(Job):
                 else:
                     archive_cls = archive.DownloadArchive
                 self.archive = archive_cls(
-                    archive_path, archive_format, archive_pragma)
+                    archive_path,
+                    archive_prefix + archive_format,
+                    cfg("archive-pragma"),
+                )
             except Exception as exc:
                 extr.log.warning(
                     "Failed to open download archive at '%s' (%s: %s)",
