@@ -23,18 +23,17 @@ class PatreonExtractor(Extractor):
     directory_fmt = ("{category}", "{creator[full_name]}")
     filename_fmt = "{id}_{title}_{num:>02}.{extension}"
     archive_fmt = "{id}_{num}"
+    useragent = "Patreon/72.2.28 (Android; Android 14; Scale/2.10)"
     _warning = True
 
     def _init(self):
-        if self.cookies_check(("session_id",)):
-            self.session.headers["User-Agent"] = \
-                "Patreon/72.2.28 (Android; Android 14; Scale/2.10)"
-        else:
+        if not self.cookies_check(("session_id",)):
             if self._warning:
                 PatreonExtractor._warning = False
                 self.log.warning("no 'session_id' cookie set")
-            self.session.headers["User-Agent"] = \
-                "Patreon/7.6.28 (Android; Android 11; Scale/2.10)"
+            if self.session.headers["User-Agent"] is self.useragent:
+                self.session.headers["User-Agent"] = \
+                    "Patreon/7.6.28 (Android; Android 11; Scale/2.10)"
 
     def items(self):
         generators = self._build_file_generators(self.config("files"))
