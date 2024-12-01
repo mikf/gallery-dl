@@ -75,10 +75,13 @@ class BlueskyExtractor(Extractor):
                 quote = embed["record"]
                 if "record" in quote:
                     quote = quote["record"]
+                value = quote.pop("value", None)
+                if value is None:
+                    break
                 quote["quote_id"] = self._pid(post)
                 quote["quote_by"] = post["author"]
                 embed = quote.get("embed")
-                quote.update(quote.pop("value"))
+                quote.update(value)
                 post = quote
 
     def posts(self):
