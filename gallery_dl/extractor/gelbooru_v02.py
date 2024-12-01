@@ -82,16 +82,17 @@ class GelbooruV02Extractor(booru.BooruExtractor):
         params["pid"] = self.page_start * self.per_page
 
         data = {}
-        while True:
-            num_ids = 0
-            page = self.request(url, params=params).text
+        find_ids = re.compile(r"\sid=\"p(\d+)").findall
 
-            for data["id"] in text.extract_iter(page, '" id="p', '"'):
-                num_ids += 1
+        while True:
+            page = self.request(url, params=params).text
+            pids = find_ids(page)
+
+            for data["id"] in pids:
                 for post in self._api_request(data):
                     yield post.attrib
 
-            if num_ids < self.per_page:
+            if len(pids) < self.per_page:
                 return
             params["pid"] += self.per_page
 
