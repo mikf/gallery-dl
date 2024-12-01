@@ -607,8 +607,12 @@ class PixivRankingExtractor(PixivExtractor):
 
     def works(self):
         ranking = self.ranking
-        for ranking["rank"], work in enumerate(
-                self.api.illust_ranking(self.mode, self.date), 1):
+
+        works = self.api.illust_ranking(self.mode, self.date)
+        if self.type:
+            works = filter(lambda work, t=self.type: work["type"] == t, works)
+
+        for ranking["rank"], work in enumerate(works, 1):
             yield work
 
     def metadata(self):
@@ -648,10 +652,13 @@ class PixivRankingExtractor(PixivExtractor):
             date = (now - timedelta(days=1)).strftime("%Y-%m-%d")
         self.date = date
 
+        self.type = type = query.get("content")
+
         self.ranking = ranking = {
             "mode": mode,
             "date": self.date,
             "rank": 0,
+            "type": type or "all",
         }
         return {"ranking": ranking}
 
