@@ -380,8 +380,9 @@ class PixivArtworksExtractor(PixivExtractor):
                 ajax_ids.extend(map(int, body["manga"]))
                 ajax_ids.sort()
             except Exception as exc:
-                self.log.warning("Unable to collect artwork IDs using AJAX "
-                                 "API (%s: %s)", exc.__class__.__name__, exc)
+                self.log.warning("u%s: Failed to collect artwork IDs "
+                                 "using AJAX API (%s: %s)",
+                                 self.user_id, exc.__class__.__name__, exc)
             else:
                 works = self._extend_sanity(works, ajax_ids)
 
