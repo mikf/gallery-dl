@@ -327,7 +327,8 @@ class BlueskySearchExtractor(BlueskyExtractor):
     example = "https://bsky.app/search?q=QUERY"
 
     def posts(self):
-        return self.api.search_posts(self.user)
+        query = text.unquote(self.user.replace("+", " "))
+        return self.api.search_posts(query)
 
 
 class BlueskyHashtagExtractor(BlueskyExtractor):
