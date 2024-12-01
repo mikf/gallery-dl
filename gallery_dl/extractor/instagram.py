@@ -14,7 +14,6 @@ from .. import text, util, exception
 from ..cache import cache, memcache
 import itertools
 import binascii
-import json
 import re
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?instagram\.com"
@@ -102,7 +101,10 @@ class InstagramExtractor(Extractor):
                         continue
 
                 url = file["display_url"]
-                yield Message.Url, url, text.nameext_from_url(url, file)
+                text.nameext_from_url(url, file)
+                if file["extension"] == "webp" and "stp=dst-jpg" in url:
+                    file["extension"] = "jpg"
+                yield Message.Url, url, file
 
     def metadata(self):
         return ()
@@ -391,10 +393,11 @@ class InstagramExtractor(Extractor):
 
     def _init_cursor(self):
         cursor = self.config("cursor", True)
-        if not cursor:
+        if cursor is True:
+            return None
+        elif not cursor:
             self._update_cursor = util.identity
-        elif isinstance(cursor, str):
-            return cursor
+        return cursor
 
     def _update_cursor(self, cursor):
         self.log.debug("Cursor: %s", cursor)
@@ -913,7 +916,7 @@ class InstagramGraphqlAPI():
         self.user_collection = self.user_saved = self.reels_media = \
             self.highlights_media = self.guide = self.guide_media = \
             self._unsupported
-        self._json_dumps = json.JSONEncoder(separators=(",", ":")).encode
+        self._json_dumps = util.json_dumps
 
         api = InstagramRestAPI(extractor)
         self.user_by_name = api.user_by_name

@@ -19,8 +19,7 @@ class CohostExtractor(Extractor):
     category = "cohost"
     root = "https://cohost.org"
     directory_fmt = ("{category}", "{postingProject[handle]}")
-    filename_fmt = ("{postId}_{headline|plainTextBody:?/_/[:100]}"
-                    "{num}.{extension}")
+    filename_fmt = ("{postId}_{headline:?/_/[b:200]}{num}.{extension}")
     archive_fmt = "{postId}_{num}"
 
     def _init(self):
@@ -110,7 +109,7 @@ class CohostUserExtractor(CohostExtractor):
             "projectHandle": self.groups[0],
             "page": 0,
             "options": {
-                "pinnedPostsAtTop"    : bool(self.pinned),
+                "pinnedPostsAtTop"    : True if self.pinned else False,
                 "hideReplies"         : not self.replies,
                 "hideShares"          : not self.shares,
                 "hideAsks"            : not self.asks,

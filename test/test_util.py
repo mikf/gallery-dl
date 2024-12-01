@@ -205,9 +205,8 @@ class TestCookiesTxt(unittest.TestCase):
     def test_cookiestxt_load(self):
 
         def _assert(content, expected):
-            jar = http.cookiejar.CookieJar()
-            util.cookiestxt_load(io.StringIO(content, None), jar)
-            for c, e in zip(jar, expected):
+            cookies = util.cookiestxt_load(io.StringIO(content, None))
+            for c, e in zip(cookies, expected):
                 self.assertEqual(c.__dict__, e.__dict__)
 
         _assert("", [])
@@ -253,8 +252,7 @@ class TestCookiesTxt(unittest.TestCase):
         )
 
         with self.assertRaises(ValueError):
-            util.cookiestxt_load("example.org\tTRUE\t/\tTRUE\t0\tname",
-                                 http.cookiejar.CookieJar())
+            util.cookiestxt_load("example.org\tTRUE\t/\tTRUE\t0\tname")
 
     def test_cookiestxt_store(self):
 
@@ -300,6 +298,96 @@ class TestCookiesTxt(unittest.TestCase):
             domain, domain_specified, domain.startswith("."),
             path, False, secure, expires, False, None, None, {},
         )
+
+
+class TestCompileExpression(unittest.TestCase):
+
+    def test_compile_expression(self):
+        expr = util.compile_expression("1 + 2 * 3")
+        self.assertEqual(expr(), 7)
+        self.assertEqual(expr({"a": 1, "b": 2, "c": 3}), 7)
+        self.assertEqual(expr({"a": 9, "b": 9, "c": 9}), 7)
+
+        expr = util.compile_expression("a + b * c")
+        self.assertEqual(expr({"a": 1, "b": 2, "c": 3}), 7)
+        self.assertEqual(expr({"a": 9, "b": 9, "c": 9}), 90)
+
+        with self.assertRaises(SyntaxError):
+            util.compile_expression("")
+        with self.assertRaises(SyntaxError):
+            util.compile_expression("x++")
+
+        expr = util.compile_expression("1 and abort()")
+        with self.assertRaises(exception.StopExtraction):
+            expr()
+
+    def test_compile_expression_raw(self):
+        expr = util.compile_expression_raw("a + b * c")
+        with self.assertRaises(NameError):
+            expr()
+        with self.assertRaises(NameError):
+            expr({"a": 2})
+
+        expr = util.compile_expression_raw("int.param")
+        with self.assertRaises(AttributeError):
+            expr({"a": 2})
+
+    def test_compile_expression_tryexcept(self):
+        expr = util.compile_expression_tryexcept("a + b * c")
+        self.assertIs(expr(), util.NONE)
+        self.assertIs(expr({"a": 2}), util.NONE)
+
+        expr = util.compile_expression_tryexcept("int.param")
+        self.assertIs(expr({"a": 2}), util.NONE)
+
+    def test_compile_expression_defaultdict(self):
+        expr = util.compile_expression_defaultdict("a + b * c")
+        self.assertIs(expr(), util.NONE)
+        self.assertIs(expr({"a": 2}), util.NONE)
+
+        expr = util.compile_expression_defaultdict("int.param")
+        with self.assertRaises(AttributeError):
+            expr({"a": 2})
+
+    def test_compile_filter(self):
+        expr = util.compile_filter("a + b * c")
+        self.assertEqual(expr({"a": 1, "b": 2, "c": 3}), 7)
+        self.assertEqual(expr({"a": 9, "b": 9, "c": 9}), 90)
+
+        expr = util.compile_filter(["a % 2 == 0", "b % 3 == 0", "c % 5 == 0"])
+        self.assertTrue(expr({"a": 4, "b": 6, "c": 10}))
+        self.assertFalse(expr({"a": 1, "b": 2, "c": 3}))
+
+    def test_custom_globals(self):
+        value = {"v": "foobar"}
+        result = "8843d7f92416211de9ebb963ff4ce28125932878"
+
+        expr = util.compile_expression("hash_sha1(v)")
+        self.assertEqual(expr(value), result)
+
+        expr = util.compile_expression("hs(v)", globals={"hs": util.sha1})
+        self.assertEqual(expr(value), result)
+
+        with tempfile.TemporaryDirectory() as path:
+            file = path + "/module_sha1.py"
+            with open(file, "w") as fp:
+                fp.write("""
+import hashlib
+def hash(value):
+    return hashlib.sha1(value.encode()).hexdigest()
+""")
+            module = util.import_file(file)
+
+        expr = util.compile_expression("hash(v)", globals=module.__dict__)
+        self.assertEqual(expr(value), result)
+
+        GLOBALS_ORIG = util.GLOBALS
+        try:
+            util.GLOBALS = module.__dict__
+            expr = util.compile_expression("hash(v)")
+        finally:
+            util.GLOBALS = GLOBALS_ORIG
+        self.assertEqual(expr(value), result)
 
 
 class TestOther(unittest.TestCase):
@@ -436,31 +524,6 @@ class TestOther(unittest.TestCase):
         self.assertEqual(util.sha1(None),
                          "da39a3ee5e6b4b0d3255bfef95601890afd80709")
 
-    def test_compile_expression(self):
-        expr = util.compile_expression("1 + 2 * 3")
-        self.assertEqual(expr(), 7)
-        self.assertEqual(expr({"a": 1, "b": 2, "c": 3}), 7)
-        self.assertEqual(expr({"a": 9, "b": 9, "c": 9}), 7)
-
-        expr = util.compile_expression("a + b * c")
-        self.assertEqual(expr({"a": 1, "b": 2, "c": 3}), 7)
-        self.assertEqual(expr({"a": 9, "b": 9, "c": 9}), 90)
-
-        expr = util.compile_expression_raw("a + b * c")
-        with self.assertRaises(NameError):
-            expr()
-        with self.assertRaises(NameError):
-            expr({"a": 2})
-
-        with self.assertRaises(SyntaxError):
-            util.compile_expression("")
-        with self.assertRaises(SyntaxError):
-            util.compile_expression("x++")
-
-        expr = util.compile_expression("1 and abort()")
-        with self.assertRaises(exception.StopExtraction):
-            expr()
-
     def test_import_file(self):
         module = util.import_file("datetime")
         self.assertIs(module, datetime)
@@ -479,37 +542,6 @@ value = 123
         self.assertEqual(module.key, "foobar")
         self.assertEqual(module.value, 123)
         self.assertIs(module.datetime, datetime)
-
-    def test_custom_globals(self):
-        value = {"v": "foobar"}
-        result = "8843d7f92416211de9ebb963ff4ce28125932878"
-
-        expr = util.compile_expression("hash_sha1(v)")
-        self.assertEqual(expr(value), result)
-
-        expr = util.compile_expression("hs(v)", globals={"hs": util.sha1})
-        self.assertEqual(expr(value), result)
-
-        with tempfile.TemporaryDirectory() as path:
-            file = path + "/module_sha1.py"
-            with open(file, "w") as fp:
-                fp.write("""
-import hashlib
-def hash(value):
-    return hashlib.sha1(value.encode()).hexdigest()
-""")
-            module = util.import_file(file)
-
-        expr = util.compile_expression("hash(v)", globals=module.__dict__)
-        self.assertEqual(expr(value), result)
-
-        GLOBALS_ORIG = util.GLOBALS
-        try:
-            util.GLOBALS = module.__dict__
-            expr = util.compile_expression("hash(v)")
-        finally:
-            util.GLOBALS = GLOBALS_ORIG
-        self.assertEqual(expr(value), result)
 
     def test_build_duration_func(self, f=util.build_duration_func):
 
@@ -831,6 +863,34 @@ def hash(value):
         for _ in obj:
             i += 1
         self.assertEqual(i, 0)
+
+    def test_module_proxy(self):
+        proxy = util.ModuleProxy()
+
+        self.assertIs(proxy.os, os)
+        self.assertIs(proxy.os.path, os.path)
+        self.assertIs(proxy["os"], os)
+        self.assertIs(proxy["os.path"], os.path)
+        self.assertIs(proxy["os"].path, os.path)
+
+        self.assertIs(proxy.abcdefghi, util.NONE)
+        self.assertIs(proxy["abcdefghi"], util.NONE)
+        self.assertIs(proxy["abc.def.ghi"], util.NONE)
+        self.assertIs(proxy["os.path2"], util.NONE)
+
+    def test_null_context(self):
+        with util.NullContext():
+            pass
+
+        with util.NullContext() as ctx:
+            self.assertIs(ctx, None)
+
+        try:
+            with util.NullContext() as ctx:
+                exc_orig = ValueError()
+                raise exc_orig
+        except ValueError as exc:
+            self.assertIs(exc, exc_orig)
 
 
 class TestExtractor():

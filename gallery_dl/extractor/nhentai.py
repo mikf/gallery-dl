@@ -61,7 +61,7 @@ class NhentaiGalleryExtractor(GalleryExtractor):
     def images(self, _):
         ufmt = ("https://i.nhentai.net/galleries/" +
                 self.data["media_id"] + "/{}.{}")
-        extdict = {"j": "jpg", "p": "png", "g": "gif"}
+        extdict = {"j": "jpg", "p": "png", "g": "gif", "w": "webp"}
 
         return [
             (ufmt.format(num, extdict.get(img["t"], "jpg")), {

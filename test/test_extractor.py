@@ -168,12 +168,17 @@ class TestExtractorModule(unittest.TestCase):
 
     def test_init(self):
         """Test for exceptions in Extractor.initialize() and .finalize()"""
+        def fail_request(*args, **kwargs):
+            self.fail("called 'request() during initialization")
+
         for cls in extractor.extractors():
             if cls.category == "ytdl":
                 continue
             extr = cls.from_url(cls.example)
             if not extr and cls.basecategory and not cls.instances:
                 continue
+
+            extr.request = fail_request
             extr.initialize()
             extr.finalize()
 

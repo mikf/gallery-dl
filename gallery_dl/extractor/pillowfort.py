@@ -52,6 +52,7 @@ class PillowfortExtractor(Extractor):
             post["date"] = text.parse_datetime(
                 post["created_at"], "%Y-%m-%dT%H:%M:%S.%f%z")
             post["post_id"] = post.pop("id")
+            post["count"] = len(files)
             yield Message.Directory, post
 
             post["num"] = 0

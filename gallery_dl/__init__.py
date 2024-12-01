@@ -63,7 +63,7 @@ def main():
             browser, _, profile = args.cookies_from_browser.partition(":")
             browser, _, keyring = browser.partition("+")
             browser, _, domain = browser.partition("/")
-            if profile.startswith(":"):
+            if profile and profile[0] == ":":
                 container = profile[1:]
                 profile = None
             else:
@@ -107,8 +107,15 @@ def main():
 
         # filter environment
         filterenv = config.get((), "filters-environment", True)
-        if not filterenv:
+        if filterenv is True:
+            pass
+        elif not filterenv:
             util.compile_expression = util.compile_expression_raw
+        elif isinstance(filterenv, str):
+            if filterenv == "raw":
+                util.compile_expression = util.compile_expression_raw
+            elif filterenv.startswith("default"):
+                util.compile_expression = util.compile_expression_defaultdict
 
         # format string separator
         separator = config.get((), "format-separator")
@@ -252,9 +259,13 @@ def main():
                     args.input_files.append(input_file)
 
             if not args.urls and not args.input_files:
-                parser.error(
-                    "The following arguments are required: URL\n"
-                    "Use 'gallery-dl --help' to get a list of all options.")
+                if args.cookies_from_browser or config.interpolate(
+                        ("extractor",), "cookies"):
+                    args.urls.append("noop")
+                else:
+                    parser.error(
+                        "The following arguments are required: URL\nUse "
+                        "'gallery-dl --help' to get a list of all options.")
 
             if args.list_urls:
                 jobtype = job.UrlJob

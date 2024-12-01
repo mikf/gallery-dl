@@ -22,14 +22,14 @@ class GelbooruV02Extractor(booru.BooruExtractor):
     def _init(self):
         self.api_key = self.config("api-key")
         self.user_id = self.config("user-id")
-        self.api_root = self.config_instance("api_root") or self.root
+        self.root_api = self.config_instance("root-api") or self.root
 
         if self.category == "realbooru":
             self.items = self._items_realbooru
             self._tags = self._tags_realbooru
 
     def _api_request(self, params):
-        url = self.api_root + "/index.php?page=dapi&s=post&q=index"
+        url = self.root_api + "/index.php?page=dapi&s=post&q=index"
         return ElementTree.fromstring(self.request(url, params=params).text)
 
     def _pagination(self, params):
@@ -82,21 +82,23 @@ class GelbooruV02Extractor(booru.BooruExtractor):
         params["pid"] = self.page_start * self.per_page
 
         data = {}
-        while True:
-            num_ids = 0
-            page = self.request(url, params=params).text
+        find_ids = re.compile(r"\sid=\"p(\d+)").findall
 
-            for data["id"] in text.extract_iter(page, '" id="p', '"'):
-                num_ids += 1
+        while True:
+            page = self.request(url, params=params).text
+            pids = find_ids(page)
+
+            for data["id"] in pids:
                 for post in self._api_request(data):
                     yield post.attrib
 
-            if num_ids < self.per_page:
+            if len(pids) < self.per_page:
                 return
             params["pid"] += self.per_page
 
     @staticmethod
     def _prepare(post):
+        post["tags"] = post["tags"].strip()
         post["date"] = text.parse_datetime(
             post["created_at"], "%a %b %d %H:%M:%S %z %Y")
 
@@ -114,7 +116,7 @@ class GelbooruV02Extractor(booru.BooruExtractor):
         pattern = re.compile(
             r"tag-type-([^\"' ]+).*?[?;]tags=([^\"'&]+)", re.S)
         for tag_type, tag_name in pattern.findall(tag_container):
-            tags[tag_type].append(text.unquote(tag_name))
+            tags[tag_type].append(text.unescape(text.unquote(tag_name)))
         for key, value in tags.items():
             post["tags_" + key] = " ".join(value)
 
@@ -178,7 +180,7 @@ class GelbooruV02Extractor(booru.BooruExtractor):
         pattern = re.compile(
             r'<a class="(?:tag-type-)?([^"]+).*?;tags=([^"&]+)')
         for tag_type, tag_name in pattern.findall(tag_container):
-            tags[tag_type].append(text.unquote(tag_name))
+            tags[tag_type].append(text.unescape(text.unquote(tag_name)))
         for key, value in tags.items():
             post["tags_" + key] = " ".join(value)
 
@@ -190,8 +192,8 @@ BASE_PATTERN = GelbooruV02Extractor.update({
     },
     "rule34": {
         "root": "https://rule34.xxx",
+        "root-api": "https://api.rule34.xxx",
         "pattern": r"(?:www\.)?rule34\.xxx",
-        "api_root": "https://api.rule34.xxx",
     },
     "safebooru": {
         "root": "https://safebooru.org",

@@ -23,9 +23,48 @@ __tests__ = (
 {
     "#url"     : "https://www.pinterest.com/pin/422564377542934214/",
     "#comment" : "video pin (#1189)",
-    "#category": ("", "pinterest", "pin"),
     "#class"   : pinterest.PinterestPinExtractor,
     "#pattern" : r"https://v\d*\.pinimg\.com/videos/mc/hls/d7/22/ff/d722ff00ab2352981b89974b37909de8.m3u8",
+    "#exception": exception.NotFoundError,
+},
+
+{
+    "#url"     : "https://jp.pinterest.com/pin/858146904010573850/",
+    "#comment" : "story pin with images",
+    "#class"   : pinterest.PinterestPinExtractor,
+    "#urls"    : (
+        "https://i.pinimg.com/originals/0f/b0/8c/0fb08c519067dd263a1fcfecea775450.jpg",
+        "https://i.pinimg.com/originals/2f/27/f3/2f27f3eb781b107ce58bf588c12a12b7.jpg",
+        "https://i.pinimg.com/originals/55/fd/df/55fddf8d26aa0d96071af52ac6a0c25f.jpg",
+    ),
+},
+
+{
+    "#url"     : "https://www.pinterest.com/pin/63824519713049795/",
+    "#comment" : "story pin with video (#6188)",
+    "#class"   : pinterest.PinterestPinExtractor,
+    "#urls"    : "ytdl:https://v1.pinimg.com/videos/iht/hls/7a/b0/cc/7ab0cc56dcbfc1508b8d650af7b0a593.m3u8",
+
+    "extension"     : "mp4",
+    "_ytdl_manifest": "hls",
+},
+
+{
+    "#url"     : "https://www.pinterest.com/pin/606508274845593025/",
+    "#comment" : "story pin with audio (#6188)",
+    "#class"   : pinterest.PinterestPinExtractor,
+    "#range"   : "2",
+    "#urls"    : "https://v1.pinimg.com/audios/mp3/5d/37/74/5d37749bde03855c1292f8869c8d9387.mp3",
+
+    "extension": "mp3",
+},
+
+{
+    "#url"     : "https://jp.pinterest.com/pin/851532242064221228/",
+    "#comment" : "story pin with text",
+    "#class"   : pinterest.PinterestPinExtractor,
+    "#range"   : "2",
+    "#urls"    : "text:Everskies character+outfits i made",
 },
 
 {
@@ -37,10 +76,8 @@ __tests__ = (
 
 {
     "#url"     : "https://www.pinterest.com/g1952849/test-/",
-    "#category": ("", "pinterest", "board"),
     "#class"   : pinterest.PinterestBoardExtractor,
-    "#pattern" : r"https://i\.pinimg\.com/originals/",
-    "#count"   : 2,
+    "#urls"    : "https://i.pinimg.com/originals/d4/f4/7f/d4f47fa2fce4c4c28475af5d94972904.jpg",
 },
 
 {
@@ -103,14 +140,14 @@ __tests__ = (
     "#category": ("", "pinterest", "allpins"),
     "#class"   : pinterest.PinterestAllpinsExtractor,
     "#pattern" : r"https://i\.pinimg\.com/originals/[0-9a-f]{2}/[0-9a-f]{2}/[0-9a-f]{2}/[0-9a-f]{32}\.\w{3}",
-    "#count"   : 7,
+    "#count"   : 9,
 },
 
 {
     "#url"     : "https://www.pinterest.de/digitalmomblog/_created/",
     "#category": ("", "pinterest", "created"),
     "#class"   : pinterest.PinterestCreatedExtractor,
-    "#pattern" : r"ytdl:|https://i\.pinimg\.com/originals/[0-9a-f]{2}/[0-9a-f]{2}/[0-9a-f]{2}/[0-9a-f]{32}\.(jpg|png)",
+    "#pattern" : r"ytdl:|https://i\.pinimg\.com/originals/[0-9a-f]{2}/[0-9a-f]{2}/[0-9a-f]{2}/[0-9a-f]{32}\.(jpg|png|webp)",
     "#range"   : "1-10",
     "#count"   : 10,
 },

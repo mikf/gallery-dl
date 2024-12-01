@@ -49,6 +49,7 @@ CATEGORY_MAP = {
     "e926"           : "e926",
     "e6ai"           : "e6AI",
     "erome"          : "EroMe",
+    "everia"         : "EVERIA.CLUB",
     "e-hentai"       : "E-Hentai",
     "exhentai"       : "ExHentai",
     "fallenangels"   : "Fallen Angels Scans",
@@ -65,6 +66,7 @@ CATEGORY_MAP = {
     "hentaihere"     : "HentaiHere",
     "hentaiimg"      : "Hentai Image",
     "hentainexus"    : "HentaiNexus",
+    "hiperdex"       : "Hipertoon",
     "hitomi"         : "Hitomi.la",
     "horne"          : "horne",
     "idolcomplex"    : "Idol Complex",
@@ -82,6 +84,7 @@ CATEGORY_MAP = {
     "jpgfish"        : "JPG Fish",
     "kabeuchi"       : "かべうち",
     "kemonoparty"    : "Kemono",
+    "koharu"         : "SchaleNetwork",
     "livedoor"       : "livedoor Blog",
     "ohpolly"        : "Oh Polly",
     "omgmiamiswimwear": "Omg Miami Swimwear",
@@ -119,6 +122,8 @@ CATEGORY_MAP = {
     "rule34"         : "Rule 34",
     "rule34hentai"   : "Rule34Hentai",
     "rule34us"       : "Rule 34",
+    "rule34vault"    : "R34 Vault",
+    "rule34xyz"      : "Rule 34 XYZ",
     "sankaku"        : "Sankaku Channel",
     "sankakucomplex" : "Sankaku Complex",
     "seiga"          : "Niconico Seiga",
@@ -191,19 +196,29 @@ SUBCATEGORY_MAP = {
         "artwork": "Artwork Listings",
         "collections": "",
     },
+    "bilibili": {
+        "user-articles": "User Articles",
+    },
     "bluesky": {
         "posts": "",
     },
+    "boosty": {
+        "feed": "Subscriptions Feed",
+    },
     "civitai": {
-        "tag-models": "Tag Searches (Models)",
-        "tag-images": "Tag Searches (Images)",
+        "models": "Model Listings",
+        "images": "Image Listings",
         "user-models": "User Models",
         "user-images": "User Images",
+        "user-posts" : "User Posts",
     },
     "coomerparty": {
         "discord"       : "",
         "discord-server": "",
         "posts"         : "",
+    },
+    "Danbooru": {
+        "artist-search": "Artist Searches",
     },
     "desktopography": {
         "site": "",
@@ -270,6 +285,7 @@ SUBCATEGORY_MAP = {
         "novel-user": "",
         "pixivision": "pixivision",
         "sketch": "Sketch",
+        "unlisted": "Unlisted Works",
         "work": "individual Images",
     },
     "poringa": {
@@ -288,6 +304,9 @@ SUBCATEGORY_MAP = {
     },
     "sankaku": {
         "books": "Book Searches",
+    },
+    "scrolller": {
+        "following": "Followed Subreddits",
     },
     "sexcom": {
         "pins": "User Pins",
@@ -378,6 +397,7 @@ AUTH_MAP = {
     "baraag"         : _OAUTH,
     "bluesky"        : "Supported",
     "booruvar"       : "Supported",
+    "boosty"         : _COOKIES,
     "coomerparty"    : "Supported",
     "danbooru"       : "Supported",
     "derpibooru"     : _APIKEY_DB,
@@ -387,6 +407,7 @@ AUTH_MAP = {
     "e926"           : "Supported",
     "e-hentai"       : "Supported",
     "exhentai"       : "Supported",
+    "facebook"       : _COOKIES,
     "fanbox"         : _COOKIES,
     "fantia"         : _COOKIES,
     "flickr"         : _OAUTH,
@@ -411,6 +432,7 @@ AUTH_MAP = {
     "ponybooru"      : "API Key",
     "reddit"         : _OAUTH,
     "sankaku"        : "Supported",
+    "scrolller"      : "Supported",
     "seiga"          : "Supported",
     "smugmug"        : _OAUTH,
     "subscribestar"  : "Supported",
@@ -431,6 +453,7 @@ IGNORE_LIST = (
     "test",
     "ytdl",
     "generic",
+    "noop",
 )
 
 

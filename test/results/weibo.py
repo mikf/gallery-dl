@@ -227,13 +227,14 @@ __tests__ = (
 },
 
 {
-    "#url"     : "https://weibo.com/5643044717/KkuDZ4jAA",
-    "#comment" : "type == livephoto (#2146)",
+    "#url"     : "https://weibo.com/3194672795/OuxSwgUrC",
+    "#comment" : "type == livephoto (#2146, #6471)",
     "#category": ("", "weibo", "status"),
     "#class"   : weibo.WeiboStatusExtractor,
-    "#pattern" : r"https://video\.weibo\.com/media/play\?livephoto=https%3A%2F%2Fus\.sinaimg\.cn%2F\w+\.mov",
-    "#range"   : "2,4,6",
+    "#pattern" : r"https://livephoto\.us\.sinaimg\.cn/\w+\.mov\?Expires=\d+&ssig=[^&#]+&KID=unistore,video",
+    "#range"   : "2,4",
 
+    "filename" : {"000yfKhRjx08hBAXxdZ60f0f0100tBPr0k01", "000GEYrCjx08hBAXUFo40f0f0100vS5G0k01"},
     "extension": "mov",
 },
 

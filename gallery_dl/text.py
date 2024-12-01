@@ -238,12 +238,49 @@ def parse_float(value, default=0.0):
 
 
 def parse_query(qs):
-    """Parse a query string into key-value pairs"""
+    """Parse a query string into name-value pairs
+
+    Ignore values whose name has been seen before
+    """
+    if not qs:
+        return {}
+
     result = {}
     try:
-        for key, value in urllib.parse.parse_qsl(qs):
-            if key not in result:
-                result[key] = value
+        for name_value in qs.split("&"):
+            name, eq, value = name_value.partition("=")
+            if eq:
+                name = unquote(name.replace("+", " "))
+                if name not in result:
+                    result[name] = unquote(value.replace("+", " "))
+    except Exception:
+        pass
+    return result
+
+
+def parse_query_list(qs):
+    """Parse a query string into name-value pairs
+
+    Combine values of duplicate names into lists
+    """
+    if not qs:
+        return {}
+
+    result = {}
+    try:
+        for name_value in qs.split("&"):
+            name, eq, value = name_value.partition("=")
+            if eq:
+                name = unquote(name.replace("+", " "))
+                value = unquote(value.replace("+", " "))
+                if name in result:
+                    rvalue = result[name]
+                    if isinstance(rvalue, list):
+                        rvalue.append(value)
+                    else:
+                        result[name] = [rvalue, value]
+                else:
+                    result[name] = value
     except Exception:
         pass
     return result
