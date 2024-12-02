@@ -12,6 +12,7 @@ __tests__ = (
     "#url"     : "https://e621.net/posts?tags=anry",
     "#category": ("E621", "e621", "tag"),
     "#class"   : e621.E621TagExtractor,
+    "#options"     : {"metadata": True},
     "#sha1_url"    : "8021e5ea28d47c474c1ffc9bd44863c4d45700ba",
     "#sha1_content": "501d1e5d922da20ee8ff9806f5ed3ce3a684fd58",
 },
