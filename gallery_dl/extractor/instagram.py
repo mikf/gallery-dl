@@ -220,7 +220,7 @@ class InstagramExtractor(Extractor):
         data["fullname"] = owner.get("full_name")
 
         data["_files"] = files = []
-        for num, item in enumerate(items, 1):
+        for num, item in enumerate(items or (), 1):
 
             try:
                 image = item["image_versions2"]["candidates"][0]
