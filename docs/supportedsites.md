@@ -326,21 +326,9 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
-    <td>Hentai Cosplay</td>
-    <td>https://hentai-cosplay-xxx.com/</td>
-    <td>Galleries</td>
-    <td></td>
-</tr>
-<tr>
     <td>Hentai Foundry</td>
     <td>https://www.hentai-foundry.com/</td>
     <td>Favorites, individual Images, Pictures, Popular Images, Recent Images, Scraps, Stories, Tag Searches, User Profiles</td>
-    <td></td>
-</tr>
-<tr>
-    <td>Hentai Image</td>
-    <td>https://hentai-img.com/</td>
-    <td>Galleries</td>
     <td></td>
 </tr>
 <tr>
@@ -749,12 +737,6 @@ Consider all listed sites to potentially be NSFW.
     <td>Poringa</td>
     <td>http://www.poringa.net/</td>
     <td>Posts Images, Search Results, User Profiles</td>
-    <td></td>
-</tr>
-<tr>
-    <td>Porn Image</td>
-    <td>https://porn-images-xxx.com/</td>
-    <td>Galleries</td>
     <td></td>
 </tr>
 <tr>
@@ -1265,6 +1247,28 @@ Consider all listed sites to potentially be NSFW.
     <td>Xbooru</td>
     <td>https://xbooru.com/</td>
     <td>Favorites, Pools, Posts, Tag Searches</td>
+    <td></td>
+</tr>
+
+<tr>
+    <td colspan="4"><strong>Hentai Cosplay Instances</strong></td>
+</tr>
+<tr>
+    <td>Hentai Cosplay</td>
+    <td>https://hentai-cosplay-xxx.com/</td>
+    <td>Galleries</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Hentai Image</td>
+    <td>https://hentai-img-xxx.com/</td>
+    <td>Galleries</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Porn Image</td>
+    <td>https://porn-image.com/</td>
+    <td>Galleries</td>
     <td></td>
 </tr>
 

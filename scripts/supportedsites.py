@@ -59,7 +59,7 @@ CATEGORY_MAP = {
     "hatenablog"     : "HatenaBlog",
     "hbrowse"        : "HBrowse",
     "hentai2read"    : "Hentai2Read",
-    "hentaicosplays" : "Hentai Cosplay",
+    "hentaicosplay"  : "Hentai Cosplay",
     "hentaifoundry"  : "Hentai Foundry",
     "hentaifox"      : "HentaiFox",
     "hentaihand"     : "HentaiHand",
@@ -112,7 +112,7 @@ CATEGORY_MAP = {
     "photovogue"     : "PhotoVogue",
     "pidgiwiki"      : "PidgiWiki",
     "pixeldrain"     : "pixeldrain",
-    "pornimagesxxx"  : "Porn Image",
+    "pornimage"      : "Porn Image",
     "pornpics"       : "PornPics.com",
     "pornreactor"    : "PornReactor",
     "readcomiconline": "Read Comic Online",
@@ -366,6 +366,7 @@ BASE_MAP = {
     "foolslide"   : "FoOlSlide Instances",
     "gelbooru_v01": "Gelbooru Beta 0.1.11",
     "gelbooru_v02": "Gelbooru Beta 0.2",
+    "hentaicosplays": "Hentai Cosplay Instances",
     "jschan"      : "jschan Imageboards",
     "lolisafe"    : "lolisafe and chibisafe",
     "lynxchan"    : "LynxChan Imageboards",
@@ -560,13 +561,6 @@ def build_extractor_list():
     # add coomer.party
     default["coomerparty"] = default["kemonoparty"]
     domains["coomerparty"] = domains["kemonoparty"].replace("kemono", "coomer")
-
-    # add hentai-cosplays sister sites (hentai-img, porn-images-xxx)
-    default["hentaiimg"] = default["hentaicosplays"]
-    domains["hentaiimg"] = "https://hentai-img.com/"
-
-    default["pornimagesxxx"] = default["hentaicosplays"]
-    domains["pornimagesxxx"] = "https://porn-images-xxx.com/"
 
     # add manga4life.com
     default["mangalife"] = default["mangasee"]
