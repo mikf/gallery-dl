@@ -387,8 +387,8 @@ class Extractor():
                 useragent = self.useragent
             elif useragent == "browser":
                 useragent = _browser_useragent()
-            elif useragent is config.get(("extractor",), "user-agent") and \
-                    useragent == Extractor.useragent:
+            elif self.useragent is not Extractor.useragent and \
+                    useragent is config.get(("extractor",), "user-agent"):
                 useragent = self.useragent
             headers["User-Agent"] = useragent
             headers["Accept"] = "*/*"
