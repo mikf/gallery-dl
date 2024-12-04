@@ -3442,10 +3442,38 @@ Type
 Default
     ``["images", "image_large", "attachments", "postfile", "content"]``
 Description
-    Determines the type and order of files to be downloaded.
+    Determines types and order of files to download.
 
-    Available types are
-    ``postfile``, ``images``, ``image_large``, ``attachments``, and ``content``.
+    Available types:
+
+    * ``postfile``
+    * ``images``
+    * ``image_large``
+    * ``attachments``
+    * ``content``
+
+
+extractor.patreon.format-images
+-------------------------------
+Type
+    ``string``
+Default
+    ``"download_url"``
+Description
+    Selects the format of ``images`` `files <extractor.patreon.files_>`__.
+
+    Possible formats:
+
+    * ``original``
+    * ``default``
+    * ``default_small``
+    * ``default_blurred``
+    * ``default_blurred_small``
+    * ``thumbnail``
+    * ``thumbnail_large``
+    * ``thumbnail_small``
+    * ``url``
+    * ``download_url``
 
 
 extractor.pillowfort.external
