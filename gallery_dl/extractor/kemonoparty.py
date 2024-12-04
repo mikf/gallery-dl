@@ -552,7 +552,8 @@ class KemonoAPI():
         return response.json()
 
     def _pagination(self, endpoint, params, batch=50, key=False):
-        params["o"] = text.parse_int(params.get("o")) % 50
+        offset = text.parse_int(params.get("o"))
+        params["o"] = offset - offset % batch
 
         while True:
             data = self._call(endpoint, params)
