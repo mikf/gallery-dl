@@ -207,8 +207,8 @@ class InstagramExtractor(Extractor):
                     for user in coauthors
                 ]
 
-            if "carousel_media" in post:
-                items = post["carousel_media"]
+            items = post.get("carousel_media")
+            if items:
                 data["sidecar_media_id"] = data["post_id"]
                 data["sidecar_shortcode"] = data["post_shortcode"]
             else:
@@ -220,7 +220,7 @@ class InstagramExtractor(Extractor):
         data["fullname"] = owner.get("full_name")
 
         data["_files"] = files = []
-        for num, item in enumerate(items or (), 1):
+        for num, item in enumerate(items, 1):
 
             try:
                 image = item["image_versions2"]["candidates"][0]
