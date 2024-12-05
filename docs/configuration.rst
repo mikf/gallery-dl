@@ -5190,6 +5190,22 @@ Description
     `youtube-dl's docstrings <https://github.com/ytdl-org/youtube-dl/blob/0153b387e57e0bb8e580f1869f85596d2767fb0d/youtube_dl/YoutubeDL.py#L157>`__
 
 
+extractor.zerochan.extensions
+-----------------------------
+Type
+    * ``string``
+    * ``list`` of ``strings``
+Default
+    ``["jpg", "png", "webp", "gif"]``
+Example
+    * ``"gif"``
+    * ``["webp", "gif", "jpg"}``
+Description
+    List of filename extensions to try when dynamically building download URLs
+    (`"pagination": "api" <extractor.zerochan.pagination_>`__ +
+    `"metadata": false <extractor.zerochan.metadata_>`__)
+
+
 extractor.zerochan.metadata
 ---------------------------
 Type

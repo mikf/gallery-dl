@@ -145,6 +145,14 @@ class ZerochanTagExtractor(ZerochanExtractor):
             self.posts = self.posts_api
             self.session.headers["User-Agent"] = util.USERAGENT
 
+        exts = self.config("extensions")
+        if exts:
+            if isinstance(exts, str):
+                exts = exts.split(",")
+            self.exts = exts
+        else:
+            self.exts = ("jpg", "png", "webp", "gif")
+
     def metadata(self):
         return {"search_tags": text.unquote(
             self.search_tag.replace("+", " "))}
@@ -194,8 +202,6 @@ class ZerochanTagExtractor(ZerochanExtractor):
             "p"   : self.page_start,
         }
 
-        static = "https://static.zerochan.net/.full."
-
         while True:
             response = self.request(url, params=params, allow_redirects=False)
 
@@ -221,14 +227,19 @@ class ZerochanTagExtractor(ZerochanExtractor):
                     yield post
             else:
                 for post in posts:
-                    base = static + str(post["id"])
-                    post["file_url"] = base + ".jpg"
-                    post["_fallback"] = (base + ".png",)
+                    urls = self._urls(post)
+                    post["file_url"] = next(urls)
+                    post["_fallback"] = urls
                     yield post
 
             if not data.get("next"):
                 return
             params["p"] += 1
+
+    def _urls(self, post, static="https://static.zerochan.net/.full."):
+        base = static + str(post["id"]) + "."
+        for ext in self.exts:
+            yield base + ext
 
 
 class ZerochanImageExtractor(ZerochanExtractor):
