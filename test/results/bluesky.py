@@ -43,6 +43,11 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://bsky.app/profile/bsky.app/info",
+    "#class"   : bluesky.BlueskyInfoExtractor,
+},
+
+{
     "#url"     : "https://bsky.app/profile/bsky.app/avatar",
     "#category": ("", "bluesky", "avatar"),
     "#class"   : bluesky.BlueskyAvatarExtractor,
