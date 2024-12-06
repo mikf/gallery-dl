@@ -609,7 +609,7 @@ extractor.*.proxy-env
 Type
     ``bool``
 Default
-    ``false``
+    ``true``
 Description
     Collect proxy configuration information from environment variables
     (``HTTP_PROXY``, ``HTTPS_PROXY``, ``NO_PROXY``)
