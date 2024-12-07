@@ -40,6 +40,7 @@ modules = [
     "cien",
     "civitai",
     "cohost",
+    "comicfury",
     "comicvine",
     "cyberdrop",
     "danbooru",
