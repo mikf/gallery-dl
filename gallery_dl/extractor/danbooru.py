@@ -224,7 +224,7 @@ class DanbooruTagExtractor(DanbooruExtractor):
                 else:
                     prefix = None
             elif tag.startswith(
-                    ("id:", "md5", "ordfav:", "ordfavgroup:", "ordpool:")):
+                    ("id:", "md5:", "ordfav:", "ordfavgroup:", "ordpool:")):
                 prefix = None
                 break
 
