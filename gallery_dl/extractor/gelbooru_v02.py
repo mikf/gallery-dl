@@ -24,10 +24,6 @@ class GelbooruV02Extractor(booru.BooruExtractor):
         self.user_id = self.config("user-id")
         self.root_api = self.config_instance("root-api") or self.root
 
-        if self.category == "realbooru":
-            self.items = self._items_realbooru
-            self._tags = self._tags_realbooru
-
     def _api_request(self, params):
         url = self.root_api + "/index.php?page=dapi&s=post&q=index"
         return ElementTree.fromstring(self.request(url, params=params).text)
@@ -137,59 +133,8 @@ class GelbooruV02Extractor(booru.BooruExtractor):
                 "body"  : text.unescape(text.remove_html(extr(">", "</div>"))),
             })
 
-    def _file_url_realbooru(self, post):
-        url = post["file_url"]
-        md5 = post["md5"]
-        if md5 not in post["preview_url"] or url.count("/") == 5:
-            url = "{}/images/{}/{}/{}.{}".format(
-                self.root, md5[0:2], md5[2:4], md5, url.rpartition(".")[2])
-        return url
-
-    def _items_realbooru(self):
-        from .common import Message
-        data = self.metadata()
-
-        for post in self.posts():
-            try:
-                html = self._html(post)
-                fallback = post["file_url"]
-                url = post["file_url"] = text.rextract(
-                    html, 'href="', '"', html.index(">Original<"))[0]
-            except Exception:
-                self.log.debug("Unable to fetch download URL for post %s "
-                               "(md5: %s)", post.get("id"), post.get("md5"))
-                continue
-
-            text.nameext_from_url(url, post)
-            post.update(data)
-            self._prepare(post)
-            self._tags(post, html)
-
-            path = url.rpartition("/")[0]
-            post["_fallback"] = (
-                "{}/{}.{}".format(path, post["md5"], post["extension"]),
-                fallback,
-            )
-
-            yield Message.Directory, post
-            yield Message.Url, url, post
-
-    def _tags_realbooru(self, post, page):
-        tag_container = text.extr(page, 'id="tagLink"', '</div>')
-        tags = collections.defaultdict(list)
-        pattern = re.compile(
-            r'<a class="(?:tag-type-)?([^"]+).*?;tags=([^"&]+)')
-        for tag_type, tag_name in pattern.findall(tag_container):
-            tags[tag_type].append(text.unescape(text.unquote(tag_name)))
-        for key, value in tags.items():
-            post["tags_" + key] = " ".join(value)
-
 
 BASE_PATTERN = GelbooruV02Extractor.update({
-    "realbooru": {
-        "root": "https://realbooru.com",
-        "pattern": r"realbooru\.com",
-    },
     "rule34": {
         "root": "https://rule34.xxx",
         "root-api": "https://api.rule34.xxx",

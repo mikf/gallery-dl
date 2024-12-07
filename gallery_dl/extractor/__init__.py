@@ -140,6 +140,7 @@ modules = [
     "postmill",
     "reactor",
     "readcomiconline",
+    "realbooru",
     "reddit",
     "redgifs",
     "rule34us",
