@@ -770,6 +770,12 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
+    <td>Realbooru</td>
+    <td>https://realbooru.com/</td>
+    <td>Favorites, Pools, Posts, Tag Searches</td>
+    <td></td>
+</tr>
+<tr>
     <td>Reddit</td>
     <td>https://www.reddit.com/</td>
     <td>Home Feed, individual Images, Redirects, Submissions, Subreddits, User Profiles</td>
@@ -1212,12 +1218,6 @@ Consider all listed sites to potentially be NSFW.
 
 <tr>
     <td colspan="4"><strong>Gelbooru Beta 0.2</strong></td>
-</tr>
-<tr>
-    <td>Realbooru</td>
-    <td>https://realbooru.com/</td>
-    <td>Favorites, Pools, Posts, Tag Searches</td>
-    <td></td>
 </tr>
 <tr>
     <td>Rule 34</td>
