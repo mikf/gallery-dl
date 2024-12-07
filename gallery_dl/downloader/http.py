@@ -12,7 +12,7 @@ import time
 import mimetypes
 from requests.exceptions import RequestException, ConnectionError, Timeout
 from .common import DownloaderBase
-from .. import text, util
+from .. import text, util, ffprobe
 from ssl import SSLError
 
 
@@ -32,6 +32,8 @@ class HttpDownloader(DownloaderBase):
         self.headers = self.config("headers")
         self.minsize = self.config("filesize-min")
         self.maxsize = self.config("filesize-max")
+        self.minlength = self.config("videolength-min")
+        self.maxlength = self.config("videolength-max")
         self.retries = self.config("retries", extractor._retries)
         self.retry_codes = self.config("retry-codes", extractor._retry_codes)
         self.timeout = self.config("timeout", extractor._timeout)
@@ -59,6 +61,20 @@ class HttpDownloader(DownloaderBase):
                 self.log.warning(
                     "Invalid maximum file size (%r)", self.maxsize)
             self.maxsize = maxsize
+        if self.minlength:
+            minlength = text.parse_duration(self.minlength)
+            if not minlength:
+                self.log.warning(
+                    "Invalid maximum videolength duration (%r)",
+                    self.minlength)
+            self.minlength = minlength
+        if self.maxlength:
+            maxlength = text.parse_duration(self.maxlength)
+            if not maxlength:
+                self.log.warning(
+                    "Invalid maximum videolength duration (%r)",
+                    self.maxlength)
+            self.maxlength = maxlength
         if isinstance(self.chunk_size, str):
             chunk_size = text.parse_bytes(self.chunk_size)
             if not chunk_size:
@@ -218,6 +234,28 @@ class HttpDownloader(DownloaderBase):
             if metadata:
                 kwdict[metadata] = util.extract_headers(response)
                 build_path = True
+
+            # check video length using ffprobe request
+            if (self.minlength or self.maxlength):
+                length = ffprobe.get_video_length(self, url)
+
+                if length and self.minlength and length < self.minlength:
+                    self.release_conn(response)
+                    self.log.warning(
+                        "Video length is shorter than allowed minimum "
+                        "(%s < %s)",
+                        length, self.minlength)
+                    pathfmt.temppath = ""
+                    return True
+
+                if length and self.maxlength and length > self.maxlength:
+                    self.release_conn(response)
+                    self.log.warning(
+                        "Video length is longer than allowed maximum "
+                        "(%s > %s)",
+                        length, self.maxlength)
+                    pathfmt.temppath = ""
+                    return True
 
             # build and check file path
             if build_path:
