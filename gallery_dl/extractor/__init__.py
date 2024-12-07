@@ -106,7 +106,7 @@ modules = [
     "mangakakalot",
     "manganelo",
     "mangapark",
-    "mangaread",
+    "wpmadara",
     "mangasee",
     "mangoxo",
     "misskey",
