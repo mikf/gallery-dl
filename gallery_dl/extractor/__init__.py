@@ -98,6 +98,7 @@ modules = [
     "lexica",
     "lightroom",
     "livedoor",
+    "lofter",
     "luscious",
     "lynxchan",
     "mangadex",
