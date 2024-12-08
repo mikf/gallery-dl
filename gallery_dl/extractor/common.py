@@ -212,6 +212,11 @@ class Extractor():
                     if b'name="captcha-bypass"' in content:
                         self.log.warning("Cloudflare CAPTCHA")
                         break
+                elif server and server.startswith("ddos-guard") and \
+                        code == 403:
+                    if b"/ddos-guard/js-challenge/" in response.content:
+                        self.log.warning("DDoS-Guard challenge")
+                        break
 
                 if code == 429 and self._handle_429(response):
                     continue
