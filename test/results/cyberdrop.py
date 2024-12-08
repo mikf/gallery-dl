@@ -58,4 +58,30 @@ __tests__ = (
     "url"         : str,
 },
 
+{
+    "#url"     : "https://cyberdrop.me/f/lHYBt9VAluZf6",
+    "#category": ("lolisafe", "cyberdrop", "media"),
+    "#class"   : cyberdrop.CyberdropMediaExtractor,
+    "#pattern"     : r"https://k1-cd\.cdn\.gigachad-cdn\.ru/api/file/d/lHYBt9VAluZf6\?token=ey.+",
+    "#count"       : 1,
+    "#sha1_content": "a546bdbc07d07f8e2c53e49e99736d5206f4da23",
+
+    "album_id"     : "",
+    "album_name"   : "",
+    "album_size"   : -1,
+    "auth_url"     : "https://api.cyberdrop.me/api/file/auth/lHYBt9VAluZf6",
+    "count"        : 1,
+    "description"  : "",
+    "extension"    : "gif",
+    "filename"     : "danbooru_133128_049ebb917bb57589bca19155271a4200-rrhV0I30",
+    "id"           : "rrhV0I30",
+    "name"         : "danbooru_133128_049ebb917bb57589bca19155271a4200",
+    "num"          : 1,
+    "size"         : 143992,
+    "slug"         : "lHYBt9VAluZf6",
+    "thumbnail_url": "https://api.cyberdrop.me/api/proxy/thumb/lHYBt9VAluZf6",
+    "type"         : "image/gif",
+    "url"          : str,
+},
+
 )
