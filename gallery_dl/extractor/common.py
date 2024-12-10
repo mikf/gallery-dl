@@ -172,8 +172,16 @@ class Extractor():
         while True:
             try:
                 response = session.request(method, url, **kwargs)
-            except (requests.exceptions.ConnectionError,
-                    requests.exceptions.Timeout,
+            except requests.exceptions.ConnectionError as exc:
+                code = 0
+                try:
+                    reason = exc.args[0].reason
+                    cls = reason.__class__.__name__
+                    pre, _, err = str(reason.args[-1]).partition(":")
+                    msg = " {}: {}".format(cls, (err or pre).lstrip())
+                except Exception:
+                    msg = exc
+            except (requests.exceptions.Timeout,
                     requests.exceptions.ChunkedEncodingError,
                     requests.exceptions.ContentDecodingError) as exc:
                 msg = exc
