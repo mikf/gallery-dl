@@ -102,15 +102,15 @@ class ItakuAPI():
         required_tags = []
         negative_tags = []
         optional_tags = []
-        tags = []
-        tags_param = params.get("tags")
-        if isinstance(tags_param, str):
-            tags = [tags_param]
-        elif isinstance(tags_param, list):
-            tags = tags_param
+
+        tags = params.pop("tags", None)
+        if not tags:
+            tags = ()
+        elif isinstance(tags, str):
+            tags = (tags,)
 
         for tag in tags:
-            if len(tag) == 0:
+            if not tag:
                 pass
             elif tag[0] == "-":
                 negative_tags.append(tag[1:])
@@ -119,22 +119,18 @@ class ItakuAPI():
             else:
                 required_tags.append(tag)
 
-        # Every param is simply passed through to the api, except "tags"
-        if "tags" in params:
-            del params["tags"]
-
         api_params = {
             "required_tags": required_tags,
             "negative_tags": negative_tags,
             "optional_tags": optional_tags,
-            "page": 1,
-            "page_size": 30,
+            "date_range": "",
             "maturity_rating": ("SFW", "Questionable", "NSFW"),
-            "ordering": "-date_added",
+            "ordering"  : "-date_added",
+            "page"      : "1",
+            "page_size" : "30",
             "visibility": ("PUBLIC", "PROFILE_ONLY"),
-            **params
         }
-
+        api_params.update(params)
         return self._pagination(endpoint, api_params, self.image)
 
     def galleries_images(self, username, section=None):
