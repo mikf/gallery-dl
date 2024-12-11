@@ -83,7 +83,8 @@ __tests__ = (
     "#comment" : "simple search",
     "#category": ("", "itaku", "search"),
     "#class"   : itaku.ItakuSearchExtractor,
-    "#count"   : "> 1",
+    "#range"   : "1-10",
+    "#count"   : 10,
 },
 
 {
@@ -91,7 +92,7 @@ __tests__ = (
     "#comment" : "search for videos",
     "#category": ("", "itaku", "search"),
     "#class"   : itaku.ItakuSearchExtractor,
-    "#count"   : 30,
+    "#count"   : range(5, 50),
 },
 
 {
@@ -99,6 +100,6 @@ __tests__ = (
     "#comment" : "search with postive, negative, and optional tags",
     "#category": ("", "itaku", "search"),
     "#class"   : itaku.ItakuSearchExtractor,
-    "#count"   : 0
+    "#count"   : 0,
 },
 )
