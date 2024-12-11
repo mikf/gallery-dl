@@ -716,6 +716,11 @@ Consider all listed sites to potentially be NSFW.
     <td><a href="https://github.com/mikf/gallery-dl#cookies">Cookies</a></td>
 </tr>
 <tr>
+    <td>FanCaps.net</td>
+    <td>https://fancaps.net/</td>
+    <td>Movie, TV, Anime Images, Screencaps, Screenshots, Wallpapers</td>
+</tr>
+<tr>
     <td>Pixnet</td>
     <td>https://www.pixnet.net/</td>
     <td>Folders, individual Images, Sets, User Profiles</td>
