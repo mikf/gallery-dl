@@ -536,6 +536,12 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
+    <td>LOFTER</td>
+    <td>https://www.lofter.com/</td>
+    <td>Blog Posts, Posts</td>
+    <td></td>
+</tr>
+<tr>
     <td>Luscious</td>
     <td>https://members.luscious.net/</td>
     <td>Albums, Search Results</td>
