@@ -86,6 +86,7 @@ CATEGORY_MAP = {
     "kemonoparty"    : "Kemono",
     "koharu"         : "SchaleNetwork",
     "livedoor"       : "livedoor Blog",
+    "lofter"         : "LOFTER",
     "ohpolly"        : "Oh Polly",
     "omgmiamiswimwear": "Omg Miami Swimwear",
     "mangadex"       : "MangaDex",
@@ -264,6 +265,9 @@ SUBCATEGORY_MAP = {
     },
     "lensdump": {
         "albums": "",
+    },
+    "lofter": {
+        "blog-posts": "Blog Posts",
     },
     "mangadex": {
         "feed" : "Followed Feed",

@@ -27,9 +27,8 @@ class LofterExtractor(Extractor):
                 post = post["post"]
 
             post["blog_name"] = post["blogInfo"]["blogName"]
-
+            post["date"] = text.parse_timestamp(post["publishTime"] // 1000)
             post_type = post["type"]
-            image_urls = []
 
             # Article
             if post_type == 1:
@@ -56,6 +55,7 @@ class LofterExtractor(Extractor):
                 image_urls = [x.partition("?")[0] for x in image_urls]
 
             else:
+                image_urls = ()
                 self.log.warning(
                     "%s: Unsupported post type '%s'.",
                     post["id"], post_type)
@@ -73,7 +73,7 @@ class LofterPostExtractor(LofterExtractor):
     """Extractor for a lofter post"""
     subcategory = "post"
     pattern = r"(?:https?://)?[\w-]+\.lofter\.com/post/([0-9a-f]+)_([0-9a-f]+)"
-    example = "https://blog_name.lofter.com/post/12345678_90abcdef"
+    example = "https://BLOG.lofter.com/post/12345678_90abcdef"
 
     def posts(self):
         blog_id, post_id = self.groups
@@ -89,21 +89,39 @@ class LofterBlogPostsExtractor(LofterExtractor):
                r"www\.lofter\.com/front/blog/home-page/([\w-]+)|"
                # https://<blog_name>.lofter.com/
                r"([\w-]+)\.lofter\.com"
-               r")")
-    example = "https://blog_name.lofter.com/"
+               r")/?(?:$|\?|#)")
+    example = "https://BLOG.lofter.com/"
 
     def posts(self):
         blog_name = self.groups[0] or self.groups[1]
-        posts = self.api.blog_posts(blog_name)
-        return posts
+        return self.api.blog_posts(blog_name)
 
 
 class LofterAPI():
+
     def __init__(self, extractor):
         self.extractor = extractor
 
+    def blog_posts(self, blog_name):
+        endpoint = "/v2.0/blogHomePage.api"
+        params = {
+            "method": "getPostLists",
+            "offset": 0,
+            "limit": 200,
+            "blogdomain": blog_name + ".lofter.com",
+        }
+        return self._pagination(endpoint, params)
+
+    def post(self, blog_id, post_id):
+        endpoint = "/oldapi/post/detail.api"
+        params = {
+            "targetblogid": blog_id,
+            "postid": post_id,
+        }
+        return self._call(endpoint, params)["posts"][0]
+
     def _call(self, endpoint, data):
-        url = "https://api.lofter.com{}".format(endpoint)
+        url = "https://api.lofter.com" + endpoint
         params = {
             'product': 'lofter-android-7.9.10'
         }
@@ -115,36 +133,15 @@ class LofterAPI():
             self.extractor.log.debug("Server response: %s", info)
             raise exception.StopExtraction("API request failed")
 
-        return info
+        return info["response"]
 
-    def blog_posts(self, blog_name):
-        endpoint = "/v2.0/blogHomePage.api"
-        params = {
-            "method": "getPostLists",
-            "offset": 0,
-            "limit": 200,
-            "blogdomain": "{}.lofter.com".format(blog_name),
-        }
-
+    def _pagination(self, endpoint, params):
         while True:
             data = self._call(endpoint, params)
-            posts = data["response"]["posts"]
+            posts = data["posts"]
 
-            for post in posts:
-                yield post
+            yield from posts
 
-            if params["offset"] + len(posts) < data["response"]["offset"]:
+            if params["offset"] + len(posts) < data["offset"]:
                 break
-
-            params["offset"] = data["response"]["offset"]
-
-    def post(self, blog_id, post_id):
-        endpoint = "/oldapi/post/detail.api"
-        params = {
-            "targetblogid": blog_id,
-            "postid": post_id,
-        }
-        data = self._call(endpoint, params)
-        posts = data["response"]["posts"]
-        post = posts[0]
-        return post
+            params["offset"] = data["offset"]
