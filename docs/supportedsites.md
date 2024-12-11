@@ -1082,6 +1082,12 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
+    <td>Yiff verse</td>
+    <td>https://yiffverse.com/</td>
+    <td>Playlists, Posts, Tag Searches</td>
+    <td></td>
+</tr>
+<tr>
     <td>Zerochan</td>
     <td>https://www.zerochan.net/</td>
     <td>individual Images, Tag Searches</td>
