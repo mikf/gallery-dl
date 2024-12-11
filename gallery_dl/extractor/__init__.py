@@ -195,6 +195,7 @@ modules = [
     "wikimedia",
     "xhamster",
     "xvideos",
+    "yiffverse",
     "zerochan",
     "zzup",
     "booru",
