@@ -40,7 +40,8 @@ class FacebookExtractor(Extractor):
     @staticmethod
     def decode_all(txt):
         return text.unescape(
-            txt.encode("utf-8").decode("unicode_escape")
+            txt.encode().decode("unicode_escape")
+            .encode("utf_16", "surrogatepass").decode("utf_16")
         ).replace("\\/", "/")
 
     @staticmethod
