@@ -134,7 +134,7 @@ __tests__ = (
         "DRAGON BALL",
     ],
     "size"     : 136192,
-    "source": "https://x.com/Raydash30/status/1766012730769862774",
+    "source"   : "https://x.com/Raydash30/status/1766012730769862774",
     "tags"     : [
         "Mangaka:Raydash",
         "Series:DRAGON BALL",
@@ -175,6 +175,26 @@ __tests__ = (
     ],
     "uploader" : "menotbug",
     "width"    : 750,
+},
+
+{
+    "#url"     : "https://www.zerochan.net/4233756",
+    "#class"   : zerochan.ZerochanImageExtractor,
+    "#auth"    : False,
+    "#urls"    : "https://static.zerochan.net/DRAGON.BALL.full.4233756.jpg",
+
+    "source"   : "https://x.com/Raydash30/status/1766012730769862774",
+    "tags"     : [
+        "Mangaka:Raydash",
+        "Series:DRAGON BALL",
+        "Series:DRAGON BALL Z",
+        "Character:Piccolo",
+        "Character:Son Gohan",
+        "Theme:Green Skin",
+        "Source:Fanart",
+        "Source:Fanart from X (Twitter)",
+        "Source:X (Twitter)",
+    ],
 },
 
 {
