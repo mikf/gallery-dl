@@ -114,6 +114,15 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.facebook.com/photo.php?fbid=1156625586261770",
+    "#comment" : "surrogate pair in 'caption' data (#6599)",
+    "#category": ("", "facebook", "photo"),
+    "#class"   : facebook.FacebookPhotoExtractor,
+
+    "caption"  : "A century of innovation parked side by side.\n\n📸: Vocabutesla via X",
+},
+
+{
     "#url"     : "https://www.facebook.com/watch/?v=1165557851291824",
     "#category": ("", "facebook", "video"),
     "#class"   : facebook.FacebookVideoExtractor,
