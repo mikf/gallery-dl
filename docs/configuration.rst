@@ -1455,7 +1455,10 @@ Type
     * ``string``
     * ``list`` of ``strings``
 Default
-    ``"media"``
+    * ``"posts"`` if
+      `reposts <extractor.bluesky.reposts_>`__ or
+      `quoted <extractor.bluesky.quoted_>`__ is enabled
+    * ``"media"`` otherwise
 Example
     * ``"avatar,background,posts"``
     * ``["avatar", "background", "posts"]``
@@ -1464,6 +1467,7 @@ Description
     when processing a user profile.
 
     Possible values are
+    ``"info"``,
     ``"avatar"``,
     ``"background"``,
     ``"posts"``,
