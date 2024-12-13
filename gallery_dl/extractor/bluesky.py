@@ -204,6 +204,8 @@ class BlueskyUserExtractor(BlueskyExtractor):
 
     def items(self):
         base = "{}/profile/{}/".format(self.root, self.user)
+        default = ("posts" if self.config("quoted", False) or
+                   self.config("reposts", False) else "media")
         return self._dispatch_extractors((
             (BlueskyInfoExtractor      , base + "info"),
             (BlueskyAvatarExtractor    , base + "avatar"),
@@ -212,7 +214,7 @@ class BlueskyUserExtractor(BlueskyExtractor):
             (BlueskyRepliesExtractor   , base + "replies"),
             (BlueskyMediaExtractor     , base + "media"),
             (BlueskyLikesExtractor     , base + "likes"),
-        ), ("media",))
+        ), (default,))
 
 
 class BlueskyPostsExtractor(BlueskyExtractor):

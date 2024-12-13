@@ -33,6 +33,7 @@ __tests__ = (
     "#class"   : bluesky.BlueskyUserExtractor,
     "#options" : {"include": "all"},
     "#urls"    : (
+        "https://bsky.app/profile/did:plc:z72i7hdynmk6r22z27h6tvur/info",
         "https://bsky.app/profile/did:plc:z72i7hdynmk6r22z27h6tvur/avatar",
         "https://bsky.app/profile/did:plc:z72i7hdynmk6r22z27h6tvur/banner",
         "https://bsky.app/profile/did:plc:z72i7hdynmk6r22z27h6tvur/posts",
@@ -40,6 +41,13 @@ __tests__ = (
         "https://bsky.app/profile/did:plc:z72i7hdynmk6r22z27h6tvur/media",
         "https://bsky.app/profile/did:plc:z72i7hdynmk6r22z27h6tvur/likes",
     ),
+},
+
+{
+    "#url"     : "https://bsky.app/profile/bsky.app",
+    "#class"   : bluesky.BlueskyUserExtractor,
+    "#options" : {"quoted": True},
+    "#urls"    : "https://bsky.app/profile/bsky.app/posts",
 },
 
 {
@@ -357,7 +365,7 @@ __tests__ = (
     "author": {
         "createdAt": "2024-10-17T13:55:48.833Z",
         "did"      : "did:plc:7x6rtuenkuvxq3zsvffp2ide",
-        "handle"   : "alt.bun.how",
+        "handle"   : "cinny.bun.how",
         "instance" : "bun.how",
     },
 },
