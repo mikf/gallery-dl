@@ -95,7 +95,7 @@ class ZerochanExtractor(BooruExtractor):
         url = "{}/{}?json".format(self.root, entry_id)
         txt = self.request(url).text
         try:
-            item = util.json_loads('"' + txt)
+            item = util.json_loads(txt)
         except ValueError:
             item = self._parse_json(txt)
             item["id"] = text.parse_int(entry_id)
