@@ -1755,6 +1755,26 @@ Description
     Extract ``ask`` posts.
 
 
+extractor.cohost.avatar
+-----------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Download ``avatar`` images.
+
+
+extractor.cohost.background
+---------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Download ``background``/``banner``/``header`` images.
+
+
 extractor.cohost.pinned
 -----------------------
 Type

@@ -17,6 +17,18 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://cohost.org/infinitebrians",
+    "#category": ("", "cohost", "user"),
+    "#class"   : cohost.CohostUserExtractor,
+    "#options" : {"avatar": True, "background": True},
+    "#range"   : "1-2",
+    "#urls"    : (
+        "https://staging.cohostcdn.org/avatar/3281-abb43502-4c48-407d-9778-2bed7722d3d7-profile.gif",
+        "https://staging.cohostcdn.org/header/3281-b29dbf4d-45b2-417b-b03b-0f7f07595e66-profile.png",
+    ),
+},
+
+{
     "#url"     : "https://cohost.org/infinitebrians/post/4957017-thank-you-akira-tori",
     "#category": ("", "cohost", "post"),
     "#class"   : cohost.CohostPostExtractor,
