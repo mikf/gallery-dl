@@ -443,4 +443,16 @@ __tests__ = (
     ),
 },
 
+{
+    "#url"     : "https://kemono.su/account/favorites/artists",
+    "#category": ("", "kemonoparty", "favorite"),
+    "#class"   : kemonoparty.KemonopartyFavoriteExtractor,
+},
+
+{
+    "#url"     : "https://kemono.su/account/favorites/posts?sort_by=published&order=asc",
+    "#category": ("", "kemonoparty", "favorite"),
+    "#class"   : kemonoparty.KemonopartyFavoriteExtractor,
+},
+
 )
