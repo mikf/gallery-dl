@@ -433,8 +433,8 @@ class KemonopartyDiscordServerExtractor(KemonopartyExtractor):
 class KemonopartyFavoriteExtractor(KemonopartyExtractor):
     """Extractor for kemono.su favorites"""
     subcategory = "favorite"
-    pattern = BASE_PATTERN + r"/favorites()()(?:/?\?([^#]+))?"
-    example = "https://kemono.su/favorites"
+    pattern = BASE_PATTERN + r"/(?:account/)?favorites()()(?:/?\?([^#]+))?"
+    example = "https://kemono.su/account/favorites/artists"
 
     def items(self):
         self._prepare_ddosguard_cookies()
