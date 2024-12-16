@@ -59,6 +59,7 @@ class Job():
                 for category in parents:
                     cat = "{}>{}".format(category, extr.category)
                     cfgpath.append((cat, extr.subcategory))
+                    cfgpath.append((category + ">*", extr.subcategory))
                 cfgpath.append((extr.category, extr.subcategory))
                 self.parents = parents
             else:
