@@ -33,7 +33,7 @@ jobs:
           python-packages: "secretstorage"
         - os: "windows-2019"
           architecture: "x86"
-          python-version: "3.8"
+          python-version: "3.9"
           python-packages: "toml"
 
     steps:
