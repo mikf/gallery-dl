@@ -10,23 +10,22 @@ from gallery_dl.extractor import tapas
 __tests__ = (
 {
     "#url"     : "https://tapas.io/series/just-leave-me-be",
-    "#category": ("", "tapas", "series"),
     "#class"   : tapas.TapasSeriesExtractor,
-    "#pattern" : r"https://us-a\.tapas\.io/pc/\w\w/[0-9a-f-]+\.jpg",
-    "#count"   : 132,
+    "#pattern" : tapas.TapasEpisodeExtractor.pattern,
+    "#count"   : 128,
 },
 
 {
     "#url"     : "https://tapas.io/series/yona",
     "#comment" : "mature",
-    "#category": ("", "tapas", "series"),
     "#class"   : tapas.TapasSeriesExtractor,
-    "#count"   : 26,
+    "#pattern" : tapas.TapasEpisodeExtractor.pattern,
+    "#count"   : 17,
 },
 
 {
     "#url"     : "https://tapas.io/episode/2068651",
-    "#category": ("", "tapas", "episode"),
+    "#comment" : "html",
     "#class"   : tapas.TapasEpisodeExtractor,
     "#pattern" : "^text:",
     "#sha1_url": "0b53644c864a0a097f65accea6bb620be9671078",
@@ -76,11 +75,10 @@ __tests__ = (
 {
     "#url"     : "https://tapas.io/SANG123/series",
     "#comment" : "#5306",
-    "#category": ("", "tapas", "creator"),
     "#class"   : tapas.TapasCreatorExtractor,
     "#urls"    : (
-        "https://tapas.io/series/the-return-of-the-disaster-class-hero-novel",
         "https://tapas.io/series/the-return-of-the-disaster-class-hero",
+        "https://tapas.io/series/the-return-of-the-disaster-class-hero-novel",
         "https://tapas.io/series/tomb-raider-king",
         "https://tapas.io/series/tomb-raider-king-novel",
     ),
