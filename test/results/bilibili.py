@@ -60,4 +60,9 @@ __tests__ = (
     "#count"  : range(50, 100),
 },
 
+{
+    "#url"    : "https://space.bilibili.com/405279279/upload/opus",
+    "#class"  : bilibili.BilibiliUserArticlesExtractor,
+},
+
 )
