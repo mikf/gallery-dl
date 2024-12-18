@@ -56,6 +56,13 @@ class BilibiliArticleExtractor(BilibiliExtractor):
         article["username"] = modules["module_author"]["name"]
 
         pics = []
+
+        if "module_top" in modules:
+            try:
+                pics.extend(modules["module_top"]["display"]["album"]["pics"])
+            except Exception:
+                pass
+
         for paragraph in modules['module_content']['paragraphs']:
             if "pic" not in paragraph:
                 continue
