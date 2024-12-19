@@ -76,6 +76,11 @@ __tests__ = (
 },
 
 {
+    "#url"  : "https://saint2.cr/embed/6lC7mKrJst8",
+    "#class": saint.SaintMediaExtractor,
+},
+
+{
     "#url"  : "https://saint.to/embed/6lC7mKrJst8",
     "#class": saint.SaintMediaExtractor,
 },
