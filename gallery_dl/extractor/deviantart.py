@@ -451,6 +451,26 @@ class DeviantartExtractor(Extractor):
         elif type == "text":
             self._tiptap_process_text(html, content)
 
+        elif type == "heading":
+            attrs = content["attrs"]
+            level = str(attrs.get("level") or "3")
+
+            html.append("<h")
+            html.append(level)
+            html.append(' style="text-align:')
+            html.append(attrs.get("textAlign") or "left")
+            html.append('">')
+            html.append('<span style="margin-inline-start:0px">')
+
+            children = content.get("content")
+            if children:
+                for block in children:
+                    self._tiptap_process_content(html, block)
+
+            html.append("</span></h")
+            html.append(level)
+            html.append(">")
+
         elif type == "hardBreak":
             html.append("<br/><br/>")
 
@@ -478,8 +498,9 @@ class DeviantartExtractor(Extractor):
             for mark in marks:
                 type = mark["type"]
                 if type == "link":
+                    attrs = mark.get("attrs") or {}
                     html.append('<a href="')
-                    html.append(text.escape(mark["attrs"]["href"]))
+                    html.append(text.escape(attrs.get("href") or ""))
                     html.append('" rel="noopener noreferrer nofollow ugc">')
                     close.append("</a>")
                 elif type == "bold":
@@ -491,6 +512,9 @@ class DeviantartExtractor(Extractor):
                 elif type == "underline":
                     html.append("<u>")
                     close.append("</u>")
+                elif type == "strike":
+                    html.append("<s>")
+                    close.append("</s>")
                 elif type == "textStyle" and len(mark) <= 1:
                     pass
                 else:
