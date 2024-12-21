@@ -85,8 +85,8 @@ class TapasEpisodeExtractor(TapasExtractor):
         episode = data["episode"]
         if not episode.get("free") and not episode.get("unlocked"):
             raise exception.AuthorizationError(
-                "%s: Episode '%s' not unlocked",
-                episode_id, episode["title"])
+                "{}: Episode '{}' not unlocked".format(
+                    episode_id, episode["title"]))
 
         html = data["html"]
         episode["series"] = self._extract_series(html)
