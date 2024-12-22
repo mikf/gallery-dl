@@ -11,8 +11,9 @@ from .. import exception, text, util
 import re
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?tiktok\.com"
-USER_PATTERN = BASE_PATTERN + r"/+@([\w.]{0,23}\w)(?:/\S*)?/*"
-POST_PATTERN = BASE_PATTERN + r"/+@(?:[\w.]{0,23}\w)(?:/\S*)?/+(?:[pP][hH][oO][tT][oO]|[vV][iI][dD][eE][oO])/+(?:[0-9]+)/*"
+USER_PATTERN = BASE_PATTERN + r"/+@([\w.]{0,23}\w)(?:/\S*)?"
+POST_PATTERN = USER_PATTERN + \
+    r"/+(?:[pP][hH][oO][tT][oO]|[vV][iI][dD][eE][oO])/+(?:[0-9]+)/*"
 VM_POST_PATTERN = r"(?:https?://)?(?:vm\.)?tiktok\.com/+.*/*"
 INSENSITIVE_PHOTO = re.compile(re.escape("/photo/"), re.IGNORECASE)
 
@@ -39,7 +40,7 @@ class TikTokExtractor(Extractor):
             video_detail = util.json_loads(text.extr(
                 self.request(tiktok_url).text,
                 '<script id="__UNIVERSAL_DATA_FOR_REHYDRATION__" '
-                    'type="application/json">',
+                'type="application/json">',
                 '</script>'
             ))["__DEFAULT_SCOPE__"]
             if "webapp.video-detail" not in video_detail:
@@ -50,29 +51,29 @@ class TikTokExtractor(Extractor):
                 video_detail = util.json_loads(text.extr(
                     self.request(tiktok_url).text,
                     '<script id="__UNIVERSAL_DATA_FOR_REHYDRATION__" '
-                        'type="application/json">',
+                    'type="application/json">',
                     '</script>'
                 ))["__DEFAULT_SCOPE__"]
             video_detail = video_detail["webapp.video-detail"]
-            if "statusMsg" in video_detail and \
-                video_detail["statusMsg"] == "author_secret":
+            has_status = "statusMsg" in video_detail
+            if has_status and video_detail["statusMsg"] == "author_secret":
                 raise exception.AuthorizationError("Login required to access "
                                                    "this post")
             post_info = video_detail["itemInfo"]["itemStruct"]
             user = post_info["author"]["uniqueId"]
             if "imagePost" in post_info:
-                yield Message.Directory, { "user": user }
+                yield Message.Directory, {"user": user}
                 img_list = post_info["imagePost"]["images"]
                 for i, img in enumerate(img_list):
                     url = img["imageURL"]["urlList"][0]
                     name_and_ext = text.nameext_from_url(url)
                     yield Message.Url, url, {
-                        "id":        post_info["id"],
-                        "index":     i,
-                        "img_id":    name_and_ext["filename"].split("~")[0],
-                        "extension": name_and_ext["extension"],
-                        "width":     img["imageWidth"],
-                        "height":    img["imageHeight"]
+                        "id"        : post_info["id"],
+                        "index"     : i,
+                        "img_id"    : name_and_ext["filename"].split("~")[0],
+                        "extension" : name_and_ext["extension"],
+                        "width"     : img["imageWidth"],
+                        "height"    : img["imageHeight"]
                     }
             else:
                 # TODO: Not a slide show. Should pass this to yt-dlp.
