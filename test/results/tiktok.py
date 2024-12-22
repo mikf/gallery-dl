@@ -25,7 +25,7 @@ __tests__ = (
 },
 {
     "#url"      : "https://vm.tiktok.com/ZGdh4WUhr/",
-    "#category" : ("", "tiktok", "post"),
+    "#category" : ("", "tiktok", "vmpost"),
     "#class"    : tiktok.TiktokVmpostExtractor,
     "#pattern"  : PATTERN
 },
@@ -44,7 +44,7 @@ __tests__ = (
 },
 {
     "#url"      : "https://vm.tiktok.com/ZGdhVtER2/",
-    "#category" : ("", "tiktok", "post"),
+    "#category" : ("", "tiktok", "vmpost"),
     "#class"    : tiktok.TiktokVmpostExtractor,
     "#pattern"  : PATTERN
 },
@@ -63,7 +63,7 @@ __tests__ = (
 },
 {
     "#url"      : "https://vm.tiktok.com/ZGdhVW3cu/",
-    "#category" : ("", "tiktok", "post"),
+    "#category" : ("", "tiktok", "vmpost"),
     "#class"    : tiktok.TiktokVmpostExtractor,
     "#pattern"  : PATTERN
 }
