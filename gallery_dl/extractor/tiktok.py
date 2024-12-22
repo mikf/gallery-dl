@@ -8,17 +8,17 @@
 
 from .common import Extractor, Message
 from .. import exception, text, util
-import re
+from re import compile, escape, IGNORECASE
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?tiktok\.com"
 USER_PATTERN = BASE_PATTERN + r"/+@([\w.]{0,23}\w)(?:/\S*)?"
 POST_PATTERN = USER_PATTERN + \
     r"/+(?:[pP][hH][oO][tT][oO]|[vV][iI][dD][eE][oO])/+(?:[0-9]+)/*"
 VM_POST_PATTERN = r"(?:https?://)?(?:vm\.)?tiktok\.com/+.*/*"
-INSENSITIVE_PHOTO = re.compile(re.escape("/photo/"), re.IGNORECASE)
+INSENSITIVE_PHOTO = compile(escape("/photo/"), IGNORECASE)
 
 
-class TikTokExtractor(Extractor):
+class TiktokExtractor(Extractor):
     """Base class for TikTok extractors"""
 
     category = "tiktok"
@@ -80,7 +80,7 @@ class TikTokExtractor(Extractor):
                 pass
 
 
-class TikTokPostExtractor(TikTokExtractor):
+class TiktokPostExtractor(TiktokExtractor):
     """Extract a single video or photo TikTok link"""
 
     subcategory = "post"
@@ -88,10 +88,10 @@ class TikTokPostExtractor(TikTokExtractor):
     example = "https://www.tiktok.com/@chillezy/photo/7240568259186019630"
 
 
-class TikTokVMPostExtractor(TikTokExtractor):
-    """Extract a single video or photo TikTok link"""
+class TiktokVmpostExtractor(TiktokExtractor):
+    """Extract a single video or photo TikTok VM link"""
 
-    subcategory = "post"
+    subcategory = "vmpost"
     pattern = VM_POST_PATTERN
     example = "https://vm.tiktok.com/ZGdh4WUhr/"
 
