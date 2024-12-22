@@ -15,7 +15,6 @@ USER_PATTERN = BASE_PATTERN + r"/+@([\w.]{0,23}\w)(?:/\S*)?"
 POST_PATTERN = USER_PATTERN + \
     r"/+(?:[pP][hH][oO][tT][oO]|[vV][iI][dD][eE][oO])/+(?:[0-9]+)/*"
 VM_POST_PATTERN = r"(?:https?://)?(?:vm\.)?tiktok\.com/+.*/*"
-INSENSITIVE_PHOTO = compile(escape("/photo/"), IGNORECASE)
 
 
 class TiktokExtractor(Extractor):
@@ -36,7 +35,10 @@ class TiktokExtractor(Extractor):
             # If we can recognise that this is a /photo/ link, preemptively
             # replace it with /video/ to prevent a needless second request.
             # See below.
-            tiktok_url = INSENSITIVE_PHOTO.sub("/video/", tiktok_url)
+            tiktok_url = compile(
+                escape("/photo/"),
+                IGNORECASE
+            ).sub("/video/", tiktok_url)
             video_detail = util.json_loads(text.extr(
                 self.request(tiktok_url).text,
                 '<script id="__UNIVERSAL_DATA_FOR_REHYDRATION__" '
