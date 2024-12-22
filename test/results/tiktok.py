@@ -14,57 +14,57 @@ __tests__ = (
 {
     "#url"      : "https://www.tiktok.com/@chillezy/photo/7240568259186019630",
     "#category" : ("", "tiktok", "post"),
-    "#class"    : tiktok.TikTokPostExtractor,
+    "#class"    : tiktok.TiktokPostExtractor,
     "#pattern"  : PATTERN
 },
 {
     "#url"      : "https://www.tiktok.com/@chillezy/video/7240568259186019630",
     "#category" : ("", "tiktok", "post"),
-    "#class"    : tiktok.TikTokPostExtractor,
+    "#class"    : tiktok.TiktokPostExtractor,
     "#pattern"  : PATTERN
 },
 {
     "#url"      : "https://vm.tiktok.com/ZGdh4WUhr/",
     "#category" : ("", "tiktok", "post"),
-    "#class"    : tiktok.TikTokVMPostExtractor,
+    "#class"    : tiktok.TiktokVmpostExtractor,
     "#pattern"  : PATTERN
 },
 # Test one photo.
 {
     "#url"      : "https://www.tiktok.com/@d4vinefem/photo/7449575367024626974",
     "#category" : ("", "tiktok", "post"),
-    "#class"    : tiktok.TikTokPostExtractor,
+    "#class"    : tiktok.TiktokPostExtractor,
     "#pattern"  : PATTERN
 },
 {
     "#url"      : "https://www.tiktok.com/@d4vinefem/video/7449575367024626974",
     "#category" : ("", "tiktok", "post"),
-    "#class"    : tiktok.TikTokPostExtractor,
+    "#class"    : tiktok.TiktokPostExtractor,
     "#pattern"  : PATTERN
 },
 {
     "#url"      : "https://vm.tiktok.com/ZGdhVtER2/",
     "#category" : ("", "tiktok", "post"),
-    "#class"    : tiktok.TikTokVMPostExtractor,
+    "#class"    : tiktok.TiktokVmpostExtractor,
     "#pattern"  : PATTERN
 },
 # Test a few photos.
 {
     "#url"      : "https://www.tiktok.com/@.mcfc.central/photo/7449701420934122785",
     "#category" : ("", "tiktok", "post"),
-    "#class"    : tiktok.TikTokPostExtractor,
+    "#class"    : tiktok.TiktokPostExtractor,
     "#pattern"  : PATTERN
 },
 {
     "#url"      : "https://www.tiktok.com/@.mcfc.central/video/7449701420934122785",
     "#category" : ("", "tiktok", "post"),
-    "#class"    : tiktok.TikTokPostExtractor,
+    "#class"    : tiktok.TiktokPostExtractor,
     "#pattern"  : PATTERN
 },
 {
     "#url"      : "https://vm.tiktok.com/ZGdhVW3cu/",
     "#category" : ("", "tiktok", "post"),
-    "#class"    : tiktok.TikTokVMPostExtractor,
+    "#class"    : tiktok.TiktokVmpostExtractor,
     "#pattern"  : PATTERN
 }
 )
