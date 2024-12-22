@@ -455,9 +455,15 @@ class KemonopartyFavoriteExtractor(KemonopartyExtractor):
                        reverse=(order == "desc"))
 
             for user in users:
-                user["_extractor"] = KemonopartyUserExtractor
-                url = "{}/{}/user/{}".format(
-                    self.root, user["service"], user["id"])
+                service = user["service"]
+                if service == "discord":
+                    user["_extractor"] = KemonopartyDiscordServerExtractor
+                    url = "{}/discord/server/{}".format(
+                        self.root, user["id"])
+                else:
+                    user["_extractor"] = KemonopartyUserExtractor
+                    url = "{}/{}/user/{}".format(
+                        self.root, service, user["id"])
                 yield Message.Queue, url, user
 
         elif type == "post":
