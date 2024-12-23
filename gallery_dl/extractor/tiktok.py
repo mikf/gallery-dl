@@ -76,9 +76,10 @@ class TiktokExtractor(Extractor):
                 elif video_detail["statusCode"] != 0:
                     raise exception.ExtractionError(
                         tiktok_url + ": Received unknown error code " +
-                        str(video_detail['statusCode']) + " with message " +
-                        (video_detail['statusMsg'] if
-                            "statusMsg" in video_detail else "")
+                        str(video_detail['statusCode']) + (
+                            " with message " + video_detail['statusMsg'] if
+                            "statusMsg" in video_detail else ""
+                        )
                     )
             post_info = video_detail["itemInfo"]["itemStruct"]
             id = post_info["id"]
