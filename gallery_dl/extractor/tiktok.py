@@ -11,7 +11,7 @@ from .. import exception, text, util, ytdl
 from re import compile, escape, IGNORECASE
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?tiktok\.com"
-USER_PATTERN = BASE_PATTERN + r"/+@([\w.]{0,23}\w)(?:/\S*)?"
+USER_PATTERN = BASE_PATTERN + r"/+@([\w.]{0,23}\w)?"
 POST_PATTERN = USER_PATTERN + \
     r"/+(?:[pP][hH][oO][tT][oO]|[vV][iI][dD][eE][oO])/+(?:[0-9]+)/*"
 VM_POST_PATTERN = r"(?:https?://)?(?:vm\.)?tiktok\.com/+.*/*"
@@ -142,7 +142,7 @@ class TiktokUserExtractor(TiktokExtractor):
     """Extract a TikTok user's profile"""
 
     subcategory = "user"
-    pattern = USER_PATTERN + r"$"
+    pattern = USER_PATTERN + r"/*$"
     example = "https://www.tiktok.com/@chillezy"
 
     def urls(self):
