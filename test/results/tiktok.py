@@ -148,4 +148,20 @@ __tests__ = (
     "#pattern"  : PATTERN_WITH_AUDIO,
     "#options"  : {"videos": True}
 },
+{
+    "#url"      : "https://www.tiktok.com/@chillezy",
+    "#comment"  : "User profile",
+    "#category" : ("", "tiktok", "user"),
+    "#class"    : tiktok.TiktokUserExtractor,
+    "#pattern"  : PATTERN_WITH_AUDIO,
+    "#options"  : {"videos": True, "tiktok-range": "1-10"}
+},
+{
+    "#url"      : "https://www.tiktok.com/@chillezy",
+    "#comment"  : "User profile without audio or videos",
+    "#category" : ("", "tiktok", "user"),
+    "#class"    : tiktok.TiktokUserExtractor,
+    "#pattern"  : PATTERN,
+    "#options"  : {"videos": False, "tiktok-range": "1-10"}
+},
 )

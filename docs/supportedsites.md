@@ -929,7 +929,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>TikTok</td>
     <td>https://www.tiktok.com/</td>
-    <td>Photos, Videos, Audio</td>
+    <td>Photos, Videos, Audio, User Profiles<br>**Videos, Audio, and User Profiles require yt-dlp or youtube-dl.** Pass `-o videos` to download photos only, and `-o tiktok-range="a-yt-dlp-range"` to tell yt-dlp to only extract XYZ links when scraping a user profile.</td>
     <td><a href="https://github.com/mikf/gallery-dl#cookies">Cookies</a></td>
 </tr>
 <tr>
