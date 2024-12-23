@@ -22,7 +22,7 @@ class TiktokExtractor(Extractor):
 
     category = "tiktok"
     directory_fmt = ("{category}", "{user}")
-    filename_fmt = "{id}_{index}_{img_id}.{extension}"
+    filename_fmt = "{title} [{id}] [{index}].{extension}"
     archive_fmt = "{id}_{img_id}"
     root = "https://www.tiktok.com/"
     cookies_domain = ".tiktok.com"
@@ -69,8 +69,13 @@ class TiktokExtractor(Extractor):
                 for i, img in enumerate(img_list):
                     url = img["imageURL"]["urlList"][0]
                     name_and_ext = text.nameext_from_url(url)
+                    id = post_info["id"]
+                    title = post_info["desc"]
+                    if len(title) == 0:
+                        title = f"TikTok photo #{id}"
                     yield Message.Url, url, {
-                        "id"        : post_info["id"],
+                        "title"     : text.sanitize_for_filename(title)[:170],
+                        "id"        : id,
                         "index"     : i,
                         "img_id"    : name_and_ext["filename"].split("~")[0],
                         "extension" : name_and_ext["extension"],

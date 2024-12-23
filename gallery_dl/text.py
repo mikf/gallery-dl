@@ -51,6 +51,21 @@ def slugify(value):
     return re.sub(r"[-\s]+", "-", value).strip("-_")
 
 
+def sanitize_for_filename(string):
+    """Removes characters from a string that would be illegal to have in
+    a filename
+
+    This function is similar to slugify(), except it retains more
+    characters (notably characters such as # and @).
+
+    Note that the length of the string is not capped!
+
+    Inspiration:
+    https://stackoverflow.com/a/71199182
+    """
+    return re.sub(r"[/\\?%*:|\"<>\x7F\x00-\x1F]", " ", str(string))
+
+
 def ensure_http_scheme(url, scheme="https://"):
     """Prepend 'scheme' to 'url' if it doesn't have one"""
     if url and not url.startswith(("https://", "http://")):
