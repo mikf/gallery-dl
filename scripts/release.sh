@@ -53,20 +53,21 @@ build-linux() {
     cd "${ROOTDIR}"
     echo Building Linux executable
 
-    build-vm 'ubuntu22.04' 'gallery-dl.bin' 'linux'
+    build-vm 'ubuntu22.04' 'gallery-dl.bin' 'linux' 24000000
 }
 
 build-windows() {
     cd "${ROOTDIR}"
     echo Building Windows executable
 
-    build-vm 'windows7_x86_sp1' 'gallery-dl.exe' 'windows'
+    build-vm 'windows7_x86_sp1' 'gallery-dl.exe' 'windows' 12000000
 }
 
 build-vm() {
     VMNAME="$1"
     BINNAME="$2"
     LABEL="$3"
+    MINSIZE="$4"
     TMPPATH="/tmp/gallery-dl/dist/$BINNAME"
 
     # launch VM
@@ -87,10 +88,23 @@ build-vm() {
     rm -f "./dist/$BINNAME"
 
     # wait for new executable
-    while [ ! -e "$TMPPATH" ] ; do
+    while true; do
         sleep 5
+
+        if [ ! -e "$TMPPATH" ]; then
+            continue
+        fi
+
+        sleep 2
+        SIZE="$(stat -c %s "$TMPPATH")"
+        if [ "$SIZE" -lt "$MINSIZE" ]; then
+            echo Size of "'$TMPPATH'" is less than "$MINSIZE" bytes "($SIZE)"
+            rm -f "$TMPPATH"
+            continue
+        fi
+
+        break
     done
-    sleep 2
 
     # move
     mv "$TMPPATH" "./dist/$BINNAME"
