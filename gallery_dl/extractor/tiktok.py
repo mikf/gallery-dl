@@ -32,6 +32,9 @@ class TiktokExtractor(Extractor):
 
     def items(self):
         videos = self.config("videos", True)
+        # We assume that all of the URLs served by urls() come from the same
+        # author.
+        downloaded_avatar = False
         for tiktok_url in self.urls():
             # If we can recognise that this is a /photo/ link, preemptively
             # replace it with /video/ to prevent a needless second request.
@@ -84,8 +87,23 @@ class TiktokExtractor(Extractor):
                 title = "TikTok photo #{}".format(id)
             title = title[:150]
             user = post_info["author"]["uniqueId"]
+            # It's probably obvious but I thought it was worth noting
+            # because I got stuck on this for a while: make sure to emit
+            # a Directory message before attempting to download anything
+            # with yt-dlp! Otherwise you'll run into NoneType, set_filename
+            # errors since the download job doesn't get initialized.
+            yield Message.Directory, {"user": user}
+            if not downloaded_avatar:
+                avatar = post_info["author"]["avatarLarger"]
+                yield Message.Url, avatar, {
+                    "title"     : "@" + user,
+                    "id"        : post_info["author"]["id"],
+                    "index"     : "",
+                    "img_id"    : "",
+                    "extension" : text.ext_from_url(avatar)
+                }
+                downloaded_avatar = True
             if "imagePost" in post_info:
-                yield Message.Directory, {"user": user}
                 img_list = post_info["imagePost"]["images"]
                 for i, img in enumerate(img_list):
                     url = img["imageURL"]["urlList"][0]
@@ -100,12 +118,6 @@ class TiktokExtractor(Extractor):
                         "height"    : img["imageHeight"]
                     }
             elif videos:
-                # It's probably obvious but I thought it was worth noting
-                # because I got stuck on this for a while: make sure to emit
-                # a Directory message before attempting to download anything
-                # with yt-dlp! Otherwise you'll run into NoneType, set_filename
-                # errors since the download job doesn't get initialized.
-                yield Message.Directory, {"user": user}
                 if len(original_title) == 0:
                     title = "TikTok video #{}".format(id)
                     title = title[:150]
