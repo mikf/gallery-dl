@@ -22,8 +22,8 @@ class TiktokExtractor(Extractor):
 
     category = "tiktok"
     directory_fmt = ("{category}", "{user}")
-    filename_fmt = "{title} [{id}] [{index}].{extension}"
-    archive_fmt = "{id}_{img_id}"
+    filename_fmt = "{title} [{id}{index:?_//}{img_id:?_//}].{extension}"
+    archive_fmt = "{id}_{index}_{img_id}"
     root = "https://www.tiktok.com/"
     cookies_domain = ".tiktok.com"
 
@@ -31,16 +31,17 @@ class TiktokExtractor(Extractor):
         return [self.url]
 
     def items(self):
+        videos = self.config("videos", True)
         for tiktok_url in self.urls():
             # If we can recognise that this is a /photo/ link, preemptively
             # replace it with /video/ to prevent a needless second request.
             # See below.
-            tiktok_url = compile(
+            tiktok_url_to_use = compile(
                 escape("/photo/"),
                 IGNORECASE
             ).sub("/video/", tiktok_url)
             video_detail = util.json_loads(text.extr(
-                self.request(tiktok_url).text,
+                self.request(tiktok_url_to_use).text,
                 '<script id="__UNIVERSAL_DATA_FOR_REHYDRATION__" '
                 'type="application/json">',
                 '</script>'
@@ -48,20 +49,40 @@ class TiktokExtractor(Extractor):
             if "webapp.video-detail" not in video_detail:
                 # Only /video/ links result in the video-detail dict we need.
                 # Try again using that form of link.
-                tiktok_url = video_detail["seo.abtest"]["canonical"] \
+                tiktok_url_to_use = video_detail["seo.abtest"]["canonical"] \
                     .replace("/photo/", "/video/")
                 video_detail = util.json_loads(text.extr(
-                    self.request(tiktok_url).text,
+                    self.request(tiktok_url_to_use).text,
                     '<script id="__UNIVERSAL_DATA_FOR_REHYDRATION__" '
                     'type="application/json">',
                     '</script>'
                 ))["__DEFAULT_SCOPE__"]
             video_detail = video_detail["webapp.video-detail"]
-            has_status = "statusMsg" in video_detail
-            if has_status and video_detail["statusMsg"] == "author_secret":
-                raise exception.AuthorizationError("Login required to access "
-                                                   "this post")
+            if "statusCode" in video_detail:
+                if video_detail["statusCode"] == 10222:
+                    raise exception.AuthorizationError(
+                        tiktok_url + ": Login required to access this post"
+                    )
+                elif video_detail["statusCode"] == 10204:
+                    raise exception.NotFoundError(tiktok_url)
+                elif video_detail["statusCode"] == 10231:
+                    raise exception.ExtractionError(
+                        tiktok_url + " is region locked, try downloading with "
+                        "a VPN/proxy connection"
+                    )
+                elif video_detail["statusCode"] != 0:
+                    raise exception.ExtractionError(
+                        tiktok_url + ": Received unknown error code " +
+                        str(video_detail['statusCode']) + " with message " +
+                        (video_detail['statusMsg'] if
+                            "statusMsg" in video_detail else "")
+                    )
             post_info = video_detail["itemInfo"]["itemStruct"]
+            id = post_info["id"]
+            original_title = title = post_info["desc"]
+            if len(original_title) == 0:
+                title = "TikTok photo #{}".format(id)
+            title = title[:150]
             user = post_info["author"]["uniqueId"]
             if "imagePost" in post_info:
                 yield Message.Directory, {"user": user}
@@ -69,22 +90,36 @@ class TiktokExtractor(Extractor):
                 for i, img in enumerate(img_list):
                     url = img["imageURL"]["urlList"][0]
                     name_and_ext = text.nameext_from_url(url)
-                    id = post_info["id"]
-                    title = post_info["desc"]
-                    if len(title) == 0:
-                        title = "TikTok photo #{}".format(id)
                     yield Message.Url, url, {
-                        "title"     : text.sanitize_for_filename(title)[:170],
+                        "title"     : title,
                         "id"        : id,
-                        "index"     : i,
+                        "index"     : i + 1,
                         "img_id"    : name_and_ext["filename"].split("~")[0],
                         "extension" : name_and_ext["extension"],
                         "width"     : img["imageWidth"],
                         "height"    : img["imageHeight"]
                     }
+            elif videos:
+                # It's probably obvious but I thought it was worth noting
+                # because I got stuck on this for a while: make sure to emit
+                # a Directory message before attempting to download anything
+                # with yt-dlp! Otherwise you'll run into NoneType, set_filename
+                # errors since the download job doesn't get initialized.
+                yield Message.Directory, {"user": user}
+                if len(original_title) == 0:
+                    title = "TikTok video #{}".format(id)
+                    title = title[:150]
             else:
-                # TODO: Not a slide show. Should pass this to yt-dlp.
-                pass
+                self.log.info("Skipping video post %s", tiktok_url)
+            if videos:
+                yield Message.Url, "ytdl:" + tiktok_url_to_use, {
+                    "filename"  : "",
+                    "extension" : "",
+                    "title"     : title,
+                    "id"        : id,
+                    "index"     : "",
+                    "img_id"    : ""
+                }
 
 
 class TiktokPostExtractor(TiktokExtractor):
