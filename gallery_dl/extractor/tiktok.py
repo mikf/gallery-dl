@@ -7,7 +7,7 @@
 """Extractors for https://www.tiktok.com/"""
 
 from .common import Extractor, Message
-from .. import exception, text, util
+from .. import exception, text, util, ytdl
 from re import compile, escape, IGNORECASE
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?tiktok\.com"
@@ -138,4 +138,33 @@ class TiktokVmpostExtractor(TiktokExtractor):
     example = "https://vm.tiktok.com/ZGdh4WUhr/"
 
 
-# TODO: Write profile extractor.
+class TiktokUserExtractor(TiktokExtractor):
+    """Extract a TikTok user's profile"""
+
+    subcategory = "user"
+    pattern = USER_PATTERN
+    example = "https://www.tiktok.com/@chillezy"
+
+    def urls(self):
+        """Attempt to use yt-dlp/youtube-dl to extract links from a
+        user's page"""
+
+        try:
+            module = ytdl.import_module(self.config("module"))
+        except (ImportError, SyntaxError) as exc:
+            self.log.error("Cannot import module '%s'",
+                            getattr(exc, "name", ""))
+            self.log.debug("", exc_info=exc)
+            raise exception.ExtractionError("yt-dlp or youtube-dl is required "
+                                            "for this feature!")
+        with ytdl.construct_YoutubeDL(
+            module=module,
+            obj=self,
+            user_opts={
+                "cookiefile": self.cookies_file,
+                "playlist_items": str(self.config("tiktok-range", ""))
+            }
+        ) as ydl:
+            info = ydl.extract_info(self.url, download=False)
+            # This should include video and photo posts in /video/ URL form.
+            return [video["webpage_url"] for video in info["entries"]]
