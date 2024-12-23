@@ -142,7 +142,7 @@ class TiktokUserExtractor(TiktokExtractor):
     """Extract a TikTok user's profile"""
 
     subcategory = "user"
-    pattern = USER_PATTERN
+    pattern = USER_PATTERN + r"$"
     example = "https://www.tiktok.com/@chillezy"
 
     def urls(self):
