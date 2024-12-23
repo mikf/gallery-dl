@@ -173,6 +173,7 @@ class TiktokUserExtractor(TiktokExtractor):
             module=module,
             obj=self,
             user_opts={
+                "ignore_no_formats_error": True,
                 "cookiefile": self.cookies_file,
                 "playlist_items": str(self.config("tiktok-range", ""))
             }
