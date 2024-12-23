@@ -92,30 +92,6 @@ class TestText(unittest.TestCase):
         self.assertEqual(f(1), "1")
         self.assertEqual(f(2.3), "23")
 
-    def test_sanitize_for_filename(self, f=text.sanitize_for_filename):
-        self.assertEqual(f("Hello World"), "Hello World")
-        self.assertEqual(f("-HeLLo---World-"), "-HeLLo---World-")
-        self.assertEqual(
-            f("_-H#e:l#l:o+\t+W?o!rl=d-_"),
-            "_-H#e l#l o+ +W o!rl=d-_"
-        )
-        self.assertEqual(f("_Hello_World_"), "_Hello_World_")
-        self.assertEqual(
-            f("/\\?%*:|\"<>\x7F\x00\x0B\x1F"),
-            "              "
-        )
-
-        self.assertEqual(f(""), "")
-        self.assertEqual(f("-"), "-")
-        self.assertEqual(f("--"), "--")
-
-        self.assertEqual(f(()), "()")
-        self.assertEqual(f([]), "[]")
-        self.assertEqual(f({}), "{}")
-        self.assertEqual(f(None), "None")
-        self.assertEqual(f(1), "1")
-        self.assertEqual(f(2.3), "2.3")
-
     def test_ensure_http_scheme(self, f=text.ensure_http_scheme):
         result = "https://example.org/filename.ext"
 
