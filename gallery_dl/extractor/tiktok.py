@@ -72,7 +72,7 @@ class TiktokExtractor(Extractor):
                     id = post_info["id"]
                     title = post_info["desc"]
                     if len(title) == 0:
-                        title = f"TikTok photo #{id}"
+                        title = "TikTok photo #{}".format(id)
                     yield Message.Url, url, {
                         "title"     : text.sanitize_for_filename(title)[:170],
                         "id"        : id,
