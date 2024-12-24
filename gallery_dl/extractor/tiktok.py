@@ -31,11 +31,14 @@ class TiktokExtractor(Extractor):
     def urls(self):
         return [self.url]
 
+    def avatar(self):
+        return False
+
     def items(self):
         videos = self.config("videos", True)
         # We assume that all of the URLs served by urls() come from the same
         # author.
-        downloaded_avatar = False
+        downloaded_avatar = not self.avatar()
         for tiktok_url in self.urls():
             # If we can recognise that this is a /photo/ link, preemptively
             # replace it with /video/ to prevent a needless second request.
@@ -97,12 +100,13 @@ class TiktokExtractor(Extractor):
             yield Message.Directory, {"user": user}
             if not downloaded_avatar:
                 avatar = post_info["author"]["avatarLarger"]
+                name_and_ext = text.nameext_from_url(avatar)
                 yield Message.Url, avatar, {
                     "title"     : "@" + user,
                     "id"        : post_info["author"]["id"],
                     "index"     : "",
-                    "img_id"    : "",
-                    "extension" : text.ext_from_url(avatar)
+                    "img_id"    : name_and_ext["filename"].split("~")[0],
+                    "extension" : name_and_ext["extension"]
                 }
                 downloaded_avatar = True
             if "imagePost" in post_info:
@@ -183,3 +187,6 @@ class TiktokUserExtractor(TiktokExtractor):
             info = ydl.extract_info(self.url, download=False)
             # This should include video and photo posts in /video/ URL form.
             return [video["webpage_url"] for video in info["entries"]]
+
+    def avatar(self):
+        return True
