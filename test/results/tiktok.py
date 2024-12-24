@@ -97,7 +97,7 @@ __tests__ = (
     "#comment"  : "Video post",
     "#category" : ("", "tiktok", "post"),
     "#class"    : tiktok.TiktokPostExtractor,
-    "#pattern"  : PATTERN_WITH_AUDIO,
+    "#urls"     : "ytdl:https://www.tiktok.com/@memezar/video/7449708266168274208",
     "#options"  : {"videos": True}
 },
 {
@@ -105,7 +105,7 @@ __tests__ = (
     "#comment"  : "Video post as a /photo/ link",
     "#category" : ("", "tiktok", "post"),
     "#class"    : tiktok.TiktokPostExtractor,
-    "#pattern"  : PATTERN_WITH_AUDIO,
+    "#urls"     : "ytdl:https://www.tiktok.com/@memezar/video/7449708266168274208",
     "#options"  : {"videos": True}
 },
 {
@@ -113,7 +113,7 @@ __tests__ = (
     "#comment"  : "Video post as a VM link",
     "#category" : ("", "tiktok", "vmpost"),
     "#class"    : tiktok.TiktokVmpostExtractor,
-    "#pattern"  : PATTERN_WITH_AUDIO,
+    "#urls"     : "ytdl:https://vm.tiktok.com/ZGdht7cjp/",
     "#options"  : {"videos": True}
 },
 {
@@ -121,7 +121,7 @@ __tests__ = (
     "#comment"  : "Skipping video post",
     "#category" : ("", "tiktok", "post"),
     "#class"    : tiktok.TiktokPostExtractor,
-    "#pattern"  : PATTERN,
+    "#urls"     : [],
     "#options"  : {"videos": False}
 },
 {
