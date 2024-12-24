@@ -57,7 +57,12 @@ class _8musesAlbumExtractor(Extractor):
             albums = data.get("albums")
             if albums:
                 for album in albums:
-                    url = self.root + "/comics/album/" + album["permalink"]
+                    permalink = album.get("permalink")
+                    if not permalink:
+                        self.log.debug("Private album")
+                        continue
+
+                    url = self.root + "/comics/album/" + permalink
                     yield Message.Queue, url, {
                         "url"       : url,
                         "name"      : album["name"],
