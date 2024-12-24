@@ -164,4 +164,20 @@ __tests__ = (
     "#pattern"  : PATTERN,
     "#options"  : {"videos": False, "tiktok-range": "1-10"}
 },
+{
+    "#url"      : "https://vt.tiktok.com/ZGdhVtER2",
+    "#comment"  : "vt.tiktok.com link: single photo",
+    "#category" : ("", "tiktok", "vmpost"),
+    "#class"    : tiktok.TiktokVmpostExtractor,
+    "#pattern"  : PATTERN,
+    "#options"  : {"videos": False}
+},
+{
+    "#url"      : "https://www.tiktok.com/t/ZGdhVtER2//",
+    "#comment"  : "www.tiktok.com/t/ link: single photo",
+    "#category" : ("", "tiktok", "vmpost"),
+    "#class"    : tiktok.TiktokVmpostExtractor,
+    "#pattern"  : PATTERN,
+    "#options"  : {"videos": False}
+},
 )
