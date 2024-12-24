@@ -211,9 +211,12 @@ __tests__ = (
 },
 
 {
-    "#url"     : "https://hitomi.la/search.html?language%3Ajapanese%20artist%3Asumiya",
+    "#url"     : "https://hitomi.la/search.html?female%3Asole_female%20language%3Ajapanese%20artist%3Asumiya",
     "#class"   : hitomi.HitomiSearchExtractor,
+    "#pattern" : hitomi.HitomiGalleryExtractor.pattern,
+    "#count"   : range(35, 50),
 },
+
 {
     "#url"     : "https://hitomi.la/search.html?group:initial_g",
     "#class"   : hitomi.HitomiSearchExtractor,

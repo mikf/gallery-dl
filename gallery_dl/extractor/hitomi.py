@@ -219,20 +219,16 @@ class HitomiSearchExtractor(Extractor):
         area, tag, language = self.get_nozomi_args(full_tag)
 
         if area:
-            referer_base = "{}/n/{}/{}-{}.html".format(
-                self.root, area, tag, language)
-            nozomi_url = "https://ltn.hitomi.la/{}/{}-{}.nozomi".format(
+            nozomi_url = "https://ltn.hitomi.la/n/{}/{}-{}.nozomi".format(
                 area, tag, language)
         else:
-            referer_base = "{}/n/{}-{}.html".format(
-                self.root, tag, language)
-            nozomi_url = "https://ltn.hitomi.la/{}-{}.nozomi".format(
+            nozomi_url = "https://ltn.hitomi.la/n/{}-{}.nozomi".format(
                 tag, language)
 
         headers = {
             "Origin": self.root,
             "Cache-Control": "max-age=0",
-            "Referer": "{}/search.html?{}".format(referer_base, self.query),
+            "Referer": "{}/search.html?{}".format(self.root, self.query),
         }
 
         response = self.request(nozomi_url, headers=headers)
@@ -251,7 +247,7 @@ class HitomiSearchExtractor(Extractor):
             language = tag
             tag = "index"
 
-        return area, tag, language
+        return area, tag.replace("_", " "), language
 
 
 @memcache(maxage=1800)
