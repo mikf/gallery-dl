@@ -172,8 +172,8 @@ class InstagramExtractor(Extractor):
                 "post_shortcode": post["code"],
                 "post_url": "{}/p/{}/".format(self.root, post["code"]),
                 "likes": post.get("like_count", 0),
-                "pinned": post.get("timeline_pinned_user_ids", ()),
                 "liked": post.get("has_liked", False),
+                "pinned": self._extract_pinned(post),
             }
 
             caption = post["caption"]
@@ -385,6 +385,10 @@ class InstagramExtractor(Extractor):
                                          "username" : user["username"],
                                          "full_name": user["full_name"]})
 
+    def _extract_pinned(self, post):
+        return (post.get("timeline_pinned_user_ids") or
+                post.get("clips_tab_pinned_user_ids") or ())
+
     def _init_cursor(self):
         cursor = self.config("cursor", True)
         if cursor is True:
@@ -451,6 +455,12 @@ class InstagramPostsExtractor(InstagramExtractor):
         uid = self.api.user_id(self.item)
         return self.api.user_feed(uid)
 
+    def _extract_pinned(self, post):
+        try:
+            return post["timeline_pinned_user_ids"]
+        except KeyError:
+            return ()
+
 
 class InstagramReelsExtractor(InstagramExtractor):
     """Extractor for an Instagram user's reels"""
@@ -461,6 +471,12 @@ class InstagramReelsExtractor(InstagramExtractor):
     def posts(self):
         uid = self.api.user_id(self.item)
         return self.api.user_clips(uid)
+
+    def _extract_pinned(self, post):
+        try:
+            return post["clips_tab_pinned_user_ids"]
+        except KeyError:
+            return ()
 
 
 class InstagramTaggedExtractor(InstagramExtractor):
