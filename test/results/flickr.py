@@ -17,6 +17,7 @@ __tests__ = (
         "contexts": True,
         "exif": True,
     },
+    "#urls"        : "https://live.staticflickr.com/7463/16089302239_de18cd8017_b_d.jpg",
     "#pattern"     : flickr.FlickrImageExtractor.pattern,
     "#sha1_content": [
         "3133006c6d657fe54cf7d4c46b82abbcb0efaf9f",
@@ -28,7 +29,7 @@ __tests__ = (
     "description": str,
     "exif"       : list,
     "extension"  : "jpg",
-    "filename"   : "16089302239_de18cd8017_b",
+    "filename"   : "16089302239_de18cd8017_b_d",
     "id"         : 16089302239,
     "height"     : 683,
     "label"      : "Large",
@@ -59,10 +60,10 @@ __tests__ = (
 },
 
 {
-    "#url"     : "https://www.flickr.com/photos/145617051@N08/46733161535",
-    "#category": ("", "flickr", "image"),
+    "#url"     : "https://www.flickr.com/photos/eliasroviello/52713899383/",
+    "#comment" : "video",
     "#class"   : flickr.FlickrImageExtractor,
-    "#count"   : 1,
+    "#pattern" : r"https://live.staticflickr\.com/video/52713899383/51dfffef79/1080p\.mp4\?s=ey.+",
 
     "media": "video",
 },

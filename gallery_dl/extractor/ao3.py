@@ -9,9 +9,11 @@
 """Extractors for https://archiveofourown.org/"""
 
 from .common import Extractor, Message
-from .. import text, util
+from .. import text, util, exception
+from ..cache import cache
 
-BASE_PATTERN = r"(?:https?://)?(?:www\.)?archiveofourown.org"
+BASE_PATTERN = (r"(?:https?://)?(?:www\.)?"
+                r"a(?:rchiveofourown|o3)\.(?:org|com|net)")
 
 
 class Ao3Extractor(Extractor):
@@ -19,17 +21,83 @@ class Ao3Extractor(Extractor):
     category = "ao3"
     root = "https://archiveofourown.org"
     categorytransfer = True
+    cookies_domain = ".archiveofourown.org"
+    cookies_names = ("remember_user_token",)
     request_interval = (0.5, 1.5)
 
     def items(self):
+        self.login()
+
         base = self.root + "/works/"
-        data = {"_extractor": Ao3WorkExtractor}
+        data = {"_extractor": Ao3WorkExtractor, "type": "work"}
 
         for work_id in self.works():
             yield Message.Queue, base + work_id, data
 
+    def items_list(self, type, needle, part=True):
+        self.login()
+
+        base = self.root + "/"
+        data_work = {"_extractor": Ao3WorkExtractor, "type": "work"}
+        data_series = {"_extractor": Ao3SeriesExtractor, "type": "series"}
+        data_user = {"_extractor": Ao3UserExtractor, "type": "user"}
+
+        for item in self._pagination(self.groups[0], needle):
+            path = item.rpartition("/")[0] if part else item
+            url = base + path
+            if item.startswith("works/"):
+                yield Message.Queue, url, data_work
+            elif item.startswith("series/"):
+                yield Message.Queue, url, data_series
+            elif item.startswith("users/"):
+                yield Message.Queue, url, data_user
+            else:
+                self.log.warning("Unsupported %s type '%s'", type, path)
+
     def works(self):
         return self._pagination(self.groups[0])
+
+    def login(self):
+        if self.cookies_check(self.cookies_names):
+            return
+
+        username, password = self._get_auth_info()
+        if username:
+            return self.cookies_update(self._login_impl(username, password))
+
+    @cache(maxage=90*86400, keyarg=1)
+    def _login_impl(self, username, password):
+        self.log.info("Logging in as %s", username)
+
+        url = self.root + "/users/login"
+        page = self.request(url).text
+
+        pos = page.find('id="loginform"')
+        token = text.extract(
+            page, ' name="authenticity_token" value="', '"', pos)[0]
+        if not token:
+            self.log.error("Unable to extract 'authenticity_token'")
+
+        data = {
+            "authenticity_token": text.unescape(token),
+            "user[login]"       : username,
+            "user[password]"    : password,
+            "user[remember_me]" : "1",
+            "commit"            : "Log In",
+        }
+
+        response = self.request(url, method="POST", data=data)
+        if not response.history:
+            raise exception.AuthenticationError()
+
+        remember = response.history[0].cookies.get("remember_user_token")
+        if not remember:
+            raise exception.AuthenticationError()
+
+        return {
+            "remember_user_token": remember,
+            "user_credentials"   : "1",
+        }
 
     def _pagination(self, path, needle='<li id="work_'):
         while True:
@@ -64,11 +132,30 @@ class Ao3WorkExtractor(Ao3Extractor):
         self.cookies.set("view_adult", "true", domain="archiveofourown.org")
 
     def items(self):
+        self.login()
+
         work_id = self.groups[0]
         url = "{}/works/{}".format(self.root, work_id)
-        extr = text.extract_from(self.request(url).text)
+        response = self.request(url, notfound="work")
+
+        if response.url.endswith("/users/login?restricted=true"):
+            raise exception.AuthorizationError(
+                "Login required to access member-only works")
+        page = response.text
+        if len(page) < 20000 and \
+                '<h2 class="landmark heading">Adult Content Warning</' in page:
+            raise exception.StopExtraction("Adult Content")
+
+        extr = text.extract_from(page)
+
+        chapters = {}
+        cindex = extr(' id="chapter_index"', "</ul>")
+        for ch in text.extract_iter(cindex, ' value="', "</option>"):
+            cid, _, cname = ch.partition('">')
+            chapters[cid] = text.unescape(cname)
 
         fmts = {}
+        path = ""
         download = extr(' class="download"', "</ul>")
         for dl in text.extract_iter(download, ' href="', "</"):
             path, _, type = dl.rpartition('">')
@@ -94,10 +181,13 @@ class Ao3WorkExtractor(Ao3Extractor):
             "series"       : extr('<dd class="series">', "</dd>"),
             "date"         : text.parse_datetime(
                 extr('<dd class="published">', "<"), "%Y-%m-%d"),
+            "date_completed": text.parse_datetime(
+                extr('>Completed:</dt><dd class="status">', "<"), "%Y-%m-%d"),
+            "date_updated" : text.parse_timestamp(
+                path.rpartition("updated_at=")[2]),
             "words"        : text.parse_int(
                 extr('<dd class="words">', "<").replace(",", "")),
-            "chapters"     : text.parse_int(
-                extr('<dd class="chapters">', "/")),
+            "chapters"     : chapters,
             "comments"     : text.parse_int(
                 extr('<dd class="comments">', "<").replace(",", "")),
             "likes"        : text.parse_int(
@@ -106,14 +196,27 @@ class Ao3WorkExtractor(Ao3Extractor):
                 extr('<dd class="bookmarks">', "</dd>")).replace(",", "")),
             "views"        : text.parse_int(
                 extr('<dd class="hits">', "<").replace(",", "")),
-            "title"        : text.unescape(
-                extr(' class="title heading">', "<").strip()),
+            "title"        : text.unescape(text.remove_html(
+                extr(' class="title heading">', "</h2>")).strip()),
             "author"       : text.unescape(text.remove_html(
                 extr(' class="byline heading">', "</h3>"))),
             "summary"      : text.split_html(
                 extr(' class="heading">Summary:</h3>', "</div>")),
         }
         data["language"] = util.code_to_language(data["lang"])
+
+        series = data["series"]
+        if series:
+            extr = text.extract_from(series)
+            data["series"] = {
+                "prev" : extr(' class="previous" href="/works/', '"'),
+                "index": extr(' class="position">Part ', " "),
+                "id"   : extr(' href="/series/', '"'),
+                "name" : text.unescape(extr(">", "<")),
+                "next" : extr(' class="next" href="/works/', '"'),
+            }
+        else:
+            data["series"] = None
 
         yield Message.Directory, data
         for fmt in self.formats:
@@ -181,6 +284,8 @@ class Ao3UserSeriesExtractor(Ao3Extractor):
     example = "https://archiveofourown.org/users/USER/series"
 
     def items(self):
+        self.login()
+
         base = self.root + "/series/"
         data = {"_extractor": Ao3SeriesExtractor}
 
@@ -188,7 +293,6 @@ class Ao3UserSeriesExtractor(Ao3Extractor):
             yield Message.Queue, base + series_id, data
 
     def series(self):
-        path, user, pseud, query = self.groups
         return self._pagination(self.groups[0], '<li id="series_')
 
 
@@ -198,3 +302,16 @@ class Ao3UserBookmarkExtractor(Ao3Extractor):
     pattern = (BASE_PATTERN + r"(/users/([^/?#]+)/(?:pseuds/([^/?#]+)/)?"
                r"bookmarks(?:/?\?.+)?)")
     example = "https://archiveofourown.org/users/USER/bookmarks"
+
+    def items(self):
+        return self.items_list("bookmark", '<span class="count"><a href="/')
+
+
+class Ao3SubscriptionsExtractor(Ao3Extractor):
+    """Extractor for your AO3 account's subscriptions"""
+    subcategory = "subscriptions"
+    pattern = BASE_PATTERN + r"(/users/([^/?#]+)/subscriptions(?:/?\?.+)?)"
+    example = "https://archiveofourown.org/users/USER/subscriptions"
+
+    def items(self):
+        return self.items_list("subscription", '<dt>\n<a href="/', False)

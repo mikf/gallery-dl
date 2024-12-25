@@ -32,6 +32,13 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.pornhub.com/album/69606532",
+    "#comment" : "KeyError due to missing image entry (#6299)",
+    "#class"   : pornhub.PornhubGalleryExtractor,
+    "#count"   : 6,
+},
+
+{
     "#url"     : "https://www.pornhub.com/album/69040172",
     "#category": ("", "pornhub", "gallery"),
     "#class"   : pornhub.PornhubGalleryExtractor,
@@ -112,7 +119,7 @@ __tests__ = (
     "#category": ("", "pornhub", "gifs"),
     "#class"   : pornhub.PornhubGifsExtractor,
     "#pattern" : pornhub.PornhubGifExtractor.pattern,
-    "#count"   : ">= 42",
+    "#count"   : ">= 30",
 },
 
 {

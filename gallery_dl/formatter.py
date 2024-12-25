@@ -476,6 +476,7 @@ _GLOBALS = {
     "_env": lambda: os.environ,
     "_lit": lambda: _literal,
     "_now": datetime.datetime.now,
+    "_nul": lambda: util.NONE,
 }
 _CONVERSIONS = {
     "l": str.lower,
@@ -484,6 +485,7 @@ _CONVERSIONS = {
     "C": string.capwords,
     "j": util.json_dumps,
     "t": str.strip,
+    "L": len,
     "T": util.datetime_to_timestamp_string,
     "d": text.parse_timestamp,
     "U": text.unescape,

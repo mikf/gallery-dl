@@ -66,10 +66,19 @@ class PornhubGalleryExtractor(PornhubExtractor):
     def items(self):
         data = self.metadata()
         yield Message.Directory, data
-        for num, image in enumerate(self.images(), 1):
+        for num, img in enumerate(self.images(), 1):
+
+            image = {
+                "url"    : img["img_large"],
+                "caption": img["caption"],
+                "id"     : text.parse_int(img["id"]),
+                "views"  : text.parse_int(img["times_viewed"]),
+                "score"  : text.parse_int(img["vote_percent"]),
+                "num"    : num,
+            }
+
             url = image["url"]
             image.update(data)
-            image["num"] = num
             yield Message.Url, url, text.nameext_from_url(url, image)
 
     def metadata(self):
@@ -105,18 +114,20 @@ class PornhubGalleryExtractor(PornhubExtractor):
         images = response.json()
         key = end = self._first
 
-        while True:
-            img = images[key]
-            yield {
-                "url"    : img["img_large"],
-                "caption": img["caption"],
-                "id"     : text.parse_int(img["id"]),
-                "views"  : text.parse_int(img["times_viewed"]),
-                "score"  : text.parse_int(img["vote_percent"]),
-            }
-            key = str(img["next"])
-            if key == end:
-                return
+        results = []
+        try:
+            while True:
+                img = images[key]
+                results.append(img)
+                key = str(img["next"])
+                if key == end:
+                    break
+        except KeyError:
+            self.log.warning("%s: Unable to ensure correct file order",
+                             self.gallery_id)
+            return images.values()
+
+        return results
 
 
 class PornhubGifExtractor(PornhubExtractor):

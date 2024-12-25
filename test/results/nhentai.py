@@ -12,7 +12,8 @@ __tests__ = (
     "#url"     : "https://nhentai.net/g/147850/",
     "#category": ("", "nhentai", "gallery"),
     "#class"   : nhentai.NhentaiGalleryExtractor,
-    "#sha1_url": "5179dbf0f96af44005a0ff705a0ad64ac26547d0",
+    "#pattern" : r"https://i[1-4]\.nhentai\.net/galleries/867789/\d+\.jpg",
+    "#count"   : 16,
 
     "title"     : r"re:\[Morris\] Amazon no Hiyaku \| Amazon Elixir",
     "title_en"  : str,
@@ -32,6 +33,19 @@ __tests__ = (
     "language"  : "English",
     "width"     : int,
     "height"    : int,
+},
+
+{
+    "#url"     : "https://nhentai.net/g/538045/",
+    "#comment" : "webp (#6442)",
+    "#class"   : nhentai.NhentaiGalleryExtractor,
+    "#range"   : "4-7",
+    "#pattern"    : (
+        r"https://i\d\.nhentai.net/galleries/3115523/4\.jpg",
+        r"https://i\d\.nhentai.net/galleries/3115523/5\.webp",
+        r"https://i\d\.nhentai.net/galleries/3115523/6\.webp",
+        r"https://i\d\.nhentai.net/galleries/3115523/7\.jpg",
+    ),
 },
 
 {

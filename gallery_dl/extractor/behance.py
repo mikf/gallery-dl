@@ -171,6 +171,7 @@ class BehanceGalleryExtractor(BehanceExtractor):
                     url = text.extr(page, '<source src="', '"')
                     if text.ext_from_url(url) == "m3u8":
                         url = "ytdl:" + url
+                        module["_ytdl_manifest"] = "hls"
                         module["extension"] = "mp4"
                     append((url, module))
                     continue

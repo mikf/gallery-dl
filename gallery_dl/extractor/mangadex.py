@@ -26,6 +26,7 @@ class MangadexExtractor(Extractor):
         "{manga}_c{chapter:>03}{chapter_minor}_{page:>03}.{extension}")
     archive_fmt = "{chapter_id}_{page}"
     root = "https://mangadex.org"
+    useragent = util.USERAGENT
     _cache = {}
 
     def __init__(self, match):
@@ -33,7 +34,6 @@ class MangadexExtractor(Extractor):
         self.uuid = match.group(1)
 
     def _init(self):
-        self.session.headers["User-Agent"] = util.USERAGENT
         self.api = MangadexAPI(self)
 
     def items(self):
@@ -174,6 +174,20 @@ class MangadexListExtractor(MangadexExtractor):
                 yield Message.Queue, url, data
 
 
+class MangadexAuthorExtractor(MangadexExtractor):
+    """Extractor for mangadex authors"""
+    subcategory = "author"
+    pattern = BASE_PATTERN + r"/author/([0-9a-f-]+)"
+    example = ("https://mangadex.org/author"
+               "/01234567-89ab-cdef-0123-456789abcdef/NAME")
+
+    def items(self):
+        for manga in self.api.manga_author(self.uuid):
+            manga["_extractor"] = MangadexMangaExtractor
+            url = "{}/title/{}".format(self.root, manga["id"])
+            yield Message.Queue, url, manga
+
+
 class MangadexAPI():
     """Interface for the MangaDex API v5
 
@@ -195,6 +209,10 @@ class MangadexAPI():
     def athome_server(self, uuid):
         return self._call("/at-home/server/" + uuid)
 
+    def author(self, uuid, manga=False):
+        params = {"includes[]": ("manga",)} if manga else None
+        return self._call("/author/" + uuid, params)["data"]
+
     def chapter(self, uuid):
         params = {"includes[]": ("scanlation_group",)}
         return self._call("/chapter/" + uuid, params)["data"]
@@ -203,12 +221,16 @@ class MangadexAPI():
         return self._call("/list/" + uuid)["data"]
 
     def list_feed(self, uuid):
-        return self._pagination("/list/" + uuid + "/feed")
+        return self._pagination_chapters("/list/" + uuid + "/feed")
 
     @memcache(keyarg=1)
     def manga(self, uuid):
         params = {"includes[]": ("artist", "author")}
         return self._call("/manga/" + uuid, params)["data"]
+
+    def manga_author(self, uuid_author):
+        params = {"authorOrArtist": uuid_author}
+        return self._pagination_manga("/manga", params)
 
     def manga_feed(self, uuid):
         order = "desc" if self.extractor.config("chapter-reverse") else "asc"
@@ -216,11 +238,11 @@ class MangadexAPI():
             "order[volume]" : order,
             "order[chapter]": order,
         }
-        return self._pagination("/manga/" + uuid + "/feed", params)
+        return self._pagination_chapters("/manga/" + uuid + "/feed", params)
 
     def user_follows_manga_feed(self):
         params = {"order[publishAt]": "desc"}
-        return self._pagination("/user/follows/manga/feed", params)
+        return self._pagination_chapters("/user/follows/manga/feed", params)
 
     def authenticate(self):
         self.headers["Authorization"] = \
@@ -267,22 +289,31 @@ class MangadexAPI():
             raise exception.StopExtraction(
                 "%s %s (%s)", response.status_code, response.reason, msg)
 
-    def _pagination(self, endpoint, params=None):
+    def _pagination_chapters(self, endpoint, params=None):
         if params is None:
             params = {}
 
+        lang = self.extractor.config("lang")
+        if isinstance(lang, str) and "," in lang:
+            lang = lang.split(",")
+        params["translatedLanguage[]"] = lang
+        params["includes[]"] = ("scanlation_group",)
+
+        return self._pagination(endpoint, params)
+
+    def _pagination_manga(self, endpoint, params=None):
+        if params is None:
+            params = {}
+
+        return self._pagination(endpoint, params)
+
+    def _pagination(self, endpoint, params):
         config = self.extractor.config
+
         ratings = config("ratings")
         if ratings is None:
             ratings = ("safe", "suggestive", "erotica", "pornographic")
-
-        lang = config("lang")
-        if isinstance(lang, str) and "," in lang:
-            lang = lang.split(",")
-
         params["contentRating[]"] = ratings
-        params["translatedLanguage[]"] = lang
-        params["includes[]"] = ("scanlation_group",)
         params["offset"] = 0
 
         api_params = config("api-parameters")

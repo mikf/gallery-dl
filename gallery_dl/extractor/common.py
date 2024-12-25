@@ -11,10 +11,10 @@
 import os
 import re
 import ssl
-import sys
 import time
 import netrc
 import queue
+import random
 import getpass
 import logging
 import datetime
@@ -22,7 +22,7 @@ import requests
 import threading
 from requests.adapters import HTTPAdapter
 from .message import Message
-from .. import config, text, util, cache, exception
+from .. import config, output, text, util, cache, exception
 urllib3 = requests.packages.urllib3
 
 
@@ -37,10 +37,12 @@ class Extractor():
     archive_fmt = ""
     root = ""
     cookies_domain = ""
+    cookies_index = 0
     referer = True
     ciphers = None
     tls12 = True
     browser = None
+    useragent = util.USERAGENT_FIREFOX
     request_interval = 0.0
     request_interval_min = 0.0
     request_interval_429 = 60.0
@@ -169,8 +171,16 @@ class Extractor():
         while True:
             try:
                 response = session.request(method, url, **kwargs)
-            except (requests.exceptions.ConnectionError,
-                    requests.exceptions.Timeout,
+            except requests.exceptions.ConnectionError as exc:
+                code = 0
+                try:
+                    reason = exc.args[0].reason
+                    cls = reason.__class__.__name__
+                    pre, _, err = str(reason.args[-1]).partition(":")
+                    msg = " {}: {}".format(cls, (err or pre).lstrip())
+                except Exception:
+                    msg = exc
+            except (requests.exceptions.Timeout,
                     requests.exceptions.ChunkedEncodingError,
                     requests.exceptions.ContentDecodingError) as exc:
                 msg = exc
@@ -183,7 +193,9 @@ class Extractor():
                     self._dump_response(response)
                 if (
                     code < 400 or
-                    code < 500 and (not fatal and code != 429 or fatal is None)
+                    code < 500 and (
+                        not fatal and code != 429 or fatal is None) or
+                    fatal is ...
                 ):
                     if encoding:
                         response.encoding = encoding
@@ -206,6 +218,11 @@ class Extractor():
                         break
                     if b'name="captcha-bypass"' in content:
                         self.log.warning("Cloudflare CAPTCHA")
+                        break
+                elif server and server.startswith("ddos-guard") and \
+                        code == 403:
+                    if b"/ddos-guard/js-challenge/" in response.content:
+                        self.log.warning("DDoS-Guard challenge")
                         break
 
                 if code == 429 and self._handle_429(response):
@@ -285,13 +302,8 @@ class Extractor():
 
     def _check_input_allowed(self, prompt=""):
         input = self.config("input")
-
         if input is None:
-            try:
-                input = sys.stdin.isatty()
-            except Exception:
-                input = False
-
+            input = output.TTY_STDIN
         if not input:
             raise exception.StopExtraction(
                 "User input required (%s)", prompt.strip(" :"))
@@ -347,6 +359,9 @@ class Extractor():
         headers.clear()
         ssl_options = ssl_ciphers = 0
 
+        # .netrc Authorization headers are alwsays disabled
+        session.trust_env = True if self.config("proxy-env", True) else False
+
         browser = self.config("browser")
         if browser is None:
             browser = self.browser
@@ -380,11 +395,13 @@ class Extractor():
             ssl_ciphers = SSL_CIPHERS[browser]
         else:
             useragent = self.config("user-agent")
-            if useragent is None:
-                useragent = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64; "
-                             "rv:128.0) Gecko/20100101 Firefox/128.0")
+            if useragent is None or useragent == "auto":
+                useragent = self.useragent
             elif useragent == "browser":
                 useragent = _browser_useragent()
+            elif self.useragent is not Extractor.useragent and \
+                    useragent is config.get(("extractor",), "user-agent"):
+                useragent = self.useragent
             headers["User-Agent"] = useragent
             headers["Accept"] = "*/*"
             headers["Accept-Language"] = "en-US,en;q=0.5"
@@ -443,45 +460,58 @@ class Extractor():
 
         cookies = self.config("cookies")
         if cookies:
-            if isinstance(cookies, dict):
-                self.cookies_update_dict(cookies, self.cookies_domain)
+            select = self.config("cookies-select")
+            if select:
+                if select == "rotate":
+                    cookies = cookies[self.cookies_index % len(cookies)]
+                    Extractor.cookies_index += 1
+                else:
+                    cookies = random.choice(cookies)
+            self.cookies_load(cookies)
 
-            elif isinstance(cookies, str):
-                path = util.expand_path(cookies)
+    def cookies_load(self, cookies_source):
+        if isinstance(cookies_source, dict):
+            self.cookies_update_dict(cookies_source, self.cookies_domain)
+
+        elif isinstance(cookies_source, str):
+            path = util.expand_path(cookies_source)
+            try:
+                with open(path) as fp:
+                    cookies = util.cookiestxt_load(fp)
+            except Exception as exc:
+                self.log.warning("cookies: %s", exc)
+            else:
+                self.log.debug("Loading cookies from '%s'", cookies_source)
+                set_cookie = self.cookies.set_cookie
+                for cookie in cookies:
+                    set_cookie(cookie)
+                self.cookies_file = path
+
+        elif isinstance(cookies_source, (list, tuple)):
+            key = tuple(cookies_source)
+            cookies = _browser_cookies.get(key)
+
+            if cookies is None:
+                from ..cookies import load_cookies
                 try:
-                    with open(path) as fp:
-                        util.cookiestxt_load(fp, self.cookies)
+                    cookies = load_cookies(cookies_source)
                 except Exception as exc:
                     self.log.warning("cookies: %s", exc)
+                    cookies = ()
                 else:
-                    self.log.debug("Loading cookies from '%s'", cookies)
-                    self.cookies_file = path
-
-            elif isinstance(cookies, (list, tuple)):
-                key = tuple(cookies)
-                cookiejar = _browser_cookies.get(key)
-
-                if cookiejar is None:
-                    from ..cookies import load_cookies
-                    cookiejar = self.cookies.__class__()
-                    try:
-                        load_cookies(cookiejar, cookies)
-                    except Exception as exc:
-                        self.log.warning("cookies: %s", exc)
-                    else:
-                        _browser_cookies[key] = cookiejar
-                else:
-                    self.log.debug("Using cached cookies from %s", key)
-
-                set_cookie = self.cookies.set_cookie
-                for cookie in cookiejar:
-                    set_cookie(cookie)
-
+                    _browser_cookies[key] = cookies
             else:
-                self.log.warning(
-                    "Expected 'dict', 'list', or 'str' value for 'cookies' "
-                    "option, got '%s' (%s)",
-                    cookies.__class__.__name__, cookies)
+                self.log.debug("Using cached cookies from %s", key)
+
+            set_cookie = self.cookies.set_cookie
+            for cookie in cookies:
+                set_cookie(cookie)
+
+        else:
+            self.log.warning(
+                "Expected 'dict', 'list', or 'str' value for 'cookies' "
+                "option, got '%s' (%s)",
+                cookies_source.__class__.__name__, cookies_source)
 
     def cookies_store(self):
         """Store the session's cookies in a cookies.txt file"""
@@ -643,6 +673,8 @@ class Extractor():
                     headers=(self._write_pages in ("all", "ALL")),
                     hide_auth=(self._write_pages != "ALL")
                 )
+            self.log.info("Writing '%s' response to '%s'",
+                          response.url, path + ".txt")
         except Exception as e:
             self.log.warning("Failed to dump HTTP request (%s: %s)",
                              e.__class__.__name__, e)
@@ -889,10 +921,11 @@ def _browser_useragent():
 
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    server.bind(("127.0.0.1", 6414))
+    server.bind(("127.0.0.1", 0))
     server.listen(1)
 
-    webbrowser.open("http://127.0.0.1:6414/user-agent")
+    host, port = server.getsockname()
+    webbrowser.open("http://{}:{}/user-agent".format(host, port))
 
     client = server.accept()[0]
     server.close()
@@ -990,6 +1023,12 @@ SSL_CIPHERS = {
     ),
 }
 
+
+# disable Basic Authorization header injection from .netrc data
+try:
+    requests.sessions.get_netrc_auth = lambda _: None
+except Exception:
+    pass
 
 # detect brotli support
 try:

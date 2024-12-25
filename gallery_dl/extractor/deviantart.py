@@ -31,7 +31,7 @@ class DeviantartExtractor(Extractor):
     root = "https://www.deviantart.com"
     directory_fmt = ("{category}", "{username}")
     filename_fmt = "{category}_{index}_{title}.{extension}"
-    cookies_domain = None
+    cookies_domain = ".deviantart.com"
     cookies_names = ("auth", "auth_secure", "userinfo")
     _last_request = 0
 
@@ -46,11 +46,13 @@ class DeviantartExtractor(Extractor):
         self.extra = self.config("extra", False)
         self.quality = self.config("quality", "100")
         self.original = self.config("original", True)
+        self.previews = self.config("previews", False)
         self.intermediary = self.config("intermediary", True)
         self.comments_avatars = self.config("comments-avatars", False)
         self.comments = self.comments_avatars or self.config("comments", False)
 
         self.api = DeviantartOAuthAPI(self)
+        self.eclipse_api = None
         self.group = False
         self._premium_cache = {}
 
@@ -75,6 +77,11 @@ class DeviantartExtractor(Extractor):
             self._update_content = self._update_content_image
         else:
             self._update_content = self._update_content_default
+
+        if self.previews == "all":
+            self.previews_images = self.previews = True
+        else:
+            self.previews_images = False
 
         journals = self.config("journals", "html")
         if journals == "html":
@@ -170,13 +177,7 @@ class DeviantartExtractor(Extractor):
                 yield self.commit(deviation, deviation["flash"])
 
             if self.commit_journal:
-                if "excerpt" in deviation:
-                    journal = self.api.deviation_content(
-                        deviation["deviationid"])
-                elif "body" in deviation:
-                    journal = {"html": deviation.pop("body")}
-                else:
-                    journal = None
+                journal = self._extract_journal(deviation)
                 if journal:
                     if self.extra:
                         deviation["_journal"] = journal["html"]
@@ -196,6 +197,18 @@ class DeviantartExtractor(Extractor):
                     url = "{}/{}/avatar/".format(self.root, name)
                     comment["_extractor"] = DeviantartAvatarExtractor
                     yield Message.Queue, url, comment
+
+            if self.previews and "preview" in deviation:
+                preview = deviation["preview"]
+                deviation["is_preview"] = True
+                if self.previews_images:
+                    yield self.commit(deviation, preview)
+                else:
+                    mtype = mimetypes.guess_type(
+                        "a." + deviation["extension"], False)[0]
+                    if mtype and not mtype.startswith("image/"):
+                        yield self.commit(deviation, preview)
+                del deviation["is_preview"]
 
             if not self.extra:
                 continue
@@ -284,6 +297,9 @@ class DeviantartExtractor(Extractor):
         html = journal["html"]
         shadow = SHADOW_TEMPLATE.format_map(thumbs[0]) if thumbs else ""
 
+        if not html:
+            self.log.warning("%s: Empty journal content", deviation["index"])
+
         if "css" in journal:
             css, cls = journal["css"], "withskin"
         elif html.startswith("<style"):
@@ -321,10 +337,11 @@ class DeviantartExtractor(Extractor):
         deviation["extension"] = "htm"
         return Message.Url, html, deviation
 
-    @staticmethod
-    def _commit_journal_text(deviation, journal):
+    def _commit_journal_text(self, deviation, journal):
         html = journal["html"]
-        if html.startswith("<style"):
+        if not html:
+            self.log.warning("%s: Empty journal content", deviation["index"])
+        elif html.startswith("<style"):
             html = html.partition("</style>")[2]
         head, _, tail = html.rpartition("<script")
         content = "\n".join(
@@ -340,6 +357,228 @@ class DeviantartExtractor(Extractor):
 
         deviation["extension"] = "txt"
         return Message.Url, txt, deviation
+
+    def _extract_journal(self, deviation):
+        if "excerpt" in deviation:
+            # # empty 'html'
+            #  return self.api.deviation_content(deviation["deviationid"])
+
+            if "_page" in deviation:
+                page = deviation["_page"]
+                del deviation["_page"]
+            else:
+                page = self._limited_request(deviation["url"]).text
+
+            # extract journal html from webpage
+            html = text.extr(
+                page,
+                "<h2>Literature Text</h2></span><div>",
+                "</div></section></div></div>")
+            if html:
+                return {"html": html}
+
+            self.log.debug("%s: Failed to extract journal HTML from webpage. "
+                           "Falling back to __INITIAL_STATE__ markup.",
+                           deviation["index"])
+
+            # parse __INITIAL_STATE__ as fallback
+            state = util.json_loads(text.extr(
+                page, 'window.__INITIAL_STATE__ = JSON.parse("', '");')
+                .replace("\\\\", "\\").replace("\\'", "'").replace('\\"', '"'))
+            deviations = state["@@entities"]["deviation"]
+            content = deviations.popitem()[1]["textContent"]
+
+            html = self._textcontent_to_html(deviation, content)
+            if html:
+                return {"html": html}
+            return {"html": content["excerpt"].replace("\n", "<br />")}
+
+        if "body" in deviation:
+            return {"html": deviation.pop("body")}
+        return None
+
+    def _textcontent_to_html(self, deviation, content):
+        html = content["html"]
+        markup = html.get("markup")
+
+        if not markup or markup[0] != "{":
+            return markup
+
+        if html["type"] == "tiptap":
+            try:
+                return self._tiptap_to_html(markup)
+            except Exception as exc:
+                self.log.debug("", exc_info=exc)
+                self.log.error("%s: '%s: %s'", deviation["index"],
+                               exc.__class__.__name__, exc)
+
+        self.log.warning("%s: Unsupported '%s' markup.",
+                         deviation["index"], html["type"])
+
+    def _tiptap_to_html(self, markup):
+        html = []
+
+        html.append('<div data-editor-viewer="1" '
+                    'class="_83r8m _2CKTq _3NjDa mDnFl">')
+        data = util.json_loads(markup)
+        for block in data["document"]["content"]:
+            self._tiptap_process_content(html, block)
+        html.append("</div>")
+
+        return "".join(html)
+
+    def _tiptap_process_content(self, html, content):
+        type = content["type"]
+
+        if type == "paragraph":
+            children = content.get("content")
+            if children:
+                html.append('<p style="')
+
+                attrs = content["attrs"]
+                if "textAlign" in attrs:
+                    html.append("text-align:")
+                    html.append(attrs["textAlign"])
+                    html.append(";")
+                html.append('margin-inline-start:0px">')
+
+                for block in children:
+                    self._tiptap_process_content(html, block)
+                html.append("</p>")
+            else:
+                html.append('<p class="empty-p"><br/></p>')
+
+        elif type == "text":
+            self._tiptap_process_text(html, content)
+
+        elif type == "heading":
+            attrs = content["attrs"]
+            level = str(attrs.get("level") or "3")
+
+            html.append("<h")
+            html.append(level)
+            html.append(' style="text-align:')
+            html.append(attrs.get("textAlign") or "left")
+            html.append('">')
+            html.append('<span style="margin-inline-start:0px">')
+
+            children = content.get("content")
+            if children:
+                for block in children:
+                    self._tiptap_process_content(html, block)
+
+            html.append("</span></h")
+            html.append(level)
+            html.append(">")
+
+        elif type == "hardBreak":
+            html.append("<br/><br/>")
+
+        elif type == "horizontalRule":
+            html.append("<hr/>")
+
+        elif type == "da-deviation":
+            self._tiptap_process_deviation(html, content)
+
+        elif type == "da-mention":
+            user = content["attrs"]["user"]["username"]
+            html.append('<a href="https://www.deviantart.com/')
+            html.append(user.lower())
+            html.append('" data-da-type="da-mention" data-user="">@<!-- -->')
+            html.append(user)
+            html.append('</a>')
+
+        else:
+            self.log.warning("Unsupported content type '%s'", type)
+
+    def _tiptap_process_text(self, html, content):
+        marks = content.get("marks")
+        if marks:
+            close = []
+            for mark in marks:
+                type = mark["type"]
+                if type == "link":
+                    attrs = mark.get("attrs") or {}
+                    html.append('<a href="')
+                    html.append(text.escape(attrs.get("href") or ""))
+                    html.append('" rel="noopener noreferrer nofollow ugc">')
+                    close.append("</a>")
+                elif type == "bold":
+                    html.append("<strong>")
+                    close.append("</strong>")
+                elif type == "italic":
+                    html.append("<em>")
+                    close.append("</em>")
+                elif type == "underline":
+                    html.append("<u>")
+                    close.append("</u>")
+                elif type == "strike":
+                    html.append("<s>")
+                    close.append("</s>")
+                elif type == "textStyle" and len(mark) <= 1:
+                    pass
+                else:
+                    self.log.warning("Unsupported text marker '%s'", type)
+            close.reverse()
+            html.append(text.escape(content["text"]))
+            html.extend(close)
+        else:
+            html.append(text.escape(content["text"]))
+
+    def _tiptap_process_deviation(self, html, content):
+        dev = content["attrs"]["deviation"]
+        media = dev.get("media") or ()
+
+        html.append('<div class="jjNX2">')
+        html.append('<figure class="Qf-HY" data-da-type="da-deviation" '
+                    'data-deviation="" '
+                    'data-width="" data-link="" data-alignment="center">')
+
+        if "baseUri" in media:
+            url, formats = self._eclipse_media(media)
+            full = formats["fullview"]
+
+            html.append('<a href="')
+            html.append(text.escape(dev["url"]))
+            html.append('" class="_3ouD5" style="margin:0 auto;display:flex;'
+                        'align-items:center;justify-content:center;'
+                        'overflow:hidden;width:780px;height:')
+            html.append(str(780 * full["h"] / full["w"]))
+            html.append('px">')
+
+            html.append('<img src="')
+            html.append(text.escape(url))
+            html.append('" alt="')
+            html.append(text.escape(dev["title"]))
+            html.append('" style="width:100%;max-width:100%;display:block"/>')
+            html.append("</a>")
+
+        elif "textContent" in dev:
+            html.append('<div class="_32Hs4" style="width:350px">')
+
+            html.append('<a href="')
+            html.append(text.escape(dev["url"]))
+            html.append('" class="_3ouD5">')
+
+            html.append('''\
+<section class="Q91qI aG7Yi" style="width:350px;height:313px">\
+<div class="_16ECM _1xMkk" aria-hidden="true">\
+<svg height="100%" viewBox="0 0 15 12" preserveAspectRatio="xMidYMin slice" \
+fill-rule="evenodd">\
+<linearGradient x1="87.8481761%" y1="16.3690766%" \
+x2="45.4107524%" y2="71.4898596%" id="app-root-3">\
+<stop stop-color="#00FF62" offset="0%"></stop>\
+<stop stop-color="#3197EF" stop-opacity="0" offset="100%"></stop>\
+</linearGradient>\
+<text class="_2uqbc" fill="url(#app-root-3)" text-anchor="end" x="15" y="11">J\
+</text></svg></div><div class="_1xz9u">Literature</div><h3 class="_2WvKD">\
+''')
+            html.append(text.escape(dev["title"]))
+            html.append('</h3><div class="_2CPLm">')
+            html.append(text.escape(dev["textContent"]["excerpt"]))
+            html.append('</div></section></a></div>')
+
+        html.append('</figure></div>')
 
     def _extract_content(self, deviation):
         content = deviation["content"]
@@ -518,6 +757,23 @@ class DeviantartExtractor(Extractor):
             self.log.info("Unwatching %s", username)
             self.api.user_friends_unwatch(username)
 
+    def _eclipse_media(self, media, format="preview"):
+        url = [media["baseUri"], ]
+
+        formats = {
+            fmt["t"]: fmt
+            for fmt in media["types"]
+        }
+
+        tokens = media["token"]
+        if len(tokens) == 1:
+            fmt = formats[format]
+            url.append(fmt["c"].replace("<prettyName>", media["prettyName"]))
+        url.append("?token=")
+        url.append(tokens[-1])
+
+        return "".join(url), formats
+
     def _eclipse_to_oauth(self, eclipse_api, deviations):
         for obj in deviations:
             deviation = obj["deviation"] if "deviation" in obj else obj
@@ -675,43 +931,35 @@ class DeviantartStashExtractor(DeviantartExtractor):
     archive_fmt = "{index}.{extension}"
     pattern = (r"(?:https?://)?(?:(?:www\.)?deviantart\.com/stash|sta\.sh)"
                r"/([a-z0-9]+)")
-    example = "https://sta.sh/abcde"
+    example = "https://www.deviantart.com/stash/abcde"
 
     skip = Extractor.skip
 
     def __init__(self, match):
         DeviantartExtractor.__init__(self, match)
         self.user = None
-        self.stash_id = match.group(1)
 
     def deviations(self, stash_id=None):
         if stash_id is None:
-            stash_id = self.stash_id
-        url = "https://sta.sh/" + stash_id
+            stash_id = self.groups[0]
+        url = "https://www.deviantart.com/stash/" + stash_id
         page = self._limited_request(url).text
 
         if stash_id[0] == "0":
             uuid = text.extr(page, '//deviation/', '"')
             if uuid:
                 deviation = self.api.deviation(uuid)
+                deviation["_page"] = page
                 deviation["index"] = text.parse_int(text.extr(
                     page, '\\"deviationId\\":', ','))
                 yield deviation
                 return
 
-        for item in text.extract_iter(
-                page, 'class="stash-thumb-container', '</div>'):
-            url = text.extr(item, '<a href="', '"')
-
-            if url:
-                stash_id = url.rpartition("/")[2]
-            else:
-                stash_id = text.extr(item, 'gmi-stashid="', '"')
-                stash_id = "2" + util.bencode(text.parse_int(
-                    stash_id), "0123456789abcdefghijklmnopqrstuvwxyz")
-
-            if len(stash_id) > 2:
-                yield from self.deviations(stash_id)
+        for sid in text.extract_iter(
+                page, 'href="https://www.deviantart.com/stash/', '"'):
+            if sid == stash_id or sid.endswith("#comments"):
+                continue
+            yield from self.deviations(sid)
 
 
 class DeviantartFavoriteExtractor(DeviantartExtractor):
@@ -905,11 +1153,14 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
         else:
             url = "{}/view/{}/".format(self.root, self.deviation_id)
 
-        uuid = text.extr(self._limited_request(url).text,
-                         '"deviationUuid\\":\\"', '\\')
+        page = self._limited_request(url, notfound="deviation").text
+        uuid = text.extr(page, '"deviationUuid\\":\\"', '\\')
         if not uuid:
             raise exception.NotFoundError("deviation")
-        return (self.api.deviation(uuid),)
+
+        deviation = self.api.deviation(uuid)
+        deviation["_page"] = page
+        return (deviation,)
 
 
 class DeviantartScrapsExtractor(DeviantartExtractor):
@@ -917,7 +1168,6 @@ class DeviantartScrapsExtractor(DeviantartExtractor):
     subcategory = "scraps"
     directory_fmt = ("{category}", "{username}", "Scraps")
     archive_fmt = "s_{_username}_{index}.{extension}"
-    cookies_domain = ".deviantart.com"
     pattern = BASE_PATTERN + r"/gallery/(?:\?catpath=)?scraps\b"
     example = "https://www.deviantart.com/USER/gallery/scraps"
 
@@ -934,7 +1184,6 @@ class DeviantartSearchExtractor(DeviantartExtractor):
     subcategory = "search"
     directory_fmt = ("{category}", "Search", "{search_tags}")
     archive_fmt = "Q_{search_tags}_{index}.{extension}"
-    cookies_domain = ".deviantart.com"
     pattern = (r"(?:https?://)?www\.deviantart\.com"
                r"/search(?:/deviations)?/?\?([^#]+)")
     example = "https://www.deviantart.com/search?q=QUERY"
@@ -986,7 +1235,6 @@ class DeviantartGallerySearchExtractor(DeviantartExtractor):
     """Extractor for deviantart gallery searches"""
     subcategory = "gallery-search"
     archive_fmt = "g_{_username}_{index}.{extension}"
-    cookies_domain = ".deviantart.com"
     pattern = BASE_PATTERN + r"/gallery/?\?(q=[^#]+)"
     example = "https://www.deviantart.com/USER/gallery?q=QUERY"
 
@@ -1074,7 +1322,7 @@ class DeviantartOAuthAPI():
 
         metadata = extractor.config("metadata", False)
         if not metadata:
-            metadata = bool(extractor.extra)
+            metadata = True if extractor.extra else False
         if metadata:
             self.metadata = True
 
@@ -1782,25 +2030,28 @@ JOURNAL_TEMPLATE_HTML = """text:<!DOCTYPE html>
 <head>
     <meta charset="utf-8">
     <title>{title}</title>
-    <link rel="stylesheet" href="https://st.deviantart.net/\
-css/deviantart-network_lc.css?3843780832">
-    <link rel="stylesheet" href="https://st.deviantart.net/\
-css/group_secrets_lc.css?3250492874">
-    <link rel="stylesheet" href="https://st.deviantart.net/\
-css/v6core_lc.css?4246581581">
-    <link rel="stylesheet" href="https://st.deviantart.net/\
-css/sidebar_lc.css?1490570941">
-    <link rel="stylesheet" href="https://st.deviantart.net/\
-css/writer_lc.css?3090682151">
-    <link rel="stylesheet" href="https://st.deviantart.net/\
-css/v6loggedin_lc.css?3001430805">
+    <link rel="stylesheet" href="https://st.deviantart.net\
+/css/deviantart-network_lc.css?3843780832"/>
+    <link rel="stylesheet" href="https://st.deviantart.net\
+/css/group_secrets_lc.css?3250492874"/>
+    <link rel="stylesheet" href="https://st.deviantart.net\
+/css/v6core_lc.css?4246581581"/>
+    <link rel="stylesheet" href="https://st.deviantart.net\
+/css/sidebar_lc.css?1490570941"/>
+    <link rel="stylesheet" href="https://st.deviantart.net\
+/css/writer_lc.css?3090682151"/>
+    <link rel="stylesheet" href="https://st.deviantart.net\
+/css/v6loggedin_lc.css?3001430805"/>
     <style>{css}</style>
-    <link rel="stylesheet" href="https://st.deviantart.net/\
-roses/cssmin/core.css?1488405371919" >
-    <link rel="stylesheet" href="https://st.deviantart.net/\
-roses/cssmin/peeky.css?1487067424177" >
-    <link rel="stylesheet" href="https://st.deviantart.net/\
-roses/cssmin/desktop.css?1491362542749" >
+    <link rel="stylesheet" href="https://st.deviantart.net\
+/roses/cssmin/core.css?1488405371919"/>
+    <link rel="stylesheet" href="https://st.deviantart.net\
+/roses/cssmin/peeky.css?1487067424177"/>
+    <link rel="stylesheet" href="https://st.deviantart.net\
+/roses/cssmin/desktop.css?1491362542749"/>
+    <link rel="stylesheet" href="https://static.parastorage.com/services\
+/da-deviation/2bfd1ff7a9d6bf10d27b98dd8504c0399c3f9974a015785114b7dc6b\
+/app.min.css"/>
 </head>
 <body id="deviantART-v7" class="bubble no-apps loggedout w960 deviantart">
     <div id="output">

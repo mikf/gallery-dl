@@ -9,7 +9,9 @@
 """Collection of functions that work on strings/text"""
 
 import re
+import sys
 import html
+import time
 import datetime
 import urllib.parse
 
@@ -236,23 +238,71 @@ def parse_float(value, default=0.0):
 
 
 def parse_query(qs):
-    """Parse a query string into key-value pairs"""
+    """Parse a query string into name-value pairs
+
+    Ignore values whose name has been seen before
+    """
+    if not qs:
+        return {}
+
     result = {}
     try:
-        for key, value in urllib.parse.parse_qsl(qs):
-            if key not in result:
-                result[key] = value
+        for name_value in qs.split("&"):
+            name, eq, value = name_value.partition("=")
+            if eq:
+                name = unquote(name.replace("+", " "))
+                if name not in result:
+                    result[name] = unquote(value.replace("+", " "))
     except Exception:
         pass
     return result
 
 
-def parse_timestamp(ts, default=None):
-    """Create a datetime object from a unix timestamp"""
+def parse_query_list(qs):
+    """Parse a query string into name-value pairs
+
+    Combine values of duplicate names into lists
+    """
+    if not qs:
+        return {}
+
+    result = {}
     try:
-        return datetime.datetime.utcfromtimestamp(int(ts))
+        for name_value in qs.split("&"):
+            name, eq, value = name_value.partition("=")
+            if eq:
+                name = unquote(name.replace("+", " "))
+                value = unquote(value.replace("+", " "))
+                if name in result:
+                    rvalue = result[name]
+                    if isinstance(rvalue, list):
+                        rvalue.append(value)
+                    else:
+                        result[name] = [rvalue, value]
+                else:
+                    result[name] = value
     except Exception:
-        return default
+        pass
+    return result
+
+
+if sys.hexversion < 0x30c0000:
+    # Python <= 3.11
+    def parse_timestamp(ts, default=None):
+        """Create a datetime object from a Unix timestamp"""
+        try:
+            return datetime.datetime.utcfromtimestamp(int(ts))
+        except Exception:
+            return default
+else:
+    # Python >= 3.12
+    def parse_timestamp(ts, default=None):
+        """Create a datetime object from a Unix timestamp"""
+        try:
+            Y, m, d, H, M, S, _, _, _ = time.gmtime(int(ts))
+            return datetime.datetime(Y, m, d, H, M, S)
+        except Exception:
+            return default
 
 
 def parse_datetime(date_string, format="%Y-%m-%dT%H:%M:%S%z", utcoffset=0):

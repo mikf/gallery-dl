@@ -10,21 +10,57 @@ from gallery_dl.extractor import ao3
 __tests__ = (
 {
     "#url"     : "https://archiveofourown.org/works/47802076",
-    "#category": ("", "ao3", "work"),
     "#class"   : ao3.Ao3WorkExtractor,
     "#urls"    : "https://archiveofourown.org/downloads/47802076/The_Wildcard.pdf?updated_at=1720398424",
 
     "author"   : "Flowers_for_ghouls",
     "bookmarks": range(100, 300),
-    "chapters" : 27,
+    "chapters": {
+        "120506833": "1. Showtime",
+        "120866506": "2. A Comedy of Errors",
+        "121739140": "3. Gifts",
+        "121941313": "4. Date Night",
+        "123054364": "5. Breaking the News",
+        "123579898": "6. Isolated Events",
+        "124258153": "7. The Home Stretch",
+        "124886536": "8. Domestic Bliss",
+        "125335270": "9. The Offer",
+        "125871166": "10. The Promise",
+        "126223879": "11. Gifts II",
+        "126692398": "12. On the Move",
+        "127471375": "13. The Fruit Vignettes",
+        "128496448": "14. Respite",
+        "128994919": "15. Changes",
+        "129492154": "16. Halloween",
+        "130379002": "17. GIfts III",
+        "131066743": "18. R.A.S.B.E.W.",
+        "131884072": "19. The Longest Night",
+        "132730264": "20. Meeting the Pack",
+        "133714876": "21. A Mystery",
+        "134663854": "22. Growing Pains",
+        "135499822": "23. Presentation Day",
+        "136500946": "24. Revelations",
+        "137857876": "25. The Retirement Plan",
+        "139463056": "26. Two Birds, One Stone",
+        "141697141": "27. New Management",
+    },
     "comments" : range(800, 2000),
     "date"     : "dt:2023-06-11 00:00:00",
+    "date_completed": "dt:2024-05-10 00:00:00",
+    "date_updated"  : "dt:2024-07-08 00:27:04",
     "extension": "pdf",
     "filename" : "The_Wildcard",
     "id"       : 47802076,
     "lang"     : "en",
     "language" : "English",
     "likes"    : range(1000, 2000),
+    "series"   : {
+        "id"   : "4237024",
+        "prev" : "",
+        "next" : "57205801",
+        "index": "1",
+        "name" : "The Wildcard Universe",
+    },
     "title"    : "The Wildcard",
     "views"    : range(34000, 50000),
     "words"    : 217549,
@@ -89,7 +125,6 @@ __tests__ = (
 
 {
     "#url"     : "https://archiveofourown.org/works/47802076",
-    "#category": ("", "ao3", "work"),
     "#class"   : ao3.Ao3WorkExtractor,
     "#options" : {"formats": ["epub", "mobi", "azw3", "pdf", "html"]},
     "#urls"    : (
@@ -102,8 +137,15 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://archiveofourown.org/works/12345",
+    "#comment" : "restricted work / login required",
+    "#class"   : ao3.Ao3WorkExtractor,
+    "#auth"    : True,
+    "#urls"    : "https://archiveofourown.org/downloads/12345/Unquenchable.pdf?updated_at=1716029699",
+},
+
+{
     "#url"     : "https://archiveofourown.org/series/1903930",
-    "#category": ("", "ao3", "series"),
     "#class"   : ao3.Ao3SeriesExtractor,
     "#urls"    : (
         "https://archiveofourown.org/works/26131546",
@@ -114,7 +156,6 @@ __tests__ = (
 
 {
     "#url"     : "https://archiveofourown.org/tags/Sunshine%20(Ghost%20Sweden%20Band)/works",
-    "#category": ("", "ao3", "tag"),
     "#class"   : ao3.Ao3TagExtractor,
     "#pattern" : ao3.Ao3WorkExtractor.pattern,
     "#range"   : "1-50",
@@ -123,7 +164,6 @@ __tests__ = (
 
 {
     "#url"     : "https://archiveofourown.org/works/search?work_search%5Bquery%5D=air+fire+ice+water",
-    "#category": ("", "ao3", "search"),
     "#class"   : ao3.Ao3SearchExtractor,
     "#pattern" : ao3.Ao3WorkExtractor.pattern,
     "#range"   : "1-50",
@@ -132,32 +172,42 @@ __tests__ = (
 
 {
     "#url"     : "https://archiveofourown.org/users/Fyrelass",
-    "#category": ("", "ao3", "user"),
     "#class"   : ao3.Ao3UserExtractor,
     "#urls"    : (
         "https://archiveofourown.org/users/Fyrelass/works",
         "https://archiveofourown.org/users/Fyrelass/series",
     ),
 },
+{
+    "#url"     : "https://archiveofourown.com/users/Fyrelass",
+    "#class"   : ao3.Ao3UserExtractor,
+},
+{
+    "#url"     : "https://archiveofourown.net/users/Fyrelass",
+    "#class"   : ao3.Ao3UserExtractor,
+},
+{
+    "#url"     : "https://ao3.org/users/Fyrelass",
+    "#class"   : ao3.Ao3UserExtractor,
+},
 
 {
     "#url"     : "https://archiveofourown.org/users/Fyrelass/profile",
-    "#category": ("", "ao3", "user"),
     "#class"   : ao3.Ao3UserExtractor,
 },
 
 {
     "#url"     : "https://archiveofourown.org/users/Fyrelass/pseuds/Aileen%20Autarkeia",
-    "#category": ("", "ao3", "user"),
     "#class"   : ao3.Ao3UserExtractor,
 },
 
 {
     "#url"     : "https://archiveofourown.org/users/Fyrelass/works",
-    "#category": ("", "ao3", "user-works"),
     "#class"   : ao3.Ao3UserWorksExtractor,
+    "#auth"    : False,
     "#urls"    : (
         "https://archiveofourown.org/works/55035061",
+        "https://archiveofourown.org/works/58979287",
         "https://archiveofourown.org/works/52704457",
         "https://archiveofourown.org/works/52502743",
         "https://archiveofourown.org/works/52170409",
@@ -172,8 +222,8 @@ __tests__ = (
 
 {
     "#url"     : "https://archiveofourown.org/users/Fyrelass/series",
-    "#category": ("", "ao3", "user-series"),
     "#class"   : ao3.Ao3UserSeriesExtractor,
+    "#auth"    : False,
     "#urls"    : (
         "https://archiveofourown.org/series/3821575",
     ),
@@ -181,11 +231,18 @@ __tests__ = (
 
 {
     "#url"     : "https://archiveofourown.org/users/Fyrelass/bookmarks",
-    "#category": ("", "ao3", "user-bookmark"),
     "#class"   : ao3.Ao3UserBookmarkExtractor,
-    "#pattern" : ao3.Ao3WorkExtractor.pattern,
+    "#pattern" : r"https://archiveofourown\.org/(work|serie)s/\d+",
     "#range"   : "1-50",
     "#count"   : 50,
+},
+
+{
+    "#url"     : "https://archiveofourown.org/users/mikf/subscriptions",
+    "#class"   : ao3.Ao3SubscriptionsExtractor,
+    "#auth"    : True,
+    "#pattern" : r"https://archiveofourown\.org/(work|serie|user)s/\w+",
+    "#count"   : range(20, 30),
 },
 
 )

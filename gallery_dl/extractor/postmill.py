@@ -50,7 +50,7 @@ class PostmillExtractor(BaseExtractor):
             forum = match.group(1)
             id = int(match.group(2))
 
-            is_text_post = url.startswith("/")
+            is_text_post = (url[0] == "/")
             is_image_post = self._search_image_tag(page) is not None
             data = {
                 "title": title,

@@ -21,6 +21,7 @@ import datetime
 import functools
 import itertools
 import subprocess
+import collections
 import urllib.parse
 from http.cookiejar import Cookie
 from email.utils import mktime_tz, parsedate_tz
@@ -218,16 +219,32 @@ def to_string(value):
 
 
 def datetime_to_timestamp(dt):
-    """Convert naive UTC datetime to timestamp"""
+    """Convert naive UTC datetime to Unix timestamp"""
     return (dt - EPOCH) / SECOND
 
 
 def datetime_to_timestamp_string(dt):
-    """Convert naive UTC datetime to timestamp string"""
+    """Convert naive UTC datetime to Unix timestamp string"""
     try:
         return str((dt - EPOCH) // SECOND)
     except Exception:
         return ""
+
+
+if sys.hexversion < 0x30c0000:
+    # Python <= 3.11
+    datetime_utcfromtimestamp = datetime.datetime.utcfromtimestamp
+    datetime_utcnow = datetime.datetime.utcnow
+    datetime_from_timestamp = datetime_utcfromtimestamp
+else:
+    # Python >= 3.12
+    def datetime_from_timestamp(ts=None):
+        """Convert Unix timestamp to naive UTC datetime"""
+        Y, m, d, H, M, S, _, _, _ = time.gmtime(ts)
+        return datetime.datetime(Y, m, d, H, M, S)
+
+    datetime_utcfromtimestamp = datetime_from_timestamp
+    datetime_utcnow = datetime_from_timestamp
 
 
 def json_default(obj):
@@ -237,7 +254,11 @@ def json_default(obj):
 
 
 json_loads = json._default_decoder.decode
-json_dumps = json.JSONEncoder(default=json_default).encode
+json_dumps = json.JSONEncoder(
+    check_circular=False,
+    separators=(",", ":"),
+    default=json_default,
+).encode
 
 
 def dump_json(obj, fp=sys.stdout, ensure_ascii=True, indent=4):
@@ -383,9 +404,9 @@ def set_mtime(path, mtime):
         pass
 
 
-def cookiestxt_load(fp, cookiejar):
-    """Parse a Netscape cookies.txt file and add its Cookies to 'cookiejar'"""
-    set_cookie = cookiejar.set_cookie
+def cookiestxt_load(fp):
+    """Parse a Netscape cookies.txt file and add return its Cookies"""
+    cookies = []
 
     for line in fp:
 
@@ -407,17 +428,19 @@ def cookiestxt_load(fp, cookiejar):
             name = value
             value = None
 
-        set_cookie(Cookie(
+        cookies.append(Cookie(
             0, name, value,
             None, False,
             domain,
             domain_specified == "TRUE",
-            domain.startswith("."),
+            domain[0] == "." if domain else False,
             path, False,
             secure == "TRUE",
             None if expires == "0" or not expires else expires,
             False, None, None, {},
         ))
+
+    return cookies
 
 
 def cookiestxt_store(fp, cookies):
@@ -436,9 +459,10 @@ def cookiestxt_store(fp, cookies):
             name = cookie.name
             value = cookie.value
 
+        domain = cookie.domain
         write("\t".join((
-            cookie.domain,
-            "TRUE" if cookie.domain.startswith(".") else "FALSE",
+            domain,
+            "TRUE" if domain and domain[0] == "." else "FALSE",
             cookie.path,
             "TRUE" if cookie.secure else "FALSE",
             "0" if cookie.expires is None else str(cookie.expires),
@@ -509,6 +533,24 @@ class HTTPBasicAuth():
         return request
 
 
+class ModuleProxy():
+    __slots__ = ()
+
+    def __getitem__(self, key, modules=sys.modules):
+        try:
+            return modules[key]
+        except KeyError:
+            pass
+        try:
+            __import__(key)
+        except ImportError:
+            modules[key] = NONE
+            return NONE
+        return modules[key]
+
+    __getattr__ = __getitem__
+
+
 class LazyPrompt():
     __slots__ = ()
 
@@ -517,6 +559,7 @@ class LazyPrompt():
 
 
 class NullContext():
+    __slots__ = ()
 
     def __enter__(self):
         return None
@@ -604,13 +647,19 @@ class CustomNone():
     __repr__ = __str__
 
 
+# v128.0 release on 2024-07-09 has ordinal 739076
+# 735492 == 739076 - 128 * 28
+_ff_ver = (datetime.date.today().toordinal() - 735492) // 28
+
 NONE = CustomNone()
 EPOCH = datetime.datetime(1970, 1, 1)
 SECOND = datetime.timedelta(0, 1)
 WINDOWS = (os.name == "nt")
 SENTINEL = object()
-USERAGENT = "gallery-dl/" + version.__version__
 EXECUTABLE = getattr(sys, "frozen", False)
+USERAGENT = "gallery-dl/" + version.__version__
+USERAGENT_FIREFOX = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:{}.0) "
+                     "Gecko/20100101 Firefox/{}.0").format(_ff_ver, _ff_ver)
 SPECIAL_EXTRACTORS = {"oauth", "recursive", "generic"}
 GLOBALS = {
     "contains" : contains,
@@ -623,6 +672,7 @@ GLOBALS = {
     "restart"  : raises(exception.RestartExtraction),
     "hash_sha1": sha1,
     "hash_md5" : md5,
+    "std"      : ModuleProxy(),
     "re"       : re,
 }
 
@@ -659,6 +709,28 @@ def compile_expression_raw(expr, name="<expr>", globals=None):
     return functools.partial(eval, code_object, globals or GLOBALS)
 
 
+def compile_expression_defaultdict(expr, name="<expr>", globals=None):
+    global GLOBALS_DEFAULT
+
+    if isinstance(__builtins__, dict):
+        # cpython
+        GLOBALS_DEFAULT = collections.defaultdict(lambda n=NONE: n, GLOBALS)
+    else:
+        # pypy3 - insert __builtins__ symbols into globals dict
+        GLOBALS_DEFAULT = collections.defaultdict(
+            lambda n=NONE: n, __builtins__.__dict__)
+        GLOBALS_DEFAULT.update(GLOBALS)
+
+    global compile_expression_defaultdict
+    compile_expression_defaultdict = compile_expression_defaultdict_impl
+    return compile_expression_defaultdict_impl(expr, name, globals)
+
+
+def compile_expression_defaultdict_impl(expr, name="<expr>", globals=None):
+    code_object = compile(expr, name, "eval")
+    return functools.partial(eval, code_object, globals or GLOBALS_DEFAULT)
+
+
 def compile_expression_tryexcept(expr, name="<expr>", globals=None):
     code_object = compile(expr, name, "eval")
 
@@ -668,12 +740,18 @@ def compile_expression_tryexcept(expr, name="<expr>", globals=None):
         except exception.GalleryDLException:
             raise
         except Exception:
-            return False
+            return NONE
 
     return _eval
 
 
 compile_expression = compile_expression_tryexcept
+
+
+def compile_filter(expr, name="<filter>", globals=None):
+    if not isinstance(expr, str):
+        expr = "(" + ") and (".join(expr) + ")"
+    return compile_expression(expr, name, globals)
 
 
 def import_file(path):
@@ -906,10 +984,8 @@ class FilterPredicate():
     """Predicate; True if evaluating the given expression returns True"""
 
     def __init__(self, expr, target="image"):
-        if not isinstance(expr, str):
-            expr = "(" + ") and (".join(expr) + ")"
         name = "<{} filter>".format(target)
-        self.expr = compile_expression(expr, name)
+        self.expr = compile_filter(expr, name)
 
     def __call__(self, _, kwdict):
         try:

@@ -18,11 +18,22 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.bsky.app/profile/bsky.app",
+    "#class"   : bluesky.BlueskyUserExtractor,
+},
+
+{
+    "#url"     : "https://main.bsky.dev/profile/bsky.app",
+    "#class"   : bluesky.BlueskyUserExtractor,
+},
+
+{
     "#url"     : "https://bsky.app/profile/did:plc:z72i7hdynmk6r22z27h6tvur",
     "#category": ("", "bluesky", "user"),
     "#class"   : bluesky.BlueskyUserExtractor,
     "#options" : {"include": "all"},
     "#urls"    : (
+        "https://bsky.app/profile/did:plc:z72i7hdynmk6r22z27h6tvur/info",
         "https://bsky.app/profile/did:plc:z72i7hdynmk6r22z27h6tvur/avatar",
         "https://bsky.app/profile/did:plc:z72i7hdynmk6r22z27h6tvur/banner",
         "https://bsky.app/profile/did:plc:z72i7hdynmk6r22z27h6tvur/posts",
@@ -33,17 +44,29 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://bsky.app/profile/bsky.app",
+    "#class"   : bluesky.BlueskyUserExtractor,
+    "#options" : {"quoted": True},
+    "#urls"    : "https://bsky.app/profile/bsky.app/posts",
+},
+
+{
+    "#url"     : "https://bsky.app/profile/bsky.app/info",
+    "#class"   : bluesky.BlueskyInfoExtractor,
+},
+
+{
     "#url"     : "https://bsky.app/profile/bsky.app/avatar",
     "#category": ("", "bluesky", "avatar"),
     "#class"   : bluesky.BlueskyAvatarExtractor,
-    "#urls"    : "https://bsky.social/xrpc/com.atproto.sync.getBlob?did=did:plc:z72i7hdynmk6r22z27h6tvur&cid=bafkreihagr2cmvl2jt4mgx3sppwe2it3fwolkrbtjrhcnwjk4jdijhsoze",
+    "#urls"    : "https://puffball.us-east.host.bsky.network/xrpc/com.atproto.sync.getBlob?did=did:plc:z72i7hdynmk6r22z27h6tvur&cid=bafkreihagr2cmvl2jt4mgx3sppwe2it3fwolkrbtjrhcnwjk4jdijhsoze",
 },
 
 {
     "#url"     : "https://bsky.app/profile/did:plc:z72i7hdynmk6r22z27h6tvur/banner",
     "#category": ("", "bluesky", "background"),
     "#class"   : bluesky.BlueskyBackgroundExtractor,
-    "#urls"    : "https://bsky.social/xrpc/com.atproto.sync.getBlob?did=did:plc:z72i7hdynmk6r22z27h6tvur&cid=bafkreichzyovokfzmymz36p5jibbjrhsur6n7hjnzxrpbt5jaydp2szvna",
+    "#urls"    : "https://puffball.us-east.host.bsky.network/xrpc/com.atproto.sync.getBlob?did=did:plc:z72i7hdynmk6r22z27h6tvur&cid=bafkreichzyovokfzmymz36p5jibbjrhsur6n7hjnzxrpbt5jaydp2szvna",
 },
 
 {
@@ -111,11 +134,27 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://bsky.app/hashtag/nature",
+    "#class"   : bluesky.BlueskyHashtagExtractor,
+    "#range"   : "1-40",
+    "#count"   : 40,
+    "#archive" : False,
+},
+{
+    "#url"     : "https://bsky.app/hashtag/top",
+    "#class"   : bluesky.BlueskyHashtagExtractor,
+},
+{
+    "#url"     : "https://bsky.app/hashtag/nature/latest",
+    "#class"   : bluesky.BlueskyHashtagExtractor,
+},
+
+{
     "#url"     : "https://bsky.app/profile/bsky.app/post/3kh5rarr3gn2n",
     "#category": ("", "bluesky", "post"),
     "#class"   : bluesky.BlueskyPostExtractor,
     "#options"     : {"metadata": True},
-    "#urls"        : "https://bsky.social/xrpc/com.atproto.sync.getBlob?did=did:plc:z72i7hdynmk6r22z27h6tvur&cid=bafkreidypzoaybmfj5h7pnpiyct6ng5yae6ydp4czrm72ocg7ev6vbirri",
+    "#urls"        : "https://puffball.us-east.host.bsky.network/xrpc/com.atproto.sync.getBlob?did=did:plc:z72i7hdynmk6r22z27h6tvur&cid=bafkreidypzoaybmfj5h7pnpiyct6ng5yae6ydp4czrm72ocg7ev6vbirri",
     "#sha1_content": "ffcf25e7c511173a12de5276b85903309fcd8d14",
 
     "author": {
@@ -123,6 +162,7 @@ __tests__ = (
         "did"        : "did:plc:z72i7hdynmk6r22z27h6tvur",
         "displayName": "Bluesky",
         "handle"     : "bsky.app",
+        "instance"   : "bsky.app",
         "labels"     : [],
     },
     "cid"        : "bafyreihh7m6bfrwlcjfklwturmja7qfse5gte7lskpmgw76flivimbnoqm",
@@ -155,7 +195,8 @@ __tests__ = (
         "followersCount": int,
         "followsCount"  : int,
         "handle"        : "bsky.app",
-        "indexedAt"     : "2024-08-30T21:49:26.737Z",
+        "instance"      : "bsky.app",
+        "indexedAt"     : str,
         "labels"        : [],
         "postsCount"    : int,
     },
@@ -166,13 +207,14 @@ __tests__ = (
     "#category": ("", "bluesky", "post"),
     "#class"   : bluesky.BlueskyPostExtractor,
     "#options"     : {"metadata": "facets"},
-    "#urls"        : "https://bsky.social/xrpc/com.atproto.sync.getBlob?did=did:plc:cslxjqkeexku6elp5xowxkq7&cid=bafkreib7ydpe3xxo4cq7nn32w7eqhcanfaanz6caepd2z4kzplxtx2ctgi",
+    "#urls"        : "https://conocybe.us-west.host.bsky.network/xrpc/com.atproto.sync.getBlob?did=did:plc:cslxjqkeexku6elp5xowxkq7&cid=bafkreib7ydpe3xxo4cq7nn32w7eqhcanfaanz6caepd2z4kzplxtx2ctgi",
     "#sha1_content": "9cf5748f6d00aae83fbb3cc2c6eb3caa832b90f4",
 
     "author": {
         "did"        : "did:plc:cslxjqkeexku6elp5xowxkq7",
         "displayName": "mikf",
         "handle"     : "mikf.bsky.social",
+        "instance"   : "bsky.social",
         "labels"     : [],
     },
     "cid"        : "bafyreihtck7clocti2qshaiounadof74pxqhz7gnvbstxujqzhlodigqru",
@@ -209,7 +251,7 @@ __tests__ = (
     "#comment" : "different embed CID path",
     "#category": ("", "bluesky", "post"),
     "#class"   : bluesky.BlueskyPostExtractor,
-    "#urls"    : "https://bsky.social/xrpc/com.atproto.sync.getBlob?did=did:plc:owc2r2dsewj3hk73rtd746zh&cid=bafkreieuhplc7fpbvi3suvacaf2dqxzvuu4hgl5o6eifqb76tf3uopldmi",
+    "#urls"    : "https://amanita.us-east.host.bsky.network/xrpc/com.atproto.sync.getBlob?did=did:plc:owc2r2dsewj3hk73rtd746zh&cid=bafkreieuhplc7fpbvi3suvacaf2dqxzvuu4hgl5o6eifqb76tf3uopldmi",
 },
 
 {
@@ -217,7 +259,7 @@ __tests__ = (
     "#comment" : "video (#6183)",
     "#category": ("", "bluesky", "post"),
     "#class"   : bluesky.BlueskyPostExtractor,
-    "#urls"    : "https://bsky.social/xrpc/com.atproto.sync.getBlob?did=did:plc:cslxjqkeexku6elp5xowxkq7&cid=bafkreihq2nsfocrnlpx4nykb4szouqszxwmy3ucnk4k46nx5t6hjnxlti4",
+    "#urls"    : "https://conocybe.us-west.host.bsky.network/xrpc/com.atproto.sync.getBlob?did=did:plc:cslxjqkeexku6elp5xowxkq7&cid=bafkreihq2nsfocrnlpx4nykb4szouqszxwmy3ucnk4k46nx5t6hjnxlti4",
 
     "description": "kirby and reimu dance",
     "text"       : "video",
@@ -225,6 +267,143 @@ __tests__ = (
     "height"     : 720,
     "filename"   : "bafkreihq2nsfocrnlpx4nykb4szouqszxwmy3ucnk4k46nx5t6hjnxlti4",
     "extension"  : "mp4",
+},
+
+{
+    "#url"     : "https://bsky.app/profile/mikf.bsky.social/post/3kmfodjotln2f",
+    "#comment" : "quote (#6183)",
+    "#class"   : bluesky.BlueskyPostExtractor,
+    "#options" : {"quoted": True},
+    "#urls"    : "https://lionsmane.us-east.host.bsky.network/xrpc/com.atproto.sync.getBlob?did=did:plc:eyhmjdxsnthqhvvszdejaocz&cid=bafkreib6eb7tfozksquveaj3z5msyx3hkniubrulxdys3eftthvmuzrtme",
+
+    "author": {
+        "associated" : dict,
+        "avatar"     : "https://cdn.bsky.app/img/avatar/plain/did:plc:eyhmjdxsnthqhvvszdejaocz/bafkreigjrftlw7tabtpie32saydttpnoi7276v252vnycr6zt6euef7vdi@jpeg",
+        "createdAt"  : "2024-01-11T00:27:37.404Z",
+        "did"        : "did:plc:eyhmjdxsnthqhvvszdejaocz",
+        "displayName": "フナ",
+        "handle"     : "ykfuna.bsky.social",
+        "labels"     : list,
+    },
+    "quote_by": {
+        "avatar"     : "https://cdn.bsky.app/img/avatar/plain/did:plc:cslxjqkeexku6elp5xowxkq7/bafkreic5jqkn5ohqhgsm6zzi7vnapuz54trojv3io4tfkrcyaprl4b2ztm@jpeg",
+        "createdAt"  : "2024-02-05T00:03:54.087Z",
+        "did"        : "did:plc:cslxjqkeexku6elp5xowxkq7",
+        "displayName": "mikf",
+        "handle"     : "mikf.bsky.social",
+        "labels"     : list,
+    },
+    "quote_id": "3kmfodjotln2f",
+    "post_id" : "3km4qy5y3jc2z",
+},
+
+{
+    "#url"     : "https://bsky.app/profile/mikf.bsky.social/post/3kmfp2qktil25",
+    "#comment" : "quote with media (#6183)",
+    "#class"   : bluesky.BlueskyPostExtractor,
+    "#options" : {"quoted": True},
+    "#urls"    : (
+        "https://conocybe.us-west.host.bsky.network/xrpc/com.atproto.sync.getBlob?did=did:plc:cslxjqkeexku6elp5xowxkq7&cid=bafkreiegcyremdrecmnpisci3a3nduc7lm3zdcl76z5o5rd4nstyolrxki",
+        "https://lionsmane.us-east.host.bsky.network/xrpc/com.atproto.sync.getBlob?did=did:plc:eyhmjdxsnthqhvvszdejaocz&cid=bafkreicojrnwiw5eqo3ko2q6duduyjaoyiqvdc25kuikcedlijtbgvlt5e",
+
+    ),
+
+    "text"     : {"quote with media", ""},
+},
+
+{
+    "#url"     : "https://bsky.app/profile/nytimes.com/post/3l7xvcjgdxg2g",
+    "#comment" : "instance metadata",
+    "#class"   : bluesky.BlueskyPostExtractor,
+    "#options" : {"metadata": "user"},
+
+    "instance": "bsky.app",
+    "author": {
+        "createdAt"  : "2023-06-05T18:50:31.498Z",
+        "did"        : "did:plc:eclio37ymobqex2ncko63h4r",
+        "displayName": "The New York Times",
+        "handle"     : "nytimes.com",
+        "instance"   : "nytimes.com",
+    },
+    "user": {
+        "avatar"        : "https://cdn.bsky.app/img/avatar/plain/did:plc:eclio37ymobqex2ncko63h4r/bafkreidvvqj5jymmpaeklwkpq6gi532el447mjy2yultuukypzqm5ohfju@jpeg",
+        "banner"        : "https://cdn.bsky.app/img/banner/plain/did:plc:eclio37ymobqex2ncko63h4r/bafkreiaiorkgl6t2j5w3sf6nj37drvwuvriq3e3vqwf4yn3pchpwfbekta@jpeg",
+        "createdAt"     : "2023-06-05T18:50:31.498Z",
+        "description"   : "In-depth, independent reporting to better understand the world, now on Bluesky. News tips? Share them here: http://nyti.ms/2FVHq9v",
+        "did"           : "did:plc:eclio37ymobqex2ncko63h4r",
+        "displayName"   : "The New York Times",
+        "followersCount": int,
+        "followsCount"  : int,
+        "handle"        : "nytimes.com",
+        "instance"      : "nytimes.com",
+        "indexedAt"     : "2024-01-20T05:04:46.757Z",
+        "labels"        : [],
+        "postsCount"    : int,
+    },
+},
+
+{
+    "#url"     : "https://bsky.app/profile/stupidsaru.woke.cat/post/3l66wwwqw6u2w",
+    "#comment" : "instance metadata",
+    "#class"   : bluesky.BlueskyPostExtractor,
+
+    "author": {
+        "createdAt": "2023-08-31T23:28:42.305Z",
+        "did"      : "did:plc:b7s3pdcjk6qvxmu3n674hlgj",
+        "handle"   : "stupidsaru.woke.cat",
+        "instance" : "woke.cat",
+    },
+},
+
+{
+    "#url"     : "https://bsky.app/profile/alt.bun.how/post/3l7rdfxhyds2f",
+    "#comment" : "non-bsky PDS (#6406)",
+    "#class"   : bluesky.BlueskyPostExtractor,
+    "#urls"        : "https://pds.bun.how/xrpc/com.atproto.sync.getBlob?did=did:plc:7x6rtuenkuvxq3zsvffp2ide&cid=bafkreielhgekjheckgjusx7x5hxkbrqryfdmzdwwp2zoxchovgnpzkxzae",
+    "#sha1_content": "1777956de0dc8cf0815c5c7eb574a24ce54a1d42",
+
+    "author": {
+        "createdAt": "2024-10-17T13:55:48.833Z",
+        "did"      : "did:plc:7x6rtuenkuvxq3zsvffp2ide",
+        "handle"   : "cinny.bun.how",
+        "instance" : "bun.how",
+    },
+},
+
+{
+    "#url"     : "https://cbsky.app/profile/bsky.app/post/3kh5rarr3gn2n",
+    "#category": ("", "bluesky", "post"),
+    "#class"   : bluesky.BlueskyPostExtractor,
+},
+
+{
+    "#url"     : "https://bskye.app/profile/bsky.app/post/3kh5rarr3gn2n",
+    "#category": ("", "bluesky", "post"),
+    "#class"   : bluesky.BlueskyPostExtractor,
+},
+
+{
+    "#url"     : "https://bskyx.app/profile/bsky.app/post/3kh5rarr3gn2n",
+    "#category": ("", "bluesky", "post"),
+    "#class"   : bluesky.BlueskyPostExtractor,
+},
+
+{
+    "#url"     : "https://bsyy.app/profile/bsky.app/post/3kh5rarr3gn2n",
+    "#category": ("", "bluesky", "post"),
+    "#class"   : bluesky.BlueskyPostExtractor,
+},
+
+{
+    "#url"     : "https://fxbsky.app/profile/bsky.app/post/3kh5rarr3gn2n",
+    "#category": ("", "bluesky", "post"),
+    "#class"   : bluesky.BlueskyPostExtractor,
+},
+
+{
+    "#url"     : "https://vxbsky.app/profile/bsky.app/post/3kh5rarr3gn2n",
+    "#category": ("", "bluesky", "post"),
+    "#class"   : bluesky.BlueskyPostExtractor,
 },
 
 )
