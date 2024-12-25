@@ -1677,9 +1677,11 @@ Description
     when processing a user profile.
 
     Possible values are
-    ``"user-models"``,
-    ``"user-posts"``,
-    ``"user-images"``.
+
+    * ``"user-models"``
+    * ``"user-posts"``
+    * ``"user-images"``
+    * ``"user-videos"``
 
     It is possible to use ``"all"`` instead of listing all values separately.
 
@@ -1698,7 +1700,7 @@ Example
 Description
     Extract additional ``generation`` metadata.
 
-    Note: This requires 1 additional HTTP request per image.
+    Note: This requires 1 additional HTTP request per image or video.
 
 
 extractor.civitai.nsfw

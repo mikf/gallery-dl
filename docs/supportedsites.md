@@ -172,7 +172,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Civitai</td>
     <td>https://www.civitai.com/</td>
-    <td>individual Images, Image Listings, Models, Model Listings, Posts, Search Results, Tag Searches, User Profiles, User Images, User Models, User Posts</td>
+    <td>individual Images, Image Listings, Models, Model Listings, Posts, Search Results, Tag Searches, User Profiles, User Images, User Models, User Posts, User Videos</td>
     <td></td>
 </tr>
 <tr>
