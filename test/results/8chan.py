@@ -10,11 +10,10 @@ _8chan = getattr(gallery_dl.extractor, "8chan")
 
 __tests__ = (
 {
-    "#url"     : "https://8chan.moe/vhs/res/4.html",
-    "#category": ("", "8chan", "thread"),
-    "#class"   : _8chan._8chanThreadExtractor,
-    "#pattern" : r"https://8chan\.moe/\.media/[0-9a-f]{64}\.\w+$",
-    "#count"   : 14,
+    "#url"  : "https://8chan.moe/vhs/res/4.html",
+    "#class": _8chan._8chanThreadExtractor,
+    "#pattern": r"https://8chan\.moe/\.media/[0-9a-f]{64}\.\w+$",
+    "#count"  : 14,
 
     "archived"        : False,
     "autoSage"        : False,
@@ -51,41 +50,40 @@ __tests__ = (
 },
 
 {
-    "#url"     : "https://8chan.se/vhs/res/4.html",
-    "#category": ("", "8chan", "thread"),
-    "#class"   : _8chan._8chanThreadExtractor,
+    "#url"  : "https://8chan.moe/vhs/last/4.html",
+    "#class": _8chan._8chanThreadExtractor,
 },
 
 {
-    "#url"     : "https://8chan.cc/vhs/res/4.html",
-    "#category": ("", "8chan", "thread"),
-    "#class"   : _8chan._8chanThreadExtractor,
+    "#url"  : "https://8chan.se/vhs/res/4.html",
+    "#class": _8chan._8chanThreadExtractor,
 },
 
 {
-    "#url"     : "https://8chan.moe/vhs/",
-    "#category": ("", "8chan", "board"),
-    "#class"   : _8chan._8chanBoardExtractor,
+    "#url"  : "https://8chan.cc/vhs/res/4.html",
+    "#class": _8chan._8chanThreadExtractor,
 },
 
 {
-    "#url"     : "https://8chan.moe/vhs/2.html",
-    "#category": ("", "8chan", "board"),
-    "#class"   : _8chan._8chanBoardExtractor,
-    "#pattern" : _8chan._8chanThreadExtractor.pattern,
-    "#count"   : range(24, 32),
+    "#url"  : "https://8chan.moe/vhs/",
+    "#class": _8chan._8chanBoardExtractor,
 },
 
 {
-    "#url"     : "https://8chan.se/vhs/",
-    "#category": ("", "8chan", "board"),
-    "#class"   : _8chan._8chanBoardExtractor,
+    "#url"  : "https://8chan.moe/vhs/2.html",
+    "#class": _8chan._8chanBoardExtractor,
+    "#pattern": _8chan._8chanThreadExtractor.pattern,
+    "#count"  : range(24, 32),
 },
 
 {
-    "#url"     : "https://8chan.cc/vhs/",
-    "#category": ("", "8chan", "board"),
-    "#class"   : _8chan._8chanBoardExtractor,
+    "#url"  : "https://8chan.se/vhs/",
+    "#class": _8chan._8chanBoardExtractor,
+},
+
+{
+    "#url"  : "https://8chan.cc/vhs/",
+    "#class": _8chan._8chanBoardExtractor,
 },
 
 )

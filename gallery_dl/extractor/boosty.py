@@ -35,8 +35,16 @@ class BoostyExtractor(Extractor):
             if isinstance(videos, str):
                 videos = videos.split(",")
             elif not isinstance(videos, (list, tuple)):
-                videos = ("quad_hd", "ultra_hd", "full_hd",
-                          "high", "medium", "low")
+                # ultra_hd: 2160p
+                #  quad_hd: 1440p
+                #  full_hd: 1080p
+                #     high:  720p
+                #   medium:  480p
+                #      low:  360p
+                #   lowest:  240p
+                #     tiny:  144p
+                videos = ("ultra_hd", "quad_hd", "full_hd",
+                          "high", "medium", "low", "lowest", "tiny")
         self.videos = videos
 
     def items(self):
@@ -325,6 +333,7 @@ class BoostyAPI():
 
     def _pagination(self, endpoint, params, transform=None, key=None):
         if "is_only_allowed" not in params and self.extractor.only_allowed:
+            params["only_allowed"] = "true"
             params["is_only_allowed"] = "true"
 
         while True:

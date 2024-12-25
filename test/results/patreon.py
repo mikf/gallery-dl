@@ -44,6 +44,11 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.patreon.com/c/koveliana",
+    "#class"   : patreon.PatreonCreatorExtractor,
+},
+
+{
     "#url"     : "https://www.patreon.com/user?u=2931440",
     "#class"   : patreon.PatreonCreatorExtractor,
 },
@@ -97,8 +102,18 @@ __tests__ = (
     "#url"     : "https://www.patreon.com/posts/free-post-12497641",
     "#comment" : "tags (#1539)",
     "#class"   : patreon.PatreonPostExtractor,
+    "#pattern" : r"https://c10.patreonusercontent.com/4/patreon-media/p/post/12497641/3d99f5f5b635428ca237fedf0f223f1a/eyJhIjoxLCJwIjoxfQ%3D%3D/1\.JPG\?.+",
 
     "tags": ["AWMedia"],
+},
+
+{
+    "#url"     : "https://www.patreon.com/posts/free-post-12497641",
+    "#comment" : "custom image format (#6569)",
+    "#class"   : patreon.PatreonPostExtractor,
+    "#options" : {"format-images": "thumbnail"},
+    "#pattern"     : r"https://c10.patreonusercontent.com/4/patreon-media/p/post/12497641/3d99f5f5b635428ca237fedf0f223f1a/eyJoIjozNjAsInciOjM2MH0%3D/1\.JPG\?.+",
+    "#sha1_content": "190e249295eeca1a8ffbcf1aece788b4f69bbb64",
 },
 
 {

@@ -254,6 +254,22 @@ class HentaifoundryFavoriteExtractor(HentaifoundryExtractor):
             self.root, self.user)
 
 
+class HentaifoundryTagExtractor(HentaifoundryExtractor):
+    """Extractor for tag searches on hentaifoundry.com"""
+    subcategory = "tag"
+    directory_fmt = ("{category}", "{search_tags}")
+    archive_fmt = "t_{search_tags}_{index}"
+    pattern = BASE_PATTERN + r"/pictures/tagged/([^/?#]+)"
+    example = "https://www.hentai-foundry.com/pictures/tagged/TAG"
+
+    def __init__(self, match):
+        HentaifoundryExtractor.__init__(self, match)
+        self.page_url = "{}/pictures/tagged/{}".format(self.root, self.user)
+
+    def metadata(self):
+        return {"search_tags": self.user}
+
+
 class HentaifoundryRecentExtractor(HentaifoundryExtractor):
     """Extractor for 'Recent Pictures' on hentaifoundry.com"""
     subcategory = "recent"

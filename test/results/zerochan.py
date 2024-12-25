@@ -134,7 +134,7 @@ __tests__ = (
         "DRAGON BALL",
     ],
     "size"     : 136192,
-    "source": "https://x.com/Raydash30/status/1766012730769862774",
+    "source"   : "https://x.com/Raydash30/status/1766012730769862774",
     "tags"     : [
         "Mangaka:Raydash",
         "Series:DRAGON BALL",
@@ -178,6 +178,26 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.zerochan.net/4233756",
+    "#class"   : zerochan.ZerochanImageExtractor,
+    "#auth"    : False,
+    "#urls"    : "https://static.zerochan.net/DRAGON.BALL.full.4233756.jpg",
+
+    "source"   : "https://x.com/Raydash30/status/1766012730769862774",
+    "tags"     : [
+        "Mangaka:Raydash",
+        "Series:DRAGON BALL",
+        "Series:DRAGON BALL Z",
+        "Character:Piccolo",
+        "Character:Son Gohan",
+        "Theme:Green Skin",
+        "Source:Fanart",
+        "Source:Fanart from X (Twitter)",
+        "Source:X (Twitter)",
+    ],
+},
+
+{
     "#url"     : "https://www.zerochan.net/1395035",
     "#comment" : "Invalid control character '\r' in 'source' field (#5892)",
     "#category": ("booru", "zerochan", "image"),
@@ -186,6 +206,48 @@ __tests__ = (
     "#options" : {"metadata": True},
 
     "source": "http://www.youtube.com/watch?v=0vodqkGPxt8",
+},
+
+{
+    "#url"     : "https://www.zerochan.net/4354955",
+    "#comment" : "unescaped quotes in 'JSON' data (#6632)",
+    "#category": ("booru", "zerochan", "image"),
+    "#class"   : zerochan.ZerochanImageExtractor,
+    "#auth"    : False,
+    "#options" : {"metadata": True},
+
+    "author"  : "SEGA",
+    "date"    : "dt:2024-12-05 06:06:14",
+    "file_url": "https://static.zerochan.net/Miles.%22Tails%22.Prower.full.4354955.jpg",
+    "filename": "Miles.\"Tails\".Prower.full.4354955",
+    "height"  : 705,
+    "id"      : 4354955,
+    "name"    : "Miles \"Tails\" Prower",
+    "size"    : 252928,
+    "source"  : "https://x.com/kellanstover/status/1580237736874606597",
+    "uploader": "Anima-Chao",
+    "width"   : 4096,
+    "path"    : [
+        "Sonic the Hedgehog",
+        "Miles \"Tails\" Prower",
+    ],
+    "tags"    : [
+        "Male",
+        "Animal",
+        "Fox",
+        "Sonic the Hedgehog",
+        "Flying",
+        "Character Sheet",
+        "Airplane",
+        "SEGA",
+        "Miles \"Tails\" Prower",
+        "Official Art",
+        "Midair",
+        "X (Twitter)",
+        "Sonic Origins",
+        "Official Art from X",
+        "Tory Patterson",
+    ],
 },
 
 )

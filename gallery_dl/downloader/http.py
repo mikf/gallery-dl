@@ -144,7 +144,16 @@ class HttpDownloader(DownloaderBase):
                     proxies=self.proxies,
                     verify=self.verify,
                 )
-            except (ConnectionError, Timeout) as exc:
+            except ConnectionError as exc:
+                try:
+                    reason = exc.args[0].reason
+                    cls = reason.__class__.__name__
+                    pre, _, err = str(reason.args[-1]).partition(":")
+                    msg = "{}: {}".format(cls, (err or pre).lstrip())
+                except Exception:
+                    msg = str(exc)
+                continue
+            except Timeout as exc:
                 msg = str(exc)
                 continue
             except Exception as exc:

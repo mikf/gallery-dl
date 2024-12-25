@@ -61,7 +61,6 @@ __tests__ = (
         "transparency": bool,
         "width"       : int,
     },
-    "da_category"     : str,
     "date"            : datetime.datetime,
     "deviationid"     : str,
     "?download_filesize": int,
@@ -283,7 +282,6 @@ __tests__ = (
         "transparency": False,
         "width"       : 6400
     },
-    "da_category"      : "Uncategorized",
     "date"             : "dt:2024-01-02 21:16:06",
     "deviationid"      : "8C8D6B28-766A-DE21-7F7D-CE055C3BD50A",
     "download_filesize": 84510,
@@ -375,7 +373,6 @@ __tests__ = (
         "height"  : 128,
         "src"     : r"re:https://wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/940f2d05-c5eb-4917-8192-7eb6a2d508c6/dcvdmbc-e506cdcf-3208-4c20-85ab-0bfa8a7bcb16.png\?token=ey.+",
     },
-    "da_category"   : "Uncategorized",
     "date"          : "dt:2018-12-26 14:49:27",
     "deviationid"   : "A4A6AD52-8857-46EE-ABFE-86D49D4FF9D0",
     "download_filesize": 380,

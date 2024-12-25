@@ -37,7 +37,7 @@ class FoolfuukaExtractor(BaseExtractor):
 
             if not url and "remote_media_link" in media:
                 url = self.remote(media)
-            if url.startswith("/"):
+            if url and url[0] == "/":
                 url = self.root + url
 
             post["filename"], _, post["extension"] = \

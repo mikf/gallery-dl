@@ -71,6 +71,13 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.pixiv.net/en/users/56514424/artworks",
+    "#comment" : "limit_sanity_level_360.png in artworks results (#5435, #6339)",
+    "#class"   : pixiv.PixivArtworksExtractor,
+    "#count"   : ">= 39",
+},
+
+{
     "#url"     : "https://www.pixiv.net/en/users/173530/manga",
     "#category": ("", "pixiv", "artworks"),
     "#class"   : pixiv.PixivArtworksExtractor,
@@ -267,9 +274,17 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.pixiv.net/en/artworks/104582860",
+    "#comment" : "deleted limit_sanity_level_360.png work (#6339)",
+    "#class"   : pixiv.PixivWorkExtractor,
+    "#count"   : 0,
+},
+
+{
     "#url"     : "https://www.pixiv.net/en/artworks/103983466",
     "#comment" : "empty 'caption' in App API response (#4327, #5191)",
     "#class"   : pixiv.PixivWorkExtractor,
+    "#options" : {"captions": True},
 
     "caption": r"re:Either she doesn't know how to pose or she can't move with that much clothing on her, in any case she's very well dressed for a holiday trip around town. Lots of stuff to see and a perfect day to grab some sweet pastries at the bakery.<br />...",
 },
@@ -430,6 +445,13 @@ __tests__ = (
     "#url"     : "https://www.pixiv.net/ranking.php",
     "#category": ("", "pixiv", "ranking"),
     "#class"   : pixiv.PixivRankingExtractor,
+    "#options" : {"max-posts": 10},
+
+    "ranking": {
+        "date": r"re:\d\d\d\d-\d\d-\d\d",
+        "mode": "day",
+        "rank": range(1, 10),
+    },
 },
 
 {

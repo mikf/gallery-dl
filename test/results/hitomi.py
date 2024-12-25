@@ -194,4 +194,41 @@ __tests__ = (
     "#class"   : hitomi.HitomiTagExtractor,
 },
 
+{
+    "#url"     : "https://hitomi.la/index-japanese.html",
+    "#class"   : hitomi.HitomiIndexExtractor,
+    "#pattern" : hitomi.HitomiGalleryExtractor.pattern,
+    "#range"   : "1-150",
+    "#count"   : 150,
+},
+
+{
+    "#url"     : "https://hitomi.la/search.html?tag%3Ascreenshots%20language%3Ajapanese",
+    "#class"   : hitomi.HitomiSearchExtractor,
+    "#pattern" : hitomi.HitomiGalleryExtractor.pattern,
+    "#range"   : "1-150",
+    "#count"   : 150,
+},
+
+{
+    "#url"     : "https://hitomi.la/search.html?language%3Ajapanese%20artist%3Asumiya",
+    "#class"   : hitomi.HitomiSearchExtractor,
+},
+{
+    "#url"     : "https://hitomi.la/search.html?group:initial_g",
+    "#class"   : hitomi.HitomiSearchExtractor,
+},
+{
+    "#url"     : "https://hitomi.la/search.html?series:amnesia",
+    "#class"   : hitomi.HitomiSearchExtractor,
+},
+{
+    "#url"     : "https://hitomi.la/search.html?type%3Adoujinshi",
+    "#class"   : hitomi.HitomiSearchExtractor,
+},
+{
+    "#url"     : "https://hitomi.la/search.html?character%3Aa2",
+    "#class"   : hitomi.HitomiSearchExtractor,
+},
+
 )

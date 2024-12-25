@@ -81,8 +81,8 @@ __tests__ = (
     "#count"   : 2,
 
     "manga"   : "Souten no Koumori",
-    "lang"    : r"re:fr|it",
-    "language": r"re:French|Italian",
+    "lang"    : {"fr", "it"},
+    "language": {"French", "Italian"},
 },
 
 {
@@ -134,10 +134,31 @@ __tests__ = (
     "#category": ("", "mangadex", "list-feed"),
     "#class"   : mangadex.MangadexListExtractor,
     "#urls"    : (
-        "https://mangadex.org/chapter/c765d6d5-5712-4360-be0b-0c8e0914fc94",
         "https://mangadex.org/chapter/fa8a695d-260f-4dcc-95a3-1f30e66d6571",
+        "https://mangadex.org/chapter/c765d6d5-5712-4360-be0b-0c8e0914fc94",
         "https://mangadex.org/chapter/788766b9-41c6-422e-97ba-552f03ba9655",
     ),
+},
+
+{
+    "#url"     : "https://mangadex.org/author/7222d0d5-836c-4bf3-9174-72bceade8c87/kotoyama",
+    "#class"   : mangadex.MangadexAuthorExtractor,
+    "#urls"    : (
+        "https://mangadex.org/title/259dfd8a-f06a-4825-8fa6-a2dcd7274230",
+        "https://mangadex.org/title/d0c88e3b-ea64-4e07-9841-c1d2ac982f4a",
+        "https://mangadex.org/title/f48bbb5f-8a23-4dea-8177-eb2dbbcbf4fa",
+        "https://mangadex.org/title/00b68132-4e69-4ff9-ad4b-29138b377dc8",
+        "https://mangadex.org/title/f1b70bba-3873-4c22-afa3-1d1c78299cd9",
+        "https://mangadex.org/title/41cd6fa7-3e53-4900-88e6-4a06cd7df9ad",
+    ),
+},
+
+{
+    "#url"     : "https://mangadex.org/author/254efca2-0ac0-432c-a3a3-55b7e207e87d/flipflops",
+    "#class"   : mangadex.MangadexAuthorExtractor,
+    "#pattern" : mangadex.MangadexMangaExtractor.pattern,
+    "#options" : {"lang": "en"},
+    "#count"   : ">= 15",
 },
 
 )

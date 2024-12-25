@@ -19,7 +19,7 @@ class CohostExtractor(Extractor):
     category = "cohost"
     root = "https://cohost.org"
     directory_fmt = ("{category}", "{postingProject[handle]}")
-    filename_fmt = ("{postId}_{headline:?/_/[b:200]}{num}.{extension}")
+    filename_fmt = ("{postId}{headline:?_//[b:200]}{num:?_//}.{extension}")
     archive_fmt = "{postId}_{num}"
 
     def _init(self):
@@ -27,6 +27,14 @@ class CohostExtractor(Extractor):
         self.pinned = self.config("pinned", False)
         self.shares = self.config("shares", False)
         self.asks = self.config("asks", True)
+
+        self.avatar = self.config("avatar", False)
+        if self.avatar:
+            self._urls_avatar = {None, ""}
+
+        self.background = self.config("background", False)
+        if self.background:
+            self._urls_background = {None, ""}
 
     def items(self):
         for post in self.posts():
@@ -43,6 +51,26 @@ class CohostExtractor(Extractor):
                 post["publishedAt"], "%Y-%m-%dT%H:%M:%S.%fZ")
 
             yield Message.Directory, post
+
+            project = post["postingProject"]
+            if self.avatar:
+                url = project.get("avatarURL")
+                if url not in self._urls_avatar:
+                    self._urls_avatar.add(url)
+                    p = post.copy()
+                    p["postId"] = p["kind"] = "avatar"
+                    p["headline"] = p["num"] = ""
+                    yield Message.Url, url, text.nameext_from_url(url, p)
+
+            if self.background:
+                url = project.get("headerURL")
+                if url not in self._urls_background:
+                    self._urls_background.add(url)
+                    p = post.copy()
+                    p["postId"] = p["kind"] = "background"
+                    p["headline"] = p["num"] = ""
+                    yield Message.Url, url, text.nameext_from_url(url, p)
+
             for post["num"], file in enumerate(files, 1):
                 url = file["fileURL"]
                 post.update(file)
@@ -109,7 +137,7 @@ class CohostUserExtractor(CohostExtractor):
             "projectHandle": self.groups[0],
             "page": 0,
             "options": {
-                "pinnedPostsAtTop"    : bool(self.pinned),
+                "pinnedPostsAtTop"    : True if self.pinned else False,
                 "hideReplies"         : not self.replies,
                 "hideShares"          : not self.shares,
                 "hideAsks"            : not self.asks,

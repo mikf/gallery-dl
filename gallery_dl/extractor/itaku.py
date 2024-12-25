@@ -78,6 +78,16 @@ class ItakuImageExtractor(ItakuExtractor):
         return (self.api.image(self.item),)
 
 
+class ItakuSearchExtractor(ItakuExtractor):
+    subcategory = "search"
+    pattern = BASE_PATTERN + r"/home/images/?\?([^#]+)"
+    example = "https://itaku.ee/home/images?tags=SEARCH"
+
+    def posts(self):
+        params = text.parse_query_list(self.item)
+        return self.api.search_images(params)
+
+
 class ItakuAPI():
 
     def __init__(self, extractor):
@@ -86,6 +96,42 @@ class ItakuAPI():
         self.headers = {
             "Accept": "application/json, text/plain, */*",
         }
+
+    def search_images(self, params):
+        endpoint = "/galleries/images/"
+        required_tags = []
+        negative_tags = []
+        optional_tags = []
+
+        tags = params.pop("tags", None)
+        if not tags:
+            tags = ()
+        elif isinstance(tags, str):
+            tags = (tags,)
+
+        for tag in tags:
+            if not tag:
+                pass
+            elif tag[0] == "-":
+                negative_tags.append(tag[1:])
+            elif tag[0] == "~":
+                optional_tags.append(tag[1:])
+            else:
+                required_tags.append(tag)
+
+        api_params = {
+            "required_tags": required_tags,
+            "negative_tags": negative_tags,
+            "optional_tags": optional_tags,
+            "date_range": "",
+            "maturity_rating": ("SFW", "Questionable", "NSFW"),
+            "ordering"  : "-date_added",
+            "page"      : "1",
+            "page_size" : "30",
+            "visibility": ("PUBLIC", "PROFILE_ONLY"),
+        }
+        api_params.update(params)
+        return self._pagination(endpoint, api_params, self.image)
 
     def galleries_images(self, username, section=None):
         endpoint = "/galleries/images/"

@@ -30,44 +30,6 @@ class TapasExtractor(Extractor):
         if self._cache is None:
             TapasExtractor._cache = {}
 
-    def items(self):
-        self.login()
-        headers = {"Accept": "application/json, text/javascript, */*;"}
-
-        for episode_id in self.episode_ids():
-            url = "{}/episode/{}".format(self.root, episode_id)
-            data = self.request(url, headers=headers).json()["data"]
-
-            episode = data["episode"]
-            if not episode.get("free") and not episode.get("unlocked"):
-                raise exception.StopExtraction(
-                    "Episode '%s' not unlocked (ID %s) ",
-                    episode["title"], episode_id)
-
-            html = data["html"]
-            series_id = text.rextract(html, 'data-series-id="', '"')[0]
-            try:
-                episode["series"] = self._cache[series_id]
-            except KeyError:
-                url = "{}/series/{}".format(self.root, series_id)
-                episode["series"] = self._cache[series_id] = self.request(
-                    url, headers=headers).json()["data"]
-
-            episode["date"] = text.parse_datetime(episode["publish_date"])
-            yield Message.Directory, episode
-
-            if episode["book"]:
-                content, _ = text.extract(
-                    html, '<div class="viewer">', '<div class="viewer-bottom')
-                episode["num"] = 1
-                episode["extension"] = "html"
-                yield Message.Url, "text:" + content, episode
-
-            else:  # comic
-                for episode["num"], url in enumerate(text.extract_iter(
-                        html, 'data-src="', '"'), 1):
-                    yield Message.Url, url, text.nameext_from_url(url, episode)
-
     def login(self):
         if self.cookies_check(self.cookies_names):
             return
@@ -103,24 +65,70 @@ class TapasExtractor(Extractor):
 
         return {"_cpc_": response.history[0].cookies.get("_cpc_")}
 
+    def request_api(self, url, params=None):
+        headers = {"Accept": "application/json, text/javascript, */*;"}
+        return self.request(url, params=params, headers=headers).json()["data"]
+
+
+class TapasEpisodeExtractor(TapasExtractor):
+    subcategory = "episode"
+    pattern = BASE_PATTERN + r"/episode/(\d+)"
+    example = "https://tapas.io/episode/12345"
+
+    def items(self):
+        self.login()
+
+        episode_id = self.groups[0]
+        url = "{}/episode/{}".format(self.root, episode_id)
+        data = self.request_api(url)
+
+        episode = data["episode"]
+        if not episode.get("free") and not episode.get("unlocked"):
+            raise exception.AuthorizationError(
+                "{}: Episode '{}' not unlocked".format(
+                    episode_id, episode["title"]))
+
+        html = data["html"]
+        episode["series"] = self._extract_series(html)
+        episode["date"] = text.parse_datetime(episode["publish_date"])
+        yield Message.Directory, episode
+
+        if episode["book"]:
+            content = text.extr(
+                html, '<div class="viewer">', '<div class="viewer-bottom')
+            episode["num"] = 1
+            episode["extension"] = "html"
+            yield Message.Url, "text:" + content, episode
+
+        else:  # comic
+            for episode["num"], url in enumerate(text.extract_iter(
+                    html, 'data-src="', '"'), 1):
+                yield Message.Url, url, text.nameext_from_url(url, episode)
+
+    def _extract_series(self, html):
+        series_id = text.rextract(html, 'data-series-id="', '"')[0]
+        try:
+            return self._cache[series_id]
+        except KeyError:
+            url = "{}/series/{}".format(self.root, series_id)
+            series = self._cache[series_id] = self.request_api(url)
+            return series
+
 
 class TapasSeriesExtractor(TapasExtractor):
     subcategory = "series"
     pattern = BASE_PATTERN + r"/series/([^/?#]+)"
     example = "https://tapas.io/series/TITLE"
 
-    def __init__(self, match):
-        TapasExtractor.__init__(self, match)
-        self.series_name = match.group(1)
+    def items(self):
+        self.login()
 
-    def episode_ids(self):
-        url = "{}/series/{}".format(self.root, self.series_name)
-        series_id, _, episode_id = text.extract(
+        url = "{}/series/{}".format(self.root, self.groups[0])
+        series_id, _, episode_id = text.extr(
             self.request(url).text, 'content="tapastic://series/', '"',
-        )[0].partition("/episodes/")
+        ).partition("/episodes/")
 
         url = "{}/series/{}/episodes".format(self.root, series_id)
-        headers = {"Accept": "application/json, text/javascript, */*;"}
         params = {
             "eid"        : episode_id,
             "page"       : 1,
@@ -129,28 +137,16 @@ class TapasSeriesExtractor(TapasExtractor):
             "max_limit"  : "20",
         }
 
+        base = self.root + "/episode/"
         while True:
-            data = self.request(
-                url, params=params, headers=headers).json()["data"]
-            yield from text.extract_iter(
-                data["body"], 'data-href="/episode/', '"')
+            data = self.request_api(url, params)
+            for episode in data["episodes"]:
+                episode["_extractor"] = TapasEpisodeExtractor
+                yield Message.Queue, base + str(episode["id"]), episode
 
             if not data["pagination"]["has_next"]:
                 return
             params["page"] += 1
-
-
-class TapasEpisodeExtractor(TapasExtractor):
-    subcategory = "episode"
-    pattern = BASE_PATTERN + r"/episode/(\d+)"
-    example = "https://tapas.io/episode/12345"
-
-    def __init__(self, match):
-        TapasExtractor.__init__(self, match)
-        self.episode_id = match.group(1)
-
-    def episode_ids(self):
-        return (self.episode_id,)
 
 
 class TapasCreatorExtractor(TapasExtractor):
@@ -159,6 +155,8 @@ class TapasCreatorExtractor(TapasExtractor):
     example = "https://tapas.io/CREATOR"
 
     def items(self):
+        self.login()
+
         url = "{}/{}/series".format(self.root, self.groups[0])
         page = self.request(url).text
         page = text.extr(page, '<ul class="content-list-wrap', "</ul>")

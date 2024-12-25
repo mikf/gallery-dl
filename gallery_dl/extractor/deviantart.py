@@ -31,7 +31,7 @@ class DeviantartExtractor(Extractor):
     root = "https://www.deviantart.com"
     directory_fmt = ("{category}", "{username}")
     filename_fmt = "{category}_{index}_{title}.{extension}"
-    cookies_domain = None
+    cookies_domain = ".deviantart.com"
     cookies_names = ("auth", "auth_secure", "userinfo")
     _last_request = 0
 
@@ -399,9 +399,9 @@ class DeviantartExtractor(Extractor):
 
     def _textcontent_to_html(self, deviation, content):
         html = content["html"]
-        markup = html["markup"]
+        markup = html.get("markup")
 
-        if not markup.startswith("{"):
+        if not markup or markup[0] != "{":
             return markup
 
         if html["type"] == "tiptap":
@@ -451,6 +451,26 @@ class DeviantartExtractor(Extractor):
         elif type == "text":
             self._tiptap_process_text(html, content)
 
+        elif type == "heading":
+            attrs = content["attrs"]
+            level = str(attrs.get("level") or "3")
+
+            html.append("<h")
+            html.append(level)
+            html.append(' style="text-align:')
+            html.append(attrs.get("textAlign") or "left")
+            html.append('">')
+            html.append('<span style="margin-inline-start:0px">')
+
+            children = content.get("content")
+            if children:
+                for block in children:
+                    self._tiptap_process_content(html, block)
+
+            html.append("</span></h")
+            html.append(level)
+            html.append(">")
+
         elif type == "hardBreak":
             html.append("<br/><br/>")
 
@@ -478,8 +498,9 @@ class DeviantartExtractor(Extractor):
             for mark in marks:
                 type = mark["type"]
                 if type == "link":
+                    attrs = mark.get("attrs") or {}
                     html.append('<a href="')
-                    html.append(text.escape(mark["attrs"]["href"]))
+                    html.append(text.escape(attrs.get("href") or ""))
                     html.append('" rel="noopener noreferrer nofollow ugc">')
                     close.append("</a>")
                 elif type == "bold":
@@ -491,6 +512,9 @@ class DeviantartExtractor(Extractor):
                 elif type == "underline":
                     html.append("<u>")
                     close.append("</u>")
+                elif type == "strike":
+                    html.append("<s>")
+                    close.append("</s>")
                 elif type == "textStyle" and len(mark) <= 1:
                     pass
                 else:
@@ -907,19 +931,18 @@ class DeviantartStashExtractor(DeviantartExtractor):
     archive_fmt = "{index}.{extension}"
     pattern = (r"(?:https?://)?(?:(?:www\.)?deviantart\.com/stash|sta\.sh)"
                r"/([a-z0-9]+)")
-    example = "https://sta.sh/abcde"
+    example = "https://www.deviantart.com/stash/abcde"
 
     skip = Extractor.skip
 
     def __init__(self, match):
         DeviantartExtractor.__init__(self, match)
         self.user = None
-        self.stash_id = match.group(1)
 
     def deviations(self, stash_id=None):
         if stash_id is None:
-            stash_id = self.stash_id
-        url = "https://sta.sh/" + stash_id
+            stash_id = self.groups[0]
+        url = "https://www.deviantart.com/stash/" + stash_id
         page = self._limited_request(url).text
 
         if stash_id[0] == "0":
@@ -932,19 +955,11 @@ class DeviantartStashExtractor(DeviantartExtractor):
                 yield deviation
                 return
 
-        for item in text.extract_iter(
-                page, 'class="stash-thumb-container', '</div>'):
-            url = text.extr(item, '<a href="', '"')
-
-            if url:
-                stash_id = url.rpartition("/")[2]
-            else:
-                stash_id = text.extr(item, 'gmi-stashid="', '"')
-                stash_id = "2" + util.bencode(text.parse_int(
-                    stash_id), "0123456789abcdefghijklmnopqrstuvwxyz")
-
-            if len(stash_id) > 2:
-                yield from self.deviations(stash_id)
+        for sid in text.extract_iter(
+                page, 'href="https://www.deviantart.com/stash/', '"'):
+            if sid == stash_id or sid.endswith("#comments"):
+                continue
+            yield from self.deviations(sid)
 
 
 class DeviantartFavoriteExtractor(DeviantartExtractor):
@@ -1153,7 +1168,6 @@ class DeviantartScrapsExtractor(DeviantartExtractor):
     subcategory = "scraps"
     directory_fmt = ("{category}", "{username}", "Scraps")
     archive_fmt = "s_{_username}_{index}.{extension}"
-    cookies_domain = ".deviantart.com"
     pattern = BASE_PATTERN + r"/gallery/(?:\?catpath=)?scraps\b"
     example = "https://www.deviantart.com/USER/gallery/scraps"
 
@@ -1170,7 +1184,6 @@ class DeviantartSearchExtractor(DeviantartExtractor):
     subcategory = "search"
     directory_fmt = ("{category}", "Search", "{search_tags}")
     archive_fmt = "Q_{search_tags}_{index}.{extension}"
-    cookies_domain = ".deviantart.com"
     pattern = (r"(?:https?://)?www\.deviantart\.com"
                r"/search(?:/deviations)?/?\?([^#]+)")
     example = "https://www.deviantart.com/search?q=QUERY"
@@ -1222,7 +1235,6 @@ class DeviantartGallerySearchExtractor(DeviantartExtractor):
     """Extractor for deviantart gallery searches"""
     subcategory = "gallery-search"
     archive_fmt = "g_{_username}_{index}.{extension}"
-    cookies_domain = ".deviantart.com"
     pattern = BASE_PATTERN + r"/gallery/?\?(q=[^#]+)"
     example = "https://www.deviantart.com/USER/gallery?q=QUERY"
 
@@ -1310,7 +1322,7 @@ class DeviantartOAuthAPI():
 
         metadata = extractor.config("metadata", False)
         if not metadata:
-            metadata = bool(extractor.extra)
+            metadata = True if extractor.extra else False
         if metadata:
             self.metadata = True
 
