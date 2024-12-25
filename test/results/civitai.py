@@ -241,4 +241,12 @@ __tests__ = (
     "#exception": exception.AuthorizationError,
 },
 
+{
+    "#url"  : "https://civitai.com/user/jboogx_creative/videos",
+    "#class": civitai.CivitaiUserVideosExtractor,
+    "#pattern": r"https://image\.civitai\.com/xG1nkqKTMzGDvpLrqFT7WA/[0-9a-f-]+/original=true/\S+\.mp4",
+    "#range"  : "1-50",
+    "#count"  : 50,
+},
+
 )
