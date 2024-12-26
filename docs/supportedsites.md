@@ -1485,6 +1485,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Posts, Tag Searches</td>
     <td></td>
 </tr>
+<tr>
+    <td>VISUABUSTERS</td>
+    <td>https://www.visuabusters.com/booru/</td>
+    <td>Posts, Tag Searches</td>
+    <td></td>
+</tr>
 
 <tr>
     <td colspan="4"><strong>URL Shorteners</strong></td>
