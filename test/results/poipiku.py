@@ -48,8 +48,8 @@ __tests__ = (
     "#count"   : 4,
 
     "count"        : 4,
+    "num"          : range(1, 4),
     "description"  : "絵茶の産物ネタバレあるやつ",
-    "num"          : int,
     "post_category": "SPOILER",
     "post_id"      : "6411749",
     "user_id"      : "2166245",
@@ -65,12 +65,28 @@ __tests__ = (
     "#count"   : 3,
 
     "count"        : 3,
+    "num"          : range(1, 3),
     "description"  : "ORANGE OASISボスネタバレ<br />曲も大好き<br />2枚目以降はほとんど見えなかった1枚目背景のヒエログリフ小ネタです𓀀",
-    "num"          : int,
     "post_category": "SPOILER",
     "post_id"      : "5776587",
     "user_id"      : "3572553",
     "user_name"    : "nagakun",
+},
+
+{
+    "#url"     : "https://poipiku.com/1400760/5483268.html",
+    "#comment" : "Warning and no 'Show all' button (#6736)",
+    "#category": ("", "poipiku", "post"),
+    "#class"   : poipiku.PoipikuPostExtractor,
+    "#urls"    : "https://img-org.poipiku.com/user_img02/001400760/005483268_JdB7sAWpv.jpeg",
+
+    "count"        : 1,
+    "num"          : 1,
+    "description"  : "えち描く描く詐欺ずっとやってるのですこしかいてた<br />ほたしか写ってないよ",
+    "post_category": "TRAINING",
+    "post_id"      : "5483268",
+    "user_id"      : "1400760",
+    "user_name"    : "onitsuraaaai",
 },
 
 )
