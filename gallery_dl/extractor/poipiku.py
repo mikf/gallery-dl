@@ -52,20 +52,23 @@ class PoipikuExtractor(Extractor):
             }
 
             yield Message.Directory, post
-            post["num"] = 0
+            post["num"] = warning = 0
 
             while True:
                 thumb = extr('class="IllustItemThumbImg" src="', '"')
                 if not thumb:
                     break
                 elif thumb.startswith(("//img.poipiku.com/img/", "/img/")):
+                    if "/warning" in thumb:
+                        warning = True
+                    self.log.debug("%s: %s", post["post_id"], thumb)
                     continue
                 post["num"] += 1
                 url = text.ensure_http_scheme(thumb[:-8]).replace(
                     "//img.", "//img-org.", 1)
                 yield Message.Url, url, text.nameext_from_url(url, post)
 
-            if not extr('ShowAppendFile', '<'):
+            if not warning and not extr('ShowAppendFile', '<'):
                 continue
 
             url = self.root + "/f/ShowAppendFileF.jsp"
@@ -87,7 +90,8 @@ class PoipikuExtractor(Extractor):
 
             page = resp["html"]
             if (resp.get("result_num") or 0) < 0:
-                self.log.warning("'%s'", page.replace("<br/>", " "))
+                self.log.warning("%s: '%s'",
+                                 post["post_id"], page.replace("<br/>", " "))
 
             for thumb in text.extract_iter(
                     page, 'class="IllustItemThumbImg" src="', '"'):
