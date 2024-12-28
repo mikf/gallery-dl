@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2020-2023 Mike Fährmann
+# Copyright 2020-2024 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -17,6 +17,7 @@ BASE_PATTERN = r"(?:https?://)?(?:www\.)?subscribestar\.(com|adult)"
 
 class SubscribestarExtractor(Extractor):
     """Base class for subscribestar extractors"""
+
     category = "subscribestar"
     root = "https://www.subscribestar.com"
     directory_fmt = ("{category}", "{author_name}")
@@ -76,6 +77,7 @@ class SubscribestarExtractor(Extractor):
 
         response = self.request(
             url, method="POST", headers=headers, data=data, fatal=False)
+
         if response.json().get("errors"):
             self.log.debug(response.json()["errors"])
             raise exception.AuthenticationError()
@@ -86,44 +88,98 @@ class SubscribestarExtractor(Extractor):
             if cookie.name.startswith("auth")
         }
 
-    def _media_from_post(self, html):
+    def _extract_media(self, html, media_types):
         media = []
+        media_config = {
+            "gallery": ('data-gallery="', '"', self._process_gallery_item),
+            "attachments": (
+                'class="uploads-docs"',
+                'data-role="post-edit_form"',
+                self._process_attachment_item,
+            ),
+            "link": ('data-href="', '"', self._process_media_item),
+            "audio": ('<source src="', '" type="audio/',
+                      self._process_media_item),
+        }
 
-        gallery = text.extr(html, 'data-gallery="', '"')
-        if gallery:
-            for item in util.json_loads(text.unescape(gallery)):
-                if "/previews" in item["url"]:
-                    self._warn_preview()
-                else:
-                    media.append(item)
+        for key, config in media_types.items():
+            if key in media_config:
+                start, end, processor = media_config[key]
+                segments = (
+                    text.extract_all(
+                        html,
+                        ((key, start, end),),
+                    )[0],
+                )
+                for segment in segments:
+                    if segment[key]:
+                        content = processor(segment, key)
+                        if content:
+                            media.append(content)
+        return media
 
-        attachments = text.extr(
-            html, 'class="uploads-docs"', 'data-role="post-edit_form"')
-        if attachments:
-            for att in attachments.split('class="doc_preview"')[1:]:
-                media.append({
-                    "id"  : text.parse_int(text.extr(
-                        att, 'data-upload-id="', '"')),
-                    "name": text.unescape(text.extr(
-                        att, 'doc_preview-title">', '<')),
-                    "url" : text.unescape(text.extr(att, 'href="', '"')),
-                    "type": "attachment",
-                })
+    def _process_gallery_item(self, item, media_type):
+        gallery_list = util.json_loads(text.unescape(item["gallery"]))
+        for media in gallery_list:
+            if "/previews" in media["url"]:
+                self._warn_preview()
+            return {"url": media["url"], "type": media_type}
 
+    def _process_attachment_item(self, item, media_type):
+        return {
+            "id": text.parse_int(text.extr(item, 'data-upload-id="', '"')),
+            "name": text.unescape(text.extr(item, 'doc_preview-title">', "<")),
+            "url": text.unescape(text.extr(item, 'href="', '"')),
+            "type": media_type,
+        }
+
+    def _process_media_item(self, item, media_type):
+        if media_type == "link" and util.check_if_supported_by_ytdlp(
+                item[media_type]):
+            return {"url": "ytdl:" + item[media_type], "type": media_type}
+        elif media_type == "audio":
+            return {"url": item[media_type], "type": media_type}
+
+    def _media_from_post(self, html):
+        media_types = {
+            "gallery": True,
+            "attachments": True,
+            "link": True,
+            "audio": True,
+        }
+        media = self._extract_media(html, media_types)
         return media
 
     def _data_from_post(self, html):
         extr = text.extract_from(html)
+
+        links = (text.extract_all(html, (("url", 'data-href="', '"'),), )[0],)
+        audios = (text.extract_all(html, (("url", '<source src="',
+                                           '" type="audio/'),),)[0],)
+        gallery = text.extr(html, 'data-gallery="', '"')
+
+        content_type = None
+        if links and any(item["url"] for item in links):
+            content_type = "link"
+        if audios and any(item["url"] for item in audios):
+            content_type = "audio"
+        if gallery:
+            for item in util.json_loads(text.unescape(gallery)):
+                if item["type"] == "video":
+                    content_type = "video"
+                    break
+                else:
+                    content_type = "image"
+
         return {
-            "post_id"    : text.parse_int(extr('data-id="', '"')),
-            "author_id"  : text.parse_int(extr('data-user-id="', '"')),
-            "author_name": text.unescape(extr('href="/', '"')),
-            "author_nick": text.unescape(extr('>', '<')),
-            "date"       : self._parse_datetime(extr(
-                'class="post-date">', '</').rpartition(">")[2]),
-            "content"    : (extr(
-                '<div class="post-content', '<div class="post-uploads')
-                .partition(">")[2]),
+            "post_id"      : text.parse_int(extr('data-id="', '"')),
+            "author_id"    : text.parse_int(extr('data-user-id="', '"')),
+            "author_name"  : text.unescape(extr('href="/', '"')),
+            "author_nick"  : text.unescape(extr(">", "<")),
+            "date"         : self._parse_datetime(
+                extr('class="post-date">', "</").rpartition(">")[2]),
+            "content"      : extr("<body>\n", "\n</body>"),
+            "content_type" : content_type,
         }
 
     def _parse_datetime(self, dt):
@@ -170,17 +226,3 @@ class SubscribestarPostExtractor(SubscribestarExtractor):
     def posts(self):
         url = "{}/posts/{}".format(self.root, self.item)
         return (self.request(url).text,)
-
-    def _data_from_post(self, html):
-        extr = text.extract_from(html)
-        return {
-            "post_id"    : text.parse_int(extr('data-id="', '"')),
-            "author_name": text.unescape(extr('href="/', '"')),
-            "author_id"  : text.parse_int(extr('data-user-id="', '"')),
-            "author_nick": text.unescape(extr('alt="', '"')),
-            "date"       : self._parse_datetime(extr(
-                '<span class="star_link-types">', '<')),
-            "content"    : (extr(
-                '<div class="post-content', '<div class="post-uploads')
-                .partition(">")[2]),
-        }
