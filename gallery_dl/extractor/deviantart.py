@@ -758,19 +758,20 @@ x2="45.4107524%" y2="71.4898596%" id="app-root-3">\
             self.api.user_friends_unwatch(username)
 
     def _eclipse_media(self, media, format="preview"):
-        url = [media["baseUri"], ]
+        url = [media["baseUri"]]
 
         formats = {
             fmt["t"]: fmt
             for fmt in media["types"]
         }
 
-        tokens = media["token"]
-        if len(tokens) == 1:
+        tokens = media.get("token") or ()
+        if len(tokens) <= 1:
             fmt = formats[format]
             url.append(fmt["c"].replace("<prettyName>", media["prettyName"]))
-        url.append("?token=")
-        url.append(tokens[-1])
+        if tokens:
+            url.append("?token=")
+            url.append(tokens[-1])
 
         return "".join(url), formats
 
