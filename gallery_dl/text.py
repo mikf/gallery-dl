@@ -305,6 +305,28 @@ else:
             return default
 
 
+def parse_duration(duration_string, default=None):
+    try:
+        patterns = {
+            'hours': r'(\d+)\s*h(our(s)?)?',
+            'minutes': r'(\d+)\s*m(in(ute)?(s)?)?',
+            'seconds': r'(\d+)\s*s(ec(ond)?(s)?)?'
+        }
+        parsed_values = {unit: 0 for unit in patterns.keys()}
+
+        for unit, pattern in patterns.items():
+            match = re.search(pattern, duration_string, re.IGNORECASE)
+            if match:
+                parsed_values[unit] = int(match.group(1))
+
+        return datetime.timedelta(
+            hours=parsed_values['hours'],
+            minutes=parsed_values['minutes'],
+            seconds=parsed_values['seconds'])
+    except Exception:
+        return default
+
+
 def parse_datetime(date_string, format="%Y-%m-%dT%H:%M:%S%z", utcoffset=0):
     """Create a datetime object by parsing 'date_string'"""
     try:
