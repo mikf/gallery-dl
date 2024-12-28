@@ -440,7 +440,10 @@ class DeviantartExtractor(Extractor):
                     html.append("text-align:")
                     html.append(attrs["textAlign"])
                     html.append(";")
-                html.append('margin-inline-start:0px">')
+                itype = ("text-indent" if attrs.get("indentType") == "line"
+                         else "margin-inline-start")
+                isize = str((attrs.get("indentation") or 0) * 24)
+                html.append(itype + ':' + isize + 'px">')
 
                 for block in children:
                     self._tiptap_process_content(html, block)
@@ -461,15 +464,28 @@ class DeviantartExtractor(Extractor):
             html.append(attrs.get("textAlign") or "left")
             html.append('">')
             html.append('<span style="margin-inline-start:0px">')
-
-            children = content.get("content")
-            if children:
-                for block in children:
-                    self._tiptap_process_content(html, block)
-
+            self._tiptap_process_children(html, content)
             html.append("</span></h")
             html.append(level)
             html.append(">")
+
+        elif type in ("listItem", "bulletList", "orderedList", "blockquote"):
+            c = type[1]
+            tag = (
+                "li" if c == "i" else
+                "ul" if c == "u" else
+                "ol" if c == "r" else
+                "blockquote"
+            )
+            html.append("<" + tag + ">")
+            self._tiptap_process_children(html, content)
+            html.append("</" + tag + ">")
+
+        elif type == "anchor":
+            attrs = content["attrs"]
+            html.append('<a id="')
+            html.append(attrs.get("id") or "")
+            html.append('" data-testid="anchor"></a>')
 
         elif type == "hardBreak":
             html.append("<br/><br/>")
@@ -487,6 +503,44 @@ class DeviantartExtractor(Extractor):
             html.append('" data-da-type="da-mention" data-user="">@<!-- -->')
             html.append(user)
             html.append('</a>')
+
+        elif type == "da-gif":
+            attrs = content["attrs"]
+            width = str(attrs.get("width") or "")
+            height = str(attrs.get("height") or "")
+            url = text.escape(attrs.get("url") or "")
+
+            html.append('<div data-da-type="da-gif" data-width="')
+            html.append(width)
+            html.append('" data-height="')
+            html.append(height)
+            html.append('" data-alignment="')
+            html.append(attrs.get("alignment") or "")
+            html.append('" data-url="')
+            html.append(url)
+            html.append('" class="t61qu"><video role="img" autoPlay="" '
+                        'muted="" loop="" style="pointer-events:none" '
+                        'controlsList="nofullscreen" playsInline="" '
+                        'aria-label="gif" data-da-type="da-gif" width="')
+            html.append(width)
+            html.append('" height="')
+            html.append(height)
+            html.append('" src="')
+            html.append(url)
+            html.append('" class="_1Fkk6"></video></div>')
+
+        elif type == "da-video":
+            src = text.escape(content["attrs"].get("src") or "")
+            html.append('<div data-testid="video" data-da-type="da-video" '
+                        'data-src="')
+            html.append(src)
+            html.append('" class="_1Uxvs"><div data-canfs="yes" data-testid="v'
+                        'ideo-inner" class="main-video" style="width:780px;hei'
+                        'ght:438px"><div style="width:780px;height:438px">'
+                        '<video src="')
+            html.append(src)
+            html.append('" style="width:100%;height:100%;" preload="auto" cont'
+                        'rols=""></video></div></div></div>')
 
         else:
             self.log.warning("Unsupported content type '%s'", type)
@@ -524,6 +578,12 @@ class DeviantartExtractor(Extractor):
             html.extend(close)
         else:
             html.append(text.escape(content["text"]))
+
+    def _tiptap_process_children(self, html, content):
+        children = content.get("content")
+        if children:
+            for block in children:
+                self._tiptap_process_content(html, block)
 
     def _tiptap_process_deviation(self, html, content):
         dev = content["attrs"]["deviation"]
