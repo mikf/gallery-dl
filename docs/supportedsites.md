@@ -590,12 +590,6 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
-    <td>MangaRead</td>
-    <td>https://mangaread.org/</td>
-    <td>Chapters, Manga</td>
-    <td></td>
-</tr>
-<tr>
     <td>MangaSee</td>
     <td>https://mangasee123.com/</td>
     <td>Chapters, Manga</td>
@@ -1783,6 +1777,28 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
     <td></td>
     <td>Albums</td>
+    <td></td>
+</tr>
+
+<tr>
+    <td colspan="4"><strong>WordPressMadara based websites</strong></td>
+</tr>
+<tr>
+    <td>MangaRead</td>
+    <td>https://mangaread.org/</td>
+    <td>Chapters, Manga</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Toonily</td>
+    <td>https://toonily.com/</td>
+    <td>Chapters, Manga</td>
+    <td></td>
+</tr>
+<tr>
+    <td>WebtoonXYZ</td>
+    <td>https://www.webtoon.xyz/</td>
+    <td>Chapters, Manga</td>
     <td></td>
 </tr>
 </tbody>
