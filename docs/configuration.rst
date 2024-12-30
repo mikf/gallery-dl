@@ -6715,6 +6715,9 @@ Description
     ``prepare-after``
         Before a file download,
         but after building and checking file paths
+    ``filtered``
+        When a file has been excluded from download
+        by image-filter or chapter-filter
     ``file``
         When completing a file download,
         but before it gets moved to its target location

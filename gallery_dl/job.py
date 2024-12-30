@@ -44,6 +44,7 @@ class Job():
         self.extractor = extr
         self.pathfmt = None
         self.status = 0
+        self.hooks = ()
         self.kwdict = {}
         self.kwdict_eval = False
 
@@ -188,6 +189,9 @@ class Job():
 
     def dispatch(self, msg):
         """Call the appropriate message handler"""
+        hooks = self.hooks
+        pathfmt = self.pathfmt
+
         if msg[0] == Message.Url:
             _, url, kwdict = msg
             if self.metadata_url:
@@ -195,6 +199,10 @@ class Job():
             if self.pred_url(url, kwdict):
                 self.update_kwdict(kwdict)
                 self.handle_url(url, kwdict)
+            else:
+                if "filtered" in hooks:
+                    for callback in hooks["filtered"]:
+                        callback(pathfmt)
 
         elif msg[0] == Message.Directory:
             self.update_kwdict(msg[1])
@@ -206,6 +214,10 @@ class Job():
                 kwdict[self.metadata_url] = url
             if self.pred_queue(url, kwdict):
                 self.handle_queue(url, kwdict)
+            else:
+                if "filtered" in hooks:
+                    for callback in hooks["filtered"]:
+                        callback(pathfmt)
 
     def handle_url(self, url, kwdict):
         """Handle Message.Url"""
