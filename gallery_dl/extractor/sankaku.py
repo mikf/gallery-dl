@@ -131,7 +131,7 @@ class SankakuPoolExtractor(SankakuExtractor):
     subcategory = "pool"
     directory_fmt = ("{category}", "pool", "{pool[id]} {pool[name_en]}")
     archive_fmt = "p_{pool}_{id}"
-    pattern = BASE_PATTERN + r"/(?:books|pools?/show)/(\d+)"
+    pattern = BASE_PATTERN + r"/(?:books|pools?/show)/(\w+)"
     example = "https://sankaku.app/books/12345"
 
     def __init__(self, match):
