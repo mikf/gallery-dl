@@ -98,7 +98,7 @@ class SubscribestarExtractor(Extractor):
                     media.append(item)
 
         attachments = text.extr(
-            html, 'class="uploads-docs"', 'data-role="post-edit_form"')
+            html, 'class="uploads-docs"', 'class="post-edit_form"')
         if attachments:
             for att in attachments.split('class="doc_preview"')[1:]:
                 media.append({
@@ -108,6 +108,19 @@ class SubscribestarExtractor(Extractor):
                         att, 'doc_preview-title">', '<')),
                     "url" : text.unescape(text.extr(att, 'href="', '"')),
                     "type": "attachment",
+                })
+
+        audios = text.extr(
+            html, 'class="uploads-audios"', 'class="post-edit_form"')
+        if audios:
+            for audio in audios.split('class="audio_preview-data"')[1:]:
+                media.append({
+                    "id"  : text.parse_int(text.extr(
+                        audio, 'data-upload-id="', '"')),
+                    "name": text.unescape(text.extr(
+                        audio, 'audio_preview-title">', '<')),
+                    "url" : text.unescape(text.extr(audio, 'src="', '"')),
+                    "type": "audio",
                 })
 
         return media
