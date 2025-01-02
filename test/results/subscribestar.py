@@ -71,6 +71,24 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.subscribestar.com/posts/920015",
+    "#comment" : "attachment (#6721)",
+    "#category": ("", "subscribestar", "post"),
+    "#class"   : subscribestar.SubscribestarPostExtractor,
+    "#range"   : "2",
+    "#pattern" : r"https://ss-uploads-prod\.b-cdn\.net/uploads_v2/users/11/posts/920015/bc018a55-9668-47f4-a664-b5fd66b56aaa\.pdf\?token=.+",
+
+    "date"     : "dt:2023-05-30 09:20:00",
+    "extension": "pdf",
+    "filename" : "Training for freelancers - Fiverr",
+    "id"       : 1957727,
+    "name"     : "Training for freelancers - Fiverr.pdf",
+    "num"      : 2,
+    "post_id"  : 920015,
+    "type"     : "attachment",
+},
+
+{
     "#url"     : "https://subscribestar.adult/posts/22950",
     "#category": ("", "subscribestar", "post-adult"),
     "#class"   : subscribestar.SubscribestarPostExtractor,
