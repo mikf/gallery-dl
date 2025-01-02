@@ -122,7 +122,10 @@ class HitomiTagExtractor(Extractor):
             self.tag = tag
 
     def items(self):
-        data = {"_extractor": HitomiGalleryExtractor}
+        data = {
+            "_extractor": HitomiGalleryExtractor,
+            "search_tags": text.unquote(self.tag.rpartition("-")[0]),
+        }
         nozomi_url = "https://ltn.hitomi.la/{}/{}.nozomi".format(
             self.type, self.tag)
         headers = {
@@ -202,12 +205,14 @@ class HitomiSearchExtractor(Extractor):
     def __init__(self, match):
         Extractor.__init__(self, match)
         self.query = match.group(1)
-        self.tags = text.unquote(self.query).split(" ")
+        self.tags = text.unquote(self.query)
 
     def items(self):
-        data = {"_extractor": HitomiGalleryExtractor}
-
-        results = [self.get_nozomi_items(tag) for tag in self.tags]
+        data = {
+            "_extractor": HitomiGalleryExtractor,
+            "search_tags": self.tags,
+        }
+        results = [self.get_nozomi_items(tag) for tag in self.tags.split(" ")]
         intersects = set.intersection(*results)
 
         for gallery_id in sorted(intersects, reverse=True):
