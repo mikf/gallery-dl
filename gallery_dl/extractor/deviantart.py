@@ -440,10 +440,8 @@ class DeviantartExtractor(Extractor):
                     html.append("text-align:")
                     html.append(attrs["textAlign"])
                     html.append(";")
-                itype = ("text-indent" if attrs.get("indentType") == "line"
-                         else "margin-inline-start")
-                isize = str((attrs.get("indentation") or 0) * 24)
-                html.append(itype + ':' + isize + 'px">')
+                self._tiptap_process_indentation(html, attrs)
+                html.append('">')
 
                 for block in children:
                     self._tiptap_process_content(html, block)
@@ -463,7 +461,9 @@ class DeviantartExtractor(Extractor):
             html.append(' style="text-align:')
             html.append(attrs.get("textAlign") or "left")
             html.append('">')
-            html.append('<span style="margin-inline-start:0px">')
+            html.append('<span style="')
+            self._tiptap_process_indentation(html, attrs)
+            html.append('">')
             self._tiptap_process_children(html, content)
             html.append("</span></h")
             html.append(level)
@@ -555,7 +555,13 @@ class DeviantartExtractor(Extractor):
                     attrs = mark.get("attrs") or {}
                     html.append('<a href="')
                     html.append(text.escape(attrs.get("href") or ""))
-                    html.append('" rel="noopener noreferrer nofollow ugc">')
+                    if "target" in attrs:
+                        html.append('" target="')
+                        html.append(attrs["target"])
+                    html.append('" rel="')
+                    html.append(attrs.get("rel") or
+                                "noopener noreferrer nofollow ugc")
+                    html.append('">')
                     close.append("</a>")
                 elif type == "bold":
                     html.append("<strong>")
@@ -584,6 +590,12 @@ class DeviantartExtractor(Extractor):
         if children:
             for block in children:
                 self._tiptap_process_content(html, block)
+
+    def _tiptap_process_indentation(self, html, attrs):
+        itype = ("text-indent" if attrs.get("indentType") == "line" else
+                 "margin-inline-start")
+        isize = str((attrs.get("indentation") or 0) * 24)
+        html.append(itype + ":" + isize + "px")
 
     def _tiptap_process_deviation(self, html, content):
         dev = content["attrs"]["deviation"]
@@ -826,10 +838,12 @@ x2="45.4107524%" y2="71.4898596%" id="app-root-3">\
         }
 
         tokens = media.get("token") or ()
-        if len(tokens) <= 1:
-            fmt = formats[format]
-            url.append(fmt["c"].replace("<prettyName>", media["prettyName"]))
         if tokens:
+            if len(tokens) <= 1:
+                fmt = formats[format]
+                if "c" in fmt:
+                    url.append(fmt["c"].replace(
+                        "<prettyName>", media["prettyName"]))
             url.append("?token=")
             url.append(tokens[-1])
 
