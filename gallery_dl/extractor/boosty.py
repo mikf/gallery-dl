@@ -222,7 +222,8 @@ class BoostyFollowingExtractor(BoostyExtractor):
 class BoostyDirectMessageExtractor(BoostyExtractor):
     """Extractor for boosty.to direct messages"""
     subcategory = "direct-messages"
-    directory_fmt = "{category}", "{user[blogUrl]} ({user[id]})", "direct-messages"
+    directory_fmt = ("{category}", "{user[blogUrl]} ({user[id]})",
+                     "direct-messages")
     pattern = BASE_PATTERN + r"/app/messages\?dialogId=(\d+)"
     example = "https://boosty.to/app/messages?dialogId=123456"
 
@@ -255,7 +256,8 @@ class BoostyDirectMessageExtractor(BoostyExtractor):
                     url = file["url"]
                     yield Message.Url, url, text.nameext_from_url(url, data)
 
-        for message in self.api.dialog_messages(dialog_id=dialog_id, offset=messages[0]["id"]):
+        for message in self.api.dialog_messages(dialog_id=dialog_id,
+                                                offset=messages[0]["id"]):
             files = self._process_dialog(message, sign=sign)
             if files:
                 data = {
@@ -285,7 +287,9 @@ class BoostyDirectMessageExtractor(BoostyExtractor):
 
             elif type == "ok_video":
                 if not self.videos:
-                    self.log.debug("%s: Skipping video %s", post["id"], block["id"])
+                    self.log.debug(
+                        "%s: Skipping video %s", post["id"],
+                        block["id"])
                     continue
                 fmts = {
                     fmt["type"]: fmt["url"]
@@ -303,7 +307,9 @@ class BoostyDirectMessageExtractor(BoostyExtractor):
                     block["_fallback"] = formats
                     files.append(block)
                 else:
-                    self.log.warning("%s: Found no suitable video format for %s", post["id"], block["id"])
+                    self.log.warning(
+                        "%s: Found no suitable video format for %s",
+                        post["id"], block["id"])
 
             elif type == "link":
                 url = block["url"]
