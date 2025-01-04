@@ -219,6 +219,105 @@ class BoostyFollowingExtractor(BoostyExtractor):
             yield Message.Queue, url, user
 
 
+class BoostyDirectMessageExtractor(BoostyExtractor):
+    """Extractor for boosty.to direct messages"""
+    subcategory = "direct-messages"
+    directory_fmt = "{category}", "{user[blogUrl]} ({user[id]})", "direct-messages"
+    pattern = BASE_PATTERN + r"/app/messages\?dialogId=(\d+)"
+    example = "https://boosty.to/app/messages?dialogId=123456"
+
+    def items(self):
+        """Yield direct messages from a given dialog ID."""
+        dialog_id = self.groups[0]
+        response = self.api.dialog(dialog_id)
+        sign = response.get("signedQuery", "")
+        messages = response.get("messages", {}).get("data", [])
+        chatmate = response.get("chatmate", {})
+        user = chatmate.get("url", "")
+
+        if self._user is None:
+            self._user = self.api.user(user)
+
+        for message in messages:
+            files = self._process_dialog(message, sign=sign)
+
+            if files:
+                data = {
+                    "post": message,
+                    "user": self._user,
+                    "count": len(files),
+                }
+
+                yield Message.Directory, data
+
+                for data["num"], file in enumerate(files, 1):
+                    data["file"] = file
+                    url = file["url"]
+                    yield Message.Url, url, text.nameext_from_url(url, data)
+
+        for message in self.api.dialog_messages(dialog_id=dialog_id, offset=messages[0]["id"]):
+            files = self._process_dialog(message, sign=sign)
+            if files:
+                data = {
+                    "post": message,
+                    "user": self._user,
+                    "count": len(files),
+                }
+                yield Message.Directory, data
+
+                for data["num"], file in enumerate(files, 1):
+                    data["file"] = file
+                    url = file["url"]
+                    yield Message.Url, url, text.nameext_from_url(url, data)
+
+    def _process_dialog(self, post, sign=None):
+        """Process a post and return the list of files."""
+        files = []
+
+        for block in post.get("data", []):
+            post["signedQuery"] = sign
+            type = block["type"]
+            if type == "text":
+                continue
+
+            if type == "image":
+                files.append(self._update_url(post, block))
+
+            elif type == "ok_video":
+                if not self.videos:
+                    self.log.debug("%s: Skipping video %s", post["id"], block["id"])
+                    continue
+                fmts = {
+                    fmt["type"]: fmt["url"]
+                    for fmt in block.get("playerUrls", [])
+                    if fmt["url"]
+                }
+                formats = [
+                    fmts[fmt]
+                    for fmt in self.videos
+                    if fmt in fmts
+                ]
+                if formats:
+                    formats = iter(formats)
+                    block["url"] = next(formats)
+                    block["_fallback"] = formats
+                    files.append(block)
+                else:
+                    self.log.warning("%s: Found no suitable video format for %s", post["id"], block["id"])
+
+            elif type == "link":
+                url = block["url"]
+                files.append({"url": url})
+
+            elif type == "audio_file":
+                files.append(self._update_url(post, block))
+
+            elif type == "file":
+                files.append(self._update_url(post, block))
+
+        return files
+
+
 class BoostyAPI():
     """Interface for the Boosty API"""
     root = "https://api.boosty.to"
@@ -366,4 +465,33 @@ class BoostyAPI():
             offset = data["offset"] + data["limit"]
             if offset > data["total"]:
                 return
+            params["offset"] = offset
+
+    def dialog(self, dialog_id):
+        endpoint = f"/v1/dialog/{dialog_id}"
+        return self._call(endpoint)
+
+    def dialog_messages(self, dialog_id, limit=300, offset=None):
+        endpoint = f"/v1/dialog/{dialog_id}/message/"
+        params = {
+            "limit": str(limit),
+            "reverse": "true",
+            "offset": str(offset) if offset else None,
+        }
+        return self._pagination_dialog(endpoint, params)
+
+    def _pagination_dialog(self, endpoint, params):
+        all_messages = []
+
+        while True:
+            data = self._call(endpoint, params)
+            messages = data.get("messages", {}).get("data", [])
+            all_messages.extend(messages)
+            extra = data.get("extra", {})
+            offset = extra.get("offset")
+            yield from data["data"]
+            if not offset:
+                break
+            if extra.get("isLast"):
+                break
             params["offset"] = offset
