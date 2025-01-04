@@ -41,6 +41,7 @@ class Job():
         if not extr:
             raise exception.NoExtractorError()
 
+        self.archive = None
         self.extractor = extr
         self.pathfmt = None
         self.status = 0
@@ -190,6 +191,7 @@ class Job():
     def dispatch(self, msg):
         """Call the appropriate message handler"""
         hooks = self.hooks
+        archive = self.archive
         pathfmt = self.pathfmt
 
         if msg[0] == Message.Url:
@@ -203,6 +205,8 @@ class Job():
                 if "filtered" in hooks:
                     for callback in hooks["filtered"]:
                         callback(pathfmt)
+                    if archive and self._archive_write_filtered:
+                        archive.add(kwdict)
 
         elif msg[0] == Message.Directory:
             self.update_kwdict(msg[1])
@@ -218,6 +222,8 @@ class Job():
                 if "filtered" in hooks:
                     for callback in hooks["filtered"]:
                         callback(pathfmt)
+                    if archive and self._archive_write_filtered:
+                        archive.add(kwdict)
 
     def handle_url(self, url, kwdict):
         """Handle Message.Url"""
@@ -592,11 +598,13 @@ class DownloadJob(Job):
                 events = cfg("archive-event")
                 if events is None:
                     self._archive_write_file = True
+                    self._archive_write_filtered = False
                     self._archive_write_skip = False
                 else:
                     if isinstance(events, str):
                         events = events.split(",")
                     self._archive_write_file = ("file" in events)
+                    self._archive_write_filtered = ("filtered" in events)
                     self._archive_write_skip = ("skip" in events)
 
         skip = cfg("skip", True)
@@ -723,6 +731,8 @@ class SimulationJob(DownloadJob):
         if self.sleep:
             self.extractor.sleep(self.sleep(), "download")
         if self.archive and self._archive_write_skip:
+            self.archive.add(kwdict)
+        if self.archive and self._archive_write_filtered:
             self.archive.add(kwdict)
         self.out.skip(self.pathfmt.build_filename(kwdict))
 

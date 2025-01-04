@@ -972,7 +972,7 @@ Description
     `archive <extractor.*.archive_>`__.
 
     Available events are:
-    ``file``, ``skip``
+    ``file``, ``filtered``, ``skip``
 
 
 extractor.*.archive-format
