@@ -219,7 +219,7 @@ class BoostyFollowingExtractor(BoostyExtractor):
             yield Message.Queue, url, user
 
 
-class BoostyDirectMessageExtractor(BoostyExtractor):
+class BoostyDirectMessagesExtractor(BoostyExtractor):
     """Extractor for boosty.to direct messages"""
     subcategory = "direct-messages"
     directory_fmt = ("{category}", "{user[blogUrl]} ({user[id]})",
