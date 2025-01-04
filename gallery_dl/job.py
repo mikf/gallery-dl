@@ -201,7 +201,7 @@ class Job():
             if self.pred_url(url, kwdict):
                 self.update_kwdict(kwdict)
                 self.handle_url(url, kwdict)
-            else:
+            if not self.pred_filter_url(url, kwdict):
                 if "filtered" in hooks:
                     for callback in hooks["filtered"]:
                         callback(pathfmt)
@@ -218,7 +218,7 @@ class Job():
                 kwdict[self.metadata_url] = url
             if self.pred_queue(url, kwdict):
                 self.handle_queue(url, kwdict)
-            else:
+            if not self.pred_filter_queue(url, kwdict):
                 if "filtered" in hooks:
                     for callback in hooks["filtered"]:
                         callback(pathfmt)
@@ -254,6 +254,23 @@ class Job():
         self.extractor.initialize()
         self.pred_url = self._prepare_predicates("image", True)
         self.pred_queue = self._prepare_predicates("chapter", False)
+        self.pred_filter_url = self._prepare_filter_predicates("image", True)
+        self.pred_filter_queue = self._prepare_filter_predicates(
+            "chapter", False)
+
+    def _prepare_filter_predicates(self, target, skip=True):
+        predicates = []
+
+        pfilter = self.extractor.config(target + "-filter")
+        if pfilter:
+            try:
+                pred = util.FilterPredicate(pfilter, target)
+            except (SyntaxError, ValueError, TypeError) as exc:
+                self.extractor.log.warning(exc)
+            else:
+                predicates.append(pred)
+
+        return util.build_predicate(predicates)
 
     def _prepare_predicates(self, target, skip=True):
         predicates = []
