@@ -137,7 +137,7 @@ class SubscribestarExtractor(Extractor):
             "author_nick": text.unescape(extr('>', '<')),
             "date"       : self._parse_datetime(extr(
                 'class="post-date">', '</').rpartition(">")[2]),
-            "content"    : extr('<body>', '</body>')
+            "content"    : extr('<body>', '</body>').strip(),
         }
 
     def _parse_datetime(self, dt):
@@ -194,5 +194,5 @@ class SubscribestarPostExtractor(SubscribestarExtractor):
             "author_nick": text.unescape(extr('alt="', '"')),
             "date"       : self._parse_datetime(extr(
                 '<span class="star_link-types">', '<')),
-            "content"    : extr('<body>', '</body>')
+            "content"    : extr('<body>', '</body>').strip(),
         }
