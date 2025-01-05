@@ -323,7 +323,7 @@ def build_parser():
     input.add_argument(
         "--no-input",
         dest="input", nargs=0, action=ConfigConstAction, const=False,
-        help=("Do not prompt for passwords/tokens"),
+        help="Do not prompt for passwords/tokens",
     )
 
     output = parser.add_argument_group("Output Options")
@@ -406,7 +406,7 @@ def build_parser():
     )
     output.add_argument(
         "--list-extractors",
-        dest="list_extractors", metavar="CATEGORIES", nargs="*",
+        dest="list_extractors", metavar="[CATEGORIES]", nargs="*",
         help=("Print a list of extractor classes "
               "with description, (sub)category and example URL"),
     )
@@ -430,12 +430,12 @@ def build_parser():
     output.add_argument(
         "--print-traffic",
         dest="print_traffic", action="store_true",
-        help=("Display sent and read HTTP traffic"),
+        help="Display sent and read HTTP traffic",
     )
     output.add_argument(
         "--no-colors",
         dest="colors", action="store_false",
-        help=("Do not emit ANSI color codes in output"),
+        help="Do not emit ANSI color codes in output",
     )
 
     networking = parser.add_argument_group("Networking Options")
