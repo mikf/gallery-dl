@@ -20,6 +20,7 @@ class DanbooruExtractor(BaseExtractor):
     page_limit = 1000
     page_start = None
     per_page = 200
+    useragent = util.USERAGENT
     request_interval = (0.5, 1.5)
 
     def _init(self):
@@ -46,8 +47,8 @@ class DanbooruExtractor(BaseExtractor):
         return pages * self.per_page
 
     def items(self):
-        self.session.headers["User-Agent"] = util.USERAGENT
-
+        # 'includes' initialization must be done here and not in '_init()'
+        # or it'll cause an exception with e621 when 'metadata' is enabled
         includes = self.config("metadata")
         if includes:
             if isinstance(includes, (list, tuple)):
@@ -107,6 +108,13 @@ class DanbooruExtractor(BaseExtractor):
             post.update(data)
             yield Message.Directory, post
             yield Message.Url, url, post
+
+    def items_artists(self):
+        for artist in self.artists():
+            artist["_extractor"] = DanbooruTagExtractor
+            url = "{}/posts?tags={}".format(
+                self.root, text.quote(artist["name"]))
+            yield Message.Queue, url, artist
 
     def metadata(self):
         return ()
@@ -216,7 +224,7 @@ class DanbooruTagExtractor(DanbooruExtractor):
                 else:
                     prefix = None
             elif tag.startswith(
-                    ("id:", "md5", "ordfav:", "ordfavgroup:", "ordpool:")):
+                    ("id:", "md5:", "ordfav:", "ordfavgroup:", "ordpool:")):
                 prefix = None
                 break
 
@@ -294,3 +302,39 @@ class DanbooruPopularExtractor(DanbooruExtractor):
 
     def posts(self):
         return self._pagination("/explore/posts/popular.json", self.params)
+
+
+class DanbooruArtistExtractor(DanbooruExtractor):
+    """Extractor for danbooru artists"""
+    subcategory = "artist"
+    pattern = BASE_PATTERN + r"/artists/(\d+)"
+    example = "https://danbooru.donmai.us/artists/12345"
+
+    items = DanbooruExtractor.items_artists
+
+    def artists(self):
+        url = "{}/artists/{}.json".format(self.root, self.groups[-1])
+        return (self.request(url).json(),)
+
+
+class DanbooruArtistSearchExtractor(DanbooruExtractor):
+    """Extractor for danbooru artist searches"""
+    subcategory = "artist-search"
+    pattern = BASE_PATTERN + r"/artists/?\?([^#]+)"
+    example = "https://danbooru.donmai.us/artists?QUERY"
+
+    items = DanbooruExtractor.items_artists
+
+    def artists(self):
+        url = self.root + "/artists.json"
+        params = text.parse_query(self.groups[-1])
+        params["page"] = text.parse_int(params.get("page"), 1)
+
+        while True:
+            artists = self.request(url, params=params).json()
+
+            yield from artists
+
+            if len(artists) < 20:
+                return
+            params["page"] += 1

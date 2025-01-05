@@ -461,6 +461,17 @@ def build_parser():
         help="Client-side IP address to bind to",
     )
     networking.add_argument(
+        "-4", "--force-ipv4",
+        dest="source-address", nargs=0, action=ConfigConstAction,
+        const="0.0.0.0",
+        help="Make all connections via IPv4",
+    )
+    networking.add_argument(
+        "-6", "--force-ipv6",
+        dest="source-address", nargs=0, action=ConfigConstAction, const="::",
+        help="Make all connections via IPv6",
+    )
+    networking.add_argument(
         "--no-check-certificate",
         dest="verify", nargs=0, action=ConfigConstAction, const=False,
         help="Disable HTTPS certificate validation",
@@ -791,5 +802,11 @@ def build_parser():
               "Example: --exec-after \"cd {_directory} "
               "&& convert * ../doc.pdf\""),
     )
+
+    try:
+        # restore normal behavior when adding '-4' or '-6' as arguments
+        parser._has_negative_number_optionals.clear()
+    except Exception:
+        pass
 
     return parser

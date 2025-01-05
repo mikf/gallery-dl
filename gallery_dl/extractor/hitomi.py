@@ -108,9 +108,9 @@ class HitomiTagExtractor(Extractor):
     category = "hitomi"
     subcategory = "tag"
     root = "https://hitomi.la"
-    pattern = (r"(?:https?://)?hitomi\.la/"
-               r"(tag|artist|group|series|type|character)/"
-               r"([^/?#]+)\.html")
+    pattern = (r"(?:https?://)?hitomi\.la"
+               r"/(tag|artist|group|series|type|character)"
+               r"/([^/?#]+)\.html")
     example = "https://hitomi.la/tag/TAG-LANG.html"
 
     def __init__(self, match):
@@ -122,7 +122,10 @@ class HitomiTagExtractor(Extractor):
             self.tag = tag
 
     def items(self):
-        data = {"_extractor": HitomiGalleryExtractor}
+        data = {
+            "_extractor": HitomiGalleryExtractor,
+            "search_tags": text.unquote(self.tag.rpartition("-")[0]),
+        }
         nozomi_url = "https://ltn.hitomi.la/{}/{}.nozomi".format(
             self.type, self.tag)
         headers = {
@@ -149,6 +152,107 @@ class HitomiTagExtractor(Extractor):
                     response.headers["content-range"].rpartition("/")[2])
             if offset >= total:
                 return
+
+
+class HitomiIndexExtractor(HitomiTagExtractor):
+    """Extractor for galleries from index searches on hitomi.la"""
+    subcategory = "index"
+    pattern = r"(?:https?://)?hitomi\.la/(\w+)-(\w+)\.html"
+    example = "https://hitomi.la/index-LANG.html"
+
+    def __init__(self, match):
+        Extractor.__init__(self, match)
+        self.tag, self.language = match.groups()
+
+    def items(self):
+        data = {"_extractor": HitomiGalleryExtractor}
+        nozomi_url = "https://ltn.hitomi.la/{}-{}.nozomi".format(
+            self.tag, self.language)
+        headers = {
+            "Origin": self.root,
+            "Cache-Control": "max-age=0",
+        }
+
+        offset = 0
+        total = None
+        while True:
+            headers["Referer"] = "{}/{}-{}.html?page={}".format(
+                self.root, self.tag, self.language, offset // 100 + 1)
+            headers["Range"] = "bytes={}-{}".format(offset, offset+99)
+            response = self.request(nozomi_url, headers=headers)
+
+            for gallery_id in decode_nozomi(response.content):
+                gallery_url = "{}/galleries/{}.html".format(
+                    self.root, gallery_id)
+                yield Message.Queue, gallery_url, data
+
+            offset += 100
+            if total is None:
+                total = text.parse_int(
+                    response.headers["content-range"].rpartition("/")[2])
+            if offset >= total:
+                return
+
+
+class HitomiSearchExtractor(Extractor):
+    """Extractor for galleries from multiple tag searches on hitomi.la"""
+    category = "hitomi"
+    subcategory = "search"
+    root = "https://hitomi.la"
+    pattern = r"(?:https?://)?hitomi\.la/search\.html\?([^/?#]+)"
+    example = "https://hitomi.la/search.html?QUERY"
+
+    def __init__(self, match):
+        Extractor.__init__(self, match)
+        self.query = match.group(1)
+        self.tags = text.unquote(self.query)
+
+    def items(self):
+        data = {
+            "_extractor": HitomiGalleryExtractor,
+            "search_tags": self.tags,
+        }
+        results = [self.get_nozomi_items(tag) for tag in self.tags.split(" ")]
+        intersects = set.intersection(*results)
+
+        for gallery_id in sorted(intersects, reverse=True):
+            gallery_url = "{}/galleries/{}.html".format(
+                self.root, gallery_id)
+            yield Message.Queue, gallery_url, data
+
+    def get_nozomi_items(self, full_tag):
+        area, tag, language = self.get_nozomi_args(full_tag)
+
+        if area:
+            nozomi_url = "https://ltn.hitomi.la/n/{}/{}-{}.nozomi".format(
+                area, tag, language)
+        else:
+            nozomi_url = "https://ltn.hitomi.la/n/{}-{}.nozomi".format(
+                tag, language)
+
+        headers = {
+            "Origin": self.root,
+            "Cache-Control": "max-age=0",
+            "Referer": "{}/search.html?{}".format(self.root, self.query),
+        }
+
+        response = self.request(nozomi_url, headers=headers)
+        return set(decode_nozomi(response.content))
+
+    def get_nozomi_args(self, query):
+        ns, _, tag = query.strip().partition(":")
+        area = ns
+        language = "all"
+
+        if ns == "female" or ns == "male":
+            area = "tag"
+            tag = query
+        elif ns == "language":
+            area = None
+            language = tag
+            tag = "index"
+
+        return area, tag.replace("_", " "), language
 
 
 @memcache(maxage=1800)

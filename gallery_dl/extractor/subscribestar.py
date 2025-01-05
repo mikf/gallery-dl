@@ -11,6 +11,7 @@
 from .common import Extractor, Message
 from .. import text, util, exception
 from ..cache import cache
+import re
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?subscribestar\.(com|adult)"
 
@@ -98,9 +99,10 @@ class SubscribestarExtractor(Extractor):
                     media.append(item)
 
         attachments = text.extr(
-            html, 'class="uploads-docs"', 'data-role="post-edit_form"')
+            html, 'class="uploads-docs"', 'class="post-edit_form"')
         if attachments:
-            for att in attachments.split('class="doc_preview"')[1:]:
+            for att in re.split(
+                    r'class="doc_preview[" ]', attachments)[1:]:
                 media.append({
                     "id"  : text.parse_int(text.extr(
                         att, 'data-upload-id="', '"')),
@@ -108,6 +110,20 @@ class SubscribestarExtractor(Extractor):
                         att, 'doc_preview-title">', '<')),
                     "url" : text.unescape(text.extr(att, 'href="', '"')),
                     "type": "attachment",
+                })
+
+        audios = text.extr(
+            html, 'class="uploads-audios"', 'class="post-edit_form"')
+        if audios:
+            for audio in re.split(
+                    r'class="audio_preview-data[" ]', audios)[1:]:
+                media.append({
+                    "id"  : text.parse_int(text.extr(
+                        audio, 'data-upload-id="', '"')),
+                    "name": text.unescape(text.extr(
+                        audio, 'audio_preview-title">', '<')),
+                    "url" : text.unescape(text.extr(audio, 'src="', '"')),
+                    "type": "audio",
                 })
 
         return media
@@ -121,9 +137,7 @@ class SubscribestarExtractor(Extractor):
             "author_nick": text.unescape(extr('>', '<')),
             "date"       : self._parse_datetime(extr(
                 'class="post-date">', '</').rpartition(">")[2]),
-            "content"    : (extr(
-                '<div class="post-content', '<div class="post-uploads')
-                .partition(">")[2]),
+            "content"    : extr('<body>', '</body>').strip(),
         }
 
     def _parse_datetime(self, dt):
@@ -180,7 +194,5 @@ class SubscribestarPostExtractor(SubscribestarExtractor):
             "author_nick": text.unescape(extr('alt="', '"')),
             "date"       : self._parse_datetime(extr(
                 '<span class="star_link-types">', '<')),
-            "content"    : (extr(
-                '<div class="post-content', '<div class="post-uploads')
-                .partition(">")[2]),
+            "content"    : extr('<body>', '</body>').strip(),
         }

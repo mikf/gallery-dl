@@ -32,7 +32,12 @@ class ScrolllerExtractor(Extractor):
 
         for post in self.posts():
 
-            src = max(post["mediaSources"], key=self._sort_key)
+            media_sources = post.get("mediaSources")
+            if not media_sources:
+                self.log.warning("%s: No media files", post.get("id"))
+                continue
+
+            src = max(media_sources, key=self._sort_key)
             post.update(src)
             url = src["url"]
             text.nameext_from_url(url, post)

@@ -23,7 +23,7 @@ __tests__ = (
     "#category": ("", "kemonoparty", "patreon"),
     "#class"   : kemonoparty.KemonopartyUserExtractor,
     "#options" : {"max-posts": 100},
-    "#count"   : range(200, 300),
+    "#count"   : range(200, 400),
 },
 
 {
@@ -92,7 +92,7 @@ __tests__ = (
     "#url"     : "https://kemono.su/gumroad/user/3101696181060/post/tOWyf",
     "#category": ("", "kemonoparty", "gumroad"),
     "#class"   : kemonoparty.KemonopartyPostExtractor,
-    "#urls"    : "https://kemono.su/data/6f/13/6f1394b19516396ea520254350662c254bbea30c1e111fd4b0f042c61c426d07.zip",
+    "#count"   : 12,
 },
 
 {
@@ -123,16 +123,36 @@ __tests__ = (
 },
 
 {
-    "#url"     : "https://kemono.su/patreon/user/34134344/post/38129255",
-    "#comment" : "DMs (#2008)",
+    "#url"     : "https://kemono.su/patreon/user/3161935/post/23445732",
+    "#comment" : "comments (#2008)",
     "#category": ("", "kemonoparty", "patreon"),
     "#class"   : kemonoparty.KemonopartyPostExtractor,
-    "#options" : {"dms": True},
+    "#options" : {"comments": True},
 
-    "dms": [{
-        "body": r"re:Hi! Thank you very much for supporting the work I did in May. Here's your reward pack! I hope you find something you enjoy in it. :\)\n\nhttps://www.mediafire.com/file/\w+/Set13_tier_2.zip/file",
-        "date": "2021-06",
-    }],
+    "comments": "len:12",
+},
+
+{
+    "#url"     : "https://kemono.su/patreon/user/34134344/post/38129255",
+    "#comment" : "DMs (#2008); no comments",
+    "#category": ("", "kemonoparty", "patreon"),
+    "#class"   : kemonoparty.KemonopartyPostExtractor,
+    "#options" : {"dms": True, "comments": True},
+
+    "comments": (),
+    "dms": [
+        {
+            "added"    : "2021-07-31T02:47:51.327865",
+            "artist"   : None,
+            "content"  : "Hi! Thank you very much for supporting the work I did in May. Here's your reward pack! I hope you find something you enjoy in it. :)\n\nhttps://www.mediafire.com/file/n9ppjpip0r3f01v/Set13_tier_2.zip/file",
+            "embed"    : {},
+            "file"     : {},
+            "hash"     : "f8d4962fb7908614c9b7c8c0de1b5f8985f01b62a9b06d74d640c5b2bcedf758",
+            "published": "2021-06-09T03:28:51.431000",
+            "service"  : "patreon",
+            "user"     : "34134344",
+        },
+    ],
 },
 
 {
@@ -142,10 +162,16 @@ __tests__ = (
     "#class"   : kemonoparty.KemonopartyPostExtractor,
     "#options" : {"announcements": True},
 
-    "announcements": [{
-        "body": "<div><strong>Thank you so much for the support!</strong><strong><br></strong>This Patreon is more of a tip jar for supporting what I make. I have to clarify that there are <strong>no exclusive Patreon animations</strong> because all are released for the public. You will get earlier access to WIPs. Direct downloads to my works are also available for $5 and $10 Tiers.</div>",
-        "date": "2023-02",
-    }],
+    "announcements": [
+        {
+            "added"    : "2023-02-01T22:44:34.670719",
+            "content"  : "<div style=\"text-align: center;\"><strong>Thank you so much for the support!</strong><strong><br></strong>This Patreon is more of a tip jar for supporting what I make. I have to clarify that there are <strong>no exclusive Patreon animations</strong>&nbsp;because all are released for the public. You will get earlier access to WIPs. Direct downloads to my works are also available for $5 and $10 Tiers.</div>",
+            "hash"     : "815648d41c60d1d546437e475a0888fd4a77fd098b1ec61a3648ea6da30c1034",
+            "published": None,
+            "service"  : "patreon",
+            "user_id"  : "3161935",
+        },
+    ],
 },
 
 {
@@ -207,7 +233,7 @@ __tests__ = (
     "hash"          : "88521f71822dfa2f42df3beba319ea4fceda2a2d6dc59da0276a75238f743f86",
     "revision_id"   : 142470,
     "revision_index": 2,
-    "revision_count": 9,
+    "revision_count": 10,
     "revision_hash" : "e0e93281495e151b11636c156e52bfe9234c2a40",
 },
 
@@ -218,13 +244,15 @@ __tests__ = (
     "#class"   : kemonoparty.KemonopartyPostExtractor,
     "#options" : {"revisions": "unique"},
     "#urls"    : "https://kemono.su/data/88/52/88521f71822dfa2f42df3beba319ea4fceda2a2d6dc59da0276a75238f743f86.jpg",
+    "#archive" : False,
 
     "filename"      : "wip update",
     "hash"          : "88521f71822dfa2f42df3beba319ea4fceda2a2d6dc59da0276a75238f743f86",
-    "revision_id"   : 0,
-    "revision_index": 1,
-    "revision_count": 1,
-    "revision_hash" : "e0e93281495e151b11636c156e52bfe9234c2a40",
+    "revision_id"   : {9277608, 0},
+    "revision_index": {1, 2},
+    "revision_count": 2,
+    "revision_hash" : {"e0e93281495e151b11636c156e52bfe9234c2a40",
+                       "79d5967719583a6fa52b2fc143e6a80fcdf75fb8"},
 },
 
 {
@@ -233,12 +261,12 @@ __tests__ = (
     "#category": ("", "kemonoparty", "patreon"),
     "#class"   : kemonoparty.KemonopartyPostExtractor,
     "#pattern" : r"https://kemono\.su/data/88/52/88521f71822dfa2f42df3beba319ea4fceda2a2d6dc59da0276a75238f743f86\.jpg",
-    "#count"   : 9,
+    "#count"   : 10,
     "#archive" : False,
 
-    "revision_id": range(134996, 3052965),
-    "revision_index": range(1, 9),
-    "revision_count": 9,
+    "revision_id": range(134996, 9277608),
+    "revision_index": range(1, 10),
+    "revision_count": 10,
     "revision_hash": "e0e93281495e151b11636c156e52bfe9234c2a40",
 },
 
@@ -269,6 +297,16 @@ __tests__ = (
     "#count"   : 8,
 
     "type"     : "attachment",
+},
+
+{
+    "#url"     : "https://kemono.su/discord/server/488668827274444803/608504710906904576",
+    "#category": ("", "kemonoparty", "discord"),
+    "#class"   : kemonoparty.KemonopartyDiscordExtractor,
+    "#count"   : 4,
+
+    "channel"     : "608504710906904576",
+    "channel_name": "",
 },
 
 {
@@ -341,15 +379,7 @@ __tests__ = (
     "#category": ("", "kemonoparty", "discord-server"),
     "#class"   : kemonoparty.KemonopartyDiscordServerExtractor,
     "#pattern" : kemonoparty.KemonopartyDiscordExtractor.pattern,
-    "#count"   : 13,
-},
-
-{
-    "#url"     : "https://kemono.su/discord/server/488668827274444803",
-    "#category": ("", "kemonoparty", "discord-server"),
-    "#class"   : kemonoparty.KemonopartyDiscordServerExtractor,
-    "#pattern" : kemonoparty.KemonopartyDiscordExtractor.pattern,
-    "#count"   : 13,
+    "#count"   : 15,
 },
 
 {
@@ -369,6 +399,7 @@ __tests__ = (
         "https://kemono.su/patreon/user/881792",
         "https://kemono.su/fanbox/user/6993449",
         "https://kemono.su/subscribestar/user/alcorart",
+        "https://kemono.su/gumroad/user/shengtian",
     ),
 },
 
@@ -382,6 +413,7 @@ __tests__ = (
         "https://kemono.su/fanbox/user/6993449",
         "https://kemono.su/patreon/user/881792",
         "https://kemono.su/subscribestar/user/alcorart",
+        "https://kemono.su/gumroad/user/shengtian",
     ),
 },
 
@@ -409,6 +441,18 @@ __tests__ = (
         "https://kemono.su/fanbox/user/6993449/post/23913",
         "https://kemono.su/subscribestar/user/alcorart/post/184329",
     ),
+},
+
+{
+    "#url"     : "https://kemono.su/account/favorites/artists",
+    "#category": ("", "kemonoparty", "favorite"),
+    "#class"   : kemonoparty.KemonopartyFavoriteExtractor,
+},
+
+{
+    "#url"     : "https://kemono.su/account/favorites/posts?sort_by=published&order=asc",
+    "#category": ("", "kemonoparty", "favorite"),
+    "#class"   : kemonoparty.KemonopartyFavoriteExtractor,
 },
 
 )

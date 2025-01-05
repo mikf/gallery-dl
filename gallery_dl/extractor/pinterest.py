@@ -117,10 +117,15 @@ class PinterestExtractor(Extractor):
                     else:
                         media = self._extract_image(page, block)
 
-                elif type == "story_pin_video_block":
+                elif type == "story_pin_video_block" or "video" in block:
                     video = block["video"]
                     media = self._extract_video(video)
                     media["media_id"] = video.get("id") or ""
+
+                elif type == "story_pin_music_block" or "audio" in block:
+                    media = block["audio"]
+                    media["url"] = media["audio_url"]
+                    media["media_id"] = media.get("id") or ""
 
                 elif type == "story_pin_paragraph_block":
                     media = {"url": "text:" + block["text"],
@@ -130,7 +135,10 @@ class PinterestExtractor(Extractor):
                 else:
                     self.log.warning("%s: Unsupported story block '%s'",
                                      pin.get("id"), type)
-                    continue
+                    try:
+                        media = self._extract_image(page, block)
+                    except Exception:
+                        continue
 
                 media["story_id"] = story_id
                 media["page_id"] = page_id
@@ -397,14 +405,19 @@ class PinterestAPI():
         self.root = extractor.root
         self.cookies = {"csrftoken": csrf_token}
         self.headers = {
-            "Accept"              : "application/json, text/javascript, "
-                                    "*/*, q=0.01",
-            "Accept-Language"     : "en-US,en;q=0.5",
-            "X-Requested-With"    : "XMLHttpRequest",
-            "X-APP-VERSION"       : "0c4af40",
-            "X-CSRFToken"         : csrf_token,
-            "X-Pinterest-AppState": "active",
-            "Origin"              : self.root,
+            "Accept"                 : "application/json, text/javascript, "
+                                       "*/*, q=0.01",
+            "X-Requested-With"       : "XMLHttpRequest",
+            "X-APP-VERSION"          : "a89153f",
+            "X-Pinterest-AppState"   : "active",
+            "X-Pinterest-Source-Url" : None,
+            "X-Pinterest-PWS-Handler": "www/[username].js",
+            "Alt-Used"               : "www.pinterest.com",
+            "Connection"             : "keep-alive",
+            "Cookie"                 : None,
+            "Sec-Fetch-Dest"         : "empty",
+            "Sec-Fetch-Mode"         : "cors",
+            "Sec-Fetch-Site"         : "same-origin",
         }
 
     def pin(self, pin_id):
@@ -437,7 +450,12 @@ class PinterestAPI():
 
     def board_pins(self, board_id):
         """Yield all pins of a specific board"""
-        options = {"board_id": board_id}
+        options = {
+            "board_id": board_id,
+            "field_set_key": "react_grid_pin",
+            "prepend": False,
+            "bookmarks": None,
+        }
         return self._pagination("BoardFeed", options)
 
     def board_section(self, section_id):

@@ -76,14 +76,15 @@ class SankakuExtractor(BooruExtractor):
 
     def _tags(self, post, page):
         tags = collections.defaultdict(list)
-        types = self.TAG_TYPES
         for tag in post["tags"]:
             name = tag["name"]
             if name:
-                tags[types[tag["type"]]].append(name.lower().replace(" ", "_"))
-        for key, value in tags.items():
-            post["tags_" + key] = value
-            post["tag_string_" + key] = " ".join(value)
+                tags[tag["type"]].append(name.lower().replace(" ", "_"))
+        types = self.TAG_TYPES
+        for type, values in tags.items():
+            name = types[type]
+            post["tags_" + name] = values
+            post["tag_string_" + name] = " ".join(values)
 
     def _notes(self, post, page):
         if post.get("has_notes"):
@@ -130,7 +131,7 @@ class SankakuPoolExtractor(SankakuExtractor):
     subcategory = "pool"
     directory_fmt = ("{category}", "pool", "{pool[id]} {pool[name_en]}")
     archive_fmt = "p_{pool}_{id}"
-    pattern = BASE_PATTERN + r"/(?:books|pools?/show)/(\d+)"
+    pattern = BASE_PATTERN + r"/(?:books|pools?/show)/(\w+)"
     example = "https://sankaku.app/books/12345"
 
     def __init__(self, match):

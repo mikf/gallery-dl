@@ -23,15 +23,22 @@ class PatreonExtractor(Extractor):
     directory_fmt = ("{category}", "{creator[full_name]}")
     filename_fmt = "{id}_{title}_{num:>02}.{extension}"
     archive_fmt = "{id}_{num}"
+    useragent = "Patreon/72.2.28 (Android; Android 14; Scale/2.10)"
     _warning = True
 
     def _init(self):
-        self.session.headers["User-Agent"] = \
-            "Patreon/72.2.28 (Android; Android 14; Scale/2.10)"
-        if self._warning:
-            if not self.cookies_check(("session_id",)):
+        if not self.cookies_check(("session_id",)):
+            if self._warning:
+                PatreonExtractor._warning = False
                 self.log.warning("no 'session_id' cookie set")
-            PatreonExtractor._warning = False
+            if self.session.headers["User-Agent"] is self.useragent:
+                self.session.headers["User-Agent"] = \
+                    "Patreon/7.6.28 (Android; Android 11; Scale/2.10)"
+
+        format_images = self.config("format-images")
+        if format_images:
+            self._images_fmt = format_images
+            self._images_url = self._images_url_fmt
 
     def items(self):
         generators = self._build_file_generators(self.config("files"))
@@ -77,10 +84,19 @@ class PatreonExtractor(Extractor):
 
     def _images(self, post):
         for image in post.get("images") or ():
-            url = image.get("download_url")
+            url = self._images_url(image)
             if url:
                 name = image.get("file_name") or self._filename(url) or url
                 yield "image", url, name
+
+    def _images_url(self, image):
+        return image.get("download_url")
+
+    def _images_url_fmt(self, image):
+        try:
+            return image["image_urls"][self._images_fmt]
+        except Exception:
+            return image.get("download_url")
 
     def _image_large(self, post):
         image = post.get("image")

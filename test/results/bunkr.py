@@ -29,23 +29,21 @@ __tests__ = (
 
 {
     "#url"     : "https://bunkr.is/a/iXTTc1o2",
-    "#comment" : "cdn4",
     "#category": ("lolisafe", "bunkr", "album"),
     "#class"   : bunkr.BunkrAlbumExtractor,
     "#urls"        : (
         "https://i-milkshake.bunkr.ru/image-sZrQUeOx.jpg?download=true",
-        "https://burger.bunkr.ru/video-gLn1hgpw.mp4",
     ),
     "#sha1_content": "caf7c3d3439d94e83b3c24ddaf5a3a48aa057519",
 
     "album_id"   : "iXTTc1o2",
     "album_name" : "test2",
-    "album_size" : "561.6 KB",
-    "count"      : 2,
-    "filename"   : r"re:video-gLn1hgpw|image-sZrQUeOx",
-    "id"         : r"re:gLn1hgpw|sZrQUeOx",
-    "name"       : r"re:video|image",
-    "num"        : range(1, 2),
+    "album_size" : "534.6 KB",
+    "count"      : 1,
+    "filename"   : r"image-sZrQUeOx",
+    "id"         : r"sZrQUeOx",
+    "name"       : r"image",
+    "num"        : 1,
 },
 
 {
@@ -55,6 +53,11 @@ __tests__ = (
     "#class"   : bunkr.BunkrAlbumExtractor,
     "#pattern" : r"https://(i-)?meatballs.bunkr.ru/\w+",
     "#count"   : 7,
+},
+
+{
+    "#url"     : "https://bunkr.ph/a/Lktg9Keq",
+    "#class"   : bunkr.BunkrAlbumExtractor,
 },
 
 {
@@ -81,6 +84,12 @@ __tests__ = (
 
 {
     "#url"     : "https://bunkr.ci/a/Lktg9Keq",
+    "#category": ("lolisafe", "bunkr", "album"),
+    "#class"   : bunkr.BunkrAlbumExtractor,
+},
+
+{
+    "#url"     : "https://bunkr.cr/a/Lktg9Keq",
     "#category": ("lolisafe", "bunkr", "album"),
     "#class"   : bunkr.BunkrAlbumExtractor,
 },

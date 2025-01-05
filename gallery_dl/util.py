@@ -21,6 +21,7 @@ import datetime
 import functools
 import itertools
 import subprocess
+import collections
 import urllib.parse
 from http.cookiejar import Cookie
 from email.utils import mktime_tz, parsedate_tz
@@ -646,13 +647,19 @@ class CustomNone():
     __repr__ = __str__
 
 
+# v128.0 release on 2024-07-09 has ordinal 739076
+# 735492 == 739076 - 128 * 28
+_ff_ver = (datetime.date.today().toordinal() - 735492) // 28
+
 NONE = CustomNone()
 EPOCH = datetime.datetime(1970, 1, 1)
 SECOND = datetime.timedelta(0, 1)
 WINDOWS = (os.name == "nt")
 SENTINEL = object()
-USERAGENT = "gallery-dl/" + version.__version__
 EXECUTABLE = getattr(sys, "frozen", False)
+USERAGENT = "gallery-dl/" + version.__version__
+USERAGENT_FIREFOX = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:{}.0) "
+                     "Gecko/20100101 Firefox/{}.0").format(_ff_ver, _ff_ver)
 SPECIAL_EXTRACTORS = {"oauth", "recursive", "generic"}
 GLOBALS = {
     "contains" : contains,
@@ -702,6 +709,28 @@ def compile_expression_raw(expr, name="<expr>", globals=None):
     return functools.partial(eval, code_object, globals or GLOBALS)
 
 
+def compile_expression_defaultdict(expr, name="<expr>", globals=None):
+    global GLOBALS_DEFAULT
+
+    if isinstance(__builtins__, dict):
+        # cpython
+        GLOBALS_DEFAULT = collections.defaultdict(lambda n=NONE: n, GLOBALS)
+    else:
+        # pypy3 - insert __builtins__ symbols into globals dict
+        GLOBALS_DEFAULT = collections.defaultdict(
+            lambda n=NONE: n, __builtins__.__dict__)
+        GLOBALS_DEFAULT.update(GLOBALS)
+
+    global compile_expression_defaultdict
+    compile_expression_defaultdict = compile_expression_defaultdict_impl
+    return compile_expression_defaultdict_impl(expr, name, globals)
+
+
+def compile_expression_defaultdict_impl(expr, name="<expr>", globals=None):
+    code_object = compile(expr, name, "eval")
+    return functools.partial(eval, code_object, globals or GLOBALS_DEFAULT)
+
+
 def compile_expression_tryexcept(expr, name="<expr>", globals=None):
     code_object = compile(expr, name, "eval")
 
@@ -711,12 +740,18 @@ def compile_expression_tryexcept(expr, name="<expr>", globals=None):
         except exception.GalleryDLException:
             raise
         except Exception:
-            return False
+            return NONE
 
     return _eval
 
 
 compile_expression = compile_expression_tryexcept
+
+
+def compile_filter(expr, name="<filter>", globals=None):
+    if not isinstance(expr, str):
+        expr = "(" + ") and (".join(expr) + ")"
+    return compile_expression(expr, name, globals)
 
 
 def import_file(path):
@@ -949,10 +984,8 @@ class FilterPredicate():
     """Predicate; True if evaluating the given expression returns True"""
 
     def __init__(self, expr, target="image"):
-        if not isinstance(expr, str):
-            expr = "(" + ") and (".join(expr) + ")"
         name = "<{} filter>".format(target)
-        self.expr = compile_expression(expr, name)
+        self.expr = compile_filter(expr, name)
 
     def __call__(self, _, kwdict):
         try:

@@ -268,4 +268,20 @@ __tests__ = (
     "#pattern" : r"^https://www\.reddit\.com/r/analog/comments/179exao/photographing_the_recent_annular_eclipse_with_a",
 },
 
+{
+    "#url"     : "https://www.reddit.com/u/Tailhook91/s/w4yAMbtOYm",
+    "#comment" : "Mobile share URL, user submission",
+    "#category": ("", "reddit", "redirect"),
+    "#class"   : reddit.RedditRedirectExtractor,
+    "#pattern" : r"^https://www.reddit.com/user/Tailhook91/comments/znfxbr/prove_it/",
+},
+
+{
+    "#url"     : "https://www.reddit.com/user/Tailhook91/s/w4yAMbtOYm",
+    "#comment" : "Mobile share URL, user submission",
+    "#category": ("", "reddit", "redirect"),
+    "#class"   : reddit.RedditRedirectExtractor,
+    "#pattern" : r"^https://www.reddit.com/user/Tailhook91/comments/znfxbr/prove_it/",
+},
+
 )

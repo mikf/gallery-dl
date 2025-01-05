@@ -69,4 +69,12 @@ __tests__ = (
     "#exception": exception.HttpError,
 },
 
+{
+    "#url"     : "https://comics.8muses.com/comics/album/Tufos-Comics/Gallery",
+    "#comment" : "private albums without 'permalink' (#6717)",
+    "#category": ("", "8muses", "album"),
+    "#class"   : _8muses._8musesAlbumExtractor,
+    "#count"   : range(100, 150),
+},
+
 )

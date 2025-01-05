@@ -92,6 +92,10 @@ BASE_PATTERN = SzurubooruExtractor.update({
         "root": "https://snootbooru.com",
         "pattern": r"snootbooru\.com",
     },
+    "visuabusters": {
+        "root": "https://www.visuabusters.com/booru",
+        "pattern": r"(?:www\.)?visuabusters\.com/booru",
+    },
 })
 
 

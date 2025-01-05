@@ -6,20 +6,27 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extractors for https://koharu.to/"""
+"""Extractors for https://niyaniya.moe/"""
 
 from .common import GalleryExtractor, Extractor, Message
 from .. import text, exception
 from ..cache import cache
+import collections
 
-BASE_PATTERN = r"(?i)(?:https?://)?(?:koharu|anchira)\.to"
+BASE_PATTERN = (
+    r"(?i)(?:https?://)?("
+    r"(?:niyaniya|shupogaki)\.moe|"
+    r"(?:koharu|anchira|seia)\.to|"
+    r"(?:hoshino)\.one"
+    r")"
+)
 
 
 class KoharuExtractor(Extractor):
     """Base class for koharu extractors"""
     category = "koharu"
-    root = "https://koharu.to"
-    root_api = "https://api.koharu.to"
+    root = "https://niyaniya.moe"
+    root_api = "https://api.schale.network"
     request_interval = (0.5, 1.5)
 
     def _init(self):
@@ -62,7 +69,7 @@ class KoharuGalleryExtractor(KoharuExtractor, GalleryExtractor):
     archive_fmt = "{id}_{num}"
     request_interval = 0.0
     pattern = BASE_PATTERN + r"/(?:g|reader)/(\d+)/(\w+)"
-    example = "https://koharu.to/g/12345/67890abcde/"
+    example = "https://niyaniya.moe/g/12345/67890abcde/"
 
     TAG_TYPES = {
         0 : "general",
@@ -100,16 +107,26 @@ class KoharuGalleryExtractor(KoharuExtractor, GalleryExtractor):
 
     def metadata(self, _):
         url = "{}/books/detail/{}/{}".format(
-            self.root_api, self.groups[0], self.groups[1])
+            self.root_api, self.groups[1], self.groups[2])
         self.data = data = self.request(url, headers=self.headers).json()
+        data["date"] = text.parse_timestamp(data["created_at"] // 1000)
 
         tags = []
-        for tag in data["tags"]:
+        types = self.TAG_TYPES
+        tags_data = data["tags"]
+
+        for tag in tags_data:
             name = tag["name"]
             namespace = tag.get("namespace", 0)
-            tags.append(self.TAG_TYPES[namespace] + ":" + name)
+            tags.append(types[namespace] + ":" + name)
         data["tags"] = tags
-        data["date"] = text.parse_timestamp(data["created_at"] // 1000)
+
+        if self.config("tags", False):
+            tags = collections.defaultdict(list)
+            for tag in tags_data    :
+                tags[tag.get("namespace", 0)].append(tag["name"])
+            for type, values in tags.items():
+                data["tags_" + types[type]] = values
 
         try:
             if self.cbz:
@@ -179,11 +196,11 @@ class KoharuGalleryExtractor(KoharuExtractor, GalleryExtractor):
                     break
             except KeyError:
                 self.log.debug("%s: Format %s is not available",
-                               self.groups[0], fmtid)
+                               self.groups[1], fmtid)
         else:
             raise exception.NotFoundError("format")
 
-        self.log.debug("%s: Selected format %s", self.groups[0], fmtid)
+        self.log.debug("%s: Selected format %s", self.groups[1], fmtid)
         fmt["w"] = fmtid
         return fmt
 
@@ -192,10 +209,10 @@ class KoharuSearchExtractor(KoharuExtractor):
     """Extractor for koharu search results"""
     subcategory = "search"
     pattern = BASE_PATTERN + r"/\?([^#]*)"
-    example = "https://koharu.to/?s=QUERY"
+    example = "https://niyaniya.moe/?s=QUERY"
 
     def items(self):
-        params = text.parse_query(self.groups[0])
+        params = text.parse_query(self.groups[1])
         params["page"] = text.parse_int(params.get("page"), 1)
         return self._pagination("/books", params)
 
@@ -204,12 +221,12 @@ class KoharuFavoriteExtractor(KoharuExtractor):
     """Extractor for koharu favorites"""
     subcategory = "favorite"
     pattern = BASE_PATTERN + r"/favorites(?:\?([^#]*))?"
-    example = "https://koharu.to/favorites"
+    example = "https://niyaniya.moe/favorites"
 
     def items(self):
         self.login()
 
-        params = text.parse_query(self.groups[0])
+        params = text.parse_query(self.groups[1])
         params["page"] = text.parse_int(params.get("page"), 1)
         return self._pagination("/favorites", params)
 
@@ -226,7 +243,7 @@ class KoharuFavoriteExtractor(KoharuExtractor):
     def _login_impl(self, username, password):
         self.log.info("Logging in as %s", username)
 
-        url = "https://auth.koharu.to/login"
+        url = "https://auth.schale.network/login"
         data = {"uname": username, "passwd": password}
         response = self.request(
             url, method="POST", headers=self.headers, data=data)

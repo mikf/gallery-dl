@@ -106,6 +106,14 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.sankakucomplex.com/books/8YEa7EERmD0",
+    "#comment" : "alphanumeric book/pool ID (#6757)",
+    "#category": ("booru", "sankaku", "pool"),
+    "#class"   : sankaku.SankakuPoolExtractor,
+    "#count"   : 5,
+},
+
+{
     "#url"     : "https://www.sankakucomplex.com/books/90",
     "#category": ("booru", "sankaku", "pool"),
     "#class"   : sankaku.SankakuPoolExtractor,

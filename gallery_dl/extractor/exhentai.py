@@ -11,6 +11,7 @@
 from .common import Extractor, Message
 from .. import text, util, exception
 from ..cache import cache
+import collections
 import itertools
 import math
 
@@ -227,6 +228,13 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
         if self.config("metadata", False):
             data.update(self.metadata_from_api())
             data["date"] = text.parse_timestamp(data["posted"])
+        if self.config("tags", False):
+            tags = collections.defaultdict(list)
+            for tag in data["tags"]:
+                type, _, value = tag.partition(":")
+                tags[type].append(value)
+            for type, values in tags.items():
+                data["tags_" + type] = values
         return data
 
     def metadata_from_page(self, page):

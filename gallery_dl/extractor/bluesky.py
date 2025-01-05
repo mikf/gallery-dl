@@ -12,7 +12,8 @@ from .common import Extractor, Message
 from .. import text, util, exception
 from ..cache import cache, memcache
 
-BASE_PATTERN = r"(?:https?://)?bsky\.app"
+BASE_PATTERN = (r"(?:https?://)?"
+                r"(?:(?:www\.)?(?:c|[fv]x)?bs[ky]y[ex]?\.app|main\.bsky\.dev)")
 USER_PATTERN = BASE_PATTERN + r"/profile/([^/?#]+)"
 
 
@@ -60,8 +61,10 @@ class BlueskyExtractor(Extractor):
 
                 yield Message.Directory, post
                 if files:
-                    base = ("https://bsky.social/xrpc/com.atproto.sync.getBlob"
-                            "?did={}&cid=".format(post["author"]["did"]))
+                    did = post["author"]["did"]
+                    base = (
+                        "{}/xrpc/com.atproto.sync.getBlob?did={}&cid=".format(
+                            self.api.service_endpoint(did), did))
                     for post["num"], file in enumerate(files, 1):
                         post.update(file)
                         yield Message.Url, base + file["filename"], post
@@ -72,10 +75,13 @@ class BlueskyExtractor(Extractor):
                 quote = embed["record"]
                 if "record" in quote:
                     quote = quote["record"]
+                value = quote.pop("value", None)
+                if value is None:
+                    break
                 quote["quote_id"] = self._pid(post)
                 quote["quote_by"] = post["author"]
                 embed = quote.get("embed")
-                quote.update(quote.pop("value"))
+                quote.update(value)
                 post = quote
 
     def posts(self):
@@ -84,7 +90,14 @@ class BlueskyExtractor(Extractor):
     def _pid(self, post):
         return post["uri"].rpartition("/")[2]
 
+    @memcache(keyarg=1)
+    def _instance(self, handle):
+        return ".".join(handle.rsplit(".", 2)[-2:])
+
     def _prepare(self, post):
+        author = post["author"]
+        author["instance"] = self._instance(author["handle"])
+
         if self._metadata_facets:
             if "facets" in post:
                 post["hashtags"] = tags = []
@@ -102,7 +115,7 @@ class BlueskyExtractor(Extractor):
                 post["hashtags"] = post["mentions"] = post["uris"] = ()
 
         if self._metadata_user:
-            post["user"] = self._user or post["author"]
+            post["user"] = self._user or author
 
         post["instance"] = self.instance
         post["post_id"] = self._pid(post)
@@ -191,14 +204,17 @@ class BlueskyUserExtractor(BlueskyExtractor):
 
     def items(self):
         base = "{}/profile/{}/".format(self.root, self.user)
+        default = ("posts" if self.config("quoted", False) or
+                   self.config("reposts", False) else "media")
         return self._dispatch_extractors((
+            (BlueskyInfoExtractor      , base + "info"),
             (BlueskyAvatarExtractor    , base + "avatar"),
             (BlueskyBackgroundExtractor, base + "banner"),
             (BlueskyPostsExtractor     , base + "posts"),
             (BlueskyRepliesExtractor   , base + "replies"),
             (BlueskyMediaExtractor     , base + "media"),
             (BlueskyLikesExtractor     , base + "likes"),
-        ), ("media",))
+        ), (default,))
 
 
 class BlueskyPostsExtractor(BlueskyExtractor):
@@ -288,6 +304,17 @@ class BlueskyPostExtractor(BlueskyExtractor):
         return self.api.get_post_thread(self.user, self.post_id)
 
 
+class BlueskyInfoExtractor(BlueskyExtractor):
+    subcategory = "info"
+    pattern = USER_PATTERN + r"/info"
+    example = "https://bsky.app/profile/HANDLE/info"
+
+    def items(self):
+        self._metadata_user = True
+        self.api._did_from_actor(self.user)
+        return iter(((Message.Directory, self._user),))
+
+
 class BlueskyAvatarExtractor(BlueskyExtractor):
     subcategory = "avatar"
     filename_fmt = "avatar_{post_id}.{extension}"
@@ -314,7 +341,8 @@ class BlueskySearchExtractor(BlueskyExtractor):
     example = "https://bsky.app/search?q=QUERY"
 
     def posts(self):
-        return self.api.search_posts(self.user)
+        query = text.unquote(self.user.replace("+", " "))
+        return self.api.search_posts(query)
 
 
 class BlueskyHashtagExtractor(BlueskyExtractor):
@@ -421,6 +449,22 @@ class BlueskyAPI():
         params = {"handle": handle}
         return self._call(endpoint, params)["did"]
 
+    @memcache(keyarg=1)
+    def service_endpoint(self, did):
+        if did.startswith('did:web:'):
+            url = "https://" + did[8:] + "/.well-known/did.json"
+        else:
+            url = "https://plc.directory/" + did
+
+        try:
+            data = self.extractor.request(url).json()
+            for service in data["service"]:
+                if service["type"] == "AtprotoPersonalDataServer":
+                    return service["serviceEndpoint"]
+        except Exception:
+            pass
+        return "https://bsky.social"
+
     def search_posts(self, query, sort=None):
         endpoint = "app.bsky.feed.searchPosts"
         params = {
@@ -440,7 +484,8 @@ class BlueskyAPI():
         if user_did and not extr.config("reposts", False):
             extr._user_did = did
         if extr._metadata_user:
-            extr._user = self.get_profile(did)
+            extr._user = user = self.get_profile(did)
+            user["instance"] = extr._instance(user["handle"])
 
         return did
 

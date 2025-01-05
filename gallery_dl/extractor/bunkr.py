@@ -22,13 +22,14 @@ else:
     BASE_PATTERN = (
         r"(?:bunkr:(?:https?://)?([^/?#]+)|"
         r"(?:https?://)?(?:app\.)?(bunkr+"
-        r"\.(?:s[kiu]|[cf]i|p[hks]|ru|la|is|to|a[cx]"
+        r"\.(?:s[kiu]|c[ir]|fi|p[hks]|ru|la|is|to|a[cx]"
         r"|black|cat|media|red|site|ws|org)))"
     )
 
 DOMAINS = [
     "bunkr.ac",
     "bunkr.ci",
+    "bunkr.cr",
     "bunkr.fi",
     "bunkr.ph",
     "bunkr.pk",
@@ -110,13 +111,17 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
 
     def fetch_album(self, album_id):
         # album metadata
-        page = self.request(self.root + "/a/" + self.album_id).text
+        page = self.request(self.root + "/a/" + album_id).text
         title, size = text.split_html(text.extr(
             page, "<h1", "</span>").partition(">")[2])
+        if "&" in title:
+            title = title.replace(
+                "&lt;", "<").replace("&gt;", ">").replace("&amp;", "&")
 
+        # files
         items = list(text.extract_iter(page, "<!-- item -->", "<!--  -->"))
         return self._extract_files(items), {
-            "album_id"   : self.album_id,
+            "album_id"   : album_id,
             "album_name" : title,
             "album_size" : text.extr(size, "(", ")"),
             "count"      : len(items),

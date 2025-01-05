@@ -50,6 +50,16 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.pinterest.com/pin/606508274845593025/",
+    "#comment" : "story pin with audio (#6188)",
+    "#class"   : pinterest.PinterestPinExtractor,
+    "#range"   : "2",
+    "#urls"    : "https://v1.pinimg.com/audios/mp3/5d/37/74/5d37749bde03855c1292f8869c8d9387.mp3",
+
+    "extension": "mp3",
+},
+
+{
     "#url"     : "https://jp.pinterest.com/pin/851532242064221228/",
     "#comment" : "story pin with text",
     "#class"   : pinterest.PinterestPinExtractor,
