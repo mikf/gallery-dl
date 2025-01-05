@@ -234,10 +234,7 @@ class BoostyDirectMessagesExtractor(BoostyExtractor):
         sign = response.get("signedQuery", "")
         messages = response.get("messages", {}).get("data", [])
         chatmate = response.get("chatmate", {})
-        user = chatmate.get("url", "")
-
-        if self._user is None:
-            self._user = self.api.user(user)
+        user = self.api.user(chatmate.get("url", ""))
 
         for message in messages:
             files = self._process_dialog(message, sign=sign)
@@ -245,10 +242,9 @@ class BoostyDirectMessagesExtractor(BoostyExtractor):
             if files:
                 data = {
                     "post": message,
-                    "user": self._user,
+                    "user": user,
                     "count": len(files),
                 }
-
                 yield Message.Directory, data
 
                 for data["num"], file in enumerate(files, 1):
@@ -262,7 +258,7 @@ class BoostyDirectMessagesExtractor(BoostyExtractor):
             if files:
                 data = {
                     "post": message,
-                    "user": self._user,
+                    "user": user,
                     "count": len(files),
                 }
                 yield Message.Directory, data
