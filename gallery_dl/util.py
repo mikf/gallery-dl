@@ -83,7 +83,7 @@ def unique_sequence(iterable):
 
 def contains(values, elements, separator=" "):
     """Returns True if at least one of 'elements' is contained in 'values'"""
-    if isinstance(values, str):
+    if isinstance(values, str) and (separator or separator is None):
         values = values.split(separator)
 
     if not isinstance(elements, (tuple, list)):

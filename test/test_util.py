@@ -459,6 +459,15 @@ class TestOther(unittest.TestCase):
         self.assertFalse(util.contains(s, "tag1"))
         self.assertFalse(util.contains(s, ["tag1", "tag2", "tag3"]))
 
+        self.assertTrue(util.contains(s, "(+)", ""))
+        self.assertTrue(util.contains(s, ["(-)", "(+)"], ""))
+        self.assertTrue(util.contains(s, "(+)", 0))
+        self.assertTrue(util.contains(s, "(+)", False))
+
+        self.assertFalse(util.contains(s, "(+)", None))
+        self.assertTrue(util.contains(s, "y(+)c", None))
+        self.assertTrue(util.contains(s, ["(-)", "(+)", "bar"], None))
+
         s = "1, 2, 3, asd, qwe, y(+)c, f(+)(-), bar"
         self.assertTrue(util.contains(s, "y(+)c", ", "))
         self.assertTrue(util.contains(s, ["sdf", "dfg", "qwe"], ", "))
