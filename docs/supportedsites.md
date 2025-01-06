@@ -136,7 +136,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Bilibili</td>
     <td>https://www.bilibili.com/</td>
-    <td>Articles, User Articles</td>
+    <td>Articles, User Articles, User Article Favorites</td>
     <td></td>
 </tr>
 <tr>

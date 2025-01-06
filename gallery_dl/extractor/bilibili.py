@@ -81,6 +81,27 @@ class BilibiliArticleExtractor(BilibiliExtractor):
             yield Message.Url, url, text.nameext_from_url(url, article)
 
 
+class BilibiliUserArticlesFavoriteExtractor(BilibiliExtractor):
+    subcategory = "user-articles-favorite"
+    pattern = (r"(?:https?://)?space\.bilibili\.com"
+               r"/(\d+)/favlist\?fid=opus")
+    example = "https://space.bilibili.com/12345/favlist?fid=opus"
+    _warning = True
+
+    def _init(self):
+        BilibiliExtractor._init(self)
+        if self._warning:
+            if not self.cookies_check(("SESSDATA",)):
+                self.log.error("'SESSDATA' cookie required")
+            BilibiliUserArticlesFavoriteExtractor._warning = False
+
+    def items(self):
+        for article in self.api.user_favlist():
+            article["_extractor"] = BilibiliArticleExtractor
+            url = "{}/opus/{}".format(self.root, article["opus_id"])
+            yield Message.Queue, url, article
+
+
 class BilibiliAPI():
     def __init__(self, extractor):
         self.extractor = extractor
@@ -122,3 +143,28 @@ class BilibiliAPI():
                     raise exception.StopExtraction(
                         "%s: Unable to extract INITIAL_STATE data", article_id)
             self.extractor.wait(seconds=300)
+
+    def user_favlist(self):
+        endpoint = "/opus/feed/fav"
+        params = {"page": 1, "page_size": 20}
+
+        while True:
+            data = self._call(endpoint, params)["data"]
+
+            yield from data["items"]
+
+            if not data.get("has_more"):
+                break
+            params["page"] += 1
+
+    def login_user_id(self):
+        url = "https://api.bilibili.com/x/space/v2/myinfo"
+        data = self.extractor.request(url).json()
+
+        if data["code"] != 0:
+            self.extractor.log.debug("Server response: %s", data)
+            raise exception.StopExtraction("API request failed,Are you login?")
+        try:
+            return data["data"]["profile"]["mid"]
+        except Exception:
+            raise exception.StopExtraction("API request failed")
