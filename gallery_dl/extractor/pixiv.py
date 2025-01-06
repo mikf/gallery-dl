@@ -111,6 +111,7 @@ class PixivExtractor(Extractor):
                 {
                     "url"   : img["image_urls"]["original"],
                     "suffix": "_p{:02}".format(num),
+                    "_fallback": self._fallback_image(img),
                 }
                 for num, img in enumerate(meta_pages)
             ]
@@ -128,7 +129,7 @@ class PixivExtractor(Extractor):
             self.log.warning("%s: 'My pixiv' locked", work["id"])
 
         elif work["type"] != "ugoira":
-            return ({"url": url},)
+            return ({"url": url, "_fallback": self._fallback_image(url)},)
 
         elif self.load_ugoira:
             try:
@@ -268,6 +269,24 @@ class PixivExtractor(Extractor):
                 return url
             except exception.HttpError:
                 pass
+
+    def _fallback_image(self, src):
+        if isinstance(src, str):
+            urls = None
+            orig = src
+        else:
+            urls = src["image_urls"]
+            orig = urls["original"]
+
+        base = orig.rpartition(".")[0]
+        yield base.replace("-original/", "-master/", 1) + "_master1200.jpg"
+
+        if urls is None:
+            return
+
+        for fmt in ("large", "medium", "square_medium"):
+            if fmt in urls:
+                yield urls[fmt]
 
     @staticmethod
     def _date_from_url(url, offset=timedelta(hours=9)):
