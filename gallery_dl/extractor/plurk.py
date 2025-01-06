@@ -104,16 +104,16 @@ class PlurkPostExtractor(PlurkExtractor):
     pattern = r"(?:https?://)?(?:www\.)?plurk\.com/p/(\w+)"
     example = "https://www.plurk.com/p/12345"
 
-    def __init__(self, match):
-        PlurkExtractor.__init__(self, match)
-        self.plurk_id = match.group(1)
-
     def plurks(self):
-        url = "{}/p/{}".format(self.root, self.plurk_id)
+        url = "{}/p/{}".format(self.root, self.groups[0])
         page = self.request(url).text
-        user, pos = text.extract(page, " GLOBAL = ", "\n")
-        data, pos = text.extract(page, "plurk = ", ";\n", pos)
+        user, pos = text.extract(page, " GLOBAL=", "\n")
+        data, pos = text.extract(page, "plurk =", ";\n", pos)
 
         data = self._load(data)
-        data["user"] = self._load(user)["page_user"]
+        try:
+            data["user"] = self._load(user)["page_user"]
+        except Exception:
+            self.log.warning("%s: Failed to extract 'user' data",
+                             self.groups[0])
         return (data,)
