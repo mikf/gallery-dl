@@ -405,6 +405,8 @@ Default
         ``flickr``,
         ``weibo``,
         ``[wikimedia]``
+    * ``"1.4"``
+        ``wallhaven``
     * ``"2.0-4.0"``
         ``behance``,
         ``imagefap``,
