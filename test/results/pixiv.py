@@ -290,6 +290,15 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.pixiv.net/artworks/56360615",
+    "#comment" : "fallback; 'original' version results in HTTP 500 error (#6762)",
+    "#class"   : pixiv.PixivWorkExtractor,
+    "#options" : {"retries": 0},
+    "#range"   : "4",
+    "#sha1_content": "aa119c27fec0a36bbd06e7491987acf5f1be6293",
+},
+
+{
     "#url"     : "https://www.pixiv.net/en/artworks/966412",
     "#category": ("", "pixiv", "work"),
     "#class"   : pixiv.PixivWorkExtractor,
