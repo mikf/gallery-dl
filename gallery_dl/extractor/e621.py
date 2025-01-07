@@ -90,7 +90,7 @@ BASE_PATTERN = E621Extractor.update({
 
 class E621TagExtractor(E621Extractor, danbooru.DanbooruTagExtractor):
     """Extractor for e621 posts from tag searches"""
-    pattern = BASE_PATTERN + r"/posts?(?:\?.*?tags=|/index/\d+/)([^&#]+)"
+    pattern = BASE_PATTERN + r"/posts?(?:\?[^#]*?tags=|/index/\d+/)([^&#]*)"
     example = "https://e621.net/posts?tags=TAG"
 
 
