@@ -30,6 +30,12 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://e621.net/post?tags=",
+    "#category": ("E621", "e621", "tag"),
+    "#class"   : e621.E621TagExtractor,
+},
+
+{
     "#url"     : "https://e621.net/pools/73",
     "#category": ("E621", "e621", "pool"),
     "#class"   : e621.E621PoolExtractor,
