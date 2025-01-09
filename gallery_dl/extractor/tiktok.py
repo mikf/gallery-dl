@@ -10,12 +10,13 @@ from .common import Extractor, Message
 from .. import exception, text, util, ytdl
 from re import compile, escape, IGNORECASE
 
-BASE_PATTERN = r"(?:https?://)?(?:www\.)?tiktok\.com"
+BASE_PATTERN = r"(?:https?://)?(?:www\.)?tiktok(?:v?)\.com"
 USER_PATTERN = BASE_PATTERN + r"/+@([\w.]{0,23}\w)?"
 POST_PATTERN = USER_PATTERN + \
     r"/+(?:[pP][hH][oO][tT][oO]|[vV][iI][dD][eE][oO])/+(?:[0-9]+)/*"
 VM_POST_PATTERN = r"(?:(?:https?://)?(?:(?:vm|vt)\.)?tiktok\.com/+.*/*)|" + \
     r"(?:(?:https?://)?(?:www\.)?tiktok\.com/+t/+.*/*)"
+SHARE_PATTERN = BASE_PATTERN + r"/+share/+video/+(?:[0-9]+)/*"
 
 
 class TiktokExtractor(Extractor):
@@ -154,6 +155,14 @@ class TiktokVmpostExtractor(TiktokExtractor):
     subcategory = "vmpost"
     pattern = VM_POST_PATTERN
     example = "https://vm.tiktok.com/ZGdh4WUhr/"
+
+
+class TiktokShareExtractor(TiktokExtractor):
+    """Extract a single video or photo TikTok share link"""
+
+    subcategory = "sharepost"
+    pattern = SHARE_PATTERN
+    example = "https://www.tiktokv.com/share/video/7240568259186019630"
 
 
 class TiktokUserExtractor(TiktokExtractor):

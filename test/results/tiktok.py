@@ -37,6 +37,14 @@ __tests__ = (
     "#options"  : {"videos": False}
 },
 {
+    "#url"      : "https://www.tiktokv.com/share/video/7240568259186019630",
+    "#comment"  : "www.tiktokv.com link: many photos",
+    "#category" : ("", "tiktok", "sharepost"),
+    "#class"    : tiktok.TiktokShareExtractor,
+    "#pattern"  : PATTERN,
+    "#options"  : {"videos": False}
+},
+{
     "#url"      : "https://www.tiktok.com/@d4vinefem/photo/7449575367024626974",
     "#comment"  : "/photo/ link: single photo",
     "#category" : ("", "tiktok", "post"),
@@ -61,6 +69,14 @@ __tests__ = (
     "#options"  : {"videos": False}
 },
 {
+    "#url"      : "https://www.tiktokv.com/share/video/7449575367024626974",
+    "#comment"  : "www.tiktokv.com link: single photo",
+    "#category" : ("", "tiktok", "sharepost"),
+    "#class"    : tiktok.TiktokShareExtractor,
+    "#pattern"  : PATTERN,
+    "#options"  : {"videos": False}
+},
+{
     "#url"      : "https://www.tiktok.com/@.mcfc.central/photo/7449701420934122785",
     "#comment"  : "/photo/ link: few photos",
     "#category" : ("", "tiktok", "post"),
@@ -81,6 +97,14 @@ __tests__ = (
     "#comment"  : "vm.tiktok.com link: few photos",
     "#category" : ("", "tiktok", "vmpost"),
     "#class"    : tiktok.TiktokVmpostExtractor,
+    "#pattern"  : PATTERN,
+    "#options"  : {"videos": False}
+},
+{
+    "#url"      : "https://www.tiktokv.com/share/video/7449701420934122785",
+    "#comment"  : "www.tiktokv.com link: few photos",
+    "#category" : ("", "tiktok", "sharepost"),
+    "#class"    : tiktok.TiktokShareExtractor,
     "#pattern"  : PATTERN,
     "#options"  : {"videos": False}
 },
@@ -117,6 +141,14 @@ __tests__ = (
     "#options"  : {"videos": True}
 },
 {
+    "#url"      : "https://www.tiktokv.com/share/video/7449708266168274208",
+    "#comment"  : "Video post as a share link",
+    "#category" : ("", "tiktok", "sharepost"),
+    "#class"    : tiktok.TiktokShareExtractor,
+    "#urls"     : "ytdl:https://www.tiktokv.com/share/video/7449708266168274208",
+    "#options"  : {"videos": True}
+},
+{
     "#url"      : "https://www.tiktok.com/@memezar/video/7449708266168274208",
     "#comment"  : "Skipping video post",
     "#category" : ("", "tiktok", "post"),
@@ -145,6 +177,14 @@ __tests__ = (
     "#comment"  : "vm.tiktok.com link: many photos with audio",
     "#category" : ("", "tiktok", "vmpost"),
     "#class"    : tiktok.TiktokVmpostExtractor,
+    "#pattern"  : PATTERN_WITH_AUDIO,
+    "#options"  : {"videos": True}
+},
+{
+    "#url"      : "https://www.tiktokv.com/share/video/7240568259186019630",
+    "#comment"  : "www.tiktokv.com link: many photos with audio",
+    "#category" : ("", "tiktok", "sharepost"),
+    "#class"    : tiktok.TiktokShareExtractor,
     "#pattern"  : PATTERN_WITH_AUDIO,
     "#options"  : {"videos": True}
 },
