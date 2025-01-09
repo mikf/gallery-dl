@@ -208,4 +208,12 @@ __tests__ = (
     "name"     : "file",
 },
 
+{
+    "#url"     : "https://bunkr.ph/v/rEeTUL8MXR17A",
+    "#comment" : "redirect to '/f/rEeTUL8MXR17A' (#6790)",
+    "#category": ("lolisafe", "bunkr", "media"),
+    "#class"   : bunkr.BunkrMediaExtractor,
+    "#urls"    : "https://meatballs.bunkr.ru/27-03-2024-Rp-0FfrropA.mp4",
+},
+
 )
