@@ -40,7 +40,7 @@ __tests__ = (
     "#url"      : "https://www.tiktokv.com/share/video/7240568259186019630",
     "#comment"  : "www.tiktokv.com link: many photos",
     "#category" : ("", "tiktok", "sharepost"),
-    "#class"    : tiktok.TiktokShareExtractor,
+    "#class"    : tiktok.TiktokSharepostExtractor,
     "#pattern"  : PATTERN,
     "#options"  : {"videos": False}
 },
@@ -72,7 +72,7 @@ __tests__ = (
     "#url"      : "https://www.tiktokv.com/share/video/7449575367024626974",
     "#comment"  : "www.tiktokv.com link: single photo",
     "#category" : ("", "tiktok", "sharepost"),
-    "#class"    : tiktok.TiktokShareExtractor,
+    "#class"    : tiktok.TiktokSharepostExtractor,
     "#pattern"  : PATTERN,
     "#options"  : {"videos": False}
 },
@@ -104,7 +104,7 @@ __tests__ = (
     "#url"      : "https://www.tiktokv.com/share/video/7449701420934122785",
     "#comment"  : "www.tiktokv.com link: few photos",
     "#category" : ("", "tiktok", "sharepost"),
-    "#class"    : tiktok.TiktokShareExtractor,
+    "#class"    : tiktok.TiktokSharepostExtractor,
     "#pattern"  : PATTERN,
     "#options"  : {"videos": False}
 },
@@ -144,7 +144,7 @@ __tests__ = (
     "#url"      : "https://www.tiktokv.com/share/video/7449708266168274208",
     "#comment"  : "Video post as a share link",
     "#category" : ("", "tiktok", "sharepost"),
-    "#class"    : tiktok.TiktokShareExtractor,
+    "#class"    : tiktok.TiktokSharepostExtractor,
     "#urls"     : "ytdl:https://www.tiktokv.com/share/video/7449708266168274208",
     "#options"  : {"videos": True}
 },
@@ -184,7 +184,7 @@ __tests__ = (
     "#url"      : "https://www.tiktokv.com/share/video/7240568259186019630",
     "#comment"  : "www.tiktokv.com link: many photos with audio",
     "#category" : ("", "tiktok", "sharepost"),
-    "#class"    : tiktok.TiktokShareExtractor,
+    "#class"    : tiktok.TiktokSharepostExtractor,
     "#pattern"  : PATTERN_WITH_AUDIO,
     "#options"  : {"videos": True}
 },

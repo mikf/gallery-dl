@@ -157,7 +157,7 @@ class TiktokVmpostExtractor(TiktokExtractor):
     example = "https://vm.tiktok.com/ZGdh4WUhr/"
 
 
-class TiktokShareExtractor(TiktokExtractor):
+class TiktokSharepostExtractor(TiktokExtractor):
     """Extract a single video or photo TikTok share link"""
 
     subcategory = "sharepost"
