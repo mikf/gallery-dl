@@ -80,6 +80,9 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
 
                 # redirect
                 url = response.headers["Location"]
+                if url[0] == "/":
+                    url = text.root_from_url(response.url) + url
+                    continue
                 root, path = self._split(url)
                 if root not in CF_DOMAINS:
                     continue
