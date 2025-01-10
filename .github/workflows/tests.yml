@@ -4,80 +4,80 @@ on:
   workflow_dispatch:
   push:
     branches:
-    - master
+      - master
   pull_request:
     branches:
-    - master
+      - master
 
 jobs:
   test:
-
     runs-on: ubuntu-20.04
     strategy:
       fail-fast: false
       matrix:
         python-version:
-        - "3.5"
-        - "3.6"
-        - "3.7"
-        - "3.8"
-        - "3.9"
-        - "3.10"
-        - "3.11"
-        - "3.12"
-        - "3.13"
-        - "pypy3.9"
+          - "3.5"
+          - "3.6"
+          - "3.7"
+          - "3.8"
+          - "3.9"
+          - "3.10"
+          - "3.11"
+          - "3.12"
+          - "3.13"
+          - "pypy3.9"
 
     steps:
-    - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Check file permissions
-      run: |
-        if [[ "$(find ./gallery_dl -type f -not -perm 644)" ]]; then exit 1; fi
+      - name: Check file permissions
+        run: |
+          if [[ "$(find ./gallery_dl -type f -not -perm 644)" ]]; then exit 1; fi
 
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5
-      with:
-        python-version: ${{ matrix.python-version }}
-      env:
-        PIP_TRUSTED_HOST: "pypi.python.org pypi.org files.pythonhosted.org"
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+        env:
+          PIP_TRUSTED_HOST: "pypi.python.org pypi.org files.pythonhosted.org"
 
-    - name: Install dependencies
-      run: |
-        pip install -r requirements.txt
-        pip install flake8 youtube-dl
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install flake8 youtube-dl
 
-    - name: Install yt-dlp
-      run: |
-        case "${{ matrix.python-version }}" in
-            3.4|3.5)
-                # don't install yt-dlp
-                ;;
-            3.6|3.7|3.8)
-                # install from PyPI
-                pip install yt-dlp
-                ;;
-            *)
-                # install from master
-                pip install https://github.com/yt-dlp/yt-dlp/archive/refs/heads/master.tar.gz
-                ;;
-        esac
+      - name: Install yt-dlp
+        run: |
+          case "${{ matrix.python-version }}" in
+              3.4|3.5)
+                  # don't install yt-dlp
+                  ;;
+              3.6|3.7|3.8)
+                  # install from PyPI
+                  pip install yt-dlp
+                  ;;
+              *)
+                  # install from master
+                  pip install https://github.com/yt-dlp/yt-dlp/archive/master.tar.gz
+                  ;;
+          esac
 
-    - name: Lint with flake8
-      run: |
-        case "${{ matrix.python-version }}" in
-            3.4|3.5|3.6|3.7)
-                flake8 --extend-exclude scripts/export_tests.py,scripts/pyprint.py .
-                ;;
-            *)
-                flake8 .
-                ;;
-        esac
+      - name: Lint with flake8
+        run: |
+          case "${{ matrix.python-version }}" in
+              3.4|3.5|3.6|3.7)
+                  flake8 --extend-exclude scripts/export_tests.py,scripts/pyprint.py .
+                  ;;
+              *)
+                  flake8 .
+                  ;;
+          esac
 
-    - name: Run tests
-      run: |
-        make test
+      - name: Run tests
+        run: |
+          make test
 
-    - name: Test autogeneration of man pages, bash/zsh/fish completion, etc
-      run: |
-        make
+      - name: Test autogeneration of man pages, bash/zsh/fish completion, etc
+        run: |
+          make
