@@ -772,7 +772,11 @@ class MangaExtractor(Extractor):
 
     def items(self):
         self.login()
-        page = self.request(self.manga_url).text
+
+        if self.manga_url:
+            page = self.request(self.manga_url, notfound=self.subcategory).text
+        else:
+            page = None
 
         chapters = self.chapters(page)
         if self.reverse:
