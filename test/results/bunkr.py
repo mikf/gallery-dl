@@ -194,6 +194,14 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://bunkr.cr/f/image-sZrQUeOx.jpg",
+    "#comment" : "/f/ URL",
+    "#category": ("lolisafe", "bunkr", "media"),
+    "#class"   : bunkr.BunkrMediaExtractor,
+    "#urls"    : "https://mlk-bk.cdn.gigachad-cdn.ru/image-sZrQUeOx.jpg?n=image.jpg",
+},
+
+{
     "#url"     : "https://bunkrrr.org/d/dJuETSzKLrUps",
     "#category": ("lolisafe", "bunkr", "media"),
     "#class"   : bunkr.BunkrMediaExtractor,

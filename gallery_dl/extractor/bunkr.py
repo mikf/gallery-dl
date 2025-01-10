@@ -182,8 +182,8 @@ class BunkrMediaExtractor(BunkrAlbumExtractor):
     """Extractor for bunkr.si media links"""
     subcategory = "media"
     directory_fmt = ("{category}",)
-    pattern = BASE_PATTERN + r"(/[vid]/[^/?#]+)"
-    example = "https://bunkr.si/v/FILENAME"
+    pattern = BASE_PATTERN + r"(/[fvid]/[^/?#]+)"
+    example = "https://bunkr.si/f/FILENAME"
 
     def fetch_album(self, album_id):
         try:
