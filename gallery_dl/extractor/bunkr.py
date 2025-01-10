@@ -114,20 +114,20 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
 
     def fetch_album(self, album_id):
         # album metadata
-        page = self.request(self.root + "/a/" + album_id).text
-        title, size = text.split_html(text.extr(
-            page, "<h1", "</span>").partition(">")[2])
-        if "&" in title:
-            title = title.replace(
-                "&lt;", "<").replace("&gt;", ">").replace("&amp;", "&")
+        page = self.request(
+            self.root + "/a/" + album_id, encoding="utf-8").text
+        title = text.unescape(text.unescape(text.extr(
+            page, 'property="og:title" content="', '"')))
 
         # files
         items = list(text.extract_iter(
             page, '<div class="grid-images_box', "</a>"))
+
         return self._extract_files(items), {
             "album_id"   : album_id,
             "album_name" : title,
-            "album_size" : text.extr(size, "(", ")"),
+            "album_size" : text.extr(
+                page, '<span class="font-semibold">(', ')'),
             "count"      : len(items),
         }
 
@@ -140,8 +140,8 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
 
                 file = self._extract_file(url)
                 info = text.split_html(item)
-                file["name"] = info[0]
-                file["size"] = info[2]
+                file["name"] = info[-3]
+                file["size"] = info[-2]
                 file["date"] = text.parse_datetime(
                     info[-1], "%H:%M:%S %d/%m/%Y")
 
