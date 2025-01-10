@@ -190,6 +190,7 @@ modules = [
     "weasyl",
     "webmshare",
     "webtoons",
+    "weebcentral",
     "weibo",
     "wikiart",
     "wikifeet",

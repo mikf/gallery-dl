@@ -400,6 +400,7 @@ Default
         ``soundgasm``,
         ``urlgalleries``,
         ``vk``,
+        ``weebcentral``,
         ``zerochan``
     * ``"1.0-2.0"``
         ``flickr``,
