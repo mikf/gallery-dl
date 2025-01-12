@@ -26,8 +26,7 @@ class BbcGalleryExtractor(GalleryExtractor):
     example = "https://www.bbc.co.uk/programmes/PATH"
 
     def metadata(self, page):
-        data = util.json_loads(text.extr(
-            page, '<script type="application/ld+json">', '</script>'))
+        data = self._extract_jsonld(page)
         return {
             "programme": self.gallery_url.split("/")[4],
             "path": list(util.unique_sequence(
