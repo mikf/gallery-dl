@@ -133,7 +133,7 @@ changelog() {
         -e "s*^## \w\+\$*## ${NEWVERSION} - $(date +%Y-%m-%d)*" \
         "${CHANGELOG}"
 
-    mv "${CHANGELOG}" "${CHANGELOG}.orig"
+    mv --no-clobber -- "${CHANGELOG}" "${CHANGELOG}.orig"
 
     # - remove all but the latest entries
     sed -n \
@@ -157,7 +157,7 @@ upload-git() {
     cd "${ROOTDIR}"
     echo Pushing changes to github
 
-    mv "${CHANGELOG}.orig" "${CHANGELOG}" || true
+    mv -- "${CHANGELOG}.orig" "${CHANGELOG}" || true
     git add "gallery_dl/version.py" "${README}" "${CHANGELOG}"
     git commit -S -m "release version ${NEWVERSION}"
     git tag -s -m "version ${NEWVERSION}" "v${NEWVERSION}"
