@@ -668,6 +668,12 @@ Consider all listed sites to potentially be NSFW.
     <td><a href="https://github.com/mikf/gallery-dl#cookies">Cookies</a></td>
 </tr>
 <tr>
+    <td>Pexels</td>
+    <td>https://pexels.com/</td>
+    <td>Collections, individual Images, Search Results, User Profiles</td>
+    <td></td>
+</tr>
+<tr>
     <td>PhotoVogue</td>
     <td>https://www.vogue.com/photovogue/</td>
     <td>User Profiles</td>

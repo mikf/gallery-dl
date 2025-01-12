@@ -124,6 +124,7 @@ modules = [
     "nsfwalbum",
     "paheal",
     "patreon",
+    "pexels",
     "philomena",
     "photovogue",
     "picarto",

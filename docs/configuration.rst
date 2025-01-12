@@ -404,6 +404,7 @@ Default
         ``zerochan``
     * ``"1.0-2.0"``
         ``flickr``,
+        ``pexels``,
         ``weibo``,
         ``[wikimedia]``
     * ``"1.4"``
