@@ -43,8 +43,7 @@ class MangaparkChapterExtractor(MangaparkBase, ChapterExtractor):
         ChapterExtractor.__init__(self, match, url)
 
     def metadata(self, page):
-        data = util.json_loads(text.extr(
-            page, 'id="__NEXT_DATA__" type="application/json">', '<'))
+        data = self._extract_nextdata(page)
         chapter = (data["props"]["pageProps"]["dehydratedState"]
                    ["queries"][0]["state"]["data"]["data"])
         manga = chapter["comicNode"]["data"]

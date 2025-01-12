@@ -591,6 +591,10 @@ class Extractor():
         return util.json_loads(text.extr(
             page, '<script type="application/ld+json">', "</script>"))
 
+    def _extract_nextdata(self, page):
+        return util.json_loads(text.extr(
+            page, ' id="__NEXT_DATA__" type="application/json">', "</script>"))
+
     def _prepare_ddosguard_cookies(self):
         if not self.cookies.get("__ddg2", domain=self.cookies_domain):
             self.cookies.set(
