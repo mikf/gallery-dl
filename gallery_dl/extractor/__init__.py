@@ -39,7 +39,6 @@ modules = [
     "chevereto",
     "cien",
     "civitai",
-    "cohost",
     "comicvine",
     "cyberdrop",
     "danbooru",
