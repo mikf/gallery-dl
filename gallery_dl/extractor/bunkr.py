@@ -70,6 +70,7 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
             self.root = "https://" + domain
 
     def request(self, url, **kwargs):
+        kwargs["encoding"] = "utf-8"
         kwargs["allow_redirects"] = False
 
         while True:
@@ -114,8 +115,7 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
 
     def fetch_album(self, album_id):
         # album metadata
-        page = self.request(
-            self.root + "/a/" + album_id, encoding="utf-8").text
+        page = self.request(self.root + "/a/" + album_id).text
         title = text.unescape(text.unescape(text.extr(
             page, 'property="og:title" content="', '"')))
 
@@ -140,7 +140,8 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
 
                 file = self._extract_file(url)
                 info = text.split_html(item)
-                file["name"] = info[-3]
+                if not file["name"]:
+                    file["name"] = info[-3]
                 file["size"] = info[-2]
                 file["date"] = text.parse_datetime(
                     info[-1], "%H:%M:%S %d/%m/%Y")
@@ -157,6 +158,8 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
         page = response.text
         file_url = (text.extr(page, '<source src="', '"') or
                     text.extr(page, '<img src="', '"'))
+        file_name = (text.extr(page, 'property="og:title" content="', '"') or
+                     text.extr(page, "<title>", " | Bunkr<"))
 
         if not file_url:
             webpage_url = text.unescape(text.rextract(
@@ -166,6 +169,7 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
 
         return {
             "file"          : text.unescape(file_url),
+            "name"          : text.unescape(file_name),
             "_http_headers" : {"Referer": response.url},
             "_http_validate": self._validate,
         }
