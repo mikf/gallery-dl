@@ -224,4 +224,17 @@ __tests__ = (
     "#urls"    : "https://meatballs.bunkr.ru/27-03-2024-Rp-0FfrropA.mp4",
 },
 
+{
+    "#url"     : "https://bunkr.site/f/wYGCKbGhSvuAW",
+    "#comment" : "correct 'name' from HTML (#6790)",
+    "#category": ("lolisafe", "bunkr", "media"),
+    "#class"   : bunkr.BunkrMediaExtractor,
+    "#urls"    : "https://kebab.bunkr.ru/80ca5405-8b8d-4f9f-8167-8b046bb9dc67.mp4",
+
+    "id"       : "",
+    "name"     : "0hwndshtfmj7hcbut1nd4_source",
+    "filename" : "0hwndshtfmj7hcbut1nd4_source",
+    "extension": "mp4",
+},
+
 )
