@@ -578,6 +578,9 @@ def build_extractor_list():
     default["wikifeetx"] = default["wikifeet"]
     domains["wikifeetx"] = "https://www.wikifeetx.com/"
 
+    # add extra e621 extractors
+    categories["E621"]["e621"].extend(default.pop("e621", ()))
+
     return categories, domains
 
 
