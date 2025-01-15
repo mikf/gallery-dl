@@ -83,8 +83,18 @@ class DiscordExtractor(Extractor):
             yield Message.Directory, self.parse_channel(thread["id"])
             yield from self.extract_channel_text(thread["id"])
 
+    def extract_category_channels(self, channel_id):
+        for channel in self.api.get_server_channels(
+            self.server_metadata["server_id"]
+        ):
+            if channel["parent_id"] == channel_id:
+                yield from self.extract_generic_channel(channel["id"])
+
     def extract_generic_channel(self, channel_id):
         self.parse_channel(channel_id)
+
+        has_text = False
+        has_threads = False
 
         # https://discord.com/developers/docs/resources/channel#channel-object-channel-types
         if self.channel_metadata["channel_type"] in (0, 5):
@@ -92,9 +102,9 @@ class DiscordExtractor(Extractor):
             has_threads = True
         elif self.channel_metadata["channel_type"] in (1, 3, 10, 11, 12):
             has_text = True
-            has_threads = False
+        elif self.channel_metadata["channel_type"] in (4,):
+            yield from self.extract_category_channels(channel_id)
         elif self.channel_metadata["channel_type"] in (15, 16):
-            has_text = False
             has_threads = True
         else:
             raise exception.StopExtraction(
@@ -121,7 +131,7 @@ class DiscordExtractor(Extractor):
             "is_thread": "thread_metadata" in channel
         }
 
-        if base_channel_metadata["channel_type"] in (0, 5, 10, 11, 12):
+        if base_channel_metadata["channel_type"] in (0, 4, 5, 10, 11, 12):
             type_channel_metadata = {
                 "channel": channel["name"]
             }
@@ -197,10 +207,8 @@ class DiscordServerExtractor(DiscordExtractor):
         server_channels = self.api.get_server_channels(server_id)
 
         for channel in server_channels:
-            try:
+            if channel["type"] in (0, 1, 3, 5, 10, 11, 12):
                 yield from self.extract_generic_channel(channel["id"])
-            except exception.StopExtraction:
-                pass
 
 
 class DiscordDirectMessagesExtractor(DiscordExtractor):
