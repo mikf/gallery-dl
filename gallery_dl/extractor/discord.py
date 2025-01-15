@@ -145,12 +145,8 @@ class DiscordExtractor(Extractor):
                 ),
                 "channel": "DMs"
             }
-        elif base_channel_metadata["channel_type"] in (15, 16):
-            type_channel_metadata = {}
         else:
-            raise exception.StopExtraction(
-                "This channel type is not supported."
-            )
+            type_channel_metadata = {}
 
         self.channel_metadata = {
             **self.server_metadata,
@@ -207,7 +203,7 @@ class DiscordServerExtractor(DiscordExtractor):
         server_channels = self.api.get_server_channels(server_id)
 
         for channel in server_channels:
-            if channel["type"] in (0, 1, 3, 5, 10, 11, 12):
+            if channel["type"] in (0, 5, 15, 16):
                 yield from self.extract_generic_channel(channel["id"])
 
 
