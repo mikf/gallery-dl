@@ -45,6 +45,7 @@ modules = [
     "danbooru",
     "desktopography",
     "deviantart",
+    "discord",
     "dynastyscans",
     "e621",
     "erome",

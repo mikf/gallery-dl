@@ -43,6 +43,7 @@ CATEGORY_MAP = {
     "coomerparty"    : "Coomer",
     "deltaporno"     : "DeltaPorno",
     "deviantart"     : "DeviantArt",
+    "discord"        : "Discord",
     "drawfriends"    : "Draw Friends",
     "dynastyscans"   : "Dynasty Reader",
     "e621"           : "e621",
@@ -233,6 +234,9 @@ SUBCATEGORY_MAP = {
         "stash" : "Sta.sh",
         "status": "Status Updates",
         "watch-posts": "",
+    },
+    "discord": {
+        "direct-messages": "DMs"
     },
     "fanbox": {
         "supporting": "Supported User Feed",

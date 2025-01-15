@@ -2235,6 +2235,26 @@ Description
     | Leave ``SIZE`` empty to download the regular, small avatar format.
 
 
+extractor.discord.threads
+-----------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Extract threads from Discord text channels.
+
+
+extractor.discord.token
+-----------------------
+Type
+    ``string``
+Description
+    Discord Bot Token for API requests.
+
+    You can follow `this guide <https://github.com/Tyrrrz/DiscordChatExporter/blob/master/.docs/Token-and-IDs.md#how-to-get-a-user-token>`__ to get a token.
+
+
 extractor.[E621].metadata
 -------------------------
 Type
