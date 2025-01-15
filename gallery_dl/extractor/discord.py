@@ -290,6 +290,6 @@ Please provide a valid token following these instructions:
 2) Open your browser's Developer Tools (F12) and switch to the Network panel;
 3) Reload the page and select any request going to https://discord.com/api/...;
 4) In the "Headers" tab, look for an entry beginning with "Authorization: ";
-6) Right-click the entry and click "copy value";
-5) Paste the token in your configuration file under "extractor.discord.token",
+5) Right-click the entry and click "Copy Value";
+6) Paste the token in your configuration file under "extractor.discord.token",
 or run this command with the -o "token=[your token]" argument.""")
