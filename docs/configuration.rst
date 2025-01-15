@@ -2236,7 +2236,7 @@ Description
 
 
 extractor.discord.threads
------------------------
+-------------------------
 Type
     ``bool``
 Default
