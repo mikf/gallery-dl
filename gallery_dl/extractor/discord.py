@@ -84,7 +84,7 @@ class DiscordExtractor(Extractor):
             yield from self.extract_channel_text(thread["id"])
 
     def extract_generic_channel(self, channel_id):
-        self.channel_metadata = self.parse_channel(channel_id)
+        self.parse_channel(channel_id)
 
         # https://discord.com/developers/docs/resources/channel#channel-object-channel-types
         if self.channel_metadata["channel_type"] in (0, 5):
@@ -122,11 +122,11 @@ class DiscordExtractor(Extractor):
         }
 
         if base_channel_metadata["channel_type"] in (0, 5, 10, 11, 12):
-            channel_metadata = {
+            type_channel_metadata = {
                 "channel": channel["name"]
             }
         elif base_channel_metadata["channel_type"] in (1, 3):
-            channel_metadata = {
+            type_channel_metadata = {
                 "recipients": (
                     [user["username"] for user in channel["recipients"]]
                 ),
@@ -136,17 +136,19 @@ class DiscordExtractor(Extractor):
                 "channel": "DMs"
             }
         elif base_channel_metadata["channel_type"] in (15, 16):
-            channel_metadata = {}
+            type_channel_metadata = {}
         else:
             raise exception.StopExtraction(
                 "This channel type is not supported."
             )
 
-        return {
+        self.channel_metadata = {
             **self.server_metadata,
             **base_channel_metadata,
-            **channel_metadata
+            **type_channel_metadata
         }
+
+        return self.channel_metadata
 
     def parse_server(self, server_id):
         server = self.api.get_server(server_id)
