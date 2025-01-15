@@ -67,6 +67,7 @@ class BatotoBase():
 
 class BatotoChapterExtractor(BatotoBase, ChapterExtractor):
     """Extractor for batoto manga chapters"""
+    archive_fmt = "{chapter_id}_{page}"
     pattern = BASE_PATTERN + r"/(?:title/[^/?#]+|chapter)/(\d+)"
     example = "https://xbato.org/title/12345-MANGA/54321"
 
