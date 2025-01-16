@@ -49,12 +49,14 @@ class DiscordExtractor(Extractor):
 
         for embed in message["embeds"]:
             if embed["type"] in ("image", "gifv", "video"):
-                embed["from"] = "embed"
                 if embed["type"] in ("image",):
-                    embed["url"] = embed["thumbnail"]["proxy_url"]
+                    embed["url"] = embed["thumbnail"].get("proxy_url")
                 elif embed["type"] in ("gifv", "video"):
-                    embed["url"] = embed["video"]["proxy_url"]
-                all_files.append(embed)
+                    embed["url"] = embed["video"].get("proxy_url")
+
+                if embed["url"] is not None:
+                    embed["from"] = "embed"
+                    all_files.append(embed)
 
         for num, file in enumerate(all_files, start=1):
             parsed_file = {
@@ -90,39 +92,45 @@ class DiscordExtractor(Extractor):
             self.server_metadata["server_id"]
         ):
             if channel["parent_id"] == channel_id:
-                yield from self.extract_generic_channel(channel["id"])
+                yield from self.extract_generic_channel(
+                    channel["id"], safe=True
+                )
 
-    def extract_generic_channel(self, channel_id):
-        self.parse_channel(channel_id)
+    def extract_generic_channel(self, channel_id, safe=False):
+        try:
+            self.parse_channel(channel_id)
 
-        has_text = False
-        has_threads = False
+            has_text = False
+            has_threads = False
 
-        # https://discord.com/developers/docs/resources/channel#channel-object-channel-types
-        if self.channel_metadata["channel_type"] in (0, 5):
-            has_text = True
-            has_threads = True
-        elif self.channel_metadata["channel_type"] in (1, 3, 10, 11, 12):
-            has_text = True
-        elif self.channel_metadata["channel_type"] in (4,):
-            yield from self.extract_category_channels(channel_id)
-        elif self.channel_metadata["channel_type"] in (15, 16):
-            has_threads = True
-        else:
-            raise exception.StopExtraction(
-                "This channel type is not supported."
-            )
+            # https://discord.com/developers/docs/resources/channel#channel-object-channel-types
+            if self.channel_metadata["channel_type"] in (0, 5):
+                has_text = True
+                has_threads = self.extract_threads
+            elif self.channel_metadata["channel_type"] in (1, 3, 10, 11, 12):
+                has_text = True
+            elif self.channel_metadata["channel_type"] in (4,):
+                yield from self.extract_category_channels(channel_id)
+            elif self.channel_metadata["channel_type"] in (15, 16):
+                has_threads = True
+            elif not safe:
+                raise exception.StopExtraction(
+                    "This channel type is not supported."
+                )
 
-        if has_text:
-            yield Message.Directory, self.channel_metadata
-            yield from self.extract_channel_text(
-                self.channel_metadata["channel_id"]
-            )
+            if has_text:
+                yield Message.Directory, self.channel_metadata
+                yield from self.extract_channel_text(
+                    self.channel_metadata["channel_id"]
+                )
 
-        if has_threads and (self.extract_threads or not has_text):
-            yield from self.extract_channel_threads(
-                self.channel_metadata["channel_id"]
-            )
+            if has_threads:
+                yield from self.extract_channel_threads(
+                    self.channel_metadata["channel_id"]
+                )
+        except exception.HttpError as e:
+            if not (e.status == 403 and safe):
+                raise
 
     def parse_channel(self, channel_id):
         channel = self.api.get_channel(channel_id)
@@ -206,7 +214,9 @@ class DiscordServerExtractor(DiscordExtractor):
 
         for channel in server_channels:
             if channel["type"] in (0, 5, 15, 16):
-                yield from self.extract_generic_channel(channel["id"])
+                yield from self.extract_generic_channel(
+                    channel["id"], safe=True
+                )
 
 
 class DiscordDirectMessagesExtractor(DiscordExtractor):
