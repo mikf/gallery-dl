@@ -176,12 +176,6 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
-    <td>cohost!</td>
-    <td>https://cohost.org/</td>
-    <td>Likes, Posts, Tag Searches, User Profiles</td>
-    <td></td>
-</tr>
-<tr>
     <td>Comic Vine</td>
     <td>https://comicvine.gamespot.com/</td>
     <td>Tag Searches</td>
@@ -674,6 +668,12 @@ Consider all listed sites to potentially be NSFW.
     <td><a href="https://github.com/mikf/gallery-dl#cookies">Cookies</a></td>
 </tr>
 <tr>
+    <td>Pexels</td>
+    <td>https://pexels.com/</td>
+    <td>Collections, individual Images, Search Results, User Profiles</td>
+    <td></td>
+</tr>
+<tr>
     <td>PhotoVogue</td>
     <td>https://www.vogue.com/photovogue/</td>
     <td>User Profiles</td>
@@ -1058,6 +1058,12 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
+    <td>Weeb Central</td>
+    <td>https://weebcentral.com/</td>
+    <td>Chapters, Manga</td>
+    <td></td>
+</tr>
+<tr>
     <td>Weibo</td>
     <td>https://www.weibo.com/</td>
     <td>Albums, Articles, Feeds, Images from Statuses, User Profiles, Videos</td>
@@ -1184,7 +1190,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>e621</td>
     <td>https://e621.net/</td>
-    <td>Favorites, Pools, Popular Images, Posts, Tag Searches</td>
+    <td>Favorites, Pools, Popular Images, Posts, Tag Searches, Frontends</td>
     <td>Supported</td>
 </tr>
 <tr>

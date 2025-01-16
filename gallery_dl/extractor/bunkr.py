@@ -70,6 +70,7 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
             self.root = "https://" + domain
 
     def request(self, url, **kwargs):
+        kwargs["encoding"] = "utf-8"
         kwargs["allow_redirects"] = False
 
         while True:
@@ -80,6 +81,9 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
 
                 # redirect
                 url = response.headers["Location"]
+                if url[0] == "/":
+                    url = self.root + url
+                    continue
                 root, path = self._split(url)
                 if root not in CF_DOMAINS:
                     continue
@@ -105,37 +109,40 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
                             "All Bunkr domains require solving a CF challenge")
 
             # select alternative domain
-            root = "https://" + random.choice(DOMAINS)
+            self.root = root = "https://" + random.choice(DOMAINS)
             self.log.debug("Trying '%s' as fallback", root)
             url = root + path
 
     def fetch_album(self, album_id):
         # album metadata
         page = self.request(self.root + "/a/" + album_id).text
-        title, size = text.split_html(text.extr(
-            page, "<h1", "</span>").partition(">")[2])
-        if "&" in title:
-            title = title.replace(
-                "&lt;", "<").replace("&gt;", ">").replace("&amp;", "&")
+        title = text.unescape(text.unescape(text.extr(
+            page, 'property="og:title" content="', '"')))
 
         # files
-        items = list(text.extract_iter(page, "<!-- item -->", "<!--  -->"))
+        items = list(text.extract_iter(
+            page, '<div class="grid-images_box', "</a>"))
+
         return self._extract_files(items), {
             "album_id"   : album_id,
             "album_name" : title,
-            "album_size" : text.extr(size, "(", ")"),
+            "album_size" : text.extr(
+                page, '<span class="font-semibold">(', ')'),
             "count"      : len(items),
         }
 
     def _extract_files(self, items):
         for item in items:
             try:
-                url = text.extr(item, ' href="', '"')
-                file = self._extract_file(text.unescape(url))
+                url = text.unescape(text.extr(item, ' href="', '"'))
+                if url[0] == "/":
+                    url = self.root + url
 
+                file = self._extract_file(url)
                 info = text.split_html(item)
-                file["name"] = info[0]
-                file["size"] = info[2]
+                if not file["name"]:
+                    file["name"] = info[-3]
+                file["size"] = info[-2]
                 file["date"] = text.parse_datetime(
                     info[-1], "%H:%M:%S %d/%m/%Y")
 
@@ -151,6 +158,8 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
         page = response.text
         file_url = (text.extr(page, '<source src="', '"') or
                     text.extr(page, '<img src="', '"'))
+        file_name = (text.extr(page, 'property="og:title" content="', '"') or
+                     text.extr(page, "<title>", " | Bunkr<"))
 
         if not file_url:
             webpage_url = text.unescape(text.rextract(
@@ -160,6 +169,7 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
 
         return {
             "file"          : text.unescape(file_url),
+            "name"          : text.unescape(file_name),
             "_http_headers" : {"Referer": response.url},
             "_http_validate": self._validate,
         }
@@ -179,8 +189,8 @@ class BunkrMediaExtractor(BunkrAlbumExtractor):
     """Extractor for bunkr.si media links"""
     subcategory = "media"
     directory_fmt = ("{category}",)
-    pattern = BASE_PATTERN + r"(/[vid]/[^/?#]+)"
-    example = "https://bunkr.si/v/FILENAME"
+    pattern = BASE_PATTERN + r"(/[fvid]/[^/?#]+)"
+    example = "https://bunkr.si/f/FILENAME"
 
     def fetch_album(self, album_id):
         try:

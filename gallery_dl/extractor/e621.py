@@ -8,7 +8,7 @@
 
 """Extractors for https://e621.net/ and other e621 instances"""
 
-from .common import Message
+from .common import Extractor, Message
 from . import danbooru
 from ..cache import memcache
 from .. import text, util
@@ -90,7 +90,7 @@ BASE_PATTERN = E621Extractor.update({
 
 class E621TagExtractor(E621Extractor, danbooru.DanbooruTagExtractor):
     """Extractor for e621 posts from tag searches"""
-    pattern = BASE_PATTERN + r"/posts?(?:\?.*?tags=|/index/\d+/)([^&#]+)"
+    pattern = BASE_PATTERN + r"/posts?(?:\?[^#]*?tags=|/index/\d+/)([^&#]*)"
     example = "https://e621.net/posts?tags=TAG"
 
 
@@ -156,3 +156,20 @@ class E621FavoriteExtractor(E621Extractor):
 
     def posts(self):
         return self._pagination("/favorites.json", self.query)
+
+
+class E621FrontendExtractor(Extractor):
+    """Extractor for alternative e621 frontends"""
+    basecategory = "E621"
+    category = "e621"
+    subcategory = "frontend"
+    pattern = r"(?:https?://)?e621\.(?:cc/\?tags|anthro\.fr/\?q)=([^&#]*)"
+    example = "https://e621.cc/?tags=TAG"
+
+    def initialize(self):
+        pass
+
+    def items(self):
+        url = "https://e621.net/posts?tags=" + self.groups[0]
+        data = {"_extractor": E621TagExtractor}
+        yield Message.Queue, url, data

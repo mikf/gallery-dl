@@ -587,6 +587,14 @@ class Extractor():
                     return True
         return False
 
+    def _extract_jsonld(self, page):
+        return util.json_loads(text.extr(
+            page, '<script type="application/ld+json">', "</script>"))
+
+    def _extract_nextdata(self, page):
+        return util.json_loads(text.extr(
+            page, ' id="__NEXT_DATA__" type="application/json">', "</script>"))
+
     def _prepare_ddosguard_cookies(self):
         if not self.cookies.get("__ddg2", domain=self.cookies_domain):
             self.cookies.set(
@@ -772,7 +780,11 @@ class MangaExtractor(Extractor):
 
     def items(self):
         self.login()
-        page = self.request(self.manga_url).text
+
+        if self.manga_url:
+            page = self.request(self.manga_url, notfound=self.subcategory).text
+        else:
+            page = None
 
         chapters = self.chapters(page)
         if self.reverse:

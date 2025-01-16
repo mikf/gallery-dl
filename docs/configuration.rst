@@ -400,11 +400,15 @@ Default
         ``soundgasm``,
         ``urlgalleries``,
         ``vk``,
+        ``weebcentral``,
         ``zerochan``
     * ``"1.0-2.0"``
         ``flickr``,
+        ``pexels``,
         ``weibo``,
         ``[wikimedia]``
+    * ``"1.4"``
+        ``wallhaven``
     * ``"2.0-4.0"``
         ``behance``,
         ``imagefap``,
@@ -1760,66 +1764,6 @@ Description
 
     Note: Set this option to an arbitrary letter, e.g., ``"w"``,
     to download images in JPEG format at their original resolution.
-
-
-extractor.cohost.asks
----------------------
-Type
-    ``bool``
-Default
-    ``true``
-Description
-    Extract ``ask`` posts.
-
-
-extractor.cohost.avatar
------------------------
-Type
-    ``bool``
-Default
-    ``false``
-Description
-    Download ``avatar`` images.
-
-
-extractor.cohost.background
----------------------------
-Type
-    ``bool``
-Default
-    ``false``
-Description
-    Download ``background``/``banner``/``header`` images.
-
-
-extractor.cohost.pinned
------------------------
-Type
-    ``bool``
-Default
-    ``false``
-Description
-    Extract pinned posts.
-
-
-extractor.cohost.replies
-------------------------
-Type
-    ``bool``
-Default
-    ``true``
-Description
-    Extract reply posts.
-
-
-extractor.cohost.shares
------------------------
-Type
-    ``bool``
-Default
-    ``false``
-Description
-    Extract shared posts.
 
 
 extractor.cyberdrop.domain

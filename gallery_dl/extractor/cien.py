@@ -9,7 +9,7 @@
 """Extractors for https://ci-en.net/"""
 
 from .common import Extractor, Message
-from .. import text, util
+from .. import text
 
 BASE_PATTERN = r"(?:https?://)?ci-en\.(?:net|dlsite\.com)"
 
@@ -56,11 +56,8 @@ class CienArticleExtractor(CienExtractor):
             self.root, self.groups[0], self.groups[1])
         page = self.request(url, notfound="article").text
 
-        post = util.json_loads(text.extr(
-            page, '<script type="application/ld+json">', '</script>'))[0]
-
         files = self._extract_files(page)
-
+        post = self._extract_jsonld(page)[0]
         post["post_url"] = url
         post["post_id"] = text.parse_int(self.groups[1])
         post["count"] = len(files)
