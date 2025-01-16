@@ -48,10 +48,12 @@ class DiscordExtractor(Extractor):
             all_files.append(attachment)
 
         for embed in message["embeds"]:
-            if embed["type"] == "gifv":
-                embed["url"] = embed["video"]["url"]
-            if embed["type"] in ("image", "gifv"):
+            if embed["type"] in ("image", "gifv", "video"):
                 embed["from"] = "embed"
+                if embed["type"] in ("image",):
+                    embed["url"] = embed["thumbnail"]["proxy_url"]
+                elif embed["type"] in ("gifv", "video"):
+                    embed["url"] = embed["video"]["proxy_url"]
                 all_files.append(embed)
 
         for num, file in enumerate(all_files, start=1):
