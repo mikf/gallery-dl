@@ -136,16 +136,14 @@ class DiscordExtractor(Extractor):
         channel = self.api.get_channel(channel_id)
 
         base_channel_metadata = {
+            "channel": channel.get("name"),
             "channel_id": channel_id,
-            "channel_type": channel["type"],
+            "channel_type": channel.get("type"),
+            "parent_id": channel.get("parent_id"),
             "is_thread": "thread_metadata" in channel
         }
 
-        if base_channel_metadata["channel_type"] in (0, 4, 5, 10, 11, 12):
-            type_channel_metadata = {
-                "channel": channel["name"]
-            }
-        elif base_channel_metadata["channel_type"] in (1, 3):
+        if base_channel_metadata["channel_type"] in (1, 3):
             type_channel_metadata = {
                 "recipients": (
                     [user["username"] for user in channel["recipients"]]
