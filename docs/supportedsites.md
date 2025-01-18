@@ -958,7 +958,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Turboimagehost</td>
     <td>https://www.turboimagehost.com/</td>
-    <td>individual Images</td>
+    <td>Galleries, individual Images</td>
     <td></td>
 </tr>
 <tr>
