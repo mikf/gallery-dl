@@ -2971,6 +2971,16 @@ Description
     * ``"reverse"``: Same as ``"asc"``
 
 
+extractor.khinsider.covers
+--------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Download album cover images.
+
+
 extractor.khinsider.format
 --------------------------
 Type
