@@ -195,6 +195,7 @@ modules = [
     "wikiart",
     "wikifeet",
     "wikimedia",
+    "xfolio",
     "xhamster",
     "xvideos",
     "yiffverse",

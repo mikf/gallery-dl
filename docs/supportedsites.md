@@ -1082,6 +1082,12 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
+    <td>Xfolio</td>
+    <td>https://xfolio.jp/</td>
+    <td>Series, User Profiles, Works</td>
+    <td></td>
+</tr>
+<tr>
     <td>xHamster</td>
     <td>https://xhamster.com/</td>
     <td>Galleries, User Profiles</td>
