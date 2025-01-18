@@ -44,11 +44,16 @@ class KhinsiderSoundtrackExtractor(AsynchronousMixin, Extractor):
         extr = text.extract_from(page)
         return {"album": {
             "name" : text.unescape(extr("<h2>", "<")),
-            "platform": extr("Platforms: <a", "<").rpartition(">")[2],
+            "platform": text.split_html(extr("Platforms: ", "<br>"))[::2],
+            "year": extr("Year: <b>", "<"),
+            "catalog": extr("Catalog Number: <b>", "<"),
+            "developer": text.remove_html(extr(" Developed by: ", "</")),
+            "publisher": text.remove_html(extr(" Published by: ", "</")),
             "count": text.parse_int(extr("Number of Files: <b>", "<")),
             "size" : text.parse_bytes(extr("Total Filesize: <b>", "<")[:-1]),
             "date" : extr("Date Added: <b>", "<"),
             "type" : text.remove_html(extr("Album type: <b>", "</b>")),
+            "uploader": text.remove_html(extr("Uploaded by: ", "</")),
         }}
 
     def tracks(self, page):
