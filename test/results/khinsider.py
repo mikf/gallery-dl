@@ -53,7 +53,43 @@ __tests__ = (
     "extension": "mp3",
     "filename" : str,
     "num"      : int,
+    "type"     : "track",
     "url"      : str,
+},
+
+{
+    "#url"  : "https://downloads.khinsider.com/game-soundtracks/album/super-mario-64-soundtrack",
+    "#class": khinsider.KhinsiderSoundtrackExtractor,
+    "#options": {"covers": True},
+    "#range"  : "1-10",
+    "#urls"   : (
+        "https://vgmsite.com/soundtracks/super-mario-64-soundtrack/00%20Front.jpg",
+        "https://vgmsite.com/soundtracks/super-mario-64-soundtrack/01%20Back.jpg",
+        "https://vgmsite.com/soundtracks/super-mario-64-soundtrack/02%20Booklet%20Front%20and%20Back.jpg",
+        "https://vgmsite.com/soundtracks/super-mario-64-soundtrack/03%20Booklet%20p%2001-02.jpg",
+        "https://vgmsite.com/soundtracks/super-mario-64-soundtrack/04%20Booklet%20p%2003-04.jpg",
+        "https://vgmsite.com/soundtracks/super-mario-64-soundtrack/05%20Booklet%20p%2005-06.jpg",
+        "https://vgmsite.com/soundtracks/super-mario-64-soundtrack/06%20Disc.jpg",
+        "https://vgmsite.com/soundtracks/super-mario-64-soundtrack/07%20Front%20digital.png",
+        "https://vgmsite.com/soundtracks/super-mario-64-soundtrack/08%20Obi.jpg",
+        "https://vgmsite.com/soundtracks/super-mario-64-soundtrack/09%20Tray.jpg",
+    ),
+
+    "extension": {"jpg", "png"},
+    "type"     : "cover",
+    "album"    : {
+        "catalog"  : "PCCG-00357",
+        "count"    : 36,
+        "date"     : "Jul 1st, 2024",
+        "developer": "Nintendo",
+        "name"     : "Super Mario 64 Original Soundtrack",
+        "platform" : ["N64"],
+        "publisher": "Nintendo",
+        "size"     : 102760448,
+        "type"     : "Soundtrack",
+        "uploader" : "HeroArts",
+        "year"     : "1996",
+    },
 },
 
 )

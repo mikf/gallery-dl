@@ -36,8 +36,17 @@ class KhinsiderSoundtrackExtractor(AsynchronousMixin, Extractor):
 
         data = self.metadata(page)
         yield Message.Directory, data
-        for track in self.tracks(page):
+
+        if self.config("covers", False):
+            for num, url in enumerate(self._extract_covers(page), 1):
+                cover = text.nameext_from_url(
+                    url, {"url": url, "num": num, "type": "cover"})
+                cover.update(data)
+                yield Message.Url, url, cover
+
+        for track in self._extract_tracks(page):
             track.update(data)
+            track["type"] = "track"
             yield Message.Url, track["url"], track
 
     def metadata(self, page):
@@ -56,7 +65,7 @@ class KhinsiderSoundtrackExtractor(AsynchronousMixin, Extractor):
             "uploader": text.remove_html(extr("Uploaded by: ", "</")),
         }}
 
-    def tracks(self, page):
+    def _extract_tracks(self, page):
         fmt = self.config("format", ("mp3",))
         if fmt and isinstance(fmt, str):
             if fmt == "all":
@@ -80,3 +89,9 @@ class KhinsiderSoundtrackExtractor(AsynchronousMixin, Extractor):
                     yield track
             if first:
                 yield first
+
+    def _extract_covers(self, page):
+        return [
+            text.unescape(text.extr(cover, ' href="', '"'))
+            for cover in text.extract_iter(page, ' class="albumImage', '</')
+        ]
