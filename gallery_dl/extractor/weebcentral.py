@@ -80,12 +80,12 @@ class WeebcentralChapterExtractor(WeebcentralBase, ChapterExtractor):
 
         results = []
         while True:
-            src = extr(' src="', '"')
+            src = extr('src="', '"')
             if not src:
                 break
             results.append((src, {
-                "width" : text.parse_int(extr(' width="' , '"')),
-                "height": text.parse_int(extr(' height="', '"')),
+                "width" : text.parse_int(extr('width="' , '"')),
+                "height": text.parse_int(extr('height="', '"')),
             }))
         return results
 
