@@ -342,15 +342,22 @@ class PathFormat():
                 try:
                     os.replace(self.temppath, self.realpath)
                 except FileNotFoundError:
-                    # delayed directory creation
-                    os.makedirs(self.realdirectory)
+                    try:
+                        # delayed directory creation
+                        os.makedirs(self.realdirectory)
+                    except FileExistsError:
+                        # file at self.temppath does not exist
+                        return False
                     continue
                 except OSError:
                     # move across different filesystems
                     try:
                         shutil.copyfile(self.temppath, self.realpath)
                     except FileNotFoundError:
-                        os.makedirs(self.realdirectory)
+                        try:
+                            os.makedirs(self.realdirectory)
+                        except FileExistsError:
+                            return False
                         shutil.copyfile(self.temppath, self.realpath)
                     os.unlink(self.temppath)
                 break
