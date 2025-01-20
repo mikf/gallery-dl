@@ -626,6 +626,12 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
+    <td>Nekohouse</td>
+    <td>https://nekohouse.su/</td>
+    <td>Posts, User Profiles</td>
+    <td></td>
+</tr>
+<tr>
     <td>Newgrounds</td>
     <td>https://www.newgrounds.com/</td>
     <td>Art, Audio, Favorites, Followed Users, Games, individual Images, Media Files, Movies, Search Results, User Profiles</td>
