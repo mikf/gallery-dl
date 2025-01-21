@@ -9,6 +9,7 @@
 from .common import Extractor, Message
 from .. import exception, text, util, ytdl
 from re import compile, escape, IGNORECASE
+from datetime import datetime
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?tiktok(?:v?)\.com"
 USER_PATTERN = BASE_PATTERN + r"/+@([\w.]{0,23}\w)?"
@@ -92,6 +93,9 @@ class TiktokExtractor(Extractor):
             if len(original_title) == 0:
                 title = "TikTok photo #{}".format(id)
             title = title[:150]
+            date = datetime.fromtimestamp(
+                int(post_info["createTime"])
+            ).isoformat()
             user = post_info["author"]["uniqueId"]
             # It's probably obvious but I thought it was worth noting
             # because I got stuck on this for a while: make sure to emit
@@ -117,6 +121,7 @@ class TiktokExtractor(Extractor):
                     name_and_ext = text.nameext_from_url(url)
                     yield Message.Url, url, {
                         "title"     : title,
+                        "date"      : date,
                         "id"        : id,
                         "index"     : i + 1,
                         "img_id"    : name_and_ext["filename"].split("~")[0],
@@ -135,6 +140,7 @@ class TiktokExtractor(Extractor):
                     "filename"  : "",
                     "extension" : "",
                     "title"     : title,
+                    "date"      : date,
                     "id"        : id,
                     "index"     : "",
                     "img_id"    : ""
