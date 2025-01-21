@@ -23,6 +23,8 @@ class LofterExtractor(Extractor):
 
     def items(self):
         for post in self.posts():
+            if post is None:
+                continue
             if "post" in post:
                 post = post["post"]
 
@@ -129,6 +131,9 @@ class LofterAPI():
             url, method="POST", params=params, data=data)
         info = response.json()
 
+        if info["meta"]["status"] == 4200:
+            raise exception.NotFoundError("blog")
+
         if info["meta"]["status"] != 200:
             self.extractor.log.debug("Server response: %s", info)
             raise exception.StopExtraction("API request failed")
@@ -141,6 +146,9 @@ class LofterAPI():
             posts = data["posts"]
 
             yield from posts
+
+            if data["offset"] < 0:
+                break
 
             if params["offset"] + len(posts) < data["offset"]:
                 break
