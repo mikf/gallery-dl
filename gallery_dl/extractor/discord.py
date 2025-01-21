@@ -21,7 +21,7 @@ class DiscordExtractor(Extractor):
     archive_fmt = "{message_id}_{num}.{extension}"
 
     server_metadata = {}
-    channel_metadata = {}
+    all_channels_metadata = {}
 
     def _init(self):
         self.token = self.config("token")
@@ -31,7 +31,7 @@ class DiscordExtractor(Extractor):
     def extract_default_message(self, message):
         message_metadata = {
             **self.server_metadata,
-            **self.channel_metadata,
+            **self.all_channels_metadata[message["channel_id"]],
             "date": text.parse_datetime(
                 message["timestamp"], "%Y-%m-%dT%H:%M:%S.%f%z"
             ),
@@ -98,20 +98,20 @@ class DiscordExtractor(Extractor):
 
     def extract_generic_channel(self, channel_id, safe=False):
         try:
-            self.parse_channel(channel_id)
+            channel = self.parse_channel(channel_id)
 
             has_text = False
             has_threads = False
 
             # https://discord.com/developers/docs/resources/channel#channel-object-channel-types
-            if self.channel_metadata["channel_type"] in (0, 5):
+            if channel["channel_type"] in (0, 5):
                 has_text = True
                 has_threads = self.extract_threads
-            elif self.channel_metadata["channel_type"] in (1, 3, 10, 11, 12):
+            elif channel["channel_type"] in (1, 3, 10, 11, 12):
                 has_text = True
-            elif self.channel_metadata["channel_type"] in (4,):
+            elif channel["channel_type"] in (4,):
                 yield from self.extract_category_channels(channel_id)
-            elif self.channel_metadata["channel_type"] in (15, 16):
+            elif channel["channel_type"] in (15, 16):
                 has_threads = True
             elif not safe:
                 raise exception.StopExtraction(
@@ -119,23 +119,22 @@ class DiscordExtractor(Extractor):
                 )
 
             if has_text:
-                yield Message.Directory, self.channel_metadata
-                yield from self.extract_channel_text(
-                    self.channel_metadata["channel_id"]
-                )
+                yield Message.Directory, channel
+                yield from self.extract_channel_text(channel_id)
 
             if has_threads:
-                yield from self.extract_channel_threads(
-                    self.channel_metadata["channel_id"]
-                )
+                yield from self.extract_channel_threads(channel_id)
         except exception.HttpError as e:
             if not (e.status == 403 and safe):
                 raise
 
     def parse_channel(self, channel_id):
+        if channel_id in self.all_channels_metadata:
+            return self.all_channels_metadata[channel_id]
+
         channel = self.api.get_channel(channel_id)
 
-        base_channel_metadata = {
+        channel_metadata = {
             "channel": channel.get("name"),
             "channel_id": channel_id,
             "channel_type": channel.get("type"),
@@ -143,8 +142,19 @@ class DiscordExtractor(Extractor):
             "is_thread": "thread_metadata" in channel
         }
 
-        if base_channel_metadata["channel_type"] in (1, 3):
-            type_channel_metadata = {
+        if channel_metadata["parent_id"] in self.all_channels_metadata:
+            parent_channel_metadata = (
+                self.all_channels_metadata[channel_metadata["parent_id"]]
+            )
+            channel_metadata = {
+                **channel_metadata,
+                "parent": parent_channel_metadata["channel"],
+                "parent_type": parent_channel_metadata["channel_type"]
+            }
+
+        if channel_metadata["channel_type"] in (1, 3):
+            channel_metadata = {
+                **channel_metadata,
                 "recipients": (
                     [user["username"] for user in channel["recipients"]]
                 ),
@@ -153,16 +163,13 @@ class DiscordExtractor(Extractor):
                 ),
                 "channel": "DMs"
             }
-        else:
-            type_channel_metadata = {}
 
-        self.channel_metadata = {
+        self.all_channels_metadata[channel_id] = {
             **self.server_metadata,
-            **base_channel_metadata,
-            **type_channel_metadata
+            **channel_metadata
         }
 
-        return self.channel_metadata
+        return self.all_channels_metadata[channel_id]
 
     def parse_server(self, server_id):
         server = self.api.get_server(server_id)
