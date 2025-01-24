@@ -64,7 +64,7 @@ __tests__ = (
     "#url"     : "https://nekohouse.su/fantia/user/19235",
     "#class"   : nekohouse.NekohouseUserExtractor,
     "#pattern" : r"https://nekohouse\.su/fantia/user/19235/post/\d+",
-    "#count"   : range(50, 100),
+    "#count"   : range(51, 100),
 },
 
 )
