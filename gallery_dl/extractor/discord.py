@@ -146,23 +146,21 @@ class DiscordExtractor(Extractor):
             parent_channel_metadata = (
                 self.all_channels_metadata[channel_metadata["parent_id"]]
             )
-            channel_metadata = {
-                **channel_metadata,
+            channel_metadata.update({
                 "parent": parent_channel_metadata["channel"],
                 "parent_type": parent_channel_metadata["channel_type"]
-            }
+            })
 
         if channel_metadata["channel_type"] in (1, 3):
-            channel_metadata = {
-                **channel_metadata,
+            channel_metadata.update({
+                "channel": "DMs",
                 "recipients": (
                     [user["username"] for user in channel["recipients"]]
                 ),
                 "recipients_id": (
                     [user["id"] for user in channel["recipients"]]
-                ),
-                "channel": "DMs"
-            }
+                )
+            })
 
         self.all_channels_metadata[channel_id] = {
             **self.server_metadata,
