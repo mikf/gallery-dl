@@ -238,8 +238,9 @@ class FacebookExtractor(Extractor):
 
         return res
 
-    def extract_set(self, first_photo_id, set_id):
-        all_photo_ids = [first_photo_id]
+    def extract_set(self, set_data):
+        set_id = set_data["set_id"]
+        all_photo_ids = [set_data["first_photo_id"]]
 
         retries = 0
         i = 0
@@ -252,7 +253,6 @@ class FacebookExtractor(Extractor):
             photo_page = self.photo_page_request_wrapper(photo_url).text
 
             photo = self.parse_photo_page(photo_page)
-            photo["set_id"] = set_id
             photo["num"] = i + 1
 
             if self.author_followups:
@@ -281,9 +281,11 @@ class FacebookExtractor(Extractor):
                     retries = 0
             else:
                 retries = 0
+                photo.update(set_data)
+                yield Message.Directory, photo
                 yield Message.Url, photo["url"], photo
 
-            if photo["next_photo_id"] == "":
+            if not photo["next_photo_id"]:
                 self.log.debug(
                     "Can't find next image in the set. "
                     "Extraction is over."
@@ -322,15 +324,11 @@ class FacebookSetExtractor(FacebookExtractor):
 
         set_url = self.set_url_fmt.format(set_id=set_id)
         set_page = self.request(set_url).text
+        set_data = self.parse_set_page(set_page)
+        if self.groups[2]:
+            set_data["first_photo_id"] = self.groups[2]
 
-        directory = self.parse_set_page(set_page)
-
-        yield Message.Directory, directory
-
-        yield from self.extract_set(
-            self.groups[2] or directory["first_photo_id"],
-            directory["set_id"]
-        )
+        return self.extract_set(set_data)
 
 
 class FacebookPhotoExtractor(FacebookExtractor):
@@ -436,13 +434,8 @@ class FacebookProfileExtractor(FacebookExtractor):
         if set_id:
             set_url = self.set_url_fmt.format(set_id=set_id)
             set_page = self.request(set_url).text
+            set_data = self.parse_set_page(set_page)
+            return self.extract_set(set_data)
 
-            directory = self.parse_set_page(set_page)
-
-            yield Message.Directory, directory
-
-            yield from self.extract_set(
-                directory["first_photo_id"], directory["set_id"]
-            )
-        else:
-            self.log.debug("Profile photos set ID not found.")
+        self.log.debug("Profile photos set ID not found.")
+        return iter(())
