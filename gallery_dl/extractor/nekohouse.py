@@ -104,18 +104,18 @@ class NekohouseUserExtractor(NekohouseExtractor):
 
     def items(self):
         service, user_id, _ = self.groups
-        url = "{}/{}/user/{}".format(self.root, service, user_id)
+        creator_url = "{}/{}/user/{}".format(self.root, service, user_id)
         params = {"o": 0}
 
         data = {"_extractor": NekohousePostExtractor}
         while True:
-            html = self.request(url, params=params).text
+            html = self.request(creator_url, params=params).text
 
             cnt = 0
             for post in text.extract_iter(html, "<article", "</article>"):
                 cnt += 1
-                url = self.root + text.extr(post, '<a href="', '"')
-                yield Message.Queue, url, data
+                post_url = self.root + text.extr(post, '<a href="', '"')
+                yield Message.Queue, post_url, data
 
             if cnt < 50:
                 return
