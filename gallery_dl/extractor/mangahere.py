@@ -37,7 +37,7 @@ class MangahereChapterExtractor(MangahereBase, ChapterExtractor):
 
     def metadata(self, page):
         pos = page.index("</select>")
-        count     , pos = text.extract(page, ">", "<", pos - 20)
+        count     , pos = text.extract(page, ">", "<", pos - 40)
         manga_id  , pos = text.extract(page, "series_id = ", ";", pos)
         chapter_id, pos = text.extract(page, "chapter_id = ", ";", pos)
         manga     , pos = text.extract(page, '"name":"', '"', pos)
@@ -61,9 +61,9 @@ class MangahereChapterExtractor(MangahereBase, ChapterExtractor):
 
         while True:
             url, pos = text.extract(page, '<img src="', '"')
-            yield text.ensure_http_scheme(url), None
+            yield text.ensure_http_scheme(text.unescape(url)), None
             url, pos = text.extract(page, ' src="', '"', pos)
-            yield text.ensure_http_scheme(url), None
+            yield text.ensure_http_scheme(text.unescape(url)), None
             pnum += 2
             page = self.request(self.url_fmt.format(self.part, pnum)).text
 
