@@ -49,7 +49,7 @@ class HiperdexBase():
             "status" : extr(
                 'class="summary-content">', '<').strip(),
             "description": text.remove_html(text.unescape(extr(
-                "Summary					</h5>", "</div>"))),
+                '<div class="description-summary">', "</div>"))),
             "language": "English",
             "lang"    : "en",
         }
