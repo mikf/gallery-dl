@@ -21,13 +21,14 @@ class ArtstationExtractor(Extractor):
     filename_fmt = "{category}_{id}_{asset[id]}_{title}.{extension}"
     directory_fmt = ("{category}", "{userinfo[username]}")
     archive_fmt = "{asset[id]}"
-    browser = "firefox"
-    tls12 = False
     root = "https://www.artstation.com"
 
     def __init__(self, match):
         Extractor.__init__(self, match)
         self.user = match.group(1) or match.group(2)
+
+    def _init(self):
+        self.session.headers["Cache-Control"] = "max-age=0"
 
     def items(self):
         videos = self.config("videos", True)
