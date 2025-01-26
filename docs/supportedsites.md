@@ -495,7 +495,7 @@ Consider all listed sites to potentially be NSFW.
 </tr>
 <tr>
     <td>Komikcast</td>
-    <td>https://komikcast.cz/</td>
+    <td>https://komikcast.la/</td>
     <td>Chapters, Manga</td>
     <td></td>
 </tr>
