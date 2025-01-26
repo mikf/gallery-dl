@@ -32,10 +32,10 @@ class ArchitizerProjectExtractor(GalleryExtractor):
         extr('id="Pages"', "")
 
         return {
-            "title"      : extr('data-name="', '"'),
-            "slug"       : extr('data-slug="', '"'),
-            "gid"        : extr('data-gid="', '"').rpartition(".")[2],
-            "firm"       : extr('data-firm-leaders-str="', '"'),
+            "title"      : extr("data-name='", "'"),
+            "slug"       : extr("data-slug='", "'"),
+            "gid"        : extr("data-gid='", "'").rpartition(".")[2],
+            "firm"       : extr("data-firm-leaders-str='", "'"),
             "location"   : extr("<h2>", "<").strip(),
             "type"       : text.unescape(text.remove_html(extr(
                 '<div class="title">Type</div>', '<br'))),
@@ -54,7 +54,7 @@ class ArchitizerProjectExtractor(GalleryExtractor):
         return [
             (url, None)
             for url in text.extract_iter(
-                page, 'property="og:image:secure_url" content="', "?")
+                page, "property='og:image:secure_url' content='", "?")
         ]
 
 
