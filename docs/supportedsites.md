@@ -350,8 +350,8 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
-    <td>Hipertoon</td>
-    <td>https://hipertoon.com/</td>
+    <td>HiperDEX</td>
+    <td>https://hiperdex.com/</td>
     <td>Artists, Chapters, Manga</td>
     <td></td>
 </tr>
