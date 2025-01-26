@@ -1480,12 +1480,6 @@ Consider all listed sites to potentially be NSFW.
     <td colspan="4"><strong>szurubooru Instances</strong></td>
 </tr>
 <tr>
-    <td>Foalcon</td>
-    <td>https://booru.foalcon.com/</td>
-    <td>Posts, Tag Searches</td>
-    <td></td>
-</tr>
-<tr>
     <td>Bcbnsfw</td>
     <td>https://booru.bcbnsfw.space/</td>
     <td>Posts, Tag Searches</td>
