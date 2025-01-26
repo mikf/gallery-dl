@@ -248,12 +248,6 @@ Consider all listed sites to potentially be NSFW.
     <td><a href="https://github.com/mikf/gallery-dl#cookies">Cookies</a></td>
 </tr>
 <tr>
-    <td>Fanleaks</td>
-    <td>https://fanleaks.club/</td>
-    <td>Models, Posts</td>
-    <td></td>
-</tr>
-<tr>
     <td>Fantia</td>
     <td>https://fantia.jp/</td>
     <td>Creators, Posts</td>
