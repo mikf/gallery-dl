@@ -27,8 +27,10 @@ class PixivExtractor(Extractor):
     filename_fmt = "{id}_p{num}.{extension}"
     archive_fmt = "{id}{suffix}.{extension}"
     cookies_domain = ".pixiv.net"
-    sanity_url = "https://s.pximg.net/common/images/limit_sanity_level_360.png"
-    mypixiv_url = "https://s.pximg.net/common/images/limit_mypixiv_360.png"
+    limit_url = "https://s.pximg.net/common/images/limit_"
+    # https://s.pximg.net/common/images/limit_sanity_level_360.png
+    # https://s.pximg.net/common/images/limit_unviewable_360.png
+    # https://s.pximg.net/common/images/limit_mypixiv_360.png
 
     def _init(self):
         self.api = PixivAppAPI(self)
@@ -117,16 +119,30 @@ class PixivExtractor(Extractor):
             ]
 
         url = meta_single_page["original_image_url"]
-        if url == self.sanity_url:
-            work["_ajax"] = True
-            self.log.warning("%s: 'limit_sanity_level' warning", work["id"])
-            if self.sanity_workaround:
-                body = self._request_ajax("/illust/" + str(work["id"]))
-                return self._extract_ajax(work, body)
+        if url.startswith(self.limit_url):
+            work_id = work["id"]
+            self.log.debug("%s: %s", work_id, url)
 
-        elif url == self.mypixiv_url:
-            work["_mypixiv"] = True
-            self.log.warning("%s: 'My pixiv' locked", work["id"])
+            limit_type = url.rpartition("/")[2]
+            if limit_type in (
+                "limit_",  # for '_extend_sanity()' inserts
+                "limit_unviewable_360.png",
+                "limit_sanity_level_360.png",
+            ):
+                work["_ajax"] = True
+                self.log.warning("%s: 'limit_sanity_level' warning", work_id)
+                if self.sanity_workaround:
+                    body = self._request_ajax("/illust/" + str(work_id))
+                    return self._extract_ajax(work, body)
+
+            elif limit_type == "limit_mypixiv_360.png":
+                work["_mypixiv"] = True
+                self.log.warning("%s: 'My pixiv' locked", work_id)
+
+            else:
+                work["_mypixiv"] = True  # stop further processing
+                self.log.error("%s: Unknown 'limit' URL type: %s",
+                               work_id, limit_type)
 
         elif work["type"] != "ugoira":
             return ({"url": url, "_fallback": self._fallback_image(url)},)
@@ -430,7 +446,7 @@ class PixivArtworksExtractor(PixivExtractor):
                 elif ajax_id > work_id:
                     index -= 1
                     self.log.debug("Inserting work %s", ajax_id)
-                    yield self._make_work(ajax_id, self.sanity_url, user)
+                    yield self._make_work(ajax_id, self.limit_url, user)
 
                 else:  # ajax_id < work_id
                     break
@@ -440,7 +456,7 @@ class PixivArtworksExtractor(PixivExtractor):
         while index >= 0:
             ajax_id = ajax_ids[index]
             self.log.debug("Inserting work %s", ajax_id)
-            yield self._make_work(ajax_id, self.sanity_url, user)
+            yield self._make_work(ajax_id, self.limit_url, user)
             index -= 1
 
 
