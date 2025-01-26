@@ -66,7 +66,7 @@ CATEGORY_MAP = {
     "hentaihere"     : "HentaiHere",
     "hentaiimg"      : "Hentai Image",
     "hentainexus"    : "HentaiNexus",
-    "hiperdex"       : "Hipertoon",
+    "hiperdex"       : "HiperDEX",
     "hitomi"         : "Hitomi.la",
     "horne"          : "horne",
     "idolcomplex"    : "Idol Complex",
