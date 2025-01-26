@@ -64,7 +64,7 @@ class _4archiveThreadExtractor(Extractor):
         data = {
             "name": extr('class="name">', "</span>"),
             "date": text.parse_datetime(
-                extr('class="dateTime postNum">', "<").strip(),
+                extr('class="dateTime postNum" >', "<").strip(),
                 "%Y-%m-%d %H:%M:%S"),
             "no"  : text.parse_int(extr('href="#p', '"')),
         }
