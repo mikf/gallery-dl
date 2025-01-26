@@ -92,9 +92,9 @@ class MangareadMangaExtractor(MangareadBase, MangaExtractor):
             "genres"     : list(text.extract_iter(
                 extr('class="genres-content">', "</div>"), '"tag">', "</a>")),
             "type"       : text.remove_html(
-                extr("Type </h5>\n</div>", "</div>")),
+                extr("	Type	", "\n</div>")),
             "release"    : text.parse_int(text.remove_html(
-                extr("Release </h5>\n</div>", "</div>"))),
+                extr("	Release	", "\n</div>"))),
             "status"     : text.remove_html(
-                extr("Status </h5>\n</div>", "</div>")),
+                extr("	Status	", "\n</div>")),
         }
