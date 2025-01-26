@@ -1452,12 +1452,6 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
-    <td>Tentaclerape</td>
-    <td>https://tentaclerape.net/</td>
-    <td>Posts, Tag Searches</td>
-    <td></td>
-</tr>
-<tr>
     <td>Cavemanon</td>
     <td>https://booru.cavemanon.xyz/</td>
     <td>Posts, Tag Searches</td>
