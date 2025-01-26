@@ -15,12 +15,15 @@ class UrlgalleriesGalleryExtractor(GalleryExtractor):
     category = "urlgalleries"
     root = "https://urlgalleries.net"
     request_interval = (0.5, 1.5)
-    pattern = r"(?:https?://)(?:(\w+)\.)?urlgalleries\.net/(?:[\w-]+-)?(\d+)"
-    example = "https://BLOG.urlgalleries.net/gallery-12345/TITLE"
+    pattern = (r"(?:https?://)()(?:(\w+)\.)?urlgalleries\.net"
+               r"/(?:b/([^/?#]+)/)?(?:[\w-]+-)?(\d+)")
+    example = "https://urlgalleries.net/b/BLOG/gallery-12345/TITLE"
 
     def items(self):
-        blog, self.gallery_id = self.groups
-        url = "https://{}.urlgalleries.net/porn-gallery-{}/?a=10000".format(
+        _, blog_alt, blog, self.gallery_id = self.groups
+        if not blog:
+            blog = blog_alt
+        url = "https://urlgalleries.net/b/{}/porn-gallery-{}/?a=10000".format(
             blog, self.gallery_id)
 
         with self.request(url, allow_redirects=False, fatal=...) as response:
@@ -35,7 +38,7 @@ class UrlgalleriesGalleryExtractor(GalleryExtractor):
         data = self.metadata(page)
         data["count"] = len(imgs)
 
-        root = "https://{}.urlgalleries.net".format(blog)
+        root = "https://urlgalleries.net/b/" + blog
         yield Message.Directory, data
         for data["num"], img in enumerate(imgs, 1):
             page = self.request(root + img).text
