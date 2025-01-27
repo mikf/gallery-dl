@@ -60,18 +60,22 @@ class Rule34xyzExtractor(BooruExtractor):
         post.pop("filesPreview", None)
         post.pop("tagsWithType", None)
         post["date"] = text.parse_datetime(
-            post["created"], "%Y-%m-%dT%H:%M:%S.%f")
+            post["created"][:19], "%Y-%m-%dT%H:%M:%S")
 
     def _tags(self, post, _):
         if post.get("tagsWithType") is None:
             post.update(self._fetch_post(post["id"]))
 
         tags = collections.defaultdict(list)
+        tagslist = []
         for tag in post["tagsWithType"]:
-            tags[tag["type"]].append(tag["value"])
+            value = tag["value"]
+            tagslist.append(value)
+            tags[tag["type"]].append(value)
         types = self.TAG_TYPES
         for type, values in tags.items():
             post["tags_" + types[type]] = values
+        post["tags"] = tagslist
 
     def _fetch_post(self, post_id):
         url = "{}/api/post/{}".format(self.root, post_id)
