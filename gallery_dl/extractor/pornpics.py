@@ -30,9 +30,11 @@ class PornpicsExtractor(Extractor):
             # fetch first 20 galleries from HTML
             # since '"offset": 0' does not return a JSON response
             page = self.request(url).text
-            for path in text.extract_iter(
+            for href in text.extract_iter(
                     page, 'class="rel-link" href="', '"'):
-                yield {"g_url": self.root + path}
+                if href[0] == "/":
+                    href = self.root + href
+                yield {"g_url": href}
             del page
             params = {"offset": 20}
 
