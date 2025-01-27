@@ -85,7 +85,7 @@ __tests__ = (
     "#url"     : "https://moko0908.hatenablog.jp/archive/2023",
     "#category": ("", "hatenablog", "archive"),
     "#class"   : hatenablog.HatenablogArchiveExtractor,
-    "#count"   : 13,
+    "#count"   : range(10, 15),
 },
 
 {

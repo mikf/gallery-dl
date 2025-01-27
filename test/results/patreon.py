@@ -82,13 +82,9 @@ __tests__ = (
 
 {
     "#url"     : "https://www.patreon.com/posts/free-mari-8s-113049301",
-    "#comment" : "postfile + attachments_media (#6241)",
+    "#comment" : "'This page has been removed' - postfile + attachments_media (#6241)",
     "#class"   : patreon.PatreonPostExtractor,
-    "#pattern" : [
-        r"https://c10\.patreonusercontent\.com/4/patreon-media/p/post/113049301/7ae4fd78d3374d849a80863f3d8eee89/eyJhIjoxLCJwIjoxfQ%3D%3D/1\.jpg",
-        r"https://c10\.patreonusercontent\.com/4/patreon-media/p/post/113049301/b6ea96b18cbc47f78f9334d50d0877ea/eyJhIjoxLCJwIjoxfQ%3D%3D/1\.mp4",
-        r"https://c10\.patreonusercontent\.com/4/patreon-media/p/post/113049301/62dc1d4194db4245aca31c56f71234ed/eyJhIjoxLCJwIjoxfQ%3D%3D/1\.mp4",
-    ],
+    "#count"   : 0,
 },
 
 {
@@ -121,7 +117,7 @@ __tests__ = (
     "#class"   : patreon.PatreonPostExtractor,
     "#pattern" : [
         r"https://c10\.patreonusercontent\.com/4/patreon-media/p/post/94714289/be3d8eb994ae44eca4baffcdc6dd25fc/eyJhIjoxLCJwIjoxfQ%3D%3D/1\.png",
-        r"ytdl:https://www.patreon\.com/api/video/255859412/video\.m3u8",
+        r"ytdl:https://stream\.mux\.com/NLrxTLdxyGStpOgapJAtB8uPGAaokEcj8YovML00y2DY\.m3u8\?token=ey",
     ]
 },
 

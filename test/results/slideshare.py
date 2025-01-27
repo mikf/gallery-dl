@@ -16,7 +16,7 @@ __tests__ = (
     "#count"       : 19,
     "#sha1_content": "2b6a191eab60b3978fdacfecf2da302dd45bc108",
 
-    "description" : "Get Started with SlideShare - A Beginngers Guide for Creators",
+    "description" : "SlideShare is a global platform for sharing presentations, infographics, videos and documents. It has over 18 million pieces of professional content uploaded by experts like Eric Schmidt and Guy Kawasaki. The document provides tips for setting up an account on SlideShare, uploading content, optimizing it for searchability, and sharing it on social media to build an audience and reputation as a subject matter expert.",
     "likes"       : int,
     "presentation": "get-started-with-slide-share",
     "date"        : "dt:2015-05-20 17:38:21",

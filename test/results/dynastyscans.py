@@ -36,8 +36,15 @@ __tests__ = (
     "#url"     : "https://dynasty-scans.com/images?with[]=4930&with[]=5211",
     "#category": ("", "dynastyscans", "search"),
     "#class"   : dynastyscans.DynastyscansSearchExtractor,
-    "#sha1_url"     : "d2422163db7b1db94bf343f8cd50ba9cc08ae6b5",
-    "#sha1_metadata": "65f9948e7f29a1db2b3e6abb697f7476d2196708",
+
+    "#sha1_metadata": "67690b4e21f59746f112803cba4c4d81fcbb9dbd",
+    "#urls"         : (
+        "https://dynasty-scans.com/system/images_images/000/032/932/full/66051624_p0.webp",
+        "https://dynasty-scans.com/system/images_images/000/021/368/full/KEIGI_32-1467964487873486851-img1.webp",
+        "https://dynasty-scans.com/system/images_images/000/004/596/full/tortoise.webp",
+        "https://dynasty-scans.com/system/images_images/000/003/206/full/1f01f72e19b98bf0083d323e3c28e4bf.webp",
+        "https://dynasty-scans.com/system/images_images/000/000/535/full/8564987.webp",
+    ),
 },
 
 {

@@ -13,7 +13,7 @@ __tests__ = (
     "#url"     : "https://vk.com/id398982326",
     "#category": ("", "vk", "photos"),
     "#class"   : vk.VkPhotosExtractor,
-    "#pattern" : r"https://sun\d+-\d+\.userapi\.com/s/v1/if1/[\w-]+\.jpg\?size=\d+x\d+&quality=96&type=album",
+    "#pattern" : r"https://sun\d+-\d+\.userapi\.com/c\d+/v\d+/\w+/[\w-]+\.\w+",
     "#count"   : ">= 35",
 
     "id"  : r"re:\d+",

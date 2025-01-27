@@ -14,7 +14,20 @@ __tests__ = (
     "#class"   : manganelo.ManganeloChapterExtractor,
     "#pattern"      : r"https://v\d+\.mkklcdnv6tempv5\.com/img/tab_17/03/23/39/gn983696/vol_3_chapter_23_24_yen/\d+-[no]\.jpg",
     "#count"        : 25,
-    "#sha1_metadata": "17faaea7f0fb8c2675a327bf3aa0bcd7a6311d68",
+
+    "author"   : "Ei Yuzuki,Maki Hayashi",
+    "chapter"  : 23,
+    "chapter_minor": "",
+    "count"    : 25,
+    "date"     : None,
+    "extension": "jpg",
+    "filename" : str,
+    "lang"     : "en",
+    "language" : "English",
+    "manga"    : "By Spring",
+    "page"     : range(1, 25),
+    "title"    : "24 Yen",
+    "volume"   : 3,
 },
 
 {

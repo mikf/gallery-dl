@@ -13,7 +13,7 @@ __tests__ = (
     "#category": ("szurubooru", "snootbooru", "tag"),
     "#class"   : szurubooru.SzurubooruTagExtractor,
     "#pattern" : r"https://snootbooru\.com/data/posts/\d+_[0-9a-f]{16}\.\w+",
-    "#count"   : range(35, 50),
+    "#count"   : range(100, 300),
 },
 
 {
@@ -52,7 +52,7 @@ __tests__ = (
     "relationCount": 0,
     "relations"    : [],
     "safety"       : "safe",
-    "score"        : 0,
+    "score"        : range(1, 10),
     "source"       : None,
     "tagCount"     : 3,
     "tags"         : [

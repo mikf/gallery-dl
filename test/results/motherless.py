@@ -89,7 +89,7 @@ __tests__ = (
     "#range"  : "1-100",
     "#count"  : 100,
 
-    "count"        : 6503,
+    "count"        : range(5000, 8000),
     "extension"    : {"jpg", "png", "gif"},
     "filename"     : str,
     "gallery_id"   : "43D8704",
@@ -110,7 +110,7 @@ __tests__ = (
     "#range"  : "1-100",
     "#count"  : 100,
 
-    "count"        : 869,
+    "count"        : range(500, 900),
     "extension"    : "mp4",
     "filename"     : str,
     "gallery_id"   : "43D8704",

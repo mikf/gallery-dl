@@ -21,7 +21,7 @@ __tests__ = (
     "chapter_minor" : "",
     "chapter_string": "110630",
     "count"         : 13,
-    "date"          : "dt:2022-10-16 17:32:54",
+    "date"          : "dt:2024-03-29 15:07:00",
     "extension"     : "png",
     "filename"      : r"re:1063-0\d\d",
     "genre"         : [

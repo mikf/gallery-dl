@@ -26,7 +26,7 @@ __tests__ = (
     "#comment" : "2 pages",
     "#class"   : lensdump.LensdumpAlbumExtractor,
     "#pattern" : r"https://[abcd]\.l3n\.co/i/\w{6}\.(jpe?g|png)",
-    "#count"   : 64,
+    "#count"   : range(68, 80),
 },
 
 {

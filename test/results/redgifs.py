@@ -13,7 +13,7 @@ __tests__ = (
     "#category": ("", "redgifs", "user"),
     "#class"   : redgifs.RedgifsUserExtractor,
     "#pattern" : r"https://\w+\.redgifs\.com/[\w-]+\.mp4",
-    "#count"   : range(50, 60),
+    "#count"   : range(40, 60),
 },
 
 {

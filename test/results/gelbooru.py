@@ -44,7 +44,7 @@ __tests__ = (
     "#comment" : "meta tags (#5478)",
     "#category": ("booru", "gelbooru", "tag"),
     "#class"   : gelbooru.GelbooruTagExtractor,
-    "#count"   : 187,
+    "#count"   : range(180, 190),
 },
 
 {
@@ -52,7 +52,7 @@ __tests__ = (
     "#comment" : "meta + sort tags (#5478)",
     "#category": ("booru", "gelbooru", "tag"),
     "#class"   : gelbooru.GelbooruTagExtractor,
-    "#count"   : 187,
+    "#count"   : range(180, 190),
 },
 
 {

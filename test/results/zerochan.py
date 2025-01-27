@@ -130,7 +130,7 @@ __tests__ = (
     "height"   : 1125,
     "id"       : 4233756,
     "path"     : [
-        "Toriyama Akira",
+        "Manga",
         "DRAGON BALL",
     ],
     "size"     : 136192,

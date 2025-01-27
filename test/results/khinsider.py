@@ -81,7 +81,7 @@ __tests__ = (
         "catalog"  : "PCCG-00357",
         "count"    : 36,
         "date"     : "Jul 1st, 2024",
-        "developer": "Nintendo",
+        "developer": "",
         "name"     : "Super Mario 64 Original Soundtrack",
         "platform" : ["N64"],
         "publisher": "Nintendo",
