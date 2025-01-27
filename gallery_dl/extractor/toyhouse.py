@@ -52,16 +52,18 @@ class ToyhouseExtractor(Extractor):
         return {
             "url": extr(needle, '"'),
             "date": text.parse_datetime(extr(
-                'Credits\n</h2>\n<div class="mb-1">', '<'),
+                '</h2>\n            <div class="mb-1">', '<'),
                 "%d %b %Y, %I:%M:%S %p"),
             "artists": [
                 text.remove_html(artist)
                 for artist in extr(
-                    '<div class="artist-credit">', '</div>\n</div>').split(
-                    '<div class="artist-credit">')
+                    '<div class="artist-credit">',
+                    '</div>\n                    </div>').split(
+                    '<div class="ar tist-credit">')
             ],
             "characters": text.split_html(extr(
-                '<div class="image-characters', '</div>\n</div>'))[2:],
+                '<div class="image-characters',
+                '<div class="image-comments">'))[2:],
         }
 
     def _pagination(self, path):
