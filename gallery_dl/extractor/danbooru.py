@@ -32,7 +32,7 @@ class DanbooruExtractor(BaseExtractor):
         if isinstance(threshold, int):
             self.threshold = 1 if threshold < 1 else threshold
         else:
-            self.threshold = self.per_page
+            self.threshold = self.per_page - 20
 
         username, api_key = self._get_auth_info()
         if username:
