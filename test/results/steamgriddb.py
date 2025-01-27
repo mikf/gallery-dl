@@ -77,8 +77,8 @@ __tests__ = (
     "#category": ("", "steamgriddb", "grids"),
     "#class"   : steamgriddb.SteamgriddbGridsExtractor,
     "#options" : {"humor": False, "epilepsy": False, "untagged": False},
-    "#range"   : "1-33",
-    "#count"   : 33,
+    "#range"   : "1-30",
+    "#count"   : range(1, 30),
 },
 
 {

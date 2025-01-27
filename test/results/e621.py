@@ -90,16 +90,25 @@ __tests__ = (
             "creator_id"  : 1077440,
             "creator_name": "Yeetus90",
             "description" : """\
-* "Little Legends":/pools/27971\r
-* Little Legends 2\r
+[quote]h2.【web再録】ぷち・れじぇんず2
+2015年の関西けもケット4で頒布した個人誌第2弾！
+～行方不明になった親友のビクティニを救うべく怪しげな館に単身乗り込んだミュウ。
+しかし彼女の前には強大な力を持つ館の主が立ちはだかる！果たして二人は無事脱出することができるのか！？～
+ \n\
+この頃の方が背景に力が入ってますねw
+あとジャローダの顔の模様思いっきり間違ってますがそこはご愛嬌ということで…[/quote]
+
+* "Little Legends":/pools/27971
+* Little Legends 2
 * "Little Legends 3":/pools/27481\
 """,
+
             "id"          : 27492,
             "is_active"   : False,
             "name"        : "Little Legends 2",
             "post_count"  : 39,
             "post_ids"    : list,
-            "updated_at"  : "2022-03-27T06:30:03.382-04:00",
+            "updated_at"  : "2025-01-07T22:01:40.319-05:00",
         },
     ],
 },

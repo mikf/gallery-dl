@@ -51,7 +51,7 @@ __tests__ = (
         "https://kemono.su/data/b0/38/b03882c8b0ab3b1cf9fc658a2bb2f9ac6ad4f3449015311dcd2d7ee7f748db31.png",
     ),
 
-    "tags": r"\bpin-up\b",
+    "tags": r"re:\bpin-up\b",
 },
 
 {
