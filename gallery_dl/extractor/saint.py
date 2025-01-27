@@ -81,6 +81,7 @@ class SaintMediaExtractor(SaintAlbumExtractor):
             else:  # /d/
                 file = {
                     "file"     : text.unescape(extr('<a href="', '"')),
+                    "id"       : album_id,
                     "id_dl"    : album_id,
                     "name"     : album_id,
                     "filename" : album_id,
