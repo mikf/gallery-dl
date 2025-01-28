@@ -28,51 +28,53 @@ class DiscordExtractor(Extractor):
         self.extract_threads = self.config("threads", True)
         self.api = DiscordAPI(self)
 
-    def extract_default_message(self, message):
-        message_metadata = {
-            **self.server_metadata,
-            **self.all_channels_metadata[message["channel_id"]],
-            "date": text.parse_datetime(
-                message["timestamp"], "%Y-%m-%dT%H:%M:%S.%f%z"
-            ),
-            "message": message["content"],
-            "message_id": message["id"],
-            "author": message["author"]["username"],
-            "author_id": message["author"]["id"],
-            "files": []
-        }
+    def extract_message(self, message):
+        # https://discord.com/developers/docs/resources/message#message-object-message-types
+        if message["type"] in (0, 19, 21):
+            message_metadata = {
+                **self.server_metadata,
+                **self.all_channels_metadata[message["channel_id"]],
+                "date": text.parse_datetime(
+                    message["timestamp"], "%Y-%m-%dT%H:%M:%S.%f%z"
+                ),
+                "message": message["content"],
+                "message_id": message["id"],
+                "author": message["author"]["username"],
+                "author_id": message["author"]["id"],
+                "files": []
+            }
 
-        for attachment in message["attachments"]:
-            message_metadata["files"].append({
-                "url": attachment["url"],
-                "type": "attachment"
-            })
-
-        for embed in message["embeds"]:
-            url = None
-            if embed["type"] in ("image",):
-                url = embed["thumbnail"].get("proxy_url")
-            elif embed["type"] in ("gifv", "video"):
-                url = embed["video"].get("proxy_url")
-
-            if url is not None:
+            for attachment in message["attachments"]:
                 message_metadata["files"].append({
-                    "url": url,
-                    "type": "embed"
+                    "url": attachment["url"],
+                    "type": "attachment"
                 })
 
-        for num, file in enumerate(message_metadata["files"], start=1):
-            text.nameext_from_url(file["url"], file)
-            file["num"] = num
+            for embed in message["embeds"]:
+                url = None
+                if embed["type"] in ("image",):
+                    url = embed["thumbnail"].get("proxy_url")
+                elif embed["type"] in ("gifv", "video"):
+                    url = embed["video"].get("proxy_url")
 
-        yield Message.Directory, message_metadata
+                if url is not None:
+                    message_metadata["files"].append({
+                        "url": url,
+                        "type": "embed"
+                    })
 
-        for file in message_metadata["files"]:
-            parsed_file = {
-                **message_metadata,
-                **file
-            }
-            yield Message.Url, file["url"], parsed_file
+            for num, file in enumerate(message_metadata["files"], start=1):
+                text.nameext_from_url(file["url"], file)
+                file["num"] = num
+
+            yield Message.Directory, message_metadata
+
+            for file in message_metadata["files"]:
+                parsed_file = {
+                    **message_metadata,
+                    **file
+                }
+                yield Message.Url, file["url"], parsed_file
 
     def extract_channel_text(self, channel_id):
         api = DiscordAPI(self)
@@ -82,8 +84,7 @@ class DiscordExtractor(Extractor):
             return api.get_channel_messages(channel_id, oldest_message_id)
 
         for message in api._loop_call(_api_call, DiscordAPI.MESSAGES_LIMIT):
-            if message["type"] in (0, 19, 21):
-                yield from self.extract_default_message(message)
+            yield from self.extract_message(message)
             oldest_message_id = message["id"]
 
     def extract_channel_threads(self, channel_id):
@@ -143,6 +144,7 @@ class DiscordExtractor(Extractor):
             "channel": channel.get("name"),
             "channel_id": channel_id,
             "channel_type": channel.get("type"),
+            "channel_topic": channel.get("topic", ""),
             "parent_id": channel.get("parent_id"),
             "is_thread": "thread_metadata" in channel
         }
