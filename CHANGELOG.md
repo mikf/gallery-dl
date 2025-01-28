@@ -1,5 +1,59 @@
 # Changelog
 
+## 1.28.5 - 2025-01-28
+### Extractors
+#### Additions
+- [nekohouse] add support ([#5241](https://github.com/mikf/gallery-dl/issues/5241), [#6738](https://github.com/mikf/gallery-dl/issues/6738))
+- [turboimagehost] add support for galleries ([#6855](https://github.com/mikf/gallery-dl/issues/6855))
+- [xfolio] add support ([#5514](https://github.com/mikf/gallery-dl/issues/5514), [#6351](https://github.com/mikf/gallery-dl/issues/6351), [#6837](https://github.com/mikf/gallery-dl/issues/6837))
+#### Fixes
+- [4archive] fix `TypeError`
+- [adultempire] bypass age confirmation check
+- [architizer] fix extraction
+- [artstation] avoid Cloudflare challenges ([#5817](https://github.com/mikf/gallery-dl/issues/5817), [#5658](https://github.com/mikf/gallery-dl/issues/5658), [#5564](https://github.com/mikf/gallery-dl/issues/5564), [#5554](https://github.com/mikf/gallery-dl/issues/5554))
+- [deviantart] prevent crash when accessing `premium_folder` data ([#6873](https://github.com/mikf/gallery-dl/issues/6873))
+- [fapachi] fix extraction ([#6881](https://github.com/mikf/gallery-dl/issues/6881))
+- [issuu] fix `user` extractor
+- [kemonoparty] fix `username` metadata and filtering by `tag` for `/posts` URLs ([#6833](https://github.com/mikf/gallery-dl/issues/6833))
+- [mangafox] fix chapter extraction
+- [mangahere] fix chapter extraction
+- [pixiv] fix `sanity_level` workaround ([#4327](https://github.com/mikf/gallery-dl/issues/4327))
+- [pornpics] fix pagination results from HTML pages
+- [twitter] handle exceptions during file extraction ([#6647](https://github.com/mikf/gallery-dl/issues/6647))
+- [vsco] fix `JSONDecodeError` ([#6887](https://github.com/mikf/gallery-dl/issues/6887), [#6891](https://github.com/mikf/gallery-dl/issues/6891))
+- [weebcentral] fix extraction ([#6860](https://github.com/mikf/gallery-dl/issues/6860))
+- [xhamster] fix `gallery` extractor ([#6818](https://github.com/mikf/gallery-dl/issues/6818), [#6876](https://github.com/mikf/gallery-dl/issues/6876))
+#### Improvements
+- [batoto] use `chapter_id` in default archive IDs ([#6835](https://github.com/mikf/gallery-dl/issues/6835))
+- [e621] support `e621.cc` and `e621.anthro.fr` frontend URLs ([#6809](https://github.com/mikf/gallery-dl/issues/6809))
+- [e621] prevent premature pagination end ([#6886](https://github.com/mikf/gallery-dl/issues/6886))
+- [facebook] allow accessing all metadata in `directory` format strings ([#6874](https://github.com/mikf/gallery-dl/issues/6874))
+- [hiperdex] update domain to `hiperdex.com`
+- [kemonoparty] enable filtering creator posts by tag ([#6833](https://github.com/mikf/gallery-dl/issues/6833))
+- [khinsider] add `covers` option ([#6844](https://github.com/mikf/gallery-dl/issues/6844))
+- [komikcast] update domain to `komikcast.la`
+- [lofter] improve error handling ([#6865](https://github.com/mikf/gallery-dl/issues/6865))
+- [pornpics] avoid redirect when retrieving a gallery page
+- [urlgalleries] support new URL format
+#### Metadata
+- [bunkr] extract better `filename` metadata ([#6824](https://github.com/mikf/gallery-dl/issues/6824))
+- [hiperdex] fix `description` metadata
+- [khinsider] extract more `album` metadata ([#6844](https://github.com/mikf/gallery-dl/issues/6844))
+- [mangaread] fix manga metadata extraction
+- [rule34xyz] fix `date` and `tags` metadata
+- [saint] fix metadata of `/d/` URLs
+- [toyhouse] fix `date`, `artists`, and `characters` metadata
+- [webtoons] fix `username` and `author_name` metadata
+#### Removals
+- [cohost] remove module
+- [fanleaks] remove module
+- [shimmie2] remove `tentaclerape.net`
+- [szurubooru] remove `booru.foalcon.com`
+### Miscellaneous
+- [docs] add `nix` docs to README ([#6606](https://github.com/mikf/gallery-dl/issues/6606))
+- [path] fix exception when using `--rename-to` + `--no-download` ([#6861](https://github.com/mikf/gallery-dl/issues/6861))
+- [release] include `scripts/run_tests.py` in release tarball ([#6856](https://github.com/mikf/gallery-dl/issues/6856))
+
 ## 1.28.4 - 2025-01-12
 ### Extractors
 #### Additions
