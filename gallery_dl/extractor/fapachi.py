@@ -33,7 +33,8 @@ class FapachiPostExtractor(Extractor):
         }
         page = self.request("{}/{}/media/{}".format(
             self.root, self.user, self.id)).text
-        url = self.root + text.extr(page, 'd-block" src="', '"')
+        url = self.root + text.extract(
+            page, 'data-src="', '"', page.index('class="media-img'))[0]
         yield Message.Directory, data
         yield Message.Url, url, text.nameext_from_url(url, data)
 
