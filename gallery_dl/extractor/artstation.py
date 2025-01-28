@@ -19,6 +19,8 @@ class ArtstationExtractor(Extractor):
     filename_fmt = "{category}_{id}_{asset[id]}_{title}.{extension}"
     directory_fmt = ("{category}", "{userinfo[username]}")
     archive_fmt = "{asset[id]}"
+    browser = "firefox"
+    tls12 = False
     root = "https://www.artstation.com"
 
     def __init__(self, match):

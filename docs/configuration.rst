@@ -673,7 +673,7 @@ extractor.*.browser
 Type
     ``string``
 Default
-    * ``"firefox"``: ``mangasee``, ``twitter``
+    * ``"firefox"``: ``artstation``, ``mangasee``, ``twitter``
     * ``null``: otherwise
 Example
     * ``"chrome:macos"``
@@ -749,7 +749,8 @@ extractor.*.tls12
 Type
     ``bool``
 Default
-    ``true``
+    * ``false``: ``artstation``
+    * ``true``: otherwise
 Description
     Allow selecting TLS 1.2 cipher suites.
 
