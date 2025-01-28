@@ -39,32 +39,39 @@ class DiscordExtractor(Extractor):
             "message_id": message["id"],
             "author": message["author"]["username"],
             "author_id": message["author"]["id"],
+            "files": []
         }
 
-        all_files = []
-
         for attachment in message["attachments"]:
-            attachment["from"] = "attachment"
-            all_files.append(attachment)
+            message_metadata["files"].append({
+                "url": attachment["url"],
+                "type": "attachment"
+            })
 
         for embed in message["embeds"]:
-            if embed["type"] in ("image", "gifv", "video"):
-                if embed["type"] in ("image",):
-                    embed["url"] = embed["thumbnail"].get("proxy_url")
-                elif embed["type"] in ("gifv", "video"):
-                    embed["url"] = embed["video"].get("proxy_url")
+            url = None
+            if embed["type"] in ("image",):
+                url = embed["thumbnail"].get("proxy_url")
+            elif embed["type"] in ("gifv", "video"):
+                url = embed["video"].get("proxy_url")
 
-                if embed["url"] is not None:
-                    embed["from"] = "embed"
-                    all_files.append(embed)
+            if url is not None:
+                message_metadata["files"].append({
+                    "url": url,
+                    "type": "embed"
+                })
 
-        for num, file in enumerate(all_files, start=1):
+        for num, file in enumerate(message_metadata["files"], start=1):
+            text.nameext_from_url(file["url"], file)
+            file["num"] = num
+
+        yield Message.Directory, message_metadata
+
+        for file in message_metadata["files"]:
             parsed_file = {
                 **message_metadata,
-                "type": file["from"],
-                "num": num,
+                **file
             }
-            text.nameext_from_url(file["url"], parsed_file)
             yield Message.Url, file["url"], parsed_file
 
     def extract_channel_text(self, channel_id):
@@ -84,7 +91,7 @@ class DiscordExtractor(Extractor):
             return self.api.get_channel_threads(channel_id, offset)["threads"]
 
         for thread in self.api._loop_call(_api_call, DiscordAPI.THREADS_LIMIT):
-            yield Message.Directory, self.parse_channel(thread["id"])
+            self.parse_channel(thread["id"])
             yield from self.extract_channel_text(thread["id"])
 
     def extract_category_channels(self, channel_id):
@@ -98,20 +105,20 @@ class DiscordExtractor(Extractor):
 
     def extract_generic_channel(self, channel_id, safe=False):
         try:
-            channel = self.parse_channel(channel_id)
+            channel_type = self.parse_channel(channel_id)["channel_type"]
 
             has_text = False
             has_threads = False
 
             # https://discord.com/developers/docs/resources/channel#channel-object-channel-types
-            if channel["channel_type"] in (0, 5):
+            if channel_type in (0, 5):
                 has_text = True
                 has_threads = self.extract_threads
-            elif channel["channel_type"] in (1, 3, 10, 11, 12):
+            elif channel_type in (1, 3, 10, 11, 12):
                 has_text = True
-            elif channel["channel_type"] in (4,):
+            elif channel_type in (4,):
                 yield from self.extract_category_channels(channel_id)
-            elif channel["channel_type"] in (15, 16):
+            elif channel_type in (15, 16):
                 has_threads = True
             elif not safe:
                 raise exception.StopExtraction(
@@ -119,9 +126,7 @@ class DiscordExtractor(Extractor):
                 )
 
             if has_text:
-                yield Message.Directory, channel
                 yield from self.extract_channel_text(channel_id)
-
             if has_threads:
                 yield from self.extract_channel_threads(channel_id)
         except exception.HttpError as e:
@@ -186,13 +191,14 @@ class DiscordChannelExtractor(DiscordExtractor):
     directory_fmt = (
         "{category}", "{server_id}_{server}", "{channel_id}_{channel}"
     )
-    pattern = BASE_PATTERN + r"/channels/(\d+)/(\d+)"
+    pattern = BASE_PATTERN + r"/channels/(\d+)/(\d+)(?:/threads/(\d+))?"
     example = (
         "https://discord.com/channels/302094807046684672/302094807046684672"
     )
 
     def items(self):
-        server_id, channel_id = self.groups
+        server_id = self.groups[0]
+        channel_id = self.groups[2] or self.groups[1]
 
         self.parse_server(server_id)
 

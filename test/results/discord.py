@@ -52,6 +52,12 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://discord.com/channels/302094807046684672/1306705919916249098/threads/1306706528786583623",
+    "#category": ("", "discord", "channel"),
+    "#class"   : discord.DiscordChannelExtractor,
+},
+
+{
     "#url"     : "https://discord.com/channels/302094807046684672",
     "#category": ("", "discord", "server"),
     "#class"   : discord.DiscordServerExtractor
