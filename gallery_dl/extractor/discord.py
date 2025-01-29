@@ -18,7 +18,9 @@ class DiscordExtractor(Extractor):
     category = "discord"
     root = "https://discord.com"
     filename_fmt = "{message_id}_{num:>02}_{filename}.{extension}"
-    archive_fmt = "{message_id}_{num}.{extension}"
+    archive_fmt = "{message_id}_{num}"
+
+    cdn_fmt = "https://cdn.discordapp.com/{}/{}/{}.png?size=4096"
 
     server_metadata = {}
     server_channels_metadata = {}
@@ -61,6 +63,7 @@ class DiscordExtractor(Extractor):
                 **self.server_channels_metadata[message["channel_id"]],
                 "author": message["author"]["username"],
                 "author_id": message["author"]["id"],
+                "author_files": [],
                 "message": self.extract_message_text(message),
                 "message_id": message["id"],
                 "date": text.parse_datetime(
@@ -68,6 +71,21 @@ class DiscordExtractor(Extractor):
                 ),
                 "files": []
             }
+
+            for icon_type, icon_path in (
+                ("avatar", "avatars"),
+                ("banner", "banners")
+            ):
+                if message["author"].get(icon_type):
+                    message_metadata["author_files"].append({
+                        "url": self.cdn_fmt.format(
+                            icon_path,
+                            message_metadata["author_id"],
+                            message["author"][icon_type]
+                        ),
+                        "filename": icon_type,
+                        "extension": "png",
+                    })
 
             for attachment in message["attachments"]:
                 message_metadata["files"].append({
@@ -190,11 +208,6 @@ class DiscordExtractor(Extractor):
             "owner_id": server["owner_id"]
         }
 
-        ICON_FMT = (
-            "https://cdn.discordapp.com/{}/" +
-            self.server_metadata["server_id"] + "/{}.webp?size=4096"
-        )
-
         for icon_type, icon_path in (
             ("icon", "icons"),
             ("banner", "banners"),
@@ -203,9 +216,13 @@ class DiscordExtractor(Extractor):
         ):
             if server.get(icon_type):
                 self.server_metadata["server_files"].append({
-                    "url": ICON_FMT.format(icon_path, server[icon_type]),
+                    "url": self.cdn_fmt.format(
+                        icon_path,
+                        self.server_metadata["server_id"],
+                        server[icon_type]
+                    ),
                     "filename": icon_type,
-                    "extension": "webp",
+                    "extension": "png",
                 })
 
         return self.server_metadata
@@ -225,7 +242,7 @@ class DiscordChannelExtractor(DiscordExtractor):
     )
     pattern = BASE_PATTERN + r"/channels/(\d+)/(\d+)(?:/threads/(\d+))?"
     example = (
-        "https://discord.com/channels/302094807046684672/302094807046684672"
+        "https://discord.com/channels/302094807046684672/1306705919916249098"
     )
 
     def items(self):
