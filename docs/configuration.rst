@@ -2235,6 +2235,19 @@ Description
     | Leave ``SIZE`` empty to download the regular, small avatar format.
 
 
+extractor.discord.embeds
+------------------------
+Type
+    ``list`` of ``strings``
+Default
+    ``["image", "gifv", "video"]``
+Description
+    Selects which embed types to download from.
+
+    Supported embed types are
+    ``image``, ``gifv``, ``video``, ``rich``, ``article``, ``link``.
+
+
 extractor.discord.threads
 -------------------------
 Type
