@@ -33,7 +33,7 @@ __tests__ = (
 #
 #    "author"      : str,
 #    "author_id"   : str,
-#    "author_files": str,
+#    "author_files": list,
 #    "message"     : str,
 #    "message_id"  : str,
 #    "filename"    : str,

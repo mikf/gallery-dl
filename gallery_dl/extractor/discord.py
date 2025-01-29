@@ -117,20 +117,11 @@ class DiscordExtractor(Extractor):
                 }
 
     def extract_channel_text(self, channel_id):
-        oldest_message_id = None
-
-        def _call(_):
-            return self.api.get_channel_messages(channel_id, oldest_message_id)
-
-        for message in self.api._loop_call(_call, DiscordAPI.MESSAGES_LIMIT):
+        for message in self.api.get_channel_messages(channel_id):
             yield from self.extract_message(message)
-            oldest_message_id = message["id"]
 
     def extract_channel_threads(self, channel_id):
-        def _call(offset):
-            return self.api.get_channel_threads(channel_id, offset)["threads"]
-
-        for thread in self.api._loop_call(_call, DiscordAPI.THREADS_LIMIT):
+        for thread in self.api.get_channel_threads(channel_id):
             id = self.parse_channel(thread)["channel_id"]
             yield from self.extract_channel_text(id)
 
@@ -146,7 +137,8 @@ class DiscordExtractor(Extractor):
             # https://discord.com/developers/docs/resources/channel#channel-object-channel-types
             if channel_type in (0, 5):
                 yield from self.extract_channel_text(channel_id)
-                yield from self.extract_channel_threads(channel_id)
+                if self.enabled_threads:
+                    yield from self.extract_channel_threads(channel_id)
             elif channel_type in (1, 3, 10, 11, 12):
                 yield from self.extract_channel_text(channel_id)
             elif channel_type in (15, 16):
@@ -298,9 +290,6 @@ class DiscordAPI():
     https://discord.com/developers/docs/reference
     """
 
-    MESSAGES_LIMIT = 100
-    THREADS_LIMIT = 25
-
     def __init__(self, extractor):
         self.extractor = extractor
         self.token = extractor.token
@@ -318,26 +307,41 @@ class DiscordAPI():
         """Get channel information"""
         return self._call("/channels/" + channel_id)
 
-    def get_channel_threads(self, channel_id, offset=0):
+    def get_channel_threads(self, channel_id):
         """Get channel threads"""
-        return self._call(
-            "/channels/" + channel_id + "/threads/search?"
-            "sort_by=last_message_time&sort_order=desc"
-            "&limit=" + str(self.THREADS_LIMIT) + "&offset=" + str(offset)
-        )
+        THREADS_BATCH = 25
 
-    def get_channel_messages(self, channel_id, before=None):
+        def _method(offset):
+            return self._call(
+                "/channels/" + channel_id + "/threads/search?"
+                "sort_by=last_message_time&sort_order=desc"
+                "&limit=" + str(THREADS_BATCH) + "&offset=" + str(offset)
+            )["threads"]
+
+        return self._pagination(_method, THREADS_BATCH)
+
+    def get_channel_messages(self, channel_id):
         """Get channel messages"""
-        return self._call(
-            "/channels/" + channel_id +
-            "/messages?limit=" + str(self.MESSAGES_LIMIT) +
-            (("&before=" + before) if before else "")
-        )
+        MESSAGES_BATCH = 100
 
-    def _call(self, endpoint, params=None):
+        before = None
+
+        def _method(_):
+            nonlocal before
+            messages = self._call(
+                "/channels/" + channel_id +
+                "/messages?limit=" + str(MESSAGES_BATCH) +
+                (("&before=" + before) if before else "")
+            )
+            before = messages[-1]["id"]
+            return messages
+
+        return self._pagination(_method, MESSAGES_BATCH)
+
+    def _call(self, endpoint):
         url = self.root + endpoint
         try:
-            response = self.extractor.request(url, params=params, headers={
+            response = self.extractor.request(url, headers={
                 "Authorization": self.token,
             })
         except exception.HttpError as e:
@@ -346,15 +350,14 @@ class DiscordAPI():
             raise
         return response.json()
 
-    @staticmethod
-    def _loop_call(call, target_count):
+    def _pagination(self, method, batch):
         offset = 0
         while True:
-            response = call(offset)
-            yield from response
-            if len(response) < target_count:
-                break
-            offset += len(response)
+            data = method(offset)
+            yield from data
+            if len(data) < batch:
+                return
+            offset += len(data)
 
     @staticmethod
     def _raise_invalid_token():
