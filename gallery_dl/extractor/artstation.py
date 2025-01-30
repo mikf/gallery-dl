@@ -11,8 +11,6 @@
 from .common import Extractor, Message
 from .. import text, util, exception
 import itertools
-import random
-import string
 
 
 class ArtstationExtractor(Extractor):
@@ -28,6 +26,9 @@ class ArtstationExtractor(Extractor):
     def __init__(self, match):
         Extractor.__init__(self, match)
         self.user = match.group(1) or match.group(2)
+
+    def _init(self):
+        self.session.headers["Cache-Control"] = "max-age=0"
 
     def items(self):
         videos = self.config("videos", True)
@@ -172,7 +173,7 @@ class ArtstationExtractor(Extractor):
         ).json()["public_csrf_token"]
 
     @staticmethod
-    def _no_cache(url, alphabet=(string.digits + string.ascii_letters)):
+    def _no_cache(url):
         """Cause a cache miss to prevent Cloudflare 'optimizations'
 
         Cloudflare's 'Polish' optimization strips image metadata and may even
@@ -184,10 +185,9 @@ class ArtstationExtractor(Extractor):
         https://github.com/r888888888/danbooru/issues/3528
         https://danbooru.donmai.us/forum_topics/14952
         """
-        param = "gallerydl_no_cache=" + util.bencode(
-            random.getrandbits(64), alphabet)
         sep = "&" if "?" in url else "?"
-        return url + sep + param
+        token = util.generate_token(8)
+        return url + sep + token[:4] + "=" + token[4:]
 
 
 class ArtstationUserExtractor(ArtstationExtractor):

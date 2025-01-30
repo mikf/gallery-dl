@@ -822,7 +822,7 @@ x2="45.4107524%" y2="71.4898596%" id="app-root-3">\
                 username, folder["gallery_id"], public=False):
             cache[dev["deviationid"]] = dev if has_access else None
 
-        return cache[deviation["deviationid"]]
+        return cache.get(deviation["deviationid"])
 
     def _unwatch_premium(self):
         for username in self.unwatch:

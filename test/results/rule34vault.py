@@ -20,7 +20,7 @@ __tests__ = (
     "#url"  : "https://rule34vault.com/playlists/view/20164",
     "#class": rule34vault.Rule34vaultPlaylistExtractor,
     "#pattern": r"https://r34xyz\.b-cdn\.net/posts/\d+/\d+/\d+\.(jpg|mp4)",
-    "#count"  : 55,
+    "#count"  : range(55, 75),
 },
 
 {

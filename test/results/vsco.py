@@ -73,7 +73,7 @@ __tests__ = (
     "#url"     : "https://vsco.co/vsco/avatar",
     "#category": ("", "vsco", "avatar"),
     "#class"   : vsco.VscoAvatarExtractor,
-    "#urls"         : "https://image-aws-us-west-2.vsco.co/3c69ae/304128/652d9f3b39a6007526dda683/vscoprofile-avatar.jpg",
+    "#pattern" : r"https://(?:image-aws-us-west-2|img).vsco.co/3c69ae/304128/652d9f3b39a6007526dda683/vscoprofile-avatar.jpg",
     "#sha1_content" : "57cd648759e34a6daefc5c79542ddb4595b9b677",
 
     "id": "652d9f3b39a6007526dda683",
@@ -102,7 +102,7 @@ __tests__ = (
     "#url"     : "https://vsco.co/jimenalazof/media/5b4feec558f6c45c18c040fd",
     "#category": ("", "vsco", "image"),
     "#class"   : vsco.VscoImageExtractor,
-    "#sha1_url"    : "08e7eef3301756ce81206c0b47c1e9373756a74a",
+    "#sha1_url"    : "c2cf4bd2a627419785613dc5475cbb7c2699f3dd",
     "#sha1_content": "e739f058d726ee42c51c180a505747972a7dfa47",
 
     "video": True,

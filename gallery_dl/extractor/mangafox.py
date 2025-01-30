@@ -30,7 +30,7 @@ class MangafoxChapterExtractor(ChapterExtractor):
     def metadata(self, page):
         manga, pos = text.extract(page, "<title>", "</title>")
         count, pos = text.extract(
-            page, ">", "<", page.find("</select>", pos) - 20)
+            page, ">", "<", page.find("</select>", pos) - 40)
         sid  , pos = text.extract(page, "var series_id =", ";", pos)
         cid  , pos = text.extract(page, "var chapter_id =", ";", pos)
 
@@ -49,9 +49,9 @@ class MangafoxChapterExtractor(ChapterExtractor):
         pnum = 1
         while True:
             url, pos = text.extract(page, '<img src="', '"')
-            yield text.ensure_http_scheme(url), None
+            yield text.ensure_http_scheme(text.unescape(url)), None
             url, pos = text.extract(page, ' src="', '"', pos)
-            yield text.ensure_http_scheme(url), None
+            yield text.ensure_http_scheme(text.unescape(url)), None
 
             pnum += 2
             page = self.request("{}/{}.html".format(self.urlbase, pnum)).text

@@ -76,9 +76,9 @@ Standalone Executable
 Prebuilt executable files with a Python interpreter and
 required Python packages included are available for
 
-- `Windows <https://github.com/mikf/gallery-dl/releases/download/v1.28.4/gallery-dl.exe>`__
+- `Windows <https://github.com/mikf/gallery-dl/releases/download/v1.28.5/gallery-dl.exe>`__
   (Requires `Microsoft Visual C++ Redistributable Package (x86) <https://aka.ms/vs/17/release/vc_redist.x86.exe>`__)
-- `Linux   <https://github.com/mikf/gallery-dl/releases/download/v1.28.4/gallery-dl.bin>`__
+- `Linux   <https://github.com/mikf/gallery-dl/releases/download/v1.28.5/gallery-dl.bin>`__
 
 
 Nightly Builds
@@ -116,7 +116,6 @@ Scoop
 .. code:: powershell
 
     scoop install gallery-dl
-
 
 Homebrew
 --------
@@ -173,6 +172,48 @@ This will remove the container after every use so you will always have a fresh e
     docker run --rm  -v $HOME/Downloads/:/gallery-dl/ -v $HOME/.config/gallery-dl/gallery-dl.conf:/etc/gallery-dl.conf -it gallery-dl:latest
 
 You can also add an alias to your shell for "gallery-dl" or create a simple bash script and drop it somewhere in your $PATH to act as a shim for this command.
+
+Nix and Home Manager
+--------------------------
+
+Adding *gallery-dl* to your system environment:
+
+.. code:: nix
+
+    environment.systemPackages = with pkgs; [
+      gallery-dl
+    ];
+
+Using :code:`nix-shell`
+
+.. code:: bash
+
+    nix-shell -p gallery-dl
+
+.. code:: bash
+
+    nix-shell -p gallery-dl --run "gallery-dl <args>"
+
+For Home Manager users, you can manage *gallery-dl* declaratively:
+
+.. code:: nix
+
+    programs.gallery-dl = {
+      enable = true;
+      settings = {
+        extractor.base-directory = "~/Downloads";
+      };
+    };
+
+Alternatively, you can just add it to :code:`home.packages` if you don't want to manage it declaratively:
+
+.. code:: nix
+
+    home.packages = with pkgs; [
+      gallery-dl
+    ];
+
+After making these changes, simply rebuild your configuration and open a new shell to have *gallery-dl* available.
 
 Usage
 =====

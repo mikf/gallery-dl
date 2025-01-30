@@ -102,8 +102,8 @@ class WebtoonsEpisodeExtractor(WebtoonsBase, GalleryExtractor):
         else:
             episode = ""
 
-        if extr('<div class="author_area"', '\n'):
-            username = extr('/creator/', '"')
+        if extr('<span class="author"', '\n'):
+            username = extr('/u/', '"')
             author_name = extr('<span>', '</span>')
         else:
             username = author_name = ""

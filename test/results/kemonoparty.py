@@ -40,6 +40,21 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://kemono.su/patreon/user/3161935?tag=pin-up",
+    "#comment" : "'tag' query parameter",
+    "#category": ("", "kemonoparty", "patreon"),
+    "#class"   : kemonoparty.KemonopartyUserExtractor,
+    "#urls"    : (
+        "https://kemono.su/data/03/e6/03e62592c3b616b8906c1aaa130bd9ceaa24d7f601b31f90cc11956a57ca1d82.png",
+        "https://kemono.su/data/6a/9b/6a9b6d93dcb86c24a48def1bb93ce2a9ad77393941f3469d87d39400433cf825.png",
+        "https://kemono.su/data/2a/b8/2ab8ba30644249e9516afaea05d61c0de14591cb9d232a2dc249650eb1a9a759.jpg",
+        "https://kemono.su/data/b0/38/b03882c8b0ab3b1cf9fc658a2bb2f9ac6ad4f3449015311dcd2d7ee7f748db31.png",
+    ),
+
+    "tags": r"re:\bpin-up\b",
+},
+
+{
     "#url"     : "https://kemono.su/subscribestar/user/alcorart",
     "#category": ("", "kemonoparty", "subscribestar"),
     "#class"   : kemonoparty.KemonopartyUserExtractor,
@@ -379,7 +394,7 @@ __tests__ = (
     "#category": ("", "kemonoparty", "discord-server"),
     "#class"   : kemonoparty.KemonopartyDiscordServerExtractor,
     "#pattern" : kemonoparty.KemonopartyDiscordExtractor.pattern,
-    "#count"   : 15,
+    "#count"   : 26,
 },
 
 {

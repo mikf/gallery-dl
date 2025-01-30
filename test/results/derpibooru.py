@@ -60,7 +60,7 @@ __tests__ = (
     "#comment" : "svg (#5643)",
     "#category": ("philomena", "derpibooru", "post"),
     "#class"   : philomena.PhilomenaPostExtractor,
-    "#urls"        : "https://derpicdn.net/img/view/2024/4/1/3334658__safe_alternate+version_artist-colon-jp_derpibooru+exclusive_twilight+sparkle_alicorn_pony_amending+fences_g4_season+5_-dot-svg+available_female_grin_lo.svg",
+    "#urls"        : "https://derpicdn.net/img/view/2024/4/1/3334658__safe_alternate+version_artist-colon-jp_derpibooru+exclusive_twilight+sparkle_alicorn_pony_amending+fences_g4_my+little+pony-colon-+friendship+is+magic_.svg",
     "#sha1_content": "eec5adf02e2a4fe83b9211c0444d57dc03e21f50",
 
     "extension": "svg",

@@ -54,13 +54,13 @@ __tests__ = (
     "tags"            : list,
     "tags_character"  : ["hatsune_miku"],
     "tags_copyright"  : ["vocaloid"],
-    "tags_general": [
+    "tags_general"    : [
+        "female",
+        "green_eyes",
         "twintails",
         "green_hair",
-        "flag",
         "gloves",
-        "green_eyes",
-        "female",
+        "flag",
         "racing_miku",
     ],
     "title"           : "Racing Miku 2022 Ver.",

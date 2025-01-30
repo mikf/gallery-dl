@@ -248,12 +248,6 @@ Consider all listed sites to potentially be NSFW.
     <td><a href="https://github.com/mikf/gallery-dl#cookies">Cookies</a></td>
 </tr>
 <tr>
-    <td>Fanleaks</td>
-    <td>https://fanleaks.club/</td>
-    <td>Models, Posts</td>
-    <td></td>
-</tr>
-<tr>
     <td>Fantia</td>
     <td>https://fantia.jp/</td>
     <td>Creators, Posts</td>
@@ -362,8 +356,8 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
-    <td>Hipertoon</td>
-    <td>https://hipertoon.com/</td>
+    <td>HiperDEX</td>
+    <td>https://hiperdex.com/</td>
     <td>Artists, Chapters, Manga</td>
     <td></td>
 </tr>
@@ -507,7 +501,7 @@ Consider all listed sites to potentially be NSFW.
 </tr>
 <tr>
     <td>Komikcast</td>
-    <td>https://komikcast.cz/</td>
+    <td>https://komikcast.la/</td>
     <td>Chapters, Manga</td>
     <td></td>
 </tr>
@@ -629,6 +623,12 @@ Consider all listed sites to potentially be NSFW.
     <td>NaverWebtoon</td>
     <td>https://comic.naver.com/</td>
     <td>Comics, Episodes</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Nekohouse</td>
+    <td>https://nekohouse.su/</td>
+    <td>Posts, User Profiles</td>
     <td></td>
 </tr>
 <tr>
@@ -964,7 +964,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Turboimagehost</td>
     <td>https://www.turboimagehost.com/</td>
-    <td>individual Images</td>
+    <td>Galleries, individual Images</td>
     <td></td>
 </tr>
 <tr>
@@ -1085,6 +1085,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Wikifeetx</td>
     <td>https://www.wikifeetx.com/</td>
     <td>Galleries</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Xfolio</td>
+    <td>https://xfolio.jp/</td>
+    <td>Series, User Profiles, Works</td>
     <td></td>
 </tr>
 <tr>
@@ -1452,12 +1458,6 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
-    <td>Tentaclerape</td>
-    <td>https://tentaclerape.net/</td>
-    <td>Posts, Tag Searches</td>
-    <td></td>
-</tr>
-<tr>
     <td>Cavemanon</td>
     <td>https://booru.cavemanon.xyz/</td>
     <td>Posts, Tag Searches</td>
@@ -1478,12 +1478,6 @@ Consider all listed sites to potentially be NSFW.
 
 <tr>
     <td colspan="4"><strong>szurubooru Instances</strong></td>
-</tr>
-<tr>
-    <td>Foalcon</td>
-    <td>https://booru.foalcon.com/</td>
-    <td>Posts, Tag Searches</td>
-    <td></td>
 </tr>
 <tr>
     <td>Bcbnsfw</td>

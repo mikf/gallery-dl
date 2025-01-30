@@ -401,6 +401,7 @@ Default
         ``urlgalleries``,
         ``vk``,
         ``weebcentral``,
+        ``xfolio``,
         ``zerochan``
     * ``"1.0-2.0"``
         ``flickr``,
@@ -1513,7 +1514,7 @@ Description
 
     * ``facets``: ``hashtags``, ``mentions``, and ``uris``
     * ``user``: detailed ``user`` metadata for the user referenced in the input URL
-      (See `app.bsky.actor.getProfile <https://www.docs.bsky.app/docs/api/app-bsky-actor-get-profile>`__).
+      (See `app.bsky.actor.getProfile <https://docs.bsky.app/docs/api/app-bsky-actor-get-profile>`__).
 
 
 
@@ -1526,7 +1527,7 @@ Default
 Description
     Sets the maximum depth of returned reply posts.
 
-    (See `depth` parameter of `app.bsky.feed.getPostThread <https://www.docs.bsky.app/docs/api/app-bsky-feed-get-post-thread>`__)
+    (See `depth` parameter of `app.bsky.feed.getPostThread <https://docs.bsky.app/docs/api/app-bsky-feed-get-post-thread>`__)
 
 
 extractor.bluesky.quoted
@@ -2969,6 +2970,16 @@ Description
     * ``"asc"``: Ascending order (oldest first)
     * ``"desc"``: Descending order (newest first)
     * ``"reverse"``: Same as ``"asc"``
+
+
+extractor.khinsider.covers
+--------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Download album cover images.
 
 
 extractor.khinsider.format

@@ -121,14 +121,7 @@ class TwitterExtractor(Extractor):
                 txt = data.get("full_text") or data.get("text") or ""
                 self.log.warning("'%s' (%s)", txt, data["id_str"])
 
-            files = []
-            if "extended_entities" in data:
-                self._extract_media(
-                    data, data["extended_entities"]["media"], files)
-            if "card" in tweet and self.cards:
-                self._extract_card(tweet, files)
-            if self.twitpic:
-                self._extract_twitpic(data, files)
+            files = self._extract_files(data, tweet)
             if not files and not self.textonly:
                 continue
 
@@ -142,6 +135,39 @@ class TwitterExtractor(Extractor):
                 if "extension" not in file:
                     text.nameext_from_url(url, file)
                 yield Message.Url, url, file
+
+    def _extract_files(self, data, tweet):
+        files = []
+
+        if "extended_entities" in data:
+            try:
+                self._extract_media(
+                    data, data["extended_entities"]["media"], files)
+            except Exception as exc:
+                self.log.debug("", exc_info=exc)
+                self.log.warning(
+                    "%s: Error while extracting media files (%s: %s)",
+                    data["id_str"], exc.__class__.__name__, exc)
+
+        if self.cards and "card" in tweet:
+            try:
+                self._extract_card(tweet, files)
+            except Exception as exc:
+                self.log.debug("", exc_info=exc)
+                self.log.warning(
+                    "%s: Error while extracting Card files (%s: %s)",
+                    data["id_str"], exc.__class__.__name__, exc)
+
+        if self.twitpic:
+            try:
+                self._extract_twitpic(data, files)
+            except Exception as exc:
+                self.log.debug("", exc_info=exc)
+                self.log.warning(
+                    "%s: Error while extracting TwitPic files (%s: %s)",
+                    data["id_str"], exc.__class__.__name__, exc)
+
+        return files
 
     def _extract_media(self, tweet, entities, files):
         for media in entities:
@@ -1039,7 +1065,7 @@ class TwitterAPI():
         else:
             csrf_token = None
         if not csrf_token:
-            csrf_token = util.generate_token()
+            csrf_token = util.generate_token(80)
             cookies.set("ct0", csrf_token, domain=cookies_domain)
 
         auth_token = cookies.get("auth_token", domain=cookies_domain)

@@ -10,7 +10,6 @@ from gallery_dl.extractor import issuu
 __tests__ = (
 {
     "#url"     : "https://issuu.com/issuu/docs/motions-1-2019/",
-    "#category": ("", "issuu", "publication"),
     "#class"   : issuu.IssuuPublicationExtractor,
     "#pattern" : r"https://image.isu.pub/190916155301-\w+/jpg/page_\d+.jpg",
     "#count"   : 36,
@@ -37,10 +36,15 @@ __tests__ = (
 
 {
     "#url"     : "https://issuu.com/issuu",
-    "#category": ("", "issuu", "user"),
     "#class"   : issuu.IssuuUserExtractor,
     "#pattern" : issuu.IssuuPublicationExtractor.pattern,
-    "#count"   : "> 25",
+    "#count"   : range(100, 150),
+},
+
+{
+    "#url"     : "https://issuu.com/issuu/3",
+    "#class"   : issuu.IssuuUserExtractor,
+    "#count"   : range(4, 40),
 },
 
 )
