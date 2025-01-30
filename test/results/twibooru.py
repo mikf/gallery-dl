@@ -100,6 +100,11 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.twibooru.org/tags/cute",
+    "#class"   : twibooru.TwibooruSearchExtractor,
+},
+
+{
     "#url"     : "https://twibooru.org/galleries/1",
     "#category": ("philomena", "twibooru", "gallery"),
     "#class"   : twibooru.TwibooruGalleryExtractor,
