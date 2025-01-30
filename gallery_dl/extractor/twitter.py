@@ -1065,7 +1065,7 @@ class TwitterAPI():
         else:
             csrf_token = None
         if not csrf_token:
-            csrf_token = util.generate_token(80)
+            csrf_token = util.generate_token()
             cookies.set("ct0", csrf_token, domain=cookies_domain)
 
         auth_token = cookies.get("auth_token", domain=cookies_domain)
