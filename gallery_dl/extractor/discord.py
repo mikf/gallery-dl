@@ -144,7 +144,7 @@ class DiscordExtractor(Extractor):
             elif channel_type in (15, 16):
                 yield from self.extract_channel_threads(channel_id)
             elif channel_type in (4,):
-                for channel in self.server_channels_metadata.values():
+                for channel in self.server_channels_metadata.copy().values():
                     if channel["parent_id"] == channel_id:
                         yield from self.extract_channel(
                             channel["channel_id"], safe=True
@@ -261,7 +261,7 @@ class DiscordServerExtractor(DiscordExtractor):
 
         self.build_server_and_channels(server_id)
 
-        for channel in self.server_channels_metadata.values():
+        for channel in self.server_channels_metadata.copy().values():
             if channel["channel_type"] in (0, 5, 15, 16):
                 yield from self.extract_channel(
                     channel["channel_id"], safe=True
