@@ -915,7 +915,7 @@ def _build_requests_adapter(ssl_options, ssl_ciphers, source_address):
             options=ssl_options or None, ciphers=ssl_ciphers)
         if not requests.__version__ < "2.32":
             # https://github.com/psf/requests/pull/6731
-            ssl_context.load_default_certs()
+            ssl_context.load_verify_locations(requests.certs.where())
         ssl_context.check_hostname = False
     else:
         ssl_context = None
