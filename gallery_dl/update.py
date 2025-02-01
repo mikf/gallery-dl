@@ -23,14 +23,14 @@ REPOS = {
 
 BINARIES_STABLE = {
     "windows"    : "gallery-dl.exe",
-    "windows_x86": "gallery-dl.exe",
     "windows_x64": "gallery-dl.exe",
+    "windows_x86": "gallery-dl_x86.exe",
     "linux"      : "gallery-dl.bin",
 }
 BINARIES_DEV = {
     "windows"    : "gallery-dl_windows.exe",
-    "windows_x86": "gallery-dl_windows_x86.exe",
     "windows_x64": "gallery-dl_windows.exe",
+    "windows_x86": "gallery-dl_windows_x86.exe",
     "linux"      : "gallery-dl_linux",
     "macos"      : "gallery-dl_macos",
 }

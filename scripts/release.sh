@@ -53,29 +53,37 @@ build-linux() {
     cd "${ROOTDIR}"
     echo Building Linux executable
 
-    build-vm 'ubuntu22.04' 'gallery-dl.bin' 'linux' 24000000
+    build-vm 'ubuntu22.04' 'gallery-dl.bin' 'gallery-dl.bin' 'linux' 24000000
 }
 
 build-windows() {
     cd "${ROOTDIR}"
     echo Building Windows executable
 
-    build-vm 'windows7_x86_sp1' 'gallery-dl.exe' 'windows' 12000000
+    build-vm 'win10' 'gallery-dl.exe' 'gallery-dl.exe' 'windows' 19000000
+}
+
+build-windows_x86() {
+    cd "${ROOTDIR}"
+    echo Building Windows X86 executable
+
+    build-vm 'windows7_x86_sp1' 'gallery-dl_x86.exe' 'gallery-dl.exe' 'windows_x86' 12000000
 }
 
 build-vm() {
     VMNAME="$1"
     BINNAME="$2"
-    LABEL="$3"
-    MINSIZE="$4"
-    TMPPATH="/tmp/gallery-dl/dist/$BINNAME"
+    TMPNAME="$3"
+    LABEL="$4"
+    MINSIZE="$5"
+    TMPPATH="/tmp/gallery-dl/dist/$TMPNAME"
 
     # launch VM
     vmstart "$VMNAME" &
     disown
 
     # copy source files
-    mkdir -p /tmp/gallery-dl
+    mkdir -p /tmp/gallery-dl/dist
     cp -a -t /tmp/gallery-dl -- \
         ./gallery_dl ./scripts ./data ./setup.py ./README.rst
 
@@ -99,7 +107,6 @@ build-vm() {
         SIZE="$(stat -c %s "$TMPPATH")"
         if [ "$SIZE" -lt "$MINSIZE" ]; then
             echo Size of "'$TMPPATH'" is less than "$MINSIZE" bytes "($SIZE)"
-            rm -f "$TMPPATH"
             continue
         fi
 
@@ -119,6 +126,7 @@ sign() {
     gpg --detach-sign --armor gallery_dl-${NEWVERSION}-py3-none-any.whl
     gpg --detach-sign --armor gallery_dl-${NEWVERSION}.tar.gz
     gpg --detach-sign --yes gallery-dl.exe
+    gpg --detach-sign --yes gallery-dl_x86.exe
     gpg --detach-sign --yes gallery-dl.bin
 }
 
@@ -201,6 +209,7 @@ changelog
 build-python
 build-linux
 build-windows
+build-windows_x86
 sign
 upload-pypi
 upload-git
