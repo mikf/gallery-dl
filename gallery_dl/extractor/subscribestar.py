@@ -51,6 +51,23 @@ class SubscribestarExtractor(Extractor):
     def posts(self):
         """Yield HTML content of all relevant posts"""
 
+    def request(self, url, **kwargs):
+        while True:
+            response = Extractor.request(self, url, **kwargs)
+
+            if response.history and "/verify_subscriber" in response.url:
+                raise exception.StopExtraction(
+                    "HTTP redirect to %s", response.url)
+
+            content = response.content
+            if len(content) < 250 and b">redirected<" in content:
+                url = text.unescape(text.extr(
+                    content, b'href="', b'"').decode())
+                self.log.debug("HTML redirect message for %s", url)
+                continue
+
+            return response
+
     def login(self):
         if self.cookies_check(self.cookies_names):
             return
