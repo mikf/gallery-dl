@@ -14,6 +14,13 @@ except ImportError:
         from Crypto.Cipher import AES as Cryptodome_AES
     except ImportError:
         Cryptodome_AES = None
+except Exception as exc:
+    Cryptodome_AES = None
+    import logging
+    logging.getLogger("aes").warning(
+        "Error when trying to import 'Cryptodome' module (%s: %s)",
+        exc.__class__.__name__, exc)
+    del logging
 
 
 if Cryptodome_AES:
