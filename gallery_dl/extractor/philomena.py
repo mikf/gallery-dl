@@ -34,7 +34,8 @@ class PhilomenaExtractor(BooruExtractor):
 
     @staticmethod
     def _prepare(post):
-        post["date"] = text.parse_datetime(post["created_at"])
+        post["date"] = text.parse_datetime(
+            post["created_at"][:19], "%Y-%m-%dT%H:%M:%S")
 
 
 BASE_PATTERN = PhilomenaExtractor.update({
