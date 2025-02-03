@@ -662,10 +662,15 @@ Default
     * ``"Patreon/72.2.28 (Android; Android 14; Scale/2.10)"``: ``patreon``
     * ``"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:LATEST) Gecko/20100101 Firefox/LATEST"``: otherwise
 Description
-    User-Agent header value to be used for HTTP requests.
+    User-Agent header value used for HTTP requests.
 
     Setting this value to ``"browser"`` will try to automatically detect
     and use the ``User-Agent`` header of the system's default browser.
+
+    Note:
+    This option has *no* effect if
+    `extractor.browser <extractor.*.browser_>`__
+    is enabled.
 
 
 extractor.*.browser
@@ -683,6 +688,15 @@ Description
 
     Optionally, the operating system used in the ``User-Agent`` header can be
     specified after a ``:`` (``windows``, ``linux``, or ``macos``).
+
+    Note:
+    This option overrides
+    `user-agent <extractor.*.user-agent_>`__
+    and sets custom
+    `headers <extractor.*.headers_>`__
+    and
+    `ciphers <extractor.*.ciphers_>`__
+    defaults.
 
     Note: ``requests`` and ``urllib3`` only support HTTP/1.1, while a real
     browser would use HTTP/2.
