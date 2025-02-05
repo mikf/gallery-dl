@@ -56,6 +56,16 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://bunkr.cr/a/Gm931jJz",
+    "#comment" : "empty 'id', duplicate archive IDs (#6935)",
+    "#category": ("lolisafe", "bunkr", "album"),
+    "#class"   : bunkr.BunkrAlbumExtractor,
+    "#count"   : 2,
+
+    "id": "",
+},
+
+{
     "#url"     : "https://bunkr.ph/a/Lktg9Keq",
     "#class"   : bunkr.BunkrAlbumExtractor,
 },
