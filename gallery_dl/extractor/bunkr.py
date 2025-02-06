@@ -60,7 +60,7 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
     """Extractor for bunkr.si albums"""
     category = "bunkr"
     root = "https://bunkr.si"
-    archive_fmt = "{album_id}_{id|name}"
+    archive_fmt = "{album_id}_{id|id_url}"
     pattern = BASE_PATTERN + r"/a/([^/?#]+)"
     example = "https://bunkr.si/a/ID"
 
@@ -171,6 +171,7 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
         return {
             "file"          : text.unescape(file_url),
             "name"          : text.unescape(file_name),
+            "id_url"        : webpage_url.rpartition("/")[2],
             "_http_headers" : {"Referer": response.url},
             "_http_validate": self._validate,
         }
