@@ -23,6 +23,7 @@ __tests__ = (
     "file"       : "https://brg-bk.cdn.gigachad-cdn.ru/test-%E3%83%86%E3%82%B9%E3%83%88-%22%26%3E-QjgneIQv.png",
     "filename"   : "test-テスト-\"&>-QjgneIQv",
     "id"         : "QjgneIQv",
+    "id_url"     : "1044478",
     "name"       : "test-テスト-\"&>",
     "num"        : 1,
 },
@@ -62,7 +63,8 @@ __tests__ = (
     "#class"   : bunkr.BunkrAlbumExtractor,
     "#count"   : 2,
 
-    "id": "",
+    "id"    : "",
+    "id_url": {"UPKDHBf0CvrCe", "zQgSePr1f4HZ2"},
 },
 
 {
@@ -223,6 +225,7 @@ __tests__ = (
     "file"     : "https://brg-bk.cdn.gigachad-cdn.ru/file-r5fmwjdd.zip",
     "filename" : "file-r5fmwjdd",
     "id"       : "r5fmwjdd",
+    "id_url"   : "38792076",
     "name"     : "file",
 },
 
@@ -242,6 +245,7 @@ __tests__ = (
     "#urls"    : "https://kebab.bunkr.ru/80ca5405-8b8d-4f9f-8167-8b046bb9dc67.mp4",
 
     "id"       : "",
+    "id_url"   : "wYGCKbGhSvuAW",
     "name"     : "0hwndshtfmj7hcbut1nd4_source",
     "filename" : "0hwndshtfmj7hcbut1nd4_source",
     "extension": "mp4",
