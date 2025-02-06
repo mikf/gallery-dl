@@ -46,8 +46,6 @@ class DiscordExtractor(Extractor):
 
                 text_content.append(embed.get("footer", {}).get("text", ""))
 
-                return "\n".join(t for t in text_content if t)
-
         if message.get("poll"):
             text_content.append(message["poll"]["question"]["text"])
             for answer in message["poll"]["answers"]:
@@ -232,14 +230,13 @@ class DiscordChannelExtractor(DiscordExtractor):
     directory_fmt = (
         "{category}", "{server_id}_{server}", "{channel_id}_{channel}"
     )
-    pattern = BASE_PATTERN + r"/channels/(\d+)/(\d+)(?:/threads/(\d+))?"
+    pattern = BASE_PATTERN + r"/channels/(\d+)/(?:\d+/threads/)?(\d+)/?$"
     example = (
         "https://discord.com/channels/302094807046684672/1306705919916249098"
     )
 
     def items(self):
-        server_id = self.groups[0]
-        channel_id = self.groups[2] or self.groups[1]
+        server_id, channel_id = self.groups
 
         self.build_server_and_channels(server_id)
 

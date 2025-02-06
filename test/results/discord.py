@@ -36,8 +36,6 @@ __tests__ = (
 #    "author_files": list,
 #    "message"     : str,
 #    "message_id"  : str,
-#    "filename"    : str,
-#    "extension"   : str,
 #    "type"        : str,
 #    "date"        : datetime.datetime,
 #    "files"       : list,
