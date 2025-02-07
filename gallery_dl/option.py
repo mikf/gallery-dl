@@ -179,7 +179,9 @@ class PrintAction(argparse.Action):
         if not format_string:
             return
 
-        if "{" not in format_string and \
+        if format_string.startswith("\\f"):
+            format_string = "\f" + format_string[2:]
+        elif "{" not in format_string and \
                 " " not in format_string and \
                 format_string[0] != "\f":
             format_string = "{" + format_string + "}"
