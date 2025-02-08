@@ -1638,8 +1638,8 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
-    <td>arch.b4k.co</td>
-    <td>https://arch.b4k.co/</td>
+    <td>arch.b4k.dev</td>
+    <td>https://arch.b4k.dev/</td>
     <td>Boards, Galleries, Search Results, Threads</td>
     <td></td>
 </tr>
