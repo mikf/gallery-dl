@@ -82,7 +82,7 @@ BASE_PATTERN = FoolfuukaExtractor.update({
     },
     "b4k": {
         "root": "https://arch.b4k.dev",
-        "pattern": r"arch\.b4k\.dev",
+        "pattern": r"arch\.b4k\.(?:dev|co)",
     },
     "desuarchive": {
         "root": "https://desuarchive.org",
