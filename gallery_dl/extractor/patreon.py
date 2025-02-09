@@ -324,7 +324,8 @@ class PatreonCreatorExtractor(PatreonExtractor):
     subcategory = "creator"
     pattern = (r"(?:https?://)?(?:www\.)?patreon\.com"
                r"/(?!(?:home|join|posts|login|signup)(?:$|[/?#]))"
-               r"(?:c/)?([^/?#]+)(?:/posts)?/?(?:\?([^#]+))?")
+               r"(?:profile/creators|(?:c/)?([^/?#]+)(?:/posts)?)"
+               r"/?(?:\?([^#]+))?")
     example = "https://www.patreon.com/USER"
 
     def posts(self):
@@ -345,7 +346,7 @@ class PatreonCreatorExtractor(PatreonExtractor):
         return self._pagination(url)
 
     def _get_campaign_id(self, creator, query):
-        if creator.startswith("id:"):
+        if creator and creator.startswith("id:"):
             return creator[3:]
 
         campaign_id = query.get("c") or query.get("campaign_id")
