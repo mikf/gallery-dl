@@ -64,6 +64,16 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.patreon.com/profile/creators?u=2931440",
+    "#class"   : patreon.PatreonCreatorExtractor,
+},
+
+{
+    "#url"     : "https://www.patreon.com/profile/creators?c=369707",
+    "#class"   : patreon.PatreonCreatorExtractor,
+},
+
+{
     "#url"     : "https://www.patreon.com/id:369707",
     "#class"   : patreon.PatreonCreatorExtractor,
 },
