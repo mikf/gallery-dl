@@ -33,7 +33,7 @@ CATEGORY_MAP = {
     "aryion"         : "Eka's Portal",
     "atfbooru"       : "ATFBooru",
     "azurlanewiki"   : "Azur Lane Wiki",
-    "b4k"            : "arch.b4k.co",
+    "b4k"            : "arch.b4k.dev",
     "baraag"         : "baraag",
     "batoto"         : "BATO.TO",
     "bbc"            : "BBC",
