@@ -73,7 +73,7 @@ class KemonopartyExtractor(Extractor):
         post_rev_id_set = set()
 
         for post in posts:
-            post_rev_id = post.get("revision_id") or post["id"]
+            post_rev_id = (post["id"], post.get("revision_id"))
             if post_rev_id in post_rev_id_set:
                 continue
             post_rev_id_set.add(post_rev_id)
