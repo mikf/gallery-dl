@@ -79,6 +79,7 @@ CATEGORY_MAP = {
     "imgkiwi"        : "IMG.Kiwi",
     "imgth"          : "imgth",
     "imgur"          : "imgur",
+    "imhentai"       : "IMHentai",
     "joyreactor"     : "JoyReactor",
     "itchio"         : "itch.io",
     "jpgfish"        : "JPG Fish",
