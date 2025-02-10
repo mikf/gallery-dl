@@ -71,9 +71,12 @@ class PixivExtractor(Extractor):
             if self.meta_user:
                 work.update(self.api.user_detail(work["user"]["id"]))
             if self.meta_comments:
-                if work["total_comments"]:
-                    work["comments"] = list(
-                        self.api.illust_comments(work["id"]))
+                if work["total_comments"] and not work.get("_ajax"):
+                    try:
+                        work["comments"] = list(
+                            self.api.illust_comments(work["id"]))
+                    except Exception:
+                        work["comments"] = ()
                 else:
                     work["comments"] = ()
             if self.meta_bookmark and work["is_bookmarked"]:
