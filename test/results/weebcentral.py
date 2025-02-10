@@ -45,6 +45,21 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://weebcentral.com/chapters/01J76XZ4PBJFDFCQA6NQP4HDNJ",
+    "#comment" : "wrong page count after chapter with less pages (#6966)",
+    "#class"   : weebcentral.WeebcentralChapterExtractor,
+    "#pattern" : r"https://official\.lowee\.us/manga/Aria/0001-0\d\d\.png",
+    "#count"   : 42,
+
+    "chapter"      : 1,
+    "chapter_id"   : "01J76XZ4PBJFDFCQA6NQP4HDNJ",
+    "chapter_minor": "",
+    "chapter_type" : "Navigation",
+    "count"        : 42,
+    "page"         : range(1, 42),
+},
+
+{
     "#url"     : "https://weebcentral.com/series/01J76XY8G1GK8EJ9VQG92C3DKM/Aria",
     "#class"   : weebcentral.WeebcentralMangaExtractor,
     "#pattern" : weebcentral.WeebcentralChapterExtractor.pattern,
