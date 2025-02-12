@@ -161,6 +161,7 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
                     text.extr(page, '<img src="', '"'))
         file_name = (text.extr(page, 'property="og:title" content="', '"') or
                      text.extr(page, "<title>", " | Bunkr<"))
+        fallback = text.extr(page, 'property="og:url" content="', '"')
 
         if not file_url:
             webpage_url = text.unescape(text.rextract(
@@ -172,6 +173,7 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
             "file"          : text.unescape(file_url),
             "name"          : text.unescape(file_name),
             "id_url"        : webpage_url.rpartition("/")[2],
+            "_fallback"     : (fallback,) if fallback else (),
             "_http_headers" : {"Referer": response.url},
             "_http_validate": self._validate,
         }
