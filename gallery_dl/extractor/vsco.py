@@ -38,9 +38,7 @@ class VscoExtractor(Extractor):
             if img["is_video"]:
                 if not videos:
                     continue
-                url = img["video_url"]
-                if not url.startswith("ytdl:"):
-                    url = "https://" + url
+                url = text.ensure_http_scheme(img["video_url"])
             else:
                 base = img["responsive_url"].partition("/")[2]
                 cdn, _, path = base.partition("/")
@@ -66,6 +64,7 @@ class VscoExtractor(Extractor):
                 "description": img.get("description") or "",
             })
             if data["extension"] == "m3u8":
+                url = "ytdl:" + url
                 data["_ytdl_manifest"] = "hls"
                 data["extension"] = "mp4"
             yield Message.Url, url, data
