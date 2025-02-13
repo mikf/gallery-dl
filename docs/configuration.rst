@@ -488,7 +488,7 @@ Description
     `cookies <extractor.*.cookies_>`__ is required
 
     Note: Leave the ``password`` value empty or undefined
-    to be prompted for a passeword when performing a login
+    to be prompted for a password when performing a login
     (see `getpass() <https://docs.python.org/3/library/getpass.html#getpass.getpass>`__).
 
 
@@ -4703,7 +4703,7 @@ Default
     ``true``
 Description
     When receiving a "Could not authenticate you" error while logged in with
-    `username & passeword <extractor.*.username & .password_>`__,
+    `username & password <extractor.*.username & .password_>`__,
     refresh the current login session and
     try to continue from where it left off.
 
@@ -5052,6 +5052,16 @@ Default
     ``true``
 Description
     Download ``livephoto`` files.
+
+
+extractor.weibo.movies
+----------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Download ``movie`` videos.
 
 
 extractor.weibo.retweets

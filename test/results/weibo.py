@@ -283,6 +283,20 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://weibo.com/1919017185/4246199458129705",
+    "#comment" : "'movie'-type video (#3793)",
+    "#category": ("", "weibo", "status"),
+    "#class"   : weibo.WeiboStatusExtractor,
+    "#options" : {"movies": True},
+    "#urls"    : (
+        "https://wx4.sinaimg.cn/large/7261e0e1gy1frvyc1xnkfj20qo0zkwjh.jpg",
+        "https://wx2.sinaimg.cn/large/7261e0e1gy1frvyc30b1jj20zk0qojwh.jpg",
+        "https://wx4.sinaimg.cn/large/7261e0e1gy1frvyc44lx8j20qo0zk7a6.jpg",
+        "https://gslb.miaopai.com/stream/KdhuavhOnJ7R6zJFXfEXm-sDthpmC5DIGqrdOg__.mp4?yx=&refer=weibo_app&tags=weibocard",
+    ),
+},
+
+{
     "#url"     : "https://m.weibo.cn/status/4339748116375525",
     "#category": ("", "weibo", "status"),
     "#class"   : weibo.WeiboStatusExtractor,
