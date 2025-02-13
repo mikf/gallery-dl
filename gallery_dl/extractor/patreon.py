@@ -169,6 +169,12 @@ class PatreonExtractor(Extractor):
             attr["date"] = text.parse_datetime(
                 attr["published_at"], "%Y-%m-%dT%H:%M:%S.%f%z")
 
+            try:
+                attr["campaign"] = (included["campaign"][
+                                    relationships["campaign"]["data"]["id"]])
+            except Exception:
+                attr["campaign"] = None
+
             tags = relationships.get("user_defined_tags")
             attr["tags"] = [
                 tag["id"].replace("user_defined;", "")
