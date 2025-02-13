@@ -41,7 +41,8 @@ class YoutubeDLDownloader(DownloaderBase):
             ytdl_instance = self.ytdl_instance
             if not ytdl_instance:
                 try:
-                    module = ytdl.import_module(self.config("module-name"), self.config("module-location"))
+                    module = ytdl.import_module(self.config("module-name"), 
+                                                self.config("module-location"))
                 except (ImportError, SyntaxError) as exc:
                     self.log.error("Cannot import module '%s'",
                                    getattr(exc, "name", ""))
