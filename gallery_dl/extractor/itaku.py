@@ -24,10 +24,6 @@ class ItakuExtractor(Extractor):
     archive_fmt = "{id}"
     request_interval = (0.5, 1.5)
 
-    def __init__(self, match):
-        Extractor.__init__(self, match)
-        self.item = match.group(1)
-
     def _init(self):
         self.api = ItakuAPI(self)
         self.videos = self.config("videos", True)
@@ -62,11 +58,11 @@ class ItakuExtractor(Extractor):
 class ItakuGalleryExtractor(ItakuExtractor):
     """Extractor for posts from an itaku user gallery"""
     subcategory = "gallery"
-    pattern = BASE_PATTERN + r"/profile/([^/?#]+)/gallery"
+    pattern = BASE_PATTERN + r"/profile/([^/?#]+)/gallery(?:/(\d+))?"
     example = "https://itaku.ee/profile/USER/gallery"
 
     def posts(self):
-        return self.api.galleries_images(self.item)
+        return self.api.galleries_images(*self.groups)
 
 
 class ItakuImageExtractor(ItakuExtractor):
@@ -75,7 +71,7 @@ class ItakuImageExtractor(ItakuExtractor):
     example = "https://itaku.ee/images/12345"
 
     def posts(self):
-        return (self.api.image(self.item),)
+        return (self.api.image(self.groups[0]),)
 
 
 class ItakuSearchExtractor(ItakuExtractor):
@@ -84,7 +80,7 @@ class ItakuSearchExtractor(ItakuExtractor):
     example = "https://itaku.ee/home/images?tags=SEARCH"
 
     def posts(self):
-        params = text.parse_query_list(self.item)
+        params = text.parse_query_list(self.groups[0])
         return self.api.search_images(params)
 
 
@@ -138,7 +134,7 @@ class ItakuAPI():
         params = {
             "cursor"    : None,
             "owner"     : self.user(username)["owner"],
-            "section"   : section,
+            "sections"  : section,
             "date_range": "",
             "maturity_rating": ("SFW", "Questionable", "NSFW"),
             "ordering"  : "-date_added",
