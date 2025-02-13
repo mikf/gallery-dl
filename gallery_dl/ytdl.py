@@ -11,15 +11,19 @@
 import re
 import shlex
 import itertools
+import sys
 from . import text, util, exception
 
+def import_module(module_name, module_location=None):
+    if module_location is not None and module_location not in sys.path:
+        sys.path.append(module_location)
 
-def import_module(module_name):
     if module_name is None:
         try:
             return __import__("yt_dlp")
         except (ImportError, SyntaxError):
             return __import__("youtube_dl")
+        
     return __import__(module_name.replace("-", "_"))
 
 

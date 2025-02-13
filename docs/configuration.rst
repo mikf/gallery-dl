@@ -5641,7 +5641,7 @@ Description
     `downloader.ytdl.raw-options`_ to ``true`` to suppress all output.
 
 
-downloader.ytdl.module
+downloader.ytdl.module-name
 ----------------------
 Type
     ``string``
@@ -5652,6 +5652,16 @@ Description
 
     Setting this to ``null`` will try to import ``"yt_dlp"``
     followed by ``"youtube_dl"`` as fallback.
+
+
+downloader.ytdl.module-location
+----------------------
+Type
+    ``string``
+Default
+    ``null``
+Description
+    Specified directory path to import the ``ytdl`` module from.
 
 
 downloader.ytdl.outtmpl
