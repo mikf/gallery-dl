@@ -18,6 +18,19 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://itaku.ee/profile/piku/gallery/7391",
+    "#comment" : "gallery section (#6951)",
+    "#category": ("", "itaku", "gallery"),
+    "#class"   : itaku.ItakuGalleryExtractor,
+    "#urls"    : (
+        "https://itaku.ee/api/media/gallery_imgs/misty-psyduck_IWbYdwT.png",
+        "https://itaku.ee/api/media/gallery_imgs/bea_alpha_N0YGfeT.png",
+    ),
+
+    "sections" : ["Fanart/Pokemon"],
+},
+
+{
     "#url"     : "https://itaku.ee/images/100471",
     "#category": ("", "itaku", "image"),
     "#class"   : itaku.ItakuImageExtractor,

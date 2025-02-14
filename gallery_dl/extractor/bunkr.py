@@ -10,7 +10,7 @@
 
 from .common import Extractor
 from .lolisafe import LolisafeAlbumExtractor
-from .. import text, config, exception
+from .. import text, util, config, exception
 import random
 
 if config.get(("extractor", "bunkr"), "tlds"):
@@ -60,6 +60,7 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
     """Extractor for bunkr.si albums"""
     category = "bunkr"
     root = "https://bunkr.si"
+    archive_fmt = "{album_id}_{id|id_url}"
     pattern = BASE_PATTERN + r"/a/([^/?#]+)"
     example = "https://bunkr.si/a/ID"
 
@@ -68,6 +69,11 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
         domain = self.groups[0] or self.groups[1]
         if domain not in LEGACY_DOMAINS:
             self.root = "https://" + domain
+        self.offset = 0
+
+    def skip(self, num):
+        self.offset = num
+        return num
 
     def request(self, url, **kwargs):
         kwargs["encoding"] = "utf-8"
@@ -132,6 +138,9 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
         }
 
     def _extract_files(self, items):
+        if self.offset:
+            items = util.advance(items, self.offset)
+
         for item in items:
             try:
                 url = text.unescape(text.extr(item, ' href="', '"'))
@@ -160,6 +169,7 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
                     text.extr(page, '<img src="', '"'))
         file_name = (text.extr(page, 'property="og:title" content="', '"') or
                      text.extr(page, "<title>", " | Bunkr<"))
+        fallback = text.extr(page, 'property="og:url" content="', '"')
 
         if not file_url:
             webpage_url = text.unescape(text.rextract(
@@ -170,6 +180,8 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
         return {
             "file"          : text.unescape(file_url),
             "name"          : text.unescape(file_name),
+            "id_url"        : webpage_url.rpartition("/")[2],
+            "_fallback"     : (fallback,) if fallback else (),
             "_http_headers" : {"Referer": response.url},
             "_http_validate": self._validate,
         }

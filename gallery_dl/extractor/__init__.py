@@ -81,6 +81,7 @@ modules = [
     "imgbox",
     "imgth",
     "imgur",
+    "imhentai",
     "inkbunny",
     "instagram",
     "issuu",

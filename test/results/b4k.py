@@ -9,20 +9,27 @@ from gallery_dl.extractor import foolfuuka
 
 __tests__ = (
 {
-    "#url"     : "https://arch.b4k.co/meta/thread/196/",
+    "#url"     : "https://arch.b4k.dev/meta/thread/196/",
     "#category": ("foolfuuka", "b4k", "thread"),
     "#class"   : foolfuuka.FoolfuukaThreadExtractor,
-    "#sha1_url": "d309713d2f838797096b3e9cb44fe514a9c9d07a",
+    "#urls"    : "https://arch.b4k.dev/media/meta/image/1481/33/14813348737492.jpg",
 },
 
 {
-    "#url"     : "https://arch.b4k.co/meta/",
+    "#url"     : "https://arch.b4k.co/meta/thread/196/",
+    "#category": ("foolfuuka", "b4k", "thread"),
+    "#class"   : foolfuuka.FoolfuukaThreadExtractor,
+    "#urls"    : "https://arch.b4k.dev/media/meta/image/1481/33/14813348737492.jpg",
+},
+
+{
+    "#url"     : "https://arch.b4k.dev/meta/",
     "#category": ("foolfuuka", "b4k", "board"),
     "#class"   : foolfuuka.FoolfuukaBoardExtractor,
 },
 
 {
-    "#url"     : "https://arch.b4k.co/meta/gallery/",
+    "#url"     : "https://arch.b4k.dev/meta/gallery/",
     "#category": ("foolfuuka", "b4k", "gallery"),
     "#class"   : foolfuuka.FoolfuukaGalleryExtractor,
 },

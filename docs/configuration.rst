@@ -488,7 +488,7 @@ Description
     `cookies <extractor.*.cookies_>`__ is required
 
     Note: Leave the ``password`` value empty or undefined
-    to be prompted for a passeword when performing a login
+    to be prompted for a password when performing a login
     (see `getpass() <https://docs.python.org/3/library/getpass.html#getpass.getpass>`__).
 
 
@@ -662,10 +662,15 @@ Default
     * ``"Patreon/72.2.28 (Android; Android 14; Scale/2.10)"``: ``patreon``
     * ``"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:LATEST) Gecko/20100101 Firefox/LATEST"``: otherwise
 Description
-    User-Agent header value to be used for HTTP requests.
+    User-Agent header value used for HTTP requests.
 
     Setting this value to ``"browser"`` will try to automatically detect
     and use the ``User-Agent`` header of the system's default browser.
+
+    Note:
+    This option has *no* effect if
+    `extractor.browser <extractor.*.browser_>`__
+    is enabled.
 
 
 extractor.*.browser
@@ -683,6 +688,15 @@ Description
 
     Optionally, the operating system used in the ``User-Agent`` header can be
     specified after a ``:`` (``windows``, ``linux``, or ``macos``).
+
+    Note:
+    This option overrides
+    `user-agent <extractor.*.user-agent_>`__
+    and sets custom
+    `headers <extractor.*.headers_>`__
+    and
+    `ciphers <extractor.*.ciphers_>`__
+    defaults.
 
     Note: ``requests`` and ``urllib3`` only support HTTP/1.1, while a real
     browser would use HTTP/2.
@@ -4689,7 +4703,7 @@ Default
     ``true``
 Description
     When receiving a "Could not authenticate you" error while logged in with
-    `username & passeword <extractor.*.username & .password_>`__,
+    `username & password <extractor.*.username & .password_>`__,
     refresh the current login session and
     try to continue from where it left off.
 
@@ -5040,6 +5054,16 @@ Description
     Download ``livephoto`` files.
 
 
+extractor.weibo.movies
+----------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Download ``movie`` videos.
+
+
 extractor.weibo.retweets
 ------------------------
 Type
@@ -5160,11 +5184,15 @@ Description
 extractor.ytdl.module
 ---------------------
 Type
-    ``string``
+    * ``string``
+    * |Path|_
 Default
     ``null``
+Example
+    * ``"yt-dlp"``
+    * ``"/home/user/.local/lib/python3.13/site-packages/youtube_dl"``
 Description
-    Name of the ``ytdl`` Python module to import.
+    Name or filesystem path of the ``ytdl`` Python module to import.
 
     Setting this to ``null`` will try to import ``"yt_dlp"``
     followed by ``"youtube_dl"`` as fallback.
@@ -5620,11 +5648,15 @@ Description
 downloader.ytdl.module
 ----------------------
 Type
-    ``string``
+    * ``string``
+    * |Path|_
 Default
     ``null``
+Example
+    * ``"yt-dlp"``
+    * ``"/home/user/.local/lib/python3.13/site-packages/youtube_dl"``
 Description
-    Name of the ``ytdl`` Python module to import.
+    Name or filesystem path of the ``ytdl`` Python module to import.
 
     Setting this to ``null`` will try to import ``"yt_dlp"``
     followed by ``"youtube_dl"`` as fallback.

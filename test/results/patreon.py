@@ -17,6 +17,7 @@ __tests__ = (
     "#count"   : 15,
 
     "attachments"  : list,
+    "campaign"     : dict,
     "comment_count": int,
     "content"      : str,
     "creator"      : dict,
@@ -64,6 +65,16 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.patreon.com/profile/creators?u=2931440",
+    "#class"   : patreon.PatreonCreatorExtractor,
+},
+
+{
+    "#url"     : "https://www.patreon.com/profile/creators?c=369707",
+    "#class"   : patreon.PatreonCreatorExtractor,
+},
+
+{
     "#url"     : "https://www.patreon.com/id:369707",
     "#class"   : patreon.PatreonCreatorExtractor,
 },
@@ -101,6 +112,26 @@ __tests__ = (
     "#pattern" : r"https://c10.patreonusercontent.com/4/patreon-media/p/post/12497641/3d99f5f5b635428ca237fedf0f223f1a/eyJhIjoxLCJwIjoxfQ%3D%3D/1\.JPG\?.+",
 
     "tags": ["AWMedia"],
+    "campaign": {
+        "avatar_photo_image_urls": dict,
+        "avatar_photo_url": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/350434/cadc16f03fa1460f9185505b0a858c1b/eyJ3IjoyMDB9/1.png?token-time=2145916800&token-hash=yBXVH1-UXYOUow9qRey-I6eJe8PcuRQDDKhw730g5jc%3D",
+        "creation_name": "creating Art Photography/Videography",
+        "currency": "USD",
+        "current_user_can_be_free_member": True,
+        "current_user_is_free_member": False,
+        "is_free_membership_paused": False,
+        "is_monthly": True,
+        "name": "ReedandWeep",
+        "offers_free_membership": True,
+        "offers_paid_membership": True,
+        "pay_per_name": "month",
+        "pledge_url": "/checkout/Reedandweep",
+        "primary_theme_color": None,
+        "show_audio_post_download_links": True,
+        "show_free_membership_cta": False,
+        "url": "https://www.patreon.com/Reedandweep",
+    },
+
 },
 
 {

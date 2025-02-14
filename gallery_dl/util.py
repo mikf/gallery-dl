@@ -770,7 +770,7 @@ def import_file(path):
         finally:
             del sys.path[0]
     else:
-        return __import__(name)
+        return __import__(name.replace("-", "_"))
 
 
 def build_duration_func(duration, min=0.0):

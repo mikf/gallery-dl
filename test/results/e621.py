@@ -147,4 +147,18 @@ __tests__ = (
     "#count"   : "> 260",
 },
 
+{
+    "#url"     : "https://e621.cc/?tags=rating:safe",
+    "#category": ("E621", "e621", "frontend"),
+    "#class"   : e621.E621FrontendExtractor,
+    "#urls"    : "https://e621.net/posts?tags=rating:safe",
+},
+
+{
+    "#url"     : "https://e621.anthro.fr/?q=rating:safe",
+    "#category": ("E621", "e621", "frontend"),
+    "#class"   : e621.E621FrontendExtractor,
+    "#urls"    : "https://e621.net/posts?tags=rating:safe",
+},
+
 )
