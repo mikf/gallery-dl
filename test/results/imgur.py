@@ -381,6 +381,32 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://imgur.com/user/me",
+    "#class"   : imgur.ImgurMeExtractor,
+    "#auth"    : True,
+    "#pattern" : r"https://imgur\.com(/a)?/\w+$",
+    "#count"   : 3,
+},
+
+{
+    "#url"     : "https://imgur.com/user/me/hidden",
+    "#class"   : imgur.ImgurMeExtractor,
+    "#auth"    : True,
+    "#pattern" : r"https://imgur\.com(/a)?/\w+$",
+    "#count"   : 2,
+},
+
+{
+    "#url"     : "https://imgur.com/user/me/posts",
+    "#class"   : imgur.ImgurMeExtractor,
+},
+
+{
+    "#url"     : "https://imgur.com/user/me/posts/hidden",
+    "#class"   : imgur.ImgurMeExtractor,
+},
+
+{
     "#url"     : "https://imgur.com/r/pics",
     "#category": ("", "imgur", "subreddit"),
     "#class"   : imgur.ImgurSubredditExtractor,

@@ -436,7 +436,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>imgur</td>
     <td>https://imgur.com/</td>
-    <td>Albums, Favorites, Favorites Folders, Galleries, individual Images, Search Results, Subreddits, Tag Searches, User Profiles</td>
+    <td>Albums, Favorites, Favorites Folders, Galleries, individual Images, Personal Posts, Search Results, Subreddits, Tag Searches, User Profiles</td>
     <td></td>
 </tr>
 <tr>
