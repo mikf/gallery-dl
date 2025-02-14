@@ -5184,11 +5184,15 @@ Description
 extractor.ytdl.module
 ---------------------
 Type
-    ``string``
+    * ``string``
+    * |Path|_
 Default
     ``null``
+Example
+    * ``"yt-dlp"``
+    * ``"/home/user/.local/lib/python3.13/site-packages/youtube_dl"``
 Description
-    Name of the ``ytdl`` Python module to import.
+    Name or filesystem path of the ``ytdl`` Python module to import.
 
     Setting this to ``null`` will try to import ``"yt_dlp"``
     followed by ``"youtube_dl"`` as fallback.
@@ -5644,11 +5648,15 @@ Description
 downloader.ytdl.module
 ----------------------
 Type
-    ``string``
+    * ``string``
+    * |Path|_
 Default
     ``null``
+Example
+    * ``"yt-dlp"``
+    * ``"/home/user/.local/lib/python3.13/site-packages/youtube_dl"``
 Description
-    Name of the ``ytdl`` Python module to import.
+    Name or filesystem path of the ``ytdl`` Python module to import.
 
     Setting this to ``null`` will try to import ``"yt_dlp"``
     followed by ``"youtube_dl"`` as fallback.

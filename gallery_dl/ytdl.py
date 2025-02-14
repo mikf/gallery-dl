@@ -20,7 +20,7 @@ def import_module(module_name):
             return __import__("yt_dlp")
         except (ImportError, SyntaxError):
             return __import__("youtube_dl")
-    return __import__(module_name.replace("-", "_"))
+    return util.import_file(module_name)
 
 
 def construct_YoutubeDL(module, obj, user_opts, system_opts=None):
