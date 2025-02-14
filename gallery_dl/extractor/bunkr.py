@@ -10,7 +10,7 @@
 
 from .common import Extractor
 from .lolisafe import LolisafeAlbumExtractor
-from .. import text, config, exception
+from .. import text, util, config, exception
 import random
 
 if config.get(("extractor", "bunkr"), "tlds"):
@@ -69,6 +69,11 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
         domain = self.groups[0] or self.groups[1]
         if domain not in LEGACY_DOMAINS:
             self.root = "https://" + domain
+        self.offset = 0
+
+    def skip(self, num):
+        self.offset = num
+        return num
 
     def request(self, url, **kwargs):
         kwargs["encoding"] = "utf-8"
@@ -133,6 +138,9 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
         }
 
     def _extract_files(self, items):
+        if self.offset:
+            items = util.advance(items, self.offset)
+
         for item in items:
             try:
                 url = text.unescape(text.extr(item, ' href="', '"'))

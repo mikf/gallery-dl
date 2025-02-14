@@ -53,7 +53,8 @@ __tests__ = (
     "#category": ("lolisafe", "bunkr", "album"),
     "#class"   : bunkr.BunkrAlbumExtractor,
     "#pattern" : r"https://(i-)?meatballs.bunkr.ru/\w+",
-    "#count"   : 7,
+    "#range"   : "5-",
+    "#count"   : 3,
 },
 
 {
@@ -253,7 +254,7 @@ __tests__ = (
 
 {
     "#url"     : "https://bunkr.site/f/JEn5iQgYVYJfi",
-    "#comment" : "403 error for main 'brg-bk.cdn.gigachad-cdn.ru' URL (#6732 #6972)",
+    "#comment" : "file gone --- 403 error for main 'brg-bk.cdn.gigachad-cdn.ru' URL (#6732 #6972)",
     "#category": ("lolisafe", "bunkr", "media"),
     "#class"   : bunkr.BunkrMediaExtractor,
     "#urls"        : "https://brg-bk.cdn.gigachad-cdn.ru/IMG_47272f2c698d257fd22f4300ae98ec35929b-iEYVkLPQ.jpg?n=IMG_47272f2c698d257fd22f4300ae98ec35929b.jpg",
