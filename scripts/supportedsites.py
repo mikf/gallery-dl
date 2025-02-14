@@ -254,6 +254,7 @@ SUBCATEGORY_MAP = {
     },
     "imgur": {
         "favorite-folder": "Favorites Folders",
+        "me": "Personal Posts",
     },
     "inkbunny": {
         "unread": "Unread Submissions",
