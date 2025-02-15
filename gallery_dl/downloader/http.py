@@ -12,7 +12,7 @@ import time
 import mimetypes
 from requests.exceptions import RequestException, ConnectionError, Timeout
 from .common import DownloaderBase
-from .. import text, util
+from .. import text, util, output
 from ssl import SSLError
 
 
@@ -89,7 +89,7 @@ class HttpDownloader(DownloaderBase):
         try:
             return self._download_impl(url, pathfmt)
         except Exception:
-            print()
+            output.stderr_write("\n")
             raise
         finally:
             # remove file from incomplete downloads
@@ -269,7 +269,7 @@ class HttpDownloader(DownloaderBase):
                         else response.iter_content(16), b"")
                 except (RequestException, SSLError) as exc:
                     msg = str(exc)
-                    print()
+                    output.stderr_write("\n")
                     continue
                 if self._adjust_extension(pathfmt, file_header) and \
                         pathfmt.exists():
@@ -303,14 +303,14 @@ class HttpDownloader(DownloaderBase):
                     self.receive(fp, content, size, offset)
                 except (RequestException, SSLError) as exc:
                     msg = str(exc)
-                    print()
+                    output.stderr_write("\n")
                     continue
 
                 # check file size
                 if size and fp.tell() < size:
                     msg = "file size mismatch ({} < {})".format(
                         fp.tell(), size)
-                    print()
+                    output.stderr_write("\n")
                     continue
 
             break
@@ -329,7 +329,7 @@ class HttpDownloader(DownloaderBase):
             for _ in response.iter_content(self.chunk_size):
                 pass
         except (RequestException, SSLError) as exc:
-            print()
+            output.stderr_write("\n")
             self.log.debug(
                 "Unable to consume response body (%s: %s); "
                 "closing the connection anyway", exc.__class__.__name__, exc)

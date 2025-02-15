@@ -9,7 +9,7 @@
 """Compare versions of the same file and replace/enumerate them on mismatch"""
 
 from .common import PostProcessor
-from .. import text, util, exception
+from .. import text, util, output, exception
 import os
 
 
@@ -83,7 +83,7 @@ class ComparePP(PostProcessor):
             self._equal_cnt += 1
             if self._equal_cnt >= self._equal_max:
                 util.remove_file(pathfmt.temppath)
-                print()
+                output.stderr_write("\n")
                 raise self._equal_exc()
         pathfmt.delete = True
 

@@ -9,7 +9,7 @@
 """Convert Pixiv Ugoira to WebM"""
 
 from .common import PostProcessor
-from .. import util
+from .. import util, output
 import subprocess
 import tempfile
 import zipfile
@@ -226,13 +226,13 @@ class UgoiraPP(PostProcessor):
             if self._finalize:
                 self._finalize(pathfmt, tempdir)
         except OSError as exc:
-            print()
+            output.stderr_write("\n")
             self.log.error("Unable to invoke FFmpeg (%s: %s)",
                            exc.__class__.__name__, exc)
             self.log.debug("", exc_info=exc)
             pathfmt.realpath = pathfmt.temppath
         except Exception as exc:
-            print()
+            output.stderr_write("\n")
             self.log.error("%s: %s", exc.__class__.__name__, exc)
             self.log.debug("", exc_info=exc)
             pathfmt.realpath = pathfmt.temppath
@@ -296,7 +296,7 @@ class UgoiraPP(PostProcessor):
         out = None if self.output else subprocess.DEVNULL
         retcode = util.Popen(args, stdout=out, stderr=out).wait()
         if retcode:
-            print()
+            output.stderr_write("\n")
             self.log.error("Non-zero exit status when running %s (%s)",
                            args, retcode)
             raise ValueError()
