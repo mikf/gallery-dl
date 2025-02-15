@@ -183,7 +183,7 @@ class ImgurMeExtractor(ImgurExtractor):
 
     def items(self):
         if not self.cookies_check(("accesstoken",)):
-            raise exception.AuthorizationError("'accesstoken' cookie required")
+            self.log.error("'accesstoken' cookie required")
 
         if self.groups[0]:
             posts = self.api.accounts_me_hiddenalbums()
