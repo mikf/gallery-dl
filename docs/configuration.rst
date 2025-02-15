@@ -5564,6 +5564,21 @@ Description
     regardless of this option.
 
 
+downloader.http.sleep-429
+-------------------------
+Type
+    |Duration|_
+Default
+    `extractor.*.sleep-429`_
+Description
+    Number of seconds to sleep when receiving a `429 Too Many Requests`
+    response before `retrying <downloader.*.retries_>`__ the request.
+
+    Note: Requires
+    `retry-codes <downloader.http.retry-codes_>`__
+    to include ``429``.
+
+
 downloader.http.validate
 ------------------------
 Type

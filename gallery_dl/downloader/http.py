@@ -38,6 +38,7 @@ class HttpDownloader(DownloaderBase):
         self.verify = self.config("verify", extractor._verify)
         self.mtime = self.config("mtime", True)
         self.rate = self.config("rate")
+        interval_429 = self.config("sleep-429")
 
         if not self.config("consume-content", False):
             # this resets the underlying TCP connection, and therefore
@@ -79,6 +80,10 @@ class HttpDownloader(DownloaderBase):
             self.receive = self._receive_rate
             if self.progress < 0.0:
                 self.progress = 0.0
+        if interval_429 is None:
+            self.interval_429 = extractor._interval_429
+        else:
+            self.interval_429 = util.build_duration_func(interval_429)
 
     def download(self, url, pathfmt):
         try:
@@ -93,7 +98,7 @@ class HttpDownloader(DownloaderBase):
 
     def _download_impl(self, url, pathfmt):
         response = None
-        tries = 0
+        tries = code = 0
         msg = ""
 
         metadata = self.metadata
@@ -111,10 +116,17 @@ class HttpDownloader(DownloaderBase):
                 if response:
                     self.release_conn(response)
                     response = None
+
                 self.log.warning("%s (%s/%s)", msg, tries, self.retries+1)
                 if tries > self.retries:
                     return False
-                time.sleep(tries)
+
+                if code == 429 and self.interval_429:
+                    s = self.interval_429()
+                    time.sleep(s if s > tries else tries)
+                else:
+                    time.sleep(tries)
+                code = 0
 
             tries += 1
             file_header = None
