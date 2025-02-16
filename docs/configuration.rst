@@ -922,11 +922,13 @@ Description
 extractor.*.archive
 -------------------
 Type
-    |Path|_
+    * ``string``
+    * |Path|_
 Default
     ``null``
 Example
-    ``"$HOME/.archives/{category}.sqlite3"``
+    * ``"$HOME/.archives/{category}.sqlite3"``
+    * ``"postgresql://user:pass@host/database"``
 Description
     File to store IDs of downloaded files in. Downloads of files
     already recorded in this archive file will be
@@ -936,6 +938,11 @@ Description
     database, as either lookup operations are significantly faster or
     memory requirements are significantly lower when the
     amount of stored IDs gets reasonably large.
+
+    If this value is a
+    `PostgreSQL Connection URI <https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-CONNSTRING-URIS>`__,
+    the archive will use this PostgreSQL database as backend (requires
+    `Psycopg <https://www.psycopg.org/>`__).
 
     Note: Archive files that do not already exist get generated automatically.
 
