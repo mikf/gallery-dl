@@ -79,9 +79,7 @@ class ImhentaiGalleryExtractor(ImhentaiExtractor, GalleryExtractor):
             results.append(tag)
         return results
 
-    def images(self, _):
-        url = "{}/view/{}/1/".format(self.root, self.gallery_id)
-        page = self.request(url).text
+    def images(self, page):
         data = util.json_loads(text.extr(page, "$.parseJSON('", "'"))
         base = text.extr(page, 'data-src="', '"').rpartition("/")[0] + "/"
         exts = {"j": "jpg", "p": "png", "g": "gif", "w": "webp", "a": "avif"}
