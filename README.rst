@@ -34,6 +34,7 @@ Optional
 - PyYAML_: YAML configuration file support
 - toml_: TOML configuration file support for Python<3.11
 - SecretStorage_: GNOME keyring passwords for ``--cookies-from-browser``
+- Psycopg_: PostgreSQL archive support
 
 
 Installation
@@ -472,6 +473,7 @@ To authenticate with a ``mastodon`` instance, run *gallery-dl* with
 .. _PyYAML:     https://pyyaml.org/
 .. _toml:       https://pypi.org/project/toml/
 .. _SecretStorage: https://pypi.org/project/SecretStorage/
+.. _Psycopg:    https://www.psycopg.org/
 .. _Snapd:      https://docs.snapcraft.io/installing-snapd
 .. _OAuth:      https://en.wikipedia.org/wiki/OAuth
 .. _Chocolatey: https://chocolatey.org/install
