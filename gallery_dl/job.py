@@ -551,8 +551,6 @@ class DownloadJob(Job):
 
         archive_path = cfg("archive")
         if archive_path:
-            archive_path = util.expand_path(archive_path)
-
             archive_prefix = cfg("archive-prefix")
             if archive_prefix is None:
                 archive_prefix = extr.category
@@ -562,16 +560,11 @@ class DownloadJob(Job):
                 archive_format = extr.archive_fmt
 
             try:
-                if "{" in archive_path:
-                    archive_path = formatter.parse(
-                        archive_path).format_map(kwdict)
-                if cfg("archive-mode") == "memory":
-                    archive_cls = archive.DownloadArchiveMemory
-                else:
-                    archive_cls = archive.DownloadArchive
-                self.archive = archive_cls(
+                self.archive = archive.connect(
                     archive_path,
-                    archive_prefix + archive_format,
+                    archive_prefix,
+                    archive_format,
+                    cfg("archive-mode"),
                     cfg("archive-pragma"),
                 )
             except Exception as exc:
