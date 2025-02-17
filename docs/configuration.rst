@@ -448,6 +448,7 @@ Description
     * ``aryion``
     * ``atfbooru`` (*)
     * ``bluesky``
+    * ``bleachbooru`` (*)
     * ``booruvar`` (*)
     * ``coomerparty``
     * ``danbooru`` (*)

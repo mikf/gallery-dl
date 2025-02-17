@@ -1189,6 +1189,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Artists, Artist Searches, Pools, Popular Images, Posts, Tag Searches</td>
     <td>Supported</td>
 </tr>
+<tr>
+    <td>Bleachbooru</td>
+    <td>https://bleachbooru.org/</td>
+    <td>Artists, Artist Searches, Pools, Popular Images, Posts, Tag Searches</td>
+    <td>Supported</td>
+</tr>
 
 <tr>
     <td colspan="4"><strong>e621 Instances</strong></td>

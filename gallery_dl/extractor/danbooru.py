@@ -194,6 +194,10 @@ BASE_PATTERN = DanbooruExtractor.update({
         "root": "https://booru.borvar.art",
         "pattern": r"booru\.borvar\.art",
     },
+    "bleachbooru": {
+        "root": "https://bleachbooru.org",
+        "pattern": r"bleachbooru\.org",
+    },
 })
 
 

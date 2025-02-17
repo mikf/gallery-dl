@@ -406,6 +406,7 @@ AUTH_MAP = {
     "aryion"         : "Supported",
     "atfbooru"       : "Supported",
     "baraag"         : _OAUTH,
+    "bleachbooru"    : "Supported",
     "bluesky"        : "Supported",
     "booruvar"       : "Supported",
     "boosty"         : _COOKIES,
