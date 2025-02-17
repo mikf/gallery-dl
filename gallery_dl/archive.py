@@ -16,7 +16,7 @@ log = logging.getLogger("archive")
 
 
 def connect(path, prefix, format,
-            table=None, mode=None, pragma=None, kwdict=None):
+            table=None, mode=None, pragma=None, kwdict=None, cache_key=None):
     keygen = formatter.parse(prefix + format).format_map
 
     if path.startswith(("postgres://", "postgresql://")):
@@ -36,7 +36,7 @@ def connect(path, prefix, format,
     if kwdict is not None and table:
         table = formatter.parse(table).format_map(kwdict)
 
-    return cls(path, keygen, table, pragma)
+    return cls(path, keygen, table, pragma, cache_key)
 
 
 def sanitize(name):

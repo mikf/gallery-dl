@@ -6114,16 +6114,18 @@ Description
 exec.archive
 ------------
 Type
-    |Path|_
+    * ``string``
+    * |Path|_
 Description
-    File to store IDs of executed commands in,
+    Database to store IDs of executed commands in,
     similar to `extractor.*.archive`_.
 
-    ``archive-format``, ``archive-prefix``, and ``archive-pragma`` options,
-    akin to
-    `extractor.*.archive-format`_,
-    `extractor.*.archive-prefix`_, and
-    `extractor.*.archive-pragma`_, are supported as well.
+    The following archive options are also supported:
+
+    * `archive-format <extractor.*.archive-format_>`__
+    * `archive-prefix <extractor.*.archive-prefix_>`__
+    * `archive-pragma <extractor.*.archive-pragma_>`__
+    * `archive-table  <extractor.*.archive-table_>`__
 
 
 exec.async
@@ -6563,16 +6565,18 @@ Description
 metadata.archive
 ----------------
 Type
-    |Path|_
+    * ``string``
+    * |Path|_
 Description
-    File to store IDs of generated metadata files in,
+    Database to store IDs of generated metadata files in,
     similar to `extractor.*.archive`_.
 
-    ``archive-format``, ``archive-prefix``, and ``archive-pragma`` options,
-    akin to
-    `extractor.*.archive-format`_,
-    `extractor.*.archive-prefix`_, and
-    `extractor.*.archive-pragma`_, are supported as well.
+    The following archive options are also supported:
+
+    * `archive-format <extractor.*.archive-format_>`__
+    * `archive-prefix <extractor.*.archive-prefix_>`__
+    * `archive-pragma <extractor.*.archive-pragma_>`__
+    * `archive-table  <extractor.*.archive-table_>`__
 
 
 metadata.mtime
@@ -6643,16 +6647,18 @@ Description
 python.archive
 --------------
 Type
-    |Path|_
+    * ``string``
+    * |Path|_
 Description
-    File to store IDs of called Python functions in,
+    Database to store IDs of called Python functions in,
     similar to `extractor.*.archive`_.
 
-    ``archive-format``, ``archive-prefix``, and ``archive-pragma`` options,
-    akin to
-    `extractor.*.archive-format`_,
-    `extractor.*.archive-prefix`_, and
-    `extractor.*.archive-pragma`_, are supported as well.
+    The following archive options are also supported:
+
+    * `archive-format <extractor.*.archive-format_>`__
+    * `archive-prefix <extractor.*.archive-prefix_>`__
+    * `archive-pragma <extractor.*.archive-pragma_>`__
+    * `archive-table  <extractor.*.archive-table_>`__
 
 
 python.event
