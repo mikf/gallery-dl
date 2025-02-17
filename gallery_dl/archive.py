@@ -15,7 +15,8 @@ from . import util, formatter
 log = logging.getLogger("archive")
 
 
-def connect(path, prefix, format, mode=None, pragma=None, kwdict=None):
+def connect(path, prefix, format,
+            table=None, mode=None, pragma=None, kwdict=None):
     keygen = formatter.parse(prefix + format).format_map
 
     if path.startswith(("postgres://", "postgresql://")):
@@ -32,13 +33,20 @@ def connect(path, prefix, format, mode=None, pragma=None, kwdict=None):
         else:
             cls = DownloadArchive
 
-    return cls(path, keygen, pragma)
+    if kwdict is not None and table:
+        table = formatter.parse(table).format_map(kwdict)
+
+    return cls(path, keygen, table, pragma)
+
+
+def sanitize(name):
+    return '"' + name.replace('"', "_") + '"'
 
 
 class DownloadArchive():
     _sqlite3 = None
 
-    def __init__(self, path, keygen, pragma=None, cache_key=None):
+    def __init__(self, path, keygen, table=None, pragma=None, cache_key=None):
 
         if self._sqlite3 is None:
             import sqlite3
@@ -59,29 +67,37 @@ class DownloadArchive():
         self.cursor = cursor = con.cursor()
         self._cache_key = cache_key or "_archive_key"
 
+        table = "archive" if table is None else sanitize(table)
+        self._stmt_select = (
+            "SELECT 1 "
+            "FROM " + table + " "
+            "WHERE entry=? "
+            "LIMIT 1")
+        self._stmt_insert = (
+            "INSERT OR IGNORE INTO " + table + " "
+            "(entry) VALUES (?)")
+
         if pragma:
             for stmt in pragma:
                 cursor.execute("PRAGMA " + stmt)
 
         try:
-            cursor.execute("CREATE TABLE IF NOT EXISTS archive "
+            cursor.execute("CREATE TABLE IF NOT EXISTS " + table + " "
                            "(entry TEXT PRIMARY KEY) WITHOUT ROWID")
         except self._sqlite3.OperationalError:
             # fallback for missing WITHOUT ROWID support (#553)
-            cursor.execute("CREATE TABLE IF NOT EXISTS archive "
+            cursor.execute("CREATE TABLE IF NOT EXISTS " + table + " "
                            "(entry TEXT PRIMARY KEY)")
 
     def add(self, kwdict):
         """Add item described by 'kwdict' to archive"""
         key = kwdict.get(self._cache_key) or self.keygen(kwdict)
-        self.cursor.execute(
-            "INSERT OR IGNORE INTO archive (entry) VALUES (?)", (key,))
+        self.cursor.execute(self._stmt_insert, (key,))
 
     def check(self, kwdict):
         """Return True if the item described by 'kwdict' exists in archive"""
         key = kwdict[self._cache_key] = self.keygen(kwdict)
-        self.cursor.execute(
-            "SELECT 1 FROM archive WHERE entry=? LIMIT 1", (key,))
+        self.cursor.execute(self._stmt_select, (key,))
         return self.cursor.fetchone()
 
     def finalize(self):
@@ -90,9 +106,9 @@ class DownloadArchive():
 
 class DownloadArchiveMemory(DownloadArchive):
 
-    def __init__(self, path, keygen, pragma=None, cache_key=None):
+    def __init__(self, path, keygen, table=None, pragma=None, cache_key=None):
         DownloadArchive.__init__(
-            self, path, keygen, pragma, cache_key)
+            self, path, keygen, table, pragma, cache_key)
         self.keys = set()
 
     def add(self, kwdict):
@@ -104,8 +120,7 @@ class DownloadArchiveMemory(DownloadArchive):
         key = kwdict[self._cache_key] = self.keygen(kwdict)
         if key in self.keys:
             return True
-        self.cursor.execute(
-            "SELECT 1 FROM archive WHERE entry=? LIMIT 1", (key,))
+        self.cursor.execute(self._stmt_select, (key,))
         return self.cursor.fetchone()
 
     def finalize(self):
@@ -119,7 +134,7 @@ class DownloadArchiveMemory(DownloadArchive):
             except self._sqlite3.OperationalError:
                 pass
 
-            stmt = "INSERT OR IGNORE INTO archive (entry) VALUES (?)"
+            stmt = self._stmt_insert
             if len(self.keys) < 100:
                 for key in self.keys:
                     cursor.execute(stmt, (key,))
@@ -130,7 +145,7 @@ class DownloadArchiveMemory(DownloadArchive):
 class DownloadArchivePostgresql():
     _psycopg = None
 
-    def __init__(self, uri, keygen, pragma=None, cache_key=None):
+    def __init__(self, uri, keygen, table=None, pragma=None, cache_key=None):
         if self._psycopg is None:
             import psycopg
             DownloadArchivePostgresql._psycopg = psycopg
@@ -141,24 +156,31 @@ class DownloadArchivePostgresql():
         self.keygen = keygen
         self._cache_key = cache_key or "_archive_key"
 
+        table = "archive" if table is None else sanitize(table)
+        self._stmt_select = (
+            "SELECT true "
+            "FROM " + table + " "
+            "WHERE entry=%s "
+            "LIMIT 1")
+        self._stmt_insert = (
+            "INSERT INTO " + table + " (entry) "
+            "VALUES (%s) "
+            "ON CONFLICT DO NOTHING")
+
         try:
-            cursor.execute("CREATE TABLE IF NOT EXISTS archive "
+            cursor.execute("CREATE TABLE IF NOT EXISTS " + table + " "
                            "(entry TEXT PRIMARY KEY)")
             con.commit()
         except Exception as exc:
-            log.error("%s: %s when creating 'archive' table: %s",
-                      con, exc.__class__.__name__, exc)
+            log.error("%s: %s when creating '%s' table: %s",
+                      con, exc.__class__.__name__, table, exc)
             con.rollback()
             raise
 
     def add(self, kwdict):
         key = kwdict.get(self._cache_key) or self.keygen(kwdict)
         try:
-            self.cursor.execute(
-                "INSERT INTO archive (entry) "
-                "VALUES (%s) "
-                "ON CONFLICT DO NOTHING",
-                (key,))
+            self.cursor.execute(self._stmt_insert, (key,))
             self.connection.commit()
         except Exception as exc:
             log.error("%s: %s when writing entry: %s",
@@ -168,12 +190,7 @@ class DownloadArchivePostgresql():
     def check(self, kwdict):
         key = kwdict[self._cache_key] = self.keygen(kwdict)
         try:
-            self.cursor.execute(
-                "SELECT true "
-                "FROM archive "
-                "WHERE entry=%s "
-                "LIMIT 1",
-                (key,))
+            self.cursor.execute(self._stmt_select, (key,))
             return self.cursor.fetchone()
         except Exception as exc:
             log.error("%s: %s when checking entry: %s",
@@ -187,9 +204,9 @@ class DownloadArchivePostgresql():
 
 class DownloadArchivePostgresqlMemory(DownloadArchivePostgresql):
 
-    def __init__(self, path, keygen, pragma=None, cache_key=None):
+    def __init__(self, path, keygen, table=None, pragma=None, cache_key=None):
         DownloadArchivePostgresql.__init__(
-            self, path, keygen, pragma, cache_key)
+            self, path, keygen, table, pragma, cache_key)
         self.keys = set()
 
     def add(self, kwdict):
@@ -202,12 +219,7 @@ class DownloadArchivePostgresqlMemory(DownloadArchivePostgresql):
         if key in self.keys:
             return True
         try:
-            self.cursor.execute(
-                "SELECT true "
-                "FROM archive "
-                "WHERE entry=%s "
-                "LIMIT 1",
-                (key,))
+            self.cursor.execute(self._stmt_select, (key,))
             return self.cursor.fetchone()
         except Exception as exc:
             log.error("%s: %s when checking entry: %s",
@@ -220,9 +232,7 @@ class DownloadArchivePostgresqlMemory(DownloadArchivePostgresql):
             return
         try:
             self.cursor.executemany(
-                "INSERT INTO archive (entry) "
-                "VALUES (%s) "
-                "ON CONFLICT DO NOTHING",
+                self._stmt_insert,
                 ((key,) for key in self.keys))
             self.connection.commit()
         except Exception as exc:
