@@ -13,8 +13,8 @@ __tests__ = (
     "#url"     : "https://www.subscribestar.com/subscribestar",
     "#category": ("", "subscribestar", "user"),
     "#class"   : subscribestar.SubscribestarUserExtractor,
-    "#pattern" : r"https://(ss-uploads-prod\.b-cdn|\w+\.cloudfront)\.net/uploads(_v2)?/users/11/",
-    "#count"   : ">= 20",
+    "#pattern" : r"https://(www\.subscribestar\.com/uploads\?payload=.+|(ss-uploads-prod\.b-cdn|\w+\.cloudfront)\.net/uploads(_v2)?/users/11/)",
+    "#count"   : range(15, 25),
 
     "author_id"  : 11,
     "author_name": "subscribestar",
@@ -58,8 +58,8 @@ __tests__ = (
     "author_nick": "SubscribeStar",
     "content"    : r"re:<h1>Brand Guidelines and Assets</h1>",
     "date"       : "dt:2020-05-07 12:33:00",
-    "extension"  : "jpg",
-    "filename"   : "8ff61299-b249-47dc-880a-cdacc9081c62",
+    "extension"  : "",
+    "filename"   : "uploads",
     "group"      : "imgs_and_videos",
     "height"     : 291,
     "id"         : 203885,
@@ -68,6 +68,24 @@ __tests__ = (
     "post_id"    : 102468,
     "type"       : "image",
     "width"      : 700,
+},
+
+{
+    "#url"     : "https://www.subscribestar.com/posts/920015",
+    "#comment" : "attachment (#6721)",
+    "#category": ("", "subscribestar", "post"),
+    "#class"   : subscribestar.SubscribestarPostExtractor,
+    "#range"   : "2",
+    "#pattern" : r"https://ss-uploads-prod\.b-cdn\.net/uploads_v2/users/11/posts/920015/bc018a55-9668-47f4-a664-b5fd66b56aaa\.pdf\?token=.+",
+
+    "date"     : "dt:2023-05-30 09:20:00",
+    "extension": "pdf",
+    "filename" : "Training for freelancers - Fiverr",
+    "id"       : 1957727,
+    "name"     : "Training for freelancers - Fiverr.pdf",
+    "num"      : 2,
+    "post_id"  : 920015,
+    "type"     : "attachment",
 },
 
 {

@@ -75,8 +75,8 @@ class GofileFolderExtractor(Extractor):
     @cache(maxage=86400)
     def _get_website_token(self):
         self.log.debug("Fetching website token")
-        page = self.request(self.root + "/dist/js/alljs.js").text
-        return text.extr(page, 'wt: "', '"')
+        page = self.request(self.root + "/dist/js/global.js").text
+        return text.extr(page, '.wt = "', '"')
 
     def _get_content(self, content_id, password=None):
         headers = {"Authorization": "Bearer " + self.api_token}

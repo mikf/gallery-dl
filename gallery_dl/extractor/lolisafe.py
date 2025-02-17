@@ -53,7 +53,14 @@ class LolisafeAlbumExtractor(LolisafeExtractor):
             if "name" in file:
                 name = file["name"]
                 file["name"] = name.rpartition(".")[0] or name
-                file["id"] = file["filename"].rpartition("-")[2]
+                _, sep, fid = file["filename"].rpartition("-")
+                if not sep or len(fid) == 12:
+                    if "id" not in file:
+                        file["id"] = ""
+                    file["filename"] = file["name"]
+                else:
+                    file["id"] = fid
+                    file["filename"] = file["name"] + "-" + fid
             elif "id" in file:
                 file["name"] = file["filename"]
                 file["filename"] = "{}-{}".format(file["name"], file["id"])

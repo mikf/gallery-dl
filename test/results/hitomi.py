@@ -162,6 +162,8 @@ __tests__ = (
     "#class"   : hitomi.HitomiTagExtractor,
     "#pattern" : hitomi.HitomiGalleryExtractor.pattern,
     "#count"   : ">= 35",
+
+    "search_tags": "screenshots",
 },
 
 {
@@ -208,12 +210,19 @@ __tests__ = (
     "#pattern" : hitomi.HitomiGalleryExtractor.pattern,
     "#range"   : "1-150",
     "#count"   : 150,
+
+    "search_tags": "tag:screenshots language:japanese",
 },
 
 {
-    "#url"     : "https://hitomi.la/search.html?language%3Ajapanese%20artist%3Asumiya",
+    "#url"     : "https://hitomi.la/search.html?female%3Asole_female%20language%3Ajapanese%20artist%3Asumiya",
     "#class"   : hitomi.HitomiSearchExtractor,
+    "#pattern" : hitomi.HitomiGalleryExtractor.pattern,
+    "#count"   : range(35, 50),
+
+    "search_tags": "female:sole_female language:japanese artist:sumiya",
 },
+
 {
     "#url"     : "https://hitomi.la/search.html?group:initial_g",
     "#class"   : hitomi.HitomiSearchExtractor,

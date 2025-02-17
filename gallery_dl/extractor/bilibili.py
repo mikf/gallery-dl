@@ -23,7 +23,8 @@ class BilibiliExtractor(Extractor):
 class BilibiliUserArticlesExtractor(BilibiliExtractor):
     """Extractor for a bilibili user's articles"""
     subcategory = "user-articles"
-    pattern = r"(?:https?://)?space\.bilibili\.com/(\d+)/article"
+    pattern = (r"(?:https?://)?space\.bilibili\.com/(\d+)"
+               r"/(?:article|upload/opus)")
     example = "https://space.bilibili.com/12345/article"
 
     def items(self):
@@ -56,6 +57,13 @@ class BilibiliArticleExtractor(BilibiliExtractor):
         article["username"] = modules["module_author"]["name"]
 
         pics = []
+
+        if "module_top" in modules:
+            try:
+                pics.extend(modules["module_top"]["display"]["album"]["pics"])
+            except Exception:
+                pass
+
         for paragraph in modules['module_content']['paragraphs']:
             if "pic" not in paragraph:
                 continue

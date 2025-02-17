@@ -11,7 +11,7 @@
 from .lolisafe import LolisafeAlbumExtractor
 from .. import text
 
-BASE_PATTERN = r"(?:https?://)?saint\d*\.(?:su|pk|to)"
+BASE_PATTERN = r"(?:https?://)?saint\d*\.(?:su|pk|cr|to)"
 
 
 class SaintAlbumExtractor(LolisafeAlbumExtractor):
@@ -81,6 +81,7 @@ class SaintMediaExtractor(SaintAlbumExtractor):
             else:  # /d/
                 file = {
                     "file"     : text.unescape(extr('<a href="', '"')),
+                    "id"       : album_id,
                     "id_dl"    : album_id,
                     "name"     : album_id,
                     "filename" : album_id,

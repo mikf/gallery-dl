@@ -286,6 +286,34 @@ class TurboimagehostImageExtractor(ImagehostImageExtractor):
         return url, url
 
 
+class TurboimagehostGalleryExtractor(ImagehostImageExtractor):
+    """Extractor for image galleries from turboimagehost.com"""
+    category = "turboimagehost"
+    subcategory = "gallery"
+    pattern = (r"(?:https?://)?((?:www\.)?turboimagehost\.com"
+               r"/album/(\d+)/([^/?#]*))")
+    example = "https://www.turboimagehost.com/album/12345/GALLERY_NAME"
+
+    def items(self):
+        data = {"_extractor": TurboimagehostImageExtractor}
+        params = {"p": 1}
+
+        while True:
+            page = self.request(self.page_url, params=params).text
+
+            if params["p"] == 1 and \
+                    "Requested gallery don`t exist on our website." in page:
+                raise exception.NotFoundError("gallery")
+
+            thumb_url = None
+            for thumb_url in text.extract_iter(page, '"><a href="', '"'):
+                yield Message.Queue, thumb_url, data
+            if thumb_url is None:
+                return
+
+            params["p"] += 1
+
+
 class ViprImageExtractor(ImagehostImageExtractor):
     """Extractor for single images from vipr.im"""
     category = "vipr"

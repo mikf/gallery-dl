@@ -142,7 +142,8 @@ class ImgurGalleryExtractor(ImgurExtractor):
 class ImgurUserExtractor(ImgurExtractor):
     """Extractor for all images posted by a user"""
     subcategory = "user"
-    pattern = BASE_PATTERN + r"/user/([^/?#]+)(?:/posts|/submitted)?/?$"
+    pattern = (BASE_PATTERN + r"/user/(?!me(?:/|$|\?|#))"
+               r"([^/?#]+)(?:/posts|/submitted)?/?$")
     example = "https://imgur.com/user/USER"
 
     def items(self):
@@ -172,6 +173,23 @@ class ImgurFavoriteFolderExtractor(ImgurExtractor):
     def items(self):
         return self._items_queue(self.api.account_favorites_folder(
             self.key, self.folder_id))
+
+
+class ImgurMeExtractor(ImgurExtractor):
+    """Extractor for your personal uploads"""
+    subcategory = "me"
+    pattern = BASE_PATTERN + r"/user/me(?:/posts)?(/hidden)?"
+    example = "https://imgur.com/user/me"
+
+    def items(self):
+        if not self.cookies_check(("accesstoken",)):
+            self.log.error("'accesstoken' cookie required")
+
+        if self.groups[0]:
+            posts = self.api.accounts_me_hiddenalbums()
+        else:
+            posts = self.api.accounts_me_allposts()
+        return self._items_queue(posts)
 
 
 class ImgurSubredditExtractor(ImgurExtractor):
@@ -215,6 +233,10 @@ class ImgurAPI():
         self.client_id = extractor.config("client-id") or "546c25a59c58ad7"
         self.headers = {"Authorization": "Client-ID " + self.client_id}
 
+    def account_submissions(self, account):
+        endpoint = "/3/account/{}/submissions".format(account)
+        return self._pagination(endpoint)
+
     def account_favorites(self, account):
         endpoint = "/3/account/{}/gallery_favorites".format(account)
         return self._pagination(endpoint)
@@ -224,14 +246,28 @@ class ImgurAPI():
             account, folder_id)
         return self._pagination_v2(endpoint)
 
+    def accounts_me_allposts(self):
+        endpoint = "/post/v1/accounts/me/all_posts"
+        params = {
+            "include": "media,tags,account",
+            "page"   : 1,
+            "sort"   : "-created_at",
+        }
+        return self._pagination_v2(endpoint, params)
+
+    def accounts_me_hiddenalbums(self):
+        endpoint = "/post/v1/accounts/me/hidden_albums"
+        params = {
+            "include": "media,tags,account",
+            "page"   : 1,
+            "sort"   : "-created_at",
+        }
+        return self._pagination_v2(endpoint, params)
+
     def gallery_search(self, query):
         endpoint = "/3/gallery/search"
         params = {"q": query}
         return self._pagination(endpoint, params)
-
-    def account_submissions(self, account):
-        endpoint = "/3/account/{}/submissions".format(account)
-        return self._pagination(endpoint)
 
     def gallery_subreddit(self, subreddit):
         endpoint = "/3/gallery/r/{}".format(subreddit)
@@ -284,12 +320,16 @@ class ImgurAPI():
         if params is None:
             params = {}
         params["client_id"] = self.client_id
-        params["page"] = 0
-        params["sort"] = "newest"
+        if "page" not in params:
+            params["page"] = 0
+        if "sort" not in params:
+            params["sort"] = "newest"
         headers = {"Origin": "https://imgur.com"}
 
         while True:
-            data = self._call(endpoint, params, headers)["data"]
+            data = self._call(endpoint, params, headers)
+            if "data" in data:
+                data = data["data"]
             if not data:
                 return
             yield from data

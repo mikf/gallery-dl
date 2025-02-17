@@ -53,28 +53,37 @@ build-linux() {
     cd "${ROOTDIR}"
     echo Building Linux executable
 
-    build-vm 'ubuntu22.04' 'gallery-dl.bin' 'linux'
+    build-vm 'ubuntu22.04' 'gallery-dl.bin' 'gallery-dl.bin' 'linux' 24000000
 }
 
 build-windows() {
     cd "${ROOTDIR}"
     echo Building Windows executable
 
-    build-vm 'windows7_x86_sp1' 'gallery-dl.exe' 'windows'
+    build-vm 'win10' 'gallery-dl.exe' 'gallery-dl.exe' 'windows' 19000000
+}
+
+build-windows_x86() {
+    cd "${ROOTDIR}"
+    echo Building Windows X86 executable
+
+    build-vm 'windows7_x86_sp1' 'gallery-dl_x86.exe' 'gallery-dl.exe' 'windows_x86' 12000000
 }
 
 build-vm() {
     VMNAME="$1"
     BINNAME="$2"
-    LABEL="$3"
-    TMPPATH="/tmp/gallery-dl/dist/$BINNAME"
+    TMPNAME="$3"
+    LABEL="$4"
+    MINSIZE="$5"
+    TMPPATH="/tmp/gallery-dl/dist/$TMPNAME"
 
     # launch VM
     vmstart "$VMNAME" &
     disown
 
     # copy source files
-    mkdir -p /tmp/gallery-dl
+    mkdir -p /tmp/gallery-dl/dist
     cp -a -t /tmp/gallery-dl -- \
         ./gallery_dl ./scripts ./data ./setup.py ./README.rst
 
@@ -87,10 +96,22 @@ build-vm() {
     rm -f "./dist/$BINNAME"
 
     # wait for new executable
-    while [ ! -e "$TMPPATH" ] ; do
+    while true; do
         sleep 5
+
+        if [ ! -e "$TMPPATH" ]; then
+            continue
+        fi
+
+        sleep 2
+        SIZE="$(stat -c %s "$TMPPATH")"
+        if [ "$SIZE" -lt "$MINSIZE" ]; then
+            echo Size of "'$TMPPATH'" is less than "$MINSIZE" bytes "($SIZE)"
+            continue
+        fi
+
+        break
     done
-    sleep 2
 
     # move
     mv "$TMPPATH" "./dist/$BINNAME"
@@ -105,6 +126,7 @@ sign() {
     gpg --detach-sign --armor gallery_dl-${NEWVERSION}-py3-none-any.whl
     gpg --detach-sign --armor gallery_dl-${NEWVERSION}.tar.gz
     gpg --detach-sign --yes gallery-dl.exe
+    gpg --detach-sign --yes gallery-dl_x86.exe
     gpg --detach-sign --yes gallery-dl.bin
 }
 
@@ -119,7 +141,7 @@ changelog() {
         -e "s*^## \w\+\$*## ${NEWVERSION} - $(date +%Y-%m-%d)*" \
         "${CHANGELOG}"
 
-    mv "${CHANGELOG}" "${CHANGELOG}.orig"
+    mv --no-clobber -- "${CHANGELOG}" "${CHANGELOG}.orig"
 
     # - remove all but the latest entries
     sed -n \
@@ -143,7 +165,7 @@ upload-git() {
     cd "${ROOTDIR}"
     echo Pushing changes to github
 
-    mv "${CHANGELOG}.orig" "${CHANGELOG}" || true
+    mv -- "${CHANGELOG}.orig" "${CHANGELOG}" || true
     git add "gallery_dl/version.py" "${README}" "${CHANGELOG}"
     git commit -S -m "release version ${NEWVERSION}"
     git tag -s -m "version ${NEWVERSION}" "v${NEWVERSION}"
@@ -187,6 +209,7 @@ changelog
 build-python
 build-linux
 build-windows
+build-windows_x86
 sign
 upload-pypi
 upload-git

@@ -23,18 +23,22 @@ class PatreonExtractor(Extractor):
     directory_fmt = ("{category}", "{creator[full_name]}")
     filename_fmt = "{id}_{title}_{num:>02}.{extension}"
     archive_fmt = "{id}_{num}"
+    useragent = "Patreon/72.2.28 (Android; Android 14; Scale/2.10)"
     _warning = True
 
     def _init(self):
-        if self.cookies_check(("session_id",)):
-            self.session.headers["User-Agent"] = \
-                "Patreon/72.2.28 (Android; Android 14; Scale/2.10)"
-        else:
+        if not self.cookies_check(("session_id",)):
             if self._warning:
                 PatreonExtractor._warning = False
                 self.log.warning("no 'session_id' cookie set")
-            self.session.headers["User-Agent"] = \
-                "Patreon/7.6.28 (Android; Android 11; Scale/2.10)"
+            if self.session.headers["User-Agent"] is self.useragent:
+                self.session.headers["User-Agent"] = \
+                    "Patreon/7.6.28 (Android; Android 11; Scale/2.10)"
+
+        format_images = self.config("format-images")
+        if format_images:
+            self._images_fmt = format_images
+            self._images_url = self._images_url_fmt
 
     def items(self):
         generators = self._build_file_generators(self.config("files"))
@@ -80,10 +84,19 @@ class PatreonExtractor(Extractor):
 
     def _images(self, post):
         for image in post.get("images") or ():
-            url = image.get("download_url")
+            url = self._images_url(image)
             if url:
                 name = image.get("file_name") or self._filename(url) or url
                 yield "image", url, name
+
+    def _images_url(self, image):
+        return image.get("download_url")
+
+    def _images_url_fmt(self, image):
+        try:
+            return image["image_urls"][self._images_fmt]
+        except Exception:
+            return image.get("download_url")
 
     def _image_large(self, post):
         image = post.get("image")
@@ -155,6 +168,12 @@ class PatreonExtractor(Extractor):
                 post, included, "attachments_media")
             attr["date"] = text.parse_datetime(
                 attr["published_at"], "%Y-%m-%dT%H:%M:%S.%f%z")
+
+            try:
+                attr["campaign"] = (included["campaign"][
+                                    relationships["campaign"]["data"]["id"]])
+            except Exception:
+                attr["campaign"] = None
 
             tags = relationships.get("user_defined_tags")
             attr["tags"] = [
@@ -273,15 +292,12 @@ class PatreonExtractor(Extractor):
         return [genmap[ft] for ft in filetypes]
 
     def _extract_bootstrap(self, page):
-        data = text.extr(
-            page, 'id="__NEXT_DATA__" type="application/json">', '</script')
-        if data:
-            try:
-                data = util.json_loads(data)
-                env = data["props"]["pageProps"]["bootstrapEnvelope"]
-                return env.get("pageBootstrap") or env["bootstrap"]
-            except Exception as exc:
-                self.log.debug("%s: %s", exc.__class__.__name__, exc)
+        try:
+            data = self._extract_nextdata(page)
+            env = data["props"]["pageProps"]["bootstrapEnvelope"]
+            return env.get("pageBootstrap") or env["bootstrap"]
+        except Exception as exc:
+            self.log.debug("%s: %s", exc.__class__.__name__, exc)
 
         bootstrap = text.extr(
             page, 'window.patreon = {"bootstrap":', '},"apiServer"')
@@ -314,7 +330,8 @@ class PatreonCreatorExtractor(PatreonExtractor):
     subcategory = "creator"
     pattern = (r"(?:https?://)?(?:www\.)?patreon\.com"
                r"/(?!(?:home|join|posts|login|signup)(?:$|[/?#]))"
-               r"(?:c/)?([^/?#]+)(?:/posts)?/?(?:\?([^#]+))?")
+               r"(?:profile/creators|(?:c/)?([^/?#]+)(?:/posts)?)"
+               r"/?(?:\?([^#]+))?")
     example = "https://www.patreon.com/USER"
 
     def posts(self):
@@ -335,7 +352,7 @@ class PatreonCreatorExtractor(PatreonExtractor):
         return self._pagination(url)
 
     def _get_campaign_id(self, creator, query):
-        if creator.startswith("id:"):
+        if creator and creator.startswith("id:"):
             return creator[3:]
 
         campaign_id = query.get("c") or query.get("campaign_id")

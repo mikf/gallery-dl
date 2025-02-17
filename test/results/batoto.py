@@ -135,7 +135,7 @@ __tests__ = (
     "#class"   : batoto.BatotoMangaExtractor,
     "#count"   : ">= 29",
 
-    "manga": "Grand Duke Dan Putri Rubah [cont by LUNABY]",
+    "manga": "The Grand Duke’s Fox Princess [cont by LUNABY]",
 },
 
 {

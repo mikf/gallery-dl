@@ -36,10 +36,33 @@ __tests__ = (
 },
 
 {
+    "#url"    : "https://www.bilibili.com/opus/977981688469520405",
+    "#comment": "'module_top' file (#6687)",
+    "#class"  : bilibili.BilibiliArticleExtractor,
+    "#urls"   : (
+        "http://i0.hdslb.com/bfs/new_dyn/c74018e8272c56a6c28a1a1dc3c586311242656443.jpg",
+    ),
+
+    "count"    : 1,
+    "filename" : "c74018e8272c56a6c28a1a1dc3c586311242656443",
+    "extension": "jpg",
+    "width"    : 712,
+    "height"   : 1068,
+    "size"     : 115.80999755859375,
+    "id"       : "977981688469520405",
+    "username" : "诗月饼",
+},
+
+{
     "#url"    : "https://space.bilibili.com/405279279/article",
     "#class"  : bilibili.BilibiliUserArticlesExtractor,
     "#pattern": bilibili.BilibiliArticleExtractor.pattern,
     "#count"  : range(50, 100),
+},
+
+{
+    "#url"    : "https://space.bilibili.com/405279279/upload/opus",
+    "#class"  : bilibili.BilibiliUserArticlesExtractor,
 },
 
 )

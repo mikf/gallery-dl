@@ -1,2 +1,2 @@
-include README.rst CHANGELOG.md LICENSE
+include README.rst CHANGELOG.md LICENSE scripts/run_tests.py
 recursive-include docs *.conf

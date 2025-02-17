@@ -12,7 +12,7 @@ import sys
 
 from .extractor.common import Extractor, Message
 from .job import DownloadJob
-from . import util, version, exception
+from . import util, version, output, exception
 
 REPOS = {
     "stable" : "mikf/gallery-dl",
@@ -23,14 +23,14 @@ REPOS = {
 
 BINARIES_STABLE = {
     "windows"    : "gallery-dl.exe",
-    "windows_x86": "gallery-dl.exe",
     "windows_x64": "gallery-dl.exe",
+    "windows_x86": "gallery-dl_x86.exe",
     "linux"      : "gallery-dl.bin",
 }
 BINARIES_DEV = {
     "windows"    : "gallery-dl_windows.exe",
-    "windows_x86": "gallery-dl_windows_x86.exe",
     "windows_x64": "gallery-dl_windows.exe",
+    "windows_x86": "gallery-dl_windows_x86.exe",
     "linux"      : "gallery-dl_linux",
     "macos"      : "gallery-dl_macos",
 }
@@ -143,13 +143,13 @@ class UpdateJob(DownloadJob):
     def _warning(self, msg, *args):
         if self._newline:
             self._newline = False
-            print()
+            output.stderr_write("\n")
         self.extractor.log.warning(msg, *args)
 
     def _error(self, msg, *args):
         if self._newline:
             self._newline = False
-            print()
+            output.stderr_write("\n")
         self.status |= 1
         self.extractor.log.error(msg, *args)
 

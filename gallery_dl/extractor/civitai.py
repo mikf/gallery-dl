@@ -338,6 +338,7 @@ class CivitaiUserExtractor(CivitaiExtractor):
             (CivitaiUserModelsExtractor, base + "models"),
             (CivitaiUserPostsExtractor , base + "posts"),
             (CivitaiUserImagesExtractor, base + "images"),
+            (CivitaiUserVideosExtractor, base + "videos"),
         ), ("user-models", "user-posts"))
 
 
@@ -397,6 +398,20 @@ class CivitaiUserImagesExtractor(CivitaiExtractor):
         else:
             params["reactions"] = (
                 "Like", "Dislike", "Heart", "Laugh", "Cry")
+        return self.api.images(params)
+
+
+class CivitaiUserVideosExtractor(CivitaiExtractor):
+    subcategory = "user-videos"
+    directory_fmt = ("{category}", "{username|user[username]}", "videos")
+    pattern = USER_PATTERN + r"/videos/?(?:\?([^#]+))?"
+    example = "https://civitai.com/user/USER/videos"
+
+    def images(self):
+        self._image_ext = "mp4"
+        params = text.parse_query(self.groups[1])
+        params["types"] = ["video"]
+        params["username"] = text.unquote(self.groups[0])
         return self.api.images(params)
 
 
@@ -484,7 +499,7 @@ class CivitaiTrpcAPI():
         self.root = extractor.root + "/api/trpc/"
         self.headers = {
             "content-type"    : "application/json",
-            "x-client-version": "5.0.211",
+            "x-client-version": "5.0.394",
             "x-client-date"   : "",
             "x-client"        : "web",
             "x-fingerprint"   : "undefined",

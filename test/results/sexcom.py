@@ -13,8 +13,8 @@ __tests__ = (
     "#comment" : "picture",
     "#category": ("", "sexcom", "pin"),
     "#class"   : sexcom.SexcomPinExtractor,
-    "#pattern"     : "https://cdn.sex.com/images/.+/2014/08/26/7637609.jpg",
-    "#sha1_content": "ebe1814dadfebf15d11c6af4f6afb1a50d6c2a1c",
+    "#urls"        : "https://imagex1.sx.cdn.live/images/pinporn/2014/08/26/7637609.jpg",
+    "#sha1_content": "8cd419c6790ef7348bd398c364ab10f956e438dc",
 
     "comments" : int,
     "date"     : "dt:2014-10-19 15:45:44",
@@ -36,7 +36,7 @@ __tests__ = (
     "#comment" : "gif",
     "#category": ("", "sexcom", "pin"),
     "#class"   : sexcom.SexcomPinExtractor,
-    "#pattern"     : "https://cdn.sex.com/images/.+/2017/12/07/18760842.gif",
+    "#urls"        : "https://imagex1.sx.cdn.live/images/pinporn/2017/12/07/18760842.gif",
     "#sha1_content": "176cc63fa05182cb0438c648230c0f324a5965fe",
 },
 
@@ -45,7 +45,7 @@ __tests__ = (
     "#comment" : "video",
     "#category": ("", "sexcom", "pin"),
     "#class"   : sexcom.SexcomPinExtractor,
-    "#pattern"     : r"https://cdn\.sex\.com/videos/pinporn/2018/02/10/776229_hd\.mp4",
+    "#urls"        : "https://video1.sx.cdn.live/videos/pinporn/2018/02/10/776229_hd.mp4",
     "#sha1_content": "e1a5834869163e2c4d1ca2677f5b7b367cf8cfff",
 },
 

@@ -46,7 +46,7 @@ __tests__ = (
     "#category": ("", "imagechest", "user"),
     "#class"   : imagechest.ImagechestUserExtractor,
     "#pattern" : imagechest.ImagechestGalleryExtractor.pattern,
-    "#count"   : 279,
+    "#count"   : range(280, 290),
 },
 
 )

@@ -124,6 +124,9 @@ class BoostyExtractor(Extractor):
                 elif type == "audio_file":
                     files.append(self._update_url(post, block))
 
+                elif type == "file":
+                    files.append(self._update_url(post, block))
+
                 else:
                     self.log.debug("%s: Unsupported data type '%s'",
                                    post["int_id"], type)
