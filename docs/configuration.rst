@@ -1001,7 +1001,8 @@ extractor.*.archive-prefix
 Type
     ``string``
 Default
-    ``"{category}"``
+    * ``""`` when `archive-table <extractor.*.archive-table_>`__ is set
+    * ``"{category}"`` otherwise
 Description
     Prefix for archive IDs.
 
@@ -1017,6 +1018,18 @@ Description
 
     See `<https://www.sqlite.org/pragma.html#toc>`__
     for available ``PRAGMA`` statements and further details.
+
+
+extractor.*.archive-table
+-------------------------
+Type
+    ``string``
+Default
+    ``"archive"``
+Example
+    ``"{category}"``
+Description
+    `Format string`_ selecting the archive database table name.
 
 
 extractor.*.actions

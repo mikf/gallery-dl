@@ -551,9 +551,10 @@ class DownloadJob(Job):
 
         archive_path = cfg("archive")
         if archive_path:
+            archive_table = cfg("archive-table")
             archive_prefix = cfg("archive-prefix")
             if archive_prefix is None:
-                archive_prefix = extr.category
+                archive_prefix = extr.category if archive_table is None else ""
 
             archive_format = cfg("archive-format")
             if archive_format is None:
@@ -564,8 +565,10 @@ class DownloadJob(Job):
                     archive_path,
                     archive_prefix,
                     archive_format,
+                    archive_table,
                     cfg("archive-mode"),
                     cfg("archive-pragma"),
+                    kwdict,
                 )
             except Exception as exc:
                 extr.log.warning(
