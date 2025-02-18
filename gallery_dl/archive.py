@@ -47,15 +47,13 @@ class DownloadArchive():
     _sqlite3 = None
 
     def __init__(self, path, keygen, table=None, pragma=None, cache_key=None):
-
         if self._sqlite3 is None:
-            import sqlite3
-            DownloadArchive._sqlite3 = sqlite3
+            DownloadArchive._sqlite3 = __import__("sqlite3")
 
         try:
             con = self._sqlite3.connect(
                 path, timeout=60, check_same_thread=False)
-        except sqlite3.OperationalError:
+        except self._sqlite3.OperationalError:
             os.makedirs(os.path.dirname(path))
             con = self._sqlite3.connect(
                 path, timeout=60, check_same_thread=False)
@@ -147,8 +145,7 @@ class DownloadArchivePostgresql():
 
     def __init__(self, uri, keygen, table=None, pragma=None, cache_key=None):
         if self._psycopg is None:
-            import psycopg
-            DownloadArchivePostgresql._psycopg = psycopg
+            DownloadArchivePostgresql._psycopg = __import__("psycopg")
 
         self.connection = con = self._psycopg.connect(uri)
         self.cursor = cursor = con.cursor()
