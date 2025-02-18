@@ -206,6 +206,12 @@ Consider all listed sites to potentially be NSFW.
     <td><a href="https://github.com/mikf/gallery-dl#oauth">OAuth</a></td>
 </tr>
 <tr>
+    <td>Discord</td>
+    <td>https://discord.com/</td>
+    <td>Channels, DMs, Servers</td>
+    <td></td>
+</tr>
+<tr>
     <td>Dynasty Reader</td>
     <td>https://dynasty-scans.com/</td>
     <td>Chapters, individual Images, Manga, Search Results</td>

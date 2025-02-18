@@ -235,6 +235,9 @@ SUBCATEGORY_MAP = {
         "status": "Status Updates",
         "watch-posts": "",
     },
+    "discord": {
+        "direct-messages": "DMs",
+    },
     "fanbox": {
         "supporting": "Supported User Feed",
         "redirect"  : "Pixiv Redirects",
