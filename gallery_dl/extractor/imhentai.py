@@ -20,7 +20,7 @@ class ImhentaiExtractor(Extractor):
 
     def _pagination(self, url):
         base = self.root + "/gallery/"
-        data = {"_extractor": ImhentaiGalleryExtractor}
+        data = {"_extractor": self._gallery_extractor}
 
         while True:
             page = self.request(url).text
@@ -36,7 +36,12 @@ class ImhentaiExtractor(Extractor):
             href = text.rextract(page, "class='page-link' href='", "'")[0]
             if not href or href == "#":
                 return
-            url = text.ensure_http_scheme(href)
+            if href[0] == "/":
+                if href[1] == "/":
+                    href = "https:" + href
+                else:
+                    href = self.root + href
+            url = href
 
 
 class ImhentaiGalleryExtractor(ImhentaiExtractor, GalleryExtractor):
@@ -62,7 +67,7 @@ class ImhentaiGalleryExtractor(ImhentaiExtractor, GalleryExtractor):
             "artist"    : self._split(extr(">Artists:</span>", "</li>")),
             "group"     : self._split(extr(">Groups:</span>", "</li>")),
             "language"  : self._split(extr(">Languages:</span>", "</li>")),
-            "type"      : text.remove_html(extr(">Category:</span>", "<span")),
+            "type"      : extr("href='/category/", "/"),
         }
 
         if data["language"]:
@@ -117,3 +122,6 @@ class ImhentaiSearchExtractor(ImhentaiExtractor):
     def items(self):
         url = self.root + "/search/?" + self.groups[0]
         return self._pagination(url)
+
+
+ImhentaiExtractor._gallery_extractor = ImhentaiGalleryExtractor

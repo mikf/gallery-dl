@@ -70,6 +70,7 @@ modules = [
     "hentaihand",
     "hentaihere",
     "hentainexus",
+    "hentairox",
     "hiperdex",
     "hitomi",
     "hotleak",

@@ -356,6 +356,12 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
+    <td>HentaiRox</td>
+    <td>https://hentairox.com/</td>
+    <td>Galleries, Search Results, Tag Searches</td>
+    <td></td>
+</tr>
+<tr>
     <td>HiperDEX</td>
     <td>https://hiperdex.com/</td>
     <td>Artists, Chapters, Manga</td>
