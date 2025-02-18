@@ -17,6 +17,8 @@ class DiscordExtractor(Extractor):
     """Base class for Discord extractors"""
     category = "discord"
     root = "https://discord.com"
+    directory_fmt = ("{category}", "{server_id}_{server}",
+                     "{channel_id}_{channel}")
     filename_fmt = "{message_id}_{num:>02}_{filename}.{extension}"
     archive_fmt = "{message_id}_{num}"
 
@@ -36,7 +38,10 @@ class DiscordExtractor(Extractor):
 
         for embed in message["embeds"]:
             if embed["type"] == "rich":
-                text_content.append(embed.get("author", {}).get("name", ""))
+                try:
+                    text_content.append(embed["author"]["name"])
+                except Exception:
+                    pass
                 text_content.append(embed.get("title", ""))
                 text_content.append(embed.get("description", ""))
 
@@ -56,9 +61,11 @@ class DiscordExtractor(Extractor):
     def extract_message(self, message):
         # https://discord.com/developers/docs/resources/message#message-object-message-types
         if message["type"] in (0, 19, 21):
-            message_metadata = {
-                **self.server_metadata,
-                **self.server_channels_metadata[message["channel_id"]],
+            message_metadata = {}
+            message_metadata.update(self.server_metadata)
+            message_metadata.update(
+                self.server_channels_metadata[message["channel_id"]])
+            message_metadata.update({
                 "author": message["author"]["username"],
                 "author_id": message["author"]["id"],
                 "author_files": [],
@@ -68,7 +75,7 @@ class DiscordExtractor(Extractor):
                     message["timestamp"], "%Y-%m-%dT%H:%M:%S.%f%z"
                 ),
                 "files": []
-            }
+            })
 
             for icon_type, icon_path in (
                 ("avatar", "avatars"),
@@ -88,17 +95,19 @@ class DiscordExtractor(Extractor):
             for attachment in message["attachments"]:
                 message_metadata["files"].append({
                     "url": attachment["url"],
-                    "type": "attachment"
+                    "type": "attachment",
                 })
 
             for embed in message["embeds"]:
                 if embed["type"] in self.enabled_embeds:
                     for field in ("video", "image", "thumbnail"):
-                        url = embed.get(field, {}).get("proxy_url")
+                        if field not in embed:
+                            continue
+                        url = embed[field].get("proxy_url")
                         if url is not None:
                             message_metadata["files"].append({
                                 "url": url,
-                                "type": "embed"
+                                "type": "embed",
                             })
                             break
 
@@ -109,10 +118,9 @@ class DiscordExtractor(Extractor):
             yield Message.Directory, message_metadata
 
             for file in message_metadata["files"]:
-                yield Message.Url, file["url"], {
-                    **message_metadata,
-                    **file
-                }
+                message_metadata_file = message_metadata.copy()
+                message_metadata_file.update(file)
+                yield Message.Url, file["url"], message_metadata_file
 
     def extract_channel_text(self, channel_id):
         for message in self.api.get_channel_messages(channel_id):
@@ -145,30 +153,28 @@ class DiscordExtractor(Extractor):
                 for channel in self.server_channels_metadata.copy().values():
                     if channel["parent_id"] == channel_id:
                         yield from self.extract_channel(
-                            channel["channel_id"], safe=True
-                        )
+                            channel["channel_id"], safe=True)
             elif not safe:
                 raise exception.StopExtraction(
                     "This channel type is not supported."
                 )
-        except exception.HttpError as e:
-            if not (e.status == 403 and safe):
+        except exception.HttpError as exc:
+            if not (exc.status == 403 and safe):
                 raise
 
     def parse_channel(self, channel):
+        parent_id = channel.get("parent_id")
         channel_metadata = {
             "channel": channel.get("name", ""),
             "channel_id": channel.get("id"),
             "channel_type": channel.get("type"),
             "channel_topic": channel.get("topic", ""),
-            "parent_id": channel.get("parent_id"),
+            "parent_id": parent_id,
             "is_thread": "thread_metadata" in channel
         }
 
-        if channel_metadata["parent_id"] in self.server_channels_metadata:
-            parent_metadata = (
-                self.server_channels_metadata[channel_metadata["parent_id"]]
-            )
+        if parent_id in self.server_channels_metadata:
+            parent_metadata = self.server_channels_metadata[parent_id]
             channel_metadata.update({
                 "parent": parent_metadata["channel"],
                 "parent_type": parent_metadata["channel_type"]
@@ -188,7 +194,7 @@ class DiscordExtractor(Extractor):
         channel_id = channel_metadata["channel_id"]
 
         self.server_channels_metadata[channel_id] = channel_metadata
-        return self.server_channels_metadata[channel_id]
+        return channel_metadata
 
     def parse_server(self, server):
         self.server_metadata = {
@@ -227,31 +233,21 @@ class DiscordExtractor(Extractor):
 
 class DiscordChannelExtractor(DiscordExtractor):
     subcategory = "channel"
-    directory_fmt = (
-        "{category}", "{server_id}_{server}", "{channel_id}_{channel}"
-    )
-    pattern = BASE_PATTERN + r"/channels/(\d+)/(?:\d+/threads/)?(\d+)/?$"
-    example = (
-        "https://discord.com/channels/302094807046684672/1306705919916249098"
-    )
+    pattern = BASE_PATTERN + r"/channels/(\d+)/(?:\d+/threads/)?(\d+)"
+    example = "https://discord.com/channels/1234567890/9876543210"
 
     def items(self):
         server_id, channel_id = self.groups
 
         self.build_server_and_channels(server_id)
 
-        yield from self.extract_channel(channel_id)
+        return self.extract_channel(channel_id)
 
 
 class DiscordServerExtractor(DiscordExtractor):
     subcategory = "server"
-    directory_fmt = (
-        "{category}", "{server_id}_{server}", "{channel_id}_{channel}"
-    )
     pattern = BASE_PATTERN + r"/channels/(\d+)/?$"
-    example = (
-        "https://discord.com/channels/302094807046684672"
-    )
+    example = "https://discord.com/channels/1234567890"
 
     def items(self):
         server_id = self.groups[0]
@@ -261,24 +257,18 @@ class DiscordServerExtractor(DiscordExtractor):
         for channel in self.server_channels_metadata.copy().values():
             if channel["channel_type"] in (0, 5, 15, 16):
                 yield from self.extract_channel(
-                    channel["channel_id"], safe=True
-                )
+                    channel["channel_id"], safe=True)
 
 
 class DiscordDirectMessagesExtractor(DiscordExtractor):
     subcategory = "direct-messages"
-    directory_fmt = (
-        "{category}", "{subcategory}", "{channel_id}_{recipients:J,}"
-    )
-    pattern = BASE_PATTERN + r"/channels/@me/(\d+)/?$"
-    example = (
-        "https://discord.com/channels/@me/302094807046684672"
-    )
+    directory_fmt = ("{category}", "Direct Messages",
+                     "{channel_id}_{recipients:J,}")
+    pattern = BASE_PATTERN + r"/channels/@me/(\d+)"
+    example = "https://discord.com/channels/@me/1234567890"
 
     def items(self):
-        channel_id = self.groups[0]
-
-        yield from self.extract_channel(channel_id)
+        return self.extract_channel(self.groups[0])
 
 
 class DiscordAPI():
@@ -289,8 +279,8 @@ class DiscordAPI():
 
     def __init__(self, extractor):
         self.extractor = extractor
-        self.token = extractor.token
         self.root = extractor.root + "/api/v10"
+        self.headers = {"Authorization": extractor.token}
 
     def get_server(self, server_id):
         """Get server information"""
@@ -309,11 +299,12 @@ class DiscordAPI():
         THREADS_BATCH = 25
 
         def _method(offset):
-            return self._call(
-                "/channels/" + channel_id + "/threads/search?"
-                "sort_by=last_message_time&sort_order=desc"
-                "&limit=" + str(THREADS_BATCH) + "&offset=" + str(offset)
-            )["threads"]
+            return self._call("/channels/" + channel_id + "/threads/search", {
+                "sort_by": "last_message_time",
+                "sort_order": "desc",
+                "limit": THREADS_BATCH,
+                "offset": + offset,
+            })["threads"]
 
         return self._pagination(_method, THREADS_BATCH)
 
@@ -325,24 +316,22 @@ class DiscordAPI():
 
         def _method(_):
             nonlocal before
-            messages = self._call(
-                "/channels/" + channel_id +
-                "/messages?limit=" + str(MESSAGES_BATCH) +
-                (("&before=" + before) if before else "")
-            )
+            messages = self._call("/channels/" + channel_id + "/messages", {
+                "limit": MESSAGES_BATCH,
+                "before": before
+            })
             before = messages[-1]["id"]
             return messages
 
         return self._pagination(_method, MESSAGES_BATCH)
 
-    def _call(self, endpoint):
+    def _call(self, endpoint, params=None):
         url = self.root + endpoint
         try:
-            response = self.extractor.request(url, headers={
-                "Authorization": self.token,
-            })
-        except exception.HttpError as e:
-            if e.status == 401:
+            response = self.extractor.request(
+                url, params=params, headers=self.headers)
+        except exception.HttpError as exc:
+            if exc.status == 401:
                 self._raise_invalid_token()
             raise
         return response.json()

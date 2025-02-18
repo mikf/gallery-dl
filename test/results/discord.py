@@ -5,7 +5,6 @@
 # published by the Free Software Foundation.
 
 from gallery_dl.extractor import discord
-# import datetime
 
 
 __tests__ = (
@@ -37,7 +36,7 @@ __tests__ = (
 #    "message"     : str,
 #    "message_id"  : str,
 #    "type"        : str,
-#    "date"        : datetime.datetime,
+#    "date"        : "type:datetime",
 #    "files"       : list,
 #    "filename"    : str,
 #    "extension"   : str,
@@ -53,13 +52,13 @@ __tests__ = (
 {
     "#url"     : "https://discord.com/channels/302094807046684672",
     "#category": ("", "discord", "server"),
-    "#class"   : discord.DiscordServerExtractor
+    "#class"   : discord.DiscordServerExtractor,
 },
 
 {
     "#url"     : "https://discord.com/channels/@me/302094807046684672",
     "#category": ("", "discord", "direct-messages"),
-    "#class"   : discord.DiscordDirectMessagesExtractor
-}
+    "#class"   : discord.DiscordDirectMessagesExtractor,
+},
 
 )
