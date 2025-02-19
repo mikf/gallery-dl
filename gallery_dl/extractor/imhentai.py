@@ -61,12 +61,12 @@ class ImhentaiGalleryExtractor(ImhentaiExtractor, GalleryExtractor):
             "gallery_id": text.parse_int(self.gallery_id),
             "title"     : text.unescape(extr("<h1>", "<")),
             "title_alt" : text.unescape(extr('class="subtitle">', "<")),
-            "parody"    : self._split(extr(">Parodies:</span>", "</li>")),
-            "character" : self._split(extr(">Characters:</span>", "</li>")),
-            "tags"      : self._split(extr(">Tags:</span>", "</li>")),
-            "artist"    : self._split(extr(">Artists:</span>", "</li>")),
-            "group"     : self._split(extr(">Groups:</span>", "</li>")),
-            "language"  : self._split(extr(">Languages:</span>", "</li>")),
+            "parody"    : self._split(extr(">Parodies", "</li>")),
+            "character" : self._split(extr(">Characters", "</li>")),
+            "tags"      : self._split(extr(">Tags", "</li>")),
+            "artist"    : self._split(extr(">Artists", "</li>")),
+            "group"     : self._split(extr(">Groups", "</li>")),
+            "language"  : self._split(extr(">Languages", "</li>")),
             "type"      : extr("href='/category/", "/"),
         }
 
