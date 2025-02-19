@@ -4,15 +4,16 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-from gallery_dl.extractor import hentaiera
+from gallery_dl.extractor import imhentai
 
 
 __tests__ = (
 {
-    "#url"    : "https://hentaiera.com/gallery/28/",
-    "#class"  : hentaiera.HentaieraGalleryExtractor,
-    "#pattern": r"https://m1\.hentaiera\.com/001/knrxtga49v/\d+\.jpg",
-    "#count"  : 25,
+    "#url"     : "https://hentaiera.com/gallery/28/",
+    "#category": ("IMHentai", "hentaiera", "gallery"),
+    "#class"   : imhentai.ImhentaiGalleryExtractor,
+    "#pattern" : r"https://m1\.hentaiera\.com/001/knrxtga49v/\d+\.jpg",
+    "#count"   : 25,
 
     "count"     : 25,
     "extension" : "jpg",
@@ -58,10 +59,11 @@ __tests__ = (
 },
 
 {
-    "#url"    : "https://hentaiera.com/gallery/9319/",
-    "#class"  : hentaiera.HentaieraGalleryExtractor,
-    "#pattern": r"https://m1\.hentaiera\.com/001/gkchsf3x5m/\d+\.jpg",
-    "#count"  : 8,
+    "#url"     : "https://hentaiera.com/gallery/9319/",
+    "#category": ("IMHentai", "hentaiera", "gallery"),
+    "#class"   : imhentai.ImhentaiGalleryExtractor,
+    "#pattern" : r"https://m1\.hentaiera\.com/001/gkchsf3x5m/\d+\.jpg",
+    "#count"   : 8,
 
     "count"     : 8,
     "extension" : "jpg",
@@ -103,17 +105,19 @@ __tests__ = (
 },
 
 {
-    "#url"    : "https://hentaiera.com/artist/kujiran/",
-    "#class"  : hentaiera.HentaieraTagExtractor,
-    "#pattern": hentaiera.HentaieraGalleryExtractor.pattern,
-    "#count"  : range(120, 150),
+    "#url"     : "https://hentaiera.com/artist/kujiran/",
+    "#category": ("IMHentai", "hentaiera", "tag"),
+    "#class"   : imhentai.ImhentaiTagExtractor,
+    "#pattern" : imhentai.ImhentaiGalleryExtractor.pattern,
+    "#count"   : range(120, 150),
 },
 
 {
-    "#url"    : "https://hentaiera.com/search/?key=kujiran",
-    "#class"  : hentaiera.HentaieraSearchExtractor,
-    "#pattern": hentaiera.HentaieraGalleryExtractor.pattern,
-    "#count"  : range(120, 150),
+    "#url"     : "https://hentaiera.com/search/?key=kujiran",
+    "#category": ("IMHentai", "hentaiera", "search"),
+    "#class"   : imhentai.ImhentaiSearchExtractor,
+    "#pattern" : imhentai.ImhentaiGalleryExtractor.pattern,
+    "#count"   : range(120, 150),
 },
 
 )

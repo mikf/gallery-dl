@@ -338,12 +338,6 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
-    <td>HentaiEra</td>
-    <td>https://hentaiera.com/</td>
-    <td>Galleries, Search Results, Tag Searches</td>
-    <td></td>
-</tr>
-<tr>
     <td>HentaiFox</td>
     <td>https://hentaifox.com/</td>
     <td>Galleries, Search Results</td>
@@ -365,12 +359,6 @@ Consider all listed sites to potentially be NSFW.
     <td>HentaiNexus</td>
     <td>https://hentainexus.com/</td>
     <td>Galleries, Search Results</td>
-    <td></td>
-</tr>
-<tr>
-    <td>HentaiRox</td>
-    <td>https://hentairox.com/</td>
-    <td>Galleries, Search Results, Tag Searches</td>
     <td></td>
 </tr>
 <tr>
@@ -461,12 +449,6 @@ Consider all listed sites to potentially be NSFW.
     <td>imgur</td>
     <td>https://imgur.com/</td>
     <td>Albums, Favorites, Favorites Folders, Galleries, individual Images, Personal Posts, Search Results, Subreddits, Tag Searches, User Profiles</td>
-    <td></td>
-</tr>
-<tr>
-    <td>IMHentai</td>
-    <td>https://imhentai.xxx/</td>
-    <td>Galleries, Search Results, Tag Searches</td>
     <td></td>
 </tr>
 <tr>
@@ -1323,6 +1305,28 @@ Consider all listed sites to potentially be NSFW.
     <td>Porn Image</td>
     <td>https://porn-image.com/</td>
     <td>Galleries</td>
+    <td></td>
+</tr>
+
+<tr>
+    <td colspan="4"><strong>IMHentai and Mirror Sites</strong></td>
+</tr>
+<tr>
+    <td>IMHentai</td>
+    <td>https://imhentai.xxx/</td>
+    <td>Galleries, Search Results, Tag Searches</td>
+    <td></td>
+</tr>
+<tr>
+    <td>HentaiEra</td>
+    <td>https://hentaiera.com/</td>
+    <td>Galleries, Search Results, Tag Searches</td>
+    <td></td>
+</tr>
+<tr>
+    <td>HentaiRox</td>
+    <td>https://hentairox.com/</td>
+    <td>Galleries, Search Results, Tag Searches</td>
     <td></td>
 </tr>
 
