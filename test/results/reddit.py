@@ -41,6 +41,17 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.reddit.com/r/IdiotsInCars/search/?q=flair%3AOC",
+    "#comment" : "(#7025)",
+    "#category": ("", "reddit", "subreddit-search"),
+    "#class"   : reddit.RedditSubredditExtractor,
+    "#range"   : "1-25",
+
+    "subreddit"      : "IdiotsInCars",
+    "link_flair_text": "OC",
+},
+
+{
     "#url"     : "https://www.reddit.com/",
     "#category": ("", "reddit", "home"),
     "#class"   : reddit.RedditHomeExtractor,

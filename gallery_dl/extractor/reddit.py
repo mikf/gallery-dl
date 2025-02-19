@@ -259,6 +259,8 @@ class RedditSubredditExtractor(RedditExtractor):
         self.subreddit, sub, params = match.groups()
         self.params = text.parse_query(params)
         if sub:
+            if sub == "search" and "restrict_sr" not in self.params:
+                self.params["restrict_sr"] = "1"
             self.subcategory += "-" + sub
         RedditExtractor.__init__(self, match)
 
