@@ -338,6 +338,12 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
+    <td>HentaiEra</td>
+    <td>https://hentaiera.com/</td>
+    <td>Galleries, Search Results, Tag Searches</td>
+    <td></td>
+</tr>
+<tr>
     <td>HentaiFox</td>
     <td>https://hentaifox.com/</td>
     <td>Galleries, Search Results</td>

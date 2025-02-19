@@ -66,6 +66,7 @@ modules = [
     "hatenablog",
     "hentai2read",
     "hentaicosplays",
+    "hentaiera",
     "hentaifoundry",
     "hentaifox",
     "hentaihand",
