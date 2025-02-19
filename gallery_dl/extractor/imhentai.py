@@ -6,21 +6,18 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extractors for https://imhentai.xxx/"""
+"""Extractors for https://imhentai.xxx/ and mirror sites"""
 
-from .common import GalleryExtractor, Extractor, Message
+from .common import GalleryExtractor, BaseExtractor, Message
 from .. import text, util
 
-BASE_PATTERN = r"(?:https?://)?(?:www\.)?imhentai\.xxx"
 
-
-class ImhentaiExtractor(Extractor):
-    category = "imhentai"
-    root = "https://imhentai.xxx"
+class ImhentaiExtractor(BaseExtractor):
+    basecategory = "IMHentai"
 
     def _pagination(self, url):
         base = self.root + "/gallery/"
-        data = {"_extractor": self._gallery_extractor}
+        data = {"_extractor": ImhentaiGalleryExtractor}
 
         while True:
             page = self.request(url).text
@@ -44,15 +41,31 @@ class ImhentaiExtractor(Extractor):
             url = href
 
 
+BASE_PATTERN = ImhentaiExtractor.update({
+    "imhentai": {
+        "root": "https://imhentai.xxx",
+        "pattern": r"(?:www\.)?imhentai\.xxx",
+    },
+    "hentaiera": {
+        "root": "https://hentaiera.com",
+        "pattern": r"(?:www\.)?hentaiera\.com",
+    },
+    "hentairox": {
+        "root": "https://hentairox.com",
+        "pattern": r"(?:www\.)?hentairox\.com",
+    },
+})
+
+
 class ImhentaiGalleryExtractor(ImhentaiExtractor, GalleryExtractor):
     """Extractor for imhentai galleries"""
     pattern = BASE_PATTERN + r"/(?:gallery|view)/(\d+)"
     example = "https://imhentai.xxx/gallery/12345/"
 
     def __init__(self, match):
-        self.gallery_id = match.group(1)
-        url = "{}/gallery/{}/".format(self.root, self.gallery_id)
-        GalleryExtractor.__init__(self, match, url)
+        ImhentaiExtractor.__init__(self, match)
+        self.gallery_id = self.groups[-1]
+        self.gallery_url = "{}/gallery/{}/".format(self.root, self.gallery_id)
 
     def metadata(self, page):
         extr = text.extract_from(page)
@@ -109,7 +122,7 @@ class ImhentaiTagExtractor(ImhentaiExtractor):
     example = "https://imhentai.xxx/tag/TAG/"
 
     def items(self):
-        url = self.root + self.groups[0] + "/"
+        url = self.root + self.groups[-2] + "/"
         return self._pagination(url)
 
 
@@ -120,8 +133,5 @@ class ImhentaiSearchExtractor(ImhentaiExtractor):
     example = "https://imhentai.xxx/search/?key=QUERY"
 
     def items(self):
-        url = self.root + "/search/?" + self.groups[0]
+        url = self.root + "/search/?" + self.groups[-1]
         return self._pagination(url)
-
-
-ImhentaiExtractor._gallery_extractor = ImhentaiGalleryExtractor

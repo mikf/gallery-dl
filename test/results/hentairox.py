@@ -4,15 +4,16 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-from gallery_dl.extractor import hentairox
+from gallery_dl.extractor import imhentai
 
 
 __tests__ = (
 {
-    "#url"    : "https://hentairox.com/gallery/25/",
-    "#class"  : hentairox.HentairoxGalleryExtractor,
-    "#pattern": r"https://m1\.hentairox\.com/001/knrxtga49v/\d+\.jpg",
-    "#count"  : 25,
+    "#url"     : "https://hentairox.com/gallery/25/",
+    "#category": ("IMHentai", "hentairox", "gallery"),
+    "#class"   : imhentai.ImhentaiGalleryExtractor,
+    "#pattern" : r"https://m1\.hentairox\.com/001/knrxtga49v/\d+\.jpg",
+    "#count"   : 25,
 
     "count"     : 25,
     "extension" : "jpg",
@@ -59,7 +60,8 @@ __tests__ = (
 
 {
     "#url"    : "https://hentairox.com/gallery/8526/",
-    "#class"  : hentairox.HentairoxGalleryExtractor,
+    "#category": ("IMHentai", "hentairox", "gallery"),
+    "#class"   : imhentai.ImhentaiGalleryExtractor,
     "#pattern": r"https://m1\.hentairox\.com/001/gkchsf3x5m/\d+\.jpg",
     "#count"  : 8,
 
@@ -103,17 +105,19 @@ __tests__ = (
 },
 
 {
-    "#url"    : "https://hentairox.com/artist/kizuki-aruchu/",
-    "#class"  : hentairox.HentairoxTagExtractor,
-    "#pattern": hentairox.HentairoxGalleryExtractor.pattern,
-    "#count"  : range(140, 160),
+    "#url"     : "https://hentairox.com/artist/kizuki-aruchu/",
+    "#category": ("IMHentai", "hentairox", "tag"),
+    "#class"   : imhentai.ImhentaiTagExtractor,
+    "#pattern" : imhentai.ImhentaiGalleryExtractor.pattern,
+    "#count"   : range(140, 160),
 },
 
 {
-    "#url"    : "https://hentairox.com/search/?key=aruchu",
-    "#class"  : hentairox.HentairoxSearchExtractor,
-    "#pattern": hentairox.HentairoxGalleryExtractor.pattern,
-    "#count"  : range(140, 160),
+    "#url"     : "https://hentairox.com/search/?key=aruchu",
+    "#category": ("IMHentai", "hentairox", "search"),
+    "#class"   : imhentai.ImhentaiSearchExtractor,
+    "#pattern" : imhentai.ImhentaiGalleryExtractor.pattern,
+    "#count"   : range(140, 160),
 },
 
 )
