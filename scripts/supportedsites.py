@@ -56,6 +56,7 @@ CATEGORY_MAP = {
     "fanbox"         : "pixivFANBOX",
     "fashionnova"    : "Fashion Nova",
     "furaffinity"    : "Fur Affinity",
+    "furry34"        : "Furry 34 com",
     "hatenablog"     : "HatenaBlog",
     "hbrowse"        : "HBrowse",
     "hentai2read"    : "Hentai2Read",

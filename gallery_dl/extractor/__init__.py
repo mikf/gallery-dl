@@ -57,6 +57,7 @@ modules = [
     "fapachi",
     "flickr",
     "furaffinity",
+    "furry34",
     "fuskator",
     "gelbooru",
     "gelbooru_v01",

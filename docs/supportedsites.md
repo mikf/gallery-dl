@@ -290,6 +290,12 @@ Consider all listed sites to potentially be NSFW.
     <td><a href="https://github.com/mikf/gallery-dl#cookies">Cookies</a></td>
 </tr>
 <tr>
+    <td>Furry 34 com</td>
+    <td>https://furry34.com/</td>
+    <td>Playlists, Posts, Tag Searches</td>
+    <td></td>
+</tr>
+<tr>
     <td>Fuskator</td>
     <td>https://fuskator.com/</td>
     <td>Galleries, Search Results</td>
