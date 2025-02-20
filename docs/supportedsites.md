@@ -524,6 +524,12 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
+    <td>Kissjav</td>
+    <td>https://kissjav.com</td>
+    <td>Albums, Videos</td>
+    <td></td>
+</tr>
+<tr>
     <td>Komikcast</td>
     <td>https://komikcast.la/</td>
     <td>Chapters, Manga</td>
