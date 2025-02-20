@@ -16,6 +16,7 @@ class ImhentaiExtractor(BaseExtractor):
     basecategory = "IMHentai"
 
     def _pagination(self, url):
+        prev = None
         base = self.root + "/gallery/"
         data = {"_extractor": ImhentaiGalleryExtractor}
 
@@ -25,10 +26,12 @@ class ImhentaiExtractor(BaseExtractor):
 
             while True:
                 gallery_id = extr('<a href="/gallery/', '"')
+                if gallery_id == prev:
+                    continue
                 if not gallery_id:
                     break
                 yield Message.Queue, base + gallery_id, data
-                extr('<a href="/gallery/', '"')  # skip duplicate GIDs
+                prev = gallery_id
 
             href = text.rextract(page, "class='page-link' href='", "'")[0]
             if not href or href == "#":
