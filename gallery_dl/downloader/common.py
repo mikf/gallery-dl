@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2022 Mike Fährmann
+# Copyright 2014-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -17,8 +17,15 @@ class DownloaderBase():
     scheme = ""
 
     def __init__(self, job):
+        extractor = job.extractor
+
+        opts = self._extractor_config(extractor)
+        if opts:
+            self.opts = opts
+            self.config = self.config_opts
+
         self.out = job.out
-        self.session = job.extractor.session
+        self.session = extractor.session
         self.part = self.config("part", True)
         self.partdir = self.config("part-directory")
         self.log = job.get_logger("downloader." + self.scheme)
@@ -29,13 +36,51 @@ class DownloaderBase():
 
         proxies = self.config("proxy", util.SENTINEL)
         if proxies is util.SENTINEL:
-            self.proxies = job.extractor._proxies
+            self.proxies = extractor._proxies
         else:
             self.proxies = util.build_proxy_map(proxies, self.log)
 
     def config(self, key, default=None):
         """Interpolate downloader config value for 'key'"""
         return config.interpolate(("downloader", self.scheme), key, default)
+
+    def config_opts(self, key, default=None):
+        value = self.opts.get(key, util.SENTINEL)
+        if value is not util.SENTINEL:
+            return value
+        return config.interpolate(("downloader", self.scheme), key, default)
+
+    def _extractor_config(self, extractor):
+        path = extractor._cfgpath
+        if not isinstance(path, list):
+            return self._extractor_opts(path[1], path[2])
+
+        opts = {}
+        for cat, sub in reversed(path):
+            popts = self._extractor_opts(cat, sub)
+            if popts:
+                opts.update(popts)
+        return opts
+
+    def _extractor_opts(self, category, subcategory):
+        cfg = config.get(("extractor",), category)
+        if not cfg:
+            return None
+
+        copts = cfg.get(self.scheme)
+        if copts:
+            if subcategory in cfg:
+                sopts = cfg[subcategory].get(self.scheme)
+                if sopts:
+                    opts = copts.copy()
+                    opts.update(sopts)
+                    return opts
+            return copts
+
+        if subcategory in cfg:
+            return cfg[subcategory].get(self.scheme)
+
+        return None
 
     def download(self, url, pathfmt):
         """Write data from 'url' into the file specified by 'pathfmt'"""
