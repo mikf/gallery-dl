@@ -37,6 +37,7 @@ class GenericExtractor(Extractor):
     example = "generic:https://www.nongnu.org/lzip/"
 
     def __init__(self, match):
+        self.subcategory = match.group('domain')
         Extractor.__init__(self, match)
 
         # Strip the "g(eneric):" prefix
@@ -54,7 +55,6 @@ class GenericExtractor(Extractor):
             self.scheme = 'https://'
             self.url = text.ensure_http_scheme(self.url, self.scheme)
 
-        self.subcategory = match.group('domain')
         self.path = match.group('path')
 
         # Used to resolve relative image urls
