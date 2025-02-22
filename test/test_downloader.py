@@ -150,20 +150,21 @@ class TestDownloaderConfig(unittest.TestCase):
         config.set(("downloader", "http"), "filesize-min", "10k")
         config.set(("extractor", "generic"), "verify", False)
         config.set(("extractor", "generic", "example.org"), "timeout", 10)
-        config.set(("extractor", "generic", "http"), "rate", "1k")
+        config.set(("extractor", "generic", "http"), "part", False)
         config.set(
             ("extractor", "generic", "example.org", "http"), "headers", {})
 
         job = FakeJob()
         dl = downloader.find("http")(job)
 
-        self.assertEqual(dl.headers, {})
+        self.assertEqual(dl.headers, {"foo": "bar"})
         self.assertEqual(dl.minsize, 10240)
         self.assertEqual(dl.retries, float("inf"))
         self.assertEqual(dl.timeout, 10)
         self.assertEqual(dl.verify, False)
         self.assertEqual(dl.mtime, False)
-        self.assertEqual(dl.rate, 1024)
+        self.assertEqual(dl.rate, 42)
+        self.assertEqual(dl.part, False)
 
 
 class TestDownloaderBase(unittest.TestCase):
