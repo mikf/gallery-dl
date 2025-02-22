@@ -81,25 +81,21 @@ class BilibiliArticleExtractor(BilibiliExtractor):
             yield Message.Url, url, text.nameext_from_url(url, article)
 
 
-class BilibiliUserArticleFavlistExtractor(BilibiliExtractor):
-    subcategory = "user-article-favlist"
-    pattern = (r"(?:https?://)?(?:space.bilibili.com)"
-               r"/(\d+)/(?:favlist\?fid=opus)"
-               r"(?:&ftype=opus)?")
-    example = "https://space.bilibili.com/123456/favlist?fid=opus"
+class BilibiliUserArticlesFavoriteExtractor(BilibiliExtractor):
+    subcategory = "user-articles-favorite"
+    pattern = (r"(?:https?://)?space\.bilibili\.com"
+               r"/(\d+)/favlist\?fid=opus")
+    example = "https://space.bilibili.com/12345/favlist?fid=opus"
     _warning = True
 
     def _init(self):
         BilibiliExtractor._init(self)
         if self._warning:
             if not self.cookies_check(("SESSDATA",)):
-                self.log.warning("no 'SESSDATA' cookie set")
-            BilibiliUserArticleFavlistExtractor._warning = False
+                self.log.error("'SESSDATA' cookie required")
+            BilibiliUserArticlesFavoriteExtractor._warning = False
 
     def items(self):
-        mid = self.api.login_user_id()
-        if str(mid) != self.groups[0]:
-            raise exception.StopExtraction("This is not you favlist url!")
         for article in self.api.user_favlist():
             article["_extractor"] = BilibiliArticleExtractor
             url = "{}/opus/{}".format(self.root, article["opus_id"])
@@ -153,15 +149,13 @@ class BilibiliAPI():
         params = {"page": 1, "page_size": 20}
 
         while True:
-            data = self._call(endpoint, params)
+            data = self._call(endpoint, params)["data"]
 
-            for item in data["data"]["items"]:
-                yield item
+            yield from data["items"]
 
-            if not data["data"]["has_more"]:
+            if not data.get("has_more"):
                 break
-
-            params["page"] = params["page"] + 1
+            params["page"] += 1
 
     def login_user_id(self):
         url = "https://api.bilibili.com/x/space/v2/myinfo"
