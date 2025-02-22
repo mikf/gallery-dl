@@ -206,10 +206,11 @@ class SubscribestarPostExtractor(SubscribestarExtractor):
         extr = text.extract_from(html)
         return {
             "post_id"    : text.parse_int(extr('data-id="', '"')),
-            "author_name": text.unescape(extr('href="/', '"')),
+            "date"       : self._parse_datetime(extr(
+                '<div class="section-title_date">', '<')),
+            "content"    : extr('<body>', '</body>').strip(),
+            "author_name": text.unescape(extr(
+                'class="star_link" href="/', '"')),
             "author_id"  : text.parse_int(extr('data-user-id="', '"')),
             "author_nick": text.unescape(extr('alt="', '"')),
-            "date"       : self._parse_datetime(extr(
-                '<span class="star_link-types">', '<')),
-            "content"    : extr('<body>', '</body>').strip(),
         }
