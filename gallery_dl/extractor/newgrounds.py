@@ -190,8 +190,8 @@ class NewgroundsExtractor(Extractor):
         extr = text.extract_from(page)
         data = extract_data(extr, post_url)
 
-        data["_comment"] = extr(
-            'id="author_comments"', '</div>').partition(">")[2]
+        data["comment_html"] = data["_comment"] = extr(
+            'id="author_comments"', '</div>').partition(">")[2].strip()
         data["comment"] = text.unescape(text.remove_html(
             data["_comment"]
             .replace("<p><br></p>", "\n\n").replace("<br>", "\n"), "", ""))
