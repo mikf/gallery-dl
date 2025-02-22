@@ -65,4 +65,10 @@ __tests__ = (
     "#class"  : bilibili.BilibiliUserArticlesExtractor,
 },
 
+{
+    "#url"    : "https://space.bilibili.com/405279279/favlist?fid=opus",
+    "#class"  : bilibili.BilibiliUserArticlesFavoriteExtractor,
+    "#auth"   : True,
+},
+
 )
