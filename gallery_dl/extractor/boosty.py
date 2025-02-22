@@ -8,6 +8,7 @@
 
 from .common import Extractor, Message
 from .. import text, util, exception
+import itertools
 
 BASE_PATTERN = r"(?:https?://)?boosty\.to"
 
@@ -53,7 +54,11 @@ class BoostyExtractor(Extractor):
                 self.log.warning("Not allowed to access post %s", post["id"])
                 continue
 
-            files = self._process_post(post)
+            files = self._extract_files(post)
+            if "createdAt" in post:
+                post["date"] = text.parse_timestamp(post["createdAt"])
+            if self._user:
+                post["user"] = self._user
             data = {
                 "post" : post,
                 "user" : post.pop("user", None),
@@ -69,15 +74,10 @@ class BoostyExtractor(Extractor):
     def posts(self):
         """Yield JSON content of all relevant posts"""
 
-    def _process_post(self, post):
+    def _extract_files(self, post):
         files = []
         post["content"] = content = []
         post["links"] = links = []
-
-        if "createdAt" in post:
-            post["date"] = text.parse_timestamp(post["createdAt"])
-        if self._user:
-            post["user"] = self._user
 
         for block in post["data"]:
             try:
@@ -223,101 +223,45 @@ class BoostyDirectMessagesExtractor(BoostyExtractor):
     """Extractor for boosty.to direct messages"""
     subcategory = "direct-messages"
     directory_fmt = ("{category}", "{user[blogUrl]} ({user[id]})",
-                     "direct-messages")
-    pattern = BASE_PATTERN + r"/app/messages\?dialogId=(\d+)"
-    example = "https://boosty.to/app/messages?dialogId=123456"
+                     "Direct Messages")
+    pattern = BASE_PATTERN + r"/app/messages/?\?dialogId=(\d+)"
+    example = "https://boosty.to/app/messages?dialogId=12345"
 
     def items(self):
         """Yield direct messages from a given dialog ID."""
         dialog_id = self.groups[0]
         response = self.api.dialog(dialog_id)
-        sign = response.get("signedQuery", "")
-        messages = response.get("messages", {}).get("data", [])
-        chatmate = response.get("chatmate", {})
-        user = self.api.user(chatmate.get("url", ""))
+        signed_query = response.get("signedQuery")
 
-        for message in messages:
-            files = self._process_dialog(message, sign=sign)
+        try:
+            messages = response["messages"]["data"]
+            offset = messages[0]["id"]
+        except Exception:
+            messages = ()
+            offset = None
 
-            if files:
-                data = {
-                    "post": message,
-                    "user": user,
-                    "count": len(files),
-                }
-                yield Message.Directory, data
+        try:
+            user = self.api.user(response["chatmate"]["url"])
+        except Exception:
+            user = None
 
-                for data["num"], file in enumerate(files, 1):
-                    data["file"] = file
-                    url = file["url"]
-                    yield Message.Url, url, text.nameext_from_url(url, data)
+        for message in itertools.chain(
+            messages,
+            self.api.dialog_messages(dialog_id, offset=offset)
+        ):
+            message["signedQuery"] = signed_query
+            files = self._extract_files(message)
+            data = {
+                "post": message,
+                "user": user,
+                "count": len(files),
+            }
 
-        for message in self.api.dialog_messages(dialog_id=dialog_id,
-                                                offset=messages[0]["id"]):
-            files = self._process_dialog(message, sign=sign)
-            if files:
-                data = {
-                    "post": message,
-                    "user": user,
-                    "count": len(files),
-                }
-                yield Message.Directory, data
-
-                for data["num"], file in enumerate(files, 1):
-                    data["file"] = file
-                    url = file["url"]
-                    yield Message.Url, url, text.nameext_from_url(url, data)
-
-    def _process_dialog(self, post, sign=None):
-        """Process a post and return the list of files."""
-        files = []
-
-        for block in post.get("data", []):
-            post["signedQuery"] = sign
-            type = block["type"]
-            if type == "text":
-                continue
-
-            if type == "image":
-                files.append(self._update_url(post, block))
-
-            elif type == "ok_video":
-                if not self.videos:
-                    self.log.debug(
-                        "%s: Skipping video %s", post["id"],
-                        block["id"])
-                    continue
-                fmts = {
-                    fmt["type"]: fmt["url"]
-                    for fmt in block.get("playerUrls", [])
-                    if fmt["url"]
-                }
-                formats = [
-                    fmts[fmt]
-                    for fmt in self.videos
-                    if fmt in fmts
-                ]
-                if formats:
-                    formats = iter(formats)
-                    block["url"] = next(formats)
-                    block["_fallback"] = formats
-                    files.append(block)
-                else:
-                    self.log.warning(
-                        "%s: Found no suitable video format for %s",
-                        post["id"], block["id"])
-
-            elif type == "link":
-                url = block["url"]
-                files.append({"url": url})
-
-            elif type == "audio_file":
-                files.append(self._update_url(post, block))
-
-            elif type == "file":
-                files.append(self._update_url(post, block))
-
-        return files
+            yield Message.Directory, data
+            for data["num"], file in enumerate(files, 1):
+                data["file"] = file
+                url = file["url"]
+                yield Message.Url, url, text.nameext_from_url(url, data)
 
 
 class BoostyAPI():

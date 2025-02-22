@@ -131,5 +131,10 @@ __tests__ = (
     "#auth"    : True,
 },
 
+{
+    "#url"     : "https://boosty.to/app/messages?dialogId=12345",
+    "#class"   : boosty.BoostyDirectMessagesExtractor,
+    "#auth"    : True,
+},
 
 )
