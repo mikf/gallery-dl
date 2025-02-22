@@ -10,6 +10,7 @@
 
 import os
 from .. import config, util
+_config = config._config
 
 
 class DownloaderBase():
@@ -44,7 +45,9 @@ class DownloaderBase():
         """Interpolate downloader config value for 'key'"""
         return config.interpolate(("downloader", self.scheme), key, default)
 
-    def config_opts(self, key, default=None):
+    def config_opts(self, key, default=None, conf=_config):
+        if key in conf:
+            return conf[key]
         value = self.opts.get(key, util.SENTINEL)
         if value is not util.SENTINEL:
             return value
