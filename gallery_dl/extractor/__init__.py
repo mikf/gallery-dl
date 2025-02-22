@@ -171,6 +171,7 @@ modules = [
     "tapas",
     "tcbscans",
     "telegraph",
+    "tiktok",
     "tmohentai",
     "toyhouse",
     "tsumino",
