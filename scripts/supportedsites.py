@@ -211,6 +211,7 @@ SUBCATEGORY_MAP = {
         "posts": "",
     },
     "boosty": {
+        "direct-messages": "DMs",
         "feed": "Subscriptions Feed",
     },
     "civitai": {
