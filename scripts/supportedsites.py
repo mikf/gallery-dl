@@ -206,6 +206,7 @@ SUBCATEGORY_MAP = {
     },
     "bilibili": {
         "user-articles": "User Articles",
+        "user-articles-favorite": "User Article Favorites",
     },
     "bluesky": {
         "posts": "",
