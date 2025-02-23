@@ -22,7 +22,8 @@ case "${2,,}" in
 ""|"f"|"fetch")
     call git remote add "$USER" git@github.com:"$USER"/"$REPO".git || true
     call git fetch "$USER" "$BRANCH"
-    call git checkout -b "$USER-$BRANCH" "$USER/$BRANCH"
+    call git branch "$USER-$BRANCH" "$USER/$BRANCH" || true
+    call git switch "$USER-$BRANCH"
     ;;
 
 "m"|"merge")
