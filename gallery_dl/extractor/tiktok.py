@@ -10,7 +10,6 @@ from .common import Extractor, Message
 from .. import text, util, ytdl, exception
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?tiktokv?\.com"
-USER_PATTERN = BASE_PATTERN + r"/@([\w_.-]+)"
 
 
 class TiktokExtractor(Extractor):
@@ -21,11 +20,6 @@ class TiktokExtractor(Extractor):
     archive_fmt = "{id}_{num}_{img_id}"
     root = "https://www.tiktok.com"
     cookies_domain = ".tiktok.com"
-
-    def urls(self):
-        user, post_id = self.groups
-        url = "{}/@{}/video/{}".format(self.root, user or "", post_id)
-        return (url,)
 
     def avatar(self):
         return False
@@ -142,8 +136,13 @@ class TiktokExtractor(Extractor):
 class TiktokPostExtractor(TiktokExtractor):
     """Extract a single video or photo TikTok link"""
     subcategory = "post"
-    pattern = USER_PATTERN + r"/(?:phot|vide)o/(\d+)"
+    pattern = BASE_PATTERN + r"/(?:@([\w_.-]*)|share)/(?:phot|vide)o/(\d+)"
     example = "https://www.tiktok.com/@USER/photo/1234567890"
+
+    def urls(self):
+        user, post_id = self.groups
+        url = "{}/@{}/video/{}".format(self.root, user or "", post_id)
+        return (url,)
 
 
 class TiktokVmpostExtractor(TiktokExtractor):
@@ -170,17 +169,10 @@ class TiktokVmpostExtractor(TiktokExtractor):
         yield Message.Queue, url.partition("?")[0], data
 
 
-class TiktokSharepostExtractor(TiktokExtractor):
-    """Extract a single video or photo TikTok share link"""
-    subcategory = "sharepost"
-    pattern = BASE_PATTERN + r"/share/video/()(\d+)"
-    example = "https://www.tiktokv.com/share/video/1234567890"
-
-
 class TiktokUserExtractor(TiktokExtractor):
     """Extract a TikTok user's profile"""
     subcategory = "user"
-    pattern = USER_PATTERN + r"/?(?:$|\?|#)"
+    pattern = BASE_PATTERN + r"/@([\w_.-]+)/?(?:$|\?|#)"
     example = "https://www.tiktok.com/@USER"
 
     def urls(self):

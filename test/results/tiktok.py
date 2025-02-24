@@ -30,19 +30,10 @@ __tests__ = (
 },
 
 {
-    "#url"      : "https://vm.tiktok.com/ZGdh4WUhr/",
-    "#comment"  : "vm.tiktok.com link: many photos",
-    "#category" : ("", "tiktok", "vmpost"),
-    "#class"    : tiktok.TiktokVmpostExtractor,
-    "#pattern"  : PATTERN,
-    "#options"  : {"videos": False},
-},
-
-{
     "#url"      : "https://www.tiktokv.com/share/video/7240568259186019630",
     "#comment"  : "www.tiktokv.com link: many photos",
-    "#category" : ("", "tiktok", "sharepost"),
-    "#class"    : tiktok.TiktokSharepostExtractor,
+    "#category" : ("", "tiktok", "post"),
+    "#class"    : tiktok.TiktokPostExtractor,
     "#pattern"  : PATTERN,
     "#options"  : {"videos": False},
 },
@@ -66,19 +57,10 @@ __tests__ = (
 },
 
 {
-    "#url"      : "https://vm.tiktok.com/ZGdhVtER2/",
-    "#comment"  : "vm.tiktok.com link: single photo",
-    "#category" : ("", "tiktok", "vmpost"),
-    "#class"    : tiktok.TiktokVmpostExtractor,
-    "#pattern"  : PATTERN,
-    "#options"  : {"videos": False},
-},
-
-{
     "#url"      : "https://www.tiktokv.com/share/video/7449575367024626974",
     "#comment"  : "www.tiktokv.com link: single photo",
-    "#category" : ("", "tiktok", "sharepost"),
-    "#class"    : tiktok.TiktokSharepostExtractor,
+    "#category" : ("", "tiktok", "post"),
+    "#class"    : tiktok.TiktokPostExtractor,
     "#pattern"  : PATTERN,
     "#options"  : {"videos": False},
 },
@@ -102,19 +84,10 @@ __tests__ = (
 },
 
 {
-    "#url"      : "https://vm.tiktok.com/ZGdhVW3cu/",
-    "#comment"  : "vm.tiktok.com link: few photos",
-    "#category" : ("", "tiktok", "vmpost"),
-    "#class"    : tiktok.TiktokVmpostExtractor,
-    "#pattern"  : PATTERN,
-    "#options"  : {"videos": False},
-},
-
-{
     "#url"      : "https://www.tiktokv.com/share/video/7449701420934122785",
     "#comment"  : "www.tiktokv.com link: few photos",
-    "#category" : ("", "tiktok", "sharepost"),
-    "#class"    : tiktok.TiktokSharepostExtractor,
+    "#category" : ("", "tiktok", "post"),
+    "#class"    : tiktok.TiktokPostExtractor,
     "#pattern"  : PATTERN,
     "#options"  : {"videos": False},
 },
@@ -147,20 +120,20 @@ __tests__ = (
 },
 
 {
-    "#url"      : "https://vm.tiktok.com/ZGdht7cjp/",
-    "#comment"  : "Video post as a VM link",
-    "#category" : ("", "tiktok", "vmpost"),
-    "#class"    : tiktok.TiktokVmpostExtractor,
-    "#urls"     : "ytdl:https://vm.tiktok.com/ZGdht7cjp/",
+    "#url"      : "https://www.tiktokv.com/share/video/7240568259186019630",
+    "#comment"  : "www.tiktokv.com link: many photos with audio",
+    "#category" : ("", "tiktok", "post"),
+    "#class"    : tiktok.TiktokPostExtractor,
+    "#pattern"  : PATTERN_WITH_AUDIO,
     "#options"  : {"videos": True},
 },
 
 {
     "#url"      : "https://www.tiktokv.com/share/video/7449708266168274208",
     "#comment"  : "Video post as a share link",
-    "#category" : ("", "tiktok", "sharepost"),
-    "#class"    : tiktok.TiktokSharepostExtractor,
-    "#urls"     : "ytdl:https://www.tiktokv.com/share/video/7449708266168274208",
+    "#category" : ("", "tiktok", "post"),
+    "#class"    : tiktok.TiktokPostExtractor,
+    "#urls"     : "ytdl:https://www.tiktok.com/@/video/7449708266168274208",
     "#options"  : {"videos": True},
 },
 
@@ -192,21 +165,64 @@ __tests__ = (
 },
 
 {
+    "#url"      : "https://www.tiktok.com/@/video/7240568259186019630",
+    "#class"    : tiktok.TiktokPostExtractor,
+},
+
+{
+    "#url"      : "https://vm.tiktok.com/ZGdh4WUhr/",
+    "#comment"  : "vm.tiktok.com link: many photos",
+    "#category" : ("", "tiktok", "vmpost"),
+    "#class"    : tiktok.TiktokVmpostExtractor,
+    "#pattern"  : tiktok.TiktokPostExtractor.pattern,
+},
+
+{
+    "#url"      : "https://vm.tiktok.com/ZGdhVtER2/",
+    "#comment"  : "vm.tiktok.com link: single photo",
+    "#category" : ("", "tiktok", "vmpost"),
+    "#class"    : tiktok.TiktokVmpostExtractor,
+    "#pattern"  : tiktok.TiktokPostExtractor.pattern,
+},
+
+{
+    "#url"      : "https://vm.tiktok.com/ZGdhVW3cu/",
+    "#comment"  : "vm.tiktok.com link: few photos",
+    "#category" : ("", "tiktok", "vmpost"),
+    "#class"    : tiktok.TiktokVmpostExtractor,
+    "#pattern"  : tiktok.TiktokPostExtractor.pattern,
+},
+
+{
+    "#url"      : "https://vm.tiktok.com/ZGdht7cjp/",
+    "#comment"  : "Video post as a VM link",
+    "#category" : ("", "tiktok", "vmpost"),
+    "#class"    : tiktok.TiktokVmpostExtractor,
+    "#pattern"  : tiktok.TiktokPostExtractor.pattern,
+},
+
+{
     "#url"      : "https://vm.tiktok.com/ZGdh4WUhr/",
     "#comment"  : "vm.tiktok.com link: many photos with audio",
     "#category" : ("", "tiktok", "vmpost"),
     "#class"    : tiktok.TiktokVmpostExtractor,
-    "#pattern"  : PATTERN_WITH_AUDIO,
-    "#options"  : {"videos": True},
+    "#pattern"  : tiktok.TiktokPostExtractor.pattern,
 },
 
 {
-    "#url"      : "https://www.tiktokv.com/share/video/7240568259186019630",
-    "#comment"  : "www.tiktokv.com link: many photos with audio",
-    "#category" : ("", "tiktok", "sharepost"),
-    "#class"    : tiktok.TiktokSharepostExtractor,
-    "#pattern"  : PATTERN_WITH_AUDIO,
-    "#options"  : {"videos": True},
+    "#url"      : "https://vt.tiktok.com/ZGdhVtER2",
+    "#comment"  : "vt.tiktok.com link: single photo",
+    "#category" : ("", "tiktok", "vmpost"),
+    "#class"    : tiktok.TiktokVmpostExtractor,
+    "#pattern"  : tiktok.TiktokPostExtractor.pattern,
+},
+
+{
+    "#url"      : "https://www.tiktok.com/t/ZGdhVtER2//",
+    "#comment"  : "www.tiktok.com/t/ link: single photo",
+    "#category" : ("", "tiktok", "vmpost"),
+    "#class"    : tiktok.TiktokVmpostExtractor,
+    "#pattern"  : tiktok.TiktokPostExtractor.pattern,
 },
 
 {
@@ -225,24 +241,6 @@ __tests__ = (
     "#class"    : tiktok.TiktokUserExtractor,
     "#pattern"  : PATTERN,
     "#options"  : {"videos": False, "tiktok-range": "1-10"},
-},
-
-{
-    "#url"      : "https://vt.tiktok.com/ZGdhVtER2",
-    "#comment"  : "vt.tiktok.com link: single photo",
-    "#category" : ("", "tiktok", "vmpost"),
-    "#class"    : tiktok.TiktokVmpostExtractor,
-    "#pattern"  : PATTERN,
-    "#options"  : {"videos": False},
-},
-
-{
-    "#url"      : "https://www.tiktok.com/t/ZGdhVtER2//",
-    "#comment"  : "www.tiktok.com/t/ link: single photo",
-    "#category" : ("", "tiktok", "vmpost"),
-    "#class"    : tiktok.TiktokVmpostExtractor,
-    "#pattern"  : PATTERN,
-    "#options"  : {"videos": False},
 },
 
 )

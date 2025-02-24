@@ -330,6 +330,9 @@ SUBCATEGORY_MAP = {
     "steamgriddb": {
         "asset": "Individual Assets",
     },
+    "tiktok": {
+        "vmpost": "VM Posts",
+    },
     "tumblr": {
         "day": "Days",
     },
