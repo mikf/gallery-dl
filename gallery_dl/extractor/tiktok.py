@@ -19,11 +19,13 @@ class TiktokExtractor(Extractor):
     directory_fmt = ("{category}", "{user}")
     filename_fmt = "{title[b:150]} [{id}{num:?_//}{img_id:?_//}].{extension}"
     archive_fmt = "{id}_{num}_{img_id}"
-    root = "https://www.tiktok.com/"
+    root = "https://www.tiktok.com"
     cookies_domain = ".tiktok.com"
 
     def urls(self):
-        return (self.url,)
+        user, post_id = self.groups
+        url = "{}/@{}/video/{}".format(self.root, user or "", post_id)
+        return (url,)
 
     def avatar(self):
         return False
@@ -140,7 +142,7 @@ class TiktokExtractor(Extractor):
 class TiktokPostExtractor(TiktokExtractor):
     """Extract a single video or photo TikTok link"""
     subcategory = "post"
-    pattern = USER_PATTERN + r"/(?:phot|vide)o/\d+"
+    pattern = USER_PATTERN + r"/(?:phot|vide)o/(\d+)"
     example = "https://www.tiktok.com/@USER/photo/1234567890"
 
 
@@ -149,7 +151,7 @@ class TiktokVmpostExtractor(TiktokExtractor):
     subcategory = "vmpost"
     pattern = (r"(?:https?://)?(?:"
                r"(?:v[mt]\.)?tiktok\.com|(?:www\.)?tiktok\.com/t"
-               r")/(?!@)[^/?#]+")
+               r")/(?!@)([^/?#]+)")
     example = "https://vm.tiktok.com/1a2B3c4E5"
 
     def items(self):
@@ -171,7 +173,7 @@ class TiktokVmpostExtractor(TiktokExtractor):
 class TiktokSharepostExtractor(TiktokExtractor):
     """Extract a single video or photo TikTok share link"""
     subcategory = "sharepost"
-    pattern = BASE_PATTERN + r"/share/video/\d+"
+    pattern = BASE_PATTERN + r"/share/video/()(\d+)"
     example = "https://www.tiktokv.com/share/video/1234567890"
 
 
