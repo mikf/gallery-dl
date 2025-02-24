@@ -944,6 +944,12 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
+    <td>ToonDex</td>
+    <td>https://toondex.net/</td>
+    <td>Chapters, Manga</td>
+    <td></td>
+</tr>
+<tr>
     <td>Toyhouse</td>
     <td>https://toyhou.se/</td>
     <td>Art, individual Images</td>
