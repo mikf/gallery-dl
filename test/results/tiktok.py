@@ -5,10 +5,9 @@
 # published by the Free Software Foundation.
 
 from gallery_dl.extractor import tiktok
-from gallery_dl import exception
 
-PATTERN = r"https://p1[69]-.*\.tiktokcdn.*\.com/.*/[0-9a-fA-F]+~.*\.jpeg"
-PATTERN_WITH_AUDIO = r"(?:" + PATTERN + r")|(?:ytdl\:)"
+PATTERN = r"https://p1[69]-[^/?#.]+\.tiktokcdn[^/?#.]*\.com/[^/?#]+/\w+~.*\.jpe?g"
+PATTERN_WITH_AUDIO = r"(?:" + PATTERN + r"|ytdl:http.+)"
 
 
 __tests__ = (
@@ -18,206 +17,232 @@ __tests__ = (
     "#category" : ("", "tiktok", "post"),
     "#class"    : tiktok.TiktokPostExtractor,
     "#pattern"  : PATTERN,
-    "#options"  : {"videos": False}
+    "#options"  : {"videos": False},
 },
+
 {
     "#url"      : "https://www.tiktok.com/@chillezy/video/7240568259186019630",
     "#comment"  : "/video/ link: many photos",
     "#category" : ("", "tiktok", "post"),
     "#class"    : tiktok.TiktokPostExtractor,
     "#pattern"  : PATTERN,
-    "#options"  : {"videos": False}
+    "#options"  : {"videos": False},
 },
+
 {
     "#url"      : "https://vm.tiktok.com/ZGdh4WUhr/",
     "#comment"  : "vm.tiktok.com link: many photos",
     "#category" : ("", "tiktok", "vmpost"),
     "#class"    : tiktok.TiktokVmpostExtractor,
     "#pattern"  : PATTERN,
-    "#options"  : {"videos": False}
+    "#options"  : {"videos": False},
 },
+
 {
     "#url"      : "https://www.tiktokv.com/share/video/7240568259186019630",
     "#comment"  : "www.tiktokv.com link: many photos",
     "#category" : ("", "tiktok", "sharepost"),
     "#class"    : tiktok.TiktokSharepostExtractor,
     "#pattern"  : PATTERN,
-    "#options"  : {"videos": False}
+    "#options"  : {"videos": False},
 },
+
 {
     "#url"      : "https://www.tiktok.com/@d4vinefem/photo/7449575367024626974",
     "#comment"  : "/photo/ link: single photo",
     "#category" : ("", "tiktok", "post"),
     "#class"    : tiktok.TiktokPostExtractor,
     "#pattern"  : PATTERN,
-    "#options"  : {"videos": False}
+    "#options"  : {"videos": False},
 },
+
 {
     "#url"      : "https://www.tiktok.com/@d4vinefem/video/7449575367024626974",
     "#comment"  : "/video/ link: single photo",
     "#category" : ("", "tiktok", "post"),
     "#class"    : tiktok.TiktokPostExtractor,
     "#pattern"  : PATTERN,
-    "#options"  : {"videos": False}
+    "#options"  : {"videos": False},
 },
+
 {
     "#url"      : "https://vm.tiktok.com/ZGdhVtER2/",
     "#comment"  : "vm.tiktok.com link: single photo",
     "#category" : ("", "tiktok", "vmpost"),
     "#class"    : tiktok.TiktokVmpostExtractor,
     "#pattern"  : PATTERN,
-    "#options"  : {"videos": False}
+    "#options"  : {"videos": False},
 },
+
 {
     "#url"      : "https://www.tiktokv.com/share/video/7449575367024626974",
     "#comment"  : "www.tiktokv.com link: single photo",
     "#category" : ("", "tiktok", "sharepost"),
     "#class"    : tiktok.TiktokSharepostExtractor,
     "#pattern"  : PATTERN,
-    "#options"  : {"videos": False}
+    "#options"  : {"videos": False},
 },
+
 {
     "#url"      : "https://www.tiktok.com/@.mcfc.central/photo/7449701420934122785",
     "#comment"  : "/photo/ link: few photos",
     "#category" : ("", "tiktok", "post"),
     "#class"    : tiktok.TiktokPostExtractor,
     "#pattern"  : PATTERN,
-    "#options"  : {"videos": False}
+    "#options"  : {"videos": False},
 },
+
 {
     "#url"      : "https://www.tiktok.com/@.mcfc.central/video/7449701420934122785",
     "#comment"  : "/video/ link: few photos",
     "#category" : ("", "tiktok", "post"),
     "#class"    : tiktok.TiktokPostExtractor,
     "#pattern"  : PATTERN,
-    "#options"  : {"videos": False}
+    "#options"  : {"videos": False},
 },
+
 {
     "#url"      : "https://vm.tiktok.com/ZGdhVW3cu/",
     "#comment"  : "vm.tiktok.com link: few photos",
     "#category" : ("", "tiktok", "vmpost"),
     "#class"    : tiktok.TiktokVmpostExtractor,
     "#pattern"  : PATTERN,
-    "#options"  : {"videos": False}
+    "#options"  : {"videos": False},
 },
+
 {
     "#url"      : "https://www.tiktokv.com/share/video/7449701420934122785",
     "#comment"  : "www.tiktokv.com link: few photos",
     "#category" : ("", "tiktok", "sharepost"),
     "#class"    : tiktok.TiktokSharepostExtractor,
     "#pattern"  : PATTERN,
-    "#options"  : {"videos": False}
+    "#options"  : {"videos": False},
 },
+
 {
     "#url"       : "https://www.tiktok.com/@ughuwhguweghw/video/1",
     "#comment"   : "deleted post",
     "#category"  : ("", "tiktok", "post"),
     "#class"     : tiktok.TiktokPostExtractor,
-    "#exception" : exception.NotFoundError,
-    "#options"  : {"videos": False}
+    "#options"   : {"videos": False},
+    "count"      : 0,
 },
+
 {
     "#url"      : "https://www.tiktok.com/@memezar/video/7449708266168274208",
     "#comment"  : "Video post",
     "#category" : ("", "tiktok", "post"),
     "#class"    : tiktok.TiktokPostExtractor,
     "#urls"     : "ytdl:https://www.tiktok.com/@memezar/video/7449708266168274208",
-    "#options"  : {"videos": True}
+    "#options"  : {"videos": True},
 },
+
 {
     "#url"      : "https://www.tiktok.com/@memezar/photo/7449708266168274208",
     "#comment"  : "Video post as a /photo/ link",
     "#category" : ("", "tiktok", "post"),
     "#class"    : tiktok.TiktokPostExtractor,
     "#urls"     : "ytdl:https://www.tiktok.com/@memezar/video/7449708266168274208",
-    "#options"  : {"videos": True}
+    "#options"  : {"videos": True},
 },
+
 {
     "#url"      : "https://vm.tiktok.com/ZGdht7cjp/",
     "#comment"  : "Video post as a VM link",
     "#category" : ("", "tiktok", "vmpost"),
     "#class"    : tiktok.TiktokVmpostExtractor,
     "#urls"     : "ytdl:https://vm.tiktok.com/ZGdht7cjp/",
-    "#options"  : {"videos": True}
+    "#options"  : {"videos": True},
 },
+
 {
     "#url"      : "https://www.tiktokv.com/share/video/7449708266168274208",
     "#comment"  : "Video post as a share link",
     "#category" : ("", "tiktok", "sharepost"),
     "#class"    : tiktok.TiktokSharepostExtractor,
     "#urls"     : "ytdl:https://www.tiktokv.com/share/video/7449708266168274208",
-    "#options"  : {"videos": True}
+    "#options"  : {"videos": True},
 },
+
 {
     "#url"      : "https://www.tiktok.com/@memezar/video/7449708266168274208",
     "#comment"  : "Skipping video post",
     "#category" : ("", "tiktok", "post"),
     "#class"    : tiktok.TiktokPostExtractor,
     "#urls"     : [],
-    "#options"  : {"videos": False}
+    "#options"  : {"videos": False},
 },
+
 {
     "#url"      : "https://www.tiktok.com/@chillezy/photo/7240568259186019630",
     "#comment"  : "/photo/ link: many photos with audio",
     "#category" : ("", "tiktok", "post"),
     "#class"    : tiktok.TiktokPostExtractor,
     "#pattern"  : PATTERN_WITH_AUDIO,
-    "#options"  : {"videos": True}
+    "#options"  : {"videos": True},
 },
+
 {
     "#url"      : "https://www.tiktok.com/@chillezy/video/7240568259186019630",
     "#comment"  : "/video/ link: many photos with audio",
     "#category" : ("", "tiktok", "post"),
     "#class"    : tiktok.TiktokPostExtractor,
     "#pattern"  : PATTERN_WITH_AUDIO,
-    "#options"  : {"videos": True}
+    "#options"  : {"videos": True},
 },
+
 {
     "#url"      : "https://vm.tiktok.com/ZGdh4WUhr/",
     "#comment"  : "vm.tiktok.com link: many photos with audio",
     "#category" : ("", "tiktok", "vmpost"),
     "#class"    : tiktok.TiktokVmpostExtractor,
     "#pattern"  : PATTERN_WITH_AUDIO,
-    "#options"  : {"videos": True}
+    "#options"  : {"videos": True},
 },
+
 {
     "#url"      : "https://www.tiktokv.com/share/video/7240568259186019630",
     "#comment"  : "www.tiktokv.com link: many photos with audio",
     "#category" : ("", "tiktok", "sharepost"),
     "#class"    : tiktok.TiktokSharepostExtractor,
     "#pattern"  : PATTERN_WITH_AUDIO,
-    "#options"  : {"videos": True}
+    "#options"  : {"videos": True},
 },
+
 {
     "#url"      : "https://www.tiktok.com/@chillezy",
     "#comment"  : "User profile",
     "#category" : ("", "tiktok", "user"),
     "#class"    : tiktok.TiktokUserExtractor,
     "#pattern"  : PATTERN_WITH_AUDIO,
-    "#options"  : {"videos": True, "tiktok-range": "1-10"}
+    "#options"  : {"videos": True, "tiktok-range": "1-10"},
 },
+
 {
     "#url"      : "https://www.tiktok.com/@chillezy/",
     "#comment"  : "User profile without audio or videos",
     "#category" : ("", "tiktok", "user"),
     "#class"    : tiktok.TiktokUserExtractor,
     "#pattern"  : PATTERN,
-    "#options"  : {"videos": False, "tiktok-range": "1-10"}
+    "#options"  : {"videos": False, "tiktok-range": "1-10"},
 },
+
 {
     "#url"      : "https://vt.tiktok.com/ZGdhVtER2",
     "#comment"  : "vt.tiktok.com link: single photo",
     "#category" : ("", "tiktok", "vmpost"),
     "#class"    : tiktok.TiktokVmpostExtractor,
     "#pattern"  : PATTERN,
-    "#options"  : {"videos": False}
+    "#options"  : {"videos": False},
 },
+
 {
     "#url"      : "https://www.tiktok.com/t/ZGdhVtER2//",
     "#comment"  : "www.tiktok.com/t/ link: single photo",
     "#category" : ("", "tiktok", "vmpost"),
     "#class"    : tiktok.TiktokVmpostExtractor,
     "#pattern"  : PATTERN,
-    "#options"  : {"videos": False}
+    "#options"  : {"videos": False},
 },
+
 )

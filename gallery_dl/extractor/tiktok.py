@@ -7,26 +7,18 @@
 """Extractors for https://www.tiktok.com/"""
 
 from .common import Extractor, Message
-from .. import exception, text, util, ytdl
-from re import compile, escape, IGNORECASE
-from datetime import datetime
+from .. import text, util, ytdl, exception
 
-BASE_PATTERN = r"(?:https?://)?(?:www\.)?tiktok(?:v?)\.com"
-USER_PATTERN = BASE_PATTERN + r"/+@([\w.]{0,23}\w)?"
-POST_PATTERN = USER_PATTERN + \
-    r"/+(?:[pP][hH][oO][tT][oO]|[vV][iI][dD][eE][oO])/+(?:[0-9]+)/*"
-VM_POST_PATTERN = r"(?:(?:https?://)?(?:(?:vm|vt)\.)?tiktok\.com/+.*/*)|" + \
-    r"(?:(?:https?://)?(?:www\.)?tiktok\.com/+t/+.*/*)"
-SHARE_PATTERN = BASE_PATTERN + r"/+share/+video/+(?:[0-9]+)/*"
+BASE_PATTERN = r"(?:https?://)?(?:www\.)?tiktokv?\.com"
+USER_PATTERN = BASE_PATTERN + r"/@([\w_.-]+)"
 
 
 class TiktokExtractor(Extractor):
     """Base class for TikTok extractors"""
-
     category = "tiktok"
     directory_fmt = ("{category}", "{user}")
-    filename_fmt = "{title} [{id}{index:?_//}{img_id:?_//}].{extension}"
-    archive_fmt = "{id}_{index}_{img_id}"
+    filename_fmt = "{title[b:150]} [{id}{num:?_//}{img_id:?_//}].{extension}"
+    archive_fmt = "{id}_{num}_{img_id}"
     root = "https://www.tiktok.com/"
     cookies_domain = ".tiktok.com"
 
@@ -41,142 +33,138 @@ class TiktokExtractor(Extractor):
         # We assume that all of the URLs served by urls() come from the same
         # author.
         downloaded_avatar = not self.avatar()
+
         for tiktok_url in self.urls():
-            # If we can recognise that this is a /photo/ link, preemptively
-            # replace it with /video/ to prevent a needless second request.
-            # See below.
-            tiktok_url_to_use = compile(
-                escape("/photo/"),
-                IGNORECASE
-            ).sub("/video/", tiktok_url)
-            video_detail = util.json_loads(text.extr(
-                self.request(tiktok_url_to_use).text,
-                '<script id="__UNIVERSAL_DATA_FOR_REHYDRATION__" '
-                'type="application/json">',
-                '</script>'
-            ))["__DEFAULT_SCOPE__"]
-            if "webapp.video-detail" not in video_detail:
+            tiktok_url = self._sanitize_url(tiktok_url)
+            data = self._extract_rehydration_data(tiktok_url)
+            if "webapp.video-detail" not in data:
                 # Only /video/ links result in the video-detail dict we need.
                 # Try again using that form of link.
-                tiktok_url_to_use = video_detail["seo.abtest"]["canonical"] \
-                    .replace("/photo/", "/video/")
-                video_detail = util.json_loads(text.extr(
-                    self.request(tiktok_url_to_use).text,
-                    '<script id="__UNIVERSAL_DATA_FOR_REHYDRATION__" '
-                    'type="application/json">',
-                    '</script>'
-                ))["__DEFAULT_SCOPE__"]
-            video_detail = video_detail["webapp.video-detail"]
-            if "statusCode" in video_detail:
-                if video_detail["statusCode"] == 10222:
-                    raise exception.AuthorizationError(
-                        tiktok_url + ": Login required to access this post"
-                    )
-                elif video_detail["statusCode"] == 10204:
-                    raise exception.NotFoundError(tiktok_url)
-                elif video_detail["statusCode"] == 10231:
-                    raise exception.ExtractionError(
-                        tiktok_url + " is region locked, try downloading with "
-                        "a VPN/proxy connection"
-                    )
-                elif video_detail["statusCode"] != 0:
-                    raise exception.ExtractionError(
-                        tiktok_url + ": Received unknown error code " +
-                        str(video_detail['statusCode']) + (
-                            " with message " + video_detail['statusMsg'] if
-                            "statusMsg" in video_detail else ""
-                        )
-                    )
-            post_info = video_detail["itemInfo"]["itemStruct"]
-            id = post_info["id"]
-            original_title = title = post_info["desc"]
-            if len(original_title) == 0:
-                title = "TikTok photo #{}".format(id)
-            title = title[:150]
-            date = datetime.fromtimestamp(
-                int(post_info["createTime"])
-            ).isoformat()
-            user = post_info["author"]["uniqueId"]
-            # It's probably obvious but I thought it was worth noting
-            # because I got stuck on this for a while: make sure to emit
-            # a Directory message before attempting to download anything
-            # with yt-dlp! Otherwise you'll run into NoneType, set_filename
-            # errors since the download job doesn't get initialized.
-            yield Message.Directory, {"user": user}
+                tiktok_url = self._sanitize_url(
+                    data["seo.abtest"]["canonical"])
+                data = self._extract_rehydration_data(tiktok_url)
+            video_detail = data["webapp.video-detail"]
+
+            if not self._check_status_code(video_detail, tiktok_url):
+                continue
+
+            post = video_detail["itemInfo"]["itemStruct"]
+            author = post["author"]
+            post["user"] = user = author["uniqueId"]
+            post["date"] = text.parse_timestamp(post["createTime"])
+            original_title = title = post["desc"]
+            if not title:
+                title = "TikTok photo #{}".format(post["id"])
+
             if not downloaded_avatar:
-                avatar = post_info["author"]["avatarLarger"]
-                name_and_ext = text.nameext_from_url(avatar)
-                yield Message.Url, avatar, {
-                    "title"     : "@" + user,
-                    "id"        : post_info["author"]["id"],
-                    "index"     : "",
-                    "img_id"    : name_and_ext["filename"].split("~")[0],
-                    "extension" : name_and_ext["extension"]
-                }
+                avatar_url = post["author"]["avatarLarger"]
+                avatar = text.nameext_from_url(avatar_url, post.copy())
+                avatar.update({
+                    "type"  : "avatar",
+                    "title" : "@" + user,
+                    "id"    : author["id"],
+                    "img_id": avatar["filename"].partition("~")[0],
+                    "num"   : 0,
+                })
+                yield Message.Directory, avatar
+                yield Message.Url, avatar_url, avatar
                 downloaded_avatar = True
-            if "imagePost" in post_info:
-                img_list = post_info["imagePost"]["images"]
-                for i, img in enumerate(img_list):
+
+            yield Message.Directory, post
+            if "imagePost" in post:
+                img_list = post["imagePost"]["images"]
+                for i, img in enumerate(img_list, 1):
                     url = img["imageURL"]["urlList"][0]
-                    name_and_ext = text.nameext_from_url(url)
-                    yield Message.Url, url, {
-                        "title"     : title,
-                        "date"      : date,
-                        "id"        : id,
-                        "index"     : i + 1,
-                        "img_id"    : name_and_ext["filename"].split("~")[0],
-                        "extension" : name_and_ext["extension"],
-                        "width"     : img["imageWidth"],
-                        "height"    : img["imageHeight"]
-                    }
+                    text.nameext_from_url(url, post)
+                    post.update({
+                        "type"  : "image",
+                        "image" : img,
+                        "title" : title,
+                        "num"   : i,
+                        "img_id": post["filename"].partition("~")[0],
+                        "width" : img["imageWidth"],
+                        "height": img["imageHeight"],
+                    })
+                    yield Message.Url, url, post
+
             elif videos:
-                if len(original_title) == 0:
-                    title = "TikTok video #{}".format(id)
-                    title = title[:150]
+                if not original_title:
+                    title = "TikTok video #{}".format(post["id"])
+
             else:
-                self.log.info("Skipping video post %s", tiktok_url)
+                self.log.info("%s: Skipping post", tiktok_url)
+
             if videos:
-                yield Message.Url, "ytdl:" + tiktok_url_to_use, {
+                post.update({
+                    "type"      : "video",
+                    "image"     : None,
                     "filename"  : "",
-                    "extension" : "",
+                    "extension" : "mp4",
                     "title"     : title,
-                    "date"      : date,
-                    "id"        : id,
-                    "index"     : "",
-                    "img_id"    : ""
-                }
+                    "num"       : 0,
+                    "img_id"    : "",
+                    "width"     : 0,
+                    "height"    : 0,
+                })
+                yield Message.Url, "ytdl:" + tiktok_url, post
+
+    def _sanitize_url(self, url):
+        return text.ensure_http_scheme(url.replace("/photo/", "/video/", 1))
+
+    def _extract_rehydration_data(self, url):
+        html = self.request(url).text
+        data = text.extr(
+            html, '<script id="__UNIVERSAL_DATA_FOR_REHYDRATION__" '
+            'type="application/json">', '</script>')
+        return util.json_loads(data)["__DEFAULT_SCOPE__"]
+
+    def _check_status_code(self, detail, url):
+        status = detail.get("statusCode")
+        if not status:
+            return True
+
+        if status == 10222:
+            self.log.error("%s: Login required to access this post", url)
+        elif status == 10204:
+            self.log.error("%s: Requested post not available", url)
+        elif status == 10231:
+            self.log.error("%s: Region locked - Try downloading with a"
+                           "VPN/proxy connection", url)
+        else:
+            self.log.error(
+                "%s: Received unknown error code %s ('%s')",
+                url, status, detail.get("statusMsg") or "")
+        return False
 
 
 class TiktokPostExtractor(TiktokExtractor):
     """Extract a single video or photo TikTok link"""
-
     subcategory = "post"
-    pattern = POST_PATTERN
-    example = "https://www.tiktok.com/@chillezy/photo/7240568259186019630"
+    pattern = USER_PATTERN + r"/(?:phot|vide)o/\d+"
+    example = "https://www.tiktok.com/@USER/photo/1234567890"
 
 
 class TiktokVmpostExtractor(TiktokExtractor):
     """Extract a single video or photo TikTok VM link"""
-
     subcategory = "vmpost"
-    pattern = VM_POST_PATTERN
-    example = "https://vm.tiktok.com/ZGdh4WUhr/"
+    pattern = (r"(?:https?://)?(?:"
+               r"(?:v[mt]\.)?tiktok\.com|(?:www\.)?tiktok\.com/t"
+               r")/(?!@)[^/?#]+")
+    example = "https://vm.tiktok.com/1a2B3c4E5"
 
 
 class TiktokSharepostExtractor(TiktokExtractor):
     """Extract a single video or photo TikTok share link"""
-
     subcategory = "sharepost"
-    pattern = SHARE_PATTERN
-    example = "https://www.tiktokv.com/share/video/7240568259186019630"
+    pattern = BASE_PATTERN + r"/share/video/\d+"
+    example = "https://www.tiktokv.com/share/video/1234567890"
 
 
 class TiktokUserExtractor(TiktokExtractor):
     """Extract a TikTok user's profile"""
-
     subcategory = "user"
-    pattern = USER_PATTERN + r"/*$"
-    example = "https://www.tiktok.com/@chillezy"
+    pattern = USER_PATTERN + r"/?(?:$|\?|#)"
+    example = "https://www.tiktok.com/@USER"
 
     def urls(self):
         """Attempt to use yt-dlp/youtube-dl to extract links from a
@@ -196,7 +184,7 @@ class TiktokUserExtractor(TiktokExtractor):
             user_opts={
                 "ignore_no_formats_error": True,
                 "cookiefile": self.cookies_file,
-                "playlist_items": str(self.config("tiktok-range", ""))
+                "playlist_items": str(self.config("tiktok-range", "")),
             }
         ) as ydl:
             info = ydl.extract_info(self.url, download=False)
