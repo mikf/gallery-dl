@@ -23,7 +23,7 @@ class TiktokExtractor(Extractor):
     cookies_domain = ".tiktok.com"
 
     def urls(self):
-        return [self.url]
+        return (self.url,)
 
     def avatar(self):
         return False
@@ -151,6 +151,21 @@ class TiktokVmpostExtractor(TiktokExtractor):
                r"(?:v[mt]\.)?tiktok\.com|(?:www\.)?tiktok\.com/t"
                r")/(?!@)[^/?#]+")
     example = "https://vm.tiktok.com/1a2B3c4E5"
+
+    def items(self):
+        url = text.ensure_http_scheme(self.url)
+        headers = {"User-Agent": "facebookexternalhit/1.1"}
+
+        response = self.request(url, headers=headers, method="HEAD",
+                                allow_redirects=False, notfound="post")
+
+        url = response.headers.get("Location")
+        if not url or len(url) <= 28:
+            # https://www.tiktok.com/?_r=1
+            raise exception.NotFoundError("post")
+
+        data = {"_extractor": TiktokPostExtractor}
+        yield Message.Queue, url.partition("?")[0], data
 
 
 class TiktokSharepostExtractor(TiktokExtractor):
