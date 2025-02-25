@@ -23,6 +23,7 @@ class FuraffinityExtractor(Extractor):
     cookies_domain = ".furaffinity.net"
     cookies_names = ("a", "b")
     root = "https://www.furaffinity.net"
+    request_interval = 1.0
     _warning = True
 
     def __init__(self, match):
