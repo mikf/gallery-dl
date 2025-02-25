@@ -16,7 +16,8 @@ class TiktokExtractor(Extractor):
     """Base class for TikTok extractors"""
     category = "tiktok"
     directory_fmt = ("{category}", "{user}")
-    filename_fmt = "{title[b:150]} [{id}{num:?_//}{img_id:?_//}].{extension}"
+    filename_fmt = (
+        "{id}{num:?_//>02} {title[b:150]}{img_id:? [/]/}.{extension}")
     archive_fmt = "{id}_{num}_{img_id}"
     root = "https://www.tiktok.com"
     cookies_domain = ".tiktok.com"
