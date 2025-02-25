@@ -450,6 +450,7 @@ AUTH_MAP = {
     "smugmug"        : _OAUTH,
     "subscribestar"  : "Supported",
     "tapas"          : "Supported",
+    "tiktok"         : _COOKIES,
     "tsumino"        : "Supported",
     "tumblr"         : _OAUTH,
     "twitter"        : "Supported",

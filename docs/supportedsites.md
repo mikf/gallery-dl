@@ -929,7 +929,7 @@ Consider all listed sites to potentially be NSFW.
     <td>TikTok</td>
     <td>https://www.tiktok.com/</td>
     <td>Posts, User Profiles, VM Posts</td>
-    <td></td>
+    <td><a href="https://github.com/mikf/gallery-dl#cookies">Cookies</a></td>
 </tr>
 <tr>
     <td>TMOHentai</td>
