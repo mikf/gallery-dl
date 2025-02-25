@@ -188,18 +188,35 @@ class TiktokUserExtractor(TiktokExtractor):
             self.log.debug("", exc_info=exc)
             raise exception.ExtractionError("yt-dlp or youtube-dl is required "
                                             "for this feature!")
-        with ytdl.construct_YoutubeDL(
-            module=module,
-            obj=self,
-            user_opts={
-                "ignore_no_formats_error": True,
-                "cookiefile": self.cookies_file,
-                "playlist_items": str(self.config("tiktok-range", "")),
-            }
-        ) as ydl:
-            info = ydl.extract_info(self.url, download=False)
+        extr_opts = {
+            "extract_flat"           : True,
+            "ignore_no_formats_error": True,
+        }
+        user_opts = {
+            "retries"                : self._retries,
+            "socket_timeout"         : self._timeout,
+            "nocheckcertificate"     : not self._verify,
+            "playlist_items"         : str(self.config("tiktok-range", "")),
+        }
+        if self._proxies:
+            user_opts["proxy"] = self._proxies.get("http")
+
+        ytdl_instance = ytdl.construct_YoutubeDL(
+            module, self, user_opts, extr_opts)
+
+        # transfer cookies to ytdl
+        if self.cookies:
+            set_cookie = ytdl_instance.cookiejar.set_cookie
+            for cookie in self.cookies:
+                set_cookie(cookie)
+
+        with ytdl_instance as ydl:
+            info_dict = ydl._YoutubeDL__extract_info(
+                "{}/@{}".format(self.root, self.groups[0]),
+                ydl.get_info_extractor("TikTokUser"),
+                False, {}, True)
             # This should include video and photo posts in /video/ URL form.
-            return [video["webpage_url"] for video in info["entries"]]
+            return [video["url"] for video in info_dict["entries"]]
 
     def avatar(self):
         return True
