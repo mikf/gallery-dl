@@ -403,6 +403,8 @@ Default
         ``weebcentral``,
         ``xfolio``,
         ``zerochan``
+    * ``"1.0"``
+        ``furaffinity``
     * ``"1.0-2.0"``
         ``flickr``,
         ``pexels``,
