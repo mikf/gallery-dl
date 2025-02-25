@@ -54,10 +54,11 @@ class TiktokExtractor(Extractor):
                 title = "TikTok photo #{}".format(post["id"])
 
             if not downloaded_avatar:
+                avatar_url = author["avatarLarger"]
                 avatar = self._generate_avatar(
-                    author["avatarLarger"], post, user, author["id"])
+                    avatar_url, post, user, author["id"])
                 yield Message.Directory, avatar
-                yield Message.Url, author["avatarLarger"], avatar
+                yield Message.Url, avatar_url, avatar
                 downloaded_avatar = True
 
             yield Message.Directory, post
