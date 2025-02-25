@@ -234,6 +234,13 @@ class TwitterExtractor(Extractor):
         for fmt in self._size_fallback:
             yield base + fmt
 
+    def _extract_components(self, tweet, data, files):
+        for component_id in data["components"]:
+            com = data["component_objects"][component_id]
+            for conv in com["data"]["conversation_preview"]:
+                for url in conv.get("mediaUrls") or ():
+                    files.append({"url": url})
+
     def _extract_card(self, tweet, files):
         card = tweet["card"]
         if "legacy" in card:
@@ -272,7 +279,11 @@ class TwitterExtractor(Extractor):
                             return
         elif name == "unified_card":
             data = util.json_loads(bvals["unified_card"]["string_value"])
-            self._extract_media(tweet, data["media_entities"].values(), files)
+            if "media_entities" in data:
+                self._extract_media(
+                    tweet, data["media_entities"].values(), files)
+            if "component_objects" in data:
+                self._extract_components(tweet, data, files)
             return
 
         if self.cards == "ytdl":
