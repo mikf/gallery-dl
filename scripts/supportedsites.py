@@ -145,10 +145,11 @@ CATEGORY_MAP = {
     "tbib"           : "The Big ImageBoard",
     "tcbscans"       : "TCB Scans",
     "tco"            : "Twitter t.co",
-    "tmohentai"      : "TMOHentai",
     "thatpervert"    : "ThatPervert",
     "thebarchive"    : "The /b/ Archive",
     "thecollection"  : "The /co/llection",
+    "tiktok"         : "TikTok",
+    "tmohentai"      : "TMOHentai",
     "tumblrgallery"  : "TumblrGallery",
     "vanillarock"    : "もえぴりあ",
     "vidyart2"       : "/v/idyart2",
@@ -339,6 +340,9 @@ SUBCATEGORY_MAP = {
     "steamgriddb": {
         "asset": "Individual Assets",
     },
+    "tiktok": {
+        "vmpost": "VM Posts",
+    },
     "tumblr": {
         "day": "Days",
     },
@@ -408,6 +412,11 @@ _APIKEY_WH = ('<a href="https://gdl-org.github.io/docs/configuration.html'
               '#extractor-wallhaven-api-key">API Key</a>')
 _APIKEY_WY = ('<a href="https://gdl-org.github.io/docs/configuration.html'
               '#extractor-weasyl-api-key">API Key</a>')
+_TIKTOK_MORE_INFO = '''
+    <br /><span title="Pass `-o videos` to download photos only, and
+    `-o tiktok-range=a-yt-dlp-range` to tell yt-dlp to only extract XYZ links
+    when scraping a user profile. Also note that profile avatars will only be
+    downloaded when downloading a User Profile.">Hover for more info</span>'''
 
 AUTH_MAP = {
     "aibooru"        : "Supported",
@@ -457,6 +466,7 @@ AUTH_MAP = {
     "smugmug"        : _OAUTH,
     "subscribestar"  : "Supported",
     "tapas"          : "Supported",
+    "tiktok"         : _COOKIES + _TIKTOK_MORE_INFO,
     "tsumino"        : "Supported",
     "tumblr"         : _OAUTH,
     "twitter"        : "Supported",
