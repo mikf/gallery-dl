@@ -29,7 +29,7 @@ class TiktokExtractor(Extractor):
         videos = self.config("videos", True)
         # We assume that all of the URLs served by urls() come from the same
         # author.
-        downloaded_avatar = not bool(self.avatar())
+        downloaded_avatar = not self.avatar()
 
         for tiktok_url in self.urls():
             tiktok_url = self._sanitize_url(tiktok_url)
@@ -54,11 +54,10 @@ class TiktokExtractor(Extractor):
                 title = "TikTok photo #{}".format(post["id"])
 
             if not downloaded_avatar:
-                avatar_url = post["author"]["avatarLarger"]
-                avatar = \
-                    self._generate_avatar(avatar_url, post, user, author["id"])
+                avatar = self._generate_avatar(
+                    author["avatarLarger"], post, user, author["id"])
                 yield Message.Directory, avatar
-                yield Message.Url, avatar_url, avatar
+                yield Message.Url, author["avatarLarger"], avatar
                 downloaded_avatar = True
 
             yield Message.Directory, post
@@ -109,9 +108,8 @@ class TiktokExtractor(Extractor):
             data = data["webapp.user-detail"]["userInfo"]["user"]
             data["user"] = user_name
             avatar_url = data["avatarLarger"]
-            user_id = data["id"]
-            avatar = \
-                self._generate_avatar(avatar_url, data, user_name, user_id)
+            avatar = self._generate_avatar(
+                avatar_url, data, user_name, data["id"])
             yield Message.Directory, avatar
             yield Message.Url, avatar_url, avatar
 
