@@ -23,13 +23,13 @@ class TiktokExtractor(Extractor):
     cookies_domain = ".tiktok.com"
 
     def avatar(self):
-        return False
+        return ""
 
     def items(self):
         videos = self.config("videos", True)
         # We assume that all of the URLs served by urls() come from the same
         # author.
-        downloaded_avatar = not self.avatar()
+        downloaded_avatar = not bool(self.avatar())
 
         for tiktok_url in self.urls():
             tiktok_url = self._sanitize_url(tiktok_url)
@@ -55,14 +55,8 @@ class TiktokExtractor(Extractor):
 
             if not downloaded_avatar:
                 avatar_url = post["author"]["avatarLarger"]
-                avatar = text.nameext_from_url(avatar_url, post.copy())
-                avatar.update({
-                    "type"  : "avatar",
-                    "title" : "@" + user,
-                    "id"    : author["id"],
-                    "img_id": avatar["filename"].partition("~")[0],
-                    "num"   : 0,
-                })
+                avatar = \
+                    self._generate_avatar(avatar_url, post, user, author["id"])
                 yield Message.Directory, avatar
                 yield Message.Url, avatar_url, avatar
                 downloaded_avatar = True
@@ -104,6 +98,33 @@ class TiktokExtractor(Extractor):
                     "height"    : 0,
                 })
                 yield Message.Url, "ytdl:" + tiktok_url, post
+
+        # If we couldn't download the avatar because the given user has no
+        # posts, we'll need to make a separate request for the user's page
+        # and download the avatar that way.
+        if not downloaded_avatar:
+            user_name = self.avatar()
+            profile_url = "https://www.tiktok.com/@{}".format(user_name)
+            data = self._extract_rehydration_data(profile_url)
+            data = data["webapp.user-detail"]["userInfo"]["user"]
+            data["user"] = user_name
+            avatar_url = data["avatarLarger"]
+            user_id = data["id"]
+            avatar = \
+                self._generate_avatar(avatar_url, data, user_name, user_id)
+            yield Message.Directory, avatar
+            yield Message.Url, avatar_url, avatar
+
+    def _generate_avatar(self, avatar_url, data, user_name, user_id):
+        avatar = text.nameext_from_url(avatar_url, data.copy())
+        avatar.update({
+            "type"  : "avatar",
+            "title" : "@" + user_name,
+            "id"    : user_id,
+            "img_id": avatar["filename"].partition("~")[0],
+            "num"   : 0,
+        })
+        return avatar
 
     def _sanitize_url(self, url):
         return text.ensure_http_scheme(url.replace("/photo/", "/video/", 1))
@@ -219,4 +240,4 @@ class TiktokUserExtractor(TiktokExtractor):
             return [video["url"] for video in info_dict["entries"]]
 
     def avatar(self):
-        return True
+        return self.groups[0]

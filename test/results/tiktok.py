@@ -243,4 +243,14 @@ __tests__ = (
     "#options"  : {"videos": False, "tiktok-range": "1-10"},
 },
 
+{
+    "#url"      : "https://www.tiktok.com/@joeysc14/",
+    "#comment"  : "Public user profile with no content",
+    "#category" : ("", "tiktok", "user"),
+    "#class"    : tiktok.TiktokUserExtractor,
+    "#pattern"  : PATTERN,
+    "#options"  : {"videos": False, "tiktok-range": "1"},
+    "#count"    : 1,
+},
+
 )
