@@ -4316,6 +4316,16 @@ Description
     and click ``Create Token``.
 
 
+extractor.tiktok.audio
+----------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Download audio tracks using |ytdl|.
+
+
 extractor.tiktok.videos
 -----------------------
 Type

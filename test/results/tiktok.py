@@ -124,8 +124,19 @@ __tests__ = (
     "#comment"  : "www.tiktokv.com link: many photos with audio",
     "#category" : ("", "tiktok", "post"),
     "#class"    : tiktok.TiktokPostExtractor,
+    "#options"  : {"audio": True},
     "#pattern"  : PATTERN_WITH_AUDIO,
-    "#options"  : {"videos": True},
+    "#count"    : 17,
+},
+
+{
+    "#url"      : "https://www.tiktokv.com/share/video/7240568259186019630",
+    "#comment"  : "www.tiktokv.com link: many photos with audio disabled",
+    "#category" : ("", "tiktok", "post"),
+    "#class"    : tiktok.TiktokPostExtractor,
+    "#options"  : {"audio": False},
+    "#pattern"  : PATTERN,
+    "#count"    : 16,
 },
 
 {
