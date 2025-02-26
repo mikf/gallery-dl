@@ -4931,7 +4931,7 @@ extractor.vipergirls.domain
 Type
     ``string``
 Default
-    ``"vipergirls.to"``
+    ``"viper.click"``
 Description
     Specifies the domain used by ``vipergirls`` extractors.
 
