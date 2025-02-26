@@ -24,7 +24,7 @@ class TiktokExtractor(Extractor):
 
     def _init(self):
         self.audio = self.config("audio", True)
-        self.videos = self.config("videos", True)
+        self.video = self.config("videos", True)
         if not self.config("avatar", True):
             self.avatar = util.false
 
