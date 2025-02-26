@@ -4336,6 +4336,16 @@ Description
     Download videos using |ytdl|.
 
 
+extractor.tiktok.user.avatar
+----------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Download user avatars.
+
+
 extractor.tiktok.user.module
 ----------------------------
 Type

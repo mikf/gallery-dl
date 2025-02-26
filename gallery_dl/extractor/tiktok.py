@@ -25,9 +25,8 @@ class TiktokExtractor(Extractor):
     def _init(self):
         self.audio = self.config("audio", True)
         self.videos = self.config("videos", True)
-
-    def avatar(self):
-        return ""
+        if not self.config("avatar", True):
+            self.avatar = util.false
 
     def items(self):
         # We assume that all of the URLs served by urls() come from the same
@@ -122,6 +121,9 @@ class TiktokExtractor(Extractor):
                 avatar_url, data, user_name, data["id"])
             yield Message.Directory, avatar
             yield Message.Url, avatar_url, avatar
+
+    def avatar(self):
+        return False
 
     def _generate_avatar(self, avatar_url, data, user_name, user_id):
         avatar = text.nameext_from_url(avatar_url, data.copy())
