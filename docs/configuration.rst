@@ -4316,6 +4316,45 @@ Description
     and click ``Create Token``.
 
 
+extractor.tiktok.videos
+-----------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Download videos using |ytdl|.
+
+
+extractor.tiktok.user.module
+----------------------------
+Type
+    ``string``
+Default
+    ``null``
+Description
+    Name or filesystem path of the ``ytdl`` Python module
+    to extract posts from a ``tiktok`` user profile with.
+
+    See `extractor.ytdl.module`_.
+
+
+extractor.tiktok.user.tiktok-range
+----------------------------------
+Type
+    ``string``
+Default
+    ``null``
+Example
+    ``"1-20"``
+Description
+    Range or playlist indices of ``tiktok`` user posts to extract.
+
+    See
+    `ytdl/playlist_items <https://github.com/yt-dlp/yt-dlp/blob/3042afb5fe342d3a00de76704cd7de611acc350e/yt_dlp/YoutubeDL.py#L289>`__
+    for details.
+
+
 extractor.tumblr.avatar
 -----------------------
 Type
