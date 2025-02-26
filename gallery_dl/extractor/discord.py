@@ -233,7 +233,7 @@ class DiscordExtractor(Extractor):
 
 class DiscordChannelExtractor(DiscordExtractor):
     subcategory = "channel"
-    pattern = BASE_PATTERN + r"/channels/(\d+)/(?:\d+/threads/)?(\d+)"
+    pattern = BASE_PATTERN + r"/channels/(\d+)/(?:\d+/threads/)?(\d+)/?$"
     example = "https://discord.com/channels/1234567890/9876543210"
 
     def items(self):
