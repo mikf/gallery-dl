@@ -11,6 +11,7 @@
 from .common import Extractor
 from .lolisafe import LolisafeAlbumExtractor
 from .. import text, util, config, exception
+import binascii
 import random
 
 if config.get(("extractor", "bunkr"), "tlds"):
@@ -60,6 +61,7 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
     """Extractor for bunkr.si albums"""
     category = "bunkr"
     root = "https://bunkr.si"
+    root_dl = "https://get.bunkrr.su"
     archive_fmt = "{album_id}_{id|id_url}"
     pattern = BASE_PATTERN + r"/a/([^/?#]+)"
     example = "https://bunkr.si/a/ID"
@@ -163,28 +165,42 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
                 self.log.debug("", exc_info=exc)
 
     def _extract_file(self, webpage_url):
-        response = self.request(webpage_url)
-        page = response.text
-        file_url = (text.extr(page, '<source src="', '"') or
-                    text.extr(page, '<img src="', '"'))
+        page = self.request(webpage_url).text
+        data_id = text.extr(page, 'data-file-id="', '"')
+        referer = self.root_dl + "/file/" + data_id
+
+        url = self.root_dl + "/api/vs"
+        headers = {"Referer": referer}
+        data = self.request(
+            url, method="POST", headers=headers, json={"id": data_id}).json()
+
+        if data.get("encrypted"):
+            file_url = self._decrypt_url(data["url"], data["timestamp"])
+        else:
+            file_url = data["url"]
+
         file_name = (text.extr(page, 'property="og:title" content="', '"') or
                      text.extr(page, "<title>", " | Bunkr<"))
         fallback = text.extr(page, 'property="og:url" content="', '"')
 
-        if not file_url:
-            webpage_url = text.unescape(text.rextract(
-                page, ' href="', '"', page.rindex("Download"))[0])
-            response = self.request(webpage_url)
-            file_url = text.rextract(response.text, ' href="', '"')[0]
-
         return {
-            "file"          : text.unescape(file_url),
+            "file"          : file_url,
             "name"          : text.unescape(file_name),
-            "id_url"        : webpage_url.rpartition("/")[2],
+            "id_url"        : data_id,
             "_fallback"     : (fallback,) if fallback else (),
-            "_http_headers" : {"Referer": response.url},
+            "_http_headers" : {"Referer": referer},
             "_http_validate": self._validate,
         }
+
+    def _decrypt_url(self, encrypted_b64, timestamp):
+        encrypted_bytes = binascii.a2b_base64(encrypted_b64)
+        key = "SECRET_KEY_{}".format(timestamp // 3600).encode()
+        div = len(key)
+
+        return bytes([
+            encrypted_bytes[i] ^ key[i % div]
+            for i in range(len(encrypted_bytes))
+        ]).decode()
 
     def _validate(self, response):
         if response.history and response.url.endswith("/maintenance-vid.mp4"):
