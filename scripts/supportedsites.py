@@ -243,6 +243,7 @@ SUBCATEGORY_MAP = {
     },
     "discord": {
         "direct-messages": "DMs",
+        "direct-message" : "",
     },
     "fanbox": {
         "supporting": "Supported User Feed",
