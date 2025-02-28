@@ -57,7 +57,8 @@ class CheveretoImageExtractor(CheveretoExtractor):
 
         image = {
             "id"   : self.path.rpartition(".")[2],
-            "url"  : extr('<meta property="og:image" content="', '"'),
+            "url"  : (extr('<meta property="og:image" content="', '"') or
+                      extr('url: "', '"')),
             "album": text.extr(extr("Added to <a", "/a>"), ">", "<"),
             "user" : extr('username: "', '"'),
         }
