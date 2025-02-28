@@ -9,6 +9,18 @@ from gallery_dl.extractor import discord
 
 __tests__ = (
 {
+    "#url"     : "https://discord.com/channels/302094807046684672/1306706528786583623/1306706528786583623",
+    "#category": ("", "discord", "message"),
+    "#class"   : discord.DiscordMessageExtractor,
+},
+
+{
+    "#url"     : "https://discord.com/channels/@me/1306706528786583623/1306706528786583623",
+    "#category": ("", "discord", "direct-message"),
+    "#class"   : discord.DiscordDirectMessageExtractor,
+},
+
+{
     "#url"     : "https://discord.com/channels/302094807046684672/1306705919916249098",
     "#category": ("", "discord", "channel"),
     "#class"   : discord.DiscordChannelExtractor,

@@ -244,6 +244,23 @@ class DiscordChannelExtractor(DiscordExtractor):
         return self.extract_channel(channel_id)
 
 
+class DiscordMessageExtractor(DiscordExtractor):
+    subcategory = "message"
+    pattern = BASE_PATTERN + r"/channels/(\d+)/(\d+)/(\d+)/?$"
+    example = "https://discord.com/channels/1234567890/9876543210/2468013579"
+
+    def items(self):
+        server_id, channel_id, message_id = self.groups
+
+        self.build_server_and_channels(server_id)
+
+        if channel_id not in self.server_channels_metadata:
+            self.parse_channel(self.api.get_channel(channel_id))
+
+        return self.extract_message(
+            self.api.get_message(channel_id, message_id))
+
+
 class DiscordServerExtractor(DiscordExtractor):
     subcategory = "server"
     pattern = BASE_PATTERN + r"/channels/(\d+)/?$"
@@ -264,11 +281,27 @@ class DiscordDirectMessagesExtractor(DiscordExtractor):
     subcategory = "direct-messages"
     directory_fmt = ("{category}", "Direct Messages",
                      "{channel_id}_{recipients:J,}")
-    pattern = BASE_PATTERN + r"/channels/@me/(\d+)"
+    pattern = BASE_PATTERN + r"/channels/@me/(\d+)/?$"
     example = "https://discord.com/channels/@me/1234567890"
 
     def items(self):
         return self.extract_channel(self.groups[0])
+
+
+class DiscordDirectMessageExtractor(DiscordExtractor):
+    subcategory = "direct-message"
+    directory_fmt = ("{category}", "Direct Messages",
+                     "{channel_id}_{recipients:J,}")
+    pattern = BASE_PATTERN + r"/channels/@me/(\d+)/(\d+)/?$"
+    example = "https://discord.com/channels/@me/1234567890/9876543210"
+
+    def items(self):
+        channel_id, message_id = self.groups
+
+        self.parse_channel(self.api.get_channel(channel_id))
+
+        return self.extract_message(
+            self.api.get_message(channel_id, message_id))
 
 
 class DiscordAPI():
@@ -324,6 +357,13 @@ class DiscordAPI():
             return messages
 
         return self._pagination(_method, MESSAGES_BATCH)
+
+    def get_message(self, channel_id, message_id):
+        """Get message information"""
+        return self._call("/channels/" + channel_id + "/messages", {
+            "limit": 1,
+            "around": message_id
+        })[0]
 
     def _call(self, endpoint, params=None):
         url = self.root + endpoint
