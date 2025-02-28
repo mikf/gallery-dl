@@ -44,6 +44,8 @@ class EromeExtractor(Extractor):
             pos = page.index('<div class="user-profile', pos)
             user, pos = text.extract(
                 page, 'href="https://www.erome.com/', '"', pos)
+            tags, pos = text.extract(
+                page, '<p class="mt-10"', '</p>', pos)
 
             urls = []
             date = None
@@ -59,11 +61,13 @@ class EromeExtractor(Extractor):
                         date = text.parse_timestamp(ts)
 
             data = {
-                "album_id"     : album_id,
-                "title"        : text.unescape(title),
-                "user"         : text.unquote(user),
-                "count"        : len(urls),
-                "date"         : date,
+                "album_id": album_id,
+                "title"   : text.unescape(title),
+                "user"    : text.unquote(user),
+                "count"   : len(urls),
+                "date"    : date,
+                "tags"    : [t.replace("+", " ")
+                             for t in text.extract_iter(tags, "?q=", '"')],
                 "_http_headers": {"Referer": url},
             }
 
