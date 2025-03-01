@@ -124,6 +124,7 @@ modules = [
     "nitter",
     "nozomi",
     "nsfwalbum",
+    "nudostar",
     "paheal",
     "patreon",
     "pexels",
