@@ -66,8 +66,9 @@ class EromeExtractor(Extractor):
                 "user"    : text.unquote(user),
                 "count"   : len(urls),
                 "date"    : date,
-                "tags"    : [t.replace("+", " ")
-                             for t in text.extract_iter(tags, "?q=", '"')],
+                "tags"    : ([t.replace("+", " ")
+                              for t in text.extract_iter(tags, "?q=", '"')]
+                             if tags else ()),
                 "_http_headers": {"Referer": url},
             }
 
