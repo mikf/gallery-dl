@@ -4364,7 +4364,7 @@ extractor.tiktok.user.tiktok-range
 Type
     ``string``
 Default
-    ``null``
+    ``""``
 Example
     ``"1-20"``
 Description
