@@ -205,12 +205,8 @@ class DanbooruTagExtractor(DanbooruExtractor):
     pattern = BASE_PATTERN + r"/posts\?(?:[^&#]*&)*tags=([^&#]*)"
     example = "https://danbooru.donmai.us/posts?tags=TAG"
 
-    def __init__(self, match):
-        DanbooruExtractor.__init__(self, match)
-        tags = match.group(match.lastindex)
-        self.tags = text.unquote(tags.replace("+", " "))
-
     def metadata(self):
+        self.tags = text.unquote(self.groups[-1].replace("+", " "))
         return {"search_tags": self.tags}
 
     def posts(self):
@@ -239,11 +235,8 @@ class DanbooruPoolExtractor(DanbooruExtractor):
     pattern = BASE_PATTERN + r"/pool(?:s|/show)/(\d+)"
     example = "https://danbooru.donmai.us/pools/12345"
 
-    def __init__(self, match):
-        DanbooruExtractor.__init__(self, match)
-        self.pool_id = match.group(match.lastindex)
-
     def metadata(self):
+        self.pool_id = self.groups[-1]
         url = "{}/pools/{}.json".format(self.root, self.pool_id)
         pool = self.request(url).json()
         pool["name"] = pool["name"].replace("_", " ")
@@ -262,12 +255,8 @@ class DanbooruPostExtractor(DanbooruExtractor):
     pattern = BASE_PATTERN + r"/post(?:s|/show)/(\d+)"
     example = "https://danbooru.donmai.us/posts/12345"
 
-    def __init__(self, match):
-        DanbooruExtractor.__init__(self, match)
-        self.post_id = match.group(match.lastindex)
-
     def posts(self):
-        url = "{}/posts/{}.json".format(self.root, self.post_id)
+        url = "{}/posts/{}.json".format(self.root, self.groups[-1])
         post = self.request(url).json()
         if self.includes:
             params = {"only": self.includes}
@@ -283,12 +272,8 @@ class DanbooruPopularExtractor(DanbooruExtractor):
     pattern = BASE_PATTERN + r"/(?:explore/posts/)?popular(?:\?([^#]*))?"
     example = "https://danbooru.donmai.us/explore/posts/popular"
 
-    def __init__(self, match):
-        DanbooruExtractor.__init__(self, match)
-        self.params = match.group(match.lastindex)
-
     def metadata(self):
-        self.params = params = text.parse_query(self.params)
+        self.params = params = text.parse_query(self.groups[-1])
         scale = params.get("scale", "day")
         date = params.get("date") or datetime.date.today().isoformat()
 
