@@ -10,6 +10,7 @@
 
 from .common import BaseExtractor, Message
 from .. import text
+import binascii
 
 
 class CheveretoExtractor(BaseExtractor):
@@ -32,6 +33,18 @@ class CheveretoExtractor(BaseExtractor):
 
             url = text.extr(page, '<a data-pagination="next" href="', '" ><')
 
+    def _decrypt_url(self, encrypted_b64):
+        encrypted_hex = binascii.a2b_base64(encrypted_b64)
+        encrypted_bytes = bytes.fromhex(encrypted_hex.decode())
+
+        key = b"seltilovessimpcity@simpcityhatesscrapers"
+        div = len(key)
+
+        return bytes([
+            encrypted_bytes[i] ^ key[i % div]
+            for i in range(len(encrypted_bytes))
+        ]).decode()
+
 
 BASE_PATTERN = CheveretoExtractor.update({
     "jpgfish": {
@@ -53,12 +66,20 @@ class CheveretoImageExtractor(CheveretoExtractor):
 
     def items(self):
         url = self.root + self.path
-        extr = text.extract_from(self.request(url).text)
+        page = self.request(url).text
+        extr = text.extract_from(page)
+
+        url = (extr('<meta property="og:image" content="', '"') or
+               extr('url: "', '"'))
+        if not url or url.endswith("/loading.svg"):
+            pos = page.find(" download=")
+            url = text.rextract(page, 'href="', '"', pos)[0]
+            if not url.startswith("https://"):
+                url = self._decrypt_url(url)
 
         image = {
             "id"   : self.path.rpartition(".")[2],
-            "url"  : (extr('<meta property="og:image" content="', '"') or
-                      extr('url: "', '"')),
+            "url"  : url,
             "album": text.extr(extr("Added to <a", "/a>"), ">", "<"),
             "user" : extr('username: "', '"'),
         }
