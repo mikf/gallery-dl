@@ -219,6 +219,11 @@ class TiktokUserExtractor(TiktokExtractor):
             self.log.debug("", exc_info=exc)
             raise exception.ExtractionError("yt-dlp or youtube-dl is required "
                                             "for this feature!")
+
+        ytdl_range = self.config("tiktok-range")
+        if ytdl_range is None or not ytdl_range and ytdl_range != 0:
+            ytdl_range = ""
+
         extr_opts = {
             "extract_flat"           : True,
             "ignore_no_formats_error": True,
@@ -227,7 +232,7 @@ class TiktokUserExtractor(TiktokExtractor):
             "retries"                : self._retries,
             "socket_timeout"         : self._timeout,
             "nocheckcertificate"     : not self._verify,
-            "playlist_items"         : str(self.config("tiktok-range", "")),
+            "playlist_items"         : str(ytdl_range),
         }
         if self._proxies:
             user_opts["proxy"] = self._proxies.get("http")
