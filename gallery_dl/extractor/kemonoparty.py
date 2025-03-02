@@ -67,12 +67,17 @@ class KemonopartyExtractor(Extractor):
         headers = {"Accept-Encoding": "identity"}
 
         posts = self.posts()
-        if max_posts:
-            posts = itertools.islice(posts, max_posts)
         if self.revisions:
             posts = self._revisions(posts)
 
+        post_rev_id_set = set()
+
         for post in posts:
+            post_rev_id = (post["id"], post.get("revision_id"))
+            if post_rev_id in post_rev_id_set:
+                continue
+            post_rev_id_set.add(post_rev_id)
+
             headers["Referer"] = "{}/{}/user/{}/post/{}".format(
                 self.root, post["service"], post["user"], post["id"])
             post["_http_headers"] = headers
@@ -154,6 +159,9 @@ class KemonopartyExtractor(Extractor):
                 elif url.startswith(self.root):
                     url = self.root + "/data" + url[20:]
                 yield Message.Url, url, post
+
+            if max_posts and len(post_rev_id_set) >= max_posts:
+                break
 
     def login(self):
         username, password = self._get_auth_info()
@@ -506,7 +514,12 @@ class KemonoAPI():
     def creator_posts(self, service, creator_id, offset=0, query=None):
         endpoint = "/{}/user/{}".format(service, creator_id)
         params = {"q": query, "o": offset}
-        return self._pagination(endpoint, params, 50)
+        return itertools.chain(
+            self._call(
+                endpoint, {"o": ""}
+            ) if (offset is None and query is None) else (),
+            self._pagination(endpoint, params, 50)
+        )
 
     def creator_tagged_posts(self, service, creator_id, tags, offset=0):
         endpoint = "/{}/user/{}/posts-legacy".format(service, creator_id)
