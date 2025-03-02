@@ -300,6 +300,12 @@ class TestText(unittest.TestCase):
         self.assertEqual(
             g(txt, "[", "]", 6), ["a", "d"])
 
+        # invalid arguments
+        for value in INVALID:
+            self.assertEqual(g(value, "<"  , ">")  , [])
+            self.assertEqual(g(txt  , value, ">")  , [])
+            self.assertEqual(g(txt  , "<"  , value), [])
+
     def test_extract_from(self, f=text.extract_from):
         txt = "[c][b][a]: xyz! [d][e"
 

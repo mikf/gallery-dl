@@ -160,10 +160,10 @@ def extract_all(txt, rules, pos=0, values=None):
 
 def extract_iter(txt, begin, end, pos=0):
     """Yield values that would be returned by repeated calls of extract()"""
-    index = txt.index
-    lbeg = len(begin)
-    lend = len(end)
     try:
+        index = txt.index
+        lbeg = len(begin)
+        lend = len(end)
         while True:
             first = index(begin, pos) + lbeg
             last = index(end, first)
