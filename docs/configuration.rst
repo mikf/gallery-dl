@@ -4335,6 +4335,36 @@ Description
     and click ``Create Token``.
 
 
+extractor.tenor.format
+----------------------
+Type
+    * ``string``
+    * ``list`` of ``strings``
+Default
+    ``["gif", "mp4", "webm", "webp"]``
+Description
+    List of names of the preferred animation format.
+
+    If a selected format is not available, the next one in the list will be
+    tried until a format is found.
+
+    Possible formats include
+
+    * ``"gif"``
+    * ``"gif_transparent"``
+    * ``"gifpreview"``
+    * ``"mediumgif"``
+    * ``"tinygif"``
+    * ``"tinygif_transparent"``
+    * ``"mp4"``
+    * ``"tinymp4"``
+    * ``"webm"``
+    * ``"webp"``
+    * ``"webp_transparent"``
+    * ``"tinywebp"``
+    * ``"tinywebp_transparent"``
+
+
 extractor.tiktok.audio
 ----------------------
 Type

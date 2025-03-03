@@ -938,6 +938,12 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
+    <td>Tenor</td>
+    <td>https://tenor.com/</td>
+    <td>individual Images, Search Results</td>
+    <td></td>
+</tr>
+<tr>
     <td>TikTok</td>
     <td>https://www.tiktok.com/</td>
     <td>Posts, User Profiles, VM Posts</td>
