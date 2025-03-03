@@ -1829,6 +1829,25 @@ Description
     follow the ``source`` and download from there if possible.
 
 
+extractor.[Danbooru].pool.order-posts
+-------------------------------------
+Type
+    ``string``
+Default
+    ``"pool"``
+Description
+    Controls the order in which pool posts are returned.
+
+    ``"pool"`` | ``"pool_asc"`` | ``"asc"`` | ``"asc_pool"``
+        Pool order
+    ``"pool_desc"`` | ``"desc_pool"`` | ``"desc"``
+        Reverse Pool order
+    ``"id"`` | ``"id_desc"`` | ``"desc_id"``
+        Descending Post ID order
+    ``"id_asc"`` | ``"asc_id"``
+        Ascending Post ID order
+
+
 extractor.[Danbooru].ugoira
 ---------------------------
 Type
