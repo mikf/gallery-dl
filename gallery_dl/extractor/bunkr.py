@@ -169,8 +169,8 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
         data_id = text.extr(page, 'data-file-id="', '"')
         referer = self.root_dl + "/file/" + data_id
 
-        url = self.root_dl + "/api/vs"
-        headers = {"Referer": referer}
+        url = self.root_dl + "/api/_001"
+        headers = {"Referer": referer, "Origin": self.root_dl}
         data = self.request(
             url, method="POST", headers=headers, json={"id": data_id}).json()
 
