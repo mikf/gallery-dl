@@ -231,6 +231,7 @@ class DanbooruPoolExtractor(DanbooruExtractor):
     """Extractor for posts from danbooru pools"""
     subcategory = "pool"
     directory_fmt = ("{category}", "pool", "{pool[id]} {pool[name]}")
+    filename_fmt = "{num:>04}_{id}_{filename}.{extension}"
     archive_fmt = "p_{pool[id]}_{id}"
     pattern = BASE_PATTERN + r"/pool(?:s|/show)/(\d+)"
     example = "https://danbooru.donmai.us/pools/12345"
@@ -244,8 +245,42 @@ class DanbooruPoolExtractor(DanbooruExtractor):
         return {"pool": pool}
 
     def posts(self):
-        params = {"tags": "pool:" + self.pool_id}
-        return self._pagination("/posts.json", params, "b")
+        reverse = prefix = None
+
+        order = self.config("order-posts")
+        if not order or order in ("asc", "pool", "pool_asc", "asc_pool"):
+            params = {"tags": "ordpool:" + self.pool_id}
+        elif order in ("id", "desc_id", "id_desc"):
+            params = {"tags": "pool:" + self.pool_id}
+            prefix = "b"
+        elif order in ("desc", "desc_pool", "pool_desc"):
+            params = {"tags": "ordpool:" + self.pool_id}
+            reverse = True
+        elif order in ("asc_id", "id_asc"):
+            params = {"tags": "pool:" + self.pool_id}
+            reverse = True
+
+        posts = self._pagination("/posts.json", params, prefix)
+        if reverse:
+            return self._enumerate_posts_reverse(posts)
+        else:
+            return self._enumerate_posts(posts)
+
+    def _enumerate_posts(self, posts):
+        pid_to_num = {pid: num+1 for num, pid in enumerate(self.post_ids)}
+        for post in posts:
+            post["num"] = pid_to_num[post["id"]]
+            yield post
+
+    def _enumerate_posts_reverse(self, posts):
+        self.log.info("Collecting posts of pool %s", self.pool_id)
+        posts = list(posts)
+        posts.reverse()
+
+        pid_to_num = {pid: num+1 for num, pid in enumerate(self.post_ids)}
+        for post in posts:
+            post["num"] = pid_to_num[post["id"]]
+        return posts
 
 
 class DanbooruPostExtractor(DanbooruExtractor):
