@@ -19,6 +19,7 @@ class DownloaderBase():
 
     def __init__(self, job):
         extractor = job.extractor
+        self.log = job.get_logger("downloader." + self.scheme)
 
         opts = self._extractor_config(extractor)
         if opts:
@@ -29,7 +30,6 @@ class DownloaderBase():
         self.session = extractor.session
         self.part = self.config("part", True)
         self.partdir = self.config("part-directory")
-        self.log = job.get_logger("downloader." + self.scheme)
 
         if self.partdir:
             self.partdir = util.expand_path(self.partdir)
@@ -73,17 +73,27 @@ class DownloaderBase():
         copts = cfg.get(self.scheme)
         if copts:
             if subcategory in cfg:
-                sopts = cfg[subcategory].get(self.scheme)
-                if sopts:
-                    opts = copts.copy()
-                    opts.update(sopts)
-                    return opts
+                try:
+                    sopts = cfg[subcategory].get(self.scheme)
+                    if sopts:
+                        opts = copts.copy()
+                        opts.update(sopts)
+                        return opts
+                except Exception:
+                    self._report_config_error(subcategory, cfg[subcategory])
             return copts
 
         if subcategory in cfg:
-            return cfg[subcategory].get(self.scheme)
+            try:
+                return cfg[subcategory].get(self.scheme)
+            except Exception:
+                self._report_config_error(subcategory, cfg[subcategory])
 
         return None
+
+    def _report_config_error(self, subcat, value):
+        self.log.warning("'%s' set to %s instead of object",
+                         subcat, util.json_dumps(value))
 
     def download(self, url, pathfmt):
         """Write data from 'url' into the file specified by 'pathfmt'"""
