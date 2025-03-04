@@ -11,7 +11,6 @@
 from .common import Extractor
 from .lolisafe import LolisafeAlbumExtractor
 from .. import text, util, config, exception
-import binascii
 import random
 
 if config.get(("extractor", "bunkr"), "tlds"):
@@ -175,7 +174,8 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
             url, method="POST", headers=headers, json={"id": data_id}).json()
 
         if data.get("encrypted"):
-            file_url = self._decrypt_url(data["url"], data["timestamp"])
+            key = "SECRET_KEY_{}".format(data["timestamp"] // 3600)
+            file_url = util.decrypt_xor(data["url"], key.encode())
         else:
             file_url = data["url"]
 
@@ -191,16 +191,6 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
             "_http_headers" : {"Referer": referer},
             "_http_validate": self._validate,
         }
-
-    def _decrypt_url(self, encrypted_b64, timestamp):
-        encrypted_bytes = binascii.a2b_base64(encrypted_b64)
-        key = "SECRET_KEY_{}".format(timestamp // 3600).encode()
-        div = len(key)
-
-        return bytes([
-            encrypted_bytes[i] ^ key[i % div]
-            for i in range(len(encrypted_bytes))
-        ]).decode()
 
     def _validate(self, response):
         if response.history and response.url.endswith("/maintenance-vid.mp4"):
