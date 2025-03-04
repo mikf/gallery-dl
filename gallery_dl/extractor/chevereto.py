@@ -9,8 +9,7 @@
 """Extractors for Chevereto galleries"""
 
 from .common import BaseExtractor, Message
-from .. import text
-import binascii
+from .. import text, util
 
 
 class CheveretoExtractor(BaseExtractor):
@@ -32,18 +31,6 @@ class CheveretoExtractor(BaseExtractor):
                 yield text.extr(item, '<a href="', '"')
 
             url = text.extr(page, '<a data-pagination="next" href="', '" ><')
-
-    def _decrypt_url(self, encrypted_b64):
-        encrypted_hex = binascii.a2b_base64(encrypted_b64)
-        encrypted_bytes = bytes.fromhex(encrypted_hex.decode())
-
-        key = b"seltilovessimpcity@simpcityhatesscrapers"
-        div = len(key)
-
-        return bytes([
-            encrypted_bytes[i] ^ key[i % div]
-            for i in range(len(encrypted_bytes))
-        ]).decode()
 
 
 BASE_PATTERN = CheveretoExtractor.update({
@@ -75,7 +62,9 @@ class CheveretoImageExtractor(CheveretoExtractor):
             pos = page.find(" download=")
             url = text.rextract(page, 'href="', '"', pos)[0]
             if not url.startswith("https://"):
-                url = self._decrypt_url(url)
+                url = util.decrypt_xor(
+                    url, b"seltilovessimpcity@simpcityhatesscrapers",
+                    fromhex=True)
 
         image = {
             "id"   : self.path.rpartition(".")[2],

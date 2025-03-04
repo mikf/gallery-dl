@@ -48,6 +48,19 @@ def bdecode(data, alphabet="0123456789"):
     return num
 
 
+def decrypt_xor(encrypted, key, base64=True, fromhex=False):
+    if base64:
+        encrypted = binascii.a2b_base64(encrypted)
+    if fromhex:
+        encrypted = bytes.fromhex(encrypted.decode())
+
+    div = len(key)
+    return bytes([
+        encrypted[i] ^ key[i % div]
+        for i in range(len(encrypted))
+    ]).decode()
+
+
 def advance(iterable, num):
     """"Advance 'iterable' by 'num' steps"""
     iterator = iter(iterable)
