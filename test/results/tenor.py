@@ -17,7 +17,7 @@ __tests__ = (
     "content_description": "an illustration of a tree with green leaves",
     "created"  : 1687512768.687436,
     "date"     : "dt:2023-06-23 09:32:48",
-    "embed"    : "<div class=\"tenor-gif-embed\" data-postid=\"8525772382434057283\" data-share-method=\"host\" data-aspect-ratio=\"0.937751\" data-width=\"100%\"><a href=\"https://tenor.com/view/moving-gif-8525772382434057283\">Moving Sticker</a>from <a href=\"https://tenor.com/search/moving-stickers\">Moving Stickers</a></div> <script type=\"text/javascript\" async src=\"https://tenor.com/embed.js\"></script>",
+    "embed"    : r"re:<div class=.+",
     "extension": "gif",
     "filename" : "moving",
     "h1_title" : "Moving Sticker",
@@ -30,7 +30,7 @@ __tests__ = (
     "long_title": "Moving Sticker - Moving Stickers",
     "media_formats": dict,
     "policy_status": "POLICY_STATUS_UNSPECIFIED",
-    "shares"   : 42528,
+    "shares"   : range(40000, 60000),
     "source_id": "",
     "title"    : "Moving Sti",
     "url"      : "https://tenor.com/kjYh53rdMGt.gif",
@@ -86,6 +86,34 @@ __tests__ = (
     "#count"  : 80,
 
     "search_tags": "trees water wind sun <&>",
+},
+
+{
+    "#url"    : "https://tenor.com/users/robloxfan123",
+    "#class"  : tenor.TenorUserExtractor,
+    "#urls"   : "https://media1.tenor.com/m/1auSjzCikuoAAAAC/2016-roblox.gif",
+
+    "user": {
+        "profile_id": "8180139772821505417",
+        "url"       : "https://tenor.com/users/ROBLOXfan123",
+        "userid"    : "11206759",
+        "username"  : "ROBLOXfan123",
+        "usertype"  : "user",
+    },
+},
+
+{
+    "#url"    : "https://tenor.com/users/annetv",
+    "#class"  : tenor.TenorUserExtractor,
+    "#pattern": r"https://media\d+\.tenor\.com/m/[\w-]+/[\w%-]+\.gif",
+    "#count"  : range(70, 100),
+
+    "user": {
+        "profile_id": "14727075564983373376",
+        "url"       : "https://tenor.com/users/annetv",
+        "userid"    : "8529134",
+        "username"  : "annetv",
+    },
 },
 
 )

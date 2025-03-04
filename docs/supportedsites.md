@@ -940,7 +940,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Tenor</td>
     <td>https://tenor.com/</td>
-    <td>individual Images, Search Results</td>
+    <td>individual Images, Search Results, User Profiles</td>
     <td></td>
 </tr>
 <tr>
