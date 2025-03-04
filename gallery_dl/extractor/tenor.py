@@ -57,6 +57,47 @@ class TenorExtractor(Extractor):
             if fmt in media_formats:
                 return media_formats[fmt]
 
+    def _search_results(self, query):
+        url = "https://tenor.googleapis.com/v2/search"
+        params = {
+            "appversion": "browser-r20250225-1",
+            "prettyPrint": "false",
+            "key": "AIzaSyC-P6_qz3FzCoXGLk6tgitZo4jEJ5mLzD8",
+            "client_key": "tenor_web",
+            "locale": "en",
+            "anon_id": "",
+            "q": query,
+            "limit": "50",
+            "contentfilter": "low",
+            "media_filter": "gif,gif_transparent,mediumgif,tinygif,"
+                            "tinygif_transparent,webp,webp_transparent,"
+                            "tinywebp,tinywebp_transparent,tinymp4,mp4,webm,"
+                            "originalgif,gifpreview",
+            "fields": "next,results.id,results.media_formats,results.title,"
+                      "results.h1_title,results.long_title,results.itemurl,"
+                      "results.url,results.created,results.user,"
+                      "results.shares,results.embed,results.hasaudio,"
+                      "results.policy_status,results.source_id,results.flags,"
+                      "results.tags,results.content_rating,results.bg_color,"
+                      "results.legacy_info,results.geographic_restriction,"
+                      "results.content_description",
+            "pos": None,
+            "component": "web_desktop",
+        }
+        headers = {
+            "Referer": self.root + "/",
+            "Origin" : self.root,
+        }
+
+        while True:
+            data = self.request(url, params=params, headers=headers).json()
+
+            yield from data["results"]
+
+            params["pos"] = data.get("next")
+            if not params["pos"]:
+                return
+
     def metadata(self):
         return False
 
@@ -93,43 +134,14 @@ class TenorSearchExtractor(TenorExtractor):
         return {"search_tags": self.search_tags}
 
     def gifs(self):
-        url = "https://tenor.googleapis.com/v2/search"
-        params = {
-            "appversion": "browser-r20250225-1",
-            "prettyPrint": "false",
-            "key": "AIzaSyC-P6_qz3FzCoXGLk6tgitZo4jEJ5mLzD8",
-            "client_key": "tenor_web",
-            "locale": "en",
-            "anon_id": "",
-            "q": self.search_tags,
-            "limit": "50",
-            "contentfilter": "low",
-            "media_filter": "gif,gif_transparent,mediumgif,tinygif,"
-                            "tinygif_transparent,webp,webp_transparent,"
-                            "tinywebp,tinywebp_transparent,tinymp4,mp4,webm,"
-                            "originalgif,gifpreview",
-            "fields": "next,results.id,results.media_formats,results.title,"
-                      "results.h1_title,results.long_title,results.itemurl,"
-                      "results.url,results.created,results.user,"
-                      "results.shares,results.embed,results.hasaudio,"
-                      "results.policy_status,results.source_id,results.flags,"
-                      "results.tags,results.content_rating,results.bg_color,"
-                      "results.legacy_info,results.geographic_restriction,"
-                      "results.content_description",
-            "searchfilter": "none",
-            "pos": None,
-            "component": "web_desktop",
-        }
-        headers = {
-            "Referer": self.root + "/",
-            "Origin" : self.root,
-        }
+        return self._search_results(self.search_tags)
 
-        while True:
-            data = self.request(url, params=params, headers=headers).json()
 
-            yield from data["results"]
+class TenorUserExtractor(TenorExtractor):
+    subcategory = "user"
+    directory_fmt = ("{category}", "@{user[username]}")
+    pattern = BASE_PATTERN + r"/users/([^/?#]+)"
+    example = "https://tenor.com/users/USER"
 
-            params["pos"] = data.get("next")
-            if not params["pos"]:
-                return
+    def gifs(self):
+        return self._search_results("@" + self.groups[0])
