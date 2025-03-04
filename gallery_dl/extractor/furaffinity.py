@@ -98,7 +98,8 @@ class FuraffinityExtractor(Extractor):
             data["tags"] = text.split_html(extr(
                 'class="tags-row">', '</section>'))
             data["title"] = text.unescape(extr("<h2><p>", "</p></h2>"))
-            data["artist"] = extr("<strong>", "<")
+            extr('title=', '"')
+            data["artist"] = extr(">", "<")
             data["_description"] = extr(
                 'class="submission-description user-submitted-links">',
                 '                                    </div>')
@@ -121,6 +122,7 @@ class FuraffinityExtractor(Extractor):
         else:
             # old site layout
             data["title"] = text.unescape(extr("<h2>", "</h2>"))
+            extr('title=', '"')
             data["artist"] = extr(">", "<")
             data["fa_category"] = extr("<b>Category:</b>", "<").strip()
             data["theme"] = extr("<b>Theme:</b>", "<").strip()
