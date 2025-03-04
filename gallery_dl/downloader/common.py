@@ -91,9 +91,9 @@ class DownloaderBase():
 
         return None
 
-    def _report_config_error(self, subcat, value):
-        self.log.warning("'%s' set to %s instead of object",
-                         subcat, util.json_dumps(value))
+    def _report_config_error(self, subcategory, value):
+        config.log.warning("Subcategory '%s' set to '%s' instead of object",
+                           subcategory, util.json_dumps(value).strip('"'))
 
     def download(self, url, pathfmt):
         """Write data from 'url' into the file specified by 'pathfmt'"""
