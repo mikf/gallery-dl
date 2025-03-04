@@ -322,7 +322,7 @@ class VscoVideoExtractor(VscoExtractor):
             "grid_name"     : "",
             "upload_date"   : media["createdDate"],
             "responsive_url": media["posterUrl"],
-            "video_url"     : "ytdl:" + media.get("playbackUrl"),
+            "video_url"     : media.get("playbackUrl"),
             "image_meta"    : None,
             "width"         : media["width"],
             "height"        : media["height"],
