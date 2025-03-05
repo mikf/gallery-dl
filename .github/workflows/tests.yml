@@ -12,13 +12,11 @@ on:
 jobs:
   test:
 
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
       matrix:
         python-version:
-        - "3.5"
-        - "3.6"
         - "3.7"
         - "3.8"
         - "3.9"
@@ -39,8 +37,6 @@ jobs:
       uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
-      env:
-        PIP_TRUSTED_HOST: "pypi.python.org pypi.org files.pythonhosted.org"
 
     - name: Install dependencies
       run: |
