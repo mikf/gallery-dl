@@ -369,6 +369,31 @@ def extract_headers(response):
     return data
 
 
+def detect_challenge(response):
+    server = response.headers.get("server")
+    if not server:
+        return
+
+    elif server.startswith("cloudflare"):
+        if response.status_code not in (403, 503):
+            return
+
+        mitigated = response.headers.get("cf-mitigated")
+        if mitigated and mitigated.lower() == "challenge":
+            return "Cloudflare challenge"
+
+        content = response.content
+        if b"_cf_chl_opt" in content or b"jschl-answer" in content:
+            return "Cloudflare challenge"
+        elif b'name="captcha-bypass"' in content:
+            return "Cloudflare CAPTCHA"
+
+    elif server.startswith("ddos-guard"):
+        if response.status_code == 403 and \
+                b"/ddos-guard/js-challenge/" in response.content:
+            return "DDoS-Guard challenge"
+
+
 @functools.lru_cache(maxsize=None)
 def git_head():
     try:
