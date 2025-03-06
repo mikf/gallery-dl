@@ -160,6 +160,17 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.furaffinity.net/view/46163989/",
+    "#comment" : "display names (#7115 #7123)",
+    "#category": ("", "furaffinity", "post"),
+    "#class"   : furaffinity.FuraffinityPostExtractor,
+
+    "artist"    : "Pickra the magical feline",
+    "artist_url": "pickra",
+    "user"      : "pickra",
+},
+
+{
     "#url"     : "https://www.furaffinity.net/view/57587562",
     "#comment" : "login required",
     "#category": ("", "furaffinity", "post"),
