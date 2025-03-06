@@ -205,25 +205,10 @@ class Extractor():
 
                 msg = "'{} {}' for '{}'".format(
                     code, response.reason, response.url)
-                server = response.headers.get("Server")
-                if server and server.startswith("cloudflare") and \
-                        code in (403, 503):
-                    mitigated = response.headers.get("cf-mitigated")
-                    if mitigated and mitigated.lower() == "challenge":
-                        self.log.warning("Cloudflare challenge")
-                        break
-                    content = response.content
-                    if b"_cf_chl_opt" in content or b"jschl-answer" in content:
-                        self.log.warning("Cloudflare challenge")
-                        break
-                    if b'name="captcha-bypass"' in content:
-                        self.log.warning("Cloudflare CAPTCHA")
-                        break
-                elif server and server.startswith("ddos-guard") and \
-                        code == 403:
-                    if b"/ddos-guard/js-challenge/" in response.content:
-                        self.log.warning("DDoS-Guard challenge")
-                        break
+
+                challenge = util.detect_challenge(response)
+                if challenge is not None:
+                    self.log.warning(challenge)
 
                 if code == 429 and self._handle_429(response):
                     continue
