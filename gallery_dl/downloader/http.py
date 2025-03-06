@@ -184,6 +184,11 @@ class HttpDownloader(DownloaderBase):
                 break
             else:
                 msg = "'{} {}' for '{}'".format(code, response.reason, url)
+
+                challenge = util.detect_challenge(response)
+                if challenge is not None:
+                    self.log.warning(challenge)
+
                 if code in self.retry_codes or 500 <= code < 600:
                     continue
                 retry = kwdict.get("_http_retry")
