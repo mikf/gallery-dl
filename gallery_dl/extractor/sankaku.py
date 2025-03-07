@@ -244,7 +244,7 @@ class SankakuAPI():
                 if not until and b"_tags-explicit-limit" in response.content:
                     raise exception.AuthorizationError(
                         "Search tag limit exceeded")
-                seconds = None if until else 60
+                seconds = None if until else 600
                 self.extractor.wait(until=until, seconds=seconds)
                 continue
 
