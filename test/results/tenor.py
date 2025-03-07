@@ -126,4 +126,29 @@ __tests__ = (
     },
 },
 
+{
+    "#url"  : "https://tenor.com/official/rwrbonprime",
+    "#class": tenor.TenorUserExtractor,
+    "#range": "1",
+
+    "user": {
+        "avatars"      : dict,
+        "flags"        : ["partner"],
+        "partnerbanner": dict,
+        "partnercategories": [],
+        "partnercta"   : {
+            "text": "Learn More",
+            "url" : "https://www.amazon.com/dp/B0BYSWHGB9",
+        },
+        "partnerlinks" : list,
+        "partnername"  : "Red, White & Royal Blue",
+        "profile_id"   : "9116468280322048077",
+        "tagline"      : "Love is about to get royally complicated",
+        "url"          : "https://tenor.com/official/RWRBonPrime",
+        "userid"       : "0",
+        "username"     : "RWRBonPrime",
+        "usertype"     : "partner",
+    },
+},
+
 )
