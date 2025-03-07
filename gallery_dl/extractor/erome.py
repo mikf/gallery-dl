@@ -23,12 +23,8 @@ class EromeExtractor(Extractor):
     archive_fmt = "{album_id}_{num}"
     root = "https://www.erome.com"
 
-    def __init__(self, match):
-        Extractor.__init__(self, match)
-        self.item = match.group(1)
-        self.__cookies = True
-
     def items(self):
+        self.__cookies = True
         for album_id in self.albums():
             url = "{}/a/{}".format(self.root, album_id)
 
@@ -111,7 +107,7 @@ class EromeAlbumExtractor(EromeExtractor):
     example = "https://www.erome.com/a/ID"
 
     def albums(self):
-        return (self.item,)
+        return (self.groups[0],)
 
 
 class EromeUserExtractor(EromeExtractor):
@@ -120,18 +116,18 @@ class EromeUserExtractor(EromeExtractor):
     example = "https://www.erome.com/USER"
 
     def albums(self):
-        url = "{}/{}".format(self.root, self.item)
+        url = "{}/{}".format(self.root, self.groups[0])
         return self._pagination(url, {})
 
 
 class EromeSearchExtractor(EromeExtractor):
     subcategory = "search"
-    pattern = BASE_PATTERN + r"/search\?q=([^&#]+)"
+    pattern = BASE_PATTERN + r"/search/?\?(q=[^#]+)"
     example = "https://www.erome.com/search?q=QUERY"
 
     def albums(self):
         url = self.root + "/search"
-        params = {"q": text.unquote(self.item)}
+        params = text.parse_query(self.groups[0])
         return self._pagination(url, params)
 
 
