@@ -11,7 +11,7 @@
 from .common import Extractor, Message
 from .. import text, util
 
-BASE_PATTERN = r"(?:https?://)?tenor\.com"
+BASE_PATTERN = r"(?:https?://)?tenor\.com/(?:\w\w(?:-\w\w)?/)?"
 
 
 class TenorExtractor(Extractor):
@@ -107,7 +107,7 @@ class TenorExtractor(Extractor):
 
 class TenorImageExtractor(TenorExtractor):
     subcategory = "image"
-    pattern = BASE_PATTERN + r"/view/(?:[\w-]*-)?(\d+)"
+    pattern = BASE_PATTERN + r"view/(?:[\w-]*-)?(\d+)"
     example = "https://tenor.com/view/SLUG-1234567890"
 
     def gifs(self):
@@ -121,7 +121,7 @@ class TenorImageExtractor(TenorExtractor):
 class TenorSearchExtractor(TenorExtractor):
     subcategory = "search"
     directory_fmt = ("{category}", "{search_tags}")
-    pattern = BASE_PATTERN + r"/search/([^/?#]+)"
+    pattern = BASE_PATTERN + r"search/([^/?#]+)"
     example = "https://tenor.com/search/QUERY"
 
     def metadata(self):
@@ -140,7 +140,7 @@ class TenorSearchExtractor(TenorExtractor):
 class TenorUserExtractor(TenorExtractor):
     subcategory = "user"
     directory_fmt = ("{category}", "@{user[username]}")
-    pattern = BASE_PATTERN + r"/users/([^/?#]+)"
+    pattern = BASE_PATTERN + r"users/([^/?#]+)"
     example = "https://tenor.com/users/USER"
 
     def gifs(self):

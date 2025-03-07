@@ -69,6 +69,11 @@ __tests__ = (
 },
 
 {
+    "#url"  : "https://tenor.com/ja/view/moving-gif-8525772382434057283",
+    "#class": tenor.TenorImageExtractor,
+},
+
+{
     "#url"    : "https://tenor.com/search/trees-gifs",
     "#class"  : tenor.TenorSearchExtractor,
     "#pattern": r"https://media\d+\.tenor\.com/m/[\w-]+/[\w%-]+\.gif",
@@ -76,6 +81,11 @@ __tests__ = (
     "#count"  : 80,
 
     "search_tags": "trees",
+},
+
+{
+    "#url"  : "https://tenor.com/en-GB/search/trees-gifs",
+    "#class": tenor.TenorSearchExtractor,
 },
 
 {
