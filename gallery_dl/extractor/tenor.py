@@ -140,7 +140,7 @@ class TenorSearchExtractor(TenorExtractor):
 class TenorUserExtractor(TenorExtractor):
     subcategory = "user"
     directory_fmt = ("{category}", "@{user[username]}")
-    pattern = BASE_PATTERN + r"users/([^/?#]+)"
+    pattern = BASE_PATTERN + r"(?:users|official)/([^/?#]+)"
     example = "https://tenor.com/users/USER"
 
     def gifs(self):
