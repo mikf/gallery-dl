@@ -14,7 +14,7 @@ __tests__ = (
     "#urls" : "https://media1.tenor.com/m/dlGgz3LRXEMAAAAC/moving.gif",
 
     "bg_color" : "",
-    "content_description": "an illustration of a tree with green leaves",
+    "description": "an illustration of a tree with green leaves",
     "created"  : 1687512768.687436,
     "date"     : "dt:2023-06-23 09:32:48",
     "embed"    : r"re:<div class=.+",
