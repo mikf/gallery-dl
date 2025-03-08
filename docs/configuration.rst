@@ -1651,6 +1651,16 @@ Description
     * ``tiny`` (144p)
 
 
+extractor.bunkr.endpoint
+------------------------
+Type
+    ``string``
+Default
+    ``"/api/_001"``
+Description
+    API endpoint for retrieving file URLs.
+
+
 extractor.bunkr.tlds
 --------------------
 Type

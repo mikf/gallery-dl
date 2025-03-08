@@ -70,6 +70,17 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
         domain = self.groups[0] or self.groups[1]
         if domain not in LEGACY_DOMAINS:
             self.root = "https://" + domain
+
+    def _init(self):
+        LolisafeAlbumExtractor._init(self)
+
+        endpoint = self.config("endpoint")
+        if not endpoint:
+            endpoint = self.root_dl + "/api/_001"
+        elif endpoint[0] == "/":
+            endpoint = self.root_dl + endpoint
+
+        self.endpoint = endpoint
         self.offset = 0
 
     def skip(self, num):
@@ -168,10 +179,9 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
         data_id = text.extr(page, 'data-file-id="', '"')
         referer = self.root_dl + "/file/" + data_id
 
-        url = self.root_dl + "/api/_001"
         headers = {"Referer": referer, "Origin": self.root_dl}
-        data = self.request(
-            url, method="POST", headers=headers, json={"id": data_id}).json()
+        data = self.request(self.endpoint, method="POST", headers=headers,
+                            json={"id": data_id}).json()
 
         if data.get("encrypted"):
             key = "SECRET_KEY_{}".format(data["timestamp"] // 3600)
