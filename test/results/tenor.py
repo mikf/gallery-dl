@@ -69,6 +69,15 @@ __tests__ = (
 },
 
 {
+    "#url"    : "https://tenor.com/view/vtuber-hololive-%E3%83%9B%E3%83%AD%E3%83%A9%E3%82%A4%E3%83%96-hologra-%E3%83%9B%E3%83%AD%E3%81%90%E3%82%89-gif-26058046",
+    "#comment": "non-ASCII characters in URL",
+    "#class"  : tenor.TenorImageExtractor,
+    "#urls"   : "https://media1.tenor.com/m/jHugoUKy-T0AAAAC/vtuber-hololive.gif",
+
+    "id": "10122861201914526013",
+},
+
+{
     "#url"  : "https://tenor.com/ja/view/moving-gif-8525772382434057283",
     "#class": tenor.TenorImageExtractor,
 },
