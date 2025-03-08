@@ -41,6 +41,11 @@ class RedditExtractor(Extractor):
                 self._extract_video = self._extract_video_dash
             videos = True
 
+        selftext = self.config("selftext")
+        if selftext is None:
+            selftext = self.api.comments
+        selftext = True if selftext else False
+
         submissions = self.submissions()
         visited = set()
         depth = 0
@@ -92,12 +97,12 @@ class RedditExtractor(Extractor):
                 elif parentdir:
                     yield Message.Directory, comments[0]
 
+                if selftext and submission:
+                    for url in text.extract_iter(
+                            submission["selftext_html"] or "", ' href="', '"'):
+                        urls.append((url, submission))
+
                 if self.api.comments:
-                    if submission:
-                        for url in text.extract_iter(
-                                submission["selftext_html"] or "",
-                                ' href="', '"'):
-                            urls.append((url, submission))
                     for comment in comments:
                         html = comment["body_html"] or ""
                         href = (' href="' in html)

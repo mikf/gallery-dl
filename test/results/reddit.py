@@ -224,6 +224,18 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.reddit.com/r/gonewildaudio/comments/1j2pxfn/",
+    "#comment" : "'selftext' option (#7111)",
+    "#category": ("", "reddit", "submission"),
+    "#class"   : reddit.RedditSubmissionExtractor,
+    "#options" : {"selftext": True, "comments": 0},
+    "#urls"    : (
+        "https://www.reddit.com/r/gonewildaudio/s/22pP7vizkx",
+        "https://soundgasm.net/u/chuwa/Your-Timid-Neighbor-Asks-You-To-Turn-Your-Music-Down-So-You-Fuck-Her-Stupid",
+    ),
+},
+
+{
     "#url"     : "https://old.reddit.com/r/lavaporn/comments/2a00np/",
     "#category": ("", "reddit", "submission"),
     "#class"   : reddit.RedditSubmissionExtractor,

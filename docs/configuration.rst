@@ -4005,6 +4005,17 @@ Description
     at 600 requests every 10 minutes/600 seconds.
 
 
+extractor.reddit.selftext
+-------------------------
+Type
+    ``bool``
+Default
+    * ``true`` if `comments <extractor.reddit.comments_>`__ are enabled
+    * ``false`` otherwise
+Description
+    Follow links in the original post's ``selftext``.
+
+
 extractor.reddit.videos
 -----------------------
 Type
