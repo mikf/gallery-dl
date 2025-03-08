@@ -44,6 +44,7 @@ class TenorExtractor(Extractor):
             url = fmt["url"]
             gif["width"], gif["height"] = fmt["dims"]
             gif["title"] = gif["h1_title"][:-4]
+            gif["description"] = gif.pop("content_description", "")
             gif["date"] = text.parse_timestamp(gif["created"])
             if meta:
                 gif.update(meta)
