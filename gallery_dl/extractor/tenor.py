@@ -108,7 +108,7 @@ class TenorExtractor(Extractor):
 
 class TenorImageExtractor(TenorExtractor):
     subcategory = "image"
-    pattern = BASE_PATTERN + r"view/(?:[\w-]*-)?(\d+)"
+    pattern = BASE_PATTERN + r"view/(?:[^/?#]*-)?(\d+)"
     example = "https://tenor.com/view/SLUG-1234567890"
 
     def gifs(self):
