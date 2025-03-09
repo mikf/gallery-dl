@@ -237,7 +237,7 @@ class TwitterExtractor(Extractor):
     def _extract_components(self, tweet, data, files):
         for component_id in data["components"]:
             com = data["component_objects"][component_id]
-            for conv in com["data"]["conversation_preview"]:
+            for conv in com["data"].get("conversation_preview") or ():
                 for url in conv.get("mediaUrls") or ():
                     files.append({"url": url})
 
