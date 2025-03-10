@@ -431,10 +431,10 @@ class TestText(unittest.TestCase):
         self.assertEqual(f("foo=1&bar&baz=3"), {"foo": "1", "baz": "3"})
 
         # keys with identical names
-        self.assertEqual(f("foo=1&foo=2"), {"foo": ["1", "2"]})
+        self.assertEqual(f("foo=1&foo=2", ("foo",)), {"foo": ["1", "2"]})
         self.assertEqual(
-            f("foo=1&bar=2&foo=3&bar=4&foo=5"),
-            {"foo": ["1", "3", "5"], "bar": ["2", "4"]},
+            f("foo=1&bar=2&foo=3&bar=4&foo=5", {"foo", "baz"}),
+            {"foo": ["1", "3", "5"], "bar": "2"},
         )
 
         # invalid arguments

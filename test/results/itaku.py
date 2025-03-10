@@ -109,7 +109,7 @@ __tests__ = (
 },
 
 {
-    "#url"     : "https://itaku.ee/home/images?tags=%2Bcute&tags=-cute&tags=~cute&maturity_rating=SFW&date_range=&ordering=-date_added",
+    "#url"     : "https://itaku.ee/home/images?tags=cute&tags=-cute&tags=~cute&maturity_rating=SFW&date_range=&ordering=-date_added",
     "#comment" : "search with postive, negative, and optional tags",
     "#category": ("", "itaku", "search"),
     "#class"   : itaku.ItakuSearchExtractor,
