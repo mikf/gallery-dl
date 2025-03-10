@@ -93,6 +93,7 @@ modules = [
     "keenspot",
     "kemonoparty",
     "khinsider",
+    "kissjav",
     "koharu",
     "komikcast",
     "lensdump",
