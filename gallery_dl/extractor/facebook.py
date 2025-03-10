@@ -99,9 +99,10 @@ class FacebookExtractor(Extractor):
                 '"message":{"delight_ranges"',
                 '"},"message_preferred_body"'
             ).rsplit('],"text":"', 1)[-1]),
-            "date": text.parse_timestamp(text.extr(
-                photo_page, '\\"publish_time\\":', ','
-            )),
+            "date": text.parse_timestamp(
+                text.extr(photo_page, '\\"publish_time\\":', ',') or
+                text.extr(photo_page, '"created_time":', ',')
+            ),
             "url": FacebookExtractor.decode_all(text.extr(
                 photo_page, ',"image":{"uri":"', '","'
             )),
