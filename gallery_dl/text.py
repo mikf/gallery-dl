@@ -258,10 +258,10 @@ def parse_query(qs):
     return result
 
 
-def parse_query_list(qs):
+def parse_query_list(qs, as_list=()):
     """Parse a query string into name-value pairs
 
-    Combine values of duplicate names into lists
+    Combine values of names in 'as_list' into lists
     """
     if not qs:
         return {}
@@ -273,14 +273,13 @@ def parse_query_list(qs):
             if eq:
                 name = unquote(name.replace("+", " "))
                 value = unquote(value.replace("+", " "))
-                if name in result:
-                    rvalue = result[name]
-                    if isinstance(rvalue, list):
-                        rvalue.append(value)
+                if name in as_list:
+                    if name in result:
+                        result[name].append(value)
                     else:
-                        result[name] = [rvalue, value]
-                else:
-                    result[name] = value
+                        result[name] = [value]
+                elif name not in result:
+                    result[name] = unquote(value.replace("+", " "))
     except Exception:
         pass
     return result
