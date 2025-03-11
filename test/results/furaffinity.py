@@ -18,6 +18,23 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.furaffinity.net/gallery/markrun15/folder/173240/Inanimate/?",
+    "#category": ("", "furaffinity", "folder"),
+    "#class"   : furaffinity.FuraffinityFolderExtractor,
+    "#range"   : "46-50",
+    "#urla"    : (
+        "https://d.furaffinity.net/art/markrun15/1598704240/1598704240.markrun15_20200829_dusknoir_flat3.jpg",
+        "https://d.furaffinity.net/art/markrun15/1598704109/1598704109.markrun15_20200829_dusknoir_flat1.jpg",
+        "https://d.furaffinity.net/art/markrun15/1588674514/1588674514.markrun15_20200504_cubemorgana.jpg",
+        "https://d.furaffinity.net/art/markrun15/1588501280/1588501280.markrun15_20200427_inanimate_animal3.jpg",
+        "https://d.furaffinity.net/art/markrun15/1588501161/1588501161.markrun15_20200427_inanimate_animal.jpg",
+    ),
+
+    "folder_id"  : "173240",
+    "folder_name": "Inanimate",
+},
+
+{
     "#url"     : "https://www.furaffinity.net/scraps/mirlinthloth/",
     "#category": ("", "furaffinity", "scraps"),
     "#class"   : furaffinity.FuraffinityScrapsExtractor,
