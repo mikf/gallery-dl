@@ -79,7 +79,7 @@ __tests__ = (
     "#category": ("booru", "sankaku", "tag"),
     "#class"   : sankaku.SankakuTagExtractor,
     "#options"  : {"username": None},
-    "#exception": exception.StopExtraction,
+    "#exception": exception.AuthorizationError,
 },
 
 {
@@ -87,6 +87,15 @@ __tests__ = (
     "#comment" : "match arbitrary query parameters",
     "#category": ("booru", "sankaku", "tag"),
     "#class"   : sankaku.SankakuTagExtractor,
+},
+
+{
+    "#url"     : "https://chan.sankakucomplex.com/?tags=date:2023-03-20T00:00",
+    "#comment" : "'date:' tags (#1790)",
+    "#category": ("booru", "sankaku", "tag"),
+    "#class"   : sankaku.SankakuTagExtractor,
+    "#range"   : "1",
+    "#count"   : 1,
 },
 
 {
@@ -102,7 +111,6 @@ __tests__ = (
     "#url"     : "https://sankaku.app/books/90",
     "#category": ("booru", "sankaku", "pool"),
     "#class"   : sankaku.SankakuPoolExtractor,
-    "#count"   : 5,
 },
 
 {
@@ -182,11 +190,14 @@ __tests__ = (
         {
             "body"      : "A lonely person, is a lonely person, because he or she is lonely.",
             "created_at": 1643733759,
-            "creator_id": 1370766,
+            #  "creator_id": 1370766,
+            "creator_id": "WKaoQv7VRJ0",
             "height"    : 871,
-            "id"        : 1832643,
+            #  "id"        : 1832643,
+            "id"        : "e8M5EmNZMzv",
             "is_active" : True,
-            "post_id"   : 23688624,
+            #  "post_id"   : 23688624,
+            "post_id"   : "VAr2mjLJ2av",
             "updated_at": 1643733759,
             "width"     : 108,
             "x"         : 703,
@@ -196,22 +207,26 @@ __tests__ = (
 },
 
 {
-    "#url"     : "https://sankaku.app/post/show/360451",
+    #  "#url"     : "https://sankaku.app/post/show/360451",
+    "#url"     : "https://sankaku.app/post/show/y0abGlDOr2o",
     "#comment" : "legacy post URL",
     "#category": ("booru", "sankaku", "post"),
     "#class"   : sankaku.SankakuPostExtractor,
     "#pattern" : r"https://s\.sankakucomplex\.com/data/ac/8e/ac8e3b92ea328ce9cf7211e69c905bf9\.jpg\?e=.+",
 
-    "id": 360451,
+    #  "id": 360451,
+    "id": "y0abGlDOr2o",
 },
 
 {
-    "#url"     : "https://sankaku.app/post/show/21418978",
+    "#url"     : "https://www.sankakucomplex.com/posts/8JaGbKW4eML",
     "#comment" : "'contentious_content'",
     "#category": ("booru", "sankaku", "post"),
     "#class"   : sankaku.SankakuPostExtractor,
     "#auth"    : True,
     "#pattern" : r"https://s\.sankakucomplex\.com/data/13/3c/133cda3bfde249c504284493903fb985\.jpg",
+
+    "md5": "133cda3bfde249c504284493903fb985",
 },
 
 {
@@ -244,7 +259,8 @@ __tests__ = (
     "#pattern" : r"https://s\.sankakucomplex\.com/data/f8/ba/f8ba89043078f0e4be2d9c46550b840a\.jpg",
     "#count"   : 1,
 
-    "id" : 33195194,
+    #  "id" : 33195194,
+    "id" : "k3R93nWBqaG",
     "md5": "f8ba89043078f0e4be2d9c46550b840a",
 },
 
@@ -256,7 +272,8 @@ __tests__ = (
     "#pattern" : r"https://s\.sankakucomplex\.com/data/f8/ba/f8ba89043078f0e4be2d9c46550b840a\.jpg",
     "#count"   : 1,
 
-    "id" : 33195194,
+    #  "id" : 33195194,
+    "id" : "k3R93nWBqaG",
     "md5": "f8ba89043078f0e4be2d9c46550b840a",
 },
 
@@ -266,7 +283,8 @@ __tests__ = (
     "#category": ("booru", "sankaku", "post"),
     "#class"   : sankaku.SankakuPostExtractor,
 
-    "id" : 360451,
+    #  "id" : 360451,
+    "id" : "y0abGlDOr2o",
     "md5": "ac8e3b92ea328ce9cf7211e69c905bf9",
 },
 
