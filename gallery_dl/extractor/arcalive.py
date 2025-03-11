@@ -8,6 +8,7 @@
 
 from .common import Extractor, Message
 from .. import text, util, exception
+import re
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?arca\.live"
 
@@ -34,17 +35,45 @@ class ArcalivePostExtractor(ArcaliveExtractor):
         post = self.api.post(self.groups[0])
         files = self._extract_files(post)
 
-        post["date"] = text.parse_datetime(post["createdAt"])
         post["count"] = len(files)
+        post["date"] = text.parse_datetime(
+            post["createdAt"][:19], "%Y-%m-%dT%H:%M:%S")
+        post["post_url"] = post_url = "{}/b/{}/{}".format(
+            self.root, post["boardSlug"], post["id"])
+        post["_http_headers"] = {"Referer": post_url + "?p=1"}
 
         yield Message.Directory, post
-        for post["num"], url in enumerate(files, 1):
+        for post["num"], file in enumerate(files, 1):
+            post.update(file)
+            url = file["url"]
             yield Message.Url, url, text.nameext_from_url(url, post)
 
     def _extract_files(self, post):
-        # post["images"] doen't always have all the media
-        # therefore, parse the content ourselves
-        raise NotImplementedError
+        files = []
+
+        for media in self._extract_media(post["content"]):
+
+            src = text.extr(media, 'src="', '"')
+            if not src:
+                continue
+            elif src[0] == "/":
+                if src[1] == "/":
+                    url = "https:" + src
+                else:
+                    url = self.root + src
+            else:
+                url = src
+
+            files.append({
+                "url"   : text.unescape(url),
+                "width" : text.parse_int(text.extr(media, 'width="', '"')),
+                "height": text.parse_int(text.extr(media, 'height="', '"')),
+            })
+
+        return files
+
+    def _extract_media(self, content):
+        return re.findall(r"<(?:img|video) ([^>]+)", content)
 
 
 class ArcaliveBoardExtractor(ArcaliveExtractor):
