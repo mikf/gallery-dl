@@ -210,8 +210,25 @@ class SankakuAPI():
         return self._call("/posts/{}/notes".format(post_id), params)
 
     def tags(self, post_id):
-        params = {"lang": "en"}
-        return self._call("/posts/{}/tags".format(post_id), params)["data"]
+        endpoint = "/posts/{}/tags".format(post_id)
+        params = {
+            "lang" : "en",
+            "page" : 1,
+            "limit": 100,
+        }
+
+        tags = None
+        while True:
+            data = self._call(endpoint, params)
+
+            if tags is None:
+                tags = data["data"]
+            else:
+                tags.extend(data["data"])
+
+            if len(tags) >= data["total"]:
+                return tags
+            params["page"] += 1
 
     def pools(self, pool_id):
         params = {"lang": "en"}
