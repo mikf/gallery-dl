@@ -76,7 +76,7 @@ class SankakuExtractor(BooruExtractor):
 
     def _tags(self, post, page):
         tags = collections.defaultdict(list)
-        for tag in post["tags"]:
+        for tag in self.api.tags(post["id"]):
             name = tag["name"]
             if name:
                 tags[tag["type"]].append(name.lower().replace(" ", "_"))
@@ -112,11 +112,11 @@ class SankakuTagExtractor(SankakuExtractor):
         if "date:" in self.tags:
             # rewrite 'date:' tags (#1790)
             self.tags = re.sub(
-                r"date:(\d\d)[.-](\d\d)[.-](\d\d\d\d)",
-                r"date:\3.\2.\1", self.tags)
+                r"date:(\d\d)[.-](\d\d)[.-](\d\d\d\d)(?!T)",
+                r"date:\3-\2-\1T00:00", self.tags)
             self.tags = re.sub(
-                r"date:(\d\d\d\d)[.-](\d\d)[.-](\d\d)",
-                r"date:\1.\2.\3", self.tags)
+                r"date:(\d\d\d\d)[.-](\d\d)[.-](\d\d)(?!T)",
+                r"date:\1-\2-\3T00:00", self.tags)
 
     def metadata(self):
         return {"search_tags": self.tags}
@@ -209,12 +209,25 @@ class SankakuAPI():
         params = {"lang": "en"}
         return self._call("/posts/{}/notes".format(post_id), params)
 
+    def tags(self, post_id):
+        params = {"lang": "en"}
+        return self._call("/posts/{}/tags".format(post_id), params)["data"]
+
     def pools(self, pool_id):
         params = {"lang": "en"}
         return self._call("/pools/" + pool_id, params)
 
     def pools_keyset(self, params):
         return self._pagination("/pools/keyset", params)
+
+    def pools_series(self, params):
+        params_ = {
+            "lang"       : "en",
+            "filledPools": "true",
+            "includes[]" : "pools",
+        }
+        params_.update(params)
+        return self._pagination("/poolseriesv2", params)
 
     def posts(self, post_id):
         params = {
@@ -223,17 +236,17 @@ class SankakuAPI():
             "limit": "1",
             "tags" : ("md5:" if len(post_id) == 32 else "id_range:") + post_id,
         }
-        return self._call("/posts", params)
+        return self._call("/v2/posts", params)
 
     def posts_keyset(self, params):
-        return self._pagination("/posts/keyset", params)
+        return self._pagination("/v2/posts/keyset", params)
 
     def authenticate(self):
         self.headers["Authorization"] = \
             _authenticate_impl(self.extractor, self.username, self.password)
 
     def _call(self, endpoint, params=None):
-        url = "https://capi-v2.sankakucomplex.com" + endpoint
+        url = "https://sankakuapi.com" + endpoint
         for _ in range(5):
             self.authenticate()
             response = self.extractor.request(
@@ -311,7 +324,7 @@ class SankakuAPI():
 def _authenticate_impl(extr, username, password):
     extr.log.info("Logging in as %s", username)
 
-    url = "https://capi-v2.sankakucomplex.com/auth/token"
+    url = "https://sankakuapi.com/auth/token"
     headers = {"Accept": "application/vnd.sankaku.api+json;v=2"}
     data = {"login": username, "password": password}
 
