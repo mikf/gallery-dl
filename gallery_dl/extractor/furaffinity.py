@@ -153,12 +153,13 @@ class FuraffinityExtractor(Extractor):
     def _process_description(description):
         return text.unescape(text.remove_html(description, "", ""))
 
-    def _pagination(self, path):
+    def _pagination(self, path, folder=None):
         num = 1
+        folder = "" if folder is None else "/folder/{}/a".format(folder)
 
         while True:
-            url = "{}/{}/{}/{}/".format(
-                self.root, path, self.user, num)
+            url = "{}/{}/{}{}/{}/".format(
+                self.root, path, self.user, folder, num)
             page = self.request(url).text
             post_id = None
 
@@ -232,11 +233,29 @@ class FuraffinityExtractor(Extractor):
 class FuraffinityGalleryExtractor(FuraffinityExtractor):
     """Extractor for a furaffinity user's gallery"""
     subcategory = "gallery"
-    pattern = BASE_PATTERN + r"/gallery/([^/?#]+)"
+    pattern = BASE_PATTERN + r"/gallery/([^/?#]+)(?:$|/(?!folder/))"
     example = "https://www.furaffinity.net/gallery/USER/"
 
     def posts(self):
         return self._pagination("gallery")
+
+
+class FuraffinityFolderExtractor(FuraffinityExtractor):
+    """Extractor for a FurAffinity folder"""
+    subcategory = "folder"
+    directory_fmt = ("{category}", "{user!l}",
+                     "Folders", "{folder_id}{folder_name:? //}")
+    pattern = BASE_PATTERN + r"/gallery/([^/?#]+)/folder/(\d+)(?:/([^/?#]+))?"
+    example = "https://www.furaffinity.net/gallery/USER/folder/12345/FOLDER"
+
+    def metadata(self):
+        return {
+            "folder_id"  : self.groups[1],
+            "folder_name": self.groups[2] or "",
+        }
+
+    def posts(self):
+        return self._pagination("gallery", self.groups[1])
 
 
 class FuraffinityScrapsExtractor(FuraffinityExtractor):
