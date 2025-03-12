@@ -372,6 +372,7 @@ __tests__ = (
 {
     "#url"     : "https://sankaku.app/post/show/20758561",
     "#comment" : "empty tags (#1617)",
+    "#skip"    : "legacy, now unsupported, numerical post ID",
     "#category": ("booru", "sankaku", "post"),
     "#class"   : sankaku.SankakuPostExtractor,
     "#options" : {"tags": True},

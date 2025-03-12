@@ -106,6 +106,10 @@ class TestExtractorResults(unittest.TestCase):
         if len(result) <= 2:
             return  # only matching
 
+        skip = result.pop("#skip", False)
+        if skip:
+            return self._skipped.append((result["#url"], skip))
+
         if auth is None:
             auth = (cat in AUTH_REQUIRED)
         elif not auth:
