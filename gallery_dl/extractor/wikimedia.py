@@ -54,7 +54,7 @@ class WikimediaExtractor(BaseExtractor):
 
     @staticmethod
     def prepare(image):
-        """Adjust the content of a image object"""
+        """Adjust the content of an image object"""
         image["metadata"] = {
             m["name"]: m["value"]
             for m in image["metadata"] or ()}
@@ -79,6 +79,14 @@ class WikimediaExtractor(BaseExtractor):
             self.prepare(image)
             yield Message.Directory, image
             yield Message.Url, image["url"], image
+
+        if self.subcategories:
+            base = self.root + "/wiki/"
+            self.params["gcmtype"] = "subcat"
+            for subcat in self._pagination(self.params):
+                url = base + subcat["title"].replace(" ", "_")
+                subcat["_extractor"] = WikimediaArticleExtractor
+                yield Message.Queue, url, subcat
 
     def _pagination(self, params):
         """
@@ -208,6 +216,8 @@ class WikimediaArticleExtractor(WikimediaExtractor):
             self.subcategory = prefix
 
         if prefix == "category":
+            self.subcategories = \
+                True if self.config("subcategories", True) else False
             self.params = {
                 "generator": "categorymembers",
                 "gcmtitle" : path,
@@ -215,10 +225,12 @@ class WikimediaArticleExtractor(WikimediaExtractor):
                 "gcmlimit" : self.per_page,
             }
         elif prefix == "file":
+            self.subcategories = False
             self.params = {
                 "titles"   : path,
             }
         else:
+            self.subcategories = False
             self.params = {
                 "generator": "images",
                 "gimlimit" : self.per_page,

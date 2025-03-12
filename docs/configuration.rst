@@ -5288,6 +5288,16 @@ Description
     The value must be between 10 and 500.
 
 
+extractor.wikimedia.subcategories
+---------------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    For ``Category:`` pages, recursively descent into subcategories.
+
+
 extractor.ytdl.cmdline-args
 ---------------------------
 Type
