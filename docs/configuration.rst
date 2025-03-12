@@ -4389,11 +4389,16 @@ Description
 extractor.tiktok.audio
 ----------------------
 Type
-    ``bool``
+    * ``bool``
+    * ``string``
 Default
     ``true``
 Description
-    Download audio tracks using |ytdl|.
+    Controls audio download behavior.
+
+    * ``true``: Download audio tracks
+    * ``"ytdl"``: Download audio tracks using |ytdl|
+    * ``false``: Ignore audio tracks
 
 
 extractor.tiktok.videos
