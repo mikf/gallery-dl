@@ -97,6 +97,7 @@ class FuraffinityExtractor(Extractor):
         if self._new_layout:
             data["tags"] = text.split_html(extr(
                 'class="tags-row">', '</section>'))
+            data["scraps"] = (extr(' submissions">', "<") == "Scraps")
             data["title"] = text.unescape(extr("<h2><p>", "</p></h2>"))
             data["artist_url"] = extr('title="', '"').strip()
             data["artist"] = extr(">", "<")
@@ -121,6 +122,8 @@ class FuraffinityExtractor(Extractor):
                     folders.append(folder)
         else:
             # old site layout
+            data["scraps"] = (
+                "/scraps/" in extr('class="minigallery-title', "</a>"))
             data["title"] = text.unescape(extr("<h2>", "</h2>"))
             data["artist_url"] = extr('title="', '"').strip()
             data["artist"] = extr(">", "<")

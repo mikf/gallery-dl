@@ -98,6 +98,7 @@ __tests__ = (
     "gender"     : "Any",
     "width"      : 120,
     "height"     : 120,
+    "scraps"     : False,
 },
 
 {
@@ -168,12 +169,38 @@ __tests__ = (
                      "Custom Character Folder - Other Ungulates",
                      "Custom Character Folder - Female",
                      "Custom Character Folder - Patreon Supported Custom Characters"],
-    "height"      : 900,
     "id"          : 34260156,
     "rating"      : "General",
     "title"       : "Patreon Custom Deer",
     "thumbnail"   : "https://t.furaffinity.net/34260156@600-1576623121.jpg",
     "width"       : 488,
+    "height"      : 900,
+    "scraps"      : False,
+},
+
+{
+    "#url"     : "https://www.furaffinity.net/view/4919026/",
+    "#comment" : "'scraps' metadata (#7015)",
+    "#category": ("", "furaffinity", "post"),
+    "#class"   : furaffinity.FuraffinityPostExtractor,
+    "#auth"    : False,
+
+    "id"         : 4919026,
+    "scraps"     : True,
+    "title"      : "Loth Color Test",
+    "rating"     : "General",
+    "theme"      : "Fantasy",
+    "species"    : "Dragon (Other)",
+    "gender"     : "Multiple characters",
+    "width"      : 600,
+    "height"     : 777,
+    "user"       : "mirlinthloth",
+    "date"       : "dt:2010-12-10 01:47:23",
+    "description": "I think this is the first coloring for Loth that I did, I loved the goofy expression so I kept it.",
+    "folders": [
+        "Mirlinth Loth",
+        "Akiric Works",
+    ],
 },
 
 {
