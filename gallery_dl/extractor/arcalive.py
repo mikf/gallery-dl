@@ -73,7 +73,9 @@ class ArcalivePostExtractor(ArcaliveExtractor):
         return files
 
     def _extract_media(self, content):
-        return re.findall(r"<(?:img|video) ([^>]+)", content)
+        ArcalivePostExtractor._extract_media = extr = re.compile(
+            r"<(?:img|video) ([^>]+)").findall
+        return extr(content)
 
 
 class ArcaliveBoardExtractor(ArcaliveExtractor):
