@@ -186,17 +186,10 @@ __tests__ = (
     "#class"   : sankaku.SankakuPostExtractor,
     "#options" : {"tags": True},
 
-    "id"       : "9PMwlDWjXaB",
-    "md5"      : "dc9a3cbfcfee836779bc4f8d5d95c346",
-    "tag_names": "len:106",
+    "id"  : "9PMwlDWjXaB",
+    "md5" : "dc9a3cbfcfee836779bc4f8d5d95c346",
+    "tags": "len:106",
 
-    "tags": [
-        "mahou_shoujo_madoka_magica",
-        "mahou_shoujo_madoka_magica:_hangyaku_no_monogatari",
-        "pixiv",
-        "akemi_homura",
-        "kaname_madoka",
-    ],
     "tags_copyright": [
         "mahou_shoujo_madoka_magica",
         "mahou_shoujo_madoka_magica:_hangyaku_no_monogatari",

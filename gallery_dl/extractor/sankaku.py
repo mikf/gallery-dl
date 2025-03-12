@@ -66,8 +66,7 @@ class SankakuExtractor(BooruExtractor):
     def _prepare(self, post):
         post["created_at"] = post["created_at"]["s"]
         post["date"] = text.parse_timestamp(post["created_at"])
-        post["tags"] = [tag["name"].lower().replace(" ", "_")
-                        for tag in post["tags"] if tag["name"]]
+        post["tags"] = post.pop("tag_names", ())
         post["tag_string"] = " ".join(post["tags"])
         post["_http_validate"] = self._check_expired
 
