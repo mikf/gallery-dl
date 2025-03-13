@@ -102,15 +102,19 @@ class GirlswithmusclePostExtractor(GirlswithmuscleExtractor):
 
     def metadata(self, page, url, content_type):
         info_source_begin = \
-            '<div class="image-info" id="info-source" style="display: none">'
+            '<div id="info-source" style="display: none">'
         info_source_end = "</div>"
         source = text.remove_html(
             text.extr(page, info_source_begin, info_source_end))
 
-        info_uploader_begin = '<div class="image-info" id="info-uploader">'
-        info_uploader_end = "</div>"
+        img_info_begin = '<div class="image-info">'
+        img_info_end = "</div>"
+        img_info_div = text.extr(page, img_info_begin, img_info_end)
+
+        info_uploader_begin = '<span class="username-html">'
+        info_uploader_end = '</a>'
         uploader = text.remove_html(
-            text.extr(page, info_uploader_begin, info_uploader_end))
+            text.extr(img_info_div, info_uploader_begin, info_uploader_end))
 
         tags = text.extr(
             page, 'class="selected-tags">', "</span>", ''
