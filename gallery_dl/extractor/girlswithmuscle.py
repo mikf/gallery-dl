@@ -117,9 +117,9 @@ class GirlswithmusclePostExtractor(GirlswithmuscleExtractor):
             text.extr(img_info_div, info_uploader_begin, info_uploader_end))
 
         tags = text.extr(
-            page, 'class="selected-tags">', "</span>", ''
-        ).split(', ')
-        tags = [tag for tag in tags if tag]
+            page, 'id="tags-text">', "</div>", ''
+        ).replace('Tags:', '').strip().split(', ')
+        tags = [text.remove_html(tag).strip() for tag in tags if tag]
 
         score = text.parse_int(text.remove_html(
             text.extr(page, 'Score: <b>', '</span', '0')))
