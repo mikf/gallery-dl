@@ -83,7 +83,7 @@ __tests__ = (
     "book"         : False,
     "closing"      : None,
     "closing_date" : None,
-    "comment_cnt"  : 335,
+    "comment_cnt"  : range(330, 500),
     "date"         : "dt:2023-01-13 19:00:00",
     "early_access" : False,
     "escape_title" : "Episode 3",

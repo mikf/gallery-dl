@@ -50,7 +50,10 @@ __tests__ = (
         "following" : False,
         "hero"      : bool,
         "id"        : int,
+        "last_name" : {str, None},
+        "location"  : {str, None},
         "slug"      : str,
+        "username"  : {str, None},
     },
 },
 

@@ -17,7 +17,17 @@ __tests__ = (
     "#sha1_content" : (
         "f38b54b17cd7462e687b58d83f00fca88b1b105a",
         "0c8768055e4e20e7c7259608b67799171b691140",
+        "961b25d85b5f5bd18cbe3e847ac55925f14d0286"
     ),
+},
+
+{
+    "#url"     : "https://www.turboimagehost.com/album/344597/testimagegallery",
+    "#category": ("imagehost", "turboimagehost", "gallery"),
+    "#class"   : imagehosts.TurboimagehostGalleryExtractor,
+    "#pattern" : imagehosts.TurboimagehostImageExtractor.pattern,
+    "#sha1_url": "f2d4fe102fdd71dd1f595cdb0c16ce999d6bb19b",
+    "#count"   : 110,
 },
 
 )

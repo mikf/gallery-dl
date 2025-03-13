@@ -401,7 +401,10 @@ Default
         ``urlgalleries``,
         ``vk``,
         ``weebcentral``,
+        ``xfolio``,
         ``zerochan``
+    * ``"1.0"``
+        ``furaffinity``
     * ``"1.0-2.0"``
         ``flickr``,
         ``pexels``,
@@ -487,7 +490,7 @@ Description
     `cookies <extractor.*.cookies_>`__ is required
 
     Note: Leave the ``password`` value empty or undefined
-    to be prompted for a passeword when performing a login
+    to be prompted for a password when performing a login
     (see `getpass() <https://docs.python.org/3/library/getpass.html#getpass.getpass>`__).
 
 
@@ -661,10 +664,15 @@ Default
     * ``"Patreon/72.2.28 (Android; Android 14; Scale/2.10)"``: ``patreon``
     * ``"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:LATEST) Gecko/20100101 Firefox/LATEST"``: otherwise
 Description
-    User-Agent header value to be used for HTTP requests.
+    User-Agent header value used for HTTP requests.
 
     Setting this value to ``"browser"`` will try to automatically detect
     and use the ``User-Agent`` header of the system's default browser.
+
+    Note:
+    This option has *no* effect if
+    `extractor.browser <extractor.*.browser_>`__
+    is enabled.
 
 
 extractor.*.browser
@@ -682,6 +690,15 @@ Description
 
     Optionally, the operating system used in the ``User-Agent`` header can be
     specified after a ``:`` (``windows``, ``linux``, or ``macos``).
+
+    Note:
+    This option overrides
+    `user-agent <extractor.*.user-agent_>`__
+    and sets custom
+    `headers <extractor.*.headers_>`__
+    and
+    `ciphers <extractor.*.ciphers_>`__
+    defaults.
 
     Note: ``requests`` and ``urllib3`` only support HTTP/1.1, while a real
     browser would use HTTP/2.
@@ -907,11 +924,13 @@ Description
 extractor.*.archive
 -------------------
 Type
-    |Path|_
+    * ``string``
+    * |Path|_
 Default
     ``null``
 Example
-    ``"$HOME/.archives/{category}.sqlite3"``
+    * ``"$HOME/.archives/{category}.sqlite3"``
+    * ``"postgresql://user:pass@host/database"``
 Description
     File to store IDs of downloaded files in. Downloads of files
     already recorded in this archive file will be
@@ -921,6 +940,11 @@ Description
     database, as either lookup operations are significantly faster or
     memory requirements are significantly lower when the
     amount of stored IDs gets reasonably large.
+
+    If this value is a
+    `PostgreSQL Connection URI <https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-CONNSTRING-URIS>`__,
+    the archive will use this PostgreSQL database as backend (requires
+    `Psycopg <https://www.psycopg.org/>`__).
 
     Note: Archive files that do not already exist get generated automatically.
 
@@ -979,7 +1003,8 @@ extractor.*.archive-prefix
 Type
     ``string``
 Default
-    ``"{category}"``
+    * ``""`` when `archive-table <extractor.*.archive-table_>`__ is set
+    * ``"{category}"`` otherwise
 Description
     Prefix for archive IDs.
 
@@ -995,6 +1020,18 @@ Description
 
     See `<https://www.sqlite.org/pragma.html#toc>`__
     for available ``PRAGMA`` statements and further details.
+
+
+extractor.*.archive-table
+-------------------------
+Type
+    ``string``
+Default
+    ``"archive"``
+Example
+    ``"{category}"``
+Description
+    `Format string`_ selecting the archive database table name.
 
 
 extractor.*.actions
@@ -1513,7 +1550,7 @@ Description
 
     * ``facets``: ``hashtags``, ``mentions``, and ``uris``
     * ``user``: detailed ``user`` metadata for the user referenced in the input URL
-      (See `app.bsky.actor.getProfile <https://www.docs.bsky.app/docs/api/app-bsky-actor-get-profile>`__).
+      (See `app.bsky.actor.getProfile <https://docs.bsky.app/docs/api/app-bsky-actor-get-profile>`__).
 
 
 
@@ -1526,7 +1563,7 @@ Default
 Description
     Sets the maximum depth of returned reply posts.
 
-    (See `depth` parameter of `app.bsky.feed.getPostThread <https://www.docs.bsky.app/docs/api/app-bsky-feed-get-post-thread>`__)
+    (See `depth` parameter of `app.bsky.feed.getPostThread <https://docs.bsky.app/docs/api/app-bsky-feed-get-post-thread>`__)
 
 
 extractor.bluesky.quoted
@@ -1612,6 +1649,16 @@ Description
     * ``low`` (360p)
     * ``lowest`` (240p)
     * ``tiny`` (144p)
+
+
+extractor.bunkr.endpoint
+------------------------
+Type
+    ``string``
+Default
+    ``"/api/_001"``
+Description
+    API endpoint for retrieving file URLs.
 
 
 extractor.bunkr.tlds
@@ -1766,66 +1813,6 @@ Description
     to download images in JPEG format at their original resolution.
 
 
-extractor.cohost.asks
----------------------
-Type
-    ``bool``
-Default
-    ``true``
-Description
-    Extract ``ask`` posts.
-
-
-extractor.cohost.avatar
------------------------
-Type
-    ``bool``
-Default
-    ``false``
-Description
-    Download ``avatar`` images.
-
-
-extractor.cohost.background
----------------------------
-Type
-    ``bool``
-Default
-    ``false``
-Description
-    Download ``background``/``banner``/``header`` images.
-
-
-extractor.cohost.pinned
------------------------
-Type
-    ``bool``
-Default
-    ``false``
-Description
-    Extract pinned posts.
-
-
-extractor.cohost.replies
-------------------------
-Type
-    ``bool``
-Default
-    ``true``
-Description
-    Extract reply posts.
-
-
-extractor.cohost.shares
------------------------
-Type
-    ``bool``
-Default
-    ``false``
-Description
-    Extract shared posts.
-
-
 extractor.cyberdrop.domain
 --------------------------
 Type
@@ -1850,6 +1837,25 @@ Default
 Description
     For unavailable or restricted posts,
     follow the ``source`` and download from there if possible.
+
+
+extractor.[Danbooru].pool.order-posts
+-------------------------------------
+Type
+    ``string``
+Default
+    ``"pool"``
+Description
+    Controls the order in which pool posts are returned.
+
+    ``"pool"`` | ``"pool_asc"`` | ``"asc"`` | ``"asc_pool"``
+        Pool order
+    ``"pool_desc"`` | ``"desc_pool"`` | ``"desc"``
+        Reverse Pool order
+    ``"id"`` | ``"id_desc"`` | ``"desc_id"``
+        Descending Post ID order
+    ``"id_asc"`` | ``"asc_id"``
+        Ascending Post ID order
 
 
 extractor.[Danbooru].ugoira
@@ -2233,6 +2239,39 @@ Description
 
     | Each format is parsed as ``SIZE.EXT``.
     | Leave ``SIZE`` empty to download the regular, small avatar format.
+
+
+extractor.discord.embeds
+------------------------
+Type
+    ``list`` of ``strings``
+Default
+    ``["image", "gifv", "video"]``
+Description
+    Selects which embed types to download from.
+
+    Supported embed types are
+    ``image``, ``gifv``, ``video``, ``rich``, ``article``, ``link``.
+
+
+extractor.discord.threads
+-------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Extract threads from Discord text channels.
+
+
+extractor.discord.token
+-----------------------
+Type
+    ``string``
+Description
+    Discord Bot Token for API requests.
+
+    You can follow `this guide <https://github.com/Tyrrrz/DiscordChatExporter/blob/master/.docs/Token-and-IDs.md#how-to-get-a-user-token>`__ to get a token.
 
 
 extractor.[E621].metadata
@@ -3029,6 +3068,16 @@ Description
     * ``"asc"``: Ascending order (oldest first)
     * ``"desc"``: Descending order (newest first)
     * ``"reverse"``: Same as ``"asc"``
+
+
+extractor.khinsider.covers
+--------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Download album cover images.
 
 
 extractor.khinsider.format
@@ -3956,6 +4005,17 @@ Description
     at 600 requests every 10 minutes/600 seconds.
 
 
+extractor.reddit.selftext
+-------------------------
+Type
+    ``bool``
+Default
+    * ``true`` if `comments <extractor.reddit.comments_>`__ are enabled
+    * ``false`` otherwise
+Description
+    Follow links in the original post's ``selftext``.
+
+
 extractor.reddit.videos
 -----------------------
 Type
@@ -4294,6 +4354,95 @@ Description
 
     To generate a token, visit ``/user/USERNAME/list-tokens``
     and click ``Create Token``.
+
+
+extractor.tenor.format
+----------------------
+Type
+    * ``string``
+    * ``list`` of ``strings``
+Default
+    ``["gif", "mp4", "webm", "webp"]``
+Description
+    List of names of the preferred animation format.
+
+    If a selected format is not available, the next one in the list will be
+    tried until a format is found.
+
+    Possible formats include
+
+    * ``"gif"``
+    * ``"gif_transparent"``
+    * ``"gifpreview"``
+    * ``"mediumgif"``
+    * ``"tinygif"``
+    * ``"tinygif_transparent"``
+    * ``"mp4"``
+    * ``"tinymp4"``
+    * ``"webm"``
+    * ``"webp"``
+    * ``"webp_transparent"``
+    * ``"tinywebp"``
+    * ``"tinywebp_transparent"``
+
+
+extractor.tiktok.audio
+----------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Download audio tracks using |ytdl|.
+
+
+extractor.tiktok.videos
+-----------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Download videos using |ytdl|.
+
+
+extractor.tiktok.user.avatar
+----------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Download user avatars.
+
+
+extractor.tiktok.user.module
+----------------------------
+Type
+    ``string``
+Default
+    ``null``
+Description
+    Name or filesystem path of the ``ytdl`` Python module
+    to extract posts from a ``tiktok`` user profile with.
+
+    See `extractor.ytdl.module`_.
+
+
+extractor.tiktok.user.tiktok-range
+----------------------------------
+Type
+    ``string``
+Default
+    ``""``
+Example
+    ``"1-20"``
+Description
+    Range or playlist indices of ``tiktok`` user posts to extract.
+
+    See
+    `ytdl/playlist_items <https://github.com/yt-dlp/yt-dlp/blob/3042afb5fe342d3a00de76704cd7de611acc350e/yt_dlp/YoutubeDL.py#L289>`__
+    for details.
 
 
 extractor.tumblr.avatar
@@ -4738,7 +4887,7 @@ Default
     ``true``
 Description
     When receiving a "Could not authenticate you" error while logged in with
-    `username & passeword <extractor.*.username & .password_>`__,
+    `username & password <extractor.*.username & .password_>`__,
     refresh the current login session and
     try to continue from where it left off.
 
@@ -4911,7 +5060,7 @@ extractor.vipergirls.domain
 Type
     ``string``
 Default
-    ``"vipergirls.to"``
+    ``"viper.click"``
 Description
     Specifies the domain used by ``vipergirls`` extractors.
 
@@ -5089,6 +5238,16 @@ Description
     Download ``livephoto`` files.
 
 
+extractor.weibo.movies
+----------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Download ``movie`` videos.
+
+
 extractor.weibo.retweets
 ------------------------
 Type
@@ -5209,11 +5368,15 @@ Description
 extractor.ytdl.module
 ---------------------
 Type
-    ``string``
+    * ``string``
+    * |Path|_
 Default
     ``null``
+Example
+    * ``"yt-dlp"``
+    * ``"/home/user/.local/lib/python3.13/site-packages/youtube_dl"``
 Description
-    Name of the ``ytdl`` Python module to import.
+    Name or filesystem path of the ``ytdl`` Python module to import.
 
     Setting this to ``null`` will try to import ``"yt_dlp"``
     followed by ``"youtube_dl"`` as fallback.
@@ -5585,6 +5748,21 @@ Description
     regardless of this option.
 
 
+downloader.http.sleep-429
+-------------------------
+Type
+    |Duration|_
+Default
+    `extractor.*.sleep-429`_
+Description
+    Number of seconds to sleep when receiving a `429 Too Many Requests`
+    response before `retrying <downloader.*.retries_>`__ the request.
+
+    Note: Requires
+    `retry-codes <downloader.http.retry-codes_>`__
+    to include ``429``.
+
+
 downloader.http.validate
 ------------------------
 Type
@@ -5669,11 +5847,15 @@ Description
 downloader.ytdl.module
 ----------------------
 Type
-    ``string``
+    * ``string``
+    * |Path|_
 Default
     ``null``
+Example
+    * ``"yt-dlp"``
+    * ``"/home/user/.local/lib/python3.13/site-packages/youtube_dl"``
 Description
-    Name of the ``ytdl`` Python module to import.
+    Name or filesystem path of the ``ytdl`` Python module to import.
 
     Setting this to ``null`` will try to import ``"yt_dlp"``
     followed by ``"youtube_dl"`` as fallback.
@@ -6096,16 +6278,18 @@ Description
 exec.archive
 ------------
 Type
-    |Path|_
+    * ``string``
+    * |Path|_
 Description
-    File to store IDs of executed commands in,
+    Database to store IDs of executed commands in,
     similar to `extractor.*.archive`_.
 
-    ``archive-format``, ``archive-prefix``, and ``archive-pragma`` options,
-    akin to
-    `extractor.*.archive-format`_,
-    `extractor.*.archive-prefix`_, and
-    `extractor.*.archive-pragma`_, are supported as well.
+    The following archive options are also supported:
+
+    * `archive-format <extractor.*.archive-format_>`__
+    * `archive-prefix <extractor.*.archive-prefix_>`__
+    * `archive-pragma <extractor.*.archive-pragma_>`__
+    * `archive-table  <extractor.*.archive-table_>`__
 
 
 exec.async
@@ -6545,16 +6729,18 @@ Description
 metadata.archive
 ----------------
 Type
-    |Path|_
+    * ``string``
+    * |Path|_
 Description
-    File to store IDs of generated metadata files in,
+    Database to store IDs of generated metadata files in,
     similar to `extractor.*.archive`_.
 
-    ``archive-format``, ``archive-prefix``, and ``archive-pragma`` options,
-    akin to
-    `extractor.*.archive-format`_,
-    `extractor.*.archive-prefix`_, and
-    `extractor.*.archive-pragma`_, are supported as well.
+    The following archive options are also supported:
+
+    * `archive-format <extractor.*.archive-format_>`__
+    * `archive-prefix <extractor.*.archive-prefix_>`__
+    * `archive-pragma <extractor.*.archive-pragma_>`__
+    * `archive-table  <extractor.*.archive-table_>`__
 
 
 metadata.mtime
@@ -6625,16 +6811,18 @@ Description
 python.archive
 --------------
 Type
-    |Path|_
+    * ``string``
+    * |Path|_
 Description
-    File to store IDs of called Python functions in,
+    Database to store IDs of called Python functions in,
     similar to `extractor.*.archive`_.
 
-    ``archive-format``, ``archive-prefix``, and ``archive-pragma`` options,
-    akin to
-    `extractor.*.archive-format`_,
-    `extractor.*.archive-prefix`_, and
-    `extractor.*.archive-pragma`_, are supported as well.
+    The following archive options are also supported:
+
+    * `archive-format <extractor.*.archive-format_>`__
+    * `archive-prefix <extractor.*.archive-prefix_>`__
+    * `archive-pragma <extractor.*.archive-pragma_>`__
+    * `archive-table  <extractor.*.archive-table_>`__
 
 
 python.event

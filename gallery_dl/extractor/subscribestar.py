@@ -51,6 +51,23 @@ class SubscribestarExtractor(Extractor):
     def posts(self):
         """Yield HTML content of all relevant posts"""
 
+    def request(self, url, **kwargs):
+        while True:
+            response = Extractor.request(self, url, **kwargs)
+
+            if response.history and "/verify_subscriber" in response.url:
+                raise exception.StopExtraction(
+                    "HTTP redirect to %s", response.url)
+
+            content = response.content
+            if len(content) < 250 and b">redirected<" in content:
+                url = text.unescape(text.extr(
+                    content, b'href="', b'"').decode())
+                self.log.debug("HTML redirect message for %s", url)
+                continue
+
+            return response
+
     def login(self):
         if self.cookies_check(self.cookies_names):
             return
@@ -189,10 +206,11 @@ class SubscribestarPostExtractor(SubscribestarExtractor):
         extr = text.extract_from(html)
         return {
             "post_id"    : text.parse_int(extr('data-id="', '"')),
-            "author_name": text.unescape(extr('href="/', '"')),
+            "date"       : self._parse_datetime(extr(
+                '<div class="section-title_date">', '<')),
+            "content"    : extr('<body>', '</body>').strip(),
+            "author_name": text.unescape(extr(
+                'class="star_link" href="/', '"')),
             "author_id"  : text.parse_int(extr('data-user-id="', '"')),
             "author_nick": text.unescape(extr('alt="', '"')),
-            "date"       : self._parse_datetime(extr(
-                '<span class="star_link-types">', '<')),
-            "content"    : extr('<body>', '</body>').strip(),
         }

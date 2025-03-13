@@ -50,14 +50,16 @@ class WeebcentralChapterExtractor(WeebcentralBase, ChapterExtractor):
     def metadata(self, page):
         extr = text.extract_from(page)
         manga_id = extr("'series_id': '", "'")
-
-        data = self._extract_manga_data(manga_id)
-        data["chapter_id"] = self.groups[1]
-        data["chapter_type"] = extr("'chapter_type': '", "'")
-
+        chapter_type = extr("'chapter_type': '", "'")
         chapter, sep, minor = extr("'number': '", "'").partition(".")
-        data["chapter"] = text.parse_int(chapter)
-        data["chapter_minor"] = sep + minor
+
+        data = {
+            "chapter": text.parse_int(chapter),
+            "chapter_id": self.groups[1],
+            "chapter_type": chapter_type,
+            "chapter_minor": sep + minor,
+        }
+        data.update(self._extract_manga_data(manga_id))
 
         return data
 
@@ -80,12 +82,12 @@ class WeebcentralChapterExtractor(WeebcentralBase, ChapterExtractor):
 
         results = []
         while True:
-            src = extr(' src="', '"')
+            src = extr('src="', '"')
             if not src:
                 break
             results.append((src, {
-                "width" : text.parse_int(extr(' width="' , '"')),
-                "height": text.parse_int(extr(' height="', '"')),
+                "width" : text.parse_int(extr('width="' , '"')),
+                "height": text.parse_int(extr('height="', '"')),
             }))
         return results
 

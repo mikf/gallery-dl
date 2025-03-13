@@ -74,10 +74,6 @@ BASE_PATTERN = Shimmie2Extractor.update({
         "pattern": r"(?:sizechange|giantess)booru\.com",
         "cookies": {"agreed": "true"},
     },
-    "tentaclerape": {
-        "root": "https://tentaclerape.net",
-        "pattern": r"tentaclerape\.net",
-    },
     "cavemanon": {
         "root": "https://booru.cavemanon.xyz",
         "pattern": r"booru\.cavemanon\.xyz",

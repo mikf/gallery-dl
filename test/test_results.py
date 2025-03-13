@@ -106,6 +106,10 @@ class TestExtractorResults(unittest.TestCase):
         if len(result) <= 2:
             return  # only matching
 
+        skip = result.pop("#skip", False)
+        if skip:
+            return self._skipped.append((result["#url"], skip))
+
         if auth is None:
             auth = (cat in AUTH_REQUIRED)
         elif not auth:
@@ -237,7 +241,7 @@ class TestExtractorResults(unittest.TestCase):
             elif isinstance(test, range):
                 self.assertRange(value, test, msg=path)
             elif isinstance(test, set):
-                self.assertIn(value, test, msg=path)
+                self.assertTrue(value in test or type(value) in test, msg=path)
             elif isinstance(test, list):
                 subtest = False
                 for idx, item in enumerate(test):

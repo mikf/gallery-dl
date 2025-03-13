@@ -12,7 +12,7 @@ import time
 import mimetypes
 from requests.exceptions import RequestException, ConnectionError, Timeout
 from .common import DownloaderBase
-from .. import text, util
+from .. import text, util, output
 from ssl import SSLError
 
 
@@ -38,6 +38,7 @@ class HttpDownloader(DownloaderBase):
         self.verify = self.config("verify", extractor._verify)
         self.mtime = self.config("mtime", True)
         self.rate = self.config("rate")
+        interval_429 = self.config("sleep-429")
 
         if not self.config("consume-content", False):
             # this resets the underlying TCP connection, and therefore
@@ -79,12 +80,16 @@ class HttpDownloader(DownloaderBase):
             self.receive = self._receive_rate
             if self.progress < 0.0:
                 self.progress = 0.0
+        if interval_429 is None:
+            self.interval_429 = extractor._interval_429
+        else:
+            self.interval_429 = util.build_duration_func(interval_429)
 
     def download(self, url, pathfmt):
         try:
             return self._download_impl(url, pathfmt)
         except Exception:
-            print()
+            output.stderr_write("\n")
             raise
         finally:
             # remove file from incomplete downloads
@@ -93,7 +98,7 @@ class HttpDownloader(DownloaderBase):
 
     def _download_impl(self, url, pathfmt):
         response = None
-        tries = 0
+        tries = code = 0
         msg = ""
 
         metadata = self.metadata
@@ -111,10 +116,17 @@ class HttpDownloader(DownloaderBase):
                 if response:
                     self.release_conn(response)
                     response = None
+
                 self.log.warning("%s (%s/%s)", msg, tries, self.retries+1)
                 if tries > self.retries:
                     return False
-                time.sleep(tries)
+
+                if code == 429 and self.interval_429:
+                    s = self.interval_429()
+                    time.sleep(s if s > tries else tries)
+                else:
+                    time.sleep(tries)
+                code = 0
 
             tries += 1
             file_header = None
@@ -172,6 +184,11 @@ class HttpDownloader(DownloaderBase):
                 break
             else:
                 msg = "'{} {}' for '{}'".format(code, response.reason, url)
+
+                challenge = util.detect_challenge(response)
+                if challenge is not None:
+                    self.log.warning(challenge)
+
                 if code in self.retry_codes or 500 <= code < 600:
                     continue
                 retry = kwdict.get("_http_retry")
@@ -257,7 +274,7 @@ class HttpDownloader(DownloaderBase):
                         else response.iter_content(16), b"")
                 except (RequestException, SSLError) as exc:
                     msg = str(exc)
-                    print()
+                    output.stderr_write("\n")
                     continue
                 if self._adjust_extension(pathfmt, file_header) and \
                         pathfmt.exists():
@@ -291,14 +308,14 @@ class HttpDownloader(DownloaderBase):
                     self.receive(fp, content, size, offset)
                 except (RequestException, SSLError) as exc:
                     msg = str(exc)
-                    print()
+                    output.stderr_write("\n")
                     continue
 
                 # check file size
                 if size and fp.tell() < size:
                     msg = "file size mismatch ({} < {})".format(
                         fp.tell(), size)
-                    print()
+                    output.stderr_write("\n")
                     continue
 
             break
@@ -317,7 +334,7 @@ class HttpDownloader(DownloaderBase):
             for _ in response.iter_content(self.chunk_size):
                 pass
         except (RequestException, SSLError) as exc:
-            print()
+            output.stderr_write("\n")
             self.log.debug(
                 "Unable to consume response body (%s: %s); "
                 "closing the connection anyway", exc.__class__.__name__, exc)

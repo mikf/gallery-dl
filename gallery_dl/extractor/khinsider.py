@@ -36,22 +36,36 @@ class KhinsiderSoundtrackExtractor(AsynchronousMixin, Extractor):
 
         data = self.metadata(page)
         yield Message.Directory, data
-        for track in self.tracks(page):
+
+        if self.config("covers", False):
+            for num, url in enumerate(self._extract_covers(page), 1):
+                cover = text.nameext_from_url(
+                    url, {"url": url, "num": num, "type": "cover"})
+                cover.update(data)
+                yield Message.Url, url, cover
+
+        for track in self._extract_tracks(page):
             track.update(data)
+            track["type"] = "track"
             yield Message.Url, track["url"], track
 
     def metadata(self, page):
         extr = text.extract_from(page)
         return {"album": {
             "name" : text.unescape(extr("<h2>", "<")),
-            "platform": extr("Platforms: <a", "<").rpartition(">")[2],
+            "platform": text.split_html(extr("Platforms: ", "<br>"))[::2],
+            "year": extr("Year: <b>", "<"),
+            "catalog": extr("Catalog Number: <b>", "<"),
+            "developer": text.remove_html(extr(" Developed by: ", "</")),
+            "publisher": text.remove_html(extr(" Published by: ", "</")),
             "count": text.parse_int(extr("Number of Files: <b>", "<")),
             "size" : text.parse_bytes(extr("Total Filesize: <b>", "<")[:-1]),
             "date" : extr("Date Added: <b>", "<"),
             "type" : text.remove_html(extr("Album type: <b>", "</b>")),
+            "uploader": text.remove_html(extr("Uploaded by: ", "</")),
         }}
 
-    def tracks(self, page):
+    def _extract_tracks(self, page):
         fmt = self.config("format", ("mp3",))
         if fmt and isinstance(fmt, str):
             if fmt == "all":
@@ -75,3 +89,9 @@ class KhinsiderSoundtrackExtractor(AsynchronousMixin, Extractor):
                     yield track
             if first:
                 yield first
+
+    def _extract_covers(self, page):
+        return [
+            text.unescape(text.extr(cover, ' href="', '"'))
+            for cover in text.extract_iter(page, ' class="albumImage', '</')
+        ]

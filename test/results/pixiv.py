@@ -200,11 +200,12 @@ __tests__ = (
     "#url"     : "https://www.pixiv.net/en/artworks/102932581",
     "#comment" : "limit_sanity_level_360.png (#4327, #5180)",
     "#class"   : pixiv.PixivWorkExtractor,
-    "#options" : {"sanity": True},
+    "#options" : {"sanity": True, "comments": True},
     "#urls"    : "https://i.pximg.net/img-original/img/2022/11/20/00/00/49/102932581_p0.jpg",
 
     "caption"       : "Meet a deer .",
     "comment_access_control": 0,
+    "comments"      : (),
     "create_date"   : "2022-11-19T15:00:00+00:00",
     "date"          : "dt:2022-11-19 15:00:00",
     "date_url"      : "dt:2022-11-19 15:00:49",

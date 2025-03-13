@@ -179,11 +179,15 @@ class PrintAction(argparse.Action):
         if not format_string:
             return
 
-        if "{" not in format_string and \
-                " " not in format_string and \
-                format_string[0] != "\f":
-            format_string = "{" + format_string + "}"
-        if format_string[-1] != "\n":
+        if format_string.startswith("\\f"):
+            format_string = "\f" + format_string[2:]
+
+        if format_string[0] == "\f":
+            if format_string[1] == "F" and format_string[-1] != "\n":
+                format_string += "\n"
+        elif "{" not in format_string and " " not in format_string:
+            format_string = "{" + format_string + "}\n"
+        elif format_string[-1] != "\n":
             format_string += "\n"
 
         namespace.postprocessors.append({

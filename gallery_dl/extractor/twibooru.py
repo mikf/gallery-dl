@@ -12,7 +12,7 @@ from .booru import BooruExtractor
 from .. import text, exception
 import operator
 
-BASE_PATTERN = r"(?:https?://)?twibooru\.org"
+BASE_PATTERN = r"(?:https?://)?(?:www\.)?twibooru\.org"
 
 
 class TwibooruExtractor(BooruExtractor):

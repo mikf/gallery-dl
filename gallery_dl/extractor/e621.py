@@ -8,7 +8,7 @@
 
 """Extractors for https://e621.net/ and other e621 instances"""
 
-from .common import Message
+from .common import Extractor, Message
 from . import danbooru
 from ..cache import memcache
 from .. import text, util
@@ -100,7 +100,7 @@ class E621PoolExtractor(E621Extractor, danbooru.DanbooruPoolExtractor):
     example = "https://e621.net/pools/12345"
 
     def posts(self):
-        self.log.info("Fetching posts of pool %s", self.pool_id)
+        self.log.info("Collecting posts of pool %s", self.pool_id)
 
         id_to_post = {
             post["id"]: post
@@ -126,7 +126,7 @@ class E621PostExtractor(E621Extractor, danbooru.DanbooruPostExtractor):
     example = "https://e621.net/posts/12345"
 
     def posts(self):
-        url = "{}/posts/{}.json".format(self.root, self.post_id)
+        url = "{}/posts/{}.json".format(self.root, self.groups[-1])
         return (self.request(url).json()["post"],)
 
 
@@ -147,12 +147,26 @@ class E621FavoriteExtractor(E621Extractor):
     pattern = BASE_PATTERN + r"/favorites(?:\?([^#]*))?"
     example = "https://e621.net/favorites"
 
-    def __init__(self, match):
-        E621Extractor.__init__(self, match)
-        self.query = text.parse_query(match.group(match.lastindex))
-
     def metadata(self):
+        self.query = text.parse_query(self.groups[-1])
         return {"user_id": self.query.get("user_id", "")}
 
     def posts(self):
         return self._pagination("/favorites.json", self.query)
+
+
+class E621FrontendExtractor(Extractor):
+    """Extractor for alternative e621 frontends"""
+    basecategory = "E621"
+    category = "e621"
+    subcategory = "frontend"
+    pattern = r"(?:https?://)?e621\.(?:cc/\?tags|anthro\.fr/\?q)=([^&#]*)"
+    example = "https://e621.cc/?tags=TAG"
+
+    def initialize(self):
+        pass
+
+    def items(self):
+        url = "https://e621.net/posts?tags=" + self.groups[0]
+        data = {"_extractor": E621TagExtractor}
+        yield Message.Queue, url, data

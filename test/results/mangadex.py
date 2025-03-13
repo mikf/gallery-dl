@@ -144,6 +144,7 @@ __tests__ = (
     "#url"     : "https://mangadex.org/author/7222d0d5-836c-4bf3-9174-72bceade8c87/kotoyama",
     "#class"   : mangadex.MangadexAuthorExtractor,
     "#urls"    : (
+        "https://mangadex.org/title/ef4ead73-57a7-4d10-95b3-de73cfdd2670",
         "https://mangadex.org/title/259dfd8a-f06a-4825-8fa6-a2dcd7274230",
         "https://mangadex.org/title/d0c88e3b-ea64-4e07-9841-c1d2ac982f4a",
         "https://mangadex.org/title/f48bbb5f-8a23-4dea-8177-eb2dbbcbf4fa",

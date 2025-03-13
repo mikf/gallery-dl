@@ -23,12 +23,8 @@ class EromeExtractor(Extractor):
     archive_fmt = "{album_id}_{num}"
     root = "https://www.erome.com"
 
-    def __init__(self, match):
-        Extractor.__init__(self, match)
-        self.item = match.group(1)
-        self.__cookies = True
-
     def items(self):
+        self.__cookies = True
         for album_id in self.albums():
             url = "{}/a/{}".format(self.root, album_id)
 
@@ -44,6 +40,8 @@ class EromeExtractor(Extractor):
             pos = page.index('<div class="user-profile', pos)
             user, pos = text.extract(
                 page, 'href="https://www.erome.com/', '"', pos)
+            tags, pos = text.extract(
+                page, '<p class="mt-10"', '</p>', pos)
 
             urls = []
             date = None
@@ -59,11 +57,14 @@ class EromeExtractor(Extractor):
                         date = text.parse_timestamp(ts)
 
             data = {
-                "album_id"     : album_id,
-                "title"        : text.unescape(title),
-                "user"         : text.unquote(user),
-                "count"        : len(urls),
-                "date"         : date,
+                "album_id": album_id,
+                "title"   : text.unescape(title),
+                "user"    : text.unquote(user),
+                "count"   : len(urls),
+                "date"    : date,
+                "tags"    : ([t.replace("+", " ")
+                              for t in text.extract_iter(tags, "?q=", '"')]
+                             if tags else ()),
                 "_http_headers": {"Referer": url},
             }
 
@@ -106,7 +107,7 @@ class EromeAlbumExtractor(EromeExtractor):
     example = "https://www.erome.com/a/ID"
 
     def albums(self):
-        return (self.item,)
+        return (self.groups[0],)
 
 
 class EromeUserExtractor(EromeExtractor):
@@ -115,18 +116,18 @@ class EromeUserExtractor(EromeExtractor):
     example = "https://www.erome.com/USER"
 
     def albums(self):
-        url = "{}/{}".format(self.root, self.item)
+        url = "{}/{}".format(self.root, self.groups[0])
         return self._pagination(url, {})
 
 
 class EromeSearchExtractor(EromeExtractor):
     subcategory = "search"
-    pattern = BASE_PATTERN + r"/search\?q=([^&#]+)"
+    pattern = BASE_PATTERN + r"/search/?\?(q=[^#]+)"
     example = "https://www.erome.com/search?q=QUERY"
 
     def albums(self):
         url = self.root + "/search"
-        params = {"q": text.unquote(self.item)}
+        params = text.parse_query(self.groups[0])
         return self._pagination(url, params)
 
 

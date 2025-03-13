@@ -58,7 +58,6 @@ __tests__ = (
     "sponsorship": None,
     "subcategory": "image",
     "tags"       : list,
-    "tags_preview": list,
     "topic_submissions": {},
     "topics"     : [],
     "updated_at" : str,

@@ -121,14 +121,7 @@ class TwitterExtractor(Extractor):
                 txt = data.get("full_text") or data.get("text") or ""
                 self.log.warning("'%s' (%s)", txt, data["id_str"])
 
-            files = []
-            if "extended_entities" in data:
-                self._extract_media(
-                    data, data["extended_entities"]["media"], files)
-            if "card" in tweet and self.cards:
-                self._extract_card(tweet, files)
-            if self.twitpic:
-                self._extract_twitpic(data, files)
+            files = self._extract_files(data, tweet)
             if not files and not self.textonly:
                 continue
 
@@ -142,6 +135,39 @@ class TwitterExtractor(Extractor):
                 if "extension" not in file:
                     text.nameext_from_url(url, file)
                 yield Message.Url, url, file
+
+    def _extract_files(self, data, tweet):
+        files = []
+
+        if "extended_entities" in data:
+            try:
+                self._extract_media(
+                    data, data["extended_entities"]["media"], files)
+            except Exception as exc:
+                self.log.debug("", exc_info=exc)
+                self.log.warning(
+                    "%s: Error while extracting media files (%s: %s)",
+                    data["id_str"], exc.__class__.__name__, exc)
+
+        if self.cards and "card" in tweet:
+            try:
+                self._extract_card(tweet, files)
+            except Exception as exc:
+                self.log.debug("", exc_info=exc)
+                self.log.warning(
+                    "%s: Error while extracting Card files (%s: %s)",
+                    data["id_str"], exc.__class__.__name__, exc)
+
+        if self.twitpic:
+            try:
+                self._extract_twitpic(data, files)
+            except Exception as exc:
+                self.log.debug("", exc_info=exc)
+                self.log.warning(
+                    "%s: Error while extracting TwitPic files (%s: %s)",
+                    data["id_str"], exc.__class__.__name__, exc)
+
+        return files
 
     def _extract_media(self, tweet, entities, files):
         for media in entities:
@@ -208,6 +234,13 @@ class TwitterExtractor(Extractor):
         for fmt in self._size_fallback:
             yield base + fmt
 
+    def _extract_components(self, tweet, data, files):
+        for component_id in data["components"]:
+            com = data["component_objects"][component_id]
+            for conv in com["data"].get("conversation_preview") or ():
+                for url in conv.get("mediaUrls") or ():
+                    files.append({"url": url})
+
     def _extract_card(self, tweet, files):
         card = tweet["card"]
         if "legacy" in card:
@@ -246,7 +279,11 @@ class TwitterExtractor(Extractor):
                             return
         elif name == "unified_card":
             data = util.json_loads(bvals["unified_card"]["string_value"])
-            self._extract_media(tweet, data["media_entities"].values(), files)
+            if "media_entities" in data:
+                self._extract_media(
+                    tweet, data["media_entities"].values(), files)
+            if "component_objects" in data:
+                self._extract_components(tweet, data, files)
             return
 
         if self.cards == "ytdl":

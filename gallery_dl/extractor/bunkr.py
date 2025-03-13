@@ -10,7 +10,7 @@
 
 from .common import Extractor
 from .lolisafe import LolisafeAlbumExtractor
-from .. import text, config, exception
+from .. import text, util, config, exception
 import random
 
 if config.get(("extractor", "bunkr"), "tlds"):
@@ -60,6 +60,8 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
     """Extractor for bunkr.si albums"""
     category = "bunkr"
     root = "https://bunkr.si"
+    root_dl = "https://get.bunkrr.su"
+    archive_fmt = "{album_id}_{id|id_url}"
     pattern = BASE_PATTERN + r"/a/([^/?#]+)"
     example = "https://bunkr.si/a/ID"
 
@@ -69,7 +71,24 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
         if domain not in LEGACY_DOMAINS:
             self.root = "https://" + domain
 
+    def _init(self):
+        LolisafeAlbumExtractor._init(self)
+
+        endpoint = self.config("endpoint")
+        if not endpoint:
+            endpoint = self.root_dl + "/api/_001"
+        elif endpoint[0] == "/":
+            endpoint = self.root_dl + endpoint
+
+        self.endpoint = endpoint
+        self.offset = 0
+
+    def skip(self, num):
+        self.offset = num
+        return num
+
     def request(self, url, **kwargs):
+        kwargs["encoding"] = "utf-8"
         kwargs["allow_redirects"] = False
 
         while True:
@@ -114,8 +133,7 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
 
     def fetch_album(self, album_id):
         # album metadata
-        page = self.request(
-            self.root + "/a/" + album_id, encoding="utf-8").text
+        page = self.request(self.root + "/a/" + album_id).text
         title = text.unescape(text.unescape(text.extr(
             page, 'property="og:title" content="', '"')))
 
@@ -132,6 +150,9 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
         }
 
     def _extract_files(self, items):
+        if self.offset:
+            items = util.advance(items, self.offset)
+
         for item in items:
             try:
                 url = text.unescape(text.extr(item, ' href="', '"'))
@@ -140,7 +161,8 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
 
                 file = self._extract_file(url)
                 info = text.split_html(item)
-                file["name"] = info[-3]
+                if not file["name"]:
+                    file["name"] = info[-3]
                 file["size"] = info[-2]
                 file["date"] = text.parse_datetime(
                     info[-1], "%H:%M:%S %d/%m/%Y")
@@ -153,20 +175,30 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
                 self.log.debug("", exc_info=exc)
 
     def _extract_file(self, webpage_url):
-        response = self.request(webpage_url)
-        page = response.text
-        file_url = (text.extr(page, '<source src="', '"') or
-                    text.extr(page, '<img src="', '"'))
+        page = self.request(webpage_url).text
+        data_id = text.extr(page, 'data-file-id="', '"')
+        referer = self.root_dl + "/file/" + data_id
 
-        if not file_url:
-            webpage_url = text.unescape(text.rextract(
-                page, ' href="', '"', page.rindex("Download"))[0])
-            response = self.request(webpage_url)
-            file_url = text.rextract(response.text, ' href="', '"')[0]
+        headers = {"Referer": referer, "Origin": self.root_dl}
+        data = self.request(self.endpoint, method="POST", headers=headers,
+                            json={"id": data_id}).json()
+
+        if data.get("encrypted"):
+            key = "SECRET_KEY_{}".format(data["timestamp"] // 3600)
+            file_url = util.decrypt_xor(data["url"], key.encode())
+        else:
+            file_url = data["url"]
+
+        file_name = (text.extr(page, 'property="og:title" content="', '"') or
+                     text.extr(page, "<title>", " | Bunkr<"))
+        fallback = text.extr(page, 'property="og:url" content="', '"')
 
         return {
-            "file"          : text.unescape(file_url),
-            "_http_headers" : {"Referer": response.url},
+            "file"          : file_url,
+            "name"          : text.unescape(file_name),
+            "id_url"        : data_id,
+            "_fallback"     : (fallback,) if fallback else (),
+            "_http_headers" : {"Referer": referer},
             "_http_validate": self._validate,
         }
 

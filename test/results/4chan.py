@@ -14,8 +14,8 @@ __tests__ = (
     "#category": ("", "4chan", "thread"),
     "#class"   : _4chan._4chanThreadExtractor,
     "#sha1_url"     : "39082ad166161966d7ba8e37f2173a824eb540f0",
-    "#sha1_metadata": "7ae2f4049adf0d2f835eb91b6b26b7f4ec882e0a",
-    "#sha1_content" : "551e432d52700ff3711f14752124e9af86ecbbdf",
+    "#sha1_metadata": "2cadd32796492baca25f5060dc95e9f4e24a0ff2",
+    "#sha1_content" : "742c6d256c813b29f246e1d765bba949fc3ac453",
 },
 
 {
@@ -23,7 +23,7 @@ __tests__ = (
     "#category": ("", "4chan", "thread"),
     "#class"   : _4chan._4chanThreadExtractor,
     "#sha1_url"     : "39082ad166161966d7ba8e37f2173a824eb540f0",
-    "#sha1_metadata": "7ae2f4049adf0d2f835eb91b6b26b7f4ec882e0a",
+    "#sha1_metadata": "2cadd32796492baca25f5060dc95e9f4e24a0ff2",
 },
 
 {
