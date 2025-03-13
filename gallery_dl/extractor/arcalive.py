@@ -32,6 +32,8 @@ class ArcalivePostExtractor(ArcaliveExtractor):
     example = "https://arca.live/b/breaking/123456789"
 
     def items(self):
+        self.emoticons = self.config("emoticons", False)
+
         post = self.api.post(self.groups[0])
         files = self._extract_files(post)
 
@@ -53,10 +55,16 @@ class ArcalivePostExtractor(ArcaliveExtractor):
 
         for media in self._extract_media(post["content"]):
 
-            src = text.extr(media, 'src="', '"')
+            if not self.emoticons and 'class="arca-emoticon"' in media:
+                continue
+
+            src = (text.extr(media, 'data-originalurl="', '"') or
+                   text.extr(media, 'src="', '"'))
             if not src:
                 continue
-            elif src[0] == "/":
+
+            src = text.unescape(src.partition("?")[0])
+            if src[0] == "/":
                 if src[1] == "/":
                     url = "https:" + src
                 else:
@@ -65,7 +73,7 @@ class ArcalivePostExtractor(ArcaliveExtractor):
                 url = src
 
             files.append({
-                "url"   : text.unescape(url),
+                "url"   : url + "?type=orig",
                 "width" : text.parse_int(text.extr(media, 'width="', '"')),
                 "height": text.parse_int(text.extr(media, 'height="', '"')),
             })
