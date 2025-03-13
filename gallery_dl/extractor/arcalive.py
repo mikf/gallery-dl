@@ -73,10 +73,19 @@ class ArcalivePostExtractor(ArcaliveExtractor):
             else:
                 url = src
 
+            fallback = ()
+            orig = text.extr(media, 'data-orig="', '"')
+            if orig:
+                path, _, ext = url.rpartition(".")
+                if ext != orig:
+                    fallback = (url + "?type=orig",)
+                    url = path + "." + orig
+
             files.append({
                 "url"   : url + "?type=orig",
                 "width" : text.parse_int(text.extr(media, 'width="', '"')),
                 "height": text.parse_int(text.extr(media, 'height="', '"')),
+                "_fallback": fallback,
             })
 
         return files
