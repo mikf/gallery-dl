@@ -99,7 +99,7 @@ class ArcalivePostExtractor(ArcaliveExtractor):
 class ArcaliveBoardExtractor(ArcaliveExtractor):
     """Extractor for an arca.live board's posts"""
     subcategory = "board"
-    pattern = BASE_PATTERN + r"/b/(\w+)(?:/?\?([^#]+))?"
+    pattern = BASE_PATTERN + r"/b/(\w+)(?:/?\?([^#]+))?$"
     example = "https://arca.live/b/breaking"
 
     def items(self):
