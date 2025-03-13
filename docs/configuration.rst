@@ -384,6 +384,7 @@ Type
 Default
     * ``"0.5-1.5"``
         ``ao3``,
+        ``arcalive``,
         ``civitai``,
         ``[Danbooru]``,
         ``[E621]``,
@@ -1392,6 +1393,16 @@ Example
     * ``["azw3", "epub", "mobi", "pdf", "html"]``
 Description
     Format(s) to download.
+
+
+extractor.arcalive.emoticons
+----------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Download emoticon images.
 
 
 extractor.artstation.external

@@ -17,6 +17,7 @@ class ArcaliveExtractor(Extractor):
     """Base class for Arca.live extractors"""
     category = "arcalive"
     root = "https://arca.live"
+    request_interval = (0.5, 1.5)
 
     def _init(self):
         self.api = ArcaliveAPI(self)
@@ -26,7 +27,7 @@ class ArcalivePostExtractor(ArcaliveExtractor):
     """Extractor for an arca.live post"""
     subcategory = "post"
     directory_fmt = ("{category}", "{boardSlug}")
-    filename_fmt = "{id}_{num}.{extension}"
+    filename_fmt = "{id}_{num}{title:? //[b:230]}.{extension}"
     archive_fmt = "{id}_{num}"
     pattern = BASE_PATTERN + r"/b/(?:\w+)/(\d+)"
     example = "https://arca.live/b/breaking/123456789"
