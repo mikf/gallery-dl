@@ -9,10 +9,11 @@ from gallery_dl.extractor import imhentai
 
 __tests__ = (
 {
-    "#url"    : "https://imhentai.xxx/gallery/12/",
-    "#class"  : imhentai.ImhentaiGalleryExtractor,
-    "#pattern": r"https://m1\.imhentai\.xxx/001/3x907ntq18/\d+\.jpg",
-    "#count"  : 94,
+    "#url"     : "https://imhentai.xxx/gallery/12/",
+    "#category": ("IMHentai", "imhentai", "gallery"),
+    "#class"   : imhentai.ImhentaiGalleryExtractor,
+    "#pattern" : r"https://m1\.imhentai\.xxx/001/3x907ntq18/\d+\.jpg",
+    "#count"   : 94,
 
     "count"     : 94,
     "extension" : "jpg",
@@ -61,10 +62,11 @@ __tests__ = (
 },
 
 {
-    "#url"    : "https://imhentai.xxx/gallery/1396508/",
-    "#class"  : imhentai.ImhentaiGalleryExtractor,
-    "#pattern": r"https://m9\.imhentai\.xxx/028/po9f4w3jzx/\d+\.webp",
-    "#count"  : 34,
+    "#url"     : "https://imhentai.xxx/gallery/1396508/",
+    "#category": ("IMHentai", "imhentai", "gallery"),
+    "#class"   : imhentai.ImhentaiGalleryExtractor,
+    "#pattern" : r"https://m9\.imhentai\.xxx/028/po9f4w3jzx/\d+\.webp",
+    "#count"   : 34,
 
     "count"     : 34,
     "extension" : "webp",
@@ -113,17 +115,19 @@ __tests__ = (
 },
 
 {
-    "#url"    : "https://imhentai.xxx/artist/asutora/",
-    "#class"  : imhentai.ImhentaiTagExtractor,
-    "#pattern": imhentai.ImhentaiGalleryExtractor.pattern,
-    "#count"  : range(30, 50),
+    "#url"     : "https://imhentai.xxx/artist/asutora/",
+    "#category": ("IMHentai", "imhentai", "tag"),
+    "#class"   : imhentai.ImhentaiTagExtractor,
+    "#pattern" : imhentai.ImhentaiGalleryExtractor.pattern,
+    "#count"   : range(30, 50),
 },
 
 {
-    "#url"    : "https://imhentai.xxx/search/?lt=1&pp=0&m=1&d=1&w=1&i=1&a=1&g=1&key=asutora&apply=Search&en=1&jp=1&es=1&fr=1&kr=1&de=1&ru=1&dl=0&tr=0",
-    "#class"  : imhentai.ImhentaiSearchExtractor,
-    "#pattern": imhentai.ImhentaiGalleryExtractor.pattern,
-    "#count"  : range(30, 50),
+    "#url"     : "https://imhentai.xxx/search/?lt=1&pp=0&m=1&d=1&w=1&i=1&a=1&g=1&key=asutora&apply=Search&en=1&jp=1&es=1&fr=1&kr=1&de=1&ru=1&dl=0&tr=0",
+    "#category": ("IMHentai", "imhentai", "search"),
+    "#class"   : imhentai.ImhentaiSearchExtractor,
+    "#pattern" : imhentai.ImhentaiGalleryExtractor.pattern,
+    "#count"   : range(30, 50),
 },
 
 )

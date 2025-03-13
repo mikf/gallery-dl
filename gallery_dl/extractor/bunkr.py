@@ -60,6 +60,7 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
     """Extractor for bunkr.si albums"""
     category = "bunkr"
     root = "https://bunkr.si"
+    root_dl = "https://get.bunkrr.su"
     archive_fmt = "{album_id}_{id|id_url}"
     pattern = BASE_PATTERN + r"/a/([^/?#]+)"
     example = "https://bunkr.si/a/ID"
@@ -69,6 +70,17 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
         domain = self.groups[0] or self.groups[1]
         if domain not in LEGACY_DOMAINS:
             self.root = "https://" + domain
+
+    def _init(self):
+        LolisafeAlbumExtractor._init(self)
+
+        endpoint = self.config("endpoint")
+        if not endpoint:
+            endpoint = self.root_dl + "/api/_001"
+        elif endpoint[0] == "/":
+            endpoint = self.root_dl + endpoint
+
+        self.endpoint = endpoint
         self.offset = 0
 
     def skip(self, num):
@@ -163,26 +175,30 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
                 self.log.debug("", exc_info=exc)
 
     def _extract_file(self, webpage_url):
-        response = self.request(webpage_url)
-        page = response.text
-        file_url = (text.extr(page, '<source src="', '"') or
-                    text.extr(page, '<img src="', '"'))
+        page = self.request(webpage_url).text
+        data_id = text.extr(page, 'data-file-id="', '"')
+        referer = self.root_dl + "/file/" + data_id
+
+        headers = {"Referer": referer, "Origin": self.root_dl}
+        data = self.request(self.endpoint, method="POST", headers=headers,
+                            json={"id": data_id}).json()
+
+        if data.get("encrypted"):
+            key = "SECRET_KEY_{}".format(data["timestamp"] // 3600)
+            file_url = util.decrypt_xor(data["url"], key.encode())
+        else:
+            file_url = data["url"]
+
         file_name = (text.extr(page, 'property="og:title" content="', '"') or
                      text.extr(page, "<title>", " | Bunkr<"))
         fallback = text.extr(page, 'property="og:url" content="', '"')
 
-        if not file_url:
-            webpage_url = text.unescape(text.rextract(
-                page, ' href="', '"', page.rindex("Download"))[0])
-            response = self.request(webpage_url)
-            file_url = text.rextract(response.text, ' href="', '"')[0]
-
         return {
-            "file"          : text.unescape(file_url),
+            "file"          : file_url,
             "name"          : text.unescape(file_name),
-            "id_url"        : webpage_url.rpartition("/")[2],
+            "id_url"        : data_id,
             "_fallback"     : (fallback,) if fallback else (),
-            "_http_headers" : {"Referer": response.url},
+            "_http_headers" : {"Referer": referer},
             "_http_validate": self._validate,
         }
 

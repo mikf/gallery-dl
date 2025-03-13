@@ -144,6 +144,11 @@ class CivitaiExtractor(Extractor):
                 file["generation"] = self.api.image_generationdata(file["id"])
             yield data
 
+    def _parse_query(self, value):
+        return text.parse_query_list(
+            value, {"tags", "reactions", "baseModels", "tools", "techniques",
+                    "types", "fileFormats"})
+
 
 class CivitaiModelExtractor(CivitaiExtractor):
     subcategory = "model"
@@ -348,8 +353,9 @@ class CivitaiUserModelsExtractor(CivitaiExtractor):
     example = "https://civitai.com/user/USER/models"
 
     def models(self):
-        params = text.parse_query(self.groups[1])
-        params["username"] = text.unquote(self.groups[0])
+        user, query = self.groups
+        params = self._parse_query(query)
+        params["username"] = text.unquote(user)
         return self.api.models(params)
 
 
@@ -361,8 +367,9 @@ class CivitaiUserPostsExtractor(CivitaiExtractor):
     example = "https://civitai.com/user/USER/posts"
 
     def posts(self):
-        params = text.parse_query(self.groups[1])
-        params["username"] = text.unquote(self.groups[0])
+        user, query = self.groups
+        params = self._parse_query(query)
+        params["username"] = text.unquote(user)
         return self.api.posts(params)
 
 
@@ -372,7 +379,7 @@ class CivitaiUserImagesExtractor(CivitaiExtractor):
     example = "https://civitai.com/user/USER/images"
 
     def __init__(self, match):
-        self.params = text.parse_query_list(match.group(2))
+        self.params = self._parse_query(match.group(2))
         if self.params.get("section") == "reactions":
             self.subcategory = "reactions"
             self.images = self.images_reactions
@@ -392,12 +399,8 @@ class CivitaiUserImagesExtractor(CivitaiExtractor):
         params = self.params
         params["authed"] = True
         params["useIndex"] = False
-        if "reactions" in params:
-            if isinstance(params["reactions"], str):
-                params["reactions"] = (params["reactions"],)
-        else:
-            params["reactions"] = (
-                "Like", "Dislike", "Heart", "Laugh", "Cry")
+        if "reactions" not in params:
+            params["reactions"] = ("Like", "Dislike", "Heart", "Laugh", "Cry")
         return self.api.images(params)
 
 
@@ -409,9 +412,11 @@ class CivitaiUserVideosExtractor(CivitaiExtractor):
 
     def images(self):
         self._image_ext = "mp4"
-        params = text.parse_query(self.groups[1])
+
+        user, query = self.groups
+        params = self._parse_query(query)
         params["types"] = ["video"]
-        params["username"] = text.unquote(self.groups[0])
+        params["username"] = text.unquote(user)
         return self.api.images(params)
 
 
@@ -499,7 +504,7 @@ class CivitaiTrpcAPI():
         self.root = extractor.root + "/api/trpc/"
         self.headers = {
             "content-type"    : "application/json",
-            "x-client-version": "5.0.394",
+            "x-client-version": "5.0.542",
             "x-client-date"   : "",
             "x-client"        : "web",
             "x-fingerprint"   : "undefined",
@@ -660,15 +665,35 @@ class CivitaiTrpcAPI():
             meta_ = meta
 
     def _merge_params(self, params_user, params_default):
+        """Combine 'params_user' with 'params_default'"""
         params_default.update(params_user)
         return params_default
 
     def _type_params(self, params):
-        for key, type in (
-            ("tags"          , int),
-            ("modelId"       , int),
-            ("modelVersionId", int),
-        ):
-            if key in params:
-                params[key] = type(params[key])
+        """Convert 'params' values to expected types"""
+        types = {
+            "tags"          : int,
+            "tools"         : int,
+            "techniques"    : int,
+            "modelId"       : int,
+            "modelVersionId": int,
+            "remixesOnly"   : _bool,
+            "nonRemixesOnly": _bool,
+            "withMeta"      : _bool,
+            "fromPlatform"  : _bool,
+            "supportsGeneration": _bool,
+        }
+
+        for name, value in params.items():
+            if name not in types:
+                continue
+            elif isinstance(value, str):
+                params[name] = types[name](value)
+            elif isinstance(value, list):
+                type = types[name]
+                params[name] = [type(item) for item in value]
         return params
+
+
+def _bool(value):
+    return True if value == "true" else False

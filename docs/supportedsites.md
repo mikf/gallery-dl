@@ -136,7 +136,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Bilibili</td>
     <td>https://www.bilibili.com/</td>
-    <td>Articles, User Articles</td>
+    <td>Articles, User Articles, User Article Favorites</td>
     <td></td>
 </tr>
 <tr>
@@ -148,7 +148,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Boosty</td>
     <td>https://www.boosty.to/</td>
-    <td>Subscriptions Feed, Followed Users, Media Files, Posts, User Profiles</td>
+    <td>DMs, Subscriptions Feed, Followed Users, Media Files, Posts, User Profiles</td>
     <td><a href="https://github.com/mikf/gallery-dl#cookies">Cookies</a></td>
 </tr>
 <tr>
@@ -204,6 +204,12 @@ Consider all listed sites to potentially be NSFW.
     <td>https://www.deviantart.com/</td>
     <td>Avatars, Backgrounds, Collections, Deviations, Favorites, Folders, Followed Users, Galleries, Gallery Searches, Journals, Scraps, Search Results, Sta.sh, Status Updates, Tag Searches, User Profiles, Watches</td>
     <td><a href="https://github.com/mikf/gallery-dl#oauth">OAuth</a></td>
+</tr>
+<tr>
+    <td>Discord</td>
+    <td>https://discord.com/</td>
+    <td>Channels, DMs, Messages, Servers</td>
+    <td></td>
 </tr>
 <tr>
     <td>Dynasty Reader</td>
@@ -280,8 +286,14 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Fur Affinity</td>
     <td>https://www.furaffinity.net/</td>
-    <td>Favorites, Followed Users, Galleries, Posts, Scraps, Search Results, New Submissions, User Profiles</td>
+    <td>Favorites, Folders, Followed Users, Galleries, Posts, Scraps, Search Results, New Submissions, User Profiles</td>
     <td><a href="https://github.com/mikf/gallery-dl#cookies">Cookies</a></td>
+</tr>
+<tr>
+    <td>Furry 34 com</td>
+    <td>https://furry34.com/</td>
+    <td>Playlists, Posts, Tag Searches</td>
+    <td></td>
 </tr>
 <tr>
     <td>Fuskator</td>
@@ -443,12 +455,6 @@ Consider all listed sites to potentially be NSFW.
     <td>imgur</td>
     <td>https://imgur.com/</td>
     <td>Albums, Favorites, Favorites Folders, Galleries, individual Images, Personal Posts, Search Results, Subreddits, Tag Searches, User Profiles</td>
-    <td></td>
-</tr>
-<tr>
-    <td>IMHentai</td>
-    <td>https://imhentai.xxx/</td>
-    <td>Galleries, Search Results, Tag Searches</td>
     <td></td>
 </tr>
 <tr>
@@ -938,6 +944,22 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
+    <td>Tenor</td>
+    <td>https://tenor.com/</td>
+    <td>individual Images, Search Results, User Profiles</td>
+    <td></td>
+</tr>
+<tr>
+    <td>TikTok</td>
+    <td>https://www.tiktok.com/</td>
+    <td>Posts, User Profiles, VM Posts</td>
+    <td><a href="https://github.com/mikf/gallery-dl#cookies">Cookies</a>
+    <br /><span title="Pass `-o videos` to download photos only, and
+    `-o tiktok-range=a-yt-dlp-range` to tell yt-dlp to only extract XYZ links
+    when scraping a user profile. Also note that profile avatars will only be
+    downloaded when downloading a User Profile.">Hover for more info</span></td>
+</tr>
+<tr>
     <td>TMOHentai</td>
     <td>https://tmohentai.com/</td>
     <td>Galleries</td>
@@ -1305,6 +1327,28 @@ Consider all listed sites to potentially be NSFW.
     <td>Porn Image</td>
     <td>https://porn-image.com/</td>
     <td>Galleries</td>
+    <td></td>
+</tr>
+
+<tr>
+    <td colspan="4"><strong>IMHentai and Mirror Sites</strong></td>
+</tr>
+<tr>
+    <td>IMHentai</td>
+    <td>https://imhentai.xxx/</td>
+    <td>Galleries, Search Results, Tag Searches</td>
+    <td></td>
+</tr>
+<tr>
+    <td>HentaiEra</td>
+    <td>https://hentaiera.com/</td>
+    <td>Galleries, Search Results, Tag Searches</td>
+    <td></td>
+</tr>
+<tr>
+    <td>HentaiRox</td>
+    <td>https://hentairox.com/</td>
+    <td>Galleries, Search Results, Tag Searches</td>
     <td></td>
 </tr>
 

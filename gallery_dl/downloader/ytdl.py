@@ -48,6 +48,13 @@ class YoutubeDLDownloader(DownloaderBase):
                     self.log.debug("", exc_info=exc)
                     self.download = lambda u, p: False
                     return False
+
+                try:
+                    ytdl_version = module.version.__version__
+                except Exception:
+                    ytdl_version = ""
+                self.log.debug("Using %s version %s", module, ytdl_version)
+
                 self.ytdl_instance = ytdl_instance = ytdl.construct_YoutubeDL(
                     module, self, self.ytdl_opts)
                 if self.outtmpl == "default":

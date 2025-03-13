@@ -13,12 +13,15 @@ __tests__ = (
     "#url"  : "https://civitai.com/models/703211/maid-classic",
     "#class": civitai.CivitaiModelExtractor,
     "#urls" : [
-        "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/5c4efa68-bb58-47c5-a716-98cd0f51f047/original=true/00013-4238863814.png",
-        "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/69bf3279-df2c-4ec8-b795-479e9cd3db1b/original=true/00014-3150861441.png",
-        "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/2dd1dc69-45a6-4beb-b36b-2e2bc65e3cda/original=true/00015-2885514572.png",
+        "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/51ea6a54-762c-46cf-9588-726461193c96/original=true/00019-2944604798.png",
+        "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/aaa474a8-5a4d-4003-819f-79df2935ad78/original=true/00020-1919126538.png",
+        "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/1bb22783-1c29-405e-9d7e-7c98b5a53d65/original=true/00021-2415646212.png",
         "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/52b6efa7-801c-4901-90b4-fa3964d23480/original=true/00004-822988489.png",
         "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/c4d3bcd5-0e23-4f4e-9f34-d13b2f2bf14c/original=true/00005-1059918744.png",
         "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/68568d22-c4f3-45cb-ac32-82f1cedf968f/original=true/00006-3467286319.png",
+        "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/5c4efa68-bb58-47c5-a716-98cd0f51f047/original=true/00013-4238863814.png",
+        "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/69bf3279-df2c-4ec8-b795-479e9cd3db1b/original=true/00014-3150861441.png",
+        "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/2dd1dc69-45a6-4beb-b36b-2e2bc65e3cda/original=true/00015-2885514572.png",
     ],
 
     "model"  : {
@@ -206,6 +209,20 @@ __tests__ = (
 },
 
 {
+    "#url"    : "https://civitai.com/user/waomodder/models?tag=character&types=Checkpoint&types=TextualInversion&types=Hypernetwork&types=LORA&checkpointType=Trained&fileFormats=SafeTensor&fileFormats=PickleTensor",
+    "#comment": "various filters (#7138)",
+    "#class"  : civitai.CivitaiUserModelsExtractor,
+    "#urls"   : (
+        "https://civitai.com/models/42166",
+        "https://civitai.com/models/79845",
+        "https://civitai.com/models/81424",
+        "https://civitai.com/models/75925",
+        "https://civitai.com/models/65818",
+        "https://civitai.com/models/64272",
+    ),
+},
+
+{
     "#url"  : "https://civitai.com/user/waomodder/posts",
     "#class": civitai.CivitaiUserPostsExtractor,
     "#pattern": r"https://image\.civitai\.com/xG1nkqKTMzGDvpLrqFT7WA/[0-9a-f-]+/original=true/\S+\.(jpe?g|png)",
@@ -219,6 +236,25 @@ __tests__ = (
     "#pattern": r"https://image\.civitai\.com/xG1nkqKTMzGDvpLrqFT7WA/[0-9a-f-]+/original=true/\S+\.png",
     "#range"  : "1-50",
     "#count"  : 50,
+},
+
+{
+    "#url"    : "https://civitai.com/user/waomodder/images?tags=5132",
+    "#comment": "tags (#7138)",
+    "#class"  : civitai.CivitaiUserImagesExtractor,
+    "#urls"   : "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/8cc7c513-ba77-4444-a21f-7e3907d29a4e/original=true/982824.png",
+},
+
+{
+    "#url"    : "https://civitai.com/user/waomodder/images?sort=Most+Collected&period=AllTime&tags=6594&baseModels=Illustrious&baseModels=PixArt+a&baseModels=Other&baseModels=Pony&remixesOnly=false",
+    "#comment": "various filters (#7138)",
+    "#class"  : civitai.CivitaiUserImagesExtractor,
+    "#range"  : "1-3",
+    "#urls"   : (
+        "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/c44c116a-263b-457d-8fa8-cc3d7716a0aa/original=true/36800924.png",
+        "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/0f6cf303-8b12-4401-914e-bff33371e9c6/original=true/36801099.png",
+        "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/9a682316-e451-4b98-8873-cc6c2e2d39bb/original=true/36801079.png",
+    ),
 },
 
 {

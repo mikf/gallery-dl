@@ -32,7 +32,11 @@ class VscoExtractor(Extractor):
         yield Message.Directory, {"user": self.user}
         for img in self.images():
 
-            if not img or "responsive_url" not in img:
+            if not img:
+                continue
+            elif "playback_url" in img:
+                img = self._transform_video(img)
+            elif "responsive_url" not in img:
                 continue
 
             if img["is_video"]:
@@ -116,6 +120,15 @@ class VscoExtractor(Extractor):
         media["responsive_url"] = media["responsiveUrl"]
         media["video_url"] = media.get("videoUrl")
         media["image_meta"] = media.get("imageMeta")
+        return media
+
+    @staticmethod
+    def _transform_video(media):
+        media["is_video"] = True
+        media["grid_name"] = ""
+        media["video_url"] = media["playback_url"]
+        media["responsive_url"] = media["poster_url"]
+        media["upload_date"] = media["created_date"]
         return media
 
 
@@ -322,7 +335,7 @@ class VscoVideoExtractor(VscoExtractor):
             "grid_name"     : "",
             "upload_date"   : media["createdDate"],
             "responsive_url": media["posterUrl"],
-            "video_url"     : "ytdl:" + media.get("playbackUrl"),
+            "video_url"     : media.get("playbackUrl"),
             "image_meta"    : None,
             "width"         : media["width"],
             "height"        : media["height"],

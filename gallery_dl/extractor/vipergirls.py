@@ -29,7 +29,17 @@ class VipergirlsExtractor(Extractor):
     def _init(self):
         domain = self.config("domain")
         if domain:
-            self.root = text.ensure_http_scheme(domain)
+            pos = domain.find("://")
+            if pos >= 0:
+                self.root = domain.rstrip("/")
+                self.cookies_domain = "." + domain[pos+1:].strip("/")
+            else:
+                domain = domain.strip("/")
+                self.root = "https://" + domain
+                self.cookies_domain = "." + domain
+        else:
+            self.root = "https://viper.click"
+            self.cookies_domain = ".viper.click"
 
     def items(self):
         self.login()

@@ -9,7 +9,7 @@
 """Extractors for Chevereto galleries"""
 
 from .common import BaseExtractor, Message
-from .. import text
+from .. import text, util
 
 
 class CheveretoExtractor(BaseExtractor):
@@ -53,11 +53,22 @@ class CheveretoImageExtractor(CheveretoExtractor):
 
     def items(self):
         url = self.root + self.path
-        extr = text.extract_from(self.request(url).text)
+        page = self.request(url).text
+        extr = text.extract_from(page)
+
+        url = (extr('<meta property="og:image" content="', '"') or
+               extr('url: "', '"'))
+        if not url or url.endswith("/loading.svg"):
+            pos = page.find(" download=")
+            url = text.rextract(page, 'href="', '"', pos)[0]
+            if not url.startswith("https://"):
+                url = util.decrypt_xor(
+                    url, b"seltilovessimpcity@simpcityhatesscrapers",
+                    fromhex=True)
 
         image = {
             "id"   : self.path.rpartition(".")[2],
-            "url"  : extr('<meta property="og:image" content="', '"'),
+            "url"  : url,
             "album": text.extr(extr("Added to <a", "/a>"), ">", "<"),
             "user" : extr('username: "', '"'),
         }

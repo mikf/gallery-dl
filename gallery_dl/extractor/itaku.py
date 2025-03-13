@@ -80,7 +80,8 @@ class ItakuSearchExtractor(ItakuExtractor):
     example = "https://itaku.ee/home/images?tags=SEARCH"
 
     def posts(self):
-        params = text.parse_query_list(self.groups[0])
+        params = text.parse_query_list(
+            self.groups[0], {"tags", "maturity_rating"})
         return self.api.search_images(params)
 
 
@@ -99,13 +100,7 @@ class ItakuAPI():
         negative_tags = []
         optional_tags = []
 
-        tags = params.pop("tags", None)
-        if not tags:
-            tags = ()
-        elif isinstance(tags, str):
-            tags = (tags,)
-
-        for tag in tags:
+        for tag in params.pop("tags", None) or ():
             if not tag:
                 pass
             elif tag[0] == "-":

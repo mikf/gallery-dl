@@ -32,9 +32,31 @@ __tests__ = (
     "#url"     : "https://vsco.co/missuri/gallery",
     "#category": ("", "vsco", "gallery"),
     "#class"   : vsco.VscoGalleryExtractor,
-    "#pattern" : r"https://image(-aws.+)?\.vsco\.co/[0-9a-f/]+/[\w-]+\.\w+",
+    "#pattern" : r"https://image(-aws.+)?\.vsco\.co/[0-9a-f/]+/[\w-]+\.\w+|^ytdl:https://stream\.mux\.com/.+",
     "#range"   : "1-80",
     "#count"   : 80,
+},
+
+{
+    "#url"     : "https://vsco.co/shavonec/gallery",
+    "#comment" : "meu8 video (#7113)",
+    "#category": ("", "vsco", "gallery"),
+    "#class"   : vsco.VscoGalleryExtractor,
+    "#pattern" : r"^ytdl:https://stream\.mux\.com/3o01XbjqTI4rkeRwPzR17H9i7VSFdWX1h\.m3u8\?token=ey.+",
+    "#range"   : "8",
+
+    "date"       : "dt:2020-02-04 15:11:52",
+    "description": "Big news: 🎥 YOU CAN NOW POST VIDEOS TO VSCO ⚡️⚡️💪🏾. ⁣\n⁣\n🔗BTS from my #FashionIsActivism panel with the California African American Arts museum ✊🏾",
+    "extension"  : "mp4",
+    "filename"   : "3o01XbjqTI4rkeRwPzR17H9i7VSFdWX1h",
+    "grid"       : "",
+    "id"         : "c5eb34bb-dd13-4d7a-a09c-2a7cd719c9fa",
+    "meta"       : {},
+    "tags"       : [],
+    "user"       : "shavonec",
+    "video"      : True,
+    "width"      : 624,
+    "height"     : 1232,
 },
 
 {
@@ -112,7 +134,7 @@ __tests__ = (
     "#url"     : "https://vsco.co/shavonec/video/c5eb34bb-dd13-4d7a-a09c-2a7cd719c9fa",
     "#category": ("", "vsco", "video"),
     "#class"   : vsco.VscoVideoExtractor,
-    "#pattern" : r"ytdl:https://stream\.mux\.com/3o01XbjqTI4rkeRwPzR17H9i7VSFdWX1h\.m3u8\?token=ey.+",
+    "#pattern" : r"^ytdl:https://stream\.mux\.com/3o01XbjqTI4rkeRwPzR17H9i7VSFdWX1h\.m3u8\?token=ey.+",
 
     "date"       : "dt:2020-02-04 15:11:52",
     "description": "Big news: 🎥 YOU CAN NOW POST VIDEOS TO VSCO ⚡️⚡️💪🏾. ⁣\n⁣\n🔗BTS from my #FashionIsActivism panel with the California African American Arts museum ✊🏾",
