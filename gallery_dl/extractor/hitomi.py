@@ -122,7 +122,10 @@ class HitomiTagExtractor(Extractor):
             self.tag = tag
 
     def items(self):
-        data = {"_extractor": HitomiGalleryExtractor}
+        data = {
+            "_extractor": HitomiGalleryExtractor,
+            "search_tags": text.unquote(self.tag.rpartition("-")[0]),
+        }
         nozomi_url = "https://ltn.hitomi.la/{}/{}.nozomi".format(
             self.type, self.tag)
         headers = {
@@ -202,12 +205,14 @@ class HitomiSearchExtractor(Extractor):
     def __init__(self, match):
         Extractor.__init__(self, match)
         self.query = match.group(1)
-        self.tags = text.unquote(self.query).split(" ")
+        self.tags = text.unquote(self.query)
 
     def items(self):
-        data = {"_extractor": HitomiGalleryExtractor}
-
-        results = [self.get_nozomi_items(tag) for tag in self.tags]
+        data = {
+            "_extractor": HitomiGalleryExtractor,
+            "search_tags": self.tags,
+        }
+        results = [self.get_nozomi_items(tag) for tag in self.tags.split(" ")]
         intersects = set.intersection(*results)
 
         for gallery_id in sorted(intersects, reverse=True):
@@ -219,20 +224,16 @@ class HitomiSearchExtractor(Extractor):
         area, tag, language = self.get_nozomi_args(full_tag)
 
         if area:
-            referer_base = "{}/n/{}/{}-{}.html".format(
-                self.root, area, tag, language)
-            nozomi_url = "https://ltn.hitomi.la/{}/{}-{}.nozomi".format(
+            nozomi_url = "https://ltn.hitomi.la/n/{}/{}-{}.nozomi".format(
                 area, tag, language)
         else:
-            referer_base = "{}/n/{}-{}.html".format(
-                self.root, tag, language)
-            nozomi_url = "https://ltn.hitomi.la/{}-{}.nozomi".format(
+            nozomi_url = "https://ltn.hitomi.la/n/{}-{}.nozomi".format(
                 tag, language)
 
         headers = {
             "Origin": self.root,
             "Cache-Control": "max-age=0",
-            "Referer": "{}/search.html?{}".format(referer_base, self.query),
+            "Referer": "{}/search.html?{}".format(self.root, self.query),
         }
 
         response = self.request(nozomi_url, headers=headers)
@@ -251,7 +252,7 @@ class HitomiSearchExtractor(Extractor):
             language = tag
             tag = "index"
 
-        return area, tag, language
+        return area, tag.replace("_", " "), language
 
 
 @memcache(maxage=1800)

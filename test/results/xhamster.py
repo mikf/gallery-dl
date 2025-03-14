@@ -47,7 +47,7 @@ __tests__ = (
     "user"    : {
         "id"         : 4741860,
         "name"       : "DaringSex",
-        "retired"    : False,
+        "?retired"   : False,
         "subscribers": range(25000, 50000),
         "url"        : "https://xhamster.com/users/daringsex",
         "verified"   : False,

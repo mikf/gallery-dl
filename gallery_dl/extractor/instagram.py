@@ -163,24 +163,17 @@ class InstagramExtractor(Extractor):
                 "post_id": reel_id,
                 "post_shortcode": shortcode_from_id(reel_id),
             }
-
             if "title" in post:
                 data["highlight_title"] = post["title"]
-            if "created_at" in post:
-                data["post_date"] = data["date"] = text.parse_timestamp(
-                    post.get("created_at"))
 
         else:  # regular image/video post
-            date = text.parse_timestamp(post.get("taken_at"))
             data = {
                 "post_id" : post["pk"],
                 "post_shortcode": post["code"],
                 "post_url": "{}/p/{}/".format(self.root, post["code"]),
-                "post_date": date,
-                "date": date,
                 "likes": post.get("like_count", 0),
-                "pinned": post.get("timeline_pinned_user_ids", ()),
                 "liked": post.get("has_liked", False),
+                "pinned": self._extract_pinned(post),
             }
 
             caption = post["caption"]
@@ -207,8 +200,8 @@ class InstagramExtractor(Extractor):
                     for user in coauthors
                 ]
 
-            if "carousel_media" in post:
-                items = post["carousel_media"]
+            items = post.get("carousel_media")
+            if items:
                 data["sidecar_media_id"] = data["post_id"]
                 data["sidecar_shortcode"] = data["post_shortcode"]
             else:
@@ -218,7 +211,8 @@ class InstagramExtractor(Extractor):
         data["owner_id"] = owner["pk"]
         data["username"] = owner.get("username")
         data["fullname"] = owner.get("full_name")
-
+        data["post_date"] = data["date"] = text.parse_timestamp(
+            post.get("taken_at") or post.get("created_at") or post.get("seen"))
         data["_files"] = files = []
         for num, item in enumerate(items, 1):
 
@@ -391,6 +385,10 @@ class InstagramExtractor(Extractor):
                                          "username" : user["username"],
                                          "full_name": user["full_name"]})
 
+    def _extract_pinned(self, post):
+        return (post.get("timeline_pinned_user_ids") or
+                post.get("clips_tab_pinned_user_ids") or ())
+
     def _init_cursor(self):
         cursor = self.config("cursor", True)
         if cursor is True:
@@ -457,6 +455,12 @@ class InstagramPostsExtractor(InstagramExtractor):
         uid = self.api.user_id(self.item)
         return self.api.user_feed(uid)
 
+    def _extract_pinned(self, post):
+        try:
+            return post["timeline_pinned_user_ids"]
+        except KeyError:
+            return ()
+
 
 class InstagramReelsExtractor(InstagramExtractor):
     """Extractor for an Instagram user's reels"""
@@ -467,6 +471,12 @@ class InstagramReelsExtractor(InstagramExtractor):
     def posts(self):
         uid = self.api.user_id(self.item)
         return self.api.user_clips(uid)
+
+    def _extract_pinned(self, post):
+        try:
+            return post["clips_tab_pinned_user_ids"]
+        except KeyError:
+            return ()
 
 
 class InstagramTaggedExtractor(InstagramExtractor):

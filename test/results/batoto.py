@@ -109,6 +109,7 @@ __tests__ = (
     "#url"     : "https://bato.to/title/113742-futsutsuka-na-akujo-de-wa-gozaimasu-ga-suuguu-chouso-torikae-den-official",
     "#category": ("", "batoto", "manga"),
     "#class"   : batoto.BatotoMangaExtractor,
+    "#options" : {"domain": "xbato.org"},
     "#count"   : ">= 21",
 
     "chapter"      : int,
@@ -135,7 +136,7 @@ __tests__ = (
     "#class"   : batoto.BatotoMangaExtractor,
     "#count"   : ">= 29",
 
-    "manga": "Grand Duke Dan Putri Rubah [cont by LUNABY]",
+    "manga": "The Grand Duke’s Fox Princess [cont by LUNABY]",
 },
 
 {

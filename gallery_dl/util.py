@@ -48,6 +48,19 @@ def bdecode(data, alphabet="0123456789"):
     return num
 
 
+def decrypt_xor(encrypted, key, base64=True, fromhex=False):
+    if base64:
+        encrypted = binascii.a2b_base64(encrypted)
+    if fromhex:
+        encrypted = bytes.fromhex(encrypted.decode())
+
+    div = len(key)
+    return bytes([
+        encrypted[i] ^ key[i % div]
+        for i in range(len(encrypted))
+    ]).decode()
+
+
 def advance(iterable, num):
     """"Advance 'iterable' by 'num' steps"""
     iterator = iter(iterable)
@@ -83,7 +96,7 @@ def unique_sequence(iterable):
 
 def contains(values, elements, separator=" "):
     """Returns True if at least one of 'elements' is contained in 'values'"""
-    if isinstance(values, str):
+    if isinstance(values, str) and (separator or separator is None):
         values = values.split(separator)
 
     if not isinstance(elements, (tuple, list)):
@@ -354,6 +367,31 @@ def extract_headers(response):
         data["date"] = datetime.datetime(*parsedate_tz(hlm)[:6])
 
     return data
+
+
+def detect_challenge(response):
+    server = response.headers.get("server")
+    if not server:
+        return
+
+    elif server.startswith("cloudflare"):
+        if response.status_code not in (403, 503):
+            return
+
+        mitigated = response.headers.get("cf-mitigated")
+        if mitigated and mitigated.lower() == "challenge":
+            return "Cloudflare challenge"
+
+        content = response.content
+        if b"_cf_chl_opt" in content or b"jschl-answer" in content:
+            return "Cloudflare challenge"
+        elif b'name="captcha-bypass"' in content:
+            return "Cloudflare CAPTCHA"
+
+    elif server.startswith("ddos-guard"):
+        if response.status_code == 403 and \
+                b"/ddos-guard/js-challenge/" in response.content:
+            return "DDoS-Guard challenge"
 
 
 @functools.lru_cache(maxsize=None)
@@ -647,13 +685,19 @@ class CustomNone():
     __repr__ = __str__
 
 
+# v128.0 release on 2024-07-09 has ordinal 739076
+# 735492 == 739076 - 128 * 28
+_ff_ver = (datetime.date.today().toordinal() - 735492) // 28
+
 NONE = CustomNone()
 EPOCH = datetime.datetime(1970, 1, 1)
 SECOND = datetime.timedelta(0, 1)
 WINDOWS = (os.name == "nt")
 SENTINEL = object()
-USERAGENT = "gallery-dl/" + version.__version__
 EXECUTABLE = getattr(sys, "frozen", False)
+USERAGENT = "gallery-dl/" + version.__version__
+USERAGENT_FIREFOX = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:{}.0) "
+                     "Gecko/20100101 Firefox/{}.0").format(_ff_ver, _ff_ver)
 SPECIAL_EXTRACTORS = {"oauth", "recursive", "generic"}
 GLOBALS = {
     "contains" : contains,
@@ -764,7 +808,7 @@ def import_file(path):
         finally:
             del sys.path[0]
     else:
-        return __import__(name)
+        return __import__(name.replace("-", "_"))
 
 
 def build_duration_func(duration, min=0.0):

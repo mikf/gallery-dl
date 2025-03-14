@@ -204,14 +204,17 @@ class BlueskyUserExtractor(BlueskyExtractor):
 
     def items(self):
         base = "{}/profile/{}/".format(self.root, self.user)
+        default = ("posts" if self.config("quoted", False) or
+                   self.config("reposts", False) else "media")
         return self._dispatch_extractors((
+            (BlueskyInfoExtractor      , base + "info"),
             (BlueskyAvatarExtractor    , base + "avatar"),
             (BlueskyBackgroundExtractor, base + "banner"),
             (BlueskyPostsExtractor     , base + "posts"),
             (BlueskyRepliesExtractor   , base + "replies"),
             (BlueskyMediaExtractor     , base + "media"),
             (BlueskyLikesExtractor     , base + "likes"),
-        ), ("media",))
+        ), (default,))
 
 
 class BlueskyPostsExtractor(BlueskyExtractor):
@@ -299,6 +302,17 @@ class BlueskyPostExtractor(BlueskyExtractor):
 
     def posts(self):
         return self.api.get_post_thread(self.user, self.post_id)
+
+
+class BlueskyInfoExtractor(BlueskyExtractor):
+    subcategory = "info"
+    pattern = USER_PATTERN + r"/info"
+    example = "https://bsky.app/profile/HANDLE/info"
+
+    def items(self):
+        self._metadata_user = True
+        self.api._did_from_actor(self.user)
+        return iter(((Message.Directory, self._user),))
 
 
 class BlueskyAvatarExtractor(BlueskyExtractor):

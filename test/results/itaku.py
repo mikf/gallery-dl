@@ -18,6 +18,19 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://itaku.ee/profile/piku/gallery/7391",
+    "#comment" : "gallery section (#6951)",
+    "#category": ("", "itaku", "gallery"),
+    "#class"   : itaku.ItakuGalleryExtractor,
+    "#urls"    : (
+        "https://itaku.ee/api/media/gallery_imgs/misty-psyduck_IWbYdwT.png",
+        "https://itaku.ee/api/media/gallery_imgs/bea_alpha_N0YGfeT.png",
+    ),
+
+    "sections" : ["Fanart/Pokemon"],
+},
+
+{
     "#url"     : "https://itaku.ee/images/100471",
     "#category": ("", "itaku", "image"),
     "#class"   : itaku.ItakuImageExtractor,
@@ -54,13 +67,13 @@ __tests__ = (
     "tags"            : list,
     "tags_character"  : ["hatsune_miku"],
     "tags_copyright"  : ["vocaloid"],
-    "tags_general": [
+    "tags_general"    : [
+        "female",
+        "green_eyes",
         "twintails",
         "green_hair",
-        "flag",
         "gloves",
-        "green_eyes",
-        "female",
+        "flag",
         "racing_miku",
     ],
     "title"           : "Racing Miku 2022 Ver.",
@@ -78,4 +91,28 @@ __tests__ = (
     "#urls"    : "https://itaku.ee/api/media/gallery_vids/sleepy_af_OY5GHWw.mp4",
 },
 
+{
+    "#url"     : "https://itaku.ee/home/images?tags=cute",
+    "#comment" : "simple search",
+    "#category": ("", "itaku", "search"),
+    "#class"   : itaku.ItakuSearchExtractor,
+    "#range"   : "1-10",
+    "#count"   : 10,
+},
+
+{
+    "#url"     : "https://itaku.ee/home/images?maturity_rating=SFW&date_range=&ordering=-date_added&text=hello&is_video=true",
+    "#comment" : "search for videos",
+    "#category": ("", "itaku", "search"),
+    "#class"   : itaku.ItakuSearchExtractor,
+    "#count"   : range(5, 50),
+},
+
+{
+    "#url"     : "https://itaku.ee/home/images?tags=cute&tags=-cute&tags=~cute&maturity_rating=SFW&date_range=&ordering=-date_added",
+    "#comment" : "search with postive, negative, and optional tags",
+    "#category": ("", "itaku", "search"),
+    "#class"   : itaku.ItakuSearchExtractor,
+    "#count"   : 0,
+},
 )

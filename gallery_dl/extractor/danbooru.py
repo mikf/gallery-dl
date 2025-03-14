@@ -26,22 +26,13 @@ class DanbooruExtractor(BaseExtractor):
     def _init(self):
         self.ugoira = self.config("ugoira", False)
         self.external = self.config("external", False)
-
-        includes = self.config("metadata")
-        if includes:
-            if isinstance(includes, (list, tuple)):
-                includes = ",".join(includes)
-            elif not isinstance(includes, str):
-                includes = "artist_commentary,children,notes,parent,uploader"
-            self.includes = includes + ",id"
-        else:
-            self.includes = False
+        self.includes = False
 
         threshold = self.config("threshold")
         if isinstance(threshold, int):
             self.threshold = 1 if threshold < 1 else threshold
         else:
-            self.threshold = self.per_page
+            self.threshold = self.per_page - 20
 
         username, api_key = self._get_auth_info()
         if username:
@@ -56,6 +47,16 @@ class DanbooruExtractor(BaseExtractor):
         return pages * self.per_page
 
     def items(self):
+        # 'includes' initialization must be done here and not in '_init()'
+        # or it'll cause an exception with e621 when 'metadata' is enabled
+        includes = self.config("metadata")
+        if includes:
+            if isinstance(includes, (list, tuple)):
+                includes = ",".join(includes)
+            elif not isinstance(includes, str):
+                includes = "artist_commentary,children,notes,parent,uploader"
+            self.includes = includes + ",id"
+
         data = self.metadata()
         for post in self.posts():
 
@@ -204,12 +205,8 @@ class DanbooruTagExtractor(DanbooruExtractor):
     pattern = BASE_PATTERN + r"/posts\?(?:[^&#]*&)*tags=([^&#]*)"
     example = "https://danbooru.donmai.us/posts?tags=TAG"
 
-    def __init__(self, match):
-        DanbooruExtractor.__init__(self, match)
-        tags = match.group(match.lastindex)
-        self.tags = text.unquote(tags.replace("+", " "))
-
     def metadata(self):
+        self.tags = text.unquote(self.groups[-1].replace("+", " "))
         return {"search_tags": self.tags}
 
     def posts(self):
@@ -223,7 +220,7 @@ class DanbooruTagExtractor(DanbooruExtractor):
                 else:
                     prefix = None
             elif tag.startswith(
-                    ("id:", "md5", "ordfav:", "ordfavgroup:", "ordpool:")):
+                    ("id:", "md5:", "ordfav:", "ordfavgroup:", "ordpool:")):
                 prefix = None
                 break
 
@@ -234,15 +231,13 @@ class DanbooruPoolExtractor(DanbooruExtractor):
     """Extractor for posts from danbooru pools"""
     subcategory = "pool"
     directory_fmt = ("{category}", "pool", "{pool[id]} {pool[name]}")
+    filename_fmt = "{num:>04}_{id}_{filename}.{extension}"
     archive_fmt = "p_{pool[id]}_{id}"
     pattern = BASE_PATTERN + r"/pool(?:s|/show)/(\d+)"
     example = "https://danbooru.donmai.us/pools/12345"
 
-    def __init__(self, match):
-        DanbooruExtractor.__init__(self, match)
-        self.pool_id = match.group(match.lastindex)
-
     def metadata(self):
+        self.pool_id = self.groups[-1]
         url = "{}/pools/{}.json".format(self.root, self.pool_id)
         pool = self.request(url).json()
         pool["name"] = pool["name"].replace("_", " ")
@@ -250,8 +245,42 @@ class DanbooruPoolExtractor(DanbooruExtractor):
         return {"pool": pool}
 
     def posts(self):
-        params = {"tags": "pool:" + self.pool_id}
-        return self._pagination("/posts.json", params, "b")
+        reverse = prefix = None
+
+        order = self.config("order-posts")
+        if not order or order in ("asc", "pool", "pool_asc", "asc_pool"):
+            params = {"tags": "ordpool:" + self.pool_id}
+        elif order in ("id", "desc_id", "id_desc"):
+            params = {"tags": "pool:" + self.pool_id}
+            prefix = "b"
+        elif order in ("desc", "desc_pool", "pool_desc"):
+            params = {"tags": "ordpool:" + self.pool_id}
+            reverse = True
+        elif order in ("asc_id", "id_asc"):
+            params = {"tags": "pool:" + self.pool_id}
+            reverse = True
+
+        posts = self._pagination("/posts.json", params, prefix)
+        if reverse:
+            return self._enumerate_posts_reverse(posts)
+        else:
+            return self._enumerate_posts(posts)
+
+    def _enumerate_posts(self, posts):
+        pid_to_num = {pid: num+1 for num, pid in enumerate(self.post_ids)}
+        for post in posts:
+            post["num"] = pid_to_num[post["id"]]
+            yield post
+
+    def _enumerate_posts_reverse(self, posts):
+        self.log.info("Collecting posts of pool %s", self.pool_id)
+        posts = list(posts)
+        posts.reverse()
+
+        pid_to_num = {pid: num+1 for num, pid in enumerate(self.post_ids)}
+        for post in posts:
+            post["num"] = pid_to_num[post["id"]]
+        return posts
 
 
 class DanbooruPostExtractor(DanbooruExtractor):
@@ -261,12 +290,8 @@ class DanbooruPostExtractor(DanbooruExtractor):
     pattern = BASE_PATTERN + r"/post(?:s|/show)/(\d+)"
     example = "https://danbooru.donmai.us/posts/12345"
 
-    def __init__(self, match):
-        DanbooruExtractor.__init__(self, match)
-        self.post_id = match.group(match.lastindex)
-
     def posts(self):
-        url = "{}/posts/{}.json".format(self.root, self.post_id)
+        url = "{}/posts/{}.json".format(self.root, self.groups[-1])
         post = self.request(url).json()
         if self.includes:
             params = {"only": self.includes}
@@ -282,12 +307,8 @@ class DanbooruPopularExtractor(DanbooruExtractor):
     pattern = BASE_PATTERN + r"/(?:explore/posts/)?popular(?:\?([^#]*))?"
     example = "https://danbooru.donmai.us/explore/posts/popular"
 
-    def __init__(self, match):
-        DanbooruExtractor.__init__(self, match)
-        self.params = match.group(match.lastindex)
-
     def metadata(self):
-        self.params = params = text.parse_query(self.params)
+        self.params = params = text.parse_query(self.groups[-1])
         scale = params.get("scale", "day")
         date = params.get("date") or datetime.date.today().isoformat()
 

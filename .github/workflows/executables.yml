@@ -24,12 +24,12 @@ jobs:
       matrix:
         os: ["windows-latest", "macOS-latest"]
         architecture: ["x64"]
-        python-version: ["3.12"]
+        python-version: ["3.13"]
         python-packages: [""]
         include:
         - os: "ubuntu-latest"
           architecture: "x64"
-          python-version: "3.12"
+          python-version: "3.13"
           python-packages: "secretstorage"
         - os: "windows-2019"
           architecture: "x86"

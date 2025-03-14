@@ -124,37 +124,10 @@ __tests__ = (
 
 {
     "#url"     : "https://nijie.info/view.php?id=594044",
+    "#comment" : "404",
     "#category": ("Nijie", "nijie", "image"),
     "#class"   : nijie.NijieImageExtractor,
-    "#urls": (
-        "https://pic.nijie.net/02/nijie/23m12/09/49509/illust/0_0_63568cc428259d50_45ca51.jpg",
-        "https://pic.nijie.net/01/nijie/23m12/09/49509/illust/594044_0_1c94b7cc4503589f_79c66c.jpg",
-        "https://pic.nijie.net/02/nijie/23m12/09/49509/illust/594044_1_9f4737ad48bf43c7_8f1e8e.jpg",
-        "https://pic.nijie.net/01/nijie/23m12/09/49509/illust/594044_2_a162861fac970a45_38c5f8.jpg",
-    ),
-
-    "artist_id"  : 49509,
-    "artist_name": "黒川　竜",
-    "count"      : 4,
-    "date"       : "dt:2023-12-02 04:19:29",
-    "description": "【DLサイトコム】ウィンターセール　30%OFF\r\n期間：2024年2月14日まで\r\n【toloveるドリンク】\r\nhttps://www.dlsite.com/maniax/work/=/product_id/RJ042727.html\r\n【toloveるドリンク２】\r\nhttps://www.dlsite.com/maniax/work/=/product_id/RJ043289.html\r\n【クランクランBIG】\r\nhttps://www.dlsite.com/maniax/work/=/product_id/RJ043564.html",
-    "image_id"   : 594044,
-    "num"        : range(0, 3),
-    "tags"       : [
-        "オリジナル",
-        "漫画",
-        "中出し",
-        "爆乳",
-        "巨乳",
-        "ToLOVEる",
-        "宣伝",
-        "クラン・クラン",
-        "マクロスF",
-    ],
-    "title"      : "【DLサイトコム】ウィンターセール",
-    "url"        : str,
-    "user_id"    : 49509,
-    "user_name"  : "黒川　竜",
+    "#count"   : 0,
 },
 
 {

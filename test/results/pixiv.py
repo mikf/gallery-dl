@@ -200,11 +200,12 @@ __tests__ = (
     "#url"     : "https://www.pixiv.net/en/artworks/102932581",
     "#comment" : "limit_sanity_level_360.png (#4327, #5180)",
     "#class"   : pixiv.PixivWorkExtractor,
-    "#options" : {"sanity": True},
+    "#options" : {"sanity": True, "comments": True},
     "#urls"    : "https://i.pximg.net/img-original/img/2022/11/20/00/00/49/102932581_p0.jpg",
 
     "caption"       : "Meet a deer .",
     "comment_access_control": 0,
+    "comments"      : (),
     "create_date"   : "2022-11-19T15:00:00+00:00",
     "date"          : "dt:2022-11-19 15:00:00",
     "date_url"      : "dt:2022-11-19 15:00:49",
@@ -287,6 +288,15 @@ __tests__ = (
     "#options" : {"captions": True},
 
     "caption": r"re:Either she doesn't know how to pose or she can't move with that much clothing on her, in any case she's very well dressed for a holiday trip around town. Lots of stuff to see and a perfect day to grab some sweet pastries at the bakery.<br />...",
+},
+
+{
+    "#url"     : "https://www.pixiv.net/artworks/56360615",
+    "#comment" : "fallback; 'original' version results in HTTP 500 error (#6762)",
+    "#class"   : pixiv.PixivWorkExtractor,
+    "#options" : {"retries": 0},
+    "#range"   : "4",
+    "#sha1_content": "aa119c27fec0a36bbd06e7491987acf5f1be6293",
 },
 
 {

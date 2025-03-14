@@ -42,8 +42,7 @@ class Extractor():
     ciphers = None
     tls12 = True
     browser = None
-    useragent = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64; "
-                 "rv:128.0) Gecko/20100101 Firefox/128.0")
+    useragent = util.USERAGENT_FIREFOX
     request_interval = 0.0
     request_interval_min = 0.0
     request_interval_429 = 60.0
@@ -172,8 +171,16 @@ class Extractor():
         while True:
             try:
                 response = session.request(method, url, **kwargs)
-            except (requests.exceptions.ConnectionError,
-                    requests.exceptions.Timeout,
+            except requests.exceptions.ConnectionError as exc:
+                code = 0
+                try:
+                    reason = exc.args[0].reason
+                    cls = reason.__class__.__name__
+                    pre, _, err = str(reason.args[-1]).partition(":")
+                    msg = " {}: {}".format(cls, (err or pre).lstrip())
+                except Exception:
+                    msg = exc
+            except (requests.exceptions.Timeout,
                     requests.exceptions.ChunkedEncodingError,
                     requests.exceptions.ContentDecodingError) as exc:
                 msg = exc
@@ -198,20 +205,10 @@ class Extractor():
 
                 msg = "'{} {}' for '{}'".format(
                     code, response.reason, response.url)
-                server = response.headers.get("Server")
-                if server and server.startswith("cloudflare") and \
-                        code in (403, 503):
-                    mitigated = response.headers.get("cf-mitigated")
-                    if mitigated and mitigated.lower() == "challenge":
-                        self.log.warning("Cloudflare challenge")
-                        break
-                    content = response.content
-                    if b"_cf_chl_opt" in content or b"jschl-answer" in content:
-                        self.log.warning("Cloudflare challenge")
-                        break
-                    if b'name="captcha-bypass"' in content:
-                        self.log.warning("Cloudflare CAPTCHA")
-                        break
+
+                challenge = util.detect_challenge(response)
+                if challenge is not None:
+                    self.log.warning(challenge)
 
                 if code == 429 and self._handle_429(response):
                     continue
@@ -348,7 +345,7 @@ class Extractor():
         ssl_options = ssl_ciphers = 0
 
         # .netrc Authorization headers are alwsays disabled
-        session.trust_env = True if self.config("proxy-env", False) else False
+        session.trust_env = True if self.config("proxy-env", True) else False
 
         browser = self.config("browser")
         if browser is None:
@@ -387,8 +384,8 @@ class Extractor():
                 useragent = self.useragent
             elif useragent == "browser":
                 useragent = _browser_useragent()
-            elif useragent is config.get(("extractor",), "user-agent") and \
-                    useragent == Extractor.useragent:
+            elif self.useragent is not Extractor.useragent and \
+                    useragent is config.get(("extractor",), "user-agent"):
                 useragent = self.useragent
             headers["User-Agent"] = useragent
             headers["Accept"] = "*/*"
@@ -575,6 +572,14 @@ class Extractor():
                     return True
         return False
 
+    def _extract_jsonld(self, page):
+        return util.json_loads(text.extr(
+            page, '<script type="application/ld+json">', "</script>"))
+
+    def _extract_nextdata(self, page):
+        return util.json_loads(text.extr(
+            page, ' id="__NEXT_DATA__" type="application/json">', "</script>"))
+
     def _prepare_ddosguard_cookies(self):
         if not self.cookies.get("__ddg2", domain=self.cookies_domain):
             self.cookies.set(
@@ -760,7 +765,11 @@ class MangaExtractor(Extractor):
 
     def items(self):
         self.login()
-        page = self.request(self.manga_url).text
+
+        if self.manga_url:
+            page = self.request(self.manga_url, notfound=self.subcategory).text
+        else:
+            page = None
 
         chapters = self.chapters(page)
         if self.reverse:
@@ -891,7 +900,7 @@ def _build_requests_adapter(ssl_options, ssl_ciphers, source_address):
             options=ssl_options or None, ciphers=ssl_ciphers)
         if not requests.__version__ < "2.32":
             # https://github.com/psf/requests/pull/6731
-            ssl_context.load_default_certs()
+            ssl_context.load_verify_locations(requests.certs.where())
         ssl_context.check_hostname = False
     else:
         ssl_context = None
@@ -909,10 +918,11 @@ def _browser_useragent():
 
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    server.bind(("127.0.0.1", 6414))
+    server.bind(("127.0.0.1", 0))
     server.listen(1)
 
-    webbrowser.open("http://127.0.0.1:6414/user-agent")
+    host, port = server.getsockname()
+    webbrowser.open("http://{}:{}/user-agent".format(host, port))
 
     client = server.accept()[0]
     server.close()

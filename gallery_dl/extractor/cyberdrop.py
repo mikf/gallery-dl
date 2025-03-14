@@ -10,12 +10,15 @@ from . import lolisafe
 from .common import Message
 from .. import text
 
+BASE_PATTERN = r"(?:https?://)?(?:www\.)?cyberdrop\.(?:me|to)"
+
 
 class CyberdropAlbumExtractor(lolisafe.LolisafeAlbumExtractor):
+    """Extractor for cyberdrop albums"""
     category = "cyberdrop"
     root = "https://cyberdrop.me"
     root_api = "https://api.cyberdrop.me"
-    pattern = r"(?:https?://)?(?:www\.)?cyberdrop\.(?:me|to)/a/([^/?#]+)"
+    pattern = BASE_PATTERN + r"/a/([^/?#]+)"
     example = "https://cyberdrop.me/a/ID"
 
     def items(self):
@@ -40,7 +43,7 @@ class CyberdropAlbumExtractor(lolisafe.LolisafeAlbumExtractor):
         extr('id="title"', "")
 
         album = {
-            "album_id"   : self.album_id,
+            "album_id"   : album_id,
             "album_name" : text.unescape(extr('title="', '"')),
             "album_size" : text.parse_bytes(extr(
                 '<p class="title">', "B")),
@@ -67,3 +70,20 @@ class CyberdropAlbumExtractor(lolisafe.LolisafeAlbumExtractor):
                 continue
 
             yield file
+
+
+class CyberdropMediaExtractor(CyberdropAlbumExtractor):
+    """Extractor for cyberdrop media links"""
+    subcategory = "media"
+    directory_fmt = ("{category}",)
+    pattern = BASE_PATTERN + r"/f/([^/?#]+)"
+    example = "https://cyberdrop.me/f/ID"
+
+    def fetch_album(self, album_id):
+        return self._extract_files((album_id,)), {
+            "album_id"   : "",
+            "album_name" : "",
+            "album_size" : -1,
+            "description": "",
+            "count"      : 1,
+        }

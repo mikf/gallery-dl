@@ -45,7 +45,7 @@ __tests__ = (
     "#category": ("chevereto", "imgkiwi", "user"),
     "#class"   : chevereto.CheveretoUserExtractor,
     "#pattern" : chevereto.CheveretoAlbumExtractor.pattern,
-    "#count"   : 50,
+    "#count"   : range(155, 175),
 },
 
 )

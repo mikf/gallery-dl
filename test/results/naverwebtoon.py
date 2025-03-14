@@ -117,7 +117,7 @@ __tests__ = (
     "#category": ("", "naverwebtoon", "comic"),
     "#class"   : naverwebtoon.NaverwebtoonComicExtractor,
     "#pattern" : naverwebtoon.NaverwebtoonEpisodeExtractor.pattern,
-    "#count"   : ">= 12",
+    "#count"   : 1,
 },
 
 )

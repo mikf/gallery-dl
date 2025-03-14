@@ -131,5 +131,24 @@ __tests__ = (
     "#auth"    : True,
 },
 
+{
+    "#url"     : "https://boosty.to/app/messages?dialogId=3598621",
+    "#class"   : boosty.BoostyDirectMessagesExtractor,
+    "#auth"    : True,
+    "#count"   : 7,
+
+    "count"    : 1,
+    "extension": "",
+    "file"     : dict,
+    "user"     : dict,
+
+    "post": {
+        "authorId": int,
+        "content" : list,
+        "date"    : "type:datetime",
+        "dialogId": 3598621,
+        "id"      : int,
+    },
+},
 
 )

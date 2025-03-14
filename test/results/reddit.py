@@ -41,6 +41,17 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.reddit.com/r/IdiotsInCars/search/?q=flair%3AOC",
+    "#comment" : "(#7025)",
+    "#category": ("", "reddit", "subreddit-search"),
+    "#class"   : reddit.RedditSubredditExtractor,
+    "#range"   : "1-25",
+
+    "subreddit"      : "IdiotsInCars",
+    "link_flair_text": "OC",
+},
+
+{
     "#url"     : "https://www.reddit.com/",
     "#category": ("", "reddit", "home"),
     "#class"   : reddit.RedditHomeExtractor,
@@ -210,6 +221,18 @@ __tests__ = (
     "#category": ("", "reddit", "submission"),
     "#class"   : reddit.RedditSubmissionExtractor,
     "#urls"    : "https://preview.redd.it/u9ud4k6xaf271.jpg?auto=webp&s=19b1334cb4409111cda136c01f7b44c2c42bf9fb",
+},
+
+{
+    "#url"     : "https://www.reddit.com/r/gonewildaudio/comments/1j2pxfn/",
+    "#comment" : "'selftext' option (#7111)",
+    "#category": ("", "reddit", "submission"),
+    "#class"   : reddit.RedditSubmissionExtractor,
+    "#options" : {"selftext": True, "comments": 0},
+    "#urls"    : (
+        "https://www.reddit.com/r/gonewildaudio/s/22pP7vizkx",
+        "https://soundgasm.net/u/chuwa/Your-Timid-Neighbor-Asks-You-To-Turn-Your-Music-Down-So-You-Fuck-Her-Stupid",
+    ),
 },
 
 {

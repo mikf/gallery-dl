@@ -114,6 +114,24 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.facebook.com/photo.php?fbid=1156625586261770",
+    "#comment" : "surrogate pair in 'caption' data (#6599)",
+    "#category": ("", "facebook", "photo"),
+    "#class"   : facebook.FacebookPhotoExtractor,
+
+    "caption"  : "A century of innovation parked side by side.\n\n📸: Vocabutesla via X",
+},
+
+{
+    "#url"     : "https://www.facebook.com/photo.php?fbid=989340003138066&set=pb.100061862277212.-2207520000&type=3",
+    "#comment" : "no 'publish_time' (#7151)",
+    "#category": ("", "facebook", "photo"),
+    "#class"   : facebook.FacebookPhotoExtractor,
+
+    "date"     : "dt:2025-02-25 15:00:09",
+},
+
+{
     "#url"     : "https://www.facebook.com/watch/?v=1165557851291824",
     "#category": ("", "facebook", "video"),
     "#class"   : facebook.FacebookVideoExtractor,

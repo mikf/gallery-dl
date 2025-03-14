@@ -10,7 +10,6 @@
 
 from .booru import BooruExtractor
 from .. import text, exception
-import operator
 
 
 class PhilomenaExtractor(BooruExtractor):
@@ -24,17 +23,22 @@ class PhilomenaExtractor(BooruExtractor):
 
     def _init(self):
         self.api = PhilomenaAPI(self)
-        if not self.config("svg", True):
-            self._file_url = operator.itemgetter("view_url")
+        self.svg = self.config("svg", True)
 
     def _file_url(self, post):
-        if post["format"] == "svg":
-            return post["view_url"].rpartition(".")[0] + ".svg"
-        return post["view_url"]
+        try:
+            url = post["representations"]["full"]
+        except Exception:
+            url = post["view_url"]
+
+        if self.svg and post["format"] == "svg":
+            return url.rpartition(".")[0] + ".svg"
+        return url
 
     @staticmethod
     def _prepare(post):
-        post["date"] = text.parse_datetime(post["created_at"])
+        post["date"] = text.parse_datetime(
+            post["created_at"][:19], "%Y-%m-%dT%H:%M:%S")
 
 
 BASE_PATTERN = PhilomenaExtractor.update({
