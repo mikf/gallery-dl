@@ -1405,6 +1405,17 @@ Description
     Download emoticon images.
 
 
+extractor.arcalive.gifs
+-----------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Check if ``.mp4`` videos have a ``.gif`` version
+    and download those instead.
+
+
 extractor.artstation.external
 -----------------------------
 Type
