@@ -24,6 +24,7 @@ modules = [
     "adultempire",
     "agnph",
     "ao3",
+    "arcalive",
     "architizer",
     "artstation",
     "aryion",
