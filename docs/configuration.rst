@@ -1459,6 +1459,29 @@ Description
     * ``false``: Get posts from "Latest Updates" pages
 
 
+extractor.batoto.domain
+-----------------------
+Type
+    ``string``
+Default
+    ``"auto"``
+Example
+    ``"mangatoto.org"``
+Description
+    Specifies the domain used by ``batoto`` extractors.
+
+    ``"auto"`` | ``"url"``
+        Use the input URL's domain
+    ``"nolegacy"``
+        Use the input URL's domain
+        - replace legacy domains with ``"xbato.org"``
+    ``"nowarn"``
+        Use the input URL's domain
+        - do not warn about legacy domains
+    any ``string``
+        Use this domain
+
+
 extractor.bbc.width
 -------------------
 Type
