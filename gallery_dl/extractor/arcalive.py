@@ -41,6 +41,7 @@ class ArcalivePostExtractor(ArcaliveExtractor):
 
     def items(self):
         self.emoticons = self.config("emoticons", False)
+        self.gifs = self.config("gifs", True)
 
         post = self.api.post(self.groups[0])
         files = self._extract_files(post)
@@ -61,7 +62,7 @@ class ArcalivePostExtractor(ArcaliveExtractor):
     def _extract_files(self, post):
         files = []
 
-        for media in self._extract_media(post["content"]):
+        for video, media in self._extract_media(post["content"]):
 
             if not self.emoticons and 'class="arca-emoticon"' in media:
                 continue
@@ -87,6 +88,13 @@ class ArcalivePostExtractor(ArcaliveExtractor):
                 if ext != orig:
                     fallback = (url + "?type=orig",)
                     url = path + "." + orig
+            elif video and self.gifs:
+                url_gif = url.rpartition(".")[0] + ".gif"
+                response = self.request(
+                    url_gif + "?type=orig", method="HEAD", fatal=False)
+                if response.status_code < 400:
+                    fallback = (url + "?type=orig",)
+                    url = url_gif
 
             files.append({
                 "url"   : url + "?type=orig",
@@ -99,7 +107,7 @@ class ArcalivePostExtractor(ArcaliveExtractor):
 
     def _extract_media(self, content):
         ArcalivePostExtractor._extract_media = extr = re.compile(
-            r"<(?:img|video) ([^>]+)").findall
+            r"<(?:img|vide(o)) ([^>]+)").findall
         return extr(content)
 
 
