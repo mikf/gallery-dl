@@ -241,7 +241,10 @@ class TestExtractorResults(unittest.TestCase):
             elif isinstance(test, range):
                 self.assertRange(value, test, msg=path)
             elif isinstance(test, set):
-                self.assertTrue(value in test or type(value) in test, msg=path)
+                try:
+                    self.assertIn(value, test, msg=path)
+                except AssertionError:
+                    self.assertIn(type(value), test, msg=path)
             elif isinstance(test, list):
                 subtest = False
                 for idx, item in enumerate(test):
