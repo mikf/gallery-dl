@@ -100,7 +100,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Arcalive</td>
     <td>https://arca.live/</td>
-    <td>Boards, Posts</td>
+    <td>Boards, Posts, User Posts</td>
     <td></td>
 </tr>
 <tr>

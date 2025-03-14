@@ -22,6 +22,13 @@ class ArcaliveExtractor(Extractor):
     def _init(self):
         self.api = ArcaliveAPI(self)
 
+    def items(self):
+        for article in self.articles():
+            article["_extractor"] = ArcalivePostExtractor
+            board = self.board or article.get("boardSlug") or "breaking"
+            url = "{}/b/{}/{}".format(self.root, board, article["id"])
+            yield Message.Queue, url, article
+
 
 class ArcalivePostExtractor(ArcaliveExtractor):
     """Extractor for an arca.live post"""
@@ -99,18 +106,26 @@ class ArcalivePostExtractor(ArcaliveExtractor):
 class ArcaliveBoardExtractor(ArcaliveExtractor):
     """Extractor for an arca.live board's posts"""
     subcategory = "board"
-    pattern = BASE_PATTERN + r"/b/(\w+)(?:/?\?([^#]+))?$"
+    pattern = BASE_PATTERN + r"/b/([^/?#]+)/?(?:\?([^#]+))?$"
     example = "https://arca.live/b/breaking"
 
-    def items(self):
-        board, query = self.groups
+    def articles(self):
+        self.board, query = self.groups
         params = text.parse_query(query)
-        articles = self.api.board(board, params)
+        return self.api.board(self.board, params)
 
-        for article in articles:
-            article["_extractor"] = ArcalivePostExtractor
-            url = "{}/b/{}/{}".format(self.root, board, article["id"])
-            yield Message.Queue, url, article
+
+class ArcaliveUserExtractor(ArcaliveExtractor):
+    """Extractor for an arca.live users's posts"""
+    subcategory = "user"
+    pattern = BASE_PATTERN + r"/u/@([^/?#]+)/?(?:\?([^#]+))?$"
+    example = "https://arca.live/u/@USER"
+
+    def articles(self):
+        self.board = None
+        user, query = self.groups
+        params = text.parse_query(query)
+        return self.api.user_posts(text.unquote(user), params)
 
 
 class ArcaliveAPI():
@@ -131,6 +146,12 @@ class ArcaliveAPI():
     def post(self, post_id):
         endpoint = "/view/article/breaking/" + str(post_id)
         return self._call(endpoint)
+
+    def user_posts(self, username, params):
+        endpoint = "/list/channel/breaking"
+        params["target"] = "nickname"
+        params["keyword"] = username
+        return self._pagination(endpoint, params, "articles")
 
     def _call(self, endpoint, params=None):
         url = self.root + endpoint
