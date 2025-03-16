@@ -168,6 +168,7 @@ class TestConfig(unittest.TestCase):
         options = (
             (("b",)    , "c", [1, 2, 3]),
             (("e", "f"), "g", 234),
+            (("e", "f"), "g", 234),
         )
 
         self.assertEqual(config.get(("b",)    , "c"), "text")
