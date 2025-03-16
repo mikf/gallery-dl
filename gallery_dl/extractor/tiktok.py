@@ -6,6 +6,7 @@
 
 """Extractors for https://www.tiktok.com/"""
 
+from json.decoder import JSONDecodeError
 from .common import Extractor, Message
 from .. import text, util, ytdl, exception
 
@@ -143,12 +144,22 @@ class TiktokExtractor(Extractor):
     def _sanitize_url(self, url):
         return text.ensure_http_scheme(url.replace("/photo/", "/video/", 1))
 
-    def _extract_rehydration_data(self, url):
-        html = self.request(url).text
-        data = text.extr(
-            html, '<script id="__UNIVERSAL_DATA_FOR_REHYDRATION__" '
-            'type="application/json">', '</script>')
-        return util.json_loads(data)["__DEFAULT_SCOPE__"]
+    def _extract_rehydration_data(self, url, *, retries=1):
+        try:
+            html = self.request(url).text
+            data = text.extr(
+                html, '<script id="__UNIVERSAL_DATA_FOR_REHYDRATION__" '
+                'type="application/json">', '</script>')
+            return util.json_loads(data)["__DEFAULT_SCOPE__"]
+        except JSONDecodeError:
+            # We failed to retrieve rehydration data. This happens relatively
+            # frequently, so retry if we're told to do so.
+            self.log.warning("%s: Failed to retrieve rehydration data, trying "
+                             "%d more time%s", url, retries,
+                             "" if retries == 1 else "s")
+            if retries > 0:
+                return self._extract_rehydration_data(url, retries=retries-1)
+            raise
 
     def _extract_audio(self, post):
         audio = post["music"]
@@ -179,7 +190,7 @@ class TiktokExtractor(Extractor):
         elif status == 10204:
             self.log.error("%s: Requested post not available", url)
         elif status == 10231:
-            self.log.error("%s: Region locked - Try downloading with a"
+            self.log.error("%s: Region locked - Try downloading with a "
                            "VPN/proxy connection", url)
         else:
             self.log.error(
