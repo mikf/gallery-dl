@@ -1004,7 +1004,7 @@ class DeviantartStashExtractor(DeviantartExtractor):
     """Extractor for sta.sh-ed deviations"""
     subcategory = "stash"
     archive_fmt = "{index}.{extension}"
-    pattern = (r"(?:https?://)?(?:(?:www\.)?deviantart\.com/stash|sta\.sh)"
+    pattern = (r"(?:https?://)?(?:(?:www\.)?deviantart\.com/stash|sta\.s(h))"
                r"/([a-z0-9]+)")
     example = "https://www.deviantart.com/stash/abcde"
 
@@ -1016,9 +1016,18 @@ class DeviantartStashExtractor(DeviantartExtractor):
 
     def deviations(self, stash_id=None):
         if stash_id is None:
-            stash_id = self.groups[0]
-        url = "https://www.deviantart.com/stash/" + stash_id
-        page = self._limited_request(url).text
+            legacy_url, stash_id = self.groups
+        else:
+            legacy_url = False
+
+        if legacy_url and stash_id[0] == "2":
+            url = "https://sta.sh/" + stash_id
+            response = self._limited_request(url)
+            stash_id = response.url.rpartition("/")[2]
+            page = response.text
+        else:
+            url = "https://www.deviantart.com/stash/" + stash_id
+            page = self._limited_request(url).text
 
         if stash_id[0] == "0":
             uuid = text.extr(page, '//deviation/', '"')
