@@ -322,6 +322,7 @@ class apply():
             set(path, key, value)
 
     def __exit__(self, exc_type, exc_value, traceback):
+        self.original.reverse()
         for path, key, value in self.original:
             if value is util.SENTINEL:
                 unset(path, key)
