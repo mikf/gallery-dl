@@ -144,7 +144,9 @@ class TiktokExtractor(Extractor):
     def _sanitize_url(self, url):
         return text.ensure_http_scheme(url.replace("/photo/", "/video/", 1))
 
-    def _extract_rehydration_data(self, url, *, retries=1):
+    def _extract_rehydration_data(self, url, *, retries=None):
+        if retries is None:
+            retries = self._retries
         try:
             html = self.request(url).text
             data = text.extr(
@@ -153,10 +155,12 @@ class TiktokExtractor(Extractor):
             return util.json_loads(data)["__DEFAULT_SCOPE__"]
         except JSONDecodeError:
             # We failed to retrieve rehydration data. This happens relatively
-            # frequently, so retry if we're told to do so.
+            # frequently when making many requests, so retry.
             self.log.warning("%s: Failed to retrieve rehydration data, trying "
-                             "%d more time%s", url, retries,
-                             "" if retries == 1 else "s")
+                             "%d more time%s and delaying for %d second(s)",
+                             url, retries, "" if retries == 1 else "s",
+                             self._timeout)
+            self.sleep(self._timeout, "retry")
             if retries > 0:
                 return self._extract_rehydration_data(url, retries=retries-1)
             raise
