@@ -53,7 +53,6 @@ __tests__ = (
         "userid"  : "9AE51FC7-0278-806C-3FFF-F4961ABF9E2B",
         "username": "shimoda7",
     },
-    "category_path"   : str,
     "content"         : {
         "filesize"    : int,
         "height"      : int,
@@ -149,7 +148,7 @@ __tests__ = (
         "folders" : 1,
         "original": 0,
     },
-    "#count"   : 3,
+    "#count"   : 10,
 
     "description": str,
     "folders"    : list,
@@ -173,6 +172,12 @@ __tests__ = (
 
 {
     "#url"     : "https://www.deviantart.com/shimoda7/gallery/all",
+    "#category": ("", "deviantart", "gallery"),
+    "#class"   : deviantart.DeviantartGalleryExtractor,
+},
+
+{
+    "#url"     : "https://www.deviantart.com/shimoda7/gallery/recommended-for-you",
     "#category": ("", "deviantart", "gallery"),
     "#class"   : deviantart.DeviantartGalleryExtractor,
 },
@@ -273,7 +278,6 @@ __tests__ = (
         "userid"  : "1A12BA26-33C2-AA0A-7678-0B6DFBA7AC8E",
         "username": "gdldev"
     },
-    "category_path"    : "",
     "content"          : {
         "filename"    : "banner_by_gdldev_dgntyqc.png",
         "filesize"    : 84510,
