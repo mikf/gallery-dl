@@ -201,6 +201,9 @@ SUBCATEGORY_MAP = {
         "user-series"  : "",
         "user-bookmark": "Bookmarks",
     },
+    "arcalive": {
+        "user": "User Posts",
+    },
     "artstation": {
         "artwork": "Artwork Listings",
         "collections": "",

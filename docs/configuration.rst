@@ -384,6 +384,7 @@ Type
 Default
     * ``"0.5-1.5"``
         ``ao3``,
+        ``arcalive``,
         ``civitai``,
         ``[Danbooru]``,
         ``[E621]``,
@@ -1394,6 +1395,27 @@ Description
     Format(s) to download.
 
 
+extractor.arcalive.emoticons
+----------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Download emoticon images.
+
+
+extractor.arcalive.gifs
+-----------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Check if ``.mp4`` videos have a ``.gif`` version
+    and download those instead.
+
+
 extractor.artstation.external
 -----------------------------
 Type
@@ -1457,6 +1479,29 @@ Description
     * ``true``: Start on users' main gallery pages and recursively
       descend into subfolders
     * ``false``: Get posts from "Latest Updates" pages
+
+
+extractor.batoto.domain
+-----------------------
+Type
+    ``string``
+Default
+    ``"auto"``
+Example
+    ``"mangatoto.org"``
+Description
+    Specifies the domain used by ``batoto`` extractors.
+
+    ``"auto"`` | ``"url"``
+        Use the input URL's domain
+    ``"nolegacy"``
+        Use the input URL's domain
+        - replace legacy domains with ``"xbato.org"``
+    ``"nowarn"``
+        Use the input URL's domain
+        - do not warn about legacy domains
+    any ``string``
+        Use this domain
 
 
 extractor.bbc.width
@@ -4389,11 +4434,16 @@ Description
 extractor.tiktok.audio
 ----------------------
 Type
-    ``bool``
+    * ``bool``
+    * ``string``
 Default
     ``true``
 Description
-    Download audio tracks using |ytdl|.
+    Controls audio download behavior.
+
+    * ``true``: Download audio tracks
+    * ``"ytdl"``: Download audio tracks using |ytdl|
+    * ``false``: Ignore audio tracks
 
 
 extractor.tiktok.videos
@@ -5281,6 +5331,16 @@ Description
     Number of results to return in a single API query.
 
     The value must be between 10 and 500.
+
+
+extractor.wikimedia.subcategories
+---------------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    For ``Category:`` pages, recursively descent into subcategories.
 
 
 extractor.ytdl.cmdline-args

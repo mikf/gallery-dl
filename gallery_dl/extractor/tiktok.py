@@ -17,7 +17,7 @@ class TiktokExtractor(Extractor):
     category = "tiktok"
     directory_fmt = ("{category}", "{user}")
     filename_fmt = (
-        "{id}{num:?_//>02} {title[b:150]}{img_id:? [/]/}.{extension}")
+        "{id}{num:?_//>02} {title[b:150]}{img_id|audio_id:? [/]/}.{extension}")
     archive_fmt = "{id}_{num}_{img_id}"
     root = "https://www.tiktok.com"
     cookies_domain = ".tiktok.com"
@@ -83,7 +83,11 @@ class TiktokExtractor(Extractor):
                     yield Message.Url, url, post
 
                 if self.audio and "music" in post:
-                    ytdl_media = "audio"
+                    if self.audio == "ytdl":
+                        ytdl_media = "audio"
+                    else:
+                        url = self._extract_audio(post)
+                        yield Message.Url, url, post
 
             elif self.video and "video" in post:
                 ytdl_media = "video"
@@ -145,6 +149,25 @@ class TiktokExtractor(Extractor):
             html, '<script id="__UNIVERSAL_DATA_FOR_REHYDRATION__" '
             'type="application/json">', '</script>')
         return util.json_loads(data)["__DEFAULT_SCOPE__"]
+
+    def _extract_audio(self, post):
+        audio = post["music"]
+        url = audio["playUrl"]
+        text.nameext_from_url(url, post)
+        post.update({
+            "type"     : "audio",
+            "image"    : None,
+            "title"    : post["desc"] or "TikTok audio #{}".format(post["id"]),
+            "duration" : audio.get("duration"),
+            "num"      : 0,
+            "img_id"   : "",
+            "audio_id" : audio.get("id"),
+            "width"    : 0,
+            "height"   : 0,
+        })
+        if not post["extension"]:
+            post["extension"] = "mp3"
+        return url
 
     def _check_status_code(self, detail, url):
         status = detail.get("statusCode")
