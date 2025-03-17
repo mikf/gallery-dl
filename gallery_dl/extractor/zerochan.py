@@ -64,16 +64,22 @@ class ZerochanExtractor(BooruExtractor):
 
     def _parse_entry_html(self, entry_id):
         url = "{}/{}".format(self.root, entry_id)
-        extr = text.extract_from(self.request(url).text)
+        page = self.request(url).text
 
+        try:
+            jsonld = self._extract_jsonld(page)
+        except Exception:
+            return {"id": entry_id}
+
+        extr = text.extract_from(page)
         data = {
             "id"      : text.parse_int(entry_id),
-            "author"  : text.parse_unicode_escapes(extr('    "name": "', '"')),
-            "file_url": extr('"contentUrl": "', '"'),
-            "date"    : text.parse_datetime(extr('"datePublished": "', '"')),
-            "width"   : text.parse_int(extr('"width": "', ' ')),
-            "height"  : text.parse_int(extr('"height": "', ' ')),
-            "size"    : text.parse_bytes(extr('"contentSize": "', 'B')),
+            "author"  : jsonld["author"]["name"],
+            "file_url": jsonld["contentUrl"],
+            "date"    : text.parse_datetime(jsonld["datePublished"]),
+            "width"   : text.parse_int(jsonld["width"][:-3]),
+            "height"  : text.parse_int(jsonld["height"][:-3]),
+            "size"    : text.parse_bytes(jsonld["contentSize"][:-1]),
             "path"    : text.split_html(extr(
                 'class="breadcrumbs', '</nav>'))[2:],
             "uploader": extr('href="/user/', '"'),
@@ -86,7 +92,7 @@ class ZerochanExtractor(BooruExtractor):
         tags = data["tags"] = []
         for tag in html.split("<li class=")[1:]:
             category = text.extr(tag, '"', '"')
-            name = text.extr(tag, 'data-tag="', '"')
+            name = text.unescape(text.extr(tag, 'data-tag="', '"'))
             tags.append(category.partition(" ")[0].capitalize() + ":" + name)
 
         return data

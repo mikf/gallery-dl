@@ -250,4 +250,58 @@ __tests__ = (
     ],
 },
 
+{
+    "#url"     : "https://www.zerochan.net/4354955",
+    "#comment" : "quotes in HTML tags",
+    "#category": ("booru", "zerochan", "image"),
+    "#class"   : zerochan.ZerochanImageExtractor,
+    "#auth"    : False,
+    "#options" : {"metadata": False},
+
+    "tags": [
+        "Mangaka:Tory Patterson",
+        "Studio:SEGA",
+        "Game:Sonic Origins",
+        "Series:Sonic the Hedgehog",
+        "Character:Miles \"Tails\" Prower",
+        "Theme:Airplane",
+        "Theme:Flying",
+        "Theme:Fox",
+        "Source:Character Sheet",
+        "Source:Official Art",
+        "Source:Official Art from X",
+        "Source:X (Twitter)",
+    ],
+},
+
+{
+    "#url"     : "https://www.zerochan.net/2275437",
+    "#comment" : "unicode escapes with surrogate pair (#7178)",
+    "#category": ("booru", "zerochan", "image"),
+    "#class"   : zerochan.ZerochanImageExtractor,
+    "#auth"    : False,
+    "#options" : {"metadata": False},
+
+    "author"   : "MAYO🍚",
+    "date"     : "dt:2018-02-25 16:03:48",
+    "extension": "png",
+    "file_url" : "https://static.zerochan.net/Kongou.full.2275437.png",
+    "filename" : "Kongou.full.2275437",
+    "width"    : 1047,
+    "height"   : 1365,
+    "id"       : 2275437,
+    "size"     : 502784,
+    "source"   : "",
+    "uploader" : "SubaruSumeragi",
+    "path"     : [
+        "Kantai Collection",
+        "Kongou",
+    ],
+    "tags"     : [
+        "Mangaka:MAYO🍚",
+        "Game:Kantai Collection",
+        "Character:Kongou"
+    ],
+},
+
 )
