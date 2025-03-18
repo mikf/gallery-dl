@@ -329,10 +329,11 @@ class PatreonCreatorExtractor(PatreonExtractor):
     """Extractor for a creator's works"""
     subcategory = "creator"
     pattern = (r"(?:https?://)?(?:www\.)?patreon\.com"
-               r"/(?!(?:home|join|posts|login|signup)(?:$|[/?#]))"
+               r"/(?!(?:home|create|login|signup|search|posts|messages)"
+               r"(?:$|[/?#]))"
                r"(?:profile/creators|(?:c/)?([^/?#]+)(?:/posts)?)"
                r"/?(?:\?([^#]+))?")
-    example = "https://www.patreon.com/USER"
+    example = "https://www.patreon.com/c/USER"
 
     def posts(self):
         creator, query = self.groups
@@ -370,7 +371,7 @@ class PatreonCreatorExtractor(PatreonExtractor):
             data = None
             data = self._extract_bootstrap(page)
             return data["campaign"]["data"]["id"]
-        except (KeyError, ValueError) as exc:
+        except Exception as exc:
             if data:
                 self.log.debug(data)
             raise exception.StopExtraction(
