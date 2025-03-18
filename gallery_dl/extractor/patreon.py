@@ -27,7 +27,7 @@ class PatreonExtractor(Extractor):
     _warning = True
 
     def _init(self):
-        if not self.cookies_check(("session_id",)):
+        if not self.cookies_check(("session_id",), subdomains=True):
             if self._warning:
                 PatreonExtractor._warning = False
                 self.log.warning("no 'session_id' cookie set")
