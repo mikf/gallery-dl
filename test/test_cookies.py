@@ -153,19 +153,49 @@ class TestCookieUtils(unittest.TestCase):
         self.assertFalse(extr.cookies_check(("a",)))
         self.assertFalse(extr.cookies_check(("a", "b")))
 
-        extr.cookies.set("a", "1")
-        self.assertFalse(extr.cookies_check(("a",)))
+        extr.cookies.set("nd_a", "1")
+        self.assertFalse(extr.cookies_check(("nd_a",)))
 
-        extr.cookies.set("a", "1", domain=extr.cookies_domain)
-        self.assertTrue(extr.cookies_check(("a",)))
+        extr.cookies.set("cd_a", "1", domain=extr.cookies_domain)
+        self.assertTrue(extr.cookies_check(("cd_a",)))
 
-        extr.cookies.set("a", "1", domain="www" + extr.cookies_domain)
+        extr.cookies.set("wd_a", "1", domain="www" + extr.cookies_domain)
+        self.assertFalse(extr.cookies_check(("wd_a",)))
         self.assertEqual(len(extr.cookies), 3)
-        self.assertTrue(extr.cookies_check(("a",)))
 
-        extr.cookies.set("b", "2", domain=extr.cookies_domain)
-        extr.cookies.set("c", "3", domain=extr.cookies_domain)
-        self.assertTrue(extr.cookies_check(("a", "b", "c")))
+        extr.cookies.set("cd_b", "2", domain=extr.cookies_domain)
+        extr.cookies.set("cd_c", "3", domain=extr.cookies_domain)
+        self.assertFalse(extr.cookies_check(("nd_a", "cd_b", "cd_c")))
+        self.assertTrue(extr.cookies_check(("cd_a", "cd_b", "cd_c")))
+        self.assertFalse(extr.cookies_check(("wd_a", "cd_b", "cd_c")))
+        self.assertEqual(len(extr.cookies), 5)
+
+    def test_check_cookies_domain_sub(self):
+        extr = _get_extractor("test")
+        self.assertFalse(extr.cookies, "empty")
+        extr.cookies_domain = ".example.org"
+
+        self.assertFalse(extr.cookies_check(("a",), subdomains=True))
+        self.assertFalse(extr.cookies_check(("a", "b"), subdomains=True))
+
+        extr.cookies.set("nd_a", "1")
+        self.assertFalse(extr.cookies_check(("nd_a",), subdomains=True))
+
+        extr.cookies.set("cd_a", "1", domain=extr.cookies_domain)
+        self.assertTrue(extr.cookies_check(("cd_a",), subdomains=True))
+
+        extr.cookies.set("wd_a", "1", domain="www" + extr.cookies_domain)
+        self.assertTrue(extr.cookies_check(("wd_a",), subdomains=True))
+
+        extr.cookies.set("cd_b", "2", domain=extr.cookies_domain)
+        extr.cookies.set("cd_c", "3", domain=extr.cookies_domain)
+        self.assertEqual(len(extr.cookies), 5)
+        self.assertFalse(extr.cookies_check(
+            ("nd_a", "cd_b", "cd_c"), subdomains=True))
+        self.assertTrue(extr.cookies_check(
+            ("cd_a", "cd_b", "cd_c"), subdomains=True))
+        self.assertTrue(extr.cookies_check(
+            ("wd_a", "cd_b", "cd_c"), subdomains=True))
 
     def test_check_cookies_expires(self):
         extr = _get_extractor("test")
