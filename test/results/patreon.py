@@ -80,6 +80,30 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.patreon.com/create",
+    "#class"   : patreon.PatreonCreatorExtractor,
+    "#fail"    : True,
+},
+
+{
+    "#url"     : "https://www.patreon.com/login",
+    "#class"   : patreon.PatreonCreatorExtractor,
+    "#fail"    : True,
+},
+
+{
+    "#url"     : "https://www.patreon.com/search?q=foobar",
+    "#class"   : patreon.PatreonCreatorExtractor,
+    "#fail"    : True,
+},
+
+{
+    "#url"     : "https://www.patreon.com/messages/?mode=user&tab=chats",
+    "#class"   : patreon.PatreonCreatorExtractor,
+    "#fail"    : True,
+},
+
+{
     "#url"     : "https://www.patreon.com/home",
     "#class"   : patreon.PatreonUserExtractor,
 },
