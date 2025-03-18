@@ -92,6 +92,15 @@ class TestExtractorResults(unittest.TestCase):
             self.assertGreaterEqual(value, range.start, msg=msg)
 
     def _run_test(self, result):
+        if result.get("#fail"):
+            del result["#fail"]
+            try:
+                self._run_test(result)
+            except AssertionError:
+                return
+            else:
+                self.fail("Test did not fail")
+
         base, cat, sub = result_categories(result)
         result.pop("#comment", None)
         result.pop("#category", None)
