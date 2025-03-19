@@ -6,7 +6,6 @@
 
 """Extractors for https://www.tiktok.com/"""
 
-from json.decoder import JSONDecodeError
 from .common import Extractor, Message
 from .. import text, util, ytdl, exception
 
@@ -101,26 +100,26 @@ class TiktokExtractor(Extractor):
     def _sanitize_url(self, url):
         return text.ensure_http_scheme(url.replace("/photo/", "/video/", 1))
 
-    def _extract_rehydration_data(self, url, *, retries=None):
-        if retries is None:
-            retries = self._retries
-        try:
-            html = self.request(url).text
-            data = text.extr(
-                html, '<script id="__UNIVERSAL_DATA_FOR_REHYDRATION__" '
-                'type="application/json">', '</script>')
-            return util.json_loads(data)["__DEFAULT_SCOPE__"]
-        except JSONDecodeError:
-            # We failed to retrieve rehydration data. This happens relatively
-            # frequently when making many requests, so retry.
-            self.log.warning("%s: Failed to retrieve rehydration data, trying "
-                             "%d more time%s and delaying for %d second(s)",
-                             url, retries, "" if retries == 1 else "s",
-                             self._timeout)
-            self.sleep(self._timeout, "retry")
-            if retries > 0:
-                return self._extract_rehydration_data(url, retries=retries-1)
-            raise
+    def _extract_rehydration_data(self, url):
+        tries = 0
+        while True:
+            try:
+                html = self.request(url).text
+                data = text.extr(
+                    html, '<script id="__UNIVERSAL_DATA_FOR_REHYDRATION__" '
+                    'type="application/json">', '</script>')
+                return util.json_loads(data)["__DEFAULT_SCOPE__"]
+            except ValueError:
+                # We failed to retrieve rehydration data. This happens
+                # relatively frequently when making many requests, so
+                # retry.
+                tries += 1
+                self.log.warning("%s: Failed to retrieve rehydration data "
+                                 "(%s/%s)", url.rpartition("/")[2], tries,
+                                 self._retries)
+                self.sleep(self._timeout, "retry")
+                if tries >= self._retries:
+                    raise
 
     def _extract_audio(self, post):
         audio = post["music"]
