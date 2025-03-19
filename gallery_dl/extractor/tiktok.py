@@ -113,13 +113,13 @@ class TiktokExtractor(Extractor):
                 # We failed to retrieve rehydration data. This happens
                 # relatively frequently when making many requests, so
                 # retry.
+                if tries >= self._retries:
+                    raise
                 tries += 1
                 self.log.warning("%s: Failed to retrieve rehydration data "
                                  "(%s/%s)", url.rpartition("/")[2], tries,
                                  self._retries)
                 self.sleep(self._timeout, "retry")
-                if tries >= self._retries:
-                    raise
 
     def _extract_audio(self, post):
         audio = post["music"]
