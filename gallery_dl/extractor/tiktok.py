@@ -25,14 +25,8 @@ class TiktokExtractor(Extractor):
     def _init(self):
         self.audio = self.config("audio", True)
         self.video = self.config("videos", True)
-        if not self.config("avatar", True):
-            self.avatar = util.false
 
     def items(self):
-        # We assume that all of the URLs served by urls() come from the same
-        # author.
-        downloaded_avatar = not self.avatar()
-
         for tiktok_url in self.urls():
             tiktok_url = self._sanitize_url(tiktok_url)
             data = self._extract_rehydration_data(tiktok_url)
@@ -49,17 +43,9 @@ class TiktokExtractor(Extractor):
 
             post = video_detail["itemInfo"]["itemStruct"]
             author = post["author"]
-            post["user"] = user = author["uniqueId"]
+            post["user"] = author["uniqueId"]
             post["date"] = text.parse_timestamp(post["createTime"])
             original_title = title = post["desc"]
-
-            if not downloaded_avatar:
-                avatar_url = author["avatarLarger"]
-                avatar = self._generate_avatar(
-                    avatar_url, post, user, author["id"])
-                yield Message.Directory, avatar
-                yield Message.Url, avatar_url, avatar
-                downloaded_avatar = True
 
             yield Message.Directory, post
             ytdl_media = False
@@ -111,44 +97,29 @@ class TiktokExtractor(Extractor):
                 })
                 yield Message.Url, "ytdl:" + tiktok_url, post
 
-        # If we couldn't download the avatar because the given user has no
-        # posts, we'll need to make a separate request for the user's page
-        # and download the avatar that way.
-        if not downloaded_avatar:
-            user_name = self.avatar()
-            profile_url = "https://www.tiktok.com/@{}".format(user_name)
-            data = self._extract_rehydration_data(profile_url)
-            data = data["webapp.user-detail"]["userInfo"]["user"]
-            data["user"] = user_name
-            avatar_url = data["avatarLarger"]
-            avatar = self._generate_avatar(
-                avatar_url, data, user_name, data["id"])
-            yield Message.Directory, avatar
-            yield Message.Url, avatar_url, avatar
-
-    def avatar(self):
-        return False
-
-    def _generate_avatar(self, avatar_url, data, user_name, user_id):
-        avatar = text.nameext_from_url(avatar_url, data.copy())
-        avatar.update({
-            "type"  : "avatar",
-            "title" : "@" + user_name,
-            "id"    : user_id,
-            "img_id": avatar["filename"].partition("~")[0],
-            "num"   : 0,
-        })
-        return avatar
-
     def _sanitize_url(self, url):
         return text.ensure_http_scheme(url.replace("/photo/", "/video/", 1))
 
     def _extract_rehydration_data(self, url):
-        html = self.request(url).text
-        data = text.extr(
-            html, '<script id="__UNIVERSAL_DATA_FOR_REHYDRATION__" '
-            'type="application/json">', '</script>')
-        return util.json_loads(data)["__DEFAULT_SCOPE__"]
+        tries = 0
+        while True:
+            try:
+                html = self.request(url).text
+                data = text.extr(
+                    html, '<script id="__UNIVERSAL_DATA_FOR_REHYDRATION__" '
+                    'type="application/json">', '</script>')
+                return util.json_loads(data)["__DEFAULT_SCOPE__"]
+            except ValueError:
+                # We failed to retrieve rehydration data. This happens
+                # relatively frequently when making many requests, so
+                # retry.
+                if tries >= self._retries:
+                    raise
+                tries += 1
+                self.log.warning("%s: Failed to retrieve rehydration data "
+                                 "(%s/%s)", url.rpartition("/")[2], tries,
+                                 self._retries)
+                self.sleep(self._timeout, "retry")
 
     def _extract_audio(self, post):
         audio = post["music"]
@@ -179,7 +150,7 @@ class TiktokExtractor(Extractor):
         elif status == 10204:
             self.log.error("%s: Requested post not available", url)
         elif status == 10231:
-            self.log.error("%s: Region locked - Try downloading with a"
+            self.log.error("%s: Region locked - Try downloading with a "
                            "VPN/proxy connection", url)
         else:
             self.log.error(
@@ -230,7 +201,10 @@ class TiktokUserExtractor(TiktokExtractor):
     pattern = BASE_PATTERN + r"/@([\w_.-]+)/?(?:$|\?|#)"
     example = "https://www.tiktok.com/@USER"
 
-    def urls(self):
+    def _init(self):
+        self.avatar = self.config("avatar", True)
+
+    def items(self):
         """Attempt to use yt-dlp/youtube-dl to extract links from a
         user's page"""
 
@@ -263,19 +237,39 @@ class TiktokUserExtractor(TiktokExtractor):
         ytdl_instance = ytdl.construct_YoutubeDL(
             module, self, user_opts, extr_opts)
 
-        # transfer cookies to ytdl
+        # Transfer cookies to ytdl.
         if self.cookies:
             set_cookie = ytdl_instance.cookiejar.set_cookie
             for cookie in self.cookies:
                 set_cookie(cookie)
 
+        user_name = self.groups[0]
+        profile_url = "{}/@{}".format(self.root, user_name)
+        if self.avatar:
+            avatar_url, avatar = self._generate_avatar(user_name, profile_url)
+            yield Message.Directory, avatar
+            yield Message.Url, avatar_url, avatar
+
         with ytdl_instance as ydl:
             info_dict = ydl._YoutubeDL__extract_info(
-                "{}/@{}".format(self.root, self.groups[0]),
-                ydl.get_info_extractor("TikTokUser"),
+                profile_url, ydl.get_info_extractor("TikTokUser"),
                 False, {}, True)
             # This should include video and photo posts in /video/ URL form.
-            return [video["url"] for video in info_dict["entries"]]
+            for video in info_dict["entries"]:
+                data = {"_extractor": TiktokPostExtractor}
+                yield Message.Queue, video["url"].partition("?")[0], data
 
-    def avatar(self):
-        return self.groups[0]
+    def _generate_avatar(self, user_name, profile_url):
+        data = self._extract_rehydration_data(profile_url)
+        data = data["webapp.user-detail"]["userInfo"]["user"]
+        data["user"] = user_name
+        avatar_url = data["avatarLarger"]
+        avatar = text.nameext_from_url(avatar_url, data.copy())
+        avatar.update({
+            "type"  : "avatar",
+            "title" : "@" + user_name,
+            "id"    : data["id"],
+            "img_id": avatar["filename"].partition("~")[0],
+            "num"   : 0,
+        })
+        return (avatar_url, avatar)
