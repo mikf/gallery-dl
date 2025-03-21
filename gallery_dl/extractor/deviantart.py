@@ -1023,7 +1023,8 @@ class DeviantartFolderExtractor(DeviantartExtractor):
 
 class DeviantartSubFolderExtractor(DeviantartFolderExtractor):
     """Extractor for deviations inside an artist's gallery folder"""
-    directory_fmt = ("{category}", "{username}", "{folder[parent_name]}", "{folder[title]}")
+    directory_fmt = ("{category}", "{username}", "{folder[parent_name]}",
+                     "{folder[title]}")
     # Track against parent folder - prevent duplicate downloads
     archive_fmt = "F_{folder[parent_uuid]}_{index}.{extension}"
 
