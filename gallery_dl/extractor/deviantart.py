@@ -1008,11 +1008,11 @@ class DeviantartFolderExtractor(DeviantartExtractor):
 
         if folder['has_subfolders']:
             if self.flat:
-                yield from self._folder_urls(
-                    folder["subfolders"], "gallery", DeviantartFolderExtractor)
+                yield from self._folder_urls(folder["subfolders"], "gallery",
+                                             DeviantartFolderExtractor)
             else:
-                yield from self._folder_urls(
-                    folder["subfolders"], "gallery", DeviantartSubFolderExtractor)
+                yield from self._folder_urls(folder["subfolders"], "gallery",
+                                             DeviantartSubFolderExtractor)
 
         yield from self.api.gallery(self.user, folder["folderid"], self.offset)
 
@@ -1026,6 +1026,7 @@ class DeviantartSubFolderExtractor(DeviantartFolderExtractor):
     directory_fmt = ("{category}", "{username}", "{folder[parent_name]}", "{folder[title]}")
     # Track against parent folder - prevent duplicate downloads
     archive_fmt = "F_{folder[parent_uuid]}_{index}.{extension}"
+
 
 class DeviantartStashExtractor(DeviantartExtractor):
     """Extractor for sta.sh-ed deviations"""
