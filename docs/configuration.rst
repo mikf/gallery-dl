@@ -3079,9 +3079,9 @@ extractor.kemonoparty.metadata
 Type
     ``bool``
 Default
-    ``false``
+    ``true``
 Description
-    Extract ``username`` metadata.
+    Extract ``username`` and ``user_profile`` metadata.
 
 
 extractor.kemonoparty.revisions
