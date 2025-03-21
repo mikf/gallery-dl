@@ -987,18 +987,45 @@ class DeviantartFolderExtractor(DeviantartExtractor):
     def deviations(self):
         folders = self.api.gallery_folders(self.user)
         folder = self._find_folder(folders, self.folder_name, self.folder_id)
-        self.folder = {
-            "title": folder["name"],
-            "uuid" : folder["folderid"],
-            "index": self.folder_id,
-            "owner": self.user,
-        }
-        return self.api.gallery(self.user, folder["folderid"], self.offset)
+
+        # Parent_name is only included for subfolders
+        if self.flat and folder.get("parent_name"):
+            self.folder = {
+                "title": folder["parent_name"],
+                "uuid": folder["parent"],
+                "index": self.folder_id,
+                "owner": self.user
+            }
+        else:
+            self.folder = {
+                "title": folder["name"],
+                "uuid" : folder["folderid"],
+                "index": self.folder_id,
+                "owner": self.user,
+                "parent_uuid": folder["parent"],
+                "parent_name": folder.get("parent_name")
+            }
+
+        if folder['has_subfolders']:
+            if self.flat:
+                yield from self._folder_urls(
+                    folder["subfolders"], "gallery", DeviantartFolderExtractor)
+            else:
+                yield from self._folder_urls(
+                    folder["subfolders"], "gallery", DeviantartSubFolderExtractor)
+
+        yield from self.api.gallery(self.user, folder["folderid"], self.offset)
 
     def prepare(self, deviation):
         DeviantartExtractor.prepare(self, deviation)
         deviation["folder"] = self.folder
 
+
+class DeviantartSubFolderExtractor(DeviantartFolderExtractor):
+    """Extractor for deviations inside an artist's gallery folder"""
+    directory_fmt = ("{category}", "{username}", "{folder[parent_name]}", "{folder[title]}")
+    # Track against parent folder - prevent duplicate downloads
+    archive_fmt = "F_{folder[parent_uuid]}_{index}.{extension}"
 
 class DeviantartStashExtractor(DeviantartExtractor):
     """Extractor for sta.sh-ed deviations"""
@@ -1366,7 +1393,7 @@ class DeviantartOAuthAPI():
     def __init__(self, extractor):
         self.extractor = extractor
         self.log = extractor.log
-        self.headers = {"dA-minor-version": "20200519"}
+        self.headers = {"dA-minor-version": "20210526"}
         self._warn_429 = True
 
         self.delay = extractor.config("wait-min", 0)
@@ -1578,7 +1605,15 @@ class DeviantartOAuthAPI():
         endpoint = "/gallery/folders"
         params = {"username": username, "offset": offset, "limit": 50,
                   "mature_content": self.mature}
-        return self._pagination_list(endpoint, params)
+        # Flatten the folder structure and include parent name
+        _folders = []
+        for folder in self._pagination(endpoint, params):
+            _folders.append(folder)
+            if folder['has_subfolders']:
+                for subfolder in folder['subfolders']:
+                    subfolder['parent_name'] = folder['name']
+                    _folders.append(subfolder)
+        return _folders
 
     def user_friends(self, username, offset=0):
         """Get the users list of friends"""
