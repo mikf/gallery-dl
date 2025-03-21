@@ -61,7 +61,7 @@ class KemonopartyExtractor(Extractor):
         duplicates = True if self.config("duplicates") else False
         dms = True if self.config("dms") else None
         max_posts = self.config("max-posts")
-        creator_info = {} if self.config("metadata") else None
+        creator_info = {} if self.config("metadata", True) else None
 
         # prevent files from being sent with gzip compression
         headers = {"Accept-Encoding": "identity"}
