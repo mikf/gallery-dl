@@ -57,7 +57,9 @@ class SubscribestarExtractor(Extractor):
         while True:
             response = Extractor.request(self, url, **kwargs)
 
-            if response.history and "/verify_subscriber" in response.url:
+            if response.history and (
+                    "/verify_subscriber" in response.url or
+                    "/age_confirmation_warning" in response.url):
                 raise exception.StopExtraction(
                     "HTTP redirect to %s", response.url)
 
