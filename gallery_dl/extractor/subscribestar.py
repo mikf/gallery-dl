@@ -39,6 +39,8 @@ class SubscribestarExtractor(Extractor):
         for post_html in self.posts():
             media = self._media_from_post(post_html)
             data = self._data_from_post(post_html)
+            data["title"] = text.unescape(text.extr(
+                data["content"], "<h1>", "</h1>"))
             yield Message.Directory, data
             for num, item in enumerate(media, 1):
                 item.update(data)

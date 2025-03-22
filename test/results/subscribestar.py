@@ -24,6 +24,7 @@ __tests__ = (
     "id"         : int,
     "num"        : int,
     "post_id"    : int,
+    "title"      : str,
     "type"       : r"re:image|video|attachment",
     "url"        : str,
     "?pinned"    : bool,
@@ -66,6 +67,7 @@ __tests__ = (
     "num"        : 1,
     "pinned"     : False,
     "post_id"    : 102468,
+    "title"      : "Brand Guidelines and Assets",
     "type"       : "image",
     "width"      : 700,
 },
@@ -85,6 +87,7 @@ __tests__ = (
     "name"     : "Training for freelancers - Fiverr.pdf",
     "num"      : 2,
     "post_id"  : 920015,
+    "title"    : "",
     "type"     : "attachment",
 },
 
