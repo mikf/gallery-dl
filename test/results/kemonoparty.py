@@ -45,9 +45,12 @@ __tests__ = (
     "#category": ("", "kemonoparty", "patreon"),
     "#class"   : kemonoparty.KemonopartyUserExtractor,
     "#urls"    : (
+        "https://kemono.su/data/83/61/8361560887a09c7b828d326b3e1a2f0288673741569a09d74bcd01e602d20db1.png",
         "https://kemono.su/data/03/e6/03e62592c3b616b8906c1aaa130bd9ceaa24d7f601b31f90cc11956a57ca1d82.png",
+        "https://kemono.su/data/83/0d/830d017873157d2e6544a0f23a47622ec1e91be09b5d7795eb22e32b3150c837.png",
         "https://kemono.su/data/6a/9b/6a9b6d93dcb86c24a48def1bb93ce2a9ad77393941f3469d87d39400433cf825.png",
-        "https://kemono.su/data/2a/b8/2ab8ba30644249e9516afaea05d61c0de14591cb9d232a2dc249650eb1a9a759.jpg",
+        "https://kemono.su/data/96/43/9643ac03888f3b199f4e769242477b8d4d4f96025b10ab3f28affc3a1ae6bf52.jpg",
+        "https://kemono.su/data/f7/a8/f7a87ccac5736f46190a53a2bb1ff3828230e90f480776759895fcba28375909.jpg",
         "https://kemono.su/data/b0/38/b03882c8b0ab3b1cf9fc658a2bb2f9ac6ad4f3449015311dcd2d7ee7f748db31.png",
     ),
 
@@ -74,6 +77,7 @@ __tests__ = (
     "#sha1_content": "900949cefc97ab8dc1979cc3664785aac5ba70dd",
 
     "added"      : "2020-05-06T20:28:02.302000",
+    "archives"   : [],
     "content"    : str,
     "count"      : 1,
     "date"       : "dt:2019-08-10 17:09:04",
@@ -229,7 +233,7 @@ __tests__ = (
     "#class"   : kemonoparty.KemonopartyPostExtractor,
     "#urls"    : "https://kemono.su/data/88/52/88521f71822dfa2f42df3beba319ea4fceda2a2d6dc59da0276a75238f743f86.jpg",
 
-    "file"          : {
+    "file": {
         "hash": "88521f71822dfa2f42df3beba319ea4fceda2a2d6dc59da0276a75238f743f86",
         "name": "wip update.jpg",
         "path": "/88/52/88521f71822dfa2f42df3beba319ea4fceda2a2d6dc59da0276a75238f743f86.jpg",
@@ -248,7 +252,7 @@ __tests__ = (
     "hash"          : "88521f71822dfa2f42df3beba319ea4fceda2a2d6dc59da0276a75238f743f86",
     "revision_id"   : 142470,
     "revision_index": 2,
-    "revision_count": 10,
+    "revision_count": 11,
     "revision_hash" : "e0e93281495e151b11636c156e52bfe9234c2a40",
 },
 
@@ -258,16 +262,22 @@ __tests__ = (
     "#category": ("", "kemonoparty", "patreon"),
     "#class"   : kemonoparty.KemonopartyPostExtractor,
     "#options" : {"revisions": "unique"},
-    "#urls"    : "https://kemono.su/data/88/52/88521f71822dfa2f42df3beba319ea4fceda2a2d6dc59da0276a75238f743f86.jpg",
+    "#urls"    : "https://kemono.su/data/e3/e6/e3e6287dbc0468dd2a9d28ed276ae86788907143acf2ba10ab886a3add4c436c.jpg",
     "#archive" : False,
 
     "filename"      : "wip update",
-    "hash"          : "88521f71822dfa2f42df3beba319ea4fceda2a2d6dc59da0276a75238f743f86",
-    "revision_id"   : {9277608, 0},
-    "revision_index": {1, 2},
-    "revision_count": 2,
-    "revision_hash" : {"e0e93281495e151b11636c156e52bfe9234c2a40",
-                       "79d5967719583a6fa52b2fc143e6a80fcdf75fb8"},
+    "hash"          : {
+        "88521f71822dfa2f42df3beba319ea4fceda2a2d6dc59da0276a75238f743f86",
+        "e3e6287dbc0468dd2a9d28ed276ae86788907143acf2ba10ab886a3add4c436c",
+    },
+    "revision_id"   : {9277608, 10619155, 0},
+    "revision_index": {1, 2, 3},
+    "revision_count": 3,
+    "revision_hash" : {
+        "e0e93281495e151b11636c156e52bfe9234c2a40",
+        "bc5713195e14799da40c525381216c5a1a340b0f",
+        "9872bfb536a47cc69d95d2f195cd5c825808f089",
+    },
 },
 
 {
@@ -276,13 +286,16 @@ __tests__ = (
     "#category": ("", "kemonoparty", "patreon"),
     "#class"   : kemonoparty.KemonopartyPostExtractor,
     "#pattern" : r"https://kemono\.su/data/88/52/88521f71822dfa2f42df3beba319ea4fceda2a2d6dc59da0276a75238f743f86\.jpg",
-    "#count"   : 10,
+    "#count"   : 11,
     "#archive" : False,
 
-    "revision_id": range(134996, 9277608),
-    "revision_index": range(1, 10),
-    "revision_count": 10,
-    "revision_hash": "e0e93281495e151b11636c156e52bfe9234c2a40",
+    "revision_id": range(134996, 10619155),
+    "revision_index": range(1, 11),
+    "revision_count": 11,
+    "revision_hash": {
+        "9872bfb536a47cc69d95d2f195cd5c825808f089",
+        "e0e93281495e151b11636c156e52bfe9234c2a40",
+    },
 },
 
 
@@ -312,6 +325,86 @@ __tests__ = (
     "#count"   : 8,
 
     "type"     : "attachment",
+},
+
+{
+    "#url"     : "https://kemono.su/fanbox/user/49494721/post/9457614",
+    "#comment" : "archives",
+    "#category": ("", "kemonoparty", "fanbox"),
+    "#class"   : kemonoparty.KemonopartyPostExtractor,
+    "#options" : {"archives": True},
+
+    "archives": [
+        {
+            "file": {
+                "added": "2025-03-03T02:11:28.153911",
+                "ctime": "2025-03-03T02:05:15.810201",
+                "ext"  : ".zip",
+                "hash" : "c22c7e979355f633aaae4929b010816895a47ec37a9cfc25186a0952ec6e5774",
+                "id"   : 190824068,
+                "ihash": None,
+                "mime" : "application/zip",
+                "mtime": "2025-03-03T02:11:28.807462",
+                "size" : 18634288,
+            },
+            "file_list": [
+                "モナmp4形式まとめ/",
+                "モナmp4形式まとめ/Movie_1.mp4",
+                "モナmp4形式まとめ/Movie_2.mp4",
+                "モナmp4形式まとめ/Movie_3.mp4",
+                "モナmp4形式まとめ/Movie_4.mp4",
+                "モナmp4形式まとめ/Movie_5.mp4",
+                "モナmp4形式まとめ/Movie_End_3.mp4",
+            ],
+            "filename": "モナmp4形式まとめ",
+            "extension": "zip",
+            "hash": "c22c7e979355f633aaae4929b010816895a47ec37a9cfc25186a0952ec6e5774",
+            "name": "モナmp4形式まとめ.zip",
+            "password": None,
+            "path": "/c2/2c/c22c7e979355f633aaae4929b010816895a47ec37a9cfc25186a0952ec6e5774.zip",
+            "type": "attachment",
+            "url": "https://kemono.su/data/c2/2c/c22c7e979355f633aaae4929b010816895a47ec37a9cfc25186a0952ec6e5774.zip",
+        },
+        {
+            "file": {
+                "added": "2025-03-03T02:11:00.541142",
+                "ctime": "2025-03-03T02:04:56.754326",
+                "ext"  : ".zip",
+                "hash" : "f7b4dedd9742aeb8da56dc6fe07deb7639880d0800ac0b7a6e91f64ff6b40178",
+                "id"   : 190824029,
+                "ihash": None,
+                "mime" : "application/zip",
+                "mtime": "2025-03-03T02:11:01.110281",
+                "size" : 84738158,
+            },
+            "file_list": "len:229",
+            "filename": "モナUnity",
+            "extension": "zip",
+            "hash": "f7b4dedd9742aeb8da56dc6fe07deb7639880d0800ac0b7a6e91f64ff6b40178",
+            "name": "モナUnity.zip",
+            "password": None,
+            "path": "/f7/b4/f7b4dedd9742aeb8da56dc6fe07deb7639880d0800ac0b7a6e91f64ff6b40178.zip",
+            "type": "attachment",
+            "url": "https://kemono.su/data/f7/b4/f7b4dedd9742aeb8da56dc6fe07deb7639880d0800ac0b7a6e91f64ff6b40178.zip"
+        },
+    ],
+
+    "title": "モナ（Live2Dアニメ）",
+    "user": "49494721",
+    "username": "soso",
+    "user_profile": {
+        "id": "49494721",
+        "indexed": "2021-04-02T23:50:57.138135",
+        "name": "soso",
+        "public_id": "soso",
+        "relation_id": None,
+        "service": "fanbox",
+        "updated": "2025-03-03T03:29:08.598883",
+    },
+    "tags": [
+        "うごイラ",
+        "原神",
+    ],
 },
 
 {

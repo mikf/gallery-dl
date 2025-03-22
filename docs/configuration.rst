@@ -2995,6 +2995,19 @@ Description
     Download video files.
 
 
+extractor.kemonoparty.archives
+------------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Extract additional metadata for ``archives`` files, including
+    ``file``, ``file_list``, and ``password``.
+
+    Note: This requires 1 additional HTTP request per ``archives`` file.
+
+
 extractor.kemonoparty.comments
 ------------------------------
 Type
