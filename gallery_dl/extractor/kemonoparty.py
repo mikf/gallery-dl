@@ -57,11 +57,13 @@ class KemonopartyExtractor(Extractor):
         find_hash = re.compile(HASH_PATTERN).match
         generators = self._build_file_generators(self.config("files"))
         announcements = True if self.config("announcements") else None
+        archives = True if self.config("archives") else False
         comments = True if self.config("comments") else False
         duplicates = True if self.config("duplicates") else False
         dms = True if self.config("dms") else None
         max_posts = self.config("max-posts")
         creator_info = {} if self.config("metadata", True) else None
+        exts_archive = {"zip", "rar", "7z"}
 
         # prevent files from being sent with gzip compression
         headers = {"Accept-Encoding": "identity"}
@@ -115,6 +117,7 @@ class KemonopartyExtractor(Extractor):
 
             files = []
             hashes = set()
+            post_archives = post["archives"] = []
 
             for file in itertools.chain.from_iterable(
                     g(post) for g in generators):
@@ -129,31 +132,44 @@ class KemonopartyExtractor(Extractor):
                             continue
                         hashes.add(hash)
                 else:
-                    file["hash"] = ""
-
-                files.append(file)
-
-            post["count"] = len(files)
-            yield Message.Directory, post
-
-            for post["num"], file in enumerate(files, 1):
-                post["_http_validate"] = None
-                post["hash"] = file["hash"]
-                post["type"] = file["type"]
-                url = file["path"]
-
-                text.nameext_from_url(file.get("name", url), post)
-                ext = text.ext_from_url(url)
-                if not post["extension"]:
-                    post["extension"] = ext
-                elif ext == "txt" and post["extension"] != "txt":
-                    post["_http_validate"] = _validate
+                    file["hash"] = hash = ""
 
                 if url[0] == "/":
                     url = self.root + "/data" + url
                 elif url.startswith(self.root):
                     url = self.root + "/data" + url[20:]
-                yield Message.Url, url, post
+                file["url"] = url
+
+                text.nameext_from_url(file.get("name", url), file)
+                ext = text.ext_from_url(url)
+                if not file["extension"]:
+                    file["extension"] = ext
+                elif ext == "txt" and file["extension"] != "txt":
+                    file["_http_validate"] = _validate
+                elif ext in exts_archive:
+                    if archives:
+                        try:
+                            data = self.api.posts_archives(file["hash"])
+                            data.update(file)
+                            post_archives.append(data)
+                        except Exception as exc:
+                            self.log.warning(
+                                "%s: Failed to retrieve archive metadata of "
+                                "'%s' (%s: %s)", post["id"], file.get("name"),
+                                exc.__class__.__name__, exc)
+                            post_archives.append(file.copy())
+                    else:
+                        post_archives.append(file.copy())
+
+                files.append(file)
+
+            post["count"] = len(files)
+            yield Message.Directory, post
+            for post["num"], file in enumerate(files, 1):
+                if "id" in file:
+                    del file["id"]
+                post.update(file)
+                yield Message.Url, file["url"], post
 
     def login(self):
         username, password = self._get_auth_info()
@@ -502,6 +518,10 @@ class KemonoAPI():
         endpoint = "/posts"
         params = {"q": query, "o": offset, "tag": tags}
         return self._pagination(endpoint, params, 50, "posts")
+
+    def posts_archives(self, file_hash):
+        endpoint = "/posts/archives/" + file_hash
+        return self._call(endpoint)["archive"]
 
     def creator_posts(self, service, creator_id, offset=0, query=None):
         endpoint = "/{}/user/{}".format(service, creator_id)
