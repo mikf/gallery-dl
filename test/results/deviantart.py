@@ -351,6 +351,33 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.deviantart.com/avapithecus/gallery/71028779/drake-hero",
+    "#comment" : "main folder + subfolders",
+    "#category": ("", "deviantart", "folder"),
+    "#class"   : deviantart.DeviantartFolderExtractor,
+    "#options" : {"subfolders": True, "original": False, "image-range": "1"},
+    "#pattern" : (
+        r"https://www.deviantart.com/Avapithecus/gallery/6FCC57FA-F21D-14CC-5E0F-BB76479B6555/Folk Hero",
+        r"https://www.deviantart.com/Avapithecus/gallery/8D5E41B0-4BF5-649B-6620-B1D89C6D6BCE/Denizens of Suwarrow",
+        r"https://www.deviantart.com/Avapithecus/gallery/7FE4D499-E883-23D2-1659-1B64CA67358D/Beyond Suwarrow",
+        r"https://www.deviantart.com/Avapithecus/gallery/38AAB41C-F0F1-4DE9-6FB9-D3493CD77D01/The Drake Number",
+        r"https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/c5e7b050-4923-4473-b8c0-ca0bc1c1b1fe/dgqc5py-3371d62e-465f-4b17-bd23-5005517fc68d.jpg/v1/fill/.+",
+    ),
+},
+
+{
+    "#url"     : "https://www.deviantart.com/avapithecus/gallery/87003033/the-drake-number",
+    "#comment" : "subfolder",
+    "#category": ("", "deviantart", "folder"),
+    "#class"   : deviantart.DeviantartFolderExtractor,
+    "#options" : {"original": False},
+    "#pattern" : (
+        r"https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/c5e7b050-4923-4473-b8c0-ca0bc1c1b1fe/dfu7xyj-44d1a551-dbdc-4614-baee-82612fb044a6.jpg\?token=ey.+",
+        r"https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/c5e7b050-4923-4473-b8c0-ca0bc1c1b1fe/deeoxic-932e966c-6d3b-473c-8053-ed7bad05813a.jpg/v1/fill/.+",
+    ),
+},
+
+{
     "#url"     : "https://shimoda7.deviantart.com/gallery/722019/Miscellaneous",
     "#category": ("", "deviantart", "folder"),
     "#class"   : deviantart.DeviantartFolderExtractor,
