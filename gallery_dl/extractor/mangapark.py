@@ -10,6 +10,7 @@
 
 from .common import ChapterExtractor, Extractor, Message
 from .. import text, util, exception
+from ..cache import memcache
 import re
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?mangapark\.(?:net|com|org|io|me)"
@@ -31,6 +32,42 @@ class MangaparkBase():
         match = self._match_title(title)
         return match.groups() if match else (0, 0, "", "")
 
+    @memcache(keyarg=1)
+    def _extract_manga(self, manga_id):
+        variables = {
+            "getComicNodeId": manga_id,
+        }
+        return self._request_graphql("Get_comicNode", variables)["data"]
+
+    def _extract_chapter(self, chapter_id):
+        variables = {
+            "getChapterNodeId": chapter_id,
+        }
+        return self._request_graphql("Get_chapterNode", variables)["data"]
+
+    def _extract_chapters_all(self, manga_id):
+        variables = {
+            "comicId": manga_id,
+        }
+        return self._request_graphql("Get_comicChapterList", variables)
+
+    def _extract_chapters_source(self, source_id):
+        variables = {
+            "sourceId": source_id,
+        }
+        return self._request_graphql(
+            "get_content_source_chapterList", variables)
+
+    def _request_graphql(self, opname, variables):
+        url = self.root + "/apo/"
+        data = {
+            "query"        : QUERIES[opname],
+            "variables"    : variables,
+            "operationName": opname,
+        }
+        return self.request(
+            url, method="POST", json=data).json()["data"].popitem()[1]
+
 
 class MangaparkChapterExtractor(MangaparkBase, ChapterExtractor):
     """Extractor for manga-chapters from mangapark.net"""
@@ -39,43 +76,36 @@ class MangaparkChapterExtractor(MangaparkBase, ChapterExtractor):
 
     def __init__(self, match):
         self.root = text.root_from_url(match.group(0))
-        url = "{}/title/_/{}".format(self.root, match.group(1))
-        ChapterExtractor.__init__(self, match, url)
+        ChapterExtractor.__init__(self, match, False)
 
-    def metadata(self, page):
-        data = self._extract_nextdata(page)
-        chapter = (data["props"]["pageProps"]["dehydratedState"]
-                   ["queries"][0]["state"]["data"]["data"])
-        manga = chapter["comicNode"]["data"]
-        source = chapter["sourceNode"]["data"]
+    def metadata(self, _):
+        chapter = self._extract_chapter(self.groups[0])
+        manga = self._extract_manga(chapter["comicNode"]["id"])
 
-        self._urls = chapter["imageSet"]["httpLis"]
-        self._params = chapter["imageSet"]["wordLis"]
+        self._urls = chapter["imageFile"]["urlList"]
         vol, ch, minor, title = self._parse_chapter_title(chapter["dname"])
+        lang = chapter.get("lang") or "en"
 
         return {
             "manga"     : manga["name"],
-            "manga_id"  : manga["id"],
-            "artist"    : source["artists"],
-            "author"    : source["authors"],
-            "genre"     : source["genres"],
+            "manga_id"  : text.parse_int(manga["id"]),
+            "artist"    : manga["artists"],
+            "author"    : manga["authors"],
+            "genre"     : manga["genres"],
             "volume"    : text.parse_int(vol),
             "chapter"   : text.parse_int(ch),
             "chapter_minor": minor,
-            "chapter_id": chapter["id"],
-            "title"     : chapter["title"] or title or "",
-            "lang"      : chapter["lang"],
-            "language"  : util.code_to_language(chapter["lang"]),
-            "source"    : source["srcTitle"],
-            "source_id" : source["id"],
+            "chapter_id": text.parse_int(chapter["id"]),
+            "title"     : title or "",
+            "lang"      : lang,
+            "language"  : util.code_to_language(lang),
+            "source"    : chapter["srcTitle"],
+            "source_id" : chapter["sourceId"],
             "date"      : text.parse_timestamp(chapter["dateCreate"] // 1000),
         }
 
-    def images(self, page):
-        return [
-            (url + "?" + params, None)
-            for url, params in zip(self._urls, self._params)
-        ]
+    def images(self, _):
+        return [(url, None) for url in self._urls]
 
 
 class MangaparkMangaExtractor(MangaparkBase, Extractor):
@@ -95,6 +125,8 @@ class MangaparkMangaExtractor(MangaparkBase, Extractor):
             url = self.root + chapter["urlPath"]
 
             vol, ch, minor, title = self._parse_chapter_title(chapter["dname"])
+            lang = chapter.get("lang") or "en"
+
             data = {
                 "manga_id"  : self.manga_id,
                 "volume"    : text.parse_int(vol),
@@ -102,8 +134,8 @@ class MangaparkMangaExtractor(MangaparkBase, Extractor):
                 "chapter_minor": minor,
                 "chapter_id": chapter["id"],
                 "title"     : chapter["title"] or title or "",
-                "lang"      : chapter["lang"],
-                "language"  : util.code_to_language(chapter["lang"]),
+                "lang"      : lang,
+                "language"  : util.code_to_language(lang),
                 "source"    : chapter["srcTitle"],
                 "source_id" : chapter["sourceId"],
                 "date"      : text.parse_timestamp(
@@ -114,45 +146,12 @@ class MangaparkMangaExtractor(MangaparkBase, Extractor):
 
     def chapters(self):
         source = self.config("source")
-        if not source:
-            return self.chapters_all()
-
-        source_id = self._select_source(source)
-        self.log.debug("Requesting chapters for source_id %s", source_id)
-        return self.chapters_source(source_id)
-
-    def chapters_all(self):
-        pnum = 0
-        variables = {
-            "select": {
-                "comicId": self.manga_id,
-                "range"  : None,
-                "isAsc"  : not self.config("chapter-reverse"),
-            }
-        }
-
-        while True:
-            data = self._request_graphql(
-                "get_content_comicChapterRangeList", variables)
-
-            for item in data["items"]:
-                yield from item["chapterNodes"]
-
-            if not pnum:
-                pager = data["pager"]
-            pnum += 1
-
-            try:
-                variables["select"]["range"] = pager[pnum]
-            except IndexError:
-                return
-
-    def chapters_source(self, source_id):
-        variables = {
-            "sourceId": source_id,
-        }
-        chapters = self._request_graphql(
-            "get_content_source_chapterList", variables)
+        if source:
+            source_id = self._select_source(source)
+            self.log.debug("Requesting chapters for source_id %s", source_id)
+            chapters = self._extract_chapters_source(source_id)
+        else:
+            chapters = self._extract_chapters_all(self.groups[0])
 
         if self.config("chapter-reverse"):
             chapters.reverse()
@@ -180,101 +179,58 @@ class MangaparkMangaExtractor(MangaparkBase, Extractor):
         raise exception.StopExtraction(
             "'%s' does not match any available source", source)
 
-    def _request_graphql(self, opname, variables):
-        url = self.root + "/apo/"
-        data = {
-            "query"        : QUERIES[opname],
-            "variables"    : util.json_dumps(variables),
-            "operationName": opname,
-        }
-        return self.request(
-            url, method="POST", json=data).json()["data"][opname]
-
 
 QUERIES = {
-    "get_content_comicChapterRangeList": """
-  query get_content_comicChapterRangeList($select: Content_ComicChapterRangeList_Select) {
-    get_content_comicChapterRangeList(
-      select: $select
-    ) {
-      reqRange{x y}
-      missing
-      pager {x y}
-      items{
-        serial
-        chapterNodes {
-
-  id
-  data {
-
-
-  id
-  sourceId
-
-  dbStatus
-  isNormal
-  isHidden
-  isDeleted
-  isFinal
-
-  dateCreate
-  datePublic
-  dateModify
-  lang
-  volume
-  serial
-  dname
-  title
-  urlPath
-
-  srcTitle srcColor
-
-  count_images
-
-  stat_count_post_child
-  stat_count_post_reply
-  stat_count_views_login
-  stat_count_views_guest
-
-  userId
-  userNode {
-
-  id
-  data {
-
-id
-name
-uniq
-avatarUrl
-urlPath
-
-verified
-deleted
-banned
-
-dateCreate
-dateOnline
-
-stat_count_chapters_normal
-stat_count_chapters_others
-
-is_adm is_mod is_vip is_upr
-
-  }
-
-  }
-
-  disqusId
-
-
-  }
-
-          sser_read
+    "Get_comicChapterList": """
+query Get_comicChapterList($comicId: ID!) {
+    get_comicChapterList(comicId: $comicId) {
+        data {
+            id
+            dname
+            title
+            lang
+            urlPath
+            srcTitle
+            sourceId
+            dateCreate
         }
-      }
-
     }
-  }
+}
+""",
+
+    "Get_chapterNode": """
+query Get_chapterNode($getChapterNodeId: ID!) {
+    get_chapterNode(id: $getChapterNodeId) {
+        data {
+            id
+            dname
+            lang
+            sourceId
+            srcTitle
+            dateCreate
+            comicNode{
+                id
+            }
+            imageFile {
+                urlList
+            }
+        }
+    }
+}
+""",
+
+    "Get_comicNode": """
+query Get_comicNode($getComicNodeId: ID!) {
+    get_comicNode(id: $getComicNodeId) {
+        data {
+            id
+            name
+            artists
+            authors
+            genres
+        }
+    }
+}
 """,
 
     "get_content_source_chapterList": """
