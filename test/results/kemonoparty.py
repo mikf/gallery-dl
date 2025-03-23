@@ -333,6 +333,7 @@ __tests__ = (
     "#category": ("", "kemonoparty", "fanbox"),
     "#class"   : kemonoparty.KemonopartyPostExtractor,
     "#options" : {"archives": True},
+    "#range"   : "1-2",
 
     "archives": [
         {
@@ -362,7 +363,7 @@ __tests__ = (
             "name": "モナmp4形式まとめ.zip",
             "password": None,
             "path": "/c2/2c/c22c7e979355f633aaae4929b010816895a47ec37a9cfc25186a0952ec6e5774.zip",
-            "type": "attachment",
+            "type": "archive",
             "url": "https://kemono.su/data/c2/2c/c22c7e979355f633aaae4929b010816895a47ec37a9cfc25186a0952ec6e5774.zip",
         },
         {
@@ -384,12 +385,13 @@ __tests__ = (
             "name": "モナUnity.zip",
             "password": None,
             "path": "/f7/b4/f7b4dedd9742aeb8da56dc6fe07deb7639880d0800ac0b7a6e91f64ff6b40178.zip",
-            "type": "attachment",
+            "type": "archive",
             "url": "https://kemono.su/data/f7/b4/f7b4dedd9742aeb8da56dc6fe07deb7639880d0800ac0b7a6e91f64ff6b40178.zip"
         },
     ],
 
     "title": "モナ（Live2Dアニメ）",
+    "type": "archive",
     "user": "49494721",
     "username": "soso",
     "user_profile": {
