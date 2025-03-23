@@ -687,6 +687,10 @@ x2="45.4107524%" y2="71.4898596%" id="app-root-3">\
             for folder in folders:
                 if match(folder["name"]):
                     return folder
+                elif folder["has_subfolders"]:
+                    for subfolder in folder["subfolders"]:
+                        if match(subfolder["name"]):
+                            return subfolder
         else:
             for folder in folders:
                 if folder["folderid"] == uuid:
