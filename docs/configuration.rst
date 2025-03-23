@@ -2286,6 +2286,16 @@ Description
     | Leave ``SIZE`` empty to download the regular, small avatar format.
 
 
+extractor.deviantart.folder.subfolders
+--------------------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Also extract subfolder content.
+
+
 extractor.discord.embeds
 ------------------------
 Type

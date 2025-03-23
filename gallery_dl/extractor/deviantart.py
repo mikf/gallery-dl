@@ -1018,7 +1018,7 @@ class DeviantartFolderExtractor(DeviantartExtractor):
                                       "{folder[parent_folder]}",
                                       "{folder[title]}")
 
-        if folder.get("has_subfolders"):
+        if folder.get("has_subfolders") and self.config("subfolders", True):
             for subfolder in folder["subfolders"]:
                 subfolder["parent_folder"] = folder["name"]
                 subfolder["subfolder"] = True
