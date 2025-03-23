@@ -2793,9 +2793,6 @@ Description
 
     Available formats are ``"webp"`` and ``"avif"``.
 
-    ``"original"`` will try to download the original ``jpg`` or ``png`` versions,
-    but is most likely going to fail with ``403 Forbidden`` errors.
-
 
 extractor.imagechest.access-token
 ---------------------------------

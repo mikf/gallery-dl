@@ -12,8 +12,8 @@ __tests__ = (
     "#url"     : "https://hitomi.la/galleries/867789.html",
     "#category": ("", "hitomi", "gallery"),
     "#class"   : hitomi.HitomiGalleryExtractor,
-    "#pattern"      : r"https://[a-c]a\.hitomi\.la/webp/\d+/\d+/[0-9a-f]{64}\.webp",
-    "#count"        : 16,
+    "#pattern" : r"https://w[1-3]\.gold-usergeneratedcontent\.net/\d+/\d+/[0-9a-f]{64}\.webp",
+    "#count"   : 16,
 
     "artist"    : ["morris"],
     "characters": [],
@@ -82,7 +82,7 @@ __tests__ = (
     "#category": ("", "hitomi", "gallery"),
     "#class"   : hitomi.HitomiGalleryExtractor,
     "#options" : {"format": "avif"},
-    "#pattern" : r"https://[a-c]a\.hitomi\.la/avif/\d+/\d+/[0-9a-f]{64}\.avif",
+    "#pattern" : r"https://a[1-3]\.gold-usergeneratedcontent\.net/\d+/\d+/[0-9a-f]{64}\.avif",
     "#count"   : 22,
 
     "artist"    : ["sorairo len"],
@@ -96,7 +96,7 @@ __tests__ = (
     "lang"      : "ja",
     "language"  : "Japanese",
     "num"       : range(1, 22),
-    "parody"    : [],
+    "parody"    : ["original"],
     "tags"      : [
         "Blowjob ♀",
         "Focus Blowjob ♀",
