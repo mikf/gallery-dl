@@ -1002,9 +1002,7 @@ class DeviantartFolderExtractor(DeviantartExtractor):
             "parent_uuid": folder["parent"],
         }
 
-        del folder["thumb"]
-
-        if folder.get('subfolder'):
+        if folder.get("subfolder"):
             self.folder["parent_folder"] = folder["parent_folder"]
             self.archive_fmt = "F_{folder[parent_uuid]}_{index}.{extension}"
 
@@ -1016,13 +1014,12 @@ class DeviantartFolderExtractor(DeviantartExtractor):
                                       "{folder[parent_folder]}",
                                       "{folder[title]}")
 
-        if folder['has_subfolders']:
+        if folder.get("has_subfolders"):
             for subfolder in folder["subfolders"]:
                 subfolder["parent_folder"] = folder["name"]
                 subfolder["subfolder"] = True
-
-            yield from self._folder_urls(folder['subfolders'],
-                                         "gallery", DeviantartFolderExtractor)
+            yield from self._folder_urls(
+                folder["subfolders"], "gallery", DeviantartFolderExtractor)
 
         yield from self.api.gallery(self.user, folder["folderid"], self.offset)
 
