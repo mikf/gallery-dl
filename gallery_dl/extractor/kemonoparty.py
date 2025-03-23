@@ -147,6 +147,7 @@ class KemonopartyExtractor(Extractor):
                 elif ext == "txt" and file["extension"] != "txt":
                     file["_http_validate"] = _validate
                 elif ext in exts_archive:
+                    file["type"] = "archive"
                     if archives:
                         try:
                             data = self.api.posts_archives(file["hash"])
