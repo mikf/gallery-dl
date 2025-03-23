@@ -516,8 +516,8 @@ class KemonoAPI():
         params = {"q": query, "o": offset}
         return itertools.chain(
             self._call(
-                endpoint, {"o": ""}
-            ) if (offset is None and query is None) else (),
+                endpoint + "/posts-legacy"
+            )["results"] if (offset is None and query is None) else (),
             self._pagination(endpoint, params, 50)
         )
 
