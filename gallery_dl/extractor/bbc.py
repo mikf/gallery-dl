@@ -27,7 +27,12 @@ class BbcGalleryExtractor(GalleryExtractor):
 
     def metadata(self, page):
         data = self._extract_jsonld(page)
+
         return {
+            "title": text.unescape(text.extr(
+                page, "<h1>", "</h1>").rpartition("</span>")[2]),
+            "description": text.unescape(text.extr(
+                page, 'property="og:description" content="', '"')),
             "programme": self.gallery_url.split("/")[4],
             "path": list(util.unique_sequence(
                 element["name"]
@@ -40,11 +45,20 @@ class BbcGalleryExtractor(GalleryExtractor):
         width = width - width % 16 if width else 1920
         dimensions = "/{}xn/".format(width)
 
-        return [
-            (src.replace("/320x180_b/", dimensions),
-             {"_fallback": self._fallback_urls(src, width)})
-            for src in text.extract_iter(page, 'data-image-src="', '"')
-        ]
+        results = []
+        for img in text.extract_iter(page, 'class="gallery__thumbnail', ">"):
+            src = text.extr(img, 'data-image-src="', '"')
+            results.append((
+                src.replace("/320x180_b/", dimensions),
+                {
+                    "title_image": text.unescape(text.extr(
+                        img, 'data-gallery-title="', '"')),
+                    "synopsis": text.unescape(text.extr(
+                        img, 'data-gallery-synopsis="', '"')),
+                    "_fallback": self._fallback_urls(src, width),
+                },
+            ))
+        return results
 
     @staticmethod
     def _fallback_urls(src, max_width):
@@ -62,14 +76,11 @@ class BbcProgrammeExtractor(Extractor):
     pattern = BASE_PATTERN + r"[^/?#]+/galleries)(?:/?\?page=(\d+))?"
     example = "https://www.bbc.co.uk/programmes/ID/galleries"
 
-    def __init__(self, match):
-        Extractor.__init__(self, match)
-        self.path, self.page = match.groups()
-
     def items(self):
+        path, pnum = self.groups
         data = {"_extractor": BbcGalleryExtractor}
-        params = {"page": text.parse_int(self.page, 1)}
-        galleries_url = self.root + self.path
+        params = {"page": text.parse_int(pnum, 1)}
+        galleries_url = self.root + path
 
         while True:
             page = self.request(galleries_url, params=params).text
