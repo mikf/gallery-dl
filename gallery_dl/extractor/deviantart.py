@@ -687,10 +687,18 @@ x2="45.4107524%" y2="71.4898596%" id="app-root-3">\
             for folder in folders:
                 if match(folder["name"]):
                     return folder
+                elif folder["has_subfolders"]:
+                    for subfolder in folder["subfolders"]:
+                        if match(subfolder["name"]):
+                            return subfolder
         else:
             for folder in folders:
                 if folder["folderid"] == uuid:
                     return folder
+                elif folder["has_subfolders"]:
+                    for subfolder in folder["subfolders"]:
+                        if subfolder["folderid"] == uuid:
+                            return subfolder
         raise exception.NotFoundError("folder")
 
     def _folder_urls(self, folders, category, extractor):
@@ -988,13 +996,36 @@ class DeviantartFolderExtractor(DeviantartExtractor):
     def deviations(self):
         folders = self.api.gallery_folders(self.user)
         folder = self._find_folder(folders, self.folder_name, self.folder_id)
+
+        # Leaving this here for backwards compatibility
         self.folder = {
             "title": folder["name"],
             "uuid" : folder["folderid"],
             "index": self.folder_id,
             "owner": self.user,
+            "parent_uuid": folder["parent"],
         }
-        return self.api.gallery(self.user, folder["folderid"], self.offset)
+
+        if folder.get("subfolder"):
+            self.folder["parent_folder"] = folder["parent_folder"]
+            self.archive_fmt = "F_{folder[parent_uuid]}_{index}.{extension}"
+
+            if self.flat:
+                self.directory_fmt = ("{category}", "{username}",
+                                      "{folder[parent_folder]}")
+            else:
+                self.directory_fmt = ("{category}", "{username}",
+                                      "{folder[parent_folder]}",
+                                      "{folder[title]}")
+
+        if folder.get("has_subfolders") and self.config("subfolders", True):
+            for subfolder in folder["subfolders"]:
+                subfolder["parent_folder"] = folder["name"]
+                subfolder["subfolder"] = True
+            yield from self._folder_urls(
+                folder["subfolders"], "gallery", DeviantartFolderExtractor)
+
+        yield from self.api.gallery(self.user, folder["folderid"], self.offset)
 
     def prepare(self, deviation):
         DeviantartExtractor.prepare(self, deviation)
@@ -1376,7 +1407,7 @@ class DeviantartOAuthAPI():
     def __init__(self, extractor):
         self.extractor = extractor
         self.log = extractor.log
-        self.headers = {"dA-minor-version": "20200519"}
+        self.headers = {"dA-minor-version": "20210526"}
         self._warn_429 = True
 
         self.delay = extractor.config("wait-min", 0)
