@@ -189,8 +189,7 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
         else:
             file_url = data["url"]
 
-        file_name = (text.extr(page, 'property="og:title" content="', '"') or
-                     text.extr(page, "<title>", " | Bunkr<"))
+        file_name = text.extr(page, "<h1", "<").rpartition(">")[2]
         fallback = text.extr(page, 'property="og:url" content="', '"')
 
         return {
