@@ -344,12 +344,6 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
-    <td>HentaiFox</td>
-    <td>https://hentaifox.com/</td>
-    <td>Galleries, Search Results</td>
-    <td></td>
-</tr>
-<tr>
     <td>HentaiHand</td>
     <td>https://hentaihand.com/</td>
     <td>Galleries, Tag Searches</td>
@@ -1348,6 +1342,24 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>HentaiRox</td>
     <td>https://hentairox.com/</td>
+    <td>Galleries, Search Results, Tag Searches</td>
+    <td></td>
+</tr>
+<tr>
+    <td>HentaiFox</td>
+    <td>https://hentaifox.com/</td>
+    <td>Galleries, Search Results, Tag Searches</td>
+    <td></td>
+</tr>
+<tr>
+    <td>HentaiEnvy</td>
+    <td>https://hentaienvy.com/</td>
+    <td>Galleries, Search Results, Tag Searches</td>
+    <td></td>
+</tr>
+<tr>
+    <td>HentaiZap</td>
+    <td>https://hentaizap.com/</td>
     <td>Galleries, Search Results, Tag Searches</td>
     <td></td>
 </tr>
