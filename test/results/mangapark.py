@@ -44,25 +44,54 @@ __tests__ = (
 
 {
     "#url"     : "https://mangapark.com/title/114972-aria/6710214-en-ch.60.2",
-    "#category": ("", "mangapark", "chapter"),
     "#class"   : mangapark.MangaparkChapterExtractor,
 },
-
 {
     "#url"     : "https://mangapark.org/title/114972-aria/6710214-en-ch.60.2",
-    "#category": ("", "mangapark", "chapter"),
     "#class"   : mangapark.MangaparkChapterExtractor,
 },
-
-{
-    "#url"     : "https://mangapark.io/title/114972-aria/6710214-en-ch.60.2",
-    "#category": ("", "mangapark", "chapter"),
-    "#class"   : mangapark.MangaparkChapterExtractor,
-},
-
 {
     "#url"     : "https://mangapark.me/title/114972-aria/6710214-en-ch.60.2",
-    "#category": ("", "mangapark", "chapter"),
+    "#class"   : mangapark.MangaparkChapterExtractor,
+},
+{
+    "#url"     : "https://mangapark.io/title/114972-aria/6710214-en-ch.60.2",
+    "#class"   : mangapark.MangaparkChapterExtractor,
+},
+{
+    "#url"     : "https://mangapark.to/title/114972-aria/6710214-en-ch.60.2",
+    "#class"   : mangapark.MangaparkChapterExtractor,
+},
+{
+    "#url"     : "https://comicpark.org/title/114972-aria/6710214-en-ch.60.2",
+    "#class"   : mangapark.MangaparkChapterExtractor,
+},
+{
+    "#url"     : "https://comicpark.to/title/114972-aria/6710214-en-ch.60.2",
+    "#class"   : mangapark.MangaparkChapterExtractor,
+},
+{
+    "#url"     : "https://readpark.org/title/114972-aria/6710214-en-ch.60.2",
+    "#class"   : mangapark.MangaparkChapterExtractor,
+},
+{
+    "#url"     : "https://readpark.net/title/114972-aria/6710214-en-ch.60.2",
+    "#class"   : mangapark.MangaparkChapterExtractor,
+},
+{
+    "#url"     : "https://parkmanga.com/title/114972-aria/6710214-en-ch.60.2",
+    "#class"   : mangapark.MangaparkChapterExtractor,
+},
+{
+    "#url"     : "https://parkmanga.net/title/114972-aria/6710214-en-ch.60.2",
+    "#class"   : mangapark.MangaparkChapterExtractor,
+},
+{
+    "#url"     : "https://parkmanga.org/title/114972-aria/6710214-en-ch.60.2",
+    "#class"   : mangapark.MangaparkChapterExtractor,
+},
+{
+    "#url"     : "https://mpark.to/title/114972-aria/6710214-en-ch.60.2",
     "#class"   : mangapark.MangaparkChapterExtractor,
 },
 

@@ -13,7 +13,10 @@ from .. import text, util, exception
 from ..cache import memcache
 import re
 
-BASE_PATTERN = r"(?:https?://)?(?:www\.)?mangapark\.(?:net|com|org|io|me)"
+BASE_PATTERN = (r"(?:https?://)?(?:www\.)?(?:"
+                r"(?:manga|comic|read)park\.(?:com|net|org|me|io|to)|"
+                r"parkmanga\.(?:com|net|org)|"
+                r"mpark\.to)")
 
 
 class MangaparkBase():
