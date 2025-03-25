@@ -77,7 +77,7 @@ class InstagramExtractor(Extractor):
         if match_share:
             share_response = self.request(self.url, allow_redirects=False)
             if share_response.status_code == 302:
-                self.url = share_response.headers['Location'].split('?', maxsplit=1)[0] # Remove tracking info
+                self.url = share_response.headers['Location'].split('?', maxsplit=1)[0]  # Remove tracking info
                 self.match = self.match.re.match(self.url)
                 self.item = self.match.group(1)
 
