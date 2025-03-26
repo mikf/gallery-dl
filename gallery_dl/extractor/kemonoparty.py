@@ -385,17 +385,18 @@ class KemonopartyDiscordExtractor(KemonopartyExtractor):
                 key = "id"
             else:
                 key = "name"
+        else:
+            key = "id"
+            channel = channel_id
 
+        if not channel_name or not channel_id:
             for ch in self.api.discord_server(server_id):
                 if ch[key] == channel:
                     break
             else:
                 raise exception.NotFoundError("channel")
-
             channel_id = ch["id"]
             channel_name = ch["name"]
-        elif channel_name is None:
-            channel_name = ""
 
         find_inline = re.compile(
             r"https?://(?:cdn\.discordapp.com|media\.discordapp\.net)"

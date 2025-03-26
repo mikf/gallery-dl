@@ -416,7 +416,7 @@ __tests__ = (
     "#count"   : 4,
 
     "channel"     : "608504710906904576",
-    "channel_name": "",
+    "channel_name": "finish-work",
 },
 
 {
