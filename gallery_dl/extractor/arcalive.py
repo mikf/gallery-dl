@@ -41,7 +41,9 @@ class ArcalivePostExtractor(ArcaliveExtractor):
 
     def items(self):
         self.emoticons = self.config("emoticons", False)
-        self.gifs = self.config("gifs", True)
+        self.gifs = gifs = self.config("gifs", True)
+        if gifs:
+            self.gifs_fallback = (gifs != "check")
 
         post = self.api.post(self.groups[0])
         files = self._extract_files(post)
@@ -90,11 +92,15 @@ class ArcalivePostExtractor(ArcaliveExtractor):
                     url = path + "." + orig
             elif video and self.gifs:
                 url_gif = url.rpartition(".")[0] + ".gif"
-                response = self.request(
-                    url_gif + "?type=orig", method="HEAD", fatal=False)
-                if response.status_code < 400:
+                if self.gifs_fallback:
                     fallback = (url + "?type=orig",)
                     url = url_gif
+                else:
+                    response = self.request(
+                        url_gif + "?type=orig", method="HEAD", fatal=False)
+                    if response.status_code < 400:
+                        fallback = (url + "?type=orig",)
+                        url = url_gif
 
             files.append({
                 "url"   : url + "?type=orig",
