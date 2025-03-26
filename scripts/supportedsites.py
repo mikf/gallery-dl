@@ -236,6 +236,7 @@ SUBCATEGORY_MAP = {
     },
     "Danbooru": {
         "artist-search": "Artist Searches",
+        "favgroup": "Favorite Groups",
     },
     "desktopography": {
         "site": "",

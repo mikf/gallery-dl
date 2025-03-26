@@ -1886,12 +1886,14 @@ Description
 
 extractor.[Danbooru].pool.order-posts
 -------------------------------------
+extractor.[Danbooru].favgroup.order-posts
+-----------------------------------------
 Type
     ``string``
 Default
     ``"pool"``
 Description
-    Controls the order in which pool posts are returned.
+    Controls the order in which ``pool``/``favgroup`` posts are returned.
 
     ``"pool"`` | ``"pool_asc"`` | ``"asc"`` | ``"asc_pool"``
         Pool order

@@ -147,6 +147,23 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://danbooru.donmai.us/favorite_groups/14",
+    "#category": ("Danbooru", "danbooru", "favgroup"),
+    "#class"   : danbooru.DanbooruFavgroupExtractor,
+    "#auth"    : False,
+    "#count"   : 24,
+
+    "favgroup": {
+        "created_at": "2015-06-29T13:59:10.808-04:00",
+        "creator_id": 65304,
+        "id"        : 14,
+        "is_public" : True,
+        "name"      : "Mecha",
+        "updated_at": "2019-07-07T07:21:50.677-04:00",
+    },
+},
+
+{
     "#url"     : "https://danbooru.donmai.us/posts/294929",
     "#category": ("Danbooru", "danbooru", "post"),
     "#class"   : danbooru.DanbooruPostExtractor,
