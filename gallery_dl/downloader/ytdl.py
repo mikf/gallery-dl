@@ -10,6 +10,7 @@
 
 from .common import DownloaderBase
 from .. import ytdl, text
+from xml.etree import ElementTree
 import os
 
 
@@ -76,7 +77,8 @@ class YoutubeDLDownloader(DownloaderBase):
                 manifest = kwdict.pop("_ytdl_manifest", None)
                 if manifest:
                     info_dict = self._extract_manifest(
-                        ytdl_instance, url, manifest)
+                        ytdl_instance, url, manifest,
+                        kwdict.pop("_ytdl_manifest_data", None))
                 else:
                     info_dict = self._extract_info(ytdl_instance, url)
             except Exception as exc:
@@ -154,37 +156,55 @@ class YoutubeDLDownloader(DownloaderBase):
     def _extract_info(self, ytdl, url):
         return ytdl.extract_info(url, download=False)
 
-    def _extract_manifest(self, ytdl, url, manifest):
+    def _extract_manifest(self, ytdl, url, manifest_type, manifest_data=None):
         extr = ytdl.get_info_extractor("Generic")
         video_id = extr._generic_id(url)
 
-        if manifest == "hls":
-            try:
-                formats, subtitles = extr._extract_m3u8_formats_and_subtitles(
-                    url, video_id, "mp4")
-            except AttributeError:
-                formats = extr._extract_m3u8_formats(url, video_id, "mp4")
-                subtitles = None
+        if manifest_type == "hls":
+            if manifest_data is None:
+                try:
+                    fmts, subs = extr._extract_m3u8_formats_and_subtitles(
+                        url, video_id, "mp4")
+                except AttributeError:
+                    fmts = extr._extract_m3u8_formats(url, video_id, "mp4")
+                    subs = None
+            else:
+                try:
+                    fmts, subs = extr._parse_m3u8_formats_and_subtitles(
+                        url, video_id, "mp4")
+                except AttributeError:
+                    fmts = extr._parse_m3u8_formats(url, video_id, "mp4")
+                    subs = None
 
-        elif manifest == "dash":
-            try:
-                formats, subtitles = extr._extract_mpd_formats_and_subtitles(
-                    url, video_id)
-            except AttributeError:
-                formats = extr._extract_mpd_formats(url, video_id)
-                subtitles = None
+        elif manifest_type == "dash":
+            if manifest_data is None:
+                try:
+                    fmts, subs = extr._extract_mpd_formats_and_subtitles(
+                        url, video_id)
+                except AttributeError:
+                    fmts = extr._extract_mpd_formats(url, video_id)
+                    subs = None
+            else:
+                if isinstance(manifest_data, str):
+                    manifest_data = ElementTree.fromstring(manifest_data)
+                try:
+                    fmts, subs = extr._parse_mpd_formats_and_subtitles(
+                        manifest_data, mpd_id="dash")
+                except AttributeError:
+                    fmts = extr._parse_mpd_formats(
+                        manifest_data, mpd_id="dash")
+                    subs = None
 
         else:
-            self.log.error("Unsupported manifest type '%s'", manifest)
+            self.log.error("Unsupported manifest type '%s'", manifest_type)
             return None
 
         info_dict = {
             "id"       : video_id,
             "title"    : video_id,
-            "formats"  : formats,
-            "subtitles": subtitles,
+            "formats"  : fmts,
+            "subtitles": subs,
         }
-        #  extr._extra_manifest_info(info_dict, url)
         return ytdl.process_ie_result(info_dict, download=False)
 
     def _progress_hook(self, info):
