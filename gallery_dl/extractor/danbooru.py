@@ -175,6 +175,51 @@ class DanbooruExtractor(BaseExtractor):
         return [{"file": fmt(index), "delay": delay}
                 for index, delay in enumerate(delays)]
 
+    def _collection_posts(self, cid, ctype):
+        reverse = prefix = None
+
+        order = self.config("order-posts")
+        if not order or order in {"asc", "pool", "pool_asc", "asc_pool"}:
+            params = {"tags": "ord{}:{}".format(ctype, cid)}
+        elif order in {"id", "desc_id", "id_desc"}:
+            params = {"tags": "{}:{}".format(ctype, cid)}
+            prefix = "b"
+        elif order in {"desc", "desc_pool", "pool_desc"}:
+            params = {"tags": "ord{}:{}".format(ctype, cid)}
+            reverse = True
+        elif order in {"asc_id", "id_asc"}:
+            params = {"tags": "{}:{}".format(ctype, cid)}
+            reverse = True
+
+        posts = self._pagination("/posts.json", params, prefix)
+        if reverse:
+            self.log.info("Collecting posts of %s %s", ctype, cid)
+            return self._collection_enumerate_reverse(posts)
+        else:
+            return self._collection_enumerate(posts)
+
+    def _collection_metadata(self, cid, ctype, cname=None):
+        url = "{}/{}s/{}.json".format(self.root, cname or ctype, cid)
+        collection = self.request(url).json()
+        collection["name"] = collection["name"].replace("_", " ")
+        self.post_ids = collection.pop("post_ids", ())
+        return {ctype: collection}
+
+    def _collection_enumerate(self, posts):
+        pid_to_num = {pid: num for num, pid in enumerate(self.post_ids, 1)}
+        for post in posts:
+            post["num"] = pid_to_num[post["id"]]
+            yield post
+
+    def _collection_enumerate_reverse(self, posts):
+        posts = list(posts)
+        posts.reverse()
+
+        pid_to_num = {pid: num for num, pid in enumerate(self.post_ids, 1)}
+        for post in posts:
+            post["num"] = pid_to_num[post["id"]]
+        return posts
+
 
 BASE_PATTERN = DanbooruExtractor.update({
     "danbooru": {
@@ -228,7 +273,7 @@ class DanbooruTagExtractor(DanbooruExtractor):
 
 
 class DanbooruPoolExtractor(DanbooruExtractor):
-    """Extractor for posts from danbooru pools"""
+    """Extractor for Danbooru pools"""
     subcategory = "pool"
     directory_fmt = ("{category}", "pool", "{pool[id]} {pool[name]}")
     filename_fmt = "{num:>04}_{id}_{filename}.{extension}"
@@ -237,50 +282,28 @@ class DanbooruPoolExtractor(DanbooruExtractor):
     example = "https://danbooru.donmai.us/pools/12345"
 
     def metadata(self):
-        self.pool_id = self.groups[-1]
-        url = "{}/pools/{}.json".format(self.root, self.pool_id)
-        pool = self.request(url).json()
-        pool["name"] = pool["name"].replace("_", " ")
-        self.post_ids = pool.pop("post_ids", ())
-        return {"pool": pool}
+        return self._collection_metadata(self.groups[-1], "pool")
 
     def posts(self):
-        reverse = prefix = None
+        return self._collection_posts(self.groups[-1], "pool")
 
-        order = self.config("order-posts")
-        if not order or order in ("asc", "pool", "pool_asc", "asc_pool"):
-            params = {"tags": "ordpool:" + self.pool_id}
-        elif order in ("id", "desc_id", "id_desc"):
-            params = {"tags": "pool:" + self.pool_id}
-            prefix = "b"
-        elif order in ("desc", "desc_pool", "pool_desc"):
-            params = {"tags": "ordpool:" + self.pool_id}
-            reverse = True
-        elif order in ("asc_id", "id_asc"):
-            params = {"tags": "pool:" + self.pool_id}
-            reverse = True
 
-        posts = self._pagination("/posts.json", params, prefix)
-        if reverse:
-            return self._enumerate_posts_reverse(posts)
-        else:
-            return self._enumerate_posts(posts)
+class DanbooruFavgroupExtractor(DanbooruExtractor):
+    """Extractor for Danbooru favorite groups"""
+    subcategory = "favgroup"
+    directory_fmt = ("{category}", "Favorite Groups",
+                     "{favgroup[id]} {favgroup[name]}")
+    filename_fmt = "{num:>04}_{id}_{filename}.{extension}"
+    archive_fmt = "fg_{favgroup[id]}_{id}"
+    pattern = BASE_PATTERN + r"/favorite_group(?:s|/show)/(\d+)"
+    example = "https://danbooru.donmai.us/favorite_groups/12345"
 
-    def _enumerate_posts(self, posts):
-        pid_to_num = {pid: num+1 for num, pid in enumerate(self.post_ids)}
-        for post in posts:
-            post["num"] = pid_to_num[post["id"]]
-            yield post
+    def metadata(self):
+        return self._collection_metadata(
+            self.groups[-1], "favgroup", "favorite_group")
 
-    def _enumerate_posts_reverse(self, posts):
-        self.log.info("Collecting posts of pool %s", self.pool_id)
-        posts = list(posts)
-        posts.reverse()
-
-        pid_to_num = {pid: num+1 for num, pid in enumerate(self.post_ids)}
-        for post in posts:
-            post["num"] = pid_to_num[post["id"]]
-        return posts
+    def posts(self):
+        return self._collection_posts(self.groups[-1], "favgroup")
 
 
 class DanbooruPostExtractor(DanbooruExtractor):
