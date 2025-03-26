@@ -88,6 +88,7 @@ __tests__ = (
     "#url"    : "https://arca.live/b/bluearchive/117240135",
     "#comment": ".mp4 video",
     "#class"  : arcalive.ArcalivePostExtractor,
+    "#options": {"gifs": "check"},
     "#urls"   : "https://ac.namu.la/20240926sac/16f07778a97f91b935c8a3394ead01a223d96b2a619fdb25c4628ddba88b5fad.mp4?type=orig",
 },
 
@@ -95,7 +96,18 @@ __tests__ = (
     "#url"    : "https://arca.live/b/bluearchive/111191955",
     "#comment": "fake .mp4 GIF",
     "#class"  : arcalive.ArcalivePostExtractor,
+    "#options": {"gifs": True},
     "#urls"   : "https://ac.namu.la/20240714sac/c8fcadeb0b578e5121eb7a7e8fb05984cb87c68e7a6e0481a1c8869bf0ecfd2b.gif?type=orig",
+
+    "_fallback": ("https://ac.namu.la/20240714sac/c8fcadeb0b578e5121eb7a7e8fb05984cb87c68e7a6e0481a1c8869bf0ecfd2b.mp4?type=orig",),
+},
+
+{
+    "#url"    : "https://arca.live/b/bluearchive/111191955",
+    "#comment": "fake .mp4 GIF",
+    "#class"  : arcalive.ArcalivePostExtractor,
+    "#options": {"gifs": False},
+    "#urls"   : "https://ac.namu.la/20240714sac/c8fcadeb0b578e5121eb7a7e8fb05984cb87c68e7a6e0481a1c8869bf0ecfd2b.mp4?type=orig",
 },
 
 {

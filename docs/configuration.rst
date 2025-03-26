@@ -1408,12 +1408,22 @@ Description
 extractor.arcalive.gifs
 -----------------------
 Type
-    ``bool``
+    * ``bool``
+    * ``string``
 Default
     ``true``
 Description
-    Check if ``.mp4`` videos have a ``.gif`` version
-    and download those instead.
+    Try to download ``.gif`` versions of ``.mp4`` videos.
+
+    ``true`` | ``"fallback``
+        Use the ``.gif`` version as primary URL
+        and provide the ``.mp4`` one as
+        `fallback <extractor.*.fallback_>`__.
+    ``"check"``
+        Check whether a ``.gif`` version is available
+        by sending an extra HEAD request.
+    ``false``
+        Always download the ``.mp4`` version.
 
 
 extractor.artstation.external
