@@ -48,7 +48,12 @@ class SkebExtractor(Extractor):
     def items(self):
         metadata = self.metadata()
         for user_name, post_num in self.posts():
-            response, post = self._get_post_data(user_name, post_num)
+            try:
+                response, post = self._get_post_data(user_name, post_num)
+            except Exception as exc:
+                self.log.error("@%s/%s: %s: %s", user_name, post_num,
+                               exc.__class__.__name__, exc)
+                continue
             if metadata:
                 post.update(metadata)
 
