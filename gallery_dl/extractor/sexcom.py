@@ -58,7 +58,9 @@ class SexcomExtractor(Extractor):
 
         if "/pin/" in response.url:
             return self._parse_pin_legacy(response)
-        return self._parse_pin_new(response)
+        if "/videos/" in response.url:
+            return self._parse_pin_video(response)
+        return self._parse_pin_gifs(response)
 
     def _parse_pin_legacy(self, response):
         extr = text.extract_from(response.text)
@@ -109,8 +111,9 @@ class SexcomExtractor(Extractor):
 
         return data
 
-    def _parse_pin_new(self, response):
+    def _parse_pin_gifs(self, response):
         extr = text.extract_from(response.text)
+
         data = {
             "_http_headers": {"Referer": response.url},
             "type": "gif",
@@ -123,12 +126,34 @@ class SexcomExtractor(Extractor):
 
         return text.nameext_from_url(data["url"], data)
 
+    def _parse_pin_video(self, response):
+        extr = text.extract_from(response.text)
+
+        if not self.cookies.get("CloudFront-Key-Pair-Id", domain=".sex.com"):
+            self.log.warning("CloudFront cookies required for video downloads")
+
+        data = {
+            "_ytdl_manifest": "hls",
+            "extension": "mp4",
+            "type": "video",
+            "title": text.unescape(extr("<title>", " | Sex.com<")),
+            "pin_id": text.parse_int(extr(
+                'rel="canonical" href="', '"').rpartition("/")[2]),
+            "tags": text.split_html(extr(
+                'event_name="video_tags_click"', "<div data-testid=")
+                .partition(">")[2]),
+            "url": "ytdl:" + extr('<source src="', '"'),
+        }
+
+        return data
+
 
 class SexcomPinExtractor(SexcomExtractor):
     """Extractor for a pinned image or video on www.sex.com"""
     subcategory = "pin"
     directory_fmt = ("{category}",)
-    pattern = BASE_PATTERN + r"(/(?:pin|\w\w/gifs)/\d+/?)(?!.*#related$)"
+    pattern = (BASE_PATTERN +
+               r"(/(?:pin|\w\w/(?:gif|video)s)/\d+/?)(?!.*#related$)")
     example = "https://www.sex.com/pin/12345-TITLE/"
 
     def pins(self):
