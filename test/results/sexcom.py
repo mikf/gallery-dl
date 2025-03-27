@@ -38,6 +38,26 @@ __tests__ = (
 
 {
     "#url"     : "https://www.sex.com/pin/55435122-ecchi/",
+    "#comment" : "gif legacy URL",
+    "#category": ("", "sexcom", "pin"),
+    "#class"   : sexcom.SexcomPinExtractor,
+    "#urls"        : "https://imagex1.sx.cdn.live/images/pinporn/2017/12/07/18760842.gif",
+    "#sha1_content": "176cc63fa05182cb0438c648230c0f324a5965fe",
+
+    "extension": "gif",
+    "filename" : "18760842",
+    "pin_id"   : 209061,
+    "title"    : "Ecchi",
+    "type"     : "gif",
+    "url"      : "https://imagex1.sx.cdn.live/images/pinporn/2017/12/07/18760842.gif",
+    "tags"     : [
+        "#Big Tits",
+        "#Hentai",
+    ],
+},
+
+{
+    "#url"     : "https://www.sex.com/en/gifs/209061",
     "#comment" : "gif",
     "#category": ("", "sexcom", "pin"),
     "#class"   : sexcom.SexcomPinExtractor,
