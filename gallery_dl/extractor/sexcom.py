@@ -11,6 +11,8 @@
 from .common import Extractor, Message
 from .. import text
 
+BASE_PATTERN = r"(?:https?://)?(?:www\.)?sex\.com"
+
 
 class SexcomExtractor(Extractor):
     """Base class for sexcom extractors"""
@@ -105,22 +107,18 @@ class SexcomPinExtractor(SexcomExtractor):
     """Extractor for a pinned image or video on www.sex.com"""
     subcategory = "pin"
     directory_fmt = ("{category}",)
-    pattern = r"(?:https?://)?(?:www\.)?sex\.com/pin/(\d+)(?!.*#related$)"
+    pattern = BASE_PATTERN + r"/pin/(\d+)(?!.*#related$)"
     example = "https://www.sex.com/pin/12345-TITLE/"
 
-    def __init__(self, match):
-        SexcomExtractor.__init__(self, match)
-        self.pin_id = match.group(1)
-
     def pins(self):
-        return ("{}/pin/{}/".format(self.root, self.pin_id),)
+        return ("{}/pin/{}/".format(self.root, self.groups[0]),)
 
 
 class SexcomRelatedPinExtractor(SexcomPinExtractor):
     """Extractor for related pins on www.sex.com"""
     subcategory = "related-pin"
     directory_fmt = ("{category}", "related {original_pin[pin_id]}")
-    pattern = r"(?:https?://)?(?:www\.)?sex\.com/pin/(\d+).*#related$"
+    pattern = BASE_PATTERN + r"/pin/(\d+).*#related$"
     example = "https://www.sex.com/pin/12345#related"
 
     def metadata(self):
@@ -129,7 +127,7 @@ class SexcomRelatedPinExtractor(SexcomPinExtractor):
 
     def pins(self):
         url = "{}/pin/related?pinId={}&limit=24&offset=0".format(
-            self.root, self.pin_id)
+            self.root, self.groups[0])
         return self._pagination(url)
 
 
@@ -137,18 +135,14 @@ class SexcomPinsExtractor(SexcomExtractor):
     """Extractor for a user's pins on www.sex.com"""
     subcategory = "pins"
     directory_fmt = ("{category}", "{user}")
-    pattern = r"(?:https?://)?(?:www\.)?sex\.com/user/([^/?#]+)/pins/"
+    pattern = BASE_PATTERN + r"/user/([^/?#]+)/pins/"
     example = "https://www.sex.com/user/USER/pins/"
 
-    def __init__(self, match):
-        SexcomExtractor.__init__(self, match)
-        self.user = match.group(1)
-
     def metadata(self):
-        return {"user": text.unquote(self.user)}
+        return {"user": text.unquote(self.groups[0])}
 
     def pins(self):
-        url = "{}/user/{}/pins/".format(self.root, self.user)
+        url = "{}/user/{}/pins/".format(self.root, self.groups[0])
         return self._pagination(url)
 
 
@@ -156,18 +150,14 @@ class SexcomLikesExtractor(SexcomExtractor):
     """Extractor for a user's liked pins on www.sex.com"""
     subcategory = "likes"
     directory_fmt = ("{category}", "{user}", "Likes")
-    pattern = r"(?:https?://)?(?:www\.)?sex\.com/user/([^/?#]+)/likes/"
+    pattern = BASE_PATTERN + r"/user/([^/?#]+)/likes/"
     example = "https://www.sex.com/user/USER/likes/"
 
-    def __init__(self, match):
-        SexcomExtractor.__init__(self, match)
-        self.user = match.group(1)
-
     def metadata(self):
-        return {"user": text.unquote(self.user)}
+        return {"user": text.unquote(self.groups[0])}
 
     def pins(self):
-        url = "{}/user/{}/likes/".format(self.root, self.user)
+        url = "{}/user/{}/likes/".format(self.root, self.groups[0])
         return self._pagination(url)
 
 
@@ -175,15 +165,12 @@ class SexcomBoardExtractor(SexcomExtractor):
     """Extractor for pins from a board on www.sex.com"""
     subcategory = "board"
     directory_fmt = ("{category}", "{user}", "{board}")
-    pattern = (r"(?:https?://)?(?:www\.)?sex\.com/user"
+    pattern = (BASE_PATTERN + r"/user"
                r"/([^/?#]+)/(?!(?:following|pins|repins|likes)/)([^/?#]+)")
     example = "https://www.sex.com/user/USER/BOARD/"
 
-    def __init__(self, match):
-        SexcomExtractor.__init__(self, match)
-        self.user, self.board = match.groups()
-
     def metadata(self):
+        self.user, self.board = self.groups
         return {
             "user" : text.unquote(self.user),
             "board": text.unquote(self.board),
@@ -198,19 +185,18 @@ class SexcomSearchExtractor(SexcomExtractor):
     """Extractor for search results on www.sex.com"""
     subcategory = "search"
     directory_fmt = ("{category}", "search", "{search[query]}")
-    pattern = (r"(?:https?://)?(?:www\.)?sex\.com/((?:"
+    pattern = (BASE_PATTERN + r"/((?:"
                r"(pic|gif|video)s/([^/?#]*)|search/(pic|gif|video)s"
                r")/?(?:\?([^#]+))?)")
     example = "https://www.sex.com/search/pics?query=QUERY"
 
-    def __init__(self, match):
-        SexcomExtractor.__init__(self, match)
-        self.path = match.group(1)
+    def _init(self):
+        self.path, t1, query_alt, t2, query = self.groups
 
-        self.search = text.parse_query(match.group(5))
-        self.search["type"] = match.group(2) or match.group(4)
+        self.search = text.parse_query(query)
+        self.search["type"] = t1 or t2
         if "query" not in self.search:
-            self.search["query"] = match.group(3) or ""
+            self.search["query"] = query_alt or ""
 
     def metadata(self):
         return {"search": self.search}
