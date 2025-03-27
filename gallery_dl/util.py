@@ -686,8 +686,10 @@ class CustomNone():
 
 
 # v128.0 release on 2024-07-09 has ordinal 739076
+# v137.0 release on 2025-04-01 has ordinal 739342
 # 735492 == 739076 - 128 * 28
-_ff_ver = (datetime.date.today().toordinal() - 735492) // 28
+# 735506 == 739342 - 137 * 28
+_ff_ver = (datetime.date.today().toordinal() - 735506) // 28
 
 NONE = CustomNone()
 EPOCH = datetime.datetime(1970, 1, 1)
