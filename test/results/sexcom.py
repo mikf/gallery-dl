@@ -16,19 +16,24 @@ __tests__ = (
     "#urls"        : "https://imagex1.sx.cdn.live/images/pinporn/2014/08/26/7637609.jpg",
     "#sha1_content": "8cd419c6790ef7348bd398c364ab10f956e438dc",
 
-    "comments" : int,
+    "comments" : range(0, 5),
     "date"     : "dt:2014-10-19 15:45:44",
     "extension": "jpg",
     "filename" : "7637609",
-    "likes"    : int,
+    "likes"    : range(240, 275),
     "pin_id"   : 21241874,
-    "repins"   : int,
-    "tags"     : list,
-    "thumbnail": str,
+    "repins"   : range(90, 120),
+    "thumbnail": "https://imagex1.sx.cdn.live/images/pinporn/2014/08/26/7637609.jpg?width=300",
     "title"    : "Sexy Ecchi Girls 166",
     "type"     : "picture",
     "uploader" : "mangazeta",
-    "url"      : str,
+    "url"      : "https://imagex1.sx.cdn.live/images/pinporn/2014/08/26/7637609.jpg",
+    "tags": [
+        "ecchi",
+        "ecchi-girls",
+        "Hot",
+        "sexy-ecchi",
+    ],
 },
 
 {
@@ -38,6 +43,17 @@ __tests__ = (
     "#class"   : sexcom.SexcomPinExtractor,
     "#urls"        : "https://imagex1.sx.cdn.live/images/pinporn/2017/12/07/18760842.gif",
     "#sha1_content": "176cc63fa05182cb0438c648230c0f324a5965fe",
+
+    "extension": "gif",
+    "filename" : "18760842",
+    "pin_id"   : 209061,
+    "title"    : "Ecchi",
+    "type"     : "gif",
+    "url"      : "https://imagex1.sx.cdn.live/images/pinporn/2017/12/07/18760842.gif",
+    "tags"     : [
+        "#Big Tits",
+        "#Hentai",
+    ],
 },
 
 {
