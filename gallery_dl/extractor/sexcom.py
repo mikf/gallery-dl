@@ -128,18 +128,18 @@ class SexcomPinExtractor(SexcomExtractor):
     """Extractor for a pinned image or video on www.sex.com"""
     subcategory = "pin"
     directory_fmt = ("{category}",)
-    pattern = BASE_PATTERN + r"/pin/(\d+)(?!.*#related$)"
+    pattern = BASE_PATTERN + r"(/(?:pin|\w\w/gifs)/\d+/?)(?!.*#related$)"
     example = "https://www.sex.com/pin/12345-TITLE/"
 
     def pins(self):
-        return ("{}/pin/{}/".format(self.root, self.groups[0]),)
+        return (self.root + self.groups[0],)
 
 
 class SexcomRelatedPinExtractor(SexcomPinExtractor):
     """Extractor for related pins on www.sex.com"""
     subcategory = "related-pin"
     directory_fmt = ("{category}", "related {original_pin[pin_id]}")
-    pattern = BASE_PATTERN + r"/pin/(\d+).*#related$"
+    pattern = BASE_PATTERN + r"(/pin/(\d+)/?).*#related$"
     example = "https://www.sex.com/pin/12345#related"
 
     def metadata(self):
@@ -148,7 +148,7 @@ class SexcomRelatedPinExtractor(SexcomPinExtractor):
 
     def pins(self):
         url = "{}/pin/related?pinId={}&limit=24&offset=0".format(
-            self.root, self.groups[0])
+            self.root, self.groups[1])
         return self._pagination(url)
 
 
