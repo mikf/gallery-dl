@@ -2997,11 +2997,19 @@ Description
 extractor.instagram.videos
 --------------------------
 Type
-    ``bool``
+    * ``bool``
+    * ``string``
 Default
     ``true``
 Description
-    Download video files.
+    Controls video download behavior.
+
+    ``true`` | ``"dash"`` | ``"ytdl"``
+        Download videos from ``video_dash_manifest`` data using |ytdl|
+    ``"merged"``
+        Download pre-merged video formats
+    ``false``
+        Do not download videos
 
 
 extractor.itaku.videos
@@ -4448,19 +4456,19 @@ Description
 
     Possible formats include
 
-    * ``"gif"``
-    * ``"gif_transparent"``
-    * ``"gifpreview"``
-    * ``"mediumgif"``
-    * ``"tinygif"``
-    * ``"tinygif_transparent"``
-    * ``"mp4"``
-    * ``"tinymp4"``
-    * ``"webm"``
-    * ``"webp"``
-    * ``"webp_transparent"``
-    * ``"tinywebp"``
-    * ``"tinywebp_transparent"``
+    * ``gif``
+    * ``gif_transparent``
+    * ``mediumgif``
+    * ``gifpreview``
+    * ``tinygif``
+    * ``tinygif_transparent``
+    * ``mp4``
+    * ``tinymp4``
+    * ``webm``
+    * ``webp``
+    * ``webp_transparent``
+    * ``tinywebp``
+    * ``tinywebp_transparent``
 
 
 extractor.tiktok.audio

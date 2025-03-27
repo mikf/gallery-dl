@@ -56,9 +56,11 @@ class InstagramExtractor(Extractor):
 
         data = self.metadata()
         videos = self.config("videos", True)
+        if videos:
+            videos_dash = (videos != "merged")
+            videos_headers = {"User-Agent": "Mozilla/5.0"}
         previews = self.config("previews", False)
         max_posts = self.config("max-posts")
-        video_headers = {"User-Agent": "Mozilla/5.0"}
 
         order = self.config("order-files")
         reverse = order[0] in ("r", "d") if order else False
@@ -92,8 +94,12 @@ class InstagramExtractor(Extractor):
                 url = file.get("video_url")
                 if url:
                     if videos:
-                        file["_http_headers"] = video_headers
+                        file["_http_headers"] = videos_headers
                         text.nameext_from_url(url, file)
+                        if videos_dash:
+                            file["_fallback"] = (url,)
+                            file["_ytdl_manifest"] = "dash"
+                            url = "ytdl:dash"
                         yield Message.Url, url, file
                     if previews:
                         file["media_id"] += "p"
@@ -246,6 +252,7 @@ class InstagramExtractor(Extractor):
                 "video_url"  : video["url"] if video else None,
                 "width"      : media["width"],
                 "height"     : media["height"],
+                "_ytdl_manifest_data": item.get("video_dash_manifest"),
             }
 
             if "expiring_at" in item:
