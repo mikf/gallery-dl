@@ -196,7 +196,8 @@ class MastodonFollowingExtractor(MastodonExtractor):
 class MastodonStatusExtractor(MastodonExtractor):
     """Extractor for images from a status"""
     subcategory = "status"
-    pattern = BASE_PATTERN + r"/@[^/?#]+/(?!following)([^/?#]+)"
+    pattern = (BASE_PATTERN + r"/(?:@[^/?#]+|(?:users/[^/?#]+/)?statuses)"
+               r"/(?!following)([^/?#]+)")
     example = "https://mastodon.social/@USER/12345"
 
     def statuses(self):

@@ -160,8 +160,23 @@ __tests__ = (
     "#class"   : mastodon.MastodonStatusExtractor,
     "#count"   : 4,
 
+    "account": {
+        "acct": "jk",
+    },
     "count": 4,
     "num"  : int,
+},
+
+{
+    "#url"     : "https://mastodon.social/statuses/103794036899778366",
+    "#category": ("mastodon", "mastodon.social", "status"),
+    "#class"   : mastodon.MastodonStatusExtractor,
+},
+
+{
+    "#url"     : "https://mastodon.social/users/jk/statuses/103794036899778366",
+    "#category": ("mastodon", "mastodon.social", "status"),
+    "#class"   : mastodon.MastodonStatusExtractor,
 },
 
 {
