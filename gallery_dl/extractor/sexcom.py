@@ -55,10 +55,16 @@ class SexcomExtractor(Extractor):
             self.log.warning('Unable to fetch %s ("%s %s")',
                              url, response.status_code, response.reason)
             return None
+
+        if "/pin/" in response.url:
+            return self._parse_pin_legacy(response)
+        return self._parse_pin_new(response)
+
+    def _parse_pin_legacy(self, response):
         extr = text.extract_from(response.text)
         data = {}
 
-        data["_http_headers"] = {"Referer": url}
+        data["_http_headers"] = {"Referer": response.url}
         data["thumbnail"] = extr('itemprop="thumbnail" content="', '"')
         data["type"] = extr('<h1>' , '<').rstrip(" -").strip().lower()
         data["title"] = text.unescape(extr('itemprop="name">' , '<'))
@@ -84,7 +90,8 @@ class SexcomExtractor(Extractor):
                 src = (text.extr(iframe, ' src="', '"') or
                        text.extr(iframe, " src='", "'"))
                 if not src:
-                    self.log.warning("Unable to fetch media from %s", url)
+                    self.log.warning(
+                        "Unable to fetch media from %s", response.url)
                     return None
                 data["extension"] = None
                 data["url"] = "ytdl:" + src
@@ -101,6 +108,20 @@ class SexcomExtractor(Extractor):
         data["comments"] = text.parse_int(extr('Comments (', ')'))
 
         return data
+
+    def _parse_pin_new(self, response):
+        extr = text.extract_from(response.text)
+        data = {
+            "_http_headers": {"Referer": response.url},
+            "type": "gif",
+            "url": extr(' href="', '"'),
+            "title": text.unescape(extr("<title>", " Gif | Sex.com<")),
+            "pin_id": text.parse_int(extr(
+                'rel="canonical" href="', '"').rpartition("/")[2]),
+            "tags": text.split_html(extr("</h1>", "</section>")),
+        }
+
+        return text.nameext_from_url(data["url"], data)
 
 
 class SexcomPinExtractor(SexcomExtractor):
