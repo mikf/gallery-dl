@@ -10,6 +10,7 @@
 
 from .common import Extractor, Message
 from .. import text
+from datetime import datetime
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?sex\.com"
 
@@ -25,8 +26,20 @@ class SexcomExtractor(Extractor):
     def items(self):
         yield Message.Directory, self.metadata()
         for pin in map(self._parse_pin, self.pins()):
-            if pin:
-                yield Message.Url, pin["url"], pin
+            if not pin:
+                continue
+
+            url = pin["url"]
+            parts = url.rsplit("/", 4)
+            try:
+                pin["date_url"] = dt = datetime(
+                    int(parts[1]), int(parts[2]), int(parts[3]))
+                if "date" not in pin:
+                    pin["date"] = dt
+            except Exception:
+                pass
+
+            yield Message.Url, url, pin
 
     def metadata(self):
         return {}
