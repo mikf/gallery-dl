@@ -1287,7 +1287,7 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
         if len(additional_media) > 0:
             self.filename_fmt = \
                 "{category}_{index}_{title}_{num:>02}.{extension}"
-        deviation["is_downloadable"] = True
+
         deviation["img_count"] = 1 + len(additional_media)
         deviation["num"] = 1
 
