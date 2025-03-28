@@ -7,7 +7,8 @@
 from gallery_dl.extractor import tiktok
 
 PATTERN = r"https://p1[69]-[^/?#.]+\.tiktokcdn[^/?#.]*\.com/[^/?#]+/\w+~.*\.jpe?g"
-PATTERN_WITH_AUDIO = r"(?:" + PATTERN + r"|ytdl:http.+)"
+PATTERN_WITH_AUDIO = r"(?:" + PATTERN + r"|https://v\d+m?\.tiktokcdn[^/?#.]*\.com/[^?#]+\?[^/?#]+)"
+USER_PATTERN = r"(https://www.tiktok.com/@([\w_.-]+)/video/(\d+)|" + PATTERN + r")"
 
 
 __tests__ = (
@@ -17,7 +18,7 @@ __tests__ = (
     "#category" : ("", "tiktok", "post"),
     "#class"    : tiktok.TiktokPostExtractor,
     "#pattern"  : PATTERN,
-    "#options"  : {"videos": False},
+    "#options"  : {"videos": False, "audio": False},
 },
 
 {
@@ -26,7 +27,7 @@ __tests__ = (
     "#category" : ("", "tiktok", "post"),
     "#class"    : tiktok.TiktokPostExtractor,
     "#pattern"  : PATTERN,
-    "#options"  : {"videos": False},
+    "#options"  : {"videos": False, "audio": False},
 },
 
 {
@@ -35,7 +36,7 @@ __tests__ = (
     "#category" : ("", "tiktok", "post"),
     "#class"    : tiktok.TiktokPostExtractor,
     "#pattern"  : PATTERN,
-    "#options"  : {"videos": False},
+    "#options"  : {"videos": False, "audio": False},
 },
 
 {
@@ -44,7 +45,7 @@ __tests__ = (
     "#category" : ("", "tiktok", "post"),
     "#class"    : tiktok.TiktokPostExtractor,
     "#pattern"  : PATTERN,
-    "#options"  : {"videos": False},
+    "#options"  : {"videos": False, "audio": False},
 },
 
 {
@@ -53,7 +54,7 @@ __tests__ = (
     "#category" : ("", "tiktok", "post"),
     "#class"    : tiktok.TiktokPostExtractor,
     "#pattern"  : PATTERN,
-    "#options"  : {"videos": False},
+    "#options"  : {"videos": False, "audio": False},
 },
 
 {
@@ -62,7 +63,7 @@ __tests__ = (
     "#category" : ("", "tiktok", "post"),
     "#class"    : tiktok.TiktokPostExtractor,
     "#pattern"  : PATTERN,
-    "#options"  : {"videos": False},
+    "#options"  : {"videos": False, "audio": False},
 },
 
 {
@@ -71,7 +72,7 @@ __tests__ = (
     "#category" : ("", "tiktok", "post"),
     "#class"    : tiktok.TiktokPostExtractor,
     "#pattern"  : PATTERN,
-    "#options"  : {"videos": False},
+    "#options"  : {"videos": False, "audio": False},
 },
 
 {
@@ -80,7 +81,7 @@ __tests__ = (
     "#category" : ("", "tiktok", "post"),
     "#class"    : tiktok.TiktokPostExtractor,
     "#pattern"  : PATTERN,
-    "#options"  : {"videos": False},
+    "#options"  : {"videos": False, "audio": False},
 },
 
 {
@@ -89,7 +90,7 @@ __tests__ = (
     "#category" : ("", "tiktok", "post"),
     "#class"    : tiktok.TiktokPostExtractor,
     "#pattern"  : PATTERN,
-    "#options"  : {"videos": False},
+    "#options"  : {"videos": False, "audio": False},
 },
 
 {
@@ -97,7 +98,7 @@ __tests__ = (
     "#comment"   : "deleted post",
     "#category"  : ("", "tiktok", "post"),
     "#class"     : tiktok.TiktokPostExtractor,
-    "#options"   : {"videos": False},
+    "#options"   : {"videos": False, "audio": False},
     "count"      : 0,
 },
 
@@ -107,7 +108,7 @@ __tests__ = (
     "#category" : ("", "tiktok", "post"),
     "#class"    : tiktok.TiktokPostExtractor,
     "#urls"     : "ytdl:https://www.tiktok.com/@memezar/video/7449708266168274208",
-    "#options"  : {"videos": True},
+    "#options"  : {"videos": True, "audio": True},
 },
 
 {
@@ -116,7 +117,7 @@ __tests__ = (
     "#category" : ("", "tiktok", "post"),
     "#class"    : tiktok.TiktokPostExtractor,
     "#urls"     : "ytdl:https://www.tiktok.com/@memezar/video/7449708266168274208",
-    "#options"  : {"videos": True},
+    "#options"  : {"videos": True, "audio": True},
 },
 
 {
@@ -241,17 +242,8 @@ __tests__ = (
     "#comment"  : "User profile",
     "#category" : ("", "tiktok", "user"),
     "#class"    : tiktok.TiktokUserExtractor,
-    "#pattern"  : PATTERN_WITH_AUDIO,
-    "#options"  : {"videos": True, "tiktok-range": "1-10"},
-},
-
-{
-    "#url"      : "https://www.tiktok.com/@chillezy/",
-    "#comment"  : "User profile without audio or videos",
-    "#category" : ("", "tiktok", "user"),
-    "#class"    : tiktok.TiktokUserExtractor,
-    "#pattern"  : PATTERN,
-    "#options"  : {"videos": False, "tiktok-range": "1-10"},
+    "#pattern"  : USER_PATTERN,
+    "#options"  : {"videos": True, "audio": True, "tiktok-range": "1-10"},
 },
 
 {
