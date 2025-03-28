@@ -1280,7 +1280,8 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
         _dev_info = text.extr(
             page, '\\"deviationExtended\\":', ',\\"deviation\\":', None)
         # Clean up escaped quotes
-        _json_str = re.sub(r'(?<!\\)\\{1}"', '"', _dev_info).replace("\\'", "'")
+        _json_str = re.sub(
+            r'(?<!\\)\\{1}"', '"', _dev_info).replace("\\'", "'")
         _extended_info = json.loads(_json_str)[self.deviation_id]
         additional_media = _extended_info.get('additionalMedia', [])
 
