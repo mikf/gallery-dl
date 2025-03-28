@@ -1290,8 +1290,8 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
 
         deviation["img_count"] = 1 + len(additional_media)
         deviation["num"] = 1
-
         yield deviation
+
         for index, post in enumerate(additional_media):
             uri = post['media']['baseUri'].encode().decode('unicode-escape')
             deviation["content"]["src"] = uri
