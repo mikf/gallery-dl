@@ -7,10 +7,10 @@
 # published by the Free Software Foundation.
 
 """Extractors for https://www.deviantart.com/"""
+
 from .common import Extractor, Message
 from .. import text, util, exception
 from ..cache import cache, memcache
-import json
 import collections
 import mimetypes
 import binascii
@@ -1282,24 +1282,27 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
         # Clean up escaped quotes
         _json_str = re.sub(
             r'(?<!\\)\\{1}"', '"', _dev_info).replace("\\'", "'")
-        _extended_info = json.loads(_json_str)[self.deviation_id]
-        additional_media = _extended_info.get('additionalMedia', [])
+        _extended_info = util.json_loads(_json_str)[self.deviation_id]
+        additional_media = _extended_info.get("additionalMedia") or ()
 
-        if len(additional_media) > 0:
-            self.filename_fmt = \
-                "{category}_{index}_{title}_{num:>02}.{extension}"
+        if additional_media:
+            self.filename_fmt = ("{category}_{index}_{index_file}_{title}_"
+                                 "{num:>02}.{extension}")
+            self.archive_fmt = ("g_{_username}_{index}{index_file:?_//}."
+                                "{extension}")
 
-        deviation["img_count"] = 1 + len(additional_media)
+        deviation["index_file"] = 0
+        deviation["count"] = 1 + len(additional_media)
         deviation["num"] = 1
         yield deviation
 
         for index, post in enumerate(additional_media):
-            uri = post['media']['baseUri'].encode().decode('unicode-escape')
+            uri = post["media"]["baseUri"].encode().decode("unicode-escape")
             deviation["content"]["src"] = uri
             deviation["num"] += 1
-            deviation['index'] = post['fileId']
+            deviation["index_file"] = post["fileId"]
             # Download only works on purchased materials - no way to check
-            deviation['is_downloadable'] = False
+            deviation["is_downloadable"] = False
             yield deviation
 
 
