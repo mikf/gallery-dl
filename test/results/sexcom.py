@@ -18,6 +18,7 @@ __tests__ = (
 
     "comments" : range(0, 5),
     "date"     : "dt:2014-10-19 15:45:44",
+    "date_url" : "dt:2014-08-26 00:00:00",
     "extension": "jpg",
     "filename" : "7637609",
     "likes"    : range(240, 275),
@@ -44,6 +45,8 @@ __tests__ = (
     "#urls"        : "https://imagex1.sx.cdn.live/images/pinporn/2017/12/07/18760842.gif",
     "#sha1_content": "176cc63fa05182cb0438c648230c0f324a5965fe",
 
+    "date"     : "dt:2017-12-07 00:00:00",
+    "date_url" : "dt:2017-12-07 00:00:00",
     "extension": "gif",
     "filename" : "18760842",
     "pin_id"   : 209061,
@@ -64,6 +67,8 @@ __tests__ = (
     "#urls"        : "https://imagex1.sx.cdn.live/images/pinporn/2017/12/07/18760842.gif",
     "#sha1_content": "176cc63fa05182cb0438c648230c0f324a5965fe",
 
+    "date"     : "dt:2017-12-07 00:00:00",
+    "date_url" : "dt:2017-12-07 00:00:00",
     "extension": "gif",
     "filename" : "18760842",
     "pin_id"   : 209061,
@@ -85,7 +90,8 @@ __tests__ = (
     "#sha1_content": "e1a5834869163e2c4d1ca2677f5b7b367cf8cfff",
 
     "comments" : range(0, 5),
-    "date"     : "2018-02-10 14:58:55",
+    "date"     : "dt:2018-02-10 14:58:55",
+    "date_url" : "dt:2018-02-10 00:00:00",
     "extension": "mp4",
     "filename" : "776229_hd",
     "likes"    : range(30, 50),
