@@ -7,10 +7,10 @@
 # published by the Free Software Foundation.
 
 """Extractors for https://www.deviantart.com/"""
-
 from .common import Extractor, Message
 from .. import text, util, exception
 from ..cache import cache, memcache
+import json
 import collections
 import mimetypes
 import binascii
@@ -1276,7 +1276,30 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
 
         deviation = self.api.deviation(uuid)
         deviation["_page"] = page
-        return (deviation,)
+
+        _dev_info = text.extr(
+            page, '\\"deviationExtended\\":', ',\\"deviation\\":', None)
+        # Clean up escaped quotes
+        _json_str = re.sub(r'(?<!\\)\\{1}"', '"', _dev_info).replace("\\'", "'")
+        _extended_info = json.loads(_json_str)[self.deviation_id]
+        additional_media = _extended_info.get('additionalMedia', [])
+
+        if len(additional_media) > 0:
+            self.filename_fmt = \
+                "{category}_{index}_{title}_{num:>02}.{extension}"
+        deviation["is_downloadable"] = True
+        deviation["img_count"] = 1 + len(additional_media)
+        deviation["num"] = 1
+
+        yield deviation
+        for index, post in enumerate(additional_media):
+            uri = post['media']['baseUri'].encode().decode('unicode-escape')
+            deviation["content"]["src"] = uri
+            deviation["num"] += 1
+            deviation['index'] = post['fileId']
+            # Download only works on purchased materials - no way to check
+            deviation['is_downloadable'] = False
+            yield deviation
 
 
 class DeviantartScrapsExtractor(DeviantartExtractor):
