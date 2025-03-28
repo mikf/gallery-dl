@@ -68,6 +68,13 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.pinterest.com/pin/1025272671423645004/",
+    "#comment" : "story pin with 'story_pin_static_sticker_block' blocks",
+    "#class"   : pinterest.PinterestPinExtractor,
+    "#urls"    : "https://i.pinimg.com/originals/70/ab/31/70ab31654b2329e2ec74a39adf7ee683.jpg",
+},
+
+{
     "#url"     : "https://www.pinterest.com/pin/858146903966145188/",
     "#category": ("", "pinterest", "pin"),
     "#class"   : pinterest.PinterestPinExtractor,
