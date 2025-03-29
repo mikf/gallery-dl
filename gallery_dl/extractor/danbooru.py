@@ -282,10 +282,11 @@ class DanbooruPoolExtractor(DanbooruExtractor):
     example = "https://danbooru.donmai.us/pools/12345"
 
     def metadata(self):
-        return self._collection_metadata(self.groups[-1], "pool")
+        self.pool_id = self.groups[-1]
+        return self._collection_metadata(self.pool_id, "pool")
 
     def posts(self):
-        return self._collection_posts(self.groups[-1], "pool")
+        return self._collection_posts(self.pool_id, "pool")
 
 
 class DanbooruFavgroupExtractor(DanbooruExtractor):

@@ -140,11 +140,11 @@ __tests__ = (
 },
 
 {
-    "#url"     : "https://e621.net/favorites?page=2&user_id=53275",
+    "#url"     : "https://e621.net/favorites?page=1&user_id=460755",
     "#category": ("E621", "e621", "favorite"),
     "#class"   : e621.E621FavoriteExtractor,
     "#pattern" : r"https://static\d.e621.net/data/../../[0-9a-f]+",
-    "#count"   : "> 260",
+    "#count"   : 15,
 },
 
 {
