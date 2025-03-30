@@ -29,6 +29,7 @@ class InstagramExtractor(Extractor):
     root = "https://www.instagram.com"
     cookies_domain = ".instagram.com"
     cookies_names = ("sessionid",)
+    useragent = util.USERAGENT_CHROME
     request_interval = (6.0, 12.0)
 
     def __init__(self, match):

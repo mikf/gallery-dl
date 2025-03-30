@@ -663,6 +663,7 @@ Default
     * ``"gallery-dl/VERSION"``: ``[Danbooru]``, ``mangadex``
     * ``"gallery-dl/VERSION (by mikf)"``: ``[E621]``
     * ``"Patreon/72.2.28 (Android; Android 14; Scale/2.10)"``: ``patreon``
+    * ``"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36"``: ``instagram``
     * ``"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:LATEST) Gecko/20100101 Firefox/LATEST"``: otherwise
 Description
     User-Agent header value used for HTTP requests.

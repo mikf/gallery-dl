@@ -700,6 +700,9 @@ EXECUTABLE = getattr(sys, "frozen", False)
 USERAGENT = "gallery-dl/" + version.__version__
 USERAGENT_FIREFOX = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:{}.0) "
                      "Gecko/20100101 Firefox/{}.0").format(_ff_ver, _ff_ver)
+USERAGENT_CHROME = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                    "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 "
+                    "Safari/537.36")
 SPECIAL_EXTRACTORS = {"oauth", "recursive", "generic"}
 GLOBALS = {
     "contains" : contains,
