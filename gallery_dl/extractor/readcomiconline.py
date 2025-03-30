@@ -85,7 +85,7 @@ class ReadcomiconlineIssueExtractor(ReadcomiconlineBase, ChapterExtractor):
         replacements = re.findall(
             r"l = l\.replace\(/([^/]+)/g, [\"']([^\"']*)", page)
 
-        for block in page.split("    pth = '")[1:]:
+        for block in page.split("\t\tpht = '")[1:]:
             pth = text.extr(block, "", "'")
 
             for needle, repl in re.findall(
@@ -129,7 +129,7 @@ class ReadcomiconlineComicExtractor(ReadcomiconlineBase, MangaExtractor):
 
 
 def baeu(url, root="", root_blogspot="https://2.bp.blogspot.com"):
-    """https://readcomiconline.li/Scripts/rguard.min.js"""
+    """https://readcomiconline.li/Scripts/rguard.min.js?v=1.5.4"""
     if not root:
         root = root_blogspot
 
