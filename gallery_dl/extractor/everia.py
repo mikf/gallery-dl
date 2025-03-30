@@ -52,7 +52,7 @@ class EveriaPostExtractor(EveriaExtractor):
     def items(self):
         url = self.root + self.groups[0]
         page = self.request(url).text
-        content = text.extr(page, 'itemprop="text">', "</div>")
+        content = text.extr(page, 'itemprop="text">', "<h3")
         urls = re.findall(r'img.*?src="([^"]+)', content)
 
         data = {
