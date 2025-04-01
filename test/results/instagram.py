@@ -66,14 +66,6 @@ __tests__ = (
 },
 
 {
-    "#url"     : "https://www.instagram.com/kadakaofficial/guide/knit-i-need-collection/18131821684305217/",
-    "#category": ("", "instagram", "guide"),
-    "#class"   : instagram.InstagramGuideExtractor,
-    "#range"   : "1-16",
-    "#count"   : ">= 16",
-},
-
-{
     "#url"     : "https://www.instagram.com/instagram/saved/",
     "#category": ("", "instagram", "saved"),
     "#class"   : instagram.InstagramSavedExtractor,
@@ -276,5 +268,19 @@ __tests__ = (
     "#category": ("", "instagram", "post"),
     "#class"   : instagram.InstagramPostExtractor,
 },
+
+{
+    "#url"     : "https://www.instagram.com/share/p/BACiUUUYQV",
+    "#category": ("", "instagram", "post"),
+    "#class"   : instagram.InstagramPostExtractor,
+    "shortcode"  : "C6q-XdvsU5v",
+},
+
+{
+    "#url"     : "https://www.instagram.com/share/reel/BARSSL4rTu",
+    "#category": ("", "instagram", "post"),
+    "#class"   : instagram.InstagramPostExtractor,
+    "shortcode"  : "DHbVbT4Jx0c",
+}
 
 )
