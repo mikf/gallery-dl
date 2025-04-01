@@ -12,7 +12,8 @@
 from .common import GalleryExtractor, Extractor, Message
 from .. import exception, text, util
 
-BASE_PATTERN = r"(?:https?://)?(?:www\.)?webtoons\.com/(([^/?#]+)"
+BASE_PATTERN = r"(?:https?://)?(?:www\.)?webtoons\.com"
+LANG_PATTERN = BASE_PATTERN + r"/(([^/?#]+)"
 
 
 class WebtoonsBase():
@@ -44,7 +45,7 @@ class WebtoonsEpisodeExtractor(WebtoonsBase, GalleryExtractor):
     directory_fmt = ("{category}", "{comic}")
     filename_fmt = "{episode_no}-{num:>02}.{extension}"
     archive_fmt = "{title_no}_{episode_no}_{num}"
-    pattern = (BASE_PATTERN + r"/([^/?#]+)/([^/?#]+)/[^/?#]+)"
+    pattern = (LANG_PATTERN + r"/([^/?#]+)/([^/?#]+)/[^/?#]+)"
                r"/viewer\?([^#'\"]+)")
     example = ("https://www.webtoons.com/en/GENRE/TITLE/NAME/viewer"
                "?title_no=123&episode_no=12345")
@@ -108,7 +109,7 @@ class WebtoonsComicExtractor(WebtoonsBase, Extractor):
     """Extractor for an entire comic on webtoons.com"""
     subcategory = "comic"
     categorytransfer = True
-    pattern = BASE_PATTERN + r"/([^/?#]+)/([^/?#]+))/list\?([^#]+)"
+    pattern = LANG_PATTERN + r"/([^/?#]+)/([^/?#]+))/list\?([^#]+)"
     example = "https://www.webtoons.com/en/GENRE/TITLE/list?title_no=123"
 
     def _init(self):
@@ -155,3 +156,40 @@ class WebtoonsComicExtractor(WebtoonsBase, Extractor):
             match.group(0)
             for match in WebtoonsEpisodeExtractor.pattern.finditer(page)
         ]
+
+
+class WebtoonsArtistExtractor(WebtoonsBase, Extractor):
+    """Extractor for webtoons.com artists"""
+    subcategory = "artist"
+    pattern = BASE_PATTERN + r"/p/community/([^/?#]+)/u/([^/?#]+)"
+    example = "https://www.webtoons.com/p/community/LANG/u/ARTIST"
+
+    def items(self):
+        self.setup_agegate_cookies()
+
+        for comic in self.comics():
+            comic["_extractor"] = WebtoonsComicExtractor
+            comic_url = self.root + comic["extra"]["episodeListPath"]
+            yield Message.Queue, comic_url, comic
+
+    def comics(self):
+        lang, artist = self.groups
+        language = util.code_to_language(lang).upper()
+
+        url = "{}/p/community/{}/u/{}".format(
+            self.root, lang, artist)
+        page = self.request(url).text
+        creator_id = text.extr(page, '\\"creatorId\\":\\"', '\\')
+
+        url = "{}/p/community/api/v1/creator/{}/titles".format(
+            self.root, creator_id)
+        params = {
+            "language": language,
+            "nextSize": "50",
+        }
+        headers = {
+            "language": language,
+        }
+        data = self.request(url, params=params, headers=headers).json()
+
+        return data["result"]["titles"]

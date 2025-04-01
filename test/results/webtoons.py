@@ -83,9 +83,9 @@ __tests__ = (
     "#url"     : "https://www.webtoons.com/en/canvas/us-over-here/1-the-wheel/viewer?title_no=919536&episode_no=1",
     "#category": ("", "webtoons", "episode"),
     "#class"   : webtoons.WebtoonsEpisodeExtractor,
-    "#count"   : 60,
+    "#count"   : 3,
 
-    "comic_name"  : "Us, over here",
+    "comic_name"  : "(news soon)",
     "episode_name": "1. The Wheel",
     "episode"     : "1",
     "username"    : "i94q8",
@@ -135,6 +135,24 @@ __tests__ = (
     "#comment" : "(#1643)",
     "#category": ("", "webtoons", "comic"),
     "#class"   : webtoons.WebtoonsComicExtractor,
+},
+
+{
+    "#url"     : "https://www.webtoons.com/p/community/en/u/g6vj8",
+    "#class"   : webtoons.WebtoonsArtistExtractor,
+    "#urls"    : (
+        "https://www.webtoons.com/en/canvas/scoob-and-shag/list?title_no=210827",
+        "https://www.webtoons.com/en/canvas/sparkle-kid/list?title_no=205304",
+    ),
+
+    "id"     : {"210827", "205304"},
+    "subject": {"Scoob and Shag", "Sparkle Kid"},
+    "authors": [
+        {
+            "nickname": "Misterie Krew",
+        },
+    ],
+
 },
 
 )
