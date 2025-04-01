@@ -304,4 +304,41 @@ __tests__ = (
     ],
 },
 
+{
+    "#url"     : "https://www.zerochan.net/4147104",
+    "#comment" : "no 'author' in JSON-LD data (#7282)",
+    "#category": ("booru", "zerochan", "image"),
+    "#class"   : zerochan.ZerochanImageExtractor,
+    "#auth"    : False,
+
+    "author"   : "",
+    "date"     : "dt:2024-04-02 12:09:30",
+    "extension": "jpg",
+    "file_url" : "https://static.zerochan.net/Lycoris.Recoil.full.4147104.jpg",
+    "filename" : "Lycoris.Recoil.full.4147104",
+    "width"    : 1061,
+    "height"   : 1500,
+    "id"       : 4147104,
+    "size"     : 224256,
+    "source"   : "https://twitter.com/animetv_jp/status/1775101399648374835/",
+    "uploader" : "cutesherry",
+    "path"     : [
+        "Lycoris Recoil",
+    ],
+    "tags"     : [
+        "Studio:A-1 Pictures",
+        "Series:Lycoris Recoil",
+        "Character:Inoue Takina",
+        "Character:Nishikigi Chisato",
+        "Theme:Bench",
+        "Theme:Cherry Tree",
+        "Theme:Floating Hair",
+        "Theme:Sitting On Bench",
+        "Theme:Sneakers",
+        "Theme:Spring",
+        "Source:Key Visual",
+        "Source:Official Art",
+    ],
+},
+
 )
