@@ -78,6 +78,7 @@ CATEGORY_MAP = {
     "illusioncardsbooru": "Illusion Game Cards",
     "imagebam"       : "ImageBam",
     "imagefap"       : "ImageFap",
+    "imagepond"      : "ImagePond",
     "imgbb"          : "ImgBB",
     "imgbox"         : "imgbox",
     "imagechest"     : "ImageChest",
