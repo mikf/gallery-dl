@@ -1076,7 +1076,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Webtoon</td>
     <td>https://www.webtoons.com/</td>
-    <td>Comics, Episodes</td>
+    <td>Artists, Comics, Episodes</td>
     <td></td>
 </tr>
 <tr>
