@@ -74,7 +74,6 @@ class ZerochanExtractor(BooruExtractor):
         extr = text.extract_from(page)
         data = {
             "id"      : text.parse_int(entry_id),
-            "author"  : jsonld["author"]["name"],
             "file_url": jsonld["contentUrl"],
             "date"    : text.parse_datetime(jsonld["datePublished"]),
             "width"   : text.parse_int(jsonld["width"][:-3]),
@@ -87,6 +86,11 @@ class ZerochanExtractor(BooruExtractor):
             "source"  : text.unescape(text.remove_html(extr(
                 'id="source-url"', '</p>').rpartition("</s>")[2])),
         }
+
+        try:
+            data["author"] = jsonld["author"]["name"]
+        except Exception:
+            data["author"] = ""
 
         html = data["tags"]
         tags = data["tags"] = []
