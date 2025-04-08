@@ -200,6 +200,7 @@ class YoutubeDLDownloader(DownloaderBase):
             return None
 
         info_dict = {
+            "extractor": "",
             "id"       : video_id,
             "title"    : video_id,
             "formats"  : fmts,
