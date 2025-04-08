@@ -35,17 +35,13 @@ __tests__ = (
     "#urls"        : "https://rule34xyz.b-cdn.net/posts/3613/3613851/3613851.pic.jpg",
     "#sha1_content": "4d7146db258fd5b1645a1a5fc01550d102f495e1",
 
-    "attributes": 0,
-    "comments"  : 0,
     "created"   : "2023-03-29T03:00:59.136819Z",
     "date"      : "dt:2023-03-29 03:00:59",
-    "duration"  : None,
-    "error"     : {"", None},
     "extension" : "jpg",
     "file_url"  : "https://rule34xyz.b-cdn.net/posts/3613/3613851/3613851.pic.jpg",
-    "filename"  : "3613851.pic",
+    "filename"  : "3613851",
     "format"    : "pic",
-    "format_id" : "2",
+    "format_id" : "10",
     "id"        : 3613851,
     "likes"     : range(3, 100),
     "posted"    : "2023-03-29T03:01:07.900161Z",
@@ -53,10 +49,11 @@ __tests__ = (
     "uploaderId": 9741,
     "views"     : range(200, 2000),
     "status"    : 2,
-    "files"     : dict,
-    "sources": [
-        "https://twitter.com/DesireDelta13/status/1636502494292373505?t=OrmlnC85cELyY5BPmBy9Hw&s=19",
-    ],
+    "data"      : {
+        "sources": [
+            "https://twitter.com/DesireDelta13/status/1636502494292373505?t=OrmlnC85cELyY5BPmBy9Hw&s=19",
+        ],
+    },
     "tags": [
         "doki doki literature club",
         "doki doki takeover",
@@ -112,8 +109,8 @@ __tests__ = (
     "#urls"        : "https://rule34xyz.b-cdn.net/posts/3571/3571567/3571567.mov720.mp4",
     "#sha1_content": "c0a5e7e887774f91527f00e6142c435a3c482c1f",
 
-    "format"    : "mov720",
-    "format_id" : "40",
+    "format"   : "mov720",
+    "format_id": "101",
 },
 
 {
@@ -121,10 +118,10 @@ __tests__ = (
     "#comment": "'format' option",
     "#class"  : rule34xyz.Rule34xyzPostExtractor,
     "#options": {"format": "10,4,5"},
-    "#urls"   : "https://rule34xyz.b-cdn.net/posts/3571/3571567/3571567.pic256ex.jpg",
+    "#urls"   : "https://rule34xyz.b-cdn.net/posts/3571/3571567/3571567.pic.jpg",
 
-    "format"    : "pic256ex",
-    "format_id" : "4",
+    "format"   : "pic",
+    "format_id": "10",
 },
 
 )
