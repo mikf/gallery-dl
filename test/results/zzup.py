@@ -15,7 +15,7 @@ __tests__ = (
     "#pattern" : r"https://zzup\.com/[^/?#]+/showimage/zzup-8769086487/image00\d\d\d-5896498214-1-9689595623/MetArt-20080206_viki_c_sensazioni_by_ingret/9879560327/zzup.com.jpg",
 
     "slug"  : "MetArt_20080206_viki_c_sensazioni_by_ingret",
-    "title" : "MetArt 20080206 viki c sensazioni by ingret",
+    "title" : "MetArt [2008 02 06] Viki C - Sensazioni by ingret",
     "num"   : int,
     "count" : 135,
 },
@@ -25,6 +25,20 @@ __tests__ = (
     "#category": ("", "zzup", "gallery"),
     "#class"   : zzup.ZzupGalleryExtractor,
     "#pattern" : r"https://zzup\.com/[^/?#]+/showimage/zzup-8769086487/image000\d\d-5896498214-40-9689595623/Courtesan/9879560327/zzup.com.jpg",
+},
+
+{
+    "#url"     : "https://www.zzup.com/content/NjM=/MetArt_20080206_viki_c_sensazioni_by_ingret/OTE=/index.html",
+    "#category": ("", "zzup", "gallery"),
+    "#class"   : zzup.ZzupGalleryExtractor,
+    "#pattern" : r"https://zzup\.com/[^/?#]+/showimage/zzup-8769086487/image\d+-5896498214-\d+-9689595623/[^/?#]+/9879560327/zzup.com.jpg",
+},
+
+{
+    "#url"     : "https://w.zzup.com/content/NjM=/MetArt_20080206_viki_c_sensazioni_by_ingret/OTE=/index.html",
+    "#category": ("", "zzup", "gallery"),
+    "#class"   : zzup.ZzupGalleryExtractor,
+    "#pattern" : r"https://zzup\.com/[^/?#]+/showimage/zzup-8769086487/image\d+-5896498214-\d+-9689595623/[^/?#]+/9879560327/zzup.com.jpg",
 },
 
 {
