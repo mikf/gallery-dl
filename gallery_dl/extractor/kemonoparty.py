@@ -123,6 +123,9 @@ class KemonopartyExtractor(Extractor):
                     g(post) for g in generators):
                 url = file["path"]
 
+                if "\\" in url:
+                    file["path"] = url = url.replace("\\", "/")
+
                 match = find_hash(url)
                 if match:
                     file["hash"] = hash = match.group(1)
