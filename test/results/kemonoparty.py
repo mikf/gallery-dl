@@ -410,6 +410,26 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://kemono.su/boosty/user/felixf/post/d9d8d670-16be-4e06-8ff9-65b13e322ba8",
+    "#comment" : r"'\' in file paths",
+    "#category": ("", "kemonoparty", "boosty"),
+    "#class"   : kemonoparty.KemonopartyPostExtractor,
+    "#urls"    : (
+        "https://kemono.su/data/dd/35/dd35c43d8a93f1806f094d9331a17c5037ed5d93e0f30c28d3cca2056b400aa6.png",
+        "https://kemono.su/data/25/48/254864eb2523ab48be8d3fb7ad21ab3a127d61736b76602f8421cde88700a174.png",
+    ),
+
+    "hash": {
+        "dd35c43d8a93f1806f094d9331a17c5037ed5d93e0f30c28d3cca2056b400aa6",
+        "254864eb2523ab48be8d3fb7ad21ab3a127d61736b76602f8421cde88700a174",
+    },
+    "path": {
+        "/dd/35/dd35c43d8a93f1806f094d9331a17c5037ed5d93e0f30c28d3cca2056b400aa6.png",
+        "/25/48/254864eb2523ab48be8d3fb7ad21ab3a127d61736b76602f8421cde88700a174.png",
+    },
+},
+
+{
     "#url"     : "https://kemono.su/discord/server/488668827274444803/608504710906904576",
     "#category": ("", "kemonoparty", "discord"),
     "#class"   : kemonoparty.KemonopartyDiscordExtractor,
