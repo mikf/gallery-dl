@@ -5,6 +5,7 @@
 # published by the Free Software Foundation.
 
 from gallery_dl.extractor import issuu
+from gallery_dl import exception
 
 
 __tests__ = (
@@ -35,10 +36,11 @@ __tests__ = (
 },
 
 {
-    "#url"     : "https://issuu.com/foodhome1955/docs/fh_winter2025-issuu-011625",
-    "#comment" : "HTML escapes",
-    "#class"   : issuu.IssuuPublicationExtractor,
-    "#count"   : 84,
+    "#url"      : "https://issuu.com/foodhome1955/docs/fh_winter2025-issuu-011625",
+    "#comment"  : "HTML escapes",
+    "#class"    : issuu.IssuuPublicationExtractor,
+    "#exception": exception.NotFoundError,
+    "#count"    : 84,
 
     "document": {
         "access"          : "PUBLIC",

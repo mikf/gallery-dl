@@ -29,9 +29,11 @@ class IssuuPublicationExtractor(IssuuBase, GalleryExtractor):
     example = "https://issuu.com/issuu/docs/TITLE/"
 
     def metadata(self, page):
-        pos = page.rindex('id="initial-data"')
-        data = util.json_loads(text.unescape(text.rextract(
-            page, '<script data-json="', '"', pos)[0]))
+
+        data = text.extr(
+            page, '{\\"documentTextVersion\\":', ']\\n"])</script>')
+        data = util.json_loads(text.unescape(
+            '{"":' + data.replace('\\"', '"')))
 
         doc = data["initialDocumentData"]["document"]
         doc["date"] = text.parse_datetime(
@@ -39,7 +41,7 @@ class IssuuPublicationExtractor(IssuuBase, GalleryExtractor):
 
         self._cnt = text.parse_int(doc["pageCount"])
         self._tpl = "https://{}/{}-{}/jpg/page_{{}}.jpg".format(
-            data["config"]["hosts"]["image"],
+            "image.isu.pub",  # data["config"]["hosts"]["image"],
             doc["revisionId"],
             doc["publicationId"],
         )
@@ -66,9 +68,8 @@ class IssuuUserExtractor(IssuuBase, Extractor):
             url = base + "/" + str(pnum) if pnum > 1 else base
             try:
                 html = self.request(url).text
-                data = util.json_loads(text.unescape(text.extr(
-                    html, '</main></div><script data-json="', '" id="')))
-                docs = data["docs"]
+                data = text.extr(html, '\\"docs\\":', '}]\\n"]')
+                docs = util.json_loads(data.replace('\\"', '"'))
             except Exception as exc:
                 self.log.debug("", exc_info=exc)
                 return
