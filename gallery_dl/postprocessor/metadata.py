@@ -180,7 +180,10 @@ class MetadataPP(PostProcessor):
             pathfmt.directory_formatters = self._directory_formatters
             pathfmt.directory_conditions = ()
             segments = pathfmt.build_directory(pathfmt.kwdict)
-            directory = pathfmt.clean_path(os.sep.join(segments) + os.sep)
+            if segments:
+                directory = pathfmt.clean_path(os.sep.join(segments) + os.sep)
+            else:
+                directory = "." + os.sep
             return os.path.join(self._base(pathfmt), directory)
         finally:
             pathfmt.directory_conditions = conditions
