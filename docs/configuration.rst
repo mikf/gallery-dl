@@ -401,6 +401,7 @@ Default
         ``soundgasm``,
         ``urlgalleries``,
         ``vk``,
+        ``webtoons``,
         ``weebcentral``,
         ``xfolio``,
         ``zerochan``

@@ -20,6 +20,7 @@ class WebtoonsBase():
     category = "webtoons"
     root = "https://www.webtoons.com"
     cookies_domain = ".webtoons.com"
+    request_interval = (0.5, 1.5)
 
     def setup_agegate_cookies(self):
         self.cookies_update({
