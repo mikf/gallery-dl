@@ -6611,6 +6611,17 @@ Description
     Note: `metadata.extension`_ is ignored if this option is set.
 
 
+metadata.metadata-path
+----------------------
+Type
+    ``string``
+Example
+    ``"_meta_path"``
+Description
+    Insert the path of generated files
+    into metadata dictionaries as the given name.
+
+
 metadata.event
 --------------
 Type

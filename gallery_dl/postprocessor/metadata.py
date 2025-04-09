@@ -108,6 +108,7 @@ class MetadataPP(PostProcessor):
         self.omode = options.get("open", omode)
         self.encoding = options.get("encoding", "utf-8")
         self.skip = options.get("skip", False)
+        self.meta_path = options.get("metadata-path")
 
     def run(self, pathfmt):
         archive = self.archive
@@ -119,6 +120,9 @@ class MetadataPP(PostProcessor):
         else:
             directory = self._directory(pathfmt)
         path = directory + self._filename(pathfmt)
+
+        if self.meta_path is not None:
+            pathfmt.kwdict[self.meta_path] = path
 
         if self.skip and os.path.exists(path):
             return
