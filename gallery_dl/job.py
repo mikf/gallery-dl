@@ -212,7 +212,7 @@ class Job():
             else:
                 _filtered = True
 
-        if _filtered:
+        if _filtered and hasattr(self, 'hooks'):
             if 'filter' in self.hooks:
                 for callback in self.hooks['filter']:
                     callback(self.pathfmt)
