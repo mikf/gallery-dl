@@ -14,6 +14,13 @@ __tests__ = (
     "#category": ("", "webtoons", "episode"),
     "#class"   : webtoons.WebtoonsEpisodeExtractor,
     "#count"       : 5,
+    "#urls"        : (
+        "https://swebtoon-phinf.pstatic.net/20200513_191/1589322488148XfdRr_PNG/15893224850013525720.png?type=opti",
+        "https://swebtoon-phinf.pstatic.net/20200513_143/1589322489499KJLvU_PNG/15893224866183525723.png?type=opti",
+        "https://swebtoon-phinf.pstatic.net/20200513_281/15893224881499wbH7_PNG/15893224865073525729.png?type=opti",
+        "https://swebtoon-phinf.pstatic.net/20200513_155/1589322489501Kuczb_PNG/15893224866533525729.png?type=opti",
+        "https://swebtoon-phinf.pstatic.net/20200513_122/1589322489499nS1t2_PNG/15893224863973525726.png?type=opti",
+    ),
     "#sha1_url"    : "55bec5d7c42aba19e3d0d56db25fdf0b0b13be38",
     "#sha1_content": [
         "1748c7e82b6db910fa179f6dc7c4281b0f680fa7",
@@ -57,7 +64,12 @@ __tests__ = (
     "#url"     : "https://www.webtoons.com/en/canvas/i-want-to-be-a-cute-anime-girl/209-the-storys-story/viewer?title_no=349416&episode_no=214",
     "#category": ("", "webtoons", "episode"),
     "#class"   : webtoons.WebtoonsEpisodeExtractor,
-    "#count"   : 4,
+    "#urls"    : (
+        "https://swebtoon-phinf.pstatic.net/20220121_262/1642763563000TUsiC_JPEG/7ddc535a-0bde-40df-ab62-f912aed1c751.jpg",
+        "https://swebtoon-phinf.pstatic.net/20220121_152/1642763564219c8T9I_JPEG/73ccdf9f-c46c-4760-8553-799713300fd7.jpg",
+        "https://swebtoon-phinf.pstatic.net/20220121_80/16427635653964Eh5i_JPEG/1bd3c498-656b-4b1f-bf22-e25c01a01679.jpg",
+        "https://swebtoon-phinf.pstatic.net/20220121_224/1642763566551Rx6e2_JPEG/6e61cddc-0af5-4e2a-b3b4-67fdd258feac.jpg",
+    ),
 
     "comic_name"  : "I want to be a cute anime girl",
     "episode_name": "209 - The story's story",
@@ -70,7 +82,13 @@ __tests__ = (
     "#url"     : "https://www.webtoons.com/en/canvas/i-want-to-be-a-cute-anime-girl/174-not-194-it-was-a-typo-later/viewer?title_no=349416&episode_no=179",
     "#category": ("", "webtoons", "episode"),
     "#class"   : webtoons.WebtoonsEpisodeExtractor,
-    "#count"   : 4,
+    "#options" : {"quality": 50},
+    "#urls"    : (
+        "https://swebtoon-phinf.pstatic.net/20210629_102/1624911944660PIYD2_JPEG/27c5312d-7b9b-4b75-8026-526e9a55331a.jpg?type=q50",
+        "https://swebtoon-phinf.pstatic.net/20210629_295/1624911951107dhQEw_JPEG/fc4bd86a-effc-4f0e-88d5-8c48d6ec3902.jpg?type=q50",
+        "https://swebtoon-phinf.pstatic.net/20210629_293/16249119579830kbnl_JPEG/96203608-31e7-4f1c-a9e0-db5d43457884.jpg?type=q50",
+        "https://swebtoon-phinf.pstatic.net/20210629_152/1624911964359nWSlj_JPEG/510e1c7e-2d13-4757-b215-8fbd1883e81e.jpg?type=q50",
+    ),
 
     "comic_name"  : "I want to be a cute anime girl",
     "episode_name": "174 (not 194, it was a typo) - Later",
@@ -83,7 +101,12 @@ __tests__ = (
     "#url"     : "https://www.webtoons.com/en/canvas/us-over-here/1-the-wheel/viewer?title_no=919536&episode_no=1",
     "#category": ("", "webtoons", "episode"),
     "#class"   : webtoons.WebtoonsEpisodeExtractor,
-    "#count"   : 3,
+    "#options" : {"quality": {"jpg": "q0", "jpeg": "q100", "png": False}},
+    "#urls"    : (
+        "https://swebtoon-phinf.pstatic.net/20240125_32/17061125731244mMCw_JPEG/0001.JPEG?type=q100",
+        "https://swebtoon-phinf.pstatic.net/20240125_290/1706112575827OXqUk_JPEG/0059.JPEG?type=q100",
+        "https://swebtoon-phinf.pstatic.net/20240125_211/1706112575860p6rEU_JPEG/0060.JPEG?type=q100",
+    ),
 
     "comic_name"  : "(news soon)",
     "episode_name": "1. The Wheel",
