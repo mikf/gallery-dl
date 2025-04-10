@@ -5285,6 +5285,34 @@ Description
     Note: This requires 1 additional HTTP request per submission.
 
 
+extractor.webtoons.quality
+--------------------------
+Type
+    * ``integer``
+    * ``string``
+    * ``object`` (`ext` -> `type`)
+
+Default
+    ``"original"``
+Example
+    * ``90``
+    * ``"q50"``
+    * ``{"jpg": "q80", "jpeg": "q80", "png": false}``
+Description
+    Controls the quality of downloaded files by modifying URLs' ``type`` parameter.
+
+    ``"original"``
+        Download minimally compressed versions of JPG files
+    any ``integer``
+        Use ``"q<VALUE>"`` as ``type`` parameter for JPEG files
+    any ``string``
+        Use this value as ``type`` parameter for JPEG files
+    any ``object``
+        | Use the given values as ``type`` parameter for URLs with the specified extensions
+        | - Set a value to ``false`` to completely remove these extension's ``type`` parameter
+        | - Omit an extension to leave its URLs unchanged
+
+
 extractor.weibo.gifs
 --------------------
 Type
