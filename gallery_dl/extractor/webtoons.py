@@ -12,13 +12,15 @@
 from .common import GalleryExtractor, Extractor, Message
 from .. import exception, text, util
 
-BASE_PATTERN = r"(?:https?://)?(?:www\.)?webtoons\.com/(([^/?#]+)"
+BASE_PATTERN = r"(?:https?://)?(?:www\.)?webtoons\.com"
+LANG_PATTERN = BASE_PATTERN + r"/(([^/?#]+)"
 
 
 class WebtoonsBase():
     category = "webtoons"
     root = "https://www.webtoons.com"
     cookies_domain = ".webtoons.com"
+    request_interval = (0.5, 1.5)
 
     def setup_agegate_cookies(self):
         self.cookies_update({
@@ -34,7 +36,7 @@ class WebtoonsBase():
         response = Extractor.request(self, url, **kwargs)
         if response.history and "/ageGate" in response.url:
             raise exception.StopExtraction(
-                "HTTP redirect to age gate check ('%s')", response.request.url)
+                "HTTP redirect to age gate check ('%s')", response.url)
         return response
 
 
@@ -44,47 +46,19 @@ class WebtoonsEpisodeExtractor(WebtoonsBase, GalleryExtractor):
     directory_fmt = ("{category}", "{comic}")
     filename_fmt = "{episode_no}-{num:>02}.{extension}"
     archive_fmt = "{title_no}_{episode_no}_{num}"
-    pattern = (BASE_PATTERN + r"/([^/?#]+)/([^/?#]+)/(?:[^/?#]+))"
-               r"/viewer(?:\?([^#'\"]+))")
+    pattern = (LANG_PATTERN + r"/([^/?#]+)/([^/?#]+)/[^/?#]+)"
+               r"/viewer\?([^#'\"]+)")
     example = ("https://www.webtoons.com/en/GENRE/TITLE/NAME/viewer"
                "?title_no=123&episode_no=12345")
-    test = (
-        (("https://www.webtoons.com/en/comedy/safely-endangered"
-          "/ep-572-earth/viewer?title_no=352&episode_no=572"), {
-            "url": "55bec5d7c42aba19e3d0d56db25fdf0b0b13be38",
-            "content": ("1748c7e82b6db910fa179f6dc7c4281b0f680fa7",
-                        "42055e44659f6ffc410b3fb6557346dfbb993df3",
-                        "49e1f2def04c6f7a6a3dacf245a1cd9abe77a6a9"),
-            "count": 5,
-        }),
-        (("https://www.webtoons.com/en/challenge/punderworld"
-          "/happy-earth-day-/viewer?title_no=312584&episode_no=40"), {
-            "exception": exception.NotFoundError,
-            "keyword": {
-                "comic": "punderworld",
-                "description": str,
-                "episode": "36",
-                "episode_no": "40",
-                "genre": "challenge",
-                "title": r"re:^Punderworld - .+",
-                "title_no": "312584",
-            },
-        }),
-    )
-
-    def __init__(self, match):
-        self.path, self.lang, self.genre, self.comic, self.query = \
-            match.groups()
-
-        url = "{}/{}/viewer?{}".format(self.root, self.path, self.query)
-        GalleryExtractor.__init__(self, match, url)
 
     def _init(self):
         self.setup_agegate_cookies()
 
-        params = text.parse_query(self.query)
+        path, self.lang, self.genre, self.comic, query = self.groups
+        params = text.parse_query(query)
         self.title_no = params.get("title_no")
         self.episode_no = params.get("episode_no")
+        self.gallery_url = "{}/{}/viewer?{}".format(self.root, path, query)
 
     def metadata(self, page):
         extr = text.extract_from(page)
@@ -124,32 +98,49 @@ class WebtoonsEpisodeExtractor(WebtoonsBase, GalleryExtractor):
             "language"    : util.code_to_language(self.lang),
         }
 
-    @staticmethod
-    def images(page):
-        return [
-            (url.replace("://webtoon-phinf.", "://swebtoon-phinf."), None)
-            for url in text.extract_iter(
-                page, 'class="_images" data-url="', '"')
-        ]
+    def images(self, page):
+        quality = self.config("quality")
+        if quality is None or quality == "original":
+            quality = {"jpg": False, "jpeg": False, "webp": False}
+        elif not quality:
+            quality = None
+        elif isinstance(quality, str):
+            quality = {"jpg": quality, "jpeg": quality}
+        elif isinstance(quality, int):
+            quality = "q" + str(quality)
+            quality = {"jpg": quality, "jpeg": quality}
+        elif not isinstance(quality, dict):
+            quality = None
+
+        results = []
+        for url in text.extract_iter(
+                page, 'class="_images" data-url="', '"'):
+
+            if quality is not None:
+                path, _, query = url.rpartition("?")
+                type = quality.get(path.rpartition(".")[2].lower())
+                if type is False:
+                    url = path
+                elif type:
+                    url = "{}?type={}".format(path, type)
+
+            url = url.replace("://webtoon-phinf.", "://swebtoon-phinf.")
+            results.append((url, None))
+        return results
 
 
 class WebtoonsComicExtractor(WebtoonsBase, Extractor):
     """Extractor for an entire comic on webtoons.com"""
     subcategory = "comic"
     categorytransfer = True
-    pattern = (BASE_PATTERN + r"/([^/?#]+)/([^/?#]+))"
-               r"/list(?:\?([^#]+))")
+    pattern = LANG_PATTERN + r"/([^/?#]+)/([^/?#]+))/list\?([^#]+)"
     example = "https://www.webtoons.com/en/GENRE/TITLE/list?title_no=123"
-
-    def __init__(self, match):
-        Extractor.__init__(self, match)
-        self.path, self.lang, self.genre, self.comic, self.query = \
-            match.groups()
 
     def _init(self):
         self.setup_agegate_cookies()
 
-        params = text.parse_query(self.query)
+        self.path, self.lang, self.genre, self.comic, query = self.groups
+        params = text.parse_query(query)
         self.title_no = params.get("title_no")
         self.page_no = text.parse_int(params.get("page"), 1)
 
@@ -164,7 +155,7 @@ class WebtoonsComicExtractor(WebtoonsBase, Extractor):
             path = "/{}/list?title_no={}&page={}".format(
                 self.path, self.title_no, self.page_no)
 
-            if page and path not in page:
+            if page is not None and path not in page:
                 return
 
             response = self.request(self.root + path)
@@ -182,11 +173,47 @@ class WebtoonsComicExtractor(WebtoonsBase, Extractor):
 
             self.page_no += 1
 
-    @staticmethod
-    def get_episode_urls(page):
+    def get_episode_urls(self, page):
         """Extract and return all episode urls in 'page'"""
         page = text.extr(page, 'id="_listUl"', '</ul>')
         return [
             match.group(0)
             for match in WebtoonsEpisodeExtractor.pattern.finditer(page)
         ]
+
+
+class WebtoonsArtistExtractor(WebtoonsBase, Extractor):
+    """Extractor for webtoons.com artists"""
+    subcategory = "artist"
+    pattern = BASE_PATTERN + r"/p/community/([^/?#]+)/u/([^/?#]+)"
+    example = "https://www.webtoons.com/p/community/LANG/u/ARTIST"
+
+    def items(self):
+        self.setup_agegate_cookies()
+
+        for comic in self.comics():
+            comic["_extractor"] = WebtoonsComicExtractor
+            comic_url = self.root + comic["extra"]["episodeListPath"]
+            yield Message.Queue, comic_url, comic
+
+    def comics(self):
+        lang, artist = self.groups
+        language = util.code_to_language(lang).upper()
+
+        url = "{}/p/community/{}/u/{}".format(
+            self.root, lang, artist)
+        page = self.request(url).text
+        creator_id = text.extr(page, '\\"creatorId\\":\\"', '\\')
+
+        url = "{}/p/community/api/v1/creator/{}/titles".format(
+            self.root, creator_id)
+        params = {
+            "language": language,
+            "nextSize": "50",
+        }
+        headers = {
+            "language": language,
+        }
+        data = self.request(url, params=params, headers=headers).json()
+
+        return data["result"]["titles"]

@@ -539,7 +539,7 @@ class Extractor():
         for name, value in cookiedict.items():
             set_cookie(name, value, domain=domain)
 
-    def cookies_check(self, cookies_names, domain=None):
+    def cookies_check(self, cookies_names, domain=None, subdomains=False):
         """Check if all 'cookies_names' are in the session's cookiejar"""
         if not self.cookies:
             return False
@@ -550,26 +550,31 @@ class Extractor():
         now = time.time()
 
         for cookie in self.cookies:
-            if cookie.name in names and (
-                    not domain or cookie.domain == domain):
+            if cookie.name not in names:
+                continue
 
-                if cookie.expires:
-                    diff = int(cookie.expires - now)
+            if not domain or cookie.domain == domain:
+                pass
+            elif not subdomains or not cookie.domain.endswith(domain):
+                continue
 
-                    if diff <= 0:
-                        self.log.warning(
-                            "Cookie '%s' has expired", cookie.name)
-                        continue
+            if cookie.expires:
+                diff = int(cookie.expires - now)
 
-                    elif diff <= 86400:
-                        hours = diff // 3600
-                        self.log.warning(
-                            "Cookie '%s' will expire in less than %s hour%s",
-                            cookie.name, hours + 1, "s" if hours else "")
+                if diff <= 0:
+                    self.log.warning(
+                        "Cookie '%s' has expired", cookie.name)
+                    continue
 
-                names.discard(cookie.name)
-                if not names:
-                    return True
+                elif diff <= 86400:
+                    hours = diff // 3600
+                    self.log.warning(
+                        "Cookie '%s' will expire in less than %s hour%s",
+                        cookie.name, hours + 1, "s" if hours else "")
+
+            names.discard(cookie.name)
+            if not names:
+                return True
         return False
 
     def _extract_jsonld(self, page):

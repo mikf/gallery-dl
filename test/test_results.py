@@ -92,6 +92,15 @@ class TestExtractorResults(unittest.TestCase):
             self.assertGreaterEqual(value, range.start, msg=msg)
 
     def _run_test(self, result):
+        if result.get("#fail"):
+            del result["#fail"]
+            try:
+                self._run_test(result)
+            except AssertionError:
+                return
+            else:
+                self.fail("Test did not fail")
+
         base, cat, sub = result_categories(result)
         result.pop("#comment", None)
         result.pop("#category", None)
@@ -241,7 +250,10 @@ class TestExtractorResults(unittest.TestCase):
             elif isinstance(test, range):
                 self.assertRange(value, test, msg=path)
             elif isinstance(test, set):
-                self.assertTrue(value in test or type(value) in test, msg=path)
+                try:
+                    self.assertIn(value, test, msg=path)
+                except AssertionError:
+                    self.assertIn(type(value), test, msg=path)
             elif isinstance(test, list):
                 subtest = False
                 for idx, item in enumerate(test):

@@ -15,7 +15,36 @@ __tests__ = (
 
     "title"        : "Mikacho 조미카, JOApictures ‘Someday’",
     "post_category": "Korea",
-    "tags"         : ["[JOApictures]", "Mikacho 조미카"]
+    "tags"         : ["[JOApictures]", "Mikacho 조미카"],
+},
+
+{
+    "#url"  : "https://everia.club/2020/12/13/karin-fujiyoshi-%e8%97%a4%e5%90%89%e5%a4%8f%e9%88%b4-rina-matsuda-%e6%9d%be%e7%94%b0%e9%87%8c%e5%a5%88-ex-taishu-2020-no-11-ex%e5%a4%a7%e8%a1%86-2020%e5%b9%b411%e6%9c%88%e5%8f%b7/",
+    "#class": everia.EveriaPostExtractor,
+    "#count": 21,
+
+    "title"        : "Karin Fujiyoshi 藤吉夏鈴, Rina Matsuda 松田里奈, Ex-Taishu 2020 No.11 (EX大衆 2020年11月号)",
+    "post_category": "Uncategorized",
+    "tags"         : [
+        "Ex-Taishu EX大衆",
+        "Karin Fujiyoshi 藤吉夏鈴",
+        "Rina Matsuda 松田里奈",
+        "Sakurazaka46 櫻坂46",
+    ],
+},
+
+{
+    "#url"  : "https://everia.club/2019/03/26/moeka-yahagi-%e7%9f%a2%e4%bd%9c%e8%90%8c%e5%a4%8f-b-l-t-graph-2019%e5%b9%b403%e6%9c%88%e5%8f%b7-vol-41/",
+    "#class": everia.EveriaPostExtractor,
+    "#count": 9,
+
+    "title"        : "Moeka Yahagi 矢作萌夏, B.L.T Graph 2019年03月号 Vol.41",
+    "post_category": "Uncategorized",
+    "tags"         : [
+        "AKB48",
+        "B.L.T ビー・エル・ティー",
+        "Moeka Yahagi 矢作萌夏",
+    ],
 },
 
 {

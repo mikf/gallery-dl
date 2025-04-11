@@ -384,6 +384,7 @@ Type
 Default
     * ``"0.5-1.5"``
         ``ao3``,
+        ``arcalive``,
         ``civitai``,
         ``[Danbooru]``,
         ``[E621]``,
@@ -400,6 +401,7 @@ Default
         ``soundgasm``,
         ``urlgalleries``,
         ``vk``,
+        ``webtoons``,
         ``weebcentral``,
         ``xfolio``,
         ``zerochan``
@@ -662,6 +664,7 @@ Default
     * ``"gallery-dl/VERSION"``: ``[Danbooru]``, ``mangadex``
     * ``"gallery-dl/VERSION (by mikf)"``: ``[E621]``
     * ``"Patreon/72.2.28 (Android; Android 14; Scale/2.10)"``: ``patreon``
+    * ``"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36"``: ``instagram``
     * ``"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:LATEST) Gecko/20100101 Firefox/LATEST"``: otherwise
 Description
     User-Agent header value used for HTTP requests.
@@ -1394,6 +1397,37 @@ Description
     Format(s) to download.
 
 
+extractor.arcalive.emoticons
+----------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Download emoticon images.
+
+
+extractor.arcalive.gifs
+-----------------------
+Type
+    * ``bool``
+    * ``string``
+Default
+    ``true``
+Description
+    Try to download ``.gif`` versions of ``.mp4`` videos.
+
+    ``true`` | ``"fallback``
+        Use the ``.gif`` version as primary URL
+        and provide the ``.mp4`` one as
+        `fallback <extractor.*.fallback_>`__.
+    ``"check"``
+        Check whether a ``.gif`` version is available
+        by sending an extra HEAD request.
+    ``false``
+        Always download the ``.mp4`` version.
+
+
 extractor.artstation.external
 -----------------------------
 Type
@@ -1457,6 +1491,29 @@ Description
     * ``true``: Start on users' main gallery pages and recursively
       descend into subfolders
     * ``false``: Get posts from "Latest Updates" pages
+
+
+extractor.batoto.domain
+-----------------------
+Type
+    ``string``
+Default
+    ``"auto"``
+Example
+    ``"mangatoto.org"``
+Description
+    Specifies the domain used by ``batoto`` extractors.
+
+    ``"auto"`` | ``"url"``
+        Use the input URL's domain
+    ``"nolegacy"``
+        Use the input URL's domain
+        - replace legacy domains with ``"xbato.org"``
+    ``"nowarn"``
+        Use the input URL's domain
+        - do not warn about legacy domains
+    any ``string``
+        Use this domain
 
 
 extractor.bbc.width
@@ -1841,12 +1898,14 @@ Description
 
 extractor.[Danbooru].pool.order-posts
 -------------------------------------
+extractor.[Danbooru].favgroup.order-posts
+-----------------------------------------
 Type
     ``string``
 Default
     ``"pool"``
 Description
-    Controls the order in which pool posts are returned.
+    Controls the order in which ``pool``/``favgroup`` posts are returned.
 
     ``"pool"`` | ``"pool_asc"`` | ``"asc"`` | ``"asc_pool"``
         Pool order
@@ -2239,6 +2298,16 @@ Description
 
     | Each format is parsed as ``SIZE.EXT``.
     | Leave ``SIZE`` empty to download the regular, small avatar format.
+
+
+extractor.deviantart.folder.subfolders
+--------------------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Also extract subfolder content.
 
 
 extractor.discord.embeds
@@ -2748,9 +2817,6 @@ Description
 
     Available formats are ``"webp"`` and ``"avif"``.
 
-    ``"original"`` will try to download the original ``jpg`` or ``png`` versions,
-    but is most likely going to fail with ``403 Forbidden`` errors.
-
 
 extractor.imagechest.access-token
 ---------------------------------
@@ -2933,11 +2999,19 @@ Description
 extractor.instagram.videos
 --------------------------
 Type
-    ``bool``
+    * ``bool``
+    * ``string``
 Default
     ``true``
 Description
-    Download video files.
+    Controls video download behavior.
+
+    ``true`` | ``"dash"`` | ``"ytdl"``
+        Download videos from ``video_dash_manifest`` data using |ytdl|
+    ``"merged"``
+        Download pre-merged video formats
+    ``false``
+        Do not download videos
 
 
 extractor.itaku.videos
@@ -2948,6 +3022,19 @@ Default
     ``true``
 Description
     Download video files.
+
+
+extractor.kemonoparty.archives
+------------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Extract additional metadata for ``archives`` files, including
+    ``file``, ``file_list``, and ``password``.
+
+    Note: This requires 1 additional HTTP request per ``archives`` file.
 
 
 extractor.kemonoparty.comments
@@ -3034,9 +3121,9 @@ extractor.kemonoparty.metadata
 Type
     ``bool``
 Default
-    ``false``
+    ``true``
 Description
-    Extract ``username`` metadata.
+    Extract ``username`` and ``user_profile`` metadata.
 
 
 extractor.kemonoparty.revisions
@@ -4371,29 +4458,34 @@ Description
 
     Possible formats include
 
-    * ``"gif"``
-    * ``"gif_transparent"``
-    * ``"gifpreview"``
-    * ``"mediumgif"``
-    * ``"tinygif"``
-    * ``"tinygif_transparent"``
-    * ``"mp4"``
-    * ``"tinymp4"``
-    * ``"webm"``
-    * ``"webp"``
-    * ``"webp_transparent"``
-    * ``"tinywebp"``
-    * ``"tinywebp_transparent"``
+    * ``gif``
+    * ``gif_transparent``
+    * ``mediumgif``
+    * ``gifpreview``
+    * ``tinygif``
+    * ``tinygif_transparent``
+    * ``mp4``
+    * ``tinymp4``
+    * ``webm``
+    * ``webp``
+    * ``webp_transparent``
+    * ``tinywebp``
+    * ``tinywebp_transparent``
 
 
 extractor.tiktok.audio
 ----------------------
 Type
-    ``bool``
+    * ``bool``
+    * ``string``
 Default
     ``true``
 Description
-    Download audio tracks using |ytdl|.
+    Controls audio download behavior.
+
+    * ``true``: Download audio tracks
+    * ``"ytdl"``: Download audio tracks using |ytdl|
+    * ``false``: Ignore audio tracks
 
 
 extractor.tiktok.videos
@@ -5193,6 +5285,34 @@ Description
     Note: This requires 1 additional HTTP request per submission.
 
 
+extractor.webtoons.quality
+--------------------------
+Type
+    * ``integer``
+    * ``string``
+    * ``object`` (`ext` -> `type`)
+
+Default
+    ``"original"``
+Example
+    * ``90``
+    * ``"q50"``
+    * ``{"jpg": "q80", "jpeg": "q80", "png": false}``
+Description
+    Controls the quality of downloaded files by modifying URLs' ``type`` parameter.
+
+    ``"original"``
+        Download minimally compressed versions of JPG files
+    any ``integer``
+        Use ``"q<VALUE>"`` as ``type`` parameter for JPEG files
+    any ``string``
+        Use this value as ``type`` parameter for JPEG files
+    any ``object``
+        | Use the given values as ``type`` parameter for URLs with the specified extensions
+        | - Set a value to ``false`` to completely remove these extension's ``type`` parameter
+        | - Omit an extension to leave its URLs unchanged
+
+
 extractor.weibo.gifs
 --------------------
 Type
@@ -5281,6 +5401,16 @@ Description
     Number of results to return in a single API query.
 
     The value must be between 10 and 500.
+
+
+extractor.wikimedia.subcategories
+---------------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    For ``Category:`` pages, recursively descent into subcategories.
 
 
 extractor.ytdl.cmdline-args
@@ -6508,6 +6638,17 @@ Description
     files with, which will replace the original filename extensions.
 
     Note: `metadata.extension`_ is ignored if this option is set.
+
+
+metadata.metadata-path
+----------------------
+Type
+    ``string``
+Example
+    ``"_meta_path"``
+Description
+    Insert the path of generated files
+    into metadata dictionaries as the given name.
 
 
 metadata.event

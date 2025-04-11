@@ -21,6 +21,7 @@ class NozomiExtractor(Extractor):
     """Base class for nozomi extractors"""
     category = "nozomi"
     root = "https://nozomi.la"
+    domain = "gold-usergeneratedcontent.net"
     filename_fmt = "{postid} {dataid}.{extension}"
     archive_fmt = "{dataid}"
 
@@ -31,8 +32,8 @@ class NozomiExtractor(Extractor):
         data = self.metadata()
 
         for post_id in map(str, self.posts()):
-            url = "https://j.nozomi.la/post/{}/{}/{}.json".format(
-                post_id[-1], post_id[-3:-1], post_id)
+            url = "https://j.{}/post/{}/{}/{}.json".format(
+                self.domain, post_id[-1], post_id[-3:-1], post_id)
             response = self.request(url, fatal=False)
 
             if response.status_code >= 400:
@@ -76,8 +77,8 @@ class NozomiExtractor(Extractor):
                     ext = "webp"
 
                 post["extension"] = ext
-                post["url"] = url = "https://{}.nozomi.la/{}/{}/{}.{}".format(
-                    subdomain, did[-1], did[-3:-1], did, ext)
+                post["url"] = url = "https://{}.{}/{}/{}/{}.{}".format(
+                    subdomain, self.domain, did[-1], did[-3:-1], did, ext)
                 yield Message.Url, url, post
 
     def posts(self):
@@ -168,7 +169,7 @@ class NozomiSearchExtractor(NozomiExtractor):
         negative = []
 
         def nozomi(path):
-            url = "https://j.nozomi.la/" + path + ".nozomi"
+            url = "https://j.{}/{}.nozomi".format(self.domain, path)
             return decode_nozomi(self.request(url).content)
 
         for tag in self.tags:

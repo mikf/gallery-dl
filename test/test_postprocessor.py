@@ -511,6 +511,17 @@ class MetadataTest(BasePostprocessorTest):
         path = self.pathfmt.realdirectory + "../json/12500/file.ext.json"
         m.assert_called_once_with(path, "w", encoding="utf-8")
 
+    def test_metadata_directory_empty(self):
+        self._create(
+            {"directory": []},
+        )
+
+        with patch("builtins.open", mock_open()) as m:
+            self._trigger()
+
+        path = self.pathfmt.realdirectory + "./file.ext.json"
+        m.assert_called_once_with(path, "w", encoding="utf-8")
+
     def test_metadata_basedirectory(self):
         self._create({"base-directory": True})
 
@@ -543,6 +554,16 @@ class MetadataTest(BasePostprocessorTest):
 
         path = self.pathfmt.realdirectory + "test_file__meta_.data"
         m.assert_called_once_with(path, "w", encoding="utf-8")
+
+    def test_metadata_meta_path(self):
+        self._create({
+            "metadata-path": "_meta_path",
+        })
+
+        self._trigger()
+
+        self.assertEqual(self.pathfmt.kwdict["_meta_path"],
+                         self.pathfmt.realpath + ".json")
 
     def test_metadata_stdout(self):
         self._create({"filename": "-", "indent": None, "sort": True})

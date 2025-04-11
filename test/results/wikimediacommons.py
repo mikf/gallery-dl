@@ -21,4 +21,24 @@ __tests__ = (
     "#class"   : wikimedia.WikimediaArticleExtractor,
 },
 
+{
+    "#url"     : "https://commons.wikimedia.org/wiki/Category:Ivan_Shishkin",
+    "#comment" : "subcategories",
+    "#category": ("wikimedia", "wikimediacommons", "category"),
+    "#class"   : wikimedia.WikimediaArticleExtractor,
+    "#options" : {"image-filter": "False"},
+
+    "#urls": (
+        "https://commons.wikimedia.org/wiki/Category:3558_Shishkin",
+        "https://commons.wikimedia.org/wiki/Category:Drawings_by_Ivan_Shishkin",
+        "https://commons.wikimedia.org/wiki/Category:Ivan_Shishkin_grave",
+        "https://commons.wikimedia.org/wiki/Category:Ivan_Shishkin_in_art",
+        "https://commons.wikimedia.org/wiki/Category:Ivan_Shishkin._To_the_190th_anniversary_of_the_birth",
+        "https://commons.wikimedia.org/wiki/Category:Paintings_by_Ivan_Shishkin",
+        "https://commons.wikimedia.org/wiki/Category:Shishkin_street_(Martyshkino)",
+        "https://commons.wikimedia.org/wiki/Category:Shishkin_street,_Moscow",
+        "https://commons.wikimedia.org/wiki/Category:Shishkin's_Pine",
+    ),
+},
+
 )

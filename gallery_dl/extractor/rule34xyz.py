@@ -23,10 +23,18 @@ class Rule34xyzExtractor(BooruExtractor):
     per_page = 60
 
     TAG_TYPES = {
-        0: "general",
-        1: "copyright",
-        2: "character",
-        3: "artist",
+        None: "general",
+        0   : "general",
+        1   : "general",
+        2   : "copyright",
+        4   : "character",
+        8   : "artist",
+    }
+    FORMATS = {
+        "10" : "pic.jpg",
+        "100": "mov.mp4",
+        "101": "mov720.mp4",
+        "102": "mov480.mp4",
     }
 
     def _init(self):
@@ -36,49 +44,49 @@ class Rule34xyzExtractor(BooruExtractor):
                 formats = formats.split(",")
             self.formats = formats
         else:
-            self.formats = ("10", "40", "41", "2")
+            self.formats = ("100", "101", "102", "10")
 
     def _file_url(self, post):
-        post["files"] = files = {
-            str(link["type"]): link["url"]
-            for link in post.pop("imageLinks")
-        }
+        files = post["files"]
 
         for fmt in self.formats:
             if fmt in files:
+                extension = self.FORMATS.get(fmt)
                 break
         else:
-            fmt = "2"
             self.log.warning("%s: Requested format not available", post["id"])
+            fmt = next(iter(files))
 
-        post["file_url"] = url = files[fmt]
+        post_id = post["id"]
+        root = self.root_cdn if files[fmt][0] else self.root
+        post["file_url"] = url = "{}/posts/{}/{}/{}.{}".format(
+            root, post_id // 1000, post_id, post_id, extension)
         post["format_id"] = fmt
-        post["format"] = url.rsplit(".", 2)[1]
+        post["format"] = extension.partition(".")[0]
+
         return url
 
     def _prepare(self, post):
-        post.pop("filesPreview", None)
-        post.pop("tagsWithType", None)
+        post.pop("files", None)
         post["date"] = text.parse_datetime(
-            post["created"][:19], "%Y-%m-%dT%H:%M:%S")
+            post["created"], "%Y-%m-%dT%H:%M:%S.%fZ")
+        post["filename"], _, post["format"] = post["filename"].rpartition(".")
+        if "tags" in post:
+            post["tags"] = [t["value"] for t in post["tags"]]
 
     def _tags(self, post, _):
-        if post.get("tagsWithType") is None:
+        if "tags" not in post:
             post.update(self._fetch_post(post["id"]))
 
         tags = collections.defaultdict(list)
-        tagslist = []
-        for tag in post["tagsWithType"]:
-            value = tag["value"]
-            tagslist.append(value)
-            tags[tag["type"]].append(value)
+        for tag in post["tags"]:
+            tags[tag["type"]].append(tag["value"])
         types = self.TAG_TYPES
         for type, values in tags.items():
             post["tags_" + types[type]] = values
-        post["tags"] = tagslist
 
     def _fetch_post(self, post_id):
-        url = "{}/api/post/{}".format(self.root, post_id)
+        url = "{}/api/v2/post/{}".format(self.root, post_id)
         return self.request(url).json()
 
     def _pagination(self, endpoint, params=None):
@@ -86,22 +94,22 @@ class Rule34xyzExtractor(BooruExtractor):
 
         if params is None:
             params = {}
-        params["IncludeLinks"] = "true"
-        params["IncludeTags"] = "true"
-        params["OrderBy"] = "0"
         params["Skip"] = self.page_start * self.per_page
-        params["Take"] = self.per_page
-        params["DisableTotal"] = "true"
+        params["take"] = self.per_page
+        params["CountTotal"] = False
+        params["IncludeLinks"] = True
+        params["OrderBy"] = 0
         threshold = self.per_page
 
         while True:
-            data = self.request(url, params=params).json()
+            data = self.request(url, method="POST", json=params).json()
 
             yield from data["items"]
 
             if len(data["items"]) < threshold:
                 return
-            params["Skip"] += params["Take"]
+            params["Skip"] += self.per_page
+            params["cursor"] = data["cursor"]
 
 
 class Rule34xyzPostExtractor(Rule34xyzExtractor):
@@ -125,9 +133,8 @@ class Rule34xyzPlaylistExtractor(Rule34xyzExtractor):
         return {"playlist_id": self.groups[0]}
 
     def posts(self):
-        endpoint = "/playlist-item"
-        params = {"PlaylistId": self.groups[0]}
-        return self._pagination(endpoint, params)
+        endpoint = "/v2/post/search/playlist/" + self.groups[0]
+        return self._pagination(endpoint)
 
 
 class Rule34xyzTagExtractor(Rule34xyzExtractor):
@@ -138,10 +145,11 @@ class Rule34xyzTagExtractor(Rule34xyzExtractor):
     example = "https://rule34.xyz/TAG"
 
     def metadata(self):
-        self.tags = text.unquote(self.groups[0]).replace("_", " ")
-        return {"search_tags": self.tags}
+        self.tags = text.unquote(text.unquote(
+            self.groups[0]).replace("_", " ")).split("|")
+        return {"search_tags": ", ".join(self.tags)}
 
     def posts(self):
-        endpoint = "/post/search"
-        params = {"Tag": self.tags}
+        endpoint = "/v2/post/search/root"
+        params = {"includeTags": self.tags}
         return self._pagination(endpoint, params)

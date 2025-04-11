@@ -39,6 +39,8 @@ class SubscribestarExtractor(Extractor):
         for post_html in self.posts():
             media = self._media_from_post(post_html)
             data = self._data_from_post(post_html)
+            data["title"] = text.unescape(text.extr(
+                data["content"], "<h1>", "</h1>"))
             yield Message.Directory, data
             for num, item in enumerate(media, 1):
                 item.update(data)
@@ -55,7 +57,9 @@ class SubscribestarExtractor(Extractor):
         while True:
             response = Extractor.request(self, url, **kwargs)
 
-            if response.history and "/verify_subscriber" in response.url:
+            if response.history and (
+                    "/verify_subscriber" in response.url or
+                    "/age_confirmation_warning" in response.url):
                 raise exception.StopExtraction(
                     "HTTP redirect to %s", response.url)
 

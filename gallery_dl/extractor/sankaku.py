@@ -220,12 +220,15 @@ class SankakuAPI():
         while True:
             data = self._call(endpoint, params)
 
-            if tags is None:
-                tags = data["data"]
+            tags_new = data["data"]
+            if not tags_new:
+                return tags or []
+            elif tags is None:
+                tags = tags_new
             else:
-                tags.extend(data["data"])
+                tags.extend(tags_new)
 
-            if len(tags) >= data["total"]:
+            if len(tags_new) < 80 or len(tags) >= data["total"]:
                 return tags
             params["page"] += 1
 

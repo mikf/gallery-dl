@@ -98,6 +98,12 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
+    <td>Arcalive</td>
+    <td>https://arca.live/</td>
+    <td>Boards, Posts, User Posts</td>
+    <td></td>
+</tr>
+<tr>
     <td>Architizer</td>
     <td>https://architizer.com/</td>
     <td>Firms, Projects</td>
@@ -341,12 +347,6 @@ Consider all listed sites to potentially be NSFW.
     <td>Hentai2Read</td>
     <td>https://hentai2read.com/</td>
     <td>Chapters, Manga</td>
-    <td></td>
-</tr>
-<tr>
-    <td>HentaiFox</td>
-    <td>https://hentaifox.com/</td>
-    <td>Galleries, Search Results</td>
     <td></td>
 </tr>
 <tr>
@@ -1082,7 +1082,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Webtoon</td>
     <td>https://www.webtoons.com/</td>
-    <td>Comics, Episodes</td>
+    <td>Artists, Comics, Episodes</td>
     <td></td>
 </tr>
 <tr>
@@ -1189,6 +1189,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Albums, individual Images, User Profiles</td>
     <td></td>
 </tr>
+<tr>
+    <td>ImagePond</td>
+    <td>https://imagepond.net/</td>
+    <td>Albums, individual Images, User Profiles</td>
+    <td></td>
+</tr>
 
 <tr>
     <td colspan="4"><strong>Danbooru Instances</strong></td>
@@ -1196,25 +1202,25 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Danbooru</td>
     <td>https://danbooru.donmai.us/</td>
-    <td>Artists, Artist Searches, Pools, Popular Images, Posts, Tag Searches</td>
+    <td>Artists, Artist Searches, Favorite Groups, Pools, Popular Images, Posts, Tag Searches</td>
     <td>Supported</td>
 </tr>
 <tr>
     <td>ATFBooru</td>
     <td>https://booru.allthefallen.moe/</td>
-    <td>Artists, Artist Searches, Pools, Popular Images, Posts, Tag Searches</td>
+    <td>Artists, Artist Searches, Favorite Groups, Pools, Popular Images, Posts, Tag Searches</td>
     <td>Supported</td>
 </tr>
 <tr>
     <td>Aibooru</td>
     <td>https://aibooru.online/</td>
-    <td>Artists, Artist Searches, Pools, Popular Images, Posts, Tag Searches</td>
+    <td>Artists, Artist Searches, Favorite Groups, Pools, Popular Images, Posts, Tag Searches</td>
     <td>Supported</td>
 </tr>
 <tr>
     <td>Booruvar</td>
     <td>https://booru.borvar.art/</td>
-    <td>Artists, Artist Searches, Pools, Popular Images, Posts, Tag Searches</td>
+    <td>Artists, Artist Searches, Favorite Groups, Pools, Popular Images, Posts, Tag Searches</td>
     <td>Supported</td>
 </tr>
 
@@ -1348,6 +1354,24 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>HentaiRox</td>
     <td>https://hentairox.com/</td>
+    <td>Galleries, Search Results, Tag Searches</td>
+    <td></td>
+</tr>
+<tr>
+    <td>HentaiFox</td>
+    <td>https://hentaifox.com/</td>
+    <td>Galleries, Search Results, Tag Searches</td>
+    <td></td>
+</tr>
+<tr>
+    <td>HentaiEnvy</td>
+    <td>https://hentaienvy.com/</td>
+    <td>Galleries, Search Results, Tag Searches</td>
+    <td></td>
+</tr>
+<tr>
+    <td>HentaiZap</td>
+    <td>https://hentaizap.com/</td>
     <td>Galleries, Search Results, Tag Searches</td>
     <td></td>
 </tr>

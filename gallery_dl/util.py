@@ -686,8 +686,10 @@ class CustomNone():
 
 
 # v128.0 release on 2024-07-09 has ordinal 739076
+# v137.0 release on 2025-04-01 has ordinal 739342
 # 735492 == 739076 - 128 * 28
-_ff_ver = (datetime.date.today().toordinal() - 735492) // 28
+# 735506 == 739342 - 137 * 28
+_ff_ver = (datetime.date.today().toordinal() - 735506) // 28
 
 NONE = CustomNone()
 EPOCH = datetime.datetime(1970, 1, 1)
@@ -698,6 +700,9 @@ EXECUTABLE = getattr(sys, "frozen", False)
 USERAGENT = "gallery-dl/" + version.__version__
 USERAGENT_FIREFOX = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:{}.0) "
                      "Gecko/20100101 Firefox/{}.0").format(_ff_ver, _ff_ver)
+USERAGENT_CHROME = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                    "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 "
+                    "Safari/537.36")
 SPECIAL_EXTRACTORS = {"oauth", "recursive", "generic"}
 GLOBALS = {
     "contains" : contains,
