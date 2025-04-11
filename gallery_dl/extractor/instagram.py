@@ -18,6 +18,7 @@ import re
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?instagram\.com"
 USER_PATTERN = BASE_PATTERN + r"/(?!(?:p|tv|reel|explore|stories)/)([^/?#]+)"
+SHARE_PATTERN = BASE_PATTERN + r"/share/"
 
 
 class InstagramExtractor(Extractor):
@@ -43,6 +44,14 @@ class InstagramExtractor(Extractor):
         self._logged_in = True
         self._cursor = None
         self._user = None
+        headers = self.session.headers
+        headers["Accept"] = (
+            "text/html,application/xhtml+xml,application/xml;q=0.9,"
+            "image/avif,image/webp,image/png,image/svg+xml,*/*;q=0.8"
+        )
+        headers["Sec-Fetch-Dest"] = "empty"
+        headers["Sec-Fetch-Mode"] = "navigate"
+        headers["Sec-Fetch-Site"] = "same-origin"
 
         self.cookies.set(
             "csrftoken", self.csrf_token, domain=self.cookies_domain)
@@ -65,6 +74,16 @@ class InstagramExtractor(Extractor):
 
         order = self.config("order-files")
         reverse = order[0] in ("r", "d") if order else False
+
+        # Share URLs need a redirect to the real URL
+        match_share = re.match(SHARE_PATTERN, self.url)
+        if match_share:
+            share_response = self.request(self.url, allow_redirects=False)
+            if share_response.status_code == 302:
+                self.url = share_response.headers['Location'] \
+                    .split('?', maxsplit=1)[0]  # Remove tracking info
+                self.match = self.match.re.match(self.url)
+                self.item = self.match.group(1)
 
         posts = self.posts()
         if max_posts:
