@@ -176,6 +176,18 @@ Conversion specifiers allow to *convert* the value to a different form or type. 
     <td></td>
     <td></td>
 </tr>
+<tr>
+    <td align="center"><code>i</code></td>
+    <td>Convert value to <a href="https://docs.python.org/3/library/functions.html#int"><code>int</code></a></td>
+    <td></td>
+    <td></td>
+</tr>
+<tr>
+    <td align="center"><code>f</code></td>
+    <td>Convert value to <a href="https://docs.python.org/3/library/functions.html#float"><code>float</code></a></td>
+    <td></td>
+    <td></td>
+</tr>
 </tbody>
 </table>
 
@@ -233,7 +245,7 @@ Format specifiers can be used for advanced formatting by using the options provi
     <td><code>Foo&nbsp;Bar</code></td>
 </tr>
 <tr>
-    <td><code>{foo:L6/&nbsp;.../}</code></td>
+    <td><code>{foo:X6/&nbsp;.../}</code></td>
     <td><code>Fo&nbsp;...</code></td>
 </tr>
 <tr>
