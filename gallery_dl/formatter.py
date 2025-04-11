@@ -495,6 +495,8 @@ _CONVERSIONS = {
     "s": str,
     "r": repr,
     "a": ascii,
+    "i": int,
+    "f": float,
 }
 _FORMAT_SPECIFIERS = {
     "?": _parse_optional,

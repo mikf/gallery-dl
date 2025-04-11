@@ -35,6 +35,8 @@ class TestFormatter(unittest.TestCase):
         "ds": "2010-01-01T01:00:00+0100",
         "dt": datetime.datetime(2010, 1, 1),
         "dt_dst": datetime.datetime(2010, 6, 1),
+        "i_str": "12345",
+        "f_str": "12.45",
         "name": "Name",
         "title1": "Title",
         "title2": "",
@@ -70,6 +72,9 @@ class TestFormatter(unittest.TestCase):
         self._run_test("{a!L}", 11)
         self._run_test("{l!L}", 3)
         self._run_test("{d!L}", 3)
+        self._run_test("{i_str!i}", 12345)
+        self._run_test("{i_str!f}", 12345.0)
+        self._run_test("{f_str!f}", 12.45)
 
         with self.assertRaises(KeyError):
             self._run_test("{a!q}", "hello world")
@@ -483,10 +488,10 @@ def noarg():
             fmt4 = formatter.parse("\fM " + path + ":lengths")
 
         self.assertEqual(fmt1.format_map(self.kwdict), "'Title' by Name")
-        self.assertEqual(fmt2.format_map(self.kwdict), "126")
+        self.assertEqual(fmt2.format_map(self.kwdict), "136")
 
         self.assertEqual(fmt3.format_map(self.kwdict), "'Title' by Name")
-        self.assertEqual(fmt4.format_map(self.kwdict), "126")
+        self.assertEqual(fmt4.format_map(self.kwdict), "136")
 
         with self.assertRaises(TypeError):
             self.assertEqual(fmt0.format_map(self.kwdict), "")
