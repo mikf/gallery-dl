@@ -49,7 +49,10 @@ class DiscordExtractor(Extractor):
                     text_content.append(field.get("name", ""))
                     text_content.append(field.get("value", ""))
 
-                text_content.append(embed.get("footer", {}).get("text", ""))
+                try:
+                    text_content.append(embed["footer"]["text"])
+                except Exception:
+                    pass
 
         if message.get("poll"):
             text_content.append(message["poll"]["question"]["text"])
@@ -224,10 +227,12 @@ class DiscordExtractor(Extractor):
         return self.server_metadata
 
     def build_server_and_channels(self, server_id):
-        server = self.api.get_server(server_id)
-        self.parse_server(server)
+        self.parse_server(self.api.get_server(server_id))
 
-        for channel in self.api.get_server_channels(server_id):
+        for channel in sorted(
+            self.api.get_server_channels(server_id),
+            key=lambda ch: ch["type"] != 4
+        ):
             self.parse_channel(channel)
 
 
@@ -353,7 +358,8 @@ class DiscordAPI():
                 "limit": MESSAGES_BATCH,
                 "before": before
             })
-            before = messages[-1]["id"]
+            if messages:
+                before = messages[-1]["id"]
             return messages
 
         return self._pagination(_method, MESSAGES_BATCH)
