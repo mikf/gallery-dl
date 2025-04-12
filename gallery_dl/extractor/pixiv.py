@@ -15,7 +15,7 @@ from datetime import datetime, timedelta
 import itertools
 import hashlib
 
-BASE_PATTERN = r"(?:https?://)?(?:www\.|touch\.)?pixiv\.net"
+BASE_PATTERN = r"(?:https?://)?(?:www\.|touch\.)?ph?ixiv\.net"
 USER_PATTERN = BASE_PATTERN + r"/(?:en/)?users/(\d+)"
 
 
@@ -531,7 +531,7 @@ class PixivMeExtractor(PixivExtractor):
 class PixivWorkExtractor(PixivExtractor):
     """Extractor for a single pixiv work/illustration"""
     subcategory = "work"
-    pattern = (r"(?:https?://)?(?:(?:www\.|touch\.)?pixiv\.net"
+    pattern = (r"(?:https?://)?(?:(?:www\.|touch\.)?ph?ixiv\.net"
                r"/(?:(?:en/)?artworks/"
                r"|member_illust\.php\?(?:[^&]+&)*illust_id=)(\d+)"
                r"|(?:i(?:\d+\.pixiv|\.pximg)\.net"

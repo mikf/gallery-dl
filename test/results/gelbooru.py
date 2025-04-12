@@ -36,7 +36,7 @@ __tests__ = (
     "#pattern" : r"https://img\d\.gelbooru\.com/images/../../[0-9a-f]{32}\.jpg",
     "#range"   : "196-204",
     "#count"   : 9,
-    "#sha1_url": "845a61aa1f90fb4ced841e8b7e62098be2e967bf",
+    "#sha1_url": "75326d788049459aff46c537fe53d6ea31a2305e",
 },
 
 {
@@ -67,11 +67,11 @@ __tests__ = (
     "#category": ("booru", "gelbooru", "favorite"),
     "#class"   : gelbooru.GelbooruFavoriteExtractor,
     "#urls"    : (
-        "https://img3.gelbooru.com/images/5d/30/5d30fc056ed8668616b3c440df9bac89.jpg",
-        "https://img3.gelbooru.com/images/4c/2d/4c2da867ed643acdadd8105177dcdaf0.png",
-        "https://img3.gelbooru.com/images/c8/26/c826f3cb90d9aaca8d0632a96bf4abe8.jpg",
-        "https://img3.gelbooru.com/images/c1/fe/c1fe59c0bc8ce955dd353544b1015d0c.jpg",
-        "https://img3.gelbooru.com/images/e6/6d/e66d8883c184f5d3b2591dfcdf0d007c.jpg",
+        "https://img4.gelbooru.com/images/5d/30/5d30fc056ed8668616b3c440df9bac89.jpg",
+        "https://img4.gelbooru.com/images/4c/2d/4c2da867ed643acdadd8105177dcdaf0.png",
+        "https://img4.gelbooru.com/images/c8/26/c826f3cb90d9aaca8d0632a96bf4abe8.jpg",
+        "https://img4.gelbooru.com/images/c1/fe/c1fe59c0bc8ce955dd353544b1015d0c.jpg",
+        "https://img4.gelbooru.com/images/e6/6d/e66d8883c184f5d3b2591dfcdf0d007c.jpg",
     ),
 },
 
@@ -81,11 +81,11 @@ __tests__ = (
     "#class"   : gelbooru.GelbooruFavoriteExtractor,
     "#options" : {"order-posts": "reverse"},
     "#urls"    : (
-        "https://img3.gelbooru.com/images/e6/6d/e66d8883c184f5d3b2591dfcdf0d007c.jpg",
-        "https://img3.gelbooru.com/images/c1/fe/c1fe59c0bc8ce955dd353544b1015d0c.jpg",
-        "https://img3.gelbooru.com/images/c8/26/c826f3cb90d9aaca8d0632a96bf4abe8.jpg",
-        "https://img3.gelbooru.com/images/4c/2d/4c2da867ed643acdadd8105177dcdaf0.png",
-        "https://img3.gelbooru.com/images/5d/30/5d30fc056ed8668616b3c440df9bac89.jpg",
+        "https://img4.gelbooru.com/images/e6/6d/e66d8883c184f5d3b2591dfcdf0d007c.jpg",
+        "https://img4.gelbooru.com/images/c1/fe/c1fe59c0bc8ce955dd353544b1015d0c.jpg",
+        "https://img4.gelbooru.com/images/c8/26/c826f3cb90d9aaca8d0632a96bf4abe8.jpg",
+        "https://img4.gelbooru.com/images/4c/2d/4c2da867ed643acdadd8105177dcdaf0.png",
+        "https://img4.gelbooru.com/images/5d/30/5d30fc056ed8668616b3c440df9bac89.jpg",
     ),
 },
 

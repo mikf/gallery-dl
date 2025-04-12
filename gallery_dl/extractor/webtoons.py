@@ -20,6 +20,7 @@ class WebtoonsBase():
     category = "webtoons"
     root = "https://www.webtoons.com"
     cookies_domain = ".webtoons.com"
+    request_interval = (0.5, 1.5)
 
     def setup_agegate_cookies(self):
         self.cookies_update({
@@ -98,11 +99,34 @@ class WebtoonsEpisodeExtractor(WebtoonsBase, GalleryExtractor):
         }
 
     def images(self, page):
-        return [
-            (url.replace("://webtoon-phinf.", "://swebtoon-phinf."), None)
-            for url in text.extract_iter(
-                page, 'class="_images" data-url="', '"')
-        ]
+        quality = self.config("quality")
+        if quality is None or quality == "original":
+            quality = {"jpg": False, "jpeg": False, "webp": False}
+        elif not quality:
+            quality = None
+        elif isinstance(quality, str):
+            quality = {"jpg": quality, "jpeg": quality}
+        elif isinstance(quality, int):
+            quality = "q" + str(quality)
+            quality = {"jpg": quality, "jpeg": quality}
+        elif not isinstance(quality, dict):
+            quality = None
+
+        results = []
+        for url in text.extract_iter(
+                page, 'class="_images" data-url="', '"'):
+
+            if quality is not None:
+                path, _, query = url.rpartition("?")
+                type = quality.get(path.rpartition(".")[2].lower())
+                if type is False:
+                    url = path
+                elif type:
+                    url = "{}?type={}".format(path, type)
+
+            url = url.replace("://webtoon-phinf.", "://swebtoon-phinf.")
+            results.append((url, None))
+        return results
 
 
 class WebtoonsComicExtractor(WebtoonsBase, Extractor):
