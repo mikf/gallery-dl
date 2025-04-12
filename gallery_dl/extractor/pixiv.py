@@ -15,7 +15,7 @@ from datetime import datetime, timedelta
 import itertools
 import hashlib
 
-BASE_PATTERN = r"(?:https?://)?(?:www\.|touch\.)?pixiv\.net"
+BASE_PATTERN = r"(?:https?://)?(?:www\.|touch\.)?ph?ixiv\.net"
 USER_PATTERN = BASE_PATTERN + r"/(?:en/)?users/(\d+)"
 
 
