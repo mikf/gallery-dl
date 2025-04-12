@@ -236,6 +236,14 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://old.reddit.com/r/redgifs/comments/gfvw9v/redgifs_links_on_reddit_see_comment/",
+    "#comment" : "redgifs embed",
+    "#category": ("", "reddit", "submission"),
+    "#class"   : reddit.RedditSubmissionExtractor,
+    "#urls"    : "https://redgifs.com/watch/foolishforkedabyssiniancat",
+},
+
+{
     "#url"     : "https://old.reddit.com/r/lavaporn/comments/2a00np/",
     "#category": ("", "reddit", "submission"),
     "#class"   : reddit.RedditSubmissionExtractor,
