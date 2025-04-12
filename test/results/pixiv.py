@@ -102,6 +102,18 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.phixiv.net/member_illust.php?id=173530",
+    "#category": ("", "pixiv", "artworks"),
+    "#class"   : pixiv.PixivArtworksExtractor,
+},
+
+{
+    "#url"     : "https://phixiv.net/en/users/56514424/artworks",
+    "#category": ("", "pixiv", "artworks"),
+    "#class"   : pixiv.PixivArtworksExtractor,
+},
+
+{
     "#url"     : "https://www.pixiv.net/en/users/173530/avatar",
     "#category": ("", "pixiv", "avatar"),
     "#class"   : pixiv.PixivAvatarExtractor,
@@ -337,6 +349,18 @@ __tests__ = (
 
 {
     "#url"     : "http://i2.pixiv.net/img76/img/snailrin/42672235.jpg",
+    "#category": ("", "pixiv", "work"),
+    "#class"   : pixiv.PixivWorkExtractor,
+},
+
+{
+    "#url"     : "https://www.phixiv.net/en/artworks/966412",
+    "#category": ("", "pixiv", "work"),
+    "#class"   : pixiv.PixivWorkExtractor,
+},
+
+{
+    "#url"     : "https://phixiv.net/member_illust.php?mode=medium&illust_id=966412",
     "#category": ("", "pixiv", "work"),
     "#class"   : pixiv.PixivWorkExtractor,
 },
