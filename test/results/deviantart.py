@@ -903,7 +903,7 @@ __tests__ = (
 
 {
     "#url"     : "https://www.deviantart.com/justatest235723/art/1133021832",
-    "#comment" : "mutliple images (#6653)",
+    "#comment" : "multiple images (#6653)",
     "#category": ("", "deviantart", "deviation"),
     "#class"   : deviantart.DeviantartDeviationExtractor,
     "#archive" : False,
