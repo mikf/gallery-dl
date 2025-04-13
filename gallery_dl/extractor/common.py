@@ -59,7 +59,7 @@ class Extractor():
     @classmethod
     def from_url(cls, url):
         if isinstance(cls.pattern, str):
-            cls.pattern = re.compile(cls.pattern)
+            cls.pattern = util.re_compile(cls.pattern)
         match = cls.pattern.match(url)
         return cls(match) if match else None
 
