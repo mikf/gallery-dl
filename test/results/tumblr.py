@@ -93,6 +93,13 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://tumblr.com/mikf123",
+    "#comment" : "no 'www.' subdomain (#7358)",
+    "#category": ("", "tumblr", "user"),
+    "#class"   : tumblr.TumblrUserExtractor,
+},
+
+{
     "#url"     : "https://donttrustthetits.tumblr.com/",
     "#comment" : "pagination with 'date-max' (#2191) and 'api-key'",
     "#category": ("", "tumblr", "user"),
@@ -274,6 +281,12 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://tumblr.com/smarties-art/686047436641353728",
+    "#category": ("", "tumblr", "post"),
+    "#class"   : tumblr.TumblrPostExtractor,
+},
+
+{
     "#url"     : "http://demo.tumblr.com/tagged/Times%20Square",
     "#category": ("", "tumblr", "tag"),
     "#class"   : tumblr.TumblrTagExtractor,
@@ -361,6 +374,12 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://tumblr.com/mikf123/likes",
+    "#category": ("", "tumblr", "likes"),
+    "#class"   : tumblr.TumblrLikesExtractor,
+},
+
+{
     "#url"     : "https://www.tumblr.com/search/nathan fielder",
     "#category": ("", "tumblr", "search"),
     "#class"   : tumblr.TumblrSearchExtractor,
@@ -377,4 +396,11 @@ __tests__ = (
     "#category": ("", "tumblr", "search"),
     "#class"   : tumblr.TumblrSearchExtractor,
 },
+
+{
+    "#url"     : "https://tumblr.com/search/nathan%20fielder?t=90",
+    "#category": ("", "tumblr", "search"),
+    "#class"   : tumblr.TumblrSearchExtractor,
+},
+
 )
