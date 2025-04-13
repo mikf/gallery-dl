@@ -27,6 +27,11 @@ from http.cookiejar import Cookie
 from email.utils import mktime_tz, parsedate_tz
 from . import text, version, exception
 
+try:
+    re_compile = re._compiler.compile
+except AttributeError:
+    re_compile = re.sre_compile.compile
+
 
 def bencode(num, alphabet="0123456789"):
     """Encode an integer into a base-N encoded string"""
