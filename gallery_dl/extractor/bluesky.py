@@ -25,10 +25,6 @@ class BlueskyExtractor(Extractor):
     archive_fmt = "{filename}"
     root = "https://bsky.app"
 
-    def __init__(self, match):
-        Extractor.__init__(self, match)
-        self.user = match.group(1)
-
     def _init(self):
         meta = self.config("metadata") or ()
         if meta:
@@ -219,7 +215,7 @@ class BlueskyUserExtractor(BlueskyExtractor):
         pass
 
     def items(self):
-        base = "{}/profile/{}/".format(self.root, self.user)
+        base = "{}/profile/{}/".format(self.root, self.groups[0])
         default = ("posts" if self.config("quoted", False) or
                    self.config("reposts", False) else "media")
         return self._dispatch_extractors((
@@ -239,7 +235,8 @@ class BlueskyPostsExtractor(BlueskyExtractor):
     example = "https://bsky.app/profile/HANDLE/posts"
 
     def posts(self):
-        return self.api.get_author_feed(self.user, "posts_and_author_threads")
+        return self.api.get_author_feed(
+            self.groups[0], "posts_and_author_threads")
 
 
 class BlueskyRepliesExtractor(BlueskyExtractor):
@@ -248,7 +245,8 @@ class BlueskyRepliesExtractor(BlueskyExtractor):
     example = "https://bsky.app/profile/HANDLE/replies"
 
     def posts(self):
-        return self.api.get_author_feed(self.user, "posts_with_replies")
+        return self.api.get_author_feed(
+            self.groups[0], "posts_with_replies")
 
 
 class BlueskyMediaExtractor(BlueskyExtractor):
@@ -257,7 +255,8 @@ class BlueskyMediaExtractor(BlueskyExtractor):
     example = "https://bsky.app/profile/HANDLE/media"
 
     def posts(self):
-        return self.api.get_author_feed(self.user, "posts_with_media")
+        return self.api.get_author_feed(
+            self.groups[0], "posts_with_media")
 
 
 class BlueskyLikesExtractor(BlueskyExtractor):
@@ -267,8 +266,8 @@ class BlueskyLikesExtractor(BlueskyExtractor):
 
     def posts(self):
         if self.config("endpoint") == "getActorLikes":
-            return self.api.get_actor_likes(self.user)
-        return self._posts_records(self.user, "app.bsky.feed.like")
+            return self.api.get_actor_likes(self.groups[0])
+        return self._posts_records(self.groups[0], "app.bsky.feed.like")
 
 
 class BlueskyFeedExtractor(BlueskyExtractor):
@@ -276,12 +275,9 @@ class BlueskyFeedExtractor(BlueskyExtractor):
     pattern = USER_PATTERN + r"/feed/([^/?#]+)"
     example = "https://bsky.app/profile/HANDLE/feed/NAME"
 
-    def __init__(self, match):
-        BlueskyExtractor.__init__(self, match)
-        self.feed = match.group(2)
-
     def posts(self):
-        return self.api.get_feed(self.user, self.feed)
+        actor, feed = self.groups
+        return self.api.get_feed(actor, feed)
 
 
 class BlueskyListExtractor(BlueskyExtractor):
@@ -289,12 +285,9 @@ class BlueskyListExtractor(BlueskyExtractor):
     pattern = USER_PATTERN + r"/lists/([^/?#]+)"
     example = "https://bsky.app/profile/HANDLE/lists/ID"
 
-    def __init__(self, match):
-        BlueskyExtractor.__init__(self, match)
-        self.list = match.group(2)
-
     def posts(self):
-        return self.api.get_list_feed(self.user, self.list)
+        actor, list_id = self.groups
+        return self.api.get_list_feed(actor, list_id)
 
 
 class BlueskyFollowingExtractor(BlueskyExtractor):
@@ -303,7 +296,7 @@ class BlueskyFollowingExtractor(BlueskyExtractor):
     example = "https://bsky.app/profile/HANDLE/follows"
 
     def items(self):
-        for user in self.api.get_follows(self.user):
+        for user in self.api.get_follows(self.groups[0]):
             url = "https://bsky.app/profile/" + user["did"]
             user["_extractor"] = BlueskyUserExtractor
             yield Message.Queue, url, user
@@ -314,12 +307,9 @@ class BlueskyPostExtractor(BlueskyExtractor):
     pattern = USER_PATTERN + r"/post/([^/?#]+)"
     example = "https://bsky.app/profile/HANDLE/post/ID"
 
-    def __init__(self, match):
-        BlueskyExtractor.__init__(self, match)
-        self.post_id = match.group(2)
-
     def posts(self):
-        return self.api.get_post_thread(self.user, self.post_id)
+        actor, post_id = self.groups
+        return self.api.get_post_thread(actor, post_id)
 
 
 class BlueskyInfoExtractor(BlueskyExtractor):
@@ -329,7 +319,7 @@ class BlueskyInfoExtractor(BlueskyExtractor):
 
     def items(self):
         self._metadata_user = True
-        self.api._did_from_actor(self.user)
+        self.api._did_from_actor(self.groups[0])
         return iter(((Message.Directory, self._user),))
 
 
@@ -340,7 +330,7 @@ class BlueskyAvatarExtractor(BlueskyExtractor):
     example = "https://bsky.app/profile/HANDLE/avatar"
 
     def posts(self):
-        return self._make_post(self.user, "avatar")
+        return self._make_post(self.groups[0], "avatar")
 
 
 class BlueskyBackgroundExtractor(BlueskyExtractor):
@@ -350,7 +340,7 @@ class BlueskyBackgroundExtractor(BlueskyExtractor):
     example = "https://bsky.app/profile/HANDLE/banner"
 
     def posts(self):
-        return self._make_post(self.user, "banner")
+        return self._make_post(self.groups[0], "banner")
 
 
 class BlueskySearchExtractor(BlueskyExtractor):
@@ -359,7 +349,7 @@ class BlueskySearchExtractor(BlueskyExtractor):
     example = "https://bsky.app/search?q=QUERY"
 
     def posts(self):
-        query = text.unquote(self.user.replace("+", " "))
+        query = text.unquote(self.groups[0].replace("+", " "))
         return self.api.search_posts(query)
 
 
@@ -369,13 +359,14 @@ class BlueskyHashtagExtractor(BlueskyExtractor):
     example = "https://bsky.app/hashtag/NAME"
 
     def posts(self):
-        return self.api.search_posts("#"+self.user, self.groups[1])
+        hashtag, order = self.groups
+        return self.api.search_posts("#"+hashtag, order)
 
 
 class BlueskyAPI():
     """Interface for the Bluesky API
 
-    https://www.docs.bsky.app/docs/category/http-reference
+    https://docs.bsky.app/docs/category/http-reference
     """
 
     def __init__(self, extractor):
