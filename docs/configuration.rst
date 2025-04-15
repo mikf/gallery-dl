@@ -1591,6 +1591,28 @@ Description
     It is possible to use ``"all"`` instead of listing all values separately.
 
 
+extractor.bluesky.likes.endpoint
+--------------------------------
+Type
+    ``string``
+Default
+    ``"listRecords"``
+Description
+    API endpoint to use for retrieving liked posts.
+
+    ``"listRecords"``
+        | Use the results from
+          `com.atproto.repo.listRecords <https://docs.bsky.app/docs/api/com-atproto-repo-list-records>`__
+        | Requires no login and alows accessing likes of all users,
+          but uses one request to
+          `getPostThread <https://docs.bsky.app/docs/api/app-bsky-feed-get-post-thread>`__
+          per post,
+    ``"getActorLikes"``
+        | Use the results from
+          `app.bsky.feed.getActorLikes <https://docs.bsky.app/docs/api/app-bsky-feed-get-actor-likes>`__
+        | Requires login and only allows accessing your own likes.
+
+
 extractor.bluesky.metadata
 --------------------------
 Type
@@ -1613,6 +1635,8 @@ Description
 
 extractor.bluesky.post.depth
 ----------------------------
+extractor.bluesky.likes.depth
+-----------------------------
 Type
     ``integer``
 Default
