@@ -87,6 +87,22 @@ class BlueskyExtractor(Extractor):
     def posts(self):
         return ()
 
+    def _posts_records(self, actor, collection):
+        depth = self.config("depth", "0")
+
+        for record in self.api.list_records(actor, collection):
+            uri = None
+            try:
+                uri = record["value"]["subject"]["uri"]
+                if "/app.bsky.feed.post/" in uri:
+                    yield from self.api.get_post_thread_uri(uri, depth)
+            except exception.StopExtraction:
+                pass  # deleted post
+            except Exception as exc:
+                self.log.debug(record, exc_info=exc)
+                self.log.warning("Failed to extract %s (%s: %s)",
+                                 uri or "record", exc.__class__.__name__, exc)
+
     def _pid(self, post):
         return post["uri"].rpartition("/")[2]
 
@@ -250,7 +266,9 @@ class BlueskyLikesExtractor(BlueskyExtractor):
     example = "https://bsky.app/profile/HANDLE/likes"
 
     def posts(self):
-        return self.api.get_actor_likes(self.user)
+        if self.config("endpoint") == "getActorLikes":
+            return self.api.get_actor_likes(self.user)
+        return self._posts_records(self.user, "app.bsky.feed.like")
 
 
 class BlueskyFeedExtractor(BlueskyExtractor):
@@ -416,11 +434,16 @@ class BlueskyAPI():
         return self._pagination(endpoint, params)
 
     def get_post_thread(self, actor, post_id):
+        uri = "at://{}/app.bsky.feed.post/{}".format(
+            self._did_from_actor(actor), post_id)
+        depth = self.extractor.config("depth", "0")
+        return self.get_post_thread_uri(uri, depth)
+
+    def get_post_thread_uri(self, uri, depth="0"):
         endpoint = "app.bsky.feed.getPostThread"
         params = {
-            "uri": "at://{}/app.bsky.feed.post/{}".format(
-                self._did_from_actor(actor), post_id),
-            "depth"       : self.extractor.config("depth", "0"),
+            "uri"         : uri,
+            "depth"       : depth,
             "parentHeight": "0",
         }
 
@@ -442,6 +465,18 @@ class BlueskyAPI():
         endpoint = "app.bsky.actor.getProfile"
         params = {"actor": did}
         return self._call(endpoint, params)
+
+    def list_records(self, actor, collection):
+        endpoint = "com.atproto.repo.listRecords"
+        actor_did = self._did_from_actor(actor)
+        params = {
+            "repo"      : actor_did,
+            "collection": collection,
+            "limit"     : "100",
+            #  "reverse"   : "false",
+        }
+        return self._pagination(endpoint, params, "records",
+                                self.service_endpoint(actor_did))
 
     @memcache(keyarg=1)
     def resolve_handle(self, handle):
@@ -523,8 +558,10 @@ class BlueskyAPI():
         _refresh_token_cache.update(self.username, data["refreshJwt"])
         return "Bearer " + data["accessJwt"]
 
-    def _call(self, endpoint, params):
-        url = "{}/xrpc/{}".format(self.root, endpoint)
+    def _call(self, endpoint, params, root=None):
+        if root is None:
+            root = self.root
+        url = "{}/xrpc/{}".format(root, endpoint)
 
         while True:
             self.authenticate()
@@ -549,9 +586,9 @@ class BlueskyAPI():
             self.extractor.log.debug("Server response: %s", response.text)
             raise exception.StopExtraction(msg)
 
-    def _pagination(self, endpoint, params, key="feed"):
+    def _pagination(self, endpoint, params, key="feed", root=None):
         while True:
-            data = self._call(endpoint, params)
+            data = self._call(endpoint, params, root)
             yield from data[key]
 
             cursor = data.get("cursor")
