@@ -39,6 +39,7 @@ __tests__ = (
         "https://bsky.app/profile/did:plc:z72i7hdynmk6r22z27h6tvur/posts",
         "https://bsky.app/profile/did:plc:z72i7hdynmk6r22z27h6tvur/replies",
         "https://bsky.app/profile/did:plc:z72i7hdynmk6r22z27h6tvur/media",
+        "https://bsky.app/profile/did:plc:z72i7hdynmk6r22z27h6tvur/video",
         "https://bsky.app/profile/did:plc:z72i7hdynmk6r22z27h6tvur/likes",
     ),
 },
@@ -91,6 +92,16 @@ __tests__ = (
     "#class"   : bluesky.BlueskyMediaExtractor,
     "#range"   : "1-40",
     "#count"   : 40,
+},
+
+{
+    "#url"     : "https://bsky.app/profile/mikf.bsky.social/video",
+    "#category": ("", "bluesky", "video"),
+    "#class"   : bluesky.BlueskyVideoExtractor,
+    "#urls"    : (
+        "https://conocybe.us-west.host.bsky.network/xrpc/com.atproto.sync.getBlob?did=did:plc:cslxjqkeexku6elp5xowxkq7&cid=bafkreibmoobktxndnzauku65onoxu2tvvqswetezv76tqcwipktjs3cw3m",
+        "https://conocybe.us-west.host.bsky.network/xrpc/com.atproto.sync.getBlob?did=did:plc:cslxjqkeexku6elp5xowxkq7&cid=bafkreihq2nsfocrnlpx4nykb4szouqszxwmy3ucnk4k46nx5t6hjnxlti4",
+    ),
 },
 
 {
