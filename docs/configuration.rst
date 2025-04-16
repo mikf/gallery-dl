@@ -1586,6 +1586,7 @@ Description
     ``"posts"``,
     ``"replies"``,
     ``"media"``,
+    ``"video"``,
     ``"likes"``,
 
     It is possible to use ``"all"`` instead of listing all values separately.

@@ -225,6 +225,7 @@ class BlueskyUserExtractor(BlueskyExtractor):
             (BlueskyPostsExtractor     , base + "posts"),
             (BlueskyRepliesExtractor   , base + "replies"),
             (BlueskyMediaExtractor     , base + "media"),
+            (BlueskyVideoExtractor     , base + "video"),
             (BlueskyLikesExtractor     , base + "likes"),
         ), (default,))
 
@@ -257,6 +258,16 @@ class BlueskyMediaExtractor(BlueskyExtractor):
     def posts(self):
         return self.api.get_author_feed(
             self.groups[0], "posts_with_media")
+
+
+class BlueskyVideoExtractor(BlueskyExtractor):
+    subcategory = "video"
+    pattern = USER_PATTERN + r"/video"
+    example = "https://bsky.app/profile/HANDLE/video"
+
+    def posts(self):
+        return self.api.get_author_feed(
+            self.groups[0], "posts_with_video")
 
 
 class BlueskyLikesExtractor(BlueskyExtractor):
