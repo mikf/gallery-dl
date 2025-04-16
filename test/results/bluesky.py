@@ -132,6 +132,14 @@ __tests__ = (
     "#url"     : "https://bsky.app/profile/mikf.bsky.social/likes",
     "#class"   : bluesky.BlueskyLikesExtractor,
     "#options" : {"endpoint": "getActorLikes"},
+    "#auth"    : True,
+    "#urls"    : "https://conocybe.us-west.host.bsky.network/xrpc/com.atproto.sync.getBlob?did=did:plc:cslxjqkeexku6elp5xowxkq7&cid=bafkreih2dn2xeyoayabgvpyutv5ldubcdxzfqipijasfzxyeez7fff5ymi",
+},
+
+{
+    "#url"     : "https://bsky.app/profile/mikf.bsky.social/likes",
+    "#class"   : bluesky.BlueskyLikesExtractor,
+    "#options" : {"endpoint": "getActorLikes"},
     "#auth"    : False,
     "#count"   : 0,
 },

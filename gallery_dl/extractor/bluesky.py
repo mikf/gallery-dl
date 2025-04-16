@@ -387,7 +387,7 @@ class BlueskyAPI():
             "actor": self._did_from_actor(actor),
             "limit": "100",
         }
-        return self._pagination(endpoint, params)
+        return self._pagination(endpoint, params, check_empty=True)
 
     def get_author_feed(self, actor, filter="posts_and_author_threads"):
         endpoint = "app.bsky.feed.getAuthorFeed"
@@ -577,9 +577,13 @@ class BlueskyAPI():
             self.extractor.log.debug("Server response: %s", response.text)
             raise exception.StopExtraction(msg)
 
-    def _pagination(self, endpoint, params, key="feed", root=None):
+    def _pagination(self, endpoint, params,
+                    key="feed", root=None, check_empty=False):
         while True:
             data = self._call(endpoint, params, root)
+
+            if check_empty and not data[key]:
+                return
             yield from data[key]
 
             cursor = data.get("cursor")
