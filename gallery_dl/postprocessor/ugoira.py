@@ -135,7 +135,7 @@ class UgoiraPP(PostProcessor):
         if not self._convert_zip:
             return
         self._zip_source = True
-        ext = pathfmt.extension
+        self._zip_ext = ext = pathfmt.extension
 
         with self._tempdir() as tempdir:
             if tempdir:
@@ -255,9 +255,15 @@ class UgoiraPP(PostProcessor):
             ]).encode()
 
         if self._zip_source:
-            self.delete = False
+            zpath = pathfmt.temppath
+            if self.delete:
+                self.delete = False
+            elif self._zip_ext != self.extension:
+                self._copy_file(zpath, pathfmt.realpath)
+                zpath = pathfmt.realpath
+
             if self.metadata:
-                with zipfile.ZipFile(pathfmt.temppath, "a") as zfile:
+                with zipfile.ZipFile(zpath, "a") as zfile:
                     zinfo = zipfile.ZipInfo(metaname)
                     if self.mtime:
                         zinfo.date_time = zfile.infolist()[0].date_time
