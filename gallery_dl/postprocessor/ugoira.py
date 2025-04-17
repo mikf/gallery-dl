@@ -111,16 +111,13 @@ class UgoiraPP(PostProcessor):
             return
 
         self._frames = pathfmt.kwdict["_ugoira_frame_data"]
-        if pathfmt.extension == "zip":
+        index = pathfmt.kwdict.get("_ugoira_frame_index")
+        if index is None:
             self._convert_zip = True
             if self.delete:
                 pathfmt.set_extension(self.extension)
                 pathfmt.build_path()
         else:
-            index = pathfmt.kwdict.get("_ugoira_frame_index")
-            if index is None:
-                return
-
             pathfmt.build_path()
             frame = self._frames[index].copy()
             frame["index"] = index
