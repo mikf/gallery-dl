@@ -57,7 +57,7 @@ class EveriaPostExtractor(EveriaExtractor):
 
         data = {
             "title": text.unescape(
-                text.extr(page, 'itemprop="headline">', "</h1>")),
+                text.extr(page, 'itemprop="headline">', "</h")),
             "tags": list(text.extract_iter(page, 'rel="tag">', "</a>")),
             "post_url": url,
             "post_category": text.extr(
