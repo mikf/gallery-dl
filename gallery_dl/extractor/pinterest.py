@@ -380,15 +380,10 @@ class PinterestPinitExtractor(PinterestExtractor):
     pattern = r"(?:https?://)?pin\.it/([^/?#]+)"
     example = "https://pin.it/abcde"
 
-    def __init__(self, match):
-        PinterestExtractor.__init__(self, match)
-        self.shortened_id = match.group(1)
-
     def items(self):
         url = "https://api.pinterest.com/url_shortener/{}/redirect/".format(
-            self.shortened_id)
-        response = self.request(url, method="HEAD", allow_redirects=False)
-        location = response.headers.get("Location")
+            self.groups[0])
+        location = self.request_location(url)
         if not location or not PinterestPinExtractor.pattern.match(location):
             raise exception.NotFoundError("pin")
         yield Message.Queue, location, {"_extractor": PinterestPinExtractor}

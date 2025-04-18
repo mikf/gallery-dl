@@ -357,10 +357,9 @@ class RedditRedirectExtractor(Extractor):
             sub_type = "user"
         url = "https://www.reddit.com/{}/{}/s/{}".format(
             sub_type, subreddit, share_url)
+        location = self.request_location(url, notfound="submission")
         data = {"_extractor": RedditSubmissionExtractor}
-        response = self.request(url, method="HEAD", allow_redirects=False,
-                                notfound="submission")
-        yield Message.Queue, response.headers["Location"], data
+        yield Message.Queue, location, data
 
 
 class RedditAPI():

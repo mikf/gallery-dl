@@ -296,8 +296,7 @@ class FanboxExtractor(Extractor):
             url = "https://www.pixiv.net/fanbox/"+content_id
             # resolve redirect
             try:
-                url = self.request(url, method="HEAD",
-                                   allow_redirects=False).headers["location"]
+                url = self.request_location(url)
             except Exception as exc:
                 url = None
                 self.log.warning("Unable to extract fanbox embed %s (%s: %s)",
@@ -392,13 +391,7 @@ class FanboxRedirectExtractor(Extractor):
     pattern = r"(?:https?://)?(?:www\.)?pixiv\.net/fanbox/creator/(\d+)"
     example = "https://www.pixiv.net/fanbox/creator/12345"
 
-    def __init__(self, match):
-        Extractor.__init__(self, match)
-        self.user_id = match.group(1)
-
     def items(self):
-        url = "https://www.pixiv.net/fanbox/creator/" + self.user_id
-        data = {"_extractor": FanboxCreatorExtractor}
-        response = self.request(
-            url, method="HEAD", allow_redirects=False, notfound="user")
-        yield Message.Queue, response.headers["Location"], data
+        url = "https://www.pixiv.net/fanbox/creator/" + self.groups[0]
+        location = self.request_location(url, notfound="user")
+        yield Message.Queue, location, {"_extractor": FanboxCreatorExtractor}

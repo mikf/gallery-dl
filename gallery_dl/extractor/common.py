@@ -240,6 +240,11 @@ class Extractor():
 
         raise exception.HttpError(msg, response)
 
+    def request_location(self, url, **kwargs):
+        kwargs.setdefault("method", "HEAD")
+        kwargs.setdefault("allow_redirects", False)
+        return self.request(url, **kwargs).headers.get("location", "")
+
     _handle_429 = util.false
 
     def wait(self, seconds=None, until=None, adjust=1.0,
