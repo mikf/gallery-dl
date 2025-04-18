@@ -72,10 +72,13 @@ class FapelloModelExtractor(Extractor):
             if not page:
                 return
 
+            url = None
             for url in text.extract_iter(page, '<a href="', '"'):
                 if url == "javascript:void(0);":
                     continue
                 yield Message.Queue, url, data
+            if url is None:
+                return
             num += 1
 
 
