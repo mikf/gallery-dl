@@ -127,6 +127,7 @@ class MoebooruPoolExtractor(MoebooruExtractor):
         if self.config("metadata"):
             url = "{}/pool/show/{}.json".format(self.root, self.pool_id)
             pool = self.request(url).json()
+            pool["name"] = pool["name"].replace("_", " ")
             pool.pop("posts", None)
             return {"pool": pool}
         return {"pool": text.parse_int(self.pool_id)}
