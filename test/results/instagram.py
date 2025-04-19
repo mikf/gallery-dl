@@ -277,4 +277,18 @@ __tests__ = (
     "#class"   : instagram.InstagramPostExtractor,
 },
 
+{
+    "#url"     : "https://www.instagram.com/share/p/BACiUUUYQV",
+    "#category": ("", "instagram", "post"),
+    "#class"   : instagram.InstagramPostExtractor,
+    "shortcode"  : "C6q-XdvsU5v",
+},
+
+{
+    "#url"     : "https://www.instagram.com/share/reel/BARSSL4rTu",
+    "#category": ("", "instagram", "post"),
+    "#class"   : instagram.InstagramPostExtractor,
+    "shortcode"  : "DHbVbT4Jx0c",
+}
+
 )
