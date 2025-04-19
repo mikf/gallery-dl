@@ -272,6 +272,12 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://twitter.com/supernaturepics/followers",
+    "#category": ("", "twitter", "followers"),
+    "#class"   : twitter.TwitterFollowersExtractor,
+},
+
+{
     "#url"     : "https://twitter.com/search?q=nature",
     "#category": ("", "twitter", "search"),
     "#class"   : twitter.TwitterSearchExtractor,
