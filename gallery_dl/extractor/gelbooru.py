@@ -107,21 +107,15 @@ class GelbooruBase():
                 return
             params["pid"] += self.per_page
 
-    @staticmethod
-    def _file_url(post):
+    def _file_url(self, post):
         url = post["file_url"]
         if url.endswith((".webm", ".mp4")):
+            post["_fallback"] = (url,)
             md5 = post["md5"]
+            root = text.root_from_url(post["preview_url"])
             path = "/images/{}/{}/{}.webm".format(md5[0:2], md5[2:4], md5)
-            post["_fallback"] = GelbooruBase._video_fallback(path)
-            url = "https://img4.gelbooru.com" + path
+            url = root + path
         return url
-
-    @staticmethod
-    def _video_fallback(path):
-        yield "https://img3.gelbooru.com" + path
-        yield "https://img2.gelbooru.com" + path
-        yield "https://img1.gelbooru.com" + path
 
     def _notes(self, post, page):
         notes_data = text.extr(page, '<section id="notes"', '</section>')
