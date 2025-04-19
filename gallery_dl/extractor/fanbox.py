@@ -173,15 +173,16 @@ class FanboxExtractor(Extractor):
         return plans
 
     def _get_comment_data(self, post_id):
-        url = ("https://api.fanbox.cc/post.listComments"
+        url = ("https://api.fanbox.cc/post.getComments"
                "?limit=10&postId=" + post_id)
 
         comments = []
         while url:
             url = text.ensure_http_scheme(url)
             body = self.request(url, headers=self.headers).json()["body"]
-            comments.extend(body["items"])
-            url = body["nextUrl"]
+            data = body["commentList"]
+            comments.extend(data["items"])
+            url = data["nextUrl"]
         return comments
 
     def _get_urls_from_post(self, content_body, post):
