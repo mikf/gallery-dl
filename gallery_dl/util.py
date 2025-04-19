@@ -27,6 +27,11 @@ from http.cookiejar import Cookie
 from email.utils import mktime_tz, parsedate_tz
 from . import text, version, exception
 
+try:
+    re_compile = re._compiler.compile
+except AttributeError:
+    re_compile = re.sre_compile.compile
+
 
 def bencode(num, alphabet="0123456789"):
     """Encode an integer into a base-N encoded string"""
@@ -685,11 +690,16 @@ class CustomNone():
     __repr__ = __str__
 
 
-# v128.0 release on 2024-07-09 has ordinal 739076
-# v137.0 release on 2025-04-01 has ordinal 739342
-# 735492 == 739076 - 128 * 28
+# v137.0 release of Firefox on 2025-04-01 has ordinal 739342
 # 735506 == 739342 - 137 * 28
+# v135.0 release of Chrome  on 2025-04-01 has ordinal 739342
+# 735562 == 739342 - 135 * 28
+#  _ord_today = datetime.date.today().toordinal()
+#  _ff_ver = (_ord_today - 735506) // 28
+#  _ch_ver = (_ord_today - 735562) // 28
+
 _ff_ver = (datetime.date.today().toordinal() - 735506) // 28
+#  _ch_ver = _ff_ver - 2
 
 NONE = CustomNone()
 EPOCH = datetime.datetime(1970, 1, 1)
@@ -701,8 +711,8 @@ USERAGENT = "gallery-dl/" + version.__version__
 USERAGENT_FIREFOX = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:{}.0) "
                      "Gecko/20100101 Firefox/{}.0").format(_ff_ver, _ff_ver)
 USERAGENT_CHROME = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                    "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 "
-                    "Safari/537.36")
+                    "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/{}.0.0.0 "
+                    "Safari/537.36").format(_ff_ver - 2)
 SPECIAL_EXTRACTORS = {"oauth", "recursive", "generic"}
 GLOBALS = {
     "contains" : contains,

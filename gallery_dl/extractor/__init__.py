@@ -7,7 +7,7 @@
 # published by the Free Software Foundation.
 
 import sys
-import re
+from ..util import re_compile
 
 modules = [
     "2ch",
@@ -235,7 +235,8 @@ def find(url):
 
 def add(cls):
     """Add 'cls' to the list of available extractors"""
-    cls.pattern = re.compile(cls.pattern)
+    if isinstance(cls.pattern, str):
+        cls.pattern = re_compile(cls.pattern)
     _cache.append(cls)
     return cls
 
@@ -243,9 +244,11 @@ def add(cls):
 def add_module(module):
     """Add all extractors in 'module' to the list of available extractors"""
     classes = _get_classes(module)
-    for cls in classes:
-        cls.pattern = re.compile(cls.pattern)
-    _cache.extend(classes)
+    if classes:
+        if isinstance(classes[0].pattern, str):
+            for cls in classes:
+                cls.pattern = re_compile(cls.pattern)
+        _cache.extend(classes)
     return classes
 
 

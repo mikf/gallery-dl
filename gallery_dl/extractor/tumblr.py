@@ -17,7 +17,7 @@ import re
 BASE_PATTERN = (
     r"(?:tumblr:(?:https?://)?([^/]+)|"
     r"(?:https?://)?"
-    r"(?:www\.tumblr\.com/(?:blog/(?:view/)?)?([\w-]+)|"
+    r"(?:(?:www\.)?tumblr\.com/(?:blog/(?:view/)?)?([\w-]+)|"
     r"([\w-]+\.tumblr\.com)))"
 )
 
@@ -357,7 +357,7 @@ class TumblrLikesExtractor(TumblrExtractor):
 class TumblrSearchExtractor(TumblrExtractor):
     """Extractor for a Tumblr search"""
     subcategory = "search"
-    pattern = (BASE_PATTERN + r"/search/([^/?#]+)"
+    pattern = (r"(?:https?://)?(?:www\.)?tumblr\.com/search/([^/?#]+)"
                r"(?:/([^/?#]+)(?:/([^/?#]+))?)?(?:/?\?([^#]+))?")
     example = "https://www.tumblr.com/search/QUERY"
 

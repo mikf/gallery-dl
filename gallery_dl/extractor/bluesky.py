@@ -25,10 +25,6 @@ class BlueskyExtractor(Extractor):
     archive_fmt = "{filename}"
     root = "https://bsky.app"
 
-    def __init__(self, match):
-        Extractor.__init__(self, match)
-        self.user = match.group(1)
-
     def _init(self):
         meta = self.config("metadata") or ()
         if meta:
@@ -86,6 +82,22 @@ class BlueskyExtractor(Extractor):
 
     def posts(self):
         return ()
+
+    def _posts_records(self, actor, collection):
+        depth = self.config("depth", "0")
+
+        for record in self.api.list_records(actor, collection):
+            uri = None
+            try:
+                uri = record["value"]["subject"]["uri"]
+                if "/app.bsky.feed.post/" in uri:
+                    yield from self.api.get_post_thread_uri(uri, depth)
+            except exception.StopExtraction:
+                pass  # deleted post
+            except Exception as exc:
+                self.log.debug(record, exc_info=exc)
+                self.log.warning("Failed to extract %s (%s: %s)",
+                                 uri or "record", exc.__class__.__name__, exc)
 
     def _pid(self, post):
         return post["uri"].rpartition("/")[2]
@@ -203,7 +215,7 @@ class BlueskyUserExtractor(BlueskyExtractor):
         pass
 
     def items(self):
-        base = "{}/profile/{}/".format(self.root, self.user)
+        base = "{}/profile/{}/".format(self.root, self.groups[0])
         default = ("posts" if self.config("quoted", False) or
                    self.config("reposts", False) else "media")
         return self._dispatch_extractors((
@@ -213,6 +225,7 @@ class BlueskyUserExtractor(BlueskyExtractor):
             (BlueskyPostsExtractor     , base + "posts"),
             (BlueskyRepliesExtractor   , base + "replies"),
             (BlueskyMediaExtractor     , base + "media"),
+            (BlueskyVideoExtractor     , base + "video"),
             (BlueskyLikesExtractor     , base + "likes"),
         ), (default,))
 
@@ -223,7 +236,8 @@ class BlueskyPostsExtractor(BlueskyExtractor):
     example = "https://bsky.app/profile/HANDLE/posts"
 
     def posts(self):
-        return self.api.get_author_feed(self.user, "posts_and_author_threads")
+        return self.api.get_author_feed(
+            self.groups[0], "posts_and_author_threads")
 
 
 class BlueskyRepliesExtractor(BlueskyExtractor):
@@ -232,7 +246,8 @@ class BlueskyRepliesExtractor(BlueskyExtractor):
     example = "https://bsky.app/profile/HANDLE/replies"
 
     def posts(self):
-        return self.api.get_author_feed(self.user, "posts_with_replies")
+        return self.api.get_author_feed(
+            self.groups[0], "posts_with_replies")
 
 
 class BlueskyMediaExtractor(BlueskyExtractor):
@@ -241,7 +256,18 @@ class BlueskyMediaExtractor(BlueskyExtractor):
     example = "https://bsky.app/profile/HANDLE/media"
 
     def posts(self):
-        return self.api.get_author_feed(self.user, "posts_with_media")
+        return self.api.get_author_feed(
+            self.groups[0], "posts_with_media")
+
+
+class BlueskyVideoExtractor(BlueskyExtractor):
+    subcategory = "video"
+    pattern = USER_PATTERN + r"/video"
+    example = "https://bsky.app/profile/HANDLE/video"
+
+    def posts(self):
+        return self.api.get_author_feed(
+            self.groups[0], "posts_with_video")
 
 
 class BlueskyLikesExtractor(BlueskyExtractor):
@@ -250,7 +276,9 @@ class BlueskyLikesExtractor(BlueskyExtractor):
     example = "https://bsky.app/profile/HANDLE/likes"
 
     def posts(self):
-        return self.api.get_actor_likes(self.user)
+        if self.config("endpoint") == "getActorLikes":
+            return self.api.get_actor_likes(self.groups[0])
+        return self._posts_records(self.groups[0], "app.bsky.feed.like")
 
 
 class BlueskyFeedExtractor(BlueskyExtractor):
@@ -258,12 +286,9 @@ class BlueskyFeedExtractor(BlueskyExtractor):
     pattern = USER_PATTERN + r"/feed/([^/?#]+)"
     example = "https://bsky.app/profile/HANDLE/feed/NAME"
 
-    def __init__(self, match):
-        BlueskyExtractor.__init__(self, match)
-        self.feed = match.group(2)
-
     def posts(self):
-        return self.api.get_feed(self.user, self.feed)
+        actor, feed = self.groups
+        return self.api.get_feed(actor, feed)
 
 
 class BlueskyListExtractor(BlueskyExtractor):
@@ -271,12 +296,9 @@ class BlueskyListExtractor(BlueskyExtractor):
     pattern = USER_PATTERN + r"/lists/([^/?#]+)"
     example = "https://bsky.app/profile/HANDLE/lists/ID"
 
-    def __init__(self, match):
-        BlueskyExtractor.__init__(self, match)
-        self.list = match.group(2)
-
     def posts(self):
-        return self.api.get_list_feed(self.user, self.list)
+        actor, list_id = self.groups
+        return self.api.get_list_feed(actor, list_id)
 
 
 class BlueskyFollowingExtractor(BlueskyExtractor):
@@ -285,7 +307,7 @@ class BlueskyFollowingExtractor(BlueskyExtractor):
     example = "https://bsky.app/profile/HANDLE/follows"
 
     def items(self):
-        for user in self.api.get_follows(self.user):
+        for user in self.api.get_follows(self.groups[0]):
             url = "https://bsky.app/profile/" + user["did"]
             user["_extractor"] = BlueskyUserExtractor
             yield Message.Queue, url, user
@@ -296,12 +318,9 @@ class BlueskyPostExtractor(BlueskyExtractor):
     pattern = USER_PATTERN + r"/post/([^/?#]+)"
     example = "https://bsky.app/profile/HANDLE/post/ID"
 
-    def __init__(self, match):
-        BlueskyExtractor.__init__(self, match)
-        self.post_id = match.group(2)
-
     def posts(self):
-        return self.api.get_post_thread(self.user, self.post_id)
+        actor, post_id = self.groups
+        return self.api.get_post_thread(actor, post_id)
 
 
 class BlueskyInfoExtractor(BlueskyExtractor):
@@ -311,7 +330,7 @@ class BlueskyInfoExtractor(BlueskyExtractor):
 
     def items(self):
         self._metadata_user = True
-        self.api._did_from_actor(self.user)
+        self.api._did_from_actor(self.groups[0])
         return iter(((Message.Directory, self._user),))
 
 
@@ -322,7 +341,7 @@ class BlueskyAvatarExtractor(BlueskyExtractor):
     example = "https://bsky.app/profile/HANDLE/avatar"
 
     def posts(self):
-        return self._make_post(self.user, "avatar")
+        return self._make_post(self.groups[0], "avatar")
 
 
 class BlueskyBackgroundExtractor(BlueskyExtractor):
@@ -332,7 +351,7 @@ class BlueskyBackgroundExtractor(BlueskyExtractor):
     example = "https://bsky.app/profile/HANDLE/banner"
 
     def posts(self):
-        return self._make_post(self.user, "banner")
+        return self._make_post(self.groups[0], "banner")
 
 
 class BlueskySearchExtractor(BlueskyExtractor):
@@ -341,7 +360,7 @@ class BlueskySearchExtractor(BlueskyExtractor):
     example = "https://bsky.app/search?q=QUERY"
 
     def posts(self):
-        query = text.unquote(self.user.replace("+", " "))
+        query = text.unquote(self.groups[0].replace("+", " "))
         return self.api.search_posts(query)
 
 
@@ -351,13 +370,14 @@ class BlueskyHashtagExtractor(BlueskyExtractor):
     example = "https://bsky.app/hashtag/NAME"
 
     def posts(self):
-        return self.api.search_posts("#"+self.user, self.groups[1])
+        hashtag, order = self.groups
+        return self.api.search_posts("#"+hashtag, order)
 
 
 class BlueskyAPI():
     """Interface for the Bluesky API
 
-    https://www.docs.bsky.app/docs/category/http-reference
+    https://docs.bsky.app/docs/category/http-reference
     """
 
     def __init__(self, extractor):
@@ -378,7 +398,7 @@ class BlueskyAPI():
             "actor": self._did_from_actor(actor),
             "limit": "100",
         }
-        return self._pagination(endpoint, params)
+        return self._pagination(endpoint, params, check_empty=True)
 
     def get_author_feed(self, actor, filter="posts_and_author_threads"):
         endpoint = "app.bsky.feed.getAuthorFeed"
@@ -416,11 +436,16 @@ class BlueskyAPI():
         return self._pagination(endpoint, params)
 
     def get_post_thread(self, actor, post_id):
+        uri = "at://{}/app.bsky.feed.post/{}".format(
+            self._did_from_actor(actor), post_id)
+        depth = self.extractor.config("depth", "0")
+        return self.get_post_thread_uri(uri, depth)
+
+    def get_post_thread_uri(self, uri, depth="0"):
         endpoint = "app.bsky.feed.getPostThread"
         params = {
-            "uri": "at://{}/app.bsky.feed.post/{}".format(
-                self._did_from_actor(actor), post_id),
-            "depth"       : self.extractor.config("depth", "0"),
+            "uri"         : uri,
+            "depth"       : depth,
             "parentHeight": "0",
         }
 
@@ -442,6 +467,18 @@ class BlueskyAPI():
         endpoint = "app.bsky.actor.getProfile"
         params = {"actor": did}
         return self._call(endpoint, params)
+
+    def list_records(self, actor, collection):
+        endpoint = "com.atproto.repo.listRecords"
+        actor_did = self._did_from_actor(actor)
+        params = {
+            "repo"      : actor_did,
+            "collection": collection,
+            "limit"     : "100",
+            #  "reverse"   : "false",
+        }
+        return self._pagination(endpoint, params, "records",
+                                self.service_endpoint(actor_did))
 
     @memcache(keyarg=1)
     def resolve_handle(self, handle):
@@ -523,8 +560,10 @@ class BlueskyAPI():
         _refresh_token_cache.update(self.username, data["refreshJwt"])
         return "Bearer " + data["accessJwt"]
 
-    def _call(self, endpoint, params):
-        url = "{}/xrpc/{}".format(self.root, endpoint)
+    def _call(self, endpoint, params, root=None):
+        if root is None:
+            root = self.root
+        url = "{}/xrpc/{}".format(root, endpoint)
 
         while True:
             self.authenticate()
@@ -549,9 +588,13 @@ class BlueskyAPI():
             self.extractor.log.debug("Server response: %s", response.text)
             raise exception.StopExtraction(msg)
 
-    def _pagination(self, endpoint, params, key="feed"):
+    def _pagination(self, endpoint, params,
+                    key="feed", root=None, check_empty=False):
         while True:
-            data = self._call(endpoint, params)
+            data = self._call(endpoint, params, root)
+
+            if check_empty and not data[key]:
+                return
             yield from data[key]
 
             cursor = data.get("cursor")

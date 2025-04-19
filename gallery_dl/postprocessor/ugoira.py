@@ -156,12 +156,7 @@ class UgoiraPP(PostProcessor):
                     return self.log.debug("", exc_info=exc)
 
             if self.convert(pathfmt, tempdir):
-                if self.delete:
-                    pathfmt.delete = True
-                elif pathfmt.extension != "zip":
-                    self.log.info(pathfmt.filename)
-                    pathfmt.set_extension("zip")
-                    pathfmt.build_path()
+                pathfmt.delete = self.delete
 
     def convert_from_files(self, pathfmt):
         if not self._convert_files:

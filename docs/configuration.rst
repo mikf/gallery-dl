@@ -664,7 +664,7 @@ Default
     * ``"gallery-dl/VERSION"``: ``[Danbooru]``, ``mangadex``
     * ``"gallery-dl/VERSION (by mikf)"``: ``[E621]``
     * ``"Patreon/72.2.28 (Android; Android 14; Scale/2.10)"``: ``patreon``
-    * ``"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36"``: ``instagram``
+    * ``"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/LATEST.0.0.0 Safari/537.36"``: ``instagram``
     * ``"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:LATEST) Gecko/20100101 Firefox/LATEST"``: otherwise
 Description
     User-Agent header value used for HTTP requests.
@@ -1586,9 +1586,32 @@ Description
     ``"posts"``,
     ``"replies"``,
     ``"media"``,
+    ``"video"``,
     ``"likes"``,
 
     It is possible to use ``"all"`` instead of listing all values separately.
+
+
+extractor.bluesky.likes.endpoint
+--------------------------------
+Type
+    ``string``
+Default
+    ``"listRecords"``
+Description
+    API endpoint to use for retrieving liked posts.
+
+    ``"listRecords"``
+        | Use the results from
+          `com.atproto.repo.listRecords <https://docs.bsky.app/docs/api/com-atproto-repo-list-records>`__
+        | Requires no login and alows accessing likes of all users,
+          but uses one request to
+          `getPostThread <https://docs.bsky.app/docs/api/app-bsky-feed-get-post-thread>`__
+          per post,
+    ``"getActorLikes"``
+        | Use the results from
+          `app.bsky.feed.getActorLikes <https://docs.bsky.app/docs/api/app-bsky-feed-get-actor-likes>`__
+        | Requires login and only allows accessing your own likes.
 
 
 extractor.bluesky.metadata
@@ -1613,6 +1636,8 @@ Description
 
 extractor.bluesky.post.depth
 ----------------------------
+extractor.bluesky.likes.depth
+-----------------------------
 Type
     ``integer``
 Default

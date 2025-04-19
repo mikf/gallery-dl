@@ -39,6 +39,7 @@ __tests__ = (
         "https://bsky.app/profile/did:plc:z72i7hdynmk6r22z27h6tvur/posts",
         "https://bsky.app/profile/did:plc:z72i7hdynmk6r22z27h6tvur/replies",
         "https://bsky.app/profile/did:plc:z72i7hdynmk6r22z27h6tvur/media",
+        "https://bsky.app/profile/did:plc:z72i7hdynmk6r22z27h6tvur/video",
         "https://bsky.app/profile/did:plc:z72i7hdynmk6r22z27h6tvur/likes",
     ),
 },
@@ -94,6 +95,16 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://bsky.app/profile/mikf.bsky.social/video",
+    "#category": ("", "bluesky", "video"),
+    "#class"   : bluesky.BlueskyVideoExtractor,
+    "#urls"    : (
+        "https://conocybe.us-west.host.bsky.network/xrpc/com.atproto.sync.getBlob?did=did:plc:cslxjqkeexku6elp5xowxkq7&cid=bafkreibmoobktxndnzauku65onoxu2tvvqswetezv76tqcwipktjs3cw3m",
+        "https://conocybe.us-west.host.bsky.network/xrpc/com.atproto.sync.getBlob?did=did:plc:cslxjqkeexku6elp5xowxkq7&cid=bafkreihq2nsfocrnlpx4nykb4szouqszxwmy3ucnk4k46nx5t6hjnxlti4",
+    ),
+},
+
+{
     "#url"     : "https://bsky.app/profile/did:plc:jfhpnnst6flqway4eaeqzj2a/feed/for-science",
     "#category": ("", "bluesky", "feed"),
     "#class"   : bluesky.BlueskyFeedExtractor,
@@ -116,6 +127,32 @@ __tests__ = (
     "#url"     : "https://bsky.app/profile/bsky.app/likes",
     "#category": ("", "bluesky", "likes"),
     "#class"   : bluesky.BlueskyLikesExtractor,
+    "#auth"    : False,
+    "#range"   : "1-5",
+    "#count"   : 5,
+},
+
+{
+    "#url"     : "https://bsky.app/profile/mikf.bsky.social/likes",
+    "#class"   : bluesky.BlueskyLikesExtractor,
+    "#auth"    : False,
+    "#urls"    : "https://conocybe.us-west.host.bsky.network/xrpc/com.atproto.sync.getBlob?did=did:plc:cslxjqkeexku6elp5xowxkq7&cid=bafkreih2dn2xeyoayabgvpyutv5ldubcdxzfqipijasfzxyeez7fff5ymi",
+},
+
+{
+    "#url"     : "https://bsky.app/profile/mikf.bsky.social/likes",
+    "#class"   : bluesky.BlueskyLikesExtractor,
+    "#options" : {"endpoint": "getActorLikes"},
+    "#auth"    : True,
+    "#urls"    : "https://conocybe.us-west.host.bsky.network/xrpc/com.atproto.sync.getBlob?did=did:plc:cslxjqkeexku6elp5xowxkq7&cid=bafkreih2dn2xeyoayabgvpyutv5ldubcdxzfqipijasfzxyeez7fff5ymi",
+},
+
+{
+    "#url"     : "https://bsky.app/profile/mikf.bsky.social/likes",
+    "#class"   : bluesky.BlueskyLikesExtractor,
+    "#options" : {"endpoint": "getActorLikes"},
+    "#auth"    : False,
+    "#count"   : 0,
 },
 
 {
