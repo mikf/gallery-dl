@@ -1298,6 +1298,7 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
 
         for index, post in enumerate(additional_media):
             uri = post["media"]["baseUri"].encode().decode("unicode-escape")
+            uri += "?token=" + post["media"]["token"][-1]
             deviation["content"]["src"] = uri
             deviation["num"] += 1
             deviation["index_file"] = post["fileId"]
