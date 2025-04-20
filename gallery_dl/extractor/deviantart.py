@@ -1299,7 +1299,7 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
         yield deviation
 
         for index, post in enumerate(additional_media):
-            uri = post["media"]["baseUri"]
+            uri = self._eclipse_media(post["media"], "fullview")[0]
             deviation["content"]["src"] = uri
             deviation["num"] += 1
             deviation["index_file"] = post["fileId"]

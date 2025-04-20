@@ -902,16 +902,16 @@ __tests__ = (
 },
 
 {
-    "#url"     : "https://www.deviantart.com/justatest235723/art/1133021832",
+    "#url"     : "https://www.deviantart.com/justatest235723/art/Numbers-1133021832",
     "#comment" : "multiple images (#6653)",
     "#category": ("", "deviantart", "deviation"),
     "#class"   : deviantart.DeviantartDeviationExtractor,
     "#archive" : False,
     "#pattern" : (
         r"https://wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/940f2d05-c5eb-4917-8192-7eb6a2d508c6/diqkl8o-235680f0-7746-485c-9022-6042ab1f4d50\.png\?token=ey.+",
-        r"https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/940f2d05-c5eb-4917-8192-7eb6a2d508c6/diqkl8o-a47549b4-427d-404d-9a39-64cc07c6b5fb\.png",
-        r"https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/940f2d05-c5eb-4917-8192-7eb6a2d508c6/diqkl8o-faac0af6-ef9b-4c49-82af-349ba9f4acf7\.png",
-        r"https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/940f2d05-c5eb-4917-8192-7eb6a2d508c6/diqkl8o-34396355-d67d-4069-987f-b80f25495635\.png",
+        r"https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/940f2d05-c5eb-4917-8192-7eb6a2d508c6/diqkl8o-a47549b4-427d-404d-9a39-64cc07c6b5fb\.png\?token=ey.+",
+        r"https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/940f2d05-c5eb-4917-8192-7eb6a2d508c6/diqkl8o-faac0af6-ef9b-4c49-82af-349ba9f4acf7\.png\?token=ey.+",
+        r"https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/940f2d05-c5eb-4917-8192-7eb6a2d508c6/diqkl8o-34396355-d67d-4069-987f-b80f25495635\.png\?token=ey.+",
     ),
 
     "index"     : 1133021832,
