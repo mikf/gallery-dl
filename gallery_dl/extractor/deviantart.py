@@ -1276,28 +1276,30 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
 
         deviation = self.api.deviation(uuid)
         deviation["_page"] = page
-
-        _dev_info = text.extr(
-            page, '\\"deviationExtended\\":', ',\\"deviation\\":', None)
-        # Clean up escaped quotes
-        _json_str = re.sub(
-            r'(?<!\\)\\{1}"', '"', _dev_info).replace("\\'", "'")
-        _extended_info = util.json_loads(_json_str)[self.deviation_id]
-        additional_media = _extended_info.get("additionalMedia") or ()
-
-        if additional_media:
-            self.filename_fmt = ("{category}_{index}_{index_file}_{title}_"
-                                 "{num:>02}.{extension}")
-            self.archive_fmt = ("g_{_username}_{index}{index_file:?_//}."
-                                "{extension}")
-
         deviation["index_file"] = 0
+        deviation["num"] = deviation["count"] = 1
+
+        additional_media = text.extr(page, ',\\"additionalMedia\\":', '}],\\"')
+        if not additional_media:
+            yield deviation
+            return
+
+        self.filename_fmt = ("{category}_{index}_{index_file}_{title}_"
+                             "{num:>02}.{extension}")
+        self.archive_fmt = ("g_{_username}_{index}{index_file:?_//}."
+                            "{extension}")
+
+        additional_media = util.json_loads(
+            # unescape quotes: \" -> "
+            # unescape backslashes: \\ -> \
+            # add closing braces
+            additional_media.replace('\\"', '"').replace("\\\\", "\\") + "}]")
+
         deviation["count"] = 1 + len(additional_media)
-        deviation["num"] = 1
         yield deviation
 
         for index, post in enumerate(additional_media):
-            uri = post["media"]["baseUri"].encode().decode("unicode-escape")
+            uri = post["media"]["baseUri"]
             deviation["content"]["src"] = uri
             deviation["num"] += 1
             deviation["index_file"] = post["fileId"]
