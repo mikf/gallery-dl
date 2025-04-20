@@ -183,10 +183,7 @@ class TiktokVmpostExtractor(TiktokExtractor):
         url = text.ensure_http_scheme(self.url)
         headers = {"User-Agent": "facebookexternalhit/1.1"}
 
-        response = self.request(url, headers=headers, method="HEAD",
-                                allow_redirects=False, notfound="post")
-
-        url = response.headers.get("Location")
+        url = self.request_location(url, headers=headers, notfound="post")
         if not url or len(url) <= 28:
             # https://www.tiktok.com/?_r=1
             raise exception.NotFoundError("post")

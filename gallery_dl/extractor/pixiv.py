@@ -516,16 +516,10 @@ class PixivMeExtractor(PixivExtractor):
     pattern = r"(?:https?://)?pixiv\.me/([^/?#]+)"
     example = "https://pixiv.me/USER"
 
-    def __init__(self, match):
-        PixivExtractor.__init__(self, match)
-        self.account = match.group(1)
-
     def items(self):
-        url = "https://pixiv.me/" + self.account
-        data = {"_extractor": PixivUserExtractor}
-        response = self.request(
-            url, method="HEAD", allow_redirects=False, notfound="user")
-        yield Message.Queue, response.headers["Location"], data
+        url = "https://pixiv.me/" + self.groups[0]
+        location = self.request_location(url, notfound="user")
+        yield Message.Queue, location, {"_extractor": PixivUserExtractor}
 
 
 class PixivWorkExtractor(PixivExtractor):

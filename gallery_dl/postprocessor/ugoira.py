@@ -111,16 +111,13 @@ class UgoiraPP(PostProcessor):
             return
 
         self._frames = pathfmt.kwdict["_ugoira_frame_data"]
-        if pathfmt.extension == "zip":
+        index = pathfmt.kwdict.get("_ugoira_frame_index")
+        if index is None:
             self._convert_zip = True
             if self.delete:
                 pathfmt.set_extension(self.extension)
                 pathfmt.build_path()
         else:
-            index = pathfmt.kwdict.get("_ugoira_frame_index")
-            if index is None:
-                return
-
             pathfmt.build_path()
             frame = self._frames[index].copy()
             frame["index"] = index
@@ -138,6 +135,7 @@ class UgoiraPP(PostProcessor):
         if not self._convert_zip:
             return
         self._zip_source = True
+        self._zip_ext = ext = pathfmt.extension
 
         with self._tempdir() as tempdir:
             if tempdir:
@@ -156,7 +154,12 @@ class UgoiraPP(PostProcessor):
                     return self.log.debug("", exc_info=exc)
 
             if self.convert(pathfmt, tempdir):
-                pathfmt.delete = self.delete
+                if self.delete:
+                    pathfmt.delete = True
+                elif pathfmt.extension != ext:
+                    self.log.info(pathfmt.filename)
+                    pathfmt.set_extension(ext)
+                    pathfmt.build_path()
 
     def convert_from_files(self, pathfmt):
         if not self._convert_files:
@@ -252,9 +255,15 @@ class UgoiraPP(PostProcessor):
             ]).encode()
 
         if self._zip_source:
-            self.delete = False
+            zpath = pathfmt.temppath
+            if self.delete:
+                self.delete = False
+            elif self._zip_ext != self.extension:
+                self._copy_file(zpath, pathfmt.realpath)
+                zpath = pathfmt.realpath
+
             if self.metadata:
-                with zipfile.ZipFile(pathfmt.temppath, "a") as zfile:
+                with zipfile.ZipFile(zpath, "a") as zfile:
                     zinfo = zipfile.ZipInfo(metaname)
                     if self.mtime:
                         zinfo.date_time = zfile.infolist()[0].date_time
