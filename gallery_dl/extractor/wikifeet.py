@@ -33,12 +33,12 @@ class WikifeetGalleryExtractor(GalleryExtractor):
         return {
             "celeb"     : self.celeb,
             "type"      : self.type,
-            "rating"    : text.parse_float(extr('"ratingValue": "', '"')),
-            "celebrity" : text.unescape(extr("times'>", "</h1>")),
-            "shoesize"  : text.remove_html(extr("Shoe Size:", "edit")),
-            "birthplace": text.remove_html(extr("Birthplace:", "edit")),
-            "birthday"  : text.parse_datetime(text.remove_html(
-                extr("Birth Date:", "edit")), "%Y-%m-%d"),
+            "birthplace": text.unescape(extr('"bplace":"', '"')),
+            "birthday"  : text.parse_datetime(text.unescape(
+                extr('"bdate":"', '"'))[:10], "%Y-%m-%d"),
+            "shoesize"  : text.unescape(extr('"ssize":', ',')),
+            "rating"    : text.parse_float(extr('"score":', ',')),
+            "celebrity" : text.unescape(extr('"cname":"', '"')),
         }
 
     def images(self, page):
@@ -61,5 +61,6 @@ class WikifeetGalleryExtractor(GalleryExtractor):
                     for tag in data["tags"] if tag in tagmap
                 ],
             })
-            for data in util.json_loads(text.extr(page, "['gdata'] = ", ";"))
+            for data in
+            util.json_loads("[" + text.extr(page, '"gallery":[', '],') + "]")
         ]
