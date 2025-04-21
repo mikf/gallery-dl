@@ -69,7 +69,7 @@ class PixivExtractor(Extractor):
             files = self._extract_files(work)
 
             if self.meta_user:
-                work.update(self.api.user_detail(work["user"]["id"]))
+                work.update(self.api.user_detail(str(work["user"]["id"])))
             if self.meta_comments:
                 if work["total_comments"] and not work.get("_ajax"):
                     try:
@@ -881,7 +881,7 @@ class PixivNovelExtractor(PixivExtractor):
             novels = itertools.islice(novels, self.max_posts)
         for novel in novels:
             if self.meta_user:
-                novel.update(self.api.user_detail(novel["user"]["id"]))
+                novel.update(self.api.user_detail(str(novel["user"]["id"])))
             if self.meta_comments:
                 if novel["total_comments"]:
                     novel["comments"] = list(
