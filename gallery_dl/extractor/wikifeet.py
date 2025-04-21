@@ -34,11 +34,11 @@ class WikifeetGalleryExtractor(GalleryExtractor):
             "celeb"     : self.celeb,
             "type"      : self.type,
             "birthplace": text.unescape(extr('"bplace":"', '"')),
-            "birthday": text.parse_datetime(text.unescape(
-                extr('"bdate":"', '"'))),
-            "shoesize": text.unescape(extr('"ssize":', ',')),
-            "rating": text.parse_float(extr('"score":', ',')),
-            "celebrity": text.unescape(extr('"cname":"', '"')),
+            "birthday"  : text.parse_datetime(text.unescape(
+                extr('"bdate":"', '"'))[:10], "%Y-%m-%d"),
+            "shoesize"  : text.unescape(extr('"ssize":', ',')),
+            "rating"    : text.parse_float(extr('"score":', ',')),
+            "celebrity" : text.unescape(extr('"cname":"', '"')),
         }
 
     def images(self, page):
