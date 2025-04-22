@@ -71,7 +71,7 @@ class ScrolllerExtractor(Extractor):
 
         return data["login"]["token"]
 
-    def _request_graphql(self, opname, variables):
+    def _request_graphql(self, opname, variables, admin=False):
         url = "https://api.scrolller.com/api/v2/graphql"
         headers = {
             "Content-Type"  : "text/plain;charset=UTF-8",
@@ -85,6 +85,11 @@ class ScrolllerExtractor(Extractor):
             "variables"    : variables,
             "authorization": self.auth_token,
         }
+
+        if admin:
+            url = "https://api.scrolller.com/admin"
+            headers["Content-Type"] = "application/json"
+
         return self.request(
             url, method="POST", headers=headers, data=util.json_dumps(data),
         ).json()["data"]
@@ -159,12 +164,9 @@ class ScrolllerPostExtractor(ScrolllerExtractor):
     example = "https://scrolller.com/title-slug-a1b2c3d4f5"
 
     def posts(self):
-        url = "{}/{}".format(self.root, self.groups[0])
-        page = self.request(url).text
-        data = util.json_loads(text.extr(
-            page, '<script>window.scrolllerConfig="', '"</script>')
-            .replace('\\"', '"'))
-        return (data["item"],)
+        variables = {"url": "/" + self.groups[0]}
+        data = self._request_graphql("SubredditPostQuery", variables, True)
+        return (data["getPost"],)
 
 
 QUERIES = {
@@ -225,6 +227,34 @@ query LoginQuery(
         password: $password
     ) {
         username token expiresAt isAdmin status isPremium
+    }
+}
+""",
+
+    "ItemTypeQuery": """\
+query ItemTypeQuery(
+    $url: String!
+) {
+    getItemType(
+        url: $url
+    )
+}
+""",
+
+    "SubredditPostQuery": """\
+query SubredditPostQuery(
+    $url: String!
+) {
+    getPost(
+        data: { url: $url }
+    ) {
+        __typename id url title subredditId subredditTitle subredditUrl
+        redditPath isNsfw hasAudio fullLengthSource gfycatSource redgifsSource
+        ownerAvatar username displayName favoriteCount isPaid tags
+        commentsCount commentsRepliesCount isFavorite
+        albumContent { mediaSources { url width height isOptimized } }
+        mediaSources { url width height isOptimized }
+        blurredMediaSources { url width height isOptimized }
     }
 }
 """,
