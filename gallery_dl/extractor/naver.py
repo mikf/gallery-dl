@@ -9,7 +9,9 @@
 """Extractors for https://blog.naver.com/"""
 
 from .common import GalleryExtractor, Extractor, Message
-from .. import text
+from .. import text, util
+import datetime
+import time
 
 
 class NaverBase():
@@ -59,19 +61,66 @@ class NaverPostExtractor(NaverBase, GalleryExtractor):
                 "user"       : extr("var nickName = '", "'"),
             },
         }
-        data["post"]["date"] = text.parse_datetime(
+
+        data["post"]["date"] = self._parse_datetime(
             extr('se_publishDate pcol2">', '<') or
-            extr('_postAddDate">', '<'), "%Y. %m. %d. %H:%M")
+            extr('_postAddDate">', '<'))
+
         return data
 
+    def _parse_datetime(self, date_string):
+        if "전" in date_string:
+            ts = time.gmtime()
+            return datetime.datetime(ts.tm_year, ts.tm_mon, ts.tm_mday)
+        return text.parse_datetime(date_string, "%Y. %m. %d. %H:%M")
+
     def images(self, page):
-        results = []
+        files = []
+        self._extract_images(files, page)
+        if self.config("videos", True):
+            self._extract_videos(files, page)
+        return files
+
+    def _extract_images(self, files, page):
         for url in text.extract_iter(page, 'data-lazy-src="', '"'):
             url = url.replace("://post", "://blog", 1).partition("?")[0]
             if "\ufffd" in text.unquote(url):
                 url = text.unquote(url, encoding="EUC-KR")
-            results.append((url, None))
-        return results
+            files.append((url, None))
+
+    def _extract_videos(self, files, page):
+        for module in text.extract_iter(page, " data-module='", "'></"):
+            if '"v2_video"' not in module:
+                continue
+            media = util.json_loads(module)["data"]
+            try:
+                self._extract_media(files, media)
+            except Exception as exc:
+                self.log.warning("%s: Failed to extract video '%s' (%s: %s)",
+                                 self.post_id, media.get("vid"),
+                                 exc.__class__.__name__, exc)
+
+    def _extract_media(self, files, media):
+        url = ("https://apis.naver.com/rmcnmv/rmcnmv/vod/play/v2.0/" +
+               media["vid"])
+        params = {
+            "key"  : media["inkey"],
+            "sid"  : "2",
+            #  "pid": "00000000-0000-0000-0000-000000000000",
+            "nonce": int(time.time()),
+            "devt" : "html5_pc",
+            "prv"  : "N",
+            "aup"  : "N",
+            "stpb" : "N",
+            "cpl"  : "ko_KR",
+            "providerEnv": "real",
+            "adt"  : "glad",
+            "lc"   : "ko_KR",
+        }
+        data = self.request(url, params=params).json()
+        video = max(data["videos"]["list"],
+                    key=lambda v: v.get("size") or 0)
+        files.append((video["source"], video))
 
 
 class NaverBlogExtractor(NaverBase, Extractor):
