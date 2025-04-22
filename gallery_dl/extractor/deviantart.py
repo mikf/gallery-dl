@@ -867,6 +867,9 @@ x2="45.4107524%" y2="71.4898596%" id="app-root-3">\
             )["deviation"]["extended"]["deviationUuid"]
             yield self.api.deviation(deviation_uuid)
 
+    def _unescape_json(self, json):
+        return json.replace('\\"', '"').replace("\\\\", "\\")
+
 
 class DeviantartUserExtractor(DeviantartExtractor):
     """Extractor for an artist's user profile"""
@@ -1046,7 +1049,7 @@ class DeviantartStashExtractor(DeviantartExtractor):
         DeviantartExtractor.__init__(self, match)
         self.user = None
 
-    def deviations(self, stash_id=None):
+    def deviations(self, stash_id=None, stash_data=None):
         if stash_id is None:
             legacy_url, stash_id = self.groups
         else:
@@ -1068,14 +1071,33 @@ class DeviantartStashExtractor(DeviantartExtractor):
                 deviation["_page"] = page
                 deviation["index"] = text.parse_int(text.extr(
                     page, '\\"deviationId\\":', ','))
+
+                deviation["stash_id"] = stash_id
+                if stash_data:
+                    folder = stash_data["folder"]
+                    deviation["stash_name"] = folder["name"]
+                    deviation["stash_folder"] = folder["folderId"]
+                    deviation["stash_parent"] = folder["parentId"] or 0
+                    deviation["stash_description"] = \
+                        folder["richDescription"]["excerpt"]
+                else:
+                    deviation["stash_name"] = ""
+                    deviation["stash_description"] = ""
+                    deviation["stash_folder"] = 0
+                    deviation["stash_parent"] = 0
+
                 yield deviation
                 return
+
+        stash_data = text.extr(page, ',\\"stash\\":', ',\\"@@')
+        if stash_data:
+            stash_data = util.json_loads(self._unescape_json(stash_data))
 
         for sid in text.extract_iter(
                 page, 'href="https://www.deviantart.com/stash/', '"'):
             if sid == stash_id or sid.endswith("#comments"):
                 continue
-            yield from self.deviations(sid)
+            yield from self.deviations(sid, stash_data)
 
 
 class DeviantartFavoriteExtractor(DeviantartExtractor):
@@ -1289,12 +1311,8 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
         self.archive_fmt = ("g_{_username}_{index}{index_file:?_//}."
                             "{extension}")
 
-        additional_media = util.json_loads(
-            # unescape quotes: \" -> "
-            # unescape backslashes: \\ -> \
-            # add closing braces
-            additional_media.replace('\\"', '"').replace("\\\\", "\\") + "}]")
-
+        additional_media = util.json_loads(self._unescape_json(
+            additional_media) + "}]")
         deviation["count"] = 1 + len(additional_media)
         yield deviation
 

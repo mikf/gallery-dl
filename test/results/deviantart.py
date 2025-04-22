@@ -412,6 +412,11 @@ __tests__ = (
     "index"         : 778297656,
     "index_base36"  : "cvdmbc",
     "published_time": 1545835767,
+    "stash_description": "",
+    "stash_id"      : "022c83odnaxc",
+    "stash_name"    : "",
+    "stash_folder"  : 0,
+    "stash_parent"  : 0,
     "title"         : "01",
     "url"           : "https://www.deviantart.com/stash/022c83odnaxc",
 },
@@ -441,7 +446,18 @@ __tests__ = (
     "#category": ("", "deviantart", "stash"),
     "#class"   : deviantart.DeviantartStashExtractor,
     "#options" : {"original": False},
-    "#count"   : 4,
+    "#pattern" : (
+        r"https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/940f2d05-c5eb-4917-8192-7eb6a2d508c6/dcvdmcb-b0178127-de9d-48e2-b95c-8627778b1c20.png\?token=ey.+",
+        r"https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/940f2d05-c5eb-4917-8192-7eb6a2d508c6/dcvdmc6-a2402b2f-b469-42d2-99ca-a3464b3c5889.png\?token=ey.+",
+        r"https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/940f2d05-c5eb-4917-8192-7eb6a2d508c6/dcvdmbz-adf92e46-0481-4c65-9e3b-e142a86a2d44.png\?token=ey.+",
+        r"https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/940f2d05-c5eb-4917-8192-7eb6a2d508c6/dcvdmbx-08eb6ce5-c892-4f16-8676-668cd2276697.png\?token=ey.+",
+    ),
+
+    "stash_description": """Sta.sh Description\ntest-テスト-"&>""",
+    "stash_id"    : {"021rsajamktz", "099tbcst5u5", "02394fx5fagg", "01okox2yh0o2"},
+    "stash_name"  : """Sta.sh Title test-テスト-"&>""",
+    "stash_folder": 7362377764221985,
+    "stash_parent": 0,
 },
 
 {
@@ -460,6 +476,12 @@ __tests__ = (
     "#class"   : deviantart.DeviantartStashExtractor,
     "#options" : {"original": False},
     "#count"   : 4,
+
+    "stash_description": "",
+    "stash_id"    : {"018dfylek5o1", "0vmi73y92tn", "02g2v51kb8y2", "06nnon5vucx"},
+    "stash_name"  : {"Sta.sh Uploads 147", "1"},
+    "stash_folder": {7382365850253347, 2415594944160654},
+    "stash_parent": {0, 7382365850253347},
 },
 
 {
