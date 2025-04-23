@@ -76,7 +76,7 @@ class TumblrExtractor(Extractor):
             self._subn_orig_image = re.compile(r"/s\d+x\d+/").subn
             _findall_image = re.compile('<img src="([^"]+)"').findall
             _findall_video = re.compile('<source src="([^"]+)"').findall
-            _find_keep_reading_link = re.compile(r'<a[^>]+class=["\'](?:tmblr-truncated-link|read_more)["\'][^>]+href=["\']([^"\']+)["\']')
+            _find_keep_reading_link = re.compile(r'<a[^>]+class=["\'][^"\']*(?:tmblr-truncated-link|read_more)[^"\']*["\'][^>]+href=["\']([^"\']+)["\']')
 
         for post in self.posts():
             if self.date_min > post["timestamp"]:
