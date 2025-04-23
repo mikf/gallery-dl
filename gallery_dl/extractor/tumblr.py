@@ -76,6 +76,7 @@ class TumblrExtractor(Extractor):
             self._subn_orig_image = re.compile(r"/s\d+x\d+/").subn
             _findall_image = re.compile('<img src="([^"]+)"').findall
             _findall_video = re.compile('<source src="([^"]+)"').findall
+            _find_keep_reading_link = re.compile(r'<a[^>]+class=["\'](?:tmblr-truncated-link|read_more)["\'][^>]+href=["\']([^"\']+)["\']')
 
         for post in self.posts():
             if self.date_min > post["timestamp"]:
@@ -107,6 +108,26 @@ class TumblrExtractor(Extractor):
                 del post["trail"]
             post["date"] = text.parse_timestamp(post["timestamp"])
             posts = []
+            
+            if self.inline and "reblog" in post:
+                body = post["reblog"]["comment"] + post["reblog"]["tree_html"]
+
+                keep_reading_match = _find_keep_reading_link.search(body)
+                if keep_reading_match:
+                    full_content_url = keep_reading_match.group(1)
+                    try:
+                        response = self.request(full_content_url)
+                        full_content_body = response.text
+
+                        for url in _findall_image(full_content_body):
+                            url, fb = self._original_inline_image(url)
+                            if fb:
+                                post["_fallback"] = self._original_image_fallback(url, post["id"])
+                            posts.append(self._prepare_image(url, post.copy()))
+                            post.pop("_fallback", None)
+
+                    except Exception as e:
+                        self.log.warning("Failed to fetch full content from %s: %s", full_content_url, e)
 
             if "photos" in post:  # type "photo" or "link"
                 photos = post["photos"]
