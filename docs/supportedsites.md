@@ -692,6 +692,12 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
+    <td>Pictoa</td>
+    <td>https://pictoa.com/</td>
+    <td>Albums, individual Images</td>
+    <td></td>
+</tr>
+<tr>
     <td>Piczel</td>
     <td>https://piczel.tv/</td>
     <td>Folders, individual Images, User Profiles</td>
