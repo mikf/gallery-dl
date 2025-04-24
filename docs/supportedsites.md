@@ -694,7 +694,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Pictoa</td>
     <td>https://pictoa.com/</td>
-    <td>Galleries, individual Images</td>
+    <td>Albums, individual Images</td>
     <td></td>
 </tr>
 <tr>
