@@ -65,6 +65,15 @@ class ItakuGalleryExtractor(ItakuExtractor):
         return self.api.galleries_images(*self.groups)
 
 
+class ItakuStarsExtractor(ItakuExtractor):
+    subcategory = "stars"
+    pattern = BASE_PATTERN + r"/profile/([^/?#]+)/stars(?:/(\d+))?"
+    example = "https://itaku.ee/profile/USER/stars"
+
+    def posts(self):
+        return self.api.galleries_images_starred(*self.groups)
+
+
 class ItakuImageExtractor(ItakuExtractor):
     subcategory = "image"
     pattern = BASE_PATTERN + r"/images/(\d+)"
@@ -83,15 +92,6 @@ class ItakuSearchExtractor(ItakuExtractor):
         params = text.parse_query_list(
             self.groups[0], {"tags", "maturity_rating"})
         return self.api.search_images(params)
-
-
-class ItakuStarsExtractor(ItakuExtractor):
-    subcategory = "stars"
-    pattern = BASE_PATTERN + r"/profile/([^/?#]+)/stars(?:/(\d+))?"
-    example = "https://itaku.ee/profile/USER/stars"
-
-    def posts(self):
-        return self.api.stars_images(*self.groups)
 
 
 class ItakuAPI():
@@ -148,11 +148,11 @@ class ItakuAPI():
         }
         return self._pagination(endpoint, params, self.image)
 
-    def stars_images(self, username: str, section: str = None):
+    def galleries_images_starred(self, username, section=None):
         endpoint = "/galleries/images/user_starred_imgs/"
         params = {
             "cursor"    : None,
-            "stars_of": self.user(username)["owner"],
+            "stars_of"  : self.user(username)["owner"],
             "sections"  : section,
             "date_range": "",
             "ordering"  : "-date_added",
