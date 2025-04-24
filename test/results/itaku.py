@@ -31,6 +31,15 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://itaku.ee/profile/piku/stars",
+    "#category": ("", "itaku", "stars"),
+    "#class"   : itaku.ItakuStarsExtractor,
+    "#pattern" : r"https://itaku\.ee/api/media/gallery_imgs/[^/?#]+\.(jpg|png|gif)",
+    "#range"   : "1-10",
+    "#count"   : 10,
+},
+
+{
     "#url"     : "https://itaku.ee/images/100471",
     "#category": ("", "itaku", "image"),
     "#class"   : itaku.ItakuImageExtractor,
