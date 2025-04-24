@@ -478,7 +478,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Itaku</td>
     <td>https://itaku.ee/</td>
-    <td>Galleries, individual Images, Search Results</td>
+    <td>Galleries, individual Images, Search Results, Stars</td>
     <td></td>
 </tr>
 <tr>
