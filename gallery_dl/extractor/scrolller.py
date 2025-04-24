@@ -20,8 +20,8 @@ class ScrolllerExtractor(Extractor):
     category = "scrolller"
     root = "https://scrolller.com"
     directory_fmt = ("{category}", "{subredditTitle}")
-    filename_fmt = "{id}{title:? //}.{extension}"
-    archive_fmt = "{id}"
+    filename_fmt = "{id}{num:?_//>03}{title:? //}.{extension}"
+    archive_fmt = "{id}_{num}"
     request_interval = (0.5, 1.5)
 
     def _init(self):
@@ -31,22 +31,35 @@ class ScrolllerExtractor(Extractor):
         self.login()
 
         for post in self.posts():
-
-            media_sources = post.get("mediaSources")
-            if not media_sources:
-                self.log.warning("%s: No media files", post.get("id"))
-                continue
-
-            src = max(media_sources, key=self._sort_key)
-            post.update(src)
-            url = src["url"]
-            text.nameext_from_url(url, post)
+            files = self._extract_files(post)
+            post["count"] = len(files)
 
             yield Message.Directory, post
-            yield Message.Url, url, post
+            for file in files:
+                url = file["url"]
+                post.update(file)
+                yield Message.Url, url, text.nameext_from_url(url, post)
 
     def posts(self):
         return ()
+
+    def _extract_files(self, post):
+        album = post.pop("albumContent", None)
+        if not album:
+            sources = post.get("mediaSources")
+            if not sources:
+                self.log.warning("%s: No media files", post.get("id"))
+                return ()
+            src = max(sources, key=self._sort_key)
+            src["num"] = 0
+            return (src,)
+
+        files = []
+        for num, media in enumerate(album, 1):
+            src = max(media["mediaSources"], key=self._sort_key)
+            src["num"] = num
+            files.append(src)
+        return files
 
     def login(self):
         username, password = self._get_auth_info()
