@@ -153,7 +153,7 @@ class KemonopartyExtractor(Extractor):
                     file["type"] = "archive"
                     if archives:
                         try:
-                            data = self.api.posts_archives(file["hash"])
+                            data = self.api.file(file["hash"])
                             data.update(file)
                             post_archives.append(data)
                         except Exception as exc:
@@ -521,9 +521,9 @@ class KemonoAPI():
         params = {"q": query, "o": offset, "tag": tags}
         return self._pagination(endpoint, params, 50, "posts")
 
-    def posts_archives(self, file_hash):
-        endpoint = "/posts/archives/" + file_hash
-        return self._call(endpoint)["archive"]
+    def file(self, file_hash):
+        endpoint = "/file/" + file_hash
+        return self._call(endpoint)
 
     def creator_posts(self, service, creator_id, offset=0, query=None):
         endpoint = "/{}/user/{}".format(service, creator_id)
