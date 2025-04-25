@@ -401,7 +401,7 @@ __tests__ = (
         "public_id": "soso",
         "relation_id": None,
         "service": "fanbox",
-        "updated": "2025-03-03T03:29:08.598883",
+        "updated": "2025-03-29T05:44:56.747243",
     },
     "tags": [
         "うごイラ",
