@@ -79,7 +79,8 @@ class SubscribestarExtractor(Extractor):
 
         username, password = self._get_auth_info()
         if username:
-            self.cookies_update(self._login_impl(username, password))
+            self.cookies_update(self._login_impl(
+                (username, self.cookies_domain), password))
 
         if self._warning:
             if not username or not self.cookies_check(self.cookies_names):
@@ -88,30 +89,54 @@ class SubscribestarExtractor(Extractor):
 
     @cache(maxage=28*86400, keyarg=1)
     def _login_impl(self, username, password):
+        username = username[0]
         self.log.info("Logging in as %s", username)
 
-        url = "https://www.subscribestar.com/session.json"
+        if self.root.endswith(".adult"):
+            self.cookies.set("18_plus_agreement_generic", "true",
+                             domain=self.cookies_domain)
+
+        # load login page
+        url = self.root + "/login"
+        page = self.request(url).text
+
         headers = {
-            "Origin"          : "https://www.subscribestar.com",
-            "Referer"         : "https://www.subscribestar.com/login",
+            "Accept": "*/*;q=0.5, text/javascript, application/javascript, "
+                      "application/ecmascript, application/x-ecmascript",
+            "Referer": self.root + "/login",
+            "X-CSRF-Token": text.unescape(text.extr(
+                page, '<meta name="csrf-token" content="', '"')),
+            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
             "X-Requested-With": "XMLHttpRequest",
         }
-        data = {
-            "utf8"    : "✓",
-            "email"   : username,
-            "password": password,
-        }
 
-        response = self.request(
-            url, method="POST", headers=headers, data=data, fatal=False)
-        if response.json().get("errors"):
-            self.log.debug(response.json()["errors"])
-            raise exception.AuthenticationError()
+        def check_errors(response):
+            errors = response.json().get("errors")
+            if errors:
+                self.log.debug(errors)
+                try:
+                    msg = '"{}"'.format(errors.popitem()[1])
+                except Exception:
+                    msg = None
+                raise exception.AuthenticationError(msg)
+            return response
 
+        # submit username / email
+        url = self.root + "/session.json"
+        data = {"email": username}
+        response = check_errors(self.request(
+            url, method="POST", headers=headers, data=data, fatal=False))
+
+        # submit password
+        url = self.root + "/session/password.json"
+        data = {"password": password}
+        response = check_errors(self.request(
+            url, method="POST", headers=headers, data=data, fatal=False))
+
+        # return cookies
         return {
             cookie.name: cookie.value
             for cookie in response.cookies
-            if cookie.name.startswith("auth")
         }
 
     def _media_from_post(self, html):
