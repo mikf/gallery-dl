@@ -23,14 +23,15 @@ class SubscribestarExtractor(Extractor):
     directory_fmt = ("{category}", "{author_name}")
     filename_fmt = "{post_id}_{id}.{extension}"
     archive_fmt = "{id}"
-    cookies_domain = "www.subscribestar.com"
-    cookies_names = ("auth_token",)
+    cookies_domain = ".subscribestar.com"
+    cookies_names = ("_personalization_id",)
+    _warning = True
 
     def __init__(self, match):
         tld, self.item = match.groups()
         if tld == "adult":
             self.root = "https://subscribestar.adult"
-            self.cookies_domain = "subscribestar.adult"
+            self.cookies_domain = ".subscribestar.adult"
             self.subcategory += "-adult"
         Extractor.__init__(self, match)
 
@@ -79,6 +80,11 @@ class SubscribestarExtractor(Extractor):
         username, password = self._get_auth_info()
         if username:
             self.cookies_update(self._login_impl(username, password))
+
+        if self._warning:
+            if not username or not self.cookies_check(self.cookies_names):
+                self.log.warning("no '_personalization_id' cookie set")
+            SubscribestarExtractor._warning = False
 
     @cache(maxage=28*86400, keyarg=1)
     def _login_impl(self, username, password):
