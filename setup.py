@@ -103,6 +103,7 @@ def build_setuptools():
         python_requires=">=3.4",
         install_requires=[
             "requests>=2.11.0",
+            "XClientTransaction @ https://github.com/iSarabjitDhiman/XClientTransaction/archive/refs/heads/master.tar.gz",
         ],
         extras_require={
             "video": [

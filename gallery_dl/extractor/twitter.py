@@ -15,6 +15,9 @@ import itertools
 import random
 import re
 
+from x_client_transaction import ClientTransaction
+from x_client_transaction.utils import handle_x_migration
+
 BASE_PATTERN = (r"(?:https?://)?(?:www\.|mobile\.)?"
                 r"(?:(?:[fv]x)?twitter|(?:fix(?:up|v))?x)\.com")
 
@@ -1101,6 +1104,7 @@ class TwitterAPI():
             "x-csrf-token": csrf_token,
             "x-twitter-client-language": "en",
             "x-twitter-active-user": "yes",
+            "x-client-transaction-id": None,
             "Sec-Fetch-Dest": "empty",
             "Sec-Fetch-Mode": "cors",
             "Sec-Fetch-Site": "same-origin",
@@ -1108,6 +1112,13 @@ class TwitterAPI():
                              "COuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu"
                              "4FA33AGWWjCpTnA",
         }
+
+        self.session = extractor.session.__class__()
+        self.session.headers.update(extractor.session.headers)
+        self.session.headers.update(self.headers)
+        _response = handle_x_migration(self.session)
+        self.ct = ClientTransaction(_response)
+
         self.params = {
             "include_profile_interstitial_type": "1",
             "include_blocking": "1",
@@ -1509,6 +1520,9 @@ class TwitterAPI():
         while True:
             if not self.headers["x-twitter-auth-type"] and auth:
                 self._authenticate_guest()
+
+            self.headers["x-client-transaction-id"] = \
+                self.ct.generate_transaction_id(method, endpoint)
 
             response = self.extractor.request(
                 url, method=method, params=params,
