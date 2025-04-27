@@ -930,7 +930,7 @@ class PixivNovelExtractor(PixivExtractor):
                         images = (data["textEmbeddedImages"]).values()
                     except Exception:
                         self.log.error(
-                            "Failed to get embedded novel images:",
+                            "Failed to get embedded novel images: %s",
                             novel_id)
                         images = ()
 
