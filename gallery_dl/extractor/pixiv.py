@@ -934,19 +934,10 @@ class PixivNovelExtractor(PixivExtractor):
                         illusts[marker[11:].partition("-")[0]] = None
 
                 if desktop:
-                    try:
-                        novel_id = str(novel["id"])
-                        url = "{}/novel/show.php?id={}".format(
-                            self.root, novel_id)
-                        data = util.json_loads(text.extr(
-                            self.request(url, headers=headers).text,
-                            "id=\"meta-preload-data\" content='", "'"))
-                        images = (data["novel"][novel_id]
-                                  ["textEmbeddedImages"]).values()
-                    except Exception:
-                        images = ()
+                    novel_id = str(novel["id"])
+                    data = self._request_ajax("/novel/" + novel_id)
 
-                    for image in images:
+                    for image in (data["textEmbeddedImages"]).values():
                         url = image.pop("urls")["original"]
                         novel.update(image)
                         novel["date_url"] = self._date_from_url(url)
