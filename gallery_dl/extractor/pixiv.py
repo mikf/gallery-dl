@@ -866,16 +866,6 @@ class PixivNovelExtractor(PixivExtractor):
         embeds = self.config("embeds")
         covers = self.config("covers")
 
-        if embeds:
-            headers = {
-                "User-Agent"    : "Mozilla/5.0",
-                "App-OS"        : None,
-                "App-OS-Version": None,
-                "App-Version"   : None,
-                "Referer"       : self.root + "/",
-                "Authorization" : None,
-            }
-
         novels = self.novels()
         if self.max_posts:
             novels = itertools.islice(novels, self.max_posts)
