@@ -173,6 +173,24 @@ class ClassifyTest(BasePostprocessorTest):
         self.assertEqual(self.pathfmt.realpath, path + "/file.foo")
 
 
+class DirectoryTest(BasePostprocessorTest):
+
+    def test_default(self):
+        self._create()
+
+        path = os.path.join(self.dir.name, "test")
+        self.assertEqual(self.pathfmt.realdirectory, path + "/")
+        self.assertEqual(self.pathfmt.realpath, path + "/file.ext")
+
+        self.pathfmt.kwdict["category"] = "custom"
+        self._trigger()
+
+        path = os.path.join(self.dir.name, "custom")
+        self.assertEqual(self.pathfmt.realdirectory, path + "/")
+        self.pathfmt.build_path()
+        self.assertEqual(self.pathfmt.realpath, path + "/file.ext")
+
+
 class ExecTest(BasePostprocessorTest):
 
     def test_command_string(self):

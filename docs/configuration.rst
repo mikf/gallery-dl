@@ -6440,6 +6440,19 @@ Description
     Only compare file sizes. Do not read and compare their content.
 
 
+directory.event
+---------------
+Type
+    * ``string``
+    * ``list`` of ``strings``
+Default
+    ``"prepare"``
+Description
+    The event(s) for which directory_ format strings are (re)evaluated.
+
+    See `metadata.event`_ for a list of available events.
+
+
 exec.archive
 ------------
 Type
@@ -7738,6 +7751,8 @@ Description
     ``compare``
         | Compare versions of the same file and replace/enumerate them on mismatch
         | (requires `downloader.*.part`_ = ``true`` and `extractor.*.skip`_ = ``false``)
+    ``directory``
+        Reevaluate directory_ format strings
     ``exec``
         Execute external commands
     ``hash``
