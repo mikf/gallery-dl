@@ -929,7 +929,9 @@ class PixivNovelExtractor(PixivExtractor):
                         data = self._request_ajax("/novel/" + novel_id)
                         images = (data["textEmbeddedImages"]).values()
                     except Exception:
-                        self.log.error("Failed to get embedded novel images:", novel_id)
+                        self.log.error(
+                            "Failed to get embedded novel images:",
+                            novel_id)
                         images = ()
 
                     for image in images:
