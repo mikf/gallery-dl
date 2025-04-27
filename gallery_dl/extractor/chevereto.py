@@ -78,6 +78,7 @@ class CheveretoImageExtractor(CheveretoExtractor):
             "id"   : self.path.rpartition(".")[2],
             "url"  : url,
             "album": text.extr(extr("Added to <a", "/a>"), ">", "<"),
+            "date" : text.parse_datetime(extr('<span title="', '"')),
             "user" : extr('username: "', '"'),
         }
 
