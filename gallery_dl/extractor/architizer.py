@@ -54,7 +54,7 @@ class ArchitizerProjectExtractor(GalleryExtractor):
         return [
             (url, None)
             for url in text.extract_iter(
-                page, "property='og:image:secure_url' content='", "?")
+                page, 'property="og:image:secure_url" content="', "?")
         ]
 
 

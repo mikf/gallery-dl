@@ -109,11 +109,7 @@ class PatreonExtractor(Extractor):
 
     def _attachments(self, post):
         for attachment in post.get("attachments") or ():
-            url = self.request(
-                attachment["url"], method="HEAD",
-                allow_redirects=False, fatal=False,
-            ).headers.get("Location")
-
+            url = self.request_location(attachment["url"], fatal=False)
             if url:
                 yield "attachment", url, attachment["name"]
 

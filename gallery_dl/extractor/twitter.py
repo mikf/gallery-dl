@@ -798,6 +798,17 @@ class TwitterFollowingExtractor(TwitterExtractor):
         return self._users_result(TwitterAPI(self).user_following(self.user))
 
 
+class TwitterFollowersExtractor(TwitterExtractor):
+    """Extractor for a user's followers"""
+    subcategory = "followers"
+    pattern = BASE_PATTERN + r"/(?!search)([^/?#]+)/followers(?!\w)"
+    example = "https://x.com/USER/followers"
+
+    def items(self):
+        self.login()
+        return self._users_result(TwitterAPI(self).user_followers(self.user))
+
+
 class TwitterSearchExtractor(TwitterExtractor):
     """Extractor for Twitter search results"""
     subcategory = "search"
@@ -1139,54 +1150,76 @@ class TwitterAPI():
                    "collab_control,vibe",
         }
         self.features = {
-            "hidden_profile_likes_enabled": True,
             "hidden_profile_subscriptions_enabled": True,
+            "profile_label_improvements_pcf_label_in_post_enabled": True,
+            "rweb_tipjar_consumption_enabled": True,
             "responsive_web_graphql_exclude_directive_enabled": True,
             "verified_phone_label_enabled": False,
             "highlights_tweets_tab_ui_enabled": True,
             "responsive_web_twitter_article_notes_tab_enabled": True,
+            "subscriptions_feature_can_gift_premium": True,
             "creator_subscriptions_tweet_preview_api_enabled": True,
             "responsive_web_graphql_"
             "skip_user_profile_image_extensions_enabled": False,
-            "responsive_web_graphql_timeline_navigation_enabled": True,
+            "responsive_web_graphql_"
+            "timeline_navigation_enabled": True,
         }
         self.features_pagination = {
+            "rweb_video_screen_enabled": False,
+            "profile_label_improvements_pcf_label_in_post_enabled": True,
+            "rweb_tipjar_consumption_enabled": True,
             "responsive_web_graphql_exclude_directive_enabled": True,
             "verified_phone_label_enabled": False,
             "creator_subscriptions_tweet_preview_api_enabled": True,
-            "responsive_web_graphql_timeline_navigation_enabled": True,
-            "responsive_web_graphql_skip_user_profile_"
-            "image_extensions_enabled": False,
+            "responsive_web_graphql_"
+            "timeline_navigation_enabled": True,
+            "responsive_web_graphql_"
+            "skip_user_profile_image_extensions_enabled": False,
+            "premium_content_api_read_enabled": False,
+            "communities_web_enable_tweet_community_results_fetch": True,
             "c9s_tweet_anatomy_moderator_badge_enabled": True,
-            "tweetypie_unmention_optimization_enabled": True,
+            "responsive_web_grok_analyze_button_fetch_trends_enabled": False,
+            "responsive_web_grok_analyze_post_followups_enabled": True,
+            "responsive_web_jetfuel_frame": False,
+            "responsive_web_grok_share_attachment_enabled": True,
+            "articles_preview_enabled": True,
             "responsive_web_edit_tweet_api_enabled": True,
             "graphql_is_translatable_rweb_tweet_is_translatable_enabled": True,
             "view_counts_everywhere_api_enabled": True,
             "longform_notetweets_consumption_enabled": True,
             "responsive_web_twitter_article_tweet_consumption_enabled": True,
             "tweet_awards_web_tipping_enabled": False,
+            "responsive_web_grok_show_grok_translated_post": False,
+            "responsive_web_grok_analysis_button_from_backend": True,
+            "creator_subscriptions_quote_tweet_preview_enabled": False,
             "freedom_of_speech_not_reach_fetch_enabled": True,
             "standardized_nudges_misinfo": True,
-            "tweet_with_visibility_results_prefer_gql_"
-            "limited_actions_policy_enabled": True,
-            "rweb_video_timestamps_enabled": True,
+            "tweet_with_visibility_results_"
+            "prefer_gql_limited_actions_policy_enabled": True,
             "longform_notetweets_rich_text_read_enabled": True,
             "longform_notetweets_inline_media_enabled": True,
-            "responsive_web_media_download_video_enabled": True,
+            "responsive_web_grok_image_annotation_enabled": True,
             "responsive_web_enhance_cards_enabled": False,
         }
 
     def tweet_result_by_rest_id(self, tweet_id):
-        endpoint = "/graphql/MWY3AO9_I3rcP_L2A4FR4A/TweetResultByRestId"
+        endpoint = "/graphql/Vg2Akr5FzUmF0sTplA5k6g/TweetResultByRestId"
         variables = {
             "tweetId": tweet_id,
             "withCommunity": False,
             "includePromotedContent": False,
             "withVoice": False,
         }
+        field_toggles = {
+            "withArticleRichContentState": True,
+            "withArticlePlainText": False,
+            "withGrokAnalyze": False,
+            "withDisallowedReplyControls": False,
+        }
         params = {
-            "variables": self._json_dumps(variables),
-            "features" : self._json_dumps(self.features_pagination),
+            "variables"   : self._json_dumps(variables),
+            "features"    : self._json_dumps(self.features_pagination),
+            "fieldToggles": self._json_dumps(field_toggles),
         }
         tweet = self._call(endpoint, params)["data"]["tweetResult"]["result"]
         if "tweet" in tweet:
@@ -1203,47 +1236,61 @@ class TwitterAPI():
         return tweet
 
     def tweet_detail(self, tweet_id):
-        endpoint = "/graphql/B9_KmbkLhXt6jRwGjJrweg/TweetDetail"
+        endpoint = "/graphql/b9Yw90FMr_zUb8DvA8r2ug/TweetDetail"
         variables = {
             "focalTweetId": tweet_id,
             "referrer": "profile",
             "with_rux_injections": False,
+            #  "rankingMode": "Relevance",
             "includePromotedContent": False,
             "withCommunity": True,
-            "withQuickPromoteEligibilityTweetFields": True,
+            "withQuickPromoteEligibilityTweetFields": False,
             "withBirdwatchNotes": True,
             "withVoice": True,
-            "withV2Timeline": True,
+        }
+        field_toggles = {
+            "withArticleRichContentState": True,
+            "withArticlePlainText": False,
+            "withGrokAnalyze": False,
+            "withDisallowedReplyControls": False,
         }
         return self._pagination_tweets(
-            endpoint, variables, ("threaded_conversation_with_injections_v2",))
+            endpoint, variables,
+            ("threaded_conversation_with_injections_v2",),
+            field_toggles=field_toggles)
 
     def user_tweets(self, screen_name):
-        endpoint = "/graphql/5ICa5d9-AitXZrIA3H-4MQ/UserTweets"
+        endpoint = "/graphql/M3Hpkrb8pjWkEuGdLeXMOA/UserTweets"
         variables = {
             "userId": self._user_id_by_screen_name(screen_name),
             "count": 100,
             "includePromotedContent": False,
-            "withQuickPromoteEligibilityTweetFields": True,
+            "withQuickPromoteEligibilityTweetFields": False,
             "withVoice": True,
-            "withV2Timeline": True,
         }
-        return self._pagination_tweets(endpoint, variables)
+        field_toggles = {
+            "withArticlePlainText": False,
+        }
+        return self._pagination_tweets(
+            endpoint, variables, field_toggles=field_toggles)
 
     def user_tweets_and_replies(self, screen_name):
-        endpoint = "/graphql/UtLStR_BnYUGD7Q453UXQg/UserTweetsAndReplies"
+        endpoint = "/graphql/pz0IHaV_t7T4HJavqqqcIA/UserTweetsAndReplies"
         variables = {
             "userId": self._user_id_by_screen_name(screen_name),
             "count": 100,
             "includePromotedContent": False,
             "withCommunity": True,
             "withVoice": True,
-            "withV2Timeline": True,
         }
-        return self._pagination_tweets(endpoint, variables)
+        field_toggles = {
+            "withArticlePlainText": False,
+        }
+        return self._pagination_tweets(
+            endpoint, variables, field_toggles=field_toggles)
 
     def user_media(self, screen_name):
-        endpoint = "/graphql/tO4LMUYAZbR4T0SqQ85aAw/UserMedia"
+        endpoint = "/graphql/8B9DqlaGvYyOvTCzzZWtNA/UserMedia"
         variables = {
             "userId": self._user_id_by_screen_name(screen_name),
             "count": 100,
@@ -1251,12 +1298,15 @@ class TwitterAPI():
             "withClientEventToken": False,
             "withBirdwatchNotes": False,
             "withVoice": True,
-            "withV2Timeline": True,
         }
-        return self._pagination_tweets(endpoint, variables)
+        field_toggles = {
+            "withArticlePlainText": False,
+        }
+        return self._pagination_tweets(
+            endpoint, variables, field_toggles=field_toggles)
 
     def user_likes(self, screen_name):
-        endpoint = "/graphql/9s8V6sUI8fZLDiN-REkAxA/Likes"
+        endpoint = "/graphql/uxjTlmrTI61zreSIV1urbw/Likes"
         variables = {
             "userId": self._user_id_by_screen_name(screen_name),
             "count": 100,
@@ -1264,24 +1314,24 @@ class TwitterAPI():
             "withClientEventToken": False,
             "withBirdwatchNotes": False,
             "withVoice": True,
-            "withV2Timeline": True,
         }
-        return self._pagination_tweets(endpoint, variables)
+        field_toggles = {
+            "withArticlePlainText": False,
+        }
+        return self._pagination_tweets(
+            endpoint, variables, field_toggles=field_toggles)
 
     def user_bookmarks(self):
-        endpoint = "/graphql/cQxQgX8MJYjWwC0dxpyfYg/Bookmarks"
+        endpoint = "/graphql/ztCdjqsvvdL0dE8R5ME0hQ/Bookmarks"
         variables = {
             "count": 100,
             "includePromotedContent": False,
         }
-        features = self.features_pagination.copy()
-        features["graphql_timeline_v2_bookmark_timeline"] = True
         return self._pagination_tweets(
-            endpoint, variables, ("bookmark_timeline_v2", "timeline"), False,
-            features=features)
+            endpoint, variables, ("bookmark_timeline_v2", "timeline"), False)
 
     def list_latest_tweets_timeline(self, list_id):
-        endpoint = "/graphql/HjsWc-nwwHKYwHenbHm-tw/ListLatestTweetsTimeline"
+        endpoint = "/graphql/LSefrrxhpeX8HITbKfWz9g/ListLatestTweetsTimeline"
         variables = {
             "listId": list_id,
             "count": 100,
@@ -1289,21 +1339,20 @@ class TwitterAPI():
         return self._pagination_tweets(
             endpoint, variables, ("list", "tweets_timeline", "timeline"))
 
-    def search_timeline(self, query):
-        endpoint = "/graphql/fZK7JipRHWtiZsTodhsTfQ/SearchTimeline"
+    def search_timeline(self, query, product="Latest"):
+        endpoint = "/graphql/fL2MBiqXPk5pSrOS5ACLdA/SearchTimeline"
         variables = {
             "rawQuery": query,
             "count": 100,
-            "querySource": "",
-            "product": "Latest",
+            "querySource": "typed_query",
+            "product": product,
         }
-
         return self._pagination_tweets(
             endpoint, variables,
             ("search_by_raw_query", "search_timeline", "timeline"))
 
     def community_tweets_timeline(self, community_id):
-        endpoint = "/graphql/7B2AdxSuC-Er8qUr3Plm_w/CommunityTweetsTimeline"
+        endpoint = "/graphql/awszcpgwaIeqqNfmzjxUow/CommunityTweetsTimeline"
         variables = {
             "communityId": community_id,
             "count": 100,
@@ -1317,7 +1366,7 @@ class TwitterAPI():
              "timeline"))
 
     def community_media_timeline(self, community_id):
-        endpoint = "/graphql/qAGUldfcIoMv5KyAyVLYog/CommunityMediaTimeline"
+        endpoint = "/graphql/HfMuDHto2j3NKUeiLjKWHA/CommunityMediaTimeline"
         variables = {
             "communityId": community_id,
             "count": 100,
@@ -1329,7 +1378,7 @@ class TwitterAPI():
              "timeline"))
 
     def communities_main_page_timeline(self, screen_name):
-        endpoint = ("/graphql/GtOhw2mstITBepTRppL6Uw"
+        endpoint = ("/graphql/NbdrKPY_h_nlvZUg7oqH5Q"
                     "/CommunitiesMainPageTimeline")
         variables = {
             "count": 100,
@@ -1356,17 +1405,34 @@ class TwitterAPI():
                 ["twitter_objects"]["live_events"][event_id])
 
     def list_members(self, list_id):
-        endpoint = "/graphql/BQp2IEYkgxuSxqbTAr1e1g/ListMembers"
+        endpoint = "/graphql/v97svwb-qcBmzv6QruDuNg/ListMembers"
         variables = {
             "listId": list_id,
             "count": 100,
-            "withSafetyModeUserFields": True,
         }
         return self._pagination_users(
             endpoint, variables, ("list", "members_timeline", "timeline"))
 
+    def user_followers(self, screen_name):
+        endpoint = "/graphql/jqZ0_HJBA6mnu18iTZYm9w/Followers"
+        variables = {
+            "userId": self._user_id_by_screen_name(screen_name),
+            "count": 100,
+            "includePromotedContent": False,
+        }
+        return self._pagination_users(endpoint, variables)
+
+    def user_followers_verified(self, screen_name):
+        endpoint = "/graphql/GHg0X_FjrJoISwwLPWi1LQ/BlueVerifiedFollowers"
+        variables = {
+            "userId": self._user_id_by_screen_name(screen_name),
+            "count": 100,
+            "includePromotedContent": False,
+        }
+        return self._pagination_users(endpoint, variables)
+
     def user_following(self, screen_name):
-        endpoint = "/graphql/PAnE9toEjRfE-4tozRcsfw/Following"
+        endpoint = "/graphql/4QHbs4wmzgtU91f-t96_Eg/Following"
         variables = {
             "userId": self._user_id_by_screen_name(screen_name),
             "count": 100,
@@ -1376,12 +1442,11 @@ class TwitterAPI():
 
     @memcache(keyarg=1)
     def user_by_rest_id(self, rest_id):
-        endpoint = "/graphql/tD8zKvQzwY3kdx5yz6YmOw/UserByRestId"
+        endpoint = "/graphql/5vdJ5sWkbSRDiiNZvwc2Yg/UserByRestId"
         features = self.features
         params = {
             "variables": self._json_dumps({
                 "userId": rest_id,
-                "withSafetyModeUserFields": True,
             }),
             "features": self._json_dumps(features),
         }
@@ -1389,7 +1454,7 @@ class TwitterAPI():
 
     @memcache(keyarg=1)
     def user_by_screen_name(self, screen_name):
-        endpoint = "/graphql/k5XapwcSikNsEsILW5FvgA/UserByScreenName"
+        endpoint = "/graphql/32pL5BWe9WKeSK1MoPvFQQ/UserByScreenName"
         features = self.features.copy()
         features["subscriptions_verification_info_"
                  "is_identity_verified_enabled"] = True
@@ -1398,9 +1463,11 @@ class TwitterAPI():
         params = {
             "variables": self._json_dumps({
                 "screen_name": screen_name,
-                "withSafetyModeUserFields": True,
             }),
             "features": self._json_dumps(features),
+            "fieldToggles": self._json_dumps({
+                "withAuxiliaryUserLabels": True,
+            }),
         }
         return self._call(endpoint, params)["data"]["user"]["result"]
 
@@ -1620,7 +1687,8 @@ class TwitterAPI():
             params["cursor"] = extr._update_cursor(cursor)
 
     def _pagination_tweets(self, endpoint, variables,
-                           path=None, stop_tweets=True, features=None):
+                           path=None, stop_tweets=True,
+                           features=None, field_toggles=None):
         extr = self.extractor
         original_retweets = (extr.retweets == "original")
         pinned_tweet = extr.pinned
@@ -1633,6 +1701,8 @@ class TwitterAPI():
             features = self.features_pagination
         if features:
             params["features"] = self._json_dumps(features)
+        if field_toggles:
+            params["fieldToggles"] = self._json_dumps(field_toggles)
 
         while True:
             params["variables"] = self._json_dumps(variables)
@@ -1640,7 +1710,7 @@ class TwitterAPI():
 
             try:
                 if path is None:
-                    instructions = (data["user"]["result"]["timeline_v2"]
+                    instructions = (data["user"]["result"]["timeline"]
                                     ["timeline"]["instructions"])
                 else:
                     instructions = data

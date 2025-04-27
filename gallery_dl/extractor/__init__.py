@@ -131,6 +131,7 @@ modules = [
     "philomena",
     "photovogue",
     "picarto",
+    "pictoa",
     "piczel",
     "pillowfort",
     "pinterest",

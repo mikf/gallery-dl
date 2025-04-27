@@ -65,6 +65,15 @@ class ItakuGalleryExtractor(ItakuExtractor):
         return self.api.galleries_images(*self.groups)
 
 
+class ItakuStarsExtractor(ItakuExtractor):
+    subcategory = "stars"
+    pattern = BASE_PATTERN + r"/profile/([^/?#]+)/stars(?:/(\d+))?"
+    example = "https://itaku.ee/profile/USER/stars"
+
+    def posts(self):
+        return self.api.galleries_images_starred(*self.groups)
+
+
 class ItakuImageExtractor(ItakuExtractor):
     subcategory = "image"
     pattern = BASE_PATTERN + r"/images/(\d+)"
@@ -133,6 +142,21 @@ class ItakuAPI():
             "date_range": "",
             "maturity_rating": ("SFW", "Questionable", "NSFW"),
             "ordering"  : "-date_added",
+            "page"      : "1",
+            "page_size" : "30",
+            "visibility": ("PUBLIC", "PROFILE_ONLY"),
+        }
+        return self._pagination(endpoint, params, self.image)
+
+    def galleries_images_starred(self, username, section=None):
+        endpoint = "/galleries/images/user_starred_imgs/"
+        params = {
+            "cursor"    : None,
+            "stars_of"  : self.user(username)["owner"],
+            "sections"  : section,
+            "date_range": "",
+            "ordering"  : "-date_added",
+            "maturity_rating": ("SFW", "Questionable", "NSFW"),
             "page"      : "1",
             "page_size" : "30",
             "visibility": ("PUBLIC", "PROFILE_ONLY"),

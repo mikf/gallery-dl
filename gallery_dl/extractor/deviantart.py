@@ -867,6 +867,9 @@ x2="45.4107524%" y2="71.4898596%" id="app-root-3">\
             )["deviation"]["extended"]["deviationUuid"]
             yield self.api.deviation(deviation_uuid)
 
+    def _unescape_json(self, json):
+        return json.replace('\\"', '"').replace("\\\\", "\\")
+
 
 class DeviantartUserExtractor(DeviantartExtractor):
     """Extractor for an artist's user profile"""
@@ -1046,7 +1049,7 @@ class DeviantartStashExtractor(DeviantartExtractor):
         DeviantartExtractor.__init__(self, match)
         self.user = None
 
-    def deviations(self, stash_id=None):
+    def deviations(self, stash_id=None, stash_data=None):
         if stash_id is None:
             legacy_url, stash_id = self.groups
         else:
@@ -1068,14 +1071,33 @@ class DeviantartStashExtractor(DeviantartExtractor):
                 deviation["_page"] = page
                 deviation["index"] = text.parse_int(text.extr(
                     page, '\\"deviationId\\":', ','))
+
+                deviation["stash_id"] = stash_id
+                if stash_data:
+                    folder = stash_data["folder"]
+                    deviation["stash_name"] = folder["name"]
+                    deviation["stash_folder"] = folder["folderId"]
+                    deviation["stash_parent"] = folder["parentId"] or 0
+                    deviation["stash_description"] = \
+                        folder["richDescription"]["excerpt"]
+                else:
+                    deviation["stash_name"] = ""
+                    deviation["stash_description"] = ""
+                    deviation["stash_folder"] = 0
+                    deviation["stash_parent"] = 0
+
                 yield deviation
                 return
+
+        stash_data = text.extr(page, ',\\"stash\\":', ',\\"@@')
+        if stash_data:
+            stash_data = util.json_loads(self._unescape_json(stash_data))
 
         for sid in text.extract_iter(
                 page, 'href="https://www.deviantart.com/stash/', '"'):
             if sid == stash_id or sid.endswith("#comments"):
                 continue
-            yield from self.deviations(sid)
+            yield from self.deviations(sid, stash_data)
 
 
 class DeviantartFavoriteExtractor(DeviantartExtractor):
@@ -1276,28 +1298,26 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
 
         deviation = self.api.deviation(uuid)
         deviation["_page"] = page
-
-        _dev_info = text.extr(
-            page, '\\"deviationExtended\\":', ',\\"deviation\\":', None)
-        # Clean up escaped quotes
-        _json_str = re.sub(
-            r'(?<!\\)\\{1}"', '"', _dev_info).replace("\\'", "'")
-        _extended_info = util.json_loads(_json_str)[self.deviation_id]
-        additional_media = _extended_info.get("additionalMedia") or ()
-
-        if additional_media:
-            self.filename_fmt = ("{category}_{index}_{index_file}_{title}_"
-                                 "{num:>02}.{extension}")
-            self.archive_fmt = ("g_{_username}_{index}{index_file:?_//}."
-                                "{extension}")
-
         deviation["index_file"] = 0
+        deviation["num"] = deviation["count"] = 1
+
+        additional_media = text.extr(page, ',\\"additionalMedia\\":', '}],\\"')
+        if not additional_media:
+            yield deviation
+            return
+
+        self.filename_fmt = ("{category}_{index}_{index_file}_{title}_"
+                             "{num:>02}.{extension}")
+        self.archive_fmt = ("g_{_username}_{index}{index_file:?_//}."
+                            "{extension}")
+
+        additional_media = util.json_loads(self._unescape_json(
+            additional_media) + "}]")
         deviation["count"] = 1 + len(additional_media)
-        deviation["num"] = 1
         yield deviation
 
         for index, post in enumerate(additional_media):
-            uri = post["media"]["baseUri"].encode().decode("unicode-escape")
+            uri = self._eclipse_media(post["media"], "fullview")[0]
             deviation["content"]["src"] = uri
             deviation["num"] += 1
             deviation["index_file"] = post["fileId"]

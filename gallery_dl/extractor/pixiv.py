@@ -69,7 +69,7 @@ class PixivExtractor(Extractor):
             files = self._extract_files(work)
 
             if self.meta_user:
-                work.update(self.api.user_detail(work["user"]["id"]))
+                work.update(self.api.user_detail(str(work["user"]["id"])))
             if self.meta_comments:
                 if work["total_comments"] and not work.get("_ajax"):
                     try:
@@ -516,16 +516,10 @@ class PixivMeExtractor(PixivExtractor):
     pattern = r"(?:https?://)?pixiv\.me/([^/?#]+)"
     example = "https://pixiv.me/USER"
 
-    def __init__(self, match):
-        PixivExtractor.__init__(self, match)
-        self.account = match.group(1)
-
     def items(self):
-        url = "https://pixiv.me/" + self.account
-        data = {"_extractor": PixivUserExtractor}
-        response = self.request(
-            url, method="HEAD", allow_redirects=False, notfound="user")
-        yield Message.Queue, response.headers["Location"], data
+        url = "https://pixiv.me/" + self.groups[0]
+        location = self.request_location(url, notfound="user")
+        yield Message.Queue, location, {"_extractor": PixivUserExtractor}
 
 
 class PixivWorkExtractor(PixivExtractor):
@@ -887,7 +881,7 @@ class PixivNovelExtractor(PixivExtractor):
             novels = itertools.islice(novels, self.max_posts)
         for novel in novels:
             if self.meta_user:
-                novel.update(self.api.user_detail(novel["user"]["id"]))
+                novel.update(self.api.user_detail(str(novel["user"]["id"])))
             if self.meta_comments:
                 if novel["total_comments"]:
                     novel["comments"] = list(
@@ -940,15 +934,19 @@ class PixivNovelExtractor(PixivExtractor):
                         illusts[marker[11:].partition("-")[0]] = None
 
                 if desktop:
-                    novel_id = str(novel["id"])
-                    url = "{}/novel/show.php?id={}".format(
-                        self.root, novel_id)
-                    data = util.json_loads(text.extr(
-                        self.request(url, headers=headers).text,
-                        "id=\"meta-preload-data\" content='", "'"))
+                    try:
+                        novel_id = str(novel["id"])
+                        url = "{}/novel/show.php?id={}".format(
+                            self.root, novel_id)
+                        data = util.json_loads(text.extr(
+                            self.request(url, headers=headers).text,
+                            "id=\"meta-preload-data\" content='", "'"))
+                        images = (data["novel"][novel_id]
+                                  ["textEmbeddedImages"]).values()
+                    except Exception:
+                        images = ()
 
-                    for image in (data["novel"][novel_id]
-                                  ["textEmbeddedImages"]).values():
+                    for image in images:
                         url = image.pop("urls")["original"]
                         novel.update(image)
                         novel["date_url"] = self._date_from_url(url)

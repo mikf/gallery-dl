@@ -661,7 +661,7 @@ extractor.*.user-agent
 Type
     ``string``
 Default
-    * ``"gallery-dl/VERSION"``: ``[Danbooru]``, ``mangadex``
+    * ``"gallery-dl/VERSION"``: ``[Danbooru]``, ``mangadex``, ``weasyl``
     * ``"gallery-dl/VERSION (by mikf)"``: ``[E621]``
     * ``"Patreon/72.2.28 (Android; Android 14; Scale/2.10)"``: ``patreon``
     * ``"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/LATEST.0.0.0 Safari/537.36"``: ``instagram``
@@ -3435,6 +3435,16 @@ Description
     Extract extended ``pool`` metadata.
 
     Note: Not supported by all ``moebooru`` instances.
+
+
+extractor.naver.videos
+----------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Download videos.
 
 
 extractor.newgrounds.flash

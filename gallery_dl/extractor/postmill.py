@@ -153,17 +153,13 @@ class PostmillPostExtractor(PostmillExtractor):
 class PostmillShortURLExtractor(PostmillExtractor):
     """Extractor for short submission URLs"""
     subcategory = "shorturl"
-    pattern = BASE_PATTERN + r"/(\d+)$"
+    pattern = BASE_PATTERN + r"(/\d+)$"
     example = "https://raddle.me/123"
 
-    def __init__(self, match):
-        PostmillExtractor.__init__(self, match)
-        self.post_id = match.group(3)
-
     def items(self):
-        url = self.root + "/" + self.post_id
-        response = self.request(url, method="HEAD", allow_redirects=False)
-        full_url = text.urljoin(url, response.headers["Location"])
+        url = self.root + self.groups[2]
+        location = self.request_location(url)
+        full_url = text.urljoin(url, location)
         yield Message.Queue, full_url, {"_extractor": PostmillPostExtractor}
 
 

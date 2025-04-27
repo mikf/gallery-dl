@@ -606,6 +606,20 @@ class InstagramHighlightsExtractor(InstagramExtractor):
         return self.api.highlights_media(uid)
 
 
+class InstagramFollowersExtractor(InstagramExtractor):
+    """Extractor for an Instagram user's followers"""
+    subcategory = "followers"
+    pattern = USER_PATTERN + r"/followers"
+    example = "https://www.instagram.com/USER/followers/"
+
+    def items(self):
+        uid = self.api.user_id(self.item)
+        for user in self.api.user_followers(uid):
+            user["_extractor"] = InstagramUserExtractor
+            url = "{}/{}".format(self.root, user["username"])
+            yield Message.Queue, url, user
+
+
 class InstagramFollowingExtractor(InstagramExtractor):
     """Extractor for an Instagram user's followed users"""
     subcategory = "following"
@@ -693,11 +707,21 @@ class InstagramPostExtractor(InstagramExtractor):
     """Extractor for an Instagram post"""
     subcategory = "post"
     pattern = (r"(?:https?://)?(?:www\.)?instagram\.com"
-               r"/(?:[^/?#]+/)?(?:p|tv|reel)/([^/?#]+)")
+               r"/(?:share/()|[^/?#]+/)?(?:p|tv|reel)/([^/?#]+)")
     example = "https://www.instagram.com/p/abcdefg/"
 
     def posts(self):
-        return self.api.media(self.item)
+        share, shortcode = self.groups
+        if share is not None:
+            url = text.ensure_http_scheme(self.url)
+            headers = {
+                "Sec-Fetch-Dest": "empty",
+                "Sec-Fetch-Mode": "navigate",
+                "Sec-Fetch-Site": "same-origin",
+            }
+            location = self.request_location(url, headers=headers)
+            shortcode = location.split("/")[-2]
+        return self.api.media(shortcode)
 
 
 class InstagramRestAPI():
@@ -816,6 +840,11 @@ class InstagramRestAPI():
         params = {"count": 30}
         return self._pagination(endpoint, params)
 
+    def user_followers(self, user_id):
+        endpoint = "/v1/friendships/{}/followers/".format(user_id)
+        params = {"count": 12}
+        return self._pagination_following(endpoint, params)
+
     def user_following(self, user_id):
         endpoint = "/v1/friendships/{}/following/".format(user_id)
         params = {"count": 12}
@@ -908,9 +937,10 @@ class InstagramRestAPI():
             for item in data["items"]:
                 yield from item["media_items"]
 
-            if "next_max_id" not in data:
+            next_max_id = data.get("next_max_id")
+            if not next_max_id:
                 return extr._update_cursor(None)
-            params["max_id"] = extr._update_cursor(data["next_max_id"])
+            params["max_id"] = extr._update_cursor(next_max_id)
 
     def _pagination_following(self, endpoint, params):
         extr = self.extractor
@@ -921,10 +951,10 @@ class InstagramRestAPI():
 
             yield from data["users"]
 
-            if len(data["users"]) < params["count"]:
+            next_max_id = data.get("next_max_id")
+            if not next_max_id:
                 return extr._update_cursor(None)
-            params["max_id"] = extr._update_cursor(
-                params["max_id"] + params["count"])
+            params["max_id"] = extr._update_cursor(next_max_id)
 
 
 class InstagramGraphqlAPI():
