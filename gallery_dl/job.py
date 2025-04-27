@@ -496,8 +496,6 @@ class DownloadJob(Job):
                 self._skipcnt += 1
                 if self._skipcnt >= self._skipmax:
                     raise self._skipexc()
-            else:
-                self._skipcnt = 0
 
     def download(self, url):
         """Download 'url'"""
