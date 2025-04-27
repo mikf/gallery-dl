@@ -73,12 +73,24 @@ __tests__ = (
 
 {
     "#url"    : "https://scrolller.com/long-comic-the-twelve-tasks-of-eve-12ch1ve8ko",
+    "#comment": "album post (#7339)",
     "#class"  : scrolller.ScrolllerPostExtractor,
     "#pattern": r"https://static\.scrolller\.com/\w+/long-comic-the-twelve-tasks-of-eve-\d+-\w+\.png",
     "#count"  : 177,
 
     "count": 177,
     "num"  : range(1, 177),
+},
+
+{
+    "#url"    : "https://scrolller.com/some-quick-news-tboi-rule-34-mod-czedll1bum",
+    "#comment": "album post with empty 'mediaSources' (#7428)",
+    "#class"  : scrolller.ScrolllerPostExtractor,
+    "#urls"   : "https://static.scrolller.com/gamma/some-quick-news-tboi-rule-34-mod-1-50uolks94u.png",
+    "#count"  : 1,
+
+    "count": 1,
+    "num"  : 1,
 },
 
 {
