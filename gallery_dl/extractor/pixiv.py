@@ -926,8 +926,9 @@ class PixivNovelExtractor(PixivExtractor):
                 if desktop:
                     novel_id = str(novel["id"])
                     data = self._request_ajax("/novel/" + novel_id)
+                    images = (data["textEmbeddedImages"]).values()
 
-                    for image in (data["textEmbeddedImages"]).values():
+                    for image in images:
                         url = image.pop("urls")["original"]
                         novel.update(image)
                         novel["date_url"] = self._date_from_url(url)
