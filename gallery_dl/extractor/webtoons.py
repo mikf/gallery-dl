@@ -59,6 +59,7 @@ class WebtoonsEpisodeExtractor(WebtoonsBase, GalleryExtractor):
         self.title_no = params.get("title_no")
         self.episode_no = params.get("episode_no")
         self.gallery_url = "{}/{}/viewer?{}".format(self.root, path, query)
+        self.thumbnails = self.config("thumbnails", False)
 
     def metadata(self, page):
         extr = text.extract_from(page)
@@ -113,6 +114,23 @@ class WebtoonsEpisodeExtractor(WebtoonsBase, GalleryExtractor):
             quality = None
 
         results = []
+        
+        if self.thumbnails:
+            activeThumbnails = text.extract(page, 'class="on ', '</a>')
+            episodeThumbnailURL = text.extract(str(activeThumbnails),'data-url="', '"')
+            episodeThumbnailURL = str(episodeThumbnailURL[0])
+            if quality is not None:
+                path, _, query = episodeThumbnailURL.rpartition("?")
+                type = quality.get(path.rpartition(".")[2].lower())
+                if type is False:
+                    episodeThumbnailURL = path
+                elif type:
+                    episodeThumbnailURL = "{}?type={}".format(path, type)
+
+            episodeThumbnailURL = episodeThumbnailURL.replace("://webtoon-phinf.", "://swebtoon-phinf.")
+            results.append((episodeThumbnailURL, None))
+
+        
         for url in text.extract_iter(
                 page, 'class="_images" data-url="', '"'):
 
