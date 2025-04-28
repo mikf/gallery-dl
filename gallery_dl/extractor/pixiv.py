@@ -866,16 +866,6 @@ class PixivNovelExtractor(PixivExtractor):
         embeds = self.config("embeds")
         covers = self.config("covers")
 
-        if embeds:
-            headers = {
-                "User-Agent"    : "Mozilla/5.0",
-                "App-OS"        : None,
-                "App-OS-Version": None,
-                "App-Version"   : None,
-                "Referer"       : self.root + "/",
-                "Authorization" : None,
-            }
-
         novels = self.novels()
         if self.max_posts:
             novels = itertools.islice(novels, self.max_posts)
@@ -935,15 +925,12 @@ class PixivNovelExtractor(PixivExtractor):
 
                 if desktop:
                     try:
-                        novel_id = str(novel["id"])
-                        url = "{}/novel/show.php?id={}".format(
-                            self.root, novel_id)
-                        data = util.json_loads(text.extr(
-                            self.request(url, headers=headers).text,
-                            "id=\"meta-preload-data\" content='", "'"))
-                        images = (data["novel"][novel_id]
-                                  ["textEmbeddedImages"]).values()
-                    except Exception:
+                        body = self._request_ajax("/novel/" + str(novel["id"]))
+                        images = body["textEmbeddedImages"].values()
+                    except Exception as exc:
+                        self.log.warning(
+                            "%s: Failed to get embedded novel images (%s: %s)",
+                            novel["id"], exc.__class__.__name__, exc)
                         images = ()
 
                     for image in images:
