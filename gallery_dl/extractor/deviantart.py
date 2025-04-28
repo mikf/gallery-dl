@@ -868,7 +868,9 @@ x2="45.4107524%" y2="71.4898596%" id="app-root-3">\
             yield self.api.deviation(deviation_uuid)
 
     def _unescape_json(self, json):
-        return json.replace('\\"', '"').replace("\\\\", "\\")
+        return json.replace('\\"', '"') \
+                   .replace("\\'", "'") \
+                   .replace("\\\\", "\\")
 
 
 class DeviantartUserExtractor(DeviantartExtractor):
