@@ -105,7 +105,6 @@ modules = [
     "mangadex",
     "mangafox",
     "mangahere",
-    "mangakakalot",
     "manganelo",
     "mangapark",
     "mangaread",
