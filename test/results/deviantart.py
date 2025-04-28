@@ -943,6 +943,19 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.deviantart.com/exusiasword/art/Zenith-and-Silpha-combo-1186254616",
+    "#comment" : "JSON escapes in 'additionalMedia' (#6653)",
+    "#category": ("", "deviantart", "deviation"),
+    "#class"   : deviantart.DeviantartDeviationExtractor,
+    "#archive" : False,
+    "#pattern" : (
+        r"https://wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/54e06808-f21d-4b8d-bd48-bdea03cf0af5/djm9jx4-23fc1032-ee0d-460b-ac52-fcdf5e871317\.jpg\?token=ey.+",
+        r"https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/54e06808-f21d-4b8d-bd48-bdea03cf0af5/djm9jx4-7710b540-c27c-41f2-ae84-9d050ec170bc\.png\?token=ey.+",
+        r"https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/54e06808-f21d-4b8d-bd48-bdea03cf0af5/djm9jx4-e04525ea-b781-451a-ae70-b66243417868\.png\?token=ey.+",
+    ),
+},
+
+{
     "#url"     : "https://deviantart.com/view/904858796/",
     "#comment" : "/view/ URLs",
     "#category": ("", "deviantart", "deviation"),
