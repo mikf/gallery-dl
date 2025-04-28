@@ -272,8 +272,11 @@ class TestExtractorResults(unittest.TestCase):
                 elif test.startswith("type:"):
                     self.assertEqual(test[5:], type(value).__name__, msg=path)
                 elif test.startswith("len:"):
-                    self.assertIsInstance(value, (list, tuple), msg=path)
-                    self.assertEqual(int(test[4:]), len(value), msg=path)
+                    cls, _, length = test[4:].rpartition(":")
+                    if cls:
+                        self.assertEqual(
+                            cls, type(value).__name__, msg=path + "/type")
+                    self.assertEqual(int(length), len(value), msg=path)
                 else:
                     self.assertEqual(test, value, msg=path)
             else:
