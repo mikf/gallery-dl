@@ -48,10 +48,20 @@ __tests__ = (
     "chapter" : range(1, 60),
     "chapter_minor": {"", ".1", ".2", ".5"},
     "date"    : "type:datetime",
+    "date_updated": "dt:2024-10-30 17:20:58",
     "lang"    : "en",
     "language": "English",
     "manga"   : "Aria",
+    "status"  : "Completed",
     "title"   : "",
+    "tags": [
+        "Adventure",
+        "Comedy",
+        "Drama",
+        "Sci fi",
+        "Shounen",
+        "Slice of life",
+    ],
 },
 
 {

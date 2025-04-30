@@ -94,8 +94,14 @@ class ManganeloMangaExtractor(ManganeloExtractor, MangaExtractor):
         self.manga_url = self.root + self.groups[-1]
 
     def chapters(self, page):
-        manga = text.unescape(text.extr(page, "<h1>", "<"))
-        author = text.remove_html(text.extr(page, "<li>Author(s) :", "</a>"))
+        extr = text.extract_from(page)
+
+        manga = text.unescape(extr("<h1>", "<"))
+        author = text.remove_html(extr("<li>Author(s) :", "</a>"))
+        status = extr("<li>Status :", "<").strip()
+        update = text.parse_datetime(extr(
+            "<li>Last updated :", "<").strip(), "%b-%d-%Y %I:%M:%S %p")
+        tags = text.split_html(extr(">Genres :", "</li>"))[::2]
 
         results = []
         for chapter in text.extract_iter(page, '<div class="row">', '</div>'):
@@ -109,6 +115,9 @@ class ManganeloMangaExtractor(ManganeloExtractor, MangaExtractor):
             results.append((url, {
                 "manga"   : manga,
                 "author"  : author,
+                "status"  : status,
+                "tags"    : tags,
+                "date_updated": update,
                 "chapter" : text.parse_int(chapter),
                 "chapter_minor": (sep and ".") + minor,
                 "title"   : title.partition(": ")[2],
