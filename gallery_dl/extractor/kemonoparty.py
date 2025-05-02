@@ -317,15 +317,25 @@ class KemonopartyUserExtractor(KemonopartyExtractor):
         KemonopartyExtractor.__init__(self, match)
 
     def posts(self):
-        if self.config("endpoint") == "posts":
-            endpoint = self.api.creator_posts
-        else:
+        endpoint = self.config("endpoint")
+        if endpoint == "legacy":
             endpoint = self.api.creator_posts_legacy
+        elif endpoint == "legacy+":
+            endpoint = self._posts_legacy_plus
+        else:
+            endpoint = self.api.creator_posts
 
         _, _, service, creator_id, query = self.groups
         params = text.parse_query(query)
         return endpoint(service, creator_id,
                         params.get("o"), params.get("q"), params.get("tag"))
+
+    def _posts_legacy_plus(self, service, creator_id,
+                           offset=0, query=None, tags=None):
+        for post in self.api.creator_posts_legacy(
+                service, creator_id, offset, query, tags):
+            yield self.api.creator_post(
+                service, creator_id, post["id"])["post"]
 
 
 class KemonopartyPostsExtractor(KemonopartyExtractor):
