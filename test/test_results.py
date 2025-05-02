@@ -239,7 +239,11 @@ class TestExtractorResults(unittest.TestCase):
                 key = key[1:]
                 if key not in kwdict:
                     continue
+
             path = "{}.{}".format(parent, key) if parent else key
+            if key.startswith("!"):
+                self.assertNotIn(key[1:], kwdict, msg=path)
+                continue
             self.assertIn(key, kwdict, msg=path)
             value = kwdict[key]
 
