@@ -9,7 +9,7 @@
 """Extractors for https://x.com/"""
 
 from .common import Extractor, Message
-from .. import text, util, exception
+from .. import text, util, exception, transaction_id
 from ..cache import cache, memcache
 import itertools
 import random
@@ -1069,6 +1069,7 @@ class TwitterImageExtractor(Extractor):
 
 
 class TwitterAPI():
+    transaction = None
 
     def __init__(self, extractor):
         self.extractor = extractor
@@ -1101,6 +1102,7 @@ class TwitterAPI():
             "x-csrf-token": csrf_token,
             "x-twitter-client-language": "en",
             "x-twitter-active-user": "yes",
+            "x-client-transaction-id": None,
             "Sec-Fetch-Dest": "empty",
             "Sec-Fetch-Mode": "cors",
             "Sec-Fetch-Site": "same-origin",
@@ -1496,6 +1498,14 @@ class TwitterAPI():
             endpoint, None, "POST", False, "https://api.x.com",
         )["guest_token"])
 
+    def _transaction_id(self, url, method="GET"):
+        path = url[url.find("/", 8):]
+        if self.transaction is None:
+            TwitterAPI.transaction = transaction_id.ClientTransaction()
+            self.transaction.initialize(self.extractor)
+        self.headers["x-client-transaction-id"] = \
+            self.transaction.generate_transaction_id(method, path)
+
     def _authenticate_guest(self):
         guest_token = self._guest_token()
         if guest_token != self.headers["x-guest-token"]:
@@ -1507,8 +1517,11 @@ class TwitterAPI():
         url = (root or self.root) + endpoint
 
         while True:
-            if not self.headers["x-twitter-auth-type"] and auth:
-                self._authenticate_guest()
+            if auth:
+                if self.headers["x-twitter-auth-type"]:
+                    self._transaction_id(url, method)
+                else:
+                    self._authenticate_guest()
 
             response = self.extractor.request(
                 url, method=method, params=params,
