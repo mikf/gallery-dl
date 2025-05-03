@@ -1510,6 +1510,13 @@ class TwitterAPI():
         self.log.info("Initializing client transaction keys")
         ct = transaction_id.ClientTransaction()
         ct.initialize(self.extractor)
+
+        # update 'x-csrf-token' header (#7467)
+        csrf_token = self.extractor.cookies.get(
+            "ct0", domain=self.extractor.cookies_domain)
+        if csrf_token:
+            self.headers["x-csrf-token"] = csrf_token
+
         return ct
 
     def _transaction_id(self, url, method="GET"):
