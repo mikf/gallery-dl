@@ -474,8 +474,14 @@ class TumblrAPI(oauth.OAuth1API):
                     board = False
 
                 if board:
-                    self.log.info("Run 'gallery-dl oauth:tumblr' "
-                                  "to access dashboard-only blogs")
+                    if self.api_key is None:
+                        self.log.info(
+                            "Ensure your 'access-token' and "
+                            "'access-token-secret' belong to the same "
+                            "application as 'api-key' and 'api-secret'")
+                    else:
+                        self.log.info("Run 'gallery-dl oauth:tumblr' "
+                                      "to access dashboard-only blogs")
                     raise exception.AuthorizationError(error)
                 raise exception.NotFoundError("user or post")
 
