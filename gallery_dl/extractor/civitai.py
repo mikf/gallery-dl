@@ -109,7 +109,7 @@ class CivitaiExtractor(Extractor):
                         version_id = post["modelVersionId"]
                     image["version"] = version = self.api.model_version(
                         version_id).copy()
-                    image["model2"] = version.pop("model")
+                    image["model"] = version.pop("model")
 
                 image["date"] = text.parse_datetime(
                     image["createdAt"], "%Y-%m-%dT%H:%M:%S.%fZ")
