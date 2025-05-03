@@ -1069,7 +1069,7 @@ class TwitterImageExtractor(Extractor):
 
 
 class TwitterAPI():
-    transaction = None
+    client_transaction = None
 
     def __init__(self, extractor):
         self.extractor = extractor
@@ -1498,20 +1498,26 @@ class TwitterAPI():
             endpoint, None, "POST", False, "https://api.x.com",
         )["guest_token"])
 
-    def _transaction_id(self, url, method="GET"):
-        path = url[url.find("/", 8):]
-        if self.transaction is None:
-            TwitterAPI.transaction = transaction_id.ClientTransaction()
-            self.transaction.initialize(self.extractor)
-        self.headers["x-client-transaction-id"] = \
-            self.transaction.generate_transaction_id(method, path)
-
     def _authenticate_guest(self):
         guest_token = self._guest_token()
         if guest_token != self.headers["x-guest-token"]:
             self.headers["x-guest-token"] = guest_token
             self.extractor.cookies.set(
                 "gt", guest_token, domain=self.extractor.cookies_domain)
+
+    @cache(maxage=10800)
+    def _client_transaction(self):
+        self.log.info("Initializing client transaction keys")
+        ct = transaction_id.ClientTransaction()
+        ct.initialize(self.extractor)
+        return ct
+
+    def _transaction_id(self, url, method="GET"):
+        if self.client_transaction is None:
+            TwitterAPI.client_transaction = self._client_transaction()
+        path = url[url.find("/", 8):]
+        self.headers["x-client-transaction-id"] = \
+            self.client_transaction.generate_transaction_id(method, path)
 
     def _call(self, endpoint, params, method="GET", auth=True, root=None):
         url = (root or self.root) + endpoint

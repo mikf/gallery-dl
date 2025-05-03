@@ -22,15 +22,20 @@ import random
 import hashlib
 import binascii
 import itertools
-
 from . import text, util
+from .cache import cache
 
 
 class ClientTransaction():
+    __slots__ = ("key_bytes", "animation_key")
+
+    def __getstate__(self):
+        return (self.key_bytes, self.animation_key)
+
+    def __setstate__(self, state):
+        self.key_bytes, self.animation_key = state
 
     def initialize(self, extractor, homepage=None):
-        extractor.log.debug("Initializing 'x-client-transaction-id' values")
-
         if homepage is None:
             homepage = extractor.request("https://x.com/").text
 
@@ -39,7 +44,8 @@ class ClientTransaction():
             extractor.log.error(
                 "Failed to extract 'twitter-site-verification' key")
 
-        indices = self._extract_indices(homepage, extractor)
+        ondemand_s = text.extr(homepage, '"ondemand.s":"', '"')
+        indices = self._extract_indices(ondemand_s, extractor)
         if not indices:
             extractor.log.error("Failed to extract KEY_BYTE indices")
 
@@ -51,18 +57,18 @@ class ClientTransaction():
         self.animation_key = self._calculate_animation_key(
             frames, indices[0], key_bytes, indices[1:])
 
-    def _extract_verification_key(self, page):
-        pos = page.find('name="twitter-site-verification"')
-        beg = page.rfind("<", 0, pos)
-        end = page.find(">", pos)
-        return text.extr(page[beg:end], 'content="', '"')
+    def _extract_verification_key(self, homepage):
+        pos = homepage.find('name="twitter-site-verification"')
+        beg = homepage.rfind("<", 0, pos)
+        end = homepage.find(">", pos)
+        return text.extr(homepage[beg:end], 'content="', '"')
 
-    def _extract_indices(self, homepage, extractor,
-                         pattern=util.re_compile(r"\(\w\[(\d\d?)\],\s*16\)")):
-        ondemand_s = text.extr(homepage, '"ondemand.s":"', '"')
+    @cache(maxage=36500*86400, keyarg=1)
+    def _extract_indices(self, ondemand_s, extractor):
         url = ("https://abs.twimg.com/responsive-web/client-web"
                "/ondemand.s." + ondemand_s + "a.js")
         page = extractor.request(url).text
+        pattern = util.re_compile(r"\(\w\[(\d\d?)\],\s*16\)")
         return [int(i) for i in pattern.findall(page)]
 
     def _extract_frames(self, homepage):
