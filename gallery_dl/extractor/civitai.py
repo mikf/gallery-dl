@@ -10,6 +10,7 @@
 
 from .common import Extractor, Message
 from .. import text, util, exception
+from ..cache import memcache
 import itertools
 import time
 
@@ -49,10 +50,11 @@ class CivitaiExtractor(Extractor):
             if isinstance(metadata, str):
                 metadata = metadata.split(",")
             elif not isinstance(metadata, (list, tuple)):
-                metadata = ("generation",)
+                metadata = ("generation", "version")
             self._meta_generation = ("generation" in metadata)
+            self._meta_version = ("version" in metadata)
         else:
-            self._meta_generation = False
+            self._meta_generation = self._meta_version = False
 
     def items(self):
         models = self.models()
@@ -77,9 +79,12 @@ class CivitaiExtractor(Extractor):
                     post["publishedAt"], "%Y-%m-%dT%H:%M:%S.%fZ")
                 data = {
                     "post": post,
-                    "user": post["user"],
+                    "user": post.pop("user"),
                 }
-                del post["user"]
+                if self._meta_version:
+                    data["version"] = version = self.api.model_version(
+                        post["modelVersionId"]).copy()
+                    data["model"] = version.pop("model")
 
                 yield Message.Directory, data
                 for file in self._image_results(images):
@@ -94,6 +99,18 @@ class CivitaiExtractor(Extractor):
                 if self._meta_generation:
                     image["generation"] = self.api.image_generationdata(
                         image["id"])
+                if self._meta_version:
+                    if "modelVersionId" in image:
+                        version_id = image["modelVersionId"]
+                    else:
+                        post = image["post"] = self.api.post(
+                            image["postId"])
+                        post.pop("user", None)
+                        version_id = post["modelVersionId"]
+                    image["version"] = version = self.api.model_version(
+                        version_id).copy()
+                    image["model2"] = version.pop("model")
+
                 image["date"] = text.parse_datetime(
                     image["createdAt"], "%Y-%m-%dT%H:%M:%S.%fZ")
                 text.nameext_from_url(url, image)
@@ -464,6 +481,7 @@ class CivitaiRestAPI():
         endpoint = "/v1/models/{}".format(model_id)
         return self._call(endpoint)
 
+    @memcache(keyarg=1)
     def model_version(self, model_version_id):
         endpoint = "/v1/model-versions/{}".format(model_version_id)
         return self._call(endpoint)
@@ -504,7 +522,7 @@ class CivitaiTrpcAPI():
         self.root = extractor.root + "/api/trpc/"
         self.headers = {
             "content-type"    : "application/json",
-            "x-client-version": "5.0.542",
+            "x-client-version": "5.0.701",
             "x-client-date"   : "",
             "x-client"        : "web",
             "x-fingerprint"   : "undefined",
@@ -576,6 +594,7 @@ class CivitaiTrpcAPI():
         params = {"id": int(model_id)}
         return self._call(endpoint, params)
 
+    @memcache(keyarg=1)
     def model_version(self, model_version_id):
         endpoint = "modelVersion.getById"
         params = {"id": int(model_version_id)}

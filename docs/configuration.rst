@@ -1843,10 +1843,10 @@ Type
 Default
     ``false``
 Example
-    * ``"generation"``
-    * ``["generation"]``
+    * ``"generation,version"``
+    * ``["generation", "version"]``
 Description
-    Extract additional ``generation`` metadata.
+    Extract additional ``generation`` and ``version`` metadata.
 
     Note: This requires 1 additional HTTP request per image or video.
 
