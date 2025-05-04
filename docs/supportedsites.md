@@ -706,7 +706,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>pixeldrain</td>
     <td>https://pixeldrain.com/</td>
-    <td>Albums, Files</td>
+    <td>Albums, Files, Filesystems</td>
     <td></td>
 </tr>
 <tr>

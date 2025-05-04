@@ -3862,6 +3862,16 @@ Description
     Your account's `API key <https://pixeldrain.com/user/api_keys>`__
 
 
+extractor.pixeldrain.recursive
+--------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Recursively download files from subfolders.
+
+
 extractor.pixiv.include
 -----------------------
 Type
