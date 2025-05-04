@@ -9,7 +9,7 @@
 """Extractors for https://x.com/"""
 
 from .common import Extractor, Message
-from .. import text, util, exception, transaction_id
+from .. import text, util, exception
 from ..cache import cache, memcache
 import itertools
 import random
@@ -1508,6 +1508,8 @@ class TwitterAPI():
     @cache(maxage=10800)
     def _client_transaction(self):
         self.log.info("Initializing client transaction keys")
+
+        from .. import transaction_id
         ct = transaction_id.ClientTransaction()
         ct.initialize(self.extractor)
 
