@@ -235,16 +235,20 @@ class CivitaiModelExtractor(CivitaiExtractor):
         files = []
 
         for num, file in enumerate(version["files"], 1):
+            name, sep, ext = file["name"].rpartition(".")
+            if not sep:
+                name = ext
+                ext = "bin"
             file["uuid"] = "model-{}-{}-{}".format(
                 model["id"], version["id"], file["id"])
             files.append({
                 "num"      : num,
                 "file"     : file,
-                "filename" : file["name"],
-                "extension": "bin",
-                "url"      : file.get("downloadUrl") or
-                             "{}/api/download/models/{}".format(
-                                 self.root, version["id"]),
+                "filename" : name,
+                "extension": ext,
+                "url"      : (file.get("downloadUrl") or
+                              "{}/api/download/models/{}".format(
+                              self.root, version["id"])),
                 "_http_headers" : {
                     "Authorization": self.api.headers.get("Authorization")},
                 "_http_validate": self._validate_file_model,
