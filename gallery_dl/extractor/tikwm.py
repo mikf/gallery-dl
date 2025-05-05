@@ -378,7 +378,7 @@ class TikwmUserExtractor(TikwmExtractor):
             
             if not feed_data or not feed_data.get("videos"):
                 if cursor == "0":
-                    raise exception.NotFoundError("user")
+                    break
                 break
             
             for post_data in feed_data["videos"]:
