@@ -274,15 +274,18 @@ class TikwmExtractor(Extractor):
 
 
 class TikwmPostExtractor(TikwmExtractor):
-    """Extract a single video or photo TikTok link"""
+    """Extract a single video or photo TikTok link, or by post ID"""
     subcategory = "post"
-    pattern = BASE_PATTERN + r"/(?:@([\w_.-]*)|share)/(?:phot|vide)o/(\d+)"
+    pattern = BASE_PATTERN + r"/(?:pid:(\d+)|(?:@([\w_.-]*)|share)/(?:phot|vide)o/(\d+))"
     example = "https://www.tiktok.com/@USER/photo/1234567890"
 
     def items(self):
-        user, post_id = self.groups
-        url = "{}/@{}/video/{}".format(self.root, user or "", post_id)
-        url = self._sanitize_url(url)
+        pid, user, post_id = self.groups
+        if pid:
+            url = pid
+        else:
+            url = "{}/@{}/video/{}".format(self.root, user or "", post_id)
+            url = self._sanitize_url(url)
         
         post, post_data = self._extract_post(url)
         if not post:

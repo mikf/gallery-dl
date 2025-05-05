@@ -190,13 +190,16 @@ class TiktokExtractor(Extractor):
 class TiktokPostExtractor(TiktokExtractor):
     """Extract a single video or photo TikTok link"""
     subcategory = "post"
-    pattern = BASE_PATTERN + r"/(?:@([\w_.-]*)|share)/(?:phot|vide)o/(\d+)"
+    pattern = BASE_PATTERN + r"/(?:pid:(\d+)|(?:@([\w_.-]*)|share)/(?:phot|vide)o/(\d+))"
     example = "https://www.tiktok.com/@USER/photo/1234567890"
 
     def urls(self):
-        user, post_id = self.groups
-        url = f"{self.root}/@{user or ''}/video/{post_id}"
-        return (url,)
+        pid, user, post_id = self.groups
+        if pid and not self.tikwm:
+            raise exception.StopExtraction(f"Unsupported format 'https://tiktok.com/pid:{pid}'")
+        else:
+            url = f"{self.root}/@{user or ''}/video/{post_id}"
+            return (url,)
 
 
 class TiktokVmpostExtractor(TiktokExtractor):
