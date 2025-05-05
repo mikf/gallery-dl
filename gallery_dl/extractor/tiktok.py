@@ -198,7 +198,8 @@ class TiktokVmpostExtractor(TiktokExtractor):
     """Extract a single video or photo TikTok VM link"""
     subcategory = "vmpost"
     pattern = (r"(?:https?://)?(?:"
-               r"(?:v[mt]\.)?tiktok\.com|(?:www\.)?tiktok\.com/t"
+               r"v[mt]\.tiktok\.com"
+               r"|(?:www\.)?tiktok\.com/t"
                r")/(?!@)([^/?#]+)")
     example = "https://vm.tiktok.com/1a2B3c4E5"
 
@@ -218,7 +219,7 @@ class TiktokVmpostExtractor(TiktokExtractor):
 class TiktokUserExtractor(TiktokExtractor):
     """Extract a TikTok user's profile"""
     subcategory = "user"
-    pattern = BASE_PATTERN + r"/@([\w_.-]+)/?(?:$|\?|#)"
+    pattern = BASE_PATTERN + r"/(?:@([\w_.-]+)|id:(\d+))/?(?:$|\?|#)"
     example = "https://www.tiktok.com/@USER"
 
     def _init(self):
@@ -281,8 +282,12 @@ class TiktokUserExtractor(TiktokExtractor):
             for cookie in self.cookies:
                 set_cookie(cookie)
 
-        user_name = self.groups[0]
-        profile_url = "{}/@{}".format(self.root, user_name)
+        user_name, user_id = self.groups
+        if user_id:
+            profile_url = "{}/@{}".format(self.root, user_id)
+        else:
+            profile_url = "{}/@{}".format(self.root, user_name)
+        
         if self.avatar:
             avatar_url, avatar = self._generate_avatar(user_name, profile_url)
             yield Message.Directory, avatar
