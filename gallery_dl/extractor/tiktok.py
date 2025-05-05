@@ -45,7 +45,7 @@ class TiktokExtractor(Extractor):
 
     def items(self):
         if self.tikwm and hasattr(self, "_tikwm_extractor") and self._tikwm_extractor:
-            self.log.info("Using tikwm API for extraction")
+            self.log.debug("Using tikwm API for extraction")
             extractor = self._tikwm_extractor(self.url)
             yield from extractor.items()
             return
@@ -247,7 +247,7 @@ class TiktokUserExtractor(TiktokExtractor):
 
     def items(self):
         if self.tikwm and hasattr(self, "_tikwm_extractor") and self._tikwm_extractor:
-            self.log.info("Using tikwm API for user extraction")
+            self.log.debug("Using tikwm API for user extraction")
             extractor = self._tikwm_extractor(self.url)
             yield from extractor.items()
             return
