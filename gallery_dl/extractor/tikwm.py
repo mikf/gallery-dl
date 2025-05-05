@@ -299,7 +299,8 @@ class TikwmVmpostExtractor(TikwmExtractor):
     """Extract a single video or photo TikTok VM link"""
     subcategory = "vmpost"
     pattern = (r"(?:https?://)?(?:"
-               r"(?:v[mt]\.)?tiktok\.com|(?:www\.)?tiktok\.com/t"
+               r"v[mt]\.tiktok\.com"
+               r"|(?:www\.)?tiktok\.com/t"
                r")/(?!@)([^/?#]+)")
     example = "https://vm.tiktok.com/1a2B3c4E5"
 
@@ -343,12 +344,15 @@ class TikwmUserExtractor(TikwmExtractor):
         user_name, user_id = self.groups
 
         if user_id:
-            user_identifier = {"user_id": user_id}
+            identifier = {"user_id": user_id}
         else:
-            user_identifier = {"unique_id": user_name}
+            if user_name.isdigit():
+                identifier = {"user_id": user_name}
+            else:
+                identifier = {"unique_id": user_name}
         
         if self.avatar:
-            user_data = self._api_request("user/info", user_identifier)
+            user_data = self._api_request("user/info", identifier)
             if not user_data:
                 raise exception.NotFoundError("user")
                 
@@ -364,7 +368,7 @@ class TikwmUserExtractor(TikwmExtractor):
                 self.log.debug("Fetching posts from cursor: %s", cursor)
             
             feed_data = self._api_request("user/posts", {
-                **user_identifier,
+                **identifier,
                 "count": str(self.batch_size),
                 "cursor": cursor
             })
