@@ -1039,15 +1039,19 @@ class ProxyRotator():
 
     def __init__(self, proxy_list_path, strategy=None):
         """Initialize a proxy rotator with proxies from a list
-        
+
         Args:
-            proxy_list_path: Path to a list containing proxy URLs (one per line)
-                             Empty lines and lines starting with '#' are ignored
+            proxy_list_path: Path to a list containing proxy URLs
+                             (one per line). Empty lines and lines
+                             starting with '#' are ignored
+
             strategy: Proxy rotation strategy:
-                      - "fixed": Select a random proxy and use it for all requests for a single session.
-                      - "random": Select a random proxy for each request.
-                      Defaults to "fixed" if None.
-        
+            - "fixed": Select a random proxy and use it for all requests
+                       in a single session.
+            - "random": Select a random proxy for each extractor request and
+                        download session.
+                        Defaults to "fixed" if None.
+
         Raises:
             FileNotFoundError: If the proxy list doesn't exist
             ValueError: If no valid proxies were found in the list
@@ -1057,7 +1061,7 @@ class ProxyRotator():
         self.strategy = strategy if strategy is not None else "fixed"
         self._fixed_proxy = None
         self._fixed_proxy_info = None
-        
+
         if not self.proxies:
             raise ValueError("No valid proxies found in the list")
 
@@ -1066,10 +1070,14 @@ class ProxyRotator():
         try:
             with open(file_path, 'r', encoding='utf-8') as f:
                 # Filter out empty lines and comments
-                proxies = [line.strip() for line in f 
-                          if line.strip() and not line.strip().startswith('#')]
+                proxies = [
+                    line.strip() for line in f if line.strip() and not
+                    line.strip().startswith('#')
+                ]
                 if not proxies:
-                    raise ValueError("Proxy list is empty or contains only comments")
+                    raise ValueError(
+                        "Proxy list is empty or contains only comments"
+                    )
                 random.shuffle(proxies)
                 return proxies
         except FileNotFoundError:
@@ -1077,16 +1085,17 @@ class ProxyRotator():
 
     def _get_proxy_info(self, proxy_url):
         """Determine proxy capabilities based on URL scheme
-        
+
         Args:
             proxy_url: The proxy URL string
-            
+
         Returns:
-            dict: Information about the proxy including URL and supported schemes
+            dict: Information about the proxy including URL and
+            supported schemes
         """
         # Parse the proxy URL to get the scheme
         scheme = urllib.parse.urlparse(proxy_url).scheme.lower()
-        
+
         # Map proxy types to supported protocols
         protocol_map = {
             "http": ["http"],
@@ -1096,7 +1105,7 @@ class ProxyRotator():
             "socks5h": ["http", "https"],
             "": ["http", "https"]  # Default for URLs without a scheme
         }
-        
+
         return {
             "url": proxy_url,
             "schemes": protocol_map.get(scheme, ["http", "https"])
@@ -1104,7 +1113,7 @@ class ProxyRotator():
 
     def get_next_proxy(self):
         """Get a proxy based on the selected strategy
-        
+
         Returns:
             dict: Proxy information including URL and supported schemes
         """
