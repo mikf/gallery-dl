@@ -23,11 +23,18 @@ class YoutubeDLDownloader(DownloaderBase):
 
         extractor = job.extractor
         retries = self.config("retries", extractor._retries)
+        proxy_url = None
+        if self._proxy_rotator:
+            proxy_info = self._proxy_rotator.get_next_proxy()
+            proxy_url = proxy_info["url"]
+            self.log.debug("YTDL using rotated proxy: %s", proxy_url)
+        elif self.proxies:
+            proxy_url = self.proxies.get("http") if self.proxies else None
         self.ytdl_opts = {
             "retries": retries+1 if retries >= 0 else float("inf"),
             "socket_timeout": self.config("timeout", extractor._timeout),
             "nocheckcertificate": not self.config("verify", extractor._verify),
-            "proxy": self.proxies.get("http") if self.proxies else None,
+            "proxy": proxy_url,
             "ignoreerrors": True,
         }
 
