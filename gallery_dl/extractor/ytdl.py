@@ -64,7 +64,12 @@ class YoutubeDLExtractor(Extractor):
             "nocheckcertificate"     : not self._verify,
         }
 
-        if self._proxies:
+        if self._proxy_rotator:
+            proxy_info = self._proxy_rotator.get_next_proxy()
+            proxy_url = proxy_info["url"]
+            user_opts["proxy"] = proxy_url
+            self.log.debug("YTDL (extractor) using rotated proxy: %s", proxy_url)
+        elif self._proxies:
             user_opts["proxy"] = self._proxies.get("http")
 
         username, password = self._get_auth_info()

@@ -145,6 +145,16 @@ class HttpDownloader(DownloaderBase):
             if file_size:
                 headers["Range"] = "bytes={}-".format(file_size)
 
+            proxies = self.proxies
+            if self._proxy_rotator:
+                proxy_info = self._proxy_rotator.get_next_proxy()
+                proxy_url = proxy_info["url"]
+                proxies = {
+                    scheme: proxy_url
+                    for scheme in proxy_info["schemes"]
+                }
+                self.log.debug("Downloader using rotated proxy: %s ", proxy_url)
+
             # connect to (remote) source
             try:
                 response = self.session.request(
@@ -153,7 +163,7 @@ class HttpDownloader(DownloaderBase):
                     headers=headers,
                     data=kwdict.get("_http_data"),
                     timeout=self.timeout,
-                    proxies=self.proxies,
+                    proxies=proxies,
                     verify=self.verify,
                 )
             except ConnectionError as exc:
