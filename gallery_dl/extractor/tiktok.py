@@ -27,13 +27,13 @@ class TiktokExtractor(Extractor):
         self.audio = self.config("audio", True)
         self.video = self.config("videos", True)
         self.tikwm = self.config("tikwm", False)
-        
+
         # If tikwm is enabled, delegate to the tikwm extractor
         if self.tikwm and self.__class__.__name__ != "TiktokUserExtractor":
             self._tikwm_extractor = None
             try:
                 tikwm = importlib.import_module(".tikwm", __package__)
-                
+
                 if self.__class__.__name__ == "TiktokPostExtractor":
                     self._tikwm_extractor = tikwm.TikwmPostExtractor
                 elif self.__class__.__name__ == "TiktokVmpostExtractor":
@@ -44,12 +44,13 @@ class TiktokExtractor(Extractor):
                 self.tikwm = False
 
     def items(self):
-        if self.tikwm and hasattr(self, "_tikwm_extractor") and self._tikwm_extractor:
+        if (self.tikwm and hasattr(self, "_tikwm_extractor") and
+                self._tikwm_extractor):
             self.log.debug("Using tikwm API for extraction")
             extractor = self._tikwm_extractor(self.url)
             yield from extractor.items()
             return
-            
+
         for tiktok_url in self.urls():
             tiktok_url = self._sanitize_url(tiktok_url)
             data = self._extract_rehydration_data(tiktok_url)
@@ -190,13 +191,15 @@ class TiktokExtractor(Extractor):
 class TiktokPostExtractor(TiktokExtractor):
     """Extract a single video or photo TikTok link"""
     subcategory = "post"
-    pattern = BASE_PATTERN + r"/(?:pid:(\d+)|(?:@([\w_.-]*)|share)/(?:phot|vide)o/(\d+))"
+    pattern = BASE_PATTERN + \
+        r"/(?:pid:(\d+)|(?:@([\w_.-]*)|share)/(?:phot|vide)o/(\d+))"
     example = "https://www.tiktok.com/@USER/photo/1234567890"
 
     def urls(self):
         pid, user, post_id = self.groups
         if pid and not self.tikwm:
-            raise exception.StopExtraction(f"Unsupported format 'https://tiktok.com/pid:{pid}'")
+            raise exception.StopExtraction(
+                f"Unsupported format 'https://tiktok.com/pid:{pid}'")
         else:
             url = f"{self.root}/@{user or ''}/video/{post_id}"
             return (url,)
@@ -233,7 +236,7 @@ class TiktokUserExtractor(TiktokExtractor):
     def _init(self):
         TiktokExtractor._init(self)
         self.avatar = self.config("avatar", True)
-        
+
         # If tikwm is enabled, delegate to the tikwm extractor
         if self.tikwm:
             self._tikwm_extractor = None
@@ -246,12 +249,13 @@ class TiktokUserExtractor(TiktokExtractor):
                 self.tikwm = False
 
     def items(self):
-        if self.tikwm and hasattr(self, "_tikwm_extractor") and self._tikwm_extractor:
+        if (self.tikwm and hasattr(self, "_tikwm_extractor") and
+                self._tikwm_extractor):
             self.log.debug("Using tikwm API for user extraction")
             extractor = self._tikwm_extractor(self.url)
             yield from extractor.items()
             return
-            
+
         """Attempt to use yt-dlp/youtube-dl to extract links from a
         user's page"""
 
