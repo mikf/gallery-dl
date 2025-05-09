@@ -36,7 +36,7 @@ class DownloaderBase():
 
         self._proxy_rotator = extractor._proxy_rotator
         if self._proxy_rotator:
-            self.proxies = None # Clear static proxies
+            self.proxies = None  # Clear static proxies
         else:
             proxies = self.config("proxy", util.SENTINEL)
             if proxies is util.SENTINEL:
