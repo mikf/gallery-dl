@@ -395,17 +395,21 @@ class Extractor():
         self._verify = self.config("verify", True)
         self._proxies = util.build_proxy_map(self.config("proxy"), self.log)
         self._proxy_rotator = None
-        
+
         proxy_list = self.config("proxy-list")
         if proxy_list:
             proxy_strategy = self.config("proxy-strategy")
             try:
-                self._proxy_rotator = util.ProxyRotator(proxy_list, strategy=proxy_strategy)
-                self.log.debug("Initialized proxy rotator with file: %s, strategy: %s",
-                               proxy_list, self._proxy_rotator.strategy or "random")
+                self._proxy_rotator = util.ProxyRotator(
+                    proxy_list, strategy=proxy_strategy)
+                self.log.debug(
+                    "Initialized proxy rotator with file: %s, strategy: %s",
+                    proxy_list, self._proxy_rotator.strategy or "random"
+                )
             except (FileNotFoundError, ValueError) as e:
                 self.log.error("Failed to initialize proxy rotator: %s", e)
-                self._proxy_rotator = None # Ensure rotator is None if init fails
+                # Ensure rotator is None if init fails
+                self._proxy_rotator = None
 
         self._interval = util.build_duration_func(
             self.config("sleep-request", self.request_interval),
