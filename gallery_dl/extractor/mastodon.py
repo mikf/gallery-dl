@@ -197,10 +197,14 @@ class MastodonStatusExtractor(MastodonExtractor):
     """Extractor for images from a status"""
     subcategory = "status"
     pattern = (BASE_PATTERN + r"/(?:@[^/?#]+|(?:users/[^/?#]+/)?"
-               r"(?:statuses|notice))/(?!following)([^/?#]+)")
+               r"(?:statuses|notice|objects()))/(?!following)([^/?#]+)")
     example = "https://mastodon.social/@USER/12345"
 
     def statuses(self):
+        if self.groups[-2] is not None:
+            url = "{}/objects/{}".format(self.root, self.item)
+            location = self.request_location(url)
+            self.item = location.rpartition("/")[2]
         return (MastodonAPI(self).status(self.item),)
 
 
