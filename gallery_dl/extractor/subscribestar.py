@@ -40,8 +40,14 @@ class SubscribestarExtractor(Extractor):
         for post_html in self.posts():
             media = self._media_from_post(post_html)
             data = self._data_from_post(post_html)
-            data["title"] = text.unescape(text.extr(
-                data["content"], "<h1>", "</h1>"))
+
+            content = data["content"]
+            if "<html><body>" in content:
+                data["content"] = content = text.extr(
+                    content, "<body>", "</body>")
+            data["title"] = text.unescape(
+                text.extr(content, "<h1>", "</h1>"))
+
             yield Message.Directory, data
             for num, item in enumerate(media, 1):
                 item.update(data)
@@ -189,7 +195,12 @@ class SubscribestarExtractor(Extractor):
             "author_nick": text.unescape(extr('>', '<')),
             "date"       : self._parse_datetime(extr(
                 'class="post-date">', '</').rpartition(">")[2]),
-            "content"    : extr('<body>', '</body>').strip(),
+            "content"    : extr(
+                '<div class="post-content" data-role="post_content-text">',
+                '</div><div class="post-uploads for-youtube"').strip(),
+            "tags"       : list(text.extract_iter(extr(
+                '<div class="post_tags for-post">',
+                '<div class="post-actions">'), '?tag=', '"')),
         }
 
     def _parse_datetime(self, dt):
@@ -243,7 +254,12 @@ class SubscribestarPostExtractor(SubscribestarExtractor):
             "post_id"    : text.parse_int(extr('data-id="', '"')),
             "date"       : self._parse_datetime(extr(
                 '<div class="section-title_date">', '<')),
-            "content"    : extr('<body>', '</body>').strip(),
+            "content"    : extr(
+                '<div class="post-content" data-role="post_content-text">',
+                '</div><div class="post-uploads for-youtube"').strip(),
+            "tags"       : list(text.extract_iter(extr(
+                '<div class="post_tags for-post">',
+                '<div class="post-actions">'), '?tag=', '"')),
             "author_name": text.unescape(extr(
                 'class="star_link" href="/', '"')),
             "author_id"  : text.parse_int(extr('data-user-id="', '"')),
