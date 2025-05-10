@@ -8,9 +8,9 @@ from gallery_dl.extractor import mastodon
 
 
 __tests__ = (
-# Akkoma - /:user/:status_id
 {
     "#url"     : "mastodon:https://donotsta.re/@elly/AcoUaA7EH1igiYKmFU",
+    "#comment" : "Akkoma - /:user/:status_id",
     "#category": ("mastodon", "donotsta.re", "status"),
     "#class"   : mastodon.MastodonStatusExtractor,
     "#urls"    : "https://asdf.donotsta.re/media/917e7722dd30d510686ce9f3717a1f722dac96fd974b5af5ec2ccbc8cbd740c6.png",
@@ -30,9 +30,9 @@ __tests__ = (
     "instance_remote": None,
 },
 
-# Akkoma - /notice/:status_id
 {
     "#url"     : "mastodon:https://woem.space/notice/Aswds12sVGsm55NS2S",
+    "#comment" : "Akkoma - /notice/:status_id",
     "#category": ("mastodon", "woem.space", "status"),
     "#class"   : mastodon.MastodonStatusExtractor,
     "#urls"    : "https://nbg1.your-objectstorage.com/woem-space/261f4f482e1cb641db732dab91f0177b1f5ea0bcf008f4831c593ff718dff4fe.jpg",
@@ -41,13 +41,9 @@ __tests__ = (
     "instance_remote": None,
 },
 
-# Note that Akkoma/Pleroma urls of type /objects/:UUID won't work,
-# but attempting to access them will trigger a redirect.
-# We could follow them
-
-# Akkoma - /notice/:status_id
 {
     "#url"     : "mastodon:https://labyrinth.zone/notice/Ai9Y2EijwN3gAil1nM",
+    "#comment" : "Akkoma - /notice/:status_id",
     "#category": ("mastodon", "labyrinth.zone", "status"),
     "#class"   : mastodon.MastodonStatusExtractor,
     "#urls"    : "https://media.labyrinth.zone/media/96e10a9e3b0f24f63713d8a03e939eec7f9e636cdef57a14c389163f58e60947.png",
@@ -56,9 +52,9 @@ __tests__ = (
     "instance_remote": None,
 },
 
-# Pleroma - /notice/:status_id
 {
     "#url"     : "mastodon:https://udongein.xyz/notice/Asl9hUpShUamlVAZiC",
+    "#comment" : "Pleroma - /notice/:status_id",
     "#category": ("mastodon", "udongein.xyz", "status"),
     "#class"   : mastodon.MastodonStatusExtractor,
     "#urls"    : "https://statics.udongein.xyz/udongein/cc3c7a8b749cd88298fda6553e10f81f9c4de280f03ad107ed25a439e6be23eb.jpg?name=Husky_1743801357069_6QIL5OZLXK.jpg",
@@ -67,15 +63,15 @@ __tests__ = (
     "instance_remote": None,
 },
 
-# Mastodon - /:user/:status_id
 {
     "#url"     : "mastodon:https://freeradical.zone/@bitartbot/114477182939377350",
+    "#comment" : "Mastodon - /:user/:status_id",
     "#category": ("mastodon", "freeradical.zone", "status"),
     "#class"   : mastodon.MastodonStatusExtractor,
     "#urls"    : "https://nfts.freeradical.zone/media_attachments/files/114/477/182/897/690/030/original/96700c8ae9a79651.png",
 
     "instance" : "freeradical.zone",
     "instance_remote": None,
-}
+},
 
 )
