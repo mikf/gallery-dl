@@ -197,9 +197,8 @@ class TiktokPostExtractor(TiktokExtractor):
 
     def urls(self):
         pid, user, post_id = self.groups
-        if pid and not self.tikwm:
-            raise exception.StopExtraction(
-                f"Unsupported format 'https://tiktok.com/pid:{pid}'")
+        if pid:
+            url = f"{self.root}/@/video/{pid}"
         else:
             url = f"{self.root}/@{user or ''}/video/{post_id}"
             return (url,)
@@ -242,7 +241,7 @@ class TiktokUserExtractor(TiktokExtractor):
             self._tikwm_extractor = None
             try:
                 tikwm = importlib.import_module(".tikwm", __package__)
-                self._tikwm_extractor = tikwm.TikwmUserExtractor
+                self._tikwm_extractor = tikwm.TiktokUserExtractor
             except ImportError as e:
                 self.log.error("Could not import tikwm extractor: %s", e)
                 self.log.warning("Falling back to default TikTok extractor")
