@@ -74,4 +74,15 @@ __tests__ = (
     "instance_remote": None,
 },
 
+{
+    "#url"     : "mastodon:https://labyrinth.zone/objects/ac523779-93d3-4315-ab8e-25b1665740cf",
+    "#comment" : "/objects/:uuid (#7497)",
+    "#category": ("mastodon", "labyrinth.zone", "status"),
+    "#class"   : mastodon.MastodonStatusExtractor,
+    "#urls"    : "https://media.labyrinth.zone/media/96e10a9e3b0f24f63713d8a03e939eec7f9e636cdef57a14c389163f58e60947.png",
+
+    "instance" : "labyrinth.zone",
+    "instance_remote": None,
+},
+
 )
