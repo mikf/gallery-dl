@@ -45,6 +45,20 @@ class CivitaiExtractor(Extractor):
             self._image_quality = "original=true"
             self._image_ext = "png"
 
+        quality_video = self.config("quality-videos")
+        if quality_video:
+            if not isinstance(quality_video, str):
+                quality_video = ",".join(quality_video)
+            if quality_video[0] == "+":
+                quality_video = (self._image_quality + "," +
+                                 quality_video.lstrip("+,"))
+            self._video_quality = quality_video
+        elif quality_video is not None and quality:
+            self._video_quality = self._image_quality
+        else:
+            self._video_quality = "quality=100"
+        self._video_ext = "webm"
+
         metadata = self.config("metadata")
         if metadata:
             if isinstance(metadata, str):
@@ -114,7 +128,10 @@ class CivitaiExtractor(Extractor):
                 image["date"] = text.parse_datetime(
                     image["createdAt"], "%Y-%m-%dT%H:%M:%S.%fZ")
                 text.nameext_from_url(url, image)
-                image["extension"] = self._image_ext
+                if not image["extension"]:
+                    image["extension"] = (
+                        self._video_ext if image.get("type") == "video" else
+                        self._image_ext)
                 yield Message.Directory, image
                 yield Message.Url, url, image
             return
@@ -130,10 +147,13 @@ class CivitaiExtractor(Extractor):
 
     def _url(self, image):
         url = image["url"]
+        video = image.get("type") == "video"
+        quality = self._video_quality if video else self._image_quality
+
         if "/" in url:
             parts = url.rsplit("/", 3)
             image["uuid"] = parts[1]
-            parts[2] = self._image_quality
+            parts[2] = quality
             return "/".join(parts)
         image["uuid"] = url
 
@@ -143,7 +163,7 @@ class CivitaiExtractor(Extractor):
             name = "{}.{}".format(image.get("id"), mime.rpartition("/")[2])
         return (
             "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/{}/{}/{}".format(
-                url, self._image_quality, name)
+                url, quality, name)
         )
 
     def _image_results(self, images):
@@ -154,7 +174,9 @@ class CivitaiExtractor(Extractor):
                 "url" : self._url(file),
             })
             if not data["extension"]:
-                data["extension"] = self._image_ext
+                data["extension"] = (
+                    self._video_ext if file.get("type") == "video" else
+                    self._image_ext)
             if "id" not in file and data["filename"].isdecimal():
                 file["id"] = text.parse_int(data["filename"])
             if self._meta_generation:

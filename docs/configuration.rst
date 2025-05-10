@@ -1895,6 +1895,26 @@ Description
     to download images in JPEG format at their original resolution.
 
 
+extractor.civitai.quality-videos
+--------------------------------
+Type
+    * ``string``
+    * ``list`` of ``strings``
+Default
+    ``"quality=100"``
+Example
+    * ``"+transcode=true,quality=100"``
+    * ``["+", "transcode=true", "quality=100"]``
+Description
+    A (comma-separated) list of video quality options
+    to pass with every video URL.
+
+    Known available options include ``original``, ``quality``, ``transcode``
+
+    Use ``+`` as first character to `add` the given options to the
+    `quality <extractor.civitai.quality_>`__ ones.
+
+
 extractor.cyberdrop.domain
 --------------------------
 Type
