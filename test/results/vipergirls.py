@@ -14,6 +14,9 @@ __tests__ = (
     "#class"   : vipergirls.VipergirlsThreadExtractor,
     "#count"   : 225,
     "#sha1_url": "0d75cb42777f5bebc0d284d1d38cb90c750c61d9",
+
+    "count": {112, 113},
+    "num"  : range(1, 113),
 },
 
 {
@@ -49,6 +52,8 @@ __tests__ = (
     "#range"   : "2-113",
     "#count"   : 112,
 
+    "count"     : 113,
+    "num"       : range(2, 113),
     "id"        : "116038081",
     "imagecount": "113",
     "number"    : "116038081",

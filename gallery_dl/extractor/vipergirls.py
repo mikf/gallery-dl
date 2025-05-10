@@ -57,17 +57,18 @@ class VipergirlsExtractor(Extractor):
             util.advance(posts, (text.parse_int(self.page[5:]) - 1) * 15)
 
         for post in posts:
+            images = list(post)
+
             data = post.attrib
             data["thread_id"] = self.thread_id
+            data["count"] = len(images)
 
             yield Message.Directory, data
-
-            image = None
-            for image in post:
-                yield Message.Queue, image.attrib["main_url"], data
-
-            if image is not None and like:
-                self.like(post, user_hash)
+            if images:
+                for data["num"], image in enumerate(images, 1):
+                    yield Message.Queue, image.attrib["main_url"], data
+                if like:
+                    self.like(post, user_hash)
 
     def login(self):
         if self.cookies_check(self.cookies_names):
