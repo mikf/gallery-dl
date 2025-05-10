@@ -8,6 +8,8 @@
 
 """Extractors for https://pixeldrain.com/"""
 
+import re
+
 from .common import Extractor, Message
 from .. import text, util
 
@@ -34,19 +36,30 @@ class PixeldrainFileExtractor(PixeldrainExtractor):
     """Extractor for pixeldrain files"""
     subcategory = "file"
     filename_fmt = "{filename[:230]} ({id}).{extension}"
-    pattern = BASE_PATTERN + r"/(?:u|api/file)/(\w+)"
+    pattern = BASE_PATTERN + r"/(u|d|api/file(?:system)?)/(\w+)"
     example = "https://pixeldrain.com/u/abcdefgh"
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.file_id = match.group(1)
+        self.path, self.file_id = match.groups()
 
     def items(self):
-        url = "{}/api/file/{}".format(self.root, self.file_id)
-        file = self.request(url + "/info").json()
+        if re.match(r"d|api/filesystem", self.path):
+            url = "{}/api/filesystem/{}".format(self.root, self.file_id)
+            file = self.request(url + "?stat").json()
+            file = file["path"][file["base_index"]]
 
-        file["url"] = url + "?download"
-        file["date"] = self.parse_datetime(file["date_upload"])
+            file["url"] = url + "?attach"
+            file["share_url"] = "{}/d/{}".format(self.root, self.file_id)
+            file["date"] = text.parse_datetime(
+                file["created"], format="%Y-%m-%dT%H:%M:%S.%fZ")
+        else:
+            url = "{}/api/file/{}".format(self.root, self.file_id)
+            file = self.request(url + "/info").json()
+
+            file["url"] = url + "?download"
+            file["share_url"] = "{}/u/{}".format(self.root, self.file_id)
+            file["date"] = self.parse_datetime(file["date_upload"])
 
         text.nameext_from_url(file["name"], file)
         yield Message.Directory, file
@@ -93,6 +106,10 @@ class PixeldrainAlbumExtractor(PixeldrainExtractor):
             file["num"] = num
             file["url"] = url = "{}/api/file/{}?download".format(
                 self.root, file["id"])
+            share_url = "{}/l/{}".format(self.root, self.album_id)
+            if self.file_index:
+                share_url = share_url + "#item={}".format(self.file_index)
+            file["share_url"] = share_url
             file["date"] = self.parse_datetime(file["date_upload"])
             text.nameext_from_url(file["name"], file)
             yield Message.Url, url, file
