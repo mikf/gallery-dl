@@ -35,9 +35,9 @@ class TiktokExtractor(Extractor):
                 tikwm = importlib.import_module(".tikwm", __package__)
 
                 if self.__class__.__name__ == "TiktokPostExtractor":
-                    self._tikwm_extractor = tikwm.TikwmPostExtractor
+                    self._tikwm_extractor = tikwm.TiktokPostExtractor
                 elif self.__class__.__name__ == "TiktokVmpostExtractor":
-                    self._tikwm_extractor = tikwm.TikwmVmpostExtractor
+                    self._tikwm_extractor = tikwm.TiktokVmpostExtractor
             except ImportError as e:
                 self.log.error("Could not import tikwm extractor: %s", e)
                 self.log.warning("Falling back to default TikTok extractor")

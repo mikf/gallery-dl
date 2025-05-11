@@ -13,8 +13,8 @@ import logging
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?tiktokv?\.com"
 
 
-class TikwmExtractor(Extractor):
-    """Base class for TikTok extractors"""
+class TiktokExtractor(Extractor):
+    """Base class for TikTok extractors using TikWM's API"""
     category = "tiktok"
     directory_fmt = ("{category}", "{user}")
     filename_fmt = (
@@ -288,14 +288,21 @@ class TikwmExtractor(Extractor):
                     yield Message.Url, audio_url, audio_post
 
 
-class TikwmPostExtractor(TikwmExtractor):
+class TiktokPostExtractor(TiktokExtractor):
     """Extract a single video or photo TikTok link, or by post ID"""
+    """using TikWM's API"""
     subcategory = "post"
     pattern = BASE_PATTERN + \
         r"/(?:pid:(\d+)|(?:@([\w_.-]*)|share)/(?:phot|vide)o/(\d+))"
     example = "https://www.tiktok.com/@USER/photo/1234567890"
 
     def items(self):
+        tikwm_status = self.config("tikwm", False)
+        if not tikwm_status:
+            raise exception.StopExtraction(
+                "TikWM is disabled. Stopping at URL: %s", self.url
+            )
+
         pid, user, post_id = self.groups
         if pid:
             url = pid
@@ -314,8 +321,8 @@ class TikwmPostExtractor(TikwmExtractor):
         return text.ensure_http_scheme(url.replace("/photo/", "/video/", 1))
 
 
-class TikwmVmpostExtractor(TikwmExtractor):
-    """Extract a single video or photo TikTok VM link"""
+class TiktokVmpostExtractor(TiktokExtractor):
+    """Extract a single video or photo TikTok VM link using TikWM's API"""
     subcategory = "vmpost"
     pattern = (r"(?:https?://)?(?:"
                r"v[mt]\.tiktok\.com"
@@ -324,6 +331,12 @@ class TikwmVmpostExtractor(TikwmExtractor):
     example = "https://vm.tiktok.com/1a2B3c4E5"
 
     def items(self):
+        tikwm_status = self.config("tikwm", False)
+        if not tikwm_status:
+            raise exception.StopExtraction(
+                "TikWM is disabled. Stopping at URL: %s", self.url
+            )
+
         url = text.ensure_http_scheme(self.url)
 
         url = self.request_location(url, notfound="post")
@@ -338,15 +351,15 @@ class TikwmVmpostExtractor(TikwmExtractor):
         yield from self._extract_media(post, post_data)
 
 
-class TikwmUserExtractor(TikwmExtractor):
-    """Extract a TikTok user's profile"""
+class TiktokUserExtractor(TiktokExtractor):
+    """Extract a TikTok user's profile using TikWM's API"""
     subcategory = "user"
     batch_size = 10
     pattern = BASE_PATTERN + r"/(?:@([\w_.-]+)|id:(\d+))/?(?:$|\?|#)"
     example = "https://www.tiktok.com/@USER"
 
     def _init(self):
-        TikwmExtractor._init(self)
+        TiktokExtractor._init(self)
         self.avatar = self.config("avatar", True)
         self.batch_size = self.config("tikwm-batch-size", self.batch_size)
 
@@ -356,6 +369,12 @@ class TikwmUserExtractor(TikwmExtractor):
             self.batch_size = 33
 
     def items(self):
+        tikwm_status = self.config("tikwm", False)
+        if not tikwm_status:
+            raise exception.StopExtraction(
+                "TikWM is disabled. Stopping at URL: %s", self.url
+            )
+
         user_name, user_id = self.groups
 
         if user_id:
