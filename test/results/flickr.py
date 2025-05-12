@@ -33,6 +33,8 @@ __tests__ = (
     "id"         : 16089302239,
     "height"     : 683,
     "label"      : "Large",
+    "license"    : "0",
+    "license_name": "All Rights Reserved",
     "media"      : "photo",
     "pool"       : list,
     "set"        : list,
@@ -87,6 +89,16 @@ __tests__ = (
     "#category": ("", "flickr", "image"),
     "#class"   : flickr.FlickrImageExtractor,
     "#pattern" : flickr.FlickrImageExtractor.pattern,
+
+    "id"  : 26140204724,
+    "date": "dt:2016-05-01 10:03:33",
+    "user": {
+        "location": "diebolsheim, france",
+        "nsid": "23965455@N05",
+        "path_alias": "sgu_",
+        "realname": "philippe baumgart",
+        "username": "philippe baumgart",
+    },
 },
 
 {
@@ -160,6 +172,13 @@ __tests__ = (
     "#url"     : "https://flickr.com/search/?text=mountain",
     "#category": ("", "flickr", "search"),
     "#class"   : flickr.FlickrSearchExtractor,
+    "#range"   : "1-10",
+    "#count"   : 10,
+    "#pattern" : r"https://live\.staticflickr\.com/\d+/.+",
+
+    "search": {
+        "text": "mountain",
+    },
 },
 
 {
