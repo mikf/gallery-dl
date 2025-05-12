@@ -23,13 +23,10 @@ class FlickrExtractor(Extractor):
     request_interval = (1.0, 2.0)
     request_interval_min = 0.5
 
-    def __init__(self, match):
-        Extractor.__init__(self, match)
-        self.item_id = match.group(1)
-
     def _init(self):
         self.api = FlickrAPI(self)
         self.user = None
+        self.item_id = self.groups[0]
 
     def items(self):
         data = self.metadata()
@@ -75,15 +72,14 @@ class FlickrImageExtractor(FlickrExtractor):
                r"|flic\.kr/p/([A-Za-z1-9]+))")
     example = "https://www.flickr.com/photos/USER/12345"
 
-    def __init__(self, match):
-        FlickrExtractor.__init__(self, match)
-        if not self.item_id:
+    def items(self):
+        item_id, enc_id = self.groups
+        if enc_id is not None:
             alphabet = ("123456789abcdefghijkmnopqrstu"
                         "vwxyzABCDEFGHJKLMNPQRSTUVWXYZ")
-            self.item_id = util.bdecode(match.group(2), alphabet)
+            item_id = util.bdecode(enc_id, alphabet)
 
-    def items(self):
-        photo = self.api.photos_getInfo(self.item_id)
+        photo = self.api.photos_getInfo(item_id)
 
         self.api._extract_metadata(photo)
         if photo["media"] == "video" and self.api.videos:
@@ -120,11 +116,8 @@ class FlickrAlbumExtractor(FlickrExtractor):
     pattern = BASE_PATTERN + r"/photos/([^/?#]+)/(?:album|set)s(?:/(\d+))?"
     example = "https://www.flickr.com/photos/USER/albums/12345"
 
-    def __init__(self, match):
-        FlickrExtractor.__init__(self, match)
-        self.album_id = match.group(2)
-
     def items(self):
+        self.album_id = self.groups[1]
         if self.album_id:
             return FlickrExtractor.items(self)
         return self._album_items()
@@ -163,12 +156,9 @@ class FlickrGalleryExtractor(FlickrExtractor):
     pattern = BASE_PATTERN + r"/photos/([^/?#]+)/galleries/(\d+)"
     example = "https://www.flickr.com/photos/USER/galleries/12345/"
 
-    def __init__(self, match):
-        FlickrExtractor.__init__(self, match)
-        self.gallery_id = match.group(2)
-
     def metadata(self):
         data = FlickrExtractor.metadata(self)
+        self.gallery_id = self.groups[1]
         data["gallery"] = self.api.galleries_getInfo(self.gallery_id)
         return data
 
@@ -223,13 +213,10 @@ class FlickrSearchExtractor(FlickrExtractor):
     pattern = BASE_PATTERN + r"/search/?\?([^#]+)"
     example = "https://flickr.com/search/?text=QUERY"
 
-    def __init__(self, match):
-        FlickrExtractor.__init__(self, match)
-        self.search = text.parse_query(match.group(1))
+    def metadata(self):
+        self.search = text.parse_query(self.groups[0])
         if "text" not in self.search:
             self.search["text"] = ""
-
-    def metadata(self):
         return {"search": self.search}
 
     def photos(self):
