@@ -29,11 +29,8 @@ class MangadexExtractor(Extractor):
     useragent = util.USERAGENT
     _cache = {}
 
-    def __init__(self, match):
-        Extractor.__init__(self, match)
-        self.uuid = match.group(1)
-
     def _init(self):
+        self.uuid = self.groups[0]
         self.api = MangadexAPI(self)
 
     def items(self):
@@ -199,7 +196,14 @@ class MangadexAPI():
         self.headers = {}
 
         self.username, self.password = extr._get_auth_info()
-        if not self.username:
+        if self.username:
+            self.client_id = cid = extr.config("client-id")
+            self.client_secret = extr.config("client-secret")
+            if cid:
+                self._authenticate_impl = self._authenticate_impl_client
+            else:
+                self._authenticate_impl = self._authenticate_impl_legacy
+        else:
             self.authenticate = util.noop
 
         server = extr.config("api-server")
@@ -249,19 +253,58 @@ class MangadexAPI():
             self._authenticate_impl(self.username, self.password)
 
     @cache(maxage=900, keyarg=1)
-    def _authenticate_impl(self, username, password):
+    def _authenticate_impl_client(self, username, password):
+        refresh_token = _refresh_token_cache((username, "personal"))
+        if refresh_token:
+            self.extractor.log.info("Refreshing access token")
+            data = {
+                "grant_type"   : "refresh_token",
+                "refresh_token": refresh_token,
+                "client_id"    : self.client_id,
+                "client_secret": self.client_secret,
+            }
+        else:
+            self.extractor.log.info("Logging in as %s", username)
+            data = {
+                "grant_type"   : "password",
+                "username"     : self.username,
+                "password"     : self.password,
+                "client_id"    : self.client_id,
+                "client_secret": self.client_secret,
+            }
+
+        self.extractor.log.debug("Using client-id '%s…'", self.client_id[:24])
+        url = ("https://auth.mangadex.org/realms/mangadex"
+               "/protocol/openid-connect/token")
+        data = self.extractor.request(
+            url, method="POST", data=data, fatal=None).json()
+
+        try:
+            access_token = data["access_token"]
+        except Exception:
+            raise exception.AuthenticationError(data.get("error_description"))
+
+        if refresh_token != data.get("refresh_token"):
+            _refresh_token_cache.update(
+                (username, "personal"), data["refresh_token"])
+
+        return "Bearer " + access_token
+
+    @cache(maxage=900, keyarg=1)
+    def _authenticate_impl_legacy(self, username, password):
         refresh_token = _refresh_token_cache(username)
         if refresh_token:
             self.extractor.log.info("Refreshing access token")
             url = self.root + "/auth/refresh"
-            data = {"token": refresh_token}
+            json = {"token": refresh_token}
         else:
             self.extractor.log.info("Logging in as %s", username)
             url = self.root + "/auth/login"
-            data = {"username": username, "password": password}
+            json = {"username": username, "password": password}
 
+        self.extractor.log.debug("Using legacy login method")
         data = self.extractor.request(
-            url, method="POST", json=data, fatal=None).json()
+            url, method="POST", json=json, fatal=None).json()
         if data.get("result") != "ok":
             raise exception.AuthenticationError()
 
@@ -329,6 +372,6 @@ class MangadexAPI():
                 return
 
 
-@cache(maxage=28*86400, keyarg=0)
+@cache(maxage=90*86400, keyarg=0)
 def _refresh_token_cache(username):
     return None
