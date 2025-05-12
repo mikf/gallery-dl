@@ -41,6 +41,12 @@ class MangadexExtractor(Extractor):
             self._cache[uuid] = data
             yield Message.Queue, self.root + "/chapter/" + uuid, data
 
+    def _items_manga(self):
+        data = {"_extractor": MangadexMangaExtractor}
+        for manga in self.manga():
+            url = "{}/title/{}".format(self.root, manga["id"])
+            yield Message.Queue, url, data
+
     def _transform(self, chapter):
         relationships = defaultdict(list)
         for item in chapter["relationships"]:
@@ -127,7 +133,7 @@ class MangadexChapterExtractor(MangadexExtractor):
 class MangadexMangaExtractor(MangadexExtractor):
     """Extractor for manga from mangadex.org"""
     subcategory = "manga"
-    pattern = BASE_PATTERN + r"/(?:title|manga)/(?!feed$)([0-9a-f-]+)"
+    pattern = BASE_PATTERN + r"/(?:title|manga)/(?!follows|feed$)([0-9a-f-]+)"
     example = ("https://mangadex.org/title"
                "/01234567-89ab-cdef-0123-456789abcdef")
 
@@ -136,17 +142,29 @@ class MangadexMangaExtractor(MangadexExtractor):
 
 
 class MangadexFeedExtractor(MangadexExtractor):
-    """Extractor for chapters from your Followed Feed"""
+    """Extractor for chapters from your Updates Feed"""
     subcategory = "feed"
-    pattern = BASE_PATTERN + r"/title/feed$()"
+    pattern = BASE_PATTERN + r"/titles?/feed$()"
     example = "https://mangadex.org/title/feed"
 
     def chapters(self):
         return self.api.user_follows_manga_feed()
 
 
+class MangadexFollowingExtractor(MangadexExtractor):
+    """Extractor for followed manga from your Library"""
+    subcategory = "following"
+    pattern = BASE_PATTERN + r"/titles?/follows(?:\?([^#]+))?$"
+    example = "https://mangadex.org/title/follows"
+
+    items = MangadexExtractor._items_manga
+
+    def manga(self):
+        return self.api.user_follows_manga()
+
+
 class MangadexListExtractor(MangadexExtractor):
-    """Extractor for mangadex lists"""
+    """Extractor for mangadex MDLists"""
     subcategory = "list"
     pattern = (BASE_PATTERN +
                r"/list/([0-9a-f-]+)(?:/[^/?#]*)?(?:\?tab=(\w+))?")
@@ -158,17 +176,17 @@ class MangadexListExtractor(MangadexExtractor):
         if match.group(2) == "feed":
             self.subcategory = "list-feed"
         else:
-            self.items = self._items_titles
+            self.items = self._items_manga
 
     def chapters(self):
         return self.api.list_feed(self.uuid)
 
-    def _items_titles(self):
-        data = {"_extractor": MangadexMangaExtractor}
-        for item in self.api.list(self.uuid)["relationships"]:
-            if item["type"] == "manga":
-                url = "{}/title/{}".format(self.root, item["id"])
-                yield Message.Queue, url, data
+    def manga(self):
+        return [
+            item
+            for item in self.api.list(self.uuid)["relationships"]
+            if item["type"] == "manga"
+        ]
 
 
 class MangadexAuthorExtractor(MangadexExtractor):
@@ -243,6 +261,10 @@ class MangadexAPI():
             "order[chapter]": order,
         }
         return self._pagination_chapters("/manga/" + uuid + "/feed", params)
+
+    def user_follows_manga(self):
+        params = {"contentRating": None}
+        return self._pagination_manga("/user/follows/manga", params)
 
     def user_follows_manga_feed(self):
         params = {"order[publishAt]": "desc"}
@@ -327,7 +349,7 @@ class MangadexAPI():
                 self.extractor.wait(until=until)
                 continue
 
-            msg = ", ".join('{title}: {detail}'.format_map(error)
+            msg = ", ".join('{title}: "{detail}"'.format_map(error)
                             for error in response.json()["errors"])
             raise exception.StopExtraction(
                 "%s %s (%s)", response.status_code, response.reason, msg)
@@ -353,10 +375,11 @@ class MangadexAPI():
     def _pagination(self, endpoint, params):
         config = self.extractor.config
 
-        ratings = config("ratings")
-        if ratings is None:
-            ratings = ("safe", "suggestive", "erotica", "pornographic")
-        params["contentRating[]"] = ratings
+        if "contentRating" not in params:
+            ratings = config("ratings")
+            if ratings is None:
+                ratings = ("safe", "suggestive", "erotica", "pornographic")
+            params["contentRating[]"] = ratings
         params["offset"] = 0
 
         api_params = config("api-parameters")

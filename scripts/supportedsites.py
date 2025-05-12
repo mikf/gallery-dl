@@ -295,7 +295,9 @@ SUBCATEGORY_MAP = {
         "blog-posts": "Blog Posts",
     },
     "mangadex": {
-        "feed" : "Followed Feed",
+        "feed": "Updates Feed",
+        "following" : "Library",
+        "list": "MDLists",
     },
     "nijie": {
         "followed": "Followed Users",
