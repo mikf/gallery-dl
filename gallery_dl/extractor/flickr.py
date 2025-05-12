@@ -81,7 +81,7 @@ class FlickrImageExtractor(FlickrExtractor):
 
         photo = self.api.photos_getInfo(item_id)
 
-        self.api._extract_metadata(photo)
+        self.api._extract_metadata(photo, False)
         if photo["media"] == "video" and self.api.videos:
             self.api._extract_video(photo)
         else:
@@ -279,9 +279,10 @@ class FlickrAPI(oauth.OAuth1API):
     def __init__(self, extractor):
         oauth.OAuth1API.__init__(self, extractor)
 
-        self.exif = extractor.config("exif", False)
         self.videos = extractor.config("videos", True)
-        self.contexts = extractor.config("contexts", False)
+        self.meta_exif = extractor.config("exif", False)
+        self.meta_info = extractor.config("info", False)
+        self.meta_contexts = extractor.config("contexts", False)
 
         self.maxsize = extractor.config("size-max")
         if isinstance(self.maxsize, str):
@@ -522,8 +523,24 @@ class FlickrAPI(oauth.OAuth1API):
         photo["width"] = photo["height"] = 0
         return photo
 
-    def _extract_metadata(self, photo):
-        if self.exif:
+    def _extract_metadata(self, photo, info=True):
+        if info and self.meta_info:
+            try:
+                photo.update(self.photos_getInfo(photo["id"]))
+                photo["user"] = photo["owner"]
+                photo["title"] = photo["title"]["_content"]
+                photo["comments"] = text.parse_int(
+                    photo["comments"]["_content"])
+                photo["description"] = photo["description"]["_content"]
+                photo["tags"] = [t["raw"] for t in photo["tags"]["tag"]]
+                photo["views"] = text.parse_int(photo["views"])
+                photo["id"] = text.parse_int(photo["id"])
+            except Exception as exc:
+                self.log.warning(
+                    "Unable to retrieve 'info' data for %s (%s: %s)",
+                    photo["id"], exc.__class__.__name__, exc)
+
+        if self.meta_exif:
             try:
                 photo.update(self.photos_getExif(photo["id"]))
             except Exception as exc:
@@ -531,7 +548,7 @@ class FlickrAPI(oauth.OAuth1API):
                     "Unable to retrieve 'exif' data for %s (%s: %s)",
                     photo["id"], exc.__class__.__name__, exc)
 
-        if self.contexts:
+        if self.meta_contexts:
             try:
                 photo.update(self.photos_getAllContexts(photo["id"]))
             except Exception as exc:
