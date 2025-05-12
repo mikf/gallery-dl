@@ -2653,6 +2653,19 @@ Description
     See `flickr.photos.getExif <https://www.flickr.com/services/api/flickr.photos.getExif.html>`__ for details.
 
 
+extractor.flickr.info
+---------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    For each photo, retrieve its "full" metadata as provided by
+    `flickr.photos.getInfo <https://www.flickr.com/services/api/flickr.photos.getInfo.html>`__
+
+    Note: This requires 1 additional API call per photo.
+
+
 extractor.flickr.metadata
 -------------------------
 Type

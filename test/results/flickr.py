@@ -38,6 +38,8 @@ __tests__ = (
     "media"      : "photo",
     "pool"       : list,
     "set"        : list,
+    "safety_level": "0",
+    "tags"       : list,
     "url"        : str,
     "views"      : int,
     "width"      : 1024,
@@ -164,8 +166,19 @@ __tests__ = (
     "#url"     : "https://www.flickr.com/photos/shona_s/favorites",
     "#category": ("", "flickr", "favorite"),
     "#class"   : flickr.FlickrFavoriteExtractor,
-    "#pattern" : flickr.FlickrImageExtractor.pattern,
-    "#count"   : 4,
+    "#options" : {"info": True},
+    "#urls"    : (
+        "https://live.staticflickr.com/7322/8719105033_4a21140220_o_d.jpg",
+        "https://live.staticflickr.com/7376/8720226282_eae0faefd1_o_d.jpg",
+        "https://live.staticflickr.com/7460/8720245516_ab06f80353_o_d.jpg",
+        "https://live.staticflickr.com/8268/8705102120_64349ebac2_o_d.jpg",
+    ),
+
+    "dates"       : dict,
+    "license"     : "0",
+    "license_name": "All Rights Reserved",
+    "notes"       : dict,
+    "safety_level": "0",
 },
 
 {
