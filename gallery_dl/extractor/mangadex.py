@@ -211,7 +211,8 @@ class MangadexAPI():
 
     def __init__(self, extr):
         self.extractor = extr
-        self.headers = {}
+        self.headers = None
+        self.headers_auth = {}
 
         self.username, self.password = extr._get_auth_info()
         if self.username:
@@ -240,10 +241,10 @@ class MangadexAPI():
         return self._call("/chapter/" + uuid, params)["data"]
 
     def list(self, uuid):
-        return self._call("/list/" + uuid)["data"]
+        return self._call("/list/" + uuid, None, True)["data"]
 
     def list_feed(self, uuid):
-        return self._pagination_chapters("/list/" + uuid + "/feed")
+        return self._pagination_chapters("/list/" + uuid + "/feed", None, True)
 
     @memcache(keyarg=1)
     def manga(self, uuid):
@@ -264,14 +265,16 @@ class MangadexAPI():
 
     def user_follows_manga(self):
         params = {"contentRating": None}
-        return self._pagination_manga("/user/follows/manga", params)
+        return self._pagination_manga(
+            "/user/follows/manga", params, True)
 
     def user_follows_manga_feed(self):
         params = {"order[publishAt]": "desc"}
-        return self._pagination_chapters("/user/follows/manga/feed", params)
+        return self._pagination_chapters(
+            "/user/follows/manga/feed", params, True)
 
     def authenticate(self):
-        self.headers["Authorization"] = \
+        self.headers_auth["Authorization"] = \
             self._authenticate_impl(self.username, self.password)
 
     @cache(maxage=900, keyarg=1)
@@ -334,13 +337,15 @@ class MangadexAPI():
             _refresh_token_cache.update(username, data["token"]["refresh"])
         return "Bearer " + data["token"]["session"]
 
-    def _call(self, endpoint, params=None):
+    def _call(self, endpoint, params=None, auth=False):
         url = self.root + endpoint
+        headers = self.headers_auth if auth else self.headers
 
         while True:
-            self.authenticate()
+            if auth:
+                self.authenticate()
             response = self.extractor.request(
-                url, params=params, headers=self.headers, fatal=None)
+                url, params=params, headers=headers, fatal=None)
 
             if response.status_code < 400:
                 return response.json()
@@ -354,7 +359,7 @@ class MangadexAPI():
             raise exception.StopExtraction(
                 "%s %s (%s)", response.status_code, response.reason, msg)
 
-    def _pagination_chapters(self, endpoint, params=None):
+    def _pagination_chapters(self, endpoint, params=None, auth=False):
         if params is None:
             params = {}
 
@@ -364,15 +369,15 @@ class MangadexAPI():
         params["translatedLanguage[]"] = lang
         params["includes[]"] = ("scanlation_group",)
 
-        return self._pagination(endpoint, params)
+        return self._pagination(endpoint, params, auth)
 
-    def _pagination_manga(self, endpoint, params=None):
+    def _pagination_manga(self, endpoint, params=None, auth=False):
         if params is None:
             params = {}
 
-        return self._pagination(endpoint, params)
+        return self._pagination(endpoint, params, auth)
 
-    def _pagination(self, endpoint, params):
+    def _pagination(self, endpoint, params, auth=False):
         config = self.extractor.config
 
         if "contentRating" not in params:
@@ -387,7 +392,7 @@ class MangadexAPI():
             params.update(api_params)
 
         while True:
-            data = self._call(endpoint, params)
+            data = self._call(endpoint, params, auth)
             yield from data["data"]
 
             params["offset"] = data["offset"] + data["limit"]
