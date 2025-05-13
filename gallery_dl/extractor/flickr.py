@@ -470,14 +470,15 @@ class FlickrAPI(oauth.OAuth1API):
         self._extract_metadata(photo)
         photo["id"] = text.parse_int(photo["id"])
 
-        if "owner" in photo:
+        if "owner" not in photo:
+            photo["owner"] = self.extractor.user
+        elif not self.meta_info:
             photo["owner"] = {
                 "nsid"      : photo["owner"],
                 "username"  : photo["ownername"],
                 "path_alias": photo["pathalias"],
             }
-        else:
-            photo["owner"] = self.extractor.user
+
         del photo["pathalias"]
         del photo["ownername"]
 
@@ -527,7 +528,6 @@ class FlickrAPI(oauth.OAuth1API):
         if info and self.meta_info:
             try:
                 photo.update(self.photos_getInfo(photo["id"]))
-                photo["user"] = photo["owner"]
                 photo["title"] = photo["title"]["_content"]
                 photo["comments"] = text.parse_int(
                     photo["comments"]["_content"])
