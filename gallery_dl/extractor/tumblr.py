@@ -76,6 +76,9 @@ class TumblrExtractor(Extractor):
             self._subn_orig_image = re.compile(r"/s\d+x\d+/").subn
             _findall_image = re.compile('<img src="([^"]+)"').findall
             _findall_video = re.compile('<source src="([^"]+)"').findall
+            _search_keep_reading_link = re.compile(
+                r'<a[^>]+class=["\'][^"\']*(?:tmblr-truncated-link|read_more)'
+                r'[^"\']*["\'][^>]+href=["\']([^"\']+)').search
 
         for post in self.posts():
             if self.date_min > post["timestamp"]:
@@ -149,6 +152,17 @@ class TumblrExtractor(Extractor):
                 # only "chat" posts are missing a "reblog" key in their
                 # API response, but they can't contain images/videos anyway
                 body = post["reblog"]["comment"] + post["reblog"]["tree_html"]
+
+                match = _search_keep_reading_link(body)
+                if match:
+                    full_content_url = match.group(1)
+                    try:
+                        body += self.request(full_content_url).text
+                    except Exception as exc:
+                        self.log.warning(
+                            "Failed to fetch full content from %s (%s: %s)",
+                            full_content_url, exc.__clasa__.__name__, exc)
+
                 for url in _findall_image(body):
                     url, fb = self._original_inline_image(url)
                     if fb:
