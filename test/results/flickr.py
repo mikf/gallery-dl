@@ -16,6 +16,7 @@ __tests__ = (
     "#options" : {
         "contexts": True,
         "exif": True,
+        "profile": True,
     },
     "#urls"        : "https://live.staticflickr.com/7463/16089302239_de18cd8017_b_d.jpg",
     "#pattern"     : flickr.FlickrImageExtractor.pattern,
@@ -43,6 +44,37 @@ __tests__ = (
     "url"        : str,
     "views"      : int,
     "width"      : 1024,
+
+    "user": {
+        "description": str,
+        "has_adfree": 0,
+        "has_free_educational_resources": 0,
+        "has_free_standard_shipping": 0,
+        "has_stats": 0,
+        "iconfarm": 8,
+        "iconserver": "7265",
+        "id": "59437997@N05",
+        "ispro": 0,
+        "location": "Canada",
+        "mobileurl": "https://www.flickr.com/photos/departingyyz/",
+        "nsid": "59437997@N05",
+        "path_alias": "departingyyz",
+        "photosurl": "https://www.flickr.com/photos/departingyyz/",
+        "profileurl": "https://www.flickr.com/people/departingyyz/",
+        "realname": "Joshua Paul Shefman",
+        "username": "departing(YYZ)",
+        "photos": {
+            "count": int,
+            "firstdate": "1297577284",
+            "firstdatetaken": "2008-07-07 18:31:47",
+        },
+        "timezone": {
+            "label": "Eastern Time (US & Canada)",
+            "offset": "-05:00",
+            "timezone": 14,
+            "timezone_id": "EST5EDT",
+        },
+    },
 },
 
 {
@@ -166,7 +198,10 @@ __tests__ = (
     "#url"     : "https://www.flickr.com/photos/shona_s/favorites",
     "#category": ("", "flickr", "favorite"),
     "#class"   : flickr.FlickrFavoriteExtractor,
-    "#options" : {"info": True},
+    "#options" : {
+        "info": True,
+        "profile": True,
+    },
     "#urls"    : (
         "https://live.staticflickr.com/7322/8719105033_4a21140220_o_d.jpg",
         "https://live.staticflickr.com/7376/8720226282_eae0faefd1_o_d.jpg",
@@ -179,6 +214,38 @@ __tests__ = (
     "license_name": "All Rights Reserved",
     "notes"       : dict,
     "safety_level": "0",
+    "owner": {
+        "iconfarm"  : int,
+        "iconserver": str,
+        "location"  : None,
+        "nsid"      : str,
+        "path_alias": None,
+        "realname"  : str,
+        "username"  : str,
+    },
+    "user": {
+        "nsid": "95410434@N08",
+        "path_alias": "shona_s",
+        "username": "Shona_S",
+
+        "description": "",
+        "has_adfree": 0,
+        "has_free_educational_resources": 0,
+        "has_free_standard_shipping": 0,
+        "has_stats": 0,
+        "iconfarm": 0,
+        "iconserver": "0",
+        "id": "95410434@N08",
+        "ispro": 0,
+        "mobileurl": "https://www.flickr.com/photos/shona_s/",
+        "photosurl": "https://www.flickr.com/photos/shona_s/",
+        "profileurl": "https://www.flickr.com/people/shona_s/",
+        "photos": {
+            "count": 28,
+            "firstdate": "1367947187",
+            "firstdatetaken": "2012-09-21 19:35:39",
+        },
+    },
 },
 
 {

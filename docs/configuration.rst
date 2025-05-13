@@ -2687,6 +2687,19 @@ Description
     for possible field names.
 
 
+extractor.flickr.profile
+------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Extract additional ``user`` profile metadata.
+
+    Note: This requires 1 additional API call per user profile.
+    See `flickr.people.getInfo <https://www.flickr.com/services/api/flickr.people.getInfo.html>`__ for details.
+
+
 extractor.flickr.videos
 -----------------------
 Type
