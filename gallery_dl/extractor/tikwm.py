@@ -241,8 +241,10 @@ class TiktokExtractor(Extractor):
                 post["title"] = post["desc"]
 
             video_url = post_data["play"]
+            video_quality = "SD"
             if self.hd and post_data.get("hdplay"):
                 video_url = post_data["hdplay"]
+                video_quality = "HD"
 
             text.nameext_from_url(video_url, post)
             post.update({
@@ -250,6 +252,7 @@ class TiktokExtractor(Extractor):
                 "image": None,
                 "num": 0,
                 "img_id": "",
+                "video_quality": video_quality,
             })
             if not post["extension"]:
                 post["extension"] = "mp4"
