@@ -23,21 +23,6 @@ class MotherlessExtractor(Extractor):
     filename_fmt = "{id} {title}.{extension}"
     archive_fmt = "{id}"
 
-
-class MotherlessMediaExtractor(MotherlessExtractor):
-    """Extractor for a single image/video from motherless.com"""
-    subcategory = "media"
-    pattern = (BASE_PATTERN +
-               r"/((?:g/[^/?#]+/|G[IV]?[A-Z0-9]+/)?"
-               r"(?!G)[A-Z0-9]+)")
-    example = "https://motherless.com/ABC123"
-
-    def items(self):
-        file = self._extract_media(self.groups[0])
-        url = file["url"]
-        yield Message.Directory, file
-        yield Message.Url, url, text.nameext_from_url(url, file)
-
     def _extract_media(self, path):
         url = self.root + "/" + path
         page = self.request(url).text
@@ -95,6 +80,21 @@ class MotherlessMediaExtractor(MotherlessExtractor):
         return ""
 
 
+class MotherlessMediaExtractor(MotherlessExtractor):
+    """Extractor for a single image/video from motherless.com"""
+    subcategory = "media"
+    pattern = (BASE_PATTERN +
+               r"/((?:g/[^/?#]+/|G[IV]?[A-Z0-9]+/)?"
+               r"(?!G)[A-Z0-9]+)")
+    example = "https://motherless.com/ABC123"
+
+    def items(self):
+        file = self._extract_media(self.groups[0])
+        url = file["url"]
+        yield Message.Directory, file
+        yield Message.Url, url, text.nameext_from_url(url, file)
+
+
 class MotherlessGalleryExtractor(MotherlessExtractor):
     """Extractor for a motherless.com gallery"""
     subcategory = "gallery"
@@ -119,6 +119,10 @@ class MotherlessGalleryExtractor(MotherlessExtractor):
 
         for num, thumb in enumerate(self._pagination(page), 1):
             file = self._parse_thumb_data(thumb)
+
+            if file["type"] == "video":
+                file = self._extract_media(file["id"])
+
             file.update(data)
             file["num"] = num
             url = file["url"]
@@ -151,17 +155,13 @@ class MotherlessGalleryExtractor(MotherlessExtractor):
 
     def _parse_thumb_data(self, thumb):
         extr = text.extract_from(thumb)
+
         data = {
             "id"       : extr('data-codename="', '"'),
             "type"     : extr('data-mediatype="', '"'),
             "thumbnail": extr('class="static" src="', '"'),
             "title"    : extr(' alt="', '"'),
         }
-
-        type = data["type"]
-        url = data["thumbnail"].replace("thumb", type)
-        if type == "video":
-            url = "{}/{}.mp4".format(url.rpartition("/")[0], data["id"])
-        data["url"] = url
+        data["url"] = data["thumbnail"].replace("thumb", data["type"])
 
         return data
