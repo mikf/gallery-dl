@@ -317,11 +317,25 @@ class KemonopartyUserExtractor(KemonopartyExtractor):
         KemonopartyExtractor.__init__(self, match)
 
     def posts(self):
+        endpoint = self.config("endpoint")
+        if endpoint == "legacy":
+            endpoint = self.api.creator_posts_legacy
+        elif endpoint == "legacy+":
+            endpoint = self._posts_legacy_plus
+        else:
+            endpoint = self.api.creator_posts
+
         _, _, service, creator_id, query = self.groups
         params = text.parse_query(query)
-        return self.api.creator_posts_legacy(
-            service, creator_id,
-            params.get("o"), params.get("q"), params.get("tag"))
+        return endpoint(service, creator_id,
+                        params.get("o"), params.get("q"), params.get("tag"))
+
+    def _posts_legacy_plus(self, service, creator_id,
+                           offset=0, query=None, tags=None):
+        for post in self.api.creator_posts_legacy(
+                service, creator_id, offset, query, tags):
+            yield self.api.creator_post(
+                service, creator_id, post["id"])["post"]
 
 
 class KemonopartyPostsExtractor(KemonopartyExtractor):
@@ -525,9 +539,10 @@ class KemonoAPI():
         endpoint = "/file/" + file_hash
         return self._call(endpoint)
 
-    def creator_posts(self, service, creator_id, offset=0, query=None):
+    def creator_posts(self, service, creator_id,
+                      offset=0, query=None, tags=None):
         endpoint = "/{}/user/{}".format(service, creator_id)
-        params = {"q": query, "o": offset}
+        params = {"q": query, "tag": tags, "o": offset}
         return self._pagination(endpoint, params, 50)
 
     def creator_posts_legacy(self, service, creator_id,

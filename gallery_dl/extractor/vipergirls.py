@@ -43,31 +43,40 @@ class VipergirlsExtractor(Extractor):
 
     def items(self):
         self.login()
-        posts = self.posts()
+        root = self.posts()
+        forum_title = root[1].attrib["title"]
+        thread_title = root[2].attrib["title"]
 
         like = self.config("like")
         if like:
-            user_hash = posts[0].get("hash")
+            user_hash = root[0].get("hash")
             if len(user_hash) < 16:
                 self.log.warning("Login required to like posts")
                 like = False
 
-        posts = posts.iter("post")
+        posts = root.iter("post")
         if self.page:
             util.advance(posts, (text.parse_int(self.page[5:]) - 1) * 15)
 
         for post in posts:
+            images = list(post)
+
             data = post.attrib
+            data["forum_title"] = forum_title
             data["thread_id"] = self.thread_id
+            data["thread_title"] = thread_title
+            data["post_id"] = data.pop("id")
+            data["post_num"] = data.pop("number")
+            data["post_title"] = data.pop("title")
+            data["count"] = len(images)
+            del data["imagecount"]
 
             yield Message.Directory, data
-
-            image = None
-            for image in post:
-                yield Message.Queue, image.attrib["main_url"], data
-
-            if image is not None and like:
-                self.like(post, user_hash)
+            if images:
+                for data["num"], image in enumerate(images, 1):
+                    yield Message.Queue, image.attrib["main_url"], data
+                if like:
+                    self.like(post, user_hash)
 
     def login(self):
         if self.cookies_check(self.cookies_names):

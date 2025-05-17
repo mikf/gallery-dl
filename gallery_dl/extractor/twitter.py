@@ -1069,6 +1069,7 @@ class TwitterImageExtractor(Extractor):
 
 
 class TwitterAPI():
+    client_transaction = None
 
     def __init__(self, extractor):
         self.extractor = extractor
@@ -1101,6 +1102,7 @@ class TwitterAPI():
             "x-csrf-token": csrf_token,
             "x-twitter-client-language": "en",
             "x-twitter-active-user": "yes",
+            "x-client-transaction-id": None,
             "Sec-Fetch-Dest": "empty",
             "Sec-Fetch-Mode": "cors",
             "Sec-Fetch-Site": "same-origin",
@@ -1503,12 +1505,38 @@ class TwitterAPI():
             self.extractor.cookies.set(
                 "gt", guest_token, domain=self.extractor.cookies_domain)
 
+    @cache(maxage=10800)
+    def _client_transaction(self):
+        self.log.info("Initializing client transaction keys")
+
+        from .. import transaction_id
+        ct = transaction_id.ClientTransaction()
+        ct.initialize(self.extractor)
+
+        # update 'x-csrf-token' header (#7467)
+        csrf_token = self.extractor.cookies.get(
+            "ct0", domain=self.extractor.cookies_domain)
+        if csrf_token:
+            self.headers["x-csrf-token"] = csrf_token
+
+        return ct
+
+    def _transaction_id(self, url, method="GET"):
+        if self.client_transaction is None:
+            TwitterAPI.client_transaction = self._client_transaction()
+        path = url[url.find("/", 8):]
+        self.headers["x-client-transaction-id"] = \
+            self.client_transaction.generate_transaction_id(method, path)
+
     def _call(self, endpoint, params, method="GET", auth=True, root=None):
         url = (root or self.root) + endpoint
 
         while True:
-            if not self.headers["x-twitter-auth-type"] and auth:
-                self._authenticate_guest()
+            if auth:
+                if self.headers["x-twitter-auth-type"]:
+                    self._transaction_id(url, method)
+                else:
+                    self._authenticate_guest()
 
             response = self.extractor.request(
                 url, method=method, params=params,

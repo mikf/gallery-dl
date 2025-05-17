@@ -10,6 +10,7 @@
 
 from .common import Extractor, Message
 from .. import text, util, exception
+from ..cache import memcache
 import itertools
 import time
 
@@ -44,15 +45,30 @@ class CivitaiExtractor(Extractor):
             self._image_quality = "original=true"
             self._image_ext = "png"
 
+        quality_video = self.config("quality-videos")
+        if quality_video:
+            if not isinstance(quality_video, str):
+                quality_video = ",".join(quality_video)
+            if quality_video[0] == "+":
+                quality_video = (self._image_quality + "," +
+                                 quality_video.lstrip("+,"))
+            self._video_quality = quality_video
+        elif quality_video is not None and quality:
+            self._video_quality = self._image_quality
+        else:
+            self._video_quality = "quality=100"
+        self._video_ext = "webm"
+
         metadata = self.config("metadata")
         if metadata:
             if isinstance(metadata, str):
                 metadata = metadata.split(",")
             elif not isinstance(metadata, (list, tuple)):
-                metadata = ("generation",)
+                metadata = ("generation", "version")
             self._meta_generation = ("generation" in metadata)
+            self._meta_version = ("version" in metadata)
         else:
-            self._meta_generation = False
+            self._meta_generation = self._meta_version = False
 
     def items(self):
         models = self.models()
@@ -77,9 +93,12 @@ class CivitaiExtractor(Extractor):
                     post["publishedAt"], "%Y-%m-%dT%H:%M:%S.%fZ")
                 data = {
                     "post": post,
-                    "user": post["user"],
+                    "user": post.pop("user"),
                 }
-                del post["user"]
+                if self._meta_version:
+                    data["version"] = version = self.api.model_version(
+                        post["modelVersionId"]).copy()
+                    data["model"] = version.pop("model")
 
                 yield Message.Directory, data
                 for file in self._image_results(images):
@@ -94,10 +113,25 @@ class CivitaiExtractor(Extractor):
                 if self._meta_generation:
                     image["generation"] = self.api.image_generationdata(
                         image["id"])
+                if self._meta_version:
+                    if "modelVersionId" in image:
+                        version_id = image["modelVersionId"]
+                    else:
+                        post = image["post"] = self.api.post(
+                            image["postId"])
+                        post.pop("user", None)
+                        version_id = post["modelVersionId"]
+                    image["version"] = version = self.api.model_version(
+                        version_id).copy()
+                    image["model"] = version.pop("model")
+
                 image["date"] = text.parse_datetime(
                     image["createdAt"], "%Y-%m-%dT%H:%M:%S.%fZ")
                 text.nameext_from_url(url, image)
-                image["extension"] = self._image_ext
+                if not image["extension"]:
+                    image["extension"] = (
+                        self._video_ext if image.get("type") == "video" else
+                        self._image_ext)
                 yield Message.Directory, image
                 yield Message.Url, url, image
             return
@@ -113,10 +147,13 @@ class CivitaiExtractor(Extractor):
 
     def _url(self, image):
         url = image["url"]
+        video = image.get("type") == "video"
+        quality = self._video_quality if video else self._image_quality
+
         if "/" in url:
             parts = url.rsplit("/", 3)
             image["uuid"] = parts[1]
-            parts[2] = self._image_quality
+            parts[2] = quality
             return "/".join(parts)
         image["uuid"] = url
 
@@ -126,7 +163,7 @@ class CivitaiExtractor(Extractor):
             name = "{}.{}".format(image.get("id"), mime.rpartition("/")[2])
         return (
             "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/{}/{}/{}".format(
-                url, self._image_quality, name)
+                url, quality, name)
         )
 
     def _image_results(self, images):
@@ -137,7 +174,9 @@ class CivitaiExtractor(Extractor):
                 "url" : self._url(file),
             })
             if not data["extension"]:
-                data["extension"] = self._image_ext
+                data["extension"] = (
+                    self._video_ext if file.get("type") == "video" else
+                    self._image_ext)
             if "id" not in file and data["filename"].isdecimal():
                 file["id"] = text.parse_int(data["filename"])
             if self._meta_generation:
@@ -218,16 +257,20 @@ class CivitaiModelExtractor(CivitaiExtractor):
         files = []
 
         for num, file in enumerate(version["files"], 1):
+            name, sep, ext = file["name"].rpartition(".")
+            if not sep:
+                name = ext
+                ext = "bin"
             file["uuid"] = "model-{}-{}-{}".format(
                 model["id"], version["id"], file["id"])
             files.append({
                 "num"      : num,
                 "file"     : file,
-                "filename" : file["name"],
-                "extension": "bin",
-                "url"      : file.get("downloadUrl") or
-                             "{}/api/download/models/{}".format(
-                                 self.root, version["id"]),
+                "filename" : name,
+                "extension": ext,
+                "url"      : (file.get("downloadUrl") or
+                              "{}/api/download/models/{}".format(
+                              self.root, version["id"])),
                 "_http_headers" : {
                     "Authorization": self.api.headers.get("Authorization")},
                 "_http_validate": self._validate_file_model,
@@ -464,6 +507,7 @@ class CivitaiRestAPI():
         endpoint = "/v1/models/{}".format(model_id)
         return self._call(endpoint)
 
+    @memcache(keyarg=1)
     def model_version(self, model_version_id):
         endpoint = "/v1/model-versions/{}".format(model_version_id)
         return self._call(endpoint)
@@ -504,7 +548,7 @@ class CivitaiTrpcAPI():
         self.root = extractor.root + "/api/trpc/"
         self.headers = {
             "content-type"    : "application/json",
-            "x-client-version": "5.0.542",
+            "x-client-version": "5.0.701",
             "x-client-date"   : "",
             "x-client"        : "web",
             "x-fingerprint"   : "undefined",
@@ -576,6 +620,7 @@ class CivitaiTrpcAPI():
         params = {"id": int(model_id)}
         return self._call(endpoint, params)
 
+    @memcache(keyarg=1)
     def model_version(self, model_version_id):
         endpoint = "modelVersion.getById"
         params = {"id": int(model_version_id)}

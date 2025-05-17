@@ -568,24 +568,12 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>MangaDex</td>
     <td>https://mangadex.org/</td>
-    <td>Authors, Chapters, Followed Feed, Lists, Manga</td>
+    <td>Authors, Chapters, Updates Feed, Library, MDLists, Manga</td>
     <td>Supported</td>
-</tr>
-<tr>
-    <td>MangaKakalot</td>
-    <td>https://mangakakalot.tv/</td>
-    <td>Chapters, Manga</td>
-    <td></td>
 </tr>
 <tr>
     <td>MangaLife</td>
     <td>https://manga4life.com/</td>
-    <td>Chapters, Manga</td>
-    <td></td>
-</tr>
-<tr>
-    <td>Manganato</td>
-    <td>https://manganato.com/</td>
     <td>Chapters, Manga</td>
     <td></td>
 </tr>
@@ -1411,6 +1399,34 @@ Consider all listed sites to potentially be NSFW.
     <td>Endchan</td>
     <td>https://endchan.org/</td>
     <td>Boards, Threads</td>
+    <td></td>
+</tr>
+
+<tr>
+    <td colspan="4"><strong>MangaNelo and Mirror Sites</strong></td>
+</tr>
+<tr>
+    <td>MangaNelo</td>
+    <td>https://www.nelomanga.net/</td>
+    <td>Chapters, Manga</td>
+    <td></td>
+</tr>
+<tr>
+    <td>MangaNato</td>
+    <td>https://www.natomanga.com/</td>
+    <td>Chapters, Manga</td>
+    <td></td>
+</tr>
+<tr>
+    <td>MangaNato</td>
+    <td>https://www.manganato.gg/</td>
+    <td>Chapters, Manga</td>
+    <td></td>
+</tr>
+<tr>
+    <td>MangaKakalot</td>
+    <td>https://www.mangakakalot.gg/</td>
+    <td>Chapters, Manga</td>
     <td></td>
 </tr>
 

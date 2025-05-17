@@ -1843,10 +1843,10 @@ Type
 Default
     ``false``
 Example
-    * ``"generation"``
-    * ``["generation"]``
+    * ``"generation,version"``
+    * ``["generation", "version"]``
 Description
-    Extract additional ``generation`` metadata.
+    Extract additional ``generation`` and ``version`` metadata.
 
     Note: This requires 1 additional HTTP request per image or video.
 
@@ -1860,7 +1860,7 @@ Type
 Default
     ``true``
 Description
-    Download images rated NSFW.
+    Download NSFW-rated images.
 
     * For ``"api": "rest"``, this can be one of
       ``"None"``, ``"Soft"``, ``"Mature"``, ``"X"``
@@ -1869,8 +1869,8 @@ Description
     * For ``"api": "trpc"``, this can be an ``integer``
       whose bits select the returned mature content flags.
 
-      For example, ``12`` (``4|8``)  would return only
-      ``Mature`` and ``X`` rated images,
+      For example, ``28`` (``4|8|16``)  would return only
+      ``R``, ``X``, and ``XXX`` rated images,
       while ``3`` (``1|2``) would return only
       ``None`` and ``Soft`` rated images,
 
@@ -1893,6 +1893,26 @@ Description
 
     Note: Set this option to an arbitrary letter, e.g., ``"w"``,
     to download images in JPEG format at their original resolution.
+
+
+extractor.civitai.quality-videos
+--------------------------------
+Type
+    * ``string``
+    * ``list`` of ``strings``
+Default
+    ``"quality=100"``
+Example
+    * ``"+transcode=true,quality=100"``
+    * ``["+", "transcode=true", "quality=100"]``
+Description
+    A (comma-separated) list of video quality options
+    to pass with every video URL.
+
+    Known available options include ``original``, ``quality``, ``transcode``
+
+    Use ``+`` as first character to `add` the given options to the
+    `quality <extractor.civitai.quality_>`__ ones.
 
 
 extractor.cyberdrop.domain
@@ -2633,6 +2653,19 @@ Description
     See `flickr.photos.getExif <https://www.flickr.com/services/api/flickr.photos.getExif.html>`__ for details.
 
 
+extractor.flickr.info
+---------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    For each photo, retrieve its "full" metadata as provided by
+    `flickr.photos.getInfo <https://www.flickr.com/services/api/flickr.photos.getInfo.html>`__
+
+    Note: This requires 1 additional API call per photo.
+
+
 extractor.flickr.metadata
 -------------------------
 Type
@@ -2652,6 +2685,19 @@ Description
     See `the extras parameter <https://www.flickr.com/services/api/flickr.people.getPhotos.html>`__
     in `Flickr's API docs <https://www.flickr.com/services/api/>`__
     for possible field names.
+
+
+extractor.flickr.profile
+------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Extract additional ``user`` profile metadata.
+
+    Note: This requires 1 additional API call per user profile.
+    See `flickr.people.getInfo <https://www.flickr.com/services/api/flickr.people.getInfo.html>`__ for details.
 
 
 extractor.flickr.videos
@@ -3107,12 +3153,39 @@ Description
     Extract a user's announcements as ``announcements`` metadata.
 
 
+extractor.kemonoparty.endpoint
+------------------------------
+Type
+    ``string``
+Default
+    ``"posts"``
+Description
+    API endpoint to use for retrieving creator posts.
+
+    ``"legacy"``
+        | Use the results from
+          `/v1/{service}/user/{creator_id}/posts-legacy <https://kemono.su/documentation/api#operations-default-get_v1__service__user__creator_id__posts_legacy>`__
+        | Provides less metadata, but is more reliable at returning all posts.
+        | Supports filtering results by ``tag`` query parameter.
+    ``"legacy+"``
+        | Use the results from
+          `/v1/{service}/user/{creator_id}/posts-legacy <https://kemono.su/documentation/api#operations-default-get_v1__service__user__creator_id__posts_legacy>`__
+          to retrieve post IDs
+        | and one request to
+          `/v1/{service}/user/{creator_id}/post/{post_id} <https://kemono.su/documentation/api#operations-Posts-get_v1__service__user__creator_id__post__post_id_>`__
+          to get a full set of metadata for each.
+    ``"posts"``
+        | Use the results from
+          `/v1/{service}/user/{creator_id} <https://kemono.su/documentation/api#operations-Posts-get_v1__service__user__creator_id_>`__
+        | Provides more metadata, but might not return a creator's first/last posts.
+
+
 extractor.kemonoparty.favorites
 -------------------------------
 Type
     ``string``
 Default
-    ``artist``
+    ``"artist"``
 Description
     Determines the type of favorites to be downloaded.
 
@@ -6440,6 +6513,19 @@ Description
     Only compare file sizes. Do not read and compare their content.
 
 
+directory.event
+---------------
+Type
+    * ``string``
+    * ``list`` of ``strings``
+Default
+    ``"prepare"``
+Description
+    The event(s) for which directory_ format strings are (re)evaluated.
+
+    See `metadata.event`_ for a list of available events.
+
+
 exec.archive
 ------------
 Type
@@ -7506,6 +7592,23 @@ How To
       as ``"api-key"`` and ``"api-secret"``
 
 
+extractor.mangadex.client-id & .client-secret
+---------------------------------------------
+Type
+    ``string``
+How To
+    * login and go to your `User Settings <https://mangadex.org/settings>`__
+    * open the "API Clients" section
+    * click "``+ Create``"
+    * choose a name
+    * click "``✔️ Create``"
+    * wait for approval / reload the page
+    * copy the value after "AUTOAPPROVED ACTIVE" in the form "personal-client-..."
+      and put it in your configuration file as ``"client-id"``
+    * click "``Get Secret``", then "``Copy Secret``",
+      and paste it into your configuration file as ``"client-secret"``
+
+
 extractor.reddit.client-id & .user-agent
 ----------------------------------------
 Type
@@ -7738,6 +7841,8 @@ Description
     ``compare``
         | Compare versions of the same file and replace/enumerate them on mismatch
         | (requires `downloader.*.part`_ = ``true`` and `extractor.*.skip`_ = ``false``)
+    ``directory``
+        Reevaluate directory_ format strings
     ``exec``
         Execute external commands
     ``hash``

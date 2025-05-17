@@ -9,8 +9,8 @@ from gallery_dl.extractor import manganelo
 
 __tests__ = (
 {
-    "#url"     : "https://www.mangakakalot.gg/manga/danzai-sareta-akuyaku-reijou-wa-gyakkou-shite-kanpeki-na-akujo-wo-mezasu/chapter-4-5",
-    "#category": ("manganelo", "mangakakalot", "chapter"),
+    "#url"     : "https://www.nelomanga.net/manga/danzai-sareta-akuyaku-reijou-wa-gyakkou-shite-kanpeki-na-akujo-wo-mezasu/chapter-4-5",
+    "#category": ("manganelo", "nelomanga", "chapter"),
     "#class"   : manganelo.ManganeloChapterExtractor,
     "#pattern" : r"https://imgs-2.2xstorage.com/danzai-sareta-akuyaku-reijou-wa-gyakkou-shite-kanpeki-na-akujo-wo-mezasu/4\.5/\d+\.webp",
     "#count"   : 24,
@@ -20,8 +20,8 @@ __tests__ = (
     "chapter_id"   : 6,
     "chapter_minor": ".5",
     "count"        : 24,
-    "date"         : "dt:2025-04-29 16:08:07",
-    "date_updated" : "dt:2025-04-29 16:08:07",
+    "date"         : "",
+    "date_updated" : "",
     "extension"    : "webp",
     "filename"     : str,
     "lang"         : "en",
@@ -32,14 +32,14 @@ __tests__ = (
 },
 
 {
-    "#url"     : "https://mangakakalot.gg/manga/aria/chapter-60-2",
-    "#category": ("manganelo", "mangakakalot", "chapter"),
+    "#url"     : "https://nelomanga.net/manga/aria/chapter-60-2",
+    "#category": ("manganelo", "nelomanga", "chapter"),
     "#class"   : manganelo.ManganeloChapterExtractor,
 },
 
 {
-    "#url"     : "https://www.mangakakalot.gg/manga/aria",
-    "#category": ("manganelo", "mangakakalot", "manga"),
+    "#url"     : "https://www.nelomanga.net/manga/aria",
+    "#category": ("manganelo", "nelomanga", "manga"),
     "#class"   : manganelo.ManganeloMangaExtractor,
     "#pattern" : manganelo.ManganeloChapterExtractor.pattern,
     "#count"   : 70,
@@ -48,7 +48,7 @@ __tests__ = (
     "chapter" : range(1, 60),
     "chapter_minor": {"", ".1", ".2", ".5"},
     "date"    : "type:datetime",
-    "date_updated": "dt:2024-10-30 10:20:58",
+    "date_updated": "dt:2024-10-30 17:20:58",
     "lang"    : "en",
     "language": "English",
     "manga"   : "Aria",
@@ -65,8 +65,8 @@ __tests__ = (
 },
 
 {
-    "#url"     : "https://mangakakalot.gg/manga/aria",
-    "#category": ("manganelo", "mangakakalot", "manga"),
+    "#url"     : "https://nelomanga.net/manga/aria",
+    "#category": ("manganelo", "nelomanga", "manga"),
     "#class"   : manganelo.ManganeloMangaExtractor,
 },
 

@@ -49,7 +49,11 @@ class BlueskyExtractor(Extractor):
                 self.log.debug("Skipping %s (repost)", self._pid(post))
                 continue
             embed = post.get("embed")
-            post.update(post.pop("record"))
+            try:
+                post.update(post.pop("record"))
+            except Exception:
+                self.log.debug("Skipping %s (no 'record')", self._pid(post))
+                continue
 
             while True:
                 self._prepare(post)
