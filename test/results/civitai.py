@@ -133,13 +133,67 @@ __tests__ = (
             },
         },
     },
+    "post": {
+        "id": 6030721,
+        "nsfwLevel": 1,
+        "title": "メイド　クラシック/maid classic - v1.0 XL Showcase",
+        "detail": None,
+        "modelVersionId": 788385,
+        "modelVersion": {
+            "id": 788385,
+        },
+        "publishedAt": "2024-08-31T01:11:52.175Z",
+        "availability": "Public",
+        "tags": [],
+        "collectionId": None,
+    },
+    "model": {
+        "id": 703211,
+        "name": "メイド　クラシック/maid classic",
+        "type": "LORA",
+        "status": "Published",
+        "publishedAt": "2024-08-30T15:38:14.770Z",
+        "nsfw": False,
+        "uploadType": "Created",
+        "availability": "Public",
+    },
+    "version": {
+        "id": 788385,
+        "name": "v1.0 XL",
+        "description": None,
+        "baseModel": "SDXL 1.0",
+        "baseModelType": None,
+        "earlyAccessConfig": None,
+        "earlyAccessEndsAt": None,
+        "trainedWords": [
+            "maid, maid apron, maid headdress, long sleeves",
+        ],
+        "epochs": None,
+        "steps": None,
+        "clipSkip": None,
+        "status": "Published",
+        "createdAt": "2024-08-31T01:11:08.841Z",
+        "vaeId": None,
+        "trainingDetails": None,
+        "trainingStatus": None,
+        "uploadType": "Created",
+        "usageControl": "Download",
+        "requireAuth": True,
+        "settings": {
+            "strength": 0.8,
+        },
+        "recommendedResources": [],
+        "monetization": None,
+        "canGenerate": True,
+        "files": None,
+    },
 },
 
 {
     "#url"    : "https://civitai.com/images/44789630",
     "#comment": "video",
     "#class"  : civitai.CivitaiImageExtractor,
-    "#urls"   : "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/6a09ec54-6de4-4af1-b11d-2d0d8a66d651/original=true,transcode=true,quality=100/copy_C6C532CE-EC47-4A52-9138-AEF1D7756F16.Mp4",
+    "#urls"   : "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/6a09ec54-6de4-4af1-b11d-2d0d8a66d651/quality=100/copy_C6C532CE-EC47-4A52-9138-AEF1D7756F16.Mp4",
 
     "date"     : "dt:2024-12-10 19:19:14",
     "extension": "mp4",
@@ -172,7 +226,7 @@ __tests__ = (
     "#url"  : "https://civitai.com/images/74353746",
     "#comment": "video, rated 'R', WebP download (#7502)",
     "#class": civitai.CivitaiImageExtractor,
-    "#urls" : "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/c7e3744b-8f0d-4124-94c1-75e2af00431d/original=true,transcode=true,quality=100/2025-04-25-23h40m21s_seed665048144_A man appears from off screen and spanks her butto_2.webm",
+    "#urls" : "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/c7e3744b-8f0d-4124-94c1-75e2af00431d/quality=100/2025-04-25-23h40m21s_seed665048144_A man appears from off screen and spanks her butto_2.webm",
 
     "date"     : "dt:2025-05-05 12:27:28",
     "extension": "webm",
@@ -204,6 +258,44 @@ __tests__ = (
 },
 
 {
+    "#url"    : "https://civitai.com/images/76635747",
+    "#comment": "no 'modelVersionId' (#7432)",
+    "#class"  : civitai.CivitaiImageExtractor,
+    "#options": {"metadata": "version"},
+    "#urls"   : "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/65c1a01c-2583-4495-b4e9-bdb94218004e/original=true/5b5b95f8-9923-4c27-b50a-c801c0311375-0.jpg",
+
+    "model"  : None,
+    "version": None,
+},
+
+{
+    "#url"    : "https://civitai.com/images/68947296",
+    "#comment": "rated R / nsfwlevel 4",
+    "#class"  : civitai.CivitaiImageExtractor,
+    "#urls"   : "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/2d1fbe1b-6038-479f-8c37-39d338198fb1/quality=100/received_687641707052140.mp4",
+
+    "nsfwLevel": 4,
+},
+
+{
+    "#url"    : "https://civitai.com/images/68852050",
+    "#comment": "rated X / nsfwlevel 8",
+    "#class"  : civitai.CivitaiImageExtractor,
+    "#urls"   : "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/1107208c-14cc-46fd-848d-2efa14fa6180/original=true/QRQC7HE5DFW3QZ85R3MXQXY440.jpeg",
+
+    "nsfwLevel": 8,
+},
+
+{
+    "#url"    : "https://civitai.com/images/68851932",
+    "#comment": "rated XXX / nsfwlevel 16",
+    "#class"  : civitai.CivitaiImageExtractor,
+    "#urls"   : "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/fdbaa27d-4278-496b-8209-21591e5dc6fe/original=true/Q8AE16QCMCYCCBX49PG8VVWWD0.jpeg",
+
+    "nsfwLevel": 16,
+},
+
+{
     "#url"    : "https://civitai.com/posts/6877551",
     "#class"  : civitai.CivitaiPostExtractor,
     "#options": {"metadata": "generation"},
@@ -232,6 +324,16 @@ __tests__ = (
             },
         },
     },
+},
+
+{
+    "#url"    : "https://civitai.com/posts/17021768",
+    "#comment": "no 'modelVersionId' (#7432)",
+    "#class"  : civitai.CivitaiPostExtractor,
+    "#options": {"metadata": "version"},
+
+    "model"  : None,
+    "version": None,
 },
 
 {

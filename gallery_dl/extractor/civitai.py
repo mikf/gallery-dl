@@ -96,9 +96,8 @@ class CivitaiExtractor(Extractor):
                     "user": post.pop("user"),
                 }
                 if self._meta_version:
-                    data["version"] = version = self.api.model_version(
-                        post["modelVersionId"]).copy()
-                    data["model"] = version.pop("model")
+                    data["model"], data["version"] = \
+                        self._extract_meta_version(post)
 
                 yield Message.Directory, data
                 for file in self._image_results(images):
@@ -109,24 +108,17 @@ class CivitaiExtractor(Extractor):
         images = self.images()
         if images:
             for image in images:
-                url = self._url(image)
-                if self._meta_generation:
-                    image["generation"] = self.api.image_generationdata(
-                        image["id"])
-                if self._meta_version:
-                    if "modelVersionId" in image:
-                        version_id = image["modelVersionId"]
-                    else:
-                        post = image["post"] = self.api.post(
-                            image["postId"])
-                        post.pop("user", None)
-                        version_id = post["modelVersionId"]
-                    image["version"] = version = self.api.model_version(
-                        version_id).copy()
-                    image["model"] = version.pop("model")
 
+                if self._meta_generation:
+                    image["generation"] = \
+                        self._extract_meta_generation(image)
+                if self._meta_version:
+                    image["model"], image["version"] = \
+                        self._extract_meta_version(image, False)
                 image["date"] = text.parse_datetime(
                     image["createdAt"], "%Y-%m-%dT%H:%M:%S.%fZ")
+
+                url = self._url(image)
                 text.nameext_from_url(url, image)
                 if not image["extension"]:
                     image["extension"] = (
@@ -155,8 +147,8 @@ class CivitaiExtractor(Extractor):
             image["uuid"] = parts[1]
             parts[2] = quality
             return "/".join(parts)
-        image["uuid"] = url
 
+        image["uuid"] = url
         name = image.get("name")
         if not name:
             mime = image.get("mimeType") or self._image_ext
@@ -180,13 +172,39 @@ class CivitaiExtractor(Extractor):
             if "id" not in file and data["filename"].isdecimal():
                 file["id"] = text.parse_int(data["filename"])
             if self._meta_generation:
-                file["generation"] = self.api.image_generationdata(file["id"])
+                file["generation"] = self._extract_meta_generation(file)
             yield data
 
     def _parse_query(self, value):
         return text.parse_query_list(
             value, {"tags", "reactions", "baseModels", "tools", "techniques",
                     "types", "fileFormats"})
+
+    def _extract_meta_generation(self, image):
+        return self.api.image_generationdata(image["id"])
+
+    def _extract_meta_version(self, item, is_post=True):
+        version_id = self._extract_version_id(item, is_post)
+        if version_id is None:
+            return None, None
+        version = self.api.model_version(version_id).copy()
+        return version.pop("model", None), version
+
+    def _extract_version_id(self, item, is_post=True):
+        version_id = item.get("modelVersionId")
+        if version_id:
+            return version_id
+
+        version_ids = item.get("modelVersionIds")
+        if version_ids:
+            return version_ids[0]
+
+        if is_post:
+            return None
+
+        item["post"] = post = self.api.post(item["postId"])
+        post.pop("user", None)
+        return self._extract_version_id(post)
 
 
 class CivitaiModelExtractor(CivitaiExtractor):
