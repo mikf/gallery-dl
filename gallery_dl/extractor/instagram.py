@@ -165,13 +165,16 @@ class InstagramExtractor(Extractor):
         if "items" in post:  # story or highlight
             items = post["items"]
             reel_id = str(post["id"]).rpartition(":")[2]
+            expires = post.get("expiring_at")
             data = {
-                "expires": text.parse_timestamp(post.get("expiring_at")),
+                "expires": text.parse_timestamp(expires),
                 "post_id": reel_id,
                 "post_shortcode": shortcode_from_id(reel_id),
             }
             if "title" in post:
                 data["highlight_title"] = post["title"]
+            if expires and not post.get("seen"):
+                post["seen"] = expires - 86400
 
         else:  # regular image/video post
             data = {
