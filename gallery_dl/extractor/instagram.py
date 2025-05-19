@@ -583,7 +583,10 @@ class InstagramStoriesExtractor(InstagramExtractor):
         reel_id = self.highlight_id or self.api.user_id(self.user)
         reels = self.api.reels_media(reel_id)
 
-        if self.media_id and reels:
+        if not reels:
+            return ()
+
+        if self.media_id:
             reel = reels[0]
             for item in reel["items"]:
                 if item["pk"] == self.media_id:
@@ -591,6 +594,16 @@ class InstagramStoriesExtractor(InstagramExtractor):
                     break
             else:
                 raise exception.NotFoundError("story")
+
+        elif self.config("split"):
+            reel = reels[0]
+            reels = []
+            for item in reel["items"]:
+                item.pop("user", None)
+                copy = reel.copy()
+                copy.update(item)
+                copy["items"] = (item,)
+                reels.append(copy)
 
         return reels
 

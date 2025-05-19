@@ -3085,6 +3085,16 @@ Description
         Do not download videos
 
 
+extractor.instagram.stories.split
+---------------------------------
+Type
+    * ``bool``
+Default
+    ``false``
+Description
+    Split ``stories`` elements into separate posts.
+
+
 extractor.itaku.videos
 ----------------------
 Type
