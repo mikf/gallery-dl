@@ -26,6 +26,7 @@ class FanboxExtractor(Extractor):
     directory_fmt = ("{category}", "{creatorId}")
     filename_fmt = "{id}_{num}.{extension}"
     archive_fmt = "{id}_{num}"
+    browser = "firefox"
     _warning = True
 
     def _init(self):
