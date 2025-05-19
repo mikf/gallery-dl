@@ -26,7 +26,9 @@ from . import aes, text, util
 
 SUPPORTED_BROWSERS_CHROMIUM = {
     "brave", "chrome", "chromium", "edge", "opera", "thorium", "vivaldi"}
-SUPPORTED_BROWSERS = SUPPORTED_BROWSERS_CHROMIUM | {"firefox", "safari"}
+SUPPORTED_BROWSERS_FIREFOX = {"firefox", "zen"}
+SUPPORTED_BROWSERS = \
+    SUPPORTED_BROWSERS_CHROMIUM | SUPPORTED_BROWSERS_FIREFOX | {"safari"}
 
 logger = logging.getLogger("cookies")
 
@@ -34,8 +36,8 @@ logger = logging.getLogger("cookies")
 def load_cookies(browser_specification):
     browser_name, profile, keyring, container, domain = \
         _parse_browser_specification(*browser_specification)
-    if browser_name == "firefox":
-        return load_cookies_firefox(profile, container, domain)
+    if browser_name in SUPPORTED_BROWSERS_FIREFOX:
+        return load_cookies_firefox(browser_name, profile, container, domain)
     elif browser_name == "safari":
         return load_cookies_safari(profile, domain)
     elif browser_name in SUPPORTED_BROWSERS_CHROMIUM:
@@ -44,8 +46,10 @@ def load_cookies(browser_specification):
         raise ValueError("unknown browser '{}'".format(browser_name))
 
 
-def load_cookies_firefox(profile=None, container=None, domain=None):
-    path, container_id = _firefox_cookies_database(profile, container)
+def load_cookies_firefox(browser_name, profile=None,
+                         container=None, domain=None):
+    path, container_id = _firefox_cookies_database(browser_name,
+                                                   profile, container)
 
     sql = ("SELECT name, value, host, path, isSecure, expiry "
            "FROM moz_cookies")
@@ -83,7 +87,8 @@ def load_cookies_firefox(profile=None, container=None, domain=None):
                 sql, parameters)
         ]
 
-    _log_info("Extracted %s cookies from Firefox", len(cookies))
+    _log_info("Extracted %s cookies from %s",
+              len(cookies), browser_name.capitalize())
     return cookies
 
 
@@ -196,13 +201,14 @@ def load_cookies_chromium(browser_name, profile=None,
 # --------------------------------------------------------------------
 # firefox
 
-def _firefox_cookies_database(profile=None, container=None):
+def _firefox_cookies_database(browser_name, profile=None, container=None):
     if not profile:
-        search_root = _firefox_browser_directory()
+        search_root = _firefox_browser_directory(browser_name)
     elif _is_path(profile):
         search_root = profile
     else:
-        search_root = os.path.join(_firefox_browser_directory(), profile)
+        search_root = os.path.join(
+            _firefox_browser_directory(browser_name), profile)
 
     path = _find_most_recently_used_file(search_root, "cookies.sqlite")
     if path is None:
@@ -245,14 +251,27 @@ def _firefox_cookies_database(profile=None, container=None):
     return path, container_id
 
 
-def _firefox_browser_directory():
+def _firefox_browser_directory(browser_name):
+    join = os.path.join
+
     if sys.platform in ("win32", "cygwin"):
-        return os.path.expandvars(
-            r"%APPDATA%\Mozilla\Firefox\Profiles")
-    if sys.platform == "darwin":
-        return os.path.expanduser(
-            "~/Library/Application Support/Firefox/Profiles")
-    return os.path.expanduser("~/.mozilla/firefox")
+        appdata = os.path.expandvars("%APPDATA%")
+        return {
+            "firefox": join(appdata, R"Mozilla\Firefox\Profiles"),
+            "zen"    : join(appdata, R"zen\Profiles")
+        }[browser_name]
+    elif sys.platform == "darwin":
+        appdata = os.path.expanduser("~/Library/Application Support")
+        return {
+            "firefox": join(appdata, R"Firefox/Profiles"),
+            "zen"    : join(appdata, R"zen/Profiles")
+        }[browser_name]
+    else:
+        home = os.path.expanduser("~")
+        return {
+            "firefox": join(home, R".mozilla/firefox"),
+            "zen"    : join(home, R".zen")
+        }[browser_name]
 
 
 # --------------------------------------------------------------------
