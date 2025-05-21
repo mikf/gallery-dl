@@ -90,9 +90,11 @@ class IdolcomplexExtractor(SankakuExtractor):
             "user[password]": password,
             "commit"        : "Login",
         }
+        self.sleep(10, "login")
         response = self.request(url, method="POST", headers=headers, data=data)
 
-        if not response.history or response.url.endswith("/user/home"):
+        if not response.history or response.url.endswith(
+                ("/users/login", "/user/home")):
             raise exception.AuthenticationError()
         return {c.name: c.value for c in response.history[0].cookies}
 
