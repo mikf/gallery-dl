@@ -309,6 +309,9 @@ SUBCATEGORY_MAP = {
         "created": "Created Pins",
         "allpins": "All Pins",
     },
+    "pixeldrain": {
+        "folder": "Filesystems",
+    },
     "pixiv": {
         "me"  : "pixiv.me Links",
         "novel-bookmark": "Novel Bookmarks",

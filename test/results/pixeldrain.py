@@ -97,4 +97,98 @@ __tests__ = (
     "#sha1_content": "0c8768055e4e20e7c7259608b67799171b691140",
 },
 
+{
+    "#url"     : "https://pixeldrain.com/d/8xz8hcYJ",
+    "#category": ("", "pixeldrain", "folder"),
+    "#class"   : pixeldrain.PixeldrainFolderExtractor,
+    "#urls"        : "https://pixeldrain.com/api/filesystem/8xz8hcYJ?attach",
+    "#sha1_content": "edfea851cad717f5643cb94ac04b32335611acf2",
+
+    "date"       : "dt:2025-05-19 15:27:54",
+    "extension"  : "mp4",
+    "filename"   : "test",
+    "id"         : "8xz8hcYJ",
+    "mime_type"  : "video/mp4",
+    "name"       : "test.mp4",
+    "path"       : "/8xz8hcYJ",
+    "hash_sha256": "c6293d8359cb84723bbf8cf355da6cf1ef9c3e8b3d465110e91db485e53ada54",
+    "share_url"  : "https://pixeldrain.com/d/8xz8hcYJ",
+    "size"       : 3026,
+    "type"       : "file",
+},
+
+{
+    "#url"     : "https://pixeldrain.com/api/filesystem/8xz8hcYJ",
+    "#category": ("", "pixeldrain", "folder"),
+    "#class"   : pixeldrain.PixeldrainFolderExtractor,
+    "#urls"        : "https://pixeldrain.com/api/filesystem/8xz8hcYJ?attach",
+    "#sha1_content": "edfea851cad717f5643cb94ac04b32335611acf2",
+
+    "date"       : "dt:2025-05-19 15:27:54",
+    "extension"  : "mp4",
+    "filename"   : "test",
+    "id"         : "8xz8hcYJ",
+    "mime_type"  : "video/mp4",
+    "name"       : "test.mp4",
+    "path"       : "/8xz8hcYJ",
+    "hash_sha256": "c6293d8359cb84723bbf8cf355da6cf1ef9c3e8b3d465110e91db485e53ada54",
+    "share_url"  : "https://pixeldrain.com/d/8xz8hcYJ",
+    "size"       : 3026,
+    "type"       : "file",
+},
+
+{
+    "#url"     : "https://pixeldrain.com/d/DkdR6QRh",
+    "#comment" : "dir with file",
+    "#category": ("", "pixeldrain", "folder"),
+    "#class"   : pixeldrain.PixeldrainFolderExtractor,
+    "#urls"    : ("https://pixeldrain.com/api/filesystem/DkdR6QRh/test.mp4?attach"),
+
+    "id": "DkdR6QRh",
+},
+
+{
+    "#url"     : "https://pixeldrain.com/d/STAcYjEh",
+    "#comment" : "dir with subdir",
+    "#category": ("", "pixeldrain", "folder"),
+    "#class"   : pixeldrain.PixeldrainFolderExtractor,
+
+    "id": "STAcYjEh",
+},
+
+{
+    "#url"     : "https://pixeldrain.com/d/qTnZkhCJ",
+    "#comment" : "dir with subdir and files",
+    "#category": ("", "pixeldrain", "folder"),
+    "#class"   : pixeldrain.PixeldrainFolderExtractor,
+    "#urls"    : (
+        "https://pixeldrain.com/api/filesystem/qTnZkhCJ/test1.mp4?attach",
+        "https://pixeldrain.com/api/filesystem/qTnZkhCJ/test2.mp4?attach",
+    ),
+
+    "id": "qTnZkhCJ",
+},
+
+{
+    "#url"     : "https://pixeldrain.com/d/qTnZkhCJ/subdir/test3.mp4",
+    "#comment" : "file in subdir",
+    "#category": ("", "pixeldrain", "folder"),
+    "#class"   : pixeldrain.PixeldrainFolderExtractor,
+    "#urls"    : (
+        "https://pixeldrain.com/api/filesystem/qTnZkhCJ/subdir/test3.mp4?attach",
+    ),
+
+    "date"       : "dt:2025-05-20 19:02:08",
+    "extension"  : "mp4",
+    "filename"   : "test3",
+    "hash_sha256": "c6293d8359cb84723bbf8cf355da6cf1ef9c3e8b3d465110e91db485e53ada54",
+    "id"         : "qTnZkhCJ",
+    "mime_type"  : "video/mp4",
+    "name"       : "test3.mp4",
+    "path"       : "/qTnZkhCJ/subdir/test3.mp4",
+    "share_url"  : "https://pixeldrain.com/d/qTnZkhCJ/subdir/test3.mp4",
+    "size"       : 3026,
+    "type"       : "file",
+},
+
 )
