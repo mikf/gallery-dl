@@ -137,16 +137,16 @@ class PixivExtractor(Extractor):
                 if self.sanity_workaround:
                     body = self._request_ajax("/illust/" + str(work_id))
                     if work["type"] == "ugoira":
-                        self.log.warning(
-                            "Attempting to retrieve ugoira AJAX metadata.")
+                        self.log.info("%s: Retrieving Ugoira AJAX metadata",
+                                      work["id"])
                         try:
                             self._extract_ajax(work, body)
                             return self._extract_ugoira(work, url)
                         except Exception as exc:
+                            self.log.debug("", exc_info=exc)
                             self.log.warning(
-                                "%s: Unable to retrieve Ugoira metatdata "
-                                "(%s - %s)",
-                                work["id"], exc.__class__.__name__, exc)
+                                "%s: Unable to extract Ugoira URL. Provide "
+                                "logged-in cookies to access it", work["id"])
                     else:
                         return self._extract_ajax(work, body)
 
