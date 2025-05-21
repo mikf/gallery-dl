@@ -169,7 +169,7 @@ class AryionExtractor(Extractor):
                 "<p>", "</p>"), "", "")),
             "filename" : fname,
             "extension": ext,
-            "_mtime"   : lmod,
+            "_http_lastmodified": lmod,
         }
 
 
