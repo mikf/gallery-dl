@@ -234,10 +234,6 @@ class IdolcomplexPoolExtractor(IdolcomplexExtractor):
     example = "https://idol.sankakucomplex.com/pools/0123456789abcdef"
     per_page = 24
 
-    def __init__(self, match):
-        IdolcomplexExtractor.__init__(self, match)
-        self.pool_id = match.group(1)
-
     def skip(self, num):
         pages, posts = divmod(num, self.per_page)
         self.start_page += pages
@@ -245,10 +241,13 @@ class IdolcomplexPoolExtractor(IdolcomplexExtractor):
         return num
 
     def metadata(self):
-        return {"pool": self.pool_id}
+        return {"pool": self.groups[0]}
 
     def post_ids(self):
-        url = self.root + "/pools/show/" + self.pool_id
+        if not self.logged_in:
+            self.log.warning("Login required")
+
+        url = self.root + "/pools/show/" + self.groups[0]
         params = {"page": self.start_page}
 
         while True:
@@ -269,9 +268,5 @@ class IdolcomplexPostExtractor(IdolcomplexExtractor):
     pattern = BASE_PATTERN + r"/posts?/(?:show/)?(\w+)"
     example = "https://idol.sankakucomplex.com/posts/0123456789abcdef"
 
-    def __init__(self, match):
-        IdolcomplexExtractor.__init__(self, match)
-        self.post_id = match.group(1)
-
     def post_ids(self):
-        return (self.post_id,)
+        return (self.groups[0],)
