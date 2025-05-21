@@ -137,6 +137,8 @@ class PixivExtractor(Extractor):
                 if self.sanity_workaround:
                     body = self._request_ajax("/illust/" + str(work_id))
                     if work["type"] == "ugoira":
+                        if not self.load_ugoira:
+                            return ()
                         self.log.info("%s: Retrieving Ugoira AJAX metadata",
                                       work["id"])
                         try:
