@@ -130,18 +130,27 @@ class YoutubeDLDownloader(DownloaderBase):
         if pathfmt.exists():
             pathfmt.temppath = ""
             return True
-        if self.part and self.partdir:
-            pathfmt.temppath = os.path.join(
-                self.partdir, pathfmt.filename)
-
-        self._set_outtmpl(ytdl_instance, pathfmt.temppath.replace("%", "%%"))
 
         self.out.start(pathfmt.path)
+        if self.part:
+            pathfmt.kwdict["extension"] = pathfmt.prefix + "part"
+            filename = pathfmt.build_filename(pathfmt.kwdict)
+            pathfmt.kwdict["extension"] = info_dict["ext"]
+            if self.partdir:
+                path = os.path.join(self.partdir, filename)
+            else:
+                path = pathfmt.realdirectory + filename
+        else:
+            path = pathfmt.realpath
+
+        self._set_outtmpl(ytdl_instance, path.replace("%", "%%"))
         try:
             ytdl_instance.process_info(info_dict)
         except Exception as exc:
             self.log.debug("", exc_info=exc)
             return False
+
+        pathfmt.temppath = info_dict["filepath"]
         return True
 
     def _download_playlist(self, ytdl_instance, pathfmt, info_dict):
