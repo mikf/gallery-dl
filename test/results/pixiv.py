@@ -287,6 +287,14 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.pixiv.net/en/artworks/103841583",
+    "#comment" : "Ugoira limit_sanity_level_360.png (#4327 #6297 #7285)",
+    "#class"   : pixiv.PixivWorkExtractor,
+    "#auth"    : True,
+    "#urls"    : "https://i.pximg.net/img-zip-ugoira/img/2022/12/23/23/36/13/103841583_ugoira1920x1080.zip",
+},
+
+{
     "#url"     : "https://www.pixiv.net/en/artworks/104582860",
     "#comment" : "deleted limit_sanity_level_360.png work (#6339)",
     "#class"   : pixiv.PixivWorkExtractor,

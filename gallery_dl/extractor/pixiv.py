@@ -136,7 +136,21 @@ class PixivExtractor(Extractor):
                 self.log.warning("%s: 'limit_sanity_level' warning", work_id)
                 if self.sanity_workaround:
                     body = self._request_ajax("/illust/" + str(work_id))
-                    return self._extract_ajax(work, body)
+                    if work["type"] == "ugoira":
+                        if not self.load_ugoira:
+                            return ()
+                        self.log.info("%s: Retrieving Ugoira AJAX metadata",
+                                      work["id"])
+                        try:
+                            self._extract_ajax(work, body)
+                            return self._extract_ugoira(work, url)
+                        except Exception as exc:
+                            self.log.debug("", exc_info=exc)
+                            self.log.warning(
+                                "%s: Unable to extract Ugoira URL. Provide "
+                                "logged-in cookies to access it", work["id"])
+                    else:
+                        return self._extract_ajax(work, body)
 
             elif limit_type == "limit_mypixiv_360.png":
                 work["_mypixiv"] = True
@@ -161,7 +175,12 @@ class PixivExtractor(Extractor):
         return ()
 
     def _extract_ugoira(self, work, img_url):
-        ugoira = self.api.ugoira_metadata(work["id"])
+        if work.get("_ajax"):
+            ugoira = self._request_ajax(
+                "/illust/" + str(work["id"]) + "/ugoira_meta")
+            img_url = ugoira["src"]
+        else:
+            ugoira = self.api.ugoira_metadata(work["id"])
         work["_ugoira_frame_data"] = work["frames"] = frames = ugoira["frames"]
         work["_ugoira_original"] = self.load_ugoira_original
         work["_http_adjust_extension"] = False
@@ -198,7 +217,10 @@ class PixivExtractor(Extractor):
             ]
 
         else:
-            zip_url = ugoira["zip_urls"]["medium"]
+            if work.get("_ajax"):
+                zip_url = ugoira["originalSrc"]
+            else:
+                zip_url = ugoira["zip_urls"]["medium"]
             work["date_url"] = self._date_from_url(zip_url)
             url = zip_url.replace("_ugoira600x600", "_ugoira1920x1080", 1)
             return ({"url": url},)
