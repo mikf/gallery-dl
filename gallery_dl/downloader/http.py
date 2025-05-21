@@ -322,7 +322,10 @@ class HttpDownloader(DownloaderBase):
 
         self.downloading = False
         if self.mtime:
-            kwdict.setdefault("_mtime", response.headers.get("Last-Modified"))
+            if "_http_lastmodified" in kwdict:
+                kwdict["_mtime"] = kwdict["_http_lastmodified"]
+            else:
+                kwdict["_mtime"] = response.headers.get("Last-Modified")
         else:
             kwdict["_mtime"] = None
 
