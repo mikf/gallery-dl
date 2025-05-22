@@ -47,6 +47,8 @@ class SankakuExtractor(BooruExtractor):
 
     def _init(self):
         self.api = SankakuAPI(self)
+        if self.config("tags") == "extended":
+            self._tags = self._tags_extended
 
     def _file_url(self, post):
         url = post["file_url"]
@@ -84,6 +86,24 @@ class SankakuExtractor(BooruExtractor):
             name = types[type]
             post["tags_" + name] = values
             post["tag_string_" + name] = " ".join(values)
+
+    def _tags_extended(self, post, page):
+        try:
+            url = "https://chan.sankakucomplex.com/posts/" + post["id"]
+            page = self.request(url).text
+        except Exception as exc:
+            return self.log.warning(
+                "%s: Failed to extract extended tag categories (%s: %s)",
+                post["id"], exc.__class__.__name__, exc)
+
+        tags = collections.defaultdict(list)
+        tag_sidebar = text.extr(page, '<ul id="tag-sidebar"', "</ul>")
+        pattern = re.compile(r"tag-type-([^\"' ]+).*?\?tags=([^\"'&]+)")
+        for tag_type, tag_name in pattern.findall(tag_sidebar):
+            tags[tag_type].append(text.unescape(text.unquote(tag_name)))
+        for type, values in tags.items():
+            post["tags_" + type] = values
+            post["tag_string_" + type] = " ".join(values)
 
     def _notes(self, post, page):
         if post.get("has_notes"):

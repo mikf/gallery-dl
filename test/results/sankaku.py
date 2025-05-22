@@ -180,6 +180,48 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://sankaku.app/posts/y0abGlDOr2o",
+    "#comment" : "new tag categories (#7333)",
+    "#category": ("booru", "sankaku", "post"),
+    "#class"   : sankaku.SankakuPostExtractor,
+    "#options" : {"tags": "extended"},
+
+    "id": "y0abGlDOr2o",
+    "tags_anatomy": [
+        "brown_eyes",
+        "male",
+        "upper_body",
+    ],
+    "tags_artist": [
+        "bonocho",
+    ],
+    "tags_character": [
+        "batman",
+        "letty_whiterock",
+        "bruce_wayne",
+        "the_joker",
+        "heath_ledger",
+    ],
+    "tags_copyright": [
+        "batman_(series)",
+        "the_dark_knight",
+    ],
+    "tags_fashion": [
+        "black_bodysuit",
+        "bodysuit",
+        "clothing",
+        "collared_shirt",
+        "facepaint",
+        "pink_shirt",
+        "shirt",
+        "wing_collar",
+    ],
+    "tags_studio": [
+        "dc_comics",
+    ],
+},
+
+{
     "#url"     : "https://sankaku.app/posts/9PMwlDWjXaB",
     "#comment" : ">100 tags",
     "#category": ("booru", "sankaku", "post"),
@@ -249,8 +291,8 @@ __tests__ = (
         "pink_bow",
         "pink_dress",
         "frilled_skirt",
-        "frilled_sleeves",
         "high_heel_boots",
+        "frilled_sleeves",
         "white_sleeves",
         "red_hairband",
         "center_frills",
@@ -283,6 +325,7 @@ __tests__ = (
         "glass",
         "doll",
         "character_doll",
+        "broken_glass",
         "pink_gemstone",
         "bodily_fluids",
         "tears",
@@ -292,7 +335,6 @@ __tests__ = (
         "2girls",
         "stairs",
         "bow_choker",
-        "broken_glass",
         "button_eyes",
         "chest_jewel",
         "mahou_shoujo_madoka_magica_(anime)",
