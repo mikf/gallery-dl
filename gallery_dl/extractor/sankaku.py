@@ -49,6 +49,8 @@ class SankakuExtractor(BooruExtractor):
         self.api = SankakuAPI(self)
         if self.config("tags") == "extended":
             self._tags = self._tags_extended
+            self._tags_findall = re.compile(
+                r"tag-type-([^\"' ]+).*?\?tags=([^\"'&]+)").findall
 
     def _file_url(self, post):
         url = post["file_url"]
@@ -98,8 +100,7 @@ class SankakuExtractor(BooruExtractor):
 
         tags = collections.defaultdict(list)
         tag_sidebar = text.extr(page, '<ul id="tag-sidebar"', "</ul>")
-        pattern = re.compile(r"tag-type-([^\"' ]+).*?\?tags=([^\"'&]+)")
-        for tag_type, tag_name in pattern.findall(tag_sidebar):
+        for tag_type, tag_name in self._tags_findall(tag_sidebar):
             tags[tag_type].append(text.unescape(text.unquote(tag_name)))
         for type, values in tags.items():
             post["tags_" + type] = values
