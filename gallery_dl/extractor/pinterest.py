@@ -132,6 +132,9 @@ class PinterestExtractor(Extractor):
                              "extension": "txt",
                              "media_id": block.get("id")}
 
+                elif type == "story_pin_product_sticker_block":
+                    continue
+
                 elif type == "story_pin_static_sticker_block":
                     continue
 
