@@ -181,14 +181,20 @@ class CivitaiExtractor(Extractor):
                     "types", "fileFormats"})
 
     def _extract_meta_generation(self, image):
-        return self.api.image_generationdata(image["id"])
+        try:
+            return self.api.image_generationdata(image["id"])
+        except Exception as exc:
+            return self.log.debug("", exc_info=exc)
 
     def _extract_meta_version(self, item, is_post=True):
-        version_id = self._extract_version_id(item, is_post)
-        if version_id is None:
-            return None, None
-        version = self.api.model_version(version_id).copy()
-        return version.pop("model", None), version
+        try:
+            version_id = self._extract_version_id(item, is_post)
+            if version_id:
+                version = self.api.model_version(version_id).copy()
+                return version.pop("model", None), version
+        except Exception as exc:
+            self.log.debug("", exc_info=exc)
+        return None, None
 
     def _extract_version_id(self, item, is_post=True):
         version_id = item.get("modelVersionId")
