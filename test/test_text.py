@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2022 Mike Fährmann
+# Copyright 2015-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -240,6 +240,29 @@ class TestText(unittest.TestCase):
             self.assertEqual(f(value, "<"  , ">")  , (None, -1))
             self.assertEqual(f(txt  , value, ">")  , (None, -1))
             self.assertEqual(f(txt  , "<"  , value), (None, -1))
+
+    def test_rextr(self, f=text.rextr):
+        txt = "<a><b>"
+        self.assertEqual(f(txt, "<", ">"), "b")
+        self.assertEqual(f(txt, "X", ">"), "")
+        self.assertEqual(f(txt, "<", "X"), "")
+
+        # 'pos' argument
+        for i in range(10, 3, -1):
+            self.assertEqual(f(txt, "<", ">", i), "b")
+        for i in range(3, 0, -1):
+            self.assertEqual(f(txt, "<", ">", i), "a")
+
+        # 'default' argument
+        self.assertEqual(f(txt, "[", "]", -1, "none"), "none")
+        self.assertEqual(f(txt, "[", "]", None, "none"), "none")
+        self.assertEqual(f(txt, "[", "]", default="none"), "none")
+
+        # invalid arguments
+        for value in INVALID:
+            self.assertEqual(f(value, "<"  , ">")  , "")
+            self.assertEqual(f(txt  , value, ">")  , "")
+            self.assertEqual(f(txt  , "<"  , value), "")
 
     def test_extract_all(self, f=text.extract_all):
         txt = "[c][b][a]: xyz! [d][e"
