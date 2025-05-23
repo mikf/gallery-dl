@@ -17,12 +17,14 @@ from . import job, util, version
 
 class ConfigAction(argparse.Action):
     """Set argparse results as config values"""
+
     def __call__(self, parser, namespace, values, option_string=None):
         namespace.options.append(((), self.dest, values))
 
 
 class ConfigConstAction(argparse.Action):
     """Set argparse const values as config values"""
+
     def __call__(self, parser, namespace, values, option_string=None):
         namespace.options.append(((), self.dest, self.const))
 
@@ -38,6 +40,7 @@ class AppendCommandAction(argparse.Action):
 
 class DeprecatedConfigConstAction(argparse.Action):
     """Set argparse const values as config values + deprecation warning"""
+
     def __call__(self, parser, namespace, values, option_string=None):
         sys.stderr.write(
             "warning: {} is deprecated. Use {} instead.\n".format(
@@ -47,6 +50,7 @@ class DeprecatedConfigConstAction(argparse.Action):
 
 class ConfigParseAction(argparse.Action):
     """Parse KEY=VALUE config options"""
+
     def __call__(self, parser, namespace, values, option_string=None):
         key, value = _parse_option(values)
         key = key.split(".")  # splitting an empty string becomes [""]
@@ -55,6 +59,7 @@ class ConfigParseAction(argparse.Action):
 
 class PPParseAction(argparse.Action):
     """Parse KEY=VALUE post processor options"""
+
     def __call__(self, parser, namespace, values, option_string=None):
         key, value = _parse_option(values)
         namespace.options_pp[key] = value
@@ -62,12 +67,14 @@ class PPParseAction(argparse.Action):
 
 class InputfileAction(argparse.Action):
     """Collect input files"""
+
     def __call__(self, parser, namespace, value, option_string=None):
         namespace.input_files.append((value, self.const))
 
 
 class MtimeAction(argparse.Action):
     """Configure mtime post processors"""
+
     def __call__(self, parser, namespace, value, option_string=None):
         namespace.postprocessors.append({
             "name": "mtime",
@@ -77,6 +84,7 @@ class MtimeAction(argparse.Action):
 
 class RenameAction(argparse.Action):
     """Configure rename post processors"""
+
     def __call__(self, parser, namespace, value, option_string=None):
         if self.const:
             namespace.postprocessors.append({
@@ -92,6 +100,7 @@ class RenameAction(argparse.Action):
 
 class UgoiraAction(argparse.Action):
     """Configure ugoira post processors"""
+
     def __call__(self, parser, namespace, value, option_string=None):
         if self.const:
             value = self.const
@@ -202,6 +211,7 @@ class PrintAction(argparse.Action):
 
 class Formatter(argparse.HelpFormatter):
     """Custom HelpFormatter class to customize help output"""
+
     def __init__(self, prog):
         argparse.HelpFormatter.__init__(self, prog, max_help_position=30)
 
@@ -323,6 +333,23 @@ def build_parser():
         dest="input_files", metavar="FILE", action=InputfileAction, const="d",
         help=("Download URLs found in FILE. "
               "Delete them after they were downloaded successfully."),
+    )
+    input.add_argument(
+        "--override-variable",
+        dest="override-variable",
+        action="append",
+        help=("Override a specific variable from the command line. "
+              "Format: key:\"value\" (e.g., date:\"2024-01-01 12:00:00\"). "
+              "Can be used multiple times.")
+    )
+
+    input.add_argument(
+        "--ignore-overrides",
+        dest="ignore-overrides",
+        action=ConfigConstAction,
+        const=True,
+        nargs=0,
+        help="Ignore variable overrides found in input files."
     )
     input.add_argument(
         "--no-input",

@@ -8,7 +8,13 @@
 
 import sys
 import logging
+import shlex
+import re
+
+
 from . import version, config, option, output, extractor, job, util, exception
+
+_imported_dateutil_parser = None
 
 __author__ = "Mike Fährmann"
 __copyright__ = "Copyright 2014-2023 Mike Fährmann"
@@ -76,6 +82,30 @@ def main():
             config.set(*opts)
 
         output.configure_standard_streams()
+
+        # parse variable overrides from CLI args
+        parsed_cli_overrides = {}
+        cli_override_strings = getattr(
+            args, "override-variable", None
+        ) or []
+        for kv_string in cli_override_strings:
+            key, sep, value_str = kv_string.partition(":")
+            if sep and key and re.match(r"^[\w.-]+$", key):
+                try:
+                    parsed_cli_overrides[key] = _parse_override_value(
+                        key, value_str
+                    )
+                except SystemExit:
+                    raise
+                except Exception as e:
+                    log.error(
+                        f"Error parsing CLI override '{kv_string}': {e}. "
+                    )
+            else:
+                log.warning(
+                    f"Invalid CLI override format: '{kv_string}'. Skipping.")
+
+        base_job_overrides = parsed_cli_overrides.copy()
 
         # signals
         signals = config.get((), "signals-ignore")
@@ -321,13 +351,25 @@ def main():
                 try:
                     log.debug("Starting %s for '%s'", jobtype.__name__, url)
 
+                    current_job_overrides = base_job_overrides.copy()
+
                     if isinstance(url, ExtendedUrl):
+                        current_job_overrides.update(url.overrides)
+
                         for opts in url.gconfig:
                             config.set(*opts)
+
                         with config.apply(url.lconfig):
-                            status = jobtype(url.value).run()
+                            status = jobtype(
+                                url.value,
+                                overrides=current_job_overrides
+                            ).run()
+
                     else:
-                        status = jobtype(url).run()
+                        status = jobtype(
+                            str(url),
+                            overrides=current_job_overrides
+                        ).run()
 
                     if status:
                         retval |= status
@@ -374,6 +416,37 @@ class InputManager():
         self._index = 0
         self._pformat = None
 
+    @staticmethod
+    def _extract_overrides(line_tokens):
+        """
+        Extracts the URL string and override key:value pairs
+        """
+        url_tokens = []
+        parsed_overrides = {}
+        first_override_idx = len(line_tokens)
+
+        # scan from right to left to find key-value pairs
+        for i in range(len(line_tokens) - 1, -1, -1):
+            token = line_tokens[i]
+            if ":" in token:
+                key, sep, value_str = token.partition(":")
+                if (
+                    i > 0 or
+                    (key.lower() not in ("http", "https"))
+                ) and re.match(r"^[\w.-]+$", key):
+                    parsed_overrides[key] = _parse_override_value(
+                        key, value_str)
+                    first_override_idx = i
+                else:
+                    break
+            else:
+                break
+
+        url_tokens = line_tokens[:first_override_idx]
+        url_string = " ".join(url_tokens)
+
+        return url_string, parsed_overrides
+
     def add_url(self, url):
         self.urls.append(url)
 
@@ -393,6 +466,8 @@ class InputManager():
         Lines starting with '-G' are the same as above, except these options
           will be applied for *all* following URLs, i.e. they are Global.
         Everything else will be used as a potential URL.
+        Lines with key-value pairs after the URL will be interpreted as
+          variable overrides for its associated URL.
 
         Example input file:
 
@@ -409,6 +484,10 @@ class InputManager():
         # next URL uses default filename and 'skip' is false.
         https://example.com/index.htm # comment1
         https://example.com/404.htm   # comment2
+
+        # setting variable overrides
+        https://example.com/image.jpg date:"2023-01-01 05:03:12"
+        https://example.com/video.mp4 title:movie description:"a description"
         """
         if path == "-" and not action:
             try:
@@ -480,15 +559,27 @@ class InputManager():
                 # url
                 if " #" in line or "\t#" in line:
                     if strip_comment is None:
-                        import re
                         strip_comment = re.compile(r"\s+#.*").sub
                     line = strip_comment("", line)
-                if gconf or lconf:
-                    url = ExtendedUrl(line, gconf, lconf)
+
+                tokens = shlex.split(line)
+                url_string, parsed_overrides = self._extract_overrides(
+                    tokens)
+
+                ignore_input_overrides = config.get(
+                    (), "ignore-overrides", False)
+                input_file_overrides = {}
+                if parsed_overrides and not ignore_input_overrides:
+                    input_file_overrides = parsed_overrides
+
+                if gconf or lconf or input_file_overrides:
+                    url = ExtendedUrl(
+                        url_string, gconf, lconf, input_file_overrides
+                    )
                     gconf = []
                     lconf = []
                 else:
-                    url = line
+                    url = url_string
 
                 if action:
                     indicies.append(n)
@@ -574,12 +665,54 @@ class InputManager():
 
 class ExtendedUrl():
     """URL with attached config key-value pairs"""
-    __slots__ = ("value", "gconfig", "lconfig")
+    __slots__ = ("value", "gconfig", "lconfig", "overrides")
 
-    def __init__(self, url, gconf, lconf):
+    def __init__(self, url, gconf, lconf, overrides=None):
         self.value = url
         self.gconfig = gconf
         self.lconfig = lconf
+        self.overrides = overrides or {}
 
     def __str__(self):
         return self.value
+
+
+def _parse_override_value(key, value_str):
+    """
+    Parses a single override value string
+    """
+    try:
+        parsed_value = util.json_loads(value_str)
+    except ValueError:
+        parsed_value = value_str
+
+    if key == "date" and isinstance(parsed_value, str):
+        global _imported_dateutil_parser
+        if _imported_dateutil_parser is None:
+            try:
+                from dateutil import parser as dateutil_parser
+
+                _imported_dateutil_parser = dateutil_parser
+            except ImportError:
+                _imported_dateutil_parser = False
+                log = logging.getLogger(__name__)
+                log.error(
+                    "The 'python-dateutil' library is required "
+                    "when using 'date' overrides"
+                )
+                raise SystemExit(1)
+
+        if _imported_dateutil_parser:
+            try:
+                return _imported_dateutil_parser.parse(parsed_value)
+            except (ValueError, TypeError):
+                log = logging.getLogger(__name__)
+                log.error(
+                    "Unable to parse date string '%s' for key '%s'. "
+                    "Ensure the date format is valid.",
+                    parsed_value,
+                    key,
+                )
+                raise SystemExit(1)
+    else:
+        return parsed_value

@@ -35,7 +35,7 @@ class Job():
     ulog = None
     _logger_adapter = output.LoggerAdapter
 
-    def __init__(self, extr, parent=None):
+    def __init__(self, extr, parent=None, overrides=None):
         if isinstance(extr, str):
             extr = extractor.find(extr)
         if not extr:
@@ -46,6 +46,7 @@ class Job():
         self.status = 0
         self.kwdict = {}
         self.kwdict_eval = False
+        self.url_overrides = overrides or {}
 
         cfgpath = []
         if parent:
@@ -231,6 +232,8 @@ class Job():
         if self.kwdict_eval:
             for key, valuegen in self.kwdict_eval:
                 kwdict[key] = valuegen(kwdict)
+        if self.url_overrides:
+            kwdict.update(self.url_overrides)
 
     def _init(self):
         self.extractor.initialize()
@@ -280,8 +283,8 @@ class Job():
 class DownloadJob(Job):
     """Download images into appropriate directory/filename locations"""
 
-    def __init__(self, url, parent=None):
-        Job.__init__(self, url, parent)
+    def __init__(self, url, parent=None, overrides=None):
+        Job.__init__(self, url, parent, overrides)
         self.log = self.get_logger("download")
         self.fallback = None
         self.archive = None
@@ -404,7 +407,7 @@ class DownloadJob(Job):
                     extr = None
 
         if extr:
-            job = self.__class__(extr, self)
+            job = self.__class__(extr, self, self.url_overrides)
             pfmt = self.pathfmt
             pextr = self.extractor
 
@@ -703,6 +706,9 @@ class DownloadJob(Job):
 class SimulationJob(DownloadJob):
     """Simulate the extraction process without downloading anything"""
 
+    def __init__(self, url, parent=None, overrides=None):
+        DownloadJob.__init__(self, url, parent, overrides)
+
     def handle_url(self, url, kwdict):
         if not kwdict["extension"]:
             kwdict["extension"] = "jpg"
@@ -720,8 +726,8 @@ class SimulationJob(DownloadJob):
 class KeywordJob(Job):
     """Print available keywords"""
 
-    def __init__(self, url, parent=None):
-        Job.__init__(self, url, parent)
+    def __init__(self, url, parent=None, overrides=None):
+        Job.__init__(self, url, parent, overrides)
         self.private = config.get(("output",), "private")
 
     def handle_url(self, url, kwdict):
@@ -810,8 +816,8 @@ class UrlJob(Job):
     """Print download urls"""
     maxdepth = 1
 
-    def __init__(self, url, parent=None, depth=1):
-        Job.__init__(self, url, parent)
+    def __init__(self, url, parent=None, depth=1, overrides=None):
+        Job.__init__(self, url, parent, overrides)
         self.depth = depth
         if depth >= self.maxdepth:
             self.handle_queue = self.handle_url
@@ -835,13 +841,17 @@ class UrlJob(Job):
             extr = extractor.find(url)
 
         if extr:
-            self.status |= self.__class__(extr, self, self.depth + 1).run()
+            self.status |= self.__class__(extr, self, self.depth + 1,
+                                          self.url_overrides).run()
         else:
             self._write_unsupported(url)
 
 
 class InfoJob(Job):
     """Print extractor defaults and settings"""
+
+    def __init__(self, url, parent=None, overrides=None):
+        Job.__init__(self, url, parent, overrides)
 
     def run(self):
         ex = self.extractor
@@ -883,8 +893,8 @@ class DataJob(Job):
     resolve = False
 
     def __init__(self, url, parent=None, file=sys.stdout, ensure_ascii=True,
-                 resolve=False):
-        Job.__init__(self, url, parent)
+                 resolve=False, overrides=None):
+        Job.__init__(self, url, parent, overrides)
         self.file = file
         self.data = []
         self.ascii = config.get(("output",), "ascii", ensure_ascii)
@@ -950,6 +960,7 @@ class DataJob(Job):
         if not extr:
             return self.data.append((Message.Queue, url, self.filter(kwdict)))
 
-        job = self.__class__(extr, self, None, self.ascii, self.resolve-1)
+        job = self.__class__(extr, self, None, self.ascii,
+                             self.resolve-1, self.url_overrides)
         job.data = self.data
         job.run()
