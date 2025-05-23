@@ -94,7 +94,7 @@ class SexcomExtractor(Extractor):
 
             if info:
                 try:
-                    path, _ = text.rextract(
+                    path = text.rextr(
                         info, "src: '", "'", info.index("label: 'HD'"))
                 except ValueError:
                     path = text.extr(info, "src: '", "'")

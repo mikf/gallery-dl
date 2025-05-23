@@ -188,7 +188,7 @@ class FuraffinityExtractor(Extractor):
 
             pos = page.find('type="submit">Next</button>')
             if pos >= 0:
-                path = text.rextract(page, '<form action="', '"', pos)[0]
+                path = text.rextr(page, '<form action="', '"', pos)
                 continue
             path = text.extr(page, 'right" href="', '"')
 
@@ -358,7 +358,7 @@ class FuraffinityFollowingExtractor(FuraffinityExtractor):
             for path in text.extract_iter(page, '<a href="', '"'):
                 yield Message.Queue, self.root + path, data
 
-            path = text.rextract(page, 'action="', '"')[0]
+            path = text.rextr(page, 'action="', '"')
             if url.endswith(path):
                 return
             url = self.root + path

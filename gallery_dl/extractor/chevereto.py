@@ -68,7 +68,7 @@ class CheveretoImageExtractor(CheveretoExtractor):
                extr('url: "', '"'))
         if not url or url.endswith("/loading.svg"):
             pos = page.find(" download=")
-            url = text.rextract(page, 'href="', '"', pos)[0]
+            url = text.rextr(page, 'href="', '"', pos)
             if not url.startswith("https://"):
                 url = util.decrypt_xor(
                     url, b"seltilovessimpcity@simpcityhatesscrapers",

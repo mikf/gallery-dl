@@ -45,8 +45,7 @@ class SubscribestarExtractor(Extractor):
             if "<html><body>" in content:
                 data["content"] = content = text.extr(
                     content, "<body>", "</body>")
-            data["title"] = text.unescape(
-                text.rextract(content, "<h1>", "</h1>")[0] or "")
+            data["title"] = text.unescape(text.rextr(content, "<h1>", "</h1>"))
 
             yield Message.Directory, data
             for num, item in enumerate(media, 1):

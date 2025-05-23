@@ -87,4 +87,4 @@ class FuskatorSearchExtractor(Extractor):
             pages = text.extr(page, 'class="pages"><span>', '>&gt;&gt;<')
             if not pages:
                 return
-            url = self.root + text.rextract(pages, 'href="', '"')[0]
+            url = self.root + text.rextr(pages, 'href="', '"')

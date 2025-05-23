@@ -108,7 +108,7 @@ class AryionExtractor(Extractor):
             pos = page.find("Next &gt;&gt;")
             if pos < 0:
                 return
-            url = self.root + text.rextract(page, "href='", "'", pos)[0]
+            url = self.root + text.rextr(page, "href='", "'", pos)
 
     def _parse_post(self, post_id):
         url = "{}/g4/data.php?id={}".format(self.root, post_id)

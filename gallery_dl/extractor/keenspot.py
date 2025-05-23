@@ -86,7 +86,7 @@ class KeenspotComicExtractor(Extractor):
         pos = page.find('id="first_day1"')
         if pos >= 0:
             self._next = self._next_id
-            return text.rextract(page, 'href="', '"', pos)[0]
+            return text.rextr(page, 'href="', '"', pos)
 
         pos = page.find('>FIRST PAGE<')
         if pos >= 0:
@@ -95,7 +95,7 @@ class KeenspotComicExtractor(Extractor):
                 self._image = '<div id="comic">'
             else:
                 self._next = self._next_id
-            return text.rextract(page, 'href="', '"', pos)[0]
+            return text.rextr(page, 'href="', '"', pos)
 
         pos = page.find('<div id="kscomicpart"')
         if pos >= 0:
@@ -106,13 +106,13 @@ class KeenspotComicExtractor(Extractor):
         if pos >= 0:
             self._image = '</header>'
             self._needle = 'class="navarchive"'
-            return text.rextract(page, 'href="', '"', pos)[0]
+            return text.rextr(page, 'href="', '"', pos)
 
         pos = page.find('id="flip_FirstDay"')  # flipside
         if pos >= 0:
             self._image = 'class="flip_Pages ksc"'
             self._needle = 'id="flip_ArcButton"'
-            return text.rextract(page, 'href="', '"', pos)[0]
+            return text.rextr(page, 'href="', '"', pos)
 
         self.log.error("Unrecognized page layout")
         return None
@@ -128,7 +128,7 @@ class KeenspotComicExtractor(Extractor):
     @staticmethod
     def _next_id(page):
         pos = page.find('id="next_')
-        return text.rextract(page, 'href="', '"', pos)[0] if pos >= 0 else None
+        return text.rextr(page, 'href="', '"', pos) if pos >= 0 else None
 
     @staticmethod
     def _next_lastblood(page):
@@ -138,5 +138,5 @@ class KeenspotComicExtractor(Extractor):
     @staticmethod
     def _next_brawl(page):
         pos = page.index("comic-nav-next")
-        url = text.rextract(page, 'href="', '"', pos)[0]
+        url = text.rextr(page, 'href="', '"', pos)
         return None if "?random" in url else url
