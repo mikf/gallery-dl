@@ -663,6 +663,7 @@ Type
 Default
     * ``"gallery-dl/VERSION"``: ``[Danbooru]``, ``mangadex``, ``weasyl``
     * ``"gallery-dl/VERSION (by mikf)"``: ``[E621]``
+    * ``"net.umanle.arca.android.playstore/0.9.75"``: ``arcalive``
     * ``"Patreon/72.2.28 (Android; Android 14; Scale/2.10)"``: ``patreon``
     * ``"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/LATEST.0.0.0 Safari/537.36"``: ``instagram``
     * ``"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:LATEST) Gecko/20100101 Firefox/LATEST"``: otherwise
