@@ -26,7 +26,6 @@ class SankakuExtractor(BooruExtractor):
     category = "sankaku"
     root = "https://sankaku.app"
     filename_fmt = "{category}_{id}_{md5}.{extension}"
-    cookies_domain = None
     _warning = True
 
     TAG_TYPES = {
