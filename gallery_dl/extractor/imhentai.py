@@ -38,7 +38,7 @@ class ImhentaiExtractor(BaseExtractor):
                 yield Message.Queue, base + gallery_id, data
                 prev = gallery_id
 
-            href = text.rextract(page, "class='page-link' href='", "'")[0]
+            href = text.rextr(page, "class='page-link' href='", "'")
             if not href or href == "#":
                 return
             if href[0] == "/":

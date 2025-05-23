@@ -70,7 +70,7 @@ class XvideosGalleryExtractor(XvideosBase, GalleryExtractor):
             return
 
         while len(results) % 500 == 0:
-            path = text.rextract(page, ' href="', '"', page.find(">Next</"))[0]
+            path = text.rextr(page, ' href="', '"', page.find(">Next</"))
             if not path:
                 break
             page = self.request(self.root + path).text

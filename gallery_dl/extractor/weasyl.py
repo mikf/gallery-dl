@@ -200,5 +200,5 @@ class WeasylFavoriteExtractor(WeasylExtractor):
                 pos = page.index('">Next (', pos)
             except ValueError:
                 return
-            path = text.unescape(text.rextract(page, 'href="', '"', pos)[0])
+            path = text.unescape(text.rextr(page, 'href="', '"', pos))
             params = None

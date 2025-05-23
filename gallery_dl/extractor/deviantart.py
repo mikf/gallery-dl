@@ -2083,8 +2083,7 @@ class DeviantartEclipseAPI():
         pos = page.find('\\"name\\":\\"watching\\"')
         if pos < 0:
             raise exception.NotFoundError("'watching' module ID")
-        module_id = text.rextract(
-            page, '\\"id\\":', ',', pos)[0].strip('" ')
+        module_id = text.rextr(page, '\\"id\\":', ',', pos).strip('" ')
 
         self._fetch_csrf_token(page)
         return gruser_id, module_id

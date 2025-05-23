@@ -56,7 +56,7 @@ class ZzupGalleryExtractor(GalleryExtractor):
             pos = page.find("glyphicon-arrow-right")
             if pos < 0:
                 break
-            path = text.rextract(page, ' href="', '"', pos)[0]
+            path = text.rextr(page, ' href="', '"', pos)
             page = self.request(text.urljoin(self.gallery_url, path)).text
 
         return results
