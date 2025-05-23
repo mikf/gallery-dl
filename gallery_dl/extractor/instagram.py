@@ -9,7 +9,7 @@
 
 """Extractors for https://www.instagram.com/"""
 
-from .common import Extractor, Message
+from .common import Extractor, Message, Dispatch
 from .. import text, util, exception
 from ..cache import cache, memcache
 import itertools
@@ -430,17 +430,10 @@ class InstagramExtractor(Extractor):
                 user[key] = 0
 
 
-class InstagramUserExtractor(InstagramExtractor):
+class InstagramUserExtractor(Dispatch, InstagramExtractor):
     """Extractor for an Instagram user profile"""
-    subcategory = "user"
     pattern = USER_PATTERN + r"/?(?:$|[?#])"
     example = "https://www.instagram.com/USER/"
-
-    def initialize(self):
-        pass
-
-    def finalize(self):
-        pass
 
     def items(self):
         base = "{}/{}/".format(self.root, self.item)

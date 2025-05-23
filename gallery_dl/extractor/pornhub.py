@@ -8,7 +8,7 @@
 
 """Extractors for https://www.pornhub.com/"""
 
-from .common import Extractor, Message
+from .common import Extractor, Message, Dispatch
 from .. import text, exception
 
 BASE_PATTERN = r"(?:https?://)?(?:[\w-]+\.)?pornhub\.com"
@@ -164,21 +164,13 @@ class PornhubGifExtractor(PornhubExtractor):
         yield Message.Url, gif["url"], text.nameext_from_url(gif["url"], gif)
 
 
-class PornhubUserExtractor(PornhubExtractor):
+class PornhubUserExtractor(Dispatch, PornhubExtractor):
     """Extractor for a pornhub user"""
-    subcategory = "user"
     pattern = BASE_PATTERN + r"/((?:users|model|pornstar)/[^/?#]+)/?$"
     example = "https://www.pornhub.com/model/USER"
 
-    def __init__(self, match):
-        PornhubExtractor.__init__(self, match)
-        self.user = match.group(1)
-
-    def initialize(self):
-        pass
-
     def items(self):
-        base = "{}/{}/".format(self.root, self.user)
+        base = "{}/{}/".format(self.root, self.groups[0])
         return self._dispatch_extractors((
             (PornhubPhotosExtractor, base + "photos"),
             (PornhubGifsExtractor  , base + "gifs"),

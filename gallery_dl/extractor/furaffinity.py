@@ -8,7 +8,7 @@
 
 """Extractors for https://www.furaffinity.net/"""
 
-from .common import Extractor, Message
+from .common import Extractor, Message, Dispatch
 from .. import text, util
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.|sfw\.)?(?:f[ux]|f?xfu)raffinity\.net"
@@ -321,17 +321,10 @@ class FuraffinityPostExtractor(FuraffinityExtractor):
         return (post_id,)
 
 
-class FuraffinityUserExtractor(FuraffinityExtractor):
+class FuraffinityUserExtractor(Dispatch, FuraffinityExtractor):
     """Extractor for furaffinity user profiles"""
-    subcategory = "user"
-    cookies_domain = None
     pattern = BASE_PATTERN + r"/user/([^/?#]+)"
     example = "https://www.furaffinity.net/user/USER/"
-
-    def initialize(self):
-        pass
-
-    skip = Extractor.skip
 
     def items(self):
         base = "{}/{{}}/{}/".format(self.root, self.user)

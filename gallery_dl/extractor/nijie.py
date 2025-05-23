@@ -8,7 +8,7 @@
 
 """Extractors for nijie instances"""
 
-from .common import BaseExtractor, Message, AsynchronousMixin
+from .common import BaseExtractor, Message, Dispatch, AsynchronousMixin
 from .. import text, exception
 from ..cache import cache
 
@@ -177,15 +177,10 @@ BASE_PATTERN = NijieExtractor.update({
 })
 
 
-class NijieUserExtractor(NijieExtractor):
+class NijieUserExtractor(Dispatch, NijieExtractor):
     """Extractor for nijie user profiles"""
-    subcategory = "user"
-    cookies_domain = None
     pattern = BASE_PATTERN + r"/members\.php\?id=(\d+)"
     example = "https://nijie.info/members.php?id=12345"
-
-    def initialize(self):
-        pass
 
     def items(self):
         fmt = "{}/{{}}.php?id={}".format(self.root, self.user_id).format
