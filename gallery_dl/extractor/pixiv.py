@@ -8,7 +8,7 @@
 
 """Extractors for https://www.pixiv.net/"""
 
-from .common import Extractor, Message
+from .common import Extractor, Message, Dispatch
 from .. import text, util, exception
 from ..cache import cache, memcache
 from datetime import datetime, timedelta
@@ -367,23 +367,15 @@ class PixivExtractor(Extractor):
         return {}
 
 
-class PixivUserExtractor(PixivExtractor):
+class PixivUserExtractor(Dispatch, PixivExtractor):
     """Extractor for a pixiv user profile"""
-    subcategory = "user"
     pattern = (BASE_PATTERN + r"/(?:"
                r"(?:en/)?u(?:sers)?/|member\.php\?id=|(?:mypage\.php)?#id="
                r")(\d+)(?:$|[?#])")
     example = "https://www.pixiv.net/en/users/12345"
 
-    def __init__(self, match):
-        PixivExtractor.__init__(self, match)
-        self.user_id = match.group(1)
-
-    def initialize(self):
-        pass
-
     def items(self):
-        base = "{}/users/{}/".format(self.root, self.user_id)
+        base = "{}/users/{}/".format(self.root, self.groups[0])
         return self._dispatch_extractors((
             (PixivAvatarExtractor       , base + "avatar"),
             (PixivBackgroundExtractor   , base + "background"),

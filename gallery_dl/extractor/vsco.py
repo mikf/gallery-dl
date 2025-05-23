@@ -8,7 +8,7 @@
 
 """Extractors for https://vsco.co/"""
 
-from .common import Extractor, Message
+from .common import Extractor, Message, Dispatch
 from .. import text, util
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?vsco\.co"
@@ -132,14 +132,10 @@ class VscoExtractor(Extractor):
         return media
 
 
-class VscoUserExtractor(VscoExtractor):
+class VscoUserExtractor(Dispatch, VscoExtractor):
     """Extractor for a vsco user profile"""
-    subcategory = "user"
     pattern = USER_PATTERN + r"/?$"
     example = "https://vsco.co/USER"
-
-    def initialize(self):
-        pass
 
     def items(self):
         base = "{}/{}/".format(self.root, self.user)

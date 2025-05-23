@@ -8,7 +8,7 @@
 
 """Extractors for https://www.newgrounds.com/"""
 
-from .common import Extractor, Message
+from .common import Extractor, Message, Dispatch
 from .. import text, util, exception
 from ..cache import cache
 import itertools
@@ -450,14 +450,10 @@ class NewgroundsGamesExtractor(NewgroundsExtractor):
     example = "https://USER.newgrounds.com/games"
 
 
-class NewgroundsUserExtractor(NewgroundsExtractor):
+class NewgroundsUserExtractor(Dispatch, NewgroundsExtractor):
     """Extractor for a newgrounds user profile"""
-    subcategory = "user"
     pattern = USER_PATTERN + r"/?$"
     example = "https://USER.newgrounds.com"
-
-    def initialize(self):
-        pass
 
     def items(self):
         base = self.user_root + "/"

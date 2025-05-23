@@ -8,7 +8,7 @@
 
 """Extractors for https://www.civitai.com/"""
 
-from .common import Extractor, Message
+from .common import Extractor, Message, Dispatch
 from .. import text, util, exception
 from ..cache import memcache
 import itertools
@@ -396,13 +396,9 @@ class CivitaiImagesExtractor(CivitaiExtractor):
         return self.api.images(params)
 
 
-class CivitaiUserExtractor(CivitaiExtractor):
-    subcategory = "user"
+class CivitaiUserExtractor(Dispatch, CivitaiExtractor):
     pattern = USER_PATTERN + r"/?(?:$|\?|#)"
     example = "https://civitai.com/user/USER"
-
-    def initialize(self):
-        pass
 
     def items(self):
         base = "{}/user/{}/".format(self.root, self.groups[0])
