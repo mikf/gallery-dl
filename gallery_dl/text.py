@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2022 Mike Fährmann
+# Copyright 2015-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -145,6 +145,15 @@ def rextract(txt, begin, end, pos=-1):
         return txt[first + lbeg:last], first
     except Exception:
         return None, pos
+
+
+def rextr(txt, begin, end, pos=None, default=""):
+    """Stripped-down version of 'rextract()'"""
+    try:
+        first = txt.rindex(begin, None, pos) + len(begin)
+        return txt[first:txt.index(end, first)]
+    except Exception:
+        return default
 
 
 def extract_all(txt, rules, pos=0, values=None):
