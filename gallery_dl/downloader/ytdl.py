@@ -150,7 +150,7 @@ class YoutubeDLDownloader(DownloaderBase):
             self.log.debug("", exc_info=exc)
             return False
 
-        pathfmt.temppath = info_dict["filepath"]
+        pathfmt.temppath = info_dict.get("filepath") or info_dict["_filename"]
         return True
 
     def _download_playlist(self, ytdl_instance, pathfmt, info_dict):
