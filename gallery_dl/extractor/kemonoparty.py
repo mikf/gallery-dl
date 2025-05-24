@@ -45,7 +45,6 @@ class KemonopartyExtractor(Extractor):
         order = self.config("order-revisions")
         self.revisions_reverse = order[0] in ("r", "a") if order else False
 
-        self._prepare_ddosguard_cookies()
         self._find_inline = re.compile(
             r'src="(?:https?://(?:kemono|coomer)\.(?:su|party))?(/inline/[^"]+'
             r'|/[0-9a-f]{2}/[0-9a-f]{2}/[0-9a-f]{64}\.[^"]+)').findall
@@ -391,7 +390,6 @@ class KemonopartyDiscordExtractor(KemonopartyExtractor):
     example = "https://kemono.su/discord/server/12345/12345"
 
     def items(self):
-        self._prepare_ddosguard_cookies()
         _, _, server_id, channel_id, channel_name, channel = self.groups
 
         if channel_id is None:
@@ -476,7 +474,6 @@ class KemonopartyFavoriteExtractor(KemonopartyExtractor):
     example = "https://kemono.su/account/favorites/artists"
 
     def items(self):
-        self._prepare_ddosguard_cookies()
         self.login()
 
         params = text.parse_query(self.groups[4])
