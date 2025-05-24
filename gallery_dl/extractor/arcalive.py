@@ -78,7 +78,8 @@ class ArcalivePostExtractor(ArcaliveExtractor):
             src = text.unescape(src.partition("?")[0])
             if src[0] == "/":
                 if src[1] == "/":
-                    url = "https:" + src
+                    url = "https:" + src.replace(
+                        "//ac-p.namu", "//ac-o.namu", 1)
                 else:
                     url = self.root + src
             else:
