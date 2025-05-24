@@ -590,11 +590,6 @@ class Extractor():
         return util.json_loads(text.extr(
             page, ' id="__NEXT_DATA__" type="application/json">', "</script>"))
 
-    def _prepare_ddosguard_cookies(self):
-        if not self.cookies.get("__ddg2", domain=self.cookies_domain):
-            self.cookies.set(
-                "__ddg2", util.generate_token(), domain=self.cookies_domain)
-
     def _cache(self, func, maxage, keyarg=None):
         #  return cache.DatabaseCacheDecorator(func, maxage, keyarg)
         return cache.DatabaseCacheDecorator(func, keyarg, maxage)
