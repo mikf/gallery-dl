@@ -95,26 +95,21 @@ class FanboxExtractor(Extractor):
             if "blocks" in content_body:
                 content = []  # text content
                 images = []   # image IDs in 'body' order
+                files = []    # file IDs in 'body' order
 
-                append = content.append
-                append_img = images.append
                 for block in content_body["blocks"]:
                     if "text" in block:
-                        append(block["text"])
+                        content.append(block["text"])
                     if "links" in block:
                         for link in block["links"]:
-                            append(link["url"])
+                            content.append(link["url"])
                     if "imageId" in block:
-                        append_img(block["imageId"])
+                        images.append(block["imageId"])
+                    if "fileId" in block:
+                        files.append(block["fileId"])
 
-                if images and "imageMap" in content_body:
-                    # reorder 'imageMap' (#2718)
-                    image_map = content_body["imageMap"]
-                    content_body["imageMap"] = {
-                        image_id: image_map[image_id]
-                        for image_id in images
-                        if image_id in image_map
-                    }
+                self._sort_map(content_body, "imageMap", images)
+                self._sort_map(content_body, "fileMap", files)
 
                 post["content"] = "\n".join(content)
 
@@ -144,6 +139,19 @@ class FanboxExtractor(Extractor):
                 post["commentd"] = ()
 
         return content_body, post
+
+    def _sort_map(self, body, key, ids):
+        orig = body.get(key)
+        if not orig:
+            return {} if orig is None else orig
+
+        body[key] = new = {
+            id: orig[id]
+            for id in ids
+            if id in orig
+        }
+
+        return new
 
     @memcache(keyarg=1)
     def _get_user_data(self, creator_id):
