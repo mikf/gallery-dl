@@ -402,27 +402,31 @@ class TestPathfmt():
 
 class TestFormatter(formatter.StringFormatter):
 
-    @staticmethod
-    def _noop(_):
-        return ""
-
     def _apply_simple(self, key, fmt):
         if key == "extension" or "_parse_optional." in repr(fmt):
-            return self._noop
-
-        def wrap(obj):
-            return fmt(obj[key])
+            def wrap(obj):
+                try:
+                    return fmt(obj[key])
+                except KeyError:
+                    return ""
+        else:
+            def wrap(obj):
+                return fmt(obj[key])
         return wrap
 
     def _apply(self, key, funcs, fmt):
         if key == "extension" or "_parse_optional." in repr(fmt):
-            return self._noop
-
-        def wrap(obj):
-            obj = obj[key]
-            for func in funcs:
-                obj = func(obj)
-            return fmt(obj)
+            def wrap(obj):
+                obj = obj[key] if key in obj else ""
+                for func in funcs:
+                    obj = func(obj)
+                return fmt(obj)
+        else:
+            def wrap(obj):
+                obj = obj[key]
+                for func in funcs:
+                    obj = func(obj)
+                return fmt(obj)
         return wrap
 
 
