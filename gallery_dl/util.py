@@ -707,13 +707,20 @@ SECOND = datetime.timedelta(0, 1)
 WINDOWS = (os.name == "nt")
 SENTINEL = object()
 EXECUTABLE = getattr(sys, "frozen", False)
+SPECIAL_EXTRACTORS = {"oauth", "recursive", "generic"}
+
+EXTS_IMAGE = {"jpg", "jpeg", "png", "gif", "bmp", "svg", "psd", "ico",
+              "webp", "avif", "heic", "heif"}
+EXTS_VIDEO = {"mp4", "m4v", "mov", "webm", "mkv", "ogv", "flv", "avi", "wmv"}
+EXTS_ARCHIVE = {"zip", "rar", "7z", "tar", "gz", "bz2", "lzma", "xz"}
+
 USERAGENT = "gallery-dl/" + version.__version__
 USERAGENT_FIREFOX = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:{}.0) "
                      "Gecko/20100101 Firefox/{}.0").format(_ff_ver, _ff_ver)
 USERAGENT_CHROME = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
                     "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/{}.0.0.0 "
                     "Safari/537.36").format(_ff_ver - 2)
-SPECIAL_EXTRACTORS = {"oauth", "recursive", "generic"}
+
 GLOBALS = {
     "contains" : contains,
     "parse_int": text.parse_int,
@@ -727,6 +734,9 @@ GLOBALS = {
     "hash_md5" : md5,
     "std"      : ModuleProxy(),
     "re"       : re,
+    "exts_image"  : EXTS_IMAGE,
+    "exts_video"  : EXTS_VIDEO,
+    "exts_archive": EXTS_ARCHIVE,
 }
 
 
