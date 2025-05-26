@@ -1043,7 +1043,7 @@ class DeviantartStashExtractor(DeviantartExtractor):
 
     def __init__(self, match):
         DeviantartExtractor.__init__(self, match)
-        self.user = None
+        self.user = ""
 
     def deviations(self, stash_id=None, stash_data=None):
         if stash_id is None:
@@ -1228,6 +1228,7 @@ class DeviantartTagExtractor(DeviantartExtractor):
     def __init__(self, match):
         DeviantartExtractor.__init__(self, match)
         self.tag = text.unquote(match.group(1))
+        self.user = ""
 
     def deviations(self):
         return self.api.browse_tags(self.tag, self.offset)
