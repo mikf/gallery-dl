@@ -680,4 +680,50 @@ __tests__ = (
     "#class"   : kemonoparty.KemonopartyFavoriteExtractor,
 },
 
+{
+    "#url"     : "https://kemono.su/artists?q=aMSa",
+    "#category": ("", "kemonoparty", "artists"),
+    "#class"   : kemonoparty.KemonopartyArtistsExtractor,
+    "#pattern" : kemonoparty.KemonopartyUserExtractor.pattern,
+    "#urls"    : (
+        "https://kemono.su/patreon/user/91205314",
+        "https://kemono.su/patreon/user/51528107",
+        "https://kemono.su/fanbox/user/12812028",
+        "https://kemono.su/patreon/user/35237747",
+        "https://kemono.su/patreon/user/8296916",
+        "https://kemono.su/patreon/user/155095324",
+        "https://kemono.su/patreon/user/75988930",
+        "https://kemono.su/patreon/user/93703989",
+        "https://kemono.su/patreon/user/100292687",
+        "https://kemono.su/patreon/user/138609443",
+        "https://kemono.su/patreon/user/61646879",
+        "https://kemono.su/patreon/user/110669843",
+        "https://kemono.su/patreon/user/44343773",
+        "https://kemono.su/patreon/user/77920059",
+        "https://kemono.su/patreon/user/102386631",
+    ),
+
+    "favorited": int,
+    "id"       : str,
+    "indexed"  : int,
+    "name"     : str,
+    "service"  : {"patreon", "fanbox"},
+    "updated"  : int,
+},
+
+{
+    "#url"     : "https://kemono.su/artists?q=Axe&service=discord&sort_by=name&order=asc",
+    "#category": ("", "kemonoparty", "artists"),
+    "#class"   : kemonoparty.KemonopartyArtistsExtractor,
+    "#pattern" : kemonoparty.KemonopartyDiscordServerExtractor.pattern,
+    "#urls"    : "https://kemono.su/discord/server/1168450323023663164",
+
+    "favorited": range(40, 80),
+    "id"       : "1168450323023663164",
+    "indexed"  : 1710201675,
+    "name"     : "Axel Colored Workshop",
+    "service"  : "discord",
+    "updated"  : range(1740000000, 2000000000),
+},
+
 )

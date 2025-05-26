@@ -190,7 +190,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Coomer</td>
     <td>https://coomer.su/</td>
-    <td>Favorites, Posts, User Profiles</td>
+    <td>Artists, Favorites, Posts, User Profiles</td>
     <td>Supported</td>
 </tr>
 <tr>
@@ -496,7 +496,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Kemono</td>
     <td>https://kemono.su/</td>
-    <td>Discord Servers, Favorites, Posts, User Profiles</td>
+    <td>Artists, Discord Servers, Favorites, Posts, User Profiles</td>
     <td>Supported</td>
 </tr>
 <tr>

@@ -528,6 +528,44 @@ class KemonopartyFavoriteExtractor(KemonopartyExtractor):
                 yield Message.Queue, url, post
 
 
+class KemonopartyArtistsExtractor(KemonopartyExtractor):
+    """Extractor for kemono artists"""
+    subcategory = "artists"
+    pattern = BASE_PATTERN + r"/artists(?:\?([^#]+))?"
+    example = "https://kemono.su/artists"
+
+    def items(self):
+        params = text.parse_query(self.groups[2])
+        users = self.api.creators()
+
+        if params.get("service"):
+            service = params["service"].lower()
+            users = [user for user in users
+                     if user["service"] == service]
+
+        if params.get("q"):
+            q = params["q"].lower()
+            users = [user for user in users
+                     if q in user["name"].lower()]
+
+        sort = params.get("sort_by") or "favorited"
+        order = params.get("order") or "desc"
+        users.sort(key=lambda user: user[sort] or util.NONE,
+                   reverse=(order != "asc"))
+
+        for user in users:
+            service = user["service"]
+            if service == "discord":
+                user["_extractor"] = KemonopartyDiscordServerExtractor
+                url = "{}/discord/server/{}".format(
+                    self.root, user["id"])
+            else:
+                user["_extractor"] = KemonopartyUserExtractor
+                url = "{}/{}/user/{}".format(
+                    self.root, service, user["id"])
+            yield Message.Queue, url, user
+
+
 class KemonoAPI():
     """Interface for the Kemono API v1.1.0
 
@@ -545,6 +583,10 @@ class KemonoAPI():
 
     def file(self, file_hash):
         endpoint = "/file/" + file_hash
+        return self._call(endpoint)
+
+    def creators(self):
+        endpoint = "/creators.txt"
         return self._call(endpoint)
 
     def creator_posts(self, service, creator_id,
