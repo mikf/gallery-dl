@@ -62,7 +62,7 @@ class KemonopartyExtractor(Extractor):
         dms = True if self.config("dms") else None
         max_posts = self.config("max-posts")
         creator_info = {} if self.config("metadata", True) else None
-        exts_archive = {"zip", "rar", "7z"}
+        exts_archive = util.EXTS_ARCHIVE
 
         # prevent files from being sent with gzip compression
         headers = {"Accept-Encoding": "identity"}
