@@ -134,17 +134,18 @@ class YoutubeDLDownloader(DownloaderBase):
 
         self.out.start(pathfmt.path)
         if self.part:
-            pathfmt.kwdict["extension"] = pathfmt.prefix + "part"
+            pathfmt.kwdict["extension"] = pathfmt.prefix
             filename = pathfmt.build_filename(pathfmt.kwdict)
             pathfmt.kwdict["extension"] = info_dict["ext"]
             if self.partdir:
                 path = os.path.join(self.partdir, filename)
             else:
                 path = pathfmt.realdirectory + filename
+            path = path.replace("%", "%%") + "%(ext)s"
         else:
-            path = pathfmt.realpath
+            path = pathfmt.realpath.replace("%", "%%")
 
-        self._set_outtmpl(ytdl_instance, path.replace("%", "%%"))
+        self._set_outtmpl(ytdl_instance, path)
         try:
             ytdl_instance.process_info(info_dict)
         except Exception as exc:
