@@ -63,7 +63,10 @@ class PatreonExtractor(Extractor):
                     text.nameext_from_url(name, post)
                     if text.ext_from_url(url) == "m3u8":
                         url = "ytdl:" + url
+                        headers = {"referer": self.root + "/"}
                         post["_ytdl_manifest"] = "hls"
+                        post["_ytdl_manifest_headers"] = headers
+                        post["_ytdl_extra"] = {"http_headers": headers}
                         post["extension"] = "mp4"
                     yield Message.Url, url, post
                 else:
