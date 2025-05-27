@@ -7,7 +7,7 @@
 """Extractors for https://www.fanbox.cc/"""
 
 from .common import Extractor, Message
-from .. import text
+from .. import text, util
 from ..cache import memcache
 import re
 
@@ -85,6 +85,7 @@ class FanboxExtractor(Extractor):
         """Fetch and process post data"""
         url = "https://api.fanbox.cc/post.info?postId="+post_id
         post = self.request(url, headers=self.headers).json()["body"]
+        post["archives"] = ()
 
         content_body = post.pop("body", None)
         if content_body:
@@ -108,10 +109,17 @@ class FanboxExtractor(Extractor):
                     if "fileId" in block:
                         files.append(block["fileId"])
 
-                self._sort_map(content_body, "imageMap", images)
-                self._sort_map(content_body, "fileMap", files)
-
                 post["content"] = "\n".join(content)
+
+                self._sort_map(content_body, "imageMap", images)
+                file_map = self._sort_map(content_body, "fileMap", files)
+                if file_map:
+                    exts = util.EXTS_ARCHIVE
+                    post["archives"] = [
+                        file
+                        for file in file_map.values()
+                        if file.get("extension", "").lower() in exts
+                    ]
 
         post["date"] = text.parse_datetime(post["publishedDatetime"])
         post["text"] = content_body.get("text") if content_body else None
