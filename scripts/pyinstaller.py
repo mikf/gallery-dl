@@ -43,6 +43,10 @@ def main():
         "--onefile",
         "--console",
         "--name", name,
+
+        # https://github.com/pyinstaller/pyinstaller/issues/9149
+        "--exclude-module", "pkg_resources",
+
         "--additional-hooks-dir", util.path("scripts"),
         "--distpath", util.path("dist"),
         "--workpath", util.path("build"),
