@@ -765,6 +765,58 @@ value = 123
         self.assertEqual(f(["a", "b", "c"]), "a, b, c")
         self.assertEqual(f([1, 2, 3]), "1, 2, 3")
 
+    @unittest.skipIf(sys.hexversion < 0x3070000,
+                     "datetime.fromisoformat")
+    def test_to_datetime(self, f=util.to_datetime):
+
+        def _assert(value, expected):
+            result = f(value)
+            self.assertIsInstance(result, datetime.datetime)
+            self.assertEqual(result, expected, msg=repr(value))
+
+        dt = datetime.datetime(2010, 1, 1)
+        self.assertIs(f(dt), dt)
+
+        _assert(dt            , dt)
+        _assert(1262304000    , dt)
+        _assert(1262304000.0  , dt)
+        _assert(1262304000.123, dt)
+        _assert("1262304000"  , dt)
+
+        _assert("2010-01-01"                      , dt)
+        _assert("2010-01-01 00:00:00"             , dt)
+        _assert("2010-01-01T00:00:00"             , dt)
+        _assert("2010-01-01T00:00:00.123456"      , dt)
+        _assert("2009-12-31T19:00:00-05:00"       , dt)
+        _assert("2009-12-31T19:00:00.123456-05:00", dt)
+        _assert("2010-01-01T00:00:00Z"            , dt)
+        _assert("2010-01-01T00:00:00.123456Z"     , dt)
+
+        _assert(0    , util.EPOCH)
+        _assert(""   , util.EPOCH)
+        _assert("foo", util.EPOCH)
+        _assert(None , util.EPOCH)
+        _assert(()   , util.EPOCH)
+        _assert([]   , util.EPOCH)
+        _assert({}   , util.EPOCH)
+        _assert((1, 2, 3), util.EPOCH)
+
+    @unittest.skipIf(sys.hexversion < 0x30b0000,
+                     "extended fromisoformat timezones")
+    def test_to_datetime_tz(self, f=util.to_datetime):
+
+        def _assert(value, expected):
+            result = f(value)
+            self.assertIsInstance(result, datetime.datetime)
+            self.assertEqual(result, expected, msg=repr(value))
+
+        dt = datetime.datetime(2010, 1, 1)
+
+        _assert("2009-12-31T19:00:00-05"          , dt)
+        _assert("2009-12-31T19:00:00-0500"        , dt)
+        _assert("2009-12-31T19:00:00.123456-05"   , dt)
+        _assert("2009-12-31T19:00:00.123456-0500" , dt)
+
     def test_datetime_to_timestamp(self, f=util.datetime_to_timestamp):
         self.assertEqual(f(util.EPOCH), 0.0)
         self.assertEqual(f(datetime.datetime(2010, 1, 1)), 1262304000.0)
