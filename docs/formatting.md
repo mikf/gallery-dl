@@ -141,6 +141,12 @@ Conversion specifiers allow to *convert* the value to a different form or type. 
     <td><code>2010-01-01 00:00:00</code></td>
 </tr>
 <tr>
+    <td align="center"><code>D</code></td>
+    <td>Convert a Unix timestamp or <a href="https://en.wikipedia.org/wiki/ISO_8601">ISO 8601</a> string to a <code>datetime</code> object</td>
+    <td><code>{created!D}</code></td>
+    <td><code>2010-01-01 00:00:00</code></td>
+</tr>
+<tr>
     <td align="center"><code>U</code></td>
     <td>Convert HTML entities</td>
     <td><code>{html!U}</code></td>
