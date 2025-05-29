@@ -172,7 +172,6 @@ class Extractor():
             try:
                 response = session.request(method, url, **kwargs)
             except requests.exceptions.ConnectionError as exc:
-                code = 0
                 try:
                     reason = exc.args[0].reason
                     cls = reason.__class__.__name__
@@ -180,13 +179,15 @@ class Extractor():
                     msg = " {}: {}".format(cls, (err or pre).lstrip())
                 except Exception:
                     msg = exc
+                code = 0
             except (requests.exceptions.Timeout,
                     requests.exceptions.ChunkedEncodingError,
                     requests.exceptions.ContentDecodingError) as exc:
                 msg = exc
                 code = 0
             except (requests.exceptions.RequestException) as exc:
-                raise exception.HttpError(exc)
+                msg = exc
+                break
             else:
                 code = response.status_code
                 if self._write_pages:
@@ -238,6 +239,9 @@ class Extractor():
                 self.sleep(seconds, "retry")
             tries += 1
 
+        if not fatal or fatal is ...:
+            self.log.warning(msg)
+            return util.NullResponse(url, msg)
         raise exception.HttpError(msg, response)
 
     def request_location(self, url, **kwargs):
