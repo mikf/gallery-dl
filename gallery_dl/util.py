@@ -639,6 +639,28 @@ class NullContext():
         pass
 
 
+class NullResponse():
+    __slots__ = ("url", "reason")
+
+    ok = is_redirect = is_permanent_redirect = False
+    cookies = headers = history = links = {}
+    encoding = apparent_encoding = "utf-8"
+    content = b""
+    text = ""
+    status_code = 900
+    close = noop
+
+    def __init__(self, url, reason=""):
+        self.url = url
+        self.reason = str(reason)
+
+    def __str__(self):
+        return "900 " + self.reason
+
+    def json(self):
+        return {}
+
+
 class CustomNone():
     """None-style type that supports more operations than regular None"""
     __slots__ = ()

@@ -953,6 +953,27 @@ value = 123
         except ValueError as exc:
             self.assertIs(exc, exc_orig)
 
+    def test_null_response(self):
+        response = util.NullResponse("https://example.org")
+
+        self.assertEqual(response.url, "https://example.org")
+        self.assertEqual(response.status_code, 900)
+        self.assertEqual(response.reason, "")
+        self.assertEqual(response.text, "")
+        self.assertEqual(response.content, b"")
+        self.assertEqual(response.json(), {})
+
+        self.assertFalse(response.ok)
+        self.assertFalse(response.is_redirect)
+        self.assertFalse(response.is_permanent_redirect)
+        self.assertFalse(response.history)
+
+        self.assertEqual(response.encoding, "utf-8")
+        self.assertEqual(response.apparent_encoding, "utf-8")
+        self.assertEqual(response.cookies.get("foo"), None)
+        self.assertEqual(response.headers.get("foo"), None)
+        self.assertEqual(response.links.get("next"), None)
+
 
 class TestExtractor():
     category = "test_category"
