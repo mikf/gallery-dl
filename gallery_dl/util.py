@@ -1031,13 +1031,17 @@ class RangePredicate():
     def __call__(self, _url, _kwdict):
         self.index = index = self.index + 1
 
-        count = _kwdict.get("count", sys.maxsize)
+        if _kwdict is not None:
+            count = _kwdict.get("count", sys.maxsize)
+        else:
+            count = sys.maxsize
         adjusted_ranges = [
             self._adjusted_range(r, count) for r in self.ranges
         ]
-        upper = max(r.stop for r in adjusted_ranges)
+        if adjusted_ranges:
+            self.upper = max(r.stop for r in adjusted_ranges) - 1
 
-        if index > upper:
+        if index > self.upper:
             raise exception.StopExtraction()
 
         for range in adjusted_ranges:
