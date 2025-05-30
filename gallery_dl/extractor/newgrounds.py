@@ -198,7 +198,10 @@ class NewgroundsExtractor(Extractor):
         data["favorites"] = text.parse_int(extr(
             'id="faves_load">', '<').replace(",", ""))
         data["score"] = text.parse_float(extr('id="score_number">', '<'))
-        data["tags"] = text.split_html(extr('<dd class="tags">', '</dd>'))
+        data["tags"] = [
+            t for t in text.split_html(extr('<dd class="tags">', '</dd>'))
+            if "(function(" not in t
+        ]
         data["artist"] = [
             text.extr(user, '//', '.')
             for user in text.extract_iter(page, '<div class="item-user">', '>')
