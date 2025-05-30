@@ -97,11 +97,9 @@ CATEGORY_MAP = {
     "mangafox"       : "Manga Fox",
     "mangahere"      : "Manga Here",
     "mangakakalot"   : "MangaKakalot",
-    "mangalife"      : "MangaLife",
     "manganato"      : "MangaNato",
     "mangapark"      : "MangaPark",
     "mangaread"      : "MangaRead",
-    "mangasee"       : "MangaSee",
     "mariowiki"      : "Super Mario Wiki",
     "mastodon.social": "mastodon.social",
     "mediawiki"      : "MediaWiki",
@@ -602,10 +600,6 @@ def build_extractor_list():
     # add coomer.su
     default["coomer"] = default["kemono"]
     domains["coomer"] = domains["kemono"].replace("kemono", "coomer")
-
-    # add manga4life.com
-    default["mangalife"] = default["mangasee"]
-    domains["mangalife"] = "https://manga4life.com/"
 
     # add wikifeetx.com
     default["wikifeetx"] = default["wikifeet"]
