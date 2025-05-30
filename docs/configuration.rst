@@ -684,7 +684,7 @@ extractor.*.browser
 Type
     ``string``
 Default
-    * ``"firefox"``: ``artstation``, ``fanbox``, ``mangasee``, ``twitter``
+    * ``"firefox"``: ``artstation``, ``fanbox``, ``twitter``
     * ``null``: otherwise
 Example
     * ``"chrome:macos"``
