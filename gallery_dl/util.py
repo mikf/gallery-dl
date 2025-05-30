@@ -1020,8 +1020,8 @@ class RangePredicate():
         if ranges:
             # technically wrong, but good enough for now
             # and evaluating min/max for a large range is slow
-            self.lower = min(r.start for r in ranges)
-            self.upper = max(r.stop for r in ranges) - 1
+            self.lower = min(r.start if r.start >= 0 else 0 for r in ranges)
+            self.upper = max(r.stop if r.stop >= 0 else sys.maxsize for r in ranges) - 1
         else:
             self.lower = 0
             self.upper = 0
@@ -1029,13 +1029,27 @@ class RangePredicate():
     def __call__(self, _url, _kwdict):
         self.index = index = self.index + 1
 
-        if index > self.upper:
+        count = _kwdict.get("count", sys.maxsize)
+        adjusted_ranges = [
+            self._adjusted_range(r, count) for r in self.ranges
+        ]
+        upper = max(r.stop for r in adjusted_ranges)
+
+        if index > upper:
             raise exception.StopExtraction()
 
-        for range in self.ranges:
+        for range in adjusted_ranges:
             if index in range:
                 return True
         return False
+
+    @staticmethod
+    def _adjusted_range(rangespec, count=sys.maxsize):
+        return range(
+            rangespec.start if rangespec.start >= 0 else rangespec.start + count + 1,
+            rangespec.stop if rangespec.stop >= 0 else rangespec.stop + count + 1,
+            rangespec.step
+        )
 
     @staticmethod
     def _parse(rangespec):
