@@ -20,9 +20,9 @@ USER_PATTERN = BASE_PATTERN + r"/([^/?#]+)/user/([^/?#]+)"
 HASH_PATTERN = r"/[0-9a-f]{2}/[0-9a-f]{2}/([0-9a-f]{64})"
 
 
-class KemonopartyExtractor(Extractor):
-    """Base class for kemonoparty extractors"""
-    category = "kemonoparty"
+class KemonoExtractor(Extractor):
+    """Base class for kemono extractors"""
+    category = "kemono"
     root = "https://kemono.su"
     directory_fmt = ("{category}", "{service}", "{user}")
     filename_fmt = "{id}_{title[:180]}_{num:>02}_{filename[:180]}.{extension}"
@@ -30,9 +30,8 @@ class KemonopartyExtractor(Extractor):
     cookies_domain = ".kemono.su"
 
     def __init__(self, match):
-        domain = match.group(1)
         tld = match.group(2)
-        self.category = domain + "party"
+        self.category = domain = match.group(1)
         self.root = text.root_from_url(match.group(0))
         self.cookies_domain = ".{}.{}".format(domain, tld)
         Extractor.__init__(self, match)
@@ -46,7 +45,7 @@ class KemonopartyExtractor(Extractor):
         self.revisions_reverse = order[0] in ("r", "a") if order else False
 
         self._find_inline = re.compile(
-            r'src="(?:https?://(?:kemono|coomer)\.(?:su|party))?(/inline/[^"]+'
+            r'src="(?:https?://(?:kemono|coomer)\.su)?(/inline/[^"]+'
             r'|/[0-9a-f]{2}/[0-9a-f]{2}/[0-9a-f]{64}\.[^"]+)').findall
         self._json_dumps = json.JSONEncoder(
             ensure_ascii=False, check_circular=False,
@@ -305,7 +304,7 @@ def _validate(response):
             response.content != b"not found")
 
 
-class KemonopartyUserExtractor(KemonopartyExtractor):
+class KemonoUserExtractor(KemonoExtractor):
     """Extractor for all posts from a kemono.su user listing"""
     subcategory = "user"
     pattern = USER_PATTERN + r"/?(?:\?([^#]+))?(?:$|\?|#)"
@@ -313,7 +312,7 @@ class KemonopartyUserExtractor(KemonopartyExtractor):
 
     def __init__(self, match):
         self.subcategory = match.group(3)
-        KemonopartyExtractor.__init__(self, match)
+        KemonoExtractor.__init__(self, match)
 
     def posts(self):
         endpoint = self.config("endpoint")
@@ -337,7 +336,7 @@ class KemonopartyUserExtractor(KemonopartyExtractor):
                 service, creator_id, post["id"])["post"]
 
 
-class KemonopartyPostsExtractor(KemonopartyExtractor):
+class KemonoPostsExtractor(KemonoExtractor):
     """Extractor for kemono.su post listings"""
     subcategory = "posts"
     pattern = BASE_PATTERN + r"/posts()()(?:/?\?([^#]+))?"
@@ -349,7 +348,7 @@ class KemonopartyPostsExtractor(KemonopartyExtractor):
             params.get("o"), params.get("q"), params.get("tag"))
 
 
-class KemonopartyPostExtractor(KemonopartyExtractor):
+class KemonoPostExtractor(KemonoExtractor):
     """Extractor for a single kemono.su post"""
     subcategory = "post"
     pattern = USER_PATTERN + r"/post/([^/?#]+)(/revisions?(?:/(\d*))?)?"
@@ -357,7 +356,7 @@ class KemonopartyPostExtractor(KemonopartyExtractor):
 
     def __init__(self, match):
         self.subcategory = match.group(3)
-        KemonopartyExtractor.__init__(self, match)
+        KemonoExtractor.__init__(self, match)
 
     def posts(self):
         _, _, service, creator_id, post_id, revision, revision_id = self.groups
@@ -378,7 +377,7 @@ class KemonopartyPostExtractor(KemonopartyExtractor):
         raise exception.NotFoundError("revision")
 
 
-class KemonopartyDiscordExtractor(KemonopartyExtractor):
+class KemonoDiscordExtractor(KemonoExtractor):
     """Extractor for kemono.su discord servers"""
     subcategory = "discord"
     directory_fmt = ("{category}", "discord",
@@ -451,7 +450,7 @@ class KemonopartyDiscordExtractor(KemonopartyExtractor):
                 yield Message.Url, url, post
 
 
-class KemonopartyDiscordServerExtractor(KemonopartyExtractor):
+class KemonoDiscordServerExtractor(KemonoExtractor):
     subcategory = "discord-server"
     pattern = BASE_PATTERN + r"/discord/server/(\d+)$"
     example = "https://kemono.su/discord/server/12345"
@@ -465,7 +464,7 @@ class KemonopartyDiscordServerExtractor(KemonopartyExtractor):
             yield Message.Queue, url, {
                 "server"    : server,
                 "channel"   : channel,
-                "_extractor": KemonopartyDiscordExtractor,
+                "_extractor": KemonoDiscordExtractor,
             }
 
 
@@ -478,7 +477,7 @@ def discord_server_info(extr, server_id):
     }
 
 
-class KemonopartyFavoriteExtractor(KemonopartyExtractor):
+class KemonoFavoriteExtractor(KemonoExtractor):
     """Extractor for kemono.su favorites"""
     subcategory = "favorite"
     pattern = BASE_PATTERN + r"/(?:account/)?favorites()()(?:/?\?([^#]+))?"
@@ -504,11 +503,11 @@ class KemonopartyFavoriteExtractor(KemonopartyExtractor):
             for user in users:
                 service = user["service"]
                 if service == "discord":
-                    user["_extractor"] = KemonopartyDiscordServerExtractor
+                    user["_extractor"] = KemonoDiscordServerExtractor
                     url = "{}/discord/server/{}".format(
                         self.root, user["id"])
                 else:
-                    user["_extractor"] = KemonopartyUserExtractor
+                    user["_extractor"] = KemonoUserExtractor
                     url = "{}/{}/user/{}".format(
                         self.root, service, user["id"])
                 yield Message.Queue, url, user
@@ -522,13 +521,13 @@ class KemonopartyFavoriteExtractor(KemonopartyExtractor):
                        reverse=(order == "desc"))
 
             for post in posts:
-                post["_extractor"] = KemonopartyPostExtractor
+                post["_extractor"] = KemonoPostExtractor
                 url = "{}/{}/user/{}/post/{}".format(
                     self.root, post["service"], post["user"], post["id"])
                 yield Message.Queue, url, post
 
 
-class KemonopartyArtistsExtractor(KemonopartyExtractor):
+class KemonoArtistsExtractor(KemonoExtractor):
     """Extractor for kemono artists"""
     subcategory = "artists"
     pattern = BASE_PATTERN + r"/artists(?:\?([^#]+))?"
@@ -556,11 +555,11 @@ class KemonopartyArtistsExtractor(KemonopartyExtractor):
         for user in users:
             service = user["service"]
             if service == "discord":
-                user["_extractor"] = KemonopartyDiscordServerExtractor
+                user["_extractor"] = KemonoDiscordServerExtractor
                 url = "{}/discord/server/{}".format(
                     self.root, user["id"])
             else:
-                user["_extractor"] = KemonopartyUserExtractor
+                user["_extractor"] = KemonoUserExtractor
                 url = "{}/{}/user/{}".format(
                     self.root, service, user["id"])
             yield Message.Queue, url, user

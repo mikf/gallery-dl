@@ -4,15 +4,15 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-from gallery_dl.extractor import kemonoparty
+from gallery_dl.extractor import kemono
 from gallery_dl import exception
 
 
 __tests__ = (
 {
     "#url"     : "https://kemono.su/fanbox/user/6993449",
-    "#category": ("", "kemonoparty", "fanbox"),
-    "#class"   : kemonoparty.KemonopartyUserExtractor,
+    "#category": ("", "kemono", "fanbox"),
+    "#class"   : kemono.KemonoUserExtractor,
     "#options" : {"endpoint": "legacy"},
     "#range"   : "1-500",
     "#count"   : 500,
@@ -44,8 +44,8 @@ __tests__ = (
 {
     "#url"     : "https://kemono.su/fanbox/user/6993449",
     "#comment" : "endpoint: legacy+ (#7438 #7450 #7462)",
-    "#category": ("", "kemonoparty", "fanbox"),
-    "#class"   : kemonoparty.KemonopartyUserExtractor,
+    "#category": ("", "kemono", "fanbox"),
+    "#class"   : kemono.KemonoUserExtractor,
     "#options" : {"endpoint": "legacy+"},
     "#range"   : "1-10",
 
@@ -81,8 +81,8 @@ __tests__ = (
 {
     "#url"     : "https://kemono.su/patreon/user/881792?o=150",
     "#comment" : "'max-posts' and 'endpoint' option, 'o' query parameter (#1674)",
-    "#category": ("", "kemonoparty", "patreon"),
-    "#class"   : kemonoparty.KemonopartyUserExtractor,
+    "#category": ("", "kemono", "patreon"),
+    "#class"   : kemono.KemonoUserExtractor,
     "#options" : {"max-posts": 100, "endpoint": "posts"},
     "#count"   : range(200, 400),
 
@@ -111,8 +111,8 @@ __tests__ = (
 {
     "#url"     : "https://kemono.su/fanbox/user/6993449?q=お蔵入りになった",
     "#comment" : "search / 'q' query parameter (#3385, #4057)",
-    "#category": ("", "kemonoparty", "fanbox"),
-    "#class"   : kemonoparty.KemonopartyUserExtractor,
+    "#category": ("", "kemono", "fanbox"),
+    "#class"   : kemono.KemonoUserExtractor,
     "#urls"    : (
         "https://kemono.su/data/ef/7b/ef7b4398a2f4ada597421fd3c116cff86e85695911f7cd2a459b0e566b864e46.png",
         "https://kemono.su/data/73/e6/73e615f6645b9d1af6329448601673c9275f07fd11eb37670c97e307e29a9ee9.png",
@@ -124,8 +124,8 @@ __tests__ = (
 {
     "#url"     : "https://kemono.su/patreon/user/3161935?tag=pin-up",
     "#comment" : "'tag' query parameter",
-    "#category": ("", "kemonoparty", "patreon"),
-    "#class"   : kemonoparty.KemonopartyUserExtractor,
+    "#category": ("", "kemono", "patreon"),
+    "#class"   : kemono.KemonoUserExtractor,
     "#urls"    : (
         "https://kemono.su/data/83/61/8361560887a09c7b828d326b3e1a2f0288673741569a09d74bcd01e602d20db1.png",
         "https://kemono.su/data/03/e6/03e62592c3b616b8906c1aaa130bd9ceaa24d7f601b31f90cc11956a57ca1d82.png",
@@ -141,20 +141,20 @@ __tests__ = (
 
 {
     "#url"     : "https://kemono.su/subscribestar/user/alcorart",
-    "#category": ("", "kemonoparty", "subscribestar"),
-    "#class"   : kemonoparty.KemonopartyUserExtractor,
+    "#category": ("", "kemono", "subscribestar"),
+    "#class"   : kemono.KemonoUserExtractor,
 },
 
 {
     "#url"     : "https://kemono.su/subscribestar/user/alcorart",
-    "#category": ("", "kemonoparty", "subscribestar"),
-    "#class"   : kemonoparty.KemonopartyUserExtractor,
+    "#category": ("", "kemono", "subscribestar"),
+    "#class"   : kemono.KemonoUserExtractor,
 },
 
 {
     "#url"     : "https://kemono.su/fanbox/user/6993449/post/506575",
-    "#category": ("", "kemonoparty", "fanbox"),
-    "#class"   : kemonoparty.KemonopartyPostExtractor,
+    "#category": ("", "kemono", "fanbox"),
+    "#class"   : kemono.KemonoPostExtractor,
     "#pattern"     : r"https://kemono.su/data/21/0f/210f35388e28bbcf756db18dd516e2d82ce75[0-9a-f]+\.jpg",
     "#sha1_content": "900949cefc97ab8dc1979cc3664785aac5ba70dd",
 
@@ -182,8 +182,8 @@ __tests__ = (
 {
     "#url"     : "https://kemono.su/fanbox/user/7356311/post/802343",
     "#comment" : "inline image (#1286)",
-    "#category": ("", "kemonoparty", "fanbox"),
-    "#class"   : kemonoparty.KemonopartyPostExtractor,
+    "#category": ("", "kemono", "fanbox"),
+    "#class"   : kemono.KemonoPostExtractor,
     "#pattern" : r"https://kemono\.su/data/47/b5/47b5c014ecdcfabdf2c85eec53f1133a76336997ae8596f332e97d956a460ad2\.jpg",
 
     "hash": "47b5c014ecdcfabdf2c85eec53f1133a76336997ae8596f332e97d956a460ad2",
@@ -191,16 +191,16 @@ __tests__ = (
 
 {
     "#url"     : "https://kemono.su/gumroad/user/3101696181060/post/tOWyf",
-    "#category": ("", "kemonoparty", "gumroad"),
-    "#class"   : kemonoparty.KemonopartyPostExtractor,
+    "#category": ("", "kemono", "gumroad"),
+    "#class"   : kemono.KemonoPostExtractor,
     "#count"   : 12,
 },
 
 {
     "#url"     : "https://kemono.party/gumroad/user/3252870377455/post/aJnAH",
     "#comment" : "username (#1548, #1652)",
-    "#category": ("", "kemonoparty", "gumroad"),
-    "#class"   : kemonoparty.KemonopartyPostExtractor,
+    "#category": ("", "kemono", "gumroad"),
+    "#class"   : kemono.KemonoPostExtractor,
     "#options" : {"metadata": True},
 
     "username": "Kudalyn's Creations",
@@ -209,16 +209,16 @@ __tests__ = (
 {
     "#url"     : "https://kemono.su/patreon/user/4158582/post/32099982",
     "#comment" : "allow duplicates (#2440)",
-    "#category": ("", "kemonoparty", "patreon"),
-    "#class"   : kemonoparty.KemonopartyPostExtractor,
+    "#category": ("", "kemono", "patreon"),
+    "#class"   : kemono.KemonoPostExtractor,
     "#count"   : 2,
 },
 
 {
     "#url"     : "https://kemono.su/patreon/user/4158582/post/32099982",
     "#comment" : "allow duplicates (#2440)",
-    "#category": ("", "kemonoparty", "patreon"),
-    "#class"   : kemonoparty.KemonopartyPostExtractor,
+    "#category": ("", "kemono", "patreon"),
+    "#class"   : kemono.KemonoPostExtractor,
     "#options" : {"duplicates": True},
     "#count"   : 3,
 },
@@ -226,8 +226,8 @@ __tests__ = (
 {
     "#url"     : "https://kemono.su/patreon/user/3161935/post/23445732",
     "#comment" : "comments (#2008)",
-    "#category": ("", "kemonoparty", "patreon"),
-    "#class"   : kemonoparty.KemonopartyPostExtractor,
+    "#category": ("", "kemono", "patreon"),
+    "#class"   : kemono.KemonoPostExtractor,
     "#options" : {"comments": True},
 
     "comments": "len:12",
@@ -236,8 +236,8 @@ __tests__ = (
 {
     "#url"     : "https://kemono.su/patreon/user/34134344/post/38129255",
     "#comment" : "DMs (#2008); no comments",
-    "#category": ("", "kemonoparty", "patreon"),
-    "#class"   : kemonoparty.KemonopartyPostExtractor,
+    "#category": ("", "kemono", "patreon"),
+    "#class"   : kemono.KemonoPostExtractor,
     "#options" : {"dms": True, "comments": True},
 
     "comments": (),
@@ -259,8 +259,8 @@ __tests__ = (
 {
     "#url"     : "https://kemono.su/patreon/user/3161935/post/68231671",
     "#comment" : "announcements",
-    "#category": ("", "kemonoparty", "patreon"),
-    "#class"   : kemonoparty.KemonopartyPostExtractor,
+    "#category": ("", "kemono", "patreon"),
+    "#class"   : kemono.KemonoPostExtractor,
     "#options" : {"announcements": True},
 
     "announcements": [
@@ -278,41 +278,41 @@ __tests__ = (
 {
     "#url"     : "https://kemono.su/patreon/user/19623797/post/29035449",
     "#comment" : "invalid file (#3510)",
-    "#category": ("", "kemonoparty", "patreon"),
-    "#class"   : kemonoparty.KemonopartyPostExtractor,
+    "#category": ("", "kemono", "patreon"),
+    "#class"   : kemono.KemonoPostExtractor,
     "#pattern"     : r"907ba78b4545338d3539683e63ecb51cf51c10adc9dabd86e92bd52339f298b9\.txt",
     "#sha1_content": "da39a3ee5e6b4b0d3255bfef95601890afd80709",
 },
 
 {
     "#url"     : "https://kemono.su/subscribestar/user/alcorart/post/184330",
-    "#category": ("", "kemonoparty", "subscribestar"),
-    "#class"   : kemonoparty.KemonopartyPostExtractor,
+    "#category": ("", "kemono", "subscribestar"),
+    "#class"   : kemono.KemonoPostExtractor,
 },
 
 {
     "#url"     : "https://kemono.su/subscribestar/user/alcorart/post/184330",
-    "#category": ("", "kemonoparty", "subscribestar"),
-    "#class"   : kemonoparty.KemonopartyPostExtractor,
+    "#category": ("", "kemono", "subscribestar"),
+    "#class"   : kemono.KemonoPostExtractor,
 },
 
 {
     "#url"     : "https://www.kemono.su/subscribestar/user/alcorart/post/184330",
-    "#category": ("", "kemonoparty", "subscribestar"),
-    "#class"   : kemonoparty.KemonopartyPostExtractor,
+    "#category": ("", "kemono", "subscribestar"),
+    "#class"   : kemono.KemonoPostExtractor,
 },
 
 {
     "#url"     : "https://beta.kemono.su/subscribestar/user/alcorart/post/184330",
-    "#category": ("", "kemonoparty", "subscribestar"),
-    "#class"   : kemonoparty.KemonopartyPostExtractor,
+    "#category": ("", "kemono", "subscribestar"),
+    "#class"   : kemono.KemonoPostExtractor,
 },
 
 {
     "#url"     : "https://kemono.su/patreon/user/3161935/post/68231671/revision/142470",
     "#comment" : "revisions (#4498)",
-    "#category": ("", "kemonoparty", "patreon"),
-    "#class"   : kemonoparty.KemonopartyPostExtractor,
+    "#category": ("", "kemono", "patreon"),
+    "#class"   : kemono.KemonoPostExtractor,
     "#urls"    : "https://kemono.su/data/88/52/88521f71822dfa2f42df3beba319ea4fceda2a2d6dc59da0276a75238f743f86.jpg",
 
     "file": {
@@ -341,8 +341,8 @@ __tests__ = (
 {
     "#url"     : "https://kemono.su/patreon/user/3161935/post/68231671",
     "#comment" : "unique revisions (#5013)",
-    "#category": ("", "kemonoparty", "patreon"),
-    "#class"   : kemonoparty.KemonopartyPostExtractor,
+    "#category": ("", "kemono", "patreon"),
+    "#class"   : kemono.KemonoPostExtractor,
     "#options" : {"revisions": "unique"},
     "#urls"    : "https://kemono.su/data/e3/e6/e3e6287dbc0468dd2a9d28ed276ae86788907143acf2ba10ab886a3add4c436c.jpg",
     "#archive" : False,
@@ -365,8 +365,8 @@ __tests__ = (
 {
     "#url"     : "https://kemono.su/patreon/user/3161935/post/68231671/revisions",
     "#comment" : "revisions (#4498)",
-    "#category": ("", "kemonoparty", "patreon"),
-    "#class"   : kemonoparty.KemonopartyPostExtractor,
+    "#category": ("", "kemono", "patreon"),
+    "#class"   : kemono.KemonoPostExtractor,
     "#pattern" : r"https://kemono\.su/data/88/52/88521f71822dfa2f42df3beba319ea4fceda2a2d6dc59da0276a75238f743f86\.jpg",
     "#count"   : 11,
     "#archive" : False,
@@ -384,16 +384,16 @@ __tests__ = (
 {
     "#url"     : "https://kemono.su/patreon/user/3161935/post/68231671/revision/12345",
     "#comment" : "revisions (#4498)",
-    "#category": ("", "kemonoparty", "patreon"),
-    "#class"   : kemonoparty.KemonopartyPostExtractor,
+    "#category": ("", "kemono", "patreon"),
+    "#class"   : kemono.KemonoPostExtractor,
     "#exception": exception.NotFoundError,
 },
 
 {
     "#url"     : "https://kemono.su/patreon/user/6298789/post/69764693",
     "#comment" : "'published' metadata with extra microsecond data",
-    "#category": ("", "kemonoparty", "patreon"),
-    "#class"   : kemonoparty.KemonopartyPostExtractor,
+    "#category": ("", "kemono", "patreon"),
+    "#class"   : kemono.KemonoPostExtractor,
 
     "date"     : "dt:2022-07-29 21:12:11",
     "published": "2022-07-29T21:12:11.483000",
@@ -402,8 +402,8 @@ __tests__ = (
 {
     "#url"     : "https://kemono.su/gumroad/user/3267960360326/post/jwwag",
     "#comment" : "empty 'file' with no 'path' (#5368)",
-    "#category": ("", "kemonoparty", "gumroad"),
-    "#class"   : kemonoparty.KemonopartyPostExtractor,
+    "#category": ("", "kemono", "gumroad"),
+    "#class"   : kemono.KemonoPostExtractor,
     "#count"   : 8,
 
     "type"     : "attachment",
@@ -412,8 +412,8 @@ __tests__ = (
 {
     "#url"     : "https://kemono.su/fanbox/user/49494721/post/9457614",
     "#comment" : "archives",
-    "#category": ("", "kemonoparty", "fanbox"),
-    "#class"   : kemonoparty.KemonopartyPostExtractor,
+    "#category": ("", "kemono", "fanbox"),
+    "#class"   : kemono.KemonoPostExtractor,
     "#options" : {"archives": True},
     "#range"   : "1-2",
 
@@ -494,8 +494,8 @@ __tests__ = (
 {
     "#url"     : "https://kemono.su/boosty/user/felixf/post/d9d8d670-16be-4e06-8ff9-65b13e322ba8",
     "#comment" : r"'\' in file paths",
-    "#category": ("", "kemonoparty", "boosty"),
-    "#class"   : kemonoparty.KemonopartyPostExtractor,
+    "#category": ("", "kemono", "boosty"),
+    "#class"   : kemono.KemonoPostExtractor,
     "#urls"    : (
         "https://kemono.su/data/dd/35/dd35c43d8a93f1806f094d9331a17c5037ed5d93e0f30c28d3cca2056b400aa6.png",
         "https://kemono.su/data/25/48/254864eb2523ab48be8d3fb7ad21ab3a127d61736b76602f8421cde88700a174.png",
@@ -513,8 +513,8 @@ __tests__ = (
 
 {
     "#url"     : "https://kemono.su/discord/server/488668827274444803/608504710906904576",
-    "#category": ("", "kemonoparty", "discord"),
-    "#class"   : kemonoparty.KemonopartyDiscordExtractor,
+    "#category": ("", "kemono", "discord"),
+    "#class"   : kemono.KemonoDiscordExtractor,
     "#count"   : 4,
 
     "channel"      : "finish-work",
@@ -528,8 +528,8 @@ __tests__ = (
 
 {
     "#url"     : "https://kemono.su/discord/server/488668827274444803#608504710906904576",
-    "#category": ("", "kemonoparty", "discord"),
-    "#class"   : kemonoparty.KemonopartyDiscordExtractor,
+    "#category": ("", "kemono", "discord"),
+    "#class"   : kemono.KemonoDiscordExtractor,
     "#count"   : 4,
 
     "channel"      : "finish-work",
@@ -543,8 +543,8 @@ __tests__ = (
 
 {
     "#url"     : "https://kemono.su/discord/server/488668827274444803/channel/608504710906904576#finish-work",
-    "#category": ("", "kemonoparty", "discord"),
-    "#class"   : kemonoparty.KemonopartyDiscordExtractor,
+    "#category": ("", "kemono", "discord"),
+    "#class"   : kemono.KemonoDiscordExtractor,
     "#count"   : 4,
 
     "channel"      : "finish-work",
@@ -560,8 +560,8 @@ __tests__ = (
 {
     "#url"     : "https://kemono.su/discord/server/818188637329031199/818343747275456522",
     "#comment" : "pagination",
-    "#category": ("", "kemonoparty", "discord"),
-    "#class"   : kemonoparty.KemonopartyDiscordExtractor,
+    "#category": ("", "kemono", "discord"),
+    "#class"   : kemono.KemonoDiscordExtractor,
     "#range"   : "1-250",
     "#count"   : 250,
 
@@ -576,8 +576,8 @@ __tests__ = (
 
 {
     "#url"     : "https://kemono.su/discord/server/256559665620451329/channel/462437519519383555#",
-    "#category": ("", "kemonoparty", "discord"),
-    "#class"   : kemonoparty.KemonopartyDiscordExtractor,
+    "#category": ("", "kemono", "discord"),
+    "#class"   : kemono.KemonoDiscordExtractor,
     "#pattern" : r"https://kemono\.su/data/(e3/77/e377e3525164559484ace2e64425b0cec1db08.*\.png|51/45/51453640a5e0a4d23fbf57fb85390f9c5ec154.*\.gif)",
     "#count"   : ">= 2",
 
@@ -590,8 +590,8 @@ __tests__ = (
 {
     "#url"     : "https://kemono.su/discord/server/315262215055736843/channel/315262215055736843#general",
     "#comment" : "'inline' files",
-    "#category": ("", "kemonoparty", "discord"),
-    "#class"   : kemonoparty.KemonopartyDiscordExtractor,
+    "#category": ("", "kemono", "discord"),
+    "#class"   : kemono.KemonoDiscordExtractor,
     "#options" : {"image-filter": "type == 'inline'"},
     "#pattern" : r"https://cdn\.discordapp\.com/attachments/\d+/\d+/.+$",
     "#range"   : "1-5",
@@ -601,24 +601,24 @@ __tests__ = (
 
 {
     "#url"     : "https://kemono.su/discord/server/488668827274444803",
-    "#category": ("", "kemonoparty", "discord-server"),
-    "#class"   : kemonoparty.KemonopartyDiscordServerExtractor,
-    "#pattern" : kemonoparty.KemonopartyDiscordExtractor.pattern,
+    "#category": ("", "kemono", "discord-server"),
+    "#class"   : kemono.KemonoDiscordServerExtractor,
+    "#pattern" : kemono.KemonoDiscordExtractor.pattern,
     "#count"   : 26,
 },
 
 {
     "#url"     : "https://kemono.su/posts?q=foobar",
-    "#category": ("", "kemonoparty", "posts"),
-    "#class"   : kemonoparty.KemonopartyPostsExtractor,
+    "#category": ("", "kemono", "posts"),
+    "#class"   : kemono.KemonoPostsExtractor,
     "#count"   : range(60, 100),
 },
 
 {
     "#url"     : "https://kemono.su/favorites",
-    "#category": ("", "kemonoparty", "favorite"),
-    "#class"   : kemonoparty.KemonopartyFavoriteExtractor,
-    "#pattern" : kemonoparty.KemonopartyUserExtractor.pattern,
+    "#category": ("", "kemono", "favorite"),
+    "#class"   : kemono.KemonoFavoriteExtractor,
+    "#pattern" : kemono.KemonoUserExtractor.pattern,
     "#auth"    : True,
     "#urls"    : (
         "https://kemono.su/patreon/user/881792",
@@ -630,9 +630,9 @@ __tests__ = (
 
 {
     "#url"     : "https://kemono.su/favorites?type=artist&sort=faved_seq&order=asc",
-    "#category": ("", "kemonoparty", "favorite"),
-    "#class"   : kemonoparty.KemonopartyFavoriteExtractor,
-    "#pattern" : kemonoparty.KemonopartyUserExtractor.pattern,
+    "#category": ("", "kemono", "favorite"),
+    "#class"   : kemono.KemonoFavoriteExtractor,
+    "#pattern" : kemono.KemonoUserExtractor.pattern,
     "#auth"    : True,
     "#urls"    : (
         "https://kemono.su/fanbox/user/6993449",
@@ -644,9 +644,9 @@ __tests__ = (
 
 {
     "#url"     : "https://kemono.su/favorites?type=post",
-    "#category": ("", "kemonoparty", "favorite"),
-    "#class"   : kemonoparty.KemonopartyFavoriteExtractor,
-    "#pattern" : kemonoparty.KemonopartyPostExtractor.pattern,
+    "#category": ("", "kemono", "favorite"),
+    "#class"   : kemono.KemonoFavoriteExtractor,
+    "#pattern" : kemono.KemonoPostExtractor.pattern,
     "#auth"    : True,
     "#urls"    : (
         "https://kemono.su/subscribestar/user/alcorart/post/184329",
@@ -657,9 +657,9 @@ __tests__ = (
 
 {
     "#url"     : "https://kemono.su/favorites?type=post&sort=published&order=asc",
-    "#category": ("", "kemonoparty", "favorite"),
-    "#class"   : kemonoparty.KemonopartyFavoriteExtractor,
-    "#pattern" : kemonoparty.KemonopartyPostExtractor.pattern,
+    "#category": ("", "kemono", "favorite"),
+    "#class"   : kemono.KemonoFavoriteExtractor,
+    "#pattern" : kemono.KemonoPostExtractor.pattern,
     "#auth"    : True,
     "#urls"    : (
         "https://kemono.su/patreon/user/881792/post/4769638",
@@ -670,21 +670,21 @@ __tests__ = (
 
 {
     "#url"     : "https://kemono.su/account/favorites/artists",
-    "#category": ("", "kemonoparty", "favorite"),
-    "#class"   : kemonoparty.KemonopartyFavoriteExtractor,
+    "#category": ("", "kemono", "favorite"),
+    "#class"   : kemono.KemonoFavoriteExtractor,
 },
 
 {
     "#url"     : "https://kemono.su/account/favorites/posts?sort_by=published&order=asc",
-    "#category": ("", "kemonoparty", "favorite"),
-    "#class"   : kemonoparty.KemonopartyFavoriteExtractor,
+    "#category": ("", "kemono", "favorite"),
+    "#class"   : kemono.KemonoFavoriteExtractor,
 },
 
 {
     "#url"     : "https://kemono.su/artists?q=aMSa",
-    "#category": ("", "kemonoparty", "artists"),
-    "#class"   : kemonoparty.KemonopartyArtistsExtractor,
-    "#pattern" : kemonoparty.KemonopartyUserExtractor.pattern,
+    "#category": ("", "kemono", "artists"),
+    "#class"   : kemono.KemonoArtistsExtractor,
+    "#pattern" : kemono.KemonoUserExtractor.pattern,
     "#urls"    : (
         "https://kemono.su/patreon/user/91205314",
         "https://kemono.su/patreon/user/51528107",
@@ -713,9 +713,9 @@ __tests__ = (
 
 {
     "#url"     : "https://kemono.su/artists?q=Axe&service=discord&sort_by=name&order=asc",
-    "#category": ("", "kemonoparty", "artists"),
-    "#class"   : kemonoparty.KemonopartyArtistsExtractor,
-    "#pattern" : kemonoparty.KemonopartyDiscordServerExtractor.pattern,
+    "#category": ("", "kemono", "artists"),
+    "#class"   : kemono.KemonoArtistsExtractor,
+    "#pattern" : kemono.KemonoDiscordServerExtractor.pattern,
     "#urls"    : "https://kemono.su/discord/server/1168450323023663164",
 
     "favorited": range(40, 80),
