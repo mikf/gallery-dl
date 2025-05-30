@@ -1021,7 +1021,9 @@ class RangePredicate():
             # technically wrong, but good enough for now
             # and evaluating min/max for a large range is slow
             self.lower = min(r.start if r.start >= 0 else 0 for r in ranges)
-            self.upper = max(r.stop if r.stop >= 0 else sys.maxsize for r in ranges) - 1
+            self.upper = max(
+                r.stop if r.stop >= 0 else sys.maxsize for r in ranges
+            ) - 1
         else:
             self.lower = 0
             self.upper = 0
@@ -1044,11 +1046,11 @@ class RangePredicate():
         return False
 
     @staticmethod
-    def _adjusted_range(rangespec, count=sys.maxsize):
+    def _adjusted_range(r, count=sys.maxsize):
         return range(
-            rangespec.start if rangespec.start >= 0 else rangespec.start + count + 1,
-            rangespec.stop if rangespec.stop >= 0 else rangespec.stop + count + 1,
-            rangespec.step
+            r.start if r.start >= 0 else r.start + count + 1,
+            r.stop if r.stop >= 0 else r.stop + count + 1,
+            r.step
         )
 
     @staticmethod
