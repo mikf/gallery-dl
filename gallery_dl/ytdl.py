@@ -71,7 +71,7 @@ def construct_YoutubeDL(module, obj, user_opts, system_opts=None):
 def parse_command_line(module, argv):
     parser, opts, args = module.parseOpts(argv)
 
-    ytdlp = (module.__name__ == "yt_dlp")
+    ytdlp = hasattr(module, "cookies")
     std_headers = module.std_headers
 
     try:
