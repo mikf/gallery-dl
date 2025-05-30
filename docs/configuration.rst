@@ -390,13 +390,13 @@ Default
         ``[E621]``,
         ``[foolfuuka]:search``,
         ``itaku``,
-        ``koharu``,
         ``newgrounds``,
         ``[philomena]``,
         ``pixiv:novel``,
         ``plurk``,
         ``poipiku`` ,
         ``pornpics``,
+        ``schalenetwork``,
         ``scrolller``,
         ``soundgasm``,
         ``urlgalleries``,
@@ -453,7 +453,7 @@ Description
     * ``atfbooru`` (*)
     * ``bluesky``
     * ``booruvar`` (*)
-    * ``coomerparty``
+    * ``coomer``
     * ``danbooru`` (*)
     * ``deviantart``
     * ``e621`` (*)
@@ -464,14 +464,14 @@ Description
     * ``idolcomplex``
     * ``imgbb``
     * ``inkbunny``
-    * ``kemonoparty``
-    * ``koharu``
+    * ``kemono``
     * ``mangadex``
     * ``mangoxo``
     * ``newgrounds``
     * ``nijie`` (R)
     * ``pillowfort``
     * ``sankaku``
+    * ``schalenetwork``
     * ``scrolller``
     * ``seiga``
     * ``subscribestar``
@@ -3106,8 +3106,8 @@ Description
     Download video files.
 
 
-extractor.kemonoparty.archives
-------------------------------
+extractor.kemono.archives
+-------------------------
 Type
     ``bool``
 Default
@@ -3119,8 +3119,8 @@ Description
     Note: This requires 1 additional HTTP request per ``archives`` file.
 
 
-extractor.kemonoparty.comments
-------------------------------
+extractor.kemono.comments
+-------------------------
 Type
     ``bool``
 Default
@@ -3131,8 +3131,8 @@ Description
     Note: This requires 1 additional HTTP request per post.
 
 
-extractor.kemonoparty.duplicates
---------------------------------
+extractor.kemono.duplicates
+---------------------------
 Type
     ``bool``
 Default
@@ -3144,8 +3144,8 @@ Description
     * ``false``: Ignore duplicates
 
 
-extractor.kemonoparty.dms
--------------------------
+extractor.kemono.dms
+--------------------
 Type
     ``bool``
 Default
@@ -3154,8 +3154,8 @@ Description
     Extract a user's direct messages as ``dms`` metadata.
 
 
-extractor.kemonoparty.announcements
------------------------------------
+extractor.kemono.announcements
+------------------------------
 Type
     ``bool``
 Default
@@ -3164,8 +3164,8 @@ Description
     Extract a user's announcements as ``announcements`` metadata.
 
 
-extractor.kemonoparty.endpoint
-------------------------------
+extractor.kemono.endpoint
+-------------------------
 Type
     ``string``
 Default
@@ -3191,8 +3191,8 @@ Description
         | Provides more metadata, but might not return a creator's first/last posts.
 
 
-extractor.kemonoparty.favorites
--------------------------------
+extractor.kemono.favorites
+--------------------------
 Type
     ``string``
 Default
@@ -3203,8 +3203,8 @@ Description
     Available types are ``artist``, and ``post``.
 
 
-extractor.kemonoparty.files
----------------------------
+extractor.kemono.files
+----------------------
 Type
     ``list`` of ``strings``
 Default
@@ -3215,8 +3215,8 @@ Description
     Available types are ``file``, ``attachments``, and ``inline``.
 
 
-extractor.kemonoparty.max-posts
--------------------------------
+extractor.kemono.max-posts
+--------------------------
 Type
     ``integer``
 Default
@@ -3225,8 +3225,8 @@ Description
     Limit the number of posts to download.
 
 
-extractor.kemonoparty.metadata
-------------------------------
+extractor.kemono.metadata
+-------------------------
 Type
     ``bool``
 Default
@@ -3235,8 +3235,8 @@ Description
     Extract ``username`` and ``user_profile`` metadata.
 
 
-extractor.kemonoparty.revisions
--------------------------------
+extractor.kemono.revisions
+--------------------------
 Type
     * ``bool``
     * ``string``
@@ -3250,15 +3250,15 @@ Description
     Note: This requires 1 additional HTTP request per post.
 
 
-extractor.kemonoparty.order-revisions
--------------------------------------
+extractor.kemono.order-revisions
+--------------------------------
 Type
     ``string``
 Default
     ``"desc"``
 Description
     Controls the order in which
-    `revisions <extractor.kemonoparty.revisions_>`__
+    `revisions <extractor.kemono.revisions_>`__
     are returned.
 
     * ``"asc"``: Ascending order (oldest first)
@@ -3292,8 +3292,8 @@ Description
     the first in the list gets chosen (usually `mp3`).
 
 
-extractor.koharu.cbz
---------------------
+extractor.schalenetwork.cbz
+---------------------------
 Type
     ``bool``
 Default
@@ -3305,8 +3305,8 @@ Description
     to be downloaded as individual image files.
 
 
-extractor.koharu.format
------------------------
+extractor.schalenetwork.format
+------------------------------
 Type
     * ``string``
     * ``list`` of ``strings``
@@ -3321,8 +3321,8 @@ Description
     | ``"780"``, ``"980"``, ``"1280"``, ``"1600"``, ``"0"`` (original)
 
 
-extractor.koharu.tags
----------------------
+extractor.schalenetwork.tags
+----------------------------
 Type
     ``bool``
 Default

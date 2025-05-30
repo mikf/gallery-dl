@@ -836,7 +836,7 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
-    <td>SchaleNetwork</td>
+    <td>Schale Network</td>
     <td>https://niyaniya.moe/</td>
     <td>Favorites, Galleries, Search Results</td>
     <td></td>
