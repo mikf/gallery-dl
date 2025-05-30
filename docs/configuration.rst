@@ -7484,6 +7484,22 @@ Description
     or by `extractor.modules`_.
 
 
+extractor.category-map
+----------------------
+Type
+    ``object`` (`category` -> `category`)
+Default
+    .. code:: json
+
+        {
+            "coomerparty": "coomer",
+            "kemonoparty": "kemono",
+            "koharu"     : "schalenetwork"
+        }
+Description
+    A JSON ``object`` mapping category names to their replacements.
+
+
 globals
 -------
 Type

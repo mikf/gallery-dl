@@ -162,6 +162,16 @@ def status():
         stdout_write(fmt(path, status))
 
 
+def rename_categories(cmap):
+    opts = _config.get("extractor")
+    if not opts:
+        return
+
+    for old, new in cmap.items():
+        if old in opts and new not in opts:
+            opts[new] = opts[old]
+
+
 def load(files=None, strict=False, loads=util.json_loads):
     """Load JSON configuration files"""
     for pathfmt in files or _default_configs:

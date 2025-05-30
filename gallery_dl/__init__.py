@@ -188,6 +188,17 @@ def main():
             ujob = update.UpdateJob(extr)
             return ujob.run()
 
+        # category remapping
+        cmap = config.interpolate(("extractor",), "category-map")
+        if cmap is None:
+            cmap = {
+                "coomerparty": "coomer",
+                "kemonoparty": "kemono",
+                "koharu"     : "schalenetwork",
+            }
+        if cmap:
+            config.rename_categories(cmap)
+
         # extractor modules
         modules = config.get(("extractor",), "modules")
         if modules is not None:
