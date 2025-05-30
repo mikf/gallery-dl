@@ -1020,10 +1020,9 @@ class RangePredicate():
         if ranges:
             # technically wrong, but good enough for now
             # and evaluating min/max for a large range is slow
-            self.lower = min(r.start if r.start >= 0 else 0 for r in ranges)
-            self.upper = max(
-                r.stop if r.stop >= 0 else sys.maxsize for r in ranges
-            ) - 1
+            adjusted_ranges = self._adjusted_ranges(self.ranges)
+            self.lower = min(r.start for r in adjusted_ranges)
+            self.upper = max(r.stop for r in adjusted_ranges) - 1
         else:
             self.lower = 0
             self.upper = 0
@@ -1031,13 +1030,8 @@ class RangePredicate():
     def __call__(self, _url, _kwdict):
         self.index = index = self.index + 1
 
-        if _kwdict is not None:
-            count = _kwdict.get("count", sys.maxsize)
-        else:
-            count = sys.maxsize
-        adjusted_ranges = [
-            self._adjusted_range(r, count) for r in self.ranges
-        ]
+        count = (_kwdict or {}).get("count", None)
+        adjusted_ranges = self._adjusted_ranges(self.ranges, count)
         if adjusted_ranges:
             self.upper = max(r.stop for r in adjusted_ranges) - 1
 
@@ -1050,12 +1044,21 @@ class RangePredicate():
         return False
 
     @staticmethod
-    def _adjusted_range(r, count=sys.maxsize):
-        return range(
-            r.start if r.start >= 0 else r.start + count + 1,
-            r.stop if r.stop >= 0 else r.stop + count + 1,
-            r.step
-        )
+    def _adjusted_ranges(ranges, count=None):
+        if count is None:
+            min_count = 0
+            max_count = sys.maxsize
+        else:
+            min_count = max_count = count
+        adj_ranges = []
+        for r in ranges:
+
+            adj_ranges.append(range(
+                r.start if r.start >= 0 else r.start + min_count + 1,
+                r.stop if r.stop >= 0 else r.stop + max_count + 1,
+                r.step
+            ))
+        return adj_ranges
 
     @staticmethod
     def _parse(rangespec):
