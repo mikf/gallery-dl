@@ -172,11 +172,11 @@ class MangadexListExtractor(MangadexExtractor):
                "/01234567-89ab-cdef-0123-456789abcdef/NAME")
 
     def __init__(self, match):
-        MangadexExtractor.__init__(self, match)
         if match.group(2) == "feed":
             self.subcategory = "list-feed"
         else:
             self.items = self._items_manga
+        MangadexExtractor.__init__(self, match)
 
     def chapters(self):
         return self.api.list_feed(self.uuid)
