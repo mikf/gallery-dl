@@ -24,9 +24,9 @@ class DirectlinkExtractor(Extractor):
     example = "https://en.wikipedia.org/static/images/project-logos/enwiki.png"
 
     def __init__(self, match):
-        Extractor.__init__(self, match)
         self.data = data = match.groupdict()
         self.subcategory = ".".join(data["domain"].rsplit(".", 2)[-2:])
+        Extractor.__init__(self, match)
 
     def items(self):
         data = self.data
