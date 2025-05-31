@@ -138,6 +138,9 @@ class TestExtractorModule(unittest.TestCase):
         self.assertEqual(extr.subcategory, sub, url)
         self.assertEqual(extr.basecategory, base, url)
 
+        if base not in ("reactor", "wikimedia"):
+            self.assertEqual(extr._cfgpath, ("extractor", cat, sub), url)
+
     @unittest.skipIf(not results, "no test data")
     def test_unique_pattern_matches(self):
         # collect testcase URLs
