@@ -372,7 +372,7 @@ class CivitaiSearchExtractor(CivitaiExtractor):
     example = "https://civitai.com/search/models?query=QUERY"
 
     def models(self):
-        params = text.parse_query(self.groups[0])
+        params = self._parse_query(self.groups[0])
         return self.api.models(params)
 
 
@@ -382,7 +382,7 @@ class CivitaiModelsExtractor(CivitaiExtractor):
     example = "https://civitai.com/models"
 
     def models(self):
-        params = text.parse_query(self.groups[0])
+        params = self._parse_query(self.groups[0])
         return self.api.models(params)
 
 
@@ -392,8 +392,18 @@ class CivitaiImagesExtractor(CivitaiExtractor):
     example = "https://civitai.com/images"
 
     def images(self):
-        params = text.parse_query(self.groups[0])
+        params = self._parse_query(self.groups[0])
         return self.api.images(params)
+
+
+class CivitaiPostsExtractor(CivitaiExtractor):
+    subcategory = "posts"
+    pattern = BASE_PATTERN + r"/posts(?:/?\?([^#]+))?(?:$|#)"
+    example = "https://civitai.com/posts"
+
+    def posts(self):
+        params = self._parse_query(self.groups[0])
+        return self.api.posts(params)
 
 
 class CivitaiUserExtractor(Dispatch, CivitaiExtractor):
@@ -689,6 +699,7 @@ class CivitaiTrpcAPI():
                 "include"      : ["cosmetics"],
             })
 
+        params = self._type_params(params)
         return self._pagination(endpoint, params, meta)
 
     def user(self, username):
