@@ -14,6 +14,7 @@ from ..cache import cache, memcache
 from datetime import datetime, timedelta
 import itertools
 import hashlib
+import re
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.|touch\.)?ph?ixiv\.net"
 USER_PATTERN = BASE_PATTERN + r"/(?:en/)?users/(\d+)"
@@ -42,6 +43,10 @@ class PixivExtractor(Extractor):
         self.meta_bookmark = self.config("metadata-bookmark")
         self.meta_comments = self.config("comments")
         self.meta_captions = self.config("captions")
+
+        if self.meta_captions:
+            self.meta_captions_sub = re.compile(
+                r'<a href="/jump\.php\?([^"]+)').sub
 
     def items(self):
         tags = self.config("tags", "japanese")
@@ -87,7 +92,10 @@ class PixivExtractor(Extractor):
                     not work.get("_mypixiv") and not work.get("_ajax"):
                 body = self._request_ajax("/illust/" + str(work["id"]))
                 if body:
-                    work["caption"] = text.unescape(body["illustComment"])
+                    caption = self.meta_captions_sub(
+                        lambda m: '<a href="' + text.unquote(m.group(1)),
+                        body["illustComment"])
+                    work["caption"] = text.unescape(caption)
 
             if transform_tags:
                 transform_tags(work)
