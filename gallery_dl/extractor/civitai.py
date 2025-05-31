@@ -175,6 +175,19 @@ class CivitaiExtractor(Extractor):
                 file["generation"] = self._extract_meta_generation(file)
             yield data
 
+    def _image_reactions(self):
+        if "Authorization" not in self.api.headers and \
+                not self.cookies.get(
+                "__Secure-civitai-token", domain=".civitai.com"):
+            raise exception.AuthorizationError("api-key or cookies required")
+
+        params = self.params
+        params["authed"] = True
+        params["useIndex"] = False
+        if "reactions" not in params:
+            params["reactions"] = ("Like", "Dislike", "Heart", "Laugh", "Cry")
+        return self.api.images(params)
+
     def _parse_query(self, value):
         return text.parse_query_list(
             value, {"tags", "reactions", "baseModels", "tools", "techniques",
@@ -452,29 +465,17 @@ class CivitaiUserImagesExtractor(CivitaiExtractor):
     example = "https://civitai.com/user/USER/images"
 
     def __init__(self, match):
-        self.params = self._parse_query(match.group(2))
+        user, query = match.groups()
+        self.params = self._parse_query(query)
         if self.params.get("section") == "reactions":
-            self.subcategory = "reactions"
-            self.images = self.images_reactions
+            self.subcategory = "reactions-images"
+            self.images = self._image_reactions
+        else:
+            self.params["username"] = text.unquote(user)
         CivitaiExtractor.__init__(self, match)
 
     def images(self):
-        params = self.params
-        params["username"] = text.unquote(self.groups[0])
-        return self.api.images(params)
-
-    def images_reactions(self):
-        if "Authorization" not in self.api.headers and \
-                not self.cookies.get(
-                "__Secure-civitai-token", domain=".civitai.com"):
-            raise exception.AuthorizationError("api-key or cookies required")
-
-        params = self.params
-        params["authed"] = True
-        params["useIndex"] = False
-        if "reactions" not in params:
-            params["reactions"] = ("Like", "Dislike", "Heart", "Laugh", "Cry")
-        return self.api.images(params)
+        return self.api.images(self.params)
 
 
 class CivitaiUserVideosExtractor(CivitaiExtractor):
@@ -483,14 +484,19 @@ class CivitaiUserVideosExtractor(CivitaiExtractor):
     pattern = USER_PATTERN + r"/videos/?(?:\?([^#]+))?"
     example = "https://civitai.com/user/USER/videos"
 
-    def images(self):
+    def __init__(self, match):
+        user, query = match.groups()
+        self.params = self._parse_query(query)
+        self.params["types"] = ["video"]
+        if self.params.get("section") == "reactions":
+            self.subcategory = "reactions-videos"
+            self.images = self._image_reactions
+        else:
+            self.params["username"] = text.unquote(user)
+        CivitaiExtractor.__init__(self, match)
         self._image_ext = "mp4"
 
-        user, query = self.groups
-        params = self._parse_query(query)
-        params["types"] = ["video"]
-        params["username"] = text.unquote(user)
-        return self.api.images(params)
+    images = CivitaiUserImagesExtractor.images
 
 
 class CivitaiRestAPI():
