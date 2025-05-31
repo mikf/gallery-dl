@@ -428,7 +428,7 @@ __tests__ = (
 
 {
     "#url"     : "https://civitai.com/user/USER/images?section=reactions",
-    "#category": ("", "civitai", "reactions"),
+    "#category": ("", "civitai", "reactions-images"),
     "#class"   : civitai.CivitaiUserImagesExtractor,
     "#auth"    : True,
     "#urls"    : (
@@ -440,7 +440,7 @@ __tests__ = (
 
 {
     "#url"     : "https://civitai.com/user/USER/images?section=reactions",
-    "#category": ("", "civitai", "reactions"),
+    "#category": ("", "civitai", "reactions-images"),
     "#class"   : civitai.CivitaiUserImagesExtractor,
     "#auth"     : False,
     "#exception": exception.AuthorizationError,
@@ -453,5 +453,25 @@ __tests__ = (
     "#range"  : "1-50",
     "#count"  : 50,
 },
+
+{
+    "#url"     : "https://civitai.com/user/USER/videos?section=reactions",
+    "#category": ("", "civitai", "reactions-videos"),
+    "#class"   : civitai.CivitaiUserVideosExtractor,
+    "#auth"    : True,
+    "#urls"    : (
+        "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/6a09ec54-6de4-4af1-b11d-2d0d8a66d651/quality=100/copy_C6C532CE-EC47-4A52-9138-AEF1D7756F16.Mp4",
+        "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/74cd3e71-7833-4e32-9724-b8d1702693be/quality=100/1_THANKSGIVING_CLAYMATION_TOPAZ.mp4",
+    ),
+},
+
+{
+    "#url"     : "https://civitai.com/user/USER/videos?section=reactions",
+    "#category": ("", "civitai", "reactions-videos"),
+    "#class"   : civitai.CivitaiUserVideosExtractor,
+    "#auth"     : False,
+    "#exception": exception.AuthorizationError,
+},
+
 
 )
