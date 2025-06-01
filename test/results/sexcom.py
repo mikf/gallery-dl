@@ -10,7 +10,7 @@ from gallery_dl.extractor import sexcom
 __tests__ = (
 {
     "#url"     : "https://www.sex.com/pin/21241874-sexy-ecchi-girls-166/",
-    "#comment" : "picture",
+    "#comment" : "picture (legacy URL)",
     "#category": ("", "sexcom", "pin"),
     "#class"   : sexcom.SexcomPinExtractor,
     "#urls"        : "https://imagex1.sx.cdn.live/images/pinporn/2014/08/26/7637609.jpg",
@@ -38,8 +38,25 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.sex.com/en/pics/612398",
+    "#comment" : "picture",
+    "#category": ("", "sexcom", "pin"),
+    "#class"   : sexcom.SexcomPinExtractor,
+    "#urls"    : "https://imagex1.sx.cdn.live/images/pinporn/2014/08/26/7637609.jpg",
+
+    "date"     : "dt:2014-08-26 00:00:00",
+    "date_url" : "dt:2014-08-26 00:00:00",
+    "extension": "jpg",
+    "filename" : "7637609",
+    "pin_id"   : 612398,
+    "tags"     : ["#Hot"],
+    "title"    : "",
+    "type"     : "gif",
+},
+
+{
     "#url"     : "https://www.sex.com/pin/55435122-ecchi/",
-    "#comment" : "gif legacy URL",
+    "#comment" : "gif (legacy URL)",
     "#category": ("", "sexcom", "pin"),
     "#class"   : sexcom.SexcomPinExtractor,
     "#urls"        : "https://imagex1.sx.cdn.live/images/pinporn/2017/12/07/18760842.gif",
