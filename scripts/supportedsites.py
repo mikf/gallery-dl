@@ -222,10 +222,13 @@ SUBCATEGORY_MAP = {
     "civitai": {
         "models": "Model Listings",
         "images": "Image Listings",
+        "posts" : "Post Listings",
+        "search-models": "Model Searches",
+        "search-images": "Image Searches",
         "user-models": "User Models",
-        "user-images": "User Images",
+        "user-images": ("User Images", "Image Reactions"),
         "user-posts" : "User Posts",
-        "user-videos": "User Videos",
+        "user-videos": ("User Videos", "Video Reactions"),
     },
     "coomer": {
         "discord"       : "",
