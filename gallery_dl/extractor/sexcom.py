@@ -24,6 +24,8 @@ class SexcomExtractor(Extractor):
     root = "https://www.sex.com"
 
     def items(self):
+        self.gifs = self.config("gifs", True)
+
         yield Message.Directory, self.metadata()
         for pin in map(self._parse_pin, self.pins()):
             if not pin:
@@ -38,6 +40,7 @@ class SexcomExtractor(Extractor):
                     pin["date"] = dt
             except Exception:
                 pass
+            pin["tags"] = [t[1:] for t in pin["tags"]]
 
             yield Message.Url, url, pin
 
@@ -73,7 +76,7 @@ class SexcomExtractor(Extractor):
             return self._parse_pin_legacy(response)
         if "/videos/" in response.url:
             return self._parse_pin_video(response)
-        return self._parse_pin_gifs(response)
+        return self._parse_pin_image(response)
 
     def _parse_pin_legacy(self, response):
         extr = text.extract_from(response.text)
@@ -124,20 +127,31 @@ class SexcomExtractor(Extractor):
 
         return data
 
-    def _parse_pin_gifs(self, response):
+    def _parse_pin_image(self, response):
         extr = text.extract_from(response.text)
+        href = extr(' href="', '"').partition("?")[0]
+        title, _, type = extr("<title>", " | ").rpartition(" ")
 
         data = {
             "_http_headers": {"Referer": response.url},
-            "type": "gif",
-            "url": extr(' href="', '"').partition("?")[0],
-            "title": text.unescape(extr("<title>", " Gif | Sex.com<")),
+            "url": href,
+            "title": text.unescape(title),
             "pin_id": text.parse_int(extr(
                 'rel="canonical" href="', '"').rpartition("/")[2]),
             "tags": text.split_html(extr("</h1>", "</section>")),
         }
 
-        return text.nameext_from_url(data["url"], data)
+        text.nameext_from_url(href, data)
+        if type.lower() == "pic":
+            data["type"] = "picture"
+        else:
+            data["type"] = "gif"
+            if self.gifs and data["extension"] == "webp":
+                data["extension"] = "gif"
+                data["_fallback"] = (href,)
+                data["url"] = href[:-4] + "gif"
+
+        return data
 
     def _parse_pin_video(self, response):
         extr = text.extract_from(response.text)
@@ -147,6 +161,7 @@ class SexcomExtractor(Extractor):
 
         data = {
             "_ytdl_manifest": "hls",
+            "_ytdl_manifest_headers": {"Referer": response.url},
             "extension": "mp4",
             "type": "video",
             "title": text.unescape(extr("<title>", " | Sex.com<")),

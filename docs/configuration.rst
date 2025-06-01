@@ -4371,6 +4371,16 @@ Description
     Download videos.
 
 
+extractor.sexcom.gifs
+---------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Download animated images as ``.gif`` instead of ``.webp``
+
+
 extractor.skeb.article
 ----------------------
 Type
