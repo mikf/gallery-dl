@@ -379,14 +379,15 @@ class CivitaiTagExtractor(CivitaiExtractor):
         return self.api.models_tag(tag)
 
 
-class CivitaiSearchExtractor(CivitaiExtractor):
-    subcategory = "search"
+class CivitaiSearchModelsExtractor(CivitaiExtractor):
+    subcategory = "search-models"
     pattern = BASE_PATTERN + r"/search/models\?([^#]+)"
     example = "https://civitai.com/search/models?query=QUERY"
 
     def models(self):
         params = self._parse_query(self.groups[0])
-        return self.api.models(params)
+        return CivitaiSearchAPI(self).search_models(
+            params.get("query"), params.get("sortBy"), self.api.nsfw)
 
 
 class CivitaiSearchImagesExtractor(CivitaiExtractor):
@@ -396,10 +397,8 @@ class CivitaiSearchImagesExtractor(CivitaiExtractor):
 
     def images(self):
         params = self._parse_query(self.groups[0])
-        return CivitaiSearchAPI(self).search(
-            params.get("query"),
-            params.get("sortBy") or "images_v6",
-            self.api.nsfw)
+        return CivitaiSearchAPI(self).search_images(
+            params.get("query"), params.get("sortBy"), self.api.nsfw)
 
 
 class CivitaiModelsExtractor(CivitaiExtractor):
@@ -812,22 +811,13 @@ class CivitaiSearchAPI():
             "Priority": "u=4",
         }
 
-    def search(self, query, type, nsfw=31):
+    def search(self, query, type, facets, nsfw=31):
         endpoint = "/multi-search"
 
         query = {
-            "q": query,
+            "q"       : query,
             "indexUid": type,
-            "facets"  : (
-                "aspectRatio",
-                "baseModel",
-                "createdAtUnix",
-                "tagNames",
-                "techniqueNames",
-                "toolNames",
-                "type",
-                "user.username",
-            ),
+            "facets"  : facets,
             "attributesToHighlight": (),
             "highlightPreTag" : "__ais-highlight__",
             "highlightPostTag": "__/ais-highlight__",
@@ -837,6 +827,32 @@ class CivitaiSearchAPI():
         }
 
         return self._pagination(endpoint, query)
+
+    def search_models(self, query, type=None, nsfw=31):
+        facets = (
+            "category.name",
+            "checkpointType",
+            "fileFormats",
+            "lastVersionAtUnix",
+            "tags.name",
+            "type",
+            "user.username",
+            "version.baseModel",
+        )
+        return self.search(query, type or "models_v9", facets, nsfw)
+
+    def search_images(self, query, type=None, nsfw=31):
+        facets = (
+            "aspectRatio",
+            "baseModel",
+            "createdAtUnix",
+            "tagNames",
+            "techniqueNames",
+            "toolNames",
+            "type",
+            "user.username",
+        )
+        return self.search(query, type or "images_v6", facets, nsfw)
 
     def _call(self, endpoint, query):
         url = self.root + endpoint
