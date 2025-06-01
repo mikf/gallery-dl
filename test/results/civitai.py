@@ -362,6 +362,14 @@ __tests__ = (
 },
 
 {
+    "#url"    : "https://civitai.com/search/images?sortBy=images_v6&query=Voynich",
+    "#class"  : civitai.CivitaiSearchImagesExtractor,
+    "#options": {"nsfw": False},
+    "#count"  : range(150, 200),
+    "#archive": False,
+},
+
+{
     "#url"  : "https://civitai.com/user/waomodder",
     "#class": civitai.CivitaiUserExtractor,
     "#urls" : [

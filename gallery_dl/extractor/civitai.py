@@ -389,6 +389,19 @@ class CivitaiSearchExtractor(CivitaiExtractor):
         return self.api.models(params)
 
 
+class CivitaiSearchImagesExtractor(CivitaiExtractor):
+    subcategory = "search-images"
+    pattern = BASE_PATTERN + r"/search/images\?([^#]+)"
+    example = "https://civitai.com/search/images?query=QUERY"
+
+    def images(self):
+        params = self._parse_query(self.groups[0])
+        return CivitaiSearchAPI(self).search(
+            params.get("query"),
+            params.get("sortBy") or "images_v6",
+            self.api.nsfw)
+
+
 class CivitaiModelsExtractor(CivitaiExtractor):
     subcategory = "models"
     pattern = BASE_PATTERN + r"/models(?:/?\?([^#]+))?(?:$|#)"
