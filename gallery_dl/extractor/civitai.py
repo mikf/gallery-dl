@@ -778,4 +778,90 @@ class CivitaiTrpcAPI():
 
 
 def _bool(value):
-    return True if value == "true" else False
+    return value == "true"
+
+
+class CivitaiSearchAPI():
+
+    def __init__(self, extractor):
+        self.extractor = extractor
+        self.root = "https://search.civitai.com"
+        self.headers = {
+            "Authorization": "Bearer 4c7745e54e872213201291ba1cae1aaca702941f2"
+                             "91432cf4fef22803333e487",
+            "Content-Type": "application/json",
+            "X-Meilisearch-Client": "Meilisearch instant-meilisearch (v0.13.5)"
+                                    " ; Meilisearch JavaScript (v0.34.0)",
+            "Origin": extractor.root,
+            "Sec-Fetch-Dest": "empty",
+            "Sec-Fetch-Mode": "cors",
+            "Sec-Fetch-Site": "same-site",
+            "Priority": "u=4",
+        }
+
+    def search(self, query, type, nsfw=31):
+        endpoint = "/multi-search"
+
+        query = {
+            "q": query,
+            "indexUid": type,
+            "facets"  : (
+                "aspectRatio",
+                "baseModel",
+                "createdAtUnix",
+                "tagNames",
+                "techniqueNames",
+                "toolNames",
+                "type",
+                "user.username",
+            ),
+            "attributesToHighlight": (),
+            "highlightPreTag" : "__ais-highlight__",
+            "highlightPostTag": "__/ais-highlight__",
+            "limit" : 51,
+            "offset": 0,
+            "filter": [self._generate_filter(nsfw)],
+        }
+
+        return self._pagination(endpoint, query)
+
+    def _call(self, endpoint, query):
+        url = self.root + endpoint
+        params = util.json_dumps({"queries": (query,)})
+
+        data = self.extractor.request(
+            url, method="POST", headers=self.headers, data=params).json()
+
+        return data["results"][0]
+
+    def _pagination(self, endpoint, query):
+        limit = query["limit"] - 1
+        threshold = limit // 2
+
+        while True:
+            data = self._call(endpoint, query)
+
+            items = data["hits"]
+            yield from items
+
+            if len(items) < threshold:
+                return
+            query["offset"] += limit
+
+    def _generate_filter(self, level):
+        fltr = []
+
+        if level & 1:
+            fltr.append("1")
+        if level & 2:
+            fltr.append("2")
+        if level & 4:
+            fltr.append("4")
+        if level & 8:
+            fltr.append("8")
+        if level & 16:
+            fltr.append("16")
+
+        if not fltr:
+            return "()"
+        return "(nsfwLevel=" + " OR nsfwLevel=".join(fltr) + ")"
