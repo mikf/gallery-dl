@@ -357,8 +357,14 @@ __tests__ = (
 },
 
 {
-    "#url"  : "https://civitai.com/search/models?sortBy=models_v9&query=mecha",
-    "#class": civitai.CivitaiSearchExtractor,
+    "#url"  : "https://civitai.com/search/models?sortBy=models_v9&query=Voynich",
+    "#class": civitai.CivitaiSearchModelsExtractor,
+    "#urls" : (
+        "https://civitai.com/models/99868",
+        "https://civitai.com/models/341330",
+        "https://civitai.com/models/884509",
+        "https://civitai.com/models/1003064",
+    ),
 },
 
 {
