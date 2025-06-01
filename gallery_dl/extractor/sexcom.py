@@ -166,7 +166,7 @@ class SexcomPinExtractor(SexcomExtractor):
     subcategory = "pin"
     directory_fmt = ("{category}",)
     pattern = (BASE_PATTERN +
-               r"(/(?:pin|\w\w/(?:gif|video)s)/\d+/?)(?!.*#related$)")
+               r"(/(?:pin|\w\w/(?:gif|video|pic)s)/\d+/?)(?!.*#related$)")
     example = "https://www.sex.com/pin/12345-TITLE/"
 
     def pins(self):
