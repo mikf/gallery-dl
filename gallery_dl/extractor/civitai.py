@@ -321,7 +321,7 @@ class CivitaiModelExtractor(CivitaiExtractor):
         else:
             params = {
                 "modelVersionId": version["id"],
-                "prioritizedUserIds": [user["id"]],
+                "prioritizedUserIds": (user["id"],),
                 "period": "AllTime",
                 "sort": "Most Reactions",
                 "limit": 20,
@@ -499,7 +499,7 @@ class CivitaiUserVideosExtractor(CivitaiExtractor):
     def __init__(self, match):
         user, query = match.groups()
         self.params = self._parse_query(query)
-        self.params["types"] = ["video"]
+        self.params["types"] = ("video",)
         if self.params.get("section") == "reactions":
             self.subcategory = "reactions-videos"
             self.images = self._image_reactions
@@ -631,11 +631,11 @@ class CivitaiTrpcAPI():
                 "useIndex"     : True,
                 "period"       : "AllTime",
                 "sort"         : "Newest",
-                "types"        : ["image"],
+                "types"        : ("image",),
                 "withMeta"     : False,  # Metadata Only
                 "fromPlatform" : False,  # Made On-Site
                 "browsingLevel": self.nsfw,
-                "include"      : ["cosmetics"],
+                "include"      : ("cosmetics",),
             })
 
         params = self._type_params(params)
@@ -714,7 +714,7 @@ class CivitaiTrpcAPI():
                 "followed"     : False,
                 "draftOnly"    : False,
                 "pending"      : True,
-                "include"      : ["cosmetics"],
+                "include"      : ("cosmetics",),
             })
 
         params = self._type_params(params)
@@ -823,7 +823,7 @@ class CivitaiSearchAPI():
             "highlightPostTag": "__/ais-highlight__",
             "limit" : 51,
             "offset": 0,
-            "filter": [self._generate_filter(nsfw)],
+            "filter": (self._generate_filter(nsfw),),
         }
 
         return self._pagination(endpoint, query)
