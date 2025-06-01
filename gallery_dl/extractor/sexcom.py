@@ -130,7 +130,7 @@ class SexcomExtractor(Extractor):
         data = {
             "_http_headers": {"Referer": response.url},
             "type": "gif",
-            "url": extr(' href="', '"'),
+            "url": extr(' href="', '"').partition("?")[0],
             "title": text.unescape(extr("<title>", " Gif | Sex.com<")),
             "pin_id": text.parse_int(extr(
                 'rel="canonical" href="', '"').rpartition("/")[2]),
