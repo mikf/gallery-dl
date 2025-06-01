@@ -130,7 +130,7 @@ class SexcomExtractor(Extractor):
         data = {
             "_http_headers": {"Referer": response.url},
             "type": "gif",
-            "url": extr(' href="', '"'),
+            "url": extr(' href="', '"').partition("?")[0],
             "title": text.unescape(extr("<title>", " Gif | Sex.com<")),
             "pin_id": text.parse_int(extr(
                 'rel="canonical" href="', '"').rpartition("/")[2]),
@@ -166,7 +166,7 @@ class SexcomPinExtractor(SexcomExtractor):
     subcategory = "pin"
     directory_fmt = ("{category}",)
     pattern = (BASE_PATTERN +
-               r"(/(?:pin|\w\w/(?:gif|video)s)/\d+/?)(?!.*#related$)")
+               r"(/(?:\w\w/(?:pic|gif|video)s|pin)/\d+/?)(?!.*#related$)")
     example = "https://www.sex.com/pin/12345-TITLE/"
 
     def pins(self):
