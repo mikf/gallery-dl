@@ -12,6 +12,7 @@ import sys
 import unittest
 
 import io
+import re
 import time
 import random
 import string
@@ -973,6 +974,25 @@ value = 123
         self.assertEqual(response.cookies.get("foo"), None)
         self.assertEqual(response.headers.get("foo"), None)
         self.assertEqual(response.links.get("next"), None)
+
+    def test_re(self):
+        Pattern = type(re.compile(""))
+
+        p1 = util.re_compile("foo")
+        p2 = util.re("foo")
+        p3 = util.re("foo")
+
+        self.assertIsInstance(p1, Pattern)
+        self.assertIsInstance(p2, Pattern)
+        self.assertIsInstance(p3, Pattern)
+
+        self.assertIsNot(p1, p2)
+        self.assertIs(p2, p3)
+
+        if sys.hexversion >= 0x3060000:
+            self.assertEqual(p1, p2)
+        else:
+            self.assertEqual(repr(p1), repr(p2))
 
 
 class TestExtractor():

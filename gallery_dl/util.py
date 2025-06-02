@@ -32,6 +32,19 @@ try:
 except AttributeError:
     re_compile = re.sre_compile.compile
 
+CACHE_PATTERN = {}
+
+
+def re(pattern):
+    """Compile a regular expression pattern"""
+    try:
+        return CACHE_PATTERN[pattern]
+    except KeyError:
+        pass
+
+    p = CACHE_PATTERN[pattern] = re_compile(pattern)
+    return p
+
 
 def bencode(num, alphabet="0123456789"):
     """Encode an integer into a base-N encoded string"""
@@ -360,9 +373,8 @@ Response Headers
 
             set_cookie = res_headers.get("Set-Cookie")
             if set_cookie:
-                res_headers["Set-Cookie"] = re.sub(
-                    r"(^|, )([^ =]+)=[^,;]*", r"\1\2=***", set_cookie,
-                )
+                res_headers["Set-Cookie"] = re(r"(^|, )([^ =]+)=[^,;]*").sub(
+                    r"\1\2=***", set_cookie)
 
         fmt_nv = "{}: {}".format
 
