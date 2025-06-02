@@ -140,6 +140,7 @@ modules = [
     "pornhub",
     "pornpics",
     "postmill",
+    "rawkuma",
     "reactor",
     "readcomiconline",
     "realbooru",

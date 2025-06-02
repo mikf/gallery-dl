@@ -764,6 +764,12 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
+    <td>Rawkuma</td>
+    <td>https://rawkuma.net/</td>
+    <td>Chapters, Manga</td>
+    <td></td>
+</tr>
+<tr>
     <td>Read Comic Online</td>
     <td>https://readcomiconline.li/</td>
     <td>Comic Issues, Comics</td>
