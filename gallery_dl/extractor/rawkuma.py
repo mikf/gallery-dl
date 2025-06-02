@@ -1,18 +1,22 @@
 # -*- coding: utf-8 -*-
 
-"""Extractors for https://rawkuma.com/"""
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 2 as
+# published by the Free Software Foundation.
+
+"""Extractors for https://rawkuma.net/"""
 
 from .common import MangaExtractor, ChapterExtractor
 from .. import text, util
 import re
 
-BASE_PATTERN = r"(?:https?://)?rawkuma\.com"
+BASE_PATTERN = r"(?:https?://)?rawkuma\.(?:net|com)"
 
 
 class RawkumaBase():
     """Base class for rawkuma extractors"""
     category = "rawkuma"
-    root = "https://rawkuma.com"
+    root = "https://rawkuma.net"
 
     def get_title(self, page):
         title = text.extr(page, 'property="og:title" content="', '"')
@@ -25,10 +29,10 @@ class RawkumaBase():
 
 
 class RawkumaChapterExtractor(RawkumaBase, ChapterExtractor):
-    """Extractor for manga chapters from rawkuma.com"""
+    """Extractor for manga chapters from rawkuma.net"""
     archive_fmt = "{chapter_id}_{page}"
-    pattern = BASE_PATTERN + r"/([\w\d-]+)-chapter-(\d+)"
-    example = "https://rawkuma.com/ID-chapter-1"
+    pattern = BASE_PATTERN + r"/([^/?#]+)-chapter-(\d+)"
+    example = "https://rawkuma.net/TITLE-chapter-123"
 
     def __init__(self, match):
         url = match.group(0)
@@ -62,10 +66,10 @@ class RawkumaChapterExtractor(RawkumaBase, ChapterExtractor):
 
 
 class RawkumaMangaExtractor(RawkumaBase, MangaExtractor):
-    """Extractor for manga from rawkuma.com"""
+    """Extractor for manga from rawkuma.net"""
     chapterclass = RawkumaChapterExtractor
-    pattern = BASE_PATTERN + r"/manga/([\w\d-]+)"
-    example = "https://rawkuma.com/manga/ID"
+    pattern = BASE_PATTERN + r"/manga/([^/?#]+)"
+    example = "https://rawkuma.net/manga/TITLE"
 
     def __init__(self, match):
         url, self.gid = match.group(0), match.group(1)
