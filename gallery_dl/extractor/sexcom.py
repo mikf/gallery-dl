@@ -73,6 +73,8 @@ class SexcomExtractor(Extractor):
             return self._parse_pin_legacy(response)
         if "/videos/" in response.url:
             return self._parse_pin_video(response)
+        if "/pics/" in response.url:
+            return self._parse_pin_pics(response)                
         return self._parse_pin_gifs(response)
 
     def _parse_pin_legacy(self, response):
@@ -138,7 +140,21 @@ class SexcomExtractor(Extractor):
         }
 
         return text.nameext_from_url(data["url"], data)
+        
+    def _parse_pin_pics(self, response):
+        extr = text.extract_from(response.text)
 
+        data = {
+            "_http_headers": {"Referer": response.url},
+            "type": "pics",
+            "url": extr(' href="', '"'),  # Adjust if the full image src is different
+            "title": text.unescape(extr("<title>", " Pic | Sex.com<")),
+            "pin_id": text.parse_int(extr(
+                'rel="canonical" href="', '"').rpartition("/")[2]),
+            "tags": text.split_html(extr("</h1>", "</section>")),
+        }
+        return text.nameext_from_url(data["url"], data)
+        
     def _parse_pin_video(self, response):
         extr = text.extract_from(response.text)
 
