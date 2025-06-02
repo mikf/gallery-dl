@@ -69,33 +69,26 @@ class RawkumaMangaExtractor(RawkumaBase, MangaExtractor):
     """Extractor for manga from rawkuma.net"""
     chapterclass = RawkumaChapterExtractor
     pattern = BASE_PATTERN + r"/manga/([^/?#]+)"
-    example = "https://rawkuma.net/manga/TITLE"
+    example = "https://rawkuma.net/manga/TITLE/"
 
     def __init__(self, match):
-        url, self.gid = match.group(0), match.group(1)
+        url = "{}/manga/{}/".format(self.root, match.group(1))
         MangaExtractor.__init__(self, match, url)
 
     def chapters(self, page):
-        results = []
-        pos = 0
-        title = self.get_title(page)
+        manga = text.unescape(text.extr(page, "<title>", " &#8211; "))
 
-        while True:
-            chapter_id, pos = \
-                text.extract(page, '<div class="eph-num">\n'
-                             '<a href="https://rawkuma.com/',
-                             '/"', pos)
-            if not chapter_id:
-                return results
-            url = text.urljoin(self.root, chapter_id)
-            # chapter, pos = text.extract(page,
-            #     '<span class="chapternum">Chapter ', '<', pos)
-            data = {
-                "manga_id": self.gid,
-                "chapter_id": chapter_id,
-                "title": title,
-            }
-            chapter_match = re.search(r"\d+$", chapter_id)
-            if chapter_match:
-                data["chapter"] = chapter_match.group(0)
-            results.append((url, data))
+        results = []
+        for chbox in text.extract_iter(
+                page, '<li data-num="', "</a>"):
+            info = text.extr(chbox, '', '"')
+            chapter, _, title = info.partition(" - ")
+            chapter, sep, minor = chapter.partition(".")
+
+            results.append((text.extr(chbox, 'href="', '"'), {
+                "manga"        : manga,
+                "chapter"      : text.parse_int(chapter),
+                "chapter-minor": sep + minor,
+                "title"        : title,
+            }))
+        return results
