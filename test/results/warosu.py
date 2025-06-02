@@ -46,12 +46,24 @@ __tests__ = (
     "image"     : "https://i.warosu.org/data/jp/img/0166/58/1488521824388.jpg",
     "name"      : "Anonymous",
     "no"        : 16658073,
-    "now"       : "Fri Mar 3 01:17:04 2017",
+    "now"       : "Fri, Mar 3, 2017 01:17:04",
     "thread"    : "16658073",
     "tim"       : 1488521824388,
     "time"      : 1488503824,
     "title"     : "Is this canon?",
     "w"         : 450,
+},
+
+{
+    "#url"     : "https://warosu.org/jp/thread/45886210",
+    "#comment" : "deleted post (#5289)",
+    "#category": ("", "warosu", "thread"),
+    "#class"   : warosu.WarosuThreadExtractor,
+    "#count"   : "> 150",
+
+    "board"     : "jp",
+    "board_name": "Otaku Culture",
+    "title"     : "/07/th Expansion Thread",
 },
 
 {
@@ -71,7 +83,7 @@ __tests__ = (
     "image"     : r"re:https://i.warosu\.org/data/ic/img/0046/04/1590\d+\.jpg",
     "name"      : "re:Anonymous|Dhe Specky Spider-Man",
     "no"        : range(4604652, 4620000),
-    "now"       : r"re:\w\w\w \w\w\w \d\d \d\d:\d\d:\d\d 2020",
+    "now"       : r"re:\w\w\w, \w\w\w \d\d?, 2020 \d\d:\d\d:\d\d",
     "thread"    : "4604652",
     "tim"       : range(1590430159651, 1590755510488),
     "time"      : range(1590415759, 1590755510),

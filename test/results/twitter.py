@@ -14,8 +14,16 @@ __tests__ = (
     "#category": ("", "twitter", "user"),
     "#class"   : twitter.TwitterUserExtractor,
     "#options" : {"include": "all"},
-    "#pattern" : r"https://twitter\.com/supernaturepics/(photo|header_photo|timeline|tweets|media|with_replies|likes)$",
-    "#count"   : 7,
+    "#urls"    : [
+        "https://x.com/supernaturepics/info",
+        "https://x.com/supernaturepics/photo",
+        "https://x.com/supernaturepics/header_photo",
+        "https://x.com/supernaturepics/timeline",
+        "https://x.com/supernaturepics/tweets",
+        "https://x.com/supernaturepics/media",
+        "https://x.com/supernaturepics/with_replies",
+        "https://x.com/supernaturepics/likes",
+    ],
 },
 
 {
@@ -61,6 +69,12 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://fixvx.com/supernaturepics",
+    "#category": ("", "twitter", "user"),
+    "#class"   : twitter.TwitterUserExtractor,
+},
+
+{
     "#url"     : "https://x.com/supernaturepics",
     "#category": ("", "twitter", "user"),
     "#class"   : twitter.TwitterUserExtractor,
@@ -72,6 +86,59 @@ __tests__ = (
     "#class"   : twitter.TwitterTimelineExtractor,
     "#range"   : "1-40",
     "#sha1_url": "c570ac1aae38ed1463be726cc46f31cac3d82a40",
+
+    "author": {
+        "date"            : "dt:2015-01-12 10:25:22",
+        "description"     : "The very best nature pictures.",
+        "favourites_count": int,
+        "followers_count" : int,
+        "friends_count"   : int,
+        "listed_count"    : int,
+        "media_count"     : int,
+        "statuses_count"  : int,
+        "id"              : 2976459548,
+        "location"        : "Earth",
+        "name"            : "supernaturepics",
+        "nick"            : "Nature Pictures",
+        "profile_banner"  : "https://pbs.twimg.com/profile_banners/2976459548/1421058583",
+        "profile_image"   : "https://pbs.twimg.com/profile_images/554585280938659841/FLVAlX18.jpeg",
+        "protected"       : False,
+        "verified"        : False,
+    },
+    "user": {
+        "date"            : "dt:2015-01-12 10:25:22",
+        "description"     : "The very best nature pictures.",
+        "favourites_count": int,
+        "followers_count" : int,
+        "friends_count"   : int,
+        "listed_count"    : int,
+        "media_count"     : int,
+        "statuses_count"  : int,
+        "id"              : 2976459548,
+        "location"        : "Earth",
+        "name"            : "supernaturepics",
+        "nick"            : "Nature Pictures",
+        "profile_banner"  : "https://pbs.twimg.com/profile_banners/2976459548/1421058583",
+        "profile_image"   : "https://pbs.twimg.com/profile_images/554585280938659841/FLVAlX18.jpeg",
+        "protected"       : False,
+        "verified"        : False,
+    },
+    "tweet_id"       : range(400000000000000000, 800000000000000000),
+    "conversation_id": range(400000000000000000, 800000000000000000),
+    "quote_id"       : 0,
+    "reply_id"       : 0,
+    "retweet_id"     : 0,
+    "count"          : range(1, 4),
+    "num"            : range(1, 4),
+    "favorite_count" : int,
+    "quote_count"    : int,
+    "reply_count"    : int,
+    "retweet_count"  : int,
+    "content"        : str,
+    "lang"           : str,
+    "date"           : "type:datetime",
+    "sensitive"      : False,
+    "source"         : "nature_pics",
 },
 
 {
@@ -205,6 +272,12 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://twitter.com/supernaturepics/followers",
+    "#category": ("", "twitter", "followers"),
+    "#class"   : twitter.TwitterFollowersExtractor,
+},
+
+{
     "#url"     : "https://twitter.com/search?q=nature",
     "#category": ("", "twitter", "search"),
     "#class"   : twitter.TwitterSearchExtractor,
@@ -218,7 +291,7 @@ __tests__ = (
     "#category": ("", "twitter", "hashtag"),
     "#class"   : twitter.TwitterHashtagExtractor,
     "#pattern" : twitter.TwitterSearchExtractor.pattern,
-    "#sha1_url": "3571c3a53b7647ea35517041fdc17f77ec5b2cb9",
+    "#urls"    : "https://x.com/search?q=%23nature",
 },
 
 {
@@ -227,6 +300,22 @@ __tests__ = (
     "#class"   : twitter.TwitterEventExtractor,
     "#range"   : "1-20",
     "#count"   : ">=1",
+},
+
+{
+    "#url"     : "https://twitter.com/i/communities",
+    "#category": ("", "twitter", "communities"),
+    "#class"   : twitter.TwitterCommunitiesExtractor,
+    "#range"   : "1-20",
+    "#count"   : 20,
+},
+
+{
+    "#url"     : "https://twitter.com/i/communities/1651515740753735697",
+    "#category": ("", "twitter", "community"),
+    "#class"   : twitter.TwitterCommunityExtractor,
+    "#range"   : "1-20",
+    "#count"   : 20,
 },
 
 {
@@ -244,18 +333,22 @@ __tests__ = (
     "#category": ("", "twitter", "tweet"),
     "#class"   : twitter.TwitterTweetExtractor,
     "#sha1_url": "3a2a43dc5fb79dd5432c701d8e55e87c4e551f47",
+
+    "type": "photo",
 },
 
 {
-    "#url"     : "https://twitter.com/perrypumas/status/1065692031626829824",
+    "#url"     : "https://twitter.com/perrypumas/status/1065692031626829824?s=20",
     "#comment" : "video",
     "#category": ("", "twitter", "tweet"),
     "#class"   : twitter.TwitterTweetExtractor,
     "#pattern" : r"https://video.twimg.com/ext_tw_video/.+\.mp4\?tag=5",
+
+    "type": "video",
 },
 
 {
-    "#url"     : "https://twitter.com/playpokemon/status/1263832915173048321",
+    "#url"     : "https://twitter.com/playpokemon/status/1263832915173048321/",
     "#comment" : "content with emoji, newlines, hashtags (#338)",
     "#category": ("", "twitter", "tweet"),
     "#class"   : twitter.TwitterTweetExtractor,
@@ -458,6 +551,20 @@ You’ll be able to receive four Galarian form Pokémon with Hidden Abilities, p
 },
 
 {
+    "#url"     : "https://twitter.com/supernaturepics/status/604341487988576256/photo/1",
+    "#comment" : "/photo/ URL (#5443)",
+    "#category": ("", "twitter", "tweet"),
+    "#class"   : twitter.TwitterTweetExtractor,
+},
+
+{
+    "#url"     : "https://twitter.com/perrypumas/status/1065692031626829824/video/1",
+    "#comment" : "/video/ URL",
+    "#category": ("", "twitter", "tweet"),
+    "#class"   : twitter.TwitterTweetExtractor,
+},
+
+{
     "#url"     : "https://twitter.com/morino_ya/status/1392763691599237121",
     "#comment" : "retweet with missing media entities (#1555)",
     "#category": ("", "twitter", "tweet"),
@@ -487,11 +594,8 @@ You’ll be able to receive four Galarian form Pokémon with Hidden Abilities, p
     "#comment" : "age-restricted (#2354)",
     "#category": ("", "twitter", "tweet"),
     "#class"   : twitter.TwitterTweetExtractor,
+    "#auth"     : False,
     "#exception": exception.AuthorizationError,
-    "#options"  : {"syndication": True},
-    "#count"    : 1,
-
-    "date": "dt:2022-02-13 20:10:09",
 },
 
 {
@@ -501,6 +605,7 @@ You’ll be able to receive four Galarian form Pokémon with Hidden Abilities, p
     "#class"   : twitter.TwitterTweetExtractor,
 
     "description": "oc",
+    "type"       : "photo",
 },
 
 {
@@ -509,7 +614,7 @@ You’ll be able to receive four Galarian form Pokémon with Hidden Abilities, p
     "#category": ("", "twitter", "tweet"),
     "#class"   : twitter.TwitterTweetExtractor,
     "#options" : {"cards": True},
-    "#pattern" : r"https://pbs.twimg.com/card_img/174\d+/[\w-]+\?format=(jpg|png)&name=orig$",
+    "#pattern" : r"https://pbs.twimg.com/card_img/17\d+/[\w-]+\?format=(jpg|png)&name=orig$",
     "#range"   : "1,3",
 },
 
@@ -522,6 +627,48 @@ You’ll be able to receive four Galarian form Pokémon with Hidden Abilities, p
     "content": """BREAKING - DEADLY LIES: Independent researchers at Texas A&M University have just contradicted federal government regulators, saying that toxic air pollutants in East Palestine, Ohio, could pose long-term risks. \n
 The Washington Post writes, "Three weeks after the toxic train derailment in Ohio, an analysis of Environmental Protection Agency data has found nine air pollutants at levels that could raise long-term health concerns in and around East Palestine, according to an independent analysis. \n
 "The analysis by Texas A&M University seems to contradict statements by state and federal regulators that air near the crash site is completely safe, despite residents complaining about rashes, breathing problems and other health effects." Your reaction.""",
+},
+
+{
+    "#url"     : "https://twitter.com/KrisKobach1787/status/1765935595702919299",
+    "#comment" : "'birdwatch' note (#5317)",
+    "#category": ("", "twitter", "tweet"),
+    "#class"   : twitter.TwitterTweetExtractor,
+    "#options" : {"text-tweets": True},
+
+    "birdwatch": "In addition to the known harm of lead exposure, especially to children, Mr. Kobach is incorrect when he states the mandate is unfunded. In fact, the BIPARTISAN Infrastructure Law Joe Biden signed into law in Nov 2021 provides $15B toward lead service line replacement projects. epa.gov/ground-water-a…",
+    "content"  : "Biden wants to replace lead pipes. He failed to mention that the unfunded mandate sets an almost impossible timeline, will cost billions, infringe on the rights of the States and their residents – all for benefits that may be entirely speculative. #sotu https://ag.ks.gov/media-center/news-releases/2024/02/09/kobach-leads-coalition-demanding-biden-drop-unnecessary-epa-rule",
+},
+
+{
+    "#url"     : "https://x.com/jsports_motor/status/1801338077618524583",
+    "#comment" : "geo-restricted video (#5736)",
+    "#category": ("", "twitter", "tweet"),
+    "#class"   : twitter.TwitterTweetExtractor,
+    "#count"   : 0,
+},
+
+{
+    "#url"     : "https://x.com/fw_rion_/status/1866737025824829544",
+    "#comment" : "grok share (#7040)",
+    "#category": ("", "twitter", "tweet"),
+    "#class"   : twitter.TwitterTweetExtractor,
+    "#options" : {"cards": True},
+    "#urls"    : "https://pbs.twimg.com/grok-img-share/1866736156786008064.jpg",
+},
+
+{
+    "#url"     : "https://twitter.com/playpokemon/status/1263832915173048321/quotes",
+    "#category": ("", "twitter", "quotes"),
+    "#class"   : twitter.TwitterQuotesExtractor,
+    "#pattern" : twitter.TwitterSearchExtractor.pattern,
+    "#urls"    : "https://x.com/search?q=quoted_tweet_id:1263832915173048321",
+},
+
+{
+    "#url"     : "https://twitter.com/supernaturepics/info",
+    "#category": ("", "twitter", "info"),
+    "#class"   : twitter.TwitterInfoExtractor,
 },
 
 {

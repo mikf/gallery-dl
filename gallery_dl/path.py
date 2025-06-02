@@ -38,7 +38,7 @@ class PathFormat():
                 filename_fmt = extractor.filename_fmt
             elif isinstance(filename_fmt, dict):
                 self.filename_conditions = [
-                    (util.compile_expression(expr),
+                    (util.compile_filter(expr),
                      formatter.parse(fmt, kwdefault).format_map)
                     for expr, fmt in filename_fmt.items() if expr
                 ]
@@ -51,12 +51,13 @@ class PathFormat():
             raise exception.FilenameFormatError(exc)
 
         directory_fmt = config("directory")
+        self.directory_conditions = ()
         try:
             if directory_fmt is None:
                 directory_fmt = extractor.directory_fmt
             elif isinstance(directory_fmt, dict):
                 self.directory_conditions = [
-                    (util.compile_expression(expr), [
+                    (util.compile_filter(expr), [
                         formatter.parse(fmt, kwdefault).format_map
                         for fmt in fmts
                     ])
@@ -183,28 +184,30 @@ class PathFormat():
     def set_directory(self, kwdict):
         """Build directory path and create it if necessary"""
         self.kwdict = kwdict
-        sep = os.sep
 
         segments = self.build_directory(kwdict)
         if segments:
             self.directory = directory = self.basedirectory + self.clean_path(
-                sep.join(segments) + sep)
+                os.sep.join(segments) + os.sep)
         else:
             self.directory = directory = self.basedirectory
 
         if WINDOWS and self.extended:
-            # Enable longer-than-260-character paths
-            directory = os.path.abspath(directory)
-            if directory.startswith("\\\\"):
-                directory = "\\\\?\\UNC\\" + directory[2:]
-            else:
-                directory = "\\\\?\\" + directory
-
-            # abspath() in Python 3.7+ removes trailing path separators (#402)
-            if directory[-1] != sep:
-                directory += sep
-
+            directory = self._extended_path(directory)
         self.realdirectory = directory
+
+    def _extended_path(self, path):
+        # Enable longer-than-260-character paths
+        path = os.path.abspath(path)
+        if not path.startswith("\\\\"):
+            path = "\\\\?\\" + path
+        elif not path.startswith("\\\\?\\"):
+            path = "\\\\?\\UNC\\" + path[2:]
+
+        # abspath() in Python 3.7+ removes trailing path separators (#402)
+        if path[-1] != os.sep:
+            return path + os.sep
+        return path
 
     def set_filename(self, kwdict):
         """Set general filename data"""
@@ -231,6 +234,8 @@ class PathFormat():
                     self.temppath = self.realpath = self.realpath[:-1]
             elif not self.temppath:
                 self.build_path()
+        except exception.GalleryDLException:
+            raise
         except Exception:
             self.path = self.directory + "?"
             self.realpath = self.temppath = self.realdirectory + "?"
@@ -264,7 +269,7 @@ class PathFormat():
         try:
             for fmt in self.directory_formatters:
                 segment = fmt(kwdict).strip()
-                if strip:
+                if strip and segment not in {".", ".."}:
                     # remove trailing dots and spaces (#647)
                     segment = segment.rstrip(strip)
                 if segment:
@@ -286,7 +291,7 @@ class PathFormat():
                 formatters = self.directory_formatters
             for fmt in formatters:
                 segment = fmt(kwdict).strip()
-                if strip:
+                if strip and segment != "..":
                     segment = segment.rstrip(strip)
                 if segment:
                     append(self.clean_segment(segment))
@@ -337,12 +342,23 @@ class PathFormat():
                 try:
                     os.replace(self.temppath, self.realpath)
                 except FileNotFoundError:
-                    # delayed directory creation
-                    os.makedirs(self.realdirectory)
+                    try:
+                        # delayed directory creation
+                        os.makedirs(self.realdirectory)
+                    except FileExistsError:
+                        # file at self.temppath does not exist
+                        return False
                     continue
                 except OSError:
                     # move across different filesystems
-                    shutil.copyfile(self.temppath, self.realpath)
+                    try:
+                        shutil.copyfile(self.temppath, self.realpath)
+                    except FileNotFoundError:
+                        try:
+                            os.makedirs(self.realdirectory)
+                        except FileExistsError:
+                            return False
+                        shutil.copyfile(self.temppath, self.realpath)
                     os.unlink(self.temppath)
                 break
 

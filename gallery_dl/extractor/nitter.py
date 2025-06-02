@@ -219,7 +219,10 @@ class NitterExtractor(BaseExtractor):
                 self.user_obj = self._user_from_html(tweets_html[0])
 
             for html, quote in map(self._extract_quote, tweets_html[1:]):
-                yield self._tweet_from_html(html)
+                tweet = self._tweet_from_html(html)
+                if not tweet["date"]:
+                    continue
+                yield tweet
                 if quoted and quote:
                     yield self._tweet_from_quote(quote)
 
@@ -231,26 +234,6 @@ class NitterExtractor(BaseExtractor):
 
 
 BASE_PATTERN = NitterExtractor.update({
-    "nitter.net": {
-        "root": "https://nitter.net",
-        "pattern": r"nitter\.net",
-    },
-    "nitter.1d4.us": {
-        "root": "https://nitter.1d4.us",
-        "pattern": r"nitter\.1d4\.us",
-    },
-    "nitter.kavin.rocks": {
-        "root": "https://nitter.kavin.rocks",
-        "pattern": r"nitter\.kavin\.rocks",
-    },
-    "nitter.unixfox.eu": {
-        "root": "https://nitter.unixfox.eu",
-        "pattern": r"nitter\.unixfox\.eu",
-    },
-    "nitter.it": {
-        "root": "https://nitter.it",
-        "pattern": r"nitter\.it",
-    },
 })
 
 USER_PATTERN = BASE_PATTERN + r"/(i(?:/user/|d:)(\d+)|[^/?#]+)"

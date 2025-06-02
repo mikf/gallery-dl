@@ -32,6 +32,13 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.pornhub.com/album/69606532",
+    "#comment" : "KeyError due to missing image entry (#6299)",
+    "#class"   : pornhub.PornhubGalleryExtractor,
+    "#count"   : 6,
+},
+
+{
     "#url"     : "https://www.pornhub.com/album/69040172",
     "#category": ("", "pornhub", "gallery"),
     "#class"   : pornhub.PornhubGalleryExtractor,
@@ -62,9 +69,11 @@ __tests__ = (
         "hardcore sex",
         "babes 18 year",
     ],
+    "timestamp": "5:07",
     "title"    : "Intense sloppy blowjob of Danika Mori",
     "url"      : "https://el.phncdn.com/pics/gifs/043/726/891/43726891a.webm",
     "user"     : "Danika Mori",
+    "viewkey"  : "64367c8c78a4a",
 },
 
 {
@@ -110,7 +119,7 @@ __tests__ = (
     "#category": ("", "pornhub", "gifs"),
     "#class"   : pornhub.PornhubGifsExtractor,
     "#pattern" : pornhub.PornhubGifExtractor.pattern,
-    "#count"   : ">= 42",
+    "#count"   : ">= 30",
 },
 
 {

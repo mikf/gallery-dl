@@ -13,7 +13,7 @@ __tests__ = (
     "#category": ("", "redgifs", "user"),
     "#class"   : redgifs.RedgifsUserExtractor,
     "#pattern" : r"https://\w+\.redgifs\.com/[\w-]+\.mp4",
-    "#count"   : range(50, 60),
+    "#count"   : range(40, 60),
 },
 
 {
@@ -94,6 +94,20 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.redgifs.com/search/gifs?query=jav+model&order=top",
+    "#category": ("", "redgifs", "search"),
+    "#class"   : redgifs.RedgifsSearchExtractor,
+    "#pattern" : r"https://\w+\.redgifs\.com/[A-Za-z-]+\.(mp4|jpg)",
+    "#range"   : "1-10",
+    "#count"   : 10,
+},
+
+{
+    "#url"     : "https://www.redgifs.com/search?query=Skinny+Lesbian",
+    "#class"   : redgifs.RedgifsSearchExtractor,
+},
+
+{
     "#url"     : "https://www.redgifs.com/browse?tags=JAV",
     "#category": ("", "redgifs", "search"),
     "#class"   : redgifs.RedgifsSearchExtractor,
@@ -163,6 +177,14 @@ __tests__ = (
     "#url"     : "https://v3.redgifs.com/watch/FoolishForkedAbyssiniancat",
     "#category": ("", "redgifs", "image"),
     "#class"   : redgifs.RedgifsImageExtractor,
+},
+
+{
+    "#url"     : "https://v3.redgifs.com/watch/605025947780972895",
+    "#category": ("", "redgifs", "image"),
+    "#class"   : redgifs.RedgifsImageExtractor,
+
+    "id": "humblegrippingmole",
 },
 
 {

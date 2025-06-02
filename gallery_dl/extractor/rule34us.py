@@ -36,7 +36,7 @@ class Rule34usExtractor(BooruExtractor):
             "score"   : text.extract(extr('Score: ', '> - <'), ">", "<")[0],
             "width"   : extr('Size: ', 'w'),
             "height"  : extr(' x ', 'h'),
-            "file_url": extr(' src="', '"'),
+            "file_url": extr('<source src="', '"') or extr('<img src="', '"'),
         }
 
         url = post["file_url"]

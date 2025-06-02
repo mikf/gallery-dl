@@ -50,7 +50,7 @@ class WarosuThreadExtractor(Extractor):
         title = text.unescape(text.extr(page, "class=filetitle>", "<"))
         return {
             "board"     : self.board,
-            "board_name": boardname.rpartition(" - ")[2],
+            "board_name": boardname.split(" - ")[1],
             "thread"    : self.thread,
             "title"     : title,
         }
@@ -64,8 +64,7 @@ class WarosuThreadExtractor(Extractor):
     def parse(self, post):
         """Build post object by extracting data from an HTML post"""
         data = self._extract_post(post)
-        if "<span> File:" in post:
-            self._extract_image(post, data)
+        if "<span class=fileinfo>" in post and self._extract_image(post, data):
             part = data["image"].rpartition("/")[2]
             data["tim"], _, data["extension"] = part.partition(".")
             data["ext"] = "." + data["extension"]
@@ -84,13 +83,18 @@ class WarosuThreadExtractor(Extractor):
 
     def _extract_image(self, post, data):
         extr = text.extract_from(post)
-        data["fsize"] = extr("<span> File: ", ", ")
+        data["fsize"] = extr("<span class=fileinfo> File: ", ", ")
         data["w"] = extr("", "x")
         data["h"] = extr("", ", ")
         data["filename"] = text.unquote(extr(
             "", "<").rstrip().rpartition(".")[0])
         extr("<br>", "")
 
-        data["image"] = url = extr("<a href=", ">")
-        if url[0] == "/":
-            data["image"] = self.root + url
+        url = extr("<a href=", ">")
+        if url:
+            if url[0] == "/":
+                data["image"] = self.root + url
+            else:
+                data["image"] = url
+            return True
+        return False

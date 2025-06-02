@@ -10,9 +10,54 @@ import os
 import sys
 import shutil
 import logging
-import functools
 import unicodedata
 from . import config, util, formatter
+
+
+# --------------------------------------------------------------------
+# Globals
+
+try:
+    TTY_STDOUT = sys.stdout.isatty()
+except Exception:
+    TTY_STDOUT = False
+
+try:
+    TTY_STDERR = sys.stderr.isatty()
+except Exception:
+    TTY_STDERR = False
+
+try:
+    TTY_STDIN = sys.stdin.isatty()
+except Exception:
+    TTY_STDIN = False
+
+
+COLORS_DEFAULT = {}
+COLORS = not os.environ.get("NO_COLOR")
+if COLORS:
+    if TTY_STDOUT:
+        COLORS_DEFAULT["success"] = "1;32"
+        COLORS_DEFAULT["skip"] = "2"
+    if TTY_STDERR:
+        COLORS_DEFAULT["debug"] = "0;37"
+        COLORS_DEFAULT["info"] = "1;37"
+        COLORS_DEFAULT["warning"] = "1;33"
+        COLORS_DEFAULT["error"] = "1;31"
+
+
+if util.WINDOWS:
+    ANSI = COLORS and os.environ.get("TERM") == "ANSI"
+    OFFSET = 1
+    CHAR_SKIP = "# "
+    CHAR_SUCCESS = "* "
+    CHAR_ELLIPSIES = "..."
+else:
+    ANSI = COLORS
+    OFFSET = 0
+    CHAR_SKIP = "# "
+    CHAR_SUCCESS = "✔ "
+    CHAR_ELLIPSIES = "…"
 
 
 # --------------------------------------------------------------------
@@ -21,6 +66,7 @@ from . import config, util, formatter
 LOG_FORMAT = "[{name}][{levelname}] {message}"
 LOG_FORMAT_DATE = "%Y-%m-%d %H:%M:%S"
 LOG_LEVEL = logging.INFO
+LOG_LEVELS = ("debug", "info", "warning", "error")
 
 
 class Logger(logging.Logger):
@@ -64,38 +110,6 @@ class LoggerAdapter():
             self.logger._log(logging.ERROR, msg, args, **kwargs)
 
 
-class LoggerAdapterActions():
-
-    def __init__(self, logger, job):
-        self.logger = logger
-        self.extra = job._logger_extra
-        self.actions = job._logger_actions
-
-        self.debug = functools.partial(self.log, logging.DEBUG)
-        self.info = functools.partial(self.log, logging.INFO)
-        self.warning = functools.partial(self.log, logging.WARNING)
-        self.error = functools.partial(self.log, logging.ERROR)
-
-    def log(self, level, msg, *args, **kwargs):
-        if args:
-            msg = msg % args
-
-        actions = self.actions[level]
-        if actions:
-            args = self.extra.copy()
-            args["level"] = level
-
-            for cond, action in actions:
-                if cond(msg):
-                    action(args)
-
-            level = args["level"]
-
-        if self.logger.isEnabledFor(level):
-            kwargs["extra"] = self.extra
-            self.logger._log(level, msg, (), **kwargs)
-
-
 class PathfmtProxy():
     __slots__ = ("job",)
 
@@ -129,7 +143,7 @@ class Formatter(logging.Formatter):
 
     def __init__(self, fmt, datefmt):
         if isinstance(fmt, dict):
-            for key in ("debug", "info", "warning", "error"):
+            for key in LOG_LEVELS:
                 value = fmt[key] if key in fmt else LOG_FORMAT
                 fmt[key] = (formatter.parse(value).format_map,
                             "{asctime" in value)
@@ -187,16 +201,36 @@ def configure_logging(loglevel):
     # stream logging handler
     handler = root.handlers[0]
     opts = config.interpolate(("output",), "log")
+
+    colors = config.interpolate(("output",), "colors")
+    if colors is None:
+        colors = COLORS_DEFAULT
+    if colors and not opts:
+        opts = LOG_FORMAT
+
     if opts:
         if isinstance(opts, str):
-            opts = {"format": opts}
-        if handler.level == LOG_LEVEL and "level" in opts:
+            logfmt = opts
+            opts = {}
+        elif "format" in opts:
+            logfmt = opts["format"]
+        else:
+            logfmt = LOG_FORMAT
+
+        if not isinstance(logfmt, dict) and colors:
+            ansifmt = "\033[{}m{}\033[0m".format
+            lf = {}
+            for level in LOG_LEVELS:
+                c = colors.get(level)
+                lf[level] = ansifmt(c, logfmt) if c else logfmt
+            logfmt = lf
+
+        handler.setFormatter(Formatter(
+            logfmt, opts.get("format-date", LOG_FORMAT_DATE)))
+
+        if "level" in opts and handler.level == LOG_LEVEL:
             handler.setLevel(opts["level"])
-        if "format" in opts or "format-date" in opts:
-            handler.setFormatter(Formatter(
-                opts.get("format", LOG_FORMAT),
-                opts.get("format-date", LOG_FORMAT_DATE),
-            ))
+
         if minlevel > handler.level:
             minlevel = handler.level
 
@@ -223,6 +257,9 @@ def setup_logging_handler(key, fmt=LOG_FORMAT, lvl=LOG_LEVEL, mode="w"):
     encoding = opts.get("encoding", "utf-8")
     try:
         path = util.expand_path(path)
+        handler = logging.FileHandler(path, mode, encoding)
+    except FileNotFoundError:
+        os.makedirs(os.path.dirname(path))
         handler = logging.FileHandler(path, mode, encoding)
     except (OSError, ValueError) as exc:
         logging.getLogger("gallery-dl").warning(
@@ -304,12 +341,17 @@ def select():
     mode = config.get(("output",), "mode")
 
     if mode is None or mode == "auto":
-        if hasattr(sys.stdout, "isatty") and sys.stdout.isatty():
-            output = ColorOutput() if ANSI else TerminalOutput()
-        else:
+        try:
+            if TTY_STDOUT:
+                output = ColorOutput() if ANSI else TerminalOutput()
+            else:
+                output = PipeOutput()
+        except Exception:
             output = PipeOutput()
     elif isinstance(mode, dict):
         output = CustomOutput(mode)
+    elif not mode:
+        output = NullOutput()
     else:
         output = {
             "default" : PipeOutput,
@@ -385,7 +427,10 @@ class ColorOutput(TerminalOutput):
     def __init__(self):
         TerminalOutput.__init__(self)
 
-        colors = config.get(("output",), "colors") or {}
+        colors = config.interpolate(("output",), "colors")
+        if colors is None:
+            colors = COLORS_DEFAULT
+
         self.color_skip = "\033[{}m".format(
             colors.get("skip", "2"))
         self.color_success = "\r\033[{}m".format(
@@ -511,17 +556,3 @@ def shorten_string_eaw(txt, limit, sep="…", cache=EAWCache()):
         right -= 1
 
     return txt[:left] + sep + txt[right+1:]
-
-
-if util.WINDOWS:
-    ANSI = os.environ.get("TERM") == "ANSI"
-    OFFSET = 1
-    CHAR_SKIP = "# "
-    CHAR_SUCCESS = "* "
-    CHAR_ELLIPSIES = "..."
-else:
-    ANSI = True
-    OFFSET = 0
-    CHAR_SKIP = "# "
-    CHAR_SUCCESS = "✔ "
-    CHAR_ELLIPSIES = "…"

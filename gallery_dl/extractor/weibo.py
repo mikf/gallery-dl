@@ -8,7 +8,7 @@
 
 """Extractors for https://www.weibo.com/"""
 
-from .common import Extractor, Message
+from .common import Extractor, Message, Dispatch
 from .. import text, util, exception
 from ..cache import cache
 import random
@@ -30,9 +30,12 @@ class WeiboExtractor(Extractor):
         self._prefix, self.user = match.groups()
 
     def _init(self):
-        self.retweets = self.config("retweets", True)
-        self.videos = self.config("videos", True)
         self.livephoto = self.config("livephoto", True)
+        self.retweets = self.config("retweets", False)
+        self.videos = self.config("videos", True)
+        self.movies = self.config("movies", False)
+        self.gifs = self.config("gifs", True)
+        self.gifs_video = (self.gifs == "video")
 
         cookies = _cookie_cache()
         if cookies is not None:
@@ -57,15 +60,25 @@ class WeiboExtractor(Extractor):
 
         for status in self.statuses():
 
-            files = []
-            if self.retweets and "retweeted_status" in status:
+            if "ori_mid" in status and not self.retweets:
+                self.log.debug("Skipping %s (快转 retweet)", status["id"])
+                continue
+
+            if "retweeted_status" in status:
+                if not self.retweets:
+                    self.log.debug("Skipping %s (retweet)", status["id"])
+                    continue
+
+                # videos of the original post are in status
+                # images of the original post are in status["retweeted_status"]
+                files = []
+                self._extract_status(status, files)
+                self._extract_status(status["retweeted_status"], files)
+
                 if original_retweets:
                     status = status["retweeted_status"]
-                    self._extract_status(status, files)
-                else:
-                    self._extract_status(status, files)
-                    self._extract_status(status["retweeted_status"], files)
             else:
+                files = []
                 self._extract_status(status, files)
 
             status["date"] = text.parse_datetime(
@@ -106,16 +119,15 @@ class WeiboExtractor(Extractor):
                 pic = pics[pic_id]
                 pic_type = pic.get("type")
 
-                if pic_type == "gif" and self.videos:
-                    append({"url": pic["video"]})
+                if pic_type == "gif" and self.gifs:
+                    if self.gifs_video:
+                        append({"url": pic["video"]})
+                    else:
+                        append(pic["largest"].copy())
 
                 elif pic_type == "livephoto" and self.livephoto:
                     append(pic["largest"].copy())
-
-                    file = {"url": pic["video"]}
-                    file["filehame"], _, file["extension"] = \
-                        pic["video"].rpartition("%2F")[2].rpartition(".")
-                    append(file)
+                    append({"url": pic["video"]})
 
                 else:
                     append(pic["largest"].copy())
@@ -123,7 +135,10 @@ class WeiboExtractor(Extractor):
         if "page_info" in status:
             info = status["page_info"]
             if "media_info" in info and self.videos:
-                append(self._extract_video(info["media_info"]))
+                if info.get("type") != "5" or self.movies:
+                    append(self._extract_video(info["media_info"]))
+                else:
+                    self.log.debug("%s: Ignoring 'movie' video", status["id"])
 
     def _extract_video(self, info):
         try:
@@ -171,23 +186,34 @@ class WeiboExtractor(Extractor):
 
             data = data["data"]
             statuses = data["list"]
-            if not statuses:
-                return
             yield from statuses
 
-            if "next_cursor" in data:  # videos, newvideo
-                if data["next_cursor"] == -1:
+            # videos, newvideo
+            cursor = data.get("next_cursor")
+            if cursor:
+                if cursor == -1:
                     return
-                params["cursor"] = data["next_cursor"]
-            elif "page" in params:     # home, article
-                params["page"] += 1
-            elif data["since_id"]:     # album
+                params["cursor"] = cursor
+                continue
+
+            # album
+            since_id = data.get("since_id")
+            if since_id:
                 params["sinceid"] = data["since_id"]
-            else:                      # feed, last album page
-                try:
-                    params["since_id"] = statuses[-1]["id"] - 1
-                except KeyError:
+                continue
+
+            # home, article
+            if "page" in params:
+                if not statuses:
                     return
+                params["page"] += 1
+                continue
+
+            # feed, last album page
+            try:
+                params["since_id"] = statuses[-1]["id"] - 1
+            except LookupError:
+                return
 
     def _sina_visitor_system(self, response):
         self.log.info("Sina Visitor System")
@@ -225,9 +251,14 @@ class WeiboUserExtractor(WeiboExtractor):
     pattern = USER_PATTERN + r"(?:$|#)"
     example = "https://weibo.com/USER"
 
+    # do NOT override 'initialize()'
+    # it is needed for 'self._user_id()'
+    # def initialize(self):
+    #     pass
+
     def items(self):
         base = "{}/u/{}?tabtype=".format(self.root, self._user_id())
-        return self._dispatch_extractors((
+        return Dispatch._dispatch_extractors(self, (
             (WeiboHomeExtractor    , base + "home"),
             (WeiboFeedExtractor    , base + "feed"),
             (WeiboVideosExtractor  , base + "video"),

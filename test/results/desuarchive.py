@@ -16,9 +16,29 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://desuarchive.org/a",
+    "#category": ("foolfuuka", "desuarchive", "board"),
+    "#class"   : foolfuuka.FoolfuukaBoardExtractor,
+},
+
+{
     "#url"     : "https://desuarchive.org/a/",
     "#category": ("foolfuuka", "desuarchive", "board"),
     "#class"   : foolfuuka.FoolfuukaBoardExtractor,
+},
+
+{
+    "#url"     : "https://desuarchive.org/a/2",
+    "#category": ("foolfuuka", "desuarchive", "board"),
+    "#class"   : foolfuuka.FoolfuukaBoardExtractor,
+},
+
+{
+    "#url"     : "https://desuarchive.org/a/page/2",
+    "#category": ("foolfuuka", "desuarchive", "board"),
+    "#class"   : foolfuuka.FoolfuukaBoardExtractor,
+    "#pattern" : foolfuuka.FoolfuukaThreadExtractor.pattern,
+    "#count"   : 10,
 },
 
 {

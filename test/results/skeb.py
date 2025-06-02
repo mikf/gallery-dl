@@ -16,6 +16,8 @@ __tests__ = (
 
     "anonymous"       : False,
     "body"            : r"re:はじめまして。私はYouTubeにてVTuberとして活動をしている湊ラ",
+    "count"           : 2,
+    "num"             : range(1, 2),
     "client"          : {
         "avatar_url" : r"re:https://pbs.twimg.com/profile_images/\d+/\w+\.jpg",
         "header_url" : r"re:https://pbs.twimg.com/profile_banners/1375007870291300358/\d+/1500x500",
@@ -60,6 +62,9 @@ __tests__ = (
     "#class"   : skeb.SkebUserExtractor,
     "#pattern" : r"https://si\.imgix\.net/\w+/uploads/origins/[\w-]+",
     "#range"   : "1-5",
+
+    "count": int,
+    "num"  : int,
 },
 
 {
@@ -75,6 +80,14 @@ __tests__ = (
     "#url"     : "https://skeb.jp/@user/following_creators",
     "#category": ("", "skeb", "following"),
     "#class"   : skeb.SkebFollowingExtractor,
+},
+
+{
+    "#url"     : "https://skeb.jp/following_users",
+    "#category": ("", "skeb", "following-users"),
+    "#class"   : skeb.SkebFollowingUsersExtractor,
+    "#pattern" : skeb.SkebUserExtractor.pattern,
+    "#auth"    : True,
 },
 
 )

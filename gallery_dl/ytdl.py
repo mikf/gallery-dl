@@ -18,9 +18,9 @@ def import_module(module_name):
     if module_name is None:
         try:
             return __import__("yt_dlp")
-        except ImportError:
+        except (ImportError, SyntaxError):
             return __import__("youtube_dl")
-    return __import__(module_name.replace("-", "_"))
+    return util.import_file(module_name)
 
 
 def construct_YoutubeDL(module, obj, user_opts, system_opts=None):
@@ -71,7 +71,7 @@ def construct_YoutubeDL(module, obj, user_opts, system_opts=None):
 def parse_command_line(module, argv):
     parser, opts, args = module.parseOpts(argv)
 
-    ytdlp = (module.__name__ == "yt_dlp")
+    ytdlp = hasattr(module, "cookies")
     std_headers = module.std_headers
 
     try:
@@ -134,6 +134,7 @@ def parse_command_line(module, argv):
     else:
         date = module.DateRange(opts.dateafter, opts.datebefore)
 
+    decodeOption = getattr(module, "decodeOption", util.identity)
     compat_opts = getattr(opts, "compat_opts", ())
 
     def _unused_compat_opt(name):
@@ -249,6 +250,22 @@ def parse_command_line(module, argv):
         None if opts.match_filter is None
         else module.match_filter_func(opts.match_filter))
 
+    cookiesfrombrowser = getattr(opts, "cookiesfrombrowser", None)
+    if cookiesfrombrowser:
+        match = re.fullmatch(r"""(?x)
+            (?P<name>[^+:]+)
+            (?:\s*\+\s*(?P<keyring>[^:]+))?
+            (?:\s*:\s*(?!:)(?P<profile>.+?))?
+            (?:\s*::\s*(?P<container>.+))?
+        """, cookiesfrombrowser)
+        if match:
+            browser, keyring, profile, container = match.groups()
+            if keyring is not None:
+                keyring = keyring.upper()
+            cookiesfrombrowser = (browser.lower(), profile, keyring, container)
+        else:
+            cookiesfrombrowser = None
+
     return {
         "usenetrc": opts.usenetrc,
         "netrc_location": getattr(opts, "netrc_location", None),
@@ -339,8 +356,8 @@ def parse_command_line(module, argv):
         "allsubtitles": opts.allsubtitles,
         "subtitlesformat": opts.subtitlesformat,
         "subtitleslangs": opts.subtitleslangs,
-        "matchtitle": module.decodeOption(opts.matchtitle),
-        "rejecttitle": module.decodeOption(opts.rejecttitle),
+        "matchtitle": decodeOption(opts.matchtitle),
+        "rejecttitle": decodeOption(opts.rejecttitle),
         "max_downloads": opts.max_downloads,
         "prefer_free_formats": opts.prefer_free_formats,
         "trim_file_name": getattr(opts, "trim_file_name", None),
@@ -364,7 +381,7 @@ def parse_command_line(module, argv):
         "skip_playlist_after_errors": getattr(
             opts, "skip_playlist_after_errors", None),
         "cookiefile": opts.cookiefile,
-        "cookiesfrombrowser": getattr(opts, "cookiesfrombrowser", None),
+        "cookiesfrombrowser": cookiesfrombrowser,
         "nocheckcertificate": opts.no_check_certificate,
         "prefer_insecure": opts.prefer_insecure,
         "proxy": opts.proxy,

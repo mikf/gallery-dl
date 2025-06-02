@@ -33,7 +33,8 @@ class FapachiPostExtractor(Extractor):
         }
         page = self.request("{}/{}/media/{}".format(
             self.root, self.user, self.id)).text
-        url = self.root + text.extr(page, 'd-block" src="', '"')
+        url = self.root + text.extract(
+            page, 'data-src="', '"', page.index('class="media-img'))[0]
         yield Message.Directory, data
         yield Message.Url, url, text.nameext_from_url(url, data)
 
@@ -58,8 +59,9 @@ class FapachiUserExtractor(Extractor):
             page = self.request("{}/{}/page/{}".format(
                 self.root, self.user, self.num)).text
             for post in text.extract_iter(page, 'model-media-prew">', ">"):
-                url = self.root + text.extr(post, '<a href="', '"')
-                yield Message.Queue, url, data
+                path = text.extr(post, '<a href="', '"')
+                if path:
+                    yield Message.Queue, self.root + path, data
 
             if '">Next page</a>' not in page:
                 return

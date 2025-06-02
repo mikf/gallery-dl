@@ -29,9 +29,11 @@ class IssuuPublicationExtractor(IssuuBase, GalleryExtractor):
     example = "https://issuu.com/issuu/docs/TITLE/"
 
     def metadata(self, page):
-        pos = page.rindex('id="initial-data"')
-        data = util.json_loads(text.rextract(
-            page, '<script data-json="', '"', pos)[0].replace("&quot;", '"'))
+
+        data = text.extr(
+            page, '{\\"documentTextVersion\\":', ']\\n"])</script>')
+        data = util.json_loads(text.unescape(
+            '{"":' + data.replace('\\"', '"')))
 
         doc = data["initialDocumentData"]["document"]
         doc["date"] = text.parse_datetime(
@@ -39,7 +41,7 @@ class IssuuPublicationExtractor(IssuuBase, GalleryExtractor):
 
         self._cnt = text.parse_int(doc["pageCount"])
         self._tpl = "https://{}/{}-{}/jpg/page_{{}}.jpg".format(
-            data["config"]["hosts"]["image"],
+            "image.isu.pub",  # data["config"]["hosts"]["image"],
             doc["revisionId"],
             doc["publicationId"],
         )
@@ -54,26 +56,29 @@ class IssuuPublicationExtractor(IssuuBase, GalleryExtractor):
 class IssuuUserExtractor(IssuuBase, Extractor):
     """Extractor for all publications of a user/publisher"""
     subcategory = "user"
-    pattern = r"(?:https?://)?issuu\.com/([^/?#]+)/?$"
+    pattern = r"(?:https?://)?issuu\.com/([^/?#]+)(?:/(\d*))?$"
     example = "https://issuu.com/USER"
 
-    def __init__(self, match):
-        Extractor.__init__(self, match)
-        self.user = match.group(1)
-
     def items(self):
-        url = "{}/call/profile/v1/documents/{}".format(self.root, self.user)
-        params = {"offset": 0, "limit": "25"}
+        user, pnum = self.groups
+        base = self.root + "/" + user
+        pnum = text.parse_int(pnum, 1)
 
         while True:
-            data = self.request(url, params=params).json()
-
-            for publication in data["items"]:
-                publication["url"] = "{}/{}/docs/{}".format(
-                    self.root, self.user, publication["uri"])
-                publication["_extractor"] = IssuuPublicationExtractor
-                yield Message.Queue, publication["url"], publication
-
-            if not data["hasMore"]:
+            url = base + "/" + str(pnum) if pnum > 1 else base
+            try:
+                html = self.request(url).text
+                data = text.extr(html, '\\"docs\\":', '}]\\n"]')
+                docs = util.json_loads(data.replace('\\"', '"'))
+            except Exception as exc:
+                self.log.debug("", exc_info=exc)
                 return
-            params["offset"] += data["limit"]
+
+            for publication in docs:
+                url = self.root + "/" + publication["uri"]
+                publication["_extractor"] = IssuuPublicationExtractor
+                yield Message.Queue, url, publication
+
+            if len(docs) < 48:
+                return
+            pnum += 1

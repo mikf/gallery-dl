@@ -22,10 +22,11 @@ class Test_CommandlineArguments(unittest.TestCase):
     def setUpClass(cls):
         try:
             cls.module = __import__(cls.module_name)
-        except ImportError:
+        except (ImportError, SyntaxError):
             raise unittest.SkipTest("cannot import module '{}'".format(
                 cls.module_name))
         cls.default = ytdl.parse_command_line(cls.module, [])
+        cls.ytdlp = hasattr(cls.module, "cookies")
 
     def test_ignore_errors(self):
         self._("--ignore-errors" , "ignoreerrors", True)
@@ -155,21 +156,21 @@ class Test_CommandlineArguments(unittest.TestCase):
     def test_subs(self):
         opts = self._(["--convert-subs", "srt"])
         conv = {"key": "FFmpegSubtitlesConvertor", "format": "srt"}
-        if self.module_name == "yt_dlp":
+        if self.ytdlp:
             conv["when"] = "before_dl"
         self.assertEqual(opts["postprocessors"][0], conv)
 
     def test_embed(self):
         subs = {"key": "FFmpegEmbedSubtitle"}
         thumb = {"key": "EmbedThumbnail", "already_have_thumbnail": False}
-        if self.module_name == "yt_dlp":
+        if self.ytdlp:
             subs["already_have_subtitle"] = False
 
         opts = self._(["--embed-subs", "--embed-thumbnail"])
         self.assertEqual(opts["postprocessors"][:2], [subs, thumb])
 
         thumb["already_have_thumbnail"] = True
-        if self.module_name == "yt_dlp":
+        if self.ytdlp:
             subs["already_have_subtitle"] = True
             thumb["already_have_thumbnail"] = "all"
 
@@ -212,7 +213,7 @@ class Test_CommandlineArguments(unittest.TestCase):
             "--ignore-config",
         ]
 
-        if self.module_name != "yt_dlp":
+        if not self.ytdlp:
             cmdline.extend((
                 "--dump-json",
                 "--dump-single-json",
@@ -293,6 +294,20 @@ class Test_CommandlineArguments_YtDlp(Test_CommandlineArguments):
                "geo_bypass", "EN")
         self._(["--geo-bypass-ip-block", "198.51.100.14/24"],
                "geo_bypass", "198.51.100.14/24")
+
+    def test_cookiesfrombrowser(self):
+        self._(["--cookies-from-browser", "firefox"],
+               "cookiesfrombrowser", ("firefox", None, None, None))
+        self._(["--cookies-from-browser", "firefox:profile"],
+               "cookiesfrombrowser", ("firefox", "profile", None, None))
+        self._(["--cookies-from-browser", "firefox+keyring"],
+               "cookiesfrombrowser", ("firefox", None, "KEYRING", None))
+        self._(["--cookies-from-browser", "firefox::container"],
+               "cookiesfrombrowser", ("firefox", None, None, "container"))
+        self._(["--cookies-from-browser",
+                "firefox+keyring:profile::container"],
+               "cookiesfrombrowser",
+               ("firefox", "profile", "KEYRING", "container"))
 
 
 if __name__ == "__main__":

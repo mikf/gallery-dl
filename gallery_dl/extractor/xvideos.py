@@ -11,6 +11,9 @@
 from .common import GalleryExtractor, Extractor, Message
 from .. import text, util
 
+BASE_PATTERN = (r"(?:https?://)?(?:www\.)?xvideos\.com"
+                r"/(?:profiles|(?:amateur-|model-)?channels)")
+
 
 class XvideosBase():
     """Base class for xvideos extractors"""
@@ -25,9 +28,7 @@ class XvideosGalleryExtractor(XvideosBase, GalleryExtractor):
                      "{gallery[id]} {gallery[title]}")
     filename_fmt = "{category}_{gallery[id]}_{num:>03}.{extension}"
     archive_fmt = "{gallery[id]}_{num}"
-    pattern = (r"(?:https?://)?(?:www\.)?xvideos\.com"
-               r"/(?:profiles|amateur-channels|model-channels)"
-               r"/([^/?#]+)/photos/(\d+)")
+    pattern = BASE_PATTERN + r"/([^/?#]+)/photos/(\d+)"
     example = "https://www.xvideos.com/profiles/USER/photos/12345"
 
     def __init__(self, match):
@@ -58,22 +59,35 @@ class XvideosGalleryExtractor(XvideosBase, GalleryExtractor):
             },
         }
 
-    @staticmethod
-    def images(page):
-        """Return a list of all image urls for this gallery"""
-        return [
+    def images(self, page):
+        results = [
             (url, None)
             for url in text.extract_iter(
                 page, '<a class="embed-responsive-item" href="', '"')
         ]
+
+        if not results:
+            return
+
+        while len(results) % 500 == 0:
+            path = text.rextr(page, ' href="', '"', page.find(">Next</"))
+            if not path:
+                break
+            page = self.request(self.root + path).text
+            results.extend(
+                (url, None)
+                for url in text.extract_iter(
+                    page, '<a class="embed-responsive-item" href="', '"')
+            )
+
+        return results
 
 
 class XvideosUserExtractor(XvideosBase, Extractor):
     """Extractor for user profiles on xvideos.com"""
     subcategory = "user"
     categorytransfer = True
-    pattern = (r"(?:https?://)?(?:www\.)?xvideos\.com"
-               r"/profiles/([^/?#]+)/?(?:#.*)?$")
+    pattern = BASE_PATTERN + r"/([^/?#]+)/?(?:#.*)?$"
     example = "https://www.xvideos.com/profiles/USER"
 
     def __init__(self, match):

@@ -7,7 +7,7 @@
 """Extractors for https://www.weasyl.com/"""
 
 from .common import Extractor, Message
-from .. import text
+from .. import text, util
 
 BASE_PATTERN = r"(?:https://)?(?:www\.)?weasyl.com/"
 
@@ -18,6 +18,7 @@ class WeasylExtractor(Extractor):
     filename_fmt = "{submitid} {title}.{extension}"
     archive_fmt = "{submitid}"
     root = "https://www.weasyl.com"
+    useragent = util.USERAGENT
 
     @staticmethod
     def populate_submission(data):
@@ -71,7 +72,7 @@ class WeasylExtractor(Extractor):
 
 class WeasylSubmissionExtractor(WeasylExtractor):
     subcategory = "submission"
-    pattern = BASE_PATTERN + r"(?:~[\w~-]+/submissions|submission)/(\d+)"
+    pattern = BASE_PATTERN + r"(?:~[\w~-]+/submissions|submission|view)/(\d+)"
     example = "https://www.weasyl.com/~USER/submissions/12345/TITLE"
 
     def __init__(self, match):
@@ -159,24 +160,26 @@ class WeasylJournalsExtractor(WeasylExtractor):
 
 class WeasylFavoriteExtractor(WeasylExtractor):
     subcategory = "favorite"
-    directory_fmt = ("{category}", "{owner_login}", "Favorites")
-    pattern = BASE_PATTERN + r"favorites\?userid=(\d+)"
+    directory_fmt = ("{category}", "{user}", "Favorites")
+    pattern = BASE_PATTERN + r"favorites(?:\?userid=(\d+)|/([^/?#]+))"
     example = "https://www.weasyl.com/favorites?userid=12345"
 
-    def __init__(self, match):
-        WeasylExtractor.__init__(self, match)
-        self.userid = match.group(1)
-
     def items(self):
+        userid, username = self.groups
         owner_login = lastid = None
-        url = self.root + "/favorites"
+
+        if username:
+            owner_login = username
+            path = "/favorites/" + username
+        else:
+            path = "/favorites"
         params = {
-            "userid" : self.userid,
+            "userid" : userid,
             "feature": "submit",
         }
 
         while True:
-            page = self.request(url, params=params).text
+            page = self.request(self.root + path, params=params).text
             pos = page.index('id="favorites-content"')
 
             if not owner_login:
@@ -186,12 +189,16 @@ class WeasylFavoriteExtractor(WeasylExtractor):
                 if submitid == lastid:
                     continue
                 lastid = submitid
+
                 submission = self.request_submission(submitid)
                 if self.populate_submission(submission):
                     submission["user"] = owner_login
                     yield Message.Directory, submission
                     yield Message.Url, submission["url"], submission
 
-            if "&amp;nextid=" not in page:
+            try:
+                pos = page.index('">Next (', pos)
+            except ValueError:
                 return
-            params["nextid"] = submitid
+            path = text.unescape(text.rextr(page, 'href="', '"', pos))
+            params = None

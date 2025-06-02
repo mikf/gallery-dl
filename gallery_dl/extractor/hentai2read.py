@@ -25,26 +25,30 @@ class Hentai2readChapterExtractor(Hentai2readBase, ChapterExtractor):
     pattern = r"(?:https?://)?(?:www\.)?hentai2read\.com(/[^/?#]+/([^/?#]+))"
     example = "https://hentai2read.com/TITLE/1/"
 
-    def __init__(self, match):
-        self.chapter = match.group(2)
-        ChapterExtractor.__init__(self, match)
-
     def metadata(self, page):
         title, pos = text.extract(page, "<title>", "</title>")
         manga_id, pos = text.extract(page, 'data-mid="', '"', pos)
         chapter_id, pos = text.extract(page, 'data-cid="', '"', pos)
-        chapter, sep, minor = self.chapter.partition(".")
-        match = re.match(r"Reading (.+) \(([^)]+)\) Hentai(?: by (.+))? - "
+        chapter, sep, minor = self.groups[1].partition(".")
+
+        match = re.match(r"Reading (.+) \(([^)]+)\) Hentai(?: by (.*))? - "
                          r"([^:]+): (.+) . Page 1 ", title)
+        if match:
+            manga, type, author, _, title = match.groups()
+        else:
+            self.log.warning("Failed to extract 'manga', 'type', 'author', "
+                             "and 'title' metadata")
+            manga = type = author = title = ""
+
         return {
-            "manga": match.group(1),
+            "manga": manga,
             "manga_id": text.parse_int(manga_id),
             "chapter": text.parse_int(chapter),
             "chapter_minor": sep + minor,
             "chapter_id": text.parse_int(chapter_id),
-            "type": match.group(2),
-            "author": match.group(3),
-            "title": match.group(5),
+            "type": type,
+            "author": author,
+            "title": title,
             "lang": "en",
             "language": "English",
         }

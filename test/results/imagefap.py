@@ -121,10 +121,24 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.imagefap.com/organizer/613950/Grace-Stout",
+    "#category": ("", "imagefap", "folder"),
+    "#class"   : imagefap.ImagefapFolderExtractor,
+    "#pattern" : imagefap.ImagefapGalleryExtractor.pattern,
+    "#count"   : 31,
+
+    "title": r"re:Grace Stout .+",
+},
+
+{
     "#url"     : "https://www.imagefap.com/usergallery.php?userid=1981976&folderid=409758",
     "#category": ("", "imagefap", "folder"),
     "#class"   : imagefap.ImagefapFolderExtractor,
-    "#sha1_url": "37822523e6e4a56feb9dea35653760c86b44ff89",
+    "#urls"    : "https://www.imagefap.com/gallery/7876223",
+
+    "folder"    : "Softcore",
+    "gallery_id": "7876223",
+    "title"     : "Kelsi Monroe in lingerie",
 },
 
 {
@@ -140,6 +154,8 @@ __tests__ = (
     "#class"   : imagefap.ImagefapFolderExtractor,
     "#pattern" : imagefap.ImagefapGalleryExtractor.pattern,
     "#range"   : "1-40",
+
+    "folder": "Uncategorized",
 },
 
 {

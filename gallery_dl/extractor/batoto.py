@@ -10,17 +10,67 @@ from .common import Extractor, ChapterExtractor, MangaExtractor
 from .. import text, exception
 import re
 
-BASE_PATTERN = (r"(?:https?://)?(?:"
-                r"(?:ba|d|h|m|w)to\.to|"
+BASE_PATTERN = (r"(?:https?://)?("
+                r"(?:ba|d|f|h|j|m|w)to\.to|"
                 r"(?:(?:manga|read)toto|batocomic|[xz]bato)\.(?:com|net|org)|"
                 r"comiko\.(?:net|org)|"
                 r"bat(?:otoo|o?two)\.com)")
+
+#  https://rentry.co/batoto
+DOMAINS = {
+    "dto.to",
+    "fto.to",
+    "hto.to",
+    "jto.to",
+    "mto.to",
+    "wto.to",
+    "xbato.com",
+    "xbato.net",
+    "xbato.org",
+    "zbato.com",
+    "zbato.net",
+    "zbato.org",
+    "readtoto.com",
+    "readtoto.net",
+    "readtoto.org",
+    "batocomic.com",
+    "batocomic.net",
+    "batocomic.org",
+    "batotoo.com",
+    "batotwo.com",
+    "comiko.net",
+    "comiko.org",
+    "battwo.com",
+}
+LEGACY_DOMAINS = {
+    "bato.to",
+    "mangatoto.com",
+    "mangatoto.net",
+    "mangatoto.org",
+}
 
 
 class BatotoBase():
     """Base class for batoto extractors"""
     category = "batoto"
-    root = "https://bato.to"
+    root = "https://xbato.org"
+    _warn_legacy = True
+
+    def _init_root(self):
+        domain = self.config("domain")
+        if domain is None or domain in {"auto", "url"}:
+            domain = self.groups[0]
+            if domain in LEGACY_DOMAINS:
+                if self._warn_legacy:
+                    BatotoBase._warn_legacy = False
+                    self.log.warning("Legacy domain '%s'", domain)
+        elif domain == "nolegacy":
+            domain = self.groups[0]
+            if domain in LEGACY_DOMAINS:
+                domain = "xbato.org"
+        elif domain == "nowarn":
+            domain = self.groups[0]
+        self.root = "https://" + domain
 
     def request(self, url, **kwargs):
         kwargs["encoding"] = "utf-8"
@@ -28,43 +78,53 @@ class BatotoBase():
 
 
 class BatotoChapterExtractor(BatotoBase, ChapterExtractor):
-    """Extractor for bato.to manga chapters"""
+    """Extractor for batoto manga chapters"""
+    archive_fmt = "{chapter_id}_{page}"
     pattern = BASE_PATTERN + r"/(?:title/[^/?#]+|chapter)/(\d+)"
-    example = "https://bato.to/title/12345-MANGA/54321"
+    example = "https://xbato.org/title/12345-MANGA/54321"
 
     def __init__(self, match):
-        self.root = text.root_from_url(match.group(0))
-        self.chapter_id = match.group(1)
-        url = "{}/title/0/{}".format(self.root, self.chapter_id)
-        ChapterExtractor.__init__(self, match, url)
+        ChapterExtractor.__init__(self, match, False)
+        self._init_root()
+        self.chapter_id = self.groups[1]
+        self.gallery_url = "{}/title/0/{}".format(self.root, self.chapter_id)
 
     def metadata(self, page):
         extr = text.extract_from(page)
-        manga, info, _ = extr("<title>", "<").rsplit(" - ", 3)
+        try:
+            manga, info, _ = extr("<title>", "<").rsplit(" - ", 3)
+        except ValueError:
+            manga = info = None
+
         manga_id = text.extr(
             extr('rel="canonical" href="', '"'), "/title/", "/")
 
+        if not manga:
+            manga = extr('link-hover">', "<")
+            info = text.remove_html(extr('link-hover">', "</"))
+        info = text.unescape(info)
+
         match = re.match(
-            r"(?:Volume\s+(\d+) )?"
-            r"\w+\s+(\d+)(.*)", info)
+            r"(?i)(?:(?:Volume|S(?:eason)?)\s*(\d+)\s+)?"
+            r"(?:Chapter|Episode)\s*(\d+)([\w.]*)", info)
         if match:
             volume, chapter, minor = match.groups()
-            title = text.remove_html(extr(
-                "selected>", "</option")).partition(" : ")[2]
         else:
             volume = chapter = 0
             minor = ""
-            title = info
 
         return {
-            "manga"        : text.unescape(manga),
-            "manga_id"     : text.parse_int(manga_id),
-            "title"        : text.unescape(title),
-            "volume"       : text.parse_int(volume),
-            "chapter"      : text.parse_int(chapter),
-            "chapter_minor": minor,
-            "chapter_id"   : text.parse_int(self.chapter_id),
-            "date"         : text.parse_timestamp(extr(' time="', '"')[:-3]),
+            "manga"         : text.unescape(manga),
+            "manga_id"      : text.parse_int(manga_id),
+            "chapter_url"   : extr(self.chapter_id + "-ch_", '"'),
+            "title"         : text.unescape(text.remove_html(extr(
+                "selected>", "</option")).partition(" : ")[2]),
+            "volume"        : text.parse_int(volume),
+            "chapter"       : text.parse_int(chapter),
+            "chapter_minor" : minor,
+            "chapter_string": info,
+            "chapter_id"    : text.parse_int(self.chapter_id),
+            "date"          : text.parse_timestamp(extr(' time="', '"')[:-3]),
         }
 
     def images(self, page):
@@ -77,18 +137,18 @@ class BatotoChapterExtractor(BatotoBase, ChapterExtractor):
 
 
 class BatotoMangaExtractor(BatotoBase, MangaExtractor):
-    """Extractor for bato.to manga"""
+    """Extractor for batoto manga"""
     reverse = False
     chapterclass = BatotoChapterExtractor
     pattern = (BASE_PATTERN +
                r"/(?:title/(\d+)[^/?#]*|series/(\d+)(?:/[^/?#]*)?)/?$")
-    example = "https://bato.to/title/12345-MANGA/"
+    example = "https://xbato.org/title/12345-MANGA/"
 
     def __init__(self, match):
-        self.root = text.root_from_url(match.group(0))
-        self.manga_id = match.group(1) or match.group(2)
-        url = "{}/title/{}".format(self.root, self.manga_id)
-        MangaExtractor.__init__(self, match, url)
+        MangaExtractor.__init__(self, match, False)
+        self._init_root()
+        self.manga_id = self.groups[1] or self.groups[2]
+        self.manga_url = "{}/title/{}".format(self.root, self.manga_id)
 
     def chapters(self, page):
         extr = text.extract_from(page)

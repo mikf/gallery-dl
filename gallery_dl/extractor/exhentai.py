@@ -11,6 +11,7 @@
 from .common import Extractor, Message
 from .. import text, util, exception
 from ..cache import cache
+import collections
 import itertools
 import math
 
@@ -50,7 +51,7 @@ class ExhentaiExtractor(Extractor):
 
     def request(self, url, **kwargs):
         response = Extractor.request(self, url, **kwargs)
-        if response.history and response.headers.get("Content-Length") == "0":
+        if "Cache-Control" not in response.headers and not response.content:
             self.log.info("blank page")
             raise exception.AuthorizationError()
         return response
@@ -95,7 +96,11 @@ class ExhentaiExtractor(Extractor):
         self.cookies.clear()
 
         response = self.request(url, method="POST", headers=headers, data=data)
-        if b"You are now logged in as:" not in response.content:
+        content = response.content
+        if b"You are now logged in as:" not in content:
+            if b"The captcha was not entered correctly" in content:
+                raise exception.AuthenticationError(
+                    "CAPTCHA required. Use cookies instead.")
             raise exception.AuthenticationError()
 
         # collect more cookies
@@ -223,6 +228,13 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
         if self.config("metadata", False):
             data.update(self.metadata_from_api())
             data["date"] = text.parse_timestamp(data["posted"])
+        if self.config("tags", False):
+            tags = collections.defaultdict(list)
+            for tag in data["tags"]:
+                type, _, value = tag.partition(":")
+                tags[type].append(value)
+            for type, values in tags.items():
+                data["tags_" + type] = values
         return data
 
     def metadata_from_page(self, page):
@@ -256,9 +268,9 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
             "torrentcount" : extr('>Torrent Download (', ')'),
         }
 
-        if data["uploader"].startswith("<"):
-            data["uploader"] = text.unescape(text.extr(
-                data["uploader"], ">", "<"))
+        uploader = data["uploader"]
+        if uploader and uploader[0] == "<":
+            data["uploader"] = text.unescape(text.extr(uploader, ">", "<"))
 
         f = data["favorites"][0]
         if f == "N":
@@ -390,6 +402,9 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
                 self.original = False
                 return self.data["_url_1280"]
 
+            if " temporarily banned " in page:
+                raise exception.AuthorizationError("Temporarily Banned")
+
             self._report_limits()
         return True
 
@@ -423,7 +438,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
         }
 
         page = self.request(url, cookies=cookies).text
-        current = text.extr(page, "<strong>", "</strong>")
+        current = text.extr(page, "<strong>", "</strong>").replace(",", "")
         self.log.debug("Image Limits: %s/%s", current, self.limits)
         self._remaining = self.limits - text.parse_int(current)
 
@@ -437,7 +452,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
             raise exception.AuthorizationError()
         if page.startswith(("Key missing", "Gallery not found")):
             raise exception.NotFoundError("gallery")
-        if "hentai.org/mpv/" in page:
+        if page.count("hentai.org/mpv/") > 1:
             self.log.warning("Enabled Multi-Page Viewer is not supported")
         return page
 

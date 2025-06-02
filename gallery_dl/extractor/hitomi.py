@@ -16,19 +16,25 @@ import string
 import re
 
 
-class HitomiGalleryExtractor(GalleryExtractor):
-    """Extractor for image galleries from hitomi.la"""
+class HitomiExtractor(Extractor):
+    """Base class for hitomi extractors"""
     category = "hitomi"
     root = "https://hitomi.la"
+    domain = "gold-usergeneratedcontent.net"
+
+
+class HitomiGalleryExtractor(HitomiExtractor, GalleryExtractor):
+    """Extractor for hitomi.la galleries"""
     pattern = (r"(?:https?://)?hitomi\.la"
                r"/(?:manga|doujinshi|cg|gamecg|imageset|galleries|reader)"
                r"/(?:[^/?#]+-)?(\d+)")
     example = "https://hitomi.la/manga/TITLE-867789.html"
 
     def __init__(self, match):
-        self.gid = match.group(1)
-        url = "https://ltn.hitomi.la/galleries/{}.js".format(self.gid)
-        GalleryExtractor.__init__(self, match, url)
+        GalleryExtractor.__init__(self, match, False)
+        self.gid = gid = self.groups[0]
+        self.gallery_url = "https://ltn.{}/galleries/{}.js".format(
+            self.domain, gid)
 
     def _init(self):
         self.session.headers["Referer"] = "{}/reader/{}.html".format(
@@ -58,6 +64,7 @@ class HitomiGalleryExtractor(GalleryExtractor):
         return {
             "gallery_id": text.parse_int(info["id"]),
             "title"     : info["title"],
+            "title_jpn" : info.get("japanese_title") or "",
             "type"      : info["type"].capitalize(),
             "language"  : language,
             "lang"      : util.language_to_code(language),
@@ -70,45 +77,37 @@ class HitomiGalleryExtractor(GalleryExtractor):
         }
 
     def images(self, _):
-        # see https://ltn.hitomi.la/gg.js
+        # https://ltn.gold-usergeneratedcontent.net/gg.js
         gg_m, gg_b, gg_default = _parse_gg(self)
 
-        fmt = self.config("format") or "webp"
-        if fmt == "original":
-            subdomain, path, ext, check = "b", "images", None, False
-        else:
-            subdomain, path, ext, check = "a", fmt, fmt, (fmt != "webp")
+        fmt = ext = self.config("format") or "webp"
+        check = (fmt != "webp")
 
         result = []
         for image in self.info["files"]:
             if check:
-                if image.get("has" + fmt):
-                    path = ext = fmt
-                else:
-                    path = ext = "webp"
+                ext = fmt if image.get("has" + fmt) else "webp"
             ihash = image["hash"]
             idata = text.nameext_from_url(image["name"])
-            if ext:
-                idata["extension"] = ext
+            idata["extension_original"] = idata["extension"]
+            idata["extension"] = ext
 
-            # see https://ltn.hitomi.la/common.js
+            # https://ltn.gold-usergeneratedcontent.net/common.js
             inum = int(ihash[-1] + ihash[-3:-1], 16)
-            url = "https://{}{}.hitomi.la/{}/{}/{}/{}.{}".format(
-                chr(97 + gg_m.get(inum, gg_default)),
-                subdomain, path, gg_b, inum, ihash, idata["extension"],
+            url = "https://{}{}.{}/{}/{}/{}.{}".format(
+                ext[0], gg_m.get(inum, gg_default) + 1, self.domain,
+                gg_b, inum, ihash, ext,
             )
             result.append((url, idata))
         return result
 
 
-class HitomiTagExtractor(Extractor):
+class HitomiTagExtractor(HitomiExtractor):
     """Extractor for galleries from tag searches on hitomi.la"""
-    category = "hitomi"
     subcategory = "tag"
-    root = "https://hitomi.la"
-    pattern = (r"(?:https?://)?hitomi\.la/"
-               r"(tag|artist|group|series|type|character)/"
-               r"([^/?#]+)\.html")
+    pattern = (r"(?:https?://)?hitomi\.la"
+               r"/(tag|artist|group|series|type|character)"
+               r"/([^/?#]+)\.html")
     example = "https://hitomi.la/tag/TAG-LANG.html"
 
     def __init__(self, match):
@@ -120,9 +119,12 @@ class HitomiTagExtractor(Extractor):
             self.tag = tag
 
     def items(self):
-        data = {"_extractor": HitomiGalleryExtractor}
-        nozomi_url = "https://ltn.hitomi.la/{}/{}.nozomi".format(
-            self.type, self.tag)
+        data = {
+            "_extractor": HitomiGalleryExtractor,
+            "search_tags": text.unquote(self.tag.rpartition("-")[0]),
+        }
+        nozomi_url = "https://ltn.{}/{}/{}.nozomi".format(
+            self.domain, self.type, self.tag)
         headers = {
             "Origin": self.root,
             "Cache-Control": "max-age=0",
@@ -149,9 +151,108 @@ class HitomiTagExtractor(Extractor):
                 return
 
 
+class HitomiIndexExtractor(HitomiTagExtractor):
+    """Extractor for galleries from index searches on hitomi.la"""
+    subcategory = "index"
+    pattern = r"(?:https?://)?hitomi\.la/(\w+)-(\w+)\.html"
+    example = "https://hitomi.la/index-LANG.html"
+
+    def __init__(self, match):
+        Extractor.__init__(self, match)
+        self.tag, self.language = match.groups()
+
+    def items(self):
+        data = {"_extractor": HitomiGalleryExtractor}
+        nozomi_url = "https://ltn.{}/{}-{}.nozomi".format(
+            self.domain, self.tag, self.language)
+        headers = {
+            "Origin": self.root,
+            "Cache-Control": "max-age=0",
+        }
+
+        offset = 0
+        total = None
+        while True:
+            headers["Referer"] = "{}/{}-{}.html?page={}".format(
+                self.root, self.tag, self.language, offset // 100 + 1)
+            headers["Range"] = "bytes={}-{}".format(offset, offset+99)
+            response = self.request(nozomi_url, headers=headers)
+
+            for gallery_id in decode_nozomi(response.content):
+                gallery_url = "{}/galleries/{}.html".format(
+                    self.root, gallery_id)
+                yield Message.Queue, gallery_url, data
+
+            offset += 100
+            if total is None:
+                total = text.parse_int(
+                    response.headers["content-range"].rpartition("/")[2])
+            if offset >= total:
+                return
+
+
+class HitomiSearchExtractor(HitomiExtractor):
+    """Extractor for galleries from multiple tag searches on hitomi.la"""
+    subcategory = "search"
+    pattern = r"(?:https?://)?hitomi\.la/search\.html\?([^/?#]+)"
+    example = "https://hitomi.la/search.html?QUERY"
+
+    def __init__(self, match):
+        Extractor.__init__(self, match)
+        self.query = match.group(1)
+        self.tags = text.unquote(self.query)
+
+    def items(self):
+        data = {
+            "_extractor": HitomiGalleryExtractor,
+            "search_tags": self.tags,
+        }
+        results = [self.get_nozomi_items(tag) for tag in self.tags.split(" ")]
+        intersects = set.intersection(*results)
+
+        for gallery_id in sorted(intersects, reverse=True):
+            gallery_url = "{}/galleries/{}.html".format(
+                self.root, gallery_id)
+            yield Message.Queue, gallery_url, data
+
+    def get_nozomi_items(self, full_tag):
+        area, tag, language = self.get_nozomi_args(full_tag)
+
+        if area:
+            nozomi_url = "https://ltn.{}/n/{}/{}-{}.nozomi".format(
+                self.domain, area, tag, language)
+        else:
+            nozomi_url = "https://ltn.{}/n/{}-{}.nozomi".format(
+                self.domain, tag, language)
+
+        headers = {
+            "Origin": self.root,
+            "Cache-Control": "max-age=0",
+            "Referer": "{}/search.html?{}".format(self.root, self.query),
+        }
+
+        response = self.request(nozomi_url, headers=headers)
+        return set(decode_nozomi(response.content))
+
+    def get_nozomi_args(self, query):
+        ns, _, tag = query.strip().partition(":")
+        area = ns
+        language = "all"
+
+        if ns == "female" or ns == "male":
+            area = "tag"
+            tag = query
+        elif ns == "language":
+            area = None
+            language = tag
+            tag = "index"
+
+        return area, tag.replace("_", " "), language
+
+
 @memcache(maxage=1800)
 def _parse_gg(extr):
-    page = extr.request("https://ltn.hitomi.la/gg.js").text
+    page = extr.request("https://ltn.gold-usergeneratedcontent.net/gg.js").text
 
     m = {}
 
@@ -174,4 +275,4 @@ def _parse_gg(extr):
     d = re.search(r"(?:var\s|default:)\s*o\s*=\s*(\d+)", page)
     b = re.search(r"b:\s*[\"'](.+)[\"']", page)
 
-    return m, b.group(1).strip("/"), int(d.group(1)) if d else 1
+    return m, b.group(1).strip("/"), int(d.group(1)) if d else 0

@@ -23,6 +23,7 @@ class ImagehostImageExtractor(Extractor):
     _params = None
     _cookies = None
     _encoding = None
+    _validate = None
 
     def __init__(self, match):
         Extractor.__init__(self, match)
@@ -57,6 +58,8 @@ class ImagehostImageExtractor(Extractor):
         data.update(self.metadata(page))
         if self._https and url.startswith("http:"):
             url = "https:" + url[5:]
+        if self._validate is not None:
+            data["_http_validate"] = self._validate
 
         yield Message.Directory, data
         yield Message.Url, url, data
@@ -164,6 +167,14 @@ class ImagevenueImageExtractor(ImagehostImageExtractor):
         filename, pos = text.extract(page, 'alt="', '"', pos)
         return url, text.unescape(filename)
 
+    def _validate(self, response):
+        hget = response.headers.get
+        return not (
+            hget("content-length") == "14396" and
+            hget("content-type") == "image/jpeg" and
+            hget("last-modified") == "Mon, 04 May 2020 07:19:52 GMT"
+        )
+
 
 class ImagetwistImageExtractor(ImagehostImageExtractor):
     """Extractor for single images from imagetwist.com"""
@@ -181,6 +192,23 @@ class ImagetwistImageExtractor(ImagehostImageExtractor):
         url     , pos = text.extract(page, '<img src="', '"')
         filename, pos = text.extract(page, ' alt="', '"', pos)
         return url, filename
+
+
+class ImagetwistGalleryExtractor(ImagehostImageExtractor):
+    """Extractor for galleries from imagetwist.com"""
+    category = "imagetwist"
+    subcategory = "gallery"
+    pattern = (r"(?:https?://)?((?:www\.|phun\.)?"
+               r"image(?:twist|haha)\.com/(p/[^/?#]+/\d+))")
+    example = "https://imagetwist.com/p/USER/12345/NAME"
+
+    def items(self):
+        data = {"_extractor": ImagetwistImageExtractor}
+        root = self.page_url[:self.page_url.find("/", 8)]
+        page = self.request(self.page_url).text
+        gallery = text.extr(page, 'class="gallerys', "</div")
+        for path in text.extract_iter(gallery, ' href="', '"'):
+            yield Message.Queue, root + path, data
 
 
 class ImgspiceImageExtractor(ImagehostImageExtractor):
@@ -267,6 +295,34 @@ class TurboimagehostImageExtractor(ImagehostImageExtractor):
     def get_info(self, page):
         url = text.extract(page, 'src="', '"', page.index("<img "))[0]
         return url, url
+
+
+class TurboimagehostGalleryExtractor(ImagehostImageExtractor):
+    """Extractor for image galleries from turboimagehost.com"""
+    category = "turboimagehost"
+    subcategory = "gallery"
+    pattern = (r"(?:https?://)?((?:www\.)?turboimagehost\.com"
+               r"/album/(\d+)/([^/?#]*))")
+    example = "https://www.turboimagehost.com/album/12345/GALLERY_NAME"
+
+    def items(self):
+        data = {"_extractor": TurboimagehostImageExtractor}
+        params = {"p": 1}
+
+        while True:
+            page = self.request(self.page_url, params=params).text
+
+            if params["p"] == 1 and \
+                    "Requested gallery don`t exist on our website." in page:
+                raise exception.NotFoundError("gallery")
+
+            thumb_url = None
+            for thumb_url in text.extract_iter(page, '"><a href="', '"'):
+                yield Message.Queue, thumb_url, data
+            if thumb_url is None:
+                return
+
+            params["p"] += 1
 
 
 class ViprImageExtractor(ImagehostImageExtractor):

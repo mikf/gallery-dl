@@ -12,7 +12,7 @@ __tests__ = (
     "#url"     : "https://julianbphotography.blogspot.com/2010/12/moon-rise.html",
     "#category": ("blogger", "blogspot", "post"),
     "#class"   : blogger.BloggerPostExtractor,
-    "#urls"    : "https://3.bp.blogspot.com/-zlJddJtJOUo/Tt4WooTPNtI/AAAAAAAABG8/dGT2cGp2E7Y/s0/Icy-Moonrise---For-Web.jpg",
+    "#urls"    : "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjH9WkPvLJq2moxKtyt3ieJZWSDFQwOi3PHRdlHVHEQHRwy-d86Jg6HWSMhxaa6EgvlXq-zDMmKM4kIPn27eJ9Hepk2X9e9HQhqwMfrT8RYTnFe65uexw7KSk5FdWHxRVp5crz3p_qph3Bj/s0/Icy-Moonrise---For-Web.jpg",
 
     "blog": {
         "date"       : "dt:2010-11-21 18:19:42",
@@ -43,7 +43,7 @@ __tests__ = (
     "extension": "jpg",
     "filename" : "Icy-Moonrise---For-Web",
     "num"      : 1,
-    "url"      : "https://3.bp.blogspot.com/-zlJddJtJOUo/Tt4WooTPNtI/AAAAAAAABG8/dGT2cGp2E7Y/s0/Icy-Moonrise---For-Web.jpg",
+    "url"      : "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjH9WkPvLJq2moxKtyt3ieJZWSDFQwOi3PHRdlHVHEQHRwy-d86Jg6HWSMhxaa6EgvlXq-zDMmKM4kIPn27eJ9Hepk2X9e9HQhqwMfrT8RYTnFe65uexw7KSk5FdWHxRVp5crz3p_qph3Bj/s0/Icy-Moonrise---For-Web.jpg",
 },
 
 {
@@ -59,7 +59,7 @@ __tests__ = (
     "#comment" : "new image domain (#2204)",
     "#category": ("blogger", "blogspot", "post"),
     "#class"   : blogger.BloggerPostExtractor,
-    "#pattern" : "https://blogger.googleusercontent.com/img/a/.+=s0$",
+    "#pattern" : r"https://blogger\.googleusercontent\.com/img/.+=s0$",
     "#count"   : 8,
 },
 
@@ -67,7 +67,7 @@ __tests__ = (
     "#url"     : "https://julianbphotography.blogspot.com/",
     "#category": ("blogger", "blogspot", "blog"),
     "#class"   : blogger.BloggerBlogExtractor,
-    "#pattern" : r"https://\d\.bp\.blogspot\.com/.*/s0/[^.]+\.jpg",
+    "#pattern" : r"https://blogger\.googleusercontent\.com/img/.+/s0/",
     "#range"   : "1-25",
     "#count"   : 25,
 },

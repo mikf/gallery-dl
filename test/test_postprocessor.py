@@ -12,6 +12,7 @@ import sys
 import unittest
 from unittest.mock import Mock, mock_open, patch
 
+import shutil
 import logging
 import zipfile
 import tempfile
@@ -30,7 +31,8 @@ class MockPostprocessorModule(Mock):
 
 class FakeJob():
 
-    def __init__(self, extr=extractor.find("test:")):
+    def __init__(self, extr=extractor.find("generic:https://example.org/")):
+        extr.directory_fmt = ("{category}",)
         self.extractor = extr
         self.pathfmt = path.PathFormat(extr)
         self.out = output.NullOutput()
@@ -118,29 +120,36 @@ class ClassifyTest(BasePostprocessorTest):
             for directory, exts in pp.DEFAULT_MAPPING.items()
             for ext in exts
         })
-        self.pathfmt.set_extension("jpg")
-        self.pathfmt.build_path()
 
-        pp.prepare(self.pathfmt)
+        self.assertEqual(pp.directory, "")
+        self._trigger(("post",))
+        self.assertEqual(pp.directory, self.pathfmt.directory)
+
+        self.pathfmt.set_extension("jpg")
+        self._trigger(("prepare",))
+        self.pathfmt.build_path()
         path = os.path.join(self.dir.name, "test", "Pictures")
         self.assertEqual(self.pathfmt.path, path + "/file.jpg")
         self.assertEqual(self.pathfmt.realpath, path + "/file.jpg")
 
-        with patch("os.makedirs") as mkdirs:
-            self._trigger()
-            mkdirs.assert_called_once_with(path, exist_ok=True)
+        self.pathfmt.set_extension("mp4")
+        self._trigger(("prepare",))
+        self.pathfmt.build_path()
+        path = os.path.join(self.dir.name, "test", "Video")
+        self.assertEqual(self.pathfmt.path, path + "/file.mp4")
+        self.assertEqual(self.pathfmt.realpath, path + "/file.mp4")
 
     def test_classify_noop(self):
         pp = self._create()
         rp = self.pathfmt.realpath
 
-        pp.prepare(self.pathfmt)
+        self.assertEqual(pp.directory, "")
+        self._trigger(("post",))
+        self._trigger(("prepare",))
+
+        self.assertEqual(pp.directory, self.pathfmt.directory)
         self.assertEqual(self.pathfmt.path, rp)
         self.assertEqual(self.pathfmt.realpath, rp)
-
-        with patch("os.makedirs") as mkdirs:
-            self._trigger()
-            self.assertEqual(mkdirs.call_count, 0)
 
     def test_classify_custom(self):
         pp = self._create({"mapping": {
@@ -151,17 +160,35 @@ class ClassifyTest(BasePostprocessorTest):
             "foo": "foo/bar",
             "bar": "foo/bar",
         })
-        self.pathfmt.set_extension("foo")
-        self.pathfmt.build_path()
 
-        pp.prepare(self.pathfmt)
+        self.assertEqual(pp.directory, "")
+        self._trigger(("post",))
+        self.assertEqual(pp.directory, self.pathfmt.directory)
+
+        self.pathfmt.set_extension("foo")
+        self._trigger(("prepare",))
+        self.pathfmt.build_path()
         path = os.path.join(self.dir.name, "test", "foo", "bar")
         self.assertEqual(self.pathfmt.path, path + "/file.foo")
         self.assertEqual(self.pathfmt.realpath, path + "/file.foo")
 
-        with patch("os.makedirs") as mkdirs:
-            self._trigger()
-            mkdirs.assert_called_once_with(path, exist_ok=True)
+
+class DirectoryTest(BasePostprocessorTest):
+
+    def test_default(self):
+        self._create()
+
+        path = os.path.join(self.dir.name, "test")
+        self.assertEqual(self.pathfmt.realdirectory, path + "/")
+        self.assertEqual(self.pathfmt.realpath, path + "/file.ext")
+
+        self.pathfmt.kwdict["category"] = "custom"
+        self._trigger()
+
+        path = os.path.join(self.dir.name, "custom")
+        self.assertEqual(self.pathfmt.realdirectory, path + "/")
+        self.pathfmt.build_path()
+        self.assertEqual(self.pathfmt.realpath, path + "/file.ext")
 
 
 class ExecTest(BasePostprocessorTest):
@@ -171,7 +198,7 @@ class ExecTest(BasePostprocessorTest):
             "command": "echo {} {_path} {_directory} {_filename} && rm {};",
         })
 
-        with patch("subprocess.Popen") as p:
+        with patch("gallery_dl.util.Popen") as p:
             i = Mock()
             i.wait.return_value = 0
             p.return_value = i
@@ -191,7 +218,7 @@ class ExecTest(BasePostprocessorTest):
                         "\fE _directory.upper()"],
         })
 
-        with patch("subprocess.Popen") as p:
+        with patch("gallery_dl.util.Popen") as p:
             i = Mock()
             i.wait.return_value = 0
             p.return_value = i
@@ -211,7 +238,7 @@ class ExecTest(BasePostprocessorTest):
             "command": "echo {}",
         })
 
-        with patch("subprocess.Popen") as p:
+        with patch("gallery_dl.util.Popen") as p:
             i = Mock()
             i.wait.return_value = 123
             p.return_value = i
@@ -229,13 +256,64 @@ class ExecTest(BasePostprocessorTest):
             "command": "echo {}",
         })
 
-        with patch("subprocess.Popen") as p:
+        with patch("gallery_dl.util.Popen") as p:
             i = Mock()
             p.return_value = i
             self._trigger(("after",))
 
         self.assertTrue(p.called)
         self.assertFalse(i.wait.called)
+
+
+class HashTest(BasePostprocessorTest):
+
+    def test_default(self):
+        self._create({})
+
+        with self.pathfmt.open() as fp:
+            fp.write(b"Foo Bar\n")
+
+        self._trigger()
+
+        kwdict = self.pathfmt.kwdict
+        self.assertEqual(
+            "35c9c9c7c90ad764bae9e2623f522c24", kwdict["md5"], "md5")
+        self.assertEqual(
+            "14d3d804494ef4e57d72de63e4cfee761240471a", kwdict["sha1"], "sha1")
+
+    def test_custom_hashes(self):
+        self._create({"hashes": "sha256:a,sha512:b"})
+
+        with self.pathfmt.open() as fp:
+            fp.write(b"Foo Bar\n")
+
+        self._trigger()
+
+        kwdict = self.pathfmt.kwdict
+        self.assertEqual(
+            "4775b55be17206445d7015a5fc7656f38a74b880670523c3b175455f885f2395",
+            kwdict["a"], "sha256")
+        self.assertEqual(
+            "6028f9e6957f4ca929941318c4bba6258713fd5162f9e33bd10e1c456d252700"
+            "3e1095b50736c4fd1e2deea152e3c8ecd5993462a747208e4d842659935a1c62",
+            kwdict["b"], "sha512")
+
+    def test_custom_hashes_dict(self):
+        self._create({"hashes": {"a": "sha256", "b": "sha512"}})
+
+        with self.pathfmt.open() as fp:
+            fp.write(b"Foo Bar\n")
+
+        self._trigger()
+
+        kwdict = self.pathfmt.kwdict
+        self.assertEqual(
+            "4775b55be17206445d7015a5fc7656f38a74b880670523c3b175455f885f2395",
+            kwdict["a"], "sha256")
+        self.assertEqual(
+            "6028f9e6957f4ca929941318c4bba6258713fd5162f9e33bd10e1c456d252700"
+            "3e1095b50736c4fd1e2deea152e3c8ecd5993462a747208e4d842659935a1c62",
+            kwdict["b"], "sha512")
 
 
 class MetadataTest(BasePostprocessorTest):
@@ -439,6 +517,50 @@ class MetadataTest(BasePostprocessorTest):
         path = self.pathfmt.realdirectory + "metadata/file.json"
         m.assert_called_once_with(path, "w", encoding="utf-8")
 
+    def test_metadata_directory_format(self):
+        self._create(
+            {"directory": ["..", "json", "\fE str(id // 500 * 500 + 500)"]},
+            {"id": 12345},
+        )
+
+        with patch("builtins.open", mock_open()) as m:
+            self._trigger()
+
+        path = self.pathfmt.realdirectory + "../json/12500/file.ext.json"
+        m.assert_called_once_with(path, "w", encoding="utf-8")
+
+    def test_metadata_directory_empty(self):
+        self._create(
+            {"directory": []},
+        )
+
+        with patch("builtins.open", mock_open()) as m:
+            self._trigger()
+
+        path = self.pathfmt.realdirectory + "./file.ext.json"
+        m.assert_called_once_with(path, "w", encoding="utf-8")
+
+    def test_metadata_basedirectory(self):
+        self._create({"base-directory": True})
+
+        with patch("builtins.open", mock_open()) as m:
+            self._trigger()
+
+        path = self.pathfmt.basedirectory + "file.ext.json"
+        m.assert_called_once_with(path, "w", encoding="utf-8")
+
+    def test_metadata_basedirectory_custom(self):
+        self._create({
+            "base-directory": "/home/test",
+            "directory": "meta",
+        })
+
+        with patch("builtins.open", mock_open()) as m:
+            self._trigger()
+
+        path = "/home/test/meta/file.ext.json"
+        m.assert_called_once_with(path, "w", encoding="utf-8")
+
     def test_metadata_filename(self):
         self._create({
             "filename"        : "{category}_{filename}_/meta/\n\r.data",
@@ -450,6 +572,16 @@ class MetadataTest(BasePostprocessorTest):
 
         path = self.pathfmt.realdirectory + "test_file__meta_.data"
         m.assert_called_once_with(path, "w", encoding="utf-8")
+
+    def test_metadata_meta_path(self):
+        self._create({
+            "metadata-path": "_meta_path",
+        })
+
+        self._trigger()
+
+        self.assertEqual(self.pathfmt.kwdict["_meta_path"],
+                         self.pathfmt.realpath + ".json")
 
     def test_metadata_stdout(self):
         self._create({"filename": "-", "indent": None, "sort": True})
@@ -551,6 +683,36 @@ class MetadataTest(BasePostprocessorTest):
         self.assertTrue(not e.called)
         self.assertTrue(m.called)
 
+    def test_metadata_option_include(self):
+        self._create(
+            {"include": ["_private", "filename", "foo"], "sort": True},
+            {"public": "hello ワールド", "_private": "foo バー"},
+        )
+
+        with patch("builtins.open", mock_open()) as m:
+            self._trigger()
+
+        self.assertEqual(self._output(m), """{
+    "_private": "foo バー",
+    "filename": "file"
+}
+""")
+
+    def test_metadata_option_exclude(self):
+        self._create(
+            {"exclude": ["category", "filename", "foo"], "sort": True},
+            {"public": "hello ワールド", "_private": "foo バー"},
+        )
+
+        with patch("builtins.open", mock_open()) as m:
+            self._trigger()
+
+        self.assertEqual(self._output(m), """{
+    "extension": "ext",
+    "public": "hello ワールド"
+}
+""")
+
     @staticmethod
     def _output(mock):
         return "".join(
@@ -571,6 +733,16 @@ class MtimeTest(BasePostprocessorTest):
         self._create(None, {"date": 315532800})
         self._trigger()
         self.assertEqual(self.pathfmt.kwdict["_mtime"], 315532800)
+
+    def test_mtime_none(self):
+        self._create(None, {"date": None})
+        self._trigger()
+        self.assertNotIn("_mtime", self.pathfmt.kwdict)
+
+    def test_mtime_undefined(self):
+        self._create(None, {})
+        self._trigger()
+        self.assertNotIn("_mtime", self.pathfmt.kwdict)
 
     def test_mtime_key(self):
         self._create({"key": "foo"}, {"foo": 315532800})
@@ -615,6 +787,60 @@ class PythonTest(BasePostprocessorTest):
 def calc(kwdict):
     kwdict["_result"] = kwdict["_value"] * 2
 """)
+
+
+class RenameTest(BasePostprocessorTest):
+
+    def _prepare(self, filename):
+        path = self.pathfmt.realdirectory
+        shutil.rmtree(path, ignore_errors=True)
+        os.makedirs(path, exist_ok=True)
+
+        with open(path + filename, "w"):
+            pass
+
+        return path
+
+    def test_rename_from(self):
+        self._create({"from": "{id}.{extension}"}, {"id": 12345})
+        path = self._prepare("12345.ext")
+
+        self._trigger()
+
+        self.assertEqual(os.listdir(path), ["file.ext"])
+
+    def test_rename_to(self):
+        self._create({"to": "{id}.{extension}"}, {"id": 12345})
+        path = self._prepare("file.ext")
+
+        self._trigger(("skip",))
+
+        self.assertEqual(os.listdir(path), ["12345.ext"])
+
+    def test_rename_from_to(self):
+        self._create({"from": "name", "to": "{id}"}, {"id": 12345})
+        path = self._prepare("name")
+
+        self._trigger()
+
+        self.assertEqual(os.listdir(path), ["12345"])
+
+    def test_rename_noopt(self):
+        with self.assertRaises(ValueError):
+            self._create({})
+
+    def test_rename_skip(self):
+        self._create({"from": "{id}.{extension}"}, {"id": 12345})
+        path = self._prepare("12345.ext")
+        with open(path + "file.ext", "w"):
+            pass
+
+        with self.assertLogs("postprocessor.rename", level="WARNING") as cm:
+            self._trigger()
+        self.assertTrue(cm.output[0].startswith(
+            "WARNING:postprocessor.rename:Not renaming "
+            "'12345.ext' to 'file.ext'"))
+        self.assertEqual(sorted(os.listdir(path)), ["12345.ext", "file.ext"])
 
 
 class ZipTest(BasePostprocessorTest):

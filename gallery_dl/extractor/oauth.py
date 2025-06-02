@@ -83,8 +83,9 @@ class OAuthBase(Extractor):
                 browser = None
 
         if browser and browser.open(url):
-            name = getattr(browser, "name", "Browser")
-            self.log.info("Opening URL in %s:", name.capitalize())
+            name = getattr(browser, "name", None)
+            if name:
+                self.log.info("Opening URL with %s:", name.capitalize())
         else:
             self.log.info("Please open this URL in your browser:")
 
@@ -110,7 +111,7 @@ class OAuthBase(Extractor):
 
         # get a request token
         params = {"oauth_callback": self.redirect_uri}
-        data = self.session.get(request_token_url, params=params).text
+        data = self.request(request_token_url, params=params).text
 
         data = text.parse_query(data)
         self.session.auth.token_secret = data["oauth_token_secret"]
@@ -120,7 +121,7 @@ class OAuthBase(Extractor):
         data = self.open(authorize_url, params)
 
         # exchange the request token for an access token
-        data = self.session.get(access_token_url, params=data).text
+        data = self.request(access_token_url, params=data).text
         data = text.parse_query(data)
         token = data["oauth_token"]
         token_secret = data["oauth_token_secret"]
@@ -189,7 +190,8 @@ class OAuthBase(Extractor):
             data["client_id"] = client_id
             data["client_secret"] = client_secret
 
-        data = self.session.post(token_url, data=data, auth=auth).json()
+        data = self.request(
+            token_url, method="POST", data=data, auth=auth).json()
 
         # check token response
         if "error" in data:
@@ -386,7 +388,7 @@ class OAuthMastodon(OAuthBase):
             "redirect_uris": self.redirect_uri,
             "scopes": "read",
         }
-        data = self.session.post(url, data=data).json()
+        data = self.request(url, method="POST", data=data).json()
 
         if "client_id" not in data or "client_secret" not in data:
             raise exception.StopExtraction(
@@ -423,7 +425,7 @@ class OAuthPixiv(OAuthBase):
             "code_challenge_method": "S256",
             "client": "pixiv-android",
         }
-        code = self.open(url, params, self._input)
+        code = self.open(url, params, self._input_code)
 
         url = "https://oauth.secure.pixiv.net/auth/token"
         headers = {
@@ -441,7 +443,8 @@ class OAuthPixiv(OAuthBase):
             "redirect_uri"  : "https://app-api.pixiv.net"
                               "/web/v1/users/auth/pixiv/callback",
         }
-        data = self.session.post(url, headers=headers, data=data).json()
+        data = self.request(
+            url, method="POST", headers=headers, data=data).json()
 
         if "error" in data:
             stdout_write("\n{}\n".format(data))
@@ -457,7 +460,7 @@ class OAuthPixiv(OAuthBase):
 
         stdout_write(self._generate_message(("refresh-token",), (token,)))
 
-    def _input(self):
+    def _input_code(self):
         stdout_write("""\
 1) Open your browser's Developer Tools (F12) and switch to the Network tab
 2) Login
@@ -469,5 +472,5 @@ class OAuthPixiv(OAuthBase):
   like the entire URL or several query parameters.
 
 """)
-        code = input("code: ")
+        code = self.input("code: ")
         return code.rpartition("=")[2].strip()

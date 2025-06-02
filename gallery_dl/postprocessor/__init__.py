@@ -11,10 +11,13 @@
 modules = [
     "classify",
     "compare",
+    "directory",
     "exec",
+    "hash",
     "metadata",
     "mtime",
     "python",
+    "rename",
     "ugoira",
     "zip",
 ]

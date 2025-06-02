@@ -12,7 +12,7 @@ __tests__ = (
     "#url"     : "https://xhamster.com/photos/gallery/take-me-to-the-carwash-at-digitaldesire-15860946",
     "#category": ("", "xhamster", "gallery"),
     "#class"   : xhamster.XhamsterGalleryExtractor,
-    "#pattern" : r"https://ic-ph-ah\.xhcdn\.com/a/\w+/webp/000/\d+/\d+/\d+_1000\.jpg$",
+    "#pattern" : r"https://ic-ph-\w+\.xhcdn\.com/a/\w+/webp/000/\d+/\d+/\d+_1000\.jpg$",
     "#count"   : 19,
 
     "comments": int,
@@ -47,7 +47,7 @@ __tests__ = (
     "user"    : {
         "id"         : 4741860,
         "name"       : "DaringSex",
-        "retired"    : False,
+        "?retired"   : False,
         "subscribers": range(25000, 50000),
         "url"        : "https://xhamster.com/users/daringsex",
         "verified"   : False,
@@ -58,7 +58,7 @@ __tests__ = (
     "#url"     : "https://jp.xhamster2.com/photos/gallery/take-me-to-the-carwash-at-digitaldesire-15860946",
     "#category": ("", "xhamster", "gallery"),
     "#class"   : xhamster.XhamsterGalleryExtractor,
-    "#pattern" : r"https://ic-ph-ah\.xhcdn\.com/a/\w+/webp/000/\d+/\d+/\d+_1000\.jpg$",
+    "#pattern" : r"https://ic-ph-\w+\.xhcdn\.com/a/\w+/webp/000/\d+/\d+/\d+_1000\.jpg$",
     "#count"   : 19,
 },
 

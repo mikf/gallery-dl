@@ -79,17 +79,18 @@ class SzurubooruExtractor(booru.BooruExtractor):
 
 
 BASE_PATTERN = SzurubooruExtractor.update({
-    "foalcon": {
-        "root": "https://booru.foalcon.com",
-        "pattern": r"booru\.foalcon\.com",
-    },
     "bcbnsfw": {
         "root": "https://booru.bcbnsfw.space",
         "pattern": r"booru\.bcbnsfw\.space",
+        "query-all": "*",
     },
     "snootbooru": {
         "root": "https://snootbooru.com",
         "pattern": r"snootbooru\.com",
+    },
+    "visuabusters": {
+        "root": "https://www.visuabusters.com/booru",
+        "pattern": r"(?:www\.)?visuabusters\.com/booru",
     },
 })
 
@@ -98,30 +99,31 @@ class SzurubooruTagExtractor(SzurubooruExtractor):
     subcategory = "tag"
     directory_fmt = ("{category}", "{search_tags}")
     archive_fmt = "t_{search_tags}_{id}_{version}"
-    pattern = BASE_PATTERN + r"/posts/query=([^/?#]+)"
-    example = "https://booru.foalcon.com/posts/query=TAG"
+    pattern = BASE_PATTERN + r"/posts(?:/query=([^/?#]*))?"
+    example = "https://booru.bcbnsfw.space/posts/query=TAG"
 
     def __init__(self, match):
         SzurubooruExtractor.__init__(self, match)
-        query = match.group(match.lastindex)
-        self.query = text.unquote(query.replace("+", " "))
+        query = self.groups[-1]
+        self.query = text.unquote(query.replace("+", " ")) if query else ""
 
     def metadata(self):
         return {"search_tags": self.query}
 
     def posts(self):
-        return self._pagination("/posts/", {"query": self.query})
+        if self.query.strip():
+            query = self.query
+        else:
+            query = self.config_instance("query-all")
+
+        return self._pagination("/posts/", {"query": query})
 
 
 class SzurubooruPostExtractor(SzurubooruExtractor):
     subcategory = "post"
     archive_fmt = "{id}_{version}"
     pattern = BASE_PATTERN + r"/post/(\d+)"
-    example = "https://booru.foalcon.com/post/12345"
-
-    def __init__(self, match):
-        SzurubooruExtractor.__init__(self, match)
-        self.post_id = match.group(match.lastindex)
+    example = "https://booru.bcbnsfw.space/post/12345"
 
     def posts(self):
-        return (self._api_request("/post/" + self.post_id),)
+        return (self._api_request("/post/" + self.groups[-1]),)

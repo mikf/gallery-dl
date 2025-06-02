@@ -17,6 +17,7 @@ __tests__ = (
     "#sha1_content": [
         "5c6ae9ee13e6d4bc9cb8bdce224c84e67fbfa36c",
         "622e80be3f496672c44aab5c47fbc6941c61bc79",
+        "1e0dced55bcb5eefe5cc32f69c7a8df35547b459",
     ],
 },
 
@@ -57,7 +58,7 @@ __tests__ = (
 
     "tags_artist"   : "reverse_noise yamu_(reverse_noise)",
     "tags_character": "hong_meiling",
-    "tags_copyright": "touhou",
+    "tags_copyright": "team_shanghai_alice touhou",
     "tags_general"  : str,
     "tags_metadata" : "censored translated",
     "notes"         : [

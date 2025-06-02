@@ -26,16 +26,57 @@ class VipergirlsExtractor(Extractor):
     cookies_domain = ".vipergirls.to"
     cookies_names = ("vg_userid", "vg_password")
 
+    def _init(self):
+        domain = self.config("domain")
+        if domain:
+            pos = domain.find("://")
+            if pos >= 0:
+                self.root = domain.rstrip("/")
+                self.cookies_domain = "." + domain[pos+1:].strip("/")
+            else:
+                domain = domain.strip("/")
+                self.root = "https://" + domain
+                self.cookies_domain = "." + domain
+        else:
+            self.root = "https://viper.click"
+            self.cookies_domain = ".viper.click"
+
     def items(self):
         self.login()
+        root = self.posts()
+        forum_title = root[1].attrib["title"]
+        thread_title = root[2].attrib["title"]
 
-        for post in self.posts():
+        like = self.config("like")
+        if like:
+            user_hash = root[0].get("hash")
+            if len(user_hash) < 16:
+                self.log.warning("Login required to like posts")
+                like = False
+
+        posts = root.iter("post")
+        if self.page:
+            util.advance(posts, (text.parse_int(self.page[5:]) - 1) * 15)
+
+        for post in posts:
+            images = list(post)
+
             data = post.attrib
+            data["forum_title"] = forum_title
             data["thread_id"] = self.thread_id
+            data["thread_title"] = thread_title
+            data["post_id"] = data.pop("id")
+            data["post_num"] = data.pop("number")
+            data["post_title"] = data.pop("title")
+            data["count"] = len(images)
+            del data["imagecount"]
 
             yield Message.Directory, data
-            for image in post:
-                yield Message.Queue, image.attrib["main_url"], data
+            if images:
+                for data["num"], image in enumerate(images, 1):
+                    yield Message.Queue, image.attrib["main_url"], data
+                if like:
+                    self.like(post, user_hash)
 
     def login(self):
         if self.cookies_check(self.cookies_names):
@@ -64,11 +105,23 @@ class VipergirlsExtractor(Extractor):
         return {cookie.name: cookie.value
                 for cookie in response.cookies}
 
+    def like(self, post, user_hash):
+        url = self.root + "/post_thanks.php"
+        params = {
+            "do"           : "post_thanks_add",
+            "p"            : post.get("id"),
+            "securitytoken": user_hash,
+        }
+
+        with self.request(url, params=params, allow_redirects=False):
+            pass
+
 
 class VipergirlsThreadExtractor(VipergirlsExtractor):
     """Extractor for vipergirls threads"""
     subcategory = "thread"
-    pattern = BASE_PATTERN + r"/threads/(\d+)(?:-[^/?#]+)?(/page\d+)?$"
+    pattern = (BASE_PATTERN +
+               r"/threads/(\d+)(?:-[^/?#]+)?(/page\d+)?(?:$|#|\?(?!p=))")
     example = "https://vipergirls.to/threads/12345-TITLE"
 
     def __init__(self, match):
@@ -77,12 +130,7 @@ class VipergirlsThreadExtractor(VipergirlsExtractor):
 
     def posts(self):
         url = "{}/vr.php?t={}".format(self.root, self.thread_id)
-        root = ElementTree.fromstring(self.request(url).text)
-        posts = root.iter("post")
-
-        if self.page:
-            util.advance(posts, (text.parse_int(self.page[5:]) - 1) * 15)
-        return posts
+        return ElementTree.fromstring(self.request(url).text)
 
 
 class VipergirlsPostExtractor(VipergirlsExtractor):
@@ -95,8 +143,8 @@ class VipergirlsPostExtractor(VipergirlsExtractor):
     def __init__(self, match):
         VipergirlsExtractor.__init__(self, match)
         self.thread_id, self.post_id = match.groups()
+        self.page = 0
 
     def posts(self):
         url = "{}/vr.php?p={}".format(self.root, self.post_id)
-        root = ElementTree.fromstring(self.request(url).text)
-        return root.iter("post")
+        return ElementTree.fromstring(self.request(url).text)

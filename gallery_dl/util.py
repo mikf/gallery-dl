@@ -16,16 +16,21 @@ import time
 import random
 import getpass
 import hashlib
-import sqlite3
 import binascii
 import datetime
 import functools
 import itertools
 import subprocess
+import collections
 import urllib.parse
 from http.cookiejar import Cookie
 from email.utils import mktime_tz, parsedate_tz
 from . import text, version, exception
+
+try:
+    re_compile = re._compiler.compile
+except AttributeError:
+    re_compile = re.sre_compile.compile
 
 
 def bencode(num, alphabet="0123456789"):
@@ -46,6 +51,19 @@ def bdecode(data, alphabet="0123456789"):
         num *= base
         num += alphabet.index(c)
     return num
+
+
+def decrypt_xor(encrypted, key, base64=True, fromhex=False):
+    if base64:
+        encrypted = binascii.a2b_base64(encrypted)
+    if fromhex:
+        encrypted = bytes.fromhex(encrypted.decode())
+
+    div = len(key)
+    return bytes([
+        encrypted[i] ^ key[i % div]
+        for i in range(len(encrypted))
+    ]).decode()
 
 
 def advance(iterable, num):
@@ -83,7 +101,7 @@ def unique_sequence(iterable):
 
 def contains(values, elements, separator=" "):
     """Returns True if at least one of 'elements' is contained in 'values'"""
-    if isinstance(values, str):
+    if isinstance(values, str) and (separator or separator is None):
         values = values.split(separator)
 
     if not isinstance(elements, (tuple, list)):
@@ -102,17 +120,17 @@ def raises(cls):
     return wrap
 
 
-def identity(x):
+def identity(x, _=None):
     """Returns its argument"""
     return x
 
 
-def true(_):
+def true(_, __=None):
     """Always returns True"""
     return True
 
 
-def false(_):
+def false(_, __=None):
     """Always returns False"""
     return False
 
@@ -218,17 +236,61 @@ def to_string(value):
     return str(value)
 
 
+def to_datetime(value):
+    """Convert 'value' to a datetime object"""
+    if not value:
+        return EPOCH
+
+    if isinstance(value, datetime.datetime):
+        return value
+
+    if isinstance(value, str):
+        try:
+            if value[-1] == "Z":
+                # compat for Python < 3.11
+                value = value[:-1]
+            dt = datetime.datetime.fromisoformat(value)
+            if dt.tzinfo is None:
+                if dt.microsecond:
+                    dt = dt.replace(microsecond=0)
+            else:
+                # convert to naive UTC
+                dt = dt.astimezone(datetime.timezone.utc).replace(
+                    microsecond=0, tzinfo=None)
+            return dt
+        except Exception:
+            pass
+
+    return text.parse_timestamp(value, EPOCH)
+
+
 def datetime_to_timestamp(dt):
-    """Convert naive UTC datetime to timestamp"""
+    """Convert naive UTC datetime to Unix timestamp"""
     return (dt - EPOCH) / SECOND
 
 
 def datetime_to_timestamp_string(dt):
-    """Convert naive UTC datetime to timestamp string"""
+    """Convert naive UTC datetime to Unix timestamp string"""
     try:
         return str((dt - EPOCH) // SECOND)
     except Exception:
         return ""
+
+
+if sys.hexversion < 0x30c0000:
+    # Python <= 3.11
+    datetime_utcfromtimestamp = datetime.datetime.utcfromtimestamp
+    datetime_utcnow = datetime.datetime.utcnow
+    datetime_from_timestamp = datetime_utcfromtimestamp
+else:
+    # Python >= 3.12
+    def datetime_from_timestamp(ts=None):
+        """Convert Unix timestamp to naive UTC datetime"""
+        Y, m, d, H, M, S, _, _, _ = time.gmtime(ts)
+        return datetime.datetime(Y, m, d, H, M, S)
+
+    datetime_utcfromtimestamp = datetime_from_timestamp
+    datetime_utcnow = datetime_from_timestamp
 
 
 def json_default(obj):
@@ -238,7 +300,11 @@ def json_default(obj):
 
 
 json_loads = json._default_decoder.decode
-json_dumps = json.JSONEncoder(default=json_default).encode
+json_dumps = json.JSONEncoder(
+    check_circular=False,
+    separators=(",", ":"),
+    default=json_default,
+).encode
 
 
 def dump_json(obj, fp=sys.stdout, ensure_ascii=True, indent=4):
@@ -336,10 +402,35 @@ def extract_headers(response):
     return data
 
 
+def detect_challenge(response):
+    server = response.headers.get("server")
+    if not server:
+        return
+
+    elif server.startswith("cloudflare"):
+        if response.status_code not in (403, 503):
+            return
+
+        mitigated = response.headers.get("cf-mitigated")
+        if mitigated and mitigated.lower() == "challenge":
+            return "Cloudflare challenge"
+
+        content = response.content
+        if b"_cf_chl_opt" in content or b"jschl-answer" in content:
+            return "Cloudflare challenge"
+        elif b'name="captcha-bypass"' in content:
+            return "Cloudflare CAPTCHA"
+
+    elif server.startswith("ddos-guard"):
+        if response.status_code == 403 and \
+                b"/ddos-guard/js-challenge/" in response.content:
+            return "DDoS-Guard challenge"
+
+
 @functools.lru_cache(maxsize=None)
 def git_head():
     try:
-        out, err = subprocess.Popen(
+        out, err = Popen(
             ("git", "rev-parse", "--short", "HEAD"),
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
@@ -384,9 +475,9 @@ def set_mtime(path, mtime):
         pass
 
 
-def cookiestxt_load(fp, cookiejar):
-    """Parse a Netscape cookies.txt file and add its Cookies to 'cookiejar'"""
-    set_cookie = cookiejar.set_cookie
+def cookiestxt_load(fp):
+    """Parse a Netscape cookies.txt file and add return its Cookies"""
+    cookies = []
 
     for line in fp:
 
@@ -408,17 +499,19 @@ def cookiestxt_load(fp, cookiejar):
             name = value
             value = None
 
-        set_cookie(Cookie(
+        cookies.append(Cookie(
             0, name, value,
             None, False,
             domain,
             domain_specified == "TRUE",
-            domain.startswith("."),
+            domain[0] == "." if domain else False,
             path, False,
             secure == "TRUE",
             None if expires == "0" or not expires else expires,
             False, None, None, {},
         ))
+
+    return cookies
 
 
 def cookiestxt_store(fp, cookies):
@@ -437,9 +530,10 @@ def cookiestxt_store(fp, cookies):
             name = cookie.name
             value = cookie.value
 
+        domain = cookie.domain
         write("\t".join((
-            cookie.domain,
-            "TRUE" if cookie.domain.startswith(".") else "FALSE",
+            domain,
+            "TRUE" if domain and domain[0] == "." else "FALSE",
             cookie.path,
             "TRUE" if cookie.secure else "FALSE",
             "0" if cookie.expires is None else str(cookie.expires),
@@ -510,6 +604,24 @@ class HTTPBasicAuth():
         return request
 
 
+class ModuleProxy():
+    __slots__ = ()
+
+    def __getitem__(self, key, modules=sys.modules):
+        try:
+            return modules[key]
+        except KeyError:
+            pass
+        try:
+            __import__(key)
+        except ImportError:
+            modules[key] = NONE
+            return NONE
+        return modules[key]
+
+    __getattr__ = __getitem__
+
+
 class LazyPrompt():
     __slots__ = ()
 
@@ -517,18 +629,45 @@ class LazyPrompt():
         return getpass.getpass()
 
 
+class NullContext():
+    __slots__ = ()
+
+    def __enter__(self):
+        return None
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        pass
+
+
+class NullResponse():
+    __slots__ = ("url", "reason")
+
+    ok = is_redirect = is_permanent_redirect = False
+    cookies = headers = history = links = {}
+    encoding = apparent_encoding = "utf-8"
+    content = b""
+    text = ""
+    status_code = 900
+    close = noop
+
+    def __init__(self, url, reason=""):
+        self.url = url
+        self.reason = str(reason)
+
+    def __str__(self):
+        return "900 " + self.reason
+
+    def json(self):
+        return {}
+
+
 class CustomNone():
     """None-style type that supports more operations than regular None"""
     __slots__ = ()
 
-    def __getattribute__(self, _):
-        return self
-
-    def __getitem__(self, _):
-        return self
-
-    def __iter__(self):
-        return self
+    __getattribute__ = identity
+    __getitem__ = identity
+    __iter__ = identity
 
     def __call__(self, *args, **kwargs):
         return self
@@ -537,13 +676,58 @@ class CustomNone():
     def __next__():
         raise StopIteration
 
-    @staticmethod
-    def __bool__():
-        return False
+    def __eq__(self, other):
+        return self is other
+
+    def __ne__(self, other):
+        return self is not other
+
+    __lt__ = true
+    __le__ = true
+    __gt__ = false
+    __ge__ = false
+    __bool__ = false
+
+    __add__ = identity
+    __sub__ = identity
+    __mul__ = identity
+    __matmul__ = identity
+    __truediv__ = identity
+    __floordiv__ = identity
+    __mod__ = identity
+
+    __radd__ = identity
+    __rsub__ = identity
+    __rmul__ = identity
+    __rmatmul__ = identity
+    __rtruediv__ = identity
+    __rfloordiv__ = identity
+    __rmod__ = identity
+
+    __lshift__ = identity
+    __rshift__ = identity
+    __and__ = identity
+    __xor__ = identity
+    __or__ = identity
+
+    __rlshift__ = identity
+    __rrshift__ = identity
+    __rand__ = identity
+    __rxor__ = identity
+    __ror__ = identity
+
+    __neg__ = identity
+    __pos__ = identity
+    __abs__ = identity
+    __invert__ = identity
 
     @staticmethod
     def __len__():
         return 0
+
+    __int__ = __len__
+    __hash__ = __len__
+    __index__ = __len__
 
     @staticmethod
     def __format__(_):
@@ -556,14 +740,37 @@ class CustomNone():
     __repr__ = __str__
 
 
+# v137.0 release of Firefox on 2025-04-01 has ordinal 739342
+# 735506 == 739342 - 137 * 28
+# v135.0 release of Chrome  on 2025-04-01 has ordinal 739342
+# 735562 == 739342 - 135 * 28
+#  _ord_today = datetime.date.today().toordinal()
+#  _ff_ver = (_ord_today - 735506) // 28
+#  _ch_ver = (_ord_today - 735562) // 28
+
+_ff_ver = (datetime.date.today().toordinal() - 735506) // 28
+#  _ch_ver = _ff_ver - 2
+
 NONE = CustomNone()
 EPOCH = datetime.datetime(1970, 1, 1)
 SECOND = datetime.timedelta(0, 1)
 WINDOWS = (os.name == "nt")
 SENTINEL = object()
-USERAGENT = "gallery-dl/" + version.__version__
 EXECUTABLE = getattr(sys, "frozen", False)
-SPECIAL_EXTRACTORS = {"oauth", "recursive", "test"}
+SPECIAL_EXTRACTORS = {"oauth", "recursive", "generic"}
+
+EXTS_IMAGE = {"jpg", "jpeg", "png", "gif", "bmp", "svg", "psd", "ico",
+              "webp", "avif", "heic", "heif"}
+EXTS_VIDEO = {"mp4", "m4v", "mov", "webm", "mkv", "ogv", "flv", "avi", "wmv"}
+EXTS_ARCHIVE = {"zip", "rar", "7z", "tar", "gz", "bz2", "lzma", "xz"}
+
+USERAGENT = "gallery-dl/" + version.__version__
+USERAGENT_FIREFOX = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:{}.0) "
+                     "Gecko/20100101 Firefox/{}.0").format(_ff_ver, _ff_ver)
+USERAGENT_CHROME = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                    "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/{}.0.0.0 "
+                    "Safari/537.36").format(_ff_ver - 2)
+
 GLOBALS = {
     "contains" : contains,
     "parse_int": text.parse_int,
@@ -575,13 +782,89 @@ GLOBALS = {
     "restart"  : raises(exception.RestartExtraction),
     "hash_sha1": sha1,
     "hash_md5" : md5,
+    "std"      : ModuleProxy(),
     "re"       : re,
+    "exts_image"  : EXTS_IMAGE,
+    "exts_video"  : EXTS_VIDEO,
+    "exts_archive": EXTS_ARCHIVE,
 }
 
 
-def compile_expression(expr, name="<expr>", globals=None):
+if EXECUTABLE and hasattr(sys, "_MEIPASS"):
+    # https://github.com/pyinstaller/pyinstaller/blob/develop/doc
+    # /runtime-information.rst#ld_library_path--libpath-considerations
+    _popen_env = os.environ.copy()
+
+    orig = _popen_env.get("LD_LIBRARY_PATH_ORIG")
+    if orig is None:
+        _popen_env.pop("LD_LIBRARY_PATH", None)
+    else:
+        _popen_env["LD_LIBRARY_PATH"] = orig
+
+    orig = _popen_env.get("DYLD_LIBRARY_PATH_ORIG")
+    if orig is None:
+        _popen_env.pop("DYLD_LIBRARY_PATH", None)
+    else:
+        _popen_env["DYLD_LIBRARY_PATH"] = orig
+
+    del orig
+
+    class Popen(subprocess.Popen):
+        def __init__(self, args, **kwargs):
+            kwargs["env"] = _popen_env
+            subprocess.Popen.__init__(self, args, **kwargs)
+else:
+    Popen = subprocess.Popen
+
+
+def compile_expression_raw(expr, name="<expr>", globals=None):
     code_object = compile(expr, name, "eval")
     return functools.partial(eval, code_object, globals or GLOBALS)
+
+
+def compile_expression_defaultdict(expr, name="<expr>", globals=None):
+    global GLOBALS_DEFAULT
+
+    if isinstance(__builtins__, dict):
+        # cpython
+        GLOBALS_DEFAULT = collections.defaultdict(lambda n=NONE: n, GLOBALS)
+    else:
+        # pypy3 - insert __builtins__ symbols into globals dict
+        GLOBALS_DEFAULT = collections.defaultdict(
+            lambda n=NONE: n, __builtins__.__dict__)
+        GLOBALS_DEFAULT.update(GLOBALS)
+
+    global compile_expression_defaultdict
+    compile_expression_defaultdict = compile_expression_defaultdict_impl
+    return compile_expression_defaultdict_impl(expr, name, globals)
+
+
+def compile_expression_defaultdict_impl(expr, name="<expr>", globals=None):
+    code_object = compile(expr, name, "eval")
+    return functools.partial(eval, code_object, globals or GLOBALS_DEFAULT)
+
+
+def compile_expression_tryexcept(expr, name="<expr>", globals=None):
+    code_object = compile(expr, name, "eval")
+
+    def _eval(locals=None, globals=(globals or GLOBALS), co=code_object):
+        try:
+            return eval(co, globals, locals)
+        except exception.GalleryDLException:
+            raise
+        except Exception:
+            return NONE
+
+    return _eval
+
+
+compile_expression = compile_expression_tryexcept
+
+
+def compile_filter(expr, name="<filter>", globals=None):
+    if not isinstance(expr, str):
+        expr = "(" + ") and (".join(expr) + ")"
+    return compile_expression(expr, name, globals)
 
 
 def import_file(path):
@@ -600,7 +883,7 @@ def import_file(path):
         finally:
             del sys.path[0]
     else:
-        return __import__(name)
+        return __import__(name.replace("-", "_"))
 
 
 def build_duration_func(duration, min=0.0):
@@ -677,8 +960,9 @@ def build_extractor_filter(categories, negate=True, special=None):
     if catsub:
         def test(extr):
             for category, subcategory in catsub:
-                if category in (extr.category, extr.basecategory) and \
-                        subcategory == extr.subcategory:
+                if subcategory == extr.subcategory and (
+                        category == extr.category or
+                        category == extr.basecategory):
                     return not negate
             return negate
         tests.append(test)
@@ -813,10 +1097,8 @@ class FilterPredicate():
     """Predicate; True if evaluating the given expression returns True"""
 
     def __init__(self, expr, target="image"):
-        if not isinstance(expr, str):
-            expr = "(" + ") and (".join(expr) + ")"
         name = "<{} filter>".format(target)
-        self.expr = compile_expression(expr, name)
+        self.expr = compile_filter(expr, name)
 
     def __call__(self, _, kwdict):
         try:
@@ -825,46 +1107,3 @@ class FilterPredicate():
             raise
         except Exception as exc:
             raise exception.FilterError(exc)
-
-
-class DownloadArchive():
-
-    def __init__(self, path, format_string, pragma=None,
-                 cache_key="_archive_key"):
-        try:
-            con = sqlite3.connect(path, timeout=60, check_same_thread=False)
-        except sqlite3.OperationalError:
-            os.makedirs(os.path.dirname(path))
-            con = sqlite3.connect(path, timeout=60, check_same_thread=False)
-        con.isolation_level = None
-
-        from . import formatter
-        self.keygen = formatter.parse(format_string).format_map
-        self.close = con.close
-        self.cursor = cursor = con.cursor()
-        self._cache_key = cache_key
-
-        if pragma:
-            for stmt in pragma:
-                cursor.execute("PRAGMA " + stmt)
-
-        try:
-            cursor.execute("CREATE TABLE IF NOT EXISTS archive "
-                           "(entry TEXT PRIMARY KEY) WITHOUT ROWID")
-        except sqlite3.OperationalError:
-            # fallback for missing WITHOUT ROWID support (#553)
-            cursor.execute("CREATE TABLE IF NOT EXISTS archive "
-                           "(entry TEXT PRIMARY KEY)")
-
-    def check(self, kwdict):
-        """Return True if the item described by 'kwdict' exists in archive"""
-        key = kwdict[self._cache_key] = self.keygen(kwdict)
-        self.cursor.execute(
-            "SELECT 1 FROM archive WHERE entry=? LIMIT 1", (key,))
-        return self.cursor.fetchone()
-
-    def add(self, kwdict):
-        """Add item described by 'kwdict' to archive"""
-        key = kwdict.get(self._cache_key) or self.keygen(kwdict)
-        self.cursor.execute(
-            "INSERT OR IGNORE INTO archive (entry) VALUES (?)", (key,))

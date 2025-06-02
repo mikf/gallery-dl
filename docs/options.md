@@ -11,11 +11,15 @@
     -d, --destination PATH      Target location for file downloads
     -D, --directory PATH        Exact location for file downloads
     -X, --extractors PATH       Load external extractors from PATH
-    --proxy URL                 Use the specified proxy
-    --source-address IP         Client-side IP address to bind to
     --user-agent UA             User-Agent request header
     --clear-cache MODULE        Delete cached login sessions, cookies, etc. for
                                 MODULE (ALL to delete everything)
+
+## Update Options:
+    -U, --update                Update to the latest version
+    --update-to CHANNEL[@TAG]   Switch to a dfferent release channel (stable or
+                                dev) or upgrade/downgrade to a specific version
+    --update-check              Check if a newer version is available
 
 ## Input Options:
     -i, --input-file FILE       Download URLs found in FILE ('-' for stdin).
@@ -26,35 +30,55 @@
     -x, --input-file-delete FILE
                                 Download URLs found in FILE. Delete them after
                                 they were downloaded successfully.
+    --no-input                  Do not prompt for passwords/tokens
 
 ## Output Options:
     -q, --quiet                 Activate quiet mode
+    -w, --warning               Print only warnings and errors
     -v, --verbose               Print various debugging information
     -g, --get-urls              Print URLs instead of downloading
     -G, --resolve-urls          Print URLs instead of downloading; resolve
                                 intermediary URLs
     -j, --dump-json             Print JSON information
+    -J, --resolve-json          Print JSON information; resolve intermediary
+                                URLs
     -s, --simulate              Simulate data extraction; do not download
                                 anything
     -E, --extractor-info        Print extractor defaults and settings
     -K, --list-keywords         Print a list of available keywords and example
                                 values for the given URLs
     -e, --error-file FILE       Add input URLs which returned an error to FILE
+    -N, --print [EVENT:]FORMAT  Write FORMAT during EVENT (default 'prepare')
+                                to standard output. Examples: 'id' or
+                                'post:{md5[:8]}'
+    --print-to-file [EVENT:]FORMAT FILE
+                                Append FORMAT during EVENT to FILE
     --list-modules              Print a list of available extractor modules
-    --list-extractors           Print a list of extractor classes with
+    --list-extractors [CATEGORIES]
+                                Print a list of extractor classes with
                                 description, (sub)category and example URL
     --write-log FILE            Write logging output to FILE
     --write-unsupported FILE    Write URLs, which get emitted by other
                                 extractors but cannot be handled, to FILE
     --write-pages               Write downloaded intermediary pages to files in
                                 the current directory to debug problems
+    --print-traffic             Display sent and read HTTP traffic
+    --no-colors                 Do not emit ANSI color codes in output
 
-## Downloader Options:
-    -r, --limit-rate RATE       Maximum download rate (e.g. 500k or 2.5M)
+## Networking Options:
     -R, --retries N             Maximum number of retries for failed HTTP
                                 requests or -1 for infinite retries (default:
                                 4)
     --http-timeout SECONDS      Timeout for HTTP connections (default: 30.0)
+    --proxy URL                 Use the specified proxy
+    --source-address IP         Client-side IP address to bind to
+    -4, --force-ipv4            Make all connections via IPv4
+    -6, --force-ipv6            Make all connections via IPv6
+    --no-check-certificate      Disable HTTPS certificate validation
+
+## Downloader Options:
+    -r, --limit-rate RATE       Maximum download rate (e.g. 500k or 2.5M)
+    --chunk-size SIZE           Size of in-memory data chunks (default: 32k)
     --sleep SECONDS             Number of seconds to wait before each download.
                                 This can be either a constant value or a range
                                 (e.g. 2.7 or 2.0-3.5)
@@ -62,18 +86,11 @@
                                 during data extraction
     --sleep-extractor SECONDS   Number of seconds to wait before starting data
                                 extraction for an input URL
-    --filesize-min SIZE         Do not download files smaller than SIZE (e.g.
-                                500k or 2.5M)
-    --filesize-max SIZE         Do not download files larger than SIZE (e.g.
-                                500k or 2.5M)
-    --chunk-size SIZE           Size of in-memory data chunks (default: 32k)
     --no-part                   Do not use .part files
     --no-skip                   Do not skip downloads; overwrite existing files
     --no-mtime                  Do not set file modification times according to
                                 Last-Modified HTTP response headers
     --no-download               Do not download any files
-    --no-postprocessors         Do not run any post processors
-    --no-check-certificate      Disable HTTPS certificate validation
 
 ## Configuration Options:
     -o, --option KEY=VALUE      Additional options. Example: -o browser=firefox
@@ -81,6 +98,8 @@
     --config-yaml FILE          Additional configuration files in YAML format
     --config-toml FILE          Additional configuration files in TOML format
     --config-create             Create a basic configuration file
+    --config-status             Show configuration file status
+    --config-open               Open configuration file in external application
     --config-ignore             Do not read default configuration files
 
 ## Authentication Options:
@@ -96,15 +115,19 @@
                                 optional domain prefixed with '/', keyring name
                                 prefixed with '+', profile prefixed with ':',
                                 and container prefixed with '::' ('none' for no
-                                container)
+                                container (default), 'all' for all containers)
 
 ## Selection Options:
-    --download-archive FILE     Record all downloaded or skipped files in FILE
-                                and skip downloading any file already in it
     -A, --abort N               Stop current extractor run after N consecutive
                                 file downloads were skipped
     -T, --terminate N           Stop current and parent extractor runs after N
                                 consecutive file downloads were skipped
+    --filesize-min SIZE         Do not download files smaller than SIZE (e.g.
+                                500k or 2.5M)
+    --filesize-max SIZE         Do not download files larger than SIZE (e.g.
+                                500k or 2.5M)
+    --download-archive FILE     Record all downloaded or skipped files in FILE
+                                and skip downloading any file already in it
     --range RANGE               Index range(s) specifying which files to
                                 download. These can be either a constant value,
                                 range, or slice (e.g. '5', '8-20', or '1:24:3')
@@ -121,6 +144,7 @@
 
 ## Post-processing Options:
     -P, --postprocessor NAME    Activate the specified post processor
+    --no-postprocessors         Do not run any post processors
     -O, --postprocessor-option KEY=VALUE
                                 Additional post processor options
     --write-metadata            Write metadata to separate JSON files
@@ -131,9 +155,13 @@
     --mtime NAME                Set file modification times according to
                                 metadata selected by NAME. Examples: 'date' or
                                 'status[date]'
-    --ugoira FORMAT             Convert Pixiv Ugoira to FORMAT using FFmpeg.
+    --rename FORMAT             Rename previously downloaded files from FORMAT
+                                to the current filename format
+    --rename-to FORMAT          Rename previously downloaded files from the
+                                current filename format to FORMAT
+    --ugoira FMT                Convert Pixiv Ugoira to FMT using FFmpeg.
                                 Supported formats are 'webm', 'mp4', 'gif',
-                                'vp8', 'vp9', 'vp9-lossless', 'copy'.
+                                'vp8', 'vp9', 'vp9-lossless', 'copy', 'zip'.
     --exec CMD                  Execute CMD for each downloaded file. Supported
                                 replacement fields are {} or {_path},
                                 {_directory}, {_filename}. Example: --exec

@@ -8,7 +8,7 @@
 
 """Extractors for https://wallhaven.cc/"""
 
-from .common import Extractor, Message
+from .common import Extractor, Message, Dispatch
 from .. import text, exception
 
 
@@ -54,7 +54,7 @@ class WallhavenExtractor(Extractor):
 class WallhavenSearchExtractor(WallhavenExtractor):
     """Extractor for search results on wallhaven.cc"""
     subcategory = "search"
-    directory_fmt = ("{category}", "{search[q]}")
+    directory_fmt = ("{category}", "{search[tags]}")
     archive_fmt = "s_{search[q]}_{id}"
     pattern = r"(?:https?://)?wallhaven\.cc/search(?:/?\?([^#]+))?"
     example = "https://wallhaven.cc/search?q=QUERY"
@@ -64,7 +64,7 @@ class WallhavenSearchExtractor(WallhavenExtractor):
         self.params = text.parse_query(match.group(1))
 
     def wallpapers(self):
-        return self.api.search(self.params.copy())
+        return self.api.search(self.params)
 
     def metadata(self):
         return {"search": self.params}
@@ -88,21 +88,13 @@ class WallhavenCollectionExtractor(WallhavenExtractor):
         return {"username": self.username, "collection_id": self.collection_id}
 
 
-class WallhavenUserExtractor(WallhavenExtractor):
+class WallhavenUserExtractor(Dispatch, WallhavenExtractor):
     """Extractor for a wallhaven user"""
-    subcategory = "user"
     pattern = r"(?:https?://)?wallhaven\.cc/user/([^/?#]+)/?$"
     example = "https://wallhaven.cc/user/USER"
 
-    def __init__(self, match):
-        WallhavenExtractor.__init__(self, match)
-        self.username = match.group(1)
-
-    def initialize(self):
-        pass
-
     def items(self):
-        base = "{}/user/{}/".format(self.root, self.username)
+        base = "{}/user/{}/".format(self.root, self.groups[0])
         return self._dispatch_extractors((
             (WallhavenUploadsExtractor    , base + "uploads"),
             (WallhavenCollectionsExtractor, base + "favorites"),
@@ -141,7 +133,7 @@ class WallhavenUploadsExtractor(WallhavenExtractor):
 
     def wallpapers(self):
         params = {"q": "@" + self.username}
-        return self.api.search(params.copy())
+        return self.api.search(params)
 
     def metadata(self):
         return {"username": self.username}
@@ -215,12 +207,28 @@ class WallhavenAPI():
 
     def _pagination(self, endpoint, params=None, metadata=None):
         if params is None:
+            params_ptr = None
             params = {}
+        else:
+            params_ptr = params
+            params = params.copy()
         if metadata is None:
             metadata = self.extractor.config("metadata")
 
         while True:
             data = self._call(endpoint, params)
+
+            meta = data.get("meta")
+            if params_ptr is not None:
+                if meta and "query" in meta:
+                    query = meta["query"]
+                    if isinstance(query, dict):
+                        params_ptr["tags"] = query.get("tag")
+                        params_ptr["tag_id"] = query.get("id")
+                    else:
+                        params_ptr["tags"] = query
+                        params_ptr["tag_id"] = 0
+                params_ptr = None
 
             if metadata:
                 for wp in data["data"]:
@@ -228,7 +236,6 @@ class WallhavenAPI():
             else:
                 yield from data["data"]
 
-            meta = data.get("meta")
             if not meta or meta["current_page"] >= meta["last_page"]:
                 return
             params["page"] = meta["current_page"] + 1

@@ -38,6 +38,11 @@ def main():
             except ImportError:
                 import toml
             config.load(args.configs_toml, strict=True, loads=toml.loads)
+        if not args.colors:
+            output.ANSI = False
+            config.set((), "colors", False)
+            if util.WINDOWS:
+                config.set(("output",), "ansi", False)
         if args.filename:
             filename = args.filename
             if filename == "/O":
@@ -58,7 +63,7 @@ def main():
             browser, _, profile = args.cookies_from_browser.partition(":")
             browser, _, keyring = browser.partition("+")
             browser, _, domain = browser.partition("/")
-            if profile.startswith(":"):
+            if profile and profile[0] == ":":
                 container = profile[1:]
                 profile = None
             else:
@@ -86,7 +91,7 @@ def main():
                     signal.signal(signal_num, signal.SIG_IGN)
 
         # enable ANSI escape sequences on Windows
-        if util.WINDOWS and config.get(("output",), "ansi"):
+        if util.WINDOWS and config.get(("output",), "ansi", output.COLORS):
             from ctypes import windll, wintypes, byref
             kernel32 = windll.kernel32
             mode = wintypes.DWORD()
@@ -99,6 +104,18 @@ def main():
                     kernel32.SetConsoleMode(handle, mode)
 
             output.ANSI = True
+
+        # filter environment
+        filterenv = config.get((), "filters-environment", True)
+        if filterenv is True:
+            pass
+        elif not filterenv:
+            util.compile_expression = util.compile_expression_raw
+        elif isinstance(filterenv, str):
+            if filterenv == "raw":
+                util.compile_expression = util.compile_expression_raw
+            elif filterenv.startswith("default"):
+                util.compile_expression = util.compile_expression_defaultdict
 
         # format string separator
         separator = config.get((), "format-separator")
@@ -113,7 +130,7 @@ def main():
 
         # loglevels
         output.configure_logging(args.loglevel)
-        if args.loglevel >= logging.ERROR:
+        if args.loglevel >= logging.WARNING:
             config.set(("output",), "mode", "null")
             config.set(("downloader",), "progress", None)
         elif args.loglevel <= logging.DEBUG:
@@ -122,7 +139,7 @@ def main():
 
             extra = ""
             if util.EXECUTABLE:
-                extra = " - Executable"
+                extra = " - Executable ({})".format(version.__variant__)
             else:
                 git_head = util.git_head()
                 if git_head:
@@ -139,6 +156,48 @@ def main():
                 pass
 
             log.debug("Configuration Files %s", config._files)
+
+        if args.clear_cache:
+            from . import cache
+            log = logging.getLogger("cache")
+            cnt = cache.clear(args.clear_cache)
+
+            if cnt is None:
+                log.error("Database file not available")
+                return 1
+
+            log.info("Deleted %d entr%s from '%s'",
+                     cnt, "y" if cnt == 1 else "ies", cache._path())
+            return 0
+
+        if args.config:
+            if args.config == "init":
+                return config.initialize()
+            elif args.config == "status":
+                return config.status()
+            else:
+                return config.open_extern()
+
+        if args.print_traffic:
+            import requests
+            requests.packages.urllib3.connection.HTTPConnection.debuglevel = 1
+
+        if args.update:
+            from . import update
+            extr = update.UpdateExtractor.from_url("update:" + args.update)
+            ujob = update.UpdateJob(extr)
+            return ujob.run()
+
+        # category remapping
+        cmap = config.interpolate(("extractor",), "category-map")
+        if cmap is None:
+            cmap = {
+                "coomerparty": "coomer",
+                "kemonoparty": "kemono",
+                "koharu"     : "schalenetwork",
+            }
+        if cmap:
+            config.rename_categories(cmap)
 
         # extractor modules
         modules = config.get(("extractor",), "modules")
@@ -182,12 +241,18 @@ def main():
             extractor.modules.append("")
             sys.stdout.write("\n".join(extractor.modules))
 
-        elif args.list_extractors:
+        elif args.list_extractors is not None:
             write = sys.stdout.write
             fmt = ("{}{}\nCategory: {} - Subcategory: {}"
                    "\nExample : {}\n\n").format
 
-            for extr in extractor.extractors():
+            extractors = extractor.extractors()
+            if args.list_extractors:
+                fltr = util.build_extractor_filter(
+                    args.list_extractors, negate=False)
+                extractors = filter(fltr, extractors)
+
+            for extr in extractors:
                 write(fmt(
                     extr.__name__,
                     "\n" + extr.__doc__ if extr.__doc__ else "",
@@ -195,27 +260,22 @@ def main():
                     extr.example,
                 ))
 
-        elif args.clear_cache:
-            from . import cache
-            log = logging.getLogger("cache")
-            cnt = cache.clear(args.clear_cache)
-
-            if cnt is None:
-                log.error("Database file not available")
-            else:
-                log.info(
-                    "Deleted %d %s from '%s'",
-                    cnt, "entry" if cnt == 1 else "entries", cache._path(),
-                )
-
-        elif args.config_init:
-            return config.initialize()
-
         else:
+            input_files = config.get((), "input-files")
+            if input_files:
+                for input_file in input_files:
+                    if isinstance(input_file, str):
+                        input_file = (input_file, None)
+                    args.input_files.append(input_file)
+
             if not args.urls and not args.input_files:
-                parser.error(
-                    "The following arguments are required: URL\n"
-                    "Use 'gallery-dl --help' to get a list of all options.")
+                if args.cookies_from_browser or config.interpolate(
+                        ("extractor",), "cookies"):
+                    args.urls.append("noop")
+                else:
+                    parser.error(
+                        "The following arguments are required: URL\nUse "
+                        "'gallery-dl --help' to get a list of all options.")
 
             if args.list_urls:
                 jobtype = job.UrlJob
@@ -223,6 +283,9 @@ def main():
                 if config.get(("output",), "fallback", True):
                     jobtype.handle_url = \
                         staticmethod(jobtype.handle_url_fallback)
+            elif args.dump_json:
+                jobtype = job.DataJob
+                jobtype.resolve = args.dump_json - 1
             else:
                 jobtype = args.jobtype or job.DownloadJob
 
@@ -282,6 +345,8 @@ def main():
                     else:
                         input_manager.success()
 
+                except exception.StopExtraction:
+                    pass
                 except exception.TerminateExtraction:
                     pass
                 except exception.RestartExtraction:
@@ -294,6 +359,7 @@ def main():
 
                 input_manager.next()
             return retval
+        return 0
 
     except KeyboardInterrupt:
         raise SystemExit("\nKeyboardInterrupt")

@@ -8,7 +8,7 @@
 
 """Extractors for https://www.pornhub.com/"""
 
-from .common import Extractor, Message
+from .common import Extractor, Message, Dispatch
 from .. import text, exception
 
 BASE_PATTERN = r"(?:https?://)?(?:[\w-]+\.)?pornhub\.com"
@@ -66,10 +66,19 @@ class PornhubGalleryExtractor(PornhubExtractor):
     def items(self):
         data = self.metadata()
         yield Message.Directory, data
-        for num, image in enumerate(self.images(), 1):
+        for num, img in enumerate(self.images(), 1):
+
+            image = {
+                "url"    : img["img_large"],
+                "caption": img["caption"],
+                "id"     : text.parse_int(img["id"]),
+                "views"  : text.parse_int(img["times_viewed"]),
+                "score"  : text.parse_int(img["vote_percent"]),
+                "num"    : num,
+            }
+
             url = image["url"]
             image.update(data)
-            image["num"] = num
             yield Message.Url, url, text.nameext_from_url(url, image)
 
     def metadata(self):
@@ -105,18 +114,20 @@ class PornhubGalleryExtractor(PornhubExtractor):
         images = response.json()
         key = end = self._first
 
-        while True:
-            img = images[key]
-            yield {
-                "url"    : img["img_large"],
-                "caption": img["caption"],
-                "id"     : text.parse_int(img["id"]),
-                "views"  : text.parse_int(img["times_viewed"]),
-                "score"  : text.parse_int(img["vote_percent"]),
-            }
-            key = str(img["next"])
-            if key == end:
-                return
+        results = []
+        try:
+            while True:
+                img = images[key]
+                results.append(img)
+                key = str(img["next"])
+                if key == end:
+                    break
+        except KeyError:
+            self.log.warning("%s: Unable to ensure correct file order",
+                             self.gallery_id)
+            return images.values()
+
+        return results
 
 
 class PornhubGifExtractor(PornhubExtractor):
@@ -143,6 +154,9 @@ class PornhubGifExtractor(PornhubExtractor):
             "url"  : extr('"contentUrl": "', '"'),
             "date" : text.parse_datetime(
                 extr('"uploadDate": "', '"'), "%Y-%m-%d"),
+            "viewkey"  : extr('From this video: '
+                              '<a href="/view_video.php?viewkey=', '"'),
+            "timestamp": extr('lass="directLink tstamp" rel="nofollow">', '<'),
             "user" : text.remove_html(extr("Created by:", "</div>")),
         }
 
@@ -150,21 +164,13 @@ class PornhubGifExtractor(PornhubExtractor):
         yield Message.Url, gif["url"], text.nameext_from_url(gif["url"], gif)
 
 
-class PornhubUserExtractor(PornhubExtractor):
+class PornhubUserExtractor(Dispatch, PornhubExtractor):
     """Extractor for a pornhub user"""
-    subcategory = "user"
     pattern = BASE_PATTERN + r"/((?:users|model|pornstar)/[^/?#]+)/?$"
     example = "https://www.pornhub.com/model/USER"
 
-    def __init__(self, match):
-        PornhubExtractor.__init__(self, match)
-        self.user = match.group(1)
-
-    def initialize(self):
-        pass
-
     def items(self):
-        base = "{}/{}/".format(self.root, self.user)
+        base = "{}/{}/".format(self.root, self.groups[0])
         return self._dispatch_extractors((
             (PornhubPhotosExtractor, base + "photos"),
             (PornhubGifsExtractor  , base + "gifs"),

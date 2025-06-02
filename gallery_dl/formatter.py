@@ -243,12 +243,11 @@ class TemplateFStringFormatter(FStringFormatter):
 
 
 def parse_field_name(field_name):
+    if field_name[0] == "'":
+        return "_lit", (operator.itemgetter(field_name[1:-1]),)
+
     first, rest = _string.formatter_field_name_split(field_name)
     funcs = []
-
-    if first[0] == "'":
-        funcs.append(operator.itemgetter(first[1:-1]))
-        first = "_lit"
 
     for is_attr, key in rest:
         if is_attr:
@@ -326,6 +325,43 @@ def _parse_slice(format_spec, default):
     return apply_slice
 
 
+def _parse_arithmetic(format_spec, default):
+    op, _, format_spec = format_spec.partition(_SEPARATOR)
+    fmt = _build_format_func(format_spec, default)
+
+    value = int(op[2:])
+    op = op[1]
+
+    if op == "+":
+        return lambda obj: fmt(obj + value)
+    if op == "-":
+        return lambda obj: fmt(obj - value)
+    if op == "*":
+        return lambda obj: fmt(obj * value)
+
+    return fmt
+
+
+def _parse_conversion(format_spec, default):
+    conversions, _, format_spec = format_spec.partition(_SEPARATOR)
+    convs = [_CONVERSIONS[c] for c in conversions[1:]]
+    fmt = _build_format_func(format_spec, default)
+
+    if len(conversions) <= 2:
+
+        def convert_one(obj):
+            return fmt(conv(obj))
+        conv = _CONVERSIONS[conversions[1]]
+        return convert_one
+
+    def convert_many(obj):
+        for conv in convs:
+            obj = conv(obj)
+        return fmt(obj)
+    convs = [_CONVERSIONS[c] for c in conversions[1:]]
+    return convert_many
+
+
 def _parse_maxlen(format_spec, default):
     maxlen, replacement, format_spec = format_spec.split(_SEPARATOR, 2)
     maxlen = text.parse_int(maxlen[1:])
@@ -375,18 +411,18 @@ def _parse_offset(format_spec, default):
     fmt = _build_format_func(format_spec, default)
 
     if not offset or offset == "local":
-        is_dst = time.daylight and time.localtime().tm_isdst > 0
-        offset = -(time.altzone if is_dst else time.timezone)
+        def off(dt):
+            local = time.localtime(util.datetime_to_timestamp(dt))
+            return fmt(dt + datetime.timedelta(0, local.tm_gmtoff))
     else:
         hours, _, minutes = offset.partition(":")
         offset = 3600 * int(hours)
         if minutes:
             offset += 60 * (int(minutes) if offset > 0 else -int(minutes))
+        offset = datetime.timedelta(0, offset)
 
-    offset = datetime.timedelta(seconds=offset)
-
-    def off(obj):
-        return fmt(obj + offset)
+        def off(obj):
+            return fmt(obj + offset)
     return off
 
 
@@ -402,6 +438,19 @@ def _parse_sort(format_spec, default):
         def sort_asc(obj):
             return fmt(sorted(obj))
         return sort_asc
+
+
+def _parse_limit(format_spec, default):
+    limit, hint, format_spec = format_spec.split(_SEPARATOR, 2)
+    limit = int(limit[1:])
+    limit_hint = limit - len(hint)
+    fmt = _build_format_func(format_spec, default)
+
+    def apply_limit(obj):
+        if len(obj) > limit:
+            obj = obj[:limit_hint] + hint
+        return fmt(obj)
+    return apply_limit
 
 
 def _default_format(format_spec, default):
@@ -427,6 +476,7 @@ _GLOBALS = {
     "_env": lambda: os.environ,
     "_lit": lambda: _literal,
     "_now": datetime.datetime.now,
+    "_nul": lambda: util.NONE,
 }
 _CONVERSIONS = {
     "l": str.lower,
@@ -435,8 +485,10 @@ _CONVERSIONS = {
     "C": string.capwords,
     "j": util.json_dumps,
     "t": str.strip,
+    "L": len,
     "T": util.datetime_to_timestamp_string,
     "d": text.parse_timestamp,
+    "D": util.to_datetime,
     "U": text.unescape,
     "H": lambda s: text.unescape(text.remove_html(s)),
     "g": text.slugify,
@@ -444,14 +496,19 @@ _CONVERSIONS = {
     "s": str,
     "r": repr,
     "a": ascii,
+    "i": int,
+    "f": float,
 }
 _FORMAT_SPECIFIERS = {
     "?": _parse_optional,
     "[": _parse_slice,
+    "A": _parse_arithmetic,
+    "C": _parse_conversion,
     "D": _parse_datetime,
-    "L": _parse_maxlen,
     "J": _parse_join,
+    "L": _parse_maxlen,
     "O": _parse_offset,
     "R": _parse_replace,
     "S": _parse_sort,
+    "X": _parse_limit,
 }

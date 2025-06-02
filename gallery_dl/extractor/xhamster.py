@@ -20,8 +20,8 @@ class XhamsterExtractor(Extractor):
     category = "xhamster"
 
     def __init__(self, match):
-        Extractor.__init__(self, match)
         self.root = "https://" + match.group(1)
+        Extractor.__init__(self, match)
 
 
 class XhamsterGalleryExtractor(XhamsterExtractor):
@@ -34,48 +34,48 @@ class XhamsterGalleryExtractor(XhamsterExtractor):
     pattern = BASE_PATTERN + r"(/photos/gallery/[^/?#]+)"
     example = "https://xhamster.com/photos/gallery/12345"
 
-    def __init__(self, match):
-        XhamsterExtractor.__init__(self, match)
-        self.path = match.group(2)
-        self.data = None
-
     def items(self):
         data = self.metadata()
         yield Message.Directory, data
         for num, image in enumerate(self.images(), 1):
             url = image["imageURL"]
             image.update(data)
+            text.nameext_from_url(url, image)
             image["num"] = num
-            yield Message.Url, url, text.nameext_from_url(url, image)
+            image["extension"] = "webp"
+            del image["modelName"]
+            yield Message.Url, url, image
 
     def metadata(self):
-        self.data = self._data(self.root + self.path)
-        user = self.data["authorModel"]
-        imgs = self.data["photosGalleryModel"]
+        data = self.data = self._extract_data(self.root + self.groups[1])
+
+        gallery = data["galleryPage"]
+        info = gallery["infoProps"]
+        model = gallery["galleryModel"]
+        author = info["authorInfoProps"]
 
         return {
             "user":
             {
-                "id"         : text.parse_int(user["id"]),
-                "url"        : user["pageURL"],
-                "name"       : user["name"],
-                "retired"    : user["retired"],
-                "verified"   : user["verified"],
-                "subscribers": user["subscribers"],
+                "id"         : text.parse_int(model["userId"]),
+                "url"        : author["authorLink"],
+                "name"       : author["authorName"],
+                "verified"   : True if author.get("verified") else False,
+                "subscribers": info["subscribeButtonProps"]["subscribers"],
             },
             "gallery":
             {
-                "id"         : text.parse_int(imgs["id"]),
-                "tags"       : [c["name"] for c in imgs["categories"]],
-                "date"       : text.parse_timestamp(imgs["created"]),
-                "views"      : text.parse_int(imgs["views"]),
-                "likes"      : text.parse_int(imgs["rating"]["likes"]),
-                "dislikes"   : text.parse_int(imgs["rating"]["dislikes"]),
-                "title"      : text.unescape(imgs["title"]),
-                "description": text.unescape(imgs["description"]),
-                "thumbnail"  : imgs["thumbURL"],
+                "id"         : text.parse_int(gallery["id"]),
+                "tags"       : [t["label"] for t in info["categoriesTags"]],
+                "date"       : text.parse_timestamp(model["created"]),
+                "views"      : text.parse_int(model["views"]),
+                "likes"      : text.parse_int(model["rating"]["likes"]),
+                "dislikes"   : text.parse_int(model["rating"]["dislikes"]),
+                "title"      : model["title"],
+                "description": model["description"],
+                "thumbnail"  : model["thumbURL"],
             },
-            "count": text.parse_int(imgs["quantity"]),
+            "count": text.parse_int(gallery["photosCount"]),
         }
 
     def images(self):
@@ -83,17 +83,17 @@ class XhamsterGalleryExtractor(XhamsterExtractor):
         self.data = None
 
         while True:
-            for image in data["photosGalleryModel"]["photos"]:
-                del image["modelName"]
-                yield image
+            yield from data["photosGalleryModel"]["photos"]
 
-            pgntn = data["pagination"]
-            if pgntn["active"] == pgntn["maxPage"]:
+            pagination = data["galleryPage"]["paginationProps"]
+            if pagination["currentPageNumber"] >= pagination["lastPageNumber"]:
                 return
-            url = pgntn["pageLinkTemplate"][:-3] + str(pgntn["next"])
-            data = self._data(url)
+            url = (pagination["pageLinkTemplate"][:-3] +
+                   str(pagination["currentPageNumber"] + 1))
 
-    def _data(self, url):
+            data = self._extract_data(url)
+
+    def _extract_data(self, url):
         page = self.request(url).text
         return util.json_loads(text.extr(
             page, "window.initials=", "</script>").rstrip("\n\r;"))
@@ -105,12 +105,8 @@ class XhamsterUserExtractor(XhamsterExtractor):
     pattern = BASE_PATTERN + r"/users/([^/?#]+)(?:/photos)?/?(?:$|[?#])"
     example = "https://xhamster.com/users/USER/photos"
 
-    def __init__(self, match):
-        XhamsterExtractor.__init__(self, match)
-        self.user = match.group(2)
-
     def items(self):
-        url = "{}/users/{}/photos".format(self.root, self.user)
+        url = "{}/users/{}/photos".format(self.root, self.groups[1])
         data = {"_extractor": XhamsterGalleryExtractor}
 
         while url:

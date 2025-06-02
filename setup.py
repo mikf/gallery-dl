@@ -9,8 +9,8 @@ import warnings
 
 def read(fname):
     path = os.path.join(os.path.dirname(__file__), fname)
-    with open(path, encoding="utf-8") as file:
-        return file.read()
+    with open(path, encoding="utf-8") as fp:
+        return fp.read()
 
 
 def check_file(fname):
@@ -136,6 +136,7 @@ def build_setuptools():
             "Programming Language :: Python :: 3.10",
             "Programming Language :: Python :: 3.11",
             "Programming Language :: Python :: 3.12",
+            "Programming Language :: Python :: 3.13",
             "Programming Language :: Python :: Implementation :: CPython",
             "Programming Language :: Python :: Implementation :: PyPy",
             "Topic :: Internet :: WWW/HTTP",

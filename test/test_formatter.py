@@ -25,14 +25,18 @@ class TestFormatter(unittest.TestCase):
         "b": "äöü",
         "j": "げんそうきょう",
         "d": {"a": "foo", "b": 0, "c": None},
+        "i": 2,
         "l": ["a", "b", "c"],
         "n": None,
         "s": " \n\r\tSPACE    ",
         "h": "<p>foo </p> &amp; bar <p> </p>",
         "u": "&#x27;&lt; / &gt;&#x27;",
         "t": 1262304000,
+        "ds": "2010-01-01T01:00:00+01:00",
         "dt": datetime.datetime(2010, 1, 1),
-        "ds": "2010-01-01T01:00:00+0100",
+        "dt_dst": datetime.datetime(2010, 6, 1),
+        "i_str": "12345",
+        "f_str": "12.45",
         "name": "Name",
         "title1": "Title",
         "title2": "",
@@ -61,10 +65,23 @@ class TestFormatter(unittest.TestCase):
         self._run_test("{n!S}", "")
         self._run_test("{t!d}", datetime.datetime(2010, 1, 1))
         self._run_test("{t!d:%Y-%m-%d}", "2010-01-01")
+        self._run_test("{t!D}" , datetime.datetime(2010, 1, 1))
+        if sys.hexversion >= 0x3070000:
+            self._run_test("{ds!D}", datetime.datetime(2010, 1, 1))
+        else:
+            self._run_test("{ds!D}", datetime.datetime(1970, 1, 1))
+        self._run_test("{dt!D}", datetime.datetime(2010, 1, 1))
+        self._run_test("{t!D:%Y-%m-%d}", "2010-01-01")
         self._run_test("{dt!T}", "1262304000")
-        self._run_test("{l!j}", '["a", "b", "c"]')
+        self._run_test("{l!j}", '["a","b","c"]')
         self._run_test("{dt!j}", '"2010-01-01 00:00:00"')
         self._run_test("{a!g}", "hello-world")
+        self._run_test("{a!L}", 11)
+        self._run_test("{l!L}", 3)
+        self._run_test("{d!L}", 3)
+        self._run_test("{i_str!i}", 12345)
+        self._run_test("{i_str!f}", 12345.0)
+        self._run_test("{f_str!f}", 12.45)
 
         with self.assertRaises(KeyError):
             self._run_test("{a!q}", "hello world")
@@ -222,7 +239,7 @@ class TestFormatter(unittest.TestCase):
 
     def test_datetime(self):
         self._run_test("{ds:D%Y-%m-%dT%H:%M:%S%z}", "2010-01-01 00:00:00")
-        self._run_test("{ds:D%Y}", "2010-01-01T01:00:00+0100")
+        self._run_test("{ds:D%Y}", "2010-01-01T01:00:00+01:00")
         self._run_test("{l:D%Y}", "None")
 
     def test_offset(self):
@@ -236,19 +253,20 @@ class TestFormatter(unittest.TestCase):
         self._run_test("{ds:D%Y-%m-%dT%H:%M:%S%z/O1}", "2010-01-01 01:00:00")
         self._run_test("{t!d:O2}", "2010-01-01 02:00:00")
 
-        orig_daylight = time.daylight
-        orig_timezone = time.timezone
-        orig_altzone = time.altzone
-        try:
-            time.daylight = False
-            time.timezone = -3600
-            self._run_test("{dt:O}", "2010-01-01 01:00:00")
-            time.timezone = 7200
-            self._run_test("{dt:Olocal}", "2009-12-31 22:00:00")
-        finally:
-            time.daylight = orig_daylight
-            time.timezone = orig_timezone
-            time.altzone = orig_altzone
+    def test_offset_local(self):
+        ts = self.kwdict["dt"].replace(
+            tzinfo=datetime.timezone.utc).timestamp()
+        offset = time.localtime(ts).tm_gmtoff
+        dt = self.kwdict["dt"] + datetime.timedelta(seconds=offset)
+        self._run_test("{dt:O}", str(dt))
+        self._run_test("{dt:Olocal}", str(dt))
+
+        ts = self.kwdict["dt_dst"].replace(
+            tzinfo=datetime.timezone.utc).timestamp()
+        offset = time.localtime(ts).tm_gmtoff
+        dt = self.kwdict["dt_dst"] + datetime.timedelta(seconds=offset)
+        self._run_test("{dt_dst:O}", str(dt))
+        self._run_test("{dt_dst:Olocal}", str(dt))
 
     def test_sort(self):
         self._run_test("{l:S}" , "['a', 'b', 'c']")
@@ -264,6 +282,23 @@ class TestFormatter(unittest.TestCase):
         self._run_test(
             "{a:Sort-reverse}",  # starts with 'S', contains 'r'
             "['w', 'r', 'o', 'l', 'h', 'd', 'O', 'L', 'L', 'E', ' ']")
+
+    def test_specifier_arithmetic(self):
+        self._run_test("{i:A+1}", "3")
+        self._run_test("{i:A-1}", "1")
+        self._run_test("{i:A*3}", "6")
+
+    def test_specifier_conversions(self):
+        self._run_test("{a:Cl}"   , "hello world")
+        self._run_test("{h:CHC}"  , "Foo & Bar")
+        self._run_test("{l:CSulc}", "A, b, c")
+
+    def test_specifier_limit(self):
+        self._run_test("{a:X20/ */}", "hElLo wOrLd")
+        self._run_test("{a:X10/ */}", "hElLo wO *")
+
+        with self.assertRaises(ValueError):
+            self._run_test("{a:Xfoo/ */}", "hello wo *")
 
     def test_chain_special(self):
         # multiple replacements
@@ -331,23 +366,42 @@ class TestFormatter(unittest.TestCase):
         self.assertRegex(out1, r"^\d{4}-\d\d-\d\d \d\d:\d\d:\d\d(\.\d+)?$")
         self.assertNotEqual(out1, out2)
 
+    def test_globals_nul(self):
+        value = "None"
+
+        self._run_test("{_nul}"         , value)
+        self._run_test("{_nul[key]}"    , value)
+        self._run_test("{z|_nul}"       , value)
+        self._run_test("{z|_nul:%Y%m%s}", value)
+
     def test_literals(self):
         value = "foo"
 
-        self._run_test("{'foo'}"       , value)
-        self._run_test("{'foo'!u}"     , value.upper())
-        self._run_test("{'f00':R0/o/}" , value)
-        self._run_test("{'foobar'[:3]}", value)
-        self._run_test("{z|'foo'}"     , value)
-        self._run_test("{z|''|'foo'}"  , value)
-        self._run_test("{z|''}"        , "")
-        self._run_test("{''|''}"       , "")
+        self._run_test("{'foo'}"      , value)
+        self._run_test("{'foo'!u}"    , value.upper())
+        self._run_test("{'f00':R0/o/}", value)
+
+        self._run_test("{z|'foo'}"      , value)
+        self._run_test("{z|''|'foo'}"   , value)
+        self._run_test("{z|'foo'!u}"    , value.upper())
+        self._run_test("{z|'f00':R0/o/}", value)
 
         self._run_test("{_lit[foo]}"       , value)
         self._run_test("{_lit[foo]!u}"     , value.upper())
         self._run_test("{_lit[f00]:R0/o/}" , value)
         self._run_test("{_lit[foobar][:3]}", value)
         self._run_test("{z|_lit[foo]}"     , value)
+
+        # empty (#4492)
+        self._run_test("{z|''}" , "")
+        self._run_test("{''|''}", "")
+
+        # special characters (dots, brackets, singlee quotes) (#5539)
+        self._run_test("{'f.o.o'}"    , "f.o.o")
+        self._run_test("{_lit[f.o.o]}", "f.o.o")
+        self._run_test("{_lit[f'o'o]}", "f'o'o")
+        self._run_test("{'f.[].[]'}"  , "f.[].[]")
+        self._run_test("{z|'f.[].[]'}", "f.[].[]")
 
     def test_template(self):
         with tempfile.TemporaryDirectory() as tmpdirname:
@@ -441,10 +495,10 @@ def noarg():
             fmt4 = formatter.parse("\fM " + path + ":lengths")
 
         self.assertEqual(fmt1.format_map(self.kwdict), "'Title' by Name")
-        self.assertEqual(fmt2.format_map(self.kwdict), "126")
+        self.assertEqual(fmt2.format_map(self.kwdict), "137")
 
         self.assertEqual(fmt3.format_map(self.kwdict), "'Title' by Name")
-        self.assertEqual(fmt4.format_map(self.kwdict), "126")
+        self.assertEqual(fmt4.format_map(self.kwdict), "137")
 
         with self.assertRaises(TypeError):
             self.assertEqual(fmt0.format_map(self.kwdict), "")
@@ -455,5 +509,5 @@ def noarg():
         self.assertEqual(output, result, format_string)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

@@ -222,5 +222,5 @@ class TestCache(unittest.TestCase):
         self.assertEqual(db.cache[2][0], 6)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

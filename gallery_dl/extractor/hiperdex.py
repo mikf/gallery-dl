@@ -14,7 +14,7 @@ from ..cache import memcache
 import re
 
 BASE_PATTERN = (r"((?:https?://)?(?:www\.)?"
-                r"(?:1st)?hiperdex\d?\.(?:com|net|info))")
+                r"(?:1st)?hiper(?:dex|toon)\d?\.(?:com|net|info|top))")
 
 
 class HiperdexBase():
@@ -33,7 +33,7 @@ class HiperdexBase():
             "url"    : text.unescape(extr(
                 'property="og:url" content="', '"')),
             "manga"  : text.unescape(extr(
-                '"headline": "', '"')),
+                ' property="name" title="', '"')),
             "score"  : text.parse_float(extr(
                 'id="averagerate">', '<')),
             "author" : text.remove_html(extr(
@@ -49,7 +49,7 @@ class HiperdexBase():
             "status" : extr(
                 'class="summary-content">', '<').strip(),
             "description": text.remove_html(text.unescape(extr(
-                'class="description-summary">', '</div>'))),
+                '<div class="description-summary">', "</div>"))),
             "language": "English",
             "lang"    : "en",
         }
@@ -67,8 +67,8 @@ class HiperdexBase():
 
 
 class HiperdexChapterExtractor(HiperdexBase, ChapterExtractor):
-    """Extractor for manga chapters from hiperdex.com"""
-    pattern = BASE_PATTERN + r"(/manga/([^/?#]+)/([^/?#]+))"
+    """Extractor for hiperdex manga chapters"""
+    pattern = BASE_PATTERN + r"(/mangas?/([^/?#]+)/([^/?#]+))"
     example = "https://hiperdex.com/manga/MANGA/CHAPTER/"
 
     def __init__(self, match):
@@ -88,9 +88,9 @@ class HiperdexChapterExtractor(HiperdexBase, ChapterExtractor):
 
 
 class HiperdexMangaExtractor(HiperdexBase, MangaExtractor):
-    """Extractor for manga from hiperdex.com"""
+    """Extractor for hiperdex manga"""
     chapterclass = HiperdexChapterExtractor
-    pattern = BASE_PATTERN + r"(/manga/([^/?#]+))/?$"
+    pattern = BASE_PATTERN + r"(/mangas?/([^/?#]+))/?$"
     example = "https://hiperdex.com/manga/MANGA/"
 
     def __init__(self, match):
@@ -121,7 +121,7 @@ class HiperdexMangaExtractor(HiperdexBase, MangaExtractor):
 
 
 class HiperdexArtistExtractor(HiperdexBase, MangaExtractor):
-    """Extractor for an artists's manga on hiperdex.com"""
+    """Extractor for an artists's manga on hiperdex"""
     subcategory = "artist"
     categorytransfer = False
     chapterclass = HiperdexMangaExtractor

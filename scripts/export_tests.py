@@ -14,6 +14,7 @@ import itertools
 import collections
 
 import util
+from pyprint import pyprint
 from gallery_dl import extractor
 
 
@@ -31,97 +32,6 @@ __tests__ = (
 {tests}\
 )
 '''
-
-
-def pprint(obj, indent=0, lmin=9, lmax=16):
-
-    if isinstance(obj, str):
-        if obj.startswith("lit:"):
-            return f'''{obj[4:]}'''
-
-        if "\\" in obj or obj.startswith("re:"):
-            prefix = "r"
-        else:
-            prefix = ""
-
-        if "\n" in obj:
-            quote = '"""'
-        elif '"' in obj:
-            obj = re.sub(r'(?<!\\)"', '\\"', obj)
-            quote = '"'
-        else:
-            quote = '"'
-
-        return f'''{prefix}{quote}{obj}{quote}'''
-
-    if isinstance(obj, bytes):
-        return f'''b"{str(obj)[2:-1]}"'''
-
-    if isinstance(obj, type):
-        if obj.__module__ == "builtins":
-            return f'''{obj.__name__}'''
-
-        name = obj.__module__.rpartition(".")[2]
-        if name[0].isdecimal():
-            name = f"_{name}"
-        return f'''{name}.{obj.__name__}'''
-
-    if isinstance(obj, dict):
-        if not obj:
-            return "{}"
-
-        if len(obj) >= 2 or not indent:
-            ws = " " * indent
-
-            lkey = max(map(len, obj))
-            if not indent:
-                if lkey < lmin:
-                    lkey = lmin
-                elif lkey > lmax:
-                    lkey = lmax
-
-            lines = []
-            lines.append("{")
-            for key, value in obj.items():
-                if key.startswith("#blank-"):
-                    lines.append("")
-                else:
-                    lines.append(
-                        f'''{ws}    "{key}"'''
-                        f'''{' '*(lkey - len(key))}: '''
-                        f'''{pprint(value, indent+4)},'''
-                    )
-            lines.append(f'''{ws}}}''')
-            return "\n".join(lines)
-        else:
-            key, value = obj.popitem()
-            return f'''{{"{key}": {pprint(value)}}}'''
-
-    if isinstance(obj, list):
-        if not obj:
-            return "[]"
-
-        if len(obj) >= 2:
-            ws = " " * indent
-
-            lines = []
-            lines.append("[")
-            lines.extend(
-                f'''{ws}    {pprint(value, indent+4)},'''
-                for value in obj
-            )
-            lines.append(f'''{ws}]''')
-            return "\n".join(lines)
-        else:
-            return f'''[{pprint(obj[0])}]'''
-
-    if isinstance(obj, tuple):
-        if len(obj) == 1:
-            return f'''({pprint(obj[0], indent+4)},)'''
-        return f'''({", ".join(pprint(v, indent+4) for v in obj)})'''
-
-    else:
-        return f'''{obj}'''
 
 
 def extract_tests_from_source(lines):
@@ -201,7 +111,7 @@ def build_test(extr, data):
     if (pattern := data.pop("pattern", None)):
         if pattern in PATTERNS:
             cls = PATTERNS[pattern]
-            pattern = f"lit:{pprint(cls)}.pattern"
+            pattern = f"lit:{pyprint(cls)}.pattern"
         instr["#pattern"] = pattern
     if (exception := data.pop("exception", None)):
         instr["#exception"] = exception
@@ -280,15 +190,15 @@ _{name} = getattr({module}, "{name}")'''
                 stmt = f"import {name}"
             imports[v.__module__] = stmt
 
-        test = pprint(head)
+        test = pyprint(head)
         if instr:
-            test = f"{test[:-2]}{pprint(instr)[1:]}"
+            test = f"{test[:-2]}{pyprint(instr)[1:]}"
         if metadata:
             for k, v in metadata.items():
                 if v == "type:datetime":
                     imports["datetime"] = "import datetime"
                     metadata[k] = "lit:datetime.datetime"
-            test = f"{test[:-1]}{pprint(metadata, lmin=0)[1:]}"
+            test = f"{test[:-1]}{pyprint(metadata, lmin=0)[1:]}"
 
         tests.append(f"{test},\n\n")
 
@@ -329,8 +239,8 @@ def main():
     os.makedirs(args.target, exist_ok=True)
     for name, tests in collect_tests(args.category).items():
         name = name.replace(".", "")
-        with util.lazy(f"{args.target}/{name}.py") as file:
-            file.write(export_tests(tests))
+        with util.lazy(f"{args.target}/{name}.py") as fp:
+            fp.write(export_tests(tests))
 
 
 if __name__ == "__main__":

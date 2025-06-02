@@ -1,6 +1,7 @@
-name: tests
+name: Tests
 
 on:
+  workflow_dispatch:
   push:
     branches:
     - master
@@ -9,13 +10,21 @@ on:
     - master
 
 jobs:
-  build:
+  test:
 
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.5", "3.6", "3.7", "3.8", "3.9", "3.10", "3.11", "3.12", "pypy3.9"]
+        python-version:
+        - "3.7"
+        - "3.8"
+        - "3.9"
+        - "3.10"
+        - "3.11"
+        - "3.12"
+        - "3.13"
+        - "pypy3.9"
 
     steps:
     - uses: actions/checkout@v4
@@ -25,7 +34,7 @@ jobs:
         if [[ "$(find ./gallery_dl -type f -not -perm 644)" ]]; then exit 1; fi
 
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
 
@@ -40,7 +49,7 @@ jobs:
             3.4|3.5)
                 # don't install yt-dlp
                 ;;
-            3.6|3.7)
+            3.6|3.7|3.8)
                 # install from PyPI
                 pip install yt-dlp
                 ;;
@@ -54,7 +63,7 @@ jobs:
       run: |
         case "${{ matrix.python-version }}" in
             3.4|3.5|3.6|3.7)
-                flake8 --extend-exclude scripts/export_tests.py .
+                flake8 --extend-exclude scripts/export_tests.py,scripts/pyprint.py .
                 ;;
             *)
                 flake8 .

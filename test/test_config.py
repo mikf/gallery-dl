@@ -117,6 +117,24 @@ class TestConfig(unittest.TestCase):
         self.assertEqual(
             config.accumulate(("c", "c"), "l"), [5, 6])
 
+        config.set(()        , "l", 4)
+        config.set(("c",)    , "l", [2, 3])
+        config.set(("c", "c"), "l", 1)
+        self.assertEqual(
+            config.accumulate((), "l")        , [4])
+        self.assertEqual(
+            config.accumulate(("c",), "l")    , [2, 3, 4])
+        self.assertEqual(
+            config.accumulate(("c", "c"), "l"), [1, 2, 3, 4])
+
+        config.set(("c",), "l", None)
+        self.assertEqual(
+            config.accumulate((), "l")        , [4])
+        self.assertEqual(
+            config.accumulate(("c",), "l")    , [4])
+        self.assertEqual(
+            config.accumulate(("c", "c"), "l"), [1, 4])
+
     def test_set(self):
         config.set(()        , "c", [1, 2, 3])
         config.set(("b",)    , "c", [1, 2, 3])
@@ -150,6 +168,7 @@ class TestConfig(unittest.TestCase):
         options = (
             (("b",)    , "c", [1, 2, 3]),
             (("e", "f"), "g", 234),
+            (("e", "f"), "g", 234),
         )
 
         self.assertEqual(config.get(("b",)    , "c"), "text")
@@ -165,12 +184,12 @@ class TestConfig(unittest.TestCase):
     def test_load(self):
         with tempfile.TemporaryDirectory() as base:
             path1 = os.path.join(base, "cfg1")
-            with open(path1, "w") as file:
-                file.write('{"a": 1, "b": {"a": 2, "c": "text"}}')
+            with open(path1, "w") as fp:
+                fp.write('{"a": 1, "b": {"a": 2, "c": "text"}}')
 
             path2 = os.path.join(base, "cfg2")
-            with open(path2, "w") as file:
-                file.write('{"a": 7, "b": {"a": 8, "e": "foo"}}')
+            with open(path2, "w") as fp:
+                fp.write('{"a": 7, "b": {"a": 8, "e": "foo"}}')
 
             config.clear()
             config.load((path1,))
@@ -208,11 +227,11 @@ class TestConfigFiles(unittest.TestCase):
     def _load(name):
         path = os.path.join(ROOTDIR, "docs", name)
         try:
-            with open(path) as file:
-                return util.json_loads(file.read())
+            with open(path) as fp:
+                return util.json_loads(fp.read())
         except FileNotFoundError:
             raise unittest.SkipTest(path + " not available")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

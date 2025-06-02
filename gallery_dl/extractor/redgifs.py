@@ -52,22 +52,21 @@ class RedgifsExtractor(Extractor):
 
             gif.update(metadata)
             gif["count"] = cnt
+            gif["date"] = text.parse_timestamp(gif.get("createDate"))
             yield Message.Directory, gif
 
             for num, gif in enumerate(gifs, enum):
-                url = self._process(gif)
+                gif["_fallback"] = formats = self._formats(gif)
+                url = next(formats, None)
+
                 if not url:
                     self.log.warning(
                         "Skipping '%s' (format not available)", gif["id"])
                     continue
+
                 gif["num"] = num
                 gif["count"] = cnt
                 yield Message.Url, url, gif
-
-    def _process(self, gif):
-        gif["_fallback"] = formats = self._formats(gif)
-        gif["date"] = text.parse_timestamp(gif.get("createDate"))
-        return next(formats, None)
 
     def _formats(self, gif):
         urls = gif["urls"]
@@ -164,24 +163,27 @@ class RedgifsSearchExtractor(RedgifsExtractor):
     subcategory = "search"
     directory_fmt = ("{category}", "Search", "{search}")
     pattern = (r"(?:https?://)?(?:\w+\.)?redgifs\.com"
-               r"/(?:gifs/([^/?#]+)|browse)(?:/?\?([^#]+))?")
+               r"/(?:gifs/([^/?#]+)|search(?:/gifs)?()|browse)"
+               r"(?:/?\?([^#]+))?")
     example = "https://www.redgifs.com/gifs/TAG"
 
-    def __init__(self, match):
-        RedgifsExtractor.__init__(self, match)
-        self.search, self.query = match.groups()
-
     def metadata(self):
-        self.params = text.parse_query(self.query)
-        if self.search:
-            self.params["tags"] = text.unquote(self.search)
+        tag, self.search, query = self.groups
 
-        return {"search": (self.params.get("tags") or
-                           self.params.get("order") or
+        self.params = params = text.parse_query(query)
+        if tag is not None:
+            params["tags"] = text.unquote(tag)
+
+        return {"search": (params.get("query") or
+                           params.get("tags") or
+                           params.get("order") or
                            "trending")}
 
     def gifs(self):
-        return self.api.search(self.params)
+        if self.search is None:
+            return self.api.gifs_search(self.params)
+        else:
+            return self.api.search_gifs(self.params)
 
 
 class RedgifsImageExtractor(RedgifsExtractor):
@@ -191,7 +193,7 @@ class RedgifsImageExtractor(RedgifsExtractor):
                r"(?:\w+\.)?redgifs\.com/(?:watch|ifr)|"
                r"(?:\w+\.)?gfycat\.com(?:/gifs/detail|/\w+)?|"
                r"(?:www\.)?gifdeliverynetwork\.com|"
-               r"i\.redgifs\.com/i)/([A-Za-z]+)")
+               r"i\.redgifs\.com/i)/([A-Za-z0-9]+)")
     example = "https://redgifs.com/watch/ID"
 
     def gifs(self):
@@ -206,9 +208,9 @@ class RedgifsAPI():
     def __init__(self, extractor):
         self.extractor = extractor
         self.headers = {
-            "authorization" : None,
-            "content-type"  : "application/json",
-            "x-customheader": extractor.root + "/",
+            "Accept"        : "application/json, text/plain, */*",
+            "Referer"       : extractor.root + "/",
+            "Authorization" : None,
             "Origin"        : extractor.root,
         }
 
@@ -243,14 +245,18 @@ class RedgifsAPI():
         params = {"count": 30, "order": order}
         return self._pagination(endpoint, params)
 
-    def search(self, params):
+    def gifs_search(self, params):
         endpoint = "/v2/gifs/search"
         params["search_text"] = params.pop("tags", None)
         return self._pagination(endpoint, params)
 
+    def search_gifs(self, params):
+        endpoint = "/v2/search/gifs"
+        return self._pagination(endpoint, params)
+
     def _call(self, endpoint, params=None):
         url = self.API_ROOT + endpoint
-        self.headers["authorization"] = self._auth()
+        self.headers["Authorization"] = self._auth()
         return self.extractor.request(
             url, params=params, headers=self.headers).json()
 
@@ -271,6 +277,6 @@ class RedgifsAPI():
     def _auth(self):
         # https://github.com/Redgifs/api/wiki/Temporary-tokens
         url = self.API_ROOT + "/v2/auth/temporary"
-        self.headers["authorization"] = None
+        self.headers["Authorization"] = None
         return "Bearer " + self.extractor.request(
             url, headers=self.headers).json()["token"]

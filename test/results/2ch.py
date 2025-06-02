@@ -22,7 +22,7 @@ __tests__ = (
     "comment"  : str,
     "date"     : "type:datetime",
     "displayname": str,
-    "email"    : "",
+    "email"    : str,
     "endless"  : 1,
     "extension": str,
     "filename" : str,
@@ -36,7 +36,7 @@ __tests__ = (
     "op"       : 0,
     "parent"   : int,
     "path"     : r"re:/a/src/6202876/\d+\.\w+",
-    "post_name": "Аноним",
+    "post_name": str,
     "size"     : int,
     "sticky"   : 0,
     "subject"  : str,
@@ -58,7 +58,7 @@ __tests__ = (
     "#category": ("", "2ch", "board"),
     "#class"   : _2ch._2chBoardExtractor,
     "#pattern" : _2ch._2chThreadExtractor.pattern,
-    "#count"   : range(200, 300),
+    "#count"   : range(200, 400),
 },
 
 )

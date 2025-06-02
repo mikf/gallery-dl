@@ -22,21 +22,19 @@ class GelbooruV02Extractor(booru.BooruExtractor):
     def _init(self):
         self.api_key = self.config("api-key")
         self.user_id = self.config("user-id")
-        self.api_root = self.config_instance("api_root") or self.root
-
-        if self.category == "realbooru":
-            self._file_url = self._file_url_realbooru
-            self._tags = self._tags_realbooru
+        self.root_api = self.config_instance("root-api") or self.root
 
     def _api_request(self, params):
-        url = self.api_root + "/index.php?page=dapi&s=post&q=index"
+        url = self.root_api + "/index.php?page=dapi&s=post&q=index"
         return ElementTree.fromstring(self.request(url, params=params).text)
 
     def _pagination(self, params):
         params["pid"] = self.page_start
         params["limit"] = self.per_page
 
-        post = None
+        post = total = None
+        count = 0
+
         while True:
             try:
                 root = self._api_request(params)
@@ -50,12 +48,29 @@ class GelbooruV02Extractor(booru.BooruExtractor):
                 params["pid"] = 0
                 continue
 
+            if total is None:
+                try:
+                    total = int(root.attrib["count"])
+                    self.log.debug("%s posts in total", total)
+                except Exception as exc:
+                    total = 0
+                    self.log.debug(
+                        "Failed to get total number of posts (%s: %s)",
+                        exc.__class__.__name__, exc)
+
             post = None
             for post in root:
                 yield post.attrib
 
-            if len(root) < self.per_page:
-                return
+            num = len(root)
+            count += num
+            if num < self.per_page:
+                if not total or count >= total:
+                    return
+                if not num:
+                    self.log.debug("Empty response - Retrying")
+                    continue
+
             params["pid"] += 1
 
     def _pagination_html(self, params):
@@ -63,21 +78,23 @@ class GelbooruV02Extractor(booru.BooruExtractor):
         params["pid"] = self.page_start * self.per_page
 
         data = {}
-        while True:
-            num_ids = 0
-            page = self.request(url, params=params).text
+        find_ids = re.compile(r"\sid=\"p(\d+)").findall
 
-            for data["id"] in text.extract_iter(page, '" id="p', '"'):
-                num_ids += 1
+        while True:
+            page = self.request(url, params=params).text
+            pids = find_ids(page)
+
+            for data["id"] in pids:
                 for post in self._api_request(data):
                     yield post.attrib
 
-            if num_ids < self.per_page:
+            if len(pids) < self.per_page:
                 return
             params["pid"] += self.per_page
 
     @staticmethod
     def _prepare(post):
+        post["tags"] = post["tags"].strip()
         post["date"] = text.parse_datetime(
             post["created_at"], "%a %b %d %H:%M:%S %z %Y")
 
@@ -95,7 +112,7 @@ class GelbooruV02Extractor(booru.BooruExtractor):
         pattern = re.compile(
             r"tag-type-([^\"' ]+).*?[?;]tags=([^\"'&]+)", re.S)
         for tag_type, tag_name in pattern.findall(tag_container):
-            tags[tag_type].append(text.unquote(tag_name))
+            tags[tag_type].append(text.unescape(text.unquote(tag_name)))
         for key, value in tags.items():
             post["tags_" + key] = " ".join(value)
 
@@ -116,34 +133,12 @@ class GelbooruV02Extractor(booru.BooruExtractor):
                 "body"  : text.unescape(text.remove_html(extr(">", "</div>"))),
             })
 
-    def _file_url_realbooru(self, post):
-        url = post["file_url"]
-        md5 = post["md5"]
-        if md5 not in post["preview_url"] or url.count("/") == 5:
-            url = "{}/images/{}/{}/{}.{}".format(
-                self.root, md5[0:2], md5[2:4], md5, url.rpartition(".")[2])
-        return url
-
-    def _tags_realbooru(self, post, page):
-        tag_container = text.extr(page, 'id="tagLink"', '</div>')
-        tags = collections.defaultdict(list)
-        pattern = re.compile(
-            r'<a class="(?:tag-type-)?([^"]+).*?;tags=([^"&]+)')
-        for tag_type, tag_name in pattern.findall(tag_container):
-            tags[tag_type].append(text.unquote(tag_name))
-        for key, value in tags.items():
-            post["tags_" + key] = " ".join(value)
-
 
 BASE_PATTERN = GelbooruV02Extractor.update({
-    "realbooru": {
-        "root": "https://realbooru.com",
-        "pattern": r"realbooru\.com",
-    },
     "rule34": {
         "root": "https://rule34.xxx",
+        "root-api": "https://api.rule34.xxx",
         "pattern": r"(?:www\.)?rule34\.xxx",
-        "api_root": "https://api.rule34.xxx",
     },
     "safebooru": {
         "root": "https://safebooru.org",

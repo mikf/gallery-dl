@@ -12,11 +12,11 @@ __tests__ = (
     "#url"     : "https://www.slideshare.net/Slideshare/get-started-with-slide-share",
     "#category": ("", "slideshare", "presentation"),
     "#class"   : slideshare.SlidesharePresentationExtractor,
-    "#pattern"     : r"https://image\.slidesharecdn\.com/getstartedwithslideshare-150520173821-lva1-app6892/95/get-started-with-slide-share-\d+-1024\.jpg\?cb=\d+",
+    "#pattern"     : r"https://image\.slidesharecdn\.com/getstartedwithslideshare-150520173821-lva1-app6892/95/Getting-Started-With-SlideShare-\d+-1024\.jpg",
     "#count"       : 19,
     "#sha1_content": "2b6a191eab60b3978fdacfecf2da302dd45bc108",
 
-    "description" : "Get Started with SlideShare - A Beginngers Guide for Creators",
+    "description" : "SlideShare is a global platform for sharing presentations, infographics, videos and documents. It has over 18 million pieces of professional content uploaded by experts like Eric Schmidt and Guy Kawasaki. The document provides tips for setting up an account on SlideShare, uploading content, optimizing it for searchability, and sharing it on social media to build an audience and reputation as a subject matter expert.",
     "likes"       : int,
     "presentation": "get-started-with-slide-share",
     "date"        : "dt:2015-05-20 17:38:21",
@@ -30,7 +30,7 @@ __tests__ = (
     "#comment" : "long title and description",
     "#category": ("", "slideshare", "presentation"),
     "#class"   : slideshare.SlidesharePresentationExtractor,
-    "#sha1_url": "d8952260f8bec337dd809a958ec8091350393f6b",
+    "#sha1_url": "c2d0079cc3b05de0fd93b0d0b1f47ff2a32119b7",
 
     "title"      : "Warum Sie nicht Ihren Mitarbeitenden ändern sollten, sondern Ihr Managementsystem",
     "description": "Mitarbeitende verhalten sich mehrheitlich so, wie das System es ihnen vorgibt. Welche Voraussetzungen es braucht, damit Ihre Mitarbeitenden ihr ganzes Herzblut einsetzen, bespricht Fredi Schmidli in diesem Referat.",
@@ -41,7 +41,8 @@ __tests__ = (
     "#comment" : "mobile URL",
     "#category": ("", "slideshare", "presentation"),
     "#class"   : slideshare.SlidesharePresentationExtractor,
-    "#sha1_url": "72c431cb1eccbb6794f608ecbbc01d52e8768159",
+    "#pattern" : r"https://image\.slidesharecdn\.com/introductiontofixedprosthodonticsfinal-110427200948-phpapp02/95/Introduction-to-fixed-prosthodontics-\d+-1024\.jpg",
+    "#count"   : 27,
 },
 
 )

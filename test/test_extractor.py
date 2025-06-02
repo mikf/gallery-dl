@@ -17,7 +17,7 @@ import string
 from datetime import datetime, timedelta
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from gallery_dl import extractor  # noqa E402
+from gallery_dl import extractor, util  # noqa E402
 from gallery_dl.extractor import mastodon  # noqa E402
 from gallery_dl.extractor.common import Extractor, Message  # noqa E402
 from gallery_dl.extractor.directlink import DirectlinkExtractor  # noqa E402
@@ -25,7 +25,11 @@ from gallery_dl.extractor.directlink import DirectlinkExtractor  # noqa E402
 _list_classes = extractor._list_classes
 
 try:
-    from test import results
+    RESULTS = os.environ.get("GDL_TEST_RESULTS")
+    if RESULTS:
+        results = util.import_file(RESULTS)
+    else:
+        from test import results
 except ImportError:
     results = None
 
@@ -45,7 +49,7 @@ class TestExtractorModule(unittest.TestCase):
         "https://example.org/file.jpg",
         "tumblr:foobar",
         "oauth:flickr",
-        "test:pixiv:",
+        "generic:https://example.org/",
         "recursive:https://example.org/document.html",
     )
 
@@ -100,18 +104,42 @@ class TestExtractorModule(unittest.TestCase):
     @unittest.skipIf(not results, "no test data")
     def test_categories(self):
         for result in results.all():
-            url = result["#url"]
-            base, cat, sub = result["#category"]
-            try:
-                extr = result["#class"].from_url(url)
-            except ImportError as exc:
-                if exc.name in ("youtube_dl", "yt_dlp"):
-                    print("Skipping '{}' category checks".format(cat))
-                    continue
-                raise
-            self.assertEqual(extr.category, cat, url)
-            self.assertEqual(extr.subcategory, sub, url)
-            self.assertEqual(extr.basecategory, base, url)
+            if result.get("#fail"):
+                try:
+                    self.assertCategories(result)
+                except AssertionError:
+                    pass
+                else:
+                    self.fail(result["#url"] + ": Test did not fail")
+            else:
+                self.assertCategories(result)
+
+    def assertCategories(self, result):
+        url = result["#url"]
+        cls = result["#class"]
+
+        try:
+            extr = cls.from_url(url)
+        except ImportError as exc:
+            if exc.name in ("youtube_dl", "yt_dlp"):
+                print("Skipping '{}' category checks".format(cls.category))
+                return
+            raise
+        self.assertTrue(extr, url)
+
+        categories = result.get("#category")
+        if categories:
+            base, cat, sub = categories
+        else:
+            cat = cls.category
+            sub = cls.subcategory
+            base = cls.basecategory
+        self.assertEqual(extr.category, cat, url)
+        self.assertEqual(extr.subcategory, sub, url)
+        self.assertEqual(extr.basecategory, base, url)
+
+        if base not in ("reactor", "wikimedia"):
+            self.assertEqual(extr._cfgpath, ("extractor", cat, sub), url)
 
     @unittest.skipIf(not results, "no test data")
     def test_unique_pattern_matches(self):
@@ -120,7 +148,8 @@ class TestExtractorModule(unittest.TestCase):
         append = test_urls.append
 
         for result in results.all():
-            append((result["#url"], result["#class"]))
+            if not result.get("#fail"):
+                append((result["#url"], result["#class"]))
 
         # iterate over all testcase URLs
         for url, extr1 in test_urls:
@@ -155,12 +184,17 @@ class TestExtractorModule(unittest.TestCase):
 
     def test_init(self):
         """Test for exceptions in Extractor.initialize() and .finalize()"""
+        def fail_request(*args, **kwargs):
+            self.fail("called 'request() during initialization")
+
         for cls in extractor.extractors():
             if cls.category == "ytdl":
                 continue
             extr = cls.from_url(cls.example)
             if not extr and cls.basecategory and not cls.instances:
                 continue
+
+            extr.request = fail_request
             extr.initialize()
             extr.finalize()
 
@@ -208,7 +242,7 @@ class TestExtractorModule(unittest.TestCase):
 class TestExtractorWait(unittest.TestCase):
 
     def test_wait_seconds(self):
-        extr = extractor.find("test:")
+        extr = extractor.find("generic:https://example.org/")
         seconds = 5
         until = time.time() + seconds
 
@@ -222,7 +256,7 @@ class TestExtractorWait(unittest.TestCase):
             self._assert_isotime(calls[0][1][1], until)
 
     def test_wait_until(self):
-        extr = extractor.find("test:")
+        extr = extractor.find("generic:https://example.org/")
         until = time.time() + 5
 
         with patch("time.sleep") as sleep, patch.object(extr, "log") as log:
@@ -237,9 +271,12 @@ class TestExtractorWait(unittest.TestCase):
             self._assert_isotime(calls[0][1][1], until)
 
     def test_wait_until_datetime(self):
-        extr = extractor.find("test:")
-        until = datetime.utcnow() + timedelta(seconds=5)
+        extr = extractor.find("generic:https://example.org/")
+        until = util.datetime_utcnow() + timedelta(seconds=5)
         until_local = datetime.now() + timedelta(seconds=5)
+
+        if not until.microsecond:
+            until = until.replace(microsecond=until_local.microsecond)
 
         with patch("time.sleep") as sleep, patch.object(extr, "log") as log:
             extr.wait(until=until)

@@ -11,16 +11,56 @@ Field names select the metadata value to use in a replacement field.
 
 While simple names are usually enough, more complex forms like accessing values by attribute, element index, or slicing are also supported.
 
-|                      | Example             | Result                 |
-| -------------------- | ------------------- | ---------------------- |
-| Name                 | `{title}`           | `Hello World`          |
-| Element Index        | `{title[6]}`        | `W`                    |
-| Slicing              | `{title[3:8]}`      | `lo Wo`                |
-| Slicing (Bytes)      | `{title_ja[b3:18]}` | `ロー・ワー`           |
-| Alternatives         | `{empty\|title}`    | `Hello World`          |
-| Attribute Access     | `{extractor.url}`   | `https://example.org/` |
-| Element Access       | `{user[name]}`      | `John Doe`             |
-|                      | `{user['name']}`    | `John Doe`             |
+<table>
+<thead>
+<tr>
+    <th></th>
+    <th>Example</th>
+    <th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+    <td>Name</td>
+    <td><code>{title}</code></td>
+    <td><code>Hello World</code></td>
+</tr>
+<tr>
+    <td>Element Index</td>
+    <td><code>{title[6]}</code></td>
+    <td><code>W</code></td>
+</tr>
+<tr>
+    <td>Slicing</td>
+    <td><code>{title[3:8]}</code></td>
+    <td><code>lo Wo</code></td>
+</tr>
+<tr>
+    <td>Slicing (Bytes)</td>
+    <td><code>{title_ja[b3:18]}</code></td>
+    <td><code>ロー・ワー</code></td>
+</tr>
+<tr>
+    <td>Alternatives</td>
+    <td><code>{empty|title}</code></td>
+    <td><code>Hello World</code></td>
+</tr>
+<tr>
+    <td>Attribute Access</td>
+    <td><code>{extractor.url}</code></td>
+    <td><code>https://example.org/</code></td>
+</tr>
+<tr>
+    <td rowspan="2">Element Access</td>
+    <td><code>{user[name]}</code></td>
+    <td><code>John Doe</code></td>
+</tr>
+<tr>
+    <td><code>{user['name']}</code></td>
+    <td><code>John Doe</code></td>
+</tr>
+</tbody>
+</table>
 
 All of these methods can be combined as needed.
 For example `{title[24]|empty|extractor.url[15:-1]}` would result in `.org`.
@@ -77,6 +117,12 @@ Conversion specifiers allow to *convert* the value to a different form or type. 
     <td><code>["sun", "tree", "water"]</code></td>
 </tr>
 <tr>
+    <td align="center"><code>L</code></td>
+    <td>Return the <a href="https://docs.python.org/3/library/functions.html#len" rel="nofollow">length</a> of a value</td>
+    <td><code>{foo!L}</code></td>
+    <td><code>7</code></td>
+</tr>
+<tr>
     <td align="center"><code>t</code></td>
     <td>Trim a string, i.e. remove leading and trailing whitespace characters</td>
     <td><code>{bar!t}</code></td>
@@ -84,14 +130,20 @@ Conversion specifiers allow to *convert* the value to a different form or type. 
 </tr>
 <tr>
     <td align="center"><code>T</code></td>
-    <td>Convert a <code>datetime</code> object to a unix timestamp</td>
+    <td>Convert a <code>datetime</code> object to a Unix timestamp</td>
     <td><code>{date!T}</code></td>
     <td><code>1262304000</code></td>
 </tr>
 <tr>
     <td align="center"><code>d</code></td>
-    <td>Convert a unix timestamp to a <code>datetime</code> object</td>
+    <td>Convert a Unix timestamp to a <code>datetime</code> object</td>
     <td><code>{created!d}</code></td>
+    <td><code>2010-01-01 00:00:00</code></td>
+</tr>
+<tr>
+    <td align="center"><code>D</code></td>
+    <td>Convert a Unix timestamp or <a href="https://en.wikipedia.org/wiki/ISO_8601">ISO 8601</a> string to a <code>datetime</code> object</td>
+    <td><code>{created!D}</code></td>
     <td><code>2010-01-01 00:00:00</code></td>
 </tr>
 <tr>
@@ -127,6 +179,18 @@ Conversion specifiers allow to *convert* the value to a different form or type. 
 <tr>
     <td align="center"><code>a</code></td>
     <td>Convert value to <code>str</code> using <a href="https://docs.python.org/3/library/functions.html#ascii" rel="nofollow"><code>ascii()</code></a></td>
+    <td></td>
+    <td></td>
+</tr>
+<tr>
+    <td align="center"><code>i</code></td>
+    <td>Convert value to <a href="https://docs.python.org/3/library/functions.html#int"><code>int</code></a></td>
+    <td></td>
+    <td></td>
+</tr>
+<tr>
+    <td align="center"><code>f</code></td>
+    <td>Convert value to <a href="https://docs.python.org/3/library/functions.html#float"><code>float</code></a></td>
     <td></td>
     <td></td>
 </tr>
@@ -181,6 +245,16 @@ Format specifiers can be used for advanced formatting by using the options provi
     <td><code>long</code></td>
 </tr>
 <tr>
+    <td rowspan="2"><code>X&lt;maxlen&gt;/&lt;ext&gt;/</code></td>
+    <td rowspan="2">Limit output to <code>&lt;maxlen&gt;</code> characters. Cut output and add <code>&lt;ext&gt;</code> to its end if its length exceeds <code>&lt;maxlen&gt;</code></td>
+    <td><code>{foo:X15/&nbsp;.../}</code></td>
+    <td><code>Foo&nbsp;Bar</code></td>
+</tr>
+<tr>
+    <td><code>{foo:X6/&nbsp;.../}</code></td>
+    <td><code>Fo&nbsp;...</code></td>
+</tr>
+<tr>
     <td><code>J&lt;separator&gt;/</code></td>
     <td>Concatenates elements of a list with <code>&lt;separator&gt;</code> using <a href="https://docs.python.org/3/library/stdtypes.html#str.join" rel="nofollow"><code>str.join()</code></a></td>
     <td><code>{tags:J - /}</code></td>
@@ -191,6 +265,18 @@ Format specifiers can be used for advanced formatting by using the options provi
     <td>Replaces all occurrences of <code>&lt;old&gt;</code> with <code>&lt;new&gt;</code> using <a href="https://docs.python.org/3/library/stdtypes.html#str.replace" rel="nofollow"><code>str.replace()</code></a></td>
     <td><code>{foo:Ro/()/}</code></td>
     <td><code>F()()&nbsp;Bar</code></td>
+</tr>
+<tr>
+    <td><code>A&lt;op&gt;&lt;value&gt;/</code></td>
+    <td>Apply arithmetic operation <code>&lt;op&gt;</code> (<code>+</code>, <code>-</code>, <code>*</code>) to the current value</td>
+    <td><code>{num:A+1/}</code></td>
+    <td><code>"2"</code></td>
+</tr>
+<tr>
+    <td><code>C&lt;conversion(s)&gt;/</code></td>
+    <td>Apply <a href="#conversions">Conversions</a> to the current value</td>
+    <td><code>{tags:CSgc/}</code></td>
+    <td><code>"Sun-tree-water"</code></td>
 </tr>
 <tr>
     <td><code>S&lt;order&gt;/</code></td>
@@ -249,6 +335,12 @@ Replacement field names that are available in all format strings.
     <td>Current local date and time</td>
     <td><code>{_now:%Y-%m}</code></td>
     <td><code>2022-08</code></td>
+</tr>
+<tr>
+    <td><code>_nul</code></td>
+    <td>Universal <code>null</code> value</td>
+    <td><code>{date|_nul:%Y-%m}</code></td>
+    <td><code>None</code></td>
 </tr>
 <tr>
     <td rowspan="2"><code>_lit</code></td>

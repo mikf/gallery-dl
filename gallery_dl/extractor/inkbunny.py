@@ -132,6 +132,7 @@ class InkbunnyPoolExtractor(InkbunnyExtractor):
 class InkbunnyFavoriteExtractor(InkbunnyExtractor):
     """Extractor for inkbunny user favorites"""
     subcategory = "favorite"
+    directory_fmt = ("{category}", "{favs_username!l}", "Favorites")
     pattern = (BASE_PATTERN + r"/(?:"
                r"userfavorites_process\.php\?favs_user_id=(\d+)|"
                r"submissionsviewall\.php"
@@ -151,7 +152,17 @@ class InkbunnyFavoriteExtractor(InkbunnyExtractor):
             self.orderby = params.get("orderby", "fav_datetime")
 
     def metadata(self):
-        return {"favs_user_id": self.user_id}
+        # Lookup fav user ID as username
+        url = "{}/userfavorites_process.php?favs_user_id={}".format(
+            self.root, self.user_id)
+        page = self.request(url).text
+        user_link = text.extr(page, '<a rel="author"', '</a>')
+        favs_username = text.extr(user_link, 'href="/', '"')
+
+        return {
+            "favs_user_id": self.user_id,
+            "favs_username": favs_username,
+        }
 
     def posts(self):
         params = {
@@ -246,14 +257,12 @@ class InkbunnyFollowingExtractor(InkbunnyExtractor):
         data = {"_extractor": InkbunnyUserExtractor}
 
         while True:
-            cnt = 0
             for user in text.extract_iter(
                     page, '<a class="widget_userNameSmall" href="', '"',
                     page.index('id="changethumboriginal_form"')):
-                cnt += 1
                 yield Message.Queue, self.root + user, data
 
-            if cnt < 20:
+            if "<a title='next page' " not in page:
                 return
             params["page"] += 1
             page = self.request(url, params=params).text
@@ -329,16 +338,19 @@ class InkbunnyAPI():
 
     def _call(self, endpoint, params):
         url = "https://inkbunny.net/api_" + endpoint + ".php"
-        params["sid"] = self.session_id
-        data = self.extractor.request(url, params=params).json()
 
-        if "error_code" in data:
+        while True:
+            params["sid"] = self.session_id
+            data = self.extractor.request(url, params=params).json()
+
+            if "error_code" not in data:
+                return data
+
             if str(data["error_code"]) == "2":
                 self.authenticate(invalidate=True)
-                return self._call(endpoint, params)
-            raise exception.StopExtraction(data.get("error_message"))
+                continue
 
-        return data
+            raise exception.StopExtraction(data.get("error_message"))
 
     def _pagination_search(self, params):
         params["page"] = 1

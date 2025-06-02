@@ -26,13 +26,13 @@ class PahealExtractor(Extractor):
         data = self.get_metadata()
 
         for post in self.get_posts():
-            url = post["file_url"]
-            for key in ("id", "width", "height"):
-                post[key] = text.parse_int(post[key])
+            post["id"] = text.parse_int(post["id"])
             post["tags"] = text.unquote(post["tags"])
+            post["width"] = text.parse_int(post["width"])
+            post["height"] = text.parse_int(post["height"])
             post.update(data)
             yield Message.Directory, post
-            yield Message.Url, url, post
+            yield Message.Url, post["file_url"], post
 
     def get_metadata(self):
         """Return general metadata"""
@@ -77,6 +77,7 @@ class PahealTagExtractor(PahealExtractor):
     pattern = (r"(?:https?://)?(?:rule34|rule63|cosplay)\.paheal\.net"
                r"/post/list/([^/?#]+)")
     example = "https://rule34.paheal.net/post/list/TAG/1"
+    page_start = 1
     per_page = 70
 
     def __init__(self, match):
@@ -87,11 +88,16 @@ class PahealTagExtractor(PahealExtractor):
         if self.config("metadata"):
             self._extract_data = self._extract_data_ex
 
+    def skip(self, num):
+        pages = num // self.per_page
+        self.page_start += pages
+        return pages * self.per_page
+
     def get_metadata(self):
         return {"search_tags": self.tags}
 
     def get_posts(self):
-        pnum = 1
+        pnum = self.page_start
         while True:
             url = "{}/post/list/{}/{}".format(self.root, self.tags, pnum)
             page = self.request(url).text
@@ -114,17 +120,19 @@ class PahealTagExtractor(PahealExtractor):
 
         tags, data, date = data.split("\n")
         dimensions, size, ext = data.split(" // ")
-        tags = text.unescape(tags)
         width, _, height = dimensions.partition("x")
         height, _, duration = height.partition(", ")
 
         return {
-            "id": pid, "md5": md5, "file_url": url,
-            "width": width, "height": height,
-            "duration": text.parse_float(duration[:-1]),
-            "tags": tags,
-            "size": text.parse_bytes(size[:-1]),
-            "date": text.parse_datetime(date, "%B %d, %Y; %H:%M"),
+            "id"       : pid,
+            "md5"      : md5,
+            "file_url" : url,
+            "width"    : width,
+            "height"   : height,
+            "duration" : text.parse_float(duration[:-1]),
+            "tags"     : text.unescape(tags),
+            "size"     : text.parse_bytes(size[:-1]),
+            "date"     : text.parse_datetime(date, "%B %d, %Y; %H:%M"),
             "filename" : "{} - {}".format(pid, tags),
             "extension": ext,
         }

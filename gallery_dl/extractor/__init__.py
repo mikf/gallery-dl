@@ -7,7 +7,7 @@
 # published by the Free Software Foundation.
 
 import sys
-import re
+from ..util import re_compile
 
 modules = [
     "2ch",
@@ -22,33 +22,43 @@ modules = [
     "8chan",
     "8muses",
     "adultempire",
+    "agnph",
+    "ao3",
+    "arcalive",
     "architizer",
     "artstation",
     "aryion",
     "batoto",
     "bbc",
     "behance",
+    "bilibili",
     "blogger",
+    "bluesky",
+    "boosty",
     "bunkr",
     "catbox",
     "chevereto",
+    "cien",
+    "civitai",
     "comicvine",
     "cyberdrop",
     "danbooru",
     "desktopography",
     "deviantart",
+    "discord",
     "dynastyscans",
     "e621",
     "erome",
+    "everia",
     "exhentai",
-    "fallenangels",
+    "facebook",
     "fanbox",
-    "fanleaks",
     "fantia",
     "fapello",
     "fapachi",
     "flickr",
     "furaffinity",
+    "furry34",
     "fuskator",
     "gelbooru",
     "gelbooru_v01",
@@ -58,9 +68,9 @@ modules = [
     "hentai2read",
     "hentaicosplays",
     "hentaifoundry",
-    "hentaifox",
     "hentaihand",
     "hentaihere",
+    "hentainexus",
     "hiperdex",
     "hitomi",
     "hotleak",
@@ -72,6 +82,7 @@ modules = [
     "imgbox",
     "imgth",
     "imgur",
+    "imhentai",
     "inkbunny",
     "instagram",
     "issuu",
@@ -80,29 +91,30 @@ modules = [
     "jschan",
     "kabeuchi",
     "keenspot",
-    "kemonoparty",
+    "kemono",
     "khinsider",
     "komikcast",
     "lensdump",
     "lexica",
     "lightroom",
     "livedoor",
+    "lofter",
     "luscious",
     "lynxchan",
     "mangadex",
     "mangafox",
     "mangahere",
-    "mangakakalot",
     "manganelo",
     "mangapark",
     "mangaread",
-    "mangasee",
     "mangoxo",
     "misskey",
+    "motherless",
     "myhentaigallery",
     "myportfolio",
     "naver",
     "naverwebtoon",
+    "nekohouse",
     "newgrounds",
     "nhentai",
     "nijie",
@@ -111,10 +123,11 @@ modules = [
     "nsfwalbum",
     "paheal",
     "patreon",
+    "pexels",
     "philomena",
-    "photobucket",
     "photovogue",
     "picarto",
+    "pictoa",
     "piczel",
     "pillowfort",
     "pinterest",
@@ -127,15 +140,20 @@ modules = [
     "pornhub",
     "pornpics",
     "postmill",
-    "pururin",
     "rawkuma",
     "reactor",
     "readcomiconline",
+    "realbooru",
     "reddit",
     "redgifs",
     "rule34us",
+    "rule34vault",
+    "rule34xyz",
+    "saint",
     "sankaku",
     "sankakucomplex",
+    "schalenetwork",
+    "scrolller",
     "seiga",
     "senmanga",
     "sexcom",
@@ -153,6 +171,8 @@ modules = [
     "tapas",
     "tcbscans",
     "telegraph",
+    "tenor",
+    "tiktok",
     "tmohentai",
     "toyhouse",
     "tsumino",
@@ -175,12 +195,15 @@ modules = [
     "weasyl",
     "webmshare",
     "webtoons",
+    "weebcentral",
     "weibo",
     "wikiart",
     "wikifeet",
     "wikimedia",
+    "xfolio",
     "xhamster",
     "xvideos",
+    "yiffverse",
     "zerochan",
     "zzup",
     "booru",
@@ -194,7 +217,7 @@ modules = [
     "directlink",
     "recursive",
     "oauth",
-    "test",
+    "noop",
     "ytdl",
     "generic",
 ]
@@ -211,7 +234,8 @@ def find(url):
 
 def add(cls):
     """Add 'cls' to the list of available extractors"""
-    cls.pattern = re.compile(cls.pattern)
+    if isinstance(cls.pattern, str):
+        cls.pattern = re_compile(cls.pattern)
     _cache.append(cls)
     return cls
 
@@ -219,9 +243,11 @@ def add(cls):
 def add_module(module):
     """Add all extractors in 'module' to the list of available extractors"""
     classes = _get_classes(module)
-    for cls in classes:
-        cls.pattern = re.compile(cls.pattern)
-    _cache.extend(classes)
+    if classes:
+        if isinstance(classes[0].pattern, str):
+            for cls in classes:
+                cls.pattern = re_compile(cls.pattern)
+        _cache.extend(classes)
     return classes
 
 

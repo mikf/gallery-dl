@@ -35,10 +35,7 @@ class ReadcomiconlineBase():
                 self.log.warning(
                     "Redirect to \n%s\nVisit this URL in your browser, solve "
                     "the CAPTCHA, and press ENTER to continue", response.url)
-                try:
-                    input()
-                except (EOFError, OSError):
-                    pass
+                self.input()
             else:
                 raise exception.StopExtraction(
                     "Redirect to \n%s\nVisit this URL in your browser and "
@@ -81,12 +78,25 @@ class ReadcomiconlineIssueExtractor(ReadcomiconlineBase, ChapterExtractor):
         }
 
     def images(self, page):
-        return [
-            (beau(url), None)
-            for url in text.extract_iter(
-                page, "lstImages.push('", "'",
-            )
-        ]
+        results = []
+        referer = {"_http_headers": {"Referer": self.gallery_url}}
+        root = text.extr(page, "return baeu(l, '", "'")
+
+        replacements = re.findall(
+            r"l = l\.replace\(/([^/]+)/g, [\"']([^\"']*)", page)
+
+        for block in page.split("\t\tpht = '")[1:]:
+            pth = text.extr(block, "", "'")
+
+            for needle, repl in re.findall(
+                    r"pth = pth\.replace\(/([^/]+)/g, [\"']([^\"']*)", block):
+                pth = pth.replace(needle, repl)
+            for needle, repl in replacements:
+                pth = pth.replace(needle, repl)
+
+            results.append((baeu(pth, root), referer))
+
+        return results
 
 
 class ReadcomiconlineComicExtractor(ReadcomiconlineBase, MangaExtractor):
@@ -118,20 +128,24 @@ class ReadcomiconlineComicExtractor(ReadcomiconlineBase, MangaExtractor):
         return results
 
 
-def beau(url):
-    """https://readcomiconline.li/Scripts/rguard.min.js"""
-    url = url.replace("_x236", "d")
-    url = url.replace("_x945", "g")
+def baeu(url, root="", root_blogspot="https://2.bp.blogspot.com"):
+    """https://readcomiconline.li/Scripts/rguard.min.js?v=1.5.4"""
+    if not root:
+        root = root_blogspot
+
+    url = url.replace("pw_.g28x", "b")
+    url = url.replace("d2pr.x_27", "h")
 
     if url.startswith("https"):
-        return url
+        return url.replace(root_blogspot, root, 1)
 
-    url, sep, rest = url.partition("?")
-    containsS0 = "=s0" in url
-    url = url[:-3 if containsS0 else -6]
-    url = url[4:22] + url[25:]
-    url = url[0:-6] + url[-2:]
-    url = binascii.a2b_base64(url).decode()
-    url = url[0:13] + url[17:]
-    url = url[0:-2] + ("=s0" if containsS0 else "=s1600")
-    return "https://2.bp.blogspot.com/" + url + sep + rest
+    path, sep, query = url.partition("?")
+
+    contains_s0 = "=s0" in path
+    path = path[:-3 if contains_s0 else -6]
+    path = path[15:33] + path[50:]  # step1()
+    path = path[0:-11] + path[-2:]  # step2()
+    path = binascii.a2b_base64(path).decode()  # atob()
+    path = path[0:13] + path[17:]
+    path = path[0:-2] + ("=s0" if contains_s0 else "=s1600")
+    return root + "/" + path + sep + query

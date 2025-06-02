@@ -11,8 +11,6 @@
 from .common import Extractor, Message
 from .. import text, util, exception
 import itertools
-import random
-import string
 
 
 class ArtstationExtractor(Extractor):
@@ -22,18 +20,24 @@ class ArtstationExtractor(Extractor):
     directory_fmt = ("{category}", "{userinfo[username]}")
     archive_fmt = "{asset[id]}"
     browser = "firefox"
+    tls12 = False
     root = "https://www.artstation.com"
 
     def __init__(self, match):
         Extractor.__init__(self, match)
         self.user = match.group(1) or match.group(2)
 
-    def items(self):
-        data = self.metadata()
+    def _init(self):
+        self.session.headers["Cache-Control"] = "max-age=0"
 
-        projects = self.projects()
+    def items(self):
+        videos = self.config("videos", True)
+        previews = self.config("previews", False)
         external = self.config("external", False)
         max_posts = self.config("max-posts")
+
+        data = self.metadata()
+        projects = self.projects()
         if max_posts:
             projects = itertools.islice(projects, max_posts)
 
@@ -45,13 +49,29 @@ class ArtstationExtractor(Extractor):
                 asset["num"] = num
                 yield Message.Directory, asset
 
-                if adict["has_embedded_player"] and external:
+                if adict["has_embedded_player"]:
                     player = adict["player_embedded"]
                     url = (text.extr(player, 'src="', '"') or
                            text.extr(player, "src='", "'"))
-                    if url and not url.startswith(self.root):
-                        asset["extension"] = None
-                        yield Message.Url, "ytdl:" + url, asset
+                    if url.startswith(self.root):
+                        # video clip hosted on artstation
+                        if videos:
+                            page = self.request(url).text
+                            url = text.extr(page, ' src="', '"')
+                            text.nameext_from_url(url, asset)
+                            yield Message.Url, url, asset
+                    elif url:
+                        # external URL
+                        if external:
+                            asset["extension"] = "mp4"
+                            yield Message.Url, "ytdl:" + url, asset
+                    else:
+                        self.log.debug(player)
+                        self.log.warning(
+                            "Failed to extract embedded player URL (%s)",
+                            adict.get("id"))
+
+                    if not previews:
                         continue
 
                 if adict["has_image"]:
@@ -59,10 +79,11 @@ class ArtstationExtractor(Extractor):
                     text.nameext_from_url(url, asset)
 
                     url = self._no_cache(url)
-                    lhs, _, rhs = url.partition("/large/")
-                    if rhs:
-                        url = lhs + "/4k/" + rhs
-                        asset["_fallback"] = self._image_fallback(lhs, rhs)
+                    if "/video_clips/" not in url:
+                        lhs, _, rhs = url.partition("/large/")
+                        if rhs:
+                            url = lhs + "/4k/" + rhs
+                            asset["_fallback"] = self._image_fallback(lhs, rhs)
 
                     yield Message.Url, url, asset
 
@@ -152,7 +173,7 @@ class ArtstationExtractor(Extractor):
         ).json()["public_csrf_token"]
 
     @staticmethod
-    def _no_cache(url, alphabet=(string.digits + string.ascii_letters)):
+    def _no_cache(url):
         """Cause a cache miss to prevent Cloudflare 'optimizations'
 
         Cloudflare's 'Polish' optimization strips image metadata and may even
@@ -164,10 +185,9 @@ class ArtstationExtractor(Extractor):
         https://github.com/r888888888/danbooru/issues/3528
         https://danbooru.donmai.us/forum_topics/14952
         """
-        param = "gallerydl_no_cache=" + util.bencode(
-            random.getrandbits(64), alphabet)
         sep = "&" if "?" in url else "?"
-        return url + sep + param
+        token = util.generate_token(8)
+        return url + sep + token[:4] + "=" + token[4:]
 
 
 class ArtstationUserExtractor(ArtstationExtractor):
@@ -175,7 +195,7 @@ class ArtstationUserExtractor(ArtstationExtractor):
     subcategory = "user"
     pattern = (r"(?:https?://)?(?:(?:www\.)?artstation\.com"
                r"/(?!artwork|projects|search)([^/?#]+)(?:/albums/all)?"
-               r"|((?!www)\w+)\.artstation\.com(?:/projects)?)/?$")
+               r"|((?!www)[\w-]+)\.artstation\.com(?:/projects)?)/?$")
     example = "https://www.artstation.com/USER"
 
     def projects(self):
@@ -192,7 +212,7 @@ class ArtstationAlbumExtractor(ArtstationExtractor):
     archive_fmt = "a_{album[id]}_{asset[id]}"
     pattern = (r"(?:https?://)?(?:(?:www\.)?artstation\.com"
                r"/(?!artwork|projects|search)([^/?#]+)"
-               r"|((?!www)\w+)\.artstation\.com)/albums/(\d+)")
+               r"|((?!www)[\w-]+)\.artstation\.com)/albums/(\d+)")
     example = "https://www.artstation.com/USER/albums/12345"
 
     def __init__(self, match):
@@ -226,12 +246,60 @@ class ArtstationLikesExtractor(ArtstationExtractor):
     directory_fmt = ("{category}", "{userinfo[username]}", "Likes")
     archive_fmt = "f_{userinfo[id]}_{asset[id]}"
     pattern = (r"(?:https?://)?(?:www\.)?artstation\.com"
-               r"/(?!artwork|projects|search)([^/?#]+)/likes/?")
+               r"/(?!artwork|projects|search)([^/?#]+)/likes")
     example = "https://www.artstation.com/USER/likes"
 
     def projects(self):
         url = "{}/users/{}/likes.json".format(self.root, self.user)
         return self._pagination(url)
+
+
+class ArtstationCollectionExtractor(ArtstationExtractor):
+    """Extractor for an artstation collection"""
+    subcategory = "collection"
+    directory_fmt = ("{category}", "{user}",
+                     "{collection[id]} {collection[name]}")
+    archive_fmt = "c_{collection[id]}_{asset[id]}"
+    pattern = (r"(?:https?://)?(?:www\.)?artstation\.com"
+               r"/(?!artwork|projects|search)([^/?#]+)/collections/(\d+)")
+    example = "https://www.artstation.com/USER/collections/12345"
+
+    def __init__(self, match):
+        ArtstationExtractor.__init__(self, match)
+        self.collection_id = match.group(2)
+
+    def metadata(self):
+        url = "{}/collections/{}.json".format(
+            self.root, self.collection_id)
+        params = {"username": self.user}
+        collection = self.request(
+            url, params=params, notfound="collection").json()
+        return {"collection": collection, "user": self.user}
+
+    def projects(self):
+        url = "{}/collections/{}/projects.json".format(
+            self.root, self.collection_id)
+        params = {"collection_id": self.collection_id}
+        return self._pagination(url, params)
+
+
+class ArtstationCollectionsExtractor(ArtstationExtractor):
+    """Extractor for an artstation user's collections"""
+    subcategory = "collections"
+    pattern = (r"(?:https?://)?(?:www\.)?artstation\.com"
+               r"/(?!artwork|projects|search)([^/?#]+)/collections/?$")
+    example = "https://www.artstation.com/USER/collections"
+
+    def items(self):
+        url = self.root + "/collections.json"
+        params = {"username": self.user}
+
+        for collection in self.request(
+                url, params=params, notfound="collections").json():
+            url = "{}/{}/collections/{}".format(
+                self.root, self.user, collection["id"])
+            collection["_extractor"] = ArtstationCollectionExtractor
+            yield Message.Queue, url, collection
 
 
 class ArtstationChallengeExtractor(ArtstationExtractor):
@@ -355,7 +423,7 @@ class ArtstationImageExtractor(ArtstationExtractor):
     """Extractor for images from a single artstation project"""
     subcategory = "image"
     pattern = (r"(?:https?://)?(?:"
-               r"(?:\w+\.)?artstation\.com/(?:artwork|projects|search)"
+               r"(?:[\w-]+\.)?artstation\.com/(?:artwork|projects|search)"
                r"|artstn\.co/p)/(\w+)")
     example = "https://www.artstation.com/artwork/abcde"
 

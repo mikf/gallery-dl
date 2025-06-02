@@ -26,17 +26,50 @@ class SkebExtractor(Extractor):
     def _init(self):
         self.thumbnails = self.config("thumbnails", False)
         self.article = self.config("article", False)
+        self.headers = {
+            "Accept": "application/json, text/plain, */*",
+            "sec-fetch-mode": "cors",
+            "sec-fetch-site": "same-origin",
+        }
+
+        if "Authorization" not in self.session.headers:
+            self.headers["Authorization"] = "Bearer null"
+
+    def _handle_429(self, response):
+        if "request_key" in response.cookies:
+            return True
+
+        request_key = text.extr(
+            response.text, "request_key=", ";")
+        if request_key:
+            self.cookies.set("request_key", request_key, domain="skeb.jp")
+            return True
 
     def items(self):
         metadata = self.metadata()
         for user_name, post_num in self.posts():
-            response, post = self._get_post_data(user_name, post_num)
+            try:
+                response, post = self._get_post_data(user_name, post_num)
+            except Exception as exc:
+                self.log.error("@%s/%s: %s: %s", user_name, post_num,
+                               exc.__class__.__name__, exc)
+                continue
             if metadata:
                 post.update(metadata)
+
+            files = self._get_files_from_post(response)
+            post["count"] = len(files)
             yield Message.Directory, post
-            for data in self._get_urls_from_post(response, post):
-                url = data["file_url"]
-                yield Message.Url, url, text.nameext_from_url(url, data)
+            for post["num"], file in enumerate(files, 1):
+                post.update(file)
+                url = file["file_url"]
+                yield Message.Url, url, text.nameext_from_url(url, post)
+
+    def _items_users(self):
+        base = self.root + "/@"
+        for user in self.users():
+            user["_extractor"] = SkebUserExtractor
+            yield Message.Queue, base + user["screen_name"], user
 
     def posts(self):
         """Return post number"""
@@ -45,11 +78,11 @@ class SkebExtractor(Extractor):
         """Return additional metadata"""
 
     def _pagination(self, url, params):
-        headers = {"Authorization": "Bearer null"}
         params["offset"] = 0
 
         while True:
-            posts = self.request(url, params=params, headers=headers).json()
+            posts = self.request(
+                url, params=params, headers=self.headers).json()
 
             for post in posts:
                 parts = post["path"].split("/")
@@ -66,11 +99,24 @@ class SkebExtractor(Extractor):
                 return
             params["offset"] += 30
 
+    def _pagination_users(self, endpoint, params):
+        url = "{}/api{}".format(self.root, endpoint)
+        params["offset"] = 0
+        params["limit"] = 90
+
+        while True:
+            data = self.request(
+                url, params=params, headers=self.headers).json()
+            yield from data
+
+            if len(data) < params["limit"]:
+                return
+            params["offset"] += params["limit"]
+
     def _get_post_data(self, user_name, post_num):
         url = "{}/api/users/{}/works/{}".format(
             self.root, user_name, post_num)
-        headers = {"Authorization": "Bearer null"}
-        resp = self.request(url, headers=headers).json()
+        resp = self.request(url, headers=self.headers).json()
         creator = resp["creator"]
         post = {
             "post_id"          : resp["id"],
@@ -105,40 +151,48 @@ class SkebExtractor(Extractor):
             }
         return resp, post
 
-    def _get_urls_from_post(self, resp, post):
+    def _get_files_from_post(self, resp):
+        files = []
+
         if self.thumbnails and "og_image_url" in resp:
-            post["content_category"] = "thumb"
-            post["file_id"] = "thumb"
-            post["_file_id"] = str(resp["id"]) + "t"
-            post["file_url"] = resp["og_image_url"]
-            yield post
+            files.append({
+                "content_category": "thumb",
+                "file_id" : "thumb",
+                "_file_id": str(resp["id"]) + "t",
+                "file_url": resp["og_image_url"],
+            })
 
         if self.article and "article_image_url" in resp:
             url = resp["article_image_url"]
             if url:
-                post["content_category"] = "article"
-                post["file_id"] = "article"
-                post["_file_id"] = str(resp["id"]) + "a"
-                post["file_url"] = url
-                yield post
+                files.append({
+                    "content_category": "article",
+                    "file_id" : "article",
+                    "_file_id": str(resp["id"]) + "a",
+                    "file_url": url,
+                })
 
         for preview in resp["previews"]:
-            post["content_category"] = "preview"
-            post["file_id"] = post["_file_id"] = preview["id"]
-            post["file_url"] = preview["url"]
             info = preview["information"]
-            post["original"] = {
-                "width"     : info["width"],
-                "height"    : info["height"],
-                "byte_size" : info["byte_size"],
-                "duration"  : info["duration"],
-                "frame_rate": info["frame_rate"],
-                "software"  : info["software"],
-                "extension" : info["extension"],
-                "is_movie"  : info["is_movie"],
-                "transcoder": info["transcoder"],
-            }
-            yield post
+            files.append({
+                "content_category": "preview",
+                "file_id" : preview["id"],
+                "_file_id": preview["id"],
+                "file_url": preview["url"],
+                "original": {
+                    "width"     : info["width"],
+                    "height"    : info["height"],
+                    "byte_size" : info["byte_size"],
+                    "duration"  : info["duration"],
+                    "frame_rate": info["frame_rate"],
+                    "software"  : info["software"],
+                    "extension" : info["extension"],
+                    "is_movie"  : info["is_movie"],
+                    "transcoder": info["transcoder"],
+                },
+            })
+
+        return files
 
 
 class SkebPostExtractor(SkebExtractor):
@@ -232,22 +286,23 @@ class SkebFollowingExtractor(SkebExtractor):
     pattern = r"(?:https?://)?skeb\.jp/@([^/?#]+)/following_creators"
     example = "https://skeb.jp/@USER/following_creators"
 
-    def items(self):
-        for user in self.users():
-            url = "{}/@{}".format(self.root, user["screen_name"])
-            user["_extractor"] = SkebUserExtractor
-            yield Message.Queue, url, user
+    items = SkebExtractor._items_users
 
     def users(self):
-        url = "{}/api/users/{}/following_creators".format(
-            self.root, self.user_name)
-        params = {"sort": "date", "offset": 0, "limit": 90}
-        headers = {"Authorization": "Bearer null"}
+        endpoint = "/users/{}/following_creators".format(self.user_name)
+        params = {"sort": "date"}
+        return self._pagination_users(endpoint, params)
 
-        while True:
-            data = self.request(url, params=params, headers=headers).json()
-            yield from data
 
-            if len(data) < params["limit"]:
-                return
-            params["offset"] += params["limit"]
+class SkebFollowingUsersExtractor(SkebExtractor):
+    """Extractor for your followed users"""
+    subcategory = "following-users"
+    pattern = r"(?:https?://)?skeb\.jp/following_users()"
+    example = "https://skeb.jp/following_users"
+
+    items = SkebExtractor._items_users
+
+    def users(self):
+        endpoint = "/following_users"
+        params = {}
+        return self._pagination_users(endpoint, params)
