@@ -7494,8 +7494,8 @@ Description
     or by `extractor.modules`_.
 
 
-extractor.category-map
-----------------------
+extractor.config-map
+--------------------
 Type
     ``object`` (`category` -> `category`)
 Default
@@ -7507,7 +7507,8 @@ Default
             "koharu"     : "schalenetwork"
         }
 Description
-    A JSON ``object`` mapping category names to their replacements.
+    Duplicate the configuration settings of extractor `categories`
+    to other names.
 
 
 globals
