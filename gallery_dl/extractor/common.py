@@ -53,6 +53,9 @@ class Extractor():
         self.url = match.string
         self.match = match
         self.groups = match.groups()
+
+        if self.category in CATEGORY_MAP:
+            self.category = CATEGORY_MAP[self.category]
         self._cfgpath = ("extractor", self.category, self.subcategory)
         self._parentdir = ""
 
@@ -964,7 +967,7 @@ def _browser_useragent():
 
 _adapter_cache = {}
 _browser_cookies = {}
-
+CATEGORY_MAP = ()
 
 HTTP_HEADERS = {
     "firefox": (

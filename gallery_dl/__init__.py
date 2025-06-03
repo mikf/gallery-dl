@@ -317,6 +317,17 @@ def main():
                     args.loglevel < logging.ERROR:
                 input_manager.progress(pformat)
 
+            catmap = config.interpolate(("extractor",), "category-map")
+            if catmap:
+                if catmap == "compat":
+                    catmap = {
+                        "coomer"       : "coomerparty",
+                        "kemono"       : "kemonoparty",
+                        "schalenetwork": "koharu",
+                    }
+                from .extractor import common
+                common.CATEGORY_MAP = catmap
+
             # process input URLs
             retval = 0
             for url in input_manager:
