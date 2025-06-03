@@ -7494,6 +7494,33 @@ Description
     or by `extractor.modules`_.
 
 
+extractor.category-map
+----------------------
+Type
+    * ``object`` (`category` -> `category`)
+    * ``string``
+Example
+    .. code:: json
+
+        {
+            "danbooru": "booru",
+            "gelbooru": "booru"
+        }
+Description
+    A JSON object mapping category names to their replacements.
+
+    Special values:
+
+    * ``"compat"``
+        .. code:: json
+
+            {
+                "coomer"       : "coomerparty",
+                "kemono"       : "kemonoparty",
+                "schalenetwork": "koharu"
+            }
+
+
 extractor.config-map
 --------------------
 Type
