@@ -162,12 +162,24 @@ def status():
         stdout_write(fmt(path, status))
 
 
-def rename_categories(cmap):
+def remap_categories():
     opts = _config.get("extractor")
     if not opts:
         return
 
-    for old, new in cmap.items():
+    cmap = opts.get("config-map")
+    if cmap is None:
+        cmap = (
+            ("coomerparty", "coomer"),
+            ("kemonoparty", "kemono"),
+            ("koharu"     , "schalenetwork"),
+        )
+    elif not cmap:
+        return
+    elif isinstance(cmap, dict):
+        cmap = cmap.items()
+
+    for old, new in cmap:
         if old in opts and new not in opts:
             opts[new] = opts[old]
 
