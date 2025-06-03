@@ -117,6 +117,7 @@ class NijieExtractor(AsynchronousMixin, BaseExtractor):
                 text.extr(media, ' src="', '"')
                 for media in text.extract_iter(
                     page, 'href="javascript:void(0);"><', '>')
+                if ' src="' in media
             ]
         else:
             pos = page.find('id="view-center"') + 1
