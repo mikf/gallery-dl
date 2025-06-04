@@ -59,7 +59,7 @@ class EveriaPostExtractor(EveriaExtractor):
             "title": text.unescape(
                 text.extr(page, 'itemprop="headline">', "</h")),
             "tags": list(text.extract_iter(page, 'rel="tag">', "</a>")),
-            "post_url": url,
+            "post_url": text.unquote(url),
             "post_category": text.extr(
                 page, "post-in-category-", " ").capitalize(),
             "count": len(urls),
@@ -67,6 +67,7 @@ class EveriaPostExtractor(EveriaExtractor):
 
         yield Message.Directory, data
         for data["num"], url in enumerate(urls, 1):
+            url = text.unquote(url)
             yield Message.Url, url, text.nameext_from_url(url, data)
 
 
