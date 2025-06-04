@@ -10,7 +10,6 @@
 
 from .common import ChapterExtractor, MangaExtractor, Extractor, Message
 from .. import text, util
-from xml.etree import ElementTree
 import re
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?dynasty-scans\.com"
@@ -143,9 +142,8 @@ class DynastyscansAnthologyExtractor(DynastyscansSearchExtractor):
     example = "https://dynasty-scans.com/anthologies/TITLE"
 
     def items(self):
-        url = "{}/anthologies/{}".format(self.root, self.groups[0])
-        xml = self.request(url + ".atom").text
-        root = ElementTree.fromstring(xml.replace(" xmlns=", " ns="))
+        url = "{}/anthologies/{}.atom".format(self.root, self.groups[0])
+        root = self.request_xml(url, xmlns=False)
 
         data = {
             "_extractor": DynastyscansChapterExtractor,
@@ -153,7 +151,7 @@ class DynastyscansAnthologyExtractor(DynastyscansSearchExtractor):
         }
 
         if self.config("metadata", False):
-            page = self.request(url).text
+            page = self.request(url[:-5]).text
             alert = text.extr(page, "<div class='alert", "</div>")
 
             data["alert"] = text.split_html(alert)[1:] if alert else ()

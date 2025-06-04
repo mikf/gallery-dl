@@ -20,6 +20,7 @@ import logging
 import datetime
 import requests
 import threading
+from xml.etree import ElementTree
 from requests.adapters import HTTPAdapter
 from .message import Message
 from .. import config, output, text, util, cache, exception
@@ -251,6 +252,23 @@ class Extractor():
         kwargs.setdefault("method", "HEAD")
         kwargs.setdefault("allow_redirects", False)
         return self.request(url, **kwargs).headers.get("location", "")
+
+    def request_xml(self, url, xmlns=True, **kwargs):
+        text = self.request(url, **kwargs).text
+
+        if not xmlns:
+            text = text.replace(" xmlns=", " ns=")
+
+        parser = ElementTree.XMLParser()
+        try:
+            parser.feed(text)
+            return parser.close()
+        except Exception as exc:
+            fatal = kwargs.get("fatal", True)
+            if not fatal or fatal is ...:
+                self.log.warning("%s: %s", exc.__class__.__name__, exc)
+                return ElementTree.Element("")
+            raise
 
     _handle_429 = util.false
 
