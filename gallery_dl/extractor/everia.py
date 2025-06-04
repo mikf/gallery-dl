@@ -50,7 +50,7 @@ class EveriaPostExtractor(EveriaExtractor):
     example = "https://everia.club/0000/00/00/TITLE"
 
     def items(self):
-        url = self.root + self.groups[0]
+        url = self.root + self.groups[0] + "/"
         page = self.request(url).text
         content = text.extr(page, 'itemprop="text">', "<h3")
         urls = re.findall(r'img.*?src="([^"]+)', content)
