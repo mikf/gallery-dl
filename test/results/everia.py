@@ -58,8 +58,8 @@ __tests__ = (
     "extension": "jpg",
     "filename" : r"re:雯妹不讲道理\+\(\d+\)",
     "title"    : "[雯妹不讲道理] Dido ダイドー (Azur Lane 碧蓝航线)",
+    "post_url" : "https://everia.club/2021/03/12/雯妹不讲道理-dido-ダイドー-azur-lane-碧蓝航线/",
     "post_category": "Cosplay",
-    "post_url"     : "https://everia.club/2021/03/12/雯妹不讲道理-dido-ダイドー-azur-lane-碧蓝航线",
     "tags": [
         "Cosplay",
         "雯妹不讲道理",
