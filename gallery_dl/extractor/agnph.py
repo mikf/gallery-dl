@@ -11,7 +11,6 @@
 from . import booru
 from .. import text
 
-from xml.etree import ElementTree
 import collections
 import re
 
@@ -52,8 +51,7 @@ class AgnphExtractor(booru.BooruExtractor):
             params["page"] = self.page_start
 
         while True:
-            data = self.request(url, params=params).text
-            root = ElementTree.fromstring(data)
+            root = self.request_xml(url, params=params)
 
             yield from map(self._xml_to_dict, root)
 
@@ -109,5 +107,5 @@ class AgnphPostExtractor(AgnphExtractor):
     def posts(self):
         url = "{}/gallery/post/show/{}/?api=xml".format(
             self.root, self.groups[0])
-        post = ElementTree.fromstring(self.request(url).text)
+        post = self.request_xml(url)
         return (self._xml_to_dict(post),)

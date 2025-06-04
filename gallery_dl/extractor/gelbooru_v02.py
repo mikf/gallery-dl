@@ -11,7 +11,6 @@
 from . import booru
 from .. import text, util, exception
 
-from xml.etree import ElementTree
 import collections
 import re
 
@@ -26,7 +25,7 @@ class GelbooruV02Extractor(booru.BooruExtractor):
 
     def _api_request(self, params):
         url = self.root_api + "/index.php?page=dapi&s=post&q=index"
-        return ElementTree.fromstring(self.request(url, params=params).text)
+        return self.request_xml(url, params=params)
 
     def _pagination(self, params):
         params["pid"] = self.page_start
@@ -38,7 +37,7 @@ class GelbooruV02Extractor(booru.BooruExtractor):
         while True:
             try:
                 root = self._api_request(params)
-            except ElementTree.ParseError:
+            except SyntaxError:  # ElementTree.ParseError
                 if "tags" not in params or post is None:
                     raise
                 taglist = [tag for tag in params["tags"].split()
