@@ -220,7 +220,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Dynasty Reader</td>
     <td>https://dynasty-scans.com/</td>
-    <td>Chapters, individual Images, Manga, Search Results</td>
+    <td>Anthologies, Chapters, individual Images, Manga, Search Results</td>
     <td></td>
 </tr>
 <tr>
