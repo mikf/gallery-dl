@@ -2389,6 +2389,17 @@ Description
     You can follow `this guide <https://github.com/Tyrrrz/DiscordChatExporter/blob/master/.docs/Token-and-IDs.md#how-to-get-a-user-token>`__ to get a token.
 
 
+extractor.dynastyscans.anthology.metadata
+-----------------------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Extract ``alert``, ``description``, and ``status`` metadata
+    from an anthology's HTML page.
+
+
 extractor.[E621].metadata
 -------------------------
 Type
