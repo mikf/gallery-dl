@@ -169,7 +169,9 @@ class DanbooruExtractor(BaseExtractor):
             self.root, post["id"])
         ).json()["media_metadata"]["metadata"]
 
-        ext = data["ZIP:ZipFileName"].rpartition(".")[2]
+        ext = data["Ugoira:FrameMimeType"].rpartition("/")[2]
+        if ext == "jpeg":
+            ext = "jpg"
         fmt = ("{:>06}." + ext).format
         delays = data["Ugoira:FrameDelays"]
         return [{"file": fmt(index), "delay": delay}
