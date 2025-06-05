@@ -253,6 +253,16 @@ class Extractor():
         kwargs.setdefault("allow_redirects", False)
         return self.request(url, **kwargs).headers.get("location", "")
 
+    def request_json(self, url, **kwargs):
+        try:
+            return util.json_loads(self.request(url, **kwargs).text)
+        except Exception as exc:
+            fatal = kwargs.get("fatal", True)
+            if not fatal or fatal is ...:
+                self.log.warning("%s: %s", exc.__class__.__name__, exc)
+                return {}
+            raise
+
     def request_xml(self, url, xmlns=True, **kwargs):
         text = self.request(url, **kwargs).text
 
