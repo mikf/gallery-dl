@@ -726,7 +726,8 @@ Description
 extractor.*.headers
 -------------------
 Type
-    ``object`` (`name` -> `value`)
+    * ``"string"``
+    * ``object`` (`name` -> `value`)
 Default
     .. code:: json
 
@@ -744,24 +745,32 @@ Description
 
     To disable sending a header, set its value to ``null``.
 
+    Set this option to ``"firefox"`` or ``"chrome"``
+    to use these browser's default headers.
+
 
 extractor.*.ciphers
 -------------------
 Type
-    ``list`` of ``strings``
+    * ``string``
+    * ``list`` of ``strings``
 Example
-    .. code:: json
+    * ``"firefox"``
+    * .. code:: json
 
-      ["ECDHE-ECDSA-AES128-GCM-SHA256",
-       "ECDHE-RSA-AES128-GCM-SHA256",
-       "ECDHE-ECDSA-CHACHA20-POLY1305",
-       "ECDHE-RSA-CHACHA20-POLY1305"]
+        ["ECDHE-ECDSA-AES128-GCM-SHA256",
+         "ECDHE-RSA-AES128-GCM-SHA256",
+         "ECDHE-ECDSA-CHACHA20-POLY1305",
+         "ECDHE-RSA-CHACHA20-POLY1305"]
 
 Description
     List of TLS/SSL cipher suites in
     `OpenSSL cipher list format <https://docs.openssl.org/master/man1/openssl-ciphers/#cipher-list-format>`__
     to be passed to
     `ssl.SSLContext.set_ciphers() <https://docs.python.org/3/library/ssl.html#ssl.SSLContext.set_ciphers>`__
+
+    Set this option to ``"firefox"`` or ``"chrome"``
+    to use these browser's default ciphers.
 
 
 extractor.*.tls12

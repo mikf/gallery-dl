@@ -430,7 +430,10 @@ class Extractor():
             headers["User-Agent"] = useragent
             headers["Accept"] = "*/*"
             headers["Accept-Language"] = "en-US,en;q=0.5"
+
             ssl_ciphers = self.ciphers
+            if ssl_ciphers is not None and ssl_ciphers in SSL_CIPHERS:
+                ssl_ciphers = SSL_CIPHERS[ssl_ciphers]
 
         if BROTLI:
             headers["Accept-Encoding"] = "gzip, deflate, br"
@@ -448,12 +451,21 @@ class Extractor():
 
         custom_headers = self.config("headers")
         if custom_headers:
+            if isinstance(custom_headers, str):
+                if custom_headers in HTTP_HEADERS:
+                    custom_headers = HTTP_HEADERS[custom_headers]
+                else:
+                    self.log.error("Invalid 'headers' value '%s'",
+                                   custom_headers)
+                    custom_headers = ()
             headers.update(custom_headers)
 
         custom_ciphers = self.config("ciphers")
         if custom_ciphers:
             if isinstance(custom_ciphers, list):
                 ssl_ciphers = ":".join(custom_ciphers)
+            elif custom_ciphers in SSL_CIPHERS:
+                ssl_ciphers = SSL_CIPHERS[custom_ciphers]
             else:
                 ssl_ciphers = custom_ciphers
 
