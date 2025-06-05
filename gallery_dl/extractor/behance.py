@@ -17,6 +17,7 @@ class BehanceExtractor(Extractor):
     category = "behance"
     root = "https://www.behance.net"
     request_interval = (2.0, 4.0)
+    tls12 = False
 
     def _init(self):
         self._bcp = self.cookies.get("bcp", domain="www.behance.net")

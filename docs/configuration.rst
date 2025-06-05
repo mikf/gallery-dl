@@ -778,7 +778,7 @@ extractor.*.tls12
 Type
     ``bool``
 Default
-    * ``false``: ``artstation``
+    * ``false``: ``artstation``, ``behance``
     * ``true``: otherwise
 Description
     Allow selecting TLS 1.2 cipher suites.
