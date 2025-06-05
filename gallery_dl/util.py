@@ -148,7 +148,7 @@ def false(_, __=None):
     return False
 
 
-def noop():
+def noop(_=None):
     """Does nothing"""
 
 
