@@ -663,7 +663,7 @@ class Extractor():
         util.dump_json(obj, ensure_ascii=False, indent=2)
 
     def _dump_response(self, response, history=True):
-        """Write the response content to a .dump file in the current directory.
+        """Write the response content to a .txt file in the current directory.
 
         The file name is derived from the response url,
         replacing special characters with "_"
@@ -676,7 +676,8 @@ class Extractor():
             Extractor._dump_index += 1
         else:
             Extractor._dump_index = 1
-            Extractor._dump_sanitize = re.compile(r"[\\\\|/<>:\"?*&=#]+").sub
+            Extractor._dump_sanitize = util.re_compile(
+                r"[\\\\|/<>:\"?*&=#]+").sub
 
         fname = "{:>02}_{}".format(
             Extractor._dump_index,
