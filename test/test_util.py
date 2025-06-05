@@ -493,6 +493,7 @@ class TestOther(unittest.TestCase):
 
     def test_noop(self):
         self.assertEqual(util.noop(), None)
+        self.assertEqual(util.noop(...), None)
 
     def test_md5(self):
         self.assertEqual(util.md5(b""),
@@ -974,6 +975,7 @@ value = 123
         self.assertEqual(response.cookies.get("foo"), None)
         self.assertEqual(response.headers.get("foo"), None)
         self.assertEqual(response.links.get("next"), None)
+        self.assertEqual(response.close(), None)
 
     def test_re(self):
         Pattern = type(re.compile(""))
