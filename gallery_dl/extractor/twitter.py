@@ -13,7 +13,6 @@ from .. import text, util, exception
 from ..cache import cache, memcache
 import itertools
 import random
-import re
 
 BASE_PATTERN = (r"(?:https?://)?(?:www\.|mobile\.)?"
                 r"(?:(?:[fv]x)?twitter|(?:fix(?:up|v))?x)\.com")
@@ -72,21 +71,16 @@ class TwitterExtractor(Extractor):
         self.login()
         self.api = TwitterAPI(self)
         metadata = self.metadata()
-
-        if self.config("expand"):
-            tweets = self._expand_tweets(self.tweets())
-            self.tweets = lambda : tweets
-
-        if self.config("unique", True):
-            seen_tweets = set()
-        else:
-            seen_tweets = None
+        seen_tweets = set() if self.config("unique", True) else None
 
         if self.twitpic:
-            self._find_twitpic = re.compile(
+            self._find_twitpic = util.re(
                 r"https?(://twitpic\.com/(?!photos/)\w+)").findall
 
-        for tweet in self.tweets():
+        tweets = self.tweets()
+        if self.config("expand"):
+            tweets = self._expand_tweets(tweets)
+        for tweet in tweets:
 
             if "legacy" in tweet:
                 data = tweet["legacy"]
