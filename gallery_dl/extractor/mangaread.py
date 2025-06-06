@@ -83,7 +83,7 @@ class MangareadMangaExtractor(MangareadBase, MangaExtractor):
             "rating"     : text.parse_float(
                 extr('total_votes">', "</span>").strip()),
             "manga_alt"  : text.remove_html(
-                extr("Alternative </h5>\n</div>", "</div>")).split("; "),
+                extr("Alternative\t\t</h5>\n\t</div>", "</div>")).split("; "),
             "author"     : list(text.extract_iter(
                 extr('class="author-content">', "</div>"), '"tag">', "</a>")),
             "artist"     : list(text.extract_iter(
