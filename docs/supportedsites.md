@@ -1424,25 +1424,25 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Misskey.io</td>
     <td>https://misskey.io/</td>
-    <td>Favorites, Followed Users, Images from Notes, User Profiles</td>
+    <td>Avatars, Backgrounds, Favorites, Followed Users, Images from Notes, User Profiles</td>
     <td></td>
 </tr>
 <tr>
     <td>Misskey.design</td>
     <td>https://misskey.design/</td>
-    <td>Favorites, Followed Users, Images from Notes, User Profiles</td>
+    <td>Avatars, Backgrounds, Favorites, Followed Users, Images from Notes, User Profiles</td>
     <td></td>
 </tr>
 <tr>
     <td>Lesbian.energy</td>
     <td>https://lesbian.energy/</td>
-    <td>Favorites, Followed Users, Images from Notes, User Profiles</td>
+    <td>Avatars, Backgrounds, Favorites, Followed Users, Images from Notes, User Profiles</td>
     <td></td>
 </tr>
 <tr>
     <td>Sushi.ski</td>
     <td>https://sushi.ski/</td>
-    <td>Favorites, Followed Users, Images from Notes, User Profiles</td>
+    <td>Avatars, Backgrounds, Favorites, Followed Users, Images from Notes, User Profiles</td>
     <td></td>
 </tr>
 
