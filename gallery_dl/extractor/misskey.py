@@ -113,6 +113,17 @@ class MisskeyUserExtractor(MisskeyExtractor):
         return self.api.users_notes(self.api.user_id_by_username(self.item))
 
 
+class MisskeyInfoExtractor(MisskeyExtractor):
+    """Extractor for a Misskey user's profile data"""
+    subcategory = "info"
+    pattern = BASE_PATTERN + r"/@([^/?#]+)/info"
+    example = "https://misskey.io/@USER/info"
+
+    def items(self):
+        user = self.api.users_show(self.item)
+        return iter(((Message.Directory, user),))
+
+
 class MisskeyAvatarExtractor(MisskeyExtractor):
     """Extractor for a Misskey user's avatar"""
     subcategory = "avatar"
