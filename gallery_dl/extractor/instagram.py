@@ -14,7 +14,6 @@ from .. import text, util, exception
 from ..cache import cache, memcache
 import itertools
 import binascii
-import re
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?instagram\.com"
 USER_PATTERN = BASE_PATTERN + r"/(?!(?:p|tv|reel|explore|stories)/)([^/?#]+)"
@@ -39,7 +38,7 @@ class InstagramExtractor(Extractor):
     def _init(self):
         self.www_claim = "0"
         self.csrf_token = util.generate_token()
-        self._find_tags = re.compile(r"#\w+").findall
+        self._find_tags = util.re(r"#\w+").findall
         self._logged_in = True
         self._cursor = None
         self._user = None

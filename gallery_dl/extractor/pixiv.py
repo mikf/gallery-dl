@@ -14,7 +14,6 @@ from ..cache import cache, memcache
 from datetime import datetime, timedelta
 import itertools
 import hashlib
-import re
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.|touch\.)?ph?ixiv\.net"
 USER_PATTERN = BASE_PATTERN + r"/(?:en/)?users/(\d+)"
@@ -45,7 +44,7 @@ class PixivExtractor(Extractor):
         self.meta_captions = self.config("captions")
 
         if self.meta_captions:
-            self.meta_captions_sub = re.compile(
+            self.meta_captions_sub = util.re(
                 r'<a href="/jump\.php\?([^"]+)').sub
 
     def items(self):

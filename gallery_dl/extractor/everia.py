@@ -7,8 +7,7 @@
 """Extractors for https://everia.club"""
 
 from .common import Extractor, Message
-from .. import text
-import re
+from .. import text, util
 
 BASE_PATTERN = r"(?:https?://)?everia\.club"
 
@@ -26,7 +25,7 @@ class EveriaExtractor(Extractor):
         return self._pagination(self.groups[0])
 
     def _pagination(self, path, params=None, pnum=1):
-        find_posts = re.compile(r'thumbnail">\s*<a href="([^"]+)').findall
+        find_posts = util.re(r'thumbnail">\s*<a href="([^"]+)').findall
 
         while True:
             if pnum == 1:
@@ -53,7 +52,7 @@ class EveriaPostExtractor(EveriaExtractor):
         url = self.root + self.groups[0] + "/"
         page = self.request(url).text
         content = text.extr(page, 'itemprop="text">', "<h3")
-        urls = re.findall(r'img.*?src="([^"]+)', content)
+        urls = util.re(r'img.*?src="([^"]+)').findall(content)
 
         data = {
             "title": text.unescape(

@@ -9,8 +9,7 @@
 """Extractors for https://vk.com/"""
 
 from .common import Extractor, Message
-from .. import text, exception
-import re
+from .. import text, util, exception
 
 BASE_PATTERN = r"(?:https://)?(?:www\.|m\.)?vk\.com"
 
@@ -32,7 +31,7 @@ class VkExtractor(Extractor):
         return num
 
     def items(self):
-        sub = re.compile(r"/imp[fg]/").sub
+        sub = util.re(r"/imp[fg]/").sub
         sizes = "wzyxrqpo"
 
         data = self.metadata()

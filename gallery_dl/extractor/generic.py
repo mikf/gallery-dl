@@ -7,9 +7,8 @@
 """Generic information extractor"""
 
 from .common import Extractor, Message
-from .. import config, text
+from .. import config, text, util
 import os.path
-import re
 
 
 class GenericExtractor(Extractor):
@@ -172,8 +171,8 @@ class GenericExtractor(Extractor):
             r"(?:[^\"'<>\s]*)?"            # optional query and fragment
         )
 
-        imageurls_src = re.findall(imageurl_pattern_src, page)
-        imageurls_ext = re.findall(imageurl_pattern_ext, page)
+        imageurls_src = util.re(imageurl_pattern_src).findall(page)
+        imageurls_ext = util.re(imageurl_pattern_ext).findall(page)
         imageurls = imageurls_src + imageurls_ext
 
         # Resolve relative urls
@@ -182,8 +181,8 @@ class GenericExtractor(Extractor):
         # by prepending a suitable base url.
         #
         # If the page contains a <base> element, use it as base url
-        basematch = re.search(
-            r"(?i)(?:<base\s.*?href=[\"']?)(?P<url>[^\"' >]+)", page)
+        basematch = util.re(
+            r"(?i)(?:<base\s.*?href=[\"']?)(?P<url>[^\"' >]+)").search(page)
         if basematch:
             self.baseurl = basematch.group('url').rstrip('/')
         # Otherwise, extract the base url from self.url

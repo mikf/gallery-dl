@@ -10,7 +10,6 @@
 
 from .common import ChapterExtractor, MangaExtractor, Extractor, Message
 from .. import text, util
-import re
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?dynasty-scans\.com"
 
@@ -47,12 +46,11 @@ class DynastyscansChapterExtractor(DynastyscansBase, ChapterExtractor):
 
     def metadata(self, page):
         extr = text.extract_from(page)
-        match = re.match(
-            (r"(?:<a[^>]*>)?([^<]+)(?:</a>)?"  # manga name
-             r"(?: ch(\d+)([^:<]*))?"  # chapter info
-             r"(?:: (.+))?"),  # title
-            extr("<h3 id='chapter-title'><b>", "</b>"),
-        )
+        match = util.re(
+            r"(?:<a[^>]*>)?([^<]+)(?:</a>)?"  # manga name
+            r"(?: ch(\d+)([^:<]*))?"  # chapter info
+            r"(?:: (.+))?"  # title
+        ).match(extr("<h3 id='chapter-title'><b>", "</b>"))
         author = extr(" by ", "</a>")
         group = extr('"icon-print"></i> ', '</span>')
 

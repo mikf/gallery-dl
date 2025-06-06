@@ -9,8 +9,7 @@
 """Recursive extractor"""
 
 from .common import Extractor, Message
-from .. import text
-import re
+from .. import text, util
 
 
 class RecursiveExtractor(Extractor):
@@ -28,5 +27,5 @@ class RecursiveExtractor(Extractor):
         else:
             page = self.request(text.ensure_http_scheme(url)).text
 
-        for match in re.finditer(r"https?://[^\s\"']+", page):
+        for match in util.re(r"https?://[^\s\"']+").finditer(page):
             yield Message.Queue, match.group(0), {}

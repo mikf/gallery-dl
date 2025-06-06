@@ -13,7 +13,6 @@ from .. import text, util, exception
 from ..cache import cache, memcache
 import itertools
 import json
-import re
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.|beta\.)?(kemono|coomer)\.(su|party)"
 USER_PATTERN = BASE_PATTERN + r"/([^/?#]+)/user/([^/?#]+)"
@@ -44,7 +43,7 @@ class KemonoExtractor(Extractor):
         order = self.config("order-revisions")
         self.revisions_reverse = order[0] in ("r", "a") if order else False
 
-        self._find_inline = re.compile(
+        self._find_inline = util.re(
             r'src="(?:https?://(?:kemono|coomer)\.su)?(/inline/[^"]+'
             r'|/[0-9a-f]{2}/[0-9a-f]{2}/[0-9a-f]{64}\.[^"]+)').findall
         self._json_dumps = json.JSONEncoder(
@@ -52,7 +51,7 @@ class KemonoExtractor(Extractor):
             sort_keys=True, separators=(",", ":")).encode
 
     def items(self):
-        find_hash = re.compile(HASH_PATTERN).match
+        find_hash = util.re(HASH_PATTERN).match
         generators = self._build_file_generators(self.config("files"))
         announcements = True if self.config("announcements") else None
         archives = True if self.config("archives") else False
@@ -409,10 +408,10 @@ class KemonoDiscordExtractor(KemonoExtractor):
             "parent_id"    : channel["parent_channel_id"],
         }
 
-        find_inline = re.compile(
+        find_inline = util.re(
             r"https?://(?:cdn\.discordapp.com|media\.discordapp\.net)"
             r"(/[A-Za-z0-9-._~:/?#\[\]@!$&'()*+,;%=]+)").findall
-        find_hash = re.compile(HASH_PATTERN).match
+        find_hash = util.re(HASH_PATTERN).match
 
         posts = self.api.discord_channel(channel_id)
         max_posts = self.config("max-posts")

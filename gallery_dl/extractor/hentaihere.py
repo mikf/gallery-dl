@@ -10,7 +10,6 @@
 
 from .common import ChapterExtractor, MangaExtractor
 from .. import text, util
-import re
 
 
 class HentaihereBase():
@@ -34,8 +33,9 @@ class HentaihereChapterExtractor(HentaihereBase, ChapterExtractor):
         title = text.extr(page, "<title>", "</title>")
         chapter_id = text.extr(page, 'report/C', '"')
         chapter, sep, minor = self.chapter.partition(".")
-        pattern = r"Page 1 \| (.+) \(([^)]+)\) - Chapter \d+: (.+) by (.+) at "
-        match = re.match(pattern, title)
+        match = util.re(
+            r"Page 1 \| (.+) \(([^)]+)\) - Chapter \d+: (.+) by "
+            r"(.+) at ").match(title)
         return {
             "manga": match.group(1),
             "manga_id": text.parse_int(self.manga_id),

@@ -11,7 +11,6 @@
 from .common import Extractor, Message
 from .. import text, util, exception
 from ..cache import cache
-import re
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?subscribestar\.(com|adult)"
 
@@ -158,8 +157,8 @@ class SubscribestarExtractor(Extractor):
         attachments = text.extr(
             html, 'class="uploads-docs"', 'class="post-edit_form"')
         if attachments:
-            for att in re.split(
-                    r'class="doc_preview[" ]', attachments)[1:]:
+            for att in util.re(r'class="doc_preview[" ]').split(
+                    attachments)[1:]:
                 media.append({
                     "id"  : text.parse_int(text.extr(
                         att, 'data-upload-id="', '"')),
@@ -172,8 +171,8 @@ class SubscribestarExtractor(Extractor):
         audios = text.extr(
             html, 'class="uploads-audios"', 'class="post-edit_form"')
         if audios:
-            for audio in re.split(
-                    r'class="audio_preview-data[" ]', audios)[1:]:
+            for audio in util.re(r'class="audio_preview-data[" ]').split(
+                    audios)[1:]:
                 media.append({
                     "id"  : text.parse_int(text.extr(
                         audio, 'data-upload-id="', '"')),
