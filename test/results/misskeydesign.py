@@ -12,7 +12,20 @@ __tests__ = (
     "#url"     : "https://misskey.design/@machina_3D",
     "#category": ("misskey", "misskey.design", "user"),
     "#class"   : misskey.MisskeyUserExtractor,
-    "#pattern" : r"https://file\.misskey\.design/post/[\w-]{36}\.\w+",
+    "#options" : {"include": "all"},
+    "#urls"    : (
+        "https://misskey.design/@machina_3D/info",
+        "https://misskey.design/@machina_3D/avatar",
+        "https://misskey.design/@machina_3D/banner",
+        "https://misskey.design/@machina_3D/notes",
+    ),
+},
+
+{
+    "#url"     : "https://misskey.design/@machina_3D/notes",
+    "#category": ("misskey", "misskey.design", "notes"),
+    "#class"   : misskey.MisskeyNotesExtractor,
+    "#pattern" : r"https://file\.misskey\.design/post/(webpublic-)?[\w-]{36}\.\w+",
     "#range"   : "1-50",
     "#count"   : 50,
 },
@@ -48,9 +61,9 @@ __tests__ = (
 },
 
 {
-    "#url"     : "https://misskey.design/@blooddj@pawoo.net",
-    "#category": ("misskey", "misskey.design", "user"),
-    "#class"   : misskey.MisskeyUserExtractor,
+    "#url"     : "https://misskey.design/@blooddj@pawoo.net/notes",
+    "#category": ("misskey", "misskey.design", "notes"),
+    "#class"   : misskey.MisskeyNotesExtractor,
     "#count"   : "> 30",
 },
 

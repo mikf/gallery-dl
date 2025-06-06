@@ -183,7 +183,6 @@ SUBCATEGORY_MAP = {
     "issue"  : "Comic Issues",
     "manga"  : "Manga",
     "media"  : "Media Files",
-    "note"   : "Images from Notes",
     "popular": "Popular Images",
     "recent" : "Recent Images",
     "search" : "Search Results",
@@ -295,6 +294,10 @@ SUBCATEGORY_MAP = {
         "feed": "Updates Feed",
         "following" : "Library",
         "list": "MDLists",
+    },
+    "misskey": {
+        "note" : "Notes",
+        "notes": "User Notes",
     },
     "nijie": {
         "followed": "Followed Users",
