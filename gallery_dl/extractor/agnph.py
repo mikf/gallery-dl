@@ -9,10 +9,8 @@
 """Extractors for https://agn.ph/"""
 
 from . import booru
-from .. import text
-
+from .. import text, util
 import collections
-import re
 
 BASE_PATTERN = r"(?:https?://)?agn\.ph"
 
@@ -72,7 +70,7 @@ class AgnphExtractor(booru.BooruExtractor):
             return
 
         tags = collections.defaultdict(list)
-        pattern = re.compile(r'class="(.)typetag">([^<]+)')
+        pattern = util.re(r'class="(.)typetag">([^<]+)')
         for tag_type, tag_name in pattern.findall(tag_container):
             tags[tag_type].append(text.unquote(tag_name).replace(" ", "_"))
         for key, value in tags.items():

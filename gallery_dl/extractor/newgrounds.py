@@ -12,7 +12,6 @@ from .common import Extractor, Message, Dispatch
 from .. import text, util, exception
 from ..cache import cache
 import itertools
-import re
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?newgrounds\.com"
 USER_PATTERN = r"(?:https?://)?([\w-]+)\.newgrounds\.com"
@@ -35,7 +34,7 @@ class NewgroundsExtractor(Extractor):
         self.user_root = "https://{}.newgrounds.com".format(self.user)
 
     def _init(self):
-        self._extract_comment_urls = re.compile(
+        self._extract_comment_urls = util.re(
             r'(?:<img |data-smartload-)src="([^"]+)').findall
         self.flash = self.config("flash", True)
 
@@ -322,7 +321,7 @@ class NewgroundsExtractor(Extractor):
 
     def _video_formats(self, sources):
         src = sources["360p"][0]["src"]
-        sub = re.compile(r"\.360p\.\w+").sub
+        sub = util.re(r"\.360p\.\w+").sub
 
         for fmt in self.format:
             try:

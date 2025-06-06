@@ -15,7 +15,6 @@ import collections
 import mimetypes
 import binascii
 import time
-import re
 
 BASE_PATTERN = (
     r"(?:https?://)?(?:"
@@ -66,10 +65,13 @@ class DeviantartExtractor(Extractor):
         if self.quality:
             if self.quality == "png":
                 self.quality = "-fullview.png?"
-                self.quality_sub = re.compile(r"-fullview\.[a-z0-9]+\?").sub
+                self.quality_sub = util.re(r"-fullview\.[a-z0-9]+\?").sub
             else:
                 self.quality = ",q_{}".format(self.quality)
-                self.quality_sub = re.compile(r",q_\d+").sub
+                self.quality_sub = util.re(r",q_\d+").sub
+
+        if self.intermediary:
+            self.intermediary_subn = util.re(r"(/f/[^/]+/[^/]+)/v\d+/.*").subn
 
         if isinstance(self.original, str) and \
                 self.original.lower().startswith("image"):
@@ -271,7 +273,7 @@ class DeviantartExtractor(Extractor):
             )
 
         # filename metadata
-        sub = re.compile(r"\W").sub
+        sub = util.re(r"\W").sub
         deviation["filename"] = "".join((
             sub("_", deviation["title"].lower()), "_by_",
             sub("_", deviation["author"]["username"].lower()), "-d",
@@ -666,8 +668,7 @@ x2="45.4107524%" y2="71.4898596%" id="app-root-3">\
         if content["src"].startswith("https://images-wixmp-"):
             if self.intermediary and deviation["index"] <= 790677560:
                 # https://github.com/r888888888/danbooru/issues/4069
-                intermediary, count = re.subn(
-                    r"(/f/[^/]+/[^/]+)/v\d+/.*",
+                intermediary, count = self.intermediary_subn(
                     r"/intermediary\1", content["src"], 1)
                 if count:
                     deviation["is_original"] = False
@@ -682,8 +683,8 @@ x2="45.4107524%" y2="71.4898596%" id="app-root-3">\
     @staticmethod
     def _find_folder(folders, name, uuid):
         if uuid.isdecimal():
-            match = re.compile(name.replace(
-                "-", r"[^a-z0-9]+") + "$", re.IGNORECASE).match
+            match = util.re(
+                "(?i)" + name.replace("-", "[^a-z0-9]+") + "$").match
             for folder in folders:
                 if match(folder["name"]):
                     return folder

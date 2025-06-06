@@ -8,7 +8,6 @@
 
 from .common import Extractor, Message
 from .. import text, util, exception
-import re
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?arca\.live"
 
@@ -65,8 +64,8 @@ class ArcalivePostExtractor(ArcaliveExtractor):
     def _extract_files(self, post):
         files = []
 
-        for video, media in self._extract_media(post["content"]):
-
+        for video, media in util.re(r"<(?:img|vide(o)) ([^>]+)").findall(
+                post["content"]):
             if not self.emoticons and 'class="arca-emoticon"' in media:
                 continue
 
@@ -112,11 +111,6 @@ class ArcalivePostExtractor(ArcaliveExtractor):
             })
 
         return files
-
-    def _extract_media(self, content):
-        ArcalivePostExtractor._extract_media = extr = re.compile(
-            r"<(?:img|vide(o)) ([^>]+)").findall
-        return extr(content)
 
 
 class ArcaliveBoardExtractor(ArcaliveExtractor):

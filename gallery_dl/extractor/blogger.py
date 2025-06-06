@@ -10,7 +10,6 @@
 
 from .common import BaseExtractor, Message
 from .. import text, util
-import re
 
 
 class BloggerExtractor(BaseExtractor):
@@ -33,13 +32,13 @@ class BloggerExtractor(BaseExtractor):
         blog["date"] = text.parse_datetime(blog["published"])
         del blog["selfLink"]
 
-        sub = re.compile(r"(/|=)(?:[sw]\d+|w\d+-h\d+)(?=/|$)").sub
-        findall_image = re.compile(
+        sub = util.re(r"(/|=)(?:[sw]\d+|w\d+-h\d+)(?=/|$)").sub
+        findall_image = util.re(
             r'src="(https?://(?:'
             r'blogger\.googleusercontent\.com/img|'
             r'lh\d+(?:-\w+)?\.googleusercontent\.com|'
             r'\d+\.bp\.blogspot\.com)/[^"]+)').findall
-        findall_video = re.compile(
+        findall_video = util.re(
             r'src="(https?://www\.blogger\.com/video\.g\?token=[^"]+)').findall
         metadata = self.metadata()
 

@@ -10,7 +10,6 @@
 
 from .common import Extractor, Message
 from .. import text, util
-import re
 
 
 class SankakucomplexExtractor(Extractor):
@@ -66,7 +65,7 @@ class SankakucomplexArticleExtractor(SankakucomplexExtractor):
 
     @staticmethod
     def _extract_images(content):
-        orig_sub = re.compile(r"-\d+x\d+\.").sub
+        orig_sub = util.re(r"-\d+x\d+\.").sub
         return [
             orig_sub(".", url) for url in
             util.unique(text.extract_iter(content, 'data-lazy-src="', '"'))
@@ -74,13 +73,13 @@ class SankakucomplexArticleExtractor(SankakucomplexExtractor):
 
     @staticmethod
     def _extract_videos(content):
-        return re.findall(r"<source [^>]*src=[\"']([^\"']+)", content)
+        return util.re(r"<source [^>]*src=[\"']([^\"']+)").findall(content)
 
     @staticmethod
     def _extract_embeds(content):
         return [
             "ytdl:" + url for url in
-            re.findall(r"<iframe [^>]*src=[\"']([^\"']+)", content)
+            util.re(r"<iframe [^>]*src=[\"']([^\"']+)").findall(content)
         ]
 
 

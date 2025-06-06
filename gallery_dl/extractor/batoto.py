@@ -7,8 +7,7 @@
 """Extractors for https://bato.to/"""
 
 from .common import Extractor, ChapterExtractor, MangaExtractor
-from .. import text, exception
-import re
+from .. import text, util, exception
 
 BASE_PATTERN = (r"(?:https?://)?("
                 r"(?:ba|d|f|h|j|m|w)to\.to|"
@@ -104,9 +103,9 @@ class BatotoChapterExtractor(BatotoBase, ChapterExtractor):
             info = text.remove_html(extr('link-hover">', "</"))
         info = text.unescape(info)
 
-        match = re.match(
+        match = util.re(
             r"(?i)(?:(?:Volume|S(?:eason)?)\s*(\d+)\s+)?"
-            r"(?:Chapter|Episode)\s*(\d+)([\w.]*)", info)
+            r"(?:Chapter|Episode)\s*(\d+)([\w.]*)").match(info)
         if match:
             volume, chapter, minor = match.groups()
         else:

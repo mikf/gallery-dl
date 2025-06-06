@@ -13,7 +13,6 @@ from .nozomi import decode_nozomi
 from ..cache import memcache
 from .. import text, util
 import string
-import re
 
 
 class HitomiExtractor(Extractor):
@@ -257,8 +256,8 @@ def _parse_gg(extr):
     m = {}
 
     keys = []
-    for match in re.finditer(
-            r"case\s+(\d+):(?:\s*o\s*=\s*(\d+))?", page):
+    for match in util.re_compile(
+            r"case\s+(\d+):(?:\s*o\s*=\s*(\d+))?").finditer(page):
         key, value = match.groups()
         keys.append(int(key))
 
@@ -268,11 +267,11 @@ def _parse_gg(extr):
                 m[key] = value
             keys.clear()
 
-    for match in re.finditer(
-            r"if\s+\(g\s*===?\s*(\d+)\)[\s{]*o\s*=\s*(\d+)", page):
+    for match in util.re_compile(
+            r"if\s+\(g\s*===?\s*(\d+)\)[\s{]*o\s*=\s*(\d+)").finditer(page):
         m[int(match.group(1))] = int(match.group(2))
 
-    d = re.search(r"(?:var\s|default:)\s*o\s*=\s*(\d+)", page)
-    b = re.search(r"b:\s*[\"'](.+)[\"']", page)
+    d = util.re_compile(r"(?:var\s|default:)\s*o\s*=\s*(\d+)").search(page)
+    b = util.re_compile(r"b:\s*[\"'](.+)[\"']").search(page)
 
     return m, b.group(1).strip("/"), int(d.group(1)) if d else 0

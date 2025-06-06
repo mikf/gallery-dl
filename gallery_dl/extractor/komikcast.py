@@ -9,8 +9,7 @@
 """Extractors for https://komikcast.la/"""
 
 from .common import ChapterExtractor, MangaExtractor
-from .. import text
-import re
+from .. import text, util
 
 BASE_PATTERN = (r"(?:https?://)?(?:www\.)?"
                 r"komikcast\.(?:la|cz|lol|site|mo?e|com)")
@@ -24,13 +23,11 @@ class KomikcastBase():
     @staticmethod
     def parse_chapter_string(chapter_string, data=None):
         """Parse 'chapter_string' value and add its info to 'data'"""
-        if not data:
+        if data is None:
             data = {}
 
-        match = re.match(
-            r"(?:(.*) Chapter )?0*(\d+)([^ ]*)(?: (?:- )?(.+))?",
-            text.unescape(chapter_string),
-        )
+        pattern = util.re(r"(?:(.*) Chapter )?0*(\d+)([^ ]*)(?: (?:- )?(.+))?")
+        match = pattern.match(text.unescape(chapter_string))
         manga, chapter, data["chapter_minor"], title = match.groups()
 
         if manga:
@@ -59,9 +56,10 @@ class KomikcastChapterExtractor(KomikcastBase, ChapterExtractor):
     def images(page):
         readerarea = text.extr(
             page, '<div class="main-reading-area', '</div')
+        pattern = util.re(r"<img[^>]* src=[\"']([^\"']+)")
         return [
             (text.unescape(url), None)
-            for url in re.findall(r"<img[^>]* src=[\"']([^\"']+)", readerarea)
+            for url in pattern.findall(readerarea)
         ]
 
 

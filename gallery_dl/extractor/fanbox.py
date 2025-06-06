@@ -9,7 +9,6 @@
 from .common import Extractor, Message
 from .. import text, util
 from ..cache import memcache
-import re
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?fanbox\.cc"
 USER_PATTERN = (
@@ -211,7 +210,7 @@ class FanboxExtractor(Extractor):
         num = 0
         cover_image = post.get("coverImageUrl")
         if cover_image:
-            cover_image = re.sub("/c/[0-9a-z_]+", "", cover_image)
+            cover_image = util.re("/c/[0-9a-z_]+").sub("", cover_image)
             final_post = post.copy()
             final_post["isCoverImage"] = True
             final_post["fileUrl"] = cover_image
