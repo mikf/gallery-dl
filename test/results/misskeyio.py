@@ -18,6 +18,36 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://misskey.io/@lithla/avatar",
+    "#category": ("misskey", "misskey.io", "avatar"),
+    "#class"   : misskey.MisskeyAvatarExtractor,
+    "#urls"    : "https://media.misskeyusercontent.jp/io/d84e09f8-99b7-423a-9229-78ba65ab8a82.gif",
+    "#sha1_content": "375af4d302a4aef0bc8fc3f15b2c75ec952ac086",
+
+    "extension": "gif",
+    "filename" : "d84e09f8-99b7-423a-9229-78ba65ab8a82",
+    "id"       : "avatar",
+    "instance" : "misskey.io",
+    "file"     : {"id": "d84e09f8-99b7-423a-9229-78ba65ab8a82"},
+    "user"     : {"id": "9bhpt59w5k"},
+},
+
+{
+    "#url"     : "https://misskey.io/@lithla/banner",
+    "#category": ("misskey", "misskey.io", "background"),
+    "#class"   : misskey.MisskeyBackgroundExtractor,
+    "#urls"    : "https://media.misskeyusercontent.jp/io/ddea6f5f-9cde-42ff-8e0b-dafbfa9cca9b.png",
+    "#sha1_content": "02e1d33a7aa03d8e63baa82ea6d75c7d5de80112",
+
+    "extension": "png",
+    "filename" : "ddea6f5f-9cde-42ff-8e0b-dafbfa9cca9b",
+    "id"       : "background",
+    "instance" : "misskey.io",
+    "file"     : {"id": "ddea6f5f-9cde-42ff-8e0b-dafbfa9cca9b"},
+    "user"     : {"id": "9bhpt59w5k"},
+},
+
+{
     "#url"     : "https://misskey.io/@blooddj@pawoo.net",
     "#category": ("misskey", "misskey.io", "user"),
     "#class"   : misskey.MisskeyUserExtractor,
