@@ -6,7 +6,7 @@
 
 """Extractors for Misskey instances"""
 
-from .common import BaseExtractor, Message
+from .common import BaseExtractor, Message, Dispatch
 from .. import text, exception
 from ..cache import memcache
 
@@ -103,11 +103,27 @@ BASE_PATTERN = MisskeyExtractor.update({
 })
 
 
-class MisskeyUserExtractor(MisskeyExtractor):
+class MisskeyUserExtractor(Dispatch, MisskeyExtractor):
     """Extractor for all images of a Misskey user"""
     subcategory = "user"
     pattern = BASE_PATTERN + r"/@([^/?#]+)/?$"
     example = "https://misskey.io/@USER"
+
+    def items(self):
+        base = "{}/@{}/".format(self.root, self.item)
+        return self._dispatch_extractors((
+            (MisskeyInfoExtractor      , base + "info"),
+            (MisskeyAvatarExtractor    , base + "avatar"),
+            (MisskeyBackgroundExtractor, base + "banner"),
+            (MisskeyNotesExtractor     , base + "notes"),
+        ), ("notes",))
+
+
+class MisskeyNotesExtractor(MisskeyExtractor):
+    """Extractor for a Misskey user's notes"""
+    subcategory = "notes"
+    pattern = BASE_PATTERN + r"/@([^/?#]+)/notes"
+    example = "https://misskey.io/@USER/notes"
 
     def notes(self):
         return self.api.users_notes(self.api.user_id_by_username(self.item))

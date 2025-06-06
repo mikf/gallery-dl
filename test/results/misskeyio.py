@@ -12,9 +12,28 @@ __tests__ = (
     "#url"     : "https://misskey.io/@lithla",
     "#category": ("misskey", "misskey.io", "user"),
     "#class"   : misskey.MisskeyUserExtractor,
-    "#pattern" : r"https://(media.misskeyusercontent.com|s\d+\.arkjp\.net)/(misskey|io)/[\w-]+\.\w+",
+    "#options" : {"include": "all"},
+    "#urls"    : (
+        "https://misskey.io/@lithla/info",
+        "https://misskey.io/@lithla/avatar",
+        "https://misskey.io/@lithla/banner",
+        "https://misskey.io/@lithla/notes",
+    ),
+},
+
+{
+    "#url"     : "https://misskey.io/@lithla/notes",
+    "#category": ("misskey", "misskey.io", "notes"),
+    "#class"   : misskey.MisskeyNotesExtractor,
+    "#pattern" : r"https://(media.misskeyusercontent.(jp|com)|s\d+\.arkjp\.net)/(misskey|io)/[\w-]+\.\w+",
     "#range"   : "1-50",
     "#count"   : 50,
+},
+
+{
+    "#url"     : "https://misskey.io/@lithla/info",
+    "#category": ("misskey", "misskey.io", "info"),
+    "#class"   : misskey.MisskeyInfoExtractor,
 },
 
 {
@@ -48,9 +67,9 @@ __tests__ = (
 },
 
 {
-    "#url"     : "https://misskey.io/@blooddj@pawoo.net",
-    "#category": ("misskey", "misskey.io", "user"),
-    "#class"   : misskey.MisskeyUserExtractor,
+    "#url"     : "https://misskey.io/@blooddj@pawoo.net/notes",
+    "#category": ("misskey", "misskey.io", "notes"),
+    "#class"   : misskey.MisskeyNotesExtractor,
     "#range"   : "1-50",
     "#count"   : 50,
 },
@@ -67,8 +86,12 @@ __tests__ = (
     "#url"     : "https://misskey.io/notes/9bhqfo835v",
     "#category": ("misskey", "misskey.io", "note"),
     "#class"   : misskey.MisskeyNoteExtractor,
-    "#pattern" : r"https://(media\.misskeyusercontent\.com|s\d+\.arkjp\.net)/misskey/[\w-]+\.\w+",
-    "#count"   : 4,
+    "#urls"    : (
+        "https://media.misskeyusercontent.jp/misskey/1cbba095-5a19-4107-8e20-3efb0456dda4.png?sensitive=true",
+        "https://media.misskeyusercontent.jp/misskey/6baa558b-94ac-4bd2-a393-a52324a9d2d4.png?sensitive=true",
+        "https://media.misskeyusercontent.jp/misskey/14133ad0-ea40-4fed-b6e7-65d4cbe19b96.png?sensitive=true",
+        "https://media.misskeyusercontent.jp/misskey/e11164a2-9de5-4769-8c73-0ae44124b565.png?sensitive=true",
+    ),
 },
 
 {

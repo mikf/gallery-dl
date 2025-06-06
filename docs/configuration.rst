@@ -3509,6 +3509,29 @@ Description
     Your access token, necessary to fetch favorited notes.
 
 
+extractor.[misskey].include
+---------------------------
+Type
+    * ``string``
+    * ``list`` of ``strings``
+Default
+    ``"notes"``
+Example
+    * ``"avatar,background,notes"``
+    * ``["avatar", "background", "notes"]``
+Description
+    A (comma-separated) list of subcategories to include
+    when processing a user profile.
+
+    Possible values are
+    ``"info"``,
+    ``"avatar"``,
+    ``"background"``,
+    ``"notes"``,
+
+    It is possible to use ``"all"`` instead of listing all values separately.
+
+
 extractor.[misskey].renotes
 ---------------------------
 Type
