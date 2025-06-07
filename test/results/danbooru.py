@@ -305,8 +305,25 @@ __tests__ = (
     "#url"     : "https://danbooru.donmai.us/posts/3613024",
     "#category": ("Danbooru", "danbooru", "post"),
     "#class"   : danbooru.DanbooruPostExtractor,
+    "#options" : {"ugoira": False},
+    "#urls"    : "https://cdn.donmai.us/sample/5e/e5/sample-5ee54a2d95ed36376ec1d8f6ddbdece9.webm",
+
+    "!_ugoira_original"  : ...,
+    "!_ugoira_frame_data": ...,
+},
+
+{
+    "#url"     : "https://danbooru.donmai.us/posts/3613024",
+    "#category": ("Danbooru", "danbooru", "post"),
+    "#class"   : danbooru.DanbooruPostExtractor,
     "#options" : {"ugoira": True},
-    "#pattern" : r"https?://.+\.zip$",
+    "#urls"    : "https://cdn.donmai.us/original/5e/e5/5ee54a2d95ed36376ec1d8f6ddbdece9.zip",
+
+    "_ugoira_original"     : False,
+    "_ugoira_frame_data[*]": {
+        "file" : r"re:^0000\d\d\.jpg$",
+        "delay": int,
+    },
 },
 
 {

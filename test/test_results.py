@@ -241,6 +241,12 @@ class TestExtractorResults(unittest.TestCase):
                 if key not in kwdict:
                     continue
 
+            if key.endswith("[*]"):
+                key = key[:-3]
+                subtest = True
+            else:
+                subtest = False
+
             path = "{}.{}".format(parent, key) if parent else key
 
             if key.startswith("!"):
@@ -248,7 +254,15 @@ class TestExtractorResults(unittest.TestCase):
                 continue
 
             self.assertIn(key, kwdict, msg=path)
-            self._test_kwdict_value(kwdict[key], test, path)
+            value = kwdict[key]
+
+            if subtest:
+                self.assertNotIsInstance(value, str, msg=path)
+                for idx, item in enumerate(value):
+                    subpath = "{}[{}]".format(path, idx)
+                    self._test_kwdict_value(item, test, subpath)
+            else:
+                self._test_kwdict_value(value, test, path)
 
     def _test_kwdict_value(self, value, test, path):
         if isinstance(test, dict):

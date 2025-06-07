@@ -37,14 +37,17 @@ __tests__ = (
 
 {
     "#url"     : "https://aibooru.online/posts/18315",
-    "#comment" : "ugoira ()",
+    "#comment" : "ugoira (#7630)",
     "#category": ("Danbooru", "aibooru", "post"),
     "#class"   : danbooru.DanbooruPostExtractor,
     "#options" : {"ugoira": True},
     "#urls"    : "https://cdn.aibooru.download/original/f9/6b/f96b2b3254884ab527fab0a7e9c39ba9.zip",
 
-    "_ugoira_frame_data": "len:list:60",
-    "_ugoira_original"  : False,
+    "_ugoira_original"     : False,
+    "_ugoira_frame_data[*]": {
+        "file" : r"re:^0000\d\d\.jpg$",
+        "delay": int,
+    },
 },
 
 {
