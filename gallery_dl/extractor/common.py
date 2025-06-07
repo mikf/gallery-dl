@@ -28,6 +28,7 @@ urllib3 = requests.packages.urllib3
 
 
 class Extractor():
+    """Base class for all extractors"""
 
     category = ""
     subcategory = ""
@@ -50,6 +51,18 @@ class Extractor():
     request_timestamp = 0.0
 
     def __init__(self, match):
+        """
+        Initialize the CommonExtractor object.
+
+        Args:
+            match (re.Match): The regular expression match object.
+
+        Attributes:
+            log (logging.Logger): The logger object for logging messages.
+            url (str): The URL string.
+            _cfgpath (tuple): The configuration path.
+            _parentdir (str): The parent directory.
+        """
         self.log = logging.getLogger(self.category)
         self.url = match.string
         self.match = match
@@ -62,16 +75,31 @@ class Extractor():
 
     @classmethod
     def from_url(cls, url):
+        """
+        Create an instance of the class from a given URL.
+
+        Args:
+            url (str): The URL to match against the class's pattern.
+
+        Returns:
+            cls: An instance of the class if the URL matches the pattern, otherwise None.
+        """
         if isinstance(cls.pattern, str):
             cls.pattern = util.re_compile(cls.pattern)
         match = cls.pattern.match(url)
         return cls(match) if match else None
 
     def __iter__(self):
+        """
+        Returns an iterator object that iterates over the items in the extractor.
+        """
         self.initialize()
         return self.items()
 
     def initialize(self):
+        """
+        Initializes the extractor.
+        """
         self._init_options()
         self._init_session()
         self._init_cookies()
@@ -79,15 +107,43 @@ class Extractor():
         self.initialize = util.noop
 
     def finalize(self):
+        """
+        This method is called to perform any necessary finalization steps.
+        """
         pass
 
     def items(self):
+        """
+        Generator that yields a tuple of Message.Version and 1.
+
+        Returns:
+            A tuple containing Message.Version and 1.
+        """
         yield Message.Version, 1
 
     def skip(self, num):
+        """
+        Skips a specified number of items.
+
+        Args:
+            num (int): The number of items to skip.
+
+        Returns:
+            int: The number of items skipped.
+        """
         return 0
 
     def config(self, key, default=None):
+        """
+        Retrieves the value of a configuration key from the specified configuration file.
+
+        Args:
+            key (str): The configuration key to retrieve.
+            default (Any, optional): The default value to return if the key is not found. Defaults to None.
+
+        Returns:
+            Any: The value of the configuration key, or the default value if the key is not found.
+        """
         return config.interpolate(self._cfgpath, key, default)
 
     def config2(self, key, key2, default=None, sentinel=util.SENTINEL):

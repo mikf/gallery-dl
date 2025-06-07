@@ -106,7 +106,7 @@ modules = [
     "mangahere",
     "manganelo",
     "mangapark",
-    "mangaread",
+    "wpmadara",
     "mangoxo",
     "misskey",
     "motherless",

@@ -6,13 +6,14 @@
 
 """Extractors for https://mangaread.org/"""
 
-from .common import ChapterExtractor, MangaExtractor
-from .. import text, util, exception
+from .common import BaseExtractor, ChapterExtractor, MangaExtractor
+from .. import text, exception
+import re
 
 
-class MangareadBase():
+class WPMadaraBase(BaseExtractor):
     """Base class for Mangaread extractors"""
-    category = "mangaread"
+    basecategory = "wpmadara"
     root = "https://www.mangaread.org"
 
     @staticmethod
@@ -29,12 +30,23 @@ class MangareadBase():
         data["lang"] = "en"
         data["language"] = "English"
 
+BASE_PATTERN = WPMadaraBase.update({
+    "mangaread": {
+        "root": "https://www.mangaread.org",
+        "pattern": r"(?:https?://)?(?:www\.)?mangaread\.org",
+    },
+})
 
-class MangareadChapterExtractor(MangareadBase, ChapterExtractor):
+
+class WPMadaraChapterExtractor(WPMadaraBase):
     """Extractor for manga-chapters from mangaread.org"""
-    pattern = (r"(?:https?://)?(?:www\.)?mangaread\.org"
-               r"(/manga/[^/?#]+/[^/?#]+)")
+    subcategory = "chapter"
+    pattern = BASE_PATTERN + r"(/(manga)/[^/?#]+/[^/?#]+)"
     example = "https://www.mangaread.org/manga/MANGA/chapter-01/"
+
+    def __init__(self, match):
+        WPMadaraBase.__init__(self, match)
+        self.chapter = match.group(match.lastindex)
 
     def metadata(self, page):
         tags = text.extr(page, 'class="wp-manga-tags-list">', '</div>')
@@ -54,11 +66,16 @@ class MangareadChapterExtractor(MangareadBase, ChapterExtractor):
         ]
 
 
-class MangareadMangaExtractor(MangareadBase, MangaExtractor):
+class WPMadaraMangaExtractor(WPMadaraBase):
     """Extractor for manga from mangaread.org"""
-    chapterclass = MangareadChapterExtractor
-    pattern = r"(?:https?://)?(?:www\.)?mangaread\.org(/manga/[^/?#]+)/?$"
+    chapterclass = WPMadaraChapterExtractor
+    subcategory = "manga"
+    pattern = BASE_PATTERN + r"(/(manga)/[^/?#]+)/?$"
     example = "https://www.mangaread.org/manga/MANGA"
+
+    def __init__(self, match):
+        WPMadaraBase.__init__(self, match)
+        self.manga = match.group(match.lastindex)
 
     def chapters(self, page):
         if 'class="error404' in page:
