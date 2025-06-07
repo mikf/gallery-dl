@@ -110,12 +110,19 @@ class WPMadaraMangaExtractor(WPMadaraBase, MangaExtractor):
     def metadata(self, page):
         extr = text.extract_from(text.extr(
             page, 'class="summary_content">', 'class="manga-action"'))
+        # rating = 0.0
+        if len(text.extr(page, 'total_votes">', "</span>").strip()) > 0:
+            rating = text.parse_float(text.extr(page, 'total_votes">', "</span>").strip())
+        elif len(text.extr(page, 'property="ratingValue" id="averagerate">', "</span>").strip()) > 0:
+            rating = text.parse_float(text.extr(page, 'property="ratingValue" id="averagerate">', "</span>").strip())
+        else:
+            rating = 0.0
+
         return {
             "manga"      : text.extr(page, "<h1>", "</h1>").strip(),
             "description": text.unescape(text.remove_html(text.extract(
                 page, ">", "</div>", page.index("summary__content"))[0])),
-            "rating"     : text.parse_float(
-                extr('total_votes">', "</span>").strip()),
+            "rating"     : rating,
             "manga_alt"  : text.remove_html(
                 extr("Alternative\t\t</h5>\n\t</div>", "</div>")).split("; "),
             "author"     : list(text.extract_iter(
