@@ -115,7 +115,7 @@ class WPMadaraMangaExtractor(WPMadaraBase, MangaExtractor):
             rating = text.parse_float(text.extr(
                 page, 'total_votes">', "</span>").strip())
         elif len(text.extr(page, 'property="ratingValue" id="averagerate">',
-                "</span>").strip()) > 0:
+                           "</span>").strip()) > 0:
             rating = text.parse_float(
                 text.extr(page,
                           'property="ratingValue" id="averagerate">',
