@@ -235,56 +235,60 @@ class TestExtractorResults(unittest.TestCase):
 
     def _test_kwdict(self, kwdict, tests, parent=None):
         for key, test in tests.items():
+
             if key.startswith("?"):
                 key = key[1:]
                 if key not in kwdict:
                     continue
 
             path = "{}.{}".format(parent, key) if parent else key
+
             if key.startswith("!"):
                 self.assertNotIn(key[1:], kwdict, msg=path)
                 continue
-            self.assertIn(key, kwdict, msg=path)
-            value = kwdict[key]
 
-            if isinstance(test, dict):
-                self._test_kwdict(value, test, path)
-            elif isinstance(test, type):
-                self.assertIsInstance(value, test, msg=path)
-            elif isinstance(test, range):
-                self.assertRange(value, test, msg=path)
-            elif isinstance(test, set):
-                try:
-                    self.assertIn(value, test, msg=path)
-                except AssertionError:
-                    self.assertIn(type(value), test, msg=path)
-            elif isinstance(test, list):
-                subtest = False
-                for idx, item in enumerate(test):
-                    if isinstance(item, dict):
-                        subtest = True
-                        subpath = "{}[{}]".format(path, idx)
-                        self._test_kwdict(value[idx], item, subpath)
-                if not subtest:
-                    self.assertEqual(test, value, msg=path)
-            elif isinstance(test, str):
-                if test.startswith("re:"):
-                    self.assertRegex(value, test[3:], msg=path)
-                elif test.startswith("dt:"):
-                    self.assertIsInstance(value, datetime.datetime, msg=path)
-                    self.assertEqual(test[3:], str(value), msg=path)
-                elif test.startswith("type:"):
-                    self.assertEqual(test[5:], type(value).__name__, msg=path)
-                elif test.startswith("len:"):
-                    cls, _, length = test[4:].rpartition(":")
-                    if cls:
-                        self.assertEqual(
-                            cls, type(value).__name__, msg=path + "/type")
-                    self.assertEqual(int(length), len(value), msg=path)
-                else:
-                    self.assertEqual(test, value, msg=path)
+            self.assertIn(key, kwdict, msg=path)
+            self._test_kwdict_value(kwdict[key], test, path)
+
+    def _test_kwdict_value(self, value, test, path):
+        if isinstance(test, dict):
+            self._test_kwdict(value, test, path)
+        elif isinstance(test, type):
+            self.assertIsInstance(value, test, msg=path)
+        elif isinstance(test, range):
+            self.assertRange(value, test, msg=path)
+        elif isinstance(test, set):
+            try:
+                self.assertIn(value, test, msg=path)
+            except AssertionError:
+                self.assertIn(type(value), test, msg=path)
+        elif isinstance(test, list):
+            subtest = False
+            for idx, item in enumerate(test):
+                if isinstance(item, dict):
+                    subtest = True
+                    subpath = "{}[{}]".format(path, idx)
+                    self._test_kwdict(value[idx], item, subpath)
+            if not subtest:
+                self.assertEqual(test, value, msg=path)
+        elif isinstance(test, str):
+            if test.startswith("re:"):
+                self.assertRegex(value, test[3:], msg=path)
+            elif test.startswith("dt:"):
+                self.assertIsInstance(value, datetime.datetime, msg=path)
+                self.assertEqual(test[3:], str(value), msg=path)
+            elif test.startswith("type:"):
+                self.assertEqual(test[5:], type(value).__name__, msg=path)
+            elif test.startswith("len:"):
+                cls, _, length = test[4:].rpartition(":")
+                if cls:
+                    self.assertEqual(
+                        cls, type(value).__name__, msg=path + "/type")
+                self.assertEqual(int(length), len(value), msg=path)
             else:
                 self.assertEqual(test, value, msg=path)
+        else:
+            self.assertEqual(test, value, msg=path)
 
 
 class ResultJob(job.DownloadJob):
