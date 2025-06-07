@@ -280,9 +280,13 @@ class HttpDownloader(DownloaderBase):
                 except (RequestException, SSLError) as exc:
                     msg = str(exc)
                     continue
-                if validate_sig and not validate_sig(file_header):
-                    msg = "Invalid file signature bytes"
-                    continue
+                if validate_sig:
+                    result = validate_sig(file_header)
+                    if result is not True:
+                        self.release_conn(response)
+                        self.log.warning(
+                            result or "Invalid file signature bytes")
+                        return False
                 if validate_ext and self._adjust_extension(
                         pathfmt, file_header) and pathfmt.exists():
                     pathfmt.temppath = ""
