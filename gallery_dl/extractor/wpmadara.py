@@ -30,6 +30,7 @@ class WPMadaraBase(BaseExtractor):
         data["lang"] = "en"
         data["language"] = "English"
 
+
 BASE_PATTERN = WPMadaraBase.update({
     "mangaread": {
         "root": "https://www.mangaread.org",
