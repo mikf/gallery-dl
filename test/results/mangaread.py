@@ -12,7 +12,7 @@ __tests__ = (
 {
     "#url"     : "https://www.mangaread.org/manga/one-piece/chapter-1053-3/",
     "#category": ("", "mangaread", "chapter"),
-    "#class"   : wpmadara.MangareadChapterExtractor,
+    "#class"   : wpmadara.WPMadaraChapterExtractor,
     "#pattern" : r"https://www\.mangaread\.org/wp-content/uploads/WP-manga/data/manga_[^/]+/[^/]+/[^.]+\.\w+",
     "#count"   : 11,
 
@@ -28,14 +28,14 @@ __tests__ = (
 {
     "#url"     : "https://www.mangaread.org/manga/one-piece/chapter-1000000/",
     "#category": ("", "mangaread", "chapter"),
-    "#class"   : wpmadara.MangareadChapterExtractor,
+    "#class"   : wpmadara.WPMadaraChapterExtractor,
     "#exception": exception.NotFoundError,
 },
 
 {
     "#url"     : "https://www.mangaread.org/manga/kanan-sama-wa-akumade-choroi/chapter-10/",
     "#category": ("", "mangaread", "chapter"),
-    "#class"   : wpmadara.MangareadChapterExtractor,
+    "#class"   : wpmadara.WPMadaraMangaExtractor,
     "#pattern" : r"https://www\.mangaread\.org/wp-content/uploads/WP-manga/data/manga_[^/]+/[^/]+/[^.]+\.\w+",
     "#count"   : 9,
 
@@ -52,7 +52,7 @@ __tests__ = (
     "#url"     : "https://www.mangaread.org/manga/above-all-gods/chapter146-5/",
     "#comment" : "^^ no whitespace",
     "#category": ("", "mangaread", "chapter"),
-    "#class"   : wpmadara.MangareadChapterExtractor,
+    "#class"   : wpmadara.WPMadaraMangaExtractor,
     "#pattern" : r"https://www\.mangaread\.org/wp-content/uploads/WP-manga/data/manga_[^/]+/[^/]+/[^.]+\.\w+",
     "#count"   : 6,
 
@@ -68,7 +68,7 @@ __tests__ = (
 {
     "#url"     : "https://www.mangaread.org/manga/kanan-sama-wa-akumade-choroi",
     "#category": ("", "mangaread", "manga"),
-    "#class"   : wordpressmadara.MangareadMangaExtractor,
+    "#class"   : wpmadara.WPMadaraMangaExtractor,
     "#pattern" : r"https://www\.mangaread\.org/manga/kanan-sama-wa-akumade-choroi/chapter-\d+([_-].+)?/",
     "#count"   : ">= 13",
 
@@ -94,7 +94,7 @@ __tests__ = (
 {
     "#url"     : "https://www.mangaread.org/manga/one-piece",
     "#category": ("", "mangaread", "manga"),
-    "#class"   : wordpressmadara.MangareadMangaExtractor,
+    "#class"   : wpmadara.WPMadaraMangaExtractor,
     "#pattern" : r"https://www\.mangaread\.org/manga/one-piece/chapter-\d+(-.+)?/",
     "#count"   : ">= 1066",
 
