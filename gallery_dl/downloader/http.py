@@ -267,19 +267,24 @@ class HttpDownloader(DownloaderBase):
 
             content = response.iter_content(self.chunk_size)
 
+            validate_sig = kwdict.get("_http_signature")
+            validate_ext = (adjust_extension and
+                            pathfmt.extension in SIGNATURE_CHECKS)
+
             # check filename extension against file header
-            if adjust_extension and not offset and \
-                    pathfmt.extension in SIGNATURE_CHECKS:
+            if not offset and (validate_ext or validate_sig):
                 try:
                     file_header = next(
                         content if response.raw.chunked
                         else response.iter_content(16), b"")
                 except (RequestException, SSLError) as exc:
                     msg = str(exc)
-                    output.stderr_write("\n")
                     continue
-                if self._adjust_extension(pathfmt, file_header) and \
-                        pathfmt.exists():
+                if validate_sig and not validate_sig(file_header):
+                    msg = "Invalid file signature bytes"
+                    continue
+                if validate_ext and self._adjust_extension(
+                        pathfmt, file_header) and pathfmt.exists():
                     pathfmt.temppath = ""
                     response.close()
                     return True
