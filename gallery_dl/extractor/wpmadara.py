@@ -4,7 +4,7 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extractors for https://mangaread.org/"""
+"""Extractors for WordPressMadara based websites."""
 
 from .common import BaseExtractor, ChapterExtractor, MangaExtractor
 from .. import text, exception
@@ -12,7 +12,7 @@ import re
 
 
 class WPMadaraBase(BaseExtractor):
-    """Base class for Mangaread extractors"""
+    """Base class for WordPressMadara based extractors"""
     basecategory = "wpmadara"
     root = "https://www.mangaread.org"
 
@@ -47,7 +47,7 @@ BASE_PATTERN = WPMadaraBase.update({
 
 
 class WPMadaraChapterExtractor(WPMadaraBase, ChapterExtractor):
-    """Extractor for manga-chapters from mangaread.org"""
+    """Extractor for manga-chapters from WordPressMadara based websites."""
     subcategory = "chapter"
     pattern = BASE_PATTERN + r"(/(manga|webtoon|read)/[^/?#]+/[^/?#]+)"
     example = "https://www.mangaread.org/manga/MANGA/chapter-01/"
@@ -82,7 +82,7 @@ class WPMadaraChapterExtractor(WPMadaraBase, ChapterExtractor):
 
 
 class WPMadaraMangaExtractor(WPMadaraBase, MangaExtractor):
-    """Extractor for manga from mangaread.org"""
+    """Extractor for manga from WordPressMadara based websites."""
     chapterclass = WPMadaraChapterExtractor
     subcategory = "manga"
     pattern = BASE_PATTERN + r"(/(manga|webtoon|read)/[^/?#]+)/?$"
