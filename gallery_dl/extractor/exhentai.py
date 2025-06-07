@@ -412,7 +412,12 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
     def _validate_signature(self, signature):
         """Return False if all file signature bytes are zero"""
         if signature:
-            if signature[0]:
+            byte = signature[0]
+            if byte:
+                # 60 == b"<"
+                if byte == 60 and b"<!doctype html".startswith(
+                        signature[:14].lower()):
+                    return "HTML response"
                 return True
             for byte in signature:
                 if byte:
