@@ -129,7 +129,7 @@ class DanbooruExtractor(BaseExtractor):
 
         first = True
         while True:
-            posts = self.request(url, params=params).json()
+            posts = self.request_json(url, params=params)
             if isinstance(posts, dict):
                 posts = posts["posts"]
 
@@ -142,8 +142,7 @@ class DanbooruExtractor(BaseExtractor):
                     }
                     data = {
                         meta["id"]: meta
-                        for meta in self.request(
-                            url, params=params_meta).json()
+                        for meta in self.request_json(url, params=params_meta)
                     }
                     for post in posts:
                         post.update(data[post["id"]])
@@ -165,13 +164,17 @@ class DanbooruExtractor(BaseExtractor):
             first = False
 
     def _ugoira_frames(self, post):
-        data = self.request("{}/posts/{}.json?only=media_metadata".format(
+        data = self.request_json("{}/posts/{}.json?only=media_metadata".format(
             self.root, post["id"])
-        ).json()["media_metadata"]["metadata"]
+        )["media_metadata"]["metadata"]
 
-        ext = data["Ugoira:FrameMimeType"].rpartition("/")[2]
-        if ext == "jpeg":
-            ext = "jpg"
+        if "Ugoira:FrameMimeType" in data:
+            ext = data["Ugoira:FrameMimeType"].rpartition("/")[2]
+            if ext == "jpeg":
+                ext = "jpg"
+        else:
+            ext = data["ZIP:ZipFileName"].rpartition(".")[2]
+
         fmt = ("{:>06}." + ext).format
         delays = data["Ugoira:FrameDelays"]
         return [{"file": fmt(index), "delay": delay}
@@ -202,7 +205,7 @@ class DanbooruExtractor(BaseExtractor):
 
     def _collection_metadata(self, cid, ctype, cname=None):
         url = "{}/{}s/{}.json".format(self.root, cname or ctype, cid)
-        collection = self.request(url).json()
+        collection = self.request_json(url)
         collection["name"] = collection["name"].replace("_", " ")
         self.post_ids = collection.pop("post_ids", ())
         return {ctype: collection}
@@ -318,10 +321,10 @@ class DanbooruPostExtractor(DanbooruExtractor):
 
     def posts(self):
         url = "{}/posts/{}.json".format(self.root, self.groups[-1])
-        post = self.request(url).json()
+        post = self.request_json(url)
         if self.includes:
             params = {"only": self.includes}
-            post.update(self.request(url, params=params).json())
+            post.update(self.request_json(url, params=params))
         return (post,)
 
 
@@ -360,7 +363,7 @@ class DanbooruArtistExtractor(DanbooruExtractor):
 
     def artists(self):
         url = "{}/artists/{}.json".format(self.root, self.groups[-1])
-        return (self.request(url).json(),)
+        return (self.request_json(url),)
 
 
 class DanbooruArtistSearchExtractor(DanbooruExtractor):
@@ -377,7 +380,7 @@ class DanbooruArtistSearchExtractor(DanbooruExtractor):
         params["page"] = text.parse_int(params.get("page"), 1)
 
         while True:
-            artists = self.request(url, params=params).json()
+            artists = self.request_json(url, params=params)
 
             yield from artists
 
