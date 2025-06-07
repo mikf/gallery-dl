@@ -35,18 +35,31 @@ BASE_PATTERN = WPMadaraBase.update({
         "root": "https://www.mangaread.org",
         "pattern": r"(?:https?://)?(?:www\.)?mangaread\.org",
     },
+    "toonily": {
+        "root": "https://www.toonily.com",
+        "pattern": r"(?:https?://)?(?:www\.)?toonily\.com",
+    },
+    "webtoonxyz": {
+        "root": "https://www.webtoon.xyz",
+        "pattern": r"(?:https?://)?(?:www\.)?webtoon\.xyz",
+    },
 })
 
 
-class WPMadaraChapterExtractor(WPMadaraBase):
+class WPMadaraChapterExtractor(WPMadaraBase, ChapterExtractor):
     """Extractor for manga-chapters from mangaread.org"""
     subcategory = "chapter"
-    pattern = BASE_PATTERN + r"(/(manga)/[^/?#]+/[^/?#]+)"
+    pattern = BASE_PATTERN + r"(/(manga|webtoon|read)/[^/?#]+/[^/?#]+)"
     example = "https://www.mangaread.org/manga/MANGA/chapter-01/"
 
-    def __init__(self, match):
+    def __init__(self, match, url=None):
         WPMadaraBase.__init__(self, match)
         self.chapter = match.group(match.lastindex)
+        self.log.debug("chapter: %s", self.chapter)
+        self.gallery_url = self.root + match.group(match.lastindex)
+
+        if self.config("chapter-reverse", False):
+            self.reverse = not self.reverse
 
     def metadata(self, page):
         tags = text.extr(page, 'class="wp-manga-tags-list">', '</div>')
@@ -55,27 +68,30 @@ class WPMadaraChapterExtractor(WPMadaraBase):
         if not info:
             raise exception.NotFoundError("chapter")
         self.parse_chapter_string(info, data)
+        self.log.debug("data: %s", data)
         return data
 
     def images(self, page):
         page = text.extr(
             page, '<div class="reading-content">', '<div class="entry-header')
+        self.log.debug("page: %s", page)
         return [
             (text.extr(img, 'src="', '"').strip(), None)
             for img in text.extract_iter(page, '<img id="image-', '>')
         ]
 
 
-class WPMadaraMangaExtractor(WPMadaraBase):
+class WPMadaraMangaExtractor(WPMadaraBase, MangaExtractor):
     """Extractor for manga from mangaread.org"""
     chapterclass = WPMadaraChapterExtractor
     subcategory = "manga"
-    pattern = BASE_PATTERN + r"(/(manga)/[^/?#]+)/?$"
+    pattern = BASE_PATTERN + r"(/(manga|webtoon|read)/[^/?#]+)/?$"
     example = "https://www.mangaread.org/manga/MANGA"
 
-    def __init__(self, match):
+    def __init__(self, match, url=None):
         WPMadaraBase.__init__(self, match)
         self.manga = match.group(match.lastindex)
+        self.manga_url = url or self.root + match.group(match.lastindex)
 
     def chapters(self, page):
         if 'class="error404' in page:
