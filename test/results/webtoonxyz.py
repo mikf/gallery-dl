@@ -11,7 +11,7 @@ from gallery_dl import exception
 __tests__ = (
 {
     "#url"     : "https://www.webtoon.xyz/read/the-world-after-the-end/chapter-105/",
-    "#category": ("", "wpmadara", "chapter"),
+    "#category": ("wpmadara", "webtoonxyz", "chapter"),
     "#class"   : wpmadara.WPMadaraChapterExtractor,
     "#pattern" : r"https://www\.webtoon\.xyz/wp-content/uploads/WP-manga/data/manga_[^/]+/[^/]+/[^.]+\.\w+",
     "#count"   : 11,
@@ -25,14 +25,14 @@ __tests__ = (
 
 {
     "#url"     : "https://www.webtoon.xyz/read/the-world-after-the-end/chapter-1000000/",
-    "#category": ("", "wpmadara", "chapter"),
+    "#category": ("wpmadara", "webtoonxyz", "chapter"),
     "#class"   : wpmadara.WPMadaraChapterExtractor,
     "#exception": exception.NotFoundError,
 },
 
 {
     "#url"     : "https://www.webtoon.xyz/read/the-world-after-the-end/",
-    "#category": ("", "wpmadara", "manga"),
+    "#category": ("wpmadara", "webtoonxyz", "manga"),
     "#class"   : wpmadara.WPMadaraMangaExtractor,
     "#pattern" : r"https://www\.webtoon\.xyz/read/such-a-cute-spy/chapter-\d+([_-].+)?/",
     "#count"   : ">= 13",
@@ -54,7 +54,7 @@ __tests__ = (
 
 {
     "#url"     : "https://www.webtoon.xyz/read/doesnotexist",
-    "#category": ("", "wpmadara", "manga"),
+    "#category": ("wpmadara", "webtoonxyz", "manga"),
     "#class"   : wpmadara.WPMadaraMangaExtractor,
     "#exception": exception.HttpError,
 },

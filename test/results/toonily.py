@@ -11,7 +11,7 @@ from gallery_dl import exception
 __tests__ = (
 {
     "#url"     : "https://toonily.com/webtoon/such-a-cute-spy/chapter-36/",
-    "#category": ("", "toonily", "chapter"),
+    "#category": ("wpmadara", "toonily", "chapter"),
     "#class"   : wpmadara.WPMadaraChapterExtractor,
     "#pattern" : r"https://toonily\.com/wp-content/uploads/WP-manga/data/manga_[^/]+/[^/]+/[^.]+\.\w+",
     "#count"   : 11,
@@ -26,14 +26,14 @@ __tests__ = (
 
 {
     "#url"     : "https://toonily.com/webtoon/such-a-cute-spy/chapter-1000000/",
-    "#category": ("", "toonily", "chapter"),
+    "#category": ("wpmadara", "toonily", "chapter"),
     "#class"   : wpmadara.WPMadaraChapterExtractor,
     "#exception": exception.NotFoundError,
 },
 
 {
     "#url"     : "https://toonily.com/webtoon/such-a-cute-spy",
-    "#category": ("", "toonily", "manga"),
+    "#category": ("wpmadara", "toonily", "manga"),
     "#class"   : wpmadara.WPMadaraMangaExtractor,
     "#pattern" : r"https://toonily\.com/webtoon/such-a-cute-spy/chapter-\d+([_-].+)?/",
     "#count"   : ">= 13",
@@ -56,7 +56,7 @@ __tests__ = (
 
 {
     "#url"     : "https://toonily.com/webtoon/doesnotexist",
-    "#category": ("", "toonily", "manga"),
+    "#category": ("wpmadara", "toonily", "manga"),
     "#class"   : wpmadara.WPMadaraMangaExtractor,
     "#exception": exception.HttpError,
 },
