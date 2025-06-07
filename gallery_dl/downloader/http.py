@@ -88,8 +88,10 @@ class HttpDownloader(DownloaderBase):
     def download(self, url, pathfmt):
         try:
             return self._download_impl(url, pathfmt)
-        except Exception:
-            output.stderr_write("\n")
+        except Exception as exc:
+            if self.downloading:
+                output.stderr_write("\n")
+            self.log.debug("", exc_info=exc)
             raise
         finally:
             # remove file from incomplete downloads
