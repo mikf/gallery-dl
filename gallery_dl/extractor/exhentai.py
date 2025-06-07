@@ -203,6 +203,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
                 data["_http_validate"] = self._validate_response
             else:
                 data["_http_validate"] = None
+            data["_http_signature"] = self._validate_signature
             yield Message.Url, url, data
 
         fav = self.config("fav")
@@ -407,6 +408,16 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
 
             self._report_limits()
         return True
+
+    def _validate_signature(self, signature):
+        """Return False if all file signature bytes are zero"""
+        if signature:
+            if signature[0]:
+                return True
+            for byte in signature:
+                if byte:
+                    return True
+        return False
 
     def _report_limits(self):
         ExhentaiExtractor.LIMIT = True
