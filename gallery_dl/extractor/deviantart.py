@@ -438,7 +438,7 @@ class DeviantartExtractor(Extractor):
                 html.append('<p style="')
 
                 attrs = content["attrs"]
-                if "textAlign" in attrs:
+                if attrs.get("textAlign"):
                     html.append("text-align:")
                     html.append(attrs["textAlign"])
                     html.append(";")
