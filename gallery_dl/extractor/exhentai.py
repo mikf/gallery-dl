@@ -136,6 +136,8 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
         source = self.config("source")
         if source == "hitomi":
             self.items = self._items_hitomi
+        elif source == "metadata":
+            self.items = self._items_metadata
 
         limits = self.config("limits", False)
         if limits and limits.__class__ is int:
@@ -222,6 +224,9 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
         url = "https://hitomi.la/galleries/{}.html".format(self.gallery_id)
         data["_extractor"] = HitomiGalleryExtractor
         yield Message.Queue, url, data
+
+    def _items_metadata(self):
+        yield Message.Directory, self.metadata_from_api()
 
     def get_metadata(self, page):
         """Extract gallery metadata"""
