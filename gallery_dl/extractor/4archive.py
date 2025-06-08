@@ -66,7 +66,7 @@ class _4archiveThreadExtractor(Extractor):
             "date": text.parse_datetime(
                 extr('class="dateTime postNum" >', "<").strip(),
                 "%Y-%m-%d %H:%M:%S"),
-            "no"  : text.parse_int(extr('href="#p', '"')),
+            "no"  : text.parse_int(extr(">Post No.", "<")),
         }
         if 'class="file"' in post:
             extr('class="fileText"', ">File: <a")
