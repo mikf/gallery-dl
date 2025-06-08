@@ -554,17 +554,21 @@ value = 123
         self.assertEqual(module.value, 123)
         self.assertIs(module.datetime, datetime)
 
-    def test_build_duration_func(self, f=util.build_duration_func):
+    def test_build_selection_func(self, f=util.build_selection_func):
 
-        def test_single(df, v):
+        def test_single(df, v, type=None):
             for _ in range(10):
                 self.assertEqual(df(), v)
+                if type is not None:
+                    self.assertIsInstance(df(), type)
 
-        def test_range(df, lower, upper):
+        def test_range(df, lower, upper, type=None):
             for __ in range(10):
                 v = df()
                 self.assertGreaterEqual(v, lower)
                 self.assertLessEqual(v, upper)
+                if type is not None:
+                    self.assertIsInstance(v, type)
 
         for v in (0, 0.0, "", None, (), []):
             self.assertIsNone(f(v))
@@ -572,16 +576,24 @@ value = 123
         for v in (0, 0.0, "", None, (), []):
             test_single(f(v, 1.0), 1.0)
 
-        test_single(f(3), 3)
-        test_single(f(3.0), 3.0)
-        test_single(f("3"), 3)
-        test_single(f("3.0-"), 3)
-        test_single(f("  3  -"), 3)
+        test_single(f(3)       , 3  , float)
+        test_single(f(3.0)     , 3.0, float)
+        test_single(f("3")     , 3  , float)
+        test_single(f("3.0-")  , 3  , float)
+        test_single(f("  3  -"), 3  , float)
 
-        test_range(f((2, 4)), 2, 4)
-        test_range(f([2, 4]), 2, 4)
-        test_range(f("2-4"), 2, 4)
-        test_range(f("  2.0  - 4 "), 2, 4)
+        test_range(f((2, 4))       , 2, 4, float)
+        test_range(f([2.0, 4.0])   , 2, 4, float)
+        test_range(f("2-4")        , 2, 4, float)
+        test_range(f("  2.0  - 4 "), 2, 4, float)
+
+        pb = text.parse_bytes
+        test_single(f("3", 0, pb)     , 3, int)
+        test_single(f("3.0-", 0, pb)  , 3, int)
+        test_single(f("  3  -", 0, pb), 3, int)
+
+        test_range(f("2k-4k", 0, pb)        , 2048, 4096, int)
+        test_range(f("  2.0k  - 4k ", 0, pb), 2048, 4096, int)
 
     def test_extractor_filter(self):
         # empty

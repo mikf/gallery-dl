@@ -898,25 +898,26 @@ def import_file(path):
         return __import__(name.replace("-", "_"))
 
 
-def build_duration_func(duration, min=0.0):
-    if not duration:
+def build_selection_func(value, min=0.0, conv=float):
+    if not value:
         if min:
             return lambda: min
         return None
 
-    if isinstance(duration, str):
-        lower, _, upper = duration.partition("-")
-        lower = float(lower)
+    if isinstance(value, str):
+        lower, _, upper = value.partition("-")
+        lower = conv(lower)
     else:
         try:
-            lower, upper = duration
+            lower, upper = value
         except TypeError:
-            lower, upper = duration, None
+            lower, upper = value, None
+        lower = conv(lower)
 
     if upper:
-        upper = float(upper)
+        upper = conv(upper)
         return functools.partial(
-            random.uniform,
+            random.uniform if min.__class__ is float else random.randint,
             lower if lower > min else min,
             upper if upper > min else min,
         )
@@ -924,6 +925,9 @@ def build_duration_func(duration, min=0.0):
         if lower < min:
             lower = min
         return lambda: lower
+
+
+build_duration_func = build_selection_func
 
 
 def build_extractor_filter(categories, negate=True, special=None):

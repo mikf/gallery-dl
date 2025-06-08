@@ -209,10 +209,11 @@ def _hex_to_char(match):
 
 def parse_bytes(value, default=0, suffixes="bkmgtp"):
     """Convert a bytes-amount ("500k", "2.5M", ...) to int"""
-    try:
-        last = value[-1].lower()
-    except Exception:
+    if not value:
         return default
+
+    value = str(value).strip()
+    last = value[-1].lower()
 
     if last in suffixes:
         mul = 1024 ** suffixes.index(last)
