@@ -2504,8 +2504,23 @@ Type
 Default
     ``null``
 Description
-    Sets a custom image download limit and
-    stops extraction when it gets exceeded.
+    Set a custom image download limit and perform
+    `limits-action <extractor.exhentai.limits-action_>`__
+    when it gets exceeded.
+
+
+extractor.exhentai.limits-action
+--------------------------------
+Type
+    ``string``
+Default
+    ``"stop"``
+Description
+    Action to perform when the image limit is exceeded.
+
+    * `"stop"`: Stop the current extractor run.
+    * `"wait"`: Wait for user input.
+    * `"reset"`: Spend GP to reset your account's image limits.
 
 
 extractor.exhentai.metadata
@@ -2518,8 +2533,8 @@ Description
     Load extended gallery metadata from the
     `API <https://ehwiki.org/wiki/API#Gallery_Metadata>`_.
 
-    Adds ``archiver_key``, ``posted``, and ``torrents``.
-    Makes ``date`` and ``filesize`` more precise.
+    * Adds ``archiver_key``, ``posted``, and ``torrents``
+    * Provides exact ``date`` and ``filesize``
 
 
 extractor.exhentai.original
