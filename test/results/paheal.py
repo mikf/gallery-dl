@@ -52,6 +52,15 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://rule34.paheal.net/post/list/Ranma_1%2F2/1",
+    "#comment" : "percent-encoded character in tag (#7642)",
+    "#category": ("shimmie2", "paheal", "tag"),
+    "#class"   : paheal.PahealTagExtractor,
+    "#range"   : "1-200",
+    "#count"   : 200,
+},
+
+{
     "#url"     : "https://rule34.paheal.net/post/view/481609",
     "#category": ("shimmie2", "paheal", "post"),
     "#class"   : paheal.PahealPostExtractor,
