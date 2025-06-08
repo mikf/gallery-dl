@@ -6274,8 +6274,8 @@ Description
     * ``"pipe"``: Suitable for piping to other processes or files
     * ``"terminal"``: Suitable for the standard Windows console
     * ``"color"``: Suitable for terminals that understand ANSI escape codes and colors
-    * ``"auto"``: ``"terminal"`` on Windows with `output.ansi`_ disabled,
-      ``"color"`` otherwise.
+    * ``"auto"``: ``"pipe"`` if not on a TTY, ``"terminal"`` on Windows with
+      `output.ansi`_ disabled, ``"color"`` otherwise.
 
     | It is possible to use custom output format strings
       by setting this option to an ``object`` and specifying
