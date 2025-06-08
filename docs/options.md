@@ -77,7 +77,8 @@
     --no-check-certificate      Disable HTTPS certificate validation
 
 ## Downloader Options:
-    -r, --limit-rate RATE       Maximum download rate (e.g. 500k or 2.5M)
+    -r, --limit-rate RATE       Maximum download rate (e.g. 500k, 2.5M, or
+                                800k-2M)
     --chunk-size SIZE           Size of in-memory data chunks (default: 32k)
     --sleep SECONDS             Number of seconds to wait before each download.
                                 This can be either a constant value or a range

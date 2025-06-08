@@ -163,7 +163,7 @@ class TestDownloaderConfig(unittest.TestCase):
         self.assertEqual(dl.timeout, 10)
         self.assertEqual(dl.verify, False)
         self.assertEqual(dl.mtime, False)
-        self.assertEqual(dl.rate, 42)
+        self.assertEqual(dl.rate(), 42)
         self.assertEqual(dl.part, False)
 
 

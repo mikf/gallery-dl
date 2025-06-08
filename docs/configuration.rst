@@ -5972,17 +5972,25 @@ Description
 downloader.*.rate
 -----------------
 Type
-    ``string``
+    * ``string``
+    * ``list`` with 2 ``strings``
 Default
     ``null``
 Example
-    ``"32000"``, ``"500k"``, ``"2.5M"``
+    * ``"32000"``
+    * ``"500k"``
+    * ``"1M - 2.5M"``
+    * ``["1M", "2.5M"]``
 Description
     Maximum download rate in bytes per second.
 
     Possible values are valid integer or floating-point numbers
     optionally followed by one of ``k``, ``m``. ``g``, ``t``, or ``p``.
     These suffixes are case-insensitive.
+
+    If given as a range, the maximum download rate
+    will be randomly chosen before each download.
+    (see `random.randint() <https://docs.python.org/3/library/random.html#random.randint>`_)
 
 
 downloader.*.retries

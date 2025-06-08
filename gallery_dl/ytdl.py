@@ -51,7 +51,12 @@ def construct_YoutubeDL(module, obj, user_opts, system_opts=None):
     if opts.get("updatetime") is None:
         opts["updatetime"] = config("mtime", True)
     if opts.get("ratelimit") is None:
-        opts["ratelimit"] = text.parse_bytes(config("rate"), None)
+        rate = config("rate")
+        if rate:
+            func = util.build_selection_func(rate, 0, text.parse_bytes)
+            opts["ratelimit"] = func() or None
+        else:
+            opts["ratelimit"] = None
     if opts.get("min_filesize") is None:
         opts["min_filesize"] = text.parse_bytes(config("filesize-min"), None)
     if opts.get("max_filesize") is None:
