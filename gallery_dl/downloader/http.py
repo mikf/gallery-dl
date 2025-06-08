@@ -68,14 +68,17 @@ class HttpDownloader(DownloaderBase):
                 chunk_size = 32768
             self.chunk_size = chunk_size
         if self.rate:
-            rate = text.parse_bytes(self.rate)
-            if rate:
-                if rate < self.chunk_size:
-                    self.chunk_size = rate
-                self.rate = rate
+            func = util.build_selection_func(self.rate, 0, text.parse_bytes)
+            value = func()
+            if value:
+                # wrong when func() returns from a range
+                if value < self.chunk_size:
+                    self.chunk_size = value
+                self.rate = func
                 self.receive = self._receive_rate
             else:
                 self.log.warning("Invalid rate limit (%r)", self.rate)
+                self.rate = False
         if self.progress is not None:
             self.receive = self._receive_rate
             if self.progress < 0.0:
@@ -361,7 +364,7 @@ class HttpDownloader(DownloaderBase):
             write(data)
 
     def _receive_rate(self, fp, content, bytes_total, bytes_start):
-        rate = self.rate
+        rate = self.rate() if self.rate else None
         write = fp.write
         progress = self.progress
 
@@ -382,7 +385,7 @@ class HttpDownloader(DownloaderBase):
                         int(bytes_downloaded / time_elapsed),
                     )
 
-            if rate:
+            if rate is not None:
                 time_expected = bytes_downloaded / rate
                 if time_expected > time_elapsed:
                     time.sleep(time_expected - time_elapsed)
