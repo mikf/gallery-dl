@@ -2557,6 +2557,8 @@ Description
     Selects an alternative source to download files from.
 
     * ``"hitomi"``:  Download the corresponding gallery from ``hitomi.la``
+    * ``"metadata"``:  Load only a gallery's metadata from the
+      `API <https://ehwiki.org/wiki/API#Gallery_Metadata>`_
 
 
 extractor.exhentai.tags
