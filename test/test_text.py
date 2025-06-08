@@ -359,6 +359,8 @@ class TestText(unittest.TestCase):
         )
 
     def test_parse_bytes(self, f=text.parse_bytes):
+        self.assertEqual(f(0), 0)
+        self.assertEqual(f(50), 50)
         self.assertEqual(f("0"), 0)
         self.assertEqual(f("50"), 50)
         self.assertEqual(f("50k"), 50 * 1024**1)
@@ -366,10 +368,13 @@ class TestText(unittest.TestCase):
         self.assertEqual(f("50g"), 50 * 1024**3)
         self.assertEqual(f("50t"), 50 * 1024**4)
         self.assertEqual(f("50p"), 50 * 1024**5)
+        self.assertEqual(f(" 50p "), 50 * 1024**5)
 
         # fractions
+        self.assertEqual(f(123.456), 123)
         self.assertEqual(f("123.456"), 123)
         self.assertEqual(f("123.567"), 124)
+        self.assertEqual(f(" 123.89 "), 124)
         self.assertEqual(f("0.5M"), round(0.5 * 1024**2))
 
         # invalid arguments
