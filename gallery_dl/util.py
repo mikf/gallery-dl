@@ -906,18 +906,17 @@ def build_selection_func(value, min=0.0, conv=float):
 
     if isinstance(value, str):
         lower, _, upper = value.partition("-")
-        lower = conv(lower)
     else:
         try:
             lower, upper = value
         except TypeError:
             lower, upper = value, None
-        lower = conv(lower)
+    lower = conv(lower)
 
     if upper:
         upper = conv(upper)
         return functools.partial(
-            random.uniform if min.__class__ is float else random.randint,
+            random.uniform if lower.__class__ is float else random.randint,
             lower if lower > min else min,
             upper if upper > min else min,
         )
