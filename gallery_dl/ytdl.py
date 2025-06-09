@@ -54,7 +54,8 @@ def construct_YoutubeDL(module, obj, user_opts, system_opts=None):
         rate = config("rate")
         if rate:
             func = util.build_selection_func(rate, 0, text.parse_bytes)
-            opts["ratelimit"] = func() or None
+            rmax = func.args[1] if hasattr(func, "args") else func()
+            opts["ratelimit"] = rmax or None
         else:
             opts["ratelimit"] = None
     if opts.get("min_filesize") is None:

@@ -69,11 +69,11 @@ class HttpDownloader(DownloaderBase):
             self.chunk_size = chunk_size
         if self.rate:
             func = util.build_selection_func(self.rate, 0, text.parse_bytes)
-            value = func()
-            if value:
-                # wrong when func() returns from a range
-                if value < self.chunk_size:
-                    self.chunk_size = value
+            rmax = func.args[1] if hasattr(func, "args") else func()
+            if rmax:
+                if rmax < self.chunk_size:
+                    # reduce chunk_size to allow for one iteration each second
+                    self.chunk_size = rmax
                 self.rate = func
                 self.receive = self._receive_rate
             else:
