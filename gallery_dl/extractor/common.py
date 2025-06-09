@@ -516,9 +516,11 @@ class Extractor():
                 with open(path) as fp:
                     cookies = util.cookiestxt_load(fp)
             except Exception as exc:
-                self.log.warning("cookies: %s", exc)
+                self.log.warning("cookies: Failed to load '%s' (%s: %s)",
+                                 cookies_source, exc.__class__.__name__, exc)
             else:
-                self.log.debug("Loading cookies from '%s'", cookies_source)
+                self.log.debug("cookies: Loading cookies from '%s'",
+                               cookies_source)
                 set_cookie = self.cookies.set_cookie
                 for cookie in cookies:
                     set_cookie(cookie)
@@ -538,16 +540,16 @@ class Extractor():
                 else:
                     _browser_cookies[key] = cookies
             else:
-                self.log.debug("Using cached cookies from %s", key)
+                self.log.debug("cookies: Using cached cookies from %s", key)
 
             set_cookie = self.cookies.set_cookie
             for cookie in cookies:
                 set_cookie(cookie)
 
         else:
-            self.log.warning(
-                "Expected 'dict', 'list', or 'str' value for 'cookies' "
-                "option, got '%s' (%s)",
+            self.log.error(
+                "cookies: Expected 'dict', 'list', or 'str' value for "
+                "'cookies' option, got '%s' instead (%r)",
                 cookies_source.__class__.__name__, cookies_source)
 
     def cookies_store(self):
@@ -569,7 +571,8 @@ class Extractor():
                 util.cookiestxt_store(fp, self.cookies)
             os.replace(path_tmp, path)
         except OSError as exc:
-            self.log.warning("cookies: %s", exc)
+            self.log.error("cookies: Failed to write to '%s' "
+                           "(%s: %s)", path, exc.__class__.__name__, exc)
 
     def cookies_update(self, cookies, domain=""):
         """Update the session's cookiejar with 'cookies'"""
