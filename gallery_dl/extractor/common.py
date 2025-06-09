@@ -615,14 +615,17 @@ class Extractor():
 
                 if diff <= 0:
                     self.log.warning(
-                        "Cookie '%s' has expired", cookie.name)
+                        "cookies: %s/%s expired at %s",
+                        cookie.domain.lstrip("."), cookie.name,
+                        datetime.datetime.fromtimestamp(cookie.expires))
                     continue
 
                 elif diff <= 86400:
                     hours = diff // 3600
                     self.log.warning(
-                        "Cookie '%s' will expire in less than %s hour%s",
-                        cookie.name, hours + 1, "s" if hours else "")
+                        "cookies: %s/%s will expire in less than %s hour%s",
+                        cookie.domain.lstrip("."), cookie.name,
+                        hours + 1, "s" if hours else "")
 
             names.discard(cookie.name)
             if not names:
