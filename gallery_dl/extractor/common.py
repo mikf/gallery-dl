@@ -17,9 +17,9 @@ import queue
 import random
 import getpass
 import logging
-import datetime
 import requests
 import threading
+from datetime import datetime
 from xml.etree import ElementTree
 from requests.adapters import HTTPAdapter
 from .message import Message
@@ -290,7 +290,7 @@ class Extractor():
             seconds = float(seconds)
             until = now + seconds
         elif until:
-            if isinstance(until, datetime.datetime):
+            if isinstance(until, datetime):
                 # convert to UTC timestamp
                 until = util.datetime_to_timestamp(until)
             else:
@@ -304,7 +304,7 @@ class Extractor():
             return
 
         if reason:
-            t = datetime.datetime.fromtimestamp(until).time()
+            t = datetime.fromtimestamp(until).time()
             isotime = "{:02}:{:02}:{:02}".format(t.hour, t.minute, t.second)
             self.log.info("Waiting until %s (%s)", isotime, reason)
         time.sleep(seconds)
@@ -620,7 +620,7 @@ class Extractor():
                     self.log.warning(
                         "cookies: %s/%s expired at %s",
                         cookie.domain.lstrip("."), cookie.name,
-                        datetime.datetime.fromtimestamp(cookie.expires))
+                        datetime.fromtimestamp(cookie.expires))
                     continue
 
                 elif diff <= 86400:
@@ -656,7 +656,7 @@ class Extractor():
             ts = self.config(key, default)
             if isinstance(ts, str):
                 try:
-                    ts = int(datetime.datetime.strptime(ts, fmt).timestamp())
+                    ts = int(datetime.strptime(ts, fmt).timestamp())
                 except ValueError as exc:
                     self.log.warning("Unable to parse '%s': %s", key, exc)
                     ts = default
