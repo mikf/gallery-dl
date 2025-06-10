@@ -419,15 +419,7 @@ class Extractor():
                             ssl.OP_NO_TLSv1 | ssl.OP_NO_TLSv1_1)
             ssl_ciphers = SSL_CIPHERS[browser]
         else:
-            useragent = self.config("user-agent")
-            if useragent is None or useragent == "auto":
-                useragent = self.useragent
-            elif useragent == "browser":
-                useragent = _browser_useragent()
-            elif self.useragent is not Extractor.useragent and \
-                    useragent is config.get(("extractor",), "user-agent"):
-                useragent = self.useragent
-            headers["User-Agent"] = useragent
+            headers["User-Agent"] = self.useragent
             headers["Accept"] = "*/*"
             headers["Accept-Language"] = "en-US,en;q=0.5"
 
@@ -448,6 +440,15 @@ class Extractor():
                 headers["Referer"] = referer
             elif self.root:
                 headers["Referer"] = self.root + "/"
+
+        custom_ua = self.config("user-agent")
+        if custom_ua is None or custom_ua == "auto":
+            pass
+        elif custom_ua == "browser":
+            headers["User-Agent"] = _browser_useragent()
+        elif self.useragent is Extractor.useragent or \
+                custom_ua is not config.get(("extractor",), "user-agent"):
+            headers["User-Agent"] = custom_ua
 
         custom_headers = self.config("headers")
         if custom_headers:

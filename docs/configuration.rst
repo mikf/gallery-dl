@@ -673,11 +673,6 @@ Description
     Setting this value to ``"browser"`` will try to automatically detect
     and use the ``User-Agent`` header of the system's default browser.
 
-    Note:
-    This option has *no* effect if
-    `extractor.browser <extractor.*.browser_>`__
-    is enabled.
-
 
 extractor.*.browser
 -------------------
