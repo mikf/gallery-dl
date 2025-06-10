@@ -42,8 +42,14 @@ class YoutubeDLExtractor(Extractor):
                 raise exception.NoExtractorError()
             self.force_generic_extractor = False
 
-        # set subcategory to youtube_dl extractor's key
-        self.subcategory = self.ytdl_ie_key
+        if self.ytdl_ie_key == "Generic" and config.interpolate(
+                ("extractor", "ytdl"), "generic-category", True):
+            # set subcategory to URL domain
+            self.category = "ytdl-generic"
+            self.subcategory = url[url.rfind("/", None, 8)+1:url.find("/", 8)]
+        else:
+            # set subcategory to youtube_dl extractor's key
+            self.subcategory = self.ytdl_ie_key
         Extractor.__init__(self, match)
 
     def items(self):
