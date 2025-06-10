@@ -31,7 +31,7 @@ jobs:
           architecture: "x64"
           python-version: "3.13"
           python-packages: "secretstorage"
-        - os: "windows-2019"
+        - os: "windows-2022"
           architecture: "x86"
           python-version: "3.8"
           python-packages: "toml"
