@@ -48,6 +48,25 @@ __tests__ = (
 },
 
 {
+    "#url"  : "https://everia.club/2021/03/12/%E9%9B%AF%E5%A6%B9%E4%B8%8D%E8%AE%B2%E9%81%93%E7%90%86-dido-%E3%83%80%E3%82%A4%E3%83%89%E3%83%BC-azur-lane-%E7%A2%A7%E8%93%9D%E8%88%AA%E7%BA%BF/",
+    "#class": everia.EveriaPostExtractor,
+    "#pattern": r"https://1.bp.blogspot.com/-\S+/\S+/\S+/\S+/s0/(%\w\w|\d|\+)+\.jpg",
+    "#count"  : 17,
+
+    "count"    : 17,
+    "num"      : range(1, 17),
+    "extension": "jpg",
+    "filename" : r"re:雯妹不讲道理\+\(\d+\)",
+    "title"    : "[雯妹不讲道理] Dido ダイドー (Azur Lane 碧蓝航线)",
+    "post_url" : "https://everia.club/2021/03/12/雯妹不讲道理-dido-ダイドー-azur-lane-碧蓝航线/",
+    "post_category": "Cosplay",
+    "tags": [
+        "Cosplay",
+        "雯妹不讲道理",
+    ],
+},
+
+{
     "#url"    : "https://everia.club/tag/miku-tanaka-%e7%94%b0%e4%b8%ad%e7%be%8e%e4%b9%85/",
     "#class"  : everia.EveriaTagExtractor,
     "#pattern": everia.EveriaPostExtractor.pattern,

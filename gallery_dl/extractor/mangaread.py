@@ -7,8 +7,7 @@
 """Extractors for https://mangaread.org/"""
 
 from .common import ChapterExtractor, MangaExtractor
-from .. import text, exception
-import re
+from .. import text, util, exception
 
 
 class MangareadBase():
@@ -18,9 +17,9 @@ class MangareadBase():
 
     @staticmethod
     def parse_chapter_string(chapter_string, data):
-        match = re.match(
-            r"(?:(.+)\s*-\s*)?[Cc]hapter\s*(\d+)(\.\d+)?(?:\s*-\s*(.+))?",
-            text.unescape(chapter_string).strip())
+        match = util.re(
+            r"(?:(.+)\s*-\s*)?[Cc]hapter\s*(\d+)(\.\d+)?(?:\s*-\s*(.+))?"
+        ).match(text.unescape(chapter_string).strip())
         manga, chapter, minor, title = match.groups()
         manga = manga.strip() if manga else ""
         data["manga"] = data.pop("manga", manga)
@@ -84,7 +83,7 @@ class MangareadMangaExtractor(MangareadBase, MangaExtractor):
             "rating"     : text.parse_float(
                 extr('total_votes">', "</span>").strip()),
             "manga_alt"  : text.remove_html(
-                extr("Alternative </h5>\n</div>", "</div>")).split("; "),
+                extr("Alternative\t\t</h5>\n\t</div>", "</div>")).split("; "),
             "author"     : list(text.extract_iter(
                 extr('class="author-content">', "</div>"), '"tag">', "</a>")),
             "artist"     : list(text.extract_iter(

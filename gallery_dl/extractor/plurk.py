@@ -11,7 +11,6 @@
 from .common import Extractor, Message
 from .. import text, util, exception
 import datetime
-import re
 
 
 class PlurkExtractor(Extractor):
@@ -64,7 +63,8 @@ class PlurkExtractor(Extractor):
     def _load(data):
         if not data:
             raise exception.NotFoundError("user")
-        return util.json_loads(re.sub(r"new Date\(([^)]+)\)", r"\1", data))
+        return util.json_loads(
+            util.re(r"new Date\(([^)]+)\)").sub(r"\1", data))
 
 
 class PlurkTimelineExtractor(PlurkExtractor):

@@ -11,7 +11,6 @@
 from .common import ChapterExtractor, Extractor, Message
 from .. import text, util, exception
 from ..cache import memcache
-import re
 
 BASE_PATTERN = (r"(?:https?://)?(?:www\.)?(?:"
                 r"(?:manga|comic|read)park\.(?:com|net|org|me|io|to)|"
@@ -22,17 +21,14 @@ BASE_PATTERN = (r"(?:https?://)?(?:www\.)?(?:"
 class MangaparkBase():
     """Base class for mangapark extractors"""
     category = "mangapark"
-    _match_title = None
 
     def _parse_chapter_title(self, title):
-        if not self._match_title:
-            MangaparkBase._match_title = re.compile(
-                r"(?i)"
-                r"(?:vol(?:\.|ume)?\s*(\d+)\s*)?"
-                r"ch(?:\.|apter)?\s*(\d+)([^\s:]*)"
-                r"(?:\s*:\s*(.*))?"
-            ).match
-        match = self._match_title(title)
+        match = util.re(
+            r"(?i)"
+            r"(?:vol(?:\.|ume)?\s*(\d+)\s*)?"
+            r"ch(?:\.|apter)?\s*(\d+)([^\s:]*)"
+            r"(?:\s*:\s*(.*))?"
+        ).match(title)
         return match.groups() if match else (0, 0, "", "")
 
     @memcache(keyarg=1)

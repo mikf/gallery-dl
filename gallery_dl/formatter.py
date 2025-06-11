@@ -488,6 +488,7 @@ _CONVERSIONS = {
     "L": len,
     "T": util.datetime_to_timestamp_string,
     "d": text.parse_timestamp,
+    "D": util.to_datetime,
     "U": text.unescape,
     "H": lambda s: text.unescape(text.remove_html(s)),
     "g": text.slugify,

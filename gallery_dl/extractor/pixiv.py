@@ -8,7 +8,7 @@
 
 """Extractors for https://www.pixiv.net/"""
 
-from .common import Extractor, Message
+from .common import Extractor, Message, Dispatch
 from .. import text, util, exception
 from ..cache import cache, memcache
 from datetime import datetime, timedelta
@@ -42,6 +42,10 @@ class PixivExtractor(Extractor):
         self.meta_bookmark = self.config("metadata-bookmark")
         self.meta_comments = self.config("comments")
         self.meta_captions = self.config("captions")
+
+        if self.meta_captions:
+            self.meta_captions_sub = util.re(
+                r'<a href="/jump\.php\?([^"]+)').sub
 
     def items(self):
         tags = self.config("tags", "japanese")
@@ -87,7 +91,10 @@ class PixivExtractor(Extractor):
                     not work.get("_mypixiv") and not work.get("_ajax"):
                 body = self._request_ajax("/illust/" + str(work["id"]))
                 if body:
-                    work["caption"] = text.unescape(body["illustComment"])
+                    caption = self.meta_captions_sub(
+                        lambda m: '<a href="' + text.unquote(m.group(1)),
+                        body["illustComment"])
+                    work["caption"] = text.unescape(caption)
 
             if transform_tags:
                 transform_tags(work)
@@ -136,7 +143,21 @@ class PixivExtractor(Extractor):
                 self.log.warning("%s: 'limit_sanity_level' warning", work_id)
                 if self.sanity_workaround:
                     body = self._request_ajax("/illust/" + str(work_id))
-                    return self._extract_ajax(work, body)
+                    if work["type"] == "ugoira":
+                        if not self.load_ugoira:
+                            return ()
+                        self.log.info("%s: Retrieving Ugoira AJAX metadata",
+                                      work["id"])
+                        try:
+                            self._extract_ajax(work, body)
+                            return self._extract_ugoira(work, url)
+                        except Exception as exc:
+                            self.log.debug("", exc_info=exc)
+                            self.log.warning(
+                                "%s: Unable to extract Ugoira URL. Provide "
+                                "logged-in cookies to access it", work["id"])
+                    else:
+                        return self._extract_ajax(work, body)
 
             elif limit_type == "limit_mypixiv_360.png":
                 work["_mypixiv"] = True
@@ -161,7 +182,12 @@ class PixivExtractor(Extractor):
         return ()
 
     def _extract_ugoira(self, work, img_url):
-        ugoira = self.api.ugoira_metadata(work["id"])
+        if work.get("_ajax"):
+            ugoira = self._request_ajax(
+                "/illust/" + str(work["id"]) + "/ugoira_meta")
+            img_url = ugoira["src"]
+        else:
+            ugoira = self.api.ugoira_metadata(work["id"])
         work["_ugoira_frame_data"] = work["frames"] = frames = ugoira["frames"]
         work["_ugoira_original"] = self.load_ugoira_original
         work["_http_adjust_extension"] = False
@@ -198,7 +224,10 @@ class PixivExtractor(Extractor):
             ]
 
         else:
-            zip_url = ugoira["zip_urls"]["medium"]
+            if work.get("_ajax"):
+                zip_url = ugoira["originalSrc"]
+            else:
+                zip_url = ugoira["zip_urls"]["medium"]
             work["date_url"] = self._date_from_url(zip_url)
             url = zip_url.replace("_ugoira600x600", "_ugoira1920x1080", 1)
             return ({"url": url},)
@@ -345,23 +374,15 @@ class PixivExtractor(Extractor):
         return {}
 
 
-class PixivUserExtractor(PixivExtractor):
+class PixivUserExtractor(Dispatch, PixivExtractor):
     """Extractor for a pixiv user profile"""
-    subcategory = "user"
     pattern = (BASE_PATTERN + r"/(?:"
                r"(?:en/)?u(?:sers)?/|member\.php\?id=|(?:mypage\.php)?#id="
                r")(\d+)(?:$|[?#])")
     example = "https://www.pixiv.net/en/users/12345"
 
-    def __init__(self, match):
-        PixivExtractor.__init__(self, match)
-        self.user_id = match.group(1)
-
-    def initialize(self):
-        pass
-
     def items(self):
-        base = "{}/users/{}/".format(self.root, self.user_id)
+        base = "{}/users/{}/".format(self.root, self.groups[0])
         return self._dispatch_extractors((
             (PixivAvatarExtractor       , base + "avatar"),
             (PixivBackgroundExtractor   , base + "background"),

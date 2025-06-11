@@ -40,8 +40,6 @@ CATEGORY_MAP = {
     "cien"           : "Ci-en",
     "cohost"         : "cohost!",
     "comicvine"      : "Comic Vine",
-    "coomerparty"    : "Coomer",
-    "deltaporno"     : "DeltaPorno",
     "deviantart"     : "DeviantArt",
     "drawfriends"    : "Draw Friends",
     "dynastyscans"   : "Dynasty Reader",
@@ -90,8 +88,7 @@ CATEGORY_MAP = {
     "itchio"         : "itch.io",
     "jpgfish"        : "JPG Fish",
     "kabeuchi"       : "かべうち",
-    "kemonoparty"    : "Kemono",
-    "koharu"         : "SchaleNetwork",
+    "schalenetwork"  : "Schale Network",
     "livedoor"       : "livedoor Blog",
     "lofter"         : "LOFTER",
     "ohpolly"        : "Oh Polly",
@@ -100,11 +97,9 @@ CATEGORY_MAP = {
     "mangafox"       : "Manga Fox",
     "mangahere"      : "Manga Here",
     "mangakakalot"   : "MangaKakalot",
-    "mangalife"      : "MangaLife",
     "manganato"      : "MangaNato",
     "mangapark"      : "MangaPark",
     "mangaread"      : "MangaRead",
-    "mangasee"       : "MangaSee",
     "mariowiki"      : "Super Mario Wiki",
     "mastodon.social": "mastodon.social",
     "mediawiki"      : "MediaWiki",
@@ -188,7 +183,6 @@ SUBCATEGORY_MAP = {
     "issue"  : "Comic Issues",
     "manga"  : "Manga",
     "media"  : "Media Files",
-    "note"   : "Images from Notes",
     "popular": "Popular Images",
     "recent" : "Recent Images",
     "search" : "Search Results",
@@ -197,9 +191,10 @@ SUBCATEGORY_MAP = {
     "tweets" : "",
     "user"   : "User Profiles",
     "watch"  : "Watches",
-    "following"    : "Followed Users",
-    "related-pin"  : "related Pins",
-    "related-board": "",
+    "direct-messages": "DMs",
+    "following"      : "Followed Users",
+    "related-pin"    : "related Pins",
+    "related-board"  : "",
 
     "ao3": {
         "user-works"   : "",
@@ -221,18 +216,20 @@ SUBCATEGORY_MAP = {
         "posts": "",
     },
     "boosty": {
-        "direct-messages": "DMs",
         "feed": "Subscriptions Feed",
     },
     "civitai": {
         "models": "Model Listings",
         "images": "Image Listings",
+        "posts" : "Post Listings",
+        "search-models": "Model Searches",
+        "search-images": "Image Searches",
         "user-models": "User Models",
-        "user-images": "User Images",
+        "user-images": ("User Images", "Image Reactions"),
         "user-posts" : "User Posts",
-        "user-videos": "User Videos",
+        "user-videos": ("User Videos", "Video Reactions"),
     },
-    "coomerparty": {
+    "coomer": {
         "discord"       : "",
         "discord-server": "",
         "posts"         : "",
@@ -251,7 +248,6 @@ SUBCATEGORY_MAP = {
         "watch-posts": "",
     },
     "discord": {
-        "direct-messages": "DMs",
         "direct-message" : "",
     },
     "fanbox": {
@@ -283,7 +279,7 @@ SUBCATEGORY_MAP = {
         "saved": "Saved Posts",
         "tagged": "Tagged Posts",
     },
-    "kemonoparty": {
+    "kemono": {
         "discord"       : "Discord Servers",
         "discord-server": "",
         "posts"         : "",
@@ -299,6 +295,10 @@ SUBCATEGORY_MAP = {
         "following" : "Library",
         "list": "MDLists",
     },
+    "misskey": {
+        "note" : "Notes",
+        "notes": "User Notes",
+    },
     "nijie": {
         "followed": "Followed Users",
         "nuita" : "Nuita History",
@@ -308,6 +308,9 @@ SUBCATEGORY_MAP = {
         "pinit": "pin.it Links",
         "created": "Created Pins",
         "allpins": "All Pins",
+    },
+    "pixeldrain": {
+        "folder": "Filesystems",
     },
     "pixiv": {
         "me"  : "pixiv.me Links",
@@ -440,7 +443,7 @@ AUTH_MAP = {
     "bluesky"        : "Supported",
     "booruvar"       : "Supported",
     "boosty"         : _COOKIES,
-    "coomerparty"    : "Supported",
+    "coomer"         : "Supported",
     "danbooru"       : "Supported",
     "derpibooru"     : _APIKEY_DB,
     "deviantart"     : _OAUTH,
@@ -460,7 +463,7 @@ AUTH_MAP = {
     "imgbb"          : "Supported",
     "inkbunny"       : "Supported",
     "instagram"      : _COOKIES,
-    "kemonoparty"    : "Supported",
+    "kemono"         : "Supported",
     "mangadex"       : "Supported",
     "mangoxo"        : "Supported",
     "mastodon.social": _OAUTH,
@@ -600,13 +603,9 @@ def build_extractor_list():
     default["e-hentai"] = default["exhentai"]
     domains["e-hentai"] = domains["exhentai"].replace("x", "-")
 
-    # add coomer.party
-    default["coomerparty"] = default["kemonoparty"]
-    domains["coomerparty"] = domains["kemonoparty"].replace("kemono", "coomer")
-
-    # add manga4life.com
-    default["mangalife"] = default["mangasee"]
-    domains["mangalife"] = "https://manga4life.com/"
+    # add coomer.su
+    default["coomer"] = default["kemono"]
+    domains["coomer"] = domains["kemono"].replace("kemono", "coomer")
 
     # add wikifeetx.com
     default["wikifeetx"] = default["wikifeet"]

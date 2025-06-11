@@ -22,9 +22,9 @@ BASE_PATTERN = (
 )
 
 
-class KoharuExtractor(Extractor):
-    """Base class for koharu extractors"""
-    category = "koharu"
+class SchalenetworkExtractor(Extractor):
+    """Base class for schale.network extractors"""
+    category = "schalenetwork"
     root = "https://niyaniya.moe"
     root_api = "https://api.schale.network"
     request_interval = (0.5, 1.5)
@@ -51,7 +51,7 @@ class KoharuExtractor(Extractor):
             for entry in entries:
                 url = "{}/g/{}/{}".format(
                     self.root, entry["id"], entry["public_key"])
-                entry["_extractor"] = KoharuGalleryExtractor
+                entry["_extractor"] = SchalenetworkGalleryExtractor
                 yield Message.Queue, url, entry
 
             try:
@@ -62,8 +62,8 @@ class KoharuExtractor(Extractor):
             params["page"] += 1
 
 
-class KoharuGalleryExtractor(KoharuExtractor, GalleryExtractor):
-    """Extractor for koharu galleries"""
+class SchalenetworkGalleryExtractor(SchalenetworkExtractor, GalleryExtractor):
+    """Extractor for schale.network galleries"""
     filename_fmt = "{num:>03}.{extension}"
     directory_fmt = ("{category}", "{id} {title}")
     archive_fmt = "{id}_{num}"
@@ -205,8 +205,8 @@ class KoharuGalleryExtractor(KoharuExtractor, GalleryExtractor):
         return fmt
 
 
-class KoharuSearchExtractor(KoharuExtractor):
-    """Extractor for koharu search results"""
+class SchalenetworkSearchExtractor(SchalenetworkExtractor):
+    """Extractor for schale.network search results"""
     subcategory = "search"
     pattern = BASE_PATTERN + r"/\?([^#]*)"
     example = "https://niyaniya.moe/?s=QUERY"
@@ -217,8 +217,8 @@ class KoharuSearchExtractor(KoharuExtractor):
         return self._pagination("/books", params)
 
 
-class KoharuFavoriteExtractor(KoharuExtractor):
-    """Extractor for koharu favorites"""
+class SchalenetworkFavoriteExtractor(SchalenetworkExtractor):
+    """Extractor for schale.network favorites"""
     subcategory = "favorite"
     pattern = BASE_PATTERN + r"/favorites(?:\?([^#]*))?"
     example = "https://niyaniya.moe/favorites"

@@ -90,9 +90,11 @@ class IdolcomplexExtractor(SankakuExtractor):
             "user[password]": password,
             "commit"        : "Login",
         }
+        self.sleep(10, "login")
         response = self.request(url, method="POST", headers=headers, data=data)
 
-        if not response.history or response.url.endswith("/user/home"):
+        if not response.history or response.url.endswith(
+                ("/users/login", "/user/home")):
             raise exception.AuthenticationError()
         return {c.name: c.value for c in response.history[0].cookies}
 
@@ -187,32 +189,39 @@ class IdolcomplexTagExtractor(IdolcomplexExtractor):
         return {"search_tags": " ".join(tags)}
 
     def post_ids(self):
-        params = {"tags": self.tags}
+        url = self.root + "/en/posts"
 
+        params = {"auto_page": "t"}
         if self.next:
             params["next"] = self.next
         else:
             params["page"] = self.start_page
+        params["tags"] = self.tags
 
         while True:
-            page = self.request(self.root, params=params, retries=10).text
-            pos = ((page.find('id="more-popular-posts-link"') + 1) or
-                   (page.find('<span class="thumb') + 1))
+            response = self.request(url, params=params, retries=10)
+            if response.history and "/posts/premium" in response.url:
+                self.log.warning("HTTP redirect to %s", response.url)
+            page = response.text
 
-            yield from self.find_pids(page, pos)
+            yield from text.extract_iter(page, '"id":"', '"')
 
-            next_url = text.extract(page, 'next-page-url="', '"', pos)[0]
-            if not next_url:
+            next_page_url = text.extr(page, 'next-page-url="', '"')
+            if not next_page_url:
                 return
 
-            next_params = text.parse_query(text.unquote(text.unescape(
-                text.unescape(next_url).lstrip("?/"))))
+            url, _, next_params = text.unquote(
+                text.unescape(text.unescape(next_page_url))).partition("?")
+            next_params = text.parse_query(next_params)
 
             if "next" in next_params:
                 # stop if the same "next" value occurs twice in a row (#265)
                 if "next" in params and params["next"] == next_params["next"]:
                     return
                 next_params["page"] = "2"
+
+            if url[0] == "/":
+                url = self.root + url
             params = next_params
 
 
@@ -225,10 +234,6 @@ class IdolcomplexPoolExtractor(IdolcomplexExtractor):
     example = "https://idol.sankakucomplex.com/pools/0123456789abcdef"
     per_page = 24
 
-    def __init__(self, match):
-        IdolcomplexExtractor.__init__(self, match)
-        self.pool_id = match.group(1)
-
     def skip(self, num):
         pages, posts = divmod(num, self.per_page)
         self.start_page += pages
@@ -236,10 +241,13 @@ class IdolcomplexPoolExtractor(IdolcomplexExtractor):
         return num
 
     def metadata(self):
-        return {"pool": self.pool_id}
+        return {"pool": self.groups[0]}
 
     def post_ids(self):
-        url = self.root + "/pools/show/" + self.pool_id
+        if not self.logged_in:
+            self.log.warning("Login required")
+
+        url = self.root + "/pools/show/" + self.groups[0]
         params = {"page": self.start_page}
 
         while True:
@@ -260,9 +268,5 @@ class IdolcomplexPostExtractor(IdolcomplexExtractor):
     pattern = BASE_PATTERN + r"/posts?/(?:show/)?(\w+)"
     example = "https://idol.sankakucomplex.com/posts/0123456789abcdef"
 
-    def __init__(self, match):
-        IdolcomplexExtractor.__init__(self, match)
-        self.post_id = match.group(1)
-
     def post_ids(self):
-        return (self.post_id,)
+        return (self.groups[0],)

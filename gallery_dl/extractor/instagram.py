@@ -9,12 +9,11 @@
 
 """Extractors for https://www.instagram.com/"""
 
-from .common import Extractor, Message
+from .common import Extractor, Message, Dispatch
 from .. import text, util, exception
 from ..cache import cache, memcache
 import itertools
 import binascii
-import re
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?instagram\.com"
 USER_PATTERN = BASE_PATTERN + r"/(?!(?:p|tv|reel|explore|stories)/)([^/?#]+)"
@@ -39,7 +38,7 @@ class InstagramExtractor(Extractor):
     def _init(self):
         self.www_claim = "0"
         self.csrf_token = util.generate_token()
-        self._find_tags = re.compile(r"#\w+").findall
+        self._find_tags = util.re(r"#\w+").findall
         self._logged_in = True
         self._cursor = None
         self._user = None
@@ -165,13 +164,16 @@ class InstagramExtractor(Extractor):
         if "items" in post:  # story or highlight
             items = post["items"]
             reel_id = str(post["id"]).rpartition(":")[2]
+            expires = post.get("expiring_at")
             data = {
-                "expires": text.parse_timestamp(post.get("expiring_at")),
+                "expires": text.parse_timestamp(expires),
                 "post_id": reel_id,
                 "post_shortcode": shortcode_from_id(reel_id),
             }
             if "title" in post:
                 data["highlight_title"] = post["title"]
+            if expires and not post.get("seen"):
+                post["seen"] = expires - 86400
 
         else:  # regular image/video post
             data = {
@@ -427,17 +429,10 @@ class InstagramExtractor(Extractor):
                 user[key] = 0
 
 
-class InstagramUserExtractor(InstagramExtractor):
+class InstagramUserExtractor(Dispatch, InstagramExtractor):
     """Extractor for an Instagram user profile"""
-    subcategory = "user"
     pattern = USER_PATTERN + r"/?(?:$|[?#])"
     example = "https://www.instagram.com/USER/"
-
-    def initialize(self):
-        pass
-
-    def finalize(self):
-        pass
 
     def items(self):
         base = "{}/{}/".format(self.root, self.item)
@@ -583,7 +578,10 @@ class InstagramStoriesExtractor(InstagramExtractor):
         reel_id = self.highlight_id or self.api.user_id(self.user)
         reels = self.api.reels_media(reel_id)
 
-        if self.media_id and reels:
+        if not reels:
+            return ()
+
+        if self.media_id:
             reel = reels[0]
             for item in reel["items"]:
                 if item["pk"] == self.media_id:
@@ -591,6 +589,16 @@ class InstagramStoriesExtractor(InstagramExtractor):
                     break
             else:
                 raise exception.NotFoundError("story")
+
+        elif self.config("split"):
+            reel = reels[0]
+            reels = []
+            for item in reel["items"]:
+                item.pop("user", None)
+                copy = reel.copy()
+                copy.update(item)
+                copy["items"] = (item,)
+                reels.append(copy)
 
         return reels
 

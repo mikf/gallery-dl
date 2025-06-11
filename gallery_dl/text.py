@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2022 Mike Fährmann
+# Copyright 2015-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -100,7 +100,7 @@ def nameext_from_url(url, data=None):
     return data
 
 
-def extract(txt, begin, end, pos=0):
+def extract(txt, begin, end, pos=None):
     """Extract the text between 'begin' and 'end' from 'txt'
 
     Args:
@@ -125,7 +125,7 @@ def extract(txt, begin, end, pos=0):
         last = txt.index(end, first)
         return txt[first:last], last+len(end)
     except Exception:
-        return None, pos
+        return None, 0 if pos is None else pos
 
 
 def extr(txt, begin, end, default=""):
@@ -137,17 +137,26 @@ def extr(txt, begin, end, default=""):
         return default
 
 
-def rextract(txt, begin, end, pos=-1):
+def rextract(txt, begin, end, pos=None):
     try:
         lbeg = len(begin)
-        first = txt.rindex(begin, 0, pos)
+        first = txt.rindex(begin, None, pos)
         last = txt.index(end, first + lbeg)
         return txt[first + lbeg:last], first
     except Exception:
-        return None, pos
+        return None, -1 if pos is None else pos
 
 
-def extract_all(txt, rules, pos=0, values=None):
+def rextr(txt, begin, end, pos=None, default=""):
+    """Stripped-down version of 'rextract()'"""
+    try:
+        first = txt.rindex(begin, None, pos) + len(begin)
+        return txt[first:txt.index(end, first)]
+    except Exception:
+        return default
+
+
+def extract_all(txt, rules, pos=None, values=None):
     """Calls extract for each rule and returns the result in a dict"""
     if values is None:
         values = {}
@@ -155,10 +164,10 @@ def extract_all(txt, rules, pos=0, values=None):
         result, pos = extract(txt, begin, end, pos)
         if key:
             values[key] = result
-    return values, pos
+    return values, 0 if pos is None else pos
 
 
-def extract_iter(txt, begin, end, pos=0):
+def extract_iter(txt, begin, end, pos=None):
     """Yield values that would be returned by repeated calls of extract()"""
     try:
         index = txt.index
@@ -173,7 +182,7 @@ def extract_iter(txt, begin, end, pos=0):
         return
 
 
-def extract_from(txt, pos=0, default=""):
+def extract_from(txt, pos=None, default=""):
     """Returns a function object that extracts from 'txt'"""
     def extr(begin, end, index=txt.index, txt=txt):
         nonlocal pos
@@ -200,10 +209,11 @@ def _hex_to_char(match):
 
 def parse_bytes(value, default=0, suffixes="bkmgtp"):
     """Convert a bytes-amount ("500k", "2.5M", ...) to int"""
-    try:
-        last = value[-1].lower()
-    except Exception:
+    if not value:
         return default
+
+    value = str(value).strip()
+    last = value[-1].lower()
 
     if last in suffixes:
         mul = 1024 ** suffixes.index(last)

@@ -20,9 +20,9 @@ __tests__ = (
     "#category": ("booru", "realbooru", "pool"),
     "#class"   : realbooru.RealbooruPoolExtractor,
     "#urls"    : (
-        "https://realbooru.com//images/bf/d6/bfd682f338691e5254de796040fcba21.mp4",
-        "https://realbooru.com//images/cb/7d/cb7d921673ba99f688031ac554777695.mp4",
-        "https://realbooru.com//images/9e/14/9e140edc1cb2e4cc734ba5bdc4870955.mp4",
+        "https://video-cdn.realbooru.com//images/bf/d6/bfd682f338691e5254de796040fcba21.mp4",
+        "https://video-cdn.realbooru.com//images/cb/7d/cb7d921673ba99f688031ac554777695.mp4",
+        "https://video-cdn.realbooru.com//images/9e/14/9e140edc1cb2e4cc734ba5bdc4870955.mp4",
     ),
 },
 

@@ -92,7 +92,7 @@ __tests__ = (
     "extension" : "avif",
     "filename"  : str,
     "gallery_id": 1615823,
-    "group"     : [],
+    "group"     : ["mofumofuen"],
     "lang"      : "ja",
     "language"  : "Japanese",
     "num"       : range(1, 22),

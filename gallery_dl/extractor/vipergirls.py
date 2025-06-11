@@ -12,8 +12,6 @@ from .common import Extractor, Message
 from .. import text, util, exception
 from ..cache import cache
 
-from xml.etree import ElementTree
-
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?vipergirls\.to"
 
 
@@ -130,7 +128,7 @@ class VipergirlsThreadExtractor(VipergirlsExtractor):
 
     def posts(self):
         url = "{}/vr.php?t={}".format(self.root, self.thread_id)
-        return ElementTree.fromstring(self.request(url).text)
+        return self.request_xml(url)
 
 
 class VipergirlsPostExtractor(VipergirlsExtractor):
@@ -147,4 +145,4 @@ class VipergirlsPostExtractor(VipergirlsExtractor):
 
     def posts(self):
         url = "{}/vr.php?p={}".format(self.root, self.post_id)
-        return ElementTree.fromstring(self.request(url).text)
+        return self.request_xml(url)

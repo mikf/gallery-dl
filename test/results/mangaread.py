@@ -116,7 +116,7 @@ __tests__ = (
     "#url"     : "https://www.mangaread.org/manga/doesnotexist",
     "#category": ("", "mangaread", "manga"),
     "#class"   : mangaread.MangareadMangaExtractor,
-    "#exception": exception.HttpError,
+    "#exception": exception.NotFoundError,
 },
 
 )

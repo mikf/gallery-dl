@@ -8,7 +8,7 @@
 
 """Extractors for https://wallhaven.cc/"""
 
-from .common import Extractor, Message
+from .common import Extractor, Message, Dispatch
 from .. import text, exception
 
 
@@ -88,21 +88,13 @@ class WallhavenCollectionExtractor(WallhavenExtractor):
         return {"username": self.username, "collection_id": self.collection_id}
 
 
-class WallhavenUserExtractor(WallhavenExtractor):
+class WallhavenUserExtractor(Dispatch, WallhavenExtractor):
     """Extractor for a wallhaven user"""
-    subcategory = "user"
     pattern = r"(?:https?://)?wallhaven\.cc/user/([^/?#]+)/?$"
     example = "https://wallhaven.cc/user/USER"
 
-    def __init__(self, match):
-        WallhavenExtractor.__init__(self, match)
-        self.username = match.group(1)
-
-    def initialize(self):
-        pass
-
     def items(self):
-        base = "{}/user/{}/".format(self.root, self.username)
+        base = "{}/user/{}/".format(self.root, self.groups[0])
         return self._dispatch_extractors((
             (WallhavenUploadsExtractor    , base + "uploads"),
             (WallhavenCollectionsExtractor, base + "favorites"),

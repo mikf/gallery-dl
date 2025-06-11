@@ -162,6 +162,28 @@ def status():
         stdout_write(fmt(path, status))
 
 
+def remap_categories():
+    opts = _config.get("extractor")
+    if not opts:
+        return
+
+    cmap = opts.get("config-map")
+    if cmap is None:
+        cmap = (
+            ("coomerparty", "coomer"),
+            ("kemonoparty", "kemono"),
+            ("koharu"     , "schalenetwork"),
+        )
+    elif not cmap:
+        return
+    elif isinstance(cmap, dict):
+        cmap = cmap.items()
+
+    for old, new in cmap:
+        if old in opts and new not in opts:
+            opts[new] = opts[old]
+
+
 def load(files=None, strict=False, loads=util.json_loads):
     """Load JSON configuration files"""
     for pathfmt in files or _default_configs:

@@ -73,7 +73,7 @@ __tests__ = (
     "views"      : int,
     "favorites"  : int,
     "comments"   : int,
-    "_mtime"     : "Sat, 16 Feb 2019 19:30:34 GMT",
+    "_http_lastmodified": "Sat, 16 Feb 2019 19:30:34 GMT",
 },
 
 {

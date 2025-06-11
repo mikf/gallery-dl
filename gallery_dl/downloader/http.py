@@ -68,14 +68,17 @@ class HttpDownloader(DownloaderBase):
                 chunk_size = 32768
             self.chunk_size = chunk_size
         if self.rate:
-            rate = text.parse_bytes(self.rate)
-            if rate:
-                if rate < self.chunk_size:
-                    self.chunk_size = rate
-                self.rate = rate
+            func = util.build_selection_func(self.rate, 0, text.parse_bytes)
+            rmax = func.args[1] if hasattr(func, "args") else func()
+            if rmax:
+                if rmax < self.chunk_size:
+                    # reduce chunk_size to allow for one iteration each second
+                    self.chunk_size = rmax
+                self.rate = func
                 self.receive = self._receive_rate
             else:
                 self.log.warning("Invalid rate limit (%r)", self.rate)
+                self.rate = False
         if self.progress is not None:
             self.receive = self._receive_rate
             if self.progress < 0.0:
@@ -88,8 +91,10 @@ class HttpDownloader(DownloaderBase):
     def download(self, url, pathfmt):
         try:
             return self._download_impl(url, pathfmt)
-        except Exception:
-            output.stderr_write("\n")
+        except Exception as exc:
+            if self.downloading:
+                output.stderr_write("\n")
+            self.log.debug("", exc_info=exc)
             raise
         finally:
             # remove file from incomplete downloads
@@ -265,19 +270,28 @@ class HttpDownloader(DownloaderBase):
 
             content = response.iter_content(self.chunk_size)
 
+            validate_sig = kwdict.get("_http_signature")
+            validate_ext = (adjust_extension and
+                            pathfmt.extension in SIGNATURE_CHECKS)
+
             # check filename extension against file header
-            if adjust_extension and not offset and \
-                    pathfmt.extension in SIGNATURE_CHECKS:
+            if not offset and (validate_ext or validate_sig):
                 try:
                     file_header = next(
                         content if response.raw.chunked
                         else response.iter_content(16), b"")
                 except (RequestException, SSLError) as exc:
                     msg = str(exc)
-                    output.stderr_write("\n")
                     continue
-                if self._adjust_extension(pathfmt, file_header) and \
-                        pathfmt.exists():
+                if validate_sig:
+                    result = validate_sig(file_header)
+                    if result is not True:
+                        self.release_conn(response)
+                        self.log.warning(
+                            result or "Invalid file signature bytes")
+                        return False
+                if validate_ext and self._adjust_extension(
+                        pathfmt, file_header) and pathfmt.exists():
                     pathfmt.temppath = ""
                     response.close()
                     return True
@@ -322,7 +336,10 @@ class HttpDownloader(DownloaderBase):
 
         self.downloading = False
         if self.mtime:
-            kwdict.setdefault("_mtime", response.headers.get("Last-Modified"))
+            if "_http_lastmodified" in kwdict:
+                kwdict["_mtime"] = kwdict["_http_lastmodified"]
+            else:
+                kwdict["_mtime"] = response.headers.get("Last-Modified")
         else:
             kwdict["_mtime"] = None
 
@@ -347,7 +364,7 @@ class HttpDownloader(DownloaderBase):
             write(data)
 
     def _receive_rate(self, fp, content, bytes_total, bytes_start):
-        rate = self.rate
+        rate = self.rate() if self.rate else None
         write = fp.write
         progress = self.progress
 
@@ -368,7 +385,7 @@ class HttpDownloader(DownloaderBase):
                         int(bytes_downloaded / time_elapsed),
                     )
 
-            if rate:
+            if rate is not None:
                 time_expected = bytes_downloaded / rate
                 if time_expected > time_elapsed:
                     time.sleep(time_expected - time_elapsed)

@@ -10,10 +10,7 @@
 
 from . import booru
 from .. import text, util, exception
-
-from xml.etree import ElementTree
 import collections
-import re
 
 
 class GelbooruV02Extractor(booru.BooruExtractor):
@@ -26,7 +23,7 @@ class GelbooruV02Extractor(booru.BooruExtractor):
 
     def _api_request(self, params):
         url = self.root_api + "/index.php?page=dapi&s=post&q=index"
-        return ElementTree.fromstring(self.request(url, params=params).text)
+        return self.request_xml(url, params=params)
 
     def _pagination(self, params):
         params["pid"] = self.page_start
@@ -38,7 +35,7 @@ class GelbooruV02Extractor(booru.BooruExtractor):
         while True:
             try:
                 root = self._api_request(params)
-            except ElementTree.ParseError:
+            except SyntaxError:  # ElementTree.ParseError
                 if "tags" not in params or post is None:
                     raise
                 taglist = [tag for tag in params["tags"].split()
@@ -78,7 +75,7 @@ class GelbooruV02Extractor(booru.BooruExtractor):
         params["pid"] = self.page_start * self.per_page
 
         data = {}
-        find_ids = re.compile(r"\sid=\"p(\d+)").findall
+        find_ids = util.re(r"\sid=\"p(\d+)").findall
 
         while True:
             page = self.request(url, params=params).text
@@ -109,8 +106,7 @@ class GelbooruV02Extractor(booru.BooruExtractor):
             return
 
         tags = collections.defaultdict(list)
-        pattern = re.compile(
-            r"tag-type-([^\"' ]+).*?[?;]tags=([^\"'&]+)", re.S)
+        pattern = util.re(r"(?s)tag-type-([^\"' ]+).*?[?;]tags=([^\"'&]+)")
         for tag_type, tag_name in pattern.findall(tag_container):
             tags[tag_type].append(text.unescape(text.unquote(tag_name)))
         for key, value in tags.items():

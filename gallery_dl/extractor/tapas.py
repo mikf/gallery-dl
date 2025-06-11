@@ -106,7 +106,7 @@ class TapasEpisodeExtractor(TapasExtractor):
                 yield Message.Url, url, text.nameext_from_url(url, episode)
 
     def _extract_series(self, html):
-        series_id = text.rextract(html, 'data-series-id="', '"')[0]
+        series_id = text.rextr(html, 'data-series-id="', '"')
         try:
             return self._cache[series_id]
         except KeyError:

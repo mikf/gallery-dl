@@ -78,7 +78,8 @@ class YoutubeDLDownloader(DownloaderBase):
                 if manifest:
                     info_dict = self._extract_manifest(
                         ytdl_instance, url, manifest,
-                        kwdict.pop("_ytdl_manifest_data", None))
+                        kwdict.pop("_ytdl_manifest_data", None),
+                        kwdict.pop("_ytdl_manifest_headers", None))
                 else:
                     info_dict = self._extract_info(ytdl_instance, url)
             except Exception as exc:
@@ -130,18 +131,28 @@ class YoutubeDLDownloader(DownloaderBase):
         if pathfmt.exists():
             pathfmt.temppath = ""
             return True
-        if self.part and self.partdir:
-            pathfmt.temppath = os.path.join(
-                self.partdir, pathfmt.filename)
-
-        self._set_outtmpl(ytdl_instance, pathfmt.temppath.replace("%", "%%"))
 
         self.out.start(pathfmt.path)
+        if self.part:
+            pathfmt.kwdict["extension"] = pathfmt.prefix
+            filename = pathfmt.build_filename(pathfmt.kwdict)
+            pathfmt.kwdict["extension"] = info_dict["ext"]
+            if self.partdir:
+                path = os.path.join(self.partdir, filename)
+            else:
+                path = pathfmt.realdirectory + filename
+            path = path.replace("%", "%%") + "%(ext)s"
+        else:
+            path = pathfmt.realpath.replace("%", "%%")
+
+        self._set_outtmpl(ytdl_instance, path)
         try:
             ytdl_instance.process_info(info_dict)
         except Exception as exc:
             self.log.debug("", exc_info=exc)
             return False
+
+        pathfmt.temppath = info_dict.get("filepath") or info_dict["_filename"]
         return True
 
     def _download_playlist(self, ytdl_instance, pathfmt, info_dict):
@@ -156,7 +167,8 @@ class YoutubeDLDownloader(DownloaderBase):
     def _extract_info(self, ytdl, url):
         return ytdl.extract_info(url, download=False)
 
-    def _extract_manifest(self, ytdl, url, manifest_type, manifest_data=None):
+    def _extract_manifest(self, ytdl, url, manifest_type, manifest_data=None,
+                          headers=None):
         extr = ytdl.get_info_extractor("Generic")
         video_id = extr._generic_id(url)
 
@@ -164,9 +176,10 @@ class YoutubeDLDownloader(DownloaderBase):
             if manifest_data is None:
                 try:
                     fmts, subs = extr._extract_m3u8_formats_and_subtitles(
-                        url, video_id, "mp4")
+                        url, video_id, "mp4", headers=headers)
                 except AttributeError:
-                    fmts = extr._extract_m3u8_formats(url, video_id, "mp4")
+                    fmts = extr._extract_m3u8_formats(
+                        url, video_id, "mp4", headers=headers)
                     subs = None
             else:
                 try:
@@ -180,9 +193,10 @@ class YoutubeDLDownloader(DownloaderBase):
             if manifest_data is None:
                 try:
                     fmts, subs = extr._extract_mpd_formats_and_subtitles(
-                        url, video_id)
+                        url, video_id, headers=headers)
                 except AttributeError:
-                    fmts = extr._extract_mpd_formats(url, video_id)
+                    fmts = extr._extract_mpd_formats(
+                        url, video_id, headers=headers)
                     subs = None
             else:
                 if isinstance(manifest_data, str):

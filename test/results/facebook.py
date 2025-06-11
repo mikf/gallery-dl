@@ -150,9 +150,9 @@ __tests__ = (
     "#category": ("", "facebook", "video"),
     "#class"   : facebook.FacebookVideoExtractor,
     "#count"   : 2,
-    "#archive": False,
 
-    "filename" : "1514198129001376",
+    "filename" : str,
+    "extension": {"mp4", "m4a"},
     "id"       : "644342003942740",
     "url"      : str,
     "user_id"  : "100064860875397",
