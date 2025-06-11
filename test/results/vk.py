@@ -18,9 +18,10 @@ __tests__ = (
 
     "id"  : r"re:\d+",
     "user": {
+        "group": False,
         "id"  : "398982326",
         "info": "Мы за Движуху! – m1ni SounD #4 [EROmusic]",
-        "name": "",
+        "name": "id398982326",
         "nick": "Dobrov Kurva",
     },
 },
@@ -33,8 +34,9 @@ __tests__ = (
 
     "id"  : r"re:\d+",
     "user": {
+        "group": True,
         "id"  : "-165740836",
-        "info": str,
+        "info": "",
         "name": "cosplayinrussia",
         "nick": "Косплей | Cosplay 18+",
     },

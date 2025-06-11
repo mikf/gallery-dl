@@ -149,17 +149,25 @@ class VkPhotosExtractor(VkExtractor):
         return data
 
     def _extract_profile(self, url):
-        extr = text.extract_from(self.request(url).text)
-        return {"user": {
-            "name": text.unescape(extr(
-                'rel="canonical" href="https://vk.com/', '"')),
+        page = self.request(url).text
+        extr = text.extract_from(page)
+
+        user = {
+            "id"  : extr('property="og:url" content="https://vk.com/id', '"'),
             "nick": text.unescape(extr(
-                '<h1 class="page_name">', "<")).replace("  ", " "),
-            "info": text.unescape(text.remove_html(extr(
-                '<span class="current_text">', '</span'))),
-            "id"  : (extr('<a href="/albums', '"') or
-                     extr('data-from-id="', '"')),
-        }}
+                "<title>", " | VK</title>")),
+            "info": text.unescape(extr(
+                ',"activity":"', '","')).replace("\\/", "/"),
+            "name": extr('href="https://m.vk.com/', '"'),
+        }
+
+        if user["id"]:
+            user["group"] = False
+        else:
+            user["group"] = True
+            user["id"] = extr('data-from-id="', '"')
+
+        return {"user": user}
 
 
 class VkAlbumExtractor(VkExtractor):
