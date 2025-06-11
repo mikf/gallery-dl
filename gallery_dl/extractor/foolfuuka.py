@@ -36,12 +36,15 @@ class FoolfuukaExtractor(BaseExtractor):
             url = media["media_link"]
 
             if not url and "remote_media_link" in media:
-                if "/b/" not in media["remote_media_link"] and \
-                        media["remote_media_link"].startswith("https://archived.moe/"):
+                remote_media_link = media["remote_media_link"]
+                if "/b/" not in remote_media_link and \
+                        remote_media_link.startswith("https://archived.moe/"):
                     filename = media["media"].rpartition(".")[0]
                     if len(filename) > 13:
                         filename_remainder = len(filename) - 13
-                        remote_media_link = media["remote_media_link"].replace(filename, filename[:-filename_remainder])
+                        remote_media_link = media["remote_media_link"].replace(
+                            filename, filename[:-filename_remainder]
+                        )
                         media["remote_media_link"] = remote_media_link
                 url = self.remote(media)
             if url and url[0] == "/":
