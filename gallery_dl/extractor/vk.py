@@ -26,6 +26,11 @@ class VkExtractor(Extractor):
     def _init(self):
         self.offset = text.parse_int(self.config("offset"))
 
+    def finalize(self):
+        if self.offset:
+            self.log.info("Use '-o offset=%s' to continue downloading "
+                          "from the current position", self.offset)
+
     def skip(self, num):
         self.offset += num
         return num
@@ -100,18 +105,20 @@ class VkExtractor(Extractor):
             total = payload[1]
             photos = payload[3]
 
-            data["offset"] += len(photos)
-            if data["offset"] >= total:
+            offset_next = self.offset + len(photos)
+            if offset_next >= total:
                 # the last chunk of photos also contains the first few photos
                 # again if 'total' is not a multiple of 10
-                extra = total - data["offset"]
+                extra = total - offset_next
                 if extra:
                     del photos[extra:]
 
                 yield from photos
+                self.offset = 0
                 return
 
             yield from photos
+            data["offset"] = self.offset = offset_next
 
 
 class VkPhotosExtractor(VkExtractor):
