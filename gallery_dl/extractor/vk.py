@@ -85,10 +85,13 @@ class VkExtractor(Extractor):
         }
 
         while True:
-            payload = self.request(
-                url, method="POST", headers=headers, data=data,
-            ).json()["payload"][1]
+            response = self.request(
+                url, method="POST", headers=headers, data=data)
+            if response.history and "/challenge.html" in response.url:
+                raise exception.StopExtraction(
+                    "HTTP redirect to 'challenge' page<:\n%s", response.url)
 
+            payload = response.json()["payload"][1]
             if len(payload) < 4:
                 self.log.debug(payload)
                 raise exception.AuthorizationError(
