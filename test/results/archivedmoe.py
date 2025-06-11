@@ -36,6 +36,16 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://archived.moe/a/thread/279540316/",
+    "#comment" : "filename/timestamp fixup for redirect URL (#7652)",
+    "#category": ("foolfuuka", "archivedmoe", "thread"),
+    "#class"   : foolfuuka.FoolfuukaThreadExtractor,
+    "#urls"    : (
+        "http://desuarchive.org/a/full_image/1749537017533.jpg",
+    ),
+},
+
+{
     "#url"     : "https://archived.moe/gd/",
     "#category": ("foolfuuka", "archivedmoe", "board"),
     "#class"   : foolfuuka.FoolfuukaBoardExtractor,
