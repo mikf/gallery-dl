@@ -36,7 +36,7 @@ class VkExtractor(Extractor):
         return num
 
     def items(self):
-        sub = util.re(r"/imp[fg]/").sub
+        subn = util.re(r"/imp[fg]/").subn
         sizes = "wzyxrqpo"
 
         data = self.metadata()
@@ -58,9 +58,12 @@ class VkExtractor(Extractor):
                 self.log.warning("no photo URL found (%s)", photo.get("id"))
                 continue
 
-            photo["url"] = sub("/", url.partition("?")[0])
-            #  photo["url"] = url
-            photo["_fallback"] = (url,)
+            url_sub, count = subn("/", url.partition("?")[0])
+            if count:
+                photo["_fallback"] = (url,)
+                photo["url"] = url = url_sub
+            else:
+                photo["url"] = url
 
             try:
                 _, photo["width"], photo["height"] = photo[size]
@@ -71,8 +74,8 @@ class VkExtractor(Extractor):
             photo["id"] = photo["id"].rpartition("_")[2]
             photo.update(data)
 
-            text.nameext_from_url(photo["url"], photo)
-            yield Message.Url, photo["url"], photo
+            text.nameext_from_url(url, photo)
+            yield Message.Url, url, photo
 
     def _pagination(self, photos_id):
         url = self.root + "/al_photos.php"
