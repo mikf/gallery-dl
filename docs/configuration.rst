@@ -207,11 +207,12 @@ Default
     ``"auto"``
 Example
     * ``"/!? (){}"``
-    * ``{" ": "_", "/": "-", "|": "-", ":": "_-_", "*": "_+_"}``
+    * ``{"/": "_", "+": "_+_", "({[": "(", "]})": ")", "a-z": "*"}``
 Description
-    | A string of characters to be replaced with the value of
+    | A ``string`` of characters to be replaced with the value of
       `path-replace <extractor.*.path-replace_>`__
-    | or an object mapping invalid/unwanted characters to their replacements
+    | or an ``object`` mapping invalid/unwanted characters, character sets,
+      or character ranges to their replacements
     | for generated path segment names.
 
     Special values:
