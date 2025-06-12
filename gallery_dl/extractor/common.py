@@ -52,6 +52,22 @@ class Extractor():
     def __init__(self, match):
         self.log = logging.getLogger(self.category)
         self.url = match.string
+        self._cfgpath = ("extractor", self.category, self.subcategory)
+        self._parentdir = ""
+        """
+        Initialize the CommonExtractor object.
+
+        Args:
+            match (re.Match): The regular expression match object.
+
+        Attributes:
+            log (logging.Logger): The logger object for logging messages.
+            url (str): The URL string.
+            _cfgpath (tuple): The configuration path.
+            _parentdir (str): The parent directory.
+        """
+        self.log = logging.getLogger(self.category)
+        self.url = match.string
         self.match = match
         self.groups = match.groups()
 
