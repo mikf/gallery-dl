@@ -12,6 +12,12 @@ from .common import BaseExtractor, Message
 from .. import text, util
 
 
+def original(url):
+    return (util.re(r"(/|=)(?:[sw]\d+|w\d+-h\d+)(?=/|$)")
+            .sub(r"\1s0", url)
+            .replace("http:", "https:", 1))
+
+
 class BloggerExtractor(BaseExtractor):
     """Base class for blogger extractors"""
     basecategory = "blogger"
@@ -32,7 +38,6 @@ class BloggerExtractor(BaseExtractor):
         blog["date"] = text.parse_datetime(blog["published"])
         del blog["selfLink"]
 
-        sub = util.re(r"(/|=)(?:[sw]\d+|w\d+-h\d+)(?=/|$)").sub
         findall_image = util.re(
             r'src="(https?://(?:'
             r'blogger\.googleusercontent\.com/img|'
@@ -47,7 +52,7 @@ class BloggerExtractor(BaseExtractor):
 
             files = findall_image(content)
             for idx, url in enumerate(files):
-                files[idx] = sub(r"\1s0", url).replace("http:", "https:", 1)
+                files[idx] = original(url)
 
             if self.videos and 'id="BLOG_video-' in content:
                 page = self.request(post["url"]).text
