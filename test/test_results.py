@@ -91,6 +91,23 @@ class TestExtractorResults(unittest.TestCase):
             self.assertLessEqual(value, range.stop, msg=msg)
             self.assertGreaterEqual(value, range.start, msg=msg)
 
+    def assertLogEqual(self, expected, output):
+        if isinstance(expected, str):
+            expected = (expected,)
+
+        for exp, out in zip(expected, output):
+            level, name, message = out.split(":", 2)
+
+            if isinstance(exp, str):
+                return self.assertEqual(exp, message, "#log")
+
+            self.assertEqual(exp[0].lower(), level.lower(), "#log/level")
+            if len(exp) < 3:
+                self.assertEqual(exp[1], message, "#log/message")
+            else:
+                self.assertEqual(exp[1], name   , "#log/name")
+                self.assertEqual(exp[2], message, "#log/message")
+
     def _run_test(self, result):
         if result.get("#fail"):
             del result["#fail"]
@@ -145,7 +162,12 @@ class TestExtractorResults(unittest.TestCase):
             return
 
         try:
-            tjob.run()
+            if "#log" in result:
+                with self.assertLogs() as log_info:
+                    tjob.run()
+                self.assertLogEqual(result["#log"], log_info.output)
+            else:
+                tjob.run()
         except exception.StopExtraction:
             pass
         except exception.HttpError as exc:
