@@ -469,11 +469,18 @@ MIME_TYPES = {
     "application/x-pdf": "pdf",
     "application/x-shockwave-flash": "swf",
 
+    "text/html": "html",
+
     "application/ogg": "ogg",
     # https://www.iana.org/assignments/media-types/model/obj
     "model/obj": "obj",
     "application/octet-stream": "bin",
 }
+
+
+def _signature_html(s):
+    return b"<!doctype html".startswith(s[:14].lower())
+
 
 # https://en.wikipedia.org/wiki/List_of_file_signatures
 SIGNATURE_CHECKS = {
@@ -505,6 +512,8 @@ SIGNATURE_CHECKS = {
     "7z"  : lambda s: s[0:6] == b"\x37\x7A\xBC\xAF\x27\x1C",
     "pdf" : lambda s: s[0:5] == b"%PDF-",
     "swf" : lambda s: s[0:3] in (b"CWS", b"FWS"),
+    "html": _signature_html,
+    "htm" : _signature_html,
     "blend": lambda s: s[0:7] == b"BLENDER",
     # unfortunately the Wavefront .obj format doesn't have a signature,
     # so we check for the existence of Blender's comment
