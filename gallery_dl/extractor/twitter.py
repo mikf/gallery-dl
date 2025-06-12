@@ -174,38 +174,25 @@ class TwitterExtractor(Extractor):
                     if not self.unavailable:
                         continue
 
-            mtype = media.get("type")
-            descr = media.get("ext_alt_text")
-            width = media["original_info"].get("width", 0)
-            height = media["original_info"].get("height", 0)
-
             if "video_info" in media:
                 if self.videos == "ytdl":
-                    files.append({
+                    file = {
                         "url": "ytdl:{}/i/web/status/{}".format(
                             self.root, tweet["id_str"]),
-                        "type"       : mtype,
-                        "width"      : width,
-                        "height"     : height,
-                        "extension"  : None,
-                        "description": descr,
-                    })
+                        "extension": "mp4",
+                    }
                 elif self.videos:
                     video_info = media["video_info"]
                     variant = max(
                         video_info["variants"],
                         key=lambda v: v.get("bitrate", 0),
                     )
-                    files.append({
-                        "url"        : variant["url"],
-                        "type"       : mtype,
-                        "width"      : width,
-                        "height"     : height,
-                        "bitrate"    : variant.get("bitrate", 0),
-                        "duration"   : video_info.get(
+                    file = {
+                        "url"     : variant["url"],
+                        "bitrate" : variant.get("bitrate", 0),
+                        "duration": video_info.get(
                             "duration_millis", 0) / 1000,
-                        "description": descr,
-                    })
+                    }
             elif "media_url_https" in media:
                 url = media["media_url_https"]
                 if url[-4] == ".":
@@ -213,16 +200,19 @@ class TwitterExtractor(Extractor):
                     base += "?format=" + fmt + "&name="
                 else:
                     base = url.rpartition("=")[0] + "="
-                files.append(text.nameext_from_url(url, {
-                    "url"        : base + self._size_image,
-                    "type"       : mtype,
-                    "width"      : width,
-                    "height"     : height,
-                    "_fallback"  : self._image_fallback(base),
-                    "description": descr,
-                }))
+                file = text.nameext_from_url(url, {
+                    "url"      : base + self._size_image,
+                    "_fallback": self._image_fallback(base),
+                })
             else:
                 files.append({"url": media["media_url"]})
+                continue
+
+            file["type"] = media.get("type")
+            file["width"] = media["original_info"].get("width", 0)
+            file["height"] = media["original_info"].get("height", 0)
+            file["description"] = media.get("ext_alt_text")
+            files.append(file)
 
     def _image_fallback(self, base):
         for fmt in self._size_fallback:
