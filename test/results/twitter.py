@@ -334,7 +334,9 @@ __tests__ = (
     "#class"   : twitter.TwitterTweetExtractor,
     "#sha1_url": "3a2a43dc5fb79dd5432c701d8e55e87c4e551f47",
 
-    "type": "photo",
+    "type"        : "photo",
+    "source_id"   : 0,
+    "!source_user": dict,
 },
 
 {
@@ -655,6 +657,22 @@ The Washington Post writes, "Three weeks after the toxic train derailment in Ohi
     "#class"   : twitter.TwitterTweetExtractor,
     "#options" : {"cards": True},
     "#urls"    : "https://pbs.twimg.com/grok-img-share/1866736156786008064.jpg",
+},
+
+{
+    "#url"     : "https://x.com/gdldev/status/1932109706354733077",
+    "#comment" : "'source_id' and 'source_user' metadata (#7470, #7640)",
+    "#category": ("", "twitter", "tweet"),
+    "#class"   : twitter.TwitterTweetExtractor,
+    "#urls"    : (
+        "https://video.twimg.com/amplify_video/1932079443264376832/vid/avc1/640x336/7xo7NCPkMLRWb8NZ.mp4?tag=14",
+        "https://video.twimg.com/ext_tw_video/1930425322333229056/pu/vid/avc1/1024x576/6f_cdEPY3a5CcbZP.mp4?tag=12",
+    ),
+
+    "source_id"  : {1932079546590982508, 1930425346404274416},
+    "source_user": {
+        "name": {"Satorin69", "Derlan144p_"},
+    },
 },
 
 {
