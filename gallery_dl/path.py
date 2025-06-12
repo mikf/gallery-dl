@@ -171,6 +171,9 @@ class PathFormat():
         try:
             return open(self.temppath, mode)
         except FileNotFoundError:
+            if "r" in mode:
+                # '.part' file no longer exists
+                return util.NullContext()
             os.makedirs(self.realdirectory)
             return open(self.temppath, mode)
 

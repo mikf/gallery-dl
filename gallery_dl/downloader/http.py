@@ -308,6 +308,9 @@ class HttpDownloader(DownloaderBase):
             # download content
             self.downloading = True
             with pathfmt.open(mode) as fp:
+                if fp is None:
+                    # '.part' file no longer exists
+                    break
                 if file_header:
                     fp.write(file_header)
                     offset += len(file_header)
