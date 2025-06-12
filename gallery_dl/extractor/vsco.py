@@ -109,8 +109,7 @@ class VscoExtractor(Extractor):
                 yield from medias
                 params["page"] += 1
 
-    @staticmethod
-    def _transform_media(media):
+    def _transform_media(self, media):
         if "responsiveUrl" not in media:
             return None
         media["_id"] = media["id"]
@@ -122,8 +121,7 @@ class VscoExtractor(Extractor):
         media["image_meta"] = media.get("imageMeta")
         return media
 
-    @staticmethod
-    def _transform_video(media):
+    def _transform_video(self, media):
         media["is_video"] = True
         media["grid_name"] = ""
         media["video_url"] = media["playback_url"]

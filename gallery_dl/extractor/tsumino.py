@@ -158,8 +158,7 @@ class TsuminoSearchExtractor(TsuminoBase, Extractor):
             raise exception.StopExtraction(
                 "Invalid search query '%s' (%s)", query, exc)
 
-    @staticmethod
-    def _parse_simple(query):
+    def _parse_simple(self, query):
         """Parse search query with format '?<key>=value>'"""
         key, _, value = query.partition("=")
         tag_types = {
@@ -179,8 +178,7 @@ class TsuminoSearchExtractor(TsuminoBase, Extractor):
             "Tags[0][Exclude]": "false",
         }
 
-    @staticmethod
-    def _parse_jsurl(data):
+    def _parse_jsurl(self, data):
         """Parse search query in JSURL format
 
         Nested lists and dicts are handled in a special way to deal

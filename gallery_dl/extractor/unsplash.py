@@ -48,8 +48,7 @@ class UnsplashExtractor(Extractor):
             yield Message.Directory, photo
             yield Message.Url, url, photo
 
-    @staticmethod
-    def metadata():
+    def metadata(self):
         return None
 
     def skip(self, num):

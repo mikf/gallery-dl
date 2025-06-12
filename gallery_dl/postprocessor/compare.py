@@ -62,12 +62,10 @@ class ComparePP(PostProcessor):
     def _compare(self, f1, f2):
         return self._compare_size(f1, f2) and self._compare_content(f1, f2)
 
-    @staticmethod
-    def _compare_size(f1, f2):
+    def _compare_size(self, f1, f2):
         return os.stat(f1).st_size == os.stat(f2).st_size
 
-    @staticmethod
-    def _compare_content(f1, f2):
+    def _compare_content(self, f1, f2):
         size = 16384
         with open(f1, "rb") as fp1, open(f2, "rb") as fp2:
             while True:

@@ -24,8 +24,7 @@ class FoolslideExtractor(BaseExtractor):
         return BaseExtractor.request(
             self, url, encoding="utf-8", method="POST", data={"adult": "true"})
 
-    @staticmethod
-    def parse_chapter_url(url, data):
+    def parse_chapter_url(self, url, data):
         info = url.partition("/read/")[2].rstrip("/").split("/")
         lang = info[1].partition("-")[0]
         data["lang"] = lang

@@ -89,8 +89,7 @@ class GelbooruV02Extractor(booru.BooruExtractor):
                 return
             params["pid"] += self.per_page
 
-    @staticmethod
-    def _prepare(post):
+    def _prepare(self, post):
         post["tags"] = post["tags"].strip()
         post["date"] = text.parse_datetime(
             post["created_at"], "%a %b %d %H:%M:%S %z %Y")

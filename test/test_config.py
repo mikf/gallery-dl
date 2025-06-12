@@ -223,8 +223,7 @@ class TestConfigFiles(unittest.TestCase):
         self.assertIsInstance(cfg, dict)
         self.assertTrue(cfg)
 
-    @staticmethod
-    def _load(name):
+    def _load(self, name):
         path = os.path.join(ROOTDIR, "docs", name)
         try:
             with open(path) as fp:

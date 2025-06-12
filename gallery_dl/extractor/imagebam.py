@@ -63,8 +63,7 @@ class ImagebamGalleryExtractor(ImagebamExtractor):
             image.update(data)
             yield Message.Url, image["url"], image
 
-    @staticmethod
-    def metadata(page):
+    def metadata(self, page):
         return {"title": text.unescape(text.extr(
             page, 'id="gallery-name">', '<').strip())}
 

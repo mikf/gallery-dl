@@ -713,8 +713,7 @@ class MetadataTest(BasePostprocessorTest):
 }
 """)
 
-    @staticmethod
-    def _output(mock):
+    def _output(self, mock):
         return "".join(
             call[1][0]
             for call in mock.mock_calls

@@ -357,8 +357,7 @@ class InstagramExtractor(Extractor):
 
         return data
 
-    @staticmethod
-    def _extract_tagged_users(src, dest):
+    def _extract_tagged_users(self, src, dest):
         dest["tagged_users"] = tagged_users = []
 
         edges = src.get("edge_media_to_tagged_user")
@@ -979,8 +978,7 @@ class InstagramGraphqlAPI():
         self.user_by_id = api.user_by_id
         self.user_id = api.user_id
 
-    @staticmethod
-    def _unsupported(_=None):
+    def _unsupported(self, _=None):
         raise exception.StopExtraction("Unsupported with GraphQL API")
 
     def highlights_tray(self, user_id):

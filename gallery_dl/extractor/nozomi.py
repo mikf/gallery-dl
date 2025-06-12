@@ -98,8 +98,7 @@ class NozomiExtractor(Extractor):
     def metadata(self):
         return {}
 
-    @staticmethod
-    def _list(src):
+    def _list(self, src):
         return [x["tagname_display"] for x in src] if src else ()
 
 

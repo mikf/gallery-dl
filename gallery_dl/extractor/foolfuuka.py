@@ -74,8 +74,7 @@ class FoolfuukaExtractor(BaseExtractor):
 
         return url
 
-    @staticmethod
-    def _remote_direct(media):
+    def _remote_direct(self, media):
         return media["remote_media_link"]
 
 

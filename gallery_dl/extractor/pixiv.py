@@ -336,8 +336,7 @@ class PixivExtractor(Extractor):
             if fmt in urls:
                 yield urls[fmt]
 
-    @staticmethod
-    def _date_from_url(url, offset=timedelta(hours=9)):
+    def _date_from_url(self, url, offset=timedelta(hours=9)):
         try:
             _, _, _, _, _, y, m, d, H, M, S, _ = url.split("/")
             return datetime(
@@ -345,8 +344,7 @@ class PixivExtractor(Extractor):
         except Exception:
             return None
 
-    @staticmethod
-    def _make_work(kind, url, user):
+    def _make_work(self, kind, url, user):
         p = url.split("/")
         return {
             "create_date"     : "{}-{}-{}T{}:{}:{}+09:00".format(

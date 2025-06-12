@@ -35,8 +35,7 @@ class PhilomenaExtractor(BooruExtractor):
             return url.rpartition(".")[0] + ".svg"
         return url
 
-    @staticmethod
-    def _prepare(post):
+    def _prepare(self, post):
         post["date"] = text.parse_datetime(
             post["created_at"][:19], "%Y-%m-%dT%H:%M:%S")
 

@@ -60,8 +60,7 @@ class BbcGalleryExtractor(GalleryExtractor):
             ))
         return results
 
-    @staticmethod
-    def _fallback_urls(src, max_width):
+    def _fallback_urls(self, src, max_width):
         front, _, back = src.partition("/320x180_b/")
         for width in (1920, 1600, 1280, 976):
             if width < max_width:

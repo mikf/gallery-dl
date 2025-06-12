@@ -74,8 +74,7 @@ class _2chanThreadExtractor(Extractor):
             data["ext"] = "." + data["extension"]
         return data
 
-    @staticmethod
-    def _extract_post(post):
+    def _extract_post(self, post):
         return text.extract_all(post, (
             ("post", 'class="csb">'   , '<'),
             ("name", 'class="cnm">'   , '<'),
@@ -85,8 +84,7 @@ class _2chanThreadExtractor(Extractor):
             ("com" , '>', '</blockquote>'),
         ))[0]
 
-    @staticmethod
-    def _extract_image(post, data):
+    def _extract_image(self, post, data):
         text.extract_all(post, (
             (None      , '_blank', ''),
             ("filename", '>', '<'),

@@ -92,8 +92,7 @@ class _8musesAlbumExtractor(Extractor):
                 album["updatedAt"], "%Y-%m-%dT%H:%M:%S.%fZ"),
         }
 
-    @staticmethod
-    def _unobfuscate(data):
+    def _unobfuscate(self, data):
         return util.json_loads("".join([
             chr(33 + (ord(c) + 14) % 94) if "!" <= c <= "~" else c
             for c in text.unescape(data.strip("\t\n\r !"))

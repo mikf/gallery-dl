@@ -152,8 +152,7 @@ class FuraffinityExtractor(Extractor):
 
         return data
 
-    @staticmethod
-    def _process_description(description):
+    def _process_description(self, description):
         return text.unescape(text.remove_html(description, "", ""))
 
     def _pagination(self, path, folder=None):

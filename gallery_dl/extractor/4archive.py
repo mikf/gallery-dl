@@ -58,8 +58,7 @@ class _4archiveThreadExtractor(Extractor):
             for post in page.split('class="postContainer')[1:]
         ]
 
-    @staticmethod
-    def parse(post):
+    def parse(self, post):
         extr = text.extract_from(post)
         data = {
             "name": extr('class="name">', "</span>"),

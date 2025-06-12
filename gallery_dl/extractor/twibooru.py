@@ -36,8 +36,7 @@ class TwibooruExtractor(BooruExtractor):
             return post["view_url"].rpartition(".")[0] + ".svg"
         return post["view_url"]
 
-    @staticmethod
-    def _prepare(post):
+    def _prepare(self, post):
         post["date"] = text.parse_datetime(
             post["created_at"], "%Y-%m-%dT%H:%M:%S.%fZ")
 

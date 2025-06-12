@@ -39,8 +39,7 @@ class WallhavenExtractor(Extractor):
         """Return general metadata"""
         return ()
 
-    @staticmethod
-    def _transform(wp):
+    def _transform(self, wp):
         wp["url"] = wp.pop("path")
         if "tags" in wp:
             wp["tags"] = [t["name"] for t in wp["tags"]]

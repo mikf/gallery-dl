@@ -183,8 +183,7 @@ class PathFormat():
             return self.check_file()
         return False
 
-    @staticmethod
-    def check_file():
+    def check_file(self):
         return True
 
     def _enum_file(self):
