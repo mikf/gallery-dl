@@ -28,8 +28,7 @@ class PlurkExtractor(Extractor):
     def plurks(self):
         """Return an iterable with all relevant 'plurk' objects"""
 
-    @staticmethod
-    def _urls(obj):
+    def _urls(self, obj):
         """Extract URLs from a 'plurk' object"""
         return text.extract_iter(obj["content"], ' href="', '"')
 
@@ -59,8 +58,7 @@ class PlurkExtractor(Extractor):
                 del data["count"]
             data["from_response_id"] = info["responses"][-1]["id"] + 1
 
-    @staticmethod
-    def _load(data):
+    def _load(self, data):
         if not data:
             raise exception.NotFoundError("user")
         return util.json_loads(

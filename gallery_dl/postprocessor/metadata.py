@@ -268,8 +268,7 @@ class MetadataPP(PostProcessor):
         if not private:
             return util.filter_dict
 
-    @staticmethod
-    def _make_encoder(options, indent=None):
+    def _make_encoder(self, options, indent=None):
         return json.JSONEncoder(
             ensure_ascii=options.get("ascii", False),
             sort_keys=options.get("sort", False),

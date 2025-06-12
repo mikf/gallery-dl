@@ -54,8 +54,7 @@ class NaverwebtoonEpisodeExtractor(NaverwebtoonBase, GalleryExtractor):
                 extr('"painters":[', ']'), '"name":"', '"')]
         }
 
-    @staticmethod
-    def images(page):
+    def images(self, page):
         view_area = text.extr(page, 'id="comic_view_area"', '</div>')
         return [
             (url, None)

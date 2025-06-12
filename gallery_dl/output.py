@@ -483,8 +483,7 @@ class CustomOutput():
         self._fmt_progress_total = (options.get("progress-total") or
                                     "\r{3:>3}% {0:>7}B {1:>7}B/s ").format
 
-    @staticmethod
-    def _make_func(shorten, format_string, limit):
+    def _make_func(self, shorten, format_string, limit):
         fmt = format_string.format
         return lambda txt: fmt(shorten(txt, limit, CHAR_ELLIPSIES))
 

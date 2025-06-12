@@ -108,8 +108,7 @@ class PahealTagExtractor(PahealExtractor):
                 return
             pnum += 1
 
-    @staticmethod
-    def _extract_data(post):
+    def _extract_data(self, post):
         pid , pos = text.extract(post, "", "'")
         data, pos = text.extract(post, "title='", "'", pos)
         md5 , pos = text.extract(post, "/_thumbs/", "/", pos)

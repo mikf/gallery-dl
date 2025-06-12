@@ -684,8 +684,7 @@ class CustomNone():
     def __call__(self, *args, **kwargs):
         return self
 
-    @staticmethod
-    def __next__():
+    def __next__(self):
         raise StopIteration
 
     def __eq__(self, other):
@@ -733,20 +732,17 @@ class CustomNone():
     __abs__ = identity
     __invert__ = identity
 
-    @staticmethod
-    def __len__():
+    def __len__(self):
         return 0
 
     __int__ = __len__
     __hash__ = __len__
     __index__ = __len__
 
-    @staticmethod
-    def __format__(_):
+    def __format__(self, _):
         return "None"
 
-    @staticmethod
-    def __str__():
+    def __str__(self):
         return "None"
 
     __repr__ = __str__
@@ -1052,8 +1048,7 @@ class RangePredicate():
                 return True
         return False
 
-    @staticmethod
-    def _parse(rangespec):
+    def _parse(self, rangespec):
         """Parse an integer range string and return the resulting ranges
 
         Examples:

@@ -73,8 +73,7 @@ class VichanThreadExtractor(VichanExtractor):
             self.root, post["board"], post["tim"], post["ext"])
         return Message.Url, post["url"], post
 
-    @staticmethod
-    def _process_8kun(post, data):
+    def _process_8kun(self, post, data):
         post.update(data)
         post["extension"] = post["ext"][1:]
 

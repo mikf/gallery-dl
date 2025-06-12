@@ -360,8 +360,7 @@ class HttpDownloader(DownloaderBase):
                 "closing the connection anyway", exc.__class__.__name__, exc)
             response.close()
 
-    @staticmethod
-    def receive(fp, content, bytes_total, bytes_start):
+    def receive(self, fp, content, bytes_total, bytes_start):
         write = fp.write
         for data in content:
             write(data)
@@ -411,8 +410,7 @@ class HttpDownloader(DownloaderBase):
         self.log.warning("Unknown MIME type '%s'", mtype)
         return "bin"
 
-    @staticmethod
-    def _adjust_extension(pathfmt, file_header):
+    def _adjust_extension(self, pathfmt, file_header):
         """Check filename extension against file header"""
         if not SIGNATURE_CHECKS[pathfmt.extension](file_header):
             for ext, check in SIGNATURE_CHECKS.items():

@@ -463,8 +463,7 @@ class Literal():
     # __getattr__, __getattribute__, and __class_getitem__
     # are all slower than regular __getitem__
 
-    @staticmethod
-    def __getitem__(key):
+    def __getitem__(self, key):
         return key
 
 

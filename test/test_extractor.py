@@ -296,8 +296,7 @@ class TestExtractorWait(unittest.TestCase):
         u = self._isotime_to_seconds(until.time().isoformat()[:8])
         self.assertLessEqual(o-u, 1.0)
 
-    @staticmethod
-    def _isotime_to_seconds(isotime):
+    def _isotime_to_seconds(self, isotime):
         parts = isotime.split(":")
         return int(parts[0]) * 3600 + int(parts[1]) * 60 + int(parts[2])
 

@@ -20,8 +20,7 @@ class MoebooruExtractor(BooruExtractor):
     filename_fmt = "{category}_{id}_{md5}.{extension}"
     page_start = 1
 
-    @staticmethod
-    def _prepare(post):
+    def _prepare(self, post):
         post["date"] = text.parse_timestamp(post["created_at"])
 
     def _html(self, post):

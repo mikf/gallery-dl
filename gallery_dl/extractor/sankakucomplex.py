@@ -63,20 +63,17 @@ class SankakucomplexArticleExtractor(SankakucomplexExtractor):
             file.update(data)
             yield Message.Url, url, file
 
-    @staticmethod
-    def _extract_images(content):
+    def _extract_images(self, content):
         orig_sub = util.re(r"-\d+x\d+\.").sub
         return [
             orig_sub(".", url) for url in
             util.unique(text.extract_iter(content, 'data-lazy-src="', '"'))
         ]
 
-    @staticmethod
-    def _extract_videos(content):
+    def _extract_videos(self, content):
         return util.re(r"<source [^>]*src=[\"']([^\"']+)").findall(content)
 
-    @staticmethod
-    def _extract_embeds(content):
+    def _extract_embeds(self, content):
         return [
             "ytdl:" + url for url in
             util.re(r"<iframe [^>]*src=[\"']([^\"']+)").findall(content)

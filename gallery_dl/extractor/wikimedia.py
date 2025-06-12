@@ -52,8 +52,7 @@ class WikimediaExtractor(BaseExtractor):
                 return url
         raise exception.StopExtraction("Unable to find API endpoint")
 
-    @staticmethod
-    def prepare(image):
+    def prepare(self, image):
         """Adjust the content of an image object"""
         image["metadata"] = {
             m["name"]: m["value"]

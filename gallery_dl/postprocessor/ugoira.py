@@ -425,15 +425,13 @@ class UgoiraPP(PostProcessor):
 
         return (None, None)
 
-    @staticmethod
-    def _delay_gcd(frames):
+    def _delay_gcd(self, frames):
         result = frames[0]["delay"]
         for f in frames:
             result = gcd(result, f["delay"])
         return result
 
-    @staticmethod
-    def _delay_is_uniform(frames):
+    def _delay_is_uniform(self, frames):
         delay = frames[0]["delay"]
         for f in frames:
             if f["delay"] != delay:

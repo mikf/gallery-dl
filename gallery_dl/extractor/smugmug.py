@@ -234,14 +234,12 @@ class SmugmugAPI(oauth.OAuth1API):
                 return
             params["start"] += params["count"]
 
-    @staticmethod
-    def _extend(endpoint, expands):
+    def _extend(self, endpoint, expands):
         if expands:
             endpoint += "?_expand=" + expands
         return endpoint
 
-    @staticmethod
-    def _apply_expansions(data, expands):
+    def _apply_expansions(self, data, expands):
 
         def unwrap(response):
             locator = response["Locator"]

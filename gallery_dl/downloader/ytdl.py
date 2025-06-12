@@ -233,8 +233,7 @@ class YoutubeDLDownloader(DownloaderBase):
                 int(speed) if speed else 0,
             )
 
-    @staticmethod
-    def _set_outtmpl(ytdl_instance, outtmpl):
+    def _set_outtmpl(self, ytdl_instance, outtmpl):
         try:
             ytdl_instance._parse_outtmpl
         except AttributeError:

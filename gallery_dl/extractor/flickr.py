@@ -585,8 +585,7 @@ class FlickrAPI(oauth.OAuth1API):
         if "license" in photo:
             photo["license_name"] = self.LICENSES.get(photo["license"])
 
-    @staticmethod
-    def _clean_info(info):
+    def _clean_info(self, info):
         info["title"] = info["title"]["_content"]
         info["description"] = info["description"]["_content"]
         return info

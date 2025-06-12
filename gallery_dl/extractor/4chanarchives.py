@@ -66,8 +66,7 @@ class _4chanarchivesThreadExtractor(Extractor):
             post["extension"] = post["url"].rpartition(".")[2]
         return post
 
-    @staticmethod
-    def _extract_post(html):
+    def _extract_post(self, html):
         extr = text.extract_from(html)
         return {
             "no"  : text.parse_int(extr('', '"')),
@@ -77,8 +76,7 @@ class _4chanarchivesThreadExtractor(Extractor):
                 html[html.find('<blockquote'):].partition(">")[2]),
         }
 
-    @staticmethod
-    def _extract_file(html, post):
+    def _extract_file(self, html, post):
         extr = text.extract_from(html, html.index(">File: <"))
         post["url"] = extr('href="', '"')
         post["filename"] = text.unquote(extr(">", "<").rpartition(".")[0])

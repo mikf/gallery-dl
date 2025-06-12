@@ -58,8 +58,7 @@ class SzurubooruExtractor(booru.BooruExtractor):
             url = self.root + "/" + url
         return url
 
-    @staticmethod
-    def _prepare(post):
+    def _prepare(self, post):
         post["date"] = text.parse_datetime(
             post["creationTime"], "%Y-%m-%dT%H:%M:%S.%fZ")
 

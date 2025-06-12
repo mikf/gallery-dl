@@ -28,11 +28,18 @@ from gallery_dl import util, text, exception  # noqa E402
 
 class TestRange(unittest.TestCase):
 
-    def test_parse_empty(self, f=util.RangePredicate._parse):
+    def setUp(self):
+        self.predicate = util.RangePredicate("")
+
+    def test_parse_empty(self):
+        f = self.predicate._parse
+
         self.assertEqual(f(""), [])
         self.assertEqual(f([]), [])
 
-    def test_parse_digit(self, f=util.RangePredicate._parse):
+    def test_parse_digit(self):
+        f = self.predicate._parse
+
         self.assertEqual(f("2"), [range(2, 3)])
 
         self.assertEqual(
@@ -42,7 +49,9 @@ class TestRange(unittest.TestCase):
              range(4, 5)],
         )
 
-    def test_parse_range(self, f=util.RangePredicate._parse):
+    def test_parse_range(self):
+        f = self.predicate._parse
+
         self.assertEqual(f("1-2"), [range(1, 3)])
         self.assertEqual(f("2-"), [range(2, sys.maxsize)])
         self.assertEqual(f("-3"), [range(1, 4)])
@@ -62,7 +71,9 @@ class TestRange(unittest.TestCase):
              range(2, 7)],
         )
 
-    def test_parse_slice(self, f=util.RangePredicate._parse):
+    def test_parse_slice(self):
+        f = self.predicate._parse
+
         self.assertEqual(f("2:4")  , [range(2, 4)])
         self.assertEqual(f("3::")  , [range(3, sys.maxsize)])
         self.assertEqual(f(":4:")  , [range(1, 4)])
