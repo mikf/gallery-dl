@@ -7,7 +7,7 @@
 """Extractors for https://bato.to/"""
 
 from .common import Extractor, ChapterExtractor, MangaExtractor
-from .. import text, util, exception
+from .. import text, util
 
 BASE_PATTERN = (r"(?:https?://)?("
                 r"(?:ba|d|f|h|j|m|w)to\.to|"
@@ -152,9 +152,9 @@ class BatotoMangaExtractor(BatotoBase, MangaExtractor):
     def chapters(self, page):
         extr = text.extract_from(page)
 
-        warning = extr(' class="alert alert-warning">', "</div><")
+        warning = extr(' class="alert alert-warning">', "</div>")
         if warning:
-            raise exception.StopExtraction("'%s'", text.remove_html(warning))
+            self.log.warning("'%s'", text.remove_html(warning))
 
         data = {
             "manga_id": text.parse_int(self.manga_id),

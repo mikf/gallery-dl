@@ -5,7 +5,6 @@
 # published by the Free Software Foundation.
 
 from gallery_dl.extractor import batoto
-from gallery_dl import exception
 
 __tests__ = (
 {
@@ -133,7 +132,21 @@ __tests__ = (
     "#url"     : "https://bato.to/title/134270-removed",
     "#comment" : "Deleted/removed manga",
     "#class"   : batoto.BatotoMangaExtractor,
-    "#exception": exception.StopExtraction,
+    "#log"     : "'This comic has been marked as deleted and the chapter list is not available.'",
+    "#count"   : 0,
+},
+
+{
+    "#url"     : "https://mto.to/series/136193",
+    "#comment" : "uploader notice (#7657)",
+    "#category": ("", "batoto", "manga"),
+    "#class"   : batoto.BatotoMangaExtractor,
+    "#log"     : "'UPLOADER NOTICE - The comic was deleted off EbookRenta :/'",
+    "#urls"    : (
+        "https://mto.to/title/136193-botsuraku-sunzen-desunode-konyakusha-o-furikiro-to-omoimasu-official/2456573-ch_1",
+        "https://mto.to/title/136193-botsuraku-sunzen-desunode-konyakusha-o-furikiro-to-omoimasu-official/2713985-ch_2",
+        "https://mto.to/title/136193-botsuraku-sunzen-desunode-konyakusha-o-furikiro-to-omoimasu-official/2739046-ch_3",
+    ),
 },
 
 {
