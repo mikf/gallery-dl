@@ -8,7 +8,6 @@
 
 """Extractors for FoolFuuka 4chan archives"""
 
-import logging
 from .common import BaseExtractor, Message
 from .. import text
 import itertools
@@ -85,11 +84,9 @@ class FoolfuukaExtractor(BaseExtractor):
             # if it's one of these archives, slice the name
             filename_slice_archives = {"b4k", "desuarchive", "palanq"}
             board = next((b for b in board_domains if f"/{b}/" in url), None)
-            log = logging.getLogger(__name__)
             if board:
                 domain = board_domains[board]
                 url = f"https://{domain}/{board}/full_image/{filename}"
-                log.debug(url)
             elif any(archive in path for archive in filename_slice_archives):
                 name, _, ext = filename.rpartition(".")
                 if len(name) > 13:
