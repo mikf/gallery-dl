@@ -13,7 +13,7 @@ __tests__ = (
     "#url"     : "https://horne.red/members.php?id=58000",
     "#category": ("Nijie", "horne", "user"),
     "#class"   : nijie.NijieUserExtractor,
-    "#urls"    : (
+    "#results" : (
         "https://horne.red/members_illust.php?id=58000",
         "https://horne.red/members_dojin.php?id=58000",
     ),
@@ -79,7 +79,7 @@ __tests__ = (
     "#url"     : "https://horne.red/view.php?id=8708",
     "#category": ("Nijie", "horne", "image"),
     "#class"   : nijie.NijieImageExtractor,
-    "#urls"    : "https://pic.nijie.net/__s4__/d7e18cb679f35b388dc8b0b9f2edb178078469b8970ee099cd573a577bc3a84cf33a04581f20b1cbed44bcd86147348cccdf7ded3b974bfb5b2711c2afb27c67834a22bd7411aa43895c9f480bbbed7373d345c24ac55e36018ad065.png",
+    "#results" : "https://pic.nijie.net/__s4__/d7e18cb679f35b388dc8b0b9f2edb178078469b8970ee099cd573a577bc3a84cf33a04581f20b1cbed44bcd86147348cccdf7ded3b974bfb5b2711c2afb27c67834a22bd7411aa43895c9f480bbbed7373d345c24ac55e36018ad065.png",
 
     "artist_id"  : 58000,
     "artist_name": "のえるわ",
@@ -105,7 +105,7 @@ __tests__ = (
     "#url"     : "https://horne.red/view.php?id=8716",
     "#category": ("Nijie", "horne", "image"),
     "#class"   : nijie.NijieImageExtractor,
-    "#urls"    : (
+    "#results" : (
         "https://pic.nijie.net/__s4__/d7b784b573f850628fcae5b4f7ede679085af22dba0caf6bb91622438289ddce9312ab6f2886b8d8ef104f8eb5908d57cc309ec0239464add9f9d8d17d83c39d92c680b083f107d63c68eef29938ebc937699fd50d51b1128404cc6e.png",
         "https://pic.nijie.net/__s4__/d7b9dae222f25e388a9debb4ade7eb79b87af28c9650b1babe514902eb854bbd8cb295b379d5480ea83cad78fbc843b146785ba59f1279fa77eb14e33ca66778474afb5063ba36d9d527fa31f780fbf396b27bd9901b0e3565efce08.png",
         "https://pic.nijie.net/__s4__/d7b889b276fb5a36dacde5bef7e8ea225e06c9904f18be00035c96721dd1ac6ab7217be29f8c6f58626aa9839835185f08474efd3822a3e298c74b9f2b3d0fc1cd5400b97b74512b0800eabbdcf8d4094be666ea3b6305a436cadd10.png",

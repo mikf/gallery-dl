@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2023 Mike Fährmann
+# Copyright 2015-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -91,6 +91,23 @@ class TestExtractorResults(unittest.TestCase):
             self.assertLessEqual(value, range.stop, msg=msg)
             self.assertGreaterEqual(value, range.start, msg=msg)
 
+    def assertLogEqual(self, expected, output):
+        if isinstance(expected, str):
+            expected = (expected,)
+
+        for exp, out in zip(expected, output):
+            level, name, message = out.split(":", 2)
+
+            if isinstance(exp, str):
+                return self.assertEqual(exp, message, "#log")
+
+            self.assertEqual(exp[0].lower(), level.lower(), "#log/level")
+            if len(exp) < 3:
+                self.assertEqual(exp[1], message, "#log/message")
+            else:
+                self.assertEqual(exp[1], name   , "#log/name")
+                self.assertEqual(exp[2], message, "#log/message")
+
     def _run_test(self, result):
         if result.get("#fail"):
             del result["#fail"]
@@ -145,7 +162,12 @@ class TestExtractorResults(unittest.TestCase):
             return
 
         try:
-            tjob.run()
+            if "#log" in result:
+                with self.assertLogs() as log_info:
+                    tjob.run()
+                self.assertLogEqual(result["#log"], log_info.output)
+            else:
+                tjob.run()
         except exception.StopExtraction:
             pass
         except exception.HttpError as exc:
@@ -220,13 +242,15 @@ class TestExtractorResults(unittest.TestCase):
                 for url, pat in zip(tjob.url_list, pattern):
                     self.assertRegex(url, pat, msg="#pattern")
 
-        if "#urls" in result:
-            expected = result["#urls"]
+        if "#results" in result:
+            expected = result["#results"]
             if isinstance(expected, str):
-                self.assertTrue(tjob.url_list, msg="#urls")
-                self.assertEqual(tjob.url_list[0], expected, msg="#urls")
+                self.assertTrue(tjob.url_list, msg="#results")
+                self.assertEqual(
+                    tjob.url_list[0], expected, msg="#results")
             else:
-                self.assertSequenceEqual(tjob.url_list, expected, msg="#urls")
+                self.assertSequenceEqual(
+                    tjob.url_list, expected, msg="#results")
 
         metadata = {k: v for k, v in result.items() if k[0] != "#"}
         if metadata:

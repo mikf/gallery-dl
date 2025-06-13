@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2023 Mike Fährmann
+# Copyright 2018-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -20,8 +20,7 @@ class KomikcastBase():
     category = "komikcast"
     root = "https://komikcast02.com"
 
-    @staticmethod
-    def parse_chapter_string(chapter_string, data=None):
+    def parse_chapter_string(self, chapter_string, data=None):
         """Parse 'chapter_string' value and add its info to 'data'"""
         if data is None:
             data = {}
@@ -52,8 +51,7 @@ class KomikcastChapterExtractor(KomikcastBase, ChapterExtractor):
         info = text.extr(page, "<title>", " - Komikcast<")
         return self.parse_chapter_string(info)
 
-    @staticmethod
-    def images(page):
+    def images(self, page):
         readerarea = text.extr(
             page, '<div class="main-reading-area', '</div')
         pattern = util.re(r"<img[^>]* src=[\"']([^\"']+)")
@@ -82,8 +80,7 @@ class KomikcastMangaExtractor(KomikcastBase, MangaExtractor):
             results.append((url, data.copy()))
         return results
 
-    @staticmethod
-    def metadata(page):
+    def metadata(self, page):
         """Return a dict with general metadata"""
         manga , pos = text.extract(page, "<title>" , " - Komikcast<")
         genres, pos = text.extract(

@@ -18,7 +18,7 @@ __tests__ = (
         "exif": True,
         "profile": True,
     },
-    "#urls"        : "https://live.staticflickr.com/7463/16089302239_de18cd8017_b_d.jpg",
+    "#results"     : "https://live.staticflickr.com/7463/16089302239_de18cd8017_b_d.jpg",
     "#pattern"     : flickr.FlickrImageExtractor.pattern,
     "#sha1_content": [
         "3133006c6d657fe54cf7d4c46b82abbcb0efaf9f",
@@ -202,7 +202,7 @@ __tests__ = (
         "info": True,
         "profile": True,
     },
-    "#urls"    : (
+    "#results" : (
         "https://live.staticflickr.com/7322/8719105033_4a21140220_o_d.jpg",
         "https://live.staticflickr.com/7376/8720226282_eae0faefd1_o_d.jpg",
         "https://live.staticflickr.com/7460/8720245516_ab06f80353_o_d.jpg",

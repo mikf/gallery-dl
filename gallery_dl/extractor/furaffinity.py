@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2020-2023 Mike Fährmann
+# Copyright 2020-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -152,8 +152,7 @@ class FuraffinityExtractor(Extractor):
 
         return data
 
-    @staticmethod
-    def _process_description(description):
+    def _process_description(self, description):
         return text.unescape(text.remove_html(description, "", ""))
 
     def _pagination(self, path, folder=None):

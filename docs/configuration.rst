@@ -207,11 +207,12 @@ Default
     ``"auto"``
 Example
     * ``"/!? (){}"``
-    * ``{" ": "_", "/": "-", "|": "-", ":": "_-_", "*": "_+_"}``
+    * ``{"/": "_", "+": "_+_", "({[": "(", "]})": ")", "a-z": "*"}``
 Description
-    | A string of characters to be replaced with the value of
+    | A ``string`` of characters to be replaced with the value of
       `path-replace <extractor.*.path-replace_>`__
-    | or an object mapping invalid/unwanted characters to their replacements
+    | or an ``object`` mapping invalid/unwanted characters, character sets,
+      or character ranges to their replacements
     | for generated path segment names.
 
     Special values:
@@ -6714,6 +6715,25 @@ Description
       Each element of this list is treated as a `format string`_ using
       the files' metadata as well as ``{_path}``, ``{_directory}``,
       and ``{_filename}``.
+
+
+exec.commands
+-------------
+Type
+    ``list`` of `commands <exec.command_>`__
+Example
+    .. code:: json
+
+        [
+            ["echo", "{user[account]}", "{id}"]
+            ["magick", "convert" "{_path}",  "\fF {_path.rpartition('.')[0]}.png"],
+            "rm {}",
+        ]
+Description
+    Multiple `commands <exec.command_>`__ to run in succession.
+
+    All `commands <exec.command_>`__ after the first returning with a non-zero
+    exit status will not be run.
 
 
 exec.event

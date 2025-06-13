@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2023 Mike Fährmann
+# Copyright 2014-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -43,7 +43,7 @@ class PixivExtractor(Extractor):
         self.meta_comments = self.config("comments")
         self.meta_captions = self.config("captions")
 
-        if self.meta_captions:
+        if self.sanity_workaround or self.meta_captions:
             self.meta_captions_sub = util.re(
                 r'<a href="/jump\.php\?([^"]+)').sub
 
@@ -91,10 +91,8 @@ class PixivExtractor(Extractor):
                     not work.get("_mypixiv") and not work.get("_ajax"):
                 body = self._request_ajax("/illust/" + str(work["id"]))
                 if body:
-                    caption = self.meta_captions_sub(
-                        lambda m: '<a href="' + text.unquote(m.group(1)),
+                    work["caption"] = self._sanitize_ajax_caption(
                         body["illustComment"])
-                    work["caption"] = text.unescape(caption)
 
             if transform_tags:
                 transform_tags(work)
@@ -279,7 +277,7 @@ class PixivExtractor(Extractor):
                 translated_name = None
             tags.append({"name": name, "translated_name": translated_name})
 
-        work["caption"] = text.unescape(body["illustComment"])
+        work["caption"] = self._sanitize_ajax_caption(body["illustComment"])
         work["page_count"] = count = body["pageCount"]
         if count == 1:
             return ({"url": url},)
@@ -318,6 +316,12 @@ class PixivExtractor(Extractor):
             except exception.HttpError:
                 pass
 
+    def _sanitize_ajax_caption(self, caption):
+        if not caption:
+            return ""
+        return text.unescape(self.meta_captions_sub(
+            lambda m: '<a href="' + text.unquote(m.group(1)), caption))
+
     def _fallback_image(self, src):
         if isinstance(src, str):
             urls = None
@@ -336,8 +340,7 @@ class PixivExtractor(Extractor):
             if fmt in urls:
                 yield urls[fmt]
 
-    @staticmethod
-    def _date_from_url(url, offset=timedelta(hours=9)):
+    def _date_from_url(self, url, offset=timedelta(hours=9)):
         try:
             _, _, _, _, _, y, m, d, H, M, S, _ = url.split("/")
             return datetime(
@@ -345,8 +348,7 @@ class PixivExtractor(Extractor):
         except Exception:
             return None
 
-    @staticmethod
-    def _make_work(kind, url, user):
+    def _make_work(self, kind, url, user):
         p = url.split("/")
         return {
             "create_date"     : "{}-{}-{}T{}:{}:{}+09:00".format(

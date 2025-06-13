@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2023 Mike Fährmann
+# Copyright 2018-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -260,8 +260,7 @@ class NewgroundsExtractor(Extractor):
             else:
                 yield {"image": url}
 
-    @staticmethod
-    def _extract_audio_data(extr, url):
+    def _extract_audio_data(self, extr, url):
         index = url.split("/")[5]
         return {
             "title"      : text.unescape(extr('"og:title" content="', '"')),
@@ -529,8 +528,7 @@ class NewgroundsFollowingExtractor(NewgroundsFavoriteExtractor):
         for url in self._pagination_favorites(kind, pnum):
             yield Message.Queue, url, data
 
-    @staticmethod
-    def _extract_favorites(page):
+    def _extract_favorites(self, page):
         return [
             text.ensure_http_scheme(user.rpartition('"')[2])
             for user in text.extract_iter(page, 'class="item-user', '"><img')

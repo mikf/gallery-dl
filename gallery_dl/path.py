@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2021-2023 Mike Fährmann
+# Copyright 2021-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -134,11 +134,14 @@ class PathFormat():
             basedir = self.clean_path(basedir)
         self.basedirectory = basedir
 
-    @staticmethod
-    def _build_cleanfunc(chars, repl):
+    def _build_cleanfunc(self, chars, repl):
         if not chars:
             return util.identity
         elif isinstance(chars, dict):
+            if 0 not in chars:
+                chars = self._process_repl_dict(chars)
+                chars[0] = None
+
             def func(x, table=str.maketrans(chars)):
                 return x.translate(table)
         elif len(chars) == 1:
@@ -149,11 +152,28 @@ class PathFormat():
                 re.compile("[" + chars + "]").sub, repl)
         return func
 
+    def _process_repl_dict(self, chars):
+        # can't modify 'chars' while *directly* iterating over its keys
+        for char in [c for c in chars if len(c) > 1]:
+            if len(char) == 3 and char[1] == "-":
+                citer = range(ord(char[0]), ord(char[2])+1)
+            else:
+                citer = char
+
+            repl = chars.pop(char)
+            for c in citer:
+                chars[c] = repl
+
+        return chars
+
     def open(self, mode="wb"):
         """Open file and return a corresponding file object"""
         try:
             return open(self.temppath, mode)
         except FileNotFoundError:
+            if "r" in mode:
+                # '.part' file no longer exists
+                return util.NullContext()
             os.makedirs(self.realdirectory)
             return open(self.temppath, mode)
 
@@ -163,8 +183,7 @@ class PathFormat():
             return self.check_file()
         return False
 
-    @staticmethod
-    def check_file():
+    def check_file(self):
         return True
 
     def _enum_file(self):

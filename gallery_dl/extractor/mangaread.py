@@ -15,8 +15,7 @@ class MangareadBase():
     category = "mangaread"
     root = "https://www.mangaread.org"
 
-    @staticmethod
-    def parse_chapter_string(chapter_string, data):
+    def parse_chapter_string(self, chapter_string, data):
         match = util.re(
             r"(?:(.+)\s*-\s*)?[Cc]hapter\s*(\d+)(\.\d+)?(?:\s*-\s*(.+))?"
         ).match(text.unescape(chapter_string).strip())

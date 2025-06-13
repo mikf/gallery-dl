@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2023 Mike Fährmann
+# Copyright 2014-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -308,6 +308,9 @@ class HttpDownloader(DownloaderBase):
             # download content
             self.downloading = True
             with pathfmt.open(mode) as fp:
+                if fp is None:
+                    # '.part' file no longer exists
+                    break
                 if file_header:
                     fp.write(file_header)
                     offset += len(file_header)
@@ -357,8 +360,7 @@ class HttpDownloader(DownloaderBase):
                 "closing the connection anyway", exc.__class__.__name__, exc)
             response.close()
 
-    @staticmethod
-    def receive(fp, content, bytes_total, bytes_start):
+    def receive(self, fp, content, bytes_total, bytes_start):
         write = fp.write
         for data in content:
             write(data)
@@ -408,8 +410,7 @@ class HttpDownloader(DownloaderBase):
         self.log.warning("Unknown MIME type '%s'", mtype)
         return "bin"
 
-    @staticmethod
-    def _adjust_extension(pathfmt, file_header):
+    def _adjust_extension(self, pathfmt, file_header):
         """Check filename extension against file header"""
         if not SIGNATURE_CHECKS[pathfmt.extension](file_header):
             for ext, check in SIGNATURE_CHECKS.items():
@@ -466,11 +467,18 @@ MIME_TYPES = {
     "application/x-pdf": "pdf",
     "application/x-shockwave-flash": "swf",
 
+    "text/html": "html",
+
     "application/ogg": "ogg",
     # https://www.iana.org/assignments/media-types/model/obj
     "model/obj": "obj",
     "application/octet-stream": "bin",
 }
+
+
+def _signature_html(s):
+    return b"<!doctype html".startswith(s[:14].lower())
+
 
 # https://en.wikipedia.org/wiki/List_of_file_signatures
 SIGNATURE_CHECKS = {
@@ -502,6 +510,8 @@ SIGNATURE_CHECKS = {
     "7z"  : lambda s: s[0:6] == b"\x37\x7A\xBC\xAF\x27\x1C",
     "pdf" : lambda s: s[0:5] == b"%PDF-",
     "swf" : lambda s: s[0:3] in (b"CWS", b"FWS"),
+    "html": _signature_html,
+    "htm" : _signature_html,
     "blend": lambda s: s[0:7] == b"BLENDER",
     # unfortunately the Wavefront .obj format doesn't have a signature,
     # so we check for the existence of Blender's comment

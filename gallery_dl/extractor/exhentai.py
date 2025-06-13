@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2023 Mike Fährmann
+# Copyright 2014-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -534,8 +534,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
 
             nl = data["_nl"]
 
-    @staticmethod
-    def _parse_image_info(url):
+    def _parse_image_info(self, url):
         for part in url.split("/")[4:]:
             try:
                 _, size, width, height, _ = part.split("-")
@@ -552,8 +551,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
             "height": text.parse_int(height),
         }
 
-    @staticmethod
-    def _parse_original_info(info):
+    def _parse_original_info(self, info):
         parts = info.lstrip().split(" ")
         size = text.parse_bytes(parts[3] + parts[4][0])
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2022 Mike Fährmann
+# Copyright 2018-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -369,6 +369,7 @@ SAMPLES = {
     ("heic", b"????ftypheis"),
     ("heic", b"????ftypheix"),
     ("svg" , b"<?xml"),
+    ("html", b"<!DOCTYPE html><html>...</html>"),
     ("ico" , b"\x00\x00\x01\x00"),
     ("cur" , b"\x00\x00\x02\x00"),
     ("psd" , b"8BPS"),

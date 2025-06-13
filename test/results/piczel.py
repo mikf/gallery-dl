@@ -18,7 +18,7 @@ __tests__ = (
 {
     "#url"  : "https://piczel.tv/gallery/Lulena/1114",
     "#class": piczel.PiczelFolderExtractor,
-    "#urls" : (
+    "#results": (
         "https://piczel.tv/static/uploads/gallery_image/32920/image/11194/1544126403-Lulena.png",
         "https://piczel.tv/static/uploads/gallery_image/32920/image/8008/1533616260-Lulena.png",
         "https://piczel.tv/static/uploads/plain_image/32920/image/3761/3761-Lulena.png",
@@ -34,7 +34,7 @@ __tests__ = (
 {
     "#url"  : "https://piczel.tv/gallery/image/7807",
     "#class": piczel.PiczelImageExtractor,
-    "#urls"        : "https://piczel.tv/static/uploads/gallery_image/32920/image/7807/1532236438-Lulena.png",
+    "#results"     : "https://piczel.tv/static/uploads/gallery_image/32920/image/7807/1532236438-Lulena.png",
     "#sha1_content": "df9a053a24234474a19bce2b7e27e0dec23bff87",
 
     "count"           : 1,
@@ -66,7 +66,7 @@ __tests__ = (
     "#url"    : "https://piczel.tv/gallery/image/8008",
     "#comment": "multi",
     "#class"  : piczel.PiczelImageExtractor,
-    "#urls"   : (
+    "#results": (
         "https://piczel.tv/static/uploads/gallery_image/32920/image/8008/1533616260-Lulena.png",
         "https://piczel.tv/static/uploads/plain_image/32920/image/3761/3761-Lulena.png",
         "https://piczel.tv/static/uploads/plain_image/32920/image/3762/3762-Lulena.png",

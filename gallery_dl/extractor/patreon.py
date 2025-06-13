@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2023 Mike Fährmann
+# Copyright 2019-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -188,16 +188,14 @@ class PatreonExtractor(Extractor):
 
         return attr
 
-    @staticmethod
-    def _transform(included):
+    def _transform(self, included):
         """Transform 'included' into an easier to handle format"""
         result = collections.defaultdict(dict)
         for inc in included:
             result[inc["type"]][inc["id"]] = inc["attributes"]
         return result
 
-    @staticmethod
-    def _files(post, included, key):
+    def _files(self, post, included, key):
         """Build a list of files"""
         files = post["relationships"].get(key)
         if files and files.get("data"):
@@ -226,8 +224,7 @@ class PatreonExtractor(Extractor):
         cd = response.headers.get("Content-Disposition")
         return text.extr(cd, 'filename="', '"')
 
-    @staticmethod
-    def _filehash(url):
+    def _filehash(self, url):
         """Extract MD5 hash from a download URL"""
         parts = url.partition("?")[0].split("/")
         parts.reverse()
@@ -237,8 +234,7 @@ class PatreonExtractor(Extractor):
                 return part
         return ""
 
-    @staticmethod
-    def _build_url(endpoint, query):
+    def _build_url(self, endpoint, query):
         return (
             "https://www.patreon.com/api/" + endpoint +
 

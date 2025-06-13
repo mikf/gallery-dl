@@ -42,7 +42,7 @@ __tests__ = (
 {
     "#url"  : "https://scrolller.com/cabin-in-northern-finland-7nagf1929p",
     "#class": scrolller.ScrolllerPostExtractor,
-    "#urls" : "https://static.scrolller.com/yocto/cabin-in-northern-finland-93vjsuxmcz.jpg",
+    "#results": "https://static.scrolller.com/yocto/cabin-in-northern-finland-93vjsuxmcz.jpg",
 
     "count"           : 1,
     "displayName"     : None,
@@ -86,7 +86,7 @@ __tests__ = (
     "#url"    : "https://scrolller.com/some-quick-news-tboi-rule-34-mod-czedll1bum",
     "#comment": "album post with empty 'mediaSources' (#7428)",
     "#class"  : scrolller.ScrolllerPostExtractor,
-    "#urls"   : "https://static.scrolller.com/gamma/some-quick-news-tboi-rule-34-mod-1-50uolks94u.png",
+    "#results": "https://static.scrolller.com/gamma/some-quick-news-tboi-rule-34-mod-1-50uolks94u.png",
     "#count"  : 1,
 
     "count": 1,

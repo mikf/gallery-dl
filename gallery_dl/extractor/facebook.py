@@ -37,15 +37,13 @@ class FacebookExtractor(Extractor):
         self.videos = self.config("videos", True)
         self.author_followups = self.config("author-followups", False)
 
-    @staticmethod
-    def decode_all(txt):
+    def decode_all(self, txt):
         return text.unescape(
             txt.encode().decode("unicode_escape")
             .encode("utf_16", "surrogatepass").decode("utf_16")
         ).replace("\\/", "/")
 
-    @staticmethod
-    def parse_set_page(set_page):
+    def parse_set_page(self, set_page):
         directory = {
             "set_id": text.extr(
                 set_page, '"mediaSetToken":"', '"'
@@ -77,8 +75,7 @@ class FacebookExtractor(Extractor):
 
         return directory
 
-    @staticmethod
-    def parse_photo_page(photo_page):
+    def parse_photo_page(self, photo_page):
         photo = {
             "id": text.extr(
                 photo_page, '"__isNode":"Photo","id":"', '"'
@@ -133,8 +130,7 @@ class FacebookExtractor(Extractor):
 
         return photo
 
-    @staticmethod
-    def parse_post_page(post_page):
+    def parse_post_page(self, post_page):
         first_photo_url = text.extr(
             text.extr(
                 post_page, '"__isMedia":"Photo"', '"target_group"'
@@ -148,8 +144,7 @@ class FacebookExtractor(Extractor):
 
         return post
 
-    @staticmethod
-    def parse_video_page(video_page):
+    def parse_video_page(self, video_page):
         video = {
             "id": text.extr(
                 video_page, '\\"video_id\\":\\"', '\\"'
@@ -410,8 +405,7 @@ class FacebookProfileExtractor(FacebookExtractor):
     )
     example = "https://www.facebook.com/USERNAME"
 
-    @staticmethod
-    def get_profile_photos_set_id(profile_photos_page):
+    def get_profile_photos_set_id(self, profile_photos_page):
         set_ids_raw = text.extr(
             profile_photos_page, '"pageItems"', '"page_info"'
         )

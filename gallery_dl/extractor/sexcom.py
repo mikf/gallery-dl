@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2023 Mike Fährmann
+# Copyright 2019-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -66,11 +66,26 @@ class SexcomExtractor(Extractor):
             url = text.urljoin(self.root, text.unescape(url))
 
     def _parse_pin(self, url):
-        response = self.request(url, fatal=False)
+        if "/pin/" in url:
+            if url[-1] != "/":
+                url += "/"
+        elif url[-1] == "/":
+            url = url[:-1]
+
+        response = self.request(url, fatal=False, allow_redirects=False)
+        location = response.headers.get("location")
+
+        if location:
+            if location[0] == "/":
+                location = self.root + location
+            if len(location) <= 25:
+                return self.log.warning(
+                    'Unable to fetch %s: Redirect to homepage', url)
+            response = self.request(location, fatal=False)
+
         if response.status_code >= 400:
-            self.log.warning('Unable to fetch %s ("%s %s")',
-                             url, response.status_code, response.reason)
-            return None
+            return self.log.warning('Unable to fetch %s: %s %s',
+                                    url, response.status_code, response.reason)
 
         if "/pin/" in response.url:
             return self._parse_pin_legacy(response)

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2017-2023 Mike Fährmann
+# Copyright 2017-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -585,8 +585,7 @@ class FlickrAPI(oauth.OAuth1API):
         if "license" in photo:
             photo["license_name"] = self.LICENSES.get(photo["license"])
 
-    @staticmethod
-    def _clean_info(info):
+    def _clean_info(self, info):
         info["title"] = info["title"]["_content"]
         info["description"] = info["description"]["_content"]
         return info

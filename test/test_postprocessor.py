@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2023 Mike Fährmann
+# Copyright 2019-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -10,7 +10,7 @@
 import os
 import sys
 import unittest
-from unittest.mock import Mock, mock_open, patch
+from unittest.mock import Mock, mock_open, patch, call
 
 import shutil
 import logging
@@ -232,6 +232,38 @@ class ExecTest(BasePostprocessorTest):
             ],
             shell=False,
         )
+
+    def test_command_many(self):
+        self._create({
+            "commands": [
+                "echo {} {_path} {_directory} {_filename} && rm {};",
+                ["~/script.sh", "{category}", "\fE _directory.upper()"],
+            ]
+        })
+
+        with patch("gallery_dl.util.Popen") as p:
+            i = Mock()
+            i.wait.return_value = 0
+            p.return_value = i
+            self._trigger(("after",))
+
+        self.assertEqual(p.call_args_list, [
+            call(
+                "echo {0} {0} {1} {2} && rm {0};".format(
+                    self.pathfmt.realpath,
+                    self.pathfmt.realdirectory,
+                    self.pathfmt.filename),
+                shell=True,
+            ),
+            call(
+                [
+                    os.path.expanduser("~/script.sh"),
+                    self.pathfmt.kwdict["category"],
+                    self.pathfmt.realdirectory.upper(),
+                ],
+                shell=False,
+            ),
+        ])
 
     def test_command_returncode(self):
         self._create({
@@ -713,8 +745,7 @@ class MetadataTest(BasePostprocessorTest):
 }
 """)
 
-    @staticmethod
-    def _output(mock):
+    def _output(self, mock):
         return "".join(
             call[1][0]
             for call in mock.mock_calls
@@ -945,8 +976,8 @@ class ZipTest(BasePostprocessorTest):
         self._trigger(("finalize",))
 
         self.assertEqual(pp.zfile.write.call_count, 3)
-        for call in pp.zfile.write.call_args_list:
-            args, kwargs = call
+        for call_args in pp.zfile.write.call_args_list:
+            args, kwargs = call_args
             self.assertEqual(len(args), 2)
             self.assertEqual(len(kwargs), 0)
             self.assertEqual(args[0], self.pathfmt.temppath)

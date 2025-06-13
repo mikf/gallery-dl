@@ -12,7 +12,7 @@ __tests__ = (
     "#url"     : "https://pixeldrain.com/u/jW9E6s4h",
     "#category": ("", "pixeldrain", "file"),
     "#class"   : pixeldrain.PixeldrainFileExtractor,
-    "#urls"        : "https://pixeldrain.com/api/file/jW9E6s4h?download",
+    "#results"     : "https://pixeldrain.com/api/file/jW9E6s4h?download",
     "#sha1_content": "0c8768055e4e20e7c7259608b67799171b691140",
 
     "abuse_reporter_name" : "",
@@ -49,7 +49,7 @@ __tests__ = (
     "#url"     : "https://pixeldrain.com/u/yEK1n2Qc",
     "#category": ("", "pixeldrain", "file"),
     "#class"   : pixeldrain.PixeldrainFileExtractor,
-    "#urls"        : "https://pixeldrain.com/api/file/yEK1n2Qc?download",
+    "#results"     : "https://pixeldrain.com/api/file/yEK1n2Qc?download",
     "#sha1_content": "08463261191d403de2133d829060050d8b04609f",
 
     "date"       : "dt:2023-11-22 16:38:04",
@@ -67,7 +67,7 @@ __tests__ = (
     "#url"     : "https://pixeldrain.com/l/zQ7XpWfM",
     "#category": ("", "pixeldrain", "album"),
     "#class"   : pixeldrain.PixeldrainAlbumExtractor,
-    "#urls"    : (
+    "#results" : (
         "https://pixeldrain.com/api/file/yEK1n2Qc?download",
         "https://pixeldrain.com/api/file/jW9E6s4h?download",
     ),
@@ -93,7 +93,7 @@ __tests__ = (
     "#url"     : "https://pixeldrain.com/l/zQ7XpWfM#item=0",
     "#category": ("", "pixeldrain", "album"),
     "#class"   : pixeldrain.PixeldrainAlbumExtractor,
-    "#urls"        : "https://pixeldrain.com/api/file/jW9E6s4h?download",
+    "#results"     : "https://pixeldrain.com/api/file/jW9E6s4h?download",
     "#sha1_content": "0c8768055e4e20e7c7259608b67799171b691140",
 },
 
@@ -101,7 +101,7 @@ __tests__ = (
     "#url"     : "https://pixeldrain.com/d/8xz8hcYJ",
     "#category": ("", "pixeldrain", "folder"),
     "#class"   : pixeldrain.PixeldrainFolderExtractor,
-    "#urls"        : "https://pixeldrain.com/api/filesystem/8xz8hcYJ?attach",
+    "#results"     : "https://pixeldrain.com/api/filesystem/8xz8hcYJ?attach",
     "#sha1_content": "edfea851cad717f5643cb94ac04b32335611acf2",
 
     "date"       : "dt:2025-05-19 15:27:54",
@@ -121,7 +121,7 @@ __tests__ = (
     "#url"     : "https://pixeldrain.com/api/filesystem/8xz8hcYJ",
     "#category": ("", "pixeldrain", "folder"),
     "#class"   : pixeldrain.PixeldrainFolderExtractor,
-    "#urls"        : "https://pixeldrain.com/api/filesystem/8xz8hcYJ?attach",
+    "#results"     : "https://pixeldrain.com/api/filesystem/8xz8hcYJ?attach",
     "#sha1_content": "edfea851cad717f5643cb94ac04b32335611acf2",
 
     "date"       : "dt:2025-05-19 15:27:54",
@@ -142,7 +142,7 @@ __tests__ = (
     "#comment" : "dir with file",
     "#category": ("", "pixeldrain", "folder"),
     "#class"   : pixeldrain.PixeldrainFolderExtractor,
-    "#urls"    : ("https://pixeldrain.com/api/filesystem/DkdR6QRh/test.mp4?attach"),
+    "#results" : ("https://pixeldrain.com/api/filesystem/DkdR6QRh/test.mp4?attach"),
 
     "id": "DkdR6QRh",
 },
@@ -161,7 +161,7 @@ __tests__ = (
     "#comment" : "dir with subdir and files",
     "#category": ("", "pixeldrain", "folder"),
     "#class"   : pixeldrain.PixeldrainFolderExtractor,
-    "#urls"    : (
+    "#results" : (
         "https://pixeldrain.com/api/filesystem/qTnZkhCJ/test1.mp4?attach",
         "https://pixeldrain.com/api/filesystem/qTnZkhCJ/test2.mp4?attach",
     ),
@@ -174,7 +174,7 @@ __tests__ = (
     "#comment" : "file in subdir",
     "#category": ("", "pixeldrain", "folder"),
     "#class"   : pixeldrain.PixeldrainFolderExtractor,
-    "#urls"    : (
+    "#results" : (
         "https://pixeldrain.com/api/filesystem/qTnZkhCJ/subdir/test3.mp4?attach",
     ),
 

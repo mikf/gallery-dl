@@ -60,7 +60,7 @@ __tests__ = (
     "#comment" : "svg (#5643)",
     "#category": ("philomena", "derpibooru", "post"),
     "#class"   : philomena.PhilomenaPostExtractor,
-    "#urls"        : "https://derpicdn.net/img/view/2024/4/1/3334658.svg",
+    "#results"     : "https://derpicdn.net/img/view/2024/4/1/3334658.svg",
     "#sha1_content": "eec5adf02e2a4fe83b9211c0444d57dc03e21f50",
 
     "extension": "svg",

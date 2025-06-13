@@ -35,7 +35,7 @@ __tests__ = (
     "#url"    : "https://it.pictoa.com/albums/carl-virkus-149024.html",
     "#comment": "null tags",
     "#class"  : pictoa.PictoaAlbumExtractor,
-    "#urls"   : "https://www.pictoa.com/albums/carl-virkus-149024/2221031.html",
+    "#results": "https://www.pictoa.com/albums/carl-virkus-149024/2221031.html",
 
     "album_id"   : "149024",
     "album_title": "Carl Virkus",
@@ -45,7 +45,7 @@ __tests__ = (
 {
     "#url"  : "https://www.pictoa.com/albums/anna-kendrick-showing-cleavage-at-the-56th-annual-grammy-awards-3233172/75206264.html",
     "#class": pictoa.PictoaImageExtractor,
-    "#urls" : "https://s1.pictoa.com/media/galleries/168/930/168930594a8750dfd3e/3233172594a8759dcc3a.jpg",
+    "#results": "https://s1.pictoa.com/media/galleries/168/930/168930594a8750dfd3e/3233172594a8759dcc3a.jpg",
 
     "album_id"   : "3233172",
     "album_title": "Anna Kendrick showing cleavage at the 56th Annual GRAMMY Awards",
@@ -58,7 +58,7 @@ __tests__ = (
 {
     "#url"  : "https://nl.pictoa.com/albums/kandi-barbour-3840809/94038192.html",
     "#class": pictoa.PictoaImageExtractor,
-    "#urls"        : "https://s2.pictoa.com/media/galleries/294/452/29445260009fa5b68e4/384080960009fb51e389.jpg",
+    "#results"     : "https://s2.pictoa.com/media/galleries/294/452/29445260009fa5b68e4/384080960009fb51e389.jpg",
     "#sha1_content": "152595069016da89565eb3d8e73df835afd22e2c",
 
     "album_id"   : "3840809",

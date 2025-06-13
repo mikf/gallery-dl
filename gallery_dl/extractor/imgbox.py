@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2023 Mike Fährmann
+# Copyright 2014-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -30,18 +30,15 @@ class ImgboxExtractor(Extractor):
                 text.nameext_from_url(imgdata["filename"], imgdata)
                 yield Message.Url, self.get_image_url(imgpage), imgdata
 
-    @staticmethod
-    def get_job_metadata():
+    def get_job_metadata(self):
         """Collect metadata for extractor-job"""
         return {}
 
-    @staticmethod
-    def get_image_keys():
+    def get_image_keys(self):
         """Return an iterable containing all image-keys"""
         return []
 
-    @staticmethod
-    def get_image_metadata(page):
+    def get_image_metadata(self, page):
         """Collect metadata for a downloadable file"""
         return text.extract_all(page, (
             ("num"      , '</a> &nbsp; ', ' of '),
@@ -49,8 +46,7 @@ class ImgboxExtractor(Extractor):
             ("filename" , ' title="', '"'),
         ))[0]
 
-    @staticmethod
-    def get_image_url(page):
+    def get_image_url(self, page):
         """Extract download-url"""
         return text.extr(page, 'property="og:image" content="', '"')
 
@@ -102,8 +98,7 @@ class ImgboxImageExtractor(ImgboxExtractor):
     def get_image_keys(self):
         return (self.image_key,)
 
-    @staticmethod
-    def get_image_metadata(page):
+    def get_image_metadata(self, page):
         data = ImgboxExtractor.get_image_metadata(page)
         if not data["filename"]:
             raise exception.NotFoundError("image")

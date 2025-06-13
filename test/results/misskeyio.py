@@ -13,7 +13,7 @@ __tests__ = (
     "#category": ("misskey", "misskey.io", "user"),
     "#class"   : misskey.MisskeyUserExtractor,
     "#options" : {"include": "all"},
-    "#urls"    : (
+    "#results" : (
         "https://misskey.io/@lithla/info",
         "https://misskey.io/@lithla/avatar",
         "https://misskey.io/@lithla/banner",
@@ -40,7 +40,7 @@ __tests__ = (
     "#url"     : "https://misskey.io/@lithla/avatar",
     "#category": ("misskey", "misskey.io", "avatar"),
     "#class"   : misskey.MisskeyAvatarExtractor,
-    "#urls"    : "https://media.misskeyusercontent.jp/io/d84e09f8-99b7-423a-9229-78ba65ab8a82.gif",
+    "#results" : "https://media.misskeyusercontent.jp/io/d84e09f8-99b7-423a-9229-78ba65ab8a82.gif",
     "#sha1_content": "375af4d302a4aef0bc8fc3f15b2c75ec952ac086",
 
     "extension": "gif",
@@ -55,7 +55,7 @@ __tests__ = (
     "#url"     : "https://misskey.io/@lithla/banner",
     "#category": ("misskey", "misskey.io", "background"),
     "#class"   : misskey.MisskeyBackgroundExtractor,
-    "#urls"    : "https://media.misskeyusercontent.jp/io/ddea6f5f-9cde-42ff-8e0b-dafbfa9cca9b.png",
+    "#results" : "https://media.misskeyusercontent.jp/io/ddea6f5f-9cde-42ff-8e0b-dafbfa9cca9b.png",
     "#sha1_content": "02e1d33a7aa03d8e63baa82ea6d75c7d5de80112",
 
     "extension": "png",
@@ -86,7 +86,7 @@ __tests__ = (
     "#url"     : "https://misskey.io/notes/9bhqfo835v",
     "#category": ("misskey", "misskey.io", "note"),
     "#class"   : misskey.MisskeyNoteExtractor,
-    "#urls"    : (
+    "#results" : (
         "https://media.misskeyusercontent.jp/misskey/1cbba095-5a19-4107-8e20-3efb0456dda4.png?sensitive=true",
         "https://media.misskeyusercontent.jp/misskey/6baa558b-94ac-4bd2-a393-a52324a9d2d4.png?sensitive=true",
         "https://media.misskeyusercontent.jp/misskey/14133ad0-ea40-4fed-b6e7-65d4cbe19b96.png?sensitive=true",

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2023 Mike Fährmann
+# Copyright 2014-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -273,8 +273,7 @@ def main():
                 jobtype = job.UrlJob
                 jobtype.maxdepth = args.list_urls
                 if config.get(("output",), "fallback", True):
-                    jobtype.handle_url = \
-                        staticmethod(jobtype.handle_url_fallback)
+                    jobtype.handle_url = jobtype.handle_url_fallback
             elif args.dump_json:
                 jobtype = job.DataJob
                 jobtype.resolve = args.dump_json - 1
@@ -549,13 +548,11 @@ class InputManager():
                 "Unable to update '%s' (%s: %s)",
                 path, exc.__class__.__name__, exc)
 
-    @staticmethod
-    def _action_comment(lines, indicies):
+    def _action_comment(self, lines, indicies):
         for i in indicies:
             lines[i] = "# " + lines[i]
 
-    @staticmethod
-    def _action_delete(lines, indicies):
+    def _action_delete(self, lines, indicies):
         for i in indicies:
             lines[i] = ""
 

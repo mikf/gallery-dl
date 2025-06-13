@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2023 Mike Fährmann
+# Copyright 2018-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -108,8 +108,7 @@ class PahealTagExtractor(PahealExtractor):
                 return
             pnum += 1
 
-    @staticmethod
-    def _extract_data(post):
+    def _extract_data(self, post):
         pid , pos = text.extract(post, "", "'")
         data, pos = text.extract(post, "title='", "'", pos)
         md5 , pos = text.extract(post, "/_thumbs/", "/", pos)

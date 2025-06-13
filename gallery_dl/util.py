@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2017-2023 Mike Fährmann
+# Copyright 2017-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -8,7 +8,7 @@
 
 """Utility functions and classes"""
 
-import re
+import re as re_module
 import os
 import sys
 import json
@@ -28,9 +28,9 @@ from email.utils import mktime_tz, parsedate_tz
 from . import text, version, exception
 
 try:
-    re_compile = re._compiler.compile
+    re_compile = re_module._compiler.compile
 except AttributeError:
-    re_compile = re.sre_compile.compile
+    re_compile = re_module.sre_compile.compile
 
 CACHE_PATTERN = {}
 
@@ -684,8 +684,7 @@ class CustomNone():
     def __call__(self, *args, **kwargs):
         return self
 
-    @staticmethod
-    def __next__():
+    def __next__(self):
         raise StopIteration
 
     def __eq__(self, other):
@@ -733,20 +732,17 @@ class CustomNone():
     __abs__ = identity
     __invert__ = identity
 
-    @staticmethod
-    def __len__():
+    def __len__(self):
         return 0
 
     __int__ = __len__
     __hash__ = __len__
     __index__ = __len__
 
-    @staticmethod
-    def __format__(_):
+    def __format__(self, _):
         return "None"
 
-    @staticmethod
-    def __str__():
+    def __str__(self):
         return "None"
 
     __repr__ = __str__
@@ -795,7 +791,7 @@ GLOBALS = {
     "hash_sha1": sha1,
     "hash_md5" : md5,
     "std"      : ModuleProxy(),
-    "re"       : re,
+    "re"       : re_module,
     "exts_image"  : EXTS_IMAGE,
     "exts_video"  : EXTS_VIDEO,
     "exts_archive": EXTS_ARCHIVE,
@@ -1052,8 +1048,7 @@ class RangePredicate():
                 return True
         return False
 
-    @staticmethod
-    def _parse(rangespec):
+    def _parse(self, rangespec):
         """Parse an integer range string and return the resulting ranges
 
         Examples:

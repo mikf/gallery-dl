@@ -12,7 +12,7 @@ __tests__ = (
 {
     "#url"     : "https://xfolio.jp/portfolio/yutakashii/works/23977",
     "#class"   : xfolio.XfolioWorkExtractor,
-    "#urls"    : (
+    "#results" : (
         "https://xfolio.jp/user_asset.php?id=113179&work_id=23977&work_image_id=113179&type=work_image",
         "https://xfolio.jp/user_asset.php?id=113182&work_id=23977&work_image_id=113182&type=work_image",
         "https://xfolio.jp/user_asset.php?id=113185&work_id=23977&work_image_id=113185&type=work_image",
@@ -79,7 +79,7 @@ __tests__ = (
     "#url"     : "https://xfolio.jp/portfolio/donguri/series/1391402",
     "#class"   : xfolio.XfolioSeriesExtractor,
     "#auth"    : True,
-    "#urls"    : (
+    "#results" : (
         "https://xfolio.jp/portfolio/donguri/works/2472402",
         "https://xfolio.jp/portfolio/donguri/works/2470700",
     ),

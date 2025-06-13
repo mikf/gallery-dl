@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2023 Mike Fährmann
+# Copyright 2015-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -73,8 +73,7 @@ class NijieExtractor(AsynchronousMixin, BaseExtractor):
     def image_ids(self):
         """Collect all relevant image-ids"""
 
-    @staticmethod
-    def _extract_data(page):
+    def _extract_data(self, page):
         """Extract image metadata from 'page'"""
         extr = text.extract_from(page)
         keywords = text.unescape(extr(
@@ -90,8 +89,7 @@ class NijieExtractor(AsynchronousMixin, BaseExtractor):
             "tags"       : keywords[2:-1],
         }
 
-    @staticmethod
-    def _extract_data_horne(page):
+    def _extract_data_horne(self, page):
         """Extract image metadata from 'page'"""
         extr = text.extract_from(page)
         keywords = text.unescape(extr(
@@ -124,8 +122,7 @@ class NijieExtractor(AsynchronousMixin, BaseExtractor):
             # do NOT use text.extr() here, as it doesn't support a pos argument
             return (text.extract(page, 'itemprop="image" src="', '"', pos)[0],)
 
-    @staticmethod
-    def _extract_user_name(page):
+    def _extract_user_name(self, page):
         return text.unescape(text.extr(page, "<br />", "<"))
 
     def login(self):
@@ -248,8 +245,7 @@ class NijieNuitaExtractor(NijieExtractor):
         data["user_name"] = self.user_name
         return data
 
-    @staticmethod
-    def _extract_user_name(page):
+    def _extract_user_name(self, page):
         return text.unescape(text.extr(page, "<title>", "さんの抜いた"))
 
 
@@ -262,8 +258,7 @@ class NijieFeedExtractor(NijieExtractor):
     def image_ids(self):
         return self._pagination("like_user_view")
 
-    @staticmethod
-    def _extract_user_name(page):
+    def _extract_user_name(self, page):
         return ""
 
 

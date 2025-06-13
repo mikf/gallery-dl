@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2023 Mike Fährmann
+# Copyright 2019-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -121,22 +121,18 @@ class KeenspotComicExtractor(Extractor):
         pos = page.index(self._needle) + len(self._needle)
         return text.extract(page, 'href="', '"', pos)[0]
 
-    @staticmethod
-    def _next_link(page):
+    def _next_link(self, page):
         return text.extr(page, '<link rel="next" href="', '"')
 
-    @staticmethod
-    def _next_id(page):
+    def _next_id(self, page):
         pos = page.find('id="next_')
         return text.rextr(page, 'href="', '"', pos) if pos >= 0 else None
 
-    @staticmethod
-    def _next_lastblood(page):
+    def _next_lastblood(self, page):
         pos = page.index("link rel='next'")
         return text.extract(page, "href='", "'", pos)[0]
 
-    @staticmethod
-    def _next_brawl(page):
+    def _next_brawl(self, page):
         pos = page.index("comic-nav-next")
         url = text.rextr(page, 'href="', '"', pos)
         return None if "?random" in url else url

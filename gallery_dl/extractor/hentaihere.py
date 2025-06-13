@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2023 Mike Fährmann
+# Copyright 2016-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -49,8 +49,7 @@ class HentaihereChapterExtractor(HentaihereBase, ChapterExtractor):
             "language": "English",
         }
 
-    @staticmethod
-    def images(page):
+    def images(self, page):
         images = text.extr(page, "var rff_imageList = ", ";")
         return [
             ("https://hentaicdn.com/hentai" + part, None)

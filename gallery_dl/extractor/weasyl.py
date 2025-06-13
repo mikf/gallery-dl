@@ -20,8 +20,7 @@ class WeasylExtractor(Extractor):
     root = "https://www.weasyl.com"
     useragent = util.USERAGENT
 
-    @staticmethod
-    def populate_submission(data):
+    def populate_submission(self, data):
         # Some submissions don't have content and can be skipped
         if "submission" in data["media"]:
             data["url"] = data["media"]["submission"][0]["url"]

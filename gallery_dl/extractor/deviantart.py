@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2023 Mike Fährmann
+# Copyright 2015-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -280,8 +280,7 @@ class DeviantartExtractor(Extractor):
             deviation["index_base36"],
         ))
 
-    @staticmethod
-    def commit(deviation, target):
+    def commit(self, deviation, target):
         url = target["src"]
         name = target.get("filename") or url
         target = target.copy()
@@ -680,8 +679,7 @@ x2="45.4107524%" y2="71.4898596%" id="app-root-3">\
 
         return content
 
-    @staticmethod
-    def _find_folder(folders, name, uuid):
+    def _find_folder(self, folders, name, uuid):
         if uuid.isdecimal():
             match = util.re(
                 "(?i)" + name.replace("-", "[^a-z0-9]+") + "$").match
@@ -1889,8 +1887,7 @@ class DeviantartOAuthAPI():
         result.extend(self._pagination(endpoint, params, False, key=key))
         return result
 
-    @staticmethod
-    def _shared_content(results):
+    def _shared_content(self, results):
         """Return an iterable of shared deviations in 'results'"""
         for result in results:
             for item in result.get("items") or ():

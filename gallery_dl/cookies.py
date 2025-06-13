@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2022-2023 Mike Fährmann
+# Copyright 2022-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -524,8 +524,7 @@ class LinuxChromiumCookieDecryptor(ChromiumCookieDecryptor):
         self._cookie_counts = {"v10": 0, "v11": 0, "other": 0}
         self._offset = (32 if meta_version >= 24 else 0)
 
-    @staticmethod
-    def derive_key(password):
+    def derive_key(self, password):
         # values from
         # https://chromium.googlesource.com/chromium/src/+/refs/heads
         # /main/components/os_crypt/os_crypt_linux.cc
@@ -569,8 +568,7 @@ class MacChromiumCookieDecryptor(ChromiumCookieDecryptor):
         self._cookie_counts = {"v10": 0, "other": 0}
         self._offset = (32 if meta_version >= 24 else 0)
 
-    @staticmethod
-    def derive_key(password):
+    def derive_key(self, password):
         # values from
         # https://chromium.googlesource.com/chromium/src/+/refs/heads
         # /main/components/os_crypt/os_crypt_mac.mm

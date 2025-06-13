@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2021-2022 Mike Fährmann
+# Copyright 2021-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -89,8 +89,7 @@ class GelbooruV02Extractor(booru.BooruExtractor):
                 return
             params["pid"] += self.per_page
 
-    @staticmethod
-    def _prepare(post):
+    def _prepare(self, post):
         post["tags"] = post["tags"].strip()
         post["date"] = text.parse_datetime(
             post["created_at"], "%a %b %d %H:%M:%S %z %Y")

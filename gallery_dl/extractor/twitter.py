@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2023 Mike Fährmann
+# Copyright 2016-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -123,6 +123,11 @@ class TwitterExtractor(Extractor):
             tdata.update(metadata)
             tdata["count"] = len(files)
             yield Message.Directory, tdata
+
+            del tdata["source_id"]
+            if "source_user" in tdata:
+                del tdata["source_user"]
+
             for tdata["num"], file in enumerate(files, 1):
                 file.update(tdata)
                 url = file.pop("url")
@@ -174,38 +179,25 @@ class TwitterExtractor(Extractor):
                     if not self.unavailable:
                         continue
 
-            mtype = media.get("type")
-            descr = media.get("ext_alt_text")
-            width = media["original_info"].get("width", 0)
-            height = media["original_info"].get("height", 0)
-
             if "video_info" in media:
                 if self.videos == "ytdl":
-                    files.append({
+                    file = {
                         "url": "ytdl:{}/i/web/status/{}".format(
                             self.root, tweet["id_str"]),
-                        "type"       : mtype,
-                        "width"      : width,
-                        "height"     : height,
-                        "extension"  : None,
-                        "description": descr,
-                    })
+                        "extension": "mp4",
+                    }
                 elif self.videos:
                     video_info = media["video_info"]
                     variant = max(
                         video_info["variants"],
                         key=lambda v: v.get("bitrate", 0),
                     )
-                    files.append({
-                        "url"        : variant["url"],
-                        "type"       : mtype,
-                        "width"      : width,
-                        "height"     : height,
-                        "bitrate"    : variant.get("bitrate", 0),
-                        "duration"   : video_info.get(
+                    file = {
+                        "url"     : variant["url"],
+                        "bitrate" : variant.get("bitrate", 0),
+                        "duration": video_info.get(
                             "duration_millis", 0) / 1000,
-                        "description": descr,
-                    })
+                    }
             elif "media_url_https" in media:
                 url = media["media_url_https"]
                 if url[-4] == ".":
@@ -213,16 +205,33 @@ class TwitterExtractor(Extractor):
                     base += "?format=" + fmt + "&name="
                 else:
                     base = url.rpartition("=")[0] + "="
-                files.append(text.nameext_from_url(url, {
-                    "url"        : base + self._size_image,
-                    "type"       : mtype,
-                    "width"      : width,
-                    "height"     : height,
-                    "_fallback"  : self._image_fallback(base),
-                    "description": descr,
-                }))
+                file = text.nameext_from_url(url, {
+                    "url"      : base + self._size_image,
+                    "_fallback": self._image_fallback(base),
+                })
             else:
                 files.append({"url": media["media_url"]})
+                continue
+
+            file["type"] = media.get("type")
+            file["width"] = media["original_info"].get("width", 0)
+            file["height"] = media["original_info"].get("height", 0)
+            file["description"] = media.get("ext_alt_text")
+            self._extract_media_source(file, media)
+            files.append(file)
+
+    def _extract_media_source(self, dest, media):
+        dest["source_id"] = 0
+
+        if "source_status_id_str" in media:
+            try:
+                dest["source_id"] = text.parse_int(
+                    media["source_status_id_str"])
+                dest["source_user"] = self._transform_user(
+                    media["additional_media_info"]["source_user"]
+                    ["user_results"]["result"])
+            except Exception:
+                pass
 
     def _image_fallback(self, base):
         for fmt in self._size_fallback:
@@ -348,6 +357,7 @@ class TwitterExtractor(Extractor):
                 tget("in_reply_to_status_id_str")),
             "conversation_id": text.parse_int(
                 tget("conversation_id_str")),
+            "source_id"     : 0,
             "date"          : date,
             "author"        : author,
             "user"          : self._user or author,
@@ -411,6 +421,9 @@ class TwitterExtractor(Extractor):
             tdata["reply_to"] = legacy["in_reply_to_screen_name"]
         if "quoted_by" in legacy:
             tdata["quote_by"] = legacy["quoted_by"]
+        if "extended_entities" in legacy:
+            self._extract_media_source(
+                tdata, legacy["extended_entities"]["media"][0])
         if tdata["retweet_id"]:
             tdata["content"] = "RT @{}: {}".format(
                 author["name"], tdata["content"])

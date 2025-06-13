@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2023 Mike Fährmann
+# Copyright 2018-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -39,8 +39,7 @@ class WallhavenExtractor(Extractor):
         """Return general metadata"""
         return ()
 
-    @staticmethod
-    def _transform(wp):
+    def _transform(self, wp):
         wp["url"] = wp.pop("path")
         if "tags" in wp:
             wp["tags"] = [t["name"] for t in wp["tags"]]

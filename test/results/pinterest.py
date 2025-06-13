@@ -13,6 +13,7 @@ __tests__ = (
     "#url"     : "https://www.pinterest.com/pin/858146903966145189/",
     "#category": ("", "pinterest", "pin"),
     "#class"   : pinterest.PinterestPinExtractor,
+    "#results" : "https://i.pinimg.com/originals/d4/f4/7f/d4f47fa2fce4c4c28475af5d94972904.jpg",
     "#sha1_url"    : "afb3c26719e3a530bb0e871c480882a801a4e8a5",
     "#sha1_content": [
         "4c435a66f6bb82bb681db2ecc888f76cf6c5f9ca",
@@ -32,7 +33,7 @@ __tests__ = (
     "#url"     : "https://jp.pinterest.com/pin/858146904010573850/",
     "#comment" : "story pin with images",
     "#class"   : pinterest.PinterestPinExtractor,
-    "#urls"    : (
+    "#results" : (
         "https://i.pinimg.com/originals/0f/b0/8c/0fb08c519067dd263a1fcfecea775450.jpg",
         "https://i.pinimg.com/originals/2f/27/f3/2f27f3eb781b107ce58bf588c12a12b7.jpg",
         "https://i.pinimg.com/originals/55/fd/df/55fddf8d26aa0d96071af52ac6a0c25f.jpg",
@@ -43,7 +44,7 @@ __tests__ = (
     "#url"     : "https://www.pinterest.com/pin/63824519713049795/",
     "#comment" : "story pin with video (#6188)",
     "#class"   : pinterest.PinterestPinExtractor,
-    "#urls"    : "ytdl:https://v1.pinimg.com/videos/iht/hls/7a/b0/cc/7ab0cc56dcbfc1508b8d650af7b0a593.m3u8",
+    "#results" : "ytdl:https://v1.pinimg.com/videos/iht/hls/7a/b0/cc/7ab0cc56dcbfc1508b8d650af7b0a593.m3u8",
 
     "extension"     : "mp4",
     "_ytdl_manifest": "hls",
@@ -54,7 +55,7 @@ __tests__ = (
     "#comment" : "story pin with audio (#6188)",
     "#class"   : pinterest.PinterestPinExtractor,
     "#range"   : "2",
-    "#urls"    : "https://v1.pinimg.com/audios/mp3/5d/37/74/5d37749bde03855c1292f8869c8d9387.mp3",
+    "#results" : "https://v1.pinimg.com/audios/mp3/5d/37/74/5d37749bde03855c1292f8869c8d9387.mp3",
 
     "extension": "mp3",
 },
@@ -64,21 +65,32 @@ __tests__ = (
     "#comment" : "story pin with text",
     "#class"   : pinterest.PinterestPinExtractor,
     "#range"   : "2",
-    "#urls"    : "text:Everskies character+outfits i made",
+    "#results" : "text:Everskies character+outfits i made",
 },
 
 {
     "#url"     : "https://www.pinterest.com/pin/1025272671423645004/",
     "#comment" : "story pin with 'story_pin_static_sticker_block' blocks",
     "#class"   : pinterest.PinterestPinExtractor,
-    "#urls"    : "https://i.pinimg.com/originals/70/ab/31/70ab31654b2329e2ec74a39adf7ee683.jpg",
+    "#results" : "https://i.pinimg.com/originals/70/ab/31/70ab31654b2329e2ec74a39adf7ee683.jpg",
 },
 
 {
     "#url"     : "https://www.pinterest.com/pin/777856166916298367",
     "#comment" : "story pin with 'story_pin_product_sticker_block' blocks (#7563)",
     "#class"   : pinterest.PinterestPinExtractor,
-    "#urls"    : "https://i.pinimg.com/originals/3e/0a/2e/3e0a2e6c1173866c530c8ffe18d08b9f.jpg",
+    "#results" : "https://i.pinimg.com/originals/3e/0a/2e/3e0a2e6c1173866c530c8ffe18d08b9f.jpg",
+    "#exception": exception.NotFoundError,
+},
+
+{
+    "#url"     : "https://pinterest.com/pin/725220346239561090/",
+    "#comment" : "stripped 'description' & 'closeup_unified_description' (#4335)",
+    "#class"   : pinterest.PinterestPinExtractor,
+    "#results" : "https://i.pinimg.com/originals/66/a3/9a/66a39a10c015df67b85481105fb3a81e.jpg",
+
+    "description": "",
+    "closeup_unified_description": "",
 },
 
 {
@@ -91,7 +103,7 @@ __tests__ = (
 {
     "#url"     : "https://www.pinterest.com/g1952849/test-/",
     "#class"   : pinterest.PinterestBoardExtractor,
-    "#urls"    : "https://i.pinimg.com/originals/d4/f4/7f/d4f47fa2fce4c4c28475af5d94972904.jpg",
+    "#results" : "https://i.pinimg.com/originals/d4/f4/7f/d4f47fa2fce4c4c28475af5d94972904.jpg",
 },
 
 {
@@ -109,7 +121,7 @@ __tests__ = (
     "#category": ("", "pinterest", "board"),
     "#class"   : pinterest.PinterestBoardExtractor,
     "#options" : {"sections": True},
-    "#urls"    : "https://www.pinterest.jp/gdldev/bname/id:5345901183739414095",
+    "#results" : "https://www.pinterest.jp/gdldev/bname/id:5345901183739414095",
 },
 
 {

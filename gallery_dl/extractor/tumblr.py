@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2023 Mike Fährmann
+# Copyright 2016-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -198,14 +198,12 @@ class TumblrExtractor(Extractor):
                                  "', '".join(sorted(invalid)))
             return types
 
-    @staticmethod
-    def _prepare(url, post):
+    def _prepare(self, url, post):
         text.nameext_from_url(url, post)
         post["hash"] = post["filename"].partition("_")[2]
         return Message.Url, url, post
 
-    @staticmethod
-    def _prepare_image(url, post):
+    def _prepare_image(self, url, post):
         text.nameext_from_url(url, post)
 
         # try ".gifv" (#3095)
@@ -226,8 +224,7 @@ class TumblrExtractor(Extractor):
 
         return Message.Url, url, post
 
-    @staticmethod
-    def _prepare_avatar(url, post, blog):
+    def _prepare_avatar(self, url, post, blog):
         text.nameext_from_url(url, post)
         post["num"] = post["count"] = 1
         post["blog"] = blog
@@ -298,8 +295,7 @@ class TumblrPostExtractor(TumblrExtractor):
     def posts(self):
         return self.api.posts(self.blog, {"id": self.post_id})
 
-    @staticmethod
-    def _setup_posttypes():
+    def _setup_posttypes(self):
         return POST_TYPES
 
 

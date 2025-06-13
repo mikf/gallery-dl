@@ -12,7 +12,7 @@ __tests__ = (
     "#url"     : "https://vsco.co/missuri",
     "#category": ("", "vsco", "user"),
     "#class"   : vsco.VscoUserExtractor,
-    "#urls"    : "https://vsco.co/missuri/gallery",
+    "#results" : "https://vsco.co/missuri/gallery",
 },
 
 {
@@ -20,12 +20,12 @@ __tests__ = (
     "#category": ("", "vsco", "user"),
     "#class"   : vsco.VscoUserExtractor,
     "#options" : {"include": "all"},
-    "#urls"    : [
+    "#results" : (
         "https://vsco.co/missuri/avatar",
         "https://vsco.co/missuri/gallery",
         "https://vsco.co/missuri/spaces",
         "https://vsco.co/missuri/collection",
-    ],
+    ),
 },
 
 {
@@ -86,7 +86,7 @@ __tests__ = (
     "#url"     : "https://vsco.co/missuri/spaces",
     "#category": ("", "vsco", "spaces"),
     "#class"   : vsco.VscoSpacesExtractor,
-    "#urls"    : (
+    "#results" : (
         "https://vsco.co/spaces/62e4934e6920440801d19f05",
     ),
 },

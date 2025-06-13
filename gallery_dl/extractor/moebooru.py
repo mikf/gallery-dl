@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2020-2023 Mike Fährmann
+# Copyright 2020-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -20,8 +20,7 @@ class MoebooruExtractor(BooruExtractor):
     filename_fmt = "{category}_{id}_{md5}.{extension}"
     page_start = 1
 
-    @staticmethod
-    def _prepare(post):
+    def _prepare(self, post):
         post["date"] = text.parse_timestamp(post["created_at"])
 
     def _html(self, post):

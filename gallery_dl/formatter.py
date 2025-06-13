@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2021-2023 Mike Fährmann
+# Copyright 2021-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -463,8 +463,7 @@ class Literal():
     # __getattr__, __getattribute__, and __class_getitem__
     # are all slower than regular __getitem__
 
-    @staticmethod
-    def __getitem__(key):
+    def __getitem__(self, key):
         return key
 
 

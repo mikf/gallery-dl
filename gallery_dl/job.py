@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2023 Mike Fährmann
+# Copyright 2015-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -682,8 +682,7 @@ class DownloadJob(Job):
             for hook, callback in hooks.items():
                 self.hooks[hook].append(callback)
 
-    @staticmethod
-    def _call_hook(callback, condition, pathfmt):
+    def _call_hook(self, callback, condition, pathfmt):
         if condition(pathfmt.kwdict):
             callback(pathfmt)
 
@@ -818,12 +817,10 @@ class UrlJob(Job):
         if depth >= self.maxdepth:
             self.handle_queue = self.handle_url
 
-    @staticmethod
-    def handle_url(url, _):
+    def handle_url(self, url, _):
         stdout_write(url + "\n")
 
-    @staticmethod
-    def handle_url_fallback(url, kwdict):
+    def handle_url_fallback(self, url, kwdict):
         stdout_write(url + "\n")
         if "_fallback" in kwdict:
             for url in kwdict["_fallback"]:
