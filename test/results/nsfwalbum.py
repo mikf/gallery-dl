@@ -13,7 +13,7 @@ __tests__ = (
     "#category": ("", "nsfwalbum", "album"),
     "#class"   : nsfwalbum.NsfwalbumAlbumExtractor,
     "#range"        : "1-5",
-    "#urls"         : (
+    "#results"      : (
         "https://img70.imgspice.com/i/05457/mio2bu5xbrxe.jpg",
         "https://img70.imgspice.com/i/05457/zgpxa8kr4h1d.jpg",
         "https://img70.imgspice.com/i/05457/3379nxsm9lx8.jpg",

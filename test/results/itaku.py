@@ -22,7 +22,7 @@ __tests__ = (
     "#comment" : "gallery section (#6951)",
     "#category": ("", "itaku", "gallery"),
     "#class"   : itaku.ItakuGalleryExtractor,
-    "#urls"    : (
+    "#results" : (
         "https://itaku.ee/api/media/gallery_imgs/misty-psyduck_IWbYdwT.png",
         "https://itaku.ee/api/media/gallery_imgs/bea_alpha_N0YGfeT.png",
     ),
@@ -43,7 +43,7 @@ __tests__ = (
     "#url"     : "https://itaku.ee/images/100471",
     "#category": ("", "itaku", "image"),
     "#class"   : itaku.ItakuImageExtractor,
-    "#urls"    : "https://itaku.ee/api/media/gallery_imgs/220504_oUNIAFT.png",
+    "#results" : "https://itaku.ee/api/media/gallery_imgs/220504_oUNIAFT.png",
 
     "already_pinned"  : None,
     "blacklisted"     : {
@@ -97,7 +97,7 @@ __tests__ = (
     "#comment" : "video",
     "#category": ("", "itaku", "image"),
     "#class"   : itaku.ItakuImageExtractor,
-    "#urls"    : "https://itaku.ee/api/media/gallery_vids/sleepy_af_OY5GHWw.mp4",
+    "#results" : "https://itaku.ee/api/media/gallery_vids/sleepy_af_OY5GHWw.mp4",
 },
 
 {

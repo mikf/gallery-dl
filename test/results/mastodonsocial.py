@@ -33,7 +33,7 @@ __tests__ = (
     "#class"   : mastodon.MastodonUserExtractor,
     "#options" : {"reblogs": True},
     "#archive" : False,
-    "#urls": (
+    "#results": (
         "https://files.mastodon.social/media_attachments/files/111/330/852/486/713/967/original/2c25ade55a9d1af2.jpg",
         "https://files.mastodon.social/media_attachments/files/111/331/603/082/304/823/original/e12cde371c88c1b0.png",
         "https://files.mastodon.social/media_attachments/files/111/331/603/082/304/823/original/e12cde371c88c1b0.png",
@@ -75,7 +75,7 @@ __tests__ = (
     "#category": ("mastodon", "mastodon.social", "bookmark"),
     "#class"   : mastodon.MastodonBookmarkExtractor,
     "#auth"    : True,
-    "#urls"    : "https://files.mastodon.social/media_attachments/files/111/331/603/082/304/823/original/e12cde371c88c1b0.png",
+    "#results" : "https://files.mastodon.social/media_attachments/files/111/331/603/082/304/823/original/e12cde371c88c1b0.png",
 },
 
 {
@@ -83,7 +83,7 @@ __tests__ = (
     "#category": ("mastodon", "mastodon.social", "favorite"),
     "#class"   : mastodon.MastodonFavoriteExtractor,
     "#auth"    : True,
-    "#urls"    : "https://files.mastodon.social/media_attachments/files/111/331/603/082/304/823/original/e12cde371c88c1b0.png",
+    "#results" : "https://files.mastodon.social/media_attachments/files/111/331/603/082/304/823/original/e12cde371c88c1b0.png",
 },
 
 {
@@ -108,7 +108,7 @@ __tests__ = (
     "#category": ("mastodon", "mastodon.social", "following"),
     "#class"   : mastodon.MastodonFollowingExtractor,
     "#extractor": False,
-    "#urls"     : (
+    "#results"  : (
         "https://mastodon.ie/@RustyBertrand",
         "https://ravenation.club/@soundwarrior20",
         "https://mastodon.social/@0x4f",
@@ -185,7 +185,7 @@ __tests__ = (
     "#category": ("mastodon", "mastodon.social", "status"),
     "#class"   : mastodon.MastodonStatusExtractor,
     "#options" : {"cards": True},
-    "#urls"    : "https://files.mastodon.social/cache/preview_cards/images/095/900/335/original/83f0b4a793c84123.jpg",
+    "#results" : "https://files.mastodon.social/cache/preview_cards/images/095/900/335/original/83f0b4a793c84123.jpg",
 
     "media": {
         "author_name" : "Tom Warren",

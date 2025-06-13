@@ -165,7 +165,7 @@ __tests__ = (
     "#comment" : "ugoira",
     "#category": ("", "pixiv", "work"),
     "#class"   : pixiv.PixivWorkExtractor,
-    "#urls"    : "https://i.pximg.net/img-zip-ugoira/img/2018/01/15/13/24/48/66806629_ugoira1920x1080.zip",
+    "#results" : "https://i.pximg.net/img-zip-ugoira/img/2018/01/15/13/24/48/66806629_ugoira1920x1080.zip",
 
     "frames"  : list,
     "date"    : "dt:2018-01-14 15:06:08",
@@ -178,14 +178,14 @@ __tests__ = (
     "#category": ("", "pixiv", "work"),
     "#class"   : pixiv.PixivWorkExtractor,
     "#options" : {"ugoira": "original"},
-    "#urls"    : [
+    "#results" : (
         "https://i.pximg.net/img-original/img/2022/09/04/23/54/19/101003492_ugoira0.png",
         "https://i.pximg.net/img-original/img/2022/09/04/23/54/19/101003492_ugoira1.png",
         "https://i.pximg.net/img-original/img/2022/09/04/23/54/19/101003492_ugoira2.png",
         "https://i.pximg.net/img-original/img/2022/09/04/23/54/19/101003492_ugoira3.png",
         "https://i.pximg.net/img-original/img/2022/09/04/23/54/19/101003492_ugoira4.png",
         "https://i.pximg.net/img-original/img/2022/09/04/23/54/19/101003492_ugoira5.png",
-    ],
+    ),
 
     "frames": list,
 },
@@ -213,7 +213,7 @@ __tests__ = (
     "#comment" : "limit_sanity_level_360.png (#4327, #5180)",
     "#class"   : pixiv.PixivWorkExtractor,
     "#options" : {"sanity": True, "comments": True},
-    "#urls"    : "https://i.pximg.net/img-original/img/2022/11/20/00/00/49/102932581_p0.jpg",
+    "#results" : "https://i.pximg.net/img-original/img/2022/11/20/00/00/49/102932581_p0.jpg",
 
     "caption"       : "Meet a deer .",
     "comment_access_control": 0,
@@ -278,12 +278,12 @@ __tests__ = (
     "#url"     : "https://www.pixiv.net/en/artworks/109487939",
     "#comment" : "R-18 limit_sanity_level_360.png (#4327, #5180)",
     "#class"   : pixiv.PixivWorkExtractor,
-    "#urls"    : [
+    "#results" : (
         "https://i.pximg.net/img-original/img/2023/07/01/00/06/28/109487939_p0.png",
         "https://i.pximg.net/img-original/img/2023/07/01/00/06/28/109487939_p1.png",
         "https://i.pximg.net/img-original/img/2023/07/01/00/06/28/109487939_p2.png",
         "https://i.pximg.net/img-original/img/2023/07/01/00/06/28/109487939_p3.png",
-    ],
+    ),
 },
 
 {
@@ -291,7 +291,7 @@ __tests__ = (
     "#comment" : "Ugoira limit_sanity_level_360.png (#4327 #6297 #7285)",
     "#class"   : pixiv.PixivWorkExtractor,
     "#auth"    : True,
-    "#urls"    : "https://i.pximg.net/img-zip-ugoira/img/2022/12/23/23/36/13/103841583_ugoira1920x1080.zip",
+    "#results" : "https://i.pximg.net/img-zip-ugoira/img/2022/12/23/23/36/13/103841583_ugoira1920x1080.zip",
 },
 
 {
@@ -376,7 +376,7 @@ __tests__ = (
 {
     "#url"     : "https://www.pixiv.net/en/artworks/unlisted/eE3fTYaROT9IsZmep386",
     "#class"   : pixiv.PixivUnlistedExtractor,
-    "#urls"    : "https://i.pximg.net/img-original/img/2020/10/15/00/46/12/85017704-149014193e4d3e23a6b8bd5e38b51ed4_p0.png",
+    "#results" : "https://i.pximg.net/img-original/img/2020/10/15/00/46/12/85017704-149014193e4d3e23a6b8bd5e38b51ed4_p0.png",
 
     "id"         : 85017704,
     "id_unlisted": "eE3fTYaROT9IsZmep386",
@@ -386,26 +386,26 @@ __tests__ = (
     "#url"     : "https://www.pixiv.net/en/users/173530/bookmarks/artworks",
     "#category": ("", "pixiv", "favorite"),
     "#class"   : pixiv.PixivFavoriteExtractor,
-    "#urls"    : [
+    "#results" : (
         "https://i.pximg.net/img-original/img/2008/10/31/17/54/01/2005108_p0.jpg",
         "https://i.pximg.net/img-original/img/2008/09/27/12/22/40/1719386_p0.jpg",
         "https://i.pximg.net/img-original/img/2008/04/15/01/43/46/669358_p0.jpg",
         "https://i.pximg.net/img-original/img/2008/06/19/21/52/15/1005851_p0.jpg",
         "https://i.pximg.net/img-original/img/2008/06/17/22/16/54/994965_p0.jpg",
-    ],
+    ),
 },
 
 {
     "#url"     : "https://www.pixiv.net/bookmark.php?id=173530",
     "#category": ("", "pixiv", "favorite"),
     "#class"   : pixiv.PixivFavoriteExtractor,
-    "#urls"    : [
+    "#results" : (
         "https://i.pximg.net/img-original/img/2008/10/31/17/54/01/2005108_p0.jpg",
         "https://i.pximg.net/img-original/img/2008/09/27/12/22/40/1719386_p0.jpg",
         "https://i.pximg.net/img-original/img/2008/04/15/01/43/46/669358_p0.jpg",
         "https://i.pximg.net/img-original/img/2008/06/19/21/52/15/1005851_p0.jpg",
         "https://i.pximg.net/img-original/img/2008/06/17/22/16/54/994965_p0.jpg",
-    ],
+    ),
 },
 
 {

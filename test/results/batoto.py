@@ -142,7 +142,7 @@ __tests__ = (
     "#category": ("", "batoto", "manga"),
     "#class"   : batoto.BatotoMangaExtractor,
     "#log"     : "'UPLOADER NOTICE - The comic was deleted off EbookRenta :/'",
-    "#urls"    : (
+    "#results" : (
         "https://mto.to/title/136193-botsuraku-sunzen-desunode-konyakusha-o-furikiro-to-omoimasu-official/2456573-ch_1",
         "https://mto.to/title/136193-botsuraku-sunzen-desunode-konyakusha-o-furikiro-to-omoimasu-official/2713985-ch_2",
         "https://mto.to/title/136193-botsuraku-sunzen-desunode-konyakusha-o-furikiro-to-omoimasu-official/2739046-ch_3",

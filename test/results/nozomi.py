@@ -12,7 +12,7 @@ __tests__ = (
     "#url"     : "https://nozomi.la/post/3649262.html",
     "#category": ("", "nozomi", "post"),
     "#class"   : nozomi.NozomiPostExtractor,
-    "#urls"        : "https://w.gold-usergeneratedcontent.net/2/15/aaa9f7c632cde1e1a5baaff3fb6a6d857ec73df7fdc5cf5a358caf604bf73152.webp",
+    "#results"     : "https://w.gold-usergeneratedcontent.net/2/15/aaa9f7c632cde1e1a5baaff3fb6a6d857ec73df7fdc5cf5a358caf604bf73152.webp",
     "#sha1_content": "6d62c4a7fea50c0a89d499603c4e7a2b4b9bffa8",
 
     "artist"   : ["hammer (sunset beach)"],
@@ -36,7 +36,7 @@ __tests__ = (
     "#comment" : "multiple images per post",
     "#category": ("", "nozomi", "post"),
     "#class"   : nozomi.NozomiPostExtractor,
-    "#urls"    : (
+    "#results" : (
         "https://w.gold-usergeneratedcontent.net/3/94/085e55e355808c03dedbe74fe44db1c07435e071952e8b925a3dfe5ec3278943.webp",
         "https://w.gold-usergeneratedcontent.net/e/78/0fb5675f47e981650ab7a549cc8d90230ab0d249f35247258f6a7ceb81dd578e.webp",
         "https://w.gold-usergeneratedcontent.net/3/68/f3cde060f8e9047171bebb70e62947375ef6bdc0160f2f37ea4d5d25ebfde683.webp",
@@ -61,7 +61,7 @@ __tests__ = (
     "#comment" : "gif",
     "#category": ("", "nozomi", "post"),
     "#class"   : nozomi.NozomiPostExtractor,
-    "#urls"        : "https://g.gold-usergeneratedcontent.net/a/f0/d1b06469e00d72e4f6346209c149db459d76b58a074416c260ed93cc31fa9f0a.gif",
+    "#results"     : "https://g.gold-usergeneratedcontent.net/a/f0/d1b06469e00d72e4f6346209c149db459d76b58a074416c260ed93cc31fa9f0a.gif",
     "#sha1_content": "952efb78252bbc9fb56df2e8fafb68d5e6364181",
 },
 
@@ -70,7 +70,7 @@ __tests__ = (
     "#comment" : "video",
     "#category": ("", "nozomi", "post"),
     "#class"   : nozomi.NozomiPostExtractor,
-    "#urls"        : "https://v.gold-usergeneratedcontent.net/d/0e/ff88398862669783691b31519f2bea3a35c24b6e62e3ba2d89b4409e41c660ed.webm",
+    "#results"     : "https://v.gold-usergeneratedcontent.net/d/0e/ff88398862669783691b31519f2bea3a35c24b6e62e3ba2d89b4409e41c660ed.webm",
     "#sha1_content": "57065e6c16da7b1c7098a63b36fb0c6c6f1b9bca",
 },
 

@@ -14,7 +14,7 @@ __tests__ = (
     "#class"   : instagram.InstagramUserExtractor,
     "#auth"    : False,
     "#options" : {"include": "all"},
-    "#urls": [
+    "#results" : (
         "https://www.instagram.com/instagram/info/",
         "https://www.instagram.com/instagram/avatar/",
         "https://www.instagram.com/stories/instagram/",
@@ -22,7 +22,7 @@ __tests__ = (
         "https://www.instagram.com/instagram/posts/",
         "https://www.instagram.com/instagram/reels/",
         "https://www.instagram.com/instagram/tagged/",
-    ],
+    ),
 },
 
 {

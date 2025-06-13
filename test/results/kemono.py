@@ -113,7 +113,7 @@ __tests__ = (
     "#comment" : "search / 'q' query parameter (#3385, #4057)",
     "#category": ("", "kemono", "fanbox"),
     "#class"   : kemono.KemonoUserExtractor,
-    "#urls"    : (
+    "#results" : (
         "https://kemono.su/data/ef/7b/ef7b4398a2f4ada597421fd3c116cff86e85695911f7cd2a459b0e566b864e46.png",
         "https://kemono.su/data/73/e6/73e615f6645b9d1af6329448601673c9275f07fd11eb37670c97e307e29a9ee9.png",
     ),
@@ -126,7 +126,7 @@ __tests__ = (
     "#comment" : "'tag' query parameter",
     "#category": ("", "kemono", "patreon"),
     "#class"   : kemono.KemonoUserExtractor,
-    "#urls"    : (
+    "#results" : (
         "https://kemono.su/data/83/61/8361560887a09c7b828d326b3e1a2f0288673741569a09d74bcd01e602d20db1.png",
         "https://kemono.su/data/03/e6/03e62592c3b616b8906c1aaa130bd9ceaa24d7f601b31f90cc11956a57ca1d82.png",
         "https://kemono.su/data/83/0d/830d017873157d2e6544a0f23a47622ec1e91be09b5d7795eb22e32b3150c837.png",
@@ -313,7 +313,7 @@ __tests__ = (
     "#comment" : "revisions (#4498)",
     "#category": ("", "kemono", "patreon"),
     "#class"   : kemono.KemonoPostExtractor,
-    "#urls"    : "https://kemono.su/data/88/52/88521f71822dfa2f42df3beba319ea4fceda2a2d6dc59da0276a75238f743f86.jpg",
+    "#results" : "https://kemono.su/data/88/52/88521f71822dfa2f42df3beba319ea4fceda2a2d6dc59da0276a75238f743f86.jpg",
 
     "file": {
         "hash": "88521f71822dfa2f42df3beba319ea4fceda2a2d6dc59da0276a75238f743f86",
@@ -344,7 +344,7 @@ __tests__ = (
     "#category": ("", "kemono", "patreon"),
     "#class"   : kemono.KemonoPostExtractor,
     "#options" : {"revisions": "unique"},
-    "#urls"    : "https://kemono.su/data/e3/e6/e3e6287dbc0468dd2a9d28ed276ae86788907143acf2ba10ab886a3add4c436c.jpg",
+    "#results" : "https://kemono.su/data/e3/e6/e3e6287dbc0468dd2a9d28ed276ae86788907143acf2ba10ab886a3add4c436c.jpg",
     "#archive" : False,
 
     "filename"      : "wip update",
@@ -496,7 +496,7 @@ __tests__ = (
     "#comment" : r"'\' in file paths",
     "#category": ("", "kemono", "boosty"),
     "#class"   : kemono.KemonoPostExtractor,
-    "#urls"    : (
+    "#results" : (
         "https://kemono.su/data/dd/35/dd35c43d8a93f1806f094d9331a17c5037ed5d93e0f30c28d3cca2056b400aa6.png",
         "https://kemono.su/data/25/48/254864eb2523ab48be8d3fb7ad21ab3a127d61736b76602f8421cde88700a174.png",
     ),
@@ -620,7 +620,7 @@ __tests__ = (
     "#class"   : kemono.KemonoFavoriteExtractor,
     "#pattern" : kemono.KemonoUserExtractor.pattern,
     "#auth"    : True,
-    "#urls"    : (
+    "#results" : (
         "https://kemono.su/patreon/user/881792",
         "https://kemono.su/fanbox/user/6993449",
         "https://kemono.su/subscribestar/user/alcorart",
@@ -634,7 +634,7 @@ __tests__ = (
     "#class"   : kemono.KemonoFavoriteExtractor,
     "#pattern" : kemono.KemonoUserExtractor.pattern,
     "#auth"    : True,
-    "#urls"    : (
+    "#results" : (
         "https://kemono.su/fanbox/user/6993449",
         "https://kemono.su/patreon/user/881792",
         "https://kemono.su/subscribestar/user/alcorart",
@@ -648,7 +648,7 @@ __tests__ = (
     "#class"   : kemono.KemonoFavoriteExtractor,
     "#pattern" : kemono.KemonoPostExtractor.pattern,
     "#auth"    : True,
-    "#urls"    : (
+    "#results" : (
         "https://kemono.su/subscribestar/user/alcorart/post/184329",
         "https://kemono.su/fanbox/user/6993449/post/23913",
         "https://kemono.su/patreon/user/881792/post/4769638",
@@ -661,7 +661,7 @@ __tests__ = (
     "#class"   : kemono.KemonoFavoriteExtractor,
     "#pattern" : kemono.KemonoPostExtractor.pattern,
     "#auth"    : True,
-    "#urls"    : (
+    "#results" : (
         "https://kemono.su/patreon/user/881792/post/4769638",
         "https://kemono.su/fanbox/user/6993449/post/23913",
         "https://kemono.su/subscribestar/user/alcorart/post/184329",
@@ -685,7 +685,7 @@ __tests__ = (
     "#category": ("", "kemono", "artists"),
     "#class"   : kemono.KemonoArtistsExtractor,
     "#pattern" : kemono.KemonoUserExtractor.pattern,
-    "#urls"    : (
+    "#results" : (
         "https://kemono.su/patreon/user/91205314",
         "https://kemono.su/patreon/user/51528107",
         "https://kemono.su/fanbox/user/12812028",
@@ -716,7 +716,7 @@ __tests__ = (
     "#category": ("", "kemono", "artists"),
     "#class"   : kemono.KemonoArtistsExtractor,
     "#pattern" : kemono.KemonoDiscordServerExtractor.pattern,
-    "#urls"    : "https://kemono.su/discord/server/1168450323023663164",
+    "#results" : "https://kemono.su/discord/server/1168450323023663164",
 
     "favorited": range(40, 80),
     "id"       : "1168450323023663164",

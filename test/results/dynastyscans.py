@@ -38,7 +38,7 @@ __tests__ = (
     "#class"   : dynastyscans.DynastyscansSearchExtractor,
 
     "#sha1_metadata": "67690b4e21f59746f112803cba4c4d81fcbb9dbd",
-    "#urls"         : (
+    "#results"      : (
         "https://dynasty-scans.com/system/images_images/000/032/932/full/66051624_p0.webp",
         "https://dynasty-scans.com/system/images_images/000/021/368/full/KEIGI_32-1467964487873486851-img1.webp",
         "https://dynasty-scans.com/system/images_images/000/004/596/full/tortoise.webp",
@@ -88,7 +88,7 @@ __tests__ = (
 {
     "#url"     : "https://dynasty-scans.com/anthologies/aashi_to_watashi_gyaru_yuri_anthology",
     "#class"   : dynastyscans.DynastyscansAnthologyExtractor,
-    "#urls"    : "https://dynasty-scans.com/chapters/dont_call_me_senpai",
+    "#results" : "https://dynasty-scans.com/chapters/dont_call_me_senpai",
 
     "!alert"        : (),
     "!description"  : """<p><a href="https://dynasty-scans.com/anthologies/aashi_to_watashi_gyaru_yuri_anthology_volume_2">Volume 2</a></p>""",

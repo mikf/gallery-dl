@@ -62,7 +62,7 @@ __tests__ = (
     "#class": khinsider.KhinsiderSoundtrackExtractor,
     "#options": {"covers": True},
     "#range"  : "1-10",
-    "#urls"   : (
+    "#results": (
         "https://vgmsite.com/soundtracks/super-mario-64-soundtrack/00%20Front.jpg",
         "https://vgmsite.com/soundtracks/super-mario-64-soundtrack/01%20Back.jpg",
         "https://vgmsite.com/soundtracks/super-mario-64-soundtrack/02%20Booklet%20Front%20and%20Back.jpg",

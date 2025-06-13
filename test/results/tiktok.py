@@ -107,7 +107,7 @@ __tests__ = (
     "#comment"  : "Video post",
     "#category" : ("", "tiktok", "post"),
     "#class"    : tiktok.TiktokPostExtractor,
-    "#urls"     : "ytdl:https://www.tiktok.com/@memezar/video/7449708266168274208",
+    "#results"  : "ytdl:https://www.tiktok.com/@memezar/video/7449708266168274208",
     "#options"  : {"videos": True, "audio": True},
 },
 
@@ -116,7 +116,7 @@ __tests__ = (
     "#comment"  : "Video post as a /photo/ link",
     "#category" : ("", "tiktok", "post"),
     "#class"    : tiktok.TiktokPostExtractor,
-    "#urls"     : "ytdl:https://www.tiktok.com/@memezar/video/7449708266168274208",
+    "#results"  : "ytdl:https://www.tiktok.com/@memezar/video/7449708266168274208",
     "#options"  : {"videos": True, "audio": True},
 },
 
@@ -145,7 +145,7 @@ __tests__ = (
     "#comment"  : "Video post as a share link",
     "#category" : ("", "tiktok", "post"),
     "#class"    : tiktok.TiktokPostExtractor,
-    "#urls"     : "ytdl:https://www.tiktok.com/@/video/7449708266168274208",
+    "#results"  : "ytdl:https://www.tiktok.com/@/video/7449708266168274208",
     "#options"  : {"videos": True},
 },
 
@@ -154,7 +154,7 @@ __tests__ = (
     "#comment"  : "Skipping video post",
     "#category" : ("", "tiktok", "post"),
     "#class"    : tiktok.TiktokPostExtractor,
-    "#urls"     : [],
+    "#results"  : (),
     "#options"  : {"videos": False},
 },
 

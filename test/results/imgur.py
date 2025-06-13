@@ -16,7 +16,7 @@ __tests__ = (
     "#class"   : imgur.ImgurImageExtractor,
     "#sha1_url"    : "6f2dcfb86815bdd72808c313e5f715610bc7b9b2",
     "#sha1_content": "0c8768055e4e20e7c7259608b67799171b691140",
-    "#urls"        : "https://i.imgur.com/21yMxCS.png",
+    "#results"     : "https://i.imgur.com/21yMxCS.png",
 
     "account_id"    : 0,
     "comment_count" : int,
@@ -167,7 +167,7 @@ __tests__ = (
     "#category": ("", "imgur", "album"),
     "#class"   : imgur.ImgurAlbumExtractor,
     "#sha1_url": "ce3552f550a5b5316bd9c7ae02e21e39f30c0563",
-    "#urls"    : (
+    "#results" : (
         "https://i.imgur.com/693j2Kr.jpg",
         "https://i.imgur.com/ZNalkAC.jpg",
         "https://i.imgur.com/lMox9Ek.jpg",

@@ -101,7 +101,7 @@ __tests__ = (
     "#category": ("", "naverwebtoon", "comic"),
     "#class"   : naverwebtoon.NaverwebtoonComicExtractor,
     "#range"   : "1",
-    "#urls"    : "https://comic.naver.com/challenge/detail?titleId=765124&no=1",
+    "#results" : "https://comic.naver.com/challenge/detail?titleId=765124&no=1",
 },
 
 {

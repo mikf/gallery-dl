@@ -12,7 +12,7 @@ __tests__ = (
     "#url"     : "https://rule34hentai.net/post/list/mizuki_kotora/1",
     "#category": ("shimmie2", "rule34hentai", "tag"),
     "#class"   : shimmie2.Shimmie2TagExtractor,
-    "#urls"    : (
+    "#results" : (
         "https://rule34hentai.net/_images/7f3a411263d0f6de936e47ae8f9d35fb/332%20-%20Darkstalkers%20Felicia%20mizuki_kotora.jpeg",
         "https://rule34hentai.net/_images/1a8eca7c04f8bf325bc993c5751a91c4/264%20-%20Darkstalkers%20Felicia%20mizuki_kotora.jpeg",
         "https://rule34hentai.net/_images/09511511c4c9e9e1f9b795e059a60832/259%20-%20Darkstalkers%20Felicia%20mizuki_kotora.jpeg",
@@ -34,7 +34,7 @@ __tests__ = (
     "#url"     : "https://rule34hentai.net/post/view/264",
     "#category": ("shimmie2", "rule34hentai", "post"),
     "#class"   : shimmie2.Shimmie2PostExtractor,
-    "#urls"        : "https://rule34hentai.net/_images/1a8eca7c04f8bf325bc993c5751a91c4/264%20-%20Darkstalkers%20Felicia%20mizuki_kotora.jpg",
+    "#results"     : "https://rule34hentai.net/_images/1a8eca7c04f8bf325bc993c5751a91c4/264%20-%20Darkstalkers%20Felicia%20mizuki_kotora.jpg",
     "#sha1_content": "6c23780bb78673cbff1bca9accb77ea11ec734f3",
 
     "extension": "jpg",

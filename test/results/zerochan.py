@@ -119,7 +119,7 @@ __tests__ = (
     "#url"     : "https://www.zerochan.net/4233756",
     "#category": ("booru", "zerochan", "image"),
     "#class"   : zerochan.ZerochanImageExtractor,
-    "#urls"    : "https://static.zerochan.net/DRAGON.BALL.full.4233756.jpg",
+    "#results" : "https://static.zerochan.net/DRAGON.BALL.full.4233756.jpg",
     "#options" : {"tags": True},
 
     "author"   : "Raydash",
@@ -181,7 +181,7 @@ __tests__ = (
     "#url"     : "https://www.zerochan.net/4233756",
     "#class"   : zerochan.ZerochanImageExtractor,
     "#auth"    : False,
-    "#urls"    : "https://static.zerochan.net/DRAGON.BALL.full.4233756.jpg",
+    "#results" : "https://static.zerochan.net/DRAGON.BALL.full.4233756.jpg",
 
     "source"   : "https://x.com/Raydash30/status/1766012730769862774",
     "tags"     : [

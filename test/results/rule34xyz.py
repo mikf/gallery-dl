@@ -32,7 +32,7 @@ __tests__ = (
     "#comment": "image",
     "#class"  : rule34xyz.Rule34xyzPostExtractor,
     "#options"     : {"tags": True},
-    "#urls"        : "https://rule34xyz.b-cdn.net/posts/3613/3613851/3613851.pic.jpg",
+    "#results"     : "https://rule34xyz.b-cdn.net/posts/3613/3613851/3613851.pic.jpg",
     "#sha1_content": "4d7146db258fd5b1645a1a5fc01550d102f495e1",
 
     "created"   : "2023-03-29T03:00:59.136819Z",
@@ -106,7 +106,7 @@ __tests__ = (
     "#url"    : "https://rule34.xyz/post/3571567",
     "#comment": "video",
     "#class"  : rule34xyz.Rule34xyzPostExtractor,
-    "#urls"        : "https://rule34xyz.b-cdn.net/posts/3571/3571567/3571567.mov720.mp4",
+    "#results"     : "https://rule34xyz.b-cdn.net/posts/3571/3571567/3571567.mov720.mp4",
     "#sha1_content": "c0a5e7e887774f91527f00e6142c435a3c482c1f",
 
     "format"   : "mov720",
@@ -118,7 +118,7 @@ __tests__ = (
     "#comment": "'format' option",
     "#class"  : rule34xyz.Rule34xyzPostExtractor,
     "#options": {"format": "10,4,5"},
-    "#urls"   : "https://rule34xyz.b-cdn.net/posts/3571/3571567/3571567.pic.jpg",
+    "#results": "https://rule34xyz.b-cdn.net/posts/3571/3571567/3571567.pic.jpg",
 
     "format"   : "pic",
     "format_id": "10",

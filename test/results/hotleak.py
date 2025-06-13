@@ -13,7 +13,7 @@ __tests__ = (
     "#url"     : "https://hotleak.vip/kaiyakawaii/photo/1617145",
     "#category": ("", "hotleak", "post"),
     "#class"   : hotleak.HotleakPostExtractor,
-    "#urls"    : "https://image-cdn.hotleak.vip/storage/images/e98/18ad68/18ad68.webp",
+    "#results" : "https://image-cdn.hotleak.vip/storage/images/e98/18ad68/18ad68.webp",
 
     "id"       : 1617145,
     "creator"  : "kaiyakawaii",

@@ -20,7 +20,7 @@ __tests__ = (
     "#url"     : "https://snootbooru.com/post/14511",
     "#category": ("szurubooru", "snootbooru", "post"),
     "#class"   : szurubooru.SzurubooruPostExtractor,
-    "#urls"        : "https://snootbooru.com/data/posts/14511_e753313112755da6.png",
+    "#results"     : "https://snootbooru.com/data/posts/14511_e753313112755da6.png",
     "#sha1_content": "e69e61e61c5372514808480aae3a8e355c9cd6fb",
 
     "canvasHeight" : 1000,

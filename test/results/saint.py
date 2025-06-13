@@ -11,7 +11,7 @@ __tests__ = (
 {
     "#url"  : "https://saint2.su/a/2c5iuWHTumH",
     "#class": saint.SaintAlbumExtractor,
-    "#urls" : (
+    "#results": (
         "https://data.saint2.cr/data/3b1ccebf3576f8d5aac3ee0e5a12da95.mp4",
         "https://data.saint2.cr/data/3b125e3fb4b98693f17d85cb53590215.mp4",
     ),
@@ -40,7 +40,7 @@ __tests__ = (
 {
     "#url"  : "https://saint2.su/embed/6lC7mKrJst8",
     "#class": saint.SaintMediaExtractor,
-    "#urls"        : "https://data.saint2.cr/data/3b1ccebf3576f8d5aac3ee0e5a12da95.mp4",
+    "#results"     : "https://data.saint2.cr/data/3b1ccebf3576f8d5aac3ee0e5a12da95.mp4",
     "#sha1_content": "39037a029b3fe96f838b4545316caaa545c84075",
 
     "count"    : 1,
@@ -58,7 +58,7 @@ __tests__ = (
 {
     "#url"  : "https://saint2.su/d/M2IxMjVlM2ZiNGI5ODY5M2YxN2Q4NWNiNTM1OTAyMTUubXA0",
     "#class": saint.SaintMediaExtractor,
-    "#urls" : "https://data.saint2.cr/data/3b125e3fb4b98693f17d85cb53590215.mp4",
+    "#results": "https://data.saint2.cr/data/3b125e3fb4b98693f17d85cb53590215.mp4",
 
     "count"    : 1,
     "extension": "mp4",

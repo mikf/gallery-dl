@@ -45,7 +45,7 @@ __tests__ = (
     "#url"     : "https://imagetwist.com/p/gdldev/747223/digits",
     "#category": ("imagehost", "imagetwist", "gallery"),
     "#class"   : imagehosts.ImagetwistGalleryExtractor,
-    "#urls"    : (
+    "#results" : (
         "https://imagetwist.com/j6eu91sbl9bs",
         "https://imagetwist.com/vx4oh119izyr",
         "https://imagetwist.com/n3td3a6vzzed",

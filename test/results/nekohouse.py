@@ -11,7 +11,7 @@ __tests__ = (
 {
     "#url"     : "https://nekohouse.su/fantia/user/319092/post/3163233",
     "#class"   : nekohouse.NekohousePostExtractor,
-    "#urls"    : (
+    "#results" : (
         "https://nekohouse.su/data/b2/ca/b2ca86189cda7408d75c36d850ca6394c089786d46c6dd0c90b4a2e17e07774f.jpg",
         "https://nekohouse.su/data/2e/cf/2ecfd1a04affa35c147bb43d626d6149c2c3f9a9fb7df1659a40c8de1b3e09e5.jpg",
         "https://nekohouse.su/data/9a/ed/9aed4b879023b761882c7c11ce74a3ee51a22487e2c77df0bfabed7c5a73cbe5.jpg",
@@ -39,7 +39,7 @@ __tests__ = (
     "#comment" : "attachment / video",
     "#class"   : nekohouse.NekohousePostExtractor,
     "#range"   : "6",
-    "#urls"    : (
+    "#results" : (
         "https://nekohouse.su/data/f9/4c/f94ca55a329604bec63536828a36fd2b455aec03ffb3657e25c0b405d8484823.mp4",
     ),
 

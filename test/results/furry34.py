@@ -13,7 +13,7 @@ __tests__ = (
     "#comment": "image",
     "#class"  : furry34.Furry34PostExtractor,
     "#options"     : {"tags": True},
-    "#urls"        : "https://furry34com.b-cdn.net/posts/541/541949/541949.pic.jpg",
+    "#results"     : "https://furry34com.b-cdn.net/posts/541/541949/541949.pic.jpg",
     "#sha1_content": "4880da04f7fb41b1760aad4c8297c9917aeeec53",
 
     "created"   : "2024-09-20T19:49:47.443232Z",
@@ -121,7 +121,7 @@ __tests__ = (
     "#url"    : "https://furry34.com/post/605309",
     "#comment": "video",
     "#class"  : furry34.Furry34PostExtractor,
-    "#urls"        : "https://furry34.com/posts/605/605309/605309.mov.mp4",
+    "#results"     : "https://furry34.com/posts/605/605309/605309.mov.mp4",
     "#sha1_content": "914d00e2a6cfee73547bae266ec4b7aaee5aadf2",
 
     "type": 1,

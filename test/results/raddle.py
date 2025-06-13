@@ -69,7 +69,7 @@ __tests__ = (
     "#category": ("postmill", "raddle", "post"),
     "#class"   : postmill.PostmillPostExtractor,
     "#sha1_content": "431e938082c2b59c44888a83cfc711cd1f0e910a",
-    "#urls"        : "https://uploads-cdn.raddle.me/submission_images/30f4cf7d235d40c1daebf6dc2e58bef2a80bec2b5b2dab10f2021ea8e3f29e11.png",
+    "#results"     : "https://uploads-cdn.raddle.me/submission_images/30f4cf7d235d40c1daebf6dc2e58bef2a80bec2b5b2dab10f2021ea8e3f29e11.png",
 },
 
 {
@@ -87,7 +87,7 @@ __tests__ = (
     "#comment" : "Link post",
     "#category": ("postmill", "raddle", "post"),
     "#class"   : postmill.PostmillPostExtractor,
-    "#urls"    : "https://m.youtube.com/watch?v=RFJCA5zcZxI",
+    "#results" : "https://m.youtube.com/watch?v=RFJCA5zcZxI",
     "#count"   : 1,
 },
 

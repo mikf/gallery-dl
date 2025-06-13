@@ -11,7 +11,7 @@ __tests__ = (
 {
     "#url"     : "noop",
     "#class"   : noop.NoopExtractor,
-    "#urls"    : (),
+    "#results" : (),
     "#count"   : 0,
 },
 

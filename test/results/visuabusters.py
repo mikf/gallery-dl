@@ -32,7 +32,7 @@ __tests__ = (
     "#url"     : "https://www.visuabusters.com/booru/post/2485",
     "#category": ("szurubooru", "visuabusters", "post"),
     "#class"   : szurubooru.SzurubooruPostExtractor,
-    "#urls"        : "https://www.visuabusters.com/booru/data/posts/visuabusters_2485_ynmXFhNmBs3x0cCm.gif",
+    "#results"     : "https://www.visuabusters.com/booru/data/posts/visuabusters_2485_ynmXFhNmBs3x0cCm.gif",
     "#sha1_content": "781fc0f063503d9d3f282558b9fcd69e37045e88",
 },
 

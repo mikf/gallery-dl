@@ -56,7 +56,7 @@ __tests__ = (
     "#url"    : "https://yiffverse.com/post/575680",
     "#comment": "video",
     "#class"  : yiffverse.YiffversePostExtractor,
-    "#urls"        : "https://yiffverse.com/posts/575/575680/575680.mov.mp4",
+    "#results"     : "https://yiffverse.com/posts/575/575680/575680.mov.mp4",
     "#sha1_content": "8952fc794e58c531b4e3b01cfe9e14b1c59ad9ef",
 },
 

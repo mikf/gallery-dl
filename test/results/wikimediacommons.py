@@ -12,7 +12,7 @@ __tests__ = (
     "#url"     : "https://commons.wikimedia.org/wiki/File:Starr-050516-1367-Pimenta_dioica-flowers-Maunaloa-Molokai_(24762757525).jpg",
     "#category": ("wikimedia", "wikimediacommons", "file"),
     "#class"   : wikimedia.WikimediaArticleExtractor,
-    "#urls"    : "https://upload.wikimedia.org/wikipedia/commons/f/fa/Starr-050516-1367-Pimenta_dioica-flowers-Maunaloa-Molokai_%2824762757525%29.jpg",
+    "#results" : "https://upload.wikimedia.org/wikipedia/commons/f/fa/Starr-050516-1367-Pimenta_dioica-flowers-Maunaloa-Molokai_%2824762757525%29.jpg",
 },
 
 {
@@ -28,7 +28,7 @@ __tests__ = (
     "#class"   : wikimedia.WikimediaArticleExtractor,
     "#options" : {"image-filter": "False"},
 
-    "#urls": (
+    "#results": (
         "https://commons.wikimedia.org/wiki/Category:3558_Shishkin",
         "https://commons.wikimedia.org/wiki/Category:Drawings_by_Ivan_Shishkin",
         "https://commons.wikimedia.org/wiki/Category:Ivan_Shishkin_grave",

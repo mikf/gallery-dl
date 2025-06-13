@@ -107,7 +107,7 @@ __tests__ = (
 {
     "#url"     : "https://www.pexels.com/photo/sun-shining-between-the-trees-in-the-forest-onto-an-asphalt-road-17213600/",
     "#class"   : pexels.PexelsImageExtractor,
-    "#urls"    : "https://images.pexels.com/photos/17213600/pexels-photo-17213600.jpeg",
+    "#results" : "https://images.pexels.com/photos/17213600/pexels-photo-17213600.jpeg",
 },
 
 )

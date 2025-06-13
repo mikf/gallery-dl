@@ -21,7 +21,7 @@ __tests__ = (
     "#category": ("booru", "agnph", "post"),
     "#class"   : agnph.AgnphPostExtractor,
     "#options" : {"tags": True},
-    "#urls"        : "http://agn.ph/gallery/data/7d/a5/7da50021f3e86f6cf1c215652060d772.png",
+    "#results"     : "http://agn.ph/gallery/data/7d/a5/7da50021f3e86f6cf1c215652060d772.png",
     "#sha1_content": "93c8b2d3f53e891ad8fa68d5f60f8c7a70acd836",
 
     "artist"      : "reyn_goldfur",

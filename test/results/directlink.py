@@ -31,7 +31,7 @@ __tests__ = (
     "#comment" : "empty path",
     "#category": ("", "directlink", "example.org"),
     "#class"   : directlink.DirectlinkExtractor,
-    "#urls"    : "https://example.org/file.webm",
+    "#results" : "https://example.org/file.webm",
 
     "domain"   : "example.org",
     "path"     : "",
@@ -44,7 +44,7 @@ __tests__ = (
     "#comment" : "more complex example",
     "#category": ("", "directlink", "example.org"),
     "#class"   : directlink.DirectlinkExtractor,
-    "#urls"    : "https://example.org/path/to/file.webm?que=1?&ry=2/#fragment",
+    "#results" : "https://example.org/path/to/file.webm?que=1?&ry=2/#fragment",
 
     "domain"   : "example.org",
     "path"     : "path/to",
@@ -59,7 +59,7 @@ __tests__ = (
     "#comment" : "percent-encoded characters",
     "#category": ("", "directlink", "example.org"),
     "#class"   : directlink.DirectlinkExtractor,
-    "#urls"    : "https://example.org/%27%3C%23/%23%3E%27.jpg?key=%3C%26%3E",
+    "#results" : "https://example.org/%27%3C%23/%23%3E%27.jpg?key=%3C%26%3E",
 
     "domain"   : "example.org",
     "path"     : "'<#",
@@ -81,7 +81,7 @@ __tests__ = (
     "#comment" : "internationalized domain name",
     "#category": ("", "directlink", "josefsson.org"),
     "#class"   : directlink.DirectlinkExtractor,
-    "#urls"    : "https://räksmörgås.josefsson.org/raksmorgas.jpg",
+    "#results" : "https://räksmörgås.josefsson.org/raksmorgas.jpg",
 
     "domain"   : "räksmörgås.josefsson.org",
     "path"     : "",

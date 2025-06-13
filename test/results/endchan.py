@@ -12,7 +12,7 @@ __tests__ = (
     "#url"     : "https://endchan.org/yuri/res/33621.html",
     "#category": ("lynxchan", "endchan", "thread"),
     "#class"   : lynxchan.LynxchanThreadExtractor,
-    "#urls"    : "https://endchan.org/.media/358c089df4be990e9f7b636e1ce83d3e-imagejpeg.jpg",
+    "#results" : "https://endchan.org/.media/358c089df4be990e9f7b636e1ce83d3e-imagejpeg.jpg",
 },
 
 {

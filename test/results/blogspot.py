@@ -12,7 +12,7 @@ __tests__ = (
     "#url"     : "https://julianbphotography.blogspot.com/2010/12/moon-rise.html",
     "#category": ("blogger", "blogspot", "post"),
     "#class"   : blogger.BloggerPostExtractor,
-    "#urls"    : "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjH9WkPvLJq2moxKtyt3ieJZWSDFQwOi3PHRdlHVHEQHRwy-d86Jg6HWSMhxaa6EgvlXq-zDMmKM4kIPn27eJ9Hepk2X9e9HQhqwMfrT8RYTnFe65uexw7KSk5FdWHxRVp5crz3p_qph3Bj/s0/Icy-Moonrise---For-Web.jpg",
+    "#results" : "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjH9WkPvLJq2moxKtyt3ieJZWSDFQwOi3PHRdlHVHEQHRwy-d86Jg6HWSMhxaa6EgvlXq-zDMmKM4kIPn27eJ9Hepk2X9e9HQhqwMfrT8RYTnFe65uexw7KSk5FdWHxRVp5crz3p_qph3Bj/s0/Icy-Moonrise---For-Web.jpg",
 
     "blog": {
         "date"       : "dt:2010-11-21 18:19:42",

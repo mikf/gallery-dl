@@ -12,7 +12,7 @@ __tests__ = (
     "#url"     : "smugmug:album:cr4C7f",
     "#category": ("", "smugmug", "album"),
     "#class"   : smugmug.SmugmugAlbumExtractor,
-    "#urls": (
+    "#results": (
         "https://photos.smugmug.com/Nature/Dove/i-XvZFJFG/0/DMk7cm6qRBSFPvQgT9C4t4jtBJKF7JSK9jszgHZnr/O/Dual%20Suicide_20070721-DSC_4804.jpg",
         "https://photos.smugmug.com/Nature/Dove/i-2wVPqHf/0/DBXmTSTqVWzTLZxL3JPVK7hGT9zp8tzsFdhtWm68v/O/Morning%20Dove2_20070621-DSC_3222.jpg",
         "https://photos.smugmug.com/Nature/Dove/i-QHFnmb8/0/GKLvnm7zFQWX2G2VcJRprx8WZqTfFJkn8C5nRnCk/O/Speed%20Skater_03082008_POR7728.jpg",
@@ -53,7 +53,7 @@ __tests__ = (
     "#url"     : "https://tdm.smugmug.com/Nature/Dove/i-kCsLJT6",
     "#category": ("", "smugmug", "image"),
     "#class"   : smugmug.SmugmugImageExtractor,
-    "#urls"        : "https://photos.smugmug.com/Nature/Dove/i-kCsLJT6/0/FfB6gSx8X6MS7Hvww7GK7tWsrfdtwCx79hCVzwSm/O/Fluff_20090521-_DSC1542.jpg",
+    "#results"     : "https://photos.smugmug.com/Nature/Dove/i-kCsLJT6/0/FfB6gSx8X6MS7Hvww7GK7tWsrfdtwCx79hCVzwSm/O/Fluff_20090521-_DSC1542.jpg",
     "#sha1_content": "ecbd9d7b4f75a637abc8d35319be9ec065a44eb0",
 
     "Image": {
@@ -124,7 +124,7 @@ __tests__ = (
     "#comment" : "video",
     "#category": ("", "smugmug", "image"),
     "#class"   : smugmug.SmugmugImageExtractor,
-    "#urls"         : "https://photos.smugmug.com/Dailies/Daily-Dose-2015/i-39JFNzB/0/Q4Qg6kt4SqVcKsSLWM4PnhMhSTS2r5BkmBMd9Dx4/1920/657%20WS3-1920.mp4",
+    "#results"      : "https://photos.smugmug.com/Dailies/Daily-Dose-2015/i-39JFNzB/0/Q4Qg6kt4SqVcKsSLWM4PnhMhSTS2r5BkmBMd9Dx4/1920/657%20WS3-1920.mp4",
 },
 
 {

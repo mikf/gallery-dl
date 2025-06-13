@@ -146,12 +146,12 @@ __tests__ = (
     "#class"   : fanbox.FanboxPostExtractor,
     "#options" : {"metadata": "comments"},
     "#sha1_url": "c92ddd06f2efc4a5fe30ec67e21544f79a5c4062",
-    "#urls"    : [
+    "#results" : (
         "https://pixiv.pximg.net/fanbox/public/images/post/3746116/cover/6h5w7F1MJWLeED6ODfHo6ZYQ.jpeg",
         "https://downloads.fanbox.cc/images/post/3746116/ouTz7XZIeVD3FBOzoLhJ3ZTA.jpeg",
         "https://downloads.fanbox.cc/images/post/3746116/hBs9bXEg6HvbqWT8QLD9g5ne.jpeg",
         "https://downloads.fanbox.cc/images/post/3746116/C93E7db3C3sBqbDw6gQoZBMz.jpeg",
-    ],
+    ),
 
     "archives": (),
     "comments": "len:4",
@@ -161,7 +161,7 @@ __tests__ = (
     "#url"     : "https://mochirong.fanbox.cc/posts/9809662",
     "#comment" : "'archives' metadata (#7454)",
     "#class"   : fanbox.FanboxPostExtractor,
-    "#urls"    : (
+    "#results" : (
         "https://downloads.fanbox.cc/images/post/9809662/TUeXGybLxGVmzzrP8o3fhn27.jpeg",
         "https://downloads.fanbox.cc/images/post/9809662/qt5fZBGxErXDAgBf2qgUZ1O8.jpeg",
         "https://downloads.fanbox.cc/images/post/9809662/NvA7M0tIMGjA3sQxBqvdmwBm.jpeg",

@@ -14,7 +14,7 @@ __tests__ = (
     "#url"     : "https://www.deviantart.com/shimoda7",
     "#category": ("", "deviantart", "user"),
     "#class"   : deviantart.DeviantartUserExtractor,
-    "#urls"    : "https://www.deviantart.com/shimoda7/gallery",
+    "#results" : "https://www.deviantart.com/shimoda7/gallery",
 },
 
 {
@@ -22,7 +22,7 @@ __tests__ = (
     "#category": ("", "deviantart", "user"),
     "#class"   : deviantart.DeviantartUserExtractor,
     "#options" : {"include": "all"},
-    "#urls"    : (
+    "#results" : (
         "https://www.deviantart.com/shimoda7/avatar",
         "https://www.deviantart.com/shimoda7/banner",
         "https://www.deviantart.com/shimoda7/gallery",
@@ -210,7 +210,7 @@ __tests__ = (
     "#url"     : "https://deviantart.com/shimoda7/avatar",
     "#category": ("", "deviantart", "avatar"),
     "#class"   : deviantart.DeviantartAvatarExtractor,
-    "#urls"        : "https://a.deviantart.net/avatars-big/s/h/shimoda7.jpg?4",
+    "#results"     : "https://a.deviantart.net/avatars-big/s/h/shimoda7.jpg?4",
     "#sha1_content": "abf2cc79b842315f2e54bfdd93bf794a0f612b6f",
 
     "author"         : {
@@ -248,7 +248,7 @@ __tests__ = (
     "#class"   : deviantart.DeviantartAvatarExtractor,
     "#archive" : False,
     "#options" : {"formats": ["original.jpg", "big.jpg", "big.png", "big.gif"]},
-    "#urls"    : (
+    "#results" : (
         "https://a.deviantart.net/avatars-original/s/h/shimoda7.jpg?4",
         "https://a.deviantart.net/avatars-big/s/h/shimoda7.jpg?4",
         "https://a.deviantart.net/avatars-big/s/h/shimoda7.png?4",
@@ -805,7 +805,7 @@ __tests__ = (
     "#comment" : "wixmp URL rewrite /intermediary/",
     "#category": ("", "deviantart", "deviation"),
     "#class"   : deviantart.DeviantartDeviationExtractor,
-    "#urls"    : "https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/intermediary/f/4deb0f1a-cdef-444e-b194-c8d6b3f7e933/dd1xca2-7f835e62-6fd3-4b99-92c7-2bfd4e1b296f.jpg",
+    "#results" : "https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/intermediary/f/4deb0f1a-cdef-444e-b194-c8d6b3f7e933/dd1xca2-7f835e62-6fd3-4b99-92c7-2bfd4e1b296f.jpg",
 
     "is_downloadable": False,
     "is_original"    : False,

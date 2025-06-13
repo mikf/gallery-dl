@@ -41,7 +41,7 @@ __tests__ = (
     "#category": ("Danbooru", "aibooru", "post"),
     "#class"   : danbooru.DanbooruPostExtractor,
     "#options" : {"ugoira": True},
-    "#urls"    : "https://cdn.aibooru.download/original/f9/6b/f96b2b3254884ab527fab0a7e9c39ba9.zip",
+    "#results" : "https://cdn.aibooru.download/original/f9/6b/f96b2b3254884ab527fab0a7e9c39ba9.zip",
 
     "_ugoira_original"     : False,
     "_ugoira_frame_data[*]": {

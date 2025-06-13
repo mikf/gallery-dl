@@ -78,7 +78,7 @@ __tests__ = (
     "#comment" : "Warning and no 'Show all' button (#6736)",
     "#category": ("", "poipiku", "post"),
     "#class"   : poipiku.PoipikuPostExtractor,
-    "#urls"    : "https://img-org.poipiku.com/user_img02/001400760/005483268_JdB7sAWpv.jpeg",
+    "#results" : "https://img-org.poipiku.com/user_img02/001400760/005483268_JdB7sAWpv.jpeg",
 
     "count"        : 1,
     "num"          : 1,
