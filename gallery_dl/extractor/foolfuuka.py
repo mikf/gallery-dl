@@ -75,9 +75,9 @@ class FoolfuukaExtractor(BaseExtractor):
                 "ck": "warosu.org",
                 "diy": "warosu.org",
                 "fa": "warosu.org",
+                "ic": "warosu.org",
                 "jp": "warosu.org",
                 "lit": "warosu.org",
-                "ic": "warosu.org",
                 "sci": "warosu.org",
                 "tg": "archive.4plebs.org",
             }
