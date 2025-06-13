@@ -55,6 +55,15 @@ class PinterestExtractor(Extractor):
             pin.update(data)
             pin["count"] = len(files)
 
+            for key in (
+                "description",
+                "closeup_description",
+                "closeup_unified_description",
+            ):
+                value = pin.get(key)
+                if value:
+                    pin[key] = value.strip()
+
             yield Message.Directory, pin
             for pin["num"], file in enumerate(files, 1):
                 url = file["url"]
