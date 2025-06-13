@@ -43,7 +43,7 @@ class PixivExtractor(Extractor):
         self.meta_comments = self.config("comments")
         self.meta_captions = self.config("captions")
 
-        if self.meta_captions:
+        if self.sanity_workaround or self.meta_captions:
             self.meta_captions_sub = util.re(
                 r'<a href="/jump\.php\?([^"]+)').sub
 
@@ -91,10 +91,8 @@ class PixivExtractor(Extractor):
                     not work.get("_mypixiv") and not work.get("_ajax"):
                 body = self._request_ajax("/illust/" + str(work["id"]))
                 if body:
-                    caption = self.meta_captions_sub(
-                        lambda m: '<a href="' + text.unquote(m.group(1)),
+                    work["caption"] = self._sanitize_ajax_caption(
                         body["illustComment"])
-                    work["caption"] = text.unescape(caption)
 
             if transform_tags:
                 transform_tags(work)
@@ -279,7 +277,7 @@ class PixivExtractor(Extractor):
                 translated_name = None
             tags.append({"name": name, "translated_name": translated_name})
 
-        work["caption"] = text.unescape(body["illustComment"])
+        work["caption"] = self._sanitize_ajax_caption(body["illustComment"])
         work["page_count"] = count = body["pageCount"]
         if count == 1:
             return ({"url": url},)
@@ -317,6 +315,12 @@ class PixivExtractor(Extractor):
                 return url
             except exception.HttpError:
                 pass
+
+    def _sanitize_ajax_caption(self, caption):
+        if not caption:
+            return ""
+        return text.unescape(self.meta_captions_sub(
+            lambda m: '<a href="' + text.unquote(m.group(1)), caption))
 
     def _fallback_image(self, src):
         if isinstance(src, str):
