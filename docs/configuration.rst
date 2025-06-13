@@ -6717,6 +6717,25 @@ Description
       and ``{_filename}``.
 
 
+exec.commands
+-------------
+Type
+    ``list`` of `commands <exec.command_>`__
+Example
+    .. code:: json
+
+        [
+            ["echo", "{user[account]}", "{id}"]
+            ["magick", "convert" "{_path}",  "\fF {_path.rpartition('.')[0]}.png"],
+            "rm {}",
+        ]
+Description
+    Multiple `commands <exec.command_>`__ to run in succession.
+
+    All `commands <exec.command_>`__ after the first returning with a non-zero
+    exit status will not be run.
+
+
 exec.event
 ----------
 Type
