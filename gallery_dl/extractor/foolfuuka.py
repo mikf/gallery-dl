@@ -68,9 +68,20 @@ class FoolfuukaExtractor(BaseExtractor):
         elif self.fixup_timestamp:
             # trim filename/timestamp to 13 characters (#7652)
             path, _, filename = url.rpartition("/")
-            name, _, ext = filename.rpartition(".")
-            if len(name) > 13:
-                url = "{}/{}.{}".format(path, name[:13], ext)
+            # if it's one of these boards, it should redirect to warosu
+            warosu_boards = {"3", "biz", "ck", "diy", "fa", "jp", "lit", "ic", "sci"}
+            # if it's one of these boards, it should redirect to fourplebs
+            fourplebs_boards = {"tg"}
+            # if it's one of these archives it's redirecting to it should slice the name
+            filename_slice_archives = {"b4k", "desuarchive", "palanq"}
+            if (board := next((b for b in warosu_boards if f"/{b}/" in url), None)):
+                url = f"https://warosu.org/{board}/full_image/{filename}"
+            elif (board := next((b for b in fourplebs_boards if f"/{b}/" in url), None)):
+                url = f"https://archive.4plebs.org/{board}/full_image/{filename}"
+            elif any(archive in path for archive in filename_slice_archives):
+                name, _, ext = filename.rpartition(".")
+                if len(name) > 13:
+                    url = "{}/{}.{}".format(path, name[:13], ext)
 
         return url
 
