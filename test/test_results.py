@@ -242,13 +242,15 @@ class TestExtractorResults(unittest.TestCase):
                 for url, pat in zip(tjob.url_list, pattern):
                     self.assertRegex(url, pat, msg="#pattern")
 
-        if "#urls" in result:
-            expected = result["#urls"]
+        if "#results" in result:
+            expected = result["#results"]
             if isinstance(expected, str):
-                self.assertTrue(tjob.url_list, msg="#urls")
-                self.assertEqual(tjob.url_list[0], expected, msg="#urls")
+                self.assertTrue(tjob.url_list, msg="#results")
+                self.assertEqual(
+                    tjob.url_list[0], expected, msg="#results")
             else:
-                self.assertSequenceEqual(tjob.url_list, expected, msg="#urls")
+                self.assertSequenceEqual(
+                    tjob.url_list, expected, msg="#results")
 
         metadata = {k: v for k, v in result.items() if k[0] != "#"}
         if metadata:

@@ -60,7 +60,7 @@ __tests__ = (
     "#category": ("moebooru", "yandere", "pool"),
     "#class"   : moebooru.MoebooruPoolExtractor,
     "#sha1_content": "2a35b9d6edecce11cc2918c6dce4de2198342b68",
-    "#urls"        : (
+    "#results"     : (
         "https://files.yande.re/image/62558ad1d68ffb47e903694d2c5f9e53/yande.re%2051824%20armor%20ouzoku%20pantsu%20sasaki_tamaru%20softhouse_chara%20sword%20thighhighs.jpg",
         "https://files.yande.re/image/c57fcd886f643297f1283242e572b81d/yande.re%2036975%20ashita_no_kimi_to_au_tame_ni%20cleavage%20kurashima_tomoyasu%20pantsu%20wakamiya_asuka.jpg",
         "https://files.yande.re/image/c877ec0dc18dd79d69217011adfa5af3/yande.re%2051832%20aburidashi_zakuro%20animal_ears%20erect_nipples%20pantsu%20tail.jpg",

@@ -13,7 +13,7 @@ __tests__ = (
     "#category": ("moebooru", "sakugabooru", "post"),
     "#class"   : moebooru.MoebooruPostExtractor,
     "#options" : {"tags": True},
-    "#urls"    : "https://www.sakugabooru.com/data/31db5edb23f7b5db590d182ea84a00b2.mp4",
+    "#results" : "https://www.sakugabooru.com/data/31db5edb23f7b5db590d182ea84a00b2.mp4",
 
     "actual_preview_height": 169,
     "actual_preview_width": 300,
@@ -78,7 +78,7 @@ __tests__ = (
     "#category": ("moebooru", "sakugabooru", "pool"),
     "#class"   : moebooru.MoebooruPoolExtractor,
     "#options" : {"metadata": True},
-    "#urls"    : (
+    "#results" : (
         "https://www.sakugabooru.com/data/cd1fe3601ddbb8b13db794a1f51acf36.gif",
         "https://www.sakugabooru.com/data/c6dedf058957f89126bcbdfd209bfc69.gif",
         "https://www.sakugabooru.com/data/3a8d6b7ec40fb66447d160d53759ec71.gif",

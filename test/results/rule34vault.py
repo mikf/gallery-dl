@@ -83,7 +83,7 @@ __tests__ = (
     "#url"    : "https://rule34vault.com/post/382937",
     "#comment": "video",
     "#class"  : rule34vault.Rule34vaultPostExtractor,
-    "#urls"        : "https://r34xyz.b-cdn.net/posts/382/382937/382937.mp4",
+    "#results"     : "https://r34xyz.b-cdn.net/posts/382/382937/382937.mp4",
     "#sha1_content": "b962e3e2304139767c3792508353e6e83a85a2af",
 },
 

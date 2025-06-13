@@ -18,7 +18,7 @@ __tests__ = (
 {
     "#url"     : "https://boosty.to/milshoo?postsFrom=1706742000&postsTo=1709247599",
     "#class"   : boosty.BoostyUserExtractor,
-    "#urls"    : "https://images.boosty.to/image/ff0d2006-3ee7-483d-a5fc-2a05b531742c?change_time=1707829201",
+    "#results" : "https://images.boosty.to/image/ff0d2006-3ee7-483d-a5fc-2a05b531742c?change_time=1707829201",
 },
 
 {
@@ -31,7 +31,7 @@ __tests__ = (
 {
     "#url"     : "https://boosty.to/milshoo/posts/4304d8f0-3f49-4f97-a3f3-9f064bc32b2f",
     "#class"   : boosty.BoostyPostExtractor,
-    "#urls"    : "https://images.boosty.to/image/75f86086-fc67-4ed2-9365-2958d3d1a8f7?change_time=1711027786",
+    "#results" : "https://images.boosty.to/image/75f86086-fc67-4ed2-9365-2958d3d1a8f7?change_time=1711027786",
 
     "count"    : 1,
     "num"      : 1,

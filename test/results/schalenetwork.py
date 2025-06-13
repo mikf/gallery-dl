@@ -131,9 +131,9 @@ __tests__ = (
     "#class"   : schalenetwork.SchalenetworkFavoriteExtractor,
     "#pattern" : schalenetwork.SchalenetworkGalleryExtractor.pattern,
     "#auth"    : True,
-    "#urls"    : [
+    "#results" : (
         "https://niyaniya.moe/g/14216/6c67076fdd45",
-    ],
+    ),
 },
 
 {
@@ -141,9 +141,9 @@ __tests__ = (
     "#class"   : schalenetwork.SchalenetworkFavoriteExtractor,
     "#pattern" : schalenetwork.SchalenetworkGalleryExtractor.pattern,
     "#auth"    : True,
-    "#urls"    : [
+    "#results" : (
         "https://niyaniya.moe/g/14216/6c67076fdd45",
-    ],
+    ),
 },
 
 )

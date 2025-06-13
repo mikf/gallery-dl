@@ -14,7 +14,7 @@ __tests__ = (
     "#category": ("", "sexcom", "pin"),
     "#class"   : sexcom.SexcomPinExtractor,
     "#skip"    : "legacy",
-    "#urls"        : "https://imagex1.sx.cdn.live/images/pinporn/2014/08/26/7637609.jpg",
+    "#results"     : "https://imagex1.sx.cdn.live/images/pinporn/2014/08/26/7637609.jpg",
     "#sha1_content": "8cd419c6790ef7348bd398c364ab10f956e438dc",
 
     "comments" : range(0, 5),
@@ -43,7 +43,7 @@ __tests__ = (
     "#comment" : "picture",
     "#category": ("", "sexcom", "pin"),
     "#class"   : sexcom.SexcomPinExtractor,
-    "#urls"    : "https://imagex1.sx.cdn.live/images/pinporn/2014/08/26/7637609.jpg",
+    "#results" : "https://imagex1.sx.cdn.live/images/pinporn/2014/08/26/7637609.jpg",
 
     "date"     : "dt:2014-08-26 00:00:00",
     "date_url" : "dt:2014-08-26 00:00:00",
@@ -60,7 +60,7 @@ __tests__ = (
     "#comment" : "gif (legacy URL)",
     "#category": ("", "sexcom", "pin"),
     "#class"   : sexcom.SexcomPinExtractor,
-    "#urls"        : "https://imagex1.sx.cdn.live/images/pinporn/2017/12/07/18760842.gif",
+    "#results"     : "https://imagex1.sx.cdn.live/images/pinporn/2017/12/07/18760842.gif",
     "#sha1_content": "176cc63fa05182cb0438c648230c0f324a5965fe",
 
     "date"     : "dt:2017-12-07 00:00:00",
@@ -84,7 +84,7 @@ __tests__ = (
     "#category": ("", "sexcom", "pin"),
     "#class"   : sexcom.SexcomPinExtractor,
     "#options" : {"gifs": False},
-    "#urls"        : "https://imagex1.sx.cdn.live/images/pinporn/2017/12/07/18760842.webp",
+    "#results"     : "https://imagex1.sx.cdn.live/images/pinporn/2017/12/07/18760842.webp",
     "#sha1_content": "d5d58fbb92f87be49a37d29d82687c9efa7f796f",
 
     "date"     : "dt:2017-12-07 00:00:00",
@@ -107,7 +107,7 @@ __tests__ = (
     "#category": ("", "sexcom", "pin"),
     "#class"   : sexcom.SexcomPinExtractor,
     "#skip"    : "gone",
-    "#urls"        : "https://video1.sx.cdn.live/videos/pinporn/2018/02/10/776229_hd.mp4",
+    "#results"     : "https://video1.sx.cdn.live/videos/pinporn/2018/02/10/776229_hd.mp4",
     "#sha1_content": "e1a5834869163e2c4d1ca2677f5b7b367cf8cfff",
 
     "comments" : range(0, 5),
@@ -133,7 +133,7 @@ __tests__ = (
     "#comment" : "video",
     "#category": ("", "sexcom", "pin"),
     "#class"   : sexcom.SexcomPinExtractor,
-    "#urls"    : "ytdl:https://videos.sex.com/680933/video.m3u8",
+    "#results" : "ytdl:https://videos.sex.com/680933/video.m3u8",
 
     "extension": "mp4",
     "pin_id"   : 680933,

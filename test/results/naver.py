@@ -29,7 +29,7 @@ __tests__ = (
     "#comment" : "filenames in EUC-KR encoding (#5126)",
     "#category": ("", "naver", "post"),
     "#class"   : naver.NaverPostExtractor,
-    "#urls": (
+    "#results": (
         "https://blogfiles.pstatic.net/20130305_23/ping9303_1362411028002Dpz9z_PNG/1_사본.png",
         "https://blogfiles.pstatic.net/20130305_46/rlfqjxm0_1362473322580x33zi_PNG/오마갓합작.png",
     ),
@@ -88,7 +88,7 @@ __tests__ = (
     "#category": ("", "naver", "post"),
     "#class"   : naver.NaverPostExtractor,
     "#options" : {"videos": False},
-    "#urls": (
+    "#results": (
         "https://blogfiles.pstatic.net/MjAyMzA5MjVfMTMy/MDAxNjk1NjQ0MzI4OTE3.UxgvxTesk7Y88OWGvPMwQhbmCPp6mPA_C-5l5lJggyEg.B0DbxNEzz3DxRJtShiiBHDLzLQSCFDo_Bp6c-bcMDiog.JPEG.jws790103/20230925%EF%BC%BF080218.jpg",
         "https://blogfiles.pstatic.net/MjAyMzA5MjVfMjAz/MDAxNjk1NjQ0MzI4OTA5.Kd4VzqHhhrgby7rCA1iPdBX6f_k2DPEBnlRdOWD-kPgg.U0C1lmlKVMZMA4hhhs69nolZwCZ4Plme4KVbNfhezhkg.JPEG.jws790103/20230925%EF%BC%BF081103.jpg",
         "https://blogfiles.pstatic.net/MjAyMzA5MjVfMTg3/MDAxNjk1NjQ0MzI4OTk2.faiqny7Fl82Nnc3cJj85xa_MSBjYR3BStKeHw2bjYTwg.7Z8w0lDO9Uhjr8QTGwA0az_UZhN9haHocbYWgEyBO9gg.JPEG.jws790103/20230925%EF%BC%BF081141.jpg",

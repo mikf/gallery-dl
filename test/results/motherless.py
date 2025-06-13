@@ -11,7 +11,7 @@ __tests__ = (
 {
     "#url"  : "https://motherless.com/B0168DB",
     "#class": motherless.MotherlessMediaExtractor,
-    "#urls" : "https://cdn5-images.motherlessmedia.com/images/B0168DB.jpg",
+    "#results": "https://cdn5-images.motherlessmedia.com/images/B0168DB.jpg",
     "#sha1_content": "10629fc5dd7a9623af7dd57f1a322d0f24ac9acc",
 
     "date"     : "dt:2013-03-29 00:00:00",
@@ -36,7 +36,7 @@ __tests__ = (
 {
     "#url"  : "https://motherless.com/G43D8704/F0C07D3",
     "#class": motherless.MotherlessMediaExtractor,
-    "#urls" : "https://cdn5-images.motherlessmedia.com/images/F0C07D3.jpg",
+    "#results": "https://cdn5-images.motherlessmedia.com/images/F0C07D3.jpg",
 
     "date"      : "dt:2014-08-13 00:00:00",
     "extension" : "jpg",
@@ -57,7 +57,7 @@ __tests__ = (
 {
     "#url"  : "https://motherless.com/g/classic_porn/19D6C80",
     "#class": motherless.MotherlessMediaExtractor,
-    "#urls" : "https://cdn5-images.motherlessmedia.com/images/19D6C80.gif",
+    "#results": "https://cdn5-images.motherlessmedia.com/images/19D6C80.gif",
 
     "date"     : "dt:2021-05-11 00:00:00",
     "extension": "gif",
@@ -76,7 +76,7 @@ __tests__ = (
 {
     "#url"  : "https://motherless.com/G43D8704",
     "#class": motherless.MotherlessGalleryExtractor,
-    "#urls": (
+    "#results": (
         "https://motherless.com/GI43D8704",
         "https://motherless.com/GV43D8704",
     ),

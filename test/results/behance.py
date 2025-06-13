@@ -13,7 +13,7 @@ __tests__ = (
     "#url"     : "https://www.behance.net/gallery/17386197/A-Short-Story",
     "#category": ("", "behance", "gallery"),
     "#class"   : behance.BehanceGalleryExtractor,
-    "#urls"    : (
+    "#results" : (
         "ytdl:https://player.vimeo.com/video/97189640?title=0&byline=0&portrait=0&color=ffffff",
         "https://mir-s3-cdn-cf.behance.net/project_modules/source/a5a12417386197.562bc055a107d.jpg",
     ),
@@ -69,7 +69,7 @@ __tests__ = (
     "#category": ("", "behance", "gallery"),
     "#class"   : behance.BehanceGalleryExtractor,
     "#options" : {"modules": "text"},
-    "#urls"    : """text:<div>Make Shift<br><a href="https://www.moevir.com/News/make-shif?fbclid=IwAR2MXL7mVDskdXHitLs4tv_RQFqB1tpAYix2EMIzea4lOSIPdPOR45wEJMA" target="_blank" rel="nofollow">https://www.moevir.com/News/make-shif</a><br>Moevir Magazine November Issue 2019<br>Photography by Caesar Lima @caephoto <br>Model: Bee @phamhuongbee <br>Makeup by Monica Alvarez @monicaalvarezmakeup <br>Styling by Jessica Boal @jessicaboal <br>Hair by James Gilbert @brandnewjames<br>Shot at Vila Sophia<br></div>""",
+    "#results" : """text:<div>Make Shift<br><a href="https://www.moevir.com/News/make-shif?fbclid=IwAR2MXL7mVDskdXHitLs4tv_RQFqB1tpAYix2EMIzea4lOSIPdPOR45wEJMA" target="_blank" rel="nofollow">https://www.moevir.com/News/make-shif</a><br>Moevir Magazine November Issue 2019<br>Photography by Caesar Lima @caephoto <br>Model: Bee @phamhuongbee <br>Makeup by Monica Alvarez @monicaalvarezmakeup <br>Styling by Jessica Boal @jessicaboal <br>Hair by James Gilbert @brandnewjames<br>Shot at Vila Sophia<br></div>""",
 },
 
 {

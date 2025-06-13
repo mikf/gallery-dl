@@ -12,7 +12,7 @@ __tests__ = (
     "#url"     : "https://www.newgrounds.com/art/view/tomfulp/ryu-is-hawt",
     "#category": ("", "newgrounds", "image"),
     "#class"   : newgrounds.NewgroundsImageExtractor,
-    "#urls"        : "https://art.ngfiles.com/images/1993000/1993615_4474_tomfulp_ryu-is-hawt.44f81090378ae9c257a5e46a8e17cc4d.gif?f1695674895",
+    "#results"     : "https://art.ngfiles.com/images/1993000/1993615_4474_tomfulp_ryu-is-hawt.44f81090378ae9c257a5e46a8e17cc4d.gif?f1695674895",
     "#sha1_content": "8f395e08333eb2457ba8d8b715238f8910221365",
 
     "artist"     : ["tomfulp"],
@@ -39,7 +39,7 @@ __tests__ = (
     "#url"     : "https://art.ngfiles.com/images/0/94_tomfulp_ryu-is-hawt.gif",
     "#category": ("", "newgrounds", "image"),
     "#class"   : newgrounds.NewgroundsImageExtractor,
-    "#urls"    : "https://art.ngfiles.com/images/1993000/1993615_4474_tomfulp_ryu-is-hawt.44f81090378ae9c257a5e46a8e17cc4d.gif?f1695674895",
+    "#results" : "https://art.ngfiles.com/images/1993000/1993615_4474_tomfulp_ryu-is-hawt.44f81090378ae9c257a5e46a8e17cc4d.gif?f1695674895",
 },
 
 {
@@ -47,7 +47,7 @@ __tests__ = (
     "#comment" : "embedded file in 'comments' (#1033)",
     "#category": ("", "newgrounds", "image"),
     "#class"   : newgrounds.NewgroundsImageExtractor,
-    "#urls"    : (
+    "#results" : (
         "https://art.ngfiles.com/images/1438000/1438673_sailoryon_yon-dream-buster.jpg?f1601058173",
         "https://art.ngfiles.com/comments/172000/iu_172374_7112211.jpg",
     ),
@@ -59,7 +59,7 @@ __tests__ = (
     "#category": ("", "newgrounds", "image"),
     "#class"   : newgrounds.NewgroundsImageExtractor,
     "#auth"    : True,
-    "#urls"    : (
+    "#results" : (
         "https://art.ngfiles.com/images/5091000/5091275_45067_zedrinbot_untitled-5091275.0a9d27ed2bc265a7e89478ed6ad6f86f.gif?f1696187399",
         "https://art.ngfiles.com/images/5091000/5091275_45071_zedrinbot_untitled-5091275.6fdc62eaef43528fb1c9bda624d30a3d.gif?f1696187436",
         "https://art.ngfiles.com/images/5091000/5091275_45070_zedrinbot_untitled-5091275.0d7334746374465bd448908b88d1f810.gif?f1696187434",
@@ -74,7 +74,7 @@ __tests__ = (
     "#category": ("", "newgrounds", "image"),
     "#class"   : newgrounds.NewgroundsImageExtractor,
     "#auth"    : True,
-    "#urls"    : (
+    "#results" : (
         "https://art.ngfiles.com/images/5009000/5009916_14628_zedrinbot_nazrin-tanlines.265f7b6beec5855a349e2646e90cbc01.png?f1695698131",
         "https://art.ngfiles.com/images/5009000/5009916_14632_zedrinbot_nazrin-tanlines.40bd62fbf5875806cda6b004b348114a.png?f1695727318",
         "https://art.ngfiles.com/images/5009000/5009916_14634_zedrinbot_nazrin-tanlines.40bd62fbf5875806cda6b004b348114a.png?f1695727321",
@@ -89,7 +89,7 @@ __tests__ = (
     "#comment" : "extra files in 'imageData' block (#4642)",
     "#category": ("", "newgrounds", "image"),
     "#class"   : newgrounds.NewgroundsImageExtractor,
-    "#urls"    : (
+    "#results" : (
         "https://art.ngfiles.com/images/5127000/5127150_93307_bacun_kill-la-kill-10th-anniversary.61adfe309bec342f9db55fd44397235b.png?f1697310027",
         "https://art.ngfiles.com/images/5127000/5127150_94250_bacun_kill-la-kill-10th-anniversary.64fdf525fa38c1ab34defac4b354bc7a.webp?f1697332147",
     ),
@@ -99,7 +99,7 @@ __tests__ = (
     "#url"     : "https://www.newgrounds.com/art/view/sockdotclip/trickin-treats",
     "#comment" : "extra files in comment section as '<img src=' (#6253)",
     "#class"   : newgrounds.NewgroundsImageExtractor,
-    "#urls"    : (
+    "#results" : (
         "https://art.ngfiles.com/images/2811000/2811344_sockdotclip_trickin-treats.png?f1667246310",
         "https://art.ngfiles.com/comments/788000/iu_788899_10504416.webp",
         "https://art.ngfiles.com/comments/788000/iu_788901_10504416.webp",
@@ -123,7 +123,7 @@ __tests__ = (
     "#comment" : "video",
     "#category": ("", "newgrounds", "media"),
     "#class"   : newgrounds.NewgroundsMediaExtractor,
-    "#urls"    : "https://uploads.ungrounded.net/alternate/564000/564957_alternate_31.mp4?1359712249",
+    "#results" : "https://uploads.ungrounded.net/alternate/564000/564957_alternate_31.mp4?1359712249",
 
     "artist"     : [
         "kickinthehead",
@@ -152,7 +152,7 @@ __tests__ = (
     "#category": ("", "newgrounds", "media"),
     "#class"   : newgrounds.NewgroundsMediaExtractor,
     "#options" : {"format": ["mkv", "mov", 1080]},
-    "#urls"    : "https://uploads.ungrounded.net/alternate/564000/564957_alternate_31.mkv?1359712249",
+    "#results" : "https://uploads.ungrounded.net/alternate/564000/564957_alternate_31.mkv?1359712249",
 },
 
 {
@@ -160,7 +160,7 @@ __tests__ = (
     "#category": ("", "newgrounds", "media"),
     "#class"   : newgrounds.NewgroundsMediaExtractor,
     "#options" : {"format": "720p"},
-    "#urls"    : "https://uploads.ungrounded.net/alternate/564000/564957_alternate_31.720p.mp4?1359712249",
+    "#results" : "https://uploads.ungrounded.net/alternate/564000/564957_alternate_31.720p.mp4?1359712249",
 },
 
 {
@@ -217,7 +217,7 @@ Also wanna give a big shout-out to by by Zachary (Zachary.newgrounds.com) for pr
     "#comment" : "flash animation (#1257)",
     "#category": ("", "newgrounds", "media"),
     "#class"   : newgrounds.NewgroundsMediaExtractor,
-    "#urls"    : "https://uploads.ungrounded.net/161000/161181_ddautta_mask__550x281_.swf",
+    "#results" : "https://uploads.ungrounded.net/161000/161181_ddautta_mask__550x281_.swf",
 
     "type": "movie",
 },
@@ -245,7 +245,7 @@ Also wanna give a big shout-out to by by Zachary (Zachary.newgrounds.com) for pr
     "#comment" : "flash game",
     "#category": ("", "newgrounds", "media"),
     "#class"   : newgrounds.NewgroundsMediaExtractor,
-    "#urls"    : (
+    "#results" : (
         "https://uploads.ungrounded.net/829000/829032_picovsbeardx.swf",
         "https://uploads.ungrounded.net/tmp/img/521000/iu_521265_5431202.gif",
     ),
@@ -338,14 +338,14 @@ Also wanna give a big shout-out to by by Zachary (Zachary.newgrounds.com) for pr
 {
     "#url"     : "https://tomfulp.newgrounds.com",
     "#class"   : newgrounds.NewgroundsUserExtractor,
-    "#urls"    : "https://tomfulp.newgrounds.com/art",
+    "#results" : "https://tomfulp.newgrounds.com/art",
 },
 
 {
     "#url"     : "https://tomfulp.newgrounds.com",
     "#class"   : newgrounds.NewgroundsUserExtractor,
     "#options" : {"include": "all"},
-    "#urls"    : (
+    "#results" : (
         "https://tomfulp.newgrounds.com/art",
         "https://tomfulp.newgrounds.com/audio",
         "https://tomfulp.newgrounds.com/games",

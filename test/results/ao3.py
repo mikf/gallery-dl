@@ -11,7 +11,7 @@ __tests__ = (
 {
     "#url"     : "https://archiveofourown.org/works/47802076",
     "#class"   : ao3.Ao3WorkExtractor,
-    "#urls"    : "https://archiveofourown.org/downloads/47802076/The_Wildcard.pdf?updated_at=1720398424",
+    "#results" : "https://archiveofourown.org/downloads/47802076/The_Wildcard.pdf?updated_at=1720398424",
 
     "author"   : "Flowers_for_ghouls",
     "bookmarks": range(100, 300),
@@ -127,7 +127,7 @@ __tests__ = (
     "#url"     : "https://archiveofourown.org/works/47802076",
     "#class"   : ao3.Ao3WorkExtractor,
     "#options" : {"formats": ["epub", "mobi", "azw3", "pdf", "html"]},
-    "#urls"    : (
+    "#results" : (
         "https://archiveofourown.org/downloads/47802076/The_Wildcard.epub?updated_at=1720398424",
         "https://archiveofourown.org/downloads/47802076/The_Wildcard.mobi?updated_at=1720398424",
         "https://archiveofourown.org/downloads/47802076/The_Wildcard.azw3?updated_at=1720398424",
@@ -141,13 +141,13 @@ __tests__ = (
     "#comment" : "restricted work / login required",
     "#class"   : ao3.Ao3WorkExtractor,
     "#auth"    : True,
-    "#urls"    : "https://archiveofourown.org/downloads/12345/Unquenchable.pdf?updated_at=1716029699",
+    "#results" : "https://archiveofourown.org/downloads/12345/Unquenchable.pdf?updated_at=1716029699",
 },
 
 {
     "#url"     : "https://archiveofourown.org/series/1903930",
     "#class"   : ao3.Ao3SeriesExtractor,
-    "#urls"    : (
+    "#results" : (
         "https://archiveofourown.org/works/26131546",
         "https://archiveofourown.org/works/26291101",
         "https://archiveofourown.org/works/26325292",
@@ -173,7 +173,7 @@ __tests__ = (
 {
     "#url"     : "https://archiveofourown.org/users/Fyrelass",
     "#class"   : ao3.Ao3UserExtractor,
-    "#urls"    : (
+    "#results" : (
         "https://archiveofourown.org/users/Fyrelass/works",
         "https://archiveofourown.org/users/Fyrelass/series",
     ),
@@ -205,7 +205,7 @@ __tests__ = (
     "#url"     : "https://archiveofourown.org/users/Fyrelass/works",
     "#class"   : ao3.Ao3UserWorksExtractor,
     "#auth"    : False,
-    "#urls"    : (
+    "#results" : (
         "https://archiveofourown.org/works/55035061",
         "https://archiveofourown.org/works/58979287",
         "https://archiveofourown.org/works/52704457",
@@ -224,7 +224,7 @@ __tests__ = (
     "#url"     : "https://archiveofourown.org/users/Fyrelass/series",
     "#class"   : ao3.Ao3UserSeriesExtractor,
     "#auth"    : False,
-    "#urls"    : (
+    "#results" : (
         "https://archiveofourown.org/series/3821575",
     ),
 },

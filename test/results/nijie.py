@@ -14,7 +14,7 @@ __tests__ = (
     "#url"     : "https://nijie.info/members.php?id=44",
     "#category": ("Nijie", "nijie", "user"),
     "#class"   : nijie.NijieUserExtractor,
-    "#urls"    : (
+    "#results" : (
         "https://nijie.info/members_illust.php?id=44",
         "https://nijie.info/members_dojin.php?id=44",
     ),
@@ -24,7 +24,7 @@ __tests__ = (
     "#url"     : "https://nijie.info/members_illust.php?id=44",
     "#category": ("Nijie", "nijie", "illustration"),
     "#class"   : nijie.NijieIllustrationExtractor,
-    "#urls": (
+    "#results": (
         "https://pic.nijie.net/__s4__/d7b5d8b576a90f3688cfe6bfa6ebb678817ecb4c19f118e187e0f039c81b2e5d0b6c2edfe359d9f65b457507bf9ae807801a0ac27b9cf06ee94e1cb848c75d2f31353acc3197dff04f537d70a7cb6b8782f6f0635de3f3d522e57827.jpg",
         "https://pic.nijie.net/__s4__/d7e2d9b124a95933ddc4e5baadbcb62b2a0ce7c6163dadac1d49c57e8da5d113398f3170da7835f03c897d9d6a9993d8fa40036a5209508611a305280cd684b33ca600f8160ee0d958b7c7f49972e4f4c650b8d58fff493a032d25f8.jpg",
     ),
@@ -101,7 +101,7 @@ __tests__ = (
     "#url"     : "https://nijie.info/view.php?id=70720",
     "#category": ("Nijie", "nijie", "image"),
     "#class"   : nijie.NijieImageExtractor,
-    "#urls"         : "https://pic.nijie.net/__s4__/d7e2d9b124a95933ddc4e5baadbcb62b2a0ce7c6163dadac1d49c57e8da5d113398f3170da7835f03c897d9d6a9993d8fa40036a5209508611a305280cd684b33ca600f8160ee0d958b7c7f49972e4f4c650b8d58fff493a032d25f8.jpg",
+    "#results"      : "https://pic.nijie.net/__s4__/d7e2d9b124a95933ddc4e5baadbcb62b2a0ce7c6163dadac1d49c57e8da5d113398f3170da7835f03c897d9d6a9993d8fa40036a5209508611a305280cd684b33ca600f8160ee0d958b7c7f49972e4f4c650b8d58fff493a032d25f8.jpg",
     "#sha1_content" : "d85e3ea896ed5e4da0bca2390ad310a4df716ca6",
 
     "artist_id"  : 44,
@@ -133,7 +133,7 @@ __tests__ = (
     "#comment" : "'view_side_dojin' thumbnails (#5049)",
     "#category": ("Nijie", "nijie", "image"),
     "#class"   : nijie.NijieImageExtractor,
-    "#urls"    : "https://pic.nijie.net/__s4__/d7b5d9b470fa0d368bcbb0bda4bae2797380288fb3a6f2d9aa1899530bbc0453912f2397ee9a37dbbd992b5bbde36f86061910e06961837c0ae7629006732ef8581a512a0e0b454ca050fa793340367fbef201687f1b8cdb2692898b.jpg",
+    "#results" : "https://pic.nijie.net/__s4__/d7b5d9b470fa0d368bcbb0bda4bae2797380288fb3a6f2d9aa1899530bbc0453912f2397ee9a37dbbd992b5bbde36f86061910e06961837c0ae7629006732ef8581a512a0e0b454ca050fa793340367fbef201687f1b8cdb2692898b.jpg",
 },
 
 {
@@ -141,7 +141,7 @@ __tests__ = (
     "#comment" : "video (#5707)",
     "#category": ("Nijie", "nijie", "image"),
     "#class"   : nijie.NijieImageExtractor,
-    "#urls"    : (
+    "#results" : (
         "https://pic.nijie.net/__s4__/d7b884ee71f90f358fcfe0bbf2e7b57ac1b72bd5df705d984997b3d47968e387b4d2e33c04faa793c9bb26f3f005eb5f875b440fcabb36f02d811203325ce520aacc1581c0ea361906bd6877031942a2a340d44ff9ba3d9c23950d44.mp4",
         "https://pic.nijie.net/__s4__/d7e685e777ae0f308ecaeabda0e8e32c4a0873467846be7078716328f9b105bfc278d968db43d2707e577c63c231fb1a4999570823c460f18ee35b790f6e1c4a4c01a05a8c3260c2cd3b9f77810e5a1b2a22755f279f47cf86e75733.jpg",
         "https://pic.nijie.net/__s4__/d7b38cee78f80c678acae3bef2b9e32c0fd196fdafaed57c041390ac33dd8f23b3236a48d9d41c6081ce7ca79840caa7deacc0120a0dc516210e2925c954d79c08e94bb9c0f7c572bd174336f64e6924721a2727078df5ad48e77b1b.jpg",
