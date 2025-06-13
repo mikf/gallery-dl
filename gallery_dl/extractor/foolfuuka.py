@@ -83,8 +83,8 @@ class FoolfuukaExtractor(BaseExtractor):
             }
             # if it's one of these archives, slice the name
             filename_slice_archives = {"b4k", "desuarchive", "palanq"}
-            board = next((b for b in board_domains if f"/{b}/" in url), None)
-            if board:
+            board = url.split("/", 4)[3]
+            if board in board_domains:
                 domain = board_domains[board]
                 url = f"https://{domain}/{board}/full_image/{filename}"
             elif any(archive in path for archive in filename_slice_archives):
