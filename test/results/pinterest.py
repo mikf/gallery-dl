@@ -13,6 +13,7 @@ __tests__ = (
     "#url"     : "https://www.pinterest.com/pin/858146903966145189/",
     "#category": ("", "pinterest", "pin"),
     "#class"   : pinterest.PinterestPinExtractor,
+    "#results" : "https://i.pinimg.com/originals/d4/f4/7f/d4f47fa2fce4c4c28475af5d94972904.jpg",
     "#sha1_url"    : "afb3c26719e3a530bb0e871c480882a801a4e8a5",
     "#sha1_content": [
         "4c435a66f6bb82bb681db2ecc888f76cf6c5f9ca",
@@ -79,6 +80,17 @@ __tests__ = (
     "#comment" : "story pin with 'story_pin_product_sticker_block' blocks (#7563)",
     "#class"   : pinterest.PinterestPinExtractor,
     "#results" : "https://i.pinimg.com/originals/3e/0a/2e/3e0a2e6c1173866c530c8ffe18d08b9f.jpg",
+    "#exception": exception.NotFoundError,
+},
+
+{
+    "#url"     : "https://pinterest.com/pin/725220346239561090/",
+    "#comment" : "stripped 'description' & 'closeup_unified_description' (#4335)",
+    "#class"   : pinterest.PinterestPinExtractor,
+    "#results" : "https://i.pinimg.com/originals/66/a3/9a/66a39a10c015df67b85481105fb3a81e.jpg",
+
+    "description": "",
+    "closeup_unified_description": "",
 },
 
 {
