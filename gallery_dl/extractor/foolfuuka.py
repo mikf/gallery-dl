@@ -8,6 +8,7 @@
 
 """Extractors for FoolFuuka 4chan archives"""
 
+import logging
 from .common import BaseExtractor, Message
 from .. import text
 import itertools
@@ -68,31 +69,27 @@ class FoolfuukaExtractor(BaseExtractor):
         elif self.fixup_timestamp:
             # trim filename/timestamp to 13 characters (#7652)
             path, _, filename = url.rpartition("/")
-            # if it's one of these boards, it should redirect to warosu
-            warosu_boards = {
-                "3", "biz", "ck", "diy", "fa", "jp", "lit", "ic", "sci"
+            # if it's one of these boards, redirect to warosu or 4plebs
+            board_domains = {
+                "3": "warosu.org",
+                "biz": "warosu.org",
+                "ck": "warosu.org",
+                "diy": "warosu.org",
+                "fa": "warosu.org",
+                "jp": "warosu.org",
+                "lit": "warosu.org",
+                "ic": "warosu.org",
+                "sci": "warosu.org",
+                "tg": "archive.4plebs.org",
             }
-            # if it's one of these boards, it should redirect to fourplebs
-            fourplebs_boards = {"tg"}
-            # if it's one of these archives, it should slice the name
-            filename_slice_archives = {
-                "b4k", "desuarchive", "palanq"
-            }
-            board = next(
-                (b for b in warosu_boards if f"/{b}/" in url),
-                None
-            )
+            # if it's one of these archives, slice the name
+            filename_slice_archives = {"b4k", "desuarchive", "palanq"}
+            board = next((b for b in board_domains if f"/{b}/" in url), None)
+            log = logging.getLogger(__name__)
             if board:
-                url = f"https://warosu.org/{board}/full_image/{filename}"
-
-            board = next(
-                (b for b in fourplebs_boards if f"/{b}/" in url),
-                None
-            )
-            if board:
-                url = (
-                    f"https://archive.4plebs.org/{board}/full_image/{filename}"
-                )
+                domain = board_domains[board]
+                url = f"https://{domain}/{board}/full_image/{filename}"
+                log.debug(url)
             elif any(archive in path for archive in filename_slice_archives):
                 name, _, ext = filename.rpartition(".")
                 if len(name) > 13:
