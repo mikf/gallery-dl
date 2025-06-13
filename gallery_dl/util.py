@@ -8,7 +8,7 @@
 
 """Utility functions and classes"""
 
-import re
+import re as re_module
 import os
 import sys
 import json
@@ -28,9 +28,9 @@ from email.utils import mktime_tz, parsedate_tz
 from . import text, version, exception
 
 try:
-    re_compile = re._compiler.compile
+    re_compile = re_module._compiler.compile
 except AttributeError:
-    re_compile = re.sre_compile.compile
+    re_compile = re_module.sre_compile.compile
 
 CACHE_PATTERN = {}
 
@@ -791,7 +791,7 @@ GLOBALS = {
     "hash_sha1": sha1,
     "hash_md5" : md5,
     "std"      : ModuleProxy(),
-    "re"       : re,
+    "re"       : re_module,
     "exts_image"  : EXTS_IMAGE,
     "exts_video"  : EXTS_VIDEO,
     "exts_archive": EXTS_ARCHIVE,
