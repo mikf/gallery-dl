@@ -161,6 +161,10 @@ class TestPredicate(unittest.TestCase):
 
         self.assertFalse(pred(url, {"a": 2}))
 
+        pred = util.FilterPredicate("re.search(r'.+', url)")
+        self.assertTrue(pred(url, {"url": "https://example.org/"}))
+        self.assertFalse(pred(url, {"url": ""}))
+
     def test_build_predicate(self):
         pred = util.build_predicate([])
         self.assertIsInstance(pred, type(lambda: True))
