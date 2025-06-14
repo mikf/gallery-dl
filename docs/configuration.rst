@@ -461,6 +461,7 @@ Description
     * ``e6ai`` (*)
     * ``e926`` (*)
     * ``exhentai``
+    * ``girlswithmuscle``
     * ``horne`` (R)
     * ``idolcomplex``
     * ``imgbb``
