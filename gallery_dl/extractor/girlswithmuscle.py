@@ -4,10 +4,8 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-import re
-
 from .common import Extractor, Message
-from .. import text, exception
+from .. import text, util, exception
 from ..cache import cache
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?girlswithmuscle\.com"
@@ -17,6 +15,9 @@ class GirlswithmuscleExtractor(Extractor):
     """Base class for girlswithmuscle extractors"""
     category = "girlswithmuscle"
     root = "https://www.girlswithmuscle.com"
+    directory_fmt = ("{category}", "{model}")
+    filename_fmt = "{model}_{id}.{extension}"
+    archive_fmt = "{type}_{model}_{id}"
 
     def login(self):
         username, password = self._get_auth_info()
@@ -59,9 +60,6 @@ class GirlswithmuscleExtractor(Extractor):
 class GirlswithmusclePostExtractor(GirlswithmuscleExtractor):
     """Extractor for individual posts on girlswithmuscle.com"""
     subcategory = "post"
-    directory_fmt = ("{category}", "{model}")
-    filename_fmt = "{model}_{id}.{extension}"
-    archive_fmt = "{type}_{model}_{id}"
     pattern = BASE_PATTERN + r"/(\d+)"
     example = "https://www.girlswithmuscle.com/12345/"
 
@@ -144,46 +142,38 @@ class GirlswithmusclePostExtractor(GirlswithmuscleExtractor):
         return [comment.strip() for comment in comments]
 
 
-class GirlswithmuscleGalleryExtractor(GirlswithmuscleExtractor):
-    """Extractor for galleries on girlswithmuscle.com"""
-    category = "girlswithmuscle"
-    subcategory = "gallery"
-    pattern = r"(?:https?://)?(?:www\.)?girlswithmuscle\.com/images/(.*)"
-    example = "https://www.girlswithmuscle.com/images/?name=Samantha%20Jerring"
-
-    def __init__(self, match):
-        Extractor.__init__(self, match)
-        self.query = match.groups()[0]
+class GirlswithmuscleSearchExtractor(GirlswithmuscleExtractor):
+    """Extractor for search results on girlswithmuscle.com"""
+    subcategory = "search"
+    pattern = BASE_PATTERN + r"/images/(.*)"
+    example = "https://www.girlswithmuscle.com/images/?name=MODEL"
 
     def pages(self):
-        url = "https://www.girlswithmuscle.com/images/{}".format(self.query)
+        query = self.groups[0]
+        url = "{}/images/{}".format(self.root, query)
         response = self.request(url)
-        if url != response.url:
-            msg = ('Request was redirected to "{}", try logging in'.
-                   format(response.url))
+        if response.history:
+            msg = 'Request was redirected to "{}", try logging in'.format(
+                response.url)
             raise exception.AuthorizationError(msg)
         page = response.text
 
-        match = re.search(r"Page (\d+) of (\d+)", page)
+        match = util.re(r"Page (\d+) of (\d+)").search(page)
         current, total = match.groups()
         current, total = text.parse_int(current), text.parse_int(total)
 
         yield page
         for i in range(current + 1, total + 1):
-            url = ("https://www.girlswithmuscle.com/images/{}/{}".
-                   format(i, self.query))
+            url = "{}/images/{}/{}".format(self.root, i, query)
             yield self.request(url).text
 
     def items(self):
         self.login()
         for page in self.pages():
+            data = {
+                "_extractor"  : GirlswithmusclePostExtractor,
+                "gallery_name": text.unescape(text.extr(page, "<title>", "<")),
+            }
             for imgid in text.extract_iter(page, 'id="imgid-', '"'):
-                url = "https://www.girlswithmuscle.com/{}/".format(imgid)
-                yield Message.Queue, url, {
-                    "gallery_name": self._parse_gallery_name(page),
-                    "_extractor": GirlswithmusclePostExtractor
-                }
-
-    @staticmethod
-    def _parse_gallery_name(page):
-        return text.extr(page, "<title>", "</title>")
+                url = "{}/{}/".format(self.root, imgid)
+                yield Message.Queue, url, data
