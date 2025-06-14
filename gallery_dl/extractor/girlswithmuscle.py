@@ -10,170 +10,137 @@ from .common import Extractor, Message
 from .. import text, exception
 from ..cache import cache
 
+BASE_PATTERN = r"(?:https?://)?(?:www\.)?girlswithmuscle\.com"
+
 
 class GirlswithmuscleExtractor(Extractor):
+    """Base class for girlswithmuscle extractors"""
+    category = "girlswithmuscle"
+    root = "https://www.girlswithmuscle.com"
+
     def login(self):
         username, password = self._get_auth_info()
         if username:
             self.cookies_update(self._login_impl(username, password))
 
-    @staticmethod
-    def _is_logged_in(page_text: str) -> bool:
-        return 'Log in' not in page_text
-
-    @staticmethod
-    def _get_csrfmiddlewaretoken(page: str) -> str:
-        return text.extract(
-            page,
-            'name="csrfmiddlewaretoken" value="',
-            '"'
-        )[0]
-
-    def _open_login_page(self):
-        """We need it to get second CSRF token"""
-        url = "https://www.girlswithmuscle.com/login/?next=/"
-        response = self.request(url)
-        return self._get_csrfmiddlewaretoken(response.text)
-
-    def _send_login_request(self, username, password, csrf_mw):
-        """Actual login action"""
-        data = {
-            "csrfmiddlewaretoken": csrf_mw,
-            "username": username,
-            "password": password,
-            "next": "/"
-        }
-
-        # Otherwise will be 403 Forbidden
-        self.session.headers['Origin'] = 'https://www.girlswithmuscle.com'
-        self.session.headers['Referer'] = \
-            'https://www.girlswithmuscle.com/login/?next=/'
-
-        # if successful, will update cookies
-        url = "https://www.girlswithmuscle.com/login/"
-        response = self.request(url, method="post", data=data)
-
-        if "Wrong username or password" in response.text:
-            raise exception.AuthenticationError()
-        elif not self._is_logged_in(response.text):
-            raise exception.AuthenticationError("Account data is missing")
-
-    @cache(maxage=28 * 86400, keyarg=1)
+    @cache(maxage=14*86400, keyarg=1)
     def _login_impl(self, username, password):
         self.log.info("Logging in as %s", username)
 
-        csrf_mw = self._open_login_page()
-        self._send_login_request(username, password, csrf_mw)
-        return {c.name: c.value for c in self.session.cookies}
+        url = self.root + "/login/"
+        page = self.request(url).text
+        csrf_token = text.extr(page, 'name="csrfmiddlewaretoken" value="', '"')
+
+        headers = {
+            "Origin" : self.root,
+            "Referer": url,
+        }
+        data = {
+            "csrfmiddlewaretoken": csrf_token,
+            "username": username,
+            "password": password,
+            "next": "/",
+        }
+        response = self.request(
+            url, method="POST", headers=headers, data=data)
+
+        if not response.history:
+            raise exception.AuthenticationError()
+
+        page = response.text
+        if ">Wrong username or password" in page:
+            raise exception.AuthenticationError()
+        if ">Log in<" in page:
+            raise exception.AuthenticationError("Account data is missing")
+
+        return {c.name: c.value for c in response.history[0].cookies}
 
 
 class GirlswithmusclePostExtractor(GirlswithmuscleExtractor):
     """Extractor for individual posts on girlswithmuscle.com"""
-    category = "girlswithmuscle"
     subcategory = "post"
     directory_fmt = ("{category}", "{model}")
     filename_fmt = "{model}_{id}.{extension}"
     archive_fmt = "{type}_{model}_{id}"
-    pattern = (r"(?:https?://)?(?:www\.)?girlswithmuscle\.com"
-               r"/(\d+)/")
-    example = "https://www.girlswithmuscle.com/1841638/"
-
-    def __init__(self, match):
-        Extractor.__init__(self, match)
-        self.id = match.groups()[0]
+    pattern = BASE_PATTERN + r"/(\d+)"
+    example = "https://www.girlswithmuscle.com/12345/"
 
     def items(self):
         self.login()
-        url = "https://girlswithmuscle.com/{}/".format(self.id)
-        page = self.request(url).text
 
-        if page is None:
+        url = "{}/{}/".format(self.root, self.groups[0])
+        page = self.request(url).text
+        if not page:
             raise exception.NotFoundError("post")
+
+        metadata = self.metadata(page)
 
         url = text.extr(page, 'class="main-image" src="', '"')
         if url:
-            metadata = self.metadata(page, url, 'picture')
+            metadata["type"] = "picture"
         else:
             url = text.extr(page, '<source src="', '"')
-            metadata = self.metadata(page, url, 'video')
+            metadata["type"] = "video"
 
+        text.nameext_from_url(url, metadata)
         yield Message.Directory, metadata
         yield Message.Url, url, metadata
 
-    def metadata(self, page, url, content_type):
-        info_source_begin = \
-            '<div id="info-source" style="display: none">'
-        info_source_end = "</div>"
-        source = text.remove_html(
-            text.extr(page, info_source_begin, info_source_end))
+    def metadata(self, page):
+        source = text.remove_html(text.extr(
+            page, '<div id="info-source" style="display: none">', "</div>"))
+        image_info = text.extr(
+            page, '<div class="image-info">', "</div>")
+        uploader = text.remove_html(text.extr(
+            image_info, '<span class="username-html">', "</a>"))
 
-        img_info_begin = '<div class="image-info">'
-        img_info_end = "</div>"
-        img_info_div = text.extr(page, img_info_begin, img_info_end)
-
-        info_uploader_begin = '<span class="username-html">'
-        info_uploader_end = '</a>'
-        uploader = text.remove_html(
-            text.extr(img_info_div, info_uploader_begin, info_uploader_end))
-
-        tags = text.extr(
-            page, 'id="tags-text">', "</div>", ''
-        ).replace('Tags:', '').strip().split(', ')
-        tags = [text.remove_html(tag).strip() for tag in tags if tag]
-
-        score = text.parse_int(text.remove_html(
-            text.extr(page, 'Score: <b>', '</span', '0')))
-
-        model = self._parse_model(page)
+        tags = text.extr(page, 'id="tags-text">', "</div>")
+        score = text.parse_int(text.remove_html(text.extr(
+            page, "Score: <b>", "</span")))
+        model = self._extract_model(page)
 
         return {
-            'id': self.id,
-            'model': model,
-            'model_list': self._parse_model_list(model),
-            'tags': tags,
-            'posted_dt': text.extr(
-                page, 'class="hover-time"  title="', '"', ''
-            ),
-            'is_favorite': self._parse_is_favorite(page),
-            'source_filename': source,
-            'uploader': uploader,
-            'score': score,
-            'comments': self._parse_comments(page),
-            'extension': text.ext_from_url(url),
-            'type': content_type,
+            "id": self.groups[0],
+            "model": model,
+            "model_list": self._parse_model_list(model),
+            "tags": text.split_html(tags)[1::2],
+            "date": text.parse_datetime(
+                text.extr(page, 'class="hover-time"  title="', '"')[:19],
+                "%Y-%m-%d %H:%M:%S"),
+            "is_favorite": self._parse_is_favorite(page),
+            "source_filename": source,
+            "uploader": uploader,
+            "score": score,
+            "comments": self._extract_comments(page),
         }
 
-    @staticmethod
-    def _parse_model(page):
-        model = text.extr(page, '<title>', "</title>", None)
-        return 'unknown' if model.startswith('Picture #') else model
+    def _extract_model(self, page):
+        model = text.extr(page, "<title>", "</title>")
+        return "unknown" if model.startswith("Picture #") else model
 
-    @staticmethod
-    def _parse_model_list(model):
-        if model == 'unknown':
+    def _parse_model_list(self, model):
+        if model == "unknown":
             return []
         else:
-            return [name.strip() for name in model.split(',')]
+            return [name.strip() for name in model.split(",")]
 
-    @staticmethod
-    def _parse_is_favorite(page):
-        fav_button = text.extr(page, 'id="favorite-button">', "</span>", '')
-        unfav_button = text.extr(page,
-                                 'class="actionbutton unfavorite-button">',
-                                 "</span>", '')
+    def _parse_is_favorite(self, page):
+        fav_button = text.extr(
+            page, 'id="favorite-button">', "</span>")
+        unfav_button = text.extr(
+            page, 'class="actionbutton unfavorite-button">', "</span>")
 
         is_favorite = None
-        if unfav_button == 'Unfavorite':
+        if unfav_button == "Unfavorite":
             is_favorite = True
-        if fav_button == 'Favorite':
+        if fav_button == "Favorite":
             is_favorite = False
 
         return is_favorite
 
-    @staticmethod
-    def _parse_comments(page):
-        comments = text.extract_iter(page, '<div class="comment-body-inner">',
-                                     '</div>')
+    def _extract_comments(self, page):
+        comments = text.extract_iter(
+            page, '<div class="comment-body-inner">', "</div>")
         return [comment.strip() for comment in comments]
 
 
