@@ -320,9 +320,9 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
-    <td>Girls With Muscle</td>
+    <td>Girls with Muscle</td>
     <td>https://www.girlswithmuscle.com/</td>
-    <td>Posts, Galleries, Search Results, Favorites</td>
+    <td>Posts, Search Results</td>
     <td>Supported</td>
 </tr>
 <tr>
