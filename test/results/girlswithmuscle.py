@@ -4,53 +4,52 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-gallery_dl = __import__("gallery_dl.extractor.girlswithmuscle")
-_gwm = getattr(gallery_dl.extractor, "girlswithmuscle")
+from gallery_dl.extractor import girlswithmuscle
 
 
 __tests__ = (
 {
-    "#url"           : "https://www.girlswithmuscle.com/2136096/",
-    "#category"      : ("", "girlswithmuscle", "post"),
-    "#class"         : _gwm.GirlswithmusclePostExtractor,
+    "#url"     : "https://www.girlswithmuscle.com/2526619/",
+    "#category": ("", "girlswithmuscle", "post"),
+    "#class"   : girlswithmuscle.GirlswithmusclePostExtractor,
+    "#results" : "https://www.girlswithmuscle.com/images/full/2526619.jpg",
 
-    'id'             : '2136096',
-    'model'          : str,
-    'tags'           : list,
-    'posted_dt'      : '2023-12-12 16:04:03.438979+00:00',
-    'source_filename': 'IMG_8714.png',
-    'uploader'       : 'toni1991',
-    'score'          : int,
-    'extension'      : 'png',
-    "type"           : 'picture',
-    # These are not available, unless you're logged in
-    'is_favorite'    : None,
-    'comments'       : list,
+    "comments" : [],
+    "date"     : "dt:2025-05-21 20:01:03",
+    "extension": "jpg",
+    "filename" : "2526619",
+    "id"       : "2526619",
+    "is_favorite": None,
+    "model"    : "Vladislava Galagan",
+    "model_list" : [
+        "Vladislava Galagan"
+    ],
+    "score"    : range(190, 250),
+    "source_filename": "",
+    "type"     : "picture",
+    "uploader" : "mrt",
+    "tags": [
+        "delts/shoulders",
+        "abs",
+        "casual",
+        "triceps",
+        "traps",
+        "bikini/competition suit",
+        "white",
+        "figure/fitness",
+        "bodybuilder",
+        "slavic",
+        "women's physique",
+        "russian",
+    ],
 },
 
 {
-    "#url"           : "https://www.girlswithmuscle.com/1841638/",
-    "#category"      : ("", "girlswithmuscle", "post"),
-    "#class"         : _gwm.GirlswithmusclePostExtractor,
-
-    'id'             : '1841638',
-    'model'          : str,
-    'tags'           : list,
-    'posted_dt'      : '2022-08-16 17:20:16.006855+00:00',
-    'source_filename': 'Snapinsta_299658611_1185267375661829_6167677658282784059_n.mp4',
-    'uploader'       : 'BriedFrain',
-    'score'          : int,
-    'extension'      : 'mp4',
-    "type"           : 'video',
-},
-
-{
-    "#url"           : "https://www.girlswithmuscle.com/images/?name=Samantha%20Jerring",
-    "#category"      : ("", "girlswithmuscle", "gallery"),
-    "#class"         : _gwm.GirlswithmuscleGalleryExtractor,
-
-    "#count"         : range(300, 3000),
-    "gallery_name"   : str
+    "#url"     : "https://www.girlswithmuscle.com/images/?name=Harmony%20Doughty",
+    "#category": ("", "girlswithmuscle", "search"),
+    "#class"   : girlswithmuscle.GirlswithmuscleSearchExtractor,
+    "#pattern" : girlswithmuscle.GirlswithmusclePostExtractor.pattern,
+    "#count"   : range(130, 150),
 },
 
 )
