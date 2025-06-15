@@ -19,7 +19,8 @@ def connect(path, prefix, format,
             table=None, mode=None, pragma=None, kwdict=None, cache_key=None):
     keygen = formatter.parse(prefix + format).format_map
 
-    if path.startswith(("postgres://", "postgresql://")):
+    if isinstance(path, str) and path.startswith(
+            ("postgres://", "postgresql://")):
         if mode == "memory":
             cls = DownloadArchivePostgresqlMemory
         else:

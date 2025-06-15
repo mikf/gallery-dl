@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2021-2023 Mike Fährmann
+# Copyright 2021-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -463,8 +463,7 @@ class Literal():
     # __getattr__, __getattribute__, and __class_getitem__
     # are all slower than regular __getitem__
 
-    @staticmethod
-    def __getitem__(key):
+    def __getitem__(self, key):
         return key
 
 
@@ -488,6 +487,7 @@ _CONVERSIONS = {
     "L": len,
     "T": util.datetime_to_timestamp_string,
     "d": text.parse_timestamp,
+    "D": util.to_datetime,
     "U": text.unescape,
     "H": lambda s: text.unescape(text.remove_html(s)),
     "g": text.slugify,
@@ -495,6 +495,8 @@ _CONVERSIONS = {
     "s": str,
     "r": repr,
     "a": ascii,
+    "i": int,
+    "f": float,
 }
 _FORMAT_SPECIFIERS = {
     "?": _parse_optional,

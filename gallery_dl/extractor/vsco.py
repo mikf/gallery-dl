@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2023 Mike Fährmann
+# Copyright 2019-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -8,7 +8,7 @@
 
 """Extractors for https://vsco.co/"""
 
-from .common import Extractor, Message
+from .common import Extractor, Message, Dispatch
 from .. import text, util
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?vsco\.co"
@@ -32,7 +32,11 @@ class VscoExtractor(Extractor):
         yield Message.Directory, {"user": self.user}
         for img in self.images():
 
-            if not img or "responsive_url" not in img:
+            if not img:
+                continue
+            elif "playback_url" in img:
+                img = self._transform_video(img)
+            elif "responsive_url" not in img:
                 continue
 
             if img["is_video"]:
@@ -105,8 +109,7 @@ class VscoExtractor(Extractor):
                 yield from medias
                 params["page"] += 1
 
-    @staticmethod
-    def _transform_media(media):
+    def _transform_media(self, media):
         if "responsiveUrl" not in media:
             return None
         media["_id"] = media["id"]
@@ -118,15 +121,19 @@ class VscoExtractor(Extractor):
         media["image_meta"] = media.get("imageMeta")
         return media
 
+    def _transform_video(self, media):
+        media["is_video"] = True
+        media["grid_name"] = ""
+        media["video_url"] = media["playback_url"]
+        media["responsive_url"] = media["poster_url"]
+        media["upload_date"] = media["created_date"]
+        return media
 
-class VscoUserExtractor(VscoExtractor):
+
+class VscoUserExtractor(Dispatch, VscoExtractor):
     """Extractor for a vsco user profile"""
-    subcategory = "user"
     pattern = USER_PATTERN + r"/?$"
     example = "https://vsco.co/USER"
-
-    def initialize(self):
-        pass
 
     def items(self):
         base = "{}/{}/".format(self.root, self.user)
@@ -322,7 +329,7 @@ class VscoVideoExtractor(VscoExtractor):
             "grid_name"     : "",
             "upload_date"   : media["createdDate"],
             "responsive_url": media["posterUrl"],
-            "video_url"     : "ytdl:" + media.get("playbackUrl"),
+            "video_url"     : media.get("playbackUrl"),
             "image_meta"    : None,
             "width"         : media["width"],
             "height"        : media["height"],

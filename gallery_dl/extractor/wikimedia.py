@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # Copyright 2022 Ailothaen
-# Copyright 2024 Mike Fährmann
+# Copyright 2024-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -52,9 +52,8 @@ class WikimediaExtractor(BaseExtractor):
                 return url
         raise exception.StopExtraction("Unable to find API endpoint")
 
-    @staticmethod
-    def prepare(image):
-        """Adjust the content of a image object"""
+    def prepare(self, image):
+        """Adjust the content of an image object"""
         image["metadata"] = {
             m["name"]: m["value"]
             for m in image["metadata"] or ()}
@@ -79,6 +78,14 @@ class WikimediaExtractor(BaseExtractor):
             self.prepare(image)
             yield Message.Directory, image
             yield Message.Url, image["url"], image
+
+        if self.subcategories:
+            base = self.root + "/wiki/"
+            self.params["gcmtype"] = "subcat"
+            for subcat in self._pagination(self.params):
+                url = base + subcat["title"].replace(" ", "_")
+                subcat["_extractor"] = WikimediaArticleExtractor
+                yield Message.Queue, url, subcat
 
     def _pagination(self, params):
         """
@@ -208,6 +215,8 @@ class WikimediaArticleExtractor(WikimediaExtractor):
             self.subcategory = prefix
 
         if prefix == "category":
+            self.subcategories = \
+                True if self.config("subcategories", True) else False
             self.params = {
                 "generator": "categorymembers",
                 "gcmtitle" : path,
@@ -215,10 +224,12 @@ class WikimediaArticleExtractor(WikimediaExtractor):
                 "gcmlimit" : self.per_page,
             }
         elif prefix == "file":
+            self.subcategories = False
             self.params = {
                 "titles"   : path,
             }
         else:
+            self.subcategories = False
             self.params = {
                 "generator": "images",
                 "gimlimit" : self.per_page,

@@ -14,6 +14,15 @@ __tests__ = (
     "#class"   : vipergirls.VipergirlsThreadExtractor,
     "#count"   : 225,
     "#sha1_url": "0d75cb42777f5bebc0d284d1d38cb90c750c61d9",
+
+    "count"       : {112, 113},
+    "num"         : range(1, 113),
+    "forum_title" : "Artistic Photo Sets (Archive)",
+    "post_id"     : {"116038081", "42953564"},
+    "post_num"    : {"1", "2"},
+    "post_title"  : str,
+    "thread_id"   : "4328304",
+    "thread_title": "FemJoy 2011-05-28 Danica - Simply Beautiful [x112] 4500x3000",
 },
 
 {
@@ -49,11 +58,13 @@ __tests__ = (
     "#range"   : "2-113",
     "#count"   : 112,
 
-    "id"        : "116038081",
-    "imagecount": "113",
-    "number"    : "116038081",
-    "thread_id" : "4328304",
-    "title"     : "FemJoy Danica - Simply Beautiful (x112) 3000x4500",
+    "count"       : 113,
+    "num"         : range(2, 113),
+    "post_id"     : "116038081",
+    "post_num"    : "116038081",
+    "post_title"  : "FemJoy Danica - Simply Beautiful (x112) 3000x4500",
+    "thread_id"   : "4328304",
+    "thread_title": "FemJoy 2011-05-28 Danica - Simply Beautiful [x112] 4500x3000",
 },
 
 )

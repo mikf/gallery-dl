@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2023 Mike Fährmann
+# Copyright 2018-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -80,10 +80,6 @@ class PahealTagExtractor(PahealExtractor):
     page_start = 1
     per_page = 70
 
-    def __init__(self, match):
-        PahealExtractor.__init__(self, match)
-        self.tags = text.unquote(match.group(1))
-
     def _init(self):
         if self.config("metadata"):
             self._extract_data = self._extract_data_ex
@@ -94,13 +90,14 @@ class PahealTagExtractor(PahealExtractor):
         return pages * self.per_page
 
     def get_metadata(self):
-        return {"search_tags": self.tags}
+        return {"search_tags": text.unquote(self.groups[0])}
 
     def get_posts(self):
         pnum = self.page_start
+        base = "{}/post/list/{}/".format(self.root, self.groups[0])
+
         while True:
-            url = "{}/post/list/{}/{}".format(self.root, self.tags, pnum)
-            page = self.request(url).text
+            page = self.request(base + str(pnum)).text
 
             pos = page.find("id='image-list'")
             for post in text.extract_iter(
@@ -111,8 +108,7 @@ class PahealTagExtractor(PahealExtractor):
                 return
             pnum += 1
 
-    @staticmethod
-    def _extract_data(post):
+    def _extract_data(self, post):
         pid , pos = text.extract(post, "", "'")
         data, pos = text.extract(post, "title='", "'", pos)
         md5 , pos = text.extract(post, "/_thumbs/", "/", pos)
@@ -149,9 +145,5 @@ class PahealPostExtractor(PahealExtractor):
                r"/post/view/(\d+)")
     example = "https://rule34.paheal.net/post/view/12345"
 
-    def __init__(self, match):
-        PahealExtractor.__init__(self, match)
-        self.post_id = match.group(1)
-
     def get_posts(self):
-        return (self._extract_post(self.post_id),)
+        return (self._extract_post(self.groups[0]),)

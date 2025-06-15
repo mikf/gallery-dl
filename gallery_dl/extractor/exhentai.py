@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2023 Mike Fährmann
+# Copyright 2014-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -136,11 +136,13 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
         source = self.config("source")
         if source == "hitomi":
             self.items = self._items_hitomi
+        elif source == "metadata":
+            self.items = self._items_metadata
 
         limits = self.config("limits", False)
         if limits and limits.__class__ is int:
             self.limits = limits
-            self._remaining = 0
+            self._limits_remaining = 0
         else:
             self.limits = False
 
@@ -198,11 +200,12 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
         for url, image in images:
             data.update(image)
             if self.limits:
-                self._check_limits(data)
+                self._limits_check(data)
             if "/fullimg" in url:
                 data["_http_validate"] = self._validate_response
             else:
                 data["_http_validate"] = None
+            data["_http_signature"] = self._validate_signature
             yield Message.Url, url, data
 
         fav = self.config("fav")
@@ -221,6 +224,9 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
         url = "https://hitomi.la/galleries/{}.html".format(self.gallery_id)
         data["_extractor"] = HitomiGalleryExtractor
         yield Message.Queue, url, data
+
+    def _items_metadata(self):
+        yield Message.Directory, self.metadata_from_api()
 
     def get_metadata(self, page):
         """Extract gallery metadata"""
@@ -385,39 +391,62 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
             request["imgkey"] = nextkey
 
     def _validate_response(self, response):
-        if not response.history and response.headers.get(
+        if response.history or not response.headers.get(
                 "content-type", "").startswith("text/html"):
-            page = response.text
-            self.log.warning("'%s'", page)
+            return True
 
-            if " requires GP" in page:
-                gp = self.config("gp")
-                if gp == "stop":
-                    raise exception.StopExtraction("Not enough GP")
-                elif gp == "wait":
-                    input("Press ENTER to continue.")
-                    return response.url
+        page = response.text
+        self.log.warning("'%s'", page)
 
-                self.log.info("Falling back to non-original downloads")
-                self.original = False
-                return self.data["_url_1280"]
+        if " requires GP" in page:
+            gp = self.config("gp")
+            if gp == "stop":
+                raise exception.StopExtraction("Not enough GP")
+            elif gp == "wait":
+                self.input("Press ENTER to continue.")
+                return response.url
 
-            if " temporarily banned " in page:
-                raise exception.AuthorizationError("Temporarily Banned")
+            self.log.info("Falling back to non-original downloads")
+            self.original = False
+            return self.data["_url_1280"]
 
-            self._report_limits()
-        return True
+        if " temporarily banned " in page:
+            raise exception.AuthorizationError("Temporarily Banned")
 
-    def _report_limits(self):
-        ExhentaiExtractor.LIMIT = True
-        raise exception.StopExtraction("Image limit reached!")
+        self._limits_exceeded()
+        return response.url
 
-    def _check_limits(self, data):
-        if not self._remaining or data["num"] % 25 == 0:
-            self._update_limits()
-        self._remaining -= data["cost"]
-        if self._remaining <= 0:
-            self._report_limits()
+    def _validate_signature(self, signature):
+        """Return False if all file signature bytes are zero"""
+        if signature:
+            byte = signature[0]
+            if byte:
+                # 60 == b"<"
+                if byte == 60 and b"<!doctype html".startswith(
+                        signature[:14].lower()):
+                    return "HTML response"
+                return True
+            for byte in signature:
+                if byte:
+                    return True
+        return False
+
+    def _request_home(self, **kwargs):
+        url = "https://e-hentai.org/home.php"
+        kwargs["cookies"] = {
+            cookie.name: cookie.value
+            for cookie in self.cookies
+            if cookie.domain == self.cookies_domain and
+            cookie.name != "igneous"
+        }
+        page = self.request(url, **kwargs).text
+
+        # update image limits
+        current = text.extr(page, "<strong>", "</strong>").replace(",", "")
+        self.log.debug("Image Limits: %s/%s", current, self.limits)
+        self._limits_remaining = self.limits - text.parse_int(current)
+
+        return page
 
     def _check_509(self, url):
         # full 509.gif URLs
@@ -426,21 +455,40 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
         if url.endswith(("hentai.org/img/509.gif",
                          "ehgt.org/g/509.gif")):
             self.log.debug(url)
-            self._report_limits()
+            self._limits_exceeded()
 
-    def _update_limits(self):
-        url = "https://e-hentai.org/home.php"
-        cookies = {
-            cookie.name: cookie.value
-            for cookie in self.cookies
-            if cookie.domain == self.cookies_domain and
-            cookie.name != "igneous"
-        }
+    def _limits_exceeded(self):
+        msg = "Image limit exceeded!"
+        action = self.config("limits-action")
 
-        page = self.request(url, cookies=cookies).text
-        current = text.extr(page, "<strong>", "</strong>").replace(",", "")
-        self.log.debug("Image Limits: %s/%s", current, self.limits)
-        self._remaining = self.limits - text.parse_int(current)
+        if not action or action == "stop":
+            ExhentaiExtractor.LIMIT = True
+            raise exception.StopExtraction(msg)
+
+        self.log.warning(msg)
+        if action == "wait":
+            self.input("Press ENTER to continue.")
+            self._limits_update()
+        elif action == "reset":
+            self._limits_reset()
+        else:
+            self.log.error("Invalid 'limits-action' value '%s'", action)
+
+    def _limits_check(self, data):
+        if not self._limits_remaining or data["num"] % 25 == 0:
+            self._limits_update()
+        self._limits_remaining -= data["cost"]
+        if self._limits_remaining <= 0:
+            self._limits_exceeded()
+
+    def _limits_reset(self):
+        self.log.info("Resetting image limits")
+        self._request_home(
+            method="POST",
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
+            data=b"reset_imagelimit=Reset+Quota")
+
+    _limits_update = _request_home
 
     def _gallery_page(self):
         url = "{}/g/{}/{}/".format(
@@ -486,8 +534,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
 
             nl = data["_nl"]
 
-    @staticmethod
-    def _parse_image_info(url):
+    def _parse_image_info(self, url):
         for part in url.split("/")[4:]:
             try:
                 _, size, width, height, _ = part.split("-")
@@ -504,8 +551,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
             "height": text.parse_int(height),
         }
 
-    @staticmethod
-    def _parse_original_info(info):
+    def _parse_original_info(self, info):
         parts = info.lstrip().split(" ")
         size = text.parse_bytes(parts[3] + parts[4][0])
 

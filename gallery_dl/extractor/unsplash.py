@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2021-2023 Mike Fährmann
+# Copyright 2021-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -48,8 +48,7 @@ class UnsplashExtractor(Extractor):
             yield Message.Directory, photo
             yield Message.Url, url, photo
 
-    @staticmethod
-    def metadata():
+    def metadata(self):
         return None
 
     def skip(self, num):

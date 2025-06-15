@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2022-2023 Mike Fährmann
+# Copyright 2022-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -12,7 +12,6 @@ from .booru import BooruExtractor
 from ..cache import cache
 from .. import text, util, exception
 import collections
-import re
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?zerochan\.net"
 
@@ -64,16 +63,21 @@ class ZerochanExtractor(BooruExtractor):
 
     def _parse_entry_html(self, entry_id):
         url = "{}/{}".format(self.root, entry_id)
-        extr = text.extract_from(self.request(url).text)
+        page = self.request(url).text
 
+        try:
+            jsonld = self._extract_jsonld(page)
+        except Exception:
+            return {"id": entry_id}
+
+        extr = text.extract_from(page)
         data = {
             "id"      : text.parse_int(entry_id),
-            "author"  : text.parse_unicode_escapes(extr('    "name": "', '"')),
-            "file_url": extr('"contentUrl": "', '"'),
-            "date"    : text.parse_datetime(extr('"datePublished": "', '"')),
-            "width"   : text.parse_int(extr('"width": "', ' ')),
-            "height"  : text.parse_int(extr('"height": "', ' ')),
-            "size"    : text.parse_bytes(extr('"contentSize": "', 'B')),
+            "file_url": jsonld["contentUrl"],
+            "date"    : text.parse_datetime(jsonld["datePublished"]),
+            "width"   : text.parse_int(jsonld["width"][:-3]),
+            "height"  : text.parse_int(jsonld["height"][:-3]),
+            "size"    : text.parse_bytes(jsonld["contentSize"][:-1]),
             "path"    : text.split_html(extr(
                 'class="breadcrumbs', '</nav>'))[2:],
             "uploader": extr('href="/user/', '"'),
@@ -82,11 +86,16 @@ class ZerochanExtractor(BooruExtractor):
                 'id="source-url"', '</p>').rpartition("</s>")[2])),
         }
 
+        try:
+            data["author"] = jsonld["author"]["name"]
+        except Exception:
+            data["author"] = ""
+
         html = data["tags"]
         tags = data["tags"] = []
         for tag in html.split("<li class=")[1:]:
             category = text.extr(tag, '"', '"')
-            name = text.extr(tag, 'data-tag="', '"')
+            name = text.unescape(text.extr(tag, 'data-tag="', '"'))
             tags.append(category.partition(" ")[0].capitalize() + ":" + name)
 
         return data
@@ -117,7 +126,7 @@ class ZerochanExtractor(BooruExtractor):
         return data
 
     def _parse_json(self, txt):
-        txt = re.sub(r"[\x00-\x1f\x7f]", "", txt)
+        txt = util.re(r"[\x00-\x1f\x7f]").sub("", txt)
         main, _, tags = txt.partition('tags": [')
 
         item = {}

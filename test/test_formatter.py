@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright 2021-2023 Mike Fährmann
+# Copyright 2021-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -32,9 +32,11 @@ class TestFormatter(unittest.TestCase):
         "h": "<p>foo </p> &amp; bar <p> </p>",
         "u": "&#x27;&lt; / &gt;&#x27;",
         "t": 1262304000,
-        "ds": "2010-01-01T01:00:00+0100",
+        "ds": "2010-01-01T01:00:00+01:00",
         "dt": datetime.datetime(2010, 1, 1),
         "dt_dst": datetime.datetime(2010, 6, 1),
+        "i_str": "12345",
+        "f_str": "12.45",
         "name": "Name",
         "title1": "Title",
         "title2": "",
@@ -63,6 +65,13 @@ class TestFormatter(unittest.TestCase):
         self._run_test("{n!S}", "")
         self._run_test("{t!d}", datetime.datetime(2010, 1, 1))
         self._run_test("{t!d:%Y-%m-%d}", "2010-01-01")
+        self._run_test("{t!D}" , datetime.datetime(2010, 1, 1))
+        if sys.hexversion >= 0x3070000:
+            self._run_test("{ds!D}", datetime.datetime(2010, 1, 1))
+        else:
+            self._run_test("{ds!D}", datetime.datetime(1970, 1, 1))
+        self._run_test("{dt!D}", datetime.datetime(2010, 1, 1))
+        self._run_test("{t!D:%Y-%m-%d}", "2010-01-01")
         self._run_test("{dt!T}", "1262304000")
         self._run_test("{l!j}", '["a","b","c"]')
         self._run_test("{dt!j}", '"2010-01-01 00:00:00"')
@@ -70,6 +79,9 @@ class TestFormatter(unittest.TestCase):
         self._run_test("{a!L}", 11)
         self._run_test("{l!L}", 3)
         self._run_test("{d!L}", 3)
+        self._run_test("{i_str!i}", 12345)
+        self._run_test("{i_str!f}", 12345.0)
+        self._run_test("{f_str!f}", 12.45)
 
         with self.assertRaises(KeyError):
             self._run_test("{a!q}", "hello world")
@@ -227,7 +239,7 @@ class TestFormatter(unittest.TestCase):
 
     def test_datetime(self):
         self._run_test("{ds:D%Y-%m-%dT%H:%M:%S%z}", "2010-01-01 00:00:00")
-        self._run_test("{ds:D%Y}", "2010-01-01T01:00:00+0100")
+        self._run_test("{ds:D%Y}", "2010-01-01T01:00:00+01:00")
         self._run_test("{l:D%Y}", "None")
 
     def test_offset(self):
@@ -483,10 +495,10 @@ def noarg():
             fmt4 = formatter.parse("\fM " + path + ":lengths")
 
         self.assertEqual(fmt1.format_map(self.kwdict), "'Title' by Name")
-        self.assertEqual(fmt2.format_map(self.kwdict), "126")
+        self.assertEqual(fmt2.format_map(self.kwdict), "137")
 
         self.assertEqual(fmt3.format_map(self.kwdict), "'Title' by Name")
-        self.assertEqual(fmt4.format_map(self.kwdict), "126")
+        self.assertEqual(fmt4.format_map(self.kwdict), "137")
 
         with self.assertRaises(TypeError):
             self.assertEqual(fmt0.format_map(self.kwdict), "")

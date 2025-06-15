@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2017-2023 Mike Fährmann
+# Copyright 2017-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -24,9 +24,9 @@ class DirectlinkExtractor(Extractor):
     example = "https://en.wikipedia.org/static/images/project-logos/enwiki.png"
 
     def __init__(self, match):
-        Extractor.__init__(self, match)
         self.data = data = match.groupdict()
         self.subcategory = ".".join(data["domain"].rsplit(".", 2)[-2:])
+        Extractor.__init__(self, match)
 
     def items(self):
         data = self.data

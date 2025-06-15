@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2023 Mike Fährmann
+# Copyright 2018-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -104,27 +104,42 @@ class TestExtractorModule(unittest.TestCase):
     @unittest.skipIf(not results, "no test data")
     def test_categories(self):
         for result in results.all():
-            url = result["#url"]
-            cls = result["#class"]
-            try:
-                extr = cls.from_url(url)
-            except ImportError as exc:
-                if exc.name in ("youtube_dl", "yt_dlp"):
-                    print("Skipping '{}' category checks".format(cls.category))
-                    continue
-                raise
-            self.assertTrue(extr, url)
-
-            categories = result.get("#category")
-            if categories:
-                base, cat, sub = categories
+            if result.get("#fail"):
+                try:
+                    self.assertCategories(result)
+                except AssertionError:
+                    pass
+                else:
+                    self.fail(result["#url"] + ": Test did not fail")
             else:
-                cat = cls.category
-                sub = cls.subcategory
-                base = cls.basecategory
-            self.assertEqual(extr.category, cat, url)
-            self.assertEqual(extr.subcategory, sub, url)
-            self.assertEqual(extr.basecategory, base, url)
+                self.assertCategories(result)
+
+    def assertCategories(self, result):
+        url = result["#url"]
+        cls = result["#class"]
+
+        try:
+            extr = cls.from_url(url)
+        except ImportError as exc:
+            if exc.name in ("youtube_dl", "yt_dlp"):
+                print("Skipping '{}' category checks".format(cls.category))
+                return
+            raise
+        self.assertTrue(extr, url)
+
+        categories = result.get("#category")
+        if categories:
+            base, cat, sub = categories
+        else:
+            cat = cls.category
+            sub = cls.subcategory
+            base = cls.basecategory
+        self.assertEqual(extr.category, cat, url)
+        self.assertEqual(extr.subcategory, sub, url)
+        self.assertEqual(extr.basecategory, base, url)
+
+        if base not in ("reactor", "wikimedia"):
+            self.assertEqual(extr._cfgpath, ("extractor", cat, sub), url)
 
     @unittest.skipIf(not results, "no test data")
     def test_unique_pattern_matches(self):
@@ -133,7 +148,8 @@ class TestExtractorModule(unittest.TestCase):
         append = test_urls.append
 
         for result in results.all():
-            append((result["#url"], result["#class"]))
+            if not result.get("#fail"):
+                append((result["#url"], result["#class"]))
 
         # iterate over all testcase URLs
         for url, extr1 in test_urls:
@@ -280,8 +296,7 @@ class TestExtractorWait(unittest.TestCase):
         u = self._isotime_to_seconds(until.time().isoformat()[:8])
         self.assertLessEqual(o-u, 1.0)
 
-    @staticmethod
-    def _isotime_to_seconds(isotime):
+    def _isotime_to_seconds(self, isotime):
         parts = isotime.split(":")
         return int(parts[0]) * 3600 + int(parts[1]) * 60 + int(parts[2])
 

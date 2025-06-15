@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2023 Mike Fährmann
+# Copyright 2015-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -8,7 +8,7 @@
 
 """Extractors for https://www.hentai-foundry.com/"""
 
-from .common import Extractor, Message
+from .common import Extractor, Message, Dispatch
 from .. import text, util
 
 BASE_PATTERN = r"(https?://)?(?:www\.)?hentai-foundry\.com"
@@ -192,14 +192,10 @@ class HentaifoundryExtractor(Extractor):
         self.request(url, method="POST", data=data)
 
 
-class HentaifoundryUserExtractor(HentaifoundryExtractor):
+class HentaifoundryUserExtractor(Dispatch, HentaifoundryExtractor):
     """Extractor for a hentaifoundry user profile"""
-    subcategory = "user"
     pattern = BASE_PATTERN + r"/user/([^/?#]+)/profile"
     example = "https://www.hentai-foundry.com/user/USER/profile"
-
-    def initialize(self):
-        pass
 
     def items(self):
         root = self.root

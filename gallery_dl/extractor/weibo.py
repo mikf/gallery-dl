@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2023 Mike Fährmann
+# Copyright 2019-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -8,7 +8,7 @@
 
 """Extractors for https://www.weibo.com/"""
 
-from .common import Extractor, Message
+from .common import Extractor, Message, Dispatch
 from .. import text, util, exception
 from ..cache import cache
 import random
@@ -258,7 +258,7 @@ class WeiboUserExtractor(WeiboExtractor):
 
     def items(self):
         base = "{}/u/{}?tabtype=".format(self.root, self._user_id())
-        return self._dispatch_extractors((
+        return Dispatch._dispatch_extractors(self, (
             (WeiboHomeExtractor    , base + "home"),
             (WeiboFeedExtractor    , base + "feed"),
             (WeiboVideosExtractor  , base + "video"),

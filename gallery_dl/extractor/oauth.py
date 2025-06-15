@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2017-2023 Mike Fährmann
+# Copyright 2017-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -83,8 +83,9 @@ class OAuthBase(Extractor):
                 browser = None
 
         if browser and browser.open(url):
-            name = getattr(browser, "name", None) or "Browser"
-            self.log.info("Opening URL in %s:", name.capitalize())
+            name = getattr(browser, "name", None)
+            if name:
+                self.log.info("Opening URL with %s:", name.capitalize())
         else:
             self.log.info("Please open this URL in your browser:")
 

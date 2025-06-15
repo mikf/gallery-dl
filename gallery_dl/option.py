@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2017-2023 Mike Fährmann
+# Copyright 2017-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -485,7 +485,7 @@ def build_parser():
     downloader.add_argument(
         "-r", "--limit-rate",
         dest="rate", metavar="RATE", action=ConfigAction,
-        help="Maximum download rate (e.g. 500k or 2.5M)",
+        help="Maximum download rate (e.g. 500k, 2.5M, or 800k-2M)",
     )
     downloader.add_argument(
         "--chunk-size",

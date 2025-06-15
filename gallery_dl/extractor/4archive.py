@@ -58,15 +58,14 @@ class _4archiveThreadExtractor(Extractor):
             for post in page.split('class="postContainer')[1:]
         ]
 
-    @staticmethod
-    def parse(post):
+    def parse(self, post):
         extr = text.extract_from(post)
         data = {
             "name": extr('class="name">', "</span>"),
             "date": text.parse_datetime(
                 extr('class="dateTime postNum" >', "<").strip(),
                 "%Y-%m-%d %H:%M:%S"),
-            "no"  : text.parse_int(extr('href="#p', '"')),
+            "no"  : text.parse_int(extr(">Post No.", "<")),
         }
         if 'class="file"' in post:
             extr('class="fileText"', ">File: <a")

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2023 Mike Fährmann
+# Copyright 2019-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -70,13 +70,11 @@ class NsfwalbumAlbumExtractor(GalleryExtractor):
                     self.root, image_id, spirit),),
             }
 
-    @staticmethod
-    def _validate_response(response):
+    def _validate_response(self, response):
         return not response.url.endswith(
             ("/no_image.jpg", "/placeholder.png", "/error.jpg"))
 
-    @staticmethod
-    def _annihilate(value, base=6):
+    def _annihilate(self, value, base=6):
         return "".join(
             chr(ord(char) ^ base)
             for char in value

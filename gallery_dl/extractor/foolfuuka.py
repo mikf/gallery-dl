@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2023 Mike Fährmann
+# Copyright 2019-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -26,6 +26,9 @@ class FoolfuukaExtractor(BaseExtractor):
             self.remote = self._remote_direct
         elif self.category == "archivedmoe":
             self.referer = False
+            self.fixup_redirect = True
+        else:
+            self.fixup_redirect = False
 
     def items(self):
         yield Message.Directory, self.metadata()
@@ -57,13 +60,45 @@ class FoolfuukaExtractor(BaseExtractor):
         """Resolve a remote media link"""
         page = self.request(media["remote_media_link"]).text
         url = text.extr(page, 'http-equiv="Refresh" content="0; url=', '"')
-        if url.endswith(".webm") and \
-                url.startswith("https://thebarchive.com/"):
-            return url[:-1]
+
+        if url.startswith("https://thebarchive.com/"):
+            # '.webm' -> '.web' (#5116)
+            if url.endswith(".webm"):
+                url = url[:-1]
+
+        elif self.fixup_redirect:
+            # update redirect domain or filename (#7652)
+            path, _, filename = url.rpartition("/")
+
+            # these boards link directly to i.4cdn.org
+            # -> redirect to warosu or 4plebs instead
+            board_domains = {
+                "3"  : "warosu.org",
+                "biz": "warosu.org",
+                "ck" : "warosu.org",
+                "diy": "warosu.org",
+                "fa" : "warosu.org",
+                "ic" : "warosu.org",
+                "jp" : "warosu.org",
+                "lit": "warosu.org",
+                "sci": "warosu.org",
+                "tg" : "archive.4plebs.org",
+            }
+            board = url.split("/", 4)[3]
+            if board in board_domains:
+                domain = board_domains[board]
+                url = f"https://{domain}/{board}/full_image/{filename}"
+
+            # if it's one of these archives, slice the name
+            elif any(archive in path for archive in (
+                     "b4k.", "desuarchive.", "palanq.")):
+                name, _, ext = filename.rpartition(".")
+                if len(name) > 13:
+                    url = f"{path}/{name[:13]}.{ext}"
+
         return url
 
-    @staticmethod
-    def _remote_direct(media):
+    def _remote_direct(self, media):
         return media["remote_media_link"]
 
 

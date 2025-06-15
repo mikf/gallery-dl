@@ -6,34 +6,39 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extractors for https://imhentai.xxx/"""
+"""Extractors for https://imhentai.xxx/ and mirror sites"""
 
-from .common import GalleryExtractor, Extractor, Message
+from .common import GalleryExtractor, BaseExtractor, Message
 from .. import text, util
 
-BASE_PATTERN = r"(?:https?://)?(?:www\.)?imhentai\.xxx"
 
-
-class ImhentaiExtractor(Extractor):
-    category = "imhentai"
-    root = "https://imhentai.xxx"
+class ImhentaiExtractor(BaseExtractor):
+    basecategory = "IMHentai"
 
     def _pagination(self, url):
+        prev = None
         base = self.root + "/gallery/"
-        data = {"_extractor": self._gallery_extractor}
+        data = {"_extractor": ImhentaiGalleryExtractor}
 
         while True:
             page = self.request(url).text
+
+            pos = page.find('class="ranking_list"')
+            if pos >= 0:
+                page = page[:pos]
+
             extr = text.extract_from(page)
 
             while True:
-                gallery_id = extr('<a href="/gallery/', '"')
+                gallery_id = extr('href="/gallery/', '"')
+                if gallery_id == prev:
+                    continue
                 if not gallery_id:
                     break
                 yield Message.Queue, base + gallery_id, data
-                extr('<a href="/gallery/', '"')  # skip duplicate GIDs
+                prev = gallery_id
 
-            href = text.rextract(page, "class='page-link' href='", "'")[0]
+            href = text.rextr(page, "class='page-link' href='", "'")
             if not href or href == "#":
                 return
             if href[0] == "/":
@@ -44,29 +49,60 @@ class ImhentaiExtractor(Extractor):
             url = href
 
 
+BASE_PATTERN = ImhentaiExtractor.update({
+    "imhentai": {
+        "root": "https://imhentai.xxx",
+        "pattern": r"(?:www\.)?imhentai\.xxx",
+    },
+    "hentaiera": {
+        "root": "https://hentaiera.com",
+        "pattern": r"(?:www\.)?hentaiera\.com",
+    },
+    "hentairox": {
+        "root": "https://hentairox.com",
+        "pattern": r"(?:www\.)?hentairox\.com",
+    },
+    "hentaifox": {
+        "root": "https://hentaifox.com",
+        "pattern": r"(?:www\.)?hentaifox\.com",
+    },
+    "hentaienvy": {
+        "root": "https://hentaienvy.com",
+        "pattern": r"(?:www\.)?hentaienvy\.com",
+    },
+    "hentaizap": {
+        "root": "https://hentaizap.com",
+        "pattern": r"(?:www\.)?hentaizap\.com",
+    },
+})
+
+
 class ImhentaiGalleryExtractor(ImhentaiExtractor, GalleryExtractor):
     """Extractor for imhentai galleries"""
     pattern = BASE_PATTERN + r"/(?:gallery|view)/(\d+)"
     example = "https://imhentai.xxx/gallery/12345/"
 
     def __init__(self, match):
-        self.gallery_id = match.group(1)
-        url = "{}/gallery/{}/".format(self.root, self.gallery_id)
-        GalleryExtractor.__init__(self, match, url)
+        ImhentaiExtractor.__init__(self, match)
+        self.gallery_id = self.groups[-1]
+        self.gallery_url = "{}/gallery/{}/".format(self.root, self.gallery_id)
 
     def metadata(self, page):
         extr = text.extract_from(page)
+        title = extr("<h1>", "<")
+        title_alt = extr('class="subtitle">', "<")
+        end = "</li>" if extr('<ul class="galleries_info', ">") else "</ul>"
 
         data = {
             "gallery_id": text.parse_int(self.gallery_id),
-            "title"     : text.unescape(extr("<h1>", "<")),
-            "title_alt" : text.unescape(extr('class="subtitle">', "<")),
-            "parody"    : self._split(extr(">Parodies", "</li>")),
-            "character" : self._split(extr(">Characters", "</li>")),
-            "tags"      : self._split(extr(">Tags", "</li>")),
-            "artist"    : self._split(extr(">Artists", "</li>")),
-            "group"     : self._split(extr(">Groups", "</li>")),
-            "language"  : self._split(extr(">Languages", "</li>")),
+            "title"     : text.unescape(title),
+            "title_alt" : text.unescape(title_alt),
+            "parody"    : self._split(extr(">Parodies", end)),
+            "character" : self._split(extr(">Characters", end)),
+            "tags"      : self._split(extr(">Tags", end)),
+            "artist"    : self._split(extr(">Artists", end)),
+            "group"     : self._split(extr(">Groups", end)),
+            "language"  : self._split(extr(">Languages", end)),
             "type"      : extr("href='/category/", "/"),
         }
 
@@ -78,10 +114,12 @@ class ImhentaiGalleryExtractor(ImhentaiExtractor, GalleryExtractor):
     def _split(self, html):
         results = []
         for tag in text.extract_iter(html, ">", "</a>"):
-            tag = tag.partition(" <span class='badge'>")[0]
-            if "<" in tag:
-                tag = text.remove_html(tag)
+            badge = ("badge'>" in tag or "class='badge" in tag)
+            tag = text.remove_html(tag)
+            if badge:
+                tag = tag.rpartition(" ")[0]
             results.append(tag)
+        results.sort()
         return results
 
     def images(self, page):
@@ -109,19 +147,16 @@ class ImhentaiTagExtractor(ImhentaiExtractor):
     example = "https://imhentai.xxx/tag/TAG/"
 
     def items(self):
-        url = self.root + self.groups[0] + "/"
+        url = self.root + self.groups[-2] + "/"
         return self._pagination(url)
 
 
 class ImhentaiSearchExtractor(ImhentaiExtractor):
     """Extractor for imhentai search results"""
     subcategory = "search"
-    pattern = BASE_PATTERN + r"/search/?\?([^#]+)"
+    pattern = BASE_PATTERN + r"/search(/?\?[^#]+|/[^/?#]+/?)"
     example = "https://imhentai.xxx/search/?key=QUERY"
 
     def items(self):
-        url = self.root + "/search/?" + self.groups[0]
+        url = self.root + "/search" + self.groups[-1]
         return self._pagination(url)
-
-
-ImhentaiExtractor._gallery_extractor = ImhentaiGalleryExtractor

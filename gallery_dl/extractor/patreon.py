@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2023 Mike Fährmann
+# Copyright 2019-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -27,7 +27,7 @@ class PatreonExtractor(Extractor):
     _warning = True
 
     def _init(self):
-        if not self.cookies_check(("session_id",)):
+        if not self.cookies_check(("session_id",), subdomains=True):
             if self._warning:
                 PatreonExtractor._warning = False
                 self.log.warning("no 'session_id' cookie set")
@@ -63,7 +63,10 @@ class PatreonExtractor(Extractor):
                     text.nameext_from_url(name, post)
                     if text.ext_from_url(url) == "m3u8":
                         url = "ytdl:" + url
+                        headers = {"referer": self.root + "/"}
                         post["_ytdl_manifest"] = "hls"
+                        post["_ytdl_manifest_headers"] = headers
+                        post["_ytdl_extra"] = {"http_headers": headers}
                         post["extension"] = "mp4"
                     yield Message.Url, url, post
                 else:
@@ -109,11 +112,7 @@ class PatreonExtractor(Extractor):
 
     def _attachments(self, post):
         for attachment in post.get("attachments") or ():
-            url = self.request(
-                attachment["url"], method="HEAD",
-                allow_redirects=False, fatal=False,
-            ).headers.get("Location")
-
+            url = self.request_location(attachment["url"], fatal=False)
             if url:
                 yield "attachment", url, attachment["name"]
 
@@ -189,16 +188,14 @@ class PatreonExtractor(Extractor):
 
         return attr
 
-    @staticmethod
-    def _transform(included):
+    def _transform(self, included):
         """Transform 'included' into an easier to handle format"""
         result = collections.defaultdict(dict)
         for inc in included:
             result[inc["type"]][inc["id"]] = inc["attributes"]
         return result
 
-    @staticmethod
-    def _files(post, included, key):
+    def _files(self, post, included, key):
         """Build a list of files"""
         files = post["relationships"].get(key)
         if files and files.get("data"):
@@ -227,8 +224,7 @@ class PatreonExtractor(Extractor):
         cd = response.headers.get("Content-Disposition")
         return text.extr(cd, 'filename="', '"')
 
-    @staticmethod
-    def _filehash(url):
+    def _filehash(self, url):
         """Extract MD5 hash from a download URL"""
         parts = url.partition("?")[0].split("/")
         parts.reverse()
@@ -238,8 +234,7 @@ class PatreonExtractor(Extractor):
                 return part
         return ""
 
-    @staticmethod
-    def _build_url(endpoint, query):
+    def _build_url(self, endpoint, query):
         return (
             "https://www.patreon.com/api/" + endpoint +
 
@@ -329,10 +324,11 @@ class PatreonCreatorExtractor(PatreonExtractor):
     """Extractor for a creator's works"""
     subcategory = "creator"
     pattern = (r"(?:https?://)?(?:www\.)?patreon\.com"
-               r"/(?!(?:home|join|posts|login|signup)(?:$|[/?#]))"
+               r"/(?!(?:home|create|login|signup|search|posts|messages)"
+               r"(?:$|[/?#]))"
                r"(?:profile/creators|(?:c/)?([^/?#]+)(?:/posts)?)"
                r"/?(?:\?([^#]+))?")
-    example = "https://www.patreon.com/USER"
+    example = "https://www.patreon.com/c/USER"
 
     def posts(self):
         creator, query = self.groups
@@ -370,7 +366,7 @@ class PatreonCreatorExtractor(PatreonExtractor):
             data = None
             data = self._extract_bootstrap(page)
             return data["campaign"]["data"]["id"]
-        except (KeyError, ValueError) as exc:
+        except Exception as exc:
             if data:
                 self.log.debug(data)
             raise exception.StopExtraction(

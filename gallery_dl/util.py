@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2017-2023 Mike Fährmann
+# Copyright 2017-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -8,7 +8,7 @@
 
 """Utility functions and classes"""
 
-import re
+import re as re_module
 import os
 import sys
 import json
@@ -26,6 +26,24 @@ import urllib.parse
 from http.cookiejar import Cookie
 from email.utils import mktime_tz, parsedate_tz
 from . import text, version, exception
+
+try:
+    re_compile = re_module._compiler.compile
+except AttributeError:
+    re_compile = re_module.sre_compile.compile
+
+CACHE_PATTERN = {}
+
+
+def re(pattern):
+    """Compile a regular expression pattern"""
+    try:
+        return CACHE_PATTERN[pattern]
+    except KeyError:
+        pass
+
+    p = CACHE_PATTERN[pattern] = re_compile(pattern)
+    return p
 
 
 def bencode(num, alphabet="0123456789"):
@@ -46,6 +64,19 @@ def bdecode(data, alphabet="0123456789"):
         num *= base
         num += alphabet.index(c)
     return num
+
+
+def decrypt_xor(encrypted, key, base64=True, fromhex=False):
+    if base64:
+        encrypted = binascii.a2b_base64(encrypted)
+    if fromhex:
+        encrypted = bytes.fromhex(encrypted.decode())
+
+    div = len(key)
+    return bytes([
+        encrypted[i] ^ key[i % div]
+        for i in range(len(encrypted))
+    ]).decode()
 
 
 def advance(iterable, num):
@@ -117,7 +148,7 @@ def false(_, __=None):
     return False
 
 
-def noop():
+def noop(_=None):
     """Does nothing"""
 
 
@@ -218,6 +249,34 @@ def to_string(value):
     return str(value)
 
 
+def to_datetime(value):
+    """Convert 'value' to a datetime object"""
+    if not value:
+        return EPOCH
+
+    if isinstance(value, datetime.datetime):
+        return value
+
+    if isinstance(value, str):
+        try:
+            if value[-1] == "Z":
+                # compat for Python < 3.11
+                value = value[:-1]
+            dt = datetime.datetime.fromisoformat(value)
+            if dt.tzinfo is None:
+                if dt.microsecond:
+                    dt = dt.replace(microsecond=0)
+            else:
+                # convert to naive UTC
+                dt = dt.astimezone(datetime.timezone.utc).replace(
+                    microsecond=0, tzinfo=None)
+            return dt
+        except Exception:
+            pass
+
+    return text.parse_timestamp(value, EPOCH)
+
+
 def datetime_to_timestamp(dt):
     """Convert naive UTC datetime to Unix timestamp"""
     return (dt - EPOCH) / SECOND
@@ -314,9 +373,8 @@ Response Headers
 
             set_cookie = res_headers.get("Set-Cookie")
             if set_cookie:
-                res_headers["Set-Cookie"] = re.sub(
-                    r"(^|, )([^ =]+)=[^,;]*", r"\1\2=***", set_cookie,
-                )
+                res_headers["Set-Cookie"] = re(r"(^|, )([^ =]+)=[^,;]*").sub(
+                    r"\1\2=***", set_cookie)
 
         fmt_nv = "{}: {}".format
 
@@ -354,6 +412,31 @@ def extract_headers(response):
         data["date"] = datetime.datetime(*parsedate_tz(hlm)[:6])
 
     return data
+
+
+def detect_challenge(response):
+    server = response.headers.get("server")
+    if not server:
+        return
+
+    elif server.startswith("cloudflare"):
+        if response.status_code not in (403, 503):
+            return
+
+        mitigated = response.headers.get("cf-mitigated")
+        if mitigated and mitigated.lower() == "challenge":
+            return "Cloudflare challenge"
+
+        content = response.content
+        if b"_cf_chl_opt" in content or b"jschl-answer" in content:
+            return "Cloudflare challenge"
+        elif b'name="captcha-bypass"' in content:
+            return "Cloudflare CAPTCHA"
+
+    elif server.startswith("ddos-guard"):
+        if response.status_code == 403 and \
+                b"/ddos-guard/js-challenge/" in response.content:
+            return "DDoS-Guard challenge"
 
 
 @functools.lru_cache(maxsize=None)
@@ -568,6 +651,28 @@ class NullContext():
         pass
 
 
+class NullResponse():
+    __slots__ = ("url", "reason")
+
+    ok = is_redirect = is_permanent_redirect = False
+    cookies = headers = history = links = {}
+    encoding = apparent_encoding = "utf-8"
+    content = b""
+    text = ""
+    status_code = 900
+    close = noop
+
+    def __init__(self, url, reason=""):
+        self.url = url
+        self.reason = str(reason)
+
+    def __str__(self):
+        return "900 " + self.reason
+
+    def json(self):
+        return {}
+
+
 class CustomNone():
     """None-style type that supports more operations than regular None"""
     __slots__ = ()
@@ -579,8 +684,7 @@ class CustomNone():
     def __call__(self, *args, **kwargs):
         return self
 
-    @staticmethod
-    def __next__():
+    def __next__(self):
         raise StopIteration
 
     def __eq__(self, other):
@@ -628,28 +732,32 @@ class CustomNone():
     __abs__ = identity
     __invert__ = identity
 
-    @staticmethod
-    def __len__():
+    def __len__(self):
         return 0
 
     __int__ = __len__
     __hash__ = __len__
     __index__ = __len__
 
-    @staticmethod
-    def __format__(_):
+    def __format__(self, _):
         return "None"
 
-    @staticmethod
-    def __str__():
+    def __str__(self):
         return "None"
 
     __repr__ = __str__
 
 
-# v128.0 release on 2024-07-09 has ordinal 739076
-# 735492 == 739076 - 128 * 28
-_ff_ver = (datetime.date.today().toordinal() - 735492) // 28
+# v137.0 release of Firefox on 2025-04-01 has ordinal 739342
+# 735506 == 739342 - 137 * 28
+# v135.0 release of Chrome  on 2025-04-01 has ordinal 739342
+# 735562 == 739342 - 135 * 28
+#  _ord_today = datetime.date.today().toordinal()
+#  _ff_ver = (_ord_today - 735506) // 28
+#  _ch_ver = (_ord_today - 735562) // 28
+
+_ff_ver = (datetime.date.today().toordinal() - 735506) // 28
+#  _ch_ver = _ff_ver - 2
 
 NONE = CustomNone()
 EPOCH = datetime.datetime(1970, 1, 1)
@@ -657,10 +765,20 @@ SECOND = datetime.timedelta(0, 1)
 WINDOWS = (os.name == "nt")
 SENTINEL = object()
 EXECUTABLE = getattr(sys, "frozen", False)
+SPECIAL_EXTRACTORS = {"oauth", "recursive", "generic"}
+
+EXTS_IMAGE = {"jpg", "jpeg", "png", "gif", "bmp", "svg", "psd", "ico",
+              "webp", "avif", "heic", "heif"}
+EXTS_VIDEO = {"mp4", "m4v", "mov", "webm", "mkv", "ogv", "flv", "avi", "wmv"}
+EXTS_ARCHIVE = {"zip", "rar", "7z", "tar", "gz", "bz2", "lzma", "xz"}
+
 USERAGENT = "gallery-dl/" + version.__version__
 USERAGENT_FIREFOX = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:{}.0) "
                      "Gecko/20100101 Firefox/{}.0").format(_ff_ver, _ff_ver)
-SPECIAL_EXTRACTORS = {"oauth", "recursive", "generic"}
+USERAGENT_CHROME = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                    "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/{}.0.0.0 "
+                    "Safari/537.36").format(_ff_ver - 2)
+
 GLOBALS = {
     "contains" : contains,
     "parse_int": text.parse_int,
@@ -673,7 +791,10 @@ GLOBALS = {
     "hash_sha1": sha1,
     "hash_md5" : md5,
     "std"      : ModuleProxy(),
-    "re"       : re,
+    "re"       : re_module,
+    "exts_image"  : EXTS_IMAGE,
+    "exts_video"  : EXTS_VIDEO,
+    "exts_archive": EXTS_ARCHIVE,
 }
 
 
@@ -773,25 +894,25 @@ def import_file(path):
         return __import__(name.replace("-", "_"))
 
 
-def build_duration_func(duration, min=0.0):
-    if not duration:
+def build_selection_func(value, min=0.0, conv=float):
+    if not value:
         if min:
             return lambda: min
         return None
 
-    if isinstance(duration, str):
-        lower, _, upper = duration.partition("-")
-        lower = float(lower)
+    if isinstance(value, str):
+        lower, _, upper = value.partition("-")
     else:
         try:
-            lower, upper = duration
+            lower, upper = value
         except TypeError:
-            lower, upper = duration, None
+            lower, upper = value, None
+    lower = conv(lower)
 
     if upper:
-        upper = float(upper)
+        upper = conv(upper)
         return functools.partial(
-            random.uniform,
+            random.uniform if lower.__class__ is float else random.randint,
             lower if lower > min else min,
             upper if upper > min else min,
         )
@@ -799,6 +920,9 @@ def build_duration_func(duration, min=0.0):
         if lower < min:
             lower = min
         return lambda: lower
+
+
+build_duration_func = build_selection_func
 
 
 def build_extractor_filter(categories, negate=True, special=None):
@@ -924,8 +1048,7 @@ class RangePredicate():
                 return True
         return False
 
-    @staticmethod
-    def _parse(rangespec):
+    def _parse(self, rangespec):
         """Parse an integer range string and return the resulting ranges
 
         Examples:

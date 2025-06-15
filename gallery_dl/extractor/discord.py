@@ -49,7 +49,10 @@ class DiscordExtractor(Extractor):
                     text_content.append(field.get("name", ""))
                     text_content.append(field.get("value", ""))
 
-                text_content.append(embed.get("footer", {}).get("text", ""))
+                try:
+                    text_content.append(embed["footer"]["text"])
+                except Exception:
+                    pass
 
         if message.get("poll"):
             text_content.append(message["poll"]["question"]["text"])
@@ -224,16 +227,18 @@ class DiscordExtractor(Extractor):
         return self.server_metadata
 
     def build_server_and_channels(self, server_id):
-        server = self.api.get_server(server_id)
-        self.parse_server(server)
+        self.parse_server(self.api.get_server(server_id))
 
-        for channel in self.api.get_server_channels(server_id):
+        for channel in sorted(
+            self.api.get_server_channels(server_id),
+            key=lambda ch: ch["type"] != 4
+        ):
             self.parse_channel(channel)
 
 
 class DiscordChannelExtractor(DiscordExtractor):
     subcategory = "channel"
-    pattern = BASE_PATTERN + r"/channels/(\d+)/(?:\d+/threads/)?(\d+)"
+    pattern = BASE_PATTERN + r"/channels/(\d+)/(?:\d+/threads/)?(\d+)/?$"
     example = "https://discord.com/channels/1234567890/9876543210"
 
     def items(self):
@@ -242,6 +247,23 @@ class DiscordChannelExtractor(DiscordExtractor):
         self.build_server_and_channels(server_id)
 
         return self.extract_channel(channel_id)
+
+
+class DiscordMessageExtractor(DiscordExtractor):
+    subcategory = "message"
+    pattern = BASE_PATTERN + r"/channels/(\d+)/(\d+)/(\d+)/?$"
+    example = "https://discord.com/channels/1234567890/9876543210/2468013579"
+
+    def items(self):
+        server_id, channel_id, message_id = self.groups
+
+        self.build_server_and_channels(server_id)
+
+        if channel_id not in self.server_channels_metadata:
+            self.parse_channel(self.api.get_channel(channel_id))
+
+        return self.extract_message(
+            self.api.get_message(channel_id, message_id))
 
 
 class DiscordServerExtractor(DiscordExtractor):
@@ -264,11 +286,27 @@ class DiscordDirectMessagesExtractor(DiscordExtractor):
     subcategory = "direct-messages"
     directory_fmt = ("{category}", "Direct Messages",
                      "{channel_id}_{recipients:J,}")
-    pattern = BASE_PATTERN + r"/channels/@me/(\d+)"
+    pattern = BASE_PATTERN + r"/channels/@me/(\d+)/?$"
     example = "https://discord.com/channels/@me/1234567890"
 
     def items(self):
         return self.extract_channel(self.groups[0])
+
+
+class DiscordDirectMessageExtractor(DiscordExtractor):
+    subcategory = "direct-message"
+    directory_fmt = ("{category}", "Direct Messages",
+                     "{channel_id}_{recipients:J,}")
+    pattern = BASE_PATTERN + r"/channels/@me/(\d+)/(\d+)/?$"
+    example = "https://discord.com/channels/@me/1234567890/9876543210"
+
+    def items(self):
+        channel_id, message_id = self.groups
+
+        self.parse_channel(self.api.get_channel(channel_id))
+
+        return self.extract_message(
+            self.api.get_message(channel_id, message_id))
 
 
 class DiscordAPI():
@@ -320,10 +358,18 @@ class DiscordAPI():
                 "limit": MESSAGES_BATCH,
                 "before": before
             })
-            before = messages[-1]["id"]
+            if messages:
+                before = messages[-1]["id"]
             return messages
 
         return self._pagination(_method, MESSAGES_BATCH)
+
+    def get_message(self, channel_id, message_id):
+        """Get message information"""
+        return self._call("/channels/" + channel_id + "/messages", {
+            "limit": 1,
+            "around": message_id
+        })[0]
 
     def _call(self, endpoint, params=None):
         url = self.root + endpoint
@@ -345,8 +391,7 @@ class DiscordAPI():
                 return
             offset += len(data)
 
-    @staticmethod
-    def _raise_invalid_token():
+    def _raise_invalid_token(self):
         raise exception.AuthenticationError("""Invalid or missing token.
 Please provide a valid token following these instructions:
 
