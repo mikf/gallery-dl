@@ -1,70 +1,102 @@
-from .common import Extractor, Message, GalleryExtractor
+# -*- coding: utf-8 -*-
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 2 as
+# published by the Free Software Foundation.
+
+"""Extractors for https://redbust.com/"""
+
+from .common import GalleryExtractor, Extractor, Message
 from .. import text
 
 BASE_PATTERN = r"(?:https?://)?redbust\.com"
 
 
-class RedbustGalleryExtractor(GalleryExtractor):
-    """Extractor for Redbust albums"""
+class RedbustExtractor(Extractor):
+    """Base class for RedBust extractors"""
     category = "redbust"
-    pattern = BASE_PATTERN + r"/([\w-]*)/$"
-    directory_fmt = ("{category}", "{gallery_id}")
+    root = "https://redbust.com"
     filename_fmt = "{filename}.{extension}"
 
-    def __init__(self, match):
-        self.root = text.root_from_url(match.group(0))
-        self.gallery_url = match.group(0)
-        self.gallery_id = match.group(1)
-        GalleryExtractor.__init__(self, match, self.gallery_url)
 
-    def metadata(self, page):
-        """Return a dict with gallery metadata"""
-        if not page:
-            return {}
-            
-        title = text.extract(page, '<title>', '</title>')[0]
-        if title:
-            title = title.strip()
-            
+class RedbustGalleryExtractor(GalleryExtractor, RedbustExtractor):
+    """Extractor for RedBust galleries"""
+    pattern = BASE_PATTERN + r"/([\w-]+)/?$"
+    example = "https://redbust.com/TITLE/"
+
+    def __init__(self, match):
+        Extractor.__init__(self, match)
+
+    def items(self):
+        url = f"{self.root}/{self.groups[0]}/"
+        self.page = page = self.request(url).text
+
+        self.gallery_id = gid = text.extr(
+            page, "<link rel='shortlink' href='https://redbust.com/?p=", "'")
+
+        if gid:
+            self.gallery_url = False
+            return GalleryExtractor.items(self)
+        else:
+            self.subcategory = "category"
+            return self._items_category(page)
+
+    def _items_category(self, _):
+        page = self.page
+        data = {"_extractor": RedbustGalleryExtractor}
+        base = f"{self.root}/{self.groups[0]}/page/"
+        pnum = 1
+
+        while True:
+            for post in text.extract_iter(
+                    page, '<h2 class="post-title">', "rel="):
+                url = text.extr(post, 'href="', '"')
+                yield Message.Queue, url, data
+
+            pnum += 1
+            url = f"{base}{pnum}/"
+            if url not in page:
+                return
+            page = self.request(url).text
+
+    def metadata(self, _):
+        extr = text.extract_from(self.page)
+
         return {
-            "gallery_id": self.gallery_id,
-            "title": title or self.gallery_id,
+            "gallery_id"  : self.gallery_id,
+            "gallery_slug": self.groups[0],
+            "categories"  : text.split_html(extr(
+                '<li class="category">', "</li>"))[::2],
+            "title"       : text.unescape(extr('class="post-title">', "<")),
+            "date"        : text.parse_datetime(
+                extr('class="post-byline">', "<").strip(), "%B %d, %Y"),
+            "views"       : text.parse_int(extr("</b>", "v").replace(",", "")),
+            "tags"        : text.split_html(extr(
+                'class="post-tags">', "</p"))[1:],
         }
 
-    def images(self, page):
-        """Return a list of all (image-url, metadata) tuples"""
-        if not page:
-            return []
-            
-        url_list = []
-        img_tags = list(text.extract_iter(page, '<img ', '/>'))
-        
-        for img_tag in img_tags:
-            # Skip non-gallery images (like navigation, logos, etc)
-            if 'class="attachment-medium' not in img_tag and "class='attachment-medium" not in img_tag:
-                continue
-                
-            # Extract the source URL
-            img_src = text.extract(img_tag, 'src="', '"')[0]
-            if not img_src:
-                continue
-                
-            # Check if there's a srcset with larger images
-            srcset = text.extract(img_tag, 'srcset="', '"')[0]
-            if srcset:
-                # Get the largest image (last one in srcset)
-                srcset_urls = srcset.split(', ')
-                if srcset_urls:
-                    largest_url = srcset_urls[-1].split(' ')[0]
-                    if largest_url:
-                        img_src = largest_url
-            
-            # Create data dictionary
-            data = {}
-            data["filename"] = text.filename_from_url(img_src)
-            url_list.append((img_src, data))
-                
-        return url_list
+    def images(self, _):
+        results = []
+
+        for img in text.extract_iter(self.page, "'><img ", ">"):
+            if src := text.extr(img, 'src="', '"'):
+                path, _, end = src.rpartition("-")
+                if "x" in end:
+                    url = f"{path}.{end.rpartition(".")[2]}"
+                    data = None if src == url else {"_fallback": (src,)}
+                else:
+                    url = src
+                    data = None
+                results.append((url, data))
+
+        if not results:
+            # fallback for older galleries
+            for path in text.extract_iter(
+                    self.page, '<img src="/wp-content/uploads/', '"'):
+                results.append(
+                    (f"{self.root}/wp-content/uploads/{path}", None))
+
+        return results
 
 
 class RedbustExtractor(Extractor):
