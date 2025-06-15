@@ -26,9 +26,9 @@ class FoolfuukaExtractor(BaseExtractor):
             self.remote = self._remote_direct
         elif self.category == "archivedmoe":
             self.referer = False
-            self.fixup_timestamp = True
+            self.fixup_redirect = True
         else:
-            self.fixup_timestamp = False
+            self.fixup_redirect = False
 
     def items(self):
         yield Message.Directory, self.metadata()
@@ -65,12 +65,36 @@ class FoolfuukaExtractor(BaseExtractor):
             # '.webm' -> '.web' (#5116)
             if url.endswith(".webm"):
                 url = url[:-1]
-        elif self.fixup_timestamp:
-            # trim filename/timestamp to 13 characters (#7652)
+
+        elif self.fixup_redirect:
+            # update redirect domain or filename (#7652)
             path, _, filename = url.rpartition("/")
-            name, _, ext = filename.rpartition(".")
-            if len(name) > 13:
-                url = "{}/{}.{}".format(path, name[:13], ext)
+
+            # these boards link directly to i.4cdn.org
+            # -> redirect to warosu or 4plebs instead
+            board_domains = {
+                "3"  : "warosu.org",
+                "biz": "warosu.org",
+                "ck" : "warosu.org",
+                "diy": "warosu.org",
+                "fa" : "warosu.org",
+                "ic" : "warosu.org",
+                "jp" : "warosu.org",
+                "lit": "warosu.org",
+                "sci": "warosu.org",
+                "tg" : "archive.4plebs.org",
+            }
+            board = url.split("/", 4)[3]
+            if board in board_domains:
+                domain = board_domains[board]
+                url = f"https://{domain}/{board}/full_image/{filename}"
+
+            # if it's one of these archives, slice the name
+            elif any(archive in path for archive in (
+                     "b4k.", "desuarchive.", "palanq.")):
+                name, _, ext = filename.rpartition(".")
+                if len(name) > 13:
+                    url = f"{path}/{name[:13]}.{ext}"
 
         return url
 
