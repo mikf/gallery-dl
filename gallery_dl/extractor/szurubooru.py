@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2023 Mike Fährmann
+# Copyright 2023-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -58,8 +58,7 @@ class SzurubooruExtractor(booru.BooruExtractor):
             url = self.root + "/" + url
         return url
 
-    @staticmethod
-    def _prepare(post):
+    def _prepare(self, post):
         post["date"] = text.parse_datetime(
             post["creationTime"], "%Y-%m-%dT%H:%M:%S.%fZ")
 
@@ -79,10 +78,6 @@ class SzurubooruExtractor(booru.BooruExtractor):
 
 
 BASE_PATTERN = SzurubooruExtractor.update({
-    "foalcon": {
-        "root": "https://booru.foalcon.com",
-        "pattern": r"booru\.foalcon\.com",
-    },
     "bcbnsfw": {
         "root": "https://booru.bcbnsfw.space",
         "pattern": r"booru\.bcbnsfw\.space",
@@ -92,6 +87,10 @@ BASE_PATTERN = SzurubooruExtractor.update({
         "root": "https://snootbooru.com",
         "pattern": r"snootbooru\.com",
     },
+    "visuabusters": {
+        "root": "https://www.visuabusters.com/booru",
+        "pattern": r"(?:www\.)?visuabusters\.com/booru",
+    },
 })
 
 
@@ -100,7 +99,7 @@ class SzurubooruTagExtractor(SzurubooruExtractor):
     directory_fmt = ("{category}", "{search_tags}")
     archive_fmt = "t_{search_tags}_{id}_{version}"
     pattern = BASE_PATTERN + r"/posts(?:/query=([^/?#]*))?"
-    example = "https://booru.foalcon.com/posts/query=TAG"
+    example = "https://booru.bcbnsfw.space/posts/query=TAG"
 
     def __init__(self, match):
         SzurubooruExtractor.__init__(self, match)
@@ -123,7 +122,7 @@ class SzurubooruPostExtractor(SzurubooruExtractor):
     subcategory = "post"
     archive_fmt = "{id}_{version}"
     pattern = BASE_PATTERN + r"/post/(\d+)"
-    example = "https://booru.foalcon.com/post/12345"
+    example = "https://booru.bcbnsfw.space/post/12345"
 
     def posts(self):
         return (self._api_request("/post/" + self.groups[-1]),)

@@ -1,17 +1,16 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2020-2023 Mike Fährmann
+# Copyright 2020-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extractors for https://hipertoon.com/"""
+"""Extractors for https://hiperdex.com/"""
 
 from .common import ChapterExtractor, MangaExtractor
-from .. import text
+from .. import text, util
 from ..cache import memcache
-import re
 
 BASE_PATTERN = (r"((?:https?://)?(?:www\.)?"
                 r"(?:1st)?hiper(?:dex|toon)\d?\.(?:com|net|info|top))")
@@ -20,7 +19,7 @@ BASE_PATTERN = (r"((?:https?://)?(?:www\.)?"
 class HiperdexBase():
     """Base class for hiperdex extractors"""
     category = "hiperdex"
-    root = "https://hipertoon.com"
+    root = "https://hiperdex.com"
 
     @memcache(keyarg=1)
     def manga_data(self, manga, page=None):
@@ -49,7 +48,7 @@ class HiperdexBase():
             "status" : extr(
                 'class="summary-content">', '<').strip(),
             "description": text.remove_html(text.unescape(extr(
-                "Summary					</h5>", "</div>"))),
+                '<div class="description-summary">', "</div>"))),
             "language": "English",
             "lang"    : "en",
         }
@@ -69,7 +68,7 @@ class HiperdexBase():
 class HiperdexChapterExtractor(HiperdexBase, ChapterExtractor):
     """Extractor for hiperdex manga chapters"""
     pattern = BASE_PATTERN + r"(/mangas?/([^/?#]+)/([^/?#]+))"
-    example = "https://hipertoon.com/manga/MANGA/CHAPTER/"
+    example = "https://hiperdex.com/manga/MANGA/CHAPTER/"
 
     def __init__(self, match):
         root, path, self.manga, self.chapter = match.groups()
@@ -80,10 +79,10 @@ class HiperdexChapterExtractor(HiperdexBase, ChapterExtractor):
         return self.chapter_data(self.chapter)
 
     def images(self, page):
+        pattern = util.re(r'id="image-\d+"\s+(?:data-)?src="([^"]+)')
         return [
             (url.strip(), None)
-            for url in re.findall(
-                r'id="image-\d+"\s+(?:data-)?src="([^"]+)', page)
+            for url in pattern.findall(page)
         ]
 
 
@@ -91,7 +90,7 @@ class HiperdexMangaExtractor(HiperdexBase, MangaExtractor):
     """Extractor for hiperdex manga"""
     chapterclass = HiperdexChapterExtractor
     pattern = BASE_PATTERN + r"(/mangas?/([^/?#]+))/?$"
-    example = "https://hipertoon.com/manga/MANGA/"
+    example = "https://hiperdex.com/manga/MANGA/"
 
     def __init__(self, match):
         root, path, self.manga = match.groups()
@@ -127,7 +126,7 @@ class HiperdexArtistExtractor(HiperdexBase, MangaExtractor):
     chapterclass = HiperdexMangaExtractor
     reverse = False
     pattern = BASE_PATTERN + r"(/manga-a(?:rtist|uthor)/(?:[^/?#]+))"
-    example = "https://hipertoon.com/manga-artist/NAME/"
+    example = "https://hiperdex.com/manga-artist/NAME/"
 
     def __init__(self, match):
         self.root = text.ensure_http_scheme(match.group(1))

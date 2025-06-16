@@ -141,6 +141,12 @@ Conversion specifiers allow to *convert* the value to a different form or type. 
     <td><code>2010-01-01 00:00:00</code></td>
 </tr>
 <tr>
+    <td align="center"><code>D</code></td>
+    <td>Convert a Unix timestamp or <a href="https://en.wikipedia.org/wiki/ISO_8601">ISO 8601</a> string to a <code>datetime</code> object</td>
+    <td><code>{created!D}</code></td>
+    <td><code>2010-01-01 00:00:00</code></td>
+</tr>
+<tr>
     <td align="center"><code>U</code></td>
     <td>Convert HTML entities</td>
     <td><code>{html!U}</code></td>
@@ -173,6 +179,18 @@ Conversion specifiers allow to *convert* the value to a different form or type. 
 <tr>
     <td align="center"><code>a</code></td>
     <td>Convert value to <code>str</code> using <a href="https://docs.python.org/3/library/functions.html#ascii" rel="nofollow"><code>ascii()</code></a></td>
+    <td></td>
+    <td></td>
+</tr>
+<tr>
+    <td align="center"><code>i</code></td>
+    <td>Convert value to <a href="https://docs.python.org/3/library/functions.html#int"><code>int</code></a></td>
+    <td></td>
+    <td></td>
+</tr>
+<tr>
+    <td align="center"><code>f</code></td>
+    <td>Convert value to <a href="https://docs.python.org/3/library/functions.html#float"><code>float</code></a></td>
     <td></td>
     <td></td>
 </tr>
@@ -233,7 +251,7 @@ Format specifiers can be used for advanced formatting by using the options provi
     <td><code>Foo&nbsp;Bar</code></td>
 </tr>
 <tr>
-    <td><code>{foo:L6/&nbsp;.../}</code></td>
+    <td><code>{foo:X6/&nbsp;.../}</code></td>
     <td><code>Fo&nbsp;...</code></td>
 </tr>
 <tr>

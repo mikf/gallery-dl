@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2023 Mike Fährmann
+# Copyright 2015-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -12,6 +12,7 @@ import sys
 import unittest
 
 import io
+import re
 import time
 import random
 import string
@@ -27,11 +28,18 @@ from gallery_dl import util, text, exception  # noqa E402
 
 class TestRange(unittest.TestCase):
 
-    def test_parse_empty(self, f=util.RangePredicate._parse):
+    def setUp(self):
+        self.predicate = util.RangePredicate("")
+
+    def test_parse_empty(self):
+        f = self.predicate._parse
+
         self.assertEqual(f(""), [])
         self.assertEqual(f([]), [])
 
-    def test_parse_digit(self, f=util.RangePredicate._parse):
+    def test_parse_digit(self):
+        f = self.predicate._parse
+
         self.assertEqual(f("2"), [range(2, 3)])
 
         self.assertEqual(
@@ -41,7 +49,9 @@ class TestRange(unittest.TestCase):
              range(4, 5)],
         )
 
-    def test_parse_range(self, f=util.RangePredicate._parse):
+    def test_parse_range(self):
+        f = self.predicate._parse
+
         self.assertEqual(f("1-2"), [range(1, 3)])
         self.assertEqual(f("2-"), [range(2, sys.maxsize)])
         self.assertEqual(f("-3"), [range(1, 4)])
@@ -61,7 +71,9 @@ class TestRange(unittest.TestCase):
              range(2, 7)],
         )
 
-    def test_parse_slice(self, f=util.RangePredicate._parse):
+    def test_parse_slice(self):
+        f = self.predicate._parse
+
         self.assertEqual(f("2:4")  , [range(2, 4)])
         self.assertEqual(f("3::")  , [range(3, sys.maxsize)])
         self.assertEqual(f(":4:")  , [range(1, 4)])
@@ -148,6 +160,10 @@ class TestPredicate(unittest.TestCase):
         self.assertFalse(pred(url, {"a": 2, "b": 3, "c": 5}))
 
         self.assertFalse(pred(url, {"a": 2}))
+
+        pred = util.FilterPredicate("re.search(r'.+', url)")
+        self.assertTrue(pred(url, {"url": "https://example.org/"}))
+        self.assertFalse(pred(url, {"url": ""}))
 
     def test_build_predicate(self):
         pred = util.build_predicate([])
@@ -459,6 +475,15 @@ class TestOther(unittest.TestCase):
         self.assertFalse(util.contains(s, "tag1"))
         self.assertFalse(util.contains(s, ["tag1", "tag2", "tag3"]))
 
+        self.assertTrue(util.contains(s, "(+)", ""))
+        self.assertTrue(util.contains(s, ["(-)", "(+)"], ""))
+        self.assertTrue(util.contains(s, "(+)", 0))
+        self.assertTrue(util.contains(s, "(+)", False))
+
+        self.assertFalse(util.contains(s, "(+)", None))
+        self.assertTrue(util.contains(s, "y(+)c", None))
+        self.assertTrue(util.contains(s, ["(-)", "(+)", "bar"], None))
+
         s = "1, 2, 3, asd, qwe, y(+)c, f(+)(-), bar"
         self.assertTrue(util.contains(s, "y(+)c", ", "))
         self.assertTrue(util.contains(s, ["sdf", "dfg", "qwe"], ", "))
@@ -483,6 +508,7 @@ class TestOther(unittest.TestCase):
 
     def test_noop(self):
         self.assertEqual(util.noop(), None)
+        self.assertEqual(util.noop(...), None)
 
     def test_md5(self):
         self.assertEqual(util.md5(b""),
@@ -543,17 +569,21 @@ value = 123
         self.assertEqual(module.value, 123)
         self.assertIs(module.datetime, datetime)
 
-    def test_build_duration_func(self, f=util.build_duration_func):
+    def test_build_selection_func(self, f=util.build_selection_func):
 
-        def test_single(df, v):
+        def test_single(df, v, type=None):
             for _ in range(10):
                 self.assertEqual(df(), v)
+                if type is not None:
+                    self.assertIsInstance(df(), type)
 
-        def test_range(df, lower, upper):
+        def test_range(df, lower, upper, type=None):
             for __ in range(10):
                 v = df()
                 self.assertGreaterEqual(v, lower)
                 self.assertLessEqual(v, upper)
+                if type is not None:
+                    self.assertIsInstance(v, type)
 
         for v in (0, 0.0, "", None, (), []):
             self.assertIsNone(f(v))
@@ -561,16 +591,24 @@ value = 123
         for v in (0, 0.0, "", None, (), []):
             test_single(f(v, 1.0), 1.0)
 
-        test_single(f(3), 3)
-        test_single(f(3.0), 3.0)
-        test_single(f("3"), 3)
-        test_single(f("3.0-"), 3)
-        test_single(f("  3  -"), 3)
+        test_single(f(3)       , 3  , float)
+        test_single(f(3.0)     , 3.0, float)
+        test_single(f("3")     , 3  , float)
+        test_single(f("3.0-")  , 3  , float)
+        test_single(f("  3  -"), 3  , float)
 
-        test_range(f((2, 4)), 2, 4)
-        test_range(f([2, 4]), 2, 4)
-        test_range(f("2-4"), 2, 4)
-        test_range(f("  2.0  - 4 "), 2, 4)
+        test_range(f((2, 4))       , 2, 4, float)
+        test_range(f([2.0, 4.0])   , 2, 4, float)
+        test_range(f("2-4")        , 2, 4, float)
+        test_range(f("  2.0  - 4 "), 2, 4, float)
+
+        pb = text.parse_bytes
+        test_single(f("3", 0, pb)     , 3, int)
+        test_single(f("3.0-", 0, pb)  , 3, int)
+        test_single(f("  3  -", 0, pb), 3, int)
+
+        test_range(f("2k-4k", 0, pb)        , 2048, 4096, int)
+        test_range(f("  2.0k  - 4k ", 0, pb), 2048, 4096, int)
 
     def test_extractor_filter(self):
         # empty
@@ -756,6 +794,58 @@ value = 123
         self.assertEqual(f(["a", "b", "c"]), "a, b, c")
         self.assertEqual(f([1, 2, 3]), "1, 2, 3")
 
+    @unittest.skipIf(sys.hexversion < 0x3070000,
+                     "datetime.fromisoformat")
+    def test_to_datetime(self, f=util.to_datetime):
+
+        def _assert(value, expected):
+            result = f(value)
+            self.assertIsInstance(result, datetime.datetime)
+            self.assertEqual(result, expected, msg=repr(value))
+
+        dt = datetime.datetime(2010, 1, 1)
+        self.assertIs(f(dt), dt)
+
+        _assert(dt            , dt)
+        _assert(1262304000    , dt)
+        _assert(1262304000.0  , dt)
+        _assert(1262304000.123, dt)
+        _assert("1262304000"  , dt)
+
+        _assert("2010-01-01"                      , dt)
+        _assert("2010-01-01 00:00:00"             , dt)
+        _assert("2010-01-01T00:00:00"             , dt)
+        _assert("2010-01-01T00:00:00.123456"      , dt)
+        _assert("2009-12-31T19:00:00-05:00"       , dt)
+        _assert("2009-12-31T19:00:00.123456-05:00", dt)
+        _assert("2010-01-01T00:00:00Z"            , dt)
+        _assert("2010-01-01T00:00:00.123456Z"     , dt)
+
+        _assert(0    , util.EPOCH)
+        _assert(""   , util.EPOCH)
+        _assert("foo", util.EPOCH)
+        _assert(None , util.EPOCH)
+        _assert(()   , util.EPOCH)
+        _assert([]   , util.EPOCH)
+        _assert({}   , util.EPOCH)
+        _assert((1, 2, 3), util.EPOCH)
+
+    @unittest.skipIf(sys.hexversion < 0x30b0000,
+                     "extended fromisoformat timezones")
+    def test_to_datetime_tz(self, f=util.to_datetime):
+
+        def _assert(value, expected):
+            result = f(value)
+            self.assertIsInstance(result, datetime.datetime)
+            self.assertEqual(result, expected, msg=repr(value))
+
+        dt = datetime.datetime(2010, 1, 1)
+
+        _assert("2009-12-31T19:00:00-05"          , dt)
+        _assert("2009-12-31T19:00:00-0500"        , dt)
+        _assert("2009-12-31T19:00:00.123456-05"   , dt)
+        _assert("2009-12-31T19:00:00.123456-0500" , dt)
+
     def test_datetime_to_timestamp(self, f=util.datetime_to_timestamp):
         self.assertEqual(f(util.EPOCH), 0.0)
         self.assertEqual(f(datetime.datetime(2010, 1, 1)), 1262304000.0)
@@ -891,6 +981,47 @@ value = 123
                 raise exc_orig
         except ValueError as exc:
             self.assertIs(exc, exc_orig)
+
+    def test_null_response(self):
+        response = util.NullResponse("https://example.org")
+
+        self.assertEqual(response.url, "https://example.org")
+        self.assertEqual(response.status_code, 900)
+        self.assertEqual(response.reason, "")
+        self.assertEqual(response.text, "")
+        self.assertEqual(response.content, b"")
+        self.assertEqual(response.json(), {})
+
+        self.assertFalse(response.ok)
+        self.assertFalse(response.is_redirect)
+        self.assertFalse(response.is_permanent_redirect)
+        self.assertFalse(response.history)
+
+        self.assertEqual(response.encoding, "utf-8")
+        self.assertEqual(response.apparent_encoding, "utf-8")
+        self.assertEqual(response.cookies.get("foo"), None)
+        self.assertEqual(response.headers.get("foo"), None)
+        self.assertEqual(response.links.get("next"), None)
+        self.assertEqual(response.close(), None)
+
+    def test_re(self):
+        Pattern = type(re.compile(""))
+
+        p1 = util.re_compile("foo")
+        p2 = util.re("foo")
+        p3 = util.re("foo")
+
+        self.assertIsInstance(p1, Pattern)
+        self.assertIsInstance(p2, Pattern)
+        self.assertIsInstance(p3, Pattern)
+
+        self.assertIsNot(p1, p2)
+        self.assertIs(p2, p3)
+
+        if sys.hexversion >= 0x3060000:
+            self.assertEqual(p1, p2)
+        else:
+            self.assertEqual(repr(p1), repr(p2))
 
 
 class TestExtractor():

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2023 Mike Fährmann
+# Copyright 2015-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -47,35 +47,12 @@ class Job():
         self.kwdict = {}
         self.kwdict_eval = False
 
-        cfgpath = []
-        if parent:
-            if extr.category == parent.extractor.category or \
-                    extr.category in parent.parents:
-                parents = parent.parents
-            else:
-                parents = parent.parents + (parent.extractor.category,)
-
-            if parents:
-                for category in parents:
-                    cat = "{}>{}".format(category, extr.category)
-                    cfgpath.append((cat, extr.subcategory))
-                    cfgpath.append((category + ">*", extr.subcategory))
-                cfgpath.append((extr.category, extr.subcategory))
-                self.parents = parents
-            else:
-                self.parents = ()
-        else:
-            self.parents = ()
-
-        if extr.basecategory:
-            if not cfgpath:
-                cfgpath.append((extr.category, extr.subcategory))
-            cfgpath.append((extr.basecategory, extr.subcategory))
-
+        cfgpath = self._build_config_path(parent)
         if cfgpath:
+            if isinstance(cfgpath, list):
+                extr.config = extr._config_shared
+                extr.config_accumulate = extr._config_shared_accumulate
             extr._cfgpath = cfgpath
-            extr.config = extr._config_shared
-            extr.config_accumulate = extr._config_shared_accumulate
 
         actions = extr.config("actions")
         if actions:
@@ -92,16 +69,6 @@ class Job():
         }
         extr.log = self._wrap_logger(extr.log)
         extr.log.debug("Using %s for '%s'", extr.__class__.__name__, extr.url)
-
-        # data from parent job
-        if parent:
-            pextr = parent.extractor
-
-            # transfer (sub)category
-            if pextr.config("category-transfer", pextr.categorytransfer):
-                extr._cfgpath = pextr._cfgpath
-                extr.category = pextr.category
-                extr.subcategory = pextr.subcategory
 
         self.metadata_url = extr.config2("metadata-url", "url-metadata")
         self.metadata_http = extr.config2("metadata-http", "http-metadata")
@@ -133,6 +100,41 @@ class Job():
                         self.kwdict[key] = value
             else:
                 self.kwdict.update(kwdict)
+
+    def _build_config_path(self, parent):
+        extr = self.extractor
+        cfgpath = []
+
+        if parent:
+            pextr = parent.extractor
+            if extr.category == pextr.category or \
+                    extr.category in parent.parents:
+                parents = parent.parents
+            else:
+                parents = parent.parents + (pextr.category,)
+            self.parents = parents
+
+            if pextr.config("category-transfer", pextr.categorytransfer):
+                extr.category = pextr.category
+                extr.subcategory = pextr.subcategory
+                return pextr._cfgpath
+
+            if parents:
+                sub = extr.subcategory
+                for category in parents:
+                    cat = "{}>{}".format(category, extr.category)
+                    cfgpath.append((cat, sub))
+                    cfgpath.append((category + ">*", sub))
+                cfgpath.append((extr.category, sub))
+        else:
+            self.parents = ()
+
+        if extr.basecategory:
+            if not cfgpath:
+                cfgpath.append((extr.category, extr.subcategory))
+            cfgpath.append((extr.basecategory, extr.subcategory))
+
+        return cfgpath
 
     def run(self):
         """Execute or run the job"""
@@ -496,8 +498,6 @@ class DownloadJob(Job):
                 self._skipcnt += 1
                 if self._skipcnt >= self._skipmax:
                     raise self._skipexc()
-            else:
-                self._skipcnt = 0
 
     def download(self, url):
         """Download 'url'"""
@@ -551,28 +551,24 @@ class DownloadJob(Job):
 
         archive_path = cfg("archive")
         if archive_path:
-            archive_path = util.expand_path(archive_path)
-
+            archive_table = cfg("archive-table")
             archive_prefix = cfg("archive-prefix")
             if archive_prefix is None:
-                archive_prefix = extr.category
+                archive_prefix = extr.category if archive_table is None else ""
 
             archive_format = cfg("archive-format")
             if archive_format is None:
                 archive_format = extr.archive_fmt
 
             try:
-                if "{" in archive_path:
-                    archive_path = formatter.parse(
-                        archive_path).format_map(kwdict)
-                if cfg("archive-mode") == "memory":
-                    archive_cls = archive.DownloadArchiveMemory
-                else:
-                    archive_cls = archive.DownloadArchive
-                self.archive = archive_cls(
+                self.archive = archive.connect(
                     archive_path,
-                    archive_prefix + archive_format,
+                    archive_prefix,
+                    archive_format,
+                    archive_table,
+                    cfg("archive-mode"),
                     cfg("archive-pragma"),
+                    kwdict,
                 )
             except Exception as exc:
                 extr.log.warning(
@@ -686,8 +682,7 @@ class DownloadJob(Job):
             for hook, callback in hooks.items():
                 self.hooks[hook].append(callback)
 
-    @staticmethod
-    def _call_hook(callback, condition, pathfmt):
+    def _call_hook(self, callback, condition, pathfmt):
         if condition(pathfmt.kwdict):
             callback(pathfmt)
 
@@ -822,12 +817,10 @@ class UrlJob(Job):
         if depth >= self.maxdepth:
             self.handle_queue = self.handle_url
 
-    @staticmethod
-    def handle_url(url, _):
+    def handle_url(self, url, _):
         stdout_write(url + "\n")
 
-    @staticmethod
-    def handle_url_fallback(url, kwdict):
+    def handle_url_fallback(self, url, kwdict):
         stdout_write(url + "\n")
         if "_fallback" in kwdict:
             for url in kwdict["_fallback"]:

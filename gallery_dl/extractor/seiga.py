@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2023 Mike Fährmann
+# Copyright 2016-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -43,9 +43,7 @@ class SeigaExtractor(Extractor):
     def get_image_url(self, image_id):
         """Get url for an image with id 'image_id'"""
         url = "{}/image/source/{}".format(self.root, image_id)
-        response = self.request(
-            url, method="HEAD", allow_redirects=False, notfound="image")
-        location = response.headers["location"]
+        location = self.request_location(url, notfound="image")
         if "nicovideo.jp/login" in location:
             raise exception.StopExtraction(
                 "HTTP redirect to login page (%s)", location.partition("?")[0])

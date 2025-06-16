@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2023 Mike Fährmann
+# Copyright 2019-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -108,6 +108,7 @@ class MetadataPP(PostProcessor):
         self.omode = options.get("open", omode)
         self.encoding = options.get("encoding", "utf-8")
         self.skip = options.get("skip", False)
+        self.meta_path = options.get("metadata-path")
 
     def run(self, pathfmt):
         archive = self.archive
@@ -119,6 +120,9 @@ class MetadataPP(PostProcessor):
         else:
             directory = self._directory(pathfmt)
         path = directory + self._filename(pathfmt)
+
+        if self.meta_path is not None:
+            pathfmt.kwdict[self.meta_path] = path
 
         if self.skip and os.path.exists(path):
             return
@@ -180,7 +184,10 @@ class MetadataPP(PostProcessor):
             pathfmt.directory_formatters = self._directory_formatters
             pathfmt.directory_conditions = ()
             segments = pathfmt.build_directory(pathfmt.kwdict)
-            directory = pathfmt.clean_path(os.sep.join(segments) + os.sep)
+            if segments:
+                directory = pathfmt.clean_path(os.sep.join(segments) + os.sep)
+            else:
+                directory = "." + os.sep
             return os.path.join(self._base(pathfmt), directory)
         finally:
             pathfmt.directory_conditions = conditions
@@ -261,8 +268,7 @@ class MetadataPP(PostProcessor):
         if not private:
             return util.filter_dict
 
-    @staticmethod
-    def _make_encoder(options, indent=None):
+    def _make_encoder(self, options, indent=None):
         return json.JSONEncoder(
             ensure_ascii=options.get("ascii", False),
             sort_keys=options.get("sort", False),

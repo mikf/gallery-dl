@@ -19,10 +19,10 @@ __tests__ = (
     "#url"     : "https://realbooru.com/index.php?page=pool&s=show&id=1",
     "#category": ("booru", "realbooru", "pool"),
     "#class"   : realbooru.RealbooruPoolExtractor,
-    "#urls"    : (
-        "https://realbooru.com//images/bf/d6/bfd682f338691e5254de796040fcba21.mp4",
-        "https://realbooru.com//images/cb/7d/cb7d921673ba99f688031ac554777695.mp4",
-        "https://realbooru.com//images/9e/14/9e140edc1cb2e4cc734ba5bdc4870955.mp4",
+    "#results" : (
+        "https://video-cdn.realbooru.com//images/bf/d6/bfd682f338691e5254de796040fcba21.mp4",
+        "https://video-cdn.realbooru.com//images/cb/7d/cb7d921673ba99f688031ac554777695.mp4",
+        "https://video-cdn.realbooru.com//images/9e/14/9e140edc1cb2e4cc734ba5bdc4870955.mp4",
     ),
 },
 
@@ -30,7 +30,7 @@ __tests__ = (
     "#url"     : "https://realbooru.com/index.php?page=favorites&s=view&id=274",
     "#category": ("booru", "realbooru", "favorite"),
     "#class"   : realbooru.RealbooruFavoriteExtractor,
-    "#urls"    : "https://realbooru.com//images/20/3e/203eefb39f54de049e30ff788a022ac7.jpeg",
+    "#results" : "https://realbooru.com//images/20/3e/203eefb39f54de049e30ff788a022ac7.jpeg",
 },
 
 {
@@ -39,7 +39,7 @@ __tests__ = (
     "#category": ("booru", "realbooru", "post"),
     "#class"   : realbooru.RealbooruPostExtractor,
     "#options"     : {"tags": True},
-    "#urls"        : "https://realbooru.com//images/8a/34/8a345820da989637c21ac013d522bf69.jpeg",
+    "#results"     : "https://realbooru.com//images/8a/34/8a345820da989637c21ac013d522bf69.jpeg",
     "#sha1_content": "f6213e6f25c3cb9e3cfefa6d4b3a78e44b9dea5b",
 
     "created_at"    : "Jan, 18 2024",

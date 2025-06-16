@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2023 Mike Fährmann
+# Copyright 2018-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -234,14 +234,12 @@ class SmugmugAPI(oauth.OAuth1API):
                 return
             params["start"] += params["count"]
 
-    @staticmethod
-    def _extend(endpoint, expands):
+    def _extend(self, endpoint, expands):
         if expands:
             endpoint += "?_expand=" + expands
         return endpoint
 
-    @staticmethod
-    def _apply_expansions(data, expands):
+    def _apply_expansions(self, data, expands):
 
         def unwrap(response):
             locator = response["Locator"]

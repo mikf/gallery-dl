@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2020-2023 Mike Fährmann
+# Copyright 2020-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -9,11 +9,9 @@
 """Extractors for Moebooru based sites"""
 
 from .booru import BooruExtractor
-from .. import text
-
+from .. import text, util
 import collections
 import datetime
-import re
 
 
 class MoebooruExtractor(BooruExtractor):
@@ -22,8 +20,7 @@ class MoebooruExtractor(BooruExtractor):
     filename_fmt = "{category}_{id}_{md5}.{extension}"
     page_start = 1
 
-    @staticmethod
-    def _prepare(post):
+    def _prepare(self, post):
         post["date"] = text.parse_timestamp(post["created_at"])
 
     def _html(self, post):
@@ -36,7 +33,7 @@ class MoebooruExtractor(BooruExtractor):
             return
 
         tags = collections.defaultdict(list)
-        pattern = re.compile(r"tag-type-([^\"' ]+).*?[?;]tags=([^\"'+]+)")
+        pattern = util.re(r"tag-type-([^\"' ]+).*?[?;]tags=([^\"'+]+)")
         for tag_type, tag_name in pattern.findall(tag_container):
             tags[tag_type].append(text.unquote(tag_name))
         for key, value in tags.items():
@@ -127,6 +124,7 @@ class MoebooruPoolExtractor(MoebooruExtractor):
         if self.config("metadata"):
             url = "{}/pool/show/{}.json".format(self.root, self.pool_id)
             pool = self.request(url).json()
+            pool["name"] = pool["name"].replace("_", " ")
             pool.pop("posts", None)
             return {"pool": pool}
         return {"pool": text.parse_int(self.pool_id)}

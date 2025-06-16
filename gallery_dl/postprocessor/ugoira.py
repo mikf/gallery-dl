@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2023 Mike Fährmann
+# Copyright 2018-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -9,7 +9,7 @@
 """Convert Pixiv Ugoira to WebM"""
 
 from .common import PostProcessor
-from .. import util
+from .. import util, output
 import subprocess
 import tempfile
 import zipfile
@@ -111,16 +111,13 @@ class UgoiraPP(PostProcessor):
             return
 
         self._frames = pathfmt.kwdict["_ugoira_frame_data"]
-        if pathfmt.extension == "zip":
+        index = pathfmt.kwdict.get("_ugoira_frame_index")
+        if index is None:
             self._convert_zip = True
             if self.delete:
                 pathfmt.set_extension(self.extension)
                 pathfmt.build_path()
         else:
-            index = pathfmt.kwdict.get("_ugoira_frame_index")
-            if index is None:
-                return
-
             pathfmt.build_path()
             frame = self._frames[index].copy()
             frame["index"] = index
@@ -138,6 +135,7 @@ class UgoiraPP(PostProcessor):
         if not self._convert_zip:
             return
         self._zip_source = True
+        self._zip_ext = ext = pathfmt.extension
 
         with self._tempdir() as tempdir:
             if tempdir:
@@ -158,9 +156,9 @@ class UgoiraPP(PostProcessor):
             if self.convert(pathfmt, tempdir):
                 if self.delete:
                     pathfmt.delete = True
-                elif pathfmt.extension != "zip":
+                elif pathfmt.extension != ext:
                     self.log.info(pathfmt.filename)
-                    pathfmt.set_extension("zip")
+                    pathfmt.set_extension(ext)
                     pathfmt.build_path()
 
     def convert_from_files(self, pathfmt):
@@ -226,13 +224,13 @@ class UgoiraPP(PostProcessor):
             if self._finalize:
                 self._finalize(pathfmt, tempdir)
         except OSError as exc:
-            print()
+            output.stderr_write("\n")
             self.log.error("Unable to invoke FFmpeg (%s: %s)",
                            exc.__class__.__name__, exc)
             self.log.debug("", exc_info=exc)
             pathfmt.realpath = pathfmt.temppath
         except Exception as exc:
-            print()
+            output.stderr_write("\n")
             self.log.error("%s: %s", exc.__class__.__name__, exc)
             self.log.debug("", exc_info=exc)
             pathfmt.realpath = pathfmt.temppath
@@ -257,9 +255,15 @@ class UgoiraPP(PostProcessor):
             ]).encode()
 
         if self._zip_source:
-            self.delete = False
+            zpath = pathfmt.temppath
+            if self.delete:
+                self.delete = False
+            elif self._zip_ext != self.extension:
+                self._copy_file(zpath, pathfmt.realpath)
+                zpath = pathfmt.realpath
+
             if self.metadata:
-                with zipfile.ZipFile(pathfmt.temppath, "a") as zfile:
+                with zipfile.ZipFile(zpath, "a") as zfile:
                     zinfo = zipfile.ZipInfo(metaname)
                     if self.mtime:
                         zinfo.date_time = zfile.infolist()[0].date_time
@@ -296,7 +300,7 @@ class UgoiraPP(PostProcessor):
         out = None if self.output else subprocess.DEVNULL
         retcode = util.Popen(args, stdout=out, stderr=out).wait()
         if retcode:
-            print()
+            output.stderr_write("\n")
             self.log.error("Non-zero exit status when running %s (%s)",
                            args, retcode)
             raise ValueError()
@@ -421,15 +425,13 @@ class UgoiraPP(PostProcessor):
 
         return (None, None)
 
-    @staticmethod
-    def _delay_gcd(frames):
+    def _delay_gcd(self, frames):
         result = frames[0]["delay"]
         for f in frames:
             result = gcd(result, f["delay"])
         return result
 
-    @staticmethod
-    def _delay_is_uniform(frames):
+    def _delay_is_uniform(self, frames):
         delay = frames[0]["delay"]
         for f in frames:
             if f["delay"] != delay:

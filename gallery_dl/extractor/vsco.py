@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2023 Mike Fährmann
+# Copyright 2019-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -8,7 +8,7 @@
 
 """Extractors for https://vsco.co/"""
 
-from .common import Extractor, Message
+from .common import Extractor, Message, Dispatch
 from .. import text, util
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?vsco\.co"
@@ -32,13 +32,17 @@ class VscoExtractor(Extractor):
         yield Message.Directory, {"user": self.user}
         for img in self.images():
 
-            if not img or "responsive_url" not in img:
+            if not img:
+                continue
+            elif "playback_url" in img:
+                img = self._transform_video(img)
+            elif "responsive_url" not in img:
                 continue
 
             if img["is_video"]:
                 if not videos:
                     continue
-                url = "https://" + img["video_url"]
+                url = text.ensure_http_scheme(img["video_url"])
             else:
                 base = img["responsive_url"].partition("/")[2]
                 cdn, _, path = base.partition("/")
@@ -63,6 +67,10 @@ class VscoExtractor(Extractor):
                 "height": img["height"],
                 "description": img.get("description") or "",
             })
+            if data["extension"] == "m3u8":
+                url = "ytdl:" + url
+                data["_ytdl_manifest"] = "hls"
+                data["extension"] = "mp4"
             yield Message.Url, url, data
 
     def images(self):
@@ -70,7 +78,8 @@ class VscoExtractor(Extractor):
 
     def _extract_preload_state(self, url):
         page = self.request(url, notfound=self.subcategory).text
-        return util.json_loads(text.extr(page, "__PRELOADED_STATE__ = ", "<"))
+        return util.json_loads(text.extr(page, "__PRELOADED_STATE__ = ", "<")
+                               .replace('"prevPageToken":undefined,', ''))
 
     def _pagination(self, url, params, token, key, extra=None):
         headers = {
@@ -100,8 +109,7 @@ class VscoExtractor(Extractor):
                 yield from medias
                 params["page"] += 1
 
-    @staticmethod
-    def _transform_media(media):
+    def _transform_media(self, media):
         if "responsiveUrl" not in media:
             return None
         media["_id"] = media["id"]
@@ -113,15 +121,19 @@ class VscoExtractor(Extractor):
         media["image_meta"] = media.get("imageMeta")
         return media
 
+    def _transform_video(self, media):
+        media["is_video"] = True
+        media["grid_name"] = ""
+        media["video_url"] = media["playback_url"]
+        media["responsive_url"] = media["poster_url"]
+        media["upload_date"] = media["created_date"]
+        return media
 
-class VscoUserExtractor(VscoExtractor):
+
+class VscoUserExtractor(Dispatch, VscoExtractor):
     """Extractor for a vsco user profile"""
-    subcategory = "user"
     pattern = USER_PATTERN + r"/?$"
     example = "https://vsco.co/USER"
-
-    def initialize(self):
-        pass
 
     def items(self):
         base = "{}/{}/".format(self.root, self.user)
@@ -293,12 +305,33 @@ class VscoImageExtractor(VscoExtractor):
     pattern = USER_PATTERN + r"/media/([0-9a-fA-F]+)"
     example = "https://vsco.co/USER/media/0123456789abcdef"
 
-    def __init__(self, match):
-        VscoExtractor.__init__(self, match)
-        self.media_id = match.group(2)
-
     def images(self):
-        url = "{}/{}/media/{}".format(self.root, self.user, self.media_id)
+        url = "{}/{}/media/{}".format(self.root, self.user, self.groups[1])
         data = self._extract_preload_state(url)
         media = data["medias"]["byId"].popitem()[1]["media"]
         return (self._transform_media(media),)
+
+
+class VscoVideoExtractor(VscoExtractor):
+    """Extractor for vsco.co videos links"""
+    subcategory = "video"
+    pattern = USER_PATTERN + r"/video/([^/?#]+)"
+    example = "https://vsco.co/USER/video/012345678-9abc-def0"
+
+    def images(self):
+        url = "{}/{}/video/{}".format(self.root, self.user, self.groups[1])
+        data = self._extract_preload_state(url)
+        media = data["medias"]["byId"].popitem()[1]["media"]
+
+        return ({
+            "_id"           : media["id"],
+            "is_video"      : True,
+            "grid_name"     : "",
+            "upload_date"   : media["createdDate"],
+            "responsive_url": media["posterUrl"],
+            "video_url"     : media.get("playbackUrl"),
+            "image_meta"    : None,
+            "width"         : media["width"],
+            "height"        : media["height"],
+            "description"   : media["description"],
+        },)

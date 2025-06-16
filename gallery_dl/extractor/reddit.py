@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2017-2023 Mike Fährmann
+# Copyright 2017-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -40,6 +40,11 @@ class RedditExtractor(Extractor):
             elif videos == "dash":
                 self._extract_video = self._extract_video_dash
             videos = True
+
+        selftext = self.config("selftext")
+        if selftext is None:
+            selftext = self.api.comments
+        selftext = True if selftext else False
 
         submissions = self.submissions()
         visited = set()
@@ -92,12 +97,12 @@ class RedditExtractor(Extractor):
                 elif parentdir:
                     yield Message.Directory, comments[0]
 
+                if selftext and submission:
+                    for url in text.extract_iter(
+                            submission["selftext_html"] or "", ' href="', '"'):
+                        urls.append((url, submission))
+
                 if self.api.comments:
-                    if submission:
-                        for url in text.extract_iter(
-                                submission["selftext_html"] or "",
-                                ' href="', '"'):
-                            urls.append((url, submission))
                     for comment in comments:
                         html = comment["body_html"] or ""
                         href = (' href="' in html)
@@ -259,6 +264,8 @@ class RedditSubredditExtractor(RedditExtractor):
         self.subreddit, sub, params = match.groups()
         self.params = text.parse_query(params)
         if sub:
+            if sub == "search" and "restrict_sr" not in self.params:
+                self.params["restrict_sr"] = "1"
             self.subcategory += "-" + sub
         RedditExtractor.__init__(self, match)
 
@@ -350,10 +357,9 @@ class RedditRedirectExtractor(Extractor):
             sub_type = "user"
         url = "https://www.reddit.com/{}/{}/s/{}".format(
             sub_type, subreddit, share_url)
+        location = self.request_location(url, notfound="submission")
         data = {"_extractor": RedditSubmissionExtractor}
-        response = self.request(url, method="HEAD", allow_redirects=False,
-                                notfound="submission")
-        yield Message.Queue, response.headers["Location"], data
+        yield Message.Queue, location, data
 
 
 class RedditAPI():
@@ -567,8 +573,7 @@ class RedditAPI():
         sid = self.extractor.config(key)
         return self._decode(sid.rpartition("_")[2].lower()) if sid else default
 
-    @staticmethod
-    def _decode(sid):
+    def _decode(self, sid):
         return util.bdecode(sid, "0123456789abcdefghijklmnopqrstuvwxyz")
 
 

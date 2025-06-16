@@ -12,14 +12,17 @@ __tests__ = (
 {
     "#url"  : "https://civitai.com/models/703211/maid-classic",
     "#class": civitai.CivitaiModelExtractor,
-    "#urls" : [
-        "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/5c4efa68-bb58-47c5-a716-98cd0f51f047/original=true/00013-4238863814.png",
-        "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/69bf3279-df2c-4ec8-b795-479e9cd3db1b/original=true/00014-3150861441.png",
-        "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/2dd1dc69-45a6-4beb-b36b-2e2bc65e3cda/original=true/00015-2885514572.png",
+    "#results": (
+        "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/51ea6a54-762c-46cf-9588-726461193c96/original=true/00019-2944604798.png",
+        "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/aaa474a8-5a4d-4003-819f-79df2935ad78/original=true/00020-1919126538.png",
+        "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/1bb22783-1c29-405e-9d7e-7c98b5a53d65/original=true/00021-2415646212.png",
         "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/52b6efa7-801c-4901-90b4-fa3964d23480/original=true/00004-822988489.png",
         "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/c4d3bcd5-0e23-4f4e-9f34-d13b2f2bf14c/original=true/00005-1059918744.png",
         "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/68568d22-c4f3-45cb-ac32-82f1cedf968f/original=true/00006-3467286319.png",
-    ],
+        "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/5c4efa68-bb58-47c5-a716-98cd0f51f047/original=true/00013-4238863814.png",
+        "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/69bf3279-df2c-4ec8-b795-479e9cd3db1b/original=true/00014-3150861441.png",
+        "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/2dd1dc69-45a6-4beb-b36b-2e2bc65e3cda/original=true/00015-2885514572.png",
+    ),
 
     "model"  : {
         "description": "<p>The strength of Lora is recommended to be around 1.0.</p>",
@@ -44,11 +47,11 @@ __tests__ = (
     "#url"    : "https://civitai.com/models/703211?modelVersionId=786644",
     "#comment": "model version ID",
     "#class"  : civitai.CivitaiModelExtractor,
-    "#urls"   : [
+    "#results": (
         "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/52b6efa7-801c-4901-90b4-fa3964d23480/original=true/00004-822988489.png",
         "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/c4d3bcd5-0e23-4f4e-9f34-d13b2f2bf14c/original=true/00005-1059918744.png",
         "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/68568d22-c4f3-45cb-ac32-82f1cedf968f/original=true/00006-3467286319.png",
-    ],
+    ),
 
     "version": {
         "baseModel"   : "Pony",
@@ -78,14 +81,15 @@ __tests__ = (
     "#url"  : "https://civitai.com/images/26962948",
     "#class": civitai.CivitaiImageExtractor,
     "#options"     : {"quality": "w", "metadata": True},
-    "#urls"        : "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/69bf3279-df2c-4ec8-b795-479e9cd3db1b/w/00014-3150861441.png",
+    "#results"     : "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/69bf3279-df2c-4ec8-b795-479e9cd3db1b/w/00014-3150861441.png",
     "#sha1_content": "a9a9d08f5fcdbc1e1eec7f203717f9df97b7a671",
 
     "createdAt": "2024-08-31T01:11:47.021Z",
     "date"     : "dt:2024-08-31 01:11:47",
-    "extension": "jpg",
+    "extension": "png",
     "filename" : "00014-3150861441",
     "hash"     : "ULN0-w?b4nRjxGM{-;t7M_t7NGae~qRjMyt7",
+    "width"    : 1152,
     "height"   : 1536,
     "id"       : 26962948,
     "nsfwLevel": 1,
@@ -93,14 +97,12 @@ __tests__ = (
     "stats"    : dict,
     "url"      : "69bf3279-df2c-4ec8-b795-479e9cd3db1b",
     "uuid"     : "69bf3279-df2c-4ec8-b795-479e9cd3db1b",
-    "width"    : 1152,
     "user"     : {
         "username": "bolero537",
     },
     "generation": {
         "canRemix"  : True,
         "external"  : None,
-        "generationProcess": "img2img",
         "resources" : list,
         "techniques": [],
         "tools"     : [],
@@ -131,17 +133,177 @@ __tests__ = (
             },
         },
     },
+    "post": {
+        "id": 6030721,
+        "nsfwLevel": 1,
+        "title": "メイド　クラシック/maid classic - v1.0 XL Showcase",
+        "detail": None,
+        "modelVersionId": 788385,
+        "modelVersion": {
+            "id": 788385,
+        },
+        "publishedAt": "2024-08-31T01:11:52.175Z",
+        "availability": "Public",
+        "tags": [],
+        "collectionId": None,
+    },
+    "model": {
+        "id": 703211,
+        "name": "メイド　クラシック/maid classic",
+        "type": "LORA",
+        "status": "Published",
+        "publishedAt": "2024-08-30T15:38:14.770Z",
+        "nsfw": False,
+        "uploadType": "Created",
+        "availability": "Public",
+    },
+    "version": {
+        "id": 788385,
+        "name": "v1.0 XL",
+        "description": None,
+        "baseModel": "SDXL 1.0",
+        "baseModelType": None,
+        "earlyAccessConfig": None,
+        "earlyAccessEndsAt": None,
+        "trainedWords": [
+            "maid, maid apron, maid headdress, long sleeves",
+        ],
+        "epochs": None,
+        "steps": None,
+        "clipSkip": None,
+        "status": "Published",
+        "createdAt": "2024-08-31T01:11:08.841Z",
+        "vaeId": None,
+        "trainingDetails": None,
+        "trainingStatus": None,
+        "uploadType": "Created",
+        "usageControl": "Download",
+        "requireAuth": True,
+        "settings": {
+            "strength": 0.8,
+        },
+        "recommendedResources": [],
+        "monetization": None,
+        "canGenerate": True,
+        "files": None,
+    },
+},
+
+{
+    "#url"    : "https://civitai.com/images/44789630",
+    "#comment": "video",
+    "#class"  : civitai.CivitaiImageExtractor,
+    "#results": "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/6a09ec54-6de4-4af1-b11d-2d0d8a66d651/quality=100/copy_C6C532CE-EC47-4A52-9138-AEF1D7756F16.Mp4",
+
+    "date"     : "dt:2024-12-10 19:19:14",
+    "extension": "mp4",
+    "filename" : "copy_C6C532CE-EC47-4A52-9138-AEF1D7756F16",
+    "hash"     : "U9D8%cIU03Rk02?F$$WE0gs,?GSg~B9ut6sl",
+    "width"    : 1080,
+    "height"   : 1920,
+    "id"       : 44789630,
+    "mimeType" : "video/mp4",
+    "nsfwLevel": 2,
+    "postId"   : 10151863,
+    "stats"    : dict,
+    "type"     : "video",
+    "url"      : "6a09ec54-6de4-4af1-b11d-2d0d8a66d651",
+    "uuid"     : "6a09ec54-6de4-4af1-b11d-2d0d8a66d651",
+    "metadata" : {
+        "audio"   : True,
+        "duration": 15.033,
+        "hash"    : "U9D8%cIU03Rk02?F$$WE0gs,?GSg~B9ut6sl",
+        "height"  : 1920,
+        "size"    : 23984479,
+        "width"   : 1080,
+    },
+    "user"     : {
+        "username": "jboogx_creative",
+    },
+},
+
+{
+    "#url"  : "https://civitai.com/images/74353746",
+    "#comment": "video, rated 'R', WebP download (#7502)",
+    "#class": civitai.CivitaiImageExtractor,
+    "#results": "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/c7e3744b-8f0d-4124-94c1-75e2af00431d/quality=100/2025-04-25-23h40m21s_seed665048144_A man appears from off screen and spanks her butto_2.webm",
+
+    "date"     : "dt:2025-05-05 12:27:28",
+    "extension": "webm",
+    "filename" : "2025-04-25-23h40m21s_seed665048144_A man appears from off screen and spanks her butto_2",
+    "hash"     : "UMCsEoRPivxY~VjuWBoenMWBx]WrxvV?xvbb",
+    "width"    : 512,
+    "height"   : 752,
+    "id"       : 74353746,
+    "mimeType" : "video/webm",
+    "nsfwLevel": 4,
+    "postId"   : 16509805,
+    "stats"    : dict,
+    "type"     : "video",
+    "url"      : "c7e3744b-8f0d-4124-94c1-75e2af00431d",
+    "uuid"     : "c7e3744b-8f0d-4124-94c1-75e2af00431d",
+    "metadata" : {
+        "audio"   : False,
+        "duration": 5.016,
+        "hash"    : "UMCsEoRPivxY~VjuWBoenMWBx]WrxvV?xvbb",
+        "height"  : 752,
+        "size"    : 6011344,
+        "skipScannedAtReassignment": True,
+        "width"   : 512,
+    },
+    "user"     : {
+        "id"      : 4856161,
+        "username": "VlrgRomNS",
+    },
+},
+
+{
+    "#url"    : "https://civitai.com/images/76635747",
+    "#comment": "no 'modelVersionId' (#7432)",
+    "#class"  : civitai.CivitaiImageExtractor,
+    "#options": {"metadata": "version"},
+    "#results": "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/65c1a01c-2583-4495-b4e9-bdb94218004e/original=true/5b5b95f8-9923-4c27-b50a-c801c0311375-0.jpg",
+
+    "model"  : None,
+    "version": None,
+},
+
+{
+    "#url"    : "https://civitai.com/images/68947296",
+    "#comment": "rated R / nsfwlevel 4",
+    "#class"  : civitai.CivitaiImageExtractor,
+    "#results": "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/2d1fbe1b-6038-479f-8c37-39d338198fb1/quality=100/received_687641707052140.mp4",
+
+    "nsfwLevel": 4,
+},
+
+{
+    "#url"    : "https://civitai.com/images/68852050",
+    "#comment": "rated X / nsfwlevel 8",
+    "#class"  : civitai.CivitaiImageExtractor,
+    "#results": "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/1107208c-14cc-46fd-848d-2efa14fa6180/original=true/QRQC7HE5DFW3QZ85R3MXQXY440.jpeg",
+
+    "nsfwLevel": 8,
+},
+
+{
+    "#url"    : "https://civitai.com/images/68851932",
+    "#comment": "rated XXX / nsfwlevel 16",
+    "#class"  : civitai.CivitaiImageExtractor,
+    "#results": "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/fdbaa27d-4278-496b-8209-21591e5dc6fe/original=true/Q8AE16QCMCYCCBX49PG8VVWWD0.jpeg",
+
+    "nsfwLevel": 16,
 },
 
 {
     "#url"    : "https://civitai.com/posts/6877551",
     "#class"  : civitai.CivitaiPostExtractor,
     "#options": {"metadata": "generation"},
-    "#urls"   : [
+    "#results": (
         "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/6220fa0f-9037-4b1d-bfbd-a740a06eeb7c/original=true/30748752.png",
         "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/cd1edb7f-7b50-4da5-bf23-d38f24d8aef0/original=true/30748747.png",
         "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/cfd5b231-accd-49bd-8bde-370880f63aa6/original=true/30748733.png",
-    ],
+    ),
 
     "post": {
         "id"  : 6877551,
@@ -165,6 +327,16 @@ __tests__ = (
 },
 
 {
+    "#url"    : "https://civitai.com/posts/17021768",
+    "#comment": "no 'modelVersionId' (#7432)",
+    "#class"  : civitai.CivitaiPostExtractor,
+    "#options": {"metadata": "version"},
+
+    "model"  : None,
+    "version": None,
+},
+
+{
     "#url"  : "https://civitai.com/tag/mecha",
     "#class": civitai.CivitaiTagExtractor,
 },
@@ -185,17 +357,31 @@ __tests__ = (
 },
 
 {
-    "#url"  : "https://civitai.com/search/models?sortBy=models_v9&query=mecha",
-    "#class": civitai.CivitaiSearchExtractor,
+    "#url"  : "https://civitai.com/search/models?sortBy=models_v9&query=Voynich",
+    "#class": civitai.CivitaiSearchModelsExtractor,
+    "#results": (
+        "https://civitai.com/models/99868",
+        "https://civitai.com/models/341330",
+        "https://civitai.com/models/884509",
+        "https://civitai.com/models/1003064",
+    ),
+},
+
+{
+    "#url"    : "https://civitai.com/search/images?sortBy=images_v6&query=Voynich",
+    "#class"  : civitai.CivitaiSearchImagesExtractor,
+    "#options": {"nsfw": False},
+    "#count"  : range(150, 200),
+    "#archive": False,
 },
 
 {
     "#url"  : "https://civitai.com/user/waomodder",
     "#class": civitai.CivitaiUserExtractor,
-    "#urls" : [
+    "#results": (
         "https://civitai.com/user/waomodder/models",
         "https://civitai.com/user/waomodder/posts",
-    ],
+    ),
 },
 
 {
@@ -203,6 +389,20 @@ __tests__ = (
     "#class": civitai.CivitaiUserModelsExtractor,
     "#pattern": civitai.CivitaiModelExtractor.pattern,
     "#count"  : ">= 8",
+},
+
+{
+    "#url"    : "https://civitai.com/user/waomodder/models?tag=character&types=Checkpoint&types=TextualInversion&types=Hypernetwork&types=LORA&checkpointType=Trained&fileFormats=SafeTensor&fileFormats=PickleTensor",
+    "#comment": "various filters (#7138)",
+    "#class"  : civitai.CivitaiUserModelsExtractor,
+    "#results": (
+        "https://civitai.com/models/42166",
+        "https://civitai.com/models/79845",
+        "https://civitai.com/models/81424",
+        "https://civitai.com/models/75925",
+        "https://civitai.com/models/65818",
+        "https://civitai.com/models/64272",
+    ),
 },
 
 {
@@ -222,11 +422,30 @@ __tests__ = (
 },
 
 {
+    "#url"    : "https://civitai.com/user/waomodder/images?tags=5132",
+    "#comment": "tags (#7138)",
+    "#class"  : civitai.CivitaiUserImagesExtractor,
+    "#results": "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/8cc7c513-ba77-4444-a21f-7e3907d29a4e/original=true/982824.png",
+},
+
+{
+    "#url"    : "https://civitai.com/user/waomodder/images?sort=Most+Collected&period=AllTime&tags=6594&baseModels=Illustrious&baseModels=PixArt+a&baseModels=Other&baseModels=Pony&remixesOnly=false",
+    "#comment": "various filters (#7138)",
+    "#class"  : civitai.CivitaiUserImagesExtractor,
+    "#range"  : "1-3",
+    "#results": (
+        "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/c44c116a-263b-457d-8fa8-cc3d7716a0aa/original=true/36800924.png",
+        "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/0f6cf303-8b12-4401-914e-bff33371e9c6/original=true/36801099.png",
+        "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/9a682316-e451-4b98-8873-cc6c2e2d39bb/original=true/36801079.png",
+    ),
+},
+
+{
     "#url"     : "https://civitai.com/user/USER/images?section=reactions",
-    "#category": ("", "civitai", "reactions"),
+    "#category": ("", "civitai", "reactions-images"),
     "#class"   : civitai.CivitaiUserImagesExtractor,
     "#auth"    : True,
-    "#urls"    : (
+    "#results" : (
         "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/dd29c97a-1e95-4186-8df5-632736cbae79/original=true/00012-2489035818.png",
         "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/5c4efa68-bb58-47c5-a716-98cd0f51f047/original=true/00013-4238863814.png",
         "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/69bf3279-df2c-4ec8-b795-479e9cd3db1b/original=true/00014-3150861441.png",
@@ -235,10 +454,38 @@ __tests__ = (
 
 {
     "#url"     : "https://civitai.com/user/USER/images?section=reactions",
-    "#category": ("", "civitai", "reactions"),
+    "#category": ("", "civitai", "reactions-images"),
     "#class"   : civitai.CivitaiUserImagesExtractor,
     "#auth"     : False,
     "#exception": exception.AuthorizationError,
 },
+
+{
+    "#url"  : "https://civitai.com/user/jboogx_creative/videos",
+    "#class": civitai.CivitaiUserVideosExtractor,
+    "#pattern": r"https://image\.civitai\.com/xG1nkqKTMzGDvpLrqFT7WA/[0-9a-f-]+/original=true/\S+\.mp4",
+    "#range"  : "1-50",
+    "#count"  : 50,
+},
+
+{
+    "#url"     : "https://civitai.com/user/USER/videos?section=reactions",
+    "#category": ("", "civitai", "reactions-videos"),
+    "#class"   : civitai.CivitaiUserVideosExtractor,
+    "#auth"    : True,
+    "#results" : (
+        "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/6a09ec54-6de4-4af1-b11d-2d0d8a66d651/quality=100/copy_C6C532CE-EC47-4A52-9138-AEF1D7756F16.Mp4",
+        "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/74cd3e71-7833-4e32-9724-b8d1702693be/quality=100/1_THANKSGIVING_CLAYMATION_TOPAZ.mp4",
+    ),
+},
+
+{
+    "#url"     : "https://civitai.com/user/USER/videos?section=reactions",
+    "#category": ("", "civitai", "reactions-videos"),
+    "#class"   : civitai.CivitaiUserVideosExtractor,
+    "#auth"     : False,
+    "#exception": exception.AuthorizationError,
+},
+
 
 )

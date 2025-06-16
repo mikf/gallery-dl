@@ -36,8 +36,15 @@ __tests__ = (
     "#url"     : "https://dynasty-scans.com/images?with[]=4930&with[]=5211",
     "#category": ("", "dynastyscans", "search"),
     "#class"   : dynastyscans.DynastyscansSearchExtractor,
-    "#sha1_url"     : "d2422163db7b1db94bf343f8cd50ba9cc08ae6b5",
-    "#sha1_metadata": "65f9948e7f29a1db2b3e6abb697f7476d2196708",
+
+    "#sha1_metadata": "67690b4e21f59746f112803cba4c4d81fcbb9dbd",
+    "#results"      : (
+        "https://dynasty-scans.com/system/images_images/000/032/932/full/66051624_p0.webp",
+        "https://dynasty-scans.com/system/images_images/000/021/368/full/KEIGI_32-1467964487873486851-img1.webp",
+        "https://dynasty-scans.com/system/images_images/000/004/596/full/tortoise.webp",
+        "https://dynasty-scans.com/system/images_images/000/003/206/full/1f01f72e19b98bf0083d323e3c28e4bf.webp",
+        "https://dynasty-scans.com/system/images_images/000/000/535/full/8564987.webp",
+    ),
 },
 
 {
@@ -54,6 +61,55 @@ __tests__ = (
     "#class"   : dynastyscans.DynastyscansImageExtractor,
     "#sha1_url"     : "877054defac8ea2bbaeb632db176037668c73eea",
     "#sha1_metadata": "9f6fd139c372203dcf7237e662a80963ab070cb0",
+},
+
+{
+    "#url"     : "https://dynasty-scans.com/anthologies/%C3%A9clair",
+    "#class"   : dynastyscans.DynastyscansAnthologyExtractor,
+    "#pattern" : dynastyscans.DynastyscansChapterExtractor.pattern,
+    "#options" : {"metadata": True},
+    "#count"   : 8,
+
+    "alert": [
+        "This manga has been licensed",
+        "Content licensed for English release has been removed from the reader. You can support the author by purchasing the title when it becomes available.",
+    ],
+    "anthology"     : "Éclair",
+    "author"        : {"Canno", "Kawanami Izumi", "Kagero", "Mekimeki Oukoku", "Itou Hachi", "Isaki Uta", "Nakatani Nio", "Kitao Taki"},
+    "date"          : "type:datetime",
+    "date_updated"  : "type:datetime",
+    "description"   : "<p>A compilation of one-shots from some of the best and most popular recent Yuri mangaka, including Canno (A Kiss and a White Lily for my Dearest Girl), Nakatani Nio (Bloom into you), Amano Shunita (Ayame 14), Itou Hachi (Isn't the Moon Beautiful?/Sayuri's Sister is an Angel) and many more.</p>\n\n<p>A must have for any collection, in my opinion, and a great chance to support all of the fabulous artists at once by buying yourself a copy! - Estherlea</p>",
+    "scanlator"     : {"Estherlea", "/u/ Scanlations"},
+    "status"        : "Licensed",
+    "title"         : str,
+    "tags"          : list,
+},
+
+{
+    "#url"     : "https://dynasty-scans.com/anthologies/aashi_to_watashi_gyaru_yuri_anthology",
+    "#class"   : dynastyscans.DynastyscansAnthologyExtractor,
+    "#results" : "https://dynasty-scans.com/chapters/dont_call_me_senpai",
+
+    "!alert"        : (),
+    "!description"  : """<p><a href="https://dynasty-scans.com/anthologies/aashi_to_watashi_gyaru_yuri_anthology_volume_2">Volume 2</a></p>""",
+    "!status"       : "",
+    "anthology"     : "Aashi to Watashi - Gyaru Yuri Anthology",
+    "author"        : "keyyan",
+    "date"          : "dt:2024-03-30 04:07:10",
+    "date_updated"  : "dt:2025-04-04 20:21:36",
+    "scanlator"     : "Arka",
+    "title"         : '''Don't Call Me "Senpai"''',
+    "tags"          : [
+        "big breasts",
+        "childhood friends",
+        "ecchi",
+        "gyaru",
+        "height gap",
+        "prequel",
+        "romance",
+        "school girl",
+        "yuri",
+    ],
 },
 
 )

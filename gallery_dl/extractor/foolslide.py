@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2023 Mike Fährmann
+# Copyright 2016-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -24,8 +24,7 @@ class FoolslideExtractor(BaseExtractor):
         return BaseExtractor.request(
             self, url, encoding="utf-8", method="POST", data={"adult": "true"})
 
-    @staticmethod
-    def parse_chapter_url(url, data):
+    def parse_chapter_url(self, url, data):
         info = url.partition("/read/")[2].rstrip("/").split("/")
         lang = info[1].partition("-")[0]
         data["lang"] = lang

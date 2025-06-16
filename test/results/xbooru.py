@@ -19,7 +19,7 @@ __tests__ = (
     "#url"     : "https://xbooru.com/index.php?page=pool&s=show&id=757",
     "#category": ("gelbooru_v02", "xbooru", "pool"),
     "#class"   : gelbooru_v02.GelbooruV02PoolExtractor,
-    "#urls": (
+    "#results": (
         "https://img.xbooru.com/images/154/aeca160f8c7131f6a93033adac5416d7.jpeg",
         "https://img.xbooru.com/images/278/6185a8a71547568020e45e8319c02978.jpeg",
         "https://img.xbooru.com/images/524/0fc2b1e2e3cc8be259e9712ca3f48b0b.jpeg",

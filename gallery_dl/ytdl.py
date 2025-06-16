@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2021-2023 Mike Fährmann
+# Copyright 2021-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -20,7 +20,7 @@ def import_module(module_name):
             return __import__("yt_dlp")
         except (ImportError, SyntaxError):
             return __import__("youtube_dl")
-    return __import__(module_name.replace("-", "_"))
+    return util.import_file(module_name)
 
 
 def construct_YoutubeDL(module, obj, user_opts, system_opts=None):
@@ -51,7 +51,13 @@ def construct_YoutubeDL(module, obj, user_opts, system_opts=None):
     if opts.get("updatetime") is None:
         opts["updatetime"] = config("mtime", True)
     if opts.get("ratelimit") is None:
-        opts["ratelimit"] = text.parse_bytes(config("rate"), None)
+        rate = config("rate")
+        if rate:
+            func = util.build_selection_func(rate, 0, text.parse_bytes)
+            rmax = func.args[1] if hasattr(func, "args") else func()
+            opts["ratelimit"] = rmax or None
+        else:
+            opts["ratelimit"] = None
     if opts.get("min_filesize") is None:
         opts["min_filesize"] = text.parse_bytes(config("filesize-min"), None)
     if opts.get("max_filesize") is None:
@@ -71,7 +77,7 @@ def construct_YoutubeDL(module, obj, user_opts, system_opts=None):
 def parse_command_line(module, argv):
     parser, opts, args = module.parseOpts(argv)
 
-    ytdlp = (module.__name__ == "yt_dlp")
+    ytdlp = hasattr(module, "cookies")
     std_headers = module.std_headers
 
     try:

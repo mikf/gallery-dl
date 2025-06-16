@@ -123,6 +123,15 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.facebook.com/photo.php?fbid=989340003138066&set=pb.100061862277212.-2207520000&type=3",
+    "#comment" : "no 'publish_time' (#7151)",
+    "#category": ("", "facebook", "photo"),
+    "#class"   : facebook.FacebookPhotoExtractor,
+
+    "date"     : "dt:2025-02-25 15:00:09",
+},
+
+{
     "#url"     : "https://www.facebook.com/watch/?v=1165557851291824",
     "#category": ("", "facebook", "video"),
     "#class"   : facebook.FacebookVideoExtractor,
@@ -141,9 +150,9 @@ __tests__ = (
     "#category": ("", "facebook", "video"),
     "#class"   : facebook.FacebookVideoExtractor,
     "#count"   : 2,
-    "#archive": False,
 
-    "filename" : "1514198129001376",
+    "filename" : str,
+    "extension": {"mp4", "m4a"},
     "id"       : "644342003942740",
     "url"      : str,
     "user_id"  : "100064860875397",

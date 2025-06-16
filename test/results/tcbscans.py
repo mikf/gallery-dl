@@ -10,7 +10,7 @@ from gallery_dl import exception
 
 __tests__ = (
 {
-    "#url"     : "https://tcbscans.com/chapters/4708/chainsaw-man-chapter-108",
+    "#url"     : "https://tcbscans.me/chapters/4708/chainsaw-man-chapter-108",
     "#category": ("", "tcbscans", "chapter"),
     "#class"   : tcbscans.TcbscansChapterExtractor,
     "#pattern" : r"https://cdn\.[^/]+/(file|attachments/[^/]+)/[^/]+/[^.]+\.\w+",
@@ -46,7 +46,7 @@ __tests__ = (
 },
 
 {
-    "#url"     : "https://tcb-backup.bihar-mirchi.com/chapters/7719/jujutsu-kaisen-chapter-258",
+    "#url"     : "https://tcbscans.me/chapters/7719/jujutsu-kaisen-chapter-258",
     "#category": ("", "tcbscans", "chapter"),
     "#class"   : tcbscans.TcbscansChapterExtractor,
     "#pattern" : r"https://cdn\.[^/]+/(file|attachments/[^/]+)/[^/]+/[^.]+\.\w+",
@@ -60,7 +60,7 @@ __tests__ = (
 },
 
 {
-    "#url"     : "https://tcbscans.com/mangas/13/chainsaw-man",
+    "#url"     : "https://tcbscans.me/mangas/13/chainsaw-man",
     "#category": ("", "tcbscans", "manga"),
     "#class"   : tcbscans.TcbscansMangaExtractor,
     "#pattern" : tcbscans.TcbscansChapterExtractor.pattern,
@@ -86,9 +86,13 @@ __tests__ = (
 },
 
 {
-    "#url"     : "https://tcbscans.me/mangas/4/jujutsu-kaisen",
-    "#category": ("", "tcbscans", "manga"),
+    "#url"     : "https://tcbscans.com/mangas/4/jujutsu-kaisen",
     "#class"   : tcbscans.TcbscansMangaExtractor,
+},
+
+{
+    "#url"     : "https://tcb-backup.bihar-mirchi.com/chapters/7719/jujutsu-kaisen-chapter-258",
+    "#class"   : tcbscans.TcbscansChapterExtractor,
 },
 
 )

@@ -4,37 +4,70 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-from gallery_dl.extractor import mangakakalot
+from gallery_dl.extractor import manganelo
 
 
 __tests__ = (
 {
-    "#url"     : "https://ww3.mangakakalot.tv/chapter/manga-jk986845/chapter-34.2",
-    "#category": ("", "mangakakalot", "chapter"),
-    "#class"   : mangakakalot.MangakakalotChapterExtractor,
-    "#pattern"      : r"https://cm\.blazefast\.co/[0-9a-f]{2}/[0-9a-f]{2}/[0-9a-f]{32}\.jpg",
-    "#count"        : 9,
-    "#sha1_metadata": "0f1586ff52f0f9cbbb25306ae64ab718f8a6a633",
+    "#url"     : "https://www.mangakakalot.gg/manga/danzai-sareta-akuyaku-reijou-wa-gyakkou-shite-kanpeki-na-akujo-wo-mezasu/chapter-4-5",
+    "#category": ("manganelo", "mangakakalot", "chapter"),
+    "#class"   : manganelo.ManganeloChapterExtractor,
+    "#pattern" : r"https://imgs-2.2xstorage.com/danzai-sareta-akuyaku-reijou-wa-gyakkou-shite-kanpeki-na-akujo-wo-mezasu/4\.5/\d+\.webp",
+    "#count"   : 24,
+
+    "author"       : "NARAYAMA Bakufu",
+    "chapter"      : 4,
+    "chapter_id"   : 6,
+    "chapter_minor": ".5",
+    "count"        : 24,
+    "date"         : "dt:2025-04-29 16:08:07",
+    "date_updated" : "dt:2025-04-29 16:08:07",
+    "extension"    : "webp",
+    "filename"     : str,
+    "lang"         : "en",
+    "language"     : "English",
+    "manga"        : "Danzai sareta Akuyaku Reijou wa, Gyakkou shite Kanpeki na Akujo wo Mezasu",
+    "manga_id"     : 32842,
+    "page"         : range(1, 24),
 },
 
 {
-    "#url"     : "https://mangakakalot.tv/chapter/hatarakanai_futari_the_jobless_siblings/chapter_20.1",
-    "#category": ("", "mangakakalot", "chapter"),
-    "#class"   : mangakakalot.MangakakalotChapterExtractor,
+    "#url"     : "https://mangakakalot.gg/manga/aria/chapter-60-2",
+    "#category": ("manganelo", "mangakakalot", "chapter"),
+    "#class"   : manganelo.ManganeloChapterExtractor,
 },
 
 {
-    "#url"     : "https://ww3.mangakakalot.tv/manga/manga-jk986845",
-    "#category": ("", "mangakakalot", "manga"),
-    "#class"   : mangakakalot.MangakakalotMangaExtractor,
-    "#pattern" : mangakakalot.MangakakalotChapterExtractor.pattern,
-    "#count"   : ">= 30",
+    "#url"     : "https://www.mangakakalot.gg/manga/aria",
+    "#category": ("manganelo", "mangakakalot", "manga"),
+    "#class"   : manganelo.ManganeloMangaExtractor,
+    "#pattern" : manganelo.ManganeloChapterExtractor.pattern,
+    "#count"   : 70,
+
+    "author"  : "Amano Kozue",
+    "chapter" : range(1, 60),
+    "chapter_minor": {"", ".1", ".2", ".5"},
+    "date"    : "type:datetime",
+    "date_updated": "dt:2024-10-30 10:20:58",
+    "lang"    : "en",
+    "language": "English",
+    "manga"   : "Aria",
+    "status"  : "Completed",
+    "title"   : "",
+    "tags": [
+        "Adventure",
+        "Comedy",
+        "Drama",
+        "Sci fi",
+        "Shounen",
+        "Slice of life",
+    ],
 },
 
 {
-    "#url"     : "https://mangakakalot.tv/manga/lk921810",
-    "#category": ("", "mangakakalot", "manga"),
-    "#class"   : mangakakalot.MangakakalotMangaExtractor,
+    "#url"     : "https://mangakakalot.gg/manga/aria",
+    "#category": ("manganelo", "mangakakalot", "manga"),
+    "#class"   : manganelo.ManganeloMangaExtractor,
 },
 
 )

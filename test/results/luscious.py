@@ -20,7 +20,7 @@ __tests__ = (
         "__typename"                 : "Album",
         "audiences"                  : list,
         "content"                    : "Hentai",
-        "cover"                      : r"re:https://storage\.bhs\.cloud\.ovh\.net/v1/.+/277031/",
+        "cover"                      : str,
         "created"                    : 1479625853,
         "created_by"                 : "Hive Mind",
         "date"                       : "dt:2016-11-20 07:10:53",

@@ -5,12 +5,12 @@
 # published by the Free Software Foundation.
 
 from gallery_dl.extractor import issuu
+from gallery_dl import exception
 
 
 __tests__ = (
 {
     "#url"     : "https://issuu.com/issuu/docs/motions-1-2019/",
-    "#category": ("", "issuu", "publication"),
     "#class"   : issuu.IssuuPublicationExtractor,
     "#pattern" : r"https://image.isu.pub/190916155301-\w+/jpg/page_\d+.jpg",
     "#count"   : 36,
@@ -36,11 +36,48 @@ __tests__ = (
 },
 
 {
+    "#url"      : "https://issuu.com/foodhome1955/docs/fh_winter2025-issuu-011625",
+    "#comment"  : "HTML escapes",
+    "#class"    : issuu.IssuuPublicationExtractor,
+    "#exception": exception.NotFoundError,
+    "#count"    : 84,
+
+    "document": {
+        "access"          : "PUBLIC",
+        "date"            : "dt:2025-01-17 00:00:00",
+        "description"     : "Santa Barbara's Lifestyle Magazine",
+        "documentName"    : "fh_winter2025-issuu-011625",
+        "isDocumentGated" : False,
+        "originalPublishDateInISOString": "2025-01-17T00:00:00.000Z",
+        "pageCount"       : 84,
+        "publicationId"   : "b89e35d4bd2201c7ecd871160fe000fa",
+        "revisionId"      : "250117005419",
+        "title"           : "Food & Home Winter 2025",
+        "username"        : "foodhome1955",
+        "contentRating"   : {
+            "isAdsafe"    : True,
+            "isExplicit"  : False,
+            "isReviewed"  : True,
+        },
+        "path"            : {
+            "documentName": "fh_winter2025-issuu-011625",
+            "type"        : "user",
+            "username"    : "foodhome1955",
+        },
+    },
+},
+
+{
     "#url"     : "https://issuu.com/issuu",
-    "#category": ("", "issuu", "user"),
     "#class"   : issuu.IssuuUserExtractor,
     "#pattern" : issuu.IssuuPublicationExtractor.pattern,
-    "#count"   : "> 25",
+    "#count"   : range(100, 150),
+},
+
+{
+    "#url"     : "https://issuu.com/issuu/3",
+    "#class"   : issuu.IssuuUserExtractor,
+    "#count"   : range(4, 40),
 },
 
 )

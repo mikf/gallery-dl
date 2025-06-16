@@ -38,6 +38,31 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://hentai2read.com/nozoki_ana/1/",
+    "#category": ("", "hentai2read", "chapter"),
+    "#class"   : hentai2read.Hentai2readChapterExtractor,
+    "#pattern" : r"https://hentaicdn\.com/hentai/2720/1/hcdn00\d+\.jpg",
+    "#count"   : 203,
+
+    "author"       : "",
+    "chapter"      : 1,
+    "chapter_id"   : 2965,
+    "chapter_minor": "",
+    "count"        : 203,
+    "extension"    : "jpg",
+    "filename"     : str,
+    "lang"         : "en",
+    "language"     : "English",
+    "manga"        : "Nozoki Ana [Ecchi]",
+    "manga_id"     : 2720,
+    "page"         : range(1, 203),
+    "subcategory"  : "chapter",
+    "title"        : "Nozoki Ana 1",
+    "type"         : "Original",
+
+},
+
+{
     "#url"     : "https://hentai2read.com/amazon_elixir/",
     "#category": ("", "hentai2read", "manga"),
     "#class"   : hentai2read.Hentai2readMangaExtractor,

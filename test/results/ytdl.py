@@ -14,4 +14,10 @@ __tests__ = (
     "#class"   : ytdl.YoutubeDLExtractor,
 },
 
+{
+    "#url"     : "ytdl:http://media.w3.org/2010/05/sintel/trailer.mp4",
+    "#category": ("", "ytdl-generic", "media.w3.org"),
+    "#class"   : ytdl.YoutubeDLExtractor,
+},
+
 )

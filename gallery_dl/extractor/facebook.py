@@ -37,15 +37,13 @@ class FacebookExtractor(Extractor):
         self.videos = self.config("videos", True)
         self.author_followups = self.config("author-followups", False)
 
-    @staticmethod
-    def decode_all(txt):
+    def decode_all(self, txt):
         return text.unescape(
             txt.encode().decode("unicode_escape")
             .encode("utf_16", "surrogatepass").decode("utf_16")
         ).replace("\\/", "/")
 
-    @staticmethod
-    def parse_set_page(set_page):
+    def parse_set_page(self, set_page):
         directory = {
             "set_id": text.extr(
                 set_page, '"mediaSetToken":"', '"'
@@ -77,8 +75,7 @@ class FacebookExtractor(Extractor):
 
         return directory
 
-    @staticmethod
-    def parse_photo_page(photo_page):
+    def parse_photo_page(self, photo_page):
         photo = {
             "id": text.extr(
                 photo_page, '"__isNode":"Photo","id":"', '"'
@@ -99,9 +96,10 @@ class FacebookExtractor(Extractor):
                 '"message":{"delight_ranges"',
                 '"},"message_preferred_body"'
             ).rsplit('],"text":"', 1)[-1]),
-            "date": text.parse_timestamp(text.extr(
-                photo_page, '\\"publish_time\\":', ','
-            )),
+            "date": text.parse_timestamp(
+                text.extr(photo_page, '\\"publish_time\\":', ',') or
+                text.extr(photo_page, '"created_time":', ',')
+            ),
             "url": FacebookExtractor.decode_all(text.extr(
                 photo_page, ',"image":{"uri":"', '","'
             )),
@@ -132,8 +130,7 @@ class FacebookExtractor(Extractor):
 
         return photo
 
-    @staticmethod
-    def parse_post_page(post_page):
+    def parse_post_page(self, post_page):
         first_photo_url = text.extr(
             text.extr(
                 post_page, '"__isMedia":"Photo"', '"target_group"'
@@ -147,8 +144,7 @@ class FacebookExtractor(Extractor):
 
         return post
 
-    @staticmethod
-    def parse_video_page(video_page):
+    def parse_video_page(self, video_page):
         video = {
             "id": text.extr(
                 video_page, '\\"video_id\\":\\"', '\\"'
@@ -238,8 +234,9 @@ class FacebookExtractor(Extractor):
 
         return res
 
-    def extract_set(self, first_photo_id, set_id):
-        all_photo_ids = [first_photo_id]
+    def extract_set(self, set_data):
+        set_id = set_data["set_id"]
+        all_photo_ids = [set_data["first_photo_id"]]
 
         retries = 0
         i = 0
@@ -252,7 +249,6 @@ class FacebookExtractor(Extractor):
             photo_page = self.photo_page_request_wrapper(photo_url).text
 
             photo = self.parse_photo_page(photo_page)
-            photo["set_id"] = set_id
             photo["num"] = i + 1
 
             if self.author_followups:
@@ -281,9 +277,11 @@ class FacebookExtractor(Extractor):
                     retries = 0
             else:
                 retries = 0
+                photo.update(set_data)
+                yield Message.Directory, photo
                 yield Message.Url, photo["url"], photo
 
-            if photo["next_photo_id"] == "":
+            if not photo["next_photo_id"]:
                 self.log.debug(
                     "Can't find next image in the set. "
                     "Extraction is over."
@@ -322,15 +320,11 @@ class FacebookSetExtractor(FacebookExtractor):
 
         set_url = self.set_url_fmt.format(set_id=set_id)
         set_page = self.request(set_url).text
+        set_data = self.parse_set_page(set_page)
+        if self.groups[2]:
+            set_data["first_photo_id"] = self.groups[2]
 
-        directory = self.parse_set_page(set_page)
-
-        yield Message.Directory, directory
-
-        yield from self.extract_set(
-            self.groups[2] or directory["first_photo_id"],
-            directory["set_id"]
-        )
+        return self.extract_set(set_data)
 
 
 class FacebookPhotoExtractor(FacebookExtractor):
@@ -411,8 +405,7 @@ class FacebookProfileExtractor(FacebookExtractor):
     )
     example = "https://www.facebook.com/USERNAME"
 
-    @staticmethod
-    def get_profile_photos_set_id(profile_photos_page):
+    def get_profile_photos_set_id(self, profile_photos_page):
         set_ids_raw = text.extr(
             profile_photos_page, '"pageItems"', '"page_info"'
         )
@@ -436,13 +429,8 @@ class FacebookProfileExtractor(FacebookExtractor):
         if set_id:
             set_url = self.set_url_fmt.format(set_id=set_id)
             set_page = self.request(set_url).text
+            set_data = self.parse_set_page(set_page)
+            return self.extract_set(set_data)
 
-            directory = self.parse_set_page(set_page)
-
-            yield Message.Directory, directory
-
-            yield from self.extract_set(
-                directory["first_photo_id"], directory["set_id"]
-            )
-        else:
-            self.log.debug("Profile photos set ID not found.")
+        self.log.debug("Profile photos set ID not found.")
+        return iter(())

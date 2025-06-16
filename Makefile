@@ -13,7 +13,7 @@ clean:
 	$(RM) -r data/
 
 install: man completion
-	$(PYTHON) setup.py install
+	$(PYTHON) -m pip install gallery_dl
 
 release: man completion supportedsites
 	scripts/release.sh

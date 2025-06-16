@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2022-2023 Mike Fährmann
+# Copyright 2022-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -23,10 +23,6 @@ class ItakuExtractor(Extractor):
     filename_fmt = ("{id}{title:? //}.{extension}")
     archive_fmt = "{id}"
     request_interval = (0.5, 1.5)
-
-    def __init__(self, match):
-        Extractor.__init__(self, match)
-        self.item = match.group(1)
 
     def _init(self):
         self.api = ItakuAPI(self)
@@ -62,11 +58,20 @@ class ItakuExtractor(Extractor):
 class ItakuGalleryExtractor(ItakuExtractor):
     """Extractor for posts from an itaku user gallery"""
     subcategory = "gallery"
-    pattern = BASE_PATTERN + r"/profile/([^/?#]+)/gallery"
+    pattern = BASE_PATTERN + r"/profile/([^/?#]+)/gallery(?:/(\d+))?"
     example = "https://itaku.ee/profile/USER/gallery"
 
     def posts(self):
-        return self.api.galleries_images(self.item)
+        return self.api.galleries_images(*self.groups)
+
+
+class ItakuStarsExtractor(ItakuExtractor):
+    subcategory = "stars"
+    pattern = BASE_PATTERN + r"/profile/([^/?#]+)/stars(?:/(\d+))?"
+    example = "https://itaku.ee/profile/USER/stars"
+
+    def posts(self):
+        return self.api.galleries_images_starred(*self.groups)
 
 
 class ItakuImageExtractor(ItakuExtractor):
@@ -75,7 +80,7 @@ class ItakuImageExtractor(ItakuExtractor):
     example = "https://itaku.ee/images/12345"
 
     def posts(self):
-        return (self.api.image(self.item),)
+        return (self.api.image(self.groups[0]),)
 
 
 class ItakuSearchExtractor(ItakuExtractor):
@@ -84,7 +89,8 @@ class ItakuSearchExtractor(ItakuExtractor):
     example = "https://itaku.ee/home/images?tags=SEARCH"
 
     def posts(self):
-        params = text.parse_query_list(self.item)
+        params = text.parse_query_list(
+            self.groups[0], {"tags", "maturity_rating"})
         return self.api.search_images(params)
 
 
@@ -103,13 +109,7 @@ class ItakuAPI():
         negative_tags = []
         optional_tags = []
 
-        tags = params.pop("tags", None)
-        if not tags:
-            tags = ()
-        elif isinstance(tags, str):
-            tags = (tags,)
-
-        for tag in tags:
+        for tag in params.pop("tags", None) or ():
             if not tag:
                 pass
             elif tag[0] == "-":
@@ -138,10 +138,25 @@ class ItakuAPI():
         params = {
             "cursor"    : None,
             "owner"     : self.user(username)["owner"],
-            "section"   : section,
+            "sections"  : section,
             "date_range": "",
             "maturity_rating": ("SFW", "Questionable", "NSFW"),
             "ordering"  : "-date_added",
+            "page"      : "1",
+            "page_size" : "30",
+            "visibility": ("PUBLIC", "PROFILE_ONLY"),
+        }
+        return self._pagination(endpoint, params, self.image)
+
+    def galleries_images_starred(self, username, section=None):
+        endpoint = "/galleries/images/user_starred_imgs/"
+        params = {
+            "cursor"    : None,
+            "stars_of"  : self.user(username)["owner"],
+            "sections"  : section,
+            "date_range": "",
+            "ordering"  : "-date_added",
+            "maturity_rating": ("SFW", "Questionable", "NSFW"),
             "page"      : "1",
             "page_size" : "30",
             "visibility": ("PUBLIC", "PROFILE_ONLY"),

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2023 Mike Fährmann
+# Copyright 2019-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -57,7 +57,12 @@ class _8musesAlbumExtractor(Extractor):
             albums = data.get("albums")
             if albums:
                 for album in albums:
-                    url = self.root + "/comics/album/" + album["permalink"]
+                    permalink = album.get("permalink")
+                    if not permalink:
+                        self.log.debug("Private album")
+                        continue
+
+                    url = self.root + "/comics/album/" + permalink
                     yield Message.Queue, url, {
                         "url"       : url,
                         "name"      : album["name"],
@@ -87,8 +92,7 @@ class _8musesAlbumExtractor(Extractor):
                 album["updatedAt"], "%Y-%m-%dT%H:%M:%S.%fZ"),
         }
 
-    @staticmethod
-    def _unobfuscate(data):
+    def _unobfuscate(self, data):
         return util.json_loads("".join([
             chr(33 + (ord(c) + 14) % 94) if "!" <= c <= "~" else c
             for c in text.unescape(data.strip("\t\n\r !"))

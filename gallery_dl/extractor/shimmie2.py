@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2023 Mike Fährmann
+# Copyright 2023-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -73,10 +73,6 @@ BASE_PATTERN = Shimmie2Extractor.update({
         "root": "https://sizechangebooru.com",
         "pattern": r"(?:sizechange|giantess)booru\.com",
         "cookies": {"agreed": "true"},
-    },
-    "tentaclerape": {
-        "root": "https://tentaclerape.net",
-        "pattern": r"tentaclerape\.net",
     },
     "cavemanon": {
         "root": "https://booru.cavemanon.xyz",

@@ -11,7 +11,7 @@ __tests__ = (
 {
     "#url"  : "https://gengar563.lofter.com/post/1e82da8c_1c98dae1b",
     "#class": lofter.LofterPostExtractor,
-    "#urls" : (
+    "#results": (
         "https://imglf3.lf127.net/img/S1d2QlVsWkJhSW1qcnpIS0ZSa3ZJQ1RxY0lYaU1UUE9tQ0NvUE9rVXFpOFFEVzMwbnQ4aEFnPT0.jpg",
         "https://imglf3.lf127.net/img/S1d2QlVsWkJhSW1qcnpIS0ZSa3ZJRWlXYTRVOEpXTU9TSGt3TjBDQ0JFZVpZMEJtWjFneVNBPT0.png",
         "https://imglf6.lf127.net/img/S1d2QlVsWkJhSW1qcnpIS0ZSa3ZJR1d3Y2VvbTNTQlIvdFU1WWlqZHEzbjI4MFVNZVdoN3VBPT0.png",
@@ -31,7 +31,7 @@ __tests__ = (
     "#url"    : "https://wooden-brain.lofter.com/post/1e60de5b_1c9bf8efb",
     "#comment": "video",
     "#class"  : lofter.LofterPostExtractor,
-    "#urls"   : (
+    "#results": (
         "https://vodm2lzexwq.vod.126.net/vodm2lzexwq/Pc5jg1nL_3039990631_sd.mp4?resId=254486990bfa2cd7aa860229db639341_3039990631_1&sign=4j02HTHXqNfhaF%2B%2FO14Ny%2F9SMNZj%2FIjpJDCqXfYa4aM%3D",
     ),
 

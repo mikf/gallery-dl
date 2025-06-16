@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2024 Mike Fährmann
+# Copyright 2024-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -81,6 +81,7 @@ class SaintMediaExtractor(SaintAlbumExtractor):
             else:  # /d/
                 file = {
                     "file"     : text.unescape(extr('<a href="', '"')),
+                    "id"       : album_id,
                     "id_dl"    : album_id,
                     "name"     : album_id,
                     "filename" : album_id,

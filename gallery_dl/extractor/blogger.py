@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2023 Mike Fährmann
+# Copyright 2019-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -10,7 +10,12 @@
 
 from .common import BaseExtractor, Message
 from .. import text, util
-import re
+
+
+def original(url):
+    return (util.re(r"(/|=)(?:[sw]\d+|w\d+-h\d+)(?=/|$)")
+            .sub(r"\1s0", url)
+            .replace("http:", "https:", 1))
 
 
 class BloggerExtractor(BaseExtractor):
@@ -33,13 +38,12 @@ class BloggerExtractor(BaseExtractor):
         blog["date"] = text.parse_datetime(blog["published"])
         del blog["selfLink"]
 
-        sub = re.compile(r"(/|=)(?:[sw]\d+|w\d+-h\d+)(?=/|$)").sub
-        findall_image = re.compile(
+        findall_image = util.re(
             r'src="(https?://(?:'
             r'blogger\.googleusercontent\.com/img|'
             r'lh\d+(?:-\w+)?\.googleusercontent\.com|'
             r'\d+\.bp\.blogspot\.com)/[^"]+)').findall
-        findall_video = re.compile(
+        findall_video = util.re(
             r'src="(https?://www\.blogger\.com/video\.g\?token=[^"]+)').findall
         metadata = self.metadata()
 
@@ -48,7 +52,7 @@ class BloggerExtractor(BaseExtractor):
 
             files = findall_image(content)
             for idx, url in enumerate(files):
-                files[idx] = sub(r"\1s0", url).replace("http:", "https:", 1)
+                files[idx] = original(url)
 
             if self.videos and 'id="BLOG_video-' in content:
                 page = self.request(post["url"]).text
