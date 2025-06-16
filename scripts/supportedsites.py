@@ -114,6 +114,7 @@ CATEGORY_MAP = {
     "nijie"          : "nijie",
     "nozomi"         : "Nozomi.la",
     "nsfwalbum"      : "NSFWalbum.com",
+    "nudostar"       : "NudoStar.TV",
     "paheal"         : "rule #34",
     "photovogue"     : "PhotoVogue",
     "pidgiwiki"      : "PidgiWiki",
