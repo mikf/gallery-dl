@@ -12,10 +12,11 @@ __tests__ = (
     "#url"     : "https://jpg4.su/img/funnymeme.LecXGS",
     "#category": ("chevereto", "jpgfish", "image"),
     "#class"   : chevereto.CheveretoImageExtractor,
-    "#urls"        : "https://simp3.jpg5.su/images/funnymeme.jpg",
+    "#results"     : "https://simp3.jpg5.su/images/funnymeme.jpg",
     "#sha1_content": "098e5e9b17ad634358426e0ffd1c93871474d13c",
 
     "album"    : "",
+    "date"     : "dt:2022-06-05 03:24:25",
     "extension": "jpg",
     "filename" : "funnymeme",
     "id"       : "LecXGS",
@@ -30,6 +31,7 @@ __tests__ = (
     "#pattern" : r"https://simp2\.jpg5\.su/hannahowo_00457\.jpg",
 
     "album": "401-500",
+    "date" : "dt:2022-03-23 13:50:52",
 },
 
 {

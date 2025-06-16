@@ -40,8 +40,6 @@ CATEGORY_MAP = {
     "cien"           : "Ci-en",
     "cohost"         : "cohost!",
     "comicvine"      : "Comic Vine",
-    "coomerparty"    : "Coomer",
-    "deltaporno"     : "DeltaPorno",
     "deviantart"     : "DeviantArt",
     "drawfriends"    : "Draw Friends",
     "dynastyscans"   : "Dynasty Reader",
@@ -56,16 +54,22 @@ CATEGORY_MAP = {
     "fanbox"         : "pixivFANBOX",
     "fashionnova"    : "Fashion Nova",
     "furaffinity"    : "Fur Affinity",
+    "furry34"        : "Furry 34 com",
+    "girlswithmuscle": "Girls with Muscle",
     "hatenablog"     : "HatenaBlog",
     "hbrowse"        : "HBrowse",
     "hentai2read"    : "Hentai2Read",
     "hentaicosplay"  : "Hentai Cosplay",
+    "hentaienvy"     : "HentaiEnvy",
+    "hentaiera"      : "HentaiEra",
     "hentaifoundry"  : "Hentai Foundry",
     "hentaifox"      : "HentaiFox",
     "hentaihand"     : "HentaiHand",
     "hentaihere"     : "HentaiHere",
     "hentaiimg"      : "Hentai Image",
     "hentainexus"    : "HentaiNexus",
+    "hentairox"      : "HentaiRox",
+    "hentaizap"      : "HentaiZap",
     "hiperdex"       : "HiperDEX",
     "hitomi"         : "Hitomi.la",
     "horne"          : "horne",
@@ -73,6 +77,7 @@ CATEGORY_MAP = {
     "illusioncardsbooru": "Illusion Game Cards",
     "imagebam"       : "ImageBam",
     "imagefap"       : "ImageFap",
+    "imagepond"      : "ImagePond",
     "imgbb"          : "ImgBB",
     "imgbox"         : "imgbox",
     "imagechest"     : "ImageChest",
@@ -84,8 +89,7 @@ CATEGORY_MAP = {
     "itchio"         : "itch.io",
     "jpgfish"        : "JPG Fish",
     "kabeuchi"       : "かべうち",
-    "kemonoparty"    : "Kemono",
-    "koharu"         : "SchaleNetwork",
+    "schalenetwork"  : "Schale Network",
     "livedoor"       : "livedoor Blog",
     "lofter"         : "LOFTER",
     "ohpolly"        : "Oh Polly",
@@ -94,18 +98,18 @@ CATEGORY_MAP = {
     "mangafox"       : "Manga Fox",
     "mangahere"      : "Manga Here",
     "mangakakalot"   : "MangaKakalot",
-    "mangalife"      : "MangaLife",
-    "manganelo"      : "Manganato",
+    "manganato"      : "MangaNato",
     "mangapark"      : "MangaPark",
     "mangaread"      : "MangaRead",
-    "mangasee"       : "MangaSee",
     "mariowiki"      : "Super Mario Wiki",
     "mastodon.social": "mastodon.social",
     "mediawiki"      : "MediaWiki",
     "micmicidol"     : "MIC MIC IDOL",
     "myhentaigallery": "My Hentai Gallery",
     "myportfolio"    : "Adobe Portfolio",
+    "natomanga"      : "MangaNato",
     "naverwebtoon"   : "NaverWebtoon",
+    "nelomanga"      : "MangaNelo",
     "nhentai"        : "nhentai",
     "nijie"          : "nijie",
     "nozomi"         : "Nozomi.la",
@@ -119,6 +123,7 @@ CATEGORY_MAP = {
     "pornpics"       : "PornPics.com",
     "pornreactor"    : "PornReactor",
     "readcomiconline": "Read Comic Online",
+    "redbust"        : "RedBust",
     "rbt"            : "RebeccaBlackTech",
     "redgifs"        : "RedGIFs",
     "rozenarcana"    : "Rozen Arcana",
@@ -143,10 +148,11 @@ CATEGORY_MAP = {
     "tbib"           : "The Big ImageBoard",
     "tcbscans"       : "TCB Scans",
     "tco"            : "Twitter t.co",
-    "tmohentai"      : "TMOHentai",
     "thatpervert"    : "ThatPervert",
     "thebarchive"    : "The /b/ Archive",
     "thecollection"  : "The /co/llection",
+    "tiktok"         : "TikTok",
+    "tmohentai"      : "TMOHentai",
     "tumblrgallery"  : "TumblrGallery",
     "vanillarock"    : "もえぴりあ",
     "vidyart2"       : "/v/idyart2",
@@ -180,7 +186,6 @@ SUBCATEGORY_MAP = {
     "issue"  : "Comic Issues",
     "manga"  : "Manga",
     "media"  : "Media Files",
-    "note"   : "Images from Notes",
     "popular": "Popular Images",
     "recent" : "Recent Images",
     "search" : "Search Results",
@@ -189,14 +194,18 @@ SUBCATEGORY_MAP = {
     "tweets" : "",
     "user"   : "User Profiles",
     "watch"  : "Watches",
-    "following"    : "Followed Users",
-    "related-pin"  : "related Pins",
-    "related-board": "",
+    "direct-messages": "DMs",
+    "following"      : "Followed Users",
+    "related-pin"    : "related Pins",
+    "related-board"  : "",
 
     "ao3": {
         "user-works"   : "",
         "user-series"  : "",
         "user-bookmark": "Bookmarks",
+    },
+    "arcalive": {
+        "user": "User Posts",
     },
     "artstation": {
         "artwork": "Artwork Listings",
@@ -204,6 +213,7 @@ SUBCATEGORY_MAP = {
     },
     "bilibili": {
         "user-articles": "User Articles",
+        "user-articles-favorite": "User Article Favorites",
     },
     "bluesky": {
         "posts": "",
@@ -214,18 +224,22 @@ SUBCATEGORY_MAP = {
     "civitai": {
         "models": "Model Listings",
         "images": "Image Listings",
+        "posts" : "Post Listings",
+        "search-models": "Model Searches",
+        "search-images": "Image Searches",
         "user-models": "User Models",
-        "user-images": "User Images",
+        "user-images": ("User Images", "Image Reactions"),
         "user-posts" : "User Posts",
-        "user-videos": "User Videos",
+        "user-videos": ("User Videos", "Video Reactions"),
     },
-    "coomerparty": {
+    "coomer": {
         "discord"       : "",
         "discord-server": "",
         "posts"         : "",
     },
     "Danbooru": {
         "artist-search": "Artist Searches",
+        "favgroup": "Favorite Groups",
     },
     "desktopography": {
         "site": "",
@@ -235,6 +249,9 @@ SUBCATEGORY_MAP = {
         "stash" : "Sta.sh",
         "status": "Status Updates",
         "watch-posts": "",
+    },
+    "discord": {
+        "direct-message" : "",
     },
     "fanbox": {
         "supporting": "Supported User Feed",
@@ -265,7 +282,7 @@ SUBCATEGORY_MAP = {
         "saved": "Saved Posts",
         "tagged": "Tagged Posts",
     },
-    "kemonoparty": {
+    "kemono": {
         "discord"       : "Discord Servers",
         "discord-server": "",
         "posts"         : "",
@@ -277,7 +294,13 @@ SUBCATEGORY_MAP = {
         "blog-posts": "Blog Posts",
     },
     "mangadex": {
-        "feed" : "Followed Feed",
+        "feed": "Updates Feed",
+        "following" : "Library",
+        "list": "MDLists",
+    },
+    "misskey": {
+        "note" : "Notes",
+        "notes": "User Notes",
     },
     "nijie": {
         "followed": "Followed Users",
@@ -288,6 +311,9 @@ SUBCATEGORY_MAP = {
         "pinit": "pin.it Links",
         "created": "Created Pins",
         "allpins": "All Pins",
+    },
+    "pixeldrain": {
+        "folder": "Filesystems",
     },
     "pixiv": {
         "me"  : "pixiv.me Links",
@@ -310,6 +336,9 @@ SUBCATEGORY_MAP = {
         "post"           : "Individual Posts",
         "shorturl"       : "",
     },
+    "redbust": {
+        "gallery": ("Galleries", "Categories"),
+    },
     "redgifs": {
         "collections": "",
     },
@@ -331,6 +360,9 @@ SUBCATEGORY_MAP = {
     },
     "steamgriddb": {
         "asset": "Individual Assets",
+    },
+    "tiktok": {
+        "vmpost": "VM Posts",
     },
     "tumblr": {
         "day": "Days",
@@ -378,9 +410,11 @@ BASE_MAP = {
     "gelbooru_v01": "Gelbooru Beta 0.1.11",
     "gelbooru_v02": "Gelbooru Beta 0.2",
     "hentaicosplays": "Hentai Cosplay Instances",
+    "IMHentai"    : "IMHentai and Mirror Sites",
     "jschan"      : "jschan Imageboards",
     "lolisafe"    : "lolisafe and chibisafe",
     "lynxchan"    : "LynxChan Imageboards",
+    "manganelo"   : "MangaNelo and Mirror Sites",
     "moebooru"    : "Moebooru and MyImouto",
     "szurubooru"  : "szurubooru Instances",
     "urlshortener": "URL Shorteners",
@@ -400,6 +434,11 @@ _APIKEY_WH = ('<a href="https://gdl-org.github.io/docs/configuration.html'
               '#extractor-wallhaven-api-key">API Key</a>')
 _APIKEY_WY = ('<a href="https://gdl-org.github.io/docs/configuration.html'
               '#extractor-weasyl-api-key">API Key</a>')
+_TIKTOK_MORE_INFO = '''
+    <br /><span title="Pass `-o videos` to download photos only, and
+    `-o tiktok-range=a-yt-dlp-range` to tell yt-dlp to only extract XYZ links
+    when scraping a user profile. Also note that profile avatars will only be
+    downloaded when downloading a User Profile.">Hover for more info</span>'''
 
 AUTH_MAP = {
     "aibooru"        : "Supported",
@@ -410,7 +449,7 @@ AUTH_MAP = {
     "bluesky"        : "Supported",
     "booruvar"       : "Supported",
     "boosty"         : _COOKIES,
-    "coomerparty"    : "Supported",
+    "coomer"         : "Supported",
     "danbooru"       : "Supported",
     "derpibooru"     : _APIKEY_DB,
     "deviantart"     : _OAUTH,
@@ -425,12 +464,13 @@ AUTH_MAP = {
     "flickr"         : _OAUTH,
     "furaffinity"    : _COOKIES,
     "furbooru"       : "API Key",
+    "girlswithmuscle": "Supported",
     "horne"          : "Required",
     "idolcomplex"    : "Supported",
     "imgbb"          : "Supported",
     "inkbunny"       : "Supported",
     "instagram"      : _COOKIES,
-    "kemonoparty"    : "Supported",
+    "kemono"         : "Supported",
     "mangadex"       : "Supported",
     "mangoxo"        : "Supported",
     "mastodon.social": _OAUTH,
@@ -449,6 +489,7 @@ AUTH_MAP = {
     "smugmug"        : _OAUTH,
     "subscribestar"  : "Supported",
     "tapas"          : "Supported",
+    "tiktok"         : _COOKIES + _TIKTOK_MORE_INFO,
     "tsumino"        : "Supported",
     "tumblr"         : _OAUTH,
     "twitter"        : "Supported",
@@ -569,13 +610,9 @@ def build_extractor_list():
     default["e-hentai"] = default["exhentai"]
     domains["e-hentai"] = domains["exhentai"].replace("x", "-")
 
-    # add coomer.party
-    default["coomerparty"] = default["kemonoparty"]
-    domains["coomerparty"] = domains["kemonoparty"].replace("kemono", "coomer")
-
-    # add manga4life.com
-    default["mangalife"] = default["mangasee"]
-    domains["mangalife"] = "https://manga4life.com/"
+    # add coomer.su
+    default["coomer"] = default["kemono"]
+    domains["coomer"] = domains["kemono"].replace("kemono", "coomer")
 
     # add wikifeetx.com
     default["wikifeetx"] = default["wikifeet"]

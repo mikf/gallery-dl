@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # Copyright 2021 Seonghyeon Cho
-# Copyright 2022-2033 Mike Fährmann
+# Copyright 2022-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -54,8 +54,7 @@ class NaverwebtoonEpisodeExtractor(NaverwebtoonBase, GalleryExtractor):
                 extr('"painters":[', ']'), '"name":"', '"')]
         }
 
-    @staticmethod
-    def images(page):
+    def images(self, page):
         view_area = text.extr(page, 'id="comic_view_area"', '</div>')
         return [
             (url, None)

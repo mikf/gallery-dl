@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2021-2023 Mike Fährmann
+# Copyright 2021-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -10,8 +10,7 @@
 
 from .common import Extractor, Message
 from ..cache import cache
-from .. import text, exception
-import re
+from .. import text, util, exception
 
 BASE_PATTERN = r"(?:https?://)?www\.pillowfort\.social"
 
@@ -37,8 +36,8 @@ class PillowfortExtractor(Extractor):
         external = self.config("external", False)
 
         if inline:
-            inline = re.compile(r'src="(https://img\d+\.pillowfort\.social'
-                                r'/posts/[^"]+)').findall
+            inline = util.re(r'src="(https://img\d+\.pillowfort\.social'
+                             r'/posts/[^"]+)').findall
 
         for post in self.posts():
             if "original_post" in post and not reblogs:

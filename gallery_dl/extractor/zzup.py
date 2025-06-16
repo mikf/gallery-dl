@@ -16,7 +16,7 @@ class ZzupGalleryExtractor(GalleryExtractor):
     filename_fmt = "{num:>03}.{extension}"
     archive_fmt = "{slug}_{num}"
     root = "https://zzup.com"
-    pattern = (r"(?:https?://)?(up\.|www\.)?zzup\.com(/(?:viewalbum|content)"
+    pattern = (r"(?:https?://)?(up\.|w+\.)?zzup\.com(/(?:viewalbum|content)"
                r"/[\w=]+/([^/?#]+)/[\w=]+)/(?:index|page-\d+)\.html")
     example = "https://zzup.com/content/xyz=/12345_TITLE/123=/index.html"
 
@@ -56,7 +56,7 @@ class ZzupGalleryExtractor(GalleryExtractor):
             pos = page.find("glyphicon-arrow-right")
             if pos < 0:
                 break
-            path = text.rextract(page, ' href="', '"', pos)[0]
+            path = text.rextr(page, ' href="', '"', pos)
             page = self.request(text.urljoin(self.gallery_url, path)).text
 
         return results

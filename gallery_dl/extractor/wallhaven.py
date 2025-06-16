@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2023 Mike Fährmann
+# Copyright 2018-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -8,7 +8,7 @@
 
 """Extractors for https://wallhaven.cc/"""
 
-from .common import Extractor, Message
+from .common import Extractor, Message, Dispatch
 from .. import text, exception
 
 
@@ -39,8 +39,7 @@ class WallhavenExtractor(Extractor):
         """Return general metadata"""
         return ()
 
-    @staticmethod
-    def _transform(wp):
+    def _transform(self, wp):
         wp["url"] = wp.pop("path")
         if "tags" in wp:
             wp["tags"] = [t["name"] for t in wp["tags"]]
@@ -88,21 +87,13 @@ class WallhavenCollectionExtractor(WallhavenExtractor):
         return {"username": self.username, "collection_id": self.collection_id}
 
 
-class WallhavenUserExtractor(WallhavenExtractor):
+class WallhavenUserExtractor(Dispatch, WallhavenExtractor):
     """Extractor for a wallhaven user"""
-    subcategory = "user"
     pattern = r"(?:https?://)?wallhaven\.cc/user/([^/?#]+)/?$"
     example = "https://wallhaven.cc/user/USER"
 
-    def __init__(self, match):
-        WallhavenExtractor.__init__(self, match)
-        self.username = match.group(1)
-
-    def initialize(self):
-        pass
-
     def items(self):
-        base = "{}/user/{}/".format(self.root, self.username)
+        base = "{}/user/{}/".format(self.root, self.groups[0])
         return self._dispatch_extractors((
             (WallhavenUploadsExtractor    , base + "uploads"),
             (WallhavenCollectionsExtractor, base + "favorites"),

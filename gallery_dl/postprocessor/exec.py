@@ -11,7 +11,6 @@
 from .common import PostProcessor
 from .. import util, formatter
 import os
-import re
 
 
 if util.WINDOWS:
@@ -26,17 +25,14 @@ class ExecPP(PostProcessor):
     def __init__(self, job, options):
         PostProcessor.__init__(self, job)
 
-        if options.get("async", False):
-            self._exec = self._exec_async
-
-        args = options["command"]
-        if isinstance(args, str):
-            self.args = args
-            self._sub = re.compile(r"\{(_directory|_filename|_path|)\}").sub
-            execute = self.exec_string
+        cmds = options.get("commands")
+        if cmds:
+            self.cmds = [self._prepare_cmd(c) for c in cmds]
+            execute = self.exec_many
         else:
-            self.args = [formatter.parse(arg) for arg in args]
-            execute = self.exec_list
+            execute, self.args = self._prepare_cmd(options["command"])
+            if options.get("async", False):
+                self._exec = self._exec_async
 
         events = options.get("event")
         if events is None:
@@ -46,6 +42,13 @@ class ExecPP(PostProcessor):
         job.register_hooks({event: execute for event in events}, options)
 
         self._init_archive(job, options)
+
+    def _prepare_cmd(self, cmd):
+        if isinstance(cmd, str):
+            self._sub = util.re(r"\{(_directory|_filename|_path|)\}").sub
+            return self.exec_string, cmd
+        else:
+            return self.exec_list, [formatter.parse(arg) for arg in cmd]
 
     def exec_list(self, pathfmt):
         archive = self.archive
@@ -60,10 +63,11 @@ class ExecPP(PostProcessor):
 
         args = [arg.format_map(kwdict) for arg in self.args]
         args[0] = os.path.expanduser(args[0])
-        self._exec(args, False)
+        retcode = self._exec(args, False)
 
         if archive:
             archive.add(kwdict)
+        return retcode
 
     def exec_string(self, pathfmt):
         archive = self.archive
@@ -72,10 +76,31 @@ class ExecPP(PostProcessor):
 
         self.pathfmt = pathfmt
         args = self._sub(self._replace, self.args)
-        self._exec(args, True)
+        retcode = self._exec(args, True)
 
         if archive:
             archive.add(pathfmt.kwdict)
+        return retcode
+
+    def exec_many(self, pathfmt):
+        archive = self.archive
+        if archive:
+            if archive.check(pathfmt.kwdict):
+                return
+            self.archive = False
+
+        retcode = 0
+        for execute, args in self.cmds:
+            self.args = args
+            retcode = execute(pathfmt)
+            if retcode:
+                # non-zero exit status
+                break
+
+        if archive:
+            self.archive = archive
+            archive.add(pathfmt.kwdict)
+        return retcode
 
     def _exec(self, args, shell):
         self.log.debug("Running '%s'", args)
@@ -83,6 +108,7 @@ class ExecPP(PostProcessor):
         if retcode:
             self.log.warning("'%s' returned with non-zero exit status (%d)",
                              args, retcode)
+        return retcode
 
     def _exec_async(self, args, shell):
         self.log.debug("Running '%s'", args)

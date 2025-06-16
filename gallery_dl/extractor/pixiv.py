@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2023 Mike Fährmann
+# Copyright 2014-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -8,14 +8,14 @@
 
 """Extractors for https://www.pixiv.net/"""
 
-from .common import Extractor, Message
+from .common import Extractor, Message, Dispatch
 from .. import text, util, exception
 from ..cache import cache, memcache
 from datetime import datetime, timedelta
 import itertools
 import hashlib
 
-BASE_PATTERN = r"(?:https?://)?(?:www\.|touch\.)?pixiv\.net"
+BASE_PATTERN = r"(?:https?://)?(?:www\.|touch\.)?ph?ixiv\.net"
 USER_PATTERN = BASE_PATTERN + r"/(?:en/)?users/(\d+)"
 
 
@@ -43,6 +43,10 @@ class PixivExtractor(Extractor):
         self.meta_comments = self.config("comments")
         self.meta_captions = self.config("captions")
 
+        if self.sanity_workaround or self.meta_captions:
+            self.meta_captions_sub = util.re(
+                r'<a href="/jump\.php\?([^"]+)').sub
+
     def items(self):
         tags = self.config("tags", "japanese")
         if tags == "original":
@@ -69,7 +73,7 @@ class PixivExtractor(Extractor):
             files = self._extract_files(work)
 
             if self.meta_user:
-                work.update(self.api.user_detail(work["user"]["id"]))
+                work.update(self.api.user_detail(str(work["user"]["id"])))
             if self.meta_comments:
                 if work["total_comments"] and not work.get("_ajax"):
                     try:
@@ -87,7 +91,8 @@ class PixivExtractor(Extractor):
                     not work.get("_mypixiv") and not work.get("_ajax"):
                 body = self._request_ajax("/illust/" + str(work["id"]))
                 if body:
-                    work["caption"] = text.unescape(body["illustComment"])
+                    work["caption"] = self._sanitize_ajax_caption(
+                        body["illustComment"])
 
             if transform_tags:
                 transform_tags(work)
@@ -136,7 +141,21 @@ class PixivExtractor(Extractor):
                 self.log.warning("%s: 'limit_sanity_level' warning", work_id)
                 if self.sanity_workaround:
                     body = self._request_ajax("/illust/" + str(work_id))
-                    return self._extract_ajax(work, body)
+                    if work["type"] == "ugoira":
+                        if not self.load_ugoira:
+                            return ()
+                        self.log.info("%s: Retrieving Ugoira AJAX metadata",
+                                      work["id"])
+                        try:
+                            self._extract_ajax(work, body)
+                            return self._extract_ugoira(work, url)
+                        except Exception as exc:
+                            self.log.debug("", exc_info=exc)
+                            self.log.warning(
+                                "%s: Unable to extract Ugoira URL. Provide "
+                                "logged-in cookies to access it", work["id"])
+                    else:
+                        return self._extract_ajax(work, body)
 
             elif limit_type == "limit_mypixiv_360.png":
                 work["_mypixiv"] = True
@@ -161,7 +180,12 @@ class PixivExtractor(Extractor):
         return ()
 
     def _extract_ugoira(self, work, img_url):
-        ugoira = self.api.ugoira_metadata(work["id"])
+        if work.get("_ajax"):
+            ugoira = self._request_ajax(
+                "/illust/" + str(work["id"]) + "/ugoira_meta")
+            img_url = ugoira["src"]
+        else:
+            ugoira = self.api.ugoira_metadata(work["id"])
         work["_ugoira_frame_data"] = work["frames"] = frames = ugoira["frames"]
         work["_ugoira_original"] = self.load_ugoira_original
         work["_http_adjust_extension"] = False
@@ -198,7 +222,10 @@ class PixivExtractor(Extractor):
             ]
 
         else:
-            zip_url = ugoira["zip_urls"]["medium"]
+            if work.get("_ajax"):
+                zip_url = ugoira["originalSrc"]
+            else:
+                zip_url = ugoira["zip_urls"]["medium"]
             work["date_url"] = self._date_from_url(zip_url)
             url = zip_url.replace("_ugoira600x600", "_ugoira1920x1080", 1)
             return ({"url": url},)
@@ -250,7 +277,7 @@ class PixivExtractor(Extractor):
                 translated_name = None
             tags.append({"name": name, "translated_name": translated_name})
 
-        work["caption"] = text.unescape(body["illustComment"])
+        work["caption"] = self._sanitize_ajax_caption(body["illustComment"])
         work["page_count"] = count = body["pageCount"]
         if count == 1:
             return ({"url": url},)
@@ -289,6 +316,12 @@ class PixivExtractor(Extractor):
             except exception.HttpError:
                 pass
 
+    def _sanitize_ajax_caption(self, caption):
+        if not caption:
+            return ""
+        return text.unescape(self.meta_captions_sub(
+            lambda m: '<a href="' + text.unquote(m.group(1)), caption))
+
     def _fallback_image(self, src):
         if isinstance(src, str):
             urls = None
@@ -307,8 +340,7 @@ class PixivExtractor(Extractor):
             if fmt in urls:
                 yield urls[fmt]
 
-    @staticmethod
-    def _date_from_url(url, offset=timedelta(hours=9)):
+    def _date_from_url(self, url, offset=timedelta(hours=9)):
         try:
             _, _, _, _, _, y, m, d, H, M, S, _ = url.split("/")
             return datetime(
@@ -316,8 +348,7 @@ class PixivExtractor(Extractor):
         except Exception:
             return None
 
-    @staticmethod
-    def _make_work(kind, url, user):
+    def _make_work(self, kind, url, user):
         p = url.split("/")
         return {
             "create_date"     : "{}-{}-{}T{}:{}:{}+09:00".format(
@@ -345,23 +376,15 @@ class PixivExtractor(Extractor):
         return {}
 
 
-class PixivUserExtractor(PixivExtractor):
+class PixivUserExtractor(Dispatch, PixivExtractor):
     """Extractor for a pixiv user profile"""
-    subcategory = "user"
     pattern = (BASE_PATTERN + r"/(?:"
                r"(?:en/)?u(?:sers)?/|member\.php\?id=|(?:mypage\.php)?#id="
                r")(\d+)(?:$|[?#])")
     example = "https://www.pixiv.net/en/users/12345"
 
-    def __init__(self, match):
-        PixivExtractor.__init__(self, match)
-        self.user_id = match.group(1)
-
-    def initialize(self):
-        pass
-
     def items(self):
-        base = "{}/users/{}/".format(self.root, self.user_id)
+        base = "{}/users/{}/".format(self.root, self.groups[0])
         return self._dispatch_extractors((
             (PixivAvatarExtractor       , base + "avatar"),
             (PixivBackgroundExtractor   , base + "background"),
@@ -516,22 +539,16 @@ class PixivMeExtractor(PixivExtractor):
     pattern = r"(?:https?://)?pixiv\.me/([^/?#]+)"
     example = "https://pixiv.me/USER"
 
-    def __init__(self, match):
-        PixivExtractor.__init__(self, match)
-        self.account = match.group(1)
-
     def items(self):
-        url = "https://pixiv.me/" + self.account
-        data = {"_extractor": PixivUserExtractor}
-        response = self.request(
-            url, method="HEAD", allow_redirects=False, notfound="user")
-        yield Message.Queue, response.headers["Location"], data
+        url = "https://pixiv.me/" + self.groups[0]
+        location = self.request_location(url, notfound="user")
+        yield Message.Queue, location, {"_extractor": PixivUserExtractor}
 
 
 class PixivWorkExtractor(PixivExtractor):
     """Extractor for a single pixiv work/illustration"""
     subcategory = "work"
-    pattern = (r"(?:https?://)?(?:(?:www\.|touch\.)?pixiv\.net"
+    pattern = (r"(?:https?://)?(?:(?:www\.|touch\.)?ph?ixiv\.net"
                r"/(?:(?:en/)?artworks/"
                r"|member_illust\.php\?(?:[^&]+&)*illust_id=)(\d+)"
                r"|(?:i(?:\d+\.pixiv|\.pximg)\.net"
@@ -872,22 +889,12 @@ class PixivNovelExtractor(PixivExtractor):
         embeds = self.config("embeds")
         covers = self.config("covers")
 
-        if embeds:
-            headers = {
-                "User-Agent"    : "Mozilla/5.0",
-                "App-OS"        : None,
-                "App-OS-Version": None,
-                "App-Version"   : None,
-                "Referer"       : self.root + "/",
-                "Authorization" : None,
-            }
-
         novels = self.novels()
         if self.max_posts:
             novels = itertools.islice(novels, self.max_posts)
         for novel in novels:
             if self.meta_user:
-                novel.update(self.api.user_detail(novel["user"]["id"]))
+                novel.update(self.api.user_detail(str(novel["user"]["id"])))
             if self.meta_comments:
                 if novel["total_comments"]:
                     novel["comments"] = list(
@@ -940,15 +947,16 @@ class PixivNovelExtractor(PixivExtractor):
                         illusts[marker[11:].partition("-")[0]] = None
 
                 if desktop:
-                    novel_id = str(novel["id"])
-                    url = "{}/novel/show.php?id={}".format(
-                        self.root, novel_id)
-                    data = util.json_loads(text.extr(
-                        self.request(url, headers=headers).text,
-                        "id=\"meta-preload-data\" content='", "'"))
+                    try:
+                        body = self._request_ajax("/novel/" + str(novel["id"]))
+                        images = body["textEmbeddedImages"].values()
+                    except Exception as exc:
+                        self.log.warning(
+                            "%s: Failed to get embedded novel images (%s: %s)",
+                            novel["id"], exc.__class__.__name__, exc)
+                        images = ()
 
-                    for image in (data["novel"][novel_id]
-                                  ["textEmbeddedImages"]).values():
+                    for image in images:
                         url = image.pop("urls")["original"]
                         novel.update(image)
                         novel["date_url"] = self._date_from_url(url)

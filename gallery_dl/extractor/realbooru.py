@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2024 Mike Fährmann
+# Copyright 2024-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -11,7 +11,6 @@
 from . import booru
 from .. import text, util
 import collections
-import re
 
 BASE_PATTERN = r"(?:https?://)?realbooru\.com"
 
@@ -72,8 +71,7 @@ class RealbooruExtractor(booru.BooruExtractor):
         page = post["_html"]
         tag_container = text.extr(page, 'id="tagLink"', '</div>')
         tags = collections.defaultdict(list)
-        pattern = re.compile(
-            r'<a class="(?:tag-type-)?([^"]+).*?;tags=([^"&]+)')
+        pattern = util.re(r'<a class="(?:tag-type-)?([^"]+).*?;tags=([^"&]+)')
         for tag_type, tag_name in pattern.findall(tag_container):
             tags[tag_type].append(text.unescape(text.unquote(tag_name)))
         for key, value in tags.items():

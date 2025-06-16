@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2021-2023 Mike Fährmann
+# Copyright 2021-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -35,8 +35,7 @@ class PhilomenaExtractor(BooruExtractor):
             return url.rpartition(".")[0] + ".svg"
         return url
 
-    @staticmethod
-    def _prepare(post):
+    def _prepare(self, post):
         post["date"] = text.parse_datetime(
             post["created_at"][:19], "%Y-%m-%dT%H:%M:%S")
 

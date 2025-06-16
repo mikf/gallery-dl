@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2023 Mike Fährmann
+# Copyright 2015-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -8,14 +8,13 @@
 
 """Extractors for https://www.deviantart.com/"""
 
-from .common import Extractor, Message
+from .common import Extractor, Message, Dispatch
 from .. import text, util, exception
 from ..cache import cache, memcache
 import collections
 import mimetypes
 import binascii
 import time
-import re
 
 BASE_PATTERN = (
     r"(?:https?://)?(?:"
@@ -66,10 +65,13 @@ class DeviantartExtractor(Extractor):
         if self.quality:
             if self.quality == "png":
                 self.quality = "-fullview.png?"
-                self.quality_sub = re.compile(r"-fullview\.[a-z0-9]+\?").sub
+                self.quality_sub = util.re(r"-fullview\.[a-z0-9]+\?").sub
             else:
                 self.quality = ",q_{}".format(self.quality)
-                self.quality_sub = re.compile(r",q_\d+").sub
+                self.quality_sub = util.re(r",q_\d+").sub
+
+        if self.intermediary:
+            self.intermediary_subn = util.re(r"(/f/[^/]+/[^/]+)/v\d+/.*").subn
 
         if isinstance(self.original, str) and \
                 self.original.lower().startswith("image"):
@@ -271,15 +273,14 @@ class DeviantartExtractor(Extractor):
             )
 
         # filename metadata
-        sub = re.compile(r"\W").sub
+        sub = util.re(r"\W").sub
         deviation["filename"] = "".join((
             sub("_", deviation["title"].lower()), "_by_",
             sub("_", deviation["author"]["username"].lower()), "-d",
             deviation["index_base36"],
         ))
 
-    @staticmethod
-    def commit(deviation, target):
+    def commit(self, deviation, target):
         url = target["src"]
         name = target.get("filename") or url
         target = target.copy()
@@ -436,7 +437,7 @@ class DeviantartExtractor(Extractor):
                 html.append('<p style="')
 
                 attrs = content["attrs"]
-                if "textAlign" in attrs:
+                if attrs.get("textAlign"):
                     html.append("text-align:")
                     html.append(attrs["textAlign"])
                     html.append(";")
@@ -666,8 +667,7 @@ x2="45.4107524%" y2="71.4898596%" id="app-root-3">\
         if content["src"].startswith("https://images-wixmp-"):
             if self.intermediary and deviation["index"] <= 790677560:
                 # https://github.com/r888888888/danbooru/issues/4069
-                intermediary, count = re.subn(
-                    r"(/f/[^/]+/[^/]+)/v\d+/.*",
+                intermediary, count = self.intermediary_subn(
                     r"/intermediary\1", content["src"], 1)
                 if count:
                     deviation["is_original"] = False
@@ -679,18 +679,25 @@ x2="45.4107524%" y2="71.4898596%" id="app-root-3">\
 
         return content
 
-    @staticmethod
-    def _find_folder(folders, name, uuid):
+    def _find_folder(self, folders, name, uuid):
         if uuid.isdecimal():
-            match = re.compile(name.replace(
-                "-", r"[^a-z0-9]+") + "$", re.IGNORECASE).match
+            match = util.re(
+                "(?i)" + name.replace("-", "[^a-z0-9]+") + "$").match
             for folder in folders:
                 if match(folder["name"]):
                     return folder
+                elif folder.get("has_subfolders"):
+                    for subfolder in folder["subfolders"]:
+                        if match(subfolder["name"]):
+                            return subfolder
         else:
             for folder in folders:
                 if folder["folderid"] == uuid:
                     return folder
+                elif folder.get("has_subfolders"):
+                    for subfolder in folder["subfolders"]:
+                        if subfolder["folderid"] == uuid:
+                            return subfolder
         raise exception.NotFoundError("folder")
 
     def _folder_urls(self, folders, category, extractor):
@@ -859,17 +866,16 @@ x2="45.4107524%" y2="71.4898596%" id="app-root-3">\
             )["deviation"]["extended"]["deviationUuid"]
             yield self.api.deviation(deviation_uuid)
 
+    def _unescape_json(self, json):
+        return json.replace('\\"', '"') \
+                   .replace("\\'", "'") \
+                   .replace("\\\\", "\\")
 
-class DeviantartUserExtractor(DeviantartExtractor):
+
+class DeviantartUserExtractor(Dispatch, DeviantartExtractor):
     """Extractor for an artist's user profile"""
-    subcategory = "user"
     pattern = BASE_PATTERN + r"/?$"
     example = "https://www.deviantart.com/USER"
-
-    def initialize(self):
-        pass
-
-    skip = Extractor.skip
 
     def items(self):
         base = "{}/{}/".format(self.root, self.user)
@@ -891,7 +897,8 @@ class DeviantartGalleryExtractor(DeviantartExtractor):
     """Extractor for all deviations from an artist's gallery"""
     subcategory = "gallery"
     archive_fmt = "g_{_username}_{index}.{extension}"
-    pattern = BASE_PATTERN + r"/gallery(?:/all|/?\?catpath=)?/?$"
+    pattern = (BASE_PATTERN + r"/gallery"
+               r"(?:/all|/recommended-for-you|/?\?catpath=)?/?$")
     example = "https://www.deviantart.com/USER/gallery/"
 
     def deviations(self):
@@ -987,13 +994,36 @@ class DeviantartFolderExtractor(DeviantartExtractor):
     def deviations(self):
         folders = self.api.gallery_folders(self.user)
         folder = self._find_folder(folders, self.folder_name, self.folder_id)
+
+        # Leaving this here for backwards compatibility
         self.folder = {
             "title": folder["name"],
             "uuid" : folder["folderid"],
             "index": self.folder_id,
             "owner": self.user,
+            "parent_uuid": folder["parent"],
         }
-        return self.api.gallery(self.user, folder["folderid"], self.offset)
+
+        if folder.get("subfolder"):
+            self.folder["parent_folder"] = folder["parent_folder"]
+            self.archive_fmt = "F_{folder[parent_uuid]}_{index}.{extension}"
+
+            if self.flat:
+                self.directory_fmt = ("{category}", "{username}",
+                                      "{folder[parent_folder]}")
+            else:
+                self.directory_fmt = ("{category}", "{username}",
+                                      "{folder[parent_folder]}",
+                                      "{folder[title]}")
+
+        if folder.get("has_subfolders") and self.config("subfolders", True):
+            for subfolder in folder["subfolders"]:
+                subfolder["parent_folder"] = folder["name"]
+                subfolder["subfolder"] = True
+            yield from self._folder_urls(
+                folder["subfolders"], "gallery", DeviantartFolderExtractor)
+
+        yield from self.api.gallery(self.user, folder["folderid"], self.offset)
 
     def prepare(self, deviation):
         DeviantartExtractor.prepare(self, deviation)
@@ -1004,7 +1034,7 @@ class DeviantartStashExtractor(DeviantartExtractor):
     """Extractor for sta.sh-ed deviations"""
     subcategory = "stash"
     archive_fmt = "{index}.{extension}"
-    pattern = (r"(?:https?://)?(?:(?:www\.)?deviantart\.com/stash|sta\.sh)"
+    pattern = (r"(?:https?://)?(?:(?:www\.)?deviantart\.com/stash|sta\.s(h))"
                r"/([a-z0-9]+)")
     example = "https://www.deviantart.com/stash/abcde"
 
@@ -1012,13 +1042,22 @@ class DeviantartStashExtractor(DeviantartExtractor):
 
     def __init__(self, match):
         DeviantartExtractor.__init__(self, match)
-        self.user = None
+        self.user = ""
 
-    def deviations(self, stash_id=None):
+    def deviations(self, stash_id=None, stash_data=None):
         if stash_id is None:
-            stash_id = self.groups[0]
-        url = "https://www.deviantart.com/stash/" + stash_id
-        page = self._limited_request(url).text
+            legacy_url, stash_id = self.groups
+        else:
+            legacy_url = False
+
+        if legacy_url and stash_id[0] == "2":
+            url = "https://sta.sh/" + stash_id
+            response = self._limited_request(url)
+            stash_id = response.url.rpartition("/")[2]
+            page = response.text
+        else:
+            url = "https://www.deviantart.com/stash/" + stash_id
+            page = self._limited_request(url).text
 
         if stash_id[0] == "0":
             uuid = text.extr(page, '//deviation/', '"')
@@ -1027,14 +1066,33 @@ class DeviantartStashExtractor(DeviantartExtractor):
                 deviation["_page"] = page
                 deviation["index"] = text.parse_int(text.extr(
                     page, '\\"deviationId\\":', ','))
+
+                deviation["stash_id"] = stash_id
+                if stash_data:
+                    folder = stash_data["folder"]
+                    deviation["stash_name"] = folder["name"]
+                    deviation["stash_folder"] = folder["folderId"]
+                    deviation["stash_parent"] = folder["parentId"] or 0
+                    deviation["stash_description"] = \
+                        folder["richDescription"]["excerpt"]
+                else:
+                    deviation["stash_name"] = ""
+                    deviation["stash_description"] = ""
+                    deviation["stash_folder"] = 0
+                    deviation["stash_parent"] = 0
+
                 yield deviation
                 return
+
+        stash_data = text.extr(page, ',\\"stash\\":', ',\\"@@')
+        if stash_data:
+            stash_data = util.json_loads(self._unescape_json(stash_data))
 
         for sid in text.extract_iter(
                 page, 'href="https://www.deviantart.com/stash/', '"'):
             if sid == stash_id or sid.endswith("#comments"):
                 continue
-            yield from self.deviations(sid)
+            yield from self.deviations(sid, stash_data)
 
 
 class DeviantartFavoriteExtractor(DeviantartExtractor):
@@ -1169,6 +1227,7 @@ class DeviantartTagExtractor(DeviantartExtractor):
     def __init__(self, match):
         DeviantartExtractor.__init__(self, match)
         self.tag = text.unquote(match.group(1))
+        self.user = ""
 
     def deviations(self):
         return self.api.browse_tags(self.tag, self.offset)
@@ -1235,7 +1294,32 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
 
         deviation = self.api.deviation(uuid)
         deviation["_page"] = page
-        return (deviation,)
+        deviation["index_file"] = 0
+        deviation["num"] = deviation["count"] = 1
+
+        additional_media = text.extr(page, ',\\"additionalMedia\\":', '}],\\"')
+        if not additional_media:
+            yield deviation
+            return
+
+        self.filename_fmt = ("{category}_{index}_{index_file}_{title}_"
+                             "{num:>02}.{extension}")
+        self.archive_fmt = ("g_{_username}_{index}{index_file:?_//}."
+                            "{extension}")
+
+        additional_media = util.json_loads(self._unescape_json(
+            additional_media) + "}]")
+        deviation["count"] = 1 + len(additional_media)
+        yield deviation
+
+        for index, post in enumerate(additional_media):
+            uri = self._eclipse_media(post["media"], "fullview")[0]
+            deviation["content"]["src"] = uri
+            deviation["num"] += 1
+            deviation["index_file"] = post["fileId"]
+            # Download only works on purchased materials - no way to check
+            deviation["is_downloadable"] = False
+            yield deviation
 
 
 class DeviantartScrapsExtractor(DeviantartExtractor):
@@ -1366,7 +1450,7 @@ class DeviantartOAuthAPI():
     def __init__(self, extractor):
         self.extractor = extractor
         self.log = extractor.log
-        self.headers = {"dA-minor-version": "20200519"}
+        self.headers = {"dA-minor-version": "20210526"}
         self._warn_429 = True
 
         self.delay = extractor.config("wait-min", 0)
@@ -1803,8 +1887,7 @@ class DeviantartOAuthAPI():
         result.extend(self._pagination(endpoint, params, False, key=key))
         return result
 
-    @staticmethod
-    def _shared_content(results):
+    def _shared_content(self, results):
         """Return an iterable of shared deviations in 'results'"""
         for result in results:
             for item in result.get("items") or ():
@@ -1993,8 +2076,7 @@ class DeviantartEclipseAPI():
         pos = page.find('\\"name\\":\\"watching\\"')
         if pos < 0:
             raise exception.NotFoundError("'watching' module ID")
-        module_id = text.rextract(
-            page, '\\"id\\":', ',', pos)[0].strip('" ')
+        module_id = text.rextr(page, '\\"id\\":', ',', pos).strip('" ')
 
         self._fetch_csrf_token(page)
         return gruser_id, module_id

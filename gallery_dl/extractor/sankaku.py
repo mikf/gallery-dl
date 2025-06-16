@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2023 Mike Fährmann
+# Copyright 2014-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -13,7 +13,6 @@ from .common import Message
 from .. import text, util, exception
 from ..cache import cache
 import collections
-import re
 
 BASE_PATTERN = r"(?:https?://)?" \
     r"(?:(?:chan|www|beta|black|white)\.sankakucomplex\.com|sankaku\.app)" \
@@ -26,7 +25,6 @@ class SankakuExtractor(BooruExtractor):
     category = "sankaku"
     root = "https://sankaku.app"
     filename_fmt = "{category}_{id}_{md5}.{extension}"
-    cookies_domain = None
     _warning = True
 
     TAG_TYPES = {
@@ -47,6 +45,10 @@ class SankakuExtractor(BooruExtractor):
 
     def _init(self):
         self.api = SankakuAPI(self)
+        if self.config("tags") == "extended":
+            self._tags = self._tags_extended
+            self._tags_findall = util.re(
+                r"tag-type-([^\"' ]+).*?\?tags=([^\"'&]+)").findall
 
     def _file_url(self, post):
         url = post["file_url"]
@@ -66,8 +68,7 @@ class SankakuExtractor(BooruExtractor):
     def _prepare(self, post):
         post["created_at"] = post["created_at"]["s"]
         post["date"] = text.parse_timestamp(post["created_at"])
-        post["tags"] = [tag["name"].lower().replace(" ", "_")
-                        for tag in post["tags"] if tag["name"]]
+        post["tags"] = post.pop("tag_names", ())
         post["tag_string"] = " ".join(post["tags"])
         post["_http_validate"] = self._check_expired
 
@@ -76,7 +77,7 @@ class SankakuExtractor(BooruExtractor):
 
     def _tags(self, post, page):
         tags = collections.defaultdict(list)
-        for tag in post["tags"]:
+        for tag in self.api.tags(post["id"]):
             name = tag["name"]
             if name:
                 tags[tag["type"]].append(name.lower().replace(" ", "_"))
@@ -85,6 +86,23 @@ class SankakuExtractor(BooruExtractor):
             name = types[type]
             post["tags_" + name] = values
             post["tag_string_" + name] = " ".join(values)
+
+    def _tags_extended(self, post, page):
+        try:
+            url = "https://chan.sankakucomplex.com/posts/" + post["id"]
+            page = self.request(url).text
+        except Exception as exc:
+            return self.log.warning(
+                "%s: Failed to extract extended tag categories (%s: %s)",
+                post["id"], exc.__class__.__name__, exc)
+
+        tags = collections.defaultdict(list)
+        tag_sidebar = text.extr(page, '<ul id="tag-sidebar"', "</ul>")
+        for tag_type, tag_name in self._tags_findall(tag_sidebar):
+            tags[tag_type].append(text.unescape(text.unquote(tag_name)))
+        for type, values in tags.items():
+            post["tags_" + type] = values
+            post["tag_string_" + type] = " ".join(values)
 
     def _notes(self, post, page):
         if post.get("has_notes"):
@@ -111,12 +129,12 @@ class SankakuTagExtractor(SankakuExtractor):
 
         if "date:" in self.tags:
             # rewrite 'date:' tags (#1790)
-            self.tags = re.sub(
-                r"date:(\d\d)[.-](\d\d)[.-](\d\d\d\d)",
-                r"date:\3.\2.\1", self.tags)
-            self.tags = re.sub(
-                r"date:(\d\d\d\d)[.-](\d\d)[.-](\d\d)",
-                r"date:\1.\2.\3", self.tags)
+            self.tags = util.re(
+                r"date:(\d\d)[.-](\d\d)[.-](\d\d\d\d)(?!T)").sub(
+                r"date:\3-\2-\1T00:00", self.tags)
+            self.tags = util.re(
+                r"date:(\d\d\d\d)[.-](\d\d)[.-](\d\d)(?!T)").sub(
+                r"date:\1-\2-\3T00:00", self.tags)
 
     def metadata(self):
         return {"search_tags": self.tags}
@@ -194,7 +212,6 @@ class SankakuAPI():
         self.extractor = extractor
         self.headers = {
             "Accept"     : "application/vnd.sankaku.api+json;v=2",
-            "Platform"   : "web-app",
             "Api-Version": None,
             "Origin"     : extractor.root,
         }
@@ -210,12 +227,45 @@ class SankakuAPI():
         params = {"lang": "en"}
         return self._call("/posts/{}/notes".format(post_id), params)
 
+    def tags(self, post_id):
+        endpoint = "/posts/{}/tags".format(post_id)
+        params = {
+            "lang" : "en",
+            "page" : 1,
+            "limit": 100,
+        }
+
+        tags = None
+        while True:
+            data = self._call(endpoint, params)
+
+            tags_new = data["data"]
+            if not tags_new:
+                return tags or []
+            elif tags is None:
+                tags = tags_new
+            else:
+                tags.extend(tags_new)
+
+            if len(tags_new) < 80 or len(tags) >= data["total"]:
+                return tags
+            params["page"] += 1
+
     def pools(self, pool_id):
         params = {"lang": "en"}
         return self._call("/pools/" + pool_id, params)
 
     def pools_keyset(self, params):
         return self._pagination("/pools/keyset", params)
+
+    def pools_series(self, params):
+        params_ = {
+            "lang"       : "en",
+            "filledPools": "true",
+            "includes[]" : "pools",
+        }
+        params_.update(params)
+        return self._pagination("/poolseriesv2", params)
 
     def posts(self, post_id):
         params = {
@@ -224,17 +274,17 @@ class SankakuAPI():
             "limit": "1",
             "tags" : ("md5:" if len(post_id) == 32 else "id_range:") + post_id,
         }
-        return self._call("/posts", params)
+        return self._call("/v2/posts", params)
 
     def posts_keyset(self, params):
-        return self._pagination("/posts/keyset", params)
+        return self._pagination("/v2/posts/keyset", params)
 
     def authenticate(self):
         self.headers["Authorization"] = \
             _authenticate_impl(self.extractor, self.username, self.password)
 
     def _call(self, endpoint, params=None):
-        url = "https://capi-v2.sankakucomplex.com" + endpoint
+        url = "https://sankakuapi.com" + endpoint
         for _ in range(5):
             self.authenticate()
             response = self.extractor.request(
@@ -242,9 +292,10 @@ class SankakuAPI():
 
             if response.status_code == 429:
                 until = response.headers.get("X-RateLimit-Reset")
-                if not until and b"tags-limit" in response.content:
-                    raise exception.StopExtraction("Search tag limit exceeded")
-                seconds = None if until else 60
+                if not until and b"_tags-explicit-limit" in response.content:
+                    raise exception.AuthorizationError(
+                        "Search tag limit exceeded")
+                seconds = None if until else 600
                 self.extractor.wait(until=until, seconds=seconds)
                 continue
 
@@ -311,7 +362,7 @@ class SankakuAPI():
 def _authenticate_impl(extr, username, password):
     extr.log.info("Logging in as %s", username)
 
-    url = "https://capi-v2.sankakucomplex.com/auth/token"
+    url = "https://sankakuapi.com/auth/token"
     headers = {"Accept": "application/vnd.sankaku.api+json;v=2"}
     data = {"login": username, "password": password}
 

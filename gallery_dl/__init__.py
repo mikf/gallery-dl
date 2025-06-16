@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2023 Mike Fährmann
+# Copyright 2014-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -157,9 +157,39 @@ def main():
 
             log.debug("Configuration Files %s", config._files)
 
+        if args.clear_cache:
+            from . import cache
+            log = logging.getLogger("cache")
+            cnt = cache.clear(args.clear_cache)
+
+            if cnt is None:
+                log.error("Database file not available")
+                return 1
+
+            log.info("Deleted %d entr%s from '%s'",
+                     cnt, "y" if cnt == 1 else "ies", cache._path())
+            return 0
+
+        if args.config:
+            if args.config == "init":
+                return config.initialize()
+            elif args.config == "status":
+                return config.status()
+            else:
+                return config.open_extern()
+
         if args.print_traffic:
             import requests
             requests.packages.urllib3.connection.HTTPConnection.debuglevel = 1
+
+        if args.update:
+            from . import update
+            extr = update.UpdateExtractor.from_url("update:" + args.update)
+            ujob = update.UpdateJob(extr)
+            return ujob.run()
+
+        # category renaming
+        config.remap_categories()
 
         # extractor modules
         modules = config.get(("extractor",), "modules")
@@ -199,13 +229,7 @@ def main():
             else:
                 extractor._module_iter = iter(modules[0])
 
-        if args.update:
-            from . import update
-            extr = update.UpdateExtractor.from_url("update:" + args.update)
-            ujob = update.UpdateJob(extr)
-            return ujob.run()
-
-        elif args.list_modules:
+        if args.list_modules:
             extractor.modules.append("")
             sys.stdout.write("\n".join(extractor.modules))
 
@@ -228,28 +252,6 @@ def main():
                     extr.example,
                 ))
 
-        elif args.clear_cache:
-            from . import cache
-            log = logging.getLogger("cache")
-            cnt = cache.clear(args.clear_cache)
-
-            if cnt is None:
-                log.error("Database file not available")
-                return 1
-            else:
-                log.info(
-                    "Deleted %d %s from '%s'",
-                    cnt, "entry" if cnt == 1 else "entries", cache._path(),
-                )
-
-        elif args.config:
-            if args.config == "init":
-                return config.initialize()
-            elif args.config == "status":
-                return config.status()
-            else:
-                return config.open_extern()
-
         else:
             input_files = config.get((), "input-files")
             if input_files:
@@ -271,8 +273,7 @@ def main():
                 jobtype = job.UrlJob
                 jobtype.maxdepth = args.list_urls
                 if config.get(("output",), "fallback", True):
-                    jobtype.handle_url = \
-                        staticmethod(jobtype.handle_url_fallback)
+                    jobtype.handle_url = jobtype.handle_url_fallback
             elif args.dump_json:
                 jobtype = job.DataJob
                 jobtype.resolve = args.dump_json - 1
@@ -314,6 +315,17 @@ def main():
             if pformat and len(input_manager.urls) > 1 and \
                     args.loglevel < logging.ERROR:
                 input_manager.progress(pformat)
+
+            catmap = config.interpolate(("extractor",), "category-map")
+            if catmap:
+                if catmap == "compat":
+                    catmap = {
+                        "coomer"       : "coomerparty",
+                        "kemono"       : "kemonoparty",
+                        "schalenetwork": "koharu",
+                    }
+                from .extractor import common
+                common.CATEGORY_MAP = catmap
 
             # process input URLs
             retval = 0
@@ -536,13 +548,11 @@ class InputManager():
                 "Unable to update '%s' (%s: %s)",
                 path, exc.__class__.__name__, exc)
 
-    @staticmethod
-    def _action_comment(lines, indicies):
+    def _action_comment(self, lines, indicies):
         for i in indicies:
             lines[i] = "# " + lines[i]
 
-    @staticmethod
-    def _action_delete(lines, indicies):
+    def _action_delete(self, lines, indicies):
         for i in indicies:
             lines[i] = ""
 

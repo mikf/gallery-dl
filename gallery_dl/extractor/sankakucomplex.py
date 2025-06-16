@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2023 Mike Fährmann
+# Copyright 2019-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -10,7 +10,6 @@
 
 from .common import Extractor, Message
 from .. import text, util
-import re
 
 
 class SankakucomplexExtractor(Extractor):
@@ -64,23 +63,20 @@ class SankakucomplexArticleExtractor(SankakucomplexExtractor):
             file.update(data)
             yield Message.Url, url, file
 
-    @staticmethod
-    def _extract_images(content):
-        orig_sub = re.compile(r"-\d+x\d+\.").sub
+    def _extract_images(self, content):
+        orig_sub = util.re(r"-\d+x\d+\.").sub
         return [
             orig_sub(".", url) for url in
             util.unique(text.extract_iter(content, 'data-lazy-src="', '"'))
         ]
 
-    @staticmethod
-    def _extract_videos(content):
-        return re.findall(r"<source [^>]*src=[\"']([^\"']+)", content)
+    def _extract_videos(self, content):
+        return util.re(r"<source [^>]*src=[\"']([^\"']+)").findall(content)
 
-    @staticmethod
-    def _extract_embeds(content):
+    def _extract_embeds(self, content):
         return [
             "ytdl:" + url for url in
-            re.findall(r"<iframe [^>]*src=[\"']([^\"']+)", content)
+            util.re(r"<iframe [^>]*src=[\"']([^\"']+)").findall(content)
         ]
 
 

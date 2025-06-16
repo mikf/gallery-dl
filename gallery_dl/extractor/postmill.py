@@ -6,9 +6,8 @@
 
 """Extractors for Postmill instances"""
 
-import re
 from .common import BaseExtractor, Message
-from .. import text, exception
+from .. import text, util, exception
 
 
 class PostmillExtractor(BaseExtractor):
@@ -21,8 +20,8 @@ class PostmillExtractor(BaseExtractor):
     def _init(self):
         self.instance = self.root.partition("://")[2]
         self.save_link_post_body = self.config("save-link-post-body", False)
-        self._search_canonical_url = re.compile(r"/f/([\w\d_]+)/(\d+)/").search
-        self._search_image_tag = re.compile(
+        self._search_canonical_url = util.re(r"/f/([\w\d_]+)/(\d+)/").search
+        self._search_image_tag = util.re(
             r'<a href="[^"]+"\n +class="submission__image-link"').search
 
     def items(self):
@@ -153,17 +152,13 @@ class PostmillPostExtractor(PostmillExtractor):
 class PostmillShortURLExtractor(PostmillExtractor):
     """Extractor for short submission URLs"""
     subcategory = "shorturl"
-    pattern = BASE_PATTERN + r"/(\d+)$"
+    pattern = BASE_PATTERN + r"(/\d+)$"
     example = "https://raddle.me/123"
 
-    def __init__(self, match):
-        PostmillExtractor.__init__(self, match)
-        self.post_id = match.group(3)
-
     def items(self):
-        url = self.root + "/" + self.post_id
-        response = self.request(url, method="HEAD", allow_redirects=False)
-        full_url = text.urljoin(url, response.headers["Location"])
+        url = self.root + self.groups[2]
+        location = self.request_location(url)
+        full_url = text.urljoin(url, location)
         yield Message.Queue, full_url, {"_extractor": PostmillPostExtractor}
 
 

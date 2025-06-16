@@ -60,13 +60,107 @@ __tests__ = (
     "#url"     : "https://danbooru.donmai.us/pools/7659",
     "#category": ("Danbooru", "danbooru", "pool"),
     "#class"   : danbooru.DanbooruPoolExtractor,
-    "#sha1_content": "b16bab12bea5f7ea9e0a836bf8045f280e113d99",
+    "#auth"    : False,
+    "#sha1_content": "15226ba183579bc2cdd67260445b5c97959a3e82",
+    "#results"     : (
+        "https://cdn.donmai.us/original/d8/3d/d83df4af8c0fa6d6069f8d3cf0b7dd56.jpg",
+        "https://cdn.donmai.us/original/70/82/7082572fa74650f3c1f39152550cd724.jpg",
+        "https://cdn.donmai.us/original/7a/b5/7ab551d011b89155a743d81308de653a.jpg",
+        "https://cdn.donmai.us/original/fd/d3/fdd31d7feb62e2a90de950765aa556b9.jpg",
+        "https://cdn.donmai.us/original/e7/11/e71119c20e1f7f7be829c168786ba807.jpg",
+        "https://cdn.donmai.us/original/65/ae/65ae1865ebfe490a00039832cd0ce16a.jpg",
+        "https://cdn.donmai.us/original/c3/e8/c3e82e213e6fa83fbe9c00659114c2d6.jpg",
+        "https://cdn.donmai.us/original/58/64/586438b110b88aef5f2bf14c19e7102d.jpg",
+    ),
+
+    "num" : range(1, 8),
+    "pool": {
+        "category"   : "series",
+        "created_at" : "2013-11-08T21:44:54.588-05:00",
+        "description": "A comic by [[ken (koala)]] about a girl. Seems to be somewhat melancholy.\r\n\r\n(Also, this will probably be renamed if it gets translated, since the title doesn't make much sense as-is)",
+        "id"         : 7659,
+        "is_active"  : False,
+        "is_deleted" : False,
+        "name"       : "Original - ある○人の島 (Ken (Koala))",
+        "post_count" : 8,
+        "updated_at" : "2017-08-10T20:16:04.564-04:00",
+    },
+},
+
+{
+    "#url"     : "https://danbooru.donmai.us/pools/24413",
+    "#category": ("Danbooru", "danbooru", "pool"),
+    "#class"   : danbooru.DanbooruPoolExtractor,
+    "#options" : {"order-posts": "asc"},
+    "#results" : (
+        "https://cdn.donmai.us/original/c5/7b/c57b045fee282199277d0f94e298b9dc.jpg",
+        "https://cdn.donmai.us/original/44/6d/446d8b5db9b78694936408049745ee42.jpg",
+        "https://cdn.donmai.us/original/34/0c/340c721ceb7fce6892a234adf0bea811.jpg",
+        "https://cdn.donmai.us/original/47/c2/47c2c1ba1f7b83e0a487dbc7e722059f.jpg",
+        "https://cdn.donmai.us/original/30/3b/303bdefb719b54253aa7731cf11ef91f.jpg",
+    ),
+},
+{
+    "#url"     : "https://danbooru.donmai.us/pools/24413",
+    "#category": ("Danbooru", "danbooru", "pool"),
+    "#class"   : danbooru.DanbooruPoolExtractor,
+    "#options" : {"order-posts": "pool_desc"},
+    "#results" : (
+        "https://cdn.donmai.us/original/30/3b/303bdefb719b54253aa7731cf11ef91f.jpg",
+        "https://cdn.donmai.us/original/47/c2/47c2c1ba1f7b83e0a487dbc7e722059f.jpg",
+        "https://cdn.donmai.us/original/34/0c/340c721ceb7fce6892a234adf0bea811.jpg",
+        "https://cdn.donmai.us/original/44/6d/446d8b5db9b78694936408049745ee42.jpg",
+        "https://cdn.donmai.us/original/c5/7b/c57b045fee282199277d0f94e298b9dc.jpg",
+    ),
+},
+{
+    "#url"     : "https://danbooru.donmai.us/pools/24413",
+    "#category": ("Danbooru", "danbooru", "pool"),
+    "#class"   : danbooru.DanbooruPoolExtractor,
+    "#options" : {"order-posts": "id"},
+    "#results" : (
+        "https://cdn.donmai.us/original/30/3b/303bdefb719b54253aa7731cf11ef91f.jpg",
+        "https://cdn.donmai.us/original/44/6d/446d8b5db9b78694936408049745ee42.jpg",
+        "https://cdn.donmai.us/original/34/0c/340c721ceb7fce6892a234adf0bea811.jpg",
+        "https://cdn.donmai.us/original/47/c2/47c2c1ba1f7b83e0a487dbc7e722059f.jpg",
+        "https://cdn.donmai.us/original/c5/7b/c57b045fee282199277d0f94e298b9dc.jpg",
+    ),
+},
+{
+    "#url"     : "https://danbooru.donmai.us/pools/24413",
+    "#category": ("Danbooru", "danbooru", "pool"),
+    "#class"   : danbooru.DanbooruPoolExtractor,
+    "#options" : {"order-posts": "asc_id"},
+    "#results" : (
+        "https://cdn.donmai.us/original/c5/7b/c57b045fee282199277d0f94e298b9dc.jpg",
+        "https://cdn.donmai.us/original/47/c2/47c2c1ba1f7b83e0a487dbc7e722059f.jpg",
+        "https://cdn.donmai.us/original/34/0c/340c721ceb7fce6892a234adf0bea811.jpg",
+        "https://cdn.donmai.us/original/44/6d/446d8b5db9b78694936408049745ee42.jpg",
+        "https://cdn.donmai.us/original/30/3b/303bdefb719b54253aa7731cf11ef91f.jpg",
+    ),
 },
 
 {
     "#url"     : "https://danbooru.donmai.us/pool/show/7659",
     "#category": ("Danbooru", "danbooru", "pool"),
     "#class"   : danbooru.DanbooruPoolExtractor,
+},
+
+{
+    "#url"     : "https://danbooru.donmai.us/favorite_groups/14",
+    "#category": ("Danbooru", "danbooru", "favgroup"),
+    "#class"   : danbooru.DanbooruFavgroupExtractor,
+    "#auth"    : False,
+    "#count"   : 24,
+
+    "favgroup": {
+        "created_at": "2015-06-29T13:59:10.808-04:00",
+        "creator_id": 65304,
+        "id"        : 14,
+        "is_public" : True,
+        "name"      : "Mecha",
+        "updated_at": "2019-07-07T07:21:50.677-04:00",
+    },
 },
 
 {
@@ -211,8 +305,25 @@ __tests__ = (
     "#url"     : "https://danbooru.donmai.us/posts/3613024",
     "#category": ("Danbooru", "danbooru", "post"),
     "#class"   : danbooru.DanbooruPostExtractor,
+    "#options" : {"ugoira": False},
+    "#results" : "https://cdn.donmai.us/sample/5e/e5/sample-5ee54a2d95ed36376ec1d8f6ddbdece9.webm",
+
+    "!_ugoira_original"  : ...,
+    "!_ugoira_frame_data": ...,
+},
+
+{
+    "#url"     : "https://danbooru.donmai.us/posts/3613024",
+    "#category": ("Danbooru", "danbooru", "post"),
+    "#class"   : danbooru.DanbooruPostExtractor,
     "#options" : {"ugoira": True},
-    "#pattern" : r"https?://.+\.zip$",
+    "#results" : "https://cdn.donmai.us/original/5e/e5/5ee54a2d95ed36376ec1d8f6ddbdece9.zip",
+
+    "_ugoira_original"     : False,
+    "_ugoira_frame_data[*]": {
+        "file" : r"re:^0000\d\d\.jpg$",
+        "delay": int,
+    },
 },
 
 {
@@ -239,7 +350,7 @@ __tests__ = (
     "#url"     : "https://danbooru.donmai.us/artists/288683",
     "#category": ("Danbooru", "danbooru", "artist"),
     "#class"   : danbooru.DanbooruArtistExtractor,
-    "#urls"    : "https://danbooru.donmai.us/posts?tags=kaori_%28vuoian_appxv%29",
+    "#results" : "https://danbooru.donmai.us/posts?tags=kaori_%28vuoian_appxv%29",
 
     "created_at" : "2022-05-12T16:00:40.852-04:00",
     "updated_at" : "2022-05-12T22:10:51.917-04:00",

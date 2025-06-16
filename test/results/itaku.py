@@ -22,7 +22,7 @@ __tests__ = (
     "#comment" : "gallery section (#6951)",
     "#category": ("", "itaku", "gallery"),
     "#class"   : itaku.ItakuGalleryExtractor,
-    "#urls"    : (
+    "#results" : (
         "https://itaku.ee/api/media/gallery_imgs/misty-psyduck_IWbYdwT.png",
         "https://itaku.ee/api/media/gallery_imgs/bea_alpha_N0YGfeT.png",
     ),
@@ -31,10 +31,19 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://itaku.ee/profile/piku/stars",
+    "#category": ("", "itaku", "stars"),
+    "#class"   : itaku.ItakuStarsExtractor,
+    "#pattern" : r"https://itaku\.ee/api/media/gallery_imgs/[^/?#]+\.(jpg|png|gif)",
+    "#range"   : "1-10",
+    "#count"   : 10,
+},
+
+{
     "#url"     : "https://itaku.ee/images/100471",
     "#category": ("", "itaku", "image"),
     "#class"   : itaku.ItakuImageExtractor,
-    "#urls"    : "https://itaku.ee/api/media/gallery_imgs/220504_oUNIAFT.png",
+    "#results" : "https://itaku.ee/api/media/gallery_imgs/220504_oUNIAFT.png",
 
     "already_pinned"  : None,
     "blacklisted"     : {
@@ -88,7 +97,7 @@ __tests__ = (
     "#comment" : "video",
     "#category": ("", "itaku", "image"),
     "#class"   : itaku.ItakuImageExtractor,
-    "#urls"    : "https://itaku.ee/api/media/gallery_vids/sleepy_af_OY5GHWw.mp4",
+    "#results" : "https://itaku.ee/api/media/gallery_vids/sleepy_af_OY5GHWw.mp4",
 },
 
 {
@@ -109,7 +118,7 @@ __tests__ = (
 },
 
 {
-    "#url"     : "https://itaku.ee/home/images?tags=%2Bcute&tags=-cute&tags=~cute&maturity_rating=SFW&date_range=&ordering=-date_added",
+    "#url"     : "https://itaku.ee/home/images?tags=cute&tags=-cute&tags=~cute&maturity_rating=SFW&date_range=&ordering=-date_added",
     "#comment" : "search with postive, negative, and optional tags",
     "#category": ("", "itaku", "search"),
     "#class"   : itaku.ItakuSearchExtractor,

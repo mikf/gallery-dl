@@ -20,13 +20,11 @@ class TumblrgalleryExtractor(GalleryExtractor):
     root = "https://tumblrgallery.xyz"
     referer = False
 
-    @staticmethod
-    def _urls_from_page(page):
+    def _urls_from_page(self, page):
         return text.extract_iter(
             page, '<div class="report"> <a class="xx-co-me" href="', '"')
 
-    @staticmethod
-    def _data_from_url(url):
+    def _data_from_url(self, url):
         filename = text.nameext_from_url(url)["filename"]
         parts = filename.split("_")
         try:
