@@ -42,6 +42,9 @@ class WarosuThreadExtractor(Extractor):
             if "image" in post:
                 for key in ("w", "h", "no", "time", "tim"):
                     post[key] = text.parse_int(post[key])
+                dt = text.parse_timestamp(post["time"])
+                # avoid zero-padding 'day' with %d
+                post["now"] = dt.strftime(f"%a, %b {dt.day}, %Y %H:%M:%S")
                 post.update(data)
                 yield Message.Url, post["image"], post
 
@@ -77,7 +80,6 @@ class WarosuThreadExtractor(Extractor):
             "no"  : extr('id="p', '"'),
             "name": extr('class="postername ">', "<").strip(),
             "time": extr('class="posttime" title="', '000">'),
-            "now" : extr("", "<").strip(),
             "com" : text.unescape(text.remove_html(extr(
                 "<blockquote>", "</blockquote>").strip())),
         }
