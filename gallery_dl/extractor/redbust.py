@@ -24,9 +24,6 @@ class RedbustGalleryExtractor(GalleryExtractor, RedbustExtractor):
     pattern = BASE_PATTERN + r"/([\w-]+)/?$"
     example = "https://redbust.com/TITLE/"
 
-    def __init__(self, match):
-        Extractor.__init__(self, match)
-
     def items(self):
         url = f"{self.root}/{self.groups[0]}/"
         self.page = page = self.request(url).text
@@ -99,49 +96,46 @@ class RedbustGalleryExtractor(GalleryExtractor, RedbustExtractor):
         return results
 
 
-class RedbustExtractor(Extractor):
-    """Extractor for Redbust Images"""
-    category = "redbust"
-    pattern = BASE_PATTERN + r"/([\w-]*)/([\w-]*)/$"
-    directory_fmt = ("{category}", "{gallery}")
-    filename_fmt = "{filename}.{extension}"
-
-    def __init__(self, match):
-        Extractor.__init__(self, match)
-        self.gallery, self.image_id = match.groups()
+class RedbustImageExtractor(RedbustExtractor):
+    """Extractor for RedBust images"""
+    subcategory = "image"
+    directory_fmt = ("{category}", "{title}")
+    pattern = BASE_PATTERN + r"/([\w-]+)/([\w-]+)/?$"
+    example = "https://redbust.com/TITLE/SLUG/"
 
     def items(self):
-        """Return a list of all (image-url, metadata)-tuples"""
-        pagetext = self.request(text.ensure_http_scheme(self.url)).text
+        gallery_slug, image_slug = self.groups
+        url = f"{self.root}/{gallery_slug}/{image_slug}/"
+        page = self.request(url).text
+
+        img_url = None
 
         # Look for the largest image in srcset first
-        srcset = text.extract(pagetext, 'srcset="', '"')[0]
-        if srcset:
+        if srcset := text.extr(page, 'srcset="', '"'):
             # Extract the largest image from srcset (typically last one)
-            srcset_urls = srcset.split(', ')
-            img_url = srcset_urls[-1].split(' ')[0] if srcset_urls else None
-        
+            urls = srcset.split(", ")
+            img_url = urls[-1].partition(" ")[0] if urls else None
+
         # Fallback to original extraction method
-        if not srcset or not img_url:
-            divdata = text.extract(pagetext, '<div class="entry-inner ', 'alt="')
-            if not divdata or not divdata[0]:
-                divdata = text.extract(pagetext, '<div class=\'entry-inner ', 'alt=\'')
-            
-            img_url = None
-            if divdata and divdata[0]:
-                img_url_data = text.extract(divdata[0], 'img src=\"', '\"')
-                if not img_url_data or not img_url_data[0]:
-                    img_url_data = text.extract(divdata[0], 'img src=\'', '\'')
-                
-                if img_url_data and img_url_data[0]:
-                    img_url = img_url_data[0]
-        
+        if not img_url:
+            if entry := text.extr(page, "entry-inner ", "alt="):
+                img_url = text.extr(entry, "img src=", " ").strip("\"'")
+
         if not img_url:
             return
 
-        data = text.nameext_from_url(img_url, {"url": img_url})
-        data["filename"] = self.image_id
-        data["gallery"] = self.gallery
+        end = img_url.rpartition("-")[2]
+        data = text.nameext_from_url(img_url, {
+            "title"       : text.unescape(text.extr(
+                page, 'title="Return to ', '"')),
+            "image_id"    : text.extr(
+                page, "rel='shortlink' href='https://redbust.com/?p=", "'"),
+            "gallery_slug": gallery_slug,
+            "image_slug"  : image_slug,
+            "num"         : text.parse_int(end.partition(".")[0]),
+            "count"       : 1,
+            "url"         : img_url,
+        })
 
         yield Message.Directory, data
         yield Message.Url, img_url, data

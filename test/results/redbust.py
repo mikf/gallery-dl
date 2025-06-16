@@ -23,7 +23,7 @@ __tests__ = (
     "gallery_slug": "sadie-gray-wearing-black-nighty",
     "title"       : "Sadie Gray wearing black nighty",
     "views"       : range(38_000, 50_000),
-    "categories": [
+    "categories"  : [
         "Super Chicks",
     ],
     "tags"        : [
@@ -51,7 +51,7 @@ __tests__ = (
     "gallery_slug": "girls-in-carwash",
     "title"       : "Girls in carwash",
     "views"       : range(9_000, 20_000),
-    "categories": [
+    "categories"  : [
         "Automotive",
     ],
     "tags"        : [
@@ -65,6 +65,22 @@ __tests__ = (
     "#class"   : redbust.RedbustGalleryExtractor,
     "#pattern" : redbust.RedbustGalleryExtractor.pattern,
     "#count"   : 28,
+},
+
+{
+    "#url"     : "https://redbust.com/sadie-gray-wearing-black-nighty/sadie-gray-morning-ritual-bathroom-naked-boobs-nighty-playboy-04/",
+    "#class"   : redbust.RedbustImageExtractor,
+    "#results" : "https://redbust.com/stuff/sadie-gray-wearing-black-nighty/sadie-gray-morning-ritual-bathroom-naked-boobs-nighty-playboy-04.jpg",
+
+    "count"       : 1,
+    "num"         : 4,
+    "extension"   : "jpg",
+    "filename"    : "sadie-gray-morning-ritual-bathroom-naked-boobs-nighty-playboy-04",
+    "gallery_slug": "sadie-gray-wearing-black-nighty",
+    "image_id"    : "373925",
+    "image_slug"  : "sadie-gray-morning-ritual-bathroom-naked-boobs-nighty-playboy-04",
+    "title"       : "Sadie Gray wearing black nighty",
+    "url"         : "https://redbust.com/stuff/sadie-gray-wearing-black-nighty/sadie-gray-morning-ritual-bathroom-naked-boobs-nighty-playboy-04.jpg",
 },
 
 )
