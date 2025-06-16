@@ -122,7 +122,7 @@ CATEGORY_MAP = {
     "pornpics"       : "PornPics.com",
     "pornreactor"    : "PornReactor",
     "readcomiconline": "Read Comic Online",
-    "redbust"        : "Redbust.com",
+    "redbust"        : "RedBust",
     "rbt"            : "RebeccaBlackTech",
     "redgifs"        : "RedGIFs",
     "rozenarcana"    : "Rozen Arcana",
@@ -334,6 +334,9 @@ SUBCATEGORY_MAP = {
         "usersubmissions": "User Profiles",
         "post"           : "Individual Posts",
         "shorturl"       : "",
+    },
+    "redbust": {
+        "gallery": ("Galleries", "Categories"),
     },
     "redgifs": {
         "collections": "",
