@@ -794,6 +794,12 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
+    <td>RedBust</td>
+    <td>https://redbust.com/</td>
+    <td>Archives, Galleries, Categories, individual Images, Tag Searches</td>
+    <td></td>
+</tr>
+<tr>
     <td>Reddit</td>
     <td>https://www.reddit.com/</td>
     <td>Home Feed, individual Images, Redirects, Submissions, Subreddits, User Profiles</td>

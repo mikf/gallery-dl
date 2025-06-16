@@ -146,6 +146,7 @@ modules = [
     "reactor",
     "readcomiconline",
     "realbooru",
+    "redbust",
     "reddit",
     "redgifs",
     "rule34us",
