@@ -49,23 +49,23 @@ class NudostarModelExtractor(NudostarExtractor):
             for i in range(1, int(cnt)+1)
         ]
 
-    def __init__(self, match):
-        Extractor.__init__(self, match)
-        self.user_id, self.image_id = match.groups()
+
+class NudostarImageExtractor(NudostarExtractor):
+    """Extractor for NudoStar images"""
+    subcategory = "image"
+    pattern = BASE_PATTERN + r"(/models/([^/?#]+)/(\d+)/)"
+    example = "https://nudostar.tv/models/MODEL/123/"
 
     def items(self):
-        """Return a list of all (image-url, metadata)-tuples"""
-        pagetext = self.request(self.url, notfound=self.subcategory).text
-        url_regex = (
-            r'<a href=\"https://nudostar\.tv/models/[^&#]+'
-            r'\s+<img src=\"([^&\"]+)\"'
-        )
-        match = re.search(url_regex, pagetext)
-        image_url = match.group(1)
-        data = text.nameext_from_url(image_url, {"url": image_url})
-        data["extension"] = text.ext_from_url(image_url)
-        data["filename"] = f"{self.user_id}-{self.image_id}"
-        data["user_id"] = self.user_id
+        page = self.request(self.gallery_url, notfound=self.subcategory).text
+
+        img_url = text.extract(
+            page, 'src="', '"', page.index('class="headline"'))[0]
+
+        data = NudostarModelExtractor.metadata(self, page)
+        data = text.nameext_from_url(img_url, data)
+        data["num"] = text.parse_int(self.groups[2])
+        data["url"] = img_url
 
         yield Message.Directory, data
-        yield Message.Url, image_url, data
+        yield Message.Url, img_url, data
