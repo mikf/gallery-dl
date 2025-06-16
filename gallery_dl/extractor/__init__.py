@@ -63,6 +63,7 @@ modules = [
     "gelbooru",
     "gelbooru_v01",
     "gelbooru_v02",
+    "girlsreleased",
     "girlswithmuscle",
     "gofile",
     "hatenablog",
