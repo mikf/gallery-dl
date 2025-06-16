@@ -733,6 +733,7 @@ class GalleryExtractor(Extractor):
 
         data = self.metadata(page)
         imgs = self.images(page)
+        assets = self.assets(page)
 
         if "count" in data:
             if self.config("page-reverse"):
@@ -754,7 +755,18 @@ class GalleryExtractor(Extractor):
             images = enum(imgs, 1)
 
         yield Message.Directory, data
-        for data[self.enum], (url, imgdata) in images:
+        enum_key = self.enum
+
+        if assets:
+            for asset in assets:
+                url = asset["url"]
+                asset.update(data)
+                asset[enum_key] = 0
+                if "extension" not in asset:
+                    text.nameext_from_url(url, asset)
+                yield Message.Url, url, asset
+
+        for data[enum_key], (url, imgdata) in images:
             if imgdata:
                 data.update(imgdata)
                 if "extension" not in imgdata:
@@ -770,7 +782,13 @@ class GalleryExtractor(Extractor):
         """Return a dict with general metadata"""
 
     def images(self, page):
-        """Return a list of all (image-url, metadata)-tuples"""
+        """Return a list or iterable of all (image-url, metadata)-tuples"""
+
+    def assets(self, page):
+        """Return an iterable of additional gallery assets
+
+        Each asset must be a 'dict' containing at least 'url' and 'type'
+        """
 
 
 class ChapterExtractor(GalleryExtractor):
