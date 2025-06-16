@@ -68,6 +68,13 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://redbust.com/tag/tan-lines/",
+    "#class"   : redbust.RedbustTagExtractor,
+    "#pattern" : redbust.RedbustGalleryExtractor.pattern,
+    "#count"   : range(70, 100),
+},
+
+{
     "#url"     : "https://redbust.com/sadie-gray-wearing-black-nighty/sadie-gray-morning-ritual-bathroom-naked-boobs-nighty-playboy-04/",
     "#class"   : redbust.RedbustImageExtractor,
     "#results" : "https://redbust.com/stuff/sadie-gray-wearing-black-nighty/sadie-gray-morning-ritual-bathroom-naked-boobs-nighty-playboy-04.jpg",

@@ -18,6 +18,31 @@ class RedbustExtractor(Extractor):
     root = "https://redbust.com"
     filename_fmt = "{filename}.{extension}"
 
+    def items(self):
+        data = {"_extractor": RedbustGalleryExtractor}
+        for url in self.galleries():
+            yield Message.Queue, url, data
+
+    def _pagination(self, path, page=None):
+        if page is None:
+            url = f"{self.root}{path}/"
+            base = url + "page/"
+            page = self.request(url).text
+        else:
+            base = f"{self.root}{path}/page/"
+
+        pnum = 1
+        while True:
+            for post in text.extract_iter(
+                    page, '<h2 class="post-title">', "rel="):
+                yield text.extr(post, 'href="', '"')
+
+            pnum += 1
+            url = f"{base}{pnum}/"
+            if url not in page:
+                return
+            page = self.request(url).text
+
 
 class RedbustGalleryExtractor(GalleryExtractor, RedbustExtractor):
     """Extractor for RedBust galleries"""
@@ -94,6 +119,16 @@ class RedbustGalleryExtractor(GalleryExtractor, RedbustExtractor):
                     (f"{self.root}/wp-content/uploads/{path}", None))
 
         return results
+
+
+class RedbustTagExtractor(RedbustExtractor):
+    """Extractor for RedBust tag searches"""
+    subcategory = "tag"
+    pattern = BASE_PATTERN + r"/tag/([\w-]+)"
+    example = "https://redbust.com/tag/TAG/"
+
+    def galleries(self):
+        return self._pagination("/tag/" + self.groups[0])
 
 
 class RedbustImageExtractor(RedbustExtractor):
