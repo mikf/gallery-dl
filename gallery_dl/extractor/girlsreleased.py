@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2023 Mike Fährmann
-#
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
@@ -15,23 +13,40 @@ import itertools
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?girlsreleased\.com"
 
 
-class GirlsreleasedSetExtractor(Extractor):
-    """Extractor for girlsreleased galleries"""
+class GirlsreleasedExtractor(Extractor):
+    """Base class for girlsreleased extractors"""
     category = "girlsreleased"
-    subcategory = "set"
-    pattern = BASE_PATTERN + r"/set/(\d+)"
-    example = "https://girlsreleased.com/set/12345"
     root = "https://girlsreleased.com"
     request_interval = 0.5
     request_interval_min = 0.2
 
-    def __init__(self, match):
-        super().__init__(match)
-        self.id = match.group(1)
+    def items(self):
+        data = {"_extractor": GirlsreleasedSetExtractor}
+        base = f"{self.root}/set/"
+        for set in self._pagination():
+            yield Message.Queue, f"{base}{set[0]}", data
+
+    def _pagination(self):
+        base = f"{self.root}/api/0.1/sets/{self._path}/{self.groups[0]}/page/"
+        for pnum in itertools.count():
+            sets = self.request_json(f"{base}{pnum}")["sets"]
+            if not sets:
+                return
+
+            yield from sets[1:] if pnum else sets
+            if len(sets) < 80:
+                return
+
+
+class GirlsreleasedSetExtractor(GirlsreleasedExtractor):
+    """Extractor for girlsreleased galleries"""
+    subcategory = "set"
+    pattern = BASE_PATTERN + r"/set/(\d+)"
+    example = "https://girlsreleased.com/set/12345"
 
     def items(self):
-        url = "{}/api/0.1/set/{}".format(self.root, self.id)
-        json = self.request(url).json()["set"]
+        url = f"{self.root}/api/0.1/set/{self.groups[0]}"
+        json = self.request_json(url)["set"]
         data = {
             "title": json["name"] or json["id"],
             "id": json["id"],
@@ -47,31 +62,15 @@ class GirlsreleasedSetExtractor(Extractor):
             yield Message.Queue, image[3], data
 
 
-class GirlsreleasedModelExtractor(GirlsreleasedSetExtractor):
+class GirlsreleasedModelExtractor(GirlsreleasedExtractor):
     """Extractor for girlsreleased models"""
-    subcategory = "model"
-    pattern = BASE_PATTERN + r"/model/(\d+/?.*)"
+    subcategory = _path = "model"
+    pattern = BASE_PATTERN + r"/model/(\d+(?:/.+)?)"
     example = "https://girlsreleased.com/model/12345/MODEL"
 
-    def _pagination(self):
-        for page in itertools.count():
-            url = "{}/api/0.1/sets/{}/{}/page/{}".format(
-                self.root, self.subcategory, self.id, page
-            )
-            json = self.request(url).json()["sets"]
-            if not json:
-                return
-            offset = 0 if page == 0 else 1
-            yield from json[offset:]
 
-    def items(self):
-        data = {"_extractor": GirlsreleasedSetExtractor}
-        for set in self._pagination():
-            yield Message.Queue, "{}/set/{}".format(self.root, set[0]), data
-
-
-class GirlsreleasedSiteExtractor(GirlsreleasedModelExtractor):
+class GirlsreleasedSiteExtractor(GirlsreleasedExtractor):
     """Extractor for girlsreleased sites"""
-    subcategory = "site"
-    pattern = BASE_PATTERN + r"/site/(.+(?:/model/\d+/?.*)?)"
+    subcategory = _path = "site"
+    pattern = BASE_PATTERN + r"/site/([^/?#]+(?:/model/\d+/?.*)?)"
     example = "https://girlsreleased.com/site/SITE"
