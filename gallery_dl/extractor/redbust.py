@@ -104,7 +104,7 @@ class RedbustGalleryExtractor(GalleryExtractor, RedbustExtractor):
             if src := text.extr(img, 'src="', '"'):
                 path, _, end = src.rpartition("-")
                 if "x" in end:
-                    url = f"{path}.{end.rpartition(".")[2]}"
+                    url = f"{path}.{end.rpartition('.')[2]}"
                     data = None if src == url else {"_fallback": (src,)}
                 else:
                     url = src
