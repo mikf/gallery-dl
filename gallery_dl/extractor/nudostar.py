@@ -1,77 +1,53 @@
 # -*- coding: utf-8 -*-
-import re
-from .common import Extractor, Message, GalleryExtractor
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 2 as
+# published by the Free Software Foundation.
+
+"""Extractors for https://nudostar.tv/"""
+
+from .common import GalleryExtractor, Message
 from .. import text
 
-BASE_PATTERN = r"(?:https?://)?nudostar\.tv"
+BASE_PATTERN = r"(?:https?://)?(?:[a-z]{2}.)?nudostar\.tv"
 
 
-class NudostarGalleryExtractor(GalleryExtractor):
-    """Extractor for Nudostar albums"""
+class NudostarExtractor(GalleryExtractor):
+    """Base class for NudoStar extractors"""
     category = "nudostar"
-    pattern = BASE_PATTERN + r"/models/([\w-]*)/$"
-    directory_fmt = ("{category}", "{user_id}")
-    filename_fmt = "{filename}.{extension}"
+    root = "https://nudostar.tv"
 
-    def __init__(self, match):
-        self.root = text.root_from_url(match.group(0))
-        self.gallery_url = match.group(0)
-        GalleryExtractor.__init__(self, match, self.gallery_url)
 
-    def images(self, page):
-        """Return a list of all (image-url, None) tuples"""
-        url_list = []
-        while True:  # Loop to handle all pages
-            # Process current page's images
-            for image_page_url in text.extract_iter(
-                    page, '<div class="item">', 'title='):
-                page_url = text.extract(image_page_url, '="', '"')[0]
-                # Create a match object for the image extractor
-                image_match = re.match(NudostarExtractor.pattern, page_url)
-                if image_match:
-                    # Create an instance of the image extractor
-                    image_extractor = NudostarExtractor(image_match)
-                    image_extractor.session = self.session  # Share our session
-                    image_extractor.initialize()  # Initialize the extractor
-                    # Get the items from the extractor
-                    for item in image_extractor.items():
-                        if item[0] == Message.Url:
-                            message_type, url, metadata = item
-                            url_list.append((url, metadata))
-                            break  # We only want the first URL from each page
-
-            # Look for next page
-            next_page = text.extract(
-                page, '<li class="next"><a href="', '"')[0]
-            if not next_page:
-                break  # No more pages
-
-            # Get the next page's content
-            page = self.request(next_page).text
-        return url_list
+class NudostarModelExtractor(NudostarExtractor):
+    """Extractor for NudoStar models"""
+    subcategory = "model"
+    pattern = BASE_PATTERN + r"(/models/([^/?#]+)/?)$"
+    example = "https://nudostar.tv/models/MODEL/"
 
     def metadata(self, page):
-        """Return metadata dictionary"""
-        model = self.gallery_url.split("/models/")[1].split("/")[0]
+        names = text.extr(page, "<title>", "<").rpartition(
+            " Nude ")[0].split(" / ")
+        slug = self.groups[1]
+
         return {
-            "gallery_id": model,
-            "title": model,
-            "user_id": model,
+            "gallery_id" : slug,
+            "model_slug" : slug,
+            "model_names": names,
+            "model"      : names[0],
+            "title"      : "",
         }
 
+    def images(self, page):
+        path = text.extr(page, '" src="https://nudostar.tv', '"')
+        path, cnt, end = path.rsplit("_", 2)
 
-class NudostarExtractor(Extractor):
-    """Extractor for Nudostar Images"""
-    category = "nudostar"
-    directory_fmt = ("{category}", "{user_id}")
-    filename_fmt = "{filename}.{extension}"
-    pattern = (
-        BASE_PATTERN +
-        r"/models/([^&#/]+)*/(\w*)/"
-    )
-    # Sample URL: "https://nudostar.tv/models/megan-bitchell/343/"
+        base = f"{self.root}{path}_"
+        ext = "." + end.rpartition(".")[2]
 
-    # TODO: page head/title has some good metadata for alternate names?
+        return [
+            (f"{base}{i:04}{ext}", None)
+            for i in range(1, int(cnt)+1)
+        ]
 
     def __init__(self, match):
         Extractor.__init__(self, match)
