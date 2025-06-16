@@ -145,7 +145,7 @@ class RedbustImageExtractor(RedbustExtractor):
     """Extractor for RedBust images"""
     subcategory = "image"
     directory_fmt = ("{category}", "{title}")
-    pattern = BASE_PATTERN + r"/([\w-]+)/([\w-]+)/?$"
+    pattern = BASE_PATTERN + r"/(?!tag/|\d{4}/)([\w-]+)/([\w-]+)/?$"
     example = "https://redbust.com/TITLE/SLUG/"
 
     def items(self):
