@@ -75,6 +75,13 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://redbust.com/2021/04/",
+    "#class"   : redbust.RedbustArchiveExtractor,
+    "#pattern" : redbust.RedbustGalleryExtractor.pattern,
+    "#count"   : 25,
+},
+
+{
     "#url"     : "https://redbust.com/sadie-gray-wearing-black-nighty/sadie-gray-morning-ritual-bathroom-naked-boobs-nighty-playboy-04/",
     "#class"   : redbust.RedbustImageExtractor,
     "#results" : "https://redbust.com/stuff/sadie-gray-wearing-black-nighty/sadie-gray-morning-ritual-bathroom-naked-boobs-nighty-playboy-04.jpg",

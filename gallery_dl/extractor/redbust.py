@@ -131,6 +131,16 @@ class RedbustTagExtractor(RedbustExtractor):
         return self._pagination("/tag/" + self.groups[0])
 
 
+class RedbustArchiveExtractor(RedbustExtractor):
+    """Extractor for RedBust monthly archive collections"""
+    subcategory = "archive"
+    pattern = BASE_PATTERN + r"(/\d{4}/\d{2})"
+    example = "https://redbust.com/2010/01/"
+
+    def galleries(self):
+        return self._pagination(self.groups[0])
+
+
 class RedbustImageExtractor(RedbustExtractor):
     """Extractor for RedBust images"""
     subcategory = "image"
