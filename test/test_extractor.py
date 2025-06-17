@@ -122,7 +122,7 @@ class TestExtractorModule(unittest.TestCase):
             extr = cls.from_url(url)
         except ImportError as exc:
             if exc.name in ("youtube_dl", "yt_dlp"):
-                print("Skipping '{}' category checks".format(cls.category))
+                sys.stdout.write(f"Skipping '{cls.category}' category checks")
                 return
             raise
         self.assertTrue(extr, url)
