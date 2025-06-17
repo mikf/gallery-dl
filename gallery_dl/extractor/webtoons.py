@@ -114,23 +114,6 @@ class WebtoonsEpisodeExtractor(WebtoonsBase, GalleryExtractor):
             quality = None
 
         results = []
-        
-        if self.thumbnails:
-            activeThumbnails = text.extract(page, 'class="on ', '</a>')
-            episodeThumbnailURL = text.extract(str(activeThumbnails),'data-url="', '"')
-            episodeThumbnailURL = str(episodeThumbnailURL[0])
-            if quality is not None:
-                path, _, query = episodeThumbnailURL.rpartition("?")
-                type = quality.get(path.rpartition(".")[2].lower())
-                if type is False:
-                    episodeThumbnailURL = path
-                elif type:
-                    episodeThumbnailURL = "{}?type={}".format(path, type)
-
-            episodeThumbnailURL = episodeThumbnailURL.replace("://webtoon-phinf.", "://swebtoon-phinf.")
-            results.append((episodeThumbnailURL, None))
-
-        
         for url in text.extract_iter(
                 page, 'class="_images" data-url="', '"'):
 
@@ -145,6 +128,14 @@ class WebtoonsEpisodeExtractor(WebtoonsBase, GalleryExtractor):
             url = url.replace("://webtoon-phinf.", "://swebtoon-phinf.")
             results.append((url, None))
         return results
+
+    def assets(self, page):
+        if self.thumbnails:
+            activeThumbnails = text.extract(page, 'class="on ', '</a>')
+            episodeThumbnailURL = text.extract(str(activeThumbnails),'data-url="', '"')
+            episodeThumbnailURL = str(episodeThumbnailURL[0])
+            episodeThumbnailURL = episodeThumbnailURL.replace("://webtoon-phinf.", "://swebtoon-phinf.")
+            return ({"url": episodeThumbnailURL, "type": "thumbnail"},)
 
 
 class WebtoonsComicExtractor(WebtoonsBase, Extractor):
