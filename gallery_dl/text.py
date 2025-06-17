@@ -317,12 +317,7 @@ else:
 def parse_datetime(date_string, format="%Y-%m-%dT%H:%M:%S%z", utcoffset=0):
     """Create a datetime object by parsing 'date_string'"""
     try:
-        if format.endswith("%z") and date_string[-3] == ":":
-            # workaround for Python < 3.7: +00:00 -> +0000
-            ds = date_string[:-3] + date_string[-2:]
-        else:
-            ds = date_string
-        d = datetime.datetime.strptime(ds, format)
+        d = datetime.datetime.strptime(date_string, format)
         o = d.utcoffset()
         if o is not None:
             # convert to naive UTC

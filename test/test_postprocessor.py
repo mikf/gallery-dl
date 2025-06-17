@@ -377,9 +377,7 @@ class MetadataTest(BasePostprocessorTest):
         path = self.pathfmt.realpath + ".JSON"
         m.assert_called_once_with(path, "w", encoding="utf-8")
 
-        if sys.hexversion >= 0x3060000:
-            # python 3.4 & 3.5 have random order without 'sort: True'
-            self.assertEqual(self._output(m), """{
+        self.assertEqual(self._output(m), """{
     "category": "test",
     "filename": "file",
     "extension": "ext",

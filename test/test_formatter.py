@@ -66,10 +66,7 @@ class TestFormatter(unittest.TestCase):
         self._run_test("{t!d}", datetime.datetime(2010, 1, 1))
         self._run_test("{t!d:%Y-%m-%d}", "2010-01-01")
         self._run_test("{t!D}" , datetime.datetime(2010, 1, 1))
-        if sys.hexversion >= 0x3070000:
-            self._run_test("{ds!D}", datetime.datetime(2010, 1, 1))
-        else:
-            self._run_test("{ds!D}", datetime.datetime(1970, 1, 1))
+        self._run_test("{ds!D}", datetime.datetime(2010, 1, 1))
         self._run_test("{dt!D}", datetime.datetime(2010, 1, 1))
         self._run_test("{t!D:%Y-%m-%d}", "2010-01-01")
         self._run_test("{dt!T}", "1262304000")
@@ -427,7 +424,6 @@ class TestFormatter(unittest.TestCase):
         self._run_test("\fE name * 2 + ' ' + a", "{}{} {}".format(
             self.kwdict["name"], self.kwdict["name"], self.kwdict["a"]))
 
-    @unittest.skipIf(sys.hexversion < 0x3060000, "no fstring support")
     def test_fstring(self):
         self._run_test("\fF {a}", self.kwdict["a"])
         self._run_test("\fF {name}{name} {a}", "{}{} {}".format(
@@ -435,7 +431,6 @@ class TestFormatter(unittest.TestCase):
         self._run_test("\fF foo-'\"{a.upper()}\"'-bar",
                        """foo-'"{}"'-bar""".format(self.kwdict["a"].upper()))
 
-    @unittest.skipIf(sys.hexversion < 0x3060000, "no fstring support")
     def test_template_fstring(self):
         with tempfile.TemporaryDirectory() as tmpdirname:
             path1 = os.path.join(tmpdirname, "tpl1")

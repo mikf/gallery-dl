@@ -794,8 +794,6 @@ value = 123
         self.assertEqual(f(["a", "b", "c"]), "a, b, c")
         self.assertEqual(f([1, 2, 3]), "1, 2, 3")
 
-    @unittest.skipIf(sys.hexversion < 0x3070000,
-                     "datetime.fromisoformat")
     def test_to_datetime(self, f=util.to_datetime):
 
         def _assert(value, expected):
@@ -1017,11 +1015,7 @@ value = 123
 
         self.assertIsNot(p1, p2)
         self.assertIs(p2, p3)
-
-        if sys.hexversion >= 0x3060000:
-            self.assertEqual(p1, p2)
-        else:
-            self.assertEqual(repr(p1), repr(p2))
+        self.assertEqual(p1, p2)
 
 
 class TestExtractor():
