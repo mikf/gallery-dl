@@ -504,6 +504,9 @@ def generate_tests():
     def _generate_method(result):
         def test(self):
             sys.stdout.write(f"\n{result['#url']}\n")
+            if "#comment" in result:
+                sys.stdout.write(f"# {result['#comment']}\n")
+
             try:
                 self._run_test(result)
             except KeyboardInterrupt as exc:
