@@ -243,9 +243,15 @@ class TiktokUserExtractor(TiktokExtractor):
         user_name = self.groups[0]
         profile_url = "{}/@{}".format(self.root, user_name)
         if self.avatar:
-            avatar_url, avatar = self._generate_avatar(user_name, profile_url)
-            yield Message.Directory, avatar
-            yield Message.Url, avatar_url, avatar
+            try:
+                avatar_url, avatar = self._generate_avatar(
+                    user_name, profile_url)
+            except Exception as exc:
+                self.log.warning("Unable to extract 'avatar' URL (%s: %s)",
+                                 exc.__class__.__name__, exc)
+            else:
+                yield Message.Directory, avatar
+                yield Message.Url, avatar_url, avatar
 
         with ytdl_instance as ydl:
             info_dict = ydl._YoutubeDL__extract_info(
