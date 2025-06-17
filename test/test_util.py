@@ -10,6 +10,7 @@
 import os
 import sys
 import unittest
+from unittest.mock import patch
 
 import io
 import re
@@ -988,6 +989,16 @@ value = 123
         self.assertIs(proxy["abcdefghi"], util.NONE)
         self.assertIs(proxy["abc.def.ghi"], util.NONE)
         self.assertIs(proxy["os.path2"], util.NONE)
+
+    def test_lazy_prompt(self):
+        prompt = util.LazyPrompt()
+
+        with patch("getpass.getpass") as p:
+            p.return_value = "***"
+            result = str(prompt)
+
+        self.assertEqual(result, "***")
+        p.assert_called_once_with()
 
     def test_null_context(self):
         with util.NullContext():
