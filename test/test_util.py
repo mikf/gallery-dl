@@ -955,6 +955,26 @@ value = 123
             i += 1
         self.assertEqual(i, 0)
 
+    def test_HTTPBasicAuth(self, f=util.HTTPBasicAuth):
+        class Request:
+            headers = {}
+        request = Request()
+
+        auth = f("", "")
+        auth(request)
+        self.assertEqual(request.headers["Authorization"],
+                         b"Basic Og==")
+
+        f("foo", "bar")(request)
+        self.assertEqual(request.headers["Authorization"],
+                         b"Basic Zm9vOmJhcg==")
+
+        f("ewsxcvbhnjtr",
+          "RVXQ4i9Ju5ypi86VGJ8MqhDYpDKluS0sxiSRBAG7ymB3Imok")(request)
+        self.assertEqual(request.headers["Authorization"],
+                         b"Basic ZXdzeGN2YmhuanRyOlJWWFE0aTlKdTV5cGk4NlZHSjhNc"
+                         b"WhEWXBES2x1UzBzeGlTUkJBRzd5bUIzSW1vaw==")
+
     def test_module_proxy(self):
         proxy = util.ModuleProxy()
 
