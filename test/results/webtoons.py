@@ -13,8 +13,8 @@ __tests__ = (
     "#url"     : "https://www.webtoons.com/en/comedy/safely-endangered/ep-572-earth/viewer?title_no=352&episode_no=572",
     "#category": ("", "webtoons", "episode"),
     "#class"   : webtoons.WebtoonsEpisodeExtractor,
-    "#count"       : 5,
-    "#results"     : (
+    "#count"   : 5,
+    "#results" : (
         "https://swebtoon-phinf.pstatic.net/20200513_191/1589322488148XfdRr_PNG/15893224850013525720.png?type=opti",
         "https://swebtoon-phinf.pstatic.net/20200513_143/1589322489499KJLvU_PNG/15893224866183525723.png?type=opti",
         "https://swebtoon-phinf.pstatic.net/20200513_281/15893224881499wbH7_PNG/15893224865073525729.png?type=opti",
@@ -43,6 +43,20 @@ __tests__ = (
     "title"       : "Safely Endangered - Ep. 572 - Earth",
     "title_no"    : "352",
     "username"    : "safelyendangered",
+},
+
+{
+    "#url"     : "https://www.webtoons.com/en/comedy/safely-endangered/ep-572-earth/viewer?title_no=352&episode_no=572",
+    "#comment" : "thumbnails (#6468 #7441)",
+    "#class"   : webtoons.WebtoonsEpisodeExtractor,
+    "#options" : {"thumbnails": True},
+    "#range"   : "1",
+    "#results" : "https://swebtoon-phinf.pstatic.net/20200513_37/1589322553469E5p76_PNG/thumb_15893224866533525729.png",
+    "#sha1_content": "e01e70610821df6ece601393eb6fd7d80fc42f9a",
+
+    "count": 5,
+    "num"  : 0,
+    "type" : "thumbnail",
 },
 
 {
