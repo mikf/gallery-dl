@@ -44,7 +44,7 @@ class WebtoonsEpisodeExtractor(WebtoonsBase, GalleryExtractor):
     """Extractor for an episode on webtoons.com"""
     subcategory = "episode"
     directory_fmt = ("{category}", "{comic}")
-    filename_fmt = "{episode_no}-{num:>02}.{extension}"
+    filename_fmt = "{episode_no}-{num:>02}{type:?-//}.{extension}"
     archive_fmt = "{title_no}_{episode_no}_{num}"
     pattern = (LANG_PATTERN + r"/([^/?#]+)/([^/?#]+)/[^/?#]+)"
                r"/viewer\?([^#'\"]+)")
@@ -59,6 +59,7 @@ class WebtoonsEpisodeExtractor(WebtoonsBase, GalleryExtractor):
         self.title_no = params.get("title_no")
         self.episode_no = params.get("episode_no")
         self.gallery_url = "{}/{}/viewer?{}".format(self.root, path, query)
+        self.thumbnails = self.config("thumbnails", False)
 
     def metadata(self, page):
         extr = text.extract_from(page)
@@ -127,6 +128,13 @@ class WebtoonsEpisodeExtractor(WebtoonsBase, GalleryExtractor):
             url = url.replace("://webtoon-phinf.", "://swebtoon-phinf.")
             results.append((url, None))
         return results
+
+    def assets(self, page):
+        if self.thumbnails:
+            active = text.extr(page, 'class="on ', '</a>')
+            url = text.extr(active, 'data-url="', '"')
+            url = url.replace("://webtoon-phinf.", "://swebtoon-phinf.")
+            return ({"url": url, "type": "thumbnail"},)
 
 
 class WebtoonsComicExtractor(WebtoonsBase, Extractor):
