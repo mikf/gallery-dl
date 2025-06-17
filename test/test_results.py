@@ -80,9 +80,9 @@ class TestExtractorResults(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         if cls._skipped:
-            print("\n\nSkipped tests:")
-            for url, exc in cls._skipped:
-                print('- {} ("{}")'.format(url, exc))
+            sys.stdout.write("\n\nSkipped tests:\n")
+            for url, reason in cls._skipped:
+                sys.stdout.write(f'- {url} ("{reason}")\n')
 
     def assertRange(self, value, range, msg=None):
         if range.step > 1:
@@ -503,7 +503,7 @@ def generate_tests():
     """Dynamically generate extractor unittests"""
     def _generate_method(result):
         def test(self):
-            print("\n" + result["#url"])
+            sys.stdout.write(f"\n{result['#url']}\n")
             try:
                 self._run_test(result)
             except KeyboardInterrupt as exc:
