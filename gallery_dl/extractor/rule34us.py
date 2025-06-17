@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2021-2023 Mike Fährmann
+# Copyright 2021-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -9,9 +9,8 @@
 """Extractors for https://rule34.us/"""
 
 from .booru import BooruExtractor
-from .. import text
+from .. import text, util
 import collections
-import re
 
 
 class Rule34usExtractor(BooruExtractor):
@@ -20,7 +19,7 @@ class Rule34usExtractor(BooruExtractor):
     per_page = 42
 
     def _init(self):
-        self._find_tags = re.compile(
+        self._find_tags = util.re(
             r'<li class="([^-"]+)-tag"[^>]*><a href="[^;"]+;q=([^"]+)').findall
 
     def _parse_post(self, post_id):

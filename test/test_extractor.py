@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2023 Mike Fährmann
+# Copyright 2018-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -138,6 +138,9 @@ class TestExtractorModule(unittest.TestCase):
         self.assertEqual(extr.subcategory, sub, url)
         self.assertEqual(extr.basecategory, base, url)
 
+        if base not in ("reactor", "wikimedia"):
+            self.assertEqual(extr._cfgpath, ("extractor", cat, sub), url)
+
     @unittest.skipIf(not results, "no test data")
     def test_unique_pattern_matches(self):
         # collect testcase URLs
@@ -195,7 +198,6 @@ class TestExtractorModule(unittest.TestCase):
             extr.initialize()
             extr.finalize()
 
-    @unittest.skipIf(sys.hexversion < 0x3060000, "test fails in CI")
     def test_init_ytdl(self):
         try:
             extr = extractor.find("ytdl:")
@@ -293,8 +295,7 @@ class TestExtractorWait(unittest.TestCase):
         u = self._isotime_to_seconds(until.time().isoformat()[:8])
         self.assertLessEqual(o-u, 1.0)
 
-    @staticmethod
-    def _isotime_to_seconds(isotime):
+    def _isotime_to_seconds(self, isotime):
         parts = isotime.split(":")
         return int(parts[0]) * 3600 + int(parts[1]) * 60 + int(parts[2])
 

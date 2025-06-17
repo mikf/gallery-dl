@@ -20,8 +20,7 @@ class WeasylExtractor(Extractor):
     root = "https://www.weasyl.com"
     useragent = util.USERAGENT
 
-    @staticmethod
-    def populate_submission(data):
+    def populate_submission(self, data):
         # Some submissions don't have content and can be skipped
         if "submission" in data["media"]:
             data["url"] = data["media"]["submission"][0]["url"]
@@ -72,7 +71,7 @@ class WeasylExtractor(Extractor):
 
 class WeasylSubmissionExtractor(WeasylExtractor):
     subcategory = "submission"
-    pattern = BASE_PATTERN + r"(?:~[\w~-]+/submissions|submission)/(\d+)"
+    pattern = BASE_PATTERN + r"(?:~[\w~-]+/submissions|submission|view)/(\d+)"
     example = "https://www.weasyl.com/~USER/submissions/12345/TITLE"
 
     def __init__(self, match):
@@ -200,5 +199,5 @@ class WeasylFavoriteExtractor(WeasylExtractor):
                 pos = page.index('">Next (', pos)
             except ValueError:
                 return
-            path = text.unescape(text.rextract(page, 'href="', '"', pos)[0])
+            path = text.unescape(text.rextr(page, 'href="', '"', pos))
             params = None

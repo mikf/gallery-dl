@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2023 Mike Fährmann
+# Copyright 2015-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -160,6 +160,28 @@ def status():
 
     for path, status in paths:
         stdout_write(fmt(path, status))
+
+
+def remap_categories():
+    opts = _config.get("extractor")
+    if not opts:
+        return
+
+    cmap = opts.get("config-map")
+    if cmap is None:
+        cmap = (
+            ("coomerparty", "coomer"),
+            ("kemonoparty", "kemono"),
+            ("koharu"     , "schalenetwork"),
+        )
+    elif not cmap:
+        return
+    elif isinstance(cmap, dict):
+        cmap = cmap.items()
+
+    for old, new in cmap:
+        if old in opts and new not in opts:
+            opts[new] = opts[old]
 
 
 def load(files=None, strict=False, loads=util.json_loads):

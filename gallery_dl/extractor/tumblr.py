@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2023 Mike Fährmann
+# Copyright 2016-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -11,7 +11,6 @@
 from .common import Extractor, Message
 from .. import text, util, oauth, exception
 from datetime import datetime, date, timedelta
-import re
 
 
 BASE_PATTERN = (
@@ -66,16 +65,16 @@ class TumblrExtractor(Extractor):
         blog = None
 
         # pre-compile regular expressions
-        self._sub_video = re.compile(
+        self._sub_video = util.re(
             r"https?://((?:vt|vtt|ve)(?:\.media)?\.tumblr\.com"
             r"/tumblr_[^_]+)_\d+\.([0-9a-z]+)").sub
         if self.inline:
-            self._sub_image = re.compile(
+            self._sub_image = util.re(
                 r"https?://(\d+\.media\.tumblr\.com(?:/[0-9a-f]+)?"
                 r"/tumblr(?:_inline)?_[^_]+)_\d+\.([0-9a-z]+)").sub
-            self._subn_orig_image = re.compile(r"/s\d+x\d+/").subn
-            _findall_image = re.compile('<img src="([^"]+)"').findall
-            _findall_video = re.compile('<source src="([^"]+)"').findall
+            self._subn_orig_image = util.re(r"/s\d+x\d+/").subn
+            _findall_image = util.re('<img src="([^"]+)"').findall
+            _findall_video = util.re('<source src="([^"]+)"').findall
 
         for post in self.posts():
             if self.date_min > post["timestamp"]:
@@ -199,14 +198,12 @@ class TumblrExtractor(Extractor):
                                  "', '".join(sorted(invalid)))
             return types
 
-    @staticmethod
-    def _prepare(url, post):
+    def _prepare(self, url, post):
         text.nameext_from_url(url, post)
         post["hash"] = post["filename"].partition("_")[2]
         return Message.Url, url, post
 
-    @staticmethod
-    def _prepare_image(url, post):
+    def _prepare_image(self, url, post):
         text.nameext_from_url(url, post)
 
         # try ".gifv" (#3095)
@@ -227,8 +224,7 @@ class TumblrExtractor(Extractor):
 
         return Message.Url, url, post
 
-    @staticmethod
-    def _prepare_avatar(url, post, blog):
+    def _prepare_avatar(self, url, post, blog):
         text.nameext_from_url(url, post)
         post["num"] = post["count"] = 1
         post["blog"] = blog
@@ -299,8 +295,7 @@ class TumblrPostExtractor(TumblrExtractor):
     def posts(self):
         return self.api.posts(self.blog, {"id": self.post_id})
 
-    @staticmethod
-    def _setup_posttypes():
+    def _setup_posttypes(self):
         return POST_TYPES
 
 
@@ -474,8 +469,14 @@ class TumblrAPI(oauth.OAuth1API):
                     board = False
 
                 if board:
-                    self.log.info("Run 'gallery-dl oauth:tumblr' "
-                                  "to access dashboard-only blogs")
+                    if self.api_key is None:
+                        self.log.info(
+                            "Ensure your 'access-token' and "
+                            "'access-token-secret' belong to the same "
+                            "application as 'api-key' and 'api-secret'")
+                    else:
+                        self.log.info("Run 'gallery-dl oauth:tumblr' "
+                                      "to access dashboard-only blogs")
                     raise exception.AuthorizationError(error)
                 raise exception.NotFoundError("user or post")
 

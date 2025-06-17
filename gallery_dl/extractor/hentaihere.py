@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2023 Mike Fährmann
+# Copyright 2016-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -10,7 +10,6 @@
 
 from .common import ChapterExtractor, MangaExtractor
 from .. import text, util
-import re
 
 
 class HentaihereBase():
@@ -34,8 +33,9 @@ class HentaihereChapterExtractor(HentaihereBase, ChapterExtractor):
         title = text.extr(page, "<title>", "</title>")
         chapter_id = text.extr(page, 'report/C', '"')
         chapter, sep, minor = self.chapter.partition(".")
-        pattern = r"Page 1 \| (.+) \(([^)]+)\) - Chapter \d+: (.+) by (.+) at "
-        match = re.match(pattern, title)
+        match = util.re(
+            r"Page 1 \| (.+) \(([^)]+)\) - Chapter \d+: (.+) by "
+            r"(.+) at ").match(title)
         return {
             "manga": match.group(1),
             "manga_id": text.parse_int(self.manga_id),
@@ -49,8 +49,7 @@ class HentaihereChapterExtractor(HentaihereBase, ChapterExtractor):
             "language": "English",
         }
 
-    @staticmethod
-    def images(page):
+    def images(self, page):
         images = text.extr(page, "var rff_imageList = ", ";")
         return [
             ("https://hentaicdn.com/hentai" + part, None)

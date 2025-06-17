@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright 2021-2023 Mike Fährmann
+# Copyright 2021-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -32,7 +32,7 @@ class TestFormatter(unittest.TestCase):
         "h": "<p>foo </p> &amp; bar <p> </p>",
         "u": "&#x27;&lt; / &gt;&#x27;",
         "t": 1262304000,
-        "ds": "2010-01-01T01:00:00+0100",
+        "ds": "2010-01-01T01:00:00+01:00",
         "dt": datetime.datetime(2010, 1, 1),
         "dt_dst": datetime.datetime(2010, 6, 1),
         "i_str": "12345",
@@ -65,6 +65,10 @@ class TestFormatter(unittest.TestCase):
         self._run_test("{n!S}", "")
         self._run_test("{t!d}", datetime.datetime(2010, 1, 1))
         self._run_test("{t!d:%Y-%m-%d}", "2010-01-01")
+        self._run_test("{t!D}" , datetime.datetime(2010, 1, 1))
+        self._run_test("{ds!D}", datetime.datetime(2010, 1, 1))
+        self._run_test("{dt!D}", datetime.datetime(2010, 1, 1))
+        self._run_test("{t!D:%Y-%m-%d}", "2010-01-01")
         self._run_test("{dt!T}", "1262304000")
         self._run_test("{l!j}", '["a","b","c"]')
         self._run_test("{dt!j}", '"2010-01-01 00:00:00"')
@@ -232,7 +236,7 @@ class TestFormatter(unittest.TestCase):
 
     def test_datetime(self):
         self._run_test("{ds:D%Y-%m-%dT%H:%M:%S%z}", "2010-01-01 00:00:00")
-        self._run_test("{ds:D%Y}", "2010-01-01T01:00:00+0100")
+        self._run_test("{ds:D%Y}", "2010-01-01T01:00:00+01:00")
         self._run_test("{l:D%Y}", "None")
 
     def test_offset(self):
@@ -420,7 +424,6 @@ class TestFormatter(unittest.TestCase):
         self._run_test("\fE name * 2 + ' ' + a", "{}{} {}".format(
             self.kwdict["name"], self.kwdict["name"], self.kwdict["a"]))
 
-    @unittest.skipIf(sys.hexversion < 0x3060000, "no fstring support")
     def test_fstring(self):
         self._run_test("\fF {a}", self.kwdict["a"])
         self._run_test("\fF {name}{name} {a}", "{}{} {}".format(
@@ -428,7 +431,6 @@ class TestFormatter(unittest.TestCase):
         self._run_test("\fF foo-'\"{a.upper()}\"'-bar",
                        """foo-'"{}"'-bar""".format(self.kwdict["a"].upper()))
 
-    @unittest.skipIf(sys.hexversion < 0x3060000, "no fstring support")
     def test_template_fstring(self):
         with tempfile.TemporaryDirectory() as tmpdirname:
             path1 = os.path.join(tmpdirname, "tpl1")
@@ -488,10 +490,10 @@ def noarg():
             fmt4 = formatter.parse("\fM " + path + ":lengths")
 
         self.assertEqual(fmt1.format_map(self.kwdict), "'Title' by Name")
-        self.assertEqual(fmt2.format_map(self.kwdict), "136")
+        self.assertEqual(fmt2.format_map(self.kwdict), "137")
 
         self.assertEqual(fmt3.format_map(self.kwdict), "'Title' by Name")
-        self.assertEqual(fmt4.format_map(self.kwdict), "136")
+        self.assertEqual(fmt4.format_map(self.kwdict), "137")
 
         with self.assertRaises(TypeError):
             self.assertEqual(fmt0.format_map(self.kwdict), "")

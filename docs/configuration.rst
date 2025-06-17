@@ -78,8 +78,8 @@ Description
 
     If this is an ``object``, it must contain Python expressions mapping to the
     filename format strings to use.
-    These expressions are evaluated in the order as specified in Python 3.6+
-    and in an undetermined order in Python 3.4 and 3.5.
+    These expressions are evaluated in the specified order until one evaluates
+    to ``True``.
 
     The available replacement keys depend on the extractor used. A list
     of keys for a specific one can be acquired by calling *gallery-dl*
@@ -207,11 +207,12 @@ Default
     ``"auto"``
 Example
     * ``"/!? (){}"``
-    * ``{" ": "_", "/": "-", "|": "-", ":": "_-_", "*": "_+_"}``
+    * ``{"/": "_", "+": "_+_", "({[": "(", "]})": ")", "a-z": "*"}``
 Description
-    | A string of characters to be replaced with the value of
+    | A ``string`` of characters to be replaced with the value of
       `path-replace <extractor.*.path-replace_>`__
-    | or an object mapping invalid/unwanted characters to their replacements
+    | or an ``object`` mapping invalid/unwanted characters, character sets,
+      or character ranges to their replacements
     | for generated path segment names.
 
     Special values:
@@ -390,13 +391,13 @@ Default
         ``[E621]``,
         ``[foolfuuka]:search``,
         ``itaku``,
-        ``koharu``,
         ``newgrounds``,
         ``[philomena]``,
         ``pixiv:novel``,
         ``plurk``,
         ``poipiku`` ,
         ``pornpics``,
+        ``schalenetwork``,
         ``scrolller``,
         ``soundgasm``,
         ``urlgalleries``,
@@ -453,25 +454,26 @@ Description
     * ``atfbooru`` (*)
     * ``bluesky``
     * ``booruvar`` (*)
-    * ``coomerparty``
+    * ``coomer``
     * ``danbooru`` (*)
     * ``deviantart``
     * ``e621`` (*)
     * ``e6ai`` (*)
     * ``e926`` (*)
     * ``exhentai``
+    * ``girlswithmuscle``
     * ``horne`` (R)
     * ``idolcomplex``
     * ``imgbb``
     * ``inkbunny``
-    * ``kemonoparty``
-    * ``koharu``
+    * ``kemono``
     * ``mangadex``
     * ``mangoxo``
     * ``newgrounds``
     * ``nijie`` (R)
     * ``pillowfort``
     * ``sankaku``
+    * ``schalenetwork``
     * ``scrolller``
     * ``seiga``
     * ``subscribestar``
@@ -663,6 +665,7 @@ Type
 Default
     * ``"gallery-dl/VERSION"``: ``[Danbooru]``, ``mangadex``, ``weasyl``
     * ``"gallery-dl/VERSION (by mikf)"``: ``[E621]``
+    * ``"net.umanle.arca.android.playstore/0.9.75"``: ``arcalive``
     * ``"Patreon/72.2.28 (Android; Android 14; Scale/2.10)"``: ``patreon``
     * ``"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/LATEST.0.0.0 Safari/537.36"``: ``instagram``
     * ``"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:LATEST) Gecko/20100101 Firefox/LATEST"``: otherwise
@@ -672,18 +675,13 @@ Description
     Setting this value to ``"browser"`` will try to automatically detect
     and use the ``User-Agent`` header of the system's default browser.
 
-    Note:
-    This option has *no* effect if
-    `extractor.browser <extractor.*.browser_>`__
-    is enabled.
-
 
 extractor.*.browser
 -------------------
 Type
     ``string``
 Default
-    * ``"firefox"``: ``artstation``, ``mangasee``, ``twitter``
+    * ``"firefox"``: ``artstation``, ``fanbox``, ``twitter``
     * ``null``: otherwise
 Example
     * ``"chrome:macos"``
@@ -725,7 +723,8 @@ Description
 extractor.*.headers
 -------------------
 Type
-    ``object`` (`name` -> `value`)
+    * ``"string"``
+    * ``object`` (`name` -> `value`)
 Default
     .. code:: json
 
@@ -743,18 +742,23 @@ Description
 
     To disable sending a header, set its value to ``null``.
 
+    Set this option to ``"firefox"`` or ``"chrome"``
+    to use these browser's default headers.
+
 
 extractor.*.ciphers
 -------------------
 Type
-    ``list`` of ``strings``
+    * ``string``
+    * ``list`` of ``strings``
 Example
-    .. code:: json
+    * ``"firefox"``
+    * .. code:: json
 
-      ["ECDHE-ECDSA-AES128-GCM-SHA256",
-       "ECDHE-RSA-AES128-GCM-SHA256",
-       "ECDHE-ECDSA-CHACHA20-POLY1305",
-       "ECDHE-RSA-CHACHA20-POLY1305"]
+        ["ECDHE-ECDSA-AES128-GCM-SHA256",
+         "ECDHE-RSA-AES128-GCM-SHA256",
+         "ECDHE-ECDSA-CHACHA20-POLY1305",
+         "ECDHE-RSA-CHACHA20-POLY1305"]
 
 Description
     List of TLS/SSL cipher suites in
@@ -762,13 +766,16 @@ Description
     to be passed to
     `ssl.SSLContext.set_ciphers() <https://docs.python.org/3/library/ssl.html#ssl.SSLContext.set_ciphers>`__
 
+    Set this option to ``"firefox"`` or ``"chrome"``
+    to use these browser's default ciphers.
+
 
 extractor.*.tls12
 -----------------
 Type
     ``bool``
 Default
-    * ``false``: ``artstation``
+    * ``false``: ``artstation``, ``behance``
     * ``true``: otherwise
 Description
     Allow selecting TLS 1.2 cipher suites.
@@ -1843,10 +1850,10 @@ Type
 Default
     ``false``
 Example
-    * ``"generation"``
-    * ``["generation"]``
+    * ``"generation,version"``
+    * ``["generation", "version"]``
 Description
-    Extract additional ``generation`` metadata.
+    Extract additional ``generation`` and ``version`` metadata.
 
     Note: This requires 1 additional HTTP request per image or video.
 
@@ -1860,7 +1867,7 @@ Type
 Default
     ``true``
 Description
-    Download images rated NSFW.
+    Download NSFW-rated images.
 
     * For ``"api": "rest"``, this can be one of
       ``"None"``, ``"Soft"``, ``"Mature"``, ``"X"``
@@ -1869,8 +1876,8 @@ Description
     * For ``"api": "trpc"``, this can be an ``integer``
       whose bits select the returned mature content flags.
 
-      For example, ``12`` (``4|8``)  would return only
-      ``Mature`` and ``X`` rated images,
+      For example, ``28`` (``4|8|16``)  would return only
+      ``R``, ``X``, and ``XXX`` rated images,
       while ``3`` (``1|2``) would return only
       ``None`` and ``Soft`` rated images,
 
@@ -1893,6 +1900,26 @@ Description
 
     Note: Set this option to an arbitrary letter, e.g., ``"w"``,
     to download images in JPEG format at their original resolution.
+
+
+extractor.civitai.quality-videos
+--------------------------------
+Type
+    * ``string``
+    * ``list`` of ``strings``
+Default
+    ``"quality=100"``
+Example
+    * ``"+transcode=true,quality=100"``
+    * ``["+", "transcode=true", "quality=100"]``
+Description
+    A (comma-separated) list of video quality options
+    to pass with every video URL.
+
+    Known available options include ``original``, ``quality``, ``transcode``
+
+    Use ``+`` as first character to `add` the given options to the
+    `quality <extractor.civitai.quality_>`__ ones.
 
 
 extractor.cyberdrop.domain
@@ -2368,6 +2395,17 @@ Description
     You can follow `this guide <https://github.com/Tyrrrz/DiscordChatExporter/blob/master/.docs/Token-and-IDs.md#how-to-get-a-user-token>`__ to get a token.
 
 
+extractor.dynastyscans.anthology.metadata
+-----------------------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Extract ``alert``, ``description``, and ``status`` metadata
+    from an anthology's HTML page.
+
+
 extractor.[E621].metadata
 -------------------------
 Type
@@ -2463,8 +2501,23 @@ Type
 Default
     ``null``
 Description
-    Sets a custom image download limit and
-    stops extraction when it gets exceeded.
+    Set a custom image download limit and perform
+    `limits-action <extractor.exhentai.limits-action_>`__
+    when it gets exceeded.
+
+
+extractor.exhentai.limits-action
+--------------------------------
+Type
+    ``string``
+Default
+    ``"stop"``
+Description
+    Action to perform when the image limit is exceeded.
+
+    * `"stop"`: Stop the current extractor run.
+    * `"wait"`: Wait for user input.
+    * `"reset"`: Spend GP to reset your account's image limits.
 
 
 extractor.exhentai.metadata
@@ -2477,8 +2530,8 @@ Description
     Load extended gallery metadata from the
     `API <https://ehwiki.org/wiki/API#Gallery_Metadata>`_.
 
-    Adds ``archiver_key``, ``posted``, and ``torrents``.
-    Makes ``date`` and ``filesize`` more precise.
+    * Adds ``archiver_key``, ``posted``, and ``torrents``
+    * Provides exact ``date`` and ``filesize``
 
 
 extractor.exhentai.original
@@ -2501,6 +2554,8 @@ Description
     Selects an alternative source to download files from.
 
     * ``"hitomi"``:  Download the corresponding gallery from ``hitomi.la``
+    * ``"metadata"``:  Load only a gallery's metadata from the
+      `API <https://ehwiki.org/wiki/API#Gallery_Metadata>`_
 
 
 extractor.exhentai.tags
@@ -2633,6 +2688,19 @@ Description
     See `flickr.photos.getExif <https://www.flickr.com/services/api/flickr.photos.getExif.html>`__ for details.
 
 
+extractor.flickr.info
+---------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    For each photo, retrieve its "full" metadata as provided by
+    `flickr.photos.getInfo <https://www.flickr.com/services/api/flickr.photos.getInfo.html>`__
+
+    Note: This requires 1 additional API call per photo.
+
+
 extractor.flickr.metadata
 -------------------------
 Type
@@ -2652,6 +2720,19 @@ Description
     See `the extras parameter <https://www.flickr.com/services/api/flickr.people.getPhotos.html>`__
     in `Flickr's API docs <https://www.flickr.com/services/api/>`__
     for possible field names.
+
+
+extractor.flickr.profile
+------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Extract additional ``user`` profile metadata.
+
+    Note: This requires 1 additional API call per user profile.
+    See `flickr.people.getInfo <https://www.flickr.com/services/api/flickr.people.getInfo.html>`__ for details.
 
 
 extractor.flickr.videos
@@ -3039,6 +3120,16 @@ Description
         Do not download videos
 
 
+extractor.instagram.stories.split
+---------------------------------
+Type
+    * ``bool``
+Default
+    ``false``
+Description
+    Split ``stories`` elements into separate posts.
+
+
 extractor.itaku.videos
 ----------------------
 Type
@@ -3049,8 +3140,8 @@ Description
     Download video files.
 
 
-extractor.kemonoparty.archives
-------------------------------
+extractor.kemono.archives
+-------------------------
 Type
     ``bool``
 Default
@@ -3062,8 +3153,8 @@ Description
     Note: This requires 1 additional HTTP request per ``archives`` file.
 
 
-extractor.kemonoparty.comments
-------------------------------
+extractor.kemono.comments
+-------------------------
 Type
     ``bool``
 Default
@@ -3074,8 +3165,8 @@ Description
     Note: This requires 1 additional HTTP request per post.
 
 
-extractor.kemonoparty.duplicates
---------------------------------
+extractor.kemono.duplicates
+---------------------------
 Type
     ``bool``
 Default
@@ -3087,8 +3178,8 @@ Description
     * ``false``: Ignore duplicates
 
 
-extractor.kemonoparty.dms
--------------------------
+extractor.kemono.dms
+--------------------
 Type
     ``bool``
 Default
@@ -3097,8 +3188,8 @@ Description
     Extract a user's direct messages as ``dms`` metadata.
 
 
-extractor.kemonoparty.announcements
------------------------------------
+extractor.kemono.announcements
+------------------------------
 Type
     ``bool``
 Default
@@ -3107,20 +3198,47 @@ Description
     Extract a user's announcements as ``announcements`` metadata.
 
 
-extractor.kemonoparty.favorites
--------------------------------
+extractor.kemono.endpoint
+-------------------------
 Type
     ``string``
 Default
-    ``artist``
+    ``"posts"``
+Description
+    API endpoint to use for retrieving creator posts.
+
+    ``"legacy"``
+        | Use the results from
+          `/v1/{service}/user/{creator_id}/posts-legacy <https://kemono.su/documentation/api#operations-default-get_v1__service__user__creator_id__posts_legacy>`__
+        | Provides less metadata, but is more reliable at returning all posts.
+        | Supports filtering results by ``tag`` query parameter.
+    ``"legacy+"``
+        | Use the results from
+          `/v1/{service}/user/{creator_id}/posts-legacy <https://kemono.su/documentation/api#operations-default-get_v1__service__user__creator_id__posts_legacy>`__
+          to retrieve post IDs
+        | and one request to
+          `/v1/{service}/user/{creator_id}/post/{post_id} <https://kemono.su/documentation/api#operations-Posts-get_v1__service__user__creator_id__post__post_id_>`__
+          to get a full set of metadata for each.
+    ``"posts"``
+        | Use the results from
+          `/v1/{service}/user/{creator_id} <https://kemono.su/documentation/api#operations-Posts-get_v1__service__user__creator_id_>`__
+        | Provides more metadata, but might not return a creator's first/last posts.
+
+
+extractor.kemono.favorites
+--------------------------
+Type
+    ``string``
+Default
+    ``"artist"``
 Description
     Determines the type of favorites to be downloaded.
 
     Available types are ``artist``, and ``post``.
 
 
-extractor.kemonoparty.files
----------------------------
+extractor.kemono.files
+----------------------
 Type
     ``list`` of ``strings``
 Default
@@ -3131,8 +3249,8 @@ Description
     Available types are ``file``, ``attachments``, and ``inline``.
 
 
-extractor.kemonoparty.max-posts
--------------------------------
+extractor.kemono.max-posts
+--------------------------
 Type
     ``integer``
 Default
@@ -3141,8 +3259,8 @@ Description
     Limit the number of posts to download.
 
 
-extractor.kemonoparty.metadata
-------------------------------
+extractor.kemono.metadata
+-------------------------
 Type
     ``bool``
 Default
@@ -3151,8 +3269,8 @@ Description
     Extract ``username`` and ``user_profile`` metadata.
 
 
-extractor.kemonoparty.revisions
--------------------------------
+extractor.kemono.revisions
+--------------------------
 Type
     * ``bool``
     * ``string``
@@ -3166,15 +3284,15 @@ Description
     Note: This requires 1 additional HTTP request per post.
 
 
-extractor.kemonoparty.order-revisions
--------------------------------------
+extractor.kemono.order-revisions
+--------------------------------
 Type
     ``string``
 Default
     ``"desc"``
 Description
     Controls the order in which
-    `revisions <extractor.kemonoparty.revisions_>`__
+    `revisions <extractor.kemono.revisions_>`__
     are returned.
 
     * ``"asc"``: Ascending order (oldest first)
@@ -3208,8 +3326,8 @@ Description
     the first in the list gets chosen (usually `mp3`).
 
 
-extractor.koharu.cbz
---------------------
+extractor.schalenetwork.cbz
+---------------------------
 Type
     ``bool``
 Default
@@ -3221,8 +3339,8 @@ Description
     to be downloaded as individual image files.
 
 
-extractor.koharu.format
------------------------
+extractor.schalenetwork.format
+------------------------------
 Type
     * ``string``
     * ``list`` of ``strings``
@@ -3237,8 +3355,8 @@ Description
     | ``"780"``, ``"980"``, ``"1280"``, ``"1600"``, ``"0"`` (original)
 
 
-extractor.koharu.tags
----------------------
+extractor.schalenetwork.tags
+----------------------------
 Type
     ``bool``
 Default
@@ -3403,6 +3521,29 @@ Type
     ``string``
 Description
     Your access token, necessary to fetch favorited notes.
+
+
+extractor.[misskey].include
+---------------------------
+Type
+    * ``string``
+    * ``list`` of ``strings``
+Default
+    ``"notes"``
+Example
+    * ``"avatar,background,notes"``
+    * ``["avatar", "background", "notes"]``
+Description
+    A (comma-separated) list of subcategories to include
+    when processing a user profile.
+
+    Possible values are
+    ``"info"``,
+    ``"avatar"``,
+    ``"background"``,
+    ``"notes"``,
+
+    It is possible to use ``"all"`` instead of listing all values separately.
 
 
 extractor.[misskey].renotes
@@ -3777,6 +3918,16 @@ Type
     ``string``
 Description
     Your account's `API key <https://pixeldrain.com/user/api_keys>`__
+
+
+extractor.pixeldrain.recursive
+------------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Recursively download files from subfolders.
 
 
 extractor.pixiv.include
@@ -4224,6 +4375,39 @@ Description
     Refresh download URLs before they expire.
 
 
+extractor.sankaku.tags
+----------------------
+Type
+    * ``bool``
+    * ``string``
+Default
+    ``false``
+Description
+    | Group ``tags`` by type and
+      provide them as ``tags_TYPE`` and ``tag_string_TYPE`` metadata fields,
+    | for example ``tags_artist`` and ``tags_character``.
+
+    ``true``
+        Enable general ``tags`` categories
+
+        Requires:
+
+        * 1 additional API request per 100 tags per post
+
+    ``"extended"``
+        Group ``tags`` by the new, extended tag category system
+        used on ``chan.sankakucomplex.com``
+
+        Requires:
+
+        * 1 additional HTTP request per post
+        * logged-in `cookies <extractor.*.cookies_>`__
+          to fetch full ``tags`` category data
+
+    ``false``
+        Disable ``tags`` categories
+
+
 extractor.sankakucomplex.embeds
 -------------------------------
 Type
@@ -4242,6 +4426,16 @@ Default
     ``true``
 Description
     Download videos.
+
+
+extractor.sexcom.gifs
+---------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Download animated images as ``.gif`` instead of ``.webp``
 
 
 extractor.skeb.article
@@ -5519,10 +5713,22 @@ Type
 Default
     ``true``
 Description
-    Enables the use of |ytdl's| ``generic`` extractor.
+    Enables the use of |ytdl's| ``Generic`` extractor.
 
     Set this option to ``"force"`` for the same effect as
     ``--force-generic-extractor``.
+
+
+extractor.ytdl.generic-category
+-------------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    When using |ytdl's| ``Generic`` extractor,
+    change `category` to ``"ytdl-generic"`` and
+    set `subcategory` to the input URL's domain.
 
 
 extractor.ytdl.logging
@@ -5784,17 +5990,25 @@ Description
 downloader.*.rate
 -----------------
 Type
-    ``string``
+    * ``string``
+    * ``list`` with 2 ``strings``
 Default
     ``null``
 Example
-    ``"32000"``, ``"500k"``, ``"2.5M"``
+    * ``"32000"``
+    * ``"500k"``
+    * ``"1M - 2.5M"``
+    * ``["1M", "2.5M"]``
 Description
     Maximum download rate in bytes per second.
 
     Possible values are valid integer or floating-point numbers
     optionally followed by one of ``k``, ``m``. ``g``, ``t``, or ``p``.
     These suffixes are case-insensitive.
+
+    If given as a range, the maximum download rate
+    will be randomly chosen before each download.
+    (see `random.randint() <https://docs.python.org/3/library/random.html#random.randint>`_)
 
 
 downloader.*.retries
@@ -6103,8 +6317,8 @@ Description
     * ``"pipe"``: Suitable for piping to other processes or files
     * ``"terminal"``: Suitable for the standard Windows console
     * ``"color"``: Suitable for terminals that understand ANSI escape codes and colors
-    * ``"auto"``: ``"terminal"`` on Windows with `output.ansi`_ disabled,
-      ``"color"`` otherwise.
+    * ``"auto"``: ``"pipe"`` if not on a TTY, ``"terminal"`` on Windows with
+      `output.ansi`_ disabled, ``"color"`` otherwise.
 
     | It is possible to use custom output format strings
       by setting this option to an ``object`` and specifying
@@ -6449,6 +6663,19 @@ Description
     Only compare file sizes. Do not read and compare their content.
 
 
+directory.event
+---------------
+Type
+    * ``string``
+    * ``list`` of ``strings``
+Default
+    ``"prepare"``
+Description
+    The event(s) for which directory_ format strings are (re)evaluated.
+
+    See `metadata.event`_ for a list of available events.
+
+
 exec.archive
 ------------
 Type
@@ -6498,6 +6725,25 @@ Description
       Each element of this list is treated as a `format string`_ using
       the files' metadata as well as ``{_path}``, ``{_directory}``,
       and ``{_filename}``.
+
+
+exec.commands
+-------------
+Type
+    ``list`` of `commands <exec.command_>`__
+Example
+    .. code:: json
+
+        [
+            ["echo", "{user[account]}", "{id}"]
+            ["magick", "convert" "{_path}",  "\fF {_path.rpartition('.')[0]}.png"],
+            "rm {}",
+        ]
+Description
+    Multiple `commands <exec.command_>`__ to run in succession.
+
+    All `commands <exec.command_>`__ after the first returning with a non-zero
+    exit status will not be run.
 
 
 exec.event
@@ -7353,6 +7599,50 @@ Description
     or by `extractor.modules`_.
 
 
+extractor.category-map
+----------------------
+Type
+    * ``object`` (`category` -> `category`)
+    * ``string``
+Example
+    .. code:: json
+
+        {
+            "danbooru": "booru",
+            "gelbooru": "booru"
+        }
+Description
+    A JSON object mapping category names to their replacements.
+
+    Special values:
+
+    * ``"compat"``
+        .. code:: json
+
+            {
+                "coomer"       : "coomerparty",
+                "kemono"       : "kemonoparty",
+                "schalenetwork": "koharu"
+            }
+
+
+extractor.config-map
+--------------------
+Type
+    ``object`` (`category` -> `category`)
+Default
+    .. code:: json
+
+        {
+            "coomerparty": "coomer",
+            "kemonoparty": "kemono",
+            "koharu"     : "schalenetwork"
+        }
+Description
+    Duplicate the configuration settings of extractor `categories`
+    to other names.
+
+
 globals
 -------
 Type
@@ -7513,6 +7803,23 @@ How To
       and click "SUBMIT"
     * copy ``Key`` and ``Secret`` and put them in your configuration file
       as ``"api-key"`` and ``"api-secret"``
+
+
+extractor.mangadex.client-id & .client-secret
+---------------------------------------------
+Type
+    ``string``
+How To
+    * login and go to your `User Settings <https://mangadex.org/settings>`__
+    * open the "API Clients" section
+    * click "``+ Create``"
+    * choose a name
+    * click "``✔️ Create``"
+    * wait for approval / reload the page
+    * copy the value after "AUTOAPPROVED ACTIVE" in the form "personal-client-..."
+      and put it in your configuration file as ``"client-id"``
+    * click "``Get Secret``", then "``Copy Secret``",
+      and paste it into your configuration file as ``"client-secret"``
 
 
 extractor.reddit.client-id & .user-agent
@@ -7747,6 +8054,8 @@ Description
     ``compare``
         | Compare versions of the same file and replace/enumerate them on mismatch
         | (requires `downloader.*.part`_ = ``true`` and `extractor.*.skip`_ = ``false``)
+    ``directory``
+        Reevaluate directory_ format strings
     ``exec``
         Execute external commands
     ``hash``

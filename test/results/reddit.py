@@ -184,7 +184,7 @@ __tests__ = (
     "#comment" : "comment embeds (#5366)",
     "#class"   : reddit.RedditSubmissionExtractor,
     "#options" : {"comments": 10},
-    "#urls"    : (
+    "#results" : (
         "https://i.redd.it/ppt5yciyipgb1.jpg",
         "https://i.redd.it/u0ojzd69kpgb1.png",
     ),
@@ -195,7 +195,7 @@ __tests__ = (
     "#comment" : "disabled comment embeds (#6357)",
     "#class"   : reddit.RedditSubmissionExtractor,
     "#options" : {"comments": 10, "embeds": False},
-    "#urls"    : "https://i.redd.it/ppt5yciyipgb1.jpg",
+    "#results" : "https://i.redd.it/ppt5yciyipgb1.jpg",
 },
 
 {
@@ -220,7 +220,7 @@ __tests__ = (
     "#comment" : "preview.redd.it (#4470)",
     "#category": ("", "reddit", "submission"),
     "#class"   : reddit.RedditSubmissionExtractor,
-    "#urls"    : "https://preview.redd.it/u9ud4k6xaf271.jpg?auto=webp&s=19b1334cb4409111cda136c01f7b44c2c42bf9fb",
+    "#results" : "https://preview.redd.it/u9ud4k6xaf271.jpg?auto=webp&s=19b1334cb4409111cda136c01f7b44c2c42bf9fb",
 },
 
 {
@@ -229,7 +229,7 @@ __tests__ = (
     "#category": ("", "reddit", "submission"),
     "#class"   : reddit.RedditSubmissionExtractor,
     "#options" : {"selftext": True, "comments": 0},
-    "#urls"    : (
+    "#results" : (
         "https://www.reddit.com/r/gonewildaudio/s/22pP7vizkx",
         "https://soundgasm.net/u/chuwa/Your-Timid-Neighbor-Asks-You-To-Turn-Your-Music-Down-So-You-Fuck-Her-Stupid",
     ),
@@ -240,7 +240,7 @@ __tests__ = (
     "#comment" : "redgifs embed",
     "#category": ("", "reddit", "submission"),
     "#class"   : reddit.RedditSubmissionExtractor,
-    "#urls"    : "https://redgifs.com/watch/foolishforkedabyssiniancat",
+    "#results" : "https://redgifs.com/watch/foolishforkedabyssiniancat",
 },
 
 {

@@ -12,7 +12,7 @@ __tests__ = (
     "#url"     : "https://www.mediawiki.org/wiki/Help:Navigation",
     "#category": ("wikimedia", "mediawiki", "help"),
     "#class"   : wikimedia.WikimediaArticleExtractor,
-    "#urls"    : (
+    "#results" : (
         "https://upload.wikimedia.org/wikipedia/commons/e/ec/OOjs_UI_icon_information-progressive.svg",
         "https://upload.wikimedia.org/wikipedia/commons/6/62/PD-icon.svg",
         "https://upload.wikimedia.org/wikipedia/commons/0/0e/Vector_Sidebar.png",

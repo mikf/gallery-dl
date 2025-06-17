@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2020-2023 Mike Fährmann
+# Copyright 2020-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -11,7 +11,6 @@
 from .common import Extractor, Message
 from .. import text, util, exception
 from ..cache import cache
-import re
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?subscribestar\.(com|adult)"
 
@@ -40,8 +39,13 @@ class SubscribestarExtractor(Extractor):
         for post_html in self.posts():
             media = self._media_from_post(post_html)
             data = self._data_from_post(post_html)
-            data["title"] = text.unescape(text.extr(
-                data["content"], "<h1>", "</h1>"))
+
+            content = data["content"]
+            if "<html><body>" in content:
+                data["content"] = content = text.extr(
+                    content, "<body>", "</body>")
+            data["title"] = text.unescape(text.rextr(content, "<h1>", "</h1>"))
+
             yield Message.Directory, data
             for num, item in enumerate(media, 1):
                 item.update(data)
@@ -153,8 +157,8 @@ class SubscribestarExtractor(Extractor):
         attachments = text.extr(
             html, 'class="uploads-docs"', 'class="post-edit_form"')
         if attachments:
-            for att in re.split(
-                    r'class="doc_preview[" ]', attachments)[1:]:
+            for att in util.re(r'class="doc_preview[" ]').split(
+                    attachments)[1:]:
                 media.append({
                     "id"  : text.parse_int(text.extr(
                         att, 'data-upload-id="', '"')),
@@ -167,8 +171,8 @@ class SubscribestarExtractor(Extractor):
         audios = text.extr(
             html, 'class="uploads-audios"', 'class="post-edit_form"')
         if audios:
-            for audio in re.split(
-                    r'class="audio_preview-data[" ]', audios)[1:]:
+            for audio in util.re(r'class="audio_preview-data[" ]').split(
+                    audios)[1:]:
                 media.append({
                     "id"  : text.parse_int(text.extr(
                         audio, 'data-upload-id="', '"')),
@@ -189,7 +193,12 @@ class SubscribestarExtractor(Extractor):
             "author_nick": text.unescape(extr('>', '<')),
             "date"       : self._parse_datetime(extr(
                 'class="post-date">', '</').rpartition(">")[2]),
-            "content"    : extr('<body>', '</body>').strip(),
+            "content"    : extr(
+                '<div class="post-content" data-role="post_content-text">',
+                '</div><div class="post-uploads for-youtube"').strip(),
+            "tags"       : list(text.extract_iter(extr(
+                '<div class="post_tags for-post">',
+                '<div class="post-actions">'), '?tag=', '"')),
         }
 
     def _parse_datetime(self, dt):
@@ -243,7 +252,12 @@ class SubscribestarPostExtractor(SubscribestarExtractor):
             "post_id"    : text.parse_int(extr('data-id="', '"')),
             "date"       : self._parse_datetime(extr(
                 '<div class="section-title_date">', '<')),
-            "content"    : extr('<body>', '</body>').strip(),
+            "content"    : extr(
+                '<div class="post-content" data-role="post_content-text">',
+                '</div><div class="post-uploads for-youtube"').strip(),
+            "tags"       : list(text.extract_iter(extr(
+                '<div class="post_tags for-post">',
+                '<div class="post-actions">'), '?tag=', '"')),
             "author_name": text.unescape(extr(
                 'class="star_link" href="/', '"')),
             "author_id"  : text.parse_int(extr('data-user-id="', '"')),

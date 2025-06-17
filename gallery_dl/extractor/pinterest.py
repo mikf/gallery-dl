@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2023 Mike Fährmann
+# Copyright 2016-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -54,6 +54,15 @@ class PinterestExtractor(Extractor):
 
             pin.update(data)
             pin["count"] = len(files)
+
+            for key in (
+                "description",
+                "closeup_description",
+                "closeup_unified_description",
+            ):
+                value = pin.get(key)
+                if value:
+                    pin[key] = value.strip()
 
             yield Message.Directory, pin
             for pin["num"], file in enumerate(files, 1):
@@ -131,6 +140,9 @@ class PinterestExtractor(Extractor):
                     media = {"url": "text:" + block["text"],
                              "extension": "txt",
                              "media_id": block.get("id")}
+
+                elif type == "story_pin_product_sticker_block":
+                    continue
 
                 elif type == "story_pin_static_sticker_block":
                     continue

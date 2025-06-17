@@ -391,8 +391,7 @@ class DiscordAPI():
                 return
             offset += len(data)
 
-    @staticmethod
-    def _raise_invalid_token():
+    def _raise_invalid_token(self):
         raise exception.AuthenticationError("""Invalid or missing token.
 Please provide a valid token following these instructions:
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2023 Mike Fährmann
+# Copyright 2014-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -17,9 +17,10 @@ import queue
 import random
 import getpass
 import logging
-import datetime
 import requests
 import threading
+from datetime import datetime
+from xml.etree import ElementTree
 from requests.adapters import HTTPAdapter
 from .message import Message
 from .. import config, output, text, util, cache, exception
@@ -53,6 +54,9 @@ class Extractor():
         self.url = match.string
         self.match = match
         self.groups = match.groups()
+
+        if self.category in CATEGORY_MAP:
+            self.category = CATEGORY_MAP[self.category]
         self._cfgpath = ("extractor", self.category, self.subcategory)
         self._parentdir = ""
 
@@ -172,7 +176,6 @@ class Extractor():
             try:
                 response = session.request(method, url, **kwargs)
             except requests.exceptions.ConnectionError as exc:
-                code = 0
                 try:
                     reason = exc.args[0].reason
                     cls = reason.__class__.__name__
@@ -180,13 +183,15 @@ class Extractor():
                     msg = " {}: {}".format(cls, (err or pre).lstrip())
                 except Exception:
                     msg = exc
+                code = 0
             except (requests.exceptions.Timeout,
                     requests.exceptions.ChunkedEncodingError,
                     requests.exceptions.ContentDecodingError) as exc:
                 msg = exc
                 code = 0
             except (requests.exceptions.RequestException) as exc:
-                raise exception.HttpError(exc)
+                msg = exc
+                break
             else:
                 code = response.status_code
                 if self._write_pages:
@@ -238,12 +243,42 @@ class Extractor():
                 self.sleep(seconds, "retry")
             tries += 1
 
+        if not fatal or fatal is ...:
+            self.log.warning(msg)
+            return util.NullResponse(url, msg)
         raise exception.HttpError(msg, response)
 
     def request_location(self, url, **kwargs):
         kwargs.setdefault("method", "HEAD")
         kwargs.setdefault("allow_redirects", False)
         return self.request(url, **kwargs).headers.get("location", "")
+
+    def request_json(self, url, **kwargs):
+        try:
+            return util.json_loads(self.request(url, **kwargs).text)
+        except Exception as exc:
+            fatal = kwargs.get("fatal", True)
+            if not fatal or fatal is ...:
+                self.log.warning("%s: %s", exc.__class__.__name__, exc)
+                return {}
+            raise
+
+    def request_xml(self, url, xmlns=True, **kwargs):
+        text = self.request(url, **kwargs).text
+
+        if not xmlns:
+            text = text.replace(" xmlns=", " ns=")
+
+        parser = ElementTree.XMLParser()
+        try:
+            parser.feed(text)
+            return parser.close()
+        except Exception as exc:
+            fatal = kwargs.get("fatal", True)
+            if not fatal or fatal is ...:
+                self.log.warning("%s: %s", exc.__class__.__name__, exc)
+                return ElementTree.Element("")
+            raise
 
     _handle_429 = util.false
 
@@ -255,7 +290,7 @@ class Extractor():
             seconds = float(seconds)
             until = now + seconds
         elif until:
-            if isinstance(until, datetime.datetime):
+            if isinstance(until, datetime):
                 # convert to UTC timestamp
                 until = util.datetime_to_timestamp(until)
             else:
@@ -269,7 +304,7 @@ class Extractor():
             return
 
         if reason:
-            t = datetime.datetime.fromtimestamp(until).time()
+            t = datetime.fromtimestamp(until).time()
             isotime = "{:02}:{:02}:{:02}".format(t.hour, t.minute, t.second)
             self.log.info("Waiting until %s (%s)", isotime, reason)
         time.sleep(seconds)
@@ -384,18 +419,13 @@ class Extractor():
                             ssl.OP_NO_TLSv1 | ssl.OP_NO_TLSv1_1)
             ssl_ciphers = SSL_CIPHERS[browser]
         else:
-            useragent = self.config("user-agent")
-            if useragent is None or useragent == "auto":
-                useragent = self.useragent
-            elif useragent == "browser":
-                useragent = _browser_useragent()
-            elif self.useragent is not Extractor.useragent and \
-                    useragent is config.get(("extractor",), "user-agent"):
-                useragent = self.useragent
-            headers["User-Agent"] = useragent
+            headers["User-Agent"] = self.useragent
             headers["Accept"] = "*/*"
             headers["Accept-Language"] = "en-US,en;q=0.5"
+
             ssl_ciphers = self.ciphers
+            if ssl_ciphers is not None and ssl_ciphers in SSL_CIPHERS:
+                ssl_ciphers = SSL_CIPHERS[ssl_ciphers]
 
         if BROTLI:
             headers["Accept-Encoding"] = "gzip, deflate, br"
@@ -411,14 +441,32 @@ class Extractor():
             elif self.root:
                 headers["Referer"] = self.root + "/"
 
+        custom_ua = self.config("user-agent")
+        if custom_ua is None or custom_ua == "auto":
+            pass
+        elif custom_ua == "browser":
+            headers["User-Agent"] = _browser_useragent()
+        elif self.useragent is Extractor.useragent or \
+                custom_ua is not config.get(("extractor",), "user-agent"):
+            headers["User-Agent"] = custom_ua
+
         custom_headers = self.config("headers")
         if custom_headers:
+            if isinstance(custom_headers, str):
+                if custom_headers in HTTP_HEADERS:
+                    custom_headers = HTTP_HEADERS[custom_headers]
+                else:
+                    self.log.error("Invalid 'headers' value '%s'",
+                                   custom_headers)
+                    custom_headers = ()
             headers.update(custom_headers)
 
         custom_ciphers = self.config("ciphers")
         if custom_ciphers:
             if isinstance(custom_ciphers, list):
                 ssl_ciphers = ":".join(custom_ciphers)
+            elif custom_ciphers in SSL_CIPHERS:
+                ssl_ciphers = SSL_CIPHERS[custom_ciphers]
             else:
                 ssl_ciphers = custom_ciphers
 
@@ -469,9 +517,11 @@ class Extractor():
                 with open(path) as fp:
                     cookies = util.cookiestxt_load(fp)
             except Exception as exc:
-                self.log.warning("cookies: %s", exc)
+                self.log.warning("cookies: Failed to load '%s' (%s: %s)",
+                                 cookies_source, exc.__class__.__name__, exc)
             else:
-                self.log.debug("Loading cookies from '%s'", cookies_source)
+                self.log.debug("cookies: Loading cookies from '%s'",
+                               cookies_source)
                 set_cookie = self.cookies.set_cookie
                 for cookie in cookies:
                     set_cookie(cookie)
@@ -491,16 +541,16 @@ class Extractor():
                 else:
                     _browser_cookies[key] = cookies
             else:
-                self.log.debug("Using cached cookies from %s", key)
+                self.log.debug("cookies: Using cached cookies from %s", key)
 
             set_cookie = self.cookies.set_cookie
             for cookie in cookies:
                 set_cookie(cookie)
 
         else:
-            self.log.warning(
-                "Expected 'dict', 'list', or 'str' value for 'cookies' "
-                "option, got '%s' (%s)",
+            self.log.error(
+                "cookies: Expected 'dict', 'list', or 'str' value for "
+                "'cookies' option, got '%s' instead (%r)",
                 cookies_source.__class__.__name__, cookies_source)
 
     def cookies_store(self):
@@ -522,7 +572,8 @@ class Extractor():
                 util.cookiestxt_store(fp, self.cookies)
             os.replace(path_tmp, path)
         except OSError as exc:
-            self.log.warning("cookies: %s", exc)
+            self.log.error("cookies: Failed to write to '%s' "
+                           "(%s: %s)", path, exc.__class__.__name__, exc)
 
     def cookies_update(self, cookies, domain=""):
         """Update the session's cookiejar with 'cookies'"""
@@ -568,14 +619,17 @@ class Extractor():
 
                 if diff <= 0:
                     self.log.warning(
-                        "Cookie '%s' has expired", cookie.name)
+                        "cookies: %s/%s expired at %s",
+                        cookie.domain.lstrip("."), cookie.name,
+                        datetime.fromtimestamp(cookie.expires))
                     continue
 
                 elif diff <= 86400:
                     hours = diff // 3600
                     self.log.warning(
-                        "Cookie '%s' will expire in less than %s hour%s",
-                        cookie.name, hours + 1, "s" if hours else "")
+                        "cookies: %s/%s will expire in less than %s hour%s",
+                        cookie.domain.lstrip("."), cookie.name,
+                        hours + 1, "s" if hours else "")
 
             names.discard(cookie.name)
             if not names:
@@ -590,11 +644,6 @@ class Extractor():
         return util.json_loads(text.extr(
             page, ' id="__NEXT_DATA__" type="application/json">', "</script>"))
 
-    def _prepare_ddosguard_cookies(self):
-        if not self.cookies.get("__ddg2", domain=self.cookies_domain):
-            self.cookies.set(
-                "__ddg2", util.generate_token(), domain=self.cookies_domain)
-
     def _cache(self, func, maxage, keyarg=None):
         #  return cache.DatabaseCacheDecorator(func, maxage, keyarg)
         return cache.DatabaseCacheDecorator(func, keyarg, maxage)
@@ -608,7 +657,7 @@ class Extractor():
             ts = self.config(key, default)
             if isinstance(ts, str):
                 try:
-                    ts = int(datetime.datetime.strptime(ts, fmt).timestamp())
+                    ts = int(datetime.strptime(ts, fmt).timestamp())
                 except ValueError as exc:
                     self.log.warning("Unable to parse '%s': %s", key, exc)
                     ts = default
@@ -616,35 +665,12 @@ class Extractor():
         fmt = self.config("date-format", "%Y-%m-%dT%H:%M:%S")
         return get("date-min", dmin), get("date-max", dmax)
 
-    def _dispatch_extractors(self, extractor_data, default=()):
-        """ """
-        extractors = {
-            data[0].subcategory: data
-            for data in extractor_data
-        }
-
-        include = self.config("include", default) or ()
-        if include == "all":
-            include = extractors
-        elif isinstance(include, str):
-            include = include.replace(" ", "").split(",")
-
-        result = [(Message.Version, 1)]
-        for category in include:
-            try:
-                extr, url = extractors[category]
-            except KeyError:
-                self.log.warning("Invalid include '%s'", category)
-            else:
-                result.append((Message.Queue, url, {"_extractor": extr}))
-        return iter(result)
-
     @classmethod
     def _dump(cls, obj):
         util.dump_json(obj, ensure_ascii=False, indent=2)
 
     def _dump_response(self, response, history=True):
-        """Write the response content to a .dump file in the current directory.
+        """Write the response content to a .txt file in the current directory.
 
         The file name is derived from the response url,
         replacing special characters with "_"
@@ -657,7 +683,8 @@ class Extractor():
             Extractor._dump_index += 1
         else:
             Extractor._dump_index = 1
-            Extractor._dump_sanitize = re.compile(r"[\\\\|/<>:\"?*&=#]+").sub
+            Extractor._dump_sanitize = util.re_compile(
+                r"[\\\\|/<>:\"?*&=#]+").sub
 
         fname = "{:>02}_{}".format(
             Extractor._dump_index,
@@ -706,6 +733,7 @@ class GalleryExtractor(Extractor):
 
         data = self.metadata(page)
         imgs = self.images(page)
+        assets = self.assets(page)
 
         if "count" in data:
             if self.config("page-reverse"):
@@ -727,7 +755,18 @@ class GalleryExtractor(Extractor):
             images = enum(imgs, 1)
 
         yield Message.Directory, data
-        for data[self.enum], (url, imgdata) in images:
+        enum_key = self.enum
+
+        if assets:
+            for asset in assets:
+                url = asset["url"]
+                asset.update(data)
+                asset[enum_key] = 0
+                if "extension" not in asset:
+                    text.nameext_from_url(url, asset)
+                yield Message.Url, url, asset
+
+        for data[enum_key], (url, imgdata) in images:
             if imgdata:
                 data.update(imgdata)
                 if "extension" not in imgdata:
@@ -743,7 +782,13 @@ class GalleryExtractor(Extractor):
         """Return a dict with general metadata"""
 
     def images(self, page):
-        """Return a list of all (image-url, metadata)-tuples"""
+        """Return a list or iterable of all (image-url, metadata)-tuples"""
+
+    def assets(self, page):
+        """Return an iterable of additional gallery assets
+
+        Each asset must be a 'dict' containing at least 'url' and 'type'
+        """
 
 
 class ChapterExtractor(GalleryExtractor):
@@ -794,6 +839,41 @@ class MangaExtractor(Extractor):
 
     def chapters(self, page):
         """Return a list of all (chapter-url, metadata)-tuples"""
+
+
+class Dispatch():
+    subcategory = "user"
+    cookies_domain = None
+    finalize = Extractor.finalize
+    skip = Extractor.skip
+
+    def __iter__(self):
+        return self.items()
+
+    def initialize(self):
+        pass
+
+    def _dispatch_extractors(self, extractor_data, default=()):
+        extractors = {
+            data[0].subcategory: data
+            for data in extractor_data
+        }
+
+        include = self.config("include", default) or ()
+        if include == "all":
+            include = extractors
+        elif isinstance(include, str):
+            include = include.replace(" ", "").split(",")
+
+        result = [(Message.Version, 1)]
+        for category in include:
+            try:
+                extr, url = extractors[category]
+            except KeyError:
+                self.log.warning("Invalid include '%s'", category)
+            else:
+                result.append((Message.Queue, url, {"_extractor": extr}))
+        return iter(result)
 
 
 class AsynchronousMixin():
@@ -953,7 +1033,7 @@ def _browser_useragent():
 
 _adapter_cache = {}
 _browser_cookies = {}
-
+CATEGORY_MAP = ()
 
 HTTP_HEADERS = {
     "firefox": (

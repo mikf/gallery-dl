@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2024 Mike Fährmann
+# Copyright 2024-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -56,7 +56,12 @@ class ScrolllerExtractor(Extractor):
 
         files = []
         for num, media in enumerate(album, 1):
-            src = max(media["mediaSources"], key=self._sort_key)
+            sources = media.get("mediaSources")
+            if not sources:
+                self.log.warning("%s/%s: Missing media file",
+                                 post.get("id"), num)
+                continue
+            src = max(sources, key=self._sort_key)
             src["num"] = num
             files.append(src)
         return files

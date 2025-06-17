@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2020-2023 Mike Fährmann
+# Copyright 2020-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -108,7 +108,7 @@ class AryionExtractor(Extractor):
             pos = page.find("Next &gt;&gt;")
             if pos < 0:
                 return
-            url = self.root + text.rextract(page, "href='", "'", pos)[0]
+            url = self.root + text.rextr(page, "href='", "'", pos)
 
     def _parse_post(self, post_id):
         url = "{}/g4/data.php?id={}".format(self.root, post_id)
@@ -169,7 +169,7 @@ class AryionExtractor(Extractor):
                 "<p>", "</p>"), "", "")),
             "filename" : fname,
             "extension": ext,
-            "_mtime"   : lmod,
+            "_http_lastmodified": lmod,
         }
 
 

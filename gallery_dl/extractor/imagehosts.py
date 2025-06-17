@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2023 Mike Fährmann
+# Copyright 2016-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -23,6 +23,7 @@ class ImagehostImageExtractor(Extractor):
     _params = None
     _cookies = None
     _encoding = None
+    _validate = None
 
     def __init__(self, match):
         Extractor.__init__(self, match)
@@ -57,6 +58,8 @@ class ImagehostImageExtractor(Extractor):
         data.update(self.metadata(page))
         if self._https and url.startswith("http:"):
             url = "https:" + url[5:]
+        if self._validate is not None:
+            data["_http_validate"] = self._validate
 
         yield Message.Directory, data
         yield Message.Url, url, data
@@ -163,6 +166,14 @@ class ImagevenueImageExtractor(ImagehostImageExtractor):
             url, pos = text.extract(page, '<img src="', '"', pos)
         filename, pos = text.extract(page, 'alt="', '"', pos)
         return url, text.unescape(filename)
+
+    def _validate(self, response):
+        hget = response.headers.get
+        return not (
+            hget("content-length") == "14396" and
+            hget("content-type") == "image/jpeg" and
+            hget("last-modified") == "Mon, 04 May 2020 07:19:52 GMT"
+        )
 
 
 class ImagetwistImageExtractor(ImagehostImageExtractor):

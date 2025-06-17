@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2024 Mike Fährmann
+# Copyright 2024-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -8,7 +8,7 @@
 
 """Extractors for https://archiveofourown.org/"""
 
-from .common import Extractor, Message
+from .common import Extractor, Message, Dispatch
 from .. import text, util, exception
 from ..cache import cache
 
@@ -249,15 +249,11 @@ class Ao3SearchExtractor(Ao3Extractor):
     example = "https://archiveofourown.org/works/search?work_search[query]=air"
 
 
-class Ao3UserExtractor(Ao3Extractor):
+class Ao3UserExtractor(Dispatch, Ao3Extractor):
     """Extractor for an AO3 user profile"""
-    subcategory = "user"
     pattern = (BASE_PATTERN + r"/users/([^/?#]+(?:/pseuds/[^/?#]+)?)"
                r"(?:/profile)?/?(?:$|\?|#)")
     example = "https://archiveofourown.org/users/USER"
-
-    def initialize(self):
-        pass
 
     def items(self):
         base = "{}/users/{}/".format(self.root, self.groups[0])

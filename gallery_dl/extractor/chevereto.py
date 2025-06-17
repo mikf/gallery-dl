@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2023 Mike Fährmann
+# Copyright 2023-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -68,7 +68,7 @@ class CheveretoImageExtractor(CheveretoExtractor):
                extr('url: "', '"'))
         if not url or url.endswith("/loading.svg"):
             pos = page.find(" download=")
-            url = text.rextract(page, 'href="', '"', pos)[0]
+            url = text.rextr(page, 'href="', '"', pos)
             if not url.startswith("https://"):
                 url = util.decrypt_xor(
                     url, b"seltilovessimpcity@simpcityhatesscrapers",
@@ -78,6 +78,8 @@ class CheveretoImageExtractor(CheveretoExtractor):
             "id"   : self.path.rpartition(".")[2],
             "url"  : url,
             "album": text.extr(extr("Added to <a", "/a>"), ">", "<"),
+            "date" : text.parse_datetime(extr(
+                '<span title="', '"'), "%Y-%m-%d %H:%M:%S"),
             "user" : extr('username: "', '"'),
         }
 

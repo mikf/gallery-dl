@@ -12,7 +12,7 @@ __tests__ = (
     "#url"     : "https://img.kiwi/image/79de2c41-70f9-4a87-bd6d-00fe9997c0c4.JR2wZz",
     "#category": ("chevereto", "imgkiwi", "image"),
     "#class"   : chevereto.CheveretoImageExtractor,
-    "#urls"        : "https://img.kiwi/images/2023/02/28/11ac1ebf28a2eae8265026b28e9c4413.jpg",
+    "#results"     : "https://img.kiwi/images/2023/02/28/11ac1ebf28a2eae8265026b28e9c4413.jpg",
     "#sha1_content": "9ea704a77e2038b9008350682cfad53a614a60bd",
 
     "album"    : "Kins3y Wolansk1",

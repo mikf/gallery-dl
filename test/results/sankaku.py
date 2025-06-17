@@ -13,7 +13,7 @@ __tests__ = (
     "#url"     : "https://sankaku.app/?tags=bonocho",
     "#category": ("booru", "sankaku", "tag"),
     "#class"   : sankaku.SankakuTagExtractor,
-    "#pattern" : r"https://s\.sankakucomplex\.com/data/[^/]{2}/[^/]{2}/[0-9a-f]{32}\.\w+\?e=\d+&(expires=\d+&)?m=[^&#]+",
+    "#pattern" : r"https://s\.sankakucomplex\.com/o/[^/]{2}/[^/]{2}/[0-9a-f]{32}\.\w+\?e=\d+&(expires=\d+&)?m=[^&#]+",
     "#count"   : 5,
 },
 
@@ -180,6 +180,48 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://sankaku.app/posts/y0abGlDOr2o",
+    "#comment" : "new tag categories (#7333)",
+    "#category": ("booru", "sankaku", "post"),
+    "#class"   : sankaku.SankakuPostExtractor,
+    "#options" : {"tags": "extended"},
+
+    "id": "y0abGlDOr2o",
+    "tags_anatomy": [
+        "brown_eyes",
+        "male",
+        "upper_body",
+    ],
+    "tags_artist": [
+        "bonocho",
+    ],
+    "tags_character": [
+        "batman",
+        "letty_whiterock",
+        "bruce_wayne",
+        "the_joker",
+        "heath_ledger",
+    ],
+    "tags_copyright": [
+        "batman_(series)",
+        "the_dark_knight",
+    ],
+    "tags_fashion": [
+        "black_bodysuit",
+        "bodysuit",
+        "clothing",
+        "collared_shirt",
+        "facepaint",
+        "pink_shirt",
+        "shirt",
+        "wing_collar",
+    ],
+    "tags_studio": [
+        "dc_comics",
+    ],
+},
+
+{
     "#url"     : "https://sankaku.app/posts/9PMwlDWjXaB",
     "#comment" : ">100 tags",
     "#category": ("booru", "sankaku", "post"),
@@ -249,8 +291,8 @@ __tests__ = (
         "pink_bow",
         "pink_dress",
         "frilled_skirt",
-        "frilled_sleeves",
         "high_heel_boots",
+        "frilled_sleeves",
         "white_sleeves",
         "red_hairband",
         "center_frills",
@@ -283,6 +325,7 @@ __tests__ = (
         "glass",
         "doll",
         "character_doll",
+        "broken_glass",
         "pink_gemstone",
         "bodily_fluids",
         "tears",
@@ -292,7 +335,6 @@ __tests__ = (
         "2girls",
         "stairs",
         "bow_choker",
-        "broken_glass",
         "button_eyes",
         "chest_jewel",
         "mahou_shoujo_madoka_magica_(anime)",
@@ -419,7 +461,7 @@ __tests__ = (
     "#comment" : "legacy post URL",
     "#category": ("booru", "sankaku", "post"),
     "#class"   : sankaku.SankakuPostExtractor,
-    "#pattern" : r"https://s\.sankakucomplex\.com/data/ac/8e/ac8e3b92ea328ce9cf7211e69c905bf9\.jpg\?e=.+",
+    "#pattern" : r"https://s\.sankakucomplex\.com/o/ac/8e/ac8e3b92ea328ce9cf7211e69c905bf9\.jpg\?e=.+",
 
     #  "id": 360451,
     "id": "y0abGlDOr2o",
@@ -431,7 +473,7 @@ __tests__ = (
     "#category": ("booru", "sankaku", "post"),
     "#class"   : sankaku.SankakuPostExtractor,
     "#auth"    : True,
-    "#pattern" : r"https://s\.sankakucomplex\.com/data/13/3c/133cda3bfde249c504284493903fb985\.jpg",
+    "#pattern" : r"https://s\.sankakucomplex\.com/o/13/3c/133cda3bfde249c504284493903fb985\.jpg",
 
     "md5": "133cda3bfde249c504284493903fb985",
 },
@@ -464,7 +506,7 @@ __tests__ = (
     "#comment" : "md5 hexdigest instead of ID (#3952)",
     "#category": ("booru", "sankaku", "post"),
     "#class"   : sankaku.SankakuPostExtractor,
-    "#pattern" : r"https://s\.sankakucomplex\.com/data/f8/ba/f8ba89043078f0e4be2d9c46550b840a\.jpg",
+    "#pattern" : r"https://s\.sankakucomplex\.com/o/f8/ba/f8ba89043078f0e4be2d9c46550b840a\.jpg",
     "#count"   : 1,
 
     #  "id" : 33195194,
@@ -477,7 +519,7 @@ __tests__ = (
     "#comment" : "/posts/ instead of /post/show/ (#4688)",
     "#category": ("booru", "sankaku", "post"),
     "#class"   : sankaku.SankakuPostExtractor,
-    "#pattern" : r"https://s\.sankakucomplex\.com/data/f8/ba/f8ba89043078f0e4be2d9c46550b840a\.jpg",
+    "#pattern" : r"https://s\.sankakucomplex\.com/o/f8/ba/f8ba89043078f0e4be2d9c46550b840a\.jpg",
     "#count"   : 1,
 
     #  "id" : 33195194,

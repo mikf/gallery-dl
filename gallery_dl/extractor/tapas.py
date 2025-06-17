@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2021-2023 Mike Fährmann
+# Copyright 2021-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -106,7 +106,7 @@ class TapasEpisodeExtractor(TapasExtractor):
                 yield Message.Url, url, text.nameext_from_url(url, episode)
 
     def _extract_series(self, html):
-        series_id = text.rextract(html, 'data-series-id="', '"')[0]
+        series_id = text.rextr(html, 'data-series-id="', '"')
         try:
             return self._cache[series_id]
         except KeyError:

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2023 Mike Fährmann
+# Copyright 2016-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -10,7 +10,6 @@
 
 from .common import ChapterExtractor, MangaExtractor
 from .. import text, util
-import re
 
 
 class Hentai2readBase():
@@ -31,8 +30,9 @@ class Hentai2readChapterExtractor(Hentai2readBase, ChapterExtractor):
         chapter_id, pos = text.extract(page, 'data-cid="', '"', pos)
         chapter, sep, minor = self.groups[1].partition(".")
 
-        match = re.match(r"Reading (.+) \(([^)]+)\) Hentai(?: by (.*))? - "
-                         r"([^:]+): (.+) . Page 1 ", title)
+        match = util.re(
+            r"Reading (.+) \(([^)]+)\) Hentai(?: by (.*))? - "
+            r"([^:]+): (.+) . Page 1 ").match(title)
         if match:
             manga, type, author, _, title = match.groups()
         else:

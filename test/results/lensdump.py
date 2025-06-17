@@ -32,7 +32,7 @@ __tests__ = (
 {
     "#url"     : "https://lensdump.com/vstar925",
     "#class"   : lensdump.LensdumpAlbumsExtractor,
-    "#urls"    : (
+    "#results" : (
         "https://lensdump.com/a/tX1uA",
         "https://lensdump.com/a/R0gfK",
         "https://lensdump.com/a/RSOMv",
@@ -44,7 +44,7 @@ __tests__ = (
     "#url"     : "https://lensdump.com/vstar925/?sort=likes_desc&page=1",
     "#comment" : "custom sort order",
     "#class"   : lensdump.LensdumpAlbumsExtractor,
-    "#urls"    : (
+    "#results" : (
         "https://lensdump.com/a/9TbdT",
         "https://lensdump.com/a/RSOMv",
         "https://lensdump.com/a/R0gfK",
@@ -60,7 +60,7 @@ __tests__ = (
 {
     "#url"     : "https://lensdump.com/i/tyoAyM",
     "#class"   : lensdump.LensdumpImageExtractor,
-    "#urls"        : "https://c.l3n.co/i/tyoAyM.webp",
+    "#results"     : "https://c.l3n.co/i/tyoAyM.webp",
     "#sha1_content": "1aa749ed2c0cf679ec8e1df60068edaf3875de46",
 
     "date"     : "dt:2022-08-01 08:24:28",
@@ -76,7 +76,7 @@ __tests__ = (
 {
     "#url"     : "https://c.l3n.co/i/tyoAyM.webp",
     "#class"   : lensdump.LensdumpImageExtractor,
-    "#urls"    : "https://c.l3n.co/i/tyoAyM.webp",
+    "#results" : "https://c.l3n.co/i/tyoAyM.webp",
 
     "date"     : "dt:2022-08-01 08:24:28",
     "extension": "webp",

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2017-2023 Mike Fährmann
+# Copyright 2017-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -8,7 +8,7 @@
 
 """Utility functions and classes"""
 
-import re
+import re as re_module
 import os
 import sys
 import json
@@ -28,9 +28,22 @@ from email.utils import mktime_tz, parsedate_tz
 from . import text, version, exception
 
 try:
-    re_compile = re._compiler.compile
+    re_compile = re_module._compiler.compile
 except AttributeError:
-    re_compile = re.sre_compile.compile
+    re_compile = re_module.sre_compile.compile
+
+CACHE_PATTERN = {}
+
+
+def re(pattern):
+    """Compile a regular expression pattern"""
+    try:
+        return CACHE_PATTERN[pattern]
+    except KeyError:
+        pass
+
+    p = CACHE_PATTERN[pattern] = re_compile(pattern)
+    return p
 
 
 def bencode(num, alphabet="0123456789"):
@@ -48,8 +61,7 @@ def bdecode(data, alphabet="0123456789"):
     num = 0
     base = len(alphabet)
     for c in data:
-        num *= base
-        num += alphabet.index(c)
+        num = num * base + alphabet.find(c)
     return num
 
 
@@ -135,7 +147,7 @@ def false(_, __=None):
     return False
 
 
-def noop():
+def noop(_=None):
     """Does nothing"""
 
 
@@ -159,18 +171,17 @@ def sha1(s):
 
 def generate_token(size=16):
     """Generate a random token with hexadecimal digits"""
-    data = random.getrandbits(size * 8).to_bytes(size, "big")
-    return binascii.hexlify(data).decode()
+    return random.getrandbits(size * 8).to_bytes(size, "big").hex()
 
 
 def format_value(value, suffixes="kMGTPEZY"):
-    value = format(value)
+    value = str(value)
     value_len = len(value)
     index = value_len - 4
     if index >= 0:
         offset = (value_len - 1) % 3 + 1
-        return (value[:offset] + "." + value[offset:offset+2] +
-                suffixes[index // 3])
+        return (f"{value[:offset]}.{value[offset:offset+2]}"
+                f"{suffixes[index // 3]}")
     return value
 
 
@@ -236,6 +247,34 @@ def to_string(value):
     return str(value)
 
 
+def to_datetime(value):
+    """Convert 'value' to a datetime object"""
+    if not value:
+        return EPOCH
+
+    if isinstance(value, datetime.datetime):
+        return value
+
+    if isinstance(value, str):
+        try:
+            if value[-1] == "Z":
+                # compat for Python < 3.11
+                value = value[:-1]
+            dt = datetime.datetime.fromisoformat(value)
+            if dt.tzinfo is None:
+                if dt.microsecond:
+                    dt = dt.replace(microsecond=0)
+            else:
+                # convert to naive UTC
+                dt = dt.astimezone(datetime.timezone.utc).replace(
+                    microsecond=0, tzinfo=None)
+            return dt
+        except Exception:
+            pass
+
+    return text.parse_timestamp(value, EPOCH)
+
+
 def datetime_to_timestamp(dt):
     """Convert naive UTC datetime to Unix timestamp"""
     return (dt - EPOCH) / SECOND
@@ -298,30 +337,12 @@ def dump_response(response, fp, headers=False, content=True, hide_auth=True):
         request = response.request
         req_headers = request.headers.copy()
         res_headers = response.headers.copy()
-        outfmt = """\
-{request.method} {request.url}
-Status: {response.status_code} {response.reason}
 
-Request Headers
----------------
-{request_headers}
-"""
-        if request.body:
-            outfmt += """
-Request Body
-------------
-{request.body}
-"""
-        outfmt += """
-Response Headers
-----------------
-{response_headers}
-"""
         if hide_auth:
             authorization = req_headers.get("Authorization")
             if authorization:
                 atype, sep, _ = str(authorization).partition(" ")
-                req_headers["Authorization"] = atype + " ***" if sep else "***"
+                req_headers["Authorization"] = f"{atype} ***" if sep else "***"
 
             cookie = req_headers.get("Cookie")
             if cookie:
@@ -332,24 +353,38 @@ Response Headers
 
             set_cookie = res_headers.get("Set-Cookie")
             if set_cookie:
-                res_headers["Set-Cookie"] = re.sub(
-                    r"(^|, )([^ =]+)=[^,;]*", r"\1\2=***", set_cookie,
-                )
+                res_headers["Set-Cookie"] = re(r"(^|, )([^ =]+)=[^,;]*").sub(
+                    r"\1\2=***", set_cookie)
 
-        fmt_nv = "{}: {}".format
+        request_headers = "\n".join(
+            f"{name}: {value}"
+            for name, value in req_headers.items()
+        )
+        response_headers = "\n".join(
+            f"{name}: {value}"
+            for name, value in res_headers.items()
+        )
 
-        fp.write(outfmt.format(
-            request=request,
-            response=response,
-            request_headers="\n".join(
-                fmt_nv(name, value)
-                for name, value in req_headers.items()
-            ),
-            response_headers="\n".join(
-                fmt_nv(name, value)
-                for name, value in res_headers.items()
-            ),
-        ).encode())
+        output = f"""\
+{request.method} {request.url}
+Status: {response.status_code} {response.reason}
+
+Request Headers
+---------------
+{request_headers}
+"""
+        if request.body:
+            output = f"""{output}
+Request Body
+------------
+{request.body}
+"""
+        output = f"""{output}
+Response Headers
+----------------
+{response_headers}
+"""
+        fp.write(output.encode())
 
     if content:
         if headers:
@@ -488,8 +523,7 @@ def cookiestxt_load(fp):
 
 def cookiestxt_store(fp, cookies):
     """Write 'cookies' in Netscape cookies.txt format to 'fp'"""
-    write = fp.write
-    write("# Netscape HTTP Cookie File\n\n")
+    fp.write("# Netscape HTTP Cookie File\n\n")
 
     for cookie in cookies:
         if not cookie.domain:
@@ -503,7 +537,7 @@ def cookiestxt_store(fp, cookies):
             value = cookie.value
 
         domain = cookie.domain
-        write("\t".join((
+        fp.write("\t".join((
             domain,
             "TRUE" if domain and domain[0] == "." else "FALSE",
             cookie.path,
@@ -568,8 +602,7 @@ class HTTPBasicAuth():
 
     def __init__(self, username, password):
         self.authorization = b"Basic " + binascii.b2a_base64(
-            username.encode("latin1") + b":" + str(password).encode("latin1")
-        )[:-1]
+            f"{username}:{password}".encode("latin1"), newline=False)
 
     def __call__(self, request):
         request.headers["Authorization"] = self.authorization
@@ -611,6 +644,28 @@ class NullContext():
         pass
 
 
+class NullResponse():
+    __slots__ = ("url", "reason")
+
+    ok = is_redirect = is_permanent_redirect = False
+    cookies = headers = history = links = {}
+    encoding = apparent_encoding = "utf-8"
+    content = b""
+    text = ""
+    status_code = 900
+    close = noop
+
+    def __init__(self, url, reason=""):
+        self.url = url
+        self.reason = str(reason)
+
+    def __str__(self):
+        return "900 " + self.reason
+
+    def json(self):
+        return {}
+
+
 class CustomNone():
     """None-style type that supports more operations than regular None"""
     __slots__ = ()
@@ -622,8 +677,7 @@ class CustomNone():
     def __call__(self, *args, **kwargs):
         return self
 
-    @staticmethod
-    def __next__():
+    def __next__(self):
         raise StopIteration
 
     def __eq__(self, other):
@@ -671,20 +725,17 @@ class CustomNone():
     __abs__ = identity
     __invert__ = identity
 
-    @staticmethod
-    def __len__():
+    def __len__(self):
         return 0
 
     __int__ = __len__
     __hash__ = __len__
     __index__ = __len__
 
-    @staticmethod
-    def __format__(_):
+    def __format__(self, _):
         return "None"
 
-    @staticmethod
-    def __str__():
+    def __str__(self):
         return "None"
 
     __repr__ = __str__
@@ -707,13 +758,20 @@ SECOND = datetime.timedelta(0, 1)
 WINDOWS = (os.name == "nt")
 SENTINEL = object()
 EXECUTABLE = getattr(sys, "frozen", False)
-USERAGENT = "gallery-dl/" + version.__version__
-USERAGENT_FIREFOX = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:{}.0) "
-                     "Gecko/20100101 Firefox/{}.0").format(_ff_ver, _ff_ver)
-USERAGENT_CHROME = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                    "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/{}.0.0.0 "
-                    "Safari/537.36").format(_ff_ver - 2)
 SPECIAL_EXTRACTORS = {"oauth", "recursive", "generic"}
+
+EXTS_IMAGE = {"jpg", "jpeg", "png", "gif", "bmp", "svg", "psd", "ico",
+              "webp", "avif", "heic", "heif"}
+EXTS_VIDEO = {"mp4", "m4v", "mov", "webm", "mkv", "ogv", "flv", "avi", "wmv"}
+EXTS_ARCHIVE = {"zip", "rar", "7z", "tar", "gz", "bz2", "lzma", "xz"}
+
+USERAGENT = "gallery-dl/" + version.__version__
+USERAGENT_FIREFOX = (f"Mozilla/5.0 (Windows NT 10.0; Win64; x64; "
+                     f"rv:{_ff_ver}.0) Gecko/20100101 Firefox/{_ff_ver}.0")
+USERAGENT_CHROME = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                    "AppleWebKit/537.36 (KHTML, like Gecko) "
+                    f"Chrome/{_ff_ver - 2}.0.0.0 Safari/537.36")
+
 GLOBALS = {
     "contains" : contains,
     "parse_int": text.parse_int,
@@ -726,7 +784,10 @@ GLOBALS = {
     "hash_sha1": sha1,
     "hash_md5" : md5,
     "std"      : ModuleProxy(),
-    "re"       : re,
+    "re"       : re_module,
+    "exts_image"  : EXTS_IMAGE,
+    "exts_video"  : EXTS_VIDEO,
+    "exts_archive": EXTS_ARCHIVE,
 }
 
 
@@ -826,25 +887,25 @@ def import_file(path):
         return __import__(name.replace("-", "_"))
 
 
-def build_duration_func(duration, min=0.0):
-    if not duration:
+def build_selection_func(value, min=0.0, conv=float):
+    if not value:
         if min:
             return lambda: min
         return None
 
-    if isinstance(duration, str):
-        lower, _, upper = duration.partition("-")
-        lower = float(lower)
+    if isinstance(value, str):
+        lower, _, upper = value.partition("-")
     else:
         try:
-            lower, upper = duration
+            lower, upper = value
         except TypeError:
-            lower, upper = duration, None
+            lower, upper = value, None
+    lower = conv(lower)
 
     if upper:
-        upper = float(upper)
+        upper = conv(upper)
         return functools.partial(
-            random.uniform,
+            random.uniform if lower.__class__ is float else random.randint,
             lower if lower > min else min,
             upper if upper > min else min,
         )
@@ -852,6 +913,9 @@ def build_duration_func(duration, min=0.0):
         if lower < min:
             lower = min
         return lambda: lower
+
+
+build_duration_func = build_selection_func
 
 
 def build_extractor_filter(categories, negate=True, special=None):
@@ -977,8 +1041,7 @@ class RangePredicate():
                 return True
         return False
 
-    @staticmethod
-    def _parse(rangespec):
+    def _parse(self, rangespec):
         """Parse an integer range string and return the resulting ranges
 
         Examples:
@@ -987,7 +1050,6 @@ class RangePredicate():
             _parse("1:2,4:8:2")         -> [(1,1), (4,7,2)]
         """
         ranges = []
-        append = ranges.append
 
         if isinstance(rangespec, str):
             rangespec = rangespec.split(",")
@@ -999,7 +1061,7 @@ class RangePredicate():
             elif ":" in group:
                 start, _, stop = group.partition(":")
                 stop, _, step = stop.partition(":")
-                append(range(
+                ranges.append(range(
                     int(start) if start.strip() else 1,
                     int(stop) if stop.strip() else sys.maxsize,
                     int(step) if step.strip() else 1,
@@ -1007,14 +1069,14 @@ class RangePredicate():
 
             elif "-" in group:
                 start, _, stop = group.partition("-")
-                append(range(
+                ranges.append(range(
                     int(start) if start.strip() else 1,
                     int(stop) + 1 if stop.strip() else sys.maxsize,
                 ))
 
             else:
                 start = int(group)
-                append(range(start, start+1))
+                ranges.append(range(start, start+1))
 
         return ranges
 
@@ -1037,7 +1099,7 @@ class FilterPredicate():
     """Predicate; True if evaluating the given expression returns True"""
 
     def __init__(self, expr, target="image"):
-        name = "<{} filter>".format(target)
+        name = f"<{target} filter>"
         self.expr = compile_filter(expr, name)
 
     def __call__(self, _, kwdict):

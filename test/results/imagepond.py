@@ -12,10 +12,11 @@ __tests__ = (
     "#url"     : "https://imagepond.net/image/IMG-20250217-160622.TJNphg",
     "#category": ("chevereto", "imagepond", "image"),
     "#class"   : chevereto.CheveretoImageExtractor,
-    "#urls"        : "https://media.imagepond.net/media/IMG_20250217_1606226b345a5dbd0e8971.jpg",
+    "#results"     : "https://media.imagepond.net/media/IMG_20250217_1606226b345a5dbd0e8971.jpg",
     "#sha1_content": "ec7fac6b427f7af01038619208cd69478e91ddef",
 
     "album"    : "",
+    "date"     : "dt:2025-02-17 19:15:25",
     "extension": "jpg",
     "filename" : "IMG_20250217_1606226b345a5dbd0e8971",
     "id"       : "TJNphg",

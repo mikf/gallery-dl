@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2021-2023 Mike Fährmann
+# Copyright 2021-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -60,8 +60,7 @@ class BbcGalleryExtractor(GalleryExtractor):
             ))
         return results
 
-    @staticmethod
-    def _fallback_urls(src, max_width):
+    def _fallback_urls(self, src, max_width):
         front, _, back = src.partition("/320x180_b/")
         for width in (1920, 1600, 1280, 976):
             if width < max_width:

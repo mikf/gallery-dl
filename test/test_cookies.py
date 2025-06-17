@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright 2017-2023 Mike Fährmann
+# Copyright 2017-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -14,6 +14,7 @@ from unittest import mock
 
 import time
 import logging
+import datetime
 import tempfile
 from os.path import join
 
@@ -70,8 +71,7 @@ class TestCookiejar(unittest.TestCase):
 
         self.assertEqual(len(cookies), 0)
         self.assertEqual(mock_warning.call_count, 1)
-        self.assertEqual(mock_warning.call_args[0][0], "cookies: %s")
-        self.assertIsInstance(mock_warning.call_args[0][1], exc)
+        self.assertIsInstance(mock_warning.call_args[0][-1], exc)
 
 
 class TestCookiedict(unittest.TestCase):
@@ -205,27 +205,32 @@ class TestCookieUtils(unittest.TestCase):
         now = int(time.time())
         log = logging.getLogger("generic")
 
-        extr.cookies.set("a", "1", expires=now-100)
+        extr.cookies.set("a", "1", expires=now-100, domain=".example.org")
         with mock.patch.object(log, "warning") as mw:
             self.assertFalse(extr.cookies_check(("a",)))
             self.assertEqual(mw.call_count, 1)
-            self.assertEqual(mw.call_args[0], ("Cookie '%s' has expired", "a"))
+            self.assertEqual(mw.call_args[0], (
+                "cookies: %s/%s expired at %s", "example.org", "a",
+                datetime.datetime.fromtimestamp(now-100)))
 
-        extr.cookies.set("a", "1", expires=now+100)
+        extr.cookies.set("a", "1", expires=now+100, domain=".example.org")
         with mock.patch.object(log, "warning") as mw:
             self.assertTrue(extr.cookies_check(("a",)))
             self.assertEqual(mw.call_count, 1)
             self.assertEqual(mw.call_args[0], (
-                "Cookie '%s' will expire in less than %s hour%s", "a", 1, ""))
+                "cookies: %s/%s will expire in less than %s hour%s",
+                "example.org", "a", 1, ""))
 
-        extr.cookies.set("a", "1", expires=now+100+7200)
+        extr.cookies.set("a", "1", expires=now+100+7200, domain=".example.org")
         with mock.patch.object(log, "warning") as mw:
             self.assertTrue(extr.cookies_check(("a",)))
             self.assertEqual(mw.call_count, 1)
             self.assertEqual(mw.call_args[0], (
-                "Cookie '%s' will expire in less than %s hour%s", "a", 3, "s"))
+                "cookies: %s/%s will expire in less than %s hour%s",
+                "example.org", "a", 3, "s"))
 
-        extr.cookies.set("a", "1", expires=now+100+24*3600)
+        extr.cookies.set(
+            "a", "1", expires=now+100+24*3600, domain=".example.org")
         with mock.patch.object(log, "warning") as mw:
             self.assertTrue(extr.cookies_check(("a",)))
             self.assertEqual(mw.call_count, 0)

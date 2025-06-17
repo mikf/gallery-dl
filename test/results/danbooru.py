@@ -62,7 +62,7 @@ __tests__ = (
     "#class"   : danbooru.DanbooruPoolExtractor,
     "#auth"    : False,
     "#sha1_content": "15226ba183579bc2cdd67260445b5c97959a3e82",
-    "#urls"        : (
+    "#results"     : (
         "https://cdn.donmai.us/original/d8/3d/d83df4af8c0fa6d6069f8d3cf0b7dd56.jpg",
         "https://cdn.donmai.us/original/70/82/7082572fa74650f3c1f39152550cd724.jpg",
         "https://cdn.donmai.us/original/7a/b5/7ab551d011b89155a743d81308de653a.jpg",
@@ -92,7 +92,7 @@ __tests__ = (
     "#category": ("Danbooru", "danbooru", "pool"),
     "#class"   : danbooru.DanbooruPoolExtractor,
     "#options" : {"order-posts": "asc"},
-    "#urls"    : (
+    "#results" : (
         "https://cdn.donmai.us/original/c5/7b/c57b045fee282199277d0f94e298b9dc.jpg",
         "https://cdn.donmai.us/original/44/6d/446d8b5db9b78694936408049745ee42.jpg",
         "https://cdn.donmai.us/original/34/0c/340c721ceb7fce6892a234adf0bea811.jpg",
@@ -105,7 +105,7 @@ __tests__ = (
     "#category": ("Danbooru", "danbooru", "pool"),
     "#class"   : danbooru.DanbooruPoolExtractor,
     "#options" : {"order-posts": "pool_desc"},
-    "#urls"    : (
+    "#results" : (
         "https://cdn.donmai.us/original/30/3b/303bdefb719b54253aa7731cf11ef91f.jpg",
         "https://cdn.donmai.us/original/47/c2/47c2c1ba1f7b83e0a487dbc7e722059f.jpg",
         "https://cdn.donmai.us/original/34/0c/340c721ceb7fce6892a234adf0bea811.jpg",
@@ -118,7 +118,7 @@ __tests__ = (
     "#category": ("Danbooru", "danbooru", "pool"),
     "#class"   : danbooru.DanbooruPoolExtractor,
     "#options" : {"order-posts": "id"},
-    "#urls"    : (
+    "#results" : (
         "https://cdn.donmai.us/original/30/3b/303bdefb719b54253aa7731cf11ef91f.jpg",
         "https://cdn.donmai.us/original/44/6d/446d8b5db9b78694936408049745ee42.jpg",
         "https://cdn.donmai.us/original/34/0c/340c721ceb7fce6892a234adf0bea811.jpg",
@@ -131,7 +131,7 @@ __tests__ = (
     "#category": ("Danbooru", "danbooru", "pool"),
     "#class"   : danbooru.DanbooruPoolExtractor,
     "#options" : {"order-posts": "asc_id"},
-    "#urls"    : (
+    "#results" : (
         "https://cdn.donmai.us/original/c5/7b/c57b045fee282199277d0f94e298b9dc.jpg",
         "https://cdn.donmai.us/original/47/c2/47c2c1ba1f7b83e0a487dbc7e722059f.jpg",
         "https://cdn.donmai.us/original/34/0c/340c721ceb7fce6892a234adf0bea811.jpg",
@@ -305,8 +305,25 @@ __tests__ = (
     "#url"     : "https://danbooru.donmai.us/posts/3613024",
     "#category": ("Danbooru", "danbooru", "post"),
     "#class"   : danbooru.DanbooruPostExtractor,
+    "#options" : {"ugoira": False},
+    "#results" : "https://cdn.donmai.us/sample/5e/e5/sample-5ee54a2d95ed36376ec1d8f6ddbdece9.webm",
+
+    "!_ugoira_original"  : ...,
+    "!_ugoira_frame_data": ...,
+},
+
+{
+    "#url"     : "https://danbooru.donmai.us/posts/3613024",
+    "#category": ("Danbooru", "danbooru", "post"),
+    "#class"   : danbooru.DanbooruPostExtractor,
     "#options" : {"ugoira": True},
-    "#pattern" : r"https?://.+\.zip$",
+    "#results" : "https://cdn.donmai.us/original/5e/e5/5ee54a2d95ed36376ec1d8f6ddbdece9.zip",
+
+    "_ugoira_original"     : False,
+    "_ugoira_frame_data[*]": {
+        "file" : r"re:^0000\d\d\.jpg$",
+        "delay": int,
+    },
 },
 
 {
@@ -333,7 +350,7 @@ __tests__ = (
     "#url"     : "https://danbooru.donmai.us/artists/288683",
     "#category": ("Danbooru", "danbooru", "artist"),
     "#class"   : danbooru.DanbooruArtistExtractor,
-    "#urls"    : "https://danbooru.donmai.us/posts?tags=kaori_%28vuoian_appxv%29",
+    "#results" : "https://danbooru.donmai.us/posts?tags=kaori_%28vuoian_appxv%29",
 
     "created_at" : "2022-05-12T16:00:40.852-04:00",
     "updated_at" : "2022-05-12T22:10:51.917-04:00",

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2023 Mike Fährmann
+# Copyright 2019-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -83,8 +83,7 @@ class _35photoExtractor(Extractor):
             info["num"] = 1
             yield info
 
-    @staticmethod
-    def _photo_ids(page):
+    def _photo_ids(self, page):
         """Extract unique photo IDs and return them as sorted list"""
         #  searching for photo-id="..." doesn't always work (see unit tests)
         if not page:

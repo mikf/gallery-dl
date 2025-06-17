@@ -178,7 +178,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Civitai</td>
     <td>https://www.civitai.com/</td>
-    <td>individual Images, Image Listings, Models, Model Listings, Posts, Search Results, Tag Searches, User Profiles, User Images, User Models, User Posts, User Videos</td>
+    <td>individual Images, Image Listings, Models, Model Listings, Posts, Post Listings, Image Searches, Model Searches, Tag Searches, User Profiles, User Images, Image Reactions, User Models, User Posts, User Videos, Video Reactions</td>
     <td></td>
 </tr>
 <tr>
@@ -190,7 +190,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Coomer</td>
     <td>https://coomer.su/</td>
-    <td>Favorites, Posts, User Profiles</td>
+    <td>Artists, Favorites, Posts, User Profiles</td>
     <td>Supported</td>
 </tr>
 <tr>
@@ -220,7 +220,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Dynasty Reader</td>
     <td>https://dynasty-scans.com/</td>
-    <td>Chapters, individual Images, Manga, Search Results</td>
+    <td>Anthologies, Chapters, individual Images, Manga, Search Results</td>
     <td></td>
 </tr>
 <tr>
@@ -317,6 +317,18 @@ Consider all listed sites to potentially be NSFW.
     <td>Gelbooru</td>
     <td>https://gelbooru.com/</td>
     <td>Favorites, Pools, Posts, Redirects, Tag Searches</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Girls with Muscle</td>
+    <td>https://www.girlswithmuscle.com/</td>
+    <td>Posts, Search Results</td>
+    <td>Supported</td>
+</tr>
+<tr>
+    <td>Girlsreleased</td>
+    <td>https://girlsreleased.com/</td>
+    <td>Models, Sets, Sites</td>
     <td></td>
 </tr>
 <tr>
@@ -496,7 +508,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Kemono</td>
     <td>https://kemono.su/</td>
-    <td>Discord Servers, Favorites, Posts, User Profiles</td>
+    <td>Artists, Discord Servers, Favorites, Posts, User Profiles</td>
     <td>Supported</td>
 </tr>
 <tr>
@@ -507,7 +519,7 @@ Consider all listed sites to potentially be NSFW.
 </tr>
 <tr>
     <td>Komikcast</td>
-    <td>https://komikcast.la/</td>
+    <td>https://komikcast02.com/</td>
     <td>Chapters, Manga</td>
     <td></td>
 </tr>
@@ -562,26 +574,8 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>MangaDex</td>
     <td>https://mangadex.org/</td>
-    <td>Authors, Chapters, Followed Feed, Lists, Manga</td>
+    <td>Authors, Chapters, Updates Feed, Library, MDLists, Manga</td>
     <td>Supported</td>
-</tr>
-<tr>
-    <td>MangaKakalot</td>
-    <td>https://mangakakalot.tv/</td>
-    <td>Chapters, Manga</td>
-    <td></td>
-</tr>
-<tr>
-    <td>MangaLife</td>
-    <td>https://manga4life.com/</td>
-    <td>Chapters, Manga</td>
-    <td></td>
-</tr>
-<tr>
-    <td>Manganato</td>
-    <td>https://manganato.com/</td>
-    <td>Chapters, Manga</td>
-    <td></td>
 </tr>
 <tr>
     <td>MangaPark</td>
@@ -592,12 +586,6 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>MangaRead</td>
     <td>https://mangaread.org/</td>
-    <td>Chapters, Manga</td>
-    <td></td>
-</tr>
-<tr>
-    <td>MangaSee</td>
-    <td>https://mangasee123.com/</td>
     <td>Chapters, Manga</td>
     <td></td>
 </tr>
@@ -668,6 +656,12 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
+    <td>NudoStar.TV</td>
+    <td>https://nudostar.tv/</td>
+    <td>individual Images, Models</td>
+    <td></td>
+</tr>
+<tr>
     <td>Patreon</td>
     <td>https://www.patreon.com/</td>
     <td>Creators, Posts, User Profiles</td>
@@ -718,7 +712,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>pixeldrain</td>
     <td>https://pixeldrain.com/</td>
-    <td>Albums, Files</td>
+    <td>Albums, Files, Filesystems</td>
     <td></td>
 </tr>
 <tr>
@@ -788,6 +782,12 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
+    <td>Rawkuma</td>
+    <td>https://rawkuma.net/</td>
+    <td>Chapters, Manga</td>
+    <td></td>
+</tr>
+<tr>
     <td>Read Comic Online</td>
     <td>https://readcomiconline.li/</td>
     <td>Comic Issues, Comics</td>
@@ -797,6 +797,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Realbooru</td>
     <td>https://realbooru.com/</td>
     <td>Favorites, Pools, Posts, Tag Searches</td>
+    <td></td>
+</tr>
+<tr>
+    <td>RedBust</td>
+    <td>https://redbust.com/</td>
+    <td>Archives, Galleries, Categories, individual Images, Tag Searches</td>
     <td></td>
 </tr>
 <tr>
@@ -848,7 +854,7 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
-    <td>SchaleNetwork</td>
+    <td>Schale Network</td>
     <td>https://niyaniya.moe/</td>
     <td>Favorites, Galleries, Search Results</td>
     <td></td>
@@ -1409,30 +1415,58 @@ Consider all listed sites to potentially be NSFW.
 </tr>
 
 <tr>
+    <td colspan="4"><strong>MangaNelo and Mirror Sites</strong></td>
+</tr>
+<tr>
+    <td>MangaNelo</td>
+    <td>https://www.nelomanga.net/</td>
+    <td>Chapters, Manga</td>
+    <td></td>
+</tr>
+<tr>
+    <td>MangaNato</td>
+    <td>https://www.natomanga.com/</td>
+    <td>Chapters, Manga</td>
+    <td></td>
+</tr>
+<tr>
+    <td>MangaNato</td>
+    <td>https://www.manganato.gg/</td>
+    <td>Chapters, Manga</td>
+    <td></td>
+</tr>
+<tr>
+    <td>MangaKakalot</td>
+    <td>https://www.mangakakalot.gg/</td>
+    <td>Chapters, Manga</td>
+    <td></td>
+</tr>
+
+<tr>
     <td colspan="4"><strong>Misskey Instances</strong></td>
 </tr>
 <tr>
     <td>Misskey.io</td>
     <td>https://misskey.io/</td>
-    <td>Favorites, Followed Users, Images from Notes, User Profiles</td>
+    <td>Avatars, Backgrounds, Favorites, Followed Users, User Profile Information, Notes, User Notes, User Profiles</td>
     <td></td>
 </tr>
 <tr>
     <td>Misskey.design</td>
     <td>https://misskey.design/</td>
-    <td>Favorites, Followed Users, Images from Notes, User Profiles</td>
+    <td>Avatars, Backgrounds, Favorites, Followed Users, User Profile Information, Notes, User Notes, User Profiles</td>
     <td></td>
 </tr>
 <tr>
     <td>Lesbian.energy</td>
     <td>https://lesbian.energy/</td>
-    <td>Favorites, Followed Users, Images from Notes, User Profiles</td>
+    <td>Avatars, Backgrounds, Favorites, Followed Users, User Profile Information, Notes, User Notes, User Profiles</td>
     <td></td>
 </tr>
 <tr>
     <td>Sushi.ski</td>
     <td>https://sushi.ski/</td>
-    <td>Favorites, Followed Users, Images from Notes, User Profiles</td>
+    <td>Avatars, Backgrounds, Favorites, Followed Users, User Profile Information, Notes, User Notes, User Profiles</td>
     <td></td>
 </tr>
 

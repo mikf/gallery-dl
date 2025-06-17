@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2023 Mike Fährmann
+# Copyright 2019-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -268,8 +268,7 @@ class MetadataPP(PostProcessor):
         if not private:
             return util.filter_dict
 
-    @staticmethod
-    def _make_encoder(options, indent=None):
+    def _make_encoder(self, options, indent=None):
         return json.JSONEncoder(
             ensure_ascii=options.get("ascii", False),
             sort_keys=options.get("sort", False),

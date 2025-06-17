@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2023 Mike Fährmann
+# Copyright 2014-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -13,7 +13,6 @@ from .common import Message
 from .. import text, util, exception
 from ..cache import cache
 import collections
-import re
 
 BASE_PATTERN = r"(?:https?://)?" \
     r"(?:(?:chan|www|beta|black|white)\.sankakucomplex\.com|sankaku\.app)" \
@@ -26,7 +25,6 @@ class SankakuExtractor(BooruExtractor):
     category = "sankaku"
     root = "https://sankaku.app"
     filename_fmt = "{category}_{id}_{md5}.{extension}"
-    cookies_domain = None
     _warning = True
 
     TAG_TYPES = {
@@ -47,6 +45,10 @@ class SankakuExtractor(BooruExtractor):
 
     def _init(self):
         self.api = SankakuAPI(self)
+        if self.config("tags") == "extended":
+            self._tags = self._tags_extended
+            self._tags_findall = util.re(
+                r"tag-type-([^\"' ]+).*?\?tags=([^\"'&]+)").findall
 
     def _file_url(self, post):
         url = post["file_url"]
@@ -85,6 +87,23 @@ class SankakuExtractor(BooruExtractor):
             post["tags_" + name] = values
             post["tag_string_" + name] = " ".join(values)
 
+    def _tags_extended(self, post, page):
+        try:
+            url = "https://chan.sankakucomplex.com/posts/" + post["id"]
+            page = self.request(url).text
+        except Exception as exc:
+            return self.log.warning(
+                "%s: Failed to extract extended tag categories (%s: %s)",
+                post["id"], exc.__class__.__name__, exc)
+
+        tags = collections.defaultdict(list)
+        tag_sidebar = text.extr(page, '<ul id="tag-sidebar"', "</ul>")
+        for tag_type, tag_name in self._tags_findall(tag_sidebar):
+            tags[tag_type].append(text.unescape(text.unquote(tag_name)))
+        for type, values in tags.items():
+            post["tags_" + type] = values
+            post["tag_string_" + type] = " ".join(values)
+
     def _notes(self, post, page):
         if post.get("has_notes"):
             post["notes"] = self.api.notes(post["id"])
@@ -110,11 +129,11 @@ class SankakuTagExtractor(SankakuExtractor):
 
         if "date:" in self.tags:
             # rewrite 'date:' tags (#1790)
-            self.tags = re.sub(
-                r"date:(\d\d)[.-](\d\d)[.-](\d\d\d\d)(?!T)",
+            self.tags = util.re(
+                r"date:(\d\d)[.-](\d\d)[.-](\d\d\d\d)(?!T)").sub(
                 r"date:\3-\2-\1T00:00", self.tags)
-            self.tags = re.sub(
-                r"date:(\d\d\d\d)[.-](\d\d)[.-](\d\d)(?!T)",
+            self.tags = util.re(
+                r"date:(\d\d\d\d)[.-](\d\d)[.-](\d\d)(?!T)").sub(
                 r"date:\1-\2-\3T00:00", self.tags)
 
     def metadata(self):

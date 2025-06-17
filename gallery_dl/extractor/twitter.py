@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2023 Mike Fährmann
+# Copyright 2016-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -8,12 +8,11 @@
 
 """Extractors for https://x.com/"""
 
-from .common import Extractor, Message
+from .common import Extractor, Message, Dispatch
 from .. import text, util, exception
 from ..cache import cache, memcache
 import itertools
 import random
-import re
 
 BASE_PATTERN = (r"(?:https?://)?(?:www\.|mobile\.)?"
                 r"(?:(?:[fv]x)?twitter|(?:fix(?:up|v))?x)\.com")
@@ -72,21 +71,16 @@ class TwitterExtractor(Extractor):
         self.login()
         self.api = TwitterAPI(self)
         metadata = self.metadata()
-
-        if self.config("expand"):
-            tweets = self._expand_tweets(self.tweets())
-            self.tweets = lambda : tweets
-
-        if self.config("unique", True):
-            seen_tweets = set()
-        else:
-            seen_tweets = None
+        seen_tweets = set() if self.config("unique", True) else None
 
         if self.twitpic:
-            self._find_twitpic = re.compile(
+            self._find_twitpic = util.re(
                 r"https?(://twitpic\.com/(?!photos/)\w+)").findall
 
-        for tweet in self.tweets():
+        tweets = self.tweets()
+        if self.config("expand"):
+            tweets = self._expand_tweets(tweets)
+        for tweet in tweets:
 
             if "legacy" in tweet:
                 data = tweet["legacy"]
@@ -129,6 +123,11 @@ class TwitterExtractor(Extractor):
             tdata.update(metadata)
             tdata["count"] = len(files)
             yield Message.Directory, tdata
+
+            del tdata["source_id"]
+            if "source_user" in tdata:
+                del tdata["source_user"]
+
             for tdata["num"], file in enumerate(files, 1):
                 file.update(tdata)
                 url = file.pop("url")
@@ -180,38 +179,25 @@ class TwitterExtractor(Extractor):
                     if not self.unavailable:
                         continue
 
-            mtype = media.get("type")
-            descr = media.get("ext_alt_text")
-            width = media["original_info"].get("width", 0)
-            height = media["original_info"].get("height", 0)
-
             if "video_info" in media:
                 if self.videos == "ytdl":
-                    files.append({
+                    file = {
                         "url": "ytdl:{}/i/web/status/{}".format(
                             self.root, tweet["id_str"]),
-                        "type"       : mtype,
-                        "width"      : width,
-                        "height"     : height,
-                        "extension"  : None,
-                        "description": descr,
-                    })
+                        "extension": "mp4",
+                    }
                 elif self.videos:
                     video_info = media["video_info"]
                     variant = max(
                         video_info["variants"],
                         key=lambda v: v.get("bitrate", 0),
                     )
-                    files.append({
-                        "url"        : variant["url"],
-                        "type"       : mtype,
-                        "width"      : width,
-                        "height"     : height,
-                        "bitrate"    : variant.get("bitrate", 0),
-                        "duration"   : video_info.get(
+                    file = {
+                        "url"     : variant["url"],
+                        "bitrate" : variant.get("bitrate", 0),
+                        "duration": video_info.get(
                             "duration_millis", 0) / 1000,
-                        "description": descr,
-                    })
+                    }
             elif "media_url_https" in media:
                 url = media["media_url_https"]
                 if url[-4] == ".":
@@ -219,16 +205,33 @@ class TwitterExtractor(Extractor):
                     base += "?format=" + fmt + "&name="
                 else:
                     base = url.rpartition("=")[0] + "="
-                files.append(text.nameext_from_url(url, {
-                    "url"        : base + self._size_image,
-                    "type"       : mtype,
-                    "width"      : width,
-                    "height"     : height,
-                    "_fallback"  : self._image_fallback(base),
-                    "description": descr,
-                }))
+                file = text.nameext_from_url(url, {
+                    "url"      : base + self._size_image,
+                    "_fallback": self._image_fallback(base),
+                })
             else:
                 files.append({"url": media["media_url"]})
+                continue
+
+            file["type"] = media.get("type")
+            file["width"] = media["original_info"].get("width", 0)
+            file["height"] = media["original_info"].get("height", 0)
+            file["description"] = media.get("ext_alt_text")
+            self._extract_media_source(file, media)
+            files.append(file)
+
+    def _extract_media_source(self, dest, media):
+        dest["source_id"] = 0
+
+        if "source_status_id_str" in media:
+            try:
+                dest["source_id"] = text.parse_int(
+                    media["source_status_id_str"])
+                dest["source_user"] = self._transform_user(
+                    media["additional_media_info"]["source_user"]
+                    ["user_results"]["result"])
+            except Exception:
+                pass
 
     def _image_fallback(self, base):
         for fmt in self._size_fallback:
@@ -354,6 +357,7 @@ class TwitterExtractor(Extractor):
                 tget("in_reply_to_status_id_str")),
             "conversation_id": text.parse_int(
                 tget("conversation_id_str")),
+            "source_id"     : 0,
             "date"          : date,
             "author"        : author,
             "user"          : self._user or author,
@@ -417,6 +421,9 @@ class TwitterExtractor(Extractor):
             tdata["reply_to"] = legacy["in_reply_to_screen_name"]
         if "quoted_by" in legacy:
             tdata["quote_by"] = legacy["quoted_by"]
+        if "extended_entities" in legacy:
+            self._extract_media_source(
+                tdata, legacy["extended_entities"]["media"][0])
         if tdata["retweet_id"]:
             tdata["content"] = "RT @{}: {}".format(
                 author["name"], tdata["content"])
@@ -577,27 +584,18 @@ class TwitterExtractor(Extractor):
             return self.cookies_update(_login_impl(self, username, password))
 
 
-class TwitterUserExtractor(TwitterExtractor):
+class TwitterUserExtractor(Dispatch, TwitterExtractor):
     """Extractor for a Twitter user"""
-    subcategory = "user"
     pattern = (BASE_PATTERN + r"/(?!search)(?:([^/?#]+)/?(?:$|[?#])"
                r"|i(?:/user/|ntent/user\?user_id=)(\d+))")
     example = "https://x.com/USER"
 
-    def __init__(self, match):
-        TwitterExtractor.__init__(self, match)
-        user_id = match.group(2)
-        if user_id:
-            self.user = "id:" + user_id
-
-    def initialize(self):
-        pass
-
-    def finalize(self):
-        pass
-
     def items(self):
-        base = "{}/{}/".format(self.root, self.user)
+        user, user_id = self.groups
+        if user_id is not None:
+            user = "id:" + user_id
+
+        base = "{}/{}/".format(self.root, user)
         return self._dispatch_extractors((
             (TwitterInfoExtractor      , base + "info"),
             (TwitterAvatarExtractor    , base + "photo"),
@@ -1069,6 +1067,7 @@ class TwitterImageExtractor(Extractor):
 
 
 class TwitterAPI():
+    client_transaction = None
 
     def __init__(self, extractor):
         self.extractor = extractor
@@ -1101,6 +1100,7 @@ class TwitterAPI():
             "x-csrf-token": csrf_token,
             "x-twitter-client-language": "en",
             "x-twitter-active-user": "yes",
+            "x-client-transaction-id": None,
             "Sec-Fetch-Dest": "empty",
             "Sec-Fetch-Mode": "cors",
             "Sec-Fetch-Site": "same-origin",
@@ -1503,12 +1503,38 @@ class TwitterAPI():
             self.extractor.cookies.set(
                 "gt", guest_token, domain=self.extractor.cookies_domain)
 
+    @cache(maxage=10800)
+    def _client_transaction(self):
+        self.log.info("Initializing client transaction keys")
+
+        from .. import transaction_id
+        ct = transaction_id.ClientTransaction()
+        ct.initialize(self.extractor)
+
+        # update 'x-csrf-token' header (#7467)
+        csrf_token = self.extractor.cookies.get(
+            "ct0", domain=self.extractor.cookies_domain)
+        if csrf_token:
+            self.headers["x-csrf-token"] = csrf_token
+
+        return ct
+
+    def _transaction_id(self, url, method="GET"):
+        if self.client_transaction is None:
+            TwitterAPI.client_transaction = self._client_transaction()
+        path = url[url.find("/", 8):]
+        self.headers["x-client-transaction-id"] = \
+            self.client_transaction.generate_transaction_id(method, path)
+
     def _call(self, endpoint, params, method="GET", auth=True, root=None):
         url = (root or self.root) + endpoint
 
         while True:
-            if not self.headers["x-twitter-auth-type"] and auth:
-                self._authenticate_guest()
+            if auth:
+                if self.headers["x-twitter-auth-type"]:
+                    self._transaction_id(url, method)
+                else:
+                    self._authenticate_guest()
 
             response = self.extractor.request(
                 url, method=method, params=params,

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # Copyright 2022 Ailothaen
-# Copyright 2024 Mike Fährmann
+# Copyright 2024-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -52,8 +52,7 @@ class WikimediaExtractor(BaseExtractor):
                 return url
         raise exception.StopExtraction("Unable to find API endpoint")
 
-    @staticmethod
-    def prepare(image):
+    def prepare(self, image):
         """Adjust the content of an image object"""
         image["metadata"] = {
             m["name"]: m["value"]
