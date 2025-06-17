@@ -78,8 +78,8 @@ Description
 
     If this is an ``object``, it must contain Python expressions mapping to the
     filename format strings to use.
-    These expressions are evaluated in the order as specified in Python 3.6+
-    and in an undetermined order in Python 3.4 and 3.5.
+    These expressions are evaluated in the specified order until one evaluates
+    to ``True``.
 
     The available replacement keys depend on the extractor used. A list
     of keys for a specific one can be acquired by calling *gallery-dl*
