@@ -5541,14 +5541,16 @@ Description
         | - Set a value to ``false`` to completely remove these extension's ``type`` parameter
         | - Omit an extension to leave its URLs unchanged
 
-extractor.webtoons.thumbnail
---------------------------
+extractor.webtoons.thumbnails
+-----------------------------
 Type
     ``bool``
 Default
     ``false``
 Description
-    Download the active chapter ``thumbnail`` files and prepend it as file 1 before the actual images. Useful to create cbz files with actual thumbnails from source
+    Download the active chapter's ``thumbnail``.
+
+    Useful for creating CBZ archives with actual source thumbnails.
 
 
 extractor.weibo.gifs
