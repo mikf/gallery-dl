@@ -131,11 +131,10 @@ class WebtoonsEpisodeExtractor(WebtoonsBase, GalleryExtractor):
 
     def assets(self, page):
         if self.thumbnails:
-            activeThumbnails = text.extract(page, 'class="on ', '</a>')
-            episodeThumbnailURL = text.extract(str(activeThumbnails),'data-url="', '"')
-            episodeThumbnailURL = str(episodeThumbnailURL[0])
-            episodeThumbnailURL = episodeThumbnailURL.replace("://webtoon-phinf.", "://swebtoon-phinf.")
-            return ({"url": episodeThumbnailURL, "type": "thumbnail"},)
+            active = text.extr(page, 'class="on ', '</a>')
+            url = text.extr(active, 'data-url="', '"')
+            url = url.replace("://webtoon-phinf.", "://swebtoon-phinf.")
+            return ({"url": url, "type": "thumbnail"},)
 
 
 class WebtoonsComicExtractor(WebtoonsBase, Extractor):
