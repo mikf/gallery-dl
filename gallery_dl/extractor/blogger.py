@@ -102,12 +102,8 @@ class BloggerPostExtractor(BloggerExtractor):
     pattern = BASE_PATTERN + r"(/\d\d\d\d/\d\d/[^/?#]+\.html)"
     example = "https://BLOG.blogspot.com/1970/01/TITLE.html"
 
-    def __init__(self, match):
-        BloggerExtractor.__init__(self, match)
-        self.path = match[match.lastindex]
-
     def posts(self, blog):
-        return (self.api.post_by_path(blog["id"], self.path),)
+        return (self.api.post_by_path(blog["id"], self.groups[-1]),)
 
 
 class BloggerBlogExtractor(BloggerExtractor):
@@ -126,15 +122,12 @@ class BloggerSearchExtractor(BloggerExtractor):
     pattern = BASE_PATTERN + r"/search/?\?q=([^&#]+)"
     example = "https://BLOG.blogspot.com/search?q=QUERY"
 
-    def __init__(self, match):
-        BloggerExtractor.__init__(self, match)
-        self.query = text.unquote(match[match.lastindex])
+    def metadata(self):
+        self.query = query = text.unquote(self.groups[-1])
+        return {"query": query}
 
     def posts(self, blog):
         return self.api.blog_search(blog["id"], self.query)
-
-    def metadata(self):
-        return {"query": self.query}
 
 
 class BloggerLabelExtractor(BloggerExtractor):
@@ -143,21 +136,18 @@ class BloggerLabelExtractor(BloggerExtractor):
     pattern = BASE_PATTERN + r"/search/label/([^/?#]+)"
     example = "https://BLOG.blogspot.com/search/label/LABEL"
 
-    def __init__(self, match):
-        BloggerExtractor.__init__(self, match)
-        self.label = text.unquote(match[match.lastindex])
+    def metadata(self):
+        self.label = label = text.unquote(self.groups[-1])
+        return {"label": label}
 
     def posts(self, blog):
         return self.api.blog_posts(blog["id"], self.label)
 
-    def metadata(self):
-        return {"label": self.label}
-
 
 class BloggerAPI():
-    """Minimal interface for the Blogger v3 API
+    """Minimal interface for the Blogger API v3
 
-    Ref: https://developers.google.com/blogger
+    https://developers.google.com/blogger
     """
     API_KEY = "AIzaSyCN9ax34oMMyM07g_M-5pjeDp_312eITK8"
 
@@ -166,27 +156,27 @@ class BloggerAPI():
         self.api_key = extractor.config("api-key") or self.API_KEY
 
     def blog_by_url(self, url):
-        return self._call("blogs/byurl", {"url": url}, "blog")
+        return self._call("/blogs/byurl", {"url": url}, "blog")
 
     def blog_posts(self, blog_id, label=None):
-        endpoint = "blogs/{}/posts".format(blog_id)
+        endpoint = f"/blogs/{blog_id}/posts"
         params = {"labels": label}
         return self._pagination(endpoint, params)
 
     def blog_search(self, blog_id, query):
-        endpoint = "blogs/{}/posts/search".format(blog_id)
+        endpoint = f"/blogs/{blog_id}/posts/search"
         params = {"q": query}
         return self._pagination(endpoint, params)
 
     def post_by_path(self, blog_id, path):
-        endpoint = "blogs/{}/posts/bypath".format(blog_id)
+        endpoint = f"/blogs/{blog_id}/posts/bypath"
         return self._call(endpoint, {"path": path}, "post")
 
     def _call(self, endpoint, params, notfound=None):
-        url = "https://www.googleapis.com/blogger/v3/" + endpoint
+        url = "https://www.googleapis.com/blogger/v3" + endpoint
         params["key"] = self.api_key
-        return self.extractor.request(
-            url, params=params, notfound=notfound).json()
+        return self.extractor.request_json(
+            url, params=params, notfound=notfound)
 
     def _pagination(self, endpoint, params):
         while True:

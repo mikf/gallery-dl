@@ -95,8 +95,8 @@ class GelbooruV02Extractor(booru.BooruExtractor):
             post["created_at"], "%a %b %d %H:%M:%S %z %Y")
 
     def _html(self, post):
-        return self.request("{}/index.php?page=post&s=view&id={}".format(
-            self.root, post["id"])).text
+        url = f"{self.root}/index.php?page=post&s=view&id={post['id']}"
+        return self.request(url).text
 
     def _tags(self, post, page):
         tag_container = (text.extr(page, '<ul id="tag-', '</ul>') or
@@ -161,13 +161,9 @@ class GelbooruV02TagExtractor(GelbooruV02Extractor):
     pattern = BASE_PATTERN + r"/index\.php\?page=post&s=list&tags=([^&#]*)"
     example = "https://safebooru.org/index.php?page=post&s=list&tags=TAG"
 
-    def __init__(self, match):
-        GelbooruV02Extractor.__init__(self, match)
-        tags = match[match.lastindex]
-        self.tags = text.unquote(tags.replace("+", " "))
-
     def metadata(self):
-        return {"search_tags": self.tags}
+        self.tags = tags = text.unquote(self.groups[-1].replace("+", " "))
+        return {"search_tags": tags}
 
     def posts(self):
         if self.tags == "all":
@@ -184,7 +180,7 @@ class GelbooruV02PoolExtractor(GelbooruV02Extractor):
 
     def __init__(self, match):
         GelbooruV02Extractor.__init__(self, match)
-        self.pool_id = match[match.lastindex]
+        self.pool_id = self.groups[-1]
 
         if self.category == "rule34":
             self.posts = self._posts_pages
@@ -197,8 +193,7 @@ class GelbooruV02PoolExtractor(GelbooruV02Extractor):
         return num
 
     def metadata(self):
-        url = "{}/index.php?page=pool&s=show&id={}".format(
-            self.root, self.pool_id)
+        url = f"{self.root}/index.php?page=pool&s=show&id={self.pool_id}"
         page = self.request(url).text
 
         name, pos = text.extract(page, "<h4>Pool: ", "</h4>")
@@ -234,12 +229,9 @@ class GelbooruV02FavoriteExtractor(GelbooruV02Extractor):
     pattern = BASE_PATTERN + r"/index\.php\?page=favorites&s=view&id=(\d+)"
     example = "https://safebooru.org/index.php?page=favorites&s=view&id=12345"
 
-    def __init__(self, match):
-        GelbooruV02Extractor.__init__(self, match)
-        self.favorite_id = match[match.lastindex]
-
     def metadata(self):
-        return {"favorite_id": text.parse_int(self.favorite_id)}
+        self.favorite_id = fav_id = self.groups[-1]
+        return {"favorite_id": text.parse_int(fav_id)}
 
     def posts(self):
         return self._pagination_html({
@@ -255,9 +247,5 @@ class GelbooruV02PostExtractor(GelbooruV02Extractor):
     pattern = BASE_PATTERN + r"/index\.php\?page=post&s=view&id=(\d+)"
     example = "https://safebooru.org/index.php?page=post&s=view&id=12345"
 
-    def __init__(self, match):
-        GelbooruV02Extractor.__init__(self, match)
-        self.post_id = match[match.lastindex]
-
     def posts(self):
-        return self._pagination({"id": self.post_id})
+        return self._pagination({"id": self.groups[-1]})

@@ -184,13 +184,12 @@ class FoolfuukaBoardExtractor(FoolfuukaExtractor):
         self.page = self.groups[-1]
 
     def items(self):
-        index_base = "{}/_/api/chan/index/?board={}&page=".format(
-            self.root, self.board)
-        thread_base = "{}/{}/thread/".format(self.root, self.board)
+        index_base = f"{self.root}/_/api/chan/index/?board={self.board}&page="
+        thread_base = f"{self.root}/{self.board}/thread/"
 
         page = self.page
         for pnum in itertools.count(text.parse_int(page, 1)):
-            with self.request(index_base + format(pnum)) as response:
+            with self.request(index_base + str(pnum)) as response:
                 try:
                     threads = response.json()
                 except ValueError:
@@ -270,27 +269,17 @@ class FoolfuukaGalleryExtractor(FoolfuukaExtractor):
     pattern = BASE_PATTERN + r"/([^/?#]+)/gallery(?:/(\d+))?"
     example = "https://archived.moe/a/gallery"
 
-    def __init__(self, match):
-        FoolfuukaExtractor.__init__(self, match)
-
-        board = match[match.lastindex]
-        if board.isdecimal():
-            self.board = match[match.lastindex-1]
-            self.pages = (board,)
-        else:
-            self.board = board
-            self.pages = map(format, itertools.count(1))
-
     def metadata(self):
-        return {"board": self.board}
+        self.board = board = self.groups[-2]
+        return {"board": board}
 
     def posts(self):
-        base = "{}/_/api/chan/gallery/?board={}&page=".format(
-            self.root, self.board)
+        pnum = self.groups[-1]
+        pages = itertools.count(1) if pnum is None else (pnum,)
+        base = f"{self.root}/_/api/chan/gallery/?board={self.board}&page="
 
-        for page in self.pages:
-            with self.request(base + page) as response:
-                posts = response.json()
+        for pnum in pages:
+            posts = self.request_json(f"{base}{pnum}")
             if not posts:
                 return
             yield from posts

@@ -20,7 +20,7 @@ class MisskeyExtractor(BaseExtractor):
 
     def __init__(self, match):
         BaseExtractor.__init__(self, match)
-        self.item = match[match.lastindex]
+        self.item = self.groups[-1]
 
     def _init(self):
         self.api = MisskeyAPI(self)
@@ -110,7 +110,7 @@ class MisskeyUserExtractor(Dispatch, MisskeyExtractor):
     example = "https://misskey.io/@USER"
 
     def items(self):
-        base = "{}/@{}/".format(self.root, self.item)
+        base = f"{self.root}/@{self.item}/"
         return self._dispatch_extractors((
             (MisskeyInfoExtractor      , base + "info"),
             (MisskeyAvatarExtractor    , base + "avatar"),
@@ -174,10 +174,9 @@ class MisskeyFollowingExtractor(MisskeyExtractor):
         user_id = self.api.user_id_by_username(self.item)
         for user in self.api.users_following(user_id):
             user = user["followee"]
-            url = self.root + "/@" + user["username"]
-            host = user["host"]
-            if host is not None:
-                url += "@" + host
+            url = f"{self.root}/@{user['username']}"
+            if (host := user["host"]) is not None:
+                url = f"{url}@{host}"
             user["_extractor"] = MisskeyUserExtractor
             yield Message.Queue, url, user
 
@@ -248,7 +247,7 @@ class MisskeyAPI():
         return self._pagination(endpoint, data)
 
     def _call(self, endpoint, data):
-        url = self.root + "/api" + endpoint
+        url = f"{self.root}/api{endpoint}"
         return self.extractor.request_json(url, method="POST", json=data)
 
     def _pagination(self, endpoint, data):

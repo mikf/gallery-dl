@@ -176,7 +176,7 @@ class ReactorTagExtractor(ReactorExtractor):
 
     def __init__(self, match):
         ReactorExtractor.__init__(self, match)
-        self.tag = match[match.lastindex]
+        self.tag = self.groups[-1]
 
     def metadata(self):
         return {"search_tags": text.unescape(self.tag).replace("+", " ")}
@@ -192,7 +192,7 @@ class ReactorSearchExtractor(ReactorExtractor):
 
     def __init__(self, match):
         ReactorExtractor.__init__(self, match)
-        self.tag = match[match.lastindex]
+        self.tag = self.groups[-1]
 
     def metadata(self):
         return {"search_tags": text.unescape(self.tag).replace("+", " ")}
@@ -207,7 +207,7 @@ class ReactorUserExtractor(ReactorExtractor):
 
     def __init__(self, match):
         ReactorExtractor.__init__(self, match)
-        self.user = match[match.lastindex]
+        self.user = self.groups[-1]
 
     def metadata(self):
         return {"user": text.unescape(self.user).replace("+", " ")}
@@ -221,7 +221,7 @@ class ReactorPostExtractor(ReactorExtractor):
 
     def __init__(self, match):
         ReactorExtractor.__init__(self, match)
-        self.post_id = match[match.lastindex]
+        self.post_id = self.groups[-1]
 
     def items(self):
         post = self.request(self.root + self.path).text
