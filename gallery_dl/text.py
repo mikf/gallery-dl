@@ -289,10 +289,17 @@ def parse_query_list(qs, as_list=()):
                     else:
                         result[name] = [value]
                 elif name not in result:
-                    result[name] = unquote(value.replace("+", " "))
+                    result[name] = value
     except Exception:
         pass
     return result
+
+
+def build_query(params):
+    return "&".join([
+        f"{quote(name)}={quote(value)}"
+        for name, value in params.items()
+    ])
 
 
 if sys.hexversion < 0x30c0000:

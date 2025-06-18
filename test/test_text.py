@@ -456,6 +456,8 @@ class TestText(unittest.TestCase):
         self.assertEqual(f(""), {})
         self.assertEqual(f("foo=1"), {"foo": "1"})
         self.assertEqual(f("foo=1&bar=2"), {"foo": "1", "bar": "2"})
+        self.assertEqual(f("%C3%A4%26=%E3%81%82%E3%81%A8&%23=%3F"),
+                         {"ä&": "あと", "#": "?"})
 
         # missing value
         self.assertEqual(f("bar"), {})
@@ -472,6 +474,21 @@ class TestText(unittest.TestCase):
         # invalid arguments
         for value in INVALID:
             self.assertEqual(f(value), {})
+
+    def test_build_query(self, f=text.build_query):
+        # standard usage
+        self.assertEqual(f({}), "")
+        self.assertEqual(f({"foo": "1"}), "foo=1")
+        self.assertEqual(f({"foo": "1", "bar": "2"}), "foo=1&bar=2")
+
+        # missing value
+        self.assertEqual(f({"bar": ""}), "bar=")
+        self.assertEqual(f({"foo": "1", "bar": ""}), "foo=1&bar=")
+        self.assertEqual(f({"foo": "1", "bar": "", "baz": "3"}),
+                         "foo=1&bar=&baz=3")
+
+        self.assertEqual(f({"ä&": "あと", "#": "?"}),
+                         "%C3%A4%26=%E3%81%82%E3%81%A8&%23=%3F")
 
     def test_parse_timestamp(self, f=text.parse_timestamp):
         null = util.datetime_utcfromtimestamp(0)
