@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2023 Mike Fährmann
+# Copyright 2015-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -20,7 +20,7 @@ class ImgthGalleryExtractor(GalleryExtractor):
     example = "https://imgth.com/gallery/123/TITLE"
 
     def __init__(self, match):
-        self.gallery_id = gid = match.group(1)
+        self.gallery_id = gid = match[1]
         url = "{}/gallery/{}/g/".format(self.root, gid)
         GalleryExtractor.__init__(self, match, url)
 

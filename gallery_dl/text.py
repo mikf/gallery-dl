@@ -204,7 +204,7 @@ def parse_unicode_escapes(txt):
 
 
 def _hex_to_char(match):
-    return chr(int(match.group(1), 16))
+    return chr(int(match[1], 16))
 
 
 def parse_bytes(value, default=0, suffixes="bkmgtp"):

@@ -198,7 +198,7 @@ class HitomiSearchExtractor(HitomiExtractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.query = match.group(1)
+        self.query = match[1]
         self.tags = text.unquote(self.query)
 
     def items(self):
@@ -269,9 +269,9 @@ def _parse_gg(extr):
 
     for match in util.re_compile(
             r"if\s+\(g\s*===?\s*(\d+)\)[\s{]*o\s*=\s*(\d+)").finditer(page):
-        m[int(match.group(1))] = int(match.group(2))
+        m[int(match[1])] = int(match[2])
 
     d = util.re_compile(r"(?:var\s|default:)\s*o\s*=\s*(\d+)").search(page)
     b = util.re_compile(r"b:\s*[\"'](.+)[\"']").search(page)
 
-    return m, b.group(1).strip("/"), int(d.group(1)) if d else 0
+    return m, b[1].strip("/"), int(d[1]) if d else 0

@@ -33,13 +33,13 @@ class NaverPostExtractor(NaverBase, GalleryExtractor):
     example = "https://blog.naver.com/BLOGID/12345"
 
     def __init__(self, match):
-        blog_id = match.group(1)
+        blog_id = match[1]
         if blog_id:
             self.blog_id = blog_id
-            self.post_id = match.group(2)
+            self.post_id = match[2]
         else:
-            self.blog_id = match.group(3)
-            self.post_id = match.group(4)
+            self.blog_id = match[3]
+            self.post_id = match[4]
 
         url = "{}/PostView.nhn?blogId={}&logNo={}".format(
             self.root, self.blog_id, self.post_id)
@@ -134,7 +134,7 @@ class NaverBlogExtractor(NaverBase, Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.blog_id = match.group(1) or match.group(2)
+        self.blog_id = match[1] or match[2]
 
     def items(self):
         # fetch first post number

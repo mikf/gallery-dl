@@ -354,7 +354,7 @@ class OAuthMastodon(OAuthBase):
 
     def __init__(self, match):
         OAuthBase.__init__(self, match)
-        self.instance = match.group(1)
+        self.instance = match[1]
 
     def items(self):
         yield Message.Version, 1

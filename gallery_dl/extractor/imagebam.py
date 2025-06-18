@@ -19,7 +19,7 @@ class ImagebamExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.path = match.group(1)
+        self.path = match[1]
 
     def _init(self):
         self.cookies.set("nsfw_inter", "1", domain="www.imagebam.com")

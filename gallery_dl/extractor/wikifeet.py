@@ -21,11 +21,11 @@ class WikifeetGalleryExtractor(GalleryExtractor):
     example = "https://www.wikifeet.com/CELEB"
 
     def __init__(self, match):
-        self.root = text.root_from_url(match.group(0))
+        self.root = text.root_from_url(match[0])
         if "wikifeetx.com" in self.root:
             self.category = "wikifeetx"
         self.type = "men" if "://men." in self.root else "women"
-        self.celeb = match.group(1)
+        self.celeb = match[1]
         GalleryExtractor.__init__(self, match, self.root + "/" + self.celeb)
 
     def metadata(self, page):

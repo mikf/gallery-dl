@@ -50,8 +50,8 @@ class FapachiUserExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.user = match.group(1)
-        self.num = text.parse_int(match.group(2), 1)
+        self.user = match[1]
+        self.num = text.parse_int(match[2], 1)
 
     def items(self):
         data = {"_extractor": FapachiPostExtractor}

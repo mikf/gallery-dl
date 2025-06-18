@@ -25,8 +25,8 @@ class HentaifoundryExtractor(Extractor):
     per_page = 25
 
     def __init__(self, match):
-        self.root = (match.group(1) or "https://") + "www.hentai-foundry.com"
-        self.user = match.group(2)
+        self.root = (match[1] or "https://") + "www.hentai-foundry.com"
+        self.user = match[2]
         Extractor.__init__(self, match)
         self.page_url = ""
         self.start_post = 0
@@ -306,7 +306,7 @@ class HentaifoundryImageExtractor(HentaifoundryExtractor):
 
     def __init__(self, match):
         HentaifoundryExtractor.__init__(self, match)
-        self.index = match.group(3)
+        self.index = match[3]
 
     def items(self):
         post_url = "{}/pictures/user/{}/{}/?enterAgree=1".format(
@@ -347,7 +347,7 @@ class HentaifoundryStoryExtractor(HentaifoundryExtractor):
 
     def __init__(self, match):
         HentaifoundryExtractor.__init__(self, match)
-        self.index = match.group(3)
+        self.index = match[3]
 
     def items(self):
         story_url = "{}/stories/user/{}/{}/x?enterAgree=1".format(

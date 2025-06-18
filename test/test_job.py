@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright 2021-2023 Mike Fährmann
+# Copyright 2021-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -364,7 +364,7 @@ class TestExtractor(Extractor):
     def __init__(self, match):
         Extractor.__init__(self, match)
         self.user = {"id": 123, "name": "test"}
-        if match.group(1) == "self":
+        if match[1] == "self":
             self.user["self"] = self.user
 
     def items(self):

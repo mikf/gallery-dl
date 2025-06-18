@@ -34,7 +34,7 @@ class ExhentaiExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.version = match.group(1)
+        self.version = match[1]
 
     def initialize(self):
         domain = self.config("domain", "auto")
@@ -122,10 +122,10 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
 
     def __init__(self, match):
         ExhentaiExtractor.__init__(self, match)
-        self.gallery_id = text.parse_int(match.group(2) or match.group(5))
-        self.gallery_token = match.group(3)
-        self.image_token = match.group(4)
-        self.image_num = text.parse_int(match.group(6), 1)
+        self.gallery_id = text.parse_int(match[2] or match[5])
+        self.gallery_token = match[3]
+        self.image_token = match[4]
+        self.image_num = text.parse_int(match[6], 1)
         self.key_start = None
         self.key_show = None
         self.key_next = None
@@ -573,7 +573,7 @@ class ExhentaiSearchExtractor(ExhentaiExtractor):
     def __init__(self, match):
         ExhentaiExtractor.__init__(self, match)
 
-        _, query, tag = match.groups()
+        _, query, tag = self.groups
         if tag:
             if "+" in tag:
                 ns, _, tag = tag.rpartition(":")
@@ -599,13 +599,13 @@ class ExhentaiSearchExtractor(ExhentaiExtractor):
             last = None
             page = self.request(search_url, params=params).text
 
-            for gallery in ExhentaiGalleryExtractor.pattern.finditer(page):
-                url = gallery.group(0)
+            for match in ExhentaiGalleryExtractor.pattern.finditer(page):
+                url = match[0]
                 if url == last:
                     continue
                 last = url
-                data["gallery_id"] = text.parse_int(gallery.group(2))
-                data["gallery_token"] = gallery.group(3)
+                data["gallery_id"] = text.parse_int(match[2])
+                data["gallery_token"] = match[3]
                 yield Message.Queue, url + "/", data
 
             next_url = text.extr(page, 'nexturl="', '"', None)

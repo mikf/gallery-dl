@@ -115,7 +115,7 @@ class ExecPP(PostProcessor):
         util.Popen(args, shell=shell)
 
     def _replace(self, match):
-        name = match.group(1)
+        name = match[1]
         if name == "_directory":
             return quote(self.pathfmt.realdirectory)
         if name == "_filename":

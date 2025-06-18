@@ -29,9 +29,9 @@ class KemonoExtractor(Extractor):
     cookies_domain = ".kemono.su"
 
     def __init__(self, match):
-        tld = match.group(2)
-        self.category = domain = match.group(1)
-        self.root = text.root_from_url(match.group(0))
+        tld = match[2]
+        self.category = domain = match[1]
+        self.root = text.root_from_url(match[0])
         self.cookies_domain = ".{}.{}".format(domain, tld)
         Extractor.__init__(self, match)
 
@@ -125,7 +125,7 @@ class KemonoExtractor(Extractor):
 
                 match = find_hash(url)
                 if match:
-                    file["hash"] = hash = match.group(1)
+                    file["hash"] = hash = match[1]
                     if not duplicates:
                         if hash in hashes:
                             self.log.debug("Skipping %s (duplicate)", url)
@@ -310,7 +310,7 @@ class KemonoUserExtractor(KemonoExtractor):
     example = "https://kemono.su/SERVICE/user/12345"
 
     def __init__(self, match):
-        self.subcategory = match.group(3)
+        self.subcategory = match[3]
         KemonoExtractor.__init__(self, match)
 
     def posts(self):
@@ -356,7 +356,7 @@ class KemonoPostExtractor(KemonoExtractor):
     example = "https://kemono.su/SERVICE/user/12345/post/12345"
 
     def __init__(self, match):
-        self.subcategory = match.group(3)
+        self.subcategory = match[3]
         KemonoExtractor.__init__(self, match)
 
     def posts(self):
@@ -423,7 +423,7 @@ class KemonoDiscordExtractor(KemonoExtractor):
             append = files.append
             for attachment in post["attachments"]:
                 match = find_hash(attachment["path"])
-                attachment["hash"] = match.group(1) if match else ""
+                attachment["hash"] = match[1] if match else ""
                 attachment["type"] = "attachment"
                 append(attachment)
             for path in find_inline(post["content"] or ""):

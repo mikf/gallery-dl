@@ -28,4 +28,4 @@ class RecursiveExtractor(Extractor):
             page = self.request(text.ensure_http_scheme(url)).text
 
         for match in util.re(r"https?://[^\s\"']+").finditer(page):
-            yield Message.Queue, match.group(0), {}
+            yield Message.Queue, match[0], {}

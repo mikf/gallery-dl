@@ -33,7 +33,7 @@ class InstagramExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.item = match.group(1)
+        self.item = match[1]
 
     def _init(self):
         self.www_claim = "0"
@@ -513,7 +513,7 @@ class InstagramGuideExtractor(InstagramExtractor):
 
     def __init__(self, match):
         InstagramExtractor.__init__(self, match)
-        self.guide_id = match.group(2)
+        self.guide_id = match[2]
 
     def metadata(self):
         return {"guide": self.api.guide(self.guide_id)}

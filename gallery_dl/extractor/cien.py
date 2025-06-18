@@ -20,7 +20,7 @@ class CienExtractor(Extractor):
     request_interval = (1.0, 2.0)
 
     def __init__(self, match):
-        self.root = text.root_from_url(match.group(0))
+        self.root = text.root_from_url(match[0])
         Extractor.__init__(self, match)
 
     def _init(self):

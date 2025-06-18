@@ -46,8 +46,8 @@ class PostmillExtractor(BaseExtractor):
                 '</div>')
 
             match = self._search_canonical_url(post_canonical_url)
-            forum = match.group(1)
-            id = int(match.group(2))
+            forum = match[1]
+            id = int(match[2])
 
             is_text_post = (url[0] == "/")
             is_image_post = self._search_image_tag(page) is not None
@@ -142,8 +142,8 @@ class PostmillPostExtractor(PostmillExtractor):
 
     def __init__(self, match):
         PostmillExtractor.__init__(self, match)
-        self.forum = match.group(3)
-        self.post_id = match.group(4)
+        self.forum = match[3]
+        self.post_id = match[4]
 
     def post_urls(self):
         return (self.root + "/f/" + self.forum + "/" + self.post_id,)

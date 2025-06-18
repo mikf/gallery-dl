@@ -20,7 +20,7 @@ class XhamsterExtractor(Extractor):
     category = "xhamster"
 
     def __init__(self, match):
-        self.root = "https://" + match.group(1)
+        self.root = "https://" + match[1]
         Extractor.__init__(self, match)
 
 

@@ -92,7 +92,7 @@ class XvideosUserExtractor(XvideosBase, Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.user = match.group(1)
+        self.user = match[1]
 
     def items(self):
         url = "{}/profiles/{}".format(self.root, self.user)

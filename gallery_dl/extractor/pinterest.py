@@ -214,7 +214,7 @@ class PinterestPinExtractor(PinterestExtractor):
 
     def __init__(self, match):
         PinterestExtractor.__init__(self, match)
-        self.pin_id = match.group(1)
+        self.pin_id = match[1]
         self.pin = None
 
     def metadata(self):
@@ -236,8 +236,8 @@ class PinterestBoardExtractor(PinterestExtractor):
 
     def __init__(self, match):
         PinterestExtractor.__init__(self, match)
-        self.user = text.unquote(match.group(1))
-        self.board_name = text.unquote(match.group(2))
+        self.user = text.unquote(match[1])
+        self.board_name = text.unquote(match[2])
         self.board = None
 
     def metadata(self):
@@ -266,7 +266,7 @@ class PinterestUserExtractor(PinterestExtractor):
 
     def __init__(self, match):
         PinterestExtractor.__init__(self, match)
-        self.user = text.unquote(match.group(1))
+        self.user = text.unquote(match[1])
 
     def items(self):
         for board in self.api.boards(self.user):
@@ -285,7 +285,7 @@ class PinterestAllpinsExtractor(PinterestExtractor):
 
     def __init__(self, match):
         PinterestExtractor.__init__(self, match)
-        self.user = text.unquote(match.group(1))
+        self.user = text.unquote(match[1])
 
     def metadata(self):
         return {"user": self.user}
@@ -303,7 +303,7 @@ class PinterestCreatedExtractor(PinterestExtractor):
 
     def __init__(self, match):
         PinterestExtractor.__init__(self, match)
-        self.user = text.unquote(match.group(1))
+        self.user = text.unquote(match[1])
 
     def metadata(self):
         return {"user": self.user}
@@ -323,9 +323,9 @@ class PinterestSectionExtractor(PinterestExtractor):
 
     def __init__(self, match):
         PinterestExtractor.__init__(self, match)
-        self.user = text.unquote(match.group(1))
-        self.board_slug = text.unquote(match.group(2))
-        self.section_slug = text.unquote(match.group(3))
+        self.user = text.unquote(match[1])
+        self.board_slug = text.unquote(match[2])
+        self.section_slug = text.unquote(match[3])
         self.section = None
 
     def metadata(self):
@@ -351,7 +351,7 @@ class PinterestSearchExtractor(PinterestExtractor):
 
     def __init__(self, match):
         PinterestExtractor.__init__(self, match)
-        self.search = text.unquote(match.group(1))
+        self.search = text.unquote(match[1])
 
     def metadata(self):
         return {"search": self.search}

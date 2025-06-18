@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2023 Mike Fährmann
+# Copyright 2015-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -22,7 +22,7 @@ class NhentaiGalleryExtractor(GalleryExtractor):
     example = "https://nhentai.net/g/12345/"
 
     def __init__(self, match):
-        url = self.root + "/api/gallery/" + match.group(1)
+        url = self.root + "/api/gallery/" + match[1]
         GalleryExtractor.__init__(self, match, url)
 
     def metadata(self, page):

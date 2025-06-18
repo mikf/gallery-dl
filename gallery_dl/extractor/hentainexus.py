@@ -22,7 +22,7 @@ class HentainexusGalleryExtractor(GalleryExtractor):
     example = "https://hentainexus.com/view/12345"
 
     def __init__(self, match):
-        self.gallery_id = match.group(1)
+        self.gallery_id = match[1]
         url = "{}/view/{}".format(self.root, self.gallery_id)
         GalleryExtractor.__init__(self, match, url)
 

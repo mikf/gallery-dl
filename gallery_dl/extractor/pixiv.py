@@ -320,7 +320,7 @@ class PixivExtractor(Extractor):
         if not caption:
             return ""
         return text.unescape(self.meta_captions_sub(
-            lambda m: '<a href="' + text.unquote(m.group(1)), caption))
+            lambda m: '<a href="' + text.unquote(m[1]), caption))
 
     def _fallback_image(self, src):
         if isinstance(src, str):
@@ -558,7 +558,7 @@ class PixivWorkExtractor(PixivExtractor):
 
     def __init__(self, match):
         PixivExtractor.__init__(self, match)
-        self.illust_id = match.group(1) or match.group(2)
+        self.illust_id = match[1] or match[2]
 
     def works(self):
         works = (self.api.illust_detail(self.illust_id),)
@@ -658,7 +658,7 @@ class PixivRankingExtractor(PixivExtractor):
 
     def __init__(self, match):
         PixivExtractor.__init__(self, match)
-        self.query = match.group(1)
+        self.query = match[1]
         self.mode = self.date = None
 
     def works(self):
@@ -812,7 +812,7 @@ class PixivPixivisionExtractor(PixivExtractor):
 
     def __init__(self, match):
         PixivExtractor.__init__(self, match)
-        self.pixivision_id = match.group(1)
+        self.pixivision_id = match[1]
 
     def works(self):
         return (
@@ -870,7 +870,7 @@ class PixivNovelExtractor(PixivExtractor):
 
     def __init__(self, match):
         PixivExtractor.__init__(self, match)
-        self.novel_id = match.group(1)
+        self.novel_id = match[1]
 
     def items(self):
         tags = self.config("tags", "japanese")
@@ -1041,7 +1041,7 @@ class PixivSketchExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.username = match.group(1)
+        self.username = match[1]
 
     def items(self):
         headers = {"Referer": "{}/@{}".format(self.root, self.username)}

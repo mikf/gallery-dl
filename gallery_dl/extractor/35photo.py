@@ -104,7 +104,7 @@ class _35photoUserExtractor(_35photoExtractor):
 
     def __init__(self, match):
         _35photoExtractor.__init__(self, match)
-        self.user = match.group(1)
+        self.user = match[1]
         self.user_id = 0
 
     def metadata(self):
@@ -133,7 +133,7 @@ class _35photoTagExtractor(_35photoExtractor):
 
     def __init__(self, match):
         _35photoExtractor.__init__(self, match)
-        self.tag = match.group(1)
+        self.tag = match[1]
 
     def metadata(self):
         return {"search_tag": text.unquote(self.tag).lower()}
@@ -198,7 +198,7 @@ class _35photoImageExtractor(_35photoExtractor):
 
     def __init__(self, match):
         _35photoExtractor.__init__(self, match)
-        self.photo_id = match.group(1)
+        self.photo_id = match[1]
 
     def photos(self):
         return (self.photo_id,)

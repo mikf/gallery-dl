@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2023 Mike Fährmann
+# Copyright 2019-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -21,7 +21,7 @@ class SlickpicExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.user = match.group(1)
+        self.user = match[1]
         self.root = "https://{}.slickpic.com".format(self.user)
 
 
@@ -37,7 +37,7 @@ class SlickpicAlbumExtractor(SlickpicExtractor):
 
     def __init__(self, match):
         SlickpicExtractor.__init__(self, match)
-        self.album = match.group(2)
+        self.album = match[2]
 
     def items(self):
         data = self.metadata()

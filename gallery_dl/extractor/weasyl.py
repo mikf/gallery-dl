@@ -76,7 +76,7 @@ class WeasylSubmissionExtractor(WeasylExtractor):
 
     def __init__(self, match):
         WeasylExtractor.__init__(self, match)
-        self.submitid = match.group(1)
+        self.submitid = match[1]
 
     def items(self):
         data = self.request_submission(self.submitid)
@@ -92,7 +92,7 @@ class WeasylSubmissionsExtractor(WeasylExtractor):
 
     def __init__(self, match):
         WeasylExtractor.__init__(self, match)
-        self.owner_login = match.group(1)
+        self.owner_login = match[1]
 
     def items(self):
         yield Message.Directory, {"owner_login": self.owner_login}
@@ -128,7 +128,7 @@ class WeasylJournalExtractor(WeasylExtractor):
 
     def __init__(self, match):
         WeasylExtractor.__init__(self, match)
-        self.journalid = match.group(1)
+        self.journalid = match[1]
 
     def items(self):
         data = self.retrieve_journal(self.journalid)
@@ -145,7 +145,7 @@ class WeasylJournalsExtractor(WeasylExtractor):
 
     def __init__(self, match):
         WeasylExtractor.__init__(self, match)
-        self.owner_login = match.group(1)
+        self.owner_login = match[1]
 
     def items(self):
         yield Message.Directory, {"owner_login": self.owner_login}

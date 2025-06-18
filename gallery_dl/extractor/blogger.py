@@ -104,7 +104,7 @@ class BloggerPostExtractor(BloggerExtractor):
 
     def __init__(self, match):
         BloggerExtractor.__init__(self, match)
-        self.path = match.group(match.lastindex)
+        self.path = match[match.lastindex]
 
     def posts(self, blog):
         return (self.api.post_by_path(blog["id"], self.path),)
@@ -128,7 +128,7 @@ class BloggerSearchExtractor(BloggerExtractor):
 
     def __init__(self, match):
         BloggerExtractor.__init__(self, match)
-        self.query = text.unquote(match.group(match.lastindex))
+        self.query = text.unquote(match[match.lastindex])
 
     def posts(self, blog):
         return self.api.blog_search(blog["id"], self.query)
@@ -145,7 +145,7 @@ class BloggerLabelExtractor(BloggerExtractor):
 
     def __init__(self, match):
         BloggerExtractor.__init__(self, match)
-        self.label = text.unquote(match.group(match.lastindex))
+        self.label = text.unquote(match[match.lastindex])
 
     def posts(self, blog):
         return self.api.blog_posts(blog["id"], self.label)

@@ -83,11 +83,11 @@ class SteamgriddbAssetsExtractor(SteamgriddbExtractor):
 
     def __init__(self, match):
         SteamgriddbExtractor.__init__(self, match)
-        list_type = match.group(1)
-        id = int(match.group(2))
+        list_type = match[1]
+        id = int(match[2])
         self.game_id = id if list_type == "game" else None
         self.collection_id = id if list_type == "collection" else None
-        self.page = int(match.group(3) or 1)
+        self.page = int(match[3] or 1)
 
     def assets(self):
         limit = 48
@@ -162,8 +162,8 @@ class SteamgriddbAssetExtractor(SteamgriddbExtractor):
 
     def __init__(self, match):
         SteamgriddbExtractor.__init__(self, match)
-        self.asset_type = match.group(1)
-        self.asset_id = match.group(2)
+        self.asset_type = match[1]
+        self.asset_id = match[2]
 
     def assets(self):
         endpoint = "/api/public/asset/" + self.asset_type + "/" + self.asset_id

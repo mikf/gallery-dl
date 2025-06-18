@@ -187,7 +187,7 @@ class SeigaImageExtractor(SeigaExtractor):
 
     def __init__(self, match):
         SeigaExtractor.__init__(self, match)
-        self.image_id = match.group(1)
+        self.image_id = match[1]
 
     def skip(self, num):
         self.start_image += num

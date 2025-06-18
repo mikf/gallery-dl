@@ -60,7 +60,7 @@ class PornhubGalleryExtractor(PornhubExtractor):
 
     def __init__(self, match):
         PornhubExtractor.__init__(self, match)
-        self.gallery_id = match.group(1)
+        self.gallery_id = match[1]
         self._first = None
 
     def items(self):
@@ -141,7 +141,7 @@ class PornhubGifExtractor(PornhubExtractor):
 
     def __init__(self, match):
         PornhubExtractor.__init__(self, match)
-        self.gallery_id = match.group(1)
+        self.gallery_id = match[1]
 
     def items(self):
         url = "{}/gif/{}".format(self.root, self.gallery_id)

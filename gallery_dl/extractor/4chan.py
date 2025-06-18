@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2023 Mike Fährmann
+# Copyright 2015-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -59,7 +59,7 @@ class _4chanBoardExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.board = match.group(1)
+        self.board = match[1]
 
     def items(self):
         url = "https://a.4cdn.org/{}/threads.json".format(self.board)

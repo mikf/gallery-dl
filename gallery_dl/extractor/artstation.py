@@ -25,7 +25,7 @@ class ArtstationExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.user = match.group(1) or match.group(2)
+        self.user = match[1] or match[2]
 
     def _init(self):
         self.session.headers["Cache-Control"] = "max-age=0"
@@ -215,7 +215,7 @@ class ArtstationAlbumExtractor(ArtstationExtractor):
 
     def __init__(self, match):
         ArtstationExtractor.__init__(self, match)
-        self.album_id = text.parse_int(match.group(3))
+        self.album_id = text.parse_int(match[3])
 
     def metadata(self):
         userinfo = self.get_user_info(self.user)
@@ -264,7 +264,7 @@ class ArtstationCollectionExtractor(ArtstationExtractor):
 
     def __init__(self, match):
         ArtstationExtractor.__init__(self, match)
-        self.collection_id = match.group(2)
+        self.collection_id = match[2]
 
     def metadata(self):
         url = "{}/collections/{}.json".format(
@@ -314,8 +314,8 @@ class ArtstationChallengeExtractor(ArtstationExtractor):
 
     def __init__(self, match):
         ArtstationExtractor.__init__(self, match)
-        self.challenge_id = match.group(1)
-        self.sorting = match.group(2) or "popular"
+        self.challenge_id = match[1]
+        self.sorting = match[2] or "popular"
 
     def items(self):
         challenge_url = "{}/contests/_/challenges/{}.json".format(
@@ -359,7 +359,7 @@ class ArtstationSearchExtractor(ArtstationExtractor):
 
     def __init__(self, match):
         ArtstationExtractor.__init__(self, match)
-        self.params = query = text.parse_query(match.group(1))
+        self.params = query = text.parse_query(match[1])
         self.query = text.unquote(query.get("query") or query.get("q", ""))
         self.sorting = query.get("sort_by", "relevance").lower()
         self.tags = query.get("tags", "").split(",")
@@ -406,7 +406,7 @@ class ArtstationArtworkExtractor(ArtstationExtractor):
 
     def __init__(self, match):
         ArtstationExtractor.__init__(self, match)
-        self.query = text.parse_query(match.group(1))
+        self.query = text.parse_query(match[1])
 
     def metadata(self):
         return {"artwork": self.query}
@@ -426,7 +426,7 @@ class ArtstationImageExtractor(ArtstationExtractor):
 
     def __init__(self, match):
         ArtstationExtractor.__init__(self, match)
-        self.project_id = match.group(1)
+        self.project_id = match[1]
         self.assets = None
 
     def metadata(self):

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2023 Mike Fährmann
+# Copyright 2019-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -22,7 +22,7 @@ class LivedoorExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.user = match.group(1)
+        self.user = match[1]
 
     def items(self):
         for post in self.posts():
@@ -108,7 +108,7 @@ class LivedoorPostExtractor(LivedoorExtractor):
 
     def __init__(self, match):
         LivedoorExtractor.__init__(self, match)
-        self.post_id = match.group(2)
+        self.post_id = match[2]
 
     def posts(self):
         url = "{}/{}/archives/{}.html".format(

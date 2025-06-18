@@ -45,7 +45,7 @@ class ImagefapGalleryExtractor(ImagefapExtractor):
 
     def __init__(self, match):
         ImagefapExtractor.__init__(self, match)
-        self.gid = match.group(1)
+        self.gid = match[1]
         self.image_id = ""
 
     def items(self):
@@ -116,7 +116,7 @@ class ImagefapImageExtractor(ImagefapExtractor):
 
     def __init__(self, match):
         ImagefapExtractor.__init__(self, match)
-        self.image_id = match.group(1)
+        self.image_id = match[1]
 
     def items(self):
         url, data = self.get_image()

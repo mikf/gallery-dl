@@ -37,14 +37,14 @@ class HentaihereChapterExtractor(HentaihereBase, ChapterExtractor):
             r"Page 1 \| (.+) \(([^)]+)\) - Chapter \d+: (.+) by "
             r"(.+) at ").match(title)
         return {
-            "manga": match.group(1),
+            "manga": match[1],
             "manga_id": text.parse_int(self.manga_id),
             "chapter": text.parse_int(chapter),
             "chapter_minor": sep + minor,
             "chapter_id": text.parse_int(chapter_id),
-            "type": match.group(2),
-            "title": match.group(3),
-            "author": match.group(4),
+            "type": match[2],
+            "title": match[3],
+            "author": match[4],
             "lang": "en",
             "language": "English",
         }

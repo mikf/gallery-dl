@@ -61,7 +61,7 @@ class Rule34usTagExtractor(Rule34usExtractor):
 
     def __init__(self, match):
         Rule34usExtractor.__init__(self, match)
-        self.tags = text.unquote(match.group(1).replace("+", " "))
+        self.tags = text.unquote(match[1].replace("+", " "))
 
     def metadata(self):
         return {"search_tags": self.tags}
@@ -98,7 +98,7 @@ class Rule34usPostExtractor(Rule34usExtractor):
 
     def __init__(self, match):
         Rule34usExtractor.__init__(self, match)
-        self.post_id = match.group(1)
+        self.post_id = match[1]
 
     def posts(self):
         return (self._parse_post(self.post_id),)

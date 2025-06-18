@@ -28,7 +28,7 @@ def check_file(fname):
 VERSION = re.search(
     r'__version__\s*=\s*"([^"]+)"',
     read("gallery_dl/version.py"),
-).group(1)
+)[1]
 
 FILES = [
     (path, [f for f in files if check_file(f)])

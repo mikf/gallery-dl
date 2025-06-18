@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # Copyright 2020 Leonid "Bepis" Pavel
-# Copyright 2023 Mike Fährmann
+# Copyright 2023-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -23,7 +23,7 @@ class ImagechestGalleryExtractor(GalleryExtractor):
     example = "https://imgchest.com/p/abcdefghijk"
 
     def __init__(self, match):
-        self.gallery_id = match.group(1)
+        self.gallery_id = match[1]
         url = self.root + "/p/" + self.gallery_id
         GalleryExtractor.__init__(self, match, url)
 

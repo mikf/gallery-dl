@@ -50,7 +50,7 @@ class ReadcomiconlineIssueExtractor(ReadcomiconlineBase, ChapterExtractor):
 
     def __init__(self, match):
         ChapterExtractor.__init__(self, match)
-        self.params = match.group(2)
+        self.params = match[2]
 
     def _init(self):
         params = text.parse_query(self.params)
@@ -71,7 +71,7 @@ class ReadcomiconlineIssueExtractor(ReadcomiconlineBase, ChapterExtractor):
         match = re.match(r"(?:Issue )?#(\d+)|(.+)", iinfo)
         return {
             "comic": comic,
-            "issue": match.group(1) or match.group(2),
+            "issue": match[1] or match[2],
             "issue_id": text.parse_int(self.issue_id),
             "lang": "en",
             "language": "English",

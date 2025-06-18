@@ -172,7 +172,7 @@ class MangadexListExtractor(MangadexExtractor):
                "/01234567-89ab-cdef-0123-456789abcdef/NAME")
 
     def __init__(self, match):
-        if match.group(2) == "feed":
+        if match[2] == "feed":
             self.subcategory = "list-feed"
         else:
             self.items = self._items_manga

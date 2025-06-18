@@ -98,7 +98,7 @@ class MoebooruTagExtractor(MoebooruExtractor):
 
     def __init__(self, match):
         MoebooruExtractor.__init__(self, match)
-        tags = match.group(match.lastindex)
+        tags = match[match.lastindex]
         self.tags = text.unquote(tags.replace("+", " "))
 
     def metadata(self):
@@ -118,7 +118,7 @@ class MoebooruPoolExtractor(MoebooruExtractor):
 
     def __init__(self, match):
         MoebooruExtractor.__init__(self, match)
-        self.pool_id = match.group(match.lastindex)
+        self.pool_id = match[match.lastindex]
 
     def metadata(self):
         if self.config("metadata"):
@@ -142,7 +142,7 @@ class MoebooruPostExtractor(MoebooruExtractor):
 
     def __init__(self, match):
         MoebooruExtractor.__init__(self, match)
-        self.post_id = match.group(match.lastindex)
+        self.post_id = match[match.lastindex]
 
     def posts(self):
         params = {"tags": "id:" + self.post_id}
@@ -159,8 +159,8 @@ class MoebooruPopularExtractor(MoebooruExtractor):
 
     def __init__(self, match):
         MoebooruExtractor.__init__(self, match)
-        self.scale = match.group(match.lastindex-1)
-        self.query = match.group(match.lastindex)
+        self.scale = match[match.lastindex-1]
+        self.query = match[match.lastindex]
 
     def metadata(self):
         self.params = params = text.parse_query(self.query)

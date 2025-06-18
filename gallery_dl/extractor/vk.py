@@ -204,7 +204,7 @@ class VkTaggedExtractor(VkExtractor):
 
     def __init__(self, match):
         VkExtractor.__init__(self, match)
-        self.user_id = match.group(1)
+        self.user_id = match[1]
 
     def photos(self):
         return self._pagination("tag{}".format(self.user_id))

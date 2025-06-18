@@ -82,7 +82,7 @@ class MangoxoAlbumExtractor(MangoxoExtractor):
 
     def __init__(self, match):
         MangoxoExtractor.__init__(self, match)
-        self.album_id = match.group(1)
+        self.album_id = match[1]
 
     def items(self):
         self.login()
@@ -147,7 +147,7 @@ class MangoxoChannelExtractor(MangoxoExtractor):
 
     def __init__(self, match):
         MangoxoExtractor.__init__(self, match)
-        self.user = match.group(1)
+        self.user = match[1]
 
     def items(self):
         self.login()

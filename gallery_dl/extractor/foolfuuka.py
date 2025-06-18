@@ -273,9 +273,9 @@ class FoolfuukaGalleryExtractor(FoolfuukaExtractor):
     def __init__(self, match):
         FoolfuukaExtractor.__init__(self, match)
 
-        board = match.group(match.lastindex)
+        board = match[match.lastindex]
         if board.isdecimal():
-            self.board = match.group(match.lastindex-1)
+            self.board = match[match.lastindex-1]
             self.pages = (board,)
         else:
             self.board = board

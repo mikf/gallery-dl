@@ -926,7 +926,7 @@ class BaseExtractor(Extractor):
                 if index:
                     self.category, self.root, info = self.instances[index-1]
                     if not self.root:
-                        self.root = text.root_from_url(self.match.group(0))
+                        self.root = text.root_from_url(self.match[0])
                     self.config_instance = info.get
                 else:
                     self.root = group

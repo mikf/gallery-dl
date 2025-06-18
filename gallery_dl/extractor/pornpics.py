@@ -62,7 +62,7 @@ class PornpicsGalleryExtractor(PornpicsExtractor, GalleryExtractor):
     example = "https://www.pornpics.com/galleries/TITLE-12345/"
 
     def __init__(self, match):
-        url = "{}/galleries/{}/".format(self.root, match.group(1))
+        url = "{}/galleries/{}/".format(self.root, match[1])
         GalleryExtractor.__init__(self, match, url)
 
     items = GalleryExtractor.items

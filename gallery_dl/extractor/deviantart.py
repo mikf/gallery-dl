@@ -36,7 +36,7 @@ class DeviantartExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.user = (match.group(1) or match.group(2) or "").lower()
+        self.user = (match[1] or match[2] or "").lower()
         self.offset = 0
 
     def _init(self):
@@ -227,7 +227,7 @@ class DeviantartExtractor(Extractor):
                 if txt is None:
                     continue
                 for match in DeviantartStashExtractor.pattern.finditer(txt):
-                    url = text.ensure_http_scheme(match.group(0))
+                    url = text.ensure_http_scheme(match[0])
                     deviation["_extractor"] = DeviantartStashExtractor
                     yield Message.Queue, url, deviation
 
@@ -988,8 +988,8 @@ class DeviantartFolderExtractor(DeviantartExtractor):
     def __init__(self, match):
         DeviantartExtractor.__init__(self, match)
         self.folder = None
-        self.folder_id = match.group(3)
-        self.folder_name = match.group(4)
+        self.folder_id = match[3]
+        self.folder_name = match[4]
 
     def deviations(self):
         folders = self.api.gallery_folders(self.user)
@@ -1123,8 +1123,8 @@ class DeviantartCollectionExtractor(DeviantartExtractor):
     def __init__(self, match):
         DeviantartExtractor.__init__(self, match)
         self.collection = None
-        self.collection_id = match.group(3)
-        self.collection_name = match.group(4)
+        self.collection_id = match[3]
+        self.collection_name = match[4]
 
     def deviations(self):
         folders = self.api.collections_folders(self.user)
@@ -1226,7 +1226,7 @@ class DeviantartTagExtractor(DeviantartExtractor):
 
     def __init__(self, match):
         DeviantartExtractor.__init__(self, match)
-        self.tag = text.unquote(match.group(1))
+        self.tag = text.unquote(match[1])
         self.user = ""
 
     def deviations(self):
@@ -1276,9 +1276,9 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
 
     def __init__(self, match):
         DeviantartExtractor.__init__(self, match)
-        self.type = match.group(3)
+        self.type = match[3]
         self.deviation_id = \
-            match.group(4) or match.group(5) or id_from_base36(match.group(6))
+            match[4] or match[5] or id_from_base36(match[6])
 
     def deviations(self):
         if self.user:
@@ -1399,7 +1399,7 @@ class DeviantartGallerySearchExtractor(DeviantartExtractor):
 
     def __init__(self, match):
         DeviantartExtractor.__init__(self, match)
-        self.query = match.group(3)
+        self.query = match[3]
 
     def deviations(self):
         self.login()

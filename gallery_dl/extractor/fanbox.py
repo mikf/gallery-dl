@@ -351,7 +351,7 @@ class FanboxCreatorExtractor(FanboxExtractor):
 
     def __init__(self, match):
         FanboxExtractor.__init__(self, match)
-        self.creator_id = match.group(1) or match.group(2)
+        self.creator_id = match[1] or match[2]
 
     def posts(self):
         url = "https://api.fanbox.cc/post.paginateCreator?creatorId="
@@ -378,7 +378,7 @@ class FanboxPostExtractor(FanboxExtractor):
 
     def __init__(self, match):
         FanboxExtractor.__init__(self, match)
-        self.post_id = match.group(3)
+        self.post_id = match[3]
 
     def posts(self):
         return (self._get_post_data(self.post_id),)

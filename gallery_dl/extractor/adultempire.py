@@ -22,7 +22,7 @@ class AdultempireGalleryExtractor(GalleryExtractor):
 
     def __init__(self, match):
         GalleryExtractor.__init__(self, match)
-        self.gallery_id = match.group(2)
+        self.gallery_id = match[2]
 
     def _init(self):
         self.cookies.set("ageConfirmed", "true", domain="www.adultempire.com")

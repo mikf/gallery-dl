@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2022-2023 Mike Fährmann
+# Copyright 2022-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -25,8 +25,8 @@ class NitterExtractor(BaseExtractor):
         BaseExtractor.__init__(self, match)
 
         lastindex = match.lastindex
-        self.user = match.group(lastindex)
-        self.user_id = match.group(lastindex + 1)
+        self.user = match[lastindex]
+        self.user_id = match[lastindex + 1]
         self.user_obj = None
 
     def items(self):

@@ -25,7 +25,7 @@ class NsfwalbumAlbumExtractor(GalleryExtractor):
     example = "https://nsfwalbum.com/album/12345"
 
     def __init__(self, match):
-        self.album_id = match.group(2)
+        self.album_id = match[2]
         GalleryExtractor.__init__(self, match)
 
     def metadata(self, page):

@@ -110,7 +110,7 @@ class NozomiPostExtractor(NozomiExtractor):
 
     def __init__(self, match):
         NozomiExtractor.__init__(self, match)
-        self.post_id = match.group(1)
+        self.post_id = match[1]
 
     def posts(self):
         return (self.post_id,)
@@ -157,7 +157,7 @@ class NozomiSearchExtractor(NozomiExtractor):
 
     def __init__(self, match):
         NozomiExtractor.__init__(self, match)
-        self.tags = text.unquote(match.group(1)).split()
+        self.tags = text.unquote(match[1]).split()
 
     def metadata(self):
         return {"search_tags": self.tags}

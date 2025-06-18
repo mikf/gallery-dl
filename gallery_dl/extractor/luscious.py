@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2023 Mike Fährmann
+# Copyright 2016-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -51,7 +51,7 @@ class LusciousAlbumExtractor(LusciousExtractor):
 
     def __init__(self, match):
         LusciousExtractor.__init__(self, match)
-        self.album_id = match.group(1)
+        self.album_id = match[1]
 
     def _init(self):
         self.gif = self.config("gif", False)
@@ -280,7 +280,7 @@ class LusciousSearchExtractor(LusciousExtractor):
 
     def __init__(self, match):
         LusciousExtractor.__init__(self, match)
-        self.query = match.group(1)
+        self.query = match[1]
 
     def items(self):
         query = text.parse_query(self.query)
