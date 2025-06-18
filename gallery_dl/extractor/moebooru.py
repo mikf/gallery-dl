@@ -24,8 +24,8 @@ class MoebooruExtractor(BooruExtractor):
         post["date"] = text.parse_timestamp(post["created_at"])
 
     def _html(self, post):
-        return self.request("{}/post/show/{}".format(
-            self.root, post["id"])).text
+        url = f"{self.root}/post/show/{post['id']}"
+        return self.request(url).text
 
     def _tags(self, post, page):
         tag_container = text.extr(page, '<ul id="tag-', '</ul>')
@@ -61,7 +61,7 @@ class MoebooruExtractor(BooruExtractor):
         params["limit"] = self.per_page
 
         while True:
-            posts = self.request(url, params=params).json()
+            posts = self.request_json(url, params=params)
             yield from posts
 
             if len(posts) < self.per_page:
@@ -98,15 +98,14 @@ class MoebooruTagExtractor(MoebooruExtractor):
 
     def __init__(self, match):
         MoebooruExtractor.__init__(self, match)
-        tags = match[match.lastindex]
-        self.tags = text.unquote(tags.replace("+", " "))
+        self.tags = text.unquote(self.groups[-1].replace("+", " "))
 
     def metadata(self):
         return {"search_tags": self.tags}
 
     def posts(self):
         params = {"tags": self.tags}
-        return self._pagination(self.root + "/post.json", params)
+        return self._pagination(f"{self.root}/post.json", params)
 
 
 class MoebooruPoolExtractor(MoebooruExtractor):
@@ -118,12 +117,12 @@ class MoebooruPoolExtractor(MoebooruExtractor):
 
     def __init__(self, match):
         MoebooruExtractor.__init__(self, match)
-        self.pool_id = match[match.lastindex]
+        self.pool_id = self.groups[-1]
 
     def metadata(self):
         if self.config("metadata"):
-            url = "{}/pool/show/{}.json".format(self.root, self.pool_id)
-            pool = self.request(url).json()
+            url = f"{self.root}/pool/show/{self.pool_id}.json"
+            pool = self.request_json(url)
             pool["name"] = pool["name"].replace("_", " ")
             pool.pop("posts", None)
             return {"pool": pool}
@@ -131,7 +130,7 @@ class MoebooruPoolExtractor(MoebooruExtractor):
 
     def posts(self):
         params = {"tags": "pool:" + self.pool_id}
-        return self._pagination(self.root + "/post.json", params)
+        return self._pagination(f"{self.root}/post.json", params)
 
 
 class MoebooruPostExtractor(MoebooruExtractor):
@@ -140,13 +139,9 @@ class MoebooruPostExtractor(MoebooruExtractor):
     pattern = BASE_PATTERN + r"/post/show/(\d+)"
     example = "https://yande.re/post/show/12345"
 
-    def __init__(self, match):
-        MoebooruExtractor.__init__(self, match)
-        self.post_id = match[match.lastindex]
-
     def posts(self):
-        params = {"tags": "id:" + self.post_id}
-        return self.request(self.root + "/post.json", params=params).json()
+        params = {"tags": "id:" + self.groups[-1]}
+        return self.request_json(f"{self.root}/post.json", params=params)
 
 
 class MoebooruPopularExtractor(MoebooruExtractor):
@@ -159,8 +154,8 @@ class MoebooruPopularExtractor(MoebooruExtractor):
 
     def __init__(self, match):
         MoebooruExtractor.__init__(self, match)
-        self.scale = match[match.lastindex-1]
-        self.query = match[match.lastindex]
+        self.scale = self.groups[-2]
+        self.query = self.groups[-1]
 
     def metadata(self):
         self.params = params = text.parse_query(self.query)
@@ -186,5 +181,5 @@ class MoebooruPopularExtractor(MoebooruExtractor):
         return {"date": date, "scale": scale}
 
     def posts(self):
-        url = "{}/post/popular_{}.json".format(self.root, self.scale)
-        return self.request(url, params=self.params).json()
+        url = f"{self.root}/post/popular_{self.scale}.json"
+        return self.request_json(url, params=self.params)

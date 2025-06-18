@@ -24,9 +24,8 @@ class NitterExtractor(BaseExtractor):
         self.cookies_domain = self.root.partition("://")[2]
         BaseExtractor.__init__(self, match)
 
-        lastindex = match.lastindex
-        self.user = match[lastindex]
-        self.user_id = match[lastindex + 1]
+        self.user = self.groups[-2]
+        self.user_id = self.groups[-1]
         self.user_obj = None
 
     def items(self):

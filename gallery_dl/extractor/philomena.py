@@ -65,12 +65,8 @@ class PhilomenaPostExtractor(PhilomenaExtractor):
     pattern = BASE_PATTERN + r"/(?:images/)?(\d+)"
     example = "https://derpibooru.org/images/12345"
 
-    def __init__(self, match):
-        PhilomenaExtractor.__init__(self, match)
-        self.image_id = match[match.lastindex]
-
     def posts(self):
-        return (self.api.image(self.image_id),)
+        return (self.api.image(self.groups[-1]),)
 
 
 class PhilomenaSearchExtractor(PhilomenaExtractor):
@@ -82,9 +78,9 @@ class PhilomenaSearchExtractor(PhilomenaExtractor):
 
     def __init__(self, match):
         PhilomenaExtractor.__init__(self, match)
-        groups = match.groups()
-        if groups[-1]:
-            q = groups[-1].replace("+", " ")
+
+        if q := self.groups[-1]:
+            q = q.replace("+", " ")
             for old, new in (
                 ("-colon-"  , ":"),
                 ("-dash-"   , "-"),
@@ -97,7 +93,7 @@ class PhilomenaSearchExtractor(PhilomenaExtractor):
                     q = q.replace(old, new)
             self.params = {"q": text.unquote(text.unquote(q))}
         else:
-            self.params = text.parse_query(groups[-2])
+            self.params = text.parse_query(self.groups[-2])
 
     def metadata(self):
         return {"search_tags": self.params.get("q", "")}
@@ -114,18 +110,14 @@ class PhilomenaGalleryExtractor(PhilomenaExtractor):
     pattern = BASE_PATTERN + r"/galleries/(\d+)"
     example = "https://derpibooru.org/galleries/12345"
 
-    def __init__(self, match):
-        PhilomenaExtractor.__init__(self, match)
-        self.gallery_id = match[match.lastindex]
-
     def metadata(self):
         try:
-            return {"gallery": self.api.gallery(self.gallery_id)}
+            return {"gallery": self.api.gallery(self.groups[-1])}
         except IndexError:
             raise exception.NotFoundError("gallery")
 
     def posts(self):
-        gallery_id = "gallery_id:" + self.gallery_id
+        gallery_id = f"gallery_id:{self.groups[-1]}"
         params = {"sd": "desc", "sf": gallery_id, "q": gallery_id}
         return self.api.search(params)
 

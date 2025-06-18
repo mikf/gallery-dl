@@ -23,7 +23,7 @@ class NijieExtractor(AsynchronousMixin, BaseExtractor):
 
     def __init__(self, match):
         BaseExtractor.__init__(self, match)
-        self.user_id = text.parse_int(match[match.lastindex])
+        self.user_id = text.parse_int(self.groups[-1])
 
     def initialize(self):
         self.cookies_domain = "." + self.root.rpartition("/")[2]
@@ -294,9 +294,5 @@ class NijieImageExtractor(NijieExtractor):
     pattern = BASE_PATTERN + r"/view(?:_popup)?\.php\?id=(\d+)"
     example = "https://nijie.info/view.php?id=12345"
 
-    def __init__(self, match):
-        NijieExtractor.__init__(self, match)
-        self.image_id = match[match.lastindex]
-
     def image_ids(self):
-        return (self.image_id,)
+        return (self.groups[-1],)
