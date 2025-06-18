@@ -864,7 +864,7 @@ compile_expression = compile_expression_tryexcept
 
 def compile_filter(expr, name="<filter>", globals=None):
     if not isinstance(expr, str):
-        expr = "(" + ") and (".join(expr) + ")"
+        expr = f"({') and ('.join(expr)})"
     return compile_expression(expr, name, globals)
 
 
@@ -995,13 +995,13 @@ def build_proxy_map(proxies, log=None):
                 proxies[scheme] = "http://" + proxy.lstrip("/")
         return proxies
 
-    if log:
+    if log is not None:
         log.warning("invalid proxy specifier: %s", proxies)
 
 
 def build_predicate(predicates):
     if not predicates:
-        return lambda url, kwdict: True
+        return true
     elif len(predicates) == 1:
         return predicates[0]
     return functools.partial(chain_predicates, predicates)
