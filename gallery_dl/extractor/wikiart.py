@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2023 Mike Fährmann
+# Copyright 2019-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -23,7 +23,7 @@ class WikiartExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.lang = match.group(1)
+        self.lang = match[1]
 
     def items(self):
         data = self.metadata()
@@ -73,7 +73,7 @@ class WikiartArtistExtractor(WikiartExtractor):
 
     def __init__(self, match):
         WikiartExtractor.__init__(self, match)
-        self.artist_name = match.group(2)
+        self.artist_name = match[2]
         self.artist = None
 
     def metadata(self):
@@ -95,7 +95,7 @@ class WikiartImageExtractor(WikiartArtistExtractor):
 
     def __init__(self, match):
         WikiartArtistExtractor.__init__(self, match)
-        self.title = match.group(3)
+        self.title = match[3]
 
     def paintings(self):
         title, sep, year = self.title.rpartition("-")
@@ -117,8 +117,8 @@ class WikiartArtworksExtractor(WikiartExtractor):
 
     def __init__(self, match):
         WikiartExtractor.__init__(self, match)
-        self.group = match.group(2)
-        self.type = match.group(3)
+        self.group = match[2]
+        self.type = match[3]
 
     def metadata(self):
         return {"group": self.group, "type": self.type}
@@ -137,8 +137,8 @@ class WikiartArtistsExtractor(WikiartExtractor):
 
     def __init__(self, match):
         WikiartExtractor.__init__(self, match)
-        self.group = match.group(2)
-        self.type = match.group(3)
+        self.group = match[2]
+        self.type = match[3]
 
     def items(self):
         url = "{}/{}/App/Search/Artists-by-{}".format(

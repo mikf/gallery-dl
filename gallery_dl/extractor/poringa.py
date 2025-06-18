@@ -23,7 +23,7 @@ class PoringaExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.item = match.group(1)
+        self.item = match[1]
         self.__cookies = True
 
     def items(self):

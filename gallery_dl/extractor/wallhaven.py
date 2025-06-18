@@ -60,7 +60,7 @@ class WallhavenSearchExtractor(WallhavenExtractor):
 
     def __init__(self, match):
         WallhavenExtractor.__init__(self, match)
-        self.params = text.parse_query(match.group(1))
+        self.params = text.parse_query(match[1])
 
     def wallpapers(self):
         return self.api.search(self.params)
@@ -108,7 +108,7 @@ class WallhavenCollectionsExtractor(WallhavenExtractor):
 
     def __init__(self, match):
         WallhavenExtractor.__init__(self, match)
-        self.username = match.group(1)
+        self.username = match[1]
 
     def items(self):
         for collection in self.api.collections(self.username):
@@ -128,7 +128,7 @@ class WallhavenUploadsExtractor(WallhavenExtractor):
 
     def __init__(self, match):
         WallhavenExtractor.__init__(self, match)
-        self.username = match.group(1)
+        self.username = match[1]
 
     def wallpapers(self):
         params = {"q": "@" + self.username}
@@ -147,7 +147,7 @@ class WallhavenImageExtractor(WallhavenExtractor):
 
     def __init__(self, match):
         WallhavenExtractor.__init__(self, match)
-        self.wallpaper_id = match.group(1)
+        self.wallpaper_id = match[1]
 
     def wallpapers(self):
         return (self.api.info(self.wallpaper_id),)

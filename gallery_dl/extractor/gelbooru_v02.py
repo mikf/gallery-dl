@@ -163,7 +163,7 @@ class GelbooruV02TagExtractor(GelbooruV02Extractor):
 
     def __init__(self, match):
         GelbooruV02Extractor.__init__(self, match)
-        tags = match.group(match.lastindex)
+        tags = match[match.lastindex]
         self.tags = text.unquote(tags.replace("+", " "))
 
     def metadata(self):
@@ -184,7 +184,7 @@ class GelbooruV02PoolExtractor(GelbooruV02Extractor):
 
     def __init__(self, match):
         GelbooruV02Extractor.__init__(self, match)
-        self.pool_id = match.group(match.lastindex)
+        self.pool_id = match[match.lastindex]
 
         if self.category == "rule34":
             self.posts = self._posts_pages
@@ -236,7 +236,7 @@ class GelbooruV02FavoriteExtractor(GelbooruV02Extractor):
 
     def __init__(self, match):
         GelbooruV02Extractor.__init__(self, match)
-        self.favorite_id = match.group(match.lastindex)
+        self.favorite_id = match[match.lastindex]
 
     def metadata(self):
         return {"favorite_id": text.parse_int(self.favorite_id)}
@@ -257,7 +257,7 @@ class GelbooruV02PostExtractor(GelbooruV02Extractor):
 
     def __init__(self, match):
         GelbooruV02Extractor.__init__(self, match)
-        self.post_id = match.group(match.lastindex)
+        self.post_id = match[match.lastindex]
 
     def posts(self):
         return self._pagination({"id": self.post_id})

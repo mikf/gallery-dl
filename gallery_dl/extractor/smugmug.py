@@ -71,7 +71,7 @@ class SmugmugAlbumExtractor(SmugmugExtractor):
 
     def __init__(self, match):
         SmugmugExtractor.__init__(self, match)
-        self.album_id = match.group(1)
+        self.album_id = match[1]
 
     def items(self):
         album = self.api.album(self.album_id, "User")
@@ -98,7 +98,7 @@ class SmugmugImageExtractor(SmugmugExtractor):
 
     def __init__(self, match):
         SmugmugExtractor.__init__(self, match)
-        self.image_id = match.group(3)
+        self.image_id = match[3]
 
     def items(self):
         image = self.api.image(self.image_id, "ImageSizeDetails")

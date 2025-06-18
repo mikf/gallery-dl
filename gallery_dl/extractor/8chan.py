@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2022-2023 Mike Fährmann
+# Copyright 2022-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -23,7 +23,7 @@ class _8chanExtractor(Extractor):
     root = "https://8chan.moe"
 
     def __init__(self, match):
-        self.root = "https://8chan." + match.group(1)
+        self.root = "https://8chan." + match[1]
         Extractor.__init__(self, match)
 
     @memcache()

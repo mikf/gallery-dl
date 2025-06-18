@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2023 Mike Fährmann
+# Copyright 2018-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -80,8 +80,8 @@ class SimplyhentaiImageExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.page_url = "https://old." + match.group(1)
-        self.type = match.group(2)
+        self.page_url = "https://old." + match[1]
+        self.type = match[2]
 
     def items(self):
         extr = text.extract_from(self.request(self.page_url).text)
@@ -123,7 +123,7 @@ class SimplyhentaiVideoExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.page_url = "https://" + match.group(1)
+        self.page_url = "https://" + match[1]
 
     def items(self):
         page = self.request(self.page_url).text

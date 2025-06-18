@@ -20,7 +20,7 @@ class TmohentaiGalleryExtractor(GalleryExtractor):
     example = "https://tmohentai.com/contents/12345a67b89c0"
 
     def __init__(self, match):
-        self.gallery_id = match.group(1)
+        self.gallery_id = match[1]
         url = "{}/contents/{}".format(self.root, self.gallery_id)
         GalleryExtractor.__init__(self, match, url)
 

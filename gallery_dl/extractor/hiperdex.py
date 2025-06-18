@@ -129,8 +129,8 @@ class HiperdexArtistExtractor(HiperdexBase, MangaExtractor):
     example = "https://hiperdex.com/manga-artist/NAME/"
 
     def __init__(self, match):
-        self.root = text.ensure_http_scheme(match.group(1))
-        MangaExtractor.__init__(self, match, self.root + match.group(2) + "/")
+        self.root = text.ensure_http_scheme(match[1])
+        MangaExtractor.__init__(self, match, self.root + match[2] + "/")
 
     def chapters(self, page):
         results = []

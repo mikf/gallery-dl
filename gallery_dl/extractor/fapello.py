@@ -25,7 +25,7 @@ class FapelloPostExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.root = text.root_from_url(match.group(0))
+        self.root = text.root_from_url(match[0])
         self.model, self.id = match.groups()
 
     def items(self):
@@ -59,8 +59,8 @@ class FapelloModelExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.root = text.root_from_url(match.group(0))
-        self.model = match.group(1)
+        self.root = text.root_from_url(match[0])
+        self.model = match[1]
 
     def items(self):
         num = 1
@@ -93,8 +93,8 @@ class FapelloPathExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.root = text.root_from_url(match.group(0))
-        self.path = match.group(1)
+        self.root = text.root_from_url(match[0])
+        self.path = match[1]
 
     def items(self):
         num = 1

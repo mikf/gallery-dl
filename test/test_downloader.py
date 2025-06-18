@@ -332,7 +332,7 @@ class HttpRequestHandler(http.server.BaseHTTPRequestHandler):
             status = 206
 
             match = re.match(r"bytes=(\d+)-", self.headers["Range"])
-            start = int(match.group(1))
+            start = int(match[1])
 
             headers["Content-Range"] = "bytes {}-{}/{}".format(
                 start, len(output)-1, len(output))

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2020-2023 Mike Fährmann
+# Copyright 2020-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -109,12 +109,12 @@ class InkbunnyPoolExtractor(InkbunnyExtractor):
 
     def __init__(self, match):
         InkbunnyExtractor.__init__(self, match)
-        pid = match.group(1)
+        pid = match[1]
         if pid:
             self.pool_id = pid
             self.orderby = "pool_order"
         else:
-            params = text.parse_query(match.group(2))
+            params = text.parse_query(match[2])
             self.pool_id = params.get("pool_id")
             self.orderby = params.get("orderby", "pool_order")
 
@@ -142,12 +142,12 @@ class InkbunnyFavoriteExtractor(InkbunnyExtractor):
 
     def __init__(self, match):
         InkbunnyExtractor.__init__(self, match)
-        uid = match.group(1)
+        uid = match[1]
         if uid:
             self.user_id = uid
             self.orderby = self.config("orderby", "fav_datetime")
         else:
-            params = text.parse_query(match.group(2))
+            params = text.parse_query(match[2])
             self.user_id = params.get("user_id")
             self.orderby = params.get("orderby", "fav_datetime")
 
@@ -184,7 +184,7 @@ class InkbunnyUnreadExtractor(InkbunnyExtractor):
 
     def __init__(self, match):
         InkbunnyExtractor.__init__(self, match)
-        self.params = text.parse_query(match.group(1))
+        self.params = text.parse_query(match[1])
 
     def posts(self):
         params = self.params.copy()
@@ -204,7 +204,7 @@ class InkbunnySearchExtractor(InkbunnyExtractor):
 
     def __init__(self, match):
         InkbunnyExtractor.__init__(self, match)
-        self.params = text.parse_query(match.group(1))
+        self.params = text.parse_query(match[1])
 
     def metadata(self):
         return {"search": self.params}
@@ -241,8 +241,8 @@ class InkbunnyFollowingExtractor(InkbunnyExtractor):
 
     def __init__(self, match):
         InkbunnyExtractor.__init__(self, match)
-        self.user_id = match.group(1) or \
-            text.parse_query(match.group(2)).get("user_id")
+        self.user_id = match[1] or \
+            text.parse_query(match[2]).get("user_id")
 
     def items(self):
         url = self.root + "/watchlist_process.php"
@@ -276,7 +276,7 @@ class InkbunnyPostExtractor(InkbunnyExtractor):
 
     def __init__(self, match):
         InkbunnyExtractor.__init__(self, match)
-        self.submission_id = match.group(1)
+        self.submission_id = match[1]
 
     def posts(self):
         submissions = self.api.detail(({"submission_id": self.submission_id},))

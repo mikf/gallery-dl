@@ -22,7 +22,7 @@ class MastodonExtractor(BaseExtractor):
 
     def __init__(self, match):
         BaseExtractor.__init__(self, match)
-        self.item = match.group(match.lastindex)
+        self.item = match[match.lastindex]
 
     def _init(self):
         self.instance = self.root.partition("://")[2]

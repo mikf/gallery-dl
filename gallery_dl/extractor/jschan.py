@@ -36,8 +36,8 @@ class JschanThreadExtractor(JschanExtractor):
     def __init__(self, match):
         JschanExtractor.__init__(self, match)
         index = match.lastindex
-        self.board = match.group(index-1)
-        self.thread = match.group(index)
+        self.board = match[index-1]
+        self.thread = match[index]
 
     def items(self):
         url = "{}/{}/thread/{}.json".format(
@@ -70,7 +70,7 @@ class JschanBoardExtractor(JschanExtractor):
 
     def __init__(self, match):
         JschanExtractor.__init__(self, match)
-        self.board = match.group(match.lastindex)
+        self.board = match[match.lastindex]
 
     def items(self):
         url = "{}/{}/catalog.json".format(self.root, self.board)

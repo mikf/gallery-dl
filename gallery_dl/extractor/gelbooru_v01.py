@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2021-2023 Mike Fährmann
+# Copyright 2021-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -94,7 +94,7 @@ class GelbooruV01TagExtractor(GelbooruV01Extractor):
 
     def __init__(self, match):
         GelbooruV01Extractor.__init__(self, match)
-        self.tags = match.group(match.lastindex)
+        self.tags = match[match.lastindex]
 
     def metadata(self):
         return {"search_tags": text.unquote(self.tags.replace("+", " "))}
@@ -115,7 +115,7 @@ class GelbooruV01FavoriteExtractor(GelbooruV01Extractor):
 
     def __init__(self, match):
         GelbooruV01Extractor.__init__(self, match)
-        self.favorite_id = match.group(match.lastindex)
+        self.favorite_id = match[match.lastindex]
 
     def metadata(self):
         return {"favorite_id": text.parse_int(self.favorite_id)}
@@ -134,7 +134,7 @@ class GelbooruV01PostExtractor(GelbooruV01Extractor):
 
     def __init__(self, match):
         GelbooruV01Extractor.__init__(self, match)
-        self.post_id = match.group(match.lastindex)
+        self.post_id = match[match.lastindex]
 
     def posts(self):
         return (self._parse_post(self.post_id),)

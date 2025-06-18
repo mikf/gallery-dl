@@ -41,7 +41,7 @@ class TumblrgalleryTumblrblogExtractor(TumblrgalleryExtractor):
 
     def __init__(self, match):
         TumblrgalleryExtractor.__init__(self, match)
-        self.gallery_id = text.parse_int(match.group(2))
+        self.gallery_id = text.parse_int(match[2])
 
     def metadata(self, page):
         return {
@@ -72,7 +72,7 @@ class TumblrgalleryPostExtractor(TumblrgalleryExtractor):
 
     def __init__(self, match):
         TumblrgalleryExtractor.__init__(self, match)
-        self.gallery_id = text.parse_int(match.group(2))
+        self.gallery_id = text.parse_int(match[2])
 
     def metadata(self, page):
         return {
@@ -97,7 +97,7 @@ class TumblrgallerySearchExtractor(TumblrgalleryExtractor):
 
     def __init__(self, match):
         TumblrgalleryExtractor.__init__(self, match)
-        self.search_term = match.group(2)
+        self.search_term = match[2]
 
     def metadata(self, page):
         return {

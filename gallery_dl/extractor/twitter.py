@@ -31,7 +31,7 @@ class TwitterExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.user = match.group(1)
+        self.user = match[1]
 
     def _init(self):
         self.unavailable = self.config("unavailable", False)
@@ -896,7 +896,7 @@ class TwitterTweetExtractor(TwitterExtractor):
 
     def __init__(self, match):
         TwitterExtractor.__init__(self, match)
-        self.tweet_id = match.group(2)
+        self.tweet_id = match[2]
 
     def tweets(self):
         conversations = self.config("conversations")

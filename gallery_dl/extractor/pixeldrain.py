@@ -39,7 +39,7 @@ class PixeldrainFileExtractor(PixeldrainExtractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.file_id = match.group(1)
+        self.file_id = match[1]
 
     def items(self):
         url = "{}/api/file/{}".format(self.root, self.file_id)
@@ -64,8 +64,8 @@ class PixeldrainAlbumExtractor(PixeldrainExtractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.album_id = match.group(1)
-        self.file_index = match.group(2)
+        self.album_id = match[1]
+        self.file_index = match[2]
 
     def items(self):
         url = "{}/api/list/{}".format(self.root, self.album_id)

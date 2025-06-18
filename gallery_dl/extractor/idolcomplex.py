@@ -159,7 +159,7 @@ class IdolcomplexTagExtractor(IdolcomplexExtractor):
 
     def __init__(self, match):
         IdolcomplexExtractor.__init__(self, match)
-        query = text.parse_query(match.group(1))
+        query = text.parse_query(match[1])
         self.tags = text.unquote(query.get("tags", "").replace("+", " "))
         self.start_page = text.parse_int(query.get("page"), 1)
         self.next = text.parse_int(query.get("next"), 0)

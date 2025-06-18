@@ -25,7 +25,7 @@ class RawkumaChapterExtractor(RawkumaBase, ChapterExtractor):
     example = "https://rawkuma.net/TITLE-chapter-123/"
 
     def __init__(self, match):
-        url = "{}/{}/".format(self.root, match.group(1))
+        url = "{}/{}/".format(self.root, match[1])
         ChapterExtractor.__init__(self, match, url)
 
     def metadata(self, page):
@@ -61,7 +61,7 @@ class RawkumaMangaExtractor(RawkumaBase, MangaExtractor):
     example = "https://rawkuma.net/manga/TITLE/"
 
     def __init__(self, match):
-        url = "{}/manga/{}/".format(self.root, match.group(1))
+        url = "{}/manga/{}/".format(self.root, match[1])
         MangaExtractor.__init__(self, match, url)
 
     def chapters(self, page):

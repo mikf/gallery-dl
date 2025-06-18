@@ -277,7 +277,7 @@ class ZerochanImageExtractor(ZerochanExtractor):
 
     def __init__(self, match):
         ZerochanExtractor.__init__(self, match)
-        self.image_id = match.group(1)
+        self.image_id = match[1]
 
     def posts(self):
         post = self._parse_entry_html(self.image_id)

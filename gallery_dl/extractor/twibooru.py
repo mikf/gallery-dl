@@ -54,7 +54,7 @@ class TwibooruPostExtractor(TwibooruExtractor):
 
     def __init__(self, match):
         TwibooruExtractor.__init__(self, match)
-        self.post_id = match.group(1)
+        self.post_id = match[1]
 
     def posts(self):
         return (self.api.post(self.post_id),)
@@ -103,7 +103,7 @@ class TwibooruGalleryExtractor(TwibooruExtractor):
 
     def __init__(self, match):
         TwibooruExtractor.__init__(self, match)
-        self.gallery_id = match.group(1)
+        self.gallery_id = match[1]
 
     def metadata(self):
         return {"gallery": self.api.gallery(self.gallery_id)}

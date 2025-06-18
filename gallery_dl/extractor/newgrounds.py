@@ -30,7 +30,7 @@ class NewgroundsExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.user = match.group(1)
+        self.user = match[1]
         self.user_root = "https://{}.newgrounds.com".format(self.user)
 
     def _init(self):
@@ -397,12 +397,12 @@ class NewgroundsImageExtractor(NewgroundsExtractor):
 
     def __init__(self, match):
         NewgroundsExtractor.__init__(self, match)
-        if match.group(2):
-            self.user = match.group(2)
+        if match[2]:
+            self.user = match[2]
             self.post_url = "https://www.newgrounds.com/art/view/{}/{}".format(
-                self.user, match.group(3))
+                self.user, match[3])
         else:
-            self.post_url = text.ensure_http_scheme(match.group(0))
+            self.post_url = text.ensure_http_scheme(match[0])
 
     def posts(self):
         return (self.post_url,)
@@ -417,7 +417,7 @@ class NewgroundsMediaExtractor(NewgroundsExtractor):
     def __init__(self, match):
         NewgroundsExtractor.__init__(self, match)
         self.user = ""
-        self.post_url = self.root + match.group(1)
+        self.post_url = self.root + match[1]
 
     def posts(self):
         return (self.post_url,)

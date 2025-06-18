@@ -28,7 +28,7 @@ class FuraffinityExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.user = match.group(1)
+        self.user = match[1]
         self.offset = 0
 
     def _init(self):
@@ -297,7 +297,7 @@ class FuraffinitySearchExtractor(FuraffinityExtractor):
 
     def __init__(self, match):
         FuraffinityExtractor.__init__(self, match)
-        self.query = text.parse_query(match.group(2))
+        self.query = text.parse_query(match[2])
         if self.user and "q" not in self.query:
             self.query["q"] = text.unquote(self.user)
 

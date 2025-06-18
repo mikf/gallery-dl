@@ -124,7 +124,7 @@ class SankakuTagExtractor(SankakuExtractor):
 
     def __init__(self, match):
         SankakuExtractor.__init__(self, match)
-        query = text.parse_query(match.group(1))
+        query = text.parse_query(match[1])
         self.tags = text.unquote(query.get("tags", "").replace("+", " "))
 
         if "date:" in self.tags:
@@ -154,7 +154,7 @@ class SankakuPoolExtractor(SankakuExtractor):
 
     def __init__(self, match):
         SankakuExtractor.__init__(self, match)
-        self.pool_id = match.group(1)
+        self.pool_id = match[1]
 
     def metadata(self):
         pool = self.api.pools(self.pool_id)
@@ -180,7 +180,7 @@ class SankakuPostExtractor(SankakuExtractor):
 
     def __init__(self, match):
         SankakuExtractor.__init__(self, match)
-        self.post_id = match.group(1)
+        self.post_id = match[1]
 
     def posts(self):
         return self.api.posts(self.post_id)
@@ -194,7 +194,7 @@ class SankakuBooksExtractor(SankakuExtractor):
 
     def __init__(self, match):
         SankakuExtractor.__init__(self, match)
-        query = text.parse_query(match.group(1))
+        query = text.parse_query(match[1])
         self.tags = text.unquote(query.get("tags", "").replace("+", " "))
 
     def items(self):

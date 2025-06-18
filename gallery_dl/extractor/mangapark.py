@@ -75,7 +75,7 @@ class MangaparkChapterExtractor(MangaparkBase, ChapterExtractor):
     example = "https://mangapark.net/title/MANGA/12345-en-ch.01"
 
     def __init__(self, match):
-        self.root = text.root_from_url(match.group(0))
+        self.root = text.root_from_url(match[0])
         ChapterExtractor.__init__(self, match, False)
 
     def metadata(self, _):
@@ -115,8 +115,8 @@ class MangaparkMangaExtractor(MangaparkBase, Extractor):
     example = "https://mangapark.net/title/12345-MANGA"
 
     def __init__(self, match):
-        self.root = text.root_from_url(match.group(0))
-        self.manga_id = int(match.group(1))
+        self.root = text.root_from_url(match[0])
+        self.manga_id = int(match[1])
         Extractor.__init__(self, match)
 
     def items(self):

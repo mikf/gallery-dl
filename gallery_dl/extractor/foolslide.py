@@ -18,7 +18,7 @@ class FoolslideExtractor(BaseExtractor):
 
     def __init__(self, match):
         BaseExtractor.__init__(self, match)
-        self.gallery_url = self.root + match.group(match.lastindex)
+        self.gallery_url = self.root + match[match.lastindex]
 
     def request(self, url):
         return BaseExtractor.request(

@@ -26,8 +26,8 @@ class _8musesAlbumExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.path = match.group(1)
-        self.params = match.group(2) or ""
+        self.path = match[1]
+        self.params = match[2] or ""
 
     def items(self):
         url = self.root + self.path + self.params

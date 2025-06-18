@@ -67,7 +67,7 @@ class PhilomenaPostExtractor(PhilomenaExtractor):
 
     def __init__(self, match):
         PhilomenaExtractor.__init__(self, match)
-        self.image_id = match.group(match.lastindex)
+        self.image_id = match[match.lastindex]
 
     def posts(self):
         return (self.api.image(self.image_id),)
@@ -116,7 +116,7 @@ class PhilomenaGalleryExtractor(PhilomenaExtractor):
 
     def __init__(self, match):
         PhilomenaExtractor.__init__(self, match)
-        self.gallery_id = match.group(match.lastindex)
+        self.gallery_id = match[match.lastindex]
 
     def metadata(self):
         try:

@@ -62,7 +62,7 @@ class ImgboxGalleryExtractor(AsynchronousMixin, ImgboxExtractor):
 
     def __init__(self, match):
         ImgboxExtractor.__init__(self, match)
-        self.gallery_key = match.group(1)
+        self.gallery_key = match[1]
         self.image_keys = []
 
     def get_job_metadata(self):
@@ -93,7 +93,7 @@ class ImgboxImageExtractor(ImgboxExtractor):
 
     def __init__(self, match):
         ImgboxExtractor.__init__(self, match)
-        self.image_key = match.group(1)
+        self.image_key = match[1]
 
     def get_image_keys(self):
         return (self.image_key,)

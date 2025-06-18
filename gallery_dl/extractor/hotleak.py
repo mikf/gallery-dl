@@ -103,7 +103,7 @@ class HotleakCreatorExtractor(HotleakExtractor):
 
     def __init__(self, match):
         HotleakExtractor.__init__(self, match)
-        self.creator = match.group(1)
+        self.creator = match[1]
 
     def posts(self):
         url = "{}/{}".format(self.root, self.creator)
@@ -178,7 +178,7 @@ class HotleakSearchExtractor(HotleakExtractor):
 
     def __init__(self, match):
         HotleakExtractor.__init__(self, match)
-        self.params = match.group(1)
+        self.params = match[1]
 
     def items(self):
         data = {"_extractor": HotleakCreatorExtractor}

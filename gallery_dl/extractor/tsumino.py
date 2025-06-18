@@ -47,7 +47,7 @@ class TsuminoGalleryExtractor(TsuminoBase, GalleryExtractor):
     example = "https://www.tsumino.com/entry/12345"
 
     def __init__(self, match):
-        self.gallery_id = match.group(1)
+        self.gallery_id = match[1]
         url = "{}/entry/{}".format(self.root, self.gallery_id)
         GalleryExtractor.__init__(self, match, url)
 
@@ -109,7 +109,7 @@ class TsuminoSearchExtractor(TsuminoBase, Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.query = match.group(1)
+        self.query = match[1]
 
     def items(self):
         for gallery in self.galleries():

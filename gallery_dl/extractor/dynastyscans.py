@@ -55,10 +55,10 @@ class DynastyscansChapterExtractor(DynastyscansBase, ChapterExtractor):
         group = extr('"icon-print"></i> ', '</span>')
 
         return {
-            "manga"   : text.unescape(match.group(1)),
-            "chapter" : text.parse_int(match.group(2)),
-            "chapter_minor": match.group(3) or "",
-            "title"   : text.unescape(match.group(4) or ""),
+            "manga"   : text.unescape(match[1]),
+            "chapter" : text.parse_int(match[2]),
+            "chapter_minor": match[3] or "",
+            "title"   : text.unescape(match[4] or ""),
             "author"  : text.remove_html(author),
             "group"   : (text.remove_html(group) or
                          text.extr(group, ' alt="', '"')),
@@ -102,7 +102,7 @@ class DynastyscansSearchExtractor(DynastyscansBase, Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.query = match.group(1) or ""
+        self.query = match[1] or ""
 
     def items(self):
         yield Message.Directory, {}

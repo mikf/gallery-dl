@@ -23,7 +23,7 @@ class PhotovogueUserExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.user_id = match.group(1)
+        self.user_id = match[1]
 
     def items(self):
         for photo in self.photos():

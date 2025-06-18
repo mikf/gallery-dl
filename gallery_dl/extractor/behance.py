@@ -88,7 +88,7 @@ class BehanceGalleryExtractor(BehanceExtractor):
 
     def __init__(self, match):
         BehanceExtractor.__init__(self, match)
-        self.gallery_id = match.group(1)
+        self.gallery_id = match[1]
 
     def _init(self):
         BehanceExtractor._init(self)
@@ -229,7 +229,7 @@ class BehanceUserExtractor(BehanceExtractor):
 
     def __init__(self, match):
         BehanceExtractor.__init__(self, match)
-        self.user = match.group(1)
+        self.user = match[1]
 
     def galleries(self):
         endpoint = "GetProfileProjects"
@@ -257,7 +257,7 @@ class BehanceCollectionExtractor(BehanceExtractor):
 
     def __init__(self, match):
         BehanceExtractor.__init__(self, match)
-        self.collection_id = match.group(1)
+        self.collection_id = match[1]
 
     def galleries(self):
         endpoint = "GetMoodboardItemsAndRecommendations"

@@ -73,7 +73,7 @@ class PlurkTimelineExtractor(PlurkExtractor):
 
     def __init__(self, match):
         PlurkExtractor.__init__(self, match)
-        self.user = match.group(1)
+        self.user = match[1]
 
     def plurks(self):
         url = "{}/{}".format(self.root, self.user)

@@ -34,11 +34,11 @@ class TumblrExtractor(Extractor):
     def __init__(self, match):
         Extractor.__init__(self, match)
 
-        name = match.group(2)
+        name = match[2]
         if name:
             self.blog = name + ".tumblr.com"
         else:
-            self.blog = match.group(1) or match.group(3)
+            self.blog = match[1] or match[3]
 
     def _init(self):
         self.api = TumblrAPI(self)
@@ -288,7 +288,7 @@ class TumblrPostExtractor(TumblrExtractor):
 
     def __init__(self, match):
         TumblrExtractor.__init__(self, match)
-        self.post_id = match.group(4)
+        self.post_id = match[4]
         self.reblogs = True
         self.date_min = 0
 
@@ -307,7 +307,7 @@ class TumblrTagExtractor(TumblrExtractor):
 
     def __init__(self, match):
         TumblrExtractor.__init__(self, match)
-        self.tag = text.unquote(match.group(4).replace("-", " "))
+        self.tag = text.unquote(match[4].replace("-", " "))
 
     def posts(self):
         return self.api.posts(self.blog, {"tag": self.tag})
@@ -321,7 +321,7 @@ class TumblrDayExtractor(TumblrExtractor):
 
     def __init__(self, match):
         TumblrExtractor.__init__(self, match)
-        year, month, day = match.group(4).split("/")
+        year, month, day = match[4].split("/")
         self.ordinal = date(int(year), int(month), int(day)).toordinal()
 
     def _init(self):

@@ -23,7 +23,7 @@ class GofileFolderExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.content_id = match.group(1)
+        self.content_id = match[1]
 
     def items(self):
         recursive = self.config("recursive")

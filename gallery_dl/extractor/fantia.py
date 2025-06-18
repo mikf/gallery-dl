@@ -186,7 +186,7 @@ class FantiaCreatorExtractor(FantiaExtractor):
 
     def __init__(self, match):
         FantiaExtractor.__init__(self, match)
-        self.creator_id = match.group(1)
+        self.creator_id = match[1]
 
     def posts(self):
         url = "{}/fanclubs/{}/posts".format(self.root, self.creator_id)
@@ -201,7 +201,7 @@ class FantiaPostExtractor(FantiaExtractor):
 
     def __init__(self, match):
         FantiaExtractor.__init__(self, match)
-        self.post_id = match.group(1)
+        self.post_id = match[1]
 
     def posts(self):
         self._csrf_token()

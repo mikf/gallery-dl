@@ -25,7 +25,7 @@ class VscoExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.user = match.group(1).lower()
+        self.user = match[1].lower()
 
     def items(self):
         videos = self.config("videos", True)

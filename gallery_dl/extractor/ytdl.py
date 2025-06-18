@@ -28,7 +28,7 @@ class YoutubeDLExtractor(Extractor):
         self.ytdl_module_name = ytdl_module.__name__
 
         # find suitable youtube_dl extractor
-        self.ytdl_url = url = match.group(1)
+        self.ytdl_url = url = match[1]
         generic = config.interpolate(("extractor", "ytdl"), "generic", True)
         if generic == "force":
             self.ytdl_ie_key = "Generic"

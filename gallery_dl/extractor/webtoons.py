@@ -185,7 +185,7 @@ class WebtoonsComicExtractor(WebtoonsBase, Extractor):
         """Extract and return all episode urls in 'page'"""
         page = text.extr(page, 'id="_listUl"', '</ul>')
         return [
-            match.group(0)
+            match[0]
             for match in WebtoonsEpisodeExtractor.pattern.finditer(page)
         ]
 

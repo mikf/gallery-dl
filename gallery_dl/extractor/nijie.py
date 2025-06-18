@@ -23,7 +23,7 @@ class NijieExtractor(AsynchronousMixin, BaseExtractor):
 
     def __init__(self, match):
         BaseExtractor.__init__(self, match)
-        self.user_id = text.parse_int(match.group(match.lastindex))
+        self.user_id = text.parse_int(match[match.lastindex])
 
     def initialize(self):
         self.cookies_domain = "." + self.root.rpartition("/")[2]
@@ -296,7 +296,7 @@ class NijieImageExtractor(NijieExtractor):
 
     def __init__(self, match):
         NijieExtractor.__init__(self, match)
-        self.image_id = match.group(match.lastindex)
+        self.image_id = match[match.lastindex]
 
     def image_ids(self):
         return (self.image_id,)

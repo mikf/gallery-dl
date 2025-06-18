@@ -19,7 +19,7 @@ class SankakucomplexExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.path = match.group(1)
+        self.path = match[1]
 
 
 class SankakucomplexArticleExtractor(SankakucomplexExtractor):

@@ -68,7 +68,7 @@ class _2chBoardExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.board = match.group(1)
+        self.board = match[1]
 
     def items(self):
         # index page

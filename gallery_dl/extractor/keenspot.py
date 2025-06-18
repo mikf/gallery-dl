@@ -24,8 +24,8 @@ class KeenspotComicExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.comic = match.group(1).lower()
-        self.path = match.group(2)
+        self.comic = match[1].lower()
+        self.path = match[2]
         self.root = "http://" + self.comic + ".keenspot.com"
 
         self._needle = ""

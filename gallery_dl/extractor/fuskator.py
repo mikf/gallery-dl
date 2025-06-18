@@ -21,7 +21,7 @@ class FuskatorGalleryExtractor(GalleryExtractor):
     example = "https://fuskator.com/thumbs/ID/"
 
     def __init__(self, match):
-        self.gallery_hash = match.group(1)
+        self.gallery_hash = match[1]
         url = "{}/thumbs/{}/index.html".format(self.root, self.gallery_hash)
         GalleryExtractor.__init__(self, match, url)
 
@@ -72,7 +72,7 @@ class FuskatorSearchExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.path = match.group(1)
+        self.path = match[1]
 
     def items(self):
         url = self.root + self.path

@@ -21,7 +21,7 @@ class SkebExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.user_name = match.group(1)
+        self.user_name = match[1]
 
     def _init(self):
         self.thumbnails = self.config("thumbnails", False)
@@ -203,7 +203,7 @@ class SkebPostExtractor(SkebExtractor):
 
     def __init__(self, match):
         SkebExtractor.__init__(self, match)
-        self.post_num = match.group(2)
+        self.post_num = match[2]
 
     def posts(self):
         return ((self.user_name, self.post_num),)
