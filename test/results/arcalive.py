@@ -11,7 +11,8 @@ __tests__ = (
 {
     "#url"    : "https://arca.live/b/arknights/66031722?p=1",
     "#class"  : arcalive.ArcalivePostExtractor,
-    "#results": "https://ac.namu.la/20221225sac2/e06dcf8edd29c597240898a6752c74dbdd0680fc932cfd0ecc898795f1db34b5.jpg?type=orig",
+    "#pattern": r"https://ac.namu.la/20221225sac2/e06dcf8edd29c597240898a6752c74dbdd0680fc932cfd0ecc898795f1db34b5.jpg\?type=orig&expires=\d+&key=\w+",
+    "#count"  : 1,
 
     "isEditable": False,
     "isDeletable": False,
@@ -49,7 +50,7 @@ __tests__ = (
     "post_url": "https://arca.live/b/arknights/66031722",
     "count": 1,
     "num": 1,
-    "url": "https://ac.namu.la/20221225sac2/e06dcf8edd29c597240898a6752c74dbdd0680fc932cfd0ecc898795f1db34b5.jpg?type=orig",
+    "url": str,
     "width": 3200,
     "height": 1440,
     "filename": "e06dcf8edd29c597240898a6752c74dbdd0680fc932cfd0ecc898795f1db34b5",
@@ -60,17 +61,17 @@ __tests__ = (
     "#url"    : "https://arca.live/b/breaking/66031722",
     "#comment": "/b/breaking page URL",
     "#class"  : arcalive.ArcalivePostExtractor,
-    "#results": "https://ac.namu.la/20221225sac2/e06dcf8edd29c597240898a6752c74dbdd0680fc932cfd0ecc898795f1db34b5.jpg?type=orig",
+    "#pattern": r"https://ac.namu.la/20221225sac2/e06dcf8edd29c597240898a6752c74dbdd0680fc932cfd0ecc898795f1db34b5.jpg\?type=orig",
 },
 
 {
     "#url"    : "https://arca.live/b/bluearchive/65031202",
     "#comment": "animated gif",
     "#class"  : arcalive.ArcalivePostExtractor,
-    "#results": (
-        "https://ac.namu.la/20221211sac/5ea7fbca5e49ec16beb099fc6fc991690d37552e599b1de8462533908346241e.png?type=orig",
-        "https://ac.namu.la/20221211sac/7f73beefc4f18a2f986bc4c6821caba706e27f4c94cb828fc16e2af1253402d9.gif?type=orig",
-        "https://ac.namu.la/20221211sac2/3e72f9e05ca97c0c3c0fe5f25632b06eb21ab9f211e9ea22816e16468ee241ca.png?type=orig",
+    "#pattern": (
+        r"https://ac.namu.la/20221211sac/5ea7fbca5e49ec16beb099fc6fc991690d37552e599b1de8462533908346241e.png\?type=orig",
+        r"https://ac.namu.la/20221211sac/7f73beefc4f18a2f986bc4c6821caba706e27f4c94cb828fc16e2af1253402d9.gif\?type=orig",
+        r"https://ac.namu.la/20221211sac2/3e72f9e05ca97c0c3c0fe5f25632b06eb21ab9f211e9ea22816e16468ee241ca.png\?type=orig",
     ),
 },
 
@@ -78,9 +79,9 @@ __tests__ = (
     "#url"    : "https://arca.live/b/arknights/122263340",
     "#comment": "animated webp",
     "#class"  : arcalive.ArcalivePostExtractor,
-    "#results": (
-        "https://ac.namu.la/20241126sac/b2175d9ef4504945d3d989526120dbb6aded501ddedfba8ecc44a64e7aae9059.gif?type=orig",
-        "https://ac.namu.la/20241126sac/bc1f3cb388a3a2d099ab67bc09b28f0a93c2c4755152b3ef9190690a9f0a28fb.webp?type=orig",
+    "#pattern": (
+        r"https://ac.namu.la/20241126sac/b2175d9ef4504945d3d989526120dbb6aded501ddedfba8ecc44a64e7aae9059.gif\?type=orig",
+        r"https://ac.namu.la/20241126sac/bc1f3cb388a3a2d099ab67bc09b28f0a93c2c4755152b3ef9190690a9f0a28fb.webp\?type=orig",
     ),
 },
 
@@ -89,7 +90,7 @@ __tests__ = (
     "#comment": ".mp4 video",
     "#class"  : arcalive.ArcalivePostExtractor,
     "#options": {"gifs": "check"},
-    "#results": "https://ac.namu.la/20240926sac/16f07778a97f91b935c8a3394ead01a223d96b2a619fdb25c4628ddba88b5fad.mp4?type=orig",
+    "#pattern": r"https://ac.namu.la/20240926sac/16f07778a97f91b935c8a3394ead01a223d96b2a619fdb25c4628ddba88b5fad.mp4\?type=orig",
 },
 
 {
@@ -97,9 +98,9 @@ __tests__ = (
     "#comment": "fake .mp4 GIF",
     "#class"  : arcalive.ArcalivePostExtractor,
     "#options": {"gifs": True},
-    "#results": "https://ac.namu.la/20240714sac/c8fcadeb0b578e5121eb7a7e8fb05984cb87c68e7a6e0481a1c8869bf0ecfd2b.gif?type=orig",
+    "#pattern": r"https://ac.namu.la/20240714sac/c8fcadeb0b578e5121eb7a7e8fb05984cb87c68e7a6e0481a1c8869bf0ecfd2b.gif\?type=orig",
 
-    "_fallback": ("https://ac.namu.la/20240714sac/c8fcadeb0b578e5121eb7a7e8fb05984cb87c68e7a6e0481a1c8869bf0ecfd2b.mp4?type=orig",),
+    "_fallback": "len:tuple:1",
 },
 
 {
@@ -107,14 +108,14 @@ __tests__ = (
     "#comment": "fake .mp4 GIF",
     "#class"  : arcalive.ArcalivePostExtractor,
     "#options": {"gifs": False},
-    "#results": "https://ac.namu.la/20240714sac/c8fcadeb0b578e5121eb7a7e8fb05984cb87c68e7a6e0481a1c8869bf0ecfd2b.mp4?type=orig",
+    "#pattern": r"https://ac.namu.la/20240714sac/c8fcadeb0b578e5121eb7a7e8fb05984cb87c68e7a6e0481a1c8869bf0ecfd2b.mp4\?type=orig",
 },
 
 {
     "#url"    : "https://arca.live/b/arknights/49406926",
     "#comment": "static emoticon",
     "#class"  : arcalive.ArcalivePostExtractor,
-    "#results": "https://ac.namu.la/20220428sac2/41f472adcea674aff75f15f146e81c27032bc4d6c8073bd7c19325bd1c97d335.png?type=orig",
+    "#pattern": r"https://ac.namu.la/20220428sac2/41f472adcea674aff75f15f146e81c27032bc4d6c8073bd7c19325bd1c97d335.png\?type=orig",
 },
 
 {
@@ -122,10 +123,10 @@ __tests__ = (
     "#comment": "animated emoticon",
     "#class"  : arcalive.ArcalivePostExtractor,
     "#options": {"emoticons": True},
-    "#results": (
-        "https://ac.namu.la/20221123sac2/14925c5e22ab9f17f2923ae60a39b7af0794c43e478ecaba054ab6131e57e022.png?type=orig",
-        "https://ac.namu.la/20221123sac2/50c385a4004bca44271a2f6133990f086cfefd29a7968514e9c14d6017d61265.png?type=orig",
-        "https://ac.namu.la/20221005sac2/28ebe073fffbb2b88f710c2d380b0fe6dd99a856070c4a836db57634a5371366.gif?type=orig",
+    "#pattern": (
+        r"https://ac.namu.la/20221123sac2/14925c5e22ab9f17f2923ae60a39b7af0794c43e478ecaba054ab6131e57e022.png\?type=orig",
+        r"https://ac.namu.la/20221123sac2/50c385a4004bca44271a2f6133990f086cfefd29a7968514e9c14d6017d61265.png\?type=orig",
+        r"https://ac.namu.la/20221005sac2/28ebe073fffbb2b88f710c2d380b0fe6dd99a856070c4a836db57634a5371366.gif\?type=orig",
     ),
 },
 

@@ -74,7 +74,7 @@ class ArcalivePostExtractor(ArcaliveExtractor):
             if not src:
                 continue
 
-            src = text.unescape(src.partition("?")[0])
+            src, _, query = text.unescape(src).partition("?")
             if src[0] == "/":
                 if src[1] == "/":
                     url = "https:" + src.replace(
@@ -85,26 +85,27 @@ class ArcalivePostExtractor(ArcaliveExtractor):
                 url = src
 
             fallback = ()
+            query = f"?type=orig&{query}"
             orig = text.extr(media, 'data-orig="', '"')
             if orig:
                 path, _, ext = url.rpartition(".")
                 if ext != orig:
-                    fallback = (url + "?type=orig",)
+                    fallback = (url + query,)
                     url = path + "." + orig
             elif video and self.gifs:
                 url_gif = url.rpartition(".")[0] + ".gif"
                 if self.gifs_fallback:
-                    fallback = (url + "?type=orig",)
+                    fallback = (url + query,)
                     url = url_gif
                 else:
                     response = self.request(
-                        url_gif + "?type=orig", method="HEAD", fatal=False)
+                        url_gif + query, method="HEAD", fatal=False)
                     if response.status_code < 400:
-                        fallback = (url + "?type=orig",)
+                        fallback = (url + query,)
                         url = url_gif
 
             files.append({
-                "url"   : url + "?type=orig",
+                "url"   : url + query,
                 "width" : text.parse_int(text.extr(media, 'width="', '"')),
                 "height": text.parse_int(text.extr(media, 'height="', '"')),
                 "_fallback": fallback,
