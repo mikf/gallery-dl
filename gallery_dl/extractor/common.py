@@ -446,7 +446,7 @@ class Extractor():
             pass
         elif custom_ua == "browser":
             headers["User-Agent"] = _browser_useragent()
-        elif self.useragent is Extractor.useragent or \
+        elif self.useragent is Extractor.useragent and not self.browser or \
                 custom_ua is not config.get(("extractor",), "user-agent"):
             headers["User-Agent"] = custom_ua
 
