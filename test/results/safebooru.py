@@ -14,6 +14,15 @@ __tests__ = (
     "#class"   : gelbooru_v02.GelbooruV02TagExtractor,
     "#sha1_url"    : "17c61b386530cf4c30842c9f580d15ef1cd09586",
     "#sha1_content": "e5ad4c5bf241b1def154958535bef6c2f6b733eb",
+    "#results" : (
+        "https://safebooru.org/images/344/3894735145db4f94cc6a3839004ebf4f16a9bc10.jpg",
+        "https://safebooru.org/images/344/ae7198cbc41bed9b282fe5ec00b5b91509c53b30.jpg",
+        "https://safebooru.org/images/264/458a42a01ca7090aca27a85c814557bee9e22a63.jpg",
+        "https://safebooru.org/images/263/00a74a8736a7691dc1df3def867c32d5ad0fadeb.jpg",
+    ),
+
+    "search_tags" : "bonocho",
+    "search_count": 4,
 },
 
 {
@@ -22,6 +31,8 @@ __tests__ = (
     "#class"   : gelbooru_v02.GelbooruV02TagExtractor,
     "#range"   : "1-3",
     "#count"   : 3,
+
+    "total": range(5_600_000, 6_000_000),
 },
 
 {
