@@ -122,8 +122,8 @@ class TestExtractorModule(unittest.TestCase):
             extr = cls.from_url(url)
         except ImportError as exc:
             if exc.name in ("youtube_dl", "yt_dlp"):
-                sys.stdout.write(f"Skipping '{cls.category}' category checks")
-                return
+                return sys.stdout.write(
+                    f"Skipping '{cls.category}' category checks\n")
             raise
         self.assertTrue(extr, url)
 
