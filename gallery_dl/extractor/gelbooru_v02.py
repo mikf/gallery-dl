@@ -47,7 +47,9 @@ class GelbooruV02Extractor(booru.BooruExtractor):
 
             if total is None:
                 try:
-                    total = int(root.attrib["count"])
+                    self.kwdict["total"] = total = int(root.attrib["count"])
+                    if "search_tags" in self.kwdict:
+                        self.kwdict["search_count"] = total
                     self.log.debug("%s posts in total", total)
                 except Exception as exc:
                     total = 0
@@ -161,14 +163,13 @@ class GelbooruV02TagExtractor(GelbooruV02Extractor):
     pattern = BASE_PATTERN + r"/index\.php\?page=post&s=list&tags=([^&#]*)"
     example = "https://safebooru.org/index.php?page=post&s=list&tags=TAG"
 
-    def metadata(self):
-        self.tags = tags = text.unquote(self.groups[-1].replace("+", " "))
-        return {"search_tags": tags}
-
     def posts(self):
-        if self.tags == "all":
-            self.tags = ""
-        return self._pagination({"tags": self.tags})
+        self.kwdict["search_tags"] = tags = text.unquote(
+            self.groups[-1].replace("+", " "))
+
+        if tags == "all":
+            tags = ""
+        return self._pagination({"tags": tags})
 
 
 class GelbooruV02PoolExtractor(GelbooruV02Extractor):

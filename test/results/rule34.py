@@ -19,6 +19,9 @@ __tests__ = (
         "622e80be3f496672c44aab5c47fbc6941c61bc79",
         "1e0dced55bcb5eefe5cc32f69c7a8df35547b459",
     ],
+
+    "search_tags" : "danraku",
+    "search_count": 2,
 },
 
 {
