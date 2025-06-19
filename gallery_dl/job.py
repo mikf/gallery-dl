@@ -228,6 +228,8 @@ class Job():
         kwdict["subcategory"] = extr.subcategory
         if self.metadata_http:
             kwdict.pop(self.metadata_http, None)
+        if extr.kwdict:
+            kwdict.update(extr.kwdict)
         if self.kwdict:
             kwdict.update(self.kwdict)
         if self.kwdict_eval:

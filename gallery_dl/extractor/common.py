@@ -54,6 +54,7 @@ class Extractor():
         self.url = match.string
         self.match = match
         self.groups = match.groups()
+        self.kwdict = {}
 
         if self.category in CATEGORY_MAP:
             self.category = CATEGORY_MAP[self.category]
