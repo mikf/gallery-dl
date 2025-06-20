@@ -91,4 +91,12 @@ __tests__ = (
     "w"         : range(200, 3000),
 },
 
+{
+    "#url"     : "https://warosu.org/fa/thread/18460691",
+    "#comment" : "non-archived post (#7698)",
+    "#class"   : warosu.WarosuThreadExtractor,
+    "#pattern" : r"https://i.warosu.org/data/fa/img/0184/60/17\d+\.\w+",
+    "#count"   : 20,
+},
+
 )
