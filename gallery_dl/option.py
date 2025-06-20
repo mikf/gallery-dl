@@ -71,7 +71,7 @@ class MtimeAction(argparse.Action):
     def __call__(self, parser, namespace, value, option_string=None):
         namespace.postprocessors.append({
             "name": "mtime",
-            "value": "{" + (self.const or value) + "}",
+            "value": f"{{{self.const or value}}}",
         })
 
 
@@ -190,7 +190,7 @@ class PrintAction(argparse.Action):
             if format_string[1] == "F" and format_string[-1] != "\n":
                 format_string += "\n"
         elif "{" not in format_string and " " not in format_string:
-            format_string = "{" + format_string + "}\n"
+            format_string = f"{{{format_string}}}\n"
         elif format_string[-1] != "\n":
             format_string += "\n"
 
@@ -209,12 +209,19 @@ class Formatter(argparse.HelpFormatter):
     def __init__(self, prog):
         argparse.HelpFormatter.__init__(self, prog, max_help_position=30)
 
-    def _format_action_invocation(self, action, join=", ".join):
+    def _format_action_invocation(self, action):
         opts = action.option_strings
         if action.metavar:
             opts = opts.copy()
-            opts[-1] += " " + action.metavar
-        return join(opts)
+            opts[-1] = f"{opts[-1]} {action.metavar}"
+        return ", ".join(opts)
+
+    def _format_usage(self, usage, actions, groups, prefix):
+        return f"Usage: {self._prog} [OPTIONS] URL [URL...]\n"
+
+    def format_help(self):
+        return self._long_break_matcher.sub(
+            "\n\n", self._root_section.format_help())
 
 
 def _parse_option(opt):
@@ -229,7 +236,6 @@ def _parse_option(opt):
 def build_parser():
     """Build and configure an ArgumentParser object"""
     parser = argparse.ArgumentParser(
-        usage="%(prog)s [OPTION]... URL...",
         formatter_class=Formatter,
         add_help=False,
     )
