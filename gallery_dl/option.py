@@ -156,7 +156,11 @@ class UgoiraAction(argparse.Action):
 class PrintAction(argparse.Action):
     def __call__(self, parser, namespace, value, option_string=None):
         if self.const:
-            filename = self.const
+            if self.const == "+":
+                namespace.options.append(((), "skip", False))
+                namespace.options.append(((), "download", False))
+                namespace.options.append((("output",), "mode", False))
+            filename = "-"
             base = None
             mode = "w"
         else:
@@ -396,6 +400,13 @@ def build_parser():
         action=PrintAction, const="-", default=[],
         help=("Write FORMAT during EVENT (default 'prepare') to standard "
               "output. Examples: 'id' or 'post:{md5[:8]}'"),
+    )
+    output.add_argument(
+        "--Print",
+        dest="postprocessors", metavar="[EVENT:]FORMAT",
+        action=PrintAction, const="+",
+        help=("Like --print, but also sets --no-download, --no-skip, "
+              "and disables other output to stdout"),
     )
     output.add_argument(
         "--print-to-file",
