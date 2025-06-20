@@ -756,32 +756,32 @@ class MtimeTest(BasePostprocessorTest):
     def test_mtime_datetime(self):
         self._create(None, {"date": datetime(1980, 1, 1)})
         self._trigger()
-        self.assertEqual(self.pathfmt.kwdict["_mtime"], 315532800)
+        self.assertEqual(self.pathfmt.kwdict["_mtime_meta"], 315532800)
 
     def test_mtime_timestamp(self):
         self._create(None, {"date": 315532800})
         self._trigger()
-        self.assertEqual(self.pathfmt.kwdict["_mtime"], 315532800)
+        self.assertEqual(self.pathfmt.kwdict["_mtime_meta"], 315532800)
 
     def test_mtime_none(self):
         self._create(None, {"date": None})
         self._trigger()
-        self.assertNotIn("_mtime", self.pathfmt.kwdict)
+        self.assertNotIn("_mtime_meta", self.pathfmt.kwdict)
 
     def test_mtime_undefined(self):
         self._create(None, {})
         self._trigger()
-        self.assertNotIn("_mtime", self.pathfmt.kwdict)
+        self.assertNotIn("_mtime_meta", self.pathfmt.kwdict)
 
     def test_mtime_key(self):
         self._create({"key": "foo"}, {"foo": 315532800})
         self._trigger()
-        self.assertEqual(self.pathfmt.kwdict["_mtime"], 315532800)
+        self.assertEqual(self.pathfmt.kwdict["_mtime_meta"], 315532800)
 
     def test_mtime_value(self):
         self._create({"value": "{foo}"}, {"foo": 315532800})
         self._trigger()
-        self.assertEqual(self.pathfmt.kwdict["_mtime"], 315532800)
+        self.assertEqual(self.pathfmt.kwdict["_mtime_meta"], 315532800)
 
 
 class PythonTest(BasePostprocessorTest):

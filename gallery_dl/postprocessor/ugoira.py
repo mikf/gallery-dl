@@ -236,9 +236,7 @@ class UgoiraPP(PostProcessor):
             pathfmt.realpath = pathfmt.temppath
         else:
             if self.mtime:
-                mtime = pathfmt.kwdict.get("_mtime")
-                if mtime:
-                    util.set_mtime(pathfmt.realpath, mtime)
+                pathfmt.set_mtime()
             return True
 
     def convert_to_archive(self, pathfmt, tempdir):

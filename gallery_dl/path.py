@@ -348,6 +348,11 @@ class PathFormat():
             pass
         return 0
 
+    def set_mtime(self, path=None):
+        if (mtime := (self.kwdict.get("_mtime_meta") or
+                      self.kwdict.get("_mtime_http"))):
+            util.set_mtime(self.realpath if path is None else path, mtime)
+
     def finalize(self):
         """Move tempfile to its target location"""
         if self.delete:
@@ -381,6 +386,4 @@ class PathFormat():
                     os.unlink(self.temppath)
                 break
 
-        mtime = self.kwdict.get("_mtime")
-        if mtime:
-            util.set_mtime(self.realpath, mtime)
+        self.set_mtime()
