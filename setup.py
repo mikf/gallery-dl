@@ -113,6 +113,7 @@ def build_setuptools():
                 "yt-dlp[default]",
                 "pyyaml",
                 "toml; python_version < '3.11'",
+                "truststore; python_version >= '3.10'",
                 "secretstorage; sys_platform == 'linux'",
             ],
         },

@@ -1238,6 +1238,22 @@ Description
     |requests.request()|_ method.
 
 
+extractor.*.truststore
+----------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    | Use a
+      `truststore <https://truststore.readthedocs.io/en/latest/>`__
+      ``SSLContext`` for verifying SSL/TLS certificates
+    | to make use of your system's native certificate stores
+      instead of relying on
+      `certifi <https://pypi.org/project/certifi/>`__
+      certificates.
+
+
 extractor.*.download
 --------------------
 Type

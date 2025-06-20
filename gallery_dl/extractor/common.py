@@ -485,8 +485,17 @@ class Extractor():
             ssl_options |= ssl.OP_NO_TLSv1_2
             self.log.debug("TLS 1.2 disabled.")
 
+        if self.config("truststore"):
+            try:
+                from truststore import SSLContext as ssl_ctx
+            except ImportError as exc:
+                self.log.error("%s: %s", exc.__class__.__name__, exc)
+                ssl_ctx = None
+        else:
+            ssl_ctx = None
+
         adapter = _build_requests_adapter(
-            ssl_options, ssl_ciphers, source_address)
+            ssl_options, ssl_ciphers, ssl_ctx, source_address)
         session.mount("https://", adapter)
         session.mount("http://", adapter)
 
@@ -979,19 +988,30 @@ class RequestsAdapter(HTTPAdapter):
         return HTTPAdapter.proxy_manager_for(self, *args, **kwargs)
 
 
-def _build_requests_adapter(ssl_options, ssl_ciphers, source_address):
-    key = (ssl_options, ssl_ciphers, source_address)
+def _build_requests_adapter(
+        ssl_options, ssl_ciphers, ssl_ctx, source_address):
+
+    key = (ssl_options, ssl_ciphers, ssl_ctx, source_address)
     try:
         return _adapter_cache[key]
     except KeyError:
         pass
 
-    if ssl_options or ssl_ciphers:
-        ssl_context = urllib3.connection.create_urllib3_context(
-            options=ssl_options or None, ciphers=ssl_ciphers)
-        if not requests.__version__ < "2.32":
-            # https://github.com/psf/requests/pull/6731
-            ssl_context.load_verify_locations(requests.certs.where())
+    if ssl_options or ssl_ciphers or ssl_ctx:
+        if ssl_ctx is None:
+            ssl_context = urllib3.connection.create_urllib3_context(
+                options=ssl_options or None, ciphers=ssl_ciphers)
+            if not requests.__version__ < "2.32":
+                # https://github.com/psf/requests/pull/6731
+                ssl_context.load_verify_locations(requests.certs.where())
+        else:
+            ssl_ctx_orig = urllib3.util.ssl_.SSLContext
+            try:
+                urllib3.util.ssl_.SSLContext = ssl_ctx
+                ssl_context = urllib3.connection.create_urllib3_context(
+                    options=ssl_options or None, ciphers=ssl_ciphers)
+            finally:
+                urllib3.util.ssl_.SSLContext = ssl_ctx_orig
         ssl_context.check_hostname = False
     else:
         ssl_context = None
