@@ -39,7 +39,7 @@ class WarosuThreadExtractor(Extractor):
 
         yield Message.Directory, data
         for post in posts:
-            if "image" in post:
+            if "image" in post and "warosu" in post["image"]:
                 for key in ("w", "h", "no", "time", "tim"):
                     post[key] = text.parse_int(post[key])
                 dt = text.parse_timestamp(post["time"])
