@@ -51,6 +51,8 @@
     -N, --print [EVENT:]FORMAT  Write FORMAT during EVENT (default 'prepare')
                                 to standard output. Examples: 'id' or
                                 'post:{md5[:8]}'
+    --Print [EVENT:]FORMAT      Like --print, but also sets --no-download,
+                                --no-skip, and disables other output to stdout
     --print-to-file [EVENT:]FORMAT FILE
                                 Append FORMAT during EVENT to FILE
     --list-modules              Print a list of available extractor modules
