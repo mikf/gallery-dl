@@ -56,7 +56,6 @@ class FantiaExtractor(Extractor):
                         "%s#post-content-id-%s", content["visible_status"],
                         post["post_url"], content["id"])
 
-                post["_http_validate"] = self._validate_response
                 for file in files:
                     post.update(file)
                     post["num"] += 1
@@ -90,10 +89,6 @@ class FantiaExtractor(Extractor):
             page = self.request(self.root + "/").text
         self.headers["X-CSRF-Token"] = text.extr(
             page, 'name="csrf-token" content="', '"')
-
-    def _validate_response(self, response):
-        return not response.history or not response.headers.get(
-            "content-type", "").startswith("text/html")
 
     def _get_post_data(self, post_id):
         """Fetch and process post data"""
