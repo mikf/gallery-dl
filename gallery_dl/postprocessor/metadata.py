@@ -139,9 +139,7 @@ class MetadataPP(PostProcessor):
             archive.add(pathfmt.kwdict)
 
         if self.mtime:
-            mtime = pathfmt.kwdict.get("_mtime")
-            if mtime:
-                util.set_mtime(path, mtime)
+            pathfmt.set_mtime(path)
 
     def _run_stdout(self, pathfmt):
         self.write(sys.stdout, pathfmt.kwdict)
