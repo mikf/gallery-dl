@@ -98,6 +98,8 @@ class WarosuThreadExtractor(Extractor):
         if url:
             if url[0] == "/":
                 data["image"] = self.root + url
+            elif "warosu." not in url:
+                return False
             else:
                 data["image"] = url
             return True
