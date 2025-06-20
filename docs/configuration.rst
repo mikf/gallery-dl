@@ -6166,6 +6166,20 @@ Description
     instead of downloading a potentially broken file.
 
 
+downloader.http.validate-html
+-----------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Check for unexpected HTML responses.
+
+    Fail file downloads with a ``text/html``
+    `Content-Type header <https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Type>`__
+    when expecting a media file instead.
+
+
 downloader.ytdl.cmdline-args
 ----------------------------
 Type
