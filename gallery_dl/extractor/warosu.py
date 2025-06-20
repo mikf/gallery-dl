@@ -39,7 +39,7 @@ class WarosuThreadExtractor(Extractor):
 
         yield Message.Directory, data
         for post in posts:
-            if "image" in post and "warosu" in post["image"]:
+            if "image" in post:
                 for key in ("w", "h", "no", "time", "tim"):
                     post[key] = text.parse_int(post[key])
                 dt = text.parse_timestamp(post["time"])
@@ -98,6 +98,8 @@ class WarosuThreadExtractor(Extractor):
         if url:
             if url[0] == "/":
                 data["image"] = self.root + url
+            elif "warosu." not in url:
+                return False
             else:
                 data["image"] = url
             return True
