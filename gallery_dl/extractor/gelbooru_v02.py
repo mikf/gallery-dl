@@ -21,6 +21,9 @@ class GelbooruV02Extractor(booru.BooruExtractor):
         self.user_id = self.config("user-id")
         self.root_api = self.config_instance("root-api") or self.root
 
+        if self.category == "rule34":
+            self._file_url = self._file_url_rule34
+
     def _api_request(self, params):
         url = self.root_api + "/index.php?page=dapi&s=post&q=index"
         return self.request_xml(url, params=params)
@@ -90,6 +93,16 @@ class GelbooruV02Extractor(booru.BooruExtractor):
             if len(pids) < self.per_page:
                 return
             params["pid"] += self.per_page
+
+    def _file_url_rule34(self, post):
+        url = post["file_url"]
+
+        if text.ext_from_url(url) not in util.EXTS_VIDEO:
+            path = url.partition(".")[2]
+            post["_fallback"] = (url,)
+            post["file_url"] = url = "https://wimg." + path
+
+        return url
 
     def _prepare(self, post):
         post["tags"] = post["tags"].strip()
