@@ -486,7 +486,8 @@ MIME_TYPES = {
 
 
 def _signature_html(s):
-    return b"<!doctype html".startswith(s[:14].lower())
+    s = s[:14].lstrip()
+    return s and b"<!doctype html".startswith(s.lower())
 
 
 # https://en.wikipedia.org/wiki/List_of_file_signatures

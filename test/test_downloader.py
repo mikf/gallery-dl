@@ -370,6 +370,7 @@ SAMPLES = {
     ("heic", b"????ftypheix"),
     ("svg" , b"<?xml"),
     ("html", b"<!DOCTYPE html><html>...</html>"),
+    ("html", b"  \n  \n\r\t\n  <!DOCTYPE html><html>...</html>"),
     ("ico" , b"\x00\x00\x01\x00"),
     ("cur" , b"\x00\x00\x02\x00"),
     ("psd" , b"8BPS"),
