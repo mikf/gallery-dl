@@ -177,6 +177,7 @@ modules = [
     "telegraph",
     "tenor",
     "tiktok",
+    "tikwm",
     "tmohentai",
     "toyhouse",
     "tsumino",
