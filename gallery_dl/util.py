@@ -681,10 +681,10 @@ class CustomNone():
         raise StopIteration
 
     def __eq__(self, other):
-        return self is other
+        return other is self or other is None
 
     def __ne__(self, other):
-        return self is not other
+        return other is not self and other is not None
 
     __lt__ = true
     __le__ = true
