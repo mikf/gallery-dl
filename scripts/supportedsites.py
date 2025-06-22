@@ -40,6 +40,7 @@ CATEGORY_MAP = {
     "cien"           : "Ci-en",
     "cohost"         : "cohost!",
     "comicvine"      : "Comic Vine",
+    "dankefuerslesen": "Danke fürs Lesen",
     "deviantart"     : "DeviantArt",
     "drawfriends"    : "Draw Friends",
     "dynastyscans"   : "Dynasty Reader",

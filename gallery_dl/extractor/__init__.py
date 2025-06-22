@@ -43,6 +43,7 @@ modules = [
     "comicvine",
     "cyberdrop",
     "danbooru",
+    "dankefuerslesen",
     "desktopography",
     "deviantart",
     "discord",

@@ -1,0 +1,123 @@
+# -*- coding: utf-8 -*-
+
+# Copyright 2025 Mike Fährmann
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 2 as
+# published by the Free Software Foundation.
+
+"""Extractors for https://danke.moe/"""
+
+from .common import ChapterExtractor, MangaExtractor
+from .. import text
+from ..cache import memcache
+
+BASE_PATTERN = r"(?:https?://)?(?:www\.)?danke\.moe"
+
+
+class DankefuerslesenBase():
+    """Base class for dankefuerslesen extractors"""
+    category = "dankefuerslesen"
+    root = "https://danke.moe"
+
+    @memcache(keyarg=1)
+    def _manga_info(self, slug):
+        url = f"{self.root}/api/series/{slug}/"
+        return self.request_json(url)
+
+
+class DankefuerslesenChapterExtractor(DankefuerslesenBase, ChapterExtractor):
+    """Extractor for Danke fürs Lesen manga chapters"""
+    pattern = BASE_PATTERN + r"/read/manga/([\w-]+)/([\w-]+)"
+    example = "https://danke.moe/read/manga/TITLE/123/1/"
+
+    def __init__(self, match):
+        ChapterExtractor.__init__(self, match, False)
+
+    def _init(self):
+        self.zip = self.config("zip", False)
+        if self.zip:
+            self.filename_fmt = f"{self.directory_fmt[-1]}.{{extension}}"
+            self.directory_fmt = self.directory_fmt[:-1]
+
+    def metadata(self, page):
+        slug, ch = self.groups
+        manga = self._manga_info(slug)
+
+        if "-" in ch:
+            chapter, sep, minor = ch.rpartition("-")
+            ch = ch.replace("-", ".")
+            minor = "." + minor
+        else:
+            chapter = ch
+            minor = ""
+
+        data = manga["chapters"][ch]
+        group_id, self._files = data["groups"].popitem()
+
+        if not self.zip:
+            self.base = (f"{self.root}/media/manga/{slug}/chapters"
+                         f"/{data['folder']}/{group_id}/")
+
+        return {
+            "manga"     : manga["title"],
+            "manga_slug": manga["slug"],
+            "title"     : data["title"],
+            "volume"    : text.parse_int(data["volume"]),
+            "chapter"   : text.parse_int(chapter),
+            "chapter_minor": minor,
+            "group"     : manga["groups"][group_id],
+            "group_id"  : text.parse_int(group_id),
+            "date"      : text.parse_timestamp(data["release_date"][group_id]),
+            "lang"      : "en",
+            "language"  : "English",
+        }
+
+    def images(self, page):
+        if self.zip:
+            return ()
+
+        base = self.base
+        return [(base + file, None) for file in self._files]
+
+    def assets(self, page):
+        if self.zip:
+            slug, ch = self.groups
+            url = f"{self.root}/api/download_chapter/{slug}/{ch}/"
+            return ({
+                "type"     : "archive",
+                "extension": "zip",
+                "url"      : url,
+            },)
+
+
+class DankefuerslesenMangaExtractor(DankefuerslesenBase, MangaExtractor):
+    """Extractor for Danke fürs Lesen manga"""
+    chapterclass = DankefuerslesenChapterExtractor
+    pattern = BASE_PATTERN + r"/read/manga/([^/?#]+)"
+    example = "https://danke.moe/read/manga/TITLE/"
+
+    def __init__(self, match):
+        MangaExtractor.__init__(self, match, False)
+
+    def chapters(self, page):
+        results = []
+
+        manga = self._manga_info(self.groups[0]).copy()
+        base = f"{self.root}/read/manga/{manga['slug']}/"
+        for ch, data in manga.pop("chapters").items():
+
+            if "." in ch:
+                chapter, sep, minor = ch.rpartition(".")
+                ch = ch.replace('.', '-')
+                data["chapter"] = text.parse_int(chapter)
+                data["chapter-minor"] = sep + minor
+            else:
+                data["chapter"] = text.parse_int(ch)
+                data["chapter-minor"] = ""
+
+            url = f"{base}{ch}/1/"
+            manga.update(data)
+            results.append((url, manga))
+
+        return results
