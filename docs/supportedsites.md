@@ -200,6 +200,12 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
+    <td>Danke fürs Lesen</td>
+    <td>https://danke.moe/</td>
+    <td>Chapters, Manga</td>
+    <td></td>
+</tr>
+<tr>
     <td>Desktopography</td>
     <td>https://desktopography.net/</td>
     <td>Entries, Exhibitions</td>

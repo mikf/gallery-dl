@@ -2037,6 +2037,16 @@ Description
     batch. The value cannot be less than 1.
 
 
+extractor.dankefuerslesen.zip
+-----------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Download each chapter as a single ZIP archive instead of individual images.
+
+
 extractor.deviantart.auto-watch
 -------------------------------
 Type
