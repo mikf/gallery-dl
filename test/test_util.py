@@ -882,6 +882,12 @@ value = 123
         obj = util.NONE
 
         self.assertFalse(obj)
+        self.assertEqual(obj, obj)
+        self.assertEqual(obj, None)
+        self.assertNotEqual(obj, False)
+        self.assertNotEqual(obj, 0)
+        self.assertNotEqual(obj, "")
+
         self.assertEqual(len(obj), 0)
         self.assertEqual(int(obj), 0)
         self.assertEqual(hash(obj), 0)
