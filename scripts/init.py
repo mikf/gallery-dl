@@ -112,8 +112,16 @@ def insert_into_supportedsites(opts):
 
 
 def insert_test_result(opts):
-    cat = opts["category"]
-    sub = opts["subcategory"]
+    if url := opts["url"]:
+        from gallery_dl.extractor import find
+        extr = opts["extractor"] = find(url)
+        cat = extr.category
+        sub = extr.subcategory
+        gen = generate_test_result_extractor
+    else:
+        cat = opts["category"]
+        sub = opts["subcategory"]
+        gen = generate_test_result_basic
 
     path = util.path("test", "results", f"{cat}.py")
     LOG.info("Adding %stest result skeleton into '%s'",
@@ -122,7 +130,7 @@ def insert_test_result(opts):
     with open(path) as fp:
         lines = fp.readlines()
 
-    lines.insert(-2, generate_test_result_skeleton(opts))
+    lines.insert(-2, gen(opts))
 
     with util.lazy(path) as fp:
         fp.writelines(lines)
@@ -286,21 +294,56 @@ from gallery_dl.extractor import {cat}
     return module, import_stmt
 
 
-def generate_test_result_skeleton(opts):
+def generate_test_result_basic(opts):
     cat = opts["category"]
-    ccat = cat.capitalize()
     sub = opts["subcategory"]
-    csub = sub.capitalize()
-
+    extr_name = f"{cat.capitalize()}{sub.capitalize()}Extractor"
     module_name, _ = generate_test_result_import(opts)
 
-    return f'''
+    return f"""
 {{
     "#url"     : "{opts['url']}",
     "#comment" : "",
-    "#class"   : {module_name}.{ccat}{csub}Extractor,
+    "#class"   : {module_name}.{extr_name},
+}}
+"""
+
+
+def generate_test_result_extractor(opts):
+    from gallery_dl.extractor import common
+
+    extr = opts["extractor"]
+    extr_name = extr.__class__.__name__
+    module_name = extr.__module__.rpartition(".")[2]
+
+    head = f"""
+{{
+    "#url"     : "{extr.url}",
+    "#comment" : "",
+    "#class"   : {module_name}.{extr_name},\
+"""
+
+    if isinstance(extr, common.GalleryExtractor):
+        body = """
+    "#pattern" : r"",
+    "#count"   : 123,
+"""
+
+    elif isinstance(extr, common.MangaExtractor):
+        extr_name = extr_name.replace("MangaEx", "ChapterEx")
+        body = f"""
+    "#pattern" : {module_name}.{extr_name}.pattern,
+    "#count"   : 123,
+"""
+
+    else:
+        body = ""
+
+    tail = """\
 }},
-'''
+"""
+
+    return f"{head}{body}{tail}"
 
 
 ###############################################################################
@@ -330,7 +373,7 @@ def parse_args(args=None):
         "-U", "--user",
         action="store_const", const="user", dest="type")
 
-    parser.add_argument("category")
+    parser.add_argument("category", default="")
     parser.add_argument("subcategory", nargs="?", default="")
 
     return parser.parse_args()
@@ -339,7 +382,7 @@ def parse_args(args=None):
 def parse_opts(args=None):
     args = parse_args(args)
 
-    if not args.mode and not args.type and not args.root:
+    if not (args.mode or args.type or args.url or args.root):
         LOG.error("--root required")
         raise SystemExit(2)
 
@@ -350,6 +393,7 @@ def parse_opts(args=None):
         "mode"       : args.mode,
         "type"       : args.type,
         "url"        : args.url,
+        "results"    : False,
         "open_mode"  : args.open_mode,
     }
 
@@ -383,7 +427,7 @@ def parse_opts(args=None):
 def main():
     opts = parse_opts()
 
-    if opts["mode"] == "test":
+    if opts["url"] or opts["mode"] == "test":
         insert_test_result(opts)
     else:
         init_extractor_module(opts)
