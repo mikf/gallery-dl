@@ -485,6 +485,7 @@ _CONVERSIONS = {
     "j": util.json_dumps,
     "t": str.strip,
     "n": len,
+    "L": util.code_to_language,
     "T": util.datetime_to_timestamp_string,
     "d": text.parse_timestamp,
     "D": util.to_datetime,
