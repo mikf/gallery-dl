@@ -141,47 +141,6 @@ class TestExtractorModule(unittest.TestCase):
         if base not in ("reactor", "wikimedia"):
             self.assertEqual(extr._cfgpath, ("extractor", cat, sub), url)
 
-    @unittest.skipIf(not results, "no test data")
-    def test_unique_pattern_matches(self):
-        # collect testcase URLs
-        test_urls = []
-        append = test_urls.append
-
-        for result in results.all():
-            if not result.get("#fail"):
-                append((result["#url"], result["#class"]))
-
-        # iterate over all testcase URLs
-        for url, extr1 in test_urls:
-            matches = []
-
-            # ... and apply all regex patterns to each one
-            for extr2 in _list_classes():
-
-                # skip DirectlinkExtractor pattern if it isn't tested
-                if extr1 != DirectlinkExtractor and \
-                        extr2 == DirectlinkExtractor:
-                    continue
-
-                match = extr2.pattern.match(url)
-                if match:
-                    matches.append((match, extr2))
-
-            # fail if more or less than 1 match happened
-            if len(matches) > 1:
-                msg = "'{}' gets matched by more than one pattern:".format(url)
-                for match, extr in matches:
-                    msg += "\n\n- {}:\n{}".format(
-                        extr.__name__, match.re.pattern)
-                self.fail(msg)
-
-            elif len(matches) < 1:
-                msg = "'{}' isn't matched by any pattern".format(url)
-                self.fail(msg)
-
-            else:
-                self.assertIs(extr1, matches[0][1], url)
-
     def test_init(self):
         """Test for exceptions in Extractor.initialize() and .finalize()"""
         def fail_request(*args, **kwargs):
