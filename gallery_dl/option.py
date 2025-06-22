@@ -156,7 +156,7 @@ class UgoiraAction(argparse.Action):
 class PrintAction(argparse.Action):
     def __call__(self, parser, namespace, value, option_string=None):
         if self.const:
-            if self.const == "+":
+            if self.const == "-":
                 namespace.options.append(((), "skip", False))
                 namespace.options.append(((), "download", False))
                 namespace.options.append((("output",), "mode", False))
@@ -164,6 +164,9 @@ class PrintAction(argparse.Action):
             base = None
             mode = "w"
         else:
+            if self.const is None:
+                namespace.options.append(((), "skip", False))
+                namespace.options.append(((), "download", False))
             value, path = value
             base, filename = os.path.split(path)
             mode = "a"
@@ -405,20 +408,28 @@ def build_parser():
         dest="postprocessors", metavar="[EVENT:]FORMAT",
         action=PrintAction, const="-", default=[],
         help=("Write FORMAT during EVENT (default 'prepare') to standard "
-              "output. Examples: 'id' or 'post:{md5[:8]}'"),
+              "output instead of downloading files. "
+              "Can be used multiple times. "
+              "Examples: 'id' or 'post:{md5[:8]}'"),
     )
     output.add_argument(
         "--Print",
         dest="postprocessors", metavar="[EVENT:]FORMAT",
         action=PrintAction, const="+",
-        help=("Like --print, but also sets --no-download, --no-skip, "
-              "and disables other output to stdout"),
+        help="Like --print, but downloads files as well",
     )
     output.add_argument(
         "--print-to-file",
         dest="postprocessors", metavar="[EVENT:]FORMAT FILE",
-        action=PrintAction, nargs=2,
-        help="Append FORMAT during EVENT to FILE",
+        action=PrintAction, const=None, nargs=2,
+        help=("Append FORMAT during EVENT to FILE instead of downloading "
+              "files. Can be used multiple times"),
+    )
+    output.add_argument(
+        "--Print-to-file",
+        dest="postprocessors", metavar="[EVENT:]FORMAT FILE",
+        action=PrintAction, const=False, nargs=2,
+        help="Like --print-to-file, but downloads files as well",
     )
     output.add_argument(
         "--list-modules",

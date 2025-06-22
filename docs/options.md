@@ -49,12 +49,16 @@
                                 values for the given URLs
     -e, --error-file FILE       Add input URLs which returned an error to FILE
     -N, --print [EVENT:]FORMAT  Write FORMAT during EVENT (default 'prepare')
-                                to standard output. Examples: 'id' or
-                                'post:{md5[:8]}'
-    --Print [EVENT:]FORMAT      Like --print, but also sets --no-download,
-                                --no-skip, and disables other output to stdout
+                                to standard output instead of downloading
+                                files. Can be used multiple times. Examples:
+                                'id' or 'post:{md5[:8]}'
+    --Print [EVENT:]FORMAT      Like --print, but downloads files as well
     --print-to-file [EVENT:]FORMAT FILE
-                                Append FORMAT during EVENT to FILE
+                                Append FORMAT during EVENT to FILE instead of
+                                downloading files. Can be used multiple times
+    --Print-to-file [EVENT:]FORMAT FILE
+                                Like --print-to-file, but downloads files as
+                                well
     --list-modules              Print a list of available extractor modules
     --list-extractors [CATEGORIES]
                                 Print a list of extractor classes with
