@@ -104,7 +104,12 @@ class TiktokExtractor(Extractor):
         tries = 0
         while True:
             try:
-                html = self.request(url).text
+                response = self.request(url)
+                if response.history and "/login" in response.url:
+                    raise exception.AuthorizationError(
+                        "HTTP redirect to login page "
+                        f"('{response.url.partition('?')[0]}')")
+                html = response.text
                 data = text.extr(
                     html, '<script id="__UNIVERSAL_DATA_FOR_REHYDRATION__" '
                     'type="application/json">', '</script>')
