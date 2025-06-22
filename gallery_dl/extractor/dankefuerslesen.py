@@ -9,7 +9,7 @@
 """Extractors for https://danke.moe/"""
 
 from .common import ChapterExtractor, MangaExtractor
-from .. import text
+from .. import text, util
 from ..cache import memcache
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?danke\.moe"
@@ -53,7 +53,7 @@ class DankefuerslesenChapterExtractor(DankefuerslesenBase, ChapterExtractor):
             minor = ""
 
         data = manga["chapters"][ch]
-        group_id, self._files = data["groups"].popitem()
+        group_id, self._files = next(iter(data["groups"].items()))
 
         if not self.zip:
             self.base = (f"{self.root}/media/manga/{slug}/chapters"
@@ -66,11 +66,11 @@ class DankefuerslesenChapterExtractor(DankefuerslesenBase, ChapterExtractor):
             "volume"    : text.parse_int(data["volume"]),
             "chapter"   : text.parse_int(chapter),
             "chapter_minor": minor,
-            "group"     : manga["groups"][group_id],
+            "group"     : manga["groups"][group_id].split(" & "),
             "group_id"  : text.parse_int(group_id),
             "date"      : text.parse_timestamp(data["release_date"][group_id]),
-            "lang"      : "en",
-            "language"  : "English",
+            "lang"      : util.NONE,
+            "language"  : util.NONE,
         }
 
     def images(self, page):
@@ -94,6 +94,7 @@ class DankefuerslesenChapterExtractor(DankefuerslesenBase, ChapterExtractor):
 class DankefuerslesenMangaExtractor(DankefuerslesenBase, MangaExtractor):
     """Extractor for Danke fürs Lesen manga"""
     chapterclass = DankefuerslesenChapterExtractor
+    reverse = False
     pattern = BASE_PATTERN + r"/read/manga/([^/?#]+)"
     example = "https://danke.moe/read/manga/TITLE/"
 
@@ -104,6 +105,9 @@ class DankefuerslesenMangaExtractor(DankefuerslesenBase, MangaExtractor):
         results = []
 
         manga = self._manga_info(self.groups[0]).copy()
+        manga["lang"] = util.NONE
+        manga["language"] = util.NONE
+
         base = f"{self.root}/read/manga/{manga['slug']}/"
         for ch, data in manga.pop("chapters").items():
 
@@ -111,13 +115,12 @@ class DankefuerslesenMangaExtractor(DankefuerslesenBase, MangaExtractor):
                 chapter, sep, minor = ch.rpartition(".")
                 ch = ch.replace('.', '-')
                 data["chapter"] = text.parse_int(chapter)
-                data["chapter-minor"] = sep + minor
+                data["chapter_minor"] = sep + minor
             else:
                 data["chapter"] = text.parse_int(ch)
-                data["chapter-minor"] = ""
+                data["chapter_minor"] = ""
 
-            url = f"{base}{ch}/1/"
             manga.update(data)
-            results.append((url, manga))
+            results.append((f"{base}{ch}/1/", manga))
 
         return results
