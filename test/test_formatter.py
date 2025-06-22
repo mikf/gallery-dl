@@ -27,6 +27,11 @@ class TestFormatter(unittest.TestCase):
         "d": {"a": "foo", "b": 0, "c": None},
         "i": 2,
         "l": ["a", "b", "c"],
+        "L": [
+            {"name": "John Doe"      , "age": 42, "email": "jd@example.org"},
+            {"name": "Jane Smith"    , "age": 24, "email": None},
+            {"name": "Max Mustermann", "age": False},
+        ],
         "n": None,
         "s": " \n\r\tSPACE    ",
         "h": "<p>foo </p> &amp; bar <p> </p>",
@@ -209,7 +214,7 @@ class TestFormatter(unittest.TestCase):
         self._run_test("{j:[b:]}"     , v)
         self._run_test("{j:[b::]}"    , v)
 
-    def test_maxlen(self):
+    def test_specifier_maxlen(self):
         v = self.kwdict["a"]
         self._run_test("{a:L5/foo/}" , "foo")
         self._run_test("{a:L50/foo/}", v)
@@ -217,7 +222,7 @@ class TestFormatter(unittest.TestCase):
         self._run_test("{a:L50/foo/>51}", "foo")
         self._run_test("{a:Lab/foo/}", "foo")
 
-    def test_join(self):
+    def test_specifier_join(self):
         self._run_test("{l:J}"       , "abc")
         self._run_test("{l:J,}"      , "a,b,c")
         self._run_test("{l:J,/}"     , "a,b,c")
@@ -229,7 +234,7 @@ class TestFormatter(unittest.TestCase):
         self._run_test("{a:J/}"      , self.kwdict["a"])
         self._run_test("{a:J, /}"    , self.kwdict["a"])
 
-    def test_replace(self):
+    def test_specifier_replace(self):
         self._run_test("{a:Rh/C/}"  , "CElLo wOrLd")
         self._run_test("{a!l:Rh/C/}", "Cello world")
         self._run_test("{a!u:Rh/C/}", "HELLO WORLD")
@@ -238,12 +243,12 @@ class TestFormatter(unittest.TestCase):
         self._run_test("{a!l:Rl//}" , "heo word")
         self._run_test("{name:Rame/othing/}", "Nothing")
 
-    def test_datetime(self):
+    def test_specifier_datetime(self):
         self._run_test("{ds:D%Y-%m-%dT%H:%M:%S%z}", "2010-01-01 00:00:00")
         self._run_test("{ds:D%Y}", "2010-01-01T01:00:00+01:00")
         self._run_test("{l:D%Y}", "None")
 
-    def test_offset(self):
+    def test_specifier_offset(self):
         self._run_test("{dt:O 01:00}", "2010-01-01 01:00:00")
         self._run_test("{dt:O+02:00}", "2010-01-01 02:00:00")
         self._run_test("{dt:O-03:45}", "2009-12-31 20:15:00")
@@ -254,7 +259,7 @@ class TestFormatter(unittest.TestCase):
         self._run_test("{ds:D%Y-%m-%dT%H:%M:%S%z/O1}", "2010-01-01 01:00:00")
         self._run_test("{t!d:O2}", "2010-01-01 02:00:00")
 
-    def test_offset_local(self):
+    def test_specifier_offset_local(self):
         ts = self.kwdict["dt"].replace(
             tzinfo=datetime.timezone.utc).timestamp()
         offset = time.localtime(ts).tm_gmtoff
@@ -269,7 +274,7 @@ class TestFormatter(unittest.TestCase):
         self._run_test("{dt_dst:O}", str(dt))
         self._run_test("{dt_dst:Olocal}", str(dt))
 
-    def test_sort(self):
+    def test_specifier_sort(self):
         self._run_test("{l:S}" , "['a', 'b', 'c']")
         self._run_test("{l:Sa}", "['a', 'b', 'c']")
         self._run_test("{l:Sd}", "['c', 'b', 'a']")
@@ -301,6 +306,19 @@ class TestFormatter(unittest.TestCase):
         with self.assertRaises(ValueError):
             self._run_test("{a:Xfoo/ */}", "hello wo *")
 
+    def test_specifier_map(self):
+        self._run_test("{L:Mname/}" ,
+                       "['John Doe', 'Jane Smith', 'Max Mustermann']")
+        self._run_test("{L:Mage/}"  ,
+                       "[42, 24, False]")
+
+        self._run_test("{a:Mname}", self.kwdict["a"])
+        self._run_test("{n:Mname}", "None")
+        self._run_test("{title4:Mname}", "0")
+
+        with self.assertRaises(ValueError):
+            self._run_test("{t:Mname", "")
+
     def test_chain_special(self):
         # multiple replacements
         self._run_test("{a:Rh/C/RE/e/RL/l/}", "Cello wOrld")
@@ -321,6 +339,9 @@ class TestFormatter(unittest.TestCase):
 
         # sort and join
         self._run_test("{a:S/J}", " ELLOdhlorw")
+
+        # map and join
+        self._run_test("{L:Mname/J-}", "John Doe-Jane Smith-Max Mustermann")
 
     def test_separator(self):
         orig_separator = formatter._SEPARATOR
@@ -494,10 +515,10 @@ def noarg():
             fmt4 = formatter.parse("\fM " + path + ":lengths")
 
         self.assertEqual(fmt1.format_map(self.kwdict), "'Title' by Name")
-        self.assertEqual(fmt2.format_map(self.kwdict), "139")
+        self.assertEqual(fmt2.format_map(self.kwdict), "142")
 
         self.assertEqual(fmt3.format_map(self.kwdict), "'Title' by Name")
-        self.assertEqual(fmt4.format_map(self.kwdict), "139")
+        self.assertEqual(fmt4.format_map(self.kwdict), "142")
 
         with self.assertRaises(TypeError):
             self.assertEqual(fmt0.format_map(self.kwdict), "")

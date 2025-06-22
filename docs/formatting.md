@@ -267,6 +267,12 @@ Format specifiers can be used for advanced formatting by using the options provi
     <td><code>sun - tree - water</code></td>
 </tr>
 <tr>
+    <td><code>M&lt;key&gt;/</code></td>
+    <td>Maps a list of objects to a list of corresponding values by looking up <code>&lt;key&gt;</code> in each object</td>
+    <td><code>{users:Mname/}</code></td>
+    <td><code>["John", "David", "Max"]</code></td>
+</tr>
+<tr>
     <td><code>R&lt;old&gt;/&lt;new&gt;/</code></td>
     <td>Replaces all occurrences of <code>&lt;old&gt;</code> with <code>&lt;new&gt;</code> using <a href="https://docs.python.org/3/library/stdtypes.html#str.replace" rel="nofollow"><code>str.replace()</code></a></td>
     <td><code>{foo:Ro/()/}</code></td>
