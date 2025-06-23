@@ -95,35 +95,42 @@ class DiscordExtractor(Extractor):
                         "extension": "png",
                     })
 
-            for attachment in message["attachments"]:
-                message_metadata["files"].append({
-                    "url": attachment["url"],
-                    "type": "attachment",
-                })
+            message_snapshots = [message]
+            message_snapshots.extend(
+                msg["message"] for msg in message.get("message_snapshots", [])
+                if msg["message"]["type"] in (0, 19, 21)
+            )
 
-            for embed in message["embeds"]:
-                if embed["type"] in self.enabled_embeds:
-                    for field in ("video", "image", "thumbnail"):
-                        if field not in embed:
-                            continue
-                        url = embed[field].get("proxy_url")
-                        if url is not None:
-                            message_metadata["files"].append({
-                                "url": url,
-                                "type": "embed",
-                            })
-                            break
+            for snapshot in message_snapshots:
+                for attachment in snapshot["attachments"]:
+                    message_metadata["files"].append({
+                        "url": attachment["url"],
+                        "type": "attachment",
+                    })
 
-            for num, file in enumerate(message_metadata["files"], start=1):
-                text.nameext_from_url(file["url"], file)
-                file["num"] = num
+                for embed in snapshot["embeds"]:
+                    if embed["type"] in self.enabled_embeds:
+                        for field in ("video", "image", "thumbnail"):
+                            if field not in embed:
+                                continue
+                            url = embed[field].get("proxy_url")
+                            if url is not None:
+                                message_metadata["files"].append({
+                                    "url": url,
+                                    "type": "embed",
+                                })
+                                break
 
-            yield Message.Directory, message_metadata
+                for num, file in enumerate(message_metadata["files"], start=1):
+                    text.nameext_from_url(file["url"], file)
+                    file["num"] = num
 
-            for file in message_metadata["files"]:
-                message_metadata_file = message_metadata.copy()
-                message_metadata_file.update(file)
-                yield Message.Url, file["url"], message_metadata_file
+                yield Message.Directory, message_metadata
+
+                for file in message_metadata["files"]:
+                    message_metadata_file = message_metadata.copy()
+                    message_metadata_file.update(file)
+                    yield Message.Url, file["url"], message_metadata_file
 
     def extract_channel_text(self, channel_id):
         for message in self.api.get_channel_messages(channel_id):
@@ -342,7 +349,7 @@ class DiscordAPI():
                 "sort_order": "desc",
                 "limit": THREADS_BATCH,
                 "offset": + offset,
-            })["threads"]
+            }).get("threads", [])
 
         return self._pagination(_method, THREADS_BATCH)
 
