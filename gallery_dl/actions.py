@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2023 Mike Fährmann
+# Copyright 2023-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -8,7 +8,6 @@
 
 """ """
 
-import re
 import time
 import logging
 import operator
@@ -32,7 +31,7 @@ def parse(actionspec):
 
     for event, spec in actionspec:
         level, _, pattern = event.partition(":")
-        search = re.compile(pattern).search if pattern else util.true
+        search = util.re(pattern).search if pattern else util.true
 
         if isinstance(spec, str):
             type, _, args = spec.partition(" ")
@@ -138,7 +137,7 @@ def action_print(opts):
 
 
 def action_status(opts):
-    op, value = re.match(r"\s*([&|^=])=?\s*(\d+)", opts).groups()
+    op, value = util.re(r"\s*([&|^=])=?\s*(\d+)").match(opts).groups()
 
     op = {
         "&": operator.and_,

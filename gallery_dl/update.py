@@ -7,7 +7,6 @@
 # published by the Free Software Foundation.
 
 import os
-import re
 import sys
 
 from .extractor.common import Extractor, Message
@@ -184,7 +183,7 @@ class UpdateExtractor(Extractor):
                 tag = channel
                 exact = True
 
-            if re.match(r"\d\.\d+\.\d+", tag):
+            if util.re_compile(r"\d\.\d+\.\d+").match(tag):
                 tag = "v" + tag
 
         try:
