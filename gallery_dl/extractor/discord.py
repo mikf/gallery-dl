@@ -98,7 +98,7 @@ class DiscordExtractor(Extractor):
             message_snapshots = [message]
             message_snapshots.extend(
                 msg["message"] for msg in message.get("message_snapshots", [])
-                 if msg["message"]["type"] in (0, 19, 21)
+                if msg["message"]["type"] in (0, 19, 21)
             )
 
             for snapshot in message_snapshots:
