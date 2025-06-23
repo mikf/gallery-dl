@@ -913,7 +913,10 @@ class DataJob(Job):
         except exception.StopExtraction:
             pass
         except Exception as exc:
-            self.data.append((exc.__class__.__name__, str(exc)))
+            self.data.append((-1, {
+                "error"  : exc.__class__.__name__,
+                "message": str(exc),
+            }))
         except BaseException:
             pass
 
