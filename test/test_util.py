@@ -13,7 +13,6 @@ import unittest
 from unittest.mock import patch
 
 import io
-import re
 import time
 import random
 import string
@@ -1041,21 +1040,6 @@ value = 123
         self.assertEqual(response.headers.get("foo"), None)
         self.assertEqual(response.links.get("next"), None)
         self.assertEqual(response.close(), None)
-
-    def test_re(self):
-        Pattern = type(re.compile(""))
-
-        p1 = util.re_compile("foo")
-        p2 = util.re("foo")
-        p3 = util.re("foo")
-
-        self.assertIsInstance(p1, Pattern)
-        self.assertIsInstance(p2, Pattern)
-        self.assertIsInstance(p3, Pattern)
-
-        self.assertIsNot(p1, p2)
-        self.assertIs(p2, p3)
-        self.assertEqual(p1, p2)
 
 
 class TestExtractor():

@@ -23,6 +23,20 @@ INVALID_ALT = ((), [], {}, None, "")
 
 class TestText(unittest.TestCase):
 
+    def test_re(self):
+        p1 = text.re_compile("foo")
+        p2 = text.re("foo")
+        p3 = text.re("foo")
+
+        Pattern = text.re_module.Pattern
+        self.assertIsInstance(p1, Pattern)
+        self.assertIsInstance(p2, Pattern)
+        self.assertIsInstance(p3, Pattern)
+
+        self.assertEqual(p1, p2)
+        self.assertIsNot(p1, p2)
+        self.assertIs(p2, p3)
+
     def test_remove_html(self, f=text.remove_html):
         result = "Hello World."
 
