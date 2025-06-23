@@ -99,7 +99,7 @@ class ImgboxImageExtractor(ImgboxExtractor):
         return (self.image_key,)
 
     def get_image_metadata(self, page):
-        data = ImgboxExtractor.get_image_metadata(page)
+        data = ImgboxExtractor.get_image_metadata(self, page)
         if not data["filename"]:
             raise exception.NotFoundError("image")
         return data
