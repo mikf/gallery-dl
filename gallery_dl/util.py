@@ -8,7 +8,6 @@
 
 """Utility functions and classes"""
 
-import re as re_module
 import os
 import sys
 import json
@@ -26,24 +25,6 @@ import urllib.parse
 from http.cookiejar import Cookie
 from email.utils import mktime_tz, parsedate_tz
 from . import text, version, exception
-
-try:
-    re_compile = re_module._compiler.compile
-except AttributeError:
-    re_compile = re_module.sre_compile.compile
-
-CACHE_PATTERN = {}
-
-
-def re(pattern):
-    """Compile a regular expression pattern"""
-    try:
-        return CACHE_PATTERN[pattern]
-    except KeyError:
-        pass
-
-    p = CACHE_PATTERN[pattern] = re_compile(pattern)
-    return p
 
 
 def bencode(num, alphabet="0123456789"):
@@ -752,6 +733,9 @@ class CustomNone():
 _ff_ver = (datetime.date.today().toordinal() - 735506) // 28
 #  _ch_ver = _ff_ver - 2
 
+re = text.re
+re_compile = text.re_compile
+
 NONE = CustomNone()
 EPOCH = datetime.datetime(1970, 1, 1)
 SECOND = datetime.timedelta(0, 1)
@@ -784,7 +768,7 @@ GLOBALS = {
     "hash_sha1": sha1,
     "hash_md5" : md5,
     "std"      : ModuleProxy(),
-    "re"       : re_module,
+    "re"       : text.re_module,
     "exts_image"  : EXTS_IMAGE,
     "exts_video"  : EXTS_VIDEO,
     "exts_archive": EXTS_ARCHIVE,

@@ -8,14 +8,29 @@
 
 """Collection of functions that work on strings/text"""
 
-import re
 import sys
 import html
 import time
 import datetime
 import urllib.parse
+import re as re_module
 
-HTML_RE = re.compile("<[^>]+>")
+try:
+    re_compile = re_module._compiler.compile
+except AttributeError:
+    re_compile = re_module.sre_compile.compile
+
+HTML_RE = re_compile(r"<[^>]+>")
+PATTERN_CACHE = {}
+
+
+def re(pattern):
+    """Compile a regular expression pattern"""
+    try:
+        return PATTERN_CACHE[pattern]
+    except KeyError:
+        p = PATTERN_CACHE[pattern] = re_compile(pattern)
+        return p
 
 
 def remove_html(txt, repl=" ", sep=" "):
@@ -47,8 +62,8 @@ def slugify(value):
     Adapted from:
     https://github.com/django/django/blob/master/django/utils/text.py
     """
-    value = re.sub(r"[^\w\s-]", "", str(value).lower())
-    return re.sub(r"[-\s]+", "-", value).strip("-_")
+    value = re(r"[^\w\s-]").sub("", str(value).lower())
+    return re(r"[-\s]+").sub("-", value).strip("-_")
 
 
 def ensure_http_scheme(url, scheme="https://"):
@@ -199,7 +214,7 @@ def extract_from(txt, pos=None, default=""):
 def parse_unicode_escapes(txt):
     """Convert JSON Unicode escapes in 'txt' into actual characters"""
     if "\\u" in txt:
-        return re.sub(r"\\u([0-9a-fA-F]{4})", _hex_to_char, txt)
+        return re(r"\\u([0-9a-fA-F]{4})").sub(_hex_to_char, txt)
     return txt
 
 
