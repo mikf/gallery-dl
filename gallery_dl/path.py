@@ -9,7 +9,6 @@
 """Filesystem path handling"""
 
 import os
-import re
 import shutil
 import functools
 from . import util, formatter, exception
@@ -148,8 +147,7 @@ class PathFormat():
             def func(x, c=chars, r=repl):
                 return x.replace(c, r)
         else:
-            return functools.partial(
-                re.compile("[" + chars + "]").sub, repl)
+            return functools.partial(util.re(f"[{chars}]").sub, repl)
         return func
 
     def _process_repl_dict(self, chars):

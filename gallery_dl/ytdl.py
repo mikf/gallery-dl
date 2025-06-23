@@ -8,7 +8,6 @@
 
 """Helpers for interacting with youtube-dl"""
 
-import re
 import shlex
 import itertools
 from . import text, util, exception
@@ -258,13 +257,12 @@ def parse_command_line(module, argv):
 
     cookiesfrombrowser = getattr(opts, "cookiesfrombrowser", None)
     if cookiesfrombrowser:
-        match = re.fullmatch(r"""(?x)
+        pattern = util.re(r"""(?x)
             (?P<name>[^+:]+)
             (?:\s*\+\s*(?P<keyring>[^:]+))?
             (?:\s*:\s*(?!:)(?P<profile>.+?))?
-            (?:\s*::\s*(?P<container>.+))?
-        """, cookiesfrombrowser)
-        if match:
+            (?:\s*::\s*(?P<container>.+))?""")
+        if match := pattern.fullmatch(cookiesfrombrowser):
             browser, keyring, profile, container = match.groups()
             if keyring is not None:
                 keyring = keyring.upper()
@@ -524,7 +522,7 @@ def legacy_postprocessors(opts, module, ytdlp, compat_opts):
             if len(dur) == 2 and all(t is not None for t in dur):
                 remove_ranges.append(tuple(dur))
                 continue
-        remove_chapters_patterns.append(re.compile(regex))
+        remove_chapters_patterns.append(util.re(regex))
     if opts.remove_chapters or sponsorblock_query:
         postprocessors.append({
             "key": "ModifyChapters",

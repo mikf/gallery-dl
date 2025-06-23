@@ -492,8 +492,7 @@ class InputManager():
                 # url
                 if " #" in line or "\t#" in line:
                     if strip_comment is None:
-                        import re
-                        strip_comment = re.compile(r"\s+#.*").sub
+                        strip_comment = util.re(r"\s+#.*").sub
                     line = strip_comment("", line)
                 if gconf or lconf:
                     url = ExtendedUrl(line, gconf, lconf)
