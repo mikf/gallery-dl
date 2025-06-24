@@ -282,7 +282,12 @@ class TestDataJob(TestJob):
         tjob = self.jobclass(extr, file=io.StringIO())
         tjob.run()
         self.assertEqual(
-            tjob.data[-1], ("ZeroDivisionError", "division by zero"))
+            tjob.data[-1],
+            (-1, {
+                "error"  : "ZeroDivisionError",
+                "message": "division by zero",
+            })
+        )
 
     def test_private(self):
         config.set(("output",), "private", True)
