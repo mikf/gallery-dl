@@ -61,7 +61,14 @@ class FanboxExtractor(Extractor):
             FanboxExtractor._warning = False
 
     def items(self):
+        fee_max = self.config("fee-max")
+
         for item in self.posts():
+            if fee_max is not None and fee_max < item["feeRequired"]:
+                self.log.warning("Skipping post %s (feeRequired of %s > %s)",
+                                 item["id"], item["feeRequired"], fee_max)
+                continue
+
             try:
                 url = "https://api.fanbox.cc/post.info?postId=" + item["id"]
                 body = self.request_json(url, headers=self.headers)["body"]

@@ -12,6 +12,7 @@ __tests__ = (
     "#url"     : "https://xub.fanbox.cc",
     "#category": ("", "fanbox", "creator"),
     "#class"   : fanbox.FanboxCreatorExtractor,
+    "#options" : {"fee-max": 0},
     "#range"   : "1-15",
     "#count"   : ">= 15",
 

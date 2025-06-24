@@ -2651,6 +2651,17 @@ Description
     * ``false``: Ignore embeds.
 
 
+extractor.fanbox.fee-max
+------------------------
+Type
+    ``integer``
+Description
+    Do not request API data or extract files from posts
+    that require a fee (``feeRequired``) greater than the specified amount.
+
+    Note: This option has no effect on individual post URLs.
+
+
 extractor.fanbox.metadata
 -------------------------
 Type
