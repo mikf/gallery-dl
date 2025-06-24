@@ -40,7 +40,8 @@ class Rule34usExtractor(BooruExtractor):
 
         url = post["file_url"]
         if "//video-cdn1." in url:
-            post["_fallback"] = (url.replace("//video-cdn1.", "//video."),)
+            post["file_url"] = url.replace("//video-cdn1.", "//video.")
+            post["_fallback"] = (url,)
         post["md5"] = url.rpartition("/")[2].partition(".")[0]
 
         tags = collections.defaultdict(list)
