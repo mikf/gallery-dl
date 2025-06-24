@@ -45,10 +45,10 @@ class PatreonExtractor(Extractor):
 
         for post in self.posts():
 
+            yield Message.Directory, post
             if not post.get("current_user_can_view", True):
                 self.log.warning("Not allowed to view post %s", post["id"])
                 continue
-            yield Message.Directory, post
 
             post["num"] = 0
             hashes = set()
