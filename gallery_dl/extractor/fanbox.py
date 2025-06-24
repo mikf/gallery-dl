@@ -61,7 +61,16 @@ class FanboxExtractor(Extractor):
             FanboxExtractor._warning = False
 
     def items(self):
-        for content_body, post in self.posts():
+        for item in self.posts():
+            try:
+                url = "https://api.fanbox.cc/post.info?postId=" + item["id"]
+                body = self.request_json(url, headers=self.headers)["body"]
+                content_body, post = self._extract_post(body)
+            except Exception as exc:
+                self.log.warning("Skipping post %s (%s: %s)",
+                                 item["id"], exc.__class__.__name__, exc)
+                continue
+
             yield Message.Directory, post
             yield from self._get_urls_from_post(content_body, post)
 
@@ -71,23 +80,17 @@ class FanboxExtractor(Extractor):
     def _pagination(self, url):
         while url:
             url = text.ensure_http_scheme(url)
-            body = self.request(url, headers=self.headers).json()["body"]
-            for item in body["items"]:
-                try:
-                    yield self._get_post_data(item["id"])
-                except Exception as exc:
-                    self.log.warning("Skipping post %s (%s: %s)",
-                                     item["id"], exc.__class__.__name__, exc)
+            body = self.request_json(url, headers=self.headers)["body"]
+
+            yield from body["items"]
+
             url = body["nextUrl"]
 
-    def _get_post_data(self, post_id):
+    def _extract_post(self, post):
         """Fetch and process post data"""
-        url = "https://api.fanbox.cc/post.info?postId="+post_id
-        post = self.request(url, headers=self.headers).json()["body"]
         post["archives"] = ()
 
-        content_body = post.pop("body", None)
-        if content_body:
+        if content_body := post.pop("body", None):
             if "html" in content_body:
                 post["html"] = content_body["html"]
             if post["type"] == "article":
@@ -111,8 +114,7 @@ class FanboxExtractor(Extractor):
                 post["content"] = "\n".join(content)
 
                 self._sort_map(content_body, "imageMap", images)
-                file_map = self._sort_map(content_body, "fileMap", files)
-                if file_map:
+                if file_map := self._sort_map(content_body, "fileMap", files):
                     exts = util.EXTS_ARCHIVE
                     post["archives"] = [
                         file
@@ -141,7 +143,7 @@ class FanboxExtractor(Extractor):
                 post["plan"] = plans[fee] = plan
         if self._meta_comments:
             if post["commentCount"]:
-                post["comments"] = list(self._get_comment_data(post_id))
+                post["comments"] = list(self._get_comment_data(post["id"]))
             else:
                 post["commentd"] = ()
 
@@ -164,7 +166,7 @@ class FanboxExtractor(Extractor):
     def _get_user_data(self, creator_id):
         url = "https://api.fanbox.cc/creator.get"
         params = {"creatorId": creator_id}
-        data = self.request(url, params=params, headers=self.headers).json()
+        data = self.request_json(url, params=params, headers=self.headers)
 
         user = data["body"]
         user.update(user.pop("user"))
@@ -175,7 +177,7 @@ class FanboxExtractor(Extractor):
     def _get_plan_data(self, creator_id):
         url = "https://api.fanbox.cc/plan.listCreator"
         params = {"creatorId": creator_id}
-        data = self.request(url, params=params, headers=self.headers).json()
+        data = self.request_json(url, params=params, headers=self.headers)
 
         plans = {0: {
             "id"             : "",
@@ -200,7 +202,7 @@ class FanboxExtractor(Extractor):
         comments = []
         while url:
             url = text.ensure_http_scheme(url)
-            body = self.request(url, headers=self.headers).json()["body"]
+            body = self.request_json(url, headers=self.headers)["body"]
             data = body["commentList"]
             comments.extend(data["items"])
             url = data["nextUrl"]
@@ -349,25 +351,16 @@ class FanboxCreatorExtractor(FanboxExtractor):
     pattern = USER_PATTERN + r"(?:/posts)?/?$"
     example = "https://USER.fanbox.cc/"
 
-    def __init__(self, match):
-        FanboxExtractor.__init__(self, match)
-        self.creator_id = match[1] or match[2]
-
     def posts(self):
         url = "https://api.fanbox.cc/post.paginateCreator?creatorId="
-        return self._pagination_creator(url + self.creator_id)
+        creator_id = self.groups[0] or self.groups[1]
+        return self._pagination_creator(url + creator_id)
 
     def _pagination_creator(self, url):
-        urls = self.request(url, headers=self.headers).json()["body"]
+        urls = self.request_json(url, headers=self.headers)["body"]
         for url in urls:
             url = text.ensure_http_scheme(url)
-            body = self.request(url, headers=self.headers).json()["body"]
-            for item in body:
-                try:
-                    yield self._get_post_data(item["id"])
-                except Exception as exc:
-                    self.log.warning("Skipping post %s (%s: %s)",
-                                     item["id"], exc.__class__.__name__, exc)
+            yield from self.request_json(url, headers=self.headers)["body"]
 
 
 class FanboxPostExtractor(FanboxExtractor):
@@ -376,12 +369,8 @@ class FanboxPostExtractor(FanboxExtractor):
     pattern = USER_PATTERN + r"/posts/(\d+)"
     example = "https://USER.fanbox.cc/posts/12345"
 
-    def __init__(self, match):
-        FanboxExtractor.__init__(self, match)
-        self.post_id = match[3]
-
     def posts(self):
-        return (self._get_post_data(self.post_id),)
+        return ({"id": self.groups[2], "feeRequired": 0},)
 
 
 class FanboxHomeExtractor(FanboxExtractor):
