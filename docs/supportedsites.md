@@ -188,6 +188,12 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
+    <td>Comick</td>
+    <td>https://comick.io/</td>
+    <td>Chapters, Manga</td>
+    <td></td>
+</tr>
+<tr>
     <td>Coomer</td>
     <td>https://coomer.su/</td>
     <td>Artists, Favorites, Posts, User Profiles</td>

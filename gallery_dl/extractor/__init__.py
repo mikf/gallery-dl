@@ -7,7 +7,7 @@
 # published by the Free Software Foundation.
 
 import sys
-from ..util import re_compile
+from ..text import re_compile
 
 modules = [
     "2ch",
@@ -40,6 +40,7 @@ modules = [
     "chevereto",
     "cien",
     "civitai",
+    "comick",
     "comicvine",
     "cyberdrop",
     "danbooru",
