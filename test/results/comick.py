@@ -140,6 +140,30 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://comick.io/comic/kobayashi-san-chi-no-maid-dragon",
+    "#comment" : "all chapters",
+    "#class"   : comick.ComickMangaExtractor,
+    "#pattern" : comick.ComickChapterExtractor.pattern,
+    "#count"   : range(890, 1000),
+},
+
+{
+    "#url"     : "https://comick.io/comic/kobayashi-san-chi-no-maid-dragon?lang=pt-br&group=Amadeus+Scans&chap-order=&date-order=1&page=3#chapter-header",
+    "#comment" : "query parameters",
+    "#class"   : comick.ComickMangaExtractor,
+    "#pattern" : comick.ComickChapterExtractor.pattern,
+    "#results" : (
+        "https://comick.io/comic/kobayashi-san-chi-no-maid-dragon/It8UGI_U-chapter-137-pt-br",
+        "https://comick.io/comic/kobayashi-san-chi-no-maid-dragon/YlHNac8_-chapter-138-pt-br",
+        "https://comick.io/comic/kobayashi-san-chi-no-maid-dragon/dnMuDUdy-chapter-139-pt-br",
+        "https://comick.io/comic/kobayashi-san-chi-no-maid-dragon/1oFGBeum-chapter-140-pt-br",
+        "https://comick.io/comic/kobayashi-san-chi-no-maid-dragon/_lIICVw3-chapter-141-pt-br",
+    ),
+
+    "lang": "pt-br",
+},
+
+{
     "#url"     : "https://comick.io/comic/koko-jidai-ni-gomandatta-jou-sama-to-no-dousei-seikatsu-wa-igaito-igokochi-ga-warukunai?lang=vi",
     "#comment" : "language filter",
     "#class"   : comick.ComickMangaExtractor,
