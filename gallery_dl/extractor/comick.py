@@ -28,12 +28,6 @@ class ComickBase():
         props = data["props"]["pageProps"]
         comic = props["comic"]
 
-        map_status = {
-            0: "Unknown",
-            1: "Ongoing",
-            2: "Complete",
-        }
-
         genre = []
         theme = []
         format = ""
@@ -76,7 +70,7 @@ class ComickBase():
             "rating": comic["content_rating"],
             "rank"  : comic["follow_rank"],
             "score" : text.parse_float(comic["bayesian_rating"]),
-            "status": map_status[comic["status"]],
+            "status": "Complete" if comic["status"] == 2 else "Ongoing",
             "links" : comic["links"],
             "_build_id": data["buildId"],
         }
@@ -125,7 +119,12 @@ class ComickChapterExtractor(ComickBase, ChapterExtractor):
 
     def images(self, page):
         return [
-            ("https://meo.comick.pictures/" + img["b2key"], img)
+            ("https://meo.comick.pictures/" + img["b2key"], {
+                "width"    : img["w"],
+                "height"   : img["h"],
+                "size"     : img["s"],
+                "optimized": img["optimized"],
+            })
             for img in self._images
         ]
 
