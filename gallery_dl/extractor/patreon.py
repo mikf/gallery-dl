@@ -156,35 +156,33 @@ class PatreonExtractor(Extractor):
         attr = post["attributes"]
         attr["id"] = text.parse_int(post["id"])
 
-        if attr.get("current_user_can_view", True):
+        relationships = post["relationships"]
+        attr["images"] = self._files(
+            post, included, "images")
+        attr["attachments"] = self._files(
+            post, included, "attachments")
+        attr["attachments_media"] = self._files(
+            post, included, "attachments_media")
+        attr["date"] = text.parse_datetime(
+            attr["published_at"], "%Y-%m-%dT%H:%M:%S.%f%z")
 
-            relationships = post["relationships"]
-            attr["images"] = self._files(
-                post, included, "images")
-            attr["attachments"] = self._files(
-                post, included, "attachments")
-            attr["attachments_media"] = self._files(
-                post, included, "attachments_media")
-            attr["date"] = text.parse_datetime(
-                attr["published_at"], "%Y-%m-%dT%H:%M:%S.%f%z")
+        try:
+            attr["campaign"] = (included["campaign"][
+                                relationships["campaign"]["data"]["id"]])
+        except Exception:
+            attr["campaign"] = None
 
-            try:
-                attr["campaign"] = (included["campaign"][
-                                    relationships["campaign"]["data"]["id"]])
-            except Exception:
-                attr["campaign"] = None
+        tags = relationships.get("user_defined_tags")
+        attr["tags"] = [
+            tag["id"].replace("user_defined;", "")
+            for tag in tags["data"]
+            if tag["type"] == "post_tag"
+        ] if tags else []
 
-            tags = relationships.get("user_defined_tags")
-            attr["tags"] = [
-                tag["id"].replace("user_defined;", "")
-                for tag in tags["data"]
-                if tag["type"] == "post_tag"
-            ] if tags else []
-
-            user = relationships["user"]
-            attr["creator"] = (
-                self._user(user["links"]["related"]) or
-                included["user"][user["data"]["id"]])
+        user = relationships["user"]
+        attr["creator"] = (
+            self._user(user["links"]["related"]) or
+            included["user"][user["data"]["id"]])
 
         return attr
 
