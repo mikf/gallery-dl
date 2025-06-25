@@ -20,6 +20,13 @@ __tests__ = (
         "https://meo.comick.pictures/4-N8Vj2XVdYY4Pv.webp",
     ),
 
+    "filename" : str,
+    "extension": "webp",
+    "width"    : 1424,
+    "height"   : 2000,
+    "size"     : range(67460, 276608),
+    "optimized": None,
+
     "volume": 1,
     "chapter": 10,
     "chapter_minor": ".5",
