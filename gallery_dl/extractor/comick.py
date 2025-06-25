@@ -8,7 +8,7 @@
 
 """Extractors for https://comick.io/"""
 
-from .common import ChapterExtractor, MangaExtractor
+from .common import ChapterExtractor, MangaExtractor, Message
 from .. import text
 from ..cache import memcache
 
@@ -131,29 +131,17 @@ class ComickChapterExtractor(ComickBase, ChapterExtractor):
 
 class ComickMangaExtractor(ComickBase, MangaExtractor):
     """Extractor for comick.io manga"""
-    chapterclass = ComickChapterExtractor
-    pattern = BASE_PATTERN + r"/comic/([\w-]+)/?(?:\?lang=(\w{2}))?"
+    pattern = BASE_PATTERN + r"/comic/([\w-]+)/?(?:\?([^#]+))?"
     example = "https://comick.io/comic/MANGA"
 
     def __init__(self, match):
         MangaExtractor.__init__(self, match, False)
 
-    def chapters(self, page):
-        slug, lang = self.groups
+    def items(self):
+        slug = self.groups[0]
         manga = self._manga_info(slug)
 
-        url = f"https://api.comick.io/comic/{manga['manga_hid']}/chapters"
-        params = {"lang": lang}
-        data = self.request_json(url, params=params)
-
-        if data["total"] > data["limit"]:
-            # workaround for manga with more than 60 chapters
-            ch = data["chapters"][0]
-            chstr = f"{ch['hid']}-chapter-{ch['chap']}-{ch['lang']}"
-            data = self._chapter_info(manga, chstr)
-
-        results = []
-        for ch in data["chapters"]:
+        for ch in self.chapters(manga):
             url = (f"{self.root}/comic/{slug}"
                    f"/{ch['hid']}-chapter-{ch['chap']}-{ch['lang']}")
 
@@ -161,6 +149,55 @@ class ComickMangaExtractor(ComickBase, MangaExtractor):
             chapter, sep, minor = ch["chap"].partition(".")
             ch["chapter"] = text.parse_int(chapter)
             ch["chapter_minor"] = sep + minor
+            ch["_extractor"] = ComickChapterExtractor
 
-            results.append((url, ch))
-        return results
+            yield Message.Queue, url, ch
+
+    def chapters(self, manga):
+        info = True
+        slug, query = self.groups
+
+        url = f"https://api.comick.io/comic/{manga['manga_hid']}/chapters"
+        headers = {
+            "Origin": "https://comick.io",
+            "Sec-Fetch-Dest": "empty",
+            "Sec-Fetch-Mode": "cors",
+            "Sec-Fetch-Site": "same-site",
+        }
+
+        query = text.parse_query(query)
+        params = {"lang": query.get("lang") or None}
+        params["page"] = page = text.parse_int(query.get("page"), 1)
+
+        if date_order := query.get("date-order"):
+            params["date-order"] = date_order
+        elif chap_order := query.get("chap-order"):
+            params["chap-order"] = chap_order
+        else:
+            params["chap-order"] = \
+                "0" if self.config("chapter-reverse", False) else "1"
+
+        group = query.get("group", None)
+        if group == "0":
+            group = None
+
+        while True:
+            data = self.request_json(url, params=params, headers=headers)
+            limit = data["limit"]
+
+            if info:
+                info = False
+                total = data["total"] - limit * page
+                if total > limit:
+                    self.log.info("Collecting %s chapters", total)
+
+            if group is None:
+                yield from data["chapters"]
+            else:
+                for ch in data["chapters"]:
+                    if group in ch["group_name"]:
+                        yield ch
+
+            if data["total"] <= limit * page:
+                return
+            params["page"] = page = page + 1
