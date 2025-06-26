@@ -32,11 +32,9 @@ class TenorExtractor(Extractor):
             self.formats = formats
 
     def items(self):
-        meta = self.metadata()
-
         for gif in self.gifs():
-            fmt = self._extract_format(gif)
-            if not fmt:
+
+            if not (fmt := self._extract_format(gif)):
                 self.log.warning("%s: Selected format(s) not available",
                                  gif.get("id"))
                 continue
@@ -46,8 +44,6 @@ class TenorExtractor(Extractor):
             gif["title"] = gif["h1_title"][:-4]
             gif["description"] = gif.pop("content_description", "")
             gif["date"] = text.parse_timestamp(gif["created"])
-            if meta:
-                gif.update(meta)
 
             yield Message.Directory, gif
             yield Message.Url, url, text.nameext_from_url(url, gif)
@@ -91,7 +87,7 @@ class TenorExtractor(Extractor):
         }
 
         while True:
-            data = self.request(url, params=params, headers=headers).json()
+            data = self.request_json(url, params=params, headers=headers)
 
             yield from data["results"]
 
@@ -112,7 +108,7 @@ class TenorImageExtractor(TenorExtractor):
     example = "https://tenor.com/view/SLUG-1234567890"
 
     def gifs(self):
-        url = "{}/view/{}".format(self.root, self.groups[0])
+        url = f"{self.root}/view/{self.groups[0]}"
         page = self.request(url).text
         pos = page.index('id="store-cache"')
         data = util.json_loads(text.extract(page, ">", "</script>", pos)[0])
@@ -125,17 +121,14 @@ class TenorSearchExtractor(TenorExtractor):
     pattern = BASE_PATTERN + r"search/([^/?#]+)"
     example = "https://tenor.com/search/QUERY"
 
-    def metadata(self):
+    def gifs(self):
         query = text.unquote(self.groups[0])
         rest, _, last = query.rpartition("-")
         if last == "gifs":
             query = rest
-        self.search_tags = query.replace("-", " ")
+        self.kwdict["search_tags"] = search_tags = query.replace("-", " ")
 
-        return {"search_tags": self.search_tags}
-
-    def gifs(self):
-        return self._search_results(self.search_tags)
+        return self._search_results(search_tags)
 
 
 class TenorUserExtractor(TenorExtractor):
