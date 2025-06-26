@@ -5578,6 +5578,17 @@ Description
         | - Set a value to ``false`` to completely remove these extension's ``type`` parameter
         | - Omit an extension to leave its URLs unchanged
 
+
+extractor.webtoons.banners
+--------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Download the active comic's ``banner``.
+
+
 extractor.webtoons.thumbnails
 -----------------------------
 Type
@@ -5585,7 +5596,7 @@ Type
 Default
     ``false``
 Description
-    Download the active chapter's ``thumbnail``.
+    Download the active episode's ``thumbnail``.
 
     Useful for creating CBZ archives with actual source thumbnails.
 

@@ -144,6 +144,25 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.webtoons.com/en/comedy/live-with-yourself/list?title_no=919",
+    "#comment" : "banner (#6468)",
+    "#category": ("", "webtoons", "comic"),
+    "#class"   : webtoons.WebtoonsComicExtractor,
+    "#options" : {"banners": True},
+    "#range"   : "1-3",
+    "#results" : (
+        "https://swebtoon-phinf.pstatic.net/20190126_226/1548461599138G7THv_PNG/03_EC9E91ED9288EC8381EC84B8_PC_ECBA90EBA6ADED84B0.png",
+        "https://www.webtoons.com/en/comedy/live-with-yourself/ep-12-aint-gonna-face-no-defeat/viewer?title_no=919&episode_no=14",
+        "https://www.webtoons.com/en/comedy/live-with-yourself/interlude-2/viewer?title_no=919&episode_no=13",
+        "https://www.webtoons.com/en/comedy/live-with-yourself/ep-11-can-barely-stand-on-my-feet/viewer?title_no=919&episode_no=12",
+    ),
+
+    "?type"      : "banner",
+    "title_no"   : 919,
+    "?episode_no": range(12, 14),
+},
+
+{
     "#url"     : "https://www.webtoons.com/fr/romance/subzero/list?title_no=1845&page=7",
     "#comment" : "french",
     "#category": ("", "webtoons", "comic"),
