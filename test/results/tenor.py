@@ -22,9 +22,13 @@ __tests__ = (
     "filename" : "moving",
     "h1_title" : "Moving Sticker",
     "hasaudio" : False,
+    "format"   : "gif",
     "width"    : 467,
     "height"   : 498,
+    "size"     : 60157,
+    "duration" : 0,
     "id"       : "8525772382434057283",
+    "id_format": "dlGgz3LRXEMAAAAC",
     "index"    : 0,
     "itemurl"  : "https://tenor.com/view/moving-gif-8525772382434057283",
     "long_title": "Moving Sticker - Moving Stickers",
@@ -66,6 +70,14 @@ __tests__ = (
     "#class"  : tenor.TenorImageExtractor,
     "#options": {"format": ["mkv", "foobar", "webp"]},
     "#results": "https://media.tenor.com/dlGgz3LRXEMAAAAx/moving.webp",
+
+    "format"   : "webp",
+    "width"    : 468,
+    "height"   : 498,
+    "size"     : 9808,
+    "duration" : 0,
+    "id"       : "8525772382434057283",
+    "id_format": "dlGgz3LRXEMAAAAx",
 },
 
 {
