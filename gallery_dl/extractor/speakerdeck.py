@@ -23,14 +23,12 @@ class SpeakerdeckPresentationExtractor(GalleryExtractor):
     pattern = r"(?:https?://)?(?:www\.)?speakerdeck\.com/([^/?#]+)/([^/?#]+)"
     example = "https://speakerdeck.com/USER/PRESENTATION"
 
-    def __init__(self, match):
-        GalleryExtractor.__init__(self, match, "")
-        self.user, self.presentation = match.groups()
-
     def metadata(self, _):
+        user, presentation = self.groups
+
         url = self.root + "/oembed.json"
         params = {
-            "url": "{}/{}/{}".format(self.root, self.user, self.presentation),
+            "url": "{}/{}/{}".format(self.root, user, presentation),
         }
         data = self.request(url, params=params).json()
 
@@ -38,8 +36,8 @@ class SpeakerdeckPresentationExtractor(GalleryExtractor):
             data["html"], 'src="//speakerdeck.com/player/', '"')
 
         return {
-            "user": self.user,
-            "presentation": self.presentation,
+            "user": user,
+            "presentation": presentation,
             "presentation_id": self.presentation_id,
             "title": data["title"],
             "author": data["author_name"],

@@ -730,7 +730,12 @@ class GalleryExtractor(Extractor):
 
     def __init__(self, match, url=None):
         Extractor.__init__(self, match)
-        self.page_url = self.root + self.groups[0] if url is None else url
+
+        if url is None:
+            path = self.groups[0]
+            self.page_url = self.root + path if path[0] == "/" else None
+        else:
+            self.page_url = url
 
     def items(self):
         self.login()
@@ -823,7 +828,12 @@ class MangaExtractor(Extractor):
 
     def __init__(self, match, url=None):
         Extractor.__init__(self, match)
-        self.page_url = self.root + self.groups[0] if url is None else url
+
+        if url is None:
+            path = self.groups[0]
+            self.page_url = self.root + path if path[0] == "/" else None
+        else:
+            self.page_url = url
 
         if self.config("chapter-reverse", False):
             self.reverse = not self.reverse

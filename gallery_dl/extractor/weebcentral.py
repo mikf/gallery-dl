@@ -98,9 +98,6 @@ class WeebcentralMangaExtractor(WeebcentralBase, MangaExtractor):
     pattern = BASE_PATTERN + r"/series/(\w+)"
     example = "https://weebcentral.com/series/01J7ABCDEFGHIJKLMNOPQRSTUV/TITLE"
 
-    def __init__(self, match):
-        MangaExtractor.__init__(self, match, False)
-
     def chapters(self, _):
         manga_id = self.groups[0]
         referer = "{}/series/{}".format(self.root, manga_id)
