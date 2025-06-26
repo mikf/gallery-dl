@@ -1,0 +1,43 @@
+#!/bin/bash
+
+TEMP="$(mktemp --directory)"
+trap 'rm -rf -- "$TEMP"' EXIT
+
+while IFS="" read -r FILE
+do
+    mkdir -p -- "$TEMP/$(dirname $FILE)"
+    git cat-file -p ":$FILE" > "$TEMP/$FILE"
+done < <(git diff --name-only --cached --diff-filter=d)
+
+REPO=$PWD
+cd "$TEMP"
+
+# -----------------------------------------------------------------------------
+py 10 -m flake8 --config "$REPO/setup.cfg" .
+A=$?
+
+# -----------------------------------------------------------------------------
+DEBUG="$(grep --recursive --line-number \
+    --exclude-dir='docs' \
+    --regexp='\bif [01]:' \
+    --regexp='\bif [01] and ' \
+    --regexp='\bif [01] or ' \
+    --regexp='\band 0\b' \
+    --regexp='\bor 1\b' \
+    --regexp='[[:digit:]]/0\b' \
+    --regexp='\bexit()' \
+    --regexp='\bprint(' \
+    --regexp='\._dump(' \
+    . \
+)"
+
+if [[ "$DEBUG" ]]; then
+    DEBUG="$( printf %s "$DEBUG " | sed -e 's/   */\n    /' )"
+    printf '### Debug Remains:\n%s\n' "$DEBUG"
+    B=1
+fi
+
+# -----------------------------------------------------------------------------
+if [[ "$A" > 0 || "$B" > 0 ]]; then
+    exit 1
+fi
