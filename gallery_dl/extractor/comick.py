@@ -88,9 +88,6 @@ class ComickChapterExtractor(ComickBase, ChapterExtractor):
     pattern = BASE_PATTERN + r"/comic/([\w-]+)/(\w+-chapter-[^/?#]+)"
     example = "https://comick.io/comic/MANGA/ID-chapter-123-en"
 
-    def __init__(self, match):
-        ChapterExtractor.__init__(self, match, False)
-
     def metadata(self, page):
         slug, chstr = self.groups
         manga = self._manga_info(slug)
@@ -133,9 +130,6 @@ class ComickMangaExtractor(ComickBase, MangaExtractor):
     """Extractor for comick.io manga"""
     pattern = BASE_PATTERN + r"/comic/([\w-]+)/?(?:\?([^#]+))?"
     example = "https://comick.io/comic/MANGA"
-
-    def __init__(self, match):
-        MangaExtractor.__init__(self, match, False)
 
     def items(self):
         slug = self.groups[0]

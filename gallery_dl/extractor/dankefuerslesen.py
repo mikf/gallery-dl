@@ -31,9 +31,6 @@ class DankefuerslesenChapterExtractor(DankefuerslesenBase, ChapterExtractor):
     pattern = BASE_PATTERN + r"/read/manga/([\w-]+)/([\w-]+)"
     example = "https://danke.moe/read/manga/TITLE/123/1/"
 
-    def __init__(self, match):
-        ChapterExtractor.__init__(self, match, False)
-
     def _init(self):
         self.zip = self.config("zip", False)
         if self.zip:
@@ -97,9 +94,6 @@ class DankefuerslesenMangaExtractor(DankefuerslesenBase, MangaExtractor):
     reverse = False
     pattern = BASE_PATTERN + r"/read/manga/([^/?#]+)"
     example = "https://danke.moe/read/manga/TITLE/"
-
-    def __init__(self, match):
-        MangaExtractor.__init__(self, match, False)
 
     def chapters(self, page):
         results = []
