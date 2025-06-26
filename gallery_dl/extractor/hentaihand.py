@@ -44,7 +44,7 @@ class HentaihandGalleryExtractor(GalleryExtractor):
         return data
 
     def images(self, _):
-        info = self.request(self.gallery_url + "/images").json()
+        info = self.request(self.page_url + "/images").json()
         return [(img["source_url"], img) for img in info["images"]]
 
 

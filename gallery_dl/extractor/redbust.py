@@ -57,7 +57,7 @@ class RedbustGalleryExtractor(GalleryExtractor, RedbustExtractor):
             page, "<link rel='shortlink' href='https://redbust.com/?p=", "'")
 
         if gid:
-            self.gallery_url = False
+            self.page_url = False
             return GalleryExtractor.items(self)
         else:
             self.subcategory = "category"

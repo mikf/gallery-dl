@@ -64,7 +64,7 @@ class WeebcentralChapterExtractor(WeebcentralBase, ChapterExtractor):
         return data
 
     def images(self, page):
-        referer = self.gallery_url
+        referer = self.page_url
         url = referer + "/images"
         params = {
             "is_prev"      : "False",

@@ -32,7 +32,7 @@ class HitomiGalleryExtractor(HitomiExtractor, GalleryExtractor):
     def __init__(self, match):
         GalleryExtractor.__init__(self, match, False)
         self.gid = gid = self.groups[0]
-        self.gallery_url = "https://ltn.{}/galleries/{}.js".format(
+        self.page_url = "https://ltn.{}/galleries/{}.js".format(
             self.domain, gid)
 
     def _init(self):

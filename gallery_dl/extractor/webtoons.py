@@ -60,7 +60,7 @@ class WebtoonsEpisodeExtractor(WebtoonsBase, GalleryExtractor):
         params = text.parse_query(query)
         self.title_no = params.get("title_no")
         self.episode_no = params.get("episode_no")
-        self.gallery_url = f"{self.root}/{base}/viewer?{query}"
+        self.page_url = f"{self.root}/{base}/viewer?{query}"
 
     def metadata(self, page):
         extr = text.extract_from(page)

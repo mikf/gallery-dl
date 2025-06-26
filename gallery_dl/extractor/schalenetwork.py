@@ -89,7 +89,7 @@ class SchalenetworkGalleryExtractor(SchalenetworkExtractor, GalleryExtractor):
 
     def __init__(self, match):
         GalleryExtractor.__init__(self, match)
-        self.gallery_url = None
+        self.page_url = None
 
     def _init(self):
         self.headers = {

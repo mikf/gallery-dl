@@ -31,7 +31,7 @@ class ImagechestGalleryExtractor(GalleryExtractor):
         access_token = self.config("access-token")
         if access_token:
             self.api = ImagechestAPI(self, access_token)
-            self.gallery_url = None
+            self.page_url = None
             self.metadata = self._metadata_api
 
     def metadata(self, page):

@@ -18,7 +18,7 @@ class FoolslideExtractor(BaseExtractor):
 
     def __init__(self, match):
         BaseExtractor.__init__(self, match)
-        self.gallery_url = self.root + self.groups[-1]
+        self.page_url = self.root + self.groups[-1]
 
     def request(self, url):
         return BaseExtractor.request(
@@ -51,7 +51,7 @@ class FoolslideChapterExtractor(FoolslideExtractor):
     example = "https://read.powermanga.org/read/MANGA/en/0/123/"
 
     def items(self):
-        page = self.request(self.gallery_url).text
+        page = self.request(self.page_url).text
         data = self.metadata(page)
         imgs = self.images(page)
 
@@ -78,7 +78,7 @@ class FoolslideChapterExtractor(FoolslideExtractor):
     def metadata(self, page):
         extr = text.extract_from(page)
         extr('<h1 class="tbtitle dnone">', '')
-        return self.parse_chapter_url(self.gallery_url, {
+        return self.parse_chapter_url(self.page_url, {
             "manga"         : text.unescape(extr('title="', '"')).strip(),
             "chapter_string": text.unescape(extr('title="', '"')),
         })
@@ -95,7 +95,7 @@ class FoolslideMangaExtractor(FoolslideExtractor):
     example = "https://read.powermanga.org/series/MANGA/"
 
     def items(self):
-        page = self.request(self.gallery_url).text
+        page = self.request(self.page_url).text
 
         chapters = self.chapters(page)
         if not self.config("chapter-reverse", False):

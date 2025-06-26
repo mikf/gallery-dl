@@ -33,7 +33,7 @@ class BbcGalleryExtractor(GalleryExtractor):
                 page, "<h1>", "</h1>").rpartition("</span>")[2]),
             "description": text.unescape(text.extr(
                 page, 'property="og:description" content="', '"')),
-            "programme": self.gallery_url.split("/")[4],
+            "programme": self.page_url.split("/")[4],
             "path": list(util.unique_sequence(
                 element["name"]
                 for element in data["itemListElement"]

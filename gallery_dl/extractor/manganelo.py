@@ -44,7 +44,7 @@ class ManganeloChapterExtractor(ManganeloExtractor, ChapterExtractor):
 
     def __init__(self, match):
         ManganeloExtractor.__init__(self, match)
-        self.gallery_url = self.root + self.groups[-1]
+        self.page_url = self.root + self.groups[-1]
 
     def metadata(self, page):
         extr = text.extract_from(page)
@@ -91,7 +91,7 @@ class ManganeloMangaExtractor(ManganeloExtractor, MangaExtractor):
 
     def __init__(self, match):
         ManganeloExtractor.__init__(self, match)
-        self.manga_url = self.root + self.groups[-1]
+        self.page_url = self.root + self.groups[-1]
 
     def chapters(self, page):
         extr = text.extract_from(page)
