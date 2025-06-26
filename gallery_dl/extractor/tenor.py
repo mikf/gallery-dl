@@ -40,7 +40,11 @@ class TenorExtractor(Extractor):
                 continue
 
             url = fmt["url"]
+            gif["id_format"] = url.rsplit("/", 2)[1]
+            gif["format"] = fmt["name"]
             gif["width"], gif["height"] = fmt["dims"]
+            gif["duration"] = fmt["duration"]
+            gif["size"] = fmt["size"]
             gif["title"] = gif["h1_title"][:-4]
             gif["description"] = gif.pop("content_description", "")
             gif["date"] = text.parse_timestamp(gif["created"])
@@ -52,7 +56,9 @@ class TenorExtractor(Extractor):
         media_formats = gif["media_formats"]
         for fmt in self.formats:
             if fmt in media_formats:
-                return media_formats[fmt]
+                media = media_formats[fmt]
+                media["name"] = fmt
+                return media
 
     def _search_results(self, query):
         url = "https://tenor.googleapis.com/v2/search"
