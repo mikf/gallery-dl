@@ -72,7 +72,7 @@ class HentaihereMangaExtractor(HentaihereBase, MangaExtractor):
         mtype, pos = text.extract(
             page, '<span class="mngType text-danger">[', ']</span>', pos)
         manga_id = text.parse_int(
-            self.manga_url.rstrip("/").rpartition("/")[2][1:])
+            self.page_url.rstrip("/").rpartition("/")[2][1:])
 
         while True:
             marker, pos = text.extract(

@@ -86,7 +86,7 @@ class BatotoChapterExtractor(BatotoBase, ChapterExtractor):
         ChapterExtractor.__init__(self, match, False)
         self._init_root()
         self.chapter_id = self.groups[1]
-        self.gallery_url = "{}/title/0/{}".format(self.root, self.chapter_id)
+        self.page_url = "{}/title/0/{}".format(self.root, self.chapter_id)
 
     def metadata(self, page):
         extr = text.extract_from(page)
@@ -147,7 +147,7 @@ class BatotoMangaExtractor(BatotoBase, MangaExtractor):
         MangaExtractor.__init__(self, match, False)
         self._init_root()
         self.manga_id = self.groups[1] or self.groups[2]
-        self.manga_url = "{}/title/{}".format(self.root, self.manga_id)
+        self.page_url = "{}/title/{}".format(self.root, self.manga_id)
 
     def chapters(self, page):
         extr = text.extract_from(page)

@@ -62,7 +62,7 @@ class ReadcomiconlineIssueExtractor(ReadcomiconlineBase, ChapterExtractor):
         else:
             params["quality"] = str(quality)
 
-        self.gallery_url += "&".join(k + "=" + v for k, v in params.items())
+        self.page_url += "&".join(k + "=" + v for k, v in params.items())
         self.issue_id = params.get("id")
 
     def metadata(self, page):
@@ -79,7 +79,7 @@ class ReadcomiconlineIssueExtractor(ReadcomiconlineBase, ChapterExtractor):
 
     def images(self, page):
         results = []
-        referer = {"_http_headers": {"Referer": self.gallery_url}}
+        referer = {"_http_headers": {"Referer": self.page_url}}
         root = text.extr(page, "return baeu(l, '", "'")
 
         replacements = re.findall(

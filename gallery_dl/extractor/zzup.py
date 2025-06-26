@@ -57,6 +57,6 @@ class ZzupGalleryExtractor(GalleryExtractor):
             if pos < 0:
                 break
             path = text.rextr(page, ' href="', '"', pos)
-            page = self.request(text.urljoin(self.gallery_url, path)).text
+            page = self.request(text.urljoin(self.page_url, path)).text
 
         return results

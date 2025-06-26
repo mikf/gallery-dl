@@ -57,7 +57,7 @@ class NudostarImageExtractor(NudostarExtractor):
     example = "https://nudostar.tv/models/MODEL/123/"
 
     def items(self):
-        page = self.request(self.gallery_url, notfound=self.subcategory).text
+        page = self.request(self.page_url, notfound=self.subcategory).text
 
         img_url = text.extract(
             page, 'src="', '"', page.index('class="headline"'))[0]

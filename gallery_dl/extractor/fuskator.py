@@ -27,7 +27,7 @@ class FuskatorGalleryExtractor(GalleryExtractor):
 
     def metadata(self, page):
         headers = {
-            "Referer"         : self.gallery_url,
+            "Referer"         : self.page_url,
             "X-Requested-With": "XMLHttpRequest",
         }
         auth = self.request(

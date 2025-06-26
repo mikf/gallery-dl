@@ -48,4 +48,4 @@ class AdultempireGalleryExtractor(GalleryExtractor):
             if len(urls) < 24:
                 return
             params["page"] += 1
-            page = self.request(self.gallery_url, params=params).text
+            page = self.request(self.page_url, params=params).text

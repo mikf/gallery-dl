@@ -29,7 +29,7 @@ class SimplyhentaiGalleryExtractor(GalleryExtractor):
         GalleryExtractor.__init__(self, match, url)
 
     def _init(self):
-        self.session.headers["Referer"] = self.gallery_url
+        self.session.headers["Referer"] = self.page_url
 
     def metadata(self, page):
         extr = text.extract_from(page)
@@ -55,7 +55,7 @@ class SimplyhentaiGalleryExtractor(GalleryExtractor):
         return data
 
     def images(self, _):
-        url = self.gallery_url + "/all-pages"
+        url = self.page_url + "/all-pages"
         headers = {"Accept": "application/json"}
         images = self.request(url, headers=headers).json()
         return [
