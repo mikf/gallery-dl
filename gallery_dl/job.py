@@ -207,6 +207,7 @@ class Job():
             if self.metadata_url:
                 kwdict[self.metadata_url] = url
             if self.pred_queue(url, kwdict):
+                self.update_kwdict(kwdict)
                 self.handle_queue(url, kwdict)
 
     def handle_url(self, url, kwdict):
