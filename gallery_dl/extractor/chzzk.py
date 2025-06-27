@@ -7,14 +7,21 @@
 """Extractors for https://chzzk.naver.com"""
 
 from .common import Extractor, Message
-from .. import text
+from .. import text, util
 
 
 class ChzzkExtractor(Extractor):
+    """Base class for chzzk extractors"""
     category = "chzzk"
     filename_fmt = "{uid}_{id}_{num}.{extension}"
     directory_fmt = ("{category}", "{user[userNickname]}")
     archive_fmt = "{uid}_{id}_{num}"
+
+    def request_api(self, uid, id=None, params=None):
+        return self.request_json(
+            f"https://apis.naver.com/nng_main/nng_comment_api/v1/type"
+            f"/CHANNEL_POST/id/{uid}/comments/{id or ''}",
+            params=params)["content"]
 
     def items(self):
         for comment in self.comments():
@@ -29,6 +36,8 @@ class ChzzkExtractor(Extractor):
 
             yield Message.Directory, data
             for data["num"], file in enumerate(files, 1):
+                if extra := file.get("extraJson"):
+                    file.update(util.json_loads(extra))
                 file["date"] = text.parse_datetime(
                     file["createdDate"], "%Y-%m-%dT%H:%M:%S.%f%z")
                 file["date_updated"] = text.parse_datetime(
@@ -46,9 +55,7 @@ class ChzzkCommentExtractor(ChzzkExtractor):
 
     def comments(self):
         uid, id = self.groups
-        res = self.request_json(
-            f"https://apis.naver.com/nng_main/nng_comment_api/v1/type"
-            f"/CHANNEL_POST/id/{uid}/comments/{id}")["content"]
+        res = self.request_api(uid, id)
         return ({"comment": res["comment"], "user": res["user"]},)
 
 
@@ -67,10 +74,7 @@ class ChzzkCommunityExtractor(ChzzkExtractor):
             "pagingType": "PAGE",
         }
         while True:
-            res = self.request_json(
-                f"https://apis.naver.com/nng_main/nng_comment_api/v1/type"
-                f"/CHANNEL_POST/id/{uid}/comments", params=params)["content"]
-            comments = res["comments"]
+            comments = self.request_api(uid, params=params)["comments"]
             yield from comments["data"]
             if not comments["page"]["next"]:
                 return
