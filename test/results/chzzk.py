@@ -64,10 +64,18 @@ __tests__ = (
 },
 
 {
-    "#url"     : "https://chzzk.naver.com/f30b95fc9af53a75b781d7d3dd933892/community",
-    "#class"   : chzzk.ChzzkCommunityExtractor,
-    "#range"   : "1-50",
-    "#count"   : 50,
+    "#url"  : "https://chzzk.naver.com/f30b95fc9af53a75b781d7d3dd933892/community",
+    "#class": chzzk.ChzzkCommunityExtractor,
+    "#range": "1-50",
+    "#count": 50,
+},
+
+{
+    "#url"    : "https://chzzk.naver.com/f30b95fc9af53a75b781d7d3dd933892/community",
+    "#class"  : chzzk.ChzzkCommunityExtractor,
+    "#options": {"offset": 50},
+    "#range"  : "1-50",
+    "#count"  : 50,
 },
 
 )

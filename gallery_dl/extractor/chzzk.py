@@ -70,7 +70,7 @@ class ChzzkCommunityExtractor(ChzzkExtractor):
         uid = self.match[1]
         params = {
             "limit": 10,
-            "offset": 0,
+            "offset": text.parse_int(self.config("offset")),
             "pagingType": "PAGE",
         }
         while True:
