@@ -845,7 +845,7 @@ Consider all listed sites to potentially be NSFW.
     <td>Rule 34 XYZ</td>
     <td>https://rule34.xyz/</td>
     <td>Playlists, Posts, Tag Searches</td>
-    <td></td>
+    <td>Supported</td>
 </tr>
 <tr>
     <td>Saint</td>

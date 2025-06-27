@@ -472,6 +472,7 @@ Description
     * ``newgrounds``
     * ``nijie`` (R)
     * ``pillowfort``
+    * ``rule34xyz``
     * ``sankaku``
     * ``schalenetwork``
     * ``scrolller``
