@@ -56,11 +56,20 @@ class KemonoExtractor(Extractor):
         announcements = True if self.config("announcements") else None
         archives = True if self.config("archives") else False
         comments = True if self.config("comments") else False
-        duplicates = True if self.config("duplicates") else False
         dms = True if self.config("dms") else None
         max_posts = self.config("max-posts")
         creator_info = {} if self.config("metadata", True) else None
         exts_archive = util.EXTS_ARCHIVE
+
+        if duplicates := self.config("duplicates"):
+            if isinstance(duplicates, str):
+                duplicates = set(duplicates.split(","))
+            elif isinstance(duplicates, (list, tuple)):
+                duplicates = set(duplicates)
+            else:
+                duplicates = {"file", "attachment", "inline"}
+        else:
+            duplicates = ()
 
         # prevent files from being sent with gzip compression
         headers = {"Accept-Encoding": "identity"}
@@ -123,14 +132,13 @@ class KemonoExtractor(Extractor):
                 if "\\" in url:
                     file["path"] = url = url.replace("\\", "/")
 
-                match = find_hash(url)
-                if match:
+                if match := find_hash(url):
                     file["hash"] = hash = match[1]
-                    if not duplicates:
-                        if hash in hashes:
-                            self.log.debug("Skipping %s (duplicate)", url)
-                            continue
-                        hashes.add(hash)
+                    if file["type"] not in duplicates and hash in hashes:
+                        self.log.debug("Skipping %s %s (duplicate)",
+                                       file["type"], url)
+                        continue
+                    hashes.add(hash)
                 else:
                     file["hash"] = hash = ""
 
@@ -150,7 +158,7 @@ class KemonoExtractor(Extractor):
                     file["type"] = "archive"
                     if archives:
                         try:
-                            data = self.api.file(file["hash"])
+                            data = self.api.file(hash)
                             data.update(file)
                             post_archives.append(data)
                         except Exception as exc:
