@@ -693,9 +693,7 @@ Description
     specified after a ``:`` (``windows``, ``linux``, or ``macos``).
 
     Note:
-    This option overrides
-    `user-agent <extractor.*.user-agent_>`__
-    and sets custom
+    This option sets custom
     `headers <extractor.*.headers_>`__
     and
     `ciphers <extractor.*.ciphers_>`__
@@ -3205,14 +3203,24 @@ Description
 extractor.kemono.duplicates
 ---------------------------
 Type
-    ``bool``
+    * ``bool``
+    * ``string``
+    * ``list`` of ``strings``
 Default
     ``false``
+Example
+    * ``"attachment,inline"``
+    * ``["file", "attachment"]``
 Description
     Controls how to handle duplicate files in a post.
 
-    * ``true``: Download duplicates
-    * ``false``: Ignore duplicates
+    ``true``
+        Download duplicates
+    ``false``
+        Ignore duplicates
+    any ``list`` or ``string``
+        | Download a duplicate file if its ``type`` is in the given list
+        | Ignore it otherwise
 
 
 extractor.kemono.dms
