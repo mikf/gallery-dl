@@ -484,6 +484,7 @@ AUTH_MAP = {
     "pixiv"          : _OAUTH,
     "ponybooru"      : "API Key",
     "reddit"         : _OAUTH,
+    "rule34xyz"      : "Supported",
     "sankaku"        : "Supported",
     "scrolller"      : "Supported",
     "seiga"          : "Supported",

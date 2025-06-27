@@ -9,7 +9,8 @@
 """Extractors for https://rule34.xyz/"""
 
 from .booru import BooruExtractor
-from .. import text
+from .. import text, exception
+from ..cache import cache
 import collections
 
 BASE_PATTERN = r"(?:https?://)?rule34\.xyz"
@@ -110,6 +111,26 @@ class Rule34xyzExtractor(BooruExtractor):
                 return
             params["Skip"] += self.per_page
             params["cursor"] = data["cursor"]
+
+    def login(self):
+        username, password = self._get_auth_info()
+        if username:
+            self.session.headers["Authorization"] = \
+                self._login_impl(username, password)
+
+    @cache(maxage=3650*86400, keyarg=1)
+    def _login_impl(self, username, password):
+        self.log.info("Logging in as %s", username)
+
+        url = f"{self.root}/api/v2/auth/signin"
+        data = {"email": username, "password": password}
+        response = self.request_json(
+            url, method="POST", json=data, fatal=False)
+
+        if jwt := response.get("jwt"):
+            return f"Bearer {jwt}"
+        raise exception.AuthenticationError(
+            (msg := response.get("message")) and f'"{msg}"')
 
 
 class Rule34xyzPostExtractor(Rule34xyzExtractor):
