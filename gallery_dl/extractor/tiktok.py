@@ -8,6 +8,7 @@
 
 from .common import Extractor, Message
 from .. import text, util, ytdl, exception
+import importlib
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?tiktokv?\.com"
 
@@ -25,8 +26,31 @@ class TiktokExtractor(Extractor):
     def _init(self):
         self.audio = self.config("audio", True)
         self.video = self.config("videos", True)
+        self.tikwm = self.config("tikwm", False)
+
+        # If tikwm is enabled, delegate to the tikwm extractor
+        if self.tikwm and self.__class__.__name__ != "TiktokUserExtractor":
+            self._tikwm_extractor = None
+            try:
+                tikwm = importlib.import_module(".tikwm", __package__)
+
+                if self.__class__.__name__ == "TiktokPostExtractor":
+                    self._tikwm_extractor = tikwm.TiktokPostExtractor
+                elif self.__class__.__name__ == "TiktokVmpostExtractor":
+                    self._tikwm_extractor = tikwm.TiktokVmpostExtractor
+            except ImportError as e:
+                self.log.error("Could not import tikwm extractor: %s", e)
+                self.log.warning("Falling back to default TikTok extractor")
+                self.tikwm = False
 
     def items(self):
+        if (self.tikwm and hasattr(self, "_tikwm_extractor") and
+                self._tikwm_extractor):
+            self.log.debug("Using tikwm API for extraction")
+            extractor = self._tikwm_extractor(self.url)
+            yield from extractor.items()
+            return
+
         for tiktok_url in self.urls():
             tiktok_url = self._sanitize_url(tiktok_url)
             data = self._extract_rehydration_data(tiktok_url)
@@ -167,12 +191,16 @@ class TiktokExtractor(Extractor):
 class TiktokPostExtractor(TiktokExtractor):
     """Extract a single video or photo TikTok link"""
     subcategory = "post"
-    pattern = BASE_PATTERN + r"/(?:@([\w_.-]*)|share)/(?:phot|vide)o/(\d+)"
+    pattern = BASE_PATTERN + \
+        r"/(?:pid:(\d+)|(?:@([\w_.-]*)|share)/(?:phot|vide)o/(\d+))"
     example = "https://www.tiktok.com/@USER/photo/1234567890"
 
     def urls(self):
-        user, post_id = self.groups
-        url = "{}/@{}/video/{}".format(self.root, user or "", post_id)
+        pid, user, post_id = self.groups
+        if pid:
+            url = f"{self.root}/@/video/{pid}"
+        else:
+            url = f"{self.root}/@{user or ''}/video/{post_id}"
         return (url,)
 
 
@@ -180,7 +208,8 @@ class TiktokVmpostExtractor(TiktokExtractor):
     """Extract a single video or photo TikTok VM link"""
     subcategory = "vmpost"
     pattern = (r"(?:https?://)?(?:"
-               r"(?:v[mt]\.)?tiktok\.com|(?:www\.)?tiktok\.com/t"
+               r"v[mt]\.tiktok\.com"
+               r"|(?:www\.)?tiktok\.com/t"
                r")/(?!@)([^/?#]+)")
     example = "https://vm.tiktok.com/1a2B3c4E5"
 
@@ -200,13 +229,32 @@ class TiktokVmpostExtractor(TiktokExtractor):
 class TiktokUserExtractor(TiktokExtractor):
     """Extract a TikTok user's profile"""
     subcategory = "user"
-    pattern = BASE_PATTERN + r"/@([\w_.-]+)/?(?:$|\?|#)"
+    pattern = BASE_PATTERN + r"/(?:@([\w_.-]+)|id:(\d+))/?(?:$|\?|#)"
     example = "https://www.tiktok.com/@USER"
 
     def _init(self):
+        TiktokExtractor._init(self)
         self.avatar = self.config("avatar", True)
 
+        # If tikwm is enabled, delegate to the tikwm extractor
+        if self.tikwm:
+            self._tikwm_extractor = None
+            try:
+                tikwm = importlib.import_module(".tikwm", __package__)
+                self._tikwm_extractor = tikwm.TiktokUserExtractor
+            except ImportError as e:
+                self.log.error("Could not import tikwm extractor: %s", e)
+                self.log.warning("Falling back to default TikTok extractor")
+                self.tikwm = False
+
     def items(self):
+        if (self.tikwm and hasattr(self, "_tikwm_extractor") and
+                self._tikwm_extractor):
+            self.log.debug("Using tikwm API for user extraction")
+            extractor = self._tikwm_extractor(self.url)
+            yield from extractor.items()
+            return
+
         """Attempt to use yt-dlp/youtube-dl to extract links from a
         user's page"""
 
@@ -245,8 +293,12 @@ class TiktokUserExtractor(TiktokExtractor):
             for cookie in self.cookies:
                 set_cookie(cookie)
 
-        user_name = self.groups[0]
-        profile_url = "{}/@{}".format(self.root, user_name)
+        user_name, user_id = self.groups
+        if user_id:
+            profile_url = "{}/@{}".format(self.root, user_id)
+        else:
+            profile_url = "{}/@{}".format(self.root, user_name)
+
         if self.avatar:
             try:
                 avatar_url, avatar = self._generate_avatar(
