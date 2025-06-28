@@ -170,6 +170,12 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
+    <td>Chzzk</td>
+    <td>https://chzzk.naver.com</td>
+    <td>Comments, Communities</td>
+    <td></td>
+</tr>
+<tr>
     <td>Ci-en</td>
     <td>https://ci-en.net/</td>
     <td>Articles, Creators, Followed Users, Recent Images</td>

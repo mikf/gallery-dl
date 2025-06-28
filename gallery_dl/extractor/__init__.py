@@ -38,6 +38,7 @@ modules = [
     "bunkr",
     "catbox",
     "chevereto",
+    "chzzk",
     "cien",
     "civitai",
     "comick",
