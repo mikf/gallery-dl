@@ -32,12 +32,10 @@ class HitomiGalleryExtractor(HitomiExtractor, GalleryExtractor):
     def __init__(self, match):
         GalleryExtractor.__init__(self, match, False)
         self.gid = gid = self.groups[0]
-        self.page_url = "https://ltn.{}/galleries/{}.js".format(
-            self.domain, gid)
+        self.page_url = f"https://ltn.{self.domain}/galleries/{gid}.js"
 
     def _init(self):
-        self.session.headers["Referer"] = "{}/reader/{}.html".format(
-            self.root, self.gid)
+        self.session.headers["Referer"] = f"{self.root}/reader/{self.gid}.html"
 
     def metadata(self, page):
         self.info = info = util.json_loads(page.partition("=")[2])
@@ -93,10 +91,8 @@ class HitomiGalleryExtractor(HitomiExtractor, GalleryExtractor):
 
             # https://ltn.gold-usergeneratedcontent.net/common.js
             inum = int(ihash[-1] + ihash[-3:-1], 16)
-            url = "https://{}{}.{}/{}/{}/{}.{}".format(
-                ext[0], gg_m.get(inum, gg_default) + 1, self.domain,
-                gg_b, inum, ihash, ext,
-            )
+            url = (f"https://{ext[0]}{gg_m.get(inum, gg_default) + 1}."
+                   f"{self.domain}/{gg_b}/{inum}/{ihash}.{ext}")
             result.append((url, idata))
         return result
 
@@ -122,8 +118,7 @@ class HitomiTagExtractor(HitomiExtractor):
             "_extractor": HitomiGalleryExtractor,
             "search_tags": text.unquote(self.tag.rpartition("-")[0]),
         }
-        nozomi_url = "https://ltn.{}/{}/{}.nozomi".format(
-            self.domain, self.type, self.tag)
+        nozomi_url = f"https://ltn.{self.domain}/{self.type}/{self.tag}.nozomi"
         headers = {
             "Origin": self.root,
             "Cache-Control": "max-age=0",
@@ -132,14 +127,13 @@ class HitomiTagExtractor(HitomiExtractor):
         offset = 0
         total = None
         while True:
-            headers["Referer"] = "{}/{}/{}.html?page={}".format(
-                self.root, self.type, self.tag, offset // 100 + 1)
-            headers["Range"] = "bytes={}-{}".format(offset, offset+99)
+            headers["Referer"] = (f"{self.root}/{self.type}/{self.tag}.html"
+                                  f"?page={offset // 100 + 1}")
+            headers["Range"] = f"bytes={offset}-{offset + 99}"
             response = self.request(nozomi_url, headers=headers)
 
             for gallery_id in decode_nozomi(response.content):
-                gallery_url = "{}/galleries/{}.html".format(
-                    self.root, gallery_id)
+                gallery_url = f"{self.root}/galleries/{gallery_id}.html"
                 yield Message.Queue, gallery_url, data
 
             offset += 100
@@ -162,8 +156,8 @@ class HitomiIndexExtractor(HitomiTagExtractor):
 
     def items(self):
         data = {"_extractor": HitomiGalleryExtractor}
-        nozomi_url = "https://ltn.{}/{}-{}.nozomi".format(
-            self.domain, self.tag, self.language)
+        nozomi_url = (f"https://ltn.{self.domain}"
+                      f"/{self.tag}-{self.language}.nozomi")
         headers = {
             "Origin": self.root,
             "Cache-Control": "max-age=0",
@@ -172,14 +166,13 @@ class HitomiIndexExtractor(HitomiTagExtractor):
         offset = 0
         total = None
         while True:
-            headers["Referer"] = "{}/{}-{}.html?page={}".format(
-                self.root, self.tag, self.language, offset // 100 + 1)
-            headers["Range"] = "bytes={}-{}".format(offset, offset+99)
+            headers["Referer"] = (f"{self.root}/{self.tag}-{self.language}"
+                                  f".html?page={offset // 100 + 1}")
+            headers["Range"] = f"bytes={offset}-{offset + 99}"
             response = self.request(nozomi_url, headers=headers)
 
             for gallery_id in decode_nozomi(response.content):
-                gallery_url = "{}/galleries/{}.html".format(
-                    self.root, gallery_id)
+                gallery_url = f"{self.root}/galleries/{gallery_id}.html"
                 yield Message.Queue, gallery_url, data
 
             offset += 100
@@ -210,24 +203,22 @@ class HitomiSearchExtractor(HitomiExtractor):
         intersects = set.intersection(*results)
 
         for gallery_id in sorted(intersects, reverse=True):
-            gallery_url = "{}/galleries/{}.html".format(
-                self.root, gallery_id)
+            gallery_url = f"{self.root}/galleries/{gallery_id}.html"
             yield Message.Queue, gallery_url, data
 
     def get_nozomi_items(self, full_tag):
         area, tag, language = self.get_nozomi_args(full_tag)
+        base = f"https://ltn.{self.domain}/n/"
 
         if area:
-            nozomi_url = "https://ltn.{}/n/{}/{}-{}.nozomi".format(
-                self.domain, area, tag, language)
+            nozomi_url = f"{base}{area}/{tag}-{language}.nozomi"
         else:
-            nozomi_url = "https://ltn.{}/n/{}-{}.nozomi".format(
-                self.domain, tag, language)
+            nozomi_url = f"{base}{tag}-{language}.nozomi"
 
         headers = {
             "Origin": self.root,
             "Cache-Control": "max-age=0",
-            "Referer": "{}/search.html?{}".format(self.root, self.query),
+            "Referer": f"{self.root}/search.html?{self.query}",
         }
 
         response = self.request(nozomi_url, headers=headers)

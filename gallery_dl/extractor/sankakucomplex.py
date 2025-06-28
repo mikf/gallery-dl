@@ -33,7 +33,7 @@ class SankakucomplexArticleExtractor(SankakucomplexExtractor):
     example = "https://news.sankakucomplex.com/1970/01/01/TITLE"
 
     def items(self):
-        url = "{}/{}/?pg=X".format(self.root, self.path)
+        url = f"{self.root}/{self.path}/?pg=X"
         extr = text.extract_from(self.request(url).text)
         data = {
             "title"      : text.unescape(
@@ -92,7 +92,7 @@ class SankakucomplexTagExtractor(SankakucomplexExtractor):
         data = {"_extractor": SankakucomplexArticleExtractor}
 
         while True:
-            url = "{}/{}/page/{}/".format(self.root, self.path, pnum)
+            url = f"{self.root}/{self.path}/page/{pnum}/"
             response = self.request(url, fatal=False)
             if response.status_code >= 400:
                 return

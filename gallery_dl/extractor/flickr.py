@@ -134,8 +134,8 @@ class FlickrAlbumExtractor(FlickrExtractor):
 
         for album in self.api.photosets_getList(self.user["nsid"]):
             self.api._clean_info(album).update(data)
-            url = "https://www.flickr.com/photos/{}/albums/{}".format(
-                self.user["path_alias"], album["id"])
+            url = (f"https://www.flickr.com/photos/{self.user['path_alias']}"
+                   f"/albums/{album['id']}")
             yield Message.Queue, url, album
 
     def metadata(self):

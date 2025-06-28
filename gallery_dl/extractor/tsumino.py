@@ -30,7 +30,7 @@ class TsuminoBase():
     @cache(maxage=14*86400, keyarg=1)
     def _login_impl(self, username, password):
         self.log.info("Logging in as %s", username)
-        url = "{}/Account/Login".format(self.root)
+        url = f"{self.root}/Account/Login"
         headers = {"Referer": url}
         data = {"Username": username, "Password": password}
 
@@ -48,7 +48,7 @@ class TsuminoGalleryExtractor(TsuminoBase, GalleryExtractor):
 
     def __init__(self, match):
         self.gallery_id = match[1]
-        url = "{}/entry/{}".format(self.root, self.gallery_id)
+        url = f"{self.root}/entry/{self.gallery_id}"
         GalleryExtractor.__init__(self, match, url)
 
     def metadata(self, page):
@@ -81,7 +81,7 @@ class TsuminoGalleryExtractor(TsuminoBase, GalleryExtractor):
         }
 
     def images(self, page):
-        url = "{}/Read/Index/{}?page=1".format(self.root, self.gallery_id)
+        url = f"{self.root}/Read/Index/{self.gallery_id}?page=1"
         headers = {"Referer": self.page_url}
         response = self.request(url, headers=headers, fatal=False)
 
@@ -113,15 +113,15 @@ class TsuminoSearchExtractor(TsuminoBase, Extractor):
 
     def items(self):
         for gallery in self.galleries():
-            url = "{}/entry/{}".format(self.root, gallery["id"])
+            url = f"{self.root}/entry/{gallery['id']}"
             gallery["_extractor"] = TsuminoGalleryExtractor
             yield Message.Queue, url, gallery
 
     def galleries(self):
         """Return all gallery results matching 'self.query'"""
-        url = "{}/Search/Operate?type=Book".format(self.root)
+        url = f"{self.root}/Search/Operate?type=Book"
         headers = {
-            "Referer": "{}/".format(self.root),
+            "Referer": f"{self.root}/",
             "X-Requested-With": "XMLHttpRequest",
         }
         data = {
@@ -194,9 +194,8 @@ class TsuminoSearchExtractor(TsuminoBase, Extractor):
             nonlocal i
 
             if data[i] != expected:
-                error = "bad JSURL syntax: expected '{}', got {}".format(
-                    expected, data[i])
-                raise ValueError(error)
+                raise ValueError(
+                    f"bad JSURL syntax: expected '{expected}', got {data[i]}")
             i += 1
 
         def decode():
@@ -293,11 +292,11 @@ class TsuminoSearchExtractor(TsuminoBase, Extractor):
         def expand(key, value):
             if isinstance(value, list):
                 for index, cvalue in enumerate(value):
-                    ckey = "{}[{}]".format(key, index)
+                    ckey = f"{key}[{index}]"
                     yield from expand(ckey, cvalue)
             elif isinstance(value, dict):
                 for ckey, cvalue in value.items():
-                    ckey = "{}[{}]".format(key, ckey)
+                    ckey = f"{key}[{ckey}]"
                     yield from expand(ckey, cvalue)
             else:
                 yield key, value

@@ -29,8 +29,7 @@ class _4chanarchivesThreadExtractor(Extractor):
         self.board, self.thread = match.groups()
 
     def items(self):
-        url = "{}/board/{}/thread/{}".format(
-            self.root, self.board, self.thread)
+        url = f"{self.root}/board/{self.board}/thread/{self.thread}"
         page = self.request(url).text
         data = self.metadata(page)
         posts = self.posts(page)
@@ -104,7 +103,7 @@ class _4chanarchivesBoardExtractor(Extractor):
                         <span><a href="'''
 
         while True:
-            url = "{}/board/{}/{}".format(self.root, self.board, pnum)
+            url = f"{self.root}/board/{self.board}/{pnum}"
             page = self.request(url).text
 
             thread = None

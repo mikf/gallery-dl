@@ -108,7 +108,7 @@ class ToyhouseArtExtractor(ToyhouseExtractor):
     example = "https://www.toyhou.se/USER/art"
 
     def posts(self):
-        return self._pagination("/{}/art".format(self.user))
+        return self._pagination(f"/{self.user}/art")
 
     def metadata(self):
         return {"user": self.user}
@@ -124,6 +124,6 @@ class ToyhouseImageExtractor(ToyhouseExtractor):
     example = "https://toyhou.se/~images/12345"
 
     def posts(self):
-        url = "{}/~images/{}".format(self.root, self.user)
+        url = f"{self.root}/~images/{self.user}"
         return (self._parse_post(
             self.request(url).text, '<img class="mw-100" src="'),)

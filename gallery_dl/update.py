@@ -97,7 +97,7 @@ class UpdateJob(DownloadJob):
             import atexit
             import subprocess
 
-            cmd = 'ping 127.0.0.1 -n 5 -w 1000 & del /F "{}"'.format(path_old)
+            cmd = f'ping 127.0.0.1 -n 5 -w 1000 & del /F "{path_old}"'
             atexit.register(
                 util.Popen, cmd, shell=True,
                 stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
@@ -192,8 +192,7 @@ class UpdateExtractor(Extractor):
             raise exception.StopExtraction("Invalid channel '%s'", repo)
 
         path_tag = tag if tag == "latest" else "tags/" + tag
-        url = "{}/repos/{}/releases/{}".format(
-            self.root_api, path_repo, path_tag)
+        url = f"{self.root_api}/repos/{path_repo}/releases/{path_tag}"
         headers = {
             "Accept": "application/vnd.github+json",
             "User-Agent": util.USERAGENT,
@@ -210,8 +209,8 @@ class UpdateExtractor(Extractor):
         else:
             binary_name = BINARIES[repo][binary]
 
-        url = "{}/{}/releases/download/{}/{}".format(
-            self.root, path_repo, data["tag_name"], binary_name)
+        url = (f"{self.root}/{path_repo}/releases/download"
+               f"/{data['tag_name']}/{binary_name}")
 
         yield Message.Directory, data
         yield Message.Url, url, data

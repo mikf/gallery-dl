@@ -54,7 +54,7 @@ class MangafoxChapterExtractor(ChapterExtractor):
             yield text.ensure_http_scheme(text.unescape(url)), None
 
             pnum += 2
-            page = self.request("{}/{}.html".format(self.urlbase, pnum)).text
+            page = self.request(f"{self.urlbase}/{pnum}.html").text
 
 
 class MangafoxMangaExtractor(MangaExtractor):

@@ -62,7 +62,7 @@ class ZerochanExtractor(BooruExtractor):
         return response.cookies
 
     def _parse_entry_html(self, entry_id):
-        url = "{}/{}".format(self.root, entry_id)
+        url = f"{self.root}/{entry_id}"
         page = self.request(url).text
 
         try:
@@ -101,7 +101,7 @@ class ZerochanExtractor(BooruExtractor):
         return data
 
     def _parse_entry_api(self, entry_id):
-        url = "{}/{}?json".format(self.root, entry_id)
+        url = f"{self.root}/{entry_id}?json"
         txt = self.request(url).text
         try:
             item = util.json_loads(txt)

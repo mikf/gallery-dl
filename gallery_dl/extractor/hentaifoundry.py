@@ -58,7 +58,7 @@ class HentaifoundryExtractor(Extractor):
         num = self.start_page
 
         while True:
-            page = self.request("{}/page/{}".format(url, num)).text
+            page = self.request(f"{url}/page/{num}").text
             yield from text.extract_iter(page, begin, end)
 
             if 'class="pager"' not in page or 'class="last hidden"' in page:
@@ -220,7 +220,7 @@ class HentaifoundryPicturesExtractor(HentaifoundryExtractor):
 
     def __init__(self, match):
         HentaifoundryExtractor.__init__(self, match)
-        self.page_url = "{}/pictures/user/{}".format(self.root, self.user)
+        self.page_url = f"{self.root}/pictures/user/{self.user}"
 
 
 class HentaifoundryScrapsExtractor(HentaifoundryExtractor):
@@ -232,8 +232,7 @@ class HentaifoundryScrapsExtractor(HentaifoundryExtractor):
 
     def __init__(self, match):
         HentaifoundryExtractor.__init__(self, match)
-        self.page_url = "{}/pictures/user/{}/scraps".format(
-            self.root, self.user)
+        self.page_url = f"{self.root}/pictures/user/{self.user}/scraps"
 
 
 class HentaifoundryFavoriteExtractor(HentaifoundryExtractor):
@@ -246,8 +245,7 @@ class HentaifoundryFavoriteExtractor(HentaifoundryExtractor):
 
     def __init__(self, match):
         HentaifoundryExtractor.__init__(self, match)
-        self.page_url = "{}/user/{}/faves/pictures".format(
-            self.root, self.user)
+        self.page_url = f"{self.root}/user/{self.user}/faves/pictures"
 
 
 class HentaifoundryTagExtractor(HentaifoundryExtractor):
@@ -260,7 +258,7 @@ class HentaifoundryTagExtractor(HentaifoundryExtractor):
 
     def __init__(self, match):
         HentaifoundryExtractor.__init__(self, match)
-        self.page_url = "{}/pictures/tagged/{}".format(self.root, self.user)
+        self.page_url = f"{self.root}/pictures/tagged/{self.user}"
 
     def metadata(self):
         return {"search_tags": self.user}
@@ -276,7 +274,7 @@ class HentaifoundryRecentExtractor(HentaifoundryExtractor):
 
     def __init__(self, match):
         HentaifoundryExtractor.__init__(self, match)
-        self.page_url = "{}/pictures/recent/{}".format(self.root, self.user)
+        self.page_url = f"{self.root}/pictures/recent/{self.user}"
 
     def metadata(self):
         return {"date": self.user}
@@ -309,8 +307,8 @@ class HentaifoundryImageExtractor(HentaifoundryExtractor):
         self.index = match[3]
 
     def items(self):
-        post_url = "{}/pictures/user/{}/{}/?enterAgree=1".format(
-            self.root, self.user, self.index)
+        post_url = (f"{self.root}/pictures/user/{self.user}"
+                    f"/{self.index}/?enterAgree=1")
         image = self._parse_post(post_url)
         image["user"] = self.user
         yield Message.Directory, image
@@ -332,7 +330,7 @@ class HentaifoundryStoriesExtractor(HentaifoundryExtractor):
             yield Message.Url, story["src"], story
 
     def stories(self):
-        url = "{}/stories/user/{}".format(self.root, self.user)
+        url = f"{self.root}/stories/user/{self.user}"
         return self._pagination(url, '<div class="storyRow">', '</tr></table>')
 
 
@@ -350,8 +348,8 @@ class HentaifoundryStoryExtractor(HentaifoundryExtractor):
         self.index = match[3]
 
     def items(self):
-        story_url = "{}/stories/user/{}/{}/x?enterAgree=1".format(
-            self.root, self.user, self.index)
+        story_url = (f"{self.root}/stories/user/{self.user}"
+                     f"/{self.index}/x?enterAgree=1")
         story = self._parse_story(self.request(story_url).text)
         yield Message.Directory, story
         yield Message.Url, story["src"], story

@@ -23,7 +23,7 @@ class Rule34usExtractor(BooruExtractor):
             r'<li class="([^-"]+)-tag"[^>]*><a href="[^;"]+;q=([^"]+)').findall
 
     def _parse_post(self, post_id):
-        url = "{}/index.php?r=posts/view&id={}".format(self.root, post_id)
+        url = f"{self.root}/index.php?r=posts/view&id={post_id}"
         page = self.request(url).text
         extr = text.extract_from(page)
 

@@ -416,10 +416,10 @@ class TerminalOutput():
         bdl = util.format_value(bytes_downloaded)
         bps = util.format_value(bytes_per_second)
         if bytes_total is None:
-            stderr_write("\r{:>7}B {:>7}B/s ".format(bdl, bps))
+            stderr_write(f"\r{bdl:>7}B {bps:>7}B/s ")
         else:
-            stderr_write("\r{:>3}% {:>7}B {:>7}B/s ".format(
-                bytes_downloaded * 100 // bytes_total, bdl, bps))
+            stderr_write(f"\r{bytes_downloaded * 100 // bytes_total:>3}% "
+                         f"{bdl:>7}B {bps:>7}B/s ")
 
 
 class ColorOutput(TerminalOutput):
@@ -431,10 +431,8 @@ class ColorOutput(TerminalOutput):
         if colors is None:
             colors = COLORS_DEFAULT
 
-        self.color_skip = "\033[{}m".format(
-            colors.get("skip", "2"))
-        self.color_success = "\r\033[{}m".format(
-            colors.get("success", "1;32"))
+        self.color_skip = f"\x1b[{colors.get('skip', '2')}m"
+        self.color_success = f"\r\x1b[{colors.get('success', '1;32')}m"
 
     def start(self, path):
         stdout_write_flush(self.shorten(path))

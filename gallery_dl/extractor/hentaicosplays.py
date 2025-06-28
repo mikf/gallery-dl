@@ -44,7 +44,7 @@ class HentaicosplaysGalleryExtractor(
     def __init__(self, match):
         BaseExtractor.__init__(self, match)
         self.slug = self.groups[-1]
-        self.page_url = "{}/story/{}/".format(self.root, self.slug)
+        self.page_url = f"{self.root}/story/{self.slug}/"
 
     def _init(self):
         self.session.headers["Referer"] = self.page_url

@@ -221,7 +221,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
             data = {}
 
         from .hitomi import HitomiGalleryExtractor
-        url = "https://hitomi.la/galleries/{}.html".format(self.gallery_id)
+        url = f"https://hitomi.la/galleries/{self.gallery_id}.html"
         data["_extractor"] = HitomiGalleryExtractor
         yield Message.Queue, url, data
 
@@ -491,8 +491,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
     _limits_update = _request_home
 
     def _gallery_page(self):
-        url = "{}/g/{}/{}/".format(
-            self.root, self.gallery_id, self.gallery_token)
+        url = f"{self.root}/g/{self.gallery_id}/{self.gallery_token}/"
         response = self.request(url, fatal=False)
         page = response.text
 
@@ -505,8 +504,8 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
         return page
 
     def _image_page(self):
-        url = "{}/s/{}/{}-{}".format(
-            self.root, self.image_token, self.gallery_id, self.image_num)
+        url = (f"{self.root}/s/{self.image_token}"
+               f"/{self.gallery_id}-{self.image_num}")
         page = self.request(url, fatal=False).text
 
         if page.startswith(("Invalid page", "Keep trying")):
@@ -514,7 +513,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
         return page
 
     def _fallback_original(self, nl, fullimg):
-        url = "{}?nl={}".format(fullimg, nl)
+        url = f"{fullimg}?nl={nl}"
         for _ in util.repeat(self.fallback_retries):
             yield url
 
@@ -523,8 +522,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
             token = self.key_start
 
         for _ in util.repeat(self.fallback_retries):
-            url = "{}/s/{}/{}-{}?nl={}".format(
-                self.root, token, self.gallery_id, num, nl)
+            url = f"{self.root}/s/{token}/{self.gallery_id}-{num}?nl={nl}"
 
             page = self.request(url, fatal=False).text
             if page.startswith(("Invalid page", "Keep trying")):
@@ -577,7 +575,7 @@ class ExhentaiSearchExtractor(ExhentaiExtractor):
         if tag:
             if "+" in tag:
                 ns, _, tag = tag.rpartition(":")
-                tag = '{}:"{}$"'.format(ns, tag.replace("+", " "))
+                tag = f"{ns}:\"{tag.replace('+', ' ')}$\""
             else:
                 tag += "$"
             self.params = {"f_search": tag, "page": 0}

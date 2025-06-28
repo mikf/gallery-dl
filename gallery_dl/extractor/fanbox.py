@@ -340,7 +340,7 @@ class FanboxExtractor(Extractor):
             templ = "https://docs.google.com/forms/d/e/{}/viewform?usp=sf_link"
             url = templ.format(content_id)
         else:
-            self.log.warning("service not recognized: {}".format(provider))
+            self.log.warning(f"service not recognized: {provider}")
 
         if url:
             final_post["embed"] = embed

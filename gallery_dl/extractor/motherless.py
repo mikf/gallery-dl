@@ -113,7 +113,7 @@ class MotherlessGalleryExtractor(MotherlessExtractor):
             yield Message.Queue, self.root + "/GV" + gid, data
             return
 
-        url = "{}/G{}{}".format(self.root, type, gid)
+        url = f"{self.root}/G{type}{gid}"
         page = self.request(url).text
         data = self._extract_gallery_data(page)
 

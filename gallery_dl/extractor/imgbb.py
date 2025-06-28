@@ -164,7 +164,7 @@ class ImgbbUserExtractor(ImgbbExtractor):
         ImgbbExtractor.__init__(self, match)
         self.user = match[1]
         self.sort = text.parse_query(match[2]).get("sort", "date_desc")
-        self.page_url = "https://{}.imgbb.com/".format(self.user)
+        self.page_url = f"https://{self.user}.imgbb.com/"
 
     def metadata(self, page):
         user = self._extract_user(page)

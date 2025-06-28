@@ -108,7 +108,7 @@ class _35photoUserExtractor(_35photoExtractor):
         self.user_id = 0
 
     def metadata(self):
-        url = "{}/{}/".format(self.root, self.user)
+        url = f"{self.root}/{self.user}/"
         page = self.request(url).text
         self.user_id = text.parse_int(text.extr(page, "/user_", ".xml"))
         return {
@@ -142,7 +142,7 @@ class _35photoTagExtractor(_35photoExtractor):
         num = 1
 
         while True:
-            url = "{}/tags/{}/list_{}/".format(self.root, self.tag, num)
+            url = f"{self.root}/tags/{self.tag}/list_{num}/"
             page = self.request(url).text
             prev = None
 
@@ -170,7 +170,7 @@ class _35photoGenreExtractor(_35photoExtractor):
         self.photo_ids = None
 
     def metadata(self):
-        url = "{}/genre_{}{}".format(self.root, self.genre_id, self.new or "/")
+        url = f"{self.root}/genre_{self.genre_id}{self.new or '/'}"
         page = self.request(url).text
         self.photo_ids = self._photo_ids(text.extr(
             page, ' class="photo', '\n'))

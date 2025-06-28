@@ -179,7 +179,7 @@ class InstagramExtractor(Extractor):
             data = {
                 "post_id" : post["pk"],
                 "post_shortcode": post["code"],
-                "post_url": "{}/p/{}/".format(self.root, post["code"]),
+                "post_url": f"{self.root}/p/{post['code']}/",
                 "likes": post.get("like_count", 0),
                 "liked": post.get("has_liked", False),
                 "pinned": self._extract_pinned(post),
@@ -197,8 +197,8 @@ class InstagramExtractor(Extractor):
                 slug = location["short_name"].replace(" ", "-").lower()
                 data["location_id"] = location["pk"]
                 data["location_slug"] = slug
-                data["location_url"] = "{}/explore/locations/{}/{}/".format(
-                    self.root, location["pk"], slug)
+                data["location_url"] = \
+                    f"{self.root}/explore/locations/{location['pk']}/{slug}/"
 
             coauthors = post.get("coauthor_producers")
             if coauthors:
@@ -292,7 +292,7 @@ class InstagramExtractor(Extractor):
             "fullname"   : owner.get("full_name"),
             "post_id"    : post["id"],
             "post_shortcode": post["shortcode"],
-            "post_url"   : "{}/p/{}/".format(self.root, post["shortcode"]),
+            "post_url"   : f"{self.root}/p/{post['shortcode']}/",
             "post_date"  : text.parse_timestamp(post["taken_at_timestamp"]),
             "description": text.parse_unicode_escapes("\n".join(
                 edge["node"]["text"]
@@ -309,8 +309,8 @@ class InstagramExtractor(Extractor):
         if location:
             data["location_id"] = location["id"]
             data["location_slug"] = location["slug"]
-            data["location_url"] = "{}/explore/locations/{}/{}/".format(
-                self.root, location["id"], location["slug"])
+            data["location_url"] = (f"{self.root}/explore/locations/"
+                                    f"{location['id']}/{location['slug']}/")
 
         coauthors = post.get("coauthor_producers")
         if coauthors:
@@ -434,8 +434,8 @@ class InstagramUserExtractor(Dispatch, InstagramExtractor):
     example = "https://www.instagram.com/USER/"
 
     def items(self):
-        base = "{}/{}/".format(self.root, self.item)
-        stories = "{}/stories/{}/".format(self.root, self.item)
+        base = f"{self.root}/{self.item}/"
+        stories = f"{self.root}/stories/{self.item}/"
         return self._dispatch_extractors((
             (InstagramInfoExtractor      , base + "info/"),
             (InstagramAvatarExtractor    , base + "avatar/"),
@@ -623,7 +623,7 @@ class InstagramFollowersExtractor(InstagramExtractor):
         uid = self.api.user_id(self.item)
         for user in self.api.user_followers(uid):
             user["_extractor"] = InstagramUserExtractor
-            url = "{}/{}".format(self.root, user["username"])
+            url = f"{self.root}/{user['username']}"
             yield Message.Queue, url, user
 
 
@@ -637,7 +637,7 @@ class InstagramFollowingExtractor(InstagramExtractor):
         uid = self.api.user_id(self.item)
         for user in self.api.user_following(uid):
             user["_extractor"] = InstagramUserExtractor
-            url = "{}/{}".format(self.root, user["username"])
+            url = f"{self.root}/{user['username']}"
             yield Message.Queue, url, user
 
 
@@ -742,7 +742,7 @@ class InstagramRestAPI():
         return self._call(endpoint, params=params)
 
     def guide_media(self, guide_id):
-        endpoint = "/v1/guides/guide/{}/".format(guide_id)
+        endpoint = f"/v1/guides/guide/{guide_id}/"
         return self._pagination_guides(endpoint)
 
     def highlights_media(self, user_id, chunk_size=5):
@@ -764,13 +764,13 @@ class InstagramRestAPI():
                 reel_ids[offset : offset+chunk_size])
 
     def highlights_tray(self, user_id):
-        endpoint = "/v1/highlights/{}/highlights_tray/".format(user_id)
+        endpoint = f"/v1/highlights/{user_id}/highlights_tray/"
         return self._call(endpoint)["tray"]
 
     def media(self, shortcode):
         if len(shortcode) > 28:
             shortcode = shortcode[:-28]
-        endpoint = "/v1/media/{}/info/".format(id_from_shortcode(shortcode))
+        endpoint = f"/v1/media/{id_from_shortcode(shortcode)}/info/"
         return self._pagination(endpoint)
 
     def reels_media(self, reel_ids):
@@ -787,7 +787,7 @@ class InstagramRestAPI():
                 yield media["media"]
 
     def tags_sections(self, tag):
-        endpoint = "/v1/tags/{}/sections/".format(tag)
+        endpoint = f"/v1/tags/{tag}/sections/"
         data = {
             "include_persistent": "0",
             "max_id" : None,
@@ -806,7 +806,7 @@ class InstagramRestAPI():
 
     @memcache(keyarg=1)
     def user_by_id(self, user_id):
-        endpoint = "/v1/users/{}/info/".format(user_id)
+        endpoint = f"/v1/users/{user_id}/info/"
         return self._call(endpoint)["user"]
 
     def user_id(self, screen_name, check_private=True):
@@ -838,22 +838,22 @@ class InstagramRestAPI():
         return self._pagination_post(endpoint, data)
 
     def user_collection(self, collection_id):
-        endpoint = "/v1/feed/collection/{}/posts/".format(collection_id)
+        endpoint = f"/v1/feed/collection/{collection_id}/posts/"
         params = {"count": 50}
         return self._pagination(endpoint, params, media=True)
 
     def user_feed(self, user_id):
-        endpoint = "/v1/feed/user/{}/".format(user_id)
+        endpoint = f"/v1/feed/user/{user_id}/"
         params = {"count": 30}
         return self._pagination(endpoint, params)
 
     def user_followers(self, user_id):
-        endpoint = "/v1/friendships/{}/followers/".format(user_id)
+        endpoint = f"/v1/friendships/{user_id}/followers/"
         params = {"count": 12}
         return self._pagination_following(endpoint, params)
 
     def user_following(self, user_id):
-        endpoint = "/v1/friendships/{}/following/".format(user_id)
+        endpoint = f"/v1/friendships/{user_id}/following/"
         params = {"count": 12}
         return self._pagination_following(endpoint, params)
 
@@ -863,7 +863,7 @@ class InstagramRestAPI():
         return self._pagination(endpoint, params, media=True)
 
     def user_tagged(self, user_id):
-        endpoint = "/v1/usertags/{}/feed/".format(user_id)
+        endpoint = f"/v1/usertags/{user_id}/feed/"
         params = {"count": 20}
         return self._pagination(endpoint, params)
 

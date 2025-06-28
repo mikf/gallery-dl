@@ -336,7 +336,7 @@ class RedditImageExtractor(Extractor):
             self.query = match[3] or ""
 
     def items(self):
-        url = "https://{}/{}{}".format(self.domain, self.path, self.query)
+        url = f"https://{self.domain}/{self.path}{self.query}"
         data = text.nameext_from_url(url)
         yield Message.Directory, data
         yield Message.Url, url, data
@@ -355,8 +355,7 @@ class RedditRedirectExtractor(Extractor):
         sub_type, subreddit, share_url = self.groups
         if sub_type == "u":
             sub_type = "user"
-        url = "https://www.reddit.com/{}/{}/s/{}".format(
-            sub_type, subreddit, share_url)
+        url = f"https://www.reddit.com/{sub_type}/{subreddit}/s/{share_url}"
         location = self.request_location(url, notfound="submission")
         data = {"_extractor": RedditSubmissionExtractor}
         yield Message.Queue, location, data
@@ -478,8 +477,8 @@ class RedditAPI():
 
         if response.status_code != 200:
             self.log.debug("Server response: %s", data)
-            raise exception.AuthenticationError('"{}: {}"'.format(
-                data.get("error"), data.get("message")))
+            raise exception.AuthenticationError(
+                f"\"{data.get('error')}: {data.get('message')}\"")
         return "Bearer " + data["access_token"]
 
     def _call(self, endpoint, params):

@@ -26,7 +26,7 @@ class _2chThreadExtractor(Extractor):
         self.board, self.thread = match.groups()
 
     def items(self):
-        url = "{}/{}/res/{}.json".format(self.root, self.board, self.thread)
+        url = f"{self.root}/{self.board}/res/{self.thread}.json"
         posts = self.request(url).json()["threads"][0]["posts"]
 
         op = posts[0]
@@ -71,21 +71,21 @@ class _2chBoardExtractor(Extractor):
         self.board = match[1]
 
     def items(self):
+        base = f"{self.root}/{self.board}"
+
         # index page
-        url = "{}/{}/index.json".format(self.root, self.board)
+        url = f"{base}/index.json"
         index = self.request(url).json()
         index["_extractor"] = _2chThreadExtractor
         for thread in index["threads"]:
-            url = "{}/{}/res/{}.html".format(
-                self.root, self.board, thread["thread_num"])
+            url = f"{base}/res/{thread['thread_num']}.html"
             yield Message.Queue, url, index
 
         # pages 1..n
         for n in util.advance(index["pages"], 1):
-            url = "{}/{}/{}.json".format(self.root, self.board, n)
+            url = f"{base}/{n}.json"
             page = self.request(url).json()
             page["_extractor"] = _2chThreadExtractor
             for thread in page["threads"]:
-                url = "{}/{}/res/{}.html".format(
-                    self.root, self.board, thread["thread_num"])
+                url = f"{base}/res/{thread['thread_num']}.html"
                 yield Message.Queue, url, page

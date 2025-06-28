@@ -70,8 +70,7 @@ class HotleakPostExtractor(HotleakExtractor):
         self.creator, self.type, self.id = match.groups()
 
     def posts(self):
-        url = "{}/{}/{}/{}".format(
-            self.root, self.creator, self.type, self.id)
+        url = f"{self.root}/{self.creator}/{self.type}/{self.id}"
         page = self.request(url).text
         page = text.extr(
             page, '<div class="movie-image thumb">', '</article>')
@@ -106,7 +105,7 @@ class HotleakCreatorExtractor(HotleakExtractor):
         self.creator = match[1]
 
     def posts(self):
-        url = "{}/{}".format(self.root, self.creator)
+        url = f"{self.root}/{self.creator}"
         return self._pagination(url)
 
     def _pagination(self, url):
@@ -159,7 +158,7 @@ class HotleakCategoryExtractor(HotleakExtractor):
         self._category, self.params = match.groups()
 
     def items(self):
-        url = "{}/{}".format(self.root, self._category)
+        url = f"{self.root}/{self._category}"
 
         if self._category in ("hot", "creators"):
             data = {"_extractor": HotleakCreatorExtractor}

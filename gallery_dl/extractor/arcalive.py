@@ -26,7 +26,7 @@ class ArcaliveExtractor(Extractor):
         for article in self.articles():
             article["_extractor"] = ArcalivePostExtractor
             board = self.board or article.get("boardSlug") or "breaking"
-            url = "{}/b/{}/{}".format(self.root, board, article["id"])
+            url = f"{self.root}/b/{board}/{article['id']}"
             yield Message.Queue, url, article
 
 
@@ -51,8 +51,8 @@ class ArcalivePostExtractor(ArcaliveExtractor):
         post["count"] = len(files)
         post["date"] = text.parse_datetime(
             post["createdAt"][:19], "%Y-%m-%dT%H:%M:%S")
-        post["post_url"] = post_url = "{}/b/{}/{}".format(
-            self.root, post["boardSlug"], post["id"])
+        post["post_url"] = post_url = \
+            f"{self.root}/b/{post['boardSlug']}/{post['id']}"
         post["_http_headers"] = {"Referer": post_url + "?p=1"}
 
         yield Message.Directory, post

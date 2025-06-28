@@ -139,7 +139,7 @@ def main():
 
             extra = ""
             if util.EXECUTABLE:
-                extra = " - Executable ({})".format(version.__variant__)
+                extra = f" - Executable ({version.__variant__})"
             else:
                 git_head = util.git_head()
                 if git_head:

@@ -184,7 +184,7 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
                             json={"id": data_id}).json()
 
         if data.get("encrypted"):
-            key = "SECRET_KEY_{}".format(data["timestamp"] // 3600)
+            key = f"SECRET_KEY_{data['timestamp'] // 3600}"
             file_url = util.decrypt_xor(data["url"], key.encode())
         else:
             file_url = data["url"]

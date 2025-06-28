@@ -155,8 +155,7 @@ def status():
 
         paths.append((path, status))
 
-    fmt = "{{:<{}}} : {{}}\n".format(
-        max(len(p[0]) for p in paths)).format
+    fmt = f"{{:<{max(len(p[0]) for p in paths)}}} : {{}}\n".format
 
     for path, status in paths:
         stdout_write(fmt(path, status))

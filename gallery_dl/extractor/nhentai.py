@@ -87,7 +87,7 @@ class NhentaiExtractor(Extractor):
     def items(self):
         data = {"_extractor": NhentaiGalleryExtractor}
         for gallery_id in self._pagination():
-            url = "{}/g/{}/".format(self.root, gallery_id)
+            url = f"{self.root}/g/{gallery_id}/"
             yield Message.Queue, url, data
 
     def _pagination(self):

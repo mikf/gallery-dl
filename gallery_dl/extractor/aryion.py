@@ -111,7 +111,7 @@ class AryionExtractor(Extractor):
             url = self.root + text.rextr(page, "href='", "'", pos)
 
     def _parse_post(self, post_id):
-        url = "{}/g4/data.php?id={}".format(self.root, post_id)
+        url = f"{self.root}/g4/data.php?id={post_id}"
         with self.request(url, method="HEAD", fatal=False) as response:
 
             if response.status_code >= 400:
@@ -141,9 +141,9 @@ class AryionExtractor(Extractor):
             # fix 'Last-Modified' header
             lmod = headers["last-modified"]
             if lmod[22] != ":":
-                lmod = "{}:{} GMT".format(lmod[:22], lmod[22:24])
+                lmod = f"{lmod[:22]}:{lmod[22:24]} GMT"
 
-        post_url = "{}/g4/view/{}".format(self.root, post_id)
+        post_url = f"{self.root}/g4/view/{post_id}"
         extr = text.extract_from(self.request(post_url).text)
 
         title, _, artist = text.unescape(extr(
@@ -195,10 +195,10 @@ class AryionGalleryExtractor(AryionExtractor):
 
     def posts(self):
         if self.recursive:
-            url = "{}/g4/gallery/{}".format(self.root, self.user)
+            url = f"{self.root}/g4/gallery/{self.user}"
             return self._pagination_params(url)
         else:
-            url = "{}/g4/latest.php?name={}".format(self.root, self.user)
+            url = f"{self.root}/g4/latest.php?name={self.user}"
             return util.advance(self._pagination_next(url), self.offset)
 
 
@@ -212,7 +212,7 @@ class AryionFavoriteExtractor(AryionExtractor):
     example = "https://aryion.com/g4/favorites/USER"
 
     def posts(self):
-        url = "{}/g4/favorites/{}".format(self.root, self.user)
+        url = f"{self.root}/g4/favorites/{self.user}"
         return self._pagination_params(
             url, None, "class='gallery-item favorite' id='")
 

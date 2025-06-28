@@ -66,8 +66,8 @@ class NsfwalbumAlbumExtractor(GalleryExtractor):
                 "width" : text.parse_int(data[1]),
                 "height": text.parse_int(data[2]),
                 "_http_validate": self._validate_response,
-                "_fallback": ("{}/imageProxy.php?photoId={}&spirit={}".format(
-                    self.root, image_id, spirit),),
+                "_fallback": (f"{self.root}/imageProxy.php"
+                              f"?photoId={image_id}&spirit={spirit}",),
             }
 
     def _validate_response(self, response):

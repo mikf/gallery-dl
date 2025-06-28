@@ -79,14 +79,13 @@ class TapasEpisodeExtractor(TapasExtractor):
         self.login()
 
         episode_id = self.groups[0]
-        url = "{}/episode/{}".format(self.root, episode_id)
+        url = f"{self.root}/episode/{episode_id}"
         data = self.request_api(url)
 
         episode = data["episode"]
         if not episode.get("free") and not episode.get("unlocked"):
             raise exception.AuthorizationError(
-                "{}: Episode '{}' not unlocked".format(
-                    episode_id, episode["title"]))
+                f"{episode_id}: Episode '{episode['title']}' not unlocked")
 
         html = data["html"]
         episode["series"] = self._extract_series(html)
@@ -110,7 +109,7 @@ class TapasEpisodeExtractor(TapasExtractor):
         try:
             return self._cache[series_id]
         except KeyError:
-            url = "{}/series/{}".format(self.root, series_id)
+            url = f"{self.root}/series/{series_id}"
             series = self._cache[series_id] = self.request_api(url)
             return series
 
@@ -123,12 +122,12 @@ class TapasSeriesExtractor(TapasExtractor):
     def items(self):
         self.login()
 
-        url = "{}/series/{}".format(self.root, self.groups[0])
+        url = f"{self.root}/series/{self.groups[0]}"
         series_id, _, episode_id = text.extr(
             self.request(url).text, 'content="tapastic://series/', '"',
         ).partition("/episodes/")
 
-        url = "{}/series/{}/episodes".format(self.root, series_id)
+        url = f"{self.root}/series/{series_id}/episodes"
         params = {
             "eid"        : episode_id,
             "page"       : 1,
@@ -157,7 +156,7 @@ class TapasCreatorExtractor(TapasExtractor):
     def items(self):
         self.login()
 
-        url = "{}/{}/series".format(self.root, self.groups[0])
+        url = f"{self.root}/{self.groups[0]}/series"
         page = self.request(url).text
         page = text.extr(page, '<ul class="content-list-wrap', "</ul>")
 

@@ -53,7 +53,7 @@ class XfolioWorkExtractor(XfolioExtractor):
 
     def items(self):
         creator, work_id = self.groups
-        url = "{}/portfolio/{}/works/{}".format(self.root, creator, work_id)
+        url = f"{self.root}/portfolio/{creator}/works/{work_id}"
         html = self.request(url).text
 
         work = self._extract_data(html)
@@ -113,7 +113,7 @@ class XfolioUserExtractor(XfolioExtractor):
     example = "https://xfolio.jp/portfolio/USER"
 
     def works(self):
-        url = "{}/portfolio/{}/works".format(self.root, self.groups[0])
+        url = f"{self.root}/portfolio/{self.groups[0]}/works"
 
         while True:
             html = self.request(url).text
@@ -136,7 +136,7 @@ class XfolioSeriesExtractor(XfolioExtractor):
 
     def works(self):
         creator, series_id = self.groups
-        url = "{}/portfolio/{}/series/{}".format(self.root, creator, series_id)
+        url = f"{self.root}/portfolio/{creator}/series/{series_id}"
         html = self.request(url).text
 
         return [

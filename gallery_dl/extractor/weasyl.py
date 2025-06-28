@@ -35,11 +35,11 @@ class WeasylExtractor(Extractor):
 
     def request_submission(self, submitid):
         return self.request(
-            "{}/api/submissions/{}/view".format(self.root, submitid)).json()
+            f"{self.root}/api/submissions/{submitid}/view").json()
 
     def retrieve_journal(self, journalid):
         data = self.request(
-            "{}/api/journals/{}/view".format(self.root, journalid)).json()
+            f"{self.root}/api/journals/{journalid}/view").json()
         data["extension"] = "html"
         data["html"] = "text:" + data["content"]
         data["date"] = text.parse_datetime(data["posted_at"])
@@ -47,7 +47,7 @@ class WeasylExtractor(Extractor):
 
     def submissions(self, owner_login, folderid=None):
         metadata = self.config("metadata")
-        url = "{}/api/users/{}/gallery".format(self.root, owner_login)
+        url = f"{self.root}/api/users/{owner_login}/gallery"
         params = {
             "nextid"  : None,
             "folderid": folderid,
@@ -150,7 +150,7 @@ class WeasylJournalsExtractor(WeasylExtractor):
     def items(self):
         yield Message.Directory, {"owner_login": self.owner_login}
 
-        url = "{}/journals/{}".format(self.root, self.owner_login)
+        url = f"{self.root}/journals/{self.owner_login}"
         page = self.request(url).text
         for journalid in text.extract_iter(page, 'href="/journal/', '/'):
             data = self.retrieve_journal(journalid)

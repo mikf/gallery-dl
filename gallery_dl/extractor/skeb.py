@@ -100,7 +100,7 @@ class SkebExtractor(Extractor):
             params["offset"] += 30
 
     def _pagination_users(self, endpoint, params):
-        url = "{}/api{}".format(self.root, endpoint)
+        url = f"{self.root}/api{endpoint}"
         params["offset"] = 0
         params["limit"] = 90
 
@@ -114,8 +114,7 @@ class SkebExtractor(Extractor):
             params["offset"] += params["limit"]
 
     def _get_post_data(self, user_name, post_num):
-        url = "{}/api/users/{}/works/{}".format(
-            self.root, user_name, post_num)
+        url = f"{self.root}/api/users/{user_name}/works/{post_num}"
         resp = self.request(url, headers=self.headers).json()
         creator = resp["creator"]
         post = {
@@ -216,7 +215,7 @@ class SkebUserExtractor(SkebExtractor):
     example = "https://skeb.jp/@USER"
 
     def posts(self):
-        url = "{}/api/users/{}/works".format(self.root, self.user_name)
+        url = f"{self.root}/api/users/{self.user_name}/works"
 
         params = {"role": "creator", "sort": "date"}
         posts = self._pagination(url, params)
@@ -289,7 +288,7 @@ class SkebFollowingExtractor(SkebExtractor):
     items = SkebExtractor._items_users
 
     def users(self):
-        endpoint = "/users/{}/following_creators".format(self.user_name)
+        endpoint = f"/users/{self.user_name}/following_creators"
         params = {"sort": "date"}
         return self._pagination_users(endpoint, params)
 

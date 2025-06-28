@@ -32,7 +32,7 @@ class KemonoExtractor(Extractor):
         tld = match[2]
         self.category = domain = match[1]
         self.root = text.root_from_url(match[0])
-        self.cookies_domain = ".{}.{}".format(domain, tld)
+        self.cookies_domain = f".{domain}.{tld}"
         Extractor.__init__(self, match)
 
     def _init(self):
@@ -81,8 +81,8 @@ class KemonoExtractor(Extractor):
             posts = self._revisions(posts)
 
         for post in posts:
-            headers["Referer"] = "{}/{}/user/{}/post/{}".format(
-                self.root, post["service"], post["user"], post["id"])
+            headers["Referer"] = (f"{self.root}/{post['service']}/user/"
+                                  f"{post['user']}/post/{post['id']}")
             post["_http_headers"] = headers
             post["date"] = self._parse_datetime(
                 post.get("published") or post.get("added") or "")
@@ -90,7 +90,7 @@ class KemonoExtractor(Extractor):
             creator_id = post["user"]
 
             if creator_info is not None:
-                key = "{}_{}".format(service, creator_id)
+                key = f"{service}_{creator_id}"
                 if key not in creator_info:
                     creator = creator_info[key] = self.api.creator_profile(
                         service, creator_id)
@@ -468,8 +468,8 @@ class KemonoDiscordServerExtractor(KemonoExtractor):
         server_id = self.groups[2]
         server, channels = discord_server_info(self, server_id)
         for channel in channels.values():
-            url = "{}/discord/server/{}/{}#{}".format(
-                self.root, server_id, channel["id"], channel["name"])
+            url = (f"{self.root}/discord/server/{server_id}/"
+                   f"{channel['id']}#{channel['name']}")
             yield Message.Queue, url, {
                 "server"    : server,
                 "channel"   : channel,
@@ -513,12 +513,10 @@ class KemonoFavoriteExtractor(KemonoExtractor):
                 service = user["service"]
                 if service == "discord":
                     user["_extractor"] = KemonoDiscordServerExtractor
-                    url = "{}/discord/server/{}".format(
-                        self.root, user["id"])
+                    url = f"{self.root}/discord/server/{user['id']}"
                 else:
                     user["_extractor"] = KemonoUserExtractor
-                    url = "{}/{}/user/{}".format(
-                        self.root, service, user["id"])
+                    url = f"{self.root}/{service}/user/{user['id']}"
                 yield Message.Queue, url, user
 
         elif type == "post":
@@ -531,8 +529,8 @@ class KemonoFavoriteExtractor(KemonoExtractor):
 
             for post in posts:
                 post["_extractor"] = KemonoPostExtractor
-                url = "{}/{}/user/{}/post/{}".format(
-                    self.root, post["service"], post["user"], post["id"])
+                url = (f"{self.root}/{post['service']}/user/"
+                       f"{post['user']}/post/{post['id']}")
                 yield Message.Queue, url, post
 
 
@@ -565,12 +563,10 @@ class KemonoArtistsExtractor(KemonoExtractor):
             service = user["service"]
             if service == "discord":
                 user["_extractor"] = KemonoDiscordServerExtractor
-                url = "{}/discord/server/{}".format(
-                    self.root, user["id"])
+                url = f"{self.root}/discord/server/{user['id']}"
             else:
                 user["_extractor"] = KemonoUserExtractor
-                url = "{}/{}/user/{}".format(
-                    self.root, service, user["id"])
+                url = f"{self.root}/{service}/user/{user['id']}"
             yield Message.Queue, url, user
 
 
@@ -599,64 +595,62 @@ class KemonoAPI():
 
     def creator_posts(self, service, creator_id,
                       offset=0, query=None, tags=None):
-        endpoint = "/{}/user/{}".format(service, creator_id)
+        endpoint = f"/{service}/user/{creator_id}"
         params = {"q": query, "tag": tags, "o": offset}
         return self._pagination(endpoint, params, 50)
 
     def creator_posts_legacy(self, service, creator_id,
                              offset=0, query=None, tags=None):
-        endpoint = "/{}/user/{}/posts-legacy".format(service, creator_id)
+        endpoint = f"/{service}/user/{creator_id}/posts-legacy"
         params = {"o": offset, "tag": tags, "q": query}
         return self._pagination(endpoint, params, 50, "results")
 
     def creator_announcements(self, service, creator_id):
-        endpoint = "/{}/user/{}/announcements".format(service, creator_id)
+        endpoint = f"/{service}/user/{creator_id}/announcements"
         return self._call(endpoint)
 
     def creator_dms(self, service, creator_id):
-        endpoint = "/{}/user/{}/dms".format(service, creator_id)
+        endpoint = f"/{service}/user/{creator_id}/dms"
         return self._call(endpoint)
 
     def creator_fancards(self, service, creator_id):
-        endpoint = "/{}/user/{}/fancards".format(service, creator_id)
+        endpoint = f"/{service}/user/{creator_id}/fancards"
         return self._call(endpoint)
 
     def creator_post(self, service, creator_id, post_id):
-        endpoint = "/{}/user/{}/post/{}".format(service, creator_id, post_id)
+        endpoint = f"/{service}/user/{creator_id}/post/{post_id}"
         return self._call(endpoint)
 
     def creator_post_comments(self, service, creator_id, post_id):
-        endpoint = "/{}/user/{}/post/{}/comments".format(
-            service, creator_id, post_id)
+        endpoint = f"/{service}/user/{creator_id}/post/{post_id}/comments"
         return self._call(endpoint)
 
     def creator_post_revisions(self, service, creator_id, post_id):
-        endpoint = "/{}/user/{}/post/{}/revisions".format(
-            service, creator_id, post_id)
+        endpoint = f"/{service}/user/{creator_id}/post/{post_id}/revisions"
         return self._call(endpoint)
 
     def creator_profile(self, service, creator_id):
-        endpoint = "/{}/user/{}/profile".format(service, creator_id)
+        endpoint = f"/{service}/user/{creator_id}/profile"
         return self._call(endpoint)
 
     def creator_links(self, service, creator_id):
-        endpoint = "/{}/user/{}/links".format(service, creator_id)
+        endpoint = f"/{service}/user/{creator_id}/links"
         return self._call(endpoint)
 
     def creator_tags(self, service, creator_id):
-        endpoint = "/{}/user/{}/tags".format(service, creator_id)
+        endpoint = f"/{service}/user/{creator_id}/tags"
         return self._call(endpoint)
 
     def discord_channel(self, channel_id):
-        endpoint = "/discord/channel/{}".format(channel_id)
+        endpoint = f"/discord/channel/{channel_id}"
         return self._pagination(endpoint, {}, 150)
 
     def discord_channel_lookup(self, server_id):
-        endpoint = "/discord/channel/lookup/{}".format(server_id)
+        endpoint = f"/discord/channel/lookup/{server_id}"
         return self._call(endpoint)
 
     def discord_server(self, server_id):
-        endpoint = "/discord/server/{}".format(server_id)
+        endpoint = f"/discord/server/{server_id}"
         return self._call(endpoint)
 
     def account_favorites(self, type):

@@ -26,7 +26,7 @@ class HentaihereChapterExtractor(HentaihereBase, ChapterExtractor):
 
     def __init__(self, match):
         self.manga_id, self.chapter = match.groups()
-        url = "{}/m/S{}/{}/1".format(self.root, self.manga_id, self.chapter)
+        url = f"{self.root}/m/S{self.manga_id}/{self.chapter}/1"
         ChapterExtractor.__init__(self, match, url)
 
     def metadata(self, page):

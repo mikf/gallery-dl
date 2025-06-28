@@ -60,7 +60,7 @@ class AgnphExtractor(booru.BooruExtractor):
             params["page"] += 1
 
     def _html(self, post):
-        url = "{}/gallery/post/show/{}/".format(self.root, post["id"])
+        url = f"{self.root}/gallery/post/show/{post['id']}/"
         return self.request(url).text
 
     def _tags(self, post, page):
@@ -103,7 +103,6 @@ class AgnphPostExtractor(AgnphExtractor):
     example = "https://agn.ph/gallery/post/show/12345/"
 
     def posts(self):
-        url = "{}/gallery/post/show/{}/?api=xml".format(
-            self.root, self.groups[0])
+        url = f"{self.root}/gallery/post/show/{self.groups[0]}/?api=xml"
         post = self.request_xml(url)
         return (self._xml_to_dict(post),)

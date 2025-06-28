@@ -40,7 +40,7 @@ class NijieExtractor(AsynchronousMixin, BaseExtractor):
 
         for image_id in self.image_ids():
 
-            url = "{}/view.php?id={}".format(self.root, image_id)
+            url = f"{self.root}/view.php?id={image_id}"
             response = self.request(url, fatal=False)
             if response.status_code >= 400:
                 continue
@@ -109,7 +109,7 @@ class NijieExtractor(AsynchronousMixin, BaseExtractor):
     def _extract_images(self, image_id, page):
         if '&#diff_1" ' in page:
             # multiple images
-            url = "{}/view_popup.php?id={}".format(self.root, image_id)
+            url = f"{self.root}/view_popup.php?id={image_id}"
             page = self.request(url).text
             return [
                 text.extr(media, ' src="', '"')
@@ -139,7 +139,7 @@ class NijieExtractor(AsynchronousMixin, BaseExtractor):
     def _login_impl(self, username, password):
         self.log.info("Logging in as %s", username)
 
-        url = "{}/login_int.php".format(self.root)
+        url = f"{self.root}/login_int.php"
         data = {"email": username, "password": password, "save": "on"}
 
         response = self.request(url, method="POST", data=data)
@@ -148,7 +148,7 @@ class NijieExtractor(AsynchronousMixin, BaseExtractor):
         return self.cookies
 
     def _pagination(self, path):
-        url = "{}/{}.php".format(self.root, path)
+        url = f"{self.root}/{path}.php"
         params = {"id": self.user_id, "p": 1}
 
         while True:
@@ -181,7 +181,7 @@ class NijieUserExtractor(Dispatch, NijieExtractor):
     example = "https://nijie.info/members.php?id=12345"
 
     def items(self):
-        fmt = "{}/{{}}.php?id={}".format(self.root, self.user_id).format
+        fmt = f"{self.root}/{{}}.php?id={self.user_id}".format
         return self._dispatch_extractors((
             (NijieIllustrationExtractor, fmt("members_illust")),
             (NijieDoujinExtractor      , fmt("members_dojin")),
@@ -280,7 +280,7 @@ class NijieFollowedExtractor(NijieExtractor):
 
             for user_id in text.extract_iter(
                     page, '"><a href="/members.php?id=', '"'):
-                user_url = "{}/members.php?id={}".format(self.root, user_id)
+                user_url = f"{self.root}/members.php?id={user_id}"
                 yield Message.Queue, user_url, data
 
             if '<a rel="next"' not in page:

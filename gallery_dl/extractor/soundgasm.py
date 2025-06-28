@@ -58,7 +58,7 @@ class SoundgasmAudioExtractor(SoundgasmExtractor):
         self.user, self.slug = match.groups()
 
     def sounds(self):
-        return ("{}/u/{}/{}".format(self.root, self.user, self.slug),)
+        return (f"{self.root}/u/{self.user}/{self.slug}",)
 
 
 class SoundgasmUserExtractor(SoundgasmExtractor):

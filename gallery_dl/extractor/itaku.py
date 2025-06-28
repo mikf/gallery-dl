@@ -164,12 +164,12 @@ class ItakuAPI():
         return self._pagination(endpoint, params, self.image)
 
     def image(self, image_id):
-        endpoint = "/galleries/images/{}/".format(image_id)
+        endpoint = f"/galleries/images/{image_id}/"
         return self._call(endpoint)
 
     @memcache(keyarg=1)
     def user(self, username):
-        return self._call("/user_profiles/{}/".format(username))
+        return self._call(f"/user_profiles/{username}/")
 
     def _call(self, endpoint, params=None):
         if not endpoint.startswith("http"):

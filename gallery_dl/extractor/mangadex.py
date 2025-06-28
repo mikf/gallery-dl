@@ -44,7 +44,7 @@ class MangadexExtractor(Extractor):
     def _items_manga(self):
         data = {"_extractor": MangadexMangaExtractor}
         for manga in self.manga():
-            url = "{}/title/{}".format(self.root, manga["id"])
+            url = f"{self.root}/title/{manga['id']}"
             yield Message.Queue, url, data
 
     def _transform(self, chapter):
@@ -121,7 +121,7 @@ class MangadexChapterExtractor(MangadexExtractor):
 
         server = self.api.athome_server(self.uuid)
         chapter = server["chapter"]
-        base = "{}/data/{}/".format(server["baseUrl"], chapter["hash"])
+        base = f"{server['baseUrl']}/data/{chapter['hash']}/"
 
         enum = util.enumerate_reversed if self.config(
             "page-reverse") else enumerate
@@ -199,7 +199,7 @@ class MangadexAuthorExtractor(MangadexExtractor):
     def items(self):
         for manga in self.api.manga_author(self.uuid):
             manga["_extractor"] = MangadexMangaExtractor
-            url = "{}/title/{}".format(self.root, manga["id"])
+            url = f"{self.root}/title/{manga['id']}"
             yield Message.Queue, url, manga
 
 

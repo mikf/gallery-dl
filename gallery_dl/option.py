@@ -40,8 +40,8 @@ class DeprecatedConfigConstAction(argparse.Action):
     """Set argparse const values as config values + deprecation warning"""
     def __call__(self, parser, namespace, values, option_string=None):
         sys.stderr.write(
-            "warning: {} is deprecated. Use {} instead.\n".format(
-                "/".join(self.option_strings), self.choices))
+            f"Warning: {'/'.join(self.option_strings)} is deprecated. "
+            f"Use {self.choices} instead.\n")
         namespace.options.append(((), self.dest, self.const))
 
 
@@ -144,7 +144,7 @@ class UgoiraAction(argparse.Action):
             }
             namespace.options.append(((), "ugoira", "original"))
         else:
-            parser.error("Unsupported Ugoira format '{}'".format(value))
+            parser.error(f"Unsupported Ugoira format '{value}'")
 
         pp["name"] = "ugoira"
         pp["whitelist"] = ("pixiv", "danbooru")

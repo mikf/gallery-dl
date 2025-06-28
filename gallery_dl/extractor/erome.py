@@ -26,7 +26,7 @@ class EromeExtractor(Extractor):
     def items(self):
         self.__cookies = True
         for album_id in self.albums():
-            url = "{}/a/{}".format(self.root, album_id)
+            url = f"{self.root}/a/{album_id}"
 
             try:
                 page = self.request(url).text
@@ -116,7 +116,7 @@ class EromeUserExtractor(EromeExtractor):
     example = "https://www.erome.com/USER"
 
     def albums(self):
-        url = "{}/{}".format(self.root, self.groups[0])
+        url = f"{self.root}/{self.groups[0]}"
         return self._pagination(url, {})
 
 

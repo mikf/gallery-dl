@@ -31,7 +31,7 @@ class NewgroundsExtractor(Extractor):
     def __init__(self, match):
         Extractor.__init__(self, match)
         self.user = match[1]
-        self.user_root = "https://{}.newgrounds.com".format(self.user)
+        self.user_root = f"https://{self.user}.newgrounds.com"
 
     def _init(self):
         self._extract_comment_urls = util.re(
@@ -71,8 +71,7 @@ class NewgroundsExtractor(Extractor):
                 if "_multi" in post:
                     for data in post["_multi"]:
                         post["num"] += 1
-                        post["_index"] = "{}_{:>02}".format(
-                            post["index"], post["num"])
+                        post["_index"] = f"{post['index']}_{post['num']:>02}"
                         post.update(data)
                         url = data["image"]
 
@@ -84,8 +83,7 @@ class NewgroundsExtractor(Extractor):
 
                 for url in self._extract_comment_urls(post["_comment"]):
                     post["num"] += 1
-                    post["_index"] = "{}_{:>02}".format(
-                        post["index"], post["num"])
+                    post["_index"] = f"{post['index']}_{post['num']:>02}"
                     url = text.ensure_http_scheme(url)
                     text.nameext_from_url(url, post)
                     yield Message.Url, url, post
@@ -152,7 +150,7 @@ class NewgroundsExtractor(Extractor):
                 data["codehint"] = "      "
             elif result.get("requiresEmailMfa"):
                 email = result.get("obfuscatedEmail")
-                prompt = "Email Verification Code ({}): ".format(email)
+                prompt = f"Email Verification Code ({email}): "
                 data["code"] = self.input(prompt)
                 data["codehint"] = "      "
 
@@ -346,7 +344,7 @@ class NewgroundsExtractor(Extractor):
             yield fmt[1][0]["src"]
 
     def _pagination(self, kind, pnum=1):
-        url = "{}/{}".format(self.user_root, kind)
+        url = f"{self.user_root}/{kind}"
         params = {
             "page": text.parse_int(pnum, 1),
             "isAjaxRequest": "1",
@@ -399,8 +397,7 @@ class NewgroundsImageExtractor(NewgroundsExtractor):
         NewgroundsExtractor.__init__(self, match)
         if match[2]:
             self.user = match[2]
-            self.post_url = "https://www.newgrounds.com/art/view/{}/{}".format(
-                self.user, match[3])
+            self.post_url = f"{self.root}/art/view/{self.user}/{match[3]}"
         else:
             self.post_url = text.ensure_http_scheme(match[0])
 
@@ -483,7 +480,7 @@ class NewgroundsFavoriteExtractor(NewgroundsExtractor):
         )
 
     def _pagination_favorites(self, kind, pnum=1):
-        url = "{}/favorites/{}".format(self.user_root, kind)
+        url = f"{self.user_root}/favorites/{kind}"
         params = {
             "page": text.parse_int(pnum, 1),
             "isAjaxRequest": "1",
@@ -509,8 +506,7 @@ class NewgroundsFavoriteExtractor(NewgroundsExtractor):
     def _extract_favorites(self, page):
         return [
             self.root + path
-            for path in text.extract_iter(
-                page, 'href="https://www.newgrounds.com', '"')
+            for path in text.extract_iter(page, f'href="{self.root}', '"')
         ]
 
 

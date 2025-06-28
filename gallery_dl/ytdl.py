@@ -146,7 +146,7 @@ def parse_command_line(module, argv):
         if name not in compat_opts:
             return False
         compat_opts.discard(name)
-        compat_opts.update(["*%s" % name])
+        compat_opts.update([f"*{name}"])
         return True
 
     def set_default_compat(
@@ -211,7 +211,7 @@ def parse_command_line(module, argv):
                 if "pre_process" not in parse_metadata:
                     parse_metadata["pre_process"] = []
                 parse_metadata["pre_process"].append(
-                    "title:%s" % opts.metafromtitle)
+                    f"title:{opts.metafromtitle}")
             opts.parse_metadata = {
                 k: list(itertools.chain.from_iterable(map(
                         metadataparser_actions, v)))
@@ -221,7 +221,7 @@ def parse_command_line(module, argv):
             if parse_metadata is None:
                 parse_metadata = []
             if opts.metafromtitle is not None:
-                parse_metadata.append("title:%s" % opts.metafromtitle)
+                parse_metadata.append(f"title:{opts.metafromtitle}")
             opts.parse_metadata = list(itertools.chain.from_iterable(map(
                 metadataparser_actions, parse_metadata)))
 

@@ -23,8 +23,7 @@ class UrlgalleriesGalleryExtractor(GalleryExtractor):
         _, blog_alt, blog, self.gallery_id = self.groups
         if not blog:
             blog = blog_alt
-        url = "https://urlgalleries.net/b/{}/porn-gallery-{}/?a=10000".format(
-            blog, self.gallery_id)
+        url = f"{self.root}/b/{blog}/porn-gallery-{self.gallery_id}/?a=10000"
 
         with self.request(url, allow_redirects=False, fatal=...) as response:
             if 300 <= response.status_code < 500:

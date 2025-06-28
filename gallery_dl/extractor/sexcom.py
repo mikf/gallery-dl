@@ -215,8 +215,8 @@ class SexcomRelatedPinExtractor(SexcomPinExtractor):
         return {"original_pin": pin}
 
     def pins(self):
-        url = "{}/pin/related?pinId={}&limit=24&offset=0".format(
-            self.root, self.groups[1])
+        url = (f"{self.root}/pin/related?pinId={self.groups[1]}"
+               f"&limit=24&offset=0")
         return self._pagination(url)
 
 
@@ -231,7 +231,7 @@ class SexcomPinsExtractor(SexcomExtractor):
         return {"user": text.unquote(self.groups[0])}
 
     def pins(self):
-        url = "{}/user/{}/pins/".format(self.root, self.groups[0])
+        url = f"{self.root}/user/{self.groups[0]}/pins/"
         return self._pagination(url)
 
 
@@ -246,7 +246,7 @@ class SexcomLikesExtractor(SexcomExtractor):
         return {"user": text.unquote(self.groups[0])}
 
     def pins(self):
-        url = "{}/user/{}/likes/".format(self.root, self.groups[0])
+        url = f"{self.root}/user/{self.groups[0]}/likes/"
         return self._pagination(url)
 
 
@@ -266,7 +266,7 @@ class SexcomBoardExtractor(SexcomExtractor):
         }
 
     def pins(self):
-        url = "{}/user/{}/{}/".format(self.root, self.user, self.board)
+        url = f"{self.root}/user/{self.user}/{self.board}/"
         return self._pagination(url)
 
 
@@ -291,7 +291,7 @@ class SexcomSearchExtractor(SexcomExtractor):
         return {"search": self.search}
 
     def pins(self):
-        url = "{}/{}".format(self.root, self.path)
+        url = f"{self.root}/{self.path}"
         return self._pagination(url)
 
 

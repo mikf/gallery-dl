@@ -70,11 +70,8 @@ class NitterExtractor(BaseExtractor):
 
                 if videos and not files:
                     if ytdl:
-                        append({
-                            "url": "ytdl:{}/i/status/{}".format(
-                                self.root, tweet["tweet_id"]),
-                            "extension": None,
-                        })
+                        url = f"ytdl:{self.root}/i/status/{tweet['tweet_id']}"
+                        append({"url": url, "extension": "mp4"})
                     else:
                         for url in text.extract_iter(
                                 attachments, 'data-url="', '"'):
@@ -205,10 +202,10 @@ class NitterExtractor(BaseExtractor):
 
         if self.user_id:
             self.user = self.request(
-                "{}/i/user/{}".format(self.root, self.user_id),
+                f"{self.root}/i/user/{self.user_id}",
                 allow_redirects=False,
             ).headers["location"].rpartition("/")[2]
-        base_url = url = "{}/{}{}".format(self.root, self.user, path)
+        base_url = url = f"{self.root}/{self.user}{path}"
 
         while True:
             tweets_html = self.request(url).text.split(
@@ -284,7 +281,7 @@ class NitterTweetExtractor(NitterExtractor):
     example = "https://nitter.net/USER/status/12345"
 
     def tweets(self):
-        url = "{}/i/status/{}".format(self.root, self.user)
+        url = f"{self.root}/i/status/{self.user}"
         html = text.extr(self.request(url).text, 'class="main-tweet', '''\
                 </div>
               </div></div></div>''')

@@ -58,7 +58,7 @@ bytes_to_intlist = list
 def intlist_to_bytes(xs):
     if not xs:
         return b""
-    return struct.pack("%dB" % len(xs), *xs)
+    return struct.pack(f"{len(xs)}B", *xs)
 
 
 def unpad_pkcs7(data):
@@ -615,7 +615,7 @@ def block_product(block_x, block_y):
 
     if len(block_x) != BLOCK_SIZE_BYTES or len(block_y) != BLOCK_SIZE_BYTES:
         raise ValueError(
-            "Length of blocks need to be %d bytes" % BLOCK_SIZE_BYTES)
+            f"Length of blocks need to be {BLOCK_SIZE_BYTES} bytes")
 
     block_r = [0xE1] + [0] * (BLOCK_SIZE_BYTES - 1)
     block_v = block_y[:]
@@ -639,7 +639,7 @@ def ghash(subkey, data):
 
     if len(data) % BLOCK_SIZE_BYTES:
         raise ValueError(
-            "Length of data should be %d bytes" % BLOCK_SIZE_BYTES)
+            f"Length of data should be {BLOCK_SIZE_BYTES} bytes")
 
     last_y = [0] * BLOCK_SIZE_BYTES
     for i in range(0, len(data), BLOCK_SIZE_BYTES):

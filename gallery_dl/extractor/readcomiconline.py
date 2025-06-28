@@ -112,7 +112,7 @@ class ReadcomiconlineComicExtractor(ReadcomiconlineBase, MangaExtractor):
         page , pos = text.extract(page, ' class="listing">', '</table>', pos)
 
         comic = comic.rpartition("information")[0].strip()
-        needle = ' title="Read {} '.format(comic)
+        needle = f' title="Read {comic} '
         comic = text.unescape(comic)
 
         for item in text.extract_iter(page, ' href="', ' comic online '):

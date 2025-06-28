@@ -32,7 +32,7 @@ class CyberdropAlbumExtractor(lolisafe.LolisafeAlbumExtractor):
             yield Message.Url, file["url"], file
 
     def fetch_album(self, album_id):
-        url = "{}/a/{}".format(self.root, album_id)
+        url = f"{self.root}/a/{album_id}"
         page = self.request(url).text
         extr = text.extract_from(page)
 
@@ -60,7 +60,7 @@ class CyberdropAlbumExtractor(lolisafe.LolisafeAlbumExtractor):
     def _extract_files(self, file_ids):
         for file_id in file_ids:
             try:
-                url = "{}/api/file/info/{}".format(self.root_api, file_id)
+                url = f"{self.root_api}/api/file/info/{file_id}"
                 file = self.request(url).json()
                 auth = self.request(file["auth_url"]).json()
                 file["url"] = auth["url"]

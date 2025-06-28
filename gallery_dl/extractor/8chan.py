@@ -78,7 +78,7 @@ class _8chanThreadExtractor(_8chanExtractor):
         self.cookies.set(self.cookies_tos_name(), "1", domain=self.root[8:])
 
         # fetch thread data
-        url = "{}/{}/res/{}.".format(self.root, board, thread)
+        url = f"{self.root}/{board}/res/{thread}."
         self.session.headers["Referer"] = url + "html"
         thread = self.request(url + "json").json()
         thread["postId"] = thread["threadId"]
@@ -116,19 +116,18 @@ class _8chanBoardExtractor(_8chanExtractor):
         self.cookies.set(self.cookies_tos_name(), "1", domain=self.root[8:])
 
         pnum = text.parse_int(pnum, 1)
-        url = "{}/{}/{}.json".format(self.root, board, pnum)
+        url = f"{self.root}/{board}/{pnum}.json"
         data = self.request(url).json()
         threads = data["threads"]
 
         while True:
             for thread in threads:
                 thread["_extractor"] = _8chanThreadExtractor
-                url = "{}/{}/res/{}.html".format(
-                    self.root, board, thread["threadId"])
+                url = f"{self.root}/{board}/res/{thread['threadId']}.html"
                 yield Message.Queue, url, thread
 
             pnum += 1
             if pnum > data["pageCount"]:
                 return
-            url = "{}/{}/{}.json".format(self.root, board, pnum)
+            url = f"{self.root}/{board}/{pnum}.json"
             threads = self.request(url).json()["threads"]

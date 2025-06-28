@@ -161,11 +161,8 @@ class MoebooruPopularExtractor(MoebooruExtractor):
         self.params = params = text.parse_query(self.query)
 
         if "year" in params:
-            date = "{:>04}-{:>02}-{:>02}".format(
-                params["year"],
-                params.get("month", "01"),
-                params.get("day", "01"),
-            )
+            date = (f"{params['year']:>04}-{params.get('month', '01'):>02}-"
+                    f"{params.get('day', '01'):>02}")
         else:
             date = datetime.date.today().isoformat()
 

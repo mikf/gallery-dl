@@ -21,7 +21,7 @@ class MyhentaigalleryGalleryExtractor(GalleryExtractor):
 
     def __init__(self, match):
         self.gallery_id = match[1]
-        url = "{}/g/{}".format(self.root, self.gallery_id)
+        url = f"{self.root}/g/{self.gallery_id}"
         GalleryExtractor.__init__(self, match, url)
 
     def _init(self):

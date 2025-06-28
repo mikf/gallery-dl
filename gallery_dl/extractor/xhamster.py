@@ -106,7 +106,7 @@ class XhamsterUserExtractor(XhamsterExtractor):
     example = "https://xhamster.com/users/USER/photos"
 
     def items(self):
-        url = "{}/users/{}/photos".format(self.root, self.groups[1])
+        url = f"{self.root}/users/{self.groups[1]}/photos"
         data = {"_extractor": XhamsterGalleryExtractor}
 
         while url:

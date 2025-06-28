@@ -139,8 +139,7 @@ class ClientTransaction():
             (now >> 24) & 0xFF,
         )
 
-        payload = "{}!{}!{}{}{}".format(
-            method, path, now, keyword, self.animation_key)
+        payload = f"{method}!{path}!{now}{keyword}{self.animation_key}"
         bytes_hash = hashlib.sha256(payload.encode()).digest()[:16]
 
         num = (random.randrange(16) << 4) + int((nowf - nowi) * 16.0)

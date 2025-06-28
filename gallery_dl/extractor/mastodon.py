@@ -202,7 +202,7 @@ class MastodonStatusExtractor(MastodonExtractor):
 
     def statuses(self):
         if self.groups[-2] is not None:
-            url = "{}/objects/{}".format(self.root, self.item)
+            url = f"{self.root}/objects/{self.item}"
             location = self.request_location(url)
             self.item = location.rpartition("/")[2]
         return (MastodonAPI(self).status(self.item),)
@@ -243,7 +243,7 @@ class MastodonAPI():
         if "@" in username:
             handle = "@" + username
         else:
-            handle = "@{}@{}".format(username, self.extractor.instance)
+            handle = f"@{username}@{self.extractor.instance}"
 
         for account in self.account_search(handle, 1):
             if account["acct"] == username:
@@ -263,7 +263,7 @@ class MastodonAPI():
 
     def account_following(self, account_id):
         """Accounts which the given account is following"""
-        endpoint = "/v1/accounts/{}/following".format(account_id)
+        endpoint = f"/v1/accounts/{account_id}/following"
         return self._pagination(endpoint, None)
 
     def account_lookup(self, username):
@@ -281,7 +281,7 @@ class MastodonAPI():
     def account_statuses(self, account_id, only_media=True,
                          exclude_replies=False):
         """Statuses posted to the given account"""
-        endpoint = "/v1/accounts/{}/statuses".format(account_id)
+        endpoint = f"/v1/accounts/{account_id}/statuses"
         params = {"only_media"     : "true" if only_media else "false",
                   "exclude_replies": "true" if exclude_replies else "false"}
         return self._pagination(endpoint, params)

@@ -87,7 +87,7 @@ class LivedoorBlogExtractor(LivedoorExtractor):
     example = "http://blog.livedoor.jp/USER/"
 
     def posts(self):
-        url = "{}/{}".format(self.root, self.user)
+        url = f"{self.root}/{self.user}"
         while url:
             extr = text.extract_from(self.request(url).text)
             while True:
@@ -111,8 +111,7 @@ class LivedoorPostExtractor(LivedoorExtractor):
         self.post_id = match[2]
 
     def posts(self):
-        url = "{}/{}/archives/{}.html".format(
-            self.root, self.user, self.post_id)
+        url = f"{self.root}/{self.user}/archives/{self.post_id}.html"
         extr = text.extract_from(self.request(url).text)
         data = extr('<rdf:RDF', '</rdf:RDF>')
         body = extr('class="article-body-inner">', 'class="article-footer">')

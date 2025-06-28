@@ -52,8 +52,7 @@ class CienArticleExtractor(CienExtractor):
     example = "https://ci-en.net/creator/123/article/12345"
 
     def items(self):
-        url = "{}/creator/{}/article/{}".format(
-            self.root, self.groups[0], self.groups[1])
+        url = f"{self.root}/creator/{self.groups[0]}/article/{self.groups[1]}"
         page = self.request(url, notfound="article").text
 
         files = self._extract_files(page)
@@ -121,7 +120,7 @@ class CienArticleExtractor(CienExtractor):
             auth = text.extr(video, ' auth-key="', '"')
 
             file = text.nameext_from_url(name)
-            file["url"] = "{}video-web.mp4?{}".format(path, auth)
+            file["url"] = f"{path}video-web.mp4?{auth}"
             file["type"] = "video"
             files.append(file)
 
@@ -163,7 +162,7 @@ class CienCreatorExtractor(CienExtractor):
     example = "https://ci-en.net/creator/123"
 
     def items(self):
-        url = "{}/creator/{}/article".format(self.root, self.groups[0])
+        url = f"{self.root}/creator/{self.groups[0]}/article"
         params = text.parse_query(self.groups[1])
         params["mode"] = "list"
         return self._pagination_articles(url, params)

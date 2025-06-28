@@ -41,8 +41,8 @@ class NaverPostExtractor(NaverBase, GalleryExtractor):
             self.blog_id = match[3]
             self.post_id = match[4]
 
-        url = "{}/PostView.nhn?blogId={}&logNo={}".format(
-            self.root, self.blog_id, self.post_id)
+        url = (f"{self.root}/PostView.nhn"
+               f"?blogId={self.blog_id}&logNo={self.post_id}")
         GalleryExtractor.__init__(self, match, url)
 
     def metadata(self, page):
@@ -138,13 +138,13 @@ class NaverBlogExtractor(NaverBase, Extractor):
 
     def items(self):
         # fetch first post number
-        url = "{}/PostList.nhn?blogId={}".format(self.root, self.blog_id)
+        url = f"{self.root}/PostList.nhn?blogId={self.blog_id}"
         post_num = text.extr(
             self.request(url).text, 'gnFirstLogNo = "', '"',
         )
 
         # setup params for API calls
-        url = "{}/PostViewBottomTitleListAsync.nhn".format(self.root)
+        url = f"{self.root}/PostViewBottomTitleListAsync.nhn"
         params = {
             "blogId"             : self.blog_id,
             "logNo"              : post_num or "0",
@@ -163,8 +163,8 @@ class NaverBlogExtractor(NaverBase, Extractor):
             data = self.request(url, params=params).json()
 
             for post in data["postList"]:
-                post["url"] = "{}/PostView.nhn?blogId={}&logNo={}".format(
-                    self.root, self.blog_id, post["logNo"])
+                post["url"] = (f"{self.root}/PostView.nhn?blogId="
+                               f"{self.blog_id}&logNo={post['logNo']}")
                 post["_extractor"] = NaverPostExtractor
                 yield Message.Queue, post["url"], post
 

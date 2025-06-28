@@ -23,7 +23,7 @@ class HentainexusGalleryExtractor(GalleryExtractor):
 
     def __init__(self, match):
         self.gallery_id = match[1]
-        url = "{}/view/{}".format(self.root, self.gallery_id)
+        url = f"{self.root}/view/{self.gallery_id}"
         GalleryExtractor.__init__(self, match, url)
 
     def metadata(self, page):
@@ -59,7 +59,7 @@ class HentainexusGalleryExtractor(GalleryExtractor):
         return data
 
     def images(self, _):
-        url = "{}/read/{}".format(self.root, self.gallery_id)
+        url = f"{self.root}/read/{self.gallery_id}"
         page = self.request(url).text
         imgs = util.json_loads(self._decode(text.extr(
             page, 'initReader("', '"')))
@@ -135,18 +135,18 @@ class HentainexusGalleryExtractor(GalleryExtractor):
 
         jt = ''
         if event:
-            jt += '({}) '.format(event)
+            jt += f'({event}) '
         if circle:
-            jt += '[{} ({})] '.format(circle, artist)
+            jt += f'[{circle} ({artist})] '
         else:
-            jt += '[{}] '.format(artist)
+            jt += f'[{artist}] '
         jt += title
         if parody.lower() != 'original work':
-            jt += ' ({})'.format(parody)
+            jt += f' ({parody})'
         if book:
-            jt += ' ({})'.format(book)
+            jt += f' ({book})'
         if magazine:
-            jt += ' ({})'.format(magazine)
+            jt += f' ({magazine})'
         return jt
 
 

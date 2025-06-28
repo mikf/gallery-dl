@@ -49,8 +49,7 @@ class SchalenetworkExtractor(Extractor):
                 return
 
             for entry in entries:
-                url = "{}/g/{}/{}".format(
-                    self.root, entry["id"], entry["public_key"])
+                url = f"{self.root}/g/{entry['id']}/{entry['public_key']}"
                 entry["_extractor"] = SchalenetworkGalleryExtractor
                 yield Message.Queue, url, entry
 
@@ -106,8 +105,7 @@ class SchalenetworkGalleryExtractor(SchalenetworkExtractor, GalleryExtractor):
             self.directory_fmt = ("{category}",)
 
     def metadata(self, _):
-        url = "{}/books/detail/{}/{}".format(
-            self.root_api, self.groups[1], self.groups[2])
+        url = f"{self.root_api}/books/detail/{self.groups[1]}/{self.groups[2]}"
         self.data = data = self.request(url, headers=self.headers).json()
         data["date"] = text.parse_timestamp(data["created_at"] // 1000)
 
@@ -142,11 +140,8 @@ class SchalenetworkGalleryExtractor(SchalenetworkExtractor, GalleryExtractor):
         data = self.data
         fmt = self._select_format(data["data"])
 
-        url = "{}/books/data/{}/{}/{}/{}".format(
-            self.root_api,
-            data["id"], data["public_key"],
-            fmt["id"], fmt["public_key"],
-        )
+        url = (f"{self.root_api}/books/data/{data['id']}/"
+               f"{data['public_key']}/{fmt['id']}/{fmt['public_key']}")
         params = {
             "v": data["updated_at"],
             "w": fmt["w"],
@@ -157,7 +152,7 @@ class SchalenetworkGalleryExtractor(SchalenetworkExtractor, GalleryExtractor):
             base = self.request(
                 url, method="POST", params=params, headers=self.headers,
             ).json()["base"]
-            url = "{}?v={}&w={}".format(base, data["updated_at"], fmt["w"])
+            url = f"{base}?v={data['updated_at']}&w={fmt['w']}"
             info = text.nameext_from_url(base)
             if not info["extension"]:
                 info["extension"] = "cbz"
