@@ -1778,6 +1778,16 @@ Description
     * ``false``: Match only URLs with known TLDs
 
 
+extractor.chzzk.offset
+----------------------
+Type
+    ``integer``
+Default
+    ``0``
+Description
+    Custom ``offset`` starting value when paginating over comments.
+
+
 extractor.cien.files
 --------------------
 Type
