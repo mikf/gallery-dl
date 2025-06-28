@@ -85,6 +85,7 @@ class ComickBase():
 
 class ComickChapterExtractor(ComickBase, ChapterExtractor):
     """Extractor for comick.io manga chapters"""
+    archive_fmt = "{chapter_hid}_{page}"
     pattern = BASE_PATTERN + r"/comic/([\w-]+)/(\w+-chapter-[^/?#]+)"
     example = "https://comick.io/comic/MANGA/ID-chapter-123-en"
 
