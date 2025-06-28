@@ -197,7 +197,7 @@ class SmugmugAPI(oauth.OAuth1API):
         return self._expansion(endpoint, "Node", params)
 
     def _call(self, endpoint, params=None, domain=API_DOMAIN):
-        url = "https://{}/api/v2/{}".format(domain, endpoint)
+        url = f"https://{domain}/api/v2/{endpoint}"
         params = params or {}
         if self.api_key:
             params["APIKey"] = self.api_key

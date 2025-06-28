@@ -88,7 +88,7 @@ class VipergirlsExtractor(Extractor):
     def _login_impl(self, username, password):
         self.log.info("Logging in as %s", username)
 
-        url = "{}/login.php?do=login".format(self.root)
+        url = f"{self.root}/login.php?do=login"
         data = {
             "vb_login_username": username,
             "vb_login_password": password,
@@ -127,7 +127,7 @@ class VipergirlsThreadExtractor(VipergirlsExtractor):
         self.thread_id, self.page = match.groups()
 
     def posts(self):
-        url = "{}/vr.php?t={}".format(self.root, self.thread_id)
+        url = f"{self.root}/vr.php?t={self.thread_id}"
         return self.request_xml(url)
 
 
@@ -144,5 +144,5 @@ class VipergirlsPostExtractor(VipergirlsExtractor):
         self.page = 0
 
     def posts(self):
-        url = "{}/vr.php?p={}".format(self.root, self.post_id)
+        url = f"{self.root}/vr.php?p={self.post_id}"
         return self.request_xml(url)

@@ -381,7 +381,7 @@ class TumblrAPI(oauth.OAuth1API):
         try:
             return self.BLOG_CACHE[blog]
         except KeyError:
-            endpoint = "/v2/blog/{}/info".format(blog)
+            endpoint = f"/v2/blog/{blog}/info"
             params = {"api_key": self.api_key} if self.api_key else None
             self.BLOG_CACHE[blog] = blog = self._call(endpoint, params)["blog"]
             return blog
@@ -389,9 +389,9 @@ class TumblrAPI(oauth.OAuth1API):
     def avatar(self, blog, size="512"):
         """Retrieve a blog avatar"""
         if self.api_key:
-            return "{}/v2/blog/{}/avatar/{}?api_key={}".format(
-                self.ROOT, blog, size, self.api_key)
-        endpoint = "/v2/blog/{}/avatar".format(blog)
+            return (f"{self.ROOT}/v2/blog/{blog}/avatar/{size}"
+                    f"?api_key={self.api_key}")
+        endpoint = f"/v2/blog/{blog}/avatar"
         params = {"size": size}
         return self._call(
             endpoint, params, allow_redirects=False)["avatar_url"]
@@ -407,12 +407,12 @@ class TumblrAPI(oauth.OAuth1API):
         if self.before and params["offset"]:
             self.log.warning("'offset' and 'date-max' cannot be used together")
 
-        endpoint = "/v2/blog/{}/posts".format(blog)
+        endpoint = f"/v2/blog/{blog}/posts"
         return self._pagination(endpoint, params, blog=blog, cache=True)
 
     def likes(self, blog):
         """Retrieve liked posts"""
-        endpoint = "/v2/blog/{}/likes".format(blog)
+        endpoint = f"/v2/blog/{blog}/likes"
         params = {"limit": "50", "before": self.before}
         if self.api_key:
             params["api_key"] = self.api_key
@@ -501,7 +501,7 @@ class TumblrAPI(oauth.OAuth1API):
                     t = (datetime.now() + timedelta(0, float(reset))).time()
                     raise exception.StopExtraction(
                         "Aborting - Rate limit will reset at %s",
-                        "{:02}:{:02}:{:02}".format(t.hour, t.minute, t.second))
+                        f"{t.hour:02}:{t.minute:02}:{t.second:02}")
 
                 # hourly rate limit
                 reset = response.headers.get("x-ratelimit-perhour-reset")

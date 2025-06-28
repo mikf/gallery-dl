@@ -22,7 +22,7 @@ class SlickpicExtractor(Extractor):
     def __init__(self, match):
         Extractor.__init__(self, match)
         self.user = match[1]
-        self.root = "https://{}.slickpic.com".format(self.user)
+        self.root = f"https://{self.user}.slickpic.com"
 
 
 class SlickpicAlbumExtractor(SlickpicExtractor):
@@ -72,7 +72,7 @@ class SlickpicAlbumExtractor(SlickpicExtractor):
             yield Message.Url, url, img
 
     def metadata(self):
-        url = "{}/albums/{}/?wallpaper".format(self.root, self.album)
+        url = f"{self.root}/albums/{self.album}/?wallpaper"
         extr = text.extract_from(self.request(url).text)
 
         title = text.unescape(extr("<title>", "</title>"))

@@ -31,8 +31,7 @@ class FapachiPostExtractor(Extractor):
             "user": self.user,
             "id"  : self.id,
         }
-        page = self.request("{}/{}/media/{}".format(
-            self.root, self.user, self.id)).text
+        page = self.request(f"{self.root}/{self.user}/media/{self.id}").text
         url = self.root + text.extract(
             page, 'data-src="', '"', page.index('class="media-img'))[0]
         yield Message.Directory, data
@@ -56,8 +55,8 @@ class FapachiUserExtractor(Extractor):
     def items(self):
         data = {"_extractor": FapachiPostExtractor}
         while True:
-            page = self.request("{}/{}/page/{}".format(
-                self.root, self.user, self.num)).text
+            url = f"{self.root}/{self.user}/page/{self.num}"
+            page = self.request(url).text
             for post in text.extract_iter(page, 'model-media-prew">', ">"):
                 path = text.extr(post, '<a href="', '"')
                 if path:

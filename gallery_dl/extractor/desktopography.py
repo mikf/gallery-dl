@@ -49,7 +49,7 @@ class DesktopographyExhibitionExtractor(DesktopographyExtractor):
         self.year = match[1]
 
     def items(self):
-        url = "{}/exhibition-{}/".format(self.root, self.year)
+        url = f"{self.root}/exhibition-{self.year}/"
         base_entry_url = "https://desktopography.net/portfolios/"
         page = self.request(url).text
 
@@ -78,7 +78,7 @@ class DesktopographyEntryExtractor(DesktopographyExtractor):
         self.entry = match[1]
 
     def items(self):
-        url = "{}/portfolios/{}".format(self.root, self.entry)
+        url = f"{self.root}/portfolios/{self.entry}"
         page = self.request(url).text
 
         entry_data = {"entry": self.entry}

@@ -135,7 +135,7 @@ class Ao3WorkExtractor(Ao3Extractor):
         self.login()
 
         work_id = self.groups[0]
-        url = "{}/works/{}".format(self.root, work_id)
+        url = f"{self.root}/works/{work_id}"
         response = self.request(url, notfound="work")
 
         if response.url.endswith("/users/login?restricted=true"):
@@ -256,7 +256,7 @@ class Ao3UserExtractor(Dispatch, Ao3Extractor):
     example = "https://archiveofourown.org/users/USER"
 
     def items(self):
-        base = "{}/users/{}/".format(self.root, self.groups[0])
+        base = f"{self.root}/users/{self.groups[0]}/"
         return self._dispatch_extractors((
             (Ao3UserWorksExtractor   , base + "works"),
             (Ao3UserSeriesExtractor  , base + "series"),

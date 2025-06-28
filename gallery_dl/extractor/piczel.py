@@ -71,7 +71,7 @@ class PiczelUserExtractor(PiczelExtractor):
     example = "https://piczel.tv/gallery/USER"
 
     def posts(self):
-        url = "{}/api/users/{}/gallery".format(self.root_api, self.groups[0])
+        url = f"{self.root_api}/api/users/{self.groups[0]}/gallery"
         return self._pagination(url)
 
 
@@ -84,7 +84,7 @@ class PiczelFolderExtractor(PiczelExtractor):
     example = "https://piczel.tv/gallery/USER/12345"
 
     def posts(self):
-        url = "{}/api/gallery/folder/{}".format(self.root_api, self.groups[0])
+        url = f"{self.root_api}/api/gallery/folder/{self.groups[0]}"
         return self._pagination(url)
 
 
@@ -95,5 +95,5 @@ class PiczelImageExtractor(PiczelExtractor):
     example = "https://piczel.tv/gallery/image/12345"
 
     def posts(self):
-        url = "{}/api/gallery/{}".format(self.root_api, self.groups[0])
+        url = f"{self.root_api}/api/gallery/{self.groups[0]}"
         return (self.request(url).json(),)

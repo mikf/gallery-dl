@@ -74,8 +74,7 @@ class _8musesAlbumExtractor(Extractor):
                 return
             path, _, num = self.path.rstrip("/").rpartition("/")
             path = path if num.isdecimal() else self.path
-            url = "{}{}/{}{}".format(
-                self.root, path, data["page"] + 1, self.params)
+            url = f"{self.root}{path}/{data['page'] + 1}{self.params}"
 
     def _make_album(self, album):
         return {

@@ -149,7 +149,7 @@ class HttpDownloader(DownloaderBase):
             #   partial content
             file_size = pathfmt.part_size()
             if file_size:
-                headers["Range"] = "bytes={}-".format(file_size)
+                headers["Range"] = f"bytes={file_size}-"
 
             # connect to (remote) source
             try:
@@ -167,7 +167,7 @@ class HttpDownloader(DownloaderBase):
                     reason = exc.args[0].reason
                     cls = reason.__class__.__name__
                     pre, _, err = str(reason.args[-1]).partition(":")
-                    msg = "{}: {}".format(cls, (err or pre).lstrip())
+                    msg = f"{cls}: {(err or pre).lstrip()}"
                 except Exception:
                     msg = str(exc)
                 continue
@@ -189,7 +189,7 @@ class HttpDownloader(DownloaderBase):
             elif code == 416 and file_size:  # Requested Range Not Satisfiable
                 break
             else:
-                msg = "'{} {}' for '{}'".format(code, response.reason, url)
+                msg = f"'{code} {response.reason}' for '{url}'"
 
                 challenge = util.detect_challenge(response)
                 if challenge is not None:
@@ -339,8 +339,7 @@ class HttpDownloader(DownloaderBase):
 
                 # check file size
                 if size and fp.tell() < size:
-                    msg = "file size mismatch ({} < {})".format(
-                        fp.tell(), size)
+                    msg = f"file size mismatch ({fp.tell()} < {size})"
                     output.stderr_write("\n")
                     continue
 

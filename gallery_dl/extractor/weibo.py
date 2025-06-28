@@ -151,17 +151,16 @@ class WeiboExtractor(Extractor):
             return media["play_info"].copy()
 
     def _status_by_id(self, status_id):
-        url = "{}/ajax/statuses/show?id={}".format(self.root, status_id)
+        url = f"{self.root}/ajax/statuses/show?id={status_id}"
         return self.request(url).json()
 
     def _user_id(self):
         if len(self.user) >= 10 and self.user.isdecimal():
             return self.user[-10:]
         else:
-            url = "{}/ajax/profile/info?{}={}".format(
-                self.root,
-                "screen_name" if self._prefix == "n" else "custom",
-                self.user)
+            url = (f"{self.root}/ajax/profile/info?"
+                   f"{'screen_name' if self._prefix == 'n' else 'custom'}="
+                   f"{self.user}")
             return self.request(url).json()["data"]["user"]["idstr"]
 
     def _pagination(self, endpoint, params):
@@ -169,7 +168,7 @@ class WeiboExtractor(Extractor):
         headers = {
             "X-Requested-With": "XMLHttpRequest",
             "X-XSRF-TOKEN": None,
-            "Referer": "{}/u/{}".format(self.root, params["uid"]),
+            "Referer": f"{self.root}/u/{params['uid']}",
         }
 
         while True:
@@ -235,7 +234,7 @@ class WeiboExtractor(Extractor):
             "a"    : "incarnate",
             "t"    : data["tid"],
             "w"    : "3" if data.get("new_tid") else "2",
-            "c"    : "{:>03}".format(data.get("confidence") or 100),
+            "c"    : f"{data.get('confidence') or 100:>03}",
             "gc"   : "",
             "cb"   : "cross_domain",
             "from" : "weibo",
@@ -257,7 +256,7 @@ class WeiboUserExtractor(WeiboExtractor):
     #     pass
 
     def items(self):
-        base = "{}/u/{}?tabtype=".format(self.root, self._user_id())
+        base = f"{self.root}/u/{self._user_id()}?tabtype="
         return Dispatch._dispatch_extractors(self, (
             (WeiboHomeExtractor    , base + "home"),
             (WeiboFeedExtractor    , base + "feed"),

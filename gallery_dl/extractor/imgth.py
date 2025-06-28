@@ -21,7 +21,7 @@ class ImgthGalleryExtractor(GalleryExtractor):
 
     def __init__(self, match):
         self.gallery_id = gid = match[1]
-        url = "{}/gallery/{}/g/".format(self.root, gid)
+        url = f"{self.root}/gallery/{gid}/g/"
         GalleryExtractor.__init__(self, match, url)
 
     def metadata(self, page):
@@ -45,12 +45,11 @@ class ImgthGalleryExtractor(GalleryExtractor):
             thumbs = text.extr(page, '<ul class="thumbnails">', '</ul>')
             for url in text.extract_iter(thumbs, '<img src="', '"'):
                 path = url.partition("/thumbs/")[2]
-                yield ("{}/images/{}".format(self.root, path), None)
+                yield (f"{self.root}/images/{path}", None)
 
             if '<li class="next">' not in page:
                 return
 
             pnum += 1
-            url = "{}/gallery/{}/g/page/{}".format(
-                self.root, self.gallery_id, pnum)
+            url = f"{self.root}/gallery/{self.gallery_id}/g/page/{pnum}"
             page = self.request(url).text

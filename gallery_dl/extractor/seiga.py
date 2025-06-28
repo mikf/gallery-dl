@@ -42,7 +42,7 @@ class SeigaExtractor(Extractor):
 
     def get_image_url(self, image_id):
         """Get url for an image with id 'image_id'"""
-        url = "{}/image/source/{}".format(self.root, image_id)
+        url = f"{self.root}/image/source/{image_id}"
         location = self.request_location(url, notfound="image")
         if "nicovideo.jp/login" in location:
             raise exception.StopExtraction(
@@ -81,7 +81,7 @@ class SeigaExtractor(Extractor):
         if "/mfa" in response.url:
             page = response.text
             email = text.extr(page, 'class="userAccount">', "<")
-            code = self.input("Email Confirmation Code ({}): ".format(email))
+            code = self.input(f"Email Confirmation Code ({email}): ")
 
             data = {
                 "otp": code,
@@ -145,7 +145,7 @@ class SeigaUserExtractor(SeigaExtractor):
         }
 
     def get_images(self):
-        url = "{}/user/illust/{}".format(self.root, self.user_id)
+        url = f"{self.root}/user/illust/{self.user_id}"
         params = {"sort": self.order, "page": self.start_page,
                   "target": "illust_all"}
 
@@ -197,7 +197,7 @@ class SeigaImageExtractor(SeigaExtractor):
         self.cookies.set(
             "skip_fetish_warning", "1", domain="seiga.nicovideo.jp")
 
-        url = "{}/seiga/im{}".format(self.root, self.image_id)
+        url = f"{self.root}/seiga/im{self.image_id}"
         page = self.request(url, notfound="image").text
 
         data = text.extract_all(page, (

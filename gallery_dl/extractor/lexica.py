@@ -43,7 +43,7 @@ class LexicaSearchExtractor(Extractor):
         url = self.root + "/api/infinite-prompts"
         headers = {
             "Accept" : "application/json, text/plain, */*",
-            "Referer": "{}/?q={}".format(self.root, self.query),
+            "Referer": f"{self.root}/?q={self.query}",
         }
         json = {
             "text"      : self.text,

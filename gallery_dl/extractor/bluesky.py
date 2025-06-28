@@ -62,9 +62,8 @@ class BlueskyExtractor(Extractor):
                 yield Message.Directory, post
                 if files:
                     did = post["author"]["did"]
-                    base = (
-                        "{}/xrpc/com.atproto.sync.getBlob?did={}&cid=".format(
-                            self.api.service_endpoint(did), did))
+                    base = (f"{self.api.service_endpoint(did)}/xrpc"
+                            f"/com.atproto.sync.getBlob?did={did}&cid=")
                     for post["num"], file in enumerate(files, 1):
                         post.update(file)
                         yield Message.Url, base + file["filename"], post
@@ -215,7 +214,7 @@ class BlueskyUserExtractor(Dispatch, BlueskyExtractor):
     example = "https://bsky.app/profile/HANDLE"
 
     def items(self):
-        base = "{}/profile/{}/".format(self.root, self.groups[0])
+        base = f"{self.root}/profile/{self.groups[0]}/"
         default = ("posts" if self.config("quoted", False) or
                    self.config("reposts", False) else "media")
         return self._dispatch_extractors((
@@ -411,11 +410,9 @@ class BlueskyAPI():
 
     def get_feed(self, actor, feed):
         endpoint = "app.bsky.feed.getFeed"
-        params = {
-            "feed" : "at://{}/app.bsky.feed.generator/{}".format(
-                self._did_from_actor(actor), feed),
-            "limit": "100",
-        }
+        uri = (f"at://{self._did_from_actor(actor)}"
+               f"/app.bsky.feed.generator/{feed}")
+        params = {"feed": uri, "limit": "100"}
         return self._pagination(endpoint, params)
 
     def get_follows(self, actor):
@@ -428,16 +425,13 @@ class BlueskyAPI():
 
     def get_list_feed(self, actor, list):
         endpoint = "app.bsky.feed.getListFeed"
-        params = {
-            "list" : "at://{}/app.bsky.graph.list/{}".format(
-                self._did_from_actor(actor), list),
-            "limit": "100",
-        }
+        uri = f"at://{self._did_from_actor(actor)}/app.bsky.graph.list/{list}"
+        params = {"list" : uri, "limit": "100"}
         return self._pagination(endpoint, params)
 
     def get_post_thread(self, actor, post_id):
-        uri = "at://{}/app.bsky.feed.post/{}".format(
-            self._did_from_actor(actor), post_id)
+        uri = (f"at://{self._did_from_actor(actor)}"
+               f"/app.bsky.feed.post/{post_id}")
         depth = self.extractor.config("depth", "0")
         return self.get_post_thread_uri(uri, depth)
 
@@ -547,15 +541,15 @@ class BlueskyAPI():
                 "password"  : self.password,
             }
 
-        url = "{}/xrpc/{}".format(self.root, endpoint)
+        url = f"{self.root}/xrpc/{endpoint}"
         response = self.extractor.request(
             url, method="POST", headers=headers, json=data, fatal=None)
         data = response.json()
 
         if response.status_code != 200:
             self.log.debug("Server response: %s", data)
-            raise exception.AuthenticationError('"{}: {}"'.format(
-                data.get("error"), data.get("message")))
+            raise exception.AuthenticationError(
+                f"\"{data.get('error')}: {data.get('message')}\"")
 
         _refresh_token_cache.update(self.username, data["refreshJwt"])
         return "Bearer " + data["accessJwt"]
@@ -563,7 +557,7 @@ class BlueskyAPI():
     def _call(self, endpoint, params, root=None):
         if root is None:
             root = self.root
-        url = "{}/xrpc/{}".format(root, endpoint)
+        url = f"{root}/xrpc/{endpoint}"
 
         while True:
             self.authenticate()
@@ -577,13 +571,12 @@ class BlueskyAPI():
                 self.extractor.wait(until=until)
                 continue
 
+            msg = "API request failed"
             try:
                 data = response.json()
-                msg = "API request failed ('{}: {}')".format(
-                    data["error"], data["message"])
+                msg = f"{msg} ('{data['error']}: {data['message']}')"
             except Exception:
-                msg = "API request failed ({} {})".format(
-                    response.status_code, response.reason)
+                msg = f"{msg} ({response.status_code} {response.reason})"
 
             self.extractor.log.debug("Server response: %s", response.text)
             raise exception.StopExtraction(msg)

@@ -122,7 +122,7 @@ class Job():
             if parents:
                 sub = extr.subcategory
                 for category in parents:
-                    cat = "{}>{}".format(category, extr.category)
+                    cat = f"{category}>{extr.category}"
                     cfgpath.append((cat, sub))
                     cfgpath.append((category + ">*", sub))
                 cfgpath.append((extr.category, sub))
@@ -779,7 +779,7 @@ class KeywordJob(Job):
         if markers is None:
             markers = {markerid}
         elif markerid in markers:
-            write("{}\n  <circular reference>\n".format(prefix[:-2]))
+            write(f"{prefix[:-2]}\n  <circular reference>\n")
             return  # ignore circular reference
         else:
             markers.add(markerid)
@@ -805,7 +805,7 @@ class KeywordJob(Job):
 
             else:
                 # string or number
-                write("{}\n  {}\n".format(key, value))
+                write(f"{key}\n  {value}\n")
 
         markers.remove(markerid)
 
@@ -864,20 +864,18 @@ class InfoJob(Job):
         return 0
 
     def _print_multi(self, title, *values):
-        stdout_write("{}\n  {}\n\n".format(
-            title, " / ".join(map(util.json_dumps, values))))
+        stdout_write(
+            f"{title}\n  {' / '.join(map(util.json_dumps, values))}\n\n")
 
     def _print_config(self, title, optname, value):
         optval = self.extractor.config(optname, util.SENTINEL)
         if optval is not util.SENTINEL:
             stdout_write(
-                "{} (custom):\n  {}\n{} (default):\n  {}\n\n".format(
-                    title, util.json_dumps(optval),
-                    title, util.json_dumps(value)))
+                f"{title} (custom):\n  {util.json_dumps(optval)}\n"
+                f"{title} (default):\n  {util.json_dumps(value)}\n\n")
         elif value:
             stdout_write(
-                "{} (default):\n  {}\n\n".format(
-                    title, util.json_dumps(value)))
+                f"{title} (default):\n  {util.json_dumps(value)}\n\n")
 
 
 class DataJob(Job):

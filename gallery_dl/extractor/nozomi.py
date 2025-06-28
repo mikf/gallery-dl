@@ -32,8 +32,8 @@ class NozomiExtractor(Extractor):
         data = self.metadata()
 
         for post_id in map(str, self.posts()):
-            url = "https://j.{}/post/{}/{}/{}.json".format(
-                self.domain, post_id[-1], post_id[-3:-1], post_id)
+            url = (f"https://j.{self.domain}/post"
+                   f"/{post_id[-1]}/{post_id[-3:-1]}/{post_id}.json")
             response = self.request(url, fatal=False)
 
             if response.status_code >= 400:
@@ -77,8 +77,8 @@ class NozomiExtractor(Extractor):
                     ext = "webp"
 
                 post["extension"] = ext
-                post["url"] = url = "https://{}.{}/{}/{}/{}.{}".format(
-                    subdomain, self.domain, did[-1], did[-3:-1], did, ext)
+                post["url"] = url = (f"https://{subdomain}.{self.domain}"
+                                     f"/{did[-1]}/{did[-3:-1]}/{did}.{ext}")
                 yield Message.Url, url, post
 
     def posts(self):
@@ -86,7 +86,7 @@ class NozomiExtractor(Extractor):
         offset = (text.parse_int(self.pnum, 1) - 1) * 256
 
         while True:
-            headers = {"Range": "bytes={}-{}".format(offset, offset+255)}
+            headers = {"Range": f"bytes={offset}-{offset + 255}"}
             response = self.request(url, headers=headers)
             yield from decode_nozomi(response.content)
 
@@ -126,7 +126,7 @@ class NozomiIndexExtractor(NozomiExtractor):
     def __init__(self, match):
         NozomiExtractor.__init__(self, match)
         index, self.pnum = match.groups()
-        self.nozomi = "/{}.nozomi".format(index or "index")
+        self.nozomi = f"/{index or 'index'}.nozomi"
 
 
 class NozomiTagExtractor(NozomiExtractor):
@@ -141,7 +141,7 @@ class NozomiTagExtractor(NozomiExtractor):
         NozomiExtractor.__init__(self, match)
         tags, self.pnum = match.groups()
         self.tags = text.unquote(tags)
-        self.nozomi = "/nozomi/{}.nozomi".format(self.tags)
+        self.nozomi = f"/nozomi/{self.tags}.nozomi"
 
     def metadata(self):
         return {"search_tags": self.tags}
@@ -168,7 +168,7 @@ class NozomiSearchExtractor(NozomiExtractor):
         negative = []
 
         def nozomi(path):
-            url = "https://j.{}/{}.nozomi".format(self.domain, path)
+            url = f"https://j.{self.domain}/{path}.nozomi"
             return decode_nozomi(self.request(url).content)
 
         for tag in self.tags:

@@ -143,10 +143,10 @@ class VkPhotosExtractor(VkExtractor):
         if self.user_id:
             user_id = self.user_id
             prefix = "public" if user_id[0] == "-" else "id"
-            url = "{}/{}{}".format(self.root, prefix, user_id.lstrip("-"))
+            url = f"{self.root}/{prefix}{user_id.lstrip('-')}"
             data = self._extract_profile(url)
         else:
-            url = "{}/{}".format(self.root, self.user_name)
+            url = f"{self.root}/{self.user_name}"
             data = self._extract_profile(url)
             self.user_id = data["user"]["id"]
         return data
@@ -185,8 +185,7 @@ class VkAlbumExtractor(VkExtractor):
         self.user_id, self.album_id = match.groups()
 
     def photos(self):
-        return self._pagination("album{}_{}".format(
-            self.user_id, self.album_id))
+        return self._pagination(f"album{self.user_id}_{self.album_id}")
 
     def metadata(self):
         return {
@@ -207,7 +206,7 @@ class VkTaggedExtractor(VkExtractor):
         self.user_id = match[1]
 
     def photos(self):
-        return self._pagination("tag{}".format(self.user_id))
+        return self._pagination(f"tag{self.user_id}")
 
     def metadata(self):
         return {"user": {"id": self.user_id}}

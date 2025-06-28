@@ -153,8 +153,8 @@ class InkbunnyFavoriteExtractor(InkbunnyExtractor):
 
     def metadata(self):
         # Lookup fav user ID as username
-        url = "{}/userfavorites_process.php?favs_user_id={}".format(
-            self.root, self.user_id)
+        url = (f"{self.root}/userfavorites_process.php"
+               f"?favs_user_id={self.user_id}")
         page = self.request(url).text
         user_link = text.extr(page, '<a rel="author"', '</a>')
         favs_username = text.extr(user_link, 'href="/', '"')
@@ -221,7 +221,7 @@ class InkbunnySearchExtractor(InkbunnyExtractor):
         favsby = pop("favsby", None)
         if favsby:
             # get user_id from user profile
-            url = "{}/{}".format(self.root, favsby)
+            url = f"{self.root}/{favsby}"
             page = self.request(url).text
             user_id = text.extr(page, "?user_id=", "'")
             params["favs_user_id"] = user_id.partition("&")[0]

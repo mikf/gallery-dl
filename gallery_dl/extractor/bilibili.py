@@ -30,7 +30,7 @@ class BilibiliUserArticlesExtractor(BilibiliExtractor):
     def items(self):
         for article in self.api.user_articles(self.groups[0]):
             article["_extractor"] = BilibiliArticleExtractor
-            url = "{}/opus/{}".format(self.root, article["opus_id"])
+            url = f"{self.root}/opus/{article['opus_id']}"
             yield Message.Queue, url, article
 
 
@@ -98,7 +98,7 @@ class BilibiliUserArticlesFavoriteExtractor(BilibiliExtractor):
     def items(self):
         for article in self.api.user_favlist():
             article["_extractor"] = BilibiliArticleExtractor
-            url = "{}/opus/{}".format(self.root, article["opus_id"])
+            url = f"{self.root}/opus/{article['opus_id']}"
             yield Message.Queue, url, article
 
 

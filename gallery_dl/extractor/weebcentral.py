@@ -22,7 +22,7 @@ class WeebcentralBase():
 
     @memcache(keyarg=1)
     def _extract_manga_data(self, manga_id):
-        url = "{}/series/{}".format(self.root, manga_id)
+        url = f"{self.root}/series/{manga_id}"
         page = self.request(url).text
         extr = text.extract_from(page)
 
@@ -100,7 +100,7 @@ class WeebcentralMangaExtractor(WeebcentralBase, MangaExtractor):
 
     def chapters(self, _):
         manga_id = self.groups[0]
-        referer = "{}/series/{}".format(self.root, manga_id)
+        referer = f"{self.root}/series/{manga_id}"
         url = referer + "/full-chapter-list"
         headers = {
             "Accept"        : "*/*",

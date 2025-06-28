@@ -73,7 +73,7 @@ class GelbooruBase():
                 if id:
                     tag = "id:" + op
                     tags = [t for t in tags if not t.startswith(tag)]
-                tags = "{} id:{}".format(" ".join(tags), op)
+                tags = f"{' '.join(tags)} id:{op}"
 
         while True:
             posts = self._api_request(params)
@@ -113,7 +113,7 @@ class GelbooruBase():
             post["_fallback"] = (url,)
             md5 = post["md5"]
             root = text.root_from_url(post["preview_url"])
-            path = "/images/{}/{}/{}.webm".format(md5[0:2], md5[2:4], md5)
+            path = f"/images/{md5[0:2]}/{md5[2:4]}/{md5}.webm"
             url = root + path
         return url
 

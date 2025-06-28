@@ -36,8 +36,8 @@ class ImgurExtractor(Extractor):
         elif image["is_animated"] and self.mp4 and image["ext"] == "gif":
             image["ext"] = "mp4"
 
-        image["url"] = url = "https://i.imgur.com/{}.{}".format(
-            image["id"], image["ext"])
+        image["url"] = url = \
+            f"https://i.imgur.com/{image['id']}.{image['ext']}"
         image["date"] = text.parse_datetime(image["created_at"])
         image["_http_validate"] = self._validate
         text.nameext_from_url(url, image)
@@ -131,10 +131,10 @@ class ImgurGalleryExtractor(ImgurExtractor):
 
     def items(self):
         if self.api.gallery(self.key)["is_album"]:
-            url = "{}/a/{}".format(self.root, self.key)
+            url = f"{self.root}/a/{self.key}"
             extr = ImgurAlbumExtractor
         else:
-            url = "{}/{}".format(self.root, self.key)
+            url = f"{self.root}/{self.key}"
             extr = ImgurImageExtractor
         yield Message.Queue, url, {"_extractor": extr}
 
@@ -234,16 +234,15 @@ class ImgurAPI():
         self.headers = {"Authorization": "Client-ID " + self.client_id}
 
     def account_submissions(self, account):
-        endpoint = "/3/account/{}/submissions".format(account)
+        endpoint = f"/3/account/{account}/submissions"
         return self._pagination(endpoint)
 
     def account_favorites(self, account):
-        endpoint = "/3/account/{}/gallery_favorites".format(account)
+        endpoint = f"/3/account/{account}/gallery_favorites"
         return self._pagination(endpoint)
 
     def account_favorites_folder(self, account, folder_id):
-        endpoint = "/3/account/{}/folders/{}/favorites".format(
-            account, folder_id)
+        endpoint = f"/3/account/{account}/folders/{folder_id}/favorites"
         return self._pagination_v2(endpoint)
 
     def accounts_me_allposts(self):
@@ -270,11 +269,11 @@ class ImgurAPI():
         return self._pagination(endpoint, params)
 
     def gallery_subreddit(self, subreddit):
-        endpoint = "/3/gallery/r/{}".format(subreddit)
+        endpoint = f"/3/gallery/r/{subreddit}"
         return self._pagination(endpoint)
 
     def gallery_tag(self, tag):
-        endpoint = "/3/gallery/t/{}".format(tag)
+        endpoint = f"/3/gallery/t/{tag}"
         return self._pagination(endpoint, key="items")
 
     def image(self, image_hash):
@@ -308,7 +307,7 @@ class ImgurAPI():
         num = 0
 
         while True:
-            data = self._call("{}/{}".format(endpoint, num), params)["data"]
+            data = self._call(f"{endpoint}/{num}", params)["data"]
             if key:
                 data = data[key]
             if not data:

@@ -112,8 +112,7 @@ class DanbooruExtractor(BaseExtractor):
     def items_artists(self):
         for artist in self.artists():
             artist["_extractor"] = DanbooruTagExtractor
-            url = "{}/posts?tags={}".format(
-                self.root, text.quote(artist["name"]))
+            url = f"{self.root}/posts?tags={text.quote(artist['name'])}"
             yield Message.Queue, url, artist
 
     def metadata(self):
@@ -156,7 +155,7 @@ class DanbooruExtractor(BaseExtractor):
                 return
 
             if prefix:
-                params["page"] = "{}{}".format(prefix, posts[-1]["id"])
+                params["page"] = f"{prefix}{posts[-1]['id']}"
             elif params["page"]:
                 params["page"] += 1
             else:
@@ -164,8 +163,8 @@ class DanbooruExtractor(BaseExtractor):
             first = False
 
     def _ugoira_frames(self, post):
-        data = self.request_json("{}/posts/{}.json?only=media_metadata".format(
-            self.root, post["id"])
+        data = self.request_json(
+            f"{self.root}/posts/{post['id']}.json?only=media_metadata"
         )["media_metadata"]["metadata"]
 
         if "Ugoira:FrameMimeType" in data:
@@ -185,15 +184,15 @@ class DanbooruExtractor(BaseExtractor):
 
         order = self.config("order-posts")
         if not order or order in {"asc", "pool", "pool_asc", "asc_pool"}:
-            params = {"tags": "ord{}:{}".format(ctype, cid)}
+            params = {"tags": f"ord{ctype}:{cid}"}
         elif order in {"id", "desc_id", "id_desc"}:
-            params = {"tags": "{}:{}".format(ctype, cid)}
+            params = {"tags": f"{ctype}:{cid}"}
             prefix = "b"
         elif order in {"desc", "desc_pool", "pool_desc"}:
-            params = {"tags": "ord{}:{}".format(ctype, cid)}
+            params = {"tags": f"ord{ctype}:{cid}"}
             reverse = True
         elif order in {"asc_id", "id_asc"}:
-            params = {"tags": "{}:{}".format(ctype, cid)}
+            params = {"tags": f"{ctype}:{cid}"}
             reverse = True
 
         posts = self._pagination("/posts.json", params, prefix)
@@ -204,7 +203,7 @@ class DanbooruExtractor(BaseExtractor):
             return self._collection_enumerate(posts)
 
     def _collection_metadata(self, cid, ctype, cname=None):
-        url = "{}/{}s/{}.json".format(self.root, cname or ctype, cid)
+        url = f"{self.root}/{cname or ctype}s/{cid}.json"
         collection = self.request_json(url)
         collection["name"] = collection["name"].replace("_", " ")
         self.post_ids = collection.pop("post_ids", ())
@@ -320,7 +319,7 @@ class DanbooruPostExtractor(DanbooruExtractor):
     example = "https://danbooru.donmai.us/posts/12345"
 
     def posts(self):
-        url = "{}/posts/{}.json".format(self.root, self.groups[-1])
+        url = f"{self.root}/posts/{self.groups[-1]}.json"
         post = self.request_json(url)
         if self.includes:
             params = {"only": self.includes}
@@ -362,7 +361,7 @@ class DanbooruArtistExtractor(DanbooruExtractor):
     items = DanbooruExtractor.items_artists
 
     def artists(self):
-        url = "{}/artists/{}.json".format(self.root, self.groups[-1])
+        url = f"{self.root}/artists/{self.groups[-1]}.json"
         return (self.request_json(url),)
 
 

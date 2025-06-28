@@ -28,7 +28,7 @@ class ItchioGameExtractor(Extractor):
         Extractor.__init__(self, match)
 
     def items(self):
-        game_url = "https://{}.itch.io/{}".format(self.user, self.slug)
+        game_url = f"https://{self.user}.itch.io/{self.slug}"
         page = self.request(game_url).text
 
         params = {
@@ -39,14 +39,14 @@ class ItchioGameExtractor(Extractor):
         headers = {
             "Referer": game_url,
             "X-Requested-With": "XMLHttpRequest",
-            "Origin": "https://{}.itch.io".format(self.user),
+            "Origin": f"https://{self.user}.itch.io",
         }
         data = {
             "csrf_token": text.unquote(self.cookies["itchio_token"]),
         }
 
         for upload_id in text.extract_iter(page, 'data-upload_id="', '"'):
-            file_url = "{}/file/{}".format(game_url, upload_id)
+            file_url = f"{game_url}/file/{upload_id}"
             info = self.request(file_url, method="POST", params=params,
                                 headers=headers, data=data).json()
 

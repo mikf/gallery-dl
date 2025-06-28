@@ -29,9 +29,9 @@ class EveriaExtractor(Extractor):
 
         while True:
             if pnum == 1:
-                url = "{}{}/".format(self.root, path)
+                url = f"{self.root}{path}/"
             else:
-                url = "{}{}/page/{}/".format(self.root, path, pnum)
+                url = f"{self.root}{path}/page/{pnum}/"
             response = self.request(url, params=params, allow_redirects=False)
 
             if response.status_code >= 300:

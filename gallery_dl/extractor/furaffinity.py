@@ -71,7 +71,7 @@ class FuraffinityExtractor(Extractor):
         return num
 
     def _parse_post(self, post_id):
-        url = "{}/view/{}/".format(self.root, post_id)
+        url = f"{self.root}/view/{post_id}/"
         extr = text.extract_from(self.request(url).text)
 
         if self._new_layout is None:
@@ -147,9 +147,8 @@ class FuraffinityExtractor(Extractor):
         data["user"] = self.user or data["artist_url"]
         data["date"] = text.parse_timestamp(data["filename"].partition(".")[0])
         data["description"] = self._process_description(data["_description"])
-        data["thumbnail"] = "https://t.furaffinity.net/{}@600-{}.jpg".format(
-            post_id, path.rsplit("/", 2)[1])
-
+        data["thumbnail"] = (f"https://t.furaffinity.net/{post_id}@600-"
+                             f"{path.rsplit('/', 2)[1]}.jpg")
         return data
 
     def _process_description(self, description):
@@ -157,11 +156,10 @@ class FuraffinityExtractor(Extractor):
 
     def _pagination(self, path, folder=None):
         num = 1
-        folder = "" if folder is None else "/folder/{}/a".format(folder)
+        folder = "" if folder is None else f"/folder/{folder}/a"
 
         while True:
-            url = "{}/{}/{}{}/{}/".format(
-                self.root, path, self.user, folder, num)
+            url = f"{self.root}/{path}/{self.user}{folder}/{num}/"
             page = self.request(url).text
             post_id = None
 
@@ -173,7 +171,7 @@ class FuraffinityExtractor(Extractor):
             num += 1
 
     def _pagination_favorites(self):
-        path = "/favorites/{}/".format(self.user)
+        path = f"/favorites/{self.user}/"
 
         while path:
             page = self.request(self.root + path).text
@@ -326,7 +324,7 @@ class FuraffinityUserExtractor(Dispatch, FuraffinityExtractor):
     example = "https://www.furaffinity.net/user/USER/"
 
     def items(self):
-        base = "{}/{{}}/{}/".format(self.root, self.user)
+        base = f"{self.root}/{{}}/{self.user}/"
         return self._dispatch_extractors((
             (FuraffinityGalleryExtractor , base.format("gallery")),
             (FuraffinityScrapsExtractor  , base.format("scraps")),
@@ -341,7 +339,7 @@ class FuraffinityFollowingExtractor(FuraffinityExtractor):
     example = "https://www.furaffinity.net/watchlist/by/USER/"
 
     def items(self):
-        url = "{}/watchlist/by/{}/".format(self.root, self.user)
+        url = f"{self.root}/watchlist/by/{self.user}/"
         data = {"_extractor": FuraffinityUserExtractor}
 
         while True:

@@ -66,7 +66,7 @@ class GirlswithmusclePostExtractor(GirlswithmuscleExtractor):
     def items(self):
         self.login()
 
-        url = "{}/{}/".format(self.root, self.groups[0])
+        url = f"{self.root}/{self.groups[0]}/"
         page = self.request(url).text
         if not page:
             raise exception.NotFoundError("post")
@@ -150,11 +150,10 @@ class GirlswithmuscleSearchExtractor(GirlswithmuscleExtractor):
 
     def pages(self):
         query = self.groups[0]
-        url = "{}/images/{}".format(self.root, query)
+        url = f"{self.root}/images/{query}"
         response = self.request(url)
         if response.history:
-            msg = 'Request was redirected to "{}", try logging in'.format(
-                response.url)
+            msg = f'Request was redirected to "{response.url}", try logging in'
             raise exception.AuthorizationError(msg)
         page = response.text
 
@@ -164,7 +163,7 @@ class GirlswithmuscleSearchExtractor(GirlswithmuscleExtractor):
 
         yield page
         for i in range(current + 1, total + 1):
-            url = "{}/images/{}/{}".format(self.root, i, query)
+            url = f"{self.root}/images/{i}/{query}"
             yield self.request(url).text
 
     def items(self):
@@ -175,5 +174,5 @@ class GirlswithmuscleSearchExtractor(GirlswithmuscleExtractor):
                 "gallery_name": text.unescape(text.extr(page, "<title>", "<")),
             }
             for imgid in text.extract_iter(page, 'id="imgid-', '"'):
-                url = "{}/{}/".format(self.root, imgid)
+                url = f"{self.root}/{imgid}/"
                 yield Message.Queue, url, data

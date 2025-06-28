@@ -30,7 +30,7 @@ class PictoaImageExtractor(PictoaExtractor):
     def items(self):
         album_id, image_id = self.groups
 
-        url = "{}/albums/{}/{}.html".format(self.root, album_id, image_id)
+        url = f"{self.root}/albums/{album_id}/{image_id}.html"
         page = self.request(url).text
         album_title = text.extr(page, 'property="og:title" content="', '"')
         image_url = text.extr(page, 'property="og:image" content="', '"')
@@ -55,7 +55,7 @@ class PictoaAlbumExtractor(PictoaExtractor):
 
     def items(self):
         album_id = self.groups[0]
-        url = "{}/albums/{}.html".format(self.root, album_id)
+        url = f"{self.root}/albums/{album_id}.html"
         page = self.request(url).text
 
         album_data = {

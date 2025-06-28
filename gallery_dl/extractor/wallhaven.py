@@ -93,7 +93,7 @@ class WallhavenUserExtractor(Dispatch, WallhavenExtractor):
     example = "https://wallhaven.cc/user/USER"
 
     def items(self):
-        base = "{}/user/{}/".format(self.root, self.groups[0])
+        base = f"{self.root}/user/{self.groups[0]}/"
         return self._dispatch_extractors((
             (WallhavenUploadsExtractor    , base + "uploads"),
             (WallhavenCollectionsExtractor, base + "favorites"),
@@ -111,10 +111,10 @@ class WallhavenCollectionsExtractor(WallhavenExtractor):
         self.username = match[1]
 
     def items(self):
+        base = f"{self.root}/user/{self.username}/favorites/"
         for collection in self.api.collections(self.username):
             collection["_extractor"] = WallhavenCollectionExtractor
-            url = "https://wallhaven.cc/user/{}/favorites/{}".format(
-                self.username, collection["id"])
+            url = f"{base}{collection['id']}"
             yield Message.Queue, url, collection
 
 
@@ -175,7 +175,7 @@ class WallhavenAPI():
         return self._call(endpoint)["data"]
 
     def collection(self, username, collection_id):
-        endpoint = "/v1/collections/{}/{}".format(username, collection_id)
+        endpoint = f"/v1/collections/{username}/{collection_id}"
         return self._pagination(endpoint)
 
     def collections(self, username):

@@ -40,8 +40,8 @@ class E621Extractor(danbooru.DanbooruExtractor):
 
             if not file["url"]:
                 md5 = file["md5"]
-                file["url"] = "https://static1.{}/data/{}/{}/{}.{}".format(
-                    self.root[8:], md5[0:2], md5[2:4], md5, file["ext"])
+                file["url"] = (f"https://static1.{self.root[8:]}/data"
+                               f"/{md5[0:2]}/{md5[2:4]}/{md5}.{file['ext']}")
 
             if notes and post.get("has_notes"):
                 post["notes"] = self._get_notes(post["id"])
@@ -61,12 +61,12 @@ class E621Extractor(danbooru.DanbooruExtractor):
 
     def _get_notes(self, id):
         return self.request(
-            "{}/notes.json?search[post_id]={}".format(self.root, id)).json()
+            f"{self.root}/notes.json?search[post_id]={id}").json()
 
     @memcache(keyarg=1)
     def _get_pools(self, ids):
         pools = self.request(
-            "{}/pools.json?search[id]={}".format(self.root, ids)).json()
+            f"{self.root}/pools.json?search[id]={ids}").json()
         for pool in pools:
             pool["name"] = pool["name"].replace("_", " ")
         return pools
@@ -126,7 +126,7 @@ class E621PostExtractor(E621Extractor, danbooru.DanbooruPostExtractor):
     example = "https://e621.net/posts/12345"
 
     def posts(self):
-        url = "{}/posts/{}.json".format(self.root, self.groups[-1])
+        url = f"{self.root}/posts/{self.groups[-1]}.json"
         return (self.request(url).json()["post"],)
 
 

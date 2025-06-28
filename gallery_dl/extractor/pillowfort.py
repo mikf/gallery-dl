@@ -125,7 +125,7 @@ class PillowfortPostExtractor(PillowfortExtractor):
     example = "https://www.pillowfort.social/posts/12345"
 
     def posts(self):
-        url = "{}/posts/{}/json/".format(self.root, self.item)
+        url = f"{self.root}/posts/{self.item}/json/"
         return (self.request(url).json(),)
 
 
@@ -136,7 +136,7 @@ class PillowfortUserExtractor(PillowfortExtractor):
     example = "https://www.pillowfort.social/USER"
 
     def posts(self):
-        url = "{}/{}/json/".format(self.root, self.item)
+        url = f"{self.root}/{self.item}/json/"
         params = {"p": 1}
 
         while True:

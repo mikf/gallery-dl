@@ -170,8 +170,8 @@ class UgoiraPP(PostProcessor):
             for frame in self._files:
 
                 # update frame filename extension
-                frame["file"] = name = "{}.{}".format(
-                    frame["file"].partition(".")[0], frame["ext"])
+                frame["file"] = name = \
+                    f"{frame['file'].partition('.')[0]}.{frame['ext']}"
 
                 if tempdir:
                     # move frame into tempdir
@@ -332,7 +332,7 @@ class UgoiraPP(PostProcessor):
                 last_copy = last.copy()
                 frames.append(last_copy)
                 name, _, ext = last_copy["file"].rpartition(".")
-                last_copy["file"] = "{:>06}.{}".format(int(name)+1, ext)
+                last_copy["file"] = f"{int(name) + 1:>06}.{ext}"
                 shutil.copyfile(tempdir + last["file"],
                                 tempdir + last_copy["file"])
 
@@ -347,10 +347,8 @@ class UgoiraPP(PostProcessor):
             "-f", "image2",
             "-ts_from_file", "2",
             "-pattern_type", "sequence",
-            "-i", "{}%06d.{}".format(
-                tempdir.replace("%", "%%"),
-                frame["file"].rpartition(".")[2]
-            ),
+            "-i", (f"{tempdir.replace('%', '%%')}%06d."
+                   f"{frame['file'].rpartition('.')[2]}"),
         ]
 
     def _process_mkvmerge(self, pathfmt, tempdir):
@@ -361,10 +359,8 @@ class UgoiraPP(PostProcessor):
             self.ffmpeg,
             "-f", "image2",
             "-pattern_type", "sequence",
-            "-i", "{}/%06d.{}".format(
-                tempdir.replace("%", "%%"),
-                self._frames[0]["file"].rpartition(".")[2]
-            ),
+            "-i", (f"{tempdir.replace('%', '%%')}/%06d."
+                   f"{self._frames[0]['file'].rpartition('.')[2]}"),
         ]
 
     def _finalize_mkvmerge(self, pathfmt, tempdir):
@@ -385,10 +381,9 @@ class UgoiraPP(PostProcessor):
         append = content.append
 
         for frame in self._frames:
-            append("file '{}'\nduration {}".format(
-                frame["file"], frame["delay"] / 1000))
+            append(f"file '{frame['file']}'\nduration {frame['delay'] / 1000}")
         if self.repeat:
-            append("file '{}'".format(frame["file"]))
+            append(f"file '{frame['file']}'")
         append("")
 
         ffconcat = tempdir + "/ffconcat.txt"
@@ -414,12 +409,12 @@ class UgoiraPP(PostProcessor):
 
     def calculate_framerate(self, frames):
         if self._delay_is_uniform(frames):
-            return ("1000/{}".format(frames[0]["delay"]), None)
+            return (f"1000/{frames[0]['delay']}", None)
 
         if not self.uniform:
             gcd = self._delay_gcd(frames)
             if gcd >= 10:
-                return (None, "1000/{}".format(gcd))
+                return (None, f"1000/{gcd}")
 
         return (None, None)
 

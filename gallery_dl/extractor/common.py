@@ -181,7 +181,7 @@ class Extractor():
                     reason = exc.args[0].reason
                     cls = reason.__class__.__name__
                     pre, _, err = str(reason.args[-1]).partition(":")
-                    msg = " {}: {}".format(cls, (err or pre).lstrip())
+                    msg = f" {cls}: {(err or pre).lstrip()}"
                 except Exception:
                     msg = exc
                 code = 0
@@ -209,8 +209,7 @@ class Extractor():
                 if notfound and code == 404:
                     raise exception.NotFoundError(notfound)
 
-                msg = "'{} {}' for '{}'".format(
-                    code, response.reason, response.url)
+                msg = f"'{code} {response.reason}' for '{response.url}'"
 
                 challenge = util.detect_challenge(response)
                 if challenge is not None:
@@ -306,7 +305,7 @@ class Extractor():
 
         if reason:
             t = datetime.fromtimestamp(until).time()
-            isotime = "{:02}:{:02}:{:02}".format(t.hour, t.minute, t.second)
+            isotime = f"{t.hour:02}:{t.minute:02}:{t.second:02}"
             self.log.info("Waiting until %s (%s)", isotime, reason)
         time.sleep(seconds)
 
@@ -696,10 +695,8 @@ class Extractor():
             Extractor._dump_sanitize = util.re_compile(
                 r"[\\\\|/<>:\"?*&=#]+").sub
 
-        fname = "{:>02}_{}".format(
-            Extractor._dump_index,
-            Extractor._dump_sanitize('_', response.url),
-        )
+        fname = (f"{Extractor._dump_index:>02}_"
+                 f"{Extractor._dump_sanitize('_', response.url)}")
 
         if util.WINDOWS:
             path = os.path.abspath(fname)[:255]
@@ -1041,7 +1038,7 @@ def _browser_useragent():
     server.listen(1)
 
     host, port = server.getsockname()
-    webbrowser.open("http://{}:{}/user-agent".format(host, port))
+    webbrowser.open(f"http://{host}:{port}/user-agent")
 
     client = server.accept()[0]
     server.close()

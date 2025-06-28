@@ -42,7 +42,7 @@ class PahealExtractor(Extractor):
         """Return an iterable containing data of all relevant posts"""
 
     def _extract_post(self, post_id):
-        url = "{}/post/view/{}".format(self.root, post_id)
+        url = f"{self.root}/post/view/{post_id}"
         extr = text.extract_from(self.request(url).text)
 
         post = {
@@ -64,7 +64,7 @@ class PahealExtractor(Extractor):
         post["width"], _, height = dimensions.partition("x")
         post["height"], _, duration = height.partition(", ")
         post["duration"] = text.parse_float(duration[:-1])
-        post["filename"] = "{} - {}".format(post_id, post["tags"])
+        post["filename"] = f"{post_id} - {post['tags']}"
         post["extension"] = ext
 
         return post
@@ -94,7 +94,7 @@ class PahealTagExtractor(PahealExtractor):
 
     def get_posts(self):
         pnum = self.page_start
-        base = "{}/post/list/{}/".format(self.root, self.groups[0])
+        base = f"{self.root}/post/list/{self.groups[0]}/"
 
         while True:
             page = self.request(base + str(pnum)).text
@@ -129,7 +129,7 @@ class PahealTagExtractor(PahealExtractor):
             "tags"     : text.unescape(tags),
             "size"     : text.parse_bytes(size[:-1]),
             "date"     : text.parse_datetime(date, "%B %d, %Y; %H:%M"),
-            "filename" : "{} - {}".format(pid, tags),
+            "filename" : f"{pid} - {tags}",
             "extension": ext,
         }
 

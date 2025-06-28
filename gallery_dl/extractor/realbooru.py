@@ -21,8 +21,7 @@ class RealbooruExtractor(booru.BooruExtractor):
     root = "https://realbooru.com"
 
     def _parse_post(self, post_id):
-        url = "{}/index.php?page=post&s=view&id={}".format(
-            self.root, post_id)
+        url = f"{self.root}/index.php?page=post&s=view&id={post_id}"
         page = self.request(url).text
         extr = text.extract_from(page)
         rating = extr('name="rating" content="', '"')
@@ -126,7 +125,7 @@ class RealbooruPoolExtractor(RealbooruExtractor):
 
     def metadata(self):
         pool_id = self.groups[0]
-        url = "{}/index.php?page=pool&s=show&id={}".format(self.root, pool_id)
+        url = f"{self.root}/index.php?page=pool&s=show&id={pool_id}"
         page = self.request(url).text
 
         name, pos = text.extract(page, "<h4>Pool: ", "</h4>")

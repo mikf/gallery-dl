@@ -27,7 +27,7 @@ class UploadirFileExtractor(Extractor):
         self.file_id = match[1]
 
     def items(self):
-        url = "{}/u/{}".format(self.root, self.file_id)
+        url = f"{self.root}/u/{self.file_id}"
         response = self.request(url, method="HEAD", allow_redirects=False)
 
         if 300 <= response.status_code < 400:

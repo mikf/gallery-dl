@@ -120,7 +120,7 @@ class PixivExtractor(Extractor):
             return [
                 {
                     "url"   : img["image_urls"]["original"],
-                    "suffix": "_p{:02}".format(num),
+                    "suffix": f"_p{num:02}",
                     "_fallback": self._fallback_image(img),
                 }
                 for num, img in enumerate(meta_pages)
@@ -203,7 +203,7 @@ class PixivExtractor(Extractor):
 
                 for ext in ("jpg", "png", "gif"):
                     try:
-                        url = "{}0.{}".format(base, ext)
+                        url = f"{base}0.{ext}"
                         self.request(url, method="HEAD")
                         break
                     except exception.HttpError:
@@ -214,8 +214,8 @@ class PixivExtractor(Extractor):
 
             return [
                 {
-                    "url": "{}{}.{}".format(base, num, ext),
-                    "suffix": "_p{:02}".format(num),
+                    "url": f"{base}{num}.{ext}",
+                    "suffix": f"_p{num:02}",
                     "_ugoira_frame_index": num,
                 }
                 for num in range(len(frames))
@@ -231,7 +231,7 @@ class PixivExtractor(Extractor):
             return ({"url": url},)
 
     def _request_ajax(self, endpoint):
-        url = "{}/ajax{}".format(self.root, endpoint)
+        url = f"{self.root}/ajax{endpoint}"
         try:
             return self.request(url, headers=self.headers_web).json()["body"]
         except Exception:
@@ -285,8 +285,8 @@ class PixivExtractor(Extractor):
         base, _, ext = url.rpartition("_p0.")
         return [
             {
-                "url"   : "{}_p{}.{}".format(base, num, ext),
-                "suffix": "_p{:02}".format(num),
+                "url"   : f"{base}_p{num}.{ext}",
+                "suffix": f"_p{num:02}",
             }
             for num in range(count)
         ]
@@ -310,7 +310,7 @@ class PixivExtractor(Extractor):
 
         for ext in ("jpg", "png", "gif"):
             try:
-                url = "{}_p0.{}".format(base, ext)
+                url = f"{base}_p0.{ext}"
                 self.request(url, method="HEAD")
                 return url
             except exception.HttpError:
@@ -351,8 +351,8 @@ class PixivExtractor(Extractor):
     def _make_work(self, kind, url, user):
         p = url.split("/")
         return {
-            "create_date"     : "{}-{}-{}T{}:{}:{}+09:00".format(
-                p[5], p[6], p[7], p[8], p[9], p[10]) if len(p) > 9 else None,
+            "create_date"     : (f"{p[5]}-{p[6]}-{p[7]}T{p[8]}:{p[9]}:{p[10]}"
+                                 f"+09:00" if len(p) > 9 else None),
             "height"          : 0,
             "id"              : kind,
             "image_urls"      : None,
@@ -384,7 +384,7 @@ class PixivUserExtractor(Dispatch, PixivExtractor):
     example = "https://www.pixiv.net/en/users/12345"
 
     def items(self):
-        base = "{}/users/{}/".format(self.root, self.groups[0])
+        base = f"{self.root}/users/{self.groups[0]}/"
         return self._dispatch_extractors((
             (PixivAvatarExtractor       , base + "avatar"),
             (PixivBackgroundExtractor   , base + "background"),
@@ -435,7 +435,7 @@ class PixivArtworksExtractor(PixivExtractor):
 
         if self.sanity_workaround:
             body = self._request_ajax(
-                "/user/{}/profile/all".format(self.user_id))
+                f"/user/{self.user_id}/profile/all")
             try:
                 ajax_ids = list(map(int, body["illusts"]))
                 ajax_ids.extend(map(int, body["manga"]))
@@ -643,7 +643,7 @@ class PixivFavoriteExtractor(PixivExtractor):
         for preview in self.api.user_following(self.user_id, restrict):
             user = preview["user"]
             user["_extractor"] = PixivUserExtractor
-            url = "https://www.pixiv.net/users/{}".format(user["id"])
+            url = f"https://www.pixiv.net/users/{user['id']}"
             yield Message.Queue, url, user
 
 
@@ -699,7 +699,7 @@ class PixivRankingExtractor(PixivExtractor):
         date = query.get("date")
         if date:
             if len(date) == 8 and date.isdecimal():
-                date = "{}-{}-{}".format(date[0:4], date[4:6], date[6:8])
+                date = f"{date[0:4]}-{date[4:6]}-{date[6:8]}"
             else:
                 self.log.warning("invalid date '%s'", date)
                 date = None
@@ -929,7 +929,7 @@ class PixivNovelExtractor(PixivExtractor):
                        path.rpartition(".")[0].replace("_master1200", ""))
                 novel["date_url"] = self._date_from_url(url)
                 novel["num"] += 1
-                novel["suffix"] = "_p{:02}".format(novel["num"])
+                novel["suffix"] = f"_p{novel['num']:02}"
                 novel["_fallback"] = (url + ".png",)
                 url_jpg = url + ".jpg"
                 text.nameext_from_url(url_jpg, novel)
@@ -961,7 +961,7 @@ class PixivNovelExtractor(PixivExtractor):
                         novel.update(image)
                         novel["date_url"] = self._date_from_url(url)
                         novel["num"] += 1
-                        novel["suffix"] = "_p{:02}".format(novel["num"])
+                        novel["suffix"] = f"_p{novel['num']:02}"
                         text.nameext_from_url(url, novel)
                         yield Message.Url, url, novel
 
@@ -970,8 +970,8 @@ class PixivNovelExtractor(PixivExtractor):
                     novel["date_url"] = None
                     for illust_id in illusts:
                         novel["num"] += 1
-                        novel["suffix"] = "_p{:02}".format(novel["num"])
-                        url = "{}/artworks/{}".format(self.root, illust_id)
+                        novel["suffix"] = f"_p{novel['num']:02}"
+                        url = f"{self.root}/artworks/{illust_id}"
                         yield Message.Queue, url, novel
 
     def novels(self):
@@ -1044,7 +1044,7 @@ class PixivSketchExtractor(Extractor):
         self.username = match[1]
 
     def items(self):
-        headers = {"Referer": "{}/@{}".format(self.root, self.username)}
+        headers = {"Referer": f"{self.root}/@{self.username}"}
 
         for post in self.posts():
             media = post["media"]
@@ -1067,11 +1067,10 @@ class PixivSketchExtractor(Extractor):
                 yield Message.Url, url, post
 
     def posts(self):
-        url = "{}/api/walls/@{}/posts/public.json".format(
-            self.root, self.username)
+        url = f"{self.root}/api/walls/@{self.username}/posts/public.json"
         headers = {
             "Accept": "application/vnd.sketch-v4+json",
-            "X-Requested-With": "{}/@{}".format(self.root, self.username),
+            "X-Requested-With": f"{self.root}/@{self.username}",
             "Referer": self.root + "/",
         }
 

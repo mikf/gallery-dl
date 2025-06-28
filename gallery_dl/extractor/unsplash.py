@@ -78,7 +78,7 @@ class UnsplashImageExtractor(UnsplashExtractor):
     example = "https://unsplash.com/photos/ID"
 
     def photos(self):
-        url = "{}/napi/photos/{}".format(self.root, self.item)
+        url = f"{self.root}/napi/photos/{self.item}"
         return (self.request(url).json(),)
 
 
@@ -89,7 +89,7 @@ class UnsplashUserExtractor(UnsplashExtractor):
     example = "https://unsplash.com/@USER"
 
     def photos(self):
-        url = "{}/napi/users/{}/photos".format(self.root, self.item)
+        url = f"{self.root}/napi/users/{self.item}/photos"
         params = {"order_by": "latest"}
         return self._pagination(url, params)
 
@@ -101,7 +101,7 @@ class UnsplashFavoriteExtractor(UnsplashExtractor):
     example = "https://unsplash.com/@USER/likes"
 
     def photos(self):
-        url = "{}/napi/users/{}/likes".format(self.root, self.item)
+        url = f"{self.root}/napi/users/{self.item}/likes"
         params = {"order_by": "latest"}
         return self._pagination(url, params)
 
@@ -120,7 +120,7 @@ class UnsplashCollectionExtractor(UnsplashExtractor):
         return {"collection_id": self.item, "collection_title": self.title}
 
     def photos(self):
-        url = "{}/napi/collections/{}/photos".format(self.root, self.item)
+        url = f"{self.root}/napi/collections/{self.item}/photos"
         params = {"order_by": "latest"}
         return self._pagination(url, params)
 

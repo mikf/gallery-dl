@@ -115,7 +115,7 @@ class BehanceGalleryExtractor(BehanceExtractor):
 
     def get_gallery_data(self):
         """Collect gallery info dict"""
-        url = "{}/gallery/{}/a".format(self.root, self.gallery_id)
+        url = f"{self.root}/gallery/{self.gallery_id}/a"
         cookies = {
             "gki": '{"feature_project_view":false,'
                    '"feature_discover_login_prompt":false,'

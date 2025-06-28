@@ -39,7 +39,7 @@ class GalleryDLException(Exception):
         if not message:
             message = self.default
         elif isinstance(message, Exception):
-            message = "{}: {}".format(message.__class__.__name__, message)
+            message = f"{message.__class__.__name__}: {message}"
         if self.msgfmt and fmt:
             message = self.msgfmt.format(message)
         Exception.__init__(self, message)
@@ -61,8 +61,8 @@ class HttpError(ExtractionError):
         else:
             self.status = response.status_code
             if not message:
-                message = "'{} {}' for '{}'".format(
-                    response.status_code, response.reason, response.url)
+                message = (f"'{response.status_code} {response.reason}' "
+                           f"for '{response.url}'")
         ExtractionError.__init__(self, message)
 
 

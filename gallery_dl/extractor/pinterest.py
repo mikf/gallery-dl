@@ -173,8 +173,8 @@ class PinterestExtractor(Extractor):
 
     def _extract_image(self, page, block):
         sig = block.get("image_signature") or page["image_signature"]
-        url_base = "https://i.pinimg.com/originals/{}/{}/{}/{}.".format(
-            sig[0:2], sig[2:4], sig[4:6], sig)
+        url_base = (f"https://i.pinimg.com/originals"
+                    f"/{sig[0:2]}/{sig[2:4]}/{sig[4:6]}/{sig}.")
         url_jpg = url_base + "jpg"
         url_png = url_base + "png"
         url_webp = url_base + "webp"
@@ -249,7 +249,7 @@ class PinterestBoardExtractor(PinterestExtractor):
         pins = self.api.board_pins(board["id"])
 
         if board["section_count"] and self.config("sections", True):
-            base = "{}{}id:".format(self.root, board["url"])
+            base = f"{self.root}{board['url']}id:"
             data = {"_extractor": PinterestSectionExtractor}
             sections = [(base + section["id"], data)
                         for section in self.api.board_sections(board["id"])]
@@ -393,8 +393,8 @@ class PinterestPinitExtractor(PinterestExtractor):
     example = "https://pin.it/abcde"
 
     def items(self):
-        url = "https://api.pinterest.com/url_shortener/{}/redirect/".format(
-            self.groups[0])
+        url = (f"https://api.pinterest.com/url_shortener"
+               f"/{self.groups[0]}/redirect/")
         location = self.request_location(url)
         if not location or not PinterestPinExtractor.pattern.match(location):
             raise exception.NotFoundError("pin")
@@ -520,7 +520,7 @@ class PinterestAPI():
         return self._pagination("BaseSearch", options)
 
     def _call(self, resource, options):
-        url = "{}/resource/{}Resource/get/".format(self.root, resource)
+        url = f"{self.root}/resource/{resource}Resource/get/"
         params = {
             "data"      : util.json_dumps({"options": options}),
             "source_url": "",

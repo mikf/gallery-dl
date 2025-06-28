@@ -28,8 +28,7 @@ class _4chanThreadExtractor(Extractor):
         self.board, self.thread = match.groups()
 
     def items(self):
-        url = "https://a.4cdn.org/{}/thread/{}.json".format(
-            self.board, self.thread)
+        url = f"https://a.4cdn.org/{self.board}/thread/{self.thread}.json"
         posts = self.request(url).json()["posts"]
         title = posts[0].get("sub") or text.remove_html(posts[0]["com"])
 
@@ -45,8 +44,8 @@ class _4chanThreadExtractor(Extractor):
                 post.update(data)
                 post["extension"] = post["ext"][1:]
                 post["filename"] = text.unescape(post["filename"])
-                url = "https://i.4cdn.org/{}/{}{}".format(
-                    post["board"], post["tim"], post["ext"])
+                url = (f"https://i.4cdn.org"
+                       f"/{post['board']}/{post['tim']}{post['ext']}")
                 yield Message.Url, url, post
 
 
@@ -62,13 +61,13 @@ class _4chanBoardExtractor(Extractor):
         self.board = match[1]
 
     def items(self):
-        url = "https://a.4cdn.org/{}/threads.json".format(self.board)
+        url = f"https://a.4cdn.org/{self.board}/threads.json"
         threads = self.request(url).json()
 
         for page in threads:
             for thread in page["threads"]:
-                url = "https://boards.4chan.org/{}/thread/{}/".format(
-                    self.board, thread["no"])
+                url = (f"https://boards.4chan.org"
+                       f"/{self.board}/thread/{thread['no']}/")
                 thread["page"] = page["page"]
                 thread["_extractor"] = _4chanThreadExtractor
                 yield Message.Queue, url, thread

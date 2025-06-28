@@ -20,7 +20,7 @@ class DynastyscansBase():
     root = "https://dynasty-scans.com"
 
     def _parse_image_page(self, image_id):
-        url = "{}/images/{}".format(self.root, image_id)
+        url = f"{self.root}/images/{image_id}"
         extr = text.extract_from(self.request(url).text)
 
         date = extr("class='create_at'>", "</span>")
@@ -140,7 +140,7 @@ class DynastyscansAnthologyExtractor(DynastyscansSearchExtractor):
     example = "https://dynasty-scans.com/anthologies/TITLE"
 
     def items(self):
-        url = "{}/anthologies/{}.atom".format(self.root, self.groups[0])
+        url = f"{self.root}/anthologies/{self.groups[0]}.atom"
         root = self.request_xml(url, xmlns=False)
 
         data = {

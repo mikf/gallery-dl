@@ -17,8 +17,7 @@ class GelbooruV01Extractor(booru.BooruExtractor):
     per_page = 20
 
     def _parse_post(self, post_id):
-        url = "{}/index.php?page=post&s=view&id={}".format(
-            self.root, post_id)
+        url = f"{self.root}/index.php?page=post&s=view&id={post_id}"
         extr = text.extract_from(self.request(url).text)
 
         post = {

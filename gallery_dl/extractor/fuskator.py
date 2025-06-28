@@ -22,7 +22,7 @@ class FuskatorGalleryExtractor(GalleryExtractor):
 
     def __init__(self, match):
         self.gallery_hash = match[1]
-        url = "{}/thumbs/{}/index.html".format(self.root, self.gallery_hash)
+        url = f"{self.root}/thumbs/{self.gallery_hash}/index.html"
         GalleryExtractor.__init__(self, match, url)
 
     def metadata(self, page):

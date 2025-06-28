@@ -218,7 +218,7 @@ class BoostyFollowingExtractor(BoostyExtractor):
 
     def items(self):
         for user in self.api.user_subscriptions():
-            url = "{}/{}".format(self.root, user["blog"]["blogUrl"])
+            url = f"{self.root}/{user['blog']['blogUrl']}"
             user["_extractor"] = BoostyUserExtractor
             yield Message.Queue, url, user
 
@@ -288,7 +288,7 @@ class BoostyAPI():
             self.headers["Authorization"] = "Bearer " + access_token
 
     def blog_posts(self, username, params):
-        endpoint = "/v1/blog/{}/post/".format(username)
+        endpoint = f"/v1/blog/{username}/post/"
         params = self._merge_params(params, {
             "limit"         : "5",
             "offset"        : None,
@@ -298,7 +298,7 @@ class BoostyAPI():
         return self._pagination(endpoint, params)
 
     def blog_media_album(self, username, type="all", params=()):
-        endpoint = "/v1/blog/{}/media_album/".format(username)
+        endpoint = f"/v1/blog/{username}/media_album/"
         params = self._merge_params(params, {
             "type"    : type.rstrip("s"),
             "limit"   : "15",
@@ -318,7 +318,7 @@ class BoostyAPI():
         return posts
 
     def post(self, username, post_id):
-        endpoint = "/v1/blog/{}/post/{}".format(username, post_id)
+        endpoint = f"/v1/blog/{username}/post/{post_id}"
         return self._call(endpoint)
 
     def feed_posts(self, params=None):
@@ -418,11 +418,11 @@ class BoostyAPI():
             params["offset"] = offset
 
     def dialog(self, dialog_id):
-        endpoint = "/v1/dialog/{}".format(dialog_id)
+        endpoint = f"/v1/dialog/{dialog_id}"
         return self._call(endpoint)
 
     def dialog_messages(self, dialog_id, limit=300, offset=None):
-        endpoint = "/v1/dialog/{}/message/".format(dialog_id)
+        endpoint = f"/v1/dialog/{dialog_id}/message/"
         params = {
             "limit": limit,
             "reverse": "true",

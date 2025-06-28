@@ -75,7 +75,7 @@ class CivitaiExtractor(Extractor):
         if models:
             data = {"_extractor": CivitaiModelExtractor}
             for model in models:
-                url = "{}/models/{}".format(self.root, model["id"])
+                url = f"{self.root}/models/{model['id']}"
                 yield Message.Queue, url, data
             return
 
@@ -152,11 +152,9 @@ class CivitaiExtractor(Extractor):
         name = image.get("name")
         if not name:
             mime = image.get("mimeType") or self._image_ext
-            name = "{}.{}".format(image.get("id"), mime.rpartition("/")[2])
-        return (
-            "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/{}/{}/{}".format(
-                url, quality, name)
-        )
+            name = f"{image.get('id')}.{mime.rpartition('/')[2]}"
+        return (f"https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA"
+                f"/{url}/{quality}/{name}")
 
     def _image_results(self, images):
         for num, file in enumerate(images, 1):
@@ -298,16 +296,15 @@ class CivitaiModelExtractor(CivitaiExtractor):
             if not sep:
                 name = ext
                 ext = "bin"
-            file["uuid"] = "model-{}-{}-{}".format(
-                model["id"], version["id"], file["id"])
+            file["uuid"] = f"model-{model['id']}-{version['id']}-{file['id']}"
             files.append({
                 "num"      : num,
                 "file"     : file,
                 "filename" : name,
                 "extension": ext,
-                "url"      : (file.get("downloadUrl") or
-                              "{}/api/download/models/{}".format(
-                              self.root, version["id"])),
+                "url"      : (
+                    file.get("downloadUrl") or
+                    f"{self.root}/api/download/models/{version['id']}"),
                 "_http_headers" : {
                     "Authorization": self.api.headers.get("Authorization")},
                 "_http_validate": self._validate_file_model,
@@ -340,8 +337,7 @@ class CivitaiModelExtractor(CivitaiExtractor):
             alert = text.extr(
                 response.text, 'mantine-Alert-message">', "</div></div></div>")
             if alert:
-                msg = "\"{}\" - 'api-key' required".format(
-                    text.remove_html(alert))
+                msg = f"\"{text.remove_html(alert)}\" - 'api-key' required"
             else:
                 msg = "'api-key' required to download this file"
             self.log.warning(msg)
@@ -436,7 +432,7 @@ class CivitaiUserExtractor(Dispatch, CivitaiExtractor):
     example = "https://civitai.com/user/USER"
 
     def items(self):
-        base = "{}/user/{}/".format(self.root, self.groups[0])
+        base = f"{self.root}/user/{self.groups[0]}/"
         return self._dispatch_extractors((
             (CivitaiUserModelsExtractor, base + "models"),
             (CivitaiUserPostsExtractor , base + "posts"),
@@ -552,12 +548,12 @@ class CivitaiRestAPI():
         })
 
     def model(self, model_id):
-        endpoint = "/v1/models/{}".format(model_id)
+        endpoint = f"/v1/models/{model_id}"
         return self._call(endpoint)
 
     @memcache(keyarg=1)
     def model_version(self, model_version_id):
-        endpoint = "/v1/model-versions/{}".format(model_version_id)
+        endpoint = f"/v1/model-versions/{model_version_id}"
         return self._call(endpoint)
 
     def models(self, params):

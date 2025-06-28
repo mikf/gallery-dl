@@ -67,7 +67,7 @@ class MangahereChapterExtractor(MangahereBase, ChapterExtractor):
             page = self.request(self.url_fmt.format(self.part, pnum)).text
 
     def _get_title(self):
-        url = "{}/manga/{}/".format(self.root, self.part)
+        url = f"{self.root}/manga/{self.part}/"
         page = self.request(url).text
 
         try:

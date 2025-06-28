@@ -67,7 +67,7 @@ class DeviantartExtractor(Extractor):
                 self.quality = "-fullview.png?"
                 self.quality_sub = util.re(r"-fullview\.[a-z0-9]+\?").sub
             else:
-                self.quality = ",q_{}".format(self.quality)
+                self.quality = f",q_{self.quality}"
                 self.quality_sub = util.re(r",q_\d+").sub
 
         if self.intermediary:
@@ -196,7 +196,7 @@ class DeviantartExtractor(Extractor):
                         continue
                     _user_details.update(name, user)
 
-                    url = "{}/{}/avatar/".format(self.root, name)
+                    url = f"{self.root}/{name}/avatar/"
                     comment["_extractor"] = DeviantartAvatarExtractor
                     yield Message.Queue, url, comment
 
@@ -701,10 +701,10 @@ x2="45.4107524%" y2="71.4898596%" id="app-root-3">\
         raise exception.NotFoundError("folder")
 
     def _folder_urls(self, folders, category, extractor):
-        base = "{}/{}/{}/".format(self.root, self.user, category)
+        base = f"{self.root}/{self.user}/{category}/"
         for folder in folders:
             folder["_extractor"] = extractor
-            url = "{}{}/{}".format(base, folder["folderid"], folder["name"])
+            url = f"{base}{folder['folderid']}/{folder['name']}"
             yield url, folder
 
     def _update_content_default(self, deviation, content):
@@ -878,7 +878,7 @@ class DeviantartUserExtractor(Dispatch, DeviantartExtractor):
     example = "https://www.deviantart.com/USER"
 
     def items(self):
-        base = "{}/{}/".format(self.root, self.user)
+        base = f"{self.root}/{self.user}/"
         return self._dispatch_extractors((
             (DeviantartAvatarExtractor    , base + "avatar"),
             (DeviantartBackgroundExtractor, base + "banner"),
@@ -943,8 +943,8 @@ class DeviantartAvatarExtractor(DeviantartExtractor):
             fmt, _, ext = fmt.rpartition(".")
             if fmt:
                 fmt = "-" + fmt
-            url = "https://a.deviantart.net/avatars{}/{}/{}/{}.{}?{}".format(
-                fmt, name[0], name[1], name, ext, index)
+            url = (f"https://a.deviantart.net/avatars{fmt}"
+                   f"/{name[0]}/{name[1]}/{name}.{ext}?{index}")
             results.append(self._make_deviation(url, user, index, fmt))
         return results
 
@@ -1282,10 +1282,10 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
 
     def deviations(self):
         if self.user:
-            url = "{}/{}/{}/{}".format(
-                self.root, self.user, self.type or "art", self.deviation_id)
+            url = (f"{self.root}/{self.user}"
+                   f"/{self.type or 'art'}/{self.deviation_id}")
         else:
-            url = "{}/view/{}/".format(self.root, self.deviation_id)
+            url = f"{self.root}/view/{self.deviation_id}/"
 
         page = self._limited_request(url, notfound="deviation").text
         uuid = text.extr(page, '"deviationUuid\\":\\"', '\\')
@@ -1431,7 +1431,7 @@ class DeviantartFollowingExtractor(DeviantartExtractor):
         api = DeviantartOAuthAPI(self)
 
         for user in api.user_friends(self.user):
-            url = "{}/{}".format(self.root, user["user"]["username"])
+            url = f"{self.root}/{user['user']['username']}"
             user["_extractor"] = DeviantartUserExtractor
             yield Message.Queue, url, user
 
@@ -1579,7 +1579,7 @@ class DeviantartOAuthAPI():
     def comments(self, target_id, target_type="deviation",
                  comment_id=None, offset=0):
         """Fetch comments posted on a target"""
-        endpoint = "/comments/{}/{}".format(target_type, target_id)
+        endpoint = f"/comments/{target_type}/{target_id}"
         params = {
             "commentid"     : comment_id,
             "maxdepth"      : "5",
@@ -1633,7 +1633,7 @@ class DeviantartOAuthAPI():
     def deviation_metadata(self, deviations):
         """ Fetch deviation metadata for a set of deviations"""
         endpoint = "/deviation/metadata?" + "&".join(
-            "deviationids[{}]={}".format(num, deviation["deviationid"])
+            f"deviationids[{num}]={deviation['deviationid']}"
             for num, deviation in enumerate(deviations)
         )
         return self._call(
@@ -1740,8 +1740,8 @@ class DeviantartOAuthAPI():
 
         if response.status_code != 200:
             self.log.debug("Server response: %s", data)
-            raise exception.AuthenticationError('"{}" ({})'.format(
-                data.get("error_description"), data.get("error")))
+            raise exception.AuthenticationError(
+                f"\"{data.get('error_description')}\" ({data.get('error')})")
         if refresh_token_key:
             _refresh_token_cache.update(
                 refresh_token_key, data["refresh_token"])
@@ -1784,8 +1784,7 @@ class DeviantartOAuthAPI():
                 raise exception.AuthorizationError()
 
             self.log.debug(response.text)
-            msg = "API responded with {} {}".format(
-                status, response.reason)
+            msg = f"API responded with {status} {response.reason}"
             if status == 429:
                 if self.delay < 30:
                     self.delay += 1
@@ -2068,7 +2067,7 @@ class DeviantartEclipseAPI():
                 params["offset"] = int(params["offset"]) + len(results)
 
     def _ids_watching(self, user):
-        url = "{}/{}/about".format(self.extractor.root, user)
+        url = f"{self.extractor.root}/{user}/about"
         page = self.request(url).text
 
         gruser_id = text.extr(page, ' data-userid="', '"')

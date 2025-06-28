@@ -145,4 +145,4 @@ class PoipikuPostExtractor(PoipikuExtractor):
         self.user_id, self.post_id = match.groups()
 
     def posts(self):
-        return ("/{}/{}.html".format(self.user_id, self.post_id),)
+        return (f"/{self.user_id}/{self.post_id}.html",)

@@ -27,8 +27,7 @@ class _4archiveThreadExtractor(Extractor):
         self.board, self.thread = match.groups()
 
     def items(self):
-        url = "{}/board/{}/thread/{}".format(
-            self.root, self.board, self.thread)
+        url = f"{self.root}/board/{self.board}/thread/{self.thread}"
         page = self.request(url).text
         data = self.metadata(page)
         posts = self.posts(page)
@@ -99,12 +98,11 @@ class _4archiveBoardExtractor(Extractor):
     def items(self):
         data = {"_extractor": _4archiveThreadExtractor}
         while True:
-            url = "{}/board/{}/{}".format(self.root, self.board, self.num)
+            url = f"{self.root}/board/{self.board}/{self.num}"
             page = self.request(url).text
             if 'class="thread"' not in page:
                 return
             for thread in text.extract_iter(page, 'class="thread" id="t', '"'):
-                url = "{}/board/{}/thread/{}".format(
-                    self.root, self.board, thread)
+                url = f"{self.root}/board/{self.board}/thread/{thread}"
                 yield Message.Queue, url, data
             self.num += 1

@@ -119,7 +119,7 @@ class SubscribestarExtractor(Extractor):
             if errors:
                 self.log.debug(errors)
                 try:
-                    msg = '"{}"'.format(errors.popitem()[1])
+                    msg = f'"{errors.popitem()[1]}"'
                 except Exception:
                     msg = None
                 raise exception.AuthenticationError(msg)
@@ -222,7 +222,7 @@ class SubscribestarUserExtractor(SubscribestarExtractor):
 
     def posts(self):
         needle_next_page = 'data-role="infinite_scroll-next_page" href="'
-        page = self.request("{}/{}".format(self.root, self.item)).text
+        page = self.request(f"{self.root}/{self.item}").text
 
         while True:
             posts = page.split('<div class="post ')[1:]
@@ -243,7 +243,7 @@ class SubscribestarPostExtractor(SubscribestarExtractor):
     example = "https://www.subscribestar.com/posts/12345"
 
     def posts(self):
-        url = "{}/posts/{}".format(self.root, self.item)
+        url = f"{self.root}/posts/{self.item}"
         return (self.request(url).text,)
 
     def _data_from_post(self, html):

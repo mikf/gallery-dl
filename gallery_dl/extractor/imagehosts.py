@@ -27,8 +27,7 @@ class ImagehostImageExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.page_url = "http{}://{}".format(
-            "s" if self._https else "", match[1])
+        self.page_url = f"http{'s' if self._https else ''}://{match[1]}"
         self.token = match[2]
 
         if self._params == "simple":

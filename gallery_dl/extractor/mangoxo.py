@@ -86,7 +86,7 @@ class MangoxoAlbumExtractor(MangoxoExtractor):
 
     def items(self):
         self.login()
-        url = "{}/album/{}/".format(self.root, self.album_id)
+        url = f"{self.root}/album/{self.album_id}/"
         page = self.request(url).text
         data = self.metadata(page)
         imgs = self.images(url, page)
@@ -152,7 +152,7 @@ class MangoxoChannelExtractor(MangoxoExtractor):
     def items(self):
         self.login()
         num = total = 1
-        url = "{}/{}/album/".format(self.root, self.user)
+        url = f"{self.root}/{self.user}/album/"
         data = {"_extractor": MangoxoAlbumExtractor}
 
         while True:

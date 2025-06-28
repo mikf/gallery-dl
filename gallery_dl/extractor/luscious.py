@@ -26,7 +26,7 @@ class LusciousExtractor(Extractor):
             "variables"    : variables,
         }
         response = self.request(
-            "{}/graphql/nobatch/?operationName={}".format(self.root, op),
+            f"{self.root}/graphql/nobatch/?operationName={op}",
             method="POST", json=data, fatal=False,
         )
 

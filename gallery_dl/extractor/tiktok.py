@@ -52,7 +52,7 @@ class TiktokExtractor(Extractor):
 
             if "imagePost" in post:
                 if not original_title:
-                    title = "TikTok photo #{}".format(post["id"])
+                    title = f"TikTok photo #{post['id']}"
                 img_list = post["imagePost"]["images"]
                 for i, img in enumerate(img_list, 1):
                     url = img["imageURL"]["urlList"][0]
@@ -83,7 +83,7 @@ class TiktokExtractor(Extractor):
 
             if ytdl_media:
                 if not original_title:
-                    title = "TikTok {} #{}".format(ytdl_media, post["id"])
+                    title = f"TikTok {ytdl_media} #{post['id']}"
                 post.update({
                     "type"      : ytdl_media,
                     "image"     : None,
@@ -133,7 +133,7 @@ class TiktokExtractor(Extractor):
         post.update({
             "type"     : "audio",
             "image"    : None,
-            "title"    : post["desc"] or "TikTok audio #{}".format(post["id"]),
+            "title"    : post["desc"] or f"TikTok audio #{post['id']}",
             "duration" : audio.get("duration"),
             "num"      : 0,
             "img_id"   : "",
@@ -172,7 +172,7 @@ class TiktokPostExtractor(TiktokExtractor):
 
     def urls(self):
         user, post_id = self.groups
-        url = "{}/@{}/video/{}".format(self.root, user or "", post_id)
+        url = f"{self.root}/@{user or ''}/video/{post_id}"
         return (url,)
 
 
@@ -246,7 +246,7 @@ class TiktokUserExtractor(TiktokExtractor):
                 set_cookie(cookie)
 
         user_name = self.groups[0]
-        profile_url = "{}/@{}".format(self.root, user_name)
+        profile_url = f"{self.root}/@{user_name}"
         if self.avatar:
             try:
                 avatar_url, avatar = self._generate_avatar(

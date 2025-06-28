@@ -37,9 +37,9 @@ class LensdumpAlbumExtractor(LensdumpBase, GalleryExtractor):
     def __init__(self, match):
         self.gallery_id, query = match.groups()
         if query:
-            url = "{}/a/{}/?{}".format(self.root, self.gallery_id, query)
+            url = f"{self.root}/a/{self.gallery_id}/?{query}"
         else:
-            url = "{}/a/{}".format(self.root, self.gallery_id)
+            url = f"{self.root}/a/{self.gallery_id}"
         GalleryExtractor.__init__(self, match, url)
 
     def metadata(self, page):
@@ -81,7 +81,7 @@ class LensdumpAlbumsExtractor(LensdumpBase, Extractor):
 
     def items(self):
         user, query = self.groups
-        url = "{}/{}/".format(self.root, user)
+        url = f"{self.root}/{user}/"
         if query:
             params = text.parse_query(query)
         else:
@@ -105,7 +105,7 @@ class LensdumpImageExtractor(LensdumpBase, Extractor):
 
     def items(self):
         key = self.groups[0]
-        url = "{}/i/{}".format(self.root, key)
+        url = f"{self.root}/i/{key}"
         extr = text.extract_from(self.request(url).text)
 
         data = {

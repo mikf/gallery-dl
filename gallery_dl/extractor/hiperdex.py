@@ -24,7 +24,7 @@ class HiperdexBase():
     @memcache(keyarg=1)
     def manga_data(self, manga, page=None):
         if not page:
-            url = "{}/manga/{}/".format(self.root, manga)
+            url = f"{self.root}/manga/{manga}/"
             page = self.request(url).text
         extr = text.extract_from(page)
 
