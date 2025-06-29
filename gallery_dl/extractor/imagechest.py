@@ -97,7 +97,7 @@ class ImagechestUserExtractor(Extractor):
 
         while True:
             try:
-                data = self.request(url, params=params).json()["data"]
+                data = self.request_json(url, params=params)["data"]
             except (TypeError, KeyError):
                 return
 

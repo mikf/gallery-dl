@@ -39,9 +39,8 @@ class FuskatorGalleryExtractor(GalleryExtractor):
             "hash"  : self.gallery_hash,
             "_"     : int(time.time()),
         }
-        self.data = data = self.request(
-            self.root + "/ajax/gal.aspx", params=params, headers=headers,
-        ).json()
+        self.data = data = self.request_json(
+            self.root + "/ajax/gal.aspx", params=params, headers=headers)
 
         title = text.extr(page, "<title>", "</title>").strip()
         title, _, gallery_id = title.rpartition("#")

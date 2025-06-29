@@ -62,7 +62,7 @@ class PicartoGalleryExtractor(Extractor):
         }
 
         while True:
-            posts = self.request(url, params=params).json()
+            posts = self.request_json(url, params=params)
             if not posts:
                 return
             yield from posts

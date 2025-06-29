@@ -131,7 +131,7 @@ class PatreonExtractor(Extractor):
 
         while url:
             url = text.ensure_http_scheme(url)
-            posts = self.request(url, headers=headers).json()
+            posts = self.request_json(url, headers=headers)
 
             if "included" in posts:
                 included = self._transform(posts["included"])

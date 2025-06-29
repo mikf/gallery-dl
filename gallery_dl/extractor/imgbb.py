@@ -112,7 +112,7 @@ class ImgbbExtractor(Extractor):
                 params["page"] += 1
             elif not seek or 'class="pagination-next"' not in page:
                 return
-            data = self.request(endpoint, method="POST", data=params).json()
+            data = self.request_json(endpoint, method="POST", data=params)
             page = data["html"]
 
 

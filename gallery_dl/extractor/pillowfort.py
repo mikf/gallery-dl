@@ -126,7 +126,7 @@ class PillowfortPostExtractor(PillowfortExtractor):
 
     def posts(self):
         url = f"{self.root}/posts/{self.item}/json/"
-        return (self.request(url).json(),)
+        return (self.request_json(url),)
 
 
 class PillowfortUserExtractor(PillowfortExtractor):
@@ -140,7 +140,7 @@ class PillowfortUserExtractor(PillowfortExtractor):
         params = {"p": 1}
 
         while True:
-            posts = self.request(url, params=params).json()["posts"]
+            posts = self.request_json(url, params=params)["posts"]
             yield from posts
 
             if len(posts) < 20:

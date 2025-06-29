@@ -29,7 +29,7 @@ class _4chanThreadExtractor(Extractor):
 
     def items(self):
         url = f"https://a.4cdn.org/{self.board}/thread/{self.thread}.json"
-        posts = self.request(url).json()["posts"]
+        posts = self.request_json(url)["posts"]
         title = posts[0].get("sub") or text.remove_html(posts[0]["com"])
 
         data = {
@@ -62,7 +62,7 @@ class _4chanBoardExtractor(Extractor):
 
     def items(self):
         url = f"https://a.4cdn.org/{self.board}/threads.json"
-        threads = self.request(url).json()
+        threads = self.request_json(url)
 
         for page in threads:
             for thread in page["threads"]:

@@ -256,8 +256,8 @@ class RedgifsAPI():
     def _call(self, endpoint, params=None):
         url = self.API_ROOT + endpoint
         self.headers["Authorization"] = self._auth()
-        return self.extractor.request(
-            url, params=params, headers=self.headers).json()
+        return self.extractor.request_json(
+            url, params=params, headers=self.headers)
 
     def _pagination(self, endpoint, params=None, key="gifs"):
         if params is None:
@@ -277,5 +277,5 @@ class RedgifsAPI():
         # https://github.com/Redgifs/api/wiki/Temporary-tokens
         url = self.API_ROOT + "/v2/auth/temporary"
         self.headers["Authorization"] = None
-        return "Bearer " + self.extractor.request(
-            url, headers=self.headers).json()["token"]
+        return "Bearer " + self.extractor.request_json(
+            url, headers=self.headers)["token"]

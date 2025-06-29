@@ -57,7 +57,7 @@ class SimplyhentaiGalleryExtractor(GalleryExtractor):
     def images(self, _):
         url = self.page_url + "/all-pages"
         headers = {"Accept": "application/json"}
-        images = self.request(url, headers=headers).json()
+        images = self.request_json(url, headers=headers)
         return [
             (
                 urls["full"].replace("/giant_thumb_", "/"),

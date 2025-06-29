@@ -299,7 +299,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
             "namespace": 1,
         }
 
-        data = self.request(self.api_url, method="POST", json=data).json()
+        data = self.request_json(self.api_url, method="POST", json=data)
         if "error" in data:
             raise exception.StopExtraction(data["error"])
 
@@ -351,7 +351,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
         }
 
         for request["page"] in range(self.image_num + 1, self.count + 1):
-            page = self.request(api_url, method="POST", json=request).json()
+            page = self.request_json(api_url, method="POST", json=request)
 
             i3 = page["i3"]
             i6 = page["i6"]

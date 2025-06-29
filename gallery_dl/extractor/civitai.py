@@ -854,8 +854,8 @@ class CivitaiSearchAPI():
         url = self.root + endpoint
         params = util.json_dumps({"queries": (query,)})
 
-        data = self.extractor.request(
-            url, method="POST", headers=self.headers, data=params).json()
+        data = self.extractor.request_json(
+            url, method="POST", headers=self.headers, data=params)
 
         return data["results"][0]
 

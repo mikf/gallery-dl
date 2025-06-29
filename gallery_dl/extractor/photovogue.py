@@ -45,7 +45,7 @@ class PhotovogueUserExtractor(Extractor):
         }
 
         while True:
-            data = self.request(url, params=params).json()
+            data = self.request_json(url, params=params)
             yield from data["items"]
 
             if not data["has_next"]:

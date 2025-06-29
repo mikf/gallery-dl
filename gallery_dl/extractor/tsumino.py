@@ -137,8 +137,8 @@ class TsuminoSearchExtractor(TsuminoBase, Extractor):
         data.update(self._parse(self.query))
 
         while True:
-            info = self.request(
-                url, method="POST", headers=headers, data=data).json()
+            info = self.request_json(
+                url, method="POST", headers=headers, data=data)
 
             for gallery in info["data"]:
                 yield gallery["entry"]

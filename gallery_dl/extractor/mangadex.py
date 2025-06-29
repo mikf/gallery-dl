@@ -301,8 +301,8 @@ class MangadexAPI():
         self.extractor.log.debug("Using client-id '%s…'", self.client_id[:24])
         url = ("https://auth.mangadex.org/realms/mangadex"
                "/protocol/openid-connect/token")
-        data = self.extractor.request(
-            url, method="POST", data=data, fatal=None).json()
+        data = self.extractor.request_json(
+            url, method="POST", data=data, fatal=None)
 
         try:
             access_token = data["access_token"]
@@ -328,8 +328,8 @@ class MangadexAPI():
             json = {"username": username, "password": password}
 
         self.extractor.log.debug("Using legacy login method")
-        data = self.extractor.request(
-            url, method="POST", json=json, fatal=None).json()
+        data = self.extractor.request_json(
+            url, method="POST", json=json, fatal=None)
         if data.get("result") != "ok":
             raise exception.AuthenticationError()
 

@@ -45,8 +45,8 @@ class BehanceExtractor(Extractor):
             "variables": variables,
         }
 
-        return self.request(url, method="POST", headers=headers,
-                            json=data).json()["data"]
+        return self.request_json(
+            url, method="POST", headers=headers, json=data)["data"]
 
     def _update(self, data):
         # compress data to simple lists

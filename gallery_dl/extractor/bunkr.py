@@ -180,8 +180,8 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
         referer = self.root_dl + "/file/" + data_id
 
         headers = {"Referer": referer, "Origin": self.root_dl}
-        data = self.request(self.endpoint, method="POST", headers=headers,
-                            json={"id": data_id}).json()
+        data = self.request_json(self.endpoint, method="POST", headers=headers,
+                                 json={"id": data_id})
 
         if data.get("encrypted"):
             key = f"SECRET_KEY_{data['timestamp'] // 3600}"

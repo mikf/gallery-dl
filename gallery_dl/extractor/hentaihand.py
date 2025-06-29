@@ -44,7 +44,7 @@ class HentaihandGalleryExtractor(GalleryExtractor):
         return data
 
     def images(self, _):
-        info = self.request(self.page_url + "/images").json()
+        info = self.request_json(self.page_url + "/images")
         return [(img["source_url"], img) for img in info["images"]]
 
 
@@ -69,7 +69,7 @@ class HentaihandTagExtractor(Extractor):
             tpl = self.type + "s"
 
         url = f"{self.root}/api/{tpl}/{self.key}"
-        tid = self.request(url, notfound=self.type).json()["id"]
+        tid = self.request_json(url, notfound=self.type)["id"]
 
         url = self.root + "/api/comics"
         params = {
@@ -82,7 +82,7 @@ class HentaihandTagExtractor(Extractor):
             "duration": "day",
         }
         while True:
-            info = self.request(url, params=params).json()
+            info = self.request_json(url, params=params)
 
             for gallery in info["data"]:
                 gurl = f"{self.root}/en/comic/{gallery['slug']}"

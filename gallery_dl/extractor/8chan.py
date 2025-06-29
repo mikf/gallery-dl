@@ -80,7 +80,7 @@ class _8chanThreadExtractor(_8chanExtractor):
         # fetch thread data
         url = f"{self.root}/{board}/res/{thread}."
         self.session.headers["Referer"] = url + "html"
-        thread = self.request(url + "json").json()
+        thread = self.request_json(url + "json")
         thread["postId"] = thread["threadId"]
         thread["_http_headers"] = {"Referer": url + "html"}
 
@@ -117,7 +117,7 @@ class _8chanBoardExtractor(_8chanExtractor):
 
         pnum = text.parse_int(pnum, 1)
         url = f"{self.root}/{board}/{pnum}.json"
-        data = self.request(url).json()
+        data = self.request_json(url)
         threads = data["threads"]
 
         while True:
@@ -130,4 +130,4 @@ class _8chanBoardExtractor(_8chanExtractor):
             if pnum > data["pageCount"]:
                 return
             url = f"{self.root}/{board}/{pnum}.json"
-            threads = self.request(url).json()["threads"]
+            threads = self.request_json(url)["threads"]

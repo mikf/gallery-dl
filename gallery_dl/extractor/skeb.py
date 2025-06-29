@@ -81,8 +81,8 @@ class SkebExtractor(Extractor):
         params["offset"] = 0
 
         while True:
-            posts = self.request(
-                url, params=params, headers=self.headers).json()
+            posts = self.request_json(
+                url, params=params, headers=self.headers)
 
             for post in posts:
                 parts = post["path"].split("/")
@@ -105,8 +105,8 @@ class SkebExtractor(Extractor):
         params["limit"] = 90
 
         while True:
-            data = self.request(
-                url, params=params, headers=self.headers).json()
+            data = self.request_json(
+                url, params=params, headers=self.headers)
             yield from data
 
             if len(data) < params["limit"]:
@@ -115,7 +115,7 @@ class SkebExtractor(Extractor):
 
     def _get_post_data(self, user_name, post_num):
         url = f"{self.root}/api/users/{user_name}/works/{post_num}"
-        resp = self.request(url, headers=self.headers).json()
+        resp = self.request_json(url, headers=self.headers)
         creator = resp["creator"]
         post = {
             "post_id"          : resp["id"],
@@ -265,9 +265,9 @@ class SkebSearchExtractor(SkebExtractor):
         data = {"requests": (request,)}
 
         while True:
-            result = self.request(
+            result = self.request_json(
                 url, method="POST", params=params, headers=headers, json=data,
-            ).json()["results"][0]
+            )["results"][0]
 
             for post in result["hits"]:
                 parts = post["path"].split("/")

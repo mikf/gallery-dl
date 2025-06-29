@@ -30,7 +30,7 @@ class SpeakerdeckPresentationExtractor(GalleryExtractor):
         params = {
             "url": f"{self.root}/{user}/{presentation}",
         }
-        data = self.request(url, params=params).json()
+        data = self.request_json(url, params=params)
 
         self.presentation_id = text.extr(
             data["html"], 'src="//speakerdeck.com/player/', '"')

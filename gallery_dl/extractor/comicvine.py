@@ -46,7 +46,7 @@ class ComicvineTagExtractor(BooruExtractor):
         }
 
         while True:
-            images = self.request(url, params=params).json()["images"]
+            images = self.request_json(url, params=params)["images"]
             yield from images
 
             if len(images) < self.per_page:

@@ -49,8 +49,8 @@ class PlurkExtractor(Extractor):
         }
 
         while True:
-            info = self.request(
-                url, method="POST", headers=headers, data=data).json()
+            info = self.request_json(
+                url, method="POST", headers=headers, data=data)
             yield from info["responses"]
             if not info["has_newer"]:
                 return

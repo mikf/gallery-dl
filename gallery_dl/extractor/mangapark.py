@@ -64,8 +64,8 @@ class MangaparkBase():
             "variables"    : variables,
             "operationName": opname,
         }
-        return self.request(
-            url, method="POST", json=data).json()["data"].popitem()[1]
+        return self.request_json(
+            url, method="POST", json=data)["data"].popitem()[1]
 
 
 class MangaparkChapterExtractor(MangaparkBase, ChapterExtractor):

@@ -40,8 +40,8 @@ class SchalenetworkExtractor(Extractor):
         url_api = self.root_api + endpoint
 
         while True:
-            data = self.request(
-                url_api, params=params, headers=self.headers).json()
+            data = self.request_json(
+                url_api, params=params, headers=self.headers)
 
             try:
                 entries = data["entries"]
@@ -106,7 +106,7 @@ class SchalenetworkGalleryExtractor(SchalenetworkExtractor, GalleryExtractor):
 
     def metadata(self, _):
         url = f"{self.root_api}/books/detail/{self.groups[1]}/{self.groups[2]}"
-        self.data = data = self.request(url, headers=self.headers).json()
+        self.data = data = self.request_json(url, headers=self.headers)
         data["date"] = text.parse_timestamp(data["created_at"] // 1000)
 
         tags = []
@@ -149,16 +149,16 @@ class SchalenetworkGalleryExtractor(SchalenetworkExtractor, GalleryExtractor):
 
         if self.cbz:
             params["action"] = "dl"
-            base = self.request(
+            base = self.request_json(
                 url, method="POST", params=params, headers=self.headers,
-            ).json()["base"]
+            )["base"]
             url = f"{base}?v={data['updated_at']}&w={fmt['w']}"
             info = text.nameext_from_url(base)
             if not info["extension"]:
                 info["extension"] = "cbz"
             return ((url, info),)
 
-        data = self.request(url, params=params, headers=self.headers).json()
+        data = self.request_json(url, params=params, headers=self.headers)
         base = data["base"]
 
         results = []

@@ -144,12 +144,12 @@ class CienArticleExtractor(CienExtractor):
                 "gallery_id": text.extr(gallery, ' gallery-id="', '"'),
                 "time"      : text.extr(gallery, ' time="', '"'),
             }
-            data = self.request(url, params=params).json()
+            data = self.request_json(url, params=params)
             url = self.root + "/api/creator/gallery/imagePath"
 
             for params["page"], params["file_id"] in enumerate(
                     data["imgList"]):
-                path = self.request(url, params=params).json()["path"]
+                path = self.request_json(url, params=params)["path"]
 
                 file = params.copy()
                 file["url"] = path

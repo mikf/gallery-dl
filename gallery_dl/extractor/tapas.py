@@ -67,7 +67,7 @@ class TapasExtractor(Extractor):
 
     def request_api(self, url, params=None):
         headers = {"Accept": "application/json, text/javascript, */*;"}
-        return self.request(url, params=params, headers=headers).json()["data"]
+        return self.request_json(url, params=params, headers=headers)["data"]
 
 
 class TapasEpisodeExtractor(TapasExtractor):

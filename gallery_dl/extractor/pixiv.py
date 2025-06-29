@@ -233,7 +233,7 @@ class PixivExtractor(Extractor):
     def _request_ajax(self, endpoint):
         url = f"{self.root}/ajax{endpoint}"
         try:
-            return self.request(url, headers=self.headers_web).json()["body"]
+            return self.request_json(url, headers=self.headers_web)["body"]
         except Exception:
             return None
 
@@ -1075,7 +1075,7 @@ class PixivSketchExtractor(Extractor):
         }
 
         while True:
-            data = self.request(url, headers=headers).json()
+            data = self.request_json(url, headers=headers)
             yield from data["data"]["items"]
 
             next_url = data["_links"].get("next")

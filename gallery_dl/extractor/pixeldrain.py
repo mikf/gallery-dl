@@ -43,7 +43,7 @@ class PixeldrainFileExtractor(PixeldrainExtractor):
 
     def items(self):
         url = f"{self.root}/api/file/{self.file_id}"
-        file = self.request(url + "/info").json()
+        file = self.request_json(url + "/info")
 
         file["url"] = url + "?download"
         file["date"] = self.parse_datetime(file["date_upload"])
@@ -69,7 +69,7 @@ class PixeldrainAlbumExtractor(PixeldrainExtractor):
 
     def items(self):
         url = f"{self.root}/api/list/{self.album_id}"
-        album = self.request(url).json()
+        album = self.request_json(url)
 
         files = album["files"]
         album["count"] = album["file_count"]
@@ -120,7 +120,7 @@ class PixeldrainFolderExtractor(PixeldrainExtractor):
         recursive = self.config("recursive")
 
         url = f"{self.root}/api/filesystem/{self.groups[0]}"
-        stat = self.request(url + "?stat").json()
+        stat = self.request_json(url + "?stat")
 
         paths = stat["path"]
         path = paths[stat["base_index"]]

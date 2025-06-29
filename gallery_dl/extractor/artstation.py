@@ -104,7 +104,7 @@ class ArtstationExtractor(Extractor):
         url = f"{self.root}/projects/{project_id}.json"
 
         try:
-            data = self.request(url).json()
+            data = self.request_json(url)
         except exception.HttpError as exc:
             self.log.warning(exc)
             return
@@ -152,7 +152,7 @@ class ArtstationExtractor(Extractor):
         params["page"] = 1
 
         while True:
-            data = self.request(url, **kwargs).json()
+            data = self.request_json(url, **kwargs)
             yield from data["data"]
 
             total += len(data["data"])
@@ -167,9 +167,8 @@ class ArtstationExtractor(Extractor):
             "Accept" : "*/*",
             "Origin" : self.root,
         }
-        return self.request(
-            url, method="POST", headers=headers, json={},
-        ).json()["public_csrf_token"]
+        return self.request_json(
+            url, method="POST", headers=headers, json={})["public_csrf_token"]
 
     def _no_cache(self, url):
         """Cause a cache miss to prevent Cloudflare 'optimizations'
@@ -269,8 +268,8 @@ class ArtstationCollectionExtractor(ArtstationExtractor):
     def metadata(self):
         url = f"{self.root}/collections/{self.collection_id}.json"
         params = {"username": self.user}
-        collection = self.request(
-            url, params=params, notfound="collection").json()
+        collection = self.request_json(
+            url, params=params, notfound="collection")
         return {"collection": collection, "user": self.user}
 
     def projects(self):
@@ -290,8 +289,8 @@ class ArtstationCollectionsExtractor(ArtstationExtractor):
         url = self.root + "/collections.json"
         params = {"username": self.user}
 
-        for collection in self.request(
-                url, params=params, notfound="collections").json():
+        for collection in self.request_json(
+                url, params=params, notfound="collections"):
             url = f"{self.root}/{self.user}/collections/{collection['id']}"
             collection["_extractor"] = ArtstationCollectionExtractor
             yield Message.Queue, url, collection
@@ -320,7 +319,7 @@ class ArtstationChallengeExtractor(ArtstationExtractor):
         submission_url = f"{base}/submissions.json"
         update_url = f"{self.root}/contests/submission_updates.json"
 
-        challenge = self.request(challenge_url).json()
+        challenge = self.request_json(challenge_url)
         yield Message.Directory, {"challenge": challenge}
 
         params = {"sorting": self.sorting}

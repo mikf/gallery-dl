@@ -77,7 +77,7 @@ class PixnetImageExtractor(PixnetExtractor):
             "format": "json",
         }
 
-        data = self.request(url, params=params).json()
+        data = self.request_json(url, params=params)
         data["id"] = text.parse_int(
             data["url"].rpartition("/")[2].partition("-")[0])
         data["filename"], _, data["extension"] = data["title"].rpartition(".")

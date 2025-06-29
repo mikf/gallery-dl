@@ -20,7 +20,7 @@ class ItchioGameExtractor(Extractor):
     directory_fmt = ("{category}", "{user[name]}")
     filename_fmt = "{game[title]} ({id}).{extension}"
     archive_fmt = "{id}"
-    pattern = r"(?:https?://)?(\w+).itch\.io/([\w-]+)"
+    pattern = r"(?:https?://)?(\w+)\.itch\.io/([\w-]+)"
     example = "https://USER.itch.io/GAME"
 
     def __init__(self, match):
@@ -47,8 +47,8 @@ class ItchioGameExtractor(Extractor):
 
         for upload_id in text.extract_iter(page, 'data-upload_id="', '"'):
             file_url = f"{game_url}/file/{upload_id}"
-            info = self.request(file_url, method="POST", params=params,
-                                headers=headers, data=data).json()
+            info = self.request_json(file_url, method="POST", params=params,
+                                     headers=headers, data=data)
 
             game = info["lightbox"]["game"]
             user = info["lightbox"]["user"]

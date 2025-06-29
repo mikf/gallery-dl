@@ -296,7 +296,7 @@ class NewgroundsExtractor(Extractor):
                 "Accept": "application/json, text/javascript, */*; q=0.01",
                 "X-Requested-With": "XMLHttpRequest",
             }
-            sources = self.request(url, headers=headers).json()["sources"]
+            sources = self.request_json(url, headers=headers)["sources"]
             formats = self._video_formats(sources)
             src = next(formats, "")
             date = text.parse_timestamp(src.rpartition("?")[2])
@@ -566,7 +566,7 @@ class NewgroundsSearchExtractor(NewgroundsExtractor):
         }
 
         while True:
-            data = self.request(url, params=params, headers=headers).json()
+            data = self.request_json(url, params=params, headers=headers)
 
             post_url = None
             for post_url in text.extract_iter(data["content"], 'href="', '"'):

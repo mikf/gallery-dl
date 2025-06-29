@@ -233,7 +233,7 @@ class SubscribestarUserExtractor(SubscribestarExtractor):
             url = text.extr(posts[-1], needle_next_page, '"')
             if not url:
                 return
-            page = self.request(self.root + text.unescape(url)).json()["html"]
+            page = self.request_json(self.root + text.unescape(url))["html"]
 
 
 class SubscribestarPostExtractor(SubscribestarExtractor):

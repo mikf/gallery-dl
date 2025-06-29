@@ -61,8 +61,8 @@ class CyberdropAlbumExtractor(lolisafe.LolisafeAlbumExtractor):
         for file_id in file_ids:
             try:
                 url = f"{self.root_api}/api/file/info/{file_id}"
-                file = self.request(url).json()
-                auth = self.request(file["auth_url"]).json()
+                file = self.request_json(url)
+                auth = self.request_json(file["auth_url"])
                 file["url"] = auth["url"]
             except Exception as exc:
                 self.log.warning("%s (%s: %s)",

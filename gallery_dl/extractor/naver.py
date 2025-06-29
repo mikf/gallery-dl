@@ -117,7 +117,7 @@ class NaverPostExtractor(NaverBase, GalleryExtractor):
             "adt"  : "glad",
             "lc"   : "ko_KR",
         }
-        data = self.request(url, params=params).json()
+        data = self.request_json(url, params=params)
         video = max(data["videos"]["list"],
                     key=lambda v: v.get("size") or 0)
         files.append((video["source"], video))
@@ -160,7 +160,7 @@ class NaverBlogExtractor(NaverBase, Extractor):
 
         # loop over all posts
         while True:
-            data = self.request(url, params=params).json()
+            data = self.request_json(url, params=params)
 
             for post in data["postList"]:
                 post["url"] = (f"{self.root}/PostView.nhn?blogId="

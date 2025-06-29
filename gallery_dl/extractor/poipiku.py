@@ -85,8 +85,8 @@ class PoipikuExtractor(Extractor):
                 "MD" : "0",
                 "TWF": "-1",
             }
-            resp = self.request(
-                url, method="POST", headers=headers, data=data).json()
+            resp = self.request_json(
+                url, method="POST", headers=headers, data=data)
 
             page = resp["html"]
             if (resp.get("result_num") or 0) < 0:

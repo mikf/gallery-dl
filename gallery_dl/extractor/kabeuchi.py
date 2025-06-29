@@ -65,7 +65,7 @@ class KabeuchiUserExtractor(Extractor):
         }
 
         while True:
-            info = self.request(url, method="POST", data=data).json()
+            info = self.request_json(url, method="POST", data=data)
             datas = info["datas"]
 
             if not datas or not isinstance(datas, list):
