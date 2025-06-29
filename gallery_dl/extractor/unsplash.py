@@ -61,7 +61,7 @@ class UnsplashExtractor(Extractor):
         params["page"] = self.page_start
 
         while True:
-            photos = self.request(url, params=params).json()
+            photos = self.request_json(url, params=params)
             if results:
                 photos = photos["results"]
             yield from photos
@@ -79,7 +79,7 @@ class UnsplashImageExtractor(UnsplashExtractor):
 
     def photos(self):
         url = f"{self.root}/napi/photos/{self.item}"
-        return (self.request(url).json(),)
+        return (self.request_json(url),)
 
 
 class UnsplashUserExtractor(UnsplashExtractor):

@@ -152,7 +152,7 @@ class WeiboExtractor(Extractor):
 
     def _status_by_id(self, status_id):
         url = f"{self.root}/ajax/statuses/show?id={status_id}"
-        return self.request(url).json()
+        return self.request_json(url)
 
     def _user_id(self):
         if len(self.user) >= 10 and self.user.isdecimal():
@@ -161,7 +161,7 @@ class WeiboExtractor(Extractor):
             url = (f"{self.root}/ajax/profile/info?"
                    f"{'screen_name' if self._prefix == 'n' else 'custom'}="
                    f"{self.user}")
-            return self.request(url).json()["data"]["user"]["idstr"]
+            return self.request_json(url)["data"]["user"]["idstr"]
 
     def _pagination(self, endpoint, params):
         url = self.root + "/ajax" + endpoint

@@ -341,7 +341,7 @@ class InkbunnyAPI():
 
         while True:
             params["sid"] = self.session_id
-            data = self.extractor.request(url, params=params).json()
+            data = self.extractor.request_json(url, params=params)
 
             if "error_code" not in data:
                 return data
@@ -378,7 +378,7 @@ def _authenticate_impl(api, username, password):
 
     url = "https://inkbunny.net/api_login.php"
     data = {"username": username, "password": password}
-    data = api.extractor.request(url, method="POST", data=data).json()
+    data = api.extractor.request_json(url, method="POST", data=data)
 
     if "sid" not in data:
         raise exception.AuthenticationError(data.get("error_message"))

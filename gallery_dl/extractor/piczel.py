@@ -55,7 +55,7 @@ class PiczelExtractor(Extractor):
         params = {"page": pnum}
 
         while True:
-            data = self.request(url, params=params).json()
+            data = self.request_json(url, params=params)
 
             yield from data["data"]
 
@@ -96,4 +96,4 @@ class PiczelImageExtractor(PiczelExtractor):
 
     def posts(self):
         url = f"{self.root_api}/api/gallery/{self.groups[0]}"
-        return (self.request(url).json(),)
+        return (self.request_json(url),)

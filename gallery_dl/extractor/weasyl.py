@@ -34,12 +34,12 @@ class WeasylExtractor(Extractor):
         self.session.headers['X-Weasyl-API-Key'] = self.config("api-key")
 
     def request_submission(self, submitid):
-        return self.request(
-            f"{self.root}/api/submissions/{submitid}/view").json()
+        return self.request_json(
+            f"{self.root}/api/submissions/{submitid}/view")
 
     def retrieve_journal(self, journalid):
-        data = self.request(
-            f"{self.root}/api/journals/{journalid}/view").json()
+        data = self.request_json(
+            f"{self.root}/api/journals/{journalid}/view")
         data["extension"] = "html"
         data["html"] = "text:" + data["content"]
         data["date"] = text.parse_datetime(data["posted_at"])
@@ -54,7 +54,7 @@ class WeasylExtractor(Extractor):
         }
 
         while True:
-            data = self.request(url, params=params).json()
+            data = self.request_json(url, params=params)
             for submission in data["submissions"]:
                 if metadata:
                     submission = self.request_submission(

@@ -53,7 +53,7 @@ class NsfwalbumAlbumExtractor(GalleryExtractor):
                             self.request(iframe + image_id).text,
                             'giraffe.annihilate("', '"')[0])
                         params = {"spirit": spirit, "photo": image_id}
-                    data = self.request(backend, params=params).json()
+                    data = self.request_json(backend, params=params)
                     break
                 except Exception:
                     tries += 1

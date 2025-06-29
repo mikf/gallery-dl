@@ -93,7 +93,7 @@ class FantiaExtractor(Extractor):
     def _get_post_data(self, post_id):
         """Fetch and process post data"""
         url = self.root+"/api/v1/posts/"+post_id
-        resp = self.request(url, headers=self.headers).json()["post"]
+        resp = self.request_json(url, headers=self.headers)["post"]
         return {
             "post_id": resp["id"],
             "post_url": self.root + "/posts/" + str(resp["id"]),

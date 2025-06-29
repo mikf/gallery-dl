@@ -72,7 +72,7 @@ class LolisafeAlbumExtractor(LolisafeExtractor):
 
     def fetch_album(self, album_id):
         url = f"{self.root}/api/album/get/{album_id}"
-        data = self.request(url).json()
+        data = self.request_json(url)
 
         return data["files"], {
             "album_id"  : self.album_id,

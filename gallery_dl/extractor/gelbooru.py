@@ -30,7 +30,7 @@ class GelbooruBase():
         params["user_id"] = self.user_id
 
         url = self.root + "/index.php?page=dapi&q=index&json=1"
-        data = self.request(url, params=params).json()
+        data = self.request_json(url, params=params)
 
         if not key:
             return data

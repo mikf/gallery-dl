@@ -72,7 +72,7 @@ class _500pxExtractor(Extractor):
             "x-csrf-token": self.cookies.get(
                 "x-csrf-token", domain=".500px.com"),
         }
-        return self.request(url, headers=headers, params=params).json()
+        return self.request_json(url, headers=headers, params=params)
 
     def _request_graphql(self, opname, variables):
         url = "https://api.500px.com/graphql"
@@ -85,8 +85,8 @@ class _500pxExtractor(Extractor):
             "variables"    : util.json_dumps(variables),
             "query"        : QUERIES[opname],
         }
-        return self.request(
-            url, method="POST", headers=headers, json=data).json()["data"]
+        return self.request_json(
+            url, method="POST", headers=headers, json=data)["data"]
 
 
 class _500pxUserExtractor(_500pxExtractor):

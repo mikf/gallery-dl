@@ -74,7 +74,7 @@ class YiffverseExtractor(BooruExtractor):
 
     def _fetch_post(self, post_id):
         url = f"{self.root}/api/v2/post/{post_id}"
-        return self.request(url).json()
+        return self.request_json(url)
 
     def _pagination(self, endpoint, params=None):
         url = f"{self.root}/api{endpoint}"
@@ -87,7 +87,7 @@ class YiffverseExtractor(BooruExtractor):
         threshold = self.per_page
 
         while True:
-            data = self.request(url, method="POST", json=params).json()
+            data = self.request_json(url, method="POST", json=params)
 
             yield from data["items"]
 

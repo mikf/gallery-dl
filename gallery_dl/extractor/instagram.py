@@ -884,7 +884,7 @@ class InstagramRestAPI():
             "Sec-Fetch-Mode"  : "cors",
             "Sec-Fetch-Site"  : "same-origin",
         }
-        return extr.request(url, **kwargs).json()
+        return extr.request_json(url, **kwargs)
 
     def _pagination(self, endpoint, params=None, media=False):
         if params is None:
@@ -1047,7 +1047,7 @@ class InstagramGraphqlAPI():
             "X-Requested-With": "XMLHttpRequest",
             "Referer"         : extr.root + "/",
         }
-        return extr.request(url, params=params, headers=headers).json()["data"]
+        return extr.request_json(url, params=params, headers=headers)["data"]
 
     def _pagination(self, query_hash, variables,
                     key_data="user", key_edge=None):

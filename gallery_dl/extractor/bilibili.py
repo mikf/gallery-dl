@@ -108,7 +108,7 @@ class BilibiliAPI():
 
     def _call(self, endpoint, params):
         url = "https://api.bilibili.com/x/polymer/web-dynamic/v1" + endpoint
-        data = self.extractor.request(url, params=params).json()
+        data = self.extractor.request_json(url, params=params)
 
         if data["code"] != 0:
             self.extractor.log.debug("Server response: %s", data)
@@ -159,7 +159,7 @@ class BilibiliAPI():
 
     def login_user_id(self):
         url = "https://api.bilibili.com/x/space/v2/myinfo"
-        data = self.extractor.request(url).json()
+        data = self.extractor.request_json(url)
 
         if data["code"] != 0:
             self.extractor.log.debug("Server response: %s", data)

@@ -27,7 +27,7 @@ class _2chThreadExtractor(Extractor):
 
     def items(self):
         url = f"{self.root}/{self.board}/res/{self.thread}.json"
-        posts = self.request(url).json()["threads"][0]["posts"]
+        posts = self.request_json(url)["threads"][0]["posts"]
 
         op = posts[0]
         title = op.get("subject") or text.remove_html(op["comment"])
@@ -75,7 +75,7 @@ class _2chBoardExtractor(Extractor):
 
         # index page
         url = f"{base}/index.json"
-        index = self.request(url).json()
+        index = self.request_json(url)
         index["_extractor"] = _2chThreadExtractor
         for thread in index["threads"]:
             url = f"{base}/res/{thread['thread_num']}.html"
@@ -84,7 +84,7 @@ class _2chBoardExtractor(Extractor):
         # pages 1..n
         for n in util.advance(index["pages"], 1):
             url = f"{base}/{n}.json"
-            page = self.request(url).json()
+            page = self.request_json(url)
             page["_extractor"] = _2chThreadExtractor
             for thread in page["threads"]:
                 url = f"{base}/res/{thread['thread_num']}.html"

@@ -72,7 +72,7 @@ class SteamgriddbExtractor(Extractor):
                 yield Message.Url, url, text.nameext_from_url(url, asset)
 
     def _call(self, endpoint, **kwargs):
-        data = self.request(self.root + endpoint, **kwargs).json()
+        data = self.request_json(self.root + endpoint, **kwargs)
         if not data["success"]:
             raise exception.StopExtraction(data["error"])
         return data["data"]

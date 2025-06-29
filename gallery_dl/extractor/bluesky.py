@@ -488,7 +488,7 @@ class BlueskyAPI():
             url = "https://plc.directory/" + did
 
         try:
-            data = self.extractor.request(url).json()
+            data = self.extractor.request_json(url)
             for service in data["service"]:
                 if service["type"] == "AtprotoPersonalDataServer":
                     return service["serviceEndpoint"]

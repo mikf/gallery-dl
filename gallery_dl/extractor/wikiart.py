@@ -54,7 +54,7 @@ class WikiartExtractor(Extractor):
             params.update(extra_params)
 
         while True:
-            data = self.request(url, headers=headers, params=params).json()
+            data = self.request_json(url, headers=headers, params=params)
             items = data.get(key)
             if not items:
                 return
@@ -78,7 +78,7 @@ class WikiartArtistExtractor(WikiartExtractor):
 
     def metadata(self):
         url = f"{self.root}/{self.lang}/{self.artist_name}?json=2"
-        self.artist = self.request(url).json()
+        self.artist = self.request_json(url)
         return {"artist": self.artist}
 
     def paintings(self):

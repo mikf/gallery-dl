@@ -93,7 +93,7 @@ class VscoExtractor(Extractor):
             yield from map(self._transform_media, extra)
 
         while True:
-            data = self.request(url, params=params, headers=headers).json()
+            data = self.request_json(url, params=params, headers=headers)
             medias = data.get(key)
             if not medias:
                 return
@@ -238,7 +238,7 @@ class VscoSpaceExtractor(VscoExtractor):
                 return
             params["cursor"] = cursor["postcursorcontext"]["postId"]
 
-            data = self.request(url, params=params, headers=headers).json()
+            data = self.request_json(url, params=params, headers=headers)
 
 
 class VscoSpacesExtractor(VscoExtractor):
@@ -262,7 +262,7 @@ class VscoSpacesExtractor(VscoExtractor):
         }
         # this would theoretically need to be paginated
         url = f"{self.root}/grpc/spaces/user/{uid}"
-        data = self.request(url, headers=headers).json()
+        data = self.request_json(url, headers=headers)
 
         for space in data["spacesWithRoleList"]:
             space = space["space"]

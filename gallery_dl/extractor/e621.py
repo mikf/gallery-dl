@@ -60,13 +60,13 @@ class E621Extractor(danbooru.DanbooruExtractor):
             yield Message.Url, file["url"], post
 
     def _get_notes(self, id):
-        return self.request(
-            f"{self.root}/notes.json?search[post_id]={id}").json()
+        return self.request_json(
+            f"{self.root}/notes.json?search[post_id]={id}")
 
     @memcache(keyarg=1)
     def _get_pools(self, ids):
-        pools = self.request(
-            f"{self.root}/pools.json?search[id]={ids}").json()
+        pools = self.request_json(
+            f"{self.root}/pools.json?search[id]={ids}")
         for pool in pools:
             pool["name"] = pool["name"].replace("_", " ")
         return pools
@@ -127,7 +127,7 @@ class E621PostExtractor(E621Extractor, danbooru.DanbooruPostExtractor):
 
     def posts(self):
         url = f"{self.root}/posts/{self.groups[-1]}.json"
-        return (self.request(url).json()["post"],)
+        return (self.request_json(url)["post"],)
 
 
 class E621PopularExtractor(E621Extractor, danbooru.DanbooruPopularExtractor):

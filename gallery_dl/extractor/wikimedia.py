@@ -107,7 +107,7 @@ class WikimediaExtractor(BaseExtractor):
         )
 
         while True:
-            data = self.request(url, params=params).json()
+            data = self.request_json(url, params=params)
 
             # ref: https://www.mediawiki.org/wiki/API:Errors_and_warnings
             error = data.get("error")

@@ -47,8 +47,8 @@ class PornpicsExtractor(Extractor):
         }
 
         while True:
-            galleries = self.request(
-                url, params=params, headers=headers).json()
+            galleries = self.request_json(
+                url, params=params, headers=headers)
             yield from galleries
 
             if len(galleries) < limit:

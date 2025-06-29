@@ -89,7 +89,7 @@ class NaverwebtoonComicExtractor(NaverwebtoonBase, Extractor):
         }
 
         while True:
-            data = self.request(url, headers=headers, params=params).json()
+            data = self.request_json(url, headers=headers, params=params)
 
             path = data["webtoonLevelCode"].lower().replace("_c", "C", 1)
             base = f"{self.root}/{path}/detail?titleId={data['titleId']}&no="

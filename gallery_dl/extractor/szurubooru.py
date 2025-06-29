@@ -36,7 +36,7 @@ class SzurubooruExtractor(booru.BooruExtractor):
 
     def _api_request(self, endpoint, params=None):
         url = self.root + "/api" + endpoint
-        return self.request(url, headers=self.headers, params=params).json()
+        return self.request_json(url, headers=self.headers, params=params)
 
     def _pagination(self, endpoint, params):
         params["offset"] = 0

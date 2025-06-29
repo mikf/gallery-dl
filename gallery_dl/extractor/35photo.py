@@ -49,14 +49,14 @@ class _35photoExtractor(Extractor):
         if extra_ids:
             yield from extra_ids
         while params["lastId"]:
-            data = self.request(url, headers=headers, params=params).json()
+            data = self.request_json(url, headers=headers, params=params)
             yield from self._photo_ids(data["data"])
             params["lastId"] = data["lastId"]
 
     def _photo_data(self, photo_id):
         params = {"method": "photo.getData", "photoId": photo_id}
-        data = self.request(
-            "https://api.35photo.pro/", params=params).json()["data"][photo_id]
+        data = self.request_json(
+            "https://api.35photo.pro/", params=params)["data"][photo_id]
         info = {
             "url"        : data["src"],
             "id"         : data["photo_id"],

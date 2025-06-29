@@ -105,7 +105,7 @@ class SlickpicAlbumExtractor(SlickpicExtractor):
             "sng"   : "0",
             "whq"   : "1",
         }
-        return self.request(url, method="POST", data=data).json()["list"]
+        return self.request_json(url, method="POST", data=data)["list"]
 
 
 class SlickpicUserExtractor(SlickpicExtractor):

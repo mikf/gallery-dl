@@ -110,9 +110,9 @@ class ScrolllerExtractor(Extractor):
             url = "https://api.scrolller.com/api/v2/graphql"
             headers["Content-Type"] = "text/plain;charset=UTF-8"
 
-        return self.request(
+        return self.request_json(
             url, method="POST", headers=headers, data=util.json_dumps(data),
-        ).json()["data"]
+        )["data"]
 
     def _pagination(self, opname, variables, data=None):
         if data is None:
