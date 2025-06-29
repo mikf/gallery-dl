@@ -117,10 +117,13 @@ class BehanceGalleryExtractor(BehanceExtractor):
         """Collect gallery info dict"""
         url = f"{self.root}/gallery/{self.gallery_id}/a"
         cookies = {
-            "gki": '{"feature_project_view":false,'
-                   '"feature_discover_login_prompt":false,'
-                   '"feature_project_login_prompt":false}',
+            "gk_suid": "14118261",
+            "gki": "feature_3_in_1_checkout_test:false,hire_browse_get_quote_c"
+                   "ta_ab_test:false,feature_hire_dashboard_services_ab_test:f"
+                   "alse,feature_show_details_jobs_row_ab_test:false,feature_a"
+                   "i_freelance_project_create_flow:false,",
             "ilo0": "true",
+            "originalReferrer": "",
         }
         page = self.request(url, cookies=cookies).text
 
