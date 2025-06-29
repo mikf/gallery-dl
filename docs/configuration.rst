@@ -4408,19 +4408,6 @@ Description
     When more than one format is given, the first available one is selected.
 
 
-extractor.sankaku.id-format
----------------------------
-Type
-    ``string``
-Default
-    ``"numeric"``
-Description
-    Format of ``id`` metadata fields.
-
-    * ``"alphanumeric"`` or ``"alnum"``: 11-character alphanumeric IDs (``y0abGlDOr2o``)
-    * ``"numeric"`` or ``"legacy"``: numeric IDs (``360451``)
-
-
 extractor.sankaku.refresh
 -------------------------
 Type

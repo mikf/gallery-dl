@@ -216,9 +216,6 @@ class SankakuAPI():
             "Origin"     : extractor.root,
         }
 
-        if extractor.config("id-format") in ("alnum", "alphanumeric"):
-            self.headers["Api-Version"] = "2"
-
         self.username, self.password = extractor._get_auth_info()
         if not self.username:
             self.authenticate = util.noop
