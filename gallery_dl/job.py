@@ -451,6 +451,7 @@ class DownloadJob(Job):
                             except StopIteration:
                                 pass
                             else:
+                                pextr.log.info("Downloading fallback URL")
                                 text.nameext_from_url(url, kwdict)
                                 if url.startswith("ytdl:"):
                                     kwdict["extension"] = ""
