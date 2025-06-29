@@ -1760,7 +1760,7 @@ extractor.bunkr.endpoint
 Type
     ``string``
 Default
-    ``"/api/_001"``
+    ``"/api/_001_v2"``
 Description
     API endpoint for retrieving file URLs.
 
