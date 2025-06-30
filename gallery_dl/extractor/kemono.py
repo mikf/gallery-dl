@@ -428,15 +428,14 @@ class KemonoDiscordExtractor(KemonoExtractor):
 
         for post in posts:
             files = []
-            append = files.append
             for attachment in post["attachments"]:
                 match = find_hash(attachment["path"])
                 attachment["hash"] = match[1] if match else ""
                 attachment["type"] = "attachment"
-                append(attachment)
+                files.append(attachment)
             for path in find_inline(post["content"] or ""):
-                append({"path": "https://cdn.discordapp.com" + path,
-                        "name": path, "type": "inline", "hash": ""})
+                files.append({"path": "https://cdn.discordapp.com" + path,
+                              "name": path, "type": "inline", "hash": ""})
 
             post.update(data)
             post["date"] = self._parse_datetime(post["published"])

@@ -378,13 +378,13 @@ class UgoiraPP(PostProcessor):
 
     def _write_ffmpeg_concat(self, tempdir):
         content = ["ffconcat version 1.0"]
-        append = content.append
 
         for frame in self._frames:
-            append(f"file '{frame['file']}'\nduration {frame['delay'] / 1000}")
+            content.append(f"file '{frame['file']}'\n"
+                           f"duration {frame['delay'] / 1000}")
         if self.repeat:
-            append(f"file '{frame['file']}'")
-        append("")
+            content.append(f"file '{frame['file']}'")
+        content.append("")
 
         ffconcat = tempdir + "/ffconcat.txt"
         with open(ffconcat, "w") as fp:
@@ -393,14 +393,13 @@ class UgoiraPP(PostProcessor):
 
     def _write_mkvmerge_timecodes(self, tempdir):
         content = ["# timecode format v2"]
-        append = content.append
 
         delay_sum = 0
         for frame in self._frames:
-            append(str(delay_sum))
+            content.append(str(delay_sum))
             delay_sum += frame["delay"]
-        append(str(delay_sum))
-        append("")
+        content.append(str(delay_sum))
+        content.append("")
 
         timecodes = tempdir + "/timecodes.tc"
         with open(timecodes, "w") as fp:

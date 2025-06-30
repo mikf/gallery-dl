@@ -145,9 +145,7 @@ class BehanceGalleryExtractor(BehanceExtractor):
                 raise exception.AuthorizationError()
             return ()
 
-        result = []
-        append = result.append
-
+        results = []
         for module in data["modules"]:
             mtype = module["__typename"][:-6].lower()
 
@@ -165,7 +163,7 @@ class BehanceGalleryExtractor(BehanceExtractor):
                         sizes.get("fs") or
                         sizes.get("hd") or
                         sizes.get("disp"))
-                append((size["url"], module))
+                results.append((size["url"], module))
 
             elif mtype == "video":
                 try:
@@ -177,7 +175,7 @@ class BehanceGalleryExtractor(BehanceExtractor):
                         url = "ytdl:" + url
                         module["_ytdl_manifest"] = "hls"
                         module["extension"] = "mp4"
-                    append((url, module))
+                    results.append((url, module))
                     continue
                 except Exception as exc:
                     self.log.debug("%s: %s", exc.__class__.__name__, exc)
@@ -198,7 +196,7 @@ class BehanceGalleryExtractor(BehanceExtractor):
                     self.log.debug("%s: %s", exc.__class__.__name__, exc)
                     url = "ytdl:" + renditions[-1]["url"]
 
-                append((url, module))
+                results.append((url, module))
 
             elif mtype == "mediacollection":
                 for component in module["components"]:
@@ -206,7 +204,7 @@ class BehanceGalleryExtractor(BehanceExtractor):
                         if size:
                             parts = size["url"].split("/")
                             parts[4] = "source"
-                            append(("/".join(parts), module))
+                            results.append(("/".join(parts), module))
                             break
 
             elif mtype == "embed":
@@ -214,13 +212,13 @@ class BehanceGalleryExtractor(BehanceExtractor):
                 if embed:
                     embed = text.unescape(text.extr(embed, 'src="', '"'))
                     module["extension"] = "mp4"
-                    append(("ytdl:" + embed, module))
+                    results.append(("ytdl:" + embed, module))
 
             elif mtype == "text":
                 module["extension"] = "txt"
-                append(("text:" + module["text"], module))
+                results.append(("text:" + module["text"], module))
 
-        return result
+        return results
 
 
 class BehanceUserExtractor(BehanceExtractor):

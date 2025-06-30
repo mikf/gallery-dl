@@ -45,8 +45,6 @@ class NitterExtractor(BaseExtractor):
             attachments = tweet.pop("_attach", "")
             if attachments:
                 files = []
-                append = files.append
-
                 for url in text.extract_iter(
                         attachments, 'href="', '"'):
 
@@ -66,12 +64,12 @@ class NitterExtractor(BaseExtractor):
                     file = {"url": url, "_http_retry": _retry_on_404}
                     file["filename"], _, file["extension"] = \
                         name.rpartition(".")
-                    append(file)
+                    files.append(file)
 
                 if videos and not files:
                     if ytdl:
                         url = f"ytdl:{self.root}/i/status/{tweet['tweet_id']}"
-                        append({"url": url, "extension": "mp4"})
+                        files.append({"url": url, "extension": "mp4"})
                     else:
                         for url in text.extract_iter(
                                 attachments, 'data-url="', '"'):
@@ -84,7 +82,7 @@ class NitterExtractor(BaseExtractor):
 
                             if url[0] == "/":
                                 url = self.root + url
-                            append({
+                            files.append({
                                 "url"      : "ytdl:" + url,
                                 "filename" : name.rpartition(".")[0],
                                 "extension": "mp4",
@@ -94,7 +92,8 @@ class NitterExtractor(BaseExtractor):
                                 attachments, '<source src="', '"'):
                             if url[0] == "/":
                                 url = self.root + url
-                            append(text.nameext_from_url(url, {"url": url}))
+                            files.append(
+                                text.nameext_from_url(url, {"url": url}))
 
             else:
                 files = ()

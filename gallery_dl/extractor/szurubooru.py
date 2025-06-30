@@ -63,14 +63,12 @@ class SzurubooruExtractor(booru.BooruExtractor):
             post["creationTime"], "%Y-%m-%dT%H:%M:%S.%fZ")
 
         tags = []
-        append = tags.append
         tags_categories = collections.defaultdict(list)
-
         for tag in post["tags"]:
             tag_type = tag["category"].rpartition("_")[2]
             tag_name = tag["names"][0]
             tags_categories[tag_type].append(tag_name)
-            append(tag_name)
+            tags.append(tag_name)
 
         post["tags"] = tags
         for category, tags in tags_categories.items():
