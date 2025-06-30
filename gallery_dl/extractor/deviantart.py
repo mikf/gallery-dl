@@ -1882,9 +1882,7 @@ class DeviantartOAuthAPI():
                 params["offset"] = int(params["offset"]) + len(results)
 
     def _pagination_list(self, endpoint, params, key="results"):
-        result = []
-        result.extend(self._pagination(endpoint, params, False, key=key))
-        return result
+        return list(self._pagination(endpoint, params, False, key=key))
 
     def _shared_content(self, results):
         """Return an iterable of shared deviations in 'results'"""

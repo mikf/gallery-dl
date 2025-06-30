@@ -80,7 +80,7 @@ class HitomiGalleryExtractor(HitomiExtractor, GalleryExtractor):
         fmt = ext = self.config("format") or "webp"
         check = (fmt != "webp")
 
-        result = []
+        results = []
         for image in self.info["files"]:
             if check:
                 ext = fmt if image.get("has" + fmt) else "webp"
@@ -93,8 +93,8 @@ class HitomiGalleryExtractor(HitomiExtractor, GalleryExtractor):
             inum = int(ihash[-1] + ihash[-3:-1], 16)
             url = (f"https://{ext[0]}{gg_m.get(inum, gg_default) + 1}."
                    f"{self.domain}/{gg_b}/{inum}/{ihash}.{ext}")
-            result.append((url, idata))
-        return result
+            results.append((url, idata))
+        return results
 
 
 class HitomiTagExtractor(HitomiExtractor):
