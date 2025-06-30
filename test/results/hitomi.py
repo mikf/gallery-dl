@@ -224,6 +224,16 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://hitomi.la/search.html?language%3Ajapanese%20-tag%3Aanimated%20group%3Aparadiddle#2",
+    "#comment" : "negative search tag (#7694)",
+    "#class"   : hitomi.HitomiSearchExtractor,
+    "#pattern" : hitomi.HitomiGalleryExtractor.pattern,
+    "#count"   : 41,
+
+    "search_tags": "language:japanese -tag:animated group:paradiddle",
+},
+
+{
     "#url"     : "https://hitomi.la/search.html?group:initial_g",
     "#class"   : hitomi.HitomiSearchExtractor,
 },
