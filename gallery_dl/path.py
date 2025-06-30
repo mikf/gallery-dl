@@ -280,7 +280,6 @@ class PathFormat():
     def build_directory(self, kwdict):
         """Apply 'kwdict' to directory format strings"""
         segments = []
-        append = segments.append
         strip = self.strip
 
         try:
@@ -290,14 +289,13 @@ class PathFormat():
                     # remove trailing dots and spaces (#647)
                     segment = segment.rstrip(strip)
                 if segment:
-                    append(self.clean_segment(segment))
+                    segments.append(self.clean_segment(segment))
             return segments
         except Exception as exc:
             raise exception.DirectoryFormatError(exc)
 
     def build_directory_conditional(self, kwdict):
         segments = []
-        append = segments.append
         strip = self.strip
 
         try:
@@ -311,7 +309,7 @@ class PathFormat():
                 if strip and segment != "..":
                     segment = segment.rstrip(strip)
                 if segment:
-                    append(self.clean_segment(segment))
+                    segments.append(self.clean_segment(segment))
             return segments
         except Exception as exc:
             raise exception.DirectoryFormatError(exc)

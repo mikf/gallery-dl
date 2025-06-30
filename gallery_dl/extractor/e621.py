@@ -109,12 +109,11 @@ class E621PoolExtractor(E621Extractor, danbooru.DanbooruPoolExtractor):
         }
 
         posts = []
-        append = posts.append
         for num, pid in enumerate(self.post_ids, 1):
             if pid in id_to_post:
                 post = id_to_post[pid]
                 post["num"] = num
-                append(post)
+                posts.append(post)
             else:
                 self.log.warning("Post %s is unavailable", pid)
         return posts
