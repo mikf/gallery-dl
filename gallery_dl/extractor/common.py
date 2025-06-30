@@ -880,15 +880,15 @@ class Dispatch():
         elif isinstance(include, str):
             include = include.replace(" ", "").split(",")
 
-        result = [(Message.Version, 1)]
+        results = [(Message.Version, 1)]
         for category in include:
             try:
                 extr, url = extractors[category]
             except KeyError:
                 self.log.warning("Invalid include '%s'", category)
             else:
-                result.append((Message.Queue, url, {"_extractor": extr}))
-        return iter(result)
+                results.append((Message.Queue, url, {"_extractor": extr}))
+        return iter(results)
 
 
 class AsynchronousMixin():
