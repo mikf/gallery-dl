@@ -372,9 +372,9 @@ class FuraffinitySubmissionsExtractor(FuraffinityExtractor):
             for post_id in text.extract_iter(page, 'id="sid-', '"'):
                 yield post_id
 
-            path = (text.extr(page, '<a class="button standard more" href="', '"') or  # noqa 501
-                    text.extr(page, '<a class="more-half" href="', '"') or
-                    text.extr(page, '<a class="more" href="', '"'))
-            if not path:
+            if (pos := page.find(">Next 48</a>")) < 0 and \
+                    (pos := page.find(">&gt;&gt;&gt; Next 48 &gt;&gt;")) < 0:
                 return
+
+            path = text.rextr(page, 'href="', '"', pos)
             url = self.root + text.unescape(path)
