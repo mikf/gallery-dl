@@ -4,15 +4,15 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extractors for https://chzzk.naver.com"""
+"""Extractors for https://chzzk.naver.com/"""
 
 from .common import Extractor, Message
 from .. import text, util
 
 
-class ChzzkExtractor(Extractor):
-    """Base class for chzzk extractors"""
-    category = "chzzk"
+class NaverChzzkExtractor(Extractor):
+    """Base class for chzzk.naver.com extractors"""
+    category = "naver-chzzk"
     filename_fmt = "{uid}_{id}_{num}.{extension}"
     directory_fmt = ("{category}", "{user[userNickname]}")
     archive_fmt = "{uid}_{id}_{num}"
@@ -47,7 +47,7 @@ class ChzzkExtractor(Extractor):
                 yield Message.Url, url, text.nameext_from_url(url, data)
 
 
-class ChzzkCommentExtractor(ChzzkExtractor):
+class NaverChzzkCommentExtractor(NaverChzzkExtractor):
     """Extractor for individual comment from chzzk.naver.com"""
     subcategory = "comment"
     pattern = r"(?:https?://)?chzzk\.naver\.com/(\w+)/community/detail/(\d+)"
@@ -59,7 +59,7 @@ class ChzzkCommentExtractor(ChzzkExtractor):
         return ({"comment": res["comment"], "user": res["user"]},)
 
 
-class ChzzkCommunityExtractor(ChzzkExtractor):
+class NaverChzzkCommunityExtractor(NaverChzzkExtractor):
     """Extractor for comments from chzzk.naver.com"""
     subcategory = "community"
     pattern = r"(?:https?://)?chzzk\.naver\.com/(\w+)/community"

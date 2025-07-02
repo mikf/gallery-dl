@@ -16,13 +16,13 @@ BASE_PATTERN = (r"(?:https?://)?comic\.naver\.com"
                 r"/(webtoon|challenge|bestChallenge)")
 
 
-class NaverwebtoonBase():
-    """Base class for naver webtoon extractors"""
-    category = "naverwebtoon"
+class NaverWebtoonBase():
+    """Base class for comic.naver.com extractors"""
+    category = "naver-webtoon"
     root = "https://comic.naver.com"
 
 
-class NaverwebtoonEpisodeExtractor(NaverwebtoonBase, GalleryExtractor):
+class NaverWebtoonEpisodeExtractor(NaverWebtoonBase, GalleryExtractor):
     subcategory = "episode"
     directory_fmt = ("{category}", "{comic}")
     filename_fmt = "{episode:>03}-{num:>02}.{extension}"
@@ -63,7 +63,7 @@ class NaverwebtoonEpisodeExtractor(NaverwebtoonBase, GalleryExtractor):
         ]
 
 
-class NaverwebtoonComicExtractor(NaverwebtoonBase, Extractor):
+class NaverWebtoonComicExtractor(NaverWebtoonBase, Extractor):
     subcategory = "comic"
     categorytransfer = True
     pattern = BASE_PATTERN + r"/list(?:\.nhn)?\?([^#]+)"
@@ -95,7 +95,7 @@ class NaverwebtoonComicExtractor(NaverwebtoonBase, Extractor):
             base = f"{self.root}/{path}/detail?titleId={data['titleId']}&no="
 
             for article in data["articleList"]:
-                article["_extractor"] = NaverwebtoonEpisodeExtractor
+                article["_extractor"] = NaverWebtoonEpisodeExtractor
                 yield Message.Queue, base + str(article["no"]), article
 
             params["page"] = data["pageInfo"]["nextPage"]

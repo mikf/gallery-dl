@@ -133,7 +133,7 @@
                                 500k or 2.5M)
     --filesize-max SIZE         Do not download files larger than SIZE (e.g.
                                 500k or 2.5M)
-    --download-archive FILE     Record all downloaded or skipped files in FILE
+    --download-archive FILE     Record successfully downloaded files in FILE
                                 and skip downloading any file already in it
     --range RANGE               Index range(s) specifying which files to
                                 download. These can be either a constant value,

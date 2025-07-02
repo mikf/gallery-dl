@@ -14,13 +14,13 @@ import datetime
 import time
 
 
-class NaverBase():
-    """Base class for naver extractors"""
-    category = "naver"
+class NaverBlogBase():
+    """Base class for blog.naver.com extractors"""
+    category = "naver-blog"
     root = "https://blog.naver.com"
 
 
-class NaverPostExtractor(NaverBase, GalleryExtractor):
+class NaverBlogPostExtractor(NaverBlogBase, GalleryExtractor):
     """Extractor for blog posts on blog.naver.com"""
     subcategory = "post"
     filename_fmt = "{num:>03}.{extension}"
@@ -123,7 +123,7 @@ class NaverPostExtractor(NaverBase, GalleryExtractor):
         files.append((video["source"], video))
 
 
-class NaverBlogExtractor(NaverBase, Extractor):
+class NaverBlogBlogExtractor(NaverBlogBase, Extractor):
     """Extractor for a user's blog on blog.naver.com"""
     subcategory = "blog"
     categorytransfer = True
@@ -165,7 +165,7 @@ class NaverBlogExtractor(NaverBase, Extractor):
             for post in data["postList"]:
                 post["url"] = (f"{self.root}/PostView.nhn?blogId="
                                f"{self.blog_id}&logNo={post['logNo']}")
-                post["_extractor"] = NaverPostExtractor
+                post["_extractor"] = NaverBlogPostExtractor
                 yield Message.Queue, post["url"], post
 
             if not data["hasNextPage"]:
