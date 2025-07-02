@@ -170,8 +170,8 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
-    <td>Chzzk</td>
-    <td>https://chzzk.naver.com</td>
+    <td>CHZZK</td>
+    <td>https://chzzk.naver.com/</td>
     <td>Comments, Communities</td>
     <td></td>
 </tr>
@@ -626,13 +626,13 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
-    <td>Naver</td>
+    <td>Naver Blog</td>
     <td>https://blog.naver.com/</td>
     <td>Blogs, Posts</td>
     <td></td>
 </tr>
 <tr>
-    <td>NaverWebtoon</td>
+    <td>Naver Webtoon</td>
     <td>https://comic.naver.com/</td>
     <td>Comics, Episodes</td>
     <td></td>
@@ -836,7 +836,7 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
-    <td>rule #34</td>
+    <td>Rule 34</td>
     <td>https://rule34.paheal.net/</td>
     <td>Posts, Tag Searches</td>
     <td></td>
@@ -1104,7 +1104,7 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
-    <td>Webtoon</td>
+    <td>WEBTOON</td>
     <td>https://www.webtoons.com/</td>
     <td>Artists, Comics, Episodes</td>
     <td></td>

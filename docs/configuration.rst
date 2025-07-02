@@ -1778,16 +1778,6 @@ Description
     * ``false``: Match only URLs with known TLDs
 
 
-extractor.chzzk.offset
-----------------------
-Type
-    ``integer``
-Default
-    ``0``
-Description
-    Custom ``offset`` starting value when paginating over comments.
-
-
 extractor.cien.files
 --------------------
 Type
@@ -3634,14 +3624,24 @@ Description
     Note: Not supported by all ``moebooru`` instances.
 
 
-extractor.naver.videos
-----------------------
+extractor.naver-blog.videos
+---------------------------
 Type
     ``bool``
 Default
     ``true``
 Description
     Download videos.
+
+
+extractor.naver-chzzk.offset
+----------------------------
+Type
+    ``integer``
+Default
+    ``0``
+Description
+    Custom ``offset`` starting value when paginating over comments.
 
 
 extractor.newgrounds.flash
@@ -7692,7 +7692,10 @@ Description
             {
                 "coomer"       : "coomerparty",
                 "kemono"       : "kemonoparty",
-                "schalenetwork": "koharu"
+                "schalenetwork": "koharu",
+                "naver-chzzk"  : "chzzk",
+                "naver-blog"   : "naver",
+                "naver-webtoon": "naverwebtoon"
             }
 
 
@@ -7704,9 +7707,12 @@ Default
     .. code:: json
 
         {
-            "coomerparty": "coomer",
-            "kemonoparty": "kemono",
-            "koharu"     : "schalenetwork"
+            "coomerparty" : "coomer",
+            "kemonoparty" : "kemono",
+            "koharu"      : "schalenetwork",
+            "chzzk"       : "naver-chzzk",
+            "naver"       : "naver-blog",
+            "naverwebtoon": "naver-webtoon"
         }
 Description
     Duplicate the configuration settings of extractor `categories`

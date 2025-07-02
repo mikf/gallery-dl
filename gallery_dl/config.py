@@ -169,9 +169,12 @@ def remap_categories():
     cmap = opts.get("config-map")
     if cmap is None:
         cmap = (
-            ("coomerparty", "coomer"),
-            ("kemonoparty", "kemono"),
-            ("koharu"     , "schalenetwork"),
+            ("coomerparty" , "coomer"),
+            ("kemonoparty" , "kemono"),
+            ("koharu"      , "schalenetwork"),
+            ("naver"       , "naver-blog"),
+            ("chzzk"       , "naver-chzzk"),
+            ("naverwebtoon", "naver-webtoon"),
         )
     elif not cmap:
         return
