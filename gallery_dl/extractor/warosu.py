@@ -50,7 +50,7 @@ class WarosuThreadExtractor(Extractor):
 
     def metadata(self, page):
         boardname = text.extr(page, "<title>", "</title>")
-        title = text.unescape(text.extr(page, 'class="filetitle">', "<"))
+        title = text.unescape(text.extr(page, "class=filetitle>", "<"))
         return {
             "board"     : self.board,
             "board_name": boardname.split(" - ")[1],
@@ -60,14 +60,14 @@ class WarosuThreadExtractor(Extractor):
 
     def posts(self, page):
         """Build a list of all post objects"""
-        page = text.extr(page, '<div class="content"', "</form>")
+        page = text.extr(page, "<div class=content", "</form>")
         needle = "<table>"
         return [self.parse(post) for post in page.split(needle)]
 
     def parse(self, post):
         """Build post object by extracting data from an HTML post"""
         data = self._extract_post(post)
-        if '<span class="fileinfo">' in post and \
+        if '<span class="fileinfo' in post and \
                 self._extract_image(post, data):
             part = data["image"].rpartition("/")[2]
             data["tim"], _, data["extension"] = part.partition(".")
@@ -77,9 +77,9 @@ class WarosuThreadExtractor(Extractor):
     def _extract_post(self, post):
         extr = text.extract_from(post)
         return {
-            "no"  : extr('id="p', '"'),
-            "name": extr('class="postername ">', "<").strip(),
-            "time": extr('class="posttime" title="', '000">'),
+            "no"  : extr("id=p", ">"),
+            "name": extr("class=postername>", "<").strip(),
+            "time": extr("class=posttime title=", "000>"),
             "com" : text.unescape(text.remove_html(extr(
                 "<blockquote>", "</blockquote>").strip())),
         }
@@ -92,9 +92,9 @@ class WarosuThreadExtractor(Extractor):
         data["h"] = extr("", ", ")
         data["filename"] = text.unquote(extr(
             "", "<").rstrip().rpartition(".")[0])
-        extr("<br />", "")
+        extr("<br>", "")
 
-        url = extr('<a href="', '">')
+        url = extr("<a href=", ">")
         if url:
             if url[0] == "/":
                 data["image"] = self.root + url
