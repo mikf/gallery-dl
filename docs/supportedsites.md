@@ -518,6 +518,12 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
+    <td>Iwara</td>
+    <td>https://iwara.tv/</td>
+    <td>Profiles, videos, images, playlists</td>
+    <td>Supported</td>
+</tr>
+<tr>
     <td>Keenspot</td>
     <td>http://www.keenspot.com/</td>
     <td>Comics</td>

@@ -93,6 +93,7 @@ modules = [
     "issuu",
     "itaku",
     "itchio",
+    "iwara",
     "jschan",
     "kabeuchi",
     "keenspot",
