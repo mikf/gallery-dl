@@ -315,7 +315,7 @@ class PatreonCreatorExtractor(PatreonExtractor):
     pattern = (r"(?:https?://)?(?:www\.)?patreon\.com"
                r"/(?!(?:home|create|login|signup|search|posts|messages)"
                r"(?:$|[/?#]))"
-               r"(?:profile/creators|(?:c/)?([^/?#]+)(?:/posts)?)"
+               r"(?:profile/creators|(?:cw?/)?([^/?#]+)(?:/posts)?)"
                r"/?(?:\?([^#]+))?")
     example = "https://www.patreon.com/c/USER"
 
@@ -354,12 +354,21 @@ class PatreonCreatorExtractor(PatreonExtractor):
             data = None
             data = self._extract_bootstrap(page)
             return data["campaign"]["data"]["id"]
+        except exception.StopExtraction:
+            pass
         except Exception as exc:
             if data:
                 self.log.debug(data)
             raise exception.StopExtraction(
                 "Unable to extract campaign ID (%s: %s)",
                 exc.__class__.__name__, exc)
+
+        # Next.js 13
+        if cid := text.extr(
+                page, r'{\"value\":{\"campaign\":{\"data\":{\"id\":\"', '\\"'):
+            return cid
+
+        raise exception.StopExtraction("Failed to extract campaign ID")
 
     def _get_filters(self, query):
         return "".join(
