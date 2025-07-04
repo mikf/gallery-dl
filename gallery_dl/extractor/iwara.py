@@ -25,11 +25,7 @@ class IwaraExtractor(Extractor):
         self.api = IwaraAPI(self)
 
     def extract_user_info(self, profile):
-        if not isinstance(profile, dict):
-            return {"user_id": None, "username": None, "display_name": None}
         user = profile.get("user", {})
-        if not isinstance(user, dict):
-            user = {}
         return {
             "user_id": user.get("id"),
             "username": user.get("username"),
@@ -105,9 +101,6 @@ class IwaraProfileExtractor(IwaraExtractor):
             return
         user_info = self.extract_user_info(profile)
         user_id = user_info.get("user_id")
-        if not user_id:
-            return
-
         videos = self.api.collection("/videos", user_id)
         for video in videos:
             yield from self.yield_video(user_info, video)
@@ -228,31 +221,16 @@ class IwaraAPI():
             "email": email,
             "password": password
         }
-        try:
-            response = self.extractor.request(url, method="POST", json=json)
-            response.raise_for_status()
-        except Exception:
-            return
-
-        try:
-            token = response.json().get("token")
-            if token:
-                self.token = token
-                self.headers = {"Authorization": f"Bearer {token}"}
-                self.extractor.log.info(f"Logged in as {email}.")
-            else:
-                self.extractor.log.warning("No token found in login response.")
-        except Exception:
-            return
+        response = self.extractor.request(url, method="POST", json=json)
+        token = response.json().get("token")
+        if token:
+            self.token = token
+            self.headers = {"Authorization": f"Bearer {token}"}
+            self.extractor.log.info(f"Logged in as {email}.")
 
     def profile(self, endpoint):
         url = self.root + endpoint
-        try:
-            response = self.extractor.request(url, headers=self.headers)
-            response.raise_for_status()
-            return response.json()
-        except Exception:
-            return {}
+        return self.extractor.request_json(url, headers=self.headers)
 
     def collection(self, endpoint, query, page=0, limit=50, search=False):
         url = self.root + endpoint
@@ -272,16 +250,11 @@ class IwaraAPI():
             }
         collection = []
         while True:
-            try:
-                response = self.extractor.request(
-                    url,
-                    headers=self.headers,
-                    params=params
-                )
-                response.raise_for_status()
-                data = response.json()
-            except Exception:
-                break
+            data = self.extractor.request_json(
+                url,
+                headers=self.headers,
+                params=params
+            )
             results = data.get("results", [])
             if not results:
                 break
@@ -293,12 +266,7 @@ class IwaraAPI():
 
     def item(self, endpoint):
         url = self.root + endpoint
-        try:
-            response = self.extractor.request(url, headers=self.headers)
-            response.raise_for_status()
-            return response.json()
-        except Exception:
-            return {}
+        return self.extractor.request_json(url, headers=self.headers)
 
     def source(self, file_id, url):
         expiration = parse_qs(urlparse(url).query).get("expires", [None])[0]
@@ -308,9 +276,4 @@ class IwaraAPI():
         sha_key = f"{file_id}_{expiration}_{sha_postfix}"
         hash = hashlib.sha1(sha_key.encode("utf-8")).hexdigest()
         headers = {"X-Version": hash, **self.headers}
-        try:
-            response = self.extractor.request(url, headers=headers)
-            response.raise_for_status()
-            return response.json()
-        except Exception:
-            return []
+        return self.extractor.request_json(url, headers=headers)
