@@ -182,6 +182,33 @@ class IwaraPlaylistExtractor(IwaraExtractor):
             yield from self.yield_video(user_info, video)
 
 
+class IwaraSearchExtractor(IwaraExtractor):
+    """Extractor for iwara.tv search pages"""
+    subcategory = "search"
+    pattern = BASE_PATTERN + r"/search\?query=([^&?#]+)(?:&type=([^&?#]+))?"
+    example = "https://www.iwara.tv/search?query=example&type=search_type"
+
+    def __init__(self, match):
+        IwaraExtractor.__init__(self, match)
+        self.query = match.group(1)
+        self.type = match.group(2) if match.lastindex >= 2 else None
+
+    def items(self):
+        collection = self.api.collection("/search", self.query, search=True)
+        if self.type == "video":
+            for video in collection:
+                video = self.api.item(f"/video/{video.get("id")}")
+                user_info = self.extract_user_info(video)
+                yield from self.yield_video(user_info, video)
+        elif self.type == "image":
+            for image_group in collection:
+                image_group = self.api.item(f"/image/{image_group.get("id")}")
+                if not image_group:
+                    return
+                user_info = self.extract_user_info(image_group)
+                yield from self.yield_image(user_info, image_group)
+
+
 class IwaraAPI():
     """Interface for the Iwara API"""
     root = "https://api.iwara.tv"
@@ -227,13 +254,22 @@ class IwaraAPI():
         except Exception:
             return {}
 
-    def collection(self, endpoint, user_id, page=0, limit=50):
+    def collection(self, endpoint, query, page=0, limit=50, search=False):
         url = self.root + endpoint
-        params = {
-            "user": user_id,
-            "page": page,
-            "limit": limit,
-        }
+        params = {}
+        if search:
+            params = {
+                "type": self.extractor.type,
+                "query": query,
+                "page": page,
+                "limit": limit,
+            }
+        else:
+            params = {
+                "user": query,
+                "page": page,
+                "limit": limit,
+            }
         collection = []
         while True:
             try:
