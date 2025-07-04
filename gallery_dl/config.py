@@ -175,6 +175,7 @@ def remap_categories():
             ("naver"       , "naver-blog"),
             ("chzzk"       , "naver-chzzk"),
             ("naverwebtoon", "naver-webtoon"),
+            ("pixiv"       , "pixiv-novel"),
         )
     elif not cmap:
         return
