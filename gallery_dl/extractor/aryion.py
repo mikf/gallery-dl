@@ -213,8 +213,7 @@ class AryionFavoriteExtractor(AryionExtractor):
 
     def posts(self):
         url = f"{self.root}/g4/favorites/{self.user}"
-        return self._pagination_params(
-            url, None, "class='gallery-item favorite' id='")
+        return self._pagination_params(url, None, "data-item-id='")
 
 
 class AryionTagExtractor(AryionExtractor):
