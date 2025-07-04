@@ -861,18 +861,71 @@ class PixivSeriesExtractor(PixivExtractor):
             yield work
 
 
-class PixivNovelExtractor(PixivExtractor):
-    """Extractor for pixiv novels"""
-    subcategory = "novel"
-    request_interval = (0.5, 1.5)
-    pattern = BASE_PATTERN + r"/n(?:ovel/show\.php\?id=|/)(\d+)"
-    example = "https://www.pixiv.net/novel/show.php?id=12345"
-
-    def __init__(self, match):
-        PixivExtractor.__init__(self, match)
-        self.novel_id = match[1]
+class PixivSketchExtractor(Extractor):
+    """Extractor for user pages on sketch.pixiv.net"""
+    category = "pixiv"
+    subcategory = "sketch"
+    directory_fmt = ("{category}", "sketch", "{user[unique_name]}")
+    filename_fmt = "{post_id} {id}.{extension}"
+    archive_fmt = "S{user[id]}_{id}"
+    root = "https://sketch.pixiv.net"
+    cookies_domain = ".pixiv.net"
+    pattern = r"(?:https?://)?sketch\.pixiv\.net/@([^/?#]+)"
+    example = "https://sketch.pixiv.net/@USER"
 
     def items(self):
+        self.username = self.groups[0]
+        headers = {"Referer": f"{self.root}/@{self.username}"}
+
+        for post in self.posts():
+            media = post["media"]
+            post["post_id"] = post["id"]
+            post["date"] = text.parse_datetime(
+                post["created_at"], "%Y-%m-%dT%H:%M:%S.%f%z")
+            util.delete_items(post, ("id", "media", "_links"))
+
+            yield Message.Directory, post
+            post["_http_headers"] = headers
+
+            for photo in media:
+                original = photo["photo"]["original"]
+                post["id"] = photo["id"]
+                post["width"] = original["width"]
+                post["height"] = original["height"]
+
+                url = original["url"]
+                text.nameext_from_url(url, post)
+                yield Message.Url, url, post
+
+    def posts(self):
+        url = f"{self.root}/api/walls/@{self.username}/posts/public.json"
+        headers = {
+            "Accept": "application/vnd.sketch-v4+json",
+            "Referer": self.root + "/",
+            "X-Requested-With": f"{self.root}/@{self.username}",
+        }
+
+        while True:
+            data = self.request_json(url, headers=headers)
+            yield from data["data"]["items"]
+
+            next_url = data["_links"].get("next")
+            if not next_url:
+                return
+            url = self.root + next_url["href"]
+
+
+###############################################################################
+# Novels ######################################################################
+
+class PixivNovelExtractor(PixivExtractor):
+    """Base class for pixiv novel extractors"""
+    category = "pixiv-novel"
+    request_interval = (0.5, 1.5)
+
+    def items(self):
+        self.novel_id = self.groups[0]
+
         tags = self.config("tags", "japanese")
         if tags == "original":
             transform_tags = None
@@ -974,6 +1027,13 @@ class PixivNovelExtractor(PixivExtractor):
                         url = f"{self.root}/artworks/{illust_id}"
                         yield Message.Queue, url, novel
 
+
+class PixivNovelNovelExtractor(PixivNovelExtractor):
+    """Extractor for pixiv novels"""
+    subcategory = "novel"
+    pattern = BASE_PATTERN + r"/n(?:ovel/show\.php\?id=|/)(\d+)"
+    example = "https://www.pixiv.net/novel/show.php?id=12345"
+
     def novels(self):
         novel = self.api.novel_detail(self.novel_id)
         if self.config("full-series") and novel["series"]:
@@ -984,7 +1044,7 @@ class PixivNovelExtractor(PixivExtractor):
 
 class PixivNovelUserExtractor(PixivNovelExtractor):
     """Extractor for pixiv users' novels"""
-    subcategory = "novel-user"
+    subcategory = "user"
     pattern = USER_PATTERN + r"/novels"
     example = "https://www.pixiv.net/en/users/12345/novels"
 
@@ -994,7 +1054,7 @@ class PixivNovelUserExtractor(PixivNovelExtractor):
 
 class PixivNovelSeriesExtractor(PixivNovelExtractor):
     """Extractor for pixiv novel series"""
-    subcategory = "novel-series"
+    subcategory = "series"
     pattern = BASE_PATTERN + r"/novel/series/(\d+)"
     example = "https://www.pixiv.net/novel/series/12345"
 
@@ -1004,85 +1064,25 @@ class PixivNovelSeriesExtractor(PixivNovelExtractor):
 
 class PixivNovelBookmarkExtractor(PixivNovelExtractor):
     """Extractor for bookmarked pixiv novels"""
-    subcategory = "novel-bookmark"
+    subcategory = "bookmark"
     pattern = (USER_PATTERN + r"/bookmarks/novels"
                r"(?:/([^/?#]+))?(?:/?\?([^#]+))?")
     example = "https://www.pixiv.net/en/users/12345/bookmarks/novels"
 
-    def __init__(self, match):
-        PixivNovelExtractor.__init__(self, match)
-        self.user_id, self.tag, self.query = match.groups()
-
     def novels(self):
-        if self.tag:
-            tag = text.unquote(self.tag)
-        else:
-            tag = None
+        user_id, tag, query = self.groups
+        tag = text.unquote(tag) if tag else None
 
-        if text.parse_query(self.query).get("rest") == "hide":
+        if text.parse_query(query).get("rest") == "hide":
             restrict = "private"
         else:
             restrict = "public"
 
-        return self.api.user_bookmarks_novel(self.user_id, tag, restrict)
+        return self.api.user_bookmarks_novel(user_id, tag, restrict)
 
 
-class PixivSketchExtractor(Extractor):
-    """Extractor for user pages on sketch.pixiv.net"""
-    category = "pixiv"
-    subcategory = "sketch"
-    directory_fmt = ("{category}", "sketch", "{user[unique_name]}")
-    filename_fmt = "{post_id} {id}.{extension}"
-    archive_fmt = "S{user[id]}_{id}"
-    root = "https://sketch.pixiv.net"
-    cookies_domain = ".pixiv.net"
-    pattern = r"(?:https?://)?sketch\.pixiv\.net/@([^/?#]+)"
-    example = "https://sketch.pixiv.net/@USER"
-
-    def __init__(self, match):
-        Extractor.__init__(self, match)
-        self.username = match[1]
-
-    def items(self):
-        headers = {"Referer": f"{self.root}/@{self.username}"}
-
-        for post in self.posts():
-            media = post["media"]
-            post["post_id"] = post["id"]
-            post["date"] = text.parse_datetime(
-                post["created_at"], "%Y-%m-%dT%H:%M:%S.%f%z")
-            util.delete_items(post, ("id", "media", "_links"))
-
-            yield Message.Directory, post
-            post["_http_headers"] = headers
-
-            for photo in media:
-                original = photo["photo"]["original"]
-                post["id"] = photo["id"]
-                post["width"] = original["width"]
-                post["height"] = original["height"]
-
-                url = original["url"]
-                text.nameext_from_url(url, post)
-                yield Message.Url, url, post
-
-    def posts(self):
-        url = f"{self.root}/api/walls/@{self.username}/posts/public.json"
-        headers = {
-            "Accept": "application/vnd.sketch-v4+json",
-            "X-Requested-With": f"{self.root}/@{self.username}",
-            "Referer": self.root + "/",
-        }
-
-        while True:
-            data = self.request_json(url, headers=headers)
-            yield from data["data"]["items"]
-
-            next_url = data["_links"].get("next")
-            if not next_url:
-                return
-            url = self.root + next_url["href"]
-
+###############################################################################
+# API #########################################################################
 
 class PixivAppAPI():
     """Minimal interface for the Pixiv App API for mobile devices

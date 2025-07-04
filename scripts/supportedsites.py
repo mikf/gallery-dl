@@ -122,6 +122,8 @@ CATEGORY_MAP = {
     "photovogue"     : "PhotoVogue",
     "pidgiwiki"      : "PidgiWiki",
     "pixeldrain"     : "pixeldrain",
+    "pixiv"          : "[pixiv]",
+    "pixiv-novel"    : "[pixiv] Novels",
     "pornimage"      : "Porn Image",
     "pornpics"       : "PornPics.com",
     "pornreactor"    : "PornReactor",
@@ -566,7 +568,7 @@ def subcategory_text(bc, c, sc):
 
 def category_key(c):
     """Generate sorting keys by category"""
-    return category_text(c[0]).lower()
+    return category_text(c[0]).lower().lstrip("[")
 
 
 def subcategory_key(sc):
@@ -609,6 +611,8 @@ def build_extractor_list():
     for base in categories.values():
         for subcategories in base.values():
             subcategories.sort(key=subcategory_key)
+
+    domains["pixiv-novel"] += "novel"
 
     # add e-hentai.org
     default["e-hentai"] = default["exhentai"]

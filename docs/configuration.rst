@@ -393,7 +393,7 @@ Default
         ``itaku``,
         ``newgrounds``,
         ``[philomena]``,
-        ``pixiv:novel``,
+        ``pixiv-novel``,
         ``plurk``,
         ``poipiku`` ,
         ``pornpics``,
@@ -4022,37 +4022,6 @@ Description
     `gppt <https://github.com/eggplants/get-pixivpy-token>`__.
 
 
-extractor.pixiv.novel.covers
-----------------------------
-Type
-    ``bool``
-Default
-    ``false``
-Description
-    Download cover images.
-
-
-extractor.pixiv.novel.embeds
-----------------------------
-Type
-    ``bool``
-Default
-    ``false``
-Description
-    Download embedded images.
-
-
-extractor.pixiv.novel.full-series
----------------------------------
-Type
-    ``bool``
-Default
-    ``false``
-Description
-    When downloading a novel being part of a series,
-    download all novels of that series.
-
-
 extractor.pixiv.metadata
 ------------------------
 Type
@@ -4166,6 +4135,114 @@ Default
     ``true``
 Description
     Try to fetch ``limit_sanity_level`` works via web API.
+
+
+extractor.pixiv-novel.comments
+------------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Fetch ``comments`` metadata.
+
+    Note: This requires 1 or more additional API requests per novel,
+    depending on the number of comments.
+
+
+extractor.pixiv-novel.covers
+----------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Download cover images.
+
+
+extractor.pixiv-novel.embeds
+----------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Download embedded images.
+
+
+extractor.pixiv-novel.full-series
+---------------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    When downloading a novel being part of a series,
+    download all novels of that series.
+
+
+extractor.pixiv-novel.max-posts
+-------------------------------
+Type
+    ``integer``
+Default
+    ``0``
+Description
+    When downloading multiple novels,
+    this sets the maximum number of novels to get.
+
+    A value of ``0`` means no limit.
+
+
+extractor.pixiv-novel.metadata
+------------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Fetch extended ``user`` metadata.
+
+
+extractor.pixiv-novel.metadata-bookmark
+---------------------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    For novels bookmarked by
+    `your own account <extractor.pixiv-novel.refresh-token_>`__,
+    fetch bookmark tags as ``tags_bookmark`` metadata.
+
+    Note: This requires 1 additional API request per bookmarked post.
+
+
+extractor.pixiv-novel.refresh-token
+-----------------------------------
+Type
+    ``string``
+Description
+    The ``refresh-token`` value you get
+    from running ``gallery-dl oauth:pixiv`` (see OAuth_) or
+    by using a third-party tool like
+    `gppt <https://github.com/eggplants/get-pixivpy-token>`__.
+
+    This can be the same value as `extractor.pixiv.refresh-token`_
+
+
+extractor.pixiv-novel.tags
+--------------------------
+Type
+    ``string``
+Default
+    ``"japanese"``
+Description
+    Controls the ``tags`` metadata field.
+
+    * `"japanese"`: List of Japanese tags
+    * `"translated"`: List of translated tags
+    * `"original"`: Unmodified list with both Japanese and translated tags
 
 
 extractor.plurk.comments
@@ -7695,7 +7772,8 @@ Description
                 "schalenetwork": "koharu",
                 "naver-chzzk"  : "chzzk",
                 "naver-blog"   : "naver",
-                "naver-webtoon": "naverwebtoon"
+                "naver-webtoon": "naverwebtoon",
+                "pixiv-novel"  : "pixiv"
             }
 
 
@@ -7712,7 +7790,8 @@ Default
             "koharu"      : "schalenetwork",
             "chzzk"       : "naver-chzzk",
             "naver"       : "naver-blog",
-            "naverwebtoon": "naver-webtoon"
+            "naverwebtoon": "naver-webtoon",
+            "pixiv"       : "pixiv-novel"
         }
 Description
     Duplicate the configuration settings of extractor `categories`
