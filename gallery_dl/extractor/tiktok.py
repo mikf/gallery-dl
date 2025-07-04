@@ -201,7 +201,7 @@ class TiktokPostExtractor(TiktokExtractor):
             url = f"{self.root}/@/video/{pid}"
         else:
             url = f"{self.root}/@{user or ''}/video/{post_id}"
-            return (url,)
+        return (url,)
 
 
 class TiktokVmpostExtractor(TiktokExtractor):
