@@ -36,6 +36,7 @@ class Extractor():
     directory_fmt = ("{category}",)
     filename_fmt = "{filename}.{extension}"
     archive_fmt = ""
+    status = 0
     root = ""
     cookies_domain = ""
     cookies_index = 0
@@ -207,6 +208,7 @@ class Extractor():
                         response.encoding = encoding
                     return response
                 if notfound and code == 404:
+                    self.status |= exception.NotFoundError.code
                     raise exception.NotFoundError(notfound)
 
                 msg = f"'{code} {response.reason}' for '{response.url}'"
@@ -246,6 +248,8 @@ class Extractor():
         if not fatal or fatal is ...:
             self.log.warning(msg)
             return util.NullResponse(url, msg)
+
+        self.status |= exception.HttpError.code
         raise exception.HttpError(msg, response)
 
     def request_location(self, url, **kwargs):

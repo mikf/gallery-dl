@@ -186,6 +186,8 @@ class Job():
             self.handle_finalize()
             extractor.finalize()
 
+        if s := extractor.status:
+            self.status |= s
         return self.status
 
     def dispatch(self, msg):
