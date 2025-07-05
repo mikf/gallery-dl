@@ -7,7 +7,8 @@
 """Extractors for https://www.iwara.tv/"""
 
 from .common import Extractor, Message
-from urllib.parse import urlparse, parse_qs
+from .. import text
+from urllib.parse import unquote, urlparse, parse_qs
 import hashlib
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?iwara\.tv"
@@ -18,8 +19,8 @@ class IwaraExtractor(Extractor):
     category = "iwara"
     root = "https://www.iwara.tv"
     directory_fmt = ("{category}", "{username}")
-    filename_fmt = "{id} {file_id} {title}.{extension}"
-    archive_fmt = "{type} {username} {id} {file_id}"
+    filename_fmt = "{id} {title} {filename}.{extension}"
+    archive_fmt = "{type} {username} {id} {filename}"
 
     def _init(self):
         self.api = IwaraAPI(self)
@@ -29,22 +30,31 @@ class IwaraExtractor(Extractor):
         return {
             "user_id": user.get("id"),
             "username": user.get("username"),
-            "display_name": user.get("name"),
+            "display_name": user.get("name").strip(),
         }
 
     def extract_media_info(self, item, key, include_file_info):
         data = {
             "id": item.get("id"),
-            "title": item.get("title"),
+            "title": item.get("title").strip() if item.get("title") else "",
         }
 
         if include_file_info:
             file_info = item if key is None else item.get(key, {})
             filename = file_info.get("name")
-            file_id, extension = filename.rsplit(".", 1)
+            filename, extension = filename.rsplit(".", 1)
+            createdAt = file_info.get("createdAt")
+            dt = text.parse_datetime(createdAt, "%Y-%m-%dT%H:%M:%S.%fZ")
+            datetime = dt.strftime(f"%a, %b {dt.day}, %Y %H:%M:%S")
             data.update({
-                "file_id": file_id,
+                "file_id": file_info.get("id"),
+                "filename": filename,
                 "extension": extension,
+                "size": file_info.get("size"),
+                "width": file_info.get("width"),
+                "height": file_info.get("height"),
+                "duration": file_info.get("duration"),
+                "datetime": datetime,
                 "type": file_info.get("type"),
             })
         return data
@@ -238,13 +248,13 @@ class IwaraAPI():
         if search:
             params = {
                 "type": self.extractor.type,
-                "query": query,
+                "query": unquote(query) if query else "",
                 "page": page,
                 "limit": limit,
             }
         else:
             params = {
-                "user": query,
+                "user": unquote(query) if query else "",
                 "page": page,
                 "limit": limit,
             }
