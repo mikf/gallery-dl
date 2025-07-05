@@ -117,7 +117,7 @@ class IwaraProfileExtractor(IwaraExtractor):
 
         playlists = self.api.collection("/playlists", user_id)
         for playlist in playlists:
-            videos = self.api.collection(f"/playlist/{playlist["id"]}", None)
+            videos = self.api.collection(f"/playlist/{playlist.get("id")}")
             for video in videos:
                 user_info = self.extract_user_info(video)
                 yield from self.yield_video(user_info, video)
@@ -176,7 +176,7 @@ class IwaraPlaylistExtractor(IwaraExtractor):
         self.playlist_id = match.group(1)
 
     def items(self):
-        videos = self.api.collection(f"/playlist/{self.playlist_id}", None)
+        videos = self.api.collection(f"/playlist/{self.playlist_id}")
         if not videos:
             return
         for video in videos:
@@ -197,13 +197,40 @@ class IwaraSearchExtractor(IwaraExtractor):
         self.type = match.group(2) if match.lastindex >= 2 else None
 
     def items(self):
-        collection = self.api.collection("/search", self.query, search=True)
+        collection = self.api.collection("/search", self.query)
         if self.type == "video":
             for video in collection:
                 video = self.api.item(f"/video/{video.get("id")}")
                 user_info = self.extract_user_info(video)
                 yield from self.yield_video(user_info, video)
         elif self.type == "image":
+            for image_group in collection:
+                image_group = self.api.item(f"/image/{image_group.get("id")}")
+                if not image_group:
+                    return
+                user_info = self.extract_user_info(image_group)
+                yield from self.yield_image(user_info, image_group)
+
+
+class IwaraTagExtractor(IwaraExtractor):
+    """Extractor for iwara.tv tag search"""
+    subcategory = "tag"
+    pattern = BASE_PATTERN + r"/(videos|images)\?tags=([^&#]+)"
+    example = "https://www.iwara.tv/search_type?tags=example"
+
+    def __init__(self, match):
+        IwaraExtractor.__init__(self, match)
+        self.type = match.group(1)
+        self.tags = match.group(2)
+
+    def items(self):
+        collection = self.api.collection(f"/{self.type}", self.tags)
+        if self.type == "videos":
+            for video in collection:
+                video = self.api.item(f"/video/{video.get("id")}")
+                user_info = self.extract_user_info(video)
+                yield from self.yield_video(user_info, video)
+        elif self.type == "images":
             for image_group in collection:
                 image_group = self.api.item(f"/image/{image_group.get("id")}")
                 if not image_group:
@@ -242,19 +269,27 @@ class IwaraAPI():
         url = self.root + endpoint
         return self.extractor.request_json(url, headers=self.headers)
 
-    def collection(self, endpoint, query, page=0, limit=50, search=False):
+    def collection(self, endpoint, search=None):
         url = self.root + endpoint
         params = {}
-        if search:
+        page = 0
+        limit = 50
+        if self.extractor.subcategory == "search":
             params = {
+                "query": unquote(search) if search else "",
+                "page": page,
+                "limit": limit,
                 "type": self.extractor.type,
-                "query": unquote(query) if query else "",
+            }
+        elif self.extractor.subcategory == "tag":
+            params = {
+                "tags": unquote(search) if search else "",
                 "page": page,
                 "limit": limit,
             }
         else:
             params = {
-                "user": unquote(query) if query else "",
+                "user": unquote(search) if search else "",
                 "page": page,
                 "limit": limit,
             }
