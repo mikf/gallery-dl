@@ -50,6 +50,7 @@ class IwaraExtractor(Extractor):
                 "file_id": file_info.get("id"),
                 "filename": filename,
                 "extension": extension,
+                "mime": file_info.get("mime"),
                 "size": file_info.get("size"),
                 "width": file_info.get("width"),
                 "height": file_info.get("height"),
