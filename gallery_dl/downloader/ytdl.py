@@ -30,6 +30,7 @@ class YoutubeDLDownloader(DownloaderBase):
         }
 
         self.ytdl_instance = None
+        self.rate = None
         self.forward_cookies = self.config("forward-cookies", True)
         self.progress = self.config("progress", 3.0)
         self.outtmpl = self.config("outtmpl")
@@ -69,6 +70,9 @@ class YoutubeDLDownloader(DownloaderBase):
 
         if self.progress is not None and not ytdl_instance._progress_hooks:
             ytdl_instance.add_progress_hook(self._progress_hook)
+
+        if rl := ytdl_instance.params.pop("_gdl_ratelimit", False):
+            self.rate = rl
 
         info_dict = kwdict.pop("_ytdl_info_dict", None)
         if not info_dict:
@@ -132,6 +136,9 @@ class YoutubeDLDownloader(DownloaderBase):
             pathfmt.temppath = ""
             return True
 
+        if self.rate is not None:
+            ytdl_instance.params["ratelimit"] = self.rate()
+
         self.out.start(pathfmt.path)
         if self.part:
             pathfmt.kwdict["extension"] = pathfmt.prefix
@@ -161,6 +168,8 @@ class YoutubeDLDownloader(DownloaderBase):
         self._set_outtmpl(ytdl_instance, pathfmt.realpath)
 
         for entry in info_dict["entries"]:
+            if self.rate is not None:
+                ytdl_instance.params["ratelimit"] = self.rate()
             ytdl_instance.process_info(entry)
         return True
 
