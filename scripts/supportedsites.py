@@ -86,7 +86,6 @@ CATEGORY_MAP = {
     "imgth"          : "imgth",
     "imgur"          : "imgur",
     "imhentai"       : "IMHentai",
-    "iwara"          : "Iwara",
     "joyreactor"     : "JoyReactor",
     "itchio"         : "itch.io",
     "jpgfish"        : "JPG Fish",
@@ -283,6 +282,11 @@ SUBCATEGORY_MAP = {
         "posts": "",
         "saved": "Saved Posts",
         "tagged": "Tagged Posts",
+    },
+    "iwara": {
+        "user-images": "User Images",
+        "user-videos": "User Videos",
+        "user-playlists": "User Playlists",
     },
     "kemono": {
         "discord"       : "Discord Servers",

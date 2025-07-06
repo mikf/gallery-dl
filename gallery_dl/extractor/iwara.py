@@ -6,13 +6,14 @@
 
 """Extractors for https://www.iwara.tv/"""
 
-from .common import Extractor, Message
+from .common import Extractor, Message, Dispatch
 from .. import text, util, exception
 from ..cache import cache, memcache
 from urllib.parse import urlparse, parse_qs
 import hashlib
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?iwara\.tv"
+USER_PATTERN = rf"{BASE_PATTERN}/profile/([^/?#]+)"
 
 
 class IwaraExtractor(Extractor):
@@ -96,44 +97,66 @@ class IwaraExtractor(Extractor):
             yield Message.Directory, metadata
             yield Message.Url, url, metadata
 
+    def _user_params(self):
+        user, qs = self.groups
+        params = text.parse_query(qs)
+        params["user"] = self.api.user_id(user)
+        return params
 
-class IwaraProfileExtractor(IwaraExtractor):
+
+class IwaraUserExtractor(Dispatch, IwaraExtractor):
     """Extractor for iwara.tv profile pages"""
-    subcategory = "profile"
-    pattern = BASE_PATTERN + r"/profile(?:/|$)"
-    example = "https://www.iwara.tv/profile/username"
-
-    def __init__(self, match):
-        IwaraExtractor.__init__(self, match)
-        parsed = urlparse(self.url)
-        parts = parsed.path.strip("/").split("/")
-        if len(parts) >= 2 and parts[0] == "profile":
-            self.profile = parts[1]
-        else:
-            return
+    pattern = rf"{USER_PATTERN}/?$"
+    example = "https://www.iwara.tv/profile/USERNAME"
 
     def items(self):
-        profile = self.api.profile(f"/profile/{self.profile}")
-        if not profile:
-            return
+        base = f"{self.root}/profile/{self.groups[0]}/"
+        return self._dispatch_extractors((
+            (IwaraUserImagesExtractor   , f"{base}images"),
+            (IwaraUserVideosExtractor   , f"{base}videos"),
+            (IwaraUserPlaylistsExtractor, f"{base}playlists"),
+        ), ("user-images", "user-videos"))
+
+
+class IwaraUserImagesExtractor(IwaraExtractor):
+    subcategory = "user-images"
+    pattern = rf"{USER_PATTERN}/images(?:\?([^#]+))?"
+    example = "https://www.iwara.tv/profile/USERNAME/images"
+
+    def items(self):
+        profile = self.api.profile(self.groups[0])
         user_info = self.extract_user_info(profile)
-        user_id = user_info.get("user_id")
-        videos = self.api.collection("/videos", user_id)
-        for video in videos:
+
+        for image_group in self.api.images(self._user_params()):
+            images = self.api.image(image_group["id"])
+            yield from self.yield_image(user_info, images)
+
+
+class IwaraUserVideosExtractor(IwaraExtractor):
+    subcategory = "user-videos"
+    pattern = rf"{USER_PATTERN}/videos(?:\?([^#]+))?"
+    example = "https://www.iwara.tv/profile/USERNAME/videos"
+
+    def items(self):
+        profile = self.api.profile(self.groups[0])
+        user_info = self.extract_user_info(profile)
+
+        for video in self.api.videos(self._user_params()):
             yield from self.yield_video(user_info, video)
 
-        playlists = self.api.collection("/playlists", user_id)
-        for playlist in playlists:
-            videos = self.api.collection(f"/playlist/{playlist.get('id')}")
-            for video in videos:
-                user_info = self.extract_user_info(video)
-                yield from self.yield_video(user_info, video)
 
-        image_groups = self.api.collection("/images", user_id)
-        for image_group in image_groups:
-            image_group_id = image_group.get("id")
-            images = self.api.item(f"/image/{image_group_id}")
-            yield from self.yield_image(user_info, images)
+class IwaraUserPlaylistsExtractor(IwaraExtractor):
+    subcategory = "user-playlists"
+    pattern = rf"{USER_PATTERN}/playlists(?:\?([^#]+))?"
+    example = "https://www.iwara.tv/profile/USERNAME/playlists"
+
+    def items(self):
+        base = f"{self.root}/playlist/"
+
+        for playlist in self.api.playlists(self._user_params()):
+            playlist["_extractor"] = IwaraPlaylistExtractor
+            url = f"{base}{playlist['id']}"
+            yield Message.Queue, url, playlist
 
 
 class IwaraVideoExtractor(IwaraExtractor):

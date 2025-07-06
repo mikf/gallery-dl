@@ -519,8 +519,8 @@ Consider all listed sites to potentially be NSFW.
 </tr>
 <tr>
     <td>Iwara</td>
-    <td>https://iwara.tv/</td>
-    <td>Profiles, videos, images, playlists, searches, tags</td>
+    <td>https://www.iwara.tv/</td>
+    <td>individual Images, Playlists, Search Results, Tag Searches, User Profiles, User Images, User Playlists, User Videos, Videos</td>
     <td>Supported</td>
 </tr>
 <tr>

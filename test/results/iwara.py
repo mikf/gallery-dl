@@ -10,8 +10,7 @@ from gallery_dl.extractor import iwara
 __tests__ = (
 {
     "#url"          : "https://www.iwara.tv/profile/user2426993",
-    "#category"     : ("", "iwara", "profile"),
-    "#class"        : iwara.IwaraProfileExtractor,
+    "#class"        : iwara.IwaraUserExtractor,
     "#count"        : 6,
     "#sha1_content" : "92730533a0db39a440fdfb9b7250c806207a3faf",
     "#sha1_metadata": "0ebd9be904e56215bab9f3b62ea14e3b90bfa28f",
