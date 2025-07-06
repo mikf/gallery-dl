@@ -99,12 +99,17 @@ class IwaraExtractor(Extractor):
 class IwaraProfileExtractor(IwaraExtractor):
     """Extractor for iwara.tv profile pages"""
     subcategory = "profile"
-    pattern = BASE_PATTERN + r"/profile/([^/?#]+)"
+    pattern = BASE_PATTERN + r"/profile(?:/|$)"
     example = "https://www.iwara.tv/profile/username"
 
     def __init__(self, match):
         IwaraExtractor.__init__(self, match)
-        self.profile = match.group(1)
+        parsed = urlparse(self.url)
+        parts = parsed.path.strip("/").split("/")
+        if len(parts) >= 2 and parts[0] == "profile":
+            self.profile = parts[1]
+        else:
+            return
 
     def items(self):
         profile = self.api.profile(f"/profile/{self.profile}")
@@ -133,12 +138,17 @@ class IwaraProfileExtractor(IwaraExtractor):
 class IwaraVideoExtractor(IwaraExtractor):
     """Extractor for individual iwara.tv videos"""
     subcategory = "video"
-    pattern = r"(?:https?://)?(?:www\.)?iwara\.tv/video/([\w-]+)"
+    pattern = BASE_PATTERN + r"/video(?:/|$)"
     example = "https://www.iwara.tv/video/video-id/slug"
 
     def __init__(self, match):
         IwaraExtractor.__init__(self, match)
-        self.video_id = match.group(1)
+        parsed = urlparse(self.url)
+        parts = parsed.path.strip("/").split("/")
+        if len(parts) >= 2 and parts[0] == "video":
+            self.video_id = parts[1]
+        else:
+            return
 
     def items(self):
         video = self.api.item(f"/video/{self.video_id}")
@@ -151,12 +161,17 @@ class IwaraVideoExtractor(IwaraExtractor):
 class IwaraImageExtractor(IwaraExtractor):
     """Extractor for individual iwara.tv image pages"""
     subcategory = "image"
-    pattern = r"(?:https?://)?(?:www\.)?iwara\.tv/image/([\w-]+)"
+    pattern = BASE_PATTERN + r"/image(?:/|$)"
     example = "https://www.iwara.tv/image/image-id/slug"
 
     def __init__(self, match):
         IwaraExtractor.__init__(self, match)
-        self.image_id = match.group(1)
+        parsed = urlparse(self.url)
+        parts = parsed.path.strip("/").split("/")
+        if len(parts) >= 2 and parts[0] == "image":
+            self.image_id = parts[1]
+        else:
+            return
 
     def items(self):
         image_group = self.api.item(f"/image/{self.image_id}")
@@ -169,12 +184,17 @@ class IwaraImageExtractor(IwaraExtractor):
 class IwaraPlaylistExtractor(IwaraExtractor):
     """Extractor for individual iwara.tv playlist pages"""
     subcategory = "playlist"
-    pattern = r"(?:https?://)?(?:www\.)?iwara\.tv/playlist/([\w-]+)"
+    pattern = BASE_PATTERN + r"/playlist(?:/|$)"
     example = "https://www.iwara.tv/playlist/playlist-id"
 
     def __init__(self, match):
         IwaraExtractor.__init__(self, match)
-        self.playlist_id = match.group(1)
+        parsed = urlparse(self.url)
+        parts = parsed.path.strip("/").split("/")
+        if len(parts) >= 2 and parts[0] == "playlist":
+            self.playlist_id = parts[1]
+        else:
+            return
 
     def items(self):
         videos = self.api.collection(f"/playlist/{self.playlist_id}")
@@ -189,13 +209,19 @@ class IwaraPlaylistExtractor(IwaraExtractor):
 class IwaraSearchExtractor(IwaraExtractor):
     """Extractor for iwara.tv search pages"""
     subcategory = "search"
-    pattern = BASE_PATTERN + r"/search\?query=([^&?#]+)(?:&type=([^&?#]+))?"
+    pattern = BASE_PATTERN + r"/search"
     example = "https://www.iwara.tv/search?query=example&type=search_type"
 
     def __init__(self, match):
         IwaraExtractor.__init__(self, match)
-        self.query = match.group(1)
-        self.type = match.group(2) if match.lastindex >= 2 else None
+        parsed = urlparse(self.url)
+        parts = parsed.path.strip("/").split("/")
+        if len(parts) >= 1 and parts[0] == "search":
+            query_dict = parse_qs(parsed.query)
+            self.query = query_dict.get("query", [""])[0]
+            self.type = query_dict.get("type", [None])[0]
+        else:
+            return
 
     def items(self):
         collection = self.api.collection("/search", self.query)
@@ -216,13 +242,19 @@ class IwaraSearchExtractor(IwaraExtractor):
 class IwaraTagExtractor(IwaraExtractor):
     """Extractor for iwara.tv tag search"""
     subcategory = "tag"
-    pattern = BASE_PATTERN + r"/(videos|images)\?tags=([^&#]+)"
-    example = "https://www.iwara.tv/search_type?tags=example"
+    pattern = BASE_PATTERN + r"/(videos|images)(?:\?.*)?"
+    example = "https://www.iwara.tv/videos?tags=example"
 
     def __init__(self, match):
         IwaraExtractor.__init__(self, match)
-        self.type = match.group(1)
-        self.tags = match.group(2)
+        parsed = urlparse(self.url)
+        parts = parsed.path.strip("/").split("/")
+        if len(parts) >= 1 and parts[0] in ("videos", "images"):
+            query_dict = parse_qs(parsed.query)
+            self.type = parts[0]
+            self.tags = query_dict.get("tags", [""])[0]
+        else:
+            return
 
     def items(self):
         collection = self.api.collection(f"/{self.type}", self.tags)
