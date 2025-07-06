@@ -520,7 +520,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Iwara</td>
     <td>https://iwara.tv/</td>
-    <td>Profiles, videos, images, playlists, searches</td>
+    <td>Profiles, videos, images, playlists, searches, tags</td>
     <td>Supported</td>
 </tr>
 <tr>
