@@ -405,15 +405,15 @@ class Extractor():
             elif platform == "linux":
                 platform = "X11; Linux x86_64"
             elif platform == "macos":
-                platform = "Macintosh; Intel Mac OS X 11.5"
+                platform = "Macintosh; Intel Mac OS X 15.5"
 
             if browser == "chrome":
                 if platform.startswith("Macintosh"):
-                    platform = platform.replace(".", "_") + "_2"
+                    platform = platform.replace(".", "_")
             else:
                 browser = "firefox"
 
-            for key, value in HTTP_HEADERS[browser]:
+            for key, value in HEADERS[browser]:
                 if value and "{}" in value:
                     headers[key] = value.format(platform)
                 else:
@@ -421,15 +421,15 @@ class Extractor():
 
             ssl_options |= (ssl.OP_NO_SSLv2 | ssl.OP_NO_SSLv3 |
                             ssl.OP_NO_TLSv1 | ssl.OP_NO_TLSv1_1)
-            ssl_ciphers = SSL_CIPHERS[browser]
+            ssl_ciphers = CIPHERS[browser]
         else:
             headers["User-Agent"] = self.useragent
             headers["Accept"] = "*/*"
             headers["Accept-Language"] = "en-US,en;q=0.5"
 
             ssl_ciphers = self.ciphers
-            if ssl_ciphers is not None and ssl_ciphers in SSL_CIPHERS:
-                ssl_ciphers = SSL_CIPHERS[ssl_ciphers]
+            if ssl_ciphers is not None and ssl_ciphers in CIPHERS:
+                ssl_ciphers = CIPHERS[ssl_ciphers]
 
         if BROTLI:
             headers["Accept-Encoding"] = "gzip, deflate, br"
@@ -457,8 +457,8 @@ class Extractor():
         custom_headers = self.config("headers")
         if custom_headers:
             if isinstance(custom_headers, str):
-                if custom_headers in HTTP_HEADERS:
-                    custom_headers = HTTP_HEADERS[custom_headers]
+                if custom_headers in HEADERS:
+                    custom_headers = HEADERS[custom_headers]
                 else:
                     self.log.error("Invalid 'headers' value '%s'",
                                    custom_headers)
@@ -469,8 +469,8 @@ class Extractor():
         if custom_ciphers:
             if isinstance(custom_ciphers, list):
                 ssl_ciphers = ":".join(custom_ciphers)
-            elif custom_ciphers in SSL_CIPHERS:
-                ssl_ciphers = SSL_CIPHERS[custom_ciphers]
+            elif custom_ciphers in CIPHERS:
+                ssl_ciphers = CIPHERS[custom_ciphers]
             else:
                 ssl_ciphers = custom_ciphers
 
@@ -542,7 +542,7 @@ class Extractor():
 
         elif isinstance(cookies_source, (list, tuple)):
             key = tuple(cookies_source)
-            cookies = _browser_cookies.get(key)
+            cookies = CACHE_COOKIES.get(key)
 
             if cookies is None:
                 from ..cookies import load_cookies
@@ -552,7 +552,7 @@ class Extractor():
                     self.log.warning("cookies: %s", exc)
                     cookies = ()
                 else:
-                    _browser_cookies[key] = cookies
+                    CACHE_COOKIES[key] = cookies
             else:
                 self.log.debug("cookies: Using cached cookies from %s", key)
 
@@ -1002,7 +1002,7 @@ def _build_requests_adapter(
 
     key = (ssl_options, ssl_ciphers, ssl_ctx, source_address)
     try:
-        return _adapter_cache[key]
+        return CACHE_ADAPTERS[key]
     except KeyError:
         pass
 
@@ -1025,7 +1025,7 @@ def _build_requests_adapter(
     else:
         ssl_context = None
 
-    adapter = _adapter_cache[key] = RequestsAdapter(
+    adapter = CACHE_ADAPTERS[key] = RequestsAdapter(
         ssl_context, source_address)
     return adapter
 
@@ -1061,83 +1061,131 @@ def _browser_useragent():
     return useragent.decode()
 
 
-_adapter_cache = {}
-_browser_cookies = {}
+CACHE_ADAPTERS = {}
+CACHE_COOKIES = {}
 CATEGORY_MAP = ()
 
-HTTP_HEADERS = {
-    "firefox": (
-        ("User-Agent", "Mozilla/5.0 ({}; "
-                       "rv:128.0) Gecko/20100101 Firefox/128.0"),
-        ("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,"
-                   "image/avif,image/webp,image/png,image/svg+xml,*/*;q=0.8"),
-        ("Accept-Language", "en-US,en;q=0.5"),
-        ("Accept-Encoding", None),
-        ("Referer", None),
-        ("Connection", "keep-alive"),
-        ("Upgrade-Insecure-Requests", "1"),
-        ("Cookie", None),
-        ("Sec-Fetch-Dest", "empty"),
-        ("Sec-Fetch-Mode", "no-cors"),
-        ("Sec-Fetch-Site", "same-origin"),
-        ("TE", "trailers"),
-    ),
-    "chrome": (
-        ("Connection", "keep-alive"),
-        ("Upgrade-Insecure-Requests", "1"),
-        ("User-Agent", "Mozilla/5.0 ({}) AppleWebKit/537.36 (KHTML, "
-                       "like Gecko) Chrome/111.0.0.0 Safari/537.36"),
-        ("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,"
-                   "image/avif,image/webp,image/apng,*/*;q=0.8,"
-                   "application/signed-exchange;v=b3;q=0.7"),
-        ("Referer", None),
-        ("Sec-Fetch-Site", "same-origin"),
-        ("Sec-Fetch-Mode", "no-cors"),
-        ("Sec-Fetch-Dest", "empty"),
-        ("Accept-Encoding", None),
-        ("Accept-Language", "en-US,en;q=0.9"),
-        ("cookie", None),
-        ("content-length", None),
-    ),
+
+HEADERS_FIREFOX_140 = (
+    ("User-Agent", "Mozilla/5.0 ({}; rv:140.0) Gecko/20100101 Firefox/140.0"),
+    ("Accept", "text/html,application/xhtml+xml,"
+               "application/xml;q=0.9,*/*;q=0.8"),
+    ("Accept-Language", "en-US,en;q=0.5"),
+    ("Accept-Encoding", None),
+    ("Connection", "keep-alive"),
+    ("Content-Type", None),
+    ("Content-Length", None),
+    ("Referer", None),
+    ("Origin", None),
+    ("Cookie", None),
+    ("Sec-Fetch-Dest", "empty"),
+    ("Sec-Fetch-Mode", "cors"),
+    ("Sec-Fetch-Site", "same-origin"),
+    ("TE", "trailers"),
+)
+HEADERS_FIREFOX_128 = (
+    ("User-Agent", "Mozilla/5.0 ({}; rv:128.0) Gecko/20100101 Firefox/128.0"),
+    ("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,"
+               "image/avif,image/webp,image/png,image/svg+xml,*/*;q=0.8"),
+    ("Accept-Language", "en-US,en;q=0.5"),
+    ("Accept-Encoding", None),
+    ("Referer", None),
+    ("Connection", "keep-alive"),
+    ("Upgrade-Insecure-Requests", "1"),
+    ("Cookie", None),
+    ("Sec-Fetch-Dest", "empty"),
+    ("Sec-Fetch-Mode", "no-cors"),
+    ("Sec-Fetch-Site", "same-origin"),
+    ("TE", "trailers"),
+)
+HEADERS_CHROMIUM_138 = (
+    ("Connection", "keep-alive"),
+    ("sec-ch-ua", '"Not)A;Brand";v="8", "Chromium";v="138"'),
+    ("sec-ch-ua-mobile", "?0"),
+    ("sec-ch-ua-platform", '"Linux"'),
+    ("Upgrade-Insecure-Requests", "1"),
+    ("User-Agent", "Mozilla/5.0 ({}) AppleWebKit/537.36 (KHTML, "
+                   "like Gecko) Chrome/138.0.0.0 Safari/537.36"),
+    ("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,"
+               "image/avif,image/webp,image/apng,*/*;q=0.8,"
+               "application/signed-exchange;v=b3;q=0.7"),
+    ("Referer", None),
+    ("Sec-Fetch-Site", "same-origin"),
+    ("Sec-Fetch-Mode", "no-cors"),
+    #  ("Sec-Fetch-User", "?1"),
+    ("Sec-Fetch-Dest", "empty"),
+    ("Accept-Encoding", None),
+    ("Accept-Language", "en-US,en;q=0.9"),
+)
+HEADERS_CHROMIUM_111 = (
+    ("Connection", "keep-alive"),
+    ("Upgrade-Insecure-Requests", "1"),
+    ("User-Agent", "Mozilla/5.0 ({}) AppleWebKit/537.36 (KHTML, "
+                   "like Gecko) Chrome/111.0.0.0 Safari/537.36"),
+    ("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,"
+               "image/avif,image/webp,image/apng,*/*;q=0.8,"
+               "application/signed-exchange;v=b3;q=0.7"),
+    ("Referer", None),
+    ("Sec-Fetch-Site", "same-origin"),
+    ("Sec-Fetch-Mode", "no-cors"),
+    ("Sec-Fetch-Dest", "empty"),
+    ("Accept-Encoding", None),
+    ("Accept-Language", "en-US,en;q=0.9"),
+    ("cookie", None),
+    ("content-length", None),
+)
+HEADERS = {
+    "firefox"    : HEADERS_FIREFOX_140,
+    "firefox/140": HEADERS_FIREFOX_140,
+    "firefox/128": HEADERS_FIREFOX_128,
+    "chrome"     : HEADERS_CHROMIUM_138,
+    "chrome/138" : HEADERS_CHROMIUM_138,
+    "chrome/111" : HEADERS_CHROMIUM_111,
 }
 
-SSL_CIPHERS = {
-    "firefox": (
-        "TLS_AES_128_GCM_SHA256:"
-        "TLS_CHACHA20_POLY1305_SHA256:"
-        "TLS_AES_256_GCM_SHA384:"
-        "ECDHE-ECDSA-AES128-GCM-SHA256:"
-        "ECDHE-RSA-AES128-GCM-SHA256:"
-        "ECDHE-ECDSA-CHACHA20-POLY1305:"
-        "ECDHE-RSA-CHACHA20-POLY1305:"
-        "ECDHE-ECDSA-AES256-GCM-SHA384:"
-        "ECDHE-RSA-AES256-GCM-SHA384:"
-        "ECDHE-ECDSA-AES256-SHA:"
-        "ECDHE-ECDSA-AES128-SHA:"
-        "ECDHE-RSA-AES128-SHA:"
-        "ECDHE-RSA-AES256-SHA:"
-        "AES128-GCM-SHA256:"
-        "AES256-GCM-SHA384:"
-        "AES128-SHA:"
-        "AES256-SHA"
-    ),
-    "chrome": (
-        "TLS_AES_128_GCM_SHA256:"
-        "TLS_AES_256_GCM_SHA384:"
-        "TLS_CHACHA20_POLY1305_SHA256:"
-        "ECDHE-ECDSA-AES128-GCM-SHA256:"
-        "ECDHE-RSA-AES128-GCM-SHA256:"
-        "ECDHE-ECDSA-AES256-GCM-SHA384:"
-        "ECDHE-RSA-AES256-GCM-SHA384:"
-        "ECDHE-ECDSA-CHACHA20-POLY1305:"
-        "ECDHE-RSA-CHACHA20-POLY1305:"
-        "ECDHE-RSA-AES128-SHA:"
-        "ECDHE-RSA-AES256-SHA:"
-        "AES128-GCM-SHA256:"
-        "AES256-GCM-SHA384:"
-        "AES128-SHA:"
-        "AES256-SHA"
-    ),
+CIPHERS_FIREFOX = (
+    "TLS_AES_128_GCM_SHA256:"
+    "TLS_CHACHA20_POLY1305_SHA256:"
+    "TLS_AES_256_GCM_SHA384:"
+    "ECDHE-ECDSA-AES128-GCM-SHA256:"
+    "ECDHE-RSA-AES128-GCM-SHA256:"
+    "ECDHE-ECDSA-CHACHA20-POLY1305:"
+    "ECDHE-RSA-CHACHA20-POLY1305:"
+    "ECDHE-ECDSA-AES256-GCM-SHA384:"
+    "ECDHE-RSA-AES256-GCM-SHA384:"
+    "ECDHE-ECDSA-AES256-SHA:"
+    "ECDHE-ECDSA-AES128-SHA:"
+    "ECDHE-RSA-AES128-SHA:"
+    "ECDHE-RSA-AES256-SHA:"
+    "AES128-GCM-SHA256:"
+    "AES256-GCM-SHA384:"
+    "AES128-SHA:"
+    "AES256-SHA"
+)
+CIPHERS_CHROMIUM = (
+    "TLS_AES_128_GCM_SHA256:"
+    "TLS_AES_256_GCM_SHA384:"
+    "TLS_CHACHA20_POLY1305_SHA256:"
+    "ECDHE-ECDSA-AES128-GCM-SHA256:"
+    "ECDHE-RSA-AES128-GCM-SHA256:"
+    "ECDHE-ECDSA-AES256-GCM-SHA384:"
+    "ECDHE-RSA-AES256-GCM-SHA384:"
+    "ECDHE-ECDSA-CHACHA20-POLY1305:"
+    "ECDHE-RSA-CHACHA20-POLY1305:"
+    "ECDHE-RSA-AES128-SHA:"
+    "ECDHE-RSA-AES256-SHA:"
+    "AES128-GCM-SHA256:"
+    "AES256-GCM-SHA384:"
+    "AES128-SHA:"
+    "AES256-SHA"
+)
+CIPHERS = {
+    "firefox"    : CIPHERS_FIREFOX,
+    "firefox/140": CIPHERS_FIREFOX,
+    "firefox/128": CIPHERS_FIREFOX,
+    "chrome"     : CIPHERS_CHROMIUM,
+    "chrome/138" : CIPHERS_CHROMIUM,
+    "chrome/111" : CIPHERS_CHROMIUM,
 }
 
 
