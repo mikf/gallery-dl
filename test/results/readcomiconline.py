@@ -22,7 +22,7 @@ __tests__ = (
     "#category": ("", "readcomiconline", "comic"),
     "#class"   : readcomiconline.ReadcomiconlineComicExtractor,
     "#sha1_url"     : "74eb8b9504b4084fcc9367b341300b2c52260918",
-    "#sha1_metadata": "3986248e4458fa44a201ec073c3684917f48ee0c",
+    "#sha1_metadata": "574051aaf7a5c92dafed9e94baa40a1a93db5c90",
 },
 
 {
@@ -30,7 +30,7 @@ __tests__ = (
     "#category": ("", "readcomiconline", "comic"),
     "#class"   : readcomiconline.ReadcomiconlineComicExtractor,
     "#sha1_url"     : "2f66a467a772df4d4592e97a059ddbc3e8991799",
-    "#sha1_metadata": "f5ba5246cd787bb750924d9690cb1549199bd516",
+    "#sha1_metadata": "9563a19454e1b4e0da5b7a28112bf00a3e8069a8",
 },
 
 )

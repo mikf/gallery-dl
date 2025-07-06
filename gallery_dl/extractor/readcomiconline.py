@@ -80,21 +80,20 @@ class ReadcomiconlineIssueExtractor(ReadcomiconlineBase, ChapterExtractor):
     def images(self, page):
         results = []
         referer = {"_http_headers": {"Referer": self.page_url}}
-        root = text.extr(page, "return baeu(l, '", "'")
+        root, pos = text.extract(page, "return baeu(l, '", "'")
+        _   , pos = text.extract(page, "var pth = '", "", pos)
+        var , pos = text.extract(page, "var ", "= '", pos)
 
         replacements = re.findall(
             r"l = l\.replace\(/([^/]+)/g, [\"']([^\"']*)", page)
 
-        for block in page.split("\t\tpht = '")[1:]:
-            pth = text.extr(block, "", "'")
+        for path in page.split(var)[2:]:
+            path = text.extr(path, "= '", "'")
 
-            for needle, repl in re.findall(
-                    r"pth = pth\.replace\(/([^/]+)/g, [\"']([^\"']*)", block):
-                pth = pth.replace(needle, repl)
             for needle, repl in replacements:
-                pth = pth.replace(needle, repl)
+                path = path.replace(needle, repl)
 
-            results.append((baeu(pth, root), referer))
+            results.append((baeu(path, root), referer))
 
         return results
 
