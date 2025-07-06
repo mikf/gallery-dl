@@ -58,7 +58,7 @@ def construct_YoutubeDL(module, obj, user_opts, system_opts=None):
         if rate:
             func = util.build_selection_func(rate, 0, text.parse_bytes)
             if hasattr(func, "args"):
-                opts["_gdl_ratelimit"] = func
+                opts["__gdl_ratelimit_func"] = func
             else:
                 opts["ratelimit"] = func() or None
         else:
@@ -72,6 +72,7 @@ def construct_YoutubeDL(module, obj, user_opts, system_opts=None):
     if system_opts:
         opts.update(system_opts)
 
+    opts["__gdl_initialize"] = True
     return module.YoutubeDL(opts)
 
 
