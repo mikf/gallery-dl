@@ -7,8 +7,9 @@
 """Extractors for https://www.iwara.tv/"""
 
 from .common import Extractor, Message
-from .. import text
-from urllib.parse import unquote, urlparse, parse_qs
+from .. import text, util, exception
+from ..cache import cache, memcache
+from urllib.parse import urlparse, parse_qs
 import hashlib
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?iwara\.tv"
@@ -278,69 +279,54 @@ class IwaraAPI():
 
     def __init__(self, extractor):
         self.extractor = extractor
-        self.token = None
-        self.headers = {}
-        self.login("/user/login")
-
-    def login(self, endpoint):
-        url = self.root + endpoint
-        email, password = self.extractor._get_auth_info()
-        if not email or not password:
-            return
-        json = {
-            "email": email,
-            "password": password
+        self.headers = {
+            "Referer"     : f"{extractor.root}/",
+            "Content-Type": "application/json",
+            "Origin"      : extractor.root,
         }
-        response = self.extractor.request(url, method="POST", json=json)
-        token = response.json().get("token")
-        if token:
-            self.token = token
-            self.headers = {"Authorization": f"Bearer {token}"}
-            self.extractor.log.info(f"Logged in as {email}.")
 
-    def profile(self, endpoint):
-        url = self.root + endpoint
-        return self.extractor.request_json(url, headers=self.headers)
+        self.username, self.password = extractor._get_auth_info()
+        if not self.username:
+            self.authenticate = util.noop
 
-    def collection(self, endpoint, search=None):
-        url = self.root + endpoint
-        params = {}
-        page = 0
-        limit = 50
-        if self.extractor.subcategory == "search":
-            params = {
-                "query": unquote(search) if search else "",
-                "page": page,
-                "limit": limit,
-                "type": self.extractor.type,
-            }
-        elif self.extractor.subcategory == "tag":
-            params = {
-                "tags": unquote(search) if search else "",
-                "page": page,
-                "limit": limit,
-            }
-        else:
-            params = {
-                "user": unquote(search) if search else "",
-                "page": page,
-                "limit": limit,
-            }
-        collection = []
-        while True:
-            data = self.extractor.request_json(
-                url,
-                headers=self.headers,
-                params=params
-            )
-            results = data.get("results", [])
-            if not results:
-                break
-            collection.extend(results)
-            if len(results) < limit:
-                break
-            params["page"] += 1
-        return collection
+    def image(self, image_id):
+        endpoint = f"/image/{image_id}"
+        return self._call(endpoint)
+
+    def images(self, params):
+        endpoint = "/images"
+        params.setdefault("rating", "all")
+        return self._pagination(endpoint, params)
+
+    def video(self, video_id):
+        endpoint = f"/video/{video_id}"
+        return self._call(endpoint)
+
+    def videos(self, params):
+        endpoint = "/videos"
+        params.setdefault("rating", "all")
+        return self._pagination(endpoint, params)
+
+    def playlists(self, params):
+        endpoint = "/playlists"
+        return self._pagination(endpoint, params)
+
+    def search(self, type, query):
+        endpoint = "/search"
+        params = {"type": type, "query": query}
+        return self._pagination(endpoint, params)
+
+    @memcache()
+    def profile(self, username):
+        endpoint = f"/profile/{username}"
+        return self._call(endpoint)
+
+    def user_id(self, username):
+        return self.profile(username)["user"]["id"]
+
+    def user_following(self, user_id):
+        endpoint = f"/user/{user_id}/following"
+        return self._pagination(endpoint)
 
     def item(self, endpoint):
         url = self.root + endpoint
@@ -355,3 +341,47 @@ class IwaraAPI():
         hash = hashlib.sha1(sha_key.encode("utf-8")).hexdigest()
         headers = {"X-Version": hash, **self.headers}
         return self.extractor.request_json(url, headers=headers)
+
+    def authenticate(self):
+        self.headers["Authorization"] = self._authenticate_impl(
+            self.username, self.password)
+
+    @cache(maxage=28*86400, keyarg=1)
+    def _authenticate_impl(self, username, password):
+        self.extractor.log.info("Logging in as %s", username)
+
+        url = f"{self.root}/user/login"
+        json = {
+            "email"   : username,
+            "password": password
+        }
+        data = self.extractor.request_json(
+            url, method="POST", json=json, fatal=False)
+
+        if token := data.get("token"):
+            return f"Bearer {token}"
+        raise exception.AuthenticationError(data.get("message"))
+
+    def _call(self, endpoint, params=None):
+        url = self.root + endpoint
+
+        self.authenticate()
+        return self.extractor.request_json(
+            url, params=params, headers=self.headers)
+
+    def _pagination(self, endpoint, params=None):
+        if params is None:
+            params = {}
+        params["page"] = 0
+        params["limit"] = 50
+
+        while True:
+            data = self._call(endpoint, params)
+
+            if not (results := data.get("results")):
+                break
+            yield from results
+
+            if len(results) < params["limit"]:
+                break
+            params["page"] += 1
