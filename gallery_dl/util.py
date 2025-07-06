@@ -831,10 +831,12 @@ def compile_expression_defaultdict_impl(expr, name="<expr>", globals=None):
 
 def compile_expression_tryexcept(expr, name="<expr>", globals=None):
     code_object = compile(expr, name, "eval")
+    if globals is None:
+        globals = GLOBALS
 
-    def _eval(locals=None, globals=(globals or GLOBALS), co=code_object):
+    def _eval(locals=None):
         try:
-            return eval(co, globals, locals)
+            return eval(code_object, globals, locals)
         except exception.GalleryDLException:
             raise
         except Exception:
