@@ -123,7 +123,7 @@ class IwaraProfileExtractor(IwaraExtractor):
 
         playlists = self.api.collection("/playlists", user_id)
         for playlist in playlists:
-            videos = self.api.collection(f"/playlist/{playlist.get("id")}")
+            videos = self.api.collection(f"/playlist/{playlist.get('id')}")
             for video in videos:
                 user_info = self.extract_user_info(video)
                 yield from self.yield_video(user_info, video)
@@ -201,7 +201,7 @@ class IwaraPlaylistExtractor(IwaraExtractor):
         if not videos:
             return
         for video in videos:
-            video = self.api.item(f"/video/{video.get("id")}")
+            video = self.api.item(f"/video/{video.get('id')}")
             user_info = self.extract_user_info(video)
             yield from self.yield_video(user_info, video)
 
@@ -227,12 +227,12 @@ class IwaraSearchExtractor(IwaraExtractor):
         collection = self.api.collection("/search", self.query)
         if self.type == "video":
             for video in collection:
-                video = self.api.item(f"/video/{video.get("id")}")
+                video = self.api.item(f"/video/{video.get('id')}")
                 user_info = self.extract_user_info(video)
                 yield from self.yield_video(user_info, video)
         elif self.type == "image":
             for image_group in collection:
-                image_group = self.api.item(f"/image/{image_group.get("id")}")
+                image_group = self.api.item(f"/image/{image_group.get('id')}")
                 if not image_group:
                     return
                 user_info = self.extract_user_info(image_group)
@@ -260,12 +260,12 @@ class IwaraTagExtractor(IwaraExtractor):
         collection = self.api.collection(f"/{self.type}", self.tags)
         if self.type == "videos":
             for video in collection:
-                video = self.api.item(f"/video/{video.get("id")}")
+                video = self.api.item(f"/video/{video.get('id')}")
                 user_info = self.extract_user_info(video)
                 yield from self.yield_video(user_info, video)
         elif self.type == "images":
             for image_group in collection:
-                image_group = self.api.item(f"/image/{image_group.get("id")}")
+                image_group = self.api.item(f"/image/{image_group.get('id')}")
                 if not image_group:
                     return
                 user_info = self.extract_user_info(image_group)
