@@ -125,4 +125,53 @@ __tests__ = (
     "url"          : r"re:https://cdn5-videos.motherlessmedia.com/videos/[^/]+\.mp4(?:\?.*)?",
 },
 
+{
+    "#url"  : "https://motherless.com/g/bump___grind",
+    "#class": motherless.MotherlessGroupExtractor,
+    "#results": (
+        "https://motherless.com/gi/bump___grind",
+        "https://motherless.com/gv/bump___grind",
+    ),
+},
+
+{
+    "#url"  : "https://motherless.com/gi/bump___grind",
+    "#class": motherless.MotherlessGroupExtractor,
+    "#pattern": r"https://cdn5-images\.motherlessmedia\.com/images/[^/]+\.(jpg|jpeg|png|gif)",
+    "#range"  : "1-100",
+    "#count"  : 18,
+
+    "count"        : range(5, 50),
+    "extension"    : {"jpg", "jpeg", "png", "gif"},
+    "filename"     : str,
+    "group_id"     : "bump___grind",
+    "group"        : "bump___grind",
+    "id"           : str,
+    "num"          : int,
+    "thumbnail"    : r"re:https://cdn5-thumbs\.motherlessmedia\.com/thumbs/[^/]+\.\w+",
+    "title"        : str,
+    "type"         : "image",
+    "url"          : r"re:https://cdn5-images\.motherlessmedia\.com/images/[^/]+\.(jpg|jpeg|png|gif)",
+},
+
+{
+    "#url"  : "https://motherless.com/gv/bump___grind",
+    "#class": motherless.MotherlessGroupExtractor,
+    "#pattern": r"https://cdn5-videos\.motherlessmedia\.com/videos/[^/]+\.mp4(?:\?.*)?",
+    "#range"  : "1-100",
+    "#count"  : 25,
+
+    "count"        : range(20, 100),
+    "extension"    : "mp4",
+    "filename"     : str,
+    "group_id"     : "bump___grind",
+    "group"        : "bump___grind",
+    "id"           : str,
+    "num"          : int,
+    "thumbnail"    : r"re:https://cdn5-thumbs\.motherlessmedia\.com/thumbs/[^/]+\.\w+",
+    "title"        : str,
+    "type"         : "video",
+    "url"          : r"re:https://cdn5-videos.motherlessmedia.com/videos/[^/]+\.mp4(?:\?.*)?",
+},
+
 )
