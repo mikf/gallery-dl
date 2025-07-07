@@ -75,7 +75,7 @@ class E621Extractor(danbooru.DanbooruExtractor):
 BASE_PATTERN = E621Extractor.update({
     "e621": {
         "root": "https://e621.net",
-        "pattern": r"e621\.net",
+        "pattern": r"e621\.(?:net|cc)",
     },
     "e926": {
         "root": "https://e926.net",
