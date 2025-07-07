@@ -224,31 +224,21 @@ class IwaraSearchExtractor(IwaraExtractor):
 class IwaraTagExtractor(IwaraExtractor):
     """Extractor for iwara.tv tag search"""
     subcategory = "tag"
-    pattern = BASE_PATTERN + r"/(videos|images)(?:\?.*)?"
-    example = "https://www.iwara.tv/videos?tags=example"
-
-    def __init__(self, match):
-        IwaraExtractor.__init__(self, match)
-        parsed = urlparse(self.url)
-        parts = parsed.path.strip("/").split("/")
-        if len(parts) >= 1 and parts[0] in ("videos", "images"):
-            query_dict = parse_qs(parsed.query)
-            self.type = parts[0]
-            self.tags = query_dict.get("tags", [""])[0]
-        else:
-            return
+    pattern = BASE_PATTERN + r"/(videos|images)(?:\?([^#]+))?"
+    example = "https://www.iwara.tv/videos?tags=TAGS"
 
     def items(self):
-        collection = self.api.collection(f"/{self.type}", self.tags)
-        if self.type == "videos":
-            for video in collection:
-                video = self.api.item(f"/video/{video.get('id')}")
+        type, qs = self.groups
+        params = text.parse_query(qs)
+        self.kwdict["search_type"] = type
+        self.kwdict["search_tags"] = params.get("tags")
+
+        if type == "videos":
+            for video in self.api.videos(params):
                 yield from self.yield_video(video)
-        elif self.type == "images":
-            for image_group in collection:
-                image_group = self.api.item(f"/image/{image_group.get('id')}")
-                if not image_group:
-                    return
+        else:
+            for image in self.api.images(params):
+                image_group = self.api.image(image["id"])
                 yield from self.yield_image(image_group)
 
 
