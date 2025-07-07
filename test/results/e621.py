@@ -148,6 +148,12 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://e621.cc/posts?tags=rating:safe",
+    "#category": ("E621", "e621", "tag"),
+    "#class"   : e621.E621TagExtractor,
+},
+
+{
     "#url"     : "https://e621.cc/?tags=rating:safe",
     "#category": ("E621", "e621", "frontend"),
     "#class"   : e621.E621FrontendExtractor,
