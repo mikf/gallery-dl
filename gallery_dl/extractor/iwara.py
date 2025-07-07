@@ -68,15 +68,20 @@ class IwaraExtractor(Extractor):
             **media_info
         }
 
-    def yield_video(self, user_info, video):
+    def yield_video(self, video, user_info=None):
+        if user_info is None:
+            user_info = self.extract_user_info(video)
         video_info = self.extract_media_info(video, "file", True)
-        video_id = video_info.get("id")
+
+        if "fileUrl" not in video:
+            video = self.api.video(video["id"])
+        file_url = video["fileUrl"]
+
         file_id = video_info.get("file_id")
-        video = self.api.item(f"/video/{video_id}")
-        file_url = video.get("fileUrl")
         sources = self.api.source(file_id, file_url)
         source = next((r for r in sources if r.get("name") == "Source"), None)
         download_url = source.get('src', {}).get('download')
+
         url = f"https:{download_url}"
         metadata = self.get_metadata(user_info, video_info)
         yield Message.Directory, metadata
@@ -139,7 +144,7 @@ class IwaraUserVideosExtractor(IwaraExtractor):
     def items(self):
         user, params = self._user_params()
         for video in self.api.videos(params):
-            yield from self.yield_video(user, video)
+            yield from self.yield_video(video, user)
 
 
 class IwaraUserPlaylistsExtractor(IwaraExtractor):
@@ -159,24 +164,12 @@ class IwaraUserPlaylistsExtractor(IwaraExtractor):
 class IwaraVideoExtractor(IwaraExtractor):
     """Extractor for individual iwara.tv videos"""
     subcategory = "video"
-    pattern = BASE_PATTERN + r"/video(?:/|$)"
-    example = "https://www.iwara.tv/video/video-id/slug"
-
-    def __init__(self, match):
-        IwaraExtractor.__init__(self, match)
-        parsed = urlparse(self.url)
-        parts = parsed.path.strip("/").split("/")
-        if len(parts) >= 2 and parts[0] == "video":
-            self.video_id = parts[1]
-        else:
-            return
+    pattern = rf"{BASE_PATTERN}/video/([^/?#]+)"
+    example = "https://www.iwara.tv/video/ID"
 
     def items(self):
-        video = self.api.item(f"/video/{self.video_id}")
-        if not video:
-            return
-        user_info = self.extract_user_info(video)
-        yield from self.yield_video(user_info, video)
+        video = self.api.video(self.groups[0])
+        return self.yield_video(video)
 
 
 class IwaraImageExtractor(IwaraExtractor):
@@ -223,8 +216,7 @@ class IwaraPlaylistExtractor(IwaraExtractor):
             return
         for video in videos:
             video = self.api.item(f"/video/{video.get('id')}")
-            user_info = self.extract_user_info(video)
-            yield from self.yield_video(user_info, video)
+            yield from self.yield_video(video)
 
 
 class IwaraSearchExtractor(IwaraExtractor):
@@ -249,8 +241,7 @@ class IwaraSearchExtractor(IwaraExtractor):
         if self.type == "video":
             for video in collection:
                 video = self.api.item(f"/video/{video.get('id')}")
-                user_info = self.extract_user_info(video)
-                yield from self.yield_video(user_info, video)
+                yield from self.yield_video(video)
         elif self.type == "image":
             for image_group in collection:
                 image_group = self.api.item(f"/image/{image_group.get('id')}")
@@ -282,8 +273,7 @@ class IwaraTagExtractor(IwaraExtractor):
         if self.type == "videos":
             for video in collection:
                 video = self.api.item(f"/video/{video.get('id')}")
-                user_info = self.extract_user_info(video)
-                yield from self.yield_video(user_info, video)
+                yield from self.yield_video(video)
         elif self.type == "images":
             for image_group in collection:
                 image_group = self.api.item(f"/image/{image_group.get('id')}")
