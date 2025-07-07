@@ -100,8 +100,9 @@ class IwaraExtractor(Extractor):
     def _user_params(self):
         user, qs = self.groups
         params = text.parse_query(qs)
-        params["user"] = self.api.user_id(user)
-        return params
+        profile = self.api.profile(user)
+        params["user"] = profile["user"]["id"]
+        return self.extract_user_info(profile), params
 
 
 class IwaraUserExtractor(Dispatch, IwaraExtractor):
@@ -124,12 +125,10 @@ class IwaraUserImagesExtractor(IwaraExtractor):
     example = "https://www.iwara.tv/profile/USERNAME/images"
 
     def items(self):
-        profile = self.api.profile(self.groups[0])
-        user_info = self.extract_user_info(profile)
-
-        for image_group in self.api.images(self._user_params()):
+        user, params = self._user_params()
+        for image_group in self.api.images(params):
             images = self.api.image(image_group["id"])
-            yield from self.yield_image(user_info, images)
+            yield from self.yield_image(user, images)
 
 
 class IwaraUserVideosExtractor(IwaraExtractor):
@@ -138,11 +137,9 @@ class IwaraUserVideosExtractor(IwaraExtractor):
     example = "https://www.iwara.tv/profile/USERNAME/videos"
 
     def items(self):
-        profile = self.api.profile(self.groups[0])
-        user_info = self.extract_user_info(profile)
-
-        for video in self.api.videos(self._user_params()):
-            yield from self.yield_video(user_info, video)
+        user, params = self._user_params()
+        for video in self.api.videos(params):
+            yield from self.yield_video(user, video)
 
 
 class IwaraUserPlaylistsExtractor(IwaraExtractor):
@@ -153,7 +150,7 @@ class IwaraUserPlaylistsExtractor(IwaraExtractor):
     def items(self):
         base = f"{self.root}/playlist/"
 
-        for playlist in self.api.playlists(self._user_params()):
+        for playlist in self.api.playlists(self._user_params()[1]):
             playlist["_extractor"] = IwaraPlaylistExtractor
             url = f"{base}{playlist['id']}"
             yield Message.Queue, url, playlist
