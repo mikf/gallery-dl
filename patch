@@ -1,0 +1,29 @@
+diff --git i/gallery_dl/extractor/motherless.py w/gallery_dl/extractor/motherless.py
+index 460f4f42..1d8f8f6c 100644
+--- i/gallery_dl/extractor/motherless.py
++++ w/gallery_dl/extractor/motherless.py
+@@ -174,12 +174,14 @@ class MotherlessGalleryExtractor(MotherlessExtractor):
+ 
+         for num, thumb in enumerate(self._pagination(page), 1):
+             file = self._parse_thumb_data(thumb)
++            thumbnail = file["thumbnail"]
+ 
+             if file["type"] == "video":
+                 file = self._extract_media(file["id"])
+ 
+             file.update(data)
+             file["num"] = num
++            file["thumbnail"] = thumbnail
+             url = file["url"]
+             yield Message.Directory, file
+             yield Message.Url, url, text.nameext_from_url(url, file)
+@@ -215,8 +217,8 @@ class MotherlessGroupExtractor(MotherlessExtractor):
+             uploader = file.get("uploader")
+             file.update(data)
+             file["num"] = num
+-            file["uploader"] = uploader
+             file["thumbnail"] = thumbnail
++            file["uploader"] = uploader
+             file["group"] = file["group_id"]
+             url = file["url"]
+             yield Message.Directory, file
