@@ -171,4 +171,28 @@ __tests__ = (
     "type"          : "image",
 },
 
+{
+    "#url"     : "https://www.iwara.tv/image/sjqkK5EobXucju/ellen-joe-dancing",
+    "#comment" : "WebM video with sound classified as 'image'",
+    "#class"   : iwara.IwaraImageExtractor,
+    "#results" : "https://i.iwara.tv/image/original/5866682e-a0d2-4adb-877f-a1e927fdd690/5866682e-a0d2-4adb-877f-a1e927fdd690.webm",
+
+    "datetime"    : "Mon, Jul 7, 2025 17:06:47",
+    "display_name": "Marzcade",
+    "duration"    : None,
+    "extension"   : "webm",
+    "file_id"     : "cf1686ac-9796-4213-bea3-71b6dcaac658",
+    "filename"    : "cf1686ac-9796-4213-bea3-71b6dcaac658",
+    "height"      : 768,
+    "id"          : "sjqkK5EobXucju",
+    "mime"        : "video/webm",
+    "size"        : 4747505,
+    "subcategory" : "image",
+    "title"       : "Ellen Joe Dancing To Body Shaming",
+    "type"        : "image",
+    "user_id"     : "f7625ea7-c1c8-416b-b929-a245892911a6",
+    "username"    : "marzcade",
+    "width"       : 1366,
+},
+
 )
