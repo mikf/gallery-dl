@@ -200,32 +200,25 @@ class IwaraPlaylistExtractor(IwaraExtractor):
 class IwaraSearchExtractor(IwaraExtractor):
     """Extractor for iwara.tv search pages"""
     subcategory = "search"
-    pattern = BASE_PATTERN + r"/search"
-    example = "https://www.iwara.tv/search?query=example&type=search_type"
-
-    def __init__(self, match):
-        IwaraExtractor.__init__(self, match)
-        parsed = urlparse(self.url)
-        parts = parsed.path.strip("/").split("/")
-        if len(parts) >= 1 and parts[0] == "search":
-            query_dict = parse_qs(parsed.query)
-            self.query = query_dict.get("query", [""])[0]
-            self.type = query_dict.get("type", [None])[0]
-        else:
-            return
+    pattern = BASE_PATTERN + r"/search\?([^#]+)"
+    example = "https://www.iwara.tv/search?query=QUERY&type=TYPE"
 
     def items(self):
-        collection = self.api.collection("/search", self.query)
-        if self.type == "video":
-            for video in collection:
-                video = self.api.item(f"/video/{video.get('id')}")
+        params = text.parse_query(self.groups[0])
+        self.kwdict["search_type"] = type = params.get("type", "video")
+        self.kwdict["search_tags"] = query = params.get("query")
+
+        results = self.api.search(type, query)
+        if type == "video":
+            for video in results:
                 yield from self.yield_video(video)
-        elif self.type == "image":
-            for image_group in collection:
-                image_group = self.api.item(f"/image/{image_group.get('id')}")
-                if not image_group:
-                    return
+        elif type == "image":
+            for image in results:
+                image_group = self.image(image["id"])
                 yield from self.yield_image(image_group)
+        else:
+            raise exception.StopExtraction(
+                "Unsupported search type '%s'", type)
 
 
 class IwaraTagExtractor(IwaraExtractor):
