@@ -592,7 +592,7 @@ class CivitaiTrpcAPI():
         self.root = extractor.root + "/api/trpc/"
         self.headers = {
             "content-type"    : "application/json",
-            "x-client-version": "5.0.701",
+            "x-client-version": "5.0.882",
             "x-client-date"   : "",
             "x-client"        : "web",
             "x-fingerprint"   : "undefined",
@@ -795,8 +795,8 @@ class CivitaiSearchAPI():
         self.extractor = extractor
         self.root = "https://search.civitai.com"
         self.headers = {
-            "Authorization": "Bearer 4c7745e54e872213201291ba1cae1aaca702941f2"
-                             "91432cf4fef22803333e487",
+            "Authorization": "Bearer ab8565e5ab8dc2d8f0d4256d204781cb63fe8b031"
+                             "eb3779cbbed38a7b5308e5c",
             "Content-Type": "application/json",
             "X-Meilisearch-Client": "Meilisearch instant-meilisearch (v0.13.5)"
                                     " ; Meilisearch JavaScript (v0.34.0)",
