@@ -64,11 +64,13 @@ class CivitaiExtractor(Extractor):
             if isinstance(metadata, str):
                 metadata = metadata.split(",")
             elif not isinstance(metadata, (list, tuple)):
-                metadata = ("generation", "version")
+                metadata = ("generation", "version", "post")
             self._meta_generation = ("generation" in metadata)
             self._meta_version = ("version" in metadata)
+            self._meta_post = ("post" in metadata)
         else:
-            self._meta_generation = self._meta_version = False
+            self._meta_generation = self._meta_version = self._meta_post = \
+                False
 
     def items(self):
         models = self.models()
@@ -122,6 +124,9 @@ class CivitaiExtractor(Extractor):
                         self._extract_meta_version(file, False)
                     if "post" in file:
                         data["post"] = file.pop("post")
+                if self._meta_post and "post" not in data:
+                    data["post"] = post = self._extract_meta_post(file)
+                    post.pop("user", None)
                 file["date"] = text.parse_datetime(
                     file["createdAt"], "%Y-%m-%dT%H:%M:%S.%fZ")
 
@@ -201,6 +206,12 @@ class CivitaiExtractor(Extractor):
     def _extract_meta_generation(self, image):
         try:
             return self.api.image_generationdata(image["id"])
+        except Exception as exc:
+            return self.log.debug("", exc_info=exc)
+
+    def _extract_meta_post(self, image):
+        try:
+            return self.api.post(image["postId"])
         except Exception as exc:
             return self.log.debug("", exc_info=exc)
 

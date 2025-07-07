@@ -193,8 +193,9 @@ __tests__ = (
 
 {
     "#url"    : "https://civitai.com/images/44789630",
-    "#comment": "video",
+    "#comment": "video - 'post' metadata (#7548)",
     "#class"  : civitai.CivitaiImageExtractor,
+    "#options": {"metadata": "post"},
     "#results": "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/6a09ec54-6de4-4af1-b11d-2d0d8a66d651/quality=100/copy_C6C532CE-EC47-4A52-9138-AEF1D7756F16.Mp4",
 
     "extension": "mp4",
@@ -220,6 +221,18 @@ __tests__ = (
             "size"    : 23984479,
             "width"   : 1080,
         },
+    },
+    "post": {
+        "availability": "Public",
+        "collectionId": None,
+        "detail"      : None,
+        "id"          : 10151863,
+        "modelVersion": None,
+        "modelVersionId": None,
+        "nsfwLevel"   : 2,
+        "publishedAt" : "2024-12-10T19:20:51.579Z",
+        "tags"        : [],
+        "title"       : None,
     },
     "user"     : {
         "username": "jboogx_creative",
