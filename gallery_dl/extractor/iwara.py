@@ -45,9 +45,6 @@ class IwaraExtractor(Extractor):
             file_info = item if key is None else item.get(key, {})
             filename = file_info.get("name")
             filename, extension = filename.rsplit(".", 1)
-            createdAt = file_info.get("createdAt")
-            dt = text.parse_datetime(createdAt, "%Y-%m-%dT%H:%M:%S.%fZ")
-            datetime = dt.strftime(f"%a, %b {dt.day}, %Y %H:%M:%S")
             data.update({
                 "file_id": file_info.get("id"),
                 "filename": filename,
@@ -57,7 +54,8 @@ class IwaraExtractor(Extractor):
                 "width": file_info.get("width"),
                 "height": file_info.get("height"),
                 "duration": file_info.get("duration"),
-                "datetime": datetime,
+                "date": text.parse_datetime(
+                    file_info.get("createdAt"), "%Y-%m-%dT%H:%M:%S.%fZ"),
                 "type": file_info.get("type"),
             })
         return data
