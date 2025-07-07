@@ -91,19 +91,21 @@ class IwaraExtractor(Extractor):
         if user_info is None:
             user_info = self.extract_user_info(image_group)
 
+        if not (files := image_group.get("files")):
+            image_group = self.api.image(image_group["id"])
+            files = image_group["files"]
+
         image_group_info = self.extract_media_info(image_group, "file", False)
-        for image_file in image_group.get("files", {}):
+        image_group_info.update(user_info)
+        yield Message.Directory, image_group_info
+
+        for image_file in files:
             image_file_info = self.extract_media_info(image_file, None, True)
             image_info = {**image_file_info, **image_group_info}
             file_id = image_info.get("file_id")
-            extension = image_info.get("extension")
-            url = (
-                f"https://i.iwara.tv/image/original/"
-                f"{file_id}/{file_id}.{extension}"
-            )
-            metadata = self.get_metadata(user_info, image_info)
-            yield Message.Directory, metadata
-            yield Message.Url, url, metadata
+            url = (f"https://i.iwara.tv/image/original/"
+                   f"{file_id}/{file_id}.{image_info['extension']}")
+            yield Message.Url, url, image_info
 
     def _user_params(self):
         user, qs = self.groups
@@ -134,9 +136,8 @@ class IwaraUserImagesExtractor(IwaraExtractor):
 
     def items(self):
         user, params = self._user_params()
-        for image_group in self.api.images(params):
-            images = self.api.image(image_group["id"])
-            yield from self.yield_image(images, user)
+        for image in self.api.images(params):
+            yield from self.yield_image(image, user)
 
 
 class IwaraUserVideosExtractor(IwaraExtractor):
@@ -182,8 +183,8 @@ class IwaraImageExtractor(IwaraExtractor):
     example = "https://www.iwara.tv/image/ID"
 
     def items(self):
-        images = self.api.image(self.groups[0])
-        return self.yield_image(images)
+        image = self.api.image(self.groups[0])
+        return self.yield_image(image)
 
 
 class IwaraPlaylistExtractor(IwaraExtractor):
@@ -214,8 +215,7 @@ class IwaraSearchExtractor(IwaraExtractor):
                 yield from self.yield_video(video)
         elif type == "image":
             for image in results:
-                image_group = self.image(image["id"])
-                yield from self.yield_image(image_group)
+                yield from self.yield_image(image)
         else:
             raise exception.StopExtraction(
                 "Unsupported search type '%s'", type)
@@ -238,8 +238,7 @@ class IwaraTagExtractor(IwaraExtractor):
                 yield from self.yield_video(video)
         else:
             for image in self.api.images(params):
-                image_group = self.api.image(image["id"])
-                yield from self.yield_image(image_group)
+                yield from self.yield_image(image)
 
 
 class IwaraAPI():

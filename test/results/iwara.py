@@ -134,9 +134,8 @@ __tests__ = (
     "#url"          : "https://www.iwara.tv/image/5m3gLfcei6BQsL/sparkle",
     "#category"     : ("", "iwara", "image"),
     "#class"        : iwara.IwaraImageExtractor,
+    "#pattern"      : r"https://i.iwara.tv/image/original/[\w-]{36}/[\w-]{36}\.png",
     "#count"        : 13,
-    "#sha1_content" : "989756ef85679e34e2bdc413ad9b09c90aab82c6",
-    "#sha1_metadata": "d9dbd835d5a0b89bd56e731a49d0ad5917b5ef8d",
 
     "user_id"       : "771d2b29-5935-43d7-85e1-30abbf47ccad",
     "username"      : "zcccz",
@@ -152,9 +151,8 @@ __tests__ = (
     "#url"          : "https://www.iwara.tv/image/PbYJb57QqwrFp0",
     "#category"     : ("", "iwara", "image"),
     "#class"        : iwara.IwaraImageExtractor,
-    "#count"        : 1,
+    "#results"      : "https://i.iwara.tv/image/original/0302deee-9cd5-4c1f-b931-04caf329c0c7/0302deee-9cd5-4c1f-b931-04caf329c0c7.png",
     "#sha1_content" : "9fc2ae4d0d26d4b50c38ff2c5c235d33e8b56d1c",
-    "#sha1_metadata": "5e9c748d08686b7a3a1a5bd50db716f8898c11b6",
 
     "user_id"       : "ef14099e-a6db-4325-9c67-51c0615985d5",
     "username"      : "sanka",
