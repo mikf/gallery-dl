@@ -189,24 +189,11 @@ class IwaraImageExtractor(IwaraExtractor):
 class IwaraPlaylistExtractor(IwaraExtractor):
     """Extractor for individual iwara.tv playlist pages"""
     subcategory = "playlist"
-    pattern = BASE_PATTERN + r"/playlist(?:/|$)"
-    example = "https://www.iwara.tv/playlist/playlist-id"
-
-    def __init__(self, match):
-        IwaraExtractor.__init__(self, match)
-        parsed = urlparse(self.url)
-        parts = parsed.path.strip("/").split("/")
-        if len(parts) >= 2 and parts[0] == "playlist":
-            self.playlist_id = parts[1]
-        else:
-            return
+    pattern = BASE_PATTERN + r"/playlist/([^/?#]+)"
+    example = "https://www.iwara.tv/playlist/ID"
 
     def items(self):
-        videos = self.api.collection(f"/playlist/{self.playlist_id}")
-        if not videos:
-            return
-        for video in videos:
-            video = self.api.item(f"/video/{video.get('id')}")
+        for video in self.api.playlist(self.groups[0]):
             yield from self.yield_video(video)
 
 
@@ -305,6 +292,10 @@ class IwaraAPI():
         endpoint = "/videos"
         params.setdefault("rating", "all")
         return self._pagination(endpoint, params)
+
+    def playlist(self, playlist_id):
+        endpoint = f"/playlist/{playlist_id}"
+        return self._pagination(endpoint)
 
     def playlists(self, params):
         endpoint = "/playlists"
