@@ -87,7 +87,10 @@ class IwaraExtractor(Extractor):
         yield Message.Directory, metadata
         yield Message.Url, url, metadata
 
-    def yield_image(self, user_info, image_group):
+    def yield_image(self, image_group, user_info=None):
+        if user_info is None:
+            user_info = self.extract_user_info(image_group)
+
         image_group_info = self.extract_media_info(image_group, "file", False)
         for image_file in image_group.get("files", {}):
             image_file_info = self.extract_media_info(image_file, None, True)
@@ -133,7 +136,7 @@ class IwaraUserImagesExtractor(IwaraExtractor):
         user, params = self._user_params()
         for image_group in self.api.images(params):
             images = self.api.image(image_group["id"])
-            yield from self.yield_image(user, images)
+            yield from self.yield_image(images, user)
 
 
 class IwaraUserVideosExtractor(IwaraExtractor):
@@ -175,24 +178,12 @@ class IwaraVideoExtractor(IwaraExtractor):
 class IwaraImageExtractor(IwaraExtractor):
     """Extractor for individual iwara.tv image pages"""
     subcategory = "image"
-    pattern = BASE_PATTERN + r"/image(?:/|$)"
-    example = "https://www.iwara.tv/image/image-id/slug"
-
-    def __init__(self, match):
-        IwaraExtractor.__init__(self, match)
-        parsed = urlparse(self.url)
-        parts = parsed.path.strip("/").split("/")
-        if len(parts) >= 2 and parts[0] == "image":
-            self.image_id = parts[1]
-        else:
-            return
+    pattern = BASE_PATTERN + r"/image/([^/?#]+)"
+    example = "https://www.iwara.tv/image/ID"
 
     def items(self):
-        image_group = self.api.item(f"/image/{self.image_id}")
-        if not image_group:
-            return
-        user_info = self.extract_user_info(image_group)
-        yield from self.yield_image(user_info, image_group)
+        images = self.api.image(self.groups[0])
+        return self.yield_image(images)
 
 
 class IwaraPlaylistExtractor(IwaraExtractor):
@@ -247,8 +238,7 @@ class IwaraSearchExtractor(IwaraExtractor):
                 image_group = self.api.item(f"/image/{image_group.get('id')}")
                 if not image_group:
                     return
-                user_info = self.extract_user_info(image_group)
-                yield from self.yield_image(user_info, image_group)
+                yield from self.yield_image(image_group)
 
 
 class IwaraTagExtractor(IwaraExtractor):
@@ -279,8 +269,7 @@ class IwaraTagExtractor(IwaraExtractor):
                 image_group = self.api.item(f"/image/{image_group.get('id')}")
                 if not image_group:
                     return
-                user_info = self.extract_user_info(image_group)
-                yield from self.yield_image(user_info, image_group)
+                yield from self.yield_image(image_group)
 
 
 class IwaraAPI():
