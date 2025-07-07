@@ -9,7 +9,6 @@
 from .common import Extractor, Message, Dispatch
 from .. import text, util, exception
 from ..cache import cache, memcache
-from urllib.parse import urlparse, parse_qs
 import hashlib
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?iwara\.tv"
@@ -75,8 +74,7 @@ class IwaraExtractor(Extractor):
             video = self.api.video(video["id"])
         file_url = video["fileUrl"]
 
-        file_id = video_info.get("file_id")
-        sources = self.api.source(file_id, file_url)
+        sources = self.api.source(file_url)
         source = next((r for r in sources if r.get("name") == "Source"), None)
         download_url = source.get('src', {}).get('download')
 
@@ -302,15 +300,16 @@ class IwaraAPI():
         url = self.root + endpoint
         return self.extractor.request_json(url, headers=self.headers)
 
-    def source(self, file_id, url):
-        expiration = parse_qs(urlparse(url).query).get("expires", [None])[0]
-        if not expiration:
-            return []
+    def source(self, file_url):
+        base, _, query = file_url.partition("?")
+        if not (expires := text.extr(query, "expires=", "&")):
+            return ()
+        file_id = base.rpartition("/")[2]
         sha_postfix = "5nFp9kmbNnHdAFhaqMvt"
-        sha_key = f"{file_id}_{expiration}_{sha_postfix}"
-        hash = hashlib.sha1(sha_key.encode("utf-8")).hexdigest()
+        sha_key = f"{file_id}_{expires}_{sha_postfix}"
+        hash = hashlib.sha1(sha_key.encode()).hexdigest()
         headers = {"X-Version": hash, **self.headers}
-        return self.extractor.request_json(url, headers=headers)
+        return self.extractor.request_json(file_url, headers=headers)
 
     def authenticate(self):
         self.headers["Authorization"] = self._authenticate_impl(
