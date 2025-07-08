@@ -11,22 +11,51 @@ __tests__ = (
 {
     "#url"          : "https://www.iwara.tv/profile/user2426993",
     "#class"        : iwara.IwaraUserExtractor,
-    "#count"        : 6,
-    "#sha1_content" : "92730533a0db39a440fdfb9b7250c806207a3faf",
-    "#sha1_metadata": "0ebd9be904e56215bab9f3b62ea14e3b90bfa28f",
+    "#results"      : (
+        "https://www.iwara.tv/profile/user2426993/images",
+        "https://www.iwara.tv/profile/user2426993/videos",
+    ),
+},
 
-    "user_id"       : "67059990-acdb-4d4f-9a88-abe81136bff1",
-    "username"      : "user2426993",
-    "display_name"  : "桜飘の季節",
+{
+    "#url"          : "https://www.iwara.tv/profile/user2426993/images",
+    "#class"        : iwara.IwaraUserImagesExtractor,
+    "#results"      : (
+        "https://i.iwara.tv/image/original/215ef6c5-47a9-4894-aaef-7bbc7ed2b5d0/215ef6c5-47a9-4894-aaef-7bbc7ed2b5d0.png",
+        "https://i.iwara.tv/image/original/382ce6bc-0393-43dd-adb7-dfd514a72011/382ce6bc-0393-43dd-adb7-dfd514a72011.png",
+        "https://i.iwara.tv/image/original/57fad542-d5c7-4671-b295-f7c4886db80e/57fad542-d5c7-4671-b295-f7c4886db80e.png",
+        "https://i.iwara.tv/image/original/80b61308-08b5-469b-ab86-b2d1a9819a32/80b61308-08b5-469b-ab86-b2d1a9819a32.png",
+    ),
+
+    "extension": "png",
+    "type"     : "image",
+},
+
+{
+    "#url"          : "https://www.iwara.tv/profile/user2426993/videos",
+    "#class"        : iwara.IwaraUserVideosExtractor,
+    "#pattern"      : (
+        r"https://\w+.iwara.tv/download\?filename=8035c1cb-6ac6-45df-a171-4d981a8339c5_Source.mp4&path=2025%2F07%2F04&expires=\d+.+",
+        r"https://\w+.iwara.tv/download\?filename=59691a5b-dd5d-4476-919d-dc0d8c9ee11f_Source.mp4&path=2025%2F06%2F21&expires=\d+.+",
+    ),
+
+    "extension": "mp4",
+    "type"     : "video",
+},
+
+{
+    "#url"          : "https://www.iwara.tv/profile/tyron82/playlists",
+    "#class"        : iwara.IwaraUserPlaylistsExtractor,
+    "#pattern"      : iwara.IwaraPlaylistExtractor.pattern,
+    "#count"        : range(10, 20),
 },
 
 {
     "#url"          : "https://www.iwara.tv/playlist/01ea603a-4e70-4a36-bc28-dc717eebc2d7",
     "#category"     : ("", "iwara", "playlist"),
     "#class"        : iwara.IwaraPlaylistExtractor,
+    "#pattern"      : r"https://\w+.iwara.tv/download\?filename=b7708020-f531-4eb4-bfd3-c62f3d17927e_Source.mp4&path=2024%2F05%2F12&.+",
     "#count"        : 1,
-    "#sha1_content" : "6096ef4b124795281bcf95e07157c2f294199dec",
-    "#sha1_metadata": "bd2da5b066e86a5809b41c76596ff17effed32ba",
 
     "user_id"       : "c9a08dd5-3cb5-4d7c-b9bb-9eb4c55eda14",
     "username"      : "arisananades",
@@ -41,7 +70,6 @@ __tests__ = (
     "width"         : None,
     "height"        : None,
     "duration"      : 654,
-    "datetime"      : "Sun, May 12, 2024 11:49:53",
     "type"          : "video",
 },
 
@@ -50,8 +78,6 @@ __tests__ = (
     "#category"     : ("", "iwara", "search"),
     "#class"        : iwara.IwaraSearchExtractor,
     "#count"        : 5,
-    "#sha1_content" : "880e2b5191e555594f790dafa58b5a055f91d4fb",
-    "#sha1_metadata": "0cc633020856afe0f485ac7d535799375d86f502",
 
     "user_id"       : "3ec40862-bcb6-4c2e-9f3b-6da3a00cc2d9",
     "username"      : "nizipaco-kyu",
@@ -68,8 +94,6 @@ __tests__ = (
     "#category"     : ("", "iwara", "search"),
     "#class"        : iwara.IwaraSearchExtractor,
     "#count"        : 20,
-    "#sha1_content" : "38aeed4ab6d2a8e91edfd10a1efafaad22868005",
-    "#sha1_metadata": "1918d47f23d6b87790e0e27021717f5c7270c3fc",
 
     "duration"      : None,
     "type"          : "image",
@@ -79,9 +103,11 @@ __tests__ = (
     "#url"          : "https://www.iwara.tv/videos?tags=aether%2Ccitlali",
     "#category"     : ("", "iwara", "tag"),
     "#class"        : iwara.IwaraTagExtractor,
-    "#count"        : 3,
-    "#sha1_content" : "71b4b99ccccbe93e0d2be8c828f10d30907dacd0",
-    "#sha1_metadata": "e582e14ac242c7753d813b44f24d7387c41d2b16",
+    "#pattern"      : (
+        r"https://\w+.iwara.tv/download\?filename=d8e3735d-048c-4525-adcf-4265c8b45444_Source.mp4&path=2025%2F05%2F15&expires=\d+&.+",
+        r"https://\w+.iwara.tv/download\?filename=cc1a1aba-10b9-4e0f-a20f-5b9b17b33db1_Source.mp4&path=2025%2F04%2F03&expires=\d+&.+",
+        r"https://\w+.iwara.tv/download\?filename=94a8a1b9-7586-4771-accd-6f9cb4c6a5a1_Source.mp4&path=2025%2F03%2F21&expires=\d+&.+",
+    ),
 
     "user_id"       : "2b4391f3-c46f-43f9-b18f-8bdb8a9df74f",
     "username"      : "lenoria",
@@ -91,27 +117,38 @@ __tests__ = (
     "width"         : None,
     "height"        : None,
     "type"          : "video",
+    "search_tags"   : "aether,citlali",
+    "search_type"   : "videos",
+    "duration"      : range(90, 200),
 },
 
 {
     "#url"          : "https://www.iwara.tv/images?tags=genshin_impact%2Ccitlali",
     "#category"     : ("", "iwara", "tag"),
     "#class"        : iwara.IwaraTagExtractor,
-    "#count"        : 6,
-    "#sha1_content" : "b550513726dbba9e902c309ffddcb22244be2524",
-    "#sha1_metadata": "7d765b5531dac9340dd9b0218a8cc8b3b730696f",
+    "#results"      : (
+        "https://i.iwara.tv/image/original/c442c69f-30fb-4fd4-8f8f-338bbc77c07d/c442c69f-30fb-4fd4-8f8f-338bbc77c07d.jpg",
+        "https://i.iwara.tv/image/original/7b53cc07-3640-4749-8c11-6da5f5a292a0/7b53cc07-3640-4749-8c11-6da5f5a292a0.jpg",
+        "https://i.iwara.tv/image/original/373cc1cb-028e-44bd-aef3-3400de4f995b/373cc1cb-028e-44bd-aef3-3400de4f995b.jpg",
+        "https://i.iwara.tv/image/original/0256b01b-8b4d-47f7-894d-2aceba6b8ab8/0256b01b-8b4d-47f7-894d-2aceba6b8ab8.jpg",
+        "https://i.iwara.tv/image/original/8541dab6-9c67-419d-8af8-2e040ae487dc/8541dab6-9c67-419d-8af8-2e040ae487dc.png",
+        "https://i.iwara.tv/image/original/8eba51de-c618-4853-964f-25f526b58398/8eba51de-c618-4853-964f-25f526b58398.webm",
+    ),
 
-    "duration"      : None,
-    "type"          : "image",
+    "duration"    : None,
+    "extension"   : {"jpg", "png", "webm"},
+    "mime"        : {"image/jpeg", "image/png", "video/webm"},
+    "search_tags" : "genshin_impact,citlali",
+    "search_type" : "images",
+    "type"        : "image",
 },
 
 {
     "#url"          : "https://www.iwara.tv/video/6QvQvzZnELJ9vv/bluearchive-rio",
     "#category"     : ("", "iwara", "video"),
     "#class"        : iwara.IwaraVideoExtractor,
+    "#pattern"      : r"https://\w+.iwara.tv/download\?filename=7ba6e734-b9df-4588-88fc-4eef2bbf5c56_Source.mp4&path=2025%2F07%2F05&expires=\d+&hash=[0-9a-f]{64}",
     "#count"        : 1,
-    "#sha1_content" : "2c2004daae067459466cdb5bbd8fe260c079f29a",
-    "#sha1_metadata": "1d62d855149b1fd18b0d13da8500166fd3986b29",
 
     "user_id"       : "b3f86af1-874c-41f1-b62e-4e4b736ad3a4",
     "username"      : "croove",
@@ -126,8 +163,9 @@ __tests__ = (
     "width"         : None,
     "height"        : None,
     "duration"      : 107,
-    "datetime"      : "Sat, Jul 5, 2025 06:49:56",
     "type"          : "video",
+    "date"          : "dt:2025-07-05 06:49:56",
+    "date_updated"  : "dt:2025-07-05 06:50:14",
 },
 
 {
@@ -145,6 +183,8 @@ __tests__ = (
     "extension"     : "png",
     "mime"          : "image/png",
     "type"          : "image",
+    "date"          : "type:datetime",
+    "date_updated"  : "type:datetime",
 },
 
 {
@@ -167,17 +207,19 @@ __tests__ = (
     "width"         : 2560,
     "height"        : 1440,
     "duration"      : None,
-    "datetime"      : "Fri, Jul 4, 2025 03:15:37",
     "type"          : "image",
+    "date"          : "dt:2025-07-04 03:15:37",
+    "date_updated"  : "dt:2025-07-04 03:15:53",
 },
 
 {
     "#url"     : "https://www.iwara.tv/image/sjqkK5EobXucju/ellen-joe-dancing",
     "#comment" : "WebM video with sound classified as 'image'",
     "#class"   : iwara.IwaraImageExtractor,
-    "#results" : "https://i.iwara.tv/image/original/5866682e-a0d2-4adb-877f-a1e927fdd690/5866682e-a0d2-4adb-877f-a1e927fdd690.webm",
+    "#results" : "https://i.iwara.tv/image/original/cf1686ac-9796-4213-bea3-71b6dcaac658/cf1686ac-9796-4213-bea3-71b6dcaac658.webm",
 
-    "datetime"    : "Mon, Jul 7, 2025 17:06:47",
+    "date"        : "dt:2025-07-07 17:06:47",
+    "date_updated": "dt:2025-07-07 17:07:11",
     "display_name": "Marzcade",
     "duration"    : None,
     "extension"   : "webm",
