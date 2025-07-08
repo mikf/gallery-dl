@@ -656,7 +656,26 @@ class DownloadJob(Job):
                         clist, negate)(extr):
                     continue
 
-                name = pp_dict.get("name")
+                name = pp_dict.get("name", "")
+                if "__init__" not in pp_dict:
+                    name, sep, event = name.rpartition("@")
+                    if sep:
+                        pp_dict["name"] = name
+                        if "event" not in pp_dict:
+                            pp_dict["event"] = event
+                    else:
+                        name = event
+
+                    name, sep, mode = name.rpartition("/")
+                    if sep:
+                        pp_dict["name"] = name
+                        if "mode" not in pp_dict:
+                            pp_dict["mode"] = mode
+                    else:
+                        name = mode
+
+                    pp_dict["__init__"] = None
+
                 pp_cls = postprocessor.find(name)
                 if not pp_cls:
                     pp_log.warning("module '%s' not found", name)
