@@ -178,8 +178,9 @@ class PrintAction(argparse.Action):
         else:
             event = event.strip().lower()
             if event not in {"init", "file", "after", "skip", "error",
-                             "prepare", "prepare-after", "post", "post-after",
-                             "finalize", "finalize-success", "finalize-error"}:
+                             "prepare", "prepare-after", "filtered", "post",
+                             "post-after", "finalize", "finalize-success",
+                             "finalize-error"}:
                 format_string = value
                 event = ("prepare",)
 
