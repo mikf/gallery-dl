@@ -125,6 +125,7 @@ class TwitterExtractor(Extractor):
             yield Message.Directory, tdata
 
             del tdata["source_id"]
+            del tdata["sensitive_flags"]
             if "source_user" in tdata:
                 del tdata["source_user"]
 
@@ -169,7 +170,28 @@ class TwitterExtractor(Extractor):
         return files
 
     def _extract_media(self, tweet, entities, files):
+        flags_tweet = None
+
         for media in entities:
+
+            if "sensitive_media_warning" in media:
+                flags_media = media["sensitive_media_warning"]
+
+                flags = []
+                if "adult_content" in flags_media:
+                    flags.append("Nudity")
+                if "other" in flags_media:
+                    flags.append("Sensitive")
+                if "graphic_violence" in flags_media:
+                    flags.append("Violence")
+
+                if flags_tweet is None:
+                    flags_tweet = set(flags)
+                else:
+                    flags_tweet.update(flags)
+                flags_media = flags
+            else:
+                flags_media = ()
 
             if "ext_media_availability" in media:
                 ext = media["ext_media_availability"]
@@ -214,8 +236,12 @@ class TwitterExtractor(Extractor):
             file["width"] = media["original_info"].get("width", 0)
             file["height"] = media["original_info"].get("height", 0)
             file["description"] = media.get("ext_alt_text")
+            file["sensitive_flags"] = flags_media
             self._extract_media_source(file, media)
             files.append(file)
+
+        tweet["sensitive_flags"] = \
+            () if flags_tweet is None else sorted(flags_tweet)
 
     def _extract_media_source(self, dest, media):
         dest["source_id"] = 0
@@ -361,6 +387,7 @@ class TwitterExtractor(Extractor):
             "lang"          : legacy["lang"],
             "source"        : text.extr(source, ">", "<") if source else "",
             "sensitive"     : tget("possibly_sensitive"),
+            "sensitive_flags": tget("sensitive_flags"),
             "favorite_count": tget("favorite_count"),
             "quote_count"   : tget("quote_count"),
             "reply_count"   : tget("reply_count"),
