@@ -289,7 +289,7 @@ class IwaraAPI():
         params = {"type": type, "query": query}
         return self._pagination(endpoint, params)
 
-    @memcache()
+    @memcache(keyarg=1)
     def profile(self, username):
         endpoint = f"/profile/{username}"
         return self._call(endpoint)
