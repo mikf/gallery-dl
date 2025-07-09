@@ -476,16 +476,15 @@ class InputManager():
                 key, sep, value = line.partition("=")
                 if not sep:
                     raise exception.InputFileError(
-                        "Invalid KEY=VALUE pair '%s' on line %s in %s",
-                        line, n+1, path)
+                        f"Invalid KEY=VALUE pair '{line}' "
+                        f"on line {n+1} in {path}")
 
                 try:
                     value = util.json_loads(value.strip())
                 except ValueError as exc:
                     self.log.debug("%s: %s", exc.__class__.__name__, exc)
                     raise exception.InputFileError(
-                        "Unable to parse '%s' on line %s in %s",
-                        value, n+1, path)
+                        f"Unable to parse '{value}' on line {n+1} in {path}")
 
                 key = key.strip().split(".")
                 conf.append((key[:-1], key[-1], value))
