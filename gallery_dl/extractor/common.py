@@ -155,17 +155,15 @@ class Extractor():
             kwargs["verify"] = self._verify
 
         if "json" in kwargs:
-            json = kwargs["json"]
-            if json is not None:
+            if (json := kwargs["json"]) is not None:
                 kwargs["data"] = util.json_dumps(json).encode()
                 del kwargs["json"]
-                headers = kwargs.get("headers")
-                if headers:
+                if headers := kwargs.get("headers"):
                     headers["Content-Type"] = "application/json"
                 else:
                     kwargs["headers"] = {"Content-Type": "application/json"}
 
-        response = None
+        response = challenge = None
         tries = 1
 
         if self._interval:
@@ -249,8 +247,12 @@ class Extractor():
             self.log.warning(msg)
             return util.NullResponse(url, msg)
 
-        self.status |= exception.HttpError.code
-        raise exception.HttpError(msg, response)
+        if challenge is None:
+            exc = exception.HttpError(msg, response)
+        else:
+            exc = exception.ChallengeError(challenge, response)
+        self.status |= exc.code
+        raise exc
 
     def request_location(self, url, **kwargs):
         kwargs.setdefault("method", "HEAD")
