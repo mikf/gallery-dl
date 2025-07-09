@@ -11,7 +11,7 @@ import logging
 from . import version, config, option, output, extractor, job, util, exception
 
 __author__ = "Mike Fährmann"
-__copyright__ = "Copyright 2014-2023 Mike Fährmann"
+__copyright__ = "Copyright 2014-2025 Mike Fährmann"
 __license__ = "GPLv2"
 __maintainer__ = "Mike Fährmann"
 __email__ = "mike_faehrmann@web.de"
@@ -78,8 +78,7 @@ def main():
         output.configure_standard_streams()
 
         # signals
-        signals = config.get((), "signals-ignore")
-        if signals:
+        if signals := config.get((), "signals-ignore"):
             import signal
             if isinstance(signals, str):
                 signals = signals.split(",")
@@ -89,6 +88,19 @@ def main():
                     log.warning("signal '%s' is not defined", signal_name)
                 else:
                     signal.signal(signal_num, signal.SIG_IGN)
+
+        if signals := config.get((), "signals-actions"):
+            import signal
+            for signal_name, action in signals.items():
+                signal_num = getattr(signal, signal_name, None)
+                if signal_num is None:
+                    log.warning("signal '%s' is not defined", signal_name)
+                else:
+                    def handler(signal_num, frame):
+                        signal_name = signal.Signals(signal_num).name
+                        output.stderr_write(f"{signal_name} received\n")
+                        util.FLAGS.__dict__[action.upper()] = "stop"
+                    signal.signal(signal_num, handler)
 
         # enable ANSI escape sequences on Windows
         if util.WINDOWS and config.get(("output",), "ansi", output.COLORS):
