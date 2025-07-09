@@ -211,9 +211,9 @@ class SmugmugAPI(oauth.OAuth1API):
         if data["Code"] == 404:
             raise exception.NotFoundError()
         if data["Code"] == 429:
-            raise exception.StopExtraction("Rate limit reached")
+            raise exception.AbortExtraction("Rate limit reached")
         self.log.debug(data)
-        raise exception.StopExtraction("API request failed")
+        raise exception.AbortExtraction("API request failed")
 
     def _expansion(self, endpoint, expands, params=None):
         endpoint = self._extend(endpoint, expands)

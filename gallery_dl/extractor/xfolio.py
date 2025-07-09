@@ -38,7 +38,7 @@ class XfolioExtractor(Extractor):
         response = Extractor.request(self, url, **kwargs)
 
         if "/system/recaptcha" in response.url:
-            raise exception.StopExtraction("Bot check / CAPTCHA page")
+            raise exception.AbortExtraction("Bot check / CAPTCHA page")
 
         return response
 

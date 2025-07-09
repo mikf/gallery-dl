@@ -381,7 +381,7 @@ class BoostyAPI():
 
             else:
                 self.extractor.log.debug(response.text)
-                raise exception.StopExtraction("API request failed")
+                raise exception.AbortExtraction("API request failed")
 
     def _pagination(self, endpoint, params, transform=None, key=None):
         if "is_only_allowed" not in params and self.extractor.only_allowed:

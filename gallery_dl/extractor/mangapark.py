@@ -176,8 +176,8 @@ class MangaparkMangaExtractor(MangaparkBase, Extractor):
                     not lang or data["lang"] == lang):
                 return data["id"]
 
-        raise exception.StopExtraction(
-            "'%s' does not match any available source", source)
+        raise exception.AbortExtraction(
+            f"'{source}' does not match any available source")
 
 
 QUERIES = {

@@ -74,7 +74,7 @@ class SteamgriddbExtractor(Extractor):
     def _call(self, endpoint, **kwargs):
         data = self.request_json(self.root + endpoint, **kwargs)
         if not data["success"]:
-            raise exception.StopExtraction(data["error"])
+            raise exception.AbortExtraction(data["error"])
         return data["data"]
 
 
@@ -87,7 +87,7 @@ class SteamgriddbAssetsExtractor(SteamgriddbExtractor):
         id = int(match[2])
         self.game_id = id if list_type == "game" else None
         self.collection_id = id if list_type == "collection" else None
-        self.page = int(match[3] or 1)
+        self.page = int(p) if (p := match[3]) else 1
 
     def assets(self):
         limit = 48
@@ -96,7 +96,7 @@ class SteamgriddbAssetsExtractor(SteamgriddbExtractor):
         sort = self.config("sort", "score_desc")
         if sort not in ("score_desc", "score_asc", "score_old_desc",
                         "score_old_asc", "age_desc", "age_asc"):
-            raise exception.StopExtractor("Invalid sort '%s'", sort)
+            raise exception.AbortExtraction(f"Invalid sort '{sort}'")
 
         json = {
             "static"  : self.config("static", True),
@@ -149,7 +149,7 @@ class SteamgriddbAssetsExtractor(SteamgriddbExtractor):
 
         for i in value:
             if i not in valid_values:
-                raise exception.StopExtraction("Invalid %s '%s'", type_name, i)
+                raise exception.AbortExtraction(f"Invalid {type_name} '{i}'")
 
         return value
 

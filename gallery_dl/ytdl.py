@@ -41,7 +41,7 @@ def construct_YoutubeDL(module, obj, user_opts, system_opts=None):
     try:
         opts = parse_command_line(module, argv) if argv else user_opts
     except SystemExit:
-        raise exception.StopExtraction("Invalid command-line option")
+        raise exception.AbortExtraction("Invalid command-line option")
 
     if opts.get("format") is None:
         opts["format"] = config("format")

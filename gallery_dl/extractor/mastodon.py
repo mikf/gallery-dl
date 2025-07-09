@@ -315,10 +315,9 @@ class MastodonAPI():
             if code < 400:
                 return response
             if code == 401:
-                raise exception.StopExtraction(
-                    "Invalid or missing access token.\n"
-                    "Run 'gallery-dl oauth:mastodon:%s' to obtain one.",
-                    self.extractor.instance)
+                raise exception.AbortExtraction(
+                    f"Invalid or missing access token.\nRun 'gallery-dl oauth:"
+                    f"mastodon:{self.extractor.instance}' to obtain one.")
             if code == 404:
                 raise exception.NotFoundError()
             if code == 429:
@@ -327,7 +326,7 @@ class MastodonAPI():
                     "%Y-%m-%dT%H:%M:%S.%fZ",
                 ))
                 continue
-            raise exception.StopExtraction(response.json().get("error"))
+            raise exception.AbortExtraction(response.json().get("error"))
 
     def _pagination(self, endpoint, params):
         url = endpoint

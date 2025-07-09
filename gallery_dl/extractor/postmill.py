@@ -102,8 +102,8 @@ class PostmillSubmissionsExtractor(PostmillExtractor):
             if response.history:
                 redirect_url = response.url
                 if redirect_url == self.root + "/login":
-                    raise exception.StopExtraction(
-                        "HTTP redirect to login page (%s)", redirect_url)
+                    raise exception.AbortExtraction(
+                        f"HTTP redirect to login page ({redirect_url})")
             page = response.text
 
             for nav in text.extract_iter(page,

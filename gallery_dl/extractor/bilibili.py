@@ -112,7 +112,7 @@ class BilibiliAPI():
 
         if data["code"] != 0:
             self.extractor.log.debug("Server response: %s", data)
-            raise exception.StopExtraction("API request failed")
+            raise exception.AbortExtraction("API request failed")
 
         return data
 
@@ -140,8 +140,8 @@ class BilibiliAPI():
                     page, "window.__INITIAL_STATE__=", "};") + "}")
             except Exception:
                 if "window._riskdata_" not in page:
-                    raise exception.StopExtraction(
-                        "%s: Unable to extract INITIAL_STATE data", article_id)
+                    raise exception.AbortExtraction(
+                        f"{article_id}: Unable to extract INITIAL_STATE data")
             self.extractor.wait(seconds=300)
 
     def user_favlist(self):
@@ -163,8 +163,9 @@ class BilibiliAPI():
 
         if data["code"] != 0:
             self.extractor.log.debug("Server response: %s", data)
-            raise exception.StopExtraction("API request failed,Are you login?")
+            raise exception.AbortExtraction(
+                "API request failed. Are you logges in?")
         try:
             return data["data"]["profile"]["mid"]
         except Exception:
-            raise exception.StopExtraction("API request failed")
+            raise exception.AbortExtraction("API request failed")

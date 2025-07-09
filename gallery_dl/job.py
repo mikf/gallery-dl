@@ -153,9 +153,10 @@ class Job():
         try:
             for msg in extractor:
                 self.dispatch(msg)
-        except exception.StopExtraction as exc:
-            if exc.message:
-                log.error(exc.message)
+        except exception.StopExtraction:
+            pass
+        except exception.AbortExtraction as exc:
+            log.error(exc.message)
             self.status |= exc.code
         except (exception.TerminateExtraction, exception.RestartExtraction):
             raise

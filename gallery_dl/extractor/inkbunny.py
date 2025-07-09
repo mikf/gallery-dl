@@ -350,7 +350,7 @@ class InkbunnyAPI():
                 self.authenticate(invalidate=True)
                 continue
 
-            raise exception.StopExtraction(data.get("error_message"))
+            raise exception.AbortExtraction(data.get("error_message"))
 
     def _pagination_search(self, params):
         params["page"] = 1

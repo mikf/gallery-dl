@@ -165,7 +165,7 @@ class DiscordExtractor(Extractor):
                         yield from self.extract_channel(
                             channel["channel_id"], safe=True)
             elif not safe:
-                raise exception.StopExtraction(
+                raise exception.AbortExtraction(
                     "This channel type is not supported."
                 )
         except exception.HttpError as exc:

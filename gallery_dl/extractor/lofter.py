@@ -136,7 +136,7 @@ class LofterAPI():
 
         if info["meta"]["status"] != 200:
             self.extractor.log.debug("Server response: %s", info)
-            raise exception.StopExtraction("API request failed")
+            raise exception.AbortExtraction("API request failed")
 
         return info["response"]
 

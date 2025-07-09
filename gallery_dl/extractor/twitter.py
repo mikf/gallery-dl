@@ -725,7 +725,7 @@ class TwitterTimelineExtractor(TwitterExtractor):
             return self.api.user_media
         if strategy == "with_replies":
             return self.api.user_tweets_and_replies
-        raise exception.StopExtraction("Invalid strategy '%s'", strategy)
+        raise exception.AbortExtraction(f"Invalid strategy '{strategy}'")
 
 
 class TwitterTweetsExtractor(TwitterExtractor):
@@ -940,8 +940,8 @@ class TwitterTweetExtractor(TwitterExtractor):
         try:
             self._assign_user(tweet["core"]["user_results"]["result"])
         except KeyError:
-            raise exception.StopExtraction(
-                "'%s'", tweet.get("reason") or "Unavailable")
+            raise exception.AbortExtraction(
+                f"'{tweet.get('reason') or 'Unavailable'}'")
 
         yield tweet
 
@@ -1253,7 +1253,7 @@ class TwitterAPI():
                 raise exception.AuthorizationError("NSFW Tweet")
             if reason == "Protected":
                 raise exception.AuthorizationError("Protected Tweet")
-            raise exception.StopExtraction("Tweet unavailable ('%s')", reason)
+            raise exception.AbortExtraction(f"Tweet unavailable ('{reason}')")
 
         return tweet
 
@@ -1634,8 +1634,8 @@ class TwitterAPI():
             except Exception:
                 pass
 
-            raise exception.StopExtraction(
-                "%s %s (%s)", response.status_code, response.reason, errors)
+            raise exception.AbortExtraction(
+                f"{response.status_code} {response.reason} ({errors})")
 
     def _pagination_legacy(self, endpoint, params):
         extr = self.extractor
@@ -1809,7 +1809,7 @@ class TwitterAPI():
                         raise exception.AuthorizationError(
                             f"{user['screen_name']}'s Tweets are protected")
 
-                raise exception.StopExtraction(
+                raise exception.AbortExtraction(
                     "Unable to retrieve Tweets from this timeline")
 
             tweets = []
@@ -1988,7 +1988,7 @@ class TwitterAPI():
     def _handle_ratelimit(self, response):
         rl = self.extractor.config("ratelimit")
         if rl == "abort":
-            raise exception.StopExtraction("Rate limit exceeded")
+            raise exception.AbortExtraction("Rate limit exceeded")
         elif rl and isinstance(rl, str) and rl.startswith("wait:"):
             until = None
             seconds = text.parse_float(rl.partition(":")[2]) or 60.0
@@ -2172,7 +2172,7 @@ def _login_impl(extr, username, password):
             raise exception.AuthenticationError(
                 "No 'auth_token' cookie received")
         else:
-            raise exception.StopExtraction("Unrecognized subtask %s", subtask)
+            raise exception.AbortExtraction(f"Unrecognized subtask {subtask}")
 
         inputs = {"subtask_id": subtask}
         inputs.update(data)

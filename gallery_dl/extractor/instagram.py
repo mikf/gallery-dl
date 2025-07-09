@@ -136,9 +136,9 @@ class InstagramExtractor(Extractor):
             else:
                 page = None
 
-            if page:
-                raise exception.StopExtraction("HTTP redirect to %s page (%s)",
-                                               page, url.partition("?")[0])
+            if page is not None:
+                raise exception.AbortExtraction(
+                    f"HTTP redirect to {page} page ({url.partition('?')[0]})")
 
         www_claim = response.headers.get("x-ig-set-www-claim")
         if www_claim is not None:
@@ -979,7 +979,7 @@ class InstagramGraphqlAPI():
         self.user_id = api.user_id
 
     def _unsupported(self, _=None):
-        raise exception.StopExtraction("Unsupported with GraphQL API")
+        raise exception.AbortExtraction("Unsupported with GraphQL API")
 
     def highlights_tray(self, user_id):
         query_hash = "d4d88dc1500312af6f937f7b804c68c3"
@@ -1065,9 +1065,10 @@ class InstagramGraphqlAPI():
             if not info["has_next_page"]:
                 return extr._update_cursor(None)
             elif not data["edges"]:
-                s = "" if self.extractor.item.endswith("s") else "s"
-                raise exception.StopExtraction(
-                    "%s'%s posts are private", self.extractor.item, s)
+                user = self.extractor.item
+                s = "" if user.endswith("s") else "s"
+                raise exception.AbortExtraction(
+                    f"{user}'{s} posts are private")
 
             variables["after"] = extr._update_cursor(info["end_cursor"])
 

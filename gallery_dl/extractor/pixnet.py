@@ -53,8 +53,8 @@ class PixnetExtractor(Extractor):
 
             pnext = text.extr(page, 'class="nextBtn"', '>')
             if pnext is None and 'name="albumpass">' in page:
-                raise exception.StopExtraction(
-                    "Album %s is password-protected.", self.item_id)
+                raise exception.AbortExtraction(
+                    f"Album {self.item_id} is password-protected.")
             if "href" not in pnext:
                 return
             url = self.root + text.extr(pnext, 'href="', '"')

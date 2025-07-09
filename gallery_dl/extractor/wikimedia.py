@@ -51,7 +51,7 @@ class WikimediaExtractor(BaseExtractor):
             response = self.request(url, method="HEAD", fatal=None)
             if response.status_code < 400:
                 return url
-        raise exception.StopExtraction("Unable to find API endpoint")
+        raise exception.AbortExtraction("Unable to find API endpoint")
 
     def prepare(self, image):
         """Adjust the content of an image object"""

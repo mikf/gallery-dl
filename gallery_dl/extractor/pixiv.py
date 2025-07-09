@@ -694,7 +694,7 @@ class PixivRankingExtractor(PixivExtractor):
         try:
             self.mode = mode = mode_map[mode]
         except KeyError:
-            raise exception.StopExtraction("Invalid mode '%s'", mode)
+            raise exception.AbortExtraction(f"Invalid mode '{mode}'")
 
         date = query.get("date")
         if date:
@@ -747,7 +747,7 @@ class PixivSearchExtractor(PixivExtractor):
             try:
                 self.word = query["word"]
             except KeyError:
-                raise exception.StopExtraction("Missing search term")
+                raise exception.AbortExtraction("Missing search term")
 
         sort = query.get("order", "date_d")
         sort_map = {
@@ -760,7 +760,7 @@ class PixivSearchExtractor(PixivExtractor):
         try:
             self.sort = sort = sort_map[sort]
         except KeyError:
-            raise exception.StopExtraction("Invalid search order '%s'", sort)
+            raise exception.AbortExtraction(f"Invalid search order '{sort}'")
 
         target = query.get("s_mode", "s_tag_full")
         target_map = {
@@ -771,7 +771,7 @@ class PixivSearchExtractor(PixivExtractor):
         try:
             self.target = target = target_map[target]
         except KeyError:
-            raise exception.StopExtraction("Invalid search mode '%s'", target)
+            raise exception.AbortExtraction(f"Invalid search mode '{target}'")
 
         self.date_start = query.get("scd")
         self.date_end = query.get("ecd")
@@ -1288,7 +1288,7 @@ class PixivAppAPI():
                 self.extractor.wait(seconds=300)
                 continue
 
-            raise exception.StopExtraction("API request failed: %s", error)
+            raise exception.AbortExtraction(f"API request failed: {error}")
 
     def _pagination(self, endpoint, params,
                     key_items="illusts", key_data=None):

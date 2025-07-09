@@ -40,5 +40,5 @@ class UrlshortenerLinkExtractor(UrlshortenerExtractor):
         location = self.request_location(
             url, headers=self.config_instance("headers"), notfound="URL")
         if not location:
-            raise exception.StopExtraction("Unable to resolve short URL")
+            raise exception.AbortExtraction("Unable to resolve short URL")
         yield Message.Queue, location, {}

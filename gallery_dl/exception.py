@@ -47,6 +47,7 @@ class GalleryDLException(Exception):
             message = f"{message.__class__.__name__}: {message}"
         if fmt and self.msgfmt is not None:
             message = self.msgfmt.replace("{}", message)
+        self.message = message
         Exception.__init__(self, message)
 
 
@@ -150,11 +151,6 @@ class ControlException(GalleryDLException):
 
 class StopExtraction(ControlException):
     """Stop data extraction"""
-
-    def __init__(self, message=None, *args):
-        ControlException.__init__(self)
-        self.message = message % args if args else message
-        self.code = 1 if message else 0
 
 
 class AbortExtraction(ExtractionError, ControlException):

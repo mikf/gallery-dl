@@ -451,7 +451,7 @@ class FlickrAPI(oauth.OAuth1API):
                 raise exception.AuthenticationError(msg)
             elif data["code"] == 99:
                 raise exception.AuthorizationError(msg)
-            raise exception.StopExtraction("API request failed: %s", msg)
+            raise exception.AbortExtraction(f"API request failed: {msg}")
         return data
 
     def _pagination(self, method, params, key="photos"):

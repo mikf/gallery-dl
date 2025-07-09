@@ -507,7 +507,8 @@ class RedditAPI():
             try:
                 data = response.json()
             except ValueError:
-                raise exception.StopExtraction(text.remove_html(response.text))
+                raise exception.AbortExtraction(
+                    text.remove_html(response.text))
 
             if "error" in data:
                 if data["error"] == 403:
@@ -515,7 +516,7 @@ class RedditAPI():
                 if data["error"] == 404:
                     raise exception.NotFoundError()
                 self.log.debug(data)
-                raise exception.StopExtraction(data.get("message"))
+                raise exception.AbortExtraction(data.get("message"))
             return data
 
     def _pagination(self, endpoint, params):

@@ -543,7 +543,7 @@ class PinterestAPI():
             resource = self.extractor.subcategory.rpartition("-")[2]
             raise exception.NotFoundError(resource)
         self.extractor.log.debug("Server response: %s", response.text)
-        raise exception.StopExtraction("API request failed")
+        raise exception.AbortExtraction("API request failed")
 
     def _pagination(self, resource, options):
         while True:
