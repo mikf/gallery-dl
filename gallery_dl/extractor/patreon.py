@@ -306,7 +306,7 @@ class PatreonExtractor(Extractor):
             except Exception:
                 pass
 
-        raise exception.StopExtraction("Unable to extract bootstrap data")
+        raise exception.AbortExtraction("Unable to extract bootstrap data")
 
 
 class PatreonCreatorExtractor(PatreonExtractor):
@@ -354,21 +354,21 @@ class PatreonCreatorExtractor(PatreonExtractor):
             data = None
             data = self._extract_bootstrap(page)
             return data["campaign"]["data"]["id"]
-        except exception.StopExtraction:
+        except exception.ControlException:
             pass
         except Exception as exc:
             if data:
                 self.log.debug(data)
-            raise exception.StopExtraction(
-                "Unable to extract campaign ID (%s: %s)",
-                exc.__class__.__name__, exc)
+            raise exception.AbortExtraction(
+                f"Unable to extract campaign ID "
+                f"({exc.__class__.__name__}: {exc})")
 
         # Next.js 13
         if cid := text.extr(
                 page, r'{\"value\":{\"campaign\":{\"data\":{\"id\":\"', '\\"'):
             return cid
 
-        raise exception.StopExtraction("Failed to extract campaign ID")
+        raise exception.AbortExtraction("Failed to extract campaign ID")
 
     def _get_filters(self, query):
         return "".join(

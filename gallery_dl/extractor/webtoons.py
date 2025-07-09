@@ -40,8 +40,8 @@ class WebtoonsBase():
     def request(self, url, **kwargs):
         response = Extractor.request(self, url, **kwargs)
         if response.history and "/ageGate" in response.url:
-            raise exception.StopExtraction(
-                "HTTP redirect to age gate check ('%s')", response.url)
+            raise exception.AbortExtraction(
+                f"HTTP redirect to age gate check ('{response.url}')")
         return response
 
 

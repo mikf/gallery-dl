@@ -37,9 +37,9 @@ class ReadcomiconlineBase():
                     "the CAPTCHA, and press ENTER to continue", response.url)
                 self.input()
             else:
-                raise exception.StopExtraction(
-                    "Redirect to \n%s\nVisit this URL in your browser and "
-                    "solve the CAPTCHA to continue", response.url)
+                raise exception.AbortExtraction(
+                    f"Redirect to \n{response.url}\nVisit this URL in your "
+                    f"browser and solve the CAPTCHA to continue")
 
 
 class ReadcomiconlineIssueExtractor(ReadcomiconlineBase, ChapterExtractor):

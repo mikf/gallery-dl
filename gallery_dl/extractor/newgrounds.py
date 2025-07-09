@@ -366,7 +366,7 @@ class NewgroundsExtractor(Extractor):
                     return
                 if "errors" in data:
                     msg = ", ".join(text.unescape(e) for e in data["errors"])
-                    raise exception.StopExtraction(msg)
+                    raise exception.AbortExtraction(msg)
 
             items = data.get("items")
             if not items:

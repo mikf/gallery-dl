@@ -46,9 +46,9 @@ class WeiboExtractor(Extractor):
 
         if response.history:
             if "login.sina.com" in response.url:
-                raise exception.StopExtraction(
-                    "HTTP redirect to login page (%s)",
-                    response.url.partition("?")[0])
+                raise exception.AbortExtraction(
+                    f"HTTP redirect to login page "
+                    f"({response.url.partition('?')[0]})")
             if "passport.weibo.com" in response.url:
                 self._sina_visitor_system(response)
                 response = Extractor.request(self, url, **kwargs)
@@ -179,8 +179,8 @@ class WeiboExtractor(Extractor):
             if not data.get("ok"):
                 self.log.debug(response.content)
                 if "since_id" not in params:  # first iteration
-                    raise exception.StopExtraction(
-                        '"%s"', data.get("msg") or "unknown error")
+                    raise exception.AbortExtraction(
+                        f'"{data.get("msg") or "unknown error"}"')
 
             data = data["data"]
             statuses = data["list"]

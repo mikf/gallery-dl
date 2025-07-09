@@ -308,7 +308,7 @@ class SankakuAPI():
                         ("unauthorized", "invalid-token", "invalid_token")):
                     _authenticate_impl.invalidate(self.username)
                     continue
-                raise exception.StopExtraction(code)
+                raise exception.AbortExtraction(code)
             return data
 
     def _pagination(self, endpoint, params):

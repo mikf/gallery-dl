@@ -126,7 +126,7 @@ class DeviantartExtractor(Extractor):
                     self.group = False
                 elif group == "skip":
                     self.log.info("Skipping group '%s'", self.user)
-                    raise exception.StopExtraction()
+                    raise exception.AbortExtraction()
                 else:
                     self.subcategory = "group-" + self.subcategory
                     self.group = True
@@ -1373,7 +1373,7 @@ class DeviantartSearchExtractor(DeviantartExtractor):
             response = self.request(url, params=params)
 
             if response.history and "/users/login" in response.url:
-                raise exception.StopExtraction("HTTP redirect to login page")
+                raise exception.AbortExtraction("HTTP redirect to login page")
             page = response.text
 
             for dev in DeviantartDeviationExtractor.pattern.findall(

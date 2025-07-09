@@ -124,7 +124,7 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
                     pass
                 else:
                     if not DOMAINS:
-                        raise exception.StopExtraction(
+                        raise exception.AbortExtraction(
                             "All Bunkr domains require solving a CF challenge")
 
             # select alternative domain
@@ -169,7 +169,7 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
                     info[-1], "%H:%M:%S %d/%m/%Y")
 
                 yield file
-            except exception.StopExtraction:
+            except exception.ControlException:
                 raise
             except Exception as exc:
                 self.log.error("%s: %s", exc.__class__.__name__, exc)

@@ -351,13 +351,11 @@ def main():
                     else:
                         input_manager.success()
 
-                except exception.StopExtraction:
-                    pass
-                except exception.TerminateExtraction:
-                    pass
                 except exception.RestartExtraction:
                     log.debug("Restarting '%s'", url)
                     continue
+                except exception.ControlException:
+                    pass
                 except exception.NoExtractorError:
                     log.error("Unsupported URL '%s'", url)
                     retval |= 64

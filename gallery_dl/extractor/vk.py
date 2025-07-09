@@ -96,8 +96,8 @@ class VkExtractor(Extractor):
             response = self.request(
                 url, method="POST", headers=headers, data=data)
             if response.history and "/challenge.html" in response.url:
-                raise exception.StopExtraction(
-                    "HTTP redirect to 'challenge' page<:\n%s", response.url)
+                raise exception.AbortExtraction(
+                    f"HTTP redirect to 'challenge' page:\n{response.url}")
 
             payload = response.json()["payload"][1]
             if len(payload) < 4:

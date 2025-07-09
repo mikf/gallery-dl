@@ -154,8 +154,7 @@ class TwibooruAPI():
 
             # error
             self.extractor.log.debug(response.content)
-            raise exception.StopExtraction(
-                "%s %s", response.status_code, response.reason)
+            raise exception.HttpError("", response)
 
     def _pagination(self, endpoint, params):
         extr = self.extractor

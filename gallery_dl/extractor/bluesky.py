@@ -95,7 +95,7 @@ class BlueskyExtractor(Extractor):
                 uri = record["value"]["subject"]["uri"]
                 if "/app.bsky.feed.post/" in uri:
                     yield from self.api.get_post_thread_uri(uri, depth)
-            except exception.StopExtraction:
+            except exception.ControlException:
                 pass  # deleted post
             except Exception as exc:
                 self.log.debug(record, exc_info=exc)
@@ -579,7 +579,7 @@ class BlueskyAPI():
                 msg = f"{msg} ({response.status_code} {response.reason})"
 
             self.extractor.log.debug("Server response: %s", response.text)
-            raise exception.StopExtraction(msg)
+            raise exception.AbortExtraction(msg)
 
     def _pagination(self, endpoint, params,
                     key="feed", root=None, check_empty=False):

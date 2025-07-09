@@ -189,7 +189,7 @@ class UpdateExtractor(Extractor):
         try:
             path_repo = REPOS[repo or "stable"]
         except KeyError:
-            raise exception.StopExtraction("Invalid channel '%s'", repo)
+            raise exception.AbortExtraction(f"Invalid channel '{repo}'")
 
         path_tag = tag if tag == "latest" else "tags/" + tag
         url = f"{self.root_api}/repos/{path_repo}/releases/{path_tag}"

@@ -95,7 +95,7 @@ class YoutubeDLExtractor(Extractor):
                 ytdl_instance.get_info_extractor(self.ytdl_ie_key),
                 False, {}, True)
         except ytdl_module.utils.YoutubeDLError:
-            raise exception.StopExtraction("Failed to extract video data")
+            raise exception.AbortExtraction("Failed to extract video data")
 
         if not info_dict:
             return

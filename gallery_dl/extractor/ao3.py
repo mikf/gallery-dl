@@ -144,7 +144,7 @@ class Ao3WorkExtractor(Ao3Extractor):
         page = response.text
         if len(page) < 20000 and \
                 '<h2 class="landmark heading">Adult Content Warning</' in page:
-            raise exception.StopExtraction("Adult Content")
+            raise exception.AbortExtraction("Adult Content")
 
         extr = text.extract_from(page)
 

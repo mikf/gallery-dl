@@ -336,8 +336,8 @@ class Extractor():
         if input is None:
             input = output.TTY_STDIN
         if not input:
-            raise exception.StopExtraction(
-                "User input required (%s)", prompt.strip(" :"))
+            raise exception.AbortExtraction(
+                f"User input required ({prompt.strip(' :')})")
 
     def _get_auth_info(self):
         """Return authentication information as (username, password) tuple"""

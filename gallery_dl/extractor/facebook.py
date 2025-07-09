@@ -219,17 +219,16 @@ class FacebookExtractor(Extractor):
         res = self.request(url, **kwargs)
 
         if res.url.startswith(self.root + "/login"):
-            raise exception.AuthenticationError(
-                "You must be logged in to continue viewing images." +
-                LEFT_OFF_TXT
+            raise exception.LoginRequires(
+                f"You must be logged in to continue viewing images."
+                f"{LEFT_OFF_TXT}"
             )
 
         if b'{"__dr":"CometErrorRoot.react"}' in res.content:
-            raise exception.StopExtraction(
-                "You've been temporarily blocked from viewing images. "
-                "\nPlease try using a different account, "
-                "using a VPN or waiting before you retry." +
-                LEFT_OFF_TXT
+            raise exception.AbortExtraction(
+                f"You've been temporarily blocked from viewing images.\n"
+                f"Please try using a different account, "
+                f"using a VPN or waiting before you retry.{LEFT_OFF_TXT}"
             )
 
         return res

@@ -31,7 +31,7 @@ class ImagefapExtractor(Extractor):
             msg = text.extr(response.text, '<div class="mt-4', '<')
             if msg:
                 msg = " ".join(msg.partition(">")[2].split())
-                raise exception.StopExtraction("'%s'", msg)
+                raise exception.AbortExtraction(f"'{msg}'")
             self.log.warning("HTTP redirect to %s", response.url)
 
         return response

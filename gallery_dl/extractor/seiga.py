@@ -45,8 +45,8 @@ class SeigaExtractor(Extractor):
         url = f"{self.root}/image/source/{image_id}"
         location = self.request_location(url, notfound="image")
         if "nicovideo.jp/login" in location:
-            raise exception.StopExtraction(
-                "HTTP redirect to login page (%s)", location.partition("?")[0])
+            raise exception.AbortExtraction(
+                f"HTTP redirect to login page ({location.partition('?')[0]})")
         return location.replace("/o/", "/priv/", 1)
 
     def login(self):
