@@ -183,7 +183,7 @@ class SkebExtractor(Extractor):
                     "height"    : info["height"],
                     "byte_size" : info["byte_size"],
                     "duration"  : info["duration"],
-                    "frame_rate": info["frame_rate"],
+                    "frame_rate": info.get("frame_rate"),
                     "software"  : info["software"],
                     "extension" : info["extension"],
                     "is_movie"  : info["is_movie"],
