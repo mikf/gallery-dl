@@ -384,6 +384,8 @@ class MangadexAPI():
             ratings = config("ratings")
             if ratings is None:
                 ratings = ("safe", "suggestive", "erotica", "pornographic")
+            elif isinstance(ratings, str):
+                ratings = ratings.split(",")
             params["contentRating[]"] = ratings
         params["offset"] = 0
 
