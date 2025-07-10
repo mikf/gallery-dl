@@ -17,7 +17,6 @@ class MangahereBase():
     category = "mangahere"
     root = "https://www.mangahere.cc"
     root_mobile = "https://m.mangahere.cc"
-    url_fmt = root_mobile + "/manga/{}/{}.html"
 
 
 class MangahereChapterExtractor(MangahereBase, ChapterExtractor):
@@ -28,8 +27,8 @@ class MangahereChapterExtractor(MangahereBase, ChapterExtractor):
 
     def __init__(self, match):
         self.part, self.volume, self.chapter = match.groups()
-        url = self.url_fmt.format(self.part, 1)
-        ChapterExtractor.__init__(self, match, url)
+        self.base = f"{self.root_mobile}/manga/{self.part}/"
+        ChapterExtractor.__init__(self, match, f"{self.base}1.html")
 
     def _init(self):
         self.session.headers["Referer"] = self.root_mobile + "/"
@@ -64,7 +63,7 @@ class MangahereChapterExtractor(MangahereBase, ChapterExtractor):
             url, pos = text.extract(page, ' src="', '"', pos)
             yield text.ensure_http_scheme(text.unescape(url)), None
             pnum += 2
-            page = self.request(self.url_fmt.format(self.part, pnum)).text
+            page = self.request(f"{self.base}{pnum}.html").text
 
     def _get_title(self):
         url = f"{self.root}/manga/{self.part}/"

@@ -322,7 +322,7 @@ class DeviantartExtractor(Extractor):
             header = HEADER_TEMPLATE.format(
                 title=title,
                 url=url,
-                userurl="{}/{}/".format(self.root, urlname),
+                userurl=f"{self.root}/{urlname}/",
                 username=username,
                 date=deviation["date"],
             )
@@ -747,13 +747,10 @@ x2="45.4107524%" y2="71.4898596%" id="app-root-3">\
 
         deviation["_fallback"] = (content["src"],)
         deviation["is_original"] = True
+        pl = binascii.b2a_base64(payload).rstrip(b'=\n').decode()
         content["src"] = (
-            "{}?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0.{}.".format(
-                url,
-                #  base64 of 'header' is precomputed as 'eyJ0eX...'
-                #  binascii.b2a_base64(header).rstrip(b"=\n").decode(),
-                binascii.b2a_base64(payload).rstrip(b"=\n").decode())
-        )
+            # base64 of 'header' is precomputed as 'eyJ0eX...'
+            f"{url}?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0.{pl}.")
 
     def _extract_comments(self, target_id, target_type="deviation"):
         results = None

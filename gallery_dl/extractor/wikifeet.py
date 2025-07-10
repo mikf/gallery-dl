@@ -50,9 +50,11 @@ class WikifeetGalleryExtractor(GalleryExtractor):
             "S": "Soles",
             "B": "Barefoot",
         }
-        ufmt = "https://pics.wikifeet.com/" + self.celeb + "-Feet-{}.jpg"
+
+        gallery = text.extr(page, '"gallery":[', '],')
+        base = f"https://pics.wikifeet.com/{self.celeb}-Feet-"
         return [
-            (ufmt.format(data["pid"]), {
+            (f"{base}{data['pid']}.jpg", {
                 "pid"   : data["pid"],
                 "width" : data["pw"],
                 "height": data["ph"],
@@ -61,6 +63,5 @@ class WikifeetGalleryExtractor(GalleryExtractor):
                     for tag in data["tags"] if tag in tagmap
                 ],
             })
-            for data in
-            util.json_loads("[" + text.extr(page, '"gallery":[', '],') + "]")
+            for data in util.json_loads(f"[{gallery}]")
         ]

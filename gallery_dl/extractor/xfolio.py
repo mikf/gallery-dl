@@ -47,9 +47,6 @@ class XfolioWorkExtractor(XfolioExtractor):
     subcategory = "work"
     pattern = BASE_PATTERN + r"/portfolio/([^/?#]+)/works/(\d+)"
     example = "https://xfolio.jp/portfolio/USER/works/12345"
-    ref_fmt = ("{}/fullscale_image?image_id={}&work_id={}")
-    url_fmt = ("{}/user_asset.php?id={}&work_id={}"
-               "&work_image_id={}&type=work_image")
 
     def items(self):
         creator, work_id = self.groups
@@ -98,10 +95,11 @@ class XfolioWorkExtractor(XfolioExtractor):
             files.append({
                 "image_id" : image_id,
                 "extension": "jpg",
-                "url": self.url_fmt.format(
-                    self.root, image_id, work_id, image_id),
-                "_http_headers": {"Referer": self.ref_fmt.format(
-                    self.root, image_id, work_id)},
+                "url": (f"{self.root}/user_asset.php?id={image_id}&work_id="
+                        f"{work_id}&work_image_id={image_id}&type=work_image"),
+                "_http_headers": {"Referer": (
+                    f"{self.root}/fullscale_image"
+                    f"?image_id={image_id}&work_id={work_id}")},
             })
 
         return files

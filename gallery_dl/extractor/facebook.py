@@ -20,9 +20,6 @@ class FacebookExtractor(Extractor):
     filename_fmt = "{id}.{extension}"
     archive_fmt = "{id}.{extension}"
 
-    set_url_fmt = root + "/media/set/?set={set_id}"
-    photo_url_fmt = root + "/photo/?fbid={photo_id}&set={set_id}"
-
     def _init(self):
         headers = self.session.headers
         headers["Accept"] = (
@@ -242,9 +239,7 @@ class FacebookExtractor(Extractor):
 
         while i < len(all_photo_ids):
             photo_id = all_photo_ids[i]
-            photo_url = self.photo_url_fmt.format(
-                photo_id=photo_id, set_id=set_id
-            )
+            photo_url = f"{self.root}/photo/?fbid={photo_id}&set={set_id}"
             photo_page = self.photo_page_request_wrapper(photo_url).text
 
             photo = self.parse_photo_page(photo_page)
@@ -317,7 +312,7 @@ class FacebookSetExtractor(FacebookExtractor):
             post_page = self.request(post_url).text
             set_id = self.parse_post_page(post_page)["set_id"]
 
-        set_url = self.set_url_fmt.format(set_id=set_id)
+        set_url = f"{self.root}/media/set/?set={set_id}"
         set_page = self.request(set_url).text
         set_data = self.parse_set_page(set_page)
         if self.groups[2]:
@@ -336,16 +331,15 @@ class FacebookPhotoExtractor(FacebookExtractor):
 
     def items(self):
         photo_id = self.groups[0]
-        photo_url = self.photo_url_fmt.format(photo_id=photo_id, set_id="")
+        photo_url = f"{self.root}/photo/?fbid={photo_id}&set="
         photo_page = self.photo_page_request_wrapper(photo_url).text
 
         i = 1
         photo = self.parse_photo_page(photo_page)
         photo["num"] = i
 
-        set_page = self.request(
-            self.set_url_fmt.format(set_id=photo["set_id"])
-        ).text
+        set_url = f"{self.root}/media/set/?set={photo['set_id']}"
+        set_page = self.request(set_url).text
 
         directory = self.parse_set_page(set_page)
 
@@ -356,9 +350,7 @@ class FacebookPhotoExtractor(FacebookExtractor):
             for comment_photo_id in photo["followups_ids"]:
                 comment_photo = self.parse_photo_page(
                     self.photo_page_request_wrapper(
-                        self.photo_url_fmt.format(
-                            photo_id=comment_photo_id, set_id=""
-                        )
+                        f"{self.root}/photo/?fbid={comment_photo_id}&set="
                     ).text
                 )
                 i += 1
@@ -426,7 +418,7 @@ class FacebookProfileExtractor(FacebookExtractor):
         set_id = self.get_profile_photos_set_id(profile_photos_page)
 
         if set_id:
-            set_url = self.set_url_fmt.format(set_id=set_id)
+            set_url = f"{self.root}/media/set/?set={set_id}"
             set_page = self.request(set_url).text
             set_data = self.parse_set_page(set_page)
             return self.extract_set(set_data)
