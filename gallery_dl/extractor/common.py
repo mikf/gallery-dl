@@ -24,6 +24,7 @@ from xml.etree import ElementTree
 from requests.adapters import HTTPAdapter
 from .message import Message
 from .. import config, output, text, util, cache, exception
+from ..ff_fetch import FFFetchHandler
 urllib3 = requests.packages.urllib3
 
 
@@ -60,6 +61,7 @@ class Extractor():
             self.category = CATEGORY_MAP[self.category]
         self._cfgpath = ("extractor", self.category, self.subcategory)
         self._parentdir = ""
+        self._ff_fetch_handler = FFFetchHandler(self.log)
 
     @classmethod
     def from_url(cls, url):
@@ -164,6 +166,8 @@ class Extractor():
                 else:
                     kwargs["headers"] = {"Content-Type": "application/json"}
 
+        url = self._ff_fetch_handler.adjust_request(
+            kwargs["proxies"], session, url)
         response = None
         tries = 1
 

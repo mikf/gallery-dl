@@ -13,6 +13,7 @@ import mimetypes
 from requests.exceptions import RequestException, ConnectionError, Timeout
 from .common import DownloaderBase
 from .. import text, util, output
+from ..ff_fetch import FFFetchHandler
 from ssl import SSLError
 
 
@@ -89,6 +90,8 @@ class HttpDownloader(DownloaderBase):
         else:
             self.interval_429 = util.build_duration_func(interval_429)
 
+        self._ff_fetch_handler = FFFetchHandler(self.log)
+
     def download(self, url, pathfmt):
         try:
             return self._download_impl(url, pathfmt)
@@ -106,6 +109,8 @@ class HttpDownloader(DownloaderBase):
         response = None
         tries = code = 0
         msg = ""
+        url = self._ff_fetch_handler.adjust_request(
+            self.proxies, self.session, url)
 
         metadata = self.metadata
         kwdict = pathfmt.kwdict
