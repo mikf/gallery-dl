@@ -7788,7 +7788,11 @@ Description
                 "naver-chzzk"  : "chzzk",
                 "naver-blog"   : "naver",
                 "naver-webtoon": "naverwebtoon",
-                "pixiv-novel"  : "pixiv"
+                "pixiv-novel"  : "pixiv",
+                "pixiv-novel:novel"   : ["pixiv", "novel"],
+                "pixiv-novel:user"    : ["pixiv", "novel-user"],
+                "pixiv-novel:series"  : ["pixiv", "novel-series"],
+                "pixiv-novel:bookmark": ["pixiv", "novel-bookmark"]
             }
 
 

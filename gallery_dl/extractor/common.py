@@ -58,7 +58,12 @@ class Extractor():
         self.kwdict = {}
 
         if self.category in CATEGORY_MAP:
-            self.category = CATEGORY_MAP[self.category]
+            catsub = f"{self.category}:{self.subcategory}"
+            if catsub in CATEGORY_MAP:
+                self.category, self.subcategory = CATEGORY_MAP[catsub]
+            else:
+                self.category = CATEGORY_MAP[self.category]
+
         self._cfgpath = ("extractor", self.category, self.subcategory)
         self._parentdir = ""
 

@@ -339,6 +339,10 @@ def main():
                         "naver-chzzk"  : "chzzk",
                         "naver-webtoon": "naverwebtoon",
                         "pixiv-novel"  : "pixiv",
+                        "pixiv-novel:novel"   : ("pixiv", "novel"),
+                        "pixiv-novel:user"    : ("pixiv", "novel-user"),
+                        "pixiv-novel:series"  : ("pixiv", "novel-series"),
+                        "pixiv-novel:bookmark": ("pixiv", "novel-bookmark"),
                     }
                 from .extractor import common
                 common.CATEGORY_MAP = catmap
