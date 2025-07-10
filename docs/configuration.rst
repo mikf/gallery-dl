@@ -3490,9 +3490,14 @@ Description
 extractor.mangadex.ratings
 --------------------------
 Type
-    ``list`` of ``strings``
+    * ``string``
+    * ``list`` of ``strings``
 Default
     ``["safe", "suggestive", "erotica", "pornographic"]``
+Example
+    * ``"safe"``
+    * ``"erotica,suggestive"``
+    * ``["erotica", "suggestive"]``
 Description
     List of acceptable content ratings for returned chapters.
 
