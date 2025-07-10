@@ -324,11 +324,12 @@ class FuraffinityUserExtractor(Dispatch, FuraffinityExtractor):
     example = "https://www.furaffinity.net/user/USER/"
 
     def items(self):
-        base = f"{self.root}/{{}}/{self.user}/"
+        base = self.root
+        user = f"{self.user}/"
         return self._dispatch_extractors((
-            (FuraffinityGalleryExtractor , base.format("gallery")),
-            (FuraffinityScrapsExtractor  , base.format("scraps")),
-            (FuraffinityFavoriteExtractor, base.format("favorites")),
+            (FuraffinityGalleryExtractor , f"{base}/gallery/{user}"),
+            (FuraffinityScrapsExtractor  , f"{base}/scraps/{user}"),
+            (FuraffinityFavoriteExtractor, f"{base}/favorites/{user}"),
         ), ("gallery",))
 
 

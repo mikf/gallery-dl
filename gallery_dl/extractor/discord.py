@@ -22,8 +22,6 @@ class DiscordExtractor(Extractor):
     filename_fmt = "{message_id}_{num:>02}_{filename}.{extension}"
     archive_fmt = "{message_id}_{num}"
 
-    cdn_fmt = "https://cdn.discordapp.com/{}/{}/{}.png?size=4096"
-
     server_metadata = {}
     server_channels_metadata = {}
 
@@ -86,11 +84,10 @@ class DiscordExtractor(Extractor):
             ):
                 if message["author"].get(icon_type):
                     message_metadata["author_files"].append({
-                        "url": self.cdn_fmt.format(
-                            icon_path,
-                            message_metadata["author_id"],
-                            message["author"][icon_type]
-                        ),
+                        "url": (f"https://cdn.discordapp.com/{icon_path}/"
+                                f"{message_metadata['author_id']}/"
+                                f"{message['author'][icon_type]}.png"
+                                f"?size=4096"),
                         "filename": icon_type,
                         "extension": "png",
                     })
@@ -222,11 +219,9 @@ class DiscordExtractor(Extractor):
         ):
             if server.get(icon_type):
                 self.server_metadata["server_files"].append({
-                    "url": self.cdn_fmt.format(
-                        icon_path,
-                        self.server_metadata["server_id"],
-                        server[icon_type]
-                    ),
+                    "url": (f"https://cdn.discordapp.com/{icon_path}/"
+                            f"{self.server_metadata['server_id']}/"
+                            f"{server[icon_type]}.png?size=4096"),
                     "filename": icon_type,
                     "extension": "png",
                 })

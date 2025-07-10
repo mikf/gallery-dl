@@ -417,7 +417,7 @@ class Extractor():
 
             for key, value in HEADERS[browser]:
                 if value and "{}" in value:
-                    headers[key] = value.format(platform)
+                    headers[key] = value.replace("{}", platform)
                 else:
                     headers[key] = value
 

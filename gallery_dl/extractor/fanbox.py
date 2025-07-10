@@ -337,8 +337,8 @@ class FanboxExtractor(Extractor):
         elif provider == "twitter":
             url = "https://twitter.com/_/status/"+content_id
         elif provider == "google_forms":
-            templ = "https://docs.google.com/forms/d/e/{}/viewform?usp=sf_link"
-            url = templ.format(content_id)
+            url = (f"https://docs.google.com/forms/d/e/"
+                   f"{content_id}/viewform?usp=sf_link")
         else:
             self.log.warning(f"service not recognized: {provider}")
 
