@@ -99,7 +99,7 @@ class InstagramExtractor(Extractor):
                         if videos_dash:
                             file["_fallback"] = (url,)
                             file["_ytdl_manifest"] = "dash"
-                            url = "ytdl:dash"
+                            url = f"ytdl:{post['post_url']}{file['num']}.mp4"
                         yield Message.Url, url, file
                     if previews:
                         file["media_id"] += "p"
