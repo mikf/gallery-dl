@@ -12,8 +12,9 @@ import time
 import mimetypes
 from requests.exceptions import RequestException, ConnectionError, Timeout
 from .common import DownloaderBase
-from .. import text, util, output
+from .. import text, util, output, exception
 from ssl import SSLError
+FLAGS = util.FLAGS
 
 
 class HttpDownloader(DownloaderBase):
@@ -336,6 +337,12 @@ class HttpDownloader(DownloaderBase):
                     msg = str(exc)
                     output.stderr_write("\n")
                     continue
+                except exception.StopExtraction:
+                    response.close()
+                    return False
+                except exception.ControlException:
+                    response.close()
+                    raise
 
                 # check file size
                 if size and fp.tell() < size:
@@ -373,6 +380,9 @@ class HttpDownloader(DownloaderBase):
         for data in content:
             write(data)
 
+            if FLAGS.DOWNLOAD is not None:
+                FLAGS.process("DOWNLOAD")
+
     def _receive_rate(self, fp, content, bytes_total, bytes_start):
         rate = self.rate() if self.rate else None
         write = fp.write
@@ -386,6 +396,9 @@ class HttpDownloader(DownloaderBase):
             bytes_downloaded += len(data)
 
             write(data)
+
+            if FLAGS.DOWNLOAD is not None:
+                FLAGS.process("DOWNLOAD")
 
             if progress is not None:
                 if time_elapsed > progress:
