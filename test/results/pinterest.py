@@ -148,6 +148,12 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://ru.pinterest.com/tarvenck/%D0%B0%D1%82%D0%BC%D0%BE%D1%81%D1%84%D0%B5%D1%80%D0%BD%D1%8B%D0%B5/?invite_code=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa&sender=1111111111111111111",
+    "#comment" : "board URL with query string (#7805)",
+    "#class"   : pinterest.PinterestBoardExtractor,
+},
+
+{
     "#url"     : "https://www.pinterest.com/g1952849/",
     "#category": ("", "pinterest", "user"),
     "#class"   : pinterest.PinterestUserExtractor,
