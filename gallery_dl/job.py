@@ -463,8 +463,11 @@ class DownloadJob(Job):
                             else:
                                 pextr.log.info("Downloading fallback URL")
                                 text.nameext_from_url(url, kwdict)
+                                if kwdict["filename"].startswith((
+                                        "HLS", "DASH")):
+                                    kwdict["filename"] = url.rsplit("/", 2)[-2]
                                 if url.startswith("ytdl:"):
-                                    kwdict["extension"] = ""
+                                    kwdict["extension"] = "mp4"
                                 self.handle_url(url, kwdict)
                     break
                 except exception.RestartExtraction:
