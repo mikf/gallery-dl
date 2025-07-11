@@ -202,7 +202,7 @@ class Job():
                 self.update_kwdict(kwdict)
                 self.handle_url(url, kwdict)
             if FLAGS.FILE is not None:
-                FLAGS.FILE = FLAGS.process(FLAGS.FILE)
+                FLAGS.process("FILE")
 
         elif msg[0] == Message.Directory:
             self.update_kwdict(msg[1])
@@ -216,7 +216,7 @@ class Job():
                 self.update_kwdict(kwdict)
                 self.handle_queue(url, kwdict)
             if FLAGS.CHILD is not None:
-                FLAGS.CHILD = FLAGS.process(FLAGS.CHILD)
+                FLAGS.process("CHILD")
 
     def handle_url(self, url, kwdict):
         """Handle Message.Url"""
@@ -396,7 +396,7 @@ class DownloadJob(Job):
                 for callback in self.hooks["post-after"]:
                     callback(self.pathfmt)
             if FLAGS.POST is not None:
-                FLAGS.POST = FLAGS.process(FLAGS.POST)
+                FLAGS.process("POST")
             self.pathfmt.set_directory(kwdict)
         if "post" in self.hooks:
             for callback in self.hooks["post"]:
