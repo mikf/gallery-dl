@@ -728,8 +728,15 @@ class Flags():
         self.FILE = self.POST = self.CHILD = self.DOWNLOAD = None
 
     def process(self, flag):
-        if flag == "terminate":
+        value = self.__dict__[flag]
+        self.__dict__[flag] = None
+
+        if value == "abort":
+            raise exception.AbortExtraction()
+        if value == "terminate":
             raise exception.TerminateExtraction()
+        if value == "restart":
+            raise exception.RestartExtraction()
         raise exception.StopExtraction()
 
 
