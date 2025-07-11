@@ -396,9 +396,16 @@ class PinterestPinitExtractor(PinterestExtractor):
         url = (f"https://api.pinterest.com/url_shortener"
                f"/{self.groups[0]}/redirect/")
         location = self.request_location(url)
-        if not location or not PinterestPinExtractor.pattern.match(location):
+        if not location:
             raise exception.NotFoundError("pin")
-        yield Message.Queue, location, {"_extractor": PinterestPinExtractor}
+        elif PinterestPinExtractor.pattern.match(location):
+            yield Message.Queue, location, {
+                "_extractor": PinterestPinExtractor}
+        elif PinterestBoardExtractor.pattern.match(location):
+            yield Message.Queue, location, {
+                "_extractor": PinterestBoardExtractor}
+        else:
+            raise exception.NotFoundError("pin")
 
 
 class PinterestAPI():
