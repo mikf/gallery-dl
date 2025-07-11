@@ -231,7 +231,7 @@ class PinterestBoardExtractor(PinterestExtractor):
     directory_fmt = ("{category}", "{board[owner][username]}", "{board[name]}")
     archive_fmt = "{board[id]}_{id}"
     pattern = (BASE_PATTERN + r"/(?!pin/)([^/?#]+)"
-               "/(?!_saved|_created|pins/)([^/?#]+)/?$")
+               r"/(?!_saved|_created|pins/)([^/?#]+)/?(?:$|\?|#)")
     example = "https://www.pinterest.com/USER/BOARD/"
 
     def __init__(self, match):
