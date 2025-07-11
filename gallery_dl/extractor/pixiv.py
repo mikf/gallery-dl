@@ -392,7 +392,10 @@ class PixivUserExtractor(Dispatch, PixivExtractor):
             (PixivFavoriteExtractor     , base + "bookmarks/artworks"),
             (PixivNovelBookmarkExtractor, base + "bookmarks/novels"),
             (PixivNovelUserExtractor    , base + "novels"),
-        ), ("artworks",))
+        ), ("artworks",), (
+            ("bookmark", "novel-bookmark"),
+            ("user"    , "novel-user"),
+        ))
 
 
 class PixivArtworksExtractor(PixivExtractor):

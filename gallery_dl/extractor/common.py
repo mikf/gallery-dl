@@ -879,11 +879,15 @@ class Dispatch():
     def initialize(self):
         pass
 
-    def _dispatch_extractors(self, extractor_data, default=()):
+    def _dispatch_extractors(self, extractor_data, default=(), alt=None):
         extractors = {
             data[0].subcategory: data
             for data in extractor_data
         }
+
+        if alt is not None:
+            for sub, sub_alt in alt:
+                extractors[sub_alt] = extractors[sub]
 
         include = self.config("include", default) or ()
         if include == "all":
