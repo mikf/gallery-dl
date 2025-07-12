@@ -170,6 +170,19 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.artstation.com/artwork/r8zRm",
+    "#comment" : "mview embeds (#2566)",
+    "#class"   : artstation.ArtstationImageExtractor,
+    "#options" : {"mviews": True},
+    "#range"   : "4",
+    "#results" : (
+        "https://cdna.artstation.com/p/assets/marmosets/attachments/010/915/068/original/Orca-MarmosetViewer.mview?1526922111",
+    ),
+
+    "extension": "mview",
+},
+
+{
     "#url"     : "https://www.artstation.com/artwork/g4WPK",
     "#comment" : "embedded youtube video",
     "#category": ("", "artstation", "image"),
