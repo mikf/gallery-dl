@@ -26,9 +26,9 @@ class SzurubooruExtractor(booru.BooruExtractor):
             "Content-Type": "application/json",
         }
 
-        username = self.config("username")
+        username = self.config_instance("username")
         if username:
-            token = self.config("token")
+            token = self.config_instance("token")
             if token:
                 value = username + ":" + token
                 self.headers["Authorization"] = "Token " + \
