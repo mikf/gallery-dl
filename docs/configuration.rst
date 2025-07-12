@@ -466,6 +466,7 @@ Description
     * ``idolcomplex``
     * ``imgbb``
     * ``inkbunny``
+    * ``iwara``
     * ``kemono``
     * ``mangadex``
     * ``mangoxo``

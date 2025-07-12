@@ -1,0 +1,361 @@
+# -*- coding: utf-8 -*-
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 2 as
+# published by the Free Software Foundation.
+
+"""Extractors for https://www.iwara.tv/"""
+
+from .common import Extractor, Message, Dispatch
+from .. import text, util, exception
+from ..cache import cache, memcache
+import hashlib
+
+BASE_PATTERN = r"(?:https?://)?(?:www\.)?iwara\.tv"
+USER_PATTERN = rf"{BASE_PATTERN}/profile/([^/?#]+)"
+
+
+class IwaraExtractor(Extractor):
+    """Base class for iwara.tv extractors"""
+    category = "iwara"
+    root = "https://www.iwara.tv"
+    directory_fmt = ("{category}", "{username}")
+    filename_fmt = "{id} {title} {filename}.{extension}"
+    archive_fmt = "{type} {username} {id} {filename}"
+
+    def _init(self):
+        self.api = IwaraAPI(self)
+
+    def extract_user_info(self, profile):
+        user = profile.get("user") or {}
+        return {
+            "user_id": user.get("id"),
+            "username": user.get("username"),
+            "display_name": user.get("name").strip(),
+        }
+
+    def extract_media_info(self, item, key, include_file_info=True):
+        title = t.strip() if (t := item.get("title")) else ""
+
+        if include_file_info:
+            file_info = item if key is None else item.get(key) or {}
+            filename, _, extension = file_info.get("name", "").rpartition(".")
+
+            return {
+                "id"       : item["id"],
+                "file_id"  : file_info.get("id"),
+                "title"    : title,
+                "filename" : filename,
+                "extension": extension,
+                "date"        : text.parse_datetime(
+                    file_info.get("createdAt"), "%Y-%m-%dT%H:%M:%S.%fZ"),
+                "date_updated": text.parse_datetime(
+                    file_info.get("updatedAt"), "%Y-%m-%dT%H:%M:%S.%fZ"),
+                "mime"     : file_info.get("mime"),
+                "size"     : file_info.get("size"),
+                "width"    : file_info.get("width"),
+                "height"   : file_info.get("height"),
+                "duration" : file_info.get("duration"),
+                "type"     : file_info.get("type"),
+            }
+        else:
+            return {
+                "id"   : item["id"],
+                "title": title,
+            }
+
+    def get_metadata(self, user_info, media_info):
+        return {
+            **user_info,
+            **media_info
+        }
+
+    def yield_video(self, video, user_info=None):
+        if user_info is None:
+            user_info = self.extract_user_info(video)
+        video_info = self.extract_media_info(video, "file")
+
+        if "fileUrl" not in video:
+            video = self.api.video(video["id"])
+        file_url = video["fileUrl"]
+
+        sources = self.api.source(file_url)
+        source = next((r for r in sources if r.get("name") == "Source"), None)
+        download_url = source.get('src', {}).get('download')
+
+        url = f"https:{download_url}"
+        metadata = self.get_metadata(user_info, video_info)
+        yield Message.Directory, metadata
+        yield Message.Url, url, metadata
+
+    def yield_image(self, image_group, user_info=None):
+        if user_info is None:
+            user_info = self.extract_user_info(image_group)
+
+        if not (files := image_group.get("files")):
+            image_group = self.api.image(image_group["id"])
+            files = image_group["files"]
+
+        image_group_info = self.extract_media_info(image_group, "file", False)
+        image_group_info.update(user_info)
+        yield Message.Directory, image_group_info
+
+        for image_file in files:
+            image_file_info = self.extract_media_info(image_file, None)
+            image_info = {**image_file_info, **image_group_info}
+            file_id = image_info.get("file_id")
+            url = (f"https://i.iwara.tv/image/original/"
+                   f"{file_id}/{file_id}.{image_info['extension']}")
+            yield Message.Url, url, image_info
+
+    def _user_params(self):
+        user, qs = self.groups
+        params = text.parse_query(qs)
+        profile = self.api.profile(user)
+        params["user"] = profile["user"]["id"]
+        return self.extract_user_info(profile), params
+
+
+class IwaraUserExtractor(Dispatch, IwaraExtractor):
+    """Extractor for iwara.tv profile pages"""
+    pattern = rf"{USER_PATTERN}/?$"
+    example = "https://www.iwara.tv/profile/USERNAME"
+
+    def items(self):
+        base = f"{self.root}/profile/{self.groups[0]}/"
+        return self._dispatch_extractors((
+            (IwaraUserImagesExtractor   , f"{base}images"),
+            (IwaraUserVideosExtractor   , f"{base}videos"),
+            (IwaraUserPlaylistsExtractor, f"{base}playlists"),
+        ), ("user-images", "user-videos"))
+
+
+class IwaraUserImagesExtractor(IwaraExtractor):
+    subcategory = "user-images"
+    pattern = rf"{USER_PATTERN}/images(?:\?([^#]+))?"
+    example = "https://www.iwara.tv/profile/USERNAME/images"
+
+    def items(self):
+        user, params = self._user_params()
+        for image in self.api.images(params):
+            yield from self.yield_image(image, user)
+
+
+class IwaraUserVideosExtractor(IwaraExtractor):
+    subcategory = "user-videos"
+    pattern = rf"{USER_PATTERN}/videos(?:\?([^#]+))?"
+    example = "https://www.iwara.tv/profile/USERNAME/videos"
+
+    def items(self):
+        user, params = self._user_params()
+        for video in self.api.videos(params):
+            yield from self.yield_video(video, user)
+
+
+class IwaraUserPlaylistsExtractor(IwaraExtractor):
+    subcategory = "user-playlists"
+    pattern = rf"{USER_PATTERN}/playlists(?:\?([^#]+))?"
+    example = "https://www.iwara.tv/profile/USERNAME/playlists"
+
+    def items(self):
+        base = f"{self.root}/playlist/"
+
+        for playlist in self.api.playlists(self._user_params()[1]):
+            playlist["_extractor"] = IwaraPlaylistExtractor
+            url = f"{base}{playlist['id']}"
+            yield Message.Queue, url, playlist
+
+
+class IwaraVideoExtractor(IwaraExtractor):
+    """Extractor for individual iwara.tv videos"""
+    subcategory = "video"
+    pattern = rf"{BASE_PATTERN}/video/([^/?#]+)"
+    example = "https://www.iwara.tv/video/ID"
+
+    def items(self):
+        video = self.api.video(self.groups[0])
+        return self.yield_video(video)
+
+
+class IwaraImageExtractor(IwaraExtractor):
+    """Extractor for individual iwara.tv image pages"""
+    subcategory = "image"
+    pattern = rf"{BASE_PATTERN}/image/([^/?#]+)"
+    example = "https://www.iwara.tv/image/ID"
+
+    def items(self):
+        image = self.api.image(self.groups[0])
+        return self.yield_image(image)
+
+
+class IwaraPlaylistExtractor(IwaraExtractor):
+    """Extractor for individual iwara.tv playlist pages"""
+    subcategory = "playlist"
+    pattern = rf"{BASE_PATTERN}/playlist/([^/?#]+)"
+    example = "https://www.iwara.tv/playlist/ID"
+
+    def items(self):
+        for video in self.api.playlist(self.groups[0]):
+            yield from self.yield_video(video)
+
+
+class IwaraSearchExtractor(IwaraExtractor):
+    """Extractor for iwara.tv search pages"""
+    subcategory = "search"
+    pattern = rf"{BASE_PATTERN}/search\?([^#]+)"
+    example = "https://www.iwara.tv/search?query=QUERY&type=TYPE"
+
+    def items(self):
+        params = text.parse_query(self.groups[0])
+        self.kwdict["search_type"] = type = params.get("type", "video")
+        self.kwdict["search_tags"] = query = params.get("query")
+
+        results = self.api.search(type, query)
+        if type == "video":
+            for video in results:
+                yield from self.yield_video(video)
+        elif type == "image":
+            for image in results:
+                yield from self.yield_image(image)
+        else:
+            raise exception.StopExtraction(
+                "Unsupported search type '%s'", type)
+
+
+class IwaraTagExtractor(IwaraExtractor):
+    """Extractor for iwara.tv tag search"""
+    subcategory = "tag"
+    pattern = rf"{BASE_PATTERN}/(videos|images)(?:\?([^#]+))?"
+    example = "https://www.iwara.tv/videos?tags=TAGS"
+
+    def items(self):
+        type, qs = self.groups
+        params = text.parse_query(qs)
+        self.kwdict["search_type"] = type
+        self.kwdict["search_tags"] = params.get("tags")
+
+        if type == "videos":
+            for video in self.api.videos(params):
+                yield from self.yield_video(video)
+        else:
+            for image in self.api.images(params):
+                yield from self.yield_image(image)
+
+
+class IwaraAPI():
+    """Interface for the Iwara API"""
+    root = "https://api.iwara.tv"
+
+    def __init__(self, extractor):
+        self.extractor = extractor
+        self.headers = {
+            "Referer"     : f"{extractor.root}/",
+            "Content-Type": "application/json",
+            "Origin"      : extractor.root,
+        }
+
+        self.username, self.password = extractor._get_auth_info()
+        if not self.username:
+            self.authenticate = util.noop
+
+    def image(self, image_id):
+        endpoint = f"/image/{image_id}"
+        return self._call(endpoint)
+
+    def images(self, params):
+        endpoint = "/images"
+        params.setdefault("rating", "all")
+        return self._pagination(endpoint, params)
+
+    def video(self, video_id):
+        endpoint = f"/video/{video_id}"
+        return self._call(endpoint)
+
+    def videos(self, params):
+        endpoint = "/videos"
+        params.setdefault("rating", "all")
+        return self._pagination(endpoint, params)
+
+    def playlist(self, playlist_id):
+        endpoint = f"/playlist/{playlist_id}"
+        return self._pagination(endpoint)
+
+    def playlists(self, params):
+        endpoint = "/playlists"
+        return self._pagination(endpoint, params)
+
+    def search(self, type, query):
+        endpoint = "/search"
+        params = {"type": type, "query": query}
+        return self._pagination(endpoint, params)
+
+    @memcache(keyarg=1)
+    def profile(self, username):
+        endpoint = f"/profile/{username}"
+        return self._call(endpoint)
+
+    def user_id(self, username):
+        return self.profile(username)["user"]["id"]
+
+    def user_following(self, user_id):
+        endpoint = f"/user/{user_id}/following"
+        return self._pagination(endpoint)
+
+    def item(self, endpoint):
+        url = self.root + endpoint
+        return self.extractor.request_json(url, headers=self.headers)
+
+    def source(self, file_url):
+        base, _, query = file_url.partition("?")
+        if not (expires := text.extr(query, "expires=", "&")):
+            return ()
+        file_id = base.rpartition("/")[2]
+        sha_postfix = "5nFp9kmbNnHdAFhaqMvt"
+        sha_key = f"{file_id}_{expires}_{sha_postfix}"
+        hash = hashlib.sha1(sha_key.encode()).hexdigest()
+        headers = {"X-Version": hash, **self.headers}
+        return self.extractor.request_json(file_url, headers=headers)
+
+    def authenticate(self):
+        self.headers["Authorization"] = self._authenticate_impl(
+            self.username, self.password)
+
+    @cache(maxage=28*86400, keyarg=1)
+    def _authenticate_impl(self, username, password):
+        self.extractor.log.info("Logging in as %s", username)
+
+        url = f"{self.root}/user/login"
+        json = {
+            "email"   : username,
+            "password": password
+        }
+        data = self.extractor.request_json(
+            url, method="POST", json=json, fatal=False)
+
+        if token := data.get("token"):
+            return f"Bearer {token}"
+        raise exception.AuthenticationError(data.get("message"))
+
+    def _call(self, endpoint, params=None):
+        url = self.root + endpoint
+
+        self.authenticate()
+        return self.extractor.request_json(
+            url, params=params, headers=self.headers)
+
+    def _pagination(self, endpoint, params=None):
+        if params is None:
+            params = {}
+        params["page"] = 0
+        params["limit"] = 50
+
+        while True:
+            data = self._call(endpoint, params)
+
+            if not (results := data.get("results")):
+                break
+            yield from results
+
+            if len(results) < params["limit"]:
+                break
+            params["page"] += 1

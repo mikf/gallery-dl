@@ -287,6 +287,11 @@ SUBCATEGORY_MAP = {
         "saved": "Saved Posts",
         "tagged": "Tagged Posts",
     },
+    "iwara": {
+        "user-images": "User Images",
+        "user-videos": "User Videos",
+        "user-playlists": "User Playlists",
+    },
     "kemono": {
         "discord"       : "Discord Servers",
         "discord-server": "",
@@ -475,6 +480,7 @@ AUTH_MAP = {
     "imgbb"          : "Supported",
     "inkbunny"       : "Supported",
     "instagram"      : _COOKIES,
+    "iwara"          : "Supported",
     "kemono"         : "Supported",
     "mangadex"       : "Supported",
     "mangoxo"        : "Supported",
