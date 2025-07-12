@@ -165,10 +165,15 @@ class InstagramExtractor(Extractor):
             items = post["items"]
             reel_id = str(post["id"]).rpartition(":")[2]
             expires = post.get("expiring_at")
+            if expires:
+                post_url = f"{self.root}/stories/{post['user']['username']}/"
+            else:
+                post_url = f"{self.root}/stories/highlights/{reel_id}/"
             data = {
                 "expires": text.parse_timestamp(expires),
                 "post_id": reel_id,
                 "post_shortcode": shortcode_from_id(reel_id),
+                "post_url": post_url,
             }
             if "title" in post:
                 data["highlight_title"] = post["title"]
