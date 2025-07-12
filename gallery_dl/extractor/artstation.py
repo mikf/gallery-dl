@@ -29,18 +29,18 @@ class ArtstationExtractor(Extractor):
 
     def _init(self):
         self.session.headers["Cache-Control"] = "max-age=0"
+        self.mviews = self.config("mviews", True)
+        self.videos = self.config("videos", True)
+        self.external = self.config("external", False)
+        self.previews = self.config("previews", False)
+        self.max_posts = self.config("max-posts")
 
     def items(self):
-        videos = self.config("videos", True)
-        previews = self.config("previews", False)
-        external = self.config("external", False)
-        max_posts = self.config("max-posts")
-
         data = self.metadata()
         projects = self.projects()
-        if max_posts:
-            projects = itertools.islice(projects, max_posts)
 
+        if self.max_posts:
+            projects = itertools.islice(projects, self.max_posts)
         for project in projects:
             for num, asset in enumerate(
                     self.get_project_assets(project["hash_id"]), 1):
@@ -50,28 +50,10 @@ class ArtstationExtractor(Extractor):
                 yield Message.Directory, asset
 
                 if adict["has_embedded_player"]:
-                    player = adict["player_embedded"]
-                    url = (text.extr(player, 'src="', '"') or
-                           text.extr(player, "src='", "'"))
-                    if url.startswith(self.root):
-                        # video clip hosted on artstation
-                        if videos:
-                            page = self.request(url).text
-                            url = text.extr(page, ' src="', '"')
-                            text.nameext_from_url(url, asset)
-                            yield Message.Url, url, asset
-                    elif url:
-                        # external URL
-                        if external:
-                            asset["extension"] = "mp4"
-                            yield Message.Url, "ytdl:" + url, asset
-                    else:
-                        self.log.debug(player)
-                        self.log.warning(
-                            "Failed to extract embedded player URL (%s)",
-                            adict.get("id"))
-
-                    if not previews:
+                    if url := self._extract_embed(asset):
+                        text.nameext_from_url(url, asset)
+                        yield Message.Url, url, asset
+                    if not self.previews:
                         continue
 
                 if adict["has_image"]:
@@ -79,18 +61,50 @@ class ArtstationExtractor(Extractor):
                     text.nameext_from_url(url, asset)
 
                     url = self._no_cache(url)
-                    if "/video_clips/" not in url:
+                    if "/images/images/" in url:
                         lhs, _, rhs = url.partition("/large/")
                         if rhs:
-                            url = lhs + "/4k/" + rhs
+                            url = f"{lhs}/4k/{rhs}"
                             asset["_fallback"] = self._image_fallback(lhs, rhs)
 
                     yield Message.Url, url, asset
 
+    def _extract_embed(self, asset):
+        adict = asset["asset"]
+        player = adict["player_embedded"]
+        url = (text.extr(player, 'src="', '"') or
+               text.extr(player, "src='", "'"))
+
+        if url.startswith(self.root):
+            # embed or video clip hosted on artstation
+            type = text.extr(adict.get("image_url", ""), "/assets/", "/")
+            if type == "marmosets":
+                if not self.mviews:
+                    return
+                page = self.request(url).text
+                return text.extr(page, "marmoset.embed(", '",').strip("\"' ")
+
+            elif type:
+                if not self.videos:
+                    return
+                page = self.request(url).text
+                return text.extr(page, ' src="', '"')
+
+        if url:
+            # external URL
+            if not self.external:
+                return
+            asset["extension"] = "mp4"
+            return f"ytdl:{url}"
+
+        self.log.debug(player)
+        self.log.warning("Failed to extract embedded player URL (%s)",
+                         adict.get("id"))
+
     def _image_fallback(self, lhs, rhs):
-        yield lhs + "/large/" + rhs
-        yield lhs + "/medium/" + rhs
-        yield lhs + "/small/" + rhs
+        yield f"{lhs}/large/{rhs}"
+        yield f"{lhs}/medium/{rhs}"
+        yield f"{lhs}/small/{rhs}"
 
     def metadata(self):
         """Return general metadata"""

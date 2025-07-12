@@ -1480,6 +1480,16 @@ Description
     Limit the number of posts/projects to download.
 
 
+extractor.artstation.mviews
+---------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Download ``.mview`` files.
+
+
 extractor.artstation.previews
 -----------------------------
 Type
@@ -1487,7 +1497,7 @@ Type
 Default
     ``false``
 Description
-    Download video previews.
+    Download embed previews.
 
 
 extractor.artstation.videos
