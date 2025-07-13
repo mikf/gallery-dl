@@ -71,11 +71,10 @@ def create_extractor_module(opts=NONE):
 
     with open(path, opts["open_mode"], encoding="utf-8") as fp:
         if copyright := opts.get("copyright", ""):
-            copyright = f"# Copyright {dt.date.today().year} {copyright}\n#"
+            copyright = f"\n# Copyright {dt.date.today().year} {copyright}\n#"
 
         fp.write(f'''\
-{ENCODING}
-{copyright}
+{ENCODING}{copyright}
 {LICENSE}
 """Extractors for {opts["root"]}/"""
 
