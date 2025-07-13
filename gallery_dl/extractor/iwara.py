@@ -29,6 +29,9 @@ class IwaraExtractor(Extractor):
     def items_image(self, images, user=None):
         for image in images:
             try:
+                if "image" in image:
+                    # could extract 'date_favorited' here
+                    image = image["image"]
                 if not (files := image.get("files")):
                     image = self.api.image(image["id"])
                     files = image["files"]
@@ -53,6 +56,8 @@ class IwaraExtractor(Extractor):
     def items_video(self, videos, user=None):
         for video in videos:
             try:
+                if "video" in video:
+                    video = video["video"]
                 if "fileUrl" not in video:
                     video = self.api.video(video["id"])
                 file_url = video["fileUrl"]
@@ -203,6 +208,21 @@ class IwaraPlaylistExtractor(IwaraExtractor):
         return self.items_video(self.api.playlist(self.groups[0]))
 
 
+class IwaraFavoriteExtractor(IwaraExtractor):
+    subcategory = "favorite"
+    pattern = rf"{BASE_PATTERN}/favorites(?:/(image|video)s)?"
+    example = "https://www.iwara.tv/favorites/videos"
+
+    def items(self):
+        type = self.groups[0] or "vidoo"
+
+        results = self.api.favorites(type)
+        if type == "image":
+            return self.items_image(results)
+        else:
+            return self.items_video(results)
+
+
 class IwaraSearchExtractor(IwaraExtractor):
     """Extractor for iwara.tv search pages"""
     subcategory = "search"
@@ -291,6 +311,10 @@ class IwaraAPI():
         endpoint = f"/{type}s"
         params.setdefault("rating", "all")
         return self._pagination(endpoint, params)
+
+    def favorites(self, type):
+        endpoint = f"/favorites/{type}s"
+        return self._pagination(endpoint)
 
     def search(self, type, query):
         endpoint = "/search"
