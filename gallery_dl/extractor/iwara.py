@@ -29,9 +29,15 @@ class IwaraExtractor(Extractor):
     def extract_user_info(self, profile):
         user = profile.get("user") or {}
         return {
-            "user_id": user.get("id"),
-            "username": user.get("username"),
-            "display_name": user.get("name").strip(),
+            "id"     : user.get("id"),
+            "name"   : user.get("username"),
+            "nick"   : user.get("name").strip(),
+            "status" : user.get("status"),
+            "role"   : user.get("role"),
+            "premium": user.get("premium"),
+            "date"   : text.parse_datetime(
+                user.get("createdAt"), "%Y-%m-%dT%H:%M:%S.000Z"),
+            "description": profile.get("body"),
         }
 
     def extract_media_info(self, item, key, include_file_info=True):
@@ -66,7 +72,7 @@ class IwaraExtractor(Extractor):
 
     def get_metadata(self, user_info, media_info):
         return {
-            **user_info,
+            "user": user_info,
             **media_info
         }
 
@@ -97,7 +103,7 @@ class IwaraExtractor(Extractor):
             files = image_group["files"]
 
         image_group_info = self.extract_media_info(image_group, "file", False)
-        image_group_info.update(user_info)
+        image_group_info["user"] = user_info
         yield Message.Directory, image_group_info
 
         for image_file in files:

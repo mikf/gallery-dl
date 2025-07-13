@@ -57,9 +57,6 @@ __tests__ = (
     "#pattern"      : r"https://\w+.iwara.tv/download\?filename=b7708020-f531-4eb4-bfd3-c62f3d17927e_Source.mp4&path=2024%2F05%2F12&.+",
     "#count"        : 1,
 
-    "user_id"       : "c9a08dd5-3cb5-4d7c-b9bb-9eb4c55eda14",
-    "username"      : "arisananades",
-    "display_name"  : "Arisananades",
     "id"            : "OaoVL8nqijDjhB",
     "title"         : "MMD.RuanMei's body modification",
     "file_id"       : "b7708020-f531-4eb4-bfd3-c62f3d17927e",
@@ -71,6 +68,16 @@ __tests__ = (
     "height"        : None,
     "duration"      : 654,
     "type"          : "video",
+    "user"          : {
+        "date"       : "dt:2020-05-15 09:59:32",
+        "description": str,
+        "id"         : "c9a08dd5-3cb5-4d7c-b9bb-9eb4c55eda14",
+        "name"       : "arisananades",
+        "nick"       : "Arisananades",
+        "premium"    : False,
+        "role"       : "user",
+        "status"     : "active",
+    },
 },
 
 {
@@ -79,14 +86,21 @@ __tests__ = (
     "#class"        : iwara.IwaraSearchExtractor,
     "#count"        : 5,
 
-    "user_id"       : "3ec40862-bcb6-4c2e-9f3b-6da3a00cc2d9",
-    "username"      : "nizipaco-kyu",
-    "display_name"  : "Nizipaco - Kyu",
     "extension"     : "mp4",
     "mime"          : "video/mp4",
     "width"         : None,
     "height"        : None,
     "type"          : "video",
+    "user": {
+        "date"       : "dt:2022-01-12 17:08:38",
+        "description": str,
+        "id"         : "3ec40862-bcb6-4c2e-9f3b-6da3a00cc2d9",
+        "name"       : "nizipaco-kyu",
+        "nick"       : "Nizipaco - Kyu",
+        "premium"    : False,
+        "role"       : "user",
+        "status"     : "active",
+    },
 },
 
 {
@@ -109,9 +123,11 @@ __tests__ = (
         r"https://\w+.iwara.tv/download\?filename=94a8a1b9-7586-4771-accd-6f9cb4c6a5a1_Source.mp4&path=2025%2F03%2F21&expires=\d+&.+",
     ),
 
-    "user_id"       : "2b4391f3-c46f-43f9-b18f-8bdb8a9df74f",
-    "username"      : "lenoria",
-    "display_name"  : "lenoria",
+    "user": {
+        "id"  : "2b4391f3-c46f-43f9-b18f-8bdb8a9df74f",
+        "name": "lenoria",
+        "nick": "lenoria",
+    },
     "extension"     : "mp4",
     "mime"          : "video/mp4",
     "width"         : None,
@@ -150,9 +166,11 @@ __tests__ = (
     "#pattern"      : r"https://\w+.iwara.tv/download\?filename=7ba6e734-b9df-4588-88fc-4eef2bbf5c56_Source.mp4&path=2025%2F07%2F05&expires=\d+&hash=[0-9a-f]{64}",
     "#count"        : 1,
 
-    "user_id"       : "b3f86af1-874c-41f1-b62e-4e4b736ad3a4",
-    "username"      : "croove",
-    "display_name"  : "crooveNSFW",
+    "user": {
+        "id"  : "b3f86af1-874c-41f1-b62e-4e4b736ad3a4",
+        "name": "croove",
+        "nick": "crooveNSFW",
+    },
     "id"            : "6QvQvzZnELJ9vv",
     "title"         : "[BlueArchive / ブルアカ] Rio",
     "file_id"       : "7ba6e734-b9df-4588-88fc-4eef2bbf5c56",
@@ -175,9 +193,11 @@ __tests__ = (
     "#pattern"      : r"https://i.iwara.tv/image/original/[\w-]{36}/[\w-]{36}\.png",
     "#count"        : 13,
 
-    "user_id"       : "771d2b29-5935-43d7-85e1-30abbf47ccad",
-    "username"      : "zcccz",
-    "display_name"  : "zcccz",
+    "user": {
+        "id"  : "771d2b29-5935-43d7-85e1-30abbf47ccad",
+        "name": "zcccz",
+        "nick": "zcccz",
+    },
     "id"            : "5m3gLfcei6BQsL",
     "title"         : "Sparkle",
     "extension"     : "png",
@@ -194,9 +214,11 @@ __tests__ = (
     "#results"      : "https://i.iwara.tv/image/original/0302deee-9cd5-4c1f-b931-04caf329c0c7/0302deee-9cd5-4c1f-b931-04caf329c0c7.png",
     "#sha1_content" : "9fc2ae4d0d26d4b50c38ff2c5c235d33e8b56d1c",
 
-    "user_id"       : "ef14099e-a6db-4325-9c67-51c0615985d5",
-    "username"      : "sanka",
-    "display_name"  : "Cerodiers",
+    "user": {
+        "id"  : "ef14099e-a6db-4325-9c67-51c0615985d5",
+        "name": "sanka",
+        "nick": "Cerodiers",
+    },
     "id"            : "PbYJb57QqwrFp0",
     "title"         : "还没做完",
     "file_id"       : "0302deee-9cd5-4c1f-b931-04caf329c0c7",
@@ -220,11 +242,11 @@ __tests__ = (
 
     "date"        : "dt:2025-07-07 17:06:47",
     "date_updated": "dt:2025-07-07 17:07:11",
-    "display_name": "Marzcade",
     "duration"    : None,
     "extension"   : "webm",
     "file_id"     : "cf1686ac-9796-4213-bea3-71b6dcaac658",
     "filename"    : "cf1686ac-9796-4213-bea3-71b6dcaac658",
+    "width"       : 1366,
     "height"      : 768,
     "id"          : "sjqkK5EobXucju",
     "mime"        : "video/webm",
@@ -232,9 +254,11 @@ __tests__ = (
     "subcategory" : "image",
     "title"       : "Ellen Joe Dancing To Body Shaming",
     "type"        : "image",
-    "user_id"     : "f7625ea7-c1c8-416b-b929-a245892911a6",
-    "username"    : "marzcade",
-    "width"       : 1366,
+    "user": {
+        "id"  : "f7625ea7-c1c8-416b-b929-a245892911a6",
+        "name": "marzcade",
+        "nick": "Marzcade",
+    },
 },
 
 )
