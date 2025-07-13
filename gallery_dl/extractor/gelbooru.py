@@ -26,11 +26,19 @@ class GelbooruBase():
     def _api_request(self, params, key="post", log=False):
         if "s" not in params:
             params["s"] = "post"
+
         params["api_key"] = self.api_key
         params["user_id"] = self.user_id
 
         url = self.root + "/index.php?page=dapi&q=index&json=1"
-        data = self.request_json(url, params=params)
+        try:
+            data = self.request_json(url, params=params)
+        except exception.HttpError as exc:
+            if exc.status == 401:
+                raise exception.AuthorizationError(
+                    f"'api-key' and 'user-id' required "
+                    f"({exc.status}: {exc.response.reason})")
+            raise
 
         if not key:
             return data
